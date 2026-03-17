@@ -1,0 +1,22 @@
+# Genesis Spec — Standard Module
+#
+# Usage: cortex genesis from-yaml cortex/genesis/specs/module.yaml
+---
+name: my_module
+description: "A standard CORTEX module with models and manager."
+system_type: module
+auto_cli: false
+auto_tests: true
+tags: [genesis, module]
+
+components:
+  - name: models
+    component_type: dataclass
+    docstring: "Data models for the module."
+    interfaces: [to_dict, from_dict]
+
+  - name: manager
+    component_type: module
+    docstring: "Core manager with business logic."
+    interfaces: [process, validate, export]
+    dependencies: [models]

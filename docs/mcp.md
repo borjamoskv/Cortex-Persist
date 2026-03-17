@@ -167,7 +167,7 @@ If a secret is detected, the fact is flagged and the agent is notified. Critical
 CORTEX also integrates with **Google Agent Developer Kit (ADK)**:
 
 ```bash
-pip install cortex-memory[adk]
+pip install cortex-persist[adk]
 cortex-adk  # Start the ADK runner
 ```
 

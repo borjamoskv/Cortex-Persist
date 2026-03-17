@@ -10,6 +10,7 @@ from rich.table import Table
 
 from cortex.cli.common import DEFAULT_DB, _run_async, cli, console, get_engine
 from cortex.cli.errors import err_db_not_found, handle_cli_error
+from cortex.utils import hygiene
 
 
 @cli.command()
@@ -28,17 +29,28 @@ def status(db, json_output) -> None:
             handle_cli_error(e, db_path=db, context="consulta de estado")
             return
 
+        h = hygiene.check_system_health()
+
         if json_output:
-            click.echo(json.dumps(s, indent=2))
+            out = {"stats": s, "hygiene": h}
+            click.echo(json.dumps(out, indent=2))
             return
 
         table = Table(
-            title="[bold #CCFF00]⚡ ESTADO SOBERANO (CORTEX v6)[/]", border_style="#6600FF"
+            title="[bold #CCFF00]⚡ ESTADO SOBERANO (CORTEX v7)[/]", border_style="#6600FF"
         )
         table.add_column("Métrica", style="bold #D4AF37")
         table.add_column("Valor", style="cyan")
         table.add_row("Engine State", "[bold #06d6a0]Hiperconducción 130/100[/]")
-        table.add_row("Entropía", "[dim]Aniquilada[/]")
+
+        # --- Hygiene Section ---
+        orphan_color = "red" if h["orphans"] > 0 else "#06d6a0"
+        snapshot_color = "yellow" if h["snapshot_age_min"] > 60 else "#06d6a0"
+        table.add_section()
+        table.add_row("Browser Orphans", f"[{orphan_color}]{h['orphans']}[/]")
+        table.add_row("Snapshot Age", f"[{snapshot_color}]{h['snapshot_age_min']:.1f} min[/]")
+        table.add_section()
+
         table.add_row("Database", s["db_path"])
         table.add_row("Size", f"{s['db_size_mb']} MB")
         table.add_row("Total Facts", str(s["total_facts"]))

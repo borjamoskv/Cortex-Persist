@@ -1,0 +1,150 @@
+
+[⚓ SOBERANÍA ACTIVA] Iniciando Auditoría Pre-Push (Latencia Cero)
+--------------------------------------------------------
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ 21 SEALS — CORTEX QUALITY GATES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+────────────────────────────────────────
+🔍 Gate 1: Lint (Ruff) (AX-011 Entropy Death)
+
+────────────────────────────────────────
+🔍 Gate 2: Type Check (Pyright) (AX-012 Type Safety)
+
+────────────────────────────────────────
+🔍 Gate 3: Security Scan (Bandit) (AX-010 Zero Trust)
+   [🟡 WARN] Bandit not found — skipping (install with: pip install bandit)
+
+────────────────────────────────────────
+🔍 Gate 4: Tests — skipped via SKIP_GATES (SKIPPED)
+   [🟡 WARN] Gate 4 skipped (SKIP_GATES env). Run 'pytest tests/' separately.
+
+────────────────────────────────────────
+🔍 Gate 5: Schema Initialization (AX-017 Ledger Integrity)
+
+────────────────────────────────────────
+🔍 Gate 6: Connection Guard (AX-017 Ledger Integrity)
+
+────────────────────────────────────────
+🔍 Gate 7: Async Guard (No time.sleep) (AX-013 Async Native)
+   [🟢 PASSED] No blocking time.sleep() found.
+
+────────────────────────────────────────
+🔍 Gate 8: LOC Guard (≤600 max) (AX-011 Entropy Death)
+   [🟢 PASSED] All files within entropy limits. (63 warnings >400 LOC)
+
+────────────────────────────────────────
+🔍 Gate 9: Axiom Registry Sync (Registry Integrity)
+   [🟢 PASSED] Registry load OK: 27 axioms, 9 CI-enforced.
+
+────────────────────────────────────────
+🔍 Gate 11: Cobbler's Compliance (Swarm Self-Audit) (Ω₃ Byzantine Default)
+   [🟢 PASSED] Seal 12: Temperature Determinism Gate intact.
+   [🟢 PASSED] Seal 13: A-Record Latency Gate intact (<200ms).
+   [🟢 PASSED] Seal 15: Dependency Ghost Check intact.
+   [🟢 PASSED] Seal 16: Byzantine Consensus (Weights) intact.
+   [🟢 PASSED] Seal 17: Shannon Entropy Budget intact.
+   [🟢 PASSED] Seal 18: Zero-Prompting Evolution intact.
+   [🟢 PASSED] Seal 19: EU AI Act Audit intact (Ledger C5).
+   [🟢 PASSED] Seal 20: Industrial Noir Contrast (#CCFF00) intact.
+   [🟢 PASSED] Seal 21: Sovereign Self-Preservation intact.
+   [🔴 FAILED] Ruff linting failed.
+cortex/adk/runner.py:123:9: I001 [*] Import block is un-sorted or un-formatted
+cortex/causality/models.py:7:1: I001 [*] Import block is un-sorted or un-formatted
+cortex/compaction/mem0_pipeline.py:1:1: I001 [*] Import block is un-sorted or un-formatted
+cortex/compaction/mem0_pipeline.py:1:8: F401 [*] `asyncio` imported but unused
+cortex/compaction/mem0_pipeline.py:2:1: UP035 `typing.Dict` is deprecated, use `dict` instead
+cortex/compaction/mem0_pipeline.py:2:1: UP035 `typing.List` is deprecated, use `list` instead
+cortex/compaction/mem0_pipeline.py:2:37: F401 [*] `typing.Optional` imported but unused
+cortex/compaction/mem0_pipeline.py:25:55: UP006 [*] Use `list` instead of `List` for type annotation
+cortex/compaction/mem0_pipeline.py:25:60: UP006 [*] Use `dict` instead of `Dict` for type annotation
+cortex/compaction/mem0_pipeline.py:33:44: UP006 [*] Use `list` instead of `List` for type annotation
+cortex/compaction/mem0_pipeline.py:33:49: UP006 [*] Use `dict` instead of `Dict` for type annotation
+cortex/compaction/mem0_pipeline.py:33:69: UP006 [*] Use `list` instead of `List` for type annotation
+cortex/compaction/mem0_pipeline.py:33:74: UP006 [*] Use `dict` instead of `Dict` for type annotation
+cortex/compaction/mem0_pipeline.py:41:43: UP006 [*] Use `dict` instead of `Dict` for type annotation
+cortex/compaction/mem0_pipeline.py:48:34: UP006 [*] Use `list` instead of `List` for type annotation
+cortex/compaction/mem0_pipeline.py:48:39: UP006 [*] Use `dict` instead of `Dict` for type annotation
+cortex/compaction/mem0_pipeline.py:57:29: G004 Logging statement uses f-string
+cortex/compaction/mem0_pipeline.py:61:30: G004 Logging statement uses f-string
+cortex/context/hiagent.py:1:1: I001 [*] Import block is un-sorted or un-formatted
+cortex/context/hiagent.py:1:8: F401 [*] `asyncio` imported but unused
+cortex/context/hiagent.py:2:1: UP035 `typing.List` is deprecated, use `list` instead
+cortex/context/hiagent.py:2:1: UP035 `typing.Dict` is deprecated, use `dict` instead
+cor
+   [🟢 PASSED] Connection guard passed.
+   [🟢 PASSED] Seal 14: Sovereign Aesthetic Gate intact.
+   [🟢 PASSED] Ledger schema initialized successfully.
+   [🟢 PASSED] EntropyDemon: engine source is clean (78 files scanned).
+   [🟢 PASSED] Intruder: no eval/exec/os.system in engine source.
+   [🔴 FAILED] Type checking failed.
+{
+    "version": "1.1.408",
+    "time": "1773464172886",
+    "generalDiagnostics": [
+        {
+            "file": "/Users/borjafernandezangulo/30_CORTEX/cortex/aether/daemon.py",
+            "severity": "error",
+            "message": "Argumento de tipo \"str | None\" no puede ser asignado a parámetro \"token\" de tipo \"str\" en función \"__init__\"\n  El tipo \"str | None\" no se puede asignar al tipo \"str\"\n    \"None\" no se puede asignar a \"str\"",
+            "range": {
+                "start": {
+                    "line": 117,
+                    "character": 18
+                },
+                "end": {
+                    "line": 117,
+                    "character": 36
+                }
+            },
+            "rule": "reportArgumentType"
+        },
+        {
+            "file": "/Users/borjafernandezangulo/30_CORTEX/cortex/aether/tools.py",
+            "severity": "warning",
+            "message": "No se ha podido resolver la importación \"nest_asyncio\".",
+            "range": {
+                "start": {
+                    "line": 272,
+                    "character": 27
+                },
+                "end": {
+                    "line": 272,
+                    "character": 39
+                }
+            },
+            "rule": "reportMissingImports"
+        },
+        {
+            "file": "/Users/borjafernandezangulo/30_CORTEX/cortex/aether/tools.py",
+            "severity": "error",
+            "message": "Se esperaba la clase pero se recibió \"(obj: object, /) -> TypeIs[(...) -> object]\"",
+            "range": {
+                "start": {
+                    "line": 291,
+                    "character": 28
+                },
+                "end": {
+                    "line": 291,
+                    "character": 36
+                }
+            },
+            "rule": "reportGeneralTypeIssues"
+        },
+        {
+            "file": "/Users/borjafernandezangulo/30_CORTEX/cortex/agent/degradation.py",
+            "severity": "error
+
+────────────────────────────────────────
+🔍 Gate 10: Prompt Size Check (Heuristic)
+   [🟡 WARN] No SYSTEM_PROMPT.md found.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ SEALS SUMMARY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   [🔴 FAILED] SEALS BROKEN: [1, 2]
+
+Fix violations before pushing.
+--------------------------------------------------------
+🚨 [AXIOM OVERRIDE REJECTED] El Push ha sido interceptado físicamente.
+No puedes enviar deuda técnica a la Nube. Repara los Sellos y reintenta.

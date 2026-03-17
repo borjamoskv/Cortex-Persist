@@ -59,7 +59,7 @@ class TipCategory(str, Enum):
     META = "meta"
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class Tip:
     """A single contextual tip."""
 
@@ -111,7 +111,9 @@ def _load_static_tips() -> list[Tip]:
             cat_name = raw["category"]
             category = TipCategory(cat_name)
             for lang, text in raw["content"].items():
-                tip_id = hashlib.md5(f"{cat_name}-{text}".encode()).hexdigest()[:8]  # noqa: S324
+                tip_id = hashlib.sha256(
+                    f"{cat_name}-{text}".encode(),
+                ).hexdigest()[:8]
                 tips.append(Tip(f"stat-{tip_id}", text, category, lang, "static"))
 
         _STATIC_TIPS_CACHE = tips
@@ -183,9 +185,26 @@ class TipsEngine:
     async def random(self, *, lang: str | None = None, exclude_shown: bool = True) -> Tip:
         """Get a random tip. Avoids repeats until all tips have been shown."""
         pool = await self._get_pool(lang=lang or self.lang)
-        if not pool:
-            raise ValueError(f"No tips available for lang='{lang or self.lang}'")
+        return self._pick_from_pool(pool, exclude_shown=exclude_shown)
 
+    def random_sync(self, *, lang: str | None = None, exclude_shown: bool = True) -> Tip:
+        """Synchronous version of random(). Only works with static tips (no mining)."""
+        if self._include_dynamic:
+            raise RuntimeError("random_sync() only available when include_dynamic=False")
+
+        target_lang = lang or self.lang
+        static_tips = _load_static_tips()
+        pool = [t for t in static_tips if t.lang == target_lang]
+        if not pool and target_lang != "en":
+            pool = [t for t in static_tips if t.lang == "en"]
+
+        if not pool:
+            raise ValueError(f"No static tips available for lang='{target_lang}'")
+
+        return self._pick_from_pool(pool, exclude_shown=exclude_shown)
+
+    def _pick_from_pool(self, pool: list[Tip], exclude_shown: bool = True) -> Tip:
+        """Common logic for picking a tip from a pool."""
         if exclude_shown:
             available = [t for t in pool if t.id not in self._shown_ids]
             if not available:
@@ -306,7 +325,7 @@ class TipsEngine:
                 FROM facts
                 WHERE fact_type = ?
                   AND valid_until IS NULL
-                ORDER BY created_at DESC
+                ORDER BY id DESC
                 LIMIT ?
                 """,
                 (spec.fact_type, limit * 3),

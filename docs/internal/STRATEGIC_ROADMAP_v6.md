@@ -123,8 +123,8 @@ Month 3: Helm Chart → Distributed Consensus v2 → Performance Tests
 ### Wave 3 Key Deliverables
 
 ```
-✅ TypeScript SDK with React hooks (npm install @cortex-memory/sdk)
-✅ Go SDK (go get github.com/cortex-memory/sdk-go)
+✅ TypeScript SDK with React hooks (npm install @cortex-persist/sdk)
+✅ Go SDK (go get github.com/cortex-persist/sdk-go)
 ✅ MCP Registry — shareable, versioned tool definitions
 ✅ Plugin system with 5+ official importers (Slack, Discord, Notion, Linear, GitHub)
 ✅ React Admin Dashboard — memory management, audit visualization

@@ -12,18 +12,21 @@ import os
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
-# ─── Base Paths (constant, never env-overridden) ─────────────────────
-
-CORTEX_DIR = Path.home() / ".cortex"
-AGENT_DIR = Path.home() / ".agent"
-DEFAULT_DB_PATH = CORTEX_DIR / "cortex.db"
-
+# ─── Base Paths (canonical, from cortex.core.paths) ─────────────────
+from cortex.core.paths import (
+    AGENT_DIR,  # noqa: F401 — re-exported for backwards compat
+    CORTEX_DIR,
+)
+from cortex.core.paths import (
+    CORTEX_DB as DEFAULT_DB_PATH,
+)
 
 # ─── Configuration Dataclass ─────────────────────────────────────────
 
 
-@dataclass(slots=True)
+@dataclass
 class CortexConfig:
     """Immutable configuration loaded from environment variables."""
 
@@ -41,11 +44,7 @@ class CortexConfig:
     RATE_LIMIT: int = 300
     RATE_WINDOW: int = 60
 
-    # Graph
-    GRAPH_BACKEND: str = "sqlite"
-    NEO4J_URI: str = "bolt://localhost:7687"
-    NEO4J_USER: str = "neo4j"
-    NEO4J_PASSWORD: str = ""
+    # Graph Backend is exclusively SQLite now
 
     # Ledger
     CHECKPOINT_BATCH_SIZE: int = 1000
@@ -70,19 +69,20 @@ class CortexConfig:
     # Embeddings
     EMBEDDINGS_MODE: str = "local"
     EMBEDDINGS_PROVIDER: str = "gemini"
-    EMBEDDINGS_DIMENSION: int = 384
+    EMBEDDINGS_DIMENSION: int = 768
+    EMBEDDINGS_MODEL: str = ""  # Override model name (empty = provider default)
+    EMBEDDINGS_TASK_TYPE: str = "RETRIEVAL_DOCUMENT"
 
     # L2 Vector Store
     VECTOR_STORE_PATH: str = ""
-    VECTOR_STORE_MODE: str = "local"  # local | remote
-    QDRANT_CLOUD_URL: str = ""
-    QDRANT_API_KEY: str = ""
+    VECTOR_STORE_MODE: str = "local"  # local exclusively (SQLite-vec)
 
     # LLM Provider
     LLM_PROVIDER: str = ""
     LLM_MODEL: str = ""
     LLM_BASE_URL: str = ""
     LLM_API_KEY: str = ""
+    LLM_LOCAL_FIRST: bool = False
 
     # Langbase
     LANGBASE_API_KEY: str = ""
@@ -91,12 +91,22 @@ class CortexConfig:
     # Stripe (SaaS billing)
     STRIPE_SECRET_KEY: str = ""
     STRIPE_WEBHOOK_SECRET: str = ""
-    STRIPE_PRICE_TABLE: dict[str, str] = field(default_factory=dict)
+    _STRIPE_PRICE_TABLE_RAW: str = ""
+
+    @property
+    def STRIPE_PRICE_TABLE(self) -> dict[str, str]:
+        """Lazy parsing of Stripe price table."""
+        if not self._STRIPE_PRICE_TABLE_RAW:
+            return {"pro": "", "team": ""}
+        try:
+            return json.loads(self._STRIPE_PRICE_TABLE_RAW)
+        except json.JSONDecodeError:
+            return {"pro": "", "team": ""}
 
     # Notifications
     TELEGRAM_TOKEN: str = ""
     TELEGRAM_CHAT_ID: str = ""
-    NOTIFICATIONS_MIN_SEVERITY: str = "warning"  # debug|info|warning|error|critical
+    NOTIFICATIONS_MIN_SEVERITY: str = "warning"
 
     # Deployment
     DEPLOY_MODE: str = "local"
@@ -126,14 +136,10 @@ class CortexConfig:
             RUNBOOT_MODE=os.environ.get("CORTEX_RUNBOOT", "local"),
             ALLOWED_ORIGINS=os.environ.get(
                 "CORTEX_ALLOWED_ORIGINS",
-                "http://localhost:3000,http://localhost:5173",
+                "http://localhost:3000,http://localhost:5173,http://127.0.0.1:5173",
             ).split(","),
             RATE_LIMIT=int(os.environ.get("CORTEX_RATE_LIMIT", "300")),
             RATE_WINDOW=int(os.environ.get("CORTEX_RATE_WINDOW", "60")),
-            GRAPH_BACKEND=os.environ.get("CORTEX_GRAPH_BACKEND", "sqlite"),
-            NEO4J_URI=os.environ.get("CORTEX_NEO4J_URI", "bolt://localhost:7687"),
-            NEO4J_USER=os.environ.get("CORTEX_NEO4J_USER", "neo4j"),
-            NEO4J_PASSWORD=os.environ.get("CORTEX_NEO4J_PASSWORD", ""),
             CHECKPOINT_BATCH_SIZE=int(os.environ.get("CORTEX_CHECKPOINT_BATCH", "1000")),
             CHECKPOINT_MIN=int(os.environ.get("CORTEX_CHECKPOINT_MIN", "100")),
             CHECKPOINT_MAX=int(os.environ.get("CORTEX_CHECKPOINT_MAX", "1000")),
@@ -148,24 +154,25 @@ class CortexConfig:
             TURSO_AUTH_TOKEN=os.environ.get("TURSO_AUTH_TOKEN", ""),
             EMBEDDINGS_MODE=os.environ.get("CORTEX_EMBEDDINGS", "local"),
             EMBEDDINGS_PROVIDER=os.environ.get("CORTEX_EMBEDDINGS_PROVIDER", "gemini"),
-            EMBEDDINGS_DIMENSION=int(os.environ.get("CORTEX_EMBEDDINGS_DIM", "384")),
+            EMBEDDINGS_DIMENSION=int(os.environ.get("CORTEX_EMBEDDINGS_DIM", "768")),
+            EMBEDDINGS_MODEL=os.environ.get("CORTEX_EMBEDDINGS_MODEL", ""),
+            EMBEDDINGS_TASK_TYPE=os.environ.get(
+                "CORTEX_EMBEDDINGS_TASK_TYPE", "RETRIEVAL_DOCUMENT"
+            ),
             VECTOR_STORE_PATH=os.environ.get(
                 "CORTEX_VECTOR_STORE_PATH", str(CORTEX_DIR / "vectors")
             ),
             VECTOR_STORE_MODE=os.environ.get("CORTEX_VECTOR_STORE_MODE", "local"),
-            QDRANT_CLOUD_URL=os.environ.get("QDRANT_CLOUD_URL", ""),
-            QDRANT_API_KEY=os.environ.get("QDRANT_API_KEY", ""),
             LLM_PROVIDER=os.environ.get("CORTEX_LLM_PROVIDER", ""),
             LLM_MODEL=os.environ.get("CORTEX_LLM_MODEL", ""),
             LLM_BASE_URL=os.environ.get("CORTEX_LLM_BASE_URL", ""),
             LLM_API_KEY=os.environ.get("CORTEX_LLM_API_KEY", ""),
+            LLM_LOCAL_FIRST=os.environ.get("CORTEX_LLM_LOCAL_FIRST", "0") == "1",
             LANGBASE_API_KEY=os.environ.get("LANGBASE_API_KEY", ""),
             LANGBASE_BASE_URL=os.environ.get("LANGBASE_BASE_URL", "https://api.langbase.com/v1"),
             STRIPE_SECRET_KEY=os.environ.get("STRIPE_SECRET_KEY", ""),
             STRIPE_WEBHOOK_SECRET=os.environ.get("STRIPE_WEBHOOK_SECRET", ""),
-            STRIPE_PRICE_TABLE=json.loads(
-                os.environ.get("STRIPE_PRICE_TABLE", '{"pro": "", "team": ""}')
-            ),
+            _STRIPE_PRICE_TABLE_RAW=os.environ.get("STRIPE_PRICE_TABLE", ""),
             DEPLOY_MODE=os.environ.get("CORTEX_DEPLOY", "local"),
             CONTEXT_MAX_SIGNALS=int(os.environ.get("CORTEX_CONTEXT_MAX_SIGNALS", "20")),
             CONTEXT_WORKSPACE_DIR=os.environ.get("CORTEX_CONTEXT_WORKSPACE", str(Path.home())),
@@ -188,11 +195,20 @@ def reload() -> None:
     # Update module-level attributes for backwards compat
     _module = sys.modules[__name__]
     for attr in CortexConfig.__dataclass_fields__:
+        if attr.startswith("_"):
+            continue
         setattr(_module, attr, getattr(_cfg, attr))
 
     # Set properties/helpers
-    _module.PROD = _cfg.PROD
-    _module.IS_PROD = _cfg.IS_PROD
+    _module.PROD = _cfg.PROD  # type: ignore[reportAttributeAccessIssue]
+    _module.IS_PROD = _cfg.IS_PROD  # type: ignore[reportAttributeAccessIssue]
+
+
+def __getattr__(name: str) -> Any:
+    # Evaluate at module level lazily when imported config.STRIPE_PRICE_TABLE
+    if name == "STRIPE_PRICE_TABLE":
+        return _cfg.STRIPE_PRICE_TABLE
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 # Initialize module-level attributes for backwards compatibility

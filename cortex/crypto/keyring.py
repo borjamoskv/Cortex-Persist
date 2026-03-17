@@ -25,7 +25,7 @@ def get_master_key() -> bytes | None:
     if not os.environ.get("CORTEX_TESTING"):
         try:
             key_b64 = keyring.get_password(SERVICE_NAME, KEY_NAME)
-        except (keyring.errors.KeyringError, OSError) as e:
+        except (keyring.errors.KeyringError, OSError) as e:  # type: ignore[reportAttributeAccessIssue]
             logger.warning("Failed to access OS Keychain: %s", e)
 
     if not key_b64:
@@ -44,7 +44,7 @@ def get_master_key() -> bytes | None:
                 )
                 return None
             return raw
-        except (ValueError, Exception):
+        except (ValueError, Exception):  # noqa: BLE001
             logger.error("Master key is not valid base64.")
             return None
 
@@ -59,7 +59,7 @@ def generate_and_store_master_key() -> str:
     try:
         keyring.set_password(SERVICE_NAME, KEY_NAME, key_b64)
         logger.info("Successfully vaulted new CORTEX_MASTER_KEY in OS Keychain.")
-    except (keyring.errors.KeyringError, OSError) as e:
+    except (keyring.errors.KeyringError, OSError) as e:  # type: ignore[reportAttributeAccessIssue]
         logger.error(
             "Could not store key in Keychain (%s). "
             "Set CORTEX_MASTER_KEY env var manually with the generated key.",

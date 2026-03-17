@@ -54,7 +54,7 @@ async def get_ledger_status(
         combined_violations = tx_report["violations"] + vote_report["violations"]
 
         if not combined_valid:
-            logger.error(f"Ledger violation detected! {len(combined_violations)} issues found.")
+            logger.error("Ledger violation detected! %s issues found.", len(combined_violations))
 
         return LedgerReportResponse(
             valid=combined_valid,

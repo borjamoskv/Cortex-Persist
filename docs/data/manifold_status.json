@@ -1,0 +1,31 @@
+{
+  "timestamp": "2026-03-03T01:22:23.957891",
+  "project": "system",
+  "causality": {
+    "total_edges": 0,
+    "by_edge_type": {},
+    "orphan_edges": 0
+  },
+  "efficiency": {
+    "latest_roi": {},
+    "history_count": 0
+  },
+  "signals": {
+    "total": 359,
+    "by_type": {
+      "fact:stored": 325,
+      "compact:needed": 34
+    },
+    "by_source": {
+      "agent:gemini": 257,
+      "fact-hook": 34,
+      "agent:antigravity": 26,
+      "agent:mailtv-1": 24,
+      "cli": 13,
+      "cli:close": 5
+    },
+    "unconsumed": 203
+  },
+  "architecture_integrity": 0.0,
+  "active_ghosts": 46
+}

@@ -127,9 +127,8 @@ class SqliteWriteWorker:
         conn = connect_writer(self._db_path)
         # Manual transaction control (autocommit mode)
         conn.isolation_level = None
-        # Writer-specific performance pragmas
-        conn.execute("PRAGMA temp_store=MEMORY")
-        conn.execute("PRAGMA cache_size=-64000")  # 64MB cache
+        # Performance pragmas (cache_size, temp_store, page_size) are now
+        # applied centrally by connect_writer() → _apply_pragmas_sync().
         logger.debug("Writer connection configured via connect_writer() factory")
         return conn
 
@@ -156,7 +155,7 @@ class SqliteWriteWorker:
             try:
                 await asyncio.get_running_loop().run_in_executor(
                     None,
-                    lambda: self._conn.execute("PRAGMA wal_checkpoint(TRUNCATE)"),
+                    lambda: self._conn.execute("PRAGMA wal_checkpoint(TRUNCATE)"),  # type: ignore[reportOptionalMemberAccess]
                 )
                 logger.debug("Final WAL checkpoint completed on shutdown")
             except sqlite3.Error as e:
@@ -184,7 +183,7 @@ class SqliteWriteWorker:
         try:
             cursor = await loop.run_in_executor(
                 None,
-                lambda: self._conn.execute("PRAGMA wal_checkpoint(PASSIVE)"),
+                lambda: self._conn.execute("PRAGMA wal_checkpoint(PASSIVE)"),  # type: ignore[reportOptionalMemberAccess]
             )
             row = cursor.fetchone()
             pages = row[1] if row else 0
@@ -306,18 +305,17 @@ class SqliteWriteWorker:
         loop: asyncio.AbstractEventLoop,
     ) -> bool:
         """Dispatch a single message. Returns True if loop should exit."""
-        match msg:
-            case _Shutdown(future=fut):
-                await self._handle_shutdown(conn, loop, fut)
-                return True
-            case _WriteOp() as op:
-                await self._process_write(conn, op, loop)
-            case _TxBegin(future=fut):
-                await self._handle_tx_sql(conn, loop, fut, "BEGIN IMMEDIATE")
-            case _TxCommit(future=fut):
-                await self._handle_tx_sql(conn, loop, fut, "COMMIT")
-            case _TxRollback(future=fut):
-                await self._handle_tx_sql(conn, loop, fut, "ROLLBACK")
+        if isinstance(msg, _Shutdown):
+            await self._handle_shutdown(conn, loop, msg.future)
+            return True
+        elif isinstance(msg, _WriteOp):
+            await self._process_write(conn, msg, loop)
+        elif isinstance(msg, _TxBegin):
+            await self._handle_tx_sql(conn, loop, msg.future, "BEGIN IMMEDIATE")
+        elif isinstance(msg, _TxCommit):
+            await self._handle_tx_sql(conn, loop, msg.future, "COMMIT")
+        elif isinstance(msg, _TxRollback):
+            await self._handle_tx_sql(conn, loop, msg.future, "ROLLBACK")
         return False
 
     async def _handle_shutdown(
@@ -356,7 +354,7 @@ class SqliteWriteWorker:
         loop: asyncio.AbstractEventLoop,
     ) -> None:
         """Process a single write operation in the executor."""
-        start_wait = op.created_at if hasattr(op, "created_at") else time.time()
+        start_wait = op.created_at if hasattr(op, "created_at") else time.time()  # type: ignore[reportAttributeAccessIssue]
         wait_ms = (time.time() - start_wait) * 1000
         try:
             start_exec = time.time()

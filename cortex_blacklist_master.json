@@ -1,0 +1,42 @@
+{
+    "timestamp": 1772762525.612413,
+    "source": "CORTEX_Sovereign_Audit",
+    "targets": [
+        {
+            "address": "0x06060c5E3A090A1aFF282BBeC1eB7Db7bdab7a60",
+            "risk": "critical",
+            "patterns": [
+                "phishing",
+                "dust_injection",
+                "mule_wallet"
+            ]
+        },
+        {
+            "address": "0x7df263b76f67262444952c0bd44f5259e4672642",
+            "risk": "critical",
+            "patterns": [
+                "phishing",
+                "dust_injection",
+                "mule_wallet"
+            ]
+        },
+        {
+            "address": "0xEeCAb4de46EFAa212230E6826B572522E0a59Ad2",
+            "risk": "critical",
+            "patterns": [
+                "phishing",
+                "dust_injection",
+                "mule_wallet"
+            ]
+        },
+        {
+            "address": "0x281Bb56E122759f3512a5eE6F3a376c668178962",
+            "risk": "critical",
+            "patterns": [
+                "phishing",
+                "dust_injection",
+                "mule_wallet"
+            ]
+        }
+    ]
+}

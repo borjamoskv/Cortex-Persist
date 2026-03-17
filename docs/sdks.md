@@ -6,12 +6,12 @@ CORTEX provides official SDKs for Python and JavaScript/TypeScript.
 
 ## Python SDK
 
-The Python SDK is the primary interface, distributed as `cortex-memory` on PyPI.
+The Python SDK is the primary interface, distributed as `cortex-persist` on PyPI.
 
 ### Install
 
 ```bash
-pip install cortex-memory
+pip install cortex-persist
 ```
 
 ### Basic Usage
@@ -113,7 +113,7 @@ npm install
 ### Usage
 
 ```typescript
-import { CortexClient } from '@cortex-memory/sdk';
+import { CortexClient } from '@cortex-persist/sdk';
 
 const cortex = new CortexClient({
   baseUrl: 'http://localhost:8484',
@@ -141,7 +141,7 @@ const allFacts = await cortex.recall('my-app');
 
 ```bash
 # Coming Q2 2026
-npm install @cortex-memory/sdk
+npm install @cortex-persist/sdk
 ```
 
 ---

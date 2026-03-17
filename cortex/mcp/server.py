@@ -10,8 +10,21 @@ from concurrent.futures import ThreadPoolExecutor
 
 from cortex.engine import CortexEngine
 from cortex.engine.ledger import ImmutableLedger
+from cortex.extensions.immune.filters.base import Verdict
+from cortex.extensions.immune.membrane import ImmuneMembrane
+from cortex.mcp.core_tools import (
+    _register_embed_status_tool,
+    _register_embed_tool,
+    _register_handoff_tool,
+    _register_shannon_report_tool,
+    _register_trace_chain_tool,
+    _register_trace_episode_tool,
+)
+from cortex.mcp.genesis_tools import register_genesis_tools
 from cortex.mcp.guard import MCPGuard
+from cortex.mcp.health_tools import register_health_tools
 from cortex.mcp.mega_tools import register_mega_tools
+from cortex.mcp.music_tools import register_music_tools
 from cortex.mcp.trust_tools import register_trust_tools
 from cortex.mcp.utils import (
     AsyncConnectionPool,
@@ -26,12 +39,13 @@ logger = logging.getLogger("cortex.mcp.server")
 
 _MCP_AVAILABLE = False
 try:
-    from mcp.server.fastmcp import FastMCP
+    from mcp.server.fastmcp import FastMCP as _FastMCP
 
     _MCP_AVAILABLE = True
+    FastMCP = _FastMCP
 except ImportError:
     FastMCP = None  # type: ignore
-    logger.debug("MCP SDK not installed. Install with: pip install 'cortex-memory[mcp]'")
+    logger.debug("MCP SDK not installed. Install with: pip install 'cortex-persist[mcp]'")
 
 
 # ─── Server Context ──────────────────────────────────────────────────
@@ -44,7 +58,7 @@ class _MCPContext:
     that owns its lifecycle.
     """
 
-    __slots__ = ("cfg", "metrics", "executor", "pool", "search_cache", "_initialized")
+    __slots__ = ("cfg", "metrics", "executor", "pool", "search_cache", "_initialized", "membrane")
 
     def __init__(self, cfg: MCPServerConfig) -> None:
         self.cfg = cfg
@@ -52,6 +66,7 @@ class _MCPContext:
         self.executor = ThreadPoolExecutor(max_workers=cfg.max_workers)
         self.pool = AsyncConnectionPool(cfg.db_path, max_connections=cfg.max_workers)
         self.search_cache = SimpleAsyncCache(maxsize=cfg.query_cache_size)
+        self.membrane = ImmuneMembrane()
         self._initialized = False
 
     async def ensure_ready(self) -> None:
@@ -63,7 +78,7 @@ class _MCPContext:
 # ─── Tool Registrators ───────────────────────────────────────────────
 
 
-def _register_store_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:
+def _register_store_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ignore[reportInvalidTypeForm]
     """Register the ``cortex_store`` tool on *mcp*."""
 
     @mcp.tool()
@@ -73,8 +88,13 @@ def _register_store_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:
         fact_type: str = "knowledge",
         tags: str = "[]",
         source: str = "",
+        parent_decision_id: int = 0,
     ) -> str:
-        """Store a fact in CORTEX memory."""
+        """Store a fact in CORTEX memory.
+
+        Args:
+            parent_decision_id: Causal link to parent fact (0 = auto-resolve).
+        """
         await ctx.ensure_ready()
 
         try:
@@ -87,7 +107,30 @@ def _register_store_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:
         except ValueError as e:
             ctx.metrics.record_error()
             logger.warning("MCP Guard rejected store: %s", e)
-            return f"❌ Rejected: {e}"
+            return f"❌ Rejected by Guard: {e}"
+
+        # Immune Membrane Interception (Ω₃ Byzantine Default)
+        intent_payload = f"Store Fact [{fact_type}]: {content}"
+        context_payload = {
+            "project": project,
+            "tags": parsed_tags,
+            "source": source,
+        }
+        triage = await ctx.membrane.intercept(
+            intent_payload,
+            context_payload,
+        )
+
+        if triage.verdict != Verdict.PASS:
+            ctx.metrics.record_error(is_immune_rejection=True)
+            logger.warning(
+                "Immune Membrane rejected store: %s",
+                triage.risks_assumed,
+            )
+            return f"❌ Rejected by Immune System ({triage.verdict.value}): {triage.risks_assumed}"
+
+        # Normalize parent_decision_id: 0 means None (auto-resolve)
+        parent_id = parent_decision_id if parent_decision_id > 0 else None
 
         async with ctx.pool.acquire() as conn:
             engine = CortexEngine(ctx.cfg.db_path, auto_embed=False)
@@ -100,6 +143,7 @@ def _register_store_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:
                 parsed_tags,
                 "stated",
                 source or None,
+                parent_decision_id=parent_id,
             )
 
         ctx.metrics.record_request()
@@ -107,7 +151,7 @@ def _register_store_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:
         return f"✓ Stored fact #{fact_id} in project '{project}'"
 
 
-def _register_search_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:
+def _register_search_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ignore[reportInvalidTypeForm]
     """Register the ``cortex_search`` tool on *mcp*."""
 
     @mcp.tool()
@@ -124,7 +168,31 @@ def _register_search_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:
         except ValueError as e:
             ctx.metrics.record_error()
             logger.warning("MCP Guard rejected search: %s", e)
-            return f"❌ Rejected: {e}"
+            return f"❌ Rejected by Guard: {e}"
+
+        # 1. Immune Membrane Interception (Ω₃)
+        context = {
+            "source": "mcp_search",
+            "project": project or "global",
+            "is_external_source": True,  # MCP calls are effectively external
+            "complexity_added": 1.0,  # Minimal entropy added by a read
+            "complexity_removed": 0.0,
+            "query_length": len(query),
+        }
+
+        # For search, we might want to flag highly adversarial-looking queries
+        # even before the DB is hit.
+        triage = await ctx.membrane.intercept(query, context)
+
+        if triage.verdict == Verdict.BLOCK:
+            ctx.metrics.record_error(is_immune_rejection=True)
+            logger.warning(
+                "MCP Immune System rejected search: %s\nRisks: %s", query, triage.risks_assumed
+            )
+            return f"❌ Rejected by Immune System (Ω₃): {', '.join(triage.risks_assumed)}"
+        elif triage.verdict == Verdict.HOLD:
+            # We can allow HOLD for search, but log it
+            logger.info("Search passed with HOLD warnings: %s", triage.risks_assumed)
 
         cache_key = f"{query}:{project}:{top_k}"
         cached_result = ctx.search_cache.get(cache_key)
@@ -138,8 +206,8 @@ def _register_search_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:
 
             results = await engine.search(
                 query,
-                project or None,
-                min(max(top_k, 1), 20),
+                project or None,  # type: ignore[reportArgumentType]
+                min(max(top_k, 1), 20),  # type: ignore[reportArgumentType]
             )
 
         if not results:
@@ -150,7 +218,7 @@ def _register_search_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:
         lines = [f"Found {len(results)} results:\n"]
         for r in results:
             lines.append(
-                f"[#{r.fact_id}] (score: {r.score:.3f}) [{r.project}/{r.fact_type}]\n{r.content}\n"
+                f"[#{r.fact_id}] (score: {r.score:.3f}) [{r.project}/{r.fact_type}]\n{r.content}\n"  # type: ignore[reportAttributeAccessIssue]
             )
 
         output = "\n".join(lines)
@@ -158,7 +226,7 @@ def _register_search_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:
         return output
 
 
-def _register_status_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:
+def _register_status_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ignore[reportInvalidTypeForm]
     """Register the ``cortex_status`` tool on *mcp*."""
 
     @mcp.tool()
@@ -183,7 +251,7 @@ def _register_status_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:
         )
 
 
-def _register_ledger_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:
+def _register_ledger_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ignore[reportInvalidTypeForm]
     """Register the ``cortex_ledger_verify`` tool on *mcp*."""
 
     @mcp.tool()
@@ -192,7 +260,7 @@ def _register_ledger_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:
         await ctx.ensure_ready()
 
         # ImmutableLedger expects a pool, not a single connection
-        ledger = ImmutableLedger(ctx.pool)
+        ledger = ImmutableLedger(ctx.pool)  # type: ignore[reportArgumentType]
         report = await ledger.verify_integrity_async()
 
         if report["valid"]:
@@ -210,17 +278,21 @@ def _register_ledger_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:
 # ─── Factory ─────────────────────────────────────────────────────────
 
 
-def create_mcp_server(config: MCPServerConfig | None = None) -> "FastMCP":
+def create_mcp_server(config: MCPServerConfig | None = None) -> "FastMCP":  # type: ignore[reportInvalidTypeForm]
     """Create and configure an optimized CORTEX MCP server instance.
 
     Each tool is registered via a dedicated helper, keeping this
     function focused on orchestration (cognitive complexity ≤ 5).
     """
     if not _MCP_AVAILABLE:
-        raise ImportError("MCP SDK not installed. Install with: pip install 'cortex-memory[mcp]'")
+        raise ImportError("MCP SDK not installed. Install with: pip install 'cortex-persist[mcp]'")
 
     cfg = config or MCPServerConfig()
-    mcp = FastMCP("CORTEX Trust Engine")
+    mcp = FastMCP(  # type: ignore[reportOptionalCall]
+        "CORTEX Trust Engine",
+        host=cfg.host,
+        port=cfg.port,
+    )
     ctx = _MCPContext(cfg)
 
     # Core memory tools
@@ -229,11 +301,39 @@ def create_mcp_server(config: MCPServerConfig | None = None) -> "FastMCP":
     _register_status_tool(mcp, ctx)
     _register_ledger_tool(mcp, ctx)
 
+    # Causal Episodic Trace (Epoch 8)
+    _register_trace_episode_tool(mcp, ctx)
+
+    # Causal Chain Traversal
+    _register_trace_chain_tool(mcp, ctx)
+
+    # Shannon Entropy & Session Handoff (Epoch 13)
+    _register_shannon_report_tool(mcp, ctx)
+    _register_handoff_tool(mcp, ctx)
+
+    # Embedding Tools (Gemini Embedding 2)
+    _register_embed_tool(mcp, ctx)
+    _register_embed_status_tool(mcp, ctx)
+
     # Trust & Compliance tools (EU AI Act Art. 12)
     register_trust_tools(mcp, ctx)
 
     # Mega Poderosas (Aether, Void, Chronos paradigms)
     register_mega_tools(mcp, ctx)
+
+    # Hilbert-Omega Theorem Prover (Millennium Problems + Conjectures)
+    from cortex.mcp.hilbert_tools import register_hilbert_tools
+
+    register_hilbert_tools(mcp, ctx)
+
+    # Genesis Engine — create systems from specs
+    register_genesis_tools(mcp, ctx)
+
+    # Health Index — system monitoring
+    register_health_tools(mcp, ctx)
+
+    # Music Engine — Master Orchestrator
+    register_music_tools(mcp)
 
     return mcp
 
@@ -255,7 +355,7 @@ def run_server(config: MCPServerConfig | None = None) -> None:
 
     if cfg.transport == "sse":
         logger.info("Starting CORTEX MCP server v2 (SSE) on %s:%d", cfg.host, cfg.port)
-        mcp.run(transport="sse", host=cfg.host, port=cfg.port)
+        mcp.run(transport="sse")
     else:
         logger.info("Starting CORTEX MCP server v2 (stdio)")
         mcp.run()

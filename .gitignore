@@ -51,6 +51,7 @@ build/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+reports/
 .coverage
 htmlcov/
 coverage.xml
@@ -113,11 +114,12 @@ blind-pilot/
 blue/
 code-agent-academy/
 comienzos-clone/
-cortex-persist-slogan/
-cortex-sovereign-web/
-cortex_hive_ui/
-cycle-of-pain/
-demo-padres/
+cortex-export-*.json
+
+# Sensitive data — never track
+notebooklm_domains/
+data/legal_dossiers/
+data/bandcamp_profiles.*
 docs-ui/
 economia-humor/
 filete-cumbia/
@@ -141,6 +143,7 @@ snapshots/
 sonic-supreme/
 sonic_sovereign/
 sovereign_agent/
-web/
 xokas-elevator/
 yt-notebooklm-ext/
+auramem/
+nexus-dashboard/.next/

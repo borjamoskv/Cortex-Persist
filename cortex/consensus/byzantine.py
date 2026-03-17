@@ -38,7 +38,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass, field
 
-from cortex.thinking.fusion_models import (
+from cortex.extensions.thinking.fusion_models import (
     ModelResponse,
     ThinkingHistory,
     _jaccard,
@@ -53,7 +53,7 @@ logger = logging.getLogger("cortex.consensus.byzantine")
 # ─── Data Models ─────────────────────────────────────────────────────
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class ResponseTrust:
     """Trust assessment for a single model response."""
 
@@ -70,7 +70,7 @@ class ResponseTrust:
         return self.response.label
 
 
-@dataclass(slots=True)
+@dataclass()
 class ByzantineVerdict:
     """Result of WBFT consensus evaluation."""
 

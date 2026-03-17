@@ -74,7 +74,7 @@ def sovereign_run(
     coro: Any,
     *,
     debug: bool = False,
-) -> T:
+) -> Any:
     """Run a coroutine with the sovereign event loop (uvloop if available).
 
     Drop-in replacement for asyncio.run() that:

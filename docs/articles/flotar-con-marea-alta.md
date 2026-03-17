@@ -1,6 +1,6 @@
 # Flotar con marea alta
 
-*Por Borja Moskv*
+*by [borjamoskv.com](https://borjamoskv.com)*
 
 ---
 

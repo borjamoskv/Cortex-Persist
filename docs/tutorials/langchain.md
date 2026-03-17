@@ -13,7 +13,7 @@ LangChain's default memory is ephemeral — it disappears when your process dies
 ## Setup
 
 ```bash
-pip install cortex-memory langchain-openai
+pip install cortex-persist langchain-openai
 ```
 
 ```python

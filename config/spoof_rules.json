@@ -1,0 +1,32 @@
+{
+  "mappings": {
+    "gpt-4": {
+      "intent": "reasoning",
+      "local_model": "qwen2.5-coder:32b",
+      "shield": true
+    },
+    "gpt-4-turbo": {
+      "intent": "reasoning",
+      "local_model": "qwen2.5-coder:32b",
+      "shield": true
+    },
+    "gpt-4o": {
+      "intent": "reasoning",
+      "local_model": "qwen2.5-coder:32b",
+      "shield": true
+    },
+    "gpt-3.5-turbo": {
+      "intent": "general",
+      "local_model": "qwen2.5-coder:7b",
+      "shield": true
+    },
+    "claude-3-5-sonnet": {
+      "intent": "code",
+      "local_model": "qwen2.5-coder:32b",
+      "shield": true
+    }
+  },
+  "default_intent": "general",
+  "log_telemetry": true,
+  "strip_system_identity": true
+}

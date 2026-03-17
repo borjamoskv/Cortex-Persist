@@ -40,6 +40,8 @@ def _migration_015_tenant_unification(conn: sqlite3.Connection):
         "idx_ctx_snap_tenant": "context_snapshots",
         "idx_facts_tenant": "facts",
         "idx_sess_tenant": "sessions",
+        "idx_graph_ent_tenant": "graph_entities",
+        "idx_graph_rel_tenant": "graph_relationships",
     }
 
     for idx, table in critical_indices.items():

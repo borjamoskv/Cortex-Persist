@@ -16,15 +16,15 @@ import logging
 from dataclasses import dataclass
 
 from cortex.consensus.byzantine import ByzantineVerdict, WBFTConsensus
-from cortex.ha.gossip import GossipProtocol
-from cortex.thinking.fusion_models import ModelResponse, ThinkingHistory
+from cortex.extensions.ha.gossip import GossipProtocol
+from cortex.extensions.thinking.fusion_models import ModelResponse, ThinkingHistory
 
 __all__ = ["GEACLCoordinator", "GeaclCommitResult"]
 
 logger = logging.getLogger("cortex.consensus.geacl")
 
 
-@dataclass(slots=True)
+@dataclass()
 class GeaclCommitResult:
     """Result of a GEACL commit proposal."""
 

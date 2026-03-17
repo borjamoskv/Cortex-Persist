@@ -31,7 +31,7 @@ Traditional logging captures *what happened*. CORTEX proves *it wasn't tampered 
 
 ### Who built this?
 
-[Borja Moskv](https://github.com/borjamoskv) — solo developer, based in Bilbao. CORTEX is 103 commits in 9 days (as of Feb 24, 2026). This is a real product, not a weekend experiment.
+[borjamoskv.com](https://borjamoskv.com) — solo developer, based in Bilbao. CORTEX is 103 commits in 9 days (as of Feb 24, 2026). This is a real product, not a weekend experiment.
 
 ---
 

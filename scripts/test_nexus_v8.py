@@ -10,14 +10,13 @@ import os
 import time
 
 from cortex.nexus_v8 import (
-    NexusWorldModel,
     DomainOrigin,
     IntentType,
+    NexusWorldModel,
     Priority,
     WorldMutation,
     mailtv_intercepted,
     moltbook_post_published,
-    moltbook_karma_laundered,
     moltbook_shadowban_alert,
     sap_anomaly_detected,
 )
@@ -97,14 +96,21 @@ async def run_tests():
 
     # ─── TEST 3: Priority ordering ──────────────────────────────
     await moltbook_post_published(
-        nexus, agent_name="DEBUGGER", submolt="cortex",
-        title="Test Post", karma_before=10.0,
+        nexus,
+        agent_name="DEBUGGER",
+        submolt="cortex",
+        title="Test Post",
+        karma_before=10.0,
     )
     await moltbook_shadowban_alert(
-        nexus, agent_name="INGENUE", evidence="Visibility -80%",
+        nexus,
+        agent_name="INGENUE",
+        evidence="Visibility -80%",
     )
     await sap_anomaly_detected(
-        nexus, module="FI-GL", severity="HIGH",
+        nexus,
+        module="FI-GL",
+        severity="HIGH",
         description="Duplicate posting in P12",
     )
 
@@ -128,9 +134,12 @@ async def run_tests():
     # Create a second NexusWorldModel pointing to the same DB
     nexus2 = NexusWorldModel(db_path=TEST_DB)
     cross_process_query = await nexus2.query(limit=100)
-    assert len(cross_process_query) == len(all_mutations), \
+    assert len(cross_process_query) == len(all_mutations), (
         "Second process should see same mutations"
-    logger.info("✓ TEST 5: Cross-process persistence (%d mutations visible)", len(cross_process_query))
+    )
+    logger.info(
+        "✓ TEST 5: Cross-process persistence (%d mutations visible)", len(cross_process_query)
+    )
 
     # ─── TEST 6: Mutation count ──────────────────────────────────
     assert nexus.mutation_count == 4, f"Expected 4 stored, got {nexus.mutation_count}"

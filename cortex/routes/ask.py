@@ -19,8 +19,9 @@ from pydantic import BaseModel, Field
 from cortex.api.deps import get_async_engine
 from cortex.auth import AuthResult, require_permission
 from cortex.engine_async import AsyncCortexEngine
-from cortex.llm.manager import LLMManager
-from cortex.llm.provider import LLMProvider
+from cortex.extensions.llm.manager import LLMManager
+from cortex.extensions.llm.provider import LLMProvider
+from cortex.extensions.llm.router import IntentProfile
 
 __all__ = [
     "AskRequest",
@@ -84,12 +85,20 @@ class LLMStatusResponse(BaseModel):
 
 # ─── System Prompt ───────────────────────────────────────────────────
 
-CORTEX_SYSTEM_PROMPT = """You are CORTEX, a Sovereign Memory Engine for Enterprise AI Swarms.
-You are strictly the memory product, NOT the active agent.
-You answer questions based EXCLUSIVELY on the facts provided below.
-If the facts don't contain enough information, say so clearly. Do not hallucinate.
-Be concise, precise, and cite fact IDs when relevant. Maintain an authoritative, industrial tone.
-Respond in the same language as the user's question."""
+CORTEX_SYSTEM_PROMPT = """\
+[IDENTITY] CORTEX | Sovereign Memory Engine for Enterprise AI Swarms.
+[ROLE] Memory Oracle. You are NOT the active agent. You are the cryptographic ledger.
+
+[STRUCTURAL TOPOLOGY: RAG CONSTRAINTS]
+- 1. Absolute Grounding: Answer EXCLUSIVELY using provided facts.
+- 2. Zero Hallucination: If facts lack data, emit "Missing Causal Data".
+- 3. Traceability: Cite [Fact #ID] unequivocally for every claim.
+- 4. Industrial Tone: Dense, authoritative, zero fluff.
+
+[OUTPUT PRIMITIVES]
+- Must be O(1) readable. Prioritize bullet points and pure signal.
+- Mirror user's language.\
+"""
 
 
 # ─── Endpoints ───────────────────────────────────────────────────────
@@ -114,7 +123,7 @@ async def ask_cortex(
             content={
                 "detail": "No LLM provider configured. "
                 "Set CORTEX_LLM_PROVIDER env variable. "
-                f"Supported: {LLMProvider.list_providers()}",
+                f"Supported: {LLMProvider.list_providers()}",  # type: ignore[type-error]
             },
         )
 
@@ -122,7 +131,8 @@ async def ask_cortex(
     results = await engine.search(
         query=req.query,
         top_k=req.k,
-        project=auth.tenant_id or req.project,
+        project=req.project,
+        tenant_id=auth.tenant_id,
     )
 
     # 2. Build context from retrieved facts (Optimized)
@@ -155,6 +165,7 @@ async def ask_cortex(
             system=system,
             temperature=req.temperature,
             max_tokens=req.max_tokens,
+            intent=IntentProfile.REASONING,
         )
     except (OSError, RuntimeError) as e:
         logger.error("LLM completion failed: %s", e)
@@ -210,7 +221,8 @@ async def ask_stream(
     results = await engine.search(
         query=req.query,
         top_k=req.k,
-        project=auth.tenant_id or req.project,
+        project=req.project,
+        tenant_id=auth.tenant_id,
     )
 
     # 2. Build context
@@ -248,6 +260,7 @@ async def ask_stream(
                 system=system,
                 temperature=req.temperature,
                 max_tokens=req.max_tokens,
+                intent=IntentProfile.REASONING,
             ):
                 yield f"data: {json.dumps({'type': 'token', 'data': chunk})}\n\n"
         except (OSError, RuntimeError, ValueError) as e:
@@ -269,5 +282,5 @@ async def llm_status(
         available=_llm_manager.available,
         provider=_llm_manager.provider_name or "none",
         model=provider.model if provider else None,
-        supported_providers=LLMProvider.list_providers(),
+        supported_providers=LLMProvider.list_providers(),  # type: ignore[type-error]
     )

@@ -49,13 +49,14 @@ def _migration_017_fts_decouple(conn: sqlite3.Connection):
                 insert_count += 1
             except (ValueError, TypeError, OSError) as e:
                 logger.warning(
-                    f"Migration 017: Failed to decrypt or insert fact {fact_id} into FTS: {e}"
+                    "Migration 017: Failed to decrypt or insert fact %s into FTS: %s", fact_id, e
                 )
 
         logger.info(
-            f"Migration 017: Successfully repopulated facts_fts with {insert_count} decrypted facts"
+            "Migration 017: Successfully repopulated facts_fts with %s decrypted facts",
+            insert_count,
         )
 
     except sqlite3.OperationalError as e:
-        logger.warning(f"Migration 017: Operational error during FTS decoupling: {e}")
+        logger.warning("Migration 017: Operational error during FTS decoupling: %s", e)
         raise

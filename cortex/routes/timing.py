@@ -38,7 +38,7 @@ async def record_heartbeat(
 
     try:
         hb_id = await run_in_threadpool(
-            api_state.tracker.heartbeat,
+            api_state.tracker.heartbeat,  # type: ignore[reportOptionalMemberAccess]
             project=req.project,
             entity=req.entity,
             category=req.category,
@@ -46,7 +46,7 @@ async def record_heartbeat(
             language=req.language,
             meta=req.meta,
         )
-        await run_in_threadpool(api_state.tracker.flush)
+        await run_in_threadpool(api_state.tracker.flush)  # type: ignore[reportOptionalMemberAccess]
         return {"id": hb_id, "status": "recorded"}
     except sqlite3.Error as e:
         logger.error("Heartbeat failed: %s", e)
@@ -75,7 +75,7 @@ async def time_today(
         project = auth.tenant_id
 
     try:
-        summary = await run_in_threadpool(api_state.tracker.today, project=project)
+        summary = await run_in_threadpool(api_state.tracker.today, project=project)  # type: ignore[reportOptionalMemberAccess]
         return TimeSummaryResponse(
             total_seconds=summary.total_seconds,
             total_hours=summary.total_hours,
@@ -115,7 +115,7 @@ async def time_report(
         project = auth.tenant_id
 
     try:
-        summary = await run_in_threadpool(api_state.tracker.report, project=project, days=days)
+        summary = await run_in_threadpool(api_state.tracker.report, project=project, days=days)  # type: ignore[reportOptionalMemberAccess]
         return TimeSummaryResponse(
             total_seconds=summary.total_seconds,
             total_hours=summary.total_hours,
@@ -143,7 +143,7 @@ async def get_time_history(
 ) -> list:
     """Get daily time history."""
     try:
-        return await run_in_threadpool(api_state.tracker.daily, days=days)
+        return await run_in_threadpool(api_state.tracker.daily, days=days)  # type: ignore[reportOptionalMemberAccess]
     except sqlite3.Error as e:
         logger.error("Time history failed: %s", e)
         raise HTTPException(

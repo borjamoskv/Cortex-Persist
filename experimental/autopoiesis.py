@@ -14,11 +14,12 @@ limits, `firejail`, or a cloud function).
 """
 
 from __future__ import annotations
+
 import os
 import subprocess
 import uuid
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable, Optional
 
 
 class Autopoiesis:
@@ -56,7 +57,7 @@ class Autopoiesis:
     def generate_and_register(
         self,
         generator: Callable[[], str],
-        validator: Optional[Callable[[str], bool]] = None,
+        validator: Callable[[str], bool] | None = None,
     ) -> Path:
         """Generate a script, execute it in the sandbox, and register it.
 
@@ -109,4 +110,3 @@ if __name__ == "__main__":
         return "print('Hello from sandbox')"
     path = ap.generate_and_register(gen)
     print(f"Generated tool stored at {path}")
-```

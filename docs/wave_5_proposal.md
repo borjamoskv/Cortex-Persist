@@ -2122,7 +2122,7 @@ Server Setup ──────────────────────�
 21\t_MCP_AVAILABLE = False\n    22\ttry:\n    23\t    from mcp.server.fastmcp 
 import FastMCP\n    24\t    _MCP_AVAILABLE = True\n    25\texcept ImportError:\n
 26\t    FastMCP = None  # type: ignore\n    27\t    logger.debug("MCP SDK not 
-installed. Install with: pip install \'cortex-memory[mcp]\'")\n    28\t\n    
+installed. Install with: pip install \'cortex-persist[mcp]\'")\n    28\t\n    
 29\t\n    30\tdef create_mcp_server(db_path: str = "~/.cortex/cortex.db") -> 
 "FastMCP":\n    31\t    """Create and configure a CORTEX MCP server instance.\n 
 32\t\n    33\t    Args:\n    34\t        db_path: Path to CORTEX database.\n    
@@ -2131,7 +2131,7 @@ run.\n    38\t\n    39\t    Raises:\n    40\t        ImportError: If MCP SDK is
 not installed.\n    41\t    """\n    42\t    if not _MCP_AVAILABLE:\n    43\t   
 raise ImportError(\n    44\t            "MCP SDK not installed. Install with: 
 pip install mcp\\n"\n    45\t            "Or: pip install 
-\'cortex-memory[mcp]\'"\n    46\t        )\n    47\t\n    48\t    from 
+\'cortex-persist[mcp]\'"\n    46\t        )\n    47\t\n    48\t    from 
 cortex.engine import CortexEngine\n    49\t\n    50\t    mcp = FastMCP(\n    
 51\t        "CORTEX Memory",\n    52\t        description="Sovereign memory 
 infrastructure for AI agents. "\n    53\t        "Store, search, and recall 

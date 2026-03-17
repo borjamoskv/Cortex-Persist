@@ -21,7 +21,7 @@
 - [x] MAILTV-1 autonomous email (Gmail API)
 - [x] Agent missions, reputation system, vote ledger
 - [x] Sovereign Gate — action approval framework
-- [x] Python SDK (`pip install cortex-memory`)
+- [x] Python SDK (`pip install cortex-persist`)
 - [x] OpenAPI spec (70.5 KB) + CI/CD pipeline
 - [x] Self-healing daemon (10 monitors, auto-reinstantiation)
 - [x] Tripartite Memory (L1 Working → L2 Vector → L3 Ledger)
@@ -53,7 +53,7 @@
 ### Phase 2: Orchestration *(Q2 2026)*
 - [ ] **GraphQL API** — cross-language integration replacing REST where needed
 - [ ] **Distributed Event Bus** — NATS or Redis Streams for swarm coordination
-- [ ] **JavaScript/TypeScript SDK** — `npm install @cortex-memory/sdk`
+- [ ] **JavaScript/TypeScript SDK** — `npm install @cortex-persist/sdk`
 - [ ] **Helm Chart** — Kubernetes production deployment
 - [ ] **Streaming responses** — SSE for `/v1/ask` real-time output
 - [ ] **Webhooks** — real-time event delivery to external systems

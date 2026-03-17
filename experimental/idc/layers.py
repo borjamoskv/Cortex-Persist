@@ -11,7 +11,6 @@ from numpy.typing import NDArray
 
 from .types import Action, AgentConfig, AgentMode, Belief, Observation
 
-
 # ──────────────────────────────────────────────────────────────
 # LAYER I — INFORMATION (Bayesian Belief Update)
 # ──────────────────────────────────────────────────────────────

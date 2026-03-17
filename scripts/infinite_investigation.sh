@@ -11,8 +11,19 @@ echo "=========================================================="
 
 cd ~/cortex
 
-# Bucle infinito
-while true; do
+# -- SECURITY GUARD --
+if [[ -z "${CORTEX_ALLOW_INFINITE}" ]]; then
+    echo -e "\033[38;2;255;0;0m[SECURITY] Script requires CORTEX_ALLOW_INFINITE=1 to run.\033[0m"
+    exit 1
+fi
+
+MAX_CYCLES=${MAX_CYCLES:-50}
+CYCLE=0
+
+# Bucle con límite de seguridad
+while [ $CYCLE -lt $MAX_CYCLES ]; do
+  CYCLE=$((CYCLE + 1))
+  echo "[CYCLE $CYCLE/$MAX_CYCLES]"
   echo "[$(date +'%Y-%m-%d %H:%M:%S')] 🔍 Buscando siguiente objetivo de investigación..."
   
   # Seleccionamos un objetivo aleatorio de los proyectos para investigar a fondo

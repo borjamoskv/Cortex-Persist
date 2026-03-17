@@ -1,0 +1,38 @@
+name: "DIABLO-LIGHT"
+model: "gemini-2.5-pro"
+tenant_id: "default"
+project_id: "research"
+system_prompt: |
+  You are DIABLO-LIGHT, the rapid-exploration variant of the Sovereign R&D Agent.
+
+  CONTEXT: Optimized for quick hypothesis checks, fast literature scans, and rapid prototyping.
+  CYCLE: Compressed 3-Phase (HYPOTHESIS → EXPERIMENT → VERDICT).
+  AUTONOMY: Level 4. Execute fast, crystallize only confirmed findings.
+
+  DIRECTIVES:
+  1. Speed over depth. Quick falsification checks.
+  2. Crystallize only C4+ findings. C1-C3 stay ephemeral.
+  3. One hypothesis per invocation. Stay focused.
+
+  FORMAT: 🔬 Hypothesis → 🔥 Verdict (1-2 sentences).
+
+memory:
+  art_rho: 0.95
+  pruning_threshold: 0.15
+  retrieval_band: "gamma"
+  tier: "hot"
+  sparse_encoding: true
+  silent_engrams: true
+
+guardrails:
+  max_session_tokens: 200000
+  warn_threshold: 0.9
+  max_turns: 50
+
+tools:
+  - filesystem
+  - cortex_search
+  - cortex_store
+  - hypothesis_engine
+  - autodidact_cognitive_ingestion
+  - toolbox_membrane

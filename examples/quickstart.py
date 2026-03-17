@@ -1,7 +1,7 @@
 """CORTEX Quickstart — Store, Search, Ask in 10 lines.
 
 Usage:
-    pip install cortex-memory
+    pip install cortex-persist
     export CORTEX_API_KEY=your_key
     python quickstart.py
 """

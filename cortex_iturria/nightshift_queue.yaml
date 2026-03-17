@@ -1,0 +1,36 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# NightShift Crystal Queue — Targets para cristalización autónoma
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Los agentes NightShift consumen esta lista y generan cristales cognitivos.
+# Tras procesarse, un target puede marcarse con `processed: true` o eliminarse.
+#
+# Intents:
+#   quick_read  — URL directa → Markdown (Jina)
+#   deep_learn  — Crawl recursivo + estructura (Firecrawl)
+#   search_gap  — Query de búsqueda neuronal (Exa.ai)
+#   audio_ingest — Audio → texto (AssemblyAI)
+#
+# Priority: 1 (máxima urgencia) → 10 (background)
+# ═══════════════════════════════════════════════════════════════════════════
+
+targets:
+  - target: "https://docs.anthropic.com/en/docs/build-with-claude/agentic-systems"
+    intent: "deep_learn"
+    priority: 2
+
+  - target: "Google ADK agent framework architecture patterns 2026"
+    intent: "search_gap"
+    priority: 3
+
+  - target: "https://langchain-ai.github.io/langgraph/concepts/multi_agent/"
+    intent: "quick_read"
+    priority: 4
+
+  - target: "autonomous agent memory systems state of the art 2026"
+    intent: "search_gap"
+    priority: 5
+
+  - target: "https://openai.com/index/practices-for-governing-agentic-ai-systems/"
+    intent: "quick_read"
+    priority: 6

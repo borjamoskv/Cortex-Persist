@@ -1,18 +1,25 @@
 """Search mixin module."""
 
+from __future__ import annotations
+
 import logging
 import sqlite3
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
+from cortex.engine.mixins.base import EngineMixinBase
 from cortex.graph import extract_entities, get_context_subgraph
 from cortex.search import hybrid_search, text_search
+
+if TYPE_CHECKING:
+    from cortex.search.causal_gap import CausalGap
+
 
 __all__ = ["SearchMixin"]
 
 logger = logging.getLogger("cortex.engine.search")
 
 
-class SearchMixin:
+class SearchMixin(EngineMixinBase):
     """Mixin for semantic, text, and graph-augmented search operations."""
 
     async def search(
@@ -25,9 +32,12 @@ class SearchMixin:
         graph_depth: int = 0,
         include_graph: bool = False,
         confidence: str | None = None,
+        causal_gap: CausalGap | None = None,
         **kwargs,
     ) -> list[Any]:
         """Perform hybrid search (Vector + Text) with optional Graph-RAG context."""
+        tenant_id = self._resolve_tenant(tenant_id)
+
         async with self.session() as conn:
             try:
                 # 1. Perform Hybrid Search
@@ -43,6 +53,7 @@ class SearchMixin:
                     project=project,
                     as_of=as_of,
                     confidence=confidence,
+                    causal_gap=causal_gap,
                     **kwargs,
                 )
 
@@ -62,13 +73,13 @@ class SearchMixin:
                 # 2. Enrich with Graph Context if requested
                 if results and (graph_depth > 0 or include_graph):
                     await SearchMixin._enrich_with_graph_context(
-                        self, conn, results, query, graph_depth
+                        self, conn, results, query, graph_depth, tenant_id=tenant_id
                     )
 
                 return results
 
             except (sqlite3.Error, OSError, RuntimeError) as e:
-                logger.exception(f"Hybrid Graph-RAG search failed: {e}")
+                logger.exception("Hybrid Graph-RAG search failed: %s", e)
                 # Ultimate fallback to basic text search
                 return await text_search(
                     conn,
@@ -82,7 +93,7 @@ class SearchMixin:
                 )
 
     async def _enrich_with_graph_context(
-        self, conn, results: list[Any], query: str, graph_depth: int
+        self, conn, results: list[Any], query: str, graph_depth: int, tenant_id: str = "default"
     ) -> None:
         """Helper to enrich search results with graph context."""
         entities = extract_entities(query)
@@ -94,7 +105,9 @@ class SearchMixin:
             seeds = [e["name"] for e in top_entities]
 
         if seeds:
-            subgraph = await get_context_subgraph(conn, seeds, depth=graph_depth or 1, max_nodes=50)
+            subgraph = await get_context_subgraph(
+                conn, seeds, depth=graph_depth or 1, max_nodes=50, tenant_id=tenant_id
+            )
 
             if results and (subgraph.get("nodes") or subgraph.get("edges")):
                 results[0].graph_context = {"graph": subgraph, "seeds": seeds}

@@ -28,7 +28,7 @@ RUN python -c "from cortex.embeddings import LocalEmbedder; LocalEmbedder()"
 # Stage 2: Runtime
 FROM python:3.12-slim-bookworm
 
-LABEL maintainer="Borja Moskv"
+LABEL maintainer="borjamoskv.com"
 LABEL description="CORTEX — Sovereign Memory Engine for AI Agents"
 LABEL org.opencontainers.image.source="https://github.com/borjamoskv/cortex"
 

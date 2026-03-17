@@ -1,118 +1,91 @@
-# Contributing to CORTEX
+# CONTRIBUTING.md — CORTEX Persist
 
-Thank you for your interest in CORTEX! We welcome contributions of all kinds.
+Package: cortex-persist v0.3.0b1
+Engine: v8
+License: Apache-2.0
+Python: >=3.10
+
+## Purpose
+
+This file covers local setup, quality checks, and the basic pull request flow.
+
+Before touching critical trust surfaces, also read:
+
+- [AGENTS.md](./AGENTS.md) — operational contract and invariants
+- [docs/CONTRIBUTING.md](./docs/CONTRIBUTING.md) — deep change protocols
+- [docs/SECURITY_TRUST_MODEL.md](./docs/SECURITY_TRUST_MODEL.md) — trust boundaries and verification model
 
 ## Development Setup
 
+Clone the repository and install in editable mode with development dependencies:
+
 ```bash
-# Clone the repo
-git clone https://github.com/borjamoskv/cortex.git
-cd cortex
+git clone https://github.com/borjamoskv/Cortex-Persist.git
+cd Cortex-Persist
+pip install -e ".[dev]"
+```
 
-# Create virtual environment
-python -m venv .venv
-source .venv/bin/activate  # macOS/Linux
-# .venv\Scripts\activate   # Windows
+If you are working on API, cloud, ADK, or full-surface integration paths, install the relevant extras:
 
-# Install with dev dependencies
+```bash
+pip install -e ".[api]"
+pip install -e ".[cloud]"
+pip install -e ".[adk]"
 pip install -e ".[all]"
-
-# Verify setup
-pytest tests/ -v --tb=short -x
 ```
 
-## Running the Test Suite
+## Quality Checks
+
+Run the required checks before opening a pull request:
 
 ```bash
-# Full suite (1,276+ tests)
-pytest tests/ -v --tb=short
-
-# Single file
-pytest tests/test_engine.py -v
-
-# With coverage
-pytest tests/ --cov=cortex --cov-report=term-missing
-
-# Fast smoke test
-pytest tests/ -x --timeout=30
+pytest tests/ -v --cov=cortex
+ruff check cortex/
+pyright cortex/
 ```
 
-## Code Quality
+If your change touches API surfaces, also run the relevant API tests.
+If your change touches CLI behavior, test the CLI path explicitly.
 
-We use **Ruff** for linting and formatting:
+## Pull Requests
 
-```bash
-# Check
-ruff check cortex/ tests/
-ruff format --check cortex/ tests/
+Keep pull requests small, test-backed, and scoped to one change surface when possible.
 
-# Auto-fix
-ruff check --fix cortex/ tests/
-ruff format cortex/ tests/
-```
+Before opening a PR:
 
-## Making Changes
+- run tests
+- run Ruff
+- run Pyright
+- confirm CI passes
+- update docs if public behavior changed
 
-1. **Fork** the repository
-2. **Create a branch**: `git checkout -b feature/my-change`
-3. **Make your changes** — keep commits focused and atomic
-4. **Add tests** for new functionality
-5. **Run the full test suite** to confirm nothing is broken
-6. **Submit a Pull Request** against `master`
+For schema, ledger, async, API, or trust-surface changes, follow the deep protocols in [`docs/CONTRIBUTING.md`](./docs/CONTRIBUTING.md).
 
-### Commit Message Convention
+## Basic Contribution Rules
 
-```
-<type>: <short description>
+- Preserve tenant-aware behavior in public data paths.
+- Keep CLI modules thin; do not move business logic into command wrappers.
+- Prefer explicit failure over permissive fallback behavior.
+- Add or update tests for every behavior change.
+- Use type hints on public functions.
+- Catch specific exceptions rather than broad ones.
+- Keep dependency additions justified and reflected in project metadata.
 
-Types: feat, fix, docs, test, refactor, ci, chore
-```
+## Documentation Expectations
 
-Examples:
-- `feat: add graph-based memory traversal`
-- `fix: correct Merkle checkpoint hash calculation`
-- `docs: expand privacy shield documentation`
+Update documentation when you change:
 
-## Pull Request Guidelines
+- public APIs
+- CLI behavior
+- trust boundaries
+- validation behavior
+- storage or migration semantics
+- operational procedures
 
-- PRs should target `master`
-- Ensure CI passes (lint + tests + security audit)
-- Include a description of **what** changed and **why**
-- Link related issues with `Closes #123`
+## Related Documents
 
-## Architecture Overview
-
-```
-cortex/
-├── api.py              # FastAPI REST endpoints
-├── cli/                # Click-based CLI (38 commands)
-├── engine.py           # Core CortexEngine
-├── audit/              # Immutable ledger & Merkle trees
-├── consensus/          # WBFT multi-agent consensus
-├── gate/               # Trust Gateway (RBAC, Privacy Shield)
-├── search/             # Vector + semantic search
-├── sovereign/          # Self-healing daemon & observability
-├── storage/            # SQLite, AlloyDB, Turso backends
-└── mcp/                # Model Context Protocol server
-```
-
-For detailed architecture, see [ARCHITECTURE.md](ARCHITECTURE.md).
-
-## Creating a Plugin
-
-Use the scaffold generator:
-
-```bash
-python scripts/create_plugin.py my-plugin --description "Does something cool"
-```
-
-This generates a complete working plugin with manifest, API spec, Dockerfile, tests, and docs.
-
-## Questions?
-
-- Open a [GitHub Discussion](https://github.com/borjamoskv/cortex/discussions)
-- Email: borja@moskv.com
-
-## License
-
-By contributing, you agree that your contributions will be licensed under Apache License 2.0.
+- [`AGENTS.md`](./AGENTS.md)
+- [`docs/CONTRIBUTING.md`](./docs/CONTRIBUTING.md)
+- [`docs/SECURITY_TRUST_MODEL.md`](./docs/SECURITY_TRUST_MODEL.md)
+- [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md)
+- [`SECURITY.md`](./SECURITY.md)

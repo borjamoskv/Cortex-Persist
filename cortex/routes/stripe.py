@@ -59,6 +59,7 @@ class CheckoutRequest(BaseModel):
     """Request to create a Stripe Checkout session."""
 
     plan: str = "pro"
+    customer_email: str | None = None
     success_url: str = "https://cortex.moskv.com/success"
     cancel_url: str = "https://cortex.moskv.com/pricing"
 
@@ -83,7 +84,7 @@ def _get_stripe():
             detail="stripe package not installed. Install with: pip install stripe",
         ) from exc
 
-    stripe.api_key = config.STRIPE_SECRET_KEY
+    stripe.api_key = config.STRIPE_SECRET_KEY  # type: ignore[reportAttributeAccessIssue]
     return stripe
 
 
@@ -139,7 +140,7 @@ async def _revoke_keys_for_email(email: str) -> None:
 # ─── Routes ──────────────────────────────────────────────────────────
 
 
-@router.post("/checkout")
+@router.post("/checkout", include_in_schema=False)
 async def create_checkout_session(body: CheckoutRequest) -> dict:
     """Create a Stripe Checkout session for a plan purchase."""
     stripe = _get_stripe()
@@ -160,21 +161,26 @@ async def create_checkout_session(body: CheckoutRequest) -> dict:
         )
 
     try:
-        session = stripe.checkout.Session.create(
-            mode="subscription",
-            line_items=[{"price": price_id, "quantity": 1}],
-            success_url=body.success_url + "?session_id={CHECKOUT_SESSION_ID}",
-            cancel_url=body.cancel_url,
-            metadata={"plan": body.plan},
-        )
-    except stripe.StripeError as exc:
+        session_kwargs = {
+            "mode": "subscription",
+            "ui_mode": "embedded",
+            "line_items": [{"price": price_id, "quantity": 1}],
+            "return_url": body.success_url + "?session_id={CHECKOUT_SESSION_ID}",
+            "metadata": {"plan": body.plan},
+        }
+        if body.customer_email:
+            session_kwargs["customer_email"] = body.customer_email
+
+        # type: ignore[reportAttributeAccessIssue]
+        session = stripe.checkout.Session.create(**session_kwargs)  # type: ignore[reportAttributeAccessIssue]
+    except stripe.StripeError as exc:  # type: ignore[reportAttributeAccessIssue]
         logger.error("Stripe checkout error: %s", exc)
         raise HTTPException(status_code=502, detail="Stripe API error") from exc
 
-    return {"url": session.url, "session_id": session.id}
+    return {"client_secret": session.client_secret, "session_id": session.id, "url": session.url}
 
 
-@router.post("/webhook")
+@router.post("/webhook", include_in_schema=False)
 async def stripe_webhook(
     request: Request,
     stripe_signature: str = Header(None, alias="Stripe-Signature"),
@@ -189,8 +195,9 @@ async def stripe_webhook(
     payload = await request.body()
 
     try:
-        event = stripe.Webhook.construct_event(payload, stripe_signature, webhook_secret)
-    except stripe.SignatureVerificationError as exc:
+        # type: ignore[reportAttributeAccessIssue]
+        event = stripe.Webhook.construct_event(payload, stripe_signature, webhook_secret)  # type: ignore[reportAttributeAccessIssue]
+    except stripe.SignatureVerificationError as exc:  # type: ignore[reportAttributeAccessIssue]
         raise HTTPException(status_code=400, detail="Invalid webhook signature") from exc
     except ValueError as exc:
         raise HTTPException(status_code=400, detail="Invalid payload") from exc
@@ -221,7 +228,8 @@ async def stripe_webhook(
 
         try:
             stripe_obj = _get_stripe()
-            customer = stripe_obj.Customer.retrieve(customer_id)
+            # type: ignore[reportAttributeAccessIssue]
+            customer = stripe_obj.Customer.retrieve(customer_id)  # type: ignore[reportAttributeAccessIssue]
             email = customer.get("email", "")
 
             if email:
@@ -236,17 +244,17 @@ async def stripe_webhook(
     return {"status": "ignored", "type": event_type}
 
 
-@router.post("/portal")
+@router.post("/portal", include_in_schema=False)
 async def create_portal_session(body: PortalRequest) -> dict:
     """Create a Stripe Customer Portal session for billing management."""
     stripe = _get_stripe()
 
     try:
-        session = stripe.billing_portal.Session.create(
+        session = stripe.billing_portal.Session.create(  # type: ignore[reportAttributeAccessIssue]
             customer=body.customer_id,
             return_url=body.return_url,
         )
-    except stripe.StripeError as exc:
+    except stripe.StripeError as exc:  # type: ignore[reportAttributeAccessIssue]
         logger.error("Stripe portal error: %s", exc)
         raise HTTPException(status_code=502, detail="Stripe API error") from exc
 

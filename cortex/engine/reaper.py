@@ -45,9 +45,9 @@ class GhostReaper:
         Returns:
             Number of reaped ghosts.
         """
-        cutoff = (
-            datetime.now(timezone.utc) - timedelta(days=self._ttl_days)
-        ).strftime("%Y-%m-%dT%H:%M:%S")
+        cutoff = (datetime.now(timezone.utc) - timedelta(days=self._ttl_days)).strftime(
+            "%Y-%m-%dT%H:%M:%S"
+        )
 
         # Phase 1: Explicit TTL expiry
         cursor = await conn.execute(
@@ -59,8 +59,7 @@ class GhostReaper:
 
         # Phase 2: Implicit TTL (no expires_at, old created_at)
         cursor = await conn.execute(
-            "DELETE FROM ghosts WHERE status = 'open' "
-            "AND expires_at IS NULL AND created_at < ?",
+            "DELETE FROM ghosts WHERE status = 'open' AND expires_at IS NULL AND created_at < ?",
             (cutoff,),
         )
         implicit_count = cursor.rowcount
@@ -71,7 +70,10 @@ class GhostReaper:
         if total > 0:
             logger.info(
                 "🪦 Reaped %d expired ghosts (explicit=%d, implicit=%d, ttl=%dd)",
-                total, explicit_count, implicit_count, self._ttl_days,
+                total,
+                explicit_count,
+                implicit_count,
+                self._ttl_days,
             )
         return total
 

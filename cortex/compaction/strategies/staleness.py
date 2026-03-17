@@ -54,7 +54,7 @@ async def find_stale_facts(
         "SELECT id FROM facts "
         "WHERE project = ? AND valid_until IS NULL "
         "AND created_at < ? AND consensus_score < ? "
-        "ORDER BY created_at ASC",
+        "ORDER BY id ASC",
         (project, cutoff, min_consensus),
     )
     rows = await cursor.fetchall()

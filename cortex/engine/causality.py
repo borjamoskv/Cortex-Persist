@@ -1,0 +1,590 @@
+"""Causality Engine — AX-014: Mapping the Causal Chord (Ω₁).
+
+ANAMNESIS-Ω: The Ariadne's Thread.
+Links facts to the signals that triggered them, creating
+a directed acyclic graph (DAG) of consequence. Every decision
+must be traceable to an axiom or business need.
+
+Taint Propagation (Ω₁₃ §15.9 — causality/):
+When a fact is invalidated, suspicion propagates to all descendants.
+Derived confidence must be recomputed on taint.
+
+EU AI Act Article 12 compliance: full decision traceability.
+"""
+
+from __future__ import annotations
+
+import logging
+import sqlite3
+from dataclasses import dataclass
+from typing import Any
+
+import aiosqlite
+
+from cortex.database.core import connect as db_connect
+from cortex.extensions.signals.bus import AsyncSignalBus, SignalBus
+
+logger = logging.getLogger("cortex.extensions.causality")
+
+__all__ = [
+    "CausalOracle",
+    "AsyncCausalOracle",
+    "CausalEdge",
+    "CausalGraph",
+    "AsyncCausalGraph",
+    "TaintReport",
+    "link_causality",
+]
+
+# ── Sync Schema ───────────────────────────────────────────────────────
+
+_CREATE_CAUSAL_EDGES = """\
+CREATE TABLE IF NOT EXISTS causal_edges (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    fact_id     INTEGER NOT NULL,
+    parent_id   INTEGER,
+    signal_id   INTEGER,
+    edge_type   TEXT NOT NULL DEFAULT 'triggered_by',
+    project     TEXT,
+    tenant_id   TEXT NOT NULL DEFAULT 'default',
+    created_at  TEXT NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY (fact_id) REFERENCES facts(id)
+);
+"""
+
+_CREATE_CAUSAL_INDEXES = """\
+CREATE INDEX IF NOT EXISTS idx_causal_fact ON causal_edges(fact_id);
+CREATE INDEX IF NOT EXISTS idx_causal_parent ON causal_edges(parent_id);
+CREATE INDEX IF NOT EXISTS idx_causal_signal ON causal_edges(signal_id);
+CREATE INDEX IF NOT EXISTS idx_causal_project ON causal_edges(project);
+"""
+
+# ── Edge Types ──────────────────────────────────────────────────────
+
+EDGE_TRIGGERED_BY = "triggered_by"  # fact was triggered by signal
+EDGE_UPDATED_FROM = "updated_from"  # fact is an update of another fact
+EDGE_DEPRECATED_BY = "deprecated_by"  # fact was deprecated by another
+EDGE_DERIVED_FROM = "derived_from"  # fact was derived from analysis
+EDGE_TAINTED_BY = "tainted_by"  # fact was tainted by invalidation of ancestor
+
+# Confidence degradation ladder (C5 → C1)
+CONFIDENCE_LEVELS = ["C5", "C4", "C3", "C2", "C1"]
+
+
+def _downgrade_confidence(current: str, hops: int = 1) -> str:
+    """Downgrade confidence by N levels. C5→C4→C3→C2→C1."""
+    try:
+        idx = CONFIDENCE_LEVELS.index(current)
+    except ValueError:
+        return "C1"  # Unknown confidence → floor
+    new_idx = min(idx + hops, len(CONFIDENCE_LEVELS) - 1)
+    return CONFIDENCE_LEVELS[new_idx]
+
+
+# ── Async Causal Graph ────────────────────────────────────────────────
+
+
+class AsyncCausalGraph:
+    """Async variant of the Causal Graph using aiosqlite.
+
+    Enforces decision traceability without blocking the event loop (Ω₆).
+    """
+
+    __slots__ = ("_conn", "_ready")
+
+    def __init__(self, conn: aiosqlite.Connection) -> None:
+        self._conn = conn
+        self._ready = False
+
+    async def ensure_table(self) -> None:
+        """Create the causal_edges table asynchronously."""
+        if self._ready:
+            return
+        await self._conn.executescript(_CREATE_CAUSAL_EDGES + _CREATE_CAUSAL_INDEXES)
+        await self._conn.commit()
+        self._ready = True
+
+    async def record_edge(
+        self,
+        fact_id: int,
+        *,
+        parent_id: int | None = None,
+        signal_id: int | None = None,
+        edge_type: str = EDGE_TRIGGERED_BY,
+        project: str | None = None,
+        tenant_id: str = "default",
+    ) -> int:
+        """Record a causal edge asynchronously."""
+        await self.ensure_table()
+        cursor = await self._conn.execute(
+            "INSERT INTO causal_edges (fact_id, parent_id, signal_id, edge_type, "
+            "project, tenant_id) VALUES (?, ?, ?, ?, ?, ?)",
+            (fact_id, parent_id, signal_id, edge_type, project, tenant_id),
+        )
+        await self._conn.commit()
+        return cursor.lastrowid  # type: ignore[reportReturnType]
+
+    async def stats(self) -> dict[str, Any]:
+        """Aggregate causal graph statistics asynchronously."""
+        await self.ensure_table()
+        async with self._conn.execute("SELECT COUNT(*) FROM causal_edges") as cursor:
+            row = await cursor.fetchone()
+            total = row[0] if row else 0
+
+        async with self._conn.execute(
+            "SELECT edge_type, COUNT(*) FROM causal_edges GROUP BY edge_type"
+        ) as cursor:
+            rows = await cursor.fetchall()
+            by_type = {r[0]: r[1] for r in rows}
+
+        async with self._conn.execute(
+            "SELECT COUNT(*) FROM causal_edges WHERE parent_id IS NULL AND signal_id IS NULL"
+        ) as cursor:
+            row = await cursor.fetchone()
+            orphans = row[0] if row else 0
+
+        async with self._conn.execute(
+            "SELECT COUNT(DISTINCT fact_id) FROM causal_edges WHERE edge_type = ?",
+            (EDGE_TAINTED_BY,),
+        ) as cursor:
+            row = await cursor.fetchone()
+            tainted = row[0] if row else 0
+
+        return {
+            "total_edges": total,
+            "by_edge_type": by_type,
+            "tainted_facts": tainted,
+            "orphan_edges": orphans,
+        }
+
+    async def propagate_taint(
+        self,
+        fact_id: int,
+        tenant_id: str = "default",
+        max_depth: int = 50,
+    ) -> TaintReport:
+        """Propagate taint from an invalidated fact to all descendants.
+
+        Ω₁₃ §15.9: taint_propagation_required_for_invalidated_facts = true
+        derived_confidence_must_be_recomputed_on_taint = true
+
+        Each hop downgrades confidence by one level (C5→C4→C3→C2→C1).
+        Records taint edges and marks affected facts.
+        """
+        await self.ensure_table()
+        import json
+
+        from cortex.memory.temporal import now_iso
+
+        ts = now_iso()
+        changes: list[dict[str, Any]] = []
+        visited: set[int] = set()
+        # BFS with depth tracking: (fact_id, depth)
+        queue: list[tuple[int, int]] = [(fact_id, 0)]
+
+        while queue:
+            current_id, depth = queue.pop(0)
+            if current_id in visited or depth > max_depth:
+                continue
+            visited.add(current_id)
+
+            # Find children of current fact
+            async with self._conn.execute(
+                "SELECT DISTINCT fact_id FROM causal_edges "
+                "WHERE parent_id = ? AND tenant_id = ? AND edge_type != ?",
+                (current_id, tenant_id, EDGE_TAINTED_BY),
+            ) as cursor:
+                children = await cursor.fetchall()
+
+            for (child_id,) in children:
+                if child_id in visited:
+                    continue
+
+                # Read current confidence
+                async with self._conn.execute(
+                    "SELECT confidence, meta FROM facts WHERE id = ? AND valid_until IS NULL",
+                    (child_id,),
+                ) as cursor:
+                    row = await cursor.fetchone()
+                if not row:
+                    continue
+
+                old_conf = row[0] or "C3"
+                hops = depth + 1
+                new_conf = _downgrade_confidence(old_conf, hops)
+
+                # Update confidence and meta
+                try:
+                    meta = json.loads(row[1]) if row[1] else {}
+                except (json.JSONDecodeError, TypeError):
+                    meta = {}
+                meta["tainted_by"] = fact_id
+                meta["taint_timestamp"] = ts
+                meta["taint_hops"] = hops
+                meta["pre_taint_confidence"] = old_conf
+
+                await self._conn.execute(
+                    "UPDATE facts SET confidence = ?, meta = ? WHERE id = ?",
+                    (new_conf, json.dumps(meta), child_id),
+                )
+
+                # Record taint edge
+                await self._conn.execute(
+                    "INSERT INTO causal_edges (fact_id, parent_id, edge_type, "
+                    "project, tenant_id) VALUES (?, ?, ?, ?, ?)",
+                    (child_id, fact_id, EDGE_TAINTED_BY, None, tenant_id),
+                )
+
+                changes.append(
+                    {
+                        "fact_id": child_id,
+                        "old_confidence": old_conf,
+                        "new_confidence": new_conf,
+                        "hops": hops,
+                    }
+                )
+                logger.info(
+                    "Taint propagated: fact %d (%s→%s) from source %d (%d hops)",
+                    child_id,
+                    old_conf,
+                    new_conf,
+                    fact_id,
+                    hops,
+                )
+
+                queue.append((child_id, hops))
+
+        await self._conn.commit()
+        return TaintReport(
+            source_fact_id=fact_id,
+            affected_count=len(changes),
+            confidence_changes=changes,
+        )
+
+
+# ── Async Oracle ──────────────────────────────────────────────────────
+
+
+class AsyncCausalOracle:
+    """Async variant of the Causal Oracle."""
+
+    @staticmethod
+    async def find_parent_signal(
+        conn: aiosqlite.Connection, project: str | None = None, tenant_id: str = "default"
+    ) -> int | None:
+        """Finds the most recent unconsumed causal signal asynchronously."""
+        bus = AsyncSignalBus(conn)
+        recent = await bus.history(project=project, limit=5)
+        for sig in recent:
+            if sig.event_type in ("plan:done", "task:start", "apotheosis:heal"):
+                return sig.id
+        return None
+
+
+# ── Data Model ──────────────────────────────────────────────────────
+
+
+@dataclass(frozen=True)
+class CausalEdge:
+    """A single edge in the causal DAG."""
+
+    id: int
+    fact_id: int
+    parent_id: int | None
+    signal_id: int | None
+    edge_type: str
+    project: str | None
+    tenant_id: str
+    created_at: str
+
+
+@dataclass(frozen=True)
+class TaintReport:
+    """Result of taint propagation through the causal DAG.
+
+    Ω₁₃ enforcement: measurable taint_propagation_result.
+    """
+
+    source_fact_id: int
+    affected_count: int
+    confidence_changes: list[dict[str, Any]]
+
+
+def _edge_from_row(row: tuple) -> CausalEdge:
+    """Convert a DB row to a CausalEdge."""
+    return CausalEdge(
+        id=row[0],
+        fact_id=row[1],
+        parent_id=row[2],
+        signal_id=row[3],
+        edge_type=row[4],
+        project=row[5],
+        tenant_id=row[6],
+        created_at=row[7],
+    )
+
+
+# ── Causal Graph ────────────────────────────────────────────────────
+
+
+class CausalGraph:
+    """Persistent causal DAG backed by SQLite.
+
+    Provides traversal and lineage queries for EU AI Act
+    Article 12 compliance (full decision traceability).
+    """
+
+    __slots__ = ("_conn", "_ready")
+
+    def __init__(self, conn: sqlite3.Connection) -> None:
+        self._conn = conn
+        self._ready = False
+
+    def ensure_table(self) -> None:
+        """Create the causal_edges table if it doesn't exist."""
+        if self._ready:
+            return
+        self._conn.executescript(_CREATE_CAUSAL_EDGES + _CREATE_CAUSAL_INDEXES)
+        self._conn.commit()
+        self._ready = True
+
+    def record_edge(
+        self,
+        fact_id: int,
+        *,
+        parent_id: int | None = None,
+        signal_id: int | None = None,
+        edge_type: str = EDGE_TRIGGERED_BY,
+        project: str | None = None,
+        tenant_id: str = "default",
+    ) -> int:
+        """Record a causal edge between a fact and its origin.
+
+        Returns the edge ID.
+        """
+        self.ensure_table()
+        cursor = self._conn.execute(
+            "INSERT INTO causal_edges (fact_id, parent_id, signal_id, edge_type, "
+            "project, tenant_id) VALUES (?, ?, ?, ?, ?, ?)",
+            (fact_id, parent_id, signal_id, edge_type, project, tenant_id),
+        )
+        self._conn.commit()
+        edge_id: int = cursor.lastrowid  # type: ignore[assignment]
+        logger.debug(
+            "Causal edge #%d: fact %d ←[%s]← parent=%s signal=%s",
+            edge_id,
+            fact_id,
+            edge_type,
+            parent_id,
+            signal_id,
+        )
+        return edge_id
+
+    def trace_ancestors(
+        self, fact_id: int, tenant_id: str = "default", max_depth: int = 50
+    ) -> list[CausalEdge]:
+        """Walk the DAG upward from a fact to its root causes.
+
+        Returns edges in order from immediate parent to oldest ancestor.
+        This is the core query for EU AI Act Article 12 traceability.
+        """
+        self.ensure_table()
+        result: list[CausalEdge] = []
+        visited: set[int] = set()
+        current = fact_id
+
+        for _ in range(max_depth):
+            if current in visited:
+                break  # Cycle detected — halt
+            visited.add(current)
+
+            cursor = self._conn.execute(
+                "SELECT id, fact_id, parent_id, signal_id, edge_type, project, "
+                "tenant_id, created_at FROM causal_edges WHERE fact_id = ? "
+                "AND tenant_id = ? ORDER BY id DESC LIMIT 1",
+                (current, tenant_id),
+            )
+            row = cursor.fetchone()
+            if not row:
+                break
+
+            edge = _edge_from_row(row)
+            result.append(edge)
+
+            if edge.parent_id is not None:
+                current = edge.parent_id
+            else:
+                break  # Root reached (signal-only edge)
+
+        return result
+
+    def trace_descendants(
+        self, fact_id: int, tenant_id: str = "default", max_depth: int = 50
+    ) -> list[CausalEdge]:
+        """Walk the DAG downward from a fact to its consequences.
+
+        Returns edges in BFS order.
+        """
+        self.ensure_table()
+        result: list[CausalEdge] = []
+        visited: set[int] = set()
+        queue = [fact_id]
+
+        for _ in range(max_depth):
+            if not queue:
+                break
+            current = queue.pop(0)
+            if current in visited:
+                continue
+            visited.add(current)
+
+            cursor = self._conn.execute(
+                "SELECT id, fact_id, parent_id, signal_id, edge_type, project, "
+                "tenant_id, created_at FROM causal_edges WHERE parent_id = ? "
+                "AND tenant_id = ? ORDER BY id ASC",
+                (current, tenant_id),
+            )
+            for row in cursor.fetchall():
+                edge = _edge_from_row(row)
+                result.append(edge)
+                queue.append(edge.fact_id)
+
+        return result
+
+    def lineage_report(self, fact_id: int, tenant_id: str = "default") -> dict[str, Any]:
+        """Generate a compliance-ready lineage report for a fact.
+
+        Returns a dict suitable for EU AI Act Article 12 reporting.
+        """
+        ancestors = self.trace_ancestors(fact_id, tenant_id=tenant_id)
+        descendants = self.trace_descendants(fact_id, tenant_id=tenant_id)
+
+        # Collect all signal IDs in the chain for cross-referencing
+        all_edges = ancestors + descendants
+        signal_ids = {e.signal_id for e in all_edges if e.signal_id is not None}
+
+        return {
+            "fact_id": fact_id,
+            "tenant_id": tenant_id,
+            "ancestor_count": len(ancestors),
+            "descendant_count": len(descendants),
+            "depth": len(ancestors),
+            "root_signal_ids": sorted(signal_ids),
+            "ancestors": [
+                {
+                    "edge_id": e.id,
+                    "parent_id": e.parent_id,
+                    "signal_id": e.signal_id,
+                    "edge_type": e.edge_type,
+                    "created_at": e.created_at,
+                }
+                for e in ancestors
+            ],
+            "descendants": [
+                {
+                    "edge_id": e.id,
+                    "fact_id": e.fact_id,
+                    "edge_type": e.edge_type,
+                    "created_at": e.created_at,
+                }
+                for e in descendants
+            ],
+            "compliance": {
+                "eu_ai_act_article_12": len(ancestors) > 0,
+                "full_traceability": all(
+                    e.signal_id is not None or e.parent_id is not None for e in ancestors
+                ),
+            },
+        }
+
+    def stats(self) -> dict[str, Any]:
+        """Aggregate causal graph statistics."""
+        self.ensure_table()
+        total = self._conn.execute("SELECT COUNT(*) FROM causal_edges").fetchone()
+        by_type = self._conn.execute(
+            "SELECT edge_type, COUNT(*) FROM causal_edges GROUP BY edge_type"
+        ).fetchall()
+        orphans = self._conn.execute(
+            "SELECT COUNT(*) FROM causal_edges WHERE parent_id IS NULL AND signal_id IS NULL"
+        ).fetchone()
+
+        tainted = self._conn.execute(
+            "SELECT COUNT(DISTINCT fact_id) FROM causal_edges WHERE edge_type = ?",
+            (EDGE_TAINTED_BY,),
+        ).fetchone()
+
+        return {
+            "total_edges": total[0] if total else 0,
+            "by_edge_type": {r[0]: r[1] for r in by_type},
+            "orphan_edges": orphans[0] if orphans else 0,
+            "tainted_facts": tainted[0] if tainted else 0,
+        }
+
+
+# ── Oracle (Original API — preserved for backward compatibility) ────
+
+
+class CausalOracle:
+    """Interprets the Signal Bus to find the parent of a fact."""
+
+    @staticmethod
+    def find_parent_signal(
+        db_path: str, project: str | None = None, tenant_id: str = "default"
+    ) -> int | None:
+        """Finds the most recent unconsumed causal signal.
+
+        Looks for 'plan:done', 'task:start', or 'apotheosis:heal'
+        signals from the last 60 seconds.
+        """
+        try:
+            with db_connect(db_path) as conn:
+                bus = SignalBus(conn)
+                recent = bus.history(project=project, limit=5)
+                for sig in recent:
+                    if sig.event_type in ("plan:done", "task:start", "apotheosis:heal"):
+                        return sig.id
+        except (sqlite3.Error, OSError) as e:
+            logger.debug("Causal lookup failed: %s", e)
+        return None
+
+    @staticmethod
+    def record_fact_causality(
+        db_path: str,
+        fact_id: int,
+        *,
+        parent_fact_id: int | None = None,
+        signal_id: int | None = None,
+        edge_type: str = EDGE_TRIGGERED_BY,
+        project: str | None = None,
+        tenant_id: str = "default",
+    ) -> int | None:
+        """Record a causal edge for a newly stored fact.
+
+        Convenience method that opens its own connection.
+        """
+        try:
+            with db_connect(db_path) as conn:
+                graph = CausalGraph(conn)
+                return graph.record_edge(
+                    fact_id,
+                    parent_id=parent_fact_id,
+                    signal_id=signal_id,
+                    edge_type=edge_type,
+                    project=project,
+                    tenant_id=tenant_id,
+                )
+        except (sqlite3.Error, OSError) as e:
+            logger.debug("Causal edge recording failed: %s", e)
+            return None
+
+
+# ── Linking Helper (preserved API) ──────────────────────────────────
+
+
+def link_causality(meta: dict[str, Any] | None, signal_id: int | None) -> dict[str, Any]:
+    """Attaches causal metadata to a fact's meta dictionary."""
+    m = meta or {}
+    if signal_id:
+        m["causal_parent"] = signal_id
+        m["axiomatic_integrity"] = "Ω₁"
+    return m

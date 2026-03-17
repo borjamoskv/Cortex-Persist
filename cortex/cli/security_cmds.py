@@ -29,8 +29,8 @@ def security_cli() -> None:
 @security_cli.command("status")
 def security_status() -> None:
     """Show shield health dashboard."""
-    from cortex.security.anomaly_detector import DETECTOR
-    from cortex.security.threat_feed import ThreatFeedEngine
+    from cortex.extensions.security.anomaly_detector import DETECTOR
+    from cortex.extensions.security.threat_feed import ThreatFeedEngine
 
     engine = ThreatFeedEngine()
     last_update = engine.get_last_update()
@@ -92,8 +92,8 @@ def security_status() -> None:
 @click.option("--file", "-f", "filepath", help="Scan content from file")
 def security_scan(content: str | None, filepath: str | None) -> None:
     """Manual full scan of content."""
-    from cortex.security.injection_guard import GUARD
-    from cortex.security.threat_feed import ThreatFeedEngine
+    from cortex.extensions.security.injection_guard import GUARD
+    from cortex.extensions.security.threat_feed import ThreatFeedEngine
 
     if filepath:
         from pathlib import Path
@@ -169,7 +169,7 @@ def security_scan(content: str | None, filepath: str | None) -> None:
 @security_cli.command("update")
 def security_update() -> None:
     """Force threat feed refresh from remote sources."""
-    from cortex.security.threat_feed import ThreatFeedEngine
+    from cortex.extensions.security.threat_feed import ThreatFeedEngine
 
     engine = ThreatFeedEngine()
 
@@ -195,7 +195,7 @@ def security_update() -> None:
 @security_cli.command("audit")
 def security_audit() -> None:
     """Run integrity audit (hash chain + signatures)."""
-    from cortex.security.integrity_audit import IntegrityAuditor
+    from cortex.extensions.security.integrity_audit import IntegrityAuditor
 
     auditor = IntegrityAuditor()
 
@@ -226,8 +226,8 @@ def security_audit() -> None:
 @security_cli.command("report")
 def security_report() -> None:
     """Generate daily security report."""
-    from cortex.security.anomaly_detector import DETECTOR
-    from cortex.security.threat_feed import ThreatFeedEngine
+    from cortex.extensions.security.anomaly_detector import DETECTOR
+    from cortex.extensions.security.threat_feed import ThreatFeedEngine
 
     engine = ThreatFeedEngine()
     stats = DETECTOR.get_daily_stats()
@@ -265,7 +265,7 @@ def honeypot_group() -> None:
 @click.argument("project", default="general")
 def honeypot_generate(project: str) -> None:
     """Generate a new synthetic secret (decoy)."""
-    from cortex.security.honeypot import HONEY_POT
+    from cortex.extensions.security.honeypot import HONEY_POT
 
     decoy = HONEY_POT.generate_decoy(project)
 
@@ -285,7 +285,7 @@ def honeypot_generate(project: str) -> None:
 @honeypot_group.command("list")
 def honeypot_list() -> None:
     """List all active honeypot traps."""
-    from cortex.security.honeypot import HONEY_POT
+    from cortex.extensions.security.honeypot import HONEY_POT
 
     if not HONEY_POT._active_honeypots:
         console.print("[yellow]No active honeypots.[/yellow]")
@@ -303,7 +303,7 @@ def honeypot_list() -> None:
             # ISO format string
             created = created.replace("T", " ")[:16]
         elif hasattr(created, "strftime"):
-            created = created.strftime("%Y-%m-%d %H:%M")
+            created = created.strftime("%Y-%m-%d %H:%M")  # type: ignore[reportAttributeAccessIssue]
 
         table.add_row(
             decoy.id,
@@ -319,7 +319,7 @@ def honeypot_list() -> None:
 @click.argument("mood", type=click.Choice(["clean", "scanning", "anomaly", "threat", "pruning"]))
 def security_test_sync(mood: str) -> None:
     """Test visual synchronization with the Notch."""
-    from cortex.security.security_sync import SIGNAL
+    from cortex.extensions.security.security_sync import SIGNAL
 
     console.print(f"Emitting [bold cyan]{mood}[/bold cyan] signal to Notch...")
     SIGNAL.emit_sync(mood, {"test": True})

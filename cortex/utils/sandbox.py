@@ -200,7 +200,7 @@ _BLOCKED_ATTRS = frozenset(
 # ─── Data Models ─────────────────────────────────────────────────────
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class SandboxVerdict:
     """Result of AST validation."""
 
@@ -214,7 +214,7 @@ class SandboxVerdict:
         return f"SandboxVerdict(UNSAFE, {len(self.violations)} violations)"
 
 
-@dataclass(slots=True)
+@dataclass()
 class ExecResult:
     """Result of sandboxed execution."""
 
@@ -394,7 +394,8 @@ class ASTSandbox:
                 signal.alarm(self._timeout)
 
             try:
-                exec(compile(code, "<sandbox>", "exec"), namespace)  # noqa: S102
+                # nosec B102 — guarded by AST whitelist + timeout + restricted builtins
+                exec(compile(code, "<sandbox>", "exec"), namespace)  # noqa: S102  # nosec B102 — exec() in sandboxed namespace — explicit design decision for REPL
             finally:
                 if hasattr(signal, "SIGALRM"):
                     signal.alarm(0)
@@ -407,7 +408,7 @@ class ASTSandbox:
                 stdout=captured.getvalue(),
                 duration_ms=(_time.monotonic() - start) * 1000,
             )
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 — sandbox restriction catches all dynamic execution errors
             return ExecResult(
                 success=False,
                 error=f"{type(e).__name__}: {e}",

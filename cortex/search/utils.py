@@ -5,7 +5,10 @@
 
 """Search utilities."""
 
+from __future__ import annotations
+
 import json
+import logging
 import sqlite3
 from typing import Any
 
@@ -13,6 +16,8 @@ import aiosqlite
 
 from cortex.crypto.aes import CortexEncrypter
 from cortex.search.models import SearchResult
+
+logger = logging.getLogger("cortex.search")
 
 V6_PREFIX = CortexEncrypter.PREFIX
 
@@ -95,19 +100,19 @@ def _row_to_result(row: tuple, is_fts: bool = False) -> SearchResult:
     return SearchResult(
         fact_id=fact_id,
         content=content,
-        project=row[2],
-        fact_type=row[3],
-        confidence=row[4],
-        valid_from=row[5] or "",
-        valid_until=row[6],
+        project=row[2],  # type: ignore[reportGeneralTypeIssues]
+        fact_type=row[3],  # type: ignore[reportGeneralTypeIssues]
+        confidence=row[4],  # type: ignore[reportGeneralTypeIssues]
+        valid_from=row[5] or "",  # type: ignore[reportGeneralTypeIssues]
+        valid_until=row[6],  # type: ignore[reportGeneralTypeIssues]
         tags=tags,
-        source=row[8],
+        source=row[8],  # type: ignore[reportGeneralTypeIssues]
         meta=meta,
         score=score,
-        created_at=row[10] or "",
-        updated_at=row[11] or "",
-        tx_id=row[12],
-        hash=row[13],
+        created_at=row[10] or "",  # type: ignore[reportGeneralTypeIssues]
+        updated_at=row[11] or "",  # type: ignore[reportGeneralTypeIssues]
+        tx_id=row[12],  # type: ignore[reportGeneralTypeIssues]
+        hash=row[13],  # type: ignore[reportGeneralTypeIssues]
     )
 
 
@@ -116,8 +121,9 @@ def _decrypt_row_content(content: str | None, tenant_id: str, enc: Any) -> str:
     if content and str(content).startswith(V6_PREFIX):
         try:
             return enc.decrypt_str(content, tenant_id=tenant_id)
-        except Exception:
-            pass
+        except (ValueError, TypeError, OSError):
+            logger.debug("Decryption failed for row content")
+            # Fall back to content or empty string
     return content or ""
 
 
@@ -130,7 +136,7 @@ def _parse_row_meta(meta_raw: Any, tenant_id: str, enc: Any) -> dict[str, Any]:
     if meta_str.startswith(V6_PREFIX):
         try:
             return enc.decrypt_json(meta_raw, tenant_id=tenant_id) or {}
-        except Exception:
+        except (ValueError, TypeError, OSError):
             return {}
 
     try:
@@ -159,15 +165,15 @@ def _parse_row_sync(row: tuple, has_rank: bool) -> SearchResult:
     from cortex.crypto import get_default_encrypter
 
     enc = get_default_encrypter()
-    content = _decrypt_row_content(row[1], "default", enc)
+    content = _decrypt_row_content(row[1], "default", enc)  # type: ignore[reportGeneralTypeIssues]
 
     return SearchResult(
-        fact_id=row[0],
+        fact_id=row[0],  # type: ignore[reportGeneralTypeIssues]
         content=content,
-        project=row[2],
-        fact_type=row[3],
-        confidence=row[4],
-        source=row[5],
+        project=row[2],  # type: ignore[reportGeneralTypeIssues]
+        fact_type=row[3],  # type: ignore[reportGeneralTypeIssues]
+        confidence=row[4],  # type: ignore[reportGeneralTypeIssues]
+        source=row[5],  # type: ignore[reportGeneralTypeIssues]
         tags=tags,
         score=score,
         valid_from="unknown",  # Sync rows often have fewer columns

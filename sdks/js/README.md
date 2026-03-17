@@ -1,17 +1,17 @@
 # CORTEX JS/TS SDK
 
-Thin, zero-dependency TypeScript client for the [CORTEX Memory API](https://github.com/borjamoskv/cortex).
+Thin, zero-dependency TypeScript client for the [CORTEX Persist API](https://github.com/borjamoskv/cortex).
 
 ## Install
 
 ```bash
-npm install @cortex-memory/sdk
+npm install @cortex-persist/sdk
 ```
 
 ## Usage
 
 ```typescript
-import { Cortex } from '@cortex-memory/sdk'
+import { Cortex } from '@cortex-persist/sdk'
 
 const ctx = new Cortex({ url: 'http://localhost:8000', apiKey: 'sk-xxx' })
 

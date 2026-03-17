@@ -1,0 +1,72 @@
+{
+  "gemini": {
+    "url_template": "https://generativelanguage.googleapis.com/v1beta/models/{model}:embedContent",
+    "batch_url_template": "https://generativelanguage.googleapis.com/v1beta/models/{model}:batchEmbedContents",
+    "default_model": "text-embedding-004",
+    "env_key": "GEMINI_API_KEY",
+    "native_dimension": 768,
+    "supports_multimodal": false,
+    "supports_mrl": false,
+    "task_types": [
+      "RETRIEVAL_DOCUMENT",
+      "RETRIEVAL_QUERY",
+      "SEMANTIC_SIMILARITY",
+      "CLASSIFICATION",
+      "CLUSTERING",
+      "CODE_RETRIEVAL_QUERY"
+    ]
+  },
+  "gemini-v2": {
+    "url_template": "https://generativelanguage.googleapis.com/v1beta/models/{model}:embedContent",
+    "batch_url_template": "https://generativelanguage.googleapis.com/v1beta/models/{model}:batchEmbedContents",
+    "default_model": "gemini-embedding-2-preview",
+    "env_key": "GEMINI_API_KEY",
+    "native_dimension": 3072,
+    "supports_multimodal": true,
+    "supports_mrl": true,
+    "mrl_dimensions": [256, 512, 768, 1536, 3072],
+    "max_input_tokens": 8192,
+    "max_images": 6,
+    "max_video_seconds": 120,
+    "max_pdf_pages": 6,
+    "supported_image_mimes": ["image/png", "image/jpeg", "image/webp", "image/gif"],
+    "supported_audio_mimes": ["audio/mp3", "audio/wav", "audio/aac", "audio/flac"],
+    "supported_video_mimes": ["video/mp4", "video/mov", "video/mpeg"],
+    "supported_doc_mimes": ["application/pdf"],
+    "task_types": [
+      "RETRIEVAL_DOCUMENT",
+      "RETRIEVAL_QUERY",
+      "SEMANTIC_SIMILARITY",
+      "CLASSIFICATION",
+      "CLUSTERING",
+      "CODE_RETRIEVAL_QUERY"
+    ]
+  },
+  "openai": {
+    "url_template": "https://api.openai.com/v1/embeddings",
+    "default_model": "text-embedding-3-small",
+    "env_key": "OPENAI_API_KEY",
+    "native_dimension": 1536,
+    "supports_multimodal": false,
+    "supports_mrl": false,
+    "task_types": []
+  },
+  "cohere": {
+    "url_template": "https://api.cohere.com/v1/embed",
+    "default_model": "embed-english-v3.0",
+    "env_key": "COHERE_API_KEY",
+    "native_dimension": 1024,
+    "supports_multimodal": false,
+    "supports_mrl": false,
+    "task_types": ["search_document", "search_query", "classification", "clustering"]
+  },
+  "voyage": {
+    "url_template": "https://api.voyageai.com/v1/embeddings",
+    "default_model": "voyage-3",
+    "env_key": "VOYAGE_API_KEY",
+    "native_dimension": 1024,
+    "supports_multimodal": false,
+    "supports_mrl": false,
+    "task_types": []
+  }
+}

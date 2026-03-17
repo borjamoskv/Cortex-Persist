@@ -1,0 +1,89 @@
+[
+  {
+    "url": "https://basmooy.bandcamp.com",
+    "slug": "basmooy",
+    "name": "Bas Mooy",
+    "band_id": 1157750064,
+    "location": "Rotterdam, Netherlands",
+    "bio": null,
+    "sites": [
+      {
+        "url": "http://www.basmooy.com",
+        "title": "basmooy.com"
+      }
+    ],
+    "emails": [],
+    "status": "ok",
+    "is_label": false,
+    "discography_count": 0
+  },
+  {
+    "url": "https://ansome.bandcamp.com",
+    "slug": "ansome",
+    "name": null,
+    "band_id": null,
+    "location": null,
+    "bio": null,
+    "sites": [],
+    "emails": [],
+    "status": "not_found",
+    "is_label": false,
+    "discography_count": 0
+  },
+  {
+    "url": "https://adrianalopez.bandcamp.com",
+    "slug": "adrianalopez",
+    "name": "Adriana Lopez",
+    "band_id": 1688429494,
+    "location": null,
+    "bio": null,
+    "sites": [
+      {
+        "url": "https://soundcloud.com/adrianalopez",
+        "title": "SoundCloud"
+      },
+      {
+        "url": "https://instagram.com/adrianalopezmusic/",
+        "title": "Instagram"
+      },
+      {
+        "url": "https://facebook.com/AdrianaLopezMusic",
+        "title": "Facebook"
+      },
+      {
+        "url": "https://ra.co/dj/adrianalopez",
+        "title": "ra.co"
+      }
+    ],
+    "emails": [],
+    "status": "ok",
+    "is_label": false,
+    "discography_count": 1
+  },
+  {
+    "url": "https://abstractdivision.bandcamp.com",
+    "slug": "abstractdivision",
+    "name": null,
+    "band_id": null,
+    "location": null,
+    "bio": null,
+    "sites": [],
+    "emails": [],
+    "status": "not_found",
+    "is_label": false,
+    "discography_count": 0
+  },
+  {
+    "url": "https://stanislav-tolkachev.bandcamp.com",
+    "slug": "stanislav-tolkachev",
+    "name": "Stanislav Tolkachev",
+    "band_id": 3284492347,
+    "location": "Ukraine",
+    "bio": null,
+    "sites": [],
+    "emails": [],
+    "status": "ok",
+    "is_label": false,
+    "discography_count": 1
+  }
+]

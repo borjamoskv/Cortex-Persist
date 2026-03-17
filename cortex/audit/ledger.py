@@ -48,7 +48,7 @@ class EnterpriseAuditLedger:
         await self._conn.commit()
         # Fetch the last hash to maintain the chain
         cursor = await self._conn.execute(
-            "SELECT signature FROM security_audit_log ORDER BY timestamp DESC LIMIT 1"
+            "SELECT signature FROM security_audit_log ORDER BY rowid DESC LIMIT 1"
         )
         row = await cursor.fetchone()
         if row:

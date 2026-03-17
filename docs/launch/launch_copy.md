@@ -42,7 +42,7 @@ THE ANALOGY:
   Why run an AI agent without memory verification?
 
 QUICK START:
-  pip install cortex-memory
+  pip install cortex-persist
 
   from cortex import CortexEngine
   engine = CortexEngine()
@@ -107,7 +107,7 @@ THE STACK (all open source, local-first):
   └── MCP Server native              ← Claude Code, Cursor, Windsurf plug in directly
 
 3-LINE SETUP:
-  pip install cortex-memory
+  pip install cortex-persist
 
   from cortex import CortexEngine
   engine = CortexEngine()
@@ -174,7 +174,7 @@ Requires: tamper-proof decision logs, full traceability, integrity verification.
 CORTEX generates the compliance report in one command.
 
 Tweet 5:
-pip install cortex-memory
+pip install cortex-persist
 
 from cortex import CortexEngine
 engine = CortexEngine()
@@ -204,7 +204,7 @@ We built CORTEX to solve this — a cryptographic trust layer for AI agent memor
 CORTEX is to AI memory what SSL/TLS is to web communications.
 
 You didn't build your own encryption layer. You installed TLS.
-You don't need to build your own audit trail. → pip install cortex-memory
+You don't need to build your own audit trail. → pip install cortex-persist
 
 https://cortexpersist.dev
 ```

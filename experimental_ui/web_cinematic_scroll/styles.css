@@ -1,0 +1,286 @@
+:root {
+  --bg-color: #0A0A0A;
+  --accent: #CCFF00;
+  --text-main: #FFFFFF;
+  --text-dim: #888888;
+  --glass-bg: rgba(10, 10, 10, 0.4);
+  --glass-border: rgba(255, 255, 255, 0.1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  /* Hide horizontal overflow from body to prevent native horizontal scrollbar */
+  overflow-x: hidden;
+  /* Smooth scroll behavior for trackpads */
+  overscroll-behavior-y: none;
+  cursor: none; /* Wow 1: Hide default cursor */
+}
+
+/* --- CUSTOM CURSOR (Wow 1) --- */
+.custom-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--accent);
+  pointer-events: none;
+  z-index: 9999;
+  mix-blend-mode: difference;
+  transform: translate(-50%, -50%); /* Centered */
+  transition: width 0.2s, height 0.2s;
+}
+
+/* Expand cursor on hover for clickable elements */
+a:hover ~ .custom-cursor, button:hover ~ .custom-cursor {
+  width: 48px;
+  height: 48px;
+}
+
+/* --- VIDEO BACKGROUND --- */
+.video-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  overflow: hidden;
+}
+
+#bg-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Center the video */
+  object-position: center;
+}
+
+/* Subtle overlay to ensure text readability (Industrial Noir) */
+.video-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at center, rgba(10,10,10,0.3) 0%, rgba(10,10,10,0.8) 100%);
+}
+
+/* --- SCROLLING STRUCTURE --- */
+.scroll-container {
+  width: 100vw;
+  height: 100vh;
+  /* Will be pinned by GSAP */
+}
+
+.scroll-wrapper {
+  display: flex;
+  flex-wrap: nowrap;
+  width: fit-content;
+  height: 100vh;
+  padding-right: 10vw; /* End padding */
+}
+
+/* --- PANELS --- */
+.panel {
+  width: 100vw; /* Default to full width per section */
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 4rem;
+}
+
+/* Glassmorphism boxes for text readability */
+.glass-box {
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  padding: 3rem;
+  border-radius: 4px;
+  max-width: 800px;
+  text-align: left;
+}
+
+.accent-box {
+  border-color: var(--accent);
+  box-shadow: 0 0 40px rgba(204, 255, 0, 0.1);
+}
+
+.eyebrow {
+  color: var(--accent);
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+
+.title {
+  font-size: clamp(3rem, 6vw, 6rem);
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  font-size: 1.25rem;
+  font-weight: 300;
+  color: #CCCCCC;
+  line-height: 1.6;
+}
+
+/* --- IMAGE WAYPOINTS --- */
+.image-waypoint {
+  width: 60vw; /* Give them less than full width to show they flow */
+  justify-content: center;
+  align-items: center;
+}
+
+.image-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  aspect-ratio: 4/5;
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+  background: #111;
+}
+
+.image-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  filter: grayscale(100%) contrast(1.2);
+}
+
+/* Interaction: restore color and slight zoom on hover */
+.image-wrapper:hover img {
+  transform: scale(1.05);
+  filter: grayscale(0%) contrast(1);
+}
+
+.caption {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 2rem;
+  background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+  transform: translateY(20px);
+  opacity: 0;
+  transition: all 0.4s ease;
+}
+
+.image-wrapper:hover .caption {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.caption h3 {
+  color: var(--accent);
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.caption p {
+  color: #FFF;
+  font-size: 0.9rem;
+}
+
+/* Hide scrollbar for the wrapper just in case */
+.scroll-wrapper::-webkit-scrollbar {
+  display: none;
+}
+.scroll-wrapper {
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+/* --- CLICK MARKS (PUNTAZO) WOW 7 --- */
+.puntazo {
+  position: fixed;
+  width: 12px;
+  height: 12px;
+  background-color: var(--accent);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0.8;
+  mix-blend-mode: exclusion;
+  box-shadow: 0 0 15px var(--accent);
+  animation: puntazoPulse 1s infinite alternate;
+}
+
+@keyframes puntazoPulse {
+  from { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
+  to { transform: translate(-50%, -50%) scale(1.5); opacity: 1; }
+}
+
+/* --- JUMPSCARE OVERLAY WOW 7 --- */
+.jumpscare-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #000;
+  z-index: 10000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+  opacity: 0; 
+  visibility: hidden;
+  transition: opacity 0.05s ease;
+}
+
+.jumpscare-overlay img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: contrast(300%) saturate(200%) hue-rotate(90deg) invert(100%);
+  transform: scale(1.1);
+  animation: shake 0.1s infinite;
+}
+
+@keyframes shake {
+  0% { transform: translate(10px, 10px) scale(1.1); }
+  25% { transform: translate(-10px, -10px) scale(1.1); }
+  50% { transform: translate(10px, -10px) scale(1.1); }
+  75% { transform: translate(-10px, 10px) scale(1.1); }
+  100% { transform: translate(10px, 10px) scale(1.1); }
+}
+
+.jumpscare-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+
+@media (max-width: 768px) {
+  .title {
+    font-size: 2.5rem;
+  }
+  .panel {
+    padding: 2rem;
+  }
+  .image-waypoint {
+    width: 85vw;
+  }
+}

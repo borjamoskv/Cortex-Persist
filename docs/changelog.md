@@ -91,7 +91,7 @@ All notable changes to CORTEX, derived from the git history.
 - Docker support
 - CI/CD via GitHub Actions
 - Cross-platform (macOS, Linux, Windows)
-- `pip install cortex-memory`
+- `pip install cortex-persist`
 
 ---
 

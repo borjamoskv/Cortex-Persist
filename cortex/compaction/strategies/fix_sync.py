@@ -32,7 +32,7 @@ def fix_execute(content):
 
 
 def fix_all(filename):
-    with open(filename, "r") as f:
+    with open(filename) as f:
         content = f.read()
 
     content = fix_execute_fetchall(content)

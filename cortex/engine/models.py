@@ -8,7 +8,7 @@ from dataclasses import dataclass
 __all__ = ["Fact", "row_to_fact"]
 
 
-@dataclass
+@dataclass(slots=True)
 class Fact:
     id: int
     tenant_id: str
@@ -16,19 +16,20 @@ class Fact:
     content: str
     fact_type: str
     tags: list[str]
-    confidence: str
-    valid_from: str
-    valid_until: str | None
-    source: str | None
     meta: dict
     created_at: str
     updated_at: str
-    consensus_score: float = 1.0
-    tx_id: int | None = None
+    is_tombstoned: bool = False
+    is_quarantined: bool = False
     hash: str | None = None
+    valid_from: str | None = None
+    valid_until: str | None = None
+    source: str | None = None
+    confidence: str = "C3"
 
     def is_active(self) -> bool:
-        return self.valid_until is None
+        """Evaluate logical validity using valid_until and physical state."""
+        return not self.is_tombstoned and self.valid_until is None
 
     def to_dict(self) -> dict:
         return {
@@ -38,12 +39,10 @@ class Fact:
             "content": self.content,
             "type": self.fact_type,
             "tags": self.tags,
-            "confidence": self.confidence,
-            "valid_from": self.valid_from,
-            "valid_until": self.valid_until,
-            "source": self.source,
+            "meta": self.meta,
             "active": self.is_active(),
-            "consensus_score": self.consensus_score,
+            "created_at": self.created_at,
+            "updated_at": self.updated_at,
         }
 
 
@@ -52,12 +51,11 @@ def row_to_fact(row: tuple) -> Fact:
 
     enc = get_default_encrypter()
 
-    # Handle shorter tuples safely (legacy tests might pass incomplete rows)
-    # New schema expects 16 columns (indices 0-15)
+    # New schema expects 16 columns
     # row[0]=id, row[1]=tenant_id, row[2]=project, row[3]=content, row[4]=fact_type,
-    # row[5]=tags, row[6]=confidence, row[7]=valid_from, row[8]=valid_until,
-    # row[9]=source, row[10]=meta, row[11]=consensus_score, row[12]=created_at,
-    # row[13]=updated_at, row[14]=tx_id, row[15]=hash
+    # row[5]=tags, row[6]=meta, row[7]=hash, row[8]=valid_from, row[9]=valid_until,
+    # row[10]=source, row[11]=confidence, row[12]=created_at, row[13]=updated_at,
+    # row[14]=is_tombstoned, row[15]=is_quarantined
     r = list(row)
     while len(r) < 16:
         r.append(None)
@@ -65,8 +63,8 @@ def row_to_fact(row: tuple) -> Fact:
     tenant_id = r[1] or "default"
     try:
         content = enc.decrypt_str(r[3], tenant_id=tenant_id) if r[3] else ""
-    except (ValueError, TypeError, OSError):  # InvalidTag, InvalidKey, corrupted
-        content = f"[ENCRYPTED — key mismatch] (fact #{r[0]})"
+    except ValueError:
+        content = f"[ENCRYPTED — decryption failed] (fact #{r[0]})"
 
     # Safely handle JSON parsing
     try:
@@ -75,27 +73,25 @@ def row_to_fact(row: tuple) -> Fact:
         tags = []
 
     try:
-        meta = enc.decrypt_json(r[10], tenant_id=tenant_id) if r[10] else {}
-    except (json.JSONDecodeError, TypeError):
-        meta = {}
-
-    score = r[11] if r[11] is not None else 1.0
+        meta = enc.decrypt_json(r[6], tenant_id=tenant_id) if r[6] else {}
+    except ValueError:
+        meta = {"error": "decryption_failed", "fact_id": r[0]}
 
     return Fact(
         id=r[0],
         tenant_id=tenant_id,
         project=r[2],
-        content=content,
+        content=content,  # type: ignore[reportArgumentType]
         fact_type=r[4],
         tags=tags,
-        confidence=r[6],
-        valid_from=r[7],
-        valid_until=r[8],
-        source=r[9],
-        meta=meta,
-        consensus_score=score,
+        meta=meta,  # type: ignore[reportArgumentType]
+        hash=r[7],
+        valid_from=r[8],
+        valid_until=r[9],
+        source=r[10],
+        confidence=r[11] or "C3",
         created_at=r[12],
         updated_at=r[13],
-        tx_id=r[14],
-        hash=r[15],
+        is_tombstoned=bool(r[14]),
+        is_quarantined=bool(r[15]),
     )

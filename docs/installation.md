@@ -11,38 +11,38 @@
 ## Install from PyPI
 
 ```bash
-pip install cortex-memory
+pip install cortex-persist
 ```
 
 ### Optional Extras
 
 === "API Server"
     ```bash
-    pip install cortex-memory[api]
+    pip install cortex-persist[api]
     ```
     Includes FastAPI, Uvicorn, and HTTPX for the REST API, dashboard, and MCP server.
 
 === "Development"
     ```bash
-    pip install cortex-memory[dev]
+    pip install cortex-persist[dev]
     ```
     Includes pytest, pytest-cov, pytest-asyncio, and HTTPX for testing.
 
 === "Google ADK"
     ```bash
-    pip install cortex-memory[adk]
+    pip install cortex-persist[adk]
     ```
     Adds Google Agent Developer Kit integration.
 
 === "Billing"
     ```bash
-    pip install cortex-memory[billing]
+    pip install cortex-persist[billing]
     ```
     Stripe integration for SaaS subscription management.
 
 === "Everything"
     ```bash
-    pip install cortex-memory[all]
+    pip install cortex-persist[all]
     ```
     Installs all optional dependencies.
 
@@ -63,7 +63,7 @@ pip install -e ".[all]"
 
 ```bash
 cortex --version
-# cortex-memory, version 8.0.0a1
+# cortex-persist, version 8.0.0a1
 ```
 
 ---

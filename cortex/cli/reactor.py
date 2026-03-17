@@ -43,7 +43,7 @@ class ReactorState:
         self.entropy_count = 0
         self.logs = []
         self.healed_snippets = [
-            "except Exception: -> except OSError:",
+            "except Exception:  # noqa: BLE001 -> except OSError:",
             "time.sleep(1) -> await asyncio.sleep(1)",
             "import web3 -> [INTERCEPTED]",
             "Complex branch (depth 12) -> Refactored",

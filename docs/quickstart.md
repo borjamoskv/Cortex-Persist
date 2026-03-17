@@ -7,13 +7,13 @@ Get CORTEX running in 5 minutes.
 ## 1. Install
 
 ```bash
-pip install cortex-memory
+pip install cortex-persist
 ```
 
 For the API server and MCP:
 
 ```bash
-pip install cortex-memory[api]
+pip install cortex-persist[api]
 ```
 
 ---

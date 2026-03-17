@@ -9,7 +9,7 @@ CORTEX uses **lazy consensus with benevolent dictator (BD) override**:
 1. **Proposals** are submitted as GitHub Issues or Discussions
 2. **Review period** is 7 days for non-trivial changes
 3. If no objections → proposal is accepted
-4. If contested → BD (Borja Moskv) has final say
+4. If contested → BD ([borjamoskv.com](https://borjamoskv.com)) has final say
 5. **Architecture Decision Records** (ADRs) are kept in `docs/adr/`
 
 ## Maintainers

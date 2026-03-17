@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORTEX — Payment Successful</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="saas.css">
+    <style>
+        body {
+            background-color: #0A0A0A;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+            font-family: var(--font);
+            color: var(--text);
+        }
+        .container {
+            max-width: 600px;
+            padding: 48px;
+            background: var(--bg-card);
+            border: 1px solid rgba(84, 214, 44, 0.4);
+            border-radius: var(--radius);
+            box-shadow: 0 32px 80px rgba(0,0,0,0.9), 0 0 0 1px rgba(84, 214, 44, 0.1) inset;
+        }
+        h1 {
+            color: #54D62C;
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+        }
+        p {
+            color: var(--text-dim);
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 32px;
+        }
+        .terminal-box {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 16px;
+            font-family: var(--mono);
+            font-size: 0.85rem;
+            color: #A0A0A0;
+            text-align: left;
+            margin-bottom: 32px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✅ Transaction Confirmed</h1>
+        <p>Your subscription is active. CORTEX has provisioned your cryptographic API key and sent it to your email address.</p>
+        
+        <div class="terminal-box">
+            <span style="color: var(--accent);">$</span> cortex auth login<br>
+            <span style="color: #6600FF; font-size: 0.75rem;">Waiting for key injection...</span>
+        </div>
+        
+        <a href="saas_landing.html" class="btn btn-outline" style="width: 100%">Return to Dashboard</a>
+    </div>
+</body>
+</html>

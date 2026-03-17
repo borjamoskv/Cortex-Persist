@@ -37,7 +37,7 @@ def vote(fact_id, value, agent, db) -> None:
         try:
             # En Wave 5 usamos sesiones transaccionales
             async with engine.session() as conn:
-                ledger = ImmutableVoteLedger(engine._pool if hasattr(engine, "_pool") else conn)
+                ledger = ImmutableVoteLedger(engine._pool if hasattr(engine, "_pool") else conn)  # type: ignore[reportAttributeAccessIssue]
 
                 if value not in [1, -1]:
                     err_validation("value", "El voto debe ser 1 (verificar) o -1 (disputar)")
@@ -75,11 +75,11 @@ def ledger_status(db):
         try:
             async with engine.session() as conn:
                 async with conn.execute("SELECT COUNT(*) FROM vote_ledger") as cursor:
-                    vote_count = (await cursor.fetchone())[0]
+                    vote_count = (await cursor.fetchone())[0]  # type: ignore[reportOptionalSubscript]
                 async with conn.execute("SELECT COUNT(*) FROM vote_merkle_roots") as cursor:
-                    checkpoint_count = (await cursor.fetchone())[0]
+                    checkpoint_count = (await cursor.fetchone())[0]  # type: ignore[reportOptionalSubscript]
                 async with conn.execute("SELECT MAX(vote_end_id) FROM vote_merkle_roots") as cursor:
-                    last_audited = (await cursor.fetchone())[0] or 0
+                    last_audited = (await cursor.fetchone())[0] or 0  # type: ignore[reportOptionalSubscript]
 
                 console.print(
                     Panel(
@@ -108,7 +108,7 @@ def ledger_checkpoint(db):
         engine = get_engine(db)
         try:
             async with engine.session() as conn:
-                ledger = ImmutableVoteLedger(engine._pool if hasattr(engine, "_pool") else conn)
+                ledger = ImmutableVoteLedger(engine._pool if hasattr(engine, "_pool") else conn)  # type: ignore[reportAttributeAccessIssue]
                 with console.status(
                     "[bold yellow]Calculando Merkle Root y creando punto de control...[/]"
                 ):
@@ -138,7 +138,7 @@ def ledger_verify(db):
         try:
             async with engine.session() as conn:
                 ledger_inst = ImmutableVoteLedger(
-                    engine._pool if hasattr(engine, "_pool") else conn
+                    engine._pool if hasattr(engine, "_pool") else conn  # type: ignore[reportAttributeAccessIssue]
                 )
                 with console.status(
                     "[bold blue]Verificando la cadena de hashes del registro...[/]"

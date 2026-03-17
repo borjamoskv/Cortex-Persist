@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rafael de la-Hoz — Reimagined by Sovereign Agency</title>
+    <meta name="description" content="Prototype redesign: What Rafael de la-Hoz could look like at 60fps with Industrial Noir aesthetics.">
+
+    <!-- Fonts: Variable, premium -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+
+    <!-- GSAP + ScrollTrigger + SplitText -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js" defer></script>
+
+    <style>
+        /* ═══ SOVEREIGN 200 DESIGN SYSTEM ═══ */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Base */
+            --bg-primary: #0A0A0A;
+            --bg-secondary: #111111;
+            --bg-elevated: #1A1A1A;
+
+            /* Text */
+            --text-primary: #F5F5F5;
+            --text-secondary: #999999;
+            --text-muted: #666666;
+
+            /* Accent */
+            --accent: #CCFF00;
+
+            /* Semantic */
+            --border: rgba(255, 255, 255, 0.08);
+            --glass: rgba(255, 255, 255, 0.04);
+            --glow: 0 0 40px rgba(204, 255, 0, 0.15);
+
+            /* Typography */
+            --font-body: 'Inter', system-ui, sans-serif;
+            --font-display: 'Space Grotesk', sans-serif;
+
+            /* Fluid scale */
+            --text-xs: clamp(0.7rem, 0.6rem + 0.25vw, 0.8rem);
+            --text-sm: clamp(0.8rem, 0.7rem + 0.3vw, 0.95rem);
+            --text-base: clamp(1rem, 0.9rem + 0.4vw, 1.15rem);
+            --text-lg: clamp(1.2rem, 1rem + 0.8vw, 1.6rem);
+            --text-xl: clamp(1.5rem, 1rem + 1.5vw, 2.5rem);
+            --text-hero: clamp(3rem, 1rem + 8vw, 9rem);
+            --text-mega: clamp(4rem, 2rem + 10vw, 12rem);
+        }
+
+        html {
+            scroll-behavior: smooth;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            cursor: default;
+        }
+
+        /* ═══ CUSTOM CURSOR ═══ */
+        .cursor {
+            width: 20px;
+            height: 20px;
+            border: 1.5px solid var(--accent);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s ease, height 0.3s ease, border-color 0.3s ease;
+            mix-blend-mode: difference;
+        }
+
+        .cursor.hover {
+            width: 50px;
+            height: 50px;
+            border-color: var(--text-primary);
+        }
+
+        /* ═══ NAVBAR ═══ */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: 1.5rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            background: rgba(10, 10, 10, 0.6);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .navbar__logo {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: var(--text-lg);
+            letter-spacing: -0.03em;
+            color: var(--text-primary);
+        }
+
+        .navbar__logo span {
+            color: var(--accent);
+        }
+
+        .navbar__links {
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
+        }
+
+        .navbar__links a {
+            font-family: var(--font-body);
+            font-size: var(--text-xs);
+            font-weight: 400;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .navbar__links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: var(--accent);
+            transition: width 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .navbar__links a:hover {
+            color: var(--text-primary);
+        }
+
+        .navbar__links a:hover::after {
+            width: 100%;
+        }
+
+        /* ═══ HERO SECTION ═══ */
+        .hero {
+            position: relative;
+            height: 100vh;
+            min-height: 700px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 0 3rem 6rem 3rem;
+            overflow: hidden;
+        }
+
+        .hero__bg {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+        }
+
+        .hero__bg img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(0.35) contrast(1.1) saturate(0.8);
+            transform: scale(1.05);
+            will-change: transform;
+        }
+
+        .hero__overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            background:
+                linear-gradient(180deg, rgba(10,10,10,0.3) 0%, rgba(10,10,10,0.0) 40%, rgba(10,10,10,0.85) 100%),
+                radial-gradient(ellipse at 20% 80%, rgba(204,255,0,0.04) 0%, transparent 60%);
+        }
+
+        .hero__content {
+            position: relative;
+            z-index: 2;
+            max-width: 1400px;
+        }
+
+        .hero__tag {
+            font-family: var(--font-body);
+            font-size: var(--text-xs);
+            font-weight: 400;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+            opacity: 0;
+        }
+
+        .hero__title {
+            font-family: var(--font-display);
+            font-size: var(--text-hero);
+            font-weight: 700;
+            line-height: 0.92;
+            letter-spacing: -0.04em;
+            color: var(--text-primary);
+            margin-bottom: 2rem;
+        }
+
+        .hero__title .word {
+            display: inline-block;
+            overflow: hidden;
+        }
+
+        .hero__title .word span {
+            display: inline-block;
+            transform: translateY(110%);
+            will-change: transform;
+        }
+
+        .hero__subtitle {
+            font-family: var(--font-body);
+            font-size: var(--text-lg);
+            font-weight: 300;
+            color: var(--text-secondary);
+            max-width: 600px;
+            line-height: 1.6;
+            margin-bottom: 3rem;
+            opacity: 0;
+        }
+
+        .hero__cta-group {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            opacity: 0;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-family: var(--font-body);
+            font-size: var(--text-xs);
+            font-weight: 500;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            text-decoration: none;
+            padding: 1rem 2.5rem;
+            border: 1px solid var(--border);
+            border-radius: 0;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn--primary {
+            background: var(--accent);
+            color: var(--bg-primary);
+            border-color: var(--accent);
+        }
+
+        .btn--primary:hover {
+            background: transparent;
+            color: var(--accent);
+            box-shadow: var(--glow);
+        }
+
+        .btn--ghost {
+            background: transparent;
+            color: var(--text-secondary);
+            border-color: var(--border);
+        }
+
+        .btn--ghost:hover {
+            color: var(--text-primary);
+            border-color: var(--text-secondary);
+        }
+
+        /* ═══ STATS BAR ═══ */
+        .stats {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 3;
+            display: flex;
+            border-top: 1px solid var(--border);
+            background: rgba(10, 10, 10, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+
+        .stats__item {
+            flex: 1;
+            padding: 2rem 3rem;
+            border-right: 1px solid var(--border);
+            opacity: 0;
+        }
+
+        .stats__item:last-child {
+            border-right: none;
+        }
+
+        .stats__number {
+            font-family: var(--font-display);
+            font-size: var(--text-xl);
+            font-weight: 700;
+            color: var(--accent);
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        .stats__label {
+            font-size: var(--text-xs);
+            font-weight: 400;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        /* ═══ PROJECTS SECTION ═══ */
+        .projects {
+            padding: 8rem 3rem;
+            background: var(--bg-primary);
+        }
+
+        .projects__header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 4rem;
+        }
+
+        .section-tag {
+            font-size: var(--text-xs);
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-family: var(--font-display);
+            font-size: var(--text-xl);
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        .projects__grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+        }
+
+        .project-card {
+            position: relative;
+            aspect-ratio: 16 / 10;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            background: var(--bg-secondary);
+            cursor: pointer;
+        }
+
+        .project-card__img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(0.5) saturate(0.6);
+            transform: scale(1);
+            transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                        filter 0.8s ease;
+            will-change: transform;
+        }
+
+        .project-card:hover .project-card__img {
+            transform: scale(1.08);
+            filter: brightness(0.7) saturate(0.9);
+        }
+
+        .project-card__overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, transparent 40%, rgba(10, 10, 10, 0.9) 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 2rem;
+        }
+
+        .project-card__category {
+            font-size: var(--text-xs);
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .project-card__title {
+            font-family: var(--font-display);
+            font-size: var(--text-lg);
+            font-weight: 600;
+        }
+
+        .project-card__location {
+            font-size: var(--text-sm);
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        /* ═══ PHILOSOPHY SECTION ═══ */
+        .philosophy {
+            padding: 10rem 3rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .philosophy__quote {
+            font-family: var(--font-display);
+            font-size: clamp(2rem, 1rem + 4vw, 5rem);
+            font-weight: 300;
+            line-height: 1.2;
+            letter-spacing: -0.03em;
+            max-width: 1000px;
+            color: var(--text-primary);
+        }
+
+        .philosophy__quote em {
+            color: var(--accent);
+            font-style: normal;
+        }
+
+        /* ═══ SOVEREIGN BADGE ═══ */
+        .badge {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 100;
+            padding: 0.75rem 1.25rem;
+            background: rgba(10, 10, 10, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            font-size: var(--text-xs);
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+        }
+
+        .badge span {
+            color: var(--accent);
+        }
+
+        /* ═══ CANVAS (WebGL particles) ═══ */
+        #particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.3;
+        }
+
+        /* ═══ RESPONSIVE ═══ */
+        @media (max-width: 768px) {
+            .navbar { padding: 1rem 1.5rem; }
+            .navbar__links { display: none; }
+            .hero { padding: 0 1.5rem 5rem 1.5rem; }
+            .stats { flex-wrap: wrap; }
+            .stats__item { flex: 1 1 50%; }
+            .projects__grid { grid-template-columns: 1fr; }
+            .projects { padding: 4rem 1.5rem; }
+            .philosophy { padding: 6rem 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Custom Cursor -->
+    <div class="cursor" id="cursor"></div>
+
+    <!-- WebGL Particles Canvas -->
+    <canvas id="particles"></canvas>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar__logo">Rafael de la-<span>Hoz</span></div>
+        <ul class="navbar__links">
+            <li><a href="#projects">Projects</a></li>
+            <li><a href="#philosophy">Philosophy</a></li>
+            <li><a href="#studio">Studio</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero" id="hero">
+        <div class="hero__bg">
+            <img src="hero-bg.png" alt="Architectural masterpiece at twilight" loading="eager">
+        </div>
+        <div class="hero__overlay"></div>
+
+        <div class="hero__content">
+            <p class="hero__tag">Arquitectura · Diseño · Innovación · Desde 1920</p>
+            <h1 class="hero__title">
+                <span class="word"><span>Shaping</span></span>
+                <span class="word"><span>Space.</span></span><br>
+                <span class="word"><span>Defining</span></span>
+                <span class="word"><span>Time.</span></span>
+            </h1>
+            <p class="hero__subtitle">
+                Over a century of architectural excellence. 500+ projects across 20 countries.
+                We don't follow trends — we set the standard.
+            </p>
+            <div class="hero__cta-group">
+                <a href="#projects" class="btn btn--primary">Explore Projects</a>
+                <a href="#philosophy" class="btn btn--ghost">Our Philosophy →</a>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stats__item">
+                <div class="stats__number">500+</div>
+                <div class="stats__label">Projects Completed</div>
+            </div>
+            <div class="stats__item">
+                <div class="stats__number">20</div>
+                <div class="stats__label">Countries</div>
+            </div>
+            <div class="stats__item">
+                <div class="stats__number">104</div>
+                <div class="stats__label">Years of Excellence</div>
+            </div>
+            <div class="stats__item">
+                <div class="stats__number">60fps</div>
+                <div class="stats__label">This Prototype</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects -->
+    <section class="projects" id="projects">
+        <div class="projects__header">
+            <div>
+                <p class="section-tag">Selected Work</p>
+                <h2 class="section-title">Defining Skylines Since 1920</h2>
+            </div>
+        </div>
+        <div class="projects__grid">
+            <div class="project-card">
+                <img class="project-card__img" src="hero-bg.png" alt="Project 1">
+                <div class="project-card__overlay">
+                    <span class="project-card__category">Corporate HQ</span>
+                    <h3 class="project-card__title">Torre Cepsa</h3>
+                    <span class="project-card__location">Madrid, Spain</span>
+                </div>
+            </div>
+            <div class="project-card">
+                <img class="project-card__img" src="hero-bg.png" alt="Project 2">
+                <div class="project-card__overlay">
+                    <span class="project-card__category">Cultural</span>
+                    <h3 class="project-card__title">Centro de Convenciones</h3>
+                    <span class="project-card__location">Bogotá, Colombia</span>
+                </div>
+            </div>
+            <div class="project-card">
+                <img class="project-card__img" src="hero-bg.png" alt="Project 3">
+                <div class="project-card__overlay">
+                    <span class="project-card__category">Residential</span>
+                    <h3 class="project-card__title">Skyline Residences</h3>
+                    <span class="project-card__location">Dubai, UAE</span>
+                </div>
+            </div>
+            <div class="project-card">
+                <img class="project-card__img" src="hero-bg.png" alt="Project 4">
+                <div class="project-card__overlay">
+                    <span class="project-card__category">Infrastructure</span>
+                    <h3 class="project-card__title">Terminal Internacional</h3>
+                    <span class="project-card__location">Barcelona, Spain</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Philosophy -->
+    <section class="philosophy" id="philosophy">
+        <blockquote class="philosophy__quote">
+            "Architecture is the <em>thoughtful making</em> of space.
+            It is not about the building — it is about the <em>life</em> within."
+        </blockquote>
+    </section>
+
+    <!-- Sovereign Badge -->
+    <div class="badge">
+        Prototype by <span>Sovereign Agency</span> · 60fps · borjamoskv.com
+    </div>
+
+    <script>
+        // ═══ GSAP ANIMATIONS ═══
+        document.addEventListener('DOMContentLoaded', () => {
+            gsap.registerPlugin(ScrollTrigger);
+
+            // Hero title — word-by-word reveal
+            gsap.to('.hero__title .word span', {
+                y: 0,
+                duration: 1.2,
+                ease: 'power4.out',
+                stagger: 0.12,
+                delay: 0.4
+            });
+
+            // Hero tag
+            gsap.to('.hero__tag', {
+                opacity: 1,
+                y: 0,
+                duration: 0.8,
+                delay: 1.0,
+                ease: 'power2.out'
+            });
+
+            // Hero subtitle
+            gsap.to('.hero__subtitle', {
+                opacity: 1,
+                y: 0,
+                duration: 0.8,
+                delay: 1.2,
+                ease: 'power2.out'
+            });
+
+            // Hero CTA
+            gsap.to('.hero__cta-group', {
+                opacity: 1,
+                y: 0,
+                duration: 0.8,
+                delay: 1.4,
+                ease: 'power2.out'
+            });
+
+            // Stats items stagger
+            gsap.to('.stats__item', {
+                opacity: 1,
+                y: 0,
+                duration: 0.6,
+                stagger: 0.15,
+                delay: 1.6,
+                ease: 'power2.out'
+            });
+
+            // Hero background parallax
+            gsap.to('.hero__bg img', {
+                y: 100,
+                scale: 1.15,
+                ease: 'none',
+                scrollTrigger: {
+                    trigger: '.hero',
+                    start: 'top top',
+                    end: 'bottom top',
+                    scrub: true
+                }
+            });
+
+            // Project cards reveal on scroll
+            gsap.utils.toArray('.project-card').forEach((card, i) => {
+                gsap.from(card, {
+                    y: 80,
+                    opacity: 0,
+                    duration: 0.8,
+                    ease: 'power2.out',
+                    scrollTrigger: {
+                        trigger: card,
+                        start: 'top 85%',
+                        toggleActions: 'play none none reverse'
+                    },
+                    delay: i * 0.1
+                });
+            });
+
+            // Philosophy quote reveal
+            gsap.from('.philosophy__quote', {
+                y: 60,
+                opacity: 0,
+                duration: 1.2,
+                ease: 'power2.out',
+                scrollTrigger: {
+                    trigger: '.philosophy',
+                    start: 'top 70%',
+                    toggleActions: 'play none none reverse'
+                }
+            });
+        });
+
+        // ═══ CUSTOM CURSOR ═══
+        const cursor = document.getElementById('cursor');
+        let mouseX = 0, mouseY = 0, cursorX = 0, cursorY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        function animateCursor() {
+            cursorX += (mouseX - cursorX) * 0.15;
+            cursorY += (mouseY - cursorY) * 0.15;
+            cursor.style.left = cursorX + 'px';
+            cursor.style.top = cursorY + 'px';
+            requestAnimationFrame(animateCursor);
+        }
+        animateCursor();
+
+        document.querySelectorAll('a, .btn, .project-card').forEach(el => {
+            el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+            el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+        });
+
+        // ═══ WEBGL PARTICLES ═══
+        const canvas = document.getElementById('particles');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        const PARTICLE_COUNT = 80;
+
+        function resize() {
+            canvas.width = globalThis.innerWidth;
+            canvas.height = globalThis.innerHeight;
+        }
+        resize();
+        globalThis.addEventListener('resize', resize);
+
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 1.5 + 0.5;
+                this.speedX = (Math.random() - 0.5) * 0.3;
+                this.speedY = (Math.random() - 0.5) * 0.3;
+                this.opacity = Math.random() * 0.5 + 0.1;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(204, 255, 0, ${this.opacity})`;
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
+            particles.push(new Particle());
+        }
+
+        function drawLines() {
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.hypot(dx, dy);
+                    if (dist < 150) {
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.strokeStyle = `rgba(204, 255, 0, ${0.06 * (1 - dist / 150)})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            drawLines();
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+    </script>
+</body>
+</html>

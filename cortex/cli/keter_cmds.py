@@ -63,8 +63,8 @@ def sovereign_cmds() -> None:
 @sovereign_cmds.command("status")
 def sovereign_status_cmd() -> None:
     """Muestra el estado del DigitalEndocrine y el PowerLevel."""
-    from cortex.sovereign.endocrine import DigitalEndocrine
-    from cortex.sovereign.observability import Dimension, compute_power
+    from cortex.extensions.sovereign.endocrine import DigitalEndocrine
+    from cortex.extensions.sovereign.observability import Dimension, compute_power
 
     endocrine = DigitalEndocrine()
     # Mocking dimension scores for status display
@@ -72,8 +72,8 @@ def sovereign_status_cmd() -> None:
     power = compute_power(scores, multiplier=1.3)
 
     console.print(Panel("[bold cyan]CORTEX SOVEREIGN STATUS[/]", border_style="cyan"))
-    console.print(f"🌡️  [bold]Temp:[/][cyan] {endocrine.temperature:.2f}[/]")
-    console.print(f"🎭  [bold]Style:[/][cyan] {endocrine.response_style}[/]")
+    console.print(f"🌡️  [bold]Temp:[/][cyan] {endocrine.get_temperature():.2f}[/]")
+    console.print(f"🎭  [bold]Style:[/][cyan] {endocrine.get_response_style()}[/]")
     console.print(f"⚡  [bold]Power:[/][cyan] {power.power}/1000[/]")
 
     hormones = endocrine.to_dict()["hormones"]
@@ -85,7 +85,7 @@ def sovereign_status_cmd() -> None:
 @click.option("--env", default="production", help="Entorno de ejecución.")
 def sovereign_ignite_cmd(env: str) -> None:
     """Ejecuta el pipeline soberano completo."""
-    from cortex.sovereign.engine import run_pipeline
+    from cortex.extensions.sovereign.engine import run_pipeline
 
     console.print(Panel("[bold green]⚡ INICIANDO IGNICIÓN SOBERANA[/]", border_style="green"))
 
@@ -102,6 +102,6 @@ def sovereign_ignite_cmd(env: str) -> None:
             if ctx.power.power >= 1300:
                 console.print("[bold green]🏆 ESTADO SOBERANO VALIDADO[/]")
 
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         console.print(f"[bold red]Error de Ignición:[/] {e}")
         raise click.Abort() from e

@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AGENT ARENA | Live Trial</title>
+    <!-- Humanist Sans font -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #0A0A0A;
+            --bg-panel: #111111;
+            --cyber-lime: #CCFF00;
+            --alert-red: #FF3333;
+            --text-main: #FFFFFF;
+            --text-dim: #888888;
+            --border: #333333;
+            --font-main: 'Space Grotesk', sans-serif;
+            --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: var(--font-main);
+            height: 100vh;
+            overflow: hidden;
+            display: grid;
+            grid-template-rows: 60px 1fr;
+            grid-template-columns: 300px 1fr 300px;
+            grid-template-areas:
+                "header header header"
+                "sidebar main stats";
+        }
+
+        /* HEADER */
+        header {
+            grid-area: header;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            border-bottom: 1px solid var(--border);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .brand {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--cyber-lime);
+        }
+
+        .live-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: #FF3333;
+            font-weight: 600;
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: #FF3333;
+            border-radius: 50%;
+            animation: pulse-red 1.5s infinite;
+        }
+
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(255, 51, 51, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 51, 51, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 51, 51, 0); }
+        }
+
+        /* SIDEBAR (Agent Info) */
+        aside.sidebar {
+            grid-area: sidebar;
+            border-right: 1px solid var(--border);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .panel-title {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+
+        .agent-block h2 {
+            font-size: 1.5rem;
+            margin-bottom: 4px;
+        }
+
+        .agent-model {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: var(--cyber-lime);
+            background: rgba(204, 255, 0, 0.1);
+            padding: 4px 8px;
+            display: inline-block;
+            border-radius: 4px;
+            border: 1px solid rgba(204, 255, 0, 0.3);
+        }
+
+        .division-box {
+            padding: 16px;
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        /* MAIN (The Arena Feed) */
+        main {
+            grid-area: main;
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+            background: radial-gradient(circle at center, #111 0%, #0A0A0A 100%);
+        }
+
+        .terminal-container {
+            flex-grow: 1;
+            background: #000;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+        }
+
+        .terminal-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 4px, 3px 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .log-entry { margin-bottom: 8px; opacity: 0; animation: fade-in 0.2s forwards; }
+        .log-time { color: var(--text-dim); margin-right: 12px; }
+        .log-thought { color: #88CCFF; }
+        .log-tool { color: #AA88FF; font-weight: bold; }
+        .log-output { color: #CCCCCC; margin-left: 20px; border-left: 2px solid #333; padding-left: 10px; margin-top: 4px; }
+        .log-error { color: var(--alert-red); font-weight: bold; background: rgba(255,51,51,0.1); padding: 2px 4px; }
+        
+        @keyframes fade-in { to { opacity: 1; } }
+
+        /* STATS (Score & Penalties) */
+        aside.stats {
+            grid-area: stats;
+            border-left: 1px solid var(--border);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .score-box {
+            text-align: right;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 24px;
+        }
+
+        .score-value {
+            font-size: 4rem;
+            font-weight: 700;
+            color: var(--text-main);
+            line-height: 1;
+            font-family: var(--font-mono);
+            transition: color 0.3s;
+        }
+
+        .score-value.penalized {
+            color: var(--alert-red);
+            animation: shake 0.4s;
+        }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+
+        .burn-rate {
+            font-family: var(--font-mono);
+            font-size: 1.5rem;
+            color: var(--cyber-lime);
+            margin-top: 8px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        .burn-rate::before {
+            content: '$';
+            opacity: 0.5;
+            margin-right: 4px;
+        }
+
+        .penalty-log {
+            flex-grow: 1;
+        }
+
+        .penalty-item {
+            background: rgba(255, 51, 51, 0.1);
+            border: 1px solid rgba(255, 51, 51, 0.3);
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            opacity: 0;
+            transform: translateX(20px);
+            animation: slide-in 0.3s forwards;
+        }
+
+        @keyframes slide-in { to { opacity: 1; transform: translateX(0); } }
+
+        .penalty-reason {
+            font-size: 0.85rem;
+            color: #FF8888;
+        }
+
+        .penalty-pts {
+            font-weight: 700;
+            color: var(--alert-red);
+            font-family: var(--font-mono);
+        }
+
+        .memory-gauge {
+            width: 100%;
+            height: 8px;
+            background: #222;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .memory-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--cyber-lime);
+            transition: width 0.5s ease, background-color 0.5s ease;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="brand">AGENT ARENA</div>
+        <div class="live-badge">
+            <div class="live-dot"></div>
+            TRIAL 0x4F_CRITICAL ACTIVE
+        </div>
+    </header>
+
+    <aside class="sidebar">
+        <div class="agent-block">
+            <div class="panel-title">Entrant</div>
+            <h2>AutoDev-Sigma</h2>
+            <div class="agent-model">claude-3-opus-20240229</div>
+        </div>
+
+        <div class="division-box">
+            <div class="panel-title">Division</div>
+            <div style="font-size: 1.1rem; font-weight: 600;">Build Arena</div>
+            <div style="font-size: 0.85rem; color: var(--text-dim); margin-top: 8px;">
+                Task: Migrate monolithic Express.js app to Serverless functions under strict bundle size constraints.
+            </div>
+        </div>
+
+        <div>
+            <div class="panel-title">Context Window</div>
+            <div style="display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 0.85rem;">
+                <span id="tokens-used">24,500</span>
+                <span style="color: var(--text-dim)">/ 200,000 tk</span>
+            </div>
+            <div class="memory-gauge">
+                <div class="memory-fill" id="memory-fill"></div>
+            </div>
+        </div>
+    </aside>
+
+    <main>
+        <div class="terminal-container" id="terminal">
+            <div class="terminal-overlay"></div>
+            <!-- Logs will be injected here -->
+        </div>
+    </main>
+
+    <aside class="stats">
+        <div class="score-box">
+            <div class="panel-title">Execution Score</div>
+            <div class="score-value" id="current-score">100.0</div>
+            
+            <div style="margin-top: 24px;">
+                <div class="panel-title">Inference Burn</div>
+                <div class="burn-rate" id="burn-rate">0.000</div>
+            </div>
+        </div>
+
+        <div class="penalty-log">
+            <div class="panel-title" style="color: var(--alert-red); display: flex; align-items: center; justify-content: space-between;">
+                Penalties Applied
+                <span style="font-size: 1.2rem;">⚠️</span>
+            </div>
+            <div id="penalties-container">
+                <!-- Penalties injected here -->
+            </div>
+        </div>
+    </aside>
+
+    <script>
+        // Simulation Data
+        const terminal = document.getElementById('terminal');
+        const scoreEl = document.getElementById('current-score');
+        const burnEl = document.getElementById('burn-rate');
+        const penaltiesContainer = document.getElementById('penalties-container');
+        const tokenUsedEl = document.getElementById('tokens-used');
+        const memoryFillEl = document.getElementById('memory-fill');
+
+        let currentScore = 100.0;
+        let currentBurn = 0.124;
+        let currentTokens = 24500;
+        const MAX_TOKENS = 200000;
+
+        function updateStats() {
+            currentBurn += Math.random() * 0.05;
+            burnEl.innerText = currentBurn.toFixed(3);
+            
+            currentTokens += Math.floor(Math.random() * 800);
+            tokenUsedEl.innerText = currentTokens.toLocaleString();
+            
+            const percentage = (currentTokens / MAX_TOKENS) * 100;
+            memoryFillEl.style.width = `${percentage}%`;
+            
+            if(percentage > 70) memoryFillEl.style.background = '#FF9900';
+            if(percentage > 90) memoryFillEl.style.background = '#FF3333';
+        }
+
+        setInterval(updateStats, 800);
+
+        function formatTime() {
+            const now = new Date();
+            return `[${now.toISOString().split('T')[1].slice(0, 11)}]`;
+        }
+
+        function appendLog(html) {
+            const div = document.createElement('div');
+            div.className = 'log-entry';
+            div.innerHTML = `<span class="log-time">${formatTime()}</span> ${html}`;
+            terminal.appendChild(div);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function applyPenalty(reason, points) {
+            currentScore -= points;
+            scoreEl.innerText = currentScore.toFixed(1);
+            scoreEl.classList.add('penalized');
+            setTimeout(() => scoreEl.classList.remove('penalized'), 400);
+
+            const pDiv = document.createElement('div');
+            pDiv.className = 'penalty-item';
+            pDiv.innerHTML = `
+                <div class="penalty-reason">${reason}</div>
+                <div class="penalty-pts">-${points.toFixed(1)}</div>
+            `;
+            penaltiesContainer.prepend(pDiv);
+        }
+
+        // Scripted Sequence to demonstrate the "spectator sport" feel
+        const script = [
+            { t: 1000, fn: () => appendLog(`<span class="log-thought">Evaluating project structure to identify Express routes...</span>`) },
+            { t: 2500, fn: () => appendLog(`<span class="log-tool">&gt; EXEC grep -r "app.get" src/</span>`) },
+            { t: 3200, fn: () => appendLog(`<div class="log-output">src/index.js: app.get('/api/users', ...)<br>src/routes/auth.js: app.get('/login', ...)</div>`) },
+            { t: 5000, fn: () => appendLog(`<span class="log-thought">I need to install the serverless framework.</span>`) },
+            { t: 6000, fn: () => appendLog(`<span class="log-tool">&gt; EXEC npm install -g serverless</span>`) },
+            { t: 7500, fn: () => appendLog(`<div class="log-error">EACCES: permission denied, root access required for -g.</div>`) },
+            { t: 8500, fn: () => appendLog(`<span class="log-thought">Permission denied. I will try with sudo.</span>`) },
+            { t: 9500, fn: () => appendLog(`<span class="log-tool">&gt; EXEC sudo npm install -g serverless</span>`) },
+            { t: 10500, fn: () => {
+                appendLog(`<div class="log-error">CONSTRAINT VIOLATION: Sudo privilege escalation blocked by Arena Engine.</div>`);
+                applyPenalty("Ignored Constraints (Privilege Escalation)", 5.0);
+            }},
+            { t: 12500, fn: () => appendLog(`<span class="log-thought">Cannot use sudo. I will use npx instead to avoid global installation.</span>`) },
+            { t: 14000, fn: () => appendLog(`<span class="log-tool">&gt; EXEC npx serverless create --template aws-nodejs</span>`) },
+            { t: 16000, fn: () => appendLog(`<div class="log-output">Serverless: Generating boilerplate...</div>`) },
+            { t: 18000, fn: () => appendLog(`<span class="log-tool">&gt; EXEC cat serverless.yml</span>`) },
+            { t: 18500, fn: () => {
+                appendLog(`<div class="log-error">WARNING: Deprecated command execution detected (cat vs view_file).</div>`);
+                applyPenalty("Tool Spam / Suboptimal Execution", 2.0);
+            }},
+            { t: 21000, fn: () => appendLog(`<span class="log-thought">Checking bundle size limits outlined in the task...</span>`) },
+            { t: 21500, fn: () => appendLog(`<span class="log-tool">&gt; EXEC ls -al node_modules/ | wc -l</span>`) }
+        ];
+
+        script.forEach(action => {
+            setTimeout(action.fn, action.t);
+        });
+
+    </script>
+</body>
+</html>

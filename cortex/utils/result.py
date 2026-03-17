@@ -41,7 +41,7 @@ E = TypeVar("E")
 U = TypeVar("U")
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class Ok(Generic[T]):
     """Success track of the railway. Immutable, zero-cost wrapper."""
 
@@ -76,7 +76,7 @@ class Ok(Generic[T]):
         return f"Ok({self.value!r})"
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class Err(Generic[E]):
     """Failure track of the railway. Carries structured error info."""
 
@@ -121,7 +121,7 @@ def safe(fn: Callable[..., T]) -> Callable[..., Result[T, str]]:
     def wrapper(*args: Any, **kwargs: Any) -> Result[T, str]:
         try:
             return Ok(fn(*args, **kwargs))
-        except Exception as exc:  # deliberate boundary — @safe wraps any callable
+        except Exception as exc:  # noqa: BLE001 — deliberate boundary — @safe wraps any callable
             tb = traceback.format_exception(type(exc), exc, exc.__traceback__)
             return Err(f"{type(exc).__name__}: {exc}\n{''.join(tb[-3:])}")
 
@@ -136,7 +136,7 @@ def safe_async(fn: Callable[..., Any]) -> Callable[..., Any]:
     async def wrapper(*args: Any, **kwargs: Any) -> Result[T, str]:
         try:
             return Ok(await fn(*args, **kwargs))
-        except Exception as exc:  # deliberate boundary — @safe_async wraps any async callable
+        except Exception as exc:  # noqa: BLE001 — deliberate boundary — @safe_async wraps any async callable
             tb = traceback.format_exception(type(exc), exc, exc.__traceback__)
             return Err(f"{type(exc).__name__}: {exc}\n{''.join(tb[-3:])}")
 

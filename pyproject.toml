@@ -1,13 +1,12 @@
 [project]
-name = "cortex-memory"
-version = "0.3.0b1"
+name = "cortex-persist"
+version = "0.3.0b2"
 description = "Trust Infrastructure for Autonomous AI — cryptographic verification, audit trails, and EU AI Act compliance for AI agent memory."
 readme = "README.md"
 license = "Apache-2.0"
-license-files = ["LICENSE"]
 requires-python = ">=3.10"
 authors = [
-    {name = "Borja Moskv", email = "borja@moskv.com"},
+    {name = "borjamoskv.com", email = "borja@moskv.com"},
 ]
 keywords = [
     "ai", "memory", "agents", "trust", "compliance",
@@ -17,7 +16,6 @@ keywords = [
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -35,13 +33,13 @@ dependencies = [
     "onnxruntime>=1.17",
     "click>=8.0",
     "rich>=13.0",
-    "neo4j>=5.0",
     "aiosqlite>=0.20.0",
-    "qdrant-client>=1.12",
     "pyobjc-core; sys_platform == 'darwin'",
     "pyobjc-framework-Cocoa; sys_platform == 'darwin'",
     "keyring>=25.7.0",
     "cryptography>=46.0.5",
+    "watchdog>=6.0.0",
+    "pydantic>=2.0",
 ]
 
 [project.urls]
@@ -61,6 +59,7 @@ dev = [
     "pytest-cov>=5.0",
     "pytest-asyncio",
     "httpx>=0.27",
+    "z3-solver>=4.13.0",
 ]
 adk = [
     "google-adk>=0.5.0",
@@ -71,8 +70,17 @@ toolbox = [
 billing = [
     "stripe>=8.0",
 ]
+cloud = [
+    "asyncpg>=0.29",
+    "redis>=5.0",
+    "qdrant-client>=1.9",
+]
+trends = [
+    "pytrends>=4.9",
+    "pandas>=2.0",
+]
 all = [
-    "cortex-memory[api,dev,adk,toolbox,billing]",
+    "cortex-persist[api,dev,adk,toolbox,billing,cloud,trends]",
 ]
 
 [project.scripts]
@@ -91,18 +99,36 @@ include = ["cortex*"]
 testpaths = ["tests"]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
-timeout = 60
 
 
 [tool.ruff]
 target-version = "py310"
 line-length = 100
+exclude = ["experimental", "notebooks"]
 
 [tool.ruff.lint]
-select = ["E", "F", "W", "I", "UP", "B"]
-ignore = ["E501", "B008", "W291", "W293"]
+select = ["E", "F", "W", "I", "UP", "B", "G"]
+ignore = ["E501", "B008", "W291", "W293", "S", "BLE001"]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/*.py" = ["E402", "F821"]
+"tests/**/*.py" = ["S", "E402", "F821", "BLE001", "T20"]
+"open-cortex/tests/**/*.py" = ["S", "E402", "F821", "BLE001", "T20"]
+"scripts/**/*.py" = ["S", "T20"]
+"sdks/**/*.py" = ["S", "T20"]
 "cortex/**/__init__.py" = ["F401"]
+"cortex/cli/__init__.py" = ["F401", "E402"]
+"cortex/daemon/core.py" = ["E701", "E702", "I001"]
 
+[tool.pyright]
+pythonVersion = "3.10"
+typeCheckingMode = "basic"
+exclude = [
+    "**/node_modules",
+    "**/__pycache__",
+    "tests",
+    "experimental",
+    "cortex/moltbook",
+    "scripts"
+]
+reportMissingImports = "warning"
+reportPrivateImportUsage = "none"

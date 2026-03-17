@@ -27,12 +27,12 @@ from __future__ import annotations
 
 import hmac
 import logging
-from typing import Any
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Header, HTTPException, Request
 from fastapi.responses import JSONResponse
 
-from cortex.gateway import GatewayIntent, GatewayRequest, GatewayRouter
+from cortex.gateway import GatewayIntent, GatewayRequest, GatewayResponse, GatewayRouter
 
 logger = logging.getLogger("cortex.gateway.telegram")
 
@@ -51,80 +51,95 @@ _COMMAND_TO_INTENT: dict[str, GatewayIntent] = {
 
 
 def _parse_telegram_message(text: str) -> GatewayRequest | None:
-    """Parse a Telegram message text into a GatewayRequest.
-
-    Supported formats::
-
-        /store PROJECT content...
-        /search PROJECT query...
-        /recall PROJECT
-        /status
-        /emit SEVERITY title | body
-    """
+    """Parse a Telegram message text into a GatewayRequest."""
     text = (text or "").strip()
     if not text.startswith("/"):
         return None
 
     parts = text.lstrip("/").split(None, 1)
-    command = parts[0].lower().split("@")[0]  # strip @BotName suffix
-
+    command = parts[0].lower().split("@")[0]
     intent = _COMMAND_TO_INTENT.get(command)
     if intent is None:
         return None
 
     rest = parts[1] if len(parts) > 1 else ""
-
-    # Parse intent-specific payload
-    if intent == GatewayIntent.STORE:
-        tokens = rest.split(None, 1)
-        project = tokens[0] if tokens else ""
-        content = tokens[1] if len(tokens) > 1 else ""
-        return GatewayRequest(
-            intent=intent,
-            project=project,
-            payload={"content": content, "type": "knowledge"},
-            source="telegram",
-        )
-
-    elif intent == GatewayIntent.SEARCH:
-        tokens = rest.split(None, 1)
-        project = tokens[0] if len(tokens) > 1 else ""
-        query = tokens[1] if len(tokens) > 1 else tokens[0] if tokens else ""
-        return GatewayRequest(
-            intent=intent,
-            project=project,
-            payload={"query": query, "top_k": 5},
-            source="telegram",
-        )
-
-    elif intent == GatewayIntent.RECALL:
-        return GatewayRequest(
-            intent=intent,
-            project=rest.strip(),
-            payload={},
-            source="telegram",
-        )
-
-    elif intent == GatewayIntent.STATUS:
-        return GatewayRequest(intent=intent, payload={}, source="telegram")
-
-    elif intent == GatewayIntent.EMIT:
-        tokens = rest.split(None, 1)
-        severity = tokens[0].lower() if tokens else "info"
-        body_part = tokens[1] if len(tokens) > 1 else ""
-        title_parts = body_part.split("|", 1)
-        title = title_parts[0].strip()
-        body = title_parts[1].strip() if len(title_parts) > 1 else ""
-        return GatewayRequest(
-            intent=intent,
-            payload={"severity": severity, "title": title, "body": body},
-            source="telegram",
-        )
-
-    return None
+    return _dispatch_intent(intent, rest)
 
 
-def _format_response(response) -> str:
+def _dispatch_intent(intent: GatewayIntent, rest: str) -> GatewayRequest | None:
+    """Dispatch parsing to specific intent handlers."""
+    handlers = {
+        GatewayIntent.STORE: _handle_store,
+        GatewayIntent.SEARCH: _handle_search,
+        GatewayIntent.RECALL: _handle_recall,
+        GatewayIntent.STATUS: _handle_status,
+        GatewayIntent.EMIT: _handle_emit,
+    }
+    handler = handlers.get(intent)
+    if handler:
+        return handler(intent, rest)
+    return GatewayRequest(intent=intent, payload={}, source="telegram")
+
+
+def _handle_store(intent: GatewayIntent, rest: str) -> GatewayRequest:
+    tokens = rest.split(None, 1)
+    project = tokens[0] if tokens else ""
+    content = tokens[1] if len(tokens) > 1 else ""
+    return GatewayRequest(
+        intent=intent,
+        project=project,
+        payload={"content": content, "type": "knowledge"},
+        source="telegram",
+    )
+
+
+def _handle_search(intent: GatewayIntent, rest: str) -> GatewayRequest:
+    tokens = rest.split(None, 1)
+    project = ""
+    query = ""
+
+    if len(tokens) > 1:
+        project = tokens[0]
+        query = tokens[1]
+    elif tokens:
+        query = tokens[0]
+
+    return GatewayRequest(
+        intent=intent,
+        project=project,
+        payload={"query": query, "top_k": 5},
+        source="telegram",
+    )
+
+
+def _handle_recall(intent: GatewayIntent, rest: str) -> GatewayRequest:
+    return GatewayRequest(
+        intent=intent,
+        project=rest.strip(),
+        payload={},
+        source="telegram",
+    )
+
+
+def _handle_status(intent: GatewayIntent, rest: str) -> GatewayRequest:
+    return GatewayRequest(intent=intent, payload={}, source="telegram")
+
+
+def _handle_emit(intent: GatewayIntent, rest: str) -> GatewayRequest:
+    tokens = rest.split(None, 1)
+    severity = tokens[0].lower() if tokens else "info"
+    body_part = tokens[1] if len(tokens) > 1 else ""
+    title_parts = body_part.split("|", 1)
+    title = title_parts[0].strip()
+    body = title_parts[1].strip() if len(title_parts) > 1 else ""
+    return GatewayRequest(
+        intent=intent,
+        payload={"severity": severity, "title": title, "body": body},
+        source="telegram",
+    )
+
+
+def _format_response(response: GatewayResponse) -> str:
     """Format a GatewayResponse as human-readable Telegram text."""
     if not response.ok:
         return f"❌ Error: {response.error}"
@@ -132,51 +147,66 @@ def _format_response(response) -> str:
     intent = response.intent
     data = response.data
 
-    if intent == GatewayIntent.STORE:
-        return f"✅ Stored fact #{data['fact_id']} in `{data['project']}`"
-
-    elif intent == GatewayIntent.SEARCH:
-        if not data:
-            return "🔍 No results found."
-        lines = [f"🔍 *{len(data)} results:*\n"]
-        for r in data[:5]:
-            score = r.get("score", 0)
-            lines.append(f"• `[{r['project']}]` ({score:.2f}) — {r['content'][:120]}")
-        return "\n".join(lines)
-
-    elif intent == GatewayIntent.RECALL:
-        if not data:
-            return "📭 No facts found for that project."
-        lines = [f"📚 *{len(data)} facts recalled:*\n"]
-        for r in data[:10]:
-            lines.append(f"• {r.get('content', '')[:120]}")
-        return "\n".join(lines)
-
-    elif intent == GatewayIntent.STATUS:
-        d = data or {}
-        return (
-            f"⚡ *CORTEX Status*\n"
-            f"Facts: {d.get('total_facts', '?')} total · {d.get('active_facts', '?')} active\n"
-            f"Projects: {d.get('projects', '?')}\n"
-            f"DB: {d.get('db_size_mb', 0):.1f} MB\n"
-            f"Latency: {response.latency_ms:.0f}ms"
-        )
-
-    elif intent == GatewayIntent.EMIT:
-        if data and data.get("delivered"):
-            return f"📨 Event delivered via: {', '.join(data['adapters'])}"
-        return "📭 No notification adapters configured."
+    formatters = {
+        GatewayIntent.STORE: _format_store,
+        GatewayIntent.SEARCH: _format_search,
+        GatewayIntent.RECALL: _format_recall,
+        GatewayIntent.STATUS: _format_status,
+        GatewayIntent.EMIT: _format_emit,
+    }
+    formatter = formatters.get(intent)
+    if formatter:
+        return formatter(data, response.latency_ms)
 
     return f"✅ Done ({response.latency_ms:.0f}ms)"
 
 
-@router.post("/webhook")
+def _format_store(data: dict, latency: float) -> str:
+    return f"✅ Stored fact #{data['fact_id']} in `{data['project']}`"
+
+
+def _format_search(data: list, latency: float) -> str:
+    if not data:
+        return "🔍 No results found."
+    lines = [f"🔍 *{len(data)} results:*\n"]
+    for r in data[:5]:
+        score = r.get("score", 0)
+        lines.append(f"• `[{r['project']}]` ({score:.2f}) — {r['content'][:120]}")
+    return "\n".join(lines)
+
+
+def _format_recall(data: list, latency: float) -> str:
+    if not data:
+        return "📭 No facts found for that project."
+    lines = [f"📚 *{len(data)} facts recalled:*\n"]
+    for r in data[:10]:
+        lines.append(f"• {r.get('content', '')[:120]}")
+    return "\n".join(lines)
+
+
+def _format_status(data: dict, latency: float) -> str:
+    d = data or {}
+    return (
+        f"⚡ *CORTEX Status*\n"
+        f"Facts: {d.get('total_facts', '?')} total · {d.get('active_facts', '?')} active\n"
+        f"Projects: {d.get('projects', '?')}\n"
+        f"DB: {d.get('db_size_mb', 0):.1f} MB\n"
+        f"Latency: {latency:.0f}ms"
+    )
+
+
+def _format_emit(data: dict, latency: float) -> str:
+    if data and data.get("delivered"):
+        return f"📨 Event delivered via: {', '.join(data['adapters'])}"
+    return "📭 No notification adapters configured."
+
+
+@router.post("/webhook", responses={403: {"description": "Invalid webhook secret"}})
 async def telegram_webhook(
     request: Request,
-    x_telegram_bot_api_secret_token: str = Header(default=""),
+    x_telegram_bot_api_secret_token: Annotated[str, Header()] = "",
 ) -> JSONResponse:
     """Receive Telegram webhook updates and route through Gateway."""
-    # Validate secret token if configured
     import os
 
     import cortex.api.state as api_state

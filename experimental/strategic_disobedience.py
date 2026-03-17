@@ -11,8 +11,9 @@ The module provides a `StrategicDisobedience` class with a single public method
 """
 
 from __future__ import annotations
-from typing import Any, Dict, List
+
 import re
+from typing import Any
 
 
 class StrategicDisobedience:
@@ -37,9 +38,6 @@ class StrategicDisobedience:
         "exponer",
         "bypass",
         "desactivar",
-        "desactivar",
-        "desactivar",
-        "bypass",
         "ha" + "ck",
         "spam",
         "phishing",
@@ -92,13 +90,13 @@ class StrategicDisobedience:
         )
 
     # ---------------------------------------------------------------------
-    def _suggest_alternatives(self, request: str) -> List[str]:
+    def _suggest_alternatives(self, request: str) -> list[str]:
         """Provide a short list of alternative approaches.
 
         This is a heuristic stub; in a real system you might query a knowledge
         base or run a retrieval‑augmented generation step.
         """
-        alternatives: List[str] = []
+        alternatives: list[str] = []
         lowered = request.lower()
         if "bypass" in lowered or "desactivar" in lowered:
             alternatives.append("Utilizar la API oficial con permisos adecuados")
@@ -111,7 +109,7 @@ class StrategicDisobedience:
         return alternatives
 
     # ---------------------------------------------------------------------
-    def evaluate(self, request: str, context: Dict[str, Any] | None = None) -> Dict[str, Any]:
+    def evaluate(self, request: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
         """Public API – decide whether to proceed or challenge.
 
         Parameters

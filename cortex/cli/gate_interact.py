@@ -7,14 +7,14 @@ import sqlite3
 import time
 from typing import TYPE_CHECKING, Any
 
-from cortex.gate import ActionStatus, GateNotApproved, GatePolicy
+from cortex.extensions.gate import ActionStatus, GateNotApproved, GatePolicy
 
 __all__ = ["approve_interactive"]
 
 if TYPE_CHECKING:
-    from cortex.gate import SovereignGate
+    from cortex.extensions.gate import SovereignGate
 
-logger = logging.getLogger("cortex.gate.interact")
+logger = logging.getLogger("cortex.extensions.gate.interact")
 
 
 def approve_interactive(gate: "SovereignGate", action_id: str) -> bool:
@@ -35,7 +35,7 @@ def approve_interactive(gate: "SovereignGate", action_id: str) -> bool:
     try:
         action = gate._get_action(action_id)
     except (sqlite3.Error, OSError, RuntimeError) as e:
-        logger.error(f"Failed to retrieve action {action_id}: {e}")
+        logger.error("Failed to retrieve action %s: %s", action_id, e)
         return False
 
     if gate.policy == GatePolicy.DISABLED:

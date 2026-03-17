@@ -5,7 +5,7 @@ import sys
 # Add project root to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from cortex.timing import TimingTracker
+from cortex.extensions.timing import TimingTracker
 
 
 def verify_daily_data():

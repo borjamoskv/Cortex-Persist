@@ -9,7 +9,7 @@ import time
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -46,7 +46,8 @@ class MCPMetrics:
         self.cache_hits = 0
         self.cache_misses = 0
         self.errors_total = 0
-        self.start_at = datetime.now().isoformat()
+        self.rejected_immune = 0
+        self.start_at = datetime.now(timezone.utc).isoformat()
 
     def record_request(self, cached: bool = False):
         self.requests_total += 1
@@ -55,14 +56,17 @@ class MCPMetrics:
         else:
             self.cache_misses += 1
 
-    def record_error(self):
+    def record_error(self, is_immune_rejection: bool = False):
         self.errors_total += 1
+        if is_immune_rejection:
+            self.rejected_immune += 1
 
     def get_summary(self) -> dict:
         return {
             "requests_total": self.requests_total,
             "cache_hit_rate": self.cache_hits / max(1, (self.cache_hits + self.cache_misses)),
             "errors_total": self.errors_total,
+            "rejected_immune": self.rejected_immune,
             "uptime_since": self.start_at,
         }
 

@@ -118,7 +118,7 @@ class SQLiteAuthBackend(BaseAuthBackend):
         try:
             cursor = await conn.execute(SQL_INSERT_KEY, args)
             await conn.commit()
-            return cursor.lastrowid
+            return cursor.lastrowid  # type: ignore[reportReturnType]
         finally:
             await conn.close()
 
@@ -128,11 +128,11 @@ class SQLiteAuthBackend(BaseAuthBackend):
             conn.row_factory = aiosqlite.Row
             if tenant_id:
                 cursor = await conn.execute(
-                    "SELECT * FROM api_keys WHERE tenant_id = ? ORDER BY created_at DESC",
+                    "SELECT * FROM api_keys WHERE tenant_id = ? ORDER BY id DESC",
                     (tenant_id,),
                 )
             else:
-                cursor = await conn.execute("SELECT * FROM api_keys ORDER BY created_at DESC")
+                cursor = await conn.execute("SELECT * FROM api_keys ORDER BY id DESC")
             rows = await cursor.fetchall()
             return [dict(r) for r in rows]
         finally:
@@ -235,11 +235,11 @@ class AlloyDBAuthBackend(BaseAuthBackend):
         async with pool.acquire() as conn:
             if tenant_id:
                 rows = await conn.fetch(
-                    "SELECT * FROM api_keys WHERE tenant_id = $1 ORDER BY created_at DESC",
+                    "SELECT * FROM api_keys WHERE tenant_id = $1 ORDER BY id DESC",
                     tenant_id,
                 )
             else:
-                rows = await conn.fetch("SELECT * FROM api_keys ORDER BY created_at DESC")
+                rows = await conn.fetch("SELECT * FROM api_keys ORDER BY id DESC")
             return [dict(r) for r in rows]
 
     async def revoke_key(self, key_id: int | str) -> bool:

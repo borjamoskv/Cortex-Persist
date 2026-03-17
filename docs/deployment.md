@@ -9,7 +9,7 @@ CORTEX supports multiple deployment models — from a single `pip install` to pr
 The simplest deployment. Zero network dependencies.
 
 ```bash
-pip install cortex-memory[api]
+pip install cortex-persist[api]
 cortex init
 
 # Start REST API

@@ -16,7 +16,7 @@ MOSKV-1 is a background watchdog that monitors:
 
 ```bash
 # Install with CLI
-pip install cortex-memory
+pip install cortex-persist
 
 # Start in background
 moskv-daemon start
@@ -108,7 +108,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: pip install cortex-memory
+      - run: pip install cortex-persist
       - run: |
           python -c "
           from cortex.daemon import CortexDaemon

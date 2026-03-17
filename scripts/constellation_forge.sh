@@ -18,6 +18,12 @@ log_action() { echo -e "${CYAN}  ► $1${NC}"; }
 
 log_sys "Activando forja multi-dimensión..."
 
+# -- SECURITY GUARD --
+if [[ -z "${CORTEX_ALLOW_HOME_MUTATION}" ]]; then
+    echo -e "\033[38;2;255;0;0m[SECURITY] Script requires CORTEX_ALLOW_HOME_MUTATION=1 to modify \$HOME.\033[0m"
+    exit 1
+fi
+
 # 1. CORTEX 3D HOLOGRAPH 
 log_action "PILLAR I: Forjando CORTEX 3D Holograph (Interfaz Neurológica)"
 mkdir -p ~/game/cortex-holograph/src/components

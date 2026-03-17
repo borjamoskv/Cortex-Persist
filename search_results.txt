@@ -1,0 +1,5 @@
+
+╭─────────────────────────────── [💡 WORKFLOW] ────────────────────────────────╮
+│  Los ghosts que bloquean otro trabajo cuestan 10x más que los que no         │
+│  bloquean. Clasifícalos como 'blocking' inmediatamente.                      │
+╰───────────────────────── mientras esperas · static ──────────────────────────╯

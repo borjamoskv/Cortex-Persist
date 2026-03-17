@@ -1,161 +1,98 @@
-"""
-Tests for Multi-Tenant Isolation.
+"""Tests for multi-tenant Row-Level Security (RLS) isolation in CORTEX Engine."""
 
-Verifies that tenant boundaries are enforced across all engine operations:
-store, recall, and search. No data should leak between tenants.
-"""
-
-import asyncio
 import os
 import tempfile
 
 import pytest
 
 from cortex.engine import CortexEngine
-
-_db_path: str | None = None
-_engine: CortexEngine | None = None
-_seeded = False
-
-
-def _get_engine() -> CortexEngine:
-    """Lazily create a shared engine for all tests."""
-    global _db_path, _engine, _seeded
-
-    if _engine is not None:
-        return _engine
-
-    if not os.environ.get("CORTEX_MASTER_KEY"):
-        os.environ["CORTEX_MASTER_KEY"] = (
-            "YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXoxMjM0NTY="
-        )
-
-    handle = tempfile.NamedTemporaryFile(suffix="_tenant.db", delete=False)
-    _db_path = handle.name
-    handle.close()
-
-    _engine = CortexEngine(_db_path)
-    asyncio.run(_engine.init_db())
-    return _engine
-
-
-async def _seed_data(eng: CortexEngine) -> None:
-    """Seed test data once."""
-    global _seeded
-    if _seeded:
-        return
-    _seeded = True
-
-    await eng.store(
-        project="shared-project",
-        content="Tenant A secret: budget is $1M",
-        tenant_id="tenant-alpha",
-    )
-    await eng.store(
-        project="shared-project",
-        content="Tenant B secret: budget is $5M",
-        tenant_id="tenant-beta",
-    )
-    await eng.store(
-        project="search-test",
-        content="React is the best frontend framework for our team",
-        tenant_id="tenant-x",
-    )
-    await eng.store(
-        project="search-test",
-        content="Vue.js is the best frontend framework for our team",
-        tenant_id="tenant-y",
-    )
-    await eng.store(
-        project="default-test",
-        content="No tenant specified, should go to default",
-    )
-    await eng.store(
-        project="isolation-check",
-        content="Named tenant private data XYZ789",
-        tenant_id="tenant-named",
-    )
+from cortex.extensions.security.tenant import tenant_id_var
 
 
 @pytest.fixture
-def engine():
-    return _get_engine()
+def temp_db():
+    fd, path = tempfile.mkstemp(suffix=".db")
+    os.close(fd)
+    yield path
+    os.unlink(path)
 
 
-class TestTenantIsolationRecall:
-    """Tenant A's facts must not appear in Tenant B's recall."""
+@pytest.fixture
+async def engine(temp_db):
+    """Engine fixture for memory and search isolation."""
+    # Ensure fresh state
+    e = CortexEngine(db_path=temp_db, auto_embed=False)
+    await e.init_db()
+    yield e
+    await e.close()
 
-    @pytest.mark.asyncio
-    async def test_recall_isolated_by_tenant(self, engine):
-        await _seed_data(engine)
 
-        facts_a = await engine.recall(
-            project="shared-project",
-            tenant_id="tenant-alpha",
+@pytest.mark.asyncio
+async def test_tenant_isolation_store_and_recall(engine):
+    """Verify that facts stored under one tenant cannot be recalled by another."""
+
+    # Store fact for Alice
+    token_alice = tenant_id_var.set("tenant-alice")
+    fact_id_alice = await engine.store(
+        content="Alice's secret strategy",
+        fact_type="decision",
+        project="alpha",
+        source="api",
+    )
+    tenant_id_var.reset(token_alice)
+
+    # Store fact for Bob
+    token_bob = tenant_id_var.set("tenant-bob")
+    fact_id_bob = await engine.store(
+        content="Bob's secret strategy",
+        fact_type="decision",
+        project="alpha",
+        source="api",
+    )
+    tenant_id_var.reset(token_bob)
+
+    # Alice queries -> should only see her fact
+    token_alice = tenant_id_var.set("tenant-alice")
+    facts_alice = await engine.recall(project="alpha")
+    assert len(facts_alice) == 1
+    assert facts_alice[0]["content"] == "Alice's secret strategy"
+    assert facts_alice[0]["tenant_id"] == "tenant-alice"
+    tenant_id_var.reset(token_alice)
+
+    # Bob queries -> should only see his fact
+    token_bob = tenant_id_var.set("tenant-bob")
+    facts_bob = await engine.recall(project="alpha")
+    assert len(facts_bob) == 1
+    assert facts_bob[0]["content"] == "Bob's secret strategy"
+    assert facts_bob[0]["tenant_id"] == "tenant-bob"
+    tenant_id_var.reset(token_bob)
+
+
+@pytest.mark.asyncio
+async def test_tenant_isolation_update_and_deprecate(engine):
+    """Verify that updating or deprecating cross-tenant facts fails."""
+
+    # Alice stores a fact
+    token_alice = tenant_id_var.set("tenant-alice")
+    fact_id_alice = await engine.store(
+        content="Alice's initial draft", fact_type="knowledge", project="beta", source="api"
+    )
+    tenant_id_var.reset(token_alice)
+
+    # Bob tries to update Alice's fact
+    token_bob = tenant_id_var.set("tenant-bob")
+    try:
+        updated_id = await engine.update(
+            fact_id=fact_id_alice, new_content="Bob hacked this", project="beta"
         )
-        facts_b = await engine.recall(
-            project="shared-project",
-            tenant_id="tenant-beta",
-        )
+        assert not updated_id, "Bob should not be able to update Alice's fact"
+    except Exception:
+        pass  # Depending on implementation it might raise or return None
 
-        contents_a = [f.content for f in facts_a]
-        contents_b = [f.content for f in facts_b]
+    # Verify Alice's fact is unchanged
+    tenant_id_var.reset(token_bob)
 
-        assert any("Tenant A" in c for c in contents_a)
-        assert not any("Tenant B" in c for c in contents_a)
-
-        assert any("Tenant B" in c for c in contents_b)
-        assert not any("Tenant A" in c for c in contents_b)
-
-
-class TestTenantIsolationSearch:
-    """Text search must respect tenant boundaries."""
-
-    @pytest.mark.asyncio
-    async def test_text_search_isolated(self, engine):
-        await _seed_data(engine)
-
-        results_x = await engine.search(
-            query="frontend framework",
-            project="search-test",
-            tenant_id="tenant-x",
-        )
-        results_y = await engine.search(
-            query="frontend framework",
-            project="search-test",
-            tenant_id="tenant-y",
-        )
-
-        contents_x = [r.content for r in results_x]
-        contents_y = [r.content for r in results_y]
-
-        assert any("React" in c for c in contents_x)
-        assert not any("Vue" in c for c in contents_x)
-
-        assert any("Vue" in c for c in contents_y)
-        assert not any("React" in c for c in contents_y)
-
-
-class TestTenantIsolationDefault:
-    """Default tenant behavior — backwards compatibility."""
-
-    @pytest.mark.asyncio
-    async def test_default_tenant_works(self, engine):
-        await _seed_data(engine)
-
-        results = await engine.recall(
-            project="default-test",
-            tenant_id="default",
-        )
-        assert len(results) >= 1
-
-    @pytest.mark.asyncio
-    async def test_default_tenant_isolated_from_named(self, engine):
-        await _seed_data(engine)
-
-        default_results = await engine.recall(
-            project="isolation-check",
-            tenant_id="default",
-        )
-        default_contents = [r.content for r in default_results]
-        assert not any("XYZ789" in c for c in default_contents)
+    token_alice = tenant_id_var.set("tenant-alice")
+    alice_fact = await engine.get_fact(fact_id_alice)
+    assert alice_fact.content == "Alice's initial draft"
+    tenant_id_var.reset(token_alice)

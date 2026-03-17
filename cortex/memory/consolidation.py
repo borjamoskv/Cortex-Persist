@@ -212,42 +212,77 @@ class SystemsConsolidator:
     ) -> dict[str, int]:
         """Run a consolidation sweep: mature or prune silent engrams.
 
+        Operates entirely in SQL (O(1)) rather than bringing N objects
+        into Python memory, protecting the event loop.
+
         Returns stats: {"matured": N, "deceased": N, "pending": N}.
         """
         stats = {"matured": 0, "deceased": 0, "pending": 0}
 
-        if not hasattr(self._vs, "scan_engrams"):
+        if not hasattr(self._vs, "_get_conn"):
             return stats
 
-        engrams = await self._vs.scan_engrams(tenant_id)
+        conn = self._vs._get_conn()
 
-        for engram in engrams:
-            if not isinstance(engram, SilentEngram):
-                continue
+        # We need to run these updates in an isolated execution thread to ensure
+        # database locks do not delay the async event loop.
+        import asyncio
+        import time
 
-            new_state = engram.tick()
+        def run_sweep() -> dict[str, int]:
+            now = time.time()
+            cursor = conn.cursor()
 
-            if new_state == EngramState.MATURED and engram.state != EngramState.MATURED:
-                # Promote to searchable
-                matured = engram.model_copy(update={"state": EngramState.MATURED})
-                await self._vs.upsert(matured)
-                stats["matured"] += 1
+            # Step 1: Mature silent engrams that passed maturation time and have no contradictions
+            maturation_sql = """
+                UPDATE facts_meta 
+                SET metadata = json_set(metadata, '$.state', 'matured')
+                WHERE tenant_id = ? 
+                  AND json_extract(metadata, '$.state') = 'silent'
+                  AND json_extract(metadata, '$.contradiction_count') = 0
+                  AND ( ? - timestamp ) / 86400.0 >= json_extract(metadata, '$.maturation_days')
+            """
+            cursor.execute(maturation_sql, (tenant_id, now))
+            matured_count = cursor.rowcount
+
+            # Step 2: Delete deceased engrams (failed maturation, contradictory)
+            # Find engrams that are silent but have a contradiction count > 0 OR
+            # are totally drained of energy via the decay curve.
+            deletion_sql = """
+                DELETE FROM facts_meta 
+                WHERE tenant_id = ?
+                  AND json_extract(metadata, '$.state') = 'silent'
+                  AND (
+                      json_extract(metadata, '$.contradiction_count') > 0
+                      OR (
+                          cortex_decay(is_diamond, timestamp, ?, 3.0 * 24 * 3600) <= 0.0
+                      )
+                  )
+            """
+            cursor.execute(deletion_sql, (tenant_id, now))
+            deceased_count = cursor.rowcount
+
+            # Count pending silent engrams remaining
+            pending_sql = """
+                SELECT COUNT(*) FROM facts_meta 
+                WHERE tenant_id = ? AND json_extract(metadata, '$.state') = 'silent'
+            """
+            cursor.execute(pending_sql, (tenant_id,))
+            pending_row = cursor.fetchone()
+            pending_count = pending_row[0] if pending_row else 0
+
+            conn.commit()
+            return {"matured": matured_count, "deceased": deceased_count, "pending": pending_count}
+
+        try:
+            stats = await asyncio.to_thread(run_sweep)
+            if stats["matured"] > 0 or stats["deceased"] > 0:
                 logger.info(
-                    "Silent engram %s MATURED after %.1f days.",
-                    engram.id,
-                    engram.age_days(),
+                    "O(1) Consolidation Sweep completed. Matured: %d, Deceased: %d",
+                    stats["matured"],
+                    stats["deceased"],
                 )
-
-            elif new_state == EngramState.DECEASED:
-                await self._vs.delete(engram.id)
-                stats["deceased"] += 1
-                logger.info(
-                    "Silent engram %s DECEASED (contradictions=%d).",
-                    engram.id,
-                    engram.contradiction_count,
-                )
-
-            else:
-                stats["pending"] += 1
+        except Exception as e:
+            logger.error("Failed to run O(1) consolidation sweep: %s", e)
 
         return stats

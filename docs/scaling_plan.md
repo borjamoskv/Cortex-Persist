@@ -1,7 +1,7 @@
 # CORTEX Scaling Plan — De Local a SaaS
 
 > Fecha: 2026-02-19
-> Autor: Borja Moskv + MOSKV-1
+> Autor: [borjamoskv.com](https://borjamoskv.com) + MOSKV-1
 > Estado: Draft v1.0
 
 ---

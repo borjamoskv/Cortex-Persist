@@ -1,6 +1,6 @@
 # El Leviatán en el Portátil
 
-*Por Borja Moskv*
+*by [borjamoskv.com](https://borjamoskv.com)*
 
 ---
 

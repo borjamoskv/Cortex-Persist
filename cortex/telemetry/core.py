@@ -59,7 +59,7 @@ _current_span: contextvars.ContextVar[Span | None] = contextvars.ContextVar(
 # ─── Data Models ─────────────────────────────────────────────────────
 
 
-@dataclass(slots=True)
+@dataclass()
 class Span:
     """A single trace span with timing and metadata."""
 

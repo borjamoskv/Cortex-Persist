@@ -19,7 +19,7 @@ from dataclasses import dataclass
 logger = logging.getLogger("cortex.memory.compression")
 
 
-@dataclass(slots=True)
+@dataclass()
 class CompressionResult:
     """Result of a semantic compression operation."""
 

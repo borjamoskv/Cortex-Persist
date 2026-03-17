@@ -39,7 +39,7 @@ I've created a comprehensive **Strategic Roadmap** for CORTEX v6. Here's the exe
 
 | # | Feature | Files | I/E | Key Deliverable |
 |---|---------|-------|-----|-----------------|
-| 3.1 | **TypeScript SDK** | `sdks/js/src/` full impl | 9/8 | `npm install @cortex-memory/sdk` |
+| 3.1 | **TypeScript SDK** | `sdks/js/src/` full impl | 9/8 | `npm install @cortex-persist/sdk` |
 | 3.2 | **Go SDK** | `sdks/go/` (new) | 7/7 | `go get` installable |
 | 3.3 | **MCP Registry** | `mcp/registry/` (new) | 8/6 | Versioned tool definitions |
 | 3.5 | **Admin Dashboard** | `cortex_hive_ui/` React | 9/9 | Full management SPA |

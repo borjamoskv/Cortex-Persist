@@ -85,7 +85,7 @@ def _migrate_system(engine: CortexEngine, path: Path, stats: dict) -> None:
     # Preferences
     prefs = data.get("preferences", {})
     if prefs:
-        engine.store(
+        engine.store(  # type: ignore[reportUnusedCoroutine]
             project=project,
             content=json.dumps(prefs, ensure_ascii=False),
             fact_type="preference",
@@ -98,7 +98,7 @@ def _migrate_system(engine: CortexEngine, path: Path, stats: dict) -> None:
     # Operator info
     operator = data.get("operator", {})
     if operator:
-        engine.store(
+        engine.store(  # type: ignore[reportUnusedCoroutine]
             project=project,
             content=json.dumps(operator, ensure_ascii=False),
             fact_type="identity",
@@ -110,7 +110,7 @@ def _migrate_system(engine: CortexEngine, path: Path, stats: dict) -> None:
 
     # Global decisions
     for decision in data.get("global_decisions", []):
-        engine.store(
+        engine.store(  # type: ignore[reportUnusedCoroutine]
             project=project,
             content=decision.get("decision", str(decision)),
             fact_type="decision",
@@ -123,7 +123,7 @@ def _migrate_system(engine: CortexEngine, path: Path, stats: dict) -> None:
 
     # Knowledge items
     for ki in data.get("knowledge", []):
-        engine.store(
+        engine.store(  # type: ignore[reportUnusedCoroutine]
             project=project,
             content=ki.get("content", str(ki)),
             fact_type="knowledge",
@@ -156,7 +156,7 @@ def _migrate_system(engine: CortexEngine, path: Path, stats: dict) -> None:
         except sqlite3.Error as e:
             stats["errors"].append(f"Session import failed: {e}")
 
-    conn.commit()
+    conn.commit()  # type: ignore[reportUnusedCoroutine]
 
 
 def _migrate_project(engine: CortexEngine, path: Path, stats: dict) -> None:
@@ -171,7 +171,7 @@ def _migrate_project(engine: CortexEngine, path: Path, stats: dict) -> None:
 
     # Decisions
     for decision in data.get("decisions", []):
-        engine.store(
+        engine.store(  # type: ignore[reportUnusedCoroutine]
             project=project,
             content=decision.get("decision", str(decision)),
             fact_type="decision",
@@ -184,7 +184,7 @@ def _migrate_project(engine: CortexEngine, path: Path, stats: dict) -> None:
 
     # Knowledge
     for ki in data.get("knowledge", []):
-        engine.store(
+        engine.store(  # type: ignore[reportUnusedCoroutine]
             project=project,
             content=ki.get("content", str(ki)),
             fact_type="knowledge",
@@ -197,7 +197,7 @@ def _migrate_project(engine: CortexEngine, path: Path, stats: dict) -> None:
 
     # Known issues
     for issue in data.get("known_issues", []):
-        engine.store(
+        engine.store(  # type: ignore[reportUnusedCoroutine]
             project=project,
             content=issue if isinstance(issue, str) else str(issue),
             fact_type="issue",
@@ -209,7 +209,7 @@ def _migrate_project(engine: CortexEngine, path: Path, stats: dict) -> None:
     # Ghost (last state)
     ghost = data.get("ghost", {})
     if ghost:
-        engine.store(
+        engine.store(  # type: ignore[reportUnusedCoroutine]
             project=project,
             content=json.dumps(ghost, ensure_ascii=False),
             fact_type="ghost",
@@ -239,7 +239,7 @@ def _migrate_mistakes(engine: CortexEngine, path: Path, stats: dict) -> None:
                 f"FIX: {mistake.get('fix', 'unknown')}"
             )
 
-            engine.store(
+            engine.store(  # type: ignore[reportUnusedCoroutine]
                 project=project,
                 content=content,
                 fact_type="error",
@@ -272,7 +272,7 @@ def _migrate_bridges(engine: CortexEngine, path: Path, stats: dict) -> None:
                 f"Note: {bridge.get('note', '')}"
             )
 
-            engine.store(
+            engine.store(  # type: ignore[reportUnusedCoroutine]
                 project="__bridges__",
                 content=content,
                 fact_type="bridge",
