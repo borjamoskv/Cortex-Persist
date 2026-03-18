@@ -9,7 +9,7 @@ import asyncio
 import logging
 from collections.abc import Mapping
 from dataclasses import dataclass, field
-from typing import Any, Optional, Union
+from typing import Any
 
 try:
     from cortex.cli.bicameral import bicameral
@@ -46,7 +46,6 @@ class SiegeResult:
     cycles: int
     vulnerabilities: list[str] = field(default_factory=list)
     performance_drop: float = 0.0
-    poet_narrative: str = ""
 
 
 _INITIAL_INTENT_MAP = {
@@ -106,10 +105,7 @@ class BlueTeamAgent:
         return imports, body
 
     async def synthesize(
-        self,
-        intent: str,
-        context: Mapping[str, Any],
-        feedback: Optional[list[str]] = None,  # noqa: UP007, E501
+        self, intent: str, context: Mapping[str, Any], feedback: list[str] | None = None
     ) -> str:
         """Generating code with defensive awareness (Epigenetic Synthesis)."""
         msg = f"Sintetizando defensa (Ciclo {len(feedback) if feedback else 0})..."
@@ -129,7 +125,7 @@ class BlueTeamAgent:
 class RedTeamSwarm:
     """😈 Red Team Swarm: The Annihilation Squad."""
 
-    def __init__(self, vectors: Optional[list[AttackVector]] = None, replica_count: int = 100):  # noqa: UP007, E501
+    def __init__(self, vectors: list[AttackVector] | None = None, replica_count: int = 100):
         self.vectors = vectors or list(RED_TEAM_SWARM.values())
         # Enforce the 100 Sovereign Agents Topology
         self.replica_count = replica_count
@@ -156,7 +152,7 @@ class LegionOmegaEngine:
     def __init__(
         self,
         max_cycles: int = 3,
-        vectors: Optional[Union[list[AttackVector], Mapping[str, AttackVector]]] = None,  # noqa: UP007, E501
+        vectors: list[AttackVector] | Mapping[str, AttackVector] | None = None,
     ):
         self.blue_team = BlueTeamAgent()
         # Normalización de vectores: asegurar que sea una lista de objetos, no un dict
@@ -169,12 +165,7 @@ class LegionOmegaEngine:
         self.red_team = RedTeamSwarm(vectors=self.vectors_list)
         self.max_cycles = max_cycles
 
-    async def forge(
-        self,
-        intent: str,
-        context: Optional[Mapping[str, Any]] = None,  # noqa: UP007
-        narrate: bool = True,
-    ) -> SiegeResult:
+    async def forge(self, intent: str, context: Mapping[str, Any] | None = None) -> SiegeResult:
         """Forge code through the fire of the siege."""
         ctx = context or {}
         feedback = []
@@ -201,22 +192,7 @@ class LegionOmegaEngine:
 
             if not vulnerabilities:
                 bicameral.log_motor(f"Inmunidad Química alcanzada en ciclo {cycle}", action="Ω₆")
-                poet_narrative = ""
-                if narrate:
-                    try:
-                        from cortex.extensions.git.poet import CommitPoet
-
-                        poet = CommitPoet()
-                        poet_narrative = poet.narrate(code, intent)
-                    except ImportError:
-                        pass
-                return SiegeResult(
-                    success=True,
-                    final_code=code,
-                    cycles=cycle,
-                    vulnerabilities=[],
-                    poet_narrative=poet_narrative,
-                )
+                return SiegeResult(success=True, final_code=code, cycles=cycle)
 
             # Entropy Regression Check
             # Si el número de vulnerabilidades aumenta o se estanca...
@@ -239,23 +215,12 @@ class LegionOmegaEngine:
             # Small delay to simulate evolutionary cooldown
             await asyncio.sleep(0.05)
 
-        poet_narrative = ""
-        if narrate:
-            try:
-                from cortex.extensions.git.poet import CommitPoet
-
-                poet = CommitPoet()
-                poet_narrative = poet.narrate(final_code, intent)
-            except ImportError:
-                pass
-
         bicameral.log_motor("Asedio finalizado. Código entregado con deudas.", action="YIELD")
         return SiegeResult(
             success=False,
             final_code=final_code,
             cycles=self.max_cycles,
             vulnerabilities=vulnerabilities if vulnerabilities else [],
-            poet_narrative=poet_narrative,
         )
 
 

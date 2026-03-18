@@ -3,8 +3,7 @@ from __future__ import annotations
 import json
 import logging
 import sqlite3
-from collections import deque
-from typing import Any, Optional
+from typing import Any
 
 from cortex.database.core import connect as db_connect
 from cortex.extensions.llm._models import CascadeEvent, CascadeTier
@@ -19,14 +18,17 @@ class CascadeTelemetry:
            Grounding (tracing failures).
     """
 
-    def __init__(self, db_path: Optional[str] = None) -> None:
-        # O(1) bounded sliding window — maxlen enforces eviction automatically
-        self.events: deque[CascadeEvent] = deque(maxlen=1000)
+    def __init__(self, db_path: str | None = None) -> None:
+        self.events: list[CascadeEvent] = []
         self._db_path = db_path
 
     def emit(self, event: CascadeEvent) -> None:
         """Record structured telemetry for this cascade resolution."""
-        self.events.append(event)  # O(1) — deque maxlen auto-evicts oldest
+        # Truncate history to prevent memory leaks (sliding window)
+        if len(self.events) >= 1000:
+            self.events.pop(0)
+
+        self.events.append(event)
 
         # Log visual forensic summary
         msg = f"Cascade: intent={event.intent.value} | res={event.resolved_by or 'FAIL'}"

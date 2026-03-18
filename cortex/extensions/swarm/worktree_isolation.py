@@ -1,197 +1,281 @@
+"""Worktree Isolation — O(1) ephemeral workspace lifecycle.
+
+Creates, yields, and deterministically destroys git worktrees
+with full signal telemetry and timeout protection.
+"""
+
+from __future__ import annotations
+
 import asyncio
 import logging
 import os
 import shutil
-import uuid
+import time
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Optional, Union
+from typing import Any
 
 logger = logging.getLogger("cortex.extensions.swarm.worktree")
 
+# ── Constants ─────────────────────────────────────────────────────────
+
+GIT_CMD_TIMEOUT: float = 30.0  # seconds per git subprocess
+WORKTREE_DIR_PREFIX: str = "wt_"
+
+
+# ── Signal Emission ──────────────────────────────────────────────────
+
+
+def _base_payload(
+    branch: str,
+    path: str,
+    **extra: Any,
+) -> dict[str, Any]:
+    """Build a canonical signal payload. DRY across all emission points."""
+    payload: dict[str, Any] = {
+        "branch": branch,
+        "path": path,
+        "pid": os.getpid(),
+        "timestamp": time.time(),
+    }
+    payload.update(extra)
+    return payload
+
+
+def _emit_worktree_signal(
+    event_type: str,
+    payload: dict[str, Any],
+) -> None:
+    """Fire-and-forget signal emission. Never blocks, never raises."""
+    try:
+        from cortex.database.core import connect as db_connect
+        from cortex.extensions.signals.bus import SignalBus
+
+        db_path = os.environ.get("CORTEX_DB_PATH")
+        if not db_path:
+            return
+        conn = db_connect(db_path, timeout=2)
+        try:
+            bus = SignalBus(conn)
+            bus.emit(
+                event_type,
+                payload,
+                source="worktree_isolation",
+                project="CORTEX_SWARM",
+            )
+        finally:
+            conn.close()
+    except Exception:  # noqa: BLE001
+        logger.debug(
+            "Worktree signal emission failed for %s",
+            event_type,
+        )
+
+
+# ── Error Type ───────────────────────────────────────────────────────
+
 
 class WorktreeIsolationError(Exception):
-    """Excepción específica O(1) para fallos críticos en el ciclo de vida del worktree."""
-
-    pass
+    """Critical lifecycle failure in worktree isolation."""
 
 
-async def _run_git_with_backoff(
-    *args: str, max_retries: int = 5, backoff_factor: float = 0.5
+# ── Git Subprocess Helper ────────────────────────────────────────────
+
+
+async def _git(
+    *args: str,
+    timeout: float = GIT_CMD_TIMEOUT,
 ) -> tuple[int, bytes, bytes]:
-    """Ejecuta un comando Git con backoff exponencial. Inmune a index.lock temporales."""
-    for attempt in range(max_retries):
-        proc = await asyncio.create_subprocess_exec(
-            "git",
-            *args,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-        )
-        stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=30.0)
+    """Run a git command with timeout protection.
 
-        # lock file detection
-        if proc.returncode != 0 and b"index.lock" in stderr:
-            wait_time = backoff_factor * (2**attempt)
-            logger.warning(
-                "🔒 [WORKTREE IMMUNITY] Git index locked. Retrying in %.2fs (Attempt %d/%d)",
-                wait_time,
-                attempt + 1,
-                max_retries,
-            )
-            await asyncio.sleep(wait_time)
-            continue
-
-        return proc.returncode, stdout, stderr
-
-    raise WorktreeIsolationError(
-        "Colapso termodinámico: Incapaz de superar el bloqueo lock"
-        f" (index.lock) tras {max_retries} intentos."
+    Returns (returncode, stdout, stderr).
+    Raises WorktreeIsolationError on timeout.
+    """
+    proc = await asyncio.create_subprocess_exec(
+        "git",
+        *args,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
     )
-
-
-async def _purge_zombies(base_dir: Path) -> None:
-    """Aniquila worktrees huérfanos de ejecuciones previas anómalas (Ghosts)."""
-    if not base_dir.exists():
-        return
-
     try:
-        current_pid = os.getpid()
-        for path in base_dir.iterdir():
-            if path.is_dir() and path.name.startswith("wt_"):
-                parts = path.name.split("_")
-                try:
-                    pid = int(parts[-2])  # Expected format: wt_branch_PID_UUID
-                    if pid != current_pid:
-                        # Simple detection: if the process is not alive
-                        try:
-                            os.kill(pid, 0)
-                        except OSError:
-                            # Process is dead, worktree is a ghost
-                            logger.info(
-                                "👻 [WORKTREE IMMUNITY] Purgando worktree fantasma: %s", path
-                            )
-                            shutil.rmtree(path, ignore_errors=True)
-                except (ValueError, IndexError):
-                    # Fallback structural purge if format is unknown
-                    pass
+        stdout, stderr = await asyncio.wait_for(
+            proc.communicate(),
+            timeout=timeout,
+        )
+    except asyncio.TimeoutError:
+        proc.kill()
+        raise WorktreeIsolationError(f"git {args[0]} timed out after {timeout}s") from None
+    return proc.returncode, stdout, stderr
 
-        # Force Git to prune internal metadata for physical paths we just annihilated
-        await _run_git_with_backoff("worktree", "prune")
 
-    except Exception as e:
-        logger.warning("⚠️ [WORKTREE IMMUNITY] Fallo menor al purgar zombies: %s", e)
+# ── Core Context Manager ─────────────────────────────────────────────
 
 
 @asynccontextmanager
 async def isolated_worktree(
     branch_name: str,
-    base_path: Optional[Union[str, Path]] = None,
-    force_unique_branch: bool = False,
+    base_path: str | Path | None = None,
 ) -> AsyncGenerator[Path, None]:
-    """
-    Gestor O(1) de Workspaces aislados usando `git worktree`.
-    Crea un worktree físico, cede el contexto (yield) y garantiza
-    su destrucción termodinámica al salir.
+    """O(1) ephemeral workspace via `git worktree`.
+
+    Creates a physical worktree, yields control, and guarantees
+    deterministic destruction on exit — regardless of success or
+    failure inside the yielded block.
+
+    Signals emitted:
+        worktree:created          — after successful creation
+        worktree:isolation_failed — on creation failure
+        worktree:destroyed        — after clean teardown
+        worktree:residue_detected — if teardown left artifacts
     """
     if base_path is None:
-        # Default to a safe area outside the core repo to avoid indexer pollution
         base_path = Path.home() / ".cortex" / "worktrees"
 
     base_dir = Path(base_path)
     base_dir.mkdir(parents=True, exist_ok=True)
 
-    # Immune system purge
-    await _purge_zombies(base_dir)
-
-    # Sanitizamos el nombre para el directorio físico
     safe_name = branch_name.replace("/", "_").replace("\\", "_")
-    unique_id = uuid.uuid4().hex[:8]
-    worktree_path = base_dir / f"wt_{safe_name}_{os.getpid()}_{unique_id}"
+    worktree_path = base_dir / f"{WORKTREE_DIR_PREFIX}{safe_name}_{os.getpid()}"
 
-    # Determine isolated branch name
-    actual_branch = f"{branch_name}-{unique_id}" if force_unique_branch else branch_name
+    def _payload(**extra: Any) -> dict[str, Any]:
+        return _base_payload(branch_name, str(worktree_path), **extra)
 
     logger.info(
-        "🌿 [WORKTREE ISOLATION] Bipartición del espacio-tiempo."
-        " Creando worktree en: %s (Branch: %s)",
+        "[WORKTREE] Creating: %s (branch: %s)",
         worktree_path,
-        actual_branch,
+        branch_name,
     )
 
-    # 1. Crear el Worktree
+    t0 = time.monotonic()
+
+    # ── Phase 1: Creation ─────────────────────────────────────────
     try:
-        # Check if we are inside a git repo
-        code, stdout, stderr = await _run_git_with_backoff("rev-parse", "--is-inside-work-tree")
-
-        if code != 0:
-            raise WorktreeIsolationError(
-                "No estamos en un repositorio Git válido."
-                f" Imposible bifurcar: {stderr.decode().strip()}"
-            )
-
-        # Attempt to checkout existing or create new branch
-        code_add, stdout_add, stderr_add = await _run_git_with_backoff(
-            "worktree", "add", str(worktree_path), actual_branch
+        rc, _, stderr = await _git(
+            "rev-parse",
+            "--is-inside-work-tree",
         )
+        if rc != 0:
+            raise WorktreeIsolationError(f"Not inside a valid Git repo: {stderr.decode().strip()}")
 
-        if code_add != 0:
-            if b"already exists" in stderr_add or b"invalid reference" in stderr_add:
-                # Si falla porque la rama no existe, creémosla desde el punto actual (HEAD)
-                code_b, stdout_b, stderr_b = await _run_git_with_backoff(
-                    "worktree", "add", "-b", actual_branch, str(worktree_path)
+        # Try creating branch; if it already exists, checkout instead
+        rc, _, stderr = await _git(
+            "worktree",
+            "add",
+            "-b",
+            branch_name,
+            str(worktree_path),
+        )
+        if rc != 0:
+            if b"already exists" in stderr:
+                # Branch exists — attach without -b
+                rc2, _, stderr2 = await _git(
+                    "worktree",
+                    "add",
+                    str(worktree_path),
+                    branch_name,
                 )
-                if code_b != 0 and b"already exists" not in stderr_b:
-                    raise WorktreeIsolationError(
-                        f"Colapso al instanciar Git Worktree (-b): {stderr_b.decode().strip()}"
+                if rc2 != 0:
+                    _emit_worktree_signal(
+                        "worktree:isolation_failed",
+                        _payload(error=stderr2.decode().strip()),
                     )
+                    raise WorktreeIsolationError(f"Worktree add failed: {stderr2.decode().strip()}")
             else:
-                raise WorktreeIsolationError(
-                    f"Colapso al instanciar Git Worktree: {stderr_add.decode().strip()}"
+                _emit_worktree_signal(
+                    "worktree:isolation_failed",
+                    _payload(error=stderr.decode().strip()),
                 )
+                raise WorktreeIsolationError(f"Worktree add failed: {stderr.decode().strip()}")
 
-    except Exception as e:
-        logger.error("☠️ [WORKTREE ISOLATION] Fallo catastrófico de instanciación: %s", e)
-        raise WorktreeIsolationError(f"Fallo de instanciación: {e}") from e
+    except WorktreeIsolationError:
+        raise
+    except Exception as e:  # noqa: BLE001
+        logger.error("[WORKTREE] Creation failed: %s", e)
+        _emit_worktree_signal(
+            "worktree:isolation_failed",
+            _payload(error=str(e)),
+        )
+        raise WorktreeIsolationError(f"Creation failed: {e}") from e
 
-    # Extraemos el target original antes del yield
+    creation_ms = (time.monotonic() - t0) * 1000
     cwd_original = Path.cwd()
 
+    _emit_worktree_signal(
+        "worktree:created",
+        _payload(creation_ms=round(creation_ms, 1)),
+    )
+
+    # ── Phase 2: Yield to Agent ───────────────────────────────────
     try:
-        # 2. Ceder la ejecución al Agente (dentro de la burbuja termodinámica)
         yield worktree_path
 
     finally:
-        # 3. Aniquilación Estructural O(1) (Rolback determinista)
-        logger.info(
-            "🔥 [WORKTREE ISOLATION] Colapso de función de onda. Purgando worktree obsoleto: %s",
-            worktree_path,
-        )
+        # ── Phase 3: Deterministic Destruction ────────────────────
+        t1 = time.monotonic()
+        logger.info("[WORKTREE] Destroying: %s", worktree_path)
+
         try:
-            # Aseguramos que no estamos bloqueando el path
-            if Path.cwd() == worktree_path or worktree_path in Path.cwd().parents:
+            # Restore cwd if we're inside the doomed path
+            try:
+                if Path.cwd() == worktree_path or worktree_path in Path.cwd().parents:
+                    os.chdir(cwd_original)
+            except OSError:
                 os.chdir(cwd_original)
 
-            # Git exige removerlo de su índice interno primero
-            await _run_git_with_backoff("worktree", "remove", "--force", str(worktree_path))
+            # Remove from git index
+            await _git(
+                "worktree",
+                "remove",
+                "--force",
+                str(worktree_path),
+            )
 
-            # Si forzamos una rama única, se podría borrar.
-            # De lo contrario la conservamos intacta.
-            if force_unique_branch:
-                await _run_git_with_backoff("branch", "-D", actual_branch)
+            # Delete orphan branch
+            await _git("branch", "-D", branch_name)
 
-            # Limpieza física si Git falló al borrar
+            # Physical cleanup if git left residue
             if worktree_path.exists():
                 shutil.rmtree(worktree_path, ignore_errors=True)
 
-            logger.info(
-                "✅ [WORKTREE ISOLATION] Purgatorio aniquilado."
-                " RAM y estado Git recuperados sin ghosting."
-            )
+            teardown_ms = (time.monotonic() - t1) * 1000
 
-        except Exception as e:
+            if worktree_path.exists():
+                _emit_worktree_signal(
+                    "worktree:residue_detected",
+                    _payload(teardown_ms=round(teardown_ms, 1)),
+                )
+                logger.warning(
+                    "[WORKTREE] Residue persists at %s",
+                    worktree_path,
+                )
+            else:
+                _emit_worktree_signal(
+                    "worktree:destroyed",
+                    _payload(
+                        teardown_ms=round(teardown_ms, 1),
+                        total_ms=round(
+                            (time.monotonic() - t0) * 1000,
+                            1,
+                        ),
+                    ),
+                )
+                logger.info(
+                    "[WORKTREE] Destroyed in %.1fms",
+                    teardown_ms,
+                )
+
+        except Exception as e:  # noqa: BLE001
+            teardown_ms = (time.monotonic() - t1) * 1000
             logger.error(
-                "⚠️ [WORKTREE ISOLATION] Residuo termodinámico detectado al purgar %s: %s",
+                "[WORKTREE] Teardown error at %s: %s",
                 worktree_path,
                 e,
+            )
+            _emit_worktree_signal(
+                "worktree:residue_detected",
+                _payload(
+                    error=str(e),
+                    teardown_ms=round(teardown_ms, 1),
+                ),
             )

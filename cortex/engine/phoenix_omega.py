@@ -11,7 +11,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -65,7 +65,7 @@ class PhoenixState:
     atoms: dict[str, StructuralAtom]
     artifacts: dict[str, Any]
     metrics: dict[str, float]
-    rollback_snapshot: Optional[dict] = None
+    rollback_snapshot: dict | None = None
 
     def transition_to(self, new_phase: AtomicPhase) -> "PhoenixState":
         return PhoenixState(
@@ -147,7 +147,7 @@ class AnalysisEngine(BaseEngine):
 
         file_atoms: dict[str, StructuralAtom] = {}
         for node in ast.walk(tree):
-            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef):
                 atom_id = f"{path.stem}::{node.name}"
 
                 deps = self._extract_dependencies(node)
@@ -182,16 +182,14 @@ class AnalysisEngine(BaseEngine):
             for child in ast.walk(node)
             if isinstance(
                 child,
-                (
-                    ast.If,
-                    ast.While,
-                    ast.For,
-                    ast.ExceptHandler,
-                    ast.With,
-                    ast.Assert,
-                    ast.comprehension,
-                    ast.BoolOp,
-                ),
+                ast.If
+                | ast.While
+                | ast.For
+                | ast.ExceptHandler
+                | ast.With
+                | ast.Assert
+                | ast.comprehension
+                | ast.BoolOp,
             )
         )
 
@@ -272,7 +270,7 @@ class ExtractionEngine(BaseEngine):
         node = atom.ast_node
         args = []
         is_async = False
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
             args = [arg.arg for arg in node.args.args]
             is_async = isinstance(node, ast.AsyncFunctionDef)
 

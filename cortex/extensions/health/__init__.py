@@ -22,12 +22,15 @@ from cortex.extensions.health.models import (
     Grade,
     HealthReport,
     HealthScore,
+    HealthSLA,
     HealthThresholds,
     MetricSnapshot,
 )
 from cortex.extensions.health.prometheus import export_prometheus
-from cortex.extensions.health.scorer import HealthScorer
 from cortex.extensions.health.trend import TrendDetector
+
+from .fix_registry import FixRegistry
+from .scorer import HealthScorer
 
 __all__ = [
     "CollectorRegistry",
@@ -36,6 +39,7 @@ __all__ = [
     "HealthMixin",
     "HealthReport",
     "HealthScore",
+    "HealthSLA",
     "HealthScorer",
     "HealthThresholds",
     "MetricCollectorProtocol",

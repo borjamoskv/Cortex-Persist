@@ -90,7 +90,9 @@ def main():
     logger.info("Detected Active Facts: %s", active_facts)
 
     if active_facts > HEAVY_THRESHOLD_FACTS:
-        logger.info("Context weight is HIGH (> %s). Selecting LIGHT profile.", HEAVY_THRESHOLD_FACTS)
+        logger.info(
+            "Context weight is HIGH (> %s). Selecting LIGHT profile.", HEAVY_THRESHOLD_FACTS
+        )
         source_profile = LIGHT_PROFILE
         profile_type = "LIGHT"
     else:

@@ -8,11 +8,10 @@ from __future__ import annotations
 import asyncio
 import logging
 from datetime import datetime, timedelta
-from typing import Optional
 
 import aiosqlite
 
-from cortex.database.core import connect_async_ctx
+from cortex.database.core import connect_async
 from cortex.embeddings.provider import EmbeddingProvider
 
 logger = logging.getLogger("cortex")
@@ -22,7 +21,7 @@ class EnrichmentWorker:
     """Worker that polls enrichment_jobs and processes them."""
 
     def __init__(
-        self, db_path: str, provider: Optional[EmbeddingProvider] = None, poll_interval: float = 1.0
+        self, db_path: str, provider: EmbeddingProvider | None = None, poll_interval: float = 1.0
     ):
         self.db_path = db_path
         self.provider = provider
@@ -46,7 +45,7 @@ class EnrichmentWorker:
 
     async def _process_batch(self, batch_size: int = 10):
         """Poll and process a batch of jobs."""
-        async with connect_async_ctx(self.db_path) as conn:
+        async with connect_async(self.db_path) as conn:
             # Pick 'queued' jobs or those whose next_attempt_at has passed
             query = """
                 SELECT id, fact_id FROM enrichment_jobs

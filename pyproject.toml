@@ -4,7 +4,7 @@ version = "0.3.0b2"
 description = "Tamper-evident audit and decision lineage for AI systems — cryptographic verification, integrity proofs, and traceability for agent memory."
 readme = "README.md"
 license = "Apache-2.0"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 authors = [
     {name = "borjamoskv", email = "borjamoskv@gmail.com"},
 ]
@@ -123,13 +123,13 @@ asyncio_default_fixture_loop_scope = "function"
 
 
 [tool.ruff]
-target-version = "py39"
+target-version = "py310"
 line-length = 100
 exclude = ["experimental", "notebooks"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "B", "G"]
-ignore = ["E501", "E402", "B008", "W291", "W293", "S", "BLE001", "UP045", "UP007"]
+ignore = ["E501", "E402", "B008", "W291", "W293", "S", "BLE001", "UP045"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**/*.py" = ["S", "E402", "F821", "BLE001", "T20", "B017"]
@@ -141,7 +141,7 @@ ignore = ["E501", "E402", "B008", "W291", "W293", "S", "BLE001", "UP045", "UP007
 "cortex/daemon/core.py" = ["E701", "E702", "I001"]
 
 [tool.pyright]
-pythonVersion = "3.9"
+pythonVersion = "3.10"
 typeCheckingMode = "basic"
 exclude = [
     "**/node_modules",

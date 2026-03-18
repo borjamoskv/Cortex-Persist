@@ -12,8 +12,6 @@ Usage:
 
 from __future__ import annotations
 
-from typing import Optional
-
 import click
 from rich.table import Table
 from rich.text import Text
@@ -51,7 +49,7 @@ def routing() -> None:
 
 @routing.command("matrix")
 @click.option("--intent", default=None, help="Filter by intent (code, reasoning, architect...)")
-def routing_matrix(intent: Optional[str]) -> None:
+def routing_matrix(intent: str | None) -> None:
     """Show the full intent→provider→model routing matrix."""
     from cortex.extensions.llm._presets import load_presets
 
@@ -178,6 +176,40 @@ def routing_frontier(intent: str) -> None:
             name,
             model,
             Text(cost, style=_COST_STYLE.get(cost, "white")),
+        )
+
+    console.print(table)
+
+
+@routing.command("status")
+def routing_status() -> None:
+    """Show LLM provider readiness and API key status. [STATUS_CLI]"""
+    from cortex.extensions.llm._presets import provider_inventory
+
+    inventory = provider_inventory()
+
+    table = Table(
+        title="📡 LLM Provider Readiness",
+        title_style=f"bold {_CYBER}",
+        border_style=_VIOLET,
+    )
+    table.add_column("Provider", style=f"bold {_GOLD}", min_width=12)
+    table.add_column("Ready", justify="center", width=8)
+    table.add_column("Status", min_width=15)
+    table.add_column("Tier", min_width=10)
+    table.add_column("Reason", style=_DIM, min_width=20)
+
+    for p in sorted(inventory, key=lambda x: x["name"]):
+        ready = p["ready"]
+        ready_text = "✅" if ready else "❌"
+        status_style = _EMERALD if ready else _RED
+
+        table.add_row(
+            p["name"],
+            ready_text,
+            Text(p["status"], style=status_style),
+            Text(p["tier"], style=_TIER_STYLE.get(p["tier"], "white")),
+            p["reason"] or "—",
         )
 
     console.print(table)

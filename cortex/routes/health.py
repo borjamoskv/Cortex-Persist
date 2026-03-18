@@ -1,6 +1,7 @@
 """CORTEX Health Index — FastAPI routes.
 
-Provides /v1/health/check, /v1/health/report, /v1/health/score
+Provides /v1/health/check, /v1/health/report, /v1/health/score,
+/v1/health/metrics, /v1/health/prometheus, /v1/health/history
 powered by the Health Index engine.
 """
 
@@ -9,7 +10,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Request
 
 from cortex.extensions.health import HealthCollector, HealthScorer
-from cortex.extensions.health.models import HealthReport
+from cortex.extensions.health.models import HealthReport, HealthThresholds
 
 router = APIRouter(prefix="/v1/health", tags=["health-index"])
 
@@ -24,7 +25,7 @@ async def health_index_check(request: Request) -> dict:
     return {
         "healthy": hs.score >= 40.0,
         "score": round(hs.score, 2),
-        "grade": hs.grade,
+        "grade": hs.grade.letter,
         "summary": HealthScorer.summarize(hs),
     }
 
@@ -36,7 +37,7 @@ async def health_index_score(request: Request) -> dict:
     collector = HealthCollector(db_path=db_path)
     metrics = collector.collect_all()
     hs = HealthScorer.score(metrics)
-    return {"score": round(hs.score, 2), "grade": hs.grade}
+    return {"score": round(hs.score, 2), "grade": hs.grade.letter}
 
 
 @router.get("/report")
@@ -46,18 +47,21 @@ async def health_index_report(request: Request) -> dict:
     collector = HealthCollector(db_path=db_path)
     metrics = collector.collect_all()
     hs = HealthScorer.score(metrics)
+    t = HealthThresholds()
 
     recommendations: list[str] = []
     warnings: list[str] = []
 
     for m in hs.metrics:
-        if m.value < 0.5:
-            warnings.append(f"{m.name}: critical ({m.value:.2f})")
-        elif m.value < 0.8:
-            recommendations.append(f"{m.name}: could improve ({m.value:.2f})")
+        if m.value < t.critical:
+            warnings.append(f"{m.name}: CRITICAL ({m.value:.0%})")
+        elif m.value < t.degraded:
+            warnings.append(f"{m.name}: degraded ({m.value:.0%})")
+        elif m.value < t.improve:
+            recommendations.append(f"{m.name}: could improve ({m.value:.0%})")
 
     if hs.score < 40:
-        warnings.append(f"Overall health DEGRADED ({hs.grade})")
+        warnings.append(f"Overall health DEGRADED ({hs.grade.letter})")
     elif hs.score < 70:
         recommendations.append("Run cortex compact to reduce entropy")
 
@@ -83,11 +87,39 @@ async def health_index_metrics(request: Request) -> dict:
                 "value": round(m.value, 4),
                 "weight": m.weight,
                 "unit": m.unit,
+                "latency_ms": round(getattr(m, "latency_ms", 0.0), 2),
+                "description": getattr(m, "description", ""),
+                "remediation": getattr(m, "remediation", ""),
                 "collected_at": m.collected_at,
             }
             for m in metrics
         ],
     }
+
+
+@router.get("/prometheus")
+async def health_index_prometheus(request: Request) -> str:
+    """Prometheus text exposition format."""
+    from fastapi.responses import PlainTextResponse
+
+    from cortex.extensions.health.prometheus import export_prometheus
+
+    db_path = _get_db_path(request)
+    collector = HealthCollector(db_path=db_path)
+    metrics = collector.collect_all()
+    hs = HealthScorer.score(metrics)
+    content = export_prometheus(hs)
+    return PlainTextResponse(content=content, media_type="text/plain")
+
+
+@router.get("/history")
+async def health_index_history(request: Request, limit: int = 20) -> dict:
+    """Persisted health score history."""
+    from cortex.extensions.health.trend import TrendDetector
+
+    db_path = _get_db_path(request)
+    records = TrendDetector.query_history(db_path, limit=limit)
+    return {"history": records, "count": len(records)}
 
 
 def _get_db_path(request: Request) -> str:

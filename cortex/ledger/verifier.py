@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from cortex.ledger.models import ActionResult, ActionTarget, IntentPayload, LedgerEvent
 from cortex.ledger.store import LedgerStore
@@ -67,7 +67,7 @@ class LedgerVerifier:
             "enrichment_stats": stats,
         }
 
-    def create_checkpoint(self, batch_size: int = 10) -> Optional[int]:
+    def create_checkpoint(self, batch_size: int = 10) -> int | None:
         from cortex.consensus.merkle import MerkleTree
 
         with self.store.tx() as conn:

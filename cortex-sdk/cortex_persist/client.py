@@ -163,9 +163,7 @@ class MemoryClient(BaseClientDomain):
 
     def delete(self, fact_id: str, tenant_id: str = "default") -> AcceptanceResult:
         """Tombstone a fact."""
-        self._request(
-            "DELETE", f"/v1/memory/facts/{fact_id}", params={"tenant_id": tenant_id}
-        )
+        self._request("DELETE", f"/v1/memory/facts/{fact_id}", params={"tenant_id": tenant_id})
         return AcceptanceResult(accepted=True, operation_id=fact_id, warnings=[])
 
 

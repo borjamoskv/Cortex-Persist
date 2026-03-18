@@ -3,11 +3,13 @@ import os
 import sys
 
 # Ensure we can import from local cortex
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
 
 from dotenv import load_dotenv
 
-from cortex.async_client import AsyncCortexClient
+from cortex.api.async_client import AsyncCortexClient
 
 load_dotenv()
 
@@ -17,7 +19,7 @@ COGITO_PATH = "docs/internal/COGITO.md"
 async def seed_cogito():
     api_token = os.environ.get("CORTEX_API_KEY")
     # Force IPv4 to avoid [::1] connection refusal on macOS
-    client = AsyncCortexClient(api_token=api_token, base_url="http://127.0.0.1:8000")
+    client = AsyncCortexClient(api_key=api_token, base_url="http://127.0.0.1:8000")
 
     # Wait for connection
     try:
@@ -63,7 +65,11 @@ async def seed_cogito():
         print(f"  > Seeding section: '{title}' ({fact_type})")
 
         await client.store(
-            project="cortex", content=f"## {title}\n\n{body}", tags=tags, fact_type=fact_type
+            project="cortex",
+            content=f"## {title}\n\n{body}",
+            tags=tags,
+            fact_type=fact_type,
+            source="api:seed_cogito",
         )
         count += 1
 

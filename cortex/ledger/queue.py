@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime, timedelta, timezone
-from typing import Any, Optional
+from typing import Any
 
 from cortex.ledger.store import LedgerStore
 
@@ -27,7 +27,7 @@ class EnrichmentQueue:
             )
         return job_id
 
-    def claim_one(self) -> Optional[dict[str, Any]]:
+    def claim_one(self) -> dict[str, Any] | None:
         """Atomically claim a job for processing.
 
         Uses SQLite's RETURNING clause (3.35.0+) to ensure only one worker

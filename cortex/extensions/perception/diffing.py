@@ -11,7 +11,7 @@ from __future__ import annotations
 import difflib
 import logging
 from pathlib import Path
-from typing import Final, Optional
+from typing import Final
 
 logger = logging.getLogger("cortex.extensions.perception.diffing")
 
@@ -28,7 +28,7 @@ class DiffManager:
         self.workspace_root = Path(workspace_root)
         self._shadow: dict[str, list[str]] = {}  # path -> lines
 
-    def update_file(self, path: str, content: Optional[str] = None) -> Optional[str]:
+    def update_file(self, path: str, content: str | None = None) -> str | None:
         """
         Update the shadow state and return a unified diff if available.
 

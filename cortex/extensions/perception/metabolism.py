@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import logging
 import time
-from typing import Optional
 
 from cortex.extensions.perception.base import PERCEPTION_INTENSITY
 
@@ -31,7 +30,7 @@ class MetabolicObserver:
         self._consecutive_low_exergy = 0
 
     def calculate_intensity(
-        self, event_count: int, avg_diff_size: float, exergy_score: Optional[float] = None
+        self, event_count: int, avg_diff_size: float, exergy_score: float | None = None
     ) -> str:
         """
         Determine the target intensity based on activity and exergy.

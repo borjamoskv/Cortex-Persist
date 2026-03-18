@@ -9,6 +9,7 @@ from cortex.verification.oracle import VerificationOracle
 def oracle():
     return VerificationOracle()
 
+
 @pytest.mark.asyncio
 async def test_verify_plan_step_valid(oracle):
     candidate = {"objective": "Plan the attack", "steps": ["Gather intel"]}

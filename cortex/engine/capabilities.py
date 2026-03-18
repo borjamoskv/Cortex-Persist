@@ -24,7 +24,7 @@ class RuntimeCapabilities:
 class CapabilityRegistry:
     """Registry for detecting and tracking CORTEX capabilities."""
 
-    _instance: Optional[CapabilityRegistry] = None
+    _instance: CapabilityRegistry | None = None
 
     def __init__(self):
         self._caps = self._detect_initial_capabilities()
@@ -82,6 +82,3 @@ class CapabilityRegistry:
     def refresh(self):
         """Force re-detection of capabilities."""
         self._caps = self._detect_initial_capabilities()
-
-
-from typing import Optional

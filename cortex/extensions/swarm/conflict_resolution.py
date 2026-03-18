@@ -11,7 +11,7 @@ import logging
 import time
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger("cortex.extensions.swarm.conflict_resolution")
 
@@ -129,7 +129,7 @@ _W_CONFIDENCE: float = 0.20
 _W_RECENCY: float = 0.10
 
 
-def calculate_vote_weight(agent: AgentProfile, conflict_domain: str) -> Optional[WeightedVote]:
+def calculate_vote_weight(agent: AgentProfile, conflict_domain: str) -> WeightedVote | None:
     """Compute reputation-weighted vote score for an agent."""
     domain_match = 1.0 if agent.specialty.lower() == conflict_domain.lower() else 0.3
 
@@ -202,7 +202,6 @@ class ConflictResolver:
 
     CONSENSUS_THRESHOLD: float = 0.70
     ARCHITECT_CONFIDENCE_GATE: float = 0.80
-    _MAX_HISTORY: int = 1000  # Thermodynamic cap — prevent unbounded RAM growth
 
     __slots__ = ("_history", "_deadlock_breaker", "_conflict_counter")
 
@@ -218,7 +217,7 @@ class ConflictResolver:
         options: list[ConflictOption],
         agents: dict[str, tuple[AgentProfile, str]],  # agent_id → (profile, chosen_option_id)
         conflict_domain: str = "general",
-        architect_judge: Optional[Any] = None,
+        architect_judge: Any | None = None,
     ) -> ConflictResolution:
         """Execute the full escalation ladder."""
         self._conflict_counter += 1
@@ -302,9 +301,7 @@ class ConflictResolver:
             winner_id=winner_id,
             method=ResolutionMethod.TRIANGULATION,
             consensus_level=consensus,
-            reasoning=(
-                f"Factual triangulation: {option_votes[winner_id]}/{total_votes} sources confirm."
-            ),
+            reasoning=f"Factual triangulation: {option_votes[winner_id]}/{total_votes} sources confirm.",
             total_weight_for=float(option_votes[winner_id]),
             total_weight_against=float(total_votes - option_votes[winner_id]),
         )
@@ -371,12 +368,11 @@ class ConflictResolver:
         self,
         options: list[ConflictOption],
         judge: Any,
-    ) -> Optional[ResolutionResult]:
+    ) -> ResolutionResult | None:
         """Invoke LLM-as-judge for complex strategic decisions."""
         try:
             options_desc = "\n".join(
-                f"  [{o.id}] {o.description} "
-                f"(reversibility={o.reversibility:.2f}, cost={o.estimated_cost})"
+                f"  [{o.id}] {o.description} (reversibility={o.reversibility:.2f}, cost={o.estimated_cost})"
                 for o in options
             )
             prompt = (
@@ -441,9 +437,6 @@ class ConflictResolver:
             resolution=result,
         )
         self._history.append(record)
-        # Thermodynamic eviction: evict oldest entries beyond cap
-        if len(self._history) > self._MAX_HISTORY:
-            self._history = self._history[-self._MAX_HISTORY :]
         logger.info(
             "📋 Conflict %s resolved: winner=%s method=%s consensus=%.1f%%",
             conflict_id,

@@ -12,7 +12,7 @@ import uuid
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 from cortex.extensions.swarm.budget import get_budget_manager
 
@@ -33,37 +33,24 @@ class SwarmTask:
     agent_name: str = "UniversalAgent"
     status: TaskStatus = TaskStatus.PENDING
     result: Any = None
-    error: Optional[str] = None
+    error: str | None = None
 
 
 class CapatazOrchestrator:
     """The Capataz (Foreman). Coordinates a polyphony of agents."""
 
-    _MAX_TASKS: int = 500  # Thermodynamic cap: evict oldest done tasks beyond this
-
-    def __init__(
-        self,
-        mission_id: Optional[str] = None,
-        budget_manager: Optional[Any] = None,
-    ):
+    def __init__(self, mission_id: str | None = None):
         self.mission_id = mission_id or f"mission-{uuid.uuid4().hex[:8]}"
         self.tasks: dict[str, SwarmTask] = {}
-        # Dependency Injection (ADR-035)
-        self.budget = budget_manager or get_budget_manager()
-        self._extensions: dict[str, Any] = {}
+        self.budget = get_budget_manager()
         logger.info("Capataz: Orchestrating mission %s", self.mission_id)
-
-    def register_extension(self, name: str, extension: Any) -> None:
-        """Attach a pluggable swarm capability (e.g. Byzantine, Heartbeat)."""
-        self._extensions[name] = extension
-        logger.debug("Capataz: Extension [%s] registered.", name)
 
     async def _execute_completion_with_tracking(
         self,
         url: str,
         headers: dict[str, str],
         payload: dict[str, Any],
-        mission_id: Optional[str] = None,
+        mission_id: str | None = None,
     ) -> str:
         # This method is intended to be implemented later, likely involving
         # an HTTP call to an LLM endpoint and tracking its budget.
@@ -76,9 +63,9 @@ class CapatazOrchestrator:
         agent_name: str,
         coro_func: Callable,
         args: list | tuple = (),
-        kwargs: Optional[dict] = None,
-        lock_resource: Optional[str] = None,
-        lock_manager: Optional[Any] = None,
+        kwargs: dict | None = None,
+        lock_resource: str | None = None,
+        lock_manager: Any | None = None,
         lock_timeout_s: float = 10.0,
         lock_ttl_s: float = 30.0,
     ) -> Any:
@@ -130,20 +117,6 @@ class CapatazOrchestrator:
                 )
                 await lock_manager.release(lock_resource, agent_name)
             self._print_summary()
-            self._evict_stale_tasks()
-
-    def _evict_stale_tasks(self) -> None:
-        """Purge oldest completed/failed tasks when registry exceeds _MAX_TASKS."""
-        if len(self.tasks) <= self._MAX_TASKS:
-            return
-        done_ids = [
-            tid
-            for tid, t in self.tasks.items()
-            if t.status in (TaskStatus.COMPLETED, TaskStatus.FAILED)
-        ]
-        evict_count = len(self.tasks) - self._MAX_TASKS
-        for tid in done_ids[:evict_count]:
-            del self.tasks[tid]
 
     async def run_parallel(self, task_definitions: list[dict[str, Any]]) -> list[Any]:
         """Deploy multiple agents in parallel. Dialectics in parallel... ¡cobarde!"""
@@ -175,32 +148,8 @@ class CapatazOrchestrator:
             )
 
     def get_status(self) -> dict[str, Any]:
-        status = {
+        return {
             "mission_id": self.mission_id,
             "tasks": {tid: t.status.value for tid, t in self.tasks.items()},
             "budget": self.budget.get_mission_budget(self.mission_id),
         }
-        # Polymorphic status reporting from extensions
-        for name, ext in self._extensions.items():
-            if hasattr(ext, "get_status"):
-                status[name] = ext.get_status()
-        return status
-
-    def maintenance_pulse(self) -> dict[str, int]:
-        """Perform a coordinated entropy cleanup across all extensions.
-
-        [Axiom Ω₁₃: Aniquilación Entrópica]
-        Iterates through registered extensions and calls evict_stale_data.
-        Returns a map of extension names to eviction counts.
-        """
-        results = {}
-        for name, ext in self._extensions.items():
-            if hasattr(ext, "evict_stale_data"):
-                try:
-                    results[name] = ext.evict_stale_data()
-                except Exception as e:
-                    logger.error("Capataz: Maintenance failed for [%s]: %s", name, e)
-                    results[name] = -1
-        if any(v > 0 for v in results.values()):
-            logger.info("Capataz: Maintenance pulse complete. Results: %s", results)
-        return results

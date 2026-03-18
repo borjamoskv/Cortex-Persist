@@ -28,7 +28,6 @@ from cortex.api.middleware import (
 )
 from cortex.auth import AuthManager
 from cortex.engine import CortexEngine
-from cortex.extensions.hive.main import router as hive_router
 from cortex.extensions.metering.middleware import MeteringMiddleware
 from cortex.extensions.timing import TimingTracker
 from cortex.routes import (
@@ -68,12 +67,8 @@ from cortex.routes import (
 from cortex.routes import (
     mejoralo as mejoralo_router,
 )
-from cortex.routes import memories as memories_router
 from cortex.routes import (
     missions as missions_router,
-)
-from cortex.routes import (
-    notch_ws as notch_ws_router,
 )
 from cortex.routes import onboarding as onboarding_router
 from cortex.routes import oracle as oracle_router
@@ -346,10 +341,7 @@ app.include_router(gate_router.router)
 app.include_router(context_router.router)
 app.include_router(tips_router.router)
 app.include_router(telemetry_router.router)
-app.include_router(hive_router)
-app.include_router(notch_ws_router.router)
 app.include_router(topology_ws_router.router)
-app.include_router(memories_router.router)
 app.include_router(usage_router.router)
 app.include_router(runtime_router.router)
 app.include_router(onboarding_router.router)

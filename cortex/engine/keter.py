@@ -9,7 +9,7 @@ import logging
 import os
 import typing
 from abc import ABC, abstractmethod
-from typing import Any, Final, Optional, TypedDict
+from typing import Any, Final, TypedDict
 
 from cortex.utils.errors import CortexError
 
@@ -189,7 +189,6 @@ class KeterReservoir:
     """
 
     def __init__(self, db_path: str):
-
         from cortex.database.core import connect
 
         self.db_path = db_path
@@ -204,7 +203,7 @@ class KeterReservoir:
         """)
         self._conn.commit()
 
-    def get(self, mission_id: str) -> Optional[KeterPayload]:
+    def get(self, mission_id: str) -> KeterPayload | None:
         import json
         import sqlite3
 
@@ -255,7 +254,7 @@ class KeterEngine:
         db_path = os.path.join(config_dir, "keter_reservoir.db")
         self._reservoir = KeterReservoir(db_path)
 
-    def _dispatch_skill(self, manifest: Any) -> Optional[SovereignPhase]:
+    def _dispatch_skill(self, manifest: Any) -> SovereignPhase | None:
         slug = getattr(manifest, "slug", "")
         if "evolv" in slug or "intencion" in slug:
             return IntentAlchemist()
@@ -304,7 +303,7 @@ class KeterEngine:
 
     def _check_thermal_bypass(
         self, intent: str, formation: str, thermal_audit: bool
-    ) -> tuple[str, Optional[KeterPayload]]:
+    ) -> tuple[str, KeterPayload | None]:
         import hashlib
 
         mission_id = hashlib.sha256(f"{intent}:{formation}".encode()).hexdigest()
@@ -384,7 +383,7 @@ class KeterEngine:
 
                 # Detection of Static Equilibrium (Redundancy)
                 if (
-                    isinstance(phase, (LegionSwarm, MejoraloCrush))
+                    isinstance(phase, LegionSwarm | MejoraloCrush)
                     and payload.get("final_code") == previous_code
                     and payload.get("score_130_100") == previous_score
                 ):

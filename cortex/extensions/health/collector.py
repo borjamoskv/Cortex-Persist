@@ -10,7 +10,7 @@ import logging
 import os
 import sqlite3
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from cortex.extensions.health.health_protocol import MetricCollectorProtocol
 from cortex.extensions.health.models import HealthThresholds, MetricSnapshot
@@ -426,6 +426,149 @@ class SystemLoadCollector:
             )
 
 
+class OrphanedBrowserCollector:
+    """Identify orphaned ms-playwright-go processes."""
+
+    @property
+    def name(self) -> str:
+        return "browsers"
+
+    @property
+    def weight(self) -> float:
+        return 0.5
+
+    @property
+    def description(self) -> str:
+        return "Orphaned browser process count."
+
+    @property
+    def remediation(self) -> str:
+        return "Kill orphaned browsers via `pkill -f ms-playwright-go`."
+
+    def collect(self, db_path: str) -> MetricSnapshot:
+        import subprocess
+
+        try:
+            result = subprocess.run(
+                ["pgrep", "-f", "ms-playwright-go"],
+                capture_output=True,
+                text=True,
+                timeout=5,
+            )
+            count = len(result.stdout.strip().splitlines()) if result.stdout.strip() else 0
+            val = 1.0 if count == 0 else max(0.2, 1.0 - count * 0.2)
+            return MetricSnapshot(
+                name=self.name,
+                value=val,
+                weight=self.weight,
+                description=f"Orphaned processes: {count}",
+            )
+        except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
+            return MetricSnapshot(name=self.name, value=1.0, weight=self.weight)
+
+
+class SnapshotAgeCollector:
+    """Age of the latest context snapshot."""
+
+    @property
+    def name(self) -> str:
+        return "snapshot"
+
+    @property
+    def weight(self) -> float:
+        return 0.7
+
+    @property
+    def description(self) -> str:
+        return "Age of latest context snapshot."
+
+    @property
+    def remediation(self) -> str:
+        return "Update snapshot via `cortex context snapshot`."
+
+    def collect(self, db_path: str) -> MetricSnapshot:
+        if not db_path or not Path(db_path).exists():
+            return MetricSnapshot(name=self.name, value=0.5, weight=self.weight)
+        try:
+            conn = sqlite3.connect(db_path, timeout=2.0)
+            try:
+                cur = conn.execute("SELECT MAX(created_at) FROM context_snapshots")
+                row = cur.fetchone()
+                if not row or not row[0]:
+                    return MetricSnapshot(
+                        name=self.name,
+                        value=0.3,
+                        weight=self.weight,
+                        description="No snapshots found",
+                    )
+                from datetime import datetime, timezone
+
+                ts = datetime.fromisoformat(row[0].replace("Z", "+00:00"))
+                age_hours = (datetime.now(timezone.utc) - ts).total_seconds() / 3600
+                if age_hours < 1:
+                    val = 1.0
+                elif age_hours < 6:
+                    val = 0.8
+                elif age_hours < 24:
+                    val = 0.5
+                else:
+                    val = 0.3
+                return MetricSnapshot(
+                    name=self.name,
+                    value=val,
+                    weight=self.weight,
+                    description=f"Age: {age_hours:.0f}h ({age_hours * 60:.0f} min)",
+                )
+            finally:
+                conn.close()
+        except (sqlite3.Error, OSError, ValueError):
+            return MetricSnapshot(name=self.name, value=0.5, weight=self.weight)
+
+
+class DiskSpaceCollector:
+    """Free disk space on the volume hosting the DB."""
+
+    @property
+    def name(self) -> str:
+        return "disk"
+
+    @property
+    def weight(self) -> float:
+        return 1.4
+
+    @property
+    def description(self) -> str:
+        return "Free disk space on DB volume."
+
+    @property
+    def remediation(self) -> str:
+        return "Free disk space or move DB to a larger volume."
+
+    def collect(self, db_path: str) -> MetricSnapshot:
+        import shutil
+
+        target = db_path if db_path and Path(db_path).exists() else "/"
+        try:
+            usage = shutil.disk_usage(Path(target).parent)
+            free_gb = usage.free / (1024**3)
+            if free_gb > 50:
+                val = 1.0
+            elif free_gb > 20:
+                val = 0.8
+            elif free_gb > 5:
+                val = 0.5
+            else:
+                val = 0.2
+            return MetricSnapshot(
+                name=self.name,
+                value=val,
+                weight=self.weight,
+                description=f"Free: {free_gb:.1f} GB",
+            )
+        except OSError:
+            return MetricSnapshot(name=self.name, value=1.0, weight=self.weight)
+
+
 # ─── Default Registry ────────────────────────────────────────
 
 _BUILTINS = [
@@ -435,6 +578,9 @@ _BUILTINS = [
     FactCountCollector,
     WalCollector,
     SystemLoadCollector,
+    OrphanedBrowserCollector,
+    SnapshotAgeCollector,
+    DiskSpaceCollector,
 ]
 
 
@@ -459,7 +605,7 @@ class HealthCollector:
     def __init__(
         self,
         db_path: str | Path = "",
-        registry: Optional[CollectorRegistry] = None,
+        registry: CollectorRegistry | None = None,
     ) -> None:
         self._db_path = str(db_path) if db_path else ""
         self._registry = registry or create_default_registry()

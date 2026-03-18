@@ -27,7 +27,7 @@ import logging
 import sqlite3
 import time
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
 from cortex.extensions.swarm.swarm_heartbeat import SWARM_HEARTBEAT
 from cortex.extensions.swarm.worktree_isolation import isolated_worktree
@@ -93,11 +93,7 @@ class JosuProactiveDaemon:
         "_results",
         "_active_tasks",
         "_toolbox_watchdog",
-        "_toolbox_watcher_task",
     )
-
-    # O(1) cap: keep only the last N results to prevent unbounded RAM growth
-    _MAX_RESULTS: int = 500
 
     def __init__(
         self,
@@ -108,7 +104,7 @@ class JosuProactiveDaemon:
         self.workspace_manager = workspace_manager
         self._results: list[FixResult] = []
         self._active_tasks: int = 0
-        self._toolbox_watchdog: Optional[Any] = None
+        self._toolbox_watchdog: Any | None = None
 
     async def proactive_loop(self) -> None:
         """Lifecycle loop. Scans → Filters → Spawns → Sleeps."""
@@ -126,7 +122,7 @@ class JosuProactiveDaemon:
                 name="toolbox-watchdog",
             )
             # prevent GC of the background task
-            self._toolbox_watcher_task = watcher
+            self._toolbox_watcher_task = watcher  # type: ignore[reportGeneralTypeIssues]
             logger.info(
                 "🔭 [JOSU] Toolbox watchdog co-launched.",
             )
@@ -188,9 +184,6 @@ class JosuProactiveDaemon:
 
                 result = await self._execute_in_isolation(target)
                 self._results.append(result)
-                # Thermodynamic cap: evict oldest entries beyond limit
-                if len(self._results) > self._MAX_RESULTS:
-                    self._results = self._results[-self._MAX_RESULTS :]
 
                 if result.success:
                     logger.info(

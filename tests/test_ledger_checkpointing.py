@@ -18,6 +18,7 @@ def test_db():
     if os.path.exists(db_path):
         os.remove(db_path)
 
+
 def test_merkle_checkpoint_creation(test_db):
     store = LedgerStore(test_db)
     queue = EnrichmentQueue(store)
@@ -27,11 +28,15 @@ def test_merkle_checkpoint_creation(test_db):
     # 1. Append 15 events
     t = ActionTarget(app="Test")
     r = ActionResult(ok=True, latency_ms=10)
-    
+
     for i in range(15):
         ev = LedgerEvent.new(
-            tool="cli", actor="test-actor", action=f"action-{i}", 
-            target=t, result=r, metadata={"project": "test-proj"}
+            tool="cli",
+            actor="test-actor",
+            action=f"action-{i}",
+            target=t,
+            result=r,
+            metadata={"project": "test-proj"},
         )
         writer.append(ev)
 
@@ -41,7 +46,9 @@ def test_merkle_checkpoint_creation(test_db):
 
     # 3. Check checkpoints table
     with store.tx() as conn:
-        cursor = conn.execute("SELECT * FROM ledger_checkpoints WHERE checkpoint_id = ?", (root_id_1,))
+        cursor = conn.execute(
+            "SELECT * FROM ledger_checkpoints WHERE checkpoint_id = ?", (root_id_1,)
+        )
         row = cursor.fetchone()
         assert row["event_count"] == 10
         assert row["start_event_id"] is not None
@@ -52,7 +59,9 @@ def test_merkle_checkpoint_creation(test_db):
     assert root_id_2 is not None
 
     with store.tx() as conn:
-        cursor = conn.execute("SELECT * FROM ledger_checkpoints WHERE checkpoint_id = ?", (root_id_2,))
+        cursor = conn.execute(
+            "SELECT * FROM ledger_checkpoints WHERE checkpoint_id = ?", (root_id_2,)
+        )
         row = cursor.fetchone()
         assert row["event_count"] == 5
 

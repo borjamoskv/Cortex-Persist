@@ -21,9 +21,8 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Optional
 
-from cortex.extensions.llm.router import CortexLLMRouter, IntentProfile
+from cortex.extensions.llm.router import IntentProfile
 
 __all__ = ["LLMManager"]
 
@@ -90,33 +89,18 @@ class LLMManager:
         temperature: float = 0.3,
         max_tokens: int = 2048,
         intent: IntentProfile = IntentProfile.GENERAL,
-    ) -> Optional[str]:
-        """Complete via the active provider through CortexLLMRouter.
-
-        G5: Routes through execute_resilient — gains cascade, hedging,
-        pool weighting, Shannon compression, and telemetry.
-        """
+    ) -> str | None:
+        """Complete via the active provider. Returns None if unavailable."""
         p = self._get_provider()
         if p is None:
             return None
-
-        from cortex.extensions.llm._models import CortexPrompt
-
-        cortex_prompt = CortexPrompt(
-            system_instruction=system,
-            working_memory=[{"role": "user", "content": prompt}],
+        return await p.complete(
+            prompt=prompt,
+            system=system,
             temperature=temperature,
             max_tokens=max_tokens,
             intent=intent,
         )
-        router = CortexLLMRouter(primary=p)
-        result = await router.execute_resilient(cortex_prompt)
-        if result.is_ok():
-            return result.value  # type: ignore[union-attr]
-        logger.warning(  # type: ignore[union-attr]
-            "LLMManager.complete: router exhausted cascade: %s", result.error
-        )
-        return None
 
     async def stream(
         self,

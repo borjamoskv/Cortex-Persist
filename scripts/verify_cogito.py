@@ -8,9 +8,11 @@ import httpx
 from dotenv import load_dotenv
 
 # Ensure we can import from local cortex
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
 
-from cortex.async_client import AsyncCortexClient
+from cortex.api.async_client import AsyncCortexClient
 
 load_dotenv()
 
@@ -34,7 +36,7 @@ async def verify_cogito(host: str, port: int, limit: int):
     print(f"{COLOR_DIM}└──────────────────────────────────────────────────────{COLOR_RESET}")
 
     start_time = time.perf_counter()
-    client = AsyncCortexClient(api_token=api_key, base_url=base_url)
+    client = AsyncCortexClient(api_key=api_key, base_url=base_url)
 
     try:
         # Check status

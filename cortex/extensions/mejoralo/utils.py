@@ -2,7 +2,6 @@
 
 import subprocess
 from pathlib import Path
-from typing import Optional, Union
 
 from .constants import STACK_MARKERS
 
@@ -15,7 +14,7 @@ __all__ = [
 ]
 
 
-def detect_stack(path: Union[str, Path]) -> str:
+def detect_stack(path: str | Path) -> str:
     """Detect project stack from marker files."""
     p = Path(path)
     for stack, marker in STACK_MARKERS.items():
@@ -24,7 +23,7 @@ def detect_stack(path: Union[str, Path]) -> str:
     return "unknown"
 
 
-def get_build_cmd(stack: str) -> Optional[list[str]]:
+def get_build_cmd(stack: str) -> list[str] | None:
     cmds = {
         "node": ["npm", "run", "build"],
         "python": ["python", "-m", "py_compile", "."],
@@ -32,7 +31,7 @@ def get_build_cmd(stack: str) -> Optional[list[str]]:
     return cmds.get(stack)
 
 
-def get_lint_cmd(stack: str) -> Optional[list[str]]:
+def get_lint_cmd(stack: str) -> list[str] | None:
     cmds = {
         "node": ["npm", "run", "lint"],
         "python": ["ruff", "check", "."],
@@ -40,7 +39,7 @@ def get_lint_cmd(stack: str) -> Optional[list[str]]:
     return cmds.get(stack)
 
 
-def get_test_cmd(stack: str) -> Optional[list[str]]:
+def get_test_cmd(stack: str) -> list[str] | None:
     cmds = {
         "node": ["npm", "test"],
         "python": ["pytest"],
@@ -48,7 +47,7 @@ def get_test_cmd(stack: str) -> Optional[list[str]]:
     return cmds.get(stack)
 
 
-def run_quiet(cmd: list[str], cwd: Union[str, Path]) -> bool:
+def run_quiet(cmd: list[str], cwd: str | Path) -> bool:
     """Run a command suppressed, return True if exit code 0."""
     try:
         subprocess.check_call(cmd, cwd=cwd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)

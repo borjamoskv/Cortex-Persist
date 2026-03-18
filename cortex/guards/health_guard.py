@@ -10,22 +10,24 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import ClassVar, Optional
+from typing import ClassVar
 
+HEALTH_AVAILABLE = True
 try:
     from cortex.extensions.health.health_mixin import HealthMixin  # type: ignore
     from cortex.extensions.health.models import Grade, HealthSLA, HealthSLAViolation  # type: ignore
 except ImportError:
+    HEALTH_AVAILABLE = False
 
     class Grade:  # type: ignore
         DEGRADED = "DEGRADED"
 
     class HealthSLA:  # type: ignore
         def __init__(self, target_grade: str = "DEGRADED") -> None:
-            self.target_grade = target_grade
-
-        def evaluate(self, score: float) -> None:
             pass
+
+        def evaluate(self, score: float) -> bool:
+            return True
 
     class HealthSLAViolation(Exception):  # type: ignore
         pass
@@ -47,22 +49,25 @@ class HealthGuard(HealthMixin):
     def __init__(self, db_path: str | Path) -> None:
         self._db_path = str(db_path)
 
-    async def check_write_safety(self, custom_sla: Optional[HealthSLA] = None) -> None:
-        """Verify the database is healthy enough to receive writes.
+    async def check_write_safety(self, sla: HealthSLA | None = None) -> bool:
+        """Check if it's safe to write based on system health.
 
         Args:
-            custom_sla: Override the default SLA requirement.
+            sla: Optional SLA to check against. Defaults to DEFAULT_SLA.
+
+        Returns:
+            True if health is acceptable.
 
         Raises:
-            HealthSLAViolation: If health is too poor to proceed safely.
+            HealthSLAViolation: If health is below target.
         """
-        sla = custom_sla or self.DEFAULT_SLA
+        if not HEALTH_AVAILABLE:
+            return True
 
-        # We only want the score, so HealthMixin.health_score() is perfect
+        target_sla = sla or self.DEFAULT_SLA
         score = await self.health_score()
+        if not score:
+            return True
 
-        try:
-            sla.evaluate(score)
-        except HealthSLAViolation as e:
-            logger.error("HealthGuard blocked write operation: %s", e)
-            raise
+        target_sla.evaluate(score)
+        return True

@@ -8,7 +8,6 @@ Refactored: each seal is an independent checker function.
 import logging
 import os
 from pathlib import Path
-from typing import Union
 
 from cortex.extensions.mejoralo.constants import SCAN_EXTENSIONS, SKIP_DIRS
 from cortex.extensions.mejoralo.models import ShipResult, ShipSeal
@@ -84,7 +83,7 @@ def _seal_visual(p: Path) -> ShipSeal:
     return ShipSeal(name="Visual Proof", passed=visual_ok, detail=detail)
 
 
-def _seal_performance(project: str, path: Union[str, Path]) -> ShipSeal:
+def _seal_performance(project: str, path: str | Path) -> ShipSeal:
     """Seal 5: Performance — score must be >= 70 as quality proxy."""
     result = scan(project, path)
     passed = result.score >= 70
@@ -125,7 +124,7 @@ def _seal_a11y(p: Path, stack: str) -> ShipSeal:
     )
 
 
-def _seal_psi(project: str, path: Union[str, Path]) -> ShipSeal:
+def _seal_psi(project: str, path: str | Path) -> ShipSeal:
     """Seal 7: No Psi Debt."""
     scan_result = scan(project, path)
     psi_dim = next((d for d in scan_result.dimensions if d.name == "Psi"), None)
@@ -140,7 +139,7 @@ def _seal_psi(project: str, path: Union[str, Path]) -> ShipSeal:
 # ─── Main Entry Point ────────────────────────────────────────────────
 
 
-def check_ship_gate(project: str, path: Union[str, Path]) -> ShipResult:
+def check_ship_gate(project: str, path: str | Path) -> ShipResult:
     """Validate the 7 Seals for production readiness."""
     p = Path(path).expanduser().resolve()
     stack = detect_stack(p)

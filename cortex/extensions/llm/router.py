@@ -6,7 +6,7 @@ import logging
 import time
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from cortex.extensions.llm._cascade import CascadeManager, classify_tier
 from cortex.extensions.llm._hedging import HedgedRequestStrategy
@@ -18,7 +18,6 @@ from cortex.extensions.llm._models import (
     HedgedResult,
     IntentProfile,
 )
-from cortex.extensions.llm._pool import WeightedProviderPool
 from cortex.extensions.llm._telemetry import CascadeTelemetry
 from cortex.utils.result import Err, Ok, Result
 
@@ -45,20 +44,18 @@ class CortexLLMRouter:
     def __init__(
         self,
         primary: BaseProvider,
-        fallbacks: Optional[Sequence[BaseProvider]] = None,
+        fallbacks: Sequence[BaseProvider] | None = None,
         *,
         negative_ttl: float = 300.0,
         positive_ttl: float = 600.0,
-        hedging_providers: Optional[Sequence[BaseProvider]] = None,
-        db_path: Optional[str | Path] = None,
+        hedging_providers: Sequence[BaseProvider] | None = None,
+        db_path: str | Path | None = None,
     ) -> None:
         self._primary = primary
         self._fallbacks = list(fallbacks or [])
         self._hedging_providers = list(hedging_providers or [])
         self._cascade = CascadeManager(negative_ttl, positive_ttl)
         self._telemetry = CascadeTelemetry(db_path=str(db_path) if db_path else None)
-        # G1: Anycast-style weighted pool — learns fastest providers via EWMA
-        self._pool = WeightedProviderPool()
         # Thermal Heat-Sink: coalesce identical inflight prompts (Ω₂)
         self._inflight: dict[str, asyncio.Future[Result[str, str]]] = {}
 
@@ -90,40 +87,28 @@ class CortexLLMRouter:
         self,
         intent: IntentProfile,
     ) -> list[BaseProvider]:
-        """Ordena fallbacks: pool weight (Anycast) → intent affinity → A-record → cost → tier.
+        """Ordena fallbacks: intent affinity → A-record → cost → tier.
 
-        G1: WeightedProviderPool ranks by EWMA latency * success_rate.
-        G2: NXDOMAIN expiry logged for observability — re-admission is transparent.
+        Within each tier, promotes known-good (A-record) by latency,
+        then sorts unknowns by cost_class (cheaper first), then by
+        tier (frontier > high > local) for same-cost tiebreaking.
         """
         typed_matches: list[BaseProvider] = []
         safety_net: list[BaseProvider] = []
 
         for p in self._fallbacks:
-            # G2: Log when an NXDOMAIN-expired provider re-enters the cascade
-            if not self._cascade.is_nxdomain_cached(p.provider_name):
-                nx_at = self._cascade._nxdomain_cache.get(p.provider_name)
-                if nx_at is not None:
-                    logger.debug(
-                        "NXDOMAIN expired for %s — re-admitting to cascade",
-                        p.provider_name,
-                    )
-
             if classify_tier(p, intent) == CascadeTier.TYPED_MATCH:
                 typed_matches.append(p)
             else:
                 safety_net.append(p)
 
-        # G1: Apply Anycast pool weighting within each affinity group
-        weighted_typed = self._pool.rank(typed_matches)
-        weighted_safety = self._pool.rank(safety_net)
-
         # Apply A-record promotion + cost/tier tiebreaking
         promoted_typed = self._promote_by_latency_then_cost(
-            weighted_typed,
+            typed_matches,
             intent,
         )
         promoted_safety = self._promote_by_latency_then_cost(
-            weighted_safety,
+            safety_net,
             intent,
         )
 
@@ -159,7 +144,7 @@ class CortexLLMRouter:
         )
         return known + unknown
 
-    async def execute_hedged(self, prompt: CortexPrompt) -> Optional[Result[str, str]]:
+    async def execute_hedged(self, prompt: CortexPrompt) -> Result[str, str] | None:
         """Attempt hedged (parallel) execution if peers are available."""
         if not self._hedging_providers:
             return None
@@ -304,7 +289,6 @@ class CortexLLMRouter:
         latency = (time.time() - start) * 1000
 
         if res_primary.is_ok():
-            self._pool.record_success(self._primary.provider_name, latency)  # G1
             self._telemetry.emit(
                 CascadeEvent(
                     intent=prompt.intent,
@@ -317,11 +301,7 @@ class CortexLLMRouter:
             )
             return res_primary
 
-        # Primary failed: record failure in pool (G1)
-        latency = (time.time() - start) * 1000
-        self._pool.record_failure(self._primary.provider_name, latency)
-
-        # Phase 2: Fallback cascade (G1: pool-ranked order)
+        # Phase 2: Fallback cascade
         fallbacks = self._ordered_fallbacks(prompt.intent)
         errors = [f"Primary ({self._primary.provider_name}): {res_primary.error}"]  # type: ignore[union-attr]
 
@@ -337,7 +317,6 @@ class CortexLLMRouter:
             if res_fb.is_ok():
                 tier = classify_tier(provider, prompt.intent)
                 self._cascade.set_a_record(provider.provider_name, fb_latency)
-                self._pool.record_success(provider.provider_name, fb_latency)  # G1
                 self._telemetry.emit(
                     CascadeEvent(
                         intent=prompt.intent,
@@ -379,7 +358,7 @@ class CortexLLMRouter:
         """Aggregated cascade metrics."""
         return self._telemetry.stats()
 
-    def select_model_for_intent(self, intent: str) -> Optional[str]:
+    def select_model_for_intent(self, intent: str) -> str | None:
         """Resolve the optimal model for the primary provider's intent.
 
         Uses the preset routing functions to find the best model

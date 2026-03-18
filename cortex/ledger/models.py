@@ -4,7 +4,7 @@ import json
 import uuid
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Literal, Optional
+from typing import Any, Literal
 
 SemanticStatus = Literal["pending", "processing", "indexed", "failed"]
 
@@ -16,9 +16,9 @@ def utc_now_iso() -> str:
 @dataclass(frozen=True)
 class IntentPayload:
     goal: str
-    task_id: Optional[str] = None
-    macro_objective: Optional[str] = None
-    rationale: Optional[str] = None
+    task_id: str | None = None
+    macro_objective: str | None = None
+    rationale: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -26,12 +26,12 @@ class IntentPayload:
 
 @dataclass(frozen=True)
 class ActionTarget:
-    app: Optional[str] = None
-    role: Optional[str] = None
-    title: Optional[str] = None
-    identifier: Optional[str] = None
-    path: Optional[str] = None
-    bounds: Optional[dict[str, float]] = None
+    app: str | None = None
+    role: str | None = None
+    title: str | None = None
+    identifier: str | None = None
+    path: str | None = None
+    bounds: dict[str, float] | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -41,9 +41,9 @@ class ActionTarget:
 class ActionResult:
     ok: bool
     latency_ms: int
-    error: Optional[str] = None
-    verified: Optional[bool] = None
-    verification_error: Optional[str] = None
+    error: str | None = None
+    verified: bool | None = None
+    verification_error: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -58,11 +58,11 @@ class LedgerEvent:
     action: str
     target: ActionTarget
     result: ActionResult
-    intent: Optional[IntentPayload] = None
-    correlation_id: Optional[str] = None
-    trace_id: Optional[str] = None
-    prev_hash: Optional[str] = None
-    hash: Optional[str] = None
+    intent: IntentPayload | None = None
+    correlation_id: str | None = None
+    trace_id: str | None = None
+    prev_hash: str | None = None
+    hash: str | None = None
     semantic_status: SemanticStatus = "pending"
     metadata: dict[str, Any] = field(default_factory=dict)
 
@@ -93,10 +93,10 @@ class LedgerEvent:
         action: str,
         target: ActionTarget,
         result: ActionResult,
-        intent: Optional[IntentPayload] = None,
-        correlation_id: Optional[str] = None,
-        trace_id: Optional[str] = None,
-        metadata: Optional[dict[str, Any]] = None,
+        intent: IntentPayload | None = None,
+        correlation_id: str | None = None,
+        trace_id: str | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> LedgerEvent:
         return LedgerEvent(
             event_id=str(uuid.uuid4()),

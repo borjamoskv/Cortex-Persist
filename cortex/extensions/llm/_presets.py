@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import re
 from pathlib import Path
-from typing import Any, Final, Optional
+from typing import Any, Final
 
 logger = logging.getLogger("cortex.extensions.llm.presets")
 
@@ -40,6 +41,58 @@ _VALID_COST_CLASSES: Final[frozenset[str]] = frozenset(
         "variable",
     }
 )
+
+
+def provider_inventory(active_provider: str | None = None) -> list[dict[str, Any]]:
+    """Return a list of all registered LLM providers and their operational status.
+
+    Axiom Ω₃: Deterministic Inventory with Readiness Checks.
+    """
+    presets = load_presets()
+    inventory = []
+
+    for name, config in presets.items():
+        # Check API key readiness
+        env_key = config.get("env_key") or config.get("api_key_env")
+        api_key_present = bool(os.environ.get(env_key)) if env_key else True
+        api_key_required = bool(env_key)
+
+        # Determine status and reason
+        status = "ready"
+        ready = True
+        reason = ""
+
+        # Determine status, reason, and locality
+        status = "ready"
+        ready = True
+        reason = ""
+        is_local = name in ["ollama", "lmstudio", "llamacpp", "vllm", "jan"]
+
+        if api_key_required and not api_key_present:
+            # Local providers don't need keys
+            if not is_local:
+                status = "missing_api_key"
+                ready = False
+                reason = f"Missing env var: {env_key}"
+
+        inventory.append(
+            {
+                "name": name,
+                "provider": name,
+                "tier": config.get("tier", "high"),
+                "is_local": is_local,
+                "cost_class": config.get("cost_class", "medium"),
+                "context_window": config.get("context_window", 0),
+                "default_model": config.get("default_model", ""),
+                "active": name == active_provider,
+                "ready": ready,
+                "status": status,
+                "reason": reason,
+                "api_key_required": api_key_required,
+                "api_key_present": api_key_present,
+            }
+        )
+    return inventory
 
 
 def _validate_model_policy(
@@ -126,7 +179,7 @@ def load_presets() -> dict[str, dict[str, Any]]:
         return {}
 
 
-def get_preset_info(provider: str) -> Optional[dict[str, Any]]:
+def get_preset_info(provider: str) -> dict[str, Any] | None:
     """Return preset config for a provider, or None if not found."""
     return load_presets().get(provider)
 
@@ -156,7 +209,7 @@ _TIER_RANK: dict[str, int] = {
 }
 
 
-def resolve_model(provider: str, intent: str) -> Optional[str]:
+def resolve_model(provider: str, intent: str) -> str | None:
     """Resolve the best model for a provider and intent.
 
     Returns the intent-specific model if mapped, otherwise the default model.
@@ -174,7 +227,7 @@ def providers_for_intent(
     intent: str,
     *,
     min_tier: str = "high",
-    max_cost: Optional[str] = None,
+    max_cost: str | None = None,
     sort_by: str = "cost",
 ) -> list[tuple[str, str]]:
     """Return providers that support an intent, sorted by cost or tier.
@@ -237,12 +290,9 @@ def routing_matrix() -> dict[str, dict[str, str]]:
     """Return the full intent→provider→model routing matrix.
 
     Useful for debugging and visualization.
-    Intents are derived from IntentProfile enum — always in sync.
     """
-    from cortex.extensions.llm._models import IntentProfile
-
     presets = load_presets()
-    intents = {i.value for i in IntentProfile}  # G3: enum-driven, not hardcoded
+    intents = {"code", "reasoning", "creative", "architect", "general"}
     matrix: dict[str, dict[str, str]] = {}
 
     for name, config in presets.items():

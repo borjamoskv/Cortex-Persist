@@ -11,7 +11,6 @@ import sqlite3
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 # from cortex.database.core import connect as db_connect
 
@@ -94,7 +93,7 @@ class SwarmBudgetManager:
         except sqlite3.Error as e:
             logger.error("Budget: Failed to report usage: %s", e)
 
-    def get_mission_budget(self, mission_id: str) -> Optional[MissionBudget]:
+    def get_mission_budget(self, mission_id: str) -> MissionBudget | None:
         """Retrieve current budget state for a mission."""
         try:
             with sqlite3.connect(self.db_path) as conn:
@@ -121,25 +120,6 @@ class SwarmBudgetManager:
         except sqlite3.Error as e:
             logger.error("Budget: Failed to list: %s", e)
             return []
-
-    def evict_stale_data(self, ttl_days: float = 30.0) -> int:
-        """Purge missions not updated within ttl_days. Returns count evicted.
-        [SwarmExtension Protocol Compliance]
-        """
-        return self.evict_stale_missions(ttl_days)
-
-    def evict_stale_missions(self, ttl_days: float = 30.0) -> int:
-        cutoff = time.time() - ttl_days * 86400
-        try:
-            with sqlite3.connect(self.db_path, timeout=5) as conn:
-                cur = conn.execute("DELETE FROM mission_budget WHERE last_update < ?", (cutoff,))
-                evicted = cur.rowcount
-            if evicted:
-                logger.info("Budget: Evicted %d stale missions (ttl=%.0fd).", evicted, ttl_days)
-            return evicted
-        except sqlite3.Error as e:
-            logger.error("Budget: Failed to evict stale missions: %s", e)
-            return 0
 
 
 # Single instance for the process

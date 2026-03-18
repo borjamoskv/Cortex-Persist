@@ -144,8 +144,7 @@ class TestInvalidPolicy:
     def test_missing_states(self, tmp_path):
         _write_valid_skill(tmp_path)
         (tmp_path / "policy.yaml").write_text(
-            "abort_reasons:\n  X: x\nrequired_artifacts:\n"
-            "  - path: a\n  - path: b\n  - path: c\n"
+            "abort_reasons:\n  X: x\nrequired_artifacts:\n  - path: a\n  - path: b\n  - path: c\n"
         )
         with pytest.raises(VerificationError, match="Missing keys"):
             verify_tripartite(tmp_path)

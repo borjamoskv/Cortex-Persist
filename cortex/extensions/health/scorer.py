@@ -5,8 +5,6 @@ Uses sealed Grade enum. Supports configurable weight overrides.
 
 from __future__ import annotations
 
-from typing import Optional
-
 from cortex.extensions.health.models import Grade, HealthScore, MetricSnapshot
 
 # Default metric weights (override via HealthScorer.score(weights=...))
@@ -35,7 +33,7 @@ class HealthScorer:
     @staticmethod
     def score(
         metrics: list[MetricSnapshot],
-        weights: Optional[dict[str, float]] = None,
+        weights: dict[str, float] | None = None,
     ) -> HealthScore:
         """Compute the aggregate health score."""
         if not metrics:
@@ -71,9 +69,10 @@ class HealthScorer:
         # Calculate Sub-indices
         sub_indices: dict[str, float] = {}
         mapping = {
-            "storage": {"db", "facts"},
+            "storage": {"db", "facts", "disk"},
             "integrity": {"ledger", "entropy"},
-            "performance": {"wal"},
+            "performance": {"wal", "sysload"},
+            "environment": {"browsers", "snapshot"},
         }
         for name, metrics_in_index in mapping.items():
             idx_metrics = [(m, w) for m, w in resolved if m.name in metrics_in_index]

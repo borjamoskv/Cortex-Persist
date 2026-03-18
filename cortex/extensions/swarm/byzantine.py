@@ -5,7 +5,7 @@ Byzantine Fault Tolerance / Zero-Trust Mathematics: Axiom 4.
 
 import hashlib
 import json
-from typing import Any, Optional, TypeVar
+from typing import Any, TypeVar
 
 T = TypeVar("T")
 
@@ -30,20 +30,6 @@ class ByzantineConsensus:
     def register_node(self, node_id: str, initial_reputation: float = 1.0) -> None:
         self.nodes[node_id] = ByzantineNode(node_id, initial_reputation)
 
-    def evict_dead_nodes(self, min_reputation: float = 0.05) -> int:
-        """Purge nodes whose reputation has been slashed below min_reputation."""
-        dead = [nid for nid, n in self.nodes.items() if n.reputation < min_reputation]
-        for nid in dead:
-            del self.nodes[nid]
-        return len(dead)
-
-    def evict_stale_data(self) -> int:
-        """Standard protocol eviction."""
-        return self.evict_dead_nodes()
-
-    def get_status(self) -> dict[str, Any]:
-        return {"nodes_count": len(self.nodes)}
-
     async def _get_proposal_hash(self, proposal: Any) -> str:
         """Deterministic hashing for any generic type via background thread."""
         import asyncio
@@ -58,7 +44,7 @@ class ByzantineConsensus:
 
         return await asyncio.to_thread(_sync_hash)
 
-    async def execute_consensus(self, proposals: dict[str, T]) -> Optional[T]:
+    async def execute_consensus(self, proposals: dict[str, T]) -> T | None:
         """
         Takes proposals from multiple nodes. Validates them via reputation-weighted
         thresholding. Returns the absolute truth or None if BFT consensus fails.

@@ -23,6 +23,7 @@ import threading
 import time
 from dataclasses import dataclass, field
 from enum import Enum
+from typing import Any
 
 logger = logging.getLogger("cortex.extensions.swarm.heartbeat")
 
@@ -65,11 +66,17 @@ class SwarmHeartbeat:
     immune to wall-clock drift (NTP corrections, DST changes, etc.).
     """
 
-    def __init__(self, suspect_threshold: int = 2, dead_threshold: int = 4) -> None:
+    def __init__(
+        self,
+        suspect_threshold: int = 2,
+        dead_threshold: int = 4,
+        signal_bus: Any = None,
+    ) -> None:
         self._lock = threading.Lock()
         self._registry: dict[str, NodePulse] = {}
-        self._suspect_threshold = suspect_threshold  # Miss cycles before SUSPECT
-        self._dead_threshold = dead_threshold  # Miss cycles before DEAD
+        self._suspect_threshold = suspect_threshold
+        self._dead_threshold = dead_threshold
+        self._signal_bus = signal_bus
 
     def pulse(self, node_id: str, thread_name: str = "") -> None:
         """Record proof-of-life for a node. O(1)."""
@@ -106,22 +113,43 @@ class SwarmHeartbeat:
         """
         now = time.monotonic()
         alerts: list[NodePulse] = []
-        evict_ids: list[str] = []
 
         with self._lock:
-            for node_id, node in self._registry.items():
+            for node in self._registry.values():
                 elapsed = now - node.last_pulse
 
                 if elapsed <= timeout_seconds:
                     continue
 
-                # Increment miss_count for all stale nodes — including DEAD ones
-                # so the eviction threshold can be reached
                 node.miss_count += 1
 
-                if node.status == NodeStatus.ALIVE and node.miss_count >= self._suspect_threshold:
+                if node.miss_count >= self._dead_threshold and node.status != NodeStatus.DEAD:
+                    old_status = node.status
+                    node.status = NodeStatus.DEAD
+                    alerts.append(node)
+                    self._emit_health_signal(
+                        "node:dead",
+                        node,
+                        elapsed,
+                        old_status,
+                    )
+                    logger.error(
+                        "💀 NODE DEAD: %s [%s] — no pulse for %.0fs (%d misses, was %s)",
+                        node.node_id,
+                        node.thread_name,
+                        elapsed,
+                        node.miss_count,
+                        old_status,
+                    )
+                elif node.miss_count >= self._suspect_threshold and node.status == NodeStatus.ALIVE:
                     node.status = NodeStatus.SUSPECT
                     alerts.append(node)
+                    self._emit_health_signal(
+                        "node:suspect",
+                        node,
+                        elapsed,
+                        NodeStatus.ALIVE,
+                    )
                     logger.warning(
                         "⚠️  NODE SUSPECT: %s [%s] — no pulse for %.0fs (%d misses)",
                         node.node_id,
@@ -129,29 +157,38 @@ class SwarmHeartbeat:
                         elapsed,
                         node.miss_count,
                     )
-                elif node.status == NodeStatus.SUSPECT and node.miss_count >= self._dead_threshold:
-                    node.status = NodeStatus.DEAD
-                    alerts.append(node)
-                    logger.error(
-                        "💀 NODE DEAD: %s [%s] — no pulse for %.0fs (%d misses)",
-                        node.node_id,
-                        node.thread_name,
-                        elapsed,
-                        node.miss_count,
-                    )
-                elif node.status == NodeStatus.DEAD and node.miss_count >= self._dead_threshold + 2:
-                    # Thermodynamic eviction: ghost node is beyond recovery window
-                    evict_ids.append(node_id)
-                    logger.info(
-                        "🧹 [HEARTBEAT] Evicting ghost node %s after %d miss cycles.",
-                        node_id,
-                        node.miss_count,
-                    )
-
-            for node_id in evict_ids:
-                del self._registry[node_id]
 
         return alerts
+
+    def _emit_health_signal(
+        self,
+        event_type: str,
+        node: NodePulse,
+        elapsed: float,
+        old_status: NodeStatus,
+    ) -> None:
+        """Emit health signal into SignalBus. Fire-and-forget."""
+        if self._signal_bus is None:
+            return
+        try:
+            self._signal_bus.emit(
+                event_type,
+                {
+                    "node_id": node.node_id,
+                    "thread_name": node.thread_name,
+                    "elapsed_s": round(elapsed, 1),
+                    "miss_count": node.miss_count,
+                    "old_status": old_status.value,
+                    "new_status": node.status.value,
+                },
+                source="swarm_heartbeat",
+                project="CORTEX_SWARM",
+            )
+        except Exception:  # noqa: BLE001
+            logger.debug(
+                "Health signal emission failed for %s",
+                event_type,
+            )
 
     def get_vitals(self) -> dict[str, NodePulse]:
         """Snapshot of the full registry. Returns a copy."""

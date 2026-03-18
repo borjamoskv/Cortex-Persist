@@ -21,7 +21,7 @@ import logging
 import sqlite3
 import time
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from cortex.extensions.swarm.knowledge_radar import discover
 from cortex.extensions.swarm.nightshift_pipeline import NightShiftPipeline
@@ -40,11 +40,11 @@ class NightShiftCrystalDaemon:
 
     def __init__(
         self,
-        cortex_db: Optional[Any] = None,
+        cortex_db: Any | None = None,
         cooldown_hours: float = 6.0,
         max_crystals: int = 5,
-        queue_path: Optional[Path | str] = None,
-        encoder: Optional[Any] = None,
+        queue_path: Path | str | None = None,
+        encoder: Any | None = None,
         consolidation_dry_run: bool = False,
     ) -> None:
         self._db = cortex_db
@@ -56,8 +56,6 @@ class NightShiftCrystalDaemon:
         self._stop_event = asyncio.Event()
         self._cycle_history: list[dict[str, Any]] = []
         self._pipeline = NightShiftPipeline()
-
-    _MAX_HISTORY: int = 200  # Thermodynamic cap: 200 cycles × 6h = 50 days retained
 
     # ── Single Cycle ──────────────────────────────────────────────────
 
@@ -171,8 +169,6 @@ class NightShiftCrystalDaemon:
             report["consolidation"] = consolidation_report
 
         self._cycle_history.append(report)
-        if len(self._cycle_history) > self._MAX_HISTORY:
-            self._cycle_history = self._cycle_history[-self._MAX_HISTORY :]
 
         # 4. Persist cycle report to CORTEX (fire and forget)
         await self._persist_cycle_report(report)
@@ -262,7 +258,7 @@ class NightShiftCrystalDaemon:
 
     # ── Consolidation Phase ────────────────────────────────────────────
 
-    async def _run_consolidation(self, cycle_id: str) -> Optional[dict[str, Any]]:
+    async def _run_consolidation(self, cycle_id: str) -> dict[str, Any] | None:
         """Execute Phase 2: Crystal consolidation (REM sleep)."""
         if self._db is None:
             return None
@@ -302,7 +298,7 @@ class NightShiftCrystalDaemon:
         return list(self._cycle_history)
 
     @property
-    def last_cycle(self) -> Optional[dict[str, Any]]:
+    def last_cycle(self) -> dict[str, Any] | None:
         """Most recent cycle report."""
         return self._cycle_history[-1] if self._cycle_history else None
 

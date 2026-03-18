@@ -230,14 +230,14 @@ class TestCollectorRegistry:
     def test_collect_all(self):
         reg = create_default_registry()
         results = reg.collect_all("/tmp/nonexistent.db")
-        assert len(results) == 6
+        assert len(results) == 9
         for r in results:
             assert isinstance(r, MetricSnapshot)
             assert 0.0 <= r.value <= 1.0
 
     def test_default_registry_has_5_collectors(self):
         reg = create_default_registry()
-        assert len(reg) == 6
+        assert len(reg) == 9
 
     def test_registry_truthiness(self):
         reg = CollectorRegistry()
@@ -248,7 +248,17 @@ class TestCollectorRegistry:
     def test_list_collectors(self):
         reg = create_default_registry()
         names = reg.list_collectors()
-        expected = {"db", "ledger", "entropy", "facts", "wal", "sysload"}
+        expected = {
+            "db",
+            "ledger",
+            "entropy",
+            "facts",
+            "wal",
+            "sysload",
+            "browsers",
+            "snapshot",
+            "disk",
+        }
         assert set(names) == expected
 
 
@@ -274,11 +284,11 @@ class TestHealthCollectorFacade:
     def test_backward_compatible(self):
         hc = HealthCollector(db_path="/tmp/nonexistent.db")
         metrics = hc.collect_all()
-        assert len(metrics) == 6
+        assert len(metrics) == 9
 
     def test_registry_accessible(self):
         hc = HealthCollector(db_path="/tmp/nonexistent.db")
-        assert len(hc.registry) == 6
+        assert len(hc.registry) == 9
 
 
 # ═══════════════════════════════════════════════════════════════
