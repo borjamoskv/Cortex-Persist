@@ -312,7 +312,7 @@
     "intent_model_map": {
       "code":      "qwen2.5-coder:32b",
       "architect": "qwen2.5-coder:32b",
-      "reasoning": "deepseek-r1:32b",
+      "reasoning": "qwen2.5-coder:32b",
       "creative":  "llama3.3:latest",
       "general":   "qwen2.5-coder:7b"
     }

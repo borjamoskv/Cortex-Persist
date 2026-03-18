@@ -1,6 +1,6 @@
 ## Architectural Audit Complete
 
-I've conducted an exhaustive audit of the CORTEX codebase (~42,613 LOC across 339 Python files). The detailed report has been saved to `./ARCHITECTURAL_AUDIT.md`.
+I've conducted an exhaustive audit of the CORTEX codebase (~42,613 LOC across 339 Python files). The detailed report has been saved to `/Users/borjafernandezangulo/cortex/ARCHITECTURAL_AUDIT.md`.
 
 ### Summary by Severity
 

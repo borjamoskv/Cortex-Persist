@@ -400,7 +400,6 @@ async def check_gate_12_determinism() -> GateResult:
 
     Ensures critical reasoning/architect files enforce temperature=0.
     """
-    printer.seal(12, "AX-016 Determinism", "Temperature Determinism")
     critical_files = [
         ROOT_DIR / "cortex/llm/router.py",
         ROOT_DIR / "cortex/llm/provider.py",
@@ -440,7 +439,6 @@ async def check_gate_13_latency() -> GateResult:
 
     Fails if average local model latency exceeds 200ms in telemetry.
     """
-    printer.seal(13, "AX-020 Latency", "A-Record Latency Drift")
     try:
         from cortex.extensions.llm._telemetry import CascadeTelemetry
     except ImportError:
@@ -472,7 +470,6 @@ async def check_gate_14_aesthetic() -> GateResult:
 
     Ensures no "mvp" or "placeholder" strings exist in documentation or core UI.
     """
-    printer.seal(14, "AX-021 Aesthetics", "Sovereign Aesthetic Gate")
     forbidden = ["FIXME", "TODO: placeholder", "MVP style"]
     # Check README and a few core docs
     targets = [ROOT_DIR / "README.md", ROOT_DIR / "AGENTS.md"]
@@ -539,15 +536,19 @@ async def main() -> int:
     }
 
     async def _timed_gate(
-        gate_num: int, fn: Callable[[], Coroutine[Any, Any, GateResult]],
+        gate_num: int,
+        fn: Callable[[], Coroutine[Any, Any, GateResult]],
     ) -> GateResult:
         """Execute a gate with SKIP_GATES check and timing."""
         if gate_num in _skip:
             printer.seal(gate_num, "SKIPPED", f"Gate {gate_num} — skipped via SKIP_GATES")
             printer.warn(f"Gate {gate_num} skipped (SKIP_GATES env). Enforced in CI.")
             return True, "skipped"
-        with printer.timed(gate_num):
-            return await fn()
+        start = time.perf_counter()
+        result = await fn()
+        elapsed = (time.perf_counter() - start) * 1000
+        print(f"   ⏱  {elapsed:.0f}ms")
+        return result
 
     # Collect results
     gate_results: dict[int, GateResult] = {}
@@ -571,8 +572,9 @@ async def main() -> int:
             gate_results[gn] = result
 
     # Gate 10 runs independently (never fails the run)
-    with printer.timed(10):
-        await check_gate_10_prompt_size()
+    start_10 = time.perf_counter()
+    await check_gate_10_prompt_size()
+    print(f"   ⏱  {(time.perf_counter() - start_10) * 1000:.0f}ms")
 
     # ── Summary ──
     total_elapsed = (time.perf_counter() - total_start) * 1000
@@ -583,8 +585,10 @@ async def main() -> int:
     skipped = [gn for gn, (_, k) in gate_results.items() if k == "skipped"]
     failed = [gn for gn, (p, k) in gate_results.items() if not p]
 
-    print(f"   🟢 VERIFIED: {len(verified)}  ⬜ STUB: {len(stubs)}  "
-          f"🟡 SKIPPED: {len(skipped)}  🔴 FAILED: {len(failed)}")
+    print(
+        f"   🟢 VERIFIED: {len(verified)}  ⬜ STUB: {len(stubs)}  "
+        f"🟡 SKIPPED: {len(skipped)}  🔴 FAILED: {len(failed)}"
+    )
     print(f"   ⏱  Total: {total_elapsed:.0f}ms")
 
     if failed:

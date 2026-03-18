@@ -43,7 +43,7 @@ We're open-sourcing the core engine because autonomous AI needs a sovereign foun
 
 The latency limit isn’t even the worst part. It’s what you are actually sending to the cloud.
 
-Autonomous agents (like those in DevTools, FinTech, or Legal) process sensitive state: local file paths (`~/Proyectos_Secretos/`), PII, raw tracebacks, and API keys leaked in debugging loops.
+Autonomous agents (like those in DevTools, FinTech, or Legal) process sensitive state: local file paths (`/Users/borja/Proyectos_Secretos/`), PII, raw tracebacks, and API keys leaked in debugging loops.
 
 When you push raw agent "thoughts" to a 3rd-party vector DB via API:
 1. **You breach EU AI Act / GDPR data retention policies.**

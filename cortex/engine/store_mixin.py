@@ -13,6 +13,7 @@ from typing import Any, ClassVar, Optional
 import aiosqlite
 
 from cortex.crypto import get_default_encrypter
+from cortex.engine.capabilities import CapabilityRegistry
 from cortex.engine.embedding_engine import embed_fact_async
 from cortex.engine.fact_store_core import insert_fact_record
 from cortex.engine.ghost_mixin import GhostMixin
@@ -127,7 +128,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             tags=tags,
             confidence=confidence,
             source=source,
-            meta=meta
+            meta=meta,
         )
 
     async def _store_impl(
@@ -167,9 +168,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         tx_id = (
             tx_id
             if tx_id is not None
-            else await self._log_transaction(
-                conn, project, "store", {"fact_type": fact_type}
-            )
+            else await self._log_transaction(conn, project, "store", {"fact_type": fact_type})
         )
         fact_id = await insert_fact_record(
             conn,
@@ -192,7 +191,13 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         # P0 Decoupling: Blocking embedding is now handled by EnrichmentWorker
         # We only keep this if explicitly requested or for legacy compatibility,
         # but by default, insert_fact_record now enqueues an async job.
-        if getattr(self, "_auto_embed", False) and getattr(self, "_vec_available", False):
+
+        caps = CapabilityRegistry.get_instance().capabilities
+        if (
+            getattr(self, "_auto_embed", False)
+            and getattr(self, "_vec_available", False)
+            and caps.embeddings
+        ):
             await embed_fact_async(
                 conn,
                 fact_id,
@@ -211,8 +216,13 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             db_path = str(getattr(self, "_db_path", "") or "")
             try:
                 await pipeline.run_post_hooks(
-                    fact_id, project, fact_type, conn,
-                    tenant_id=tenant_id, source=source, db_path=db_path,
+                    fact_id,
+                    project,
+                    fact_type,
+                    conn,
+                    tenant_id=tenant_id,
+                    source=source,
+                    db_path=db_path,
                 )
             except Exception as _ph_err:  # noqa: BLE001
                 logger.debug("[AX-033] GuardPipeline post-hooks skipped: %s", _ph_err)
@@ -253,9 +263,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             async with conn.execute(query, (fact_id, tenant_id)) as cursor:
                 row = await cursor.fetchone()
             if not row:
-                raise ValueError(
-                    f"Fact {fact_id} not found or belongs to another tenant"
-                )
+                raise ValueError(f"Fact {fact_id} not found or belongs to another tenant")
 
             (
                 db_tenant_id,
@@ -270,7 +278,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             # Fetch tags from bridge table
             async with conn.execute(
                 "SELECT tag FROM fact_tags WHERE fact_id = ? AND tenant_id = ?",
-                (fact_id, db_tenant_id)
+                (fact_id, db_tenant_id),
             ) as cursor:
                 tag_rows = await cursor.fetchall()
                 old_tags = [r[0] for r in tag_rows]
@@ -289,9 +297,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             new_meta["previous_fact_id"] = fact_id
 
             # Deprecate first to avoid unique constraint violations on identical hashes
-            await self.deprecate(
-                fact_id, reason="updated", conn=conn, tenant_id=db_tenant_id
-            )
+            await self.deprecate(fact_id, reason="updated", conn=conn, tenant_id=db_tenant_id)
 
             new_id = await self.store(
                 project=project,

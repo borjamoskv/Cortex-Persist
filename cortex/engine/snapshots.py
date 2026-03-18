@@ -6,7 +6,41 @@ import shutil
 import sqlite3
 from dataclasses import dataclass
 from datetime import datetime, timezone
+from pathlib import Path
+from typing import Union
 
+from cortex.config import DEFAULT_DB_PATH
+from cortex.database.core import connect_async_ctx
+
+__all__ = ["SnapshotRecord", "SnapshotManager"]
+
+logger = logging.getLogger("cortex")
+
+
+def _write_snapshot_meta(meta_path: Path, record: dict) -> None:
+    with open(meta_path, "w", encoding="utf-8") as f:
+        json.dump(record, f, indent=2)
+
+
+def _read_snapshot_meta(meta_file: Path) -> dict:
+    with open(meta_file, encoding="utf-8") as f:
+        return json.load(f)
+
+
+@dataclass
+class SnapshotRecord:
+    """Metadata for a CORTEX snapshot."""
+
+    id: int
+    name: str
+    path: str
+    tx_id: int
+    merkle_root: str
+    created_at: str
+    size_mb: float
+
+
+def _parse_snapshot_meta(meta_file: Path) -> Union[SnapshotRecord, None]:
     try:
         data = _read_snapshot_meta(meta_file)
         db_file = Path(data["path"])
@@ -53,7 +87,7 @@ class SnapshotManager:
     Manages physical and logical snapshots of the CORTEX database.
     """
 
-    def __init__(self, db_path: str | Path = DEFAULT_DB_PATH):
+    def __init__(self, db_path: Union[str, Path] = DEFAULT_DB_PATH):
         self.db_path = Path(db_path).expanduser()
         self.snapshot_dir = self.db_path.parent / "snapshots"
         self.snapshot_dir.mkdir(parents=True, exist_ok=True)

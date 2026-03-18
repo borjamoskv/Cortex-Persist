@@ -1,7 +1,7 @@
 # CORTEX Architectural Audit Report
 
 **Date:** 2026-02-24  
-**Scope:** `./cortex/` (42,613+ LOC)  
+**Scope:** `/Users/borjafernandezangulo/cortex/cortex/` (42,613+ LOC)  
 **Auditor:** Kimi Code CLI  
 
 ---

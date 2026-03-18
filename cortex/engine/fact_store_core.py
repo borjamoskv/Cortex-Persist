@@ -101,7 +101,7 @@ async def insert_fact_record(
     if pub_b64:
         meta["signer_pubkey"] = pub_b64
 
-    encrypted_meta = enc.encrypt_json(meta, tenant_id=tenant_id)
+    # encrypted_meta = enc.encrypt_json(meta, tenant_id=tenant_id)
 
     # ── Double-Plane Ingestion (V2) ──
     from cortex.engine.metadata_engine import MetadataEngine

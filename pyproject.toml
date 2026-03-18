@@ -6,7 +6,7 @@ readme = "README.md"
 license = "Apache-2.0"
 requires-python = ">=3.9"
 authors = [
-    {name = "borjamoskv.com", email = "borja@moskv.com"},
+    {name = "borjamoskv", email = "borjamoskv@gmail.com"},
 ]
 keywords = [
     "ai", "memory", "agents", "trust", "compliance",
