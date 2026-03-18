@@ -172,7 +172,7 @@ class MejoraloSwarm:
         best: Optional[ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef] = None
 
         for node in ast.walk(tree):
-            if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            if not isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef):
                 continue
             start = node.lineno
             end = getattr(node, "end_lineno", None)
@@ -286,7 +286,7 @@ class MejoraloSwarm:
             top_level = [
                 n
                 for n in ast.iter_child_nodes(patched_tree)
-                if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
+                if isinstance(n, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef)
             ]
             if len(top_level) != 1:
                 logger.warning(

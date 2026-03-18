@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
 from cortex.ledger.queue import EnrichmentQueue
 from cortex.ledger.store import LedgerStore
@@ -91,7 +91,7 @@ class EnrichmentWorker:
             logger.error("Failed to process job %s: %s", job_id, e)
             self.queue.mark_failed(job_id, event_id, str(e), attempts)
 
-    async def _enrich_fact(self, fact_id: Union[str, int], payload: dict[str, Any]):
+    async def _enrich_fact(self, fact_id: str | int, payload: dict[str, Any]):
         """Generate embeddings or summaries for a fact."""
         # This uses the engine to perform the heavy lifting
         if not hasattr(self.engine, "embeddings"):

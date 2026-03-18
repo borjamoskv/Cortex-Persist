@@ -10,7 +10,7 @@ from __future__ import annotations
 import json
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
 import aiosqlite
 
@@ -54,12 +54,12 @@ class BaseAuthBackend(ABC):
         pass
 
     @abstractmethod
-    async def revoke_key(self, key_id: Union[int, str]) -> bool:
+    async def revoke_key(self, key_id: int | str) -> bool:
         """Revoke (deactivate) an API key."""
         pass
 
     @abstractmethod
-    async def update_last_used(self, key_id: Union[int, str]) -> None:
+    async def update_last_used(self, key_id: int | str) -> None:
         """Update the last_used timestamp for a key."""
         pass
 
@@ -138,7 +138,7 @@ class SQLiteAuthBackend(BaseAuthBackend):
         finally:
             await conn.close()
 
-    async def revoke_key(self, key_id: Union[int, str]) -> bool:
+    async def revoke_key(self, key_id: int | str) -> bool:
         conn = await self._get_conn_async()
         try:
             cursor = await conn.execute("UPDATE api_keys SET is_active = 0 WHERE id = ?", (key_id,))
@@ -147,7 +147,7 @@ class SQLiteAuthBackend(BaseAuthBackend):
         finally:
             await conn.close()
 
-    async def update_last_used(self, key_id: Union[int, str]) -> None:
+    async def update_last_used(self, key_id: int | str) -> None:
         from datetime import datetime, timezone
 
         conn = await self._get_conn_async()
@@ -242,14 +242,14 @@ class AlloyDBAuthBackend(BaseAuthBackend):
                 rows = await conn.fetch("SELECT * FROM api_keys ORDER BY id DESC")
             return [dict(r) for r in rows]
 
-    async def revoke_key(self, key_id: Union[int, str]) -> bool:
+    async def revoke_key(self, key_id: int | str) -> bool:
         pool = await self._get_pool()
         async with pool.acquire() as conn:
             res = await conn.execute("UPDATE api_keys SET is_active = 0 WHERE id = $1", key_id)
             # res is something like "UPDATE 1"
             return res.endswith("1")
 
-    async def update_last_used(self, key_id: Union[int, str]) -> None:
+    async def update_last_used(self, key_id: int | str) -> None:
         from datetime import datetime, timezone
 
         pool = await self._get_pool()

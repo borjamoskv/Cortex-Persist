@@ -192,7 +192,7 @@ async def scan_semantic_gaps(cortex_db: Any, min_facts: int = 5) -> list[Crystal
             for row in rows or []:
                 project = (
                     row[0]
-                    if isinstance(row, (list, tuple))
+                    if isinstance(row, list | tuple)
                     else getattr(row, "project_id", "unknown")
                 )
                 targets.append(

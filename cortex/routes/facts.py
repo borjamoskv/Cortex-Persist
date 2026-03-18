@@ -11,6 +11,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 
 from cortex.api.deps import get_async_engine
 from cortex.auth import AuthResult, require_permission
+from cortex.engine.storage_guard import GuardViolation
 from cortex.engine_async import AsyncCortexEngine
 from cortex.types.models import (
     FactResponse,
@@ -42,16 +43,26 @@ async def store_fact(
     engine: AsyncCortexEngine = Depends(get_async_engine),
 ) -> StoreResponse:
     """Store a fact (scoped to authenticated tenant)."""
-    fact_id = await engine.store(
-        project=req.project,
-        content=req.content,
-        tenant_id=auth.tenant_id,
-        fact_type=req.fact_type,
-        tags=req.tags,
-        source=req.source,
-        meta=req.meta,
-    )
-    return StoreResponse(fact_id=fact_id, project=req.project, message="Fact stored")
+    try:
+        fact_id = await engine.store(
+            project=req.project,
+            content=req.content,
+            tenant_id=auth.tenant_id,
+            fact_type=req.fact_type,
+            tags=req.tags,
+            source=req.source,
+            meta=req.meta,
+        )
+        return StoreResponse(fact_id=fact_id, project=req.project, message="Fact stored")
+    except (ValueError, GuardViolation) as e:
+        raise HTTPException(status_code=400, detail=str(e)) from None
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error("Failed to store fact: %s", e)
+        raise HTTPException(
+            status_code=500, detail="Internal server error while storing fact"
+        ) from None
 
 
 @router.get("/v1/projects/{project}/facts", response_model=list[FactResponse])

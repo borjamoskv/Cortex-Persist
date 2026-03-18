@@ -4,7 +4,6 @@ import sqlite3
 from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Union
 
 
 class LedgerStoreError(RuntimeError):
@@ -12,7 +11,7 @@ class LedgerStoreError(RuntimeError):
 
 
 class LedgerStore:
-    def __init__(self, db_path: Union[str, Path]) -> None:
+    def __init__(self, db_path: str | Path) -> None:
         self.db_path = str(db_path)
         self._init_db()
 

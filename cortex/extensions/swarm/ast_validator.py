@@ -288,7 +288,7 @@ def _check_complexity(
         violations.append(f"Total lines ({total_lines}) exceeds maximum ({MAX_TOTAL_LINES})")
 
     for node in ast.walk(tree):
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
             stats["functions"] += 1
             func_lines = (node.end_lineno or node.lineno) - node.lineno + 1
             stats["max_function_lines"] = max(stats["max_function_lines"], func_lines)

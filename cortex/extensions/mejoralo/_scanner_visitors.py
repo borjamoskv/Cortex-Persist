@@ -53,7 +53,7 @@ class _BroadExceptionVisitor(ast.NodeVisitor):
         elif isinstance(node.type, ast.Name) and node.type.id in ("Exception", "BaseException"):
             body_is_silent = (
                 len(node.body) == 1
-                and isinstance(node.body[0], (ast.Pass, ast.Expr))
+                and isinstance(node.body[0], ast.Pass | ast.Expr)
                 and (
                     isinstance(node.body[0], ast.Pass)
                     or (

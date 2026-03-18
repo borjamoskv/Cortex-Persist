@@ -124,7 +124,7 @@ def confidence_evaluator(field: str = "confidence", min_val: float = 0.7) -> Eva
         if not isinstance(output, dict):
             return 0.0
         val = output.get(field)
-        if not isinstance(val, (int, float)):
+        if not isinstance(val, int | float):
             return 0.0
         return 1.0 if val >= min_val else float(val / min_val)
 
@@ -175,20 +175,6 @@ def circuit_reset(tool_name: str) -> None:
     """Manually reset circuit breaker for a tool (e.g. after config fix)."""
     _circuit_state.pop(tool_name, None)
     logger.info("Circuit breaker reset for %s", tool_name)
-
-
-def circuit_evict_dead(threshold: int = _CIRCUIT_BREAKER_LIMIT) -> int:
-    """Purge tools that have been at max-failure count from the circuit state dict.
-
-    Prevents the module-level dict from accumulating ghost entries for tools
-    that will never recover (e.g. removed or renamed). Returns number evicted.
-    """
-    dead = [name for name, count in _circuit_state.items() if count >= threshold]
-    for name in dead:
-        _circuit_state.pop(name, None)
-    if dead:
-        logger.info("🧹 [CIRCUIT] Evicted %d dead tool entries: %s", len(dead), dead)
-    return len(dead)
 
 
 # ═════════════════════════════════════════════════════════════════════════

@@ -37,6 +37,7 @@ from cortex.extensions.mejoralo.taint import is_file_tainted, mark_file_tainted
 
 __all__ = [
     "heal_project",
+    "heal_proj",
 ]
 
 logger = logging.getLogger("cortex.extensions.mejoralo.heal")
@@ -100,7 +101,7 @@ def _calculate_total_complexity(source_code: str) -> int:
 
     comp = 0
     for node in ast.walk(tree):
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
             comp += 1
         if isinstance(node, _COMPLEXITY_NODES):
             comp += 1
@@ -550,3 +551,14 @@ def _print_journey(console: Any, score_history: list[int]) -> None:
         return
     journey = " → ".join(str(s) for s in score_history)
     console.print(f"  [dim]Recorrido: {journey}[/]")
+
+
+def heal_proj(
+    project: str,
+    path: str | Path,
+    target_score: int,
+    scan_result: ScanResult,
+    engine: Optional[MejoraloEngine] = None,
+) -> bool:
+    """Wrapper for heal_project to match the expected signature in MejoraloEngine."""
+    return heal_project(project, path, target_score, scan_result, engine=engine)

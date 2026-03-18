@@ -16,7 +16,7 @@ from __future__ import annotations
 import re
 import sys
 from pathlib import Path
-from typing import Optional, Union
+from typing import Optional
 
 __all__ = ["scan_raw_connects", "ConnectionViolation"]
 
@@ -118,7 +118,7 @@ def _scan_file_lines(py_file: Path, violations: list[ConnectionViolation]) -> No
 
 
 def scan_raw_connects(
-    root: Union[str, Path] = "cortex",
+    root: str | Path = "cortex",
     whitelist: Optional[frozenset[str]] = None,
 ) -> list[ConnectionViolation]:
     """Scan CORTEX source for unauthorized sqlite3.connect() calls.

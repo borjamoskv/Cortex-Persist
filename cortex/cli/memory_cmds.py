@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+
 import click
 from rich.panel import Panel
 from rich.table import Table
@@ -274,7 +276,26 @@ def recall(project, db) -> None:
                 else:
                     fid, content, tags = f.id, f.content, f.tags or []
                 tags_str = f" [dim]{', '.join(tags)}[/]" if tags else ""
-                console.print(f"  [dim]#{fid}[/] {content}{tags_str}")
+
+                # Ω₁₃: Taint & Confidence visibility
+                if isinstance(f, dict):
+                    status = f.get("metadata", {}).get("taint_status", "clean")
+                    conf = f.get("confidence", "C?")
+                else:
+                    status = f.meta.get("taint_status", "clean") if hasattr(f, "meta") else "clean"
+                    conf = f.confidence if hasattr(f, "confidence") else "C?"
+
+                status_color = (
+                    "red" if status == "tainted" else "yellow" if status == "suspect" else "green"
+                )
+                status_icon = "☢" if status == "tainted" else "⚠" if status == "suspect" else "✓"
+
+                console.print(
+                    f"  [dim]#{fid}[/] "
+                    f"[[noir.cyber]{conf}[/]] "
+                    f"[{status_color}]{status_icon} {status}[/] "
+                    f"{content}{tags_str}"
+                )
         _show_tip(engine)
     finally:
         _run_async(engine.close())
@@ -445,17 +466,33 @@ def trace_chain(fact_id, direction, depth, db) -> None:
         table.add_column("Depth", style="dim", width=5)
         table.add_column("ID", style="bold", width=6)
         table.add_column("Type", style="noir.violet", width=10)
-        table.add_column("Content", width=50)
+        table.add_column("Conf", style="noir.cyber", width=5)
+        table.add_column("Taint", width=10)
+        table.add_column("Content", width=40)
         table.add_column("Parent", style="dim", width=6)
 
         for f in chain:
             content = f.get("content", "")[:50]
-            parent = f.get("parent_decision_id")
-            parent_str = str(parent) if parent else "—"
+            parent_id = f.get("parent_decision_id")
+            parent_str = str(parent_id) if parent_id else "—"
+            meta = f.get("metadata") or {}
+            if isinstance(meta, str):
+                try:
+                    meta = json.loads(meta)
+                except (ValueError, TypeError, json.JSONDecodeError):
+                    meta = {}
+
+            taint = meta.get("taint_status", "clean")
+            taint_color = (
+                "red" if taint == "tainted" else "yellow" if taint == "suspect" else "green"
+            )
+
             table.add_row(
                 str(f.get("causal_depth", "?")),
                 str(f.get("id", "?")),
                 f.get("fact_type", "?"),
+                f.get("confidence", "C?"),
+                f"[{taint_color}]{taint}[/]",
                 content,
                 parent_str,
             )

@@ -71,15 +71,13 @@ class _AstAnalyzer(ast.NodeVisitor):
         for child in ast.walk(node):
             if isinstance(
                 child,
-                (
-                    ast.If,
-                    ast.While,
-                    ast.For,
-                    ast.AsyncFor,
-                    ast.ExceptHandler,
-                    ast.With,
-                    ast.AsyncWith,
-                ),
+                ast.If
+                | ast.While
+                | ast.For
+                | ast.AsyncFor
+                | ast.ExceptHandler
+                | ast.With
+                | ast.AsyncWith,
             ):
                 complexity += 1
         self.mccabe[node.name] = complexity
