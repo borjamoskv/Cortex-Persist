@@ -65,7 +65,7 @@ DOMAIN_MAP: dict[str, list[str]] = {
         "cortexpersist",
         "cli",
         "CORE",
-        "CODEX",
+        "COGITO",
         "__system__",
     ],
     "cortex-infra": [

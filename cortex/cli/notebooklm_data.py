@@ -59,7 +59,7 @@ DOMAIN_MAP: dict[str, list[str]] = {
         "cortexpersist",
         "cli",
         "CORE",
-        "CODEX",
+        "COGITO",
         "__system__",
     ],
     "cortex-infra": [
@@ -260,7 +260,7 @@ def _get_entities_and_relations(
     """Load entity graph for NotebookLM context."""
     import pandas as pd
 
-    conn = __import__("cortex.database.core", fromlist=["db_connect"]).db_connect(_get_db_path())
+    conn = __import__("cortex.database.core", fromlist=["connect"]).connect(_get_db_path())
     try:
         if project:
             entities = pd.read_sql_query(  # type: ignore[reportCallIssue]

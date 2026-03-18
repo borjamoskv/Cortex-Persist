@@ -11,10 +11,10 @@ from cortex.async_client import AsyncCortexClient
 
 load_dotenv()
 
-CODEX_PATH = "CODEX.md"
+COGITO_PATH = "docs/internal/COGITO.md"
 
 
-async def seed_codex():
+async def seed_cogito():
     api_token = os.environ.get("CORTEX_API_KEY")
     # Force IPv4 to avoid [::1] connection refusal on macOS
     client = AsyncCortexClient(api_token=api_token, base_url="http://127.0.0.1:8000")
@@ -27,8 +27,8 @@ async def seed_codex():
         print(f"❌ Failed to connect: {e}")
         return
 
-    print("📜 Reading Codex...")
-    with open(CODEX_PATH) as f:
+    print("📜 Reading Cogito...")
+    with open(COGITO_PATH) as f:
         content = f.read()
 
     # Split into sections (naive parsing)
@@ -67,9 +67,9 @@ async def seed_codex():
         )
         count += 1
 
-    print(f"✨ Codex Seeded! ({count} sections stored)")
+    print(f"✨ Cogito Seeded! ({count} sections stored)")
     await client.close()
 
 
 if __name__ == "__main__":
-    asyncio.run(seed_codex())
+    asyncio.run(seed_cogito())

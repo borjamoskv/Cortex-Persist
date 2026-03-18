@@ -71,18 +71,21 @@
     }
   },
   "kimi": {
-    "base_url": "https://api.moonshot.cn/v1",
-    "default_model": "moonshot-v1-128k",
-    "env_key": "MOONSHOT_API_KEY",
-    "models": ["moonshot-v1-8k", "moonshot-v1-32k", "moonshot-v1-128k", "kimi-latest-2.5"],
-    "context_window": 128000,
+    "base_url": "https://api.moonshot.ai/v1",
+    "default_model": "kimi-k2.5",
+    "env_key": "KIMI_API_KEY",
+    "models": ["moonshot-v1-128k", "kimi-k2.5"],
+    "context_window": 2000000,
     "tier": "high",
-    "cost_class": "low",
-    "specialization": ["reasoning", "code", "extraction"],
+    "cost_class": "medium",
+    "specialization": ["reasoning", "code", "creative", "architect", "general"],
     "intent_model_map": {
-      "code":      "moonshot-v1-128k",
-      "reasoning": "kimi-latest-2.5",
-      "general":   "moonshot-v1-128k"
+      "code":              "kimi-k2.5",
+      "reasoning":         "kimi-k2.5",
+      "creative":          "kimi-k2.5",
+      "architect":         "kimi-k2.5",
+      "general":           "kimi-k2.5",
+      "episodic_processing": "kimi-k2.5"
     }
   },
   "mistral": {

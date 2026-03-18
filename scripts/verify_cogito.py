@@ -22,12 +22,12 @@ COLOR_RESET = "\033[0m"
 COLOR_BOLD = "\033[1m"
 
 
-async def verify_codex(host: str, port: int, limit: int):
+async def verify_cogito(host: str, port: int, limit: int):
     api_key = os.environ.get("CORTEX_API_KEY")
     base_url = f"http://{host}:{port}"
 
     print(
-        f"{COLOR_DIM}┌─{COLOR_RESET} {COLOR_BOLD}CODEX VERIFICATION PROTOCOL{COLOR_RESET} {COLOR_DIM}─────────────────────────{COLOR_RESET}"
+        f"{COLOR_DIM}┌─{COLOR_RESET} {COLOR_BOLD}COGITO VERIFICATION PROTOCOL{COLOR_RESET} {COLOR_DIM}─────────────────────────{COLOR_RESET}"
     )
     print(f"{COLOR_DIM}│{COLOR_RESET} TARGET : {COLOR_ACCENT}{base_url}{COLOR_RESET}")
     print(f"{COLOR_DIM}│{COLOR_RESET} LIMIT  : {limit} facts")
@@ -80,7 +80,7 @@ async def verify_codex(host: str, port: int, limit: int):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Verify CORTEX CODEX integrity.")
+    parser = argparse.ArgumentParser(description="Verify CORTEX COGITO integrity.")
     parser.add_argument("--host", default="127.0.0.1", help="CORTEX daemon host")
     parser.add_argument("--port", type=int, default=8000, help="CORTEX daemon port")
     parser.add_argument("--limit", type=int, default=10, help="Number of facts to recall")
@@ -88,7 +88,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     try:
-        asyncio.run(verify_codex(host=args.host, port=args.port, limit=args.limit))
+        asyncio.run(verify_cogito(host=args.host, port=args.port, limit=args.limit))
     except KeyboardInterrupt:
         print(f"\n{COLOR_DIM}Verification aborted by user.{COLOR_RESET}")
         sys.exit(0)

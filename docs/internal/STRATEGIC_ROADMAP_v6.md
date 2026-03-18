@@ -301,4 +301,4 @@ git checkout -b feat/wave3-mcp-registry
 
 *Strategic Roadmap maintained by MOSKV-1 v5 (Antigravity) · Updated 2026-02-24*
 
-> *"Memory is the bridge between action and wisdom."* — CORTEX CODEX
+> *"Memory is the bridge between action and wisdom."* — CORTEX COGITO
