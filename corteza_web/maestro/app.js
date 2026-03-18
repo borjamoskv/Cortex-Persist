@@ -1,9 +1,10 @@
 import { api } from './api.js';
+import { CortexGraph } from './graph.js';
 
 /* ═══════════════════════════════════════════════════════
    MAC MAESTRO — App Logic
    CORTEX Persist Control Panel
-   Synaptic Connectivity Module
+   Phase 3: Sovereign Orchestration Module
    ═══════════════════════════════════════════════════════ */
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -12,11 +13,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   const sidebarItems = document.querySelectorAll('.sidebar-item');
   const sections = document.querySelectorAll('.section');
   
-  // Initial population
   await updateDashboard();
   await populateAgents();
   await populateFacts('');
+  await populateNodes();
   await startLogStream();
+
+  // Initialize graph (lazy — renders when Ledger section is visible)
+  let graph = null;
 
   // ── Sidebar Navigation ──────────────────────────
   sidebarItems.forEach(item => {
@@ -27,6 +31,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       sections.forEach(s => s.classList.remove('active'));
       const targetSection = document.getElementById(`section-${target}`);
       if (targetSection) targetSection.classList.add('active');
+
+      // Lazy-init graph when Ledger is first opened
+      if (target === 'ledger' && !graph) {
+        graph = new CortexGraph('cortexGraph');
+        graph.load();
+      }
     });
   });
 
@@ -41,6 +51,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     });
   }
+
+  // ── Segmented Controls ──────────────────────────
+  document.querySelectorAll('.segmented').forEach(seg => {
+    const btns = seg.querySelectorAll('.segmented-btn');
+    btns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        btns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+  });
 
   // ── Console Logic ───────────────────────────────
   const logConsole = document.getElementById('logConsole');
@@ -69,6 +90,81 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
+  // ── Report Generator ────────────────────────────
+  const btnReport = document.getElementById('btnGenerateReport');
+  if (btnReport) {
+    btnReport.addEventListener('click', async () => {
+      const formatBtn = document.querySelector('#reportFormatSelector .segmented-btn.active');
+      const format = formatBtn?.dataset.format || 'json';
+      const progressContainer = document.getElementById('reportProgress');
+      const progressFill = document.getElementById('reportProgressFill');
+      const progressText = document.getElementById('reportProgressText');
+
+      progressContainer.hidden = false;
+      btnReport.disabled = true;
+      btnReport.textContent = 'Generating...';
+
+      const result = await api.generateReport(format, (pct, step) => {
+        progressFill.style.width = pct + '%';
+        progressText.textContent = step;
+      });
+
+      progressFill.style.width = '100%';
+      progressText.innerHTML = `<span class="report-complete">✓ ${result.filename} (${result.size})</span>`;
+      btnReport.textContent = '✓ Report Ready';
+      btnReport.style.background = 'var(--green)';
+
+      setTimeout(() => {
+        btnReport.textContent = 'Generate Article 12 Report';
+        btnReport.style.background = '';
+        btnReport.disabled = false;
+      }, 3000);
+    });
+  }
+
+  // ── Confluence Sync ─────────────────────────────
+  const syncBtn = document.getElementById('btnSyncConfluence');
+  if (syncBtn) {
+    syncBtn.addEventListener('click', () => {
+      const originalText = syncBtn.textContent;
+      syncBtn.textContent = 'Syncing...';
+      syncBtn.disabled = true;
+      setTimeout(() => {
+        syncBtn.textContent = '✓ Synced';
+        syncBtn.style.background = '#34C759';
+        setTimeout(() => {
+          syncBtn.textContent = originalText;
+          syncBtn.style.background = '';
+          syncBtn.disabled = false;
+        }, 2000);
+      }, 2500);
+    });
+  }
+
+  // ── Node Management ─────────────────────────────
+  const btnAddNode = document.getElementById('btnAddNode');
+  if (btnAddNode) {
+    btnAddNode.addEventListener('click', async () => {
+      const url = prompt('Enter remote CORTEX node address:', '10.0.1.50:8000');
+      if (!url) return;
+      btnAddNode.textContent = 'Connecting...';
+      btnAddNode.disabled = true;
+      await api.addNode(url);
+      await populateNodes();
+      btnAddNode.textContent = '+ Add Remote Node';
+      btnAddNode.disabled = false;
+    });
+  }
+
+  const btnRefresh = document.getElementById('btnRefreshNodes');
+  if (btnRefresh) {
+    btnRefresh.addEventListener('click', async () => {
+      btnRefresh.textContent = 'Refreshing...';
+      await populateNodes();
+      btnRefresh.textContent = 'Refresh';
+    });
+  }
+
   // ── Slider Sync ─────────────────────────────────
   document.querySelectorAll('.slider').forEach(slider => {
     const container = slider.closest('.slider-container');
@@ -93,10 +189,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   async function populateAgents() {
-    const agents = await api.getAgents();
-    // Implementation for dynamic injection if needed, 
-    // but current HTML has static ones for Tier demo.
-    // For now, let's keep the row selection logic.
+    await api.getAgents();
   }
 
   async function populateFacts(query) {
@@ -112,6 +205,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         <div class="fact-col-time">${f.time}</div>
       </div>
     `).join('');
+  }
+
+  async function populateNodes() {
+    const nodes = await api.getNodes();
+    const grid = document.getElementById('nodeGrid');
+    if (!grid) return;
+
+    grid.innerHTML = nodes.map(n => {
+      const latencyClass = n.latency === null ? 'dead' : n.latency > 30 ? 'slow' : '';
+      const latencyText = n.latency !== null ? `${n.latency}ms` : 'N/A';
+      return `
+        <div class="node-card">
+          <div class="node-card-header">
+            <span class="node-name">${n.name}</span>
+            <span class="node-status ${n.status}"></span>
+          </div>
+          <div class="node-host">${n.host}</div>
+          <div class="node-meta">
+            <span class="node-latency ${latencyClass}">${latencyText}</span>
+            <span>${n.facts.toLocaleString()} facts</span>
+          </div>
+        </div>`;
+    }).join('');
   }
 
   async function startLogStream() {

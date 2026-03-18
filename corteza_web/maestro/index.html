@@ -444,6 +444,16 @@
           <button class="btn btn-secondary" onclick="exportAudit()">Export Audit Report</button>
           <button class="btn btn-primary" onclick="verifyChain()">Verify Chain Integrity</button>
         </div>
+
+        <div class="settings-group-label">Agent ↔ Fact Dependency Graph</div>
+        <div class="settings-group graph-container">
+          <canvas id="cortexGraph" class="cortex-graph-canvas"></canvas>
+          <div class="graph-legend">
+            <span class="legend-item"><span class="legend-dot" data-color="agent"></span> Agents</span>
+            <span class="legend-item"><span class="legend-dot" data-color="fact"></span> Facts</span>
+            <span class="legend-hint">Drag nodes to rearrange</span>
+          </div>
+        </div>
       </div>
 
       <!-- ── EU AI Act Compliance ─────────────── -->
@@ -501,21 +511,27 @@
           </div>
         </div>
 
-        <div class="settings-group-label">Export Formats</div>
+        <div class="settings-group-label">Generate Compliance Report</div>
         <div class="settings-group">
           <div class="settings-row">
-            <div class="settings-row-label">Official Audit Document Format</div>
-            <div class="segmented">
-              <button class="segmented-btn active">JSON-LD</button>
-              <button class="segmented-btn">PDF (Legal)</button>
-              <button class="segmented-btn">XML (EU Portal)</button>
+            <div class="settings-row-label">Report Format</div>
+            <div class="segmented" id="reportFormatSelector">
+              <button class="segmented-btn active" data-format="json">JSON-LD</button>
+              <button class="segmented-btn" data-format="pdf">PDF (Legal)</button>
+              <button class="segmented-btn" data-format="xml">XML (EU Portal)</button>
             </div>
           </div>
+          <div class="report-progress-container" id="reportProgress" hidden>
+            <div class="report-progress-bar">
+              <div class="report-progress-fill" id="reportProgressFill"></div>
+            </div>
+            <div class="report-progress-text" id="reportProgressText">Initializing...</div>
+          </div>
           <div class="action-bar">
-          <button class="btn btn-primary" id="btnSyncConfluence">Sync to Confluence</button>
+            <button class="btn btn-primary" id="btnGenerateReport">Generate Article 12 Report</button>
+            <button class="btn btn-secondary" id="btnSyncConfluence">Sync to Confluence</button>
+          </div>
         </div>
-
-      </div>
 
         <div class="settings-group-label text-danger">Risk Liability Reference</div>
         <div class="settings-group border-danger">
@@ -592,7 +608,18 @@
       <div class="section" id="section-network">
         <h1 class="content-title">Network</h1>
         <div class="settings-group-footer section-subtitle">
-          Configuration for external API exposure and MCP tool propagation.
+          Configuration for external API exposure, MCP tool propagation, and multi-node orchestration.
+        </div>
+
+        <div class="settings-group-label">Connected Nodes</div>
+        <div class="settings-group">
+          <div class="node-grid" id="nodeGrid">
+            <!-- Dynamically populated -->
+          </div>
+          <div class="action-bar">
+            <button class="btn btn-secondary" id="btnAddNode">+ Add Remote Node</button>
+            <button class="btn btn-secondary" id="btnRefreshNodes">Refresh</button>
+          </div>
         </div>
 
         <div class="settings-group-label">REST API (FastAPI)</div>

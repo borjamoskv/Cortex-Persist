@@ -1118,3 +1118,130 @@ input[type=range].slider:focus::-webkit-slider-thumb {
   .log-btn { color: #000; border-color: rgba(0,0,0,0.2); }
   .log-msg { color: #000; }
 }
+
+/* ── Phase 3: Sovereign Orchestration ── */
+
+/* Graph Container */
+.graph-container { padding: 0; overflow: hidden; }
+.cortex-graph-canvas {
+  width: 100%;
+  height: 350px;
+  display: block;
+  cursor: grab;
+  background: rgba(10, 10, 10, 0.6);
+  border-radius: 8px 8px 0 0;
+}
+
+.graph-legend {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 16px;
+  font-size: 11px;
+  color: var(--text-dim);
+  background: rgba(0,0,0,0.03);
+  border-top: 1px solid var(--border);
+}
+
+.legend-item { display: flex; align-items: center; gap: 5px; }
+.legend-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.legend-dot[data-color="agent"] { background: #0A84FF; }
+.legend-dot[data-color="fact"] { background: #8E8E93; }
+.legend-hint { margin-left: auto; font-style: italic; opacity: 0.5; }
+
+@media (prefers-color-scheme: light) {
+  .cortex-graph-canvas { background: rgba(245, 245, 247, 0.9); }
+}
+
+/* Node Grid */
+.node-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 12px;
+}
+
+.node-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  transition: all 0.2s;
+}
+
+.node-card:hover { border-color: var(--blue); background: rgba(10, 132, 255, 0.05); }
+
+.node-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.node-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.node-status {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.node-status.online { background: #30D158; box-shadow: 0 0 6px rgba(48,209,88,0.5); }
+.node-status.offline { background: #FF453A; }
+.node-status.connecting { background: #FF9F0A; animation: pulse-status 1.5s infinite; }
+
+.node-host {
+  font-size: 11px;
+  font-family: 'SF Mono', monospace;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+
+.node-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.node-latency { color: var(--green); }
+.node-latency.slow { color: var(--orange); }
+.node-latency.dead { color: var(--red); }
+
+/* Report Progress */
+.report-progress-container {
+  padding: 12px 0;
+}
+
+.report-progress-bar {
+  height: 6px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.report-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--blue), #5E5CE6);
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+.report-progress-text {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.report-complete {
+  color: var(--green);
+  font-weight: 600;
+}

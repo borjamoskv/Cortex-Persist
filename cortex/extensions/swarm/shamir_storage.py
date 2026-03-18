@@ -37,43 +37,50 @@ for _i in range(255, 512):
 
 
 def _gf_mul(a: int, b: int) -> int:
-    """GF(256) multiplication via log/exp tables. O(1)."""
+    """GF(256) multiplication via log/exp tables."""
     if a == 0 or b == 0:
         return 0
+    # No need for % 255 if table is 512
     return _GF_EXP[_GF_LOG[a] + _GF_LOG[b]]
 
 
 def _gf_div(a: int, b: int) -> int:
-    """GF(256) division. b must not be zero."""
+    """GF(256) division."""
     if b == 0:
         raise ZeroDivisionError("GF(256) division by zero")
     if a == 0:
         return 0
-    return _GF_EXP[(_GF_LOG[a] - _GF_LOG[b]) % 255]
+    # Log subtraction modulo 255
+    return _GF_EXP[(_GF_LOG[a] - _GF_LOG[b] + 255) % 255]
 
 
 def _evaluate_polynomial(coeffs: list[int], x: int) -> int:
-    """Evaluate polynomial with given coefficients at x in GF(256). O(degree)."""
+    """Evaluate polynomial P(x) in GF(256).
+    coeffs[0] = constant term (P(0))
+    P(x) = coeffs[0] + coeffs[1]*x + coeffs[2]*x^2 + ...
+    """
+    if x == 0:
+        return coeffs[0]
     result = 0
+    # Process from highest power down to x^0 (Horner's method)
+    # coeffs[::-1] gives [c_n, c_{n-1}, ..., c0]
     for coeff in reversed(coeffs):
         result = _gf_mul(result, x) ^ coeff
     return result
 
 
 def _lagrange_interpolate_at_zero(shares: list[tuple[int, int]]) -> int:
-    """Lagrange interpolation at x=0 over GF(256). O(k^2)."""
+    """Recover P(0) using Lagrange interpolation in GF(256)."""
     result = 0
-    for i in range(len(shares)):
-        xi, yi = shares[i]
-        num = 1
-        den = 1
-        for j in range(len(shares)):
+    for i, (xi, yi) in enumerate(shares):
+        li = 1
+        for j, (xj, _) in enumerate(shares):
             if i == j:
                 continue
-            xj, _ = shares[j]
-            num = _gf_mul(num, xj)
-            den = _gf_mul(den, xi ^ xj)
-        result ^= _gf_mul(_gf_div(num, den), yi)
+            # L_i(0) = product( xj / (xj ^ xi) )
+            phi = _gf_div(xj, xi ^ xj)
+            li = _gf_mul(li, phi)
+        result ^= _gf_mul(yi, li)
     return result
 
 
