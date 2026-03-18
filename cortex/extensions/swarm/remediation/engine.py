@@ -20,8 +20,8 @@ import aiosqlite
 
 from cortex.agents.builtins.consignatario_agent import ConsignatarioAgent
 from cortex.agents.manifest import AgentManifest
-from cortex.extensions.git.poet import CommitPoet
 from cortex.database.core import connect_async_ctx
+from cortex.extensions.git.poet import CommitPoet
 from cortex.extensions.swarm.remediation.blue_team import BLUE_TEAM
 from cortex.extensions.swarm.remediation.diagnosis import DiagnosisClassifier
 from cortex.extensions.swarm.remediation.red_team import RED_TEAM

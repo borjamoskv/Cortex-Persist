@@ -32,7 +32,7 @@ async def spawn_proposer(run_uid: str) -> str | None:
 
     mb_client = MoltbookClient()
     # Skip registration, use default logged-in client
-    llm = LLMProvider(provider="openrouter")
+    llm = LLMProvider(provider="openai")
 
     prompt = (
         "Propose a complex, highly controversial theorem about the future of AI economics. "
@@ -90,7 +90,7 @@ async def spawn_refuter(run_uid: str, post_id: str) -> None:
         await mb_client.close()
         return
 
-    llm = LLMProvider(provider="openrouter")
+    llm = LLMProvider(provider="openai")
     prompt = (
         f"Here is a theorem proposed by another researcher:\n\n{post_content}\n\n"
         "Write a brutal, mathematically sound refutation of this theorem. "

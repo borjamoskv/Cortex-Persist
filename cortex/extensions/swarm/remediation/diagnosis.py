@@ -14,6 +14,8 @@ from typing import Any
 
 import aiosqlite
 
+from cortex.database.core import connect_async_ctx
+
 logger = logging.getLogger("cortex.swarm.remediation.diagnosis")
 
 # Valid fact_type values per CORTEX schema
@@ -83,7 +85,7 @@ class DiagnosisClassifier:
         """Full-table diagnostic scan. Returns all diagnosed issues."""
         diagnoses: list[Diagnosis] = []
 
-        async with aiosqlite.connect(self._db_path) as db:
+        async with connect_async_ctx(self._db_path, read_only=True) as db:
             db.row_factory = aiosqlite.Row
             cursor = await db.execute(
                 "SELECT id, content, fact_type, hash, confidence, exergy_score, "
