@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
+from typing import Any
 
 from cortex.extensions.hypervisor.belief_object import (
     BeliefConfidence,
@@ -31,6 +32,7 @@ from cortex.extensions.hypervisor.belief_object import (
     VerdictAction,
 )
 from cortex.extensions.llm._models import CortexPrompt, IntentProfile, ReasoningMode
+from cortex.extensions.swarm.orchestrator_ultra_think import UltraThinkOrchestrator
 
 logger = logging.getLogger(__name__)
 
@@ -102,6 +104,7 @@ class CognitiveHandoff:
         auditor_premium: str = DEFAULT_AUDITOR_PREMIUM,
         auditor_economic: str = DEFAULT_AUDITOR_ECONOMIC,
         infra_provider: str = DEFAULT_INFRA,
+        engine: Any | None = None,
     ):
         """Initialize the Cognitive Handoff.
 
@@ -117,11 +120,14 @@ class CognitiveHandoff:
         self._auditor_premium = auditor_premium
         self._auditor_economic = auditor_economic
         self._infra = infra_provider
+        self.engine = engine  # Store engine for UltraThink and other high-exergy tasks
 
         # Telemetry
         self._total_tokens = 0
         self._escalation_count = 0
         self._quarantine_count = 0
+        self._ultra_think_count = 0
+        self._ut_orchestrator = UltraThinkOrchestrator(engine) if engine else None
 
     # ─── Public API ─────────────────────────────────────────────────────
 
@@ -209,7 +215,18 @@ class CognitiveHandoff:
                     reason=premium.reason,
                 )
 
-        # ── Step 4: Architect revision (if schema change needed) ─────
+        # ── Step 4: UltraThink Execution (Event Horizon) ─────────────
+        # If still uncertain about axiomatic survival or P0 triggered.
+        is_p0 = belief.metadata.get("p0_critical", False) or self._involves_axiomatics(belief, ctx)
+        if is_p0:
+            logger.warning("🛡️ [EVENT HORIZON] Triggering UltraThink: %s", belief.id)
+            self._ultra_think_count += 1
+            ut_res = await self._ultra_think_verify(belief, ctx)
+            total_tokens += ut_res.cost_tokens
+            if ut_res.action == VerdictAction.QUARANTINE:
+                return ut_res
+
+        # ── Step 5: Architect revision (if schema change needed) ─────
         if audit.needs_schema_revision:
             logger.info("Schema revision needed — dispatching to Architect")
             revised = await self._architect_revise(belief, audit)
@@ -415,6 +432,50 @@ class CognitiveHandoff:
             model="architect",
             cost_tokens=tokens,
             reason="Architect schema revision completed",
+        )
+
+    async def _ultra_think_verify(
+        self,
+        belief: BeliefObject,
+        context: list[BeliefObject],
+    ) -> BeliefVerdict:
+        """Step 4: Sovereign Survival Audit via UltraThinkOrchestrator.
+
+        Final mechanical and logical gate for P0 singularities.
+        Eliminates stochastic hallucinations through recursive verification.
+        """
+        if not self._ut_orchestrator:
+            return BeliefVerdict(
+                action=VerdictAction.ACCEPT,
+                model="ultra_think",
+                reason="UltraThink orchestration skipped (engine/manager not available)",
+            )
+
+        prompt = CortexPrompt(
+            system_instruction="Analyze this belief for absolute sovereign survival. "
+            "Eliminate all stochastic hallucinations. Cross-verify with mechanical gates.",
+            working_memory=[
+                {
+                    "role": "user",
+                    "content": self._format_belief_for_prompt(belief, context),
+                }
+            ],
+            intent=IntentProfile.REASONING,
+            reasoning_mode=ReasoningMode.ULTRA_THINK,
+        )
+
+        res = await self._ut_orchestrator.execute(prompt)
+        if res.is_err():
+            return BeliefVerdict(
+                action=VerdictAction.QUARANTINE,
+                model="ultra_think",
+                reason=f"UltraThink Detonation: {res.error}",
+            )
+
+        return BeliefVerdict(
+            action=VerdictAction.ACCEPT,
+            model="ultra_think",
+            reason="UltraThink: Mechanical verification passed.",
         )
 
     # ─── Utilities ──────────────────────────────────────────────────────

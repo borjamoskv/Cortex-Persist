@@ -12,7 +12,7 @@ from typing import Any, Optional, final
 
 import aiosqlite
 
-from cortex.engine_async import AsyncCortexEngine
+from cortex.engine.async_engine import AsyncCortexEngine
 from cortex.memory.temporal import now_iso
 from cortex.utils.canonical import canonical_json, compute_tx_hash
 from cortex.utils.result import Err, Ok, Result
@@ -49,28 +49,45 @@ class SovereignTLRUCache:
         self.order: deque[str] = deque()
         self.on_evict = on_evict
 
+        # ◬ Thermodynamic state (Ω₁₃)
+        self._exergy_score = 1.0  # Efficiency ratio
+        self._hits = 0
+        self._misses = 0
+
         # 🔗 Sovereign Evidence Chain (Ω₀)
         self._chain_tip = hashlib.sha256(b"CORTEX_CACHE_GENESIS").hexdigest()
         self._eviction_count = 0
+
+    @property
+    def capacity_at_exergy(self) -> int:
+        """Dynamic capacity adjustment based on hit rate (Ω₁₃)."""
+        tot = self._hits + self._misses
+        hit_rate = self._hits / tot if tot > 0 else 0.5
+        # Expands capacity as exergy increases, shrinks during thermal noise
+        scaling_factor = 0.5 + hit_rate
+        return int(self.capacity * scaling_factor)
 
     def get(self, key: str) -> Optional[Any]:
         """Retrieve value with TTL check and lazy eviction."""
         if key in self.cache:
             val, expiry = self.cache[key]
             if time.time() < expiry:
+                self._hits += 1
                 return val
             # Lazy eviction (TTL)
             self._pop_with_proof(key, val, EvictionReason.TTL)
+        self._misses += 1
         return None
 
     def set(self, key: str, value: Any):
-        """Insert value, enforcing capacity with LRU evidence."""
+        """Insert value, enforcing dynamic capacity with LRU evidence."""
+        effective_capacity = self.capacity_at_exergy
         if key in self.cache:
             try:
                 self.order.remove(key)
             except ValueError:
                 pass
-        elif len(self.cache) >= self.capacity:
+        elif len(self.cache) >= effective_capacity:
             if self.order:
                 oldest_key = self.order.popleft()
                 if oldest_key in self.cache:
@@ -89,13 +106,16 @@ class SovereignTLRUCache:
         self._generate_proof(key, value, reason)
 
     def _generate_proof(self, key: str, value: Any, reason: EvictionReason):
-        """Computes the Evidence Chain Tip and triggers the hook."""
+        """Computes the Evidence Chain Tip with Exergy Estimate (Ω₁₃)."""
         self._eviction_count += 1
         prev_tip = self._chain_tip
 
-        # 130/100: Crypographic commitment to forgotten data
+        # 200/100: Thermodynamic commitment to discarded exergy
         v_repr = hashlib.sha256(str(value).encode()).hexdigest()
-        proof_material = f"{prev_tip}|{key}|{v_repr}|{reason.value}"
+        tot = self._hits + self._misses
+        ex_est = self._hits / tot if tot > 0 else 1.0
+
+        proof_material = f"{prev_tip}|{key}|{v_repr}|{reason.value}|{ex_est:.4f}"
         self._chain_tip = hashlib.sha256(proof_material.encode()).hexdigest()
 
         if self.on_evict:
@@ -104,9 +124,11 @@ class SovereignTLRUCache:
                 "prev_proof": prev_tip,
                 "current_proof": self._chain_tip,
                 "reason": reason.value,
-                "axiom": "Ω₂",
+                "exergy": ex_est,
+                "axiom": "Ω₁₃",
             }
             try:
+                # 200/100: Non-blocking firing of audit trail
                 self.on_evict(key, value, audit)
             except Exception as e:  # noqa: BLE001
                 logger.error("SovereignTLRUCache: Eviction hook failed: %s", e)
@@ -184,11 +206,15 @@ class OptimizedCortexEngine(AsyncCortexEngine):
                 return {"status": "VALIDATED", "tip": actual_tip, "evictions_audited": len(trails)}
             else:
                 logger.error(
-                    "❌ [AUDIT] Cache Evidence Chain CORRUPTED. Expected: %s, Found: %s",
+                    "❌ [AUDIT] Cache Evidence Chain CORRUPTED. Expected=%s, Found=%s",
                     actual_tip[:16],
                     calculated_tip[:16],
                 )
-                return {"status": "TAMPERED", "expected": actual_tip, "calculated": calculated_tip}
+                return {
+                    "status": "TAMPERED",
+                    "expected": actual_tip,
+                    "calculated": calculated_tip,
+                }
 
     def _parse_audit_trails(self, rows):
         trails = []
@@ -226,7 +252,11 @@ class OptimizedCortexEngine(AsyncCortexEngine):
                 self._process_batch(batch)
 
     def _process_batch(self, batch):
-        while len(batch) < 100:
+        # 200/100: Dynamic batch thresholding based on queue pressure
+        q_size = self._write_buffer.qsize()
+        dynamic_threshold = 200 if q_size > 500 else 100
+        
+        while len(batch) < dynamic_threshold:
             try:
                 item = self._write_buffer.get_nowait()
                 if item is None:
@@ -235,6 +265,7 @@ class OptimizedCortexEngine(AsyncCortexEngine):
             except asyncio.QueueEmpty:
                 break
         if batch:
+            # 200/100: Ensure true zero-blocking async firing
             asyncio.create_task(self._flush_batch(batch))
             batch.clear()
 

@@ -128,10 +128,10 @@
         "tier": "frontier",
         "cost_class": "high"
       },
-      "grok-3-mini": {
+      "grok-3-fast": {
         "context_window": 128000,
-        "tier": "high",
-        "cost_class": "low"
+        "tier": "frontier",
+        "cost_class": "medium"
       }
     },
     "tier": "frontier",
@@ -142,7 +142,23 @@
       "reasoning": "grok-3",
       "creative":  "grok-3",
       "architect": "grok-4.1-fast",
-      "general":   "grok-3-mini"
+      "general":   "grok-3"
+    }
+  },
+  "grok_local": {
+    "base_url": "http://localhost:11434/v1",
+    "default_model": "grok-4.1",
+    "env_key": "",
+    "context_window": 131072,
+    "tier": "local",
+    "cost_class": "free",
+    "specialization": ["code", "reasoning", "creative", "architect", "general"],
+    "intent_model_map": {
+      "code":      "grok-4.1",
+      "reasoning": "grok-4.1",
+      "creative":  "grok-4.1",
+      "architect": "grok-4.1",
+      "general":   "grok-4.1"
     }
   },
   "cohere": {
@@ -185,7 +201,7 @@
       "reasoning": "x-ai/grok-2",
       "creative":  "anthropic/claude-3.5-sonnet",
       "architect": "x-ai/grok-2",
-      "general":   "google/gemini-2.0-flash-001"
+      "general":   "google/gemini-2.0-pro-001"
     }
   },
   "groq": {

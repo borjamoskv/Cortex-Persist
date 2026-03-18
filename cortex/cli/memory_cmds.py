@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import sys
 
 import click
 from rich.panel import Panel
@@ -537,7 +538,8 @@ def stats(db, as_json) -> None:
 @click.pass_context
 def store_alias(ctx, args):
     """[Alias] Store a fact."""
-    ctx.invoke(store, *args)
+    sys.argv = [sys.argv[0], "memory", "store"] + list(args)
+    ctx.exit(cli.main(standalone_mode=False))
 
 
 @cli.command("search", context_settings=dict(ignore_unknown_options=True, help_option_names=[]))
@@ -545,7 +547,8 @@ def store_alias(ctx, args):
 @click.pass_context
 def search_alias(ctx, args):
     """[Alias] Semantic search."""
-    ctx.invoke(search, *args)
+    sys.argv = [sys.argv[0], "memory", "search"] + list(args)
+    ctx.exit(cli.main(standalone_mode=False))
 
 
 @cli.command("recall", context_settings=dict(ignore_unknown_options=True, help_option_names=[]))
@@ -553,4 +556,5 @@ def search_alias(ctx, args):
 @click.pass_context
 def recall_alias(ctx, args):
     """[Alias] Load full context."""
-    ctx.invoke(recall, *args)
+    sys.argv = [sys.argv[0], "memory", "recall"] + list(args)
+    ctx.exit(cli.main(standalone_mode=False))

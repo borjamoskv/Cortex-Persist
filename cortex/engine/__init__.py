@@ -38,6 +38,8 @@ except ImportError:
             return {"status": "unhealthy", "reason": "No Health extension"}
 
 
+from cortex.engine.async_engine import AsyncCortexEngine  # noqa: E402
+from cortex.engine.optimized import SovereignTLRUCache  # noqa: E402
 from cortex.migrations.core import run_migrations_async
 from cortex.telemetry.metrics import metrics
 
@@ -581,3 +583,10 @@ class CortexEngine(
 
     async def __aexit__(self, *args):
         await self.close()
+__all__ = [
+    "CortexEngine",
+    "AsyncCortexEngine",
+    "SovereignTLRUCache",
+    "CompoundReport",
+    "CompoundYieldTracker",
+]

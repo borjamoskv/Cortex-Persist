@@ -9,6 +9,7 @@ import httpx
 
 from cortex.engine.causality import LedgerEvent
 from cortex.extensions.swarm.identity import IdentityAnchor
+from cortex.extensions.swarm.verification import VERIFICATION_HEADER
 
 logger = logging.getLogger("cortex.extensions.swarm.arweave_client")
 
@@ -80,23 +81,34 @@ class ArweaveClient:
         }
 
     async def anchor_handoff(self, event: LedgerEvent, anchor: IdentityAnchor) -> str | None:
-        """Anchors the handoff event to the Arweave network."""
+        """Anchors the handoff event to the Arweave network.
+
+        Adds an ``X-Omega-Verification`` header so any HTTP intermediary or
+        monitoring layer can identify the anchored TX without a GraphQL query.
+        """
         tx = self.prepare_handoff_transaction(event, anchor)
         tx_id = tx["id"]
-        
+
         url = f"{self.node_url}/tx"
+        headers = {
+            "Content-Type": "application/json",
+            VERIFICATION_HEADER: f"{event.event_id};PENDING;0.000",
+        }
         logger.info("Anclando Handoff %s en Arweave (TX: %s)", event.event_id, tx_id)
-        
+
         try:
             async with httpx.AsyncClient(timeout=30.0) as client:
-                response = await client.post(url, json=tx)
-                
-                # Assume 200 or 202 is success. 
+                response = await client.post(url, json=tx, headers=headers)
+
                 if response.status_code in (200, 202, 208):
                     logger.info("Handoff anclado con éxito: %s", tx_id)
                     return tx_id
                 else:
-                    logger.warning("Fallo al anclar en Arweave: %s - %s", response.status_code, response.text)
+                    logger.warning(
+                        "Fallo al anclar en Arweave: %s - %s",
+                        response.status_code,
+                        response.text,
+                    )
                     return None
         except httpx.RequestError as e:
             logger.error("Error de conectividad anclando en Arweave: %s", e)

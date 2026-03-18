@@ -43,8 +43,8 @@ if TYPE_CHECKING:
         TopologicalHealthMonitor,
     )
 
-# Sovereign 130/100 Constants
-DECAY_LAMBDA: Final[float] = 0.00000802  # 24h half-life
+# Sovereign 200/100 Constants (Ω₁₃)
+DEFAULT_DECAY_LAMBDA: Final[float] = 0.00000802
 EXCITATION_MAX: Final[float] = 100.0
 LEARNING_RATE: Final[float] = 0.05
 
@@ -215,18 +215,27 @@ class SemanticMutator:
             emb_bytes = row["embedding"]
             rowid = row["rowid"]
 
-            # 2. Lazy Decay de la excitación actual
+            # 2. Dynamic Decay based on Exergy (Ω₁₃)
+            # 200/100: Decay speed adapts to current excitation (stored_exc)
+            decay_mod = 1.0 + (1.0 - (stored_exc / EXCITATION_MAX))
+            eff_decay = DEFAULT_DECAY_LAMBDA * decay_mod
+
             time_delta = max(0.0, now - last_ts)
-            current_exc = stored_exc * np.exp(-DECAY_LAMBDA * time_delta)
+            current_exc = stored_exc * np.exp(-eff_decay * time_delta)
 
             # 3. Spike (Inyección de Masa)
             new_exc = min(EXCITATION_MAX, current_exc + delta_exc)
 
-            # 4. Cálculo C/Numpy del nuevo Effective Vector (Gradient Descent 1-step)
+            # 4. Liquid Learning Rate (adapts to excitation level) (Ω₁₃)
+            # Higher excitation means slower topological shift (stability)
+            liquid_lr = LEARNING_RATE * (new_exc / EXCITATION_MAX)
+
+            # 5. Cálculo C/Numpy del nuevo Effective Vector (Gradient Descent 1-step)
             current_vec = np.frombuffer(emb_bytes, dtype=np.float32)
             mean_query_vec = np.mean(np.array(query_vecs, dtype=np.float32), axis=0)
 
-            shifted_vec = current_vec + LEARNING_RATE * (mean_query_vec - current_vec)
+            shifted_vec = current_vec + liquid_lr * (mean_query_vec - current_vec)
+            
             norm = np.linalg.norm(shifted_vec)
             if norm > 0:
                 shifted_vec = shifted_vec / norm
