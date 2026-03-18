@@ -81,6 +81,33 @@ class NightShiftCrystalDaemon:
                 max_targets=self._max_crystals,
                 queue_path=self._queue_path,
             )
+            
+            # --- Ω₃ Taint Guard (Byzantine Default) ---
+            if self._db and targets:
+                from cortex.consensus.reputation import ReputationManager
+                rep_manager = ReputationManager(self._db)
+                
+                filtered_targets = []
+                for t in targets:
+                    agent_id = None
+                    if hasattr(t, "metadata") and isinstance(t.metadata, dict):
+                        agent_id = t.metadata.get("agent_id")
+                    elif isinstance(t, dict) and isinstance(t.get("metadata"), dict):
+                        agent_id = t["metadata"].get("agent_id")
+
+                    if agent_id:
+                        score = await rep_manager.get_score(agent_id)
+                        if score < 0.0:
+                            logger.warning(
+                                "🌙 [NIGHTSHIFT] TAINT DETECTED: Dropping target from "
+                                "low-rep agent %s (score=%.2f)",
+                                agent_id,
+                                score,
+                            )
+                            continue
+                    filtered_targets.append(t)
+                targets = filtered_targets
+
         except sqlite3.Error as e:
             logger.error("🌙 [NIGHTSHIFT] Radar scan failed (Database error): %s", e)
             report = {

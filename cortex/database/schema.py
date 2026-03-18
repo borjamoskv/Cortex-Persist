@@ -293,6 +293,34 @@ CREATE_THREAT_INTEL_INDEXES = """
 CREATE INDEX IF NOT EXISTS idx_threat_intel_ip ON threat_intel(ip_address);
 """
 
+# ─── P0 Decoupling: Enrichment Queue (Ω) ──────────────────────────────
+CREATE_ENRICHMENT_JOBS = """
+CREATE TABLE IF NOT EXISTS enrichment_jobs (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    fact_id         INTEGER NOT NULL REFERENCES facts(id),
+    job_type        TEXT NOT NULL DEFAULT 'embedding',
+    status          TEXT NOT NULL DEFAULT 'queued',
+    priority        INTEGER DEFAULT 0,
+    attempts        INTEGER DEFAULT 0,
+    last_error      TEXT,
+    payload         TEXT,
+    next_attempt_at TEXT,
+    created_at      TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at      TEXT NOT NULL DEFAULT (datetime('now'))
+);
+"""
+
+CREATE_ENRICHMENT_JOBS_INDEXES = """
+CREATE INDEX IF NOT EXISTS idx_enrichment_fact ON enrichment_jobs(fact_id);
+CREATE INDEX IF NOT EXISTS idx_enrichment_status_priority ON enrichment_jobs(status, priority);
+"""
+
+# ─── Type II Structural Collapse: O(1) Scaling Indexes ───────────────
+CREATE_FACTS_COMPOSITE_INDEX = """
+CREATE INDEX IF NOT EXISTS idx_facts_causal_resolve
+ON facts(tenant_id, project, fact_type, is_tombstoned, id DESC);
+"""
+
 # ─── Tenants ──────────────────────────────────────────────────────────
 CREATE_TENANTS = """
 CREATE TABLE IF NOT EXISTS tenants (
@@ -314,8 +342,11 @@ ALTER TABLE facts ADD COLUMN signer_pubkey TEXT;
 _CORE_SCHEMA = [
     CREATE_FACTS,
     CREATE_FACTS_INDEXES,
+    CREATE_FACTS_COMPOSITE_INDEX,
     CREATE_FACT_TAGS,
     CREATE_FACT_TAGS_INDEXES,
+    CREATE_ENRICHMENT_JOBS,
+    CREATE_ENRICHMENT_JOBS_INDEXES,
     CREATE_EMBEDDINGS,
     CREATE_SPECULAR_EMBEDDINGS,
     CREATE_SESSIONS,

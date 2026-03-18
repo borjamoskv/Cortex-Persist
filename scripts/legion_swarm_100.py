@@ -13,6 +13,8 @@ from pathlib import Path
 # Add project root to sys.path
 sys.path.append(str(Path(__file__).parent.parent))
 
+from cortex.database.pool import CortexConnectionPool
+from cortex.engine.async_engine import AsyncCortexEngine
 from cortex.extensions.swarm.remediation.engine import LegionRemediationEngine
 
 
@@ -28,7 +30,12 @@ async def main():
         print(f"Error: Database not found at {db_path}")
         sys.exit(1)
 
-    engine = LegionRemediationEngine(db_path, dry_run=args.dry_run)
+    pool = CortexConnectionPool(db_path, read_only=args.dry_run)
+    await pool.initialize()
+    cortex_engine = AsyncCortexEngine(pool, db_path)
+    await cortex_engine.initialize()
+
+    engine = LegionRemediationEngine(db_path, dry_run=args.dry_run, engine=cortex_engine)
     
     print("--- LEGION-Ω REMEDIATION SWARM ---")
     print(f"DB: {db_path}")

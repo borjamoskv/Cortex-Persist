@@ -132,7 +132,7 @@ async def insert_fact_record(
     async with conn.execute(
         """
         INSERT INTO facts (
-            tenant_id, project, content, fact_type, metadata, hash, 
+            tenant_id, project, content, fact_type, metadata, hash,
             source, confidence, parent_id, relation_type,
             quadrant, storage_tier, exergy_score, category, yield_score,
             semantic_status, tags
@@ -162,40 +162,14 @@ async def insert_fact_record(
         fact_id = cursor.lastrowid
     assert fact_id is not None
 
-    # ── P0 Decoupling: Enqueue Enrichment Job ──
-    try:
-        await conn.execute(
-            """
-            INSERT INTO enrichment_jobs (fact_id, job_type, status, priority)
-            VALUES (?, 'embedding', 'pending', ?)
-            """,
-            (fact_id, 1 if fact_type == "decision" else 0),
-        )
-    except (sqlite3.OperationalError, aiosqlite.Error) as e:
-        # If the table doesn't exist yet (e.g. migration hasn't run), create it
-        if "no such table: enrichment_jobs" in str(e).lower():
-            await conn.execute(
-                """
-                CREATE TABLE IF NOT EXISTS enrichment_jobs (
-                    id              INTEGER PRIMARY KEY AUTOINCREMENT,
-                    fact_id         INTEGER NOT NULL REFERENCES facts(id),
-                    job_type        TEXT NOT NULL DEFAULT 'embedding',
-                    status          TEXT NOT NULL DEFAULT 'pending',
-                    priority        INTEGER DEFAULT 0,
-                    attempts        INTEGER DEFAULT 0,
-                    last_error      TEXT,
-                    payload         TEXT,
-                    created_at      TEXT NOT NULL DEFAULT (datetime('now')),
-                    updated_at      TEXT NOT NULL DEFAULT (datetime('now'))
-                )
-                """
-            )
-            await conn.execute(
-                "INSERT INTO enrichment_jobs (fact_id, job_type, status, priority) VALUES (?, 'embedding', 'pending', ?)",
-                (fact_id, 1 if fact_type == "decision" else 0),
-            )
-        else:
-            logger.warning("Failed to enqueue enrichment job for fact %d: %s", fact_id, e)
+    # 3. P0 Decoupling: Enqueue Enrichment Job (Direct O(1))
+    await conn.execute(
+        """
+        INSERT INTO enrichment_jobs (fact_id, job_type, status, priority)
+        VALUES (?, 'embedding', 'queued', ?)
+        """,
+        (fact_id, 1 if fact_type == "decision" else 0),
+    )
 
     # 3. Tag Persistence (fact_tags bridge table)
     if tags:
@@ -209,7 +183,8 @@ async def insert_fact_record(
     try:
         # We mirror a subset to FTS for fast keyword search
         await conn.execute(
-            "INSERT INTO facts_fts (rowid, content, project, tags, fact_type) VALUES (?, ?, ?, ?, ?)",
+            "INSERT INTO facts_fts (rowid, content, project, tags, fact_type) "
+            "VALUES (?, ?, ?, ?, ?)",
             (fact_id, content, project, tags_json, fact_type),
         )
     except (sqlite3.Error, aiosqlite.Error) as e:

@@ -58,7 +58,7 @@ logger = logging.getLogger("cortex.db")
 # for SQLite write lock (WAL allows concurrent reads but only 1 writer).
 # Reduced to 5000ms to allow the immune system to raise actionable errors
 # instead of hanging indefinitely, making lock contention visible.
-BUSY_TIMEOUT_MS: Final[int] = 5000
+BUSY_TIMEOUT_MS: Final[int] = 30000
 
 # Python-level timeout (seconds) for the sqlite3.connect() call itself.
 CONNECT_TIMEOUT_S: Final[int] = 5

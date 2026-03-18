@@ -158,7 +158,10 @@ async def scan_ghost_gaps(cortex_db: Any) -> list[CrystalTarget]:
                     intent="search_gap",
                     priority=3,
                     source="ghost_gap",
-                    metadata={"ghost_id": getattr(r, "id", "unknown")},
+                    metadata={
+                        "ghost_id": getattr(r, "id", "unknown"),
+                        "agent_id": getattr(r, "agent_id", None),
+                    },
                 )
             )
 

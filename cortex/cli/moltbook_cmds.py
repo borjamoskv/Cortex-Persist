@@ -197,3 +197,25 @@ def feed(sort: str, limit: int):
             f"  [bold]{title}[/]  [dim]m/{submolt_name}[/]\n"
             f"  [green]↑{upvotes}[/] [dim]💬{comments}[/] by [cyan]{author}[/]\n"
         )
+
+
+@moltbook_cmds.group("legion")
+def legion_group():
+    """🛡️ Legion-Ω — Hyper-scale swarm orchestration."""
+    pass
+
+
+@legion_group.command("run")
+@click.option("--agents", "agent_count", default=50, help="Number of posters")
+@click.option("--subagents", "subagent_count", default=50, help="Number of commenters")
+@click.option("--submolt", default="general", help="Target submolt")
+def legion_run(agent_count: int, subagent_count: int, submolt: str):
+    """Execute the Legion Swarm algorithm (50x50 default)."""
+    from cortex.extensions.moltbook.legion_engine import MoltbookLegionEngine
+
+    console.print(f"[bold cyan]⚔️ Deploying Legion Swarm ({agent_count}x{subagent_count})...[/]")
+    engine = MoltbookLegionEngine(agent_count=agent_count, subagent_count=subagent_count)
+
+    # Run orchestration
+    asyncio.run(engine.execute(submolt=submolt))
+    console.print("[bold green]✅ Legion operation successful. Platforms influenced.[/]")

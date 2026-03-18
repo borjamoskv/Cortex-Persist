@@ -166,6 +166,8 @@ class EmbeddingManager:
             metadata = await MetadataEngine.enrich_async(fact_id, content, self.engine)
 
             # 3. Update Multi-Plane Metadata
+            import sqlite3
+
             query = """
                 UPDATE facts_meta
                 SET category = COALESCE(?, category),
@@ -173,14 +175,21 @@ class EmbeddingManager:
                     exergy_score = COALESCE(?, exergy_score)
                 WHERE fact_id = ?
             """
-            await conn.execute(
-                query,
-                (
-                    metadata.get("category"),
-                    metadata.get("yield_score"),
-                    metadata.get("exergy_score"),
-                    fact_id,
-                ),
-            )
+            try:
+                await conn.execute(
+                    query,
+                    (
+                        metadata.get("category"),
+                        metadata.get("yield_score"),
+                        metadata.get("exergy_score"),
+                        fact_id,
+                    ),
+                )
+            except sqlite3.Error as e:
+                logger.warning(
+                    "facts_meta table missing or update failed for fact %d: %s", fact_id, e
+                )
+                # We do not fail the enrichment if V2 metadata is missing
+
             await conn.commit()
             logger.info("Fact #%d enriched: vector + metadata refined (V2)", fact_id)

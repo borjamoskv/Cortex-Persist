@@ -1,3 +1,4 @@
+# ── Sovereign Metabolic Trigger: Legion Remediation Engaged ────────────────────────
 """LEGION-Ω 100-Agent Remediation Engine.
 
 Orchestrates the Blue (remediation) and Red (siege) teams.
@@ -11,7 +12,7 @@ from __future__ import annotations
 
 import json
 import logging
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 from typing import Any
 
@@ -41,9 +42,10 @@ class RemediationReport:
 class LegionRemediationEngine:
     """The 100-agent swarm orchestrator."""
 
-    def __init__(self, db_path: str, dry_run: bool = True) -> None:
+    def __init__(self, db_path: str, dry_run: bool = True, engine: Any = None) -> None:
         self.db_path = db_path
         self.dry_run = dry_run
+        self.engine = engine
         self.classifier = DiagnosisClassifier(db_path)
 
     async def execute(self) -> RemediationReport:
@@ -74,24 +76,68 @@ class LegionRemediationEngine:
                     continue
 
                 blue_agent = blue_battalion.select_agent(diag)
+
+                # Special Handling for Functional Fixes (B06, B04)
+                if not diag.fix_sql and self.engine:
+                    if battalion_id == "B06_SEMANTIC" and diag.issue == "ENRICHMENT_INCOMPLETE":
+                        if not self.dry_run:
+                            try:
+                                # Fetch row for enrichment context
+                                cursor = await db.execute(
+                                    "SELECT content, project, tenant_id FROM facts WHERE id = ?",
+                                    (fact_id,),
+                                )
+                                row = await cursor.fetchone()
+                                if row:
+                                    await self.engine.embeddings.enrich_fact(
+                                        fact_id=fact_id,
+                                        content=row["content"],
+                                        project=row["project"],
+                                        tenant_id=row["tenant_id"],
+                                    )
+                                    blue_result = await blue_agent.remediate(
+                                        diag, db, dry_run=self.dry_run
+                                    )
+                                    # Override result since we did the functional fix
+                                    blue_result = replace(
+                                        blue_result,
+                                        success=True,
+                                        action="ENRICHED",
+                                        sql_executed="functional:enrich_fact",
+                                    )
+                            except Exception as e:
+                                logger.error("Functional enrichment failed for %s: %s", fact_id, e)
+                                # Fall through to normal remediation (which will fail)
+
                 blue_result = await blue_agent.remediate(diag, db, dry_run=self.dry_run)
 
                 if not blue_result.success:
                     failed_count += 1
-                    report_details.append({
-                        "fact_id": fact_id,
-                        "battalion": battalion_id,
-                        "status": "FAILED",
-                        "blue": asdict(blue_result),
-                    })
+                    report_details.append(
+                        {
+                            "fact_id": fact_id,
+                            "battalion": battalion_id,
+                            "status": "FAILED",
+                            "blue": asdict(blue_result),
+                        }
+                    )
                     continue
 
-                # 2. Red Team Siege
-                # Fetch full fact state after Blue's potential (dry) mutation
-                # In dry-run, we just fetch the original fact and assume the fix would be applied.
                 cursor = await db.execute("SELECT * FROM facts WHERE id = ?", (fact_id,))
                 fact_row = await cursor.fetchone()
                 fact = dict(fact_row) if fact_row else {}
+
+                # In dry-run, simulate the fix on the fact dictionary so Red can validate the proposal
+                if self.dry_run and blue_result.success and diag.fix_sql:
+                    # Simple heuristic parser for "UPDATE facts SET field = ? WHERE id = ?"
+                    try:
+                        sql = diag.fix_sql.upper()
+                        if "UPDATE FACTS SET" in sql:
+                            parts = diag.fix_sql.split("SET")[1].split("WHERE")[0].split("=")
+                            field_name = parts[0].strip().lower()
+                            fact[field_name] = diag.fix_params[0]
+                    except Exception as e:
+                        logger.warning("Could not simulate fix for %s: %s", fact_id, e)
 
                 red_battalion = RED_TEAM.get(battalion_id)
                 if not red_battalion:
@@ -100,7 +146,7 @@ class LegionRemediationEngine:
                     rejected_count += 1
                     continue
 
-                red_agent_idx = int(blue_agent.agent_id.split("-")[2]) - 1 # Mirror agent
+                red_agent_idx = int(blue_agent.agent_id.split("-")[2]) - 1  # Mirror agent
                 red_agent = red_battalion.agents[red_agent_idx]
                 siege_results = await red_agent.siege(fact, blue_result, db)
 
@@ -117,13 +163,15 @@ class LegionRemediationEngine:
                     rejected_count += 1
                     status = "REJECTED"
 
-                report_details.append({
-                    "fact_id": fact_id,
-                    "battalion": battalion_id,
-                    "status": status,
-                    "blue": asdict(blue_result),
-                    "red": [asdict(sr) for sr in siege_results],
-                })
+                report_details.append(
+                    {
+                        "fact_id": fact_id,
+                        "battalion": battalion_id,
+                        "status": status,
+                        "blue": asdict(blue_result),
+                        "red": [asdict(sr) for sr in siege_results],
+                    }
+                )
 
         report = RemediationReport(
             db_path=self.db_path,
