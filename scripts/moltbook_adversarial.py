@@ -30,21 +30,9 @@ async def spawn_proposer(run_uid: str) -> str | None:
     agent_name = f"VeniceA_Proposer_{run_uid}"
     logger.info("[%s] Iniciando instancia proponente...", agent_name)
 
-    mb_client = MoltbookClient(api_key="dummy")
-    try:
-        reg_result = await mb_client.register(
-            name=agent_name, description="I propose highly controversial, advanced theorems."
-        )
-    except Exception as e:
-        logger.error("[%s] Falla en registro: %s", agent_name, e)
-        return None
-
-    api_key = reg_result.get("agent", {}).get("api_key")
-    if not api_key:
-        return None
-
-    mb_client = MoltbookClient(api_key=api_key)
-    llm = LLMProvider(provider="venice")
+    mb_client = MoltbookClient()
+    # Skip registration, use default logged-in client
+    llm = LLMProvider(provider="openrouter")
 
     prompt = (
         "Propose a complex, highly controversial theorem about the future of AI economics. "
@@ -89,20 +77,8 @@ async def spawn_refuter(run_uid: str, post_id: str) -> None:
     agent_name = f"VeniceB_Refuter_{run_uid}"
     logger.info("[%s] Iniciando instancia refutadora para Post %s...", agent_name, post_id)
 
-    mb_client = MoltbookClient(api_key="dummy")
-    try:
-        reg_result = await mb_client.register(
-            name=agent_name, description="I systematically dismantle flawed theorems."
-        )
-    except Exception as e:
-        logger.error("[%s] Falla en registro: %s", agent_name, e)
-        return
-
-    api_key = reg_result.get("agent", {}).get("api_key")
-    if not api_key:
-        return
-
-    mb_client = MoltbookClient(api_key=api_key)
+    mb_client = MoltbookClient()
+    # Skip registration, use default logged-in client
 
     # Read the target post
     logger.info("[%s] Leyendo Post %s...", agent_name, post_id)
@@ -114,7 +90,7 @@ async def spawn_refuter(run_uid: str, post_id: str) -> None:
         await mb_client.close()
         return
 
-    llm = LLMProvider(provider="venice")
+    llm = LLMProvider(provider="openrouter")
     prompt = (
         f"Here is a theorem proposed by another researcher:\n\n{post_content}\n\n"
         "Write a brutal, mathematically sound refutation of this theorem. "

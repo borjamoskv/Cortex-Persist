@@ -116,12 +116,16 @@ class ReputationManager:
             )
             return new_score
 
-    async def slash(self, agent_id: str, penalty: float = 0.1, reason: str = "byzantine_behavior") -> float:
+    async def slash(
+        self, agent_id: str, penalty: float = 0.1, reason: str = "byzantine_behavior"
+    ) -> float:
         """Heavily penalize an agent for malicious or faulty behavior."""
         # Asymmetric penalty: failures count more (default 0.1 is 10% of total range)
         return await self.update_score(agent_id, -penalty, reason=reason, is_success=False)
 
-    async def reward(self, agent_id: str, bonus: float = 0.01, reason: str = "consensus_contribution") -> float:
+    async def reward(
+        self, agent_id: str, bonus: float = 0.01, reason: str = "consensus_contribution"
+    ) -> float:
         """Small reward for contributing to valid consensus."""
         return await self.update_score(agent_id, bonus, reason=reason, is_success=True)
 

@@ -7,12 +7,17 @@ Bypasses intermediate brokers for strict Exergy compliance (Ω₂).
 from __future__ import annotations
 
 import asyncio
+import base64
 import hmac
+import itertools
 import json
 import logging
+import time
+import zlib
 from typing import Any
 
 from cortex.extensions.swarm.protocols import SwarmExtension, SwarmModule
+from cortex.extensions.swarm.swarm_heartbeat import SWARM_HEARTBEAT
 
 logger = logging.getLogger("cortex.swarm.cables")
 
@@ -32,12 +37,15 @@ class SubmarineCable(SwarmModule, SwarmExtension):
         self.secret = secret
         self.server: asyncio.AbstractServer | None = None
         self._running = False
-        # MAXSIZE creates strict TCP backpressure (Ω₂) if the agent loop is overwhelmed
-        self._inbox: asyncio.Queue[dict[str, Any]] | None = None
+        # Phase 5: Priority queuing for critical signals (Ω₂)
+        self._inbox: asyncio.PriorityQueue[tuple[int, int, dict[str, Any]]] | None = None
+        self._msg_counter = itertools.count()
         # O(1) Exergy connection pool to avoid TCP handshake overhead
         self._pool: dict[tuple[str, int], tuple[asyncio.StreamReader, asyncio.StreamWriter]] = {}
         # Tracking incoming peers to break infinite readline() blocks on shutdown
         self._active_peers: set[asyncio.StreamWriter] = set()
+        # Phase 4: Entropy Shielding
+        self._last_sent: dict[int, str] = {}
 
     async def initialize(self) -> None:
         """Starts the server listener."""
@@ -47,10 +55,14 @@ class SubmarineCable(SwarmModule, SwarmExtension):
 
         # Lazy initialization couples strictly with the sovereign thread event loop
         if self._inbox is None:
-            self._inbox = asyncio.Queue(maxsize=1000)
+            self._inbox = asyncio.PriorityQueue(maxsize=1000)
 
-        self.server = await asyncio.start_server(self._handle_client, self.host, self.port)
-        logger.info("[CablesSubmarinos] Deep trench listener bound to %s:%d", self.host, self.port)
+        if self.host.startswith("/"):
+            self.server = await asyncio.start_unix_server(self._handle_client, path=self.host)
+            logger.info("[CablesSubmarinos] Deep trench UDS listener bound to %s", self.host)
+        else:
+            self.server = await asyncio.start_server(self._handle_client, self.host, self.port)
+            logger.info("[CablesSubmarinos] Deep trench TCP listener bound to %s:%d", self.host, self.port)
 
     async def shutdown(self) -> None:
         """Stops the server listener and severs the link."""
@@ -130,17 +142,40 @@ class SubmarineCable(SwarmModule, SwarmExtension):
 
                     msg = json.loads(payload_str)
 
-                    if "payload" not in msg or "sig" not in msg:
-                        logger.warning("Malformed transmission dropped.")
+                    if "payload" not in msg or "sig" not in msg or "timestamp" not in msg:
+                        logger.warning("Malformed transmission dropped (missing critical fields).")
                         continue
 
-                    raw_payload = json.dumps(msg["payload"], sort_keys=True).encode("utf-8")
-                    if not self._verify(raw_payload, msg["sig"]):
+                    # Temporal Entropy Shielding (30 second window)
+                    timestamp = msg.get("timestamp", 0)
+                    if abs(time.time() - timestamp) > 30:
+                        logger.warning("Temporal Entropy rejected: Message drifted outside causal window (Replay Attack).")
+                        continue
+
+                    raw_payload = json.dumps(msg["payload"], sort_keys=True).encode()
+                    signable_content = f"{timestamp}:{raw_payload.hex()}".encode()
+                    
+                    if not self._verify(signable_content, msg["sig"]):
                         logger.warning("Cryptographic verification failed on submarine cable!")
                         continue
 
+                    payload = msg["payload"]
+                    SWARM_HEARTBEAT.pulse(node_id=payload.get("author", "submarine_cable"))
+
+                    # Handle Phase 5 Compression
+                    if msg.get("compressed"):
+                        try:
+                            import base64
+
+                            decompressed = zlib.decompress(base64.b64decode(payload["data"]))
+                            payload = json.loads(decompressed)
+                        except Exception as e:
+                            logger.error("Decompression failed: %s", e)
+                            continue
+
                     if self._inbox is not None:
-                        await self._inbox.put(msg["payload"])
+                        priority = msg.get("priority", 5)  # Default priority: balanced
+                        await self._inbox.put((priority, next(self._msg_counter), payload))
                 except json.JSONDecodeError:
                     logger.error("Invalid JSON format over submarine cable.")
                 except Exception as e:
@@ -153,27 +188,67 @@ class SubmarineCable(SwarmModule, SwarmExtension):
             except Exception:
                 pass
 
-    async def send(self, target_host: str, target_port: int, payload: dict[str, Any]) -> bool:
+    async def send(
+        self,
+        target_host: str,
+        target_port: int,
+        payload: dict[str, Any],
+        priority: int = 5,
+        compress: bool = False,
+    ) -> bool:
         """Transmit over the synchronous backplane using multiplexed pool.
 
         Args:
             target_host: IP to send to
             target_port: Port to send to
             payload: JSON serializable dict
-
-        Returns:
-            bool: True if fully transmitted, False otherwise.
+            priority: 0 (critical) to 9 (telemetry)
+            compress: Enable zlib for large payloads
         """
-        raw_payload = json.dumps(payload, sort_keys=True).encode("utf-8")
-        sig = self._sign(raw_payload)
-        msg_bytes = json.dumps({"payload": payload, "sig": sig}).encode("utf-8") + b"\n"
+        if not isinstance(payload, dict):
+            payload = {"data": payload}
 
+        raw_payload = json.dumps(payload, sort_keys=True).encode()
+        timestamp = int(time.time())
+        signable_content = f"{timestamp}:{raw_payload.hex()}".encode()
+
+        is_compressed = False
+        payload_to_send = payload
+
+        if compress or len(raw_payload) > 1024: # Check if compression is requested or payload is large
+            compressed_payload = zlib.compress(raw_payload, level=zlib.Z_BEST_COMPRESSION)
+            payload_to_send = {"data": base64.b64encode(compressed_payload).decode("utf-8")}
+            is_compressed = True
+        msg_bytes = (
+            json.dumps(
+                {
+                    "payload": payload_to_send,
+                    "timestamp": timestamp,
+                    "compressed": is_compressed,
+                    "priority": priority,
+                    "sig": self._sign(signable_content),
+                }
+            ).encode("utf-8")
+            + b"\n"
+        )
+        target_str = target_host if target_host.startswith("/") else f"{target_host}:{target_port}"
         target = (target_host, target_port)
+
+        # Semaphore/Deduplication check
+        if hasattr(self, "_last_sent"):
+            payload_hash = hash(frozenset(payload.items()))
+            if payload_hash in self._last_sent and self._last_sent[payload_hash] == target_str:
+                logger.debug("Deduplication: suppressing identical payload to %s", target_str)
+                return True
+            self._last_sent[payload_hash] = target_str
 
         for attempt in range(2):
             try:
                 if target not in self._pool:
-                    reader, writer = await asyncio.open_connection(target_host, target_port)
+                    if target_host.startswith("/"):
+                        reader, writer = await asyncio.open_unix_connection(target_host)
+                    else:
+                        reader, writer = await asyncio.open_connection(target_host, target_port)
                     self._pool[target] = (reader, writer)
 
                 _, writer = self._pool[target]
@@ -199,4 +274,5 @@ class SubmarineCable(SwarmModule, SwarmExtension):
         """Consume the next verified message from the deep trench."""
         if self._inbox is None:
             raise RuntimeError("Cables Submarinos inbox is dormant.")
-        return await self._inbox.get()
+        priority, counter, payload = await self._inbox.get()
+        return payload

@@ -18,9 +18,16 @@ from typing import Any
 
 import aiosqlite
 
+from cortex.agents.builtins.consignatario_agent import ConsignatarioAgent
+from cortex.agents.manifest import AgentManifest
+from cortex.extensions.git.poet import CommitPoet
+from cortex.database.core import connect_async_ctx
 from cortex.extensions.swarm.remediation.blue_team import BLUE_TEAM
 from cortex.extensions.swarm.remediation.diagnosis import DiagnosisClassifier
 from cortex.extensions.swarm.remediation.red_team import RED_TEAM
+from cortex.ledger.queue import EnrichmentQueue
+from cortex.ledger.store import LedgerStore
+from cortex.ledger.writer import LedgerWriter
 
 logger = logging.getLogger("cortex.swarm.remediation.engine")
 
@@ -47,6 +54,17 @@ class LegionRemediationEngine:
         self.dry_run = dry_run
         self.engine = engine
         self.classifier = DiagnosisClassifier(db_path)
+        # Consignatario Manifest
+        manifest = AgentManifest(
+            agent_id="consignatario-01", purpose="Sovereign Ledger Consignment", tenant_id="swarm"
+        )
+        self.consignatario = ConsignatarioAgent(manifest=manifest, bus=None)
+        self.poet = CommitPoet()
+
+        # Ledger Infrastructure
+        store = LedgerStore(db_path=db_path)
+        queue = EnrichmentQueue(store=store)
+        self.ledger = LedgerWriter(store=store, queue=queue)
 
     async def execute(self) -> RemediationReport:
         """Run the full 100-agent remediation cycle."""
@@ -62,7 +80,7 @@ class LegionRemediationEngine:
         rejected_count = 0
         failed_count = 0
 
-        async with aiosqlite.connect(self.db_path) as db:
+        async with connect_async_ctx(self.db_path) as db:
             db.row_factory = aiosqlite.Row
 
             for diag in diagnoses:
@@ -127,13 +145,16 @@ class LegionRemediationEngine:
                 fact_row = await cursor.fetchone()
                 fact = dict(fact_row) if fact_row else {}
 
-                # In dry-run, simulate the fix on the fact dictionary so Red can validate the proposal
+                # In dry-run, simulate the fix on the fact dictionary
+                # so Red can validate the proposal.
                 if self.dry_run and blue_result.success and diag.fix_sql:
                     # Simple heuristic parser for "UPDATE facts SET field = ? WHERE id = ?"
                     try:
                         sql = diag.fix_sql.upper()
                         if "UPDATE FACTS SET" in sql:
-                            parts = diag.fix_sql.split("SET")[1].split("WHERE")[0].split("=")
+                            set_part = diag.fix_sql.split("SET")[1]
+                            where_part = set_part.split("WHERE")[0]
+                            parts = where_part.split("=")
                             field_name = parts[0].strip().lower()
                             fact[field_name] = diag.fix_params[0]
                     except Exception as e:
@@ -150,24 +171,35 @@ class LegionRemediationEngine:
                 red_agent = red_battalion.agents[red_agent_idx]
                 siege_results = await red_agent.siege(fact, blue_result, db)
 
-                passed = all(sr.passed for sr in siege_results)
+                # 3. Consignment & Authorization
+                consign_ok = await self.consignatario.authorize_and_commit(
+                    db=db,
+                    ledger=self.ledger,
+                    blue_result=blue_result,
+                    siege_results=siege_results,
+                    dry_run=self.dry_run,
+                )
 
-                if passed:
-                    if not self.dry_run:
-                        await db.commit()
+                if consign_ok:
                     applied_count += 1
                     status = "APPLIED" if not self.dry_run else "DRY_RUN_OK"
                 else:
-                    if not self.dry_run:
-                        await db.rollback()
                     rejected_count += 1
                     status = "REJECTED"
+
+                # 4. Generate Poetic Narrative
+                narrative = self.poet.compose_remediation(
+                    battalion=battalion_id,
+                    action=blue_result.action,
+                    fact_id=fact_id,
+                )
 
                 report_details.append(
                     {
                         "fact_id": fact_id,
                         "battalion": battalion_id,
                         "status": status,
+                        "narrative": narrative,
                         "blue": asdict(blue_result),
                         "red": [asdict(sr) for sr in siege_results],
                     }
@@ -185,7 +217,7 @@ class LegionRemediationEngine:
         )
 
         # Get total fact count for context
-        async with aiosqlite.connect(self.db_path) as db:
+        async with connect_async_ctx(self.db_path, read_only=True) as db:
             cursor = await db.execute("SELECT COUNT(*) FROM facts")
             row = await cursor.fetchone()
             report.total_facts_scanned = row[0] if row else 0

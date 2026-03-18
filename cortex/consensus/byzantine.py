@@ -83,7 +83,7 @@ class WBFTConsensus:
         scores = []
 
         for i in range(n):
-            rep_i = reputations.get(responses[i].label, 0.5)
+            _rep_i = reputations.get(responses[i].label, 0.5)
             w_sum = 0.0
             w_total = 0.0
             for j in range(n):
@@ -121,7 +121,7 @@ class HashConsensus:
         self.tolerance = tolerance
 
     def _hash(self, data: Any) -> str:
-        if isinstance(data, (dict, list)):
+        if isinstance(data, dict | list):
             s = json.dumps(data, sort_keys=True)
         else:
             s = str(data)
@@ -153,8 +153,8 @@ class HashConsensus:
         ratio = (max_w / total_weight) if total_weight > 0 else 0.0
         quorum_met = ratio >= self.tolerance
 
-        winning_label = [l for l, h in hashes.items() if h == best_hash][0]
-        outliers = [l for l, h in hashes.items() if h != best_hash]
+        winning_label = [label for label, h in hashes.items() if h == best_hash][0]
+        outliers = [label for label, h in hashes.items() if h != best_hash]
 
         return ConsensusVerdict(
             consensus_reached=quorum_met,
@@ -207,7 +207,7 @@ class ByzantineArbiter:
 
         if verdict.consensus_reached:
             # Reward
-            winners = [l for l in proposals if l not in verdict.outliers]
+            winners = [label for label in proposals if label not in verdict.outliers]
             for label in winners:
                 await self.rep_manager.reward(label, amount=0.01)
 

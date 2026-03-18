@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import base64
 import hashlib
 import json
@@ -413,3 +414,26 @@ def link_causality(meta: dict[str, Any] | None, signal_id: int | None) -> dict[s
         m["causal_parent"] = signal_id
         m["axiomatic_integrity"] = "Ω₁"
     return m
+
+
+async def automated_taint_bridge(conn: aiosqlite.Connection) -> None:
+    """Listens to the signal bus for taint events and propagates them."""
+    from cortex.extensions.signals.bus import AsyncSignalBus
+
+    bus = AsyncSignalBus(conn)
+    graph = AsyncCausalGraph(conn)
+
+    while True:
+        try:
+            signals = await bus.poll(event_type="taint:propagate", consumer="causal_bridge")
+            for sig in signals:
+                fact_id = sig.payload.get("fact_id")
+                tenant_id = sig.payload.get("tenant_id", "default")
+                if fact_id:
+                    await graph.propagate_taint(fact_id, tenant_id)
+            await asyncio.sleep(1)
+        except asyncio.CancelledError:
+            break
+        except Exception as e:
+            logger.error("Causal bridge error: %s", e)
+            await asyncio.sleep(5)

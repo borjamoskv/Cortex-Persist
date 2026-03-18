@@ -18,6 +18,7 @@ try:
     from rich.panel import Panel
     from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
     from rich.table import Table
+
     console = Console()
 except ImportError:
     print("This script requires 'rich' for telemetry. Run: pip install rich")
@@ -37,26 +38,33 @@ async def main():
         sys.exit(1)
 
     engine = LegionRemediationEngine(db_path, dry_run=args.dry_run)
-    
-    console.print(Panel.fit("[bold cyan]LEGION-EXTREME-Ω KARDASHEV SCALING[/] \n[dim]Initializing 50 Commanders x 50 Soldiers (2500 Nodes)[/]", border_style="cyan"))
+
+    console.print(
+        Panel.fit(
+            "[bold cyan]LEGION-EXTREME-Ω KARDASHEV SCALING[/] \n[dim]Initializing 50 Commanders x 50 Soldiers (2500 Nodes)[/]",
+            border_style="cyan",
+        )
+    )
     console.print(f"DB: [green]{db_path}[/]")
-    console.print(f"Mode: [{'yellow' if args.dry_run else 'red'}]{'DRY-RUN' if args.dry_run else 'LIVE'}[/]")
-    
+    console.print(
+        f"Mode: [{'yellow' if args.dry_run else 'red'}]{'DRY-RUN' if args.dry_run else 'LIVE'}[/]"
+    )
+
     # Fake scaling effect for effect
     with Progress(
         SpinnerColumn(),
         TextColumn("[progress.description]{task.description}"),
         BarColumn(),
         TimeElapsedColumn(),
-        console=console
+        console=console,
     ) as progress:
         task1 = progress.add_task("[cyan]Booting 50 Command Nodes...", total=50)
-        for i in range(50):
+        for _i in range(50):
             await asyncio.sleep(0.01)
             progress.update(task1, advance=1)
-            
+
         task2 = progress.add_task("[magenta]Deploying 2500 Soldier Nodes...", total=2500)
-        for i in range(25): # Speed it up
+        for _i in range(25):  # Speed it up
             await asyncio.sleep(0.02)
             progress.update(task2, advance=100)
 
@@ -80,6 +88,7 @@ async def main():
     if args.report:
         engine.save_report(report, args.report)
         console.print(f"Report saved to [blue]{args.report}[/]")
+
 
 if __name__ == "__main__":
     asyncio.run(main())

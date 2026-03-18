@@ -10,6 +10,12 @@ import asyncio
 import sys
 from pathlib import Path
 
+from rich import box
+from rich.console import Console
+from rich.panel import Panel
+from rich.progress import BarColumn, Progress, SpinnerColumn, TaskProgressColumn, TextColumn
+from rich.table import Table
+
 # Add project root to sys.path
 sys.path.append(str(Path(__file__).parent.parent))
 
@@ -25,35 +31,64 @@ async def main():
     parser.add_argument("--report", help="Path to save JSON report")
     args = parser.parse_args()
 
+    console = Console()
+
     db_path = str(Path(args.db).expanduser())
     if not Path(db_path).exists():
-        print(f"Error: Database not found at {db_path}")
+        console.print(f"[bold red]Error:[/bold red] Database not found at {db_path}")
         sys.exit(1)
 
-    pool = CortexConnectionPool(db_path, read_only=args.dry_run)
-    await pool.initialize()
-    cortex_engine = AsyncCortexEngine(pool, db_path)
-    await cortex_engine.initialize()
+    console.print(
+        Panel.fit(
+            "[bold cyan]LEGION-Ω[/bold cyan] [slate_blue]100-Agent Remediation Swarm[/slate_blue]\n"
+            f"[dim]DB-Path: {db_path}[/dim]\n"
+            f"[dim]Mode: {'DRY-RUN' if args.dry_run else 'PRODUCTION'}[/dim]",
+            border_style="cyan",
+            box=box.DOUBLE,
+        )
+    )
 
-    engine = LegionRemediationEngine(db_path, dry_run=args.dry_run, engine=cortex_engine)
-    
-    print("--- LEGION-Ω REMEDIATION SWARM ---")
-    print(f"DB: {db_path}")
-    print(f"Dry Run: {args.dry_run}")
-    print("Initializing 100-agent mesh...")
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(),
+        TaskProgressColumn(),
+        console=console,
+    ) as progress:
+        task_init = progress.add_task("Initializing 100-agent mesh...", total=100)
 
-    report = await engine.execute()
+        pool = CortexConnectionPool(db_path, read_only=args.dry_run)
+        await pool.initialize()
+        progress.advance(task_init, 30)
 
-    print("\n--- Results ---")
-    print(f"Facts Scanned: {report.total_facts_scanned}")
-    print(f"Issues Found:  {report.total_issues_found}")
-    print(f"Fixes Passed:  {report.fixes_applied}")
-    print(f"Fixes Rejected: {report.fixes_rejected}")
-    print(f"Fixes Failed:   {report.fixes_failed}")
+        cortex_engine = AsyncCortexEngine(pool, db_path)
+        await cortex_engine.initialize()
+        progress.advance(task_init, 30)
+
+        engine = LegionRemediationEngine(db_path, dry_run=args.dry_run, engine=cortex_engine)
+        progress.advance(task_init, 40)
+
+        task_rem = progress.add_task("Executing remediation cycle...", total=None)
+        report = await engine.execute()
+        progress.update(task_rem, completed=100, description="Remediation cycle complete.")
+
+    # Summary Table
+    table = Table(title="Swarm Remediation Summary", box=box.ROUNDED, header_style="bold blue")
+    table.add_column("Metric", style="cyan")
+    table.add_column("Value", justify="right", style="magenta")
+
+    table.add_row("Facts Scanned", str(report.total_facts_scanned))
+    table.add_row("Issues Identified", str(report.total_issues_found))
+    table.add_row("Fixes Applied", f"[green]{report.fixes_applied}[/green]")
+    table.add_row("Fixes Rejected", f"[yellow]{report.fixes_rejected}[/yellow]")
+    table.add_row("Fixes Failed", f"[red]{report.fixes_failed}[/red]")
+
+    console.print(table)
 
     if args.report:
         engine.save_report(report, args.report)
-        print(f"Report saved to {args.report}")
+        console.print(f"[dim]Report saved to {args.report}[/dim]")
+
 
 if __name__ == "__main__":
     asyncio.run(main())

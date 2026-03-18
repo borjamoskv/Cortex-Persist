@@ -12,10 +12,12 @@ import aiosqlite
 from cortex.database.pool import CortexConnectionPool
 from cortex.database.writer import SqliteWriteWorker
 from cortex.embeddings import LocalEmbedder
+from cortex.embeddings.manager import EmbeddingManager
 from cortex.engine.agent_mixin import AgentMixin
 from cortex.engine.consensus import ConsensusMixin
 from cortex.engine.history import HistoryMixin
 from cortex.engine.ledger import ImmutableLedger
+from cortex.engine.memory_mixin import MemoryMixin
 from cortex.engine.query_mixin import QueryMixin
 from cortex.engine.search_mixin import SearchMixin
 from cortex.engine.store_mixin import StoreMixin
@@ -33,7 +35,13 @@ TX_BEGIN_IMMEDIATE = "BEGIN IMMEDIATE"
 
 
 class AsyncCortexEngine(
-    StoreMixin, QueryMixin, SearchMixin, AgentMixin, ConsensusMixin, HistoryMixin
+    StoreMixin,
+    QueryMixin,
+    SearchMixin,
+    AgentMixin,
+    ConsensusMixin,
+    HistoryMixin,
+    MemoryMixin,
 ):
     def __init__(
         self,
@@ -48,6 +56,10 @@ class AsyncCortexEngine(
         self._ledger: ImmutableLedger | None = None
         self.vault: Any | None = None
         self._bridge_task: asyncio.Task | None = None
+        self._memory_manager = None
+
+        # Wave 5: Manager Composition
+        self.embeddings = EmbeddingManager(self)
 
         from cortex.extensions.cuatrida.orchestrator import CuatridaOrchestrator
 
@@ -62,11 +74,16 @@ class AsyncCortexEngine(
             return
 
         async with self.session() as conn:
-            # Note: automated_taint_bridge should probably take the pool
-            # or we should be careful with connection lifecycle.
-            # For simplicity, we'll implement it to listen on the pool.
             self._bridge_task = asyncio.create_task(automated_taint_bridge(conn))
             logger.info("Ω₁₃ [BRIDGE] Causal Taint Bridge entrained in AsyncCortexEngine.")
+
+    async def initialize(self):
+        """Initialize background subsystems (Memory L1-L3, Bridge)."""
+        async with self.session() as conn:
+            await self._init_memory_subsystem(self._db_path, conn)
+
+        await self.entrain_causal_bridge()
+        logger.info("AsyncCortexEngine subsystems initialized.")
 
     @property
     def cuatrida(self) -> Any:

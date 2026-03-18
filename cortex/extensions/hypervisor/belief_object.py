@@ -73,6 +73,9 @@ class BeliefStatus(str, Enum):
     CONTESTED = "contested"
     """Multiple conflicting beliefs exist — awaiting arbitration."""
 
+    TAINTED = "tainted"
+    """Proactively invalidated due to causal contamination from a parent belief."""
+
 
 class VerdictAction(str, Enum):
     """Actions the CognitiveHandoff can take on a belief."""
@@ -178,6 +181,9 @@ class BeliefObject:
     tenant_id: str = "default"
     """Multi-tenant isolation key."""
 
+    metadata: dict[str, any] = field(default_factory=dict)
+    """Additional key-value pairs for belief signaling (e.g., p0_critical)."""
+
     id: str = field(default_factory=_uuid7)
     """Time-sortable unique identifier."""
 
@@ -241,6 +247,7 @@ class BeliefObject:
             "arbitrated_by": self.arbitrated_by,
             "project": self.project,
             "tenant_id": self.tenant_id,
+            "metadata": self.metadata,
         }
 
     @classmethod
@@ -270,6 +277,7 @@ class BeliefObject:
             arbitrated_by=data.get("arbitrated_by"),
             project=data["project"],
             tenant_id=data.get("tenant_id", "default"),
+            metadata=data.get("metadata", {}),
         )
 
 

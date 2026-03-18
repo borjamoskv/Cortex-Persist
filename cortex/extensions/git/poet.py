@@ -347,6 +347,42 @@ class CommitPoet:
 
         return candidates[:count]
 
+    def compose_remediation(
+        self,
+        battalion: str,
+        action: str,
+        fact_id: str,
+    ) -> str:
+        """Generate a poetic narrative for a remediation action.
+
+        Args:
+            battalion: The remediation battalion ID (e.g. B06_SEMANTIC).
+            action: The action taken (e.g. ENRICHED).
+            fact_id: The ID of the affected fact.
+
+        Returns:
+            A sovereign remediation narrative.
+        """
+        # Map battalion to commit type for aesthetic consistency
+        type_map = {
+            "B06_SEMANTIC": "feat",  # Enrichment / Ignition
+            "B04_EXERGY": "feat",  # Energy / Core
+            "B07_TYPE": "fix",  # Repair / Suture
+            "B08_PROJECT": "refactor",  # Re-alignment
+            "B10_TOMBSTONE": "refactor",  # Purification
+        }
+        commit_type = type_map.get(battalion, "fix")
+
+        # Clean scope from battalion name
+        scope = battalion.split("_", 1)[-1].lower() if "_" in battalion else battalion.lower()
+        if scope.startswith("b"):
+            scope = scope[1:]
+
+        template = self._select_template(commit_type, scope)
+        emoji = self._select_emoji(commit_type)
+
+        return f"{emoji} {template.capitalize()} [fact:{fact_id}]"
+
     def narrate(self, code: str, context: str = "") -> str:
         """Generate an original code comment for a given code block.
 

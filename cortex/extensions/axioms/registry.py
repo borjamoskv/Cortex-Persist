@@ -337,6 +337,18 @@ _ASPIRATIONAL: list[Axiom] = [
         enforcement="Axioma de Colapso Entrópico. Guards entrópicos. "
         "Zero-trust cognitivo. Detección de premature epistemic closure.",
     ),
+    Axiom(
+        id="AX-034",
+        name="Cognitive Routing (Ω₁₆)",
+        mandate=(
+            "Agents MUST switch between discrete reasoning modes (Deep Think, "
+            "Deep Research, UltraThink) based on task complexity as defined "
+            "in GEMINI.md. Selection is structural, not preferential. "
+            "High-exergy modes are reserved for irreversible or singularity events."
+        ),
+        category=AxiomCategory.ASPIRATIONAL,
+        enforcement="CognitiveHandoff orchestration + Mode Selection Matrix in GEMINI.md.",
+    ),
 ]
 
 

@@ -57,7 +57,9 @@ class NobelSwarmOrchestrator:
             if exergy >= 90.0:
                 self.total_anomalies_detected += 1
                 logger.info(
-                    f"Anomalía Exergética Detectada: {exergy:.1f}. Despertando Swarm sobre [{paper['id']}]."
+                    "Anomalía Exergética Detectada: %.1f. Despertando Swarm sobre [%s].",
+                    exergy,
+                    paper["id"],
                 )
                 self.state = "Swarm-Assault"
                 await self._orchestrate_swarm(paper)
@@ -69,7 +71,7 @@ class NobelSwarmOrchestrator:
         return (velocity * 100) / max(abs(entropy_delta), 0.1)
 
     async def _orchestrate_swarm(self, paper: dict[str, Any]):
-        logger.info(f"Comenzando asalto Z3-SMT (hilbert-omega) sobre {paper['id']}...")
+        logger.info("Comenzando asalto Z3-SMT (hilbert-omega) sobre %s...", paper["id"])
         await asyncio.sleep(1)  # Simulated compute
         if not paper.get("solvable", True):
             logger.warning("Ficción estocástica detectada. Aniquilación epistémica ejecutada.")
@@ -78,7 +80,7 @@ class NobelSwarmOrchestrator:
         logger.info("Comenzando Inquisición de Alucinación (julio-cortazar-omega)...")
         await asyncio.sleep(1)
 
-        logger.info(f"Cristalizando Fact C5-Dynamic en Master Ledger. Hash: {hash(paper['id'])}")
+        logger.info("Cristalizando Fact C5-Dynamic en Master Ledger. Hash: %s", hash(paper["id"]))
         logger.info("Autogeneración Ouroboros iniciada: Generando nuevo agente a partir del Paper.")
 
     async def _ingest_frontier_vectors(self) -> list[dict[str, Any]]:

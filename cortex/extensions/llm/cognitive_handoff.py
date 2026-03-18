@@ -27,6 +27,7 @@ from dataclasses import dataclass
 from cortex.extensions.hypervisor.belief_object import (
     BeliefConfidence,
     BeliefObject,
+    BeliefStatus,
     BeliefVerdict,
     VerdictAction,
 )
@@ -148,6 +149,11 @@ class CognitiveHandoff:
         ctx = context or []
         total_tokens = 0
 
+        # ── Step 0: P0 Singularity Detection ──────────────────────────
+        if belief.metadata.get("p0_critical") or self._is_system_singular(ctx):
+            logger.warning("P0 SINGULARITY DETECTED — Engaging Cognitive UltraThink")
+            return await self._execute_ultra_think(belief, ctx)
+
         # ── Step 1: Infrastructure prescreen ─────────────────────────
         prescreen = await self._infra_prescreen(belief, ctx)
         total_tokens += prescreen.tokens_used
@@ -234,7 +240,60 @@ class CognitiveHandoff:
             "total_tokens": self._total_tokens,
             "escalation_count": self._escalation_count,
             "quarantine_count": self._quarantine_count,
+            "ultra_think_count": getattr(self, "_ultra_think_count", 0),
         }
+
+    # ─── P0 Singularity Remediation (Ω₁₆) ───────────────────────────────
+
+    async def _execute_ultra_think(
+        self,
+        belief: BeliefObject,
+        context: list[BeliefObject],
+    ) -> BeliefVerdict:
+        """Handle P0 singularities via SYSTEM_PROMPT_ULTRA.
+
+        Forces a frontier call with maximum reasoning capacity.
+        """
+        from cortex.extensions.agents.system_prompt import SYSTEM_PROMPT_ULTRA
+
+        self._ultra_think_count = getattr(self, "_ultra_think_count", 0) + 1
+
+        if self._router is None:
+            return BeliefVerdict(
+                action=VerdictAction.QUARANTINE,
+                model="ultra_think",
+                reason="P0 Singularity detected — Dry run mode",
+            )
+
+        prompt = CortexPrompt(
+            system_instruction=SYSTEM_PROMPT_ULTRA,
+            working_memory=[
+                {
+                    "role": "user",
+                    "content": self._format_belief_for_prompt(belief, context),
+                }
+            ],
+            intent=IntentProfile.P0_REMEDIATION,
+            reasoning_mode=ReasoningMode.ULTRA_THINK,
+        )
+
+        # Force a capable provider (e.g. o1-pro or Gemini 3 Deep Think)
+        result = await self._router.route(prompt, provider_hint="frontier")
+        tokens = getattr(result, "tokens_used", 0)
+        self._total_tokens += tokens
+
+        return BeliefVerdict(
+            action=VerdictAction.QUARANTINE,
+            model="ultra_think",
+            cost_tokens=tokens,
+            reason="ULTRA_THINK: System integrity remediation initiated.",
+        )
+
+    def _is_system_singular(self, context: list[BeliefObject]) -> bool:
+        """Heuristic for detecting system-level collapse."""
+        # Example: if more than 3 high-confidence beliefs are quarantined, the system is singular.
+        quarantined = [b for b in context if b.status == BeliefStatus.QUARANTINED]
+        return len(quarantined) > 3
 
     # ─── Internal Pipeline Steps ────────────────────────────────────────
 

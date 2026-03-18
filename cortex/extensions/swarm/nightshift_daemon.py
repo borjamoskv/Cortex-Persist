@@ -81,12 +81,13 @@ class NightShiftCrystalDaemon:
                 max_targets=self._max_crystals,
                 queue_path=self._queue_path,
             )
-            
+
             # --- Ω₃ Taint Guard (Byzantine Default) ---
             if self._db and targets:
                 from cortex.consensus.reputation import ReputationManager
+
                 rep_manager = ReputationManager(self._db)
-                
+
                 filtered_targets = []
                 for t in targets:
                     agent_id = None

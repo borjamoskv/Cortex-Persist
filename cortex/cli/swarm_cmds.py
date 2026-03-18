@@ -295,7 +295,9 @@ def swarm_remediate(db, dry_run, report):
         console.print(f"\n[bold green]✅ Detailed report saved to:[/] [white]{report}[/]")
 
     if not dry_run:
-        console.print("\n[bold green]✅ Remediation cycle complete. Database integrity restored.[/]")
+        console.print(
+            "\n[bold green]✅ Remediation cycle complete. Database integrity restored.[/]"
+        )
     else:
         console.print("\n[yellow]⚠ Dry-run complete. No changes made to the database.[/]")
 

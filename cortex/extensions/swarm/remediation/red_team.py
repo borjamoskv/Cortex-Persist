@@ -408,9 +408,7 @@ class RedBattalion:
 # ── Factory ─────────────────────────────────────────────────────────────
 
 
-def _red_agent(
-    battalion: str, idx: int, role: str, attack_def: tuple[str, str]
-) -> RedAgent:
+def _red_agent(battalion: str, idx: int, role: str, attack_def: tuple[str, str]) -> RedAgent:
     """Build a Red agent with 1 sub-agent (siege specialist)."""
     agent_id = f"{battalion}-red-{idx:02d}-{role.replace(' ', '_')}"
     av, ad = attack_def
@@ -430,94 +428,168 @@ def _build_red_team() -> dict[str, RedBattalion]:
     battalions: dict[str, RedBattalion] = {}
 
     # R01 — Schema Siege
-    battalions["B01_SCHEMA"] = RedBattalion("R01_SCHEMA", "Schema Siege", [
-        _red_agent("R01", 1, "schema_fuzzer", ("null_injection", "Injects NULL into required fields")),
-        _red_agent("R01", 2, "constraint_breaker", ("type_validity", "Probes type boundaries")),
-        _red_agent("R01", 3, "null_injector", ("null_injection", "Deep NULL injection testing")),
-        _red_agent("R01", 4, "type_poisoner", ("semantic_enum", "Tests enum boundary values")),
-        _red_agent("R01", 5, "schema_verifier", ("type_validity", "Final type compliance check")),
-    ])
+    battalions["B01_SCHEMA"] = RedBattalion(
+        "R01_SCHEMA",
+        "Schema Siege",
+        [
+            _red_agent(
+                "R01", 1, "schema_fuzzer", ("null_injection", "Injects NULL into required fields")
+            ),
+            _red_agent("R01", 2, "constraint_breaker", ("type_validity", "Probes type boundaries")),
+            _red_agent(
+                "R01", 3, "null_injector", ("null_injection", "Deep NULL injection testing")
+            ),
+            _red_agent("R01", 4, "type_poisoner", ("semantic_enum", "Tests enum boundary values")),
+            _red_agent(
+                "R01", 5, "schema_verifier", ("type_validity", "Final type compliance check")
+            ),
+        ],
+    )
 
     # R02 — Hash Siege
-    battalions["B02_HASH"] = RedBattalion("R02_HASH", "Hash Siege", [
-        _red_agent("R02", 1, "hash_corruptor", ("hash_integrity", "Corrupts hash to test detection")),
-        _red_agent("R02", 2, "chain_breaker", ("dangling_ref", "Tests orphaned chain links")),
-        _red_agent("R02", 3, "collision_probe", ("hash_integrity", "Probes for hash collisions")),
-        _red_agent("R02", 4, "replay_attacker", ("hash_integrity", "Replays old hashes")),
-        _red_agent("R02", 5, "hash_verifier", ("null_injection", "Final NULL hash check")),
-    ])
+    battalions["B02_HASH"] = RedBattalion(
+        "R02_HASH",
+        "Hash Siege",
+        [
+            _red_agent(
+                "R02", 1, "hash_corruptor", ("hash_integrity", "Corrupts hash to test detection")
+            ),
+            _red_agent("R02", 2, "chain_breaker", ("dangling_ref", "Tests orphaned chain links")),
+            _red_agent(
+                "R02", 3, "collision_probe", ("hash_integrity", "Probes for hash collisions")
+            ),
+            _red_agent("R02", 4, "replay_attacker", ("hash_integrity", "Replays old hashes")),
+            _red_agent("R02", 5, "hash_verifier", ("null_injection", "Final NULL hash check")),
+        ],
+    )
 
     # R03 — Confidence Siege
-    battalions["B03_CONFIDENCE"] = RedBattalion("R03_CONFIDENCE", "Confidence Siege", [
-        _red_agent("R03", 1, "bounds_overflow", ("bounds_overflow", "Pushes values beyond [0, 1]")),
-        _red_agent("R03", 2, "nan_injector", ("null_injection", "Tests NULL confidence")),
-        _red_agent("R03", 3, "negative_probe", ("bounds_overflow", "Tests epsilon underflow")),
-        _red_agent("R03", 4, "ceiling_breaker", ("bounds_overflow", "Tests overflow to 999")),
-        _red_agent("R03", 5, "confidence_verifier", ("null_injection", "Final NULL check")),
-    ])
+    battalions["B03_CONFIDENCE"] = RedBattalion(
+        "R03_CONFIDENCE",
+        "Confidence Siege",
+        [
+            _red_agent(
+                "R03", 1, "bounds_overflow", ("bounds_overflow", "Pushes values beyond [0, 1]")
+            ),
+            _red_agent("R03", 2, "nan_injector", ("null_injection", "Tests NULL confidence")),
+            _red_agent("R03", 3, "negative_probe", ("bounds_overflow", "Tests epsilon underflow")),
+            _red_agent("R03", 4, "ceiling_breaker", ("bounds_overflow", "Tests overflow to 999")),
+            _red_agent("R03", 5, "confidence_verifier", ("null_injection", "Final NULL check")),
+        ],
+    )
 
     # R04 — Exergy Siege
-    battalions["B04_EXERGY"] = RedBattalion("R04_EXERGY", "Exergy Siege", [
-        _red_agent("R04", 1, "zero_exergy", ("null_injection", "Tests NULL exergy")),
-        _red_agent("R04", 2, "infinity_probe", ("exergy_sanity", "Tests very large values")),
-        _red_agent("R04", 3, "negative_exergy", ("exergy_sanity", "Tests underflow")),
-        _red_agent("R04", 4, "overflow_attack", ("exergy_sanity", "Tests float precision")),
-        _red_agent("R04", 5, "exergy_verifier", ("null_injection", "Final NULL exergy check")),
-    ])
+    battalions["B04_EXERGY"] = RedBattalion(
+        "R04_EXERGY",
+        "Exergy Siege",
+        [
+            _red_agent("R04", 1, "zero_exergy", ("null_injection", "Tests NULL exergy")),
+            _red_agent("R04", 2, "infinity_probe", ("exergy_sanity", "Tests very large values")),
+            _red_agent("R04", 3, "negative_exergy", ("exergy_sanity", "Tests underflow")),
+            _red_agent("R04", 4, "overflow_attack", ("exergy_sanity", "Tests float precision")),
+            _red_agent("R04", 5, "exergy_verifier", ("null_injection", "Final NULL exergy check")),
+        ],
+    )
 
     # R05 — Source Siege
-    battalions["B05_SOURCE"] = RedBattalion("R05_SOURCE", "Source Siege", [
-        _red_agent("R05", 1, "empty_source", ("null_injection", "Tests NULL source")),
-        _red_agent("R05", 2, "injection_probe", ("source_empty", "Tests XSS in source")),
-        _red_agent("R05", 3, "unicode_attack", ("source_empty", "Tests zero-width chars")),
-        _red_agent("R05", 4, "truncation_test", ("source_empty", "Tests max-length source")),
-        _red_agent("R05", 5, "source_verifier", ("null_injection", "Final NULL check")),
-    ])
+    battalions["B05_SOURCE"] = RedBattalion(
+        "R05_SOURCE",
+        "Source Siege",
+        [
+            _red_agent("R05", 1, "empty_source", ("null_injection", "Tests NULL source")),
+            _red_agent("R05", 2, "injection_probe", ("source_empty", "Tests XSS in source")),
+            _red_agent("R05", 3, "unicode_attack", ("source_empty", "Tests zero-width chars")),
+            _red_agent("R05", 4, "truncation_test", ("source_empty", "Tests max-length source")),
+            _red_agent("R05", 5, "source_verifier", ("null_injection", "Final NULL check")),
+        ],
+    )
 
     # R06 — Semantic Siege
-    battalions["B06_SEMANTIC"] = RedBattalion("R06_SEMANTIC", "Semantic Siege", [
-        _red_agent("R06", 1, "embed_corruptor", ("null_injection", "Tests NULL semantic_status")),
-        _red_agent("R06", 2, "status_reverter", ("semantic_enum", "Tests invalid transitions")),
-        _red_agent("R06", 3, "error_reinjector", ("semantic_enum", "Tests loop detection")),
-        _red_agent("R06", 4, "timeout_simulator", ("semantic_enum", "Tests status after timeout")),
-        _red_agent("R06", 5, "semantic_verifier", ("null_injection", "Final NULL check")),
-    ])
+    battalions["B06_SEMANTIC"] = RedBattalion(
+        "R06_SEMANTIC",
+        "Semantic Siege",
+        [
+            _red_agent(
+                "R06", 1, "embed_corruptor", ("null_injection", "Tests NULL semantic_status")
+            ),
+            _red_agent("R06", 2, "status_reverter", ("semantic_enum", "Tests invalid transitions")),
+            _red_agent("R06", 3, "error_reinjector", ("semantic_enum", "Tests loop detection")),
+            _red_agent(
+                "R06", 4, "timeout_simulator", ("semantic_enum", "Tests status after timeout")
+            ),
+            _red_agent("R06", 5, "semantic_verifier", ("null_injection", "Final NULL check")),
+        ],
+    )
 
     # R07 — Type Siege
-    battalions["B07_TYPE"] = RedBattalion("R07_TYPE", "Type Siege", [
-        _red_agent("R07", 1, "invalid_type_inj", ("type_validity", "Injects invalid type values")),
-        _red_agent("R07", 2, "null_type_probe", ("type_validity", "Tests NULL fact_type handling")),
-        _red_agent("R07", 3, "overlong_value", ("type_validity", "Tests very long type strings")),
-        _red_agent("R07", 4, "enum_bypasser", ("type_validity", "Bypasses enum validation")),
-        _red_agent("R07", 5, "type_verifier", ("type_validity", "Final type enum check")),
-    ])
+    battalions["B07_TYPE"] = RedBattalion(
+        "R07_TYPE",
+        "Type Siege",
+        [
+            _red_agent(
+                "R07", 1, "invalid_type_inj", ("type_validity", "Injects invalid type values")
+            ),
+            _red_agent(
+                "R07", 2, "null_type_probe", ("type_validity", "Tests NULL fact_type handling")
+            ),
+            _red_agent(
+                "R07", 3, "overlong_value", ("type_validity", "Tests very long type strings")
+            ),
+            _red_agent("R07", 4, "enum_bypasser", ("type_validity", "Bypasses enum validation")),
+            _red_agent("R07", 5, "type_verifier", ("type_validity", "Final type enum check")),
+        ],
+    )
 
     # R08 — Project Siege
-    battalions["B08_PROJECT"] = RedBattalion("R08_PROJECT", "Project Siege", [
-        _red_agent("R08", 1, "orphan_creator", ("null_injection", "Tests NULL project")),
-        _red_agent("R08", 2, "name_collision", ("project_orphan", "Tests case-sensitive names")),
-        _red_agent("R08", 3, "case_sensitivity", ("project_orphan", "Tests whitespace in names")),
-        _red_agent("R08", 4, "empty_project", ("null_injection", "Tests NULL project")),
-        _red_agent("R08", 5, "project_verifier", ("null_injection", "Final NULL check")),
-    ])
+    battalions["B08_PROJECT"] = RedBattalion(
+        "R08_PROJECT",
+        "Project Siege",
+        [
+            _red_agent("R08", 1, "orphan_creator", ("null_injection", "Tests NULL project")),
+            _red_agent(
+                "R08", 2, "name_collision", ("project_orphan", "Tests case-sensitive names")
+            ),
+            _red_agent(
+                "R08", 3, "case_sensitivity", ("project_orphan", "Tests whitespace in names")
+            ),
+            _red_agent("R08", 4, "empty_project", ("null_injection", "Tests NULL project")),
+            _red_agent("R08", 5, "project_verifier", ("null_injection", "Final NULL check")),
+        ],
+    )
 
     # R09 — XRef Siege
-    battalions["B09_XREF"] = RedBattalion("R09_XREF", "Cross-Reference Siege", [
-        _red_agent("R09", 1, "cycle_creator", ("dangling_ref", "Tests self-referencing facts")),
-        _red_agent("R09", 2, "dangling_ref_attack", ("null_injection", "Tests NULL parent_id")),
-        _red_agent("R09", 3, "self_reference", ("dangling_ref", "Tests deep nesting")),
-        _red_agent("R09", 4, "deep_nesting", ("dangling_ref", "Tests circular chain detection")),
-        _red_agent("R09", 5, "xref_verifier", ("null_injection", "Final NULL check")),
-    ])
+    battalions["B09_XREF"] = RedBattalion(
+        "R09_XREF",
+        "Cross-Reference Siege",
+        [
+            _red_agent("R09", 1, "cycle_creator", ("dangling_ref", "Tests self-referencing facts")),
+            _red_agent("R09", 2, "dangling_ref_attack", ("null_injection", "Tests NULL parent_id")),
+            _red_agent("R09", 3, "self_reference", ("dangling_ref", "Tests deep nesting")),
+            _red_agent(
+                "R09", 4, "deep_nesting", ("dangling_ref", "Tests circular chain detection")
+            ),
+            _red_agent("R09", 5, "xref_verifier", ("null_injection", "Final NULL check")),
+        ],
+    )
 
     # R10 — Tombstone Siege
-    battalions["B10_TOMBSTONE"] = RedBattalion("R10_TOMBSTONE", "Tombstone Siege", [
-        _red_agent("R10", 1, "resurrection_attack", ("dangling_ref", "Tests resurrection side effects")),
-        _red_agent("R10", 2, "phantom_ref", ("tombstone_leak", "Tests invisible tombstone refs")),
-        _red_agent("R10", 3, "cascade_poison", ("tombstone_leak", "Tests cascading effects")),
-        _red_agent("R10", 4, "double_delete", ("tombstone_leak", "Tests re-tombstone detection")),
-        _red_agent("R10", 5, "tombstone_verifier", ("null_injection", "Final NULL check")),
-    ])
+    battalions["B10_TOMBSTONE"] = RedBattalion(
+        "R10_TOMBSTONE",
+        "Tombstone Siege",
+        [
+            _red_agent(
+                "R10", 1, "resurrection_attack", ("dangling_ref", "Tests resurrection side effects")
+            ),
+            _red_agent(
+                "R10", 2, "phantom_ref", ("tombstone_leak", "Tests invisible tombstone refs")
+            ),
+            _red_agent("R10", 3, "cascade_poison", ("tombstone_leak", "Tests cascading effects")),
+            _red_agent(
+                "R10", 4, "double_delete", ("tombstone_leak", "Tests re-tombstone detection")
+            ),
+            _red_agent("R10", 5, "tombstone_verifier", ("null_injection", "Final NULL check")),
+        ],
+    )
 
     return battalions
 
