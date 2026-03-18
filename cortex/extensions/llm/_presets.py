@@ -237,9 +237,12 @@ def routing_matrix() -> dict[str, dict[str, str]]:
     """Return the full intent→provider→model routing matrix.
 
     Useful for debugging and visualization.
+    Intents are derived from IntentProfile enum — always in sync.
     """
+    from cortex.extensions.llm._models import IntentProfile
+
     presets = load_presets()
-    intents = {"code", "reasoning", "creative", "architect", "general"}
+    intents = {i.value for i in IntentProfile}  # G3: enum-driven, not hardcoded
     matrix: dict[str, dict[str, str]] = {}
 
     for name, config in presets.items():

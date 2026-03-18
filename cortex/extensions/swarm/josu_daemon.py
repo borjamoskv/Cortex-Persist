@@ -93,7 +93,11 @@ class JosuProactiveDaemon:
         "_results",
         "_active_tasks",
         "_toolbox_watchdog",
+        "_toolbox_watcher_task",
     )
+
+    # O(1) cap: keep only the last N results to prevent unbounded RAM growth
+    _MAX_RESULTS: int = 500
 
     def __init__(
         self,
@@ -122,7 +126,7 @@ class JosuProactiveDaemon:
                 name="toolbox-watchdog",
             )
             # prevent GC of the background task
-            self._toolbox_watcher_task = watcher  # type: ignore[reportGeneralTypeIssues]
+            self._toolbox_watcher_task = watcher
             logger.info(
                 "🔭 [JOSU] Toolbox watchdog co-launched.",
             )
@@ -184,6 +188,9 @@ class JosuProactiveDaemon:
 
                 result = await self._execute_in_isolation(target)
                 self._results.append(result)
+                # Thermodynamic cap: evict oldest entries beyond limit
+                if len(self._results) > self._MAX_RESULTS:
+                    self._results = self._results[-self._MAX_RESULTS :]
 
                 if result.success:
                     logger.info(
