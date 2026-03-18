@@ -153,7 +153,7 @@ Persistencia como `fact_type="decision"`. Cooldown 6h (`asyncio.wait_for`, zero 
 Descubre targets de cristalización desde 3 fuentes:
 
 | Source | Mecanismo | Prioridad |
-|:---|:---|:---:|
+| :--- | :--- | :---: |
 | **Curated Queue** | YAML manual (`nightshift_queue.yaml`) | 5 |
 | **Ghost Gaps** | Facts tagged `knowledge_gap`/`auto_ghost` | 3 |
 | **Semantic Gaps** | Proyectos con sparse L2 coverage | 7 |
@@ -168,7 +168,7 @@ Signos vitales de cada cristal:
 - **Resonance** = Max cosine similarity contra 7 axiomas CORTEX.
 
 | | Resonance Alta (≥ 0.5) | Resonance Baja |
-|:---|:---:|:---:|
+| :--- | :---: | :---: |
 | **Temp Alta (≥ 0.1)** | ACTIVE | NOISE |
 | **Temp Baja** | FOUNDATIONAL | DEAD_WEIGHT |
 
@@ -179,7 +179,7 @@ Signos vitales de cada cristal:
 Fase destructiva (REM). 4 estrategias:
 
 | Estrategia | Condición | Efecto |
-|:---|:---|:---|
+| :--- | :--- | :--- |
 | **COLD_PURGE** | PURGE + age ≥ 14d + not diamond | Hard-delete fact + vector |
 | **SEMANTIC_MERGE** | Cosine ≥ 0.92 | LLM fuse → update primary, delete secondary |
 | **DIAMOND_PROMOTE** | PROMOTE/PROTECT + age ≥ 7d | `is_diamond = 1` (inmune a decay) |
@@ -250,8 +250,10 @@ RRF (k=60) integrando BM25 + semántica O(1). Temporal Decay (λ=0.01).
 
 Reemplaza "dame resultados similares" por "dame la evidencia que más reduce incertidumbre":
 
-```
-final = 0.25×semantic + 0.35×evidence_match + 0.30×confidence_gain + 0.10×novelty
+**Fórmula de peso de voto (Tier 2):**
+
+```text
+weight = 0.40×domain_match + 0.30×success_rate + 0.20×confidence + 0.10×recency
 ```
 
 ### 6.4 Vanguard Deployment

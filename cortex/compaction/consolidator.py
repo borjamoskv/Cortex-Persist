@@ -92,7 +92,7 @@ class BeliefConsolidator:
 
     def __init__(
         self,
-        model: str = "gemini-2.0-flash",
+        model: str = "gemini-2.5-pro",
         similarity_threshold: float = 0.80,
     ):
         self._model = model

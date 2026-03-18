@@ -19,7 +19,7 @@ router = APIRouter(prefix="/v1/translate", tags=["translate"])
 logger = logging.getLogger("uvicorn.error")
 
 MAX_TEXTS_PER_REQUEST: Final[int] = 100
-MODEL_NAME: Final[str] = "gemini-2.0-flash"
+MODEL_NAME: Final[str] = "gemini-2.5-pro"
 
 
 class TranslateRequest(BaseModel):
@@ -130,7 +130,7 @@ def translate_texts(
     OMNI-TRANSLATE: Sovereign Core translation endpoint.
 
     Translates a dictionary of texts into multiple target languages simultaneously
-    using Gemini 2.0 Flash for optimal speed and cost.
+    using Gemini 2.5 Pro.
     Ensures that the output strictly matches the input schema.
     """
     if not request.texts or not request.target_languages:
