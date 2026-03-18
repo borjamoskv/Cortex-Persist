@@ -101,3 +101,94 @@ class ArweaveClient:
         except httpx.RequestError as e:
             logger.error("Error de conectividad anclando en Arweave: %s", e)
             return None
+
+    async def query_handoff_chain(self, fact_id: str) -> list[dict[str, Any]]:
+        """Query Arweave GraphQL for transactions belonging to a Cortex-Fact-Id."""
+        query = """
+        query($factId: String!) {
+            transactions(
+                tags: [
+                    { name: "App-Name", values: ["CORTEX-Ω"] },
+                    { name: "Cortex-Fact-Id", values: [$factId] }
+                ]
+                sort: HEIGHT_ASC
+            ) {
+                edges {
+                    node {
+                        id
+                        owner {
+                            address
+                        }
+                        tags {
+                            name
+                            value
+                        }
+                        block {
+                            height
+                            timestamp
+                        }
+                    }
+                }
+            }
+        }
+        """
+        variables = {"factId": fact_id}
+        url = f"{self.node_url}/graphql"
+        
+        try:
+            async with httpx.AsyncClient(timeout=15.0) as client:
+                response = await client.post(url, json={"query": query, "variables": variables})
+                if response.status_code == 200:
+                    data = response.json()
+                    edges = data.get("data", {}).get("transactions", {}).get("edges", [])
+                    return [edge["node"] for edge in edges]
+                else:
+                    logger.warning("Fallo al acceder a Arweave GraphQL: %s", response.status_code)
+                    return []
+        except httpx.RequestError as e:
+            logger.error("Error consultando GraphQL de Arweave: %s", e)
+            return []
+
+    async def attest_handoff(self, tx_id: str, anchor: IdentityAnchor) -> str | None:
+        """Issue an Attestation to visually score a handoff as trusted."""
+        payload_bytes = b"CORTEX-ATTEST-1.0"
+        payload_b64 = base64.urlsafe_b64encode(payload_bytes).decode("ascii").rstrip("=")
+        
+        tags = [
+            self._create_tag("App-Name", "CORTEX-Ω-Attestation"),
+            self._create_tag("Target-Tx", tx_id),
+            self._create_tag("Cortex-Timestamp", str(int(time.time()))),
+        ]
+        
+        tag_concat = "".join(t["name"] + t["value"] for t in tags).encode("utf-8")
+        signature_material = hashlib.sha256(payload_bytes + tag_concat).digest()
+        signature_bytes = anchor.sign(signature_material)
+        signature_b64 = base64.urlsafe_b64encode(signature_bytes).decode("ascii").rstrip("=")
+        
+        jwk = anchor.export_public_jwk()
+        tx_id_bytes = hashlib.sha256(signature_bytes).digest()
+        tx_id_b64 = base64.urlsafe_b64encode(tx_id_bytes).decode("ascii").rstrip("=")
+        
+        tx = {
+            "format": 2,
+            "id": tx_id_b64,
+            "last_tx": "",
+            "owner": jwk["n"],
+            "tags": tags,
+            "target": "",
+            "quantity": "0",
+            "data": payload_b64,
+            "data_size": str(len(payload_bytes)),
+            "reward": "0", 
+            "signature": signature_b64,
+        }
+        
+        url = f"{self.node_url}/tx"
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                resp = await client.post(url, json=tx)
+                if resp.status_code in (200, 202, 208):
+                    return tx_id_b64
+        except httpx.RequestError:
+            pass
+        return None

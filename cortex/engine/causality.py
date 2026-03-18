@@ -103,6 +103,13 @@ class LedgerEvent:
     created_at: str
     last_revalidated_at: str | None = None
     tainted: bool = False
+    peer_attestations: list[str] = field(default_factory=list)
+
+    def add_attestation(self, tx_id: str, trust_boost: float = 0.1) -> None:
+        """Dynamically increase trust score based on peer attestations."""
+        if tx_id not in self.peer_attestations:
+            self.peer_attestations.append(tx_id)
+            self.trust_score = min(1.0, self.trust_score + trust_boost)
 
 
 def hash_event(event: LedgerEvent) -> str:
@@ -112,7 +119,8 @@ def hash_event(event: LedgerEvent) -> str:
         "status": event.status.value if isinstance(event.status, Enum) else event.status,
         "trust_score": event.trust_score,
         "created_at": event.created_at,
-        "tainted": event.tainted
+        "tainted": event.tainted,
+        "peer_attestations": sorted(event.peer_attestations)
     }
     payload = json.dumps(data, separators=(",", ":"), sort_keys=True).encode("utf-8")
     digest = hashlib.sha256(payload).digest()
