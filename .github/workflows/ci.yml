@@ -48,7 +48,7 @@ jobs:
           name: bandit-report
           path: bandit-report.json
       - name: SBOM generation
-        uses: anchore/sbom-action@61119d458adab75f756bc0b9e4bde25725f86a7a # v0
+        uses: anchore/sbom-action@57aae528053a48a3f6235f2d9461b05fbcb7366d # v0
         with:
           format: cyclonedx-json
           output-file: sbom.json
