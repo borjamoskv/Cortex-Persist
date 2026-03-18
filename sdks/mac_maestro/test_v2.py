@@ -716,5 +716,316 @@ class TestG5CandidatesCount(unittest.TestCase):
         self.assertEqual(len(matches), 5)
 
 
+# ═══════════════════════════════════════════════════════════════════
+# NEW: Levenshtein Matcher Tests
+# ═══════════════════════════════════════════════════════════════════
+
+
+class TestLevenshteinMatcher(unittest.TestCase):
+    """Tests for Levenshtein fuzzy matching in the semantic matcher."""
+
+    def test_levenshtein_typo_match(self):
+        """Typo 'Savee' should match 'Save' via Levenshtein."""
+        from mac_maestro.matcher import (
+            LEVENSHTEIN_SIMILARITY_THRESHOLD,
+            _levenshtein_similarity,
+        )
+
+        sim = _levenshtein_similarity("savee", "save")
+        self.assertGreaterEqual(sim, LEVENSHTEIN_SIMILARITY_THRESHOLD)
+
+    def test_levenshtein_no_match_beyond_threshold(self):
+        """Completely different strings should score below threshold."""
+        from mac_maestro.matcher import (
+            LEVENSHTEIN_SIMILARITY_THRESHOLD,
+            _levenshtein_similarity,
+        )
+
+        sim = _levenshtein_similarity("xyzzy", "save")
+        self.assertLess(sim, LEVENSHTEIN_SIMILARITY_THRESHOLD)
+
+    def test_levenshtein_exact_is_1(self):
+        """Identical strings should have similarity 1.0."""
+        from mac_maestro.matcher import _levenshtein_similarity
+
+        self.assertAlmostEqual(_levenshtein_similarity("hello", "hello"), 1.0)
+
+    def test_levenshtein_empty(self):
+        """Empty strings should have similarity 1.0 (both empty)."""
+        from mac_maestro.matcher import _levenshtein_similarity
+
+        self.assertAlmostEqual(_levenshtein_similarity("", ""), 1.0)
+
+    def test_levenshtein_distance_basic(self):
+        """Known edit distances."""
+        from mac_maestro.matcher import _levenshtein_distance
+
+        self.assertEqual(_levenshtein_distance("kitten", "sitting"), 3)
+        self.assertEqual(_levenshtein_distance("", "abc"), 3)
+        self.assertEqual(_levenshtein_distance("abc", "abc"), 0)
+
+    def test_matcher_prefers_exact_over_fuzzy(self):
+        """Exact match should score higher than Levenshtein match."""
+        children = [
+            _make_snapshot(role="AXButton", title="Save"),
+            _make_snapshot(role="AXButton", title="Savee"),
+        ]
+        root = _make_snapshot(
+            role="AXWindow",
+            title="Test",
+            position=(0, 0),
+            size=(500, 500),
+            path=(0,),
+            children=children,
+        )
+        match = find_best(root, title="Save")
+        self.assertIsNotNone(match)
+        self.assertEqual(match.title, "Save")
+
+    def test_score_field_levenshtein_fallback(self):
+        """_score_field should return a Levenshtein score for near-matches."""
+        from mac_maestro.matcher import _score_field
+
+        score, reason = _score_field(
+            "Settings",
+            "Settins",
+            0.4,
+            0.2,
+            0.15,
+            True,
+        )
+        self.assertGreater(score, 0)
+        self.assertIn("levenshtein", reason)
+
+
+# ═══════════════════════════════════════════════════════════════════
+# NEW: Hotkey Parsing Tests
+# ═══════════════════════════════════════════════════════════════════
+
+
+class TestHotkeyParsing(unittest.TestCase):
+    """Tests for keyboard hotkey string parsing."""
+
+    def test_parse_cmd_s(self):
+        """'cmd+s' should parse to keycode 1 with command modifier."""
+        from mac_maestro.keyboard import parse_hotkey
+
+        keycode, modifiers = parse_hotkey("cmd+s")
+        self.assertEqual(keycode, 1)  # 's' keycode
+        self.assertIn("cmd", modifiers)
+
+    def test_parse_cmd_shift_n(self):
+        """'cmd+shift+n' should have two modifiers."""
+        from mac_maestro.keyboard import parse_hotkey
+
+        keycode, modifiers = parse_hotkey("cmd+shift+n")
+        self.assertEqual(keycode, 45)  # 'n' keycode
+        self.assertIn("cmd", modifiers)
+        self.assertIn("shift", modifiers)
+
+    def test_parse_plain_return(self):
+        """'return' should parse to keycode 36 with no modifiers."""
+        from mac_maestro.keyboard import parse_hotkey
+
+        keycode, modifiers = parse_hotkey("return")
+        self.assertEqual(keycode, 36)
+        self.assertEqual(modifiers, [])
+
+    def test_parse_empty_raises(self):
+        """Empty string should raise ActionFailed."""
+        from mac_maestro.keyboard import parse_hotkey
+
+        with self.assertRaises(ActionFailed):
+            parse_hotkey("")
+
+    def test_parse_only_modifiers_raises(self):
+        """Only modifiers without a key should raise ActionFailed."""
+        from mac_maestro.keyboard import parse_hotkey
+
+        with self.assertRaises(ActionFailed):
+            parse_hotkey("cmd+shift")
+
+    def test_parse_unknown_key_raises(self):
+        """Unknown key should raise ActionFailed."""
+        from mac_maestro.keyboard import parse_hotkey
+
+        with self.assertRaises(ActionFailed):
+            parse_hotkey("cmd+unicorn")
+
+    def test_modifier_map_coverage(self):
+        """All common modifier aliases should be in the map."""
+        from mac_maestro.keyboard import MODIFIER_MAP
+
+        for alias in ["cmd", "command", "shift", "alt", "option", "opt", "ctrl", "control"]:
+            self.assertIn(alias, MODIFIER_MAP)
+
+
+# ═══════════════════════════════════════════════════════════════════
+# NEW: CGEvent Extensions Tests
+# ═══════════════════════════════════════════════════════════════════
+
+
+class TestCGEventExtensions(unittest.TestCase):
+    """Tests that new CGEvent functions exist and are callable."""
+
+    def test_right_click_at_is_callable(self):
+        from mac_maestro.cgevents import right_click_at
+
+        self.assertTrue(callable(right_click_at))
+
+    def test_double_click_at_is_callable(self):
+        from mac_maestro.cgevents import double_click_at
+
+        self.assertTrue(callable(double_click_at))
+
+    def test_functions_raise_without_quartz(self):
+        """Without Quartz, functions should raise ActionFailed."""
+        from mac_maestro import cgevents
+
+        original = cgevents.QUARTZ_AVAILABLE
+        try:
+            cgevents.QUARTZ_AVAILABLE = False
+            with self.assertRaises(ActionFailed):
+                cgevents.right_click_at(0, 0)
+            with self.assertRaises(ActionFailed):
+                cgevents.double_click_at(0, 0)
+        finally:
+            cgevents.QUARTZ_AVAILABLE = original
+
+
+# ═══════════════════════════════════════════════════════════════════
+# NEW: Async Workflow Tests
+# ═══════════════════════════════════════════════════════════════════
+
+
+class TestAsyncWorkflow(unittest.TestCase):
+    """Tests for async workflow methods."""
+
+    def test_async_methods_exist(self):
+        """Workflow should have async variants."""
+        wf = MacMaestroWorkflow(bundle_id="com.test.app")
+        self.assertTrue(hasattr(wf, "execute_action_async"))
+        self.assertTrue(hasattr(wf, "run_sequence_async"))
+        import inspect
+
+        self.assertTrue(inspect.iscoroutinefunction(wf.execute_action_async))
+        self.assertTrue(inspect.iscoroutinefunction(wf.run_sequence_async))
+
+    def test_async_backoff_sleep_exists(self):
+        """Module should export async backoff."""
+        import inspect
+
+        from mac_maestro.workflow import _async_backoff_sleep
+
+        self.assertTrue(inspect.iscoroutinefunction(_async_backoff_sleep))
+
+
+# ═══════════════════════════════════════════════════════════════════
+# NEW: Trace File Persistence Tests
+# ═══════════════════════════════════════════════════════════════════
+
+
+class TestTraceFilePersistence(unittest.TestCase):
+    """Tests for JSON Lines file trace persistence."""
+
+    def setUp(self):
+        import tempfile
+
+        self.tmpdir = tempfile.mkdtemp()
+        self.trace_file = os.path.join(self.tmpdir, "test_traces.jsonl")
+
+    def tearDown(self):
+        import shutil
+
+        shutil.rmtree(self.tmpdir, ignore_errors=True)
+
+    def test_write_trace_to_file(self):
+        """_write_trace_to_file should append a JSON line."""
+        import json
+        from pathlib import Path
+
+        from mac_maestro.trace import _write_trace_to_file
+
+        trace_file = Path(self.trace_file)
+
+        # Temporarily override TRACE_FILE
+        import mac_maestro.trace as trace_mod
+
+        original = trace_mod.TRACE_FILE
+        trace_mod.TRACE_FILE = trace_file
+
+        try:
+            _write_trace_to_file({"action": "click", "target": "Save"})
+
+            self.assertTrue(trace_file.exists())
+            with trace_file.open() as f:
+                lines = f.readlines()
+            self.assertEqual(len(lines), 1)
+            data = json.loads(lines[0])
+            self.assertEqual(data["action"], "click")
+        finally:
+            trace_mod.TRACE_FILE = original
+
+    def test_load_traces(self):
+        """load_traces should return traces from a JSONL file."""
+        import json
+
+        from mac_maestro.trace import load_traces
+
+        # Write test data
+        with open(self.trace_file, "w") as f:
+            f.write(json.dumps({"id": 1, "action": "click"}) + "\n")
+            f.write(json.dumps({"id": 2, "action": "type"}) + "\n")
+            f.write(json.dumps({"id": 3, "action": "hotkey"}) + "\n")
+
+        traces = load_traces(self.trace_file, limit=10)
+
+        self.assertEqual(len(traces), 3)
+        # Most recent first
+        self.assertEqual(traces[0]["id"], 3)
+        self.assertEqual(traces[2]["id"], 1)
+
+    def test_load_traces_with_limit(self):
+        """load_traces should respect the limit parameter."""
+        import json
+
+        from mac_maestro.trace import load_traces
+
+        with open(self.trace_file, "w") as f:
+            for i in range(10):
+                f.write(json.dumps({"id": i}) + "\n")
+
+        traces = load_traces(self.trace_file, limit=3)
+        self.assertEqual(len(traces), 3)
+
+    def test_load_traces_empty_file(self):
+        """load_traces should return empty list for nonexistent file."""
+        from mac_maestro.trace import load_traces
+
+        traces = load_traces("/nonexistent/path.jsonl")
+        self.assertEqual(traces, [])
+
+    def test_trace_append_only(self):
+        """Multiple writes should create multiple lines."""
+        from pathlib import Path
+
+        import mac_maestro.trace as trace_mod
+        from mac_maestro.trace import _write_trace_to_file
+
+        trace_file = Path(self.trace_file)
+        original = trace_mod.TRACE_FILE
+        trace_mod.TRACE_FILE = trace_file
+
+        try:
+            _write_trace_to_file({"id": 1})
+            _write_trace_to_file({"id": 2})
+
+            with trace_file.open() as f:
+                lines = f.readlines()
+            self.assertEqual(len(lines), 2)
+        finally:
+            trace_mod.TRACE_FILE = original
+
+
 if __name__ == "__main__":
     unittest.main()

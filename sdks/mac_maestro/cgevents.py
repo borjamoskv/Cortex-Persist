@@ -12,13 +12,18 @@ try:
         CGEventCreate,  # noqa: F401
         CGEventCreateMouseEvent,
         CGEventPost,
+        CGEventSetIntegerValueField,
         CGPointMake,
         kCGEventLeftMouseDown,
         kCGEventLeftMouseDragged,
         kCGEventLeftMouseUp,
         kCGEventMouseMoved,  # noqa: F401
+        kCGEventRightMouseDown,
+        kCGEventRightMouseUp,
         kCGHIDEventTap,
         kCGMouseButtonLeft,
+        kCGMouseButtonRight,
+        kCGMouseEventClickState,
     )
 
     QUARTZ_AVAILABLE = True
@@ -45,6 +50,63 @@ def click_at(x: float, y: float) -> None:
         kCGEventLeftMouseUp,
         point,
         kCGMouseButtonLeft,
+    )
+    CGEventPost(kCGHIDEventTap, down)
+    time.sleep(0.05)
+    CGEventPost(kCGHIDEventTap, up)
+
+
+def double_click_at(x: float, y: float) -> None:
+    """Double-click at absolute screen coordinates (x, y)."""
+    if not QUARTZ_AVAILABLE:
+        raise ActionFailed("Quartz not available for CGEvent.")
+
+    point = CGPointMake(x, y)
+
+    # First click
+    down1 = CGEventCreateMouseEvent(
+        None, kCGEventLeftMouseDown, point, kCGMouseButtonLeft,
+    )
+    up1 = CGEventCreateMouseEvent(
+        None, kCGEventLeftMouseUp, point, kCGMouseButtonLeft,
+    )
+    CGEventSetIntegerValueField(down1, kCGMouseEventClickState, 1)
+    CGEventSetIntegerValueField(up1, kCGMouseEventClickState, 1)
+    CGEventPost(kCGHIDEventTap, down1)
+    CGEventPost(kCGHIDEventTap, up1)
+
+    time.sleep(0.05)
+
+    # Second click (click state = 2 for double-click)
+    down2 = CGEventCreateMouseEvent(
+        None, kCGEventLeftMouseDown, point, kCGMouseButtonLeft,
+    )
+    up2 = CGEventCreateMouseEvent(
+        None, kCGEventLeftMouseUp, point, kCGMouseButtonLeft,
+    )
+    CGEventSetIntegerValueField(down2, kCGMouseEventClickState, 2)
+    CGEventSetIntegerValueField(up2, kCGMouseEventClickState, 2)
+    CGEventPost(kCGHIDEventTap, down2)
+    CGEventPost(kCGHIDEventTap, up2)
+
+
+def right_click_at(x: float, y: float) -> None:
+    """Right-click at absolute screen coordinates (x, y)."""
+    if not QUARTZ_AVAILABLE:
+        raise ActionFailed("Quartz not available for CGEvent.")
+
+    point = CGPointMake(x, y)
+    down = CGEventCreateMouseEvent(
+        None,
+        kCGEventRightMouseDown,
+        point,
+        kCGMouseButtonRight,
+    )
+    up = CGEventCreateMouseEvent(
+        None,
+        kCGEventRightMouseUp,
+        point,
+        kCGMouseButtonRight,
     )
     CGEventPost(kCGHIDEventTap, down)
     time.sleep(0.05)
@@ -94,3 +156,4 @@ def drag_to(
         kCGMouseButtonLeft,
     )
     CGEventPost(kCGHIDEventTap, up)
+

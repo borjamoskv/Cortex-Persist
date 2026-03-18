@@ -5,6 +5,7 @@ Requires `rich` for output formatting to represent massive scale.
 
 import argparse
 import asyncio
+import logging
 import sys
 from pathlib import Path
 
@@ -31,6 +32,7 @@ async def main():
     parser.add_argument("--dry-run", action="store_true", help="Dry run mode")
     parser.add_argument("--report", help="Path to save JSON report")
     args = parser.parse_args()
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
 
     db_path = str(Path(args.db).expanduser())
     if not Path(db_path).exists():

@@ -71,18 +71,36 @@ def activate_app(bundle_id: str) -> bool:
     return bool(apps[0].activateWithOptions_(0))
 
 
-def get_frontmost_app() -> tuple[str, int, str]:
-    """Get the currently frontmost application: (bundle_id, pid, name)."""
+def get_frontmost_app() -> dict[str, str | int]:
+    """Get the currently frontmost application as a dict."""
     _check_appkit()
     ws = NSWorkspace.sharedWorkspace()
     front = ws.frontmostApplication()
     if front is None:
         raise ActionFailed("No frontmost application detected.")
-    return (
-        front.bundleIdentifier() or "unknown",
-        front.processIdentifier(),
-        front.localizedName() or "unknown",
-    )
+    return {
+        "bundle_id": front.bundleIdentifier() or "unknown",
+        "pid": front.processIdentifier(),
+        "name": front.localizedName() or "unknown",
+    }
+
+
+def list_running_apps() -> list[dict[str, str | int]]:
+    """List all running GUI applications with their bundle IDs and PIDs."""
+    _check_appkit()
+    ws = NSWorkspace.sharedWorkspace()
+    apps = ws.runningApplications()
+    result: list[dict[str, str | int]] = []
+    for app in apps:
+        # Only include apps with a bundle ID (skip background services)
+        bundle = app.bundleIdentifier()
+        if bundle:
+            result.append({
+                "name": app.localizedName() or "unknown",
+                "bundle_id": bundle,
+                "pid": app.processIdentifier(),
+            })
+    return sorted(result, key=lambda a: str(a.get("name", "")).lower())
 
 
 def wait_for_app(bundle_id: str, timeout: float = 10.0) -> int:
@@ -95,3 +113,4 @@ def wait_for_app(bundle_id: str, timeout: float = 10.0) -> int:
             return apps[0].processIdentifier()
         time.sleep(0.25)
     raise ActionFailed(f"App '{bundle_id}' did not start within {timeout}s.")
+

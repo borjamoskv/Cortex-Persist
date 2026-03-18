@@ -161,6 +161,7 @@ class GatewayRouter:
             GatewayIntent.EMIT: self._handle_emit,
             GatewayIntent.ASK: self._handle_ask,
             GatewayIntent.MEJORALO: self._handle_mejoralo,
+            GatewayIntent.MISSION: self._handle_mission,
         }
 
     async def handle(self, request: GatewayRequest) -> GatewayResponse:
@@ -169,8 +170,23 @@ class GatewayRouter:
         Always returns a GatewayResponse — never raises.
         """
         t0 = time.perf_counter()
-        handler = self._handlers.get(request.intent)
-        intent_str = getattr(request.intent, "value", str(request.intent))
+        # Ensure intent is a GatewayIntent enum member
+        if isinstance(request.intent, str):
+            try:
+                intent = GatewayIntent(request.intent)
+            except ValueError:
+                return GatewayResponse(
+                    ok=False,
+                    error=f"Unknown intent: {request.intent}",
+                    intent=GatewayIntent.STATUS,  # Default to STATUS for invalid intent
+                    request_id=request.request_id,
+                    latency_ms=0.0,
+                )
+        else:
+            intent = request.intent
+
+        handler = self._handlers.get(intent)
+        intent_str = getattr(intent, "value", str(intent))
 
         if handler is None:
             return GatewayResponse(
@@ -343,4 +359,18 @@ class GatewayRouter:
             "target": target,
             "objective": objective,
             "timestamp": time.time(),
+        }
+
+    async def _handle_mission(self, req: GatewayRequest) -> dict[str, Any]:
+        """Orchestrate a swarm mission. [MISSION]"""
+        mission_id = req.payload.get("mission_id", f"mission-{int(time.time())}")
+        config = req.payload.get("config", {})
+
+        # Transition to CORTEX-NATIVE Swarm Logic (Ω₄)
+        return {
+            "status": "mission_initiated",
+            "mission_id": mission_id,
+            "config_received": bool(config),
+            "timestamp": time.time(),
+            "note": "Sovereign mission logic integration pending full swarm module activation.",
         }

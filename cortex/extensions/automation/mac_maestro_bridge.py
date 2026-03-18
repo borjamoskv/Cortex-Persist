@@ -7,6 +7,7 @@ following the Master Protocol.
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from typing import Any
 
@@ -61,8 +62,10 @@ class MaestroActionRunner:
 
         try:
             logger.info("Executing Maestro intent: %s on %s", action_name, self.bundle_id)
-            # execute_action is synchronous in the SDK for now
-            success = self.workflow.execute_action(action, apply_safety_gate=apply_safety_gate)
+            # Properly run sync SDK in thread pool to avoid blocking event loop
+            success = await asyncio.to_thread(
+                self.workflow.execute_action, action, apply_safety_gate,
+            )
 
             return {
                 "success": success,

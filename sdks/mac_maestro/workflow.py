@@ -1,7 +1,11 @@
-"""Mac-Maestro-Ω — Central workflow orchestrator with full Master Protocol."""
+"""Mac-Maestro-Ω — Central workflow orchestrator with full Master Protocol.
+
+Supports both synchronous and async execution.
+"""
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import random
 import time
@@ -52,11 +56,20 @@ _SEMANTIC_KEYS = frozenset({"role", "title", "description", "identifier", "value
 
 
 def _backoff_sleep(attempt: int) -> float:
-    """Exponential backoff with jitter."""
+    """Exponential backoff with jitter (synchronous)."""
     delay = min(BACKOFF_BASE * (2**attempt), BACKOFF_CAP)
     jitter = random.uniform(0, BACKOFF_JITTER)  # noqa: S311
     total = delay + jitter
     time.sleep(total)
+    return total
+
+
+async def _async_backoff_sleep(attempt: int) -> float:
+    """Exponential backoff with jitter (async)."""
+    delay = min(BACKOFF_BASE * (2**attempt), BACKOFF_CAP)
+    jitter = random.uniform(0, BACKOFF_JITTER)  # noqa: S311
+    total = delay + jitter
+    await asyncio.sleep(total)
     return total
 
 
@@ -259,6 +272,31 @@ class MacMaestroWorkflow:
                     raise
                 results.append(False)
         return results
+
+    async def execute_action_async(
+        self,
+        action: UIAction,
+        apply_safety_gate: bool = True,
+    ) -> bool:
+        """Async variant of execute_action.
+
+        Wraps synchronous execution in asyncio.to_thread() to avoid
+        blocking the event loop.
+        """
+        return await asyncio.to_thread(
+            self.execute_action, action, apply_safety_gate,
+        )
+
+    async def run_sequence_async(
+        self,
+        actions: list[UIAction],
+        apply_safety_gate: bool = True,
+        abort_on_failure: bool = True,
+    ) -> list[bool]:
+        """Async variant of run_sequence."""
+        return await asyncio.to_thread(
+            self.run_sequence, actions, apply_safety_gate, abort_on_failure,
+        )
 
     def _execute_single_action(
         self,

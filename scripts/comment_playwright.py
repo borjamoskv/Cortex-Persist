@@ -50,7 +50,7 @@ def run():
             try:
                 page.click('button[type="submit"]', timeout=1000)
                 print("Clicked submit type button.")
-            except:
+            except Exception:
                 pass
                 
             print("Comment pipeline finished.")
