@@ -12,7 +12,7 @@ from typing import Optional
 
 import aiosqlite
 
-from cortex.database.core import connect_async
+from cortex.database.core import connect_async_ctx
 from cortex.embeddings.provider import EmbeddingProvider
 
 logger = logging.getLogger("cortex")
@@ -44,7 +44,7 @@ class EnrichmentWorker:
 
     async def _process_batch(self, batch_size: int = 10):
         """Poll and process a batch of jobs."""
-        async with connect_async(self.db_path) as conn:
+        async with connect_async_ctx(self.db_path) as conn:
             # Pick 'queued' jobs or those whose next_attempt_at has passed
             query = """
                 SELECT id, fact_id FROM enrichment_jobs
