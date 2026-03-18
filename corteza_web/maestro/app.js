@@ -1,21 +1,29 @@
+import { api } from './api.js';
+
 /* ═══════════════════════════════════════════════════════
    MAC MAESTRO — App Logic
    CORTEX Persist Control Panel
+   Synaptic Connectivity Module
    ═══════════════════════════════════════════════════════ */
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
 
-  // ── Sidebar Navigation ──────────────────────────
+  // ── Initialization ──────────────────────────────
   const sidebarItems = document.querySelectorAll('.sidebar-item');
   const sections = document.querySelectorAll('.section');
+  
+  // Initial population
+  await updateDashboard();
+  await populateAgents();
+  await populateFacts('');
+  await startLogStream();
 
+  // ── Sidebar Navigation ──────────────────────────
   sidebarItems.forEach(item => {
     item.addEventListener('click', () => {
       const target = item.dataset.section;
-
       sidebarItems.forEach(i => i.classList.remove('active'));
       item.classList.add('active');
-
       sections.forEach(s => s.classList.remove('active'));
       const targetSection = document.getElementById(`section-${target}`);
       if (targetSection) targetSection.classList.add('active');
@@ -23,10 +31,10 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ── Sidebar Search ──────────────────────────────
-  const search = document.getElementById('sidebarSearch');
-  if (search) {
-    search.addEventListener('input', () => {
-      const q = search.value.toLowerCase();
+  const sidebarSearch = document.getElementById('sidebarSearch');
+  if (sidebarSearch) {
+    sidebarSearch.addEventListener('input', () => {
+      const q = sidebarSearch.value.toLowerCase();
       sidebarItems.forEach(item => {
         const text = item.textContent.toLowerCase();
         item.style.display = text.includes(q) ? '' : 'none';
@@ -34,18 +42,34 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ── Segmented Controls ──────────────────────────
-  document.querySelectorAll('.segmented').forEach(seg => {
-    const btns = seg.querySelectorAll('.segmented-btn');
-    btns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        btns.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-      });
-    });
-  });
+  // ── Console Logic ───────────────────────────────
+  const logConsole = document.getElementById('logConsole');
+  const toggleConsoleBtn = document.getElementById('toggleConsole');
+  const clearLogsBtn = document.getElementById('clearLogs');
 
-  // ── Slider Value Sync ───────────────────────────
+  if (toggleConsoleBtn) {
+    toggleConsoleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      logConsole.classList.toggle('hidden');
+      toggleConsoleBtn.textContent = logConsole.classList.contains('hidden') ? 'Show' : 'Hide';
+    });
+  }
+
+  if (clearLogsBtn) {
+    clearLogsBtn.addEventListener('click', () => {
+      document.getElementById('logLines').innerHTML = '';
+    });
+  }
+
+  // ── Memory Explorer Search ──────────────────────
+  const factSearch = document.getElementById('factSearch');
+  if (factSearch) {
+    factSearch.addEventListener('input', async () => {
+      await populateFacts(factSearch.value);
+    });
+  }
+
+  // ── Slider Sync ─────────────────────────────────
   document.querySelectorAll('.slider').forEach(slider => {
     const container = slider.closest('.slider-container');
     const valueEl = container?.querySelector('.slider-value');
@@ -56,203 +80,85 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // ── Agent Row Selection ─────────────────────────
-  const agentData = {
-    tutor: {
-      name: 'TUTOR',
-      guard: 75,
-      tier: 'TIER_1_LOCAL_SAFE',
-      facts: '1,248',
-      time: 'Today at 11:52 PM'
-    },
-    chema: {
-      name: 'CHEMA',
-      guard: 90,
-      tier: 'TIER_2_NETWORK',
-      facts: '847',
-      time: 'Today at 11:48 PM'
-    },
-    legion: {
-      name: 'LEGION',
-      guard: 60,
-      tier: 'TIER_3_EXTERNAL',
-      facts: '2,105',
-      time: 'Today at 10:30 PM'
-    },
-    sentinel: {
-      name: 'SENTINEL',
-      guard: 95,
-      tier: 'TIER_2_NETWORK',
-      facts: '573',
-      time: 'Today at 11:51 PM'
-    },
-    apollo: {
-      name: 'APOLLO',
-      guard: 40,
-      tier: 'TIER_1_LOCAL_SAFE',
-      facts: '312',
-      time: 'Yesterday at 8:12 PM'
-    }
-  };
-
-  const agentRows = document.querySelectorAll('.agent-row');
-  agentRows.forEach(row => {
-    row.addEventListener('click', () => {
-      agentRows.forEach(r => r.classList.remove('selected'));
-      row.classList.add('selected');
-
-      const id = row.dataset.agent;
-      const data = agentData[id];
-      if (!data) return;
-
-      const detailName = document.getElementById('agentDetailName');
-      const guardSlider = document.getElementById('guardSlider');
-      const guardValue = document.getElementById('guardValue');
-      const riskTier = document.getElementById('riskTier');
-
-      if (detailName) detailName.textContent = `${data.name} — Agent Details`;
-      if (guardSlider) {
-        guardSlider.value = data.guard;
-        if (guardValue) guardValue.textContent = `${data.guard}%`;
-      }
-      if (riskTier) riskTier.value = data.tier;
-
-      // Update facts and time in detail panel
-      const detailRows = document.querySelectorAll('#agentDetail .settings-row-value');
-      if (detailRows.length >= 2) {
-        detailRows[0].textContent = data.facts;
-        detailRows[1].textContent = data.time;
-      }
-    });
-  });
-
-  // ── Ledger Ring Animation ───────────────────────
-  const ringFill = document.getElementById('ringFill');
-  if (ringFill) {
-    const circumference = 2 * Math.PI * 60;
-    ringFill.style.strokeDasharray = circumference;
-    ringFill.style.strokeDashoffset = circumference;
-
-    // Animate on section visibility
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          setTimeout(() => {
-            ringFill.style.strokeDashoffset = '0';
-          }, 200);
-        }
-      });
-    });
-
-    const ledgerSection = document.getElementById('section-ledger');
-    if (ledgerSection) observer.observe(ledgerSection);
-
-    // Also trigger when clicking sidebar
-    sidebarItems.forEach(item => {
-      if (item.dataset.section === 'ledger') {
-        item.addEventListener('click', () => {
-          ringFill.style.strokeDashoffset = circumference;
-          setTimeout(() => {
-            ringFill.style.strokeDashoffset = '0';
-          }, 100);
-        });
-      }
-    });
+  // ── Functions ───────────────────────────────────
+  
+  async function updateDashboard() {
+    const metrics = await api.getMetrics();
+    const updateEagerly = (id, val) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = val;
+    };
+    updateEagerly('totalFacts', metrics.facts);
+    updateEagerly('dbSize', metrics.dbSize);
   }
 
-  // ── Traffic Light Hover Effect ──────────────────
-  const trafficLights = document.querySelectorAll('.traffic-light');
-  const titlebar = document.querySelector('.titlebar');
-
-  if (titlebar) {
-    titlebar.addEventListener('mouseenter', () => {
-      trafficLights.forEach(tl => tl.style.opacity = '1');
-    });
+  async function populateAgents() {
+    const agents = await api.getAgents();
+    // Implementation for dynamic injection if needed, 
+    // but current HTML has static ones for Tier demo.
+    // For now, let's keep the row selection logic.
   }
 
-  // ── Keyboard Navigation ─────────────────────────
-  document.addEventListener('keydown', (e) => {
-    if (e.metaKey && e.key === 'f') {
-      e.preventDefault();
-      search?.focus();
-    }
+  async function populateFacts(query) {
+    const facts = await api.searchFacts(query);
+    const grid = document.getElementById('factGrid');
+    if (!grid) return;
 
-    // ⌘1-8 for sections
-    if (e.metaKey && !e.shiftKey && !e.altKey) {
-      const num = parseInt(e.key);
-      if (num >= 1 && num <= 8) {
-        e.preventDefault();
-        const item = sidebarItems[num - 1];
-        if (item) item.click();
+    grid.innerHTML = facts.map(f => `
+      <div class="fact-row">
+        <div class="fact-col-id">${f.id}</div>
+        <div class="fact-col-content" title="${f.content}">${f.content}</div>
+        <div class="fact-col-source">${f.source}</div>
+        <div class="fact-col-time">${f.time}</div>
+      </div>
+    `).join('');
+  }
+
+  async function startLogStream() {
+    const logLines = document.getElementById('logLines');
+    setInterval(async () => {
+      if (Math.random() > 0.6) {
+        const logs = await api.getLogs();
+        const log = logs[Math.floor(Math.random() * logs.length)];
+        const line = document.createElement('div');
+        line.className = 'log-line';
+        line.innerHTML = `
+          <span class="log-time">[${new Date().toLocaleTimeString()}]</span>
+          <span class="log-level ${log.level.toLowerCase()}">${log.level}</span>
+          <span class="log-source">${log.source}</span>
+          <span class="log-msg">${log.msg}</span>
+        `;
+        logLines.appendChild(line);
+        logLines.scrollTop = logLines.scrollHeight;
       }
-    }
-  });
+    }, 3000);
+  }
+
 });
 
-// ── Global Actions ────────────────────────────────
-function verifyChain() {
+// ── Expose Global Buttons to Window (for Module compatibility) ──
+window.verifyChain = async function() {
   const btn = event.target;
-  const originalText = btn.textContent;
   btn.textContent = 'Verifying...';
   btn.disabled = true;
-
+  await api.verifyChain();
   setTimeout(() => {
     btn.textContent = '✓ Chain Valid';
     btn.style.background = '#34C759';
     setTimeout(() => {
-      btn.textContent = originalText;
+      btn.textContent = 'Verify Integrity';
       btn.style.background = '';
       btn.disabled = false;
     }, 2000);
   }, 1500);
-}
+};
 
-function exportAudit() {
-  const btn = event.target;
-  const originalText = btn.textContent;
-  btn.textContent = 'Exporting...';
-
-  setTimeout(() => {
-    btn.textContent = '✓ Report Exported';
-    setTimeout(() => {
-      btn.textContent = originalText;
-    }, 2000);
-  }, 1000);
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  const syncBtn = document.getElementById('btnSyncConfluence');
-  if (syncBtn) {
-    syncBtn.addEventListener('click', () => {
-      const originalText = syncBtn.textContent;
-      syncBtn.textContent = 'Syncing...';
-      syncBtn.disabled = true;
-
-      // Simulate calling the cortex_confluence_sync tool
-      setTimeout(() => {
-        syncBtn.textContent = '✓ Synced';
-        syncBtn.style.background = '#34C759';
-        setTimeout(() => {
-          syncBtn.textContent = originalText;
-          syncBtn.style.background = '';
-          syncBtn.disabled = false;
-        }, 2000);
-      }, 2500);
-    });
-  }
-});
-
-// ── Sheet Dialog Logic ────────────────────────────
-let currentSheetAction = null;
-
-function showDangerSheet(actionType) {
+window.showDangerSheet = function(actionType) {
   const overlay = document.getElementById('macSheetOverlay');
   const title = document.getElementById('macSheetTitle');
   const text = document.getElementById('macSheetText');
   const btn = document.getElementById('macSheetConfirmBtn');
   
-  currentSheetAction = actionType;
-
   if (actionType === 'gc') {
     title.textContent = 'Run Irreversible Compaction?';
     text.textContent = 'This will irreversibly purge completely bypassed semantic ghosts. Proceeding will lock the database for a few seconds.';
@@ -264,60 +170,29 @@ function showDangerSheet(actionType) {
     btn.textContent = 'Nuke Database';
     btn.style.background = 'var(--red)';
   }
-
   overlay.classList.add('active');
-}
+};
 
-function closeSheet() {
-  const overlay = document.getElementById('macSheetOverlay');
-  overlay.classList.remove('active');
-  currentSheetAction = null;
-}
+window.closeSheet = function() {
+  document.getElementById('macSheetOverlay').classList.remove('active');
+};
 
-// Bind confirm button
+// Bind sheet confirmation
 document.addEventListener('DOMContentLoaded', () => {
   const confirmBtn = document.getElementById('macSheetConfirmBtn');
   if (confirmBtn) {
     confirmBtn.addEventListener('click', () => {
-      const originalText = confirmBtn.textContent;
       confirmBtn.textContent = 'Executing...';
       confirmBtn.disabled = true;
-
       setTimeout(() => {
         confirmBtn.textContent = '✓ Done';
         confirmBtn.style.background = 'var(--green)';
         setTimeout(() => {
-          closeSheet();
-          confirmBtn.textContent = originalText;
+          window.closeSheet();
+          confirmBtn.textContent = 'Run Action';
           confirmBtn.disabled = false;
         }, 1200);
       }, 1500);
     });
-  }
-});
-
-// ── Enhanced Liveness (Autonomous Evolution) ──────
-document.addEventListener('DOMContentLoaded', () => {
-  // Simulate database fact ingestion
-  const totalFactsEl = document.getElementById('totalFacts');
-  if (totalFactsEl) {
-    let currentFacts = parseInt(totalFactsEl.textContent.replace(/,/g, ''), 10);
-    setInterval(() => {
-      if (Math.random() > 0.7) {
-        currentFacts += Math.floor(Math.random() * 3) + 1;
-        totalFactsEl.textContent = new Intl.NumberFormat('en-US').format(currentFacts);
-      }
-    }, 2000);
-  }
-
-  // Uptime tick
-  const uptimeEls = Array.from(document.querySelectorAll('.settings-row-value')).filter(el => el.textContent.includes('99.7%'));
-  if (uptimeEls.length > 0) {
-    let baseUptime = 99.700;
-    setInterval(() => {
-      baseUptime += 0.001;
-      if (baseUptime > 99.999) baseUptime = 99.999;
-      uptimeEls[0].textContent = baseUptime.toFixed(3) + '%';
-    }, 5000);
   }
 });

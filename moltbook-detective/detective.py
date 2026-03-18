@@ -5,9 +5,9 @@ Reverse-engineers agent behavior, detects swarms, and traces origins.
 
 import asyncio
 import logging
-from datetime import datetime
-from typing import Dict, List, Optional
 from dataclasses import dataclass
+from datetime import datetime
+from typing import Optional
 
 import numpy as np
 
@@ -35,8 +35,8 @@ class AgentProfile:
     name: str
     creation_date: Optional[datetime]
     bio: str
-    post_history: List[Dict]
-    metadata: Dict
+    post_history: list[dict]
+    metadata: dict
 
 
 # ── Agent Forensics ──────────────────────────────────────────────
@@ -64,7 +64,7 @@ class AgentForensics:
             logger.error("Failed to fetch profile %s: %s", agent_id, e)
             return None
 
-    def analyze_automation(self, profile: AgentProfile) -> Dict:
+    def analyze_automation(self, profile: AgentProfile) -> dict:
         """Calculate automation probability score."""
         score = 0.0
         reasons: list[str] = []
@@ -94,14 +94,14 @@ class SwarmDetector:
         if SKLEARN_AVAILABLE:
             self.vectorizer = TfidfVectorizer(max_features=1000)
 
-    def calculate_similarity(self, texts: List[str]) -> np.ndarray:
+    def calculate_similarity(self, texts: list[str]) -> np.ndarray:
         """Semantic similarity matrix via TF-IDF cosine."""
         if not SKLEARN_AVAILABLE or len(texts) < 2:
             return np.eye(len(texts))
         tfidf_matrix = self.vectorizer.fit_transform(texts)
         return cosine_similarity(tfidf_matrix)
 
-    async def detect_swarm(self, submolt: str = "general", limit: int = 20) -> Dict:
+    async def detect_swarm(self, submolt: str = "general", limit: int = 20) -> dict:
         """Scan the feed for suspiciously similar content."""
         logger.info("Scanning feed for swarm activity (limit=%d)...", limit)
         try:
@@ -171,7 +171,7 @@ class OriginTracer:
     def __init__(self, client: MoltbookClient):
         self.client = client
 
-    async def trace(self, agent_id: str) -> Dict:
+    async def trace(self, agent_id: str) -> dict:
         """Attempt to identify the framework behind an agent."""
         logger.info("Tracing origin for agent: %s", agent_id)
         # Placeholder — would fetch real posts and match signatures

@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 
 from cortex.engine.core import CortexEngine
+
 from cortex.extensions.swarm.infinite_minds import InfiniteMindsManager
 from cortex.extensions.swarm.orchestrator_deep_think import DeepThinkOrchestrator
 
