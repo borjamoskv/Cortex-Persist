@@ -16,6 +16,7 @@ from typing import Final
 
 import aiosqlite
 
+from cortex.engine.physics import EARTH
 from cortex.search.causal_gap import (
     CausalGap,
     SearchCandidate,
@@ -52,7 +53,7 @@ def _apply_temporal_decay(results: list[SearchResult], recency_weight: float) ->
             created = datetime.fromisoformat(r.created_at.replace("Z", "+00:00"))
             if created.tzinfo is None:
                 created = created.replace(tzinfo=timezone.utc)
-            age_days = (now - created).total_seconds() / 86400.0
+            age_days = (now - created).total_seconds() / float(EARTH.day_seconds)
         except (ValueError, TypeError, AttributeError):
             age_days = 0.0  # Unknown age = no penalty
 

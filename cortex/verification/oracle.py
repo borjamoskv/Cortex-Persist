@@ -54,5 +54,5 @@ class VerificationOracle:
             audit_result = await self.engine.ledger.audit()
             return audit_result["is_valid"]
         except Exception as e:
-            logger.error(f"Ledger audit failed: {e}")
+            logger.error("Ledger audit failed: %s", e)
             return False
