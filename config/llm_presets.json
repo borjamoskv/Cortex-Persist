@@ -71,21 +71,18 @@
     }
   },
   "kimi": {
-    "base_url": "https://api.moonshot.ai/v1",
-    "default_model": "kimi-k2.5",
-    "env_key": "KIMI_API_KEY",
-    "models": ["moonshot-v1-128k", "kimi-k2.5"],
-    "context_window": 2000000,
+    "base_url": "https://api.moonshot.cn/v1",
+    "default_model": "moonshot-v1-128k",
+    "env_key": "MOONSHOT_API_KEY",
+    "models": ["moonshot-v1-8k", "moonshot-v1-32k", "moonshot-v1-128k", "kimi-latest-2.5"],
+    "context_window": 128000,
     "tier": "high",
-    "cost_class": "medium",
-    "specialization": ["reasoning", "code", "creative", "architect", "general"],
+    "cost_class": "low",
+    "specialization": ["reasoning", "code", "extraction"],
     "intent_model_map": {
-      "code":              "kimi-k2.5",
-      "reasoning":         "kimi-k2.5",
-      "creative":          "kimi-k2.5",
-      "architect":         "kimi-k2.5",
-      "general":           "kimi-k2.5",
-      "episodic_processing": "kimi-k2.5"
+      "code":      "moonshot-v1-128k",
+      "reasoning": "kimi-latest-2.5",
+      "general":   "moonshot-v1-128k"
     }
   },
   "mistral": {
@@ -122,7 +119,7 @@
     "base_url": "https://api.x.ai/v1",
     "default_model": "grok-4.1",
     "env_key": "XAI_API_KEY",
-    "context_window": 131072,
+    "context_window": 2000000,
     "tier": "frontier",
     "cost_class": "high",
     "specialization": ["code", "reasoning", "creative", "architect", "general"],
@@ -383,24 +380,6 @@
     "context_window": 131072,
     "tier": "high",
     "cost_class": "low",
-    "specialization": ["reasoning", "creative", "general"],
-    "intent_model_map": {
-      "reasoning": "llama-3.3-70b",
-      "creative":  "llama-3.3-70b",
-      "general":   "llama-3.3-70b"
-    }
-  },
-  "grok": {
-    "base_url": "https://api.x.ai/v1",
-    "default_model": "grok-beta",
-    "models": ["grok-beta", "grok-2", "grok-vision-beta"],
-    "api_key": "YOUR_GROK_API_KEY",
-    "context_window": 131072,
-    "tier": "frontier",
-    "cost_class": "high",
-    "specialization": ["real-time", "general"],
-    "intent_model_map": {
-      "general": "grok-2"
-    }
+    "specialization": ["reasoning", "creative", "general"]
   }
 }
