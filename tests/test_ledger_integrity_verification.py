@@ -37,7 +37,7 @@ def test_ledger_integrity_chain(test_db):
 
     # 2. Verify chain is valid
     res = verifier.verify_chain()
-    assert res["valid"] == True
+    assert res["valid"]
     assert res["checked_events"] == 5
 
     # 3. Corrupt hash
@@ -49,7 +49,7 @@ def test_ledger_integrity_chain(test_db):
     
     # 4. Verify detects COMPROMISED
     res = verifier.verify_chain()
-    assert res["valid"] == False
+    assert not res["valid"]
     assert any("Hash mismatch" in v or "Chain break" in v for v in res["violations"])
 
 def test_ledger_chain_break(test_db):
@@ -72,5 +72,5 @@ def test_ledger_chain_break(test_db):
         conn.execute("UPDATE ledger_events SET prev_hash = 'WRONG_PREV' WHERE event_id = ?", (ev_id,))
     
     res = verifier.verify_chain()
-    assert res["valid"] == False
+    assert not res["valid"]
     assert any("Chain break" in v for v in res["violations"])

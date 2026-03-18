@@ -75,7 +75,7 @@ class DiffManager:
             fromfile="a/" + p.name,
             tofile="b/" + p.name,
             lineterm="",
-            n=2  # context lines
+            n=2,  # context lines
         )
 
         diff_list = list(diff_gen)

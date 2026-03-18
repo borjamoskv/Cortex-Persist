@@ -132,5 +132,5 @@ def row_to_fact(row: tuple) -> Fact:
         parent_id=r[21],
         relation_type=r[22],
         yield_score=float(r[23]) if r[23] is not None else 1.0,
-        tags=[]  # Tags are loaded separately from fact_tags table
+        tags=[],  # Tags are loaded separately from fact_tags table
     )

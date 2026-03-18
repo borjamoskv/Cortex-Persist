@@ -53,8 +53,7 @@ class LedgerVerifier:
                     recomputed = event.compute_hash(p_hash)
                     if recomputed != c_hash:
                         violations.append(
-                            f"Hash mismatch at {event_id}: "
-                            f"stored {c_hash}, recomputed {recomputed}"
+                            f"Hash mismatch at {event_id}: stored {c_hash}, recomputed {recomputed}"
                         )
                 except Exception as e:
                     violations.append(f"Error parsing event {event_id}: {e}")

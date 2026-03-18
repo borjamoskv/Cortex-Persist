@@ -496,7 +496,9 @@ def _compute_weighted_score(dimensions: list[DimensionResult]) -> int:
 # ─── Main Entry Point ────────────────────────────────────────────────
 
 
-def scan(project: str, path: Union[str, Path], deep: bool = False, brutal: bool = False) -> ScanResult:
+def scan(
+    project: str, path: Union[str, Path], deep: bool = False, brutal: bool = False
+) -> ScanResult:
     """Execute X-Ray 13D scan on a project directory.
 
     If brutal is True, deep is implied and penalties are more severe.

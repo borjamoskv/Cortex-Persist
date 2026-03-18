@@ -555,13 +555,13 @@ class CortexEngine(
         if self._conn:
             await self._conn.close()
             self._conn = None
-        
+
         # Clean up Wave 6 references
         self.mac_maestro = None  # type: ignore
         self.ledger_writer = None  # type: ignore
         self.enrichment_queue = None  # type: ignore
         self.ledger_store = None  # type: ignore
-        
+
         self._ledger = None
 
     async def __aenter__(self):

@@ -96,19 +96,17 @@ class TestRailway:
 class TestPatternMatching:
     def test_match_ok(self):
         result = Ok(99)
-        match result:
-            case Ok(v):
-                assert v == 99
-            case Err(_):
-                pytest.fail("Should not match Err")
+        if isinstance(result, Ok):
+            assert result.value == 99
+        elif isinstance(result, Err):
+            pytest.fail("Should not match Err")
 
     def test_match_err(self):
         result = Err("bad")
-        match result:
-            case Ok(_):
-                pytest.fail("Should not match Ok")
-            case Err(e):
-                assert e == "bad"
+        if isinstance(result, Ok):
+            pytest.fail("Should not match Ok")
+        elif isinstance(result, Err):
+            assert result.error == "bad"
 
 
 # ─── @safe / @safe_async Decorators ──────────────────────────────────

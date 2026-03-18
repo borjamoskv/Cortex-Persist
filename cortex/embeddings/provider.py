@@ -43,6 +43,7 @@ class TorchEmbeddingProvider:
     def is_available(self) -> bool:
         try:
             import torch
+
             return torch.cuda.is_available() or torch.backends.mps.is_available() or True
         except ImportError:
             return False

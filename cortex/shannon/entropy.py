@@ -169,7 +169,7 @@ async def compute_corpus_entropy(
     Returns:
         ShannonReport with entropy metrics and diagnostics.
     """
-    query = "SELECT content FROM facts " "WHERE valid_until IS NULL AND tenant_id = ?"
+    query = "SELECT content FROM facts WHERE valid_until IS NULL AND tenant_id = ?"
     params: list = [tenant_id]
 
     if project:

@@ -51,9 +51,7 @@ def get_test_cmd(stack: str) -> Optional[list[str]]:
 def run_quiet(cmd: list[str], cwd: Union[str, Path]) -> bool:
     """Run a command suppressed, return True if exit code 0."""
     try:
-        subprocess.check_call(
-            cmd, cwd=cwd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
-        )
+        subprocess.check_call(cmd, cwd=cwd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         return True
     except subprocess.CalledProcessError:
         return False

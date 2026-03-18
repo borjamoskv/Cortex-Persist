@@ -43,7 +43,7 @@ class MetadataEngine:
             "C3": 1.0,
             "C2": 0.5,
             "C1": 0.2,
-            "stated": 0.8
+            "stated": 0.8,
         }.get(fact.confidence or "stated", 1.0)
 
         # content density (normalized log-ish)

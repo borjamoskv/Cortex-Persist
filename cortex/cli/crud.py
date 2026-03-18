@@ -95,10 +95,7 @@ def list_facts(project, fact_type, limit, db) -> None:
                 suggestion="Prueba sin filtros: cortex list",
             )
             return
-        table = Table(
-            title=f"CORTEX Facts ({len(rows)})",
-            border_style="cyan"
-        )  # type: ignore[reportArgumentType]
+        table = Table(title=f"CORTEX Facts ({len(rows)})", border_style="cyan")  # type: ignore[reportArgumentType]
         table.add_column("ID", style="bold", width=5)
         table.add_column("Proyecto", style="cyan", width=18)
         table.add_column("Tipo", width=10)

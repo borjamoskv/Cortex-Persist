@@ -51,7 +51,6 @@ class MaestroActionRunner:
         else:
             vector = "A"  # Default to AppleScript for unknown actions
 
-
         # Build UIAction
         action = UIAction(
             name=action_name,
@@ -59,8 +58,6 @@ class MaestroActionRunner:
             target_query=target_query,
             unsafe=unsafe,
         )
-
-
 
         try:
             logger.info("Executing Maestro intent: %s on %s", action_name, self.bundle_id)

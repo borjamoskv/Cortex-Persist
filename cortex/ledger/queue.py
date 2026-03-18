@@ -29,7 +29,7 @@ class EnrichmentQueue:
 
     def claim_one(self) -> Optional[dict[str, Any]]:
         """Atomically claim a job for processing.
-        
+
         Uses SQLite's RETURNING clause (3.35.0+) to ensure only one worker
         claims each job, even under high concurrency.
         """
@@ -93,7 +93,13 @@ class EnrichmentQueue:
                 SET status=?, attempts=?, next_attempt_ts=?, last_error=?, updated_at=strftime('%Y-%m-%dT%H:%M:%f','now')
                 WHERE job_id=?
                 """,
-                ("failed" if terminal else "retry", attempts + 1, next_attempt, error[:2000], job_id),
+                (
+                    "failed" if terminal else "retry",
+                    attempts + 1,
+                    next_attempt,
+                    error[:2000],
+                    job_id,
+                ),
             )
             conn.execute(
                 """

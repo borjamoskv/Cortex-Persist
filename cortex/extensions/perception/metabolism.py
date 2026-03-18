@@ -31,10 +31,7 @@ class MetabolicObserver:
         self._consecutive_low_exergy = 0
 
     def calculate_intensity(
-        self,
-        event_count: int,
-        avg_diff_size: float,
-        exergy_score: Optional[float] = None
+        self, event_count: int, avg_diff_size: float, exergy_score: Optional[float] = None
     ) -> str:
         """
         Determine the target intensity based on activity and exergy.

@@ -248,15 +248,19 @@ CREATE INDEX IF NOT EXISTS idx_te_start ON time_entries(start_time);
 # ─── Enrichment Queue ──────────────────────────────────────────────────
 CREATE_ENRICHMENT_JOBS = """
 CREATE TABLE IF NOT EXISTS enrichment_jobs (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    tenant_id   TEXT NOT NULL DEFAULT 'default',
-    fact_id     INTEGER NOT NULL,
-    status      TEXT NOT NULL DEFAULT 'pending',
-    retry_count INTEGER NOT NULL DEFAULT 0,
-    locked_at   TEXT,
-    created_at  TEXT NOT NULL DEFAULT (datetime('now')),
-    updated_at  TEXT NOT NULL DEFAULT (datetime('now')),
-    error       TEXT
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenant_id       TEXT NOT NULL DEFAULT 'default',
+    fact_id         INTEGER NOT NULL REFERENCES facts(id),
+    job_type        TEXT NOT NULL DEFAULT 'embedding',
+    status          TEXT NOT NULL DEFAULT 'pending',
+    priority        INTEGER DEFAULT 0,
+    locked_at       TEXT,
+    attempts        INTEGER DEFAULT 0,
+    last_error      TEXT,
+    payload         TEXT,
+    created_at      TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at      TEXT NOT NULL DEFAULT (datetime('now')),
+    error           TEXT
 );
 """
 

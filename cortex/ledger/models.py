@@ -68,6 +68,7 @@ class LedgerEvent:
 
     def compute_hash(self, prev_hash: str) -> str:
         from cortex.utils.canonical import canonical_json, compute_tx_hash
+
         project = self.metadata.get("project", self.actor)
         detail_json = canonical_json(self.to_canonical_payload())
         return compute_tx_hash(
@@ -75,7 +76,7 @@ class LedgerEvent:
             project=project,
             action=self.action,
             detail_json=detail_json,
-            timestamp=self.ts
+            timestamp=self.ts,
         )
 
     def to_canonical_payload(self) -> dict[str, Any]:

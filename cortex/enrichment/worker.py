@@ -110,10 +110,7 @@ class EnrichmentWorker:
 
             # Call the sovereign enrichment method in EmbeddingManager
             await self.engine.embeddings.enrich_fact(
-                fact_id=int(fact_id),
-                content=content,
-                project=project,
-                tenant_id=tenant_id
+                fact_id=int(fact_id), content=content, project=project, tenant_id=tenant_id
             )
         except Exception as e:
             logger.warning("Semantic enrichment for fact %s failure: %s", fact_id, e)

@@ -106,21 +106,21 @@ async def insert_fact_record(
     # ── Double-Plane Ingestion (V2) ──
     from cortex.engine.metadata_engine import MetadataEngine
     from cortex.engine.models import Fact
-    
+
     # 1. Deterministic Classification (Heuristic-First)
     # We construct a temporary Fact object for classification
     temp_fact = Fact(
-        id=0, # Placeholder
+        id=0,  # Placeholder
         tenant_id=tenant_id,
         project=project,
         content=content,
         fact_type=fact_type,
         tags=tags or [],
         parent_id=parent_decision_id,
-        relation_type=meta.get("relation_type") if meta else None
+        relation_type=meta.get("relation_type") if meta else None,
     )
     metadata_v2 = MetadataEngine.classify_deterministic(temp_fact)
-    
+
     category = metadata_v2["category"]
     quadrant = metadata_v2["quadrant"]
     storage_tier = metadata_v2["storage_tier"]
@@ -140,10 +140,23 @@ async def insert_fact_record(
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
-            tenant_id, project, encrypted_content, fact_type, json.dumps(meta), f_hash,
-            source, confidence, parent_decision_id, relation_type,
-            quadrant, storage_tier, exergy_score, category, yield_score,
-            "pending", tags_json
+            tenant_id,
+            project,
+            encrypted_content,
+            fact_type,
+            json.dumps(meta),
+            f_hash,
+            source,
+            confidence,
+            parent_decision_id,
+            relation_type,
+            quadrant,
+            storage_tier,
+            exergy_score,
+            category,
+            yield_score,
+            "pending",
+            tags_json,
         ),
     ) as cursor:
         fact_id = cursor.lastrowid
@@ -189,7 +202,7 @@ async def insert_fact_record(
         tag_records = [(fact_id, tag, tenant_id) for tag in tags]
         await conn.executemany(
             "INSERT OR IGNORE INTO fact_tags (fact_id, tag, tenant_id) VALUES (?, ?, ?)",
-            tag_records
+            tag_records,
         )
 
     # 4. FTS Update (facts_fts virtual table)
@@ -197,7 +210,7 @@ async def insert_fact_record(
         # We mirror a subset to FTS for fast keyword search
         await conn.execute(
             "INSERT INTO facts_fts (rowid, content, project, tags, fact_type) VALUES (?, ?, ?, ?, ?)",
-            (fact_id, content, project, tags_json, fact_type)
+            (fact_id, content, project, tags_json, fact_type),
         )
     except (sqlite3.Error, aiosqlite.Error) as e:
         if "unique" in str(e).lower() or "constraint failed" in str(e).lower():

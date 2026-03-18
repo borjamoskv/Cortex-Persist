@@ -59,8 +59,7 @@ def create_checkpoint(db: str, batch: int):
         console.print(f"[bold green]Checkpoint created successfully.[/bold green] ID: {root_id}")
     else:
         console.print(
-            "[yellow]No new events available for checkpointing "
-            "(batch size not reached).[/yellow]"
+            "[yellow]No new events available for checkpointing (batch size not reached).[/yellow]"
         )
 
 

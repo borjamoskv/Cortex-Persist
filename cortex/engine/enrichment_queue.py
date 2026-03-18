@@ -12,9 +12,7 @@ logger = logging.getLogger("cortex")
 
 
 async def enqueue_enrichment_job(
-    conn: aiosqlite.Connection,
-    fact_id: int,
-    commit: bool = False
+    conn: aiosqlite.Connection, fact_id: int, commit: bool = False
 ) -> int:
     """Add a new fact to the enrichment queue."""
     query = "INSERT INTO enrichment_jobs (fact_id) VALUES (?)"

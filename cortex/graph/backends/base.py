@@ -40,7 +40,11 @@ class GraphBackend(ABC):
 
     @abstractmethod
     async def resolve_ghost(
-        self, ghost_id: Union[int, str], target_id: Union[int, str], confidence: float, timestamp: str
+        self,
+        ghost_id: Union[int, str],
+        target_id: Union[int, str],
+        confidence: float,
+        timestamp: str,
     ) -> bool:
         pass
 

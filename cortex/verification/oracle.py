@@ -11,6 +11,7 @@ from typing import Any
 
 logger = logging.getLogger("cortex.verification")
 
+
 class VerificationOracle:
     """Sovereign Oracle for deterministic fact and ledger verification."""
 
@@ -26,7 +27,7 @@ class VerificationOracle:
             row = await cursor.fetchone()
             if not row:
                 return False
-            
+
             # Additional deterministic checks (hash equality, signature verification)
             # would go here. For P0, we focus on presence and ledger consistency.
             return True
@@ -36,12 +37,14 @@ class VerificationOracle:
         async with self.engine.session() as conn:
             cursor = await conn.execute(
                 "SELECT status FROM enrichment_jobs WHERE fact_id = ? ORDER BY id DESC LIMIT 1",
-                (fact_id,)
+                (fact_id,),
             )
             row = await cursor.fetchone()
             if not row:
                 # Check if it already has an embedding (legacy or processed)
-                cursor = await conn.execute("SELECT fact_id FROM embeddings WHERE fact_id = ?", (fact_id,))
+                cursor = await conn.execute(
+                    "SELECT fact_id FROM embeddings WHERE fact_id = ?", (fact_id,)
+                )
                 if await cursor.fetchone():
                     return "completed"
                 return "not_queued"

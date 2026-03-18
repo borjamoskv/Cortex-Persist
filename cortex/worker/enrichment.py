@@ -21,7 +21,9 @@ logger = logging.getLogger("cortex")
 class EnrichmentWorker:
     """Worker that polls enrichment_jobs and processes them."""
 
-    def __init__(self, db_path: str, provider: Optional[EmbeddingProvider] = None, poll_interval: float = 1.0):
+    def __init__(
+        self, db_path: str, provider: Optional[EmbeddingProvider] = None, poll_interval: float = 1.0
+    ):
         self.db_path = db_path
         self.provider = provider
         self.poll_interval = poll_interval

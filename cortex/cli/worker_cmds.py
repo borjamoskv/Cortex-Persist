@@ -12,6 +12,7 @@ from cortex.cli.common import DEFAULT_DB, _run_async, console
 
 logger = logging.getLogger("cortex")
 
+
 @click.group(name="worker")
 def worker_group():
     """Manage background workers (Enrichment, etc)."""
