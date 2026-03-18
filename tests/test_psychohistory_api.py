@@ -1,4 +1,4 @@
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock
 
 import pytest
 from httpx import ASGITransport, AsyncClient
@@ -6,6 +6,7 @@ from httpx import ASGITransport, AsyncClient
 from cortex.api.core import app
 from cortex.api.deps import get_async_engine
 from cortex.auth import AuthResult, require_permission
+from cortex.auth.deps import require_auth
 from cortex.extensions.swarm.psychohistory import AGENT_BIASES
 from cortex.utils.result import Ok
 
@@ -27,7 +28,9 @@ def mock_engine():
     # Return Ok("Simulated cascade effect") for individual agents
     # Return Ok("O(1) Contingency Crystal") for synthesis
     router.execute_resilient.side_effect = lambda prompt: Ok(
-        "O(1) Contingency Crystal" if "Hari Seldon" in prompt.system_instruction else "Simulated cascade effect"
+        "O(1) Contingency Crystal"
+        if "Hari Seldon" in prompt.system_instruction
+        else "Simulated cascade effect"
     )
     engine.get_router.return_value = router
     engine.store.return_value = None
@@ -37,7 +40,8 @@ def mock_engine():
 @pytest.fixture
 async def client(mock_engine):
     app.dependency_overrides[get_async_engine] = lambda: mock_engine
-    
+    app.dependency_overrides[require_auth] = override_auth
+
     for perm in ["read", "write", "admin"]:
         app.dependency_overrides[require_permission(perm)] = override_auth
 
@@ -52,7 +56,7 @@ async def test_psychohistory_simulation_api(client, mock_engine):
     payload = {
         "scenario_name": "Apagón Satelital Test",
         "simulated_years": 10,
-        "project": "TEST_PROJECT"
+        "project": "TEST_PROJECT",
     }
 
     resp = await client.post("/v1/swarm/psychohistory", json=payload)

@@ -79,11 +79,11 @@ class CortexEngine(
         self._db_path.parent.mkdir(parents=True, exist_ok=True)
         self._enforce_fs_permissions()
         self._auto_embed = auto_embed
-        self._conn: Optional[aiosqlite.Connection] = None
+        self._conn: aiosqlite.Connection | None = None
         self._vec_available = False
         self._conn_lock = asyncio.Lock()
         self._ledger = None  # Wave 5: ImmutableLedger (lazy init)
-        self._embedder: Optional[LocalEmbedder] = None
+        self._embedder: LocalEmbedder | None = None
         self._memory_manager = None  # Frontera 2: Tripartite Memory (lazy init)
         self._persistence = PersistenceSupervisor(self)
         self._system_state = "ACTIVE"
@@ -362,7 +362,7 @@ class CortexEngine(
     async def trace_episode(
         self,
         fact_id: int,
-        max_depth: Optional[int] = None,
+        max_depth: int | None = None,
     ):
         """Trace the full causal DAG from a given fact ID."""
         from cortex.memory.episodic import CausalTracer
@@ -447,7 +447,7 @@ class CortexEngine(
 
         return [Fact(**{k: v for k, v in r.items() if k != "type"}) for r in results]
 
-    async def shannon_report(self, project: Optional[str] = None) -> dict:
+    async def shannon_report(self, project: str | None = None) -> dict:
         """Shannon entropy analysis of stored memory."""
         from cortex.extensions.shannon.report import EntropyReport
 
@@ -455,7 +455,7 @@ class CortexEngine(
 
     async def fingerprint(
         self,
-        project: Optional[str] = None,
+        project: str | None = None,
         top_domains: int = 15,
     ):
         """Cognitive Fingerprint — extract behavioral patterns from the Ledger.
@@ -477,7 +477,7 @@ class CortexEngine(
     def fingerprint_sync(self, *args, **kwargs):
         return self._run_sync(self.fingerprint(*args, **kwargs))
 
-    async def immortality_index(self, project: Optional[str] = None) -> dict:
+    async def immortality_index(self, project: str | None = None) -> dict:
         """Immortality Index (ι) — cognitive crystallization metric."""
         from cortex.extensions.shannon.immortality import ImmortalityIndex
 
@@ -488,7 +488,7 @@ class CortexEngine(
 
     async def prioritize(
         self,
-        project: Optional[str] = None,
+        project: str | None = None,
         tenant_id: str = "default",
     ) -> list:
         """Bellman Policy Engine — prioritized action queue.

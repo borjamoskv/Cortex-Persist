@@ -8,7 +8,7 @@ Quarantine       → cortex.engine.store_quarantine_mixin
 from __future__ import annotations
 
 import logging
-from typing import Any, ClassVar, Optional
+from typing import Any, ClassVar
 
 import aiosqlite
 
@@ -58,15 +58,15 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         content: str,
         tenant_id: str = "default",
         fact_type: str = "knowledge",
-        tags: Optional[list[str]] = None,
+        tags: list[str] | None = None,
         confidence: str = "stated",
-        source: Optional[str] = None,
-        meta: Optional[dict[str, Any]] = None,
-        valid_from: Optional[str] = None,
+        source: str | None = None,
+        meta: dict[str, Any] | None = None,
+        valid_from: str | None = None,
         commit: bool = True,
-        tx_id: Optional[int] = None,
-        parent_decision_id: Optional[int] = None,
-        conn: Optional[aiosqlite.Connection] = None,
+        tx_id: int | None = None,
+        parent_decision_id: int | None = None,
+        conn: aiosqlite.Connection | None = None,
     ) -> int:
         """Store a new fact with proper connection management."""
         tenant_id = self._resolve_tenant(tenant_id)
@@ -120,11 +120,11 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         content: str,
         tenant_id: str,
         fact_type: str,
-        tags: Optional[list[str]],
+        tags: list[str] | None,
         confidence: str,
-        source: Optional[str],
-        meta: Optional[dict[str, Any]],
-    ) -> tuple[Optional[int], Optional[dict[str, Any]], str, str]:
+        source: str | None,
+        meta: dict[str, Any] | None,
+    ) -> tuple[int | None, dict[str, Any] | None, str, str]:
         """Delegated validation logic (Ω₁₃, Semantic Dedup, Bridge)."""
         return await run_store_validation_logic(
             mixin_instance=self,
@@ -146,14 +146,14 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         content: str,
         tenant_id: str,
         fact_type: str,
-        tags: Optional[list[str]],
+        tags: list[str] | None,
         confidence: str,
-        source: Optional[str],
-        meta: Optional[dict[str, Any]],
-        valid_from: Optional[str],
+        source: str | None,
+        meta: dict[str, Any] | None,
+        valid_from: str | None,
         commit: bool,
-        tx_id: Optional[int],
-        parent_decision_id: Optional[int] = None,
+        tx_id: int | None,
+        parent_decision_id: int | None = None,
     ) -> int:
         # ═══ AX-033: Pre-store guards via GuardPipeline ═══
         pipeline = getattr(self, "_guard_pipeline", None)
@@ -255,9 +255,9 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
     async def update(
         self,
         fact_id: int,
-        content: Optional[str] = None,
-        tags: Optional[list[str]] = None,
-        meta: Optional[dict[str, Any]] = None,
+        content: str | None = None,
+        tags: list[str] | None = None,
+        meta: dict[str, Any] | None = None,
         tenant_id: str = "default",
     ) -> int:
         tenant_id = self._resolve_tenant(tenant_id)
@@ -326,8 +326,8 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
     async def deprecate(
         self,
         fact_id: int,
-        reason: Optional[str] = None,
-        conn: Optional[aiosqlite.Connection] = None,
+        reason: str | None = None,
+        conn: aiosqlite.Connection | None = None,
         tenant_id: str = "default",
     ) -> bool:
         if not isinstance(fact_id, int) or fact_id <= 0:
@@ -347,7 +347,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             return res
 
     async def _deprecate_impl(
-        self, conn: aiosqlite.Connection, fact_id: int, reason: Optional[str], tenant_id: str
+        self, conn: aiosqlite.Connection, fact_id: int, reason: str | None, tenant_id: str
     ) -> bool:
         """Delegated deprecation logic."""
         return await deprecate_impl_logic(
@@ -357,8 +357,8 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
     async def invalidate(
         self,
         fact_id: int,
-        reason: Optional[str] = None,
-        conn: Optional[aiosqlite.Connection] = None,
+        reason: str | None = None,
+        conn: aiosqlite.Connection | None = None,
         tenant_id: str = "default",
     ) -> bool:
         """Explicit severe invalidation (tombstone) + taint propagation."""
@@ -376,7 +376,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             return res
 
     async def _invalidate_impl(
-        self, conn: aiosqlite.Connection, fact_id: int, reason: Optional[str], tenant_id: str
+        self, conn: aiosqlite.Connection, fact_id: int, reason: str | None, tenant_id: str
     ) -> bool:
         """Delegated invalidation logic (tombstone + taint)."""
         return await invalidate_impl_logic(

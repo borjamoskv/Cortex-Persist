@@ -25,9 +25,10 @@ class WorktreeCreateRequest(BaseModel):
 
 class PsychohistoryRequest(BaseModel):
     scenario_name: str = Field(..., description="The catastrophic scenario to simulate")
-    simulated_years: int = Field(5, description="Number of years to simulate into the future", ge=1, le=1000)
+    simulated_years: int = Field(
+        5, description="Number of years to simulate into the future", ge=1, le=1000
+    )
     project: str = Field("SYSTEM", description="Project namespace to save the crystal")
-
 
 
 class WorktreeResponse(BaseModel):
@@ -111,7 +112,7 @@ async def delete_worktree(
 async def run_psychohistory_simulation(
     req: PsychohistoryRequest,
     auth=Depends(require_permission("admin")),
-    engine=Depends(get_async_engine)
+    engine=Depends(get_async_engine),
 ):
     """
     Trigger the Psychohistory Fracture Simulator (Hito 4).
@@ -119,12 +120,10 @@ async def run_psychohistory_simulation(
     Extracts a Byzantine consensus O(1) Contingency Crystal.
     """
     orchestrator = PsychohistoryOrchestrator(engine)
-    
+
     try:
         result = await orchestrator.simulate_fracture(
-            scenario=req.scenario_name,
-            years=req.simulated_years,
-            project=req.project
+            scenario=req.scenario_name, years=req.simulated_years, project=req.project
         )
         return result
     except Exception as e:

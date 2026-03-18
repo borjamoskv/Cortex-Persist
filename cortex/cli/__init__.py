@@ -204,6 +204,7 @@ _LAZY_GROUPS: list[tuple[str, str, str, str]] = [
     ("josu", "cortex.cli.commands.josu_start", "app", "Manage the JOSU proactive daemon."),
     ("genesis", "cortex.cli.genesis_cmds", "genesis_group", "Genesis Engine — create systems."),
     ("health", "cortex.cli.health_cmds", "health_group", "Health Index — system monitoring."),
+    ("immune", "cortex.cli.immune_cmds", "immune_group", "Immune system and epistemic membrane commands."),
     ("routing", "cortex.cli.routing_cmds", "routing", "LLM routing — tier/cost-aware selection."),
     ("maestro", "cortex.cli.maestro_cmds", "maestro", "Autonomous Mac automation agent."),
     (

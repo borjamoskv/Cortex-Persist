@@ -4,7 +4,7 @@ import logging
 from dataclasses import dataclass
 from typing import Any
 
-from cortex.engine.core import CortexEngine
+from cortex.engine import CortexEngine
 
 logger = logging.getLogger("cortex.extensions.immune.breaker")
 
@@ -12,6 +12,7 @@ logger = logging.getLogger("cortex.extensions.immune.breaker")
 @dataclass
 class EpistemicState:
     """Represents the current cognitive entropy (thrashing) level of the system."""
+
     consecutive_test_failures: int = 0
     unresolved_ghosts: int = 0
     recent_linting_mutations: int = 0
@@ -62,20 +63,21 @@ async def execute_circuit_trip(gap_description: str, cortex_engine: CortexEngine
     try:
         # We might need a flag in store() like `force=True` when locked.
         # But we'll try standard store first.
-        cortex_engine.store(
+        await cortex_engine.store(
             type="error",
             project="system-kernel",
             source="daemon:circuit-breaker",
-            confidence="C5", # Absolute certainty of halt
+            confidence="C5",  # Absolute certainty of halt
             summary="SYSTEM HALTED: Entropy spike detected. Entering autodidact mode.",
             meta={"gap_identified": gap_description},
         )
     except Exception as e:
-        logger.error(f"Failed to persist halt event: {e}")
+        logger.error("Failed to persist halt event: %s", e)
 
     # 3. Trigger Autodidact (mocked or actual if integrated)
     try:
         from cortex.agents.autodidact import force_ingestion
+
         axiom_id = await force_ingestion(query=gap_description)
     except ImportError:
         logger.warning("Autodidact-Omega not found. Halting indefinitely until manual resume.")
@@ -85,5 +87,5 @@ async def execute_circuit_trip(gap_description: str, cortex_engine: CortexEngine
     if axiom_id:
         cortex_engine.set_system_state("ACTIVE")
         return {"status": "RESTORED", "new_axiom": axiom_id}
-    
+
     return {"status": "HALTED", "reason": "Axiom not created or Autodidact missing."}
