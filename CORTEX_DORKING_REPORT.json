@@ -1,0 +1,434 @@
+[
+  {
+    "type": "infra_ghost",
+    "timestamp": "2026-03-18T01:32:03.928436Z",
+    "vulnerability": {
+      "class": "RSA_PRIVATE_KEY",
+      "file_path": "/Users/borjafernandezangulo/30_CORTEX/.venv/lib/python3.12/site-packages/googleapiclient/discovery_cache/documents/appengine.v1.json",
+      "match_snippet": "[REDACTED_FOR_CORTEX_LOGS]"
+    },
+    "confidence": "C1\ud83d\udd34",
+    "impact": "P0 (Singularity)",
+    "next_action": "Immediate revocation and ledger isolation."
+  },
+  {
+    "type": "infra_ghost",
+    "timestamp": "2026-03-18T01:32:04.008613Z",
+    "vulnerability": {
+      "class": "RSA_PRIVATE_KEY",
+      "file_path": "/Users/borjafernandezangulo/30_CORTEX/.venv/lib/python3.12/site-packages/googleapiclient/discovery_cache/documents/appengine.v1alpha.json",
+      "match_snippet": "[REDACTED_FOR_CORTEX_LOGS]"
+    },
+    "confidence": "C1\ud83d\udd34",
+    "impact": "P0 (Singularity)",
+    "next_action": "Immediate revocation and ledger isolation."
+  },
+  {
+    "type": "infra_ghost",
+    "timestamp": "2026-03-18T01:32:04.045610Z",
+    "vulnerability": {
+      "class": "RSA_PRIVATE_KEY",
+      "file_path": "/Users/borjafernandezangulo/30_CORTEX/.venv/lib/python3.12/site-packages/googleapiclient/discovery_cache/documents/appengine.v1beta.json",
+      "match_snippet": "[REDACTED_FOR_CORTEX_LOGS]"
+    },
+    "confidence": "C1\ud83d\udd34",
+    "impact": "P0 (Singularity)",
+    "next_action": "Immediate revocation and ledger isolation."
+  },
+  {
+    "type": "infra_ghost",
+    "timestamp": "2026-03-18T01:32:06.708437Z",
+    "vulnerability": {
+      "class": "GENERIC_PASSWORD",
+      "file_path": "/Users/borjafernandezangulo/30_CORTEX/.venv/lib/python3.12/site-packages/cryptography/hazmat/_oid.py",
+      "match_snippet": "[REDACTED_FOR_CORTEX_LOGS]"
+    },
+    "confidence": "C1\ud83d\udd34",
+    "impact": "P0 (Singularity)",
+    "next_action": "Immediate revocation and ledger isolation."
+  },
+  {
+    "type": "infra_ghost",
+    "timestamp": "2026-03-18T01:32:06.787331Z",
+    "vulnerability": {
+      "class": "GENERIC_PASSWORD",
+      "file_path": "/Users/borjafernandezangulo/30_CORTEX/.venv/lib/python3.12/site-packages/opentelemetry/sdk/environment_variables/__init__.py",
+      "match_snippet": "[REDACTED_FOR_CORTEX_LOGS]"
+    },
+    "confidence": "C1\ud83d\udd34",
+    "impact": "P0 (Singularity)",
+    "next_action": "Immediate revocation and ledger isolation."
+  },
+  {
+    "type": "infra_ghost",
+    "timestamp": "2026-03-18T01:32:06.822355Z",
+    "vulnerability": {
+      "class": "GENERIC_PASSWORD",
+      "file_path": "/Users/borjafernandezangulo/30_CORTEX/.venv/lib/python3.12/site-packages/fsspec/spec.py",
+      "match_snippet": "[REDACTED_FOR_CORTEX_LOGS]"
+    },
+    "confidence": "C1\ud83d\udd34",
+    "impact": "P0 (Singularity)",
+    "next_action": "Immediate revocation and ledger isolation."
+  },
+  {
+    "type": "infra_ghost",
+    "timestamp": "2026-03-18T01:32:06.873171Z",
+    "vulnerability": {
+      "class": "RSA_PRIVATE_KEY",
+      "file_path": "/Users/borjafernandezangulo/30_CORTEX/.venv/lib/python3.12/site-packages/google/auth/transport/_mtls_helper.py",
+      "match_snippet": "[REDACTED_FOR_CORTEX_LOGS]"
+    },
+    "confidence": "C1\ud83d\udd34",
+    "impact": "P0 (Singularity)",
+    "next_action": "Immediate revocation and ledger isolation."
+  },
+  {
+    "type": "infra_ghost",
+    "timestamp": "2026-03-18T01:32:06.875923Z",
+    "vulnerability": {
+      "class": "RSA_PRIVATE_KEY",
+      "file_path": "/Users/borjafernandezangulo/30_CORTEX/.venv/lib/python3.12/site-packages/google/auth/crypt/_python_rsa.py",
+      "match_snippet": "[REDACTED_FOR_CORTEX_LOGS]"
+    },
+    "confidence": "C1\ud83d\udd34",
+    "impact": "P0 (Singularity)",
+    "next_action": "Immediate revocation and ledger isolation."
+  },
+  {
+    "type": "infra_ghost",
+    "timestamp": "2026-03-18T01:32:06.886396Z",
+    "vulnerability": {
+      "class": "GENERIC_PASSWORD",
+      "file_path": "/Users/borjafernandezangulo/30_CORTEX/.venv/lib/python3.12/site-packages/google/oauth2/challenges.py",
+      "match_snippet": "[REDACTED_FOR_CORTEX_LOGS]"
+    },
+    "confidence": "C1\ud83d\udd34",
+    "impact": "P0 (Singularity)",
+    "next_action": "Immediate revocation and ledger isolation."
+  },
+  {
+    "type": "infra_ghost",
+    "timestamp": "2026-03-18T01:32:06.934413Z",
+    "vulnerability": {
+      "class": "GENERIC_PASSWORD",
+      "file_path": "/Users/borjafernandezangulo/30_CORTEX/.venv/lib/python3.12/site-packages/google/adk/auth/auth_schemes.py",
+      "match_snippet": "[REDACTED_FOR_CORTEX_LOGS]"
+    },
+    "confidence": "C1\ud83d\udd34",
+    "impact": "P0 (Singularity)",
+    "next_action": "Immediate revocation and ledger isolation."
+  },
+  {
+    "type": "infra_ghost",
+    "timestamp": "2026-03-18T01:32:06.934949Z",
+    "vulnerability": {
+      "class": "GENERIC_PASSWORD",
+      "file_path": "/Users/borjafernandezangulo/30_CORTEX/.venv/lib/python3.12/site-packages/google/adk/auth/auth_credential.py",
+      "match_snippet": "[REDACTED_FOR_CORTEX_LOGS]"
+    },
+    "confidence": "C1\ud83d\udd34",
+    "impact": "P0 (Singularity)",
+    "next_action": "Immediate revocation and ledger isolation."
+  },
+  {
+    "type": "infra_ghost",
+    "timestamp": "2026-03-18T01:32:06.998575Z",
+    "vulnerability": {
+      "class": "AWS_ACCESS_KEY",
+      "file_path": "/Users/borjafernandezangulo/30_CORTEX/.venv/lib/python3.12/site-packages/google/adk/cli/browser/main-7SJG752M.js",
+      "match_snippet": "[REDACTED_FOR_CORTEX_LOGS]"
+    },
+    "confidence": "C1\ud83d\udd34",
+    "impact": "P0 (Singularity)",
+    "next_action": "Immediate revocation and ledger isolation."
+  },
+  {
+    "type": "infra_ghost",
+    "timestamp": "2026-03-18T01:32:06.999088Z",
+    "vulnerability": {
+      "class": "AWS_ACCESS_KEY",
+      "file_path": "/Users/borjafernandezangulo/30_CORTEX/.venv/lib/python3.12/site-packages/google/adk/cli/browser/main-7SJG752M.js",
+      "match_snippet": "[REDACTED_FOR_CORTEX_LOGS]"
+    },
+    "confidence": "C1\ud83d\udd34",
+    "impact": "P0 (Singularity)",
+    "next_action": "Immediate revocation and ledger isolation."
+  },
+  {
+    "type": "infra_ghost",
+    "timestamp": "2026-03-18T01:32:06.999654Z",
+    "vulnerability": {
+      "class": "AWS_ACCESS_KEY",
+      "file_path": "/Users/borjafernandezangulo/30_CORTEX/.venv/lib/python3.12/site-packages/google/adk/cli/browser/main-7SJG752M.js",
+      "match_snippet": "[REDACTED_FOR_CORTEX_LOGS]"
+    },
+    "confidence": "C1\ud83d\udd34",
+    "impact": "P0 (Singularity)",
+    "next_action": "Immediate revocation and ledger isolation."
+  },
+  {
+    "type": "infra_ghost",
+    "timestamp": "2026-03-18T01:32:06.999675Z",
+    "vulnerability": {
+      "class": "AWS_ACCESS_KEY",
+      "file_path": "/Users/borjafernandezangulo/30_CORTEX/.venv/lib/python3.12/site-packages/google/adk/cli/browser/main-7SJG752M.js",
+      "match_snippet": "[REDACTED_FOR_CORTEX_LOGS]"
+    },
+    "confidence": "C1\ud83d\udd34",
+    "impact": "P0 (Singularity)",
+    "next_action": "Immediate revocation and ledger isolation."
+  },
+  {
+    "type": "infra_ghost",
+    "timestamp": "2026-03-18T01:32:07.028280Z",
+    "vulnerability": {
+      "class": "GENERIC_PASSWORD",
+      "file_path": "/Users/borjafernandezangulo/30_CORTEX/.venv/lib/python3.12/site-packages/google/adk/cli/browser/main-7SJG752M.js",
+      "match_snippet": "[REDACTED_FOR_CORTEX_LOGS]"
+    },
+    "confidence": "C1\ud83d\udd34",
+    "impact": "P0 (Singularity)",
+    "next_action": "Immediate revocation and ledger isolation."
+  },
+  {
+    "type": "infra_ghost",
+    "timestamp": "2026-03-18T01:32:09.811939Z",
+    "vulnerability": {
+      "class": "GENERIC_PASSWORD",
+      "file_path": "/Users/borjafernandezangulo/30_CORTEX/.venv/lib/python3.12/site-packages/starlette/datastructures.py",
+      "match_snippet": "[REDACTED_FOR_CORTEX_LOGS]"
+    },
+    "confidence": "C1\ud83d\udd34",
+    "impact": "P0 (Singularity)",
+    "next_action": "Immediate revocation and ledger isolation."
+  },
+  {
+    "type": "infra_ghost",
+    "timestamp": "2026-03-18T01:32:10.872729Z",
+    "vulnerability": {
+      "class": "GENERIC_PASSWORD",
+      "file_path": "/Users/borjafernandezangulo/30_CORTEX/.venv/lib/python3.12/site-packages/mcp/shared/_httpx_utils.py",
+      "match_snippet": "[REDACTED_FOR_CORTEX_LOGS]"
+    },
+    "confidence": "C1\ud83d\udd34",
+    "impact": "P0 (Singularity)",
+    "next_action": "Immediate revocation and ledger isolation."
+  },
+  {
+    "type": "infra_ghost",
+    "timestamp": "2026-03-18T01:32:10.936761Z",
+    "vulnerability": {
+      "class": "GENERIC_PASSWORD",
+      "file_path": "/Users/borjafernandezangulo/30_CORTEX/.venv/lib/python3.12/site-packages/sqlalchemy/dialects/oracle/oracledb.py",
+      "match_snippet": "[REDACTED_FOR_CORTEX_LOGS]"
+    },
+    "confidence": "C1\ud83d\udd34",
+    "impact": "P0 (Singularity)",
+    "next_action": "Immediate revocation and ledger isolation."
+  },
+  {
+    "type": "infra_ghost",
+    "timestamp": "2026-03-18T01:32:10.936778Z",
+    "vulnerability": {
+      "class": "GENERIC_PASSWORD",
+      "file_path": "/Users/borjafernandezangulo/30_CORTEX/.venv/lib/python3.12/site-packages/sqlalchemy/dialects/oracle/oracledb.py",
+      "match_snippet": "[REDACTED_FOR_CORTEX_LOGS]"
+    },
+    "confidence": "C1\ud83d\udd34",
+    "impact": "P0 (Singularity)",
+    "next_action": "Immediate revocation and ledger isolation."
+  },
+  {
+    "type": "infra_ghost",
+    "timestamp": "2026-03-18T01:32:10.936786Z",
+    "vulnerability": {
+      "class": "GENERIC_PASSWORD",
+      "file_path": "/Users/borjafernandezangulo/30_CORTEX/.venv/lib/python3.12/site-packages/sqlalchemy/dialects/oracle/oracledb.py",
+      "match_snippet": "[REDACTED_FOR_CORTEX_LOGS]"
+    },
+    "confidence": "C1\ud83d\udd34",
+    "impact": "P0 (Singularity)",
+    "next_action": "Immediate revocation and ledger isolation."
+  },
+  {
+    "type": "infra_ghost",
+    "timestamp": "2026-03-18T01:32:10.937222Z",
+    "vulnerability": {
+      "class": "GENERIC_PASSWORD",
+      "file_path": "/Users/borjafernandezangulo/30_CORTEX/.venv/lib/python3.12/site-packages/sqlalchemy/dialects/oracle/provision.py",
+      "match_snippet": "[REDACTED_FOR_CORTEX_LOGS]"
+    },
+    "confidence": "C1\ud83d\udd34",
+    "impact": "P0 (Singularity)",
+    "next_action": "Immediate revocation and ledger isolation."
+  },
+  {
+    "type": "infra_ghost",
+    "timestamp": "2026-03-18T01:32:10.937610Z",
+    "vulnerability": {
+      "class": "GENERIC_PASSWORD",
+      "file_path": "/Users/borjafernandezangulo/30_CORTEX/.venv/lib/python3.12/site-packages/sqlalchemy/dialects/oracle/cx_oracle.py",
+      "match_snippet": "[REDACTED_FOR_CORTEX_LOGS]"
+    },
+    "confidence": "C1\ud83d\udd34",
+    "impact": "P0 (Singularity)",
+    "next_action": "Immediate revocation and ledger isolation."
+  },
+  {
+    "type": "infra_ghost",
+    "timestamp": "2026-03-18T01:32:10.937624Z",
+    "vulnerability": {
+      "class": "GENERIC_PASSWORD",
+      "file_path": "/Users/borjafernandezangulo/30_CORTEX/.venv/lib/python3.12/site-packages/sqlalchemy/dialects/oracle/cx_oracle.py",
+      "match_snippet": "[REDACTED_FOR_CORTEX_LOGS]"
+    },
+    "confidence": "C1\ud83d\udd34",
+    "impact": "P0 (Singularity)",
+    "next_action": "Immediate revocation and ledger isolation."
+  },
+  {
+    "type": "infra_ghost",
+    "timestamp": "2026-03-18T01:32:10.942011Z",
+    "vulnerability": {
+      "class": "GENERIC_PASSWORD",
+      "file_path": "/Users/borjafernandezangulo/30_CORTEX/.venv/lib/python3.12/site-packages/sqlalchemy/dialects/sqlite/provision.py",
+      "match_snippet": "[REDACTED_FOR_CORTEX_LOGS]"
+    },
+    "confidence": "C1\ud83d\udd34",
+    "impact": "P0 (Singularity)",
+    "next_action": "Immediate revocation and ledger isolation."
+  },
+  {
+    "type": "infra_ghost",
+    "timestamp": "2026-03-18T01:32:10.951941Z",
+    "vulnerability": {
+      "class": "GENERIC_PASSWORD",
+      "file_path": "/Users/borjafernandezangulo/30_CORTEX/.venv/lib/python3.12/site-packages/sqlalchemy/dialects/mysql/mysqldb.py",
+      "match_snippet": "[REDACTED_FOR_CORTEX_LOGS]"
+    },
+    "confidence": "C1\ud83d\udd34",
+    "impact": "P0 (Singularity)",
+    "next_action": "Immediate revocation and ledger isolation."
+  },
+  {
+    "type": "infra_ghost",
+    "timestamp": "2026-03-18T01:32:10.956716Z",
+    "vulnerability": {
+      "class": "GENERIC_PASSWORD",
+      "file_path": "/Users/borjafernandezangulo/30_CORTEX/.venv/lib/python3.12/site-packages/sqlalchemy/dialects/mssql/pyodbc.py",
+      "match_snippet": "[REDACTED_FOR_CORTEX_LOGS]"
+    },
+    "confidence": "C1\ud83d\udd34",
+    "impact": "P0 (Singularity)",
+    "next_action": "Immediate revocation and ledger isolation."
+  },
+  {
+    "type": "infra_ghost",
+    "timestamp": "2026-03-18T01:32:10.956794Z",
+    "vulnerability": {
+      "class": "GENERIC_PASSWORD",
+      "file_path": "/Users/borjafernandezangulo/30_CORTEX/.venv/lib/python3.12/site-packages/sqlalchemy/dialects/mssql/pyodbc.py",
+      "match_snippet": "[REDACTED_FOR_CORTEX_LOGS]"
+    },
+    "confidence": "C1\ud83d\udd34",
+    "impact": "P0 (Singularity)",
+    "next_action": "Immediate revocation and ledger isolation."
+  },
+  {
+    "type": "infra_ghost",
+    "timestamp": "2026-03-18T01:32:10.956806Z",
+    "vulnerability": {
+      "class": "GENERIC_PASSWORD",
+      "file_path": "/Users/borjafernandezangulo/30_CORTEX/.venv/lib/python3.12/site-packages/sqlalchemy/dialects/mssql/pyodbc.py",
+      "match_snippet": "[REDACTED_FOR_CORTEX_LOGS]"
+    },
+    "confidence": "C1\ud83d\udd34",
+    "impact": "P0 (Singularity)",
+    "next_action": "Immediate revocation and ledger isolation."
+  },
+  {
+    "type": "infra_ghost",
+    "timestamp": "2026-03-18T01:32:11.249308Z",
+    "vulnerability": {
+      "class": "GENERIC_PASSWORD",
+      "file_path": "/Users/borjafernandezangulo/30_CORTEX/.venv/lib/python3.12/site-packages/pip/_internal/network/auth.py",
+      "match_snippet": "[REDACTED_FOR_CORTEX_LOGS]"
+    },
+    "confidence": "C1\ud83d\udd34",
+    "impact": "P0 (Singularity)",
+    "next_action": "Immediate revocation and ledger isolation."
+  },
+  {
+    "type": "infra_ghost",
+    "timestamp": "2026-03-18T01:32:11.252284Z",
+    "vulnerability": {
+      "class": "GENERIC_PASSWORD",
+      "file_path": "/Users/borjafernandezangulo/30_CORTEX/.venv/lib/python3.12/site-packages/pip/_internal/utils/misc.py",
+      "match_snippet": "[REDACTED_FOR_CORTEX_LOGS]"
+    },
+    "confidence": "C1\ud83d\udd34",
+    "impact": "P0 (Singularity)",
+    "next_action": "Immediate revocation and ledger isolation."
+  },
+  {
+    "type": "infra_ghost",
+    "timestamp": "2026-03-18T01:32:11.687935Z",
+    "vulnerability": {
+      "class": "GENERIC_PASSWORD",
+      "file_path": "/Users/borjafernandezangulo/30_CORTEX/.venv/lib/python3.12/site-packages/httpx/_urls.py",
+      "match_snippet": "[REDACTED_FOR_CORTEX_LOGS]"
+    },
+    "confidence": "C1\ud83d\udd34",
+    "impact": "P0 (Singularity)",
+    "next_action": "Immediate revocation and ledger isolation."
+  },
+  {
+    "type": "infra_ghost",
+    "timestamp": "2026-03-18T01:32:13.012619Z",
+    "vulnerability": {
+      "class": "GENERIC_PASSWORD",
+      "file_path": "/Users/borjafernandezangulo/30_CORTEX/.venv/lib/python3.12/site-packages/cyclonedx/model/crypto.py",
+      "match_snippet": "[REDACTED_FOR_CORTEX_LOGS]"
+    },
+    "confidence": "C1\ud83d\udd34",
+    "impact": "P0 (Singularity)",
+    "next_action": "Immediate revocation and ledger isolation."
+  },
+  {
+    "type": "infra_ghost",
+    "timestamp": "2026-03-18T01:32:13.628408Z",
+    "vulnerability": {
+      "class": "GENERIC_PASSWORD",
+      "file_path": "/Users/borjafernandezangulo/30_CORTEX/.venv/lib/python3.12/site-packages/Quartz/PDFKit/_metadata.py",
+      "match_snippet": "[REDACTED_FOR_CORTEX_LOGS]"
+    },
+    "confidence": "C1\ud83d\udd34",
+    "impact": "P0 (Singularity)",
+    "next_action": "Immediate revocation and ledger isolation."
+  },
+  {
+    "type": "infra_ghost",
+    "timestamp": "2026-03-18T01:32:13.710048Z",
+    "vulnerability": {
+      "class": "GENERIC_PASSWORD",
+      "file_path": "/Users/borjafernandezangulo/30_CORTEX/.venv/lib/python3.12/site-packages/pydantic/types.py",
+      "match_snippet": "[REDACTED_FOR_CORTEX_LOGS]"
+    },
+    "confidence": "C1\ud83d\udd34",
+    "impact": "P0 (Singularity)",
+    "next_action": "Immediate revocation and ledger isolation."
+  },
+  {
+    "type": "infra_ghost",
+    "timestamp": "2026-03-18T01:32:13.710064Z",
+    "vulnerability": {
+      "class": "GENERIC_PASSWORD",
+      "file_path": "/Users/borjafernandezangulo/30_CORTEX/.venv/lib/python3.12/site-packages/pydantic/types.py",
+      "match_snippet": "[REDACTED_FOR_CORTEX_LOGS]"
+    },
+    "confidence": "C1\ud83d\udd34",
+    "impact": "P0 (Singularity)",
+    "next_action": "Immediate revocation and ledger isolation."
+  }
+]

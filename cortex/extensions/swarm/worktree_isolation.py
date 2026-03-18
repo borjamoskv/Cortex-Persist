@@ -45,7 +45,8 @@ async def _run_git_with_backoff(
         return proc.returncode, stdout, stderr
 
     raise WorktreeIsolationError(
-        f"Colapso termodinámico: Incapaz de superar el bloqueo lock (index.lock) tras {max_retries} intentos."
+        "Colapso termodinámico: Incapaz de superar el bloqueo lock"
+        f" (index.lock) tras {max_retries} intentos."
     )
 
 
@@ -86,7 +87,8 @@ async def isolated_worktree(
 ) -> AsyncGenerator[Path, None]:
     """
     Gestor O(1) de Workspaces aislados usando `git worktree`.
-    Crea un worktree físico, cede el contexto (yield) y garantiza su destrucción termodinámica al salir.
+    Crea un worktree físico, cede el contexto (yield) y garantiza
+    su destrucción termodinámica al salir.
     """
     if base_path is None:
         # Default to a safe area outside the core repo to avoid indexer pollution
@@ -107,7 +109,8 @@ async def isolated_worktree(
     actual_branch = f"{branch_name}-{unique_id}" if force_unique_branch else branch_name
 
     logger.info(
-        "🌿 [WORKTREE ISOLATION] Bipartición del espacio-tiempo. Creando worktree en: %s (Branch: %s)",
+        "🌿 [WORKTREE ISOLATION] Bipartición del espacio-tiempo."
+        " Creando worktree en: %s (Branch: %s)",
         worktree_path,
         actual_branch,
     )
@@ -119,7 +122,8 @@ async def isolated_worktree(
 
         if code != 0:
             raise WorktreeIsolationError(
-                f"No estamos en un repositorio Git válido. Imposible bifurcar: {stderr.decode().strip()}"
+                "No estamos en un repositorio Git válido."
+                f" Imposible bifurcar: {stderr.decode().strip()}"
             )
 
         # Attempt to checkout existing or create new branch
@@ -167,8 +171,8 @@ async def isolated_worktree(
             # Git exige removerlo de su índice interno primero
             await _run_git_with_backoff("worktree", "remove", "--force", str(worktree_path))
 
-            # Si forzamos una rama única, o si ya no queremos la rama, se podría borrar.
-            # De lo contrario la conservamos intacta. De momento la rama perdura para tracking externo.
+            # Si forzamos una rama única, se podría borrar.
+            # De lo contrario la conservamos intacta.
             if force_unique_branch:
                 await _run_git_with_backoff("branch", "-D", actual_branch)
 
@@ -177,7 +181,8 @@ async def isolated_worktree(
                 shutil.rmtree(worktree_path, ignore_errors=True)
 
             logger.info(
-                "✅ [WORKTREE ISOLATION] Purgatorio aniquilado. RAM y estado Git recuperados sin ghosting."
+                "✅ [WORKTREE ISOLATION] Purgatorio aniquilado."
+                " RAM y estado Git recuperados sin ghosting."
             )
 
         except Exception as e:

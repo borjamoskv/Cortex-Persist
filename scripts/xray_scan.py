@@ -9,6 +9,7 @@ from pathlib import Path
 VENV_DIR = ".venv"
 IGNORED_DIRS = {
     VENV_DIR,
+    "venv",
     ".git",
     "node_modules",
     "__pycache__",
