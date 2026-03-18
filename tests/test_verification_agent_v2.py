@@ -34,6 +34,7 @@ async def test_handle_v2_request(agent, mock_bus):
     payload = {
         "subject": "plan_step",
         "candidate": {"objective": "Test objective with enough length", "steps": ["Step 1"]},
+        "code": "print('v2 mock code')",
     }
     msg = new_message(
         sender="sender",
@@ -48,8 +49,7 @@ async def test_handle_v2_request(agent, mock_bus):
     assert mock_bus.send.called
     reply = mock_bus.send.call_args[0][0]
     assert reply.kind == MessageKind.TASK_RESULT
-    assert reply.payload["ok"] is True
-    assert reply.payload["verdict"] == "accepted"
+    assert reply.payload["is_valid"] is True
 
 
 @pytest.mark.asyncio
@@ -66,8 +66,7 @@ async def test_handle_legacy_request(agent, mock_bus):
 
     assert mock_bus.send.called
     reply = mock_bus.send.call_args[0][0]
-    # For legacy to pass, we need to ensure the oracle result is ok
-    assert reply.payload["ok"] is True
+    assert reply.payload["is_valid"] is True
 
 
 @pytest.mark.asyncio

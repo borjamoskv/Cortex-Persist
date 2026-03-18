@@ -43,7 +43,7 @@ async def process_next_job(engine: Any) -> bool:
             SELECT j.id, j.fact_id, f.content, f.project, f.tenant_id, j.attempts
             FROM enrichment_jobs j
             JOIN facts f ON j.fact_id = f.id
-            WHERE j.status = 'queued' 
+            WHERE j.status = 'pending' 
                OR (j.status = 'failed' AND j.attempts < 5 AND j.next_attempt_at < datetime('now'))
             ORDER BY j.created_at ASC
             LIMIT 1

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import base64
+import hashlib
 import json
 import logging
 from dataclasses import dataclass, field
@@ -101,6 +103,21 @@ class LedgerEvent:
     created_at: str
     last_revalidated_at: str | None = None
     tainted: bool = False
+
+
+def hash_event(event: LedgerEvent) -> str:
+    """Generate an Arweave-compatible Base64URL(SHA-256) hash of the event."""
+    data = {
+        "parent_ids": sorted(event.parent_ids),
+        "status": event.status.value if isinstance(event.status, Enum) else event.status,
+        "trust_score": event.trust_score,
+        "created_at": event.created_at,
+        "tainted": event.tainted
+    }
+    payload = json.dumps(data, separators=(",", ":"), sort_keys=True).encode("utf-8")
+    digest = hashlib.sha256(payload).digest()
+    return base64.urlsafe_b64encode(digest).decode("ascii").rstrip("=")
+
 
 
 class CausalGraph:

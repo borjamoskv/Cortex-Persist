@@ -109,21 +109,13 @@ class CollectorRegistry:
 class DbCollector:
     """Database existence and size check."""
 
-    @property
-    def name(self) -> str:
-        return "db"
+    name = "db"
 
-    @property
-    def weight(self) -> float:
-        return 1.5
+    weight = 1.5
 
-    @property
-    def description(self) -> str:
-        return "Core SQLite database file size and health."
+    description = "Core SQLite database file size and health."
 
-    @property
-    def remediation(self) -> str:
-        return "Run `cortex gc` or consider archiving old facts."
+    remediation = "Run `cortex gc` or consider archiving old facts."
 
     def collect(self, db_path: str) -> MetricSnapshot:
         t = HealthThresholds()
@@ -157,21 +149,13 @@ class DbCollector:
 class LedgerCollector:
     """Ledger integrity via hash chain verification."""
 
-    @property
-    def name(self) -> str:
-        return "ledger"
+    name = "ledger"
 
-    @property
-    def weight(self) -> float:
-        return 1.2
+    weight = 1.2
 
-    @property
-    def description(self) -> str:
-        return "Cryptographic hash chain integrity check."
+    description = "Cryptographic hash chain integrity check."
 
-    @property
-    def remediation(self) -> str:
-        return "Run `cortex ledger verify`. If broken, DB may be tampered."
+    remediation = "Run `cortex ledger verify`. If broken, DB may be tampered."
 
     def collect(self, db_path: str) -> MetricSnapshot:
         if not db_path or not Path(db_path).exists():
@@ -215,21 +199,13 @@ class LedgerCollector:
 class EntropyCollector:
     """Entropy from fact type diversity + volume."""
 
-    @property
-    def name(self) -> str:
-        return "entropy"
+    name = "entropy"
 
-    @property
-    def weight(self) -> float:
-        return 1.0
+    weight = 1.0
 
-    @property
-    def description(self) -> str:
-        return "Type diversity and information volume (Shannon)."
+    description = "Type diversity and information volume (Shannon)."
 
-    @property
-    def remediation(self) -> str:
-        return "Inject more varied context via ADK or Web tools."
+    remediation = "Inject more varied context via ADK or Web tools."
 
     def collect(self, db_path: str) -> MetricSnapshot:
         t = HealthThresholds()
@@ -275,21 +251,13 @@ class EntropyCollector:
 class FactCountCollector:
     """Active fact volume measurement."""
 
-    @property
-    def name(self) -> str:
-        return "facts"
+    name = "facts"
 
-    @property
-    def weight(self) -> float:
-        return 0.8
+    weight = 0.8
 
-    @property
-    def description(self) -> str:
-        return "Total volume of active mnemonic facts."
+    description = "Total volume of active mnemonic facts."
 
-    @property
-    def remediation(self) -> str:
-        return "Store more facts to build agent context, or compact if too high."
+    remediation = "Store more facts to build agent context, or compact if too high."
 
     def collect(self, db_path: str) -> MetricSnapshot:
         t = HealthThresholds()
@@ -324,21 +292,13 @@ class FactCountCollector:
 class WalCollector:
     """WAL file pressure check."""
 
-    @property
-    def name(self) -> str:
-        return "wal"
+    name = "wal"
 
-    @property
-    def weight(self) -> float:
-        return 0.6
+    weight = 0.6
 
-    @property
-    def description(self) -> str:
-        return "Write-Ahead Log size (checkpoint pressure)."
+    description = "Write-Ahead Log size (checkpoint pressure)."
 
-    @property
-    def remediation(self) -> str:
-        return "Restart daemon or force SQLite PRAGMA wal_checkpoint."
+    remediation = "Restart daemon or force SQLite PRAGMA wal_checkpoint."
 
     def collect(self, db_path: str) -> MetricSnapshot:
         t = HealthThresholds()
@@ -379,21 +339,13 @@ class WalCollector:
 class SystemLoadCollector:
     """OS-level system load (1m/5m/15m) measurement."""
 
-    @property
-    def name(self) -> str:
-        return "sysload"
+    name = "sysload"
 
-    @property
-    def weight(self) -> float:
-        return 1.0
+    weight = 1.0
 
-    @property
-    def description(self) -> str:
-        return "1-minute system load average vs CPU core count."
+    description = "1-minute system load average vs CPU core count."
 
-    @property
-    def remediation(self) -> str:
-        return "High load detected. Throttle agent concurrency or pause NightShift."
+    remediation = "High load detected. Throttle agent concurrency or pause NightShift."
 
     def collect(self, db_path: str) -> MetricSnapshot:
         try:
@@ -429,21 +381,13 @@ class SystemLoadCollector:
 class OrphanedBrowserCollector:
     """Identify orphaned ms-playwright-go processes."""
 
-    @property
-    def name(self) -> str:
-        return "browsers"
+    name = "browsers"
 
-    @property
-    def weight(self) -> float:
-        return 0.5
+    weight = 0.5
 
-    @property
-    def description(self) -> str:
-        return "Orphaned browser process count."
+    description = "Orphaned browser process count."
 
-    @property
-    def remediation(self) -> str:
-        return "Kill orphaned browsers via `pkill -f ms-playwright-go`."
+    remediation = "Kill orphaned browsers via `pkill -f ms-playwright-go`."
 
     def collect(self, db_path: str) -> MetricSnapshot:
         import subprocess
@@ -470,21 +414,13 @@ class OrphanedBrowserCollector:
 class SnapshotAgeCollector:
     """Age of the latest context snapshot."""
 
-    @property
-    def name(self) -> str:
-        return "snapshot"
+    name = "snapshot"
 
-    @property
-    def weight(self) -> float:
-        return 0.7
+    weight = 0.7
 
-    @property
-    def description(self) -> str:
-        return "Age of latest context snapshot."
+    description = "Age of latest context snapshot."
 
-    @property
-    def remediation(self) -> str:
-        return "Update snapshot via `cortex context snapshot`."
+    remediation = "Update snapshot via `cortex context snapshot`."
 
     def collect(self, db_path: str) -> MetricSnapshot:
         if not db_path or not Path(db_path).exists():
@@ -528,21 +464,13 @@ class SnapshotAgeCollector:
 class DiskSpaceCollector:
     """Free disk space on the volume hosting the DB."""
 
-    @property
-    def name(self) -> str:
-        return "disk"
+    name = "disk"
 
-    @property
-    def weight(self) -> float:
-        return 1.4
+    weight = 1.4
 
-    @property
-    def description(self) -> str:
-        return "Free disk space on DB volume."
+    description = "Free disk space on DB volume."
 
-    @property
-    def remediation(self) -> str:
-        return "Free disk space or move DB to a larger volume."
+    remediation = "Free disk space or move DB to a larger volume."
 
     def collect(self, db_path: str) -> MetricSnapshot:
         import shutil

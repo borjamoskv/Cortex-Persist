@@ -54,8 +54,8 @@ class VerificationOracle:
         """Verify the integrity of the entire ledger chain."""
         # This will call SovereignLedger.audit()
         try:
-            audit_result = await self.engine.ledger.audit()
-            return audit_result["is_valid"]
+            audit_result = await self.engine.verify_ledger()
+            return audit_result.get("valid", False)
         except Exception as e:
             logger.error("Ledger audit failed: %s", e)
             return False

@@ -57,12 +57,43 @@ To ensure CORTEX can operate seamlessly with any 2026 L1 orchestration framework
 
 ---
 
-## 5. Conclusion: The Sovereign Machine
+## 5. Advanced Axioms: Eliminating Friction & Forcing Execution
+
+To ensure the native L0 infrastructure remains thermodynamically sound, CORTEX Persist incorporates these critical operational axioms for sovereign swarms:
+
+### 5.1. Axiom Ω₁₄: Zero Friction Rhetoric
+The system's output must be purely mechanical, executable, and structural. Decorative prose, apologies, unsolicited explanations, and conversational padding are strictly prohibited.
+*   **Thermodynamic Cost:** Every token spent on politeness or conversational padding is a token not spent on reasoning or state mutation. It represents "Absurd Recomputation" and thermal noise.
+*   **Enforcement:** CORTEX Guards will analyze response structures for high-entropy conversational padding and penalize generators that fail to deliver direct, executable output.
+
+### 5.2. Axiom Ω₁₅: Entropic Collapse (Execution Loops)
+A Language Model is stochastic. To prevent the accumulation of probabilistic error (compound hallucination), the system must force closed execution loops:
+1.  **Observe:** Read the immediate state (DOM, ledger, filesystem).
+2.  **Hypothesize:** Generate a localized intent.
+3.  **Act:** Execute the intent against the deterministic boundary.
+4.  **Measure:** Read the resulting state.
+*   **Friction as a Filter:** Breaking execution into micro-loops purifies the signal. The verified output of Loop N becomes the immutable ground truth for Loop N+1, isolating failures and preventing ghost code from dictating downstream logic.
+
+---
+
+## 6. The Sovereign 5-Vector Gate
+
+A CORTEX-Native release or major state transition cannot proceed unless it passes the **Ship Gate**, a 5-vector structural verification matrix:
+
+1.  **Ghost Radar:** Zero unresolved ghosts in the last 24 hours. No lurking entropy or dead abstractions.
+2.  **Test Suite:** 100% pass rate on deterministic tests (`pytest`).
+3.  **Git State:** Clean working tree, perfectly aligned with the origin repository. No untracked kinetic state allowed.
+4.  **Quality Gate:** Codebase passes structural linting with zero warnings (`ruff check`).
+5.  **Neural Connectivity (Axiom Ω₁₃):** API key coverage must be > 0. The swarm must have active connections to the frontier (xAI, Groq, Mistral, OpenAI, Claude).
+
+---
+
+## 7. Conclusion: The Sovereign Machine
 
 The industry's pivot toward constrained orchestration proves the CORTEX hypothesis: True systemic autonomy is achieved not by granting the AI infinite freedom, but by providing it with perfect, rigid, and trustless memory constraints. 
 
 By assimilating these 2026 case studies into its L0 DNA, CORTEX Persist positions itself as the mandatory foundational layer for building Sovereign Machines that will operate consistently, auditably, and thermodynamically efficiently over a 100-year horizon.
 
 ---
-*Assimilation Date: 2026-03-14*
+*Assimilation Date: 2026-03-18*
 *(Signed) Antigravity-Omega Engine*

@@ -28,14 +28,22 @@ def mock_engine():
             "project": "test",
             "content": "v1",
             "fact_type": "knowledge",
-            "created_at": "2024-01-01",
+            "tags": [],
+            "created_at": "2024-01-01T00:00:00Z",
+            "updated_at": "2024-01-01T00:00:00Z",
+            "hash": "0000",
+            "tx_id": "tx0",
         },
         {
             "id": 2,
             "project": "test",
             "content": "v2",
             "fact_type": "knowledge",
-            "created_at": "2024-01-02",
+            "tags": [],
+            "created_at": "2024-01-02T00:00:00Z",
+            "updated_at": "2024-01-02T00:00:00Z",
+            "hash": "0001",
+            "tx_id": "tx1",
         },
     ]
     # Mock taint report
@@ -56,7 +64,7 @@ def mock_engine():
     profile.last_incident_ts = None
     registry.get_profile.return_value = profile
     registry.compute_trust_score.return_value = 0.9
-    engine.get_trust_registry.return_value = registry
+    engine.get_trust_registry = MagicMock(return_value=registry)
 
     # Mock ledger verify and stats
     engine.verify_ledger.return_value = {"valid": True}

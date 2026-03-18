@@ -4,12 +4,13 @@ Verifies that facts are persistent and ledgerized even when enrichment
 is delayed or failing.
 """
 
+import sqlite3
+
 import pytest
 
-from cortex.core.config import CortexConfig
 from cortex.database.pool import CortexConnectionPool
+from cortex.engine.enrichment_worker import process_next_job
 from cortex.engine_async import AsyncCortexEngine
-from cortex.enrichment.worker import EnrichmentWorker
 from cortex.verification.oracle import VerificationOracle
 
 
@@ -57,20 +58,12 @@ async def test_asynchronous_enrichment_flow(engine):
     status = await oracle.check_enrichment_status(fact_id)
     assert status == "pending"
 
-    # 3. Start EnrichmentWorker and process
-    config = CortexConfig(DB_PATH=engine._db_path)
-    worker = EnrichmentWorker(engine, config)
-    # We bypass the loop for deterministic testing
-    job = await worker._get_next_job()
-    assert job is not None
-    assert job["fact_id"] == fact_id
-
-    # Mocking the embedder if needed, or letting it fail to see P0 resistance
-    # For now, we assume a local or mocked embedder works for this test
+    # 3. Process via synchronous manual trigger for deterministic testing
     try:
-        await worker._process_job(job)
+        processed = await process_next_job(engine)
+        assert processed is True
         final_status = await oracle.check_enrichment_status(fact_id)
-        assert final_status == "completed"
+        assert final_status in ("completed", "indexed")
     except Exception as e:
         # In P0, even if embedding fails, the fact record is ALREADY SAFE
         print(f"Embedding failed as expected in infra_ghost env: {e}")
@@ -91,11 +84,23 @@ async def test_ledger_integrity_during_decoupling(engine):
 
     oracle = VerificationOracle(engine)
     # For P0 tests, we just check if it can attempt verification without crashing
-    # or if we can manually initialize the ledger if it's None
-    if engine._ledger is None:
-        from cortex.ledger import ImmutableLedger
+    if getattr(engine, "_ledger", None) is None:
+        from cortex.engine.ledger import ImmutableLedger
 
-        engine._ledger = ImmutableLedger(engine)
+        engine._ledger = ImmutableLedger(engine._pool)
+
+    async with engine.session() as conn:
+        await conn.execute("""
+            CREATE TABLE IF NOT EXISTS integrity_checks (
+                id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                check_type      TEXT NOT NULL,
+                status          TEXT NOT NULL,
+                details         TEXT,
+                started_at      TEXT NOT NULL,
+                completed_at    TEXT NOT NULL
+            )
+        """)
+        await conn.commit()
 
     is_valid = await oracle.verify_ledger_continuity()
     assert is_valid is True

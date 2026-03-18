@@ -327,30 +327,65 @@ class LLMProvider(BaseProvider):
     async def _execute_fallback(
         self, payload: dict[str, Any], original_error: httpx.HTTPStatusError
     ) -> str:
-        """Ejecuta el fallback hacia un modelo más estable si todo falla."""
+        """Ejecuta el fallback en cascada hacia modelos locales y cloud sin cuota.
+
+        Aplica Axioma Ω: Previene interrupciones por cuota descendiendo por la topología
+        de resiliencia local -> cloud gratuito.
+        """
+        fallback_cascade = [
+            "vllm",  # Local (Fastest/Private - Llama 4 Scout / DeepSeek V3.2)
+            "ollama",  # Local (Fallback - Qwen 2.5 Coder 32b)
+            "groq",  # Cloud sin cuota (Llama 3.3 70B / Llama 4 Maverick)
+            "cerebras",  # Cloud sin cuota (Llama 3.3 70B)
+            "sambanova",  # Cloud sin cuota (Llama 3.3 70B)
+            "qwen",  # Cloud resiliencia base
+        ]
+
         logger.warning(
-            "LLM API [429 Quota Exceeded Final] on %s. Fallback to Open Code (Qwen Coder)...",
+            "LLM API [429 Quota Exceeded Final] on %s. "
+            "Iniciando cascada de fallback termosensible...",
             self._model,
         )
 
-        if self._provider == "qwen":
-            raise original_error
+        for fb_name in fallback_cascade:
+            if self._provider == fb_name:
+                continue
 
-        fallback_provider = LLMProvider(provider="qwen")
-        try:
-            fb_url, fb_headers = fallback_provider._prepare_request()
-            fb_payload = {
-                "model": fallback_provider._model,
-                "messages": payload.get("messages", []),
-                "temperature": payload.get("temperature", 0.3),
-                "max_tokens": payload.get("max_tokens", 2048),
-            }
-            return await fallback_provider._execute_completion_raw(fb_url, fb_headers, fb_payload)
-        except (httpx.HTTPError, ValueError, KeyError) as fallback_e:
-            logger.error("LLM Fallback Failure: %s", fallback_e)
-            raise original_error from fallback_e
-        finally:
-            await fallback_provider.close()
+            try:
+                # Fallará rápido con ValueError si falta la API Key requerida
+                fallback_provider = LLMProvider(provider=fb_name)
+            except ValueError:
+                continue
+
+            logger.info("Intentando recuperación de inferencia vía %s...", fb_name)
+            try:
+                fb_url, fb_headers = fallback_provider._prepare_request()
+                fb_payload = {
+                    "model": fallback_provider._model,
+                    "messages": payload.get("messages", []),
+                    "temperature": payload.get("temperature", 0.3),
+                    "max_tokens": payload.get("max_tokens", 2048),
+                }
+                # Si esto da error de conexión (local no activo) o 4xx, lo capturamos
+                result = await fallback_provider._execute_completion_raw(
+                    fb_url, fb_headers, fb_payload
+                )
+                logger.info(
+                    "Fallback exitoso en %s (%s). Estabilización lograda.",
+                    fb_name,
+                    fallback_provider._model,
+                )
+                return result
+            except (httpx.HTTPError, ValueError, KeyError) as fb_val_e:
+                logger.debug("Omitiendo fallback %s debido a error: %s", fb_name, fb_val_e)
+                continue
+            finally:
+                await fallback_provider.close()
+
+        logger.error(
+            "Colapso térmico total: todos los providers de fallback fracasaron. Propagando error."
+        )
+        raise original_error
 
     async def _process_stream_lines(self, response: httpx.Response):
         """Consume and parse SSE lines from an active HTTP stream."""

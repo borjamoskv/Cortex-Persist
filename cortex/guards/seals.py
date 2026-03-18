@@ -592,13 +592,12 @@ async def main() -> int:
     print(f"   ⏱  Total: {total_elapsed:.0f}ms")
 
     if failed:
-        printer.fail(f"SEALS BROKEN: {sorted(failed)}")
-        print("\nFix violations before pushing.")
+        printer.fail(f"SEALS BROKEN: {sorted(failed)}\nFix violations before pushing.")
         return 1
-    else:
-        active = len(verified) + len(stubs)
-        printer.success(f"ALL {active} SEALS INTACT ({len(stubs)} stubs). Ready for launch.")
-        return 0
+    printer.success(
+        f"ALL {len(verified) + len(stubs)} SEALS INTACT ({len(stubs)} stubs). Ready for launch."
+    )
+    return 0
 
 
 if __name__ == "__main__":
