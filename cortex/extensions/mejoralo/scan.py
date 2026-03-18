@@ -1,4 +1,4 @@
-from typing import Any, Optional, Union
+from typing import Optional, Union
 
 """
 CORTEX v5.0 — MEJORAlo X-Ray Scanner.

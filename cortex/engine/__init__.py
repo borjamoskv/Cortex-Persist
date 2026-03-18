@@ -71,7 +71,7 @@ class CortexEngine(
 
     def __init__(
         self,
-        db_path: str | Path = DEFAULT_DB_PATH,
+        db_path: Union[str, Path] = DEFAULT_DB_PATH,
         auto_embed: bool = True,
     ):
         super().__init__()

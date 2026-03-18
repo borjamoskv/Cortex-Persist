@@ -34,7 +34,7 @@ import os
 import sqlite3
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from typing import Any, Final, Optional, Union
+from typing import Any, Final, Optional
 
 import aiosqlite
 

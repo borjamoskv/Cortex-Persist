@@ -8,7 +8,7 @@ import time
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional, Protocol, Union
+from typing import Any, Protocol, Union
 
 logger = logging.getLogger("cortex.extensions.swarm.auto_fix")
 

@@ -68,7 +68,7 @@ class CryptoShredder:
     The immutable ledger hash chain remains intact for EU AI Act compliance.
     """
 
-    def __init__(self, conn: Union["aiosqlite.Connection", sqlite3.Connection]):
+    def __init__(self, conn: Union[aiosqlite.Connection, sqlite3.Connection]):
         self._conn = conn
         self._ensure_schema()
 

@@ -20,7 +20,7 @@ class EnrichmentQueue:
         with self.store.tx() as conn:
             conn.execute(
                 """
-                INSERT INTO enrichment_jobs (job_id, event_id, status, attempts, next_attempt_ts)
+                INSERT INTO ledger_enrichment_jobs (job_id, event_id, status, attempts, next_attempt_ts)
                 VALUES (?, ?, 'queued', 0, ?)
                 """,
                 (job_id, event_id, utc_now_iso()),
@@ -38,11 +38,11 @@ class EnrichmentQueue:
             # RETURNING gives us the row values after the update.
             row = conn.execute(
                 """
-                UPDATE enrichment_jobs
+                UPDATE ledger_enrichment_jobs
                 SET status='processing', updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now')
                 WHERE job_id = (
                     SELECT job_id
-                    FROM enrichment_jobs
+                    FROM ledger_enrichment_jobs
                     WHERE status IN ('queued', 'retry')
                       AND (next_attempt_ts IS NULL OR next_attempt_ts <= ?)
                     ORDER BY created_at ASC
@@ -66,7 +66,7 @@ class EnrichmentQueue:
         with self.store.tx() as conn:
             conn.execute(
                 """
-                UPDATE enrichment_jobs
+                UPDATE ledger_enrichment_jobs
                 SET status='done', updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now')
                 WHERE job_id=?
                 """,
@@ -89,7 +89,7 @@ class EnrichmentQueue:
         with self.store.tx() as conn:
             conn.execute(
                 """
-                UPDATE enrichment_jobs
+                UPDATE ledger_enrichment_jobs
                 SET status=?, attempts=?, next_attempt_ts=?, last_error=?, updated_at=strftime('%Y-%m-%dT%H:%M:%f','now')
                 WHERE job_id=?
                 """,

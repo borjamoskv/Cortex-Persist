@@ -8,7 +8,7 @@ Refactored: each seal is an independent checker function.
 import logging
 import os
 from pathlib import Path
-from typing import Optional, Union
+from typing import Union
 
 from cortex.extensions.mejoralo.constants import SCAN_EXTENSIONS, SKIP_DIRS
 from cortex.extensions.mejoralo.models import ShipResult, ShipSeal

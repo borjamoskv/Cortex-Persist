@@ -8,6 +8,7 @@ touching the physical disk.
 import ast
 import logging
 from pathlib import Path
+from typing import Union
 
 logger = logging.getLogger("cortex.engine.sovereign_arbiter")
 
@@ -60,7 +61,7 @@ class SovereignArbiter:
     )
 
     @classmethod
-    def validate_mutation(cls, code_string: str, file_path: str | Path) -> tuple[bool, str]:
+    def validate_mutation(cls, code_string: str, file_path: Union[str, Path]) -> tuple[bool, str]:
         """Validate if the incoming code is safe to write to the given path."""
         path = str(file_path)
 

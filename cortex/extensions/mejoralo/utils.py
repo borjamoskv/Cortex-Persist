@@ -2,7 +2,7 @@
 
 import subprocess
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Optional, Union
 
 from .constants import STACK_MARKERS
 
