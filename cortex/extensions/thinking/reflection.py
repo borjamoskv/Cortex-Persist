@@ -261,7 +261,7 @@ def _semantic_arm(  # nosec B608 — parameterized query
         " JOIN facts AS f ON f.id = ve.fact_id"
         " WHERE ve.embedding MATCH ?"
         "   AND k = ?"
-        "   " + type_clause + "   AND f.deprecated_at IS NULL"
+        "   " + type_clause + "   AND f.is_tombstoned = 0"
         " ORDER BY ve.distance"
     )
     params: list = [json.dumps(embedding), top_k * 2, *type_params]
@@ -298,7 +298,7 @@ def _text_arm(
         " FROM facts AS f"
         " JOIN facts_fts AS fts ON fts.rowid = f.id"
         " WHERE facts_fts MATCH ?"
-        "   " + type_clause + "   AND f.deprecated_at IS NULL"
+        "   " + type_clause + "   AND f.is_tombstoned = 0"
         " LIMIT ?"
     )
     params: list = [query, *type_params, top_k * 2]

@@ -195,6 +195,7 @@ class ResilientFetcher:
                 return {
                     "status": "success",
                     "content": markdown[:MAX_CONTENT_CHARS],
+                    "raw_html": html,
                     "provider": provider.name,
                     "cascade_depth": depth,
                     "latency_ms": round(latency_ms, 1),
@@ -369,7 +370,8 @@ def create_resilient_gateway(
 
         Args:
             url: The URL to read.
-            css_selector: Optional CSS selector to filter content (e.g. 'article', '.main-content').
+            css_selector: Optional CSS selector to filter content
+                (e.g. 'article', '.main-content').
             max_chars: Maximum characters to return (default 50000).
             timeout: Per-provider timeout in seconds (default 30).
         """
@@ -378,28 +380,14 @@ def create_resilient_gateway(
         if result["status"] != "success":
             return f"❌ Failed to fetch {url}: {'; '.join(result['errors'])}"
 
-        raw_content = result["content"]
+        content = result["content"]
 
-        # If a CSS selector was requested, re-parse from HTML
-        # The content is already markdown, so we need the original HTML
-        # We fetch again only if selector is given — but we can extract from
-        # the markdown content directly for simple cases
-        if css_selector:
-            # Re-fetch raw HTML for selector extraction
-            # This is a design trade-off: we cache the markdown but need HTML for selectors
-            try:
-                async with httpx.AsyncClient(
-                    timeout=httpx.Timeout(timeout),
-                    follow_redirects=True,
-                    headers=_HEADERS,
-                ) as client:
-                    resp = await client.get(url)
-                    raw_content = _extract_with_selector(resp.text, css_selector)
-            except httpx.RequestError:
-                pass  # Degrade to full markdown content
+        # If CSS selector given, re-extract from raw HTML (cached in result)
+        if css_selector and result.get("raw_html"):
+            content = _extract_with_selector(result["raw_html"], css_selector)
 
-        truncated = len(raw_content) > max_chars
-        content = raw_content[:max_chars]
+        truncated = len(content) > max_chars
+        content = content[:max_chars]
 
         suffix = "\n\n*[Content truncated]*" if truncated else ""
         return f"**Source:** {url}\n**Provider:** {result['provider']}\n\n---\n\n{content}{suffix}"

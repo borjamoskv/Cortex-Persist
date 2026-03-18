@@ -10,20 +10,46 @@ An agent calling store() with malicious data will be rejected
 before it touches the database.
 """
 
-from __future__ import annotations
-
 import logging
 import re
+import threading
+import time
 
-from cortex.config import (
+from cortex.core.config import (
     MCP_MAX_CONTENT_LENGTH,
     MCP_MAX_QUERY_LENGTH,
     MCP_MAX_TAGS,
 )
 
-__all__ = ["MCPGuard"]
+__all__ = ["MCPGuard", "RateLimiter"]
 
 logger = logging.getLogger("cortex.mcp.guard")
+
+
+class RateLimiter:
+    """Token-bucket rate limiter for MCP requests."""
+
+    __slots__ = ("capacity", "tokens", "refill_rate", "_last_refill", "_lock")
+
+    def __init__(self, capacity: int = 60, refill_rate: float = 1.0):
+        self.capacity = capacity
+        self.tokens = float(capacity)
+        self.refill_rate = refill_rate
+        self._last_refill = time.monotonic()
+        self._lock = threading.Lock()
+
+    def allow(self) -> bool:
+        """Consume a token. Returns True if allowed, False if exhausted."""
+        now = time.monotonic()
+        with self._lock:
+            elapsed = now - self._last_refill
+            self._last_refill = now
+            self.tokens = min(self.capacity, self.tokens + elapsed * self.refill_rate)
+            if self.tokens >= 1.0:
+                self.tokens -= 1.0
+                return True
+            return False
+
 
 # ─── Poisoning Detection Patterns ─────────────────────────────────
 # These catch common prompt injection / data poisoning attempts
@@ -53,6 +79,27 @@ class MCPGuard:
     max_content_length: int = MCP_MAX_CONTENT_LENGTH
     max_tags_count: int = MCP_MAX_TAGS
     max_query_length: int = MCP_MAX_QUERY_LENGTH
+    _rate_limiter: RateLimiter = RateLimiter(capacity=60, refill_rate=1.0)
+
+    _ALLOWED_FACT_TYPES = frozenset(
+        {
+            "knowledge",
+            "decision",
+            "error",
+            "rule",
+            "axiom",
+            "schema",
+            "idea",
+            "ghost",
+            "bridge",
+        }
+    )
+
+    @classmethod
+    def check_rate_limit(cls) -> None:
+        """Check rate limit. Raises ValueError if exhausted."""
+        if not cls._rate_limiter.allow():
+            raise ValueError("Rate limit exceeded. Try again later.")
 
     # ─── Validators ────────────────────────────────────────────────
 
@@ -80,21 +127,9 @@ class MCPGuard:
             )
 
         # Fact type
-        allowed_types = {
-            "knowledge",
-            "decision",
-            "error",
-            "rule",
-            "axiom",
-            "schema",
-            "idea",
-            "ghost",
-            "bridge",
-        }
-        if fact_type not in allowed_types:
-            raise ValueError(
-                f"invalid fact_type '{fact_type}'. Allowed: {', '.join(sorted(allowed_types))}"
-            )
+        if fact_type not in cls._ALLOWED_FACT_TYPES:
+            allowed = ", ".join(sorted(cls._ALLOWED_FACT_TYPES))
+            raise ValueError(f"invalid fact_type '{fact_type}'. Allowed: {allowed}")
 
         # Tags
         cls._validate_tags(tags)

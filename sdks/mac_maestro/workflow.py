@@ -284,7 +284,9 @@ class MacMaestroWorkflow:
         blocking the event loop.
         """
         return await asyncio.to_thread(
-            self.execute_action, action, apply_safety_gate,
+            self.execute_action,
+            action,
+            apply_safety_gate,
         )
 
     async def run_sequence_async(
@@ -295,7 +297,10 @@ class MacMaestroWorkflow:
     ) -> list[bool]:
         """Async variant of run_sequence."""
         return await asyncio.to_thread(
-            self.run_sequence, actions, apply_safety_gate, abort_on_failure,
+            self.run_sequence,
+            actions,
+            apply_safety_gate,
+            abort_on_failure,
         )
 
     def _execute_single_action(

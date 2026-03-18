@@ -8,10 +8,13 @@ import json
 import logging
 from concurrent.futures import ThreadPoolExecutor
 
+import aiosqlite
+
 from cortex.engine import CortexEngine
 from cortex.engine.ledger import ImmutableLedger
 from cortex.extensions.immune.filters.base import Verdict
 from cortex.extensions.immune.membrane import ImmuneMembrane
+from cortex.mcp.confluence_bridge import register_confluence_tools
 from cortex.mcp.core_tools import (
     _register_embed_status_tool,
     _register_embed_tool,
@@ -74,11 +77,30 @@ class _MCPContext:
             await self.pool.initialize()
             self._initialized = True
 
+    def engine_from_conn(self, conn: aiosqlite.Connection) -> CortexEngine:
+        """Create a CortexEngine bound to a pool connection.
+
+        Single mutation point for the private ``_conn`` attribute.
+        """
+        engine = CortexEngine(self.cfg.db_path, auto_embed=False)
+        engine._conn = conn
+        return engine
+
+    async def close(self) -> None:
+        """Release all resources held by this context."""
+        self.executor.shutdown(wait=False)
+        await self.pool.close()
+        self.search_cache.clear()
+        self._initialized = False
+
 
 # ─── Tool Registrators ───────────────────────────────────────────────
 
 
-def _register_store_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ignore[reportInvalidTypeForm]
+def _register_store_tool(
+    mcp: "FastMCP",
+    ctx: _MCPContext,
+) -> None:  # type: ignore[reportInvalidTypeForm]
     """Register the ``cortex_store`` tool on *mcp*."""
 
     @mcp.tool()
@@ -133,8 +155,7 @@ def _register_store_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ign
         parent_id = parent_decision_id if parent_decision_id > 0 else None
 
         async with ctx.pool.acquire() as conn:
-            engine = CortexEngine(ctx.cfg.db_path, auto_embed=False)
-            engine._conn = conn
+            engine = ctx.engine_from_conn(conn)
 
             fact_id = await engine.store(
                 project,
@@ -147,11 +168,14 @@ def _register_store_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ign
             )
 
         ctx.metrics.record_request()
-        ctx.search_cache.clear()
+        ctx.search_cache.invalidate_project(project)
         return f"✓ Stored fact #{fact_id} in project '{project}'"
 
 
-def _register_search_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ignore[reportInvalidTypeForm]
+def _register_search_tool(
+    mcp: "FastMCP",
+    ctx: _MCPContext,
+) -> None:  # type: ignore[reportInvalidTypeForm]
     """Register the ``cortex_search`` tool on *mcp*."""
 
     @mcp.tool()
@@ -201,8 +225,7 @@ def _register_search_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ig
             return cached_result
 
         async with ctx.pool.acquire() as conn:
-            engine = CortexEngine(ctx.cfg.db_path, auto_embed=False)
-            engine._conn = conn
+            engine = ctx.engine_from_conn(conn)
 
             results = await engine.search(
                 query,
@@ -211,6 +234,7 @@ def _register_search_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ig
             )
 
         if not results:
+            ctx.metrics.record_request()
             ctx.search_cache.set(cache_key, "No results found.")
             return "No results found."
 
@@ -218,7 +242,9 @@ def _register_search_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ig
         lines = [f"Found {len(results)} results:\n"]
         for r in results:
             lines.append(
-                f"[#{r.fact_id}] (score: {r.score:.3f}) [{r.project}/{r.fact_type}]\n{r.content}\n"  # type: ignore[reportAttributeAccessIssue]
+                f"[#{r.fact_id}] (score: {r.score:.3f}) "
+                f"[{r.project}/{r.fact_type}]\n"  # type: ignore[reportAttributeAccessIssue]
+                f"{r.content}\n"
             )
 
         output = "\n".join(lines)
@@ -226,7 +252,10 @@ def _register_search_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ig
         return output
 
 
-def _register_status_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ignore[reportInvalidTypeForm]
+def _register_status_tool(
+    mcp: "FastMCP",
+    ctx: _MCPContext,
+) -> None:  # type: ignore[reportInvalidTypeForm]
     """Register the ``cortex_status`` tool on *mcp*."""
 
     @mcp.tool()
@@ -235,8 +264,7 @@ def _register_status_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ig
         await ctx.ensure_ready()
 
         async with ctx.pool.acquire() as conn:
-            engine = CortexEngine(ctx.cfg.db_path, auto_embed=False)
-            engine._conn = conn
+            engine = ctx.engine_from_conn(conn)
             stats = await engine.stats()
 
         m_summary = ctx.metrics.get_summary()
@@ -251,7 +279,10 @@ def _register_status_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ig
         )
 
 
-def _register_ledger_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ignore[reportInvalidTypeForm]
+def _register_ledger_tool(
+    mcp: "FastMCP",
+    ctx: _MCPContext,
+) -> None:  # type: ignore[reportInvalidTypeForm]
     """Register the ``cortex_ledger_verify`` tool on *mcp*."""
 
     @mcp.tool()
@@ -278,7 +309,9 @@ def _register_ledger_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ig
 # ─── Factory ─────────────────────────────────────────────────────────
 
 
-def create_mcp_server(config: MCPServerConfig | None = None) -> "FastMCP":  # type: ignore[reportInvalidTypeForm]
+def create_mcp_server(
+    config: MCPServerConfig | None = None,
+) -> "FastMCP":  # type: ignore[reportInvalidTypeForm]
     """Create and configure an optimized CORTEX MCP server instance.
 
     Each tool is registered via a dedicated helper, keeping this
@@ -316,6 +349,7 @@ def create_mcp_server(config: MCPServerConfig | None = None) -> "FastMCP":  # ty
     _register_embed_status_tool(mcp, ctx)
 
     # Trust & Compliance tools (EU AI Act Art. 12)
+    register_confluence_tools(mcp, ctx)
     register_trust_tools(mcp, ctx)
 
     # Mega Poderosas (Aether, Void, Chronos paradigms)
@@ -338,24 +372,32 @@ def create_mcp_server(config: MCPServerConfig | None = None) -> "FastMCP":  # ty
     return mcp
 
 
-# ─── Global Server Instance ──────────────────────────────────────────
+# ─── Lazy Server Instance ────────────────────────────────────────────
 
-# Default configuration
 _default_config = MCPServerConfig()
-mcp = create_mcp_server(_default_config)
+_mcp_instance: "FastMCP | None" = None  # type: ignore[reportInvalidTypeForm]
+
+
+def _get_mcp_server() -> "FastMCP":  # type: ignore[reportInvalidTypeForm]
+    """Lazy singleton — server created on first access, not at import time."""
+    global _mcp_instance
+    if _mcp_instance is None:
+        _mcp_instance = create_mcp_server(_default_config)
+    return _mcp_instance
 
 
 def run_server(config: MCPServerConfig | None = None) -> None:
     """Start the CORTEX MCP server."""
-    global mcp
     if config:
-        mcp = create_mcp_server(config)
+        server = create_mcp_server(config)
+    else:
+        server = _get_mcp_server()
 
     cfg = config or _default_config
-
-    if cfg.transport == "sse":
-        logger.info("Starting CORTEX MCP server v2 (SSE) on %s:%d", cfg.host, cfg.port)
-        mcp.run(transport="sse")
-    else:
-        logger.info("Starting CORTEX MCP server v2 (stdio)")
-        mcp.run()
+    logger.info(
+        "Starting CORTEX MCP server v2 (%s) on %s:%d",
+        cfg.transport,
+        cfg.host,
+        cfg.port,
+    )
+    server.run(transport=cfg.transport)

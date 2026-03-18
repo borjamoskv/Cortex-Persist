@@ -14,5 +14,7 @@ password = input("Contraseña (oculta en STDIN pero visible al teclear si no usa
 print("Iniciando inyección en 3 segundos. Por favor, selecciona la ventana del navegador...")
 time.sleep(3)
 
-print("Inyección simulada por falta de PyAutoGUI pre-aprobado. El flujo de automatización se adaptará según tu entorno local.")
+print(
+    "Inyección simulada por falta de PyAutoGUI pre-aprobado. El flujo de automatización se adaptará según tu entorno local."
+)
 # Aquí iría el código real de automatización usando la librería instalada en el sistema de Borja.

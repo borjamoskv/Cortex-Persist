@@ -116,8 +116,7 @@ class VerificationOracle:
 
         if recomputed != stored_hash:
             logger.warning(
-                "⚠️ [ORACLE] Fact #%d hash mismatch (project=%s). "
-                "stored=%s… recomputed=%s…",
+                "⚠️ [ORACLE] Fact #%d hash mismatch (project=%s). stored=%s… recomputed=%s…",
                 fact_id,
                 project,
                 stored_hash[:16],
@@ -127,8 +126,7 @@ class VerificationOracle:
                 fact_id=fact_id,
                 valid=False,
                 violation=(
-                    f"HASH_MISMATCH — stored={stored_hash[:16]}… "
-                    f"recomputed={recomputed[:16]}…"
+                    f"HASH_MISMATCH — stored={stored_hash[:16]}… recomputed={recomputed[:16]}…"
                 ),
                 project=project,
             )

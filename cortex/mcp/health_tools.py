@@ -12,6 +12,15 @@ from typing import Any
 logger = logging.getLogger("cortex.mcp.health")
 
 
+def _collect_health_data(db_path: Any) -> tuple[Any, Any]:
+    """Shared collector — avoids duplicate I/O across health tools."""
+    from cortex.extensions.health import HealthCollector, HealthScorer
+
+    collector = HealthCollector(db_path=db_path)
+    metrics = collector.collect_all()
+    return metrics, HealthScorer.score(metrics)
+
+
 def register_health_tools(mcp: Any, ctx: Any) -> None:
     """Register health tools on the MCP server.
 
@@ -27,12 +36,9 @@ def register_health_tools(mcp: Any, ctx: Any) -> None:
         No arguments required. Checks DB, ledger, and entropy.
         Returns: {"healthy": bool, "score": float, "grade": str}
         """
-        from cortex.extensions.health import HealthCollector, HealthScorer
+        from cortex.extensions.health import HealthScorer
 
-        db_path = getattr(ctx, "db_path", "")
-        collector = HealthCollector(db_path=db_path)
-        metrics = collector.collect_all()
-        hs = HealthScorer.score(metrics)
+        _, hs = _collect_health_data(ctx.cfg.db_path)
 
         return {
             "healthy": hs.score >= 40.0,
@@ -51,18 +57,16 @@ def register_health_tools(mcp: Any, ctx: Any) -> None:
 
     @mcp.tool()
     async def cortex_health_report() -> dict:
-        """Full CORTEX health report with score, recommendations, and warnings.
+        """Full CORTEX health report with score, recommendations,
+        and warnings.
 
         No arguments required.
-        Returns: {"score": {...}, "recommendations": [...], "warnings": [...]}
+        Returns: {"score": {...}, "recommendations": [...],
+                  "warnings": [...]}
         """
-        from cortex.extensions.health import HealthCollector, HealthScorer
         from cortex.extensions.health.models import HealthReport
 
-        db_path = getattr(ctx, "db_path", "")
-        collector = HealthCollector(db_path=db_path)
-        metrics = collector.collect_all()
-        hs = HealthScorer.score(metrics)
+        _, hs = _collect_health_data(ctx.cfg.db_path)
 
         recommendations: list[str] = []
         warnings: list[str] = []
@@ -82,7 +86,7 @@ def register_health_tools(mcp: Any, ctx: Any) -> None:
             score=hs,
             recommendations=recommendations,
             warnings=warnings,
-            db_path=str(db_path),
+            db_path=str(ctx.cfg.db_path),
         )
         return report.to_dict()
 

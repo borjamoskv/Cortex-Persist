@@ -11,6 +11,7 @@ Copyright 2026 by borjamoskv.com — Apache-2.0
 from __future__ import annotations
 
 import logging
+import re
 from typing import Any
 
 __all__ = ["AutoPersistHook", "SessionFact"]
@@ -37,69 +38,78 @@ class SessionFact:
         return f"SessionFact({self.fact_type!r}, {self.content[:50]!r})"
 
 
-# ─── Signal Detection Patterns ────────────────────────────────────
+# ─── Signal Detection Patterns (precompiled) ─────────────────────
 
-_DECISION_SIGNALS: list[str] = [
-    r"\bdecided\b",
-    r"\bdecision:\b",
-    r"\bchose\b",
-    r"\bselected\b",
-    r"\bapproved\b",
-    r"\bwent with\b",
-    r"\bopted for\b",
-    r"\bwill use\b",
-    r"\bcommitted to\b",
-    # Spanish
-    r"\bdecidido\b",
-    r"\bdecidimos\b",
-    r"\bdecisión:\b",
-    r"\belegido\b",
-    r"\bseleccionado\b",
-    r"\baprobado\b",
-    r"\boptamos por\b",
-    r"\busaremos\b",
-    r"\bmejora\b",
+_DECISION_RE: list[re.Pattern[str]] = [
+    re.compile(p, re.IGNORECASE)
+    for p in [
+        r"\bdecided\b",
+        r"\bdecision:\b",
+        r"\bchose\b",
+        r"\bselected\b",
+        r"\bapproved\b",
+        r"\bwent with\b",
+        r"\bopted for\b",
+        r"\bwill use\b",
+        r"\bcommitted to\b",
+        # Spanish
+        r"\bdecidido\b",
+        r"\bdecidimos\b",
+        r"\bdecisión:\b",
+        r"\belegido\b",
+        r"\bseleccionado\b",
+        r"\baprobado\b",
+        r"\boptamos por\b",
+        r"\busaremos\b",
+        r"\bmejora\b",
+    ]
 ]
 
-_ERROR_SIGNALS: list[str] = [
-    r"\berror:\b",
-    r"\bfailed:\b",
-    r"\bbug:\b",
-    r"\bexception:\b",
-    r"\btraceback\b",
-    r"\bfix:\b",
-    r"\bresolved:\b",
-    r"\bcrashed\b",
-    r"\bbroken\b",
-    # Spanish
-    r"\bfallo:\b",
-    r"\bexcepción:\b",
-    r"\bcorregido:\b",
-    r"\bresuelto:\b",
-    r"\bha petado\b",
-    r"\broto\b",
-    r"\bfalló\b",
-    r"\bsolucionado:\b",
+_ERROR_RE: list[re.Pattern[str]] = [
+    re.compile(p, re.IGNORECASE)
+    for p in [
+        r"\berror:\b",
+        r"\bfailed:\b",
+        r"\bbug:\b",
+        r"\bexception:\b",
+        r"\btraceback\b",
+        r"\bfix:\b",
+        r"\bresolved:\b",
+        r"\bcrashed\b",
+        r"\bbroken\b",
+        # Spanish
+        r"\bfallo:\b",
+        r"\bexcepción:\b",
+        r"\bcorregido:\b",
+        r"\bresuelto:\b",
+        r"\bha petado\b",
+        r"\broto\b",
+        r"\bfalló\b",
+        r"\bsolucionado:\b",
+    ]
 ]
 
-_GHOST_SIGNALS: list[str] = [
-    r"\bto" + "do:\b",
-    r"\bfix" + "me:\b",
-    r"\bha" + "ck:\b",
-    r"\blater:\b",
-    r"\bincomplete\b",
-    r"\bneeds work\b",
-    r"\bfollow up\b",
-    r"\bpending\b",
-    r"\bleft off\b",
-    r"\bunfinished\b",
-    # Spanish
-    r"\bpara luego\b",
-    r"\bincompleto\b",
-    r"\bnecesita trabajo\b",
-    r"\bpendiente\b",
-    r"\bdejamos en\b",
-    r"\bsin terminar\b",
+_GHOST_RE: list[re.Pattern[str]] = [
+    re.compile(p, re.IGNORECASE)
+    for p in [
+        r"\bto" + "do:\b",
+        r"\bfix" + "me:\b",
+        r"\bha" + "ck:\b",
+        r"\blater:\b",
+        r"\bincomplete\b",
+        r"\bneeds work\b",
+        r"\bfollow up\b",
+        r"\bpending\b",
+        r"\bleft off\b",
+        r"\bunfinished\b",
+        # Spanish
+        r"\bpara luego\b",
+        r"\bincompleto\b",
+        r"\bnecesita trabajo\b",
+        r"\bpendiente\b",
+        r"\bdejamos en\b",
+        r"\bsin terminar\b",
+    ]
 ]
 
 
@@ -142,8 +152,7 @@ class AutoPersistHook:
         seen_content: set[str] = set()
 
         for msg in self._observations:
-            msg_lower = msg.lower()
-            detected_type = self._classify_message(msg_lower)
+            detected_type = self._classify_message(msg)
             if detected_type and msg not in seen_content:
                 seen_content.add(msg)
                 facts.append(
@@ -201,20 +210,18 @@ class AutoPersistHook:
         return ids
 
     @staticmethod
-    def _classify_message(msg_lower: str) -> str | None:
-        """Classify a message by its signal patterns using regex.
+    def _classify_message(msg: str) -> str | None:
+        """Classify a message by precompiled signal patterns.
 
         Priority: error > decision > ghost (errors are most critical).
         """
-        import re
-
-        for pattern in _ERROR_SIGNALS:
-            if re.search(pattern, msg_lower):
+        for pattern in _ERROR_RE:
+            if pattern.search(msg):
                 return "error"
-        for pattern in _DECISION_SIGNALS:
-            if re.search(pattern, msg_lower):
+        for pattern in _DECISION_RE:
+            if pattern.search(msg):
                 return "decision"
-        for pattern in _GHOST_SIGNALS:
-            if re.search(pattern, msg_lower):
+        for pattern in _GHOST_RE:
+            if pattern.search(msg):
                 return "ghost"
         return None

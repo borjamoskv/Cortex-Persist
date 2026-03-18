@@ -13,6 +13,7 @@ from cortex.migrations.mig_consensus import (
 )
 from cortex.migrations.mig_fts import _migration_017_fts_decouple
 from cortex.migrations.mig_graph import _migration_006_graph_memory
+from cortex.migrations.mig_graph_tenant import _migration_027_graph_tenant
 from cortex.migrations.mig_ha import _migration_013_cluster_nodes
 from cortex.migrations.mig_hash import _migration_016_add_fact_hash
 from cortex.migrations.mig_ledger import (
@@ -56,4 +57,5 @@ MIGRATIONS = [
     (21, "Solid-State Substrate (entity_events)", _migration_021_solid_state),
     (22, "Stratified Cognition + Causal Anchoring", _migration_022_cognitive_layer),
     # (23) removed — mig_simplify_facts was never applied and is incompatible with live schema
+    (27, "Graph Memory Multi-Tenancy", _migration_027_graph_tenant),
 ]

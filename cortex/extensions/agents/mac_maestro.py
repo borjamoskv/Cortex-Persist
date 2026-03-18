@@ -170,16 +170,12 @@ def _validate_script(script: str) -> str | None:
     tell_count = len(re.findall(r"\btell\b", script, re.IGNORECASE))
     end_tell_count = len(re.findall(r"\bend tell\b", script, re.IGNORECASE))
     if tell_count != end_tell_count:
-        return (
-            f"Unbalanced tell blocks: {tell_count} `tell` vs "
-            f"{end_tell_count} `end tell`."
-        )
+        return f"Unbalanced tell blocks: {tell_count} `tell` vs {end_tell_count} `end tell`."
 
     # Check for obviously dangerous commands
-    dangerous = ["do shell script \"rm -rf", "do shell script \"sudo"]
+    dangerous = ['do shell script "rm -rf', 'do shell script "sudo']
     for pattern in dangerous:
         if pattern.lower() in script.lower():
             return f"Potentially dangerous command detected: {pattern}"
 
     return None
-

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import logging
 import sqlite3
+import threading
 from datetime import datetime, timezone
 from typing import Any
 
@@ -90,13 +91,19 @@ class UsageTracker:
             db_path = DB_PATH
         self._db_path = db_path
         self._conn: sqlite3.Connection | None = None
+        self._lock = threading.Lock()
 
     def _get_conn(self) -> sqlite3.Connection:
         if self._conn is None:
-            self._conn = sqlite3.connect(self._db_path)  # type: ignore[type-error]
-            self._conn.row_factory = sqlite3.Row
-            self._conn.execute("PRAGMA journal_mode=WAL")
-            self._conn.executescript(_SCHEMA_SQL)
+            with self._lock:
+                if self._conn is None:
+                    self._conn = sqlite3.connect(
+                        self._db_path,  # type: ignore[type-error]
+                        check_same_thread=False,
+                    )
+                    self._conn.row_factory = sqlite3.Row
+                    self._conn.execute("PRAGMA journal_mode=WAL")
+                    self._conn.executescript(_SCHEMA_SQL)
         return self._conn
 
     def record(self, record: UsageRecord) -> None:
@@ -105,31 +112,32 @@ class UsageTracker:
         now = record.timestamp
         month_bucket = now[:7]  # YYYY-MM
 
-        conn.execute(
-            "INSERT INTO api_usage (tenant_id, endpoint, method, status_code, tokens_used, "
-            "timestamp, month_bucket) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (
-                record.tenant_id,
-                record.endpoint,
-                record.method,
-                record.status_code,
-                record.tokens_used,
-                now,
-                month_bucket,
-            ),
-        )
+        with self._lock:
+            conn.execute(
+                "INSERT INTO api_usage (tenant_id, endpoint, method, status_code, tokens_used, "
+                "timestamp, month_bucket) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (
+                    record.tenant_id,
+                    record.endpoint,
+                    record.method,
+                    record.status_code,
+                    record.tokens_used,
+                    now,
+                    month_bucket,
+                ),
+            )
 
-        # Upsert monthly summary — atomic O(1)
-        conn.execute(
-            "INSERT INTO usage_monthly_summary (tenant_id, month_bucket, total_calls, "
-            "total_tokens, last_updated) VALUES (?, ?, 1, ?, ?) "
-            "ON CONFLICT(tenant_id, month_bucket) DO UPDATE SET "
-            "total_calls = total_calls + 1, "
-            "total_tokens = total_tokens + excluded.total_tokens, "
-            "last_updated = excluded.last_updated",
-            (record.tenant_id, month_bucket, record.tokens_used, now),
-        )
-        conn.commit()
+            # Upsert monthly summary — atomic O(1)
+            conn.execute(
+                "INSERT INTO usage_monthly_summary (tenant_id, month_bucket, total_calls, "
+                "total_tokens, last_updated) VALUES (?, ?, 1, ?, ?) "
+                "ON CONFLICT(tenant_id, month_bucket) DO UPDATE SET "
+                "total_calls = total_calls + 1, "
+                "total_tokens = total_tokens + excluded.total_tokens, "
+                "last_updated = excluded.last_updated",
+                (record.tenant_id, month_bucket, record.tokens_used, now),
+            )
+            conn.commit()
 
     def get_usage(
         self,

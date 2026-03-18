@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORTEX Persist — Tamper-Evident Memory for AI Agents</title>
+    <meta name="description" content="CORTEX reduces regulatory exposure by converting abstract AI Act obligations into verifiable technical controls. Traceability, enforcement, and evidence for AI systems.">
+    <meta name="keywords" content="AI Act, Article 12, compliance, audit trail, AI governance, EU regulation, evidence, logging, tamper-evident, cryptographic ledger">
+    <meta name="author" content="Sovereign Systems Labs">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="CORTEX Persist — Tamper-Evident Memory for AI Agents">
+    <meta property="og:description" content="Cryptographic verification, audit trails, and verifiable lineage for autonomous AI. EU AI Act compliance infrastructure.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://cortexpersist.com">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div class="scanlines"></div>
+    <div class="glow-orb glow-orb-1"></div>
+    <div class="glow-orb glow-orb-2"></div>
+
+    <!-- ═══════════════════ NOTCH ═══════════════════ -->
+    <div class="notch" id="notch">
+        <div class="notch-camera"></div>
+        <div class="notch-lights" id="notch-lights">
+            <div class="notch-light" data-agent="tutor"></div>
+            <div class="notch-light" data-agent="guardian"></div>
+            <div class="notch-light" data-agent="auditor"></div>
+            <div class="notch-light" data-agent="scribe"></div>
+            <div class="notch-light" data-agent="sentinel"></div>
+        </div>
+        <div class="notch-agents" id="notch-agents">
+            <span class="notch-agent-tag" data-agent="tutor">
+                <span class="tag-dot"></span>TUTOR
+            </span>
+            <span class="notch-agent-tag" data-agent="guardian">
+                <span class="tag-dot"></span>GUARDIAN
+            </span>
+            <span class="notch-agent-tag" data-agent="auditor">
+                <span class="tag-dot"></span>AUDITOR
+            </span>
+            <span class="notch-agent-tag" data-agent="scribe">
+                <span class="tag-dot"></span>SCRIBE
+            </span>
+            <span class="notch-agent-tag" data-agent="sentinel">
+                <span class="tag-dot"></span>SENTINEL
+            </span>
+        </div>
+        <div class="notch-scan"></div>
+    </div>
+
+    <!-- ═══════════════════ NAV ═══════════════════ -->
+    <nav id="nav">
+        <div class="nav-inner">
+            <a href="#" class="nav-logo">
+                <span class="nav-logo-mark">⬡</span> CORTEX
+            </a>
+            <div class="nav-links" id="nav-links">
+                <a href="#features">Features</a>
+                <a href="#proof">How It Works</a>
+                <a href="#architecture">Architecture</a>
+                <a href="#pricing">Pricing</a>
+                <a href="https://cortexpersist.dev" class="nav-link-dev">Docs ↗</a>
+                <a href="#cta-final" class="nav-cta">Request Demo</a>
+            </div>
+            <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ═══════════════════ HERO ═══════════════════ -->
+    <header id="hero" class="section hero-section">
+        <div class="hero-badge">EU AI Act · Article 12 · Compliance Infrastructure</div>
+        <h1>CORTEX<span class="hero-persist">PERSIST</span></h1>
+        <p class="hero-tagline">The evidence layer for AI systems<br>that can't afford amnesia</p>
+        <p class="hero-sub">Converts regulatory obligations into operational traceability,<br>verifiable controls, and real audit response.</p>
+        <div class="hero-ctas">
+            <a href="#cta-final" class="btn btn-primary">Request Demo</a>
+            <a href="https://cortexpersist.dev" class="btn btn-ghost">Developer Docs ↗</a>
+        </div>
+        <div class="hero-stats">
+            <div class="hero-stat">
+                <span class="hero-stat-value">~18ms</span>
+                <span class="hero-stat-label">Write latency</span>
+            </div>
+            <div class="hero-stat">
+                <span class="hero-stat-value">~5ms</span>
+                <span class="hero-stat-label">Verify latency</span>
+            </div>
+            <div class="hero-stat">
+                <span class="hero-stat-value">100%</span>
+                <span class="hero-stat-label">Tamper detection</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- ═══════════════════ SUBHERO ═══════════════════ -->
+    <section class="section subhero-section">
+        <div class="content-narrow">
+            <h2 class="section-statement">The problem isn't using AI.<br>The problem is not being able to prove what it did.</h2>
+            <p>For high-risk AI systems, <strong>Article 12</strong> of the AI Act requires technical capability for automatic event logging, and <strong>Article 19</strong> requires retaining those logs under provider control for a minimum of six months.</p>
+            <p class="accent-text">CORTEX turns that into infrastructure.</p>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ COMPARISON ═══════════════════ -->
+    <section class="section comparison-section" id="comparison">
+        <h2 class="section-title">Without CORTEX vs. With CORTEX</h2>
+        <div class="comparison-grid">
+            <div class="comparison-col comparison-without">
+                <h3>Without</h3>
+                <ul>
+                    <li>Scattered logs across vendors</li>
+                    <li>Opaque model versions</li>
+                    <li>Insufficient vendor telemetry</li>
+                    <li>Partial traceability</li>
+                    <li>Slow audit response</li>
+                    <li>Corporate narrative where there should be proof</li>
+                </ul>
+            </div>
+            <div class="comparison-col comparison-with">
+                <h3>With CORTEX</h3>
+                <ul>
+                    <li>Automatic per-event logging</li>
+                    <li>Technical chain of custody</li>
+                    <li>Policy enforcement at runtime</li>
+                    <li>Queryable history</li>
+                    <li>Auditable export in minutes</li>
+                    <li>Model-neutral control layer</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ FEATURES ═══════════════════ -->
+    <section class="section features-section" id="features">
+        <h2 class="section-title">What CORTEX Does</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">⛓</div>
+                <div class="feature-number">01</div>
+                <h3>Real Automatic Logging</h3>
+                <p>Every relevant event captures: timestamp, trace_id, system_id, model version, prompt/policy version, input/output reference, operator, and <code>reconstructed=true|false</code>.</p>
+                <div class="feature-note">Aligns operations with Article 12's requirement for automatic event recording capability.</div>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">🔐</div>
+                <div class="feature-number">02</div>
+                <h3>Evidence with Chain of Custody</h3>
+                <ul class="feature-list">
+                    <li>Append-only storage</li>
+                    <li>SHA-256 hash chaining per event</li>
+                    <li>Signed export</li>
+                    <li>Configurable retention</li>
+                    <li>Native vs. reconstructed separation</li>
+                </ul>
+                <div class="feature-note">Defensive architecture so your evidence survives serious scrutiny.</div>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">🛡</div>
+                <div class="feature-number">03</div>
+                <h3>Policy Enforcement</h3>
+                <ul class="feature-list">
+                    <li>No inference without log</li>
+                    <li>No prod without approved config</li>
+                    <li>No silent model swap</li>
+                    <li>No deletion outside retention policy</li>
+                    <li>No critical output without review path</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">🔀</div>
+                <div class="feature-number">04</div>
+                <h3>Multi-Model Layer</h3>
+                <p>Claude, GPT, Gemini, open-weight, or internal models. CORTEX decouples regulatory control from the vendor. The AI Act distributes obligations by role — pointing at the model provider isn't enough.</p>
+            </div>
+
+            <div class="feature-card feature-card-wide">
+                <div class="feature-icon">📋</div>
+                <div class="feature-number">05</div>
+                <h3>Audit Response in Minutes</h3>
+                <p>When they ask <em>"show me what happened on Tuesday at 14:03"</em>, CORTEX delivers: event, input/output, version, operator, policy, and exportable evidence.</p>
+                <div class="audit-contrast">
+                    <div class="audit-before">
+                        <span class="audit-label">Before</span>
+                        <p>"We believe that flow went through the previous model."</p>
+                    </div>
+                    <div class="audit-after">
+                        <span class="audit-label">Now</span>
+                        <p>"Here is the event, the version, the operator, the evidence, and the export package."</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ PROOF ═══════════════════ -->
+    <section class="section proof-section" id="proof">
+        <h2 class="section-title">How It's Verified</h2>
+        <p class="section-subtitle">With reproducible tests, not promises or pretty dashboards.</p>
+        <div class="proof-grid">
+            <div class="proof-card">
+                <div class="proof-number">01</div>
+                <h3>Capture</h3>
+                <p>Every relevant event generates automatic logs. Normal input, errors, timeouts, retries, model changes, human intervention, policy blocks.</p>
+                <div class="proof-metric">
+                    <code>capture_rate ≥ 99.8%</code>
+                    <span>0 orphan events · unique trace_id per event</span>
+                </div>
+            </div>
+
+            <div class="proof-card">
+                <div class="proof-number">02</div>
+                <h3>Integrity</h3>
+                <p>Logs aren't retroactive play-dough. Each event hash chains to the previous one. Any later alteration breaks the chain and is detected.</p>
+                <div class="proof-metric">
+                    <code>tamper_detection = 100%</code>
+                    <span>hash_n = H(event_n + hash_(n-1))</span>
+                </div>
+            </div>
+
+            <div class="proof-card">
+                <div class="proof-number">03</div>
+                <h3>Enforcement</h3>
+                <p>CORTEX doesn't just watch. It blocks or flags: inference without log, unapproved model, silent prompt change, critical output without review, deletion outside retention.</p>
+                <div class="proof-metric">
+                    <code>Each policy: condition + response + evidence</code>
+                    <span>Reproducible. If not, it's decoration.</span>
+                </div>
+            </div>
+
+            <div class="proof-card">
+                <div class="proof-number">04</div>
+                <h3>Audit</h3>
+                <p>"Show me Tuesday 14:00–15:00 inferences from system X with model Y." Events, versions, operator, signed export. In minutes, not days.</p>
+                <div class="proof-metric">
+                    <code>search &lt;30s · export &lt;2min · integrity &lt;5min</code>
+                    <span>If it takes two days, it's compliance cosplay.</span>
+                </div>
+            </div>
+        </div>
+        <div class="proof-summary">
+            <p>CORTEX works if it can lose an argument against an auditor and still win on evidence.</p>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ ARCHITECTURE ═══════════════════ -->
+    <section class="section architecture-section" id="architecture">
+        <h2 class="section-title">Architecture</h2>
+        <p class="section-subtitle">CORTEX sits between your AI system and your regulatory responsibility.</p>
+        <div class="architecture-diagram">
+            <div class="arch-flow">
+                <div class="arch-node arch-node-top">
+                    <span class="arch-node-label">AI SYSTEM</span>
+                    <span class="arch-node-sub">GPT · Claude · Gemini · Local · Custom</span>
+                </div>
+                <div class="arch-arrow">
+                    <span>inferences / events</span>
+                    <div class="arch-arrow-line"></div>
+                </div>
+                <div class="arch-node arch-node-cortex">
+                    <span class="arch-node-label">CORTEX LAYER</span>
+                    <div class="arch-node-features">
+                        <span>Observability</span>
+                        <span>Policy</span>
+                        <span>Evidence</span>
+                        <span>Trace IDs</span>
+                    </div>
+                </div>
+                <div class="arch-split">
+                    <div class="arch-arrow-line"></div>
+                    <div class="arch-branch">
+                        <div class="arch-node arch-node-leaf">
+                            <span class="arch-node-label">Native Forward Log</span>
+                            <span class="arch-node-sub">from activation date</span>
+                        </div>
+                        <div class="arch-node arch-node-leaf">
+                            <span class="arch-node-label">Reconstructed History</span>
+                            <span class="arch-node-sub">from prior sources</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="arch-arrow">
+                    <div class="arch-arrow-line"></div>
+                </div>
+                <div class="arch-node arch-node-store">
+                    <span class="arch-node-label">Evidence Store / Retention</span>
+                    <span class="arch-node-sub">append-only · hash chain · export · native=true / reconstructed=true</span>
+                </div>
+                <div class="arch-arrow">
+                    <div class="arch-arrow-line"></div>
+                </div>
+                <div class="arch-node arch-node-bottom">
+                    <span class="arch-node-label">Audit / Incidents / Market Surveillance</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ PERFORMANCE ═══════════════════ -->
+    <section class="section perf-section">
+        <h2 class="section-title">Performance</h2>
+        <p class="section-subtitle">Typical execution on standard cloud instance (4 vCPU, 16 GB RAM).</p>
+        <div class="perf-table-wrap">
+            <table class="perf-table">
+                <thead>
+                    <tr>
+                        <th>Operation</th>
+                        <th>Median</th>
+                        <th>P95</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Memory write</td>
+                        <td class="perf-value">~18 ms</td>
+                        <td class="perf-value">~35 ms</td>
+                        <td>Local SQLite + SHA-256 hashing</td>
+                    </tr>
+                    <tr>
+                        <td>Verify record</td>
+                        <td class="perf-value">~5 ms</td>
+                        <td class="perf-value">~12 ms</td>
+                        <td>Single block hash validation</td>
+                    </tr>
+                    <tr>
+                        <td>Merkle checkpoint</td>
+                        <td class="perf-value">~85 ms</td>
+                        <td class="perf-value">~140 ms</td>
+                        <td>Aggregating 10k records</td>
+                    </tr>
+                    <tr>
+                        <td>Report export</td>
+                        <td class="perf-value">~400 ms</td>
+                        <td class="perf-value">~800 ms</td>
+                        <td>Lineage traversal & PDF generation</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ RETROACTIVITY ═══════════════════ -->
+    <section class="section retro-section">
+        <div class="content-narrow">
+            <h2 class="section-title">Retroactivity, Without the Smoke</h2>
+            <p class="retro-claim">CORTEX doesn't fabricate the past.</p>
+            <ul class="retro-list">
+                <li>Activates verifiable logging from deployment</li>
+                <li>Reconstructs partial history if prior technical traces exist</li>
+                <li>Marks that history as <code>reconstructed=true</code></li>
+                <li>Separates native evidence from reconstructed evidence</li>
+            </ul>
+            <p class="retro-close">That's defensible. Anything else would be corporate séance.</p>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ AUDIENCE ═══════════════════ -->
+    <section class="section audience-section">
+        <h2 class="section-title">Who It's For</h2>
+        <div class="audience-grid">
+            <div class="audience-card">
+                <h3>Sensitive Processes</h3>
+                <p>Scoring · matching · classification · prioritization · decision support · biometrics · automation with material impact</p>
+            </div>
+            <div class="audience-card">
+                <h3>Internal Functions</h3>
+                <p>Compliance · legal · risk · security · platform · ML engineering · audit</p>
+            </div>
+            <div class="audience-card">
+                <h3>Complex Environments</h3>
+                <p>Multi-model · multi-team · multi-jurisdiction · high third-party dependency</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ PRICING ═══════════════════ -->
+    <section class="section pricing-section" id="pricing">
+        <h2 class="section-title">Pricing</h2>
+        <div class="pricing-grid">
+            <div class="pricing-card">
+                <div class="pricing-tier">Community</div>
+                <div class="pricing-price">Free</div>
+                <div class="pricing-license">Apache-2.0</div>
+                <ul class="pricing-features">
+                    <li>Core engine</li>
+                    <li>Memory & guards</li>
+                    <li>Cryptographic ledger</li>
+                    <li>CLI interface</li>
+                    <li>Basic verification</li>
+                </ul>
+                <a href="https://github.com/borjamoskv/cortex" class="btn btn-ghost btn-block" target="_blank" rel="noopener">View on GitHub</a>
+            </div>
+            <div class="pricing-card">
+                <div class="pricing-tier">Pro</div>
+                <div class="pricing-price">€299<span>/mo</span></div>
+                <ul class="pricing-features">
+                    <li>Everything in Community</li>
+                    <li>Swarm (≤5 agents)</li>
+                    <li>LLM routing</li>
+                    <li>Background daemon</li>
+                    <li>Priority support</li>
+                </ul>
+                <a href="#cta-final" class="btn btn-ghost btn-block">Contact Sales</a>
+            </div>
+            <div class="pricing-card pricing-card-featured">
+                <div class="pricing-badge">Recommended</div>
+                <div class="pricing-tier">Enterprise</div>
+                <div class="pricing-price">€1,499<span>/mo</span></div>
+                <ul class="pricing-features">
+                    <li>Everything in Pro</li>
+                    <li>LEGION unlimited agents</li>
+                    <li>Cognitive handoff</li>
+                    <li>API gateway</li>
+                    <li>SLA guarantee</li>
+                </ul>
+                <a href="#cta-final" class="btn btn-primary btn-block">Request Demo</a>
+            </div>
+            <div class="pricing-card">
+                <div class="pricing-tier">Sovereign</div>
+                <div class="pricing-price">€4,999<span>/mo</span></div>
+                <ul class="pricing-features">
+                    <li>Everything in Enterprise</li>
+                    <li>On-premises deployment</li>
+                    <li>Custom skills</li>
+                    <li>Audit compliance pack</li>
+                    <li>Dedicated engineering</li>
+                </ul>
+                <a href="#cta-final" class="btn btn-ghost btn-block">Contact Sales</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ RISK / TIMELINE ═══════════════════ -->
+    <section class="section risk-section">
+        <div class="risk-grid">
+            <div class="risk-card">
+                <h3>Cost of Inaction</h3>
+                <p>Fines up to <strong>€35M</strong> or <strong>7% of global revenue</strong>. But the real cost isn't the number. It's:</p>
+                <ul>
+                    <li>Inability to reconstruct what happened</li>
+                    <li>Delayed incident response</li>
+                    <li>Weak audit posture</li>
+                    <li>Blind vendor dependency</li>
+                    <li>Evidentiary chaos when it's already too late</li>
+                </ul>
+            </div>
+            <div class="risk-card timeline-card">
+                <h3>Timeline</h3>
+                <div class="timeline">
+                    <div class="timeline-event">
+                        <span class="timeline-date">1 Aug 2024</span>
+                        <span class="timeline-label">AI Act enters into force</span>
+                    </div>
+                    <div class="timeline-event timeline-highlight">
+                        <span class="timeline-date">2 Aug 2026</span>
+                        <span class="timeline-label">General applicability — high-risk systems</span>
+                    </div>
+                    <div class="timeline-event">
+                        <span class="timeline-date">2 Aug 2027</span>
+                        <span class="timeline-label">Extended transition for regulated products</span>
+                    </div>
+                </div>
+                <p class="timeline-warning">Moving in 2026 isn't being proactive.<br>It's showing up with your tie on fire.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ FAQ ═══════════════════ -->
+    <section class="section faq-section" id="faq">
+        <h2 class="section-title">FAQ</h2>
+        <div class="faq-grid">
+            <div class="faq-item" id="faq-1">
+                <h3 class="faq-question">Does CORTEX guarantee no fines?</h3>
+                <p class="faq-answer">No. It reduces regulatory exposure and strengthens your technical and evidentiary position.</p>
+            </div>
+            <div class="faq-item" id="faq-2">
+                <h3 class="faq-question">Does it work if we're already in production?</h3>
+                <p class="faq-answer">Yes. It generates evidence from activation and can reconstruct partial history if prior sources exist.</p>
+            </div>
+            <div class="faq-item" id="faq-3">
+                <h3 class="faq-question">Does it replace the legal team?</h3>
+                <p class="faq-answer">No. It replaces the lack of technical evidence.</p>
+            </div>
+            <div class="faq-item" id="faq-4">
+                <h3 class="faq-question">Is it only for high-risk systems?</h3>
+                <p class="faq-answer">No. It also serves internal governance, incident response, vendor oversight, and contractual traceability.</p>
+            </div>
+            <div class="faq-item" id="faq-5">
+                <h3 class="faq-question">Does Art. 12 require cryptographic hashing?</h3>
+                <p class="faq-answer">Not literally. It requires technical capability for automatic logging. The cryptographic architecture is our design choice to ensure evidence survives real scrutiny.</p>
+            </div>
+            <div class="faq-item" id="faq-6">
+                <h3 class="faq-question">Does it integrate with any model?</h3>
+                <p class="faq-answer">Yes. CORTEX is model-agnostic. Multi-model neutrality is a core design principle, not an afterthought.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ CTA FINAL ═══════════════════ -->
+    <section class="section cta-section" id="cta-final">
+        <div class="cta-inner">
+            <h2>Activate verifiable traceability<br>before they demand it.</h2>
+            <p>CORTEX installs a common layer of evidence, control, and enforcement over your AI workflows so compliance stops being narrative and starts being proof.</p>
+            <div class="cta-buttons">
+                <a href="mailto:borjamoskv@gmail.com?subject=CORTEX%20Demo%20Request" class="btn btn-primary btn-large" id="cta-demo">Request Demo</a>
+                <a href="https://github.com/borjamoskv/cortex" class="btn btn-ghost btn-large" target="_blank" rel="noopener" id="cta-github">Evaluate on GitHub</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ FOOTER ═══════════════════ -->
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <div class="footer-brand">
+                <span class="footer-logo">⬡ CORTEX</span>
+                <p class="footer-claim">Compliance without a trail is an alibi.<br>CORTEX leaves footprints before the auditor arrives.</p>
+            </div>
+            <div class="footer-cols">
+                <div class="footer-col">
+                    <h4>Product</h4>
+                    <a href="#features">Features</a>
+                    <a href="#pricing">Pricing</a>
+                    <a href="#architecture">Architecture</a>
+                    <a href="#faq">FAQ</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Developers</h4>
+                    <a href="https://cortexpersist.dev">Documentation</a>
+                    <a href="https://github.com/borjamoskv/cortex" target="_blank" rel="noopener">GitHub</a>
+                    <a href="https://pypi.org/project/cortex-persist/" target="_blank" rel="noopener">PyPI</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Company</h4>
+                    <a href="mailto:borjamoskv@gmail.com">Contact</a>
+                    <a href="https://github.com/borjamoskv/cortex/blob/main/LICENSE" target="_blank" rel="noopener">License</a>
+                    <a href="https://github.com/borjamoskv/cortex/blob/main/SECURITY.md" target="_blank" rel="noopener">Security</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2024–2026 Sovereign Systems Labs · borjamoskv.com</p>
+                <p>Core: Apache-2.0 · Enterprise: BSL 1.1</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Sticky nav
+        const nav = document.getElementById('nav');
+        window.addEventListener('scroll', () => {
+            nav.classList.toggle('nav-scrolled', window.scrollY > 80);
+        });
+
+        // Mobile toggle
+        const toggle = document.getElementById('nav-toggle');
+        const links = document.getElementById('nav-links');
+        toggle.addEventListener('click', () => {
+            links.classList.toggle('nav-open');
+            toggle.classList.toggle('nav-toggle-active');
+        });
+
+        // Close mobile nav on link click
+        links.querySelectorAll('a').forEach(a => {
+            a.addEventListener('click', () => {
+                links.classList.remove('nav-open');
+                toggle.classList.remove('nav-toggle-active');
+            });
+        });
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(a => {
+            a.addEventListener('click', e => {
+                e.preventDefault();
+                const target = document.querySelector(a.getAttribute('href'));
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+
+        // Intersection Observer
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+        document.querySelectorAll('.section').forEach(s => observer.observe(s));
+
+        // FAQ toggle
+        document.querySelectorAll('.faq-question').forEach(q => {
+            q.addEventListener('click', () => {
+                const item = q.closest('.faq-item');
+                item.classList.toggle('faq-open');
+            });
+        });
+
+        // Counter animation for hero stats
+        function animateCounters() {
+            document.querySelectorAll('.hero-stat-value').forEach(el => {
+                el.classList.add('counter-visible');
+            });
+        }
+        setTimeout(animateCounters, 800);
+        // ─── Agent Notch Lights Simulation ───
+        const notch = document.getElementById('notch');
+        const agents = ['tutor', 'guardian', 'auditor', 'scribe', 'sentinel'];
+
+        function setAgentState(agent, active) {
+            const light = document.querySelector(
+                `.notch-light[data-agent="${agent}"]`
+            );
+            const tag = document.querySelector(
+                `.notch-agent-tag[data-agent="${agent}"]`
+            );
+            if (light) light.classList.toggle('active', active);
+            if (tag) tag.classList.toggle('agent-active', active);
+        }
+
+        function cycleAgents() {
+            // How many agents active this cycle (1-3)
+            const activeCount = Math.floor(Math.random() * 3) + 1;
+
+            // Shuffle and pick
+            const shuffled = [...agents].sort(() => Math.random() - 0.5);
+            const activeAgents = shuffled.slice(0, activeCount);
+
+            // Apply states
+            agents.forEach(a => setAgentState(a, activeAgents.includes(a)));
+
+            // Toggle notch-active if any agent is on
+            notch.classList.toggle(
+                'notch-active', activeAgents.length > 0
+            );
+
+            // Next cycle: 2-4 seconds
+            const next = 2000 + Math.random() * 2000;
+            setTimeout(cycleAgents, next);
+        }
+
+        // Start after page load
+        setTimeout(cycleAgents, 1500);
+    </script>
+</body>
+</html>

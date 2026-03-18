@@ -35,9 +35,7 @@ def _levenshtein_distance(s1: str, s2: str) -> int:
         curr_row = [i + 1]
         for j, c2 in enumerate(s2):
             cost = 0 if c1 == c2 else 1
-            curr_row.append(
-                min(prev_row[j + 1] + 1, curr_row[j] + 1, prev_row[j] + cost)
-            )
+            curr_row.append(min(prev_row[j + 1] + 1, curr_row[j] + 1, prev_row[j] + cost))
         prev_row = curr_row
     return prev_row[-1]
 

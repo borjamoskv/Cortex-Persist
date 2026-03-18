@@ -12,7 +12,10 @@ This document maps CORTEX Trust Engine capabilities to the requirements of the *
 
 **Enforcement Date:** August 2, 2026
 
-**Potential Fines:** €30 million or 6% of global annual revenue.
+**Potential Fines:**
+- High-risk requirement violations (incl. Art. 12): €15M or 3% of global annual revenue
+- Prohibited practices: €35M or 7%
+- Incorrect information to authorities: €7.5M or 1%
 
 ---
 
@@ -44,7 +47,10 @@ This document maps CORTEX Trust Engine capabilities to the requirements of the *
 
 **Verification:** `cortex compliance-report`
 
-### Art. 12.3 — Tamper-Proof Storage
+### Art. 12.3 — Biometric-Specific Requirements (Annex III, point 1(a))
+
+> **Note:** Art. 12.3 mandates specific logging for biometric identification systems.
+> Tamper-proof storage is a CORTEX design choice that exceeds Art. 12 mandates.
 
 | Requirement | CORTEX Implementation | Evidence |
 |:---|:---|:---|

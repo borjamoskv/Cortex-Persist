@@ -64,7 +64,9 @@ class MaestroActionRunner:
             logger.info("Executing Maestro intent: %s on %s", action_name, self.bundle_id)
             # Properly run sync SDK in thread pool to avoid blocking event loop
             success = await asyncio.to_thread(
-                self.workflow.execute_action, action, apply_safety_gate,
+                self.workflow.execute_action,
+                action,
+                apply_safety_gate,
             )
 
             return {

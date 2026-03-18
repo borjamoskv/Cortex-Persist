@@ -1,0 +1,5 @@
+numpy
+scikit-learn
+requests
+asyncio
+httpx

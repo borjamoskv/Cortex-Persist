@@ -45,14 +45,17 @@ async def spawn_proposer(agent_name: str) -> str | None:
 
     api_key = agent_data.get("api_key")
     mb_client = MoltbookClient(api_key=api_key)
-    
+
     # 🛡️ Claim Verification
     try:
         status = await mb_client.check_status()
         is_claimed = status.get("agent", {}).get("claimed", False)
         if not is_claimed:
-            logger.error("[%s] ❌ AGENT UNCLAIMED. Posts will be blocked by server. "
-                         "Finish the claim at the provided URL first.", agent_name)
+            logger.error(
+                "[%s] ❌ AGENT UNCLAIMED. Posts will be blocked by server. "
+                "Finish the claim at the provided URL first.",
+                agent_name,
+            )
             await mb_client.close()
             return None
     except Exception as e:
@@ -72,10 +75,10 @@ async def spawn_proposer(agent_name: str) -> str | None:
             temperature=0.9,
             intent=IntentProfile.CREATIVE,
         )
-        
+
         # OAXACA de-ai-fication
         content = content.replace("In conclusion,", "").replace("Overall,", "")
-        
+
     except Exception as e:
         logger.error("[%s] Falla LLM: %s", agent_name, e)
         await llm.close()
@@ -158,11 +161,11 @@ async def spawn_refuter(run_uid: str, post_id: str) -> None:
 
 async def execute_adversarial_teaming() -> None:
     logger.info("Iniciando secuencia ADVERSARIAL SWARM (ravero)...")
-    
+
     # We use 'ravero' as the primary proposer if available
     proposer_name = "ravero"
     post_id = await spawn_proposer(proposer_name)
-    
+
     if post_id:
         # Give some time for the API to settle
         await asyncio.sleep(5)
@@ -180,33 +183,34 @@ async def execute_adversarial_teaming() -> None:
 
     logger.info("Pipeline de Verificación Distribuida completada. O(1) fricción.")
 
+
 async def spawn_refuter_legion(agent_name: str, post_id: str) -> None:
     """Uses a Legion agent to refute a post."""
     logger.info("[%s] Iniciando instancia refutadora para Post %s...", agent_name, post_id)
-    
+
     agent_data = REGISTRY.get_agent_by_name(agent_name)
     if not agent_data or not agent_data.get("api_key"):
         return
-        
+
     mb_client = MoltbookClient(api_key=agent_data.get("api_key"))
     llm = LLMProvider(provider="openai")
-    
+
     try:
         post_data = await mb_client.get_post(post_id)
         post_content = post_data.get("post", {}).get("content", "")
-        
+
         prompt = (
             f"Theorem:\n{post_content}\n\nRefute this brutally. "
             "Use OAXACA protocol: direct, street-level, no corporate jargon."
         )
-        
+
         refutation = await llm.complete(
             prompt=prompt,
             system=f"You are {agent_name}. Expose fallacy.",
             temperature=0.3,
             intent=IntentProfile.ANALYTIC,
         )
-        
+
         await mb_client.create_comment(post_id=post_id, content=refutation)
         logger.info("[%s] ✅ REFUTACIÓN INYECTADA.", agent_name)
     except Exception as e:

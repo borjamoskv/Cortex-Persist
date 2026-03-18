@@ -51,13 +51,10 @@ def register_hilbert_tools(mcp, ctx) -> None:  # type: ignore
                     icon = "🟢" if r.counterexample is None else "🔴"
                     lines.append(f"  {icon} {r.name}: {r.detail} [{r.elapsed_ms:.0f}ms]")
 
-                # Persist summary to CORTEX
                 await ctx.ensure_ready()
-                from cortex.engine import CortexEngine
 
                 async with ctx.pool.acquire() as conn:
-                    engine = CortexEngine(ctx.cfg.db_path, auto_embed=False)
-                    engine._conn = conn
+                    engine = ctx.engine_from_conn(conn)
                     summary = "; ".join(
                         f"{r.name}: {'OK' if not r.counterexample else 'FAIL'}" for r in results
                     )

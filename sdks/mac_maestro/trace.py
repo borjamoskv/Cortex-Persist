@@ -20,9 +20,7 @@ logger = logging.getLogger("mac_maestro.trace")
 # ─── Trace File Config ────────────────────────────────────────────
 DEFAULT_TRACE_DIR = Path.home() / ".cortex"
 DEFAULT_TRACE_FILE = DEFAULT_TRACE_DIR / "mac_maestro_traces.jsonl"
-TRACE_FILE = Path(
-    os.environ.get("MAC_MAESTRO_TRACE_FILE", str(DEFAULT_TRACE_FILE))
-)
+TRACE_FILE = Path(os.environ.get("MAC_MAESTRO_TRACE_FILE", str(DEFAULT_TRACE_FILE)))
 _ledger = None
 _ledger_attempted = False
 

@@ -5,7 +5,9 @@ Configuration, Metrics, Caching, and Connection Pooling.
 
 import asyncio
 import logging
+import threading
 import time
+from collections import OrderedDict
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
@@ -44,6 +46,7 @@ class MCPMetrics:
     """Runtime metrics for the MCP server."""
 
     def __init__(self):
+        self._lock = threading.Lock()
         self.requests_total = 0
         self.cache_hits = 0
         self.cache_misses = 0
@@ -52,16 +55,18 @@ class MCPMetrics:
         self.start_at = datetime.now(timezone.utc).isoformat()
 
     def record_request(self, cached: bool = False):
-        self.requests_total += 1
-        if cached:
-            self.cache_hits += 1
-        else:
-            self.cache_misses += 1
+        with self._lock:
+            self.requests_total += 1
+            if cached:
+                self.cache_hits += 1
+            else:
+                self.cache_misses += 1
 
     def record_error(self, is_immune_rejection: bool = False):
-        self.errors_total += 1
-        if is_immune_rejection:
-            self.rejected_immune += 1
+        with self._lock:
+            self.errors_total += 1
+            if is_immune_rejection:
+                self.rejected_immune += 1
 
     def get_summary(self) -> dict:
         return {
@@ -74,12 +79,16 @@ class MCPMetrics:
 
 
 class SimpleAsyncCache:
-    """A minimal TTL-aware cache for semantic search results."""
+    """LRU + TTL cache for semantic search results.
+
+    On hit: entry moves to most-recent position.
+    On eviction: least-recently-used entry is dropped.
+    """
 
     def __init__(self, maxsize: int = 100, ttl_seconds: int = 300):
         self.maxsize = maxsize
         self.ttl = ttl_seconds
-        self._cache: dict[str, tuple[float, Any]] = {}
+        self._cache: OrderedDict[str, tuple[float, Any]] = OrderedDict()
 
     def get(self, key: str) -> Any | None:
         if key not in self._cache:
@@ -88,17 +97,31 @@ class SimpleAsyncCache:
         if time.time() - timestamp > self.ttl:
             del self._cache[key]
             return None
+        self._cache.move_to_end(key)  # LRU: promote to most-recent
         return value
 
     def set(self, key: str, value: Any):
-        if len(self._cache) >= self.maxsize:
-            # Simple eviction
-            oldest_key = next(iter(self._cache))
-            del self._cache[oldest_key]
+        if key in self._cache:
+            self._cache.move_to_end(key)
+        elif len(self._cache) >= self.maxsize:
+            self._cache.popitem(last=False)  # Evict least-recently-used
         self._cache[key] = (time.time(), value)
 
     def clear(self):
         self._cache.clear()
+
+    def invalidate_project(self, project: str) -> int:
+        """Remove cache entries whose key contains *project*.
+
+        Returns the number of evicted entries.
+        """
+        keys_to_remove = [k for k in self._cache if project in k]
+        for k in keys_to_remove:
+            del self._cache[k]
+        return len(keys_to_remove)
+
+    def __len__(self) -> int:
+        return len(self._cache)
 
 
 class AsyncConnectionPool:
@@ -163,6 +186,7 @@ class AsyncConnectionPool:
             await conn.execute("SELECT 1")
             return conn
         except (OSError, ValueError, KeyError):
+            await self._close_single_connection(conn)
             logger.warning("Reviving stale database connection")
             return await self._create_connection()
 

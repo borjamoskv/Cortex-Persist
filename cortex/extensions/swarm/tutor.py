@@ -26,6 +26,8 @@ from cortex.guards.thermodynamic import (
     ThermodynamicCounters,
     should_enter_decorative_mode,
 )
+from cortex.memory.temporal import now_iso
+from cortex.utils.canonical import canonical_json, compute_tx_hash
 
 logger = logging.getLogger("cortex.swarm.tutor")
 
@@ -45,9 +47,13 @@ class TutorAgent(BaseAgent):
         super().__init__(manifest, bus, **kwargs)
         self.swarm_manager = get_swarm_manager()
         self.conflict_resolver = ConflictResolver(budget=500.0)
+        self._indexed_count: int = 0
+        self._last_digest_ts: float = 0.0
 
     async def on_start(self) -> None:
-        logger.info("[TUTOR-x10] Agent initializing. Enforcing Ω₁-Ω₈ axioms with maximum prejudice.")
+        logger.info(
+            "[TUTOR-x10] Agent initializing. Enforcing Ω₁-Ω₈ axioms with maximum prejudice."
+        )
         await self.reconcile_swarm()
 
     async def handle_message(self, message: AgentMessage) -> None:
@@ -73,7 +79,7 @@ class TutorAgent(BaseAgent):
         elif action == "enforce_axioms":
             result = await self.enforce_axioms(payload.get("target_id"))
             await self.send_result(message.sender, result, correlation_id=message.message_id)
-            
+
         elif action == "report_stuck_agent":
             # Another agent or supervisor is reporting a looping agent
             bad_agent = payload.get("agent_id")
@@ -81,25 +87,49 @@ class TutorAgent(BaseAgent):
             await self._annihilate_agent(bad_agent, fact_id, reason="Reported explicitly as stuck")
             await self.send_result(message.sender, {"status": "annihilated", "target": bad_agent})
 
+        elif action == "register_post":
+            result = await self.register_bot_post(
+                agent_id=message.sender,
+                post_type=payload.get("type", "unknown"),
+                post_id=payload.get("post_id", ""),
+                content=payload.get("content", ""),
+            )
+            await self.send_result(
+                message.sender,
+                result,
+                correlation_id=message.message_id,
+            )
+
         else:
             logger.warning("[TUTOR-x10] Unknown action requested: %s", action)
 
     async def tick(self) -> None:
         """Periodic autonomous checks for thermodynamic hygiene."""
         await self.reconcile_swarm()
+        # V10: Periodic digest — emit every 5 minutes
+        import time
+
+        now = time.time()
+        if self._indexed_count > 0 and (now - self._last_digest_ts) > 300:
+            logger.info(
+                "[TUTOR-x10] 📊 Digest: %d posts indexed since last report.",
+                self._indexed_count,
+            )
+            self._indexed_count = 0
+            self._last_digest_ts = now
 
     async def reconcile_swarm(self) -> dict[str, Any]:
         """Scan active worktrees and agents for orphaned states or high-exergy waste."""
         status = await self.swarm_manager.get_status()
         active = status.get("active_worktrees", 0)
         total = status.get("total_worktrees", 0)
-        
+
         logger.info("[TUTOR-x10] Reconciling swarm: %d/%d active worktrees", active, total)
-        
+
         # Iteratively check for failed worktrees or agents violating Ω₂
         cleared = 0
         agents_annihilated = 0
-        
+
         async with self.swarm_manager._lock:
             for wid, wstate in list(self.swarm_manager.worktrees.items()):
                 # Clean up zombies
@@ -107,7 +137,7 @@ class TutorAgent(BaseAgent):
                     cleared += 1
                     del self.swarm_manager.worktrees[wid]
                     continue
-                
+
                 # Retrieve thermodynamic counters if the agent attached them to wstate metadata
                 # (Assuming wstate or agent state exposes these)
                 if hasattr(wstate, "agent_ref") and wstate.agent_ref is not None:
@@ -116,15 +146,19 @@ class TutorAgent(BaseAgent):
                     if "thermodynamic_counters" in meta:
                         counters_dict = meta["thermodynamic_counters"]
                         counters = ThermodynamicCounters(**counters_dict)
-                        
+
                         is_decorative, reasons = should_enter_decorative_mode(counters)
                         if is_decorative:
-                            logger.error("[TUTOR-x10] Agent %s is wasting exergy: %s", agent.agent_id, reasons)
+                            logger.error(
+                                "[TUTOR-x10] Agent %s is wasting exergy: %s",
+                                agent.agent_id,
+                                reasons,
+                            )
                             # Quarantine and propagate taint
                             await self._annihilate_agent(
-                                agent_id=agent.agent_id, 
+                                agent_id=agent.agent_id,
                                 last_fact_id=meta.get("last_fact_id"),
-                                reason=f"Thermodynamic violation (Ω₂): {', '.join(reasons)}"
+                                reason=f"Thermodynamic violation (Ω₂): {', '.join(reasons)}",
                             )
                             agents_annihilated += 1
 
@@ -138,35 +172,35 @@ class TutorAgent(BaseAgent):
     async def _annihilate_agent(self, agent_id: str, last_fact_id: int | None, reason: str) -> None:
         """Execute extreme prejudice: kill agent and propagate causal taint."""
         logger.error("☠️ [TUTOR-x10] ANNIHILATING AGENT %s: %s", agent_id, reason)
-        
+
         # 1. Ask Supervisor to Quarantine
         shutdown_msg = new_message(
             sender=self.agent_id,
             recipient="supervisor",
             kind=MessageKind.TASK_REQUEST,
-            payload={"action": "quarantine", "agent_id": agent_id, "reason": reason}
+            payload={"action": "quarantine", "agent_id": agent_id, "reason": reason},
         )
         await self.bus.send(shutdown_msg)
-        
+
         # 2. Propagate Causal Taint (Ω₁₃) -> invalidate anything this agent touched recently
         if last_fact_id and self._db_conn:
             logger.warning("[TUTOR-x10] Propagating causal taint from fact %d...", last_fact_id)
             graph = AsyncCausalGraph(self._db_conn)
             report = await graph.propagate_taint(last_fact_id)
             logger.warning(
-                "[TUTOR-x10] Taint explosion: %d downstream facts contaminated.", 
-                report.affected_count
+                "[TUTOR-x10] Taint explosion: %d downstream facts contaminated.",
+                report.affected_count,
             )
 
     async def settle_dispute(
         self,
         conflict_type: str,
         options_data: list[dict[str, Any]],
-        agents_data: dict[str, dict[str, Any]]
+        agents_data: dict[str, dict[str, Any]],
     ) -> dict[str, Any]:
         """Trigger a ConflictResolver run. Enforces Zenón's Razor on deadlocks."""
         logger.info("[TUTOR-x10] Settling dispute of type %s", conflict_type)
-        
+
         try:
             ctype = ConflictType(conflict_type)
         except ValueError:
@@ -217,12 +251,87 @@ class TutorAgent(BaseAgent):
     async def enforce_axioms(self, target_id: str | None = None) -> dict[str, Any]:
         """Validate recent actions against the Eight Laws."""
         logger.info("[TUTOR-x10] Enforcing axioms (Ω₁-Ω₈) on %s", target_id or "global swarm")
-        
+
         # Validates Ledger Integrity (Cryptographic Quarantine)
         # A full check would hash recent ledger events and compare against C5-Dynamic requirements.
         return {
             "enforced": True,
             "target": target_id or "global",
             "thermodynamic_violations": 0,
-            "ledger_integrity": "verified"
+            "ledger_integrity": "verified",
         }
+
+    async def register_bot_post(
+        self,
+        agent_id: str,
+        post_type: str,
+        post_id: str,
+        content: str,
+    ) -> dict[str, Any]:
+        """Persist a bot post into the cryptographic ledger."""
+        if not self._db_conn:
+            logger.warning(
+                "[TUTOR-x10] No DB connection — cannot index post %s",
+                post_id,
+            )
+            return {"status": "skipped", "reason": "no_db"}
+
+        ts = now_iso()
+        detail = canonical_json(
+            {
+                "agent_id": agent_id,
+                "post_type": post_type,
+                "post_id": post_id,
+                "content_hash": compute_tx_hash(
+                    "GENESIS",
+                    "moltbook",
+                    post_type,
+                    content,
+                    ts,
+                ),
+            }
+        )
+
+        # Fetch last hash for chain continuity
+        try:
+            row = await self._db_conn.execute(
+                "SELECT tx_hash FROM transactions ORDER BY id DESC LIMIT 1",
+            )
+            last = await row.fetchone()
+            prev_hash = last[0] if last else "GENESIS"
+        except Exception:
+            prev_hash = "GENESIS"
+
+        tx_hash = compute_tx_hash(
+            prev_hash,
+            "moltbook",
+            "bot_post_index",
+            detail,
+            ts,
+        )
+
+        try:
+            await self._db_conn.execute(
+                "INSERT INTO transactions "
+                "(project, action, detail, timestamp, tx_hash, prev_hash) "
+                "VALUES (?, ?, ?, ?, ?, ?)",
+                ("moltbook", "bot_post_index", detail, ts, tx_hash, prev_hash),
+            )
+            await self._db_conn.commit()
+        except Exception as exc:
+            logger.error(
+                "[TUTOR-x10] Ledger write failed for %s: %s",
+                post_id,
+                exc,
+            )
+            return {"status": "error", "reason": str(exc)}
+
+        logger.info(
+            "[TUTOR-x10] Indexed %s post %s from %s → %s",
+            post_type,
+            post_id,
+            agent_id,
+            tx_hash[:16],
+        )
+        self._indexed_count += 1
+        return {"status": "indexed", "tx_hash": tx_hash}

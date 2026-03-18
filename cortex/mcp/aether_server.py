@@ -1,8 +1,9 @@
 """CORTEX MCP Server for Aether integration.
 
-Sovereign bridge between local CORTEX infrastructure and the Aether autonomous agent.
-(Gemini 3 model). Exposes memory, file reading over massive context windows,
-and Axiom 3 verified execution.
+Sovereign bridge between local CORTEX infrastructure and the
+Aether autonomous agent (Gemini 3 model). Exposes memory, file
+reading over massive context windows, and Axiom 3 verified
+execution.
 """
 
 from __future__ import annotations
@@ -11,6 +12,7 @@ import asyncio
 import logging
 import subprocess
 from pathlib import Path
+from typing import Any
 
 try:
     from mcp.server.fastmcp import FastMCP
@@ -18,8 +20,11 @@ except ImportError:
     FastMCP = None  # type: ignore
 
 from cortex.config import DB_PATH
-from cortex.engine import CortexEngine
-from cortex.mcp.utils import AsyncConnectionPool, MCPMetrics, SimpleAsyncCache
+from cortex.mcp.utils import (
+    AsyncConnectionPool,
+    MCPMetrics,
+    SimpleAsyncCache,
+)
 
 logger = logging.getLogger("cortex.mcp.aether")
 
@@ -39,25 +44,40 @@ class AetherContext:
             await self.pool.initialize()
             self._initialized = True
 
+    def engine_from_conn(self, conn: Any) -> Any:
+        """Create a CortexEngine wired to a pooled connection."""
+        from cortex.engine import CortexEngine
+
+        engine = CortexEngine(self.db_path, auto_embed=False)
+        engine._conn = conn  # noqa: SLF001
+        return engine
+
 
 def _axiom_3_verify(action_type: str, details: str) -> bool:
     """Enforce Axiom 3 (Byzantine Default): Verify before trust.
 
-    Surfaces a macOS physical dialog asking the user to confirm a destructive
-    action requested by the Aether agent.
+    Surfaces a macOS physical dialog asking the user to confirm
+    a destructive action requested by the Aether agent.
     """
-    logger.warning("Axiom 3 Verification Triggered: %s - %s", action_type, details)
+    logger.warning(
+        "Axiom 3 Verification Triggered: %s - %s",
+        action_type,
+        details,
+    )
     prompt = (
-        f"Aether MCP Server is requesting a MUST-VERIFY action:\\n\\n"
-        f"Type: {action_type}\\n"
-        f"Payload: {details[:200]}\\n\\n"
+        f"Aether MCP Server is requesting a MUST-VERIFY action:"
+        f"\\\\n\\\\n"
+        f"Type: {action_type}\\\\n"
+        f"Payload: {details[:200]}\\\\n\\\\n"
         f"Do you authorize this?"
     )
 
     script = f'''
     try
         set theDialogText to "{prompt}"
-        display dialog theDialogText buttons {{"Deny", "Authorize"}} default button "Deny" with title "CORTEX Axiom 3 — Byzantine Verify" with icon caution
+        display dialog theDialogText buttons {{"Deny", "Authorize"}} \
+default button "Deny" \
+with title "CORTEX Axiom 3 — Byzantine Verify" with icon caution
         if button returned of result is "Authorize" then
             return "true"
         else
@@ -85,7 +105,9 @@ def _axiom_3_verify(action_type: str, details: str) -> bool:
 
 
 def create_aether_server(
-    db_path: str = DB_PATH, host: str = "127.0.0.1", port: int = 5001
+    db_path: str = DB_PATH,
+    host: str = "127.0.0.1",
+    port: int = 5001,
 ) -> FastMCP:  # type: ignore[reportInvalidTypeForm]
     """Create the Aether FastMCP server instance."""
     if FastMCP is None:
@@ -105,9 +127,7 @@ def create_aether_server(
             return cached_result
 
         async with ctx.pool.acquire() as conn:
-            engine = CortexEngine(ctx.db_path, auto_embed=False)
-            engine._conn = conn
-
+            engine = ctx.engine_from_conn(conn)
             results = await engine.search(
                 query,
                 project or None,
@@ -122,7 +142,10 @@ def create_aether_server(
         output = [f"Found {len(results)} context chunks:"]
         for r in results:
             output.append(
-                f"[FACT #{r.fact_id} | PROJECT: {r.project} | TYPE: {r.fact_type} | SCORE: {r.score:.3f}]\n{r.content}\n---"
+                f"[FACT #{r.fact_id} | PROJECT: {r.project} "
+                f"| TYPE: {r.fact_type} "
+                f"| SCORE: {r.score:.3f}]\n"
+                f"{r.content}\n---"
             )
 
         final_str = "\n".join(output)
@@ -131,7 +154,8 @@ def create_aether_server(
 
     @mcp.tool()
     async def cortex_read_file(filepath: str, max_lines: int = 5000) -> str:
-        """Read a massive system file. Tuned for Gemini 3's 1M context window.
+        """Read a massive system file. Tuned for Gemini 3's
+        1M context window.
 
         Args:
             filepath: Absolute path to the file.
@@ -148,7 +172,11 @@ def create_aether_server(
                 lines = f.readlines()
             if len(lines) > limit:
                 content = "".join(lines[:limit])
-                return f"⚠️ Output truncated to first {limit} lines (total length was {len(lines)} lines).\n\n{content}"
+                return (
+                    f"⚠️ Output truncated to first {limit} "
+                    f"lines (total length was {len(lines)} lines).\n\n"
+                    f"{content}"
+                )
             return "".join(lines)
 
         try:
@@ -160,20 +188,22 @@ def create_aether_server(
 
     @mcp.tool()
     async def cortex_store_decision(project: str, decision: str) -> str:
-        """Persist an architectural decision or ghost directly to the local CORTEX DB.
+        """Persist an architectural decision or ghost directly
+        to the local CORTEX DB.
 
         Requires physical user verification (Axiom 3).
         """
         await ctx.ensure_ready()
 
         # Axiom 3 verification loop
-        if not _axiom_3_verify("Database Write (Decision)", f"[{project}] {decision}"):
+        if not _axiom_3_verify(
+            "Database Write (Decision)",
+            f"[{project}] {decision}",
+        ):
             return "❌ Operation aborted: Axiom 3 user physical authorization DENIED."
 
         async with ctx.pool.acquire() as conn:
-            engine = CortexEngine(ctx.db_path, auto_embed=False)
-            engine._conn = conn
-
+            engine = ctx.engine_from_conn(conn)
             fact_id = await engine.store(
                 project,
                 decision,
@@ -224,11 +254,19 @@ def create_aether_server(
     return mcp
 
 
-def run_aether_mcp(host: str = "127.0.0.1", port: int = 5001, transport: str = "sse") -> None:
+def run_aether_mcp(
+    host: str = "127.0.0.1",
+    port: int = 5001,
+    transport: str = "sse",
+) -> None:
     """Boot the Aether CORTEX MCP Server."""
     server = create_aether_server(host=host, port=port)
     if transport == "sse":
-        logger.info("Starting CORTEX Aether MCP server on %s:%d (SSE Transport)", host, port)
+        logger.info(
+            "Starting CORTEX Aether MCP server on %s:%d (SSE Transport)",
+            host,
+            port,
+        )
         server.run(transport="sse")
     else:
         logger.info("Starting CORTEX Aether MCP server (STDIO Transport)")

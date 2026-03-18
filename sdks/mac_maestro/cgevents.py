@@ -65,10 +65,16 @@ def double_click_at(x: float, y: float) -> None:
 
     # First click
     down1 = CGEventCreateMouseEvent(
-        None, kCGEventLeftMouseDown, point, kCGMouseButtonLeft,
+        None,
+        kCGEventLeftMouseDown,
+        point,
+        kCGMouseButtonLeft,
     )
     up1 = CGEventCreateMouseEvent(
-        None, kCGEventLeftMouseUp, point, kCGMouseButtonLeft,
+        None,
+        kCGEventLeftMouseUp,
+        point,
+        kCGMouseButtonLeft,
     )
     CGEventSetIntegerValueField(down1, kCGMouseEventClickState, 1)
     CGEventSetIntegerValueField(up1, kCGMouseEventClickState, 1)
@@ -79,10 +85,16 @@ def double_click_at(x: float, y: float) -> None:
 
     # Second click (click state = 2 for double-click)
     down2 = CGEventCreateMouseEvent(
-        None, kCGEventLeftMouseDown, point, kCGMouseButtonLeft,
+        None,
+        kCGEventLeftMouseDown,
+        point,
+        kCGMouseButtonLeft,
     )
     up2 = CGEventCreateMouseEvent(
-        None, kCGEventLeftMouseUp, point, kCGMouseButtonLeft,
+        None,
+        kCGEventLeftMouseUp,
+        point,
+        kCGMouseButtonLeft,
     )
     CGEventSetIntegerValueField(down2, kCGMouseEventClickState, 2)
     CGEventSetIntegerValueField(up2, kCGMouseEventClickState, 2)
@@ -156,4 +168,3 @@ def drag_to(
         kCGMouseButtonLeft,
     )
     CGEventPost(kCGHIDEventTap, up)
-

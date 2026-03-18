@@ -62,7 +62,9 @@ class SubmarineCable(SwarmModule, SwarmExtension):
             logger.info("[CablesSubmarinos] Deep trench UDS listener bound to %s", self.host)
         else:
             self.server = await asyncio.start_server(self._handle_client, self.host, self.port)
-            logger.info("[CablesSubmarinos] Deep trench TCP listener bound to %s:%d", self.host, self.port)
+            logger.info(
+                "[CablesSubmarinos] Deep trench TCP listener bound to %s:%d", self.host, self.port
+            )
 
     async def shutdown(self) -> None:
         """Stops the server listener and severs the link."""
@@ -149,12 +151,14 @@ class SubmarineCable(SwarmModule, SwarmExtension):
                     # Temporal Entropy Shielding (30 second window)
                     timestamp = msg.get("timestamp", 0)
                     if abs(time.time() - timestamp) > 30:
-                        logger.warning("Temporal Entropy rejected: Message drifted outside causal window (Replay Attack).")
+                        logger.warning(
+                            "Temporal Entropy rejected: Message drifted outside causal window (Replay Attack)."
+                        )
                         continue
 
                     raw_payload = json.dumps(msg["payload"], sort_keys=True).encode()
                     signable_content = f"{timestamp}:{raw_payload.hex()}".encode()
-                    
+
                     if not self._verify(signable_content, msg["sig"]):
                         logger.warning("Cryptographic verification failed on submarine cable!")
                         continue
@@ -215,7 +219,9 @@ class SubmarineCable(SwarmModule, SwarmExtension):
         is_compressed = False
         payload_to_send = payload
 
-        if compress or len(raw_payload) > 1024: # Check if compression is requested or payload is large
+        if (
+            compress or len(raw_payload) > 1024
+        ):  # Check if compression is requested or payload is large
             compressed_payload = zlib.compress(raw_payload, level=zlib.Z_BEST_COMPRESSION)
             payload_to_send = {"data": base64.b64encode(compressed_payload).decode("utf-8")}
             is_compressed = True

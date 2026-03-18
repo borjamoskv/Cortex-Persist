@@ -201,14 +201,18 @@ class ToolboxWatchdog:
         log_file = log_dir / "toolbox.log"
         self._rotate_logs(log_file)
 
-        self._log_fd = open(log_file, "a")
-
-        self._process = subprocess.Popen(
-            cmd,
-            env=env,
-            stdout=self._log_fd,
-            stderr=subprocess.STDOUT,
-        )
+        fd = open(log_file, "a")  # noqa: SIM115
+        try:
+            self._process = subprocess.Popen(
+                cmd,
+                env=env,
+                stdout=fd,
+                stderr=subprocess.STDOUT,
+            )
+            self._log_fd = fd
+        except OSError:
+            fd.close()
+            raise
 
         logger.info(
             "🚀 [WATCHDOG] Spawned PID %d: %s",

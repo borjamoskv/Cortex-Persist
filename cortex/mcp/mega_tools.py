@@ -14,7 +14,9 @@ import os
 import tempfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
+
+from cortex.mcp.decorators import with_db
 
 if TYPE_CHECKING:
     from mcp.server.fastmcp import FastMCP
@@ -49,7 +51,8 @@ def _register_reality_weaver(mcp: FastMCP, ctx: _MCPContext) -> None:
     """Register the ``cortex_reality_weaver`` tool."""
 
     @mcp.tool()
-    async def cortex_reality_weaver(intent: str, project: str = "custom") -> str:
+    @with_db(ctx)
+    async def cortex_reality_weaver(conn: Any, intent: str, project: str = "custom") -> str:
         """Orchestrate the creation of system structures from a high-level intent.
 
         Queries CORTEX memory for existing decisions, bridges, and ghosts
@@ -60,62 +63,59 @@ def _register_reality_weaver(mcp: FastMCP, ctx: _MCPContext) -> None:
             intent: High-level description of what to build
             project: Project namespace to query
         """
-        await ctx.ensure_ready()
-
         lines = [f"═══ REALITY WEAVING: {intent.upper()} ═══", ""]
 
         # 1. Query existing facts for this project
-        async with ctx.pool.acquire() as conn:
-            # Fact distribution by type
-            cursor = await conn.execute(
-                """
-                SELECT fact_type, count(*) as cnt
-                FROM facts
-                WHERE (project = ? OR ? = '')
-                  AND is_tombstoned = 0
-                GROUP BY fact_type
-                ORDER BY cnt DESC
-                """,
-                (project, project),
-            )
-            type_rows = await cursor.fetchall()
+        # Fact distribution by type
+        cursor = await conn.execute(
+            """
+            SELECT fact_type, count(*) as cnt
+            FROM facts
+            WHERE (project = ? OR ? = '')
+              AND is_tombstoned = 0
+            GROUP BY fact_type
+            ORDER BY cnt DESC
+            """,
+            (project, project),
+        )
+        type_rows = await cursor.fetchall()
 
-            # Recent decisions (last 30 days)
-            cutoff_30d = (datetime.now(timezone.utc) - timedelta(days=30)).isoformat()
-            cursor = await conn.execute(
-                """
-                SELECT content FROM facts
-                WHERE project = ? AND fact_type = 'decision'
-                  AND is_tombstoned = 0 AND created_at > ?
-                ORDER BY id DESC LIMIT 5
-                """,
-                (project, cutoff_30d),
-            )
-            decisions = list(await cursor.fetchall())
+        # Recent decisions (last 30 days)
+        cutoff_30d = (datetime.now(timezone.utc) - timedelta(days=30)).isoformat()
+        cursor = await conn.execute(
+            """
+            SELECT content FROM facts
+            WHERE project = ? AND fact_type = 'decision'
+              AND is_tombstoned = 0 AND created_at > ?
+            ORDER BY id DESC LIMIT 5
+            """,
+            (project, cutoff_30d),
+        )
+        decisions = list(await cursor.fetchall())
 
-            # Active ghosts (unfinished work)
-            cursor = await conn.execute(
-                """
-                SELECT content FROM facts
-                WHERE project = ? AND fact_type = 'ghost'
-                  AND is_tombstoned = 0
-                ORDER BY id DESC LIMIT 5
-                """,
-                (project,),
-            )
-            ghosts = list(await cursor.fetchall())
+        # Active ghosts (unfinished work)
+        cursor = await conn.execute(
+            """
+            SELECT content FROM facts
+            WHERE project = ? AND fact_type = 'ghost'
+              AND is_tombstoned = 0
+            ORDER BY id DESC LIMIT 5
+            """,
+            (project,),
+        )
+        ghosts = list(await cursor.fetchall())
 
-            # Bridges (cross-project patterns)
-            cursor = await conn.execute(
-                """
-                SELECT content FROM facts
-                WHERE project = ? AND fact_type = 'bridge'
-                  AND is_tombstoned = 0
-                ORDER BY id DESC LIMIT 3
-                """,
-                (project,),
-            )
-            bridges = list(await cursor.fetchall())
+        # Bridges (cross-project patterns)
+        cursor = await conn.execute(
+            """
+            SELECT content FROM facts
+            WHERE project = ? AND fact_type = 'bridge'
+              AND is_tombstoned = 0
+            ORDER BY id DESC LIMIT 3
+            """,
+            (project,),
+        )
+        bridges = list(await cursor.fetchall())
 
         # 2. Build report from real data
         if type_rows:
@@ -299,7 +299,8 @@ def _register_temporal_nexus(mcp: FastMCP, ctx: _MCPContext) -> None:
     """Register the ``cortex_temporal_nexus`` tool."""
 
     @mcp.tool()
-    async def cortex_temporal_nexus(project: str = "") -> str:
+    @with_db(ctx)
+    async def cortex_temporal_nexus(conn: Any, project: str = "") -> str:
         """Analyze technical debt drift and project evolution over time.
 
         Queries the CORTEX ledger for real mutation history, ghost density,
@@ -308,107 +309,75 @@ def _register_temporal_nexus(mcp: FastMCP, ctx: _MCPContext) -> None:
         Args:
             project: Project to analyze (empty = global)
         """
-        await ctx.ensure_ready()
-
         now = datetime.now(timezone.utc)
         cutoff_7d = (now - timedelta(days=7)).isoformat()
         cutoff_14d = (now - timedelta(days=14)).isoformat()
 
-        async with ctx.pool.acquire() as conn:
-            # 1. Transaction history (ledger)
-            try:
-                cursor = await conn.execute(
-                    """
-                    SELECT count(*) as tx_count,
-                           min(timestamp) as start_date,
-                           max(timestamp) as last_date
-                    FROM transactions
-                    WHERE project = ? OR ? = ''
-                    """,
-                    (project, project),
-                )
-                tx_stats = await cursor.fetchone()
-            except Exception:  # noqa: BLE001 — fallback if stats query fails
-                tx_stats = (0, "N/A", "N/A")
-
-            # 2. Ghost density (active unresolved work)
+        # 1. Transaction history (ledger)
+        try:
             cursor = await conn.execute(
                 """
-                SELECT count(*) FROM facts
-                WHERE fact_type = 'ghost'
-                  AND is_tombstoned = 0
-                  AND (project = ? OR ? = '')
+                SELECT count(*) as tx_count,
+                       min(timestamp) as start_date,
+                       max(timestamp) as last_date
+                FROM transactions
+                WHERE project = ? OR ? = ''
                 """,
                 (project, project),
             )
-            row = await cursor.fetchone()
-            ghost_count = row[0] if row else 0
+            tx_stats = await cursor.fetchone()
+        except Exception:  # noqa: BLE001 — fallback if stats query fails
+            tx_stats = (0, "N/A", "N/A")
 
-            # 3. Total active facts
-            cursor = await conn.execute(
-                """
-                SELECT count(*) FROM facts
-                WHERE is_tombstoned = 0
-                  AND (project = ? OR ? = '')
-                """,
-                (project, project),
-            )
-            row = await cursor.fetchone()
-            total_facts = row[0] if row else 0
-
-            # 4. Temporal drift: recent vs previous 7-day window
-            cursor = await conn.execute(
-                """
-                SELECT count(*) FROM facts
-                WHERE fact_type = 'decision'
-                  AND is_tombstoned = 0
-                  AND created_at > ?
-                  AND (project = ? OR ? = '')
-                """,
-                (cutoff_7d, project, project),
-            )
-            row = await cursor.fetchone()
-            recent_decisions = row[0] if row else 0
-
-            cursor = await conn.execute(
-                """
-                SELECT count(*) FROM facts
-                WHERE fact_type = 'decision'
-                  AND is_tombstoned = 0
-                  AND created_at > ? AND created_at <= ?
-                  AND (project = ? OR ? = '')
-                """,
-                (cutoff_14d, cutoff_7d, project, project),
-            )
-            row = await cursor.fetchone()
-            prev_decisions = row[0] if row else 0
-
-            # 5. Bridge count (cross-project patterns)
-            cursor = await conn.execute(
-                """
-                SELECT count(*) FROM facts
-                WHERE fact_type = 'bridge'
-                  AND is_tombstoned = 0
-                  AND (project = ? OR ? = '')
-                """,
-                (project, project),
-            )
-            row = await cursor.fetchone()
-            bridge_count = row[0] if row else 0
-
-            # 6. Error rate (recent errors)
-            cursor = await conn.execute(
-                """
-                SELECT count(*) FROM facts
-                WHERE fact_type = 'error'
-                  AND is_tombstoned = 0
-                  AND created_at > ?
-                  AND (project = ? OR ? = '')
-                """,
-                (cutoff_7d, project, project),
-            )
-            error_row = await cursor.fetchone()
-            recent_errors = error_row[0] if error_row else 0
+        # 2-6. Batched fact aggregates in one query
+        cursor = await conn.execute(
+            """
+            SELECT
+              SUM(CASE WHEN fact_type = 'ghost'
+                AND is_tombstoned = 0
+                THEN 1 ELSE 0 END),
+              SUM(CASE WHEN is_tombstoned = 0
+                THEN 1 ELSE 0 END),
+              SUM(CASE WHEN fact_type = 'decision'
+                AND is_tombstoned = 0
+                AND created_at > ?
+                THEN 1 ELSE 0 END),
+              SUM(CASE WHEN fact_type = 'decision'
+                AND is_tombstoned = 0
+                AND created_at > ?
+                AND created_at <= ?
+                THEN 1 ELSE 0 END),
+              SUM(CASE WHEN fact_type = 'bridge'
+                AND is_tombstoned = 0
+                THEN 1 ELSE 0 END),
+              SUM(CASE WHEN fact_type = 'error'
+                AND is_tombstoned = 0
+                AND created_at > ?
+                THEN 1 ELSE 0 END)
+            FROM facts
+            WHERE (project = ? OR ? = '')
+            """,
+            (
+                cutoff_7d,
+                cutoff_14d,
+                cutoff_7d,
+                cutoff_7d,
+                project,
+                project,
+            ),
+        )
+        row = await cursor.fetchone()
+        if row:
+            ghost_count = row[0] or 0
+            total_facts = row[1] or 0
+            recent_decisions = row[2] or 0
+            prev_decisions = row[3] or 0
+            bridge_count = row[4] or 0
+            recent_errors = row[5] or 0
+        else:
+            ghost_count = total_facts = 0
+            recent_decisions = prev_decisions = 0
+            bridge_count = recent_errors = 0
 
         # Calculate real metrics
         tx_count, start, last = tx_stats if tx_stats else (0, "N/A", "N/A")

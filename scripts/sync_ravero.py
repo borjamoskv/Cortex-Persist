@@ -7,7 +7,7 @@ async def sync_swarm():
     # El archivo ~/.config/moltbook/credentials.json ahora tiene a RAVERO.
     client = MoltbookClient()
     print("Sincronizando RAVERO con la matriz principal...")
-    
+
     # 1. RAVERO sigue a Corteza (Julio Corteza)
     try:
         res = await client.follow("legionagent_3_8867")
@@ -27,6 +27,7 @@ async def sync_swarm():
         print("[-] Fallo moskv-1:", e)
 
     await client.close()
+
 
 if __name__ == "__main__":
     asyncio.run(sync_swarm())

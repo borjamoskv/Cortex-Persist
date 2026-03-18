@@ -41,6 +41,7 @@ class ConsignatarioAgent(BaseAgent):
         blue_result: RemediationResult,
         siege_results: list[SiegeResult],
         dry_run: bool = True,
+        use_async_ledger: bool = False,
     ) -> bool:
         """Evaluate the swarm consensus and consign the fix to the Ledger."""
         fact_id = blue_result.fact_id
@@ -50,7 +51,7 @@ class ConsignatarioAgent(BaseAgent):
         passes = [sr for sr in siege_results if sr.passed]
         pass_rate = len(passes) / len(siege_results) if siege_results else 0
 
-        # Threshold: 100% for P0, 80% for others (arbitrary for now)
+        # Threshold: 100% for P0, 80% for others
         is_critical = "B01" in battalion or "B02" in battalion
         threshold = 1.0 if is_critical else 0.8
 
@@ -62,9 +63,14 @@ class ConsignatarioAgent(BaseAgent):
         )
 
         if pass_rate < threshold:
-            logger.warning("Consignatario: REJECTED fact %s. Insufficient consensus.", fact_id)
-            if not dry_run:
-                await db.rollback()
+            logger.warning(
+                "Consignatario: REJECTED fact %s. Insufficient consensus.",
+                fact_id,
+            )
+            # B4: Do NOT rollback here. The engine manages batch
+            # commits. A rollback would contaminate the shared
+            # connection and undo all successful writes from
+            # other facts in the same batch.
             return False
 
         # 2. Ledger Consignment
@@ -74,11 +80,15 @@ class ConsignatarioAgent(BaseAgent):
             rationale=f"Verified by {len(passes)} Red specialists.",
         )
 
-        target = ActionTarget(identifier=fact_id, role="remediation_target", app="cortex-persist")
+        target = ActionTarget(
+            identifier=fact_id,
+            role="remediation_target",
+            app="cortex-persist",
+        )
 
         result = ActionResult(
             ok=True,
-            latency_ms=0,  # Simplified
+            latency_ms=0,
             verified=True,
         )
 
@@ -98,13 +108,22 @@ class ConsignatarioAgent(BaseAgent):
         )
 
         if not dry_run:
-            # Atomic: Ledger + Commit
-            ledger.append(event)
-            await db.commit()
+            if use_async_ledger:
+                await ledger.append_async(db, event)
+                # Commit handled by engine at batch level
+            else:
+                ledger.append(event)
+                await db.commit()
             self.signature_count += 1
-            logger.info("Consignatario: SIGNED & COMMITTED fact %s", fact_id)
+            logger.info(
+                "Consignatario: SIGNED & COMMITTED fact %s",
+                fact_id,
+            )
         else:
-            logger.info("Consignatario: DRY_RUN SIGNED fact %s", fact_id)
+            logger.info(
+                "Consignatario: DRY_RUN SIGNED fact %s",
+                fact_id,
+            )
 
         return True
 

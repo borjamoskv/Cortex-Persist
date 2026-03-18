@@ -40,7 +40,7 @@ def register_notebooklm_tools(mcp: Any, ctx: Any) -> None:
         """
         from cortex.services.notebooklm import NotebookLMService
 
-        db_path = getattr(ctx, "db_path", "")
+        db_path = ctx.cfg.db_path
         svc = NotebookLMService(str(db_path))
         content = await svc.generate_digest(project=project)
 
@@ -72,7 +72,7 @@ def register_notebooklm_tools(mcp: Any, ctx: Any) -> None:
         """
         from cortex.services.notebooklm import NotebookLMService
 
-        db_path = getattr(ctx, "db_path", "")
+        db_path = ctx.cfg.db_path
         svc = NotebookLMService(str(db_path))
         counts = await svc.fragment_by_domain(Path(output_dir))
 

@@ -219,3 +219,23 @@ def legion_run(agent_count: int, subagent_count: int, submolt: str):
     # Run orchestration
     asyncio.run(engine.execute(submolt=submolt))
     console.print("[bold green]✅ Legion operation successful. Platforms influenced.[/]")
+
+
+@legion_group.command("marketing")
+@click.option("--evangelists", default=3, help="Number of compliance evangelists")
+@click.option("--analysts", default=1, help="Number of regulatory analysts")
+@click.option("--submolt", default="general", help="Target submolt")
+def legion_marketing(evangelists: int, analysts: int, submolt: str):
+    """🎯 Autodidact Marketing — EU AI Act compliance content swarm."""
+    from cortex.extensions.moltbook.legion_engine import MoltbookLegionEngine
+
+    console.print(
+        f"[bold cyan]🎯 Autodidact Marketing Swarm ({evangelists}E + {analysts}A + 2SHA)...[/]"
+    )
+    engine = MoltbookLegionEngine(
+        mode="marketing",
+        evangelist_count=evangelists,
+        analyst_count=analysts,
+    )
+    asyncio.run(engine.execute(submolt=submolt))
+    console.print("[bold green]✅ Marketing swarm session complete.[/]")

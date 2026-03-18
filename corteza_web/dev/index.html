@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORTEX Persist — Developer Documentation</title>
+    <meta name="description" content="Developer documentation for CORTEX Persist. Tamper-evident audit trails, cryptographic verification, and verifiable lineage for AI agents. Python SDK, REST API, CLI.">
+    <meta name="keywords" content="cortex-persist, SDK, API, Python, AI agents, memory, audit trail, cryptographic ledger, documentation">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="bg-grid"></div>
+
+    <!-- ═══════════════════ NAV ═══════════════════ -->
+    <nav id="nav">
+        <div class="nav-inner">
+            <a href="#" class="nav-logo">
+                <span class="nav-logo-mark">⬡</span> CORTEX <span class="nav-logo-tag">docs</span>
+            </a>
+            <div class="nav-links" id="nav-links">
+                <a href="#quickstart">Quickstart</a>
+                <a href="#sdk">SDK</a>
+                <a href="#api">API</a>
+                <a href="#architecture">Architecture</a>
+                <a href="https://cortexpersist.com" class="nav-link-com">cortexpersist.com ↗</a>
+                <a href="https://github.com/borjamoskv/cortex" class="nav-cta" target="_blank" rel="noopener">GitHub</a>
+            </div>
+            <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ═══════════════════ HERO ═══════════════════ -->
+    <header id="hero" class="section hero-section">
+        <div class="hero-badge">v0.3.0b2 · Python 3.10+ · Apache-2.0</div>
+        <h1>cortex-persist</h1>
+        <p class="hero-tagline">Tamper-evident memory, audit trails, and<br>verifiable lineage for AI agents.</p>
+        <div class="hero-install">
+            <div class="code-block code-block-hero">
+                <div class="code-header">
+                    <span class="code-lang">terminal</span>
+                    <button class="code-copy" data-code="pip install cortex-persist" aria-label="Copy">⎘</button>
+                </div>
+                <pre><code><span class="tok-prompt">$</span> pip install cortex-persist</code></pre>
+            </div>
+        </div>
+        <div class="hero-links">
+            <a href="#quickstart" class="btn btn-primary">Quickstart</a>
+            <a href="#sdk" class="btn btn-ghost">SDK Reference</a>
+            <a href="https://github.com/borjamoskv/cortex" class="btn btn-ghost" target="_blank" rel="noopener">GitHub ↗</a>
+        </div>
+    </header>
+
+    <!-- ═══════════════════ QUICKSTART ═══════════════════ -->
+    <section class="section" id="quickstart">
+        <h2 class="section-title">90-Second Demo</h2>
+        <p class="section-subtitle">From install to tamper detection in under two minutes.</p>
+
+        <div class="steps-grid">
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <h3>Initialize the ledger</h3>
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="code-lang">terminal</span>
+                        <button class="code-copy" data-code="cortex init" aria-label="Copy">⎘</button>
+                    </div>
+                    <pre><code><span class="tok-prompt">$</span> cortex init</code></pre>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <h3>Store a memory</h3>
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="code-lang">terminal</span>
+                        <button class="code-copy" data-code='cortex memory store --agent "risk-bot" --content "Transaction flagged: IP mismatch"' aria-label="Copy">⎘</button>
+                    </div>
+                    <pre><code><span class="tok-prompt">$</span> cortex memory store --agent <span class="tok-string">"risk-bot"</span> \
+    --content <span class="tok-string">"Transaction flagged: IP mismatch"</span>
+<span class="tok-comment">[+] Fact stored. Ledger hash: 8f4a2b9e...</span></code></pre>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <h3>Verify integrity</h3>
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="code-lang">terminal</span>
+                        <button class="code-copy" data-code="cortex verify record 8f4a2b9e" aria-label="Copy">⎘</button>
+                    </div>
+                    <pre><code><span class="tok-prompt">$</span> cortex verify record 8f4a2b9e
+<span class="tok-success">[✔] VERIFIED: Hash chain intact. Merkle root sealed.</span></code></pre>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-number">4</div>
+                <h3>Attempt tampering</h3>
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="code-lang">terminal</span>
+                        <button class="code-copy" data-code="sqlite3 cortex.db \"UPDATE facts SET content='Transaction approved' WHERE id='8f4a2b9e'\"" aria-label="Copy">⎘</button>
+                    </div>
+                    <pre><code><span class="tok-prompt">$</span> sqlite3 cortex.db <span class="tok-string">"UPDATE facts SET content='Transaction approved' \
+    WHERE id='8f4a2b9e'"</span></code></pre>
+                </div>
+            </div>
+
+            <div class="step-card step-card-highlight">
+                <div class="step-number">5</div>
+                <h3>Tamper detected</h3>
+                <div class="code-block">
+                    <div class="code-header">
+                        <span class="code-lang">terminal</span>
+                        <button class="code-copy" data-code="cortex verify ledger" aria-label="Copy">⎘</button>
+                    </div>
+                    <pre><code><span class="tok-prompt">$</span> cortex verify ledger
+<span class="tok-error">[✘] TAMPER DETECTED: Hash mismatch at block 8f4a2b9e</span></code></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ PYTHON INTEGRATION ═══════════════════ -->
+    <section class="section" id="integration">
+        <h2 class="section-title">Python Integration</h2>
+        <p class="section-subtitle">CORTEX wraps your existing state management. It does not replace your embeddings or vector search.</p>
+
+        <div class="code-block code-block-large">
+            <div class="code-header">
+                <span class="code-lang">python</span>
+                <button class="code-copy" data-code='import asyncio
+from cortex import CortexEngine
+
+async def main():
+    engine = CortexEngine()
+
+    # Write to tamper-evident ledger
+    receipt = await engine.store_fact(
+        content="User approved transaction $5,000",
+        fact_type="decision",
+        project="fin-fraud-bot",
+        tenant_id="customer-123"
+    )
+
+    # Cryptographic proof verification
+    assert await engine.verify(receipt.hash) == True
+
+    # Semantic search with temporal filtering
+    results = await engine.query(
+        query="transaction approvals over $1,000",
+        strategy="hybrid",
+        intent="audit",
+        include_trace=True
+    )
+
+    for item in results.items:
+        print(f"{item.fact_id}: {item.content} [{item.evidence_level}]")
+
+asyncio.run(main())' aria-label="Copy">⎘</button>
+            </div>
+            <pre><code><span class="tok-keyword">import</span> asyncio
+<span class="tok-keyword">from</span> cortex <span class="tok-keyword">import</span> CortexEngine
+
+<span class="tok-keyword">async def</span> <span class="tok-func">main</span>():
+    engine = CortexEngine()
+
+    <span class="tok-comment"># Write to tamper-evident ledger</span>
+    receipt = <span class="tok-keyword">await</span> engine.store_fact(
+        content=<span class="tok-string">"User approved transaction $5,000"</span>,
+        fact_type=<span class="tok-string">"decision"</span>,
+        project=<span class="tok-string">"fin-fraud-bot"</span>,
+        tenant_id=<span class="tok-string">"customer-123"</span>
+    )
+
+    <span class="tok-comment"># Cryptographic proof verification</span>
+    <span class="tok-keyword">assert</span> <span class="tok-keyword">await</span> engine.verify(receipt.hash) == <span class="tok-const">True</span>
+
+    <span class="tok-comment"># Semantic search with temporal filtering</span>
+    results = <span class="tok-keyword">await</span> engine.query(
+        query=<span class="tok-string">"transaction approvals over $1,000"</span>,
+        strategy=<span class="tok-string">"hybrid"</span>,
+        intent=<span class="tok-string">"audit"</span>,
+        include_trace=<span class="tok-const">True</span>
+    )
+
+    <span class="tok-keyword">for</span> item <span class="tok-keyword">in</span> results.items:
+        <span class="tok-func">print</span>(<span class="tok-string">f"</span>{item.fact_id}: {item.content} [{item.evidence_level}]<span class="tok-string">"</span>)
+
+asyncio.run(main())</code></pre>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ SDK SURFACE ═══════════════════ -->
+    <section class="section" id="sdk">
+        <h2 class="section-title">SDK Surface</h2>
+        <p class="section-subtitle">Five operational domains. One intent, one entrypoint.</p>
+
+        <div class="sdk-grid">
+            <div class="sdk-card">
+                <div class="sdk-icon">◉</div>
+                <h3>Memory</h3>
+                <p>Store, query, history, time-travel, compaction, and working memory export.</p>
+                <div class="sdk-methods">
+                    <code>store()</code>
+                    <code>query()</code>
+                    <code>history()</code>
+                    <code>time_travel()</code>
+                    <code>compact()</code>
+                </div>
+            </div>
+
+            <div class="sdk-card">
+                <div class="sdk-icon">⟡</div>
+                <h3>Trace</h3>
+                <p>Causal lineage, audit reports, and compliance-grade export.</p>
+                <div class="sdk-methods">
+                    <code>trace()</code>
+                    <code>audit()</code>
+                    <code>export_audit()</code>
+                </div>
+            </div>
+
+            <div class="sdk-card">
+                <div class="sdk-icon">◈</div>
+                <h3>Verification</h3>
+                <p>Guard checks, integrity verification, and taint status.</p>
+                <div class="sdk-methods">
+                    <code>guard_check()</code>
+                    <code>verify()</code>
+                    <code>taint_status()</code>
+                </div>
+            </div>
+
+            <div class="sdk-card">
+                <div class="sdk-icon">⬡</div>
+                <h3>Coordination</h3>
+                <p>Agent registration, voting, consensus, and event publishing.</p>
+                <div class="sdk-methods">
+                    <code>register_agent()</code>
+                    <code>vote()</code>
+                    <code>consensus_status()</code>
+                    <code>publish_event()</code>
+                </div>
+            </div>
+
+            <div class="sdk-card">
+                <div class="sdk-icon">⊡</div>
+                <h3>Runtime</h3>
+                <p>Health monitoring, capability discovery, and recovery status.</p>
+                <div class="sdk-methods">
+                    <code>health()</code>
+                    <code>capabilities()</code>
+                    <code>recovery_status()</code>
+                    <code>memory_stats()</code>
+                </div>
+            </div>
+        </div>
+
+        <!-- Query Routing -->
+        <div class="subsection">
+            <h3 class="subsection-title">Query Routing</h3>
+            <div class="routing-grid">
+                <div class="routing-card">
+                    <h4>Intent</h4>
+                    <p>Why you're querying.</p>
+                    <div class="routing-options">
+                        <span class="routing-tag">lookup</span>
+                        <span class="routing-tag">explore</span>
+                        <span class="routing-tag">audit</span>
+                    </div>
+                </div>
+                <div class="routing-card">
+                    <h4>Strategy</h4>
+                    <p>How the engine should route.</p>
+                    <div class="routing-options">
+                        <span class="routing-tag">auto</span>
+                        <span class="routing-tag">text</span>
+                        <span class="routing-tag">vector</span>
+                        <span class="routing-tag">hybrid</span>
+                        <span class="routing-tag">temporal</span>
+                        <span class="routing-tag">graph</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Operation Results -->
+        <div class="subsection">
+            <h3 class="subsection-title">Operation Results</h3>
+            <p class="subsection-desc">The SDK distinguishes three outcomes. No silent degradation.</p>
+            <div class="result-grid">
+                <div class="result-card result-success">
+                    <h4>Success</h4>
+                    <p>Operation completed. Includes <code>operation_id</code> and optional warnings.</p>
+                </div>
+                <div class="result-card result-rejection">
+                    <h4>Rejection</h4>
+                    <p>System refused by rule or trust policy. Includes <code>code</code>, <code>layer</code>, <code>severity</code>, evidence, and remediation.</p>
+                </div>
+                <div class="result-card result-failure">
+                    <h4>Failure</h4>
+                    <p>Technical/runtime issue. Includes <code>retryable</code> flag and <code>component</code> identifier.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ REST API ═══════════════════ -->
+    <section class="section" id="api">
+        <h2 class="section-title">REST API</h2>
+        <p class="section-subtitle">FastAPI-based versioned endpoints. All routes are tenant-aware.</p>
+
+        <div class="api-group">
+            <h3 class="api-group-title">Facts & Memory <code>/v1/facts</code></h3>
+            <div class="api-table-wrap">
+                <table class="api-table">
+                    <thead>
+                        <tr><th>Method</th><th>Endpoint</th><th>Description</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="api-method api-post">POST</td><td><code>/v1/facts</code></td><td>Store a single fact</td></tr>
+                        <tr><td class="api-method api-post">POST</td><td><code>/v1/facts/batch</code></td><td>Batch store (≤100 facts)</td></tr>
+                        <tr><td class="api-method api-get">GET</td><td><code>/v1/facts/{id}</code></td><td>Retrieve fact by ID</td></tr>
+                        <tr><td class="api-method api-get">GET</td><td><code>/v1/projects/{project}/facts</code></td><td>Paginated recall</td></tr>
+                        <tr><td class="api-method api-post">POST</td><td><code>/v1/facts/search</code></td><td>Semantic search (supports <code>as_of</code>)</td></tr>
+                        <tr><td class="api-method api-delete">DELETE</td><td><code>/v1/facts/{id}</code></td><td>Soft-deprecate fact</td></tr>
+                        <tr><td class="api-method api-get">GET</td><td><code>/v1/facts/verify</code></td><td>Verify ledger integrity</td></tr>
+                        <tr><td class="api-method api-post">POST</td><td><code>/v1/facts/{id}/taint</code></td><td>Recursive confidence downgrade</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="api-group">
+            <h3 class="api-group-title">Trust & Compliance <code>/v1/trust</code></h3>
+            <div class="api-table-wrap">
+                <table class="api-table">
+                    <thead>
+                        <tr><th>Method</th><th>Endpoint</th><th>Description</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="api-method api-post">POST</td><td><code>/v1/trust/guard</code></td><td>Check trust boundaries</td></tr>
+                        <tr><td class="api-method api-get">GET</td><td><code>/v1/trust/compliance</code></td><td>Compliance status report</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="api-group">
+            <h3 class="api-group-title">Swarm <code>/v1/swarm</code></h3>
+            <div class="api-table-wrap">
+                <table class="api-table">
+                    <thead>
+                        <tr><th>Method</th><th>Endpoint</th><th>Description</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="api-method api-get">GET</td><td><code>/v1/swarm/status</code></td><td>Global health and agent PIDs</td></tr>
+                        <tr><td class="api-method api-post">POST</td><td><code>/v1/swarm/worktrees</code></td><td>Provision isolated worktree</td></tr>
+                        <tr><td class="api-method api-get">GET</td><td><code>/v1/swarm/worktrees/{id}</code></td><td>Worktree metadata</td></tr>
+                        <tr><td class="api-method api-delete">DELETE</td><td><code>/v1/swarm/worktrees/{id}</code></td><td>Terminate & cleanup</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="api-group">
+            <h3 class="api-group-title">Health</h3>
+            <div class="api-table-wrap">
+                <table class="api-table">
+                    <thead>
+                        <tr><th>Method</th><th>Endpoint</th><th>Description</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="api-method api-get">GET</td><td><code>/v1/status</code></td><td>Engine health metrics</td></tr>
+                        <tr><td class="api-method api-get">GET</td><td><code>/health</code></td><td>Standard service health</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ ARCHITECTURE ═══════════════════ -->
+    <section class="section" id="architecture">
+        <h2 class="section-title">Architecture</h2>
+        <p class="section-subtitle">CORTEX integrates as a standard Python SDK or a standalone REST/MCP gateway.</p>
+
+        <div class="arch-diagram">
+            <pre><code>[ Agent Framework ] → [ CORTEX Gateway ] → [ Target Memory Store ]
+                            │
+                            ├─ SHA-256 Hash Chaining
+                            ├─ Merkle Checkpoints
+                            └─ Cryptographic Verification</code></pre>
+        </div>
+
+        <div class="stack-grid">
+            <div class="stack-card">
+                <h4>Stack</h4>
+                <div class="stack-items">
+                    <div class="stack-item"><span class="stack-label">Language</span><span>Python 3.10–3.13</span></div>
+                    <div class="stack-item"><span class="stack-label">Database</span><span>SQLite + sqlite-vec + aiosqlite</span></div>
+                    <div class="stack-item"><span class="stack-label">Embeddings</span><span>sentence-transformers + ONNX</span></div>
+                    <div class="stack-item"><span class="stack-label">Crypto</span><span>cryptography + keyring</span></div>
+                    <div class="stack-item"><span class="stack-label">API</span><span>FastAPI + Uvicorn</span></div>
+                    <div class="stack-item"><span class="stack-label">CLI</span><span>Click + Rich</span></div>
+                    <div class="stack-item"><span class="stack-label">Cloud</span><span>asyncpg + Redis + Qdrant</span></div>
+                </div>
+            </div>
+
+            <div class="stack-card">
+                <h4>Install Variants</h4>
+                <div class="code-block">
+                    <div class="code-header"><span class="code-lang">terminal</span></div>
+                    <pre><code><span class="tok-comment"># Core</span>
+<span class="tok-prompt">$</span> pip install cortex-persist
+
+<span class="tok-comment"># With API server</span>
+<span class="tok-prompt">$</span> pip install cortex-persist[api]
+
+<span class="tok-comment"># With cloud backends</span>
+<span class="tok-prompt">$</span> pip install cortex-persist[cloud]
+
+<span class="tok-comment"># Everything</span>
+<span class="tok-prompt">$</span> pip install cortex-persist[all]</code></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ PERFORMANCE ═══════════════════ -->
+    <section class="section">
+        <h2 class="section-title">Performance</h2>
+        <p class="section-subtitle">4 vCPU, 16 GB RAM, standard cloud instance.</p>
+        <div class="perf-table-wrap">
+            <table class="api-table">
+                <thead>
+                    <tr><th>Operation</th><th>Median</th><th>P95</th><th>Notes</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Memory write</td><td class="perf-val">~18 ms</td><td class="perf-val">~35 ms</td><td>SQLite + SHA-256</td></tr>
+                    <tr><td>Verify record</td><td class="perf-val">~5 ms</td><td class="perf-val">~12 ms</td><td>Single block hash</td></tr>
+                    <tr><td>Merkle checkpoint</td><td class="perf-val">~85 ms</td><td class="perf-val">~140 ms</td><td>10k records</td></tr>
+                    <tr><td>Report export</td><td class="perf-val">~400 ms</td><td class="perf-val">~800 ms</td><td>Lineage + PDF</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ FOOTER ═══════════════════ -->
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <div class="footer-cols">
+                <div class="footer-col">
+                    <span class="footer-logo">⬡ CORTEX <span class="nav-logo-tag">docs</span></span>
+                    <p class="footer-desc">Tamper-evident memory for AI agents.<br>Apache-2.0 licensed.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Resources</h4>
+                    <a href="https://cortexpersist.com">Commercial Site</a>
+                    <a href="https://github.com/borjamoskv/cortex" target="_blank" rel="noopener">GitHub</a>
+                    <a href="https://pypi.org/project/cortex-persist/" target="_blank" rel="noopener">PyPI</a>
+                    <a href="https://github.com/borjamoskv/cortex/blob/main/CHANGELOG.md" target="_blank" rel="noopener">Changelog</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Community</h4>
+                    <a href="https://github.com/borjamoskv/cortex/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing</a>
+                    <a href="https://github.com/borjamoskv/cortex/blob/main/SECURITY.md" target="_blank" rel="noopener">Security</a>
+                    <a href="https://github.com/borjamoskv/cortex/blob/main/CODE_OF_CONDUCT.md" target="_blank" rel="noopener">Code of Conduct</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2024–2026 Sovereign Systems Labs · v0.3.0b2 · Apache-2.0</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Nav scroll
+        const nav = document.getElementById('nav');
+        window.addEventListener('scroll', () => {
+            nav.classList.toggle('nav-scrolled', window.scrollY > 60);
+        });
+
+        // Mobile toggle
+        const toggle = document.getElementById('nav-toggle');
+        const links = document.getElementById('nav-links');
+        toggle.addEventListener('click', () => {
+            links.classList.toggle('nav-open');
+            toggle.classList.toggle('nav-toggle-active');
+        });
+
+        links.querySelectorAll('a').forEach(a => {
+            a.addEventListener('click', () => {
+                links.classList.remove('nav-open');
+                toggle.classList.remove('nav-toggle-active');
+            });
+        });
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(a => {
+            a.addEventListener('click', e => {
+                e.preventDefault();
+                const target = document.querySelector(a.getAttribute('href'));
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+
+        // Intersection Observer
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('visible');
+            });
+        }, { threshold: 0.06, rootMargin: '0px 0px -30px 0px' });
+
+        document.querySelectorAll('.section').forEach(s => observer.observe(s));
+
+        // Copy buttons
+        document.querySelectorAll('.code-copy').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const code = btn.getAttribute('data-code');
+                try {
+                    await navigator.clipboard.writeText(code);
+                    btn.textContent = '✓';
+                    btn.classList.add('copied');
+                    setTimeout(() => {
+                        btn.textContent = '⎘';
+                        btn.classList.remove('copied');
+                    }, 1500);
+                } catch (e) {
+                    // fallback
+                    const ta = document.createElement('textarea');
+                    ta.value = code;
+                    document.body.appendChild(ta);
+                    ta.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(ta);
+                    btn.textContent = '✓';
+                    setTimeout(() => { btn.textContent = '⎘'; }, 1500);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

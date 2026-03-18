@@ -7,6 +7,7 @@ Tests:
     - HandoffAgent: save handoff request, load op, unknown op
     - NightshiftAgent: tick emits crystals, shutdown handling
     - SupervisorAgent: start/stop/quarantine/status/health ops
+    - MementoAgent: crystallize, recall, tick, extractor failure
 """
 
 from __future__ import annotations
@@ -19,6 +20,7 @@ import pytest
 
 from cortex.agents.builtins import (
     HandoffAgent,
+    MementoAgent,
     MemoryAgent,
     NightshiftAgent,
     SecurityAgent,
@@ -581,3 +583,288 @@ class TestSupervisorAgent:
 
         mock_supervisor.health_check.assert_called()
         mock_supervisor.status.assert_called()
+
+
+# ── MementoAgent ──────────────────────────────────────────────────
+
+
+class TestMementoAgent:
+    @pytest.fixture
+    async def bus(self):
+        b = SqliteMessageBus(db_path=_uid())
+        yield b
+        await b.close()
+
+    @pytest.fixture
+    def mock_manager(self):
+        m = MagicMock()
+        m.store = AsyncMock(return_value="memento-fact-1")
+        m.assemble_context = AsyncMock(return_value={"episodes": [], "semantic": []})
+        return m
+
+    @pytest.fixture
+    def mock_extractor(self):
+        e = MagicMock()
+        e.extract = AsyncMock(
+            return_value=[
+                {"content": "decision: use SQLite", "fact_type": "decision", "confidence": 0.9},
+                {"content": "error: OOM on 10M vectors", "fact_type": "error", "confidence": 0.95},
+            ]
+        )
+        e.pending_sessions = AsyncMock(
+            return_value=[
+                {"session_id": "sess-1", "project_id": "cortex", "messages": []},
+            ]
+        )
+        e.mark_processed = AsyncMock()
+        return e
+
+    def _agent(self, bus, manager, extractor, targets=None):
+        manifest = _manifest(
+            "memento-1",
+            daemon=True,
+            escalation_targets=targets or [],
+        )
+        return MementoAgent(manifest, bus, MagicMock(), manager, extractor)
+
+    @pytest.mark.asyncio
+    async def test_crystallize_op(self, bus, mock_manager, mock_extractor):
+        agent = self._agent(bus, mock_manager, mock_extractor)
+        await bus.send(
+            new_message(
+                "caller",
+                "memento-1",
+                MessageKind.TASK_REQUEST,
+                {
+                    "op": "crystallize",
+                    "session_data": {"session_id": "s-1", "project_id": "proj-A"},
+                },
+            )
+        )
+        await bus.send(new_message("caller", "memento-1", MessageKind.SHUTDOWN, {}))
+        await agent.run()
+
+        replies = await _drain(bus, "caller")
+        assert any(r.payload.get("op") == "crystallize" for r in replies)
+        assert mock_manager.store.call_count == 2  # two insights extracted
+        mock_extractor.mark_processed.assert_called_once_with("s-1")
+
+        # Should emit FACT_PROPOSAL to memory_agent
+        proposals = await _drain(bus, "memory_agent")
+        assert len(proposals) == 2
+        assert all(p.kind == MessageKind.FACT_PROPOSAL for p in proposals)
+        assert all(p.payload["source"] == "memento" for p in proposals)
+
+    @pytest.mark.asyncio
+    async def test_recall_op(self, bus, mock_manager, mock_extractor):
+        agent = self._agent(bus, mock_manager, mock_extractor)
+        await bus.send(
+            new_message(
+                "caller",
+                "memento-1",
+                MessageKind.TASK_REQUEST,
+                {"op": "recall", "query": "SQLite decisions", "project_id": "cortex"},
+            )
+        )
+        await bus.send(new_message("caller", "memento-1", MessageKind.SHUTDOWN, {}))
+        await agent.run()
+
+        replies = await _drain(bus, "caller")
+        assert any(r.payload.get("op") == "recall" for r in replies)
+        mock_manager.assemble_context.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_status_op(self, bus, mock_manager, mock_extractor):
+        agent = self._agent(bus, mock_manager, mock_extractor)
+        await bus.send(
+            new_message(
+                "caller",
+                "memento-1",
+                MessageKind.TASK_REQUEST,
+                {"op": "status"},
+            )
+        )
+        await bus.send(new_message("caller", "memento-1", MessageKind.SHUTDOWN, {}))
+        await agent.run()
+
+        replies = await _drain(bus, "caller")
+        task_results = [r for r in replies if r.kind == MessageKind.TASK_RESULT]
+        assert any(r.payload.get("result", {}).get("status") == "ok" for r in task_results)
+
+    @pytest.mark.asyncio
+    async def test_unknown_op(self, bus, mock_manager, mock_extractor):
+        agent = self._agent(bus, mock_manager, mock_extractor)
+        await bus.send(
+            new_message(
+                "caller",
+                "memento-1",
+                MessageKind.TASK_REQUEST,
+                {"op": "nuke"},
+            )
+        )
+        await bus.send(new_message("caller", "memento-1", MessageKind.SHUTDOWN, {}))
+        await agent.run()
+
+        replies = await _drain(bus, "caller")
+        assert any("error" in r.payload for r in replies)
+
+    @pytest.mark.asyncio
+    async def test_tick_processes_pending(self, bus, mock_manager, mock_extractor):
+        agent = self._agent(bus, mock_manager, mock_extractor, targets=["supervisor"])
+        await agent.tick()
+
+        # Should have called extract and stored 2 insights
+        mock_extractor.extract.assert_called_once()
+        assert mock_manager.store.call_count == 2
+        mock_extractor.mark_processed.assert_called_once_with("sess-1")
+
+        # Should emit FACT_PROPOSAL to memory_agent
+        proposals = await _drain(bus, "memory_agent")
+        assert len(proposals) == 2
+        assert all(p.kind == MessageKind.FACT_PROPOSAL for p in proposals)
+
+        # Should publish summary to supervisor
+        summaries = await _drain(bus, "supervisor")
+        assert len(summaries) == 1
+        assert "memento_report" in summaries[0].payload
+        assert summaries[0].payload["memento_report"]["crystals_emitted"] == 2
+
+    @pytest.mark.asyncio
+    async def test_tick_no_pending(self, bus, mock_manager, mock_extractor):
+        mock_extractor.pending_sessions.return_value = []
+        agent = self._agent(bus, mock_manager, mock_extractor)
+        await agent.tick()
+
+        mock_extractor.extract.assert_not_called()
+        mock_manager.store.assert_not_called()
+
+        proposals = await _drain(bus, "memory_agent")
+        assert proposals == []
+
+    @pytest.mark.asyncio
+    async def test_extractor_failure(self, bus, mock_manager, mock_extractor):
+        mock_extractor.pending_sessions.side_effect = RuntimeError("db locked")
+        agent = self._agent(bus, mock_manager, mock_extractor)
+
+        with pytest.raises(RuntimeError, match="SessionExtractor failure"):
+            await agent.tick()
+
+    @pytest.mark.asyncio
+    async def test_crystallize_empty_session(self, bus, mock_manager, mock_extractor):
+        mock_extractor.extract.return_value = []  # no insights
+        agent = self._agent(bus, mock_manager, mock_extractor)
+        await bus.send(
+            new_message(
+                "caller",
+                "memento-1",
+                MessageKind.TASK_REQUEST,
+                {
+                    "op": "crystallize",
+                    "session_data": {"session_id": "empty-1"},
+                },
+            )
+        )
+        await bus.send(new_message("caller", "memento-1", MessageKind.SHUTDOWN, {}))
+        await agent.run()
+
+        replies = await _drain(bus, "caller")
+        results = [r for r in replies if r.payload.get("op") == "crystallize"]
+        assert len(results) == 1
+        assert results[0].payload["result"]["crystals"] == 0
+        mock_manager.store.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_content_hash_dedup(self, bus, mock_manager, mock_extractor):
+        mock_extractor.extract.return_value = [
+            {"content": "decision: use SQLite", "fact_type": "decision", "confidence": 0.9},
+        ]
+        agent = self._agent(bus, mock_manager, mock_extractor)
+
+        await bus.send(
+            new_message(
+                "caller",
+                "memento-1",
+                MessageKind.TASK_REQUEST,
+                {"op": "crystallize", "session_data": {"session_id": "s-1"}},
+            )
+        )
+        await bus.send(new_message("caller", "memento-1", MessageKind.SHUTDOWN, {}))
+        await agent.run()
+        assert mock_manager.store.call_count == 1
+
+        await bus.send(
+            new_message(
+                "caller",
+                "memento-1",
+                MessageKind.TASK_REQUEST,
+                {"op": "crystallize", "session_data": {"session_id": "s-2"}},
+            )
+        )
+        await bus.send(new_message("caller", "memento-1", MessageKind.SHUTDOWN, {}))
+        await agent.run()
+        assert mock_manager.store.call_count == 1  # Deduplicated
+
+    @pytest.mark.asyncio
+    async def test_tick_rate_limited(self, bus, mock_manager, mock_extractor):
+        mock_extractor.pending_sessions.return_value = [
+            {"session_id": f"sess-{i}", "project_id": "p"} for i in range(5)
+        ]
+        mock_extractor.extract.return_value = [
+            {"content": f"insight-unique-{i}", "fact_type": "pattern", "confidence": 0.8}
+            for i in range(1)
+        ]
+        agent = self._agent(bus, mock_manager, mock_extractor, targets=["supervisor"])
+        agent._max_sessions_per_tick = 2
+        await agent.tick()
+
+        assert mock_extractor.extract.call_count == 2
+        assert mock_extractor.mark_processed.call_count == 2
+
+        summaries = await _drain(bus, "supervisor")
+        assert len(summaries) == 1
+        report = summaries[0].payload["memento_report"]
+        assert report["sessions_processed"] == 2
+        assert report["sessions_skipped"] == 3
+
+    @pytest.mark.asyncio
+    async def test_confidence_mapping(self, bus, mock_manager, mock_extractor):
+        mock_extractor.extract.return_value = [
+            {"content": "high conf fact", "fact_type": "decision", "confidence": 0.97},
+        ]
+        agent = self._agent(bus, mock_manager, mock_extractor)
+        await bus.send(
+            new_message(
+                "caller",
+                "memento-1",
+                MessageKind.TASK_REQUEST,
+                {"op": "crystallize", "session_data": {"session_id": "conf-1"}},
+            )
+        )
+        await bus.send(new_message("caller", "memento-1", MessageKind.SHUTDOWN, {}))
+        await agent.run()
+
+        call_kwargs = mock_manager.store.call_args
+        meta = call_kwargs.kwargs.get("metadata") or call_kwargs[1].get("metadata", {})
+        assert meta["epistemic_level"] == "C5"
+        assert meta["confidence"] == 0.97
+
+    @pytest.mark.asyncio
+    async def test_status_enriched(self, bus, mock_manager, mock_extractor):
+        agent = self._agent(bus, mock_manager, mock_extractor)
+        await bus.send(
+            new_message(
+                "caller",
+                "memento-1",
+                MessageKind.TASK_REQUEST,
+                {"op": "status"},
+            )
+        )
+        await bus.send(new_message("caller", "memento-1", MessageKind.SHUTDOWN, {}))
+        await agent.run()
+
+        replies = await _drain(bus, "caller")
+        task_results = [r for r in replies if r.kind == MessageKind.TASK_RESULT]
+        result = next(r.payload.get("result", {}) for r in task_results if "result" in r.payload)
+        assert result["status"] == "ok"
+        assert "seen_hashes" in result
+        assert "max_sessions_per_tick" in result

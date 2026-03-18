@@ -406,32 +406,24 @@ class CommitPoet:
         # Build narrative fragments
         parts: list[str] = []
         if applied > 0:
-            verb = random.choice([
-                "sutured",
-                "cauterized",
-                "crystallized",
-                "forged",
-            ])
-            parts.append(
-                f"{applied} semantic breaches {verb} "
-                f"in the engine reactor"
+            verb = random.choice(
+                [
+                    "sutured",
+                    "cauterized",
+                    "crystallized",
+                    "forged",
+                ]
             )
+            parts.append(f"{applied} semantic breaches {verb} in the engine reactor")
         else:
-            parts.append(
-                "The swarm has sutured 0 semantic breaches "
-                "in the engine reactor"
-            )
+            parts.append("The swarm has sutured 0 semantic breaches in the engine reactor")
 
         emoji = "🩺" if applied == 0 else "⚡"
         notes: list[str] = []
         if rejected > 0:
-            notes.append(
-                f"{rejected} mutations resisted the forge"
-            )
+            notes.append(f"{rejected} mutations resisted the forge")
         if failed > 0:
-            notes.append(
-                f"{failed} anomalies defied remediation"
-            )
+            notes.append(f"{failed} anomalies defied remediation")
 
         suffix = ""
         if notes:

@@ -95,11 +95,13 @@ def list_running_apps() -> list[dict[str, str | int]]:
         # Only include apps with a bundle ID (skip background services)
         bundle = app.bundleIdentifier()
         if bundle:
-            result.append({
-                "name": app.localizedName() or "unknown",
-                "bundle_id": bundle,
-                "pid": app.processIdentifier(),
-            })
+            result.append(
+                {
+                    "name": app.localizedName() or "unknown",
+                    "bundle_id": bundle,
+                    "pid": app.processIdentifier(),
+                }
+            )
     return sorted(result, key=lambda a: str(a.get("name", "")).lower())
 
 
@@ -113,4 +115,3 @@ def wait_for_app(bundle_id: str, timeout: float = 10.0) -> int:
             return apps[0].processIdentifier()
         time.sleep(0.25)
     raise ActionFailed(f"App '{bundle_id}' did not start within {timeout}s.")
-
