@@ -1,5 +1,3 @@
-from typing import Optional
-
 """
 Sovereign Reporter Daemon — The Event Horizon (Ω-Dynamic SSE).
 Empuja telemetría hacia el dashboard en verdadero tiempo real usando
@@ -29,7 +27,7 @@ class ManifoldDaemon:
         self.db_path = db_path
         self.reporter = SovereignReporter(db_path)
         self.clients: set[weakref.ReferenceType[StreamResponse]] = set()
-        self._loop_task: Optional[asyncio.Task] = None
+        self._loop_task: asyncio.Task | None = None
 
     async def metrics_producer(self):
         """Generates metrics via Event Horizon on DB changes."""

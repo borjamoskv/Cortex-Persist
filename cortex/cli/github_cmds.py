@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 import os
-from typing import Optional
 
 import click
 from rich.panel import Panel
@@ -30,7 +29,7 @@ def github_cmds() -> None:
 @click.option("--owner", default="borjamoskv", help="GitHub user/org to scan")
 @click.option("--repo", default=None, help="Sync only this repo (name, not full path)")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
-def sync(token: Optional[str], owner: str, repo: Optional[str], db: str) -> None:
+def sync(token: str | None, owner: str, repo: str | None, db: str) -> None:
     """Sync GitHub Issues/PRs → CORTEX bridge facts."""
     if not token:
         token = os.environ.get("GITHUB_TOKEN")

@@ -1,5 +1,3 @@
-from typing import Optional
-
 from cortex.ledger.models import (
     ActionResult,
     ActionTarget,
@@ -12,17 +10,17 @@ def build_mac_maestro_event(
     *,
     action: str,
     app: str,
-    role: Optional[str],
-    title: Optional[str],
-    identifier: Optional[str],
+    role: str | None,
+    title: str | None,
+    identifier: str | None,
     ok: bool,
     latency_ms: int,
-    error: Optional[str] = None,
-    verified: Optional[bool] = None,
-    verification_error: Optional[str] = None,
-    intent: Optional[IntentPayload] = None,
-    correlation_id: Optional[str] = None,
-    trace_id: Optional[str] = None,
+    error: str | None = None,
+    verified: bool | None = None,
+    verification_error: str | None = None,
+    intent: IntentPayload | None = None,
+    correlation_id: str | None = None,
+    trace_id: str | None = None,
 ) -> LedgerEvent:
     return LedgerEvent.new(
         tool="mac_maestro",

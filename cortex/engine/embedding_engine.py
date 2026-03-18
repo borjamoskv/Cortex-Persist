@@ -8,7 +8,7 @@ from __future__ import annotations
 import json
 import logging
 import sqlite3
-from typing import Any, Optional, Protocol
+from typing import Any, Protocol
 
 import aiosqlite
 
@@ -26,8 +26,8 @@ class HDCMemoryProto(Protocol):
 
 
 class MemoryManagerProtocol(Protocol):
-    _hdc_encoder: Optional[HDCEncoderProto]
-    _hdc: Optional[HDCMemoryProto]
+    _hdc_encoder: HDCEncoderProto | None
+    _hdc: HDCMemoryProto | None
 
     def get_context_vector(self) -> Any: ...
 
@@ -40,8 +40,8 @@ async def embed_fact_async(
     fact_id: int,
     project: str,
     content: str,
-    embedder: Optional[EmbedderProtocol] = None,
-    memory_manager: Optional[MemoryManagerProtocol] = None,
+    embedder: EmbedderProtocol | None = None,
+    memory_manager: MemoryManagerProtocol | None = None,
     tenant_id: str = "default",
 ) -> None:
     """Generate and store embedding for a fact asynchronously."""

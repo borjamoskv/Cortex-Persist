@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import logging
 import sqlite3
-from typing import Any, Optional
+from typing import Any
 
 from cortex.engine.mixins.base import FACT_COLUMNS, FACT_JOIN, EngineMixinBase
 from cortex.memory.temporal import build_temporal_filter_params, time_travel_filter
@@ -35,8 +35,8 @@ class QueryMixin(EngineMixinBase):
     async def get_all_active_facts(
         self,
         tenant_id: str = "default",
-        project: Optional[str] = None,
-        fact_types: Optional[list[str]] = None,
+        project: str | None = None,
+        fact_types: list[str] | None = None,
     ) -> list[dict[str, Any]]:
         """Retrieve all active facts, optionally filtered by project or types."""
         tenant_id = self._resolve_tenant(tenant_id)
@@ -72,9 +72,9 @@ class QueryMixin(EngineMixinBase):
         self,
         query: str,
         tenant_id: str = "default",
-        project: Optional[str] = None,
+        project: str | None = None,
         top_k: int = 5,
-        as_of: Optional[str] = None,
+        as_of: str | None = None,
         **kwargs,
     ) -> list[SearchResult]:
         """Hybrid search combining vector similarity + FTS5 text matching.
@@ -95,7 +95,7 @@ class QueryMixin(EngineMixinBase):
         self,
         fact_id: int,
         tenant_id: str = "default",
-    ) -> Optional[dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """Retrieve a single active or deprecated fact by primary key."""
         tenant_id = self._resolve_tenant(tenant_id)
         async with self.session() as conn:
@@ -107,9 +107,9 @@ class QueryMixin(EngineMixinBase):
     async def recall(
         self,
         project: str,
-        limit: Optional[int] = None,
+        limit: int | None = None,
         tenant_id: str = "default",
-        fact_type: Optional[str] = None,
+        fact_type: str | None = None,
         offset: int = 0,
     ) -> list[dict[str, Any]]:
         """Bayesian-scored recall with temporal decay.
@@ -160,7 +160,7 @@ class QueryMixin(EngineMixinBase):
         self,
         project: str,
         tenant_id: str = "default",
-        as_of: Optional[str] = None,
+        as_of: str | None = None,
     ) -> list[dict[str, Any]]:
         """Full temporal audit trail — active, deprecated, and updated facts.
 
@@ -346,7 +346,7 @@ class QueryMixin(EngineMixinBase):
                 "db_path": str(getattr(self, "_db_path", "unknown")),
             }
 
-    async def graph(self, project: Optional[str] = None, tenant_id: str = "default"):
+    async def graph(self, project: str | None = None, tenant_id: str = "default"):
         """Get entity graph for a project."""
         tenant_id = self._resolve_tenant(tenant_id)
         from cortex.graph import get_graph
@@ -357,9 +357,9 @@ class QueryMixin(EngineMixinBase):
     async def query_entity(
         self,
         name: str,
-        project: Optional[str] = None,
+        project: str | None = None,
         tenant_id: str = "default",
-    ) -> Optional[dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """Query a specific entity by name."""
         tenant_id = self._resolve_tenant(tenant_id)
         from cortex.graph import query_entity

@@ -120,6 +120,13 @@ class SQLiteAdapter:
             logger.exception("SQLiteAdapter.commit failed")
             raise
 
+    async def rollback(self) -> None:
+        """Rollback the current transaction."""
+        try:
+            await self._conn.rollback()
+        except Exception:  # noqa: BLE001
+            logger.debug("SQLiteAdapter.rollback: connection may be closed or auto-committed")
+
     async def close(self) -> None:
         """Delegate close to the underlying connection.
 

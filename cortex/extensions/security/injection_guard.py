@@ -18,7 +18,7 @@ import logging
 import math
 import re
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger("cortex.extensions.security.injection_guard")
 
@@ -248,13 +248,13 @@ class InjectionGuard:
     )
 
     @staticmethod
-    def _is_trusted(source: Optional[str]) -> bool:
+    def _is_trusted(source: str | None) -> bool:
         """Check if source is in the trusted set."""
         if not source:
             return False
         return source in InjectionGuard.TRUSTED_SOURCES
 
-    def scan(self, content: str, source: Optional[str] = None) -> InjectionReport:
+    def scan(self, content: str, source: str | None = None) -> InjectionReport:
         """Full 5-layer synchronous scan of content (Fast Path).
 
         Returns InjectionReport with all matches and safety verdict.
@@ -375,7 +375,7 @@ class InjectionGuard:
                     )
                 )
 
-    def is_safe(self, content: str, source: Optional[str] = None) -> bool:
+    def is_safe(self, content: str, source: str | None = None) -> bool:
         """Fast-path safety check. Returns True only if no threats detected."""
         return self.scan(content, source=source).is_safe
 

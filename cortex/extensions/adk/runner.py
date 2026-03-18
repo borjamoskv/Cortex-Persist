@@ -16,7 +16,6 @@ import argparse
 import asyncio
 import logging
 import sys
-from typing import Optional
 
 __all__ = ["run_cli", "run_web", "main"]
 
@@ -67,7 +66,7 @@ def _parse_args() -> argparse.Namespace:
 
 
 async def _connect_toolbox(
-    server_url: Optional[str] = None,
+    server_url: str | None = None,
     toolset: str = "",
 ) -> list:
     """Attempt to connect to an MCP Toolbox server and return its tools.
@@ -115,8 +114,8 @@ async def _connect_toolbox(
 
 def run_cli(
     agent_name: str = "sovereign",
-    model: Optional[str] = None,
-    toolbox_url: Optional[str] = None,
+    model: str | None = None,
+    toolbox_url: str | None = None,
     toolbox_toolset: str = "",
 ) -> None:
     """Run a CORTEX agent in interactive CLI mode."""

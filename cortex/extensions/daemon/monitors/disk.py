@@ -9,7 +9,6 @@ from __future__ import annotations
 import logging
 import time
 from pathlib import Path
-from typing import Optional
 
 from cortex.extensions.daemon.models import CORTEX_DIR, DEFAULT_DISK_WARN_MB, DiskAlert
 
@@ -34,7 +33,7 @@ class DiskMonitor:
         self.watch_path = watch_path
         self.threshold_mb = threshold_mb
         self._cache_ttl = cache_ttl_seconds
-        self._cached_size_mb: Optional[float] = None
+        self._cached_size_mb: float | None = None
         self._cache_ts: float = 0.0
 
     def check(self) -> list[DiskAlert]:

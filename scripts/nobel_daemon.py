@@ -11,25 +11,28 @@ Axiomas: Ω₁₃ (Termodinámica Computacional), Ω₇ (Zero-Prompting).
 import asyncio
 import logging
 from typing import Any
-from fastapi import FastAPI
+
 import uvicorn
+from fastapi import FastAPI
 
 # Simulación de librerías CORTEX internas
 try:
     from cortex.engine import CortexEngine
 except ImportError:
+
     class CortexEngine:
         pass
 
+
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s | NOBEL-Ω | %(levelname)s | %(message)s'
+    level=logging.INFO, format="%(asctime)s | NOBEL-Ω | %(levelname)s | %(message)s"
 )
 logger = logging.getLogger("NOBEL-Ω")
 
+
 class NobelSwarmOrchestrator:
     """Controlador Meta-Agente NOBEL-Ω."""
-    
+
     def __init__(self, db_path: str = "cortex.db"):
         self.db_path = db_path
         self.engine = CortexEngine()
@@ -53,7 +56,9 @@ class NobelSwarmOrchestrator:
             self.last_exergy = exergy
             if exergy >= 90.0:
                 self.total_anomalies_detected += 1
-                logger.info(f"Anomalía Exergética Detectada: {exergy:.1f}. Despertando Swarm sobre [{paper['id']}].")
+                logger.info(
+                    f"Anomalía Exergética Detectada: {exergy:.1f}. Despertando Swarm sobre [{paper['id']}]."
+                )
                 self.state = "Swarm-Assault"
                 await self._orchestrate_swarm(paper)
         self.state = "Void-State"
@@ -65,30 +70,43 @@ class NobelSwarmOrchestrator:
 
     async def _orchestrate_swarm(self, paper: dict[str, Any]):
         logger.info(f"Comenzando asalto Z3-SMT (hilbert-omega) sobre {paper['id']}...")
-        await asyncio.sleep(1) # Simulated compute
+        await asyncio.sleep(1)  # Simulated compute
         if not paper.get("solvable", True):
             logger.warning("Ficción estocástica detectada. Aniquilación epistémica ejecutada.")
             return
 
-        logger.info(f"Comenzando Inquisición de Alucinación (julio-cortazar-omega)...")
+        logger.info("Comenzando Inquisición de Alucinación (julio-cortazar-omega)...")
         await asyncio.sleep(1)
 
         logger.info(f"Cristalizando Fact C5-Dynamic en Master Ledger. Hash: {hash(paper['id'])}")
-        logger.info(f"Autogeneración Ouroboros iniciada: Generando nuevo agente a partir del Paper.")
+        logger.info("Autogeneración Ouroboros iniciada: Generando nuevo agente a partir del Paper.")
 
     async def _ingest_frontier_vectors(self) -> list[dict[str, Any]]:
         return [
-            {"id": "arxiv:2603.9999", "citation_velocity": 0.98, "entropy_delta": -1.2, "solvable": True},
-            {"id": "arxiv:2603.8888", "citation_velocity": 0.40, "entropy_delta": -0.5, "solvable": False}
+            {
+                "id": "arxiv:2603.9999",
+                "citation_velocity": 0.98,
+                "entropy_delta": -1.2,
+                "solvable": True,
+            },
+            {
+                "id": "arxiv:2603.8888",
+                "citation_velocity": 0.40,
+                "entropy_delta": -0.5,
+                "solvable": False,
+            },
         ]
+
 
 app = FastAPI(title="NOBEL-Ω Telemetry", version="5.1.0")
 daemon = NobelSwarmOrchestrator()
+
 
 @app.on_event("startup")
 async def startup_event():
     # Despertamos el hilo del daemon en background paralelo a FastAPI
     asyncio.create_task(daemon.run_nightshift())
+
 
 @app.get("/telemetry")
 async def get_telemetry():
@@ -97,8 +115,9 @@ async def get_telemetry():
         "status": daemon.state,
         "last_exergy_read": daemon.last_exergy,
         "total_crystalline_anomalies": daemon.total_anomalies_detected,
-        "axiom_compliance": ["Ω7 (Nightshift)", "Ω13 (Exergy Gate)", "AX-033 (Z3 Epistemic)"]
+        "axiom_compliance": ["Ω7 (Nightshift)", "Ω13 (Exergy Gate)", "AX-033 (Z3 Epistemic)"],
     }
+
 
 if __name__ == "__main__":
     logger.info("Arrancando Servidor NOBEL-Ω HTTP Telemetry en port 8099...")

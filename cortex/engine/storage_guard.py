@@ -56,7 +56,6 @@ _ALLOWED_FACT_TYPES: frozenset[str] = frozenset(
         "evolution",
         "test",
         "system_health",
-        "reflection",
     }
 )
 
@@ -70,7 +69,6 @@ _ALLOWED_CONFIDENCE: frozenset[str] = frozenset(
         "stated",
         "inferred",
         "verified",
-        "confirmed",
     }
 )
 

@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Optional
 
 from cortex.extensions.genesis.models import ComponentSpec, SystemSpec
 from cortex.extensions.genesis.templates import TemplateRegistry
@@ -29,7 +28,7 @@ class SystemAssembler:
     4. Writes files atomically (write to temp, then rename).
     """
 
-    def __init__(self, registry: Optional[TemplateRegistry] = None) -> None:
+    def __init__(self, registry: TemplateRegistry | None = None) -> None:
         self.registry = registry or TemplateRegistry()
 
     def assemble(self, spec: SystemSpec, base_dir: Path) -> tuple[list[str], list[str]]:

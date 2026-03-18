@@ -12,7 +12,7 @@ Telescope Inversion:
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 from cortex.extensions.hypervisor.compressor import ComplexityCompressor
 from cortex.extensions.hypervisor.handle import AgentHandle
@@ -78,9 +78,9 @@ class AgencyHypervisor:
         project: str,
         content: str,
         fact_type: str = "knowledge",
-        source: Optional[str] = None,
-        tags: Optional[list[str]] = None,
-        meta: Optional[dict[str, Any]] = None,
+        source: str | None = None,
+        tags: list[str] | None = None,
+        meta: dict[str, Any] | None = None,
     ) -> Receipt:
         """The real remember() — store + compress + project side-effects."""
         isolator = self._isolators[tenant]

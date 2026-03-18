@@ -20,7 +20,7 @@ from __future__ import annotations
 import hashlib
 import logging
 import struct
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger("cortex.semantic_hash")
 
@@ -118,7 +118,7 @@ def _hash_quantized(quantized: list[float]) -> str:
 
 def semantic_fingerprint(
     text: str,
-    embedder: Optional[Any] = None,
+    embedder: Any | None = None,
 ) -> SemanticFingerprint:
     """Generate a deterministic semantic fingerprint for text.
 
@@ -212,7 +212,7 @@ def is_semantically_equivalent(
 
 def batch_fingerprint(
     texts: list[str],
-    embedder: Optional[Any] = None,
+    embedder: Any | None = None,
 ) -> list[SemanticFingerprint]:
     """Generate fingerprints for multiple texts in a single batch.
 

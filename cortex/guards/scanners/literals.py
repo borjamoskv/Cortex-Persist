@@ -1,11 +1,10 @@
 import ast
 from pathlib import Path
-from typing import Optional
 
 from cortex.guards.models import ORACLE_BINARIES
 
 
-def oracle_in_str(value: str) -> Optional[str]:
+def oracle_in_str(value: str) -> str | None:
     """Return oracle name if found in string, else None."""
     lower = value.lower()
     for oracle in ORACLE_BINARIES:
@@ -65,7 +64,7 @@ def scan_variable_name(node: ast.Name) -> list[str]:
 
 class LiteralsScanner:
     """Scanner for oracle references in string literals and variables."""
-    
+
     def scan(self, node: ast.AST) -> list[tuple[int, str, str]]:
         results = []
         if isinstance(node, ast.Constant) and isinstance(node.value, str):

@@ -7,7 +7,7 @@ Integrates with drift monitoring for post-prune topological health assessment.
 from __future__ import annotations
 
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from cortex.memory.engrams import CortexSemanticEngram
 
@@ -26,7 +26,7 @@ class EntropyPruner:
         self._vs = vector_store
         self._atp_threshold = atp_threshold
 
-    async def prune_cycle(self, tenant_id: str, project_id: Optional[str] = None) -> int:
+    async def prune_cycle(self, tenant_id: str, project_id: str | None = None) -> int:
         """Execute a circadian pruning cycle on the Vector Store.
 
         Returns the number of pruned engrams.
@@ -70,9 +70,7 @@ class EntropyPruner:
 
         return False
 
-    async def _post_prune_drift_check(
-        self, tenant_id: str, project_id: Optional[str] = None
-    ) -> None:
+    async def _post_prune_drift_check(self, tenant_id: str, project_id: str | None = None) -> None:
         """Run non-blocking drift health check after pruning."""
         import importlib.util
 
@@ -164,7 +162,7 @@ class HomeostaticScaler:
     async def scale(
         self,
         tenant_id: str,
-        project_id: Optional[str] = None,
+        project_id: str | None = None,
     ) -> dict[str, Any]:
         """Apply multiplicative homeostatic scaling to all engrams.
 

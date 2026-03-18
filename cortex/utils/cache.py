@@ -16,7 +16,7 @@ import time
 from collections import OrderedDict
 from collections.abc import Callable
 from enum import Enum
-from typing import Any, Generic, Optional, TypeVar, final
+from typing import Any, Generic, TypeVar, final
 
 T = TypeVar("T")
 
@@ -59,7 +59,7 @@ class SovereignCache(Generic[T]):
         self,
         maxsize: int = 1000,
         ttl: float = 3600.0,
-        on_evict: Optional[Callable[[str, T, str, int], Any]] = None,
+        on_evict: Callable[[str, T, str, int], Any] | None = None,
     ) -> None:
         """
         Args:
@@ -78,7 +78,7 @@ class SovereignCache(Generic[T]):
         self._evidence_hash = hashlib.sha256(b"CORTEX_GENESIS_VOID").hexdigest()
         self._eviction_count = 0
 
-    async def get(self, key: str, default: Optional[T] = None) -> Optional[T]:
+    async def get(self, key: str, default: T | None = None) -> T | None:
         """Get value with LRU refresh and TTL check."""
         async with self._lock:
             if key not in self._cache:
@@ -95,7 +95,7 @@ class SovereignCache(Generic[T]):
             self._cache.move_to_end(key)
             return value
 
-    async def set(self, key: str, value: T, ttl_override: Optional[float] = None) -> None:
+    async def set(self, key: str, value: T, ttl_override: float | None = None) -> None:
         """Insert value, triggering eviction if capacity reached."""
         expiry = time.monotonic() + (ttl_override or self._ttl)
 

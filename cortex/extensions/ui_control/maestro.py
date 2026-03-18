@@ -2,15 +2,14 @@
 MaestroUI — Orquestador soberano de control de escritorio macOS.
 
 Integra todos los motores (Accessibility, Keyboard, Mouse, Window, Vision)
-en una interfaz unificada con lógica de reintento y verificación cognitiva.
+en una interfaz unificada con lógica de reintento.
 """
 
 from __future__ import annotations
 
 import asyncio
 import logging
-from collections.abc import Callable
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from cortex.extensions.ui_control.accessibility import AccessibilityEngine
 from cortex.extensions.ui_control.applescript import (
@@ -37,16 +36,17 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger("cortex.extensions.ui_control.maestro")
 
+# Constantes de reintentos
 MAX_RETRIES = 3
-RETRY_DELAY = 0.5
+RETRY_DELAY = 0.5  # segundos
 
 
 class MaestroUI:
     """
     Orquestador de automatización de escritorio macOS.
 
-    Combina todos los sub-motores bajo una API unificada con reintentos
-    y soporte para Oráculos de Verificación.
+    Combina todos los sub-motores (accessibility, keyboard, mouse, window, vision)
+    bajo una API unificada con reintentos automáticos.
     """
 
     def __init__(self, engine: CortexEngine | None = None) -> None:
@@ -61,10 +61,10 @@ class MaestroUI:
 
     async def _retry(
         self,
-        coro_fn: Callable,
-        *args: Any,
+        coro_fn,  # noqa: ANN001
+        *args,
         retries: int = MAX_RETRIES,
-        **kwargs: Any,
+        **kwargs,  # noqa: ANN003
     ) -> InteractionResult:
         """Ejecuta una coroutine con reintentos automáticos."""
         last_error = ""
@@ -139,7 +139,7 @@ class MaestroUI:
     async def type_text(
         self, text: str, target: AppTarget | None = None, delay: float = 0.05
     ) -> InteractionResult:
-        """Escribe texto directamente o vía portapapeles."""
+        """Escribe texto (clipboard para cadenas largas, keystroke para cortas)."""
         return await self.keyboard.type_text(text, target=target, delay=delay)
 
     async def press_special(
@@ -168,8 +168,10 @@ class MaestroUI:
 
     def drag(
         self,
-        from_x: int, from_y: int,
-        to_x: int, to_y: int,
+        from_x: int,
+        from_y: int,
+        to_x: int,
+        to_y: int,
         duration: float = 0.5,
     ) -> InteractionResult:
         """Drag-and-drop interpolado."""
@@ -177,10 +179,6 @@ class MaestroUI:
 
     def move_cursor(self, x: int, y: int) -> InteractionResult:
         """Mueve el cursor a coordenadas."""
-        return self.mouse.move(x, y)
-
-    def move(self, x: int, y: int) -> InteractionResult:
-        """Mueve el cursor a coordenadas (alias de move_cursor)."""
         return self.mouse.move(x, y)
 
     def scroll(self, clicks: int) -> InteractionResult:
@@ -243,94 +241,11 @@ class MaestroUI:
         """Lee el clipboard."""
         return await get_clipboard()
 
-    # ─── Acciones de alto nivel ─────────────────────────────────
-
-    async def activate_app(self, target: AppTarget) -> InteractionResult:
-        """Activa y trae al frente una aplicación macOS."""
-        try:
-            script = f'tell application "{target.name}" to activate'
-            await run_applescript(script)
-            return InteractionResult(success=True)
-        except Exception as exc:
-            return InteractionResult(success=False, error=str(exc))
-
-    async def inject_keystroke(
-        self,
-        target: AppTarget,
-        key: str,
-        modifiers: list[str] | None = None,
-    ) -> InteractionResult:
-        """Inyecta un keystroke en una aplicación."""
-        if not await is_app_running(target.name):
-            return InteractionResult(success=False, error=f"{target.name} is not running")
-
-        using = f" using {{{', '.join(modifiers)}}}" if modifiers else ""
-        script = (
-            f'tell application "{target.name}" to activate\n'
-            f"tell application \"System Events\"\n"
-            f"    tell process \"{target.name}\"\n"
-            f'        keystroke "{key}"{using}\n'
-            f"    end tell\n"
-            f"end tell"
-        )
-        try:
-            await run_applescript(script)
-            return InteractionResult(success=True)
-        except Exception as exc:
-            return InteractionResult(success=False, error=str(exc))
-
-    async def click_menu_item(self, target: AppTarget, menu_path: list[str]) -> InteractionResult:
-        """Navega y pulsa un elemento de menú por ruta jerárquica."""
-        if len(menu_path) < 2:  # noqa: PLR2004
-            msg = "menu_path must have at least 2 elements (menu + item)"
-            return InteractionResult(success=False, error=msg)
-
-        menu_name = menu_path[0]
-        item_ref = f'menu item "{menu_path[-1]}"'
-        for submenu in reversed(menu_path[1:-1]):
-            item_ref = f'menu item "{submenu}" of menu "{submenu}" of {item_ref}'
-
-        item_ref = f"{item_ref} of menu \"{menu_name}\""
-        script = (
-            f'tell application "{target.name}" to activate\n'
-            f"tell application \"System Events\"\n"
-            f"    tell process \"{target.name}\"\n"
-            f"        click {item_ref} of menu bar item \"{menu_name}\" of menu bar 1\n"
-            f"    end tell\n"
-            f"end tell"
-        )
-        try:
-            await run_applescript(script)
-            return InteractionResult(success=True)
-        except Exception as exc:
-            return InteractionResult(success=False, error=str(exc))
-
     # ─── Visión ─────────────────────────────────────────────────
 
-    async def screenshot(self, output_path: str | None = None) -> InteractionResult:
-        """Captura pantalla y devuelve un InteractionResult con la ruta."""
-        return self.vision.capture_screen()
-
-    # ─── Verificación Cognitiva ─────────────────────────────────
-
-    def verify_state(
-        self,
-        rescan_fn: Callable[[], Any],
-        matcher_fn: Callable[[Any], bool],
-    ) -> Any:
-        """
-        Verifica el estado actual mediante un Oráculo de Verificación.
-        Retorna OracleVerdict (vía import dinámico para evitar circulares).
-        """
-        from cortex.mac_maestro.oracle import VerificationOracle
-        oracle = VerificationOracle(rescan_fn, matcher_fn)
-        return oracle.verify()
-
-    def create_element_verifier(
-        self, app_name: str, title: str, exists: bool = True
-    ) -> Callable[[], bool]:
-        """Crea un matcher simple para verificar presencia de elementos AX."""
-        def matcher(_: Any) -> bool:
-            el = self.find_element_by_title(app_name, title)
-            return (el is not None) == exists
-        return matcher
+    async def screenshot(self, output_path: str | None = None) -> str | None:
+        """Captura pantalla y devuelve la ruta al archivo."""
+        result = self.vision.capture_screen()
+        if result.success:
+            return result.output
+        return None

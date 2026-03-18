@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 import time
-from typing import Optional
 
 from cortex.ledger.models import IntentPayload
 from cortex.ledger.writer import LedgerWriter
@@ -61,7 +60,7 @@ class MaestroExecutor:
     def execute_intent(
         self,
         intent: MacIntent,
-        oracle: Optional[VerificationOracle] = None,
+        oracle: VerificationOracle | None = None,
         apply_safety_gate: bool = True,
     ) -> list[str]:
         """

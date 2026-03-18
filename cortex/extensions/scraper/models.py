@@ -9,7 +9,6 @@ import enum
 import hashlib
 import time
 from dataclasses import dataclass, field
-from typing import Optional
 
 
 class ExtractionStrategy(enum.Enum):
@@ -60,7 +59,7 @@ class ScrapeResult:
     strategy_used: ExtractionStrategy
     elapsed_ms: float
     status: str = "success"
-    error: Optional[str] = None
+    error: str | None = None
     metadata: dict = field(default_factory=dict)
 
     @staticmethod
@@ -76,7 +75,7 @@ class ScrapeResult:
         content: str,
         strategy: ExtractionStrategy,
         elapsed_ms: float,
-        metadata: Optional[dict] = None,
+        metadata: dict | None = None,
     ) -> ScrapeResult:
         """Factory for successful extractions."""
         return cls(
@@ -130,7 +129,7 @@ class ScrapeJob:
     results: list[ScrapeResult] = field(default_factory=list)
     checkpoint_index: int = 0
     created_at: float = field(default_factory=time.time)
-    completed_at: Optional[float] = None
+    completed_at: float | None = None
     strategy: ExtractionStrategy = ExtractionStrategy.AUTO
 
     @property

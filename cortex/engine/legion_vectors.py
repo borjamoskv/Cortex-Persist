@@ -222,7 +222,9 @@ class VaultCracker:
                     "VaultCracker: Malleability attack succeeded (authentication failed)."
                 )
             except Exception:  # noqa: BLE001 — expected decryption failure
-                pass  # Success = Tag caught it
+                logger.debug(
+                    "VaultCracker: Expected decryption failure caught (Tamper detection OK)"
+                )
 
         except Exception as e:  # noqa: BLE001 — attack vector execution boundary
             logger.debug("VaultCracker error: %s", e)

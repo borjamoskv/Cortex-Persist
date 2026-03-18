@@ -9,7 +9,7 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import logging
-from typing import Optional, TypedDict, cast
+from typing import TypedDict, cast
 
 from pydantic import BaseModel, Field
 
@@ -136,7 +136,7 @@ class CentauroEngine:
         self,
         squad: dict[str, VirtualAgent],
         mission: str,
-    ) -> tuple[Optional[str], int]:
+    ) -> tuple[str | None, int]:
         """Execute agents and race for Byzantine consensus (Ω₃ Quorum).
 
         Returns:

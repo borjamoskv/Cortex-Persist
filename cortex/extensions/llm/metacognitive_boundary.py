@@ -34,7 +34,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 from cortex.memory.metamemory import MemoryCard, MetaJudgment, Verdict
 
@@ -120,8 +120,8 @@ def build_metacognitive_context(
     *,
     verdict: Verdict,
     judgment: MetaJudgment,
-    memory_cards: Optional[list[MemoryCard]] = None,
-    knowledge_gaps: Optional[list[str]] = None,
+    memory_cards: list[MemoryCard] | None = None,
+    knowledge_gaps: list[str] | None = None,
 ) -> MetacognitiveContext:
     """Compose a MetacognitiveContext from metamemory outputs.
 
@@ -314,7 +314,7 @@ def verify_retrieval_plan_declared(response: str) -> bool:
     return declared
 
 
-def extract_declared_confidence(response: str) -> Optional[float]:
+def extract_declared_confidence(response: str) -> float | None:
     """Extract the declared confidence from the retrieval plan block.
 
     Returns float in [0.0, 1.0] or None if not found/parseable.

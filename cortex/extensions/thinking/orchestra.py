@@ -30,7 +30,7 @@ import logging
 import os
 import random
 import time
-from typing import Any, Optional
+from typing import Any
 
 from cortex.extensions.llm._presets import load_presets
 from cortex.extensions.llm.provider import LLMProvider
@@ -86,18 +86,18 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
 
     def __init__(
         self,
-        config: Optional[OrchestraConfig] = None,
-        routing: Optional[dict[str, list[tuple[str, str]]]] = None,
+        config: OrchestraConfig | None = None,
+        routing: dict[str, list[tuple[str, str]]] | None = None,
     ):
         self.config = config or OrchestraConfig()
         self._routing = routing or DEFAULT_ROUTING
         self._pool = ProviderPool()
-        self._fusion: Optional[ThoughtFusion] = None
-        self._judge: Optional[LLMProvider] = None
+        self._fusion: ThoughtFusion | None = None
+        self._judge: LLMProvider | None = None
         self._semantic_router = SemanticRouter()
         self._initialized = False
         self._history: list[ThinkingRecord] = []
-        self._available_cache: Optional[list[str]] = None
+        self._available_cache: list[str] | None = None
 
     # ── Lifecycle ────────────────────────────────────────────────
 
@@ -143,7 +143,7 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
             if not preset.get("env_key") or os.environ.get(preset["env_key"])
         ]
 
-    def _find_judge(self, available: list[str]) -> Optional[LLMProvider]:
+    def _find_judge(self, available: list[str]) -> LLMProvider | None:
         """Encuentra el mejor provider disponible para actuar como juez."""
         judge_name = self.config.judge_provider
         if judge_name and judge_name in available:
@@ -248,8 +248,8 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
         attempt: int,
         attempts: int,
         mode: str = "deep_reasoning",
-        temperature: Optional[float] = None,
-    ) -> tuple[Optional[ModelResponse], Optional[str]]:
+        temperature: float | None = None,
+    ) -> tuple[ModelResponse | None, str | None]:
         """Ejecuta un único intento de consulta, manejando fallos y timeouts."""
         try:
             provider = self._pool.get(provider_name, model)
@@ -324,11 +324,11 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
         prompt: str,
         system: str,
         mode: str = "deep_reasoning",
-        temperature: Optional[float] = None,
+        temperature: float | None = None,
     ) -> ModelResponse:
         """Consulta un modelo individual con timeout y retry."""
         start = time.monotonic()
-        last_error: Optional[str] = None
+        last_error: str | None = None
         attempts = 2 if self.config.retry_on_failure else 1
 
         for attempt in range(attempts):
@@ -371,8 +371,8 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
         self,
         prompt: str,
         mode: str = "deep_reasoning",
-        system: Optional[str] = None,
-        strategy: Optional[FusionStrategy | str] = None,
+        system: str | None = None,
+        strategy: FusionStrategy | str | None = None,
     ) -> FusedThought:
         """Pensamiento multi-modelo con fusión.
 

@@ -24,7 +24,7 @@ import shutil
 import signal
 import subprocess
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger("cortex.mcp.toolbox_watchdog")
 
@@ -65,19 +65,19 @@ class ToolboxWatchdog:
     def __init__(
         self,
         port: int = _DEFAULT_PORT,
-        tools_yaml: Optional[Path] = None,
-        db_path: Optional[Path] = None,
+        tools_yaml: Path | None = None,
+        db_path: Path | None = None,
     ) -> None:
         self._port = port
         self._tools_yaml = tools_yaml or _TOOLS_YAML
         self._db_path = db_path or Path(
             os.environ.get("CORTEX_DB", str(_DEFAULT_DB)),
         )
-        self._process: Optional[subprocess.Popen[bytes]] = None
+        self._process: subprocess.Popen[bytes] | None = None
         self._backoff = _INITIAL_BACKOFF_S
         self._restart_count = 0
         self._shutdown = False
-        self._log_fd: Optional[Any] = None
+        self._log_fd: Any | None = None
 
     # ── Public API ────────────────────────────────────────────────
 
@@ -152,7 +152,7 @@ class ToolboxWatchdog:
 
     # ── Internals ─────────────────────────────────────────────────
 
-    def _find_binary(self) -> Optional[str]:
+    def _find_binary(self) -> str | None:
         """Locate genai-toolbox in PATH or ~/go/bin."""
         found = shutil.which("genai-toolbox")
         if found:

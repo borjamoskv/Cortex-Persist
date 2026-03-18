@@ -144,9 +144,7 @@ class LLMProvider(BaseProvider):
 
         if not self._api_key:
             # Some providers like Ollama don't need keys
-            if provider not in [
-                "ollama", "lmstudio", "llamacpp", "vllm", "jan", "grok_local"
-            ]:
+            if provider not in ["ollama", "lmstudio", "llamacpp", "vllm", "jan"]:
                 msg_base = f"LLM provider '{provider}' requires an API key "
                 msg = msg_base + f"(api_key argument or {env_key} env var)"
                 raise ValueError(msg)

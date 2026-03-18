@@ -11,7 +11,6 @@ from __future__ import annotations
 import asyncio
 import os
 from pathlib import Path
-from typing import Optional
 
 import click
 from rich.console import Console
@@ -94,7 +93,7 @@ async def _ingest_and_organize(path: Path) -> str:
 @bibliotecario_cmds.command("ordenar")
 @click.argument("path", type=click.Path(exists=True))
 @click.option("--output", "-o", help="Output file path for the organized memo")
-def ordenar(path: str, output: Optional[str]):
+def ordenar(path: str, output: str | None):
     """Ingest a file or directory and output a structured CORTEX Memo."""
     target_path = Path(path)
 

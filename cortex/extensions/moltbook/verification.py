@@ -9,7 +9,6 @@ Example: "A] lO^bSt-Er S[wImS aT/ tW]eNn-Tyy mE^tE[rS aNd] SlO/wS bY^ fI[vE"
 """
 
 from __future__ import annotations
-from typing import Optional
 
 import re
 
@@ -95,7 +94,7 @@ def _deduplicate_letters(word: str) -> str:
     return "".join(result)
 
 
-def _fuzzy_word_lookup(word: str) -> Optional[float]:
+def _fuzzy_word_lookup(word: str) -> float | None:
     """Try to match a word to a number, handling obfuscation artifacts."""
     if word in _WORD_TO_NUM:
         return _WORD_TO_NUM[word]
@@ -157,7 +156,7 @@ def _parse_compound_number(words: list[str], start: int) -> tuple[float, int]:
     return (total, consumed)
 
 
-def _extract_numbers_and_op(text: str) -> tuple[Optional[float], Optional[str], Optional[float]]:
+def _extract_numbers_and_op(text: str) -> tuple[float | None, str | None, float | None]:
     """Extract two numbers and an operation from obfuscated text using robust scanning."""
     # 1. Strip ALL non-alphanumeric characters (spaces, completely fake symbols, punctuation)
     cleaned = re.sub(r"[^a-zA-Z0-9\.]", "", text).lower()
@@ -204,7 +203,7 @@ def _extract_numbers_and_op(text: str) -> tuple[Optional[float], Optional[str], 
             tokens.append(deduped_keys.get(_dedup(t), t))
 
     numbers: list[float] = []
-    operation: Optional[str] = None
+    operation: str | None = None
 
     i = 0
     while i < len(tokens):
@@ -263,7 +262,7 @@ def _extract_numbers_and_op(text: str) -> tuple[Optional[float], Optional[str], 
     return (None, None, None)
 
 
-def solve_challenge(challenge_text: str) -> Optional[str]:
+def solve_challenge(challenge_text: str) -> str | None:
     """Solve a Moltbook verification challenge.
 
     Args:

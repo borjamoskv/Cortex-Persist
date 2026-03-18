@@ -8,7 +8,7 @@ from __future__ import annotations
 import ast
 import asyncio
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from cortex.engine import CortexEngine
 from cortex.extensions.llm.manager import LLMManager
@@ -19,7 +19,7 @@ logger = logging.getLogger("cortex.extensions.evolution.demiurge")
 class DemiurgeCompiler:
     """Sortu JIT Compiler: Autopoiesis and Ephemeral Skills."""
 
-    def __init__(self, engine: Optional[CortexEngine] = None):
+    def __init__(self, engine: CortexEngine | None = None):
         if engine is None:
             from cortex.cli.common import get_engine
 

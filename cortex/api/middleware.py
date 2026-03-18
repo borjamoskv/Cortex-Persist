@@ -354,7 +354,7 @@ class ImmuneMiddleware(BaseHTTPMiddleware):
 class OmegaVerificationMiddleware(BaseHTTPMiddleware):
     """
     AR.IO Style Verification Middleware (Sovereign Resurrection).
-    
+
     Injects the X-Omega-Verification header into HTTP responses. This header
     advertises the highest confirmed Arweave TX ID (snapshot) to clients,
     proving that CORTEX is deterministically secured in the weave.
@@ -362,11 +362,11 @@ class OmegaVerificationMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next):
         response = await call_next(request)
-        
+
         # In a fully integrated swarm, the daemon sets the latest tx_id globally
         # or it is fetched from the CausalGraph.
         last_tx = getattr(request.app.state, "last_omega_tx", "genesis-snapshot")
-        
+
         response.headers["X-Omega-Verification"] = str(last_tx)
-        
+
         return response

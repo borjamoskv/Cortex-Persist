@@ -86,10 +86,10 @@ def _lagrange_interpolate_at_zero(shares: list[tuple[int, int]]) -> int:
 class Share:
     """One Shamir share of a split secret."""
 
-    index: int           # 1-based share index (x-coordinate)
-    threshold: int       # k — minimum shares to reconstruct
-    n_total: int         # n — total shares produced
-    payload_hex: str     # hex-encoded share bytes (one per secret byte)
+    index: int  # 1-based share index (x-coordinate)
+    threshold: int  # k — minimum shares to reconstruct
+    n_total: int  # n — total shares produced
+    payload_hex: str  # hex-encoded share bytes (one per secret byte)
 
     @property
     def payload_bytes(self) -> bytes:
@@ -157,9 +157,7 @@ def reconstruct_secret(shares: list[Share]) -> bytes:
 
     k = shares[0].threshold
     if len(shares) < k:
-        raise ValueError(
-            f"Need at least {k} shares to reconstruct, got {len(shares)}"
-        )
+        raise ValueError(f"Need at least {k} shares to reconstruct, got {len(shares)}")
 
     # Validate consistency
     n_bytes = len(shares[0].payload_bytes)
@@ -180,6 +178,7 @@ def reconstruct_secret(shares: list[Share]) -> bytes:
 # ---------------------------------------------------------------------------
 # Convenience: secure random bytes (re-exported for callers)
 # ---------------------------------------------------------------------------
+
 
 def random_key(length: int = 32) -> bytes:
     """Generate cryptographically secure random bytes."""

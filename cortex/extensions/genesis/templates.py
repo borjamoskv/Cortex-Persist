@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import logging
 from collections.abc import Callable
-from typing import Optional
 
 from cortex.extensions.genesis.models import ComponentSpec
 from cortex.extensions.genesis.renderers import (
@@ -169,7 +168,7 @@ class TemplateRegistry:
         self._templates[template.name] = template
         logger.debug("Registered template: %s", template.name)
 
-    def get(self, name: str) -> Optional[SystemTemplate]:
+    def get(self, name: str) -> SystemTemplate | None:
         """Get a template by name."""
         return self._templates.get(name)
 

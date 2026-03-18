@@ -17,7 +17,7 @@ import logging
 import sqlite3
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
-from typing import TYPE_CHECKING, Final, Optional
+from typing import TYPE_CHECKING, Final
 
 from cortex.extensions.episodic.main import Episode, EpisodicMemory, Pattern
 from cortex.memory.temporal import now_iso
@@ -60,14 +60,14 @@ class BootPayload:
     """Complete session boot payload."""
 
     timestamp: str
-    active_project: Optional[str]
+    active_project: str | None
     confidence: str
     episodes: list[Episode]
     patterns: list[Pattern]
     reflections: list[dict]
     summary: str
     total_episodes: int
-    semantic_recalls: Optional[list[dict]] = None  # L2 vector results
+    semantic_recalls: list[dict] | None = None  # L2 vector results
 
     def to_dict(self) -> dict:
         result = {
@@ -146,7 +146,7 @@ def _render_reflections(lines: list[str], reflections: list[dict]) -> None:
     lines.append("")
 
 
-def _render_semantic_recalls(lines: list[str], recalls: Optional[list[dict]]) -> None:
+def _render_semantic_recalls(lines: list[str], recalls: list[dict] | None) -> None:
     """Append L2 semantic recall entries to the markdown output."""
     if not recalls:
         return
@@ -164,7 +164,7 @@ def _render_semantic_recalls(lines: list[str], recalls: Optional[list[dict]]) ->
 
 async def generate_session_boot(
     conn: aiosqlite.Connection,
-    project_hint: Optional[str] = None,
+    project_hint: str | None = None,
     top_k: int = 10,
     lookback_hours: int = DEFAULT_LOOKBACK_HOURS,
 ) -> BootPayload:
@@ -232,7 +232,7 @@ async def generate_session_boot(
 
 async def _get_reflections(
     conn: aiosqlite.Connection,
-    project: Optional[str],
+    project: str | None,
     top_k: int = 5,
 ) -> list[dict]:
     """Retrieve recent reflections from facts table (best-effort)."""
@@ -276,8 +276,8 @@ async def _get_reflections(
 
 async def _get_context_inference(
     conn: aiosqlite.Connection,
-    project_hint: Optional[str],
-) -> tuple[Optional[str], str, str]:
+    project_hint: str | None,
+) -> tuple[str | None, str, str]:
     """Get latest context inference snapshot (best-effort).
 
     Returns:
@@ -303,9 +303,9 @@ async def _get_context_inference(
 
 
 async def _get_semantic_recalls(
-    project_hint: Optional[str],
+    project_hint: str | None,
     top_k: int = 5,
-) -> Optional[list[dict]]:
+) -> list[dict] | None:
     """Retrieve semantically relevant L2 memories (best-effort).
 
     Returns None if the vector store is not configured or unavailable.

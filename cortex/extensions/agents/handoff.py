@@ -11,7 +11,7 @@ from __future__ import annotations
 import json
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 from cortex.extensions.sync.common import CORTEX_DIR, atomic_write
 from cortex.memory.temporal import now_iso
@@ -43,7 +43,7 @@ MAX_GHOSTS = 20
 
 async def generate_handoff(
     engine: CortexEngine,
-    session_meta: Optional[dict[str, Any]] = None,
+    session_meta: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Generate a compact handoff from current CORTEX state.
 
@@ -257,7 +257,7 @@ async def generate_handoff(
 
 def save_handoff(
     handoff_data: dict[str, Any],
-    path: Optional[Path] = None,
+    path: Path | None = None,
 ) -> Path:
     """Atomically save handoff JSON to disk.
 
@@ -275,7 +275,7 @@ def save_handoff(
     return out_path
 
 
-def load_handoff(path: Optional[Path] = None) -> Optional[dict[str, Any]]:
+def load_handoff(path: Path | None = None) -> dict[str, Any] | None:
     """Load an existing handoff from disk.
 
     Args:

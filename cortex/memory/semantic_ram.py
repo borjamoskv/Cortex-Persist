@@ -14,7 +14,7 @@ import asyncio
 import logging
 import time
 from concurrent.futures import ThreadPoolExecutor
-from typing import TYPE_CHECKING, Any, Final, Optional, TypedDict
+from typing import TYPE_CHECKING, Any, Final, TypedDict
 
 import numpy as np
 
@@ -43,8 +43,8 @@ if TYPE_CHECKING:
         TopologicalHealthMonitor,
     )
 
-# Sovereign 200/100 Constants (Ω₁₃)
-DEFAULT_DECAY_LAMBDA: Final[float] = 0.00000802
+# Sovereign 130/100 Constants
+DECAY_LAMBDA: Final[float] = 0.00000802  # 24h half-life
 EXCITATION_MAX: Final[float] = 100.0
 LEARNING_RATE: Final[float] = 0.05
 
@@ -62,12 +62,12 @@ class SemanticMutator:
     def __init__(
         self,
         store: SovereignVectorStoreL2,
-        health_monitor: Optional[TopologicalHealthMonitor] = None,
-        anchor: Optional[TopologicalAnchor] = None,
+        health_monitor: TopologicalHealthMonitor | None = None,
+        anchor: TopologicalAnchor | None = None,
     ) -> None:
         self._store = store
         self._queue: asyncio.Queue[tuple[list[float], str, float]] = asyncio.Queue(maxsize=10000)
-        self._worker_task: Optional[asyncio.Task[None]] = None
+        self._worker_task: asyncio.Task[None] | None = None
         # ThreadPoolExecutor to bypass Python GIL during Numpy topological operations
         self._pool = ThreadPoolExecutor(max_workers=2, thread_name_prefix="ctx_mutator")
         # Topological health write-gate: skip mutations if model_hash has drifted
@@ -215,27 +215,18 @@ class SemanticMutator:
             emb_bytes = row["embedding"]
             rowid = row["rowid"]
 
-            # 2. Dynamic Decay based on Exergy (Ω₁₃)
-            # 200/100: Decay speed adapts to current excitation (stored_exc)
-            decay_mod = 1.0 + (1.0 - (stored_exc / EXCITATION_MAX))
-            eff_decay = DEFAULT_DECAY_LAMBDA * decay_mod
-
+            # 2. Lazy Decay de la excitación actual
             time_delta = max(0.0, now - last_ts)
-            current_exc = stored_exc * np.exp(-eff_decay * time_delta)
+            current_exc = stored_exc * np.exp(-DECAY_LAMBDA * time_delta)
 
             # 3. Spike (Inyección de Masa)
             new_exc = min(EXCITATION_MAX, current_exc + delta_exc)
 
-            # 4. Liquid Learning Rate (adapts to excitation level) (Ω₁₃)
-            # Higher excitation means slower topological shift (stability)
-            liquid_lr = LEARNING_RATE * (new_exc / EXCITATION_MAX)
-
-            # 5. Cálculo C/Numpy del nuevo Effective Vector (Gradient Descent 1-step)
+            # 4. Cálculo C/Numpy del nuevo Effective Vector (Gradient Descent 1-step)
             current_vec = np.frombuffer(emb_bytes, dtype=np.float32)
             mean_query_vec = np.mean(np.array(query_vecs, dtype=np.float32), axis=0)
 
-            shifted_vec = current_vec + liquid_lr * (mean_query_vec - current_vec)
-            
+            shifted_vec = current_vec + LEARNING_RATE * (mean_query_vec - current_vec)
             norm = np.linalg.norm(shifted_vec)
             if norm > 0:
                 shifted_vec = shifted_vec / norm
@@ -296,17 +287,17 @@ class DynamicSemanticSpace:
     def __init__(
         self,
         store: SovereignVectorStoreL2,
-        health_monitor: Optional[TopologicalHealthMonitor] = None,
-        anchor: Optional[TopologicalAnchor] = None,
+        health_monitor: TopologicalHealthMonitor | None = None,
+        anchor: TopologicalAnchor | None = None,
         buffer_capacity: int = 100,
-        manager: Optional[CortexMemoryManager] = None,
+        manager: CortexMemoryManager | None = None,
     ) -> None:
         self._store = store
         self.manager = manager
         self.semantic_mutator = SemanticMutator(store, health_monitor=health_monitor, anchor=anchor)
         self.autonomic_buffer = AutonomicMemoryBuffer(capacity=buffer_capacity)
         self._active_flushes: set[asyncio.Task[Any]] = set()
-        self._heartbeat_task: Optional[asyncio.Task[None]] = None
+        self._heartbeat_task: asyncio.Task[None] | None = None
 
     def start(self) -> None:
         """Starts the semantic mutator and the autonomic heartbeat."""
@@ -370,7 +361,7 @@ class DynamicSemanticSpace:
         query: str,
         limit: int = 5,
         pulse_excitation: float = 20.0,
-        layer: Optional[str] = None,
+        layer: str | None = None,
     ) -> list[CortexFactModel]:
         """Recupera los vectores y emite un pulso topológico (Inversión Termodinámica)."""
         # Obtenemos el query vector para calcular la gradiente de topología

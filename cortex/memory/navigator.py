@@ -24,7 +24,7 @@ import logging
 import math
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
-from typing import Any, Final, Optional
+from typing import Any, Final
 
 logger = logging.getLogger("cortex.memory.navigator")
 
@@ -154,7 +154,7 @@ class SearchAdapter:
         self,
         query_embedding: list[float],
         top_k: int = 10,
-        project: Optional[str] = None,
+        project: str | None = None,
     ) -> list[dict[str, Any]]:
         """Return list of dicts with at minimum: id, content, score, embedding."""
         raise NotImplementedError
@@ -165,7 +165,7 @@ class SearchAdapter:
 
     async def get_all_embeddings(
         self,
-        project: Optional[str] = None,
+        project: str | None = None,
         limit: int = 500,
     ) -> list[dict[str, Any]]:
         """Return all stored embeddings for topology analysis."""
@@ -192,11 +192,11 @@ class SemanticNavigator:
     ) -> None:
         self._adapter = search_adapter
         self._drift_alpha = drift_alpha
-        self._position: Optional[list[float]] = None
+        self._position: list[float] | None = None
         self._breadcrumbs: deque[NavigationState] = deque(maxlen=_MAX_BREADCRUMBS)
 
     @property
-    def position(self) -> Optional[list[float]]:
+    def position(self) -> list[float] | None:
         """Current position in embedding space."""
         return self._position
 
@@ -211,7 +211,7 @@ class SemanticNavigator:
         self,
         query: str,
         top_k: int = 10,
-        project: Optional[str] = None,
+        project: str | None = None,
     ) -> NavigationState:
         """Teleport to a point in semantic space.
 
@@ -247,7 +247,7 @@ class SemanticNavigator:
         self,
         direction: str,
         steps: int = 3,
-        project: Optional[str] = None,
+        project: str | None = None,
     ) -> list[NavigationState]:
         """Move continuously through embedding space.
 
@@ -292,7 +292,7 @@ class SemanticNavigator:
         self,
         seed_query: str,
         radius: float = _DEFAULT_EXPLORE_RADIUS,
-        project: Optional[str] = None,
+        project: str | None = None,
     ) -> ClusterInfo:
         """Map the semantic neighborhood around a seed.
 
@@ -392,11 +392,11 @@ class KnowledgeMap:
 
     def __init__(self, search_adapter: SearchAdapter) -> None:
         self._adapter = search_adapter
-        self._cached_topology: Optional[dict[str, Any]] = None
+        self._cached_topology: dict[str, Any] | None = None
 
     async def build_topology(
         self,
-        project: Optional[str] = None,
+        project: str | None = None,
         sample_size: int = 200,
     ) -> dict[str, Any]:
         """Build a topological overview of the knowledge space.
@@ -447,13 +447,13 @@ class KnowledgeMap:
         }
         return self._cached_topology
 
-    async def get_dense_regions(self, project: Optional[str] = None) -> list[ClusterInfo]:
+    async def get_dense_regions(self, project: str | None = None) -> list[ClusterInfo]:
         """Where does the agent know a lot?"""
         if not self._cached_topology:
             await self.build_topology(project=project)
         return self._cached_topology.get("dense_regions", []) if self._cached_topology else []
 
-    async def get_sparse_regions(self, project: Optional[str] = None) -> list[ClusterInfo]:
+    async def get_sparse_regions(self, project: str | None = None) -> list[ClusterInfo]:
         """Where are the agent's blind spots?"""
         if not self._cached_topology:
             await self.build_topology(project=project)

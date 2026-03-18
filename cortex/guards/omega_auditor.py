@@ -10,7 +10,6 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 try:
     from cortex.extensions.llm.provider import LLMProvider
@@ -27,7 +26,7 @@ SNAPSHOT_PATH = Path.home() / ".cortex" / "context-snapshot.md"
 
 @dataclass(frozen=True)
 class OmegaConflict:
-    fact_id: Optional[str]
+    fact_id: str | None
     summary: str
     reasoning: str
     severity: str  # 'low' | 'medium' | 'high'

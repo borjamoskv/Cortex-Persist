@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field, ValidationError
 
@@ -49,7 +49,7 @@ class ContextFusion:
         """Initializes ContextFusion. `judge_provider` should be a fast model like Flash."""
         self._judge = judge_provider
 
-    async def _judge_safe(self, prompt: str, system: str, **kwargs) -> Optional[str]:
+    async def _judge_safe(self, prompt: str, system: str, **kwargs) -> str | None:
         """Llama al juez rápido con retries + timeout."""
         if self._judge is None:
             return None
@@ -250,7 +250,7 @@ class ThoughtFusion:
 
     # ── Circuit Breaker ──────────────────────────────────────────
 
-    async def _judge_safe(self, prompt: str, system: str, **kwargs) -> Optional[str]:
+    async def _judge_safe(self, prompt: str, system: str, **kwargs) -> str | None:
         """Llama al juez con retries + timeout. Devuelve None si falla."""
         # Si no hay juez, fallar rápido
         if self._judge is None:
@@ -325,7 +325,7 @@ class ThoughtFusion:
         all_responses: list[ModelResponse],
         agreement: float,
         strategy: FusionStrategy,
-        token_map: Optional[dict[int, set[str]]] = None,
+        token_map: dict[int, set[str]] | None = None,
     ) -> FusedThought:
         """Elige la respuesta más cercana al 'centro' del cluster.
 

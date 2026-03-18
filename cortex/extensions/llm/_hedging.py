@@ -17,7 +17,6 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
-from typing import Optional
 
 from cortex.extensions.llm._models import BaseProvider, CortexPrompt, HedgedResult
 
@@ -42,7 +41,7 @@ class HedgedRequestStrategy:
         cls,
         providers: list[BaseProvider],
         prompt: CortexPrompt,
-    ) -> tuple[Optional[HedgedResult], list[str]]:
+    ) -> tuple[HedgedResult | None, list[str]]:
         """Race N providers simultaneously. Returns (winner | None, errors).
 
         DNS-over-HTTPS pattern: query sent to all providers concurrently,

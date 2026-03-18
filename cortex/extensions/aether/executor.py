@@ -114,7 +114,7 @@ class ExecutorAgent:
                     "Forcing Epistemic Collapse.",
                     len(state.messages),
                 )
-                
+
                 compaction_prompt = self._build_prompt(state.messages) + (
                     "\n\n[SYSTEM OVERRIDE: AXIOM Ω₁₆]\n"
                     "Your context window is saturated. You must now perform an Epistemic Collapse.\n"
@@ -122,7 +122,7 @@ class ExecutorAgent:
                     "Omit all failed attempts, bad tool calls, and stochastic thermal noise.\n"
                     "Output ONLY the compressed valid state."
                 )
-                
+
                 compressed_state = await self._llm.complete(
                     compaction_prompt,
                     system=sys_prompt,
@@ -130,12 +130,12 @@ class ExecutorAgent:
                     max_tokens=800,
                     intent=IntentProfile.CODE,
                 )
-                
+
                 logger.info(
                     "Ω₁₆ [SHANNON PURIFIER]: Geodesic restart. "
                     "History annihilated. Compressed state exergy preserved."
                 )
-                
+
                 # Restart history: System + Compressed State
                 state.messages = [
                     state.messages[0],  # System prompt
@@ -146,10 +146,10 @@ class ExecutorAgent:
                             f"[COMPRESSED STATE (Axiom Ω₁₆)]\n{compressed_state}\n\n"
                             "Continue executing the plan using tools one at a time."
                         ),
-                    }
+                    },
                 ]
                 # Fall through to generate the next step using the purified context
-            
+
             # Build prompt from message history
             prompt = self._build_prompt(state.messages)
 

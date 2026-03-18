@@ -18,7 +18,7 @@ from __future__ import annotations
 import logging
 import re
 from collections.abc import Sequence
-from typing import Final, Optional
+from typing import Final
 
 from cortex.memory.hdc.algebra import HVType, bind, bundle, permute
 from cortex.memory.hdc.item_memory import ItemMemory
@@ -87,8 +87,8 @@ class HDCEncoder:
     def encode_fact(
         self,
         content: str,
-        fact_type: Optional[str] = None,
-        project_id: Optional[str] = None,
+        fact_type: str | None = None,
+        project_id: str | None = None,
     ) -> HVType:
         """Encode a full CORTEX fact with role and project bindings.
 

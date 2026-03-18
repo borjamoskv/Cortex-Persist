@@ -1,6 +1,5 @@
 import json
 from dataclasses import dataclass, field
-from typing import Optional
 
 # Import removed to break circularity: from cortex.embeddings.provider import EmbeddingProvider
 
@@ -22,18 +21,18 @@ class Fact:
     category: str = "general"
     tags: list[str] = field(default_factory=list)
     # Causal Lineage
-    parent_id: Optional[int | str] = None
-    relation_type: Optional[str] = None
+    parent_id: int | str | None = None
+    relation_type: str | None = None
     yield_score: float = 1.0
     # Provenance and State
     meta: dict = field(default_factory=dict)
     confidence: str = "C3"
-    source: Optional[str] = None
-    hash: Optional[str] = None
-    valid_from: Optional[str] = None
-    valid_until: Optional[str] = None
-    created_at: Optional[str] = None
-    updated_at: Optional[str] = None
+    source: str | None = None
+    hash: str | None = None
+    valid_from: str | None = None
+    valid_until: str | None = None
+    created_at: str | None = None
+    updated_at: str | None = None
     is_tombstoned: bool = False
     is_quarantined: bool = False
 

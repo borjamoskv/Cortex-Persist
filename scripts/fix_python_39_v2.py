@@ -1,8 +1,9 @@
 import os
 import re
 
+
 def fix_file(filepath):
-    with open(filepath, 'r') as f:
+    with open(filepath) as f:
         content = f.read()
 
     changed = False

@@ -11,7 +11,6 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import Optional
 
 from cortex.embeddings import EMBEDDING_DIM, LocalEmbedder
 
@@ -30,7 +29,7 @@ class AsyncEncoder:
 
     __slots__ = ("_embedder",)
 
-    def __init__(self, embedder: Optional[LocalEmbedder] = None) -> None:
+    def __init__(self, embedder: LocalEmbedder | None = None) -> None:
         self._embedder = embedder or LocalEmbedder()
 
     async def encode(self, text: str) -> list[float]:

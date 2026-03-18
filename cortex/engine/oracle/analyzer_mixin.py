@@ -8,7 +8,7 @@ from __future__ import annotations
 import json
 import logging
 import sqlite3
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 from cortex.engine.forgetting_models import EvictionVerdict
 
@@ -24,7 +24,7 @@ class AnalyzerMixin:
 
     # These will be provided by the concrete class
     _engine: AsyncCortexEngine
-    _l1: Optional[WorkingMemoryL1]
+    _l1: WorkingMemoryL1 | None
     DEFAULT_WEIGHT: float
     CAUSAL_WEIGHT_MAP: dict[str, float]
 

@@ -106,7 +106,7 @@ def verify_health_system(
     sub_idx_mapping = {
         "storage": {"db", "facts", "disk"},
         "integrity": {"ledger", "entropy"},
-        "performance": {"wal", "sysload"},
+        "performance": {"wal", "sysload", "exergy"},
         "environment": {"browsers", "snapshot"},
     }
     all_mapped = set()

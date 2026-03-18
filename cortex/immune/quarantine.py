@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from decimal import Decimal
 
 
 @dataclass(frozen=True)
@@ -7,7 +8,7 @@ class BlastRadiusReport:
     test_reference_count: int
     runtime_entrypoint_count: int
     causal_dependency_count: int
-    criticality_score: float
+    criticality_score: Decimal
 
 
 @dataclass(frozen=True)
@@ -21,7 +22,7 @@ class DemolitionDecision:
 def evaluate_demolition(
     report: BlastRadiusReport, has_snapshot: bool, modifies_schema: bool
 ) -> DemolitionDecision:
-    if report.criticality_score > 0.8:
+    if report.criticality_score > Decimal("0.8"):
         return DemolitionDecision(
             allowed=False,
             requires_quarantine=True,
@@ -48,7 +49,7 @@ def evaluate_demolition(
 
     return DemolitionDecision(
         allowed=True,
-        requires_quarantine=report.criticality_score > 0.4,
+        requires_quarantine=report.criticality_score > Decimal("0.4"),
         requires_snapshot=True,
         reason="Demolition allowed under quarantine and snapshot conditions.",
     )

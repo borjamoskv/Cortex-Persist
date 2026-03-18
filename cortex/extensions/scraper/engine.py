@@ -10,7 +10,6 @@ import asyncio
 import logging
 import time
 import uuid
-from typing import Optional
 
 from cortex.extensions.scraper.extractors import (
     CASCADE_ORDER,
@@ -221,7 +220,7 @@ class ScraperEngine:
         LOG.info("🗺️ [MAP] Discovered %d URLs from %s", len(discovered), url)
         return sorted(discovered)
 
-    def get_job(self, job_id: str) -> Optional[ScrapeJob]:
+    def get_job(self, job_id: str) -> ScrapeJob | None:
         """Get a batch job by ID."""
         return self._jobs.get(job_id)
 

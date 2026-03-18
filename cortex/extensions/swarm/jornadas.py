@@ -20,7 +20,7 @@ import time
 from dataclasses import dataclass, field
 from typing import Any
 
-from cortex.extensions.swarm.crystal_consolidator import consolidate, ConsolidationResult
+from cortex.extensions.swarm.crystal_consolidator import ConsolidationResult, consolidate
 from cortex.extensions.swarm.crystal_thermometer import scan_all_crystals
 from cortex.extensions.swarm.swarm_heartbeat import SWARM_HEARTBEAT, NodeStatus
 
@@ -30,6 +30,7 @@ logger = logging.getLogger("cortex.extensions.swarm.jornadas")
 @dataclass
 class CoexistenceReport:
     """Outcome of a Swarm Coexistence Jornada."""
+
     jornada_id: str
     duration_s: float
     nodes_participated: int
@@ -84,10 +85,11 @@ class JornadasManager:
             global_exergy = 1.0
             if nodes_count > 0:
                 global_exergy = sum(n.exergy_efficiency for n in active_nodes) / nodes_count
-                
+
             logger.info(
                 "🏔️ [JORNADAS] %d active nodes entering collective REM sleep. Global Exergy: %.3f",
-                nodes_count, global_exergy
+                nodes_count,
+                global_exergy,
             )
 
             # Step 2: Global Entropy Audit (Thermometer)
@@ -117,9 +119,13 @@ class JornadasManager:
 
             logger.info(
                 "🏔️ [JORNADAS] Event %s complete in %.2fs. Purged: %d, Merged: %d, Promoted: %d",
-                jornada_id, duration, result.purged, result.merged, result.promoted
+                jornada_id,
+                duration,
+                result.purged,
+                result.merged,
+                result.promoted,
             )
-            
+
             # Persist the Jornada outcome to the Ledger as a System Fact
             await self._persist_jornada_report(report)
 

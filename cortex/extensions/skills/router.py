@@ -8,7 +8,7 @@ Enruta dinámicamente según el grafo de dependencias de la SkillRegistry.
 from __future__ import annotations
 
 import logging
-from typing import Any, Final, Optional
+from typing import Any, Final
 
 from cortex.extensions.skills.registry import SkillManifest, SkillRegistry
 from cortex.memory.metamemory import MetamemoryMonitor
@@ -27,13 +27,13 @@ class SkillRouter:
     Abandona la ejecución lineal (fases hardcodeadas) en favor del enrutamiento basado en capabilities.
     """
 
-    def __init__(self, registry: Optional[SkillRegistry] = None) -> None:
+    def __init__(self, registry: SkillRegistry | None = None) -> None:
         self.registry = registry or SkillRegistry().load()
         self.metamemory = MetamemoryMonitor()
         self.procedural_memory = ProceduralMemory()
 
     def route_intent(
-        self, intent: str, context: Optional[dict[str, Any]] = None
+        self, intent: str, context: dict[str, Any] | None = None
     ) -> list[SkillManifest]:
         """
         Analiza la intención cruda del operador (TBD: usar LLM/Noosphere) o heuristics,

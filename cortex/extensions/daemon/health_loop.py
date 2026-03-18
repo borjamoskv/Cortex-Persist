@@ -9,7 +9,6 @@ import logging
 import time
 from collections.abc import Callable
 from pathlib import Path
-from typing import Optional
 
 from cortex.extensions.health.collector import HealthCollector
 from cortex.extensions.health.models import Grade
@@ -34,16 +33,16 @@ class HealthLoop:
         self,
         db_path: str | Path = "",
         interval: float = DEFAULT_INTERVAL,
-        notify_fn: Optional[Callable[[str, str], None]] = None,
+        notify_fn: Callable[[str, str], None] | None = None,
     ) -> None:
         self._db_path = str(db_path)
         self._interval = interval
         self._notify_fn = notify_fn
-        self._last_grade: Optional[Grade] = None
+        self._last_grade: Grade | None = None
         self._last_alert: float = 0.0
         self._trend = TrendDetector()
 
-    def tick(self) -> Optional[dict]:
+    def tick(self) -> dict | None:
         """Run one health check cycle."""
         try:
             collector = HealthCollector(db_path=self._db_path)

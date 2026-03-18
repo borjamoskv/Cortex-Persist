@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import Optional
 
 from cortex.extensions.ui_control.models import (
     AppleScriptExecutionError,
@@ -17,7 +16,7 @@ async def run_applescript(
     script: str,
     require_success: bool = True,
     timeout: float = 30.0,
-) -> Optional[str]:
+) -> str | None:
     """
     Ejecuta un AppleScript de forma asíncrona vía osascript.
 
@@ -94,7 +93,7 @@ async def is_app_running(app_name: str) -> bool:
     return result == "true"
 
 
-async def get_frontmost_app() -> Optional[str]:
+async def get_frontmost_app() -> str | None:
     """Devuelve el nombre de la aplicación en primer plano."""
     script = """
     tell application "System Events"
@@ -112,7 +111,7 @@ async def set_clipboard(text: str) -> None:
     await run_applescript(script)
 
 
-async def get_clipboard() -> Optional[str]:
+async def get_clipboard() -> str | None:
     """Lee el contenido actual del clipboard del sistema."""
     script = "return (the clipboard as text)"
     return await run_applescript(script, require_success=False)

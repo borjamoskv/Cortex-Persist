@@ -13,7 +13,7 @@ import json
 import logging
 import time
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 __all__ = ["GossipProtocol", "StateRecord", "SemanticDigest"]
 
@@ -65,7 +65,7 @@ class GossipProtocol:
         self.peers = set(peers)
         self.interval = interval
         self._running = False
-        self._task: Optional[asyncio.Task] = None
+        self._task: asyncio.Task | None = None
 
         # Local state storage
         self._records: dict[str, StateRecord] = {}
@@ -87,7 +87,7 @@ class GossipProtocol:
         )
         self._records[key] = record
 
-    def get_state(self, key: str) -> Optional[StateRecord]:
+    def get_state(self, key: str) -> StateRecord | None:
         """Retrieve local state by key."""
         return self._records.get(key)
 

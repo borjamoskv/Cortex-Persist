@@ -9,7 +9,6 @@ from __future__ import annotations
 import asyncio
 import logging
 from pathlib import Path
-from typing import Optional
 
 from cortex.extensions.aether.critic import CriticAgent
 from cortex.extensions.aether.executor import ExecutorAgent
@@ -35,14 +34,14 @@ class AetherAgent:
         agent.run_task_sync(task, queue)
     """
 
-    def __init__(self, llm_provider: str = "qwen", agent_id: Optional[str] = None) -> None:
+    def __init__(self, llm_provider: str = "qwen", agent_id: str | None = None) -> None:
         from cortex.extensions.agents.registry import AgentRegistry
         from cortex.extensions.llm.provider import LLMProvider
 
         self._llm = LLMProvider(provider=llm_provider)
 
         system_prompt = None
-        self._allowed_tools: Optional[list[str]] = None
+        self._allowed_tools: list[str] | None = None
         if agent_id:
             registry = AgentRegistry()
             # Ensure registries are loaded (safe to call multiple times)

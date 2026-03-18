@@ -31,7 +31,6 @@ Usage:
 from __future__ import annotations
 
 import logging
-from typing import Optional
 
 import click
 from rich.panel import Panel
@@ -89,7 +88,7 @@ GOLD = "#D4AF37"
     help="Disable auto-persistence",
 )
 @click.option("--db", default=DEFAULT_DB, help="Database path")
-def loop(project: str, mode: str, task: Optional[str], no_persist: bool, db: str) -> None:
+def loop(project: str, mode: str, task: str | None, no_persist: bool, db: str) -> None:
     """Sovereign Execution Loop — Task → Execute → Persist → Repeat.
 
     Interactive mode: REPL with continuous task execution.
@@ -209,7 +208,7 @@ def _run_interactive(loop_engine: ExecutionLoop) -> None:
             break
 
 
-def _dispatch_command(loop_engine: ExecutionLoop, task: str) -> Optional[str]:
+def _dispatch_command(loop_engine: ExecutionLoop, task: str) -> str | None:
     """Dispatch built-in commands. Returns 'break', 'continue', or None."""
     stripped = task.strip().lower()
 

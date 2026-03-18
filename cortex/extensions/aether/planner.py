@@ -8,7 +8,6 @@ from __future__ import annotations
 import json
 import logging
 from pathlib import Path
-from typing import Optional
 
 from cortex.extensions.aether.models import PlanOutput
 from cortex.extensions.aether.tools import AgentToolkit
@@ -42,7 +41,7 @@ _MAX_FILE_READ = 3000
 class PlannerAgent:
     """Analyzes a repo and emits a structured PlanOutput."""
 
-    def __init__(self, llm, base_system_prompt: Optional[str] = None) -> None:
+    def __init__(self, llm, base_system_prompt: str | None = None) -> None:
         self._llm = llm
         self._base_system = base_system_prompt
 

@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Optional
-
 """
 CORTEX v6.0 — Antipattern Scanner.
 
@@ -316,7 +314,7 @@ def _scan_single_file(
     _DeadCodeVisitor(rel, findings).visit(tree)
 
 
-def _gather_python_files(root: Path) -> Optional[tuple[list[Path], Path]]:
+def _gather_python_files(root: Path) -> tuple[list[Path], Path] | None:
     """Gather Python files to scan and determine the scan root."""
     if root.is_file():
         return [root], root.parent

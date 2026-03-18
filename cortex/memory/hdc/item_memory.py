@@ -18,7 +18,7 @@ import hashlib
 import json
 import logging
 from pathlib import Path
-from typing import Final, Optional
+from typing import Final
 
 import numpy as np
 
@@ -67,7 +67,7 @@ class ItemMemory:
     def __init__(
         self,
         dim: int = DEFAULT_DIM,
-        codebook_path: Optional[str | Path] = None,
+        codebook_path: str | Path | None = None,
         maxsize: int = 10_000,
     ) -> None:
         self._dim = dim
@@ -95,7 +95,7 @@ class ItemMemory:
         return self._get_or_create(f"project:{project}")
 
     def nearest(
-        self, query_hv: HVType, candidates: Optional[list[str]] = None, top_k: int = 1
+        self, query_hv: HVType, candidates: list[str] | None = None, top_k: int = 1
     ) -> list[tuple[str, float]]:
         """Find the nearest symbols to a query hypervector."""
         from cortex.memory.hdc.algebra import cosine_similarity

@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger("cortex.lineage")
 
@@ -25,7 +25,7 @@ class LineageNode:
     timestamp: str
     parents: list[LineageNode]
     is_valid: bool = True
-    error: Optional[str] = None
+    error: str | None = None
 
 
 class LineageVerifier:
@@ -35,7 +35,7 @@ class LineageVerifier:
         self.engine = engine
 
     async def get_lineage(
-        self, fact_id: int, max_depth: int = 5, _cache: Optional[dict[int, LineageNode]] = None
+        self, fact_id: int, max_depth: int = 5, _cache: dict[int, LineageNode] | None = None
     ) -> LineageNode:
         """Recursively build the lineage tree for a fact.
 

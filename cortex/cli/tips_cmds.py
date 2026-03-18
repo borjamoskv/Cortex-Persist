@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import asyncio
 import sqlite3
-from typing import Optional
 
 import click
 from rich.panel import Panel
@@ -68,10 +67,10 @@ def _get_tips_engine(db: str, lang: str = "en") -> TipsEngine:
 def tips(
     ctx: click.Context,
     db: str,
-    category: Optional[str],
-    project: Optional[str],
+    category: str | None,
+    project: str | None,
     count: int,
-    lang: Optional[str],
+    lang: str | None,
 ) -> None:
     """💡 TIPS — Contextual tips and insights from CORTEX."""
     try:
@@ -91,7 +90,7 @@ def tips(
 
 
 def _fetch_and_render_tips(
-    tips_engine: TipsEngine, category: Optional[str], project: Optional[str], count: int
+    tips_engine: TipsEngine, category: str | None, project: str | None, count: int
 ) -> None:
     if category:
         results = _run_async(tips_engine.for_category(category, limit=count))
@@ -153,7 +152,7 @@ def tips_list(ctx: click.Context) -> None:
     help="Filter by category.",
 )
 @click.pass_context
-def tips_all(ctx: click.Context, category: Optional[str]) -> None:
+def tips_all(ctx: click.Context, category: str | None) -> None:
     """Show all available tips."""
     db = ctx.obj["db"]
     lang = ctx.obj["lang"]

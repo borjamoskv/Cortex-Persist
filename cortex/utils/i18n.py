@@ -16,7 +16,7 @@ from contextlib import contextmanager
 from enum import Enum
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Final, NamedTuple, Optional
+from typing import Any, Final, NamedTuple
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +45,7 @@ _TRANSLATIONS: LocaleData = {}
 _LOAD_LOCK: Final[threading.Lock] = threading.Lock()
 
 # Thread-local context for language overrides
-_LOCALT_CONTEXT: contextvars.ContextVar[Optional[Lang]] = contextvars.ContextVar(
+_LOCALT_CONTEXT: contextvars.ContextVar[Lang | None] = contextvars.ContextVar(
     "cortex_locale", default=None
 )
 
@@ -120,7 +120,7 @@ def get_supported_languages() -> frozenset[Lang]:
     return SUPPORTED_LANGUAGES
 
 
-def _normalize_lang(lang: Optional[str | Lang]) -> Lang:
+def _normalize_lang(lang: str | Lang | None) -> Lang:
     """Fast normalization of language codes with primary-tag fallback."""
     if isinstance(lang, Lang):
         return lang
@@ -138,7 +138,7 @@ def _normalize_lang(lang: Optional[str | Lang]) -> Lang:
 
 
 @lru_cache(maxsize=4096)
-def _cached_trans(key: TranslationKey, lang_code: Lang) -> Optional[str]:
+def _cached_trans(key: TranslationKey, lang_code: Lang) -> str | None:
     """Atomic cached lookup with sovereign fallback hierarchy.
 
     Returns None if key is missing to distinguish from 'key as value'.
@@ -246,7 +246,7 @@ def _trigger_adaptive_repair(key: str, lang: Lang) -> None:
         threading.Thread(target=asyncio.run, args=(_repair(),), daemon=True).start()
 
 
-def get_trans(key: TranslationKey, lang: Optional[Lang | str] = None, **kwargs: Any) -> str:
+def get_trans(key: TranslationKey, lang: Lang | str | None = None, **kwargs: Any) -> str:
     """Retrieve localized string formatted with variables.
 
     O(1) lookup via LRU. Supports dynamic string interpolation.
@@ -296,7 +296,7 @@ class CacheStats(NamedTuple):
 
     hits: int
     misses: int
-    maxsize: Optional[int]
+    maxsize: int | None
     currsize: int
 
 

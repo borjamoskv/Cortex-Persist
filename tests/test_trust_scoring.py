@@ -161,10 +161,6 @@ def test_weight_bounds():
 
 def test_signing_material_deterministic():
     """Same inputs → same signing material."""
-    a = PeerAttestation(
-        tx_id="tx1", peer_address="peer1", timestamp=100.0
-    )
-    b = PeerAttestation(
-        tx_id="tx1", peer_address="peer1", timestamp=100.0
-    )
+    a = PeerAttestation(tx_id="tx1", peer_address="peer1", timestamp=100.0)
+    b = PeerAttestation(tx_id="tx1", peer_address="peer1", timestamp=100.0)
     assert a.signing_material() == b.signing_material()

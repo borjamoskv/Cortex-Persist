@@ -2,6 +2,7 @@ import ast
 import os
 import sys
 
+
 def get_union_str(node):
     def collect(n):
         if isinstance(n, ast.BinOp) and isinstance(n.op, ast.BitOr):
@@ -20,7 +21,7 @@ def get_union_str(node):
 
 def fix_file(path):
     try:
-        with open(path, "r") as f: source = f.read()
+        with open(path) as f: source = f.read()
     except: return False
     try: tree = ast.parse(source)
     except: return False

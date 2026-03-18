@@ -10,7 +10,6 @@ import logging
 import sqlite3
 import time
 from pathlib import Path
-from typing import Optional
 
 import numpy as np
 
@@ -30,7 +29,7 @@ class DriftMonitorDaemon:
     def __init__(
         self,
         vectors_db_path: Path | str,
-        cortex_dir: Optional[Path | str] = None,
+        cortex_dir: Path | str | None = None,
         interval_seconds: int = 6 * 3600,  # 6 hours
         health_threshold: float = 0.5,
         model_name: str = "all-MiniLM-L6-v2",
@@ -105,7 +104,7 @@ class DriftMonitorDaemon:
         logger.info("DriftMonitor: Healthy (%.2f) — %s", health, result["detail"])
         return []
 
-    def _read_embeddings(self) -> Optional[np.ndarray]:
+    def _read_embeddings(self) -> np.ndarray | None:
         """Read embedding vectors from the sqlite-vec store.
 
         Samples up to max_sample vectors to keep computation bounded.

@@ -15,7 +15,7 @@ def has_sovereign_fallback(source: str) -> bool:
 
 class DiscoveryScanner:
     """Scanner for heuristic execution triggers."""
-    
+
     def scan(self, node: ast.AST) -> list[tuple[int, str, str]]:
         # Heuristics are usually file-level, but we can detect imports here
         results = []

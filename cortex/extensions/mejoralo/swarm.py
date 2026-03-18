@@ -11,7 +11,7 @@ import logging
 import re
 import textwrap
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 from cortex.cli import console
 from cortex.extensions.mejoralo.constants import (
@@ -97,9 +97,9 @@ class MejoraloSwarm:
         file_path: Path,
         findings: list[str],
         iteration: int = 0,
-        engine: Optional[MejoraloEngine] = None,
-        project: Optional[str] = None,
-    ) -> Optional[str]:
+        engine: MejoraloEngine | None = None,
+        project: str | None = None,
+    ) -> str | None:
         """Refactor code using surgical AST mode when possible, full-file fallback.
 
         Surgical mode:
@@ -142,7 +142,7 @@ class MejoraloSwarm:
     # ── Surgical AST Mode ──────────────────────────────────────────────────
 
     @staticmethod
-    def _extract_infected_line(findings: list[str]) -> Optional[int]:
+    def _extract_infected_line(findings: list[str]) -> int | None:
         """Parse the first line number from MEJORAlo finding strings.
 
         Findings look like: 'path/to/file.py:42 -> High Complexity (15)'
@@ -158,7 +158,7 @@ class MejoraloSwarm:
     @staticmethod
     def _extract_infected_node(
         source: str, target_line: int
-    ) -> Optional[tuple[ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef, str]]:
+    ) -> tuple[ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef, str] | None:
         """Find the innermost function/class definition that contains target_line.
 
         Returns (node, dedented_source_of_node) or None.
@@ -169,7 +169,7 @@ class MejoraloSwarm:
             return None
 
         lines = source.splitlines(keepends=True)
-        best: Optional[ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef] = None
+        best: ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef | None = None
 
         for node in ast.walk(tree):
             if not isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef):
@@ -203,7 +203,7 @@ class MejoraloSwarm:
         original_source: str,
         node: ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef,
         patched_node_source: str,
-    ) -> Optional[str]:
+    ) -> str | None:
         """Replace the original node in the source with the patched version.
 
         Preserves original indentation by detecting the leading whitespace
@@ -241,7 +241,7 @@ class MejoraloSwarm:
         findings_str: str,
         scars_str: str,
         swarm_system: str,
-    ) -> Optional[str]:
+    ) -> str | None:
         """Execute surgical AST refactor: extract node, patch, reintegrate."""
         # 1. Determine the infected line number
         target_line = self._extract_infected_line(findings)
@@ -303,7 +303,7 @@ class MejoraloSwarm:
 
     # ── Full-File Prompt Builder ───────────────────────────────────────────────
 
-    def _read_source(self, file_path: Path) -> Optional[str]:
+    def _read_source(self, file_path: Path) -> str | None:
         try:
             return file_path.read_text(errors="replace")
         except OSError as e:
@@ -311,7 +311,7 @@ class MejoraloSwarm:
             return None
 
     def _build_prompt(
-        self, file_path: Path, content: str, findings_str: str, engine: Any, project: Optional[str]
+        self, file_path: Path, content: str, findings_str: str, engine: Any, project: str | None
     ) -> str:
         scars_str = self._get_scars_prompt(engine, project, file_path.name)
         return (
@@ -320,7 +320,7 @@ class MejoraloSwarm:
             f"Current Code:\n```python\n{content}\n```"
         )
 
-    async def _run_orchestra(self, base_prompt: str, swarm_system: str) -> Optional[str]:
+    async def _run_orchestra(self, base_prompt: str, swarm_system: str) -> str | None:
         console.rule(f"[cyan]SOVEREIGN SWARM L{self.level} ENGAGED")
         with console.status("[bold green]Synthesizing specialists insights...", spinner="point"):
             try:
@@ -336,7 +336,7 @@ class MejoraloSwarm:
                 logger.error("Swarm orchestration failed: %s", e)
                 return None
 
-    def _get_scars_prompt(self, engine: Any, project: Optional[str], filename: str) -> str:
+    def _get_scars_prompt(self, engine: Any, project: str | None, filename: str) -> str:
         """Helper to format previous failure scars without bloating main flow."""
         if not engine or not project:
             return ""
@@ -409,7 +409,7 @@ class MejoraloSwarm:
             "Return ONLY high-density Python code inside ```python blocks. No fluff."
         )
 
-    def _extract_code(self, content: str) -> Optional[str]:
+    def _extract_code(self, content: str) -> str | None:
         """Extract and validate python code from LLM string output."""
         clean_code = None
         match = re.search(r"```python\n(.*?)```", content, re.DOTALL)

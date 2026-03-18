@@ -8,7 +8,7 @@ from __future__ import annotations
 import asyncio
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from cortex.engine.endocrine import ENDOCRINE, HormoneType
 
@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-async def manifest_singularity(signal_bus: Optional[SignalBus] = None) -> None:
+async def manifest_singularity(signal_bus: SignalBus | None = None) -> None:
     """
     Ω₇ Manifestation: The atomic collapse of multiple project threads.
     Triggers Nexus sync, Ledger checkpoint, and Sovereign Dashboard refresh.
@@ -69,7 +69,7 @@ async def manifest_singularity(signal_bus: Optional[SignalBus] = None) -> None:
         ENDOCRINE.pulse(HormoneType.ADRENALINE, 0.5)
 
 
-async def transfigure_ui(html_file: Path, signal_bus: Optional[SignalBus] = None) -> bool:
+async def transfigure_ui(html_file: Path, signal_bus: SignalBus | None = None) -> bool:
     """Ω₆: Sovereign UI Refactor (Transfiguration)."""
     from cortex.cli.bicameral import bicameral
 

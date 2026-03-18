@@ -13,7 +13,7 @@ import time
 import uuid
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -166,13 +166,13 @@ class SovereignAgent:
         return sum(s.fitness for s in self.subagents) / len(self.subagents)
 
     @property
-    def best_subagent(self) -> Optional[SubAgent]:
+    def best_subagent(self) -> SubAgent | None:
         if not self.subagents:
             return None
         return max(self.subagents, key=lambda s: s.fitness)
 
     @property
-    def worst_subagent(self) -> Optional[SubAgent]:
+    def worst_subagent(self) -> SubAgent | None:
         if not self.subagents:
             return None
         return min(self.subagents, key=lambda s: s.fitness)

@@ -58,6 +58,10 @@ class StorageAdapter(Protocol):
         """Commit the current transaction. No-op for auto-commit backends."""
         ...
 
+    async def rollback(self) -> None:
+        """Rollback the current transaction. No-op for auto-commit backends."""
+        ...
+
     async def close(self) -> None:
         """Release all connections and resources."""
         ...

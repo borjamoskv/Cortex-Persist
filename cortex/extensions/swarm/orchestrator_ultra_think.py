@@ -74,7 +74,9 @@ class UltraThinkOrchestrator:
 
         # If the proposal mentions ledger/facts, verify continuity
         if "fact:" in proposal.lower() or "ledger" in proposal.lower():
-            logger.info("🛡️ [ULTRA-THINK] Detected ledger claim - triggering continuity verification.")
+            logger.info(
+                "🛡️ [ULTRA-THINK] Detected ledger claim - triggering continuity verification."
+            )
             # Logic for fact_id extraction would go here
             pass
 

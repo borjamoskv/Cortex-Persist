@@ -29,7 +29,6 @@ import logging
 import re
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional
 
 __all__ = ["PIISanitizer", "PIIMatch", "PIICategory", "SanitizationReport"]
 
@@ -258,7 +257,7 @@ class PIISanitizer:
 
         return report
 
-    def _try_encrypt(self, value: str, tenant_id: str) -> Optional[str]:
+    def _try_encrypt(self, value: str, tenant_id: str) -> str | None:
         """Attempt field-level encryption using CortexEncrypter."""
         try:
             from cortex.crypto import get_default_encrypter
@@ -276,7 +275,7 @@ class PIISanitizer:
 
 # ─── Module-level singleton ────────────────────────────────────────────────────
 
-_default_sanitizer: Optional[PIISanitizer] = None
+_default_sanitizer: PIISanitizer | None = None
 
 
 def get_pii_sanitizer(encrypt: bool = True) -> PIISanitizer:

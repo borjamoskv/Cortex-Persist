@@ -15,7 +15,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional
 
 
 class AxiomCategory(str, Enum):
@@ -35,7 +34,7 @@ class Axiom:
     mandate: str
     category: AxiomCategory
     enforcement: str
-    ci_gate: Optional[str] = None
+    ci_gate: str | None = None
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -362,6 +361,6 @@ def enforced() -> list[Axiom]:
     return [ax for ax in AXIOM_REGISTRY.values() if ax.ci_gate is not None]
 
 
-def get(axiom_id: str) -> Optional[Axiom]:
+def get(axiom_id: str) -> Axiom | None:
     """Retrieve an axiom by its canonical ID (e.g., 'AX-010')."""
     return AXIOM_REGISTRY.get(axiom_id)

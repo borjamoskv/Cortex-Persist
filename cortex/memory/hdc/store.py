@@ -13,7 +13,7 @@ import logging
 import sqlite3
 import time
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import numpy as np
 
@@ -63,7 +63,7 @@ class HDCVectorStoreL2:
         self._item_memory = item_memory
         self._db_path = Path(db_path).expanduser()
         self._db_path.parent.mkdir(parents=True, exist_ok=True)
-        self._conn: Optional[sqlite3.Connection] = None
+        self._conn: sqlite3.Connection | None = None
         self._lock = asyncio.Lock()
         self._ready = False
         self._half_life = half_life_days * 24 * 3600
@@ -131,7 +131,7 @@ class HDCVectorStoreL2:
             self._ready = True
         return self._conn
 
-    async def memorize(self, fact: CortexFactModel, fact_type: Optional[str] = None) -> None:
+    async def memorize(self, fact: CortexFactModel, fact_type: str | None = None) -> None:
         """Encode and store a multi-tenant CortexFactModel as a Hypervector."""
         conn = self._get_conn()
 
@@ -196,8 +196,8 @@ class HDCVectorStoreL2:
         project_id: str,
         query: str,
         limit: int = 5,
-        fact_type: Optional[str] = None,
-        inhibit_ids: Optional[list[str]] = None,
+        fact_type: str | None = None,
+        inhibit_ids: list[str] | None = None,
     ) -> list[CortexFactModel]:
         """Recuperación particionada Zero-Trust con Inhibición de Vectores Tóxicos.
 
@@ -251,7 +251,7 @@ class HDCVectorStoreL2:
         return final_facts[:limit]
 
     def _fetch_toxic_hvs(
-        self, conn: sqlite3.Connection, inhibit_ids: Optional[list[str]]
+        self, conn: sqlite3.Connection, inhibit_ids: list[str] | None
     ) -> list[np.ndarray]:
         """Fetch toxic vectors for inhibition."""
         toxic_hvs = []
@@ -337,7 +337,7 @@ class HDCVectorStoreL2:
         self,
         query: str,
         limit: int = 5,
-        project: Optional[str] = None,
+        project: str | None = None,
         tenant_id: str = "default",
     ) -> list[CortexFactModel]:
         """Backward-compatible recall."""

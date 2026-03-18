@@ -37,7 +37,6 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from typing import Optional
 
 from cortex.extensions.thinking.fusion_models import (
     ModelResponse,
@@ -97,7 +96,7 @@ class ByzantineVerdict:
         n = self.total_count
         return (n - 1) // 3 if n > 0 else 0
 
-    def best_response(self) -> Optional[ModelResponse]:
+    def best_response(self) -> ModelResponse | None:
         """Response with highest trust × reputation."""
         if not self.trusted_responses:
             return None
@@ -124,7 +123,7 @@ class WBFTConsensus:
         byzantine_fraction: float = 1 / 3,
         outlier_threshold: float = 0.15,
         min_responses: int = 2,
-        domain_weights: Optional[dict[str, dict[str, float]]] = None,
+        domain_weights: dict[str, dict[str, float]] | None = None,
         reputation_decay: float = 0.95,
     ):
         """
@@ -145,8 +144,8 @@ class WBFTConsensus:
         self,
         responses: list[ModelResponse],
         *,
-        history: Optional[ThinkingHistory] = None,
-        domain: Optional[str] = None,
+        history: ThinkingHistory | None = None,
+        domain: str | None = None,
     ) -> ByzantineVerdict:
         """Run WBFT consensus on a list of model responses.
 
@@ -334,8 +333,8 @@ class WBFTConsensus:
     def _get_reputation_weights(
         self,
         responses: list[ModelResponse],
-        history: Optional[ThinkingHistory],
-        domain: Optional[str],
+        history: ThinkingHistory | None,
+        domain: str | None,
     ) -> tuple[dict[str, float], dict[str, float]]:
         """Extract reputation weights and compute final effective weight with multipliers.
 

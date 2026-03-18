@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-from typing import Optional
 
 __all__ = [
     "get_cortex_dir",
@@ -77,7 +76,7 @@ def get_python_executable() -> str:
     return sys.executable
 
 
-def get_service_dir() -> Optional[Path]:
+def get_service_dir() -> Path | None:
     """Return the platform-specific user service directory.
 
     - macOS: ``~/Library/LaunchAgents``

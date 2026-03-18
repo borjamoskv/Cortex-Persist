@@ -16,7 +16,6 @@ import random
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
 
 # ── Commit type detection heuristics ──────────────────────────────────────────
 
@@ -278,7 +277,7 @@ class CommitPoet:
         diff_summary: str,
         files: list[str],
         *,
-        commit_type: Optional[str] = None,
+        commit_type: str | None = None,
     ) -> str:
         """Generate an original commit message from staged change metadata.
 
@@ -540,8 +539,8 @@ def generate_commit_message(
     diff_summary: str,
     files: list[str],
     *,
-    commit_type: Optional[str] = None,
-    seed: Optional[int] = None,
+    commit_type: str | None = None,
+    seed: int | None = None,
 ) -> str:
     """Convenience function — generate a single commit message.
 

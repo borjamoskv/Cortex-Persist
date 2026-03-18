@@ -10,7 +10,7 @@ import asyncio
 import logging
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
-from typing import Any, Optional
+from typing import Any
 
 from cortex.engine.models import Fact
 
@@ -37,7 +37,7 @@ class AnomalyHunterEngine:
         self.window = timedelta(hours=lookback_hours)
         self.anomalies: list[Anomaly] = []
 
-    def _get_fact_timestamp(self, fact_id: int) -> Optional[datetime]:
+    def _get_fact_timestamp(self, fact_id: int) -> datetime | None:
         """Helper para extraer timestamp de forma síncrona si es necesario
         (En la versión final usaremos el engine async directamente).
         """

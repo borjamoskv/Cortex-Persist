@@ -34,7 +34,7 @@ import os
 import sqlite3
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from typing import Any, Final, Optional
+from typing import Any, Final
 
 import aiosqlite
 
@@ -125,10 +125,10 @@ def connect(
     *,
     uri: bool = False,
     check_same_thread: bool = False,
-    row_factory: Optional[Any] = None,
+    row_factory: Any | None = None,
     timeout: int = CONNECT_TIMEOUT_S,
     read_only: bool = False,
-    isolation_level: Optional[str] = None,
+    isolation_level: str | None = None,
 ) -> sqlite3.Connection:
     """Create a hardened sync SQLite connection.
 

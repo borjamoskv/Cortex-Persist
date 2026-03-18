@@ -3,14 +3,14 @@
 import json
 import logging
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 __all__ = ["sync_fact_to_repo", "export_gitops_memory"]
 
 logger = logging.getLogger("cortex.extensions.sync.gitops")
 
 
-def _locate_repo_root(project_name: str) -> Optional[Path]:
+def _locate_repo_root(project_name: str) -> Path | None:
     """Intenta localizar la carpeta del proyecto en rutas estándar."""
     game_dir = Path.home() / "game" / project_name
     if game_dir.exists() and game_dir.is_dir():

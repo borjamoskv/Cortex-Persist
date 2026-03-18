@@ -73,7 +73,7 @@ class TrustLedger:
     """
 
     # Score parameters
-    QUORUM_MINIMUM: int = 2           # Min unique peers to reach baseline trust
+    QUORUM_MINIMUM: int = 2  # Min unique peers to reach baseline trust
     DECAY_HALF_LIFE_SECONDS: float = 86_400.0  # 24 h
 
     def __init__(self, require_signatures: bool = False) -> None:
@@ -121,6 +121,7 @@ class TrustLedger:
             else:
                 # Assume Arweave/WebCrypto URL-safe base64 modulus string
                 import base64
+
                 # Add padding if necessary
                 padded = public_key_n + "=" * ((4 - len(public_key_n) % 4) % 4)
                 decoded = base64.urlsafe_b64decode(padded)
@@ -190,12 +191,12 @@ class TrustLedger:
         unique_peers = self.unique_peer_count(tx_id)
 
         if unique_peers < self.QUORUM_MINIMUM:
-            logger.debug("TX %s below quorum (%d/%d)", tx_id[0:8], unique_peers, self.QUORUM_MINIMUM)
+            logger.debug(
+                "TX %s below quorum (%d/%d)", tx_id[0:8], unique_peers, self.QUORUM_MINIMUM
+            )
             return 0.0
 
-        raw_score = sum(
-            a.weight * self._decay_factor(a.timestamp, now) for a in attestations
-        )
+        raw_score = sum(a.weight * self._decay_factor(a.timestamp, now) for a in attestations)
         # Normalize: QUORUM_MINIMUM peers at weight=1.0 with no decay → score=1.0
         normalized = raw_score / max(self.QUORUM_MINIMUM, unique_peers)
         return max(0.0, min(1.0, normalized))

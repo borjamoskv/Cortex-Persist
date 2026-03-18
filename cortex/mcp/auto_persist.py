@@ -11,7 +11,7 @@ Copyright 2026 by borjamoskv.com — Apache-2.0
 from __future__ import annotations
 
 import logging
-from typing import Any, Optional
+from typing import Any
 
 __all__ = ["AutoPersistHook", "SessionFact"]
 
@@ -162,7 +162,7 @@ class AutoPersistHook:
         )
         return facts
 
-    async def persist(self, facts: Optional[list[SessionFact]] = None) -> list[int]:
+    async def persist(self, facts: list[SessionFact] | None = None) -> list[int]:
         """Persist detected facts to CORTEX. Returns list of stored fact IDs."""
         if facts is None:
             facts = self.analyze()
@@ -201,7 +201,7 @@ class AutoPersistHook:
         return ids
 
     @staticmethod
-    def _classify_message(msg_lower: str) -> Optional[str]:
+    def _classify_message(msg_lower: str) -> str | None:
         """Classify a message by its signal patterns using regex.
 
         Priority: error > decision > ghost (errors are most critical).

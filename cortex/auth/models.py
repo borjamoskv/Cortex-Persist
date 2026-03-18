@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional
 
 from cortex.auth.rbac import Permission
 
@@ -19,7 +18,7 @@ class APIKey:
     role: str
     permissions: list[str]
     created_at: str
-    last_used: Optional[str]
+    last_used: str | None
     is_active: bool
     rate_limit: int
 

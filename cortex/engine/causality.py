@@ -120,12 +120,11 @@ def hash_event(event: LedgerEvent) -> str:
         "trust_score": event.trust_score,
         "created_at": event.created_at,
         "tainted": event.tainted,
-        "peer_attestations": sorted(event.peer_attestations)
+        "peer_attestations": sorted(event.peer_attestations),
     }
     payload = json.dumps(data, separators=(",", ":"), sort_keys=True).encode("utf-8")
     digest = hashlib.sha256(payload).digest()
     return base64.urlsafe_b64encode(digest).decode("ascii").rstrip("=")
-
 
 
 class CausalGraph:

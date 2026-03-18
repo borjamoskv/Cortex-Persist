@@ -13,7 +13,7 @@ EXTENSIONS = [
 ]
 
 def process_file(filepath):
-    with open(filepath, "r") as f:
+    with open(filepath) as f:
         content = f.read()
 
     original = content

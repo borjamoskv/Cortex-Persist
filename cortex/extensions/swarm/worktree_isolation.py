@@ -43,11 +43,11 @@ def _base_payload(
     return payload
 
 
-def _emit_worktree_signal(
+def _emit_worktree_signal_sync(
     event_type: str,
     payload: dict[str, Any],
 ) -> None:
-    """Fire-and-forget signal emission. Never blocks, never raises."""
+    """Fire-and-forget signal emission logic."""
     try:
         from cortex.database.core import connect as db_connect
         from cortex.extensions.signals.bus import SignalBus
@@ -71,6 +71,18 @@ def _emit_worktree_signal(
             "Worktree signal emission failed for %s",
             event_type,
         )
+
+
+def _emit_worktree_signal(
+    event_type: str,
+    payload: dict[str, Any],
+) -> None:
+    """Fire-and-forget signal emission. Never blocks the loop, never raises."""
+    try:
+        loop = asyncio.get_running_loop()
+        loop.run_in_executor(None, _emit_worktree_signal_sync, event_type, payload)
+    except RuntimeError:
+        _emit_worktree_signal_sync(event_type, payload)
 
 
 # ── Error Type ───────────────────────────────────────────────────────
@@ -136,12 +148,10 @@ async def isolated_worktree(
     base_dir.mkdir(parents=True, exist_ok=True)
 
     safe_name = branch_name.replace("/", "_").replace("\\", "_")
-    unique_id = f"{os.getpid()}_{int(time.time() * 1000) % 10000}"
-    worktree_path = base_dir / f"{WORKTREE_DIR_PREFIX}{safe_name}_{unique_id}"
-    ephemeral_branch = f"tmp_{safe_name}_{unique_id}"
+    worktree_path = base_dir / f"{WORKTREE_DIR_PREFIX}{safe_name}_{os.getpid()}"
 
     def _payload(**extra: Any) -> dict[str, Any]:
-        return _base_payload(ephemeral_branch, str(worktree_path), **extra)
+        return _base_payload(branch_name, str(worktree_path), **extra)
 
     logger.info(
         "[WORKTREE] Creating: %s (branch: %s)",
@@ -165,20 +175,33 @@ async def isolated_worktree(
             "worktree",
             "add",
             "-b",
-            ephemeral_branch,
-            str(worktree_path),
             branch_name,
+            str(worktree_path),
         )
         if rc != 0:
-            # Fallback: if somehow the ephemeral branch exists, we have a bigger collision problem,
-            # but usually this happens if the base branch (branch_name) is what we should just checkout.
-            # (Ω₂ Infrastructure Refinement)
-            _emit_worktree_signal(
-                "worktree:isolation_failed",
-                _payload(error=stderr.decode().strip()),
-            )
-            error_msg = f"Worktree add failed: {stderr.decode().strip()}"
-            raise WorktreeIsolationError(error_msg)
+            if b"already exists" in stderr:
+                # Branch exists — attach without -b
+                # (Ω₂ Infrastructure Refinement)
+                rc2, _, stderr2 = await _git(
+                    "worktree",
+                    "add",
+                    str(worktree_path),
+                    branch_name,
+                )
+                if rc2 != 0:
+                    _emit_worktree_signal(
+                        "worktree:isolation_failed",
+                        _payload(error=stderr2.decode().strip()),
+                    )
+                    error_msg = f"Worktree add failed: {stderr2.decode().strip()}"
+                    raise WorktreeIsolationError(error_msg)
+            else:
+                _emit_worktree_signal(
+                    "worktree:isolation_failed",
+                    _payload(error=stderr.decode().strip()),
+                )
+                error_msg = f"Worktree add failed: {stderr.decode().strip()}"
+                raise WorktreeIsolationError(error_msg)
 
         # ── Phase 1.5: Git Configuration ──────────────────────────
         # Ensure the isolated environment has a valid user and other basics
@@ -294,30 +317,22 @@ async def cleanup_all_worktrees(base_path: str | Path | None = None) -> int:
     if not base_dir.exists():
         return 0
 
+    count = 0
     # List all worktrees according to git
     rc, stdout, _ = await _git("worktree", "list", "--porcelain")
     if rc != 0:
         return 0
 
-    # Single-pass parse: filter + slice in one iteration
-    worktree_paths = [
-        line[10:]
-        for line in stdout.decode().splitlines()
-        if line.startswith("worktree ")
-    ]
+    lines = stdout.decode().splitlines()
+    worktree_paths = [line[10:] for line in lines if line.startswith("worktree ")]
 
-    # Concurrent removal: all git ops are independent — gather collapses N round-trips to 1 batch
-    async def _remove_one(path_str: str) -> int:
+    for path_str in worktree_paths:
         path = Path(path_str)
-        if not path.name.startswith(WORKTREE_DIR_PREFIX):
-            return 0
-        logger.info("[WORKTREE] Force cleaning: %s", path)
-        await _git("worktree", "remove", "--force", path_str)
-        if path.exists():
-            shutil.rmtree(path, ignore_errors=True)
-        return 1
-
-    results = await asyncio.gather(*(_remove_one(p) for p in worktree_paths))
-    count = sum(results)
+        if path.name.startswith(WORKTREE_DIR_PREFIX):
+            logger.info("[WORKTREE] Force cleaning: %s", path)
+            await _git("worktree", "remove", "--force", path_str)
+            if path.exists():
+                shutil.rmtree(path, ignore_errors=True)
+            count += 1
 
     return count

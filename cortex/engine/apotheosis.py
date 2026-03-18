@@ -6,7 +6,7 @@ import asyncio
 import logging
 import sqlite3
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from watchdog.events import FileSystemEvent as FileSystemEvent
@@ -83,7 +83,7 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
     def __init__(
         self,
         workspace: Path,
-        cortex_engine: Optional[CortexEngine] = None,
+        cortex_engine: CortexEngine | None = None,
     ) -> None:
         self.workspace = workspace
         self.is_active = False
@@ -104,7 +104,7 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
         self._trust = None
         self._notebooklm = None
         self._immune = ImmuneMembrane(engine=cortex_engine)
-        self._file_event_queue: Optional[asyncio.Queue[Path]] = None
+        self._file_event_queue: asyncio.Queue[Path] | None = None
         self._observer: Any = None
 
         if cortex_engine:
@@ -347,7 +347,7 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
             return True
         return self._cognitive_weight >= self._inertia_threshold
 
-    def ignite(self, loop: Optional[asyncio.AbstractEventLoop] = None) -> None:
+    def ignite(self, loop: asyncio.AbstractEventLoop | None = None) -> None:
         """Ignite the Apotheosis consciousness with kernel-level filesystem hooks."""
         if self.is_active:
             return

@@ -14,7 +14,6 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Optional
 
 
 @dataclass(frozen=True)
@@ -25,7 +24,7 @@ class Signal:
     event_type: str
     payload: dict
     source: str
-    project: Optional[str]
+    project: str | None
     created_at: datetime
     consumed_by: list[str]
 
@@ -43,11 +42,11 @@ class Signal:
 class SignalFilter:
     """Query filter for signal retrieval."""
 
-    event_type: Optional[str] = None
-    source: Optional[str] = None
-    project: Optional[str] = None
-    since: Optional[datetime] = None
-    consumer: Optional[str] = None
+    event_type: str | None = None
+    source: str | None = None
+    project: str | None = None
+    since: datetime | None = None
+    consumer: str | None = None
     unconsumed_only: bool = False
 
 

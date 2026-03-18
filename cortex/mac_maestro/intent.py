@@ -1,17 +1,17 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 
 @dataclass(frozen=True)
 class MacAction:
     action: str  # click, type, select, inspect, hotkey
     app: str
-    role: Optional[str] = None
-    title: Optional[str] = None
-    identifier: Optional[str] = None
-    payload: Optional[Any] = None
+    role: str | None = None
+    title: str | None = None
+    identifier: str | None = None
+    payload: Any | None = None
     unsafe_override: bool = False
     metadata: dict[str, Any] = field(default_factory=dict)
 
@@ -20,5 +20,5 @@ class MacAction:
 class MacIntent:
     goal: str
     actions: list[MacAction]
-    correlation_id: Optional[str] = None
-    trace_id: Optional[str] = None
+    correlation_id: str | None = None
+    trace_id: str | None = None

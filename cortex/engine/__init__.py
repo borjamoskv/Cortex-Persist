@@ -38,8 +38,6 @@ except ImportError:
             return {"status": "unhealthy", "reason": "No Health extension"}
 
 
-from cortex.engine.async_engine import AsyncCortexEngine  # noqa: E402
-from cortex.engine.optimized import SovereignTLRUCache  # noqa: E402
 from cortex.migrations.core import run_migrations_async
 from cortex.telemetry.metrics import metrics
 
@@ -278,8 +276,9 @@ class CortexEngine(
             raise RuntimeError("Connection not initialized. Call get_conn() first.")
         return self._conn
 
-    def get_connection(self) -> aiosqlite.Connection:
-        return self.get_conn()  # type: ignore[reportReturnType]
+    async def get_connection(self) -> aiosqlite.Connection:
+        """Async alias for backward compatibility — delegates to get_conn()."""
+        return await self.get_conn()
 
     def _get_sync_conn(self):
         """Devuelve una conexión síncrona para procesos bloqueantes."""
@@ -299,25 +298,38 @@ class CortexEngine(
     # ─── Synchronous Wrappers (SDK Parity) ────────────────────────
 
     def _run_sync(self, coro):
-        """Execute a coroutine synchronously, thread-safe."""
+        """Execute a coroutine synchronously. CLI/SDK-only shim.
+
+        INVARIANT: Must NOT be called from within a running event loop.
+        aiosqlite connections are bound to their origin event loop and
+        are NOT thread-safe across event loops. Calling this from an
+        async context spawns a second loop in a new thread that shares
+        the same connection — undefined behavior.
+        """
         import threading
 
         try:
             asyncio.get_running_loop()
-        except RuntimeError:
+            raise RuntimeError(
+                "_run_sync called from inside a running event loop. "
+                "Use 'await' directly. This method is CLI/SDK only."
+            )
+        except RuntimeError as exc:
+            if "_run_sync" in str(exc):
+                raise
+            # No running loop — safe path
             return asyncio.run(coro)
 
-        result = None
-        exception = None
+        result = None  # pragma: no cover — unreachable, kept for clarity
+        exception = None  # pragma: no cover
 
-        def _worker():
+        def _worker():  # pragma: no cover
             nonlocal result, exception
             try:
                 result = asyncio.run(coro)
             except asyncio.CancelledError:
                 raise
             except Exception as e:
-                # noqa: BLE001 — sync wrapper must catch all async errors to propagate
                 exception = e
 
         t = threading.Thread(target=_worker)
@@ -570,11 +582,15 @@ class CortexEngine(
             await self._conn.close()
             self._conn = None
 
-        # Clean up Wave 6 references
-        self.mac_maestro = None  # type: ignore
-        self.ledger_writer = None  # type: ignore
-        self.enrichment_queue = None  # type: ignore
-        self.ledger_store = None  # type: ignore
+        # Clean up Wave 6 references — guarded to allow idempotent close()
+        if hasattr(self, "mac_maestro"):
+            self.mac_maestro = None  # type: ignore
+        if hasattr(self, "ledger_writer"):
+            self.ledger_writer = None  # type: ignore
+        if hasattr(self, "enrichment_queue"):
+            self.enrichment_queue = None  # type: ignore
+        if hasattr(self, "ledger_store"):
+            self.ledger_store = None  # type: ignore
 
         self._ledger = None
 
@@ -583,10 +599,3 @@ class CortexEngine(
 
     async def __aexit__(self, *args):
         await self.close()
-__all__ = [
-    "CortexEngine",
-    "AsyncCortexEngine",
-    "SovereignTLRUCache",
-    "CompoundReport",
-    "CompoundYieldTracker",
-]

@@ -8,7 +8,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional
 
 __all__ = [
     "Confidence",
@@ -76,4 +75,4 @@ class FactNode:
     taint_status: TaintStatus = TaintStatus.CLEAN
     parents: list[str] = field(default_factory=list)
     children: list[str] = field(default_factory=list)
-    source: Optional[str] = None
+    source: str | None = None

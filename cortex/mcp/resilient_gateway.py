@@ -15,7 +15,7 @@ import time
 import urllib.error
 import urllib.request
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 try:
     import aiohttp
@@ -75,10 +75,10 @@ class FetchCascadeEvent:
     """Telemetry event for a single cascade resolution."""
 
     url: str
-    resolved_by: Optional[str]
+    resolved_by: str | None
     depth: int
     latency_ms: float
-    status_code: Optional[int] = None
+    status_code: int | None = None
     errors: list[str] = field(default_factory=list)
 
 
@@ -294,7 +294,7 @@ def _extract_with_selector(html: str, css_selector: str) -> str:
 
 # ─── Singleton Fetcher ──────────────────────────────────────────────
 
-_fetcher: Optional[ResilientFetcher] = None
+_fetcher: ResilientFetcher | None = None
 
 
 def _get_fetcher() -> ResilientFetcher:

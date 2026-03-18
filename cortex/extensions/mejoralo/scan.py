@@ -1,5 +1,3 @@
-from typing import Optional
-
 """
 CORTEX v5.0 — MEJORAlo X-Ray Scanner.
 
@@ -37,6 +35,10 @@ from cortex.extensions.mejoralo.utils import detect_stack
 __all__ = ["scan", "MejoraloScanner"]
 
 logger = logging.getLogger("cortex.extensions.mejoralo")
+
+# Ω₁₃ Thermodynamic cap: prevent unbounded process forking.
+# Each worker ≈ 50MB RSS. Cap at min(cpu_count, 4) to balance parallelism vs memory.
+_MAX_SCAN_WORKERS: int = min(os.cpu_count() or 2, 4)
 
 _WEIGHT_MAP = {"critical": 40, "high": 35, "medium": 15, "low": 10}
 
@@ -174,7 +176,7 @@ def _analyze_polyglot_nesting(lines: list[str], rel: str) -> list[str]:
 
 def _analyze_single_file(
     sf: Path, root: Path
-) -> tuple[int, Optional[str], list[str], list[str], list[str]]:
+) -> tuple[int, str | None, list[str], list[str], list[str]]:
     """Analyse a single file and return its metrics."""
     try:
         content = sf.read_text(errors="replace")
@@ -291,7 +293,8 @@ def _detect_code_ghosts(source_files: list[Path], root: Path) -> list[str]:
                 f"{Path(f).name}:{n}:{ln}" for f, n, ln in occurrences if f != fn or n != name
             )
             findings.append(
-                f"{fn}:{lineno} → code_ghost: ({name}) Structural clone matched with [{other_locations}]"
+                f"{fn}:{lineno} → code_ghost: ({name}) "
+                f"Structural clone matched with [{other_locations}]"
             )
 
     return findings
@@ -313,7 +316,7 @@ def _analyze_files(
     security_findings: list[str] = []
     complexity_findings: list[str] = []
 
-    with ProcessPoolExecutor() as executor:
+    with ProcessPoolExecutor(max_workers=_MAX_SCAN_WORKERS) as executor:
         # Parallel analysis of files
         results = executor.map(_analyze_single_file, source_files, [root] * len(source_files))
 

@@ -14,7 +14,7 @@ All operations use numpy int8 arrays for memory efficiency:
 
 from __future__ import annotations
 
-from typing import Final, Optional
+from typing import Final
 
 import numpy as np
 from numpy.typing import NDArray
@@ -34,7 +34,7 @@ DEFAULT_DIM: Final[int] = 8000
 HVType = NDArray[np.int8]
 
 
-def random_bipolar(dim: int = DEFAULT_DIM, *, seed: Optional[int] = None) -> HVType:
+def random_bipolar(dim: int = DEFAULT_DIM, *, seed: int | None = None) -> HVType:
     """Generate a random bipolar hypervector (±1).
 
     Args:

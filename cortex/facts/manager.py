@@ -8,7 +8,7 @@ from pydantic import ValidationError
 
 from cortex.engine.models import Fact, row_to_fact
 from cortex.engine.store_validators import validate_content
-from cortex.immunity.haiku import HaikuGuard
+from cortex.immune.haiku import HaikuGuard
 from cortex.utils.canonical import now_iso
 
 if TYPE_CHECKING:

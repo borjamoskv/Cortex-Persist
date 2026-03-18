@@ -14,7 +14,7 @@ import logging
 import sqlite3
 import time
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import numpy as np
 
@@ -31,7 +31,7 @@ __all__ = ["SovereignVectorStoreL2"]
 
 # Lazy imports to avoid circular deps at module load
 # L2HybridSearch and PIISanitizer only needed at runtime
-_L2_HYBRID_SEARCH_AVAILABLE: Optional[bool] = None  # None = not yet checked
+_L2_HYBRID_SEARCH_AVAILABLE: bool | None = None  # None = not yet checked
 
 logger = logging.getLogger("cortex.memory.sqlite_vec_store")
 
@@ -75,7 +75,7 @@ class SovereignVectorStoreL2:
         self._encoder = encoder
         self._db_path = Path(db_path).expanduser()
         self._db_path.parent.mkdir(parents=True, exist_ok=True)
-        self._conn: Optional[sqlite3.Connection] = None
+        self._conn: sqlite3.Connection | None = None
         self._lock = asyncio.Lock()
         self._ready = False
         self._half_life = half_life_days * 24 * 3600
@@ -380,7 +380,7 @@ class SovereignVectorStoreL2:
         project_id: str,
         query: str,
         limit: int = 5,
-        layer: Optional[str] = None,
+        layer: str | None = None,
     ) -> list[CortexFactModel]:
         """[C5] Recuperación particionada Zero-Trust con ranking SQL nativo."""
         conn = self._get_conn()
@@ -488,7 +488,7 @@ class SovereignVectorStoreL2:
         self,
         query: str,
         limit: int = 5,
-        project: Optional[str] = None,
+        project: str | None = None,
         tenant_id: str = "default",
     ) -> list[CortexFactModel]:
         """Backward-compatible recall for legacy callers. Maps to recall_secure."""

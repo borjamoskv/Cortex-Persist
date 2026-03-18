@@ -1,5 +1,3 @@
-from typing import Optional
-
 """
 CORTEX v5.0 — Timing Router.
 """
@@ -61,7 +59,7 @@ async def record_heartbeat(
 @router.get("/v1/time/today", response_model=TimeSummaryResponse)
 async def time_today(
     request: Request,
-    project: Optional[str] = Query(None),
+    project: str | None = Query(None),
     auth: AuthResult = Depends(require_permission("read")),
 ) -> TimeSummaryResponse:
     """Get today's time tracking summary."""
@@ -100,7 +98,7 @@ async def time_today(
 @router.get("/v1/time", response_model=TimeSummaryResponse)
 async def time_report(
     request: Request,
-    project: Optional[str] = Query(None),
+    project: str | None = Query(None),
     days: int = Query(7),
     auth: AuthResult = Depends(require_permission("read")),
 ) -> TimeSummaryResponse:

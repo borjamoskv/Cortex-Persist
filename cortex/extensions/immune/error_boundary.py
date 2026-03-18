@@ -24,7 +24,7 @@ import asyncio
 import functools
 import inspect
 import logging
-from typing import Any, Optional, TypeVar
+from typing import Any, TypeVar
 
 logger = logging.getLogger("cortex.extensions.immune.error_boundary")
 
@@ -61,7 +61,7 @@ class ErrorBoundary:
         *,
         project: str = "CORTEX",
         reraise: bool = True,
-        extra_meta: Optional[dict[str, Any]] = None,
+        extra_meta: dict[str, Any] | None = None,
     ) -> None:
         self._source = source
         self._project = project
@@ -75,8 +75,8 @@ class ErrorBoundary:
 
     async def __aexit__(
         self,
-        exc_type: Optional[type[BaseException]],
-        exc_val: Optional[BaseException],
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
         exc_tb: Any,
     ) -> bool:
         if exc_val is None or isinstance(exc_val, _PASSTHROUGH):
@@ -94,8 +94,8 @@ class ErrorBoundary:
 
     def __exit__(
         self,
-        exc_type: Optional[type[BaseException]],
-        exc_val: Optional[BaseException],
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
         exc_tb: Any,
     ) -> bool:
         if exc_val is None or isinstance(exc_val, _PASSTHROUGH):
@@ -106,7 +106,7 @@ class ErrorBoundary:
 
     # ── Persistence ───────────────────────────────────────────────────
 
-    async def _persist(self, error: BaseException) -> Optional[int]:
+    async def _persist(self, error: BaseException) -> int | None:
         """Persist error to ghost pipeline (async path)."""
         try:
             from cortex.extensions.swarm.error_ghost_pipeline import ErrorGhostPipeline
@@ -159,7 +159,7 @@ def error_boundary(
     *,
     project: str = "CORTEX",
     reraise: bool = True,
-    extra_meta: Optional[dict[str, Any]] = None,
+    extra_meta: dict[str, Any] | None = None,
 ) -> Any:
     """Decorator that wraps a function with an ErrorBoundary.
 

@@ -33,7 +33,7 @@ import platform
 from collections.abc import Callable, Coroutine
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger("compaction-sidecar")
 
@@ -200,7 +200,7 @@ class MemoryPressureMonitor:
         interval: float = 5.0,
         sys_free_threshold: float = 0.15,
         malloc_free_threshold: float = 0.10,
-        alert_callback: Optional[AlertCallback] = None,
+        alert_callback: AlertCallback | None = None,
         use_legion: bool = False,
         max_workers: int = 1,
     ) -> None:
@@ -213,11 +213,11 @@ class MemoryPressureMonitor:
             max_workers=max_workers, thread_name_prefix="compaction-sidecar"
         )
         self._running = False
-        self._task: Optional[asyncio.Task[None]] = None
+        self._task: asyncio.Task[None] | None = None
 
     # ── Public API ────────────────────────────────────────────────────────────
 
-    def start(self, loop: Optional[asyncio.AbstractEventLoop] = None) -> None:
+    def start(self, loop: asyncio.AbstractEventLoop | None = None) -> None:
         """Schedule the monitoring coroutine on *loop* (or the running loop).
 
         Safe to call multiple times — idempotent.

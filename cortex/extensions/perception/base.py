@@ -11,7 +11,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Final, Optional
+from typing import Final
 
 __all__ = [
     "BehavioralSnapshot",
@@ -90,7 +90,7 @@ class FileEvent:
     path: str
     event_type: str  # created, modified, deleted, moved
     role: str  # test, config, docs, asset, source, unknown
-    project: Optional[str]
+    project: str | None
     timestamp: float
 
     @property
@@ -106,7 +106,7 @@ class BehavioralSnapshot:
     intent: str
     emotion: str  # frustrated, flow, curious, cautious, confident, neutral
     confidence: str  # C1-C5
-    project: Optional[str]
+    project: str | None
     event_count: int
     window_seconds: float
     top_files: list[str]
@@ -159,7 +159,7 @@ def classify_file(path: str) -> str:
     return "unknown"
 
 
-def infer_project_from_path(path: str, workspace_root: Optional[str] = None) -> Optional[str]:
+def infer_project_from_path(path: str, workspace_root: str | None = None) -> str | None:
     """
     Infer project name from file path with support for monorepo structures.
     Recognizes 'packages/', 'apps/', and 'services/' sub-layouts.
@@ -174,7 +174,7 @@ def infer_project_from_path(path: str, workspace_root: Optional[str] = None) -> 
     return _infer_from_parents(p)
 
 
-def _infer_from_workspace(p: Path, root: Path) -> Optional[str]:
+def _infer_from_workspace(p: Path, root: Path) -> str | None:
     """Extract project name relative to workspace root."""
     try:
         rel = p.relative_to(root)
@@ -193,7 +193,7 @@ def _infer_from_workspace(p: Path, root: Path) -> Optional[str]:
         return None
 
 
-def _infer_from_parents(p: Path) -> Optional[str]:
+def _infer_from_parents(p: Path) -> str | None:
     """Fallback: scan up parents until we find a common project marker. (Complexity Crushed O(1))"""
     ignore_dirs = {"src", "lib", "internal", "pkg", "docs", "tests", ".", "/"}
     # Use next() with a generator expression to dramatically reduce cyclomatic complexity

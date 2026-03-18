@@ -199,7 +199,7 @@ class TestContinuityVerifier:
         assert stable > unstable
 
     def test_score_clamped_to_unit_interval(self, verifier: ContinuityVerifier) -> None:
-        for (length, gaps, owner) in [
+        for length, gaps, owner in [
             (0, 10, False),
             (100, 0, True),
         ]:

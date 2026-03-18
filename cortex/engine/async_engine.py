@@ -5,7 +5,7 @@ import sqlite3
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import aiosqlite
 
@@ -39,19 +39,34 @@ class AsyncCortexEngine(
         self,
         pool: CortexConnectionPool,
         db_path: str,
-        writer: Optional[SqliteWriteWorker] = None,
+        writer: SqliteWriteWorker | None = None,
     ):
         self._pool = pool
         self._db_path = Path(db_path)
         self._writer = writer
-        self._embedder: Optional[LocalEmbedder] = None
-        self._ledger: Optional[ImmutableLedger] = None
-        self.vault: Optional[Any] = None
+        self._embedder: LocalEmbedder | None = None
+        self._ledger: ImmutableLedger | None = None
+        self.vault: Any | None = None
+        self._bridge_task: asyncio.Task | None = None
 
         from cortex.extensions.cuatrida.orchestrator import CuatridaOrchestrator
 
         self._cuatrida = CuatridaOrchestrator(self)
-        self._trust_registry: Optional[Any] = None
+        self._trust_registry: Any | None = None
+
+    async def entrain_causal_bridge(self):
+        """Ω₁₃: Activate the Autonomous Causal Bridge."""
+        from cortex.engine.causality import automated_taint_bridge
+
+        if self._bridge_task is not None:
+            return
+
+        async with self.session() as conn:
+            # Note: automated_taint_bridge should probably take the pool
+            # or we should be careful with connection lifecycle.
+            # For simplicity, we'll implement it to listen on the pool.
+            self._bridge_task = asyncio.create_task(automated_taint_bridge(conn))
+            logger.info("Ω₁₃ [BRIDGE] Causal Taint Bridge entrained in AsyncCortexEngine.")
 
     @property
     def cuatrida(self) -> Any:
@@ -74,7 +89,7 @@ class AsyncCortexEngine(
             return await graph.propagate_taint(fact_id, tenant_id=tenant_id)
 
     @property
-    def writer(self) -> Optional[SqliteWriteWorker]:
+    def writer(self) -> SqliteWriteWorker | None:
         return self._writer
 
     async def write(self, sql: str, params: tuple[Any, ...] = ()) -> Result[int, str]:
@@ -94,7 +109,7 @@ class AsyncCortexEngine(
 
     async def _try_execute_write(
         self, sql: str, params: tuple[Any, ...], attempt: int, max_retries: int
-    ) -> Optional[Result[int, str]]:
+    ) -> Result[int, str] | None:
         try:
             result = await self._execute_write(sql, params)
             if result:
@@ -105,7 +120,7 @@ class AsyncCortexEngine(
             await self._backoff(attempt)
         return None
 
-    async def _execute_write(self, sql: str, params: tuple[Any, ...]) -> Optional[Result[int, str]]:
+    async def _execute_write(self, sql: str, params: tuple[Any, ...]) -> Result[int, str] | None:
         async with self.session() as conn:
             cursor = await conn.execute(sql, params)
             await conn.commit()
@@ -201,13 +216,13 @@ class AsyncCortexEngine(
     async def verify_ledger(self) -> dict[str, Any]:
         return await self._get_ledger().verify_integrity_async()
 
-    async def create_checkpoint(self) -> Optional[int]:
+    async def create_checkpoint(self) -> int | None:
         return await self._get_ledger().create_checkpoint_async()
 
     async def verify_vote_ledger(self) -> dict[str, Any]:
         return await super().verify_vote_ledger()
 
-    async def get_graph(self, project: Optional[str] = None, limit: int = 50) -> dict[str, Any]:
+    async def get_graph(self, project: str | None = None, limit: int = 50) -> dict[str, Any]:
         async with self.session() as conn:
             return await _get_graph(conn, project, limit)
 

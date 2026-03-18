@@ -217,8 +217,8 @@ class GatewayRouter:
                     extra_meta={"request_id": request.request_id, "source": request.source},
                 )
                 await boundary._persist(exc)
-            except Exception:  # noqa: BLE001 — boundary persistence must never break gateway
-                pass
+            except Exception as e:  # noqa: BLE001 — boundary persistence must never break gateway
+                logger.critical("Gateway ErrorBoundary failed to persist exception: %s", e)
             return GatewayResponse(
                 ok=False,
                 error=str(exc),

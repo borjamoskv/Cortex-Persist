@@ -11,7 +11,7 @@ import logging
 import os
 import time
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import httpx
 
@@ -45,7 +45,7 @@ class MoltbookClient:
     Rate-limit aware: reads X-RateLimit-* headers, respects Retry-After.
     """
 
-    def __init__(self, api_key: Optional[str] = None, proxy: Optional[str] = None):
+    def __init__(self, api_key: str | None = None, proxy: str | None = None):
         self._api_key = api_key or self._try_load_api_key()
         self._rate_remaining: int = 60
         self._rate_reset: float = 0.0
@@ -55,7 +55,7 @@ class MoltbookClient:
         self._suspended_until = 0.0
         self._suspended_reason = ""
 
-    def _try_load_api_key(self) -> Optional[str]:
+    def _try_load_api_key(self) -> str | None:
         """Attempt to load API key, return None if not found."""
         env_key = os.environ.get("MOLTBOOK_API_KEY")
         if env_key:
@@ -83,7 +83,7 @@ class MoltbookClient:
         self,
         method: str,
         path: str,
-        data: Optional[dict] = None,
+        data: dict | None = None,
         auth: bool = True,
     ) -> dict[str, Any]:
         """Make an async HTTP request to the Moltbook API."""

@@ -9,7 +9,6 @@ from __future__ import annotations
 from collections import defaultdict
 from collections.abc import Callable
 from pathlib import Path
-from typing import Optional
 
 from cortex.extensions.perception.base import (
     MIN_EVENTS_FOR_INFERENCE,
@@ -169,7 +168,7 @@ def infer_behavior(events: list[FileEvent]) -> BehavioralSnapshot:
     )
 
 
-def _dominant_project(events: list[FileEvent]) -> Optional[str]:
+def _dominant_project(events: list[FileEvent]) -> str | None:
     """Find the most common project in an event list."""
     projects = defaultdict(int)
     for e in events:
@@ -195,7 +194,7 @@ def _top_files(events: list[FileEvent], n: int) -> list[str]:
     return [f for f, _ in sorted(counts.items(), key=lambda x: -x[1])[:n]]
 
 
-def _generate_summary(intent: str, emotion: str, count: int, project: Optional[str]) -> str:
+def _generate_summary(intent: str, emotion: str, count: int, project: str | None) -> str:
     """Generate a human-readable summary."""
     intents = {
         "debugging": "Debugging/testing session detected",

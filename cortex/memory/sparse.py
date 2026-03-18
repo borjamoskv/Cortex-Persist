@@ -17,7 +17,6 @@ from __future__ import annotations
 
 import logging
 import math
-from typing import Optional
 
 logger = logging.getLogger("cortex.memory.sparse")
 
@@ -38,7 +37,7 @@ class MushroomBodyEncoder:
         self._expansion = expansion_factor
         self._sparsity = sparsity
         self._seed = seed
-        self._projection: Optional[list[list[float]]] = None
+        self._projection: list[list[float]] | None = None
 
     def _init_projection(self, input_dim: int) -> list[list[float]]:
         """Initialize random projection matrix (PN → KC mapping).

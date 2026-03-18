@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, Optional
+from typing import Any
 
 
 class VectorStoreProvider(ABC):
@@ -27,8 +27,8 @@ class VectorStoreProvider(ABC):
         collection_name: str,
         vector: list[float],
         limit: int = 5,
-        query_filter: Optional[Any] = None,
-        score_threshold: Optional[float] = None,
+        query_filter: Any | None = None,
+        score_threshold: float | None = None,
     ) -> list[dict[str, Any]]:
         """Query for similar vectors."""
         pass

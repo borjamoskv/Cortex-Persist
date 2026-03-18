@@ -19,7 +19,7 @@ os.environ.setdefault("DASHSCOPE_API_KEY", "test")
 
 import pytest
 
-from cortex.extensions.llm._models import BaseProvider, CortexPrompt, IntentProfile
+from cortex.extensions.llm._models import BaseProvider, IntentProfile
 from cortex.extensions.llm._presets import (
     _PRESETS_CACHE,
     get_providers_by_cost,
@@ -210,7 +210,7 @@ class TestRouterOrdering:
                 _providers["deepseek"],
             ],
         )
-        ordered = router._ordered_fallbacks(CortexPrompt(intent=IntentProfile.CODE))
+        ordered = router._ordered_fallbacks(IntentProfile.CODE)
         costs = [p.cost_class for p in ordered]
         # free < low < medium
         assert costs == ["free", "low", "medium"]
@@ -227,7 +227,7 @@ class TestRouterOrdering:
                 _providers["deepseek"],
             ],
         )
-        ordered = router._ordered_fallbacks(CortexPrompt(intent=IntentProfile.CODE))
+        ordered = router._ordered_fallbacks(IntentProfile.CODE)
         # Both are "low" cost, but deepseek=frontier, qwen=high
         names = [p.provider_name for p in ordered]
         assert names.index("deepseek") < names.index("qwen")

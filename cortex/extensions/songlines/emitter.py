@@ -11,7 +11,6 @@ import logging
 import os
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional
 
 from cortex.memory.hdc.codec import HDCEncoder
 from cortex.memory.hdc.item_memory import ItemMemory
@@ -26,7 +25,7 @@ class ResonanceEmitter:
     on the target file.
     """
 
-    def __init__(self, encoder: Optional[HDCEncoder] = None):
+    def __init__(self, encoder: HDCEncoder | None = None):
         self.encoder = encoder or HDCEncoder(ItemMemory())
         self.prefix = "user.cortex.ghost"
 

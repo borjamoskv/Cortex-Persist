@@ -1,5 +1,3 @@
-from typing import Optional
-
 """MCP Server Implementation.
 
 Core logic for the CORTEX MCP Trust Server.
@@ -280,7 +278,7 @@ def _register_ledger_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ig
 # ─── Factory ─────────────────────────────────────────────────────────
 
 
-def create_mcp_server(config: Optional[MCPServerConfig] = None) -> "FastMCP":  # type: ignore[reportInvalidTypeForm]
+def create_mcp_server(config: MCPServerConfig | None = None) -> "FastMCP":  # type: ignore[reportInvalidTypeForm]
     """Create and configure an optimized CORTEX MCP server instance.
 
     Each tool is registered via a dedicated helper, keeping this
@@ -347,7 +345,7 @@ _default_config = MCPServerConfig()
 mcp = create_mcp_server(_default_config)
 
 
-def run_server(config: Optional[MCPServerConfig] = None) -> None:
+def run_server(config: MCPServerConfig | None = None) -> None:
     """Start the CORTEX MCP server."""
     global mcp
     if config:

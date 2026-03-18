@@ -12,7 +12,7 @@ from __future__ import annotations
 import json
 import logging
 import re
-from typing import Any, Optional
+from typing import Any
 
 from cortex.extensions.llm._models import CortexPrompt
 from cortex.extensions.llm.provider import LLMProvider
@@ -28,7 +28,7 @@ _SYNTHESIS_PROVIDERS: tuple[str, ...] = (
     "openrouter",
 )
 
-_synthesis_router: Optional[CortexLLMRouter] = None
+_synthesis_router: CortexLLMRouter | None = None
 
 
 def _get_synthesis_router() -> CortexLLMRouter:
@@ -36,7 +36,7 @@ def _get_synthesis_router() -> CortexLLMRouter:
     if _synthesis_router is not None:
         return _synthesis_router
 
-    primary: Optional[LLMProvider] = None
+    primary: LLMProvider | None = None
     fallbacks: list[LLMProvider] = []
 
     for name in _SYNTHESIS_PROVIDERS:

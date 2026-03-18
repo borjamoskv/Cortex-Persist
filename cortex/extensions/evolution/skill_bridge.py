@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from cortex.extensions.evolution.agents import AgentDomain
 
@@ -41,7 +41,7 @@ def get_skill_for_domain(domain: AgentDomain) -> str:
     return DOMAIN_SKILL_MAP.get(domain, "cortex")
 
 
-def get_domain_for_skill(skill_name: str) -> Optional[AgentDomain]:
+def get_domain_for_skill(skill_name: str) -> AgentDomain | None:
     """Return the agent domain for a MOSKV-1 skill, or None if unknown."""
     return SKILL_DOMAIN_MAP.get(skill_name)
 

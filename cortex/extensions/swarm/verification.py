@@ -39,6 +39,7 @@ class VerificationResult:
 # ContinuityVerifier
 # ---------------------------------------------------------------------------
 
+
 class ContinuityVerifier:
     """
     Queries Arweave GraphQL to verify the continuity of a CORTEX handoff chain.
@@ -132,9 +133,7 @@ class ContinuityVerifier:
         Format: X-Omega-Verification: <fact_id>;<is_continuous>;<score>
         """
         value = (
-            f"{result.fact_id};"
-            f"{'OK' if result.is_continuous else 'FAIL'};"
-            f"{result.trust_score:.3f}"
+            f"{result.fact_id};{'OK' if result.is_continuous else 'FAIL'};{result.trust_score:.3f}"
         )
         return {VERIFICATION_HEADER: value}
 
@@ -172,11 +171,7 @@ class ContinuityVerifier:
             )
             response.raise_for_status()
             data = response.json()
-            edges = (
-                data.get("data", {})
-                .get("transactions", {})
-                .get("edges", [])
-            )
+            edges = data.get("data", {}).get("transactions", {}).get("edges", [])
             return [edge["node"] for edge in edges]
         return []  # fallback
 

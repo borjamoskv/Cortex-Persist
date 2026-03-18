@@ -7,7 +7,6 @@ and enforce quota limits based on their billing plan.
 from __future__ import annotations
 
 import logging
-from typing import Optional
 
 from fastapi import Request
 from fastapi.responses import JSONResponse
@@ -40,7 +39,7 @@ class MeteringMiddleware(BaseHTTPMiddleware):
     into responses for developer visibility.
     """
 
-    def __init__(self, app, tracker: Optional[UsageTracker] = None):
+    def __init__(self, app, tracker: UsageTracker | None = None):
         super().__init__(app)
         self._tracker = tracker or UsageTracker()
         self._enforcer = QuotaEnforcer(self._tracker)

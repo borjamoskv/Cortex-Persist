@@ -26,7 +26,7 @@ import os
 import time
 from collections.abc import Callable
 from functools import wraps
-from typing import Any, Optional, TypeAlias, TypeVar
+from typing import Any, TypeAlias, TypeVar
 
 from cortex.extensions.swarm.error_ghost_pipeline import ErrorGhostPipeline
 from cortex.utils.result import Err, Result
@@ -198,7 +198,7 @@ def _sanitize_kwargs(kwargs: dict[str, Any]) -> dict[str, Any]:
 
 def sovereign_quality_gate(
     tool_name: str,
-    evaluator: Optional[EvaluatorFn] = None,
+    evaluator: EvaluatorFn | None = None,
     threshold: float = 0.8,
 ) -> Callable:
     """
@@ -253,7 +253,7 @@ def sovereign_quality_gate(
 
 def sovereign_quality_gate_async(
     tool_name: str,
-    evaluator: Optional[EvaluatorFn] = None,
+    evaluator: EvaluatorFn | None = None,
     threshold: float = 0.8,
 ) -> Callable:
     """Async variant — wraps ``async def fn(...) -> Result``."""
@@ -297,7 +297,7 @@ def sovereign_quality_gate_async(
 # ═════════════════════════════════════════════════════════════════════════
 
 
-def _maybe_create_run_tree(tool_name: str, args: tuple, kwargs: dict[str, Any]) -> Optional[Any]:
+def _maybe_create_run_tree(tool_name: str, args: tuple, kwargs: dict[str, Any]) -> Any | None:
     """Create a LangSmith RunTree if the SDK is available and configured."""
     if not _HAS_LANGSMITH or not os.getenv("LANGCHAIN_API_KEY"):
         return None
@@ -316,10 +316,10 @@ def _maybe_create_run_tree(tool_name: str, args: tuple, kwargs: dict[str, Any]) 
 
 
 def _end_run_tree(
-    run_tree: Optional[Any],
+    run_tree: Any | None,
     *,
-    outputs: Optional[dict[str, Any]] = None,
-    error: Optional[str] = None,
+    outputs: dict[str, Any] | None = None,
+    error: str | None = None,
     latency_ms: float = 0.0,
 ) -> None:
     """Safely close a RunTree (no-op if None)."""
@@ -338,11 +338,11 @@ def _end_run_tree(
 
 def _evaluate_and_finalize(
     tool_name: str,
-    evaluator: Optional[EvaluatorFn],
+    evaluator: EvaluatorFn | None,
     threshold: float,
     result: Result,
     kwargs: dict[str, Any],
-    run_tree: Optional[Any],
+    run_tree: Any | None,
     elapsed_s: float,
 ) -> Result:
     """Score the result, update circuit breaker, emit trace."""

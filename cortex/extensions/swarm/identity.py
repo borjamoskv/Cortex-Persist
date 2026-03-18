@@ -14,8 +14,8 @@ from cryptography.hazmat.primitives.serialization import (
 
 class IdentityAnchor:
     """Sovereign Identity Anchor for ΩΩ-HANDOFF (Arweave Integration).
-    
-    Generates and manages RSA-PSS 4096-bit signatures matching the Arweave 
+
+    Generates and manages RSA-PSS 4096-bit signatures matching the Arweave
     cryptographic specification for L1 data anchoring.
     """
 
@@ -73,7 +73,7 @@ class IdentityAnchor:
             payload,
             padding.PSS(
                 mgf=padding.MGF1(hashes.SHA256()),
-                salt_length=32, # Arweave uses 32-byte salts for PSS
+                salt_length=32,  # Arweave uses 32-byte salts for PSS
             ),
             hashes.SHA256(),
         )

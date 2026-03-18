@@ -9,7 +9,6 @@ from __future__ import annotations
 import logging
 import re
 from html.parser import HTMLParser
-from typing import Optional
 
 import httpx
 
@@ -64,7 +63,7 @@ class _HtmlToMarkdown(HTMLParser):
         self._title = ""
         self._in_title = False
 
-    def handle_starttag(self, tag: str, attrs: list[tuple[str, Optional[str]]]):
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]):
         tag = tag.lower()
         if tag in _SKIP_TAGS:
             self._skip_depth += 1

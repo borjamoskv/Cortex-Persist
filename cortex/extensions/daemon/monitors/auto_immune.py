@@ -9,7 +9,6 @@ import json
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional
 
 from cortex.extensions.daemon.models import AGENT_DIR, DEFAULT_STALE_HOURS
 from cortex.extensions.daemon.monitors.base import BaseMonitor
@@ -30,7 +29,7 @@ class AutoImmuneMonitor(BaseMonitor):
 
     def __init__(
         self,
-        queue: Optional[TaskQueue] = None,
+        queue: TaskQueue | None = None,
         ghosts_path: Path = AGENT_DIR / "memory" / "ghosts.json",
         stale_hours: float = DEFAULT_STALE_HOURS,
     ):
@@ -81,7 +80,7 @@ class AutoImmuneMonitor(BaseMonitor):
         except (ValueError, TypeError):
             return False
 
-    def _dispatch(self, project: str, data: dict) -> Optional[str]:
+    def _dispatch(self, project: str, data: dict) -> str | None:
         """Creates and enqueues an AgentTask for the ghost."""
         if not self.queue:
             return None

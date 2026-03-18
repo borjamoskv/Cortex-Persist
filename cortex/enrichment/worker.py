@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from cortex.ledger.queue import EnrichmentQueue
 from cortex.ledger.store import LedgerStore
@@ -19,7 +19,7 @@ class EnrichmentWorker:
         self.store = store
         self.queue = EnrichmentQueue(store)
         self.is_running = False
-        self._task: Optional[asyncio.Task] = None
+        self._task: asyncio.Task | None = None
 
     async def start(self):
         """Start the background worker."""

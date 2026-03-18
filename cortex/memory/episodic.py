@@ -15,7 +15,6 @@ import logging
 import time
 from collections import deque
 from dataclasses import dataclass, field
-from typing import Optional
 
 from .models import CausalEpisode, SourceMetadata
 
@@ -196,7 +195,7 @@ class CausalTracer:
     async def trace_episode(
         self,
         fact_id: int,
-        max_depth: Optional[int] = None,
+        max_depth: int | None = None,
     ) -> CausalEpisode:
         """Trace the full causal DAG from a given fact.
 

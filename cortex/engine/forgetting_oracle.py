@@ -9,7 +9,7 @@ import math
 import sqlite3
 import time
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 from cortex.engine.forgetting_models import (
     EvictionVerdict,
@@ -60,14 +60,14 @@ class ForgettingOracle(AnalyzerMixin, PolicyMixin, EvidenceMixin):
         self,
         engine: AsyncCortexEngine,
         cache_ref: Any = None,
-        l1_ref: Optional[WorkingMemoryL1] = None,
+        l1_ref: WorkingMemoryL1 | None = None,
     ) -> None:
         self._engine = engine
         self._cache = cache_ref
         # Direct reference to L1 Working Memory — enables real access_frequency_score
         # instead of the transactional approximation ghost (Derivation: Ω₁ + Ω₂).
         self._l1 = l1_ref
-        self._last_report: Optional[OracleReport] = None
+        self._last_report: OracleReport | None = None
         self._audit_count = 0
 
         # Ω₃/Ω₂: Integrated Services
@@ -305,6 +305,6 @@ class ForgettingOracle(AnalyzerMixin, PolicyMixin, EvidenceMixin):
         return False
 
     @property
-    def last_report(self) -> Optional[OracleReport]:
+    def last_report(self) -> OracleReport | None:
         """Last generated audit report."""
         return self._last_report

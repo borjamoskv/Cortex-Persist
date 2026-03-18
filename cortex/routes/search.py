@@ -1,5 +1,3 @@
-from typing import Optional
-
 """
 CORTEX v5.0 - Search Router.
 """
@@ -54,7 +52,7 @@ async def search_facts(
 async def search_facts_get(
     query: str = Query(..., max_length=1024),
     k: int = Query(5, ge=1, le=50),
-    as_of: Optional[str] = None,
+    as_of: str | None = None,
     graph_depth: int = Query(0, ge=0, le=5),
     include_graph: bool = Query(False),
     auth: AuthResult = Depends(require_permission("read")),

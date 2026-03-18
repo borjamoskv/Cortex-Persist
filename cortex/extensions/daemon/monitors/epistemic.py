@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import logging
 import time
-from typing import Any, Optional
+from typing import Any
 
 from cortex.extensions.daemon.models import WorkflowAlert
 from cortex.extensions.daemon.monitors.base import BaseMonitor
@@ -44,7 +44,7 @@ class EpistemicMonitor(BaseMonitor[WorkflowAlert]):
         self._stale_ratio_threshold = stale_ratio_threshold
 
         self._last_eval: float = 0.0
-        self._last_mean_confidence: Optional[float] = None
+        self._last_mean_confidence: float | None = None
         self._last_suggestions: list[WorkflowAlert] = []
 
     def check(self) -> list[WorkflowAlert]:
