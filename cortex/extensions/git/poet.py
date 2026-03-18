@@ -383,6 +383,62 @@ class CommitPoet:
 
         return f"{emoji} {template.capitalize()} [fact:{fact_id}]"
 
+    def compose_swarm_summary(
+        self,
+        applied: int,
+        rejected: int,
+        failed: int,
+    ) -> str:
+        """Generate a poetic batch summary for swarm telemetry.
+
+        Args:
+            applied: Number of fixes applied in this batch.
+            rejected: Number of fixes rejected by Red Team.
+            failed: Number of fixes that failed.
+
+        Returns:
+            A sovereign swarm narrative.
+        """
+        total = applied + rejected + failed
+        if total == 0:
+            return "The swarm rests. No mutations in this cycle."
+
+        # Build narrative fragments
+        parts: list[str] = []
+        if applied > 0:
+            verb = random.choice([
+                "sutured",
+                "cauterized",
+                "crystallized",
+                "forged",
+            ])
+            parts.append(
+                f"{applied} semantic breaches {verb} "
+                f"in the engine reactor"
+            )
+        else:
+            parts.append(
+                "The swarm has sutured 0 semantic breaches "
+                "in the engine reactor"
+            )
+
+        emoji = "🩺" if applied == 0 else "⚡"
+        notes: list[str] = []
+        if rejected > 0:
+            notes.append(
+                f"{rejected} mutations resisted the forge"
+            )
+        if failed > 0:
+            notes.append(
+                f"{failed} anomalies defied remediation"
+            )
+
+        suffix = ""
+        if notes:
+            suffix = f" [Note: {', '.join(notes)}]"
+
+        return f"{emoji} {'. '.join(parts).capitalize()}.{suffix}"
+
     def narrate(self, code: str, context: str = "") -> str:
         """Generate an original code comment for a given code block.
 
