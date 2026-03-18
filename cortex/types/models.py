@@ -5,7 +5,7 @@ Centralized Pydantic models for request/response validation.
 
 from __future__ import annotations
 
-from typing import Any, Literal, Optional, TypedDict
+from typing import Any, Literal, Optional, TypedDict, Union
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -107,7 +107,7 @@ class AcceptanceResult(TypedDict):
     warnings: list[str]
 
 
-OperationResult = AcceptanceResult | RejectionResult
+OperationResult = Union[AcceptanceResult, RejectionResult]
 
 
 class TraceInput(BaseModel):
@@ -209,7 +209,7 @@ class VoteResponse(BaseModel):
     agent: str
     vote: int
     new_consensus_score: float
-    confidence: Optional[str | float] = None
+    confidence: Optional[Union[str, float]] = None
     status: str = "recorded"
 
 
@@ -242,7 +242,7 @@ class FactResponse(BaseModel):
     tags: list[str]
     created_at: str
     updated_at: str
-    confidence: Optional[str | float] = None
+    confidence: Optional[Union[str, float]] = None
     valid_from: Optional[str] = None
     valid_until: Optional[str] = None
     source: Optional[str] = None
@@ -313,7 +313,7 @@ class HealthCheckDetail(BaseModel):
 class DeepHealthResponse(BaseModel):
     """Structured deep health check response."""
 
-    status: str  # "healthy" | "degraded"
+    status: str  # "healthy", "degraded"
     version: str
     schema_version: str
     checks: dict[str, HealthCheckDetail]

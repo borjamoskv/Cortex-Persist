@@ -23,6 +23,8 @@ from cortex.engine.query_mixin import QueryMixin
 from cortex.engine.search_mixin import SearchMixin
 from cortex.engine.store_mixin import StoreMixin
 from cortex.engine.transaction_mixin import TransactionMixin
+from cortex.ledger import EnrichmentQueue, LedgerStore, LedgerWriter
+from cortex.mac_maestro.executor import MaestroExecutor
 
 try:
     from cortex.extensions.health.health_mixin import HealthMixin  # type: ignore
@@ -90,6 +92,12 @@ class CortexEngine(
         self.embeddings = EmbeddingManager(self)
         self.consensus = ConsensusManager(self)
         self.lock_sovereign = SovereignLock(self)
+
+        # Wave 6: Sovereign Ledger Integration
+        self.ledger_store = LedgerStore(self._db_path)
+        self.enrichment_queue = EnrichmentQueue(self.ledger_store)
+        self.ledger_writer = LedgerWriter(self.ledger_store, self.enrichment_queue)
+        self.mac_maestro = MaestroExecutor(self.ledger_writer)
 
         # Decoupled guard pipeline (Ω₃: minimal coupling)
         self._guard_pipeline = self._register_default_guards()
@@ -547,6 +555,13 @@ class CortexEngine(
         if self._conn:
             await self._conn.close()
             self._conn = None
+        
+        # Clean up Wave 6 references
+        self.mac_maestro = None  # type: ignore
+        self.ledger_writer = None  # type: ignore
+        self.enrichment_queue = None  # type: ignore
+        self.ledger_store = None  # type: ignore
+        
         self._ledger = None
 
     async def __aenter__(self):

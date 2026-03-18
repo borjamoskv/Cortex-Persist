@@ -7,7 +7,6 @@ Quarantine       → cortex.engine.store_quarantine_mixin
 
 from __future__ import annotations
 
-import json
 import logging
 from typing import Any, ClassVar, Optional
 
@@ -187,18 +186,12 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             parent_decision_id=parent_decision_id,
         )
 
-        # ─── Dual-Write Bridge: sync parent_decision_id to facts_meta ───
-        if parent_decision_id is not None:
-            try:
-                # facts_meta is sharded/virtual; this update is for vector store parity
-                # Using parent_decision_id from scope instead of SELECTing from facts
-                await conn.execute(
-                    "UPDATE facts_meta SET parent_decision_id = ? WHERE id = ?",
-                    (str(parent_decision_id), fact_id),
-                )
-            except (aiosqlite.Error, OSError):
-                pass
+        # Dual-Write Bridge: sync parent_decision_id logic is currently integrated into insert_fact_record
+        pass
 
+        # P0 Decoupling: Blocking embedding is now handled by EnrichmentWorker
+        # We only keep this if explicitly requested or for legacy compatibility,
+        # but by default, insert_fact_record now enqueues an async job.
         if getattr(self, "_auto_embed", False) and getattr(self, "_vec_available", False):
             await embed_fact_async(
                 conn,
@@ -253,8 +246,8 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
 
         async with self.session() as conn:
             query = (
-                "SELECT tenant_id, project, content, fact_type, tags, "
-                "confidence, source, meta "
+                "SELECT tenant_id, project, content, fact_type, "
+                "confidence, source, metadata "
                 "FROM facts WHERE id = ? AND tenant_id = ? AND is_tombstoned = 0"
             )
             async with conn.execute(query, (fact_id, tenant_id)) as cursor:
@@ -269,11 +262,19 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                 project,
                 raw_old_content,
                 fact_type,
-                old_tags_json,
                 confidence,
                 source,
                 raw_old_meta_json,
             ) = row
+
+            # Fetch tags from bridge table
+            async with conn.execute(
+                "SELECT tag FROM fact_tags WHERE fact_id = ? AND tenant_id = ?",
+                (fact_id, db_tenant_id)
+            ) as cursor:
+                tag_rows = await cursor.fetchall()
+                old_tags = [r[0] for r in tag_rows]
+
             enc = get_default_encrypter()
             old_content = (
                 enc.decrypt_str(raw_old_content, tenant_id=db_tenant_id) if raw_old_content else ""
@@ -297,7 +298,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                 content=content if content is not None else str(old_content or ""),
                 tenant_id=db_tenant_id,
                 fact_type=fact_type,
-                tags=tags if tags is not None else json.loads(old_tags_json),
+                tags=tags if tags is not None else old_tags,
                 confidence=confidence,
                 source=source or "engine:update",
                 meta=new_meta,

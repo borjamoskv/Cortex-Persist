@@ -8,7 +8,7 @@ from __future__ import annotations
 import json
 import logging
 import sqlite3
-from typing import Any
+from typing import Any, Optional, Union
 
 import aiosqlite
 
@@ -26,13 +26,13 @@ async def insert_fact_record(
     project: str,
     content: str,
     fact_type: str,
-    tags: list[str] | None,
+    tags: Optional[list[str]],
     confidence: str,
-    ts: str | None,
-    source: str | None,
-    meta: dict[str, Any] | None,
-    tx_id: int | None,
-    parent_decision_id: int | None = None,
+    ts: Optional[str],
+    source: Optional[str],
+    meta: Optional[dict[str, Any]],
+    tx_id: Optional[int],
+    parent_decision_id: Optional[int] = None,
 ) -> int:
     """Perform the actual SQL insert into the facts table."""
     from cortex.crypto import get_default_encrypter
@@ -45,8 +45,8 @@ async def insert_fact_record(
     enc = get_default_encrypter()
     encrypted_content = enc.encrypt_str(content, tenant_id=tenant_id)
 
-    sig_b64: str | None = None
-    pub_b64: str | None = None
+    sig_b64: Optional[str] = None
+    pub_b64: Optional[str] = None
     try:
         signer = get_default_signer()
         if signer and signer.can_sign:
@@ -103,53 +103,107 @@ async def insert_fact_record(
 
     encrypted_meta = enc.encrypt_json(meta, tenant_id=tenant_id)
 
-    cursor = await conn.execute(
-        "INSERT INTO facts (tenant_id, project, content, fact_type, tags, metadata, "
-        "hash, created_at, updated_at, valid_from, confidence, source) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        (
-            tenant_id,
-            project,
-            encrypted_content,
-            fact_type,
-            tags_json,
-            encrypted_meta,
-            f_hash,
-            ts,
-            ts,
-            ts,
-            confidence,
-            source,
-        ),
+    # ── Double-Plane Ingestion (V2) ──
+    from cortex.engine.metadata_engine import MetadataEngine
+    from cortex.engine.models import Fact
+    
+    # 1. Deterministic Classification (Heuristic-First)
+    # We construct a temporary Fact object for classification
+    temp_fact = Fact(
+        id=0, # Placeholder
+        tenant_id=tenant_id,
+        project=project,
+        content=content,
+        fact_type=fact_type,
+        tags=tags or [],
+        parent_id=parent_decision_id,
+        relation_type=meta.get("relation_type") if meta else None
     )
-    fact_id = cursor.lastrowid
+    metadata_v2 = MetadataEngine.classify_deterministic(temp_fact)
+    
+    category = metadata_v2["category"]
+    quadrant = metadata_v2["quadrant"]
+    storage_tier = metadata_v2["storage_tier"]
+    exergy_score = metadata_v2["exergy_score"]
+    yield_score = metadata_v2["yield_score"]
+    relation_type = metadata_v2["relation_type"]
+
+    # 2. SQL Persistence (facts table)
+    async with conn.execute(
+        """
+        INSERT INTO facts (
+            tenant_id, project, content, fact_type, metadata, hash, 
+            source, confidence, parent_id, relation_type,
+            quadrant, storage_tier, exergy_score, category, yield_score,
+            semantic_status, tags
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            tenant_id, project, encrypted_content, fact_type, json.dumps(meta), f_hash,
+            source, confidence, parent_decision_id, relation_type,
+            quadrant, storage_tier, exergy_score, category, yield_score,
+            "pending", tags_json
+        ),
+    ) as cursor:
+        fact_id = cursor.lastrowid
     assert fact_id is not None
 
-    # FTS Update — tolerant of schema variations
+    # ── P0 Decoupling: Enqueue Enrichment Job ──
     try:
         await conn.execute(
-            "INSERT INTO facts_fts(rowid, content, project_id, tags, fact_type) "
-            "VALUES (?, ?, ?, ?, ?)",
-            (fact_id, content, project, tags_json, fact_type),
+            """
+            INSERT INTO enrichment_jobs (fact_id, job_type, status, priority)
+            VALUES (?, 'embedding', 'pending', ?)
+            """,
+            (fact_id, 1 if fact_type == "decision" else 0),
         )
-    except sqlite3.OperationalError:
-        # Fallback: try alternate column name or content-only
-        try:
+    except (sqlite3.OperationalError, aiosqlite.Error) as e:
+        # If the table doesn't exist yet (e.g. migration hasn't run), create it
+        if "no such table: enrichment_jobs" in str(e).lower():
             await conn.execute(
-                "INSERT INTO facts_fts(rowid, content, project, tags, fact_type) "
-                "VALUES (?, ?, ?, ?, ?)",
-                (fact_id, content, project, tags_json, fact_type),
-            )
-        except sqlite3.OperationalError:
-            try:
-                await conn.execute(
-                    "INSERT INTO facts_fts(rowid, content) VALUES (?, ?)",
-                    (fact_id, content),
+                """
+                CREATE TABLE IF NOT EXISTS enrichment_jobs (
+                    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                    fact_id         INTEGER NOT NULL REFERENCES facts(id),
+                    job_type        TEXT NOT NULL DEFAULT 'embedding',
+                    status          TEXT NOT NULL DEFAULT 'pending',
+                    priority        INTEGER DEFAULT 0,
+                    attempts        INTEGER DEFAULT 0,
+                    last_error      TEXT,
+                    payload         TEXT,
+                    created_at      TEXT NOT NULL DEFAULT (datetime('now')),
+                    updated_at      TEXT NOT NULL DEFAULT (datetime('now'))
                 )
-            except (sqlite3.Error, aiosqlite.Error) as e:
-                logger.warning("FTS insert failed for fact %d: %s", fact_id, e)
+                """
+            )
+            await conn.execute(
+                "INSERT INTO enrichment_jobs (fact_id, job_type, status, priority) VALUES (?, 'embedding', 'pending', ?)",
+                (fact_id, 1 if fact_type == "decision" else 0),
+            )
+        else:
+            logger.warning("Failed to enqueue enrichment job for fact %d: %s", fact_id, e)
+
+    # 3. Tag Persistence (fact_tags bridge table)
+    if tags:
+        tag_records = [(fact_id, tag, tenant_id) for tag in tags]
+        await conn.executemany(
+            "INSERT OR IGNORE INTO fact_tags (fact_id, tag, tenant_id) VALUES (?, ?, ?)",
+            tag_records
+        )
+
+    # 4. FTS Update (facts_fts virtual table)
+    try:
+        # We mirror a subset to FTS for fast keyword search
+        await conn.execute(
+            "INSERT INTO facts_fts (rowid, content, project, tags, fact_type) VALUES (?, ?, ?, ?, ?)",
+            (fact_id, content, project, tags_json, fact_type)
+        )
     except (sqlite3.Error, aiosqlite.Error) as e:
-        logger.warning("Failed to update FTS for fact %d: %s", fact_id, e)
+        if "unique" in str(e).lower() or "constraint failed" in str(e).lower():
+            logger.debug("FTS entry already exists for fact %d (likely via trigger)", fact_id)
+        else:
+            logger.warning("FTS insert failed for fact %d: %s", fact_id, e)
 
     # Causal Infrastructure (ANAMNESIS-Ω)
     try:
@@ -186,7 +240,6 @@ async def insert_fact_record(
         logger.debug("Causal edge recording skipped for fact %d: %s", fact_id, e)
 
     # Graph Extraction
-
     try:
         # type: ignore[reportArgumentType]
         await process_fact_graph(conn, fact_id, content, project, ts, tenant_id)
@@ -197,7 +250,7 @@ async def insert_fact_record(
 
 
 async def resolve_causality_async(
-    conn: aiosqlite.Connection, project: str, meta: dict[str, Any] | None
+    conn: aiosqlite.Connection, project: str, meta: Optional[dict[str, Any]]
 ) -> dict[str, Any]:
     """Resolve causal linking for a fact asynchronously.
 
@@ -212,7 +265,7 @@ async def resolve_causality_async(
 
 
 def resolve_causality(
-    db_path: str | None, project: str, meta: dict[str, Any] | None
+    db_path: Optional[str], project: str, meta: Optional[dict[str, Any]]
 ) -> dict[str, Any]:
     """Resolve causal linking for a fact (sync)."""
     from cortex.engine.causality import CausalOracle, link_causality

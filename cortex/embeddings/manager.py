@@ -103,7 +103,9 @@ class EmbeddingManager:
         if not hasattr(embedder, "embed_multimodal"):
             raise RuntimeError("Current embedder does not support multimodal")
 
-        return await embedder.embed_multimodal(parts, task_type=task_type)  # type: ignore[type-error]
+        return await embedder.embed_multimodal(
+            parts, task_type=task_type
+        )  # type: ignore
 
     async def embed_image(
         self,
@@ -122,7 +124,9 @@ class EmbeddingManager:
         if not hasattr(embedder, "embed_image"):
             raise RuntimeError("Current embedder does not support image embedding")
 
-        return await embedder.embed_image(image_bytes, mime_type=mime_type, task_type=task_type)  # type: ignore[type-error]
+        return await embedder.embed_image(
+            image_bytes, mime_type=mime_type, task_type=task_type
+        )  # type: ignore
 
     @property
     def dimension(self) -> int:
@@ -134,3 +138,53 @@ class EmbeddingManager:
         """Return True if current embedder supports multimodal input."""
         embedder = self._get_embedder()
         return getattr(embedder, "supports_multimodal", False)
+
+    async def enrich_fact(
+        self,
+        fact_id: int,
+        content: str,
+        project: str,
+        tenant_id: str = "default",
+    ) -> None:
+        """Sovereign Enrichment (Ω₁₃): Vector embedding + Metadata Refinement.
+
+        This method is called by the EnrichmentWorker to finalize a fact's
+        entry into the Double-Plane architecture.
+        """
+        from cortex.engine.embedding_engine import embed_fact_async
+        from cortex.engine.metadata_engine import MetadataEngine
+
+        async with self.engine.session() as conn:
+            # 1. Dense & Specular Embeddings
+            await embed_fact_async(
+                conn,
+                fact_id,
+                project,
+                content,
+                self._get_embedder(),
+                self.engine._memory_manager,
+                tenant_id,
+            )
+
+            # 2. Async Semantic Enrichment (V2 Refinement)
+            metadata = await MetadataEngine.enrich_async(fact_id, content, self.engine)
+
+            # 3. Update Multi-Plane Metadata
+            query = """
+                UPDATE facts_meta
+                SET category = COALESCE(?, category),
+                    yield_score = COALESCE(?, yield_score),
+                    exergy_score = COALESCE(?, exergy_score)
+                WHERE fact_id = ?
+            """
+            await conn.execute(
+                query,
+                (
+                    metadata.get("category"),
+                    metadata.get("yield_score"),
+                    metadata.get("exergy_score"),
+                    fact_id,
+                ),
+            )
+            await conn.commit()
+            logger.info("Fact #%d enriched: vector + metadata refined (V2)", fact_id)

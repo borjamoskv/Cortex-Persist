@@ -131,7 +131,12 @@ class SovereignVectorStoreL2:
                     success_rate REAL,
                     cognitive_layer TEXT,
                     parent_decision_id TEXT,
-                    metadata TEXT
+                    metadata TEXT,
+                    -- Double-Plane Facets (Ω₁₃)
+                    category TEXT DEFAULT 'general',
+                    quadrant TEXT DEFAULT 'ACTIVE',
+                    storage_tier TEXT DEFAULT 'HOT',
+                    facet_version INTEGER DEFAULT 2
                 )
             """)
             if self._vector_enabled:
@@ -150,14 +155,19 @@ class SovereignVectorStoreL2:
             self._ready = True
 
             # Ω₀: Structural integrity migration
-            try:
-                self._conn.execute("ALTER TABLE facts_meta ADD COLUMN cognitive_layer TEXT")
-            except sqlite3.OperationalError:
-                pass
-            try:
-                self._conn.execute("ALTER TABLE facts_meta ADD COLUMN parent_decision_id TEXT")
-            except sqlite3.OperationalError:
-                pass
+            migrations = [
+                ("cognitive_layer", "TEXT"),
+                ("parent_decision_id", "TEXT"),
+                ("category", "TEXT DEFAULT 'general'"),
+                ("quadrant", "TEXT DEFAULT 'ACTIVE'"),
+                ("storage_tier", "TEXT DEFAULT 'HOT'"),
+                ("facet_version", "INTEGER DEFAULT 2"),
+            ]
+            for col, col_type in migrations:
+                try:
+                    self._conn.execute(f"ALTER TABLE facts_meta ADD COLUMN {col} {col_type}")
+                except sqlite3.OperationalError:
+                    pass  # Column already exists
             self._conn.commit()
 
         # Initialize L2HybridSearch (FTS5 mirror) after conn is established

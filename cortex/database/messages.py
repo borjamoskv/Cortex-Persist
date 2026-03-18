@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Union
 
 from cortex.utils.result import Result
 
@@ -74,7 +74,7 @@ class _Shutdown:
     )
 
 
-_Message = _WriteOp | _TxBegin | _TxCommit | _TxRollback | _Shutdown
+_Message = Union[_WriteOp, _TxBegin, _TxCommit, _TxRollback, _Shutdown]
 
 
 class TransactionProxy:

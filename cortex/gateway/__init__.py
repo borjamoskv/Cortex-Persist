@@ -38,7 +38,7 @@ import logging
 import time
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any
+from typing import Any, Optional
 
 logger = logging.getLogger("cortex.gateway")
 
@@ -56,6 +56,7 @@ class GatewayIntent(str, Enum):
     EMIT = "emit"  # Fire a notification event
     MISSION = "mission"  # Launch a swarm mission
     ASK = "ask"  # Ask the AI (LLM pass-through with memory context)
+    MEJORALO = "mejoralo"  # Continuous improvement cycle
 
 
 @dataclass

@@ -11,7 +11,7 @@ import os
 import subprocess
 from collections.abc import Callable
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 
 import httpx
 
@@ -74,7 +74,7 @@ class AgentToolkit:
 
     def __init__(
         self,
-        repo_path: str | Path,
+        repo_path: Union[str, Path],
         allowed_tools: Optional[list[str]] = None,
         capability_guard: Optional[CapabilityGuard] = None,
     ) -> None:

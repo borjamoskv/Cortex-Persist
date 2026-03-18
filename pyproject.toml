@@ -4,7 +4,7 @@ version = "0.3.0b2"
 description = "Tamper-evident audit and decision lineage for AI systems — cryptographic verification, integrity proofs, and traceability for agent memory."
 readme = "README.md"
 license = "Apache-2.0"
-requires-python = ">=3.10"
+requires-python = ">=3.9"
 authors = [
     {name = "borjamoskv.com", email = "borja@moskv.com"},
 ]
@@ -123,7 +123,7 @@ asyncio_default_fixture_loop_scope = "function"
 
 
 [tool.ruff]
-target-version = "py310"
+target-version = "py39"
 line-length = 100
 exclude = ["experimental", "notebooks"]
 
@@ -141,7 +141,7 @@ ignore = ["E501", "E402", "B008", "W291", "W293", "S", "BLE001", "UP045"]
 "cortex/daemon/core.py" = ["E701", "E702", "I001"]
 
 [tool.pyright]
-pythonVersion = "3.10"
+pythonVersion = "3.9"
 typeCheckingMode = "basic"
 exclude = [
     "**/node_modules",

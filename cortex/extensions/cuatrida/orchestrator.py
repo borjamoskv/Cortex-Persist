@@ -3,7 +3,7 @@ import logging
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 from cortex.engine_async import AsyncCortexEngine
 from cortex.extensions.cuatrida.models import CuatridaMetrics, DecisionNode, Dimension
@@ -89,7 +89,7 @@ class CuatridaOrchestrator:
         )
         return node
 
-    async def validate_aesthetic(self, project: str, path: str | Path) -> bool:
+    async def validate_aesthetic(self, project: str, path: Union[str, Path]) -> bool:
         """
         Dimension C: The Consul of Honor checks for 130/100 standards.
         """

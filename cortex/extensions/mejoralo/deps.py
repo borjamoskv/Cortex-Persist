@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union
 
 """CORTEX v5.0 — Dependency Extractor.
 
@@ -13,7 +13,7 @@ logger = logging.getLogger("cortex.extensions.mejoralo.deps")
 
 
 def sort_by_topological_order(
-    file_issues: dict[str, list[str]], root_path: str | Path
+    file_issues: dict[str, list[str]], root_path: Union[str, Path]
 ) -> list[tuple[str, list[str]]]:
     """Sort target files by dependency (bottom-up)."""
     import networkx as nx

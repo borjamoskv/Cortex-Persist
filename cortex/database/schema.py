@@ -75,7 +75,7 @@ __all__ = [
     "get_init_meta",
 ]
 
-SCHEMA_VERSION = "5.3.0"
+SCHEMA_VERSION = "5.4.0"
 
 # ─── Core Facts Table ────────────────────────────────────────────────
 CREATE_FACTS = """
@@ -85,7 +85,6 @@ CREATE TABLE IF NOT EXISTS facts (
     project     TEXT NOT NULL,
     content     TEXT NOT NULL,
     fact_type   TEXT NOT NULL DEFAULT 'knowledge',
-    tags        TEXT NOT NULL DEFAULT '[]',
     metadata    TEXT DEFAULT '{}',
     hash        TEXT,
     valid_from  TEXT,
@@ -95,7 +94,23 @@ CREATE TABLE IF NOT EXISTS facts (
     created_at  TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at  TEXT NOT NULL DEFAULT (datetime('now')),
     is_tombstoned INTEGER NOT NULL DEFAULT 0,
-    is_quarantined INTEGER NOT NULL DEFAULT 0
+    is_quarantined INTEGER NOT NULL DEFAULT 0,
+    signature      TEXT,
+    signer_pubkey  TEXT,
+    -- Thermodynamic Plane (Ω₁₃)
+    quadrant      TEXT NOT NULL DEFAULT 'ACTIVE',
+    storage_tier  TEXT NOT NULL DEFAULT 'HOT',
+    exergy_score  REAL NOT NULL DEFAULT 1.0,
+    -- Semantic Plane
+    category      TEXT NOT NULL DEFAULT 'general',
+    semantic_status TEXT NOT NULL DEFAULT 'pending',
+    semantic_error  TEXT,
+    -- Causal Lineage (Ω₁₁)
+    parent_id     INTEGER,
+    relation_type TEXT,
+    yield_score   REAL NOT NULL DEFAULT 1.0,
+    -- Legacy/Compatibility
+    tags          TEXT DEFAULT '[]'
 );
 """
 
@@ -107,6 +122,27 @@ CREATE INDEX IF NOT EXISTS idx_facts_proj_type ON facts(project, fact_type);
 CREATE INDEX IF NOT EXISTS idx_facts_tombstone ON facts(is_tombstoned);
 CREATE INDEX IF NOT EXISTS idx_facts_tenant_valid ON facts(tenant_id, valid_until);
 CREATE INDEX IF NOT EXISTS idx_facts_proj_valid ON facts(project, valid_until);
+-- Double-Plane Faceting Indexes
+CREATE INDEX IF NOT EXISTS idx_facts_quadrant ON facts(quadrant);
+CREATE INDEX IF NOT EXISTS idx_facts_category ON facts(category);
+CREATE INDEX IF NOT EXISTS idx_facts_tier ON facts(storage_tier);
+-- Causal Indexes (Ω₁₁)
+CREATE INDEX IF NOT EXISTS idx_facts_parent ON facts(parent_id);
+CREATE INDEX IF NOT EXISTS idx_facts_semantic_status ON facts(semantic_status);
+"""
+
+CREATE_FACT_TAGS = """
+CREATE TABLE IF NOT EXISTS fact_tags (
+    fact_id INTEGER NOT NULL,
+    tag     TEXT NOT NULL,
+    tenant_id TEXT NOT NULL DEFAULT 'default',
+    PRIMARY KEY (fact_id, tag)
+);
+"""
+
+CREATE_FACT_TAGS_INDEXES = """
+CREATE INDEX IF NOT EXISTS idx_fact_tags_tag ON fact_tags(tag);
+CREATE INDEX IF NOT EXISTS idx_fact_tags_tenant_tag ON fact_tags(tenant_id, tag);
 """
 
 # ─── Vector Embeddings (sqlite-vec) ──────────────────────────────────
@@ -290,6 +326,8 @@ ALTER TABLE facts ADD COLUMN signer_pubkey TEXT;
 _CORE_SCHEMA = [
     CREATE_FACTS,
     CREATE_FACTS_INDEXES,
+    CREATE_FACT_TAGS,
+    CREATE_FACT_TAGS_INDEXES,
     CREATE_EMBEDDINGS,
     CREATE_SPECULAR_EMBEDDINGS,
     CREATE_SESSIONS,

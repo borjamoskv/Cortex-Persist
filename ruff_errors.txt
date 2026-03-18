@@ -1,0 +1,17 @@
+cortex/database/messages.py:77:12: UP007 Use `X | Y` for type annotations
+cortex/engine/fact_store_core.py:42:5: F841 Local variable `tags_json` is assigned to but never used
+cortex/engine/fact_store_core.py:104:5: F841 Local variable `encrypted_meta` is assigned to but never used
+cortex/engine/models.py:1:1: I001 [*] Import block is un-sorted or un-formatted
+cortex/engine/models.py:3:1: UP035 `typing.List` is deprecated, use `list` instead
+cortex/engine/models.py:12:9: UP007 [*] Use `X | Y` for type annotations
+cortex/engine/models.py:23:11: UP006 [*] Use `list` instead of `List` for type annotation
+cortex/engine/models.py:25:25: UP007 [*] Use `X | Y` for type annotations
+cortex/enrichment/worker.py:51:30: G004 Logging statement uses f-string
+cortex/enrichment/worker.py:92:25: G004 Logging statement uses f-string
+cortex/enrichment/worker.py:95:26: G004 Logging statement uses f-string
+cortex/utils/result.py:115:10: UP007 Use `X | Y` for type annotations
+cortex/verification/oracle.py:12:8: F401 [*] `aiosqlite` imported but unused
+cortex/verification/oracle.py:59:26: G004 Logging statement uses f-string
+cortex/worker/enrichment.py:23:48: F821 Undefined name `Optional`
+Found 15 errors.
+[*] 5 fixable with the `--fix` option (2 hidden fixes can be enabled with the `--unsafe-fixes` option).

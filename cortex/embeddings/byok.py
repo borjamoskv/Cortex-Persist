@@ -8,7 +8,7 @@ based on Tenant configuration. Ensures SQLite-vec dimension compatibility.
 from __future__ import annotations
 
 import logging
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 logger = logging.getLogger("cortex.embeddings.byok")
 
@@ -41,7 +41,7 @@ class BYOKEmbedder:
         if self._api_key and HAS_OPENAI:
             self._client = AsyncOpenAI(api_key=self._api_key)
 
-    async def embed(self, text: str | list[str]) -> list[float] | list[list[float]]:
+    async def embed(self, text: Union[str, list[str]]) -> Union[list[float], list[list[float]]]:
         if self._client:
             # Delegate to External
             texts = [text] if isinstance(text, str) else text

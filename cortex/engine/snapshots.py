@@ -6,40 +6,7 @@ import shutil
 import sqlite3
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from pathlib import Path
 
-from cortex.config import DEFAULT_DB_PATH
-from cortex.database.core import connect_async_ctx
-
-__all__ = ["SnapshotRecord", "SnapshotManager"]
-
-logger = logging.getLogger("cortex")
-
-
-def _write_snapshot_meta(meta_path: Path, record: dict) -> None:
-    with open(meta_path, "w", encoding="utf-8") as f:
-        json.dump(record, f, indent=2)
-
-
-def _read_snapshot_meta(meta_file: Path) -> dict:
-    with open(meta_file, encoding="utf-8") as f:
-        return json.load(f)
-
-
-@dataclass
-class SnapshotRecord:
-    """Metadata for a CORTEX snapshot."""
-
-    id: int
-    name: str
-    path: str
-    tx_id: int
-    merkle_root: str
-    created_at: str
-    size_mb: float
-
-
-def _parse_snapshot_meta(meta_file: Path) -> SnapshotRecord | None:
     try:
         data = _read_snapshot_meta(meta_file)
         db_file = Path(data["path"])

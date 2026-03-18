@@ -2,7 +2,7 @@
 
 import subprocess
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 from .constants import STACK_MARKERS
 
@@ -15,7 +15,7 @@ __all__ = [
 ]
 
 
-def detect_stack(path: str | Path) -> str:
+def detect_stack(path: Union[str, Path]) -> str:
     """Detect project stack from marker files."""
     p = Path(path)
     for stack, marker in STACK_MARKERS.items():
@@ -28,7 +28,14 @@ def get_build_cmd(stack: str) -> Optional[list[str]]:
     cmds = {
         "node": ["npm", "run", "build"],
         "python": ["python", "-m", "py_compile", "."],
-        "swift": ["swift", "build"],
+    }
+    return cmds.get(stack)
+
+
+def get_lint_cmd(stack: str) -> Optional[list[str]]:
+    cmds = {
+        "node": ["npm", "run", "lint"],
+        "python": ["ruff", "check", "."],
     }
     return cmds.get(stack)
 
@@ -36,39 +43,17 @@ def get_build_cmd(stack: str) -> Optional[list[str]]:
 def get_test_cmd(stack: str) -> Optional[list[str]]:
     cmds = {
         "node": ["npm", "test"],
-        "python": ["python", "-m", "pytest", "--tb=no", "-q"],
-        "swift": ["swift", "test"],
+        "python": ["pytest"],
     }
     return cmds.get(stack)
 
 
-def get_lint_cmd(stack: str) -> Optional[list[str]]:
-    cmds = {
-        "node": ["npx", "eslint", "."],
-        "python": ["python", "-m", "ruff", "check", "."],
-    }
-    return cmds.get(stack)
-
-
-def run_quiet(cmd: list[str], cwd: str) -> dict[str, Any]:
-    """Run a command quietly, capturing output."""
+def run_quiet(cmd: list[str], cwd: Union[str, Path]) -> bool:
+    """Run a command suppressed, return True if exit code 0."""
     try:
-        proc = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            check=False,
-            cwd=cwd,
-            timeout=120,
+        subprocess.check_call(
+            cmd, cwd=cwd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
         )
-        return {
-            "returncode": proc.returncode,
-            "stdout": proc.stdout,
-            "stderr": proc.stderr,
-        }
-    except (subprocess.TimeoutExpired, FileNotFoundError) as exc:
-        return {
-            "returncode": 1,
-            "stdout": "",
-            "stderr": str(exc),
-        }
+        return True
+    except subprocess.CalledProcessError:
+        return False
