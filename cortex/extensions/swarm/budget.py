@@ -122,6 +122,24 @@ class SwarmBudgetManager:
             logger.error("Budget: Failed to list: %s", e)
             return []
 
+    def evict_stale_missions(self, ttl_days: float = 30.0) -> int:
+        """Purge missions not updated within ttl_days. Returns count evicted.
+
+        Prevents the budget SQLite table from growing unboundedly in long-running
+        deployments where missions are created but never revisited.
+        """
+        cutoff = time.time() - ttl_days * 86400
+        try:
+            with sqlite3.connect(self.db_path, timeout=5) as conn:
+                cur = conn.execute("DELETE FROM mission_budget WHERE last_update < ?", (cutoff,))
+                evicted = cur.rowcount
+            if evicted:
+                logger.info("Budget: Evicted %d stale missions (ttl=%.0fd).", evicted, ttl_days)
+            return evicted
+        except sqlite3.Error as e:
+            logger.error("Budget: Failed to evict stale missions: %s", e)
+            return 0
+
 
 # Single instance for the process
 _instance = None

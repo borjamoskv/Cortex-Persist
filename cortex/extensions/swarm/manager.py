@@ -39,6 +39,8 @@ class SwarmTask:
 class CapatazOrchestrator:
     """The Capataz (Foreman). Coordinates a polyphony of agents."""
 
+    _MAX_TASKS: int = 500  # Thermodynamic cap: evict oldest done tasks beyond this
+
     def __init__(self, mission_id: Optional[str] = None):
         self.mission_id = mission_id or f"mission-{uuid.uuid4().hex[:8]}"
         self.tasks: dict[str, SwarmTask] = {}
@@ -117,6 +119,20 @@ class CapatazOrchestrator:
                 )
                 await lock_manager.release(lock_resource, agent_name)
             self._print_summary()
+            self._evict_stale_tasks()
+
+    def _evict_stale_tasks(self) -> None:
+        """Purge oldest completed/failed tasks when registry exceeds _MAX_TASKS."""
+        if len(self.tasks) <= self._MAX_TASKS:
+            return
+        done_ids = [
+            tid
+            for tid, t in self.tasks.items()
+            if t.status in (TaskStatus.COMPLETED, TaskStatus.FAILED)
+        ]
+        evict_count = len(self.tasks) - self._MAX_TASKS
+        for tid in done_ids[:evict_count]:
+            del self.tasks[tid]
 
     async def run_parallel(self, task_definitions: list[dict[str, Any]]) -> list[Any]:
         """Deploy multiple agents in parallel. Dialectics in parallel... ¡cobarde!"""

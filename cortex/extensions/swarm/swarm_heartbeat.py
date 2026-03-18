@@ -106,29 +106,20 @@ class SwarmHeartbeat:
         """
         now = time.monotonic()
         alerts: list[NodePulse] = []
+        evict_ids: list[str] = []
 
         with self._lock:
-            for node in self._registry.values():
+            for node_id, node in self._registry.items():
                 elapsed = now - node.last_pulse
 
                 if elapsed <= timeout_seconds:
                     continue
 
+                # Increment miss_count for all stale nodes — including DEAD ones
+                # so the eviction threshold can be reached
                 node.miss_count += 1
 
-                if node.miss_count >= self._dead_threshold and node.status != NodeStatus.DEAD:
-                    old_status = node.status
-                    node.status = NodeStatus.DEAD
-                    alerts.append(node)
-                    logger.error(
-                        "💀 NODE DEAD: %s [%s] — no pulse for %.0fs (%d misses, was %s)",
-                        node.node_id,
-                        node.thread_name,
-                        elapsed,
-                        node.miss_count,
-                        old_status,
-                    )
-                elif node.miss_count >= self._suspect_threshold and node.status == NodeStatus.ALIVE:
+                if node.status == NodeStatus.ALIVE and node.miss_count >= self._suspect_threshold:
                     node.status = NodeStatus.SUSPECT
                     alerts.append(node)
                     logger.warning(
@@ -138,6 +129,27 @@ class SwarmHeartbeat:
                         elapsed,
                         node.miss_count,
                     )
+                elif node.status == NodeStatus.SUSPECT and node.miss_count >= self._dead_threshold:
+                    node.status = NodeStatus.DEAD
+                    alerts.append(node)
+                    logger.error(
+                        "💀 NODE DEAD: %s [%s] — no pulse for %.0fs (%d misses)",
+                        node.node_id,
+                        node.thread_name,
+                        elapsed,
+                        node.miss_count,
+                    )
+                elif node.status == NodeStatus.DEAD and node.miss_count >= self._dead_threshold + 2:
+                    # Thermodynamic eviction: ghost node is beyond recovery window
+                    evict_ids.append(node_id)
+                    logger.info(
+                        "🧹 [HEARTBEAT] Evicting ghost node %s after %d miss cycles.",
+                        node_id,
+                        node.miss_count,
+                    )
+
+            for node_id in evict_ids:
+                del self._registry[node_id]
 
         return alerts
 

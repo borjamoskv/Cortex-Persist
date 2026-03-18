@@ -202,6 +202,7 @@ class ConflictResolver:
 
     CONSENSUS_THRESHOLD: float = 0.70
     ARCHITECT_CONFIDENCE_GATE: float = 0.80
+    _MAX_HISTORY: int = 1000  # Thermodynamic cap — prevent unbounded RAM growth
 
     __slots__ = ("_history", "_deadlock_breaker", "_conflict_counter")
 
@@ -301,7 +302,9 @@ class ConflictResolver:
             winner_id=winner_id,
             method=ResolutionMethod.TRIANGULATION,
             consensus_level=consensus,
-            reasoning=f"Factual triangulation: {option_votes[winner_id]}/{total_votes} sources confirm.",
+            reasoning=(
+                f"Factual triangulation: {option_votes[winner_id]}/{total_votes} sources confirm."
+            ),
             total_weight_for=float(option_votes[winner_id]),
             total_weight_against=float(total_votes - option_votes[winner_id]),
         )
@@ -372,7 +375,8 @@ class ConflictResolver:
         """Invoke LLM-as-judge for complex strategic decisions."""
         try:
             options_desc = "\n".join(
-                f"  [{o.id}] {o.description} (reversibility={o.reversibility:.2f}, cost={o.estimated_cost})"
+                f"  [{o.id}] {o.description} "
+                f"(reversibility={o.reversibility:.2f}, cost={o.estimated_cost})"
                 for o in options
             )
             prompt = (
@@ -437,6 +441,9 @@ class ConflictResolver:
             resolution=result,
         )
         self._history.append(record)
+        # Thermodynamic eviction: evict oldest entries beyond cap
+        if len(self._history) > self._MAX_HISTORY:
+            self._history = self._history[-self._MAX_HISTORY :]
         logger.info(
             "📋 Conflict %s resolved: winner=%s method=%s consensus=%.1f%%",
             conflict_id,

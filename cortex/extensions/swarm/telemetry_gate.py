@@ -177,6 +177,20 @@ def circuit_reset(tool_name: str) -> None:
     logger.info("Circuit breaker reset for %s", tool_name)
 
 
+def circuit_evict_dead(threshold: int = _CIRCUIT_BREAKER_LIMIT) -> int:
+    """Purge tools that have been at max-failure count from the circuit state dict.
+
+    Prevents the module-level dict from accumulating ghost entries for tools
+    that will never recover (e.g. removed or renamed). Returns number evicted.
+    """
+    dead = [name for name, count in _circuit_state.items() if count >= threshold]
+    for name in dead:
+        _circuit_state.pop(name, None)
+    if dead:
+        logger.info("🧹 [CIRCUIT] Evicted %d dead tool entries: %s", len(dead), dead)
+    return len(dead)
+
+
 # ═════════════════════════════════════════════════════════════════════════
 #  PII-safe kwargs extractor (allowlist, not denylist)
 # ═════════════════════════════════════════════════════════════════════════

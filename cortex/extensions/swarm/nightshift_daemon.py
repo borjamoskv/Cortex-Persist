@@ -57,6 +57,8 @@ class NightShiftCrystalDaemon:
         self._cycle_history: list[dict[str, Any]] = []
         self._pipeline = NightShiftPipeline()
 
+    _MAX_HISTORY: int = 200  # Thermodynamic cap: 200 cycles × 6h = 50 days retained
+
     # ── Single Cycle ──────────────────────────────────────────────────
 
     async def run_cycle(self) -> dict[str, Any]:
@@ -169,6 +171,8 @@ class NightShiftCrystalDaemon:
             report["consolidation"] = consolidation_report
 
         self._cycle_history.append(report)
+        if len(self._cycle_history) > self._MAX_HISTORY:
+            self._cycle_history = self._cycle_history[-self._MAX_HISTORY :]
 
         # 4. Persist cycle report to CORTEX (fire and forget)
         await self._persist_cycle_report(report)

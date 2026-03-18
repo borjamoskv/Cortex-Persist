@@ -110,6 +110,18 @@ class InfiniteMindsManager:
             raise KeyError(f"Mind {agent_id} does not exist in the continuum.")
         return self._minds[agent_id]
 
+    def dismiss_mind(self, agent_id: str) -> bool:
+        """Remove an agent lens from the continuum. O(1). Returns True if dismissed.
+
+        Call this when an agent's work is complete to prevent _minds from growing
+        without bound in systems that spawn many transient agent identities.
+        """
+        existed = agent_id in self._minds
+        self._minds.pop(agent_id, None)
+        if existed:
+            logger.info("InfiniteMinds: Dismissed Zero-Copy Consciousness [%s].", agent_id)
+        return existed
+
     async def convergence_pulse(self) -> ConvergenceDiagnostics:
         """Force a synchronization wave across all minds.
 
