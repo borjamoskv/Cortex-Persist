@@ -1,7 +1,9 @@
 """Verification Oracle — Deterministic validation for P0 Decoupling (V6).
 
-Provides a ground-truth verification layer for facts and transactions,
-independent of stochastic enrichment or external models.
+Provides a ground-truth verification layer for facts, transactions, and
+agent outputs — independent of stochastic enrichment or external models.
+
+AX-033: Stochastic outputs must cross a deterministic validation boundary.
 """
 
 from __future__ import annotations
@@ -13,77 +15,113 @@ from typing import Any, Optional
 logger = logging.getLogger("cortex.verification")
 
 
+# ── Result type ────────────────────────────────────────────────────────────
+
+
 @dataclass
-class VerificationVerdict:
-    """Result of a stateless verification check."""
+class VerificationResult:
+    """Immutable verdict emitted by the oracle after validating a candidate."""
 
     ok: bool
-    verdict: str  # "accepted" | "rejected"
+    verdict: str  # "accepted" | "rejected" | "unknown_subject"
     reasons: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+
+# ── Subject validators ─────────────────────────────────────────────────────
+
+
+def _verify_plan_step(candidate: Any) -> VerificationResult:
+    reasons: list[str] = []
+    if not isinstance(candidate, dict):
+        return VerificationResult(
+            ok=False, verdict="rejected", reasons=["Plan step must be a dict."]
+        )
+    if "objective" not in candidate:
+        reasons.append("Plan step missing objective.")
+    if "steps" not in candidate or not candidate["steps"]:
+        reasons.append("Plan step missing or empty steps list.")
+    ok = len(reasons) == 0
+    return VerificationResult(ok=ok, verdict="accepted" if ok else "rejected", reasons=reasons)
+
+
+def _verify_tool_result(candidate: Any) -> VerificationResult:
+    reasons: list[str] = []
+    if not isinstance(candidate, dict):
+        return VerificationResult(
+            ok=False, verdict="rejected", reasons=["Tool result must be a dict."]
+        )
+    if "ok" not in candidate:
+        reasons.append("Tool result missing 'ok' field.")
+    elif not candidate["ok"]:
+        if not candidate.get("error"):
+            reasons.append("Tool result marked as failed but no error message provided.")
+    ok = len(reasons) == 0
+    return VerificationResult(ok=ok, verdict="accepted" if ok else "rejected", reasons=reasons)
+
+
+# ── Subject registry ───────────────────────────────────────────────────────
+
+_VALIDATORS = {
+    "plan_step": _verify_plan_step,
+    "tool_result": _verify_tool_result,
+}
+
+
+# ── Oracle ─────────────────────────────────────────────────────────────────
 
 
 class VerificationOracle:
-    """Sovereign Oracle for deterministic fact and ledger verification."""
+    """Sovereign Oracle: deterministic fact, ledger, and agent output verification.
 
-    def __init__(self, engine: Optional[Any] = None):
+    Can be instantiated standalone (no engine) for pure structural verification,
+    or with an engine reference for ledger-level checks.
+    """
+
+    def __init__(self, engine: Optional[Any] = None) -> None:
         self.engine = engine
 
-    # ─── Stateless Validation Surface ────────────────────────────────
+    # ── Primary dispatcher ─────────────────────────────────────────────────
 
-    async def verify(
-        self, subject: str, candidate: dict[str, Any]
-    ) -> VerificationVerdict:
-        """Stateless deterministic validation for structured candidates."""
-        if subject == "plan_step":
-            return self._verify_plan_step(candidate)
-        elif subject == "tool_result":
-            return self._verify_tool_result(candidate)
-        return VerificationVerdict(
-            ok=False, verdict="rejected", reasons=[f"Unknown subject: {subject}"]
-        )
+    async def verify(self, subject: str, candidate: Any) -> VerificationResult:
+        """Dispatch validation by subject type.
 
-    def _verify_plan_step(self, candidate: dict[str, Any]) -> VerificationVerdict:
-        reasons: list[str] = []
-        if "objective" not in candidate:
-            reasons.append("Plan step missing objective.")
-        if reasons:
-            return VerificationVerdict(ok=False, verdict="rejected", reasons=reasons)
-        return VerificationVerdict(ok=True, verdict="accepted")
+        Args:
+            subject: The verification domain ("plan_step", "tool_result", …).
+            candidate: The data structure to validate.
 
-    def _verify_tool_result(self, candidate: dict[str, Any]) -> VerificationVerdict:
-        reasons: list[str] = []
-        ok_field = candidate.get("ok")
-        if ok_field is False and "error" not in candidate:
-            reasons.append(
-                "Tool result marked as failed but no error message provided."
+        Returns:
+            VerificationResult with ok, verdict, and reasons.
+        """
+        validator = _VALIDATORS.get(subject)
+        if validator is None:
+            return VerificationResult(
+                ok=False,
+                verdict="unknown_subject",
+                reasons=[f"No validator registered for subject '{subject}'."],
             )
-        if reasons:
-            return VerificationVerdict(ok=False, verdict="rejected", reasons=reasons)
-        return VerificationVerdict(ok=True, verdict="accepted")
+        return validator(candidate)
 
-    # ─── Engine-Dependent Methods ────────────────────────────────────
+    # ── Ledger-level checks (require engine) ──────────────────────────────
 
     async def verify_fact_integrity(self, fact_id: int) -> bool:
         """Verify the cryptographic integrity of a fact record."""
-        if not self.engine:
-            return False
+        if self.engine is None:
+            raise RuntimeError("VerificationOracle requires an engine for fact integrity checks.")
         async with self.engine.session() as conn:
             cursor = await conn.execute(
                 "SELECT content, hash, metadata FROM facts WHERE id = ?", (fact_id,)
             )
             row = await cursor.fetchone()
-            if not row:
-                return False
-            return True
+            return row is not None
 
     async def check_enrichment_status(self, fact_id: int) -> str:
-        """Check the status of enrichment for a specific fact."""
-        if not self.engine:
-            return "no_engine"
+        """Check the enrichment status for a specific fact."""
+        if self.engine is None:
+            raise RuntimeError("VerificationOracle requires an engine for enrichment checks.")
         async with self.engine.session() as conn:
             cursor = await conn.execute(
-                "SELECT status FROM enrichment_jobs WHERE fact_id = ?"
-                " ORDER BY id DESC LIMIT 1",
+                "SELECT status FROM enrichment_jobs WHERE fact_id = ? ORDER BY id DESC LIMIT 1",
                 (fact_id,),
             )
             row = await cursor.fetchone()
@@ -98,8 +136,10 @@ class VerificationOracle:
 
     async def verify_ledger_continuity(self) -> bool:
         """Verify the integrity of the entire ledger chain."""
-        if not self.engine:
-            return False
+        if self.engine is None:
+            raise RuntimeError(
+                "VerificationOracle requires an engine for ledger continuity checks."
+            )
         try:
             audit_result = await self.engine.ledger.audit()
             return audit_result["is_valid"]
