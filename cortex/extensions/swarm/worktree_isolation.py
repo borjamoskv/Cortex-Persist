@@ -28,7 +28,7 @@ async def _run_git_with_backoff(
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
         )
-        stdout, stderr = await proc.communicate()
+        stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=30.0)
 
         # lock file detection
         if proc.returncode != 0 and b"index.lock" in stderr:
@@ -50,7 +50,7 @@ async def _run_git_with_backoff(
     )
 
 
-def _purge_zombies(base_dir: Path) -> None:
+async def _purge_zombies(base_dir: Path) -> None:
     """Aniquila worktrees huérfanos de ejecuciones previas anómalas (Ghosts)."""
     if not base_dir.exists():
         return
@@ -75,6 +75,10 @@ def _purge_zombies(base_dir: Path) -> None:
                 except (ValueError, IndexError):
                     # Fallback structural purge if format is unknown
                     pass
+
+        # Force Git to prune internal metadata for physical paths we just annihilated
+        await _run_git_with_backoff("worktree", "prune")
+
     except Exception as e:
         logger.warning("⚠️ [WORKTREE IMMUNITY] Fallo menor al purgar zombies: %s", e)
 
@@ -98,7 +102,7 @@ async def isolated_worktree(
     base_dir.mkdir(parents=True, exist_ok=True)
 
     # Immune system purge
-    _purge_zombies(base_dir)
+    await _purge_zombies(base_dir)
 
     # Sanitizamos el nombre para el directorio físico
     safe_name = branch_name.replace("/", "_").replace("\\", "_")
