@@ -181,11 +181,12 @@
     "context_window": 131072,
     "tier": "high",
     "cost_class": "free",
-    "specialization": ["reasoning", "code", "creative", "general"],
+    "specialization": ["reasoning", "code", "creative", "architect", "general"],
     "intent_model_map": {
       "code":      "llama-3.3-70b-versatile",
       "reasoning": "llama-3.3-70b-versatile",
       "creative":  "llama-3.3-70b-versatile",
+      "architect": "openai/gpt-oss-120b",
       "general":   "llama-3.3-70b-versatile"
     }
   },
