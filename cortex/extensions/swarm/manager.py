@@ -41,11 +41,22 @@ class CapatazOrchestrator:
 
     _MAX_TASKS: int = 500  # Thermodynamic cap: evict oldest done tasks beyond this
 
-    def __init__(self, mission_id: Optional[str] = None):
+    def __init__(
+        self,
+        mission_id: Optional[str] = None,
+        budget_manager: Optional[Any] = None,
+    ):
         self.mission_id = mission_id or f"mission-{uuid.uuid4().hex[:8]}"
         self.tasks: dict[str, SwarmTask] = {}
-        self.budget = get_budget_manager()
+        # Dependency Injection (ADR-035)
+        self.budget = budget_manager or get_budget_manager()
+        self._extensions: dict[str, Any] = {}
         logger.info("Capataz: Orchestrating mission %s", self.mission_id)
+
+    def register_extension(self, name: str, extension: Any) -> None:
+        """Attach a pluggable swarm capability (e.g. Byzantine, Heartbeat)."""
+        self._extensions[name] = extension
+        logger.debug("Capataz: Extension [%s] registered.", name)
 
     async def _execute_completion_with_tracking(
         self,
@@ -164,8 +175,32 @@ class CapatazOrchestrator:
             )
 
     def get_status(self) -> dict[str, Any]:
-        return {
+        status = {
             "mission_id": self.mission_id,
             "tasks": {tid: t.status.value for tid, t in self.tasks.items()},
             "budget": self.budget.get_mission_budget(self.mission_id),
         }
+        # Polymorphic status reporting from extensions
+        for name, ext in self._extensions.items():
+            if hasattr(ext, "get_status"):
+                status[name] = ext.get_status()
+        return status
+
+    def maintenance_pulse(self) -> dict[str, int]:
+        """Perform a coordinated entropy cleanup across all extensions.
+
+        [Axiom Ω₁₃: Aniquilación Entrópica]
+        Iterates through registered extensions and calls evict_stale_data.
+        Returns a map of extension names to eviction counts.
+        """
+        results = {}
+        for name, ext in self._extensions.items():
+            if hasattr(ext, "evict_stale_data"):
+                try:
+                    results[name] = ext.evict_stale_data()
+                except Exception as e:
+                    logger.error("Capataz: Maintenance failed for [%s]: %s", name, e)
+                    results[name] = -1
+        if any(v > 0 for v in results.values()):
+            logger.info("Capataz: Maintenance pulse complete. Results: %s", results)
+        return results

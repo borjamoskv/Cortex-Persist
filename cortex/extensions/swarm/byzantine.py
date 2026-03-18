@@ -31,18 +31,18 @@ class ByzantineConsensus:
         self.nodes[node_id] = ByzantineNode(node_id, initial_reputation)
 
     def evict_dead_nodes(self, min_reputation: float = 0.05) -> int:
-        """Purge nodes whose reputation has been slashed below min_reputation.
-
-        After repeated Byzantine failures a node's reputation approaches 0.0.
-        Without eviction, the nodes dict accumulates ghost entries that
-        contribute zero weight but grow RAM indefinitely.
-
-        Returns: number of nodes evicted.
-        """
+        """Purge nodes whose reputation has been slashed below min_reputation."""
         dead = [nid for nid, n in self.nodes.items() if n.reputation < min_reputation]
         for nid in dead:
             del self.nodes[nid]
         return len(dead)
+
+    def evict_stale_data(self) -> int:
+        """Standard protocol eviction."""
+        return self.evict_dead_nodes()
+
+    def get_status(self) -> dict[str, Any]:
+        return {"nodes_count": len(self.nodes)}
 
     async def _get_proposal_hash(self, proposal: Any) -> str:
         """Deterministic hashing for any generic type via background thread."""
