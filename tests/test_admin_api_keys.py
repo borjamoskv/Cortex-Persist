@@ -45,6 +45,8 @@ def test_create_api_key_bootstrap_is_single_use(admin_client) -> None:
         "/v1/admin/keys",
         params={"name": "bootstrap-admin", "tenant_id": "tenant-alpha"},
     )
+    if first.status_code != 200:
+        print(f"DEBUG: {first.json()}")
     assert first.status_code == 200
     assert first.json()["tenant_id"] == "tenant-alpha"
 

@@ -51,10 +51,27 @@ class AsyncCortexEngine(
         from cortex.extensions.cuatrida.orchestrator import CuatridaOrchestrator
 
         self._cuatrida = CuatridaOrchestrator(self)
+        self._trust_registry: Optional[Any] = None
 
     @property
     def cuatrida(self) -> Any:
         return self._cuatrida
+
+    def get_trust_registry(self) -> Any:
+        """Access the Bayesian Trust Registry (Ω₃)."""
+        if self._trust_registry is None:
+            from cortex.engine.trust_registry import TrustRegistry
+
+            self._trust_registry = TrustRegistry()
+        return self._trust_registry
+
+    async def propagate_taint(self, fact_id: int, tenant_id: str = "default") -> Any:
+        """Propagate taint (Ω₁₃) through the causal DAG."""
+        from cortex.engine.causality import AsyncCausalGraph
+
+        async with self.session() as conn:
+            graph = AsyncCausalGraph(conn)
+            return await graph.propagate_taint(fact_id, tenant_id=tenant_id)
 
     @property
     def writer(self) -> Optional[SqliteWriteWorker]:

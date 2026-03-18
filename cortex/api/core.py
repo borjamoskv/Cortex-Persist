@@ -77,6 +77,9 @@ from cortex.routes import (
     search as search_router,
 )
 from cortex.routes import (
+    swarm as swarm_router,
+)
+from cortex.routes import (
     telemetry as telemetry_router,
 )
 from cortex.routes import (
@@ -90,6 +93,9 @@ from cortex.routes import (
 )
 from cortex.routes import (
     translate as translate_router,
+)
+from cortex.routes import (
+    trust as trust_router,
 )
 from cortex.routes import usage as usage_router
 from cortex.telemetry.metrics import MetricsMiddleware, metrics
@@ -110,6 +116,8 @@ __all__ = [
 ]
 
 logger = logging.getLogger("uvicorn.error")
+
+from cortex.extensions.swarm.manager import get_swarm_manager
 
 # ─── Initialization ───────────────────────────────────────────────────
 
@@ -135,6 +143,8 @@ async def lifespan(app: FastAPI):
     pool = CortexConnectionPool(db_path, read_only=False)
     await pool.initialize()
     async_engine = AsyncCortexEngine(pool, db_path)
+
+    app.state.swarm_manager = get_swarm_manager()
 
     # 3. Global Auth Registration
     import cortex.auth
@@ -189,6 +199,7 @@ app = FastAPI(
     docs_url="/docs" if not config.PROD else None,
     redoc_url="/redoc" if not config.PROD else None,
 )
+app.state.swarm_manager = get_swarm_manager()
 
 
 # ─── Internal Middleware ──────────────────────────────────────────────
@@ -340,12 +351,14 @@ app.include_router(mejoralo_router.router)
 app.include_router(gate_router.router)
 app.include_router(context_router.router)
 app.include_router(tips_router.router)
+app.include_router(swarm_router.router)
 app.include_router(telemetry_router.router)
 app.include_router(topology_ws_router.router)
 app.include_router(usage_router.router)
 app.include_router(runtime_router.router)
 app.include_router(onboarding_router.router)
 app.include_router(health_index_router.router)
+app.include_router(trust_router.router)
 
 # Gateway — Universal Intelligence Entry Point
 from cortex.gateway.adapters import (  # noqa: E402

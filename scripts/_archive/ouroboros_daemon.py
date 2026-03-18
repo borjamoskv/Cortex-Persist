@@ -30,16 +30,14 @@ def calculate_complexity(node):
     for child in ast.walk(node):
         if isinstance(
             child,
-            (
-                ast.If,
-                ast.While,
-                ast.For,
-                ast.ExceptHandler,
-                ast.With,
-                ast.Lambda,
-                ast.Call,
-                ast.BoolOp,
-            ),
+            ast.If
+            | ast.While
+            | ast.For
+            | ast.ExceptHandler
+            | ast.With
+            | ast.Lambda
+            | ast.Call
+            | ast.BoolOp,
         ):
             complexity += 1
     return complexity
@@ -61,7 +59,7 @@ def run_ouroboros():
                 tree = ast.parse(f.read(), filename=str(py_file))
 
             for node in ast.walk(tree):
-                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
                     comp = calculate_complexity(node)
                     if comp > worst_complexity:
                         worst_complexity = comp

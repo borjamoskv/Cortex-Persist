@@ -106,7 +106,6 @@ class LLMProvider(BaseProvider):
         self._provider = provider
         self._base_url = base_url or preset["base_url"]
         self._model = model or os.environ.get("CORTEX_LLM_MODEL") or preset["default_model"]
-        self._context_window = preset["context_window"]
         self._extra_headers = preset.get("extra_headers", {})
         self._api_key = api_key
         self._tier = preset.get("tier", "high")
@@ -146,8 +145,8 @@ class LLMProvider(BaseProvider):
         if not self._api_key:
             # Some providers like Ollama don't need keys
             if provider not in ["ollama", "lmstudio", "llamacpp", "vllm", "jan"]:
-                msg = f"LLM provider '{provider}' requires an API key "
-                msg += f"(api_key argument or {env_key} env var)"
+                msg_base = f"LLM provider '{provider}' requires an API key "
+                msg = msg_base + f"(api_key argument or {env_key} env var)"
                 raise ValueError(msg)
 
     def _prepare_request(self) -> tuple[str, dict[str, str]]:
@@ -491,8 +490,11 @@ class LLMProvider(BaseProvider):
 
     @property
     def context_window(self) -> int:
-        """Context window in tokens."""
-        return self._context_window
+        """Context window in tokens resolved for the currently active model."""
+        from cortex.extensions.llm._presets import resolve_context_window
+
+        # Resolve based on current model name (which might be the default or an intent-override)
+        return resolve_context_window(self._provider, self._model)
 
     async def close(self) -> None:
         """Gracefully close the HTTP client."""

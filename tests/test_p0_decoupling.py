@@ -45,7 +45,7 @@ async def test_store_decoupled(engine):
         ) as cursor:
             row = await cursor.fetchone()
             assert row is not None
-            assert row[1] == "queued"
+            assert row[1] == "pending"
 
 
 @pytest.mark.asyncio

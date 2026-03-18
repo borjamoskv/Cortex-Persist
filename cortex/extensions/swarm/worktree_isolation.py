@@ -169,6 +169,7 @@ async def isolated_worktree(
         if rc != 0:
             if b"already exists" in stderr:
                 # Branch exists — attach without -b
+                # (Ω₂ Infrastructure Refinement)
                 rc2, _, stderr2 = await _git(
                     "worktree",
                     "add",
@@ -180,13 +181,23 @@ async def isolated_worktree(
                         "worktree:isolation_failed",
                         _payload(error=stderr2.decode().strip()),
                     )
-                    raise WorktreeIsolationError(f"Worktree add failed: {stderr2.decode().strip()}")
+                    error_msg = f"Worktree add failed: {stderr2.decode().strip()}"
+                    raise WorktreeIsolationError(error_msg)
             else:
                 _emit_worktree_signal(
                     "worktree:isolation_failed",
                     _payload(error=stderr.decode().strip()),
                 )
-                raise WorktreeIsolationError(f"Worktree add failed: {stderr.decode().strip()}")
+                error_msg = f"Worktree add failed: {stderr.decode().strip()}"
+                raise WorktreeIsolationError(error_msg)
+
+        # ── Phase 1.5: Git Configuration ──────────────────────────
+        # Ensure the isolated environment has a valid user and other basics
+        # to prevent agent operations from failing.
+        await _git("-C", str(worktree_path), "config", "user.name", "CORTEX Agent")
+        await _git("-C", str(worktree_path), "config", "user.email", "agent@cortex.persist")
+        # Optimization: skip index/worktree comparison for performance if needed
+        await _git("-C", str(worktree_path), "config", "core.filemode", "false")
 
     except WorktreeIsolationError:
         raise
@@ -279,3 +290,37 @@ async def isolated_worktree(
                     teardown_ms=round(teardown_ms, 1),
                 ),
             )
+
+
+async def cleanup_all_worktrees(base_path: str | Path | None = None) -> int:
+    """Force-remove all ephemeral worktrees and their git metadata.
+
+    Returns:
+        Number of worktrees removed.
+    """
+    if base_path is None:
+        base_path = Path.home() / ".cortex" / "worktrees"
+
+    base_dir = Path(base_path)
+    if not base_dir.exists():
+        return 0
+
+    count = 0
+    # List all worktrees according to git
+    rc, stdout, _ = await _git("worktree", "list", "--porcelain")
+    if rc != 0:
+        return 0
+
+    lines = stdout.decode().splitlines()
+    worktree_paths = [line[10:] for line in lines if line.startswith("worktree ")]
+
+    for path_str in worktree_paths:
+        path = Path(path_str)
+        if path.name.startswith(WORKTREE_DIR_PREFIX):
+            logger.info("[WORKTREE] Force cleaning: %s", path)
+            await _git("worktree", "remove", "--force", path_str)
+            if path.exists():
+                shutil.rmtree(path, ignore_errors=True)
+            count += 1
+
+    return count

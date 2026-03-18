@@ -1,11 +1,10 @@
-from __future__ import annotations
-
 import logging
 import sqlite3
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
+from starlette.requests import Request
 
 from cortex.api.deps import get_async_engine
 from cortex.auth import AuthResult, require_permission
@@ -48,20 +47,6 @@ class SearchMemoryRequest(BaseModel):
     tags: list[str] | None = None
     as_of: str | None = None
 
-
-__all__ = [
-    "batch_store",
-    "cast_vote",
-    "cast_vote_v2",
-    "deprecate_fact",
-    "get_causal_chain",
-    "get_fact_by_id",
-    "list_votes",
-    "recall_facts",
-    "search_facts",
-    "store_fact",
-    "verify_ledger",
-]
 
 router = APIRouter(tags=["facts"])
 logger = logging.getLogger("uvicorn.error")
@@ -194,6 +179,60 @@ async def search_facts(
         )
         for r in results
     ]
+
+
+@router.get("/v1/facts/{fact_id}/history", response_model=list[FactResponse])
+async def get_fact_history(
+    fact_id: int,
+    auth: AuthResult = Depends(require_permission("read")),
+    engine: AsyncCortexEngine = Depends(get_async_engine),
+) -> list[FactResponse]:
+    """Retrieve version history for a specific fact."""
+    # Note: engine.history(project) returns audit trail for a PROJECT.
+    # We need a per-FACT history. Since CORTEX versions via new facts linked to parents,
+    # this is essentially a causal 'up' trace for that specific fact + any updates.
+    # If using the 'updated_from' edge type.
+    try:
+        chain = await engine.get_causal_chain(
+            fact_id=fact_id, direction="up", max_depth=50, tenant_id=auth.tenant_id
+        )
+        return [
+            FactResponse(
+                id=f["id"],
+                project=f["project"],
+                content=f["content"],
+                fact_type=f["fact_type"],
+                tags=f["tags"],
+                confidence=f.get("confidence", "C3"),
+                created_at=f["created_at"],
+                updated_at=f.get("updated_at"),
+                hash=f.get("hash"),
+                tx_id=f.get("tx_id"),
+            )
+            for f in chain
+        ]
+    except Exception as e:
+        logger.error("Failed to fetch fact history: %s", e)
+        raise HTTPException(status_code=500, detail="Failed to fetch history")
+
+
+@router.post("/v1/facts/{fact_id}/taint", response_model=dict)
+async def propagate_taint(
+    fact_id: int,
+    auth: AuthResult = Depends(require_permission("write")),
+    engine: AsyncCortexEngine = Depends(get_async_engine),
+) -> dict:
+    """Trigger Ω₁₃ taint propagation from a compromised/invalidated fact."""
+    try:
+        report = await engine.propagate_taint(fact_id, tenant_id=auth.tenant_id)
+        return {
+            "source_id": report.source_fact_id,
+            "affected_count": report.affected_count,
+            "changes": report.confidence_changes,
+        }
+    except Exception as e:
+        logger.error("Taint propagation failed: %s", e)
+        raise HTTPException(status_code=500, detail="Taint propagation failed")
 
 
 @router.get("/v1/facts/verify", response_model=dict)

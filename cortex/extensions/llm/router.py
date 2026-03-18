@@ -190,9 +190,8 @@ class CortexLLMRouter:
 
     # ── Shannon Compression (Ω₁₃: Entropic Containment) ────────────
 
-    # Maximum word count for working_memory before compression triggers.
-    # ~32k words ≈ ~40k tokens — safety margin for most providers.
-    _MAX_WORKING_MEMORY_WORDS: int = 32_000
+    # Default safety margin: keep prompts under 90% of model window.
+    _CONTEXT_SAFETY_MARGIN: float = 0.90
 
     # After compression, keep the first message (instruction) and last N messages.
     _COMPRESSED_TAIL_MESSAGES: int = 6
@@ -240,9 +239,14 @@ class CortexLLMRouter:
         Kairos-Ω: Requests idénticos en vuelo se coalescan — O(1) en concurrencia.
         """
         # Ω₁₃ Shannon Compression: prevent quadratic token burn
+        # Dynamic threshold based on provider context window
+        model_window = self._primary.context_window
+        # conversion factor approx 0.75 words/token
+        max_words = int((model_window * self._CONTEXT_SAFETY_MARGIN) * 0.75)
+
         prompt.working_memory = self._compress_working_memory(
             prompt.working_memory,
-            self._MAX_WORKING_MEMORY_WORDS,
+            max_words,
             self._COMPRESSED_TAIL_MESSAGES,
         )
 
@@ -330,7 +334,8 @@ class CortexLLMRouter:
                 )
                 return res_fb
 
-            errors.append(f"{provider.provider_name}: {res_fb.error}")  # type: ignore[union-attr]
+            errors.append(f"{provider.provider_name}: {res_fb.error}")
+            # type: ignore[reportOptionalMemberAccess]
             self._cascade.set_nx_record(provider.provider_name)
 
         # Final defeat: record terminal event

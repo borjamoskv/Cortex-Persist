@@ -243,3 +243,14 @@ def swarm_up(db):
             await bus.close()
 
     asyncio.run(_run_swarm())
+@swarm.command("cleanup")
+@click.option("--path", "-p", help="Base path for worktrees")
+def swarm_cleanup(path):
+    """Force-remove all ephemeral worktrees and their git metadata."""
+    from cortex.extensions.swarm.worktree_isolation import cleanup_all_worktrees
+
+    count = asyncio.run(cleanup_all_worktrees(path))
+    if count == 0:
+        console.print("[yellow]No ephemeral worktrees found to cleanup.[/]")
+    else:
+        console.print(f"[bold green]✅ Successfully cleaned up {count} worktrees.[/]")

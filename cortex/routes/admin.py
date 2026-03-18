@@ -7,18 +7,17 @@ and session handoff orchestration. Enforces strict RBAC and input validation.
 Sovereign 130/100 — Pydantic responses, structured logging, TOCTOU-safe paths.
 """
 
-from __future__ import annotations
-
 import logging
 import re
 import time
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, Header, HTTPException, Query
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from starlette.concurrency import run_in_threadpool
+from starlette.requests import Request
 
 import cortex.api.state as api_state
 from cortex import __version__
@@ -78,7 +77,7 @@ def _get_lang(request: Request) -> str:
     return request.headers.get("Accept-Language", DEFAULT_LANGUAGE)
 
 
-def _get_auth_manager() -> ApiKeyManager:
+def _get_auth_manager() -> "ApiKeyManager":
     """Resolve the active auth manager singleton."""
     return api_state.auth_manager or get_auth_manager()
 
@@ -346,7 +345,7 @@ async def create_api_key(
     authorization: Optional[str] = Header(None),
 ) -> ApiKeyResponse:
     """Sovereign Key Provisioning.
-
+ 
     First key is self-provisioned (bootstrap).
     Subsequent keys require 'admin' permission.
     """
@@ -389,7 +388,7 @@ async def list_api_keys(
 ) -> list[ApiKeyListItem]:
     """Expose non-sensitive metadata for all provisioned keys."""
     manager = _get_auth_manager()
-    keys = await manager.list_keys()
+    keys = await manager.list_keys(tenant_id=auth.tenant_id)
     return [
         ApiKeyListItem(
             id=str(k.id),

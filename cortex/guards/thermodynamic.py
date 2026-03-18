@@ -15,6 +15,20 @@ class ThermodynamicCounters:
     file_reads_without_ast_delta: int = 0
     context_expansion_rate: float = 0.0
     uncertainty_reduction_rate: float = 0.0
+    causal_taint_count: int = 0  # Ω₁₁: Number of tainted descendants detected
+
+
+class MetastabilityProbe:
+    """Detection of fragile equilibria (Ω₁₃)."""
+
+    @staticmethod
+    def probe(c: ThermodynamicCounters) -> float:
+        """Calculate metastability index. 1.0 = stable, 0.0 = collapsed."""
+        if c.context_expansion_rate == 0:
+            return 1.0
+        # If entropy grows faster than uncertainty reduction, the system is fragile.
+        balance = c.uncertainty_reduction_rate / c.context_expansion_rate
+        return min(1.0, balance)
 
 
 class DecorativeModeTriggered(RuntimeError):
@@ -32,5 +46,12 @@ def should_enter_decorative_mode(c: ThermodynamicCounters) -> tuple[bool, list[s
 
     if c.context_expansion_rate > c.uncertainty_reduction_rate:
         reasons.append("context_expansion_rate>uncertainty_reduction_rate")
+
+    if c.causal_taint_count > 10:
+        reasons.append("causal_taint_count>10 (systemic contamination)")
+
+    # Metastability check
+    if MetastabilityProbe.probe(c) < 0.2:
+        reasons.append("metastability_index<0.2 (fragile equilibrium)")
 
     return (len(reasons) > 0, reasons)

@@ -9,6 +9,7 @@ from __future__ import annotations
 import click
 
 from cortex.cli.common import DEFAULT_DB, console  # type: ignore[reportAttributeAccessIssue]
+from cortex.cli.health_dashboard import dashboard
 
 
 def _resolve_db(db_path: str | None) -> str:
@@ -292,6 +293,7 @@ health_group.add_command(dashboard)
 def verify():
     """Run structural invariant checks on the health system."""
     import sys
+
     from cortex.extensions.health.invariants import verify_health_system
 
     console.print("[bold blue]Running Health System Structural Invariants...[/bold blue]")

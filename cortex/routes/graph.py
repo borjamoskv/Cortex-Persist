@@ -7,7 +7,8 @@ Exposes entity graph endpoints for UI and external consumers.
 import logging
 import sqlite3
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query
+from starlette.requests import Request
 
 from cortex.api.deps import get_engine
 from cortex.auth import AuthResult, require_permission
@@ -36,7 +37,7 @@ async def get_graph(
 
     try:
         conn = await engine.get_conn()
-        return await _get_graph(conn, project, limit)
+        return await _get_graph(conn, project, limit, tenant_id=auth.tenant_id)
     except (sqlite3.Error, OSError, RuntimeError) as e:
         logger.error("Graph unavailable: %s", e)
         raise HTTPException(
@@ -54,7 +55,7 @@ async def get_graph_all(
     """Get entity graph across all projects."""
     try:
         conn = await engine.get_conn()
-        return await _get_graph(conn, None, limit)
+        return await _get_graph(conn, None, limit, tenant_id=auth.tenant_id)
     except (sqlite3.Error, OSError, RuntimeError) as e:
         logger.error("Graph unavailable: %s", e)
         lang = request.headers.get("Accept-Language", "en")

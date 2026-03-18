@@ -5,6 +5,13 @@
 - [ ] Identify CI blockers (Pyright/Ruff failures) [id: 1]
 - [ ] Resolve dependency conflicts (python-multipart vs python 3.9) [id: 2]
 - [ ] Resolve enum duplicate conflicts in `cortex/gateway/__init__.py` [id: 3]
+- [x] Planning: Define "Cathedral" architecture and identify "Scaffolding" to burn.
+- [x] Planning: Review implementation plan with user.
+- [x] Execution: Annihilate empty/zero-byte files (e.g., `legion_vectors_plan.py`).
+- [x] Execution: Fix trivial lint errors (`ask.py` missing `Any`).
+- [x] Execution: Purge Quarantined modules and ghost scripts.
+- [x] Execution: Synchronize schema (fix `OperationalError: no such column: priority`).
+- [/] Verification: Run core tests and `ship_gate.py`.
 - [ ] Fix Ruff linting errors in `cortex/utils/result.py` and MacMaestro SDK [id: 4]
 
 ## P1: Verification & Testing

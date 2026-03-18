@@ -18,16 +18,10 @@ from cortex.database.schema_extensions import (
     CREATE_EPISODES_INDEXES,
     CREATE_EVOLUTION_STATE,
     CREATE_EVOLUTION_STATE_INDEX,
-    CREATE_FACTS_FTS,
-    CREATE_MERKLE_ROOTS,
     CREATE_OUTCOMES,
-    CREATE_PROCEDURAL_ENGRAMS,
     CREATE_RWC_INDEXES,
     CREATE_SIGNALS,
     CREATE_SIGNALS_INDEXES,
-    CREATE_TRUST_EDGES,
-    CREATE_VOTES,
-    CREATE_VOTES_V2,
     EXTENSION_SCHEMA,
 )
 
@@ -61,14 +55,6 @@ __all__ = [
     "CREATE_TIME_ENTRIES_INDEX",
     "CREATE_TRANSACTIONS",
     "CREATE_TRANSACTIONS_INDEX",
-    "CREATE_ENRICHMENT_JOBS",
-    "CREATE_ENRICHMENT_JOBS_INDEXES",
-    CREATE_TRUST_EDGES,
-    CREATE_VOTES,
-    CREATE_VOTES_V2,
-    CREATE_PROCEDURAL_ENGRAMS,
-    CREATE_FACTS_FTS,
-    CREATE_MERKLE_ROOTS,
     "CREATE_TENANTS",
     "CREATE_THREAT_INTEL",
     "CREATE_THREAT_INTEL_INDEXES",
@@ -245,25 +231,6 @@ CREATE INDEX IF NOT EXISTS idx_te_project ON time_entries(project);
 CREATE INDEX IF NOT EXISTS idx_te_start ON time_entries(start_time);
 """
 
-# ─── Enrichment Queue ──────────────────────────────────────────────────
-CREATE_ENRICHMENT_JOBS = """
-CREATE TABLE IF NOT EXISTS enrichment_jobs (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    tenant_id   TEXT NOT NULL DEFAULT 'default',
-    fact_id     INTEGER NOT NULL,
-    status      TEXT NOT NULL DEFAULT 'pending',
-    retry_count INTEGER NOT NULL DEFAULT 0,
-    locked_at   TEXT,
-    created_at  TEXT NOT NULL DEFAULT (datetime('now')),
-    updated_at  TEXT NOT NULL DEFAULT (datetime('now')),
-    error       TEXT
-);
-"""
-
-CREATE_ENRICHMENT_JOBS_INDEXES = """
-CREATE INDEX IF NOT EXISTS idx_enrichment_status ON enrichment_jobs(status, locked_at);
-CREATE INDEX IF NOT EXISTS idx_enrichment_fact ON enrichment_jobs(fact_id);
-"""
 
 # ─── Metadata Table ───────────────────────────────────────────────────
 CREATE_META = """
@@ -365,8 +332,6 @@ _CORE_SCHEMA = [
     CREATE_THREAT_INTEL,
     CREATE_THREAT_INTEL_INDEXES,
     CREATE_TENANTS,
-    CREATE_ENRICHMENT_JOBS,
-    CREATE_ENRICHMENT_JOBS_INDEXES,
 ]
 
 # Full ordered schema: core + extensions (consensus, episodes, signals, entity_events...)

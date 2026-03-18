@@ -223,6 +223,35 @@ def resolve_model(provider: str, intent: str) -> str | None:
     return intent_map.get(intent, info.get("default_model"))
 
 
+def resolve_context_window(provider: str, model_name: str) -> int:
+    """Resolve the context window for a specific model under a provider.
+
+    Checks the 'models' dictionary in presets first, then falls back to
+    the provider-level 'context_window'.
+    """
+    info = get_preset_info(provider)
+    if not info:
+        return 0
+
+    # High-precision lookup in models dict
+    models_meta = info.get("models", {})
+    if isinstance(models_meta, dict) and model_name in models_meta:
+        meta = models_meta[model_name]
+        if isinstance(meta, dict) and "context_window" in meta:
+            return int(meta["context_window"])
+        if isinstance(meta, int | float):
+            return int(meta)
+    elif isinstance(models_meta, list) and model_name in models_meta:
+        logger.debug(
+            "[MODEL RESOLUTION] %s:%s is in models list. Using provider default.",
+            provider,
+            model_name,
+        )
+
+    # Fallback to provider default
+    return int(info.get("context_window", 0))
+
+
 def providers_for_intent(
     intent: str,
     *,

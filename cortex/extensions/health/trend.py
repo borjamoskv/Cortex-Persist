@@ -104,21 +104,52 @@ class TrendDetector:
             ")"
         )
 
-    def persist_to_db(self, db_path: str, score: float, grade: str = "") -> None:
+    def persist_to_db(
+        self,
+        db_path: str,
+        score: float,
+        grade: str = "",
+        timestamp: float | None = None,
+    ) -> None:
         """Persist a health score snapshot to SQLite."""
         try:
             conn = sqlite3.connect(db_path, timeout=2.0)
             try:
                 self._ensure_table(conn)
+                ts_str = (
+                    datetime.fromtimestamp(timestamp, tz=timezone.utc)
+                    if timestamp
+                    else datetime.now(timezone.utc)
+                ).isoformat()
                 conn.execute(
                     "INSERT INTO health_history (timestamp, score, grade) VALUES (?, ?, ?)",
-                    (datetime.now(timezone.utc).isoformat(), score, grade),
+                    (ts_str, score, grade),
+                )
+                conn.commit()
+            finally:
+                conn.close()
+        except (sqlite3.Error, OSError, ValueError) as e:
+            logger.debug("Failed to persist health score: %s", e)
+
+    def prune_history(self, db_path: str, keep_days: int = 30) -> None:
+        """Delete historical records older than keep_days."""
+        try:
+            conn = sqlite3.connect(db_path, timeout=2.0)
+            try:
+                self._ensure_table(conn)
+                # SQLite isoformat comparison: "2024-..." < "2024-..."
+                from datetime import timedelta
+
+                cutoff = (datetime.now(timezone.utc) - timedelta(days=keep_days)).isoformat()
+                conn.execute(
+                    "DELETE FROM health_history WHERE timestamp < ?",
+                    (cutoff,),
                 )
                 conn.commit()
             finally:
                 conn.close()
         except (sqlite3.Error, OSError) as e:
-            logger.debug("Failed to persist health score: %s", e)
+            logger.debug("Failed to prune health history: %s", e)
 
     def load_from_db(self, db_path: str, limit: int | None = None) -> None:
         """Seed ring buffer from historical DB records."""
