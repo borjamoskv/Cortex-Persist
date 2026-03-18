@@ -1,6 +1,6 @@
 import json
 from dataclasses import dataclass, field
-from typing import Optional, Union
+from typing import Optional
 
 # Import removed to break circularity: from cortex.embeddings.provider import EmbeddingProvider
 
@@ -9,7 +9,7 @@ __all__ = ["Fact", "row_to_fact"]
 
 @dataclass
 class Fact:
-    id: Union[int, str]
+    id: int | str
     tenant_id: str
     project: str
     content: str
@@ -22,7 +22,7 @@ class Fact:
     category: str = "general"
     tags: list[str] = field(default_factory=list)
     # Causal Lineage
-    parent_id: Optional[Union[int, str]] = None
+    parent_id: Optional[int | str] = None
     relation_type: Optional[str] = None
     yield_score: float = 1.0
     # Provenance and State

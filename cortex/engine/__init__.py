@@ -25,7 +25,6 @@ from cortex.engine.store_mixin import StoreMixin
 from cortex.engine.transaction_mixin import TransactionMixin
 from cortex.ledger import EnrichmentQueue, LedgerStore, LedgerWriter
 from cortex.mac_maestro.executor import MaestroExecutor
-from cortex.storage import StorageMode, get_storage_mode
 
 try:
     from cortex.extensions.health.health_mixin import HealthMixin  # type: ignore
@@ -72,7 +71,7 @@ class CortexEngine(
 
     def __init__(
         self,
-        db_path: Union[str, Path] = DEFAULT_DB_PATH,
+        db_path: str | Path = DEFAULT_DB_PATH,
         auto_embed: bool = True,
     ):
         super().__init__()
@@ -81,10 +80,8 @@ class CortexEngine(
         self._enforce_fs_permissions()
         self._auto_embed = auto_embed
         self._conn: Optional[aiosqlite.Connection] = None
-        self._adapter: Optional[object] = None  # StorageAdapter — set in get_conn()
         self._vec_available = False
         self._conn_lock = asyncio.Lock()
-        self._storage_mode: StorageMode = get_storage_mode()
         self._ledger = None  # Wave 5: ImmutableLedger (lazy init)
         self._embedder: Optional[LocalEmbedder] = None
         self._memory_manager = None  # Frontera 2: Tripartite Memory (lazy init)
@@ -237,32 +234,11 @@ class CortexEngine(
     # ─── Connection ───────────────────────────────────────────────
 
     async def get_conn(self) -> aiosqlite.Connection:
-        """Returns the async database connection (SQLite mode).
-
-        For postgres mode, still returns None-equivalent — callers
-        should migrate to self._adapter for backend-agnostic reads/writes.
-        Backward-compatible: all existing mixin code continues to work.
-        """
+        """Returns the async database connection."""
         async with self._conn_lock:
             if self._conn is not None:
                 return self._conn
 
-            # ── Postgres mode: adapter only, no aiosqlite conn ──
-            if self._storage_mode == StorageMode.POSTGRES:
-                if self._adapter is None:
-                    from cortex.storage import get_storage_config
-                    from cortex.storage.postgres import PostgresBackend
-
-                    cfg = get_storage_config()
-                    backend = PostgresBackend(dsn=cfg["dsn"])
-                    await backend.connect()
-                    self._adapter = backend
-                    logger.info("CortexEngine: PostgresBackend adapter initialized.")
-                # Return a sentinel — callers that still use get_conn() directly
-                # will get an AttributeError on the next SQL call, surfacing the gap.
-                return self._conn  # type: ignore[return-value]
-
-            # ── Local (SQLite) mode ──────────────────────────────
             from cortex.database.core import connect_async
 
             self._conn = await connect_async(str(self._db_path))
@@ -275,13 +251,6 @@ class CortexEngine(
             except (OSError, AttributeError) as e:
                 logger.debug("sqlite-vec extension not available: %s", e)
                 self._vec_available = False
-
-            # Wrap connection in the StorageAdapter for backend-agnostic writes.
-            if self._adapter is None:
-                from cortex.storage.sqlite_adapter import SQLiteAdapter
-
-                self._adapter = SQLiteAdapter(self._conn)
-                logger.debug("CortexEngine: SQLiteAdapter initialized.")
 
             # Ensure memory subsystem is initialized (L1/L2/L3)
             # This is critical for Active Forgetting (Thalamus Gate)
