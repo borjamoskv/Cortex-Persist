@@ -12,7 +12,7 @@ CORTEX Persist operates a multi-agent execution topology designed to minimize ep
 ```mermaid
 graph LR
     subgraph Orchestration
-        A["SwarmManager"] --> B["Jornada Scheduler"]
+        A["SwarmManager (50 agents)"] --> B["Jornada Scheduler"]
         B --> C["Worktree Isolation"]
     end
 
@@ -28,6 +28,27 @@ graph LR
         I["Swarm Heartbeat"] -->|"probe"| D
         I -->|"failure"| J["Auto-Heal"]
         J --> C
+    end
+
+    subgraph Conflict
+        D -->|"disagreement"| R["LEGION-Ω ConflictResolver"]
+        R -->|"tier-1"| S["Triangulation"]
+        R -->|"deadlock"| U["Heuristic Breaker"]
+        S & U --> F
+    end
+
+    subgraph Verification
+        F --> VV["VerificationOracle"]
+        VV -->|"SHA-256 OK"| W["Trust: LOCKED"]
+        VV -->|"mismatch"| X["HASH_MISMATCH"]
+        X --> H
+    end
+
+    subgraph CognitiveOrchestration
+        D2["Deep Think (11 HDC)"] --> F
+        D3["UltraThink (P0)"] --> F
+        D4["Psychohistory (50)"] --> F
+        D5["CentauroEngine"] --> D2
     end
 
     subgraph NightShift
@@ -273,18 +294,146 @@ graph TD
 
 ---
 
-## Module Dependency Map
+## 7. Conflict Resolution (`conflict_resolution.py`)
+
+The **LEGION-Ω Protocol** resolves multi-agent disagreements without human intervention.
+
+- **4-Tier Escalation**:
+  1. **Triangulation**: A third agent analyzes the conflict.
+  2. **Weighted Vote**: Agents vote based on domain reputation.
+  3. **Architect Arbitration**: Escalation to a high-privileged Architect agent.
+  4. **Deadlock Heuristic**: If all fails, a deterministic heuristic (e.g., preference for existing stable state) is applied.
+- **Voting Weight**: `weight = 0.40×domain_match + 0.30×success_rate + 0.20×confidence + 0.10×recency`.
+
+---
+
+## 8. Verification Oracle (`verification.py`)
+
+Provides a deterministic frontier for probabilistic LLM outputs.
+
+- **SHA-256 Integrity**: Validates fact content against its cryptographic hash.
+- **Ledger Verification**: Ensures the fact is anchored in the persistent ledger (Arweave/Local).
+- **Batch Verification**: Optimized O(N) verification for thousands of facts using vectorized checks.
+
+---
+
+## 9. Cognitive Orchestration
+
+Specialized protocols for high-complexity reasoning and simulation.
+
+### 9.1 Deep Think (`orchestrator_deep_think.py`)
+An 11-agent mesh protocol (10 specialists + 1 "Maradona" synthesizer) using **HDC (Hyperdimensional Computing)** vectors for state management. Operates on a 4D Waveform context to detect resonance and Byzantine drift.
+
+### 9.2 UltraThink (`orchestrator_ultra_think.py`)
+Handles **P0 Singularities** (system failures, security breaches) via a 3-phase gate:
+1. **Proposal Generation**: Diverse solution space.
+2. **Mechanical Verification**: AST validation and trace analysis of the proposal.
+3. **Logic Audit**: Verification Oracle check. Failure triggers a "stochastic detonation" (proposal rejection).
+
+### 9.3 Psychohistory (`psychohistory.py`)
+A 50-agent simulation across 5 domains to model catastrophic contingencies. Uses a **Hari Seldon Omega** synthesis agent to produce an O(1) **Contingency Crystal** from the swarm's collective resonance.
+
+### 9.4 InfiniteMinds (`infinite_minds.py`)
+Manages agent "minds" as zero-copy lenses over a shared **DynamicSemanticSpace**. Uses `semantic_bias` to refract queries and detects Byzantine clusters via N² similarity calculations.
+
+---
+
+## 10. CentauroEngine (Swarm Core) (`centauro_engine.py`)
+
+The tactical execution engine for the Sovereign Swarm.
+
+- **12 Combat Formations**: Dynamic switching (e.g., `BLITZ` for speed, `LEVIATHAN` for data volume).
+- **Endocrine Modulation**: Uses Adrenaline/Cortisol/Dopamine hormone types to signal mission state and urgency.
+- **ALEPH-Ω Fallback**: A probabilistic leap mechanism used when consensus fails to reach a 2/3 quorum.
+
+---
+
+## 11. Agent Infrastructure
+
+The low-level trust and communication foundation.
+
+### 11.1 Cryptographic Identity (`identity.py`)
+
+**IdentityAnchor** provides RSA-PSS 4096-bit signatures. Used for Arweave address derivation via public JWK export.
+
+### 11.2 Trust & Attestation (`trust_scoring.py`)
+
+**TrustLedger** manages peer attestations. Scores decay over time to prevent reputation squatting. Anchored on Arweave for third-party verification.
+
+### 11.3 Secret Sharing (`shamir_storage.py`)
+
+**ShamirStorage** implements k-of-n secret sharing over GF(256). Sensitive payloads are split into shares distributed across multiple backends.
+
+### 11.4 Atomic Communication (`mailbox.py`)
+
+**AtomicMailbox** provides zero-latency inter-agent messaging using a local SQLite backend for transactional reliability.
+
+### 11.5 Swarm Sync (`jornadas.py`)
+
+**JornadasManager** orchestrates "REM sleep" events. Pauses execution for global entropy reduction and axiom crystallization.
+
+### 11.6 Agent Resurrection (`phoenix_handoff_adapter.py`)
+
+Restores agent context by verifying Arweave continuity and pulling causal chains from the local CORTEX database.
+
+---
+
+## 12. Storage Layer Architecture
+
+Unified multi-tier storage with privacy safeguards.
+
+### 12.1 Storage Protocol (`storage/adapter.py`)
+
+Defines the `StorageAdapter` protocol (async execute, fetch, commit) implemented by all backends.
+
+### 12.2 Multi-Backend Router (`storage_router.py`)
+
+High-level Swarm router with **Fallback Hierarchy**: Arweave (Permanent) → IPFS (Verifiable) → Local (Reliable). Includes a re-probe logic for degraded backends.
+
+### 12.3 Multi-Tenancy & Privacy (`storage/router.py`)
+
+**TenantRouter** isolates data by `tenant_id`. Features **Zero-Trust Privacy**: scans content via `classifier.py` and forces LOCAL storage if sensitive patterns (API keys, PII) are detected.
+
+### 12.4 Database Backends
+
+- **PostgreSQL (`postgres.py`)**: Cloud-scale storage with connection pooling and idempotent schema initialization.
+- **Turso (`turso.py`)**: Edge-optimized libSQL integration for low-latency global reach.
+- **Qdrant (`qdrant.py`)**: Vector store with per-tenant collection isolation.
+
+---
+
+## 13. Module Dependency Map
 
 ```mermaid
 graph TD
-    protocols["protocols.py"] --> manager["manager.py"]
-    manager --> worktree["worktree_isolation.py"]
-    manager --> heartbeat["swarm_heartbeat.py"]
-    manager --> nightshift["nightshift_daemon.py"]
-    nightshift --> radar["knowledge_radar.py"]
-    nightshift --> thermometer["crystal_thermometer.py"]
-    nightshift --> consolidator["crystal_consolidator.py"]
-    telemetry["telemetry_gate.py"] --> ghost_pipe["error_ghost_pipeline.py"]
-    heartbeat --> heal["heal.py"]
-    causal["causal_gap.py"] --> search["hybrid.py"]
+    subgraph "Orchestration"
+        DT[DeepThink] --> CE[CentauroEngine]
+        UT[UltraThink] --> CE
+        PH[Psychohistory] --> HS[HariSeldon]
+    end
+
+    subgraph "Infrastructure"
+        CE --> ID[IdentityAnchor]
+        CE --> TS[TrustLedger]
+        CE --> MB[AtomicMailbox]
+        PX[PhoenixAdapter] --> CV[ContinuityVerifier]
+        JM[JornadasManager] --> CC[CrystalConsolidator]
+    end
+
+    subgraph "Storage"
+        CE --> SR[StorageRouter]
+        SR --> AR[ArweaveClient]
+        SR --> IPFS[IPFSClient]
+        SR --> SS[ShamirStorage]
+        SR --> TR[TenantRouter]
+        TR --> PG[PostgresBackend]
+        TR --> TU[TursoBackend]
+        TR --> CL[Classifier]
+    end
+
+    subgraph "Memory & Vector"
+        DT --> IM[InfiniteMinds]
+        IM --> S_RAM[SemanticRAM]
+        S_RAM --> QD[QdrantVector]
+    end
 ```
