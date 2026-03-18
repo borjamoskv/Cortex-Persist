@@ -9,7 +9,9 @@ from collections.abc import Callable
 from typing import Any
 
 
-def build_health_probes(conn: Any, request: Any, schema_version: int) -> dict[str, Callable[[], tuple[str, bool, dict[str, Any]]]]:
+def build_health_probes(
+    conn: Any, request: Any, schema_version: int
+) -> dict[str, Callable[[], tuple[str, bool, dict[str, Any]]]]:
     """Build a map of health probes for the admin deep check."""
 
     def probe_db() -> tuple[str, bool, dict[str, Any]]:

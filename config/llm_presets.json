@@ -122,17 +122,27 @@
     "context_window": 256000,
     "models": {
       "grok-4.1": 256000,
-      "grok-4.1-fast": 2000000
+      "grok-4.1-fast": 2000000,
+      "grok-3": {
+        "context_window": 128000,
+        "tier": "frontier",
+        "cost_class": "high"
+      },
+      "grok-3-mini": {
+        "context_window": 128000,
+        "tier": "high",
+        "cost_class": "low"
+      }
     },
     "tier": "frontier",
     "cost_class": "high",
     "specialization": ["code", "reasoning", "creative", "architect", "general"],
     "intent_model_map": {
       "code":      "grok-4.1-fast",
-      "reasoning": "grok-4.1",
-      "creative":  "grok-4.1",
+      "reasoning": "grok-3",
+      "creative":  "grok-3",
       "architect": "grok-4.1-fast",
-      "general":   "grok-4.1-fast"
+      "general":   "grok-3-mini"
     }
   },
   "cohere": {
@@ -171,11 +181,11 @@
     "cost_class": "variable",
     "specialization": ["reasoning", "code", "creative", "architect", "general"],
     "intent_model_map": {
-      "code":      "anthropic/claude-3-7-sonnet",
-      "reasoning": "x-ai/grok-4.1",
-      "creative":  "anthropic/claude-3-7-sonnet",
-      "architect": "x-ai/grok-4.1",
-      "general":   "google/gemini-2.0-pro-exp-02-05"
+      "code":      "anthropic/claude-3.5-sonnet",
+      "reasoning": "x-ai/grok-2",
+      "creative":  "anthropic/claude-3.5-sonnet",
+      "architect": "x-ai/grok-2",
+      "general":   "google/gemini-2.0-flash-001"
     }
   },
   "groq": {

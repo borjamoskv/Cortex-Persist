@@ -11,7 +11,7 @@
 - [x] Execution: Fix trivial lint errors (`ask.py` missing `Any`).
 - [x] Execution: Purge Quarantined modules and ghost scripts.
 - [x] Execution: Synchronize schema (fix `OperationalError: no such column: priority`).
-- [/] Verification: Run core tests and `ship_gate.py`.
+- [x] Verification: Run core tests and `ship_gate.py`.
 - [ ] Fix Ruff linting errors in `cortex/utils/result.py` and MacMaestro SDK [id: 4]
 
 ## P1: Verification & Testing

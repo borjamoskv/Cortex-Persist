@@ -41,7 +41,7 @@ dependencies = [
     "keyring>=25.7.0",
     "cryptography>=46.0.5",
     "watchdog>=6.0.0",
-    "pydantic>=2.10.0", # latest stable features
+    "pydantic[email]>=2.10.0", # latest stable features
 ]
 
 [project.urls]

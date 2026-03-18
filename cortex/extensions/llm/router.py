@@ -85,7 +85,7 @@ class CortexLLMRouter:
 
     def _ordered_fallbacks(
         self,
-        intent: IntentProfile,
+        prompt: CortexPrompt,
     ) -> list[BaseProvider]:
         """Ordena fallbacks: intent affinity → A-record → cost → tier.
 
@@ -93,23 +93,36 @@ class CortexLLMRouter:
         then sorts unknowns by cost_class (cheaper first), then by
         tier (frontier > high > local) for same-cost tiebreaking.
         """
+        from cortex.extensions.llm._models import ReasoningMode
+
+        effective_intent = prompt.intent
+        # Axiom Ω₁₆: If reasoning mode is DEEP_THINK or ULTRA_THINK,
+        # coerce the fallback intent to REASONING to select the right model map.
+        if prompt.reasoning_mode in (ReasoningMode.DEEP_THINK, ReasoningMode.ULTRA_THINK):
+            effective_intent = IntentProfile.REASONING
+
         typed_matches: list[BaseProvider] = []
         safety_net: list[BaseProvider] = []
 
         for p in self._fallbacks:
-            if classify_tier(p, intent) == CascadeTier.TYPED_MATCH:
+            if classify_tier(p, effective_intent) == CascadeTier.TYPED_MATCH:
                 typed_matches.append(p)
             else:
                 safety_net.append(p)
 
+        # Axiom Ω₁₆: ULTRA_THINK strictly requires frontier models.
+        if prompt.reasoning_mode == ReasoningMode.ULTRA_THINK:
+            typed_matches = [p for p in typed_matches if p.tier == "frontier"]
+            safety_net = [p for p in safety_net if p.tier == "frontier"]
+
         # Apply A-record promotion + cost/tier tiebreaking
         promoted_typed = self._promote_by_latency_then_cost(
             typed_matches,
-            intent,
+            effective_intent,
         )
         promoted_safety = self._promote_by_latency_then_cost(
             safety_net,
-            intent,
+            effective_intent,
         )
 
         return promoted_typed + promoted_safety
@@ -306,7 +319,7 @@ class CortexLLMRouter:
             return res_primary
 
         # Phase 2: Fallback cascade
-        fallbacks = self._ordered_fallbacks(prompt.intent)
+        fallbacks = self._ordered_fallbacks(prompt)
         errors = [f"Primary ({self._primary.provider_name}): {res_primary.error}"]  # type: ignore[union-attr]
 
         for i, provider in enumerate(fallbacks, start=2):

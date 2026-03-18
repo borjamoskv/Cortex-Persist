@@ -31,45 +31,43 @@ Soft-deprecate a fact.
 ### `GET /v1/facts/verify`
 Verify the cryptographic integrity of the entire memory ledger.
 
-### `GET /v1/facts/{id}/chain`
-Retrieve the causal chain (ancestors/descendants) for a specific fact.
+### `POST /v1/facts/{id}/taint`
+[Ω₁₃] Trigger recursive confidence downgrades on suspected facts.
 
 ---
 
-## Consensus & Voting
+## Swarm & Worktrees (`/v1/swarm`)
 
-### `POST /v1/facts/{id}/vote`
-Verify or dispute a fact.
+Orchestration surface for isolated agent deployment (Hito 3).
 
-### `POST /v1/facts/{id}/vote-v2`
-Reputation-weighted consensus (RWC).
+### `GET /v1/swarm/status`
+Global health metrics, active worktrees, and agent PIDs.
 
-### `GET /v1/facts/{id}/votes`
-List all votes cast on a fact.
+### `POST /v1/swarm/worktrees`
+Provision an isolated git worktree environment.
+- **Body**: `{"branch_name": "...", "base_path": "..."}`
 
----
+### `GET /v1/swarm/worktrees/{id}`
+Retrieve metadata for an active worktree.
 
-## Search (Legacy/Global)
-
-### `POST /v1/search`
-Global semantic + Graph-RAG search. (Planned move to `/v1/facts/search` in v2.0).
-
----
-
-## Time Tracking
-
-### `POST /v1/heartbeat`
-Auto-track activity.
-
-### `GET /v1/time/today`
-Today's summary.
+### `DELETE /v1/swarm/worktrees/{id}`
+Terminate and cleanup an isolated execution environment.
 
 ---
 
-## Admin & Trust
+## Trust & Compliance (`/v1/trust`)
 
-### `POST /v1/admin/keys`
-API key management.
+Sovereign guardrails and regulatory alignment.
+
+### `POST /v1/trust/guard`
+Check if a proposed action violates existing trust boundaries.
+
+### `GET /v1/trust/compliance`
+Retrieve EU AI Act or custom compliance status reports.
+
+---
+
+## Admin & Health
 
 ### `GET /v1/status`
 Engine health, cortisol levels, and neuroplasticity metrics.

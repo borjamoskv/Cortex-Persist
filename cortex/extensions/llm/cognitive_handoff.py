@@ -23,7 +23,6 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from typing import Optional
 
 from cortex.extensions.hypervisor.belief_object import (
     BeliefConfidence,
@@ -31,9 +30,22 @@ from cortex.extensions.hypervisor.belief_object import (
     BeliefVerdict,
     VerdictAction,
 )
-from cortex.extensions.llm._models import CortexPrompt, IntentProfile
+from cortex.extensions.llm._models import CortexPrompt, IntentProfile, ReasoningMode
 
 logger = logging.getLogger(__name__)
+
+
+# ─── Cognitive Reasoning Map (Axiom Ω₁₆) ────────────────────────────────────
+
+REASONING_MODE_MAP: dict[str, ReasoningMode | None] = {
+    "architecture": ReasoningMode.DEEP_THINK,
+    "tradeoff": ReasoningMode.DEEP_THINK,
+    "unknown_domain": ReasoningMode.DEEP_RESEARCH,
+    "new_api": ReasoningMode.DEEP_RESEARCH,
+    "p0_singularity": ReasoningMode.ULTRA_THINK,
+    "security_breach": ReasoningMode.ULTRA_THINK,
+    "routine": None,  # standard inference
+}
 
 
 # ─── Internal Types ─────────────────────────────────────────────────────────
@@ -116,7 +128,7 @@ class CognitiveHandoff:
     async def process_belief(
         self,
         belief: BeliefObject,
-        context: Optional[list[BeliefObject]] = None,
+        context: list[BeliefObject] | None = None,
     ) -> BeliefVerdict:
         """Cost-aware belief processing pipeline.
 
@@ -297,6 +309,7 @@ class CognitiveHandoff:
                 }
             ],
             intent=IntentProfile.BELIEF_AUDIT,
+            reasoning_mode=ReasoningMode.DEEP_THINK,
         )
 
         result = await self._router.route(prompt, provider_hint=self._auditor_economic)
@@ -347,6 +360,9 @@ class CognitiveHandoff:
                 }
             ],
             intent=IntentProfile.BELIEF_AUDIT,
+            # Opus does not have a native 'thinking' parameter like DeepSeek/Gemini,
+            # but setting DEEP_THINK here allows the router to allocate maximum resources.
+            reasoning_mode=ReasoningMode.DEEP_THINK,
         )
 
         result = await self._router.route(prompt, provider_hint=self._auditor_premium)
@@ -389,6 +405,7 @@ class CognitiveHandoff:
                 }
             ],
             intent=IntentProfile.ARCHITECT,
+            reasoning_mode=REASONING_MODE_MAP["architecture"],
         )
 
         result = await self._router.route(prompt, provider_hint=self._architect)

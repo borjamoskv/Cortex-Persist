@@ -40,7 +40,7 @@ async def dry_run_guard(
     auth: AuthResult = Depends(require_permission("read")),
 ) -> dict:
     """Dry-run a store proposal against StorageGuard (Ω₃).
-    
+
     Returns 200 {valid: true} or 400 with specific violation details.
     """
     try:
@@ -55,10 +55,12 @@ async def dry_run_guard(
         )
         return {"valid": True, "message": "Proposal passes all guards"}
     except GuardViolation as e:
-        raise HTTPException(status_code=400, detail={"valid": False, "rule": e.rule, "error": e.detail})
+        raise HTTPException(
+            status_code=400, detail={"valid": False, "rule": e.rule, "error": e.detail}
+        ) from e
     except Exception as e:
         logger.error("Guard dry-run failed: %s", e)
-        raise HTTPException(status_code=500, detail="Internal guard error")
+        raise HTTPException(status_code=500, detail="Internal guard error") from e
 
 
 @router.get("/v1/trust/profiles/{agent_id}", response_model=TrustProfileResponse)
@@ -71,7 +73,7 @@ async def get_agent_trust(
     registry = engine.get_trust_registry()
     profile = registry.get_profile(agent_id)
     score = registry.compute_trust_score(profile)
-    
+
     return TrustProfileResponse(
         agent_id=profile.agent_id,
         trust_score=score,
@@ -92,18 +94,20 @@ async def get_compliance_status(
     try:
         verification = await engine.verify_ledger()
         stats = await engine.stats()
-        
+
         # Heuristic scoring for Article 12
         audit_coverage = stats.get("causal_facts", 0) / max(stats.get("active_facts", 1), 1)
-        
+
         return ComplianceReport(
-            status="compliant" if verification["valid"] and audit_coverage > 0.8 else "non_compliant",
+            status="compliant"
+            if verification["valid"] and audit_coverage > 0.8
+            else "non_compliant",
             ledger_valid=verification["valid"],
-            total_trust_score=0.95, # Placeholder for aggregate swarm trust
+            total_trust_score=0.95,  # Placeholder for aggregate swarm trust
             audit_coverage=round(audit_coverage, 4),
             compliance_level="Sovereign-Alpha",
             article_12_status="LOGGED_AND_VERIFIED",
         )
     except Exception as e:
         logger.error("Compliance report generation failed: %s", e)
-        raise HTTPException(status_code=500, detail="Failed to generate compliance report")
+        raise HTTPException(status_code=500, detail="Failed to generate compliance report") from e

@@ -11,14 +11,16 @@ import os
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from cortex.extensions.swarm.worktree_isolation import isolated_worktree
 
 logger = logging.getLogger("cortex.swarm.manager")
 
+
 class WorktreeState:
     """Metadata for an active or pending worktree."""
+
     def __init__(self, worktree_id: str, branch_name: str, path: Path):
         self.id = worktree_id
         self.branch_name = branch_name
@@ -26,28 +28,31 @@ class WorktreeState:
         self.created_at = datetime.now(timezone.utc).isoformat()
         self.status = "provisioning"
         self.pid = os.getpid()
-        self.task: Optional[asyncio.Task] = None
+        self.task: asyncio.Task | None = None
+
 
 class SwarmManager:
     """Orchestrates ephemeral workspaces and agent health."""
-    
+
     _instance: Optional["SwarmManager"] = None
-    
+
     def __new__(cls):
         if cls._instance is None:
-            cls._instance = super(SwarmManager, cls).__new__(cls)
+            cls._instance = super().__new__(cls)
             cls._instance._initialized = False
         return cls._instance
 
     def __init__(self):
         if self._initialized:
             return
-        self.worktrees: Dict[str, WorktreeState] = {}
+        self.worktrees: dict[str, WorktreeState] = {}
         self._lock = asyncio.Lock()
         self._initialized = True
         logger.info("SwarmManager initialized: %s", id(self))
 
-    async def create_worktree(self, branch_name: str, base_path: Optional[str] = None) -> WorktreeState:
+    async def create_worktree(
+        self, branch_name: str, base_path: str | None = None
+    ) -> WorktreeState:
         """Provision a new isolated worktree."""
         worktree_id = str(uuid.uuid4())[:8]
         state = WorktreeState(worktree_id, branch_name, Path("/tmp/pending"))
@@ -59,13 +64,13 @@ class SwarmManager:
                     state.path = path
                     state.status = "active"
                     ready_event.set()
-                    logger.info(f"Worktree {worktree_id} active at {path}")
+                    logger.info("Worktree %s active at %s", worktree_id, path)
                     while state.status == "active":
                         await asyncio.sleep(0.1)
             except Exception as e:
                 state.status = "failed"
                 ready_event.set()
-                logger.error(f"Worktree {worktree_id} lifecycle failed: {e}")
+                logger.error("Worktree %s lifecycle failed: %s", worktree_id, e)
             finally:
                 state.status = "destroyed"
                 async with self._lock:
@@ -76,22 +81,24 @@ class SwarmManager:
             self.worktrees[worktree_id] = state
 
         state.task = asyncio.create_task(_lifecycle())
-        
+
         # Wait for the worktree to be actually created or fail
         try:
             await asyncio.wait_for(ready_event.wait(), timeout=10.0)
         except asyncio.TimeoutError:
             state.status = "failed"
-            logger.error(f"Worktree {worktree_id} creation timed out")
-            
+            logger.error("Worktree %s creation timed out", worktree_id)
+
         return state
 
-    async def get_worktree(self, worktree_id: str) -> Optional[WorktreeState]:
+    async def get_worktree(self, worktree_id: str) -> WorktreeState | None:
         """Retrieve worktree metadata."""
         async with self._lock:
             res = self.worktrees.get(worktree_id)
             if not res:
-                logger.warning(f"Worktree {worktree_id} not found in {list(self.worktrees.keys())}")
+                logger.warning(
+                    "Worktree %s not found in %s", worktree_id, list(self.worktrees.keys())
+                )
             return res
 
     async def delete_worktree(self, worktree_id: str) -> bool:
@@ -100,7 +107,7 @@ class SwarmManager:
             state = self.worktrees.get(worktree_id)
             if not state:
                 return False
-            
+
             state.status = "tearing_down"
             # The _lifecycle loop will now exit and trigger __aexit__
             return True
@@ -109,16 +116,22 @@ class SwarmManager:
         """Aggregate swarm health and load."""
         async with self._lock:
             return {
-                "active_worktrees": len([w for w in self.worktrees.values() if w.status == "active"]),
+                "active_worktrees": len(
+                    [w for w in self.worktrees.values() if w.status == "active"]
+                ),
                 "total_worktrees": len(self.worktrees),
                 "agent_pids": list(set(w.pid for w in self.worktrees.values())),
-                "timestamp": datetime.now(timezone.utc).isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat(),
             }
 
-_manager = None
+
+import sys
+
+_manager_key = "__cortex_swarm_manager__"
+
 
 def get_swarm_manager() -> SwarmManager:
-    global _manager
-    if _manager is None:
-        _manager = SwarmManager()
-    return _manager
+    """True singleton provider for SwarmManager."""
+    if not hasattr(sys, _manager_key):
+        setattr(sys, _manager_key, SwarmManager())
+    return getattr(sys, _manager_key)

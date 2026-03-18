@@ -243,6 +243,8 @@ def swarm_up(db):
             await bus.close()
 
     asyncio.run(_run_swarm())
+
+
 @swarm.command("cleanup")
 @click.option("--path", "-p", help="Base path for worktrees")
 def swarm_cleanup(path):

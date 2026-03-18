@@ -278,6 +278,24 @@ async def root_node(request: Request) -> dict:
     }
 
 
+# ─── Backward Compatibility Redirects ───────────────────────────────
+
+
+@app.api_route(
+    "/v1/memories/{path:path}",
+    methods=["GET", "POST", "DELETE", "PUT", "PATCH"],
+    include_in_schema=False,
+)
+async def memory_redirect(path: str, request: Request):
+    """Redirect legacy /v1/memories/* to /v1/facts/* (v5.1 consolidation)."""
+    from fastapi.responses import RedirectResponse
+
+    # Map the URL path
+    new_url = str(request.url).replace("/v1/memories", "/v1/facts")
+    logger.info("Redirecting legacy client: %s -> %s", request.url.path, new_url)
+    return RedirectResponse(url=new_url, status_code=307)
+
+
 @app.get("/health", tags=["health"])
 async def health_check(request: Request) -> dict:
     lang = request.headers.get("Accept-Language", DEFAULT_LANGUAGE)

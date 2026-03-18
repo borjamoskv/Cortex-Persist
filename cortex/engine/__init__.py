@@ -86,6 +86,7 @@ class CortexEngine(
         self._embedder: Optional[LocalEmbedder] = None
         self._memory_manager = None  # Frontera 2: Tripartite Memory (lazy init)
         self._persistence = PersistenceSupervisor(self)
+        self._system_state = "ACTIVE"
 
         # Composition layers
         self.facts = FactManager(self)
@@ -101,6 +102,17 @@ class CortexEngine(
 
         # Decoupled guard pipeline (Ω₃: minimal coupling)
         self._guard_pipeline = self._register_default_guards()
+
+    # ─── System State ─────────────────────────────────────────────────────────
+
+    @property
+    def system_state(self) -> str:
+        return self._system_state
+
+    def set_system_state(self, state: str) -> None:
+        """Lock or unlock the sovereign engine (e.g., from EpistemicCircuitBreaker)"""
+        self._system_state = state
+        logger.warning("🛡️ [SOVEREIGN-STATE] CORTEX Engine state changed to: %s", state)
 
     # ─── Guard Pipeline Registration ──────────────────────────────
 

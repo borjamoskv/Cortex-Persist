@@ -48,6 +48,10 @@ async def run_store_validation_logic(
     # metadata (programmatic/agent path). CLI stores without _prior_entropy
     # are human-intentional and bypass the thermodynamic gate.
     _has_entropy_meta = meta and ("_prior_entropy" in meta or "_posterior_entropy" in meta)
+    # Exergy validation: only enforce when caller provides explicit entropy
+    # metadata (programmatic/agent path). CLI stores without _prior_entropy
+    # are human-intentional and bypass the thermodynamic gate.
+    _has_entropy_meta = meta and ("_prior_entropy" in meta or "_posterior_entropy" in meta)
     if not skip_thermo and _has_entropy_meta:
         ex_input = ExergyInput(
             prior_uncertainty=meta.get("_prior_entropy", 1.0),
@@ -58,16 +62,22 @@ async def run_store_validation_logic(
             else ActionRisk.SCHEMA_MUTATION,
             had_backup=True,
             touched_persistent_state=True,
+            utility_delta=meta.get("_utility", 0.0),
+            causal_gap=meta.get("_causal_gap", 0.0),
         )
         ex_res = calculate_exergy(ex_input, threshold_min_work=0.01)
         enforce_exergy(ex_res)
 
-        if should_enter_decorative_mode(cls._thermo_counters):
+        # Update metadata with recorded exergy
+        meta["_exergy_score"] = ex_res.exergy_score
+
+        if should_enter_decorative_mode(cls._thermo_counters)[0]:
             cls._agent_mode = AgentMode.DECORATIVE
-            logger.error("🛑 [CRITICAL] Agent entering DECORATIVE mode due to thermodynamic waste.")
+            logger.error("🛑 [CRITICAL] Agent entering DECORATIVE mode (Ω₁₃).")
     else:
-        # Ensure we stay in ACTIVE mode during tests
-        cls._agent_mode = AgentMode.ACTIVE
+        # Ensure we stay in ACTIVE mode during tests if not explicitly decorative
+        if cls._agent_mode != AgentMode.DECORATIVE:
+            cls._agent_mode = AgentMode.ACTIVE
 
     StorageGuard.validate(
         project=project,

@@ -70,6 +70,14 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
     ) -> int:
         """Store a new fact with proper connection management."""
         tenant_id = self._resolve_tenant(tenant_id)
+        
+        # ═══ SOVEREIGN LOCK (Axiom Ω_CB) ═══
+        if getattr(self, "system_state", "ACTIVE") == "LOCKED_EPISTEMIC_HALT":
+            if source != "daemon:circuit-breaker":
+                raise RuntimeError(
+                    "CORTEX Engine is in LOCKED_EPISTEMIC_HALT state due to cognitive thrashing. "
+                    "Write access denied until Sovereign Lock is lifted by Autodidact-Omega."
+                )
 
         if conn:
             return await self._store_impl(

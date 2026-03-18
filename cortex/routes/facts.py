@@ -149,6 +149,39 @@ async def recall_facts(
     ]
 
 
+@router.get("/v1/facts", response_model=list[FactResponse])
+async def list_all_facts(
+    limit: int = Query(50, ge=1, le=1000),
+    auth: AuthResult = Depends(require_permission("read")),
+    engine: AsyncCortexEngine = Depends(get_async_engine),
+) -> list[FactResponse]:
+    """Retrieve all facts across projects (scoped to tenant)."""
+    # Using recall with project=None should return global list if engine supports it.
+    # If not, we use a custom query.
+    facts = await engine.recall(project=None, tenant_id=auth.tenant_id, limit=limit)
+
+    return [
+        FactResponse(
+            id=f["id"],
+            project=f["project"],
+            content=f["content"],
+            fact_type=f["fact_type"],
+            tags=f["tags"],
+            confidence=f["confidence"],
+            valid_from=f["valid_from"],
+            valid_until=f["valid_until"],
+            source=f["source"],  # type: ignore[reportCallIssue]
+            meta=f["meta"],  # type: ignore[reportCallIssue]
+            created_at=f["created_at"],
+            updated_at=f["updated_at"],
+            tx_id=f["tx_id"],
+            hash=f["hash"],
+            consensus_score=f.get("consensus_score", 1.0),
+        )
+        for f in facts
+    ]
+
+
 @router.post("/v1/facts/search", response_model=list[FactResponse])
 async def search_facts(
     req: SearchMemoryRequest,
@@ -213,7 +246,7 @@ async def get_fact_history(
         ]
     except Exception as e:
         logger.error("Failed to fetch fact history: %s", e)
-        raise HTTPException(status_code=500, detail="Failed to fetch history")
+        raise HTTPException(status_code=500, detail="Failed to fetch history") from e
 
 
 @router.post("/v1/facts/{fact_id}/taint", response_model=dict)
@@ -232,7 +265,7 @@ async def propagate_taint(
         }
     except Exception as e:
         logger.error("Taint propagation failed: %s", e)
-        raise HTTPException(status_code=500, detail="Taint propagation failed")
+        raise HTTPException(status_code=500, detail="Taint propagation failed") from None
 
 
 @router.get("/v1/facts/verify", response_model=dict)
