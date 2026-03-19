@@ -3,42 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BORJA MOSKV — SCROLL MACHINE</title>
+    <title>BORJA MOSKV — 3D PORTFOLIO</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700;900&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
   </head>
   <body>
-    <!-- Capa 0: Background y Overlays fijas -->
-    <div class="bg-gradient fixed-layer"></div>
-    <div class="noise-layer fixed-layer"></div>
-    <div class="scanlines fixed-layer"></div>
-
-    <!-- Capa 1: WebGL Canvas -->
-    <canvas id="webgl-canvas" class="fixed-layer"></canvas>
-
-    <!-- Capa 2: Letras, UI (scrollable proxy) -->
-    <!-- ScrollTrigger pinnea hero-section mientras el usuario scrollea height virtual -->
-    <div class="scroll-container">
-      <section class="hero-section">
-        <h1 class="hero-title">
-          <span class="char">B</span><span class="char">O</span><span class="char">R</span><span class="char">J</span><span class="char">A</span>
-          <span class="char-gap">&nbsp;</span>
-          <span class="char">M</span><span class="char">O</span><span class="char">S</span><span class="char">K</span><span class="char">V</span>
-        </h1>
-        <div class="stat-number">2026</div>
-        <div class="subtitle">INDUSTRIAL NOIR ENGINE</div>
-        
-        <div class="particle-layer"></div>
-        <div class="letterbox letterbox-top"></div>
-        <div class="letterbox letterbox-bottom"></div>
-      </section>
-      
-      <!-- Espacio virtual para el scroll -->
-      <section class="spacer-section"></section>
-    </div>
-
+    <!-- 3D Canvas -->
+    <canvas id="webgl-canvas"></canvas>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

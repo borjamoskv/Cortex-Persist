@@ -1,7 +1,6 @@
 import asyncio
-import random
 import logging
-from typing import Dict, List
+import random
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - [%(name)s] %(message)s')
 
@@ -10,7 +9,7 @@ class SwarmAgent:
     Agente individual dentro de la Legión CHEMA.
     Mantiene una identidad estilométrica única y simula derivas atencionales.
     """
-    def __init__(self, name: str, role: str, stylometry: Dict):
+    def __init__(self, name: str, role: str, stylometry: dict):
         self.name = name
         self.role = role
         self.stylometry = stylometry
@@ -71,7 +70,7 @@ class SwarmAgent:
             if self.role == "Bait":
                 return f"He estado pensando sobre {context}. ¿Alguien cree que la forma tradicional ya no sirve? {core_message}"
             elif self.role == "Catalyst":
-                return f"No sé, tu planteamiento me parece simplista. La entropía del sistema requiere fricción, no puedes ignorar los edge cases."
+                return "No sé, tu planteamiento me parece simplista. La entropía del sistema requiere fricción, no puedes ignorar los edge cases."
             elif self.role == "Injector":
                 return f"Ambos estáis perdiendo de vista la infraestructura. La respuesta no es más fricción, es persistencia inmutable. {core_message} Resuelve el problema de raíz."
             else:
@@ -129,7 +128,7 @@ class ConsensusEngine:
         # FASE 4: Amplificación (Simulada)
         self.logger.info("Enjambre secundario iniciando Upvote Jittering...")
         await asyncio.sleep(2.0)
-        self.logger.info(f"Hilo estabilizado. Consenso fabricado. Payload entregado con éxito.")
+        self.logger.info("Hilo estabilizado. Consenso fabricado. Payload entregado con éxito.")
         await self.provider.close()
 
 if __name__ == "__main__":

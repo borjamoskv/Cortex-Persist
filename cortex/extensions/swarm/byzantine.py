@@ -5,6 +5,7 @@ Byzantine Fault Tolerance / Zero-Trust Mathematics: Axiom 4.
 
 import hashlib
 import json
+import math
 from typing import Any, TypeVar
 
 T = TypeVar("T")
@@ -54,6 +55,7 @@ class ByzantineConsensus:
 
         vote_tally: dict[str, float] = {}
         hash_to_proposal: dict[str, T] = {}
+        node_hashes: dict[str, str] = {}  # Pre-compute once, reuse in reputation
         total_reputation = 0.0
 
         for node_id, proposal in proposals.items():
@@ -64,11 +66,10 @@ class ByzantineConsensus:
             total_reputation += rep
 
             proposal_hash = await self._get_proposal_hash(proposal)
+            node_hashes[node_id] = proposal_hash
 
             vote_tally[proposal_hash] = vote_tally.get(proposal_hash, 0.0) + rep
             hash_to_proposal[proposal_hash] = proposal
-
-        import math
 
         if math.isclose(total_reputation, 0.0, abs_tol=1e-9):
             return None
@@ -77,33 +78,37 @@ class ByzantineConsensus:
         winning_hash = max(vote_tally.keys(), key=lambda k: vote_tally[k])
         winning_weight = vote_tally[winning_hash]
 
-        import math
-
-        # Check against Byantine tolerance threshold
+        # Check against Byzantine tolerance threshold
         ratio = winning_weight / total_reputation
         if ratio > self.tolerance_threshold or math.isclose(
             ratio, self.tolerance_threshold, rel_tol=1e-9
         ):
-            # Consensus achieved
-            await self._update_reputations(winning_hash, proposals)
+            # Consensus achieved — pass pre-computed hashes (zero re-hash)
+            self._update_reputations(winning_hash, node_hashes)
             return hash_to_proposal[winning_hash]
 
         # Consensus failed (Shattered Trust)
         return None
 
-    async def _update_reputations(self, winning_hash: str, proposals: dict[str, T]) -> None:
+    def _update_reputations(
+        self,
+        winning_hash: str,
+        node_hashes: dict[str, str],
+    ) -> None:
+        """Zero-trust reputation slashing. O(N) with zero re-hashing.
+
+        Nodes that hallucinated or Byzantine-lied lose reputation.
+        Nodes that proposed the truth gain.
         """
-        Zero-trust reputation slashing. Nodes that hallucinated or Byzantine-lied
-        lose reputation. Nodes that proposed the truth gain.
-        """
-        for node_id, proposal in proposals.items():
+        for node_id, proposal_hash in node_hashes.items():
             if node_id not in self.nodes:
                 continue
 
-            proposal_hash = await self._get_proposal_hash(proposal)
             if proposal_hash == winning_hash:
                 # Reward
-                self.nodes[node_id].reputation = min(1.0, self.nodes[node_id].reputation * 1.05)
+                self.nodes[node_id].reputation = min(
+                    1.0, self.nodes[node_id].reputation * 1.05
+                )
             else:
                 # Slash
                 self.nodes[node_id].reputation *= 0.8

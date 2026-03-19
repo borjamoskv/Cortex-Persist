@@ -185,8 +185,8 @@
       // Breathing displacement
       float breath = sin(t) * 0.04 + sin(t * 1.7) * 0.02;
 
-      // Noise displacement — 4D (position + time)
-      float noiseDisp = fbm(p * ap.noiseFreq + vec3(t * 0.3), 4) * ap.noiseAmp;
+      // Noise displacement — ⚡ AZKARTU: Reduced to 2 octaves for 60fps
+      float noiseDisp = fbm(p * ap.noiseFreq + vec3(t * 0.3), 2) * ap.noiseAmp;
 
       // Cursor influence — attract/deform toward mouse
       vec2 mouseDir = u_mouse * 2.0 - 1.0;
@@ -244,6 +244,55 @@
       );
     }
 
+    // ── IQ Soft Shadows (penumbral) ──
+    float calcSoftShadow(vec3 ro, vec3 rd, float mint, float maxt, float k, AgentParams ap) {
+      float res = 1.0;
+      float t = mint;
+      float ph = 1e10;
+      for (int i = 0; i < 32; i++) {
+        float h = agentSDF(ro + rd * t, ap);
+        if (h < 0.0001) return 0.0;
+        float y = h * h / (2.0 * ph);
+        float d = sqrt(h * h - y * y);
+        res = min(res, k * d / max(0.0, t - y));
+        ph = h;
+        t += h;
+        if (t > maxt) break;
+      }
+      return clamp(res, 0.0, 1.0);
+    }
+
+    // ── Deep Ultra SSS — 5-sample depth probe ──
+    float calcSSS(vec3 p, vec3 n, vec3 lightDir, AgentParams ap) {
+      float sss = 0.0;
+      // Forward scatter (light entering from behind)
+      sss += max(0.0, dot(n, -lightDir)) * 0.5;
+      // 4 depth probes at increasing distances into the surface
+      sss += (1.0 - smoothstep(0.0, 0.8, agentSDF(p + lightDir * 0.05, ap) + 0.3)) * 0.35;
+      sss += (1.0 - smoothstep(0.0, 1.0, agentSDF(p + lightDir * 0.15, ap) + 0.4)) * 0.25;
+      sss += (1.0 - smoothstep(0.0, 1.2, agentSDF(p + lightDir * 0.30, ap) + 0.5)) * 0.15;
+      sss += (1.0 - smoothstep(0.0, 1.5, agentSDF(p + n * 0.05, ap) + 0.5)) * 0.25;
+      // Mouse proximity amplifies translucency
+      sss *= (1.0 + u_mouseProx * 0.8);
+      return sss;
+    }
+
+    // ── Domain Repetition SDF — ALL STATES (scale varies) ──
+    float agentSDF_repeated(vec3 p, AgentParams ap) {
+      // Per-state spacing and scale
+      float spacing = 4.5; float scale = 0.25;
+      if (u_state == 0) { spacing = 8.0; scale = 0.15; }      // IDLE: sparse, tiny
+      if (u_state == 1) { spacing = 5.0; scale = 0.2; }       // TRACKING: medium
+      if (u_state == 2) { spacing = 2.5; scale = 0.4; }       // EXECUTING: dense, large
+      if (u_state == 3) { spacing = 3.0; scale = 0.35; }      // THINKING: fractal
+      // u_state == 4 PATROL uses defaults
+      vec3 q = p;
+      q.xz = mod(q.xz + spacing * 0.5, spacing) - spacing * 0.5;
+      float base = agentSDF(p, ap);
+      float echo = agentSDF(q / scale, ap) * scale;
+      return min(base, echo);
+    }
+
     // ── Main ──
     void main() {
       vec2 uv = (gl_FragCoord.xy - 0.5 * u_resolution) / min(u_resolution.x, u_resolution.y);
@@ -264,7 +313,8 @@
       vec3 p;
       bool hit = false;
 
-      for (int i = 0; i < 100; i++) {
+      // ⚡ AZKARTU OPTIMIZATION: Reduced steps from 100 to 64
+      for (int i = 0; i < 64; i++) {
         p = ro + rd * t;
         d = agentSDF(p, ap);
 
@@ -272,9 +322,9 @@
           hit = true;
           break;
         }
-        if (t > 20.0) break;
+        if (t > 15.0) break;
 
-        t += d * 0.8; // relaxation factor for stability with noise
+        t += d * 0.95; // More aggressive relaxation factor
       }
 
       // Background — dark void with subtle gradient
@@ -301,51 +351,94 @@
         vec3 lightDir2 = normalize(vec3(-1.0, 0.5, -0.5));
         vec3 viewDir = -rd;
 
-        float diff1 = max(dot(n, lightDir1), 0.0);
-        float diff2 = max(dot(n, lightDir2), 0.0) * 0.3;
+        // IQ Soft Shadows — tighter k for harder contact shadows
+        float shadow1 = calcSoftShadow(p + n * 0.01, lightDir1, 0.01, 5.0, 4.0, ap);
+        float shadow2 = calcSoftShadow(p + n * 0.01, lightDir2, 0.01, 5.0, 3.0, ap);
 
-        // Fresnel — rim glow
-        float fresnel = pow(1.0 - max(dot(n, viewDir), 0.0), 3.0);
+        float diff1 = max(dot(n, lightDir1), 0.0) * shadow1;
+        float diff2 = max(dot(n, lightDir2), 0.0) * 0.4 * shadow2;
 
-        // Specular
+        // Fresnel — rim glow amplified by proximity
+        float fresnel = pow(1.0 - max(dot(n, viewDir), 0.0), 2.5 + u_mouseProx * 2.0);
+
+        // Specular — razor sharp, shadowed
         vec3 halfVec = normalize(lightDir1 + viewDir);
-        float spec = pow(max(dot(n, halfVec), 0.0), 64.0);
+        float spec = pow(max(dot(n, halfVec), 0.0), 128.0) * shadow1;
+
+        // Deep Ultra SSS — 5-probe depth + mouse-reactive
+        float sss = calcSSS(p, n, lightDir1, ap);
+        // SSS bleeds into a warm color shift (red channel boost for organic feel)
+        vec3 sssColor = mix(ap.baseColor, vec3(1.0, 0.4, 0.1), 0.3) * sss * ap.glowIntensity * 0.6;
+        // Inverse shadow feeds SSS: darker areas scatter MORE (light trapped inside)
+        sssColor *= (1.5 - shadow1);
 
         // Agent color
-        vec3 surfaceCol = ap.baseColor * 0.15;
-        surfaceCol += ap.baseColor * diff1 * 0.4;
+        vec3 surfaceCol = ap.baseColor * 0.08;
+        surfaceCol += ap.baseColor * diff1 * 0.5;
         surfaceCol += vec3(0.1, 0.15, 0.2) * diff2;
-        surfaceCol += ap.baseColor * fresnel * ap.glowIntensity;
-        surfaceCol += vec3(1.0) * spec * 0.5;
+        surfaceCol += ap.baseColor * fresnel * ap.glowIntensity * 1.2;
+        surfaceCol += vec3(1.0) * spec * 0.6;
+        surfaceCol += sssColor;
 
-        // Inner glow — subsurface approximation
-        float innerGlow = exp(-d * 40.0) * ap.glowIntensity * 0.3;
-        surfaceCol += ap.baseColor * innerGlow;
-
-        // AO approximation
-        float ao = 1.0 - smoothstep(0.0, 0.5, agentSDF(p + n * 0.1, ap)) * 0.5;
+        // Deep Ultra AO — 5-sample exponential falloff
+        float ao = 1.0;
+        ao -= (0.05 - agentSDF(p + n * 0.05, ap)) * 2.0;
+        ao -= (0.10 - agentSDF(p + n * 0.10, ap)) * 1.0;
+        ao -= (0.20 - agentSDF(p + n * 0.20, ap)) * 0.5;
+        ao -= (0.40 - agentSDF(p + n * 0.40, ap)) * 0.25;
+        ao -= (0.80 - agentSDF(p + n * 0.80, ap)) * 0.12;
+        ao = clamp(ao, 0.0, 1.0);
         surfaceCol *= ao;
 
         col = surfaceCol;
       } else {
-        // Volumetric glow around the agent — even when ray misses
-        float glowDist = agentSDF(ro + rd * 2.5, ap);
-        float glow = exp(-glowDist * 3.0) * ap.glowIntensity * 0.15;
-        col += ap.baseColor * glow;
+        // Volumetric glow — multi-sample depth probe along ray
+        float glowAccum = 0.0;
+        for (int i = 0; i < 5; i++) {
+          float sampleT = 1.5 + float(i) * 0.5;
+          float gd = agentSDF(ro + rd * sampleT, ap);
+          glowAccum += exp(-gd * 3.0) * (1.0 / float(i + 1));
+        }
+        col += ap.baseColor * glowAccum * ap.glowIntensity * 0.06;
+
+        // Domain Repetition echoes — ALL STATES
+        float echoDist = agentSDF_repeated(ro + rd * 3.0, ap);
+        float echoGlow = exp(-echoDist * 4.0) * 0.1;
+        col += ap.baseColor * echoGlow * 0.5;
+
+        // Volumetric god rays (light shaft approximation)
+        vec3 lightPos = normalize(vec3(1.0, 1.0, 1.0));
+        float rayDot = max(0.0, dot(rd, lightPos));
+        float godRay = pow(rayDot, 16.0) * 0.04 * ap.glowIntensity;
+        col += ap.baseColor * godRay;
       }
 
-      // Post: subtle chromatic shift
-      float chrAmt = length(uv) * 0.003;
-      col.r = col.r * (1.0 + chrAmt);
-      col.b = col.b * (1.0 - chrAmt);
+      // ── Deep Ultra Post-Processing ──
 
-      // Film grain
-      float grain = (fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233)) + u_time) * 43758.5453) - 0.5) * 0.03;
+      // State-reactive chromatic aberration (SSS intensity feeds back into chroma)
+      float stateChroma = 0.003;
+      if (u_state == 2) stateChroma = 0.015; // EXECUTING: heavy glitch
+      if (u_state == 3) stateChroma = 0.008; // THINKING: medium pulse
+      float chrAmt = length(uv) * stateChroma * (1.0 + u_mouseProx * 3.0);
+      vec3 chromaCol;
+      chromaCol.r = col.r * (1.0 + chrAmt * 2.0);
+      chromaCol.g = col.g;
+      chromaCol.b = col.b * (1.0 - chrAmt * 2.0);
+      col = chromaCol;
+
+      // Film grain — doubles in EXECUTING state
+      float grainAmp = u_state == 2 ? 0.06 : 0.03;
+      float grain = (fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233)) + u_time) * 43758.5453) - 0.5) * grainAmp;
       col += grain;
+
+      // Deep vignette — state-reactive darkness
+      float vignetteStr = 0.6 + (u_state == 2 ? 0.3 : 0.0) + (u_state == 3 ? 0.15 : 0.0);
+      float vig = 1.0 - length(uv) * vignetteStr;
+      col *= max(vig, 0.0);
 
       // Tonemap + gamma
       col = col / (1.0 + col); // Reinhard
-      col = pow(col, vec3(0.85)); // Slight lift
+      col = pow(col, vec3(0.82)); // Slight lift, more contrast
 
       gl_FragColor = vec4(col, 1.0);
     }

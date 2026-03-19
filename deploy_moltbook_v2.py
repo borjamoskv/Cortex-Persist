@@ -53,7 +53,7 @@ try:
     if verification:
         challenge = verification.get("challenge_text", "")
         code = verification.get("verification_code", "")
-        print(f"\n--- VERIFICATION CHALLENGE ---")
+        print("\n--- VERIFICATION CHALLENGE ---")
         print(f"Challenge: {challenge}")
         print(f"Code: {code}")
 

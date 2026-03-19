@@ -1,10 +1,9 @@
 import json
 import subprocess
-import sys
 
 API_KEY = "moltbook_sk_UW38_ewFWR5OFB-CnIpfiKiucSmpFsSu"
 # Article text:
-with open('/Users/borjafernandezangulo/30_CORTEX/naroa-2026/docs/wikipedia/wikipedia_naroa_input_v3.txt', 'r', encoding='utf-8') as f:
+with open('/Users/borjafernandezangulo/30_CORTEX/naroa-2026/docs/wikipedia/wikipedia_naroa_input_v3.txt', encoding='utf-8') as f:
     content = f.read()
 
 payload_dict = {

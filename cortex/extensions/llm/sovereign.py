@@ -323,6 +323,14 @@ class SovereignLLM:
             errors.append(f"{provider_name}: timeout ({self._timeout}s)")
         except (OSError, ValueError, KeyError) as e:
             errors.append(f"{provider_name}: {e!r}")
+        except Exception as e:
+            # Catch httpx.HTTPStatusError (429, 500, etc.)
+            # and any other unexpected provider errors.
+            status = getattr(getattr(e, "response", None), "status_code", 0)
+            if status:
+                errors.append(f"{provider_name}: HTTP {status}")
+            else:
+                errors.append(f"{provider_name}: {type(e).__name__}: {e}")
 
         return None
 

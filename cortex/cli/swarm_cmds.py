@@ -285,7 +285,10 @@ def swarm_remediate(db, dry_run, report):
     table.add_row("Total Facts Scanned", str(results.total_facts_scanned))
     table.add_row("Issues Identified", str(results.total_issues_found))
     table.add_row("Fixes Applied/Proposed", f"[green]{results.fixes_applied}[/]")
-    table.add_row("Fixes Rejected (Red Team)", f"[red]{results.fixes_rejected}[/]")
+    table.add_row(
+        "Fixes Rejected (Red Team)", 
+        f"[red]{results.fixes_rejected}[/]"
+    )
     table.add_row("Fixes Failed (Error)", f"[bold red]{results.fixes_failed}[/]")
 
     console.print(table)
@@ -313,3 +316,36 @@ def swarm_cleanup(path):
         console.print("[yellow]No ephemeral worktrees found to cleanup.[/]")
     else:
         console.print(f"[bold green]✅ Successfully cleaned up {count} worktrees.[/]")
+
+
+@swarm.command("kardashev")
+@click.option("--type", "-t", type=int, default=2, help="Kardashev scale type (1-3)")
+@click.option("--mission", "-m", help="Mission description (optional)")
+def swarm_kardashev(type, mission):
+    """ACTIVATE KARDASHEV-SWARM PROTOCOL (Structural Collapse)."""
+    from cortex.extensions.swarm.centauro_engine import CentauroEngine, Formation
+
+    engine = CentauroEngine()
+    
+    if type == 2:
+        target_mission = mission or "Massive O(N) structural audit and evolution"
+        formation = Formation.KARDASHEV_II
+        
+        console.print(
+            Panel(
+                f"🌌 [bold #CCFF00]KARDASHEV-SWARM TYPE II ACTIVATED[/]\n"
+                f"Protocol: [bold]Structural Collapse (O(N) → O(1))[/]\n"
+                f"Mission: [cyan]{target_mission}[/]\n"
+                f"Energy: [bold red]MAX EXERGY[/]",
+                border_style="#CCFF00",
+            )
+        )
+        
+        with console.status("[bold #CCFF00]Collapsing reality into architecture...[/]"):
+            result = asyncio.run(engine.engage(target_mission, formation=formation))
+            console.print("\n[bold green]✅ MISSION COLLAPSED[/]")
+        console.print(f"Status: [cyan]{result['status']}[/]")
+        console.print(f"Bridge: [white]{result['solution']}[/]")
+        console.print(f"Complexity: [bold #CCFF00]{result.get('reason', 'O(1)')}[/]")
+    else:
+        console.print(f"[red]Kardashev Type {type} is not yet implemented in this node.[/]")

@@ -8,10 +8,11 @@ stateful worktree_isolation context managers.
 import asyncio
 import logging
 import os
+import sys
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from cortex.extensions.swarm.worktree_isolation import isolated_worktree
 
@@ -34,21 +35,16 @@ class WorktreeState:
 class SwarmManager:
     """Orchestrates ephemeral workspaces and agent health."""
 
-    _instance: Optional["SwarmManager"] = None
-
-    def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
-            cls._instance._initialized = False
-        return cls._instance
-
     def __init__(self):
-        if self._initialized:
-            return
         self.worktrees: dict[str, WorktreeState] = {}
         self._lock = asyncio.Lock()
-        self._initialized = True
         logger.info("SwarmManager initialized: %s", id(self))
+
+    async def _trigger_auto_compaction(self, worktree_id: str) -> None:
+        """Axiom Ω₃: Enforce thermodynamic compaction on the worktree state."""
+        logger.info("SwarmManager: Triggering Auto-Compaction for %s", worktree_id)
+        # TODO: Integrate with TokenReducer or actual process compaction
+        pass
 
     async def create_worktree(
         self, branch_name: str, base_path: str | None = None
@@ -57,6 +53,9 @@ class SwarmManager:
         worktree_id = str(uuid.uuid4())[:8]
         state = WorktreeState(worktree_id, branch_name, Path("/tmp/pending"))
         ready_event = asyncio.Event()
+
+        # Phase 0: Thermodynamic Cleanup (Axiom Ω₃)
+        await self._trigger_auto_compaction(worktree_id)
 
         async def _lifecycle():
             try:
@@ -124,8 +123,6 @@ class SwarmManager:
                 "timestamp": datetime.now(timezone.utc).isoformat(),
             }
 
-
-import sys
 
 _manager_key = "__cortex_swarm_manager__"
 

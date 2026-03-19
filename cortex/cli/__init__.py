@@ -177,6 +177,7 @@ _LAZY_GROUPS: list[tuple[str, str, str, str]] = [
         "Design Sovereign Prompts from raw requirements.",
     ),
     ("apotheosis", "cortex.cli.apotheosis_cmds", "apotheosis_cmds", "Apotheosis autonomy engine."),
+    ("audit", "cortex.cli.audit_cmds", "audit_cmds", "System security and architectural auditing."),
     ("autorouter", "cortex.cli.autorouter_cmds", "autorouter_cmds", "AI model router daemon."),
     (
         "bibliotecario",
@@ -236,6 +237,9 @@ _LAZY_GROUPS: list[tuple[str, str, str, str]] = [
     ("gateway", "cortex.cli.gateway_cmds", "gateway_cmds", "CORTEX gateway management."),
     ("memory", "cortex.cli.memory_cmds", "memory_cmds", "CORTEX memory management."),
     ("doctor", "cortex.cli.doctor_cmds", "doctor", "🩺 CORTEX Doctor — Diagnostic tool."),
+    ("chomsky", "cortex.cli.chomsky_cmds", "chomsky_group", "CHOMSKY-Ω Syntactic Compressor (0% Fact Drop)."),
+    ("research", "cortex.cli.research_cmds", "research_cmds", "🚀 Sovereign Research: Architectural Innovation & Exergy."),
+    ("session", "cortex.cli.session_mgr_cmds", "session_cmds", "🤖 Autonomous agent session management."),
 ]
 
 # ─── Lazy standalone commands ────────────────────────────────────────────

@@ -165,26 +165,51 @@ def compose_or(*evaluators: EvaluatorFn) -> EvaluatorFn:
 # ═════════════════════════════════════════════════════════════════════════
 
 _circuit_state: dict[str, int] = {}  # tool_name → consecutive failures
+_circuit_last_failure: dict[str, float] = {}  # tool_name → monotonic timestamp
+_circuit_half_open: dict[str, bool] = {}  # tool_name → currently probing?
 _CIRCUIT_BREAKER_LIMIT = 3
+_HALF_OPEN_COOLDOWN_S = 60.0  # Auto-recover probe window
 
 
 def _circuit_record_success(tool_name: str) -> None:
     _circuit_state.pop(tool_name, None)
+    _circuit_last_failure.pop(tool_name, None)
+    _circuit_half_open.pop(tool_name, None)
 
 
 def _circuit_record_failure(tool_name: str) -> int:
     count = _circuit_state.get(tool_name, 0) + 1
     _circuit_state[tool_name] = count
+    _circuit_last_failure[tool_name] = time.monotonic()
+    _circuit_half_open.pop(tool_name, None)  # Close after failed probe
     return count
 
 
 def _circuit_is_open(tool_name: str) -> bool:
-    return _circuit_state.get(tool_name, 0) >= _CIRCUIT_BREAKER_LIMIT
+    failures = _circuit_state.get(tool_name, 0)
+    if failures < _CIRCUIT_BREAKER_LIMIT:
+        return False
+
+    # Half-open: allow one probe after cooldown elapses
+    last = _circuit_last_failure.get(tool_name, 0.0)
+    elapsed = time.monotonic() - last
+    if elapsed >= _HALF_OPEN_COOLDOWN_S:
+        if not _circuit_half_open.get(tool_name):
+            _circuit_half_open[tool_name] = True
+            logger.info(
+                "Circuit breaker half-open for %s (%.0fs elapsed)",
+                tool_name,
+                elapsed,
+            )
+            return False  # Allow one probe
+    return True
 
 
 def circuit_reset(tool_name: str) -> None:
-    """Manually reset circuit breaker for a tool (e.g. after config fix)."""
+    """Manually reset circuit breaker for a tool."""
     _circuit_state.pop(tool_name, None)
+    _circuit_last_failure.pop(tool_name, None)
+    _circuit_half_open.pop(tool_name, None)
     logger.info("Circuit breaker reset for %s", tool_name)
 
 

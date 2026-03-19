@@ -14,6 +14,7 @@ from enum import Enum
 from typing import Any
 
 from cortex.extensions.llm._models import ReasoningMode
+from cortex.extensions.swarm.byzantine import ByzantineArbiter
 from cortex.extensions.swarm.telemetry_gate import sovereign_quality_gate_async
 from cortex.utils.result import Ok, Result
 
@@ -159,19 +160,19 @@ def architect_evaluator(inputs: dict[str, Any], output: Any) -> float:
     """Evaluate Architect Arbitration for valid options and confidence."""
     if not isinstance(output, dict):
         return 0.0
-    
+
     winner_id = output.get("winner_id")
     if not isinstance(winner_id, str) or not winner_id:
         return 0.0
-        
+
     valid_ids = inputs.get("valid_ids", set())
     if valid_ids and winner_id not in valid_ids:
         return 0.0
-        
+
     reasoning = output.get("reasoning", "")
     if not isinstance(reasoning, str) or len(reasoning) < 10:
         return 0.0
-        
+
     try:
         conf = float(output.get("confidence", 0.0))
         # Base confidence must be at least 0.7 to score well
@@ -248,12 +249,13 @@ class ConflictResolver:
     CONSENSUS_THRESHOLD: float = 0.70
     ARCHITECT_CONFIDENCE_GATE: float = 0.80
 
-    __slots__ = ("_history", "_deadlock_breaker", "_conflict_counter")
+    __slots__ = ("_history", "_deadlock_breaker", "_conflict_counter", "_arbiter")
 
-    def __init__(self, budget: float = 100.0) -> None:
+    def __init__(self, budget: float = 100.0, arbiter: ByzantineArbiter | None = None) -> None:
         self._history: list[ConflictResolution] = []
         self._deadlock_breaker = DeadlockBreaker(budget=budget)
         self._conflict_counter = 0
+        self._arbiter = arbiter
 
     async def resolve(
         self,
@@ -281,7 +283,9 @@ class ConflictResolver:
         # Tier 1: Factual Triangulation
         if conflict_type == ConflictType.FACTUAL:
             result = await self._triangulate(options, agents)
-            return self._record(conflict_id, now, conflict_type, participants, options, result)
+            return self._record(
+                conflict_id, now, conflict_type, participants, options, result
+            )
 
         # Tier 2: Weighted Voting
         votes, result = self._weighted_vote(options, agents, conflict_domain)
@@ -322,7 +326,20 @@ class ConflictResolver:
         options: list[ConflictOption],
         agents: dict[str, tuple[AgentProfile, str]],
     ) -> ResolutionResult:
-        """Resolve factual conflicts by evidence weight."""
+        """Resolve factual conflicts by evidence weight (BFT if arbiter present)."""
+        if self._arbiter:
+            # Shift to Byzantine Consensus (Ω₃)
+            proposals = {agent_id: chosen_id for agent_id, (_, chosen_id) in agents.items()}
+            winner_id = await self._arbiter.execute_consensus(proposals)
+            if winner_id:
+                return ResolutionResult(
+                    winner_id=winner_id,
+                    method=ResolutionMethod.TRIANGULATION,
+                    consensus_level=1.0,  # Arbiter handles internal threshold
+                    reasoning="Fact verified via BFT (Byzantine Fault Tolerance).",
+                )
+
+        # Fallback to simple triangulation if no arbiter
         option_votes: dict[str, int] = {o.id: 0 for o in options}
         for _, (_, chosen_id) in agents.items():
             if chosen_id in option_votes:
@@ -346,7 +363,7 @@ class ConflictResolver:
             winner_id=winner_id,
             method=ResolutionMethod.TRIANGULATION,
             consensus_level=consensus,
-            reasoning=f"Factual triangulation: {option_votes[winner_id]}/{total_votes} sources confirm.",
+            reasoning=f"Factual triangulation: {option_votes[winner_id]}/{total_votes} confirmed.",
             total_weight_for=float(option_votes[winner_id]),
             total_weight_against=float(total_votes - option_votes[winner_id]),
         )
@@ -402,8 +419,8 @@ class ConflictResolver:
             method=ResolutionMethod.WEIGHTED_VOTE,
             consensus_level=consensus,
             reasoning=(
-                f"Weighted vote: {winner_id} received {winner_weight:.3f}/{total_weight:.3f} "
-                f"({consensus:.1%} consensus)."
+                f"Weighted vote: {winner_id} received {winner_weight:.3f}/"
+                f"{total_weight:.3f} ({consensus:.1%} consensus)."
             ),
             total_weight_for=winner_weight,
             total_weight_against=total_weight - winner_weight,

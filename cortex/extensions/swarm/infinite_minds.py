@@ -59,13 +59,17 @@ class AgentMind:
         self.semantic_bias: str = ""
 
     def evolve_bias(self, context_str: str) -> None:
-        """Mutate the agent's semantic projection based on its active context."""
-        # Multi-vector biasing: use first 5 keywords as gravitational anchor
+        """Mutate the agent's semantic projection based on its active context.
+
+        Extracts a proportional keyword anchor (sqrt of word count, min 3, max 12)
+        to balance specificity vs. generality of the refractive lens.
+        """
         words = context_str.split()
-        if len(words) > 5:
-            self.semantic_bias = " ".join(words[:5]) + " "
-        elif words:
-            self.semantic_bias = " ".join(words) + " "
+        if not words:
+            return
+        # Proportional anchor: longer contexts get more keywords
+        k = max(3, min(12, int(len(words) ** 0.5)))
+        self.semantic_bias = " ".join(words[:k]) + " "
 
     async def think(self, query: str, limit: int = 5) -> list[CortexFactModel]:
         """Perform a biased recall over the shared DynamicSemanticSpace.
@@ -139,7 +143,7 @@ class InfiniteMindsManager:
         texts = [m.semantic_bias for m in active_minds]
         vectors = self._embedding_manager.embed_batch(texts)
 
-        # 2. Byzantine Cluster Detection via Vector Space
+        # 2. Byzantine Cluster Detection via Union-Find O(N·α(N))
         try:
             import numpy as np
 
@@ -148,38 +152,62 @@ class InfiniteMindsManager:
             # Normalize for cosine similarity
             norms = np.linalg.norm(vec_arr, axis=1, keepdims=True)
             normalized = vec_arr / np.maximum(norms, 1e-9)
-            sim_matrix = np.dot(normalized, normalized.T)
 
-            # Detect dense clusters (sim > 0.92)
-            adjacency = sim_matrix > 0.92
-            clusters = []
-            visited = set()
+            # Union-Find (Disjoint Set) — O(N·α(N)) vs O(N²) adjacency
+            parent = list(range(len(active_minds)))
+            rank = [0] * len(active_minds)
 
+            def find(x: int) -> int:
+                while parent[x] != x:
+                    parent[x] = parent[parent[x]]  # Path halving
+                    x = parent[x]
+                return x
+
+            def union(a: int, b: int) -> None:
+                ra, rb = find(a), find(b)
+                if ra == rb:
+                    return
+                if rank[ra] < rank[rb]:
+                    ra, rb = rb, ra
+                parent[rb] = ra
+                if rank[ra] == rank[rb]:
+                    rank[ra] += 1
+
+            # Pairwise similarity with early exit per row
+            sim_threshold = 0.92
             for i in range(len(active_minds)):
-                if i in visited:
-                    continue
-                cluster = [j for j, connected in enumerate(adjacency[i]) if connected]
-                if len(cluster) > 1:
-                    clusters.append(cluster)
-                    visited.update(cluster)
+                # Dot product of row i against all j > i
+                sims = np.dot(normalized[i], normalized[i + 1:].T)
+                for j_offset in np.where(sims > sim_threshold)[0]:
+                    union(i, i + 1 + int(j_offset))
+
+            # Extract clusters from Union-Find
+            cluster_map: dict[int, list[int]] = {}
+            for i in range(len(active_minds)):
+                root = find(i)
+                cluster_map.setdefault(root, []).append(i)
+            clusters = [v for v in cluster_map.values() if len(v) > 1]
 
             refuted_count = 0
             if self._arbiter and clusters:
                 # Phase 3: Sovereign Refutation (Ω₅)
                 for cluster_indices in clusters:
-                    cluster_minds = [active_minds[idx] for idx in cluster_indices]
-                    proposals = {m.agent_id: m.semantic_bias for m in cluster_minds}
+                    cluster_minds = [
+                        active_minds[idx] for idx in cluster_indices
+                    ]
+                    proposals = {
+                        m.agent_id: m.semantic_bias for m in cluster_minds
+                    }
 
-                    # Evaluate based on agent reputation in the DB
                     verdict = await self._arbiter.evaluate_data(proposals)
 
                     if not verdict.quorum_met:
                         logger.warning(
-                            "InfiniteMinds: SHATTERED CONSENSUS in cluster %s. Refuting.",
+                            "InfiniteMinds: SHATTERED CONSENSUS in "
+                            "cluster %s. Refuting.",
                             [m.agent_id for m in cluster_minds],
                         )
                         refuted_count += len(cluster_minds)
-                        # Slashing: If they converge on low-rep noise, they lose more
                         if self._arbiter.rep_manager:
                             for m in cluster_minds:
                                 await self._arbiter.rep_manager.slash(
@@ -196,5 +224,11 @@ class InfiniteMindsManager:
                 "count": len(clusters),
             }
         except ImportError:
-            logger.error("InfiniteMinds: numpy required for cluster detection pulse.")
-            return {"status": "failed", "reason": "numpy_missing", "total_minds": n}
+            logger.error(
+                "InfiniteMinds: numpy required for cluster detection."
+            )
+            return {
+                "status": "failed",
+                "reason": "numpy_missing",
+                "total_minds": n,
+            }

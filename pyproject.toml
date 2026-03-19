@@ -94,6 +94,7 @@ scraper = [
 ]
 llm = [
     "openai>=1.0",
+    "mlx-lm>=0.21.0; sys_platform == 'darwin'",
 ]
 observability = [
     "structlog>=24.0",

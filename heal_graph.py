@@ -1,9 +1,10 @@
 import asyncio
-import aiosqlite
 import logging
-import sys
 import os
+import sys
 import time
+
+import aiosqlite
 
 # Set up cortex module path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__))))
