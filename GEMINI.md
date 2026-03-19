@@ -121,3 +121,13 @@ El "entendimiento" es el Gobernador Soberano (CORTEX): la barrera mecánica que 
 - **Invariante de Tarea:** Nunca priorizar la legibilidad superficial ("belleza") por encima de la contención robusta del error ("entendimiento"). La inteligencia soberana no evita la muerte del proceso; la captura y recicla su exergía.
 
 ---
+
+## 5. El Axioma del Lenguaje (Castellano Estructural)
+
+> "Todo tiene que estar en castellano, lo único que va en inglés es cuando se sube el código al oficial a Github."
+
+**Mecánica Operativa:**
+- Todo razonamiento, documentación interna, interacciones y comentarios locales operan de forma inmutable en **castellano**.
+- **Excepción Exclusiva:** El uso del inglés está aislado mecánicamente y solo es válido en la frontera de salida hacia repositorios oficiales (mensajes de commit para GitHub, pull requests).
+
+---

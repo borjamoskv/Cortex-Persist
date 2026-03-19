@@ -31,12 +31,28 @@
     background:radial-gradient(ellipse 60% 50% at 50% 40%,rgba(43,59,229,.18),transparent 70%);
     pointer-events:none;
   }
-  .hero h1{
+  .hero h1.hero-title{
     font-size:clamp(3rem,8vw,7rem);font-weight:800;letter-spacing:-.04em;
     line-height:.9;margin-bottom:.2em;
     background:linear-gradient(135deg,#4a5aff,#2B3BE5,#1a28b0);
     -webkit-background-clip:text;-webkit-text-fill-color:transparent;
     background-clip:text;
+  }
+  .hero-subtitle{
+    font-size:.35em;color:var(--naranja);font-weight:300;letter-spacing:.08em;
+  }
+  .naranja-text{
+    color:var(--naranja);
+  }
+  .anchor-container{
+    display:flex;gap:12px;align-items:center;margin-top:1.2rem;
+  }
+  .swatch-naranja{
+    background:var(--naranja) !important;
+    box-shadow:0 0 40px rgba(255,107,0,.5),0 0 80px rgba(255,107,0,.2) !important;
+  }
+  .naranja-label{
+    color:var(--naranja);margin-left:8px;
   }
   .hero .sub{
     font-size:clamp(.8rem,1.5vw,1rem);font-weight:300;color:var(--text-dim);
@@ -165,26 +181,26 @@
 <body>
 
 <section class="hero">
-  <h1>300 Blues<br><span style="font-size:.35em;color:var(--naranja);font-weight:300;letter-spacing:.08em">y un naranja</span></h1>
-  <p class="sub">Espectro completo · BlueYlb anchor · #2B3BE5 · <span style="color:var(--naranja)">+ #FF6B00</span></p>
-  <div style="display:flex;gap:12px;align-items:center;margin-top:1.2rem">
+  <h1 class="hero-title">Blue Spectrum<br><span class="hero-subtitle">y una singularidad</span></h1>
+  <p class="sub">Espectro completo · BlueYlb anchor · #2B3BE5 · <span class="naranja-text">+ #FF6B00</span></p>
+  <div class="anchor-container">
     <div class="anchor-swatch" title="#2B3BE5 — BlueYlb" onclick="navigator.clipboard.writeText('#2B3BE5')"></div>
-    <div class="anchor-swatch" title="#FF6B00 — Naranja" onclick="navigator.clipboard.writeText('#FF6B00')" style="background:var(--naranja);box-shadow:0 0 40px rgba(255,107,0,.5),0 0 80px rgba(255,107,0,.2)"></div>
+    <div class="anchor-swatch swatch-naranja" title="#FF6B00 — Naranja" onclick="navigator.clipboard.writeText('#FF6B00')"></div>
   </div>
-  <div class="anchor-label">BlueYlb · Primario <span style="color:var(--naranja);margin-left:8px">Naranja · Singularidad</span></div>
+  <div class="anchor-label">BlueYlb · Primario <span class="naranja-label">Naranja · Singularidad</span></div>
 </section>
 
 <div class="stats">
-  <div><span>300</span> azules + <span style="color:var(--naranja)">1</span> naranja</div>
-  <div><span>#2B3BE5</span> anchor · <span style="color:var(--naranja)">#FF6B00</span></div>
+  <div><span>Infinito</span> azul + <span class="naranja-text">1</span> naranja</div>
+  <div><span>#2B3BE5</span> anchor · <span class="naranja-text">#FF6B00</span></div>
   <div>click → <span>clipboard</span></div>
 </div>
 
 <nav class="filter-bar">
-  <button class="filter-btn active" data-filter="all">Todos</button>
-  <button class="filter-btn" data-filter="dark">Oscuros</button>
-  <button class="filter-btn" data-filter="mid">Medios</button>
-  <button class="filter-btn" data-filter="bright">Brillantes</button>
+  <button class="filter-btn active" data-filter="all">Espectro</button>
+  <button class="filter-btn" data-filter="dark">Abismo</button>
+  <button class="filter-btn" data-filter="mid">Atmósfera</button>
+  <button class="filter-btn" data-filter="bright">Radiación</button>
   <button class="filter-btn" data-filter="near-ylb">≈ BlueYlb</button>
 </nav>
 
