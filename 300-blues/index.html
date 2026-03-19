@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>300 Blues y un Naranja — BlueYlb Spectrum</title>
+<meta name="description" content="300 distinct shades of blue and one singular orange. Anchored around #2B3BE5 BlueYlb. Industrial Noir 2026.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --base:#0A0A0A;
+    --blue-ylb:#2B3BE5;
+    --surface:#111116;
+    --text-dim:rgba(255,255,255,.35);
+    --text-bright:rgba(255,255,255,.92);
+    --naranja:#FF6B00;
+  }
+  html{font-family:'Inter',system-ui,sans-serif;background:var(--base);color:var(--text-bright);overflow-x:hidden}
+  body{min-height:100vh}
+
+  /* ── Hero ── */
+  .hero{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:clamp(40px,8vh,100px) 20px clamp(20px,3vh,40px);
+    text-align:center;position:relative;overflow:hidden;
+  }
+  .hero::before{
+    content:'';position:absolute;inset:0;
+    background:radial-gradient(ellipse 60% 50% at 50% 40%,rgba(43,59,229,.18),transparent 70%);
+    pointer-events:none;
+  }
+  .hero h1{
+    font-size:clamp(3rem,8vw,7rem);font-weight:800;letter-spacing:-.04em;
+    line-height:.9;margin-bottom:.2em;
+    background:linear-gradient(135deg,#4a5aff,#2B3BE5,#1a28b0);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    background-clip:text;
+  }
+  .hero .sub{
+    font-size:clamp(.8rem,1.5vw,1rem);font-weight:300;color:var(--text-dim);
+    letter-spacing:.08em;text-transform:uppercase;
+  }
+  .hero .anchor-swatch{
+    margin-top:1.2rem;width:56px;height:56px;border-radius:14px;
+    background:var(--blue-ylb);
+    box-shadow:0 0 40px rgba(43,59,229,.5),0 0 80px rgba(43,59,229,.2);
+    transition:transform .3s ease;cursor:pointer;
+  }
+  .hero .anchor-swatch:hover{transform:scale(1.15) rotate(3deg)}
+  .hero .anchor-label{
+    margin-top:.5rem;font-size:.7rem;font-weight:600;color:var(--blue-ylb);
+    letter-spacing:.12em;text-transform:uppercase;
+  }
+
+  /* ── Stats bar ── */
+  .stats{
+    display:flex;gap:clamp(16px,3vw,40px);justify-content:center;
+    padding:16px 20px 12px;font-size:.7rem;font-weight:400;color:var(--text-dim);
+    letter-spacing:.08em;text-transform:uppercase;
+  }
+  .stats span{color:var(--blue-ylb);font-weight:600}
+
+  /* ── Filter ── */
+  .filter-bar{
+    display:flex;justify-content:center;gap:6px;padding:0 20px 20px;flex-wrap:wrap;
+  }
+  .filter-btn{
+    background:var(--surface);border:1px solid rgba(255,255,255,.08);
+    color:var(--text-dim);padding:5px 14px;border-radius:8px;
+    font-size:.68rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+    cursor:pointer;transition:all .2s ease;font-family:inherit;
+  }
+  .filter-btn:hover,.filter-btn.active{
+    background:var(--blue-ylb);color:#fff;border-color:var(--blue-ylb);
+  }
+
+  /* ── Grid ── */
+  .grid-section{padding:0 clamp(8px,1.5vw,32px) 80px}
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(20,1fr);
+    gap:2px;
+    max-width:1200px;margin:0 auto;
+  }
+
+  .swatch{
+    aspect-ratio:1;border-radius:4px;cursor:pointer;position:relative;
+    transition:transform .2s cubic-bezier(.4,0,.2,1),box-shadow .25s ease,border-radius .2s ease;
+    overflow:hidden;opacity:0;transform:scale(.7);
+  }
+  .swatch.visible{
+    opacity:1;transform:scale(1);
+    transition:opacity .3s ease,transform .3s ease,box-shadow .25s ease,border-radius .2s ease;
+  }
+  .swatch::after{
+    content:attr(data-hex);
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-size:.5rem;font-weight:600;letter-spacing:.03em;
+    color:rgba(255,255,255,.95);text-shadow:0 1px 3px rgba(0,0,0,.7);
+    opacity:0;transition:opacity .15s ease;
+    background:rgba(0,0,0,.3);-webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
+  }
+  .swatch:hover{
+    transform:scale(2.2);z-index:10;border-radius:8px;
+    box-shadow:0 8px 30px rgba(0,0,0,.6);
+  }
+  .swatch:hover::after{opacity:1}
+  .swatch.is-ylb{
+    border:2px solid rgba(255,255,255,.7);
+    box-shadow:0 0 12px rgba(43,59,229,.4);
+  }
+  .swatch.is-naranja{
+    border:2px solid rgba(255,107,0,.9);
+    box-shadow:0 0 20px rgba(255,107,0,.6),0 0 60px rgba(255,107,0,.2);
+    animation:pulse-naranja 2.5s ease-in-out infinite;
+    z-index:5;
+  }
+  .swatch.is-naranja:hover{
+    transform:scale(3);z-index:20;
+    box-shadow:0 0 40px rgba(255,107,0,.8),0 0 80px rgba(255,107,0,.3),0 12px 40px rgba(0,0,0,.7);
+  }
+  @keyframes pulse-naranja{
+    0%,100%{box-shadow:0 0 20px rgba(255,107,0,.5),0 0 60px rgba(255,107,0,.15)}
+    50%{box-shadow:0 0 30px rgba(255,107,0,.8),0 0 80px rgba(255,107,0,.3)}
+  }
+  .swatch.copied{animation:flash .35s ease}
+  @keyframes flash{
+    0%{filter:brightness(1)}
+    50%{filter:brightness(2.8)}
+    100%{filter:brightness(1)}
+  }
+
+  /* ── Toast ── */
+  .toast{
+    position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);
+    background:var(--surface);color:var(--text-bright);
+    padding:10px 22px;border-radius:10px;font-size:.78rem;font-weight:600;
+    letter-spacing:.04em;border:1px solid rgba(43,59,229,.35);
+    box-shadow:0 8px 32px rgba(0,0,0,.5);
+    transition:transform .3s cubic-bezier(.4,0,.2,1),opacity .3s ease;
+    opacity:0;pointer-events:none;z-index:100;
+  }
+  .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+  /* ── Counter ── */
+  .counter{
+    text-align:center;padding:8px;font-size:.65rem;color:var(--text-dim);
+    letter-spacing:.06em;text-transform:uppercase;
+  }
+  .counter span{color:var(--blue-ylb);font-weight:600}
+
+  /* ── Responsive ── */
+  @media(max-width:768px){
+    .grid{grid-template-columns:repeat(15,1fr)}
+    .swatch:hover{transform:scale(1.8)}
+  }
+  @media(max-width:480px){
+    .grid{grid-template-columns:repeat(10,1fr)}
+    .swatch:hover{transform:scale(1.5)}
+  }
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <h1>300 Blues<br><span style="font-size:.35em;color:var(--naranja);font-weight:300;letter-spacing:.08em">y un naranja</span></h1>
+  <p class="sub">Espectro completo · BlueYlb anchor · #2B3BE5 · <span style="color:var(--naranja)">+ #FF6B00</span></p>
+  <div style="display:flex;gap:12px;align-items:center;margin-top:1.2rem">
+    <div class="anchor-swatch" title="#2B3BE5 — BlueYlb" onclick="navigator.clipboard.writeText('#2B3BE5')"></div>
+    <div class="anchor-swatch" title="#FF6B00 — Naranja" onclick="navigator.clipboard.writeText('#FF6B00')" style="background:var(--naranja);box-shadow:0 0 40px rgba(255,107,0,.5),0 0 80px rgba(255,107,0,.2)"></div>
+  </div>
+  <div class="anchor-label">BlueYlb · Primario <span style="color:var(--naranja);margin-left:8px">Naranja · Singularidad</span></div>
+</section>
+
+<div class="stats">
+  <div><span>300</span> azules + <span style="color:var(--naranja)">1</span> naranja</div>
+  <div><span>#2B3BE5</span> anchor · <span style="color:var(--naranja)">#FF6B00</span></div>
+  <div>click → <span>clipboard</span></div>
+</div>
+
+<nav class="filter-bar">
+  <button class="filter-btn active" data-filter="all">Todos</button>
+  <button class="filter-btn" data-filter="dark">Oscuros</button>
+  <button class="filter-btn" data-filter="mid">Medios</button>
+  <button class="filter-btn" data-filter="bright">Brillantes</button>
+  <button class="filter-btn" data-filter="near-ylb">≈ BlueYlb</button>
+</nav>
+
+<div class="counter" id="counter"></div>
+
+<section class="grid-section">
+  <div class="grid" id="grid"></div>
+</section>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+  'use strict';
+
+  // ── HSL → Hex ──
+  function hslToHex(h, s, l) {
+    s /= 100; l /= 100;
+    const a = s * Math.min(l, 1 - l);
+    const f = n => {
+      const k = (n + h / 30) % 12;
+      const c = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+      return Math.round(255 * Math.max(0, Math.min(1, c))).toString(16).padStart(2, '0');
+    };
+    return `#${f(0)}${f(8)}${f(4)}`.toUpperCase();
+  }
+
+  // ── Generate 300 blues ──
+  // Fixed 20×15 grid = 300 cells
+  // Rows = hue bands (200–260°, pure blue range)
+  // Columns = lightness gradient (dark→light)
+  // Saturation varies by layer for depth
+
+  function generateBlues() {
+    const blues = [];
+    const rows = 15;
+    const cols = 20;
+
+    const hueMin = 205, hueMax = 260; // strict blue range (no teal, no magenta)
+    const lightMin = 6, lightMax = 86;
+    const satLayers = [40, 55, 68, 78, 88, 95, 100, 92, 82, 72, 58, 45, 35, 50, 65];
+
+    for (let row = 0; row < rows; row++) {
+      const hue = hueMin + (row / (rows - 1)) * (hueMax - hueMin);
+      const sat = satLayers[row];
+
+      for (let col = 0; col < cols; col++) {
+        const light = lightMin + (col / (cols - 1)) * (lightMax - lightMin);
+        const h = Math.round(hue * 10) / 10;
+        const s = Math.round(sat * 10) / 10;
+        const l = Math.round(light * 10) / 10;
+        const hex = hslToHex(h, s, l);
+
+        // Check if close to BlueYlb (234, 78, 53)
+        const dist = Math.sqrt(
+          Math.pow(h - 234, 2) + Math.pow(s - 78, 2) + Math.pow(l - 53, 2)
+        );
+        const isYlb = dist < 3;
+
+        blues.push({ h, s, l, hex, isYlb, dist, row, col });
+      }
+    }
+
+    // Insert the singular orange at a random position
+    const naranjaIndex = Math.floor(Math.random() * blues.length);
+    blues.splice(naranjaIndex, 0, {
+      h: 25, s: 100, l: 50,
+      hex: '#FF6B00',
+      isYlb: false,
+      isNaranja: true,
+      dist: 999,
+      row: Math.floor(naranjaIndex / 20),
+      col: naranjaIndex % 20
+    });
+    // Remove last blue to keep total at 301 (300+1) → actually keep 301
+    return blues;
+  }
+
+  const allBlues = generateBlues();
+  const grid = document.getElementById('grid');
+  const toast = document.getElementById('toast');
+  const counter = document.getElementById('counter');
+
+  // ── Render ──
+  function render(filter = 'all') {
+    grid.innerHTML = '';
+
+    const filtered = allBlues.filter(b => {
+      if (filter === 'all') return true;
+      if (filter === 'dark') return b.l < 30;
+      if (filter === 'mid') return b.l >= 30 && b.l <= 60;
+      if (filter === 'bright') return b.l > 60;
+      if (filter === 'near-ylb') return b.dist < 20;
+      return true;
+    });
+
+    const naranjaCount = filtered.filter(b => b.isNaranja).length;
+    counter.innerHTML = `mostrando <span>${filtered.length}</span> tonos` + (naranjaCount ? ` · <span style="color:var(--naranja)">1 naranja</span>` : '');
+
+    // Adjust grid columns based on filter
+    if (filter === 'all') {
+      grid.style.gridTemplateColumns = 'repeat(20, 1fr)';
+    } else {
+      const cols = Math.min(20, Math.ceil(Math.sqrt(filtered.length * 1.33)));
+      grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+    }
+
+    const fragment = document.createDocumentFragment();
+
+    filtered.forEach((b, i) => {
+      const el = document.createElement('div');
+      el.className = 'swatch' + (b.isYlb ? ' is-ylb' : '') + (b.isNaranja ? ' is-naranja' : '');
+      el.style.backgroundColor = b.hex;
+      el.dataset.hex = b.hex;
+      el.title = `${b.hex}\nH:${Math.round(b.h)}° S:${Math.round(b.s)}% L:${Math.round(b.l)}%`;
+
+      el.addEventListener('click', () => {
+        navigator.clipboard.writeText(b.hex).then(() => {
+          el.classList.add('copied');
+          setTimeout(() => el.classList.remove('copied'), 350);
+          showToast(`${b.hex} copiado`);
+        });
+      });
+
+      fragment.appendChild(el);
+    });
+
+    grid.appendChild(fragment);
+
+    // Stagger entrance animation
+    requestAnimationFrame(() => {
+      const swatches = grid.querySelectorAll('.swatch');
+      swatches.forEach((s, i) => {
+        setTimeout(() => s.classList.add('visible'), i * 3);
+      });
+    });
+  }
+
+  // ── Toast ──
+  let toastTimer;
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 1600);
+  }
+
+  // ── Filters ──
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      render(btn.dataset.filter);
+    });
+  });
+
+  // ── Init ──
+  render('all');
+})();
+</script>
+</body>
+</html>
