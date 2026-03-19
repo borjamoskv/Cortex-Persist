@@ -209,6 +209,58 @@ class CortexLLMRouter:
     # After compression, keep the first message (instruction) and last N messages.
     _COMPRESSED_TAIL_MESSAGES: int = 6
 
+    # Maximum autonomous cycles (assistant + tool) without returning to user
+    _MAX_TOOL_CYCLES: int = 8
+
+    @staticmethod
+    def _break_cyclical_deadlocks(
+        messages: list[dict[str, Any]],
+        max_cycles: int,
+    ) -> list[dict[str, Any]]:
+        """Axioma Ω₃: La Ley del Ciclo. Fricción y Auto-Compaction.
+
+        Detects if the agent is trapped in an infinite loop of tool calls
+        (> max_cycles). If so, applying thermodynamic halt, collapsing the
+        historical noise to prevent compounded hallucination, and injecting
+        a hard break directive.
+        """
+        # Count consecutive non-user messages from the end
+        cycle_count = 0
+        for msg in reversed(messages):
+            if msg.get("role") in ("user", "system") and not msg.get("tool_calls"):
+                break
+            if msg.get("role") in ("assistant", "tool") or msg.get("tool_calls"):
+                cycle_count += 1
+
+        # Each "cycle" is typically 2 messages (assistant tool_call + tool result)
+        if cycle_count > max_cycles * 2:
+            cycles_done = cycle_count // 2
+            logger.warning(
+                "♻️ [DEADLOCK] Axiom Ω₃ Triggered: Agent stuck in %d consecutive cycles. Forcing auto-compaction.",
+                cycles_done,
+            )
+
+            noise_start = len(messages) - cycle_count
+            head = messages[:noise_start]
+            noise = messages[noise_start:-2]
+            tail = messages[-2:]
+
+            noise_words = sum(len(str(m.get("content", "")).split()) for m in noise)
+
+            halt_marker = {
+                "role": "system",
+                "content": (
+                    f"[CORTEX AXIOM Ω₃: DEADLOCK CIRCUIT BREAKER]\n"
+                    f"THERMODYNAMIC HALT: You have reached {cycles_done} consecutive autonomous cycles without achieving a final state.\n"
+                    f"Auto-Compaction triggered: {len(noise)} previous intermediate operations ({noise_words} words) have been crystallized and purged to prevent compounded hallucination.\n"
+                    f"MANDATORY DIRECTIVE: Stop exploring. Evaluate your current state and output a final conclusion or ask a direct question to the user immediately. Do not trigger further tools."
+                ),
+            }
+
+            return head + [halt_marker] + tail
+
+        return messages
+
     @staticmethod
     def _compress_working_memory(
         messages: list[dict[str, str]],
@@ -256,6 +308,11 @@ class CortexLLMRouter:
         model_window = self._primary.context_window
         # conversion factor approx 0.75 words/token
         max_words = int((model_window * self._CONTEXT_SAFETY_MARGIN) * 0.75)
+
+        prompt.working_memory = self._break_cyclical_deadlocks(
+            prompt.working_memory,
+            self._MAX_TOOL_CYCLES,
+        )
 
         prompt.working_memory = self._compress_working_memory(
             prompt.working_memory,

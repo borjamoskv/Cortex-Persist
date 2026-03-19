@@ -9,7 +9,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from cortex.nexus_v8 import DomainOrigin, IntentType, NexusWorldModel, WorldMutation
+from cortex.extensions.nexus import DomainOrigin, IntentType, NexusWorldModel, WorldMutation
 
 if TYPE_CHECKING:
     from cortex.engine_async import AsyncCortexEngine

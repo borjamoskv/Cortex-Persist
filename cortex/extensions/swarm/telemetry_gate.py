@@ -46,7 +46,18 @@ T = TypeVar("T")
 
 # ── Allowlist for safe kwarg keys to send to traces ────────────────────
 _SAFE_KWARG_PREFIXES = frozenset(
-    {"query", "prompt", "model", "temperature", "max_tokens", "tool", "agent", "name"}
+    {
+        "query",
+        "prompt",
+        "model",
+        "temperature",
+        "max_tokens",
+        "tool",
+        "agent",
+        "name",
+        "reasoning_mode",
+        "intent",
+    }
 )
 
 
@@ -379,10 +390,28 @@ def _evaluate_and_finalize(
 
     # ── Success path ───────────────────────────────────────────────
     _circuit_record_success(tool_name)
+    rm = kwargs.get("reasoning_mode")
+    exergy = (
+        "HIGH"
+        if str(rm).endswith("DEEP_THINK")
+        else ("MAXIMUM" if str(rm).endswith("ULTRA_THINK") else "STANDARD")
+    )
+
     _end_run_tree(
         run_tree,
-        outputs={"score": round(score, 4), "output_type": type(output_val).__name__},
+        outputs={
+            "score": round(score, 4),
+            "output_type": type(output_val).__name__,
+            "reasoning_mode": str(rm),
+            "exergy_cost": exergy,
+        },
         latency_ms=latency_ms,
     )
-    logger.debug("Gate [%s] PASSED: score=%.3f latency=%.1fms", tool_name, score, latency_ms)
+    logger.debug(
+        "Gate [%s] PASSED: score=%.3f latency=%.1fms exergy=%s",
+        tool_name,
+        score,
+        latency_ms,
+        exergy,
+    )
     return result

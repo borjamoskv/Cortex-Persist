@@ -52,10 +52,6 @@ class CortexConfig:
     CHECKPOINT_MAX: int = 1000
     CONNECTION_POOL_SIZE: int = 5
 
-    # Federation
-    FEDERATION_MODE: str = "single"
-    SHARD_DIR: Path = field(default_factory=lambda: CORTEX_DIR / "shards")
-
     # MCP Guard
     MCP_MAX_CONTENT_LENGTH: int = 50000
     MCP_MAX_TAGS: int = 50
@@ -144,8 +140,6 @@ class CortexConfig:
             CHECKPOINT_MIN=int(os.environ.get("CORTEX_CHECKPOINT_MIN", "100")),
             CHECKPOINT_MAX=int(os.environ.get("CORTEX_CHECKPOINT_MAX", "1000")),
             CONNECTION_POOL_SIZE=int(os.environ.get("CORTEX_POOL_SIZE", "5")),
-            FEDERATION_MODE=os.environ.get("CORTEX_FEDERATION_MODE", "single"),
-            SHARD_DIR=Path(os.environ.get("CORTEX_SHARD_DIR", str(CORTEX_DIR / "shards"))),
             MCP_MAX_CONTENT_LENGTH=int(os.environ.get("CORTEX_MCP_MAX_CONTENT", "50000")),
             MCP_MAX_TAGS=int(os.environ.get("CORTEX_MCP_MAX_TAGS", "50")),
             MCP_MAX_QUERY_LENGTH=int(os.environ.get("CORTEX_MCP_MAX_QUERY", "2000")),

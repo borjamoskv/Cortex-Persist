@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       progressFill.style.width = '100%';
       progressText.innerHTML = `<span class="report-complete">✓ ${result.filename} (${result.size})</span>`;
       btnReport.textContent = '✓ Report Ready';
-      btnReport.style.background = 'var(--green)';
+      btnReport.style.background = 'var(--accent)';
 
       setTimeout(() => {
         btnReport.textContent = 'Generate Article 12 Report';
@@ -131,7 +131,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       syncBtn.disabled = true;
       setTimeout(() => {
         syncBtn.textContent = '✓ Synced';
-        syncBtn.style.background = '#34C759';
+        syncBtn.style.background = 'var(--accent)';
         setTimeout(() => {
           syncBtn.textContent = originalText;
           syncBtn.style.background = '';
@@ -260,7 +260,7 @@ window.verifyChain = async function() {
   await api.verifyChain();
   setTimeout(() => {
     btn.textContent = '✓ Chain Valid';
-    btn.style.background = '#34C759';
+    btn.style.background = 'var(--accent)';
     setTimeout(() => {
       btn.textContent = 'Verify Integrity';
       btn.style.background = '';
@@ -302,7 +302,7 @@ document.addEventListener('DOMContentLoaded', () => {
       confirmBtn.disabled = true;
       setTimeout(() => {
         confirmBtn.textContent = '✓ Done';
-        confirmBtn.style.background = 'var(--green)';
+        confirmBtn.style.background = 'var(--accent)';
         setTimeout(() => {
           window.closeSheet();
           confirmBtn.textContent = 'Run Action';
@@ -311,4 +311,19 @@ document.addEventListener('DOMContentLoaded', () => {
       }, 1500);
     });
   }
+});
+
+// ── Cortex Organism Activity ──────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  const notch = document.getElementById('cortexNotch');
+  if (!notch) return;
+  
+  // Random biological processing pulses
+  setInterval(() => {
+    // 30% chance to simulate a burst of "thinking" or agent inter-communication
+    if (Math.random() > 0.7) {
+      notch.classList.add('processing');
+      setTimeout(() => notch.classList.remove('processing'), 800 + Math.random() * 1500);
+    }
+  }, 4000);
 });

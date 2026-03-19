@@ -27,6 +27,7 @@ from typing import TYPE_CHECKING, Any
 
 from cortex.compaction.compaction_drift import apply_drift_check as _apply_drift_check
 from cortex.compaction.compaction_ttl import apply_ttl_prune as _apply_ttl_prune
+from cortex.compaction.strategies.haiku_compress import HaikuCompressConfig
 
 if TYPE_CHECKING:
     import aiosqlite
@@ -58,6 +59,7 @@ class CompactionStrategy(str, Enum):
     STALENESS_PRUNE = "staleness_prune"
     TTL_PRUNE = "ttl_prune"
     DRIFT_CHECK = "drift_check"
+    HAIKU_COMPRESS = "haiku_compress"
 
     @classmethod
     def all(cls) -> list[CompactionStrategy]:
@@ -131,6 +133,7 @@ async def _apply_strategies(
     similarity_threshold: float,
     max_age_days: int,
     min_consensus: float,
+    haiku_config: HaikuCompressConfig | None = None,
 ) -> None:
     """Execute selected compaction strategies."""
     if CompactionStrategy.DEDUP in strategies:
@@ -166,6 +169,16 @@ async def _apply_strategies(
     if CompactionStrategy.DRIFT_CHECK in strategies:
         await _apply_drift_check(engine, project, result)
 
+    if CompactionStrategy.HAIKU_COMPRESS in strategies:
+        from cortex.compaction.strategies.haiku_compress import execute_haiku_compress
+
+        prev_count = len(result.details)
+        await execute_haiku_compress(engine, project, result, dry_run, haiku_config)
+        if len(result.details) > prev_count:
+            result.strategies_applied.append(
+                str(CompactionStrategy.HAIKU_COMPRESS.value)
+            )
+
 
 async def compact(
     engine: CortexEngine,
@@ -175,6 +188,7 @@ async def compact(
     similarity_threshold: float = 0.85,
     max_age_days: int = 90,
     min_consensus: float = 0.5,
+    haiku_config: HaikuCompressConfig | None = None,
 ) -> CompactionResult:
     """Run compaction on a project. Main entry point.
 
@@ -202,6 +216,7 @@ async def compact(
         similarity_threshold,
         max_age_days,
         min_consensus,
+        haiku_config,
     )
 
     # Final count

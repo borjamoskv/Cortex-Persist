@@ -1,0 +1,92 @@
+{
+  "db_path": "tests/cortex_p0_test.db",
+  "dry_run": true,
+  "total_facts_scanned": 1,
+  "total_issues_found": 3,
+  "fixes_applied": 1,
+  "fixes_rejected": 2,
+  "fixes_failed": 0,
+  "details": [
+    {
+      "fact_id": 1,
+      "battalion": "B02_HASH",
+      "status": "REJECTED",
+      "narrative": "\ud83d\udd12 Exorcise the ghost haunting hash [fact:1]",
+      "blue": {
+        "fact_id": 1,
+        "agent_id": "B02-agent-01-hash_rebuilder",
+        "specialist_id": "B02-agent-01-hash_rebuilder-sub-null_hash",
+        "battalion": "B02_HASH",
+        "success": true,
+        "action": "DRY_RUN: UPDATE facts SET hash = ? WHERE id = ?",
+        "sql_executed": "UPDATE facts SET hash = ? WHERE id = ?",
+        "error": null
+      },
+      "red": [
+        {
+          "fact_id": 1,
+          "agent_id": "R02-red-01-hash_corruptor",
+          "specialist_id": "R02-red-01-hash_corruptor-sub-hash_integrity",
+          "battalion": "B02_HASH",
+          "passed": false,
+          "attack": "hash_integrity",
+          "finding": "Hash still mismatched after fix: f2a5a66fedc5\u2026 != b156ba129122\u2026"
+        }
+      ]
+    },
+    {
+      "fact_id": 1,
+      "battalion": "B03_CONFIDENCE",
+      "status": "REJECTED",
+      "narrative": "\ud83d\udc89 Extinguish the cascade failure in confidence [fact:1]",
+      "blue": {
+        "fact_id": 1,
+        "agent_id": "B03-agent-01-bounds_normalizer",
+        "specialist_id": "B03-agent-01-bounds_normalizer-sub-null_confidence",
+        "battalion": "B03_CONFIDENCE",
+        "success": true,
+        "action": "DRY_RUN: UPDATE facts SET confidence = ? WHERE id = ?",
+        "sql_executed": "UPDATE facts SET confidence = ? WHERE id = ?",
+        "error": null
+      },
+      "red": [
+        {
+          "fact_id": 1,
+          "agent_id": "R03-red-01-bounds_overflow",
+          "specialist_id": "R03-red-01-bounds_overflow-sub-bounds_overflow",
+          "battalion": "B03_CONFIDENCE",
+          "passed": false,
+          "attack": "bounds_overflow",
+          "finding": "Confidence 'stated' is not a valid float."
+        }
+      ]
+    },
+    {
+      "fact_id": 1,
+      "battalion": "B06_SEMANTIC",
+      "status": "DRY_RUN_OK",
+      "narrative": "\ud83d\udc8e Crystallize semantic into existence [fact:1]",
+      "blue": {
+        "fact_id": 1,
+        "agent_id": "B06-agent-01-embed_trigger",
+        "specialist_id": "B06-agent-01-embed_trigger-sub-enrichment_incomplete",
+        "battalion": "B06_SEMANTIC",
+        "success": true,
+        "action": "DRY_RUN: UPDATE facts SET semantic_status = 'pending' WHERE id = ?",
+        "sql_executed": "UPDATE facts SET semantic_status = 'pending' WHERE id = ?",
+        "error": null
+      },
+      "red": [
+        {
+          "fact_id": 1,
+          "agent_id": "R06-red-01-embed_corruptor",
+          "specialist_id": "R06-red-01-embed_corruptor-sub-null_injection",
+          "battalion": "B06_SEMANTIC",
+          "passed": true,
+          "attack": "null_injection",
+          "finding": null
+        }
+      ]
+    }
+  ]
+}

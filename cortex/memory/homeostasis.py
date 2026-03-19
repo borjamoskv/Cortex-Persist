@@ -35,13 +35,15 @@ class EntropyPruner:
         pruned_count = 0
 
         try:
-            if not hasattr(self._vs, "scan_engrams"):
+            if hasattr(self._vs, "prune_native"):
+                pruned_count = await self._vs.prune_native(tenant_id, project_id, self._atp_threshold)
+            elif hasattr(self._vs, "scan_engrams"):
+                engrams = await self._vs.scan_engrams(tenant_id, project_id)
+                for engram in engrams:
+                    if await self._prune_engram(engram):
+                        pruned_count += 1
+            else:
                 return 0
-
-            engrams = await self._vs.scan_engrams(tenant_id, project_id)
-            for engram in engrams:
-                if await self._prune_engram(engram):
-                    pruned_count += 1
 
             # Post-prune drift checkpoint (non-blocking diagnostic)
             if pruned_count > 0:
@@ -168,6 +170,13 @@ class HomeostaticScaler:
 
         Returns dict with 'scaled' count and 'factor' applied.
         """
+        if hasattr(self._vs, "scale_native"):
+            try:
+                return await self._vs.scale_native(tenant_id, project_id, self._set_point)
+            except (RuntimeError, ValueError, OSError) as exc:
+                logger.error("HomeostaticScaler native scale failed: %s", exc)
+                return {"scaled": 0, "factor": 1.0, "error": str(exc)}
+
         if not hasattr(self._vs, "scan_engrams"):
             return {"scaled": 0, "factor": 1.0}
 

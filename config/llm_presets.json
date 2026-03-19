@@ -128,7 +128,7 @@
         "tier": "frontier",
         "cost_class": "high"
       },
-      "grok-3-mini": {
+      "grok-4": {
         "context_window": 128000,
         "tier": "high",
         "cost_class": "low"
@@ -142,7 +142,7 @@
       "reasoning": "grok-3",
       "creative":  "grok-3",
       "architect": "grok-4.1-fast",
-      "general":   "grok-3-mini"
+      "general":   "grok-4"
     }
   },
   "cohere": {
@@ -185,7 +185,7 @@
       "reasoning": "x-ai/grok-2",
       "creative":  "anthropic/claude-3.5-sonnet",
       "architect": "x-ai/grok-2",
-      "general":   "google/gemini-2.0-flash-001"
+      "general":   "google/gemini-3.1-pro-preview"
     }
   },
   "groq": {

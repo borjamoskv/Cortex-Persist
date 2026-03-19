@@ -15,7 +15,13 @@ import logging
 import time
 from typing import TYPE_CHECKING
 
-from cortex.nexus_v8 import DomainOrigin, IntentType, NexusWorldModel, Priority, WorldMutation
+from cortex.extensions.nexus import (
+    DomainOrigin,
+    IntentType,
+    NexusWorldModel,
+    Priority,
+    WorldMutation,
+)
 from cortex.utils import hygiene
 from cortex.utils.semantic_heartbeat import SemanticHeartbeat
 

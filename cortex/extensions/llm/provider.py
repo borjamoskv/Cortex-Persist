@@ -13,7 +13,7 @@ from typing import Any, Final
 
 import httpx
 
-from cortex.extensions.llm._models import BaseProvider, CortexPrompt, IntentProfile
+from cortex.extensions.llm._models import BaseProvider, CortexPrompt, IntentProfile, ReasoningMode
 from cortex.extensions.llm._presets import load_presets
 from cortex.extensions.llm.quota import SovereignQuotaManager
 
@@ -167,6 +167,7 @@ class LLMProvider(BaseProvider):
         temperature: float = 0.0,
         max_tokens: int = 2048,
         intent: IntentProfile = IntentProfile.GENERAL,
+        reasoning_mode: ReasoningMode | None = None,
     ) -> str:
         """Send a chat completion request. Returns the response text.
 
@@ -177,7 +178,12 @@ class LLMProvider(BaseProvider):
         await _QUOTA_MANAGER.acquire(tokens=1)
         url, headers = self._prepare_request()
 
-        model_name = self._resolve_model(intent)
+        model_name = self._resolve_model(intent, reasoning_mode)
+
+        if reasoning_mode == ReasoningMode.ULTRA_THINK:
+            max_tokens = max(max_tokens, 16384)
+            temperature = 0.0
+
         payload = {
             "model": model_name,
             "messages": [
@@ -411,6 +417,7 @@ class LLMProvider(BaseProvider):
         temperature: float = 0.0,
         max_tokens: int = 2048,
         intent: IntentProfile = IntentProfile.GENERAL,
+        reasoning_mode: ReasoningMode | None = None,
     ):
         """Stream a chat completion request. Yields text chunks.
 
@@ -421,7 +428,12 @@ class LLMProvider(BaseProvider):
         await _QUOTA_MANAGER.acquire(tokens=1)
         url, headers = self._prepare_request()
 
-        model_name = self._resolve_model(intent)
+        model_name = self._resolve_model(intent, reasoning_mode)
+
+        if reasoning_mode == ReasoningMode.ULTRA_THINK:
+            max_tokens = max(max_tokens, 16384)
+            temperature = 0.0
+
         payload = {
             "model": model_name,
             "messages": [
@@ -456,12 +468,20 @@ class LLMProvider(BaseProvider):
             )
             raise
 
-    def _resolve_model(self, intent: IntentProfile) -> str:
+    def _resolve_model(
+        self, intent: IntentProfile, reasoning_mode: ReasoningMode | None = None
+    ) -> str:
         """Return the optimal model for the given intent.
 
         Uses ``intent_model_map`` when available (two-layer routing).
         Falls back to ``self._model`` for providers without a map.
+        Forces reasoning mapped model if reasoning_mode requires it.
         """
+        if reasoning_mode in (ReasoningMode.ULTRA_THINK, ReasoningMode.DEEP_THINK):
+            resolved = self._intent_model_map.get(IntentProfile.REASONING)
+            if resolved:
+                return resolved
+
         if self._intent_model_map:
             resolved = self._intent_model_map.get(intent, self._model)
             if resolved != self._model:
@@ -479,7 +499,7 @@ class LLMProvider(BaseProvider):
         await _QUOTA_MANAGER.acquire(tokens=1)
         url, headers = self._prepare_request()
 
-        model_name = self._resolve_model(prompt.intent)
+        model_name = self._resolve_model(prompt.intent, prompt.reasoning_mode)
         payload = {
             "model": model_name,
             "messages": prompt.to_openai_messages(),

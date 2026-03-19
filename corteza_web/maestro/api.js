@@ -37,15 +37,15 @@ class MaestroAPI {
       ],
       graph: {
         nodes: [
-          { id: 'tutor', type: 'agent', label: 'TUTOR', color: '#0A84FF', x: 300, y: 200 },
-          { id: 'chema', type: 'agent', label: 'CHEMA', color: '#5E5CE6', x: 500, y: 150 },
-          { id: 'legion', type: 'agent', label: 'LEGION', color: '#30D158', x: 400, y: 350 },
-          { id: 'sentinel', type: 'agent', label: 'SENTINEL', color: '#FF9F0A', x: 200, y: 350 },
-          { id: 'f1', type: 'fact', label: 'EU AI Act Art.12', color: '#8E8E93', x: 350, y: 100 },
-          { id: 'f2', type: 'fact', label: 'Pricing Model', color: '#8E8E93', x: 150, y: 200 },
-          { id: 'f3', type: 'fact', label: 'Immunity Rules', color: '#8E8E93', x: 550, y: 300 },
-          { id: 'f4', type: 'fact', label: 'Ledger Genesis', color: '#8E8E93', x: 300, y: 400 },
-          { id: 'f5', type: 'fact', label: 'Guard Policies', color: '#8E8E93', x: 450, y: 250 }
+          { id: 'tutor', type: 'agent', label: 'TUTOR', color: '#CCFF00', x: 300, y: 200 },
+          { id: 'chema', type: 'agent', label: 'CHEMA', color: '#FF003C', x: 500, y: 150 },
+          { id: 'legion', type: 'agent', label: 'LEGION', color: '#FFEA00', x: 400, y: 350 },
+          { id: 'sentinel', type: 'agent', label: 'SENTINEL', color: '#FF5500', x: 200, y: 350 },
+          { id: 'f1', type: 'fact', label: 'EU AI Act Art.12', color: '#555555', x: 350, y: 100 },
+          { id: 'f2', type: 'fact', label: 'Pricing Model', color: '#555555', x: 150, y: 200 },
+          { id: 'f3', type: 'fact', label: 'Immunity Rules', color: '#555555', x: 550, y: 300 },
+          { id: 'f4', type: 'fact', label: 'Ledger Genesis', color: '#555555', x: 300, y: 400 },
+          { id: 'f5', type: 'fact', label: 'Guard Policies', color: '#555555', x: 450, y: 250 }
         ],
         edges: [
           { from: 'tutor', to: 'f1' }, { from: 'tutor', to: 'f2' },

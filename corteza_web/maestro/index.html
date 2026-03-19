@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MAC MAESTRO — CORTEX Persist</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -16,6 +17,15 @@
       <button class="traffic-light minimize" aria-label="Minimize Window"></button>
       <button class="traffic-light maximize" aria-label="Maximize Window"></button>
     </div>
+
+    <!-- ═══ Cortex Organism Notch ═══ -->
+    <div class="cortex-notch" id="cortexNotch">
+      <div class="notch-led led-tutor active" id="led-tutor"></div>
+      <div class="notch-led led-chema active" id="led-chema"></div>
+      <div class="notch-led led-legion active" id="led-legion"></div>
+      <div class="notch-led led-sentinel active" id="led-sentinel"></div>
+    </div>
+
     <span class="titlebar-text">CORTEX Persist Control</span>
   </div>
 
@@ -225,22 +235,22 @@
           <div class="detail-header">
             <div class="detail-avatar bg-blue" id="detailAvatar">🎓</div>
             <div class="detail-title">
-              <h2 id="agentDetailName">TUTOR</h2>
-              <p id="agentDetailRole">Knowledge Base Management</p>
+              <h2 id="agentDetailName">[ SYS // TUTOR ]</h2>
+              <p id="agentDetailRole">> KNOWLEDGE_BASE_MGMT_</p>
             </div>
           </div>
           
-          <div class="settings-group-label pl-0">Configuration</div>
+          <div class="settings-group-label pl-0 sys-config">> /SYS/CONFIG</div>
           <div class="settings-group detail-config-panel">
             <div class="settings-row config-row">
-              <div class="settings-row-label">Capability Guard</div>
+              <div class="settings-row-label sys-mono">CAPABILITY_GUARD</div>
               <div class="guard-flex">
                 <input type="range" class="slider guard-slider" min="0" max="100" value="75" id="guardSlider">
                 <span class="guard-val" id="guardValue">75%</span>
               </div>
             </div>
             <div class="settings-row config-row">
-              <div class="settings-row-label">Risk Tier</div>
+              <div class="settings-row-label sys-mono">RISK_TIER_AUTH</div>
               <label class="sr-only" for="riskTierSelect">Risk Tier</label>
               <select class="dropdown" id="riskTierSelect" title="Risk Tier" aria-label="Risk Tier">
                 <option>TIER_1_LOCAL_SAFE</option>

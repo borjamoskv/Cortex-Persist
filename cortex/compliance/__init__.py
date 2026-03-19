@@ -1,5 +1,5 @@
-"""CORTEX Compliance SDK — EU AI Act Article 12 in 3 lines of code."""
+"""CORTEX Compliance SDK — EU AI Act Article 12."""
 
-from cortex.compliance.tracker import ComplianceTracker
+from cortex.compliance.evaluator import ComplianceEvaluator
 
-__all__ = ["ComplianceTracker"]
+__all__ = ["ComplianceEvaluator"]
