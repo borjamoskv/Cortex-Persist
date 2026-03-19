@@ -15,7 +15,7 @@ repos:
     hooks:
       - id: cortex-fast-tests
         name: CORTEX Fast Tests
-        entry: .venv/bin/pytest tests/ -m "not slow" --tb=line -q --no-header
+        entry: bash -c 'timeout 60 .venv/bin/pytest tests/ -m "not slow" --tb=line -q --no-header'
         language: system
         pass_filenames: false
         always_run: true

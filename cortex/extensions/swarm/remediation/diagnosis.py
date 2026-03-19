@@ -203,7 +203,11 @@ class DiagnosisClassifier:
 
             # B04 — Exergy Scoring
             exergy = fact["exergy_score"]
-            if exergy is None or float(exergy) == 0.0:
+            try:
+                exergy_val = float(exergy) if exergy is not None else None
+            except (ValueError, TypeError):
+                exergy_val = None
+            if exergy_val is None or exergy_val == 0.0:
                 diagnoses.append(
                     Diagnosis(
                         fact_id=fact_id,
