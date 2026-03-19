@@ -45,7 +45,7 @@ class OOMKiller:
             tree = ast.parse(code)
             # Search for infinite loops or massive allocations
             for node in ast.walk(tree):
-                if isinstance(node, (ast.While, ast.For)):
+                if isinstance(node, ast.While | ast.For):
                     if not any(isinstance(n, ast.Break) for n in ast.walk(node)):
                         findings.append(
                             "Potential infinite loop: loop without break statement detected."
@@ -222,7 +222,9 @@ class VaultCracker:
                     "VaultCracker: Malleability attack succeeded (authentication failed)."
                 )
             except Exception:  # noqa: BLE001 — expected decryption failure
-                pass  # Success = Tag caught it
+                logger.debug(
+                    "VaultCracker: Expected decryption failure caught (Tamper detection OK)"
+                )
 
         except Exception as e:  # noqa: BLE001 — attack vector execution boundary
             logger.debug("VaultCracker error: %s", e)

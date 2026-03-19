@@ -1,0 +1,21 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  overflow: hidden; /* Prevent scrolling, navigation is 3D */
+  background-color: #0A0A0A; /* Industrial Noir base */
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+  color: white;
+}
+
+#webgl-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  outline: none;
+}

@@ -17,7 +17,7 @@ import logging
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import yaml
 
@@ -53,7 +53,7 @@ class CrystalTarget:
 # ── Source 1: Curated YAML Queue ──────────────────────────────────────────
 
 
-def scan_curated_queue(queue_path: Optional[Path | str] = None) -> list[CrystalTarget]:
+def scan_curated_queue(queue_path: Path | str | None = None) -> list[CrystalTarget]:
     """Read targets from the curated YAML queue file.
 
     Expected format:
@@ -158,7 +158,10 @@ async def scan_ghost_gaps(cortex_db: Any) -> list[CrystalTarget]:
                     intent="search_gap",
                     priority=3,
                     source="ghost_gap",
-                    metadata={"ghost_id": getattr(r, "id", "unknown")},
+                    metadata={
+                        "ghost_id": getattr(r, "id", "unknown"),
+                        "agent_id": getattr(r, "agent_id", None),
+                    },
                 )
             )
 
@@ -192,7 +195,7 @@ async def scan_semantic_gaps(cortex_db: Any, min_facts: int = 5) -> list[Crystal
             for row in rows or []:
                 project = (
                     row[0]
-                    if isinstance(row, (list, tuple))
+                    if isinstance(row, list | tuple)
                     else getattr(row, "project_id", "unknown")
                 )
                 targets.append(
@@ -256,9 +259,9 @@ def merge_and_prioritize(
 
 
 async def discover(
-    cortex_db: Optional[Any] = None,
+    cortex_db: Any | None = None,
     max_targets: int = 5,
-    queue_path: Optional[Path | str] = None,
+    queue_path: Path | str | None = None,
 ) -> list[CrystalTarget]:
     """Full radar scan: curated + ghosts + semantic gaps → merged targets.
 

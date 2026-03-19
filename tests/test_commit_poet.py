@@ -231,6 +231,33 @@ class TestNarration:
         assert '"""' in comment
 
 
+# ── Swarm & Remediation ──────────────────────────────────────────────────────
+
+
+class TestSwarmSummary:
+    """Verify swarm telemetry and remediation narratives."""
+
+    def test_compose_swarm_summary_all_zeros(self, poet: CommitPoet):
+        msg = poet.compose_swarm_summary(0, 0, 0)
+        assert "The swarm rests" in msg
+
+    def test_compose_swarm_summary_applied_only(self, poet: CommitPoet):
+        msg = poet.compose_swarm_summary(5, 0, 0)
+        assert "5 semantic breaches" in msg
+        assert "Note:" not in msg
+
+    def test_compose_swarm_summary_with_failures(self, poet: CommitPoet):
+        msg = poet.compose_swarm_summary(3, 2, 1)
+        assert "3 semantic breaches" in msg
+        assert "2 mutations resisted" in msg
+        assert "1 anomalies defied" in msg
+
+    def test_compose_remediation(self, poet: CommitPoet):
+        msg = poet.compose_remediation("B06_SEMANTIC", "ENRICHED", "f_123")
+        assert "[fact:f_123]" in msg
+        assert "semantic" in msg.lower()
+
+
 # ── Convenience Functions ────────────────────────────────────────────────────
 
 

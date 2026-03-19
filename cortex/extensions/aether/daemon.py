@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import logging
 import threading
-from typing import Optional
 
 from cortex.extensions.aether.models import AetherAlert, AgentTask, TaskStatus
 from cortex.extensions.aether.queue import TaskQueue
@@ -26,12 +25,12 @@ class AetherDaemon:
 
     def __init__(
         self,
-        queue: Optional[TaskQueue] = None,
+        queue: TaskQueue | None = None,
         poll_interval: int = _DEFAULT_POLL,
         max_concurrent: int = _DEFAULT_MAX_CONCURRENT,
         llm_provider: str = "qwen",
-        github_token: Optional[str] = None,
-        github_repos: Optional[list[str]] = None,
+        github_token: str | None = None,
+        github_repos: list[str] | None = None,
     ) -> None:
         self._queue = queue or TaskQueue()
         self._poll_interval = poll_interval

@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 import time
 from abc import ABC, abstractmethod
-from typing import Any, Generic, Optional, TypeVar
+from typing import Any, Generic, TypeVar
 
 T = TypeVar("T")
 
@@ -26,7 +26,7 @@ class IntervalProjectMonitor(BaseMonitor[T]):
 
     def __init__(
         self,
-        projects: Optional[dict[str, str]] = None,
+        projects: dict[str, str] | None = None,
         interval_seconds: int = 1800,
         engine: Any = None,
     ):

@@ -27,7 +27,7 @@ CORTEX doesn't replace your memory layer — it **certifies** it.
 ## Core Capabilities
 
 | Capability | What It Does |
-|:---|:---|
+| :--- | :--- |
 | 🔗 **Immutable Ledger** | Every fact is SHA-256 hash-chained. Tamper = detectable. |
 | 🌳 **Merkle Checkpoints** | Periodic batch verification of ledger integrity |
 | 🤝 **WBFT Consensus** | Multi-agent Byzantine fault-tolerant fact verification |
@@ -68,7 +68,7 @@ cortex verify 1
 ## Project Stats
 
 | Metric | Value |
-|:---|:---|
+| :--- | :--- |
 | Production LOC | **~45,500** |
 | Test functions | **1,162+** |
 | Python modules | **444** |
@@ -82,7 +82,8 @@ cortex verify 1
 ## Documentation
 
 | Section | Description |
-|:---|:---|
+| :--- | :--- |
+| [Ley del Modelo 2026](DECALOGO.md) | The 10 core concepts of Sovereign AI |
 | [Quickstart](quickstart.md) | Get running in 5 minutes |
 | [Installation](installation.md) | All install methods and extras |
 | [Architecture](architecture.md) | Deep dive into the system design |

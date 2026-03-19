@@ -1,6 +1,6 @@
 # This file is part of CORTEX. Apache-2.0. Change Date: 2030-01-01.
 
-"""Universal LLM Provider — OpenAI-compatible async client with intent routing."""
+"""Universal LLM Provider - OpenAI-compatible async client with intent routing."""
 
 from __future__ import annotations
 
@@ -9,13 +9,13 @@ import json
 import logging
 import os
 import re
-from typing import Any, Final, Optional
+from typing import Any, Final
 
 import httpx
 
+from cortex.extensions.llm._models import BaseProvider, CortexPrompt, IntentProfile, ReasoningMode
 from cortex.extensions.llm._presets import load_presets
 from cortex.extensions.llm.quota import SovereignQuotaManager
-from cortex.extensions.llm.router import BaseProvider, CortexPrompt, IntentProfile
 
 __all__ = ["LLMProvider"]
 
@@ -40,13 +40,18 @@ class LLMProvider(BaseProvider):
         answer = await provider.complete("What is CORTEX?")
     """
 
+    @classmethod
+    def list_providers(cls) -> list[str]:
+        """List names of supported LLM provider presets."""
+        return sorted(list(load_presets().keys()))
+
     # Note: Enforces temperature=0.0 in prompts to guarantee deterministic swarm behavior
     def __init__(
         self,
         provider: str = "qwen",
-        api_key: Optional[str] = None,
-        model: Optional[str] = None,
-        base_url: Optional[str] = None,
+        api_key: str | None = None,
+        model: str | None = None,
+        base_url: str | None = None,
     ):
         presets = load_presets()
 
@@ -70,9 +75,9 @@ class LLMProvider(BaseProvider):
 
     def _init_custom(
         self,
-        api_key: Optional[str],
-        model: Optional[str],
-        base_url: Optional[str],
+        api_key: str | None,
+        model: str | None,
+        base_url: str | None,
     ) -> None:
         """Initialize a custom provider configuration."""
         self._provider = "custom"
@@ -93,15 +98,14 @@ class LLMProvider(BaseProvider):
         self,
         provider: str,
         preset: dict[str, Any],
-        api_key: Optional[str],
-        model: Optional[str],
-        base_url: Optional[str],
+        api_key: str | None,
+        model: str | None,
+        base_url: str | None,
     ) -> None:
         """Initialize from a known provider preset."""
         self._provider = provider
         self._base_url = base_url or preset["base_url"]
         self._model = model or os.environ.get("CORTEX_LLM_MODEL") or preset["default_model"]
-        self._context_window = preset["context_window"]
         self._extra_headers = preset.get("extra_headers", {})
         self._api_key = api_key
         self._tier = preset.get("tier", "high")
@@ -120,7 +124,7 @@ class LLMProvider(BaseProvider):
             _TAG_MAP[tag] for tag in raw_specs if tag in _TAG_MAP
         ) or frozenset({IntentProfile.GENERAL})
 
-        # Intent-to-model map (optional) — permite que un provider como OpenRouter
+        # Intent-to-model map (optional) - permite que un provider como OpenRouter
         # use modelos especializados según la intención del prompt.
         raw_map: dict[str, str] = preset.get("intent_model_map", {})
         self._intent_model_map: dict[IntentProfile, str] = {
@@ -141,8 +145,8 @@ class LLMProvider(BaseProvider):
         if not self._api_key:
             # Some providers like Ollama don't need keys
             if provider not in ["ollama", "lmstudio", "llamacpp", "vllm", "jan"]:
-                msg = f"LLM provider '{provider}' requires an API key "
-                msg += f"(api_key argument or {env_key} env var)"
+                msg_base = f"LLM provider '{provider}' requires an API key "
+                msg = msg_base + f"(api_key argument or {env_key} env var)"
                 raise ValueError(msg)
 
     def _prepare_request(self) -> tuple[str, dict[str, str]]:
@@ -163,6 +167,7 @@ class LLMProvider(BaseProvider):
         temperature: float = 0.0,
         max_tokens: int = 2048,
         intent: IntentProfile = IntentProfile.GENERAL,
+        reasoning_mode: ReasoningMode | None = None,
     ) -> str:
         """Send a chat completion request. Returns the response text.
 
@@ -173,7 +178,12 @@ class LLMProvider(BaseProvider):
         await _QUOTA_MANAGER.acquire(tokens=1)
         url, headers = self._prepare_request()
 
-        model_name = self._resolve_model(intent)
+        model_name = self._resolve_model(intent, reasoning_mode)
+
+        if reasoning_mode == ReasoningMode.ULTRA_THINK:
+            max_tokens = max(max_tokens, 16384)
+            temperature = 0.0
+
         payload = {
             "model": model_name,
             "messages": [
@@ -232,7 +242,7 @@ class LLMProvider(BaseProvider):
     def _log_resolved_model(self, payload: dict[str, Any], response_data: dict[str, Any]) -> None:
         """Log when a meta-router resolves to a different model than requested.
 
-        Enables traceability for hierarchical routing — when CORTEX
+        Enables traceability for hierarchical routing -- when CORTEX
         requests 'openrouter/auto' and OpenRouter resolves to e.g.
         'anthropic/claude-3.5-sonnet', this captures both layers.
         """
@@ -246,7 +256,7 @@ class LLMProvider(BaseProvider):
                 actual,
             )
 
-    def _extract_retry_delay(self, text: str) -> Optional[float]:
+    def _extract_retry_delay(self, text: str) -> float | None:
         """Extrae el delay de reintento desde el JSON o via regex."""
         try:
             data = json.loads(text)
@@ -323,30 +333,65 @@ class LLMProvider(BaseProvider):
     async def _execute_fallback(
         self, payload: dict[str, Any], original_error: httpx.HTTPStatusError
     ) -> str:
-        """Ejecuta el fallback hacia un modelo más estable si todo falla."""
+        """Ejecuta el fallback en cascada hacia modelos locales y cloud sin cuota.
+
+        Aplica Axioma Ω: Previene interrupciones por cuota descendiendo por la topología
+        de resiliencia local -> cloud gratuito.
+        """
+        fallback_cascade = [
+            "vllm",  # Local (Fastest/Private - Llama 4 Scout / DeepSeek V3.2)
+            "ollama",  # Local (Fallback - Qwen 2.5 Coder 32b)
+            "groq",  # Cloud sin cuota (Llama 3.3 70B / Llama 4 Maverick)
+            "cerebras",  # Cloud sin cuota (Llama 3.3 70B)
+            "sambanova",  # Cloud sin cuota (Llama 3.3 70B)
+            "qwen",  # Cloud resiliencia base
+        ]
+
         logger.warning(
-            "LLM API [429 Quota Exceeded Final] on %s. Fallback to Open Code (Qwen Coder)...",
+            "LLM API [429 Quota Exceeded Final] on %s. "
+            "Iniciando cascada de fallback termosensible...",
             self._model,
         )
 
-        if self._provider == "qwen":
-            raise original_error
+        for fb_name in fallback_cascade:
+            if self._provider == fb_name:
+                continue
 
-        fallback_provider = LLMProvider(provider="qwen")
-        try:
-            fb_url, fb_headers = fallback_provider._prepare_request()
-            fb_payload = {
-                "model": fallback_provider._model,
-                "messages": payload.get("messages", []),
-                "temperature": payload.get("temperature", 0.3),
-                "max_tokens": payload.get("max_tokens", 2048),
-            }
-            return await fallback_provider._execute_completion_raw(fb_url, fb_headers, fb_payload)
-        except (httpx.HTTPError, ValueError, KeyError) as fallback_e:
-            logger.error("LLM Fallback Failure: %s", fallback_e)
-            raise original_error from fallback_e
-        finally:
-            await fallback_provider.close()
+            try:
+                # Fallará rápido con ValueError si falta la API Key requerida
+                fallback_provider = LLMProvider(provider=fb_name)
+            except ValueError:
+                continue
+
+            logger.info("Intentando recuperación de inferencia vía %s...", fb_name)
+            try:
+                fb_url, fb_headers = fallback_provider._prepare_request()
+                fb_payload = {
+                    "model": fallback_provider._model,
+                    "messages": payload.get("messages", []),
+                    "temperature": payload.get("temperature", 0.3),
+                    "max_tokens": payload.get("max_tokens", 2048),
+                }
+                # Si esto da error de conexión (local no activo) o 4xx, lo capturamos
+                result = await fallback_provider._execute_completion_raw(
+                    fb_url, fb_headers, fb_payload
+                )
+                logger.info(
+                    "Fallback exitoso en %s (%s). Estabilización lograda.",
+                    fb_name,
+                    fallback_provider._model,
+                )
+                return result
+            except (httpx.HTTPError, ValueError, KeyError) as fb_val_e:
+                logger.debug("Omitiendo fallback %s debido a error: %s", fb_name, fb_val_e)
+                continue
+            finally:
+                await fallback_provider.close()
+
+        logger.error(
+            "Colapso térmico total: todos los providers de fallback fracasaron. Propagando error."
+        )
+        raise original_error
 
     async def _process_stream_lines(self, response: httpx.Response):
         """Consume and parse SSE lines from an active HTTP stream."""
@@ -372,6 +417,7 @@ class LLMProvider(BaseProvider):
         temperature: float = 0.0,
         max_tokens: int = 2048,
         intent: IntentProfile = IntentProfile.GENERAL,
+        reasoning_mode: ReasoningMode | None = None,
     ):
         """Stream a chat completion request. Yields text chunks.
 
@@ -382,7 +428,12 @@ class LLMProvider(BaseProvider):
         await _QUOTA_MANAGER.acquire(tokens=1)
         url, headers = self._prepare_request()
 
-        model_name = self._resolve_model(intent)
+        model_name = self._resolve_model(intent, reasoning_mode)
+
+        if reasoning_mode == ReasoningMode.ULTRA_THINK:
+            max_tokens = max(max_tokens, 16384)
+            temperature = 0.0
+
         payload = {
             "model": model_name,
             "messages": [
@@ -417,12 +468,20 @@ class LLMProvider(BaseProvider):
             )
             raise
 
-    def _resolve_model(self, intent: IntentProfile) -> str:
+    def _resolve_model(
+        self, intent: IntentProfile, reasoning_mode: ReasoningMode | None = None
+    ) -> str:
         """Return the optimal model for the given intent.
 
         Uses ``intent_model_map`` when available (two-layer routing).
         Falls back to ``self._model`` for providers without a map.
+        Forces reasoning mapped model if reasoning_mode requires it.
         """
+        if reasoning_mode in (ReasoningMode.ULTRA_THINK, ReasoningMode.DEEP_THINK):
+            resolved = self._intent_model_map.get(IntentProfile.REASONING)
+            if resolved:
+                return resolved
+
         if self._intent_model_map:
             resolved = self._intent_model_map.get(intent, self._model)
             if resolved != self._model:
@@ -440,7 +499,7 @@ class LLMProvider(BaseProvider):
         await _QUOTA_MANAGER.acquire(tokens=1)
         url, headers = self._prepare_request()
 
-        model_name = self._resolve_model(prompt.intent)
+        model_name = self._resolve_model(prompt.intent, prompt.reasoning_mode)
         payload = {
             "model": model_name,
             "messages": prompt.to_openai_messages(),
@@ -486,8 +545,11 @@ class LLMProvider(BaseProvider):
 
     @property
     def context_window(self) -> int:
-        """Context window in tokens."""
-        return self._context_window
+        """Context window in tokens resolved for the currently active model."""
+        from cortex.extensions.llm._presets import resolve_context_window
+
+        # Resolve based on current model name (which might be the default or an intent-override)
+        return resolve_context_window(self._provider, self._model)
 
     async def close(self) -> None:
         """Gracefully close the HTTP client."""

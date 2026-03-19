@@ -10,7 +10,7 @@ import logging
 import random
 from dataclasses import dataclass
 from decimal import Decimal
-from typing import Any, Optional, Protocol
+from typing import Any, Protocol
 
 log = logging.getLogger(__name__)
 
@@ -55,8 +55,8 @@ class FundingRateScanner:
 
     def __init__(
         self,
-        http_client: Optional[HttpClient] = None,
-        random_seed: Optional[int] = None,
+        http_client: HttpClient | None = None,
+        random_seed: int | None = None,
     ) -> None:
         self._http = http_client
         self._rng = random.Random(random_seed)

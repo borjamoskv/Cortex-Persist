@@ -37,7 +37,7 @@ class KeyboardEngine:
     async def press(
         self,
         combo: KeyCombo,
-        target: Optional[AppTarget] = None,
+        target: AppTarget | None = None,
     ) -> InteractionResult:
         """
         Press a key combination (optionally targeting a specific app).
@@ -73,7 +73,7 @@ class KeyboardEngine:
         self,
         key: str,
         *modifiers: str,
-        target: Optional[AppTarget] = None,
+        target: AppTarget | None = None,
     ) -> InteractionResult:
         """
         Convenience method for pressing a hotkey combination.
@@ -89,7 +89,7 @@ class KeyboardEngine:
     async def type_text(
         self,
         text: str,
-        target: Optional[AppTarget] = None,
+        target: AppTarget | None = None,
         delay: float = DEFAULT_TYPING_DELAY,
     ) -> InteractionResult:
         """
@@ -110,7 +110,7 @@ class KeyboardEngine:
     async def _type_char_by_char(
         self,
         text: str,
-        target: Optional[AppTarget],
+        target: AppTarget | None,
         delay: float,
     ) -> InteractionResult:
         """Injects text one character at a time via AppleScript keystroke."""
@@ -149,7 +149,7 @@ class KeyboardEngine:
     async def _type_via_clipboard(
         self,
         text: str,
-        target: Optional[AppTarget],
+        target: AppTarget | None,
     ) -> InteractionResult:
         """Uses clipboard paste for fast bulk text injection."""
         escaped = text.replace("\\", "\\\\").replace('"', '\\"')
@@ -178,7 +178,7 @@ class KeyboardEngine:
     async def press_special(
         self,
         key_name: str,
-        target: Optional[AppTarget] = None,
+        target: AppTarget | None = None,
     ) -> InteractionResult:
         """
         Press a special key by name (return, tab, escape, arrows, etc).

@@ -227,6 +227,12 @@ Para más detalles, consulta: [**OMEGA_MANIFOLD.md**](architecture/OMEGA_MANIFOL
 | `migrations/` | Versioned schema migrations |
 | `storage/` | SQLite + Turso storage backends |
 
+### Extensions
+
+| Module | Purpose |
+|:---|:---|
+| `extensions/mejoralo/` | 14D X-Ray Diagnostic Engine (Host telemetry + AST static analysis) |
+
 ---
 
 ## Data Flow

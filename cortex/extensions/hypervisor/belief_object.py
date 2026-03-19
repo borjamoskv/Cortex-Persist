@@ -25,7 +25,6 @@ import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Optional
 
 __all__ = [
     "BeliefObject",
@@ -74,6 +73,9 @@ class BeliefStatus(str, Enum):
     CONTESTED = "contested"
     """Multiple conflicting beliefs exist — awaiting arbitration."""
 
+    TAINTED = "tainted"
+    """Proactively invalidated due to causal contamination from a parent belief."""
+
 
 class VerdictAction(str, Enum):
     """Actions the CognitiveHandoff can take on a belief."""
@@ -110,7 +112,7 @@ class ProvenanceEntry:
     source_id: str
     """Reference to the originating entity (fact ID, belief ID, URL)."""
 
-    model: Optional[str]
+    model: str | None
     """Which LLM produced/validated this entry. None if human-sourced."""
 
     timestamp: str
@@ -179,6 +181,9 @@ class BeliefObject:
     tenant_id: str = "default"
     """Multi-tenant isolation key."""
 
+    metadata: dict[str, any] = field(default_factory=dict)
+    """Additional key-value pairs for belief signaling (e.g., p0_critical)."""
+
     id: str = field(default_factory=_uuid7)
     """Time-sortable unique identifier."""
 
@@ -194,7 +199,7 @@ class BeliefObject:
     created_at: str = field(default_factory=_now_iso)
     """When this belief was first created."""
 
-    revised_at: Optional[str] = None
+    revised_at: str | None = None
     """When this belief was last revised. None if never revised."""
 
     revision_count: int = 0
@@ -206,7 +211,7 @@ class BeliefObject:
     supported_by: tuple[str, ...] = ()
     """IDs of beliefs/facts that corroborate this belief."""
 
-    arbitrated_by: Optional[str] = None
+    arbitrated_by: str | None = None
     """Model identifier that last judged this belief (e.g., 'opus', 'deep_think')."""
 
     def is_axiomatic(self) -> bool:
@@ -242,6 +247,7 @@ class BeliefObject:
             "arbitrated_by": self.arbitrated_by,
             "project": self.project,
             "tenant_id": self.tenant_id,
+            "metadata": self.metadata,
         }
 
     @classmethod
@@ -271,6 +277,7 @@ class BeliefObject:
             arbitrated_by=data.get("arbitrated_by"),
             project=data["project"],
             tenant_id=data.get("tenant_id", "default"),
+            metadata=data.get("metadata", {}),
         )
 
 
@@ -294,7 +301,7 @@ class BeliefVerdict:
     contradictions: tuple[str, ...] = ()
     """IDs of contradicting beliefs (if action == QUARANTINE)."""
 
-    revised_belief: Optional[BeliefObject] = None
+    revised_belief: BeliefObject | None = None
     """Revised belief (if action == REVISE)."""
 
     cost_tokens: int = 0

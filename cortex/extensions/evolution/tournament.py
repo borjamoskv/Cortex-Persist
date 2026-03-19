@@ -12,7 +12,6 @@ from __future__ import annotations
 import logging
 import secrets
 from dataclasses import dataclass
-from typing import Optional
 
 from cortex.extensions.evolution.agents import (
     Mutation,
@@ -37,7 +36,7 @@ class TournamentResult:
 def run_tournament(
     agent: SovereignAgent,
     tournament_size: int = 3,
-) -> Optional[TournamentResult]:
+) -> TournamentResult | None:
     """Select `tournament_size` random subagents and compete.
 
     The winner donates fitness knowledge to the loser.

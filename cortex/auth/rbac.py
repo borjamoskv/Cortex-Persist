@@ -1,5 +1,3 @@
-from typing import Optional
-
 """
 CORTEX v6 — Role-Based Access Control (RBAC) Engine.
 
@@ -84,7 +82,7 @@ class RBACEvaluator:
     Supports role hierarchy and explicit policy definitions.
     """
 
-    def __init__(self, policies: Optional[dict[Role, set[Permission]]] = None) -> None:
+    def __init__(self, policies: dict[Role, set[Permission]] | None = None) -> None:
         self._policies = policies or DEFAULT_POLICIES
 
     def has_permission(self, role_name: str, permission: Permission) -> bool:

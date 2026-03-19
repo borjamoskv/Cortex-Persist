@@ -45,7 +45,6 @@ import logging
 import os
 import time
 from dataclasses import dataclass, field
-from typing import Optional
 
 from cortex.extensions.llm._presets import load_presets
 from cortex.extensions.llm.provider import LLMProvider
@@ -133,7 +132,7 @@ class SovereignLLM:
     def __init__(
         self,
         *,
-        preferred_providers: Optional[list[str]] = None,
+        preferred_providers: list[str] | None = None,
         temperature: float = 0.3,
         max_tokens: int = 2048,
         timeout_seconds: float = 60.0,
@@ -247,7 +246,7 @@ class SovereignLLM:
         mode: str,
         chain: list[str],
         errors: list[str],
-    ) -> Optional[SovereignResult]:
+    ) -> SovereignResult | None:
         """Attempt ThoughtOrchestra. Returns None on failure."""
         try:
             # Lazy import to avoid circular deps
@@ -289,7 +288,7 @@ class SovereignLLM:
         errors: list[str],
         is_local: bool,
         intent: IntentProfile = IntentProfile.GENERAL,
-    ) -> Optional[SovereignResult]:
+    ) -> SovereignResult | None:
         """Execute a single provider call with caching and error handling."""
         try:
             if provider_name not in self._providers_cache:
@@ -324,6 +323,14 @@ class SovereignLLM:
             errors.append(f"{provider_name}: timeout ({self._timeout}s)")
         except (OSError, ValueError, KeyError) as e:
             errors.append(f"{provider_name}: {e!r}")
+        except Exception as e:
+            # Catch httpx.HTTPStatusError (429, 500, etc.)
+            # and any other unexpected provider errors.
+            status = getattr(getattr(e, "response", None), "status_code", 0)
+            if status:
+                errors.append(f"{provider_name}: HTTP {status}")
+            else:
+                errors.append(f"{provider_name}: {type(e).__name__}: {e}")
 
         return None
 
@@ -335,10 +342,10 @@ class SovereignLLM:
         chain: list[str],
         errors: list[str],
         *,
-        presets: Optional[dict] = None,
+        presets: dict | None = None,
         is_local: bool = False,
         intent: IntentProfile = IntentProfile.GENERAL,
-    ) -> Optional[SovereignResult]:
+    ) -> SovereignResult | None:
         """Attempt a single provider. Returns None on failure."""
         if presets is None:
             presets = load_presets()
@@ -413,7 +420,7 @@ class Inquisitor(SovereignLLM):
     def __init__(
         self,
         *,
-        preferred_providers: Optional[list[str]] = None,
+        preferred_providers: list[str] | None = None,
         timeout_seconds: float = 60.0,
     ):
         super().__init__(

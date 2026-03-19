@@ -25,7 +25,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine
@@ -80,7 +80,7 @@ class ConsolidationResult:
     deprecated_ids: list[int] = field(default_factory=list)
     clusters: list[ClusterResult] = field(default_factory=list)
     dry_run: bool = False
-    error: Optional[str] = None
+    error: str | None = None
 
 
 class BeliefConsolidator:
@@ -92,7 +92,7 @@ class BeliefConsolidator:
 
     def __init__(
         self,
-        model: str = "gemini-2.0-flash",
+        model: str = "gemini-2.5-pro",
         similarity_threshold: float = 0.80,
     ):
         self._model = model

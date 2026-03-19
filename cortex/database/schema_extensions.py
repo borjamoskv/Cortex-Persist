@@ -258,6 +258,29 @@ CREATE INDEX IF NOT EXISTS idx_lock_intents_resource ON lock_intents(resource);
 CREATE INDEX IF NOT EXISTS idx_lock_intents_agent ON lock_intents(agent_id);
 """
 
+# ─── Enrichment Queue (P0 Decoupling) ───────────────────────────────
+CREATE_ENRICHMENT_JOBS = """
+CREATE TABLE IF NOT EXISTS enrichment_jobs (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    fact_id         INTEGER NOT NULL REFERENCES facts(id),
+    job_type        TEXT NOT NULL DEFAULT 'embedding',
+    status          TEXT NOT NULL DEFAULT 'queued',
+    priority        INTEGER DEFAULT 0,
+    attempts        INTEGER DEFAULT 0,
+    last_error      TEXT,
+    next_attempt_at TEXT,
+    payload         TEXT,
+    created_at      TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at      TEXT NOT NULL DEFAULT (datetime('now'))
+);
+"""
+
+CREATE_ENRICHMENT_JOBS_INDEXES = """
+CREATE INDEX IF NOT EXISTS idx_enrichment_jobs_status ON enrichment_jobs(status, priority DESC);
+CREATE INDEX IF NOT EXISTS idx_enrichment_jobs_fact ON enrichment_jobs(fact_id);
+"""
+
+
 # ─── Full-Text Search (Decoupled in v5) ─────────────────────────────
 CREATE_FACTS_FTS = """
 CREATE VIRTUAL TABLE IF NOT EXISTS facts_fts USING fts5(
@@ -319,7 +342,7 @@ BEFORE UPDATE OF permanent ON procedural_engrams
 FOR EACH ROW
 WHEN OLD.permanent = 1 AND NEW.permanent = 0
 BEGIN
-    SELECT RAISE(ABORT, 'Immunitas-Omega (Ω3): Unidirectional immutability violated. Cannot revert permanent=1 to permanent=0');
+    SELECT RAISE(ABORT, 'Immunitas-Omega (Ω3): Unidirectional immutability violated.');
 END;
 """
 
@@ -376,6 +399,8 @@ EXTENSION_SCHEMA = [
     CREATE_LLM_TELEMETRY,
     CREATE_LLM_TELEMETRY_INDEX,
     CREATE_CAUSAL_EDGES,
+    CREATE_ENRICHMENT_JOBS,
+    CREATE_ENRICHMENT_JOBS_INDEXES,
     CREATE_PROCEDURAL_ENGRAMS,
     CREATE_FACTS_FTS,
     CREATE_FACTS_FTS_TRIGGERS,

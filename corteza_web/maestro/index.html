@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MAC MAESTRO — CORTEX Persist</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="window">
+
+  <!-- ═══ Titlebar ═══ -->
+  <div class="titlebar">
+    <div class="traffic-lights">
+      <button class="traffic-light close" aria-label="Close Window"></button>
+      <button class="traffic-light minimize" aria-label="Minimize Window"></button>
+      <button class="traffic-light maximize" aria-label="Maximize Window"></button>
+    </div>
+
+    <!-- ═══ Cortex Organism Notch ═══ -->
+    <div class="cortex-notch" id="cortexNotch">
+      <div class="notch-led led-tutor active" id="led-tutor"></div>
+      <div class="notch-led led-chema active" id="led-chema"></div>
+      <div class="notch-led led-legion active" id="led-legion"></div>
+      <div class="notch-led led-sentinel active" id="led-sentinel"></div>
+    </div>
+
+    <span class="titlebar-text">CORTEX Persist Control</span>
+  </div>
+
+  <!-- ═══ Native macOS Sheet Dialog ═══ -->
+  <div class="mac-sheet-overlay" id="macSheetOverlay">
+    <div class="mac-sheet" id="macSheet">
+      <div class="mac-sheet-icon">⚠️</div>
+      <h3 class="mac-sheet-title" id="macSheetTitle">Are you sure?</h3>
+      <p class="mac-sheet-text" id="macSheetText">This action cannot be undone.</p>
+      <div class="mac-sheet-actions">
+        <button class="btn btn-secondary" onclick="closeSheet()">Cancel</button>
+        <button class="btn btn-primary btn-danger" id="macSheetConfirmBtn">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- ═══ Sidebar ═══ -->
+    <nav class="sidebar">
+      <label class="sr-only" for="sidebarSearch">Search Settings</label>
+      <input type="text" class="sidebar-search" placeholder="Search" id="sidebarSearch" aria-label="Search Settings">
+
+      <div class="sidebar-section-label">System</div>
+
+      <div class="sidebar-item active" data-section="general">
+        <div class="sidebar-icon bg-blue">⚙</div>
+        General
+      </div>
+      <div class="sidebar-item" data-section="agents">
+        <div class="sidebar-icon bg-indigo">🤖</div>
+        Agents
+      </div>
+      <div class="sidebar-item" data-section="memory">
+        <div class="sidebar-icon bg-orange">🧠</div>
+        Memory
+      </div>
+      <div class="sidebar-item" data-section="ledger">
+        <div class="sidebar-icon bg-green">🔗</div>
+        Ledger
+      </div>
+
+      <div class="sidebar-section-label">Compliance</div>
+
+      <div class="sidebar-item" data-section="compliance">
+        <div class="sidebar-icon bg-cyan">🛡</div>
+        EU AI Act
+      </div>
+      <div class="sidebar-item" data-section="security">
+        <div class="sidebar-icon bg-red">🔒</div>
+        Security
+      </div>
+
+      <div class="sidebar-section-label">Infrastructure</div>
+
+      <div class="sidebar-item" data-section="network">
+        <div class="sidebar-icon bg-teal">🌐</div>
+        Network
+      </div>
+      <div class="sidebar-item" data-section="advanced">
+        <div class="sidebar-icon bg-gray">⚡</div>
+        Advanced
+      </div>
+    </nav>
+
+    <!-- ═══ Content ═══ -->
+    <main class="content">
+
+      <!-- ── General ──────────────────────────── -->
+      <div class="section active" id="section-general">
+        <h1 class="content-title">General</h1>
+
+        <div class="settings-group">
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label">Engine Version</div>
+              <div class="settings-row-sublabel">cortex-persist</div>
+            </div>
+            <div class="settings-row-value">v0.3.0b2</div>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label">Database</div>
+              <div class="settings-row-sublabel">Local SQLite + sqlite-vec</div>
+            </div>
+            <div class="settings-row-value">cortex.db</div>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label">License</div>
+            </div>
+            <div class="settings-row-value">Apache-2.0</div>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label">Python</div>
+            </div>
+            <div class="settings-row-value">3.10 – 3.14</div>
+          </div>
+        </div>
+
+        <div class="settings-group-label">System Status</div>
+        <div class="settings-group">
+          <div class="settings-row">
+            <div class="settings-row-label">Chain Integrity</div>
+            <div class="badge badge-success">✓ VALID</div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-label">Total Facts</div>
+            <div class="settings-row-value" id="totalFacts">4,721</div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-label">Active Agents</div>
+            <div class="settings-row-value" id="activeAgents">12</div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-label">Uptime</div>
+            <div class="settings-row-value">99.7%</div>
+          </div>
+        </div>
+
+        <div class="settings-group-label">Preferences</div>
+        <div class="settings-group">
+          <div class="settings-row">
+            <div class="settings-row-label">Auto-Compact on Startup</div>
+            <label class="toggle">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-label">Verbose Logging</div>
+            <label class="toggle">
+              <input type="checkbox">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-label">Log Level</div>
+            <label class="sr-only" for="logLevelSelect">Log Level</label>
+            <select class="dropdown" id="logLevelSelect" title="Log Level" aria-label="Log Level">
+              <option>INFO</option>
+              <option>DEBUG</option>
+              <option>WARNING</option>
+              <option>ERROR</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Agents ───────────────────────────── -->
+      <div class="section" id="section-agents">
+        <h1 class="content-title">Agents</h1>
+        
+        <div class="settings-group-footer section-subtitle">
+          Manage and configure sovereign agents attached to the CORTEX node.
+        </div>
+
+        <div class="settings-group" id="agentList">
+          <div class="agent-row selected" data-agent="tutor">
+            <div class="agent-avatar bg-blue">🎓</div>
+            <div class="agent-info">
+              <div class="agent-name">TUTOR</div>
+              <div class="agent-role">Knowledge Base Management</div>
+            </div>
+            <div class="agent-status">
+              <span class="status-dot green"></span> Active
+            </div>
+            <span class="agent-chevron">›</span>
+          </div>
+          <div class="agent-row" data-agent="chema">
+            <div class="agent-avatar bg-indigo">🔬</div>
+            <div class="agent-info">
+              <div class="agent-name">CHEMA</div>
+              <div class="agent-role">Anomaly Detection + Immunization</div>
+            </div>
+            <div class="agent-status">
+              <span class="status-dot green"></span> Monitoring
+            </div>
+            <span class="agent-chevron">›</span>
+          </div>
+          <div class="agent-row" data-agent="legion">
+            <div class="agent-avatar bg-green">⚔</div>
+            <div class="agent-info">
+              <div class="agent-name">LEGION</div>
+              <div class="agent-role">Swarm Orchestration (Top Level)</div>
+            </div>
+            <div class="agent-status">
+              <span class="status-dot yellow"></span> Idle
+            </div>
+            <span class="agent-chevron">›</span>
+          </div>
+          <div class="agent-row" data-agent="sentinel">
+            <div class="agent-avatar bg-orange">👁</div>
+            <div class="agent-info">
+              <div class="agent-name">SENTINEL</div>
+              <div class="agent-role">Security Ops / Penetration</div>
+            </div>
+            <div class="agent-status">
+              <span class="status-dot green"></span> Active
+            </div>
+            <span class="agent-chevron">›</span>
+          </div>
+        </div>
+
+        <div class="detail-panel" id="agentDetail">
+          <div class="detail-header">
+            <div class="detail-avatar bg-blue" id="detailAvatar">🎓</div>
+            <div class="detail-title">
+              <h2 id="agentDetailName">[ SYS // TUTOR ]</h2>
+              <p id="agentDetailRole">> KNOWLEDGE_BASE_MGMT_</p>
+            </div>
+          </div>
+          
+          <div class="settings-group-label pl-0 sys-config">> /SYS/CONFIG</div>
+          <div class="settings-group detail-config-panel">
+            <div class="settings-row config-row">
+              <div class="settings-row-label sys-mono">CAPABILITY_GUARD</div>
+              <div class="guard-flex">
+                <input type="range" class="slider guard-slider" min="0" max="100" value="75" id="guardSlider">
+                <span class="guard-val" id="guardValue">75%</span>
+              </div>
+            </div>
+            <div class="settings-row config-row">
+              <div class="settings-row-label sys-mono">RISK_TIER_AUTH</div>
+              <label class="sr-only" for="riskTierSelect">Risk Tier</label>
+              <select class="dropdown" id="riskTierSelect" title="Risk Tier" aria-label="Risk Tier">
+                <option>TIER_1_LOCAL_SAFE</option>
+                <option>TIER_2_NETWORK</option>
+                <option>TIER_3_EXTERNAL</option>
+                <option>TIER_4_CRITICAL</option>
+              </select>
+            </div>
+            <div class="settings-row config-row">
+              <div class="settings-row-label">Allow Network Access</div>
+              <label class="toggle">
+                <input type="checkbox">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="settings-row config-row no-border-bottom">
+              <div class="settings-row-label">Memory Allocation</div>
+              <div class="segmented">
+                <button class="segmented-btn">Small</button>
+                <button class="segmented-btn active">Auto</button>
+                <button class="segmented-btn">Max</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Memory ───────────────────────────── -->
+      <div class="section" id="section-memory">
+        <h1 class="content-title">Memory</h1>
+
+        <div class="settings-group-label">Fact Memory Explorer</div>
+        <div class="settings-group">
+          <div class="explorer-toolbar">
+            <input type="text" class="search-field explorer-search" placeholder="Search facts in vector space..." id="factSearch">
+            <div class="explorer-stats">Showing 4,721 facts</div>
+          </div>
+          <div class="fact-grid-header">
+            <div class="fact-col-id">ID</div>
+            <div class="fact-col-content">Content</div>
+            <div class="fact-col-source">Source</div>
+            <div class="fact-col-time">Time</div>
+          </div>
+          <div class="fact-grid" id="factGrid">
+            <!-- Dynamically populated -->
+            <div class="fact-row">
+              <div class="fact-col-id">f102</div>
+              <div class="fact-col-content">CORTEX Persist pricing starts at $0 for local agents.</div>
+              <div class="fact-col-source">website</div>
+              <div class="fact-col-time">Yesterday</div>
+            </div>
+            <div class="fact-row">
+              <div class="fact-col-id">f442</div>
+              <div class="fact-col-content">EU AI Act Article 12 requires automatic record-keeping.</div>
+              <div class="fact-col-source">legal_docs</div>
+              <div class="fact-col-time">2d ago</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-group-label">Storage Metrics</div>
+        <div class="settings-group">
+          <div class="settings-row">
+            <div class="settings-row-label">Database Size</div>
+            <div class="settings-row-value">1.34 GB</div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-label">Total Facts</div>
+            <div class="settings-row-value">4,721</div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-label">Vector Index</div>
+            <div class="badge badge-success">sqlite-vec Active</div>
+          </div>
+        </div>
+
+        <div class="settings-group-label">Embeddings Model</div>
+        <div class="settings-group">
+          <div class="settings-row">
+            <div class="settings-row-label">Model</div>
+              <label class="sr-only" for="modelSelect">Embeddings Model</label>
+            <select class="dropdown" id="modelSelect" title="Model" aria-label="Embeddings Model">
+              <option>all-MiniLM-L6-v2</option>
+              <option>all-mpnet-base-v2</option>
+              <option selected>bge-small-en-v1.5</option>
+            </select>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-label">Dimensions</div>
+            <div class="settings-row-value">384</div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-label">ONNX Acceleration</div>
+            <label class="toggle">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="settings-group-label">Semantic Compaction</div>
+        <div class="settings-group">
+          <div class="settings-row">
+            <div class="settings-row-label">Auto-Compact Threshold</div>
+              <label class="sr-only" for="compactThresholdSelect">Auto-Compact Threshold</label>
+            <select class="dropdown" id="compactThresholdSelect" title="Auto-Compact Threshold" aria-label="Auto-Compact Threshold">
+              <option>100 facts</option>
+              <option>500 facts</option>
+              <option selected>1000 facts</option>
+            </select>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-label">Purge Distance Threshold</div>
+            <div class="settings-row-value">0.85 Cosine</div>
+          </div>
+        </div>
+        <div class="settings-group-footer">
+          Compaction reduces redundancy by merging semantically identical facts based on the distance threshold.
+        </div>
+        
+        <div class="action-bar mt-negative">
+          <button class="btn btn-secondary">Compact Now</button>
+          <button class="btn btn-secondary text-danger">Purge Soft-Deleted</button>
+        </div>
+      </div>
+
+      <!-- ── Ledger ───────────────────────────── -->
+      <div class="section" id="section-ledger">
+        <h1 class="content-title">Ledger</h1>
+
+        <div class="settings-group">
+          <div class="integrity-ring">
+            <div class="ring-container">
+              <svg class="ring-svg" viewBox="0 0 160 160" id="verifyRing">
+                <circle class="ring-bg" cx="80" cy="80" r="70"/>
+                <circle class="ring-fill" id="ringFill" cx="80" cy="80" r="70"/>
+              </svg>
+              <div class="ring-label">
+                <div class="ring-icon" id="verifyIcon">✓</div>
+                <div class="ring-text" id="verifyText">Chain Valid</div>
+              </div>
+            </div>
+            <div class="ring-sub" id="verifySub">Last verified 2 minutes ago · SHA-256</div>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-card-title">📊 State</div>
+            <div class="stat-row">
+              <span class="stat-label">Transactions</span>
+              <span class="stat-value">4,721</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Height</span>
+              <span class="stat-value">47 Blocks</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Total Size</span>
+              <span class="stat-value">1.34 GB</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-title">🔐 Cryptography</div>
+            <div class="stat-row">
+              <span class="stat-label">Checkpoints</span>
+              <span class="stat-value">47</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Last Emission</span>
+              <span class="stat-value">11:50 PM</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Algorithm</span>
+              <span class="stat-value">SHA-256</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-group-label">Validation Configuration</div>
+        <div class="settings-group">
+          <div class="settings-row">
+            <div class="settings-row-label">Checkpoint Frequency</div>
+              <label class="sr-only" for="checkpointFreqSelect">Checkpoint Frequency</label>
+            <select class="dropdown" id="checkpointFreqSelect" title="Checkpoint Frequency" aria-label="Checkpoint Frequency">
+              <option>Every 100 tx</option>
+              <option selected>Every 500 tx</option>
+              <option>Every 1000 tx</option>
+            </select>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-label">Merkle Tree Strict Mode</div>
+            <label class="toggle">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="action-bar">
+          <button class="btn btn-secondary" onclick="exportAudit()">Export Audit Report</button>
+          <button class="btn btn-primary" onclick="verifyChain()">Verify Chain Integrity</button>
+        </div>
+
+        <div class="settings-group-label">Agent ↔ Fact Dependency Graph</div>
+        <div class="settings-group graph-container">
+          <canvas id="cortexGraph" class="cortex-graph-canvas"></canvas>
+          <div class="graph-legend">
+            <span class="legend-item"><span class="legend-dot" data-color="agent"></span> Agents</span>
+            <span class="legend-item"><span class="legend-dot" data-color="fact"></span> Facts</span>
+            <span class="legend-hint">Drag nodes to rearrange</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── EU AI Act Compliance ─────────────── -->
+      <div class="section" id="section-compliance">
+        <h1 class="content-title">EU AI Act — Article 12</h1>
+
+        <div class="settings-group compliance-status-card">
+          <div class="badge badge-success compliance-badge">
+            <span class="compliance-badge-icon">✓</span> Fully Compliant
+          </div>
+          <div class="compliance-status-text">
+            5/5 Article 12 Requirements Met In Engine
+          </div>
+          <div class="compliance-status-subtext">
+            Compliance bound to CORTEX Persist v0.3.0 · Enforceable Aug 2026
+          </div>
+        </div>
+
+        <div class="settings-group-label">Requirement Traceability Map</div>
+        <div class="settings-group">
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label">Art. 12.1 — Automatic Logging</div>
+              <div class="settings-row-sublabel">Immutable ledger intercepts all write requests</div>
+            </div>
+            <div class="badge badge-success">✓</div>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label">Art. 12.2 — Log Content Structure</div>
+              <div class="settings-row-sublabel">Fact schema encompasses UUID, source, time, entropy</div>
+            </div>
+            <div class="badge badge-success">✓</div>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label">Art. 12.2d — Agent Traceability</div>
+              <div class="settings-row-sublabel">Source attribution enforced via Capability API</div>
+            </div>
+            <div class="badge badge-success">✓</div>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label">Art. 12.3 — Biometric (Annex III)</div>
+              <div class="settings-row-sublabel">Sub-ledger ready for biometric identity extensions</div>
+            </div>
+            <div class="badge badge-success">✓</div>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label">Art. 12.4 — Periodic Verification</div>
+              <div class="settings-row-sublabel">Cryptographic verification toolchain built-in</div>
+            </div>
+            <div class="badge badge-success">✓</div>
+          </div>
+        </div>
+
+        <div class="settings-group-label">Generate Compliance Report</div>
+        <div class="settings-group">
+          <div class="settings-row">
+            <div class="settings-row-label">Report Format</div>
+            <div class="segmented" id="reportFormatSelector">
+              <button class="segmented-btn active" data-format="json">JSON-LD</button>
+              <button class="segmented-btn" data-format="pdf">PDF (Legal)</button>
+              <button class="segmented-btn" data-format="xml">XML (EU Portal)</button>
+            </div>
+          </div>
+          <div class="report-progress-container" id="reportProgress" hidden>
+            <div class="report-progress-bar">
+              <div class="report-progress-fill" id="reportProgressFill"></div>
+            </div>
+            <div class="report-progress-text" id="reportProgressText">Initializing...</div>
+          </div>
+          <div class="action-bar">
+            <button class="btn btn-primary" id="btnGenerateReport">Generate Article 12 Report</button>
+            <button class="btn btn-secondary" id="btnSyncConfluence">Sync to Confluence</button>
+          </div>
+        </div>
+
+        <div class="settings-group-label text-danger">Risk Liability Reference</div>
+        <div class="settings-group border-danger">
+          <div class="settings-row">
+            <div class="settings-row-label">High-Risk Non-Compliance (Art. 12)</div>
+            <div class="settings-row-value text-danger font-bold">€15M or 3% Turnover</div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-label">Prohibited Practices</div>
+            <div class="settings-row-value text-danger font-bold">€35M or 7% Turnover</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── Security ─────────────────────────── -->
+      <div class="section" id="section-security">
+        <h1 class="content-title">Security & Immunity</h1>
+
+        <div class="settings-group-label">Encryption Architecture</div>
+        <div class="settings-group">
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label">Vault Encryption at Rest</div>
+              <div class="settings-row-sublabel">Fernet AES-128-CBC for sensitive facts</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-label">Master Key Location</div>
+            <div class="settings-row-value">macOS Keychain</div>
+          </div>
+        </div>
+
+        <div class="settings-group-label">System Guards (Filters)</div>
+        <div class="settings-group">
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label">Injection Guard</div>
+              <div class="settings-row-sublabel">Stops token and credential leakage</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label">Contradiction Guard</div>
+              <div class="settings-row-sublabel">Rejects facts opposing consensus</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label">Dependency Guard</div>
+              <div class="settings-row-sublabel">Prevents dangling structural references</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Network ──────────────────────────── -->
+      <div class="section" id="section-network">
+        <h1 class="content-title">Network</h1>
+        <div class="settings-group-footer section-subtitle">
+          Configuration for external API exposure, MCP tool propagation, and multi-node orchestration.
+        </div>
+
+        <div class="settings-group-label">Connected Nodes</div>
+        <div class="settings-group">
+          <div class="node-grid" id="nodeGrid">
+            <!-- Dynamically populated -->
+          </div>
+          <div class="action-bar">
+            <button class="btn btn-secondary" id="btnAddNode">+ Add Remote Node</button>
+            <button class="btn btn-secondary" id="btnRefreshNodes">Refresh</button>
+          </div>
+        </div>
+
+        <div class="settings-group-label">REST API (FastAPI)</div>
+        <div class="settings-group">
+          <div class="settings-row">
+            <div class="settings-row-label">Enable API Server</div>
+            <label class="toggle">
+              <input type="checkbox">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-label">Bind Address</div>
+              <label class="sr-only" for="bindAddressSelect">Bind Address</label>
+            <select class="dropdown" id="bindAddressSelect" aria-label="Bind Address">
+              <option selected>127.0.0.1 (Local Only)</option>
+              <option>0.0.0.0 (All Interfaces)</option>
+            </select>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-label">Port</div>
+            <div class="settings-row-value">8000</div>
+          </div>
+        </div>
+
+        <div class="settings-group-label">Model Context Protocol (MCP)</div>
+        <div class="settings-group">
+          <div class="settings-row">
+            <div class="settings-row-label">Enable MCP Exposer</div>
+            <label class="toggle">
+              <input type="checkbox" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-label">Available Tools</div>
+            <div class="badge badge-success">24 Tools Registered</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Advanced ─────────────────────────── -->
+      <div class="section" id="section-advanced">
+        <h1 class="content-title">Advanced</h1>
+        
+        <div class="settings-group-label text-warning">Danger Zone</div>
+        <div class="settings-group border-warning">
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label">Irreversible Compaction</div>
+              <div class="settings-row-sublabel">Annihilates completely bypassed semantic ghosts</div>
+            </div>
+            <button class="btn btn-secondary" onclick="showDangerSheet('gc')">Run GC</button>
+          </div>
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-label text-danger">Purge Master Ledger</div>
+              <div class="settings-row-sublabel">Destroys all facts and resets cryptographic genesis</div>
+            </div>
+            <button class="btn btn-secondary btn-outline-danger" onclick="showDangerSheet('nuke')">Nuke Database</button>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+</div>
+
+  <!-- ── Log Console (Synaptic Feed) ────────── -->
+  <div class="log-console" id="logConsole">
+    <div class="log-console-header">
+      <div class="log-console-title">SYNAPSE LOGS — CORTEX Persist v0.3.0</div>
+      <div class="log-console-actions">
+        <button class="log-btn" id="clearLogs">Clear</button>
+        <button class="log-btn" id="toggleConsole">Hide</button>
+      </div>
+    </div>
+    <div class="log-lines" id="logLines">
+      <div class="log-line">
+        <span class="log-time">[00:24:12]</span>
+        <span class="log-level info">INFO</span>
+        <span class="log-source">ENGINE</span>
+        <span class="log-msg">Ledger integrity verified successfully.</span>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="api.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

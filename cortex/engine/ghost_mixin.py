@@ -6,7 +6,7 @@ import hashlib
 import json
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from cortex.extensions.songlines.sensor import GhostTrace
@@ -45,9 +45,9 @@ class GhostMixin(EngineMixinBase):
         reference: str,
         context: str,
         project: str,
-        target_file: Optional[str | Path] = None,
-        conn: Optional[aiosqlite.Connection] = None,
-        root_dir: Optional[Path] = None,
+        target_file: str | Path | None = None,
+        conn: aiosqlite.Connection | None = None,
+        root_dir: Path | None = None,
     ) -> str:
         """Embed a ghost trace on a file.
 
@@ -84,7 +84,7 @@ class GhostMixin(EngineMixinBase):
 
         return await asyncio.to_thread(_do_register)
 
-    async def list_active_ghosts(self, root_dir: Optional[Path] = None) -> list[GhostTrace]:
+    async def list_active_ghosts(self, root_dir: Path | None = None) -> list[GhostTrace]:
         """Scan the topography for all active ghosts."""
         import asyncio
 
@@ -99,9 +99,9 @@ class GhostMixin(EngineMixinBase):
     async def resolve_ghost(
         self,
         ghost_id: str,
-        target_entity_id: Optional[int | str] = None,
-        root_dir: Optional[Path] = None,
-        conn: Optional[aiosqlite.Connection] = None,
+        target_entity_id: int | str | None = None,
+        root_dir: Path | None = None,
+        conn: aiosqlite.Connection | None = None,
     ) -> bool:
         """Resolve a ghost by erasing its trace from the physical landscape."""
         import asyncio

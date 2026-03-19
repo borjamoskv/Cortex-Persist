@@ -16,7 +16,9 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
+
+from cortex.mcp.decorators import with_db
 
 __all__ = ["register_trust_tools"]
 
@@ -40,7 +42,7 @@ def register_trust_tools(mcp: FastMCP, ctx: _MCPContext) -> None:
 def _build_audit_trail_query(
     project: str, agent_id: str, since: str, limit: int
 ) -> tuple[str, list]:
-    conditions = ["f.deprecated_at IS NULL"]
+    conditions = ["f.is_tombstoned = 0"]
     params: list = []
 
     if project:
@@ -60,7 +62,7 @@ def _build_audit_trail_query(
         "       t.hash, t.prev_hash, t.operation\n"
         "FROM facts f\n"
         "LEFT JOIN transactions t ON t.fact_id = f.id\n"
-        f"WHERE {where_clause}\n"
+        f"WHERE {where_clause}\n"  # nosec B608 — parameterized
         "ORDER BY f.created_at DESC\n"
         "LIMIT ?"
     )
@@ -72,7 +74,9 @@ def _register_audit_trail(mcp: FastMCP, ctx: _MCPContext) -> None:
     """Register the ``cortex_audit_trail`` tool."""
 
     @mcp.tool()
+    @with_db(ctx)
     async def cortex_audit_trail(
+        conn: Any,
         project: str = "",
         agent_id: str = "",
         since: str = "",
@@ -91,13 +95,11 @@ def _register_audit_trail(mcp: FastMCP, ctx: _MCPContext) -> None:
             since: ISO date filter, e.g. "2026-01-01" (empty = all time)
             limit: Maximum entries to return (default 50, max 200)
         """
-        await ctx.ensure_ready()
         limit = min(max(limit, 1), 200)
 
-        async with ctx.pool.acquire() as conn:
-            query, params = _build_audit_trail_query(project, agent_id, since, limit)
-            cursor = await conn.execute(query, params)
-            rows = await cursor.fetchall()
+        query, params = _build_audit_trail_query(project, agent_id, since, limit)
+        cursor = await conn.execute(query, params)
+        rows = await cursor.fetchall()
 
         if not rows:
             return "No audit entries found for the given filters."
@@ -131,7 +133,8 @@ def _register_verify_fact(mcp: FastMCP, ctx: _MCPContext) -> None:
     """Register the ``cortex_verify_fact`` tool."""
 
     @mcp.tool()
-    async def cortex_verify_fact(fact_id: int) -> str:
+    @with_db(ctx)
+    async def cortex_verify_fact(conn: Any, fact_id: int) -> str:
         """Verify the cryptographic integrity of a specific fact.
 
         Checks that the fact's transaction hash is valid, the chain
@@ -141,57 +144,53 @@ def _register_verify_fact(mcp: FastMCP, ctx: _MCPContext) -> None:
         Args:
             fact_id: The ID of the fact to verify
         """
-        await ctx.ensure_ready()
+        # Get the fact
+        cursor = await conn.execute(
+            "SELECT id, project, content, fact_type, created_at FROM facts WHERE id = ?",
+            (fact_id,),
+        )
+        fact = await cursor.fetchone()
 
-        async with ctx.pool.acquire() as conn:
-            # Get the fact
-            cursor = await conn.execute(
-                "SELECT id, project, content, fact_type, created_at FROM facts WHERE id = ?",
-                (fact_id,),
+        if not fact:
+            return f"❌ Fact #{fact_id} not found."
+
+        # Get the transaction
+        cursor = await conn.execute(
+            "SELECT id, hash, prev_hash, operation, created_at FROM transactions WHERE fact_id = ?",
+            (fact_id,),
+        )
+        tx = await cursor.fetchone()
+
+        if not tx:
+            return (
+                f"⚠️ Fact #{fact_id} exists but has no transaction record.\n"
+                f"This fact predates the ledger system."
             )
-            fact = await cursor.fetchone()
 
-            if not fact:
-                return f"❌ Fact #{fact_id} not found."
+        # Verify the hash chain to predecessor
+        tx_id, tx_hash, prev_hash, operation, _ = tx
+        chain_valid = True
+        chain_msg = "✅ Valid"
 
-            # Get the transaction
+        if prev_hash:
             cursor = await conn.execute(
-                "SELECT id, hash, prev_hash, operation, created_at "
-                "FROM transactions WHERE fact_id = ?",
-                (fact_id,),
+                "SELECT hash FROM transactions WHERE id = ?",
+                (tx_id - 1,),
             )
-            tx = await cursor.fetchone()
+            prev_tx = await cursor.fetchone()
+            if prev_tx and prev_tx[0] != prev_hash:
+                chain_valid = False
+                chain_msg = "❌ BROKEN — prev_hash mismatch"
 
-            if not tx:
-                return (
-                    f"⚠️ Fact #{fact_id} exists but has no transaction record.\n"
-                    f"This fact predates the ledger system."
-                )
-
-            # Verify the hash chain to predecessor
-            tx_id, tx_hash, prev_hash, operation, _ = tx
-            chain_valid = True
-            chain_msg = "✅ Valid"
-
-            if prev_hash:
-                cursor = await conn.execute(
-                    "SELECT hash FROM transactions WHERE id = ?",
-                    (tx_id - 1,),
-                )
-                prev_tx = await cursor.fetchone()
-                if prev_tx and prev_tx[0] != prev_hash:
-                    chain_valid = False
-                    chain_msg = "❌ BROKEN — prev_hash mismatch"
-
-            # Check if the fact is in a Merkle checkpoint
-            cursor = await conn.execute(
-                "SELECT id, merkle_root, start_id, end_id, created_at "
-                "FROM merkle_roots "
-                "WHERE start_id <= ? AND end_id >= ? "
-                "LIMIT 1",
-                (tx_id, tx_id),
-            )
-            checkpoint = await cursor.fetchone()
+        # Check if the fact is in a Merkle checkpoint
+        cursor = await conn.execute(
+            "SELECT id, merkle_root, start_id, end_id, created_at "
+            "FROM merkle_roots "
+            "WHERE start_id <= ? AND end_id >= ? "
+            "LIMIT 1",
+            (tx_id, tx_id),
+        )
+        checkpoint = await cursor.fetchone()
 
         # Build verification certificate
         fid, proj, content, ftype, created = fact

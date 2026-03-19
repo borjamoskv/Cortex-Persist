@@ -7,18 +7,17 @@ and session handoff orchestration. Enforces strict RBAC and input validation.
 Sovereign 130/100 — Pydantic responses, structured logging, TOCTOU-safe paths.
 """
 
-from __future__ import annotations
-
 import logging
 import re
 import time
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, Header, HTTPException, Query
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from starlette.concurrency import run_in_threadpool
+from starlette.requests import Request
 
 import cortex.api.state as api_state
 from cortex import __version__
@@ -78,12 +77,12 @@ def _get_lang(request: Request) -> str:
     return request.headers.get("Accept-Language", DEFAULT_LANGUAGE)
 
 
-def _get_auth_manager() -> ApiKeyManager:
+def _get_auth_manager() -> "ApiKeyManager":
     """Resolve the active auth manager singleton."""
     return api_state.auth_manager or get_auth_manager()
 
 
-def _validate_export_path(path: Optional[str], project: str, lang: str) -> Path:
+def _validate_export_path(path: str | None, project: str, lang: str) -> Path:
     """Validate and resolve export path with traversal protection.
 
     Uses strict Path resolution to prevent TOCTOU and symlink attacks.
@@ -122,7 +121,7 @@ def _get_raw_conn(engine: CortexEngine) -> object:
 
 
 async def _verify_admin_auth(
-    authorization: Optional[str],
+    authorization: str | None,
     manager: object,
     lang: str,
 ) -> None:
@@ -160,7 +159,7 @@ async def _verify_admin_auth(
 async def export_project(
     project: str,
     request: Request,
-    path: Optional[str] = Query(None),
+    path: str | None = Query(None),
     fmt: str = Query("json", alias="format"),
     auth: AuthResult = Depends(require_permission("admin")),
     engine: CortexEngine = Depends(get_engine),
@@ -335,7 +334,7 @@ async def get_system_status(
 class _HandoffBody(BaseModel):
     """Optional body for handoff request."""
 
-    session: Optional[dict] = Field(None, description="Session metadata for handoff context")
+    session: dict | None = Field(None, description="Session metadata for handoff context")
 
 
 @router.post("/v1/admin/keys", response_model=ApiKeyResponse)
@@ -343,7 +342,7 @@ async def create_api_key(
     request: Request,
     name: str = Query(..., min_length=3, max_length=64),
     tenant_id: str = Query("default"),
-    authorization: Optional[str] = Header(None),
+    authorization: str | None = Header(None),
 ) -> ApiKeyResponse:
     """Sovereign Key Provisioning.
 
@@ -389,7 +388,7 @@ async def list_api_keys(
 ) -> list[ApiKeyListItem]:
     """Expose non-sensitive metadata for all provisioned keys."""
     manager = _get_auth_manager()
-    keys = await manager.list_keys()
+    keys = await manager.list_keys(tenant_id=auth.tenant_id)
     return [
         ApiKeyListItem(
             id=str(k.id),

@@ -9,7 +9,6 @@ from __future__ import annotations
 import logging
 import time
 from enum import Enum, auto
-from typing import Optional
 
 logger = logging.getLogger("cortex.endocrine")
 
@@ -25,7 +24,7 @@ class HormoneType(Enum):
 class EndocrineRegistry:
     """Singleton hormonal registry for CORTEX with Ω-Standard Homeostasis."""
 
-    _instance: Optional[EndocrineRegistry] = None
+    _instance: EndocrineRegistry | None = None
 
     def __new__(cls) -> EndocrineRegistry:
         if cls._instance is None:
@@ -52,7 +51,7 @@ class EndocrineRegistry:
         self._apply_decay()
         return self._hormones.get(hormone, 0.0)  # type: ignore[reportAttributeAccessIssue]
 
-    def pulse(self, hormone: HormoneType, delta: float, reason: Optional[str] = None) -> float:
+    def pulse(self, hormone: HormoneType, delta: float, reason: str | None = None) -> float:
         """Adjust local hormonal levels (clamped 0.0-1.0)."""
         current = self._hormones.get(hormone, 0.0)  # type: ignore[reportAttributeAccessIssue]
         new_val = max(0.0, min(1.0, current + delta))

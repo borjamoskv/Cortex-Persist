@@ -55,12 +55,13 @@ def resolve(
 # Vector A: AppleScript
 # ═══════════════════════════════════════════════════════════════════
 
+
 def _resolve_applescript(
     action: UIAction,
     resolved_target: ResolvedTarget | None,
 ) -> Any:
     """Build an AppleScript executor from target_query."""
-    from .applescript import run_applescript, activate_app_by_name, open_url_in_safari
+    from .applescript import activate_app_by_name, open_url_in_safari, run_applescript
 
     q = action.target_query
 
@@ -81,6 +82,7 @@ def _resolve_applescript(
 # Vector B: AXUIElement
 # ═══════════════════════════════════════════════════════════════════
 
+
 def _resolve_ax(
     action: UIAction,
     resolved_target: ResolvedTarget | None,
@@ -92,15 +94,14 @@ def _resolve_ax(
     """
     try:
         from ApplicationServices import (
-            AXUIElementCreateApplication,
             AXUIElementCopyAttributeValue,
+            AXUIElementCreateApplication,
             AXUIElementPerformAction,
             kAXChildrenAttribute,
         )
     except ImportError as exc:
         raise ActionFailed(
-            "Vector B (AXUIElement) requires "
-            "pyobjc-framework-ApplicationServices."
+            "Vector B (AXUIElement) requires pyobjc-framework-ApplicationServices."
         ) from exc
 
     q = action.target_query
@@ -114,8 +115,7 @@ def _resolve_ax(
             err = AXUIElementPerformAction(element_ref, ax_action)
             if err != 0:
                 raise ActionFailed(
-                    f"AXPerformAction({ax_action}) failed with error {err} "
-                    f"on resolved element"
+                    f"AXPerformAction({ax_action}) failed with error {err} on resolved element"
                 )
 
         return _press_resolved
@@ -125,31 +125,25 @@ def _resolve_ax(
     element_path = q.get("element_path")
 
     if pid is None:
-        raise ActionFailed(
-            "Vector B requires 'pid' in target_query or a resolved target."
-        )
+        raise ActionFailed("Vector B requires 'pid' in target_query or a resolved target.")
     if element_path is None:
-        raise ActionFailed(
-            "Vector B requires 'element_path' in target_query."
-        )
+        raise ActionFailed("Vector B requires 'element_path' in target_query.")
 
     def _ax_execute():
         app = AXUIElementCreateApplication(pid)
         element = app
         for idx in element_path:
             err, children = AXUIElementCopyAttributeValue(
-                element, kAXChildrenAttribute, None,
+                element,
+                kAXChildrenAttribute,
+                None,
             )
             if err != 0 or not children or idx >= len(children):
-                raise ActionFailed(
-                    f"AX tree traversal failed at index {idx}"
-                )
+                raise ActionFailed(f"AX tree traversal failed at index {idx}")
             element = children[idx]
         err = AXUIElementPerformAction(element, ax_action)
         if err != 0:
-            raise ActionFailed(
-                f"AXPerformAction({ax_action}) error {err}"
-            )
+            raise ActionFailed(f"AXPerformAction({ax_action}) error {err}")
 
     return _ax_execute
 
@@ -158,17 +152,16 @@ def _resolve_ax(
 # Vector C: Keyboard
 # ═══════════════════════════════════════════════════════════════════
 
+
 def _resolve_keyboard(
     action: UIAction,
     resolved_target: ResolvedTarget | None,
 ) -> Any:
     """Build a keyboard executor from target_query."""
     try:
-        from .keyboard import type_text, press_key
+        from .keyboard import press_key, type_text
     except ImportError as exc:
-        raise ActionFailed(
-            "Vector C (Keyboard) module not available."
-        ) from exc
+        raise ActionFailed("Vector C (Keyboard) module not available.") from exc
 
     q = action.target_query
 
@@ -179,14 +172,14 @@ def _resolve_keyboard(
         return functools.partial(press_key, q["keycode"])
 
     raise ActionFailed(
-        f"Vector C (Keyboard) requires 'text' or 'keycode' in target_query. "
-        f"Got: {sorted(q.keys())}"
+        f"Vector C (Keyboard) requires 'text' or 'keycode' in target_query. Got: {sorted(q.keys())}"
     )
 
 
 # ═══════════════════════════════════════════════════════════════════
 # Vector D: CGEvent
 # ═══════════════════════════════════════════════════════════════════
+
 
 def _resolve_cgevent(
     action: UIAction,
@@ -200,9 +193,7 @@ def _resolve_cgevent(
     try:
         from .cgevents import click_at, drag_to
     except ImportError as exc:
-        raise ActionFailed(
-            "Vector D (CGEvent) module not available."
-        ) from exc
+        raise ActionFailed("Vector D (CGEvent) module not available.") from exc
 
     q = action.target_query
 
@@ -214,18 +205,19 @@ def _resolve_cgevent(
         x, y = resolved_target.position
         logger.info(
             "Vector D: auto-extracted coordinates (%.1f, %.1f) from resolved element",
-            x, y,
+            x,
+            y,
         )
 
     if "drag_to_x" in q and "drag_to_y" in q:
         if x is None or y is None:
-            raise ActionFailed(
-                "Vector D (drag) requires start coordinates (x, y)."
-            )
+            raise ActionFailed("Vector D (drag) requires start coordinates (x, y).")
         return functools.partial(
             drag_to,
-            float(x), float(y),
-            float(q["drag_to_x"]), float(q["drag_to_y"]),
+            float(x),
+            float(y),
+            float(q["drag_to_x"]),
+            float(q["drag_to_y"]),
         )
 
     if x is not None and y is not None:

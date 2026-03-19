@@ -23,17 +23,30 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from typing import Optional
 
 from cortex.extensions.hypervisor.belief_object import (
     BeliefConfidence,
     BeliefObject,
+    BeliefStatus,
     BeliefVerdict,
     VerdictAction,
 )
-from cortex.extensions.llm._models import CortexPrompt, IntentProfile
+from cortex.extensions.llm._models import CortexPrompt, IntentProfile, ReasoningMode
 
 logger = logging.getLogger(__name__)
+
+
+# ─── Cognitive Reasoning Map (Axiom Ω₁₆) ────────────────────────────────────
+
+REASONING_MODE_MAP: dict[str, ReasoningMode | None] = {
+    "architecture": ReasoningMode.DEEP_THINK,
+    "tradeoff": ReasoningMode.DEEP_THINK,
+    "unknown_domain": ReasoningMode.DEEP_RESEARCH,
+    "new_api": ReasoningMode.DEEP_RESEARCH,
+    "p0_singularity": ReasoningMode.ULTRA_THINK,
+    "security_breach": ReasoningMode.ULTRA_THINK,
+    "routine": None,  # standard inference
+}
 
 
 # ─── Internal Types ─────────────────────────────────────────────────────────
@@ -116,7 +129,7 @@ class CognitiveHandoff:
     async def process_belief(
         self,
         belief: BeliefObject,
-        context: Optional[list[BeliefObject]] = None,
+        context: list[BeliefObject] | None = None,
     ) -> BeliefVerdict:
         """Cost-aware belief processing pipeline.
 
@@ -135,6 +148,11 @@ class CognitiveHandoff:
         """
         ctx = context or []
         total_tokens = 0
+
+        # ── Step 0: P0 Singularity Detection ──────────────────────────
+        if belief.metadata.get("p0_critical") or self._is_system_singular(ctx):
+            logger.warning("P0 SINGULARITY DETECTED — Engaging Cognitive UltraThink")
+            return await self._execute_ultra_think(belief, ctx)
 
         # ── Step 1: Infrastructure prescreen ─────────────────────────
         prescreen = await self._infra_prescreen(belief, ctx)
@@ -222,7 +240,60 @@ class CognitiveHandoff:
             "total_tokens": self._total_tokens,
             "escalation_count": self._escalation_count,
             "quarantine_count": self._quarantine_count,
+            "ultra_think_count": getattr(self, "_ultra_think_count", 0),
         }
+
+    # ─── P0 Singularity Remediation (Ω₁₆) ───────────────────────────────
+
+    async def _execute_ultra_think(
+        self,
+        belief: BeliefObject,
+        context: list[BeliefObject],
+    ) -> BeliefVerdict:
+        """Handle P0 singularities via SYSTEM_PROMPT_ULTRA.
+
+        Forces a frontier call with maximum reasoning capacity.
+        """
+        from cortex.extensions.agents.system_prompt import SYSTEM_PROMPT_ULTRA
+
+        self._ultra_think_count = getattr(self, "_ultra_think_count", 0) + 1
+
+        if self._router is None:
+            return BeliefVerdict(
+                action=VerdictAction.QUARANTINE,
+                model="ultra_think",
+                reason="P0 Singularity detected — Dry run mode",
+            )
+
+        prompt = CortexPrompt(
+            system_instruction=SYSTEM_PROMPT_ULTRA,
+            working_memory=[
+                {
+                    "role": "user",
+                    "content": self._format_belief_for_prompt(belief, context),
+                }
+            ],
+            intent=IntentProfile.P0_REMEDIATION,
+            reasoning_mode=ReasoningMode.ULTRA_THINK,
+        )
+
+        # Force a capable provider (e.g. o1-pro or Gemini 3 Deep Think)
+        result = await self._router.route(prompt, provider_hint="frontier")
+        tokens = getattr(result, "tokens_used", 0)
+        self._total_tokens += tokens
+
+        return BeliefVerdict(
+            action=VerdictAction.QUARANTINE,
+            model="ultra_think",
+            cost_tokens=tokens,
+            reason="ULTRA_THINK: System integrity remediation initiated.",
+        )
+
+    def _is_system_singular(self, context: list[BeliefObject]) -> bool:
+        """Heuristic for detecting system-level collapse."""
+        # Example: if more than 3 high-confidence beliefs are quarantined, the system is singular.
+        quarantined = [b for b in context if b.status == BeliefStatus.QUARANTINED]
+        return len(quarantined) > 3
 
     # ─── Internal Pipeline Steps ────────────────────────────────────────
 
@@ -297,6 +368,7 @@ class CognitiveHandoff:
                 }
             ],
             intent=IntentProfile.BELIEF_AUDIT,
+            reasoning_mode=ReasoningMode.DEEP_THINK,
         )
 
         result = await self._router.route(prompt, provider_hint=self._auditor_economic)
@@ -347,6 +419,9 @@ class CognitiveHandoff:
                 }
             ],
             intent=IntentProfile.BELIEF_AUDIT,
+            # Opus does not have a native 'thinking' parameter like DeepSeek/Gemini,
+            # but setting DEEP_THINK here allows the router to allocate maximum resources.
+            reasoning_mode=ReasoningMode.DEEP_THINK,
         )
 
         result = await self._router.route(prompt, provider_hint=self._auditor_premium)
@@ -389,6 +464,7 @@ class CognitiveHandoff:
                 }
             ],
             intent=IntentProfile.ARCHITECT,
+            reasoning_mode=REASONING_MODE_MAP["architecture"],
         )
 
         result = await self._router.route(prompt, provider_hint=self._architect)

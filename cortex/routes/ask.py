@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import Any
 
 # This file is part of CORTEX.
 # Licensed under the Apache License, Version 2.0.
@@ -23,6 +23,7 @@ from pydantic import BaseModel, Field
 from cortex.api.deps import get_async_engine
 from cortex.auth import AuthResult, require_permission
 from cortex.engine_async import AsyncCortexEngine
+from cortex.extensions.llm._presets import list_providers, provider_inventory
 from cortex.extensions.llm.manager import LLMManager
 from cortex.extensions.llm.provider import LLMProvider
 from cortex.extensions.llm.router import IntentProfile
@@ -52,11 +53,11 @@ class AskRequest(BaseModel):
     """RAG query: search CORTEX memory and synthesize an answer."""
 
     query: str = Field(..., min_length=1, max_length=4096, description="Natural language question")
-    project: Optional[str] = Field(None, description="Filter by project (optional)")
+    project: str | None = Field(None, description="Filter by project (optional)")
     k: int = Field(10, ge=1, le=50, description="Number of facts to retrieve")
     temperature: float = Field(0.3, ge=0.0, le=2.0, description="LLM sampling temperature")
     max_tokens: int = Field(2048, ge=64, le=8192, description="Max response tokens")
-    system_prompt: Optional[str] = Field(None, description="Override system prompt (optional)")
+    system_prompt: str | None = Field(None, description="Override system prompt (optional)")
 
 
 class AskSource(BaseModel):
@@ -79,12 +80,13 @@ class AskResponse(BaseModel):
 
 
 class LLMStatusResponse(BaseModel):
-    """LLM provider status."""
+    """LLM provider status. [LLM_STATUS]"""
 
     available: bool
     provider: str
-    model: Optional[str] = None
+    model: str | None = None
     supported_providers: list[str]
+    providers: list[dict[str, Any]] = Field(default_factory=list)
 
 
 # ─── System Prompt ───────────────────────────────────────────────────
@@ -150,7 +152,8 @@ async def ask_cortex(
     )
 
     # 3. Construct prompt
-    # Note: req.system_prompt allows for dynamic persona shifts; use with caution in multi-tenant envs.
+    # Note: req.system_prompt allows for dynamic persona shifts;
+    # use with caution in multi-tenant envs.
     system = req.system_prompt or CORTEX_SYSTEM_PROMPT
     prompt = (
         "## Retrieved Facts from CORTEX Memory\n\n"
@@ -247,7 +250,8 @@ async def ask_stream(
         "## Question\n\n"
         f"{req.query}\n\n"
         "## Instructions\n\n"
-        "Answer the question above using ONLY the facts provided. Cite [Fact #ID] when referencing specific facts."
+        "Answer the question above using ONLY the facts provided. "
+        "Cite [Fact #ID] when referencing specific facts."
     )
 
     async def event_generator():
@@ -280,11 +284,13 @@ async def ask_stream(
 async def llm_status(
     auth: AuthResult = Depends(require_permission("read")),
 ):
-    """Check LLM provider status and list supported providers."""
+    """Check LLM provider status and list supported providers. [STATUS]"""
     provider = _llm_manager.provider
+    active_provider = _llm_manager.provider_name
     return LLMStatusResponse(
         available=_llm_manager.available,
-        provider=_llm_manager.provider_name or "none",
+        provider=active_provider or "none",
         model=provider.model if provider else None,
-        supported_providers=LLMProvider.list_providers(),  # type: ignore[type-error]
+        supported_providers=list_providers(),
+        providers=provider_inventory(active_provider=active_provider),
     )

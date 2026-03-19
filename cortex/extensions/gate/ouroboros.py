@@ -5,7 +5,7 @@ The thermodynamic enforcer for architectural scaling.
 
 import logging
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger("cortex.extensions.gate.ouroboros")
 
@@ -56,7 +56,7 @@ class OuroborosGate:
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
-    def identify_dead_weight(self) -> Optional[str]:
+    def identify_dead_weight(self) -> str | None:
         """Identifies the project or module with the lowest importance/density ratio."""
         # Analysis of projects with highest error/bridge ratio
         stats = self.conn.execute("""

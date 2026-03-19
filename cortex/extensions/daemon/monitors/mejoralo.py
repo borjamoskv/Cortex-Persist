@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from cortex.extensions.daemon.models import EntropyAlert, MejoraloAlert
 from cortex.extensions.daemon.monitors.base import IntervalProjectMonitor
@@ -25,7 +25,7 @@ class UnifiedMejoraloMonitor(IntervalProjectMonitor[Any]):
 
     def __init__(
         self,
-        projects: Optional[dict[str, str]] = None,
+        projects: dict[str, str] | None = None,
         interval_seconds: int = 1800,
         threshold: int = 90,
         engine: Any = None,

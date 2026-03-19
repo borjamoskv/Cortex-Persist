@@ -1,5 +1,3 @@
-from typing import Optional
-
 """Helper functions for Trust and Compliance CLI commands."""
 
 import json
@@ -12,7 +10,7 @@ from rich.table import Table
 console = Console()
 
 
-def _find_transaction(conn, fact_id: int, fact_tx_id: Optional[int]):
+def _find_transaction(conn, fact_id: int, fact_tx_id: int | None):
     """Look up the transaction for a fact, trying direct ID then join."""
     tx = None
     if fact_tx_id:
@@ -30,7 +28,7 @@ def _find_transaction(conn, fact_id: int, fact_tx_id: Optional[int]):
     return tx
 
 
-def _verify_chain(conn, tx_id: int, prev_hash: Optional[str]) -> tuple[bool, str]:
+def _verify_chain(conn, tx_id: int, prev_hash: str | None) -> tuple[bool, str]:
     if not prev_hash:
         return True, "[green]OK[/green]"
 
@@ -57,7 +55,7 @@ def _check_merkle(conn, tx_id: int):
 
 
 def _render_verification_certificate(
-    fact: tuple, tx: tuple, chain_valid: bool, chain_msg: str, checkpoint: Optional[tuple]
+    fact: tuple, tx: tuple, chain_valid: bool, chain_msg: str, checkpoint: tuple | None
 ) -> None:
     fid, proj, content, ftype, created, _fact_tx_id = fact
     _, tx_hash, prev_hash, _action, _tx_time = tx

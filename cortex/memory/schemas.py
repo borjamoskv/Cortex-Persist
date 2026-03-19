@@ -15,7 +15,6 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from typing import Optional
 
 from pydantic import BaseModel, Field
 
@@ -63,8 +62,8 @@ class SchemaEngine:
 
     def __init__(
         self,
-        schemas: Optional[list[MemorySchema]] = None,
-        config: Optional[SchemaEngineConfig] = None,
+        schemas: list[MemorySchema] | None = None,
+        config: SchemaEngineConfig | None = None,
     ) -> None:
         self._config = config or SchemaEngineConfig()
         self._schemas: dict[str, MemorySchema] = {}
@@ -122,7 +121,7 @@ class SchemaEngine:
         for s in (debug_schema, ml_schema, front_schema):
             self._schemas[s.name] = s
 
-    def match_schema(self, text: str) -> Optional[MemorySchema]:
+    def match_schema(self, text: str) -> MemorySchema | None:
         """
         Identify the most relevant schema for the given context text using fast triggers.
         Returns first match or None. O(S*T) purely in memory.

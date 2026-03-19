@@ -9,7 +9,7 @@ error thresholds and cooldown periods.
 import logging
 import time
 from collections.abc import Awaitable, Callable
-from typing import Any, Optional
+from typing import Any
 
 LOGGER = logging.getLogger(__name__)
 
@@ -39,7 +39,7 @@ class CircuitBreaker:
         self._state = "CLOSED"
         self._failure_count = 0
         self._success_count = 0
-        self._opened_at: Optional[float] = None
+        self._opened_at: float | None = None
 
     @property
     def state(self) -> str:
@@ -107,9 +107,9 @@ circuit_breaker = CircuitBreaker()
 
 
 async def call_external_compact(
-    engine: Optional[Any] = None,
+    engine: Any | None = None,
     project: str = "default",
-    db_path: Optional[str] = None,
+    db_path: str | None = None,
 ) -> None:
     """Execute compaction through the circuit breaker.
 

@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Optional
-
 """
 CORTEX v5.0 — Episodic Memory CLI Commands.
 
@@ -69,10 +67,10 @@ def episode():
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def record_cmd(
     content: str,
-    project: Optional[str],
+    project: str | None,
     event_type: str,
     emotion: str,
-    session: Optional[str],
+    session: str | None,
     tags: str,
     db: str,
 ) -> None:
@@ -82,10 +80,10 @@ def record_cmd(
 
 async def _record_async(
     content: str,
-    project: Optional[str],
+    project: str | None,
     event_type: str,
     emotion: str,
-    session: Optional[str],
+    session: str | None,
     tags: str,
     db: str,
 ) -> None:
@@ -134,10 +132,10 @@ async def _record_async(
 @click.option("--json-output", "as_json", is_flag=True, help="Output as JSON")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def recall_cmd(
-    project: Optional[str],
-    event_type: Optional[str],
-    since: Optional[str],
-    search: Optional[str],
+    project: str | None,
+    event_type: str | None,
+    since: str | None,
+    search: str | None,
     limit: int,
     as_json: bool,
     db: str,
@@ -147,10 +145,10 @@ def recall_cmd(
 
 
 async def _recall_async(
-    project: Optional[str],
-    event_type: Optional[str],
-    since: Optional[str],
-    search: Optional[str],
+    project: str | None,
+    event_type: str | None,
+    since: str | None,
+    search: str | None,
     limit: int,
     as_json: bool,
     db: str,
@@ -223,7 +221,7 @@ async def _recall_async(
 @click.option("--json-output", "as_json", is_flag=True, help="Output as JSON")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def patterns_cmd(
-    project: Optional[str],
+    project: str | None,
     min_occurrences: int,
     as_json: bool,
     db: str,
@@ -233,7 +231,7 @@ def patterns_cmd(
 
 
 async def _patterns_async(
-    project: Optional[str],
+    project: str | None,
     min_occurrences: int,
     as_json: bool,
     db: str,
@@ -293,7 +291,7 @@ async def _patterns_async(
 @click.option("--json-output", "as_json", is_flag=True, help="Output as JSON")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def boot_cmd(
-    project: Optional[str],
+    project: str | None,
     top_k: int,
     as_json: bool,
     db: str,
@@ -303,7 +301,7 @@ def boot_cmd(
 
 
 async def _boot_async(
-    project: Optional[str],
+    project: str | None,
     top_k: int,
     as_json: bool,
     db: str,

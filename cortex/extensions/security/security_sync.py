@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger("cortex.extensions.security.sync")
 
@@ -30,7 +30,7 @@ class SecurityVisualSync:
     def __init__(self) -> None:
         self._last_signal = None
 
-    async def emit_signal(self, event_type: str, details: Optional[dict[str, Any]] = None) -> None:
+    async def emit_signal(self, event_type: str, details: dict[str, Any] | None = None) -> None:
         """Send a visual signal to the Notch via NotchHub."""
         try:
             from cortex.routes.notch_ws import HUB  # type: ignore[reportAttributeAccessIssue]
@@ -54,7 +54,7 @@ class SecurityVisualSync:
         except (RuntimeError, OSError, AttributeError) as e:
             logger.error("Failed to emit security signal: %s", e)
 
-    def emit_sync(self, event_type: str, details: Optional[dict[str, Any]] = None) -> None:
+    def emit_sync(self, event_type: str, details: dict[str, Any] | None = None) -> None:
         """Synchronous wrapper for emitting signals."""
         try:
             loop = asyncio.get_event_loop()

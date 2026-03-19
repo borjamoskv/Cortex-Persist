@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
-"""CORTEX Quality Gates (11 Seals) — Sovereign Local Enforcement.
+"""CORTEX Quality Gates (21 Seals) — Sovereign Local Enforcement.
 
-Executes all 11 Axiom gates locally. Used by pre-push hooks and GitHub Actions.
+Executes all 21 Axiom gates locally. Used by pre-push hooks and GitHub Actions.
 Zero latency axiom enforcement (AX-020).
 
 Seal 11: Cobbler's Compliance — the Red Team Swarm audits itself.
@@ -13,9 +13,12 @@ from __future__ import annotations
 import asyncio
 import os
 import sys
+import time
+from collections.abc import Callable, Coroutine
 from pathlib import Path
-from typing import Optional
+from typing import Any
 
+from cortex.guards._seal_printer import SealPrinter
 from cortex.guards.sovereign_seals import (
     check_gate_15_dependency,
     check_gate_16_byzantine,
@@ -25,27 +28,6 @@ from cortex.guards.sovereign_seals import (
     check_gate_20_noir,
     check_gate_21_preservation,
 )
-
-
-class SealPrinter:
-    def head(self, title: str) -> None:
-        print(f"\n{'━' * 60}")
-        print(f" {title}")
-        print(f"{'━' * 60}")
-
-    def seal(self, gate_num: int, axiom: str, desc: str) -> None:
-        print(f"\n{'─' * 40}")
-        print(f"🔍 Gate {gate_num}: {desc} ({axiom})")
-
-    def success(self, msg: str) -> None:
-        print(f"   [🟢 PASSED] {msg}")
-
-    def fail(self, msg: str) -> None:
-        print(f"   [🔴 FAILED] {msg}")
-
-    def warn(self, msg: str) -> None:
-        print(f"   [🟡 WARN] {msg}")
-
 
 printer = SealPrinter()
 ROOT_DIR = Path(__file__).resolve().parents[2]
@@ -105,7 +87,7 @@ class GlobalSourceCache:
 
         target_files = await asyncio.to_thread(_get_files)
 
-        async def _read_file(p: Path) -> tuple[Path, Optional[str]]:
+        async def _read_file(p: Path) -> tuple[Path, str | None]:
             try:
                 # Use to_thread to prevent blocking event loop on disk I/O
                 content = await asyncio.to_thread(p.read_text, encoding="utf-8")
@@ -121,22 +103,27 @@ class GlobalSourceCache:
         cls._loaded = True
 
 
-async def check_gate_1_lint() -> bool:
+# ── Gate Result Type ──
+# Each gate returns (passed: bool, kind: str) where kind ∈ {"verified", "stub", "skipped"}
+GateResult = tuple[bool, str]
+
+
+async def check_gate_1_lint() -> GateResult:
     printer.seal(1, "AX-011 Entropy Death", "Lint (Ruff)")
     code, out = await arun_cmd(["ruff", "check", "cortex/", "--output-format", "concise"])
     if code == 0:
         printer.success("Ruff checks passed.")
-        return True
+        return True, "verified"
     elif code == 127:
         printer.warn("Ruff not found — skipping (install with: pip install ruff)")
-        return True  # Non-blocking: tool absence != code violation
+        return True, "verified"  # Non-blocking: tool absence != code violation
     else:
         printer.fail("Ruff linting failed.")
         print(out[:2000])  # Cap output to avoid flooding
-        return False
+        return False, "verified"
 
 
-async def check_gate_2_type() -> bool:
+async def check_gate_2_type() -> GateResult:
     printer.seal(2, "AX-012 Type Safety", "Type Check (Pyright)")
     # Prefer pyright (configured in pyproject.toml). Fall back to mypy.
     code, out = await arun_cmd(["pyright", "cortex/", "--outputjson"])
@@ -147,34 +134,34 @@ async def check_gate_2_type() -> bool:
         )
         if code == 127:
             printer.warn("No type checker found (pyright/mypy) — skipping")
-            return True
+            return True, "verified"
     if code == 0 or "Success: no issues found" in out or '"errorCount":0' in out:
         printer.success("Type checks passed.")
-        return True
+        return True, "verified"
     else:
         printer.fail("Type checking failed.")
         print(out[:2000])
-        return False
+        return False, "verified"
 
 
-async def check_gate_3_security() -> bool:
+async def check_gate_3_security() -> GateResult:
     printer.seal(3, "AX-010 Zero Trust", "Security Scan (Bandit)")
     code, out = await arun_cmd(
         ["bandit", "-r", "cortex/", "-q", "--severity-level", "high", "--confidence-level", "high"]
     )
     if code == 0:
         printer.success("Bandit security scan passed.")
-        return True
+        return True, "verified"
     elif code == 127:
         printer.warn("Bandit not found — skipping (install with: pip install bandit)")
-        return True
+        return True, "verified"
     else:
         printer.fail("Security vulnerabilities detected.")
         print(out[:2000])
-        return False
+        return False, "verified"
 
 
-async def check_gate_4_tests() -> bool:
+async def check_gate_4_tests() -> GateResult:
     printer.seal(4, "AX-017 Ledger Integrity", "Tests & Coverage")
     python_cmd = ROOT_DIR / ".venv" / "bin" / "python"
     if not python_cmd.exists():
@@ -184,14 +171,14 @@ async def check_gate_4_tests() -> bool:
     code, out = await arun_cmd(cmd)
     if code == 0:
         printer.success("All tests passed.")
-        return True
+        return True, "verified"
     else:
         printer.fail("Tests failed.")
         print(out[:3000])
-        return False
+        return False, "verified"
 
 
-async def check_gate_5_ledger() -> bool:
+async def check_gate_5_ledger() -> GateResult:
     printer.seal(5, "AX-017 Ledger Integrity", "Schema Initialization")
     try:
         from cortex.engine import CortexEngine
@@ -200,13 +187,13 @@ async def check_gate_5_ledger() -> bool:
         await engine.init_db()
         await engine.close()
         printer.success("Ledger schema initialized successfully.")
-        return True
+        return True, "verified"
     except Exception as e:  # noqa: BLE001 — test execution boundary
         printer.fail(f"Ledger initialization threw error: {e}")
-        return False
+        return False, "verified"
 
 
-async def check_gate_6_connection() -> bool:
+async def check_gate_6_connection() -> GateResult:
     printer.seal(6, "AX-017 Ledger Integrity", "Connection Guard")
     python_cmd = ROOT_DIR / ".venv" / "bin" / "python"
     code, out = await arun_cmd(
@@ -214,14 +201,14 @@ async def check_gate_6_connection() -> bool:
     )
     if code == 0:
         printer.success("Connection guard passed.")
-        return True
+        return True, "verified"
     else:
         printer.fail("Connection guard failed.")
         print(out)
-        return False
+        return False, "verified"
 
 
-async def check_gate_7_async() -> bool:
+async def check_gate_7_async() -> GateResult:
     printer.seal(7, "AX-013 Async Native", "Async Guard (No time.sleep)")
     # Intentional time.sleep uses — demos, network retries, fiat oracles, legacy wrappers
     _ASYNC_EXCLUDE_FILES = frozenset(
@@ -256,13 +243,13 @@ async def check_gate_7_async() -> bool:
 
     if not violations:
         printer.success("No blocking time.sleep() found.")
-        return True
+        return True, "verified"
     else:
         printer.fail(f"Found blocking time.sleep(): {violations}")
-        return False
+        return False, "verified"
 
 
-async def check_gate_8_loc() -> bool:
+async def check_gate_8_loc() -> GateResult:
     printer.seal(8, "AX-011 Entropy Death", "LOC Guard (≤600 max)")
     blocked = 0
     warnings = 0
@@ -278,18 +265,18 @@ async def check_gate_8_loc() -> bool:
 
     if blocked == 0:
         printer.success(f"All files within entropy limits. ({warnings} warnings >400 LOC)")
-        return True
-    return False
+        return True, "verified"
+    return False, "verified"
 
 
-async def check_gate_9_registry() -> bool:
+async def check_gate_9_registry() -> GateResult:
     printer.seal(9, "Registry Integrity", "Axiom Registry Sync")
     try:
         from cortex.extensions.axioms import AXIOM_REGISTRY, AxiomCategory
         from cortex.extensions.axioms.registry import by_category, enforced
     except ImportError:
         printer.warn("Axioms extension not found. Skipping registry check.")
-        return True
+        return True, "verified"
 
     try:
         total = len(AXIOM_REGISTRY)
@@ -298,24 +285,24 @@ async def check_gate_9_registry() -> bool:
 
         if total < 20:
             printer.fail(f"Registry degraded: only {total} axioms (min 20)")
-            return False
+            return False, "verified"
         if const < 3:
             printer.fail(f"Constitutional layer degraded: {const} items")
-            return False
+            return False, "verified"
 
         printer.success(f"Registry load OK: {total} axioms, {enf} CI-enforced.")
-        return True
+        return True, "verified"
     except Exception as e:  # noqa: BLE001 — registry loading boundary
         printer.fail(f"Registry error: {e}")
-        return False
+        return False, "verified"
 
 
-async def check_gate_10_prompt_size() -> bool:
+async def check_gate_10_prompt_size() -> GateResult:
     printer.seal(10, "Heuristic", "Prompt Size Check")
     prompt_file = ROOT_DIR / "SYSTEM_PROMPT.md"
     if not prompt_file.exists():
         printer.warn("No SYSTEM_PROMPT.md found.")
-        return True
+        return True, "verified"
 
     try:
         content = await asyncio.to_thread(prompt_file.read_text, encoding="utf-8")
@@ -327,10 +314,10 @@ async def check_gate_10_prompt_size() -> bool:
     except OSError:
         printer.warn("Could not read SYSTEM_PROMPT.md")
 
-    return True
+    return True, "verified"
 
 
-async def check_gate_11_cobbler() -> bool:
+async def check_gate_11_cobbler() -> GateResult:
     """Seal 11 — Cobbler's Compliance (Ω₃ Byzantine Default).
 
     The RED_TEAM_SWARM runs against the engine's own source code.
@@ -350,7 +337,7 @@ async def check_gate_11_cobbler() -> bool:
         from cortex.engine.legion_vectors import EntropyDemon, Intruder
     except ImportError as e:
         printer.fail(f"Cannot import legion_vectors: {e}")
-        return False
+        return False, "verified"
 
     demon = EntropyDemon()
     intruder = Intruder()
@@ -405,10 +392,10 @@ async def check_gate_11_cobbler() -> bool:
     else:
         printer.success("Intruder: no eval/exec/os.system in engine source.")
 
-    return passed
+    return passed, "verified"
 
 
-async def check_gate_12_determinism() -> bool:
+async def check_gate_12_determinism() -> GateResult:
     """Seal 12: Temperature Determinism Gate.
 
     Ensures critical reasoning/architect files enforce temperature=0.
@@ -441,13 +428,13 @@ async def check_gate_12_determinism() -> bool:
 
     if violations:
         printer.fail(f"Seal 12 Broken: Static temperature drift in {violations}")
-        return False
+        return False, "verified"
 
     printer.success("Seal 12: Temperature Determinism Gate intact.")
-    return True
+    return True, "verified"
 
 
-async def check_gate_13_latency() -> bool:
+async def check_gate_13_latency() -> GateResult:
     """Seal 13: A-Record Latency Drift.
 
     Fails if average local model latency exceeds 200ms in telemetry.
@@ -456,7 +443,7 @@ async def check_gate_13_latency() -> bool:
         from cortex.extensions.llm._telemetry import CascadeTelemetry
     except ImportError:
         printer.warn("Seal 13 Skipped: LLM telemetry extension not found.")
-        return True
+        return True, "verified"
 
     telemetry = CascadeTelemetry()
     stats = telemetry.stats()
@@ -472,13 +459,13 @@ async def check_gate_13_latency() -> bool:
     if slow_locals:
         printer.warn(f"Seal 13 Weakened: High local latency detected: {slow_locals}")
         # We don't fail yet, just warn for "Sovereign" status
-        return True
+        return True, "verified"
 
     printer.success("Seal 13: A-Record Latency Gate intact (<200ms).")
-    return True
+    return True, "verified"
 
 
-async def check_gate_14_aesthetic() -> bool:
+async def check_gate_14_aesthetic() -> GateResult:
     """Seal 14: Sovereign Aesthetic Gate.
 
     Ensures no "mvp" or "placeholder" strings exist in documentation or core UI.
@@ -497,69 +484,120 @@ async def check_gate_14_aesthetic() -> bool:
     if violations:
         # Warn instead of fail to allow evolution
         printer.warn(f"Seal 14 Aesthetic Drift: {violations}")
-        return True
+        return True, "verified"
 
     printer.success("Seal 14: Sovereign Aesthetic Gate intact.")
-    return True
+    return True, "verified"
+
+
+# ── Gate Registry ──
+# Maps gate number → (callable, description). Used for both gather and fail-fast modes.
+_GATE_ORDER = [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
 
 
 async def main() -> int:
+    total_start = time.perf_counter()
     printer.head("21 SEALS — CORTEX QUALITY GATES")
 
     # Pre-cache all Python files into memory concurrently. O(1) file traversals moving forward.
     await GlobalSourceCache.load()
 
-    # SKIP_GATES: comma-separated gate numbers to skip (e.g. SKIP_GATES=4)
-    # Useful when the test suite is too slow for SSH keepalive during git push.
-    # Tests always run in CI — this only affects the local pre-push hook.
+    # SKIP_GATES: comma-separated gate numbers to skip (e.g. SKIP_GATES=1,2,4)
     _skip = {
         int(g.strip()) for g in os.environ.get("SKIP_GATES", "").split(",") if g.strip().isdigit()
     }
+    fail_fast = os.environ.get("FAIL_FAST", "").strip() in ("1", "true", "yes")
 
-    async def _gate4() -> bool:
-        if 4 in _skip:
-            printer.seal(4, "SKIPPED", "Tests — skipped via SKIP_GATES")
-            printer.warn("Gate 4 skipped (SKIP_GATES env). Run 'pytest tests/' separately.")
-            return True
-        return await check_gate_4_tests()
+    # Pass cache reference to sovereign seals that accept it
+    cache_ref = GlobalSourceCache.files
 
-    results = await asyncio.gather(
-        check_gate_1_lint(),
-        check_gate_2_type(),
-        check_gate_3_security(),
-        _gate4(),
-        check_gate_5_ledger(),
-        check_gate_6_connection(),
-        check_gate_7_async(),
-        check_gate_8_loc(),
-        check_gate_9_registry(),
-        check_gate_11_cobbler(),  # Seal 11: Cobbler's Compliance
-        check_gate_12_determinism(),
-        check_gate_13_latency(),
-        check_gate_14_aesthetic(),
-        check_gate_15_dependency(),
-        check_gate_16_byzantine(),
-        check_gate_17_shannon(),
-        check_gate_18_evolution(),
-        check_gate_19_eu_ai(),
-        check_gate_20_noir(),
-        check_gate_21_preservation(),
-    )
-    # Check gate 10 independently (it never fails the run)
-    await check_gate_10_prompt_size()
+    # Build gate callables — sovereign seals receive cache
+    gate_fns: dict[int, Callable[[], Coroutine[Any, Any, GateResult]]] = {
+        1: check_gate_1_lint,
+        2: check_gate_2_type,
+        3: check_gate_3_security,
+        4: check_gate_4_tests,
+        5: check_gate_5_ledger,
+        6: check_gate_6_connection,
+        7: check_gate_7_async,
+        8: check_gate_8_loc,
+        9: check_gate_9_registry,
+        11: check_gate_11_cobbler,
+        12: check_gate_12_determinism,
+        13: check_gate_13_latency,
+        14: check_gate_14_aesthetic,
+        15: lambda: check_gate_15_dependency(cached_files=cache_ref),
+        16: check_gate_16_byzantine,
+        17: lambda: check_gate_17_shannon(cached_files=cache_ref),
+        18: check_gate_18_evolution,
+        19: check_gate_19_eu_ai,
+        20: check_gate_20_noir,
+        21: lambda: check_gate_21_preservation(cached_files=cache_ref),
+    }
 
-    printer.head("SEALS SUMMARY")
-    failed = [i + 1 for i, r in enumerate(results) if not r]
-    # Remap index 10 → seal 11 in the summary
-    remapped = [11 if s == 10 else s for s in failed]
+    async def _timed_gate(
+        gate_num: int,
+        fn: Callable[[], Coroutine[Any, Any, GateResult]],
+    ) -> GateResult:
+        """Execute a gate with SKIP_GATES check and timing."""
+        if gate_num in _skip:
+            printer.seal(gate_num, "SKIPPED", f"Gate {gate_num} — skipped via SKIP_GATES")
+            printer.warn(f"Gate {gate_num} skipped (SKIP_GATES env). Enforced in CI.")
+            return True, "skipped"
+        start = time.perf_counter()
+        result = await fn()
+        elapsed = (time.perf_counter() - start) * 1000
+        print(f"   ⏱  {elapsed:.0f}ms")
+        return result
 
-    if remapped:
-        printer.fail(f"SEALS BROKEN: {remapped}")
-        print("\nFix violations before pushing.")
-        return 1
+    # Collect results
+    gate_results: dict[int, GateResult] = {}
+
+    if fail_fast:
+        # Sequential: abort on first failure
+        for gate_num in _GATE_ORDER:
+            fn = gate_fns[gate_num]
+            result = await _timed_gate(gate_num, fn)
+            gate_results[gate_num] = result
+            if not result[0]:
+                printer.fail(f"FAIL-FAST: Gate {gate_num} failed. Aborting remaining gates.")
+                break
     else:
-        printer.success("ALL 21 SEALS INTACT. Ready for launch.")
-        return 0
+        # Parallel: run all gates concurrently
+        async def _run(gn: int) -> tuple[int, GateResult]:
+            return gn, await _timed_gate(gn, gate_fns[gn])
+
+        raw = await asyncio.gather(*(_run(gn) for gn in _GATE_ORDER))
+        for gn, result in raw:
+            gate_results[gn] = result
+
+    # Gate 10 runs independently (never fails the run)
+    start_10 = time.perf_counter()
+    await check_gate_10_prompt_size()
+    print(f"   ⏱  {(time.perf_counter() - start_10) * 1000:.0f}ms")
+
+    # ── Summary ──
+    total_elapsed = (time.perf_counter() - total_start) * 1000
+    printer.head("SEALS SUMMARY")
+
+    verified = [gn for gn, (p, k) in gate_results.items() if k == "verified" and p]
+    stubs = [gn for gn, (_, k) in gate_results.items() if k == "stub"]
+    skipped = [gn for gn, (_, k) in gate_results.items() if k == "skipped"]
+    failed = [gn for gn, (p, k) in gate_results.items() if not p]
+
+    print(
+        f"   🟢 VERIFIED: {len(verified)}  ⬜ STUB: {len(stubs)}  "
+        f"🟡 SKIPPED: {len(skipped)}  🔴 FAILED: {len(failed)}"
+    )
+    print(f"   ⏱  Total: {total_elapsed:.0f}ms")
+
+    if failed:
+        printer.fail(f"SEALS BROKEN: {sorted(failed)}\nFix violations before pushing.")
+        return 1
+    printer.success(
+        f"ALL {len(verified) + len(stubs)} SEALS INTACT ({len(stubs)} stubs). Ready for launch."
+    )
+    return 0
 
 
 if __name__ == "__main__":

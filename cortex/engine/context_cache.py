@@ -30,7 +30,7 @@ import logging
 import time
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger("cortex.context_cache")
 
@@ -133,9 +133,9 @@ class ContextCacheManager:
         token_count: int,
         provider_handle: str = "",
         agent_id: str = "",
-        ttl_seconds: Optional[int] = None,
-        tags: Optional[list[str]] = None,
-        meta: Optional[dict[str, Any]] = None,
+        ttl_seconds: int | None = None,
+        tags: list[str] | None = None,
+        meta: dict[str, Any] | None = None,
     ) -> CacheEntry:
         """Register a new cached KV-Cache state.
 
@@ -179,7 +179,7 @@ class ContextCacheManager:
         )
         return entry
 
-    def get(self, cache_id: str) -> Optional[CacheEntry]:
+    def get(self, cache_id: str) -> CacheEntry | None:
         """Retrieve a cache entry, updating access time for LRU."""
         entry = self._cache.get(cache_id)
         if entry is None:

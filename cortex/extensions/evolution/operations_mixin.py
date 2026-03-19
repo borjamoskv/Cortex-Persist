@@ -8,7 +8,7 @@ import logging
 import random
 import secrets
 import sqlite3
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from cortex.extensions.evolution.action import SymbolicActionState
 from cortex.extensions.evolution.agents import (
@@ -43,9 +43,9 @@ class EvolutionOpsMixin:
         _endocrine: DigitalEndocrine
         _ledger: SovereignLedger
         _evolution_ledger: EvolutionLedgerDB
-        _ouroboros: Optional[OuroborosGate]
+        _ouroboros: OuroborosGate | None
         _action_engine: SymbolicActionEngine
-        _broadcast_task: Optional[asyncio.Task]
+        _broadcast_task: asyncio.Task | None
 
     def _apply_epigenetic_modulation(self) -> None:
         """Modulate mutation rate and selection pressure via DigitalEndocrine."""
@@ -254,9 +254,7 @@ class EvolutionOpsMixin:
 
     async def _process_sovereign(
         self, sovereign: SovereignAgent, metrics: dict[AgentDomain, DomainMetrics]
-    ) -> tuple[
-        list[EvolutionMutation], list[EvolutionMutation], int, Optional[SymbolicActionState]
-    ]:
+    ) -> tuple[list[EvolutionMutation], list[EvolutionMutation], int, SymbolicActionState | None]:
         """Ω₀: Isolated processing for a single sovereign domain. Concurrency-safe."""
         sovereign._cycle_count += 1
         domain_grace = 0.0

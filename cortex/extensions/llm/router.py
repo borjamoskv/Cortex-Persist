@@ -6,7 +6,7 @@ import logging
 import time
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from cortex.extensions.llm._cascade import CascadeManager, classify_tier
 from cortex.extensions.llm._hedging import HedgedRequestStrategy
@@ -44,12 +44,12 @@ class CortexLLMRouter:
     def __init__(
         self,
         primary: BaseProvider,
-        fallbacks: Optional[Sequence[BaseProvider]] = None,
+        fallbacks: Sequence[BaseProvider] | None = None,
         *,
         negative_ttl: float = 300.0,
         positive_ttl: float = 600.0,
-        hedging_providers: Optional[Sequence[BaseProvider]] = None,
-        db_path: Optional[str | Path] = None,
+        hedging_providers: Sequence[BaseProvider] | None = None,
+        db_path: str | Path | None = None,
     ) -> None:
         self._primary = primary
         self._fallbacks = list(fallbacks or [])
@@ -85,7 +85,7 @@ class CortexLLMRouter:
 
     def _ordered_fallbacks(
         self,
-        intent: IntentProfile,
+        prompt: CortexPrompt,
     ) -> list[BaseProvider]:
         """Ordena fallbacks: intent affinity → A-record → cost → tier.
 
@@ -93,23 +93,36 @@ class CortexLLMRouter:
         then sorts unknowns by cost_class (cheaper first), then by
         tier (frontier > high > local) for same-cost tiebreaking.
         """
+        from cortex.extensions.llm._models import ReasoningMode
+
+        effective_intent = prompt.intent
+        # Axiom Ω₁₆: If reasoning mode is DEEP_THINK or ULTRA_THINK,
+        # coerce the fallback intent to REASONING to select the right model map.
+        if prompt.reasoning_mode in (ReasoningMode.DEEP_THINK, ReasoningMode.ULTRA_THINK):
+            effective_intent = IntentProfile.REASONING
+
         typed_matches: list[BaseProvider] = []
         safety_net: list[BaseProvider] = []
 
         for p in self._fallbacks:
-            if classify_tier(p, intent) == CascadeTier.TYPED_MATCH:
+            if classify_tier(p, effective_intent) == CascadeTier.TYPED_MATCH:
                 typed_matches.append(p)
             else:
                 safety_net.append(p)
 
+        # Axiom Ω₁₆: ULTRA_THINK strictly requires frontier models.
+        if prompt.reasoning_mode == ReasoningMode.ULTRA_THINK:
+            typed_matches = [p for p in typed_matches if p.tier == "frontier"]
+            safety_net = [p for p in safety_net if p.tier == "frontier"]
+
         # Apply A-record promotion + cost/tier tiebreaking
         promoted_typed = self._promote_by_latency_then_cost(
             typed_matches,
-            intent,
+            effective_intent,
         )
         promoted_safety = self._promote_by_latency_then_cost(
             safety_net,
-            intent,
+            effective_intent,
         )
 
         return promoted_typed + promoted_safety
@@ -144,7 +157,7 @@ class CortexLLMRouter:
         )
         return known + unknown
 
-    async def execute_hedged(self, prompt: CortexPrompt) -> Optional[Result[str, str]]:
+    async def execute_hedged(self, prompt: CortexPrompt) -> Result[str, str] | None:
         """Attempt hedged (parallel) execution if peers are available."""
         if not self._hedging_providers:
             return None
@@ -190,12 +203,63 @@ class CortexLLMRouter:
 
     # ── Shannon Compression (Ω₁₃: Entropic Containment) ────────────
 
-    # Maximum word count for working_memory before compression triggers.
-    # ~32k words ≈ ~40k tokens — safety margin for most providers.
-    _MAX_WORKING_MEMORY_WORDS: int = 32_000
+    # Default safety margin: keep prompts under 90% of model window.
+    _CONTEXT_SAFETY_MARGIN: float = 0.90
 
     # After compression, keep the first message (instruction) and last N messages.
     _COMPRESSED_TAIL_MESSAGES: int = 6
+
+    # Maximum autonomous cycles (assistant + tool) without returning to user
+    _MAX_TOOL_CYCLES: int = 8
+
+    @staticmethod
+    def _break_cyclical_deadlocks(
+        messages: list[dict[str, Any]],
+        max_cycles: int,
+    ) -> list[dict[str, Any]]:
+        """Axioma Ω₃: La Ley del Ciclo. Fricción y Auto-Compaction.
+
+        Detects if the agent is trapped in an infinite loop of tool calls
+        (> max_cycles). If so, applying thermodynamic halt, collapsing the
+        historical noise to prevent compounded hallucination, and injecting
+        a hard break directive.
+        """
+        # Count consecutive non-user messages from the end
+        cycle_count = 0
+        for msg in reversed(messages):
+            if msg.get("role") in ("user", "system") and not msg.get("tool_calls"):
+                break
+            if msg.get("role") in ("assistant", "tool") or msg.get("tool_calls"):
+                cycle_count += 1
+
+        # Each "cycle" is typically 2 messages (assistant tool_call + tool result)
+        if cycle_count > max_cycles * 2:
+            cycles_done = cycle_count // 2
+            logger.warning(
+                "♻️ [DEADLOCK] Axiom Ω₃ Triggered: Agent stuck in %d consecutive cycles. Forcing auto-compaction.",
+                cycles_done,
+            )
+
+            noise_start = len(messages) - cycle_count
+            head = messages[:noise_start]
+            noise = messages[noise_start:-2]
+            tail = messages[-2:]
+
+            noise_words = sum(len(str(m.get("content", "")).split()) for m in noise)
+
+            halt_marker = {
+                "role": "system",
+                "content": (
+                    f"[CORTEX AXIOM Ω₃: DEADLOCK CIRCUIT BREAKER]\n"
+                    f"THERMODYNAMIC HALT: You have reached {cycles_done} consecutive autonomous cycles without achieving a final state.\n"
+                    f"Auto-Compaction triggered: {len(noise)} previous intermediate operations ({noise_words} words) have been crystallized and purged to prevent compounded hallucination.\n"
+                    f"MANDATORY DIRECTIVE: Stop exploring. Evaluate your current state and output a final conclusion or ask a direct question to the user immediately. Do not trigger further tools."
+                ),
+            }
+
+            return head + [halt_marker] + tail
+
+        return messages
 
     @staticmethod
     def _compress_working_memory(
@@ -240,9 +304,19 @@ class CortexLLMRouter:
         Kairos-Ω: Requests idénticos en vuelo se coalescan — O(1) en concurrencia.
         """
         # Ω₁₃ Shannon Compression: prevent quadratic token burn
+        # Dynamic threshold based on provider context window
+        model_window = self._primary.context_window
+        # conversion factor approx 0.75 words/token
+        max_words = int((model_window * self._CONTEXT_SAFETY_MARGIN) * 0.75)
+
+        prompt.working_memory = self._break_cyclical_deadlocks(
+            prompt.working_memory,
+            self._MAX_TOOL_CYCLES,
+        )
+
         prompt.working_memory = self._compress_working_memory(
             prompt.working_memory,
-            self._MAX_WORKING_MEMORY_WORDS,
+            max_words,
             self._COMPRESSED_TAIL_MESSAGES,
         )
 
@@ -302,7 +376,7 @@ class CortexLLMRouter:
             return res_primary
 
         # Phase 2: Fallback cascade
-        fallbacks = self._ordered_fallbacks(prompt.intent)
+        fallbacks = self._ordered_fallbacks(prompt)
         errors = [f"Primary ({self._primary.provider_name}): {res_primary.error}"]  # type: ignore[union-attr]
 
         for i, provider in enumerate(fallbacks, start=2):
@@ -330,7 +404,8 @@ class CortexLLMRouter:
                 )
                 return res_fb
 
-            errors.append(f"{provider.provider_name}: {res_fb.error}")  # type: ignore[union-attr]
+            errors.append(f"{provider.provider_name}: {res_fb.error}")
+            # type: ignore[reportOptionalMemberAccess]
             self._cascade.set_nx_record(provider.provider_name)
 
         # Final defeat: record terminal event
@@ -358,7 +433,7 @@ class CortexLLMRouter:
         """Aggregated cascade metrics."""
         return self._telemetry.stats()
 
-    def select_model_for_intent(self, intent: str) -> Optional[str]:
+    def select_model_for_intent(self, intent: str) -> str | None:
         """Resolve the optimal model for the primary provider's intent.
 
         Uses the preset routing functions to find the best model

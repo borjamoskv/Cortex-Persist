@@ -51,7 +51,6 @@ import signal
 import sys
 from dataclasses import dataclass, field
 from io import StringIO
-from typing import Optional
 
 __all__ = ["ASTSandbox", "SandboxVerdict", "ExecResult"]
 
@@ -222,7 +221,7 @@ class ExecResult:
     success: bool
     output: dict[str, object] = field(default_factory=dict)
     stdout: str = ""
-    error: Optional[str] = None
+    error: str | None = None
     duration_ms: float = 0.0
 
 

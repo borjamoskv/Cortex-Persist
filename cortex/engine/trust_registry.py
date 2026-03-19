@@ -11,7 +11,6 @@ import dataclasses
 import datetime
 import logging
 from collections.abc import Sequence
-from typing import Optional
 
 logger = logging.getLogger("cortex.engine.trust")
 
@@ -26,8 +25,8 @@ class AgentTrustProfile:
     failures: int = 0
     taint_events: int = 0
     taint_severity_sum: float = 0.0
-    last_incident_ts: Optional[datetime.datetime] = None
-    last_success_ts: Optional[datetime.datetime] = None
+    last_incident_ts: datetime.datetime | None = None
+    last_success_ts: datetime.datetime | None = None
 
     @property
     def total_events(self) -> int:
@@ -46,7 +45,7 @@ class WeightedProposal:
     trust_score: float = 0.0
     influence_weight: float = 0.0
     final_score: float = 0.0
-    reasoning_ref: Optional[str] = None
+    reasoning_ref: str | None = None
 
 
 class TrustRegistry:
@@ -75,7 +74,7 @@ class TrustRegistry:
         success: bool,
         is_taint: bool = False,
         taint_severity: float = 0.0,
-        now: Optional[datetime.datetime] = None,
+        now: datetime.datetime | None = None,
     ) -> None:
         """Record operational evidence for an agent."""
         if now is None:
@@ -96,7 +95,7 @@ class TrustRegistry:
         self,
         profile: AgentTrustProfile,
         domain_risk_modifier: float = 1.0,
-        now: Optional[datetime.datetime] = None,
+        now: datetime.datetime | None = None,
     ) -> float:
         """
         trust(agent, domain) = base_prior + reliability_posterior - taint_penalty - drift_penalty
@@ -160,7 +159,7 @@ class TrustRegistry:
         self,
         proposals: Sequence[WeightedProposal],
         domain_risk_modifier: float = 1.0,
-        now: Optional[datetime.datetime] = None,
+        now: datetime.datetime | None = None,
     ) -> list[WeightedProposal]:
         """
         Hydrate proposals with trust math and rank them.
@@ -187,8 +186,8 @@ class TrustRegistry:
         self,
         proposals: Sequence[WeightedProposal],
         domain_risk_modifier: float = 1.0,
-        now: Optional[datetime.datetime] = None,
-    ) -> tuple[Optional[WeightedProposal], dict[str, str]]:
+        now: datetime.datetime | None = None,
+    ) -> tuple[WeightedProposal | None, dict[str, str]]:
         """
         Takes N proposals and returns the Single Winning Proposal (or None) + Diagnostic Reason Code.
         """

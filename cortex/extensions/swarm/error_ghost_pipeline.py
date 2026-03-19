@@ -21,7 +21,7 @@ import time
 import traceback
 from collections import OrderedDict
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger("cortex.extensions.swarm.error_ghost_pipeline")
 
@@ -53,7 +53,7 @@ class ErrorGhostPipeline:
         pipeline.capture_sync(error, source="daemon:SiteMonitor", project="CORTEX")
     """
 
-    _instance: Optional[ErrorGhostPipeline] = None
+    _instance: ErrorGhostPipeline | None = None
     _instance_lock = threading.Lock()
 
     def __new__(cls) -> ErrorGhostPipeline:
@@ -85,8 +85,8 @@ class ErrorGhostPipeline:
         source: str,
         project: str = "CORTEX",
         *,
-        extra_meta: Optional[dict[str, Any]] = None,
-    ) -> Optional[int]:
+        extra_meta: dict[str, Any] | None = None,
+    ) -> int | None:
         """Persist an error as a ghost fact. Returns fact_id or None."""
         content, content_hash, meta = self._prepare(error, source, extra_meta)
 
@@ -103,7 +103,7 @@ class ErrorGhostPipeline:
         source: str,
         project: str = "CORTEX",
         *,
-        extra_meta: Optional[dict[str, Any]] = None,
+        extra_meta: dict[str, Any] | None = None,
     ) -> None:
         """Fire-and-forget sync capture for daemon threads."""
         content, content_hash, meta = self._prepare(error, source, extra_meta)
@@ -146,7 +146,7 @@ class ErrorGhostPipeline:
         self,
         error: BaseException,
         source: str,
-        extra_meta: Optional[dict[str, Any]],
+        extra_meta: dict[str, Any] | None,
     ) -> tuple[str, str, dict[str, Any]]:
         """Build ghost content and metadata from an error."""
         error_type = type(error).__qualname__
@@ -195,7 +195,7 @@ class ErrorGhostPipeline:
 
         return False
 
-    def _record_emission(self, content_hash: str, source: str, fact_id: Optional[int]) -> None:
+    def _record_emission(self, content_hash: str, source: str, fact_id: int | None) -> None:
         """Record successful emission in dedup window and rate limiter."""
         now = time.monotonic()
         with self._lock:
@@ -220,7 +220,7 @@ class ErrorGhostPipeline:
         content: str,
         source: str,
         meta: dict[str, Any],
-    ) -> Optional[int]:
+    ) -> int | None:
         """Store ghost via CortexEngine (async path)."""
         try:
             from cortex.engine import CortexEngine

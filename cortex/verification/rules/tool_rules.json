@@ -1,0 +1,25 @@
+{
+  "tools": {
+    "run_command": {
+      "required_fields": ["ok", "exit_code"],
+      "forbidden_patterns": ["password", "secret_key"],
+      "heuristics": [
+        {
+          "name": "check_stderr_on_fail",
+          "condition": "not ok",
+          "required": "error"
+        }
+      ]
+    },
+    "write_to_file": {
+      "required_fields": ["ok", "file_path"],
+      "forbidden_paths": ["/etc/", "/usr/bin/"],
+      "heuristics": [
+        {
+          "name": "check_path_absolute",
+          "regex": "^/"
+        }
+      ]
+    }
+  }
+}

@@ -10,6 +10,19 @@ import logging
 LOG = logging.getLogger("cortex.mcp.scraper")
 
 
+_scraper_engine = None
+
+
+def _get_scraper_engine():
+    """Lazy singleton — ScraperEngine is stateless, reuse it."""
+    global _scraper_engine
+    if _scraper_engine is None:
+        from cortex.extensions.scraper.engine import ScraperEngine
+
+        _scraper_engine = ScraperEngine()
+    return _scraper_engine
+
+
 def register_scraper_tools(mcp) -> None:
     """Register scraper tools with the MCP server.
 
@@ -30,15 +43,17 @@ def register_scraper_tools(mcp) -> None:
 
         Args:
             url: The URL to scrape.
-            strategy: Extraction strategy (auto|http_fast|jina|firecrawl|playwright).
+            strategy: Extraction strategy.
 
         Returns:
-            Dict with url, title, content (markdown), hash, strategy_used, elapsed_ms.
+            Dict with url, title, content, hash, strategy_used, elapsed_ms.
         """
-        from cortex.extensions.scraper.engine import ScraperEngine
-        from cortex.extensions.scraper.models import ExtractionStrategy, ScrapeRequest
+        from cortex.extensions.scraper.models import (
+            ExtractionStrategy,
+            ScrapeRequest,
+        )
 
-        engine = ScraperEngine()
+        engine = _get_scraper_engine()
         request = ScrapeRequest(
             url=url,
             strategy=ExtractionStrategy(strategy),
@@ -64,7 +79,7 @@ def register_scraper_tools(mcp) -> None:
     ) -> dict:
         """Batch extract web content from multiple URLs.
 
-        Scrapes multiple URLs concurrently with rate limiting and deduplication.
+        Scrapes multiple URLs concurrently with rate limiting.
 
         Args:
             urls: List of URLs to scrape.
@@ -72,12 +87,11 @@ def register_scraper_tools(mcp) -> None:
             concurrency: Max concurrent extractions (default: 3).
 
         Returns:
-            Dict with job_id, total, successful, errors, and results list.
+            Dict with job_id, total, successful, errors, and results.
         """
-        from cortex.extensions.scraper.engine import ScraperEngine
         from cortex.extensions.scraper.models import ExtractionStrategy
 
-        engine = ScraperEngine()
+        engine = _get_scraper_engine()
         job = await engine.batch_scrape(
             urls=urls,
             strategy=ExtractionStrategy(strategy),
@@ -106,7 +120,7 @@ def register_scraper_tools(mcp) -> None:
     async def cortex_scrape_map(url: str, depth: int = 2) -> dict:
         """Discover all URLs from a website via link extraction.
 
-        Crawls a site up to the specified depth and returns all discovered URLs.
+        Crawls a site up to the specified depth and returns discovered URLs.
 
         Args:
             url: Starting URL.
@@ -115,9 +129,7 @@ def register_scraper_tools(mcp) -> None:
         Returns:
             Dict with url, depth, and discovered_urls list.
         """
-        from cortex.extensions.scraper.engine import ScraperEngine
-
-        engine = ScraperEngine()
+        engine = _get_scraper_engine()
         discovered = await engine.map_site(url, max_depth=depth)
 
         return {
@@ -128,5 +140,5 @@ def register_scraper_tools(mcp) -> None:
         }
 
     LOG.info(
-        "🕷️ SCRAPER-Ω MCP tools registered: cortex_scrape, cortex_scrape_batch, cortex_scrape_map"
+        "SCRAPER MCP tools registered: cortex_scrape, cortex_scrape_batch, cortex_scrape_map",
     )

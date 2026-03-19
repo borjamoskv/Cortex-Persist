@@ -55,7 +55,7 @@ class _LazyCommand(click.Command):
         self._module_path = module_path
         self._attr_name = attr_name
         self._help_text = help_text
-        self._resolved: Optional[click.Command] = None
+        self._resolved: click.Command | None = None
 
     def _resolve(self) -> click.Command:
         if self._resolved is None:
@@ -94,9 +94,9 @@ class _LazyCommand(click.Command):
 
     def make_context(
         self,
-        info_name: Optional[str],
+        info_name: str | None,
         args: list[str],
-        parent: Optional[click.Context] = None,
+        parent: click.Context | None = None,
         **extra,
     ) -> click.Context:
         return self._resolve().make_context(info_name, args, parent=parent, **extra)
@@ -120,7 +120,7 @@ class _LazyGroup(_LazyCommand, click.Group):
             return resolved.list_commands(ctx)
         return []
 
-    def get_command(self, ctx: click.Context, cmd_name: str) -> Optional[click.Command]:
+    def get_command(self, ctx: click.Context, cmd_name: str) -> click.Command | None:
         resolved = self._resolve()
         if isinstance(resolved, click.Group):
             return resolved.get_command(ctx, cmd_name)
@@ -146,7 +146,6 @@ _SELF_REGISTERING_MODULES: list[str] = [
     "cortex.cli.lineage_cmds",
     "cortex.cli.loop_cmds",
     "cortex.cli.mejoralo_cmds",
-    "cortex.cli.memory_cmds",
     "cortex.cli.prompt_cmds",
     "cortex.cli.purge",
     "cortex.cli.reflect_cmds",
@@ -162,6 +161,7 @@ _SELF_REGISTERING_MODULES: list[str] = [
     "cortex.cli.timeline_cmds",
     "cortex.cli.tips_cmds",
     "cortex.cli.trust_cmds",
+    "cortex.cli.memory_cmds",
     "cortex.cli.vote_ledger",
 ]
 
@@ -177,6 +177,7 @@ _LAZY_GROUPS: list[tuple[str, str, str, str]] = [
         "Design Sovereign Prompts from raw requirements.",
     ),
     ("apotheosis", "cortex.cli.apotheosis_cmds", "apotheosis_cmds", "Apotheosis autonomy engine."),
+    ("audit", "cortex.cli.audit_cmds", "audit_cmds", "System security and architectural auditing."),
     ("autorouter", "cortex.cli.autorouter_cmds", "autorouter_cmds", "AI model router daemon."),
     (
         "bibliotecario",
@@ -204,6 +205,12 @@ _LAZY_GROUPS: list[tuple[str, str, str, str]] = [
     ("josu", "cortex.cli.commands.josu_start", "app", "Manage the JOSU proactive daemon."),
     ("genesis", "cortex.cli.genesis_cmds", "genesis_group", "Genesis Engine — create systems."),
     ("health", "cortex.cli.health_cmds", "health_group", "Health Index — system monitoring."),
+    (
+        "immune",
+        "cortex.cli.immune_cmds",
+        "immune_group",
+        "Immune system and epistemic membrane commands.",
+    ),
     ("routing", "cortex.cli.routing_cmds", "routing", "LLM routing — tier/cost-aware selection."),
     ("maestro", "cortex.cli.maestro_cmds", "maestro", "Autonomous Mac automation agent."),
     (
@@ -227,6 +234,12 @@ _LAZY_GROUPS: list[tuple[str, str, str, str]] = [
         "Domain intelligence and market anomaly arbitrage.",
     ),
     ("wealth", "cortex.cli.wealth_cmds", "wealth_cmds", "Wealth engine."),
+    ("gateway", "cortex.cli.gateway_cmds", "gateway_cmds", "CORTEX gateway management."),
+    ("memory", "cortex.cli.memory_cmds", "memory_cmds", "CORTEX memory management."),
+    ("doctor", "cortex.cli.doctor_cmds", "doctor", "🩺 CORTEX Doctor — Diagnostic tool."),
+    ("chomsky", "cortex.cli.chomsky_cmds", "chomsky_group", "CHOMSKY-Ω Syntactic Compressor (0% Fact Drop)."),
+    ("research", "cortex.cli.research_cmds", "research_cmds", "🚀 Sovereign Research: Architectural Innovation & Exergy."),
+    ("session", "cortex.cli.session_mgr_cmds", "session_cmds", "🤖 Autonomous agent session management."),
 ]
 
 # ─── Lazy standalone commands ────────────────────────────────────────────
@@ -262,7 +275,7 @@ def _patched_list_commands(ctx: click.Context) -> list[str]:
     return _original_list_commands(ctx)
 
 
-def _patched_get_command(ctx: click.Context, cmd_name: str) -> Optional[click.Command]:
+def _patched_get_command(ctx: click.Context, cmd_name: str) -> click.Command | None:
     """Get a command, loading self-registering modules if not found."""
     # First try without loading (catches lazy groups + already loaded commands)
     cmd = _original_get_command(ctx, cmd_name)

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from fastapi import Depends, Header, HTTPException, Request
 
@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 async def require_auth(
     request: Request,
-    authorization: Optional[str] = Header(
+    authorization: str | None = Header(
         None,
         description="Bearer <api-key>",
     ),

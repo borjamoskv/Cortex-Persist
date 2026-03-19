@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 __all__ = [
     "DEFAULT_GAP_SECONDS",
@@ -112,8 +111,8 @@ class Heartbeat:
     project: str
     entity: str
     category: str
-    branch: Optional[str]
-    language: Optional[str]
+    branch: str | None
+    language: str | None
     timestamp: str
     meta: dict
 

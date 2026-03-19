@@ -15,7 +15,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional
 
 
 class AxiomCategory(str, Enum):
@@ -35,7 +34,7 @@ class Axiom:
     mandate: str
     category: AxiomCategory
     enforcement: str
-    ci_gate: Optional[str] = None
+    ci_gate: str | None = None
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -338,6 +337,18 @@ _ASPIRATIONAL: list[Axiom] = [
         enforcement="Axioma de Colapso Entrópico. Guards entrópicos. "
         "Zero-trust cognitivo. Detección de premature epistemic closure.",
     ),
+    Axiom(
+        id="AX-034",
+        name="Cognitive Routing (Ω₁₆)",
+        mandate=(
+            "Agents MUST switch between discrete reasoning modes (Deep Think, "
+            "Deep Research, UltraThink) based on task complexity as defined "
+            "in GEMINI.md. Selection is structural, not preferential. "
+            "High-exergy modes are reserved for irreversible or singularity events."
+        ),
+        category=AxiomCategory.ASPIRATIONAL,
+        enforcement="CognitiveHandoff orchestration + Mode Selection Matrix in GEMINI.md.",
+    ),
 ]
 
 
@@ -362,6 +373,6 @@ def enforced() -> list[Axiom]:
     return [ax for ax in AXIOM_REGISTRY.values() if ax.ci_gate is not None]
 
 
-def get(axiom_id: str) -> Optional[Axiom]:
+def get(axiom_id: str) -> Axiom | None:
     """Retrieve an axiom by its canonical ID (e.g., 'AX-010')."""
     return AXIOM_REGISTRY.get(axiom_id)

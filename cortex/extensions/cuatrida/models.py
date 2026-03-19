@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 
 class Dimension(Enum):
@@ -39,5 +39,5 @@ class DecisionNode:
     dimension: Dimension
     metrics: CuatridaMetrics
     timestamp: str
-    causal_link: Optional[int] = None  # Reference to previous tx_id
-    metadata: Optional[dict[str, Any]] = None
+    causal_link: int | None = None  # Reference to previous tx_id
+    metadata: dict[str, Any] | None = None

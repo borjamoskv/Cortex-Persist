@@ -48,6 +48,7 @@ class AXNodeSnapshot:
     size: tuple[float, float] | None
     path: tuple[int, ...]
     children: list[AXNodeSnapshot]
+    _ref: Any = None
 
 
 @dataclasses.dataclass

@@ -13,7 +13,7 @@ import os
 import sys
 from dataclasses import asdict, dataclass
 from enum import Enum
-from typing import NoReturn, Optional
+from typing import NoReturn
 
 from rich.panel import Panel
 
@@ -72,7 +72,7 @@ class CortexErrorStruct:
 # ─── Helpers ─────────────────────────────────────────────────────────
 
 
-def _lang() -> Optional[str]:
+def _lang() -> str | None:
     """Detect current language from environment or context."""
     import os
 
@@ -230,7 +230,7 @@ def classify_error(e: Exception, *, db_path: str = "", context: str = "") -> Cor
         return os_struct
 
     # Runtime generic
-    if isinstance(e, (RuntimeError, ValueError)):
+    if isinstance(e, RuntimeError | ValueError):
         return CortexErrorStruct(
             code=ErrorCode.VALIDATION_ERROR if isinstance(e, ValueError) else ErrorCode.UNEXPECTED,
             message=f"Error{ctx_prefix}",
@@ -250,7 +250,7 @@ def classify_error(e: Exception, *, db_path: str = "", context: str = "") -> Cor
 
 def _classify_sqlite_error(
     e: Exception, error_str: str, ctx_prefix: str
-) -> Optional[CortexErrorStruct]:
+) -> CortexErrorStruct | None:
     import sqlite3
 
     if isinstance(e, sqlite3.OperationalError) and "locked" in error_str.lower():
@@ -285,7 +285,7 @@ def _classify_sqlite_error(
 
 def _classify_os_error(
     e: Exception, error_str: str, ctx_prefix: str, db_path: str
-) -> Optional[CortexErrorStruct]:
+) -> CortexErrorStruct | None:
     if isinstance(e, FileNotFoundError):
         if db_path and "cortex" in error_str.lower():
             return CortexErrorStruct(
@@ -318,7 +318,7 @@ def _classify_os_error(
         )
 
     # Runtime generic
-    if isinstance(e, (RuntimeError, ValueError)):
+    if isinstance(e, RuntimeError | ValueError):
         return CortexErrorStruct(
             code=ErrorCode.VALIDATION_ERROR if isinstance(e, ValueError) else ErrorCode.UNEXPECTED,
             message=f"Error{ctx_prefix}",

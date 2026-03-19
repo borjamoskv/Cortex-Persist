@@ -12,7 +12,6 @@ import time
 from collections.abc import Callable
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional
 
 from cortex.extensions.daemon.alerts import AlertHandlerMixin
 from cortex.extensions.daemon.healing import HealingMixin
@@ -119,7 +118,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
 
     def __init__(
         self,
-        sites: Optional[list[str]] = None,
+        sites: list[str] | None = None,
         config_dir: Path = AGENT_DIR / "memory",
         stale_hours: float = DEFAULT_STALE_HOURS,
         memory_stale_hours: float = DEFAULT_MEMORY_STALE_HOURS,
@@ -148,7 +147,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
     def _init_core_monitors(
         self,
         file_config: dict,
-        sites: Optional[list[str]],
+        sites: list[str] | None,
         stale_hours: float,
         memory_stale_hours: float,
     ) -> None:
@@ -263,8 +262,8 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
     def _init_background_agents(self, file_config: dict) -> None:
         """Initialize autonomous background agents like Aether."""
         # pyright: reportCallIssue=false, reportArgumentType=false, reportOptionalMemberAccess=false  # type: ignore[type-error]
-        self._aether_daemon: Optional[AetherDaemon] = None
-        self.aether_monitor: Optional[AetherMonitor] = None
+        self._aether_daemon: AetherDaemon | None = None
+        self.aether_monitor: AetherMonitor | None = None
         if _AETHER_AVAILABLE and file_config.get("aether_enabled", False):
             try:
                 aether_queue = TaskQueue()
@@ -545,7 +544,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
             logger.error("Failed to save status: %s", e)
 
     @staticmethod
-    def load_status() -> Optional[dict]:
+    def load_status() -> dict | None:
         """Load last daemon status from disk."""
         if not STATUS_FILE.exists():
             return None

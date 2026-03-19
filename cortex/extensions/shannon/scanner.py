@@ -8,7 +8,7 @@ frequency distribution ready for entropy analysis.
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine
@@ -43,14 +43,14 @@ class MemoryScanner:
 
     async def type_distribution(
         self,
-        project: Optional[str] = None,
+        project: str | None = None,
     ) -> dict[str, int]:
         """Frequency of each fact_type among active facts."""
         return await self._grouped_count("fact_type", project)
 
     async def confidence_distribution(
         self,
-        project: Optional[str] = None,
+        project: str | None = None,
     ) -> dict[str, int]:
         """Frequency of each confidence level among active facts."""
         return await self._grouped_count("confidence", project)
@@ -61,14 +61,14 @@ class MemoryScanner:
 
     async def source_distribution(
         self,
-        project: Optional[str] = None,
+        project: str | None = None,
     ) -> dict[str, int]:
         """Frequency of active facts per source."""
         return await self._grouped_count("source", project)
 
     async def age_distribution(
         self,
-        project: Optional[str] = None,
+        project: str | None = None,
     ) -> dict[str, int]:
         """Active facts bucketed by age (today/week/month/quarter/older)."""
         where = _ACTIVE
@@ -118,7 +118,7 @@ class MemoryScanner:
 
     async def temporal_velocity(
         self,
-        project: Optional[str] = None,
+        project: str | None = None,
         window_days: int = 30,
     ) -> dict[str, int]:
         """Facts created per day for the last `window_days` days.
@@ -148,7 +148,7 @@ class MemoryScanner:
 
     async def content_length_distribution(
         self,
-        project: Optional[str] = None,
+        project: str | None = None,
     ) -> dict[str, int]:
         """Content length bucketed into bands for quality assessment.
 
@@ -183,7 +183,7 @@ class MemoryScanner:
 
     async def total_active_facts(
         self,
-        project: Optional[str] = None,
+        project: str | None = None,
     ) -> int:
         """Count of active (non-deprecated, non-quarantined) facts."""
         where = _ACTIVE
@@ -229,7 +229,7 @@ class MemoryScanner:
 
     async def temporal_gap_days(
         self,
-        project: Optional[str] = None,
+        project: str | None = None,
     ) -> tuple[float, float, int]:
         """Largest gap between consecutive facts and total time span.
 
@@ -267,7 +267,7 @@ class MemoryScanner:
 
     async def confidence_weight_sum(
         self,
-        project: Optional[str] = None,
+        project: str | None = None,
     ) -> tuple[float, int]:
         """Sum of confidence-weighted facts and total count.
 
@@ -305,7 +305,7 @@ class MemoryScanner:
     async def _grouped_count(
         self,
         column: str,
-        project: Optional[str],
+        project: str | None,
     ) -> dict[str, int]:
         """Generic GROUP BY count for a single column."""
         where = _ACTIVE

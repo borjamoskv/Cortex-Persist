@@ -4,7 +4,6 @@ import json
 import logging
 import sqlite3
 from datetime import datetime, timedelta, timezone
-from typing import Optional
 
 import aiosqlite
 
@@ -36,10 +35,10 @@ CREATE INDEX IF NOT EXISTS idx_signals_project ON signals(project);
 
 def _build_query(
     *,
-    event_type: Optional[str] = None,
-    source: Optional[str] = None,
-    project: Optional[str] = None,
-    unconsumed_by: Optional[str] = None,
+    event_type: str | None = None,
+    source: str | None = None,
+    project: str | None = None,
+    unconsumed_by: str | None = None,
     order: str = "ASC",
     limit: int = 50,
 ) -> tuple[str, list]:
@@ -84,10 +83,10 @@ class AsyncSignalBus:
     async def emit(
         self,
         event_type: str,
-        payload: Optional[dict] = None,
+        payload: dict | None = None,
         *,
         source: str = "cli",
-        project: Optional[str] = None,
+        project: str | None = None,
     ) -> int:
         try:
             await self.ensure_table()
@@ -111,10 +110,10 @@ class AsyncSignalBus:
     async def history(
         self,
         *,
-        event_type: Optional[str] = None,
-        source: Optional[str] = None,
-        project: Optional[str] = None,
-        since: Optional[datetime] = None,
+        event_type: str | None = None,
+        source: str | None = None,
+        project: str | None = None,
+        since: datetime | None = None,
         limit: int = 50,
     ) -> list[Signal]:
         await self.ensure_table()
@@ -135,10 +134,10 @@ class AsyncSignalBus:
     async def _query(
         self,
         *,
-        event_type: Optional[str] = None,
-        source: Optional[str] = None,
-        project: Optional[str] = None,
-        unconsumed_by: Optional[str] = None,
+        event_type: str | None = None,
+        source: str | None = None,
+        project: str | None = None,
+        unconsumed_by: str | None = None,
         limit: int = 50,
     ) -> list[Signal]:
         query, params = _build_query(
@@ -155,9 +154,9 @@ class AsyncSignalBus:
     async def poll(
         self,
         *,
-        event_type: Optional[str] = None,
-        source: Optional[str] = None,
-        project: Optional[str] = None,
+        event_type: str | None = None,
+        source: str | None = None,
+        project: str | None = None,
         consumer: str = "default",
         limit: int = 50,
     ) -> list[Signal]:
@@ -184,10 +183,10 @@ class AsyncSignalBus:
     async def peek(
         self,
         *,
-        event_type: Optional[str] = None,
-        source: Optional[str] = None,
-        project: Optional[str] = None,
-        consumer: Optional[str] = None,
+        event_type: str | None = None,
+        source: str | None = None,
+        project: str | None = None,
+        consumer: str | None = None,
         limit: int = 50,
     ) -> list[Signal]:
         await self.ensure_table()
@@ -265,10 +264,10 @@ class SignalBus:
     def emit(
         self,
         event_type: str,
-        payload: Optional[dict] = None,
+        payload: dict | None = None,
         *,
         source: str = "cli",
-        project: Optional[str] = None,
+        project: str | None = None,
     ) -> int:
         try:
             self.ensure_table()
@@ -299,9 +298,9 @@ class SignalBus:
     def poll(
         self,
         *,
-        event_type: Optional[str] = None,
-        source: Optional[str] = None,
-        project: Optional[str] = None,
+        event_type: str | None = None,
+        source: str | None = None,
+        project: str | None = None,
         consumer: str = "default",
         limit: int = 50,
     ) -> list[Signal]:
@@ -333,10 +332,10 @@ class SignalBus:
     def peek(
         self,
         *,
-        event_type: Optional[str] = None,
-        source: Optional[str] = None,
-        project: Optional[str] = None,
-        consumer: Optional[str] = None,
+        event_type: str | None = None,
+        source: str | None = None,
+        project: str | None = None,
+        consumer: str | None = None,
         limit: int = 50,
     ) -> list[Signal]:
         self.ensure_table()
@@ -351,10 +350,10 @@ class SignalBus:
     def history(
         self,
         *,
-        event_type: Optional[str] = None,
-        source: Optional[str] = None,
-        project: Optional[str] = None,
-        since: Optional[datetime] = None,
+        event_type: str | None = None,
+        source: str | None = None,
+        project: str | None = None,
+        since: datetime | None = None,
         limit: int = 50,
     ) -> list[Signal]:
         self.ensure_table()
@@ -414,10 +413,10 @@ class SignalBus:
     def _query(
         self,
         *,
-        event_type: Optional[str] = None,
-        source: Optional[str] = None,
-        project: Optional[str] = None,
-        unconsumed_by: Optional[str] = None,
+        event_type: str | None = None,
+        source: str | None = None,
+        project: str | None = None,
+        unconsumed_by: str | None = None,
         limit: int = 50,
     ) -> list[Signal]:
         query, params = _build_query(

@@ -15,7 +15,6 @@ REST endpoints for Langbase integration:
 from __future__ import annotations
 
 import logging
-from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
@@ -51,16 +50,16 @@ class PipeRunRequest(BaseModel):
 
     pipe_name: str = Field(..., min_length=1, max_length=256, description="Langbase Pipe name")
     query: str = Field(..., min_length=1, max_length=8192, description="User query / prompt")
-    project: Optional[str] = Field(None, description="Filter CORTEX facts by project")
+    project: str | None = Field(None, description="Filter CORTEX facts by project")
     top_k: int = Field(10, ge=1, le=50, description="Number of CORTEX facts for context")
-    thread_id: Optional[str] = Field(None, description="Langbase thread ID for conversation")
+    thread_id: str | None = Field(None, description="Langbase thread ID for conversation")
 
 
 class SyncRequest(BaseModel):
     """Sync CORTEX facts to Langbase Memory."""
 
     project: str = Field(..., min_length=1, max_length=256, description="CORTEX project to sync")
-    memory_name: Optional[str] = Field(None, description="Override Langbase memory name")
+    memory_name: str | None = Field(None, description="Override Langbase memory name")
     limit: int = Field(500, ge=1, le=2000, description="Max facts to sync")
 
 

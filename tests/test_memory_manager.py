@@ -244,7 +244,7 @@ async def test_store_rejection_thalamus(manager, mock_mem0_pipeline):
     manager.thalamus.filter = AsyncMock(return_value=(False, "discard:causal_saturation", None))
 
     # Patch notify_notch_pruning so it doesn't try to use WebSockets
-    with patch("cortex.memory.manager.notify_notch_pruning", new_callable=AsyncMock):
+    with patch("cortex.routes.notch_ws.notify_notch_pruning", new_callable=AsyncMock):
         result = await manager.store(
             tenant_id="t1",
             content="Saturated fact",

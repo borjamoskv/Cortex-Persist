@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 import sqlite3
-from typing import Any, Optional
+from typing import Any
 
 import aiosqlite
 
@@ -60,7 +60,7 @@ class ConsensusMixin(EngineMixinBase):
         return 1.0 + (weighted_sum / total_weight) if total_weight > 0 else 1.0
 
     async def vote(
-        self, fact_id: int, agent: str, value: int, signature: Optional[str] = None
+        self, fact_id: int, agent: str, value: int, signature: str | None = None
     ) -> float:
         """Vote with immutable ledger logging and reputation-weighted consensus."""
         if value not in (-1, 0, 1):

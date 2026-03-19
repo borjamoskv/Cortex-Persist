@@ -6,9 +6,9 @@ Contains: trace_episode, trace_chain, shannon_report, handoff, embed, embed_stat
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
-from cortex.engine import CortexEngine
+from cortex.mcp.decorators import with_db
 
 if TYPE_CHECKING:
     from cortex.mcp.server import _MCPContext
@@ -20,65 +20,63 @@ def _register_trace_episode_tool(mcp, ctx: _MCPContext) -> None:
     """Register the ``cortex_trace_episode`` tool."""
 
     @mcp.tool()
+    @with_db(ctx)
     async def cortex_trace_episode(
+        conn: Any,
         query: str = "",
         fact_id: int = 0,
         project: str = "",
         limit: int = 3,
     ) -> str:
         """Trace causal episodes in CORTEX memory."""
-        await ctx.ensure_ready()
-        async with ctx.pool.acquire() as conn:
-            engine = CortexEngine(ctx.cfg.db_path, auto_embed=False)
-            engine._conn = conn
-            if fact_id > 0:
-                episode = await engine.trace_episode(fact_id)
-                return (
-                    f"Causal Episode from fact #{fact_id}:\n"
-                    f"  Root: #{episode.root_fact_id}\n"
-                    f"  Depth: {episode.depth}\n"
-                    f"  Nodes: {len(episode.fact_chain)}\n"
-                    f"  Entropy: {episode.entropy_density:.2f}\n"
-                    f"  Project: {episode.project}\n\n"
-                    f"{episode.summary}"
+        engine = ctx.engine_from_conn(conn)
+        if fact_id > 0:
+            episode = await engine.trace_episode(fact_id)
+            return (
+                f"Causal Episode from fact #{fact_id}:\n"
+                f"  Root: #{episode.root_fact_id}\n"
+                f"  Depth: {episode.depth}\n"
+                f"  Nodes: {len(episode.fact_chain)}\n"
+                f"  Entropy: {episode.entropy_density:.2f}\n"
+                f"  Project: {episode.project}\n\n"
+                f"{episode.summary}"
+            )
+        if query:
+            episodes = await engine.recall_episode(query, project, min(max(limit, 1), 10))
+            if not episodes:
+                return "No causal episodes found."
+            lines = [f"Found {len(episodes)} causal episode(s):\n"]
+            for ep in episodes:
+                lines.append(
+                    f"--- Episode (root=#{ep.root_fact_id}, "
+                    f"depth={ep.depth}, "
+                    f"entropy={ep.entropy_density:.2f}) ---\n"
+                    f"{ep.summary}\n"
                 )
-            if query:
-                episodes = await engine.recall_episode(query, project, min(max(limit, 1), 10))
-                if not episodes:
-                    return "No causal episodes found."
-                lines = [f"Found {len(episodes)} causal episode(s):\n"]
-                for ep in episodes:
-                    lines.append(
-                        f"--- Episode (root=#{ep.root_fact_id}, "
-                        f"depth={ep.depth}, "
-                        f"entropy={ep.entropy_density:.2f}) ---\n"
-                        f"{ep.summary}\n"
-                    )
-                return "\n".join(lines)
-            return "Provide either a query or a fact_id."
+            return "\n".join(lines)
+        return "Provide either a query or a fact_id."
 
 
 def _register_trace_chain_tool(mcp, ctx: _MCPContext) -> None:
     """Register the ``cortex_trace_chain`` tool."""
 
     @mcp.tool()
+    @with_db(ctx)
     async def cortex_trace_chain(
+        conn: Any,
         fact_id: int,
         direction: str = "down",
         max_depth: int = 10,
     ) -> str:
         """Traverse the causal chain from a fact."""
-        await ctx.ensure_ready()
         if direction not in ("up", "down"):
             return "❌ direction must be 'up' or 'down'"
-        async with ctx.pool.acquire() as conn:
-            engine = CortexEngine(ctx.cfg.db_path, auto_embed=False)
-            engine._conn = conn
-            chain = await engine.get_causal_chain(
-                fact_id,
-                direction=direction,
-                max_depth=min(max(max_depth, 1), 50),
-            )
+        engine = ctx.engine_from_conn(conn)
+        chain = await engine.get_causal_chain(
+            fact_id,
+            direction=direction,
+            max_depth=min(max(max_depth, 1), 50),
+        )
         if not chain:
             return f"No causal chain from fact #{fact_id}."
         arrow = "↑" if direction == "up" else "↓"
@@ -98,13 +96,11 @@ def _register_shannon_report_tool(mcp, ctx: _MCPContext) -> None:
     """Register the ``cortex_shannon_report`` tool."""
 
     @mcp.tool()
-    async def cortex_shannon_report(project: str = "") -> str:
+    @with_db(ctx)
+    async def cortex_shannon_report(conn: Any, project: str = "") -> str:
         """Analyze Shannon entropy of CORTEX memory."""
-        await ctx.ensure_ready()
-        async with ctx.pool.acquire() as conn:
-            engine = CortexEngine(ctx.cfg.db_path, auto_embed=False)
-            engine._conn = conn
-            report = await engine.shannon_report(project or None)
+        engine = ctx.engine_from_conn(conn)
+        report = await engine.shannon_report(project or None)
         lines = ["CORTEX Shannon Entropy Report:\n"]
         for key, value in report.items():
             if isinstance(value, float):
@@ -122,15 +118,13 @@ def _register_handoff_tool(mcp, ctx: _MCPContext) -> None:
     """Register the ``cortex_handoff`` tool."""
 
     @mcp.tool()
-    async def cortex_handoff() -> str:
+    @with_db(ctx)
+    async def cortex_handoff(conn: Any) -> str:
         """Generate a session handoff with hot decisions and active ghosts."""
-        await ctx.ensure_ready()
-        async with ctx.pool.acquire() as conn:
-            engine = CortexEngine(ctx.cfg.db_path, auto_embed=False)
-            engine._conn = conn
-            from cortex.extensions.agents.handoff import generate_handoff
+        engine = ctx.engine_from_conn(conn)
+        from cortex.extensions.agents.handoff import generate_handoff
 
-            handoff = await generate_handoff(engine)
+        handoff = await generate_handoff(engine)
         lines = [
             f"CORTEX Handoff v{handoff.get('version', '?')}:\n",
             f"  Generated: {handoff.get('generated_at', '?')}\n",

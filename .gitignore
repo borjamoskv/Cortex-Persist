@@ -86,6 +86,14 @@ Thumbs.db
 # ── Generated / Scratch ──────────────────────────
 *.out
 *.png
+patch_*.py
+ledgerize_*.py
+get_claim_url.py
+remediation*.json
+legion_report*.json
+CORTEX_DORKING_REPORT.json
+_run_db.sqlite
+*.sqlite
 scratch_*.html
 *_generated.html
 *_output.txt

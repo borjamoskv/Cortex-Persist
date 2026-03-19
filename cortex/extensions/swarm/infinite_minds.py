@@ -13,8 +13,10 @@ import logging
 from typing import TYPE_CHECKING, TypedDict
 
 if TYPE_CHECKING:
+    from cortex.embeddings.manager import EmbeddingManager
     from cortex.memory.models import CortexFactModel
 
+from cortex.consensus.byzantine import ByzantineArbiter
 from cortex.memory.semantic_ram import DynamicSemanticSpace
 
 
@@ -24,6 +26,7 @@ class ConvergenceDiagnostics(TypedDict, total=False):
     count: int
     active_biases: int
     total_minds: int
+    refuted_count: int
 
 
 __all__ = ["InfiniteMindsManager", "AgentMind"]
@@ -52,17 +55,21 @@ class AgentMind:
         self._space = space
         self.tenant_id = tenant_id
         self.project_id = project_id
-        # In a full neural architecture, this would be a np.ndarray matrix.
-        # For immediate CORTEX v6 compatibility via sqlite-vec, we apply
-        # the bias as a text semantic prefix or metadata filter dynamically.
+        # In CORTEX v6, bias can be a text prefix or a vector (handled by space)
         self.semantic_bias: str = ""
 
     def evolve_bias(self, context_str: str) -> None:
-        """Mutate the agent's semantic projection based on its active context."""
-        # Simple extraction of keywords to skew the search space
+        """Mutate the agent's semantic projection based on its active context.
+
+        Extracts a proportional keyword anchor (sqrt of word count, min 3, max 12)
+        to balance specificity vs. generality of the refractive lens.
+        """
         words = context_str.split()
-        if len(words) > 3:
-            self.semantic_bias = " ".join(words[:3]) + " "
+        if not words:
+            return
+        # Proportional anchor: longer contexts get more keywords
+        k = max(3, min(12, int(len(words) ** 0.5)))
+        self.semantic_bias = " ".join(words[:k]) + " "
 
     async def think(self, query: str, limit: int = 5) -> list[CortexFactModel]:
         """Perform a biased recall over the shared DynamicSemanticSpace.
@@ -70,7 +77,7 @@ class AgentMind:
         The query is refracted through the agent's semantic_bias.
         Also triggers a topological Read-as-Rewrite pulse autonomously.
         """
-        # The agent's reality is skewed by its bias
+        # The agent's reality is skewed by its bias (Zero-Copy Refraction)
         refracted_query = f"{self.semantic_bias}{query}".strip()
 
         # O(1) Zero-Copy Read + Topological Rewrite
@@ -80,7 +87,7 @@ class AgentMind:
             query=refracted_query,
             limit=limit,
             # Agents with deeper context exert stronger gravitational pull
-            pulse_excitation=20.0 if self.semantic_bias else 5.0,
+            pulse_excitation=25.0 if self.semantic_bias else 5.0,
         )
 
 
@@ -91,10 +98,15 @@ class InfiniteMindsManager:
     physical infrastructure with zero I/O friction.
     """
 
-    __slots__ = ("_minds", "_space")
-
-    def __init__(self, space: DynamicSemanticSpace) -> None:
+    def __init__(
+        self,
+        space: DynamicSemanticSpace,
+        embedding_manager: EmbeddingManager | None = None,
+        arbiter: ByzantineArbiter | None = None,
+    ) -> None:
         self._space = space
+        self._embedding_manager = embedding_manager
+        self._arbiter = arbiter
         self._minds: dict[str, AgentMind] = {}
 
     def spawn_mind(self, agent_id: str, tenant_id: str, project_id: str) -> AgentMind:
@@ -115,73 +127,108 @@ class InfiniteMindsManager:
 
         If multiple minds have converged on similar semantic biases,
         this method detects consensus and hardcodes the bridge.
-
-        Returns:
-            Dict with convergence diagnostics.
+        High-entropy (hallucinated) clusters are actively refuted.
         """
         n = len(self._minds)
-        logger.info(
-            "InfiniteMinds: Convergence pulse across %d minds.",
-            n,
-        )
-
-        if n < 2:
-            return {"status": "skip", "reason": "<2 minds", "count": n}
-
-        # Phase 1: Compile active textual biases
         active_minds = [m for m in self._minds.values() if m.semantic_bias]
 
-        # Byzantine cluster detection via semantic centroid alignment
-        try:
-            import asyncio
+        if not active_minds:
+            return {"status": "idle", "total_minds": n}
 
+        if self._embedding_manager is None:
+            logger.warning("No EmbeddingManager; skipping deep convergence pulse.")
+            return {"status": "partial", "reason": "no_embedder", "total_minds": n}
+
+        # 1. Real Embedding Extraction (Ω₁)
+        texts = [m.semantic_bias for m in active_minds]
+        vectors = self._embedding_manager.embed_batch(texts)
+
+        # 2. Byzantine Cluster Detection via Union-Find O(N·α(N))
+        try:
             import numpy as np
 
-            def _compute_byzantine_clusters(active_biases: list[str]) -> tuple[int, int]:
-                # Simulate embedding extraction (in production this uses the embedding model)
-                def _pseudo_embed(text: str, dim: int = 64) -> np.ndarray:
-                    return np.array([float(hash(text + str(i)) % 100) / 100.0 for i in range(dim)])
+            vec_arr = np.array(vectors)
 
-                vectors = np.array([_pseudo_embed(bias) for bias in active_biases])
+            # Normalize for cosine similarity
+            norms = np.linalg.norm(vec_arr, axis=1, keepdims=True)
+            normalized = vec_arr / np.maximum(norms, 1e-9)
 
-                # Calculate pairwise cosine similarity matrix
-                norms = np.linalg.norm(vectors, axis=1, keepdims=True)
-                normalized_vectors = vectors / np.maximum(norms, 1e-9)
-                similarity_matrix = np.dot(normalized_vectors, normalized_vectors.T)
+            # Union-Find (Disjoint Set) — O(N·α(N)) vs O(N²) adjacency
+            parent = list(range(len(active_minds)))
+            rank = [0] * len(active_minds)
 
-                # Detect clusters where similarity > 0.85
-                _adjacency = similarity_matrix > 0.85
-                _edges = int(np.sum(_adjacency)) - len(active_biases)  # Subtract self-loops
+            def find(x: int) -> int:
+                while parent[x] != x:
+                    parent[x] = parent[parent[x]]  # Path halving
+                    x = parent[x]
+                return x
 
-                return len(active_biases), _edges
+            def union(a: int, b: int) -> None:
+                ra, rb = find(a), find(b)
+                if ra == rb:
+                    return
+                if rank[ra] < rank[rb]:
+                    ra, rb = rb, ra
+                parent[rb] = ra
+                if rank[ra] == rank[rb]:
+                    rank[ra] += 1
 
-            # OFF-LOAD: Liberamos el GIL / Event Loop para cálculos matemáticos
-            # (El cálculo de similaridades N^2 bloquea el hilo principal si hay muchos agentes)
-            active_biases_texts = [m.semantic_bias for m in active_minds]
-            loop = asyncio.get_running_loop()
-            biases_count, edges_count = await loop.run_in_executor(
-                None, _compute_byzantine_clusters, active_biases_texts
-            )
+            # Pairwise similarity with early exit per row
+            sim_threshold = 0.92
+            for i in range(len(active_minds)):
+                # Dot product of row i against all j > i
+                sims = np.dot(normalized[i], normalized[i + 1:].T)
+                for j_offset in np.where(sims > sim_threshold)[0]:
+                    union(i, i + 1 + int(j_offset))
 
-            logger.info(
-                "InfiniteMinds: Byzantine cluster detection complete. Evaluated %d tensors, %d edges.",
-                biases_count,
-                edges_count,
-            )
+            # Extract clusters from Union-Find
+            cluster_map: dict[int, list[int]] = {}
+            for i in range(len(active_minds)):
+                root = find(i)
+                cluster_map.setdefault(root, []).append(i)
+            clusters = [v for v in cluster_map.values() if len(v) > 1]
+
+            refuted_count = 0
+            if self._arbiter and clusters:
+                # Phase 3: Sovereign Refutation (Ω₅)
+                for cluster_indices in clusters:
+                    cluster_minds = [
+                        active_minds[idx] for idx in cluster_indices
+                    ]
+                    proposals = {
+                        m.agent_id: m.semantic_bias for m in cluster_minds
+                    }
+
+                    verdict = await self._arbiter.evaluate_data(proposals)
+
+                    if not verdict.quorum_met:
+                        logger.warning(
+                            "InfiniteMinds: SHATTERED CONSENSUS in "
+                            "cluster %s. Refuting.",
+                            [m.agent_id for m in cluster_minds],
+                        )
+                        refuted_count += len(cluster_minds)
+                        if self._arbiter.rep_manager:
+                            for m in cluster_minds:
+                                await self._arbiter.rep_manager.slash(
+                                    m.agent_id,
+                                    penalty=0.05,
+                                    reason="semantic_bias_hallucination",
+                                )
+
             return {
                 "status": "success",
-                "count": biases_count,
-                "active_biases": biases_count,
+                "active_biases": len(active_minds),
+                "total_minds": n,
+                "refuted_count": refuted_count,
+                "count": len(clusters),
+            }
+        except ImportError:
+            logger.error(
+                "InfiniteMinds: numpy required for cluster detection."
+            )
+            return {
+                "status": "failed",
+                "reason": "numpy_missing",
                 "total_minds": n,
             }
-
-        except ImportError:
-            logger.warning(
-                "InfiniteMinds: numpy not available. Falling back to textual Byzantine cluster detection."
-            )
-
-        return {
-            "status": "partial",
-            "active_biases": len(active_minds),
-            "total_minds": n,
-        }

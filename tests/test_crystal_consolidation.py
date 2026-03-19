@@ -76,7 +76,7 @@ def _insert_crystal(
 ) -> None:
     """Helper to insert a test crystal."""
     timestamp = time.time() - (age_days * 86400)
-    meta = json.dumps({"access_stats": {"total_access_count": recall_count}})
+    metadata = json.dumps({"access_stats": {"total_access_count": recall_count}})
     emb = embedding or [0.1, 0.2, 0.3, 0.4]
     emb_bytes = np.array(emb, dtype=np.float32).tobytes()
 
@@ -87,7 +87,7 @@ def _insert_crystal(
                                 is_diamond, metadata)
         VALUES (?, 'sovereign', ?, ?, ?, ?, ?)
         """,
-        (fact_id, project, content, timestamp, int(is_diamond), meta),
+        (fact_id, project, content, timestamp, int(is_diamond), metadata),
     )
     rowid = cursor.lastrowid
     cursor.execute(

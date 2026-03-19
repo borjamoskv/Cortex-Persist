@@ -99,7 +99,7 @@ MODULE_DIR = Path(__file__).parent
 DATA_PATH = MODULE_DIR / "data" / "target.json"
 
 # ❌ Forbidden
-DATA_PATH = "./data/target.json"
+DATA_PATH = "/Users/borja/cortex/data/target.json"
 ```
 
 This ensures CORTEX remains deployable on any machine without code changes — the foundation of a truly sovereign, cross-platform agent infrastructure.

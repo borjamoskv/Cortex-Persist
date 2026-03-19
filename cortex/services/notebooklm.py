@@ -4,7 +4,7 @@ import logging
 import shutil
 import time
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from cortex.database.core import connect as db_connect
 from cortex.engine import CortexEngine
@@ -143,12 +143,12 @@ class NotebookLMService:
         self.db_path = db_path
         self.engine = CortexEngine(db_path)
 
-    async def get_active_facts(self, project: Optional[str] = None) -> list[Fact]:
+    async def get_active_facts(self, project: str | None = None) -> list[Fact]:
         """Fetch cleartext facts using CortexEngine."""
         facts = await self.engine.search(project=project, limit=5000)
         return [f for f in facts if f.fact_type != "signal"]
 
-    def get_entities_and_relations(self, project: Optional[str] = None) -> list[dict[str, Any]]:
+    def get_entities_and_relations(self, project: str | None = None) -> list[dict[str, Any]]:
         """Load entity graph for NotebookLM context. Fixes connection guard."""
         conn = db_connect(self.db_path)
         try:
@@ -182,7 +182,7 @@ class NotebookLMService:
         """Apply Byzantine Defense (Ω₃): A tamper-evident signature for the export."""
         return f"\n\n---\n**SOVEREIGN SIGNATURE**: {int(time.time())};mosaic-v8;borjamoskv\n"
 
-    def detect_cloud_sync(self) -> Optional[Path]:
+    def detect_cloud_sync(self) -> Path | None:
         """Detect appropriate cloud storage sync folder."""
         for _provider, paths in CLOUD_PROVIDERS.items():
             for p in paths:
@@ -190,7 +190,7 @@ class NotebookLMService:
                     return p
         return None
 
-    async def generate_digest(self, project: Optional[str] = None) -> str:
+    async def generate_digest(self, project: str | None = None) -> str:
         """Generate Master Digest string."""
         facts = await self.get_active_facts(project)
         sections = [self.format_fact(f) for f in facts]
@@ -215,7 +215,7 @@ class NotebookLMService:
 
         return counts
 
-    def sync_to_cloud(self, source_path: Path, cloud_path: Optional[Path] = None) -> Path:
+    def sync_to_cloud(self, source_path: Path, cloud_path: Path | None = None) -> Path:
         """Copy a file or directory to cloud storage."""
         dest = cloud_path or self.detect_cloud_sync()
         if not dest:

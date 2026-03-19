@@ -119,16 +119,30 @@
     "base_url": "https://api.x.ai/v1",
     "default_model": "grok-4.1",
     "env_key": "XAI_API_KEY",
-    "context_window": 131072,
+    "context_window": 256000,
+    "models": {
+      "grok-4.1": 256000,
+      "grok-4.1-fast": 2000000,
+      "grok-3": {
+        "context_window": 128000,
+        "tier": "frontier",
+        "cost_class": "high"
+      },
+      "grok-4": {
+        "context_window": 128000,
+        "tier": "high",
+        "cost_class": "low"
+      }
+    },
     "tier": "frontier",
     "cost_class": "high",
     "specialization": ["code", "reasoning", "creative", "architect", "general"],
     "intent_model_map": {
       "code":      "grok-4.1-fast",
-      "reasoning": "grok-4.1",
-      "creative":  "grok-4.1",
-      "architect": "grok-4.1",
-      "general":   "grok-4.1-fast"
+      "reasoning": "grok-3",
+      "creative":  "grok-3",
+      "architect": "grok-4.1-fast",
+      "general":   "grok-4"
     }
   },
   "cohere": {
@@ -167,11 +181,11 @@
     "cost_class": "variable",
     "specialization": ["reasoning", "code", "creative", "architect", "general"],
     "intent_model_map": {
-      "code":      "anthropic/claude-sonnet-4-20250514",
-      "reasoning": "deepseek/deepseek-r1",
-      "creative":  "anthropic/claude-sonnet-4-20250514",
-      "architect": "anthropic/claude-sonnet-4-20250514",
-      "general":   "google/gemini-2.5-pro"
+      "code":      "anthropic/claude-3.5-sonnet",
+      "reasoning": "x-ai/grok-2",
+      "creative":  "anthropic/claude-3.5-sonnet",
+      "architect": "x-ai/grok-2",
+      "general":   "google/gemini-3.1-pro-preview"
     }
   },
   "groq": {
@@ -181,11 +195,12 @@
     "context_window": 131072,
     "tier": "high",
     "cost_class": "free",
-    "specialization": ["reasoning", "code", "creative", "general"],
+    "specialization": ["reasoning", "code", "creative", "architect", "general"],
     "intent_model_map": {
-      "code":      "llama-3.3-70b-versatile",
-      "reasoning": "llama-3.3-70b-versatile",
+      "code":      "qwen/qwen3-32b",
+      "reasoning": "openai/gpt-oss-120b",
       "creative":  "llama-3.3-70b-versatile",
+      "architect": "openai/gpt-oss-120b",
       "general":   "llama-3.3-70b-versatile"
     }
   },
@@ -312,7 +327,7 @@
     "intent_model_map": {
       "code":      "qwen2.5-coder:32b",
       "architect": "qwen2.5-coder:32b",
-      "reasoning": "deepseek-r1:32b",
+      "reasoning": "qwen2.5-coder:32b",
       "creative":  "llama3.3:latest",
       "general":   "qwen2.5-coder:7b"
     }
@@ -380,24 +395,6 @@
     "context_window": 131072,
     "tier": "high",
     "cost_class": "low",
-    "specialization": ["reasoning", "creative", "general"],
-    "intent_model_map": {
-      "reasoning": "llama-3.3-70b",
-      "creative":  "llama-3.3-70b",
-      "general":   "llama-3.3-70b"
-    }
-  },
-  "grok": {
-    "base_url": "https://api.x.ai/v1",
-    "default_model": "grok-beta",
-    "models": ["grok-beta", "grok-2", "grok-vision-beta"],
-    "api_key": "YOUR_GROK_API_KEY",
-    "context_window": 131072,
-    "tier": "frontier",
-    "cost_class": "high",
-    "specialization": ["real-time", "general"],
-    "intent_model_map": {
-      "general": "grok-2"
-    }
+    "specialization": ["reasoning", "creative", "general"]
   }
 }

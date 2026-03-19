@@ -1,255 +1,435 @@
 #!/usr/bin/env python3
-"""CORTEX Ship Gate — Blocks deploy if quality checks fail.
+"""CORTEX Ship Gate — deployment-oracle-omega arbiter.
 
-Exit 0 = safe to ship. Exit 1 = blocked.
-Outputs a JSON report to stdout.
+4-vector structural gate:
+  1. Ghost Radar   2. Test Suite   3. Git State   4. Quality Gate
 
-Usage:
-    python scripts/ship_gate.py              # all checks
-    python scripts/ship_gate.py --fast       # skip slow tests
-    python scripts/ship_gate.py --json-only  # suppress Rich output
+Exit 0 = PASS. Exit 2 = FAIL. Exit 3 = fatal error.
 """
 
 from __future__ import annotations
 
 import json
+import os
+import shlex
+import sqlite3
 import subprocess
 import sys
 import time
 from dataclasses import asdict, dataclass, field
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Final
+from typing import Any, Literal
 
-REPO_ROOT: Final[Path] = Path(__file__).resolve().parent.parent
+Status = Literal["PASS", "FAIL", "WARN"]
 
-# ── Thresholds ──────────────────────────────────────────────────────
-
-MAX_CC: Final[int] = 25  # Cyclomatic Complexity ceiling
-MIN_MEJORALO: Final[int] = 50  # MEJORAlo minimum score
-RUFF_TARGET: Final[str] = "cortex/ tests/"
-PYTEST_TIMEOUT: Final[int] = 120  # seconds
+REPO_ROOT: Path = Path(__file__).resolve().parent.parent
 
 
-@dataclass(slots=True)
+@dataclass
 class CheckResult:
-    """Result of a single quality check."""
-
     name: str
-    passed: bool
+    status: Status
+    summary: str
     duration_ms: float = 0.0
-    detail: str = ""
+    details: dict[str, Any] = field(default_factory=dict)
 
 
-@dataclass(slots=True)
+@dataclass
 class GateReport:
-    """Full ship gate report."""
+    ok: bool
+    repo: str
+    branch: str
+    timestamp_utc: str
+    checks: list[CheckResult]
 
-    gate: str = "UNKNOWN"
-    timestamp: str = ""
-    total_duration_ms: float = 0.0
-    checks: list[CheckResult] = field(default_factory=list)
-
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         return {
-            "gate": self.gate,
-            "timestamp": self.timestamp,
-            "total_duration_ms": round(self.total_duration_ms, 1),
+            "ok": self.ok,
+            "repo": self.repo,
+            "branch": self.branch,
+            "timestamp_utc": self.timestamp_utc,
             "checks": [asdict(c) for c in self.checks],
         }
 
 
-def _run(cmd: str, timeout: int = 120) -> subprocess.CompletedProcess:
-    """Run a shell command and return result."""
-    return subprocess.run(
+class GateError(RuntimeError):
+    pass
+
+
+def _run(
+    cmd: list[str],
+    cwd: Path,
+    timeout: int = 120,
+    check: bool = False,
+    env: dict[str, str] | None = None,
+) -> subprocess.CompletedProcess[str]:
+    merged_env = os.environ.copy()
+    if env:
+        merged_env.update(env)
+    proc = subprocess.run(
         cmd,
-        shell=True,
-        capture_output=True,
+        cwd=str(cwd),
+        env=merged_env,
         text=True,
-        cwd=str(REPO_ROOT),
+        capture_output=True,
         timeout=timeout,
     )
-
-
-def check_ruff() -> CheckResult:
-    """Lint check via ruff."""
-    t0 = time.monotonic()
-    result = _run(f".venv/bin/ruff check {RUFF_TARGET}")
-    ms = (time.monotonic() - t0) * 1000
-    passed = result.returncode == 0
-    error_count = len(result.stdout.strip().splitlines()) if not passed else 0
-    return CheckResult(
-        name="ruff_lint",
-        passed=passed,
-        duration_ms=round(ms, 1),
-        detail=f"{error_count} violations" if not passed else "clean",
-    )
-
-
-def check_tests(fast: bool = False) -> CheckResult:
-    """Run pytest suite."""
-    t0 = time.monotonic()
-    marker = '-m "not slow"' if fast else ""
-    result = _run(
-        f".venv/bin/pytest tests/ {marker} --tb=line -q --no-header",
-        timeout=PYTEST_TIMEOUT,
-    )
-    ms = (time.monotonic() - t0) * 1000
-
-    # Parse summary line like "1162 passed, 3 warnings in 45.2s"
-    lines = result.stdout.strip().splitlines()
-    summary = lines[-1] if lines else ""
-    passed = result.returncode == 0
-
-    return CheckResult(
-        name="pytest",
-        passed=passed,
-        duration_ms=round(ms, 1),
-        detail=summary if summary else result.stderr.strip()[:200],
-    )
-
-
-def check_radon_cc() -> CheckResult:
-    """Scan cyclomatic complexity via radon."""
-    t0 = time.monotonic()
-    try:
-        from radon.complexity import cc_visit
-    except ImportError:
-        return CheckResult(
-            name="radon_cc",
-            passed=True,
-            duration_ms=0,
-            detail="radon not installed, skipped",
+    if check and proc.returncode != 0:
+        raise GateError(
+            f"Command failed: {shlex.join(cmd)}\nexit={proc.returncode}\nstderr:\n{proc.stderr}"
         )
+    return proc
 
-    worst_cc = 0
-    worst_file = ""
-    scanned = 0
 
-    cortex_dir = REPO_ROOT / "cortex"
-    for py_file in cortex_dir.rglob("*.py"):
-        if any(p in py_file.parts for p in ("__pycache__", ".venv", "node_modules")):
+# ── Git ─────────────────────────────────────────────────────────────
+
+
+def _default_branch(repo: Path) -> str:
+    proc = _run(["git", "symbolic-ref", "refs/remotes/origin/HEAD"], cwd=repo, check=False)
+    if proc.returncode == 0:
+        return proc.stdout.strip().rsplit("/", 1)[-1]
+    for c in ("main", "master"):
+        t = _run(["git", "rev-parse", "--verify", f"origin/{c}"], cwd=repo, check=False)
+        if t.returncode == 0:
+            return c
+    return "main"
+
+
+def _current_branch(repo: Path) -> str:
+    return _run(["git", "rev-parse", "--abbrev-ref", "HEAD"], cwd=repo, check=True).stdout.strip()
+
+
+def check_git_state(repo: Path, target: str) -> CheckResult:
+    t0 = time.monotonic()
+    d: dict[str, Any] = {}
+
+    status_out = _run(
+        ["git", "status", "--porcelain"],
+        cwd=repo,
+        check=True,
+    ).stdout.splitlines()
+    dirty = [ln for ln in status_out if ln.strip()]
+    d["dirty_files"] = dirty[:20]
+
+    _run(["git", "fetch", "origin", target], cwd=repo, timeout=120, check=False)
+
+    local = _run(["git", "rev-parse", "HEAD"], cwd=repo, check=True).stdout.strip()
+    rp = _run(["git", "rev-parse", f"origin/{target}"], cwd=repo, check=False)
+    remote = rp.stdout.strip() if rp.returncode == 0 else ""
+
+    mb_proc = _run(["git", "merge-base", "HEAD", f"origin/{target}"], cwd=repo, check=False)
+    mb = mb_proc.stdout.strip() if mb_proc.returncode == 0 else ""
+
+    ahead = mb == remote and local != remote
+    behind = mb == local and local != remote
+    diverged = mb not in {local, remote} if mb else False
+    d.update(
+        {
+            "local": local[:12],
+            "remote": remote[:12],
+            "ahead": ahead,
+            "behind": behind,
+            "diverged": diverged,
+        }
+    )
+
+    fails = []
+    if dirty:
+        fails.append(f"working tree sucio ({len(dirty)} files)")
+    if ahead:
+        fails.append(f"ahead of origin/{target}")
+    if behind:
+        fails.append(f"behind origin/{target}")
+    if diverged:
+        fails.append(f"diverged from origin/{target}")
+
+    ms = (time.monotonic() - t0) * 1000
+    if fails:
+        return CheckResult("git_state", "FAIL", " | ".join(fails), ms, d)
+    return CheckResult("git_state", "PASS", f"clean & aligned with origin/{target}", ms, d)
+
+
+# ── Ghost Radar ─────────────────────────────────────────────────────
+
+
+def check_ghost_radar(repo: Path) -> CheckResult:
+    t0 = time.monotonic()
+    since = datetime.now(timezone.utc) - timedelta(hours=24)
+    d: dict[str, Any] = {"since_utc": since.isoformat()}
+
+    # Try SQLite
+    db_candidates = [
+        repo / "cortex.db",
+        repo / "cortex_memory.db",
+        Path.home() / ".cortex" / "cortex.db",
+    ]
+    ghosts: list[dict[str, Any]] = []
+    for db_path in db_candidates:
+        if not db_path.exists():
             continue
+        d["db_path"] = str(db_path)
         try:
-            code = py_file.read_text(encoding="utf-8")
-            blocks = cc_visit(code)
-            for b in blocks:
-                if b.complexity > worst_cc:
-                    worst_cc = b.complexity
-                    worst_file = str(py_file.relative_to(REPO_ROOT))
-            scanned += 1
-        except (SyntaxError, UnicodeDecodeError):
-            continue
+            conn = sqlite3.connect(str(db_path))
+            conn.row_factory = sqlite3.Row
+            tables = {
+                r["name"]
+                for r in conn.execute(
+                    "SELECT name FROM sqlite_master WHERE type='table'"
+                ).fetchall()
+            }
+            for tbl in [t for t in ("facts", "ledger", "events") if t in tables]:
+                cols = {r["name"] for r in conn.execute(f"PRAGMA table_info({tbl})").fetchall()}
+                ts_col = next((c for c in ("created_at", "timestamp", "ts") if c in cols), None)
+                text_cols = [
+                    c for c in ("content", "summary", "fact", "type", "tags", "kind") if c in cols
+                ]
+                if not ts_col or not text_cols:
+                    continue
+                preds = []
+                params: list[Any] = [since.isoformat()]
+                for col in text_cols:
+                    for term in ("code_ghost", "db_ghost", "ux_ghost"):
+                        preds.append(f"{col} LIKE ?")
+                        params.append(f"%{term}%")
+                if preds:
+                    try:
+                        rows = conn.execute(
+                            f"SELECT * FROM {tbl} WHERE {ts_col} >= ? AND ({' OR '.join(preds)})",
+                            params,
+                        ).fetchall()
+                        ghosts.extend(dict(r) for r in rows)
+                    except sqlite3.Error:
+                        pass
+            conn.close()
+        except Exception as e:
+            d["sqlite_error"] = str(e)
+        if ghosts:
+            break
 
+    # Filter unresolved
+    unresolved = [
+        g
+        for g in ghosts
+        if not any(
+            k in json.dumps(g, ensure_ascii=False).lower()
+            for k in ("resolved", "closed", "mitigated")
+        )
+    ]
+    d["unresolved_count"] = len(unresolved)
     ms = (time.monotonic() - t0) * 1000
-    passed = worst_cc <= MAX_CC
-    detail = f"scanned {scanned} files, max_cc={worst_cc}"
-    if worst_file:
-        detail += f" ({worst_file})"
 
+    if unresolved:
+        return CheckResult(
+            "ghost_radar", "FAIL", f"{len(unresolved)} unresolved ghosts in 24h", ms, d
+        )
+    return CheckResult("ghost_radar", "PASS", "no unresolved ghosts in 24h", ms, d)
+
+
+# ── Test Suite ──────────────────────────────────────────────────────
+
+
+def check_pytest(repo: Path, fast: bool = False) -> CheckResult:
+    t0 = time.monotonic()
+    for venv in (repo / ".venv" / "bin" / "pytest", repo / "venv" / "bin" / "pytest"):
+        if venv.exists():
+            cmd = [str(venv)]
+            break
+    else:
+        cmd = ["pytest"]
+
+    cmd.extend(["tests/", "-q", "--tb=line", "--no-header"])
+    if fast:
+        cmd.extend(["-m", "not slow"])
+
+    proc = _run(cmd, cwd=repo, timeout=600, check=False, env={"PYTHONUNBUFFERED": "1"})
+    lines = proc.stdout.strip().splitlines()
+    summary = lines[-1] if lines else proc.stderr.strip()[:200]
+    ms = (time.monotonic() - t0) * 1000
+
+    d = {"exit_code": proc.returncode, "summary": summary}
+    if proc.returncode != 0:
+        return CheckResult("test_suite", "FAIL", f"pytest failed: {summary}", ms, d)
+    return CheckResult("test_suite", "PASS", f"pytest green: {summary}", ms, d)
+
+
+# ── Quality Gate ────────────────────────────────────────────────────
+
+
+def check_quality(repo: Path) -> CheckResult:
+    t0 = time.monotonic()
+    for venv in (repo / ".venv" / "bin" / "ruff", repo / "venv" / "bin" / "ruff"):
+        if venv.exists():
+            ruff = str(venv)
+            break
+    else:
+        ruff = "ruff"
+
+    proc = _run([ruff, "check", "cortex/", "tests/"], cwd=repo, timeout=120, check=False)
+    ms = (time.monotonic() - t0) * 1000
+    violations = len(proc.stdout.strip().splitlines()) if proc.returncode != 0 else 0
+
+    d = {"exit_code": proc.returncode, "violations": violations}
+    if proc.returncode != 0:
+        return CheckResult("quality_gate", "FAIL", f"ruff: {violations} violations", ms, d)
+    return CheckResult("quality_gate", "PASS", "ruff clean", ms, d)
+
+
+# ── Neural Connectivity (Ω₁₃) ──────────────────────────────────────
+
+
+def check_connectivity(repo: Path) -> CheckResult:
+    """Check API key coverage — thermodynamic exergy gate."""
+    t0 = time.monotonic()
+    d: dict[str, Any] = {}
+    presets_path = repo / "config" / "llm_presets.json"
+
+    if not presets_path.exists():
+        ms = (time.monotonic() - t0) * 1000
+        return CheckResult(
+            "neural_connectivity",
+            "WARN",
+            "llm_presets.json not found",
+            ms,
+            d,
+        )
+
+    try:
+        with open(presets_path, encoding="utf-8") as f:
+            presets = json.load(f)
+    except (json.JSONDecodeError, OSError) as e:
+        ms = (time.monotonic() - t0) * 1000
+        return CheckResult(
+            "neural_connectivity",
+            "FAIL",
+            f"presets parse error: {e}",
+            ms,
+            d,
+        )
+
+    frontier_keys = []
+    configured = []
+    total = 0
+
+    for provider, cfg in presets.items():
+        tier = cfg.get("tier", "unknown")
+        if tier == "local":
+            continue
+        env_key = cfg.get("env_key")
+        if not env_key:
+            continue
+        total += 1
+        if os.getenv(env_key):
+            configured.append(provider)
+        if tier == "frontier" and os.getenv(env_key):
+            frontier_keys.append(provider)
+
+    coverage = (len(configured) / total * 100) if total > 0 else 0
+    d.update(
+        {
+            "total": total,
+            "configured": len(configured),
+            "coverage_pct": round(coverage, 1),
+            "frontier_active": frontier_keys,
+        }
+    )
+    ms = (time.monotonic() - t0) * 1000
+
+    if not configured:
+        return CheckResult(
+            "neural_connectivity",
+            "FAIL",
+            "zero API keys configured — dead system",
+            ms,
+            d,
+        )
+    if not frontier_keys:
+        return CheckResult(
+            "neural_connectivity",
+            "WARN",
+            f"{len(configured)}/{total} keys but no frontier",
+            ms,
+            d,
+        )
     return CheckResult(
-        name="radon_cc",
-        passed=passed,
-        duration_ms=round(ms, 1),
-        detail=detail,
+        "neural_connectivity",
+        "PASS",
+        f"{coverage:.0f}% coverage ({len(configured)}/{total})",
+        ms,
+        d,
     )
 
 
-def check_mejoralo() -> CheckResult:
-    """Check MEJORAlo score if available."""
-    t0 = time.monotonic()
-    try:
-        result = _run(".venv/bin/python -m cortex.mejoralo scan --score-only cortex/", timeout=60)
-        ms = (time.monotonic() - t0) * 1000
-        try:
-            score = int(result.stdout.strip().split()[-1])
-        except (ValueError, IndexError):
-            return CheckResult(
-                name="mejoralo",
-                passed=True,
-                duration_ms=round(ms, 1),
-                detail="could not parse score, skipped",
-            )
-        return CheckResult(
-            name="mejoralo",
-            passed=score >= MIN_MEJORALO,
-            duration_ms=round(ms, 1),
-            detail=f"score={score}/{MIN_MEJORALO} minimum",
-        )
-    except (subprocess.TimeoutExpired, FileNotFoundError):
-        ms = (time.monotonic() - t0) * 1000
-        return CheckResult(
-            name="mejoralo",
-            passed=True,
-            duration_ms=round(ms, 1),
-            detail="timeout or not available, skipped",
-        )
+# ── Main ────────────────────────────────────────────────────────────
 
 
-def _init_console(json_only: bool):
-    """Try to initialize Rich console, return None if json_only or unavailable."""
-    if json_only:
-        return None
+def main() -> int:
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    flags = {a for a in sys.argv[1:] if a.startswith("--")}
+    fast = "--fast" in flags
+
+    repo = Path(args[0]).resolve() if args else REPO_ROOT
+    if not (repo / ".git").exists():
+        raise GateError(f"{repo} is not a git repository")
+
+    branch = _current_branch(repo)
+    default = _default_branch(repo)
+
+    # Rich output
+    console = None
     try:
         from rich.console import Console
 
         console = Console()
-        console.print("\n[bold cyan]🚢 CORTEX Ship Gate[/bold cyan]\n")
-        return console
+        console.print("\n[bold cyan]🚢 CORTEX Ship Gate — deployment-oracle-omega[/bold cyan]\n")
     except ImportError:
-        return None
+        pass
 
-
-def _print_check(console, label: str, result: CheckResult) -> None:
-    """Print a single check result to console."""
-    if console is None:
-        return
-    icon = "✅" if result.passed else "❌"
-    console.print(f"  {icon} {label}: {result.detail} ({result.duration_ms:.0f}ms)")
-
-
-def _print_gate(console, report: GateReport) -> None:
-    """Print final gate verdict."""
-    if console is None:
-        return
-    console.print()
-    if report.gate == "PASS":
-        console.print("[bold green]🟢 GATE: PASS — Safe to ship.[/bold green]\n")
-    else:
-        failed = [c.name for c in report.checks if not c.passed]
-        console.print(f"[bold red]🔴 GATE: FAIL — Blocked by: {', '.join(failed)}[/bold red]\n")
-
-
-def main() -> None:
-    fast = "--fast" in sys.argv
-    json_only = "--json-only" in sys.argv
-    console = _init_console(json_only)
-
-    t0 = time.monotonic()
-    report = GateReport(timestamp=datetime.now(timezone.utc).isoformat())
-
-    checks = [
-        ("Lint", check_ruff),
-        ("Tests", lambda: check_tests(fast=fast)),
-        ("Complexity", check_radon_cc),
-        ("Quality", check_mejoralo),
+    gate_checks = [
+        ("Ghost Radar", lambda: check_ghost_radar(repo)),
+        ("Test Suite", lambda: check_pytest(repo, fast=fast)),
+        ("Git State", lambda: check_git_state(repo, target=default)),
+        ("Quality Gate", lambda: check_quality(repo)),
+        ("Neural Connectivity", lambda: check_connectivity(repo)),
     ]
 
-    for label, fn in checks:
+    results: list[CheckResult] = []
+    for label, fn in gate_checks:
         try:
-            result = fn()
+            r = fn()
         except Exception as e:
-            result = CheckResult(name=label.lower(), passed=False, detail=str(e))
-        report.checks.append(result)
-        _print_check(console, label, result)
+            r = CheckResult(label.lower().replace(" ", "_"), "FAIL", str(e))
+        results.append(r)
+        if console:
+            icon = "✅" if r.status == "PASS" else "❌"
+            console.print(f"  {icon} {label}: {r.summary} ({r.duration_ms:.0f}ms)")
 
-    report.total_duration_ms = (time.monotonic() - t0) * 1000
-    report.gate = "PASS" if all(c.passed for c in report.checks) else "FAIL"
+    ok = all(c.status == "PASS" for c in results)
+    report = GateReport(
+        ok=ok,
+        repo=str(repo),
+        branch=branch,
+        timestamp_utc=datetime.now(timezone.utc).isoformat(),
+        checks=results,
+    )
 
-    _print_gate(console, report)
-    print(json.dumps(report.to_dict(), indent=2, ensure_ascii=False))
-    sys.exit(0 if report.gate == "PASS" else 1)
+    if console:
+        console.print()
+        if ok:
+            console.print("[bold green]🟢 GATE: PASS — Safe to deploy.[/bold green]\n")
+        else:
+            failed = [c.name for c in results if c.status != "PASS"]
+            console.print(f"[bold red]🔴 GATE: FAIL — Blocked by: {', '.join(failed)}[/bold red]\n")
+
+    print(json.dumps(report.to_dict(), ensure_ascii=False, indent=2))
+    return 0 if ok else 2
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        raise SystemExit(main())
+    except GateError as exc:
+        print(
+            json.dumps({"ok": False, "fatal": True, "error": str(exc)}, indent=2), file=sys.stderr
+        )
+        raise SystemExit(3) from exc

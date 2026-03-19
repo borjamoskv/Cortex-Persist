@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Any, Final, Optional
+from typing import Any, Final
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
@@ -19,7 +19,7 @@ router = APIRouter(prefix="/v1/translate", tags=["translate"])
 logger = logging.getLogger("uvicorn.error")
 
 MAX_TEXTS_PER_REQUEST: Final[int] = 100
-MODEL_NAME: Final[str] = "gemini-2.0-flash"
+MODEL_NAME: Final[str] = "gemini-2.5-pro"
 
 
 class TranslateRequest(BaseModel):
@@ -30,9 +30,7 @@ class TranslateRequest(BaseModel):
     target_languages: list[str] = Field(
         ..., description="List of target language codes (e.g., ['es', 'fr', 'zh'])."
     )
-    context: Optional[str] = Field(
-        None, description="Optional context about the application or tone."
-    )
+    context: str | None = Field(None, description="Optional context about the application or tone.")
 
 
 class TranslateResponse(BaseModel):
@@ -54,7 +52,7 @@ def _get_genai_client() -> Any:
         raise HTTPException(status_code=500, detail="LLM configuration error.") from e
 
 
-def _build_system_instruction(context: Optional[str]) -> str:
+def _build_system_instruction(context: str | None) -> str:
     """Constructs the sovereign B2B translation instruction set."""
     base_instruction = (
         "You are OMNI-TRANSLATE, a sovereign localization AI for B2B applications. "
@@ -67,7 +65,7 @@ def _build_system_instruction(context: Optional[str]) -> str:
 
 
 def _parse_llm_response(
-    text_output: Optional[str], target_languages: list[str]
+    text_output: str | None, target_languages: list[str]
 ) -> dict[str, dict[str, str]]:
     """Strictly parses the LLM output ensuring all target languages are present."""
     if not text_output:
@@ -132,7 +130,7 @@ def translate_texts(
     OMNI-TRANSLATE: Sovereign Core translation endpoint.
 
     Translates a dictionary of texts into multiple target languages simultaneously
-    using Gemini 2.0 Flash for optimal speed and cost.
+    using Gemini 2.5 Pro.
     Ensures that the output strictly matches the input schema.
     """
     if not request.texts or not request.target_languages:

@@ -40,7 +40,6 @@ the second is a consequence — the system develops reflexes.
 from __future__ import annotations
 
 import logging
-from typing import Optional
 
 from cortex.database.core import connect as db_connect
 
@@ -72,7 +71,7 @@ def emit_fact_stored(
     fact_type: str,
     source: str,
     tenant_id: str = "default",
-    total_facts: Optional[int] = None,
+    total_facts: int | None = None,
 ) -> None:
     """Fire-and-forget emission of ``fact:stored`` into the Signal Bus.
 

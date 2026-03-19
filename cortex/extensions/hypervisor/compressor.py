@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from cortex.extensions.hypervisor.models import HealthReport, Memory, Receipt
 
@@ -64,7 +64,7 @@ class ComplexityCompressor:
     def to_health_report(
         *,
         active_count: int,
-        last_activity_iso: Optional[str],
+        last_activity_iso: str | None,
         chain_valid: bool,
     ) -> HealthReport:
         """Compress system stats + ledger status into a HealthReport."""
@@ -86,14 +86,14 @@ class ComplexityCompressor:
 # ── Private helpers ──────────────────────────────────────────────────
 
 
-def _normalize_score(score: Optional[float]) -> float:
+def _normalize_score(score: float | None) -> float:
     """Clamp any internal score into [0.0, 1.0]."""
     if score is None:
         return 0.0
     return max(0.0, min(1.0, float(score)))
 
 
-def _parse_iso(iso_str: Optional[str]) -> datetime:
+def _parse_iso(iso_str: str | None) -> datetime:
     """Parse an ISO string, falling back to now() on failure."""
     if not iso_str:
         return _now()

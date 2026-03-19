@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import base64
 import os
-from typing import Optional
 
 __all__ = ["Vault"]
 
@@ -20,7 +19,7 @@ except ImportError:
 class Vault:
     """Secure Vault for storing sensitive facts."""
 
-    def __init__(self, key: Optional[bytes] = None):
+    def __init__(self, key: bytes | None = None):
         if not AESGCM:
             self._key = None
             return

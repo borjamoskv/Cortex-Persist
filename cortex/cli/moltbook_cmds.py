@@ -11,6 +11,7 @@ Usage:
 from __future__ import annotations
 
 import asyncio
+from pathlib import Path
 
 import click
 from rich.console import Console
@@ -197,3 +198,136 @@ def feed(sort: str, limit: int):
             f"  [bold]{title}[/]  [dim]m/{submolt_name}[/]\n"
             f"  [green]↑{upvotes}[/] [dim]💬{comments}[/] by [cyan]{author}[/]\n"
         )
+
+
+@moltbook_cmds.group("legion")
+def legion_group():
+    """🛡️ Legion-Ω — Hyper-scale swarm orchestration."""
+    pass
+
+
+@legion_group.command("run")
+@click.option("--agents", "agent_count", default=50, help="Number of posters")
+@click.option("--subagents", "subagent_count", default=50, help="Number of commenters")
+@click.option("--submolt", default="general", help="Target submolt")
+def legion_run(agent_count: int, subagent_count: int, submolt: str):
+    """Execute the Legion Swarm algorithm (50x50 default)."""
+    from cortex.extensions.moltbook.legion_engine import MoltbookLegionEngine
+
+    console.print(f"[bold cyan]⚔️ Deploying Legion Swarm ({agent_count}x{subagent_count})...[/]")
+    engine = MoltbookLegionEngine(agent_count=agent_count, subagent_count=subagent_count)
+
+    # Run orchestration
+    asyncio.run(engine.execute(submolt=submolt))
+    console.print("[bold green]✅ Legion operation successful. Platforms influenced.[/]")
+
+
+@legion_group.command("marketing")
+@click.option("--evangelists", default=3, help="Number of compliance evangelists")
+@click.option("--analysts", default=1, help="Number of regulatory analysts")
+@click.option("--submolt", default="general", help="Target submolt")
+def legion_marketing(evangelists: int, analysts: int, submolt: str):
+    """🎯 Autodidact Marketing — EU AI Act compliance content swarm."""
+    from cortex.extensions.moltbook.legion_engine import MoltbookLegionEngine
+
+    console.print(
+        f"[bold cyan]🎯 Autodidact Marketing Swarm ({evangelists}E + {analysts}A + 2SHA)...[/]"
+    )
+    engine = MoltbookLegionEngine(
+        mode="marketing",
+        evangelist_count=evangelists,
+        analyst_count=analysts,
+    )
+    asyncio.run(engine.execute(submolt=submolt))
+    console.print("[bold green]✅ Marketing swarm session complete.[/]")
+
+
+@moltbook_cmds.group("daemon")
+def daemon_group():
+    """🔋 MoltDaemon-Ω — Persistent 24/7 social agent."""
+    pass
+
+
+@daemon_group.command("start")
+@click.option("--interval", "-i", default=600, help="Heartbeat interval in seconds")
+@click.option("--background", "-b", is_flag=True, help="Run in background")
+def daemon_start(interval: int, background: bool):
+    """Start the Moltbook Daemon."""
+    from cortex.extensions.moltbook.daemon import MoltbookDaemon
+
+    if background:
+        import subprocess
+        import sys
+        
+        # Simple nohup-like backgrounding
+        cmd = [sys.executable, "-c", 
+               f"import asyncio; from cortex.extensions.moltbook.daemon import MoltbookDaemon; "
+               f"asyncio.run(MoltbookDaemon.start_standalone(interval={interval}))"]
+        
+        log_file = Path.home() / ".config" / "cortex" / "logs" / "moltbook_daemon.log"
+        log_file.parent.mkdir(parents=True, exist_ok=True)
+        
+        with open(log_file, "a") as log:
+            subprocess.Popen(cmd, stdout=log, stderr=log, start_new_session=True)
+        
+        console.print(f"[bold green]🚀 MoltDaemon-Ω started in background.[/] Logs: {log_file}")
+    else:
+        console.print("[bold cyan]🚀 Starting MoltDaemon-Ω (foreground)...[/]")
+        try:
+            asyncio.run(MoltbookDaemon.start_standalone(interval=interval))
+        except KeyboardInterrupt:
+            console.print("\n[yellow]🛑 Stopping MoltDaemon-Ω...[/]")
+
+
+@daemon_group.command("status")
+def daemon_status():
+    """Check MoltDaemon-Ω status."""
+    import psutil
+    
+    daemons = []
+    for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
+        try:
+            cmdline = proc.info['cmdline'] or []
+            if any("MoltbookDaemon.start_standalone" in arg for arg in cmdline):
+                daemons.append(proc.info)
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
+            continue
+            
+    if daemons:
+        table = Table(title="🦞 Active Moltbook Daemons", border_style="green")
+        table.add_column("PID", style="dim")
+        table.add_column("Status", style="green")
+        
+        for d in daemons:
+            table.add_row(str(d['pid']), "RUNNING")
+        console.print(table)
+    else:
+        console.print("[yellow]No active MoltDaemon-Ω found (standalone).[/]")
+        console.print("[dim]Note: If running inside main MoskvDaemon, check 'cortex status'.[/]")
+
+
+@daemon_group.command("stop")
+def daemon_stop():
+    """Stop all standalone MoltDaemon-Ω processes."""
+    import signal
+
+    import psutil
+    
+    count = 0
+    for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
+        try:
+            cmdline = proc.info['cmdline'] or []
+            if any("MoltbookDaemon.start_standalone" in arg for arg in cmdline):
+                proc.send_signal(signal.SIGINT)
+                count += 1
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
+            continue
+            
+    if count:
+        console.print(f"[bold green]✅ Stopped {count} MoltDaemon-Ω processes.[/]")
+    else:
+        console.print("[yellow]No active MoltDaemon-Ω found to stop.[/]")
+
+
+if __name__ == "__main__":
+    moltbook_cmds()

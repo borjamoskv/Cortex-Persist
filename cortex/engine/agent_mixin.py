@@ -1,7 +1,7 @@
 import logging
 import sqlite3
 import uuid
-from typing import Any, Optional
+from typing import Any
 
 import aiosqlite
 
@@ -67,7 +67,7 @@ class AgentMixin(EngineMixinBase):
 
         return agent_id
 
-    async def get_agent(self, agent_id: str) -> Optional[dict[str, Any]]:
+    async def get_agent(self, agent_id: str) -> dict[str, Any] | None:
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             conn.row_factory = aiosqlite.Row
             async with conn.execute(

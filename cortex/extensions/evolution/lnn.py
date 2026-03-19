@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from typing import Optional
 
 import numpy as np
 
@@ -39,7 +38,7 @@ class LagrangianController:
         self.weights = np.array([1.0, -1.0, 1.0, -1.0])
 
     def predict_next_state(
-        self, current: SymbolicActionState, previous: Optional[SymbolicActionState] = None
+        self, current: SymbolicActionState, previous: SymbolicActionState | None = None
     ) -> dict[str, float]:
         """Using Euler-Lagrange to predict the stationary path.
 

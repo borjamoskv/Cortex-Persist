@@ -2,7 +2,7 @@ import json
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from cortex.extensions.moltbook.client import MoltbookClient, MoltbookRateLimited
 from cortex.extensions.moltbook.verification import solve_challenge
@@ -26,7 +26,7 @@ class MoltbookHeartbeat:
     MEJORAlo 8.0: Zero blocking I/O for social presence.
     """
 
-    def __init__(self, client: Optional[MoltbookClient] = None):
+    def __init__(self, client: MoltbookClient | None = None):
         self.client = client or MoltbookClient()
         self._state = self._load_state()
 

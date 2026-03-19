@@ -9,12 +9,13 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import logging
-from typing import Optional, TypedDict, cast
+from typing import TypedDict, cast
 
 from pydantic import BaseModel, Field
 
 from cortex.engine.aleph_omega import AxiomaticLeapEngine
 from cortex.engine.endocrine import ENDOCRINE, HormoneType
+from cortex.engine.kardashev import KardashevEngine
 from cortex.extensions.swarm.byzantine import ByzantineConsensus
 
 __all__ = [
@@ -58,6 +59,7 @@ class Formation:
     SENTINEL = "SENTINEL"  # Security/Infra monitoring
     SPECTRE = "SPECTRE"  # OSINT/Intel stealth
     GHOST = "GHOST"  # Single specialized agent
+    KARDASHEV_II = "KARDASHEV_II"  # Structural Collapse (O(1)) — Massive Scaling
 
 
 class VirtualAgent:
@@ -104,6 +106,7 @@ class CentauroEngine:
         Formation.SENTINEL: 4,
         Formation.SPECTRE: 3,
         Formation.GHOST: 1,
+        Formation.KARDASHEV_II: 500,  # Representation of a massive swarm
     }
 
     def __init__(self, tolerance: float = 0.67):
@@ -111,6 +114,7 @@ class CentauroEngine:
         self.agents: dict[str, VirtualAgent] = {}
         self._active_missions: dict[str, asyncio.Future[CentauroMissionResult]] = {}
         self._aleph = AxiomaticLeapEngine()
+        self._kardashev = KardashevEngine()
 
     def spawn_squad(self, size: int, formation: str = Formation.BLITZ) -> dict[str, VirtualAgent]:
         """Spawn a squad of virtual agents with specialized focus."""
@@ -136,7 +140,7 @@ class CentauroEngine:
         self,
         squad: dict[str, VirtualAgent],
         mission: str,
-    ) -> tuple[Optional[str], int]:
+    ) -> tuple[str | None, int]:
         """Execute agents and race for Byzantine consensus (Ω₃ Quorum).
 
         Returns:
@@ -192,6 +196,21 @@ class CentauroEngine:
             logger.info(
                 "Initiating LEGION Protocol. Mission: %s | Formation: %s", mission, formation
             )
+
+            # --- Kardashev Type II Check (Structural Collapse) ---
+            if formation == Formation.KARDASHEV_II or self._kardashev.detect_complexity(mission):
+                collapse = await self._kardashev.structural_collapse(mission)
+                ENDOCRINE.pulse(HormoneType.DOPAMINE, 0.5, reason="Structural Collapse Achieved")
+                result = {
+                    "status": "collapsed",
+                    "solution": collapse["bridge"],
+                    "agents_used": 1, # The engine itself becomes the O(1) agent
+                    "formation": Formation.KARDASHEV_II,
+                    "reason": collapse["complexity_delta"],
+                }
+                mission_future.set_result(result)
+                return result
+
             # 🧬 Endocrine modulation: High ADRENALINE forces BLITZ regardless of intention
             adrenaline = ENDOCRINE.get_level(HormoneType.ADRENALINE)
             if adrenaline > 0.7 and formation not in [Formation.BLITZ, Formation.GHOST]:

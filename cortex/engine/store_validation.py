@@ -1,17 +1,20 @@
 """Logic for store validation and thermodynamic enforcement."""
+
 from __future__ import annotations
 
 import logging
-from typing import Any, Optional
-from cortex.engine.store_validators import validate_content, check_dedup
-from cortex.guards.thermodynamic import AgentMode, should_enter_decorative_mode
-from cortex.shannon.exergy import ActionRisk, ExergyInput, calculate_exergy, enforce_exergy
-from cortex.engine.storage_guard import StorageGuard
+from typing import Any
+
+from cortex.engine.bridge_guard import BridgeGuard
 from cortex.engine.membrane.sanitizer import SovereignSanitizer
 from cortex.engine.nemesis import NemesisProtocol
-from cortex.engine.bridge_guard import BridgeGuard
+from cortex.engine.storage_guard import StorageGuard
+from cortex.engine.store_validators import check_dedup, validate_content
+from cortex.guards.thermodynamic import AgentMode, should_enter_decorative_mode
+from cortex.shannon.exergy import ActionRisk, ExergyInput, calculate_exergy, enforce_exergy
 
 logger = logging.getLogger("cortex.engine.validation")
+
 
 async def run_store_validation_logic(
     mixin_instance: Any,
@@ -20,44 +23,70 @@ async def run_store_validation_logic(
     content: str,
     tenant_id: str,
     fact_type: str,
-    tags: Optional[list[str]],
+    tags: list[str] | None,
     confidence: str,
-    source: Optional[str],
-    meta: Optional[dict[str, Any]]
-) -> tuple[Optional[int], Optional[dict[str, Any]], str, str]:
+    source: str | None,
+    meta: dict[str, Any] | None,
+) -> tuple[int | None, dict[str, Any] | None, str, str]:
     """Extracted validation logic from StoreMixin."""
     cls = mixin_instance.__class__
-    
+
     import os
+
     skip_thermo = os.getenv("CORTEX_SKIP_EXERGY_VALIDATION")
 
     # ═══ Axiom Ω₁₃: Thermodynamic Enforcement ═══
-    if cls._agent_mode == AgentMode.DECORATIVE and fact_type not in ("error", "ghost") and not skip_thermo:
+    if (
+        cls._agent_mode == AgentMode.DECORATIVE
+        and fact_type not in ("error", "ghost")
+        and not skip_thermo
+    ):
         logger.warning("🚫 [DECORATIVE MODE] Write blocked for type: %s", fact_type)
         raise RuntimeError("Operation blocked: Agent in DECORATIVE mode (Axiom Ω₁₃)")
 
-    if not skip_thermo:
+    # Exergy validation: only enforce when caller provides explicit entropy
+    # metadata (programmatic/agent path). CLI stores without _prior_entropy
+    # are human-intentional and bypass the thermodynamic gate.
+    _has_entropy_meta = meta and ("_prior_entropy" in meta or "_posterior_entropy" in meta)
+    # Exergy validation: only enforce when caller provides explicit entropy
+    # metadata (programmatic/agent path). CLI stores without _prior_entropy
+    # are human-intentional and bypass the thermodynamic gate.
+    _has_entropy_meta = meta and ("_prior_entropy" in meta or "_posterior_entropy" in meta)
+    if not skip_thermo and _has_entropy_meta:
         ex_input = ExergyInput(
-            prior_uncertainty=meta.get("_prior_entropy", 1.0) if meta else 1.0,
-            posterior_uncertainty=meta.get("_posterior_entropy", 0.5) if meta else 0.5,
-            tokens_consumed=meta.get("_tokens", 100) if meta else 100,
-            action_risk=ActionRisk.MEMORY_WRITE if fact_type != "rule" else ActionRisk.SCHEMA_MUTATION,
+            prior_uncertainty=meta.get("_prior_entropy", 1.0),
+            posterior_uncertainty=meta.get("_posterior_entropy", 0.5),
+            tokens_consumed=meta.get("_tokens", 100),
+            action_risk=ActionRisk.MEMORY_WRITE
+            if fact_type != "rule"
+            else ActionRisk.SCHEMA_MUTATION,
             had_backup=True,
-            touched_persistent_state=True
+            touched_persistent_state=True,
+            utility_delta=meta.get("_utility", 0.0),
+            causal_gap=meta.get("_causal_gap", 0.0),
         )
         ex_res = calculate_exergy(ex_input, threshold_min_work=0.01)
         enforce_exergy(ex_res)
 
-        if should_enter_decorative_mode(cls._thermo_counters):
+        # Update metadata with recorded exergy
+        meta["_exergy_score"] = ex_res.exergy_score
+
+        if should_enter_decorative_mode(cls._thermo_counters)[0]:
             cls._agent_mode = AgentMode.DECORATIVE
-            logger.error("🛑 [CRITICAL] Agent entering DECORATIVE mode due to thermodynamic waste.")
+            logger.error("🛑 [CRITICAL] Agent entering DECORATIVE mode (Ω₁₃).")
     else:
-        # Ensure we stay in ACTIVE mode during tests
-        cls._agent_mode = AgentMode.ACTIVE
+        # Ensure we stay in ACTIVE mode during tests if not explicitly decorative
+        if cls._agent_mode != AgentMode.DECORATIVE:
+            cls._agent_mode = AgentMode.ACTIVE
 
     StorageGuard.validate(
-        project=project, content=content, fact_type=fact_type,
-        source=source, confidence=confidence, tags=tags, meta=meta
+        project=project,
+        content=content,
+        fact_type=fact_type,
+        source=source,
+        confidence=confidence,
+        tags=tags,
+        meta=meta,
     )
     content = validate_content(project, content, fact_type)
 
@@ -81,14 +110,16 @@ async def run_store_validation_logic(
 
                         if hits > 4:
                             await mixin_instance.deprecate(
-                                fact_id=fact_id_int, reason=f"Thermal decay (loop {hits}x)",
-                                conn=conn, tenant_id=tenant_id
+                                fact_id=fact_id_int,
+                                reason=f"Thermal decay (loop {hits}x)",
+                                conn=conn,
+                                tenant_id=tenant_id,
                             )
                             cls._thermal_decay_cache[fact_id_int] = 0
                         else:
                             await conn.execute(
                                 "UPDATE facts SET last_accessed = CURRENT_TIMESTAMP WHERE id = ?",
-                                (fact_id_int,)
+                                (fact_id_int,),
                             )
                         return fact_id_int, meta, content, fact_type
             except Exception as e:
@@ -96,6 +127,7 @@ async def run_store_validation_logic(
 
     meta = mixin_instance._apply_privacy_shield(content, project, meta)
     from cortex.engine.store_guards import run_security_guards
+
     meta = run_security_guards(content, project, source, meta)
 
     raw_engram = {
@@ -113,6 +145,7 @@ async def run_store_validation_logic(
         meta["_membrane_log"] = membrane_log.dict()
 
     from cortex.engine.fact_store_core import resolve_causality_async
+
     meta = await resolve_causality_async(conn, project, meta)
 
     if fact_type not in ("error", "ghost"):

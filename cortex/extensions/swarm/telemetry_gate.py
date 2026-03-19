@@ -26,7 +26,7 @@ import os
 import time
 from collections.abc import Callable
 from functools import wraps
-from typing import Any, Optional, TypeAlias, TypeVar
+from typing import Any, TypeAlias, TypeVar
 
 from cortex.extensions.swarm.error_ghost_pipeline import ErrorGhostPipeline
 from cortex.utils.result import Err, Result
@@ -46,7 +46,18 @@ T = TypeVar("T")
 
 # ── Allowlist for safe kwarg keys to send to traces ────────────────────
 _SAFE_KWARG_PREFIXES = frozenset(
-    {"query", "prompt", "model", "temperature", "max_tokens", "tool", "agent", "name"}
+    {
+        "query",
+        "prompt",
+        "model",
+        "temperature",
+        "max_tokens",
+        "tool",
+        "agent",
+        "name",
+        "reasoning_mode",
+        "intent",
+    }
 )
 
 
@@ -124,7 +135,7 @@ def confidence_evaluator(field: str = "confidence", min_val: float = 0.7) -> Eva
         if not isinstance(output, dict):
             return 0.0
         val = output.get(field)
-        if not isinstance(val, (int, float)):
+        if not isinstance(val, int | float):
             return 0.0
         return 1.0 if val >= min_val else float(val / min_val)
 
@@ -154,26 +165,51 @@ def compose_or(*evaluators: EvaluatorFn) -> EvaluatorFn:
 # ═════════════════════════════════════════════════════════════════════════
 
 _circuit_state: dict[str, int] = {}  # tool_name → consecutive failures
+_circuit_last_failure: dict[str, float] = {}  # tool_name → monotonic timestamp
+_circuit_half_open: dict[str, bool] = {}  # tool_name → currently probing?
 _CIRCUIT_BREAKER_LIMIT = 3
+_HALF_OPEN_COOLDOWN_S = 60.0  # Auto-recover probe window
 
 
 def _circuit_record_success(tool_name: str) -> None:
     _circuit_state.pop(tool_name, None)
+    _circuit_last_failure.pop(tool_name, None)
+    _circuit_half_open.pop(tool_name, None)
 
 
 def _circuit_record_failure(tool_name: str) -> int:
     count = _circuit_state.get(tool_name, 0) + 1
     _circuit_state[tool_name] = count
+    _circuit_last_failure[tool_name] = time.monotonic()
+    _circuit_half_open.pop(tool_name, None)  # Close after failed probe
     return count
 
 
 def _circuit_is_open(tool_name: str) -> bool:
-    return _circuit_state.get(tool_name, 0) >= _CIRCUIT_BREAKER_LIMIT
+    failures = _circuit_state.get(tool_name, 0)
+    if failures < _CIRCUIT_BREAKER_LIMIT:
+        return False
+
+    # Half-open: allow one probe after cooldown elapses
+    last = _circuit_last_failure.get(tool_name, 0.0)
+    elapsed = time.monotonic() - last
+    if elapsed >= _HALF_OPEN_COOLDOWN_S:
+        if not _circuit_half_open.get(tool_name):
+            _circuit_half_open[tool_name] = True
+            logger.info(
+                "Circuit breaker half-open for %s (%.0fs elapsed)",
+                tool_name,
+                elapsed,
+            )
+            return False  # Allow one probe
+    return True
 
 
 def circuit_reset(tool_name: str) -> None:
-    """Manually reset circuit breaker for a tool (e.g. after config fix)."""
+    """Manually reset circuit breaker for a tool."""
     _circuit_state.pop(tool_name, None)
+    _circuit_last_failure.pop(tool_name, None)
+    _circuit_half_open.pop(tool_name, None)
     logger.info("Circuit breaker reset for %s", tool_name)
 
 
@@ -198,7 +234,7 @@ def _sanitize_kwargs(kwargs: dict[str, Any]) -> dict[str, Any]:
 
 def sovereign_quality_gate(
     tool_name: str,
-    evaluator: Optional[EvaluatorFn] = None,
+    evaluator: EvaluatorFn | None = None,
     threshold: float = 0.8,
 ) -> Callable:
     """
@@ -253,7 +289,7 @@ def sovereign_quality_gate(
 
 def sovereign_quality_gate_async(
     tool_name: str,
-    evaluator: Optional[EvaluatorFn] = None,
+    evaluator: EvaluatorFn | None = None,
     threshold: float = 0.8,
 ) -> Callable:
     """Async variant — wraps ``async def fn(...) -> Result``."""
@@ -297,7 +333,7 @@ def sovereign_quality_gate_async(
 # ═════════════════════════════════════════════════════════════════════════
 
 
-def _maybe_create_run_tree(tool_name: str, args: tuple, kwargs: dict[str, Any]) -> Optional[Any]:
+def _maybe_create_run_tree(tool_name: str, args: tuple, kwargs: dict[str, Any]) -> Any | None:
     """Create a LangSmith RunTree if the SDK is available and configured."""
     if not _HAS_LANGSMITH or not os.getenv("LANGCHAIN_API_KEY"):
         return None
@@ -316,10 +352,10 @@ def _maybe_create_run_tree(tool_name: str, args: tuple, kwargs: dict[str, Any]) 
 
 
 def _end_run_tree(
-    run_tree: Optional[Any],
+    run_tree: Any | None,
     *,
-    outputs: Optional[dict[str, Any]] = None,
-    error: Optional[str] = None,
+    outputs: dict[str, Any] | None = None,
+    error: str | None = None,
     latency_ms: float = 0.0,
 ) -> None:
     """Safely close a RunTree (no-op if None)."""
@@ -338,11 +374,11 @@ def _end_run_tree(
 
 def _evaluate_and_finalize(
     tool_name: str,
-    evaluator: Optional[EvaluatorFn],
+    evaluator: EvaluatorFn | None,
     threshold: float,
     result: Result,
     kwargs: dict[str, Any],
-    run_tree: Optional[Any],
+    run_tree: Any | None,
     elapsed_s: float,
 ) -> Result:
     """Score the result, update circuit breaker, emit trace."""
@@ -379,10 +415,28 @@ def _evaluate_and_finalize(
 
     # ── Success path ───────────────────────────────────────────────
     _circuit_record_success(tool_name)
+    rm = kwargs.get("reasoning_mode")
+    exergy = (
+        "HIGH"
+        if str(rm).endswith("DEEP_THINK")
+        else ("MAXIMUM" if str(rm).endswith("ULTRA_THINK") else "STANDARD")
+    )
+
     _end_run_tree(
         run_tree,
-        outputs={"score": round(score, 4), "output_type": type(output_val).__name__},
+        outputs={
+            "score": round(score, 4),
+            "output_type": type(output_val).__name__,
+            "reasoning_mode": str(rm),
+            "exergy_cost": exergy,
+        },
         latency_ms=latency_ms,
     )
-    logger.debug("Gate [%s] PASSED: score=%.3f latency=%.1fms", tool_name, score, latency_ms)
+    logger.debug(
+        "Gate [%s] PASSED: score=%.3f latency=%.1fms exergy=%s",
+        tool_name,
+        score,
+        latency_ms,
+        exergy,
+    )
     return result

@@ -1,5 +1,3 @@
-from typing import Optional
-
 """
 Commands for CHRONOS-1 The Senior Benchmark.
 
@@ -87,7 +85,7 @@ def analyze(ai_time: float, complexity: str) -> None:
     is_flag=True,
     help="Persist report into CORTEX ledger.",
 )
-def compound(project: Optional[str], persist: bool) -> None:
+def compound(project: str | None, persist: bool) -> None:
     """Detect compound causal chains and report exponential Ω₁₁ yield."""
     from rich.table import Table
 

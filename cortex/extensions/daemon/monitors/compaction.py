@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 import time
-from typing import Any, Optional
+from typing import Any
 
 from cortex.extensions.daemon.models import CompactionAlert
 
@@ -19,7 +19,7 @@ class CompactionMonitor:
 
     def __init__(
         self,
-        projects: Optional[list[str]] = None,
+        projects: list[str] | None = None,
         interval_seconds: int = 28800,  # 8 hours standard sleep cycle
         engine: Any = None,
     ):
@@ -32,7 +32,7 @@ class CompactionMonitor:
         self,
         project: str,
         now: float,
-    ) -> Optional[CompactionAlert]:
+    ) -> CompactionAlert | None:
         """Helper to compact a single project's memory."""
         last_run = self._last_runs.get(project, 0)
 

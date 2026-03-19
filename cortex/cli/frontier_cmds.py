@@ -1,5 +1,3 @@
-from typing import Optional
-
 """
 Frontier CLI Commands
 Control the R&D and Metabolism pulse of CORTEX.
@@ -21,7 +19,7 @@ def frontier_cmds():
 
 @frontier_cmds.command("scan")
 @click.option("--source", "-s", help="Specific URL or domain to ingest.")
-def scan_cmd(source: Optional[str]):
+def scan_cmd(source: str | None):
     """Scan the frontier for new intelligence (Cognitive Ingestion)."""
     console.print("[bold cyan]🚀 Starting Frontier Scan...[/bold cyan]")
     engine = get_engine()
@@ -39,7 +37,7 @@ def scan_cmd(source: Optional[str]):
 @frontier_cmds.command("metabolize")
 @click.option("--target", "-t", help="Target file or directory to metabolize.")
 @click.option("--commit/--dry-run", default=False, help="Allow commits if entropy gate passes.")
-def metabolize_cmd(target: Optional[str], commit: bool):
+def metabolize_cmd(target: str | None, commit: bool):
     """Force a metabolism cycle (Ouroboros-Omega) on target."""
     console.print("[bold magenta]♾️  Initializing Forced Metabolism Cycle...[/bold magenta]")
     engine = get_engine()

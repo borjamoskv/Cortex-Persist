@@ -20,7 +20,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 from cortex.extensions.sync.hlc import HLCTimestamp
 
@@ -54,7 +54,7 @@ class FactReplica:
     confidence: str = "C3"
     meta: dict[str, Any] = field(default_factory=dict)
     tags: list[str] = field(default_factory=list)
-    source: Optional[str] = None
+    source: str | None = None
     is_tombstoned: bool = False
 
     @property

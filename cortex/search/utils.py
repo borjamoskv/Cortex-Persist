@@ -10,7 +10,7 @@ from __future__ import annotations
 import json
 import logging
 import sqlite3
-from typing import Any, Optional
+from typing import Any
 
 import aiosqlite
 
@@ -116,7 +116,7 @@ def _row_to_result(row: tuple, is_fts: bool = False) -> SearchResult:
     )
 
 
-def _decrypt_row_content(content: Optional[str], tenant_id: str, enc: Any) -> str:
+def _decrypt_row_content(content: str | None, tenant_id: str, enc: Any) -> str:
     """Helper to decrypt fact content if prefixed."""
     if content and str(content).startswith(V6_PREFIX):
         try:

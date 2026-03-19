@@ -11,7 +11,12 @@ import logging
 import time
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
+
+from cortex.extensions.llm._models import ReasoningMode
+from cortex.extensions.swarm.byzantine import ByzantineArbiter
+from cortex.extensions.swarm.telemetry_gate import sovereign_quality_gate_async
+from cortex.utils.result import Ok, Result
 
 logger = logging.getLogger("cortex.extensions.swarm.conflict_resolution")
 
@@ -129,7 +134,7 @@ _W_CONFIDENCE: float = 0.20
 _W_RECENCY: float = 0.10
 
 
-def calculate_vote_weight(agent: AgentProfile, conflict_domain: str) -> Optional[WeightedVote]:
+def calculate_vote_weight(agent: AgentProfile, conflict_domain: str) -> WeightedVote | None:
     """Compute reputation-weighted vote score for an agent."""
     domain_match = 1.0 if agent.specialty.lower() == conflict_domain.lower() else 0.3
 
@@ -149,6 +154,47 @@ def calculate_vote_weight(agent: AgentProfile, conflict_domain: str) -> Optional
         confidence_component=round(c, 4),
         recency_component=round(r, 4),
     )
+
+
+def architect_evaluator(inputs: dict[str, Any], output: Any) -> float:
+    """Evaluate Architect Arbitration for valid options and confidence."""
+    if not isinstance(output, dict):
+        return 0.0
+
+    winner_id = output.get("winner_id")
+    if not isinstance(winner_id, str) or not winner_id:
+        return 0.0
+
+    valid_ids = inputs.get("valid_ids", set())
+    if valid_ids and winner_id not in valid_ids:
+        return 0.0
+
+    reasoning = output.get("reasoning", "")
+    if not isinstance(reasoning, str) or len(reasoning) < 10:
+        return 0.0
+
+    try:
+        conf = float(output.get("confidence", 0.0))
+        # Base confidence must be at least 0.7 to score well
+        return conf if conf >= 0.7 else conf / 2.0
+    except (TypeError, ValueError):
+        return 0.0
+
+
+@sovereign_quality_gate_async(
+    tool_name="architect_arbitration", evaluator=architect_evaluator, threshold=0.8
+)
+async def _invoke_architect_guarded(
+    judge: Any, prompt: str, valid_ids: set[str], reasoning_mode: Any
+) -> Result[dict[str, Any], str]:
+    """Invoke the architect judge, protected by the sovereign quality gate."""
+    try:
+        response = await judge(prompt, reasoning_mode=reasoning_mode)
+        return Ok(response)
+    except TypeError:
+        # Fallback if judge doesn't support reasoning_mode kwargs
+        response = await judge(prompt)
+        return Ok(response)
 
 
 class DeadlockBreaker:
@@ -203,12 +249,13 @@ class ConflictResolver:
     CONSENSUS_THRESHOLD: float = 0.70
     ARCHITECT_CONFIDENCE_GATE: float = 0.80
 
-    __slots__ = ("_history", "_deadlock_breaker", "_conflict_counter")
+    __slots__ = ("_history", "_deadlock_breaker", "_conflict_counter", "_arbiter")
 
-    def __init__(self, budget: float = 100.0) -> None:
+    def __init__(self, budget: float = 100.0, arbiter: ByzantineArbiter | None = None) -> None:
         self._history: list[ConflictResolution] = []
         self._deadlock_breaker = DeadlockBreaker(budget=budget)
         self._conflict_counter = 0
+        self._arbiter = arbiter
 
     async def resolve(
         self,
@@ -217,7 +264,7 @@ class ConflictResolver:
         options: list[ConflictOption],
         agents: dict[str, tuple[AgentProfile, str]],  # agent_id → (profile, chosen_option_id)
         conflict_domain: str = "general",
-        architect_judge: Optional[Any] = None,
+        architect_judge: Any | None = None,
     ) -> ConflictResolution:
         """Execute the full escalation ladder."""
         self._conflict_counter += 1
@@ -236,7 +283,9 @@ class ConflictResolver:
         # Tier 1: Factual Triangulation
         if conflict_type == ConflictType.FACTUAL:
             result = await self._triangulate(options, agents)
-            return self._record(conflict_id, now, conflict_type, participants, options, result)
+            return self._record(
+                conflict_id, now, conflict_type, participants, options, result
+            )
 
         # Tier 2: Weighted Voting
         votes, result = self._weighted_vote(options, agents, conflict_domain)
@@ -277,7 +326,20 @@ class ConflictResolver:
         options: list[ConflictOption],
         agents: dict[str, tuple[AgentProfile, str]],
     ) -> ResolutionResult:
-        """Resolve factual conflicts by evidence weight."""
+        """Resolve factual conflicts by evidence weight (BFT if arbiter present)."""
+        if self._arbiter:
+            # Shift to Byzantine Consensus (Ω₃)
+            proposals = {agent_id: chosen_id for agent_id, (_, chosen_id) in agents.items()}
+            winner_id = await self._arbiter.execute_consensus(proposals)
+            if winner_id:
+                return ResolutionResult(
+                    winner_id=winner_id,
+                    method=ResolutionMethod.TRIANGULATION,
+                    consensus_level=1.0,  # Arbiter handles internal threshold
+                    reasoning="Fact verified via BFT (Byzantine Fault Tolerance).",
+                )
+
+        # Fallback to simple triangulation if no arbiter
         option_votes: dict[str, int] = {o.id: 0 for o in options}
         for _, (_, chosen_id) in agents.items():
             if chosen_id in option_votes:
@@ -301,7 +363,7 @@ class ConflictResolver:
             winner_id=winner_id,
             method=ResolutionMethod.TRIANGULATION,
             consensus_level=consensus,
-            reasoning=f"Factual triangulation: {option_votes[winner_id]}/{total_votes} sources confirm.",
+            reasoning=f"Factual triangulation: {option_votes[winner_id]}/{total_votes} confirmed.",
             total_weight_for=float(option_votes[winner_id]),
             total_weight_against=float(total_votes - option_votes[winner_id]),
         )
@@ -357,8 +419,8 @@ class ConflictResolver:
             method=ResolutionMethod.WEIGHTED_VOTE,
             consensus_level=consensus,
             reasoning=(
-                f"Weighted vote: {winner_id} received {winner_weight:.3f}/{total_weight:.3f} "
-                f"({consensus:.1%} consensus)."
+                f"Weighted vote: {winner_id} received {winner_weight:.3f}/"
+                f"{total_weight:.3f} ({consensus:.1%} consensus)."
             ),
             total_weight_for=winner_weight,
             total_weight_against=total_weight - winner_weight,
@@ -368,55 +430,58 @@ class ConflictResolver:
         self,
         options: list[ConflictOption],
         judge: Any,
-    ) -> Optional[ResolutionResult]:
+    ) -> ResolutionResult | None:
         """Invoke LLM-as-judge for complex strategic decisions."""
-        try:
-            options_desc = "\n".join(
-                f"  [{o.id}] {o.description} (reversibility={o.reversibility:.2f}, cost={o.estimated_cost})"
-                for o in options
+        options_desc = "\n".join(
+            f"  [{o.id}] {o.description} (reversibility={o.reversibility:.2f}, cost={o.estimated_cost})"
+            for o in options
+        )
+        prompt = (
+            "You are the Architect Arbiter. Two or more proposals cannot reach consensus. "
+            "Evaluate the trade-offs and select the best option.\n\n"
+            f"Options:\n{options_desc}\n\n"
+            'Respond with JSON: {"winner_id": "... ", "confidence": 0.0-1.0, "reasoning": "..."}'
+        )
+
+        valid_ids = {o.id for o in options}
+
+        # Invoke through the Sovereign Quality Gate
+        # Exceptions/detonations are folded into Err implicitly.
+        result = await _invoke_architect_guarded(
+            judge=judge,
+            prompt=prompt,
+            valid_ids=valid_ids,
+            reasoning_mode=ReasoningMode.DEEP_THINK,
+        )
+
+        if result.is_err():
+            # Gate triggered, circuit open, or evaluator failed. Fallback to Deadlock Heuristic.
+            # The error contains detonation or trace info.
+            logger.warning(
+                "Architect arbitration rejected by Quality Gate: %s", result.unwrap_or(None)
             )
-            prompt = (
-                "You are the Architect Arbiter. Two or more proposals cannot reach consensus. "
-                "Evaluate the trade-offs and select the best option.\n\n"
-                f"Options:\n{options_desc}\n\n"
-                'Respond with JSON: {"winner_id": "...", "confidence": 0.0-1.0, "reasoning": "..."}'
-            )
-
-            # The judge is an async callable (e.g., an LLM completion function)
-            response = await judge(prompt)
-
-            if not isinstance(response, dict):
-                logger.warning("Architect judge returned non-dict response")
-                return None
-
-            confidence = float(response.get("confidence", 0.0))
-            winner_id = str(response.get("winner_id", ""))
-            reasoning = str(response.get("reasoning", "No reasoning provided"))
-
-            if confidence < self.ARCHITECT_CONFIDENCE_GATE:
-                logger.warning(
-                    "Architect confidence %.2f < gate %.2f — cannot decide",
-                    confidence,
-                    self.ARCHITECT_CONFIDENCE_GATE,
-                )
-                return None
-
-            # Validate winner_id exists in options
-            valid_ids = {o.id for o in options}
-            if winner_id not in valid_ids:
-                logger.error("Architect selected invalid option: %s", winner_id)
-                return None
-
-            return ResolutionResult(
-                winner_id=winner_id,
-                method=ResolutionMethod.ARCHITECT_ARBITRATION,
-                consensus_level=confidence,
-                reasoning=f"Architect decision (conf={confidence:.2f}): {reasoning}",
-            )
-
-        except Exception as exc:  # noqa: BLE001
-            logger.error("Architect arbitration failed: %s", exc)
             return None
+
+        response = result.unwrap()
+
+        confidence = float(response.get("confidence", 0.0))
+        winner_id = str(response.get("winner_id", ""))
+        reasoning = str(response.get("reasoning", "No reasoning provided"))
+
+        if confidence < self.ARCHITECT_CONFIDENCE_GATE:
+            logger.warning(
+                "Architect confidence %.2f < gate %.2f — cannot decide",
+                confidence,
+                self.ARCHITECT_CONFIDENCE_GATE,
+            )
+            return None
+
+        return ResolutionResult(
+            winner_id=winner_id,
+            method=ResolutionMethod.ARCHITECT_ARBITRATION,
+            consensus_level=confidence,
+            reasoning=f"Architect decision (conf={confidence:.2f}): {reasoning}",
+        )
 
     def _record(
         self,

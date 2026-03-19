@@ -12,7 +12,7 @@ import json
 import logging
 import sqlite3
 from collections import defaultdict
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from cortex.extensions.context.signals import InferenceResult, Signal
 
@@ -44,7 +44,7 @@ class ContextInference:
         5. Generate human-readable summary
     """
 
-    def __init__(self, conn: Optional[aiosqlite.Connection] = None):
+    def __init__(self, conn: aiosqlite.Connection | None = None):
         self.conn = conn
 
     def infer(self, signals: list[Signal]) -> InferenceResult:

@@ -17,7 +17,7 @@ from __future__ import annotations
 import logging
 import time
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
 from cortex.memory.metamemory import (
     FOKDirective,
@@ -41,7 +41,7 @@ class QueryResult:
     epistemic: EpistemicAnalysis
     judgment: MetaJudgment
     fok_directive: FOKDirective
-    schema_applied: Optional[str] = None
+    schema_applied: str | None = None
     augmented_query: str = ""
     pipeline_ms: float = 0.0
 
@@ -59,7 +59,7 @@ class QueryResult:
 @dataclass(frozen=True)
 class StoreResult:
     valence: ValenceRecord
-    schema_applied: Optional[str] = None
+    schema_applied: str | None = None
     filtered_content: str = ""
     stdp_edges_updated: int = 0
     pipeline_ms: float = 0.0
@@ -70,10 +70,10 @@ class NeuromorphicPipeline:
 
     def __init__(
         self,
-        metamemory: Optional[MetamemoryMonitor] = None,
-        void_detector: Optional[EpistemicVoidDetector] = None,
-        schema_engine: Optional[SchemaEngine] = None,
-        stdp: Optional[STDPEngine] = None,
+        metamemory: MetamemoryMonitor | None = None,
+        void_detector: EpistemicVoidDetector | None = None,
+        schema_engine: SchemaEngine | None = None,
+        stdp: STDPEngine | None = None,
     ) -> None:
         self._metamemory = metamemory or MetamemoryMonitor()
         self._void_detector = void_detector or EpistemicVoidDetector()
@@ -86,7 +86,7 @@ class NeuromorphicPipeline:
         query_embedding: list[float],
         candidates: list[dict[str, Any]],
         *,
-        engrams: Optional[list[Any]] = None,
+        engrams: list[Any] | None = None,
     ) -> QueryResult:
         t0 = time.monotonic()
 
@@ -139,7 +139,7 @@ class NeuromorphicPipeline:
         content: str,
         fact_type: str = "",
         fact_id: str = "",
-        related_fact_ids: Optional[list[str]] = None,
+        related_fact_ids: list[str] | None = None,
     ) -> StoreResult:
         t0 = time.monotonic()
 

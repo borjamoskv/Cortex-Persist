@@ -7,7 +7,7 @@ Integrates with drift monitoring for post-prune topological health assessment.
 from __future__ import annotations
 
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from cortex.memory.engrams import CortexSemanticEngram
 
@@ -26,7 +26,7 @@ class EntropyPruner:
         self._vs = vector_store
         self._atp_threshold = atp_threshold
 
-    async def prune_cycle(self, tenant_id: str, project_id: Optional[str] = None) -> int:
+    async def prune_cycle(self, tenant_id: str, project_id: str | None = None) -> int:
         """Execute a circadian pruning cycle on the Vector Store.
 
         Returns the number of pruned engrams.
@@ -35,13 +35,15 @@ class EntropyPruner:
         pruned_count = 0
 
         try:
-            if not hasattr(self._vs, "scan_engrams"):
+            if hasattr(self._vs, "prune_native"):
+                pruned_count = await self._vs.prune_native(tenant_id, project_id, self._atp_threshold)
+            elif hasattr(self._vs, "scan_engrams"):
+                engrams = await self._vs.scan_engrams(tenant_id, project_id)
+                for engram in engrams:
+                    if await self._prune_engram(engram):
+                        pruned_count += 1
+            else:
                 return 0
-
-            engrams = await self._vs.scan_engrams(tenant_id, project_id)
-            for engram in engrams:
-                if await self._prune_engram(engram):
-                    pruned_count += 1
 
             # Post-prune drift checkpoint (non-blocking diagnostic)
             if pruned_count > 0:
@@ -70,9 +72,7 @@ class EntropyPruner:
 
         return False
 
-    async def _post_prune_drift_check(
-        self, tenant_id: str, project_id: Optional[str] = None
-    ) -> None:
+    async def _post_prune_drift_check(self, tenant_id: str, project_id: str | None = None) -> None:
         """Run non-blocking drift health check after pruning."""
         import importlib.util
 
@@ -164,12 +164,19 @@ class HomeostaticScaler:
     async def scale(
         self,
         tenant_id: str,
-        project_id: Optional[str] = None,
+        project_id: str | None = None,
     ) -> dict[str, Any]:
         """Apply multiplicative homeostatic scaling to all engrams.
 
         Returns dict with 'scaled' count and 'factor' applied.
         """
+        if hasattr(self._vs, "scale_native"):
+            try:
+                return await self._vs.scale_native(tenant_id, project_id, self._set_point)
+            except (RuntimeError, ValueError, OSError) as exc:
+                logger.error("HomeostaticScaler native scale failed: %s", exc)
+                return {"scaled": 0, "factor": 1.0, "error": str(exc)}
+
         if not hasattr(self._vs, "scan_engrams"):
             return {"scaled": 0, "factor": 1.0}
 

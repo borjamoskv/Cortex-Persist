@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Optional
-
 """
 CORTEX v5.0 — Raft Consensus Implementation.
 
@@ -103,7 +101,7 @@ class RaftNode:
         node_id: str,
         conn: aiosqlite.Connection,
         peers: list[str],
-        state_callback: Optional[Callable[[NodeRole], Awaitable[None]]] = None,
+        state_callback: Callable[[NodeRole], Awaitable[None]] | None = None,
     ):
         self.node_id = node_id
         self.conn = conn
@@ -112,13 +110,13 @@ class RaftNode:
 
         self.role = NodeRole.FOLLOWER
         self.current_term = 0
-        self.voted_for: Optional[str] = None
-        self.leader_id: Optional[str] = None
+        self.voted_for: str | None = None
+        self.leader_id: str | None = None
 
         self.last_heartbeat = time.monotonic()
         self._running = False
-        self._election_task: Optional[asyncio.Task] = None
-        self._heartbeat_task: Optional[asyncio.Task] = None
+        self._election_task: asyncio.Task | None = None
+        self._heartbeat_task: asyncio.Task | None = None
         self._heartbeat_event = asyncio.Event()
         self._role_lock = asyncio.Lock()
 

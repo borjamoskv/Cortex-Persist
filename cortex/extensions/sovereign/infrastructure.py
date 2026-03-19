@@ -10,7 +10,7 @@ from __future__ import annotations
 import json
 import logging
 from pathlib import Path
-from typing import Final, Optional
+from typing import Final
 
 logger = logging.getLogger("cortex.extensions.sovereign.infrastructure")
 
@@ -61,7 +61,7 @@ class DataDiodeBridge:
     without any possible return path into the government network.
     """
 
-    def __init__(self, external_hub_url: Optional[str] = None):
+    def __init__(self, external_hub_url: str | None = None):
         self._external_url = external_hub_url
         self._buffer: list[dict] = []
 

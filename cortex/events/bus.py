@@ -11,7 +11,7 @@ persist to SQLite for cross-process reactive signaling.
 import asyncio
 import logging
 from collections.abc import Callable, Coroutine
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger("cortex.events.bus")
 
@@ -79,7 +79,7 @@ class DistributedEventBus:
         session_id: str,
         tenant_id: str,
         action: str,
-        data: Optional[dict[str, Any]] = None,
+        data: dict[str, Any] | None = None,
     ) -> None:
         """Highly optimized broadcast for L1/L2 memory updates.
 

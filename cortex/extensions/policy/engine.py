@@ -12,7 +12,7 @@ import logging
 import math
 import re
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from cortex.extensions.policy.models import (
     ACTION_TYPE_MAP,
@@ -34,7 +34,7 @@ _ISO_FMT = "%Y-%m-%dT%H:%M:%S"
 _ISO_FMT_FRAC = "%Y-%m-%dT%H:%M:%S.%f"
 
 
-def _parse_ts(ts: Optional[str]) -> Optional[datetime]:
+def _parse_ts(ts: str | None) -> datetime | None:
     """Parse a CORTEX timestamp string to datetime (UTC)."""
     if not ts:
         return None
@@ -71,7 +71,7 @@ class PolicyEngine:
     def __init__(
         self,
         engine: CortexEngine,
-        config: Optional[PolicyConfig] = None,
+        config: PolicyConfig | None = None,
     ) -> None:
         self._engine = engine
         self._config = config or PolicyConfig()
@@ -84,7 +84,7 @@ class PolicyEngine:
 
     async def evaluate(
         self,
-        project: Optional[str] = None,
+        project: str | None = None,
         tenant_id: str = "default",
     ) -> list[ActionItem]:
         """Evaluate all active facts and return a prioritized action queue.
@@ -264,7 +264,7 @@ class PolicyEngine:
 
     async def _gather_facts(
         self,
-        project: Optional[str],
+        project: str | None,
         tenant_id: str,
     ) -> list[Fact]:
         """Gather active facts from CORTEX engine."""

@@ -21,8 +21,8 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Optional
 
+from cortex.extensions.llm._models import ReasoningMode
 from cortex.extensions.llm.router import IntentProfile
 
 __all__ = ["LLMManager"]
@@ -90,7 +90,8 @@ class LLMManager:
         temperature: float = 0.3,
         max_tokens: int = 2048,
         intent: IntentProfile = IntentProfile.GENERAL,
-    ) -> Optional[str]:
+        reasoning_mode: ReasoningMode | None = None,
+    ) -> str | None:
         """Complete via the active provider. Returns None if unavailable."""
         p = self._get_provider()
         if p is None:
@@ -101,6 +102,7 @@ class LLMManager:
             temperature=temperature,
             max_tokens=max_tokens,
             intent=intent,
+            reasoning_mode=reasoning_mode,
         )
 
     async def stream(
@@ -110,6 +112,7 @@ class LLMManager:
         temperature: float = 0.3,
         max_tokens: int = 2048,
         intent: IntentProfile = IntentProfile.GENERAL,
+        reasoning_mode: ReasoningMode | None = None,
     ):
         """Stream via the active provider. Yields text chunks."""
         p = self._get_provider()
@@ -121,6 +124,7 @@ class LLMManager:
             temperature=temperature,
             max_tokens=max_tokens,
             intent=intent,
+            reasoning_mode=reasoning_mode,
         ):
             yield chunk
 

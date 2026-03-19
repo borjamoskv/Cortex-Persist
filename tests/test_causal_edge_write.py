@@ -30,7 +30,7 @@ async def _setup_db(conn: aiosqlite.Connection) -> None:
             valid_from TEXT,
             valid_until TEXT,
             source TEXT,
-            meta TEXT,
+            metadata TEXT,
             hash TEXT,
             signature TEXT,
             signer_pubkey TEXT,
@@ -146,7 +146,7 @@ async def test_parent_decision_id_creates_causal_edge(
         confidence="stated",
         ts=None,
         source=None,
-        meta={},
+        metadata={},
         tx_id=None,
         parent_decision_id=100,
     )
@@ -214,7 +214,7 @@ async def test_auto_resolved_parent_creates_edge(
         confidence="stated",
         ts=None,
         source=None,
-        meta={},
+        metadata={},
         tx_id=None,
         # No parent_decision_id — should auto-resolve to 50
     )
@@ -281,7 +281,7 @@ async def test_no_duplicate_edge_when_causal_parent_exists(
         confidence="stated",
         ts=None,
         source=None,
-        meta={"causal_parent": 999},  # signal-based edge
+        metadata={"causal_parent": 999},  # signal-based edge
         tx_id=None,
         parent_decision_id=200,
     )

@@ -4,6 +4,19 @@ All notable changes to CORTEX, derived from the git history.
 
 ---
 
+## [Unreleased] — Sovereign Overhaul (March 18, 2026)
+
+### Added
+
+- **Topología de Resiliencia en Cascada (Axioma Ω)**: Fallback automático a modelos locales o cloud gratuitos al agotar cuota (429), previniendo el colapso operativo.
+- **Enrutamiento Cognitivo Dinámico**: Integración de `ReasoningMode` (`DEEP_THINK`, `DEEP_RESEARCH`, `ULTRA_THINK`) mapeado transparentemente a modelos de frontera.
+- **Epistemic Circuit Breaker**: `SOVEREIGN_LOCK` con radar de entropía cognitiva para bloquear la escritura en el ledger si la máquina "alucina" o acumula errores constantes (`/circuit-breaker`).
+- **Aislamiento Multi-Agente (Swarm Isolation)**: Despliegue automático de git worktrees y directorios de caché para aislar ejecuciones concurrentes sin bloqueos de BD.
+- **Causality Deepening**: Propagación estricta de estado `TAINTED` en el Grafo Causal y Mutaciones.
+- **CORTEX-Native Architecture**: Formalización de los Axiomas Ω₁₄ (Zero Friction) y Ω₁₅ (Execution Loops) en el RFC 01.
+
+---
+
 ## v8.0.0 — Sovereign Cloud (February 24, 2026)
 
 ### Added

@@ -10,7 +10,7 @@ from __future__ import annotations
 import logging
 import sqlite3
 import time
-from typing import Any, Optional
+from typing import Any
 
 import numpy as np
 
@@ -72,7 +72,7 @@ class MemoryArchaeologist:
 
     def _extract_vectors(
         self, project: str, l3_map: dict[str, dict[str, Any]]
-    ) -> tuple[list[dict[str, Any]], Optional[np.ndarray]]:
+    ) -> tuple[list[dict[str, Any]], np.ndarray | None]:
         l2_conn = self.engine.memory._l2._get_conn()
         c2 = l2_conn.cursor()
         c2.execute(
@@ -180,7 +180,7 @@ class MemoryArchaeologist:
         project: str,
         condensed_content: str,
         old_ids: list[str],
-        primary_parent_id: Optional[str],
+        primary_parent_id: str | None,
         conn: sqlite3.Connection,
         l2_conn: sqlite3.Connection,
     ) -> None:

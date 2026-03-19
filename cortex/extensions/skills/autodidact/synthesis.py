@@ -13,7 +13,9 @@ import logging
 import os
 import re
 import time
-from typing import Any, Optional
+from typing import Any
+
+import aiosqlite
 
 from cortex.extensions.llm._models import CortexPrompt
 from cortex.extensions.llm.provider import LLMProvider
@@ -58,7 +60,7 @@ encode_engine = AsyncEncoder()
 vector_db = SovereignVectorStoreL2(encoder=encode_engine)
 
 # Lazy singleton — built on first use
-_synthesis_router: Optional[CortexLLMRouter] = None
+_synthesis_router: CortexLLMRouter | None = None
 
 
 def _get_synthesis_router() -> CortexLLMRouter:
@@ -71,7 +73,7 @@ def _get_synthesis_router() -> CortexLLMRouter:
     if _synthesis_router is not None:
         return _synthesis_router
 
-    primary: Optional[LLMProvider] = None
+    primary: LLMProvider | None = None
     fallbacks: list[LLMProvider] = []
 
     for name in _SYNTHESIS_PROVIDERS:
@@ -85,9 +87,14 @@ def _get_synthesis_router() -> CortexLLMRouter:
             logger.debug("Synthesis provider '%s' skipped: %s", name, e)
 
     if primary is None:
-        logger.critical("🛑 [CORTEX] API KEY MISSING. Cannot synthesize without LLM.")
+        logger.critical(
+            "🛑 [CORTEX] API KEY MISSING. "
+            "Cannot synthesize without LLM."
+        )
         raise RuntimeError(
-            "No LLM providers available for synthesis. Configure at least one API key (e.g., GEMINI_API_KEY) in .env"
+            "No LLM providers available for synthesis. "
+            "Configure at least one API key "
+            "(e.g., GEMINI_API_KEY) in .env"
         )
 
     _synthesis_router = CortexLLMRouter(primary, fallbacks)
@@ -109,7 +116,7 @@ async def generate_cortex_embedding(text: str) -> list[float]:
     return await encode_engine.encode(text)
 
 
-async def check_semantic_redundancy(text_snippet: str) -> Optional[tuple[bool, str]]:
+async def check_semantic_redundancy(text_snippet: str) -> tuple[bool, str] | None:
     """Axioma Ω₂: Si ya sabemos esto, aniquilamos la operación."""
     try:
         nearest = await vector_db.recall(
@@ -196,8 +203,16 @@ async def distill_sovereign_memo(
     result = await router.execute_resilient(prompt)
 
     if result.is_err():
-        logger.error("❌ [SYNTHESIS] Cascade exhausted: %s", result.error)  # type: ignore[union-attr]
-        return {"content_markdown": raw_data[:FALLBACK_CONTENT_LENGTH], "error": result.error}  # type: ignore[union-attr]
+        logger.error(
+            "❌ [SYNTHESIS] Cascade exhausted: %s",
+            result.error,  # type: ignore[union-attr]
+        )
+        return {
+            "content_markdown": raw_data[
+                :FALLBACK_CONTENT_LENGTH
+            ],
+            "error": result.error,  # type: ignore[union-attr]
+        }
 
     text_content = result.unwrap()
 
@@ -273,4 +288,147 @@ async def execute_cognitive_synthesis(
 
     await vector_db.memorize(fact)
     logger.info("✨ Singularidad Cognitiva grabada: %s", memo_id)
+
+    # ── Gap 2: Ledger Integration (Ω₃) ──
+    await _record_ledger_tx(memo_id, source, memo_content)
+
+    # ── Gap 3: Taint Propagation (Ω₁₃) ──
+    await _create_causal_edge(memo_id, source)
+
     return memo_id
+
+
+async def _record_ledger_tx(
+    memo_id: str, source: str, content: str,
+) -> None:
+    """Record crystal in the transaction ledger.
+
+    Ω₃: Every crystal leaves an immutable hash-chain trace.
+    """
+    try:
+        from cortex import config
+        from cortex.utils.canonical import compute_tx_hash
+
+        db_path = getattr(config, "DB_PATH", None)
+        if not db_path or not os.path.exists(db_path):
+            return
+
+        async with aiosqlite.connect(db_path) as conn:
+            cursor = await conn.execute(
+                "SELECT hash FROM transactions "
+                "ORDER BY id DESC LIMIT 1"
+            )
+            row = await cursor.fetchone()
+            prev_hash = row[0] if row else "GENESIS"
+
+            ts = time.time()
+            detail = (
+                f"{memo_id}|{source}|{len(content)}"
+            )
+            tx_hash = compute_tx_hash(
+                prev_hash,
+                "autodidact_knowledge",
+                "crystal_persist",
+                detail,
+                ts,
+            )
+
+            await conn.execute(
+                "INSERT INTO transactions "
+                "(prev_hash, hash, project, action, "
+                "detail, timestamp) "
+                "VALUES (?, ?, ?, ?, ?, ?)",
+                (
+                    prev_hash,
+                    tx_hash,
+                    "autodidact_knowledge",
+                    "crystal_persist",
+                    f"memo={memo_id} src={source[:180]}",
+                    ts,
+                ),
+            )
+            await conn.commit()
+            logger.info(
+                "📜 [LEDGER] Crystal %s chained",
+                memo_id,
+            )
+    except Exception as e:  # noqa: BLE001
+        logger.warning(
+            "⚠️ [LEDGER] Failed: %s", e,
+        )
+
+
+async def _create_causal_edge(
+    memo_id: str, source: str,
+) -> None:
+    """Create causal edge linking crystal to source.
+
+    Ω₁₃: If source is later invalidated,
+    propagate_taint() cascades to descendants.
+    """
+    try:
+        from cortex import config
+
+        db_path = getattr(config, "DB_PATH", None)
+        if not db_path or not os.path.exists(db_path):
+            return
+
+        async with aiosqlite.connect(db_path) as conn:
+            await conn.execute(
+                "CREATE TABLE IF NOT EXISTS "
+                "causal_edges ("
+                "id INTEGER PRIMARY KEY "
+                "AUTOINCREMENT, "
+                "fact_id INTEGER NOT NULL, "
+                "parent_id INTEGER, "
+                "signal_id INTEGER, "
+                "edge_type TEXT NOT NULL "
+                "DEFAULT 'derived_from', "
+                "project TEXT, "
+                "tenant_id TEXT NOT NULL "
+                "DEFAULT 'default', "
+                "created_at TEXT NOT NULL "
+                "DEFAULT (datetime('now')), "
+                "FOREIGN KEY (fact_id) "
+                "REFERENCES facts(id))"
+            )
+
+            cursor = await conn.execute(
+                "SELECT id FROM facts "
+                "WHERE content LIKE ? LIMIT 1",
+                (f"%{memo_id}%",),
+            )
+            fact_row = await cursor.fetchone()
+
+            cursor = await conn.execute(
+                "SELECT id FROM facts "
+                "WHERE metadata LIKE ? LIMIT 1",
+                (f'%"source": "{source[:200]}%',),
+            )
+            parent_row = await cursor.fetchone()
+
+            if fact_row:
+                parent_id = (
+                    parent_row[0]
+                    if parent_row else None
+                )
+                await conn.execute(
+                    "INSERT INTO causal_edges "
+                    "(fact_id, parent_id, "
+                    "edge_type, project, "
+                    "tenant_id) VALUES "
+                    "(?, ?, 'derived_from', "
+                    "'autodidact_knowledge', "
+                    "'sovereign')",
+                    (fact_row[0], parent_id),
+                )
+                await conn.commit()
+                logger.info(
+                    "🔗 [CAUSAL] Edge: fact=%d",
+                    fact_row[0],
+                )
+    except Exception as e:  # noqa: BLE001
+        logger.warning(
+            "⚠️ [CAUSAL] Failed for %s: %s",
+            memo_id, e,
+        )

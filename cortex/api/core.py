@@ -28,7 +28,6 @@ from cortex.api.middleware import (
 )
 from cortex.auth import AuthManager
 from cortex.engine import CortexEngine
-from cortex.extensions.hive.main import router as hive_router
 from cortex.extensions.metering.middleware import MeteringMiddleware
 from cortex.extensions.timing import TimingTracker
 from cortex.routes import (
@@ -68,18 +67,17 @@ from cortex.routes import (
 from cortex.routes import (
     mejoralo as mejoralo_router,
 )
-from cortex.routes import memories as memories_router
 from cortex.routes import (
     missions as missions_router,
-)
-from cortex.routes import (
-    notch_ws as notch_ws_router,
 )
 from cortex.routes import onboarding as onboarding_router
 from cortex.routes import oracle as oracle_router
 from cortex.routes import runtime as runtime_router
 from cortex.routes import (
     search as search_router,
+)
+from cortex.routes import (
+    swarm as swarm_router,
 )
 from cortex.routes import (
     telemetry as telemetry_router,
@@ -95,6 +93,9 @@ from cortex.routes import (
 )
 from cortex.routes import (
     translate as translate_router,
+)
+from cortex.routes import (
+    trust as trust_router,
 )
 from cortex.routes import usage as usage_router
 from cortex.telemetry.metrics import MetricsMiddleware, metrics
@@ -115,6 +116,8 @@ __all__ = [
 ]
 
 logger = logging.getLogger("uvicorn.error")
+
+from cortex.extensions.swarm.manager import get_swarm_manager
 
 # ─── Initialization ───────────────────────────────────────────────────
 
@@ -140,6 +143,8 @@ async def lifespan(app: FastAPI):
     pool = CortexConnectionPool(db_path, read_only=False)
     await pool.initialize()
     async_engine = AsyncCortexEngine(pool, db_path)
+
+    app.state.swarm_manager = get_swarm_manager()
 
     # 3. Global Auth Registration
     import cortex.auth
@@ -194,6 +199,7 @@ app = FastAPI(
     docs_url="/docs" if not config.PROD else None,
     redoc_url="/redoc" if not config.PROD else None,
 )
+app.state.swarm_manager = get_swarm_manager()
 
 
 # ─── Internal Middleware ──────────────────────────────────────────────
@@ -272,6 +278,24 @@ async def root_node(request: Request) -> dict:
     }
 
 
+# ─── Backward Compatibility Redirects ───────────────────────────────
+
+
+@app.api_route(
+    "/v1/memories/{path:path}",
+    methods=["GET", "POST", "DELETE", "PUT", "PATCH"],
+    include_in_schema=False,
+)
+async def memory_redirect(path: str, request: Request):
+    """Redirect legacy /v1/memories/* to /v1/facts/* (v5.1 consolidation)."""
+    from fastapi.responses import RedirectResponse
+
+    # Map the URL path
+    new_url = str(request.url).replace("/v1/memories", "/v1/facts")
+    logger.info("Redirecting legacy client: %s -> %s", request.url.path, new_url)
+    return RedirectResponse(url=new_url, status_code=307)
+
+
 @app.get("/health", tags=["health"])
 async def health_check(request: Request) -> dict:
     lang = request.headers.get("Accept-Language", DEFAULT_LANGUAGE)
@@ -345,15 +369,14 @@ app.include_router(mejoralo_router.router)
 app.include_router(gate_router.router)
 app.include_router(context_router.router)
 app.include_router(tips_router.router)
+app.include_router(swarm_router.router)
 app.include_router(telemetry_router.router)
-app.include_router(hive_router)
-app.include_router(notch_ws_router.router)
 app.include_router(topology_ws_router.router)
-app.include_router(memories_router.router)
 app.include_router(usage_router.router)
 app.include_router(runtime_router.router)
 app.include_router(onboarding_router.router)
 app.include_router(health_index_router.router)
+app.include_router(trust_router.router)
 
 # Gateway — Universal Intelligence Entry Point
 from cortex.gateway.adapters import (  # noqa: E402

@@ -15,7 +15,7 @@ from __future__ import annotations
 import logging
 import os
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 __all__ = [
     "DEFAULT_SERVER_URL",
@@ -81,9 +81,9 @@ class ToolboxBridge:
     Centralizes connectivity to external database toolboxes for ADK agents.
     """
 
-    def __init__(self, config: Optional[ToolboxConfig] = None) -> None:
+    def __init__(self, config: ToolboxConfig | None = None) -> None:
         self.config = config or ToolboxConfig.from_env()
-        self._client: Optional[Any] = None
+        self._client: Any | None = None
         self._tools: list[Any] = []
 
     @property
@@ -169,7 +169,7 @@ class ToolboxBridge:
 
 
 async def create_toolbox_bridge(
-    server_url: Optional[str] = None,
+    server_url: str | None = None,
     toolset: str = "",
 ) -> ToolboxBridge:
     """Sovereign factory for rapid bridge deployment."""
@@ -190,7 +190,7 @@ async def create_toolbox_bridge(
 
 async def cortex_self_bridge(
     toolset: str = "cortex-readonly",
-) -> Optional[ToolboxBridge]:
+) -> ToolboxBridge | None:
     """Connect to the local CORTEX Toolbox membrane.
 
     Returns a bridge pre-configured for reading CORTEX's own
@@ -201,7 +201,7 @@ async def cortex_self_bridge(
       query-facts, query-ghosts, query-decisions,
       query-signals, cortex-stats
     """
-    if not toolbox_health_check():
+    if not await toolbox_health_check():
         logger.warning(
             "Toolbox membrane unreachable at %s — fallback to direct ORM.",
             DEFAULT_SERVER_URL,
@@ -213,22 +213,27 @@ async def cortex_self_bridge(
     )
 
 
-def toolbox_health_check(
+async def toolbox_health_check(
     url: str = DEFAULT_SERVER_URL,
     timeout: float = 2.0,
 ) -> bool:
     """Probe whether the Toolbox server is alive.
 
-    Uses stdlib urllib — zero external deps. Hits GET /api/toolset/
-    and expects a 200 response within `timeout` seconds.
+    Uses stdlib urllib wrapped in asyncio.to_thread — zero external deps.
+    Hits GET /api/toolset/ and expects a 200 response within timeout.
     """
+    import asyncio
     import urllib.error
     import urllib.request
 
     probe = f"{url.rstrip('/')}/api/toolset/"
-    try:
-        req = urllib.request.Request(probe, method="GET")
-        with urllib.request.urlopen(req, timeout=timeout):
-            return True
-    except (urllib.error.URLError, OSError, TimeoutError):
-        return False
+    req = urllib.request.Request(probe, method="GET")
+
+    def _probe() -> bool:
+        try:
+            with urllib.request.urlopen(req, timeout=timeout):
+                return True
+        except (urllib.error.URLError, OSError, TimeoutError):
+            return False
+
+    return await asyncio.to_thread(_probe)

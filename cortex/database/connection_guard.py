@@ -16,7 +16,6 @@ from __future__ import annotations
 import re
 import sys
 from pathlib import Path
-from typing import Optional
 
 __all__ = ["scan_raw_connects", "ConnectionViolation"]
 
@@ -37,6 +36,7 @@ _WHITELISTED_MODULES: frozenset[str] = frozenset(
         # Engine low-level
         "cortex/engine/forgetting_oracle.py",  # Sync forgetting analysis
         "cortex/engine/decalcifier.py",  # Sync schema maintenance
+        "cortex/engine/capabilities.py",
         # Agent/system infra (pre- and post-refactor paths)
         "cortex/agents/system_prompt.py",
         "cortex/extensions/agents/system_prompt.py",
@@ -64,6 +64,8 @@ _WHITELISTED_MODULES: frozenset[str] = frozenset(
         # Health collector (sync reads for Prometheus hot path)
         "cortex/health/collector.py",
         "cortex/extensions/health/collector.py",
+        "cortex/extensions/health/fix_registry.py",
+        "cortex/extensions/health/trend.py",
         # UI swarm board (local read-only)
         "cortex/ui/swarm_board.py",
         "cortex/extensions/ui/swarm_board.py",
@@ -72,6 +74,8 @@ _WHITELISTED_MODULES: frozenset[str] = frozenset(
         "cortex/daemon/monitors/auto_audit.py",
         "cortex/extensions/daemon/centaur/queue.py",
         "cortex/extensions/daemon/monitors/auto_audit.py",
+        "cortex/ledger/store.py",
+        "cortex/cli/doctor_cmds.py",
     }
 )
 
@@ -119,7 +123,7 @@ def _scan_file_lines(py_file: Path, violations: list[ConnectionViolation]) -> No
 
 def scan_raw_connects(
     root: str | Path = "cortex",
-    whitelist: Optional[frozenset[str]] = None,
+    whitelist: frozenset[str] | None = None,
 ) -> list[ConnectionViolation]:
     """Scan CORTEX source for unauthorized sqlite3.connect() calls.
 

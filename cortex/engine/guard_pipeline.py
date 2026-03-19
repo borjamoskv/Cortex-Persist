@@ -9,7 +9,7 @@ Guards that fail to import at registration time are silently skipped.
 from __future__ import annotations
 
 import logging
-from typing import Any, Optional
+from typing import Any
 
 import aiosqlite
 
@@ -64,7 +64,7 @@ class GuardPipeline:
         conn: aiosqlite.Connection,
         *,
         tenant_id: str = "default",
-        source: Optional[str] = None,
+        source: str | None = None,
     ) -> tuple[str, str, dict[str, Any]]:
         """Run all content mutators in order. Each receives the previous output."""
         for mutator in self._mutators:
@@ -87,8 +87,8 @@ class GuardPipeline:
         conn: aiosqlite.Connection,
         *,
         tenant_id: str = "default",
-        source: Optional[str] = None,
-        db_path: Optional[str] = None,
+        source: str | None = None,
+        db_path: str | None = None,
     ) -> None:
         """Run all post-store hooks. Failures are logged but never raised."""
         for hook in self._post_hooks:

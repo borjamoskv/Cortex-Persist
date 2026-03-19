@@ -8,7 +8,6 @@ from __future__ import annotations
 import base64
 import logging
 import os
-from typing import Optional
 
 import keyring
 
@@ -20,7 +19,7 @@ SERVICE_NAME = "cortex_v6"
 KEY_NAME = "master_key"
 
 
-def get_master_key() -> Optional[bytes]:
+def get_master_key() -> bytes | None:
     """Read the master key from the OS keychain or fallback to env var."""
     key_b64 = None
     if not os.environ.get("CORTEX_TESTING"):

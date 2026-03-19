@@ -176,6 +176,7 @@ logging, and external verification when required.
 - [`README.md`](README.md) — project overview and install surface
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — system topology and module map
 - [`docs/SECURITY_TRUST_MODEL.md`](docs/SECURITY_TRUST_MODEL.md) — trust boundaries, ledger, verification
+- [`docs/internal/COGITO.md`](docs/internal/COGITO.md) — Mechanical Introspection and Sovereign Manifesto
 - [`docs/AXIOMS.md`](docs/AXIOMS.md) — epistemic and design axioms (incl. AX-034 & Ω₁₃)
 - [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md) — contribution workflow
 - [`docs/OPERATIONS.md`](docs/OPERATIONS.md) — runtime and maintenance procedures

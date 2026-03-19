@@ -8,7 +8,7 @@ on each tick, emits ALERT_ENTROPY messages for every security alert found.
 from __future__ import annotations
 
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from cortex.agents.base import BaseAgent
 from cortex.agents.bus import SqliteMessageBus
@@ -31,7 +31,7 @@ class SecurityAgent(BaseAgent):
         manifest: AgentManifest,
         bus: SqliteMessageBus,
         tool_registry: ToolRegistry,
-        monitor: Optional[SecurityMonitor] = None,
+        monitor: SecurityMonitor | None = None,
     ) -> None:
         super().__init__(manifest, bus, tool_registry)
         self._monitor = monitor or SecurityMonitor()

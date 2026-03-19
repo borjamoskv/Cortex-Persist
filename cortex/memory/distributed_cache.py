@@ -28,7 +28,7 @@ import os
 import time
 from collections.abc import AsyncIterator, Callable, Coroutine
 from contextlib import asynccontextmanager
-from typing import Any, Optional
+from typing import Any
 
 try:
     from cortex.extensions.immune.chaos import ChaosGate, async_interceptor
@@ -126,14 +126,14 @@ class DistributedSovereignCache:
     Cluster-safe Redis L1 cache with Persistent Audit Streams (v7.5).
     """
 
-    def __init__(self, redis_client: Any, audit_callback: Optional[AuditCallback] = None) -> None:
+    def __init__(self, redis_client: Any, audit_callback: AuditCallback | None = None) -> None:
         if not _REDIS_AVAILABLE:
             raise ImportError("redis[asyncio] required")
         self._r = redis_client
         self._audit_callback = audit_callback
         self._node_id = os.environ.get("CORTEX_NODE_ID", "cortex-node-01")
-        self._consumer_task: Optional[asyncio.Task[None]] = None
-        self._notification_task: Optional[asyncio.Task[None]] = None
+        self._consumer_task: asyncio.Task[None] | None = None
+        self._notification_task: asyncio.Task[None] | None = None
         self._is_available = True
         self.chaos_gate = ChaosGate(name="redis_l1_cache") if ChaosGate else None
 
@@ -146,7 +146,7 @@ class DistributedSovereignCache:
     @asynccontextmanager
     async def from_env(
         cls,
-        audit_callback: Optional[AuditCallback] = None,
+        audit_callback: AuditCallback | None = None,
     ) -> AsyncIterator[DistributedSovereignCache]:
         redis_url = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
         client = aioredis.from_url(redis_url, decode_responses=True)  # type: ignore[reportOptionalMemberAccess]
@@ -177,7 +177,7 @@ class DistributedSovereignCache:
 
     # ─── Core Operations ─────────────────────────────────────────────────────
 
-    async def get(self, key: str) -> Optional[dict[str, Any]]:
+    async def get(self, key: str) -> dict[str, Any] | None:
         if not self._is_available:
             # Quick Circuit Breaker Ping (Max once per 10 secs to avoid Event Loop spam)
             now = time.time()
@@ -438,7 +438,7 @@ class DistributedSovereignCache:
             return {"status": "UNAVAILABLE_FATAL"}
 
 
-def make_fastapi_lifespan(audit_callback: Optional[AuditCallback] = None) -> Any:
+def make_fastapi_lifespan(audit_callback: AuditCallback | None = None) -> Any:
     from fastapi import FastAPI as _FastAPI
 
     @asynccontextmanager

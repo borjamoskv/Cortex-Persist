@@ -64,7 +64,7 @@ class TestFTS5Triggers:
 
     def _setup_db(self, db_path: str) -> sqlite3.Connection:
         """Create facts table + FTS5 + triggers."""
-        from cortex.database.schema import CREATE_FACTS_INDEXES, CREATE_FACTS_TABLE
+        from cortex.database.schema import CREATE_FACTS_INDEXES
         from cortex.database.schema_extensions import (
             CREATE_FACTS_FTS,
             CREATE_FACTS_FTS_TRIGGERS,
@@ -260,9 +260,9 @@ class TestPoolExpansion:
         os.environ["CORTEX_POOL_MIN"] = "8"
 
         try:
-            from cortex.database.pool import AsyncConnectionPool
+            from cortex.database.pool import CortexConnectionPool
 
-            pool = AsyncConnectionPool(db_path=":memory:")
+            pool = CortexConnectionPool(":memory:")
             assert pool.min_connections == 8, f"Expected min=8, got {pool.min_connections}"
         finally:
             os.environ.clear()
@@ -274,9 +274,9 @@ class TestPoolExpansion:
         os.environ["CORTEX_POOL_MAX"] = "64"
 
         try:
-            from cortex.database.pool import AsyncConnectionPool
+            from cortex.database.pool import CortexConnectionPool
 
-            pool = AsyncConnectionPool(db_path=":memory:")
+            pool = CortexConnectionPool(":memory:")
             assert pool.max_connections == 64, f"Expected max=64, got {pool.max_connections}"
         finally:
             os.environ.clear()

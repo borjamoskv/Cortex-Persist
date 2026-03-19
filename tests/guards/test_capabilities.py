@@ -1,6 +1,6 @@
 import pytest
 
-from cortex.guards.capabilities import Capability, RiskTier
+from cortex.guards.capabilities import AgentCredentials, Capability, RiskTier
 from cortex.guards.capability_guard import CapabilityGuard
 
 
@@ -11,7 +11,12 @@ def analytics_guard() -> CapabilityGuard:
         Capability(name="fs:read", tier=RiskTier.TIER_1_LOCAL_SAFE),
         Capability(name="mem:query", tier=RiskTier.TIER_0_ANALYTICAL),
     }
-    return CapabilityGuard(allowed_capabilities=caps)
+    creds = AgentCredentials(
+        agent_id="test-analytics",
+        capabilities=caps,
+        max_tier=RiskTier.TIER_1_LOCAL_SAFE,
+    )
+    return CapabilityGuard(credentials=creds)
 
 
 @pytest.fixture
@@ -22,7 +27,12 @@ def execution_guard() -> CapabilityGuard:
         Capability(name="fs:write", tier=RiskTier.TIER_3_LOCAL_MUTATION),
         Capability(name="git:commit", tier=RiskTier.TIER_3_LOCAL_MUTATION),
     }
-    return CapabilityGuard(allowed_capabilities=caps)
+    creds = AgentCredentials(
+        agent_id="test-executor",
+        capabilities=caps,
+        max_tier=RiskTier.TIER_3_LOCAL_MUTATION,
+    )
+    return CapabilityGuard(credentials=creds)
 
 
 def test_capability_guard_success(analytics_guard: CapabilityGuard) -> None:
@@ -31,14 +41,14 @@ def test_capability_guard_success(analytics_guard: CapabilityGuard) -> None:
     analytics_guard.validate_action("mem:query", RiskTier.TIER_0_ANALYTICAL)
 
 
-def tier_escalation_violation(analytics_guard: CapabilityGuard) -> None:
+def test_tier_escalation_violation(analytics_guard: CapabilityGuard) -> None:
     # Attempting to escalate the requested tier above the allowed maximum
-    with pytest.raises(ValueError, match="exceeds max allowed Tier"):
+    with pytest.raises(ValueError, match="Execution rejected: Requested Tier"):
         # Although "fs:read" is present, the action requests TIER_3 which is blocked
         analytics_guard.validate_action("fs:read", RiskTier.TIER_3_LOCAL_MUTATION)
 
 
-def missing_capability_violation(execution_guard: CapabilityGuard) -> None:
+def test_missing_capability_violation(execution_guard: CapabilityGuard) -> None:
     # The guard allows tier 3, but specifically lacks the "network:get" capability
     with pytest.raises(ValueError, match="Missing required capability 'network:get'"):
         execution_guard.validate_action("network:get", RiskTier.TIER_2_REMOTE_READ)
@@ -49,13 +59,13 @@ def test_dynamic_capability_grant(analytics_guard: CapabilityGuard) -> None:
     assert analytics_guard.max_allowed_tier == RiskTier.TIER_1_LOCAL_SAFE
 
     # Add a Tier 3 capability dynamically
-    analytics_guard.add_capability(Capability(name="fs:write", tier=RiskTier.TIER_3_LOCAL_MUTATION))
+    new_cap = Capability(name="fs:write", tier=RiskTier.TIER_3_LOCAL_MUTATION)
+    analytics_guard.active_capabilities.add(new_cap)
+    analytics_guard._recalculate_effective_tier()
 
-    # Max tier elevates
-    assert analytics_guard.max_allowed_tier == RiskTier.TIER_3_LOCAL_MUTATION
-
-    # We can now write
-    analytics_guard.validate_action("fs:write", RiskTier.TIER_3_LOCAL_MUTATION)
+    # Max tier elevates (bounded by credentials.max_tier=TIER_1 ceiling)
+    # Since credentials.max_tier is TIER_1, the guard caps at TIER_1
+    assert analytics_guard.max_allowed_tier == RiskTier.TIER_1_LOCAL_SAFE
 
 
 def test_capability_revocation(execution_guard: CapabilityGuard) -> None:

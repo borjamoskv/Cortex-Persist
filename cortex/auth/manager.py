@@ -9,7 +9,7 @@ import logging
 import secrets
 import threading
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Any
 
 from cortex.auth.backends import BaseAuthBackend
 from cortex.auth.models import APIKey, AuthResult
@@ -27,7 +27,7 @@ class AuthManager:
 
     KEY_LENGTH = 32  # 256-bit keys
 
-    def __init__(self, backend: Optional[BaseAuthBackend | str] = None):
+    def __init__(self, backend: BaseAuthBackend | str | None = None):
         """Initialize with an optional backend or db_path.
 
         Args:
@@ -89,7 +89,7 @@ class AuthManager:
         name: str,
         tenant_id: str = "default",
         role: str = "user",
-        permissions: Optional[list[str]] = None,
+        permissions: list[str] | None = None,
         rate_limit: int = 100,
     ) -> tuple[str, APIKey]:
         """Create a new API key. Returns (raw_key, APIKey metadata)."""
@@ -135,7 +135,7 @@ class AuthManager:
         name: str,
         tenant_id: str = "default",
         role: str = "user",
-        permissions: Optional[list[str]] = None,
+        permissions: list[str] | None = None,
         rate_limit: int = 100,
     ) -> tuple[str, APIKey]:
         """Synchronous wrapper for create_key (test fixtures / CLI).
@@ -238,7 +238,7 @@ class AuthManager:
             key_name=row["name"],
         )
 
-    async def list_keys(self, tenant_id: Optional[str] = None) -> list[APIKey]:
+    async def list_keys(self, tenant_id: str | None = None) -> list[APIKey]:
         """List all API keys."""
         rows = await self.backend.list_keys(tenant_id)
         return [
@@ -266,7 +266,7 @@ class AuthManager:
 
 # ─── Singleton ────────────────────────────────────────────────────────
 
-_auth_manager: Optional[AuthManager] = None
+_auth_manager: AuthManager | None = None
 _auth_lock = threading.Lock()
 
 

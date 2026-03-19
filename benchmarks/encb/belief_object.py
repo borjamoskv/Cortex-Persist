@@ -10,7 +10,7 @@ from __future__ import annotations
 import uuid
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, FrozenSet
+from typing import Any
 
 
 class BeliefType(str, Enum):
@@ -32,7 +32,7 @@ class Evidence:
     source_node: str
     timestamp: int
     confidence: float  # 0..1
-    assumption_ids: FrozenSet[str]
+    assumption_ids: frozenset[str]
     payload_hash: str
     value: Any = None
 
@@ -43,7 +43,7 @@ class Evidence:
         conf: float,
         key: str,
         value: Any,
-        assumptions: FrozenSet[str] | None = None,
+        assumptions: frozenset[str] | None = None,
     ) -> Evidence:
         """Factory for common evidence creation."""
         return Evidence(

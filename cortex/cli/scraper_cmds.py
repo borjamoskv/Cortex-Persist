@@ -9,7 +9,6 @@ Commands:
 from __future__ import annotations
 
 import json
-from typing import Optional
 
 import click
 from rich.console import Console
@@ -48,7 +47,7 @@ def scraper():
 def scrape(
     url: str,
     strategy: str,
-    output: Optional[str],
+    output: str | None,
     output_format: str,
     no_robots: bool,
     persist: bool,
@@ -136,7 +135,7 @@ def batch(
     strategy: str,
     concurrency: int,
     rate_limit: float,
-    output: Optional[str],
+    output: str | None,
 ):
     """Batch extract URLs from a newline-delimited file."""
     from cortex.cli.common import _run_async
@@ -200,7 +199,7 @@ def batch(
 @click.argument("url")
 @click.option("--depth", "-d", type=int, default=2, help="Max crawl depth.")
 @click.option("--output", "-o", type=click.Path(), default=None, help="Output file for URLs.")
-def map_site(url: str, depth: int, output: Optional[str]):
+def map_site(url: str, depth: int, output: str | None):
     """Discover URLs from a website (sitemap)."""
     from cortex.cli.common import _run_async
     from cortex.extensions.scraper.engine import ScraperEngine

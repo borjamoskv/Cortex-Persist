@@ -15,7 +15,7 @@ import logging
 import time
 from collections import deque
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from cortex.database.pool import CortexConnectionPool
@@ -73,9 +73,7 @@ class ImmutableLedger:
             return config.CHECKPOINT_MIN
         return config.CHECKPOINT_MAX
 
-    async def compute_merkle_root_async(
-        self, start_id: int, end_id: int, conn=None
-    ) -> Optional[str]:
+    async def compute_merkle_root_async(self, start_id: int, end_id: int, conn=None) -> str | None:
         """Compute Merkle root for a range of transactions (async).
 
         Args:
@@ -102,7 +100,7 @@ class ImmutableLedger:
         async with self._acquire_conn() as acquired_conn:
             return await _compute(acquired_conn)
 
-    async def create_checkpoint_async(self) -> Optional[int]:
+    async def create_checkpoint_async(self) -> int | None:
         """Create a Merkle tree checkpoint for recent transactions (async)."""
         batch_size = self.adaptive_batch_size
 
@@ -156,7 +154,7 @@ class ImmutableLedger:
             )
             return cursor.lastrowid
 
-    def compute_merkle_root_sync(self, conn, start_id: int, end_id: int) -> Optional[str]:
+    def compute_merkle_root_sync(self, conn, start_id: int, end_id: int) -> str | None:
         """Compute Merkle root for a range of transactions synchronously."""
         cursor = conn.execute(
             "SELECT hash FROM transactions WHERE id >= ? AND id <= ? ORDER BY id ASC",
@@ -168,7 +166,7 @@ class ImmutableLedger:
         tree = MerkleTree(hashes)
         return tree.root
 
-    def create_checkpoint_sync(self, conn=None) -> Optional[int]:
+    def create_checkpoint_sync(self, conn=None) -> int | None:
         """Create a Merkle tree checkpoint for recent transactions synchronously."""
         batch_size = self.adaptive_batch_size
 

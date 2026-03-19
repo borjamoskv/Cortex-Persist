@@ -6,7 +6,6 @@ import logging
 import socket
 import ssl
 from datetime import datetime, timezone
-from typing import Optional
 
 from cortex.extensions.daemon.models import DEFAULT_CERT_WARN_DAYS, DEFAULT_TIMEOUT, CertAlert
 
@@ -33,7 +32,7 @@ class CertMonitor:
                 alerts.append(alert)
         return alerts
 
-    def _check_one(self, hostname: str) -> Optional[CertAlert]:
+    def _check_one(self, hostname: str) -> CertAlert | None:
         """Check a single hostname's SSL certificate."""
         try:
             ctx = ssl.create_default_context()

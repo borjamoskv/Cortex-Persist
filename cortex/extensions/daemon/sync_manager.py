@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 from cortex.extensions.sync import SyncResult, WritebackResult
 
@@ -27,8 +27,8 @@ class CortexSyncManager:
     def __init__(self, engine: CortexEngine):
         self._engine = engine
         self._sync_lock = asyncio.Lock()
-        self._last_sync_result: Optional[SyncResult] = None
-        self._last_wb_result: Optional[WritebackResult] = None
+        self._last_sync_result: SyncResult | None = None
+        self._last_wb_result: WritebackResult | None = None
         self._pulse_state: dict[str, str] = {}  # MerklePulse state (file -> hash)
 
     async def run_sync_cycle(self) -> dict[str, Any]:

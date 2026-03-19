@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger("cortex.mcp.notebooklm")
 
@@ -24,7 +24,7 @@ def register_notebooklm_tools(mcp: Any, ctx: Any) -> None:
     @mcp.tool()
     async def notebooklm_digest(
         output: str = "cortex_notebooklm_digest.md",
-        project: Optional[str] = None,
+        project: str | None = None,
     ) -> dict:
         """Generate Master Digest for NotebookLM with Shadow Key anchors.
 
@@ -40,7 +40,7 @@ def register_notebooklm_tools(mcp: Any, ctx: Any) -> None:
         """
         from cortex.services.notebooklm import NotebookLMService
 
-        db_path = getattr(ctx, "db_path", "")
+        db_path = ctx.cfg.db_path
         svc = NotebookLMService(str(db_path))
         content = await svc.generate_digest(project=project)
 
@@ -72,7 +72,7 @@ def register_notebooklm_tools(mcp: Any, ctx: Any) -> None:
         """
         from cortex.services.notebooklm import NotebookLMService
 
-        db_path = getattr(ctx, "db_path", "")
+        db_path = ctx.cfg.db_path
         svc = NotebookLMService(str(db_path))
         counts = await svc.fragment_by_domain(Path(output_dir))
 
@@ -80,7 +80,7 @@ def register_notebooklm_tools(mcp: Any, ctx: Any) -> None:
 
     @mcp.tool()
     async def notebooklm_sync(
-        drive_path: Optional[str] = None,
+        drive_path: str | None = None,
         mode: str = "both",
     ) -> dict:
         """Sync exported files to cloud storage for NotebookLM pickup.

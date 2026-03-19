@@ -1,4 +1,4 @@
-"""Permanent pytest tests for parent_decision_id causal infrastructure.
+"""Permanent pytest tests for parent_id causal infrastructure.
 
 Covers:
 - Phase 1: Data model, SQL roundtrip, schema index
@@ -47,21 +47,39 @@ async def db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             tenant_id TEXT DEFAULT 'default', project TEXT NOT NULL,
             content TEXT NOT NULL, fact_type TEXT DEFAULT 'knowledge',
-            tags TEXT DEFAULT '[]', cognitive_layer TEXT DEFAULT 'semantic',
-            parent_decision_id INTEGER REFERENCES facts(id),
-            confidence TEXT DEFAULT 'stated',
-            valid_from TEXT DEFAULT (datetime('now')), valid_until TEXT,
-            source TEXT, meta TEXT DEFAULT '{}',
-            consensus_score REAL DEFAULT 1.0,
-            hash TEXT, signature TEXT, signer_pubkey TEXT,
-            is_quarantined INTEGER DEFAULT 0, quarantined_at TEXT,
-            quarantine_reason TEXT,
-            created_at TEXT DEFAULT (datetime('now')),
-            updated_at TEXT DEFAULT (datetime('now')),
-            tx_id INTEGER, is_tombstoned INTEGER DEFAULT 0,
-            tombstoned_at TEXT
+            tags TEXT DEFAULT '[]',
+            id INTEGER PRIMARY KEY,
+            tenant_id TEXT NOT NULL DEFAULT 'default',
+            project TEXT NOT NULL,
+            content TEXT NOT NULL,
+            fact_type TEXT NOT NULL DEFAULT 'knowledge',
+            metadata TEXT DEFAULT '{}',
+            hash TEXT,
+            source TEXT,
+            confidence TEXT DEFAULT 'C3',
+            quadrant TEXT NOT NULL DEFAULT 'ACTIVE',
+            storage_tier TEXT NOT NULL DEFAULT 'HOT',
+            exergy_score REAL NOT NULL DEFAULT 1.0,
+            category TEXT NOT NULL DEFAULT 'general',
+            semantic_status TEXT NOT NULL DEFAULT 'pending',
+            parent_id INTEGER,
+            relation_type TEXT,
+            yield_score REAL NOT NULL DEFAULT 1.0,
+            tags TEXT DEFAULT '[]'
         );
-        CREATE INDEX idx_facts_parent ON facts(parent_decision_id);
+        CREATE TABLE enrichment_jobs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            fact_id INTEGER NOT NULL REFERENCES facts(id),
+            job_type TEXT NOT NULL DEFAULT 'embedding',
+            status TEXT NOT NULL DEFAULT 'queued',
+            priority INTEGER DEFAULT 0,
+            attempts INTEGER DEFAULT 0,
+            last_error TEXT,
+            payload TEXT,
+            next_attempt_at TEXT,
+            created_at TEXT NOT NULL DEFAULT (datetime('now')),
+            updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+        );
     """)
     yield conn
     await conn.close()
@@ -73,7 +91,7 @@ async def db():
 class TestDataModel:
     """Fact dataclass and SQL column mapping."""
 
-    def test_fact_has_parent_decision_id_field(self):
+    def test_fact_has_parent_id_field(self):
         f = Fact(
             id=1,
             tenant_id="t",
@@ -88,9 +106,9 @@ class TestDataModel:
             meta={},
             created_at="now",
             updated_at="now",
-            parent_decision_id=42,
+            parent_id=42,
         )
-        assert f.parent_decision_id == 42
+        assert f.parent_id == 42
 
     def test_to_dict_includes_parent(self):
         f = Fact(
@@ -107,23 +125,23 @@ class TestDataModel:
             meta={},
             created_at="now",
             updated_at="now",
-            parent_decision_id=7,
+            parent_id=7,
         )
         d = f.to_dict()
-        assert d["parent_decision_id"] == 7
+        assert d["parent_id"] == 7
 
     def test_fact_columns_includes_parent(self):
-        assert "parent_decision_id" in FACT_COLUMNS
+        assert "parent_id" in FACT_COLUMNS
 
     def test_insert_fact_record_signature(self):
         sig = inspect.signature(insert_fact_record)
-        assert "parent_decision_id" in sig.parameters
+        assert "parent_id" in sig.parameters
 
     def test_store_mixin_signature(self):
         from cortex.engine.store_mixin import StoreMixin
 
         sig = inspect.signature(StoreMixin.store)
-        assert "parent_decision_id" in sig.parameters
+        assert "parent_id" in sig.parameters
 
 
 # ─── Phase 2: FK Validation & Auto-Resolve ───────────────────────────
@@ -146,11 +164,11 @@ class TestFKValidation:
             "test",
             {},
             None,
-            parent_decision_id=99999,
+            parent_id=99999,
         )
         await db.commit()
         cursor = await db.execute(
-            "SELECT parent_decision_id FROM facts WHERE id = ?",
+            "SELECT parent_id FROM facts WHERE id = ?",
             (fid,),
         )
         row = await cursor.fetchone()
@@ -184,11 +202,11 @@ class TestFKValidation:
             "test",
             {},
             None,
-            parent_decision_id=d1,
+            parent_id=d1,
         )
         await db.commit()
         cursor = await db.execute(
-            "SELECT parent_decision_id FROM facts WHERE id = ?",
+            "SELECT parent_id FROM facts WHERE id = ?",
             (d2,),
         )
         assert (await cursor.fetchone())[0] == d1
@@ -214,7 +232,7 @@ class TestAutoResolve:
         )
         await db.commit()
         cursor = await db.execute(
-            "SELECT parent_decision_id FROM facts WHERE id = ?",
+            "SELECT parent_id FROM facts WHERE id = ?",
             (d1,),
         )
         assert (await cursor.fetchone())[0] is None
@@ -250,7 +268,7 @@ class TestAutoResolve:
         )
         await db.commit()
         cursor = await db.execute(
-            "SELECT parent_decision_id FROM facts WHERE id = ?",
+            "SELECT parent_id FROM facts WHERE id = ?",
             (d2,),
         )
         assert (await cursor.fetchone())[0] == d1
@@ -286,7 +304,7 @@ class TestAutoResolve:
         )
         await db.commit()
         cursor = await db.execute(
-            "SELECT parent_decision_id FROM facts WHERE id = ?",
+            "SELECT parent_id FROM facts WHERE id = ?",
             (e1,),
         )
         assert (await cursor.fetchone())[0] == d1
@@ -322,7 +340,7 @@ class TestAutoResolve:
         )
         await db.commit()
         cursor = await db.execute(
-            "SELECT parent_decision_id FROM facts WHERE id = ?",
+            "SELECT parent_id FROM facts WHERE id = ?",
             (k1,),
         )
         assert (await cursor.fetchone())[0] is None
@@ -370,11 +388,11 @@ class TestAutoResolve:
             "test",
             {},
             None,
-            parent_decision_id=d1,
+            parent_id=d1,
         )
         await db.commit()
         cursor = await db.execute(
-            "SELECT parent_decision_id FROM facts WHERE id = ?",
+            "SELECT parent_id FROM facts WHERE id = ?",
             (d3,),
         )
         assert (await cursor.fetchone())[0] == d1
@@ -391,7 +409,7 @@ class TestTypeReconciliation:
 
         from cortex.memory.models import CortexFactModel
 
-        field = CortexFactModel.model_fields["parent_decision_id"]
+        field = CortexFactModel.model_fields["parent_id"]
         args = typing.get_args(field.annotation)
         if args:
             assert int in args
@@ -446,7 +464,7 @@ class TestCLI:
 
 
 class TestMCP:
-    """MCP tools have parent_decision_id support."""
+    """MCP tools have parent_id support."""
 
     def test_cortex_store_has_parent(self):
         with open(
@@ -459,7 +477,7 @@ class TestMCP:
             )
         ) as f:
             src = f.read()
-        assert "parent_decision_id: int = 0" in src
+        assert "parent_id: int = 0" in src
 
     def test_cortex_trace_chain_defined(self):
         with open(
@@ -519,7 +537,7 @@ class TestCausalChainTraversal:
                 UNION ALL
                 SELECT f.id, c.depth + 1
                 FROM facts f JOIN chain c
-                    ON f.parent_decision_id = c.id
+                    ON f.parent_id = c.id
                 WHERE c.depth < 10
             )
             SELECT id, depth FROM chain ORDER BY depth
@@ -567,9 +585,9 @@ class TestCausalChainTraversal:
             WITH RECURSIVE chain(id, depth) AS (
                 SELECT id, 0 FROM facts WHERE id = ?
                 UNION ALL
-                SELECT f.parent_decision_id, c.depth + 1
+                SELECT f.parent_id, c.depth + 1
                 FROM facts f JOIN chain c ON f.id = c.id
-                WHERE f.parent_decision_id IS NOT NULL
+                WHERE f.parent_id IS NOT NULL
                     AND c.depth < 10
             )
             SELECT id, depth FROM chain ORDER BY depth

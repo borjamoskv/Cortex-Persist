@@ -27,7 +27,7 @@ from __future__ import annotations
 import logging
 import time
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from cortex.memory.dream import AssociativeDreamEngine
@@ -136,7 +136,7 @@ class SleepOrchestrator:
     async def run_full_cycle(
         self,
         tenant_id: str,
-        hot_engrams: Optional[list[Any]] = None,
+        hot_engrams: list[Any] | None = None,
     ) -> SleepCycleReport:
         """Execute one complete NREM → REM → Calibration cycle.
 

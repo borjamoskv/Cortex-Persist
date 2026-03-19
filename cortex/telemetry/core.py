@@ -40,7 +40,7 @@ import logging
 import time
 from collections import deque
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from cortex.telemetry.metrics import MetricsRegistry
@@ -51,7 +51,7 @@ logger = logging.getLogger("cortex.telemetry")
 
 # ─── Context propagation ────────────────────────────────────────────
 
-_current_span: contextvars.ContextVar[Optional[Span]] = contextvars.ContextVar(
+_current_span: contextvars.ContextVar[Span | None] = contextvars.ContextVar(
     "current_span", default=None
 )
 
@@ -66,8 +66,8 @@ class Span:
     name: str
     start_ns: int = 0
     end_ns: int = 0
-    parent_name: Optional[str] = None
-    error: Optional[str] = None
+    parent_name: str | None = None
+    error: str | None = None
     attributes: dict[str, Any] = field(default_factory=dict)
 
     @property
@@ -150,8 +150,8 @@ class SpanContext:
     def __init__(self, name: str, **attributes: Any):
         self._name = name
         self._attributes = attributes
-        self._span: Optional[Span] = None
-        self._token: Optional[contextvars.Token] = None
+        self._span: Span | None = None
+        self._token: contextvars.Token | None = None
 
     def __enter__(self) -> Span:
         parent = _current_span.get()
@@ -179,7 +179,7 @@ class SpanContext:
 # ─── @traced Decorator ───────────────────────────────────────────────
 
 
-def traced(fn=None, *, name: Optional[str] = None):
+def traced(fn=None, *, name: str | None = None):
     """Decorator that wraps a function in a tracing span.
 
     Works with both sync and async functions.

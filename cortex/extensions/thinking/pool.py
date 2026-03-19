@@ -14,7 +14,6 @@ from __future__ import annotations
 import logging
 import time
 from dataclasses import dataclass, field
-from typing import Optional
 
 from cortex.extensions.llm.provider import LLMProvider
 
@@ -75,5 +74,5 @@ class ThinkingRecord:
     total_latency_ms: float
     confidence: float
     agreement: float
-    winner: Optional[str] = None
+    winner: str | None = None
     timestamp: float = field(default_factory=time.time)

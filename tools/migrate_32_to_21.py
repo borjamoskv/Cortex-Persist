@@ -78,7 +78,9 @@ def migrate(db_path: str = DB_PATH) -> None:
 
     # Phase 1: Merge fold columns into metadata JSON for each row
     print("Phase 1: Folding 11 columns into metadata JSON...")
-    rows = conn.execute("SELECT id, metadata, " + ", ".join(FOLD_COLUMNS) + " FROM facts").fetchall()
+    rows = conn.execute(
+        "SELECT id, metadata, " + ", ".join(FOLD_COLUMNS) + " FROM facts"
+    ).fetchall()
     print(f"  Processing {len(rows)} rows...")
 
     for row in rows:
@@ -98,12 +100,17 @@ def migrate(db_path: str = DB_PATH) -> None:
                 continue
 
             # Parse JSON text columns
-            if col in ("source_metadata", "access_stats", "provenance_json",
-                       "claims_json", "signatures_json"):
+            if col in (
+                "source_metadata",
+                "access_stats",
+                "provenance_json",
+                "claims_json",
+                "signatures_json",
+            ):
                 try:
                     parsed = json.loads(val) if isinstance(val, str) else val
                     # Skip empty defaults
-                    if parsed in ({}, [], "{}",  "[]"):
+                    if parsed in ({}, [], "{}", "[]"):
                         continue
                     meta[col] = parsed
                 except (json.JSONDecodeError, TypeError):
@@ -171,7 +178,7 @@ def migrate(db_path: str = DB_PATH) -> None:
     print(f"  Old: {old_count} rows, New: {new_count} rows")
 
     if old_count != new_count:
-        print(f"ERROR: Row count mismatch! Aborting.")
+        print("ERROR: Row count mismatch! Aborting.")
         conn.execute("DROP TABLE facts_migrated")
         conn.commit()
         conn.close()
@@ -190,22 +197,16 @@ def migrate(db_path: str = DB_PATH) -> None:
     conn.execute("CREATE INDEX IF NOT EXISTS idx_facts_type ON facts(fact_type)")
     conn.execute("CREATE INDEX IF NOT EXISTS idx_facts_hash ON facts(hash)")
     conn.execute("CREATE INDEX IF NOT EXISTS idx_facts_tombstoned ON facts(is_tombstoned)")
-    conn.execute(
-        "CREATE INDEX IF NOT EXISTS idx_facts_tenant_project ON facts(tenant_id, project)"
-    )
-    conn.execute(
-        "CREATE INDEX IF NOT EXISTS idx_facts_cognitive_layer ON facts(cognitive_layer)"
-    )
-    conn.execute(
-        "CREATE INDEX IF NOT EXISTS idx_facts_tx_id ON facts(tx_id)"
-    )
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_facts_tenant_project ON facts(tenant_id, project)")
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_facts_cognitive_layer ON facts(cognitive_layer)")
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_facts_tx_id ON facts(tx_id)")
     conn.commit()
 
     # Verify final schema
     final_cols = [r[1] for r in conn.execute("PRAGMA table_info(facts)").fetchall()]
     print(f"\n✅ Migration complete: {len(final_cols)} columns")
     print(f"   Columns: {', '.join(final_cols)}")
-    print(f"   Old table preserved as 'facts_old_32col' for safety")
+    print("   Old table preserved as 'facts_old_32col' for safety")
 
     conn.close()
 

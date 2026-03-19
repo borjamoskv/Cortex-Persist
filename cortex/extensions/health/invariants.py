@@ -6,8 +6,6 @@ breaks automatically.
 
 from __future__ import annotations
 
-from typing import Optional
-
 from cortex.extensions.health.collector import (
     CollectorRegistry,
     create_default_registry,
@@ -17,7 +15,7 @@ from cortex.extensions.health.models import Grade
 
 
 def verify_health_system(
-    registry: Optional[CollectorRegistry] = None,
+    registry: CollectorRegistry | None = None,
 ) -> list[str]:
     """Verify all health system invariants.
 
@@ -60,9 +58,9 @@ def verify_health_system(
     if total_weight <= 0:
         violations.append(f"Total collector weight must be > 0, got {total_weight}")
 
-    # 5. Built-in collector count
-    if len(reg) < 3:
-        violations.append(f"Need at least 3 collectors, have {len(reg)}")
+    # 5. Built-in collector count — must be at least 9
+    if len(reg) < 9:
+        violations.append(f"Need at least 9 collectors, have {len(reg)}")
 
     # 6. Grade.from_score covers full range
     edge_cases = [0.0, 39.9, 40.0, 55.0, 70.0, 85.0, 95.0, 100.0]
@@ -85,8 +83,41 @@ def verify_health_system(
         if not hasattr(collector, "remediation") or not collector.remediation:
             violations.append(f"Collector '{name}' missing remediation")
 
-    # 9. SystemLoadCollector existence (C5/C10)
-    if "sysload" not in reg.list_collectors():
-        violations.append("SystemLoadCollector 'sysload' missing from default registry")
+    # 9. Required collectors by name
+    required_names = {
+        "db",
+        "ledger",
+        "entropy",
+        "facts",
+        "wal",
+        "sysload",
+        "browsers",
+        "snapshot",
+        "disk",
+    }
+    present = set(reg.list_collectors())
+    missing = required_names - present
+    if missing:
+        violations.append(f"Missing required collectors: {sorted(missing)}")
+
+    # 10. Sub-index coverage — all collector names must appear in at least one sub-index
+
+    # Build the mapping from scorer's internals
+    sub_idx_mapping = {
+        "storage": {"db", "facts", "disk"},
+        "integrity": {"ledger", "entropy"},
+        "performance": {"wal", "sysload", "exergy"},
+        "environment": {"browsers", "snapshot"},
+    }
+    all_mapped = set()
+    for metrics_set in sub_idx_mapping.values():
+        all_mapped |= metrics_set
+
+    unmapped = required_names - all_mapped
+    if unmapped:
+        violations.append(f"Collectors not in any sub-index: {sorted(unmapped)}")
+
+    if len(sub_idx_mapping) != 4:
+        violations.append(f"Expected 4 sub-indices, found {len(sub_idx_mapping)}")
 
     return violations

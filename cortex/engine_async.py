@@ -5,7 +5,7 @@ import sqlite3
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import aiosqlite
 
@@ -39,25 +39,42 @@ class AsyncCortexEngine(
         self,
         pool: CortexConnectionPool,
         db_path: str,
-        writer: Optional[SqliteWriteWorker] = None,
+        writer: SqliteWriteWorker | None = None,
     ):
         self._pool = pool
         self._db_path = Path(db_path)
         self._writer = writer
-        self._embedder: Optional[LocalEmbedder] = None
-        self._ledger: Optional[ImmutableLedger] = None
-        self.vault: Optional[Any] = None
+        self._embedder: LocalEmbedder | None = None
+        self._ledger: ImmutableLedger | None = None
+        self.vault: Any | None = None
 
         from cortex.extensions.cuatrida.orchestrator import CuatridaOrchestrator
 
         self._cuatrida = CuatridaOrchestrator(self)
+        self._trust_registry: Any | None = None
 
     @property
     def cuatrida(self) -> Any:
         return self._cuatrida
 
+    def get_trust_registry(self) -> Any:
+        """Access the Bayesian Trust Registry (Ω₃)."""
+        if self._trust_registry is None:
+            from cortex.engine.trust_registry import TrustRegistry
+
+            self._trust_registry = TrustRegistry()
+        return self._trust_registry
+
+    async def propagate_taint(self, fact_id: int, tenant_id: str = "default") -> Any:
+        """Propagate taint (Ω₁₃) through the causal DAG."""
+        from cortex.engine.causality import AsyncCausalGraph
+
+        async with self.session() as conn:
+            graph = AsyncCausalGraph(conn)
+            return await graph.propagate_taint(fact_id, tenant_id=tenant_id)
+
     @property
-    def writer(self) -> Optional[SqliteWriteWorker]:
+    def writer(self) -> SqliteWriteWorker | None:
         return self._writer
 
     async def write(self, sql: str, params: tuple[Any, ...] = ()) -> Result[int, str]:
@@ -77,7 +94,7 @@ class AsyncCortexEngine(
 
     async def _try_execute_write(
         self, sql: str, params: tuple[Any, ...], attempt: int, max_retries: int
-    ) -> Optional[Result[int, str]]:
+    ) -> Result[int, str] | None:
         try:
             result = await self._execute_write(sql, params)
             if result:
@@ -88,7 +105,7 @@ class AsyncCortexEngine(
             await self._backoff(attempt)
         return None
 
-    async def _execute_write(self, sql: str, params: tuple[Any, ...]) -> Optional[Result[int, str]]:
+    async def _execute_write(self, sql: str, params: tuple[Any, ...]) -> Result[int, str] | None:
         async with self.session() as conn:
             cursor = await conn.execute(sql, params)
             await conn.commit()
@@ -184,13 +201,13 @@ class AsyncCortexEngine(
     async def verify_ledger(self) -> dict[str, Any]:
         return await self._get_ledger().verify_integrity_async()
 
-    async def create_checkpoint(self) -> Optional[int]:
+    async def create_checkpoint(self) -> int | None:
         return await self._get_ledger().create_checkpoint_async()
 
     async def verify_vote_ledger(self) -> dict[str, Any]:
         return await super().verify_vote_ledger()
 
-    async def get_graph(self, project: Optional[str] = None, limit: int = 50) -> dict[str, Any]:
+    async def get_graph(self, project: str | None = None, limit: int = 50) -> dict[str, Any]:
         async with self.session() as conn:
             return await _get_graph(conn, project, limit)
 

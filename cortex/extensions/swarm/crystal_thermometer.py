@@ -4,7 +4,7 @@ import json
 import logging
 import time
 from dataclasses import dataclass, field
-from typing import Any, Literal, Optional
+from typing import Any, Literal
 
 logger = logging.getLogger("cortex.extensions.swarm.crystal_thermometer")
 
@@ -106,7 +106,7 @@ def measure_crystal_sync(
     is_diamond: bool,
     resonance: float,
     project_id: str = "",
-    metadata: Optional[dict[str, Any]] = None,
+    metadata: dict[str, Any] | None = None,
 ) -> CrystalVitals:
     temperature = calculate_temperature(recall_count, age_days)
     if resonance >= AXIOMATIC_INERTIA_THRESHOLD and temperature < TEMPERATURE_TIBIA:
@@ -147,7 +147,7 @@ async def get_axiom_embeddings(encoder: Any) -> list[list[float]]:
 
 async def scan_all_crystals(
     db_conn: Any,
-    encoder: Optional[Any] = None,
+    encoder: Any | None = None,
     project: str = "autodidact_knowledge",
     tenant_id: str = "sovereign",
 ) -> list[CrystalVitals]:

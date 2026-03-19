@@ -2,9 +2,10 @@ import os
 import re
 import sys
 
+
 def fix_file(filepath):
     try:
-        with open(filepath, 'r', encoding='utf-8') as f:
+        with open(filepath, encoding='utf-8') as f:
             content = f.read()
     except UnicodeDecodeError:
         return

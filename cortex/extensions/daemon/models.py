@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import dataclasses
 from dataclasses import dataclass, field
-from typing import Optional
 
 from cortex.core.paths import (
     AGENT_DIR,
@@ -93,7 +92,7 @@ class GhostAlert:
     last_activity: str
     hours_stale: float
     mood: str = ""
-    blocked_by: Optional[str] = None
+    blocked_by: str | None = None
 
 
 @dataclass
@@ -220,7 +219,7 @@ class SignalAlert:
 
     event_type: str
     message: str
-    project: Optional[str] = None
+    project: str | None = None
     payload: dict = field(default_factory=dict)
 
 

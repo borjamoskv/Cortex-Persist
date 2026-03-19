@@ -8,6 +8,8 @@ Covers all 3 dimensions:
 
 from __future__ import annotations
 
+import time
+
 import pytest
 
 from cortex.extensions.health.collector import (
@@ -230,14 +232,14 @@ class TestCollectorRegistry:
     def test_collect_all(self):
         reg = create_default_registry()
         results = reg.collect_all("/tmp/nonexistent.db")
-        assert len(results) == 6
+        assert len(results) == 9
         for r in results:
             assert isinstance(r, MetricSnapshot)
             assert 0.0 <= r.value <= 1.0
 
     def test_default_registry_has_5_collectors(self):
         reg = create_default_registry()
-        assert len(reg) == 6
+        assert len(reg) == 9
 
     def test_registry_truthiness(self):
         reg = CollectorRegistry()
@@ -248,7 +250,17 @@ class TestCollectorRegistry:
     def test_list_collectors(self):
         reg = create_default_registry()
         names = reg.list_collectors()
-        expected = {"db", "ledger", "entropy", "facts", "wal", "sysload"}
+        expected = {
+            "db",
+            "ledger",
+            "entropy",
+            "facts",
+            "wal",
+            "sysload",
+            "browsers",
+            "snapshot",
+            "disk",
+        }
         assert set(names) == expected
 
 
@@ -274,11 +286,11 @@ class TestHealthCollectorFacade:
     def test_backward_compatible(self):
         hc = HealthCollector(db_path="/tmp/nonexistent.db")
         metrics = hc.collect_all()
-        assert len(metrics) == 6
+        assert len(metrics) == 9
 
     def test_registry_accessible(self):
         hc = HealthCollector(db_path="/tmp/nonexistent.db")
-        assert len(hc.registry) == 6
+        assert len(hc.registry) == 9
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -442,3 +454,96 @@ class TestHealthMixin:
         await e.health_check()
         c2 = e._health_collector
         assert c1 is c2
+
+
+# ═══════════════════════════════════════════════════════════════
+# D1: NEW MODULES (ROUND 3)
+# ═══════════════════════════════════════════════════════════════
+
+
+class TestTrendPersistence:
+    def test_persist_round_trip(self, tmp_path):
+        db = str(tmp_path / "health_test.db")
+        td = TrendDetector()
+        td.persist_to_db(db, 85.0, timestamp=1000.0)
+        td.persist_to_db(db, 90.0, timestamp=2000.0)
+
+        # Load back
+        td2 = TrendDetector()
+        td2.load_from_db(db)
+        assert td2.sample_count == 2
+        assert td2.detect_drift() == "improving"
+
+    def test_prune_history(self, tmp_path):
+        db = str(tmp_path / "prune_test.db")
+        td = TrendDetector()
+        # Persist old and new
+        now = time.time()
+        td.persist_to_db(db, 50.0, timestamp=now - (40 * 86400))  # 40 days ago
+        td.persist_to_db(db, 95.0, timestamp=now)
+
+        td.prune_history(db, keep_days=30)
+
+        td2 = TrendDetector()
+        td2.load_from_db(db)
+        assert td2.sample_count == 1
+        assert td2.slope() == 0.0  # Only one point left
+
+
+class TestFixRegistry:
+    def test_registration_and_matching(self):
+        from cortex.extensions.health import FixRegistry
+
+        reg = FixRegistry()
+        reg.register("db_locked", "DB parity fix", lambda: True)
+
+        matches = reg.applicable_fixes(["db_locked", "other"])
+        assert len(matches) == 1
+        assert matches[0].metric == "db_locked"
+
+    def test_list_fixable(self):
+        from cortex.extensions.health import FixRegistry
+
+        reg = FixRegistry()
+        reg.register("f1", "fix 1", lambda: True)
+        reg.register("f2", "fix 2", lambda: True)
+
+        fixable = reg.list_fixable()
+        assert "f1" in fixable
+        assert "f2" in fixable
+
+
+class TestHealthGuard:
+    @pytest.mark.asyncio
+    async def test_guard_safety_pass(self, tmp_path):
+        from cortex.extensions.health import Grade, HealthScore
+        from cortex.guards.health_guard import HEALTH_AVAILABLE, HealthGuard
+
+        if not HEALTH_AVAILABLE:
+            pytest.skip("Health extension not available")
+
+        class PassGuard(HealthGuard):
+            async def health_score(self):
+                return HealthScore(score=100.0, grade=Grade.SOVEREIGN)
+
+        hg = PassGuard(str(tmp_path / "hg_test.db"))
+        safe = await hg.check_write_safety()
+        assert safe is True
+
+    @pytest.mark.asyncio
+    async def test_guard_violation(self, tmp_path):
+        from cortex.extensions.health import Grade, HealthScore, HealthSLA, HealthSLAViolation
+        from cortex.guards.health_guard import HEALTH_AVAILABLE, HealthGuard
+
+        if not HEALTH_AVAILABLE:
+            pytest.skip("Health extension not available")
+
+        class FragileGuard(HealthGuard):
+            async def health_score(self):
+                return HealthScore(score=10.0, grade=Grade.FAILED)
+
+        fg = FragileGuard(str(tmp_path / "violation.db"))
+        sla = HealthSLA(target_grade=Grade.DEGRADED)
+
+        with pytest.raises(HealthSLAViolation):
+            await fg.check_write_safety(sla=sla)

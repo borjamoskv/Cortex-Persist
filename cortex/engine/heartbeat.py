@@ -13,9 +13,15 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
-from cortex.nexus_v8 import DomainOrigin, IntentType, NexusWorldModel, Priority, WorldMutation
+from cortex.extensions.nexus import (
+    DomainOrigin,
+    IntentType,
+    NexusWorldModel,
+    Priority,
+    WorldMutation,
+)
 from cortex.utils import hygiene
 from cortex.utils.semantic_heartbeat import SemanticHeartbeat
 
@@ -58,7 +64,7 @@ class HeartbeatEmitter:
         engine: AsyncCortexEngine,
         project: str,
         *,
-        sleep: Optional[SleepOrchestrator] = None,
+        sleep: SleepOrchestrator | None = None,
         idle_threshold_s: float = _DEFAULT_IDLE_THRESHOLD_S,
         sleep_cooldown_s: float = _DEFAULT_SLEEP_COOLDOWN_S,
     ):

@@ -10,7 +10,6 @@ import logging
 import re
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
-from typing import Optional
 
 from cortex.extensions.aether.models import PlanOutput, ToolCall
 from cortex.extensions.aether.tools import AgentToolkit
@@ -70,7 +69,7 @@ class ExecutorState:
 class ExecutorAgent:
     """Iterative tool-calling executor agent."""
 
-    def __init__(self, llm, base_system_prompt: Optional[str] = None) -> None:
+    def __init__(self, llm, base_system_prompt: str | None = None) -> None:
         self._llm = llm
         self._base_system = base_system_prompt
 
@@ -106,6 +105,50 @@ class ExecutorAgent:
         while state.iterations < _MAX_ITERATIONS and not state.done:
             state.iterations += 1
             logger.info("⚙️  Executor iteration %d/%d", state.iterations, _MAX_ITERATIONS)
+
+            # Axiom Ω₁₆: Context Compaction & Thermodynamic Optimization
+            # Trigger: Context structural saturation (e.g. > 12 messages)
+            if len(state.messages) > 12:
+                logger.warning(
+                    "Ω₁₆ [AUTO-COMPACTION]: Context saturation detected (%d messages). "
+                    "Forcing Epistemic Collapse.",
+                    len(state.messages),
+                )
+
+                compaction_prompt = self._build_prompt(state.messages) + (
+                    "\n\n[SYSTEM OVERRIDE: AXIOM Ω₁₆]\n"
+                    "Your context window is saturated. You must now perform an Epistemic Collapse.\n"
+                    "Synthesize all valid, executed steps and discovered facts into a strictly factual, O(1) summary.\n"
+                    "Omit all failed attempts, bad tool calls, and stochastic thermal noise.\n"
+                    "Output ONLY the compressed valid state."
+                )
+
+                compressed_state = await self._llm.complete(
+                    compaction_prompt,
+                    system=sys_prompt,
+                    temperature=0.0,
+                    max_tokens=800,
+                    intent=IntentProfile.CODE,
+                )
+
+                logger.info(
+                    "Ω₁₆ [SHANNON PURIFIER]: Geodesic restart. "
+                    "History annihilated. Compressed state exergy preserved."
+                )
+
+                # Restart history: System + Compressed State
+                state.messages = [
+                    state.messages[0],  # System prompt
+                    {
+                        "role": "user",
+                        "content": (
+                            f"TASK:\n{task_description}\n\n"
+                            f"[COMPRESSED STATE (Axiom Ω₁₆)]\n{compressed_state}\n\n"
+                            "Continue executing the plan using tools one at a time."
+                        ),
+                    },
+                ]
+                # Fall through to generate the next step using the purified context
 
             # Build prompt from message history
             prompt = self._build_prompt(state.messages)
@@ -166,7 +209,7 @@ class ExecutorAgent:
         return "\n\n".join(parts)
 
     @staticmethod
-    def _parse_tool_call(text: str) -> Optional[ToolCall]:
+    def _parse_tool_call(text: str) -> ToolCall | None:
         """Extract first <tool_call> block from LLM output."""
         match = re.search(r"<tool_call>(.*?)</tool_call>", text, re.DOTALL)
         if not match:

@@ -16,7 +16,7 @@ import sqlite3
 import time
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 __all__ = ["MetricsRegistry", "MetricsMiddleware"]
 
@@ -71,10 +71,10 @@ class MetricsRegistry:
     def inc(
         self,
         name: str,
-        labels: Optional[dict[str, str]] = None,
+        labels: dict[str, str] | None = None,
         value: int = 1,
         *,
-        meta: Optional[dict[str, Any]] = None,
+        meta: dict[str, Any] | None = None,
     ) -> None:
         """Increment a counter.
 
@@ -88,19 +88,19 @@ class MetricsRegistry:
         if name in CRITICAL_METRICS and self._engine is not None:
             self._schedule_persist(name, key, labels, meta)
 
-    def observe(self, name: str, value: float, labels: Optional[dict[str, str]] = None) -> None:
+    def observe(self, name: str, value: float, labels: dict[str, str] | None = None) -> None:
         """Record a histogram observation (capped circular buffer)."""
         key = self._key(name, labels)
         self._histograms[key].append(value)
         self._hist_count[key] += 1
         self._hist_sum[key] += value
 
-    def set_gauge(self, name: str, value: float, labels: Optional[dict[str, str]] = None) -> None:
+    def set_gauge(self, name: str, value: float, labels: dict[str, str] | None = None) -> None:
         """Set a gauge value."""
         key = self._key(name, labels)
         self._gauges[key] = value
 
-    def _key(self, name: str, labels: Optional[dict[str, str]] = None) -> str:
+    def _key(self, name: str, labels: dict[str, str] | None = None) -> str:
         if not labels:
             return name
         label_str = ",".join(f'{k}="{v}"' for k, v in sorted(labels.items()))
@@ -112,8 +112,8 @@ class MetricsRegistry:
         self,
         name: str,
         key: str,
-        labels: Optional[dict[str, str]],
-        meta: Optional[dict[str, Any]],
+        labels: dict[str, str] | None,
+        meta: dict[str, Any] | None,
     ) -> None:
         """Schedule an async persist if debounce window has elapsed."""
         now = time.monotonic()
@@ -132,8 +132,8 @@ class MetricsRegistry:
         self,
         name: str,
         key: str,
-        labels: Optional[dict[str, str]],
-        extra_meta: Optional[dict[str, Any]],
+        labels: dict[str, str] | None,
+        extra_meta: dict[str, Any] | None,
     ) -> None:
         """Persist a critical metric event as a ``system_health`` fact."""
         try:

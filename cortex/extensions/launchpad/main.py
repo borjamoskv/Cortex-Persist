@@ -7,7 +7,7 @@ Bridge between the Python ledger and the Node.js Swarm engine.
 import logging
 import sqlite3
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from cortex.engine import CortexEngine
 
@@ -22,18 +22,18 @@ DEFAULT_SWARM_PATH = "~/game/.agent/skills/autonomous-browser-swarm/scripts/swar
 class MissionOrchestrator:
     """Manages Swarm mission lifecycles."""
 
-    def __init__(self, engine: CortexEngine, swarm_path: Optional[str] = None):
+    def __init__(self, engine: CortexEngine, swarm_path: str | None = None):
         self.engine = engine
         self.swarm_path = Path(swarm_path or DEFAULT_SWARM_PATH).expanduser()
 
     def launch(
         self,
         project: str,
-        goal: Optional[str] = None,
+        goal: str | None = None,
         formation: str = "IRON_DOME",
         agents: int = 10,
-        context: Optional[str] = None,
-        mission_file: Optional[str] = None,
+        context: str | None = None,
+        mission_file: str | None = None,
     ) -> dict[str, Any]:
         """Record intent and launch a swarm mission via subprocess."""
 
@@ -129,7 +129,7 @@ class MissionOrchestrator:
             logger.error("Failed to launch mission: %s", e)
             return {"intent_id": fact_id, "status": "error", "error": str(e)}
 
-    def list_missions(self, project: Optional[str] = None) -> list[dict[str, Any]]:
+    def list_missions(self, project: str | None = None) -> list[dict[str, Any]]:
         """Retrieve recent mission attempts from the ledger."""
         # Query facts of type 'intent' or 'report' with 'swarm' tag
         # Use sync connection

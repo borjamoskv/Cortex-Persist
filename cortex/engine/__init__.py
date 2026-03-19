@@ -23,6 +23,8 @@ from cortex.engine.query_mixin import QueryMixin
 from cortex.engine.search_mixin import SearchMixin
 from cortex.engine.store_mixin import StoreMixin
 from cortex.engine.transaction_mixin import TransactionMixin
+from cortex.ledger import EnrichmentQueue, LedgerStore, LedgerWriter
+from cortex.mac_maestro.executor import MaestroExecutor
 
 try:
     from cortex.extensions.health.health_mixin import HealthMixin  # type: ignore
@@ -77,13 +79,14 @@ class CortexEngine(
         self._db_path.parent.mkdir(parents=True, exist_ok=True)
         self._enforce_fs_permissions()
         self._auto_embed = auto_embed
-        self._conn: Optional[aiosqlite.Connection] = None
+        self._conn: aiosqlite.Connection | None = None
         self._vec_available = False
         self._conn_lock = asyncio.Lock()
         self._ledger = None  # Wave 5: ImmutableLedger (lazy init)
-        self._embedder: Optional[LocalEmbedder] = None
+        self._embedder: LocalEmbedder | None = None
         self._memory_manager = None  # Frontera 2: Tripartite Memory (lazy init)
         self._persistence = PersistenceSupervisor(self)
+        self._system_state = "ACTIVE"
 
         # Composition layers
         self.facts = FactManager(self)
@@ -91,8 +94,25 @@ class CortexEngine(
         self.consensus = ConsensusManager(self)
         self.lock_sovereign = SovereignLock(self)
 
+        # Wave 6: Sovereign Ledger Integration
+        self.ledger_store = LedgerStore(self._db_path)
+        self.enrichment_queue = EnrichmentQueue(self.ledger_store)
+        self.ledger_writer = LedgerWriter(self.ledger_store, self.enrichment_queue)
+        self.mac_maestro = MaestroExecutor(self.ledger_writer)
+
         # Decoupled guard pipeline (Ω₃: minimal coupling)
         self._guard_pipeline = self._register_default_guards()
+
+    # ─── System State ─────────────────────────────────────────────────────────
+
+    @property
+    def system_state(self) -> str:
+        return self._system_state
+
+    def set_system_state(self, state: str) -> None:
+        """Lock or unlock the sovereign engine (e.g., from EpistemicCircuitBreaker)"""
+        self._system_state = state
+        logger.warning("🛡️ [SOVEREIGN-STATE] CORTEX Engine state changed to: %s", state)
 
     # ─── Guard Pipeline Registration ──────────────────────────────
 
@@ -256,8 +276,9 @@ class CortexEngine(
             raise RuntimeError("Connection not initialized. Call get_conn() first.")
         return self._conn
 
-    def get_connection(self) -> aiosqlite.Connection:
-        return self.get_conn()  # type: ignore[reportReturnType]
+    async def get_connection(self) -> aiosqlite.Connection:
+        """Async alias for backward compatibility — delegates to get_conn()."""
+        return await self.get_conn()
 
     def _get_sync_conn(self):
         """Devuelve una conexión síncrona para procesos bloqueantes."""
@@ -277,25 +298,38 @@ class CortexEngine(
     # ─── Synchronous Wrappers (SDK Parity) ────────────────────────
 
     def _run_sync(self, coro):
-        """Execute a coroutine synchronously, thread-safe."""
+        """Execute a coroutine synchronously. CLI/SDK-only shim.
+
+        INVARIANT: Must NOT be called from within a running event loop.
+        aiosqlite connections are bound to their origin event loop and
+        are NOT thread-safe across event loops. Calling this from an
+        async context spawns a second loop in a new thread that shares
+        the same connection — undefined behavior.
+        """
         import threading
 
         try:
             asyncio.get_running_loop()
-        except RuntimeError:
+            raise RuntimeError(
+                "_run_sync called from inside a running event loop. "
+                "Use 'await' directly. This method is CLI/SDK only."
+            )
+        except RuntimeError as exc:
+            if "_run_sync" in str(exc):
+                raise
+            # No running loop — safe path
             return asyncio.run(coro)
 
-        result = None
-        exception = None
+        result = None  # pragma: no cover — unreachable, kept for clarity
+        exception = None  # pragma: no cover
 
-        def _worker():
+        def _worker():  # pragma: no cover
             nonlocal result, exception
             try:
                 result = asyncio.run(coro)
             except asyncio.CancelledError:
                 raise
             except Exception as e:
-                # noqa: BLE001 — sync wrapper must catch all async errors to propagate
                 exception = e
 
         t = threading.Thread(target=_worker)
@@ -342,7 +376,7 @@ class CortexEngine(
     async def trace_episode(
         self,
         fact_id: int,
-        max_depth: Optional[int] = None,
+        max_depth: int | None = None,
     ):
         """Trace the full causal DAG from a given fact ID."""
         from cortex.memory.episodic import CausalTracer
@@ -427,7 +461,7 @@ class CortexEngine(
 
         return [Fact(**{k: v for k, v in r.items() if k != "type"}) for r in results]
 
-    async def shannon_report(self, project: Optional[str] = None) -> dict:
+    async def shannon_report(self, project: str | None = None) -> dict:
         """Shannon entropy analysis of stored memory."""
         from cortex.extensions.shannon.report import EntropyReport
 
@@ -435,7 +469,7 @@ class CortexEngine(
 
     async def fingerprint(
         self,
-        project: Optional[str] = None,
+        project: str | None = None,
         top_domains: int = 15,
     ):
         """Cognitive Fingerprint — extract behavioral patterns from the Ledger.
@@ -457,7 +491,7 @@ class CortexEngine(
     def fingerprint_sync(self, *args, **kwargs):
         return self._run_sync(self.fingerprint(*args, **kwargs))
 
-    async def immortality_index(self, project: Optional[str] = None) -> dict:
+    async def immortality_index(self, project: str | None = None) -> dict:
         """Immortality Index (ι) — cognitive crystallization metric."""
         from cortex.extensions.shannon.immortality import ImmortalityIndex
 
@@ -468,7 +502,7 @@ class CortexEngine(
 
     async def prioritize(
         self,
-        project: Optional[str] = None,
+        project: str | None = None,
         tenant_id: str = "default",
     ) -> list:
         """Bellman Policy Engine — prioritized action queue.
@@ -547,6 +581,17 @@ class CortexEngine(
         if self._conn:
             await self._conn.close()
             self._conn = None
+
+        # Clean up Wave 6 references — guarded to allow idempotent close()
+        if hasattr(self, "mac_maestro"):
+            self.mac_maestro = None  # type: ignore
+        if hasattr(self, "ledger_writer"):
+            self.ledger_writer = None  # type: ignore
+        if hasattr(self, "enrichment_queue"):
+            self.enrichment_queue = None  # type: ignore
+        if hasattr(self, "ledger_store"):
+            self.ledger_store = None  # type: ignore
+
         self._ledger = None
 
     async def __aenter__(self):

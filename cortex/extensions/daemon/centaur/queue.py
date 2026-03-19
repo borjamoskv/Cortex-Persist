@@ -12,7 +12,7 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 from uuid import uuid4
 
 logger = logging.getLogger("moskv-daemon.centaur.queue")
@@ -69,7 +69,7 @@ class EntropicQueue:
         task_type: str,
         payload: dict[str, Any],
         priority: int = 50,
-        task_id: Optional[str] = None,
+        task_id: str | None = None,
     ) -> str:
         """Push a new task to the queue."""
         uid = task_id or str(uuid4())
@@ -86,7 +86,7 @@ class EntropicQueue:
         logger.debug("Pushed task %s (%s) to Entropic Queue.", uid, task_type)
         return uid
 
-    def pop(self, max_retries: int = 3) -> Optional[dict[str, Any]]:
+    def pop(self, max_retries: int = 3) -> dict[str, Any] | None:
         """Atomically get the highest priority pending task and mark it as 'processing'."""
         now = datetime.now(timezone.utc).isoformat()
         with self._get_conn() as conn:

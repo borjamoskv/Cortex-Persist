@@ -84,8 +84,10 @@ def cmd_click(args: argparse.Namespace) -> int:
         query["identifier"] = args.identifier
 
     if not query:
-        print("ERROR: At least one of --role, --title, --description, "
-              "--identifier is required.", file=sys.stderr)
+        print(
+            "ERROR: At least one of --role, --title, --description, --identifier is required.",
+            file=sys.stderr,
+        )
         return 1
 
     action = UIAction(
@@ -123,22 +125,57 @@ def cmd_type(args: argparse.Namespace) -> int:
 
 
 def cmd_key(args: argparse.Namespace) -> int:
-    """Send a keyboard shortcut."""
-    from .keyboard import press_key
+    """Send a keyboard shortcut (e.g. 'cmd+s', 'cmd+shift+n', 'return')."""
+    from .keyboard import parse_hotkey, press_hotkey
     from .workflow import MacMaestroWorkflow
+
+    keycode, modifiers = parse_hotkey(args.key)
 
     action = UIAction(
         name=f"cli_key_{args.key}",
         vector="C",
         target_query={},
-        executor=lambda: press_key(args.key),
+        executor=lambda: press_hotkey(keycode, modifiers),
         idempotent=True,
         retry_limit=1,
     )
 
     wf = MacMaestroWorkflow(args.app)
     wf.execute_action(action)
-    print(f"OK: sent key '{args.key}'")
+    mod_str = "+".join(modifiers) + "+" if modifiers else ""
+    print(f"OK: sent hotkey '{mod_str}{args.key.split('+')[-1]}' (keycode={keycode})")
+    return 0
+
+
+def cmd_list_apps(_args: argparse.Namespace) -> int:
+    """List running applications with bundle IDs."""
+    from .app_discovery import list_running_apps
+
+    apps = list_running_apps()
+    if not apps:
+        print("No running applications found.")
+        return 0
+
+    print(f"{'Application':<30} {'Bundle ID':<40} {'PID':>8}")
+    print("-" * 80)
+    for app in apps:
+        name = app.get("name", "Unknown")
+        bundle = app.get("bundle_id", "N/A")
+        pid = app.get("pid", "")
+        print(f"{name:<30} {bundle:<40} {pid:>8}")
+    return 0
+
+
+def cmd_frontmost(_args: argparse.Namespace) -> int:
+    """Show the current frontmost application."""
+    from .app_discovery import get_frontmost_app
+
+    info = get_frontmost_app()
+    if info is None:
+        print("Could not determine frontmost app.")
+        return 1
+
+    print(json.dumps(info, indent=2))
     return 0
 
 
@@ -151,24 +188,31 @@ def build_parser() -> argparse.ArgumentParser:
         description="Mac-Maestro-Ω: Sovereign macOS Automation Tool",
     )
     parser.add_argument(
-        "-v", "--verbose", action="store_true",
+        "-v",
+        "--verbose",
+        action="store_true",
         help="Enable debug logging",
     )
     sub = parser.add_subparsers(dest="command", required=True)
 
     # ── inspect ──
     p_inspect = sub.add_parser(
-        "inspect", help="Dump the AX tree of a running app",
+        "inspect",
+        help="Dump the AX tree of a running app",
     )
     p_inspect.add_argument("--app", "-a", required=True, help="Bundle ID")
     p_inspect.add_argument(
-        "--depth", "-d", type=int, default=8,
+        "--depth",
+        "-d",
+        type=int,
+        default=8,
         help="Max tree depth (default: 8)",
     )
 
     # ── click ──
     p_click = sub.add_parser(
-        "click", help="Click a UI element by semantic query",
+        "click",
+        help="Click a UI element by semantic query",
     )
     p_click.add_argument("--app", "-a", required=True, help="Bundle ID")
     p_click.add_argument("--role", "-r", help="AX role (e.g. AXButton)")
@@ -184,7 +228,13 @@ def build_parser() -> argparse.ArgumentParser:
     # ── key ──
     p_key = sub.add_parser("key", help="Send a keyboard shortcut")
     p_key.add_argument("--app", "-a", required=True, help="Bundle ID")
-    p_key.add_argument("key", help="Key combo (e.g. 'cmd+s', 'return')")
+    p_key.add_argument("key", help="Key combo (e.g. 'cmd+s', 'cmd+shift+n', 'return')")
+
+    # ── list-apps ──
+    sub.add_parser("list-apps", help="List running applications with bundle IDs")
+
+    # ── frontmost ──
+    sub.add_parser("frontmost", help="Show current frontmost application")
 
     return parser
 
@@ -202,6 +252,8 @@ def main() -> int:
         "click": cmd_click,
         "type": cmd_type,
         "key": cmd_key,
+        "list-apps": cmd_list_apps,
+        "frontmost": cmd_frontmost,
     }
 
     try:
@@ -210,6 +262,7 @@ def main() -> int:
         print(f"FATAL: {e}", file=sys.stderr)
         if args.verbose:
             import traceback
+
             traceback.print_exc()
         return 1
 

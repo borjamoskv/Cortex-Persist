@@ -26,7 +26,7 @@ from __future__ import annotations
 
 import logging
 import secrets
-from typing import Optional, Protocol
+from typing import Protocol
 
 from cortex.extensions.evolution.agents import (
     Mutation,
@@ -54,7 +54,7 @@ def _safe_float(val: object, default: float = 0.0) -> float:
 
     Explicitly handles MagicMock and other non-standard types in test environments.
     """
-    if isinstance(val, (int, float)):
+    if isinstance(val, int | float):
         return float(val)
     return default
 
@@ -62,8 +62,8 @@ def _safe_float(val: object, default: float = 0.0) -> float:
 class ImprovementStrategy(Protocol):
     """Protocol for pluggable improvement strategies."""
 
-    def evaluate_agent(self, agent: SovereignAgent) -> Optional[Mutation]: ...
-    def evaluate_subagent(self, sub: SubAgent) -> Optional[Mutation]: ...
+    def evaluate_agent(self, agent: SovereignAgent) -> Mutation | None: ...
+    def evaluate_subagent(self, sub: SubAgent) -> Mutation | None: ...
 
 
 class ParameterTuningStrategy:
@@ -73,7 +73,7 @@ class ParameterTuningStrategy:
     High errors → bigger leaps (domain needs aggressive repair).
     """
 
-    def evaluate_agent(self, agent: SovereignAgent) -> Optional[Mutation]:
+    def evaluate_agent(self, agent: SovereignAgent) -> Mutation | None:
         m = _dm(agent)
         if m.health_score > 0.9:
             return None  # Already sovereign-grade
@@ -93,7 +93,7 @@ class ParameterTuningStrategy:
             delta_fitness=delta,
         )
 
-    def evaluate_subagent(self, sub: SubAgent) -> Optional[Mutation]:
+    def evaluate_subagent(self, sub: SubAgent) -> Mutation | None:
         m = _dm(sub)
         if m.health_score > 0.9:
             return None
@@ -112,7 +112,7 @@ class PruneDeadPathStrategy:
     More open ghosts → more aggressive pruning (higher threshold).
     """
 
-    def evaluate_agent(self, agent: SovereignAgent) -> Optional[Mutation]:
+    def evaluate_agent(self, agent: SovereignAgent) -> Mutation | None:
         m = _dm(agent)
         # ghost_density 0→threshold=20, density 1→threshold=40
         threshold = 20.0 + 20.0 * m.ghost_density
@@ -128,7 +128,7 @@ class PruneDeadPathStrategy:
             )
         return None
 
-    def evaluate_subagent(self, sub: SubAgent) -> Optional[Mutation]:
+    def evaluate_subagent(self, sub: SubAgent) -> Mutation | None:
         m = _dm(sub)
         threshold = 15.0 + 10.0 * m.ghost_density
         if sub.fitness < threshold and sub.generation > 5:
@@ -167,7 +167,7 @@ class HeuristicInjectionStrategy:
         density_bonus = min(0.5, m.fact_density / 200.0)
         return base + density_bonus
 
-    def evaluate_agent(self, agent: SovereignAgent) -> Optional[Mutation]:
+    def evaluate_agent(self, agent: SovereignAgent) -> Mutation | None:
         if agent.fitness < 80.0:
             w = self._weight(agent)
             delta = w * _rng.uniform(1.0, 3.0)
@@ -178,7 +178,7 @@ class HeuristicInjectionStrategy:
             )
         return None
 
-    def evaluate_subagent(self, sub: SubAgent) -> Optional[Mutation]:
+    def evaluate_subagent(self, sub: SubAgent) -> Mutation | None:
         if sub.fitness < 60.0:
             m = _dm(sub)
             density_bonus = min(0.3, m.fact_density / 300.0)
@@ -198,7 +198,7 @@ class BridgeImportStrategy:
     transfer, reflecting a culture of proven cross-domain sharing.
     """
 
-    def evaluate_agent(self, agent: SovereignAgent) -> Optional[Mutation]:
+    def evaluate_agent(self, agent: SovereignAgent) -> Mutation | None:
         best = agent.best_subagent
         worst = agent.worst_subagent
         if not best or not worst:
@@ -224,7 +224,7 @@ class BridgeImportStrategy:
             delta_fitness=delta,
         )
 
-    def evaluate_subagent(self, _: SubAgent) -> Optional[Mutation]:
+    def evaluate_subagent(self, _: SubAgent) -> Mutation | None:
         return None  # Bridges happen at agent level
 
 
@@ -239,7 +239,7 @@ class AdversarialStressStrategy:
     _RESILIENCE_BONUS: float = 3.0
     _FRAGILITY_THRESHOLD: float = 100.0
 
-    def evaluate_agent(self, agent: SovereignAgent) -> Optional[Mutation]:
+    def evaluate_agent(self, agent: SovereignAgent) -> Mutation | None:
         if agent.fitness < self._FRAGILITY_THRESHOLD:
             return None
 
@@ -271,7 +271,7 @@ class AdversarialStressStrategy:
             delta_fitness=-1.0,
         )
 
-    def evaluate_subagent(self, sub: SubAgent) -> Optional[Mutation]:
+    def evaluate_subagent(self, sub: SubAgent) -> Mutation | None:
         m = _dm(sub)
         fd = _safe_float(m.fitness_delta)
         p_queen = 0.1 + 0.3 * min(1.0, max(0.0, fd))
@@ -300,7 +300,7 @@ class EntropyReductionStrategy:
 
     _MAX_MUTATIONS_PER_GAIN: float = 20.0
 
-    def evaluate_agent(self, agent: SovereignAgent) -> Optional[Mutation]:
+    def evaluate_agent(self, agent: SovereignAgent) -> Mutation | None:
         if agent.generation < 10 or agent.fitness < 80.0:
             return None
         gain = max(0.1, agent.fitness - 50.0)
@@ -321,7 +321,7 @@ class EntropyReductionStrategy:
             )
         return None
 
-    def evaluate_subagent(self, sub: SubAgent) -> Optional[Mutation]:
+    def evaluate_subagent(self, sub: SubAgent) -> Mutation | None:
         if sub.generation < 15 or sub.fitness < 70.0:
             return None
         gain = max(0.1, sub.fitness - 50.0)
@@ -348,7 +348,7 @@ class CrossoverRecombinationStrategy:
 
     _MIN_VARIANCE: float = 15.0
 
-    def evaluate_agent(self, agent: SovereignAgent) -> Optional[Mutation]:
+    def evaluate_agent(self, agent: SovereignAgent) -> Mutation | None:
         best = agent.best_subagent
         worst = agent.worst_subagent
         if not best or not worst:
@@ -365,7 +365,7 @@ class CrossoverRecombinationStrategy:
             delta_fitness=min(delta, 5.0),
         )
 
-    def evaluate_subagent(self, sub: SubAgent) -> Optional[Mutation]:
+    def evaluate_subagent(self, sub: SubAgent) -> Mutation | None:
         if sub.fitness < 70.0 and sub.generation > 3:
             m = _dm(sub)
             delta = max(0.5, (70.0 - sub.fitness) * 0.05 * (1.0 + m.health_score))
@@ -391,7 +391,7 @@ class StagnationBreakerStrategy:
         recent = mutations[-self._STAGNATION_WINDOW :]
         return all(abs(m.delta_fitness) < 0.5 for m in recent)
 
-    def evaluate_agent(self, agent: SovereignAgent) -> Optional[Mutation]:
+    def evaluate_agent(self, agent: SovereignAgent) -> Mutation | None:
         if not self._is_stagnated(agent.mutations):
             return None
 
@@ -421,7 +421,7 @@ class StagnationBreakerStrategy:
             delta_fitness=shock,
         )
 
-    def evaluate_subagent(self, sub: SubAgent) -> Optional[Mutation]:
+    def evaluate_subagent(self, sub: SubAgent) -> Mutation | None:
         if not self._is_stagnated(sub.mutations):
             return None
 

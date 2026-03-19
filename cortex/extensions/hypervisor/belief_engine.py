@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import replace
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from cortex.extensions.hypervisor.belief_object import (
     BeliefConfidence,
@@ -57,7 +57,7 @@ class BeliefEngine:
     def __init__(
         self,
         cortex_engine=None,
-        handoff: Optional[CognitiveHandoff] = None,
+        handoff: CognitiveHandoff | None = None,
         *,
         max_context_beliefs: int = 50,
     ):
@@ -83,7 +83,7 @@ class BeliefEngine:
         project: str,
         tenant_id: str = "default",
         confidence: BeliefConfidence = BeliefConfidence.C2_TENTATIVE,
-        source: Optional[str] = None,
+        source: str | None = None,
     ) -> BeliefVerdict:
         """Evaluate incoming content for belief contradictions.
 

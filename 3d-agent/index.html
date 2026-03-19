@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D AGENT — SDF Core</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #0A0A0A; }
+    canvas { display: block; width: 100%; height: 100%; cursor: crosshair; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #0A0A0A; }
+    canvas { display: block; width: 100%; height: 100%; cursor: crosshair; }
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+  <canvas id="c"></canvas>
+
+  <!-- ═══ VERTEX SHADER ═══ -->
+  <script id="vs" type="x-shader/x-vertex">
+    attribute vec2 a_position;
+    void main() {
+      gl_Position = vec4(a_position, 0.0, 1.0);
+    }
+  </script>
+
+  <!-- ═══ FRAGMENT SHADER — SDF RAYMARCHER ═══ -->
+  <script id="fs" type="x-shader/x-fragment">
+    precision highp float;
+
+    uniform vec2 u_resolution;
+    uniform float u_time;
+    uniform vec2 u_mouse;       // normalized [0,1]
+    uniform float u_mouseProx;  // 0..1 proximity influence
+    uniform int u_state;        // 0=IDLE 1=TRACKING 2=EXECUTING 3=THINKING 4=PATROL
+
+    // ── Simplex 3D noise ──
+    vec4 permute(vec4 x) { return mod(((x*34.0)+1.0)*x, 289.0); }
+    vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+
+    float snoise(vec3 v) {
+      const vec2 C = vec2(1.0/6.0, 1.0/3.0);
+      const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
+      vec3 i = floor(v + dot(v, C.yyy));
+      vec3 x0 = v - i + dot(i, C.xxx);
+      vec3 g = step(x0.yzx, x0.xyz);
+      vec3 l = 1.0 - g;
+      vec3 i1 = min(g.xyz, l.zxy);
+      vec3 i2 = max(g.xyz, l.zxy);
+      vec3 x1 = x0 - i1 + C.xxx;
+      vec3 x2 = x0 - i2 + C.yyy;
+      vec3 x3 = x0 - D.yyy;
+      i = mod(i, 289.0);
+      vec4 p = permute(permute(permute(
+        i.z + vec4(0.0, i1.z, i2.z, 1.0))
+        + i.y + vec4(0.0, i1.y, i2.y, 1.0))
+        + i.x + vec4(0.0, i1.x, i2.x, 1.0));
+      float n_ = 1.0/7.0;
+      vec3 ns = n_ * D.wyz - D.xzx;
+      vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
+      vec4 x_ = floor(j * ns.z);
+      vec4 y_ = floor(j - 7.0 * x_);
+      vec4 x = x_ * ns.x + ns.yyyy;
+      vec4 y = y_ * ns.x + ns.yyyy;
+      vec4 h = 1.0 - abs(x) - abs(y);
+      vec4 b0 = vec4(x.xy, y.xy);
+      vec4 b1 = vec4(x.zw, y.zw);
+      vec4 s0 = floor(b0)*2.0 + 1.0;
+      vec4 s1 = floor(b1)*2.0 + 1.0;
+      vec4 sh = -step(h, vec4(0.0));
+      vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy;
+      vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww;
+      vec3 p0 = vec3(a0.xy, h.x);
+      vec3 p1 = vec3(a0.zw, h.y);
+      vec3 p2 = vec3(a1.xy, h.z);
+      vec3 p3 = vec3(a1.zw, h.w);
+      vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2,p2), dot(p3,p3)));
+      p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
+      vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
+      m = m * m;
+      return 42.0 * dot(m*m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
+    }
+
+    // ── FBM ──
+    float fbm(vec3 p, int octaves) {
+      float value = 0.0;
+      float amplitude = 0.5;
+      float frequency = 1.0;
+      for (int i = 0; i < 5; i++) {
+        if (i >= octaves) break;
+        value += amplitude * snoise(p * frequency);
+        frequency *= 2.0;
+        amplitude *= 0.5;
+      }
+      return value;
+    }
+
+    // ── SDF Primitives ──
+    float sdSphere(vec3 p, float r) { return length(p) - r; }
+
+    float sdTorus(vec3 p, vec2 t) {
+      vec2 q = vec2(length(p.xz) - t.x, p.y);
+      return length(q) - t.y;
+    }
+
+    float sdCapsule(vec3 p, vec3 a, vec3 b, float r) {
+      vec3 ab = b - a;
+      float t = clamp(dot(p - a, ab) / dot(ab, ab), 0.0, 1.0);
+      return length(p - a - t * ab) - r;
+    }
+
+    // Smooth union
+    float smin(float a, float b, float k) {
+      float h = clamp(0.5 + 0.5*(b-a)/k, 0.0, 1.0);
+      return mix(b, a, h) - k*h*(1.0-h);
+    }
+
+    // ── State-dependent parameters ──
+    struct AgentParams {
+      float breathRate;
+      float noiseAmp;
+      float noiseFreq;
+      float glowIntensity;
+      float morphFactor;
+      vec3 baseColor;
+    };
+
+    AgentParams getParams() {
+      AgentParams p;
+
+      // IDLE
+      if (u_state == 0) {
+        p.breathRate = 0.8;
+        p.noiseAmp = 0.08;
+        p.noiseFreq = 2.0;
+        p.glowIntensity = 0.4;
+        p.morphFactor = 0.0;
+        p.baseColor = vec3(0.8, 1.0, 0.0); // Cyber Lime
+      }
+      // TRACKING
+      else if (u_state == 1) {
+        p.breathRate = 1.2;
+        p.noiseAmp = 0.12;
+        p.noiseFreq = 2.5;
+        p.glowIntensity = 0.7;
+        p.morphFactor = 0.3;
+        p.baseColor = vec3(0.8, 1.0, 0.0);
+      }
+      // EXECUTING
+      else if (u_state == 2) {
+        p.breathRate = 2.5;
+        p.noiseAmp = 0.2;
+        p.noiseFreq = 3.5;
+        p.glowIntensity = 1.0;
+        p.morphFactor = 0.7;
+        p.baseColor = vec3(1.0, 0.9, 0.0); // Hot gold
+      }
+      // THINKING
+      else if (u_state == 3) {
+        p.breathRate = 0.4;
+        p.noiseAmp = 0.15;
+        p.noiseFreq = 1.5;
+        p.glowIntensity = 0.9;
+        p.morphFactor = 0.5;
+        p.baseColor = vec3(0.0, 0.8, 1.0); // Cyan think
+      }
+      // PATROL
+      else {
+        p.breathRate = 1.0;
+        p.noiseAmp = 0.1;
+        p.noiseFreq = 2.0;
+        p.glowIntensity = 0.5;
+        p.morphFactor = 0.15;
+        p.baseColor = vec3(0.8, 1.0, 0.0);
+      }
+
+      return p;
+    }
+
+    // ── Agent SDF ──
+    float agentSDF(vec3 p, AgentParams ap) {
+      float t = u_time * ap.breathRate;
+
+      // Breathing displacement
+      float breath = sin(t) * 0.04 + sin(t * 1.7) * 0.02;
+
+      // Noise displacement — ⚡ AZKARTU: Reduced to 2 octaves for 60fps
+      float noiseDisp = fbm(p * ap.noiseFreq + vec3(t * 0.3), 2) * ap.noiseAmp;
+
+      // Cursor influence — attract/deform toward mouse
+      vec2 mouseDir = u_mouse * 2.0 - 1.0;
+      float aspect = u_resolution.x / u_resolution.y;
+      vec3 cursorAttract = vec3(mouseDir.x * aspect, mouseDir.y, 0.0) * u_mouseProx * 0.5;
+
+      vec3 dp = p - cursorAttract * 0.3;
+
+      // Core body — sphere with noise
+      float core = sdSphere(dp, 0.65 + breath + noiseDisp);
+
+      // Orbital ring — torus that tilts with time
+      vec3 torusP = dp;
+      float tiltAngle = t * 0.3 + ap.morphFactor;
+      float ct = cos(tiltAngle), st = sin(tiltAngle);
+      torusP.yz = mat2(ct, -st, st, ct) * torusP.yz;
+      float ring = sdTorus(torusP, vec2(0.85 + sin(t * 0.5) * 0.05, 0.04 + ap.morphFactor * 0.03));
+
+      // Second ring — perpendicular
+      vec3 torusP2 = dp;
+      float tilt2 = t * 0.2 + 1.57;
+      float ct2 = cos(tilt2), st2 = sin(tilt2);
+      torusP2.xz = mat2(ct2, -st2, st2, ct2) * torusP2.xz;
+      torusP2.yz = mat2(ct, -st, st, ct) * torusP2.yz;
+      float ring2 = sdTorus(torusP2, vec2(0.95 + sin(t * 0.7) * 0.04, 0.025));
+
+      // Tendrils — procedural capsules radiating outward
+      float tendrils = 1e10;
+      for (int i = 0; i < 5; i++) {
+        float angle = float(i) * 1.2566 + t * 0.2; // 2PI/5 spacing + rotation
+        float len = 0.4 + sin(t + float(i) * 0.8) * 0.15 * (1.0 + ap.morphFactor);
+        vec3 dir = vec3(cos(angle), sin(angle) * 0.3 + sin(t * 0.5 + float(i)) * 0.2, sin(angle));
+        vec3 tip = dir * (0.7 + len);
+        float tendril = sdCapsule(dp, dir * 0.55, tip, 0.02 + ap.morphFactor * 0.01);
+        tendrils = min(tendrils, tendril);
+      }
+
+      // Combine with smooth union
+      float body = smin(core, ring, 0.15);
+      body = smin(body, ring2, 0.1);
+      body = smin(body, tendrils, 0.08);
+
+      return body;
+    }
+
+    // ── Normal estimation ──
+    vec3 calcNormal(vec3 p, AgentParams ap) {
+      const float h = 0.001;
+      vec2 k = vec2(1, -1);
+      return normalize(
+        k.xyy * agentSDF(p + k.xyy*h, ap) +
+        k.yyx * agentSDF(p + k.yyx*h, ap) +
+        k.yxy * agentSDF(p + k.yxy*h, ap) +
+        k.xxx * agentSDF(p + k.xxx*h, ap)
+      );
+    }
+
+    // ── IQ Soft Shadows (penumbral) ──
+    float calcSoftShadow(vec3 ro, vec3 rd, float mint, float maxt, float k, AgentParams ap) {
+      float res = 1.0;
+      float t = mint;
+      float ph = 1e10;
+      for (int i = 0; i < 32; i++) {
+        float h = agentSDF(ro + rd * t, ap);
+        if (h < 0.0001) return 0.0;
+        float y = h * h / (2.0 * ph);
+        float d = sqrt(h * h - y * y);
+        res = min(res, k * d / max(0.0, t - y));
+        ph = h;
+        t += h;
+        if (t > maxt) break;
+      }
+      return clamp(res, 0.0, 1.0);
+    }
+
+    // ── Deep Ultra SSS — 5-sample depth probe ──
+    float calcSSS(vec3 p, vec3 n, vec3 lightDir, AgentParams ap) {
+      float sss = 0.0;
+      // Forward scatter (light entering from behind)
+      sss += max(0.0, dot(n, -lightDir)) * 0.5;
+      // 4 depth probes at increasing distances into the surface
+      sss += (1.0 - smoothstep(0.0, 0.8, agentSDF(p + lightDir * 0.05, ap) + 0.3)) * 0.35;
+      sss += (1.0 - smoothstep(0.0, 1.0, agentSDF(p + lightDir * 0.15, ap) + 0.4)) * 0.25;
+      sss += (1.0 - smoothstep(0.0, 1.2, agentSDF(p + lightDir * 0.30, ap) + 0.5)) * 0.15;
+      sss += (1.0 - smoothstep(0.0, 1.5, agentSDF(p + n * 0.05, ap) + 0.5)) * 0.25;
+      // Mouse proximity amplifies translucency
+      sss *= (1.0 + u_mouseProx * 0.8);
+      return sss;
+    }
+
+    // ── Domain Repetition SDF — ALL STATES (scale varies) ──
+    float agentSDF_repeated(vec3 p, AgentParams ap) {
+      // Per-state spacing and scale
+      float spacing = 4.5; float scale = 0.25;
+      if (u_state == 0) { spacing = 8.0; scale = 0.15; }      // IDLE: sparse, tiny
+      if (u_state == 1) { spacing = 5.0; scale = 0.2; }       // TRACKING: medium
+      if (u_state == 2) { spacing = 2.5; scale = 0.4; }       // EXECUTING: dense, large
+      if (u_state == 3) { spacing = 3.0; scale = 0.35; }      // THINKING: fractal
+      // u_state == 4 PATROL uses defaults
+      vec3 q = p;
+      q.xz = mod(q.xz + spacing * 0.5, spacing) - spacing * 0.5;
+      float base = agentSDF(p, ap);
+      float echo = agentSDF(q / scale, ap) * scale;
+      return min(base, echo);
+    }
+
+    // ── Main ──
+    void main() {
+      vec2 uv = (gl_FragCoord.xy - 0.5 * u_resolution) / min(u_resolution.x, u_resolution.y);
+      AgentParams ap = getParams();
+
+      // Camera
+      vec3 ro = vec3(0.0, 0.0, 3.0); // ray origin
+      vec3 rd = normalize(vec3(uv, -1.5)); // ray direction
+
+      // Subtle camera sway
+      float sway = sin(u_time * 0.3) * 0.02;
+      ro.x += sway;
+      ro.y += cos(u_time * 0.2) * 0.015;
+
+      // Raymarch
+      float t = 0.0;
+      float d;
+      vec3 p;
+      bool hit = false;
+
+      // ⚡ AZKARTU OPTIMIZATION: Reduced steps from 100 to 64
+      for (int i = 0; i < 64; i++) {
+        p = ro + rd * t;
+        d = agentSDF(p, ap);
+
+        if (d < 0.001) {
+          hit = true;
+          break;
+        }
+        if (t > 15.0) break;
+
+        t += d * 0.95; // More aggressive relaxation factor
+      }
+
+      // Background — dark void with subtle gradient
+      vec3 col = vec3(0.039, 0.039, 0.039); // #0A0A0A
+      float vignette = 1.0 - length(uv) * 0.5;
+      col *= vignette;
+
+      // Grid floor hint
+      float gridY = -0.8;
+      float gridT = (gridY - ro.y) / rd.y;
+      if (gridT > 0.0 && (!hit || gridT < t)) {
+        vec3 gp = ro + rd * gridT;
+        vec2 grid = abs(fract(gp.xz * 2.0) - 0.5);
+        float gridLine = min(grid.x, grid.y);
+        float gridAlpha = smoothstep(0.02, 0.0, gridLine) * 0.06 * smoothstep(8.0, 0.0, length(gp.xz));
+        col += vec3(0.8, 1.0, 0.0) * gridAlpha;
+      }
+
+      if (hit) {
+        vec3 n = calcNormal(p, ap);
+
+        // Lighting — three-point with rim
+        vec3 lightDir1 = normalize(vec3(1.0, 1.0, 1.0));
+        vec3 lightDir2 = normalize(vec3(-1.0, 0.5, -0.5));
+        vec3 viewDir = -rd;
+
+        // IQ Soft Shadows — tighter k for harder contact shadows
+        float shadow1 = calcSoftShadow(p + n * 0.01, lightDir1, 0.01, 5.0, 4.0, ap);
+        float shadow2 = calcSoftShadow(p + n * 0.01, lightDir2, 0.01, 5.0, 3.0, ap);
+
+        float diff1 = max(dot(n, lightDir1), 0.0) * shadow1;
+        float diff2 = max(dot(n, lightDir2), 0.0) * 0.4 * shadow2;
+
+        // Fresnel — rim glow amplified by proximity
+        float fresnel = pow(1.0 - max(dot(n, viewDir), 0.0), 2.5 + u_mouseProx * 2.0);
+
+        // Specular — razor sharp, shadowed
+        vec3 halfVec = normalize(lightDir1 + viewDir);
+        float spec = pow(max(dot(n, halfVec), 0.0), 128.0) * shadow1;
+
+        // Deep Ultra SSS — 5-probe depth + mouse-reactive
+        float sss = calcSSS(p, n, lightDir1, ap);
+        // SSS bleeds into a warm color shift (red channel boost for organic feel)
+        vec3 sssColor = mix(ap.baseColor, vec3(1.0, 0.4, 0.1), 0.3) * sss * ap.glowIntensity * 0.6;
+        // Inverse shadow feeds SSS: darker areas scatter MORE (light trapped inside)
+        sssColor *= (1.5 - shadow1);
+
+        // Agent color
+        vec3 surfaceCol = ap.baseColor * 0.08;
+        surfaceCol += ap.baseColor * diff1 * 0.5;
+        surfaceCol += vec3(0.1, 0.15, 0.2) * diff2;
+        surfaceCol += ap.baseColor * fresnel * ap.glowIntensity * 1.2;
+        surfaceCol += vec3(1.0) * spec * 0.6;
+        surfaceCol += sssColor;
+
+        // Deep Ultra AO — 5-sample exponential falloff
+        float ao = 1.0;
+        ao -= (0.05 - agentSDF(p + n * 0.05, ap)) * 2.0;
+        ao -= (0.10 - agentSDF(p + n * 0.10, ap)) * 1.0;
+        ao -= (0.20 - agentSDF(p + n * 0.20, ap)) * 0.5;
+        ao -= (0.40 - agentSDF(p + n * 0.40, ap)) * 0.25;
+        ao -= (0.80 - agentSDF(p + n * 0.80, ap)) * 0.12;
+        ao = clamp(ao, 0.0, 1.0);
+        surfaceCol *= ao;
+
+        col = surfaceCol;
+      } else {
+        // Volumetric glow — multi-sample depth probe along ray
+        float glowAccum = 0.0;
+        for (int i = 0; i < 5; i++) {
+          float sampleT = 1.5 + float(i) * 0.5;
+          float gd = agentSDF(ro + rd * sampleT, ap);
+          glowAccum += exp(-gd * 3.0) * (1.0 / float(i + 1));
+        }
+        col += ap.baseColor * glowAccum * ap.glowIntensity * 0.06;
+
+        // Domain Repetition echoes — ALL STATES
+        float echoDist = agentSDF_repeated(ro + rd * 3.0, ap);
+        float echoGlow = exp(-echoDist * 4.0) * 0.1;
+        col += ap.baseColor * echoGlow * 0.5;
+
+        // Volumetric god rays (light shaft approximation)
+        vec3 lightPos = normalize(vec3(1.0, 1.0, 1.0));
+        float rayDot = max(0.0, dot(rd, lightPos));
+        float godRay = pow(rayDot, 16.0) * 0.04 * ap.glowIntensity;
+        col += ap.baseColor * godRay;
+      }
+
+      // ── Deep Ultra Post-Processing ──
+
+      // State-reactive chromatic aberration (SSS intensity feeds back into chroma)
+      float stateChroma = 0.003;
+      if (u_state == 2) stateChroma = 0.015; // EXECUTING: heavy glitch
+      if (u_state == 3) stateChroma = 0.008; // THINKING: medium pulse
+      float chrAmt = length(uv) * stateChroma * (1.0 + u_mouseProx * 3.0);
+      vec3 chromaCol;
+      chromaCol.r = col.r * (1.0 + chrAmt * 2.0);
+      chromaCol.g = col.g;
+      chromaCol.b = col.b * (1.0 - chrAmt * 2.0);
+      col = chromaCol;
+
+      // Film grain — doubles in EXECUTING state
+      float grainAmp = u_state == 2 ? 0.06 : 0.03;
+      float grain = (fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233)) + u_time) * 43758.5453) - 0.5) * grainAmp;
+      col += grain;
+
+      // Deep vignette — state-reactive darkness
+      float vignetteStr = 0.6 + (u_state == 2 ? 0.3 : 0.0) + (u_state == 3 ? 0.15 : 0.0);
+      float vig = 1.0 - length(uv) * vignetteStr;
+      col *= max(vig, 0.0);
+
+      // Tonemap + gamma
+      col = col / (1.0 + col); // Reinhard
+      col = pow(col, vec3(0.82)); // Slight lift, more contrast
+
+      gl_FragColor = vec4(col, 1.0);
+    }
+  </script>
+
+  <!-- ═══ FRAGMENT SHADER — SDF UI OVERLAY ═══ -->
+  <script id="fs-ui" type="x-shader/x-fragment">
+    precision highp float;
+    uniform vec2 u_resolution;
+    uniform float u_time;
+    uniform float u_mouseProx;
+    uniform int u_state;
+    uniform sampler2D u_hudTex;
+    uniform float u_dpr;
+
+    float random(vec2 st) { return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123); }
+
+    void main() {
+      vec2 texUv = gl_FragCoord.xy / (1024.0 * u_dpr);
+      vec2 uv = gl_FragCoord.xy / u_resolution;
+      
+      float glitchInt = u_mouseProx * 0.15 + (u_state == 2 ? 0.4 : 0.0) + (u_state == 1 ? 0.05 : 0.0);
+      
+      float blockY = floor(uv.y * 30.0);
+      float noise = random(vec2(blockY, floor(u_time * 15.0)));
+      vec2 dispUv = texUv;
+      float isGlitched = 0.0;
+      if (noise < glitchInt * 1.5) {
+        dispUv.x += (random(vec2(blockY, 0.0)) - 0.5) * glitchInt * 0.3;
+        isGlitched = 1.0;
+      }
+      
+      float ca = glitchInt * 0.015 + (isGlitched * 0.02);
+      vec4 texR = texture2D(u_hudTex, dispUv + vec2(ca, 0.0));
+      vec4 texG = texture2D(u_hudTex, dispUv);
+      vec4 texB = texture2D(u_hudTex, dispUv - vec2(ca, 0.0));
+      
+      vec3 baseColor = vec3(0.8, 1.0, 0.0);
+      if (u_state == 2) baseColor = vec3(1.0, 0.9, 0.0);
+      else if (u_state == 3) baseColor = vec3(0.0, 0.8, 1.0);
+      
+      float a = max(texR.a, max(texG.a, texB.a));
+      vec3 col = vec3(texR.a, texG.a, texB.a) * baseColor;
+      
+      vec2 gridUv = floor(uv * vec2(120.0, 60.0));
+      float scrNoise = random(gridUv + floor(u_time * 8.0));
+      float scramblerAlpha = 0.0;
+      if (scrNoise > 0.98 - glitchInt * 0.3) {
+         scramblerAlpha = 0.2 * random(gridUv) + (isGlitched * 0.3);
+      }
+      vec3 scrCol = baseColor * scramblerAlpha;
+      
+      float finalAlpha = a > 0.1 ? a : 0.0;
+      
+      bool inside = dispUv.x >= 0.0 && dispUv.x <= 1.0 && dispUv.y >= 0.0 && dispUv.y <= 1.0;
+      
+      if (finalAlpha > 0.0 && inside) {
+          gl_FragColor = vec4(col, finalAlpha);
+      } else if (scramblerAlpha > 0.0) {
+          gl_FragColor = vec4(scrCol, scramblerAlpha);
+      } else {
+          discard;
+      }
+    }
+  </script>
+
+  <script>
+    // ═══════════════════════════════════════════
+    // 3D AGENT — H0 SDF Core Runtime
+    // ═══════════════════════════════════════════
+
+    const STATES = { IDLE: 0, TRACKING: 1, EXECUTING: 2, THINKING: 3, PATROL: 4 };
+    const STATE_NAMES = ['IDLE', 'TRACKING', 'EXECUTING', 'THINKING', 'PATROL'];
+
+    class Agent3D {
+      constructor(canvas) {
+        this.canvas = canvas;
+        this.gl = canvas.getContext('webgl', {
+          antialias: false,
+          alpha: false,
+          depth: false,
+          stencil: false,
+          powerPreference: 'high-performance'
+        });
+
+        if (!this.gl) throw new Error('WebGL not available');
+
+        // State
+        this.state = STATES.IDLE;
+        this.mouse = { x: 0.5, y: 0.5 };
+        this.mouseSmooth = { x: 0.5, y: 0.5 };
+        this.mouseProximity = 0;
+        this.lastMoveTime = 0;
+        this.patrolPhase = 0;
+        this.startTime = performance.now() / 1000;
+
+        // FPS
+        this.frameCount = 0;
+        this.lastFpsTime = performance.now();
+        this.fps = 60;
+
+        // Textures
+        this.hudScale = 1024;
+        this.dpr = Math.min(window.devicePixelRatio, 2);
+
+        this.init();
+        this.createHudCanvas();
+        this.bindEvents();
+        this.resize();
+        this.loop();
+      }
+
+      init() {
+        const gl = this.gl;
+
+        // Compile shaders
+        const vs = this.compile(gl.VERTEX_SHADER, document.getElementById('vs').textContent);
+        const fs = this.compile(gl.FRAGMENT_SHADER, document.getElementById('fs').textContent);
+
+        this.program = gl.createProgram();
+        gl.attachShader(this.program, vs);
+        gl.attachShader(this.program, fs);
+        gl.linkProgram(this.program);
+
+        const fsUI = this.compile(gl.FRAGMENT_SHADER, document.getElementById('fs-ui').textContent);
+        this.uiProgram = gl.createProgram();
+        gl.attachShader(this.uiProgram, vs);
+        gl.attachShader(this.uiProgram, fsUI);
+        gl.linkProgram(this.uiProgram);
+
+        if (!gl.getProgramParameter(this.program, gl.LINK_STATUS)) {
+          console.error('Link error:', gl.getProgramInfoLog(this.program));
+          return;
+        }
+
+        gl.useProgram(this.program);
+
+        // Fullscreen quad
+        const quad = new Float32Array([-1,-1, 1,-1, -1,1, 1,1]);
+        const buf = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+        gl.bufferData(gl.ARRAY_BUFFER, quad, gl.STATIC_DRAW);
+
+        const aPos = gl.getAttribLocation(this.program, 'a_position');
+        gl.enableVertexAttribArray(aPos);
+        gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+        // Uniforms
+        this.u = {
+          resolution: gl.getUniformLocation(this.program, 'u_resolution'),
+          time: gl.getUniformLocation(this.program, 'u_time'),
+          mouse: gl.getUniformLocation(this.program, 'u_mouse'),
+          mouseProx: gl.getUniformLocation(this.program, 'u_mouseProx'),
+          state: gl.getUniformLocation(this.program, 'u_state'),
+        };
+
+        this.uiU = {
+          resolution: gl.getUniformLocation(this.uiProgram, 'u_resolution'),
+          time: gl.getUniformLocation(this.uiProgram, 'u_time'),
+          mouseProx: gl.getUniformLocation(this.uiProgram, 'u_mouseProx'),
+          state: gl.getUniformLocation(this.uiProgram, 'u_state'),
+          hudTex: gl.getUniformLocation(this.uiProgram, 'u_hudTex'),
+          dpr: gl.getUniformLocation(this.uiProgram, 'u_dpr'),
+        };
+
+        this.hudTexObj = gl.createTexture();
+      }
+
+      createHudCanvas() {
+        if (!this.hudCanvas) {
+          this.hudCanvas = document.createElement('canvas');
+          this.hudCtx = this.hudCanvas.getContext('2d');
+          this.hudCanvas.width = this.hudScale;
+          this.hudCanvas.height = this.hudScale;
+        }
+        const ctx = this.hudCtx;
+        ctx.clearRect(0, 0, this.hudScale, this.hudScale);
+        
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 32px "SF Mono", "Fira Code", monospace';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'bottom';
+        
+        const yBase = 120;
+        ctx.fillText(`STATE: ${STATE_NAMES[this.state]}`, 40, yBase - 40);
+        ctx.fillText(`FPS: ${this.fps}`, 40, yBase);
+        
+        ctx.strokeStyle = 'white';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(35, yBase - 85);
+        ctx.lineTo(35, yBase + 10);
+        ctx.lineTo(250, yBase + 10);
+        ctx.stroke();
+
+        const gl = this.gl;
+        gl.bindTexture(gl.TEXTURE_2D, this.hudTexObj);
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.hudCanvas);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      }
+
+      compile(type, source) {
+        const gl = this.gl;
+        const shader = gl.createShader(type);
+        gl.shaderSource(shader, source);
+        gl.compileShader(shader);
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+          console.error('Shader error:', gl.getShaderInfoLog(shader));
+          console.error('Source:', source.split('\n').map((l,i) => `${i+1}: ${l}`).join('\n'));
+        }
+        return shader;
+      }
+
+      bindEvents() {
+        window.addEventListener('resize', () => this.resize());
+
+        this.canvas.addEventListener('mousemove', (e) => {
+          this.mouse.x = e.clientX / this.canvas.width;
+          this.mouse.y = 1.0 - e.clientY / this.canvas.height; // flip Y
+          this.lastMoveTime = performance.now();
+        });
+
+        this.canvas.addEventListener('click', () => {
+          // Cycle: IDLE → EXECUTING → THINKING → IDLE
+          if (this.state === STATES.IDLE || this.state === STATES.TRACKING) {
+            this.setState(STATES.EXECUTING);
+            setTimeout(() => this.setState(STATES.THINKING), 1200);
+            setTimeout(() => this.setState(STATES.IDLE), 3000);
+          }
+        });
+
+        this.canvas.addEventListener('mouseleave', () => {
+          this.mouse.x = 0.5;
+          this.mouse.y = 0.5;
+        });
+
+        // Keyboard state control
+        document.addEventListener('keydown', (e) => {
+          const idx = parseInt(e.key);
+          if (idx >= 0 && idx <= 4) {
+            this.setState(idx);
+          }
+        });
+      }
+
+      setState(s) {
+        this.state = s;
+        this.createHudCanvas();
+      }
+
+      resize() {
+        this.dpr = Math.min(window.devicePixelRatio, 2);
+        this.canvas.width = window.innerWidth * this.dpr;
+        this.canvas.height = window.innerHeight * this.dpr;
+        this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+      }
+
+      loop() {
+        const gl = this.gl;
+        const now = performance.now();
+        const t = now / 1000 - this.startTime;
+
+        // Smooth mouse interpolation
+        const ease = 0.08;
+        this.mouseSmooth.x += (this.mouse.x - this.mouseSmooth.x) * ease;
+        this.mouseSmooth.y += (this.mouse.y - this.mouseSmooth.y) * ease;
+
+        // Mouse proximity — distance from center
+        const dx = this.mouseSmooth.x - 0.5;
+        const dy = this.mouseSmooth.y - 0.5;
+        const rawProx = 1.0 - Math.min(Math.sqrt(dx*dx + dy*dy) * 2.0, 1.0);
+        this.mouseProximity += (rawProx - this.mouseProximity) * 0.05;
+
+        // Auto-state: idle → tracking when mouse near, patrol when idle 5s
+        const timeSinceMove = now - this.lastMoveTime;
+        if (this.state === STATES.IDLE && this.mouseProximity > 0.3) {
+          this.setState(STATES.TRACKING);
+        } else if (this.state === STATES.TRACKING && this.mouseProximity < 0.15) {
+          this.setState(STATES.IDLE);
+        } else if (this.state === STATES.IDLE && timeSinceMove > 5000) {
+          this.setState(STATES.PATROL);
+          this.patrolPhase = t;
+        } else if (this.state === STATES.PATROL && timeSinceMove < 1000) {
+          this.setState(STATES.TRACKING);
+        }
+
+        // Patrol: auto-move mouse in a pattern
+        if (this.state === STATES.PATROL) {
+          const pt = t - this.patrolPhase;
+          this.mouse.x = 0.5 + Math.sin(pt * 0.5) * 0.3;
+          this.mouse.y = 0.5 + Math.cos(pt * 0.7) * 0.2;
+        }
+
+        // Draw Agent
+        gl.useProgram(this.program);
+        gl.disable(gl.BLEND);
+        gl.uniform2f(this.u.resolution, this.canvas.width, this.canvas.height);
+        gl.uniform1f(this.u.time, t);
+        gl.uniform2f(this.u.mouse, this.mouseSmooth.x, this.mouseSmooth.y);
+        gl.uniform1f(this.u.mouseProx, this.mouseProximity);
+        gl.uniform1i(this.u.state, this.state);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+        // Draw UI
+        gl.useProgram(this.uiProgram);
+        gl.enable(gl.BLEND);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, this.hudTexObj);
+        gl.uniform1i(this.uiU.hudTex, 0);
+        gl.uniform2f(this.uiU.resolution, this.canvas.width, this.canvas.height);
+        gl.uniform1f(this.uiU.time, t);
+        gl.uniform1f(this.uiU.mouseProx, this.mouseProximity);
+        gl.uniform1i(this.uiU.state, this.state);
+        gl.uniform1f(this.uiU.dpr, this.dpr);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+        // FPS counter
+        this.frameCount++;
+        if (now - this.lastFpsTime > 500) {
+          this.fps = Math.round(this.frameCount / ((now - this.lastFpsTime) / 1000));
+          this.frameCount = 0;
+          this.lastFpsTime = now;
+          this.createHudCanvas();
+        }
+
+        requestAnimationFrame(() => this.loop());
+      }
+    }
+
+    // Boot
+    window.addEventListener('DOMContentLoaded', () => {
+      try {
+        window.agent = new Agent3D(document.getElementById('c'));
+      } catch (e) {
+        console.error('Agent3D failed:', e);
+        document.body.innerHTML = '<p style="color:#CCFF00;font-family:monospace;padding:40px">WebGL required. ' + e.message + '</p>';
+      }
+    });
+  </script>
+</body>
+</html>

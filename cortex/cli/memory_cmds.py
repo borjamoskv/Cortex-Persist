@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+
 import click
 from rich.panel import Panel
 from rich.table import Table
@@ -19,7 +21,12 @@ from cortex.cli.errors import err_empty_results
 from cortex.cli.slow_tip import with_slow_tips
 
 
-@cli.command()
+@click.group("memory")
+def memory_cmds() -> None:
+    """CORTEX memory management commands."""
+
+
+@memory_cmds.command("store")
 @click.argument("project")
 @click.argument("content")
 @click.option(
@@ -118,7 +125,7 @@ def store(
         _run_async(engine.close())
 
 
-@cli.command()
+@memory_cmds.command("search")
 @click.argument("query")
 @click.option("--project", "-p", default=None, help="Scope to project")
 @click.option("--top", "-k", default=5, help="Number of results")
@@ -269,7 +276,26 @@ def recall(project, db) -> None:
                 else:
                     fid, content, tags = f.id, f.content, f.tags or []
                 tags_str = f" [dim]{', '.join(tags)}[/]" if tags else ""
-                console.print(f"  [dim]#{fid}[/] {content}{tags_str}")
+
+                # Ω₁₃: Taint & Confidence visibility
+                if isinstance(f, dict):
+                    status = f.get("metadata", {}).get("taint_status", "clean")
+                    conf = f.get("confidence", "C?")
+                else:
+                    status = f.meta.get("taint_status", "clean") if hasattr(f, "meta") else "clean"
+                    conf = f.confidence if hasattr(f, "confidence") else "C?"
+
+                status_color = (
+                    "red" if status == "tainted" else "yellow" if status == "suspect" else "green"
+                )
+                status_icon = "☢" if status == "tainted" else "⚠" if status == "suspect" else "✓"
+
+                console.print(
+                    f"  [dim]#{fid}[/] "
+                    f"[[noir.cyber]{conf}[/]] "
+                    f"[{status_color}]{status_icon} {status}[/] "
+                    f"{content}{tags_str}"
+                )
         _show_tip(engine)
     finally:
         _run_async(engine.close())
@@ -340,7 +366,7 @@ def dedupe(project: str, threshold: float, simulate: bool, db: str) -> None:
         _run_async(engine.close())
 
 
-@cli.command("trace-episode")
+@memory_cmds.command("trace-episode")
 @click.argument("query", required=False, default="")
 @click.option("--fact-id", "-f", type=int, default=0, help="Trace from a specific fact ID")
 @click.option("--project", "-p", default="", help="Scope to project")
@@ -400,7 +426,7 @@ def trace_episode(query, fact_id, project, limit, db) -> None:
         _run_async(engine.close())
 
 
-@cli.command("trace-chain")
+@memory_cmds.command("trace-chain")
 @click.argument("fact_id", type=int)
 @click.option(
     "--direction",
@@ -440,17 +466,33 @@ def trace_chain(fact_id, direction, depth, db) -> None:
         table.add_column("Depth", style="dim", width=5)
         table.add_column("ID", style="bold", width=6)
         table.add_column("Type", style="noir.violet", width=10)
-        table.add_column("Content", width=50)
+        table.add_column("Conf", style="noir.cyber", width=5)
+        table.add_column("Taint", width=10)
+        table.add_column("Content", width=40)
         table.add_column("Parent", style="dim", width=6)
 
         for f in chain:
             content = f.get("content", "")[:50]
-            parent = f.get("parent_decision_id")
-            parent_str = str(parent) if parent else "—"
+            parent_id = f.get("parent_decision_id")
+            parent_str = str(parent_id) if parent_id else "—"
+            meta = f.get("metadata") or {}
+            if isinstance(meta, str):
+                try:
+                    meta = json.loads(meta)
+                except (ValueError, TypeError, json.JSONDecodeError):
+                    meta = {}
+
+            taint = meta.get("taint_status", "clean")
+            taint_color = (
+                "red" if taint == "tainted" else "yellow" if taint == "suspect" else "green"
+            )
+
             table.add_row(
                 str(f.get("causal_depth", "?")),
                 str(f.get("id", "?")),
                 f.get("fact_type", "?"),
+                f.get("confidence", "C?"),
+                f"[{taint_color}]{taint}[/]",
                 content,
                 parent_str,
             )
@@ -459,3 +501,56 @@ def trace_chain(fact_id, direction, depth, db) -> None:
         _show_tip(engine)
     finally:
         _run_async(engine.close())
+
+
+@memory_cmds.command("stats")
+@click.option("--db", default=DEFAULT_DB, help="Database path")
+@click.option("--json", "as_json", is_flag=True, help="Output as JSON")
+def stats(db, as_json) -> None:
+    """Show memory statistics."""
+    engine = get_engine(db)
+    try:
+        s = _run_async(engine.stats())
+        if as_json:
+            import json
+
+            click.echo(json.dumps(s, indent=2))
+            return
+
+        table = Table(title="🧠 Memory Statistics")
+        table.add_column("Metric", style="bold cyan")
+        table.add_column("Value", style="noir.cyber")
+        table.add_row("Total Facts", str(s["total_facts"]))
+        table.add_row("Active Facts", str(s["active_facts"]))
+        table.add_row("Deprecated", str(s["deprecated_facts"]))
+        table.add_row("Projects", str(s["project_count"]))
+        table.add_row("Embeddings", str(s["embeddings"]))
+        table.add_row("DB Size", f"{s['db_size_mb']} MB")
+        console.print(table)
+    finally:
+        _run_async(engine.close())
+
+
+# --- Root Aliases (Backward Compatibility) ---
+@cli.command("store", context_settings=dict(ignore_unknown_options=True, help_option_names=[]))
+@click.argument("args", nargs=-1, type=click.UNPROCESSED)
+@click.pass_context
+def store_alias(ctx, args):
+    """[Alias] Store a fact."""
+    store.main(args=list(args), standalone_mode=False, obj=ctx.obj)
+
+
+@cli.command("search", context_settings=dict(ignore_unknown_options=True, help_option_names=[]))
+@click.argument("args", nargs=-1, type=click.UNPROCESSED)
+@click.pass_context
+def search_alias(ctx, args):
+    """[Alias] Semantic search."""
+    search.main(args=list(args), standalone_mode=False, obj=ctx.obj)
+
+
+@cli.command("recall", context_settings=dict(ignore_unknown_options=True, help_option_names=[]))
+@click.argument("args", nargs=-1, type=click.UNPROCESSED)
+@click.pass_context
+def recall_alias(ctx, args):
+    """[Alias] Load full context."""
+    recall.main(args=list(args), standalone_mode=False, obj=ctx.obj)

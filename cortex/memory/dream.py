@@ -28,7 +28,7 @@ import math
 import time
 from collections import defaultdict
 from dataclasses import dataclass, field
-from typing import Any, Final, Optional
+from typing import Any, Final
 
 logger = logging.getLogger("cortex.memory.dream")
 
@@ -164,7 +164,7 @@ class AssociativeDreamEngine:
     async def dream_cycle(
         self,
         tenant_id: str,
-        engrams: Optional[list[Any]] = None,
+        engrams: list[Any] | None = None,
     ) -> DreamResult:
         """Execute one REM dream cycle.
 
@@ -381,7 +381,7 @@ class AssociativeDreamEngine:
 
     def _create_bridge_if_eligible(
         self, ca: SemanticCluster, cb: SemanticCluster
-    ) -> Optional[SyntheticBridge]:
+    ) -> SyntheticBridge | None:
         """Create a bridge hypothesis if semantic distance is in sweet spot."""
         sim = _cosine_similarity(ca.centroid, cb.centroid)
         distance = 1.0 - sim

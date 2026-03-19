@@ -17,7 +17,6 @@ from __future__ import annotations
 import logging
 import sys
 from pathlib import Path
-from typing import Optional
 
 import click
 from rich.console import Console
@@ -109,7 +108,7 @@ def setup_logging(verbose: bool = False) -> None:
 def cli(
     ctx: click.Context,
     verbose: bool,
-    sites: Optional[str],
+    sites: str | None,
     stale_hours: float,
     memory_stale_hours: float,
     interval: int,

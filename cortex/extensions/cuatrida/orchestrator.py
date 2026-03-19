@@ -3,7 +3,7 @@ import logging
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from cortex.engine_async import AsyncCortexEngine
 from cortex.extensions.cuatrida.models import CuatridaMetrics, DecisionNode, Dimension
@@ -22,14 +22,14 @@ class CuatridaOrchestrator:
         self.engine = engine
         self.mejoralo = MejoraloEngine(engine=engine)  # type: ignore[reportArgumentType]
         self.metrics = CuatridaMetrics()
-        self._last_tx_id: Optional[int] = None
+        self._last_tx_id: int | None = None
 
     async def log_decision(
         self,
         project: str,
         intent: str,
         dimension: Dimension,
-        metadata: Optional[dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
         conn: Any = None,
     ) -> DecisionNode:
         """

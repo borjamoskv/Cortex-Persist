@@ -13,10 +13,39 @@ from cortex.compaction.compactor import (
     compact_session,
     get_compaction_stats,
 )
+from cortex.compaction.strategies.haiku_compress import HaikuCompressConfig
 
 __all__ = ["compact_cmd", "compact_status", "compact_session_cmd", "gc_cmd"]
 
 _STRATEGY_MAP = {s.value: s for s in CompactionStrategy}
+
+
+def _build_haiku_config(
+    haiku_enabled: bool,
+    haiku_retroactive: bool,
+    haiku_model: str,
+    haiku_num_candidates: int,
+    haiku_min_content_len: int,
+    haiku_limit: int,
+    haiku_strict_575: bool,
+    haiku_min_fidelity: float,
+    haiku_language: str,
+    haiku_store_key: str,
+) -> HaikuCompressConfig:
+    return HaikuCompressConfig(
+        enabled=haiku_enabled,
+        retroactive=haiku_retroactive,
+        model=haiku_model,
+        num_candidates=haiku_num_candidates,
+        min_content_len=haiku_min_content_len,
+        limit=haiku_limit,
+        strict_575=haiku_strict_575,
+        min_fidelity=haiku_min_fidelity,
+        language=haiku_language,
+        store_key=haiku_store_key,
+        store_fidelity_key=f"{haiku_store_key}_fidelity",
+        store_candidates_key=f"{haiku_store_key}_candidates",
+    )
 
 
 def _display_compaction_result(project: str, result, dry_run: bool) -> None:
@@ -51,7 +80,7 @@ def _display_compaction_result(project: str, result, dry_run: bool) -> None:
     )
 
 
-@cli.command()
+@cli.command("run")
 @click.argument("project")
 @click.option(
     "--strategy",
@@ -77,7 +106,31 @@ def _display_compaction_result(project: str, result, dry_run: bool) -> None:
 @click.option("--max-age", default=90, type=int, help="Days threshold for staleness.")
 @click.option("--force", "-f", is_flag=True, help="Skip confirmation prompt.")
 @click.option("--db", default=DEFAULT_DB, help="Database path.")
-def compact_cmd(project, strategy, dry_run, background, threshold, max_age, force, db) -> None:
+@click.option("--haiku-enabled", is_flag=True, help="Enable haiku compaction")
+@click.option("--haiku-retroactive", is_flag=True, help="Apply haiku compaction retroactively")
+@click.option("--haiku-model", default="gemini-2.5-pro", help="LLM model for haiku generation")
+@click.option(
+    "--haiku-num-candidates", default=3, type=int, help="Number of candidates per haiku"
+)
+@click.option(
+    "--haiku-min-content-len", default=30, type=int, help="Minimum content length to compress"
+)
+@click.option("--haiku-limit", default=500, type=int, help="Max facts to process")
+@click.option("--no-haiku-strict-575", is_flag=True, help="Disable strict 5-7-5 syllable checking")
+@click.option(
+    "--haiku-min-fidelity",
+    default=0.60,
+    type=float,
+    help="Minimum semantic fidelity score (0.0 - 1.0)",
+)
+@click.option("--haiku-language", default="English", help="Poet output language")
+@click.option("--haiku-store-key", default="_haiku", help="Metadata key to store haiku")
+def compact_cmd(
+    project, strategy, dry_run, background, threshold, max_age, force, db,
+    haiku_enabled, haiku_retroactive, haiku_model, haiku_num_candidates,
+    haiku_min_content_len, haiku_limit, no_haiku_strict_575,
+    haiku_min_fidelity, haiku_language, haiku_store_key
+) -> None:
     """Run auto-compaction on a project's facts.
 
     Deduplicates, consolidates errors, and prunes stale facts.
@@ -130,6 +183,35 @@ def compact_cmd(project, strategy, dry_run, background, threshold, max_age, forc
             )
             return
 
+        # Auto-enable haiku strategy if flags given
+        has_hc = strategies and CompactionStrategy.HAIKU_COMPRESS in strategies
+        haiku_requested = bool(has_hc)
+        effective_haiku_enabled = haiku_enabled or haiku_requested
+        
+        # Insert if omitted but enabled
+        if effective_haiku_enabled and strategies and not has_hc:
+            strategies.append(CompactionStrategy.HAIKU_COMPRESS)
+
+        if haiku_retroactive and not effective_haiku_enabled:
+            console.print(
+                "[red]Error: --haiku-retroactive requires haiku compaction to be enabled[/]"
+            )
+            return
+
+        haiku_strict_575 = not no_haiku_strict_575
+        haiku_config = _build_haiku_config(
+            haiku_enabled=effective_haiku_enabled,
+            haiku_retroactive=haiku_retroactive,
+            haiku_model=haiku_model,
+            haiku_num_candidates=haiku_num_candidates,
+            haiku_min_content_len=haiku_min_content_len,
+            haiku_limit=haiku_limit,
+            haiku_strict_575=haiku_strict_575,
+            haiku_min_fidelity=haiku_min_fidelity,
+            haiku_language=haiku_language,
+            haiku_store_key=haiku_store_key,
+        )
+
         result = _run_async(
             compact(
                 engine,
@@ -138,6 +220,7 @@ def compact_cmd(project, strategy, dry_run, background, threshold, max_age, forc
                 dry_run=dry_run,
                 similarity_threshold=threshold,
                 max_age_days=max_age,
+                haiku_config=haiku_config,
             )
         )
 

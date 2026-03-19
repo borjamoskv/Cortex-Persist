@@ -9,7 +9,7 @@ from __future__ import annotations
 import logging
 import time
 from collections.abc import Callable
-from typing import Any, Optional
+from typing import Any
 
 try:
     from watchdog.events import FileSystemEvent, FileSystemEventHandler
@@ -110,7 +110,7 @@ class FileActivityObserver:
         callback: Callable[[FileEvent], None],
         debounce_s: float = DEBOUNCE_SECONDS,
         recursive: bool = True,
-        signal_bus: Optional[Any] = None,
+        signal_bus: Any | None = None,
     ) -> None:
         self.workspace = workspace
         self._signal_bus = signal_bus

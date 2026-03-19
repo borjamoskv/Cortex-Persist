@@ -18,16 +18,10 @@ from cortex.database.schema_extensions import (
     CREATE_EPISODES_INDEXES,
     CREATE_EVOLUTION_STATE,
     CREATE_EVOLUTION_STATE_INDEX,
-    CREATE_FACTS_FTS,
-    CREATE_MERKLE_ROOTS,
     CREATE_OUTCOMES,
-    CREATE_PROCEDURAL_ENGRAMS,
     CREATE_RWC_INDEXES,
     CREATE_SIGNALS,
     CREATE_SIGNALS_INDEXES,
-    CREATE_TRUST_EDGES,
-    CREATE_VOTES,
-    CREATE_VOTES_V2,
     EXTENSION_SCHEMA,
 )
 
@@ -58,16 +52,9 @@ __all__ = [
     "CREATE_SESSIONS",
     "CREATE_SIGNALS",
     "CREATE_SIGNALS_INDEXES",
-    "CREATE_TIME_ENTRIES",
     "CREATE_TIME_ENTRIES_INDEX",
     "CREATE_TRANSACTIONS",
     "CREATE_TRANSACTIONS_INDEX",
-    CREATE_TRUST_EDGES,
-    CREATE_VOTES,
-    CREATE_VOTES_V2,
-    CREATE_PROCEDURAL_ENGRAMS,
-    CREATE_FACTS_FTS,
-    CREATE_MERKLE_ROOTS,
     "CREATE_TENANTS",
     "CREATE_THREAT_INTEL",
     "CREATE_THREAT_INTEL_INDEXES",
@@ -75,7 +62,7 @@ __all__ = [
     "get_init_meta",
 ]
 
-SCHEMA_VERSION = "5.3.0"
+SCHEMA_VERSION = "5.4.0"
 
 # ─── Core Facts Table ────────────────────────────────────────────────
 CREATE_FACTS = """
@@ -85,7 +72,6 @@ CREATE TABLE IF NOT EXISTS facts (
     project     TEXT NOT NULL,
     content     TEXT NOT NULL,
     fact_type   TEXT NOT NULL DEFAULT 'knowledge',
-    tags        TEXT NOT NULL DEFAULT '[]',
     metadata    TEXT DEFAULT '{}',
     hash        TEXT,
     valid_from  TEXT,
@@ -95,7 +81,23 @@ CREATE TABLE IF NOT EXISTS facts (
     created_at  TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at  TEXT NOT NULL DEFAULT (datetime('now')),
     is_tombstoned INTEGER NOT NULL DEFAULT 0,
-    is_quarantined INTEGER NOT NULL DEFAULT 0
+    is_quarantined INTEGER NOT NULL DEFAULT 0,
+    signature      TEXT,
+    signer_pubkey  TEXT,
+    -- Thermodynamic Plane (Ω₁₃)
+    quadrant      TEXT NOT NULL DEFAULT 'ACTIVE',
+    storage_tier  TEXT NOT NULL DEFAULT 'HOT',
+    exergy_score  REAL NOT NULL DEFAULT 1.0,
+    -- Semantic Plane
+    category      TEXT NOT NULL DEFAULT 'general',
+    semantic_status TEXT NOT NULL DEFAULT 'pending',
+    semantic_error  TEXT,
+    -- Causal Lineage (Ω₁₁)
+    parent_id     INTEGER,
+    relation_type TEXT,
+    yield_score   REAL NOT NULL DEFAULT 1.0,
+    -- Legacy/Compatibility
+    tags          TEXT DEFAULT '[]'
 );
 """
 
@@ -107,6 +109,27 @@ CREATE INDEX IF NOT EXISTS idx_facts_proj_type ON facts(project, fact_type);
 CREATE INDEX IF NOT EXISTS idx_facts_tombstone ON facts(is_tombstoned);
 CREATE INDEX IF NOT EXISTS idx_facts_tenant_valid ON facts(tenant_id, valid_until);
 CREATE INDEX IF NOT EXISTS idx_facts_proj_valid ON facts(project, valid_until);
+-- Double-Plane Faceting Indexes
+CREATE INDEX IF NOT EXISTS idx_facts_quadrant ON facts(quadrant);
+CREATE INDEX IF NOT EXISTS idx_facts_category ON facts(category);
+CREATE INDEX IF NOT EXISTS idx_facts_tier ON facts(storage_tier);
+-- Causal Indexes (Ω₁₁)
+CREATE INDEX IF NOT EXISTS idx_facts_parent ON facts(parent_id);
+CREATE INDEX IF NOT EXISTS idx_facts_semantic_status ON facts(semantic_status);
+"""
+
+CREATE_FACT_TAGS = """
+CREATE TABLE IF NOT EXISTS fact_tags (
+    fact_id INTEGER NOT NULL,
+    tag     TEXT NOT NULL,
+    tenant_id TEXT NOT NULL DEFAULT 'default',
+    PRIMARY KEY (fact_id, tag)
+);
+"""
+
+CREATE_FACT_TAGS_INDEXES = """
+CREATE INDEX IF NOT EXISTS idx_fact_tags_tag ON fact_tags(tag);
+CREATE INDEX IF NOT EXISTS idx_fact_tags_tenant_tag ON fact_tags(tenant_id, tag);
 """
 
 # ─── Vector Embeddings (sqlite-vec) ──────────────────────────────────
@@ -208,6 +231,7 @@ CREATE INDEX IF NOT EXISTS idx_te_project ON time_entries(project);
 CREATE INDEX IF NOT EXISTS idx_te_start ON time_entries(start_time);
 """
 
+
 # ─── Metadata Table ───────────────────────────────────────────────────
 CREATE_META = """
 CREATE TABLE IF NOT EXISTS cortex_meta (
@@ -269,6 +293,34 @@ CREATE_THREAT_INTEL_INDEXES = """
 CREATE INDEX IF NOT EXISTS idx_threat_intel_ip ON threat_intel(ip_address);
 """
 
+# ─── P0 Decoupling: Enrichment Queue (Ω) ──────────────────────────────
+CREATE_ENRICHMENT_JOBS = """
+CREATE TABLE IF NOT EXISTS enrichment_jobs (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    fact_id         INTEGER NOT NULL REFERENCES facts(id),
+    job_type        TEXT NOT NULL DEFAULT 'embedding',
+    status          TEXT NOT NULL DEFAULT 'queued',
+    priority        INTEGER DEFAULT 0,
+    attempts        INTEGER DEFAULT 0,
+    last_error      TEXT,
+    payload         TEXT,
+    next_attempt_at TEXT,
+    created_at      TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at      TEXT NOT NULL DEFAULT (datetime('now'))
+);
+"""
+
+CREATE_ENRICHMENT_JOBS_INDEXES = """
+CREATE INDEX IF NOT EXISTS idx_enrichment_fact ON enrichment_jobs(fact_id);
+CREATE INDEX IF NOT EXISTS idx_enrichment_status_priority ON enrichment_jobs(status, priority);
+"""
+
+# ─── Type II Structural Collapse: O(1) Scaling Indexes ───────────────
+CREATE_FACTS_COMPOSITE_INDEX = """
+CREATE INDEX IF NOT EXISTS idx_facts_causal_resolve
+ON facts(tenant_id, project, fact_type, is_tombstoned, id DESC);
+"""
+
 # ─── Tenants ──────────────────────────────────────────────────────────
 CREATE_TENANTS = """
 CREATE TABLE IF NOT EXISTS tenants (
@@ -290,6 +342,11 @@ ALTER TABLE facts ADD COLUMN signer_pubkey TEXT;
 _CORE_SCHEMA = [
     CREATE_FACTS,
     CREATE_FACTS_INDEXES,
+    CREATE_FACTS_COMPOSITE_INDEX,
+    CREATE_FACT_TAGS,
+    CREATE_FACT_TAGS_INDEXES,
+    CREATE_ENRICHMENT_JOBS,
+    CREATE_ENRICHMENT_JOBS_INDEXES,
     CREATE_EMBEDDINGS,
     CREATE_SPECULAR_EMBEDDINGS,
     CREATE_SESSIONS,

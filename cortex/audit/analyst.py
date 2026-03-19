@@ -7,7 +7,7 @@ unauthorized access or tenant-boundary violations.
 """
 
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from .ledger import EnterpriseAuditLedger
 
@@ -21,7 +21,7 @@ class AuditAnalystGrok:
         self.ledger = ledger
         self._threat_score = 0.0
 
-    async def run_scan(self, _tenant_id: Optional[str] = None) -> dict[str, Any]:
+    async def run_scan(self, _tenant_id: str | None = None) -> dict[str, Any]:
         """
         Scans audit logs for common threat patterns using Grok-inspired heuristics.
         """

@@ -14,7 +14,7 @@ import asyncio
 import logging
 import time
 from concurrent.futures import ThreadPoolExecutor
-from typing import TYPE_CHECKING, Any, Final, Optional, TypedDict
+from typing import TYPE_CHECKING, Any, Final, TypedDict
 
 import numpy as np
 
@@ -62,12 +62,12 @@ class SemanticMutator:
     def __init__(
         self,
         store: SovereignVectorStoreL2,
-        health_monitor: Optional[TopologicalHealthMonitor] = None,
-        anchor: Optional[TopologicalAnchor] = None,
+        health_monitor: TopologicalHealthMonitor | None = None,
+        anchor: TopologicalAnchor | None = None,
     ) -> None:
         self._store = store
         self._queue: asyncio.Queue[tuple[list[float], str, float]] = asyncio.Queue(maxsize=10000)
-        self._worker_task: Optional[asyncio.Task[None]] = None
+        self._worker_task: asyncio.Task[None] | None = None
         # ThreadPoolExecutor to bypass Python GIL during Numpy topological operations
         self._pool = ThreadPoolExecutor(max_workers=2, thread_name_prefix="ctx_mutator")
         # Topological health write-gate: skip mutations if model_hash has drifted
@@ -287,17 +287,17 @@ class DynamicSemanticSpace:
     def __init__(
         self,
         store: SovereignVectorStoreL2,
-        health_monitor: Optional[TopologicalHealthMonitor] = None,
-        anchor: Optional[TopologicalAnchor] = None,
+        health_monitor: TopologicalHealthMonitor | None = None,
+        anchor: TopologicalAnchor | None = None,
         buffer_capacity: int = 100,
-        manager: Optional[CortexMemoryManager] = None,
+        manager: CortexMemoryManager | None = None,
     ) -> None:
         self._store = store
         self.manager = manager
         self.semantic_mutator = SemanticMutator(store, health_monitor=health_monitor, anchor=anchor)
         self.autonomic_buffer = AutonomicMemoryBuffer(capacity=buffer_capacity)
         self._active_flushes: set[asyncio.Task[Any]] = set()
-        self._heartbeat_task: Optional[asyncio.Task[None]] = None
+        self._heartbeat_task: asyncio.Task[None] | None = None
 
     def start(self) -> None:
         """Starts the semantic mutator and the autonomic heartbeat."""
@@ -361,7 +361,7 @@ class DynamicSemanticSpace:
         query: str,
         limit: int = 5,
         pulse_excitation: float = 20.0,
-        layer: Optional[str] = None,
+        layer: str | None = None,
     ) -> list[CortexFactModel]:
         """Recupera los vectores y emite un pulso topológico (Inversión Termodinámica)."""
         # Obtenemos el query vector para calcular la gradiente de topología

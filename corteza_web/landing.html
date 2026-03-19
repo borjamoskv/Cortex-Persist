@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORTEX — Compliance que compila. Evidencia que aguanta auditoría.</title>
+    <meta name="description" content="CORTEX reduce exposición regulatoria convirtiendo obligaciones abstractas del AI Act en controles técnicos verificables. Trazabilidad, enforcement y evidencia para sistemas de IA.">
+    <meta name="keywords" content="AI Act, Article 12, compliance, audit trail, AI governance, EU regulation, evidence, logging">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="landing.css">
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div class="scanlines"></div>
+
+    <!-- ═══════════════════ NAV ═══════════════════ -->
+    <nav id="nav">
+        <div class="nav-inner">
+            <a href="#" class="nav-logo">CORTEX</a>
+            <div class="nav-links">
+                <a href="#features">Qué hace</a>
+                <a href="#comparison">Comparativa</a>
+                <a href="#faq">FAQ</a>
+                <a href="#cta-final" class="nav-cta">Solicitar demo</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ═══════════════════ HERO ═══════════════════ -->
+    <header id="hero" class="section hero-section">
+        <div class="hero-badge">EU AI Act · Article 12 · Compliance Infrastructure</div>
+        <h1>CORTEX</h1>
+        <p class="hero-tagline">La capa de evidencia para sistemas de IA<br>que no pueden permitirse amnesia</p>
+        <p class="hero-sub">Convierte requisitos regulatorios en trazabilidad operativa,<br>controles verificables y respuesta real de auditoría.</p>
+        <div class="hero-ctas">
+            <a href="#cta-final" class="btn btn-primary">Solicitar demo</a>
+            <a href="#architecture" class="btn btn-ghost">Ver arquitectura</a>
+        </div>
+    </header>
+
+    <!-- ═══════════════════ SUBHERO ═══════════════════ -->
+    <section class="section subhero-section">
+        <div class="content-narrow">
+            <h2 class="section-statement">El problema no es usar IA.<br>El problema es no poder demostrar qué hizo.</h2>
+            <p>Para sistemas de IA de alto riesgo, el <strong>Artículo 12</strong> del AI Act exige capacidad técnica de registro automático de eventos, y el <strong>Artículo 19</strong> exige conservar esos logs bajo control del proveedor durante un mínimo de seis meses.</p>
+            <p class="accent-text">CORTEX convierte eso en infraestructura.</p>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ PROBLEM / SOLUTION ═══════════════════ -->
+    <section class="section comparison-section" id="comparison">
+        <h2 class="section-title">Sin CORTEX vs. Con CORTEX</h2>
+        <div class="comparison-grid">
+            <div class="comparison-col comparison-without">
+                <h3>Sin CORTEX</h3>
+                <ul>
+                    <li>Logs dispersos</li>
+                    <li>Versiones opacas</li>
+                    <li>Vendor telemetry insuficiente</li>
+                    <li>Trazabilidad parcial</li>
+                    <li>Auditoría lenta</li>
+                    <li>Narrativa corporativa donde debería haber prueba</li>
+                </ul>
+            </div>
+            <div class="comparison-col comparison-with">
+                <h3>Con CORTEX</h3>
+                <ul>
+                    <li>Logging automático por evento</li>
+                    <li>Cadena de custodia técnica</li>
+                    <li>Policy enforcement</li>
+                    <li>Histórico consultable</li>
+                    <li>Export auditable</li>
+                    <li>Capa neutral sobre múltiples modelos</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ FEATURES ═══════════════════ -->
+    <section class="section features-section" id="features">
+        <h2 class="section-title">Qué hace CORTEX</h2>
+
+        <div class="features-grid">
+            <!-- Feature 1 -->
+            <div class="feature-card">
+                <div class="feature-number">01</div>
+                <h3>Logging automático real</h3>
+                <p>Cada evento relevante queda asociado a: timestamp, trace_id, system_id, model, model_version, prompt/policy version, input/output reference, operator, review path, y <code>reconstructed=true|false</code>.</p>
+                <div class="feature-note">Alinea la operación con la exigencia del Artículo 12 de permitir técnicamente el registro automático de eventos.</div>
+            </div>
+
+            <!-- Feature 2 -->
+            <div class="feature-card">
+                <div class="feature-number">02</div>
+                <h3>Evidencia con cadena de custodia</h3>
+                <ul class="feature-list">
+                    <li>Append-only</li>
+                    <li>Hashing por evento</li>
+                    <li>Export firmado</li>
+                    <li>Retención configurable</li>
+                    <li>Separación nativo / reconstruido</li>
+                </ul>
+                <div class="feature-note">El AI Act no impone literalmente arquitectura criptográfica en el Art. 12. Esto es diseño defensivo para que tu evidencia aguante escrutinio serio.</div>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="feature-card">
+                <div class="feature-number">03</div>
+                <h3>Policy enforcement</h3>
+                <ul class="feature-list">
+                    <li>No inference without log</li>
+                    <li>No prod without approved config</li>
+                    <li>No silent model swap</li>
+                    <li>No deletion outside retention policy</li>
+                    <li>No critical output without review path</li>
+                </ul>
+            </div>
+
+            <!-- Feature 4 -->
+            <div class="feature-card">
+                <div class="feature-number">04</div>
+                <h3>Capa multi-modelo</h3>
+                <p>Claude, GPT, modelos open-weight o internos. CORTEX desacopla el control regulatorio del vendor. El AI Act reparte obligaciones por rol — no basta con señalar al proveedor del modelo.</p>
+            </div>
+
+            <!-- Feature 5 -->
+            <div class="feature-card feature-card-wide">
+                <div class="feature-number">05</div>
+                <h3>Respuesta de auditoría en minutos</h3>
+                <p>Cuando pidan <em>"enséñame lo que pasó el martes a las 14:03"</em>, CORTEX entrega: evento, input/output, versión, operador, política, y evidencia exportable.</p>
+                <div class="audit-contrast">
+                    <div class="audit-before">
+                        <span class="audit-label">Antes</span>
+                        <p>"Creemos que ese flujo iba por el modelo anterior."</p>
+                    </div>
+                    <div class="audit-after">
+                        <span class="audit-label">Ahora</span>
+                        <p>"Aquí está el evento, la versión, el operador, la evidencia y el paquete de exportación."</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ PROOF ═══════════════════ -->
+    <section class="section proof-section" id="proof">
+        <h2 class="section-title">Cómo se comprueba que funciona</h2>
+        <p class="section-subtitle">Con pruebas reproducibles, no con promesas ni dashboards bonitos.</p>
+
+        <div class="proof-grid">
+            <div class="proof-card">
+                <div class="proof-number">01</div>
+                <h3>Captura</h3>
+                <p>Cada evento relevante genera log automático. Input normal, errores, timeouts, retries, cambios de modelo, intervención humana, bloqueos de policy.</p>
+                <div class="proof-metric">
+                    <code>capture_rate ≥ 99.8%</code>
+                    <span>0 eventos huérfanos · trace_id único por evento</span>
+                </div>
+            </div>
+
+            <div class="proof-card">
+                <div class="proof-number">02</div>
+                <h3>Integridad</h3>
+                <p>Los logs no son plastilina retroactiva. Hash por evento encadenado al anterior. Cualquier alteración posterior rompe la cadena y se detecta.</p>
+                <div class="proof-metric">
+                    <code>tamper_detection = 100%</code>
+                    <span>hash_n = H(event_n + hash_(n-1))</span>
+                </div>
+            </div>
+
+            <div class="proof-card">
+                <div class="proof-number">03</div>
+                <h3>Enforcement</h3>
+                <p>CORTEX no solo mira. Bloquea o marca: inferencia sin log, modelo no aprobado, cambio silencioso de prompt, output crítico sin revisión, borrado fuera de retención.</p>
+                <div class="proof-metric">
+                    <code>Cada política: condición + respuesta + evidencia</code>
+                    <span>Reproducible. Si no, es decoración.</span>
+                </div>
+            </div>
+
+            <div class="proof-card">
+                <div class="proof-number">04</div>
+                <h3>Auditoría</h3>
+                <p>"Enséñame las inferencias del martes 14:00–15:00 del sistema X con modelo Y." Eventos, versiones, operador, export firmado. En minutos, no en días.</p>
+                <div class="proof-metric">
+                    <code>búsqueda &lt;30s · export &lt;2min · integridad &lt;5min</code>
+                    <span>Si tardas dos días, es cosplay de compliance.</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="proof-summary">
+            <p>CORTEX funciona si puede perder una discusión contra un auditor y aun así ganar por evidencia.</p>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ ARCHITECTURE ═══════════════════ -->
+    <section class="section architecture-section" id="architecture">
+        <h2 class="section-title">Arquitectura</h2>
+        <p class="section-subtitle">CORTEX se instala entre tu sistema de IA y tu responsabilidad regulatoria.</p>
+        <div class="architecture-diagram">
+            <pre>
+                ┌───────────────────────────────┐
+                │         AI SYSTEM             │
+                │  GPT · Claude · local · etc.  │
+                └──────────────┬────────────────┘
+                               │ inferences / events
+                               ▼
+                 ┌─────────────────────────────┐
+                 │        CORTEX LAYER         │
+                 │  observability + policy     │
+                 │  + evidence + trace IDs     │
+                 └───────┬───────────┬─────────┘
+                         │           │
+                         ▼           ▼
+        ┌────────────────────────┐  ┌──────────────────────────┐
+        │  NATIVE FORWARD LOG   │  │  RECONSTRUCTED HISTORY   │
+        │  desde activación     │  │  desde fuentes previas   │
+        └──────────┬────────────┘  └───────────┬──────────────┘
+                   └─────────────┬─────────────┘
+                                 ▼
+                  ┌────────────────────────────────┐
+                  │   EVIDENCE STORE / RETENTION   │
+                  │  append-only · hash · export   │
+                  │  native=true / reconstructed   │
+                  └────────────────┬───────────────┘
+                                   ▼
+                    ┌────────────────────────────┐
+                    │   AUDIT / INCIDENTS /      │
+                    │   MARKET SURVEILLANCE      │
+                    └────────────────────────────┘</pre>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ RETROACTIVITY ═══════════════════ -->
+    <section class="section retro-section">
+        <div class="content-narrow">
+            <h2 class="section-title">Retroactividad, dicho sin vender humo</h2>
+            <p class="retro-claim">CORTEX no inventa pasado.</p>
+            <ul class="retro-list">
+                <li>Activa logging verificable desde su despliegue</li>
+                <li>Reconstruye parte del histórico si existen huellas técnicas previas</li>
+                <li>Marca ese histórico como <code>reconstructed=true</code></li>
+                <li>Separa evidencia originaria de evidencia reconstruida</li>
+            </ul>
+            <p class="retro-close">Eso es defendible. Lo otro sería espiritismo corporativo.</p>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ AUDIENCE ═══════════════════ -->
+    <section class="section audience-section">
+        <h2 class="section-title">Para quién</h2>
+        <div class="audience-grid">
+            <div class="audience-card">
+                <h3>Procesos sensibles</h3>
+                <p>Scoring · matching · clasificación · priorización · support-to-decision · biometría · automatización con impacto material</p>
+            </div>
+            <div class="audience-card">
+                <h3>Funciones internas</h3>
+                <p>Compliance · legal · risk · security · platform · ML engineering · audit</p>
+            </div>
+            <div class="audience-card">
+                <h3>Entornos complejos</h3>
+                <p>Multi-modelo · multi-equipo · multi-jurisdicción · alta dependencia de terceros</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ COST / TIMELINE ═══════════════════ -->
+    <section class="section risk-section">
+        <div class="risk-grid">
+            <div class="risk-card">
+                <h3>Coste de no hacer nada</h3>
+                <p>Sanciones de hasta <strong>€35M</strong> o <strong>7% del volumen global</strong>. Pero lo relevante no es la cifra. Es:</p>
+                <ul>
+                    <li>Incapacidad de reconstrucción</li>
+                    <li>Retraso en incident response</li>
+                    <li>Debilidad frente a auditoría</li>
+                    <li>Dependencia ciega del vendor</li>
+                    <li>Caos probatorio cuando ya es tarde</li>
+                </ul>
+            </div>
+            <div class="risk-card timeline-card">
+                <h3>Calendario</h3>
+                <div class="timeline">
+                    <div class="timeline-event">
+                        <span class="timeline-date">1 ago 2024</span>
+                        <span class="timeline-label">AI Act entra en vigor</span>
+                    </div>
+                    <div class="timeline-event timeline-highlight">
+                        <span class="timeline-date">2 ago 2026</span>
+                        <span class="timeline-label">Aplicabilidad general — alto riesgo</span>
+                    </div>
+                    <div class="timeline-event">
+                        <span class="timeline-date">2 ago 2027</span>
+                        <span class="timeline-label">Transición productos regulados</span>
+                    </div>
+                </div>
+                <p class="timeline-warning">Moverse en 2026 no es ser proactivo.<br>Es llegar con la corbata ardiendo.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ FAQ ═══════════════════ -->
+    <section class="section faq-section" id="faq">
+        <h2 class="section-title">FAQ</h2>
+        <div class="faq-grid">
+            <div class="faq-item">
+                <h3>¿CORTEX garantiza que no habrá multas?</h3>
+                <p>No. Reduce exposición regulatoria y mejora tu posición técnica y probatoria.</p>
+            </div>
+            <div class="faq-item">
+                <h3>¿Sirve si ya estamos operando?</h3>
+                <p>Sí. Genera evidencia desde la activación y puede reconstruir parte del pasado si existen fuentes previas.</p>
+            </div>
+            <div class="faq-item">
+                <h3>¿Sustituye al equipo legal?</h3>
+                <p>No. Sustituye la falta de evidencia técnica.</p>
+            </div>
+            <div class="faq-item">
+                <h3>¿Vale solo para high-risk?</h3>
+                <p>No. También sirve para gobernanza interna, incident response, vendor oversight y trazabilidad contractual.</p>
+            </div>
+            <div class="faq-item">
+                <h3>¿El Art. 12 exige hashing criptográfico?</h3>
+                <p>No de forma literal. Exige capacidad técnica de logging automático. El resto es arquitectura inteligente para no quedar vendido en auditoría.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ CTA FINAL ═══════════════════ -->
+    <section class="section cta-section" id="cta-final">
+        <div class="cta-inner">
+            <h2>Activa trazabilidad verificable<br>antes de que te la exijan.</h2>
+            <p>CORTEX instala una capa común de evidencia, control y enforcement sobre tus flujos de IA para que el cumplimiento deje de ser relato y empiece a ser prueba.</p>
+            <div class="cta-buttons">
+                <a href="mailto:borjamoskv@gmail.com?subject=CORTEX%20Demo%20Request" class="btn btn-primary btn-large">Solicitar demo</a>
+                <a href="https://github.com/borjamoskv/cortex" class="btn btn-ghost btn-large" target="_blank" rel="noopener">Evaluar arquitectura</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════ FOOTER ═══════════════════ -->
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <div class="footer-claim">Compliance sin rastro es coartada.<br>CORTEX deja huellas antes de que llegue el auditor.</div>
+            <div class="footer-links">
+                <a href="https://cortexpersist.com">cortexpersist.com</a>
+                <a href="https://github.com/borjamoskv/cortex">GitHub</a>
+                <a href="mailto:borjamoskv@gmail.com">Contacto</a>
+            </div>
+            <div class="footer-legal">
+                <p>© 2024–2026 Sovereign Systems Labs / borjamoskv.com</p>
+                <p>Core: Apache-2.0 · Enterprise: BSL 1.1</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Sticky nav on scroll
+        const nav = document.getElementById('nav');
+        window.addEventListener('scroll', () => {
+            nav.classList.toggle('nav-scrolled', window.scrollY > 80);
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(a => {
+            a.addEventListener('click', e => {
+                e.preventDefault();
+                const target = document.querySelector(a.getAttribute('href'));
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+
+        // Intersection Observer for fade-in
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.section').forEach(s => observer.observe(s));
+    </script>
+</body>
+</html>

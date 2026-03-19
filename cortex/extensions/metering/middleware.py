@@ -7,7 +7,6 @@ and enforce quota limits based on their billing plan.
 from __future__ import annotations
 
 import logging
-from typing import Optional
 
 from fastapi import Request
 from fastapi.responses import JSONResponse
@@ -40,7 +39,7 @@ class MeteringMiddleware(BaseHTTPMiddleware):
     into responses for developer visibility.
     """
 
-    def __init__(self, app, tracker: Optional[UsageTracker] = None):
+    def __init__(self, app, tracker: UsageTracker | None = None):
         super().__init__(app)
         self._tracker = tracker or UsageTracker()
         self._enforcer = QuotaEnforcer(self._tracker)
@@ -52,9 +51,20 @@ class MeteringMiddleware(BaseHTTPMiddleware):
         if not path.startswith("/v1/") or any(path.startswith(p) for p in _EXCLUDED_PREFIXES):
             return await call_next(request)
 
-        # Extract tenant from auth result (set by auth dependency)
         tenant_id = getattr(getattr(request, "state", None), "tenant_id", None)
         plan = getattr(getattr(request, "state", None), "plan", "free")
+
+        if not tenant_id:
+            auth_header = request.headers.get("Authorization")
+            if auth_header and auth_header.lower().startswith("bearer "):
+                from cortex.auth.manager import get_auth_manager
+
+                manager = get_auth_manager()
+                if manager:
+                    res = await manager.authenticate_async(auth_header[7:])
+                    if res.authenticated:
+                        tenant_id = res.tenant_id
+                        request.state.tenant_id = tenant_id
 
         # If no tenant identified (unauthenticated), let the auth layer handle it
         if not tenant_id:

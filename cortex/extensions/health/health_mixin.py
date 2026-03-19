@@ -1,12 +1,13 @@
 """CortexEngine health mixin — engine.health_check() API.
 
 Cached collector, TrendDetector, configurable thresholds.
+Health scores are persisted to SQLite for cross-invocation trend analysis.
 """
 
 from __future__ import annotations
 
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from cortex.extensions.health.collector import HealthCollector
 from cortex.extensions.health.models import (
@@ -31,9 +32,10 @@ class HealthMixin:
     """
 
     _db_path: Any
-    _health_collector: Optional[HealthCollector] = None
-    _health_trend: Optional[TrendDetector] = None
-    _health_thresholds: Optional[HealthThresholds] = None
+    _health_collector: HealthCollector | None = None
+    _health_trend: TrendDetector | None = None
+    _health_thresholds: HealthThresholds | None = None
+    _health_trend_seeded: bool = False
 
     def _get_health_collector(self) -> HealthCollector:
         """Lazily create and cache the HealthCollector."""
@@ -64,7 +66,7 @@ class HealthMixin:
         }
 
     async def health_score(self, **kwargs: Any) -> HealthScore:
-        """Compute the full health score, record trend."""
+        """Compute the full health score, record trend, persist to DB."""
         collector = self._get_health_collector()
         metrics = collector.collect_all()
         weights = kwargs.get("weights")
@@ -72,7 +74,18 @@ class HealthMixin:
 
         # Feed trend detector
         trend = self._get_trend_detector()
+
+        # Seed from DB on first access
+        db_path = str(getattr(self, "_db_path", ""))
+        if not self._health_trend_seeded and db_path:
+            trend.load_from_db(db_path)
+            self._health_trend_seeded = True
+
         trend.push(hs.score)
+
+        # Persist to DB
+        if db_path:
+            trend.persist_to_db(db_path, hs.score, hs.grade.letter)
 
         return hs
 

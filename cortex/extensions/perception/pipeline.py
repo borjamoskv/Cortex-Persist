@@ -10,7 +10,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from cortex.extensions.episodic.main import EpisodicMemory
 from cortex.extensions.perception.base import (
@@ -52,7 +52,7 @@ class PerceptionRecorder:
         self.cooldown_s = cooldown_s
         self._last_record: dict[str, float] = {}  # project -> timestamp
 
-    async def maybe_record(self, snapshot: BehavioralSnapshot) -> Optional[int]:
+    async def maybe_record(self, snapshot: BehavioralSnapshot) -> int | None:
         """Record a snapshot if confidence is high enough and cooldown has passed.
 
         Returns:
@@ -123,7 +123,7 @@ class PerceptionPipeline:
         self.window_s = window_s
         self._events: list[FileEvent] = []
         self._lock = asyncio.Lock()
-        self._loop: Optional[asyncio.AbstractEventLoop] = None
+        self._loop: asyncio.AbstractEventLoop | None = None
 
         self.recorder = PerceptionRecorder(conn, session_id, cooldown_s)
         self.observer = FileActivityObserver(
@@ -157,7 +157,7 @@ class PerceptionPipeline:
         self._events = [e for e in self._events if e.timestamp >= cutoff]
         return list(self._events)
 
-    async def tick(self) -> Optional[BehavioralSnapshot]:
+    async def tick(self) -> BehavioralSnapshot | None:
         """Run one inference cycle.
 
         Call this periodically (e.g. every 30s) to process accumulated events.

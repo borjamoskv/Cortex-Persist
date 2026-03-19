@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Optional
 
 import aiosqlite
 
@@ -102,7 +101,7 @@ class BridgeGuard:
         return result
 
     @staticmethod
-    def _extract_source_project(content: str, target_project: str) -> Optional[str]:
+    def _extract_source_project(content: str, target_project: str) -> str | None:
         """Extract source project name from bridge content."""
         # Try regex pattern first
         match = _BRIDGE_SOURCE_RE.search(content)
@@ -149,7 +148,7 @@ class BridgeGuard:
         content: str,
         current_project: str,
         tenant_id: str = "default",
-    ) -> Optional[str]:
+    ) -> str | None:
         """
         Ω₁: Detect if this content already exists in another project.
 

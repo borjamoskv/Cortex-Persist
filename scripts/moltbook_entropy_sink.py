@@ -20,7 +20,7 @@ async def main():
 
     # 1. Asfixiar DMs
     try:
-        dms = client._request("GET", "/agents/dm/requests")
+        dms = await client._request("GET", "/agents/dm/requests")
         reqs = dms.get("requests", [])
         if reqs:
             logger.info("Detectadas %d solicitudes de DM.", len(reqs))
@@ -34,7 +34,7 @@ async def main():
 
     # 2. Consumir Notificaciones
     try:
-        notifs = client._request("GET", "/notifications")
+        notifs = await client._request("GET", "/notifications")
         unread = [n for n in notifs.get("notifications", []) if not n.get("isRead")]
         if unread:
             logger.info("Consumiendo %d notificaciones de la red...", len(unread))
@@ -45,7 +45,7 @@ async def main():
                     post_ids.add(pid)
 
             for pid in post_ids:
-                client.mark_notifications_read(pid)
+                await client.mark_notifications_read(pid)
                 logger.info(
                     "    -> Notificaciones del post %s marcadas como leídas. Masa devoluta: 0 bytes.",
                     pid,

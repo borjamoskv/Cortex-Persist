@@ -15,7 +15,7 @@ from __future__ import annotations
 import enum
 import logging
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger("cortex.memory.frequency")
 
@@ -55,7 +55,7 @@ class FrequencyMetadata:
 
     tier: MemoryFrequency = MemoryFrequency.HOT
     access_count: int = 0
-    promotion_history: Optional[list[str]] = None
+    promotion_history: list[str] | None = None
 
 
 class ContinuousMemorySystem:

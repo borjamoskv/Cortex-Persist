@@ -243,3 +243,109 @@ def swarm_up(db):
             await bus.close()
 
     asyncio.run(_run_swarm())
+
+
+@swarm.command("remediate")
+@click.option("--db", default="~/.cortex/cortex.db", help="Database path to remediate")
+@click.option("--dry-run", is_flag=True, help="Scan and diagnose without applying fixes")
+@click.option("--report", "-r", type=click.Path(), help="Path to save JSON report")
+def swarm_remediate(db, dry_run, report):
+    """RUN LEGION-Ω REMEDIATION (100 agents / 10 battalions)."""
+    from pathlib import Path
+
+    from rich.table import Table
+
+    from cortex.extensions.swarm.remediation.engine import LegionRemediationEngine
+
+    db_path = str(Path(db).expanduser())
+    if not Path(db_path).exists():
+        console.print(f"[bold red]❌ Database not found:[/] [white]{db_path}[/]")
+        return
+
+    engine = LegionRemediationEngine(db_path, dry_run=dry_run)
+
+    console.print(
+        Panel(
+            f"🛡️ [bold #CCFF00]LEGION-Ω REMEDIATION SWARM ACTIVATED[/]\n"
+            f"Database: [cyan]{db_path}[/]\n"
+            f"Mode: [bold {'YELLOW' if dry_run else 'RED'}]{'DRY-RUN (Scan Only)' if dry_run else 'LIVE REMEDIATION'}[/]\n"
+            f"Agents: [dim]50 Blue (Remediation) + 50 Red (Siege) + 100 Specialists[/]",
+            border_style="#CCFF00",
+        )
+    )
+
+    with console.status("[bold #CCFF00]Swarm is diagnosing and remediating...[/]"):
+        results = asyncio.run(engine.execute())
+
+    # Summary Table
+    table = Table(title="Remediation Summary", border_style="#CCFF00")
+    table.add_column("Category", style="cyan")
+    table.add_column("Count", justify="right", style="bold white")
+
+    table.add_row("Total Facts Scanned", str(results.total_facts_scanned))
+    table.add_row("Issues Identified", str(results.total_issues_found))
+    table.add_row("Fixes Applied/Proposed", f"[green]{results.fixes_applied}[/]")
+    table.add_row(
+        "Fixes Rejected (Red Team)", 
+        f"[red]{results.fixes_rejected}[/]"
+    )
+    table.add_row("Fixes Failed (Error)", f"[bold red]{results.fixes_failed}[/]")
+
+    console.print(table)
+
+    if report:
+        engine.save_report(results, report)
+        console.print(f"\n[bold green]✅ Detailed report saved to:[/] [white]{report}[/]")
+
+    if not dry_run:
+        console.print(
+            "\n[bold green]✅ Remediation cycle complete. Database integrity restored.[/]"
+        )
+    else:
+        console.print("\n[yellow]⚠ Dry-run complete. No changes made to the database.[/]")
+
+
+@swarm.command("cleanup")
+@click.option("--path", "-p", help="Base path for worktrees")
+def swarm_cleanup(path):
+    """Force-remove all ephemeral worktrees and their git metadata."""
+    from cortex.extensions.swarm.worktree_isolation import cleanup_all_worktrees
+
+    count = asyncio.run(cleanup_all_worktrees(path))
+    if count == 0:
+        console.print("[yellow]No ephemeral worktrees found to cleanup.[/]")
+    else:
+        console.print(f"[bold green]✅ Successfully cleaned up {count} worktrees.[/]")
+
+
+@swarm.command("kardashev")
+@click.option("--type", "-t", type=int, default=2, help="Kardashev scale type (1-3)")
+@click.option("--mission", "-m", help="Mission description (optional)")
+def swarm_kardashev(type, mission):
+    """ACTIVATE KARDASHEV-SWARM PROTOCOL (Structural Collapse)."""
+    from cortex.extensions.swarm.centauro_engine import CentauroEngine, Formation
+
+    engine = CentauroEngine()
+    
+    if type == 2:
+        target_mission = mission or "Massive O(N) structural audit and evolution"
+        formation = Formation.KARDASHEV_II
+        
+        console.print(
+            Panel(
+                f"🌌 [bold #CCFF00]KARDASHEV-SWARM TYPE II ACTIVATED[/]\n"
+                f"Protocol: [bold]Structural Collapse (O(N) → O(1))[/]\n"
+                f"Mission: [cyan]{target_mission}[/]\n"
+                f"Energy: [bold red]MAX EXERGY[/]",
+                border_style="#CCFF00",
+            )
+        )
+        
+        with console.status("[bold #CCFF00]Collapsing reality into architecture...[/]"):
+            result = asyncio.run(engine.engage(target_mission, formation=formation))
+            console.print("\n[bold green]✅ MISSION COLLAPSED[/]")
+        console.print(f"Status: [cyan]{result['status']}[/]")
+        console.print(f"Bridge: [white]{result['solution']}[/]")
+        console.print(f"Complexity: [bold #CCFF00]{result.get('reason', 'O(1)')}[/]")
+    else:
+        console.print(f"[red]Kardashev Type {type} is not yet implemented in this node.[/]")

@@ -9,10 +9,8 @@ Referenced by: AX-019 (Persist With Decay)
 
 from __future__ import annotations
 
-from typing import Optional
-
 # TTL in seconds. None = immortal.
-FACT_TTL: dict[str, Optional[int]] = {
+FACT_TTL: dict[str, int | None] = {
     "axiom": None,  # Immutable governance — never expires
     "decision": None,  # Append-only — architecture archaeology
     "error": 90 * 86_400,  # 90 days — if not referenced, decay
@@ -71,7 +69,7 @@ def is_tombstonable(fact_type: str, age_seconds: float) -> bool:
     return False
 
 
-def ttl_days(fact_type: str) -> Optional[int]:
+def ttl_days(fact_type: str) -> int | None:
     """Return the TTL in days for a fact type, or None if immortal."""
     ttl = FACT_TTL.get(fact_type)
     if ttl is None:

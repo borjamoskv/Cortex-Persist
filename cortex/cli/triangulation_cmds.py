@@ -1,5 +1,4 @@
 import asyncio
-from typing import Optional
 
 import click
 from rich.console import Console
@@ -24,7 +23,7 @@ _MAX_LOG_CHARS = 50_000
 async def _run_lens(
     name: str,
     prompt: str,
-) -> tuple[str, Optional[str]]:
+) -> tuple[str, str | None]:
     """Run a single diagnostic lens with timeout and error isolation."""
     # Axiom 4: Zero Trust. Never rely on a single model for diagnostics.
     async with SovereignLLM(timeout_seconds=_LENS_TIMEOUT_SECONDS, temperature=0.1) as llm:
@@ -39,7 +38,7 @@ async def _run_lens(
             return name, f"[ERROR] Lens '{name}' failed: {type(e).__name__}: {e}"
 
 
-async def _lens_information_theory(log_data: str) -> tuple[str, Optional[str]]:
+async def _lens_information_theory(log_data: str) -> tuple[str, str | None]:
     """Evaluates thermal noise, context window degradation, and entropy."""
     prompt = (
         "Analyze this log through INFORMATION THEORY. "
@@ -49,7 +48,7 @@ async def _lens_information_theory(log_data: str) -> tuple[str, Optional[str]]:
     return await _run_lens("information_theory", prompt)
 
 
-async def _lens_game_theory(log_data: str) -> tuple[str, Optional[str]]:
+async def _lens_game_theory(log_data: str) -> tuple[str, str | None]:
     """Evaluates perverse incentives and sub-agent misalignment."""
     prompt = (
         "Analyze this log through GAME THEORY. "
@@ -60,7 +59,7 @@ async def _lens_game_theory(log_data: str) -> tuple[str, Optional[str]]:
     return await _run_lens("game_theory", prompt)
 
 
-async def _lens_complex_systems(log_data: str) -> tuple[str, Optional[str]]:
+async def _lens_complex_systems(log_data: str) -> tuple[str, str | None]:
     """Evaluates emergent unpredictability from isolated simple rules."""
     prompt = (
         "Analyze this log through COMPLEX SYSTEMS THEORY. "

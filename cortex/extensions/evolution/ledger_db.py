@@ -142,7 +142,7 @@ class EvolutionLedgerDB:
         try:
             with db_connect(str(self.db_path)) as conn:
                 for name, val in metrics.items():
-                    value = float(val) if isinstance(val, (int, float)) else 0.0
+                    value = float(val) if isinstance(val, int | float) else 0.0
                     conn.execute(
                         """
                         INSERT INTO metrics (agent_id, metric_name, value, unit, timestamp)

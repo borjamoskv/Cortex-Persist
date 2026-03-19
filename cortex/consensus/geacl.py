@@ -14,7 +14,6 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from typing import Optional
 
 from cortex.consensus.byzantine import ByzantineVerdict, WBFTConsensus
 from cortex.extensions.ha.gossip import GossipProtocol
@@ -31,7 +30,7 @@ class GeaclCommitResult:
 
     success: bool
     verdict: ByzantineVerdict
-    action_digest: Optional[str]
+    action_digest: str | None
     domain: str
 
 
@@ -55,7 +54,7 @@ class GEACLCoordinator:
         intent: str,
         domain: str,
         responses: list[ModelResponse],
-        history: Optional[ThinkingHistory] = None,
+        history: ThinkingHistory | None = None,
     ) -> GeaclCommitResult:
         """
         Evaluate LLM responses using WBFT and propagate the decision context via Gossip.
