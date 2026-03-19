@@ -61,7 +61,10 @@ class _MCPContext:
     that owns its lifecycle.
     """
 
-    __slots__ = ("cfg", "metrics", "executor", "pool", "search_cache", "_initialized", "membrane")
+    __slots__ = (
+        "cfg", "metrics", "executor", "pool", "search_cache",
+        "_initialized", "membrane", "_ledger",
+    )
 
     def __init__(self, cfg: MCPServerConfig) -> None:
         self.cfg = cfg
@@ -71,6 +74,14 @@ class _MCPContext:
         self.search_cache = SimpleAsyncCache(maxsize=cfg.query_cache_size)
         self.membrane = ImmuneMembrane()
         self._initialized = False
+        self._ledger: ImmutableLedger | None = None
+
+    @property
+    def ledger(self) -> ImmutableLedger:
+        """Lazy singleton for ImmutableLedger — shared across all tools."""
+        if self._ledger is None:
+            self._ledger = ImmutableLedger(self.pool)  # type: ignore[reportArgumentType]
+        return self._ledger
 
     async def ensure_ready(self) -> None:
         if not self._initialized:
@@ -92,6 +103,7 @@ class _MCPContext:
         await self.pool.close()
         self.search_cache.clear()
         self._initialized = False
+        self._ledger = None
 
 
 # ─── Tool Registrators ───────────────────────────────────────────────
@@ -290,9 +302,8 @@ def _register_ledger_tool(
         """Perform a full integrity check on the CORTEX ledger."""
         await ctx.ensure_ready()
 
-        # ImmutableLedger expects a pool, not a single connection
-        ledger = ImmutableLedger(ctx.pool)  # type: ignore[reportArgumentType]
-        report = await ledger.verify_integrity_async()
+        # Use centralized ledger singleton (B5)
+        report = await ctx.ledger.verify_integrity_async()
 
         if report["valid"]:
             return (

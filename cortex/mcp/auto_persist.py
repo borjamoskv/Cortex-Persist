@@ -187,12 +187,21 @@ class AutoPersistHook:
         ids: list[int] = []
         for fact in facts:
             try:
+                # B4: Inject EU AI Act compliance metadata for decisions
+                tags: list[str] = []
+                if fact.fact_type == "decision":
+                    tags = [
+                        "eu_ai_act:auto",
+                        f"agent:{self.source}",
+                    ]
+
                 fact_id = await self.engine.store(
                     project=fact.project,
                     content=fact.content,
                     fact_type=fact.fact_type,
                     source=self.source,
                     confidence=fact.confidence,
+                    tags=tags if tags else None,
                 )
                 ids.append(fact_id)
                 logger.info(

@@ -8,7 +8,9 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
+
+from cortex.mcp.decorators import with_db
 
 if TYPE_CHECKING:
     from mcp.server.fastmcp import FastMCP
@@ -63,7 +65,9 @@ def register_confluence_tools(mcp: FastMCP, ctx: _MCPContext) -> None:
     """Register Confluence synchronization tools."""
 
     @mcp.tool()
+    @with_db(ctx)
     async def cortex_confluence_sync(
+        conn: Any,
         space_id: str,
         page_title: str = "CORTEX — EU AI Act Compliance Ledger",
     ) -> str:
@@ -78,16 +82,13 @@ def register_confluence_tools(mcp: FastMCP, ctx: _MCPContext) -> None:
         """
         # Note: Implementation logic delegated to CONFLUENCE-Ω agent
         # which uses cortex_compliance_report + atlassian-mcp-server tools.
-
-        async with ctx.pool.acquire() as conn:
-            # Helper to generate internal report text
-            report_text = await _generate_internal_report(conn, ctx)
-
+        report_text = await _generate_internal_report(conn, ctx)
         formatted_report = format_report_for_confluence(report_text)
         return formatted_report
 
 
-async def _generate_internal_report(conn, ctx) -> str:
+async def _generate_internal_report(conn: Any, ctx: Any) -> str:
     """Minimal version of the report generator logic."""
     # This is a placeholder for the actual extraction logic.
     return "Report content placeholder — Use CONFLUENCE-Ω agent to orchestrate."
+

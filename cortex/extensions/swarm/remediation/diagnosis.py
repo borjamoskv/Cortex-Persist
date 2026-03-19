@@ -34,6 +34,8 @@ VALID_FACT_TYPES = frozenset(
         "insight",
         "warning",
         "note",
+        "identity",
+        "knowledge",
     }
 )
 
@@ -51,6 +53,7 @@ LEGACY_TYPE_MAP = {
     "thought": "insight",
     "error": "warning",
     "log": "note",
+    "issue": "warning",
 }
 
 

@@ -21,6 +21,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import re
 from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 from typing import Any
@@ -30,7 +31,7 @@ import aiosqlite
 from cortex.agents.builtins.consignatario_agent import ConsignatarioAgent
 from cortex.agents.manifest import AgentManifest
 from cortex.database.core import connect_async_ctx
-from cortex.extensions.git.poet import CommitPoet
+from cortex.engine.poet import CommitPoet
 from cortex.extensions.swarm.remediation.blue_team import BLUE_TEAM
 from cortex.extensions.swarm.remediation.diagnosis import (
     Diagnosis,
@@ -42,6 +43,49 @@ from cortex.ledger.store import LedgerStore
 from cortex.ledger.writer import LedgerWriter
 
 logger = logging.getLogger("cortex.swarm.remediation.engine")
+
+
+def _apply_fix_in_memory(
+    fact: dict[str, Any],
+    fix_sql: str | None,
+    fix_params: tuple | None,
+) -> dict[str, Any]:
+    """Simulate SQL UPDATE on a fact dict without DB write.
+
+    Parses the fix_sql to extract column assignments and applies
+    the corresponding fix_params values to the dict. This allows
+    Red Team to validate the post-fix state before the actual
+    SQL is committed.
+
+    If fix_sql is None or unparseable, returns the original dict
+    unchanged (fail-safe: Red validates pre-fix state as before).
+    """
+    if not fix_sql or not fix_params:
+        return fact
+
+    result = dict(fact)
+
+    # Parse "UPDATE facts SET col1 = ?, col2 = ? WHERE id = ?"
+    match = re.match(
+        r"UPDATE\s+\w+\s+SET\s+(.+?)\s+WHERE",
+        fix_sql,
+        re.IGNORECASE,
+    )
+    if not match:
+        return fact
+
+    assignments = match.group(1)
+    cols = [
+        a.strip().split("=")[0].strip()
+        for a in assignments.split(",")
+    ]
+
+    # Last param is typically the WHERE id = ? value
+    value_params = fix_params[: len(cols)]
+    for col, val in zip(cols, value_params, strict=False):
+        result[col] = val
+
+    return result
 
 
 @dataclass
@@ -320,13 +364,24 @@ class LegionRemediationEngine:
             }
 
         # 2. Red Team Siege (B1: parallel specialists)
-        cursor = await read_db.execute("SELECT * FROM facts WHERE id = ?", (fact_id,))
+        cursor = await read_db.execute(
+            "SELECT * FROM facts WHERE id = ?", (fact_id,)
+        )
         fact_row = await cursor.fetchone()
         fact_dict = dict(fact_row) if fact_row else {}
 
+        # C1: Simulate post-fix state for Red Team validation.
+        # Without this, Red validates pre-fix state (the defect
+        # itself) and always rejects.
+        simulated_fact = _apply_fix_in_memory(
+            fact_dict, diag.fix_sql, diag.fix_params
+        )
+
         red_battalion = RED_TEAM.get(battalion_id)
         if not red_battalion:
-            logger.warning("No Red battalion for %s", battalion_id)
+            logger.warning(
+                "No Red battalion for %s", battalion_id
+            )
             return {
                 "diag": diag,
                 "blue": blue_result,
@@ -338,7 +393,9 @@ class LegionRemediationEngine:
         parts = blue_agent.agent_id.split("-")
         red_idx = int(parts[2]) - 1
         red_agent = red_battalion.agents[red_idx]
-        siege_results = await red_agent.siege(fact_dict, blue_result, read_db)
+        siege_results = await red_agent.siege(
+            simulated_fact, blue_result, read_db
+        )
 
         passed = all(sr.passed for sr in siege_results)
         return {

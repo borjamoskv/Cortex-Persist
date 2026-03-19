@@ -10,7 +10,7 @@ import logging
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any
 
-from cortex.engine.ledger import ImmutableLedger
+from cortex.compliance.evaluator import ComplianceEvaluator
 from cortex.mcp.decorators import with_db
 
 if TYPE_CHECKING:
@@ -89,8 +89,7 @@ def _register_compliance_report(mcp: FastMCP, ctx: _MCPContext) -> None:
         )
         agent_rows = await cursor.fetchall()
         agents = _extract_agents_from_rows(agent_rows)  # type: ignore[reportArgumentType]
-        ledger = ImmutableLedger(ctx.pool)  # type: ignore[reportArgumentType]
-        integrity = await ledger.verify_integrity_async()
+        integrity = await ctx.ledger.verify_integrity_async()
 
         now = datetime.now(timezone.utc).isoformat()
 
@@ -130,8 +129,6 @@ def _register_compliance_report(mcp: FastMCP, ctx: _MCPContext) -> None:
             if time_range[0] is not None
             else {},
         }
-
-        from cortex.compliance.evaluator import ComplianceEvaluator
 
         checks = ComplianceEvaluator.evaluate(integrity, facts_summary)
 
