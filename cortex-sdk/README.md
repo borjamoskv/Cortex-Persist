@@ -1,13 +1,14 @@
-# cortex-persist
+# cortex-persist-client
 
-> **Give your AI agent a brain that remembers.**
+> **HTTP client for the CORTEX Persist API.**
+> For the self-hosted engine, see the root package (`cortex-persist`).
 
-Persistent memory infrastructure for AI agents. Store, search, and verify memories with semantic search and cryptographic integrity.
+Python client for the CORTEX Persist REST API. Store, search, and verify agent memories with semantic search and cryptographic integrity.
 
 ## Install
 
 ```bash
-pip install cortex-persist
+pip install cortex-persist-client
 ```
 
 ## Quickstart

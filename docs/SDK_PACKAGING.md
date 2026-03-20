@@ -7,20 +7,14 @@
 | Directorio | Package name | Versión | Scope | Build backend |
 |:-----------|:-------------|:--------|:------|:--------------|
 | `/` (raíz) | `cortex-persist` | `0.3.0b2` | **Engine completo** — ledger, memory, guards, CLI, API, daemon | setuptools |
-| `cortex-sdk/` | `cortex-persist` | `0.1.0` | **Cliente HTTP** — thin wrapper sobre la REST API | setuptools legacy |
+| `cortex-sdk/` | `cortex-persist-client` ✅ | `0.1.0` | **Cliente HTTP** — thin wrapper sobre la REST API | setuptools legacy |
 | `sdks/python/` | `cortex-persist-sdk` | `0.1.0` | **Cliente HTTP** — zero dependencies, hatchling | hatchling |
 
-## Problema identificado: colisión de nombre
+## Colisión de nombre — RESUELTA ✅
 
-`cortex-sdk/pyproject.toml` declara `name = "cortex-persist"` — **mismo nombre que el paquete raíz**.
-Si ambos se publican en PyPI, el último en publicar sobreescribe al primero.
+`cortex-sdk/pyproject.toml` fue renombrado de `cortex-persist` → `cortex-persist-client`.
+La colisión con el engine está eliminada. Árbol de publicación PyPI limpio:
 
-**Diagnóstico:**
-- `cortex-sdk/` es una iteración anterior de cliente HTTP. Usa `httpx>=0.25` como única dependencia.
-- `sdks/python/` es la iteración actual: nombre correcto (`cortex-persist-sdk`), build backend moderno (hatchling), cero dependencias.
-- `cortex-sdk/` está **superseded** por `sdks/python/`.
-
-## Resolución recomendada
 
 ```
 cortex-sdk/ → DEPRECATED (no publicar)
