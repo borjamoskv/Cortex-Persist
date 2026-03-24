@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from fastapi import Depends, Header, HTTPException, Request
 
@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 async def require_auth(
     request: Request,
-    authorization: Optional[str] = Header(
+    authorization: str | None = Header(
         None,
         description="Bearer <api-key>",
     ),
@@ -97,25 +97,31 @@ def require_permission(permission: str | Permission):
 async def require_consensus(
     claim: str,
     min_score: float = 1.6,
-    engine: Any = Depends(lambda: None),
+    engine: Any = None,
 ) -> bool:
     """Verify a claim has reached sufficient consensus.
 
     Used for 'Sovereign Gate' high-stakes authorizations.
     """
     if engine is None:
-        from cortex.api.deps import get_async_engine
+        raise ValueError("engine must be provided to require_consensus")
 
-        async for e in get_async_engine():  # type: ignore[reportCallIssue]
-            engine = e
-            break
-
-    facts = await engine.recall(query=claim, limit=1)
+    facts = await engine.search(query=claim, top_k=1)
     if not facts:
         return False
 
     fact = facts[0]
-    score = fact.get("consensus_score", 0.0)
+    score: float = 0.0
+    if hasattr(fact, "meta") and isinstance(fact.meta, dict):
+        score = float(fact.meta.get("consensus_score", 0.0) or 0.0)
+    elif isinstance(fact, dict):
+        score = float(
+            fact.get("consensus_score")
+            or (fact.get("metadata") or {}).get("consensus_score")
+            or 0.0
+        )
+    else:
+        score = float(getattr(fact, "consensus_score", 0.0) or 0.0)
 
     if score < min_score:
         logger.warning(
@@ -150,16 +156,16 @@ def require_verified_permission(
 
         from cortex.api.deps import get_async_engine
 
-        async for engine in get_async_engine():  # type: ignore[reportCallIssue]
-            has_consensus = await require_consensus(
-                f"Permission {permission} granted to {auth.key_name or auth.tenant_id}",
-                min_score=min_consensus,
-                engine=engine,
-            )
-            if not has_consensus:
-                detail = f"Sovereign Gate: Action requires consensus (min: {min_consensus})"
-                raise HTTPException(status_code=403, detail=detail)
-            break
+        engine = get_async_engine(request)
+
+        has_consensus = await require_consensus(
+            f"Permission {permission} granted to {auth.key_name or auth.tenant_id}",
+            min_score=min_consensus,
+            engine=engine,
+        )
+        if not has_consensus:
+            detail = f"Sovereign Gate: Action requires consensus (min: {min_consensus})"
+            raise HTTPException(status_code=403, detail=detail)
 
         return auth
 

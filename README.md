@@ -53,18 +53,18 @@ Unverified state is unacceptable. Watch CORTEX annihilate a $50k transaction mut
 $ cortex init
 
 # Seal a high-risk financial decision into the Ledger
-$ cortex memory store --agent "treasury-phi" --content "EXECUTED: Transfer $500.00 to Auth-Wallet-A"
+$ cortex store treasury-phi "EXECUTED: Transfer $500.00 to Auth-Wallet-A" --type decision
 [+] Fact sealed. Block: 8f4a2b9e... [LIME ACTIVE]
 
-# Verify cryptographical continuity
-$ cortex verify record 8f4a2b9e
+# Verify cryptographical continuity of the fact
+$ cortex verify 8f4a2b9e
 [✔] VERIFIED: Hash chain intact. Merkle root valid.
 
 # External Threat: Unauthorized DB mutation via SQL Injection
 $ sqlite3 cortex.db "UPDATE facts SET content='EXECUTED: Transfer $50,000.00 to Auth-Wallet-A' WHERE id='8f4a2b9e'"
 
-# Sovereign Audit Execution
-$ cortex verify ledger
+# Sovereign Audit Execution of the whole ledger
+$ cortex ledger verify
 [✘] INFRA-GHOST DETECTED: Temporal Hash mismatch at block 8f4a2b9e.
 [!] SYSTEM LOCKOUT: Cryptographic continuity broken (Unauthorized Write).
 ```

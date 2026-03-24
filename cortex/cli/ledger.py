@@ -57,13 +57,45 @@ def create_checkpoint(db):
                 conn = await engine.get_conn()
                 ledger_inst = SovereignLedger(conn)  # type: ignore[reportArgumentType]
 
-            root_id = await ledger_inst.create_checkpoint_async()
+            root_id = await ledger_inst.create_checkpoint()
             if root_id:
                 console.print(
                     f"[bold green]Checkpoint created successfully.[/bold green] ID: {root_id}"
                 )
             else:
                 console.print("[yellow]No new transactions to checkpoint.[/yellow]")
+        finally:
+            await engine.close()
+
+    _run_async(_run())
+
+
+@ledger_cmds.command("record")
+@click.option("--project", required=True, help="Project identifier.")
+@click.option("--action", required=True, help="Action name.")
+@click.option("--detail", required=True, help="JSON-formatted detail.")
+@click.option("--db", default=DEFAULT_DB, help="Database path.")
+def record_transaction(project, action, detail, db):
+    """Record a manual transaction in the ledger."""
+    import json
+
+    async def _run():
+        engine = get_engine(db)
+        try:
+            await engine.init_db()
+            det = json.loads(detail)
+            
+            # Use engine's ledger if it exists, otherwise create one
+            ledger_inst = getattr(engine, "_ledger", None)
+            if not ledger_inst:
+                from cortex.engine.ledger import SovereignLedger
+                conn = await engine.get_conn()
+                ledger_inst = SovereignLedger(conn)
+
+            h = await ledger_inst.record_transaction(project, action, det)
+            console.print(f"[bold green]Transaction recorded.[/] Hash: [dim]{h}[/]")
+        except json.JSONDecodeError:
+            console.print("[bold red]Error:[/] 'detail' must be a valid JSON string.")
         finally:
             await engine.close()
 

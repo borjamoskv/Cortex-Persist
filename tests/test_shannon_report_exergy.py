@@ -7,6 +7,7 @@ exergy evidence, not just entropy measurements.
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock, patch
+from decimal import Decimal
 
 import pytest
 
@@ -79,7 +80,7 @@ async def test_analyze_includes_exergy_report():
     }
     assert required_keys <= set(er.keys()), f"Missing keys: {required_keys - set(er.keys())}"
     for k, v in er.items():
-        assert isinstance(v, (int, float)), f"{k} should be numeric, got {type(v)}"
+        assert isinstance(v, (int, float, Decimal)), f"{k} should be numeric, got {type(v)}"
 
 
 @pytest.mark.asyncio
@@ -93,7 +94,7 @@ async def test_analyze_includes_dead_weight_bits():
         result = await report.analyze(engine_mock)
 
     assert "dead_weight_bits" in result
-    assert isinstance(result["dead_weight_bits"], float)
+    assert isinstance(result["dead_weight_bits"], (float, Decimal))
     assert result["dead_weight_bits"] >= 0.0
 
 

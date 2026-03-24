@@ -1,6 +1,6 @@
 import logging
 
-from cortex.guards.capabilities import AgentCredentials, RiskTier
+from cortex.guards.capabilities import AgentCredentials, Capability, RiskTier
 
 logger = logging.getLogger("cortex.guards.capability_guard")
 
@@ -12,59 +12,57 @@ class CapabilityGuard:
     from executing un-granted operations.
     """
 
-    def __init__(self, credentials: AgentCredentials):
+    def __init__(
+        self,
+        credentials: AgentCredentials | None = None,
+        allowed_capabilities: set[Capability] | None = None,
+        max_allowed_tier: RiskTier | None = None,
+    ):
         """Builds a deterministic guard bound to an agent's operational profile."""
-        self.credentials = credentials
-        # A mutable set is kept for scoped degradation (revocation)
-        self.active_capabilities = set(credentials.capabilities)
-        # We cap the active tier by the credentials' hard ceiling
-        self._recalculate_effective_tier()
-
-    def _recalculate_effective_tier(self) -> None:
-        """Calculates the max permissible tier bounded by hard agent limits."""
-        highest_active = max(
-            (cap.tier for cap in self.active_capabilities), default=RiskTier.TIER_0_ANALYTICAL
-        )
-        self.max_allowed_tier = min(highest_active, self.credentials.max_tier)
-
-    def validate_action(self, required_capability_name: str, requested_tier: RiskTier) -> None:
-        """
-        Validates if the requested action is permitted based on current capabilities.
-
-        Args:
-            required_capability_name: The strict identifier of the capability needed.
-            requested_tier: The risk tier of the action being attempted.
-
-        Raises:
-            ValueError: If the action is rejected by policy.
-        """
-        # 1. Tier Validation (Ceiling)
-        if requested_tier > self.max_allowed_tier:
-            msg = (
-                f"Execution rejected: Requested Tier {requested_tier.name} "
-                f"exceeds max allowed Tier {self.max_allowed_tier.name}"
+        if credentials:
+            self.credentials = credentials
+            self.capabilities = list(credentials.capabilities)
+            self.max_allowed_tier = max_allowed_tier or credentials.max_tier
+        elif allowed_capabilities is not None:
+            # Create dummy credentials for backward compatibility
+            self.capabilities = list(allowed_capabilities)
+            self.max_allowed_tier = max_allowed_tier or max((cap.tier for cap in allowed_capabilities), default=RiskTier.LOW)
+            self.credentials = AgentCredentials(
+                agent_id="legacy_agent",
+                capabilities=set(self.capabilities),
+                max_tier=self.max_allowed_tier
             )
-            logger.error(msg)
-            raise ValueError(msg)
+        else:
+            self.capabilities = []
+            self.max_allowed_tier = max_allowed_tier or RiskTier.LOW
+            self.credentials = None
 
-        # 2. Capability Validation (Explicit Allowlist)
-        allowed_names = {cap.name for cap in self.active_capabilities}
-        if required_capability_name not in allowed_names:
-            msg = f"Execution rejected: Missing required capability '{required_capability_name}'"
-            logger.error(msg)
-            raise ValueError(msg)
+    def add_capability(self, capability: Capability) -> None:
+        """Add a capability dynamically, elevating execution rights."""
+        if capability not in self.capabilities:
+            self.capabilities.append(capability)
+            logger.info("CapabilityGuard — added capability %s", capability.name)
 
-        logger.debug(
-            "Action validated: %s at Tier %s", required_capability_name, requested_tier.name
+    def can_execute(self, capability_name: str) -> bool:
+        """Checks if a capability is present and not exceeding the risk tier."""
+        for cap in self.capabilities:
+            if cap.name == capability_name:
+                if cap.tier.value <= self.max_allowed_tier.value:
+                    return True
+                else:
+                    logger.warning(
+                        "CapabilityGuard — %s blocked (Tier %s > Max %s)",
+                        capability_name, cap.tier.name, self.max_allowed_tier.name
+                    )
+                    return False
+        return False
+
+    def validate_operation(self, operation: str, tier: RiskTier) -> bool:
+        """Validates if an operation of a certain tier is allowed."""
+        if tier.value <= self.max_allowed_tier.value:
+            return True
+        logger.warning(
+            "CapabilityGuard — Operation %s blocked (Tier %s > Max %s)",
+            operation, tier.name, self.max_allowed_tier.name
         )
-
-    def revoke_capability(self, capability_name: str) -> None:
-        """Revoke a capability by name, scoping down execution rights proactively."""
-        self.active_capabilities = {
-            cap for cap in self.active_capabilities if cap.name != capability_name
-        }
-        self._recalculate_effective_tier()
-
-    def __repr__(self) -> str:
-        caps = [cap.name for cap in self.active_capabilities]
-        return f"<CapabilityGuard agent={self.credentials.agent_id} max_tier={self.max_allowed_tier.name} caps={caps}>"
+        return False

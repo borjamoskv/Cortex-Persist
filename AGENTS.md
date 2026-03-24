@@ -3,7 +3,7 @@
 Trust infrastructure for autonomous AI:
 cryptographic verification, audit trails, epistemic containment, and agent memory.
 
-Package: cortex-persist v0.3.0b1
+Package: cortex-persist v0.3.1-b1
 Engine: v8
 License: Apache-2.0
 Python: >=3.10

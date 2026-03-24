@@ -5,7 +5,7 @@ import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 import aiosqlite
 
@@ -59,7 +59,7 @@ class LedgerEvent:
     status: EpistemicStatus
     trust_score: float
     created_at: str
-    last_revalidated_at: Optional[str] = None
+    last_revalidated_at: str | None = None
     tainted: bool = False
 
 
@@ -235,6 +235,21 @@ class AsyncCausalGraph:
                         visited.add(child_id)
                         queue.append((child_id, depth + 1))
 
+        # Record to Ledger (Ω₃)
+        if len(changes) > 0:
+            from cortex.engine.ledger import SovereignLedger
+            ledger = SovereignLedger(self.conn)
+            await ledger.record_transaction(
+                project=project,
+                action="propagate_taint",
+                detail={
+                    "source_fact_id": fact_id,
+                    "affected_count": len(changes),
+                    "changes": changes,
+                },
+                tenant_id=tenant_id,
+            )
+
         return TaintReport(
             source_fact_id=fact_id,
             affected_count=len(changes),
@@ -267,8 +282,8 @@ class AsyncCausalOracle:
 
     @staticmethod
     async def find_parent_signal(
-        conn: aiosqlite.Connection, project: Optional[str] = None
-    ) -> Optional[int]:
+        conn: aiosqlite.Connection, project: str | None = None
+    ) -> int | None:
         """Finds the most recent unconsumed causal signal."""
         try:
             bus = AsyncSignalBus(conn)
@@ -285,7 +300,7 @@ class CausalOracle:
     """Interprets the Signal Bus to find the parent of a fact (sync)."""
 
     @staticmethod
-    def find_parent_signal(db_path: str, project: Optional[str] = None) -> Optional[int]:
+    def find_parent_signal(db_path: str, project: str | None = None) -> int | None:
         """Finds the most recent unconsumed causal signal."""
         import sqlite3
 
@@ -301,10 +316,44 @@ class CausalOracle:
         return None
 
 
-def link_causality(meta: Optional[dict[str, Any]], signal_id: Optional[int]) -> dict[str, Any]:
+def link_causality(meta: dict[str, Any] | None, signal_id: int | None) -> dict[str, Any]:
     """Attaches causal metadata to a fact's meta dictionary."""
     m = meta or {}
     if signal_id:
         m["causal_parent"] = signal_id
         m["axiomatic_integrity"] = "Ω₁"
     return m
+
+
+class EpisodicSealer:
+    """
+    The Ω-Anamnesis Sealer.
+    Rescues context from the Shadow Key (Hydra) and seals it into the Ledger.
+    """
+
+    def __init__(self, ledger: Any):
+        self.ledger = ledger
+
+    async def seal_context(self, agent_key: str, data: dict[str, Any], metadata: dict[str, Any]) -> None:
+        """
+        Record the eviction event in the Sovereign Ledger.
+        Metadata contains the cryptographic proof (current_proof) and previous hash.
+        """
+        project = metadata.get("project", "CORTEX_SYSTEM")
+        tenant_id = metadata.get("tenant_id", "default")
+        
+        # We seal context as a 'compaction' event in the ledger
+        # This allows future retrieval for 'Historical Context Recovery'
+        await self.ledger.record_transaction(
+            project=project,
+            action="anamnesis_seal",
+            detail={
+                "agent_key": agent_key,
+                "data_summary": f"Eviction of {len(json.dumps(data))} bytes",
+                "proof": metadata.get("current_proof"),
+                "sequence": metadata.get("sequence"),
+                "event_type": metadata.get("event_type", "EVICTION")
+            },
+            tenant_id=tenant_id
+        )
+        logger.info("🎬 [Ω-ANAMNESIS] Sealed episodic memory for %s", agent_key)

@@ -11,7 +11,6 @@ from .merkle import MerkleTree
 
 logger = logging.getLogger(__name__)
 
-
 class SovereignLedger:
     """
     The Custodian of Immutable History (CORTEX Wave 5).
@@ -56,15 +55,15 @@ class SovereignLedger:
         prev_hash = self._get_last_hash()
         timestamp = datetime.now(timezone.utc).isoformat()
         detail_json = json.dumps(detail, sort_keys=True, default=str)
-
+        
         # Chain hash: sha256(prev_hash + timestamp + detail)
         payload = f"{prev_hash}{timestamp}{detail_json}"
         new_hash = hashlib.sha256(payload.encode()).hexdigest()
-
+        
         try:
             self.conn.execute(
                 "INSERT INTO transactions (timestamp, project, action, detail, prev_hash, hash) VALUES (?, ?, ?, ?, ?, ?)",
-                (timestamp, project, action, detail_json, prev_hash, new_hash),
+                (timestamp, project, action, detail_json, prev_hash, new_hash)
             )
             self.conn.commit()
             return new_hash
@@ -80,7 +79,7 @@ class SovereignLedger:
             query += " WHERE project = ?"
             params.append(project)
         query += " ORDER BY id ASC"
-
+        
         cursor = self.conn.execute(query, params)
         return cursor.fetchall()
 
@@ -88,59 +87,50 @@ class SovereignLedger:
         """Generate a Merkle Root for recent transactions to anchor history."""
         cursor = self.conn.execute("SELECT MAX(tx_end_id) FROM merkle_roots")
         last_covered = cursor.fetchone()[0] or 0
-
+        
         cursor = self.conn.execute(
             "SELECT id, hash FROM transactions WHERE id > ? ORDER BY id ASC LIMIT ?",
-            (last_covered, batch_size),
+            (last_covered, batch_size)
         )
         rows = cursor.fetchall()
-
+        
         if not rows:
             return None
-
+            
         tx_hashes = [r[1] for r in rows]
         start_id = rows[0][0]
         end_id = rows[-1][0]
-
+        
         tree = MerkleTree(tx_hashes)
         root_hash = tree.root_hash
-
+        
         if root_hash:
             self.conn.execute(
                 "INSERT INTO merkle_roots (timestamp, tx_start_id, tx_end_id, root_hash) VALUES (?, ?, ?, ?)",
-                (datetime.now(timezone.utc).isoformat(), start_id, end_id, root_hash),
+                (datetime.now(timezone.utc).isoformat(), start_id, end_id, root_hash)
             )
             self.conn.commit()
-
+            
         return root_hash
 
     def audit_integrity(self) -> bool:
         """Perform a full cryptographic audit of the chain."""
-        cursor = self.conn.execute(
-            "SELECT id, prev_hash, timestamp, detail, hash FROM transactions ORDER BY id ASC"
-        )
+        cursor = self.conn.execute("SELECT id, prev_hash, timestamp, detail, hash FROM transactions ORDER BY id ASC")
         rows = cursor.fetchall()
-
+        
         current_prev = "0" * 64
         for row_id, prev_hash, ts, detail, h in rows:
             if prev_hash != current_prev:
-                logger.error(
-                    "Chain broken at ID %d: Expected prev_hash %s, found %s",
-                    row_id,
-                    current_prev,
-                    prev_hash,
-                )
+                logger.error("Chain broken at ID %d: Expected prev_hash %s, found %s", row_id, current_prev, prev_hash)
                 return False
-
+            
             # Recompute hash
             payload = f"{prev_hash}{ts}{detail}"
             expected_hash = hashlib.sha256(payload.encode()).hexdigest()
             if h != expected_hash:
-                logger.error(
-                    "Hash mismatch at ID %d: Recomputed %s, stored %s", row_id, expected_hash, h
-                )
+                logger.error("Hash mismatch at ID %d: Recomputed %s, stored %s", row_id, expected_hash, h)
                 return False
-
+            
             current_prev = h
-
+            
         return True

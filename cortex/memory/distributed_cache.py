@@ -213,15 +213,25 @@ class DistributedSovereignCache:
 
     async def put(self, key: str, data: dict[str, Any], ttl: int = _DEFAULT_TTL_SECONDS) -> bool:
         """
-        Standard store + initial 'PUT' logging in stream.
+        Store context in Shadow Key (Data) and set a Trigger Key (Alarm).
+        Ω-Anamnesis: The Shadow Key has a massive grace period (or none if needed)
+        to allow the Sealer to rescue the data after Trigger expiration.
         """
         try:
             shadow_key = f"{_SHADOW_KEY_PREFIX}{key}"
             trigger_key = f"{_TRIGGER_KEY_PREFIX}{key}"
             serialized = json.dumps(data, sort_keys=True)
 
+            # Ω-Anamnesis: Shadow Key lives 24h longer than the trigger by default
+            # to ensure the sidecar/handoff has plenty of time to seal it even under load.
+            shadow_ttl = ttl + 86400 if ttl > 0 else 0 
+
             async with self._r.pipeline(transaction=True) as pipe:
-                pipe.set(shadow_key, serialized, ex=ttl + 60)
+                if shadow_ttl > 0:
+                    pipe.set(shadow_key, serialized, ex=shadow_ttl)
+                else:
+                    pipe.set(shadow_key, serialized)
+                
                 pipe.set(trigger_key, "1", ex=ttl)
                 await async_interceptor(self.chaos_gate, pipe.execute)
 
@@ -330,8 +340,9 @@ class DistributedSovereignCache:
                 # Atomically advances chain and logs to stream.
                 await self._reliable_advance_chain(agent_key, payload, "EVICTION")
 
-                # Cleanup shadow
-                await async_interceptor(self.chaos_gate, self._r.delete, shadow_key)
+                # Ω-Anamnesis: WE DO NOT DELETE the shadow_key here.
+                # The Auditor (consumer) will delete it after successful sealing.
+                logger.debug("👻 [HYDRA HANDOFF] Moved %s to audit stream.", agent_key)
 
         except asyncio.CancelledError:
             await pubsub.unsubscribe()
@@ -395,8 +406,12 @@ class DistributedSovereignCache:
                 # 2. Persist to DB (The Callback)
                 if self._audit_callback:
                     try:
-                        # Data in stream already has the proofs calculated by Lua
                         await self._audit_callback(agent_key, {}, data)
+                        
+                        # Ω-Anamnesis: Manual invalidation of the Shadow Key now that it's sealed.
+                        shadow_key = f"{_SHADOW_KEY_PREFIX}{agent_key}"
+                        await async_interceptor(self.chaos_gate, self._r.delete, shadow_key)
+
                         # 3. Acknowledge (Safe now)
                         await async_interceptor(
                             self.chaos_gate,
@@ -406,7 +421,7 @@ class DistributedSovereignCache:
                             msg_id,
                         )
                         logger.info(
-                            "✅ [HYDRA AUDIT] ACKed %s proof=%s",
+                            "✅ [HYDRA AUDIT] SEALED & ACKed %s proof=%s",
                             agent_key,
                             data["current_proof"][:8],
                         )

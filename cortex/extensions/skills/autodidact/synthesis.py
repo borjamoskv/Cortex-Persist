@@ -13,7 +13,7 @@ import logging
 import os
 import re
 import time
-from typing import Any, Optional
+from typing import Any
 
 from cortex.extensions.llm._models import CortexPrompt
 from cortex.extensions.llm.provider import LLMProvider
@@ -58,7 +58,7 @@ encode_engine = AsyncEncoder()
 vector_db = SovereignVectorStoreL2(encoder=encode_engine)
 
 # Lazy singleton — built on first use
-_synthesis_router: Optional[CortexLLMRouter] = None
+_synthesis_router: CortexLLMRouter | None = None
 
 
 def _get_synthesis_router() -> CortexLLMRouter:
@@ -71,7 +71,7 @@ def _get_synthesis_router() -> CortexLLMRouter:
     if _synthesis_router is not None:
         return _synthesis_router
 
-    primary: Optional[LLMProvider] = None
+    primary: LLMProvider | None = None
     fallbacks: list[LLMProvider] = []
 
     for name in _SYNTHESIS_PROVIDERS:
@@ -109,11 +109,13 @@ async def generate_cortex_embedding(text: str) -> list[float]:
     return await encode_engine.encode(text)
 
 
-async def check_semantic_redundancy(text_snippet: str) -> Optional[tuple[bool, str]]:
+async def check_semantic_redundancy(text_snippet: str) -> tuple[bool, str | None]:
     """Axioma Ω₂: Si ya sabemos esto, aniquilamos la operación."""
     try:
+        query_str: str = str(text_snippet)
+        query_limit = query_str[:1000]
         nearest = await vector_db.recall(
-            query=text_snippet[:1000],
+            query=query_limit,
             limit=1,
             project="autodidact_knowledge",
             tenant_id="sovereign",
@@ -123,7 +125,7 @@ async def check_semantic_redundancy(text_snippet: str) -> Optional[tuple[bool, s
             if similitud > ISOTHERMAL_THRESHOLD:
                 msg = f"🛡️ [ENTROPIC SHIELD] ❄️ Zona Isoterma Alcanzada (ΔS={similitud:.4f})."
                 logger.warning(msg)
-                return True, nearest[0].id
+                return True, str(nearest[0].id)
     except Exception as e:  # noqa: BLE001 — redundancy check failure must not crash synthesis
         logger.error("Error checking redundancy L2: %s", e)
 

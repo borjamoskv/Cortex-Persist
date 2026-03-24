@@ -33,6 +33,8 @@ cortex_theme = Theme(
         "noir.gold": "bold #D4AF37",
         "noir.violet": "bold #6600FF",
         "noir.yinmn": "bold #2E5090",
+        "noir.blueylb": "bold #2B3BE5",  # Sovereign Blue Accent
+        "noir.high": "bold #FAFAFA",   # High Contrast White
     }
 )
 

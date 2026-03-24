@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from cortex.guards.thermodynamic import ThermodynamicCounters, should_enter_decorative_mode
 
 
@@ -15,7 +17,10 @@ def test_decorative_mode_triggers():
     assert "file_reads_without_ast_delta>=5" in reasons
 
     # context expansion > reduction -> triggering
-    c3 = ThermodynamicCounters(context_expansion_rate=0.5, uncertainty_reduction_rate=0.1)
+    c3 = ThermodynamicCounters(
+        context_expansion_rate=Decimal("0.5"), 
+        uncertainty_reduction_rate=Decimal("0.1")
+    )
     triggered, reasons = should_enter_decorative_mode(c3)
     assert triggered
     assert "context_expansion_rate>uncertainty_reduction_rate" in reasons
@@ -25,8 +30,8 @@ def test_not_decorative():
     c = ThermodynamicCounters(
         consecutive_tool_fails_without_new_hypothesis=1,
         file_reads_without_ast_delta=2,
-        context_expansion_rate=0.1,
-        uncertainty_reduction_rate=0.5,
+        context_expansion_rate=Decimal("0.1"),
+        uncertainty_reduction_rate=Decimal("0.5"),
     )
     triggered, reasons = should_enter_decorative_mode(c)
     assert not triggered

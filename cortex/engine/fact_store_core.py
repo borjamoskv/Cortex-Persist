@@ -8,7 +8,7 @@ from __future__ import annotations
 import json
 import logging
 import sqlite3
-from typing import Any, Optional
+from typing import Any
 
 import aiosqlite
 
@@ -26,13 +26,13 @@ async def insert_fact_record(
     project: str,
     content: str,
     fact_type: str,
-    tags: Optional[list[str]],
+    tags: list[str] | None,
     confidence: str,
-    ts: Optional[str],
-    source: Optional[str],
-    meta: Optional[dict[str, Any]],
-    tx_id: Optional[int],
-    parent_decision_id: Optional[int] = None,
+    ts: str | None,
+    source: str | None,
+    meta: dict[str, Any] | None,
+    tx_id: int | None,
+    parent_decision_id: int | None = None,
 ) -> int:
     """Perform the actual SQL insert into the facts table."""
     from cortex.crypto import get_default_encrypter
@@ -45,8 +45,8 @@ async def insert_fact_record(
     enc = get_default_encrypter()
     encrypted_content = enc.encrypt_str(content, tenant_id=tenant_id)
 
-    sig_b64: Optional[str] = None
-    pub_b64: Optional[str] = None
+    sig_b64: str | None = None
+    pub_b64: str | None = None
     try:
         signer = get_default_signer()
         if signer and signer.can_sign:
@@ -166,8 +166,10 @@ async def insert_fact_record(
                 (fact_id, parent_decision_id, EDGE_DERIVED_FROM, project, tenant_id),
             )
 
-    except (ImportError, Exception) as e:  # noqa: BLE001
-        logger.debug("Causal edge recording skipped for fact %d: %s", fact_id, e)
+    except aiosqlite.Error as e:
+        logger.debug("Database error during causal edge recording: %s", e)
+    except Exception:
+        logger.exception("Unexpected error during causal edge recording")
 
     # Graph Extraction
 
@@ -181,7 +183,7 @@ async def insert_fact_record(
 
 
 async def resolve_causality_async(
-    conn: aiosqlite.Connection, project: str, meta: Optional[dict[str, Any]]
+    conn: aiosqlite.Connection, project: str, meta: dict[str, Any] | None
 ) -> dict[str, Any]:
     """Resolve causal linking for a fact asynchronously.
 
@@ -196,7 +198,7 @@ async def resolve_causality_async(
 
 
 def resolve_causality(
-    db_path: Optional[str], project: str, meta: Optional[dict[str, Any]]
+    db_path: str | None, project: str, meta: dict[str, Any] | None
 ) -> dict[str, Any]:
     """Resolve causal linking for a fact (sync)."""
     from cortex.engine.causality import CausalOracle, link_causality

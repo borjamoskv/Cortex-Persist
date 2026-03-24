@@ -225,7 +225,7 @@ class TestHandoffV13:
         import re
         from pathlib import Path
 
-        src = Path("cortex/agents/handoff.py").read_text(encoding="utf-8")
+        src = Path("cortex/extensions/agents/handoff.py").read_text(encoding="utf-8")
         match = re.search(r'HANDOFF_VERSION\s*=\s*"([\d\.]+)"', src)
         assert match is not None, "HANDOFF_VERSION not found in handoff.py"
         assert match.group(1) == "1.3"
@@ -234,5 +234,5 @@ class TestHandoffV13:
         """Verify cognitive_fingerprint key was added to generate_handoff."""
         from pathlib import Path
 
-        src = Path("cortex/agents/handoff.py").read_text(encoding="utf-8")
+        src = Path("cortex/extensions/agents/handoff.py").read_text(encoding="utf-8")
         assert '"cognitive_fingerprint"' in src, "cognitive_fingerprint section missing"

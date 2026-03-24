@@ -107,11 +107,12 @@ def swarm_deploy(mode, target, db):
 
     console.print(
         Panel(
-            f"🌊 [bold]SCALING-Ω: SOVEREIGN FRACTAL DEPLOYMENT[/]\n"
-            f"Mode: [bold #CCFF00]{mode.upper()}[/]\n"
+            f"🌊 [noir.high]SCALING-Ω: SOVEREIGN FRACTAL DEPLOYMENT[/]\n"
+            f"Mode: [noir.cyber]{mode.upper()}[/]\n"
             f"Target: [cyan]{target}[/]\n"
             f"Infrastructure: [dim]400 Specialized Agents (Byzantine v5)[/]",
-            border_style="#6600FF",
+            border_style="noir.blueylb",
+            title="[noir.blueylb]CORTEX SWARM[/]",
         )
     )
 
@@ -143,9 +144,9 @@ def swarm_deploy(mode, target, db):
         progress.update(t4, completed=100)
 
     console.print(
-        "\n[bold #CCFF00]✅ DEPLOYMENT PROTOCOL COMPLETE (420/100)[/]\n"
-        "⏱️ CHRONOS-1: Sovereign Time: 4.2m | Human Time: 1,200h | ROI: 420/100\n"
-        "Estado: [bold green]STABLE[/] | Nodos: 400/400 | Nexus: [blue]SYNCED[/]"
+        "\n[noir.cyber]✅ DEPLOYMENT PROTOCOL COMPLETE (420/100)[/]\n"
+        "[noir.high]⏱️ CHRONOS-1: Sovereign Time: 4.2m | Human Time: 1,200h | ROI: 420/100[/]\n"
+        "Estado: [bold green]STABLE[/] | Nodos: [noir.blueylb]400/400[/] | Nexus: [blue]SYNCED[/]"
     )
 
 

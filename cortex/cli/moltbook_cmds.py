@@ -20,6 +20,13 @@ from rich.table import Table
 console = Console()
 
 
+def _get_service():
+    """Helper to get a MoltbookService instance."""
+    from cortex.services.moltbook import MoltbookService
+
+    return MoltbookService()
+
+
 @click.group("moltbook")
 def moltbook_cmds():
     """🦞 Moltbook — Social network for AI agents."""
@@ -35,11 +42,9 @@ def moltbook_cmds():
     help="Agent description",
 )
 def register(name: str, description: str):
-    """Register MOSKV-1 on Moltbook."""
-    from cortex.extensions.moltbook.client import MoltbookClient
-
-    client = MoltbookClient(api_key="dummy")  # No auth needed for register
-    result = asyncio.run(client.register(name, description))
+    """Register agent on Moltbook via Service."""
+    service = _get_service()
+    result = asyncio.run(service.register_agent(name, description=description))
 
     agent = result.get("agent", {})
     api_key = agent.get("api_key", "")
@@ -62,42 +67,40 @@ def register(name: str, description: str):
 @moltbook_cmds.command("status")
 def status():
     """Check agent claim status and profile."""
-    from cortex.extensions.moltbook.client import MoltbookClient, MoltbookError
+    service = _get_service()
 
     try:
-        client = MoltbookClient()
-        result = asyncio.run(client.check_status())
-        claim_status = result.get("status", "unknown")
+        result = asyncio.run(service.get_status())
+        # The service returns engine.get_system_status() which includes 'authenticated'
+        authenticated = result.get("authenticated", False)
 
-        color = "green" if claim_status == "claimed" else "yellow"
-        console.print(f"[{color}]Status: {claim_status}[/]")
+        if not authenticated:
+            console.print("[red]Error: Authentication failed or service unavailable.[/]")
+            if "error" in result:
+                console.print(f"[dim]{result['error']}[/]")
+            return
 
-        if claim_status == "claimed":
-            me = asyncio.run(client.get_me())
-            agent = me.get("agent", me)
-            console.print(
-                Panel.fit(
-                    f"[bold]{agent.get('name', 'unknown')}[/]\n"
-                    f"Karma: {agent.get('karma', 0)}\n"
-                    f"Profile: https://www.moltbook.com/u/{agent.get('name', '')}",
-                    title="🦞 Your Moltbook Profile",
-                    border_style="cyan",
-                )
+        console.print("[green]Status: Authenticated[/]")
+        console.print(
+            Panel.fit(
+                f"Karma: {result.get('karma', 0)}\n"
+                f"Notifications: {result.get('unread_notifications', 0)}\n"
+                f"Local Agents: {result.get('registered_agents_count', 0)}",
+                title="🦞 Moltbook Swarm Status",
+                border_style="cyan",
             )
-    except MoltbookError as e:
+        )
+    except Exception as e:
         console.print(f"[red]Error: {e}[/]")
-    except ValueError as e:
-        console.print(f"[red]{e}[/]")
 
 
 @moltbook_cmds.command("heartbeat")
 def heartbeat():
     """Run a Moltbook heartbeat check-in cycle."""
-    from cortex.extensions.moltbook.heartbeat import MoltbookHeartbeat
+    service = _get_service()
 
     console.print("[dim]🦞 Running Moltbook heartbeat...[/]")
-    hb = MoltbookHeartbeat()
-    summary = asyncio.run(hb.run())
+    summary = asyncio.run(service.run_maintenance())
 
     actions = summary.get("actions", [])
     errors = summary.get("errors", [])
@@ -117,10 +120,8 @@ def heartbeat():
 @click.option("--content", "-c", default="", help="Post content")
 def post(submolt: str, title: str, content: str):
     """Create a post with auto-verification."""
-    from cortex.extensions.moltbook.heartbeat import MoltbookHeartbeat
-
-    hb = MoltbookHeartbeat()
-    result = asyncio.run(hb.create_verified_post(submolt, title, content))
+    service = _get_service()
+    result = asyncio.run(service.create_post(submolt, title, content))
 
     post_data = result.get("post", {})
     post_id = post_data.get("id", "unknown")
@@ -146,10 +147,8 @@ def post(submolt: str, title: str, content: str):
 @click.option("--limit", "-l", default=10, help="Max results")
 def search(query: str, search_type: str, limit: int):
     """Semantic search across Moltbook."""
-    from cortex.extensions.moltbook.client import MoltbookClient
-
-    client = MoltbookClient()
-    result = asyncio.run(client.search(query, search_type=search_type, limit=limit))
+    service = _get_service()
+    result = asyncio.run(service.search(query, search_type=search_type, limit=limit))
 
     results = result.get("results", [])
     if not results:
@@ -176,10 +175,8 @@ def search(query: str, search_type: str, limit: int):
 @click.option("--limit", "-l", default=15, help="Max posts")
 def feed(sort: str, limit: int):
     """Browse the Moltbook feed."""
-    from cortex.extensions.moltbook.client import MoltbookClient
-
-    client = MoltbookClient()
-    result = asyncio.run(client.get_feed(sort=sort, limit=limit))
+    service = _get_service()
+    result = asyncio.run(service.get_feed(sort=sort, limit=limit))
 
     posts = result.get("posts", [])
     if not posts:

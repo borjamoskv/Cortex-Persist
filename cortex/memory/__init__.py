@@ -59,6 +59,7 @@ if TYPE_CHECKING:
     from cortex.memory.resonance import AdaptiveResonanceGate
     from cortex.memory.sleep import SleepCycleReport, SleepOrchestrator
     from cortex.memory.sparse import MushroomBodyEncoder
+    from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2 as VectorStoreL2
     from cortex.memory.temporal_health import (
         HealthReport,
         SchedulerConfig,

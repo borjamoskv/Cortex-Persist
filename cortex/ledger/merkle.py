@@ -19,10 +19,12 @@ class MerkleNode:
     ):
         self.left = left
         self.right = right
-        self.hash = hash_val or self._compute_hash()
+        self.hash: str = hash_val or self._compute_hash()
 
     def _compute_hash(self) -> str:
-        data = (self.left.hash if self.left else "") + (self.right.hash if self.right else "")
+        left_h = self.left.hash if self.left else ""
+        right_h = self.right.hash if self.right else ""
+        data = left_h + right_h
         return hashlib.sha256(data.encode()).hexdigest()
 
 

@@ -10,6 +10,8 @@ import time
 from pathlib import Path
 from typing import Any
 
+from cortex.services.bounty_service import BountyService
+
 logger = logging.getLogger("cortex.extensions.daemon.frontier")
 
 
@@ -33,8 +35,8 @@ class FrontierDaemon:
         self.ingestion_interval = ingestion_interval_hours * 3600
         self.allow_commits = allow_commits
         self._shutdown = False
-        self.last_metabolism = 0
-        self.last_ingestion = 0
+        self.last_metabolism: float = 0.0
+        self.last_ingestion: float = 0.0
 
     async def _run_metabolism(self):
         """Executes Ouroboros-Omega on high-entropy files."""
@@ -60,17 +62,50 @@ class FrontierDaemon:
             logger.error("[FRONTIER] Metabolism cycle failed: %s", e)
 
     async def _run_ingestion(self):
-        """Ingests new intelligence to forge skills."""
+        """Ingests new intelligence and scans for high-exergy bounties."""
         logger.info("[FRONTIER] Scanning frontier for Cognitive Ingestion...")
-        sources = [
-            "https://github.com/google-deepmind/jules",
-            "https://docs.anthropic.com/en/docs/agents-and-tools/computer-use",
+        
+        # Dynamic discovery potential: In a real scenario, this would poll 
+        # an external API or a local 'AgentLandscape' registry.
+        discovery_targets = [
+            ("google-deepmind", "jules"),
+            ("openai", "operator"),
+            ("anthropic", "claude-code"),
         ]
 
-        for source in sources:
-            logger.info("[FRONTIER] Analyzing source: %s", source)
-            msg = f"Analyzed {source} for potential skill emancipation."
+        # 1. Cognitive Ingestion of SOTA logic
+        for owner, repo in discovery_targets:
+            logger.info("[FRONTIER] Analyzing repository: %s/%s", owner, repo)
+            msg = f"Analyzed {owner}/{repo} for potential skill emancipation."
             self._log_evolution("ingestion", msg)
+
+        # 2. Bounty Discovery & Autonomous Recruitment Trigger
+        bounty_service = BountyService(
+            ledger=self.engine.ledger if self.engine else None,
+            reward_threshold=250.0  # Ω₂: High-exergy filter
+        )
+        
+        for owner, repo in discovery_targets:
+            leads = await bounty_service.scan_repository(owner, repo)
+            ranked = bounty_service.rank_leads(leads)
+            for lead in ranked:
+                logger.info("[FRONTIER] High-exergy bounty found: %s (%s)", lead.title, lead.reward_usd)
+                
+                # Ω₄: Trigger dynamic recruitment via SwarmFactory
+                if self.engine and hasattr(self.engine, 'factory'):
+                    logger.info("[FRONTIER] Initializing 'Next Cycle' for %s", lead.title)
+                    # Generate a swarm cycle specifically for this bounty
+                    cycle = self.engine.factory.generate_cycle(
+                        quadrant="P1",
+                        size=3,
+                        context={"bounty": lead.title, "reward": lead.reward_usd}
+                    )
+                    # Note: Full execution would happen in a background worker or here
+                    # For now, we log the cycle initiation
+                    msg = f"Forged Swarm Cycle for bounty '{lead.title}' (${lead.reward_usd})."
+                    self._log_evolution("swarm", msg)
+                
+                self._log_evolution("bounty", f"Discovered bounty: {lead.title} (${lead.reward_usd})")
 
     def _log_evolution(self, type: str, content: str):
         """Registers the evolution event in CORTEX."""
@@ -78,10 +113,11 @@ class FrontierDaemon:
             return
         try:
             conn = self.engine.pool.get_connection()
+            content_str = f"[{type.upper()}] {content}"
             conn.execute(
                 "INSERT INTO facts (id, type, topic, content, timestamp, confidence) "
                 "VALUES (lower(hex(randomblob(16))), 'decision', 'Evolution', ?, ?, 'C5')",
-                (f"[{type.upper()}] {content}", time.time()),
+                (content_str, time.time()),
             )
             conn.commit()
             logger.info("[FRONTIER] Evolution event logged to CORTEX: %s", type)

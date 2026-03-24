@@ -1,6 +1,6 @@
 # This file is part of CORTEX. Apache-2.0. Change Date: 2030-01-01.
 
-"""Universal LLM Provider — OpenAI-compatible async client with intent routing."""
+"""Universal LLM Provider - OpenAI-compatible async client with intent routing."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ import json
 import logging
 import os
 import re
-from typing import Any, Final, Optional
+from typing import Any, Final
 
 import httpx
 
@@ -44,9 +44,9 @@ class LLMProvider(BaseProvider):
     def __init__(
         self,
         provider: str = "qwen",
-        api_key: Optional[str] = None,
-        model: Optional[str] = None,
-        base_url: Optional[str] = None,
+        api_key: str | None = None,
+        model: str | None = None,
+        base_url: str | None = None,
     ):
         presets = load_presets()
 
@@ -70,9 +70,9 @@ class LLMProvider(BaseProvider):
 
     def _init_custom(
         self,
-        api_key: Optional[str],
-        model: Optional[str],
-        base_url: Optional[str],
+        api_key: str | None,
+        model: str | None,
+        base_url: str | None,
     ) -> None:
         """Initialize a custom provider configuration."""
         self._provider = "custom"
@@ -93,9 +93,9 @@ class LLMProvider(BaseProvider):
         self,
         provider: str,
         preset: dict[str, Any],
-        api_key: Optional[str],
-        model: Optional[str],
-        base_url: Optional[str],
+        api_key: str | None,
+        model: str | None,
+        base_url: str | None,
     ) -> None:
         """Initialize from a known provider preset."""
         self._provider = provider
@@ -120,7 +120,7 @@ class LLMProvider(BaseProvider):
             _TAG_MAP[tag] for tag in raw_specs if tag in _TAG_MAP
         ) or frozenset({IntentProfile.GENERAL})
 
-        # Intent-to-model map (optional) — permite que un provider como OpenRouter
+        # Intent-to-model map (optional) - permite que un provider como OpenRouter
         # use modelos especializados según la intención del prompt.
         raw_map: dict[str, str] = preset.get("intent_model_map", {})
         self._intent_model_map: dict[IntentProfile, str] = {
@@ -232,7 +232,7 @@ class LLMProvider(BaseProvider):
     def _log_resolved_model(self, payload: dict[str, Any], response_data: dict[str, Any]) -> None:
         """Log when a meta-router resolves to a different model than requested.
 
-        Enables traceability for hierarchical routing — when CORTEX
+        Enables traceability for hierarchical routing - when CORTEX
         requests 'openrouter/auto' and OpenRouter resolves to e.g.
         'anthropic/claude-3.5-sonnet', this captures both layers.
         """
@@ -240,13 +240,13 @@ class LLMProvider(BaseProvider):
         actual = response_data.get("model", requested)
         if actual and actual != requested:
             logger.info(
-                "LLM [%s] meta-routed: requested=%s → resolved=%s",
+                "LLM [%s] meta-routed: requested=%s -> resolved=%s",
                 self._provider,
                 requested,
                 actual,
             )
 
-    def _extract_retry_delay(self, text: str) -> Optional[float]:
+    def _extract_retry_delay(self, text: str) -> float | None:
         """Extrae el delay de reintento desde el JSON o via regex."""
         try:
             data = json.loads(text)
@@ -427,7 +427,7 @@ class LLMProvider(BaseProvider):
             resolved = self._intent_model_map.get(intent, self._model)
             if resolved != self._model:
                 logger.debug(
-                    "LLM [%s] intent=%s → model: %s",
+                    "LLM [%s] intent=%s -> model: %s",
                     self._provider,
                     intent.value,
                     resolved,

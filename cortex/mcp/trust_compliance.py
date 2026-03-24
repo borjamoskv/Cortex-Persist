@@ -97,7 +97,7 @@ def _register_compliance_report(mcp: FastMCP, ctx: _MCPContext) -> None:
 
         # Verify ledger integrity
         ledger = SovereignLedger(ctx.pool)  # type: ignore[reportArgumentType]
-        integrity = await ledger.verify_integrity_async()
+        integrity = await ledger.audit_integrity()
 
         now = datetime.now(timezone.utc).isoformat()
 

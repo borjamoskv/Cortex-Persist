@@ -1,6 +1,6 @@
 [project]
 name = "cortex-persist"
-version = "0.3.0b2"
+version = "0.3.1-b1"
 description = "Tamper-evident audit and decision lineage for AI systems — cryptographic verification, integrity proofs, and traceability for agent memory."
 readme = "README.md"
 license = "Apache-2.0"
@@ -40,6 +40,7 @@ dependencies = [
     "cryptography>=46.0.5",
     "watchdog>=6.0.0",
     "pydantic>=2.0",
+    "PyYAML>=6.0",
 ]
 
 [project.urls]

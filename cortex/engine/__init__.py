@@ -24,6 +24,7 @@ from cortex.engine.query_mixin import QueryMixin
 from cortex.engine.search_mixin import SearchMixin
 from cortex.engine.store_mixin import StoreMixin
 from cortex.engine.transaction_mixin import TransactionMixin
+from cortex.ledger.compaction import ShannonCompactor
 
 try:
     from cortex.extensions.health.health_mixin import HealthMixin  # type: ignore
@@ -92,6 +93,16 @@ class CortexEngine(
         self.embeddings = EmbeddingManager(self)
         self.consensus = ConsensusManager(self)
         self.lock_sovereign = SovereignLock(self)
+
+        # 🐝 Swarm Orchestration (Ω₄: Sovereign High Command)
+        try:
+            from cortex.swarm import MasterOrchestrator
+            self.swarm = MasterOrchestrator()
+            self.factory = self.swarm.factory # FrontierDaemon Compatibility
+        except ImportError:
+            logger.warning("Swarm Orchestrator not available. Frontier systems limited.")
+            self.swarm = None
+            self.factory = None
 
         # Decoupled guard pipeline (Ω₃: minimal coupling)
         self._guard_pipeline = self._register_default_guards()
@@ -513,6 +524,7 @@ class CortexEngine(
         await conn.commit()
 
         self._ledger = SovereignLedger(conn)  # type: ignore[reportArgumentType]
+        self.shannon = ShannonCompactor(conn)
         await self._init_memory_subsystem(self._db_path, conn)
         await self._persistence.start()
         metrics.set_engine(self)

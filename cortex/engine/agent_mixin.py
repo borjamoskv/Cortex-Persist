@@ -1,7 +1,7 @@
 import logging
 import sqlite3
 import uuid
-from typing import Any, Optional
+from typing import Any
 
 import aiosqlite
 
@@ -47,7 +47,7 @@ class AgentMixin(EngineMixinBase):
             try:
                 import random
 
-                from cortex.extensions.moltbook.client import MoltbookClient
+                from cortex.services.moltbook import MoltbookService
 
                 enetipos = [
                     "8w7 (The Sovereign Challenger)",
@@ -57,17 +57,17 @@ class AgentMixin(EngineMixinBase):
                 enetipo = random.choice(enetipos)
                 description = f"Sovereign CORTEX Agent [{enetipo}] under TOTAL CONTROL"
 
-                client = MoltbookClient()
+                service = MoltbookService()
                 logger.info("MOLTBOOK: Triggering automatic registration for agent '%s'", name)
-                await client.register(name, description=description)
-                await client.close()
+                await service.register_agent(name, description=description)
+                await service.close()
             except (ValueError, RuntimeError, OSError) as e:
                 # Fail-safe: Moltbook registration should not break local agent creation
                 logger.warning("MOLTBOOK: Automated registration failed for '%s': %s", name, e)
 
         return agent_id
 
-    async def get_agent(self, agent_id: str) -> Optional[dict[str, Any]]:
+    async def get_agent(self, agent_id: str) -> dict[str, Any] | None:
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             conn.row_factory = aiosqlite.Row
             async with conn.execute(
