@@ -1,5 +1,4 @@
 """Utilities for MEJORAlo engine."""
-
 import subprocess
 from pathlib import Path
 from typing import Any, Optional
@@ -15,9 +14,27 @@ __all__ = [
 ]
 
 
+def _safe_resolve_path(path: str | Path, base: Path | None = None) -> Path:
+    """Resolve and validate a path to prevent directory traversal.
+
+    If a base directory is provided, the resolved path must be within it.
+    Raises ValueError if the path escapes the base directory.
+    """
+    resolved = Path(path).resolve()
+    if base is not None:
+        base_resolved = base.resolve()
+        try:
+            resolved.relative_to(base_resolved)
+        except ValueError:
+            raise ValueError(
+                f"Path traversal detected: '{path}' is outside the allowed base directory."
+            )
+    return resolved
+
+
 def detect_stack(path: str | Path) -> str:
     """Detect project stack from marker files."""
-    p = Path(path)
+    p = _safe_resolve_path(path)
     for stack, marker in STACK_MARKERS.items():
         if (p / marker).exists():
             return stack
