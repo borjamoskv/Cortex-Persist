@@ -1,0 +1,382 @@
+[
+  {
+    "url": "https://github.com/Jmtdw57/openclaw-test-bounty/issues/1",
+    "repo": "Jmtdw57/openclaw-test-bounty",
+    "title": "Fix RateLimiter off-by-one and unbounded refill bugs",
+    "reward_usd": 75.0,
+    "reward_source": "body",
+    "complexity": 1.1,
+    "labels": [
+      "bug",
+      "bounty"
+    ],
+    "language": "typescript",
+    "stars": 0,
+    "analysis": {
+      "passed": false,
+      "expected_value": 0.0,
+      "complexity": 1.1,
+      "reason": "BAJA_REPUTACION: 0 stars < 50."
+    }
+  },
+  {
+    "url": "https://github.com/dextonai/agent-browser/issues/1",
+    "repo": "dextonai/agent-browser",
+    "title": "Add a README badge and contribution guide to agent-browser",
+    "reward_usd": null,
+    "reward_source": "none",
+    "complexity": 1.0,
+    "labels": [
+      "documentation",
+      "bounty",
+      "1.000000000000000000 DXTN",
+      "readme",
+      "typescript"
+    ],
+    "language": "typescript",
+    "stars": 0,
+    "analysis": {
+      "passed": false,
+      "expected_value": 0.0,
+      "complexity": 1.0,
+      "reason": "BAJA_REPUTACION: 0 stars < 50."
+    }
+  },
+  {
+    "url": "https://github.com/atharvnaik1/GraciasAi-Appstore-Policy-Auditor-Opensource/issues/14",
+    "repo": "atharvnaik1/GraciasAi-Appstore-Policy-Auditor-Opensource",
+    "title": "\ud83d\udd39 Bounty: \u20b92000 \u2014PDF REPORT IMPROVEMENTS",
+    "reward_usd": null,
+    "reward_source": "none",
+    "complexity": 1.0,
+    "labels": [
+      "bug",
+      "enhancement",
+      "help wanted",
+      "good first issue",
+      "bounty"
+    ],
+    "language": "typescript",
+    "stars": 6,
+    "analysis": {
+      "passed": false,
+      "expected_value": 0.0,
+      "complexity": 1.0,
+      "reason": "BAJA_REPUTACION: 6 stars < 50."
+    }
+  },
+  {
+    "url": "https://github.com/Scottcjn/rustchain-bounties/issues/2322",
+    "repo": "Scottcjn/rustchain-bounties",
+    "title": "Retro Screenshot Gallery \u2014 Share Your RPi Gaming Setup (1 RTC)",
+    "reward_usd": null,
+    "reward_source": "none",
+    "complexity": 1.0,
+    "labels": [
+      "bounty",
+      "community",
+      "gaming",
+      "1-4-rtc"
+    ],
+    "language": "python",
+    "stars": 98,
+    "analysis": {
+      "passed": false,
+      "expected_value": 0.0,
+      "complexity": 1.0,
+      "reason": "SIN_REWARD_DETECTABLE: No se encontr\u00f3 USD expl\u00edcito."
+    }
+  },
+  {
+    "url": "https://github.com/IDT-25-27/pubblica-immagini-docker-riccardofemia-hash/issues/2",
+    "repo": "IDT-25-27/pubblica-immagini-docker-riccardofemia-hash",
+    "title": "Exercise: Publish Docker Packages",
+    "reward_usd": null,
+    "reward_source": "none",
+    "complexity": 1.0,
+    "labels": [],
+    "language": "javascript",
+    "stars": 0,
+    "analysis": {
+      "passed": false,
+      "expected_value": 0.0,
+      "complexity": 1.0,
+      "reason": "BAJA_REPUTACION: 0 stars < 50."
+    }
+  },
+  {
+    "url": "https://github.com/IDT-25-27/pubblica-immagini-docker-alessandrolanzilli-commits/issues/1",
+    "repo": "IDT-25-27/pubblica-immagini-docker-alessandrolanzilli-commits",
+    "title": "Exercise: Publish Docker Packages",
+    "reward_usd": null,
+    "reward_source": "none",
+    "complexity": 1.0,
+    "labels": [],
+    "language": "javascript",
+    "stars": 0,
+    "analysis": {
+      "passed": false,
+      "expected_value": 0.0,
+      "complexity": 1.0,
+      "reason": "BAJA_REPUTACION: 0 stars < 50."
+    }
+  },
+  {
+    "url": "https://github.com/Jk2006k/GoalNow/issues/12",
+    "repo": "Jk2006k/GoalNow",
+    "title": "Build LeetCode-style coding interface for DSA round",
+    "reward_usd": null,
+    "reward_source": "none",
+    "complexity": 1.0,
+    "labels": [
+      "\ud83d\udc8e Bounty",
+      "$2"
+    ],
+    "language": "javascript",
+    "stars": 0,
+    "analysis": {
+      "passed": false,
+      "expected_value": 0.0,
+      "complexity": 1.0,
+      "reason": "BAJA_REPUTACION: 0 stars < 50."
+    }
+  },
+  {
+    "url": "https://github.com/zumair12/blog-vlog/pull/11",
+    "repo": "zumair12/blog-vlog",
+    "title": "chore(deps): bump pagy from 9.4.0 to 43.4.2",
+    "reward_usd": null,
+    "reward_source": "none",
+    "complexity": 1.0,
+    "labels": [
+      "dependencies",
+      "ruby"
+    ],
+    "language": "html",
+    "stars": 0,
+    "analysis": {
+      "passed": false,
+      "expected_value": 0.0,
+      "complexity": 1.0,
+      "reason": "BAJA_REPUTACION: 0 stars < 50."
+    }
+  },
+  {
+    "url": "https://github.com/chwtanthakur92-ctrl/ctnt-project-/issues/1",
+    "repo": "chwtanthakur92-ctrl/ctnt-project-",
+    "title": "ctnt project",
+    "reward_usd": null,
+    "reward_source": "none",
+    "complexity": 9.524999999999999,
+    "labels": [],
+    "language": "html",
+    "stars": 0,
+    "analysis": {
+      "passed": false,
+      "expected_value": 0.0,
+      "complexity": 9.524999999999999,
+      "reason": "BAJA_REPUTACION: 0 stars < 50."
+    }
+  },
+  {
+    "url": "https://github.com/MATEBALL/MATEBALL-CLIENT/pull/410",
+    "repo": "MATEBALL/MATEBALL-CLIENT",
+    "title": "fix: SP2 \ud648 \ud398\uc774\uc9c0 \uc218\uc815",
+    "reward_usd": null,
+    "reward_source": "none",
+    "complexity": 1.0,
+    "labels": [
+      "\ucc44\uc740",
+      "fix"
+    ],
+    "language": "typescript",
+    "stars": 14,
+    "analysis": {
+      "passed": false,
+      "expected_value": 0.0,
+      "complexity": 1.0,
+      "reason": "BAJA_REPUTACION: 14 stars < 50."
+    }
+  },
+  {
+    "url": "https://github.com/ValVoy/THP---EventBritev2/pull/16",
+    "repo": "ValVoy/THP---EventBritev2",
+    "title": "Bump pagy from 43.3.0 to 43.4.2",
+    "reward_usd": null,
+    "reward_source": "none",
+    "complexity": 1.0,
+    "labels": [
+      "dependencies",
+      "ruby"
+    ],
+    "language": "html",
+    "stars": 0,
+    "analysis": {
+      "passed": false,
+      "expected_value": 0.0,
+      "complexity": 1.0,
+      "reason": "BAJA_REPUTACION: 0 stars < 50."
+    }
+  },
+  {
+    "url": "https://github.com/warmwater/ticketing_hub/pull/9",
+    "repo": "warmwater/ticketing_hub",
+    "title": "Bump pagy from 9.4.0 to 43.4.2",
+    "reward_usd": null,
+    "reward_source": "none",
+    "complexity": 1.0,
+    "labels": [
+      "dependencies",
+      "ruby"
+    ],
+    "language": "html",
+    "stars": 0,
+    "analysis": {
+      "passed": false,
+      "expected_value": 0.0,
+      "complexity": 1.0,
+      "reason": "BAJA_REPUTACION: 0 stars < 50."
+    }
+  },
+  {
+    "url": "https://github.com/zhengqunkoo/Luxuryshoppingwebsite/issues/37",
+    "repo": "zhengqunkoo/Luxuryshoppingwebsite",
+    "title": "[repo-status] Daily Status - March 24, 2026 \ud83c\udf1f",
+    "reward_usd": null,
+    "reward_source": "none",
+    "complexity": 5.750000000000001,
+    "labels": [
+      "report",
+      "daily-status"
+    ],
+    "language": "html",
+    "stars": 0,
+    "analysis": {
+      "passed": false,
+      "expected_value": 0.0,
+      "complexity": 5.750000000000001,
+      "reason": "BAJA_REPUTACION: 0 stars < 50."
+    }
+  },
+  {
+    "url": "https://github.com/FlowAnalyticsPro/axios/pull/1",
+    "repo": "FlowAnalyticsPro/axios",
+    "title": "chore(docs): update sponsor block",
+    "reward_usd": null,
+    "reward_source": "none",
+    "complexity": 1.0,
+    "labels": [
+      "commit::docs",
+      "priority::high",
+      "type::automated-pr"
+    ],
+    "language": "javascript",
+    "stars": 0,
+    "analysis": {
+      "passed": false,
+      "expected_value": 0.0,
+      "complexity": 1.0,
+      "reason": "BAJA_REPUTACION: 0 stars < 50."
+    }
+  },
+  {
+    "url": "https://github.com/zumair12/eventflow/pull/12",
+    "repo": "zumair12/eventflow",
+    "title": "chore(deps): bump pagy from 8.6.3 to 43.4.2",
+    "reward_usd": null,
+    "reward_source": "none",
+    "complexity": 1.0,
+    "labels": [
+      "dependencies",
+      "ruby"
+    ],
+    "language": "html",
+    "stars": 0,
+    "analysis": {
+      "passed": false,
+      "expected_value": 0.0,
+      "complexity": 1.0,
+      "reason": "BAJA_REPUTACION: 0 stars < 50."
+    }
+  },
+  {
+    "url": "https://github.com/TerraFirmaGreg-Team/Modpack-Modern/issues/3540",
+    "repo": "TerraFirmaGreg-Team/Modpack-Modern",
+    "title": "[\ud83d\udc8e]: Add a clay mold for lamps",
+    "reward_usd": null,
+    "reward_source": "none",
+    "complexity": 1.0,
+    "labels": [
+      "Status: Ready",
+      "Priority: Low"
+    ],
+    "language": "javascript",
+    "stars": 363,
+    "analysis": {
+      "passed": false,
+      "expected_value": 0.0,
+      "complexity": 1.0,
+      "reason": "SIN_REWARD_DETECTABLE: No se encontr\u00f3 USD expl\u00edcito."
+    }
+  },
+  {
+    "url": "https://github.com/alokKumarSingh89/trading_paltform/pull/13",
+    "repo": "alokKumarSingh89/trading_paltform",
+    "title": "build(deps): bump pagy from 43.3.0 to 43.4.2",
+    "reward_usd": null,
+    "reward_source": "none",
+    "complexity": 1.0,
+    "labels": [
+      "dependencies",
+      "ruby"
+    ],
+    "language": "html",
+    "stars": 0,
+    "analysis": {
+      "passed": false,
+      "expected_value": 0.0,
+      "complexity": 1.0,
+      "reason": "BAJA_REPUTACION: 0 stars < 50."
+    }
+  },
+  {
+    "url": "https://github.com/ryuji1968/claudecodepost/pull/26",
+    "repo": "ryuji1968/claudecodepost",
+    "title": "Bump pagy from 43.2.8 to 43.4.2",
+    "reward_usd": null,
+    "reward_source": "none",
+    "complexity": 1.0,
+    "labels": [
+      "dependencies",
+      "ruby"
+    ],
+    "language": "html",
+    "stars": 0,
+    "analysis": {
+      "passed": false,
+      "expected_value": 0.0,
+      "complexity": 1.0,
+      "reason": "BAJA_REPUTACION: 0 stars < 50."
+    }
+  },
+  {
+    "url": "https://github.com/AxiumFoundry/foundry-crm/pull/49",
+    "repo": "AxiumFoundry/foundry-crm",
+    "title": "Bump pagy from 43.3.2 to 43.4.2",
+    "reward_usd": null,
+    "reward_source": "none",
+    "complexity": 1.0,
+    "labels": [
+      "dependencies",
+      "ruby"
+    ],
+    "language": "html",
+    "stars": 10,
+    "analysis": {
+      "passed": false,
+      "expected_value": 0.0,
+      "complexity": 1.0,
+      "reason": "BAJA_REPUTACION: 10 stars < 50."
+    }
+  }
+]
