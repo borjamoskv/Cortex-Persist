@@ -1,5 +1,4 @@
 """SSL certificate monitor for MOSKV daemon."""
-
 from __future__ import annotations
 
 import logging
@@ -36,7 +35,9 @@ class CertMonitor:
     def _check_one(self, hostname: str) -> Optional[CertAlert]:
         """Check a single hostname's SSL certificate."""
         try:
+            # security: enforce minimum TLS 1.2 to prevent use of insecure SSL/TLS
             ctx = ssl.create_default_context()
+            ctx.minimum_version = ssl.TLSVersion.TLSv1_2
             with socket.create_connection((hostname, 443), timeout=DEFAULT_TIMEOUT) as sock:
                 with ctx.wrap_socket(sock, server_hostname=hostname) as ssock:
                     cert = ssock.getpeercert()
