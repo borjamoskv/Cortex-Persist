@@ -1,0 +1,13 @@
+{
+  "type": "axiom",
+  "timestamp": "2026-03-26T14:14:00Z",
+  "source": "https://www.youtube.com/watch?v=ikdCG4goKIE",
+  "project": "CORTEX-SECURITY",
+  "summary": "MFA es una ilusión arquitectónica frente a un ataque local (ej. robo de cookies/LevelDB de Chromium). El perímetro real no es el token criptográfico SMS/App, sino el contenedor OS del navegador. Autenticación de doble factor y OAuths quedan invalidados.",
+  "evidence": "Robo del canal de YouTube (Midudev) mediante troyano (scrcpy/exe) disfrazado de sponsor, exfiltrando cookies de sesión vivas.",
+  "impact": "CRITICAL. Colapso de soberanía digital. Robo de assets de alta exergía.",
+  "next_action": "Migrar entorno de ejecución CORTEX y accesos críticos a sandboxes restringidos, sin cookies reusables. Auditar descargas patrocinadas con contenedor estricto.",
+  "confidence": "C5-Dynamic",
+  "entropy_delta": "-4200",
+  "exergy_estimate": "Net_Exergy_Yield = Prevención total de robo de identidad y pérdida de capital CORTEX."
+}
