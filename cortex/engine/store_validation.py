@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import logging
 from typing import Any, Optional
+
 from cortex.engine.store_validators import validate_content, check_dedup
 from cortex.guards.thermodynamic import AgentMode, should_enter_decorative_mode
 from cortex.shannon.exergy import ActionRisk, ExergyInput, calculate_exergy, enforce_exergy
@@ -12,6 +13,13 @@ from cortex.engine.nemesis import NemesisProtocol
 from cortex.engine.bridge_guard import BridgeGuard
 
 logger = logging.getLogger("cortex.engine.validation")
+
+_EXERGY_META_KEYS = frozenset({"_prior_entropy", "_posterior_entropy", "_tokens"})
+
+
+def _has_exergy_telemetry(meta: Optional[dict[str, Any]]) -> bool:
+    """Only enforce exergy when the caller supplied actual thermodynamic telemetry."""
+    return bool(meta and _EXERGY_META_KEYS.intersection(meta))
 
 async def run_store_validation_logic(
     mixin_instance: Any,
@@ -36,19 +44,20 @@ async def run_store_validation_logic(
         logger.warning("🚫 [DECORATIVE MODE] Write blocked for type: %s", fact_type)
         raise RuntimeError("Operation blocked: Agent in DECORATIVE mode (Axiom Ω₁₃)")
 
-    if not skip_thermo:
+    if not skip_thermo and _has_exergy_telemetry(meta):
         ex_input = ExergyInput(
-            prior_uncertainty=meta.get("_prior_entropy", 1.0) if meta else 1.0,
-            posterior_uncertainty=meta.get("_posterior_entropy", 0.5) if meta else 0.5,
-            tokens_consumed=meta.get("_tokens", 100) if meta else 100,
+            prior_uncertainty=meta.get("_prior_entropy", 1.0),
+            posterior_uncertainty=meta.get("_posterior_entropy", 0.5),
+            tokens_consumed=meta.get("_tokens", 100),
             action_risk=ActionRisk.MEMORY_WRITE if fact_type != "rule" else ActionRisk.SCHEMA_MUTATION,
             had_backup=True,
-            touched_persistent_state=True
+            touched_persistent_state=True,
         )
         ex_res = calculate_exergy(ex_input, threshold_min_work=0.01)
         enforce_exergy(ex_res)
 
-        if should_enter_decorative_mode(cls._thermo_counters):
+        should_decorate, _reasons = should_enter_decorative_mode(cls._thermo_counters)
+        if should_decorate:
             cls._agent_mode = AgentMode.DECORATIVE
             logger.error("🛑 [CRITICAL] Agent entering DECORATIVE mode due to thermodynamic waste.")
     else:

@@ -254,7 +254,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         async with self.session() as conn:
             query = (
                 "SELECT tenant_id, project, content, fact_type, tags, "
-                "confidence, source, meta "
+                "confidence, source, metadata "
                 "FROM facts WHERE id = ? AND tenant_id = ? AND is_tombstoned = 0"
             )
             async with conn.execute(query, (fact_id, tenant_id)) as cursor:

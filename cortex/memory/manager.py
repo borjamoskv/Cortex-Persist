@@ -63,6 +63,13 @@ __all__ = ["CortexMemoryManager"]
 logger = logging.getLogger("cortex.memory.manager")
 
 
+async def notify_notch_pruning() -> None:
+    """Module-level proxy kept patchable for tests and optional WS delivery."""
+    from cortex.routes.notch_ws import notify_notch_pruning as _notify_notch_pruning
+
+    await _notify_notch_pruning()
+
+
 class CortexMemoryManager:
     """Orchestrator for the Tripartite Cognitive Memory Architecture.
 
@@ -348,8 +355,6 @@ class CortexMemoryManager:
         )
         if not should_process:
             logger.info("CortexMemoryManager: Fact filtered by Thalamus. Action: %s", action)
-            from cortex.routes.notch_ws import notify_notch_pruning
-
             await notify_notch_pruning()
             return f"filtered:{action}"
 

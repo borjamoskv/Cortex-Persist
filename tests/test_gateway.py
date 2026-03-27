@@ -22,7 +22,15 @@ async def test_gateway_router_store_success():
 
     assert resp.ok is True
     assert resp.data["fact_id"] == "fact_123"
-    mock_engine.store.assert_called_once()
+    mock_engine.store.assert_awaited_once_with(
+        project="test_proj",
+        content="test content",
+        fact_type="knowledge",
+        tags=[],
+        confidence="stated",
+        source="api",
+        tenant_id="default",
+    )
 
 
 @pytest.mark.asyncio
@@ -54,3 +62,9 @@ async def test_gateway_router_exception_handling():
     assert resp.ok is False
     assert "Mocked DB failure" in resp.error
     assert resp.latency_ms > 0
+    mock_engine.search.assert_awaited_once_with(
+        query="test query",
+        tenant_id="default",
+        top_k=5,
+        project=None,
+    )

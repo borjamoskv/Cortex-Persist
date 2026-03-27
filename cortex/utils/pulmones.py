@@ -3,7 +3,9 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import os
 import sqlite3
+import tempfile
 import time
 from collections.abc import Awaitable, Callable
 from functools import wraps
@@ -13,13 +15,39 @@ from typing import Any
 logger = logging.getLogger("CORTEX.PULMONES")
 
 
+def _default_db_path() -> Path:
+    configured = os.getenv("CORTEX_PULMONES_DB_PATH")
+    if configured:
+        return Path(configured).expanduser()
+    return Path.home() / ".cortex" / "pulmones.db"
+
+
 class PulmonesQueue:
     """Cola SQLite ACID para persistir tareas fallidas (Zero-Trust Queue)."""
 
-    def __init__(self, db_path: Path = Path.home() / ".cortex" / "pulmones.db"):
-        self.db_path = db_path
-        self.db_path.parent.mkdir(parents=True, exist_ok=True)
-        self._init_db()
+    def __init__(self, db_path: Path | None = None):
+        self.db_path = (db_path or _default_db_path()).expanduser()
+        self._init_with_fallback()
+
+    def _init_with_fallback(self) -> None:
+        try:
+            self._prepare_parent(self.db_path)
+            self._init_db()
+        except sqlite3.Error as exc:
+            fallback = Path(tempfile.gettempdir()) / "cortex" / "pulmones.db"
+            logger.warning(
+                "PulmonesQueue failed to initialize %s (%s); falling back to %s",
+                self.db_path,
+                exc,
+                fallback,
+            )
+            self.db_path = fallback
+            self._prepare_parent(self.db_path)
+            self._init_db()
+
+    @staticmethod
+    def _prepare_parent(db_path: Path) -> None:
+        db_path.parent.mkdir(parents=True, exist_ok=True)
 
     def _init_db(self) -> None:
         with sqlite3.connect(self.db_path) as conn:

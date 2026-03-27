@@ -233,12 +233,13 @@ class GatewayRouter:
             raise ValueError("payload.content is required for store intent")
 
         fact_id = await self._engine.store(
-            req.project or "default",
-            content,
-            fact_type,
-            tags,
-            "stated",
-            source,
+            project=req.project or "default",
+            content=content,
+            fact_type=fact_type,
+            tags=tags,
+            confidence="stated",
+            source=source,
+            tenant_id=req.tenant_id,
         )
         return {"fact_id": fact_id, "project": req.project}
 
@@ -250,9 +251,10 @@ class GatewayRouter:
             raise ValueError("payload.query is required for search intent")
 
         results = await self._engine.search(
-            query,
-            req.project or None,
-            min(max(top_k, 1), 20),
+            query=query,
+            tenant_id=req.tenant_id,
+            top_k=min(max(top_k, 1), 20),
+            project=req.project or None,
         )
         return [
             {
