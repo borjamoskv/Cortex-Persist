@@ -8,7 +8,7 @@ from pathlib import Path
 import aiosqlite
 
 from cortex.database.core import connect as db_connect
-from cortex.engine.endocrine import ENDOCRINE, HormoneType
+from cortex.engine.gradient import GRADIENT, GradientType
 from cortex.extensions.signals.bus import AsyncSignalBus, SignalBus
 
 logger = logging.getLogger("cortex.nemesis")
@@ -78,7 +78,7 @@ class NemesisProtocol:
         # 1. Static Anti-Pattern Check
         for pattern, reason in cls.ANTI_PATTERNS:
             if re.search(pattern, content_lower):
-                ENDOCRINE.pulse(HormoneType.ADRENALINE, 0.4, reason=f"Nemesis Static: {reason}")
+                GRADIENT.pulse(GradientType.ADRENALINE, 0.4, reason=f"Nemesis Static: {reason}")
                 return f"[NEMESIS PROTOCOL ACTIVO] Entropía detectada: {reason}"
 
         # 2. Dynamic Antibody Check (Delegated to reduce complexity)
@@ -94,7 +94,7 @@ class NemesisProtocol:
         # 1. Static Anti-Pattern Check
         for pattern, reason in cls.ANTI_PATTERNS:
             if re.search(pattern, content_lower):
-                ENDOCRINE.pulse(HormoneType.ADRENALINE, 0.4, reason=f"Nemesis Static: {reason}")
+                GRADIENT.pulse(GradientType.ADRENALINE, 0.4, reason=f"Nemesis Static: {reason}")
                 return f"[NEMESIS PROTOCOL ACTIVO] Entropía detectada: {reason}"
 
         # 2. Dynamic Antibody Check
@@ -104,8 +104,8 @@ class NemesisProtocol:
                 count = cls._rejection_history[pattern]
 
                 pulse_val = 0.8 + (min(0.2, count * 0.05))
-                ENDOCRINE.pulse(
-                    HormoneType.ADRENALINE,
+                GRADIENT.pulse(
+                    GradientType.ADRENALINE,
                     pulse_val,
                     reason=f"Nemesis Antibody ({count}x): {reason}",
                 )
@@ -121,7 +121,7 @@ class NemesisProtocol:
 
                 if count > 5:
                     logger.critical("💀 [NEMESIS] Metabolic loop detected on vector: %s", pattern)
-                    ENDOCRINE.pulse(HormoneType.CORTISOL, 0.4, reason="Metabolic loop Stress")
+                    GRADIENT.pulse(GradientType.CORTISOL, 0.4, reason="Metabolic loop Stress")
 
                 return f"[NEMESIS: REJECTED {count}x] Antibody: {reason}"
         return None
@@ -136,8 +136,8 @@ class NemesisProtocol:
                 count = cls._rejection_history[pattern]
 
                 pulse_val = 0.8 + (min(0.2, count * 0.05))  # Punishment climbs
-                ENDOCRINE.pulse(
-                    HormoneType.ADRENALINE,
+                GRADIENT.pulse(
+                    GradientType.ADRENALINE,
                     pulse_val,
                     reason=f"Nemesis Antibody ({count}x): {reason}",
                 )
@@ -148,7 +148,7 @@ class NemesisProtocol:
 
                 if count > 5:
                     logger.critical("💀 [NEMESIS] Metabolic loop detected on vector: %s", pattern)
-                    ENDOCRINE.pulse(HormoneType.CORTISOL, 0.4, reason="Metabolic loop Stress")
+                    GRADIENT.pulse(GradientType.CORTISOL, 0.4, reason="Metabolic loop Stress")
 
                 return f"[NEMESIS: REJECTED {count}x] Antibody: {reason}"
         return None
@@ -183,8 +183,8 @@ class NemesisProtocol:
         cls.append_antibody(vector, f"Dynamic Immunity: {reason}")
 
         # Hormonal surge for systemic mobilization
-        ENDOCRINE.pulse(HormoneType.ADRENALINE, 0.6, reason="Immuno-assimilation")
-        ENDOCRINE.pulse(HormoneType.NEURAL_GROWTH, 0.2, reason="Structural Adaptation")
+        GRADIENT.pulse(GradientType.ADRENALINE, 0.6, reason="Immuno-assimilation")
+        GRADIENT.pulse(GradientType.NEURAL_GROWTH, 0.2, reason="Structural Adaptation")
 
         if db_path:
             try:

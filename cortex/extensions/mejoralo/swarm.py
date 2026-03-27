@@ -121,7 +121,7 @@ class MejoraloSwarm:
         findings_str = "- " + "\n- ".join(findings)
         scars_str = self._get_scars_prompt(engine, project, file_path.name)
         swarm_system = self._build_swarm_system(
-            self._select_specialists(findings_str, file_path.name), iteration
+            self._select_specialists(findings_str, file_path.name), iteration, file_path.name
         )
         console.print(f"  [dim]🐝 Swarm (L{self.level}) pensando en {file_path.name}...[/]")
 
@@ -140,7 +140,7 @@ class MejoraloSwarm:
         result_content = await self._run_orchestra(base_prompt, swarm_system)
         if result_content:
             console.print(f"  [green]✨ Síntesis completada para {file_path.name}[/]")
-        return self._extract_code(result_content) if result_content else None
+        return self._extract_code(result_content, file_path.name) if result_content else None
 
     # ── Surgical AST Mode ──────────────────────────────────────────────────
 
@@ -279,7 +279,7 @@ class MejoraloSwarm:
             return None
 
         # 5. Extract just the code block
-        patched_node = self._extract_code(result_content)
+        patched_node = self._extract_code(result_content, file_path.name)
         if not patched_node:
             return None
 
@@ -317,10 +317,16 @@ class MejoraloSwarm:
         self, file_path: Path, content: str, findings_str: str, engine: Any, project: str | None
     ) -> str:
         scars_str = self._get_scars_prompt(engine, project, file_path.name)
+        lang = "python"
+        if file_path.name.endswith((".ts", ".tsx")): lang = "typescript"
+        elif file_path.name.endswith((".js", ".jsx")): lang = "javascript"
+        elif file_path.name.endswith(".astro"): lang = "astro"
+        elif file_path.name.endswith(".css"): lang = "css"
+        
         return (
             f"REFAC-TASK: Fix findings in {file_path.name}. Maintain EXACT functionality.\n"
             f"Findings:\n{findings_str}{scars_str}\n\n"
-            f"Current Code:\n```python\n{content}\n```"
+            f"Current Code:\n```{lang}\n{content}\n```"
         )
 
     async def _run_orchestra(self, base_prompt: str, swarm_system: str) -> str | None:
@@ -402,7 +408,7 @@ class MejoraloSwarm:
 
         return active[:squad_size]
 
-    def _build_swarm_system(self, specialists: list[str], iteration: int) -> str:
+    def _build_swarm_system(self, specialists: list[str], iteration: int, filename: str) -> str:
         """Construct the sovereign swarm system prompt."""
         items = [f"- {name}: {SPECIALISTS_PROMPTS[name]}" for name in specialists]
         info = "\n".join(items)
@@ -416,36 +422,45 @@ class MejoraloSwarm:
             else "Synthesize ALL specialist logic."
         )
 
+        lang = "python"
+        if filename.endswith((".ts", ".tsx")): lang = "typescript"
+        elif filename.endswith((".js", ".jsx")): lang = "javascript"
+        elif filename.endswith(".astro"): lang = "astro"
+        elif filename.endswith(".css"): lang = "css"
+
         return (
             f"You are the SOVEREIGN SWARM (Level {self.level}/3). Iteration: {iteration}.\n"
             f"Goal: Achieve 130/100 quality score. {consensus_rule}\n"
             f"Squad:\n{info}\n\n"
-            "Return ONLY high-density Python code inside ```python blocks. No fluff."
+            f"Return ONLY high-density code inside ```{lang} blocks. No fluff."
         )
 
-    def _extract_code(self, content: str) -> str | None:
+    def _extract_code(self, content: str, filename: str) -> str | None:
         """Extract and validate python code from LLM string output."""
         clean_code = None
-        match = re.search(r"```python\n(.*?)```", content, re.DOTALL)
+        match = re.search(r"```[a-z]*\n(.*?)```", content, re.DOTALL)
         if match:
             clean_code = match.group(1).strip() + "\n"
         else:
-            raw_clean = content.replace("```python", "").replace("```", "").strip()
-            is_python = any(word in raw_clean for word in ["def ", "import ", "class ", "from "])
-            if raw_clean and is_python:
+            raw_clean = re.sub(r"```[a-z]*", "", content)
+            raw_clean = raw_clean.replace("```", "").strip()
+            if raw_clean:
                 clean_code = raw_clean + "\n"
 
         if not clean_code:
             logger.error("Swarm produced no valid code block.")
             return None
 
-        # 🔬 AST Validation (130/100 standard: never return broken syntax)
-        try:
-            ast.parse(clean_code)
-            return clean_code
-        except SyntaxError as e:
-            logger.error("Swarm hallucinated invalid Python syntax: %s", e)
-            return None
+        # 🔬 AST Validation ONLY for script languages supported natively
+        if filename.endswith(".py"):
+            try:
+                ast.parse(clean_code)
+                return clean_code
+            except SyntaxError as e:
+                logger.error("Swarm hallucinated invalid Python syntax: %s", e)
+                return None
+            
+        return clean_code
 
     async def audit_files(self, file_paths: list[Path]) -> list[str]:
         """Perform a semantic audit of a set of files using the swarm in parallel."""

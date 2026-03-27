@@ -1,0 +1,183 @@
+:root {
+    --bg-color: #050505;
+    --fg-color: #e0e0e0;
+    --accent-color: #2b3be5;
+    --accent-glow: rgba(43, 59, 229, 0.4);
+    --secondary-accent: #ff00a0;
+    --glass-bg: rgba(10, 10, 10, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --font-heading: 'Outfit', sans-serif;
+    --font-body: 'Inter', sans-serif;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg-color);
+    color: var(--fg-color);
+    font-family: var(--font-body);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.industrial-noir {
+    background-image: 
+        radial-gradient(circle at 50% 50%, var(--accent-glow) 0%, transparent 70%),
+        linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 100% 100%, 50px 50px, 50px 50px;
+}
+
+.glass-container {
+    background: var(--glass-bg);
+    backdrop-filter: blur(15px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    width: 90vw;
+    max-width: 1000px;
+    height: 80vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.9);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Header */
+.apex-header {
+    padding: 20px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+#main-title {
+    font-family: var(--font-heading);
+    font-weight: 900;
+    font-size: 1.5rem;
+    letter-spacing: 2px;
+}
+
+#main-title .accent {
+    color: var(--accent-color);
+    text-shadow: 0 0 10px var(--accent-color);
+}
+
+.badge {
+    background: var(--accent-color);
+    padding: 5px 15px;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+}
+
+/* Viewport */
+.viewport {
+    flex: 1;
+    overflow-y: auto;
+    padding: 40px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent-color) transparent;
+}
+
+/* Scene Elements */
+.title {
+    font-family: var(--font-heading);
+    color: var(--accent-color);
+    font-size: 2rem;
+    margin-bottom: 20px;
+}
+
+.desc {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #ccc;
+    margin-bottom: 30px;
+}
+
+.choices {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.choice-btn {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    color: #fff;
+    padding: 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+    text-align: left;
+}
+
+.choice-btn:hover {
+    background: var(--accent-color);
+    border-color: #fff;
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px var(--accent-glow);
+}
+
+/* Animations */
+.fade-in {
+    animation: fadeIn 0.8s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes glitch {
+    0% { clip: rect(42px, 9999px, 44px, 0); }
+    5% { clip: rect(12px, 9999px, 59px, 0); }
+    10% { clip: rect(48px, 9999px, 29px, 0); }
+    15% { clip: rect(11px, 9999px, 73px, 0); }
+    100% { clip: rect(0, 0, 0, 0); }
+}
+
+/* GAMBITERO CORE UI STYLES */
+.gamb-scroll-row {
+    display: flex;
+    overflow-x: auto;
+    gap: 10px;
+    padding: 10px 0;
+    scrollbar-width: none;
+}
+.gamb-scroll-item {
+    flex: 0 0 150px;
+    background: #111;
+    border: 1px solid #333;
+    border-radius: 10px;
+    padding: 10px;
+    text-align: center;
+}
+.gamb-scroll-item img {
+    max-width: 100%;
+    border-radius: 5px;
+}
+.winner-scroll {
+    border-color: gold;
+    box-shadow: 0 0 15px rgba(255,215,0,0.3);
+}
+
+.cterm-deep-research {
+    background: #000;
+    border: 1px solid #00ff33;
+}
+.cterm-shake-x100 {
+    animation: shake 0.1s infinite;
+}
+@keyframes shake {
+    0% { transform: translate(1px, 1px) rotate(0deg); }
+    10% { transform: translate(-1px, -2px) rotate(-1deg); }
+    20% { transform: translate(-3px, 0px) rotate(1deg); }
+    30% { transform: translate(3px, 2px) rotate(0deg); }
+    100% { transform: translate(1px, -1px) rotate(0deg); }
+}

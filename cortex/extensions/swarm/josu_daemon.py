@@ -269,7 +269,6 @@ class JosuProactiveDaemon:
                 #   agent.live()
 
                 # For now: delegate to AgentToolkit + simple heuristic
-                from cortex.extensions.aether.tools import AgentToolkit
 
                 toolkit = AgentToolkit(wt_path)
 

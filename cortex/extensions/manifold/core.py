@@ -9,8 +9,6 @@ import asyncio
 import logging
 from pathlib import Path
 
-from cortex.extensions.aether.models import AgentTask, TaskStatus
-from cortex.extensions.aether.tools import AgentToolkit
 from cortex.extensions.manifold.convergence import ConvergenceEngine
 from cortex.extensions.manifold.dimensions import (
     CreationDimension,
@@ -113,7 +111,7 @@ class TesseractManifold:
 
             # Map the reality to the wave metrics
             state.metrics.siege_survival_rate = 1.0 if valid else 0.5
-            state.metrics.entropy_delta = -1.0 if valid else 1.0
+            state.metrics.exergy_delta = 1.0 if valid else -1.0
             state.metrics.prediction_accuracy = 0.8  # Stub for real D1 tracking
             state.metrics.fitness_score = 0.9 if valid else 0.6
             state.metrics.intent_drift = 0.05

@@ -83,8 +83,8 @@ async def manager(mock_l1, mock_l2, mock_l3, mock_encoder):
 async def test_process_interaction_no_overflow(manager, mock_l1, mock_l3):
     """Test standard interaction flow without L1 overflow."""
     # Ensure DigitalEndocrine is mockable so we can verify it was called
-    manager._endocrine = MagicMock()
-    manager._endocrine.ingest_context = MagicMock()
+    manager._gradient = MagicMock()
+    manager._gradient.ingest_context = MagicMock()
 
     event = await manager.process_interaction(
         role="user",
@@ -101,8 +101,8 @@ async def test_process_interaction_no_overflow(manager, mock_l1, mock_l3):
     assert appended_event.content == "Test processing"
 
     # 2. Endocrine ingested context
-    manager._endocrine.ingest_context.assert_called_once()
-    args, kwargs = manager._endocrine.ingest_context.call_args
+    manager._gradient.ingest_context.assert_called_once()
+    args, kwargs = manager._gradient.ingest_context.call_args
     assert args[0] == "Test processing"
     assert kwargs["tenant_id"] == "tenant_x"
 
@@ -234,6 +234,97 @@ async def test_store_direct_pipeline(manager, mock_mem0_pipeline):
     assert result_id == "engram_123"
     manager._membrane.evaluate.assert_called_once()
     manager.thalamus.filter.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_store_preserves_membrane_metadata_patch_without_mutating_input(manager):
+    """Membrane metadata must persist into the candidate without mutating caller input."""
+    admit_result = AdmitResult(
+        action=Action.ADMIT,
+        diagnostic=Diagnostic(
+            exergy_score=0.92,
+            behavioral_score=1.0,
+            state=MembraneState.ACTIVE,
+            reasons=[],
+        ),
+        metadata_patch={"membrane_state": "active", "exergy": 0.92},
+    )
+    manager._membrane = MagicMock()
+    manager._membrane.evaluate = MagicMock(return_value=admit_result)
+    manager.thalamus.filter = AsyncMock(return_value=(True, "encode:new", None))
+
+    observed_candidate: CortexSemanticEngram | None = None
+
+    async def _capture_gate(*, candidate, precision_mode):
+        nonlocal observed_candidate
+        observed_candidate = candidate
+        return "reset", candidate
+
+    manager._resonance_gate.gate = AsyncMock(side_effect=_capture_gate)
+
+    original_metadata = {"origin": "user"}
+
+    with (
+        patch.object(type(manager), "_check_deduplication", return_value=None),
+        patch.object(type(manager._schema_engine), "match_schema", return_value=None),
+    ):
+        result_id = await manager.store(
+            tenant_id="tenant_patch",
+            project_id="proj",
+            content="High-value fact",
+            fact_type="knowledge",
+            metadata=original_metadata,
+        )
+
+    assert observed_candidate is not None
+    assert result_id == observed_candidate.id
+    assert observed_candidate.metadata["origin"] == "user"
+    assert observed_candidate.metadata["membrane_state"] == "active"
+    assert observed_candidate.metadata["exergy"] == 0.92
+    assert observed_candidate.metadata["confidence_score"] == 0.8
+    assert original_metadata == {"origin": "user"}
+
+
+@pytest.mark.asyncio
+async def test_store_use_bus_emits_enriched_metadata(manager):
+    """Bus emission must include membrane-enriched metadata, not the stale input dict."""
+    admit_result = AdmitResult(
+        action=Action.ADMIT,
+        diagnostic=Diagnostic(
+            exergy_score=0.88,
+            behavioral_score=1.0,
+            state=MembraneState.ACTIVE,
+            reasons=[],
+        ),
+        metadata_patch={"membrane_state": "active", "exergy": 0.88},
+    )
+    manager._membrane = MagicMock()
+    manager._membrane.evaluate = MagicMock(return_value=admit_result)
+    manager.thalamus.filter = AsyncMock(return_value=(True, "encode:new", None))
+    manager._bus = object()
+
+    with (
+        patch.object(type(manager), "_check_deduplication", return_value=None),
+        patch.object(type(manager._schema_engine), "match_schema", return_value=None),
+        patch.object(type(manager), "_emit_to_bus", new_callable=AsyncMock) as mock_emit_to_bus,
+    ):
+        mock_emit_to_bus.return_value = "bus:ok"
+        result = await manager.store(
+            tenant_id="tenant_bus",
+            project_id="proj-bus",
+            content="Bus fact",
+            fact_type="knowledge",
+            metadata={"origin": "ui"},
+            use_bus=True,
+        )
+
+    assert result == "bus:ok"
+    mock_emit_to_bus.assert_awaited_once()
+    emitted_metadata = mock_emit_to_bus.await_args.args[6]
+    assert emitted_metadata["origin"] == "ui"
+    assert emitted_metadata["membrane_state"] == "active"
+    assert emitted_metadata["exergy"] == 0.88
+    assert emitted_metadata["confidence_score"] == 0.8
 
 
 @pytest.mark.asyncio

@@ -87,7 +87,7 @@ class FrontierDaemon:
 
         for owner, repo in discovery_targets:
             leads = await bounty_service.scan_repository(owner, repo)
-            ranked = bounty_service.rank_leads(leads)
+            ranked = await bounty_service.rank_leads(leads)
             for lead in ranked:
                 logger.info("[FRONTIER] High-exergy bounty found: %s (%s)", lead.title, lead.reward_usd)
 

@@ -1,6 +1,7 @@
 import argparse
 import asyncio
 import logging
+from collections.abc import Sequence
 from datetime import datetime
 
 from cortex.extensions.wealth.scanner import FundingRateScanner
@@ -9,7 +10,6 @@ from cortex.services.bounty_service import BountyLead, BountyService
 from cortex.swarm.bridges.bounty_bridge import BountySwarmBridge
 from cortex.swarm.factory import SwarmFactory
 from cortex.swarm.manager import SwarmManager
-from typing import Sequence
 
 logger = logging.getLogger("cortex.ouroboros")
 
@@ -23,7 +23,7 @@ class OuroborosEngine:
     def __init__(self, ledger: SovereignLedger, swarm_manager: SwarmManager, min_exergy: float = 50.0):
         self.ledger = ledger
         self.swarm_manager = swarm_manager
-        self.factory = SwarmFactory()
+        self.factory = SwarmFactory(manager=self.swarm_manager)
         self.min_exergy = min_exergy
 
         # Initialize Services
@@ -42,7 +42,7 @@ class OuroborosEngine:
             ("fastapi", "fastapi"),
         ]
 
-    def _verify_discovery(self, bounties: Sequence[BountyLead | Any], opps: list) -> bool:
+    def _verify_discovery(self, bounties: Sequence[BountyLead], opps: list) -> bool:
         """Byzantine fault tolerance check (Ω₁)."""
         # Logic: Ensure discovery isn't empty and has internal consistency
         # e.g., if we find 100 bounties in 1 second, it's likely a scan error/ghost.
@@ -68,7 +68,7 @@ class OuroborosEngine:
         results = await asyncio.gather(*bounty_coros, wealth_coro)
 
         # Unpack results: first N are bounties, last is wealth
-        bounty_results = list(results[:-1])
+        bounty_results = list(results)[:-1]
         opportunities = results[-1]
         bounty_leads = [lead for sublist in bounty_results for lead in sublist]
 
@@ -77,7 +77,7 @@ class OuroborosEngine:
             return
 
         # 2. Valuation Phase (Ω₂)
-        ranked_bounties = self.bounty_service.rank_leads(bounty_leads)
+        ranked_bounties = await self.bounty_service.rank_leads(bounty_leads)
         potential_exergy = self._calculate_cycle_exergy(ranked_bounties, opportunities)
 
         # 3. Proposal Phase (Ω₉)
@@ -118,9 +118,11 @@ async def main():
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 
-    ledger = SovereignLedger()
-    manager = SwarmManager()
-    engine = OuroborosEngine(ledger, manager, min_exergy=args.min_exergy)
+    from cortex.engine import CortexEngine
+    engine = CortexEngine()
+    ledger = engine.ledger or SovereignLedger(engine)
+    manager = engine.manager or SwarmManager(engine)
+    ouroboros = OuroborosEngine(ledger, manager, min_exergy=args.min_exergy)
 
     if args.continuous:
         logger.info("Starting Ouroboros Omega (CONTINUOUS mode, %ds)", args.interval)

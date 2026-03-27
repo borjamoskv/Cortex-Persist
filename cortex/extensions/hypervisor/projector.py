@@ -51,7 +51,7 @@ class EventProjector:
         # 2. Digital Endocrine signal (Neural-Growth)
         tasks.append(
             asyncio.create_task(
-                self._signal_endocrine("neural_growth", 0.3),
+                self._signal_gradient("neural_growth", 0.3),
                 name=f"endocrine_{fact_id}",
             )
         )
@@ -76,7 +76,7 @@ class EventProjector:
         Lighter than on_remember — just endocrine awareness.
         """
         try:
-            await self._signal_endocrine("awareness", 0.1)
+            await self._signal_gradient("awareness", 0.1)
         except Exception:  # noqa: BLE001
             pass
 
@@ -95,7 +95,7 @@ class EventProjector:
         except (AttributeError, TypeError, ValueError) as e:
             logger.debug("Semantic pulse skipped: %s", e)
 
-    async def _signal_endocrine(self, hormone: str, intensity: float) -> None:
+    async def _signal_gradient(self, hormone: str, intensity: float) -> None:
         """Signal the Digital Endocrine system if available."""
         try:
             from cortex.extensions.sovereign.endocrine import DigitalEndocrine

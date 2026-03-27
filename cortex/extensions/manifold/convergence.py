@@ -19,7 +19,7 @@ class ConvergenceEngine:
         to_amplify = []
         metrics = state.metrics
 
-        if metrics.entropy_delta > 0:
+        if metrics.exergy_delta < 0:
             to_amplify.append(DimensionType.D4_VALIDATION)
 
         if metrics.siege_survival_rate < 0.95:

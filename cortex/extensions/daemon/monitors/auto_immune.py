@@ -14,8 +14,6 @@ from cortex.extensions.daemon.models import AGENT_DIR, DEFAULT_STALE_HOURS
 from cortex.extensions.daemon.monitors.base import BaseMonitor
 
 try:
-    from cortex.extensions.aether.models import AgentTask, TaskSource
-    from cortex.extensions.aether.queue import TaskQueue
 
     _AETHER_AVAILABLE = True
 except ImportError:

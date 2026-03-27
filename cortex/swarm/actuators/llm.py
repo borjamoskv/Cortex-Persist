@@ -31,19 +31,31 @@ class LLMActuator(ActuatorProtocol):
         self, task: str, context: dict[str, Any], task_id: str | None = None
     ) -> ActuatorResponse:
         """Execute a task via the LLM router."""
-        logger.info("LLMActuator: Executing task %s with model %s", task_id or "anon", self._model_id)
+        logger.info(
+            "LLMActuator: Executing task %s with model %s",
+            task_id or "anon",
+            self._model_id,
+        )
 
         try:
             intent_profile = IntentProfile(self._intent)
         except ValueError:
             intent_profile = IntentProfile.GENERAL
 
+        working_memory = []
+        if instructions := context.get('instructions', ''):
+            working_memory.append({
+                "role": "system",
+                "content": f"Dynamic Context/Instructions: {instructions}"
+            })
+        working_memory.append({"role": "user", "content": task})
+
         prompt = CortexPrompt(
             system_instruction=(
                 f"You are a specialized Swarm Agent with the following intent: {self._intent}. "
-                f"Context: {context.get('instructions', '')}"
+                "Maintain strict adherence to CORTEX protocols."
             ),
-            working_memory=[{"role": "user", "content": task}],
+            working_memory=working_memory,
             intent=intent_profile,
             project=context.get("project", "swarm"),
         )

@@ -164,29 +164,57 @@ class AsyncCausalGraph:
             pass
 
         changes: list[dict[str, Any]] = []
-        queue: list[tuple[int, int]] = [(fact_id, 0)]
-        visited: set[int] = {fact_id}
         now = datetime.now(timezone.utc).isoformat()
+        
+        # O(1) CTE to fetch all descendants, their min depths, and their current facts fields
+        sql_descendants = """
+            WITH RECURSIVE taint_graph(child_id, depth, path) AS (
+                SELECT fact_id, 1, ',' || ? || ',' || fact_id || ','
+                FROM causal_edges
+                WHERE parent_id = ? AND tenant_id = ? AND edge_type != ?
 
-        while queue:
-            current_id, depth = queue.pop(0)
+                UNION ALL
 
-            if depth > 0:
-                # Read current confidence
-                old_conf = "C5"
-                old_meta_raw = "{}"
-                async with self.conn.execute(
-                    "SELECT confidence, metadata FROM facts WHERE id = ? AND tenant_id = ?",
-                    (current_id, tenant_id),
-                ) as cur:
-                    row = await cur.fetchone()
-                    if row:
-                        old_conf = row[0] or "C5"
-                        old_meta_raw = row[1] or "{}"
-
-                from cortex.crypto import get_default_encrypter
-
-                enc = get_default_encrypter()
+                SELECT ce.fact_id, tg.depth + 1, tg.path || ce.fact_id || ','
+                FROM causal_edges ce
+                JOIN taint_graph tg ON ce.parent_id = tg.child_id
+                WHERE ce.tenant_id = ?
+                  AND ce.edge_type != ?
+                  AND ce.fact_id != ?
+                  AND instr(tg.path, ',' || ce.fact_id || ',') = 0
+            )
+            SELECT tg.child_id, MIN(tg.depth) as min_depth, f.confidence, f.metadata
+            FROM taint_graph tg
+            JOIN facts f ON tg.child_id = f.id
+            WHERE f.tenant_id = ?
+            GROUP BY tg.child_id;
+        """
+        
+        updates = []
+        edge_inserts = []
+        
+        from cortex.crypto import get_default_encrypter
+        enc = get_default_encrypter()
+        
+        async with self.conn.execute(
+            sql_descendants,
+            (
+                fact_id,
+                fact_id,
+                tenant_id,
+                EDGE_TAINTED_BY,
+                tenant_id,
+                EDGE_TAINTED_BY,
+                fact_id,
+                tenant_id,
+            ),
+        ) as cur:
+            async for row in cur:
+                current_id = row[0]
+                depth = row[1]
+                old_conf = row[2] or "C5"
+                old_meta_raw = row[3] or "{}"
+                
                 try:
                     old_meta = enc.decrypt_json(old_meta_raw, tenant_id=tenant_id) or {}
                     new_conf = _downgrade_confidence(old_conf, depth)
@@ -199,34 +227,10 @@ class AsyncCausalGraph:
                         current_id,
                     )
                     continue
-
-                await self.conn.execute(
-                    "UPDATE facts SET confidence = ?, metadata = ? "
-                    "WHERE id = ? AND tenant_id = ?",
-                    (new_conf, encrypted_meta, current_id, tenant_id),
-                )
-
-                # Record taint edge
-                try:
-                    await self.conn.execute(
-                        "INSERT INTO causal_edges "
-                        "(fact_id, parent_id, edge_type, "
-                        "project, tenant_id) "
-                        "VALUES (?, ?, ?, ?, ?)",
-                        (
-                            current_id,
-                            fact_id,
-                            EDGE_TAINTED_BY,
-                            project,
-                            tenant_id,
-                        ),
-                    )
-                except aiosqlite.Error as e:
-                    logger.debug(
-                        "Failed to record taint link: %s",
-                        e,
-                    )
-
+                    
+                updates.append((new_conf, encrypted_meta, current_id, tenant_id))
+                edge_inserts.append((current_id, fact_id, EDGE_TAINTED_BY, project, tenant_id))
+                
                 changes.append(
                     {
                         "fact_id": current_id,
@@ -235,24 +239,30 @@ class AsyncCausalGraph:
                         "hops": depth,
                     },
                 )
-
-            # Traverse structural edges only
-            async with self.conn.execute(
-                "SELECT fact_id FROM causal_edges "
-                "WHERE parent_id = ? AND tenant_id = ? AND edge_type != ?",
-                (current_id, tenant_id, EDGE_TAINTED_BY),
-            ) as cursor:
-                async for row in cursor:
-                    child_id: int = row[0]
-                    if child_id not in visited:
-                        visited.add(child_id)
-                        queue.append((child_id, depth + 1))
+                
+        if updates:
+            await self.conn.executemany(
+                "UPDATE facts SET confidence = ?, metadata = ? WHERE id = ? AND tenant_id = ?",
+                updates,
+            )
+            
+        if edge_inserts:
+            try:
+                await self.conn.executemany(
+                    "INSERT INTO causal_edges "
+                    "(fact_id, parent_id, edge_type, project, tenant_id) "
+                    "VALUES (?, ?, ?, ?, ?)",
+                    edge_inserts,
+                )
+            except aiosqlite.Error as e:
+                logger.debug("Failed to record taint links: %s", e)
 
         # Record to Ledger (Ω₃)
         if len(changes) > 0:
             from cortex.ledger import SovereignLedger
+
             ledger = SovereignLedger(self.conn)
-            ledger.record_transaction(
+            await ledger.record_transaction(
                 project=project,
                 action="propagate_taint",
                 detail={
@@ -271,23 +281,26 @@ class AsyncCausalGraph:
 
     async def calculate_blast_radius(self, fact_id: int, tenant_id: str) -> int:
         """Calculate the number of dependent facts in the causal DAG."""
-        count: int = 0
-        queue: list[int] = [fact_id]
-        visited: set[int] = {fact_id}
+        sql = """
+            WITH RECURSIVE taint_graph(child_id, path) AS (
+                SELECT fact_id, ',' || ? || ',' || fact_id || ','
+                FROM causal_edges
+                WHERE parent_id = ? AND tenant_id = ?
 
-        while queue:
-            current_id = queue.pop(0)
-            async with self.conn.execute(
-                "SELECT fact_id FROM causal_edges WHERE parent_id = ? AND tenant_id = ?",
-                (current_id, tenant_id),
-            ) as cursor:
-                async for row in cursor:
-                    child_id = row[0]
-                    if child_id not in visited:
-                        visited.add(child_id)
-                        queue.append(child_id)
-                        count += 1
-        return count
+                UNION ALL
+
+                SELECT ce.fact_id, tg.path || ce.fact_id || ','
+                FROM causal_edges ce
+                JOIN taint_graph tg ON ce.parent_id = tg.child_id
+                WHERE ce.tenant_id = ?
+                  AND ce.fact_id != ?
+                  AND instr(tg.path, ',' || ce.fact_id || ',') = 0
+            )
+            SELECT COUNT(DISTINCT child_id) FROM taint_graph;
+        """
+        async with self.conn.execute(sql, (fact_id, fact_id, tenant_id, tenant_id, fact_id)) as cur:
+            row = await cur.fetchone()
+            return row[0] if row else 0
 
 
 class AsyncCausalOracle:
@@ -347,7 +360,9 @@ class EpisodicSealer:
     def __init__(self, ledger: Any):
         self.ledger = ledger
 
-    async def seal_context(self, agent_key: str, data: dict[str, Any], metadata: dict[str, Any]) -> None:
+    async def seal_context(
+        self, agent_key: str, data: dict[str, Any], metadata: dict[str, Any]
+    ) -> None:
         """
         Record the eviction event in the Sovereign Ledger.
         Metadata contains the cryptographic proof (current_proof) and previous hash.
@@ -357,7 +372,7 @@ class EpisodicSealer:
 
         # We seal context as a 'compaction' event in the ledger
         # This allows future retrieval for 'Historical Context Recovery'
-        self.ledger.record_transaction(
+        await self.ledger.record_transaction(
             project=project,
             action="anamnesis_seal",
             detail={
@@ -365,8 +380,8 @@ class EpisodicSealer:
                 "data_summary": f"Eviction of {len(json.dumps(data))} bytes",
                 "proof": metadata.get("current_proof"),
                 "sequence": metadata.get("sequence"),
-                "event_type": metadata.get("event_type", "EVICTION")
+                "event_type": metadata.get("event_type", "EVICTION"),
             },
-            tenant_id=tenant_id
+            tenant_id=tenant_id,
         )
         logger.info("🎬 [Ω-ANAMNESIS] Sealed episodic memory for %s", agent_key)

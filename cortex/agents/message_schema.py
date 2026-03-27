@@ -31,6 +31,10 @@ class MessageKind(str, Enum):
     HANDOFF_RESULT = "handoff.result"
     TASK_COMPLETED = "task.completed"
     TASK_FAILED = "task.failed"
+    
+    # Economics / Flywheel
+    CAPITAL_INBOUND = "swarm.capital.inbound"
+    CAPITAL_REINVEST = "swarm.capital.reinvest"
 
     # Old stuff for built-ins MVP backwards compatibility
     TASK_RESULT = "task.result"

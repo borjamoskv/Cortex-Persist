@@ -1,4 +1,4 @@
-"""Tests for cortex.immune.error_boundary — Ω₅ Antifragile Decorator."""
+"""Tests for cortex.quarantine.error_boundary — Ω₅ Antifragile Decorator."""
 
 from __future__ import annotations
 

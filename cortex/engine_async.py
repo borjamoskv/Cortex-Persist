@@ -26,6 +26,7 @@ from cortex.engine.store_mixin import StoreMixin
 from cortex.graph import get_graph as _get_graph
 from cortex.ledger import SovereignLedger
 from cortex.memory.temporal import now_iso
+from cortex.swarm.orchestrator import MasterOrchestrator as CuatridaOrchestrator
 from cortex.utils.canonical import canonical_json, compute_tx_hash
 from cortex.utils.result import Err, Ok, Result
 
@@ -131,6 +132,19 @@ class AsyncCortexEngine(
         if self._ledger is None:
             self._ledger = SovereignLedger(self._pool)
         return self._ledger
+
+    async def record_transaction(
+        self, project: str, action: str, detail: dict[str, Any], tenant_id: str = "default"
+    ) -> str:
+        """SovereignLedger proxy method for writing audits."""
+        tenant_id = self._resolve_tenant(tenant_id)
+        async with self.session() as conn:
+            tx_id = await self._log_transaction(conn, project, action, detail, tenant_id=tenant_id)
+            async with conn.execute(
+                "SELECT hash FROM transactions WHERE id = ?", (tx_id,)
+            ) as cursor:
+                row = await cursor.fetchone()
+                return row[0] if row else ""
 
     async def _log_transaction(
         self, conn: aiosqlite.Connection, project: str, action: str, detail: dict[str, Any], tenant_id: str = "default"

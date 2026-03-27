@@ -14,7 +14,7 @@ from typing import TypedDict, cast
 from pydantic import BaseModel, Field
 
 from cortex.engine.aleph_omega import AxiomaticLeapEngine
-from cortex.engine.endocrine import ENDOCRINE, HormoneType
+from cortex.engine.gradient import GRADIENT, GradientType
 from cortex.extensions.swarm.byzantine import ByzantineConsensus
 
 __all__ = [
@@ -193,10 +193,10 @@ class CentauroEngine:
                 "Initiating LEGION Protocol. Mission: %s | Formation: %s", mission, formation
             )
             # 🧬 Endocrine modulation: High ADRENALINE forces BLITZ regardless of intention
-            adrenaline = ENDOCRINE.get_level(HormoneType.ADRENALINE)
+            adrenaline = GRADIENT.get_level(GradientType.ADRENALINE)
             if adrenaline > 0.7 and formation not in [Formation.BLITZ, Formation.GHOST]:
                 logger.warning(
-                    "🧬 [ENDOCRINE] High Adrenaline (%.2f). Forcing BLITZ formation.", adrenaline
+                    "🧬 [GRADIENT] High Adrenaline (%.2f). Forcing BLITZ formation.", adrenaline
                 )
                 formation = Formation.BLITZ
 
@@ -215,7 +215,7 @@ class CentauroEngine:
             if winning:
                 logger.info("Consensus Achieved (UNANIMOUS or MAJORITY).")
                 # 🧬 Dopamine Reward
-                ENDOCRINE.pulse(HormoneType.DOPAMINE, 0.1, reason="Consensus Success")
+                GRADIENT.pulse(GradientType.DOPAMINE, 0.1, reason="Consensus Success")
                 result = {
                     "status": "success",
                     "solution": winning,
@@ -223,7 +223,7 @@ class CentauroEngine:
                     "formation": formation,
                 }
             else:
-                ENDOCRINE.pulse(HormoneType.CORTISOL, 0.2, reason="Consensus Failed")
+                GRADIENT.pulse(GradientType.CORTISOL, 0.2, reason="Consensus Failed")
                 logger.warning("Consensus Failed (DEADLOCK or SPLIT). Triggering ALEPH-Ω Leap...")
                 try:
                     leap = await self._aleph.execute_leap(mission)

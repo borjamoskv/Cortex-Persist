@@ -1,0 +1,19 @@
+1. Implementación efímera: El código es andamio. Se levanta para construir y se retira cuando la estructura se sostiene sola.
+2. Propósito persistent: La intención es el plano. Sin plano, cualquier martillo construye caos.
+3. Memoria verificable: Si una decisión no queda registrada, el sistema no puede aprender de ella.
+4. Reescritura inevitable: Todo sistema serio se reescribe varias veces durante su vida útil.
+5. Arquitectura sobre herramienta: Un stack es reemplazable. Una arquitectura coherente es transferible.
+6. Autonomía operativa: Un sistema maduro continúa funcionando aunque su creador desaparezca.
+7. Registro soberano: Las decisiones críticas deben quedar inscritas en una memoria verificable.
+8. Control por principios: La supervisión constante es síntoma de reglas mal diseñadas.
+9. Entropía acumulativa: La deuda técnica crece cuando el sistema deja de cuestionar sus propias estructuras.
+10. Horizonte temporal largo: Diseñar para décadas cambia completamente las decisiones de hoy.
+11. Sistemas antifrágiles: Un sistema robusto mejora cuando detecta y corrige sus propios fallos.
+12. Obra sobre herramienta: La arquitectura que importa es la que sigue en pie cuando todas las herramientas han cambiado.
+
+El código es andamio.
+La intención es plano.
+La memoria es cimiento.
+La autonomía es cuadrilla.
+
+Eso es lo que diferencia un proyecto de software de una catedral.

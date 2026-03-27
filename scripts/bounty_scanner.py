@@ -80,7 +80,12 @@ class BountyLead:
 def evaluate(lead: BountyLead) -> BountyLead:
     """Apply thermodynamic filter inline. Mutates lead in place."""
     diff_weight = {"low": 2, "medium": 5, "high": 8, "critical": 10}.get(lead.difficulty, 5)
-    context_lines = 100 if diff_weight <= 2 else (300 if diff_weight <= 5 else 500)
+    # [Ω₉] Context lines recalibration to prevent yield inflation fraud.
+    # Immunefi audits require full protocol DAG traversal. Algora is scoped to issues.
+    if lead.platform == "Immunefi":
+        context_lines = 1500 if diff_weight <= 5 else (8000 if diff_weight <= 8 else 35000)
+    else:
+        context_lines = 150 if diff_weight <= 2 else (600 if diff_weight <= 5 else 2500)
 
     exergy = Decimal(str(lead.reward_usd))
     entropy_base = Decimal(diff_weight) * 50 + Decimal(context_lines) * Decimal("0.1")
@@ -382,7 +387,7 @@ async def persist_to_ledger(accepted: list[BountyLead]) -> None:
                 content=content,
                 fact_type="scan_lead",
                 tags=["bounty", "scan", lead.platform.lower()],
-                confidence="C3",
+                confidence="C4",  # [Ω₁] API data is official documentation level (C4)
                 source="scanner:bounty_scanner.py",
                 meta={
                     "platform": lead.platform,

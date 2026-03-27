@@ -34,6 +34,21 @@ def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+@dataclass
+class ReasoningPathFingerprint:
+    """Unique cognitive fingerprint of a reasoning trajectory (Ω14).
+
+    Captures the structural and logical 'shape' of a causal chain.
+    """
+
+    path_id: str = field(default_factory=next_id)
+    causal_depth: int = 0
+    branching_factor: float = 0.0
+    intent_stability: float = 1.0  # 1.0 = single intent, 0.0 = chaotic
+    confidence_profile: dict[str, float] = field(default_factory=dict)
+    structural_hash: str = ""  # Hash of the topology + content types
+    drift_score: float = 0.0  # Deviation from user's prior CognitiveFingerprint
+
 @dataclass()
 class CausalEpisode:
     """A DAG of causally-linked facts forming a coherent temporal episode.
@@ -50,6 +65,8 @@ class CausalEpisode:
     depth: int = 0
     ghost_count: int = 0
     decision_count: int = 0
+    fingerprint: ReasoningPathFingerprint | None = None
+    byzantine_status: Literal["valid", "drifted", "faulty", "unknown"] = "unknown"
     created_at: float = field(default_factory=time.time)
 
     @property

@@ -35,7 +35,7 @@ class XIntelligenceClient:
     """Forensic-Grade X GraphQL Client."""
 
     def __init__(self, proxy: str | None = None):
-        self.client = httpx.AsyncClient(proxies=proxy, timeout=30.0)
+        self.client = httpx.AsyncClient(proxy=proxy, timeout=30.0)
         self.guest_token: str | None = None
         self.token_expiry: float = 0
         self.user_agent = (

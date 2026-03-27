@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LA CORRALA — El Mundo del Enemigo Asignado</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  :root{
+    --bg:#0A0A0A;
+    --bg2:#111111;
+    --bg3:#181818;
+    --accent:#2B3BE5;
+    --accent2:#E53B3B;
+    --accent3:#E5B53B;
+    --text:#E8E8E8;
+    --muted:#555;
+    --border:#1E1E1E;
+    --font-main:'Space Grotesk',sans-serif;
+    --font-mono:'Space Mono',monospace;
+  }
+
+  html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--font-main);}
+
+  /* === CANVAS WORLD === */
+  #world-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;}
+
+  /* === UI OVERLAY === */
+  #ui{position:fixed;top:0;left:0;width:100%;height:100%;z-index:10;pointer-events:none;display:flex;flex-direction:column;}
+
+  /* === HEADER === */
+  #header{padding:24px 32px;display:flex;align-items:flex-start;justify-content:space-between;pointer-events:all;}
+  #title-block h1{
+    font-size:clamp(18px,2vw,26px);
+    font-weight:700;
+    letter-spacing:-0.03em;
+    line-height:1.1;
+    color:#fff;
+  }
+  #title-block h1 span{color:var(--accent);}
+  #title-block p{
+    margin-top:4px;
+    font-size:11px;
+    color:var(--muted);
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    font-family:var(--font-mono);
+  }
+
+  /* === DRAIN METER === */
+  #drain-total{
+    text-align:right;
+  }
+  #drain-total .label{font-size:10px;color:var(--muted);font-family:var(--font-mono);letter-spacing:0.1em;text-transform:uppercase;}
+  #drain-total .value{
+    font-family:var(--font-mono);
+    font-size:clamp(28px,3vw,42px);
+    font-weight:700;
+    color:var(--accent2);
+    line-height:1;
+    margin-top:2px;
+    transition:color 0.3s;
+  }
+  #drain-total .unit{font-size:12px;color:var(--muted);margin-left:4px;}
+
+  /* === MIDDLE AREA (factions) === */
+  #middle{flex:1;display:flex;align-items:flex-end;padding:0 32px 20px;}
+
+  /* === FACTION PANEL === */
+  #faction-panel{
+    position:fixed;
+    left:32px;
+    top:50%;
+    transform:translateY(-50%);
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    pointer-events:all;
+    z-index:20;
+  }
+  .faction-btn{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:rgba(10,10,10,0.85);
+    border:1px solid var(--border);
+    border-radius:6px;
+    padding:8px 14px;
+    cursor:pointer;
+    transition:all 0.2s;
+    min-width:220px;
+    backdrop-filter:blur(8px);
+  }
+  .faction-btn:hover{border-color:#333;background:rgba(20,20,20,0.95);}
+  .faction-btn.active{border-color:var(--accent);background:rgba(43,59,229,0.12);}
+  .faction-btn.in-conflict{animation:pulse-border 1s ease-in-out infinite;}
+  @keyframes pulse-border{
+    0%,100%{border-color:var(--accent2);}
+    50%{border-color:rgba(229,59,59,0.3);}
+  }
+  .faction-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .faction-info{flex:1;}
+  .faction-name{font-size:11px;font-weight:600;color:#ccc;letter-spacing:0.02em;}
+  .faction-enemy{font-size:9px;color:var(--muted);font-family:var(--font-mono);margin-top:1px;}
+  .faction-energy{
+    font-family:var(--font-mono);
+    font-size:10px;
+    font-weight:700;
+    color:var(--accent2);
+    text-align:right;
+  }
+
+  /* === BOTTOM STATUS === */
+  #bottom-bar{
+    position:fixed;
+    bottom:0;
+    left:0;
+    right:0;
+    padding:16px 32px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:linear-gradient(to top, rgba(10,10,10,0.95) 60%, transparent);
+    pointer-events:all;
+    z-index:20;
+  }
+  #conflict-feed{
+    flex:1;
+    max-width:600px;
+    font-family:var(--font-mono);
+    font-size:10px;
+    color:var(--muted);
+    overflow:hidden;
+    height:32px;
+    position:relative;
+  }
+  .feed-line{
+    position:absolute;
+    left:0;
+    right:0;
+    transition:all 0.5s ease;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .feed-line .ts{color:#333;}
+  .feed-line .actor{color:var(--accent3);}
+  .feed-line .action{color:var(--text);}
+
+  #controls{
+    display:flex;
+    gap:10px;
+    align-items:center;
+  }
+  .ctrl-btn{
+    background:rgba(43,59,229,0.15);
+    border:1px solid rgba(43,59,229,0.3);
+    color:var(--accent);
+    padding:8px 16px;
+    border-radius:4px;
+    font-family:var(--font-mono);
+    font-size:10px;
+    cursor:pointer;
+    transition:all 0.2s;
+    letter-spacing:0.05em;
+  }
+  .ctrl-btn:hover{background:rgba(43,59,229,0.3);border-color:var(--accent);}
+  .ctrl-btn.red{background:rgba(229,59,59,0.15);border-color:rgba(229,59,59,0.3);color:var(--accent2);}
+  .ctrl-btn.red:hover{background:rgba(229,59,59,0.3);border-color:var(--accent2);}
+
+  /* === DETAIL PANEL === */
+  #detail-panel{
+    position:fixed;
+    right:32px;
+    top:50%;
+    transform:translateY(-50%);
+    width:260px;
+    background:rgba(10,10,10,0.92);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:20px;
+    backdrop-filter:blur(12px);
+    pointer-events:all;
+    z-index:20;
+    display:none;
+  }
+  #detail-panel.visible{display:block;}
+  #detail-panel h3{font-size:13px;font-weight:700;color:#fff;margin-bottom:4px;}
+  #detail-panel .vs{
+    font-family:var(--font-mono);
+    font-size:10px;
+    color:var(--accent2);
+    margin-bottom:14px;
+    letter-spacing:0.08em;
+  }
+  .stat-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #1a1a1a;}
+  .stat-row:last-child{border-bottom:none;}
+  .stat-label{font-size:10px;color:var(--muted);}
+  .stat-value{font-family:var(--font-mono);font-size:11px;font-weight:700;color:#ddd;}
+  .stat-value.neg{color:var(--accent2);}
+  .stat-value.acc{color:var(--accent3);}
+
+  #drain-bar-container{margin:12px 0 4px;height:4px;background:#1e1e1e;border-radius:2px;overflow:hidden;}
+  #drain-bar{height:100%;background:var(--accent2);border-radius:2px;transition:width 0.4s;}
+
+  /* === INTRO OVERLAY === */
+  #intro{
+    position:fixed;
+    inset:0;
+    background:var(--bg);
+    z-index:100;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    gap:0;
+  }
+  #intro-content{
+    max-width:560px;
+    text-align:center;
+    padding:40px;
+  }
+  #intro h1{
+    font-size:clamp(36px,5vw,56px);
+    font-weight:700;
+    letter-spacing:-0.05em;
+    line-height:1;
+    margin-bottom:8px;
+  }
+  #intro h1 .la{color:var(--muted);}
+  #intro h1 .corrala{color:#fff;}
+  #intro .subtitle{
+    font-family:var(--font-mono);
+    font-size:11px;
+    color:var(--muted);
+    letter-spacing:0.15em;
+    text-transform:uppercase;
+    margin-bottom:32px;
+  }
+  #intro .description{
+    font-size:14px;
+    color:#888;
+    line-height:1.7;
+    margin-bottom:40px;
+  }
+  #intro .description strong{color:#ccc;}
+  #enter-btn{
+    background:var(--accent);
+    color:#fff;
+    border:none;
+    padding:14px 40px;
+    border-radius:6px;
+    font-family:var(--font-mono);
+    font-size:12px;
+    letter-spacing:0.1em;
+    cursor:pointer;
+    transition:all 0.2s;
+  }
+  #enter-btn:hover{background:#3d50f0;transform:translateY(-1px);}
+
+  /* === AGENT TOOLTIP === */
+  #agent-tooltip{
+    position:fixed;
+    pointer-events:none;
+    z-index:50;
+    display:none;
+    background:rgba(10,10,10,0.95);
+    border:1px solid #222;
+    border-radius:6px;
+    padding:8px 12px;
+    font-family:var(--font-mono);
+    font-size:10px;
+    color:#aaa;
+    backdrop-filter:blur(8px);
+  }
+  #agent-tooltip .tt-name{color:#fff;font-weight:700;margin-bottom:2px;}
+  #agent-tooltip .tt-state{color:var(--accent3);}
+
+  /* === ENERGY GAUGE === */
+  #energy-gauge{
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    width:180px;
+    height:180px;
+    pointer-events:none;
+    z-index:5;
+    opacity:0.15;
+  }
+</style>
+</head>
+<body>
+
+<div id="intro">
+  <div id="intro-content">
+    <h1><span class="la">La </span><span class="corrala">Corrala</span></h1>
+    <p class="subtitle">El mundo del enemigo asignado · 2026</p>
+    <p class="description">
+      Un mundo donde 8 grupos sociales coexisten en el mismo espacio,<br/>
+      cada uno con su <strong>enemigo designado</strong> y la energía que consumen<br/>
+      <strong>peleando entre sí</strong> en lugar de construir.<br/><br/>
+      Nadie elige al enemigo. El enemigo ya está assignado.
+    </p>
+    <button id="enter-btn" onclick="enterWorld()">ENTRAR AL MUNDO →</button>
+  </div>
+</div>
+
+<canvas id="world-canvas"></canvas>
+
+<svg id="energy-gauge" viewBox="0 0 180 180">
+  <circle cx="90" cy="90" r="80" fill="none" stroke="#2B3BE5" stroke-width="1" stroke-dasharray="4 8" opacity="0.5"/>
+  <circle cx="90" cy="90" r="60" fill="none" stroke="#E53B3B" stroke-width="0.5" stroke-dasharray="2 6"/>
+  <circle cx="90" cy="90" r="40" fill="none" stroke="#E5B53B" stroke-width="0.5" stroke-dasharray="1 4"/>
+</svg>
+
+<div id="ui">
+  <div id="header">
+    <div id="title-block">
+      <h1><span>La Corrala</span> — Mundo</h1>
+      <p>Sistema de conflicto perpetuo · Tiempo real</p>
+    </div>
+    <div id="drain-total">
+      <div class="label">Energía drenada total</div>
+      <div class="value" id="drain-value">0<span class="unit">MJ</span></div>
+    </div>
+  </div>
+</div>
+
+<div id="faction-panel"></div>
+<div id="detail-panel" id="detail"></div>
+
+<div id="bottom-bar">
+  <div id="conflict-feed"></div>
+  <div id="controls">
+    <button class="ctrl-btn" onclick="togglePause()" id="pause-btn">⏸ PAUSAR</button>
+    <button class="ctrl-btn red" onclick="triggerCrisis()">⚡ CRISIS</button>
+    <button class="ctrl-btn" onclick="resetSim()" style="border-color:#333;color:#666;">↺ RESET</button>
+  </div>
+</div>
+
+<div id="agent-tooltip">
+  <div class="tt-name" id="tt-name"></div>
+  <div class="tt-state" id="tt-state"></div>
+</div>
+
+<script>
+const FACTIONS = [
+  { id:'mujeres',   name:'Mujeres',         enemy:'Hombres',         drain:'Debate de género',           color:'#C084D5', ecolor:'#5B8DDE' },
+  { id:'jovenes',   name:'Jóvenes',          enemy:'Jubilados',       drain:'"Me comen la pensión"',       color:'#5DD9C0', ecolor:'#E5965A' },
+  { id:'genz',      name:'GenZ',             enemy:'Millennials',     drain:'Identidad generacional',      color:'#70BAFF', ecolor:'#FF9F6B' },
+  { id:'veganos',   name:'Veganos',          enemy:'Omnívoros',       drain:'Dieta como ideología',        color:'#8BE56B', ecolor:'#E8A04D' },
+  { id:'animal',    name:'Animalistas',      enemy:'Cazad./Ganad.',   drain:'Ruralidad vs urbanidad',      color:'#F9E07A', ecolor:'#A87F55' },
+  { id:'indep',     name:'Independentistas', enemy:'Unionistas',      drain:'Identidad territorial',       color:'#E56B6B', ecolor:'#6BA8E5' },
+  { id:'pobresnew', name:'Pobres nuevos',    enemy:'Pobres viejos',   drain:'Migrantes y desplazamiento',  color:'#FF8FAA', ecolor:'#FFD06B' },
+  { id:'hombres',   name:'Hombres',         enemy:'Mujeres',          drain:'Debate de género',            color:'#5B8DDE', ecolor:'#C084D5' },
+];
+
+const CONFLICT_LINES = [
+  '{a} lanza un hilo de Twitter contra {b}',
+  '{a} comparte un artículo que destruye a {b}',
+  '{b} responde con estadísticas que invalidan a {a}',
+  '{a} y {b} se enzarzan en comentarios',
+  'Un medium post de {a} viraliza contra {b}',
+  '{b} abre un debate en Reddit sobre {a}',
+  '{a} organiza manifestación contra {b}',
+  '{b} hace meme viral atacando a {a}',
+  '{a} cancela a figura de {b}',
+  'Periodista de {b} escribe columna incendiaria sobre {a}',
+  '{a} y {b}: nuevo estudio "demuestra" quién tiene razón',
+  'Influencer de {a} provoca ira en {b}',
+];
+
+const canvas = document.getElementById('world-canvas');
+const ctx = canvas.getContext('2d');
+let W, H;
+let paused = false;
+let totalDrain = 0;
+let frame = 0;
+let agents = [];
+let particles = [];
+let selectedFaction = null;
+let conflictCounts = {};
+let energyDrained = {};
+
+// ---- RESIZE ----
+function resize(){
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resize);
+resize();
+
+// ---- FACTION STATE ----
+FACTIONS.forEach(f => { conflictCounts[f.id] = 0; energyDrained[f.id] = 0; });
+
+// ---- AGENTS ----
+class Agent {
+  constructor(faction, x, y){
+    this.faction = faction;
+    this.x = x || Math.random() * W;
+    this.y = y || Math.random() * H;
+    this.vx = (Math.random()-0.5)*0.8;
+    this.vy = (Math.random()-0.5)*0.8;
+    this.r = 4 + Math.random()*2;
+    this.state = 'wander'; // wander | seek | conflict | recoil
+    this.target = null;
+    this.conflictTimer = 0;
+    this.drainRate = 0;
+    this.alpha = 0;
+    this.pulsePhase = Math.random() * Math.PI * 2;
+  }
+
+  getEnemyFaction(){
+    const ef = this.faction.enemy;
+    return FACTIONS.find(f => f.name === ef) || FACTIONS.find(f => f.id !== this.faction.id);
+  }
+
+  update(){
+    if(paused) return;
+    this.alpha = Math.min(1, this.alpha + 0.02);
+    this.pulsePhase += 0.05;
+
+    if(this.state === 'wander'){
+      this.vx += (Math.random()-0.5)*0.1;
+      this.vy += (Math.random()-0.5)*0.1;
+      // wander toward center loosely
+      this.vx += (W/2 - this.x) * 0.00008;
+      this.vy += (H/2 - this.y) * 0.00008;
+      const speed = Math.hypot(this.vx, this.vy);
+      if(speed > 1.2){ this.vx = (this.vx/speed)*1.2; this.vy = (this.vy/speed)*1.2; }
+      // seek enemy occasionally
+      if(Math.random() < 0.002){ this.state = 'seek'; this.findTarget(); }
+    }
+
+    if(this.state === 'seek' && this.target){
+      if(!this.target || this.target.state === 'conflict'){
+        this.state = 'wander'; this.target = null; return;
+      }
+      const dx = this.target.x - this.x, dy = this.target.y - this.y;
+      const dist = Math.hypot(dx, dy);
+      if(dist < 20){
+        this.state = 'conflict';
+        this.target.state = 'conflict';
+        this.conflictTimer = 60 + Math.random()*120;
+        energyDrained[this.faction.id] += 1;
+        conflictCounts[this.faction.id]++;
+        totalDrain += 0.5;
+        logConflict(this.faction, this.target.faction);
+        spawnConflictParticles(this.x, this.y, this.faction.color, this.target.faction.color);
+      } else {
+        this.vx += (dx/dist)*0.15;
+        this.vy += (dy/dist)*0.15;
+        const s = Math.hypot(this.vx,this.vy);
+        if(s > 2){ this.vx=(this.vx/s)*2; this.vy=(this.vy/s)*2; }
+      }
+    }
+
+    if(this.state === 'conflict'){
+      this.conflictTimer--;
+      this.vx += (Math.random()-0.5)*0.3;
+      this.vy += (Math.random()-0.5)*0.3;
+      if(this.conflictTimer <= 0){
+        this.state = 'recoil';
+        this.vx = (Math.random()-0.5)*3;
+        this.vy = (Math.random()-0.5)*3;
+      }
+      totalDrain += 0.01;
+      energyDrained[this.faction.id] += 0.01;
+    }
+
+    if(this.state === 'recoil'){
+      this.vx *= 0.9; this.vy *= 0.9;
+      if(Math.hypot(this.vx,this.vy) < 0.2){ this.state = 'wander'; this.target = null; }
+    }
+
+    // move
+    this.x += this.vx;
+    this.y += this.vy;
+
+    // bounds
+    if(this.x < this.r){ this.x = this.r; this.vx = Math.abs(this.vx); }
+    if(this.x > W-this.r){ this.x = W-this.r; this.vx = -Math.abs(this.vx); }
+    if(this.y < this.r){ this.y = this.r; this.vy = Math.abs(this.vy); }
+    if(this.y > H-this.r){ this.y = H-this.r; this.vy = -Math.abs(this.vy); }
+  }
+
+  findTarget(){
+    const ef = this.getEnemyFaction();
+    if(!ef) return;
+    const enemies = agents.filter(a => a.faction.id === ef.id && a.state === 'wander');
+    if(enemies.length === 0){ this.state = 'wander'; return; }
+    this.target = enemies[Math.floor(Math.random()*enemies.length)];
+  }
+
+  draw(){
+    const pulse = Math.sin(this.pulsePhase) * 0.3 + 0.7;
+    const col = this.faction.color;
+    const r = this.r * (this.state === 'conflict' ? 1.4 : 1);
+
+    if(this.state === 'conflict'){
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, r*2.5, 0, Math.PI*2);
+      ctx.fillStyle = col + '22';
+      ctx.fill();
+    }
+
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, r, 0, Math.PI*2);
+    const grad = ctx.createRadialGradient(this.x-1,this.y-1,0,this.x,this.y,r);
+    grad.addColorStop(0, col+'ff');
+    grad.addColorStop(1, col+'88');
+    ctx.fillStyle = grad;
+    ctx.globalAlpha = this.alpha * pulse;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    if(this.state === 'seek'){
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, r+3, 0, Math.PI*2);
+      ctx.strokeStyle = col+'99';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+  }
+}
+
+// ---- PARTICLES ----
+class Particle {
+  constructor(x,y,c1,c2){
+    this.x = x; this.y = y;
+    this.color = Math.random() < 0.5 ? c1 : c2;
+    this.vx = (Math.random()-0.5)*4;
+    this.vy = (Math.random()-0.5)*4;
+    this.life = 1;
+    this.decay = 0.02 + Math.random()*0.03;
+    this.size = 2 + Math.random()*3;
+  }
+  update(){ this.x+=this.vx; this.y+=this.vy; this.vy+=0.05; this.vx*=0.98; this.life-=this.decay; }
+  draw(){
+    ctx.globalAlpha = this.life * 0.8;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size * this.life, 0, Math.PI*2);
+    ctx.fillStyle = this.color;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+}
+
+function spawnConflictParticles(x,y,c1,c2){
+  for(let i=0;i<18;i++) particles.push(new Particle(x,y,c1,c2));
+}
+
+// ---- CONFLICT FEED ----
+const feedEl = document.getElementById('conflict-feed');
+const feedLines = [];
+let feedY = 0;
+
+function logConflict(fa, fb){
+  const tmpl = CONFLICT_LINES[Math.floor(Math.random()*CONFLICT_LINES.length)];
+  const msg = tmpl.replace('{a}', fa.name).replace('{b}', fb.name);
+  const ts = new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  addFeedLine(ts, msg);
+}
+
+function addFeedLine(ts, msg){
+  feedLines.unshift({ts, msg});
+  if(feedLines.length > 50) feedLines.pop();
+  renderFeed();
+}
+
+function renderFeed(){
+  if(!feedLines[0]) return;
+  const l = feedLines[0];
+  feedEl.innerHTML = `<div class="feed-line"><span class="ts">[${l.ts}] </span><span class="action">${l.msg}</span></div>`;
+}
+
+// ---- FACTION PANEL ----
+function buildFactionPanel(){
+  const panel = document.getElementById('faction-panel');
+  panel.innerHTML = '';
+  FACTIONS.forEach(f => {
+    const btn = document.createElement('div');
+    btn.className = 'faction-btn';
+    btn.id = 'fbtn-'+f.id;
+    btn.innerHTML = `
+      <div class="faction-dot" style="background:${f.color}"></div>
+      <div class="faction-info">
+        <div class="faction-name">${f.name}</div>
+        <div class="faction-enemy">vs → ${f.enemy}</div>
+      </div>
+      <div class="faction-energy" id="fenergy-${f.id}">0 MJ</div>
+    `;
+    btn.onclick = () => selectFaction(f);
+    panel.appendChild(btn);
+  });
+}
+
+function selectFaction(f){
+  selectedFaction = f;
+  document.querySelectorAll('.faction-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('fbtn-'+f.id)?.classList.add('active');
+  showDetailPanel(f);
+}
+
+function showDetailPanel(f){
+  const panel = document.getElementById('detail-panel');
+  panel.classList.add('visible');
+  const ef = FACTIONS.find(x=>x.name===f.enemy);
+  panel.innerHTML = `
+    <h3>${f.name}</h3>
+    <div class="vs">↔ ${f.enemy}</div>
+    <div class="stat-row"><span class="stat-label">Energía drenada</span><span class="stat-value neg" id="dp-drain">0 MJ</span></div>
+    <div class="stat-row"><span class="stat-label">Conflictos totales</span><span class="stat-value acc" id="dp-conf">0</span></div>
+    <div class="stat-row"><span class="stat-label">Agentes activos</span><span class="stat-value" id="dp-agents">0</span></div>
+    <div class="stat-row"><span class="stat-label">Vector de drene</span><span class="stat-value neg">${f.drain}</span></div>
+    <div id="drain-bar-container"><div id="drain-bar" style="width:0%"></div></div>
+    <div style="margin-top:10px;font-size:9px;color:#444;font-family:var(--font-mono);">Ningún grupo eligió a su enemigo.<br/>El sistema lo asignó por ellos.</div>
+    <button onclick="document.getElementById('detail-panel').classList.remove('visible');selectedFaction=null;" 
+      style="margin-top:12px;width:100%;background:transparent;border:1px solid #222;color:#555;padding:6px;border-radius:4px;font-family:var(--font-mono);font-size:9px;cursor:pointer;letter-spacing:0.08em;">
+      CERRAR
+    </button>
+  `;
+}
+
+// ---- INIT AGENTS ----
+function initAgents(){
+  agents = [];
+  const perFaction = Math.floor(Math.min(W,H) / 60);
+  FACTIONS.forEach(f => {
+    for(let i=0;i<perFaction;i++){
+      agents.push(new Agent(f));
+    }
+  });
+}
+
+// ---- DRAW BACKGROUND ----
+function drawBg(){
+  ctx.fillStyle = '#0A0A0A';
+  ctx.fillRect(0,0,W,H);
+
+  // subtle grid
+  ctx.strokeStyle = '#111';
+  ctx.lineWidth = 0.5;
+  const gs = 80;
+  for(let x=0;x<W;x+=gs){
+    ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke();
+  }
+  for(let y=0;y<H;y+=gs){
+    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
+  }
+}
+
+// ---- DRAW CONFLICT LINES ----
+function drawConflictLines(){
+  if(paused) return;
+  const seeking = agents.filter(a=>a.state==='seek'&&a.target);
+  seeking.forEach(a=>{
+    ctx.beginPath();
+    ctx.moveTo(a.x, a.y);
+    ctx.lineTo(a.target.x, a.target.y);
+    const alpha = 0.1 + 0.05 * Math.sin(frame*0.05);
+    ctx.strokeStyle = a.faction.color + Math.floor(alpha*255).toString(16).padStart(2,'0');
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
+  });
+}
+
+// ---- UPDATE UI ----
+function updateUI(){
+  document.getElementById('drain-value').innerHTML = Math.round(totalDrain) + '<span class="unit">MJ</span>';
+
+  FACTIONS.forEach(f=>{
+    const el = document.getElementById('fenergy-'+f.id);
+    if(el) el.textContent = Math.round(energyDrained[f.id]) + ' MJ';
+    const btn = document.getElementById('fbtn-'+f.id);
+    const inConflict = agents.some(a=>a.faction.id===f.id&&a.state==='conflict');
+    if(btn){
+      if(inConflict) btn.classList.add('in-conflict');
+      else btn.classList.remove('in-conflict');
+    }
+  });
+
+  if(selectedFaction){
+    const f = selectedFaction;
+    const dpDrain = document.getElementById('dp-drain');
+    const dpConf = document.getElementById('dp-conf');
+    const dpAgents = document.getElementById('dp-agents');
+    const dBar = document.getElementById('drain-bar');
+    if(dpDrain) dpDrain.textContent = Math.round(energyDrained[f.id]) + ' MJ';
+    if(dpConf) dpConf.textContent = conflictCounts[f.id];
+    if(dpAgents) dpAgents.textContent = agents.filter(a=>a.faction.id===f.id).length;
+    if(dBar){
+      const maxD = Math.max(...Object.values(energyDrained));
+      const pct = maxD > 0 ? (energyDrained[f.id]/maxD)*100 : 0;
+      dBar.style.width = pct+'%';
+    }
+  }
+}
+
+// ---- MAIN LOOP ----
+function loop(){
+  requestAnimationFrame(loop);
+  frame++;
+
+  drawBg();
+  drawConflictLines();
+
+  if(!paused){
+    agents.forEach(a=>a.update());
+    particles.forEach(p=>p.update());
+    particles = particles.filter(p=>p.life>0);
+  }
+
+  particles.forEach(p=>p.draw());
+  agents.forEach(a=>a.draw());
+
+  if(frame % 5 === 0) updateUI();
+}
+
+// ---- CONTROLS ----
+function togglePause(){
+  paused = !paused;
+  document.getElementById('pause-btn').textContent = paused ? '▶ REANUDAR' : '⏸ PAUSAR';
+}
+
+function triggerCrisis(){
+  // force many conflicts at once
+  const wanderers = agents.filter(a=>a.state==='wander');
+  wanderers.slice(0, Math.floor(wanderers.length*0.6)).forEach(a=>{
+    a.state='seek'; a.findTarget();
+  });
+  addFeedLine(new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit',second:'2-digit'}), '⚡ CRISIS SISTÉMICA — todos contra todos');
+}
+
+function resetSim(){
+  totalDrain = 0;
+  FACTIONS.forEach(f=>{ conflictCounts[f.id]=0; energyDrained[f.id]=0; });
+  particles = [];
+  initAgents();
+  selectedFaction = null;
+  document.getElementById('detail-panel').classList.remove('visible');
+  document.querySelectorAll('.faction-btn').forEach(b=>b.classList.remove('active'));
+}
+
+function enterWorld(){
+  document.getElementById('intro').style.opacity='1';
+  document.getElementById('intro').style.transition='opacity 0.8s';
+  setTimeout(()=>{
+    document.getElementById('intro').style.opacity='0';
+    setTimeout(()=>{ document.getElementById('intro').style.display='none'; }, 800);
+  }, 100);
+  buildFactionPanel();
+  initAgents();
+  loop();
+}
+
+// mouse hover for tooltip
+canvas.addEventListener('mousemove', e=>{
+  const mx=e.clientX, my=e.clientY;
+  let hit = null;
+  for(let a of agents){
+    if(Math.hypot(a.x-mx,a.y-my)<a.r+4){ hit=a; break; }
+  }
+  const tt = document.getElementById('agent-tooltip');
+  if(hit){
+    tt.style.display='block';
+    tt.style.left=(mx+14)+'px';
+    tt.style.top=(my-10)+'px';
+    document.getElementById('tt-name').textContent = hit.faction.name;
+    document.getElementById('tt-state').textContent = hit.state.toUpperCase()+' — vs '+hit.faction.enemy;
+  } else {
+    tt.style.display='none';
+  }
+});
+canvas.addEventListener('mouseleave',()=>{ document.getElementById('agent-tooltip').style.display='none'; });
+</script>
+</body>
+</html>

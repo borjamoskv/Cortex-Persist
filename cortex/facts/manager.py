@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 import logging
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any
 
 from pydantic import ValidationError
 
@@ -25,9 +25,6 @@ class FactManager:
 
     def __init__(self, engine: EngineProtocol):
         self.engine = engine
-
-    # Minimum content length to prevent garbage facts.
-    MIN_CONTENT_LENGTH = 10
 
     async def store(
         self,
@@ -116,23 +113,20 @@ class FactManager:
                 raise ValueError(f"Ingestion Validation Failed: {e}") from e
             logger.warning("V8 Ingestion check failed: %s", e)
 
-        from cortex.engine.store_mixin import StoreMixin
-
-        return await StoreMixin._store_impl(
-            cast("StoreMixin", self.engine),
-            conn,  # type: ignore[reportArgumentType]
-            project,
-            content,
-            tenant_id,
-            fact_type,
-            tags,
-            confidence,
-            source,
-            meta,
-            valid_from,
-            commit,
-            tx_id,
-            parent_decision_id,
+        return await self.engine.store_direct(
+            project=project,
+            content=content,
+            tenant_id=tenant_id,
+            fact_type=fact_type,
+            tags=tags,
+            confidence=confidence,
+            source=source,
+            meta=meta,
+            valid_from=valid_from,
+            commit=commit,
+            tx_id=tx_id,
+            parent_decision_id=parent_decision_id,
+            conn=conn,
         )
 
     async def store_many(self, facts: list[dict]) -> list[int]:

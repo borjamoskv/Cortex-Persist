@@ -54,8 +54,6 @@ from cortex.extensions.daemon.sidecar.sentinel_monitor.monitor import SentinelMo
 from cortex.extensions.daemon.sidecar.telemetry.fiat_oracle import FiatOracle
 
 try:
-    from cortex.extensions.aether.daemon import AetherDaemon, AetherMonitor
-    from cortex.extensions.aether.queue import TaskQueue
 
     _AETHER_AVAILABLE = True
 except ImportError:

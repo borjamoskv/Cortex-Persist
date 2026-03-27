@@ -7,13 +7,11 @@ from __future__ import annotations
 
 import json
 import logging
-import sqlite3
 from typing import Any
 
 import aiosqlite
 
 # Hoisted from insert_fact_record hot path (was lazy import per-call)
-from cortex.graph import process_fact_graph
 from cortex.memory.temporal import now_iso
 from cortex.utils.canonical import compute_fact_hash
 
@@ -54,7 +52,11 @@ async def insert_fact_record(
             sig_b64 = signer.sign(content, f_hash)
             pub_b64 = signer.public_key_b64
     except (ImportError, ValueError, OSError) as e:
-        logger.debug("Fact signing skipped: %s", e)
+        logger.warning(
+            "CORTEX-SECURITY: Fact signing skipped due to internal error. "
+            "Audit visibility maintained. Error: %s",
+            e,
+        )
 
     meta = meta or {}
 
@@ -74,7 +76,8 @@ async def insert_fact_record(
         ) as cursor:
             if await cursor.fetchone() is None:
                 logger.warning(
-                    "parent_decision_id=%d references non-existent fact or crosses tenant bounds — cleared",
+                    "parent_decision_id=%d references non-existent fact or "
+                    "crosses tenant bounds — cleared",
                     parent_decision_id,
                 )
                 parent_decision_id = None
@@ -99,16 +102,6 @@ async def insert_fact_record(
 
     cognitive_layer = str(meta.get("cognitive_layer", "semantic") or "semantic")
 
-    # Re-pack legacy fields into meta JSON payload
-    if confidence != "stated":
-        meta["confidence"] = confidence
-    if source:
-        meta["source"] = source
-    if parent_decision_id is not None:
-        meta["parent_decision_id"] = parent_decision_id
-    if canonical_tx_id is not None:
-        meta["tx_id"] = canonical_tx_id
-    meta.setdefault("cognitive_layer", cognitive_layer)
     if sig_b64:
         meta["signature"] = sig_b64
     if pub_b64:
@@ -188,39 +181,4 @@ async def insert_fact_record(
     except Exception:
         logger.exception("Unexpected error during causal edge recording")
 
-    # Graph Extraction
-
-    try:
-        # type: ignore[reportArgumentType]
-        await process_fact_graph(conn, fact_id, content, project, ts, tenant_id)
-    except (sqlite3.Error, aiosqlite.Error, ValueError) as e:
-        logger.warning("Graph extraction failed for fact %d (tenant=%s): %s", fact_id, tenant_id, e)
-
     return fact_id  # type: ignore[reportReturnType]
-
-
-async def resolve_causality_async(
-    conn: aiosqlite.Connection, project: str, meta: dict[str, Any] | None
-) -> dict[str, Any]:
-    """Resolve causal linking for a fact asynchronously.
-
-    Ω₁: Every decision must point to its progenitor.
-    """
-    from cortex.engine.causality import AsyncCausalOracle, link_causality
-
-    if not (meta and meta.get("causal_parent")):
-        parent_sig = await AsyncCausalOracle.find_parent_signal(conn, project)
-        return link_causality(meta, parent_sig)
-    return meta or {}
-
-
-def resolve_causality(
-    db_path: str | None, project: str, meta: dict[str, Any] | None
-) -> dict[str, Any]:
-    """Resolve causal linking for a fact (sync)."""
-    from cortex.engine.causality import CausalOracle, link_causality
-
-    if db_path and not (meta and meta.get("causal_parent")):
-        parent_sig = CausalOracle.find_parent_signal(db_path, project)
-        return link_causality(meta, parent_sig)
-    return meta or {}

@@ -183,15 +183,15 @@ def _migrate_project(engine: CortexEngine, path: Path, stats: dict) -> None:
         stats["facts_imported"] += 1
 
     # Knowledge
+    logger.info(f"MIGRATING AXIOM: {len(data.get('knowledge', []))} entries")
     for ki in data.get("knowledge", []):
         engine.store_sync(
             project=project,
-            content=ki.get("content", str(ki)),
-            fact_type="knowledge",
-            tags=[ki.get("type", "factual")],
-            confidence=ki.get("confidence", "stated"),
-            source="migration-v3.1",
-            meta=ki,
+            content=json.dumps(ki, ensure_ascii=False) if isinstance(ki, dict) else str(ki),
+            fact_type="AXIOM",
+            tags=["migrated", "v4_knowledge"],
+            source="migration",
+            confidence="Ω5"
         )
         stats["facts_imported"] += 1
 
@@ -209,11 +209,12 @@ def _migrate_project(engine: CortexEngine, path: Path, stats: dict) -> None:
     # Ghost (last state)
     ghost = data.get("ghost", {})
     if ghost:
+        logger.info(f"MIGRATING GHOST: Found ghost data")
         engine.store_sync(
             project=project,
             content=json.dumps(ghost, ensure_ascii=False),
-            fact_type="ghost",
-            tags=["context", "last-state"],
+            fact_type="VOID",
+            tags=["migrated", "v4_ghost"],
             source="migration-v3.1",
             meta=ghost,
         )

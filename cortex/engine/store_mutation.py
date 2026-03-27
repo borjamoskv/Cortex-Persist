@@ -6,7 +6,7 @@ from typing import Any
 
 import aiosqlite
 
-from cortex.immune.quarantine import BlastRadiusReport, evaluate_demolition
+from cortex.quarantine.quarantine import BlastRadiusReport, evaluate_demolition
 from cortex.utils.canonical import now_iso
 
 logger = logging.getLogger("cortex.engine.mutation")

@@ -22,6 +22,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from cortex.extensions.daemon.core import MoskvDaemon
+    from cortex.extensions.daemon.epistemic_breaker import EpistemicBreakerDaemon
     from cortex.extensions.daemon.models import (
         BUNDLE_ID,
         DEFAULT_COOLDOWN,
@@ -55,6 +56,7 @@ if TYPE_CHECKING:
 __all__ = [
     # core
     "MoskvDaemon",
+    "EpistemicBreakerDaemon",
     # models
     "BUNDLE_ID",
     "DEFAULT_COOLDOWN",
@@ -89,6 +91,10 @@ __all__ = [
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     # core
     "MoskvDaemon": ("cortex.extensions.daemon.core", "MoskvDaemon"),
+    "EpistemicBreakerDaemon": (
+        "cortex.extensions.daemon.epistemic_breaker",
+        "EpistemicBreakerDaemon",
+    ),
     # models
     "BUNDLE_ID": ("cortex.extensions.daemon.models", "BUNDLE_ID"),
     "DEFAULT_COOLDOWN": ("cortex.extensions.daemon.models", "DEFAULT_COOLDOWN"),

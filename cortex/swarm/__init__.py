@@ -7,10 +7,13 @@ from .discovery import SkillRegistry
 from .factory import SwarmFactory
 from .manager import SwarmManager
 from .orchestrator import MasterOrchestrator
+from .parallel_config_swarm import ConfigSwarmReport, ParallelConfigSwarm
 from .partitioner import SwarmEnclave, SwarmPartitioner
 from .specialists import forge_sovereign_swarm
 
 __all__ = [
+    "ConfigSwarmReport",
+    "ParallelConfigSwarm",
     "SkillRegistry",
     "SwarmFactory",
     "SwarmManager",

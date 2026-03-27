@@ -49,7 +49,6 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
     """
 
     MIN_CONTENT_LENGTH = MIN_CONTENT_LENGTH
-    _thermal_decay_cache: ClassVar[dict[int, int]] = {}
     _thermo_counters: ClassVar[ThermodynamicCounters] = ThermodynamicCounters()
     _agent_mode: ClassVar[AgentMode] = AgentMode.ACTIVE
 
@@ -61,11 +60,16 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         if get_vector_backend() is not None:
             return True
 
+        if getattr(self, "_has_embeddings_table", None) is not None:
+            return self._has_embeddings_table  # type: ignore
+
         try:
             async with conn.execute(
                 "SELECT 1 FROM sqlite_master WHERE type='table' AND name='fact_embeddings'"
             ) as cursor:
-                return (await cursor.fetchone()) is not None
+                has_table = (await cursor.fetchone()) is not None
+                self._has_embeddings_table = has_table
+                return has_table
         except (aiosqlite.Error, OSError):
             return False
 
@@ -167,22 +171,17 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         # ═══ AX-033: Pre-store guards via GuardPipeline ═══
         pipeline = getattr(self, "_guard_pipeline", None)
         if pipeline is not None:
-            try:
-                await pipeline.run_guards(
-                    content, project, fact_type, meta or {}, conn, tenant_id=tenant_id
-                )
-                safe_meta = meta or {}
-                content, fact_type, modified_meta = await pipeline.run_mutators(
-                    content, project, fact_type, safe_meta, conn, tenant_id=tenant_id, source=source
-                )
-                if not meta:
-                    meta = modified_meta
-                else:
-                    meta.update(modified_meta)
-            except ValueError:
-                raise  # Guard rejections must propagate
-            except Exception as _gp_err:  # noqa: BLE001
-                logger.debug("[AX-033] GuardPipeline pre-store skipped: %s", _gp_err)
+            await pipeline.run_guards(
+                content, project, fact_type, meta or {}, conn, tenant_id=tenant_id
+            )
+            safe_meta = meta or {}
+            content, fact_type, modified_meta = await pipeline.run_mutators(
+                content, project, fact_type, safe_meta, conn, tenant_id=tenant_id, source=source
+            )
+            if not meta:
+                meta = modified_meta
+            else:
+                meta.update(modified_meta)
 
         dedupe_id, meta, content, fact_type = await self._run_store_validation(
             conn, project, content, tenant_id, fact_type, tags, confidence, source, meta

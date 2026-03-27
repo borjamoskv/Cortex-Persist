@@ -14,11 +14,13 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any
 
-from cortex.engine import bicameral
 from cortex.engine.isolation import IsolationManager
 from cortex.engine.legion_vectors import RED_TEAM_SWARM, AttackVector
+from cortex.engine.signals import log_limbic, log_motor
 
 logger = logging.getLogger("cortex.engine.legion")
+
+__all__ = ["BlueTeamAgent", "RedTeamSwarm", "LegionOmegaEngine", "SiegeResult", "LEGION_OMEGA"]
 
 
 @dataclass
@@ -28,19 +30,24 @@ class SiegeResult:
     success: bool
     final_code: str
     cycles: int
-    vulnerabilities: list[str] = None
+    vulnerabilities: list[str] | None = None
 
 
 class BlueTeamAgent:
     """Synthesis agent responsible for generating code under siege."""
 
-    async def synthesize(
-        self, intent: str, context: Mapping[str, Any], feedback: list[str]
-    ) -> str:
+    async def synthesize(self, intent: str, context: Mapping[str, Any], feedback: list[str]) -> str:
         """Generate code based on intent and adversarial feedback."""
-        # Simulated LLM synthesis for now
+        # Simulated LLM synthesis — incorporates feedback to evolve code between cycles.
         # In production, this calls a high-exergy frontier model (Ω₇)
-        return f"# Implementation of {intent}\n# Context: {context}\n# Feedback Count: {len(feedback)}"
+        feedback_hash = hash(tuple(feedback)) if feedback else 0
+        feedback_summary = "; ".join(feedback[:5]) if feedback else "none"
+        return (
+            f"# Implementation of {intent}\n"
+            f"# Context: {context}\n"
+            f"# Feedback ({len(feedback)}): {feedback_summary}\n"
+            f"# Revision: {feedback_hash}\n"
+        )
 
 
 class RedTeamSwarm:
@@ -60,7 +67,7 @@ class RedTeamSwarm:
         """Subject code to all attack vectors in parallel using a 100-agent swarm."""
         total_agents = len(self.vectors) * self.replica_count
         msg = f"⚔️ Iniciando asedio con enjambre de {total_agents} agentes..."
-        bicameral.log_limbic(msg, source="RED")
+        log_limbic(msg, source="RED")
 
         static_vectors = [v for v in self.vectors if not getattr(v, "is_dynamic", False)]
         dynamic_vectors = [v for v in self.vectors if getattr(v, "is_dynamic", False)]
@@ -71,12 +78,13 @@ class RedTeamSwarm:
             for v in static_vectors:
                 tasks.append(v.attack(code, context))
 
-        # Phase B: Isolated Dynamic Execution (Sequential batches or scoped parallelism)
+        # Phase B: Isolated Dynamic Execution (Scaled conservatively)
         if dynamic_vectors and self.isolation:
-            # We scale dynamic attacks more conservatively to avoid host exhaustion
-            # while maintaining the "Sovereign Swarm" spirit.
-            for v in dynamic_vectors:
-                tasks.append(self._run_dynamic_attack(v, code, context))
+            # Scale dynamic attacks conservatively to avoid host exhaustion
+            dynamic_replicas = min(self.replica_count, 3)
+            for _ in range(dynamic_replicas):
+                for v in dynamic_vectors:
+                    tasks.append(self._run_dynamic_attack(v, code, context))
 
         results = await asyncio.gather(*tasks)
 
@@ -105,7 +113,9 @@ class RedTeamSwarm:
                 if vector.name == "leak_hunter" and output.stderr:
                     # Naive leak detection based on stderr/traceback for now
                     if "ResourceWarning" in output.stderr or "leaked" in output.stderr.lower():
-                        findings.append(f"LeakHunter: Resource leak detected: {output.stderr[:100]}")
+                        findings.append(
+                            f"LeakHunter: Resource leak detected: {output.stderr[:100]}"
+                        )
 
                 if vector.name == "side_effect_watcher":
                     # Check for unauthorized files (anything other than siege_target.py)
@@ -143,12 +153,13 @@ class LegionOmegaEngine:
     async def forge(self, intent: str, context: Mapping[str, Any] | None = None) -> SiegeResult:
         """Forge code through the fire of the siege."""
         ctx = context or {}
-        feedback = []
+        feedback: list[str] = []
         final_code = ""
         previous_code = ""
+        vulnerabilities: list[str] = []
         previous_v_count = 1_000_000  # Initial high value for integer comparison
 
-        bicameral.log_motor(f"LEGION-OMEGA: Forjando '{intent}'", action="FORGE")
+        log_motor(f"LEGION-OMEGA: Forjando '{intent}'", action="FORGE")
 
         for cycle in range(1, self.max_cycles + 1):
             # Blue Team Synthesis
@@ -156,7 +167,7 @@ class LegionOmegaEngine:
 
             # ─── Thermal Stagnation Guard (Ω₂) ───
             if code == previous_code:
-                bicameral.log_motor(
+                log_motor(
                     "Thermal Equilibrium: Code identity reached. No further delta.", action="STABLE"
                 )
                 break
@@ -166,7 +177,7 @@ class LegionOmegaEngine:
             v_count = len(vulnerabilities)
 
             if not vulnerabilities:
-                bicameral.log_motor(f"Inmunidad Química alcanzada en ciclo {cycle}", action="Ω₆")
+                log_motor(f"Inmunidad Química alcanzada en ciclo {cycle}", action="Ω₆")
                 return SiegeResult(success=True, final_code=code, cycles=cycle)
 
             # Entropy Regression Check
@@ -190,12 +201,12 @@ class LegionOmegaEngine:
             # Small delay to simulate evolutionary cooldown
             await asyncio.sleep(0.05)
 
-        bicameral.log_motor("Asedio finalizado. Código entregado con deudas.", action="YIELD")
+        log_motor("Asedio finalizado. Código entregado con deudas.", action="YIELD")
         return SiegeResult(
             success=False,
             final_code=final_code,
             cycles=self.max_cycles,
-            vulnerabilities=vulnerabilities if vulnerabilities else [],
+            vulnerabilities=vulnerabilities,
         )
 
 

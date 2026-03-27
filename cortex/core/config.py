@@ -141,7 +141,9 @@ class CortexConfig:
             RUNBOOT_MODE=os.environ.get("CORTEX_RUNBOOT", "local"),
             ALLOWED_ORIGINS=os.environ.get(
                 "CORTEX_ALLOWED_ORIGINS",
-                "http://localhost:3000,http://localhost:5173,http://127.0.0.1:5173",
+                "http://localhost:3000,http://localhost:5173,http://127.0.0.1:5173,"
+                "http://localhost:8080,http://localhost:4321,http://127.0.0.1:8080,"
+                "https://borjamoskv.com,https://www.borjamoskv.com",
             ).split(","),
             RATE_LIMIT=int(os.environ.get("CORTEX_RATE_LIMIT", "300")),
             RATE_WINDOW=int(os.environ.get("CORTEX_RATE_WINDOW", "60")),

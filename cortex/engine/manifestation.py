@@ -10,7 +10,7 @@ import logging
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from cortex.engine.endocrine import ENDOCRINE, HormoneType
+from cortex.engine.gradient import GRADIENT, GradientType
 
 if TYPE_CHECKING:
     from cortex.extensions.signals.bus import SignalBus
@@ -62,19 +62,20 @@ async def manifest_singularity(signal_bus: SignalBus | None = None) -> None:
                 project="system",
             )
 
-        ENDOCRINE.pulse(HormoneType.DOPAMINE, 0.5)
+        GRADIENT.pulse(GradientType.DOPAMINE, 0.5)
         logger.info("🌌 [SINGULARITY] Manifestation successful. 150/100 state reached.")
     except Exception as e:  # noqa: BLE001 — singularity collapse must handle all internal failures
         logger.error("🌌 [SINGULARITY] Manifestation collapse failed: %s", e)
-        ENDOCRINE.pulse(HormoneType.ADRENALINE, 0.5)
+        GRADIENT.pulse(GradientType.ADRENALINE, 0.5)
 
 
 async def transfigure_ui(html_file: Path, signal_bus: SignalBus | None = None) -> bool:
     """Ω₆: Sovereign UI Refactor (Transfiguration)."""
-    from cortex.cli.bicameral import bicameral
 
     msg = f"Transfiriendo coherencia estética a {html_file.name}"
-    bicameral.log_limbic(msg, source="APOTH")
+    from cortex.engine.signals import log_limbic
+
+    log_limbic(msg, source="APOTH")
 
     try:
         # OOM Killer Guard: Skip files larger than 5MB

@@ -29,7 +29,10 @@ from cortex.api.middleware import (
 )
 from cortex.auth import AuthManager
 from cortex.engine import CortexEngine
-from cortex.extensions.hive.main import router as hive_router
+try:
+    from cortex.extensions.hive.main import router as hive_router
+except ModuleNotFoundError:
+    hive_router = None  # type: ignore[assignment]
 from cortex.extensions.metering.middleware import MeteringMiddleware
 from cortex.extensions.timing import TimingTracker
 from cortex.routes import (
@@ -108,6 +111,7 @@ from cortex.routes import (
     translate as translate_router,
 )
 from cortex.routes import usage as usage_router
+from cortex.routes import terminal as terminal_router
 from cortex.telemetry.metrics import MetricsMiddleware, metrics
 from cortex.utils.i18n import DEFAULT_LANGUAGE, get_trans
 
@@ -362,19 +366,33 @@ async def root_node(request: Request) -> dict:
         "version": __version__,
         "status": get_trans("system_operational", lang),
         "description": get_trans("info_service_desc", lang),
+        "sigil": [
+            "  ██████╗ ██████╗ ██████╗ ████████╗███████╗██╗  ██╗ ",
+            " ██╔════╝██╔═══██╗██╔══██╗╚══██╔══╝██╔════╝╚██╗██╔╝ ",
+            " ██║     ██║   ██║██████╔╝   ██║   █████╗   ╚███╔╝  ",
+            " ██║     ██║   ██║██╔══██╗   ██║   ██╔══╝   ██╔██╗  ",
+            " ╚██████╗╚██████╔╝██║  ██║   ██║   ███████╗██╔╝ ██╗ ",
+            "  ╚═════╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚══════╝╚═╝  ╚═╝ "
+        ],
+        "state": "SOVEREIGN",
     }
 
 
 @app.get("/health", tags=["health"])
 async def health_check(request: Request) -> dict:
     lang = request.headers.get("Accept-Language", DEFAULT_LANGUAGE)
-    cortisol = 0.0
-    growth = 0.0
+    existential_dread = 0.0
+    ascension_velocity = 0.0
     try:
         engine = getattr(request.app.state, "engine", None)
-        if engine and hasattr(engine, "manager") and hasattr(engine.manager, "_endocrine"):
-            cortisol = engine.manager._endocrine.cortisol_level
-            growth = engine.manager._endocrine.neural_growth
+        if engine and hasattr(engine, "manager") and hasattr(engine.manager, "_gradient"):
+            from cortex.engine.gradient import GradientType
+            existential_dread = engine.manager._gradient.get_level(
+                GradientType.PRESSURE
+            )
+            ascension_velocity = engine.manager._gradient.get_level(
+                GradientType.EXPANSION_COEFFICIENT
+            )
     except (ValueError, KeyError, OSError, RuntimeError, AttributeError):  # noqa: BLE001 — health check must never crash
         pass
 
@@ -400,8 +418,8 @@ async def health_check(request: Request) -> dict:
         "status": get_trans("system_healthy", lang),
         "engine": get_trans("engine_online", lang),
         "version": __version__,
-        "cortisol": round(cortisol, 3),
-        "neuroplasticity": round(growth, 3),
+        "existential_dread": round(existential_dread, 3),  # was cortisol
+        "ascension_velocity": round(ascension_velocity, 3),  # was neuroplasticity
         "health_index": {
             "score": health_score,
             "grade": health_grade,
@@ -439,7 +457,8 @@ app.include_router(gate_router.router)
 app.include_router(context_router.router)
 app.include_router(tips_router.router)
 app.include_router(telemetry_router.router)
-app.include_router(hive_router)
+if hive_router is not None:
+    app.include_router(hive_router)
 app.include_router(notch_ws_router.router)
 app.include_router(topology_ws_router.router)
 app.include_router(memories_router.router)
@@ -451,6 +470,7 @@ app.include_router(notebooklm_router.router)
 app.include_router(observatory_router.router)
 app.include_router(scraper_router.router)
 app.include_router(skills_router.router)
+app.include_router(terminal_router.router)
 
 # Gateway — Universal Intelligence Entry Point
 from cortex.gateway.adapters import (  # noqa: E402

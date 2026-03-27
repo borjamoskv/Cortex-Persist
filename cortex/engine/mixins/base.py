@@ -14,13 +14,13 @@ from typing import Any
 import aiosqlite
 
 from cortex.crypto import get_default_encrypter
-from cortex.engine.autopoiesis import AutopoiesisEngine
+from cortex.engine.self_assembly import SelfAssemblyEngine
 
 __all__ = ["EngineMixinBase"]
 
 logger = logging.getLogger("cortex.engine")
 
-_autopoiesis = AutopoiesisEngine()
+_autopoiesis = SelfAssemblyEngine()
 
 # Canonical Fact query structure — append-only to preserve older tuple offsets
 FACT_COLUMNS = (
@@ -30,7 +30,7 @@ FACT_COLUMNS = (
     "f.consensus_score, f.last_accessed, f.tx_id, f.cognitive_layer, "
     "f.parent_decision_id"
 )
-FACT_INDEX = {col.split('.')[-1].strip(): i for i, col in enumerate(FACT_COLUMNS.split(','))}
+FACT_INDEX = {col.split(".")[-1].strip(): i for i, col in enumerate(FACT_COLUMNS.split(","))}
 FACT_JOIN = "FROM facts f"
 
 
@@ -97,7 +97,11 @@ class EngineMixinBase:
 
         # Decrypt primary payload
         try:
-            content = enc.decrypt_str(r[idx["content"]], tenant_id=db_tenant_id) if r[idx["content"]] else ""
+            content = (
+                enc.decrypt_str(r[idx["content"]], tenant_id=db_tenant_id)
+                if r[idx["content"]]
+                else ""
+            )
         except (ValueError, TypeError):
             content = f"[ENCRYPTED — decryption failed] (fact #{r[idx['id']]})"
 
@@ -140,9 +144,12 @@ class EngineMixinBase:
             "fact_type": r[idx["fact_type"]],
             "type": r[idx["fact_type"]],  # Legacy compatibility alias
             "tags": tags,
-            "confidence": r[idx["confidence"]] or (meta.get("confidence", "C5") if meta else "C5"),
-            "valid_from": r[idx["valid_from"]] or (meta.get("valid_from") if meta else r[idx["created_at"]]),
-            "valid_until": "9999-12-31T23:59:59Z" if bool(r[idx["is_tombstoned"]]) else r[idx["valid_until"]],
+            "confidence": r[idx["confidence"]] or (meta.get("confidence", "Ω5") if meta else "Ω5"),
+            "valid_from": r[idx["valid_from"]]
+            or (meta.get("valid_from") if meta else r[idx["created_at"]]),
+            "valid_until": "9999-12-31T23:59:59Z"
+            if bool(r[idx["is_tombstoned"]])
+            else r[idx["valid_until"]],
             "source": r[idx["source"]] or (meta.get("source", "system") if meta else "system"),
             "meta": meta,
             "consensus_score": consensus_score,

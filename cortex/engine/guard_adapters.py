@@ -17,6 +17,7 @@ __all__ = [
     "ContradictionGuardAdapter",
     "VerifierGuardAdapter",
     "ExergyGuardAdapter",
+    "FEPMoravecGuardAdapter",
     "LedgerCheckpointHook",
     "SignalEmitHook",
     "EpistemicBreakerHook",
@@ -109,9 +110,9 @@ class VerifierGuardAdapter:
 
 
 class ExergyGuardAdapter:
-    """AX-033 Hook -> StoreGuard protocol (thermodynamic filter)."""
+    """Exergy metrics injection → ContentMutator protocol."""
 
-    async def check(
+    async def transform(
         self,
         content: str,
         project: str,
@@ -120,17 +121,28 @@ class ExergyGuardAdapter:
         conn: aiosqlite.Connection,
         *,
         tenant_id: str = "default",
-    ) -> None:
-        # Bypass thermodynamic gate for test-scope projects (integration test isolation)
+        source: str | None = None,
+    ) -> tuple[str, str, dict[str, Any]]:
+        """Inject thermodynamic metrics into fact metadata (Ω₉)."""
         if project.startswith("test"):
-            return
+            return content, fact_type, meta
 
-        from cortex.engine.membrane import Action, SovereignMembrane
+        from cortex.engine.membrane import SovereignMembrane
 
         membrane = SovereignMembrane()
-        result = membrane.evaluate(content, fact_type, counters={"source": meta.get("source")})
-        if result.action == Action.REJECT:
-            raise ValueError(f"[AX-033] Thermodynamic rejection: {result.diagnostic.reasons}")
+        result = membrane.evaluate(
+            content, fact_type, counters={"source": meta.get("source") or source}
+        )
+
+        # Persist the membrane's exergy signal using the existing metadata key
+        # that downstream aggregation already reads from.
+        exergy_score = result.diagnostic.exergy_score
+        meta["exergy_delta"] = float(exergy_score)
+        meta["exergy_justification"] = "; ".join(result.diagnostic.reasons) or result.diagnostic.state.value
+        if result.metadata_patch:
+            meta.update(result.metadata_patch)
+
+        return content, fact_type, meta
 
 
 class XForensicGuardAdapter:
@@ -152,6 +164,25 @@ class XForensicGuardAdapter:
         from cortex.guards.x_guards import XForensicGuard
 
         guard = XForensicGuard()
+        await guard.check(content, project, fact_type, meta, conn, tenant_id=tenant_id)
+
+
+class FEPMoravecGuardAdapter:
+    """FEP-Moravec Guard → StoreGuard protocol."""
+
+    async def check(
+        self,
+        content: str,
+        project: str,
+        fact_type: str,
+        meta: dict[str, Any],
+        conn: aiosqlite.Connection,
+        *,
+        tenant_id: str = "default",
+    ) -> None:
+        from cortex.guards.fep_moravec import FEPMoravecGuard
+
+        guard = FEPMoravecGuard()
         await guard.check(content, project, fact_type, meta, conn, tenant_id=tenant_id)
 
 

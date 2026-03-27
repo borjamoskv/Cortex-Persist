@@ -15,6 +15,12 @@ import logging
 import time
 from collections import deque
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import aiosqlite
+
+    from cortex.engine import CortexEngine
 
 from .models import CausalEpisode, SourceMetadata
 
@@ -189,8 +195,9 @@ class CausalTracer:
 
     MAX_DEPTH = 20
 
-    def __init__(self, conn) -> None:
+    def __init__(self, conn: aiosqlite.Connection, engine: CortexEngine | None = None) -> None:
         self._conn = conn
+        self._engine = engine
 
     async def trace_episode(
         self,
@@ -247,7 +254,11 @@ class CausalTracer:
             if row:
                 project = row[0] or ""
 
-        return CausalEpisode(
+        from cortex.extensions.fingerprint.extractor import FingerprintExtractor
+        from cortex.extensions.fingerprint.path_validator import PathValidator
+
+        # Original episode creation
+        episode = CausalEpisode(
             root_fact_id=root_id,
             fact_chain=chain,
             project=project,
@@ -256,6 +267,23 @@ class CausalTracer:
             decision_count=decision_count,
             summary=self._build_summary(chain),
         )
+
+        # Byzantine Boundary Enforcement (Ω1)
+        try:
+            # We need an engine instance to extract fingerprint if not cached
+            # CausalTracer usually has access to the connection, but we might need the engine
+            # for the high-level extractor. If engine is not available, we skip or use a mock.
+            # Assuming self._engine is available (I will add it to __init__ if needed)
+            if hasattr(self, "_engine"):
+                validator = PathValidator(self._engine)
+                # Ensure we have a user fingerprint
+                user_fp = await FingerprintExtractor.extract(self._engine)
+                episode = await validator.validate_episode(episode, user_fp)
+        except Exception as e:
+            logger.error("Failed to validate cognitive path: %s", e)
+            episode.byzantine_status = "unvalidated"
+
+        return episode
 
     async def recall_episode(
         self,

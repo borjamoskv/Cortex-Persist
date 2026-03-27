@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRO SPATIAL MASTERING | CORTEX</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <header class="top-bar">
+            <div class="logo">
+                <span class="logo-accent">PRO SPATIAL</span> MASTERING
+            </div>
+            <div class="status-indicator">
+                <span class="dot"></span> CORTEX AUDIO ENGINE :: ACTIVO
+            </div>
+        </header>
+
+        <main class="dashboard">
+            <!-- Columna Izquierda: Input y Cadena -->
+            <section class="panel io-panel">
+                <div class="panel-header"><h2>SOURCE / TRANSPORT</h2></div>
+                <div class="panel-content">
+                    <div class="file-upload">
+                        <label for="audio-upload" class="upload-btn">SELECCIONAR AUDIO</label>
+                        <input type="file" id="audio-upload" accept="audio/*">
+                        <span id="file-name" class="file-name">Ningún archivo cargado</span>
+                    </div>
+                    <audio id="audio-element" crossorigin="anonymous"></audio>
+                    
+                    <div class="transport-controls">
+                        <button id="btn-play" class="t-btn" disabled>PLAY</button>
+                        <button id="btn-pause" class="t-btn" disabled>PAUSE</button>
+                    </div>
+
+                    <div class="master-fader">
+                        <label>INPUT GAIN</label>
+                        <input type="range" id="input-gain" min="0" max="2" step="0.01" value="1">
+                        <span id="input-gain-val" class="val-display">0.0 dB</span>
+                    </div>
+                    <div class="master-fader">
+                        <label>MASTER OUTPUT</label>
+                        <input type="range" id="master-gain" min="0" max="2" step="0.01" value="1">
+                        <span id="master-gain-val" class="val-display">0.0 dB</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Columna Central: Compresión y EQ -->
+            <section class="panel efx-panel">
+                <div class="panel-header"><h2>DYNAMICS / EQ</h2></div>
+                <div class="panel-content">
+                    <div class="efx-module">
+                        <h3>COMPRESSOR</h3>
+                        <div class="slider-group">
+                            <label>THRESHOLD</label>
+                            <input type="range" id="comp-thresh" min="-100" max="0" step="1" value="-24">
+                            <span id="comp-thresh-val" class="val-display">-24 dB</span>
+                        </div>
+                        <div class="slider-group">
+                            <label>RATIO</label>
+                            <input type="range" id="comp-ratio" min="1" max="20" step="1" value="4">
+                            <span id="comp-ratio-val" class="val-display">4:1</span>
+                        </div>
+                    </div>
+
+                    <div class="efx-module">
+                        <h3>EQUALIZER (3-BAND)</h3>
+                        <div class="slider-group">
+                            <label>LOW (100Hz)</label>
+                            <input type="range" id="eq-low" min="-24" max="24" step="1" value="0">
+                            <span id="eq-low-val" class="val-display">0 dB</span>
+                        </div>
+                        <div class="slider-group">
+                            <label>MID (1000Hz)</label>
+                            <input type="range" id="eq-mid" min="-24" max="24" step="1" value="0">
+                            <span id="eq-mid-val" class="val-display">0 dB</span>
+                        </div>
+                        <div class="slider-group">
+                            <label>HIGH (5000Hz)</label>
+                            <input type="range" id="eq-high" min="-24" max="24" step="1" value="0">
+                            <span id="eq-high-val" class="val-display">0 dB</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Columna Derecha: Panner y Visualizador -->
+            <section class="panel spatial-panel">
+                <div class="panel-header"><h2>SPATIAL PANNING (HRTF)</h2></div>
+                <div class="panel-content">
+                    <div class="spatial-controls">
+                        <div class="slider-group">
+                            <label>X-AXIS (LEFT/RIGHT)</label>
+                            <input type="range" id="pan-x" min="-10" max="10" step="0.1" value="0">
+                            <span id="pan-x-val" class="val-display">0.0</span>
+                        </div>
+                        <div class="slider-group">
+                            <label>Y-AXIS (UP/DOWN)</label>
+                            <input type="range" id="pan-y" min="-10" max="10" step="0.1" value="0">
+                            <span id="pan-y-val" class="val-display">0.0</span>
+                        </div>
+                        <div class="slider-group">
+                            <label>Z-AXIS (FRONT/BACK)</label>
+                            <input type="range" id="pan-z" min="-10" max="10" step="0.1" value="0">
+                            <span id="pan-z-val" class="val-display">0.0</span>
+                        </div>
+                    </div>
+                    
+                    <div class="visualizer-container">
+                        <canvas id="visualizer"></canvas>
+                        <div class="vis-overlay">SPECTRAL ANALYSIS</div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

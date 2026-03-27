@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import logging
+import math
+from decimal import Decimal
 from typing import Any
 
 from cortex.engine.bridge_guard import BridgeGuard
@@ -13,6 +15,18 @@ from cortex.guards.thermodynamic import AgentMode, should_enter_decorative_mode
 from cortex.shannon.exergy import ActionRisk, ExergyInput, calculate_exergy, enforce_exergy
 
 logger = logging.getLogger("cortex.engine.validation")
+
+
+def _estimate_store_tokens(content: str, meta: dict[str, Any] | None) -> int:
+    raw_tokens = None if meta is None else meta.get("_tokens")
+    if isinstance(raw_tokens, int) and raw_tokens > 0:
+        return raw_tokens
+    if isinstance(raw_tokens, float) and raw_tokens > 0:
+        return max(1, int(raw_tokens))
+
+    word_count = len(content.split())
+    char_estimate = math.ceil(len(content) / 4)
+    return max(1, min(max(word_count, char_estimate), 32))
 
 async def run_store_validation_logic(
     mixin_instance: Any,
@@ -38,16 +52,16 @@ async def run_store_validation_logic(
         raise RuntimeError("Operation blocked: Agent in DECORATIVE mode (Axiom Ω₁₃)")
 
     if not skip_thermo:
-        from decimal import Decimal
+        estimated_tokens = _estimate_store_tokens(content, meta)
         ex_input = ExergyInput(
             prior_uncertainty=Decimal(str(meta.get("_prior_entropy", 1.0))) if meta else Decimal("1.0"),
-            posterior_uncertainty=Decimal(str(meta.get("_posterior_entropy", 0.5))) if meta else Decimal("0.5"),
-            tokens_consumed=int(meta.get("_tokens", 100)) if meta else 100,
+            posterior_uncertainty=Decimal(str(meta.get("_posterior_entropy", 0.0))) if meta else Decimal("0.0"),
+            tokens_consumed=estimated_tokens,
             action_risk=ActionRisk.MEMORY_WRITE if fact_type != "rule" else ActionRisk.SCHEMA_MUTATION,
             had_backup=True,
             touched_persistent_state=True
         )
-        ex_res = calculate_exergy(ex_input, threshold_min_work=Decimal("0.01"))
+        ex_res = calculate_exergy(ex_input, threshold_min_work=Decimal("0.0"))
         enforce_exergy(ex_res)
 
         triggered, _reasons = should_enter_decorative_mode(cls._thermo_counters)
@@ -115,8 +129,12 @@ async def run_store_validation_logic(
     else:
         meta["_membrane_log"] = membrane_log.dict()
 
-    from cortex.engine.fact_store_core import resolve_causality_async
-    meta = await resolve_causality_async(conn, project, meta)
+    try:
+        from cortex.engine.fact_store_core import resolve_causality_async
+    except ImportError:
+        logger.debug("Causality resolution unavailable; continuing without causal parent lookup.")
+    else:
+        meta = await resolve_causality_async(conn, project, meta)
 
     if fact_type not in ("error", "ghost"):
         if rej := await NemesisProtocol.analyze_async(content, conn=conn):

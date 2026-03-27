@@ -49,7 +49,9 @@ def extract_canonical_metrics(skill: dict[str, Any]) -> list[tuple[str, Any]]:
     return metrics
 
 
-def build_canonical_kpi_snapshot(skill: dict[str, Any], captured_at: str | None = None) -> dict[str, Any]:
+def build_canonical_kpi_snapshot(
+    skill: dict[str, Any], captured_at: str | None = None
+) -> dict[str, Any]:
     """Build a canonical snapshot payload for a KPI skill."""
     from cortex.utils.canonical import now_iso
 
@@ -59,9 +61,8 @@ def build_canonical_kpi_snapshot(skill: dict[str, Any], captured_at: str | None 
 
     resolved_at = captured_at or now_iso()
     metric_map = {metric_name: metric_value for metric_name, metric_value in metrics}
-    content = (
-        f"Canonical KPI snapshot for skill '{skill['name']}' at {resolved_at}: "
-        + "; ".join(f"{metric_name}={metric_value}" for metric_name, metric_value in metrics)
+    content = f"Canonical KPI snapshot for skill '{skill['name']}' at {resolved_at}: " + "; ".join(
+        f"{metric_name}={metric_value}" for metric_name, metric_value in metrics
     )
     return {
         "captured_at": resolved_at,
@@ -124,7 +125,9 @@ class SkillActuator(ActuatorProtocol):
         if not metrics:
             return None
 
-        content = "\n".join(f"{metric_name}: {metric_value}" for metric_name, metric_value in metrics)
+        content = "\n".join(
+            f"{metric_name}: {metric_value}" for metric_name, metric_value in metrics
+        )
         return ActuatorResponse(
             content=content,
             metadata=self._build_kpi_metadata(metrics),
@@ -169,22 +172,75 @@ class SkillActuator(ActuatorProtocol):
         if canonical_response is not None:
             return canonical_response
 
-        # Simulating execution for now.
-        simulated_content = (
-            f"Skill '{self.skill.name}' (v{self.skill.version}) "
-            f"processed the following task: {task}\n"
-            f"Description: {self.skill.description}"
-        )
+        # Execute the skill's defined trigger mechanism as a subprocess
+        trigger_cmd = self.skill.trigger
+        if not trigger_cmd:
+            logger.warning(
+                "SkillActuator: Skill '%s' has no trigger. Returning stub.",
+                self.skill.name,
+            )
+            return ActuatorResponse(
+                content=f"Error: Skill '{self.skill.name}' has no trigger defined.",
+                metadata={"status": "error", "skill_name": self.skill.name},
+            )
 
-        return ActuatorResponse(
-            content=simulated_content,
-            metadata={
-                "skill_name": self.skill.name,
-                "version": self.skill.version,
-                "category": self.skill.category,
-                "trigger": self.skill.trigger,
-            },
-        )
+        import asyncio
+        import json
+        import os
+
+        env = os.environ.copy()
+        env["CORTEX_TASK"] = task
+        if context:
+            try:
+                env["CORTEX_CONTEXT"] = json.dumps(context)
+            except Exception as e:
+                logger.warning("SkillActuator: failed to serialize context: %s", e)
+
+        cwd = self.skill.path.parent
+        logger.debug("SkillActuator: Subprocess trigger '%s' in %s", trigger_cmd, cwd)
+
+        try:
+            process = await asyncio.create_subprocess_shell(
+                trigger_cmd,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+                cwd=cwd,
+                env=env,
+            )
+            stdout, stderr = await process.communicate()
+
+            content = stdout.decode("utf-8", errors="replace").strip()
+
+            if process.returncode != 0:
+                err_msg = stderr.decode("utf-8", errors="replace").strip()
+                logger.error(
+                    "SkillActuator: Skill '%s' failed (code %s): %s",
+                    self.skill.name,
+                    process.returncode,
+                    err_msg,
+                )
+                if err_msg:
+                    content += f"\n\n[STDERR]:\n{err_msg}"
+                if not content:
+                    content = f"Error: Command failed with code {process.returncode}"
+
+            return ActuatorResponse(
+                content=content or "No output produced.",
+                metadata={
+                    "skill_name": self.skill.name,
+                    "version": self.skill.version,
+                    "category": self.skill.category,
+                    "trigger": trigger_cmd,
+                    "returncode": process.returncode,
+                    "status": "success" if process.returncode == 0 else "error",
+                },
+            )
+        except Exception as e:
+            logger.error("SkillActuator: Exception invoking skill '%s': %s", self.skill.name, e)
+            return ActuatorResponse(
+                content=f"Subprocess Exception: {e}",
+                metadata={"status": "error", "skill_name": self.skill.name},
+            )
 
     async def health_check(self) -> bool:
         """Verify the skill directory/manifest still exists."""

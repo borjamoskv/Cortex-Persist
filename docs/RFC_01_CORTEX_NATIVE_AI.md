@@ -57,12 +57,24 @@ To ensure CORTEX can operate seamlessly with any 2026 L1 orchestration framework
 
 ---
 
-## 5. Conclusion: The Sovereign Machine
+## 5. The v6 Paradigm: The Sovereign Nervous System
+
+While v5 introduced deterministic limits (reconciling string matches), CORTEX v6 shatters the Von Neumann bottleneck by treating agents as biological entities rather than deterministic state-machines. The substrate evolves from a transactional ledger to a distributed neural network.
+
+1. **Vectorial Merkle Trees (Semantic Hashing):** Strict byte-to-byte verification is replaced by Semantic Hashing. The ledger computes SimHash or quantized embeddings. An agent's memory drift is tolerated up to >98% cosine similarity, neutralizing stochastic paraphrasing without triggering false corruption alarms.
+2. **Neural State Persistence (KV-Cache Freezing):** CORTEX abandons raw-text retrieval. It persists the actual pre-computed tensor weights (KV-Cache) to disk/Redis. When an agent awakens, the context is rehydrated in VRAM in microseconds (O(1) latency).
+3. **Local-First Swarm CRDTs:** The mesh is air-gapped and multi-master. Using embedded vectorized databases (e.g., SQLite-Vec/DuckDB) and Automerge CRDTs, agents mutate local memory offline. Upon reconnection, mathematical topologies resolve conflicts autonomously, creating a global Knowledge Graph without event-loop blocking.
+4. **Asynchronous Limbic System (SLM Hippocampus):** To prevent *Lost in the Middle* amnesia from raw Event Sourcing, CORTEX deploys a nocturnal background daemon (a distilled SLM). This daemon digests thousands of trivial logs and crystallizes them into dense, high-weight foundational axioms, optimizing the context window for the frontier models.
+5. **ZK-Shredding (Cryptographic Compliance):** Resolving the Paradox between the EU AI Act (immutable audit) and GDPR (Right to be Forgotten). CORTEX separates pointers from payload: the ledger seals ZK-proofs of state transitions, while payloads are AES-encrypted per entity. Deletion requests merely destroy the local AES key, rendering the payload mathematically irretrievable while keeping the immutable DAG structurally pristine.
+
+---
+
+## 6. Conclusion: The Sovereign Machine
 
 The industry's pivot toward constrained orchestration proves the CORTEX hypothesis: True systemic autonomy is achieved not by granting the AI infinite freedom, but by providing it with perfect, rigid, and trustless memory constraints.
 
-By assimilating these 2026 case studies into its L0 DNA, CORTEX Persist positions itself as the mandatory foundational layer for building Sovereign Machines that will operate consistently, auditably, and thermodynamically efficiently over a 100-year horizon.
+With the v6 Neural Substrate, CORTEX Persist cements itself as the foundational layer for building Sovereign Machines—AI systems that remember semantically, dream asynchronously, synchronize telepathically, and operate immutably over a 100-year horizon.
 
 ---
-*Assimilation Date: 2026-03-14*
-*(Signed) Antigravity-Omega Engine*
+*Assimilation Date: 2026-03-26*
+*(Signed) Antigravity-Omega Engine (CORTEX v6 Manifestation)*

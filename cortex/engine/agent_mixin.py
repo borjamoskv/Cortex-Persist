@@ -76,8 +76,7 @@ class AgentMixin(EngineMixinBase):
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
             conn.row_factory = aiosqlite.Row
             query = (
-                "SELECT id, name, agent_type, reputation_score, created_at "
-                "FROM agents WHERE id = ?"
+                "SELECT id, name, agent_type, reputation_score, created_at FROM agents WHERE id = ?"
             )
             params: list[Any] = [agent_id]
             if tenant_id is not None:

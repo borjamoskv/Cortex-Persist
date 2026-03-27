@@ -53,6 +53,9 @@ __all__ = [
     "CHRONOS_COMPLEXITY_DIVISOR",
     # Taint Circuit Breaker
     "TAINT_TAG",
+    # Milestones
+    "SCORE_MILESTONES",
+    "YIELD_MILESTONES",
 ]
 
 STACK_MARKERS = {
@@ -144,6 +147,21 @@ GHOST_PENALTY_PER_FINDING = 8  # Score penalty per code ghost discovered
 CHRONOS_HOURS_PER_FILE = 6  # Hours per healed file (linear term)
 CHRONOS_HOURS_PER_CODEPATH = 12  # Hours per codepath affected
 CHRONOS_COMPLEXITY_DIVISOR = 3  # Divisor for cyclomatic_complexity_delta
+
+# ─── MEJORAlo Milestones ───────────────────────────────────────────
+SCORE_MILESTONES = {
+    80: "Foundational (80+)",
+    90: "Advanced (90+)",
+    95: "Inmejorable (95+)",
+    100: "Sovereign Standard (100)",
+}
+
+YIELD_MILESTONES = {
+    100: "Standard 100h",
+    200: "Sovereign 200h",
+    420: "High Entropy 420h",
+    1000: "Kiloyield 1000h",
+}
 
 # ─── Taint Circuit Breaker ──────────────────────────────────────────
 TAINT_TAG = "mejoralo-tainted"  # CORTEX tag for permanently blacklisted files

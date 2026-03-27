@@ -29,7 +29,7 @@ class DimensionalState:
 class ConvergenceMetrics:
     """Mathematical metrics evaluating the wave's convergence."""
 
-    entropy_delta: float = 0.0  # Should be <= 0
+    exergy_delta: float = 0.0  # Should be >= 0 (Utility gained)
     siege_survival_rate: float = 0.0  # Should be >= 0.95
     prediction_accuracy: float = 0.0  # Should be >= 0.70
     fitness_score: float = 0.0  # Should be >= 0.85
@@ -38,7 +38,7 @@ class ConvergenceMetrics:
     def has_converged(self) -> bool:
         """Returns True if the manifold has reached mathematical convergence."""
         return (
-            self.entropy_delta <= 0.0
+            self.exergy_delta >= 0.0
             and self.siege_survival_rate >= 0.95
             and self.prediction_accuracy >= 0.70
             and self.fitness_score >= 0.85

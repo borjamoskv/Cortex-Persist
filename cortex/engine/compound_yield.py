@@ -302,6 +302,16 @@ class CompoundYieldTracker:
                     project=project,
                 )
 
+                # MEJORAlo: Check for yield milestones
+                try:
+                    from cortex.extensions.mejoralo.milestones import MilestoneManager
+
+                    manager = MilestoneManager(self.db_path)
+                    achieved = manager.get_achieved_milestones(project)
+                    manager.check_yield_milestones(project, report.total_compound, achieved)
+                except Exception as e:
+                    logger.warning("Yield milestone check failed for %s: %s", project, e)
+
                 logger.info("CHRONOS Compound report persisted as fact #%d", fact_id)
                 return fact_id
 

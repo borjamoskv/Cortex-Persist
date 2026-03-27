@@ -1,6 +1,7 @@
 import asyncio
-import pytest
-from cortex.engine.isolation import ByzantineSandbox, IsolationManager, IsolationLevel
+
+from cortex.engine.isolation import ByzantineSandbox, IsolationManager
+
 
 class MockEngine:
     def __init__(self):

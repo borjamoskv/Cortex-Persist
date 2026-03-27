@@ -135,7 +135,7 @@ class StoreRequest(BaseModel):
     project: str = Field(..., max_length=100, description="Project/namespace for the fact")
     content: str = Field(..., max_length=50000, description="The fact content")
     fact_type: str = Field(
-        "knowledge", max_length=20, description="Type: knowledge, decision, mistake, bridge, ghost"
+        "AXIOM", max_length=20, description="Type: AXIOM, PROPOSAL, COLLISION, SYNAPSE, VOID"
     )
     tags: list[str] = Field(default_factory=list, description="Optional tags")
     source: str = Field("", max_length=200, description="Origin of the fact (e.g. agent:vex)")

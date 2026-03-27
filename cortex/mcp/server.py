@@ -26,6 +26,7 @@ from cortex.mcp.guard import MCPGuard
 from cortex.mcp.health_tools import register_health_tools
 from cortex.mcp.mega_tools import register_mega_tools
 from cortex.mcp.music_tools import register_music_tools
+from cortex.mcp.suno_tools import register_suno_tools
 from cortex.mcp.trust_tools import register_trust_tools
 from cortex.mcp.utils import (
     AsyncConnectionPool,
@@ -335,6 +336,9 @@ def create_mcp_server(config: MCPServerConfig | None = None) -> "FastMCP":  # ty
 
     # Music Engine — Master Orchestrator
     register_music_tools(mcp)
+
+    # Sovereign Suno Headless Extractor (suno-omega)
+    register_suno_tools(mcp, ctx)
 
     return mcp
 

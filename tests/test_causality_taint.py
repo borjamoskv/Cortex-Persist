@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sqlite3
+from unittest.mock import AsyncMock
 
 import pytest
 
@@ -173,6 +174,75 @@ async def test_propagate_taint_single_child() -> None:
 
 
 @pytest.mark.asyncio
+async def test_propagate_taint_records_ledger_transaction() -> None:
+    """Taint propagation must persist its audit event into the ledger."""
+    import aiosqlite
+
+    conn = await aiosqlite.connect(":memory:")
+    from cortex.engine.causality import AsyncCausalGraph
+
+    graph = AsyncCausalGraph(conn)
+    await graph.ensure_table()
+    await conn.execute(
+        """CREATE TABLE transactions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            project TEXT,
+            action TEXT,
+            detail TEXT,
+            prev_hash TEXT,
+            hash TEXT,
+            timestamp TEXT,
+            tenant_id TEXT DEFAULT 'default'
+        )"""
+    )
+    await conn.execute(
+        """CREATE TABLE facts (
+            id INTEGER PRIMARY KEY,
+            content TEXT,
+            confidence TEXT,
+            metadata TEXT DEFAULT '{}',
+            project TEXT,
+            tenant_id TEXT DEFAULT 'default',
+            valid_until TEXT
+        )"""
+    )
+
+    enc = get_default_encrypter()
+    encrypted_meta = enc.encrypt_json({}, tenant_id="default")
+
+    await conn.execute(
+        "INSERT INTO facts (id, content, confidence, metadata, project) VALUES (?, ?, ?, ?, ?)",
+        (1, "parent-fact", "C5", encrypted_meta, "ledger-test"),
+    )
+    await conn.execute(
+        "INSERT INTO facts (id, content, confidence, metadata, project) VALUES (?, ?, ?, ?, ?)",
+        (2, "child-fact", "C5", encrypted_meta, "ledger-test"),
+    )
+    await conn.execute(
+        "INSERT INTO causal_edges (fact_id, parent_id, edge_type, tenant_id, project) "
+        "VALUES (?, ?, ?, ?, ?)",
+        (2, 1, EDGE_DERIVED_FROM, "default", "ledger-test"),
+    )
+    await conn.commit()
+
+    report = await graph.propagate_taint(1)
+
+    assert report.affected_count == 1
+    async with conn.execute(
+        "SELECT project, action, detail, tenant_id FROM transactions ORDER BY id DESC LIMIT 1"
+    ) as cursor:
+        row = await cursor.fetchone()
+
+    assert row is not None
+    assert row[0] == "ledger-test"
+    assert row[1] == "propagate_taint"
+    assert '"source_fact_id": 1' in row[2]
+    assert row[3] == "default"
+
+    await conn.close()
+
+
+@pytest.mark.asyncio
 async def test_propagate_taint_chain() -> None:
     """3-deep chain: each hop increases degradation."""
     import aiosqlite
@@ -334,7 +404,50 @@ async def test_propagate_taint_cyclic_graph() -> None:
     report = await graph.propagate_taint(1)
 
     # Terminated cleanly despite the cycle.
-    assert report.affected_count >= 2
+    assert report.affected_count == 2
+    assert {change["fact_id"] for change in report.confidence_changes} == {2, 3}
+
+    await conn.close()
+
+
+@pytest.mark.asyncio
+async def test_calculate_blast_radius_cyclic_graph() -> None:
+    """Blast radius calculation must terminate and exclude the source node in a cycle."""
+    import aiosqlite
+
+    conn = await aiosqlite.connect(":memory:")
+    from cortex.engine.causality import AsyncCausalGraph
+
+    graph = AsyncCausalGraph(conn)
+    await graph.ensure_table()
+    await conn.execute(
+        """CREATE TABLE facts (
+            id INTEGER PRIMARY KEY,
+            content TEXT,
+            confidence TEXT,
+            metadata TEXT DEFAULT '{}',
+            project TEXT,
+            tenant_id TEXT DEFAULT 'default',
+            valid_until TEXT
+        )"""
+    )
+
+    for fid in range(1, 4):
+        await conn.execute(
+            "INSERT INTO facts (id, content, confidence) VALUES (?, ?, ?)",
+            (fid, f"fact-{fid}", "C5"),
+        )
+    for parent, child in [(1, 2), (2, 3), (3, 1)]:
+        await conn.execute(
+            "INSERT INTO causal_edges (fact_id, parent_id, edge_type, tenant_id) "
+            "VALUES (?, ?, ?, ?)",
+            (child, parent, EDGE_DERIVED_FROM, "default"),
+        )
+    await conn.commit()
+
+    radius = await graph.calculate_blast_radius(1, tenant_id="default")
+
+    assert radius == 2
 
     await conn.close()
 
@@ -356,6 +469,28 @@ async def test_taint_report_structure() -> None:
     # Frozen dataclass
     with pytest.raises(AttributeError):
         report.source_fact_id = 99  # type: ignore[misc]
+
+
+@pytest.mark.asyncio
+async def test_episodic_sealer_awaits_ledger_write() -> None:
+    """Anamnesis sealing must await the ledger write before returning."""
+    from cortex.engine.causality import EpisodicSealer
+
+    ledger = AsyncMock()
+    sealer = EpisodicSealer(ledger=ledger)
+
+    await sealer.seal_context(
+        agent_key="agent.alpha",
+        data={"fact_count": 3},
+        metadata={"project": "CORTEX_SYSTEM", "tenant_id": "tenant_a", "sequence": 7},
+    )
+
+    ledger.record_transaction.assert_awaited_once()
+    kwargs = ledger.record_transaction.await_args.kwargs
+    assert kwargs["project"] == "CORTEX_SYSTEM"
+    assert kwargs["action"] == "anamnesis_seal"
+    assert kwargs["tenant_id"] == "tenant_a"
+    assert kwargs["detail"]["agent_key"] == "agent.alpha"
 
 
 class TestConfidenceLevels:

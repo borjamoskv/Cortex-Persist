@@ -1,4 +1,3 @@
-
 """
 Sovereign Reporter Daemon — The Event Horizon (Ω-Dynamic SSE).
 Empuja telemetría hacia el dashboard en verdadero tiempo real usando

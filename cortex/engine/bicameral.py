@@ -1,5 +1,5 @@
-"""Bicameral Dispatcher — CORTEX v8.0.
-Decouples Fast-Path (Vector/Search) from Slow-Path (Ledger/Persistence).
+"""OaxacaEngine — Sovereign CORTEX Engine (High Performance).
+Refinement of the Bicameral architecture (Dual Bus).
 Ω₁₃: Thermodynamic optimization via asynchronous bus separation.
 """
 
@@ -7,62 +7,82 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from collections import defaultdict
-from collections.abc import Callable
+from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
-logger = logging.getLogger("cortex.bicameral")
+from cortex.engine.isolation import IsolationManager
+from cortex.ledger.sovereign_ledger import SovereignLedger
+
+logger = logging.getLogger("cortex.oaxaca")
+
+
+@dataclass
+class EngineConfig:
+    db_path: str | Path
+    storage_root: str | Path
+
 
 class BicameralDispatcher:
-    """Manages the dual-bus execution of cognitive operations."""
+    """Ω₁₃: Dual Bus Dispatcher for Asynchronous Isolation.
+
+    Routes requests through two parallel channels:
+    - 🟢 Fast Path: Non-blocking, in-memory, high-frequency (Search, Graphs).
+    - 🟡 Slow Path: Blocking, IO-intensive, auditable (Persistence, Sync).
+    """
 
     def __init__(self):
-        self._fast_bus: dict[str, Callable] = {}
-        # Per-operation slow handlers: dict[operation_name, list[Callable]]
-        # The sentinel key "_all" is used by register_slow() to attach to every operation.
-        self._slow_bus: dict[str, list[Callable]] = defaultdict(list)
+        self._fast_routes: dict[str, Any] = {}
+        self._slow_routes: dict[str, Any] = {}
+
+    def register_fast(self, name: str, handler: Any):
+        self._fast_routes[name] = handler
+
+    def register_slow(self, handler: Any):
+        # Default slow handler is usually the store/persist method
+        self._slow_routes["store"] = handler
+
+    async def dispatch(self, action: str, *args, **kwargs) -> Any:
+        """Route the action to the appropriate bus."""
+        if action in self._fast_routes:
+            return await self._fast_routes[action](*args, **kwargs)
+
+        # Fallback to slow path if it's a store action
+        if action == "store" and "store" in self._slow_routes:
+            return await self._slow_routes["store"](*args, **kwargs)
+
+        raise ValueError(f"No route registered for action: {action}")
+
+
+class OaxacaEngine:
+    """The High-Performance Sovereign Engine (Oaxaca Layer)."""
+
+    def __init__(self, config: EngineConfig):
+        self.config = config
+        self.db_path = Path(config.db_path)
+        self.storage_root = Path(config.storage_root)
+
+        # Core Components
+        self.ledger = SovereignLedger(self.db_path)
+        self.isolation = IsolationManager(self)
+
         self._background_tasks: set[asyncio.Task] = set()
 
-    def register_fast(self, name: str, func: Callable):
-        """Register a high-priority, low-latency operation."""
-        self._fast_bus[name] = func
+    async def initialize(self):
+        """Ω-Boot: Initialize all cognitive and physical subsystems."""
+        # Ensure directories exist
+        self.storage_root.mkdir(parents=True, exist_ok=True)
+        self.db_path.parent.mkdir(parents=True, exist_ok=True)
 
-    def register_slow(self, func: Callable, name: str = "_all"):
-        """Register a background persistence or audit operation.
-
-        If *name* is given, func is only triggered when that operation is dispatched.
-        The default sentinel ``_all`` triggers the handler for every dispatched operation.
-        """
-        self._slow_bus[name].append(func)
-
-    async def dispatch(self, operation: str, *args, **kwargs) -> Any:
-        """Execute the fast-path immediately and trigger the slow-path in background."""
-        if operation not in self._fast_bus:
-            raise KeyError(f"Operation '{operation}' not registered in Fast-Bus.")
-
-        # 1. Execute Fast-Path (Vector Search, L1 Cache)
-        result = await self._fast_bus[operation](*args, **kwargs)
-
-        # 2. Trigger Slow-Path — operation-specific handlers + catch-all handlers
-        slow_ops: list[Callable] = list(self._slow_bus.get(operation, []))
-        slow_ops.extend(self._slow_bus.get("_all", []))
-
-        for slow_op in slow_ops:
-            task = asyncio.create_task(self._safe_execute_slow(slow_op, *args, **kwargs))
-            self._background_tasks.add(task)
-            task.add_done_callback(self._background_tasks.discard)
-
-        return result
-
-    async def _safe_execute_slow(self, func: Callable, *args, **kwargs):
-        """Internal helper to ensure background tasks don't crash the engine."""
-        try:
-            await func(*args, **kwargs)
-        except Exception:
-            logger.exception("Slow-bus execution failed")
+        # Ledger init is sync for now in the current implementation,
+        # but isolation is already pre-initialized.
+        logger.info("OaxacaEngine initialized at %s", self.db_path)
 
     async def shutdown(self):
-        """Await all pending background tasks before closing."""
+        """Clean shutdown of all subsystems."""
         if self._background_tasks:
-            logger.info("Awaiting %d slow-bus tasks...", len(self._background_tasks))
             await asyncio.gather(*self._background_tasks, return_exceptions=True)
+        logger.info("OaxacaEngine shutdown complete.")
+
+    def __repr__(self) -> str:
+        return f"OaxacaEngine(db={self.db_path})"

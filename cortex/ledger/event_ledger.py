@@ -20,7 +20,7 @@ except ImportError:
     def get_tenant_id() -> str:
         return "default"
 
-__all__ = ["EventLedgerL3"]
+__all__ = ["EventLedgerL3", "get_default_ledger"]
 
 logger = logging.getLogger("cortex.ledger.event")
 
@@ -119,6 +119,18 @@ class EventLedgerL3:
         await self._conn.commit()
         self._last_hash_cache[event.tenant_id] = event.signature
 
+    async def store_fact(self, fact: str, metadata: dict[str, Any] | None = None) -> None:
+        """Compatibility method for semantic persistence from compaction pipelines."""
+        from cortex.memory.models import MemoryEvent
+        event = MemoryEvent(
+            role="system",
+            content=f"FACT_STORED: {fact}",
+            metadata=metadata or {},
+            session_id="system_compaction",
+            token_count=0
+        )
+        await self.append_event(event)
+
     async def get_session_events(
         self,
         session_id: str,
@@ -137,7 +149,6 @@ class EventLedgerL3:
             (session_id, tenant_id, limit),
         )
         rows = await cursor.fetchall()
-        from cortex.ledger.event_ledger import _row_to_event
         return [_row_to_event(row) for row in rows]
 
     async def replay(self, tenant_id: str, limit: int = 1000) -> list[MemoryEvent]:
@@ -210,6 +221,45 @@ class EventLedgerL3:
             "findings": audit_log or ["Memory event chain shows 100% integrity."],
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
+
+_DEFAULT_LEDGER: EventLedgerL3 | None = None
+
+
+def get_default_ledger() -> EventLedgerL3:
+    """Provides a global default ledger instance."""
+    global _DEFAULT_LEDGER
+    if _DEFAULT_LEDGER is None:
+        import os
+
+        from cortex.database.pool import CortexConnectionPool
+
+        db_path = os.path.expanduser("~/.cortex/cortex.db")
+        os.makedirs(os.path.dirname(db_path), exist_ok=True)
+        pool = CortexConnectionPool(db_path, read_only=False)
+
+        class LazyLedger(EventLedgerL3):
+            def __init__(self, ledger_pool: CortexConnectionPool):
+                self._pool = ledger_pool
+                self._real_ledger: EventLedgerL3 | None = None
+
+            async def _ensure(self) -> EventLedgerL3:
+                if self._real_ledger is None:
+                    conn = await self._pool._create_connection()
+                    self._real_ledger = EventLedgerL3(conn)
+                return self._real_ledger
+
+            async def store_fact(self, fact: str, metadata: dict[str, Any] | None = None) -> None:
+                ledger = await self._ensure()
+                await ledger.store_fact(fact, metadata)
+
+            async def append_event(self, event: MemoryEvent) -> None:
+                ledger = await self._ensure()
+                await ledger.append_event(event)
+
+        _DEFAULT_LEDGER = LazyLedger(pool)
+
+    return _DEFAULT_LEDGER
+
 
 def _row_to_event(row: tuple) -> MemoryEvent:
     raw_ts = row[1]

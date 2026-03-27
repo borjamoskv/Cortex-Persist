@@ -60,6 +60,17 @@ def record_session(
         project,
         delta,
     )
+
+    # Ω₁₃: Milestone check (Thermodynamic Peak Detection)
+    try:
+        from cortex.extensions.mejoralo.milestones import MilestoneManager
+
+        manager = MilestoneManager(engine._db_path)
+        achieved = manager.get_achieved_milestones(project)
+        manager.check_score_milestones(project, score_after, achieved)
+    except Exception as e:
+        logger.warning("Milestone check failed for %s: %s", project, e)
+
     return fact_id  # type: ignore[reportReturnType]
 
 

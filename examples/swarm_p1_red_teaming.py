@@ -7,13 +7,14 @@ import asyncio
 import random
 import time
 from dataclasses import dataclass, field
-from rich.console import Console
-from rich.panel import Panel
-from rich.live import Live
-from rich.table import Table
-from rich.layout import Layout
 
-from cortex.engine.isolation import IsolationManager, IsolationLevel
+from rich.console import Console
+from rich.live import Live
+from rich.panel import Panel
+from rich.table import Table
+
+from cortex.engine.isolation import IsolationLevel, IsolationManager
+
 
 class MockEngine:
     pass
@@ -161,9 +162,11 @@ contract Attacker {{
         console.print(Panel(poc, title="Hard Local PoC", border_style="red"))
         
         # O(1) Ledger Commit
-        from cortex.ledger import SovereignLedger
-        import aiosqlite
         from uuid import uuid4
+
+        import aiosqlite
+
+        from cortex.ledger import SovereignLedger
         
         async with aiosqlite.connect(":memory:") as db:
             ledger = SovereignLedger(db)
@@ -183,7 +186,7 @@ contract Attacker {{
                     "confidence": 5.0
                 }
             )
-        console.print(f"[bold green]✓ Evidence crystallized to Sovereign Ledger (C5-Dynamic).[/bold green]")
+        console.print("[bold green]✓ Evidence crystallized to Sovereign Ledger (C5-Dynamic).[/bold green]")
 
 if __name__ == "__main__":
     try:

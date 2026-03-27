@@ -13,8 +13,8 @@ from cortex.extensions.immune.filters.adversarial import AdversarialFilter
 from cortex.extensions.immune.filters.base import FilterResult, ImmuneFilter, Verdict
 from cortex.extensions.immune.filters.causal import CausalFilter
 from cortex.extensions.immune.filters.confidence import ConfidenceFilter
-from cortex.extensions.immune.filters.entropic_quarantine import EntropicQuarantineFilter
-from cortex.extensions.immune.filters.entropy import EntropyFilter
+from cortex.extensions.immune.filters.exergy import ExergyFilter
+from cortex.extensions.immune.filters.exergy_quarantine import ExergyQuarantineFilter
 from cortex.extensions.immune.filters.reversibility import ReversibilityFilter
 
 logger = logging.getLogger("cortex.extensions.immune.membrane")
@@ -43,10 +43,11 @@ class ImmuneMembrane:
             ReversibilityFilter(),
             AdversarialFilter(),
             CausalFilter(),
-            EntropyFilter(),
+            ExergyFilter(),
             ConfidenceFilter(),
-            EntropicQuarantineFilter(),
+            ExergyQuarantineFilter(),
         ]
+
         self._weights = {"F1": 0.25, "F2": 0.20, "F3": 0.20, "F4": 0.15, "F5": 0.10, "F6": 0.10}
 
     async def intercept(

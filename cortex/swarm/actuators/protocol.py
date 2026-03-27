@@ -38,13 +38,24 @@ class ActuatorResponse(dict[str, Any]):
         metadata: dict[str, Any],
         status: str = "success",
         error: str | None = None,
+        skills_hash: str | None = None,
+        reproducibility_level: str = "none",
+        signature: str | None = None,
     ) -> None:
-        super().__init__(
-            {
-                "content": content,
-                "metadata": metadata,
-                "status": status,
-                "error": error,
-                "correlation_id": str(uuid.uuid4()),
-            }
-        )
+        super().__init__()
+        self["content"] = content
+        self["metadata"] = metadata
+        self["status"] = status
+        self["error"] = error
+        self["skills_hash"] = skills_hash
+        self["reproducibility_level"] = reproducibility_level
+        self["signature"] = signature
+        self["correlation_id"] = str(uuid.uuid4())
+
+    @property
+    def is_signed(self) -> bool:
+        return self.get("signature") is not None
+
+    @property
+    def status(self) -> str:
+        return self["status"]

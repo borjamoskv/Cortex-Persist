@@ -244,7 +244,7 @@ class TestThalamusGate:
 
     @pytest.mark.asyncio
     async def test_low_density_rejected(self, mock_manager):
-        from cortex.memory.thalamus import ThalamusGate
+        from cortex.engine.nexus import ThalamusGate
 
         gate = ThalamusGate(mock_manager, min_density=10)
         should, action, _ = await gate.filter(
@@ -257,13 +257,13 @@ class TestThalamusGate:
 
     @pytest.mark.asyncio
     async def test_normal_content_passes(self, mock_manager):
-        from cortex.memory.thalamus import ThalamusGate
+        from cortex.engine.nexus import ThalamusGate
 
         gate = ThalamusGate(mock_manager, min_density=5)
 
         # Patch the dense retrieval to return empty (no duplicates)
         with patch(
-            "cortex.memory.thalamus._fetch_dense_results",
+            "cortex.engine.nexus._fetch_dense_results",
             new_callable=AsyncMock,
             return_value=[],
         ):
@@ -277,7 +277,7 @@ class TestThalamusGate:
 
     @pytest.mark.asyncio
     async def test_identical_content_rejected(self, mock_manager):
-        from cortex.memory.thalamus import ThalamusGate
+        from cortex.engine.nexus import ThalamusGate
 
         gate = ThalamusGate(mock_manager, min_density=5)
 
@@ -288,7 +288,7 @@ class TestThalamusGate:
         existing_fact.fact_type = "general"
 
         with patch(
-            "cortex.memory.thalamus._fetch_dense_results",
+            "cortex.engine.nexus._fetch_dense_results",
             new_callable=AsyncMock,
             return_value=[existing_fact],
         ):
@@ -302,12 +302,12 @@ class TestThalamusGate:
 
     @pytest.mark.asyncio
     async def test_graceful_degradation_on_retrieval_error(self, mock_manager):
-        from cortex.memory.thalamus import ThalamusGate
+        from cortex.engine.nexus import ThalamusGate
 
         gate = ThalamusGate(mock_manager, min_density=5)
 
         with patch(
-            "cortex.memory.thalamus._fetch_dense_results",
+            "cortex.engine.nexus._fetch_dense_results",
             new_callable=AsyncMock,
             side_effect=RuntimeError("vector store down"),
         ):

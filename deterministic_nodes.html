@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CORTEX // Deterministic Nodes</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap');
+
+    :root {
+      --bg: #0a0a0a;
+      --fg: #eaeaea;
+      --accent: #ccff00; /* Radioactive Lemon */
+      --accent-glow: rgba(204, 255, 0, 0.4);
+      --node-bg: #111111;
+      --node-border: rgba(204, 255, 0, 0.2);
+      --grid-color: rgba(255, 255, 255, 0.03);
+      --node-size: 88px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: var(--bg);
+      background-image:
+        linear-gradient(var(--grid-color) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+      background-size: 40px 40px;
+      color: var(--fg);
+      font-family: 'Inter', sans-serif;
+    }
+
+    #app {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      user-select: none;
+      touch-action: none;
+    }
+
+    .node {
+      position: absolute;
+      width: var(--node-size);
+      height: var(--node-size);
+      border-radius: 4px;
+      display: grid;
+      place-items: center;
+      background: var(--node-bg);
+      border: 1px solid var(--node-border);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+      cursor: grab;
+      transition: border-color 0.2s, box-shadow 0.2s, transform 0.1s;
+      z-index: 10;
+    }
+
+    .node::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      background: linear-gradient(135deg, var(--node-border), transparent);
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .node:hover {
+      border-color: var(--accent);
+      box-shadow: 0 0 15px var(--accent-glow);
+    }
+
+    .node.dragging {
+      cursor: grabbing;
+      z-index: 1000;
+      border-color: var(--accent);
+      box-shadow: 0 0 30px var(--accent-glow);
+      transform: scale(1.05);
+    }
+
+    .label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      pointer-events: none;
+      text-shadow: 0 0 8px var(--accent-glow);
+    }
+
+    .hud {
+      position: absolute;
+      top: 24px;
+      left: 24px;
+      z-index: 2000;
+      padding: 16px;
+      background: rgba(14, 14, 14, 0.9);
+      border-left: 3px solid var(--accent);
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      border-right: 1px solid rgba(255, 255, 255, 0.05);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(12px);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.05em;
+      color: #888;
+      pointer-events: none;
+    }
+
+    .hud strong {
+      color: var(--accent);
+      display: block;
+      margin-bottom: 4px;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    .scanline {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(to bottom, transparent 50%, rgba(0, 0, 0, 0.05) 50%);
+      background-size: 100% 4px;
+      pointer-events: none;
+      z-index: 3000;
+      opacity: 0.3;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="hud">
+      <strong>SYSTEM_STASIS // V5.0</strong>
+      STATUS: NOMINAL<br>
+      ENTROPY: 0.000<br>
+      SEED: <span id="seed-val">1337</span><br>
+      NODES: 10
+    </div>
+    <div class="scanline"></div>
+  </div>
+
+  <script>
+    const SEED = 1337;
+    const NODE_COUNT = 10;
+    const NODE_SIZE = 88;
+    const PADDING = 40;
+    const app = document.getElementById("app");
+
+    // LCG Deterministic RNG
+    function mulberry32(s) {
+      return function() {
+        s |= 0; s = s + 0x6D2B79F5 | 0;
+        let t = Math.imul(s ^ s >>> 15, 1 | s);
+        t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+      }
+    }
+
+    const rng = mulberry32(SEED);
+
+    function clamp(val, min, max) {
+      return Math.max(min, Math.min(max, val));
+    }
+
+    function generatePositions(count, width, height) {
+      const positions = [];
+      const minX = PADDING;
+      const minY = PADDING + 80; // Extra padding for HUD
+      const maxX = width - NODE_SIZE - PADDING;
+      const maxY = height - NODE_SIZE - PADDING;
+
+      for (let i = 0; i < count; i++) {
+        let x, y, overlaps, attempts = 0;
+        do {
+          x = minX + rng() * (maxX - minX);
+          y = minY + rng() * (maxY - minY);
+          overlaps = positions.some(p => {
+            const dx = p.x - x;
+            const dy = p.y - y;
+            return Math.sqrt(dx * dx + dy * dy) < NODE_SIZE * 1.3;
+          });
+          attempts++;
+        } while (overlaps && attempts < 100);
+        positions.push({ x, y });
+      }
+      return positions;
+    }
+
+    function createNode(id, x, y) {
+      const el = document.createElement("div");
+      el.className = "node";
+      el.style.left = `${x}px`;
+      el.style.top = `${y}px`;
+      el.innerHTML = `<div class="label">N${String(id).padStart(2, '0')}</div>`;
+      
+      setupDrag(el);
+      app.appendChild(el);
+    }
+
+    function setupDrag(el) {
+      let isDragging = false;
+      let startX, startY, initialX, initialY;
+
+      el.onpointerdown = (e) => {
+        isDragging = true;
+        el.setPointerCapture(e.pointerId);
+        el.classList.add("dragging");
+        
+        startX = e.clientX;
+        startY = e.clientY;
+        initialX = parseFloat(el.style.left);
+        initialY = parseFloat(el.style.top);
+      };
+
+      el.onpointermove = (e) => {
+        if (!isDragging) return;
+        
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+
+        const maxX = window.innerWidth - NODE_SIZE;
+        const maxY = window.innerHeight - NODE_SIZE;
+
+        const nextX = clamp(initialX + dx, 0, maxX);
+        const nextY = clamp(initialY + dy, 0, maxY);
+
+        el.style.left = `${nextX}px`;
+        el.style.top = `${nextY}px`;
+      };
+
+      const stop = (e) => {
+        isDragging = false;
+        el.classList.remove("dragging");
+        try { el.releasePointerCapture(e.pointerId); } catch(err) {}
+      };
+
+      el.onpointerup = stop;
+      el.onpointercancel = stop;
+    }
+
+    function init() {
+      // Clear previous
+      app.querySelectorAll(".node").forEach(n => n.remove());
+      // Reset RNG sequence for determinism on resize if desired, 
+      // but here we just want initial positions to be stable.
+      const deterministicRNG = mulberry32(SEED);
+      const positions = generatePositions(NODE_COUNT, window.innerWidth, window.innerHeight);
+      positions.forEach((p, i) => createNode(i + 1, p.x, p.y));
+    }
+
+    init();
+    // Re-init on resize to keep nodes in view, though it breaks current positions.
+    // In a "real" CORTEX system, we might want to scale positions instead.
+    let resizeTimer;
+    window.addEventListener("resize", () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(init, 200);
+    });
+  </script>
+</body>
+</html>

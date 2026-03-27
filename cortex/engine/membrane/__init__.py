@@ -24,25 +24,118 @@ from .sanitizer import SovereignSanitizer
 logger = logging.getLogger("cortex.membrane")
 
 # --- Semantic Constants ---
-_DECORATIVE_MARKERS = frozenset({
-    "por supuesto", "aquí tienes", "como un modelo de lenguaje",
-    "espero que te sea útil", "es importante notar", "en conclusión",
-    "en resumen", "sin embargo", "además", "procedo a",
-    "he actualizado", "he implementado", "entendido"
-})
+_DECORATIVE_MARKERS = frozenset(
+    {
+        "por supuesto",
+        "aquí tienes",
+        "como un modelo de lenguaje",
+        "espero que te sea útil",
+        "es importante notar",
+        "en conclusión",
+        "en resumen",
+        "sin embargo",
+        "además",
+        "procedo a",
+        "he actualizado",
+        "he implementado",
+        "entendido",
+    }
+)
 
-_STOP_WORDS = frozenset({
-    "a", "an", "the", "is", "are", "was", "were", "be", "been", "being",
-    "have", "has", "had", "do", "does", "did", "will", "would", "could",
-    "should", "may", "might", "shall", "can", "de", "del", "la", "el",
-    "los", "las", "en", "un", "una", "y", "o", "que", "con", "por",
-    "para", "se", "es", "no", "al", "su", "más", "como", "pero",
-    "sin", "sobre", "to", "of", "in", "for", "on", "with", "at",
-    "by", "from", "and", "or", "not", "but", "this", "that", "it", "its",
-    "i", "me", "my", "you", "your", "he", "she", "we", "they",
-    "now", "just", "very", "too", "also", "well", "how", "why",
-    "when", "where", "which", "who", "whom", "these", "those"
-})
+_STOP_WORDS = frozenset(
+    {
+        "a",
+        "an",
+        "the",
+        "is",
+        "are",
+        "was",
+        "were",
+        "be",
+        "been",
+        "being",
+        "have",
+        "has",
+        "had",
+        "do",
+        "does",
+        "did",
+        "will",
+        "would",
+        "could",
+        "should",
+        "may",
+        "might",
+        "shall",
+        "can",
+        "de",
+        "del",
+        "la",
+        "el",
+        "los",
+        "las",
+        "en",
+        "un",
+        "una",
+        "y",
+        "o",
+        "que",
+        "con",
+        "por",
+        "para",
+        "se",
+        "es",
+        "no",
+        "al",
+        "su",
+        "más",
+        "como",
+        "pero",
+        "sin",
+        "sobre",
+        "to",
+        "of",
+        "in",
+        "for",
+        "on",
+        "with",
+        "at",
+        "by",
+        "from",
+        "and",
+        "or",
+        "not",
+        "but",
+        "this",
+        "that",
+        "it",
+        "its",
+        "i",
+        "me",
+        "my",
+        "you",
+        "your",
+        "he",
+        "she",
+        "we",
+        "they",
+        "now",
+        "just",
+        "very",
+        "too",
+        "also",
+        "well",
+        "how",
+        "why",
+        "when",
+        "where",
+        "which",
+        "who",
+        "whom",
+        "these",
+        "those",
+    }
+)
 
 
 class MembraneState(str, Enum):
@@ -85,7 +178,7 @@ class SovereignMembrane:
         exergy_threshold: float = 0.40,
         min_density: int = 10,
         max_tool_fails: int = 3,
-        max_stale_reads: int = 5
+        max_stale_reads: int = 5,
     ):
         self.exergy_threshold = exergy_threshold
         self.min_density = min_density
@@ -102,7 +195,7 @@ class SovereignMembrane:
         content: str,
         fact_type: str,
         counters: dict[str, Any] | None = None,
-        metadata: dict[str, Any] | None = None
+        metadata: dict[str, Any] | None = None,
     ) -> AdmitResult:
         """
         Perform O(1) triage on a memory induction proposal.
@@ -113,10 +206,7 @@ class SovereignMembrane:
         # 1. Physical Density (Thalamus Gate)
         if len(content.strip()) < self.min_density:
             reasons.append("low_physical_density")
-            return AdmitResult(
-                Action.REJECT,
-                Diagnostic(0.0, 1.0, MembraneState.ACTIVE, reasons)
-            )
+            return AdmitResult(Action.REJECT, Diagnostic(0.0, 1.0, MembraneState.ACTIVE, reasons))
 
         # 2. Semantic Exergy (Exergy Guard)
         exergy_score = 1.0
@@ -152,13 +242,16 @@ class SovereignMembrane:
         if action != Action.ADMIT:
             logger.warning(
                 "⍲ Membrane: %s | Exergy: %.4f | Behavior: %.4f | Reasons: %s",
-                action.upper(), exergy_score, behavioral_score, ", ".join(reasons)
+                action.upper(),
+                exergy_score,
+                behavioral_score,
+                ", ".join(reasons),
             )
 
         return AdmitResult(
             action,
             Diagnostic(exergy_score, behavioral_score, state, reasons),
-            metadata_patch={"membrane_state": state.value, "exergy": exergy_score}
+            metadata_patch={"membrane_state": state.value, "exergy": exergy_score},
         )
 
 
@@ -188,7 +281,7 @@ def calculate_exergy(content: str) -> float:
     # Bonus for structural markers (code, lists, headers)
     structural_bonus = 0.2 if any(m in stripped for m in ("```", "###", "1.", "- ")) else 0.0
 
-    exergy = (exergy + structural_bonus)
+    exergy = exergy + structural_bonus
     return float(max(0.1, min(1.0, exergy)))
 
 
@@ -202,5 +295,5 @@ __all__ = [
     "SovereignSanitizer",
     "PureEngram",
     "MembraneLog",
-    "MembraneLogLevel"
+    "MembraneLogLevel",
 ]

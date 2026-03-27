@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import time
 from collections import deque
 from collections.abc import AsyncIterator
@@ -58,10 +59,16 @@ class SovereignLedger:
     WRITE_RATE_WINDOW = 60
     HIGH_WRITE_THRESHOLD = 10
 
-    def __init__(self, db: Any = None):
+    def __init__(self, db: Any = None, genesis_hash: str | None = None):
         self.pool = db
         self._write_timestamps: deque[float] = deque(maxlen=5000)
-        self._last_hash = "GENESIS"
+        # Ω1 Byzantine Genesis: Allow external anchor (e.g. CORTEX_LEDGER_ANCHOR)
+        anchor = os.getenv("CORTEX_LEDGER_ANCHOR")
+        if not anchor:
+            logger.warning("Ω1_WARNING: CORTEX_LEDGER_ANCHOR not found. Using default 'GENESIS'. Internal entropy risk.")
+        
+        self._genesis_hash = genesis_hash or anchor or "GENESIS"
+        self._last_hash = self._genesis_hash
 
     async def ensure_table(self):
         async with self._acquire_conn() as conn:
@@ -135,7 +142,7 @@ class SovereignLedger:
                 (tenant_id,),
             )
             row = await cursor.fetchone()
-            prev_hash = str(row[0]) if row and row[0] else "GENESIS"
+            prev_hash = str(row[0]) if row and row[0] else self._genesis_hash
             tx_hash = compute_tx_hash(prev_hash, project, action, detail_json, ts)
 
             await conn.execute(
@@ -157,7 +164,7 @@ class SovereignLedger:
                 "FROM transactions WHERE tenant_id = ? ORDER BY id",
                 (tenant_id,),
             )
-            expected_prev = "GENESIS"
+            expected_prev = self._genesis_hash
             async for row in cursor:
                 tid, proj, act, det, prev, h, ts = row
                 tx_count += 1

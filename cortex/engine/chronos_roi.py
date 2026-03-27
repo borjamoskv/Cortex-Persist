@@ -196,7 +196,7 @@ class ChronosROI:
                         "default",
                         project,
                         content,
-                        "knowledge",
+                        "AXIOM",
                         '["chronos", "roi", "metrics"]',
                         "observed",
                         ts,

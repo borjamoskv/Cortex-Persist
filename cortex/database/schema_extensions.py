@@ -13,6 +13,7 @@ from __future__ import annotations
 CREATE_VOTES = """
 CREATE TABLE IF NOT EXISTS consensus_votes (
     id      INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenant_id TEXT NOT NULL DEFAULT 'default',
     fact_id INTEGER NOT NULL REFERENCES facts(id),
     agent   TEXT NOT NULL,
     vote    INTEGER NOT NULL, -- 1 (verify), -1 (dispute)
@@ -48,6 +49,7 @@ CREATE TABLE IF NOT EXISTS agents (
 CREATE_VOTES_V2 = """
 CREATE TABLE IF NOT EXISTS consensus_votes_v2 (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenant_id       TEXT NOT NULL DEFAULT 'default',
     fact_id         INTEGER NOT NULL REFERENCES facts(id),
     agent_id        TEXT NOT NULL REFERENCES agents(id),
     vote            INTEGER NOT NULL,
@@ -65,6 +67,7 @@ CREATE TABLE IF NOT EXISTS consensus_votes_v2 (
 CREATE_TRUST_EDGES = """
 CREATE TABLE IF NOT EXISTS trust_edges (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenant_id       TEXT NOT NULL DEFAULT 'default',
     source_agent    TEXT NOT NULL REFERENCES agents(id),
     target_agent    TEXT NOT NULL REFERENCES agents(id),
     trust_weight    REAL NOT NULL,
@@ -77,6 +80,7 @@ CREATE TABLE IF NOT EXISTS trust_edges (
 CREATE_OUTCOMES = """
 CREATE TABLE IF NOT EXISTS consensus_outcomes (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenant_id       TEXT NOT NULL DEFAULT 'default',
     fact_id         INTEGER NOT NULL REFERENCES facts(id),
     final_state     TEXT NOT NULL,
     final_score     REAL NOT NULL,
@@ -96,6 +100,9 @@ CREATE INDEX IF NOT EXISTS idx_votes_v2_fact ON consensus_votes_v2(fact_id);
 CREATE INDEX IF NOT EXISTS idx_votes_v2_agent ON consensus_votes_v2(agent_id);
 CREATE INDEX IF NOT EXISTS idx_trust_source ON trust_edges(source_agent);
 CREATE INDEX IF NOT EXISTS idx_trust_target ON trust_edges(target_agent);
+CREATE INDEX IF NOT EXISTS idx_votes_v2_tenant ON consensus_votes_v2(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_trust_tenant ON trust_edges(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_votes_tenant ON consensus_votes(tenant_id);
 """
 
 # ─── Context Snapshots (Ambient Intelligence) ────────────────────────
@@ -156,6 +163,7 @@ CREATE VIRTUAL TABLE IF NOT EXISTS episodes_fts USING fts5(
 CREATE_EVOLUTION_STATE = """
 CREATE TABLE IF NOT EXISTS evolution_state (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenant_id   TEXT NOT NULL DEFAULT 'default',
     cycle       INTEGER NOT NULL,
     agent_domain TEXT NOT NULL,
     agent_json  TEXT NOT NULL,
@@ -166,6 +174,7 @@ CREATE TABLE IF NOT EXISTS evolution_state (
 CREATE_EVOLUTION_STATE_INDEX = """
 CREATE INDEX IF NOT EXISTS idx_evo_cycle ON evolution_state(cycle);
 CREATE INDEX IF NOT EXISTS idx_evo_domain ON evolution_state(agent_domain);
+CREATE INDEX IF NOT EXISTS idx_evo_tenant ON evolution_state(tenant_id);
 """
 
 # ─── Signal Bus (L1 Consciousness — Cross-Tool Reactive Signaling) ───
@@ -312,6 +321,7 @@ CREATE TABLE IF NOT EXISTS merkle_roots (
 CREATE_PROCEDURAL_ENGRAMS = """
 CREATE TABLE IF NOT EXISTS procedural_engrams (
     skill_name      TEXT PRIMARY KEY,
+    tenant_id       TEXT NOT NULL DEFAULT 'default',
     invocations     INTEGER NOT NULL DEFAULT 0,
     success_rate    REAL NOT NULL DEFAULT 1.0,
     avg_latency_ms  REAL NOT NULL DEFAULT 0.0,

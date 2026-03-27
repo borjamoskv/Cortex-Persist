@@ -10,6 +10,8 @@ from functools import wraps
 from pathlib import Path
 from typing import Any
 
+from cortex.engine.circuit_breaker import CircuitBreaker, CircuitState  # noqa: F401 — re-exported
+
 logger = logging.getLogger("CORTEX.PULMONES")
 
 
@@ -48,41 +50,6 @@ class PulmonesQueue:
             logger.warning(
                 "🫁 [PULMONES] Payload encolado para %s. Reintento en %ss.", func_name, delay
             )
-
-
-class CircuitBreaker:
-    """Implementa estados Closed, Open, Half-Open para proteger el Event Loop."""
-
-    def __init__(self, failure_threshold: int = 3, recovery_timeout: float = 30.0):
-        self.failure_threshold = failure_threshold
-        self.recovery_timeout = recovery_timeout
-        self.failure_count = 0
-        self.state = "CLOSED"  # CLOSED | OPEN | HALF_OPEN
-        self.last_failure_time = 0.0
-
-    def record_failure(self):
-        self.failure_count += 1
-        self.last_failure_time = time.time()
-        if self.failure_count >= self.failure_threshold:
-            self.state = "OPEN"
-            logger.error("🔌 [PULMONES] Circuit Breaker ABIERTO. Fallos: %s", self.failure_count)
-
-    def record_success(self):
-        if self.state != "CLOSED":
-            logger.info("🔌 [PULMONES] Circuit Breaker CERRADO. Conexión restaurada.")
-        self.failure_count = 0
-        self.state = "CLOSED"
-
-    def can_execute(self) -> bool:
-        if self.state == "CLOSED":
-            return True
-        if self.state == "OPEN":
-            if time.time() - self.last_failure_time > self.recovery_timeout:
-                self.state = "HALF_OPEN"
-                logger.info("🔌 [PULMONES] Circuit Breaker HALF-OPEN. Probando conexión...")
-                return True
-            return False
-        return True  # HALF_OPEN permite 1 intento
 
 
 def sovereign_circuit_breaker(timeout: float = 10.0, max_retries: int = 2, threshold: int = 3):
@@ -127,7 +94,7 @@ def sovereign_circuit_breaker(timeout: float = 10.0, max_retries: int = 2, thres
                     await asyncio.sleep(2**attempt)  # Exponential backoff
 
                 except Exception as e:  # noqa: BLE001
-                    # Ω₃: Excepciones de negocio o código no activan el circuit breaker, solo timeouts/red
+                    # Ω₃: Excepciones de negocio/código no activan el CB — sólo timeouts/red
                     logger.critical(
                         "💀 [PULMONES] Falla interna no recuperable en %s: %s",
                         func.__name__,

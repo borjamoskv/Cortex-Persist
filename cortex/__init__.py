@@ -27,7 +27,7 @@ _LAZY_IMPORTS = {
 _EXPERIMENTAL_MODULES = (
     "autopoiesis",
     "circadian_cycle",
-    "digital_endocrine",
+    "digital_gradient",
     "epigenetic_memory",
     "strategic_disobedience",
     "zero_prompting",

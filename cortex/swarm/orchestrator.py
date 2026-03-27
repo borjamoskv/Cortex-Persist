@@ -71,10 +71,34 @@ class MasterOrchestrator:
     async def _dispatch_to_enclave(
         self, enclave: SwarmEnclave, manager: SwarmManager, task: str
     ) -> dict[str, Any]:
-        """Internal helper for enclave-specific execution."""
+        """Dispatch task to the first available actuator in the enclave manager."""
         logger.debug("Orchestrator: Dispatching to Enclave[%s]: %s", enclave.value, task)
-        # Simplified result for protocol prototype
-        return {f"{enclave.value}_result": f"Completed: {task}"}
+        available = await manager.list_available()
+        if not available:
+            # No pre-registered actuators — attempt autonomic resolution via registry
+            skills = list(manager.registry.skills.keys())
+            if skills:
+                agent_id = skills[0]
+                try:
+                    await manager._resolve_actuator(agent_id)
+                    available = [agent_id]
+                except ValueError:
+                    pass
+
+        if not available:
+            return {f"{enclave.value}_result": {"status": "skipped", "reason": "no_actuators"}}
+
+        # Cap at 5 agents per enclave to prevent event-loop saturation
+        responses = await manager.shard_task(available[:5], task)
+        success = [r for r in responses if r.get("status") == "success"]
+        return {
+            f"{enclave.value}_result": {
+                "status": "success" if success else "partial",
+                "agents_used": len(responses),
+                "success_count": len(success),
+                "samples": [r.get("content", "")[:200] for r in success[:3]],
+            }
+        }
 
     async def execute_swarm_100(self, global_goal: str) -> dict[str, Any]:
         """
@@ -97,7 +121,10 @@ class MasterOrchestrator:
 
         # 3. Crystallization (Synthesis)
         success_count = len([r for r in responses if r.get("status") == "success"])
-        total_exergy = sum(r.get("metadata", {}).get("exergy_yield", 0.0) for r in responses)
+        # Pull exergy from the governor's live per-agent scores instead of
+        # metadata that virtual agents never populate.
+        governor = manager.exergy_governor
+        total_exergy = sum(governor.agent_scores.values())
 
         synthesis = {
             "goal": global_goal,
@@ -127,12 +154,24 @@ class MasterOrchestrator:
     async def recruit_and_execute(self, quadrant: str, task: str) -> dict[str, Any]:
         """
         Higher-level flow: Recruit specialized agents for a task and execute it.
+        Recruits a squad then dispatches the task via the EXECUTION enclave.
         """
-        logger.info("Orchestrator: Recruiting for task '%s' in quadrant %s", str(task)[:30], quadrant)
+        logger.info(
+            "Orchestrator: Recruiting for task '%s' in quadrant %s",
+            str(task)[:30],
+            quadrant,
+        )
         squad = await self.factory.recruit_squad(quadrant, size=3)
 
         if not squad:
             return {"status": "error", "message": "No specialists recruited."}
 
-        # Execution will be distributed via Enclaves in next iteration
-        return {"status": "success", "squad_size": len(squad), "task": task}
+        manager = self.enclaves[SwarmEnclave.EXECUTION]
+        responses = await manager.shard_task(squad, task)
+        success = [r for r in responses if r.get("status") == "success"]
+        return {
+            "status": "success" if success else "partial",
+            "squad_size": len(squad),
+            "success_count": len(success),
+            "task": task,
+        }

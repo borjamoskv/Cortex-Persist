@@ -3,6 +3,7 @@
 > **Version:** 7.0.0 · **Codename:** *Autopoiesis*
 > **Updated:** 2026-02-24 · **Author:** MOSKV-1 v5 (Antigravity)
 > **Status:** Active development — Biological core integration
+> **Strategic Risks:** [Death Vectors V1–V3](file:///Users/borjafernandezangulo/30_CORTEX/docs/STRATEGIC_RISKS.md)
 > **Codebase:** 306 Python modules · ~46,200 LOC · Apache 2.0
 
 ---

@@ -184,8 +184,13 @@ class SovereignLock:
                 await conn.execute(
                     "INSERT OR REPLACE INTO lock_state (resource, tenant_id, holder_agent, "
                     "acquired_at, expires_at) VALUES (?, ?, ?, ?, ?)",
-                    (resource, tenant_id, new_holder,
-                     datetime.now(timezone.utc).isoformat(), new_expiry),
+                    (
+                        resource,
+                        tenant_id,
+                        new_holder,
+                        datetime.now(timezone.utc).isoformat(),
+                        new_expiry,
+                    ),
                 )
                 # Cleanup depth info
                 async with conn.execute(

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
 import sqlite3
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
@@ -14,13 +15,20 @@ import aiosqlite
 import sqlite_vec
 
 from cortex.config import DEFAULT_DB_PATH
+from cortex.daemon.chaos import ChaosDaemon
+from cortex.daemon.maxwell import MaxwellDaemon
 from cortex.database.pool import CortexConnectionPool
 from cortex.database.schema import get_init_meta
+from cortex.database.soul_store import SoulStore
 from cortex.database.writer import SqliteWriteWorker
 from cortex.embeddings import LocalEmbedder
 from cortex.engine.agent_mixin import AgentMixin
-from cortex.engine.bicameral import BicameralDispatcher
+
+# Frontera x10: Kinetic Engines & Daemons
+from cortex.engine.annihilator import AnnihilatorEngine
+from cortex.engine.bicameral import OaxacaEngine
 from cortex.engine.consensus import ConsensusMixin
+from cortex.engine.crystallizer import CausalCrystallizer
 from cortex.engine.durability import PersistenceSupervisor
 from cortex.engine.ghost_mixin import GhostMixin
 from cortex.engine.history import HistoryMixin
@@ -33,7 +41,10 @@ from cortex.engine.query_mixin import QueryMixin
 from cortex.engine.search_mixin import SearchMixin
 from cortex.engine.store_mixin import StoreMixin
 from cortex.engine.transaction_mixin import TransactionMixin
+from cortex.identity.alma import AlmaIdentity
 from cortex.ledger.compaction import ShannonCompactor
+from cortex.ops.git_ledger import GitLedgerOps
+from cortex.ops.kv_router import KVAwareRouter
 from cortex.utils.result import Err, Ok, Result
 
 try:
@@ -58,6 +69,7 @@ from cortex.consensus.manager import ConsensusManager  # noqa: E402
 from cortex.embeddings.manager import EmbeddingManager  # noqa: E402
 from cortex.engine.compound_yield import CompoundReport, CompoundYieldTracker  # noqa: E402
 from cortex.engine.lock import SovereignLock  # noqa: E402
+from cortex.extensions.x_intelligence.daemon import XIntelligenceDaemon  # noqa: E402
 from cortex.facts.manager import FactManager  # noqa: E402
 
 if TYPE_CHECKING:
@@ -98,10 +110,11 @@ class CortexEngine(
         self._pool = pool
         self._writer = writer
         self._conn: aiosqlite.Connection | None = None
-        
+
         self._vec_available = False
         try:
             import sqlite_vec as _
+
             self._vec_available = True
         except ImportError:
             pass
@@ -111,6 +124,8 @@ class CortexEngine(
         self._embedder: LocalEmbedder | None = None
         self._memory_manager = None  # Frontera 2: Tripartite Memory (lazy init)
         self._persistence = PersistenceSupervisor(self)
+        self._x_daemon_task: asyncio.Task | None = None
+        self._memento_agent: Any | None = None
         self._closed = False
 
         # Composition layers
@@ -128,29 +143,67 @@ class CortexEngine(
         try:
             from cortex.swarm.factory import SwarmFactory
             from cortex.swarm.manager import SwarmManager
+
             self.manager = SwarmManager(self)
             self.factory = SwarmFactory(self.manager)
         except ImportError:
-            logger.warning(
-                "Swarm Orchestrator not available. Frontier systems limited."
-            )
+            logger.warning("Swarm Orchestrator not available. Frontier systems limited.")
             self.manager = None
             self.factory = None
+
+        # Ω₁₃: X-Intelligence Daemon (Autonomous Signal Monitor)
+        self.x_daemon = XIntelligenceDaemon()
+        if self.manager:
+            self.x_daemon.set_bus(self.manager.bus)
 
         # Decoupled guard pipeline (Ω₃: minimal coupling)
         self._guard_pipeline = self._register_default_guards()
 
+        # Ω₁: Identity & Soul (Apotheosis Core)
+        self._alma = AlmaIdentity(self._db_path.parent / "alma.json")
+        self._soul_store = SoulStore()
+
         # Initialize Bicameral Routes (v8.0)
         self._setup_bicameral_performance_routes()
+
+        # Frontera x10: Kinetic Engines
+        self.annihilator = AnnihilatorEngine(self, self._db_path.parent)
+        self.crystallizer = CausalCrystallizer(self)
+
+        # Frontera x10: Background Daemons
+        self.chaos_daemon = ChaosDaemon(self)
+        self.maxwell_daemon = MaxwellDaemon(self)
+
+        # Frontera x10: Sovereign Operations
+        self.git_ops = GitLedgerOps(self, self._db_path.parent)
+        self.kv_router = KVAwareRouter(self)
 
     def _setup_bicameral_performance_routes(self):
         """Internal wiring for the high-performance dual bus."""
         self.dispatcher.register_fast("search", self.search)
-        async def _noop(*a, **k): return None
-        self.dispatcher.register_fast("store", _noop)
 
-        # 🟡 Slow Path: Persistence & Audit (IO-intensive)
-        self.dispatcher.register_slow(self.facts.store)
+        # 🟡 Slow Path: Persistence & Audit (IO-intensive + Apotheosis Verification)
+        self.dispatcher.register_slow(self._apotheosis_store)
+
+    async def _apotheosis_store(self, *args, **kwargs) -> int:
+        """Unified store with Soul Integrity verification (Ω₁)."""
+        # Extract project from args/kwargs
+        project = kwargs.get("project", args[0] if args else "default")
+
+        # Verify Alma before any write
+        await self.alma.verify_soul_integrity(project)
+
+        # If it's a soul record, persist to soul store
+        if kwargs.get("fact_type") == "soul":
+            # Assuming 'content' is the soul data (dict or str)
+            content = kwargs.get("content", args[1] if len(args) > 1 else None)
+            if content:
+                # Alma already verified, now persist to soul store
+                async with self.session() as conn:
+                    await self.soul.save_pulse(conn, payload=content, tenant_id=project)
+
+        # Standard persistence (delegates to FactManager)
+        return await self.facts.store(*args, **kwargs)
 
     @property
     def memory(self) -> Any:
@@ -161,6 +214,16 @@ class CortexEngine(
     def ledger(self) -> Any:
         """Access the unified Sovereign Ledger."""
         return self._ledger
+
+    @property
+    def soul(self) -> SoulStore:
+        """Access the Soul Store (Ω₁)."""
+        return self._soul_store
+
+    @property
+    def alma(self) -> AlmaIdentity:
+        """Access the Alma Identity (Root of Trust)."""
+        return self._alma
 
     # ─── Guard Pipeline Registration ──────────────────────────────
 
@@ -181,49 +244,65 @@ class CortexEngine(
         # Any other exception (bad guard init) propagates to crash the engine.
         try:
             from cortex.engine.guard_adapters import ExergyGuardAdapter
-            pipeline.add_guard(ExergyGuardAdapter())
+
+            exergy_adapter = ExergyGuardAdapter()
+            pipeline.add_mutator(exergy_adapter)
         except ImportError:
             logger.debug("ExergyGuardAdapter not available — skipping")
 
         try:
             from cortex.engine.guard_adapters import HealthGuardAdapter
+
             pipeline.add_guard(HealthGuardAdapter(db_path))
         except ImportError:
             logger.debug("HealthGuardAdapter not available — skipping")
 
         try:
             from cortex.engine.guard_adapters import ContradictionGuardAdapter
+
             pipeline.add_guard(ContradictionGuardAdapter(db_path))
         except ImportError:
             logger.debug("ContradictionGuardAdapter not available — skipping")
 
         try:
             from cortex.engine.guard_adapters import VerifierGuardAdapter
+
             pipeline.add_guard(VerifierGuardAdapter())
         except ImportError:
             logger.debug("VerifierGuardAdapter not available — skipping")
 
         try:
             from cortex.engine.guard_adapters import XForensicGuardAdapter
+
             pipeline.add_guard(XForensicGuardAdapter())
         except ImportError:
             logger.debug("XForensicGuardAdapter not available — skipping")
 
+        try:
+            from cortex.engine.guard_adapters import FEPMoravecGuardAdapter
+
+            pipeline.add_guard(FEPMoravecGuardAdapter())
+        except ImportError:
+            logger.debug("FEPMoravecGuardAdapter not available — skipping")
+
         # Post-store hooks (AX-033 Hook 4 + signals + epistemic)
         try:
             from cortex.engine.guard_adapters import LedgerCheckpointHook
+
             pipeline.add_post_hook(LedgerCheckpointHook(self))
         except ImportError:
             logger.debug("LedgerCheckpointHook not available — skipping")
 
         try:
             from cortex.engine.guard_adapters import SignalEmitHook
+
             pipeline.add_post_hook(SignalEmitHook())
         except ImportError:
             logger.debug("SignalEmitHook not available — skipping")
 
         try:
             from cortex.engine.guard_adapters import EpistemicBreakerHook
+
             pipeline.add_post_hook(EpistemicBreakerHook())
         except ImportError:
             logger.debug("EpistemicBreakerHook not available — skipping")
@@ -324,6 +403,7 @@ class CortexEngine(
 
     async def _backoff(self, attempt: int):
         import random
+
         sleep_time = (0.5 * (3**attempt)) + random.uniform(0.1, 0.5)
         logger.warning(
             "WAL Locked: Backing off %.2fs (attempt %d/3)...",
@@ -352,12 +432,13 @@ class CortexEngine(
                 except Exception:
                     try:
                         await conn.rollback()
-                    except Exception: # noqa: BLE001
+                    except Exception:  # noqa: BLE001
                         pass
                     raise
             return
 
         from cortex.database.core import connect_async
+
         conn = await connect_async(str(self._db_path), uri=is_uri, read_only=read_only)
         try:
             yield conn
@@ -393,7 +474,9 @@ class CortexEngine(
         if self._conn is None:
             # Fallback for legacy mixins that haven't moved to session() yet
             # This should be avoided in new code.
-            raise RuntimeError("Connection singleton not initialized. Use session() context manager.")
+            raise RuntimeError(
+                "Connection singleton not initialized. Use session() context manager."
+            )
         return self._conn
 
     def get_connection(self) -> aiosqlite.Connection:
@@ -480,7 +563,7 @@ class CortexEngine(
         from cortex.memory.episodic import CausalTracer
 
         conn = await self.get_conn()
-        tracer = CausalTracer(conn)
+        tracer = CausalTracer(conn, self)
         return await tracer.recall_episode(query, project, limit)
 
     async def trace_episode(
@@ -492,7 +575,7 @@ class CortexEngine(
         from cortex.memory.episodic import CausalTracer
 
         conn = await self.get_conn()
-        tracer = CausalTracer(conn)
+        tracer = CausalTracer(conn, self)
         return await tracer.trace_episode(fact_id, max_depth)
 
     def recall_episode_sync(self, *args, **kwargs):
@@ -522,15 +605,29 @@ class CortexEngine(
     # ─── Backward Compatibility Aliases & Delegation ──────────────
 
     async def store(self, *args, **kwargs):
-        """Unified store entry point."""
+        """Unified store entry point.
+
+        Ω₃: Routes through the BicameralDispatcher (Dual Bus) to ensure
+        high-performance persistence and thermodynamic auditability.
+        """
         self._audit_log(
             "store",
             fact_type=kwargs.get("fact_type", ""),
             project=kwargs.get("project", args[0] if args else ""),
         )
-        if kwargs.get("bicameral", False):
-            return await self.bicameral_store(*args, **kwargs)
+
+        # Determine if we should use the fast path or the standard path.
+        # AX-034: All writes must be verifiable and auditable.
+        if hasattr(self, "dispatcher") and self.dispatcher:
+            # We route 'store' through the dispatcher.
+            # If it's a slow-path operation (persistence), it will be handled by the slow bus.
+            return await self.dispatcher.dispatch("store", *args, **kwargs)
+            
         return await self.facts.store(*args, **kwargs)
+
+    async def store_direct(self, *args, **kwargs):
+        """Persist a fact without re-entering the public dispatcher."""
+        return await StoreMixin.store(self, *args, **kwargs)
 
     async def store_many(self, *args, **kwargs):
         return await super().store_many(*args, **kwargs)
@@ -636,10 +733,19 @@ class CortexEngine(
         from cortex.ledger.sovereign_ledger import SovereignLedger
 
         async with self.session() as conn:
-            for stmt in get_all_schema():
-                if "USING vec0" in stmt and not self._vec_available:
+            for stmt_group in get_all_schema():
+                if "USING vec0" in stmt_group and not self._vec_available:
                     continue
-                await conn.executescript(stmt)
+                try:
+                    await conn.executescript(stmt_group)
+                except Exception as e:
+                    print(
+                        f"\n[INIT_DB_ERROR] Failed to execute schema statement group:\n{stmt_group}"
+                    )
+                    print(f"[INIT_DB_ERROR] Error: {e}\n")
+                    logger.error("Failed to execute schema statement group: %s", stmt_group)
+                    logger.error("Error: %s", e)
+                    raise e
             await conn.commit()
 
             await run_migrations_async(conn)
@@ -654,6 +760,28 @@ class CortexEngine(
             self._ledger = SovereignLedger(self._pool or self)  # type: ignore[reportArgumentType]
             self.shannon = ShannonCompactor(conn)
             await self._init_memory_subsystem(self._db_path, conn)
+
+            if not os.environ.get("CORTEX_TESTING"):
+                # Start X-Intelligence Daemon in the background (Ω₁₃)
+                if not self._x_daemon_task or self._x_daemon_task.done():
+                    self._x_daemon_task = asyncio.create_task(
+                        self.x_daemon.start_loop(), name="cortex.x_intelligence.daemon"
+                    )
+
+                # Ω₁₃: Initialize Memento Specialist & register in SwarmFactory
+                try:
+                    from cortex.agents.memento import MementoAgent
+                    from cortex.swarm.actuators.memento import MementoActuator
+
+                    self._memento_agent = MementoAgent(engine=self)
+                    await self._memento_agent.initialize()
+
+                    if self.manager:
+                        actuator = MementoActuator(engine=self)
+                        self.manager.register_actuator("memento_specialist", actuator)
+                        logger.info("Memento specialist registered in SwarmFactory")
+                except ImportError:
+                    logger.debug("Memento specialist not available — skipping")
 
         # Enforce 700/600 permissions NOW — db file exists on disk.
         self._enforce_fs_permissions()
@@ -692,9 +820,43 @@ class CortexEngine(
                 )
             except (asyncio.TimeoutError, Exception):  # noqa: BLE001
                 logger.debug("Memory manager background drain timed out — forcing close")
+            memory_l2 = getattr(self._memory_manager, "_l2", None)
+            if memory_l2 and hasattr(memory_l2, "close"):
+                try:
+                    await memory_l2.close()
+                except Exception:  # noqa: BLE001
+                    logger.debug("Memory L2 shutdown error — ignoring")
             self._memory_manager = None
+
+        signal_bus_conn = getattr(self, "_signal_bus_conn", None)
+        if signal_bus_conn is not None:
+            try:
+                signal_bus_conn.close()
+            except Exception:  # noqa: BLE001
+                logger.debug("Signal bus connection close error — ignoring")
+            self._signal_bus_conn = None
+            self._signal_bus = None
+
+        # Ω₁₃: Shutdown Memento Specialist
+        if self._memento_agent:
+            try:
+                await self._memento_agent.shutdown()
+            except Exception:  # noqa: BLE001
+                logger.debug("Memento agent shutdown error — ignoring")
+            self._memento_agent = None
         if self._persistence:
             await self._persistence.stop()
+
+        # Ω₁₃: Shutdown X-Intelligence Daemon
+        await self.x_daemon.stop()
+        if self._x_daemon_task and not self._x_daemon_task.done():
+            self._x_daemon_task.cancel()
+            try:
+                await self._x_daemon_task
+            except asyncio.CancelledError:
+                pass
+            self._x_daemon_task = None
+
         if self._conn:
             await self._conn.close()
             self._conn = None

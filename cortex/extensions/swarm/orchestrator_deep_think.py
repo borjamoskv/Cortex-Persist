@@ -108,8 +108,23 @@ class DeepThinkOrchestrator:
                     from cortex.extensions.llm.router import CortexPrompt, IntentProfile
 
                     cortex_prompt = CortexPrompt(
-                        system_instruction=f"{agent.persona.vision}\n{';'.join(agent.persona.axioms)}",
-                        working_memory=[{"role": "user", "content": prompt}],
+                        system_instruction=(
+                            "You are a CORTEX Deep Think agent. "
+                            "Reason carefully and converge on "
+                            "a coherent position."
+                        ),
+                        working_memory=[
+                            {
+                                "role": "system",
+                                "content": (
+                                    f"Agent Persona: "
+                                    f"{agent.persona.vision}\n"
+                                    f"Axioms: "
+                                    f"{';'.join(agent.persona.axioms)}"
+                                ),
+                            },
+                            {"role": "user", "content": prompt},
+                        ],
                         intent=IntentProfile.REASONING,
                         project=project,
                     )

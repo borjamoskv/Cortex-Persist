@@ -13,8 +13,8 @@ class ActionRisk(str, Enum):
 
 @dataclass(frozen=True)
 class ExergyInput:
-    prior_uncertainty: Decimal
-    posterior_uncertainty: Decimal
+    prior_uncertainty: Decimal | float
+    posterior_uncertainty: Decimal | float
     tokens_consumed: int
     action_risk: ActionRisk
     had_backup: bool
@@ -34,12 +34,19 @@ class ThermodynamicWasteError(RuntimeError):
     pass
 
 
-def calculate_exergy(inp: ExergyInput, threshold_min_work: Decimal) -> ExergyResult:
+def _to_decimal(value: Decimal | float | int | str) -> Decimal:
+    if isinstance(value, Decimal):
+        return value
+    return Decimal(str(value))
+
+
+def calculate_exergy(inp: ExergyInput, threshold_min_work: Decimal | float) -> ExergyResult:
     if inp.tokens_consumed <= 0:
         raise ValueError("tokens_consumed must be > 0")
 
-    prior = inp.prior_uncertainty
-    post = inp.posterior_uncertainty
+    prior = _to_decimal(inp.prior_uncertainty)
+    post = _to_decimal(inp.posterior_uncertainty)
+    min_work = _to_decimal(threshold_min_work)
 
     # Calculate signal gain with high precision
     signal_gain = max(Decimal("0"), prior - post) / Decimal(str(inp.tokens_consumed))
@@ -75,7 +82,7 @@ def calculate_exergy(inp: ExergyInput, threshold_min_work: Decimal) -> ExergyRes
         signal_gain=signal_gain,
         reversibility_penalty=reversibility_penalty,
         waste_ratio=waste_ratio,
-        below_threshold=score < threshold_min_work,
+        below_threshold=score < min_work,
     )
 
 

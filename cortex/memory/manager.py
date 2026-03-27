@@ -11,6 +11,7 @@ from typing import Any
 # Memory OS (RFC-CORTEX-MEMORY-OS)
 from cortex.compaction.mem0_pipeline import Mem0Pipeline
 from cortex.engine.membrane import Action, SovereignMembrane
+from cortex.engine.nexus import ThalamusGate
 from cortex.ledger.event_ledger import EventLedgerL3
 from cortex.memory.encoder import AsyncEncoder
 from cortex.memory.engrams import CortexSemanticEngram
@@ -20,7 +21,6 @@ from cortex.memory.memory_retrieval import retrieve_episodic_context
 from cortex.memory.models import MemoryEvent
 from cortex.memory.resonance import AdaptiveResonanceGate
 from cortex.memory.schemas import SchemaEngine
-from cortex.memory.thalamus import ThalamusGate
 from cortex.memory.working import WorkingMemoryL1
 from cortex.telemetry.metrics import metrics
 
@@ -98,7 +98,7 @@ class CortexMemoryManager:
         "_bus",
         "thalamus",
         "_resonance_gate",
-        "_endocrine",
+        "_gradient",
         "_schema_engine",
         "metamemory",
         "_mem0_pipeline",
@@ -145,7 +145,7 @@ class CortexMemoryManager:
         except ImportError:
             self._hologram = None
 
-        self._endocrine = DigitalEndocrine() if DigitalEndocrine else None
+        self._gradient = DigitalEndocrine() if DigitalEndocrine else None
         self._schema_engine = SchemaEngine()
 
         from cortex.memory.metamemory import MetamemoryMonitor
@@ -169,7 +169,7 @@ class CortexMemoryManager:
             pass
 
         self._resonance_gate = AdaptiveResonanceGate(
-            vector_store=self._l2, songline_sensor=_sensor, endocrine=self._endocrine
+            vector_store=self._l2, songline_sensor=_sensor, endocrine=self._gradient
         )
 
         if self._dynamic_space:
@@ -262,8 +262,8 @@ class CortexMemoryManager:
         await self._l3.append_event(event)
 
         # Ingest into Digital Endocrine system [v6.2]
-        if self._endocrine:
-            self._endocrine.ingest_context(content, tenant_id=tenant_id, metadata=_meta)
+        if self._gradient:
+            self._gradient.ingest_context(content, tenant_id=tenant_id, metadata=_meta)
 
         overflowed = self._l1.add_event(event)
 
@@ -398,7 +398,7 @@ class CortexMemoryManager:
             logger.info("CortexMemoryManager: Fact degraded to decorative by membrane.")
             fact_type = "decorative"
 
-        _meta = metadata or {}
+        _meta = dict(metadata or {})
         if result.metadata_patch:
             _meta.update(result.metadata_patch)
 
@@ -421,7 +421,6 @@ class CortexMemoryManager:
         if dedup_id:
             return f"filtered:{dedup_id}" if dedup_id == "empty" else f"deduplicated:{dedup_id}"
 
-        _meta = metadata or {}
         if "confidence_score" not in _meta:
             _meta["confidence_score"] = 0.8
 
@@ -456,7 +455,7 @@ class CortexMemoryManager:
 
         if use_bus and self._bus:
             return await self._emit_to_bus(
-                fact_id, tenant_id, project_id, content, fact_type, adjusted_layer, metadata
+                fact_id, tenant_id, project_id, content, fact_type, adjusted_layer, _meta
             )
 
         if self._hdc:

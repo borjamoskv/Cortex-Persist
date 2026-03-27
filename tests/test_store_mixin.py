@@ -7,6 +7,7 @@ of the store → deduplicate → deprecate → update pipeline.
 from __future__ import annotations
 
 from pathlib import Path
+from unittest.mock import AsyncMock
 
 import pytest
 
@@ -48,6 +49,28 @@ async def engine(tmp_path: Path):
 
 
 class TestStore:
+    async def test_fact_manager_store_uses_store_direct(self, engine, monkeypatch):
+        engine.embeddings = None
+        mock_store_direct = AsyncMock(return_value=123)
+        mock_public_store = AsyncMock(
+            side_effect=AssertionError("FactManager should not re-enter engine.store")
+        )
+        monkeypatch.setattr(engine, "store_direct", mock_store_direct)
+        monkeypatch.setattr(engine, "store", mock_public_store)
+
+        fact_id = await engine.facts.store(
+            project="test",
+            content="Enough content to pass validation and reach direct persistence.",
+            fact_type="knowledge",
+            source="agent:test_suite",
+        )
+
+        assert fact_id == 123
+        mock_public_store.assert_not_awaited()
+        mock_store_direct.assert_awaited_once()
+        assert mock_store_direct.await_args.kwargs["project"] == "test"
+        assert mock_store_direct.await_args.kwargs["fact_type"] == "knowledge"
+
     async def test_store_returns_fact_id(self, engine):
         fact_id = await engine.store(
             project="test",

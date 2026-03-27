@@ -123,7 +123,7 @@ def record_transaction(project, action, detail, db):
                 console.print("[bold red]Error:[/] Ledger not available in engine.")
                 return
 
-            h = ledger_inst.record_transaction(project, action, det)
+            h = await ledger_inst.record_transaction(project, action, det)
             console.print(f"[bold green]Transaction recorded.[/] Hash: [dim]{h}[/]")
         except json.JSONDecodeError:
             console.print("[bold red]Error:[/] 'detail' must be a valid JSON string.")

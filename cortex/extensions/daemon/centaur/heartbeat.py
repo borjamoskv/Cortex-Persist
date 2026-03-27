@@ -12,7 +12,7 @@ from pathlib import Path
 from cortex.database.core import connect_async_ctx
 from cortex.engine.auth import ByzantineAuthLayer
 from cortex.engine.decalcifier import SovereignDecalcifier
-from cortex.engine.endocrine import ENDOCRINE, HormoneType
+from cortex.engine.gradient import GRADIENT, GradientType
 from cortex.extensions.daemon.actuators import PhysicalActuator
 from cortex.extensions.daemon.centaur.queue import EntropicQueue
 from cortex.extensions.swarm.centauro_engine import CentauroEngine, Formation
@@ -55,7 +55,7 @@ class HeartbeatDaemon:
 
             try:
                 # Evaluer Cortisol (Sistema relajado)
-                cortisol = ENDOCRINE.get_level(HormoneType.CORTISOL)
+                cortisol = GRADIENT.get_level(GradientType.CORTISOL)
                 if cortisol > 0.4:
                     logger.debug(
                         "🧬 [Ω₃-E+] Decalcifier skipped: Cortisol too high (%.2f).", cortisol

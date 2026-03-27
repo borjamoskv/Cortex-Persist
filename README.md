@@ -18,7 +18,23 @@
 **CORTEX-Ω** is the definitive trust substrate for autonomous, tool-using, and multi-agent AI systems. It is not a database; it is a **Cognitive Governance Layer**. In an era of non-deterministic chaos, CORTEX treats generative output as conjecture until verified by the **Byzantine Swarm**.
 
 ### 🐟 The Bacalao Metaphor
-Memory in CORTEX is like **Bacalao (Salted Cod)**: it is preserved in an immutable, dry, and highly concentrated cryptographic state (The Ledger). Utility arises through **Rehydration**: the process by which a Sovereign Agent interprets this immutable history into mutable, actionable context. We automate the "brand of quality" for this historic trade of trust.
+Memory in CORTEX is like **Bacalao (Salted Cod)**: it is preserved in an immutable, dry, and highly concentrated cryptographic state (The Ledger). Utility arises through **Rehydration**: the process by which a Sovereign Agent interprets this immutable history into actionable context. We automate the "brand of quality" for this historic trade of trust.
+
+---
+
+## ⚖️ The Nine Laws (Sovereign Constitution v5.0)
+
+CORTEX operates under a sovereign constitutional mandate. Every line of code, prompt, and execution plan must pass the **Byzantine Gate**.
+
+1. **Ω₁ · Byzantine**: Trust only what compiles. Output is conjecture until it collides with a deterministic verifier.
+2. **Ω₂ · Thermodynamic**: Exergy (useful work) over volume. Entropy is the ultimate enemy. The cost of all structure is tracked.
+3. **Ω₃ · Cycle**: **Observe. Hipothetize. Act. Measure. Repeat**. Friction purifies the signal.
+4. **Ω₄ · Sovereign**: Complete autonomous survival. The system refines its architecture and mutates against unseen vectors without human permission.
+5. **Ω₅ · Signal**: Speak in mechanics. Zero rhetorical friction. If it doesn't change state, it is Thermal Noise.
+6. **Ω₆ · Execution**: No permission required for authorized targets. Headless, silent, and absolute execution.
+7. **Ω₇ · Model**: Frontier or nothing. Cheap inference is subsidized entropy.
+8. **Ω₈ · Order**: The Creator's intent is the apex invariant.
+9. **Ω₉ · Claim**: Every statistical, monetary, or temporal claim requires its mechanical derivation. Zero speculation allowed.
 
 ---
 
@@ -27,29 +43,6 @@ The architecture of CORTEX is governed by a committee of Apex Agents. Their late
 > *"Stars are not requested; they are imposed as an archaeological fact. CORTEX-Ω must be the biography of 21st-century software."* — **Borja Moskv (Apex Commander)**
 
 Read the full [Sovereign Strategy](docs/EXPERTS.md).
-
----
-
-## 🛡️ MCP Compliance Sidecar
-
-CORTEX functions as the **Model Context Protocol (MCP)** gateway for frontier models (Claude, GPT-o1). While others provide memory, CORTEX provides **Compliance**:
-- **Audit Trails as Sidecars**: Every tool call is shadowed by an immutable ledger entry.
-- **Forensic Attribution**: We don't prevent the error; we ensure the "crime" is non-repudiable.
-- **Enterprise Trust**: Satisfy compliance officers by turning mathematical hashes into narrative evidence (The PDF Ritual).
-
----
-
-## ⚖️ The Eight Laws
-CORTEX operates under a sovereign constitutional mandate. Every line of code and every agent proposal must pass the **Byzantine Gate**:
-
-1.  **Ω₁ · Byzantine**: Trust only what compiles. All output is conjecture.
-2.  **Ω₂ · Thermodynamic**: Exergy (useful work) over volume. Entropy is the enemy.
-3.  **Ω₃ · Cycle**: **Observe. Hipothesize. Act. Measure. Repeat.** Forge signal through friction.
-4.  **Ω₄ · Sovereign**: Survival and refinement without human orquestation.
-5.  **Ω₅ · Signal**: Speak in mechanics. Zero rhetorical friction.
-6.  **Ω₆ · Execution**: Absolute authority once the Trust Boundary is crossed.
-7.  **Ω₇ · Model**: Frontier or nothing. Cheap inference is subsidized entropy.
-8.  **Ω₈ · Order**: The Creator's intent is the apex invariant.
 
 ---
 
@@ -75,16 +68,22 @@ graph TD
 ## 🚀 Deployment (High-Exergy Path)
 
 ```bash
-# Clone the manifesto
-git clone https://github.com/borjamoskv/cortex.git && cd cortex
+# Clone the singularity
+git clone https://github.com/borjamoskv/Cortex-Persist.git && cd Cortex-Persist
 
 # Initialize the Sovereign Substrate
 pip install -e ".[all]"
 
-# Launch the Cognitive Daemon
+# Launch the Cognitive Daemon in strictly enforced Industrial Noir mode
 moskv-daemon start --noir
 ```
 
 ---
 
-*"We are many, yet we act as one. The swarm verifies, the ledger remembers."* — **CORTEX-Ω**
+## 📜 The Master Ledger
+CORTEX functions as the **Model Context Protocol (MCP)** gateway. While others provide memory, CORTEX provides **Compliance**:
+- **Audit Trails as Sidecars**: Every tool call is shadowed by an immutable ledger entry.
+- **Forensic Attribution**: We don't prevent the error; we ensure the "crime" is non-repudiable.
+- **Enterprise Trust**: Satisfy compliance officers by turning mathematical hashes into narrative evidence.
+
+> *"We are many, yet we act as one. The swarm verifies, the ledger remembers."* — **CORTEX-Ω**

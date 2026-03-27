@@ -11,6 +11,7 @@ from cortex.engine.bicameral import BicameralDispatcher
 
 logger = logging.getLogger("cortex.engine.bicameral")
 
+
 class BicameralMixin:
     """Extension for CortexEngine to support dual-bus dispatching."""
 

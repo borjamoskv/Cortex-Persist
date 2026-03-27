@@ -179,6 +179,7 @@ CREATE TABLE IF NOT EXISTS cortex_meta (
 PG_CREATE_VOTES = """
 CREATE TABLE IF NOT EXISTS consensus_votes (
     id      BIGSERIAL PRIMARY KEY,
+    tenant_id       TEXT NOT NULL DEFAULT 'default',
     fact_id BIGINT NOT NULL REFERENCES facts(id),
     agent   TEXT NOT NULL,
     vote    INTEGER NOT NULL,
@@ -212,6 +213,7 @@ CREATE TABLE IF NOT EXISTS agents (
 PG_CREATE_VOTES_V2 = """
 CREATE TABLE IF NOT EXISTS consensus_votes_v2 (
     id              BIGSERIAL PRIMARY KEY,
+    tenant_id       TEXT NOT NULL DEFAULT 'default',
     fact_id         BIGINT NOT NULL REFERENCES facts(id),
     agent_id        TEXT NOT NULL REFERENCES agents(id),
     vote            INTEGER NOT NULL,
@@ -276,6 +278,7 @@ CREATE INDEX IF NOT EXISTS idx_vote_merkle_range
 PG_CREATE_TRUST_EDGES = """
 CREATE TABLE IF NOT EXISTS trust_edges (
     id              BIGSERIAL PRIMARY KEY,
+    tenant_id       TEXT NOT NULL DEFAULT 'default',
     source_agent    TEXT NOT NULL REFERENCES agents(id),
     target_agent    TEXT NOT NULL REFERENCES agents(id),
     trust_weight    DOUBLE PRECISION NOT NULL,
@@ -289,6 +292,7 @@ CREATE TABLE IF NOT EXISTS trust_edges (
 PG_CREATE_OUTCOMES = """
 CREATE TABLE IF NOT EXISTS consensus_outcomes (
     id                  BIGSERIAL PRIMARY KEY,
+    tenant_id           TEXT NOT NULL DEFAULT 'default',
     fact_id             BIGINT NOT NULL REFERENCES facts(id),
     final_state         TEXT NOT NULL,
     final_score         DOUBLE PRECISION NOT NULL,
@@ -307,8 +311,12 @@ CREATE INDEX IF NOT EXISTS idx_agents_active ON agents(is_active, last_active_at
 CREATE INDEX IF NOT EXISTS idx_votes_v2_fact ON consensus_votes_v2(fact_id);
 CREATE INDEX IF NOT EXISTS idx_votes_v2_agent ON consensus_votes_v2(agent_id);
 CREATE INDEX IF NOT EXISTS idx_votes_v2_tx_id ON consensus_votes_v2(tx_id);
+CREATE INDEX IF NOT EXISTS idx_votes_v2_tenant ON consensus_votes_v2(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_trust_source ON trust_edges(source_agent);
 CREATE INDEX IF NOT EXISTS idx_trust_target ON trust_edges(target_agent);
+CREATE INDEX IF NOT EXISTS idx_trust_tenant ON trust_edges(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_votes_tenant ON consensus_votes(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_outcomes_tenant ON consensus_outcomes(tenant_id);
 """
 
 # ─── Ghosts ──────────────────────────────────────────────────────────
@@ -397,6 +405,7 @@ CREATE INDEX IF NOT EXISTS idx_ep_content_trgm ON episodes USING gin(content gin
 PG_CREATE_THREAT_INTEL = """
 CREATE TABLE IF NOT EXISTS threat_intel (
     id          BIGSERIAL PRIMARY KEY,
+    tenant_id   TEXT NOT NULL DEFAULT 'default',
     ip_address  TEXT NOT NULL UNIQUE,
     reason      TEXT NOT NULL,
     confidence  TEXT NOT NULL DEFAULT 'C5',
@@ -407,6 +416,7 @@ CREATE TABLE IF NOT EXISTS threat_intel (
 
 PG_CREATE_THREAT_INTEL_INDEXES = """
 CREATE INDEX IF NOT EXISTS idx_threat_intel_ip ON threat_intel(ip_address);
+CREATE INDEX IF NOT EXISTS idx_threat_intel_tenant ON threat_intel(tenant_id);
 """
 
 # ─── Tenants ─────────────────────────────────────────────────────────
@@ -424,6 +434,7 @@ CREATE TABLE IF NOT EXISTS tenants (
 PG_CREATE_EVOLUTION_STATE = """
 CREATE TABLE IF NOT EXISTS evolution_state (
     id          BIGSERIAL PRIMARY KEY,
+    tenant_id   TEXT NOT NULL DEFAULT 'default',
     cycle       INTEGER NOT NULL,
     agent_domain TEXT NOT NULL,
     agent_json  JSONB NOT NULL,
@@ -434,12 +445,14 @@ CREATE TABLE IF NOT EXISTS evolution_state (
 PG_CREATE_EVOLUTION_STATE_INDEX = """
 CREATE INDEX IF NOT EXISTS idx_evo_cycle ON evolution_state(cycle);
 CREATE INDEX IF NOT EXISTS idx_evo_domain ON evolution_state(agent_domain);
+CREATE INDEX IF NOT EXISTS idx_evo_tenant ON evolution_state(tenant_id);
 """
 
 # ─── Signal Bus ──────────────────────────────────────────────────────
 PG_CREATE_SIGNALS = """
 CREATE TABLE IF NOT EXISTS signals (
     id          BIGSERIAL PRIMARY KEY,
+    tenant_id   TEXT NOT NULL DEFAULT 'default',
     event_type  TEXT NOT NULL,
     payload     JSONB NOT NULL DEFAULT '{}',
     source      TEXT NOT NULL,
@@ -454,6 +467,7 @@ CREATE INDEX IF NOT EXISTS idx_signals_type ON signals(event_type);
 CREATE INDEX IF NOT EXISTS idx_signals_source ON signals(source);
 CREATE INDEX IF NOT EXISTS idx_signals_created ON signals(created_at);
 CREATE INDEX IF NOT EXISTS idx_signals_project ON signals(project);
+CREATE INDEX IF NOT EXISTS idx_signals_tenant ON signals(tenant_id);
 """
 
 # ─── Entity Events (Solid-State Substrate) ───────────────────────────

@@ -1,0 +1,76 @@
+{
+  "$schema": "https://fundingjson.org/schema/v1.1.0.json",
+  "version": "v1.0.0",
+  "entity": {
+    "type": "individual",
+    "role": "maintainer",
+    "name": "Borja Fernandez-Angulo",
+    "email": "",
+    "phone": "",
+    "description": "Solo architect and maintainer of CORTEX-Persist. Background in distributed systems architecture, cryptographic auditability, and AI governance tooling. Based in Spain (EU).",
+    "webpageUrl": {
+      "url": "https://github.com/borjamoskv",
+      "wellKnown": ""
+    }
+  },
+  "projects": [
+    {
+      "guid": "cortex-persist",
+      "name": "CORTEX-Persist",
+      "description": "Open-source cryptographic governance layer for autonomous AI agents. Provides SHA-256 hash-chained audit trails, epistemic validation guards, and formal trust boundaries for AI systems operating via the Model Context Protocol (MCP). Every tool call an AI agent makes is shadowed by an immutable ledger entry — forensic auditability that makes the cost of unattributed AI action structurally infinite.\n\n45+ modules across engine, memory, ledger, guards, compliance, CLI, and API layers. Full async architecture with tenant-aware persistence. Integrations with Anthropic MCP, Google ADK, and OpenAI Agent SDK.\n\nKey capabilities: tamper-evident decision logging, non-repudiable attribution, epistemic containment (preventing hallucinations from contaminating persistent state), EU AI Act Article 12 reference implementation, cross-agent causal provenance tracking.",
+      "webpageUrl": {
+        "url": "https://github.com/borjamoskv/cortex"
+      },
+      "repositoryUrl": {
+        "url": "https://github.com/borjamoskv/cortex",
+        "wellKnown": "https://github.com/borjamoskv/cortex/blob/main/.well-known/funding-manifest-urls"
+      },
+      "licenses": ["spdx:Apache-2.0"],
+      "tags": [
+        "ai-governance",
+        "cryptographic-audit",
+        "mcp",
+        "trust-boundaries",
+        "hash-chain",
+        "eu-ai-act",
+        "agent-infrastructure",
+        "forensic-auditability",
+        "python",
+        "sqlite"
+      ]
+    }
+  ],
+  "funding": {
+    "channels": [
+      {
+        "guid": "bank-transfer",
+        "type": "bank",
+        "address": "",
+        "description": "Bank transfer available for institutional grants. Contact via email."
+      }
+    ],
+    "plans": [
+      {
+        "guid": "infrastructure-grant",
+        "status": "active",
+        "name": "Infrastructure Development Grant",
+        "description": "Fund core development of CORTEX-Persist: MCP compliance sidecar, epistemic guard framework, EU AI Act compliance module, cross-agent provenance, security audit, and community building. Sole developer, self-funded since 2024.",
+        "amount": 50000,
+        "currency": "USD",
+        "frequency": "one-time",
+        "channels": ["bank-transfer"]
+      },
+      {
+        "guid": "developer-sustainability",
+        "status": "active",
+        "name": "Developer Sustainability",
+        "description": "Monthly support for continued maintenance and development of CORTEX-Persist infrastructure.",
+        "amount": 2500,
+        "currency": "USD",
+        "frequency": "monthly",
+        "channels": ["bank-transfer"]
+      }
+    ],
+    "history": []
+  }
+}

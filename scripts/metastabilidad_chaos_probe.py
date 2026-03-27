@@ -10,11 +10,11 @@ sistema continúa operando (is_sovereign = True).
 import asyncio
 import logging
 
+from cortex.extensions.red_team.hydra_chaos import HydraChaosEngine, MockRedisClient
 from rich.console import Console
 from rich.table import Table
 
 from cortex.extensions.immune.chaos import ChaosScenario
-from cortex.extensions.red_team.hydra_chaos import HydraChaosEngine, MockRedisClient
 
 logging.basicConfig(level=logging.ERROR)
 console = Console()

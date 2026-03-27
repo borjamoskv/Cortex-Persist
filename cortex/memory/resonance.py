@@ -58,7 +58,7 @@ class AdaptiveResonanceGate:
         self._rho = rho
         self._ltp_boost = ltp_boost
         self._sensor = songline_sensor
-        self._endocrine = endocrine
+        self._gradient = endocrine
 
     def _calculate_topographic_boost(self, candidate: CortexSemanticEngram) -> float:
         """Evaluate if the candidate resonates with any physical 'ghosts' in its field."""
@@ -84,15 +84,15 @@ class AdaptiveResonanceGate:
 
         return 0.0
 
-    def _calculate_endocrine_shift(self) -> float:
+    def _calculate_gradient_shift(self) -> float:
         """Modulate vigilance based on biological system state.
 
         Cortisol (Stress) -> Increases rho (Stricter matching, defensive)
         Dopamine (Creativity) -> Decreases rho (Broader resonance, exploratory)
         """
-        if not self._endocrine:
+        if not self._gradient:
             return 0.0
-        shift = (self._endocrine.cortisol * 0.1) - (self._endocrine.dopamine * 0.05)  # type: ignore[type-error]
+        shift = (self._gradient.cortisol * 0.1) - (self._gradient.dopamine * 0.05)  # type: ignore[type-error]
         return float(shift)
 
     async def _find_neighbors(self, candidate: CortexSemanticEngram, limit: int) -> list[Any]:
@@ -155,7 +155,7 @@ class AdaptiveResonanceGate:
         rho = vigilance_override or self._rho
 
         # Endocrine Modulation [v6.2]
-        endocrine_shift = self._calculate_endocrine_shift()
+        endocrine_shift = self._calculate_gradient_shift()
         rho = max(0.5, min(0.98, rho + endocrine_shift))
 
         if precision_mode:

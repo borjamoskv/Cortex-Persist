@@ -28,7 +28,12 @@ class TransactionMixin(EngineMixinBase):
     """
 
     async def _log_transaction(
-        self, conn: aiosqlite.Connection, project: str, action: str, detail: dict[str, Any], tenant_id: str = "default"
+        self,
+        conn: aiosqlite.Connection,
+        project: str,
+        action: str,
+        detail: dict[str, Any],
+        tenant_id: str = "default",
     ) -> int:
         from cortex.utils.canonical import canonical_json, compute_tx_hash
 

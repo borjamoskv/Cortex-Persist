@@ -49,15 +49,12 @@ class VLPhase(str, Enum):
 def _default_manifest() -> AgentManifest:
     return AgentManifest(
         agent_id="vector_l",
-        name="Vector L — PYME Bottleneck Hunter",
-        description=(
+        purpose=(
             "Detects SMEs with operational bottlenecks via public signals "
             "and auto-pitches CORTEX agents at $500-2000/month."
         ),
-        capabilities=["scan", "score", "pitch", "ledger_write"],
         tools_allowed=["email", "http_probe", "ledger"],
         max_consecutive_errors=5,
-        tick_interval_seconds=int(os.environ.get("VECTOR_L_SCAN_INTERVAL", "3600")),
     )
 
 

@@ -61,6 +61,21 @@ class EngineProtocol(Protocol):
         """Store a fact and return its ID."""
         ...
 
+    async def store_direct(
+        self,
+        project: str,
+        content: str,
+        tenant_id: str = "default",
+        fact_type: str = "knowledge",
+        tags: list[str] | None = None,
+        confidence: str = "stated",
+        source: str | None = None,
+        meta: dict[str, Any] | None = None,
+        **kwargs: Any,
+    ) -> int:
+        """Persist a fact without re-entering the public dispatcher."""
+        ...
+
     async def store_many(self, facts: list[dict[str, Any]]) -> list[int]:
         """Store multiple facts in a transaction."""
         ...

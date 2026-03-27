@@ -15,6 +15,7 @@ from cortex.swarm.discovery import SkillRegistry
 from cortex.swarm.guards.chaos import ChaosGuards
 from cortex.swarm.guards.convergence import ConvergenceGuards
 from cortex.swarm.guards.evolution import EvolutionGuard
+from cortex.swarm.guards.exergy import SwarmExergyGovernor
 from cortex.swarm.guards.privacy_gate import PrivacyGate
 from cortex.swarm.reputation import AgentReputationSystem
 from cortex.utils.pulmones_worker import PulmonesWorker
@@ -51,6 +52,7 @@ class SwarmManager:
         self.evolution_guard = EvolutionGuard()
         self.reputation = AgentReputationSystem()
         self.convergence = ConvergenceGuards(ledger)
+        self.exergy_governor = SwarmExergyGovernor()
         self.ledger = ledger
         self.budget_limit = 1000.0
         self.current_spend = 0.0
@@ -58,12 +60,16 @@ class SwarmManager:
         self._poet = CommitPoet()
         self._pulmones: PulmonesWorker | None = None
         self._pulmones_task: asyncio.Task[None] | None = None
+        self._background_tasks: set[asyncio.Task] = set()
 
         if start_pulmones:
             self._pulmones = PulmonesWorker()
             logger.info(
                 "SwarmManager: PulmonesWorker instantiated — call start_pulmones() to activate"
             )
+        
+        # Ω-Convergence: Subscribe to intelligence signals
+        self.bus.subscribe("X_INTELLIGENCE_SIGNAL", self._handle_x_signal)
 
     def register_actuator(self, name: str, actuator: ActuatorProtocol) -> None:
         """Register a new governed actuator."""
@@ -216,9 +222,24 @@ class SwarmManager:
             response = await actuator.execute(task=sanitized["task"], context=sanitized["context"])
 
             if response["status"] == "success":
+                # 5.1 Thermodynamic Audit (Ω₂)
+                try:
+                    await self.exergy_governor.audit_agent_work(
+                        agent_id=actuator_name, 
+                        content=response["content"]
+                    )
+                except ValueError:
+                    # Content rejected after execution - downgrade response
+                    return ActuatorResponse(
+                        content="", 
+                        metadata={}, 
+                        status="failed", 
+                        error="Ω₂ Violation: Decorative/Low-utility output rejected."
+                    )
+
                 # Calculate exergy if method exists (Ω₉)
                 if hasattr(actuator, "calculate_exergy"):
-                    exergy = getattr(actuator, "calculate_exergy")(sanitized["task"])
+                    exergy = actuator.calculate_exergy(sanitized["task"])
                     if not response.get("metadata"):
                         response["metadata"] = {}
                     response["metadata"]["exergy_score"] = float(exergy)
@@ -360,7 +381,16 @@ class SwarmManager:
         ranked_ids = self.reputation.rank_agents(agent_ids)
         logger.info("SwarmManager: Sharding task to %d agents (Ranked)...", len(ranked_ids))
 
-        tasks = [self.dispatch(aid, task) for aid in ranked_ids]
+        # Ω₂: Enforce thermodynamic concurrency limit (Event Loop Asphyxiation Prevention)
+        sem = asyncio.Semaphore(15)
+
+        async def bounded_dispatch(aid: str, tsk: str) -> ActuatorResponse:
+            async with sem:
+                await self.exergy_governor.wait_for_coolant(aid)
+                return await self.dispatch(aid, tsk)
+
+        tasks = [bounded_dispatch(aid, task) for aid in ranked_ids]
+            
         responses = await asyncio.gather(*tasks)
 
         # 1. Consensus Verification for critical tasks
@@ -391,3 +421,21 @@ class SwarmManager:
             self.current_spend += tokens * 0.00001
 
         return list(responses)
+
+    async def _handle_x_signal(self, signal: Any):
+        """Ω-Convergence: Handle incoming X-Intelligence signals."""
+        from .bus import SwarmSignal
+        sig = cast(SwarmSignal, signal)
+        exergy_score = sig.payload.get("exergy", 0.0)
+        
+        if exergy_score > 0.8:
+            logger.info("SwarmManager: High-exergy signal detected on X. Triggering P2 Squad recruitment.")
+            # Trigger a Ghost Hunt (P2) mission for the detected signal
+            # We use a separate task to avoid blocking the bus
+            t = asyncio.create_task(self.deploy_squad(
+                squad_type="P2",
+                task=f"Analyze and verify signal: {sig.payload.get('text')}",
+                count=5
+            ))
+            self._background_tasks.add(t)
+            t.add_done_callback(self._background_tasks.discard)

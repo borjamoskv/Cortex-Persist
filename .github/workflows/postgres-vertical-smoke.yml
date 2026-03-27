@@ -1,0 +1,55 @@
+name: PostgreSQL Vertical Smoke
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  postgres-vertical-smoke:
+    name: PostgreSQL Public API Smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      POSTGRES_DSN: ${{ secrets.POSTGRES_SMOKE_DSN }}
+
+    steps:
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v4
+
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.13"
+
+      - name: Validate smoke secret
+        run: |
+          if [ -z "${POSTGRES_DSN}" ]; then
+            echo "POSTGRES_SMOKE_DSN secret is not configured."
+            exit 1
+          fi
+
+      - name: Install dependencies
+        run: |
+          pip install -e ".[api,cloud,dev]"
+
+      - name: Run PostgreSQL smoke
+        run: |
+          python3 scripts/postgres_primary_smoke.py \
+            --output output/postgres_primary_smoke.json
+
+      - name: Render Markdown evidence
+        run: |
+          python3 scripts/postgres_primary_evidence.py \
+            --input output/postgres_primary_smoke.json \
+            --output output/postgres_primary_smoke.md
+
+      - name: Publish job summary
+        run: cat output/postgres_primary_smoke.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload smoke evidence
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4
+        with:
+          name: postgres-primary-smoke
+          path: |
+            output/postgres_primary_smoke.json
+            output/postgres_primary_smoke.md

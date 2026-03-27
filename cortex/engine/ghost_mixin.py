@@ -78,8 +78,7 @@ class GhostMixin(EngineMixinBase):
 
         async with self.session() as conn:  # type: ignore
             async with conn.execute(
-                "SELECT project, reference, tenant_id FROM ghosts WHERE id = ?",
-                (ghost_id,)
+                "SELECT project, reference, tenant_id FROM ghosts WHERE id = ?", (ghost_id,)
             ) as cursor:
                 row = await cursor.fetchone()
                 if not row:
@@ -99,7 +98,7 @@ class GhostMixin(EngineMixinBase):
                     "reference": reference,
                     "target_id": target_id,
                     "confidence": confidence,
-                    "ghost_id": ghost_id
+                    "ghost_id": ghost_id,
                 },
                 tenant_id=tenant_id,
             )

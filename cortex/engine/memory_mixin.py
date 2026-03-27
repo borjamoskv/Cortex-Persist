@@ -51,6 +51,8 @@ class MemoryMixin(EngineMixinBase):
             sync_conn = self._get_sync_conn()
             bus = SignalBus(sync_conn)
             bus.ensure_table()
+            self._signal_bus_conn = sync_conn
+            self._signal_bus = bus
         except (sqlite3.Error, OSError, RuntimeError, AttributeError) as e:
             logger.warning("SignalBus initialization failed: %s", e)
 

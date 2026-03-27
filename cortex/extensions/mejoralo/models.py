@@ -11,7 +11,20 @@ __all__ = [
     "ShipSeal",
     "AntipatternFinding",
     "AntipatternReport",
+    "Milestone",
 ]
+
+
+@dataclass
+class Milestone:
+    """A record-breaking achievement in the CORTEX ecosystem."""
+
+    name: str
+    target: float
+    unit: str  # "score", "hours"
+    achieved_at: str
+    message: str
+    project: str = "system"
 
 
 @dataclass

@@ -150,6 +150,70 @@ def swarm_deploy(mode, target, db):
     )
 
 
+@swarm.command("config")
+@click.argument("directive")
+@click.option(
+    "--root", "-r", type=click.Path(exists=True),
+    default=".", help="Root directory to scan",
+)
+@click.option(
+    "--shard-size", "-s", type=int, default=10,
+    help="Files per shard (default: 10)",
+)
+@click.option(
+    "--concurrency", "-c", type=int, default=15,
+    help="Max concurrent shards (default: 15)",
+)
+@click.option(
+    "--extensions", "-e", type=str, default=".py",
+    help="Comma-separated file extensions (default: .py)",
+)
+@click.option(
+    "--output-json", "-o", type=str, default=None,
+    help="Write report JSON to path",
+)
+def swarm_config(directive, root, shard_size, concurrency, extensions, output_json):
+    """Deploy Parallel Config Swarm for massive cross-cutting configuration."""
+    import json
+
+    from cortex.swarm.parallel_config_swarm import ParallelConfigSwarm
+
+    raw = extensions.split(",")
+    exts = tuple(
+        e.strip() if e.startswith(".") else f".{e.strip()}" for e in raw
+    )
+
+    console.print(
+        Panel(
+            f"[bold #2B3BE5]⚛ PARALLEL CONFIG SWARM v2.0[/bold #2B3BE5]\n"
+            f"Directive: [bold]{directive}[/bold]\n"
+            f"Root: [cyan]{root}[/cyan]  |  "
+            f"Shards: [bold]{shard_size}[/bold]  |  "
+            f"Concurrency: [bold]{concurrency}[/bold]",
+            border_style="#2B3BE5",
+            title="[bold]CONFIG SWARM[/bold]",
+        )
+    )
+
+    pcs = ParallelConfigSwarm(
+        max_concurrency=concurrency, shard_size=shard_size,
+    )
+    report = asyncio.run(pcs.configure(root, directive, extensions=exts))
+
+    console.print(
+        f"\n[bold #2B3BE5]◈ CONFIG COMPLETE[/bold #2B3BE5]  "
+        f"Files: [bold]{report.total_files}[/bold]  "
+        f"Shards: [bold]{report.total_shards}[/bold]  "
+        f"Success: [bold green]{report.success_rate:.0%}[/bold green]  "
+        f"Duration: [dim]{report.duration_s:.2f}s[/dim]\n"
+    )
+
+    if output_json:
+        with open(output_json, "w") as f:
+            json.dump(report.to_dict(), f, indent=2)
+        console.print(f"[dim]Report written → {output_json}[/dim]")
+
+
 @swarm.command("board")
 @click.option("--db", default="~/.cortex/cortex.db", help="Database path")
 def swarm_board_cmd(db):

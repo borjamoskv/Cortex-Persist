@@ -54,16 +54,21 @@ def _get_genai_client() -> Any:
         raise HTTPException(status_code=500, detail="LLM configuration error.") from e
 
 
-def _build_system_instruction(context: str | None) -> str:
-    """Constructs the sovereign B2B translation instruction set."""
-    base_instruction = (
-        "You are OMNI-TRANSLATE, a sovereign localization AI for B2B applications. "
-        "Your task is to translate JSON strictly into the requested target languages. "
+def _build_system_instruction() -> str:
+    """Constructs the sovereign B2B translation instruction set.
+
+    AX-042: Static prefix — no dynamic data injected here.
+    """
+    return (
+        "You are OMNI-TRANSLATE, a sovereign localization AI "
+        "for B2B applications. "
+        "Your task is to translate JSON strictly into the "
+        "requested target languages. "
         "You must maintain the exact same keys. "
-        "Do not translate variables in brackets like {name} or {{name}}. "
+        "Do not translate variables in brackets like "
+        "{name} or {{name}}. "
         "Your output must be VALID JSON."
     )
-    return f"{base_instruction} Context for tone/domain: {context}" if context else base_instruction
 
 
 def _parse_llm_response(
@@ -104,8 +109,18 @@ def _extract_usage(response) -> dict[str, int]:
 
 def _execute_translation(request: TranslateRequest, client: Any) -> TranslateResponse:
     """Core translation execute logic isolated from router wrapper."""
-    system_instruction = _build_system_instruction(request.context)
-    prompt = f"Target languages: {request.target_languages}\n\nTexts to translate:\n{json.dumps(request.texts, ensure_ascii=False, indent=2)}"
+    system_instruction = _build_system_instruction()
+    context_prefix = (
+        f"Context for tone/domain: {request.context}\n\n"
+        if request.context
+        else ""
+    )
+    prompt = (
+        f"{context_prefix}"
+        f"Target languages: {request.target_languages}\n\n"
+        f"Texts to translate:\n"
+        f"{json.dumps(request.texts, ensure_ascii=False, indent=2)}"
+    )
 
     response = client.models.generate_content(
         model=MODEL_NAME,

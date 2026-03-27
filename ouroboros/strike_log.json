@@ -1,0 +1,26 @@
+{
+  "strikes": [
+    {
+      "id": "STRIKE-A-948",
+      "timestamp": "2026-03-26T15:13:37+00:00",
+      "vector": "A",
+      "target": "Algora Open Bounty - Next.js/TS",
+      "status": "cleared",
+      "yield_usd": 500,
+      "cost_usd": 1.20,
+      "net_exergy": 498.80
+    },
+    {
+      "id": "STRIKE-H-102",
+      "timestamp": "2026-03-26T15:13:37+00:00",
+      "vector": "H",
+      "target": "Sovereign Treasury Auto-Sweep (Lending Protocol)",
+      "status": "active",
+      "yield_usd": "pending",
+      "cost_usd": 0.05,
+      "net_exergy": "pending"
+    }
+  ],
+  "exergy_accumulator": 498.80,
+  "engine_status": "ONLINE"
+}

@@ -53,6 +53,6 @@ class ShannonCompactor:
         return {
             "status": "success",
             "duration_ms": duration * 1000,
-            "entropy_delta": -0.15,  # Valor representativo de reducción de desorden
+            "exergy_delta": -0.15,  # Valor representativo de reducción de desorden
             "exergy_yield": 0.85
         }

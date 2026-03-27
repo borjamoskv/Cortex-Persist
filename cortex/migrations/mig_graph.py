@@ -8,6 +8,7 @@ _LOG_FMT = "Migration [%03d] %s"
 _GRAPH_MEMORY_SCHEMA = """
 CREATE TABLE IF NOT EXISTS entities (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenant_id TEXT NOT NULL DEFAULT 'default',
     name TEXT NOT NULL,
     entity_type TEXT NOT NULL DEFAULT 'unknown',
     project TEXT NOT NULL,
@@ -23,9 +24,12 @@ CREATE INDEX IF NOT EXISTS idx_entities_type
     ON entities(entity_type);
 CREATE INDEX IF NOT EXISTS idx_entities_project
     ON entities(project);
+CREATE INDEX IF NOT EXISTS idx_entities_tenant
+    ON entities(tenant_id);
 
 CREATE TABLE IF NOT EXISTS entity_relations (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenant_id TEXT NOT NULL DEFAULT 'default',
     source_entity_id INTEGER NOT NULL REFERENCES entities(id),
     target_entity_id INTEGER NOT NULL REFERENCES entities(id),
     relation_type TEXT NOT NULL DEFAULT 'related_to',
@@ -38,6 +42,8 @@ CREATE INDEX IF NOT EXISTS idx_relations_source
     ON entity_relations(source_entity_id);
 CREATE INDEX IF NOT EXISTS idx_relations_target
     ON entity_relations(target_entity_id);
+CREATE INDEX IF NOT EXISTS idx_relations_tenant
+    ON entity_relations(tenant_id);
 """
 
 

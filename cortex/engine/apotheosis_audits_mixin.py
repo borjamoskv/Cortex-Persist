@@ -6,7 +6,7 @@ import sqlite3
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from cortex.engine.endocrine import ENDOCRINE, HormoneType
+from cortex.engine.gradient import GRADIENT, GradientType
 from cortex.engine.manifestation import manifest_singularity
 
 if TYPE_CHECKING:
@@ -70,7 +70,7 @@ class ApotheosisAuditsMixin:
             global_score = manager.metamemory.calibration_score()
             if global_score != -1.0:
                 if global_score > 0.25:
-                    ENDOCRINE.pulse(HormoneType.CORTISOL, +0.05, reason="GlobalCalibrationDrift")
+                    GRADIENT.pulse(GradientType.CORTISOL, +0.05, reason="GlobalCalibrationDrift")
                     logger.warning("🧠 [METAMEMORY] Global Drift detected: %.2f", global_score)
                 else:
                     logger.debug("🧠 [METAMEMORY] Global Calibration: %.2f", global_score)
@@ -83,7 +83,7 @@ class ApotheosisAuditsMixin:
             for pid in projects:
                 p_score = manager.metamemory.calibration_score(project_id=pid)
                 if p_score > 0.35:  # Stricter threshold for domain drift
-                    ENDOCRINE.pulse(HormoneType.CORTISOL, +0.05, reason=f"DomainDrift:{pid}")
+                    GRADIENT.pulse(GradientType.CORTISOL, +0.05, reason=f"DomainDrift:{pid}")
                     logger.warning("🧠 [METAMEMORY] Domain Drift in [%s]: %.2f", pid, p_score)
                 elif p_score != -1.0:
                     logger.debug("🧠 [METAMEMORY] Domain [%s] Calibration: %.2f", pid, p_score)
@@ -114,8 +114,8 @@ class ApotheosisAuditsMixin:
                 from cortex.engine.forgetting_models import PolicyRecommendation
 
                 if report.recommendation == PolicyRecommendation.PROTECT_CAUSAL_ROOTS:
-                    ENDOCRINE.pulse(
-                        HormoneType.CORTISOL,
+                    GRADIENT.pulse(
+                        GradientType.CORTISOL,
                         +0.25,
                         reason=f"CausalRootThreat:{report.regret_rate:.0%}",
                     )
@@ -125,8 +125,8 @@ class ApotheosisAuditsMixin:
                         report.regret_rate * 100,
                     )
                 else:
-                    ENDOCRINE.pulse(
-                        HormoneType.CORTISOL,
+                    GRADIENT.pulse(
+                        GradientType.CORTISOL,
                         +0.15,
                         reason=f"MemoryRegret:{report.regret_rate:.0%}",
                     )
@@ -136,7 +136,7 @@ class ApotheosisAuditsMixin:
                         report.recommendation.value,
                     )
             else:
-                ENDOCRINE.pulse(HormoneType.DOPAMINE, +0.05)
+                GRADIENT.pulse(GradientType.DOPAMINE, +0.05)
         except (AttributeError, sqlite3.Error, asyncio.CancelledError) as e:
             logger.debug("[ORACLE] Audit skipped: %s", e)
         except Exception as e:  # noqa: BLE001 — intentional re-raise after logging
@@ -149,9 +149,9 @@ class ApotheosisAuditsMixin:
             0.0 if adrenaline > 0.5 else getattr(self, "_SLEEP_MIN", 0.1) * max(0.1, inertia)
         )
         if adrenaline <= 0.5 and cortisol > 0.8:
-            ENDOCRINE.pulse(HormoneType.CORTISOL, -0.1)
+            GRADIENT.pulse(GradientType.CORTISOL, -0.1)
         if adrenaline < 0.2 and cortisol > 0.4:
-            ENDOCRINE.pulse(HormoneType.CORTISOL, -0.05 * (1.0 + dopamine))
+            GRADIENT.pulse(GradientType.CORTISOL, -0.05 * (1.0 + dopamine))
         return base_sleep
 
     def _calc_recovery(
@@ -173,9 +173,9 @@ class ApotheosisAuditsMixin:
             )
         else:
             consecutive_clean = min(consecutive_clean + 1, 8)
-            ENDOCRINE.pulse(HormoneType.DOPAMINE, 0.02)
-            ENDOCRINE.pulse(HormoneType.NEURAL_GROWTH, 0.01)
-            ENDOCRINE.pulse(HormoneType.CORTISOL, -0.02)
+            GRADIENT.pulse(GradientType.DOPAMINE, 0.02)
+            GRADIENT.pulse(GradientType.NEURAL_GROWTH, 0.01)
+            GRADIENT.pulse(GradientType.CORTISOL, -0.02)
             derived_sleep = base_sleep * (1.0 - cortisol)
         return consecutive_clean, derived_sleep
 

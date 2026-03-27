@@ -10,10 +10,12 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from cortex.extensions.immune.filters.entropic_quarantine import (
-    EntropicQuarantineFilter,
+from cortex.extensions.immune.filters.exergy_quarantine import (
+    ExergyQuarantineFilter,
     _extract_text,
-    _shannon_entropy,
+)
+from cortex.extensions.immune.filters.exergy_quarantine import (
+    _shannon_exergy as _shannon_entropy,
 )
 from cortex.extensions.trust.bayesian import (
     BayesianTrustUpdater,
@@ -61,7 +63,7 @@ class TestShannonEntropy:
 class TestEntropicQuarantineFilter:
     @pytest.fixture
     def f(self):
-        return EntropicQuarantineFilter()
+        return ExergyQuarantineFilter()
 
     @pytest.mark.asyncio
     async def test_filter_id_is_f6(self, f):
@@ -110,7 +112,7 @@ class TestEntropicQuarantineFilter:
         """High threshold = 99 bits forces every real signal to BLOCK."""
         signal = "hello world"
         result = await f.evaluate(
-            signal, {"entropy_high_threshold": 99.0, "entropy_mid_threshold": 98.0}
+            signal, {"exergy_high_threshold": 99.0, "exergy_mid_threshold": 98.0}
         )
         from cortex.extensions.immune.filters.base import Verdict
 
@@ -120,8 +122,8 @@ class TestEntropicQuarantineFilter:
     async def test_metadata_contains_entropy(self, f):
         signal = "The quick brown fox"
         result = await f.evaluate(signal, {})
-        assert "entropy_bits" in result.metadata
-        assert result.metadata["entropy_bits"] > 0
+        assert "exergy_bits" in result.metadata
+        assert result.metadata["exergy_bits"] > 0
 
 
 # ─── Unit: BayesianTrustUpdater ──────────────────────────────────────────

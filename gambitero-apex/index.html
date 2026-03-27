@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BORJAMOSKV x GAMBITERO APEX</title>
+    <meta name="description" content="Sovereign Gambiteo Simulator — Experience the Alonsotegi Singularity under CORTEX Governance.">
+    <link rel="stylesheet" href="index.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Outfit:wght@400;900&display=swap" rel="stylesheet">
+</head>
+<body class="industrial-noir">
+    <div id="apex-container" class="glass-container">
+        <header class="apex-header">
+            <h1 id="main-title">BORJAMOSKV <span class="accent">GAMBITERO</span></h1>
+            <div id="score-badge" class="badge">SCORE: <span id="current-score">0000</span></div>
+        </header>
+
+        <main id="game-viewport" class="viewport">
+            <!-- Game Scene Injector -->
+            <div id="scene-content" class="fade-in">
+                <div class="loading-spinner">RECLUTANDO AGENTES...</div>
+            </div>
+        </main>
+
+        <footer class="apex-footer">
+            <div id="inventory-belt" class="belt">
+                <span class="belt-label">ITEMS:</span>
+                <div id="inventory-list" class="items"></div>
+            </div>
+            <div id="stats-monitor" class="monitor">
+                <div class="stat-bar"><span class="label">CUERPO</span><div class="bar"><div id="stat-cuerpo" style="width: 72%;"></div></div></div>
+                <div class="stat-bar"><span class="label">LUCIDEZ</span><div class="bar"><div id="stat-lucidez" style="width: 56%;"></div></div></div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- CORTEX Ledger Hook -->
+    <div id="ledger-toast" class="toast hidden">Ledger Updated.</div>
+
+    <script src="gambitero.js"></script>
+    <script>
+        // Initialize Game Engine
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof GambiteroEngine !== 'undefined') {
+                window.game = new GambiteroEngine();
+                window.game.init();
+            } else {
+                console.error("GambiteroEngine not found in gambitero.js");
+            }
+        });
+    </script>
+</body>
+</html>

@@ -200,7 +200,7 @@ class GatewayRouter:
                 intent_str,
                 exc,
             )
-            # Ω₅: Auto-persist error as ghost for Josu/Aether processing
+            # Ω₅: Auto-persist error as VOID for Josu/Aether processing
             try:
                 from cortex.extensions.immune.error_boundary import ErrorBoundary
 
@@ -225,7 +225,7 @@ class GatewayRouter:
 
     async def _handle_store(self, req: GatewayRequest) -> dict[str, Any]:
         content = req.payload.get("content", "")
-        fact_type = req.payload.get("type", "knowledge")
+        fact_type = req.payload.get("type", "AXIOM")
         tags = req.payload.get("tags", [])
         source = req.payload.get("source", req.source)
 

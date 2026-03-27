@@ -18,9 +18,7 @@ logger = logging.getLogger("cortex.engine.consensus")
 class ConsensusMixin(EngineMixinBase):
     """Mixin for consensus and voting logic in AsyncCortexEngine."""
 
-    async def _resolve_agent_rep(
-        self, conn: aiosqlite.Connection, target_agent_id: str
-    ) -> Decimal:
+    async def _resolve_agent_rep(self, conn: aiosqlite.Connection, target_agent_id: str) -> Decimal:
         """Resolve agent reputation, auto-registering if necessary."""
         async with conn.execute(
             "SELECT reputation_score FROM agents WHERE id = ?", (target_agent_id,)

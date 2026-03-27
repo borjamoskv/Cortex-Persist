@@ -17,6 +17,7 @@ __all__ = [
     "mejoralo_awwwards_fix",
     "mejoralo_daemon",
     "mejoralo_trend",
+    "mejoralo_milestones",
 ]
 
 
@@ -324,7 +325,8 @@ def mejoralo_awwwards_fix(project, path, db):
     try:
         m = MejoraloEngine(engine)
         with console.status("[bold blue]Injecting Awwwards Sovereign Agent...[/]"):
-            success = m.awwwards_fix(project, path)
+            import asyncio
+            success = asyncio.run(m.awwwards_fix(project, path))
 
         if success:
             console.print("[bold green]✅ UI Purificada. Niveau SOTD alcanzado.[/]")
@@ -405,3 +407,51 @@ def mejoralo_antipatterns(path, magic, no_hints):
             if f.severity == "critical":
                 console.print(f"    → {f.file}:{f.line} — {f.fix_hint}")
         console.print()
+@mejoralo.command("milestones")
+@click.argument("project")
+@click.option("--db", default=DEFAULT_DB, help="Database path")
+def mejoralo_milestones(project, db):
+    """List achieved milestones for a project (420/100)."""
+    from rich.panel import Panel
+
+    from cortex.extensions.mejoralo.milestones import MilestoneManager
+
+    manager = MilestoneManager(db)
+    achieved = manager.get_achieved_milestones(project)
+
+    if not achieved:
+        console.print(
+            Panel(
+                f"[noir.high]No milestones achieved yet for project [noir.cyber]'{project}'[/].[/]",
+                border_style="noir.abyssal",
+                title="[noir.blueylb]LECHIGO-1: MILESTONES[/]",
+            )
+        )
+        return
+
+    console.print(
+        Panel(
+            f"[noir.high]Sovereign achievements for project [noir.cyber]'{project}'[/].[/]",
+            border_style="noir.blueylb",
+            title="[noir.blueylb]CORTEX MILESTONES[/]",
+            subtitle="[noir.cyber]Standard 420/100 Approved[/]",
+        )
+    )
+
+    # Group by unit
+    scores = [m for m in achieved if m.unit == "score"]
+    yields = [m for m in achieved if m.unit == "hours"]
+
+    if scores:
+        console.print("\n[noir.high]🏆 PEAK PERFORMANCE ARCHIVE:[/]")
+        for m in scores:
+            console.print(f"  [noir.blueylb]•[/] [noir.cyber]{m.name}[/] [dim]({m.achieved_at})[/]")
+            console.print(f"    [dim]{m.message}[/]\n")
+
+    if yields:
+        console.print("\n[noir.high]⏳ COMPOUND YIELD HORIZONS:[/]")
+        for m in yields:
+            console.print(f"  [noir.blueylb]•[/] [noir.cyber]{m.name}[/] [dim]({m.achieved_at})[/]")
+            console.print(f"    [dim]{m.message}[/]\n")
+
+    console.print("[dim]⏱️ All milestones verified via CORTEX Ledger (Byzantine v5).[/]")

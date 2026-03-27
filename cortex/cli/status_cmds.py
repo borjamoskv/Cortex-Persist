@@ -51,15 +51,28 @@ def status(db, json_output) -> None:
         table.add_row("Snapshot Age", f"[{snapshot_color}]{h['snapshot_age_min']:.1f} min[/]")
         table.add_section()
 
-        table.add_row("Database", s["db_path"])
+        table.add_row("Database", s.get("db_path", "N/A"))
         table.add_row("Size", f"{s['db_size_mb']} MB")
         table.add_row("Total Facts", str(s["total_facts"]))
         table.add_row("Active Facts", f"[bold #06d6a0]{s['active_facts']}[/]")
         table.add_row("Deprecated", f"[dim]{s['deprecated_facts']}[/]")
+
+        # Ω₉: Thermodynamic Visibility
+        exergy_total = s.get("exergy_total", 0.0)
+        exergy_yield = s.get("exergy_yield", 0.0)
+        table.add_section()
+        table.add_row("Total Exergy", f"[bold #CCFF00]{exergy_total}[/] [dim]Δ[/]")
+        table.add_row("Exergy Yield", f"[bold #2B3BE5]{exergy_yield:.4f}[/] [dim]Δ/fact[/]")
+
+        # Causal Coverage
+        causal_coverage = (s["causal_facts"] / s["active_facts"] * 100) if s["active_facts"] > 0 else 0
+        table.add_row("Causal Coverage", f"{causal_coverage:.1f}%")
+        table.add_section()
+
         table.add_row("Projects", str(s["project_count"]))
         table.add_row("Embeddings", str(s["embeddings"]))
         table.add_row("Transactions", str(s["transactions"]))
-        if s["types"]:
+        if s.get("types"):
             types_str = ", ".join(f"{t}: {c}" for t, c in s["types"].items())
             table.add_row("By Type", f"[dim]{types_str}[/]")
         console.print(table)

@@ -358,6 +358,20 @@ class QueryMixin(EngineMixinBase):
                 db_size_bytes = 0
             db_size_mb = round(float(db_size_bytes) / (1024.0 * 1024.0), 2)
 
+            # Ω₉: Thermodynamic Exergy Aggregation
+            try:
+                # Summing exergy_delta from JSON metadata
+                async with conn.execute(
+                    "SELECT SUM(CAST(json_extract(metadata, '$.exergy_delta') AS REAL)) "
+                    "FROM facts WHERE tenant_id = ? AND json_valid(metadata) "
+                    "AND json_extract(metadata, '$.exergy_delta') IS NOT NULL",
+                    (tenant_id,),
+                ) as cursor:
+                    row = await cursor.fetchone()
+                    exergy_total = row[0] if row and row[0] is not None else 0.0
+            except (sqlite3.Error, OSError):
+                exergy_total = 0.0
+
             return {
                 "total_facts": total,
                 "active_facts": active,
@@ -369,6 +383,8 @@ class QueryMixin(EngineMixinBase):
                 "transactions": tx_count,
                 "embeddings": embeddings,
                 "db_size_mb": db_size_mb,
+                "exergy_total": round(exergy_total, 2),
+                "exergy_yield": round(exergy_total / active if active > 0 else 0, 4),
                 "tenant_id": tenant_id,
                 "mode": "sovereign_async_v8",
             }

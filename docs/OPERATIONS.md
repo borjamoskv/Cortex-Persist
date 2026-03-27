@@ -1,6 +1,6 @@
 # Operations — CORTEX Persist
 
-Package: cortex-persist v0.3.0b1 · Engine: v8
+Package: cortex-persist v0.3.1-b1 · Engine: v8
 License: Apache-2.0 · Python: >=3.10
 
 > Runtime, maintenance, and troubleshooting procedures.
@@ -141,6 +141,25 @@ cortex verify
 # Full integrity audit
 cortex audit
 ```
+
+## PostgreSQL Vertical Smoke
+
+```bash
+# Use any supported PostgreSQL DSN alias, then run the public API smoke path
+export POSTGRES_DSN="postgresql://USER:PASS@HOST:5432/DB"
+make pg-smoke
+```
+
+This smoke exercises the real public API slice:
+`store -> search -> vote -> checkpoint -> ledger/status`
+
+It writes a JSON evidence report with the stored fact id, checkpoint ids, and
+final ledger verification result.
+
+There is also a manual GitHub Actions workflow,
+[`postgres-vertical-smoke.yml`](../.github/workflows/postgres-vertical-smoke.yml),
+which runs the same smoke against the `POSTGRES_SMOKE_DSN` secret and uploads
+both the JSON report and a Markdown evidence pack as artifacts.
 
 ---
 

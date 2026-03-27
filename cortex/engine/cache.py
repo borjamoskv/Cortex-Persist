@@ -9,12 +9,14 @@ from typing import Any, final
 
 logger = logging.getLogger("cortex.engine.cache")
 
+
 class EvictionReason(Enum):
     """Reasons for cache purging (Ω₂)."""
 
     TTL = "ttl_expired"
     LRU = "lru_capacity"
     MANUAL = "manual_purge"
+
 
 @final
 class SovereignTLRUCache:

@@ -180,6 +180,27 @@ VECTORS: dict[str, dict[str, Any]] = {
             "bounty_usd": 150,
         },
     },
+    "Z": {
+        "name": "Fiat Liquidity (Bizum)",
+        "description": "P2P micro-bounty settlement via Bizum strike",
+        "specialist": "bizum",
+        "squad": "P2",
+        "expected_yield_usd": 150.0,
+        "confidence": 0.92,
+        "compute_cost_usd": 0.15,
+        "min_exergy_threshold": 10.0,
+        "task_template": (
+            "Execute Bizum Strike — Vector Z: "
+            "1) Verify `mac-control-omega` session for mobile bank interface. "
+            "2) Dispatched micro-bounty settlement for validated triage work. "
+            "3) Record transaction hash to CORTEX Ledger."
+        ),
+        "context": {
+            "mode": "P2P",
+            "provider": "bizum",
+            "limit_usd": 500,
+        },
+    },
 }
 
 
@@ -506,8 +527,8 @@ def main() -> None:
     parser.add_argument(
         "--vectors",
         type=str,
-        default=",".join(["A", "B", "C", "J", "M"]),
-        help="Comma-separated vector IDs to activate (A,B,C,G,J,M). Default: A,B,C,J,M",
+        default=",".join(["A", "B", "C", "J", "M", "Z"]),
+        help="Comma-separated vector IDs to activate (A,B,C,G,J,M,Z). Default: A,B,C,J,M,Z",
     )
     parser.add_argument(
         "--dry-run",

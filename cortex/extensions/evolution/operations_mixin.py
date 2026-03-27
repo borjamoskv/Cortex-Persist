@@ -40,7 +40,7 @@ class EvolutionOpsMixin:
         params: EngineParameters
         sovereigns: list[SovereignAgent]
         cycle_count: int
-        _endocrine: DigitalEndocrine
+        _gradient: DigitalEndocrine
         _ledger: SovereignLedger
         _evolution_ledger: EvolutionLedgerDB
         _ouroboros: OuroborosGate | None
@@ -49,8 +49,8 @@ class EvolutionOpsMixin:
 
     def _apply_epigenetic_modulation(self) -> None:
         """Modulate mutation rate and selection pressure via DigitalEndocrine."""
-        self.params.mutation_rate = max(0.05, min(0.4, 0.1 + (self._endocrine.dopamine * 0.2)))
-        self.params.selection_pressure = max(0.1, min(0.6, 0.3 + (self._endocrine.cortisol * 0.3)))
+        self.params.mutation_rate = max(0.05, min(0.4, 0.1 + (self._gradient.dopamine * 0.2)))
+        self.params.selection_pressure = max(0.1, min(0.6, 0.3 + (self._gradient.cortisol * 0.3)))
 
     async def _evaluate_adversarial(self, metrics: dict[AgentDomain, DomainMetrics]) -> None:
         """Ground agent fitness in real telemetry (350/100)."""
@@ -93,13 +93,13 @@ class EvolutionOpsMixin:
         )
         return 1
 
-    def _record_merkle_checkpoint(
+    async def _record_merkle_checkpoint(
         self, agent: SovereignAgent | SubAgent, mutation: Mutation
     ) -> None:
         """Record an immutable checkpoint of the agent state (Phase 2 v3)."""
         logger.info("Axiom 12: Triggering Merkle Checkpoint for %s", agent.id)
         try:
-            self._ledger.record_transaction(
+            await self._ledger.record_transaction(
                 project="cortex-evolution",
                 action="evolution_checkpoint",
                 detail={
@@ -126,8 +126,8 @@ class EvolutionOpsMixin:
         )
 
         child.epigenetic_state = {
-            "dopamine_bias": self._endocrine.dopamine,
-            "cortisol_bias": self._endocrine.cortisol,
+            "dopamine_bias": self._gradient.dopamine,
+            "cortisol_bias": self._gradient.cortisol,
         }
 
         t_a = parent_a.parameters.get("temperature", 0.5)
@@ -145,7 +145,7 @@ class EvolutionOpsMixin:
         }
 
         if random.random() < self.params.mutation_rate:
-            shift = random.uniform(-0.1, 0.1) * (1.0 + self._endocrine.dopamine)
+            shift = random.uniform(-0.1, 0.1) * (1.0 + self._gradient.dopamine)
             child.parameters["temperature"] = max(
                 0.01, min(1.0, float(f"{child.parameters['temperature'] + shift:.2f}"))
             )
@@ -290,7 +290,7 @@ class EvolutionOpsMixin:
                 sovereign_muts_to_record.append(p_mutation)
 
                 if mutation.epigenetic_tags.get("axiom_12_trigger"):
-                    self._record_merkle_checkpoint(sovereign, mutation)
+                    await self._record_merkle_checkpoint(sovereign, mutation)
 
         # Subagent Mutations
         for sub in sovereign.subagents:
@@ -321,7 +321,7 @@ class EvolutionOpsMixin:
                     sub_muts_to_record.append(p_mutation)
 
                     if mutation.epigenetic_tags.get("axiom_12_trigger"):
-                        self._record_merkle_checkpoint(sub, mutation)
+                        await self._record_merkle_checkpoint(sub, mutation)
 
         self._decision_archaeology(sovereign)
 

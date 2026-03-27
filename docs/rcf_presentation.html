@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORTEX // RCF Prospecting Strategy</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;900&family=JetBrains+Mono:wght@400;700&display=swap');
+
+        :root {
+            --bg-color: #0A0A0A;
+            --surface-color: #121212;
+            --accent-color: #2B3BE5; /* BlueYlb */
+            --text-primary: #EDEDED;
+            --text-secondary: #888888;
+            --danger: #E52B2B;
+            --font-main: 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Glitchy CRT overlay (subtle) */
+        body::after {
+            content: " ";
+            display: block;
+            position: fixed;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 999;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+            opacity: 0.3;
+        }
+
+        header {
+            padding: 4rem 2rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(43, 59, 229, 0.3);
+            background: radial-gradient(circle at top, rgba(43, 59, 229, 0.15) 0%, transparent 60%);
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 900;
+            letter-spacing: -1px;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        h1 span {
+            color: var(--accent-color);
+        }
+
+        .subtitle {
+            font-family: var(--font-mono);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        /* Audio Engine UI */
+        .lyria-engine {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--surface-color);
+            border: 1px solid var(--accent-color);
+            padding: 1rem 1.5rem;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 20px rgba(43, 59, 229, 0.1);
+        }
+
+        .lyria-engine.active {
+            box-shadow: 0 0 30px rgba(43, 59, 229, 0.3);
+            border-color: #fff;
+        }
+
+        .lyria-status {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+        }
+
+        .lyria-status .pulse {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: var(--danger);
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .lyria-engine.active .pulse {
+            background-color: var(--accent-color);
+            box-shadow: 0 0 8px var(--accent-color);
+            animation: pulse-anim 2s infinite;
+        }
+
+        @keyframes pulse-anim {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.5); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        button.btn-engine {
+            background: transparent;
+            color: #fff;
+            border: 1px solid var(--text-secondary);
+            padding: 0.5rem 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        button.btn-engine:hover {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .lyria-engine.active button.btn-engine {
+            background: var(--accent-color);
+            color: #fff;
+            border-color: var(--accent-color);
+        }
+
+        /* Ranking Cards */
+        .section-title {
+            font-family: var(--font-mono);
+            font-size: 1.2rem;
+            color: var(--accent-color);
+            border-left: 4px solid var(--accent-color);
+            padding-left: 1rem;
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            margin-bottom: 4rem;
+        }
+
+        .card {
+            background: var(--surface-color);
+            border: 1px solid #222;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-color);
+        }
+
+        .card::before {
+            content: attr(data-rank);
+            position: absolute;
+            top: -20px;
+            right: -10px;
+            font-size: 8rem;
+            font-weight: 900;
+            color: rgba(255,255,255,0.03);
+            line-height: 1;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .card-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card .yield {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            background: rgba(43, 59, 229, 0.2);
+            color: #fff;
+            padding: 2px 8px;
+            border-radius: 2px;
+        }
+
+        .card p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+        
+        .card ul {
+            list-style-type: none;
+        }
+
+        .card ul li::before {
+            content: "→";
+            color: var(--accent-color);
+            margin-right: 10px;
+        }
+
+        /* Disruptive section */
+        .disruptive-section {
+            margin-top: 5rem;
+        }
+
+        .disruptive-card {
+            border: 1px solid var(--danger);
+            background: linear-gradient(135deg, rgba(229, 43, 43, 0.05) 0%, transparent 100%);
+            margin-bottom: 2rem;
+            padding: 2rem;
+        }
+
+        .disruptive-card h3 {
+            color: var(--danger);
+            font-family: var(--font-mono);
+            text-transform: uppercase;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .falsifiable-box {
+            background: rgba(0,0,0,0.5);
+            border-left: 2px solid var(--accent-color);
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+        }
+
+        .falsifiable-box .label {
+            color: var(--accent-color);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>CORTEX <span>RCF</span></h1>
+        <div class="subtitle">Sovereign Yield Prospecting — NW Hub (Galicia/Asturias)</div>
+    </header>
+
+    <div class="container">
+        <!-- Ranking Section -->
+        <h2 class="section-title">01. Standard Vectors (Ranked by Success Prob)</h2>
+        <div class="card-grid">
+            <div class="card" data-rank="5">
+                <div class="card-content">
+                    <h3>Grandes Festivales (Barras) <span class="yield">YIELD: MAXIMUM</span></h3>
+                    <p>El dinero en los grandes festivales no lo hace la promotora, lo hace el concesionario de la barra principal. Tienen liquidez inmediata e infraestructura crítica.</p>
+                    <ul>
+                        <li>O Son do Camiño, Resurrection Fest, PortAmérica</li>
+                        <li><strong>Contacto:</strong> Dir. F&B / Jefe de Producción</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card" data-rank="4">
+                <div class="card-content">
+                    <h3>Comisiones de Fiestas y Concellos <span class="yield">YIELD: HIGH</span></h3>
+                    <p>Presupuestos públicos anuales que deben gastarse 100%. Estructuras fáciles de adjudicar por contrato menor.</p>
+                    <ul>
+                        <li>Festa do Albariño, San Froilán, Semana Grande de Gijón</li>
+                        <li><strong>Contacto:</strong> Concejalías de Festejos, Presidentes de Comisión</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card" data-rank="3">
+                <div class="card-content">
+                    <h3>Clúster Orquestas de Verbena <span class="yield">YIELD: MED-HIGH</span></h3>
+                    <p>Ciudades rodantes que mueven miles de personas en el entorno rural. Buscan complementos VIP para sponsors y palcos.</p>
+                    <ul>
+                        <li>Panorama, París de Noia, Espectáculos Gaias</li>
+                        <li><strong>Contacto:</strong> Tour Managers / Directores de Agencias</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card" data-rank="2">
+                <div class="card-content">
+                    <h3>Hubs Audiovisuales y Productoras <span class="yield">YIELD: MEDIUM</span></h3>
+                    <p>Campamentos base (catering, MUA) nómadas y resistentes a lluvia para rodajes en la costa atlántica.</p>
+                    <ul>
+                        <li>Vaca Films, Portocabo, Asturias Film Commission</li>
+                        <li><strong>Contacto:</strong> Line Producers y Location Managers</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card" data-rank="1">
+                <div class="card-content">
+                    <h3>Funcionalidad Institucional/Pública <span class="yield">YIELD: LOW (High Friction)</span></h3>
+                    <p>Cero ocio, respuesta inmediata. Hubs de emergencia, triaje o ferias de empleo universitario.</p>
+                    <ul>
+                        <li>USC (Campus Vida), Autoridad Portuaria Vigo/Gijón, Hospitales</li>
+                        <li><strong>Contacto:</strong> Directores Generales de Servicios</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Disruptive Section -->
+        <div class="disruptive-section">
+            <h2 class="section-title" style="color: var(--danger); border-color: var(--danger);">02. Falsifiable Disruptive Vectors</h2>
+            
+            <div class="disruptive-card">
+                <h3>💀 D-1: El Vector "Camellos" (Economía Sumergida de Lugo)</h3>
+                <p>Las redes de alta liquidez paralela necesitan infraestructuras físicas para macro-fiestas o raves (ej. durante franjas grises del San Froilán) gestionadas vía asociaciones fantasma. El pitch: <em>"Infraestructura premium, pago en cash, montaje nocturno invisible".</em></p>
+                
+                <div class="falsifiable-box">
+                    <span class="label">// Falsificabilidad (C5-Dynamic)</span>
+                    <p><strong>TEST:</strong> Deploy dark Telegram/Signal Ads geolocalizados en 2 polígonos de Lugo y casco viejo ofreciendo carpas VIP pago en B.</p>
+                    <p><strong>INVALIDACIÓN:</strong> Si en 72h no hay un solo ping en Signal, o el mercado no existe, o nuestro GTM falló. Se deshecha la hipótesis sin gasto de ventas tradicional.</p>
+                </div>
+            </div>
+
+            <div class="disruptive-card">
+                <h3>🛸 D-2: Seguro Anti-Lluvia Físico para Palacios</h3>
+                <p>Las bodas extremas de Pazo y Palacio sufren pánico a la lluvia atlántica. No vendes barras, vendes un seguro físico de rescate modular en menos de 4 horas.</p>
+                
+                <div class="falsifiable-box">
+                    <span class="label">// Falsificabilidad (C5-Dynamic)</span>
+                    <p><strong>TEST:</strong> Script que escropee forecast de lluvia en A Coruña/Asturias. Si P(lluvia) > 70% en Jueves, enviar correo SOS Automático a Top 10 Wedding Planners.</p>
+                    <p><strong>INVALIDACIÓN:</strong> Si tras 5 fines de semana lluviosos nadie alquila por emergencia climática, el coste de ansiedad no supera el ticket de RCF.</p>
+                </div>
+            </div>
+
+            <div class="disruptive-card">
+                <h3>⛺ D-3: Comandos Nómadas de Surf Extremo</h3>
+                <p>Campeonatos underground (Costa da Morte, marejadas de invierno) mueven liquidez en furgonetas camper pero carecen de Hub Social físico que aguante 80km/h de viento.</p>
+
+                <div class="falsifiable-box">
+                    <span class="label">// Falsificabilidad (C5-Dynamic)</span>
+                    <p><strong>TEST:</strong> Montar táctico 1 barra RCF gratis en la playa en día de campeonato, operar cafetería nómada. Si la marca local (escuela/surfshop) no quiere renovarlo pagando el finde siguiente, se cancela la ruta.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lyria 3 Audio Engine Widget -->
+    <div class="lyria-engine" id="lyriaWidget">
+        <div class="lyria-status">
+            <span class="pulse"></span> 
+            <span id="lyriaText">LYRIA 3 ENGINE: OFFLINE</span>
+        </div>
+        <button class="btn-engine" id="btnLyria">INIT KRATU_DARK</button>
+    </div>
+
+    <script>
+        // LYRIA 3 Procedural Dark Ambient Engine (Web Audio API)
+        // Generates an industrial Kratu-style dark drone procedurally
+        let audioCtx;
+        let isPlaying = false;
+        let oscillators = [];
+        let filters = [];
+        let noiseGain;
+
+        function initLyriaEngine() {
+            if (audioCtx) return;
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            
+            // Reverb Effect (Convolution)
+            const convolver = audioCtx.createConvolver();
+            // Create a fake impulse response for a huge dark space
+            const rate = audioCtx.sampleRate;
+            const length = rate * 3.0; // 3 seconds reverb
+            const impulse = audioCtx.createBuffer(2, length, rate);
+            const impulseL = impulse.getChannelData(0);
+            const impulseR = impulse.getChannelData(1);
+            for (let i = 0; i < length; i++) {
+                impulseL[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, 3);
+                impulseR[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, 3);
+            }
+            convolver.buffer = impulse;
+
+            // Master compressor to make it sound industrial and dense
+            const compressor = audioCtx.createDynamicsCompressor();
+            compressor.threshold.value = -24;
+            compressor.knee.value = 30;
+            compressor.ratio.value = 12;
+            compressor.attack.value = 0.003;
+            compressor.release.value = 0.25;
+
+            // Master Gain
+            const masterGain = audioCtx.createGain();
+            masterGain.gain.value = 0.6;
+            masterGain.connect(compressor);
+            compressor.connect(convolver);
+            convolver.connect(audioCtx.destination);
+            
+            // Clean direct path too
+            compressor.connect(audioCtx.destination);
+
+            // Sub-Bass Drones (Kratu style)
+            const frequencies = [32.7, 49.0, 65.4]; // C1, G1, C2
+            
+            frequencies.forEach(freq => {
+                const osc = audioCtx.createOscillator();
+                osc.type = 'sawtooth';
+                osc.frequency.value = freq;
+                
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.value = 100; // Deep muffle
+                filter.Q.value = 5;
+
+                const lfo = audioCtx.createOscillator();
+                lfo.type = 'sine';
+                lfo.frequency.value = 0.05 + Math.random() * 0.1; // Very slow sweeping
+                
+                const lfoGain = audioCtx.createGain();
+                lfoGain.gain.value = 150;
+                
+                lfo.connect(lfoGain);
+                lfoGain.connect(filter.frequency);
+                
+                const oscGain = audioCtx.createGain();
+                oscGain.gain.value = 0.3;
+
+                osc.connect(filter);
+                filter.connect(oscGain);
+                oscGain.connect(masterGain);
+                
+                osc.start();
+                lfo.start();
+                
+                oscillators.push(osc);
+                filters.push(filter);
+            });
+
+            // Industrial Noise Layer
+            const bufferSize = audioCtx.sampleRate * 2.0; 
+            const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const output = noiseBuffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                output[i] = Math.random() * 2 - 1;
+            }
+            const noise = audioCtx.createBufferSource();
+            noise.buffer = noiseBuffer;
+            noise.loop = true;
+
+            const noiseFilter = audioCtx.createBiquadFilter();
+            noiseFilter.type = 'bandpass';
+            noiseFilter.frequency.value = 1500;
+            noiseFilter.Q.value = 2;
+
+            noiseGain = audioCtx.createGain();
+            noiseGain.gain.value = 0.03;
+
+            noise.connect(noiseFilter);
+            noiseFilter.connect(noiseGain);
+            noiseGain.connect(masterGain);
+            noise.start();
+        }
+
+        const btnLyria = document.getElementById('btnLyria');
+        const lyriaWidget = document.getElementById('lyriaWidget');
+        const lyriaText = document.getElementById('lyriaText');
+
+        btnLyria.addEventListener('click', () => {
+            if (!audioCtx) initLyriaEngine();
+            
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            if (!isPlaying) {
+                // Resume all gains if we had muted them (or this is first start)
+                if (audioCtx.state === 'running') {
+                    lyriaWidget.classList.add('active');
+                    lyriaText.innerText = 'LYRIA 3 ENGINE: RUNNING 24/7';
+                    btnLyria.innerText = 'HALT';
+                    isPlaying = true;
+                }
+            } else {
+                audioCtx.suspend();
+                lyriaWidget.classList.remove('active');
+                lyriaText.innerText = 'LYRIA 3 ENGINE: SUSPENDED';
+                btnLyria.innerText = 'RESUME';
+                isPlaying = false;
+            }
+        });
+    </script>
+</body>
+</html>

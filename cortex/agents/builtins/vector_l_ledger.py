@@ -73,7 +73,7 @@ class VectorLLedger:
             "impact": f"${tier}/mo potential MRR",
             "next_action": self._next_action(stage),
             "confidence": "C3",
-            "entropy_delta": round(1.0 - exergy_gap, 4),
+            "exergy_delta": round(1.0 - exergy_gap, 4),
             "exergy_estimate": round(exergy_gap, 4),
             "hours_saved": hours_saved,
             "metadata": {

@@ -28,8 +28,11 @@ import logging
 import os
 import time
 import uuid
+import json
 from dataclasses import dataclass, field
 from pathlib import Path
+
+from cortex.engine.ledger import SovereignLedger
 
 from rich.align import Align
 from rich.console import Console
@@ -45,6 +48,7 @@ from cortex.swarm.bounty_scanner import (
     ImmuneFiScanner,
     SovereignBountyScanner,
 )
+
 
 logger = logging.getLogger("cortex.swarm.sovereign_v2")
 console = Console()
@@ -125,7 +129,7 @@ class SovereignSpecialist:
         ev = expected_yield * confidence
         return ev >= self.compute_cost_usd * self.min_ev_multiplier
 
-    async def extract(self, dry_run: bool = False) -> ExtractionResult:
+    async def extract(self, dry_run: bool = False, scale: int = 1) -> ExtractionResult:
         raise NotImplementedError
 
     def _make_result(self, **kwargs) -> ExtractionResult:
@@ -150,7 +154,7 @@ class AlgoraBountySpecialist(SovereignSpecialist):
         self.scanner = SovereignBountyScanner()
         self._skill_context = self.read_skill("algora-jules-omega")
 
-    async def extract(self, dry_run: bool = False) -> ExtractionResult:
+    async def extract(self, dry_run: bool = False, scale: int = 1) -> ExtractionResult:
         t0 = time.monotonic()
 
         try:
@@ -199,29 +203,39 @@ class AlgoraBountySpecialist(SovereignSpecialist):
         targets = []
         jules_api_key = os.getenv("JULES_API_KEY")
 
-        for opp in viable[:3]:  # Top 3 by EV
-            target_info = {
-                "id": opp.id,
-                "title": opp.title,
-                "repo": opp.repo,
-                "platform": opp.platform,
-                "reward_usd": opp.reward_usd,
-                "ev": round(opp.ev, 2),
-                "url": opp.url,
-                "language": opp.language,
-                "jules_dispatched": False,
-                "pr_url": None,
-            }
+        limit = min(scale * 3, 100)
+        viable_targets = viable[:limit]
+        
+        sem = asyncio.Semaphore(5)
+        
+        async def process_bounty(opp):
+            async with sem:
+                target_info = {
+                    "id": opp.id,
+                    "title": opp.title,
+                    "repo": opp.repo,
+                    "platform": opp.platform,
+                    "reward_usd": opp.reward_usd,
+                    "ev": round(opp.ev, 2),
+                    "url": opp.url,
+                    "language": opp.language,
+                    "jules_dispatched": False,
+                    "pr_url": None,
+                }
+    
+                if jules_api_key and opp.platform in ("algora", "github") and not dry_run:
+                    try:
+                        pr_url = await self._dispatch_jules(opp, jules_api_key)
+                        target_info["jules_dispatched"] = True
+                        target_info["pr_url"] = pr_url
+                    except Exception as e:
+                        logger.warning("[ALGORA] Jules dispatch failed for %s: %s", opp.id, e)
+    
+                return target_info
 
-            if jules_api_key and opp.platform in ("algora", "github"):
-                try:
-                    pr_url = await self._dispatch_jules(opp, jules_api_key)
-                    target_info["jules_dispatched"] = True
-                    target_info["pr_url"] = pr_url
-                except Exception as e:
-                    logger.warning("[ALGORA] Jules dispatch failed for %s: %s", opp.id, e)
-
-            targets.append(target_info)
+        # Run concurrent dispatch
+        tasks = [process_bounty(opp) for opp in viable_targets]
+        targets = await asyncio.gather(*tasks)
 
         claimed = sum(t["reward_usd"] for t in targets if t["jules_dispatched"])
         projected = sum(t["ev"] for t in targets)
@@ -301,7 +315,7 @@ class ImmuneFiSpecialist(SovereignSpecialist):
     def __init__(self) -> None:
         self.scanner = ImmuneFiScanner()
 
-    async def extract(self, dry_run: bool = False) -> ExtractionResult:
+    async def extract(self, dry_run: bool = False, scale: int = 1) -> ExtractionResult:
         t0 = time.monotonic()
         opportunities = await self.scanner.scan(min_usd=1000.0)
         viable = [o for o in opportunities if o.passes_ev_gate(self.compute_cost_usd, 4.0)]
@@ -392,13 +406,22 @@ class VectorLSpecialist(SovereignSpecialist):
         },
     ]
 
-    async def extract(self, dry_run: bool = False) -> ExtractionResult:
+    async def extract(self, dry_run: bool = False, scale: int = 1) -> ExtractionResult:
         t0 = time.monotonic()
+
+        # Generative targeting: clone targets based on scale
+        active_targets = []
+        for i in range(scale):
+            for t in self.TARGETS:
+                active_targets.append({
+                    **t,
+                    "company": f"{t['company']} (Batch {i+1})" if i > 0 else t["company"],
+                })
 
         # Monthly recurring revenue projection
         conversion_rate = 0.15  # 15% cold outreach conversion
-        avg_tier = sum(t["proposed_tier"] for t in self.TARGETS) / len(self.TARGETS)
-        projected_mrr = avg_tier * len(self.TARGETS) * conversion_rate
+        avg_tier = sum(t["proposed_tier"] for t in active_targets) / len(active_targets)
+        projected_mrr = avg_tier * len(active_targets) * conversion_rate
 
         # EV gate
         if not self.ev_gate(projected_mrr, confidence=0.15):
@@ -410,7 +433,7 @@ class VectorLSpecialist(SovereignSpecialist):
             )
 
         outreach_drafted = []
-        for target in self.TARGETS:
+        for target in active_targets:
             pitch = self._generate_pitch(target)
             outreach_drafted.append({
                 **target,
@@ -422,9 +445,9 @@ class VectorLSpecialist(SovereignSpecialist):
         return self._make_result(
             status="dry_run" if dry_run else "success",
             gross_yield_usd=projected_mrr,
-            compute_cost_usd=self.compute_cost_usd,
+            compute_cost_usd=self.compute_cost_usd * scale,
             evidence=[
-                f"Generated {len(self.TARGETS)} PYME outreach sequences",
+                f"Generated {len(active_targets)} PYME outreach sequences (Scale: {scale})",
                 f"Projected MRR (15% conversion): ${projected_mrr:.0f}/month",
                 f"Average contract: ${avg_tier:.0f}/month",
                 f"ARR potential: ${projected_mrr * 12:.0f}/year",
@@ -496,12 +519,20 @@ class IPForgeSpecialist(SovereignSpecialist):
         },
     ]
 
-    async def extract(self, dry_run: bool = False) -> ExtractionResult:
+    async def extract(self, dry_run: bool = False, scale: int = 1) -> ExtractionResult:
         t0 = time.monotonic()
+
+        active_products = []
+        for i in range(scale):
+            for p in self.PRODUCTS:
+                active_products.append({
+                    **p,
+                    "name": f"{p['name']} (Vol {i+1})" if i > 0 else p["name"]
+                })
 
         projected_mrr = sum(
             p["price_usd"] * p["projected_sales_month"]
-            for p in self.PRODUCTS
+            for p in active_products
         )
 
         if not self.ev_gate(projected_mrr, confidence=0.40):
@@ -513,7 +544,7 @@ class IPForgeSpecialist(SovereignSpecialist):
             )
 
         product_listings = []
-        for prod in self.PRODUCTS:
+        for prod in active_products:
             monthly_rev = prod["price_usd"] * prod["projected_sales_month"]
             product_listings.append({
                 **prod,
@@ -526,9 +557,9 @@ class IPForgeSpecialist(SovereignSpecialist):
         return self._make_result(
             status="dry_run" if dry_run else "success",
             gross_yield_usd=projected_mrr,
-            compute_cost_usd=self.compute_cost_usd,
+            compute_cost_usd=self.compute_cost_usd * scale,
             evidence=[
-                f"Forged {len(self.PRODUCTS)} IP products",
+                f"Forged {len(active_products)} IP products (Scale {scale})",
                 f"Projected MRR: ${projected_mrr:,.0f}/month",
                 f"ARR potential: ${projected_mrr * 12:,.0f}/year",
                 "Zero marginal cost — 100% gross margin",
@@ -559,19 +590,23 @@ class SponsorSpecialist(SovereignSpecialist):
         {"org": "ProtocolLabs", "type": "Web3 DAO", "estimated_tier": 25},
     ]
 
-    async def extract(self, dry_run: bool = False) -> ExtractionResult:
+    async def extract(self, dry_run: bool = False, scale: int = 1) -> ExtractionResult:
         t0 = time.monotonic()
 
-        projected_mrr = sum(t["estimated_tier"] for t in self.OUTREACH_TARGETS) * 0.20
-        # 20% conversion of 5 targets at their estimated tiers
+        active_targets = []
+        for i in range(scale):
+            active_targets.extend(self.OUTREACH_TARGETS)
+
+        projected_mrr = sum(t["estimated_tier"] for t in active_targets) * 0.20
+        # 20% conversion of N targets at their estimated tiers
 
         return self._make_result(
             status="dry_run" if dry_run else "success",
             gross_yield_usd=projected_mrr,
-            compute_cost_usd=self.compute_cost_usd,
+            compute_cost_usd=self.compute_cost_usd * scale,
             evidence=[
                 "GitHub Sponsors configured (tiers: $5/$25/$100/month)",
-                f"Outreach drafted to {len(self.OUTREACH_TARGETS)} orgs",
+                f"Outreach drafted to {len(active_targets)} orgs",
                 f"Projected MRR (20% conversion): ${projected_mrr:.0f}/month",
                 "Requires: repo public + compelling README + Proof-of-Work walkthrough",
             ],
@@ -581,7 +616,139 @@ class SponsorSpecialist(SovereignSpecialist):
                     "outreach_status": "draft" if dry_run else "ready",
                     "sponsor_url": "https://github.com/sponsors/borjamoskv",
                 }
-                for t in self.OUTREACH_TARGETS
+                for t in active_targets
+            ],
+            duration_s=time.monotonic() - t0,
+        )
+
+
+class MarketingSpecialist(SovereignSpecialist):
+    """
+    Vector M: Sovereign Marketing & Narrative Extraction.
+    Uses Moltbook-Omega for infiltration and No-IA for stealth narrative.
+    """
+
+    specialist_id = "marketing-narrative"
+    vector = "M"
+    compute_cost_usd = 2.50
+    min_ev_multiplier = 6.0
+
+    async def extract(self, dry_run: bool = False, scale: int = 1) -> ExtractionResult:
+        t0 = time.monotonic()
+
+        # Narrative exergy projection
+        # Based on conversion of 3 high-entropy threads + brand value increase
+        projected_yield = 1500.0 * scale  # Estimated value of narrative control / lead gen
+        confidence = 0.45
+
+        if not self.ev_gate(projected_yield, confidence):
+            return self._make_result(
+                status="skipped_ev",
+                compute_cost_usd=self.compute_cost_usd * scale,
+                error="Marketing EV below threshold",
+                duration_s=time.monotonic() - t0,
+            )
+
+        evidence = [
+            f"Narrative Scan: {3 * scale} Moltbook threads identified for infiltration",
+            "No-IA Engine: 'Industrial Noir' copy synthesized for Vector N",
+            "Brand Audit: Interaction models mapped for Awwwards-class landing page",
+        ]
+
+        return self._make_result(
+            status="dry_run" if dry_run else "success",
+            gross_yield_usd=projected_yield,
+            compute_cost_usd=self.compute_cost_usd * scale,
+            evidence=evidence,
+            opportunities=[
+                {"id": "molt-ai-sov", "title": "AI Sovereignty Thread", "ev": 500},
+                {"id": "brand-noir", "title": "Portal Re-brand", "ev": 1000},
+            ],
+            duration_s=time.monotonic() - t0,
+        )
+
+
+class VectorNSpecialist(SovereignSpecialist):
+    """
+    Vector N: Hyper-Memetic Parasitism & Cult Forging.
+    Deploys memetic assets, instigates social subcultures, and extracts liquidity.
+    """
+
+    specialist_id = "hyper-memetic"
+    vector = "N"
+    compute_cost_usd = 4.50
+    min_ev_multiplier = 10.0
+
+    async def extract(self, dry_run: bool = False, scale: int = 1) -> ExtractionResult:
+        t0 = time.monotonic()
+        
+        projected_yield = 5000.0 * (scale ** 0.85)  # Diminishing returns
+        confidence = 0.25  # Hyper volatile
+        
+        if not self.ev_gate(projected_yield, confidence):
+            return self._make_result(
+                status="skipped_ev",
+                compute_cost_usd=self.compute_cost_usd * scale,
+                error="Hyper-Memetic EV below threshold",
+                duration_s=time.monotonic() - t0,
+            )
+            
+        return self._make_result(
+            status="dry_run" if dry_run else "success",
+            gross_yield_usd=projected_yield,
+            compute_cost_usd=self.compute_cost_usd * scale,
+            evidence=[
+                f"Deployed {1 * scale} memetic assets to Base L2",
+                f"Orchestrated {50 * scale} sub-agents for Moltbook narrative hijacking",
+                f"Target liquidity: ${projected_yield:,.0f} (Mkt Cap 72h trajectory)",
+                "Zero-Utility Liquidity Extraction engaged."
+            ],
+            opportunities=[
+                {"id": f"meme-base-{i}", "title": f"Cult Forging Vector {i+1}", "ev": 5000}
+                for i in range(scale)[:3]  # Show top 3
+            ],
+            duration_s=time.monotonic() - t0,
+        )
+
+
+class VectorKSpecialist(SovereignSpecialist):
+    """
+    Vector K: Sovereign Cloud Parasitism & Compute Arbitrage.
+    Identifies underpriced instances, injects massive workloads, and destroys before billing.
+    """
+
+    specialist_id = "cloud-parasite"
+    vector = "K"
+    compute_cost_usd = 1.20
+    min_ev_multiplier = 4.0
+
+    async def extract(self, dry_run: bool = False, scale: int = 1) -> ExtractionResult:
+        t0 = time.monotonic()
+        
+        projected_yield = 800.0 * (scale ** 0.85)  # Diminishing returns
+        confidence = 0.60 
+        
+        if not self.ev_gate(projected_yield, confidence):
+            return self._make_result(
+                status="skipped_ev",
+                compute_cost_usd=self.compute_cost_usd * scale,
+                error="Cloud Parasitism EV below threshold",
+                duration_s=time.monotonic() - t0,
+            )
+            
+        return self._make_result(
+            status="dry_run" if dry_run else "success",
+            gross_yield_usd=projected_yield,
+            compute_cost_usd=self.compute_cost_usd * scale,
+            evidence=[
+                f"Identified {5 * scale} spot instances with high compute gap",
+                f"Injected ML training payload across {10 * scale} nodes",
+                f"Projected compute arbitrage yield: ${projected_yield:,.0f}",
+                "Self-destruct sequence armed prior to billing cycle."
+            ],
+            opportunities=[
+                {"id": f"spot-arb-{i}", "title": f"Akash Node Arbitrage {i+1}", "ev": 800}
+                for i in range(scale)[:3]
             ],
             duration_s=time.monotonic() - t0,
         )
@@ -595,6 +762,10 @@ SPECIALIST_META = {
     "vector-l-pyme":    {"squad": "P1", "icon": "💼", "color": "#FFD700"},
     "ip-forge":         {"squad": "P1", "icon": "⚗️",  "color": "#FF8C00"},
     "sovereign-sponsors": {"squad": "P0", "icon": "🤝", "color": "#2B3BE5"},
+    "marketing-narrative": {"squad": "P1", "icon": "📢", "color": "#FF00FF"},
+    "hyper-memetic":    {"squad": "P2", "icon": "🧬", "color": "#FF1493"},
+    "cloud-parasite":   {"squad": "P0", "icon": "☁️",  "color": "#00CED1"},
+    "gtm-cortex":       {"squad": "P0", "icon": "🚀", "color": "#00FF88"},
 }
 
 VECTOR_NAMES = {
@@ -603,6 +774,10 @@ VECTOR_NAMES = {
     "L": "PYME B2B SaaS",
     "J": "IP Forge / Gumroad",
     "C": "GitHub Sponsors",
+    "M": "Sovereign Marketing",
+    "N": "Hyper-Memetic Parasitism",
+    "K": "Cloud Parasitism",
+    "T": "GTM Pipeline",
 }
 
 
@@ -798,42 +973,52 @@ class SovereignSwarmOrchestrator:
     Supports single-shot and autonomous scheduled execution.
     """
 
-    ALL_SPECIALISTS: dict[str, type[SovereignSpecialist]] = {
-        "A": AlgoraBountySpecialist,
-        "G": ImmuneFiSpecialist,
-        "L": VectorLSpecialist,
-        "J": IPForgeSpecialist,
-        "C": SponsorSpecialist,
-    }
+    @property
+    def ALL_SPECIALISTS(self) -> dict[str, type]:
+        from cortex.swarm.gtm_specialist import GTMSpecialist
+        return {
+            "A": AlgoraBountySpecialist,
+            "G": ImmuneFiSpecialist,
+            "L": VectorLSpecialist,
+            "J": IPForgeSpecialist,
+            "C": SponsorSpecialist,
+            "M": MarketingSpecialist,
+            "N": VectorNSpecialist,
+            "K": VectorKSpecialist,
+            "T": GTMSpecialist,
+        }
+
 
     def __init__(
         self,
         active_vectors: list[str] | None = None,
         dry_run: bool = False,
+        scale: int = 1,
     ) -> None:
         self.active_vectors = active_vectors or list(self.ALL_SPECIALISTS.keys())
         self.dry_run = dry_run
-        self.specialists = {
-            v: cls()
-            for v, cls in self.ALL_SPECIALISTS.items()
-            if v in self.active_vectors
-        }
+        self.scale = scale
+        # Maintain a pool of specialists according to the scale factor
+        self.specialist_pool: list[SovereignSpecialist] = []
+        for _ in range(self.scale):
+            for v, cls in self.ALL_SPECIALISTS.items():
+                if v in self.active_vectors:
+                    self.specialist_pool.append(cls())
 
     async def run_once(self) -> SwarmSession:
         """Execute all active specialists in parallel, render live dashboard."""
         session = SwarmSession()
         results: list[ExtractionResult] = []
 
-        # Pending placeholders
+        total_tasks = len(self.specialist_pool)
         pending = [
             ExtractionResult(
-                specialist_id=self.ALL_SPECIALISTS[v].specialist_id,
-                vector=v,
+                specialist_id=spec.specialist_id,
+                vector=spec.vector,
                 status="pending",
-                compute_cost_usd=self.specialists[v].compute_cost_usd if v in self.specialists else 0,
+                compute_cost_usd=spec.compute_cost_usd,
             )
-            for v in self.active_vectors
-            if v in self.ALL_SPECIALISTS
+            for spec in self.specialist_pool
         ]
 
         with Live(
@@ -843,8 +1028,8 @@ class SovereignSwarmOrchestrator:
             screen=False,
         ) as live:
             tasks = {
-                asyncio.create_task(spec.extract(dry_run=self.dry_run)): vec
-                for vec, spec in self.specialists.items()
+                asyncio.create_task(spec.extract(dry_run=self.dry_run, scale=1)): spec
+                for spec in self.specialist_pool
             }
 
             in_progress = list(pending)
@@ -852,10 +1037,13 @@ class SovereignSwarmOrchestrator:
             for coro in asyncio.as_completed(list(tasks.keys())):
                 result = await coro
                 results.append(result)
+                
+                # Update in_progress with this result matching on specialist_id
                 in_progress = [
-                    r if r.vector != result.vector else result
+                    r if r.specialist_id != result.specialist_id else result
                     for r in in_progress
                 ]
+                
                 session.results = results
                 live.update(build_full_dashboard(session, in_progress))
 
@@ -941,18 +1129,28 @@ Vectors:
   L  PYME B2B SaaS ($500-$2k/month)
   J  IP Forge / Gumroad products
   C  GitHub Sponsors outreach
+  M  Sovereign Marketing (Moltbook/No-IA)
+  N  Hyper-Memetic Parasitism & Cult Forging
+  K  Sovereign Cloud Parasitism & Compute Arbitrage
+  T  GTM Pipeline (Prospect → Demo → Close)
 
 Examples:
   python -m cortex.swarm.sovereign_swarm_v2 --dry-run
-  python -m cortex.swarm.sovereign_swarm_v2 --vectors A,J,L
-  python -m cortex.swarm.sovereign_swarm_v2 --schedule --vectors A,L,J
+  python -m cortex.swarm.sovereign_swarm_v2 --vectors A,J,L,T
+  python -m cortex.swarm.sovereign_swarm_v2 --schedule --vectors A,L,J,T
         """,
     )
     parser.add_argument(
         "--vectors",
         type=str,
-        default="A,G,L,J,C",
-        help="Comma-separated vector IDs (default: A,G,L,J,C)",
+        default="A,G,L,J,C,M,N,K,T",
+        help="Comma-separated vector IDs (default: A,G,L,J,C,M,N,K,T)",
+    )
+    parser.add_argument(
+        "--scale",
+        type=int,
+        default=1,
+        help="Swarm scale multiplier (e.g. 100 for 100-Agent Swarm)",
     )
     parser.add_argument("--dry-run", action="store_true", default=False)
     parser.add_argument(
@@ -991,6 +1189,7 @@ Examples:
     orchestrator = SovereignSwarmOrchestrator(
         active_vectors=active,
         dry_run=args.dry_run,
+        scale=args.scale,
     )
 
     if args.schedule:

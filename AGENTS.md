@@ -34,15 +34,16 @@ agents working inside the repository.
 
 | Path | Risk | Notes |
 | --- | ---: | --- |
-| `engine/` | Critical | Core CRUD, orchestration, and mixin composition |
+| `engine/` | Critical | Core CRUD, Kinetic Engines (Annihilator/Crystallizer) |
 | `memory/` | Critical | Large public API surface |
 | `ledger.py` | Critical | Hash-chain integrity and trust continuity |
 | `migrations/` | Critical | Irreversible production impact |
-| `guards/` | High | Admission, contradiction, dependency, and injection-detection surfaces |
+| `guards/` | High | Admission, contradiction, dependency surfaces |
 | `verification/` | High | Formal or deterministic validation surfaces |
+| `ops/` | High | Git-Ledger entanglement & KV-Aware routing |
 | `routes/` | High | External API contract |
 | `cli/` | Medium | Thin wrappers only |
-| `daemon/` | Medium | Background process state and scheduling |
+| `daemon/` | Medium | Core Daemons: Chaos (Immunity), Maxwell (Exergy) |
 | `llm/` | Medium | Provider routing, caching, hedging, validation |
 
 ## Stack
@@ -59,6 +60,9 @@ agents working inside the repository.
 | **Linting** | Ruff (`E`, `F`, `W`, `I`, `UP`, `B`, `ASYNC` — line length 100). Enforces non-blocking limits structurally |
 | **Type check** | Pyright (basic mode) |
 | **Testing** | pytest + pytest-asyncio + pytest-cov |
+
+### 🛑 The Python Paradox
+CORTEX is built in Python to maximize **Shipping Velocity** and **Developer Adoption**. We acknowledge the paradox: using a highly mutable, dynamic language to build a trust substrate. Our mitigation is the **Byzantine Boundary**: we use Python as the "glue" for orchestration, but pivot to Rust (via `rustchain-mcp`), SQLite-Vec, and ONNX for the immutable cores. We prioritize **Tamper-Evidence** over language-level safety.
 
 ## Build / Test / Quality
 
@@ -156,10 +160,10 @@ A change is incomplete if it lacks any of:
 All non-trivial writes should be understandable as:
 
 ```text
-proposal → guards → schema/type validation → encryption → ledger/audit → persistence → index/update side effects
+proposal → guards → taint signature → schema/type validation → encryption → ledger/audit → persistence → index/update side effects
 ```
 
-If a proposal fails validation, the write aborts.
+If a proposal fails validation or lacks a valid `CORTEX-TAINT` signature, the write aborts.
 
 ## Epistemic Posture
 
@@ -167,9 +171,12 @@ CORTEX does not assume generative output is knowledge.
 It assumes generative output is a probabilistic proposal that may be useful,
 invalid, partial, or dangerous.
 
-System state may only be mutated after that proposal crosses deterministic
-validation boundaries: guards, typed interfaces, schemas, tests, cryptographic
+System state may only be mutated after that proposal crosses deterministic 
+validation boundaries: guards, typed interfaces, schemas, tests, cryptographic 
 logging, and external verification when required.
+
+### 📜 Audit Trails vs. Authorization
+CORTEX acts as a **Forensic Audit Sidecar** for MCP. We do not seek to be a "Tamper-Proof" shield (which is an architectural illusion against an adversarial OS); we seek to be **Tamper-Evident**. By the time a breach or an model hallucination is detected, the Master Ledger has already committed the "crime" to an immutable hash chain. CORTEX makes the cost of non-compliance (or non-attribution) infinite.
 
 ## Repository Navigation
 
@@ -183,3 +190,21 @@ logging, and external verification when required.
 ## AlphaZero Autodidact Assimilation
 
 - **Ω_SOVEREIGN_LEARNING**: The CORTEX ecosystem incorporates the AlphaZero self-play engine (`alphazero-autodidact-omega`) as a core capability for zero-spread, continuous local reinforcement learning capability, ensuring all derived knowledge is cryptographically verified (C5-Dynamic) without arbitrary external LLM dependency.
+
+## AX-041: Git-Ledger Sovereign Axiom
+
+> "Tu repositorio de Git es tu base de datos inmutable."
+
+CORTEX Persist shifts the ultimate truth of the system to the version control DAG. SQLite acts as an operational view over the true cryptographic ledger formed by Git commits.
+- **No Hidden Entropy:** If it's not tracked in the working tree, it does not exist causally.
+- **Deterministic Time-Travel:** Rollbacks map directly to Git checkouts.
+- **Tamper Evidence:** Git's native tree hashing absorbs the hash-chain validation mechanism at the FS level.
+
+## AX-042: KV-Aware Routing Axiom
+
+> "La recomputación de prefijos idénticos es un crimen contra la exergía."
+
+CORTEX Swarm enforces KV-Aware Routing for all agentic inference. By structuring prompts with fixed bytes at the head and dynamic state at the tail, and routing identical prefixes to state-warmed GPUs, prefill computation is eliminated.
+
+- **Thermodynamic Law (Ω₂):** Time-To-First-Token (TTFT) reduction is a rigid mandate.
+- **Invariant Contexts:** The injection of stochastic metadata into shared system prompts is strictly forbidden. Agentic workloads must be deterministically aligned to exploit global prefix caching.

@@ -9,14 +9,14 @@ ByzantineAuth and PrivacyGate governance.
 from __future__ import annotations
 
 import asyncio
+import asyncio.subprocess
 import logging
-import os
 import shutil
 from pathlib import Path
 from typing import Any
 
 from cortex.engine.auth import ByzantineAuthLayer
-from cortex.engine.bicameral import log_motor
+from cortex.engine.signals import log_motor
 from cortex.utils.result import Err, Ok, Result
 
 logger = logging.getLogger("cortex.engine.actuator")

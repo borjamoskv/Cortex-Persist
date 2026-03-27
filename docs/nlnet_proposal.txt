@@ -1,0 +1,78 @@
+CORTEX-Persist is an open-source cognitive governance layer for autonomous AI agents. It provides cryptographic audit trails, epistemic containment, and formal trust boundaries for AI systems that use external tools (via the Model Context Protocol, MCP).
+
+The problem: As AI agents (Claude, GPT, Gemini) gain the ability to autonomously read files, execute code, browse the web, and modify databases via MCP, there is no standardized mechanism for:
+
+Non-repudiable attribution: knowing which agent did what, when, and why
+Tamper-evident decision logging: ensuring that AI-generated decisions cannot be silently altered after the fact
+Epistemic containment: preventing generative hallucinations from contaminating persistent state
+What CORTEX does: Every tool call an AI agent makes is shadowed by an immutable, SHA-256 hash-chained ledger entry. This is not authorization — it is forensic auditability. CORTEX makes the cost of unattributed AI action structurally infinite.
+
+Expected outcomes:
+
+A production-ready MCP compliance sidecar that any AI agent can adopt
+A formal trust boundary specification for stochastic-to-deterministic state transitions
+EU AI Act Article 12 (record-keeping for high-risk AI) reference implementation
+Published research on cryptographic governance of non-deterministic AI systems
+Stack: Python 3.10+, SQLite + sqlite-vec, ONNX Runtime, FastAPI, SHA-256 hash chains. All code Apache-2.0 on GitHub.
+
+2. Prior Involvement
+The applicant (Borja Fernández-Angulo, Spain) is the sole architect and maintainer of CORTEX-Persist. The project has been in active development since 2024, with:
+
+45+ modules across core engine, memory, ledger, guards, compliance, CLI, and API layers
+Full async architecture with tenant-aware persistence
+Integration with Anthropic MCP, Google ADK, and OpenAI Agent SDK
+Active community engagement via GitHub
+Prior to CORTEX, the applicant has contributed to open-source Python tooling and has background in distributed systems architecture.
+
+3. Budget Breakdown (€35,000)
+Milestone	Effort	Cost	Rate
+M1: MCP Compliance Sidecar — formalize the audit trail protocol for MCP tool calls, publish specification	120h	€6,000	€50/h
+M2: Epistemic Guard Framework — implement typed validation boundaries (guards, schemas, taint signatures) for LLM-to-storage transitions	100h	€5,000	€50/h
+M3: EU AI Act Art.12 Reference Implementation — record-keeping module with forensic PDF export, hash chain visualization	100h	€5,000	€50/h
+M4: sqlite-vec Semantic Memory — vector search with causal provenance tracking for agent memory	80h	€4,000	€50/h
+M5: Formal Trust Specification — publish the trust boundary model as a verifiable specification (academic-grade document)	80h	€4,000	€50/h
+M6: Interoperability & Packaging — MCP server packaging, Docker, PyPI, integration tests with Claude/GPT/Gemini agents	80h	€4,000	€50/h
+M7: Security Audit & Hardening — independent code review, fuzz testing of hash chain integrity, adversarial testing	60h	€3,000	€50/h
+M8: Documentation & Community — user guides, architectural docs, FOSDEM/IETF participation, community building	80h	€4,000	€50/h
+Total	700h	€35,000	€50/h
+No other funding sources. The project is currently self-funded.
+
+4. Comparison with Existing Efforts
+Project	Approach	CORTEX Difference
+LangSmith (LangChain)	SaaS tracing for LLM pipelines	Proprietary, vendor lock-in. CORTEX is local-first, open-source, cryptographically verifiable
+Weights & Biases	ML experiment tracking	Not designed for agent tool calls or MCP compliance
+GuardClaw	Ed25519-based agent signing	Requires PKI infrastructure. CORTEX uses zero-config SHA-256, no key management
+OpenTelemetry	Distributed tracing standard	Observability, not tamper-evidence. No hash chains, no epistemic containment
+Helicone	LLM request logging	SaaS-only, no cryptographic guarantees, no EU AI Act alignment
+CORTEX's unique contribution: It is the only open-source project that treats AI agent output as cryptographic conjecture and provides formal verification boundaries. It bridges the gap between AI tooling (MCP) and regulatory compliance (EU AI Act) through local-first, zero-trust forensic auditability.
+
+5. Significant Technical Challenges
+The Genesis Problem: Hash chains must be anchored to an externally verifiable initial state. Without a trusted genesis, the entire chain is self-referential. CORTEX solves this via environment-configurable anchors (CORTEX_LEDGER_ANCHOR), but a publishable specification for multi-agent genesis consensus is needed.
+
+Stochastic-to-Deterministic Boundary: LLM outputs are probabilistic. Defining the precise interface where generative conjecture crosses into deterministic truth (the "guard boundary") requires formal specification, not just code.
+
+Performance at Scale: SHA-256 hash chains add ~18ms per write. For high-throughput agent swarms (100+ concurrent agents), batch verification and Merkle tree summarization are needed without breaking chain continuity.
+
+Cross-Agent Provenance: When Agent A's output becomes Agent B's input, causal taint must propagate through the DAG. This requires a novel taint-tracking protocol that doesn't exist in current MCP specifications.
+
+6. Ecosystem Engagement
+MCP Community: CORTEX directly extends the Model Context Protocol. We will engage with the MCP specification authors (Anthropic) to propose standardized audit hooks.
+EU AI Act Compliance: Target audience includes European companies deploying AI agents that must satisfy Article 12 record-keeping obligations. We will produce a practical compliance guide.
+FOSDEM / FOSS Events: Present the trust boundary specification at FOSDEM 2027 and relevant IETF/W3C working groups.
+Academic Publication: Submit the formal trust specification to a peer-reviewed venue (e.g., ACM CCS, USENIX Security).
+Packaging & Distribution: PyPI, Docker Hub, Homebrew — zero-friction adoption for any team deploying LLM agents.
+Developer Community: GitHub Discussions, Discord, documentation, and contributor guides to build a sustaining community around AI governance tooling.
+
+7. European Dimension
+Applicant: Based in Spain (EU member state)
+Regulatory Alignment: Direct implementation path for EU AI Act Article 12 compliance
+Digital Sovereignty: Local-first architecture aligns with European data sovereignty principles — no data leaves the user's machine
+Open Standards: All outputs published as Apache-2.0, compatible with European open-source policies
+Infrastructure Independence: CORTEX operates independently of US cloud providers (local SQLite, optional self-hosted cloud via AlloyDB/Redis)
+
+8. Generative AI Disclosure
+This proposal was drafted with assistance from Gemini (Google DeepMind) on 2026-03-25. The AI was used to:
+Research NLNet application requirements and format
+Structure the proposal sections
+Draft initial text which was reviewed and edited by the applicant
+All technical claims and budget figures are the applicant's own. The AI did not generate the project architecture, code, or research direction.

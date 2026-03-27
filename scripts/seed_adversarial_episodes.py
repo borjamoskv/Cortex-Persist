@@ -1,7 +1,8 @@
 import asyncio
 
-from cortex.engine import CortexEngine
 from cortex.extensions.episodic.main import EpisodicMemory
+
+from cortex.engine import CortexEngine
 
 
 async def seed_adversarial_trajectories():

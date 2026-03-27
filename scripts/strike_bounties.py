@@ -49,7 +49,7 @@ async def execute_strike() -> None:
         bounty_svc = BountyService(ledger=ledger, reward_threshold=EXERGY_THRESHOLD)
 
         leads = await bounty_svc.scan_repository(owner=TARGET_OWNER, repo=TARGET_REPO)
-        ranked_leads = bounty_svc.rank_leads(leads)
+        ranked_leads = await bounty_svc.rank_leads(leads)
 
         if not ranked_leads:
             logger.warning("[EXERGY_GATE] Yield negative (No targets above threshold). Tactical abort.")

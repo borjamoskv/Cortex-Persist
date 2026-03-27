@@ -228,9 +228,6 @@ class AutoFixPipeline:
 
     async def _execute(self, task_dict: dict[str, Any]) -> dict[str, Any]:
         """Execute the fix task via Aether in an isolated worktree."""
-        from cortex.extensions.aether.models import AgentTask, TaskStatus
-        from cortex.extensions.aether.queue import TaskQueue
-        from cortex.extensions.aether.runner import AetherAgent
         from cortex.extensions.swarm.worktree_isolation import isolated_worktree
 
         task = AgentTask.from_dict(task_dict)

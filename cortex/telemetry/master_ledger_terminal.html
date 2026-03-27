@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CORTEX PERSIST — Master Ledger Telemetry</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#050507;--bg2:#0B0B0E;--bg3:#111116;--bg4:#17171D;
+  --accent:#2B3BE5;--red:#E53B3B;--amber:#E5B53B;--green:#3BE564;--cyan:#3BD4E5;
+  --text:#C8C8D0;--muted:#555560;--dim:#2A2A35;
+  --font:'JetBrains Mono',monospace;
+  --border:#1A1A22;
+}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--font);}
+
+/* === LAYOUT === */
+.shell{display:grid;grid-template-rows:48px 1fr 32px;grid-template-columns:280px 1fr 320px;height:100vh;}
+.header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:var(--bg2);border-bottom:1px solid var(--border);}
+.sidebar{grid-row:2;grid-column:1;background:var(--bg2);border-right:1px solid var(--border);overflow-y:auto;padding:12px 0;}
+.main{grid-row:2;grid-column:2;overflow-y:auto;padding:16px;}
+.inspector{grid-row:2;grid-column:3;background:var(--bg2);border-left:1px solid var(--border);overflow-y:auto;padding:14px;}
+.footer{grid-column:1/-1;display:flex;align-items:center;padding:0 20px;background:var(--bg2);border-top:1px solid var(--border);font-size:10px;color:var(--muted);}
+
+/* === HEADER === */
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-mark{width:24px;height:24px;border-radius:4px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;}
+.logo-text{font-size:12px;font-weight:600;color:#fff;letter-spacing:0.04em;}
+.logo-sub{font-size:9px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-left:8px;}
+.header-stats{display:flex;gap:24px;}
+.hstat{text-align:right;}
+.hstat-label{font-size:8px;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;}
+.hstat-value{font-size:16px;font-weight:700;line-height:1.1;}
+.hstat-value.ok{color:var(--green);}
+.hstat-value.warn{color:var(--amber);}
+.hstat-value.crit{color:var(--red);}
+
+/* === SIDEBAR === */
+.sb-section{padding:8px 16px;margin-bottom:4px;}
+.sb-title{font-size:8px;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:6px;}
+.sb-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:6px 12px;margin:1px 0;border-radius:4px;cursor:pointer;
+  transition:background 0.15s;font-size:11px;
+}
+.sb-item:hover{background:var(--bg3);}
+.sb-item.active{background:var(--bg4);color:#fff;}
+.sb-dot{width:6px;height:6px;border-radius:50%;margin-right:8px;flex-shrink:0;}
+.sb-item-left{display:flex;align-items:center;}
+.sb-count{font-size:9px;color:var(--dim);font-weight:600;}
+
+/* === MAIN CONTENT === */
+.panel{background:var(--bg2);border:1px solid var(--border);border-radius:6px;margin-bottom:12px;overflow:hidden;}
+.panel-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border);}
+.panel-title{font-size:10px;font-weight:600;color:#fff;letter-spacing:0.04em;}
+.panel-badge{font-size:8px;padding:2px 8px;border-radius:3px;font-weight:600;}
+.badge-live{background:rgba(229,59,59,0.15);color:var(--red);border:1px solid rgba(229,59,59,0.3);}
+.badge-ok{background:rgba(59,229,100,0.1);color:var(--green);border:1px solid rgba(59,229,100,0.2);}
+
+/* === INTERCEPTION LOG === */
+.log-table{width:100%;border-collapse:collapse;}
+.log-table th{
+  font-size:8px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;
+  text-align:left;padding:6px 10px;border-bottom:1px solid var(--border);font-weight:500;
+}
+.log-table td{font-size:10px;padding:5px 10px;border-bottom:1px solid #0E0E12;vertical-align:middle;}
+.log-table tr:hover{background:rgba(43,59,229,0.04);}
+.verdict-pass{color:var(--green);}
+.verdict-quarantine{color:var(--red);}
+.verdict-shadow{color:var(--amber);}
+.hash{color:var(--cyan);opacity:0.6;}
+.agent-tag{color:var(--accent);font-weight:500;}
+.ts{color:var(--dim);font-size:9px;}
+
+/* === QUARANTINE PANEL === */
+.q-card{
+  padding:10px 14px;border-bottom:1px solid var(--border);
+  cursor:pointer;transition:background 0.15s;
+}
+.q-card:hover{background:var(--bg3);}
+.q-id{font-size:10px;color:var(--red);font-weight:600;}
+.q-agent{font-size:9px;color:var(--muted);margin-top:2px;}
+.q-violations{font-size:9px;color:var(--amber);margin-top:3px;}
+
+/* === METRICS GRID === */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;}
+.metric-card{
+  background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:12px 14px;
+}
+.metric-label{font-size:8px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;}
+.metric-value{font-size:22px;font-weight:700;line-height:1;}
+.metric-delta{font-size:9px;margin-top:2px;}
+.delta-up{color:var(--red);}
+.delta-down{color:var(--green);}
+
+/* === INSPECTOR === */
+.insp-title{font-size:10px;font-weight:600;color:#fff;margin-bottom:10px;letter-spacing:0.04em;}
+.insp-section{margin-bottom:14px;}
+.insp-label{font-size:8px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;}
+.insp-value{font-size:11px;color:var(--text);word-break:break-all;}
+.insp-code{
+  background:var(--bg);padding:8px 10px;border-radius:4px;font-size:9px;
+  color:var(--cyan);overflow-x:auto;white-space:pre;line-height:1.5;
+  border:1px solid var(--border);margin-top:4px;max-height:180px;overflow-y:auto;
+}
+.insp-violation{
+  display:flex;align-items:flex-start;gap:6px;padding:4px 0;font-size:9px;color:var(--amber);
+}
+.insp-violation::before{content:"▸";color:var(--red);flex-shrink:0;margin-top:1px;}
+
+/* === PROOF OF POISON === */
+.pop-banner{
+  background:linear-gradient(135deg, rgba(229,59,59,0.08), rgba(229,181,59,0.05));
+  border:1px solid rgba(229,59,59,0.2);border-radius:6px;padding:16px;margin-bottom:12px;
+}
+.pop-title{font-size:11px;font-weight:700;color:var(--red);margin-bottom:6px;letter-spacing:0.06em;}
+.pop-stat{display:flex;justify-content:space-between;font-size:10px;padding:2px 0;}
+.pop-stat-label{color:var(--muted);}
+.pop-stat-value{font-weight:600;}
+
+/* === SPARKLINE === */
+.sparkline{display:flex;align-items:flex-end;gap:1px;height:24px;margin-top:6px;}
+.spark-bar{
+  width:3px;background:var(--accent);border-radius:1px;
+  transition:height 0.3s;
+}
+.spark-bar.hot{background:var(--red);}
+
+/* === FOOTER === */
+.footer-left{flex:1;}
+.footer-dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:6px;}
+.footer-dot.live{background:var(--green);animation:blink 2s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
+
+/* === SCROLLBAR === */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--dim);border-radius:2px;}
+</style>
+</head>
+<body>
+<div class="shell">
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo">
+      <div class="logo-mark">C</div>
+      <span class="logo-text">CORTEX PERSIST</span>
+      <span class="logo-sub">Master Ledger Telemetry</span>
+    </div>
+    <div class="header-stats">
+      <div class="hstat">
+        <div class="hstat-label">Interceptions</div>
+        <div class="hstat-value ok" id="h-total">0</div>
+      </div>
+      <div class="hstat">
+        <div class="hstat-label">Rejected</div>
+        <div class="hstat-value crit" id="h-rejected">0</div>
+      </div>
+      <div class="hstat">
+        <div class="hstat-label">Rejection Rate</div>
+        <div class="hstat-value warn" id="h-rate">0%</div>
+      </div>
+      <div class="hstat">
+        <div class="hstat-label">Quarantined</div>
+        <div class="hstat-value crit" id="h-quarantined">0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sb-section">
+      <div class="sb-title">Agents</div>
+      <div id="agent-list"></div>
+    </div>
+    <div class="sb-section">
+      <div class="sb-title">Tools</div>
+      <div id="tool-list"></div>
+    </div>
+    <div class="sb-section">
+      <div class="sb-title">Violation Types</div>
+      <div id="violation-list"></div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <!-- Metrics -->
+    <div class="metrics">
+      <div class="metric-card">
+        <div class="metric-label">Total Calls (24h)</div>
+        <div class="metric-value" id="m-calls" style="color:var(--accent)">0</div>
+        <div class="sparkline" id="spark-calls"></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Silent Failures Caught</div>
+        <div class="metric-value" id="m-failures" style="color:var(--red)">0</div>
+        <div class="sparkline" id="spark-failures"></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">AST Injections Blocked</div>
+        <div class="metric-value" id="m-injections" style="color:var(--amber)">0</div>
+        <div class="metric-delta delta-down" id="m-inj-delta"></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Ledger Chain Integrity</div>
+        <div class="metric-value" style="color:var(--green)">100%</div>
+        <div class="metric-delta delta-down">↓ 0 chain breaks</div>
+      </div>
+    </div>
+
+    <!-- Proof of Poison Banner -->
+    <div class="pop-banner">
+      <div class="pop-title">⚡ PROOF OF POISON — Shadow Run Active</div>
+      <div class="pop-stat"><span class="pop-stat-label">Observation window</span><span class="pop-stat-value" id="pop-window">0h 0m</span></div>
+      <div class="pop-stat"><span class="pop-stat-label">Silent failures detected</span><span class="pop-stat-value" id="pop-failures" style="color:var(--red)">0</span></div>
+      <div class="pop-stat"><span class="pop-stat-label">Chain hash</span><span class="pop-stat-value hash" id="pop-hash">—</span></div>
+    </div>
+
+    <!-- Interception Log -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Interception Log</span>
+        <span class="panel-badge badge-live">● LIVE</span>
+      </div>
+      <table class="log-table">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Verdict</th>
+            <th>Agent</th>
+            <th>Tool</th>
+            <th>Hash</th>
+            <th>Violations</th>
+          </tr>
+        </thead>
+        <tbody id="log-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- INSPECTOR -->
+  <div class="inspector">
+    <div class="insp-title">Entry Inspector</div>
+    <div id="inspector-content">
+      <div style="color:var(--dim);font-size:10px;padding:20px 0;text-align:center;">
+        Click a log entry to inspect payload, violations, and constraint feedback.
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-left">
+      <span class="footer-dot live"></span>
+      <span>CORTEX AST Gateway — Shadow Mode Active</span>
+    </div>
+    <div>
+      <span style="color:var(--dim);">v0.3.1-b1 · ACID Compliant · </span>
+      <span id="footer-time" style="color:var(--muted);">—</span>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── SIMULATION ENGINE ──────────────────────────────────────────────────────
+const AGENTS = ['swarm-α','swarm-β','swarm-γ','swarm-δ','crew-λ','crew-μ','auto-ξ','auto-π'];
+const TOOLS = ['db_write','api_call','file_mutate','email_send','code_exec','query_engine','webhook','state_merge'];
+const VIOLATION_TYPES = [
+  'Missing required field','Type violation','Length violation',
+  'Undeclared fields','Dangerous call detected','Restricted import',
+  'No schema registered','Dangerous attr access','Value violation'
+];
+
+let entries = [];
+let totalCalls = 0, totalRejected = 0, totalInjections = 0;
+let sparkCalls = Array(30).fill(0), sparkFailures = Array(30).fill(0);
+let selectedEntry = null;
+let startTime = Date.now();
+
+function rnd(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function rndHash(){ return [...Array(12)].map(()=>Math.floor(Math.random()*16).toString(16)).join(''); }
+
+function generateEntry(){
+  const isFailure = Math.random() < 0.18;
+  const isInjection = isFailure && Math.random() < 0.25;
+  const agent = rnd(AGENTS);
+  const tool = rnd(TOOLS);
+  const violations = [];
+
+  if(isFailure){
+    const nv = 1 + Math.floor(Math.random()*3);
+    for(let i=0;i<nv;i++) violations.push(rnd(VIOLATION_TYPES) + `: '${rnd(['name','payload','target','code','source'])}' at line ${1+Math.floor(Math.random()*50)}`);
+    if(isInjection) violations.push(`Dangerous call detected: eval() at line ${1+Math.floor(Math.random()*20)}`);
+  }
+
+  totalCalls++;
+  if(isFailure) totalRejected++;
+  if(isInjection) totalInjections++;
+
+  const entry = {
+    ts: new Date(),
+    verdict: isFailure ? 'QUARANTINE' : 'PASS',
+    agent, tool,
+    hash: rndHash(),
+    violations,
+    payload: {
+      [rnd(['query','content','data'])]: isFailure ? `${rnd(['eval(','exec(','__import__('])}...malformed)` : `{ "action": "${tool}", "target": "prod-${Math.floor(Math.random()*100)}" }`,
+      schema_version: '2.1',
+      timestamp: Date.now(),
+    },
+    quarantine_id: isFailure ? `Q-${rndHash().slice(0,8)}` : null,
+    constraint_feedback: isFailure ? {
+      error: 'CORTEX_AST_INTERCEPTION',
+      tool, violation_count: violations.length,
+      instruction: 'Fix listed violations and retry. DO NOT bypass schema constraints.',
+      retry_allowed: true, max_retries: 3,
+    } : null,
+  };
+
+  entries.unshift(entry);
+  if(entries.length > 200) entries.pop();
+  return entry;
+}
+
+// ─── RENDER ──────────────────────────────────────────────────────────────────
+
+function renderLog(){
+  const body = document.getElementById('log-body');
+  body.innerHTML = entries.slice(0,40).map((e,i) => `
+    <tr onclick="inspectEntry(${i})" style="cursor:pointer">
+      <td class="ts">${e.ts.toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}</td>
+      <td class="${e.verdict==='PASS'?'verdict-pass':'verdict-quarantine'}">${e.verdict}</td>
+      <td class="agent-tag">${e.agent}</td>
+      <td>${e.tool}</td>
+      <td class="hash">${e.hash}</td>
+      <td style="color:${e.violations.length?'var(--red)':'var(--dim)'}">${e.violations.length||'—'}</td>
+    </tr>
+  `).join('');
+}
+
+function renderHeader(){
+  document.getElementById('h-total').textContent = totalCalls.toLocaleString();
+  document.getElementById('h-rejected').textContent = totalRejected.toLocaleString();
+  document.getElementById('h-rate').textContent = totalCalls>0 ? (totalRejected/totalCalls*100).toFixed(1)+'%' : '0%';
+  document.getElementById('h-quarantined').textContent = entries.filter(e=>e.verdict==='QUARANTINE').length;
+}
+
+function renderMetrics(){
+  document.getElementById('m-calls').textContent = totalCalls.toLocaleString();
+  document.getElementById('m-failures').textContent = totalRejected.toLocaleString();
+  document.getElementById('m-injections').textContent = totalInjections.toLocaleString();
+
+  const elapsed = (Date.now()-startTime)/3600000;
+  document.getElementById('pop-window').textContent = `${Math.floor(elapsed)}h ${Math.floor((elapsed%1)*60)}m`;
+  document.getElementById('pop-failures').textContent = totalRejected;
+  document.getElementById('pop-hash').textContent = rndHash()+rndHash();
+}
+
+function renderSparklines(){
+  ['spark-calls','spark-failures'].forEach((id,idx) => {
+    const data = idx===0 ? sparkCalls : sparkFailures;
+    const max = Math.max(...data, 1);
+    document.getElementById(id).innerHTML = data.map(v =>
+      `<div class="spark-bar${v>max*0.7?' hot':''}" style="height:${(v/max)*100}%"></div>`
+    ).join('');
+  });
+}
+
+function renderSidebar(){
+  const agentCounts = {}, toolCounts = {}, violCounts = {};
+  entries.forEach(e => {
+    agentCounts[e.agent] = (agentCounts[e.agent]||0)+1;
+    toolCounts[e.tool] = (toolCounts[e.tool]||0)+1;
+    e.violations.forEach(v => {
+      const cat = v.split(':')[0].trim();
+      violCounts[cat] = (violCounts[cat]||0)+1;
+    });
+  });
+
+  const renderList = (id, counts, color) => {
+    document.getElementById(id).innerHTML = Object.entries(counts)
+      .sort((a,b)=>b[1]-a[1]).slice(0,8)
+      .map(([name,count]) => `
+        <div class="sb-item"><div class="sb-item-left"><div class="sb-dot" style="background:${color}"></div>${name}</div><span class="sb-count">${count}</span></div>
+      `).join('');
+  };
+
+  renderList('agent-list', agentCounts, 'var(--accent)');
+  renderList('tool-list', toolCounts, 'var(--cyan)');
+  renderList('violation-list', violCounts, 'var(--red)');
+}
+
+function inspectEntry(idx){
+  const e = entries[idx];
+  if(!e) return;
+  const ic = document.getElementById('inspector-content');
+  ic.innerHTML = `
+    <div class="insp-section">
+      <div class="insp-label">Verdict</div>
+      <div class="insp-value ${e.verdict==='PASS'?'verdict-pass':'verdict-quarantine'}" style="font-weight:700;font-size:13px;">${e.verdict}</div>
+    </div>
+    <div class="insp-section">
+      <div class="insp-label">Agent</div>
+      <div class="insp-value agent-tag">${e.agent}</div>
+    </div>
+    <div class="insp-section">
+      <div class="insp-label">Tool</div>
+      <div class="insp-value">${e.tool}</div>
+    </div>
+    <div class="insp-section">
+      <div class="insp-label">Payload Hash</div>
+      <div class="insp-value hash">${e.hash}</div>
+    </div>
+    ${e.quarantine_id ? `
+    <div class="insp-section">
+      <div class="insp-label">Quarantine ID</div>
+      <div class="insp-value" style="color:var(--red);font-weight:600;">${e.quarantine_id}</div>
+    </div>` : ''}
+    <div class="insp-section">
+      <div class="insp-label">Raw Payload</div>
+      <div class="insp-code">${JSON.stringify(e.payload, null, 2)}</div>
+    </div>
+    ${e.violations.length ? `
+    <div class="insp-section">
+      <div class="insp-label">Violations (${e.violations.length})</div>
+      ${e.violations.map(v => `<div class="insp-violation">${v}</div>`).join('')}
+    </div>` : ''}
+    ${e.constraint_feedback ? `
+    <div class="insp-section">
+      <div class="insp-label">Constraint Feedback</div>
+      <div class="insp-code">${JSON.stringify(e.constraint_feedback, null, 2)}</div>
+    </div>` : ''}
+  `;
+}
+
+// ─── TICK ────────────────────────────────────────────────────────────────────
+let tickCount = 0;
+function tick(){
+  const e = generateEntry();
+  renderLog();
+  renderHeader();
+
+  tickCount++;
+  if(tickCount % 3 === 0){
+    sparkCalls.push(1+Math.floor(Math.random()*5));
+    sparkCalls.shift();
+    sparkFailures.push(Math.random()<0.2 ? 1+Math.floor(Math.random()*2) : 0);
+    sparkFailures.shift();
+    renderSparklines();
+  }
+  if(tickCount % 5 === 0) renderSidebar();
+  if(tickCount % 2 === 0) renderMetrics();
+}
+
+// Footer clock
+setInterval(()=>{
+  document.getElementById('footer-time').textContent = new Date().toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}, 1000);
+
+// Start simulation
+setInterval(tick, 800 + Math.random()*400);
+// Initial burst
+for(let i=0;i<15;i++) generateEntry();
+renderLog(); renderHeader(); renderMetrics(); renderSidebar(); renderSparklines();
+</script>
+</body>
+</html>

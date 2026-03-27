@@ -7,7 +7,7 @@ Quantifies agent sovereignty and system evolution metrics.
 import logging
 import math
 
-from cortex.engine.endocrine import ENDOCRINE, HormoneType
+from cortex.engine.gradient import GRADIENT, GradientType
 
 logger = logging.getLogger("cortex.cli.aix")
 
@@ -17,8 +17,8 @@ async def calculate_aix(conn) -> dict:
     Calculates the Apotheosis Index.
     Formula: AIx = (Neural_Growth / Cortisol) * log10(Verified_Facts + 1) * Efficiency
     """
-    growth = ENDOCRINE.get_level(HormoneType.NEURAL_GROWTH)
-    stress = ENDOCRINE.get_level(HormoneType.CORTISOL) or 0.01  # Avoid div zero
+    growth = GRADIENT.get_level(GradientType.NEURAL_GROWTH)
+    stress = GRADIENT.get_level(GradientType.CORTISOL) or 0.01  # Avoid div zero
 
     # Biological Ratio
     bio_ratio = growth / stress

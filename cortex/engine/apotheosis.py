@@ -35,12 +35,13 @@ else:
             pass
 
 
+from cortex.database.soul_store import SoulStore
 from cortex.engine.apotheosis_audits_mixin import ApotheosisAuditsMixin
 from cortex.engine.cognitive import scan_file_entropy
-from cortex.engine.endocrine import ENDOCRINE, HormoneType
+from cortex.engine.gradient import GRADIENT, GradientType
 from cortex.engine.manifestation import transfigure_ui
+from cortex.engine.phase_shift import REMCoordinator
 from cortex.engine.reflex import trigger_autonomic_reflex
-from cortex.engine.rem_cycle import REMCoordinator
 from cortex.extensions.immune.membrane import ImmuneMembrane, Verdict
 from cortex.extensions.signals.bus import SignalBus
 from cortex.guards.exergy_guard import ExergyGuard
@@ -112,6 +113,7 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
         self._file_event_queue: asyncio.Queue[Path] | None = None
         self._observer: Any = None
         self._alma: AlmaIdentity | None = None
+        self._soul_store: SoulStore | None = None
 
         alma_path = self.workspace / "alma.json"
         if alma_path.exists():
@@ -133,8 +135,9 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
                     if isinstance(sync_conn, sqlite3.Connection):
                         self._signal_bus = SignalBus(sync_conn)
                         self._signal_bus.ensure_table()
+                    self._soul_store = SoulStore(db)
                 except (sqlite3.OperationalError, OSError, AttributeError) as err:
-                    logger.debug("[APOTHEOSIS] SignalBus init skipped: %s", err)
+                    logger.debug("[APOTHEOSIS] SignalBus/SoulStore init skipped: %s", err)
 
     def _spawn_reflex(self, coro: Any) -> asyncio.Task[Any]:
         """Create a background reflex task with auto-cleanup."""
@@ -157,10 +160,10 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
         while self.is_active:
             cycle_count += 1
             await self._policy_pulse()
-            cortisol = ENDOCRINE.get_level(HormoneType.CORTISOL)
-            growth = ENDOCRINE.get_level(HormoneType.NEURAL_GROWTH)
-            adrenaline = ENDOCRINE.get_level(HormoneType.ADRENALINE)
-            dopamine = ENDOCRINE.get_level(HormoneType.DOPAMINE)
+            cortisol = GRADIENT.get_level(GradientType.CORTISOL)
+            growth = GRADIENT.get_level(GradientType.NEURAL_GROWTH)
+            adrenaline = GRADIENT.get_level(GradientType.ADRENALINE)
+            dopamine = GRADIENT.get_level(GradientType.DOPAMINE)
 
             await self._check_singularity_state(dopamine, growth)
 
@@ -195,6 +198,7 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
 
             if cycle_count % 10 == 0:
                 self._spawn_reflex(self._alma_reattunement())
+                self._spawn_reflex(self._persist_soul_state())
 
             duration = self._calc_duration(derived_sleep, adrenaline, _random)
 
@@ -302,7 +306,7 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
                             await self._heal_file_or_prune(py_file, entropy)
 
             # Autopoietic Transfiguration
-            growth = ENDOCRINE.get_level(HormoneType.NEURAL_GROWTH)
+            growth = GRADIENT.get_level(GradientType.NEURAL_GROWTH)
             if growth > 0.7:
                 for html_file in self.workspace.rglob("index.html"):
                     if await transfigure_ui(html_file, self._signal_bus):
@@ -311,7 +315,7 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
         except (OSError, asyncio.CancelledError, RuntimeError) as e:
             logger.error("[APOTHEOSIS] Workspace scan failure: %s", e)
             self._thermo_counters.consecutive_tool_fails_without_new_hypothesis += 1
-            ENDOCRINE.pulse(HormoneType.ADRENALINE, 0.4)
+            GRADIENT.pulse(GradientType.ADRENALINE, 0.4)
 
         if not entropy_found:
             self._thermo_counters.file_reads_without_ast_delta += 1
@@ -322,7 +326,7 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
 
     async def _heal_file_or_prune(self, py_file: Path, entropy: list[dict]) -> None:
         """Autonomic healing for high-entropy nodes (Ω₅)."""
-        adrenaline = ENDOCRINE.get_level(HormoneType.ADRENALINE)
+        adrenaline = GRADIENT.get_level(GradientType.ADRENALINE)
         is_adrenal_bypass = adrenaline > 0.8
 
         if not is_adrenal_bypass:
@@ -354,7 +358,7 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
                 )
                 try:
                     await keter.ignite(intent, is_adrenal_bypass=is_adrenal_bypass)
-                    ENDOCRINE.pulse(HormoneType.DOPAMINE, 0.1)
+                    GRADIENT.pulse(GradientType.DOPAMINE, 0.1)
                 except (RuntimeError, AttributeError, OSError) as e:
                     logger.error("[APOTHEOSIS] Pruning failed for %s: %s", node_name, e)
         else:
@@ -387,13 +391,13 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
                 await keter.ignite(intent, is_adrenal_bypass=is_adrenal_bypass)
             except SyntaxError:
                 logger.error("[APOTHEOSIS] AST Breach: %s. Skipping healing.", py_file.name)
-                ENDOCRINE.pulse(HormoneType.ADRENALINE, 0.2, reason="AST Breach detected")
+                GRADIENT.pulse(GradientType.ADRENALINE, 0.2, reason="AST Breach detected")
             except (OSError, ValueError, asyncio.CancelledError) as e:
                 logger.error("[APOTHEOSIS] Healing failed for %s: %s", py_file.name, e)
 
     def _apply_cognitive_dampening(self) -> bool:
         """Check if action value justifies the thermodynamic cost (Ω₂)."""
-        if ENDOCRINE.get_level(HormoneType.ADRENALINE) > 0.75:
+        if GRADIENT.get_level(GradientType.ADRENALINE) > 0.75:
             logger.warning("⚡ [APOTHEOSIS] Adrenal Override active. Bypassing dampening.")
             return True
         return self._cognitive_weight >= self._inertia_threshold
@@ -407,14 +411,13 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
 
         # Mount Event Horizon Watcher
         self._file_event_queue = asyncio.Queue()
-        if self._file_event_queue is not None:
-             event_handler = _WorkspaceEventHandler(_loop, self._file_event_queue)
+        event_handler = _WorkspaceEventHandler(_loop, self._file_event_queue)
 
-             if _HAS_WATCHDOG:
-                 self._observer = Observer()
-                 if self._observer:
-                     self._observer.schedule(event_handler, str(self.workspace), recursive=True)
-                     self._observer.start()
+        if _HAS_WATCHDOG:
+            self._observer = Observer()
+            if self._observer:
+                self._observer.schedule(event_handler, str(self.workspace), recursive=True)
+                self._observer.start()
 
         _loop.create_task(self._omniscience_loop())
         logger.info("[APOTHEOSIS-Ω] Latencia Negativa (Ω₇) — OS Hooks Mounted.")
@@ -436,6 +439,9 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
                 try:
                     self._alma = AlmaIdentity(alma_path, None)
                     logger.info("[APOTHEOSIS] Memoria-Alma engaged.")
+                    if self._soul_store:
+                        # Attempt to restore missing public key from ledger if corrupt
+                        await self._soul_store.sync_with_alma(self._alma)
                 except Exception as e:
                     logger.error("[APOTHEOSIS] Alma-Reattunement failed: %s", e)
             return
@@ -444,8 +450,22 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
             # Re-verify by reloading (if key is set, raises SoulCorruptionError on tamper)
             # As this is a sync method under the hood doing small file read, to_thread is safer.
             await asyncio.to_thread(self._alma._load_and_verify)
-            logger.info("[APOTHEOSIS] Alma-Reattunement complete. Invariants centered.")
+            logger.debug("[APOTHEOSIS] Alma-Reattunement complete. Invariants centered.")
         except Exception as e:
             logger.critical("🚫 [IMMUNE] E_SOUL_CORRUPTION during reattunement: %s", e)
-            ENDOCRINE.pulse(HormoneType.CORTISOL, 0.9, reason="Alma Corruption")
-            ENDOCRINE.pulse(HormoneType.ADRENALINE, 0.9, reason="Alma Corruption")
+            GRADIENT.pulse(GradientType.CORTISOL, 0.9, reason="Alma Corruption")
+            GRADIENT.pulse(GradientType.ADRENALINE, 0.9, reason="Alma Corruption")
+            if self._soul_store:
+                # Emergency Restore from Ledger
+                await self._soul_store.sync_with_alma(self._alma)
+
+    async def _persist_soul_state(self) -> None:
+        """(Ω₄) Soul Pulse: Sync identity invariants with the immutable Ledger."""
+        if not self._alma or not self._soul_store:
+            return
+
+        try:
+            await self._soul_store.sync_with_alma(self._alma)
+            logger.debug("[APOTHEOSIS] Soul Pulse: Identity persisted to Ledger.")
+        except Exception as e:
+            logger.error("[APOTHEOSIS] Soul Pulse failure: %s", e)

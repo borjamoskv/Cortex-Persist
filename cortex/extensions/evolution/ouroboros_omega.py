@@ -29,7 +29,7 @@ class DiagnosisMatrix:
     used_imports: set[str] = field(default_factory=set)
     dead_interfaces: set[str] = field(default_factory=set)
     blocking_calls: list[str] = field(default_factory=list)
-    entropy_score: float = 0.0
+    exergy_score: float = 0.0
 
 
 class _AstAnalyzer(ast.NodeVisitor):
@@ -241,22 +241,21 @@ class OuroborosOmega:
 
         unused_imports = analyzer.imports - analyzer.used_imports
 
-        # Calculate Entropy
-        entropy = 0.0
+        # Ω₂: Thermodynamic visibility. Exergy = 100 - Penalties.
         loc_penalty = max(0, (analyzer.loc - 500) * 0.05)
         complexity_penalty = sum(max(0, c - 15) for c in analyzer.mccabe.values()) * 2.0
         dead_code_ratio = len(dead_funcs) / max(1, len(analyzer.func_nodes)) * 20.0
         unused_imports_penalty = len(unused_imports) * 2.0
         nesting_penalty = sum(max(0, n - 4) for n in analyzer.nesting.values()) * 3.0
 
-        entropy = min(
-            100.0,
+        exergy_score = 100.0 - (
             loc_penalty
             + complexity_penalty
             + dead_code_ratio
             + unused_imports_penalty
-            + nesting_penalty,
+            + nesting_penalty
         )
+        exergy_score = max(0.0, exergy_score)
 
         detector = _BlockingPatternDetector()
         detector.visit(tree)
@@ -271,7 +270,7 @@ class OuroborosOmega:
             used_imports=analyzer.used_imports,
             dead_interfaces=dead_funcs,
             blocking_calls=detector.blocking_calls,
-            entropy_score=entropy,
+            exergy_score=exergy_score,
         )
 
     async def execute_atomic_cycle(self) -> dict[str, Any]:
@@ -281,7 +280,7 @@ class OuroborosOmega:
         try:
             # 1. ANALYSIS
             base_diagnosis = await self.diagnose()
-            logger.info("Phase 1 [Analysis] Complete. Entropy: %.2f", base_diagnosis.entropy_score)
+            logger.info("Phase 1 [Analysis] Complete. Exergy: %.2f", base_diagnosis.exergy_score)
 
             tree = ast.parse(self.original_source)
 
@@ -316,23 +315,23 @@ class OuroborosOmega:
                 return {"status": "ROLLED_BACK", "reason": str(e)}
 
             new_diagnosis = await self.diagnose(mutated_source)
-            entropy_delta = new_diagnosis.entropy_score - base_diagnosis.entropy_score
+            exergy_delta = new_diagnosis.exergy_score - base_diagnosis.exergy_score
 
-            if entropy_delta > 5.0:
+            if exergy_delta < -5.0:
                 logger.warning(
-                    "Phase 5 [Verification] Entropy increased significantly (+%.2f). APOPTOSIS.",
-                    entropy_delta,
+                    "Phase 5 [Verification] Exergy decreased significantly (%.2f). APOPTOSIS.",
+                    exergy_delta,
                 )
                 return {
                     "status": "ROLLED_BACK",
-                    "reason": f"Entropy regression: {entropy_delta:.2f}",
+                    "reason": f"Exergy regression: {exergy_delta:.2f}",
                 }
 
-            logger.info("Phase 5 [Verification] Complete. Entropy delta: %.2f", entropy_delta)
+            logger.info("Phase 5 [Verification] Complete. Exergy delta: %.2f", exergy_delta)
 
             # COMMIT
             if self.dry_run:
-                return {"status": "DRY_RUN", "delta": entropy_delta, "new_code": mutated_source}
+                return {"status": "DRY_RUN", "delta": exergy_delta, "new_code": mutated_source}
 
             current_hash = hashlib.sha256(self.target_path.read_bytes()).hexdigest()
             if current_hash != self.original_hash:
@@ -343,7 +342,7 @@ class OuroborosOmega:
                 f.write(mutated_source)
 
             logger.info("Ouroboros-Omega cycle SUCCESS for %s", self.target_path.name)
-            return {"status": "SUCCESS", "delta": entropy_delta}
+            return {"status": "SUCCESS", "delta": exergy_delta}
 
         except Exception as e:  # noqa: BLE001 — atomic cycle caught unhandled exception, triggering apoptosis
             logger.exception("Apoptosis: Unhandled exception during cycle.")

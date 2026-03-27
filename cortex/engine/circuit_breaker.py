@@ -43,34 +43,39 @@ class CircuitBreaker:
             pass
 
     State transitions:
-        CLOSED → (N failures) → OPEN
-        OPEN   → (timeout elapsed) → HALF_OPEN
-        HALF_OPEN → (success) → CLOSED
-        HALF_OPEN → (failure) → OPEN
+        CLOSED    → (N failures)       → OPEN
+        OPEN      → (timeout elapsed)  → HALF_OPEN
+        HALF_OPEN → (M successes)      → CLOSED  (M = half_open_success_threshold)
+        HALF_OPEN → (failure)          → OPEN
     """
 
     __slots__ = (
         "_name",
         "_state",
         "_failures",
+        "_successes_in_half_open",
         "_last_failure_time",
         "_threshold",
         "_timeout",
+        "_half_open_success_threshold",
         "_total_trips",
     )
 
     def __init__(
         self,
-        name: str,
+        name: str = "unnamed",
         failure_threshold: int = 5,
         recovery_timeout: float = 30.0,
+        half_open_success_threshold: int = 1,
     ) -> None:
         self._name = name
         self._state = CircuitState.CLOSED
         self._failures = 0
+        self._successes_in_half_open = 0
         self._last_failure_time: float | None = None
         self._threshold = failure_threshold
         self._timeout = recovery_timeout
+        self._half_open_success_threshold = half_open_success_threshold
         self._total_trips = 0
 
     @property
@@ -89,6 +94,14 @@ class CircuitBreaker:
     @property
     def total_trips(self) -> int:
         return self._total_trips
+
+    def can_execute(self) -> bool:
+        """Synchronous check — returns True if circuit allows a call.
+
+        Backward-compatible API matching pulmones.CircuitBreaker.can_execute().
+        Also triggers the OPEN → HALF_OPEN auto-transition.
+        """
+        return self.state in (CircuitState.CLOSED, CircuitState.HALF_OPEN)
 
     async def call(self, func: Callable[..., Awaitable[T]], *args: Any, **kwargs: Any) -> T:
         """Execute func through the circuit breaker.
@@ -111,12 +124,31 @@ class CircuitBreaker:
             self._on_failure()
             raise e
 
+    def record_failure(self) -> None:
+        """Synchronous failure recorder — backward-compat with pulmones API."""
+        self._on_failure()
+
+    def record_success(self) -> None:
+        """Synchronous success recorder — backward-compat with pulmones API."""
+        self._on_success()
+
     def _on_success(self) -> None:
         """Reset failures on success."""
         if self._state == CircuitState.HALF_OPEN:
-            logger.info("Circuit '%s' → CLOSED (recovered)", self._name)
+            self._successes_in_half_open += 1
+            if self._successes_in_half_open >= self._half_open_success_threshold:
+                logger.info(
+                    "Circuit '%s' → CLOSED (recovered after %d probes)",
+                    self._name,
+                    self._successes_in_half_open,
+                )
+                self._state = CircuitState.CLOSED
+                self._failures = 0
+                self._successes_in_half_open = 0
+            return  # Don't reset if haven't hit threshold yet
         self._state = CircuitState.CLOSED
         self._failures = 0
+        self._successes_in_half_open = 0
 
     def _on_failure(self) -> None:
         """Track failure and potentially trip the breaker."""
@@ -151,4 +183,6 @@ class CircuitBreaker:
             "threshold": self._threshold,
             "total_trips": self._total_trips,
             "recovery_timeout": self._timeout,
+            "half_open_success_threshold": self._half_open_success_threshold,
+            "successes_in_half_open": self._successes_in_half_open,
         }

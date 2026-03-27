@@ -48,15 +48,19 @@ async def test_engine_bicameral_integration():
 
     async def mock_slow_callback(*args, **kwargs):
         # FactManager.store(project, content, ...)
-        if "test_fact" in kwargs.get("content", "") or (len(args) > 1 and "test_fact" in args[1]):
+        if "test_fact_long" in kwargs.get("content", "") or (len(args) > 1 and "test_fact_long" in args[1]):
             slow_executed.set()
         return 1
 
-    # Override the registered slow-bus for 'store'
+    async def mock_fast(*args, **kwargs):
+        return "fast_ok"
+
+    # Override the registered buses for 'store'
+    engine.dispatcher.register_fast("store", mock_fast)
     engine.dispatcher._slow_bus["store"] = [mock_slow_callback]
 
     # Use 'content' as required by FactManager.store
-    await engine.store("test_project", content="test_fact")
+    await engine.store("test_project", content="test_fact_long")
 
     # Wait for the background task
     try:

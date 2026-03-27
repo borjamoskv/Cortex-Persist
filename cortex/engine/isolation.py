@@ -9,12 +9,14 @@ Inspired by Devin's Alpha (March 2026).
 from __future__ import annotations
 
 import asyncio
+import asyncio.subprocess
 import logging
+import shutil
 import time
 import uuid
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from dataclasses import dataclass, field, make_dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 from typing import Any, cast
@@ -22,6 +24,15 @@ from typing import Any, cast
 from cortex.utils.result import Err, Ok, Result
 
 logger = logging.getLogger("cortex.engine.isolation")
+
+
+@dataclass
+class ExecutionResult:
+    """Result of a sandboxed Python execution."""
+
+    stdout: str = ""
+    stderr: str = ""
+    exit_code: int | None = None
 
 
 class IsolationLevel(Enum):
@@ -182,8 +193,6 @@ class IsolationManager:
 
             ws = self.workspaces.pop(workspace_id)
             if ws.root and ws.root.exists() and not ws.metadata.get("persistent", False):
-                import shutil
-
                 try:
                     if ws.root.is_dir():
                         shutil.rmtree(str(ws.root))
@@ -194,15 +203,23 @@ class IsolationManager:
             return Ok(True)
 
     @asynccontextmanager
+    async def isolate(
+        self, level: IsolationLevel = IsolationLevel.LOCAL, label: str = "sandbox"
+    ) -> AsyncIterator[ByzantineSandbox]:
+        """Context manager for temporary isolated execution (Ω-Isolation)."""
+        async with self.provision_sandbox(level=level, label=label) as sandbox:
+            yield sandbox
+
+    @asynccontextmanager
     async def provision_sandbox(
         self, level: IsolationLevel = IsolationLevel.LOCAL, label: str = "sandbox"
     ) -> AsyncIterator[ByzantineSandbox]:
         """Context manager for temporary isolated execution."""
         res = await self.create_workspace(level=level, project=label)
         if isinstance(res, Err):
-            raise RuntimeError(f"Could not provision sandbox: {res.err}")
+            raise RuntimeError(f"Could not provision sandbox: {res.error}")
 
-        ws = res.ok
+        ws = res.value
         sandbox = ByzantineSandbox(self, ws.id)
         try:
             yield sandbox
@@ -213,29 +230,50 @@ class IsolationManager:
 class ByzantineSandbox:
     """Handle for an active isolated environment (Ω-Sandbox)."""
 
-    def __init__(self, manager: IsolationManager, workspace_id: str):
+    def __init__(self, manager: IsolationManager, workspace_id: str | None = None):
         self.manager = manager
-        self.workspace_id = workspace_id
+        self.workspace_id = workspace_id or "default"
 
-    async def write_file(self, filename: str, content: str) -> bool:
-        """Write content to a file inside the sandbox."""
-        ws = self.manager.workspaces.get(self.workspace_id)
-        if not ws or not ws.root:
-            return False
+    @property
+    def id(self) -> str:
+        """Alias for workspace_id to match test expectations."""
+        return self.workspace_id
 
-        path = ws.root / filename
-        try:
-            path.write_text(content)
-            return True
-        except OSError:
-            return False
+    async def execute(
+        self, command: str, args: list[str], timeout: float = 30.0
+    ) -> Result[dict[str, Any], str]:
+        """Execute a command within the sandbox boundary."""
+        # If no explicit workspace, provision a temporary one
+        if self.workspace_id == "default" and "default" not in self.manager.workspaces:
+            async with self.manager.isolate() as sandbox:
+                return await self.manager.execute(sandbox.workspace_id, command, args, timeout)
+
+        return await self.manager.execute(self.workspace_id, command, args, timeout)
 
     async def execute_python(self, script_name: str, args: list[str] | None = None) -> Any:
         """Run a python script within the sandbox."""
         _args = ["python3", script_name] + (args or [])
         res = await self.manager.execute(self.workspace_id, _args[0], _args[1:])
         if isinstance(res, Ok):
-            res_dict = cast(dict[str, Any], res.ok)
-            ExecutionResult = make_dataclass("ExecutionResult", ["stdout", "stderr", "exit_code"])
+            res_dict = cast(dict[str, Any], res.value)
             return ExecutionResult(**res_dict)
         return None
+
+    async def write_file(self, filename: str, content: str) -> bool:
+        """Write a file to the sandbox root."""
+        ws = self.manager.workspaces.get(self.workspace_id)
+        if not ws or not ws.root:
+            raise RuntimeError(f"Workspace {self.workspace_id} has no root")
+
+        file_path = Path(ws.root) / filename
+        await asyncio.to_thread(file_path.write_text, content, encoding="utf-8")
+        return True
+
+    async def read_file(self, filename: str) -> str:
+        """Read a file from the sandbox root."""
+        ws = self.manager.workspaces.get(self.workspace_id)
+        if not ws or not ws.root:
+            raise RuntimeError(f"Workspace {self.workspace_id} has no root")
+
+        file_path = Path(ws.root) / filename
+        return await asyncio.to_thread(file_path.read_text, encoding="utf-8")

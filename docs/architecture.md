@@ -11,6 +11,9 @@ CORTEX is a **trust infrastructure engine** that provides cryptographic verifica
 
 To enforce this, it combines a relational database with vector embeddings, hash-chained transactions, Merkle tree integrity, multi-agent consensus, and privacy protection — running locally on SQLite or scaling to AlloyDB + Qdrant + Redis for enterprise deployments.
 
+### 🌑 The Genesis Path
+Every project in CORTEX begins at `TX #0: GENESIS`. This is not a technical necessity (the system could start at any hash); it is a **conscious existentialist choice**. By grounding the identity of a swarm in a fixed, non-repudiable origin, we force agents to acknowledge their history as a singular, unbroken arc. There is no "reset" in the Industrial Noir — only the accumulation of fact or the slow erosion into ghost-state.
+
 ```mermaid
 graph TB
     subgraph Interfaces
@@ -103,6 +106,12 @@ Every piece of knowledge is a **Fact**. Facts are immutable records with tempora
 | `tx_id` | INTEGER | FK to creating transaction |
 | `tenant_id` | TEXT | Multi-tenant scope |
 
+### 🐟 Bacalao Architecture (The Salt-Gate)
+Memory in CORTEX follows the **Bacalao (Salted Cod)** duality:
+1.  **Immutability (The Salt)**: The L3 Episodic Ledger stores facts in a dry, highly concentrated, and cryptographically signed state. This is the "Product" — the non-negotiable history.
+2.  **Rehydration (The Agent)**: Utility is only achieved when a Sovereign Agent "rehydrates" these dry facts into mutable, actionable context.
+3.  **The Industrial Grade**: CORTEX automates the validation of this rehydration. If an agent tries to rehydrate a fact into a shape that contradicts the Ledger's "salt" (the hash), the **Byzantine Swarm** rejects the proposal.
+
 ### Temporal Queries
 
 Every fact has a temporal window (`valid_from` → `valid_until`):
@@ -153,7 +162,28 @@ Los pilares fundamentales:
 - **TESSERACT-Ω**: Convergencia sincrónica de ciclos de vida.
 - **APOTHEOSIS-∞**: Autonomía proactiva de Nivel 5. (`engine/apotheosis.py`)
 
-Para más detalles, consulta: [**OMEGA_MANIFOLD.md**](architecture/OMEGA_MANIFOLD.md).
+Para más detalles, consulta: ---
+
+## Sovereign Swarm Orchestration (v5.0)
+
+The `SwarmManager` is the apex orchestrator (Industrial Noir v5.0), implementing the **Tensor Vector V=5** governance:
+
+### 1. Byzantine Auth Layer
+- Enforces weighted BFT consensus.
+- Reputation-based identity gating (0.0 - 1.0).
+- Protects the ledger against unauthorized agent proposals.
+
+### 2. Chaos Guards
+- Proactive adversarial simulation.
+- Tests system resilience against edge-case conjectures.
+
+### 3. Privacy & Evolution Guards
+- **PrivacyGate**: Scans for 11+ PII/Secret patterns before persistence.
+- **EvolutionGuard**: Monitors and limits self-modification cycles to prevent recursive collapse.
+
+### 4. Swarm-100 Architecture
+- **Task Sharding**: High-exergy parallel task distribution.
+- **PulmonesWorker**: Background processing for semantic compaction and trust cleanup.
 
 ---
 
@@ -226,6 +256,7 @@ Para más detalles, consulta: [**OMEGA_MANIFOLD.md**](architecture/OMEGA_MANIFOL
 | `telemetry/` | OpenTelemetry-compatible span tracing |
 | `mcp/` | Model Context Protocol server |
 | `cli/` | 38 CLI commands via Click |
+| `swarm/` | [**Sovereign Swarm**](swarm/manager.py) — V=5 Orchestration |
 | `migrations/` | Versioned schema migrations |
 | `storage/` | SQLite + Turso storage backends |
 

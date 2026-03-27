@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING, Any
 
 from cortex.agents.base import BaseAgent
 from cortex.agents.message_schema import MessageKind
-from cortex.immune.quarantine import BlastRadiusReport, evaluate_demolition
+from cortex.quarantine.quarantine import BlastRadiusReport, evaluate_demolition
 from cortex.memory.temporal import now_iso
 from cortex.shannon.exergy import ActionRisk, ExergyInput, calculate_exergy
 
@@ -287,7 +287,7 @@ class CazarecompensasAgent(BaseAgent):
 
         Calculation:
           - exergy_estimate: Measured in capital yield (USD) and ecosystem impact.
-          - entropy_delta: Estimated cognitive/computational debt to solve it,
+          - exergy_delta: Estimated cognitive/computational exergy required (cost),
             plus penalties for ghost vectors and meta-stability risk.
         """
         # Exergy based on raw reward
@@ -295,7 +295,7 @@ class CazarecompensasAgent(BaseAgent):
         base_reward = Decimal(base_reward_str)
         exergy_estimate = base_reward
 
-        # Entropy based on difficulty and required context loading
+        # Complexity/Cost based on difficulty and required context loading
         difficulty = Decimal(str(bounty.get("difficulty_score", 1.0)))
         lines = Decimal(str(bounty.get("context_lines", 100)))
 
@@ -307,14 +307,14 @@ class CazarecompensasAgent(BaseAgent):
         )
         meta_stability_risk: Decimal = (difficulty ** 2) * Decimal("4.0") if difficulty >= Decimal("8") else Decimal("0.0")
 
-        entropy_base = (difficulty * Decimal("50")) + (lines * Decimal("0.1"))
-        entropy_delta = entropy_base + ghost_vector_penalty + meta_stability_risk
+        exergy_base = (difficulty * Decimal("50")) + (lines * Decimal("0.1"))
+        exergy_delta = exergy_base + ghost_vector_penalty + meta_stability_risk
 
-        # Safety against zero entropy
-        if entropy_delta <= Decimal("0"):
-            entropy_delta = Decimal("1.0")
+        # Safety against zero division
+        if exergy_delta <= Decimal("0"):
+            exergy_delta = Decimal("1.0")
 
-        ratio: Decimal = exergy_estimate / entropy_delta
+        ratio: Decimal = exergy_estimate / exergy_delta
         accepted = ratio >= Decimal(str(self._thermodynamic_threshold))
 
         # Enforce Ω₉ Law of Claim justification format
@@ -331,7 +331,7 @@ class CazarecompensasAgent(BaseAgent):
 
         return {
             "exergy_estimate": float(exergy_estimate),
-            "entropy_delta": float(entropy_delta),
+            "exergy_delta": float(exergy_delta),
             "ratio": float(ratio),
             "accepted": accepted,
             "justification": justification,
@@ -418,7 +418,7 @@ class CazarecompensasAgent(BaseAgent):
                     "bounty_id": bounty["id"],
                     "evaluation_metrics": {
                         "exergy_estimate": evaluation["exergy_estimate"],
-                        "entropy_delta": evaluation["entropy_delta"],
+                        "exergy_delta": evaluation["exergy_delta"],
                         "ratio": evaluation["ratio"]
                     },
                     "shannon_metrics": {

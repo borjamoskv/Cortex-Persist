@@ -17,6 +17,9 @@ from pathlib import Path
 from typing import Any
 
 from cortex.config import DEFAULT_DB_PATH
+from cortex.ledger.event_ledger import get_default_ledger
+from cortex.utils.forensics import check_for_drift
+from cortex.verification.audit_openai import run_byzantine_audit
 
 __all__ = ["ComplianceTracker"]
 
@@ -44,7 +47,7 @@ class ComplianceTracker:
         project: Default project namespace for all operations.
     """
 
-    __slots__ = ("_engine", "_default_project", "_initialized")
+    __slots__ = ("_engine", "_default_project", "_initialized", "_l3_ledger")
 
     def __init__(
         self,
@@ -55,6 +58,7 @@ class ComplianceTracker:
 
         self._engine = CortexEngine(db_path=str(db_path), auto_embed=False)
         self._default_project = project
+        self._l3_ledger = get_default_ledger()
         self._initialized = False
 
     def _ensure_init(self) -> None:
@@ -110,7 +114,7 @@ class ComplianceTracker:
         if meta:
             eu_meta.update(meta)
 
-        return self._engine.store_sync(  # type: ignore[type-error]
+        fact_id = self._engine.store_sync(  # type: ignore[type-error]
             project=proj,
             content=content,
             fact_type="decision",
@@ -119,6 +123,11 @@ class ComplianceTracker:
             meta=eu_meta,
             tags=tags or ["eu-ai-act", "compliance"],
         )
+
+        # 4. Cognitive Anchor (Ω₁₃): Anchor in Immutable L3 Ledger
+        self._engine._run_sync(self._l3_ledger.store_fact(content, metadata=eu_meta))
+
+        return fact_id
 
     # ─── 2. verify_chain ──────────────────────────────────────────
 
@@ -205,6 +214,69 @@ class ComplianceTracker:
             report["facts"] = all_facts
 
         return report
+
+    def export_pdf(self, project: str | None = None, output_path: str = "audit_report.pdf") -> str:
+        """Export the compliance report as an Industrial Noir PDF.
+        
+        Args:
+            project: Project to scope the report to.
+            output_path: Path to save the PDF.
+            
+        Returns:
+            The absolute path to the generated PDF.
+        """
+        from cortex.compliance.pdf_gen import generate_report
+        
+        # 1. Get the structured report
+        report = self.export_audit(project=project, include_facts=True)
+        
+        # 2. Prepare records for the PDF engine
+        # In this context, we use the facts list since that's what we want to audit
+        facts = report.get("facts", [])
+        pdf_records = []
+        for f in facts:
+            pdf_records.append({
+                "id": str(f["id"]),
+                "hash": "---", # We'd need to fetch actual transaction hashes here if we strictly want LX
+                "ts": f["created_at"],
+                "status": "VERIFIED" if report["eu_ai_act"]["status"] == "COMPLIANT" else "WARNING"
+            })
+            
+        proj_name = project or self._default_project
+        return generate_report(proj_name, pdf_records, output_path)
+
+    def run_forensics_scan(self) -> dict[str, Any]:
+        """Run the out-of-band forensics drift detector."""
+        self._ensure_init()
+        return self._engine._run_sync(check_for_drift(self._engine._db_path))
+
+    def run_byzantine_audit(self, project: str | None = None) -> dict[str, Any]:
+        """Run a GPT-5.4 based semantic audit for Byzantine anomalies."""
+        self._ensure_init()
+        proj = project or self._default_project
+        records = self._engine._run_sync(self._gather_facts_list(proj))
+        # We need the full content for a semantic audit
+        full_records = self._engine._run_sync(self._gather_full_records(proj))
+        return self._engine._run_sync(run_byzantine_audit(full_records))
+
+    async def _gather_full_records(self, project: str) -> list[dict[str, Any]]:
+        """Retrieve full records for semantic audit."""
+        conn = await self._engine.get_conn()
+        cursor = await conn.execute(
+            "SELECT id, fact_type, source, confidence, content, meta "
+            "FROM facts WHERE project = ?", (project,)
+        )
+        return [
+            {
+                "id": r[0],
+                "fact_type": r[1],
+                "source": r[2],
+                "confidence": r[3],
+                "content": r[4], # Decrypted via engine session if needed, assuming plaintext for now or handled by engine
+                "meta": r[5]
+            }
+            for r in await cursor.fetchall()
+        ]
 
     # ─── Internal helpers ─────────────────────────────────────────
 

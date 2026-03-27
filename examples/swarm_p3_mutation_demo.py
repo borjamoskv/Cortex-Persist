@@ -1,13 +1,13 @@
 import asyncio
-import random
 import logging
+import random
+
 from rich.console import Console
-from rich.table import Table
 from rich.live import Live
+from rich.table import Table
 
 # CORTEX Native Imports
 from cortex.swarm.specialists import DevinAutodidactOmega
-from cortex.swarm.real_vector import RealVectorActuator
 
 logger = logging.getLogger("cortex.swarm.mutation")
 console = Console()
@@ -46,9 +46,9 @@ async def run_mutation_swarm():
                 f"MUT-{i:03}",
                 devin.provider_id.split("-")[0],
                 target["url"].split("/")[-1],
-                f"{resp.metadata['titration_delay']:.2f}",
-                f"{resp.metadata['exergy_cost']:.4f}",
-                "[bold green]CRYSTALLIZED[/]" if resp.status == "success" else "[red]ABORTED[/]"
+                f"{resp['metadata']['titration_delay']:.2f}",
+                f"{resp['metadata']['exergy_cost']:.4f}",
+                "[bold green]CRYSTALLIZED[/]" if resp["status"] == "success" else "[red]ABORTED[/]"
             )
             
             await asyncio.sleep(0.5)

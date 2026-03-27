@@ -1,11 +1,10 @@
-from __future__ import annotations
-
 import hashlib
 import json
 import logging
-import sqlite3
 from datetime import datetime, timezone
 from typing import Any
+
+import aiosqlite
 
 from .merkle import MerkleTree
 
@@ -17,13 +16,12 @@ class SovereignLedger:
     Refactored as a core component for sovereign persistence.
     """
 
-    def __init__(self, db_conn: sqlite3.Connection):
+    def __init__(self, db_conn: aiosqlite.Connection):
         self.conn = db_conn
-        self._ensure_schema()
 
-    def _ensure_schema(self) -> None:
+    async def ensure_schema(self) -> None:
         """Initialize the cryptographic registry tables."""
-        self.conn.execute("""
+        await self.conn.execute("""
             CREATE TABLE IF NOT EXISTS transactions (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 timestamp TEXT NOT NULL,
@@ -34,7 +32,7 @@ class SovereignLedger:
                 hash TEXT NOT NULL
             )
         """)
-        self.conn.execute("""
+        await self.conn.execute("""
             CREATE TABLE IF NOT EXISTS merkle_roots (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 timestamp TEXT NOT NULL,
@@ -43,16 +41,16 @@ class SovereignLedger:
                 root_hash TEXT NOT NULL
             )
         """)
-        self.conn.commit()
+        await self.conn.commit()
 
-    def _get_last_hash(self) -> str:
-        cursor = self.conn.execute("SELECT hash FROM transactions ORDER BY id DESC LIMIT 1")
-        row = cursor.fetchone()
-        return row[0] if row else "0" * 64
+    async def _get_last_hash(self) -> str:
+        async with self.conn.execute("SELECT hash FROM transactions ORDER BY id DESC LIMIT 1") as cursor:
+            row = await cursor.fetchone()
+            return row[0] if row else "0" * 64
 
-    def record_transaction(self, project: str, action: str, detail: dict[str, Any]) -> str:
+    async def record_transaction(self, project: str, action: str, detail: dict[str, Any]) -> str:
         """Record a validated event into the hash chain."""
-        prev_hash = self._get_last_hash()
+        prev_hash = await self._get_last_hash()
         timestamp = datetime.now(timezone.utc).isoformat()
         detail_json = json.dumps(detail, sort_keys=True, default=str)
 
@@ -61,17 +59,17 @@ class SovereignLedger:
         new_hash = hashlib.sha256(payload.encode()).hexdigest()
 
         try:
-            self.conn.execute(
+            await self.conn.execute(
                 "INSERT INTO transactions (timestamp, project, action, detail, prev_hash, hash) VALUES (?, ?, ?, ?, ?, ?)",
                 (timestamp, project, action, detail_json, prev_hash, new_hash)
             )
-            self.conn.commit()
+            await self.conn.commit()
             return new_hash
-        except sqlite3.Error as e:
+        except aiosqlite.Error as e:
             logger.error("Ledger OS/IO Failure: %s", e)
             raise
 
-    def get_transactions(self, project: str | None = None) -> list[tuple]:
+    async def get_transactions(self, project: str | None = None) -> list[tuple]:
         """Retrieve transactions from the ledger, optionally filtered by project."""
         query = "SELECT id, timestamp, action, detail, prev_hash, hash FROM transactions"
         params = []
@@ -80,19 +78,20 @@ class SovereignLedger:
             params.append(project)
         query += " ORDER BY id ASC"
 
-        cursor = self.conn.execute(query, params)
-        return cursor.fetchall()
+        async with self.conn.execute(query, params) as cursor:
+            return await cursor.fetchall()
 
-    def create_checkpoint(self, batch_size: int = 100) -> str | None:
+    async def create_checkpoint(self, batch_size: int = 100) -> str | None:
         """Generate a Merkle Root for recent transactions to anchor history."""
-        cursor = self.conn.execute("SELECT MAX(tx_end_id) FROM merkle_roots")
-        last_covered = cursor.fetchone()[0] or 0
+        async with self.conn.execute("SELECT MAX(tx_end_id) FROM merkle_roots") as cursor:
+            row = await cursor.fetchone()
+            last_covered = row[0] or 0 if row else 0
 
-        cursor = self.conn.execute(
+        async with self.conn.execute(
             "SELECT id, hash FROM transactions WHERE id > ? ORDER BY id ASC LIMIT ?",
             (last_covered, batch_size)
-        )
-        rows = cursor.fetchall()
+        ) as cursor:
+            rows = await cursor.fetchall()
 
         if not rows:
             return None
@@ -105,18 +104,18 @@ class SovereignLedger:
         root_hash = tree.root_hash
 
         if root_hash:
-            self.conn.execute(
+            await self.conn.execute(
                 "INSERT INTO merkle_roots (timestamp, tx_start_id, tx_end_id, root_hash) VALUES (?, ?, ?, ?)",
                 (datetime.now(timezone.utc).isoformat(), start_id, end_id, root_hash)
             )
-            self.conn.commit()
+            await self.conn.commit()
 
         return root_hash
 
-    def audit_integrity(self) -> bool:
+    async def audit_integrity(self) -> bool:
         """Perform a full cryptographic audit of the chain."""
-        cursor = self.conn.execute("SELECT id, prev_hash, timestamp, detail, hash FROM transactions ORDER BY id ASC")
-        rows = cursor.fetchall()
+        async with self.conn.execute("SELECT id, prev_hash, timestamp, detail, hash FROM transactions ORDER BY id ASC") as cursor:
+            rows = await cursor.fetchall()
 
         current_prev = "0" * 64
         for row_id, prev_hash, ts, detail, h in rows:

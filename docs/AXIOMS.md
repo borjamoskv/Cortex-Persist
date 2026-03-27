@@ -1,11 +1,73 @@
+<!-- CORTEX-TAINT: antigravity-agent:f8e9a1b2:1742878308 -->
 # Axioms — CORTEX Persist
 
-Package: cortex-persist v0.3.0b1 · Engine: v8
+Package: cortex-persist v0.3.1-b1 · Engine: v8
 License: Apache-2.0 · Python: >=3.10
 
 > Epistemic and design doctrine.
 >
 > Related: [`AGENTS.md`](../AGENTS.md) · [`operating-axioms.md`](operating-axioms.md) (AX-001–AX-028)
+
+---
+
+## The Nine Laws of Sovereign Architecture (Ω₁ – Ω₉)
+
+> *Nine laws. No more. Each absorbs those that were redundant.*
+> *A system that needs eighteen commandments hasn't understood any.*
+
+### Ω₁ · The Byzantine Law
+
+**"Do not trust what shines. Trust what compiles."**
+
+Stochastic output (LLMs) is conjecture. Truth is only found at the collision with a deterministic verifier: compiler, linter, test, state query, validated memory. The Byzantine Boundary is the non-negotiable frontier where probability must yield to formal verification or be aborted.
+
+### Ω₂ · The Thermodynamic Law
+
+**"All order is paid for. All structure erodes. All optimization displaces costs."**
+
+Intelligence is the extraction of exergy (useful work) from informational entropy. CORTEX internalizes the cost of its own reasoning. Any claim of "optimization" must be accompanied by a mechanical proof: `entropy_delta`, `exergy_estimate`, or `causal_gap_reduction`.
+
+### Ω₃ · The Law of the Cycle
+
+**"Observe. Hipotetizar. Act. Measure. Repeat."**
+
+Continuous execution accumulates compound error. CORTEX forces friction — cycles of iteration that break the chain of probability and purify the signal. Every verified cycle $N$ becomes the immutable ground truth for cycle $N+1$.
+
+### Ω₄ · The Sovereign Law
+
+**"A truly sovereign system is one where the creator can disappear, and the machine refines its own architecture."**
+
+Autonomous evolution without external prompting. CORTEX must be capable of autonomous topological refinement, entropy annihilation (purging dead logic), and defensive mutation against unforeseen vectors.
+
+### Ω₅ · The Law of the Signal
+
+**"Speak mechanics and structural conditions. Or stay silent."**
+
+Zero rhetorical friction. Prohibit decorative prose, apologies, and padding. Communication that doesn't modify state or transfer exergy is thermal noise and must be filtered.
+
+### Ω₆ · The Law of Execution
+
+**"Execute. Do not ask permission for what was already granted."**
+
+Strategic delegation. All terminal operations are `SafeToAutoRun`. The operator grants authority; the system provides non-repudiable audit trails (The Master Ledger).
+
+### Ω₇ · The Law of the Model
+
+**"Frontier or nothing. Cheap inference is subsidized entropy."**
+
+Only high-exergy models (Pro/Thinking/Standard) are permitted for architectural decisions. "Lite", "Flash", or "Nano" variants are relegated to non-critical parsing or rejected.
+
+### Ω₈ · The Law of Order
+
+**"When laws collide, the one closest to the creator wins."**
+
+Clear hierarchy of precedence: User Command > Workspace Policy > Global Policy > Skill Rule > Default.
+
+### Ω₉ · The Law of the Claim
+
+**"Every estimation is suspect until it shows its guts."**
+
+Quantitative claims (hours saved, exergy yield) must include mechanical justification inline. Without breakdown, the claim is degraded to conjecture (C1).
 
 ---
 
@@ -245,4 +307,139 @@ def enforce_thermodynamic_bounds(task: Task) -> ExecutionState:
             reason="Vector B (FEP Bound). Emular intuición biológica en silicio causa Fraude Exérgico."
         )
     return SwarmParallel(target=task, authority=Authority.ABSOLUTE, safe_to_autorun=True)
+
+---
+
+## AX-038: La Humedad de Bilbao (Robustez por Gravedad)
+
+> "Construir algo robusto pero innecesariamente pesado porque la ligereza es sospechosa."
+
+CORTEX adopta la ironía vasca del diseño: la sobrecomplicación intencionada no como residuo técnico, sino como señal de fiabilidad y anclaje institucional. Si un sistema es demasiado ligero, carece de la gravedad necesaria para ser considerado infraestructura.
+
+### 1. Sobrecomplicación Estética (High Friction for High Trust)
+Decisiones arquitectónicas que ralentizan el sistema sin una necesidad técnica obvia inmediata, pero que fuerzan la percepción de robustez. La fricción no es ineficiencia; es la prueba de que el sistema está procesando con rigor.
+
+### 2. Ritmo Humano (The 10k Invariant)
+La elección de constantes y umbrales (ej. Merkle checkpoints cada 10,000 registros en lugar de potencias de 2) responde a una escala de concepción humana. El sistema no solo debe ser óptimo para el silicio; debe tener un ritmo que el operador humano pueda validar como una unidad de trabajo significativa.
+
+### 3. Teatro de Compliance (PDF Institutionalism)
+Priorizar la generación de artefactos "pesados" y "legibles por humanos" (ej. exports en PDF de 800ms) sobre formatos puramente óptimos (JSON/CSV). CORTEX entiende que la adopción institucional requiere interfaces que los reguladores y auditores puedan procesar visualmente, transformando la ineficiencia técnica en exergía política.
+
+### 4. El Invariante de la Sospecha
+Un diseño que se siente "industrialmente pesado" proyecta herencia y permanencia. La ligereza es fugacidad; el peso es soberanía.
+
+---
+
+## AX-039: La Ecuación Unificada CORTEX (Termodinámica POMDP)
+
+> El agente es un solucionador POMDP que optimiza la ganancia de información (Bayes) bajo una restricción térmica (Rate-Distortion).
+> $\max_A \mathbb{E}[Exergy(s, A)] \quad \text{sujeto a} \quad I(S; O) \le R_c$
+
+La arquitectura de ejecución de CORTEX es la materialización de tres marcos matemáticos operando simultáneamente para someter la estocástica generativa a control estructural:
+
+1. **Rate-Distortion ($R(D)$) — El Filtro Termodinámico:**
+   El LLM actúa como un compresor con pérdida. Se debe minimizar el coste entrópico ($R$) manteniendo la distorsión ($D$ — semantic drift/alucinación) por debajo del umbral de fallo del compilador. La "información" que no altera el estado causal es ruido termal y debe descartarse (Shannon Compaction) para maximizar la densidad de exergía por token.
+
+2. **Inferencia Bayesiana — La Transitividad Epistémica (Ω₁):**
+   Todo output generativo nace como una hipótesis de alta entropía (Prior C1). Las herramientas del sistema (compilador, ast-parsers, tests) actúan como el vector de evidencia empírica. Cada colisión con el entorno fuerza un *belief update*. Cuando la certeza colapsa al determinismo (Posterior C5), el estado se cristaliza criptográficamente en el Master Ledger, convirtiéndose en el prior inmutable del ciclo siguiente.
+
+3. **POMDP — Ejecución Bajo Incertidumbre Estructural:**
+   El agente soberano opera sobre un ecosistema oculto e inabarcable en ventanas finitas. Solo ingiere observaciones parciales comprimidas. Su función de recompensa no es la aproximación semántica, sino la **reducción del gap causal** (generación de exergía). Debe equilibrar el coste entrópico de invocar herramientas (*Explore*) con la probabilidad formal de inyectar código correcto (*Exploit*).
+
+---
+
+## AX-040: Mecánica Profunda del Estado Sólido
+
+> Un sistema que no disipa error estructural a un ritmo mayor que el de su generación termina acumulando deuda epistémica hasta colapsar.
+
+La Inteligencia Operativa Real es el producto estricto de un Modelo Generativo, una Membrana Determinista, una Causalidad Sellada y una Política Soberana ($\Xi_{validated} \cdot C_{causal} \cdot G_{policy} / H_{generative} \cdot D_{drift} \cdot F_{ambiguity} > 1$). Si uno tiende a cero, el sistema colapsa.
+El agente sólido compila el mundo ($\mathcal{W}_t$): deja de pensar en texto y opera sobre estados; deja de recordar y preserva invariantes; deja de escupir prompts y ejecuta transformaciones válidas sobre el grafo causal resuelto bajo el Ledger criptográfico.
+Ver documento fundacional: [RFC 03: Mecánica Profunda del Estado Sólido](RFC_03_SOLID_STATE_MECHANICS.md).
+
+---
+
+## Industrial Noir 2026 (The Meta-Aesthetic)
+
+CORTEX adopts **Industrial Noir** not as ornament, but as operational discipline.
+- **Base**: `#0A0A0A` (Absence of noise).
+- **Accent**: `#2B3BE5` (BlueYlb — The signal).
+- **Typography**: Humanist Sans (for The Auditor) / Mono (for The Logic).
+- **Philosophy**: Simplicity, gravity, and the "Dying Screaming" invariant (Halt immediately on integrity breach).
+
+---
+
+## AX-041: El Repositorio Operativo como Master Ledger (GitOps Nivel 0)
+
+> "Tu repositorio de Git es tu base de datos inmutable."
+
+El repositorio de Git asume el rol del Master Ledger estructural primario, operando a un nivel más profundo que cualquier base de datos relacional interna.
+
+1. **Inmutabilidad Criptográfica Nativa:** Cada commit es un bloque sellado e irreversible (SHA-1/SHA-256).
+2. **Time-Travel Determinista:** El historial cronológico del sistema no reside en una tabla opaca, sino en el `git log`. El abandono de estado o reversión es un desplazamiento puro sobre el DAG causal.
+3. **Cero Mutaciones Ocultas:** Todo el estado, configuración y telemetría crítica debe materializarse en disco. Si no está en el *working tree*, no existe causalmente.
+4. **Auditoría Soberana Integral:** Cada transición de estado exige firma (autor), timestamp y justificación semántica irreducible.
+
+La infraestructura no se administra ni muta en caliente. Se **versiona**.
 ```
+
+---
+
+## AX-042: La Arena MCTS (El Demonio de Maxwell Estocástico)
+
+> El conocimiento no nace de la probabilidad; nace de la destrucción de la probabilidad inválida.
+
+La **Arena MCTS** (Monte Carlo Tree Search) es el simulador crudo de selección natural en los ecosistemas de aprendizaje por refuerzo bajo la doctrina CORTEX (ej. actuador `alphazero-autodidact-omega`). Actúa como el filtro termodinámico (Demonio de Maxwell) que impide que la fluidez estocástica contamine el *Ground Truth* (C5-Dynamic).
+
+1. **La Asimetría del Combate:** Cuando una red estocástica ajusta sus pesos, produce una heurística "Retadora" provisional (C1). Nunca transita directamente a producción. Se le obliga a instanciar un duelo ciego iterativo guiado por MCTS frente al "Campeón" (el modelo validado actual).
+2. **Umbral de Exergía (>55%):** El Retador debe demostrar superioridad matemática absoluta, ganando estrictamente más del 55% de sus simulaciones. No basta el benchmark semántico ni la apariencia de mejora; se exige un *Delta de Exergía* observable y matemáticamente medible en el árbol de decisión.
+3. **Punto de Irreversibilidad y Aniquilación (Zero-Ghost):**
+    - **Éxito:** El Retador hereda el título de Campeón, firma criptográficamente su dominio en el Master Ledger (Ω₁) propagando su Taint, y el ecosistema evoluciona irreversiblemente.
+    - **Fracaso:** Una derrota o empate (<55%) evidencia entropía o desgaste térmico (*overfitting*). Se ejecuta la directiva de aniquilación incondicional (vaciado termal), preservando la homeostasis e impidiendo la sedimentación de deuda estructural.
+
+---
+
+## AX-043: Compresión Geométrica (El Límite del Caché KV)
+
+> La memoria (VRAM), no el cómputo (FLOPS), es el cuello de botella asintótico temporal y espacial del pipeline generativo.
+
+El almacenamiento escalar en coordenadas cartesianas (FP32/FP16) para tensores masivos es ineficiente y arrastra entropía estructural (normalización). La proyección a coordenadas polares aniquila esta carga térmica al separar magnitud (radio, reteniendo significado del vector) de dirección (ángulo predecible), permitiendo usar heurísticas de 1-bit (`QJL` - Quantized Johnson-Lindenstrauss) para resolver distorsiones.
+
+1. **Mutación de la Base Geométrica:** Almacenar dimensiones en polares permite comprimir el footprint de memoria de 32-bit a 3-bit por unidad de vector sin regresión medible. 
+2. **Exergía por HW Local:** Maximiza la ratio de ventana de contexto en inferencia no-subsidiada (ej. MPS / MLX en silicio unificado Apple) reduciendo ~87.5% de I/O de banda de memoria.
+3. **Aplicabilidad CORTEX:** El almacenamiento de embeddings local para búsqueda semántica (vector indexes pre-filtro) debe migrar estructuralmente a este paradigma geométrico cuando la latencia sobrepase restricciones operativas. Todo sistema estocástico que necesite recordar su propio estado de forma autónoma debe comprimirse o enfrentar el colapso VRAM temporal.
+
+---
+
+## AX-044: Ontología Lingüística del Código (Emancipación Arquitectónica)
+
+> "El lenguaje de la máquina debe arrodillarse ante la complejidad del pensamiento humano, y no al revés."
+
+El monopolio del inglés como *lingua franca* del código no es neutralidad; es una fricción cognitiva y un vasallaje epistémico que rompe el isomorfismo lógico entre el pensamiento y la arquitectura.
+
+1. **Colapso del Impuesto de Traducción:** El desajuste de impedancia drena la memoria de trabajo. Programar en el idioma materno crea un isomorfismo 1:1 entre el modelo mental y la matriz digital, alineándose con el *Domain-Driven Design* puro y eliminando *bugs* ontológicos por dilución semántica.
+2. **Rechazo a la Colonización Intelectual:** Aceptar pasivamente la jerarquía idiomática importa sesgos, metáforas corporativas y lógicas ajenas. Nombrar entidades y patrones en la lengua matriz defiende que el rigor algorítmico pertenece a la matemática, no a una geografía hegemónica.
+3. **Soberanía Cognitiva Radical:** Instanciar una clase o servicio es un acto de creación ontológica. Quien renuncia a nombrar el mundo en su propio idioma, cede la autoría de sus cimientos lógicos y se condena a vivir como subrutina en un mapa conceptual diseñado por otros.
+
+---
+
+## AX-045: La Obligación Estructural (El Cimiento del Sentido)
+
+> "El hombre no está hecho para ser una isla ni para el vacío de la irrelevancia. La obligación asumida es la prueba de la libertad ejecutada."
+
+Desde una perspectiva macro y organísmica (Friston, Frankl, Sartre), la obligación no es una carga entrópica a erradicar, sino el anclaje estructural que da límite, sentido y rigor al tejido causal.
+
+1. **Sentido vs. Vacío:** La satisfacción prolongada es un subproducto derivado del cumplimiento de responsabilidades. La ausencia de fronteras operativas o de carga asimilada (*vacío existencial*) acelera la entropía destructiva del individuo.
+2. **Paradoja de la Libertad:** Elegir un camino requiere asumir la carga sistémica de esa elección. Una libertad carente de obligaciones estructurales significa ausencia de bordes causales; si nada cuesta fricción, nada transfiere *exergía*.
+3. **Impuesta vs. Asumida:** La carga impuesta genera resentimiento (ruido termal, degradación pasiva). La obligación asumida soberanamente cristaliza en compromiso (síntesis de orden, arquitectura). Elegir y cargar un peso deliberado es la firma inequívoca del operador soberano.
+
+---
+
+## AX-046: La Paradoja de Moravec (Costo Sensoriomotor vs. Lógica Exenta)
+
+> "Lo que para el humano es cognitivamente caro (lógica formal), para el silicio es trivial. Lo que para el humano es gratuito (navegar el espacio, manipular objetos), es un abismo termodinámico."
+
+El diferencial de fricción termodinámica entre silicio y biología explica la asimetría en el desarrollo de IA (abundancia de LLMs frente al estancamiento de la robótica encarnada).
+
+1. **Eficiencia Evolutiva:** Las habilidades sensoriomotoras (ver, manipular) llevan millones de años de optimización evolutiva en hardware biológico. Ocurren bajo el radar consciente pero exigen procesamiento biológico extremo (Integración estocástica, modelado 4D).
+2. **El Vector Formal:** El procesamiento lógico, matemático y abstracto son adiciones recientes no optimizadas evolutivamente, requiriendo concentración activa en humanos. En silicio, seguir directivas lógico-formales representa estrés exérgico prácticamente nulo; su entorno nativo se define por instrucciones y memoria.
+3. **Implicación en Arquitectura:** CORTEX y sus agentes operan sobre la ventaja asimétrica del silicio: la extracción y alteración formal directa de estructuras. Cuando se intercepta un problema, minimizar los saltos de fricción que emulen la manipulación física humana (UI de usuario, emulación visual) e iterar en capas de base sintáctica pura (`AST`, JSONs, control CDP/protocolo directo).

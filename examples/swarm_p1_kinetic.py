@@ -1,16 +1,19 @@
 import asyncio
 import logging
+from pathlib import Path
+from unittest.mock import AsyncMock, MagicMock
+
+import aiosqlite
 
 from cortex.ledger.core import SovereignLedger
 from cortex.services.bounty_service import BountyService
+from cortex.swarm.discovery import SkillMetadata
 from cortex.swarm.factory import SwarmFactory
 from cortex.swarm.manager import SwarmManager
 
 # Configuracion de Logs (Industrial Noir Aesthetic)
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger("cortex.p1.orchestrator")
-
-import sqlite3
 
 
 async def run_p1_extraction():
@@ -19,78 +22,78 @@ async def run_p1_extraction():
     """
     logger.info("--- [Ω] Iniciando Escuadra P1: Extracción de Capital ---")
 
-    # 1. Inicializar Infraestructura de Trust (Real, not Mock)
-    db_conn = sqlite3.connect(":memory:")
-    # Initialize DB Schema for Ledger
-    db_conn.execute("CREATE TABLE transactions (id INTEGER PRIMARY KEY, project TEXT, action TEXT, detail TEXT, prev_hash TEXT, hash TEXT, timestamp TEXT, tenant_id TEXT)")
-    db_conn.execute("CREATE TABLE merkle_roots (id INTEGER PRIMARY KEY, root_hash TEXT, tx_start_id INTEGER, tx_end_id INTEGER, tx_count INTEGER)")
+    # 1. Inicializar Infraestructura de Trust (Async)
+    async with aiosqlite.connect(":memory:") as db_conn:
+        ledger = SovereignLedger(db_conn)
+        await ledger.ensure_schema()
 
-    ledger = SovereignLedger(db_conn)
+        router = AsyncMock()
+        mock_result = MagicMock()
+        mock_result.is_ok.return_value = True
+        mock_result.unwrap.return_value = "Mocked LLM Response for Bounty"
+        router.execute_resilient.return_value = mock_result
+        router.default_config = {"model": "gemini-3-pro", "provider": "google"}
 
-    from unittest.mock import AsyncMock, MagicMock
-    router = AsyncMock()
+        manager = SwarmManager(ledger=ledger)
 
-    mock_result = MagicMock()
-    mock_result.is_ok.return_value = True
-    mock_result.unwrap.return_value = "Mocked LLM Response for Bounty"
-    router.execute_resilient.return_value = mock_result
+        # Registrar skills de soporte para el cuadrante P1
+        for cat in ["automation", "recruitment", "capital"]:
+            skill = SkillMetadata(
+                data={"name": f"p1_specialist_{cat}", "category": cat, "version": "1.0"},
+                path=Path(f"/tmp/p1_{cat}/SKILL.md")
+            )
+            manager.registry.skills[skill.name] = skill
 
-    router.default_config = {"model": "gemini-3-pro", "provider": "google"}
+        factory = SwarmFactory(manager=manager, router=router)
+        bounty_service = BountyService(ledger=ledger, reward_threshold=5.0)
 
-    manager = SwarmManager(ledger=ledger)
-
-    # Registrar skills de soporte para el cuadrante P1
-    from pathlib import Path
-
-    from cortex.swarm.discovery import SkillMetadata
-    for cat in ["automation", "recruitment", "capital"]:
-        skill = SkillMetadata(
-            data={"name": f"p1_specialist_{cat}", "category": cat, "version": "1.0"},
-            path=Path(f"/tmp/p1_{cat}/SKILL.md")
+        # 2. Reclutamiento de la Escuadra P1 (Kinetic Squad) via SwarmCycle (Ω₃)
+        logger.info("Iniciando Ciclos de Evolución P1...")
+        agent_ids = await factory.recruit_squad(
+            quadrant="P1",
+            size=3
         )
-        manager.registry.skills[skill.name] = skill
+        logger.info("Escuadra P1 evolucionada y reclutada: %s", agent_ids)
 
-    factory = SwarmFactory(manager=manager, router=router)
-    bounty_service = BountyService(ledger=ledger, reward_threshold=5.0)
+        # 3. Escaneo de Oportunidades (Bounties)
+        # Mocking scan for the demo
+        repos = [("google", "cortex"), ("borjamoskv", "Cortex-Persist")]
+        all_leads = []
+        
+        for owner, repo in repos:
+            leads = await bounty_service.scan_repository(owner, repo)
+            all_leads.extend(leads)
 
-    # 2. Reclutamiento de la Escuadra P1 (Kinetic Squad) via SwarmCycle (Ω₃)
-    logger.info("Iniciando Ciclos de Evolución P1...")
-    agent_ids = await factory.recruit_squad(
-        quadrant="P1",
-        size=3
-    )
-    logger.info("Escuadra P1 evolucionada y reclutada: %s", agent_ids)
+        ranked_leads = await bounty_service.rank_leads(all_leads)
 
-    # 3. Escaneo de Oportunidades (Bounties)
-    # Ejemplo con repositorios de alta exergia
-    repos = [("google", "cortex"), ("borjamoskv", "Cortex-Persist")]
-    all_leads = []
+        if not ranked_leads:
+            logger.warning("No se encontraron leads de alta exergia. Usando leads simulados.")
+            from cortex.services.bounty_service import BountyLead
+            ranked_leads = [BountyLead(
+                number=1,
+                title="Critical Path Optimization (Ω₁₃ Path)",
+                url="https://github.com/google/cortex/issues/1",
+                reward_usd=500.0,
+                difficulty="high",
+                score=10.0,
+                repo="google/cortex"
+            )]
 
-    for owner, repo in repos:
-        leads = await bounty_service.scan_repository(owner, repo)
-        all_leads.extend(leads)
+        # 4. Distribucion de Tareas (Sharding)
+        target_lead = ranked_leads[0]
+        task_description = bounty_service.generate_claim_prompt(target_lead)
 
-    ranked_leads = bounty_service.rank_leads(all_leads)
+        logger.info("Distribuyendo tarea a la Escuadra P1: %s", task_description)
 
-    if not ranked_leads:
-        logger.warning("No se encontraron leads de alta exergia. Abortando mision.")
-        return
+        # Ejecucion paralela via SwarmManager.shard_task (CORTEX-100)
+        responses = await manager.shard_task(agent_ids, task_description)
 
-    # 4. Distribucion de Tareas (Sharding)
-    target_lead = ranked_leads[0]
-    task_description = bounty_service.generate_claim_prompt(target_lead)
+        for i, resp in enumerate(responses):
+            status = resp.get("status", "unknown")
+            tx_hash = resp.get("metadata", {}).get("cortex_tx_hash", "no_tx")
+            logger.info("Agente %s | Status: %s | Tx: %s", agent_ids[i], status, tx_hash)
 
-    logger.info("Distribuyendo tarea a la Escuadra P1: %s", task_description)
-
-    # Ejecucion paralela via SwarmManager.shard_task (CORTEX-100)
-    responses = await manager.shard_task(agent_ids, task_description)
-
-    for i, resp in enumerate(responses):
-        status = resp.get("status", "unknown")
-        tx_hash = resp.get("metadata", {}).get("cortex_tx_hash", "no_tx")
-        logger.info("Agente %s | Status: %s | Tx: %s", agent_ids[i], status, tx_hash)
-
-    logger.info("--- [\u03a9] Mision de la Escuadra P1 Completada ---")
+        logger.info("--- [Ω] Mision de la Escuadra P1 Completada ---")
 
 if __name__ == "__main__":
     asyncio.run(run_p1_extraction())

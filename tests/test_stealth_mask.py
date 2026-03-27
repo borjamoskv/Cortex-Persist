@@ -1,9 +1,12 @@
 import asyncio
+from unittest.mock import AsyncMock
+
 import pytest
-from unittest.mock import AsyncMock, MagicMock
+
+from cortex.extensions.llm._models import CortexPrompt
 from cortex.extensions.llm.router import CortexLLMRouter
-from cortex.extensions.llm._models import CortexPrompt, IntentProfile
 from cortex.utils.result import Ok
+
 
 @pytest.mark.asyncio
 async def test_stealth_mask_application():

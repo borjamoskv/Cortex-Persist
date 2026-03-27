@@ -51,7 +51,7 @@ class EvolutionEngine(EvolutionOpsMixin):
         self.last_run: float = 0.0
         self.engine = engine
         self._ouroboros = None
-        self._endocrine = DigitalEndocrine()
+        self._gradient = DigitalEndocrine()
         self._action_engine = SymbolicActionEngine()
         self._lnn = LagrangianController()
         self._ledger = self._build_ledger()

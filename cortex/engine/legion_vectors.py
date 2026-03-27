@@ -41,7 +41,7 @@ class ProcessLeakHunter:
     is_dynamic = True
 
     async def attack(self, code: str, context: Mapping[str, Any]) -> list[str]:
-        # Implementation will be handled by the Swarm Orchestrator 
+        # Implementation will be handled by the Swarm Orchestrator
         # using the isolation manager's sandbox.
         return []
 
@@ -100,11 +100,12 @@ class Intruder:
                         findings.append(
                             f"Security Vulnerability: Use of dangerous function `{pattern}`."
                         )
-                        break
 
         for pattern in ["os.system(", "subprocess.run(shell=True)"]:
             if pattern in code:
-                findings.append(f"Security Vulnerability: Use of dangerous function `{pattern}`.")
+                findings.append(
+                    f"Security Vulnerability: Use of dangerous function `{pattern}`."
+                )
         return findings
 
     def _check_ast(self, code: str) -> list[str]:
@@ -132,14 +133,35 @@ class EntropyDemon:
     @oxygenate(min_interval=0.01)
     async def attack(self, code: str, context: Mapping[str, Any]) -> list[str]:
         findings = []
-        # Checks for missing null-safety and generic exception handling
+        # Bare exception handling
         if "except Exception:  # noqa: BLE001" in code or "except:" in code:
             findings.append(
                 "Fragility: Bare `except` detected. System cannot tolerate undetected entropy."
             )
 
+        # Unsafe key/index access
         if ".get(" not in code and "[" in code and "]" in code:
             findings.append("Unsafe access: Potential KeyError/IndexError under entropy.")
+
+        # type() comparison instead of isinstance()
+        if re.search(r"type\(.+\)\s*==\s*", code):
+            findings.append(
+                "Fragility: `type()` comparison detected. Use `isinstance()` for subclass safety."
+            )
+
+        # Mutable default arguments
+        if re.search(r"def\s+\w+\([^)]*=\s*\[\]", code) or re.search(
+            r"def\s+\w+\([^)]*=\s*\{\}", code
+        ):
+            findings.append(
+                "Fragility: Mutable default argument detected. Shared state across calls."
+            )
+
+        # Wildcard imports
+        if re.search(r"from\s+\S+\s+import\s+\*", code):
+            findings.append(
+                "Namespace Pollution: `import *` detected. Uncontrolled symbol injection."
+            )
 
         return findings
 
@@ -157,18 +179,19 @@ class ChronosSniper:
         if "async def" in code:
             for b in blocking:
                 if b in code:
-                    findings.append(f"Async Violation: Blocking call `{b}` inside async function.")
+                    findings.append(
+                        f"Async Violation: Blocking call `{b}` inside async function."
+                    )
         elif "sleep" in context.get("intent", "").lower() and "import asyncio" not in code:
-            # If intent wants sleep/async but code is sync blocking
             findings.append(
                 "Blocking Logic: Synchronous `time.sleep` in logic that requires asynchrony."
             )
 
-            # Check for shared state without locks in pseudo-code intent
-            if "global " in code:
-                findings.append(
-                    "Race Condition: Use of `global` in async context without explicit locking."
-                )
+        # Global shared state without locks (independent check)
+        if "global " in code and ("async def" in code or "threading" in code):
+            findings.append(
+                "Race Condition: Use of `global` in concurrent context without explicit locking."
+            )
 
         return findings
 

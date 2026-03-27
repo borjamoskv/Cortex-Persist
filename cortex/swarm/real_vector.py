@@ -1,9 +1,9 @@
-import asyncio
-import httpx
 import logging
-from typing import Any, Dict, List, Optional
 from dataclasses import dataclass
 from datetime import datetime, timezone
+from typing import Any
+
+import httpx
 
 logger = logging.getLogger("cortex.swarm.real_vector")
 
@@ -26,7 +26,7 @@ class RealVectorActuator:
         self.total_spent_j = 0.0
         self._client = httpx.AsyncClient(timeout=10.0)
 
-    async def execute_mutation(self, method: str, url: str, mutation_data: Dict[str, Any], **kwargs) -> VectorResponse:
+    async def execute_mutation(self, method: str, url: str, mutation_data: dict[str, Any], **kwargs) -> VectorResponse:
         """
         Executes an Atomic Mutation (Ω2, Ω3).
         Enforces pre-flight logging, titration, and rollback hooks.

@@ -88,7 +88,7 @@ def _handle_store(intent: GatewayIntent, rest: str) -> GatewayRequest:
     return GatewayRequest(
         intent=intent,
         project=project,
-        payload={"content": content, "type": "knowledge"},
+        payload={"content": content, "type": "AXIOM"},
         source="telegram",
     )
 

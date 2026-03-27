@@ -1,71 +1,66 @@
-from enum import Enum
+from __future__ import annotations
+
 from typing import Any
+
+from cortex.compaction.mem0_pipeline import Mem0Pipeline
 
 try:
     import structlog
-
+    _HAS_STRUCTLOG = True
     logger = structlog.get_logger(__name__)
-except ModuleNotFoundError:  # pragma: no cover
+except ModuleNotFoundError:
     import logging
-
+    _HAS_STRUCTLOG = False
     logger = logging.getLogger(__name__)
 
 
-class MemoryTier(Enum):
-    WORKING = "working"  # Short-term, high volatility, current task context
-    EPISODIC = "episodic"  # Medium-term, action-observation traces
-    SEMANTIC = "semantic"  # Long-term, verified facts, ledger-backed (Axiom Ω₁₃)
+def log_info(msg: str, **kwargs: Any) -> None:
+    if _HAS_STRUCTLOG:
+        logger.info(msg, **kwargs)
+    else:
+        logger.info("%s %s", msg, kwargs)
 
 
 class MemoryOS:
+    """CORTEX Memory OS Policy Layer.
+
+    Orchestrates EPISODIC → SEMANTIC flow via Mem0Pipeline.
+    When an engine reference is provided, gc() delegates to the
+    Memento specialist for real compaction (Cable 4 lifecycle).
     """
-    Cognitive Operating System Hypervisor.
 
-    Enforces access, mutation, and lifecycle policies across
-    memory variants to prevent Entropic Decay.
-    """
+    def __init__(
+        self,
+        exergy_threshold: float = 0.5,
+        engine: Any | None = None,
+    ) -> None:
+        self.pipeline = Mem0Pipeline(exergy_threshold=exergy_threshold)
+        self._engine = engine
 
-    def __init__(self):
-        self._working_memory: dict[str, Any] = {}
-        self._episodic_traces: list[Any] = []
-        # Semantic memory connects to ledger
+    async def persist_episodic_to_semantic(self, context: str) -> int:
+        """Extract semantic facts from episodic context and persist."""
+        log_info("MemoryOS: Starting episodic-to-semantic persistence")
 
-    async def write(self, tier: MemoryTier, key: str, value: Any, cost_budget: float) -> bool:
-        """
-        Writes data to the specified memory tier, metering the energy/cost budget.
-        """
-        logger.debug("Writing to %s memory under budget %s", tier.value, cost_budget)
-        if tier == MemoryTier.WORKING:
-            self._working_memory[key] = value
-            return True
-        elif tier == MemoryTier.EPISODIC:
-            self._episodic_traces.append({"key": key, "value": value})
-            return True
-        elif tier == MemoryTier.SEMANTIC:
-            # Requires Maxwell's Demon (Mem0 pipeline)
-            raise NotImplementedError(
-                "Semantic writes must pass through mem0_pipeline for exergy validation."
-            )
+        facts = await self.pipeline.extract(context)
+        if not facts:
+            log_info("MemoryOS: No facts extracted from context")
+            return 0
 
-        return False
+        consolidated = await self.pipeline.consolidate(facts)
+        stored_count = await self.pipeline.store(consolidated)
 
-    async def read(self, tier: MemoryTier, query: str) -> Any | None:
-        """
-        Routes the retrieval request to the appropriate subsystem,
-        bypassing expensive global searches.
-        """
-        logger.debug("Reading from %s memory: %s", tier.value, query)
-        # Search implementation based on tier
-        return None
+        log_info("MemoryOS: Persistence complete", stored_facts=stored_count)
+        return stored_count
 
-    async def flush(self, tier: MemoryTier):
-        """
-        Forces an entropic collapse (amnesia) on the specified tier.
-        """
-        logger.warning("Flushing %s memory", tier.value)
-        if tier == MemoryTier.WORKING:
-            self._working_memory.clear()
-        elif tier == MemoryTier.EPISODIC:
-            self._episodic_traces.clear()
-        elif tier == MemoryTier.SEMANTIC:
-            raise PermissionError("Cannot flush immutable semantic ledger.")
+    async def gc(self) -> None:
+        """Thermodynamic GC — delegates to Memento agent when available."""
+        log_info("MemoryOS: Running thermodynamic compaction (GC)")
+
+        if self._engine and hasattr(self._engine, "_memento_agent"):
+            agent = self._engine._memento_agent
+            if agent is not None:
+                await agent.compact()
+                log_info("MemoryOS: GC delegated to Memento specialist")
+                return
+
+        log_info("MemoryOS: No Memento agent — GC skipped")

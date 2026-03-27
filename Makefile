@@ -1,4 +1,4 @@
-.PHONY: help install dev test lint format build serve docs deploy clean bench
+.PHONY: help install dev test lint format build serve docs deploy clean bench pg-smoke
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
@@ -72,3 +72,7 @@ typecheck: ## Run type checker
 
 mcp: ## Start MCP server
 	python run_mcp_server.py
+
+pg-smoke: ## Run PostgreSQL public API smoke and render evidence (requires POSTGRES_DSN or alias)
+	python3 scripts/postgres_primary_smoke.py --output output/postgres_primary_smoke.json
+	python3 scripts/postgres_primary_evidence.py --input output/postgres_primary_smoke.json --output output/postgres_primary_smoke.md
