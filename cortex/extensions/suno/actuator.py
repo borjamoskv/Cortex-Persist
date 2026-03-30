@@ -2,7 +2,6 @@ import argparse
 import asyncio
 import json
 import logging
-from typing import Optional
 
 from playwright.async_api import Page, async_playwright
 
@@ -35,7 +34,7 @@ class SunoActuator:
         await page.goto(self.base_url)
         return page
 
-    async def generate_track(self, lyrics: str, style: str, title: str, clip_id: Optional[str] = None) -> Optional[dict]:
+    async def generate_track(self, lyrics: str, style: str, title: str, clip_id: str | None = None) -> dict | None:
         """
         Orquesta la generación de una pista en Suno usando Playwright.
         Si se provee clip_id, ejecuta la operación Extend sobre el clip persistido.
@@ -46,7 +45,7 @@ class SunoActuator:
             try:
                 logger.info("[*] Attaching to Chrome via CDP port %s...", self.port)
                 browser = await p.chromium.connect_over_cdp(f"http://localhost:{self.port}")
-                
+
                 # Force the URL if clip_id is detected
                 page = await browser.contexts[0].new_page() if clip_id else await self._find_or_open_suno_tab(browser)
                 if clip_id:
@@ -56,7 +55,7 @@ class SunoActuator:
                 # TODO: Interactuar con el DOM de Suno.
                 # Nota: Estos selectores son stubs adaptables. Suno suele blindar clases (ej. react divs).
                 logger.info("[*] Injecting prompts into Suno DOM...")
-                
+
                 # Simulamos espera bot-like para no disparar rate limits (Ω₂)
                 await asyncio.sleep(2)
 

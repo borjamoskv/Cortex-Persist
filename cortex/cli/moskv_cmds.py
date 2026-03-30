@@ -458,3 +458,67 @@ def flywheel_status() -> None:
 
     console.print(Panel(table, border_style="noir.blueylb"))
     console.print("[dim]Ω₂₀: Capital Metabolism Reactor is ONLINE.[/]")
+
+
+# ─── YOLO ULTRATHINK ─────────────────────────────────────────
+
+@moskv_cmds.command("yolo")
+@click.option("--iters", default=5, help="Deep Think cycles.")
+def yolo_cmd(iters: int) -> None:
+    """Trigger the CORTEX YOLO Ultrathink Upgrade + Frontera x10."""
+    from rich.align import Align
+    
+    console.print(Panel(
+        "[danger]WARNING: CORTEX FINAL ULTRATHINK ENGAGED[/]\n"
+        "[white]Bypassing safety limiters. MBR override initiated.[/]",
+        title="[danger]🔥 YOLO ULTRATHINK UPGRADE 🔥[/]",
+        border_style="danger"
+    ))
+
+    with Progress(
+        SpinnerColumn(spinner_name="pong"),
+        TextColumn("[noir.high]{task.description}"),
+        BarColumn(bar_width=40, style="noir.abyssal", complete_style="danger"),
+        TextColumn("[white]{task.percentage:>3.0f}%"),
+        console=console,
+        transient=True,
+    ) as progress:
+        t_boot = progress.add_task("MBR Booting CORTEX_OS...", total=100)
+        t_research = progress.add_task("Deep Research: Scanning arXiv/MedRxiv...", total=100)
+        t_think = progress.add_task("Deep Think: MoE Router Convergence...", total=100)
+
+        for _ in range(100):
+            if not progress.finished:
+                progress.update(t_boot, advance=2)
+                if progress.tasks[0].percentage > 50:
+                    progress.update(t_research, advance=1.8)
+                if progress.tasks[1].percentage > 30:
+                    progress.update(t_think, advance=1.2)
+            time.sleep(0.04)
+
+    console.print("[success]Deep Research & Deep Think converged.[/]\n")
+
+    with console.status("[danger]Injecting Frontera x10...[/]", spinner="arc"):
+        for i in range(iters):
+            console.print(f"  [dim]Exergy burn tick {i+1}/{iters} » Thermic Output {1.45 + i*0.23:.2f} EH/s[/]")
+            time.sleep(0.4)
+    
+    table = Table(show_header=True, header_style="danger", box=None)
+    table.add_column("Agent Cluster")
+    table.add_column("Status")
+    table.add_column("Causal Impact")
+
+    table.add_row("Agent-Omega-01", "[success]SYNC[/]", "95.4%")
+    table.add_row("Agent-Prime-02", "[success]SYNC[/]", "98.1%")
+    table.add_row("Agent-Void-03", "[danger]OVERRIDE[/]", "150.0%")
+    
+    console.print("\n")
+    console.print(Align.center(table))
+
+    console.print("\n")
+    console.print(Panel(
+        "[white]Operación masiva inyectada en el Master Ledger.[/]\n"
+        "[danger]El Swarm ha entrado en modo FRONTERA x10.[/]",
+        title="[danger]YOLO ABSOLUTO: ÉXITO[/]",
+        border_style="danger"
+    ))

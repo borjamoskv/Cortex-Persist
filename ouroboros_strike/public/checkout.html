@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CORTEX — Ouroboros Sovereign Exergy Extraction</title>
+  <style>
+    body { font-family: 'Courier New', Courier, monospace; background: #0A0A0A; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+    #payment-form { width: 30vw; min-width: 500px; display: flex; flex-direction: column; gap: 1rem; border: 1px solid #2B3BE5; padding: 2rem; background: rgba(0,0,0,0.8); box-shadow: 0 0 20px rgba(43,59,229,0.3); }
+    h1 { color: #00FF9D; font-size: 1.5rem; text-align: center; margin-bottom: 2rem; text-transform: uppercase; letter-spacing: 2px;}
+    button { background: #00FF9D; color: #000; padding: 1rem; border: none; font-weight: 950; font-size: 1.2rem; cursor: pointer; text-transform: uppercase; transition: all 0.2s; }
+    button:hover { background: #2B3BE5; color: #fff; box-shadow: 0 0 15px #2B3BE5; }
+    .stripe-element { background: rgba(255, 255, 255, 0.05); padding: 1rem; border: 1px solid rgba(255,255,255,0.1); }
+  </style>
+  <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+  <form id="payment-form">
+    <h1>CORTEX SWARM BLUEPRINT (OMEGA) — $999.00 USD</h1>
+    <p style="text-align: center; opacity: 0.7; font-size: 0.8rem;">Vector J Active. Secure Checkout via Stripe.</p>
+    <div id="payment-element" class="stripe-element"></div>
+    <button id="submit">
+      <div class="spinner hidden" id="spinner"></div>
+      <span id="button-text">EXTRACT EXERGY (PAY NOW)</span>
+    </button>
+    <div id="payment-message" class="hidden"></div>
+  </form>
+
+  <script>
+    const stripe = Stripe("pk_test_TYooMQauvdEDq54NiTphI7jx"); // Testing key placeholder
+
+    let elements;
+
+    initialize();
+    checkStatus();
+
+    document
+      .querySelector("#payment-form")
+      .addEventListener("submit", handleSubmit);
+
+    async function initialize() {
+      const response = await fetch("/create-payment-intent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      const { clientSecret } = await response.json();
+
+      const appearance = { theme: 'night', variables: { colorPrimary: '#00FF9D' } };
+      elements = stripe.elements({ appearance, clientSecret });
+
+      const paymentElement = elements.create("payment");
+      paymentElement.mount("#payment-element");
+    }
+
+    async function handleSubmit(e) {
+      e.preventDefault();
+      setLoading(true);
+
+      const { error } = await stripe.confirmPayment({
+        elements,
+        confirmParams: { return_url: window.location.href },
+      });
+
+      if (error.type === "card_error" || error.type === "validation_error") {
+        showMessage(error.message);
+      } else {
+        showMessage("An unexpected error occurred.");
+      }
+
+      setLoading(false);
+    }
+
+    async function checkStatus() {
+      const clientSecret = new URLSearchParams(window.location.search).get("payment_intent_client_secret");
+      if (!clientSecret) return;
+
+      const { paymentIntent } = await stripe.retrievePaymentIntent(clientSecret);
+      switch (paymentIntent.status) {
+        case "succeeded": showMessage("Payment succeeded! Vector J Liquidated."); break;
+        case "processing": showMessage("Your payment is processing."); break;
+        case "requires_payment_method": showMessage("Your payment was not successful, please try again."); break;
+        default: showMessage("Something went wrong."); break;
+      }
+    }
+
+    function showMessage(messageText) {
+      const messageContainer = document.querySelector("#payment-message");
+      messageContainer.classList.remove("hidden");
+      messageContainer.textContent = messageText;
+    }
+
+    function setLoading(isLoading) {
+      if (isLoading) {
+        document.querySelector("#submit").disabled = true;
+        document.querySelector("#spinner").classList.remove("hidden");
+        document.querySelector("#button-text").classList.add("hidden");
+      } else {
+        document.querySelector("#submit").disabled = false;
+        document.querySelector("#spinner").classList.add("hidden");
+        document.querySelector("#button-text").classList.remove("hidden");
+      }
+    }
+  </script>
+</body>
+</html>

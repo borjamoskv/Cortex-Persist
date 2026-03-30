@@ -73,10 +73,10 @@ class Mem0Pipeline:
         fact_str = str(fact)
         # 1. Estimate Signal Gain (Dummy calculation for now, in prod would use Shannon entropy)
         signal_gain = 0.8 if len(fact_str) > 20 else 0.2
-        
+
         # 2. Score mapping
         score = signal_gain # In prod, this would be a full ExergyResult
-        
+
         return ExergyScore(
             score=float(score),
             justification=f"Signal density: {len(fact_str)} chars"
@@ -89,9 +89,9 @@ class Mem0Pipeline:
         """
         stored_count = 0
         from cortex.ledger.event_ledger import get_default_ledger
-        
+
         ledger = get_default_ledger()
-        
+
         for fact in facts:
             exergy = await self.evaluate_exergy(fact)
             if exergy.score >= self.exergy_threshold:
@@ -104,8 +104,8 @@ class Mem0Pipeline:
                 stored_count += 1
             else:
                 log_debug(
-                    "Maxwell's Demon: Fact rejected (low exergy)", 
-                    score=exergy.score, 
+                    "Maxwell's Demon: Fact rejected (low exergy)",
+                    score=exergy.score,
                     threshold=self.exergy_threshold
                 )
 

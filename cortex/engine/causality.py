@@ -165,7 +165,7 @@ class AsyncCausalGraph:
 
         changes: list[dict[str, Any]] = []
         now = datetime.now(timezone.utc).isoformat()
-        
+
         # O(1) CTE to fetch all descendants, their min depths, and their current facts fields
         sql_descendants = """
             WITH RECURSIVE taint_graph(child_id, depth, path) AS (
@@ -189,13 +189,13 @@ class AsyncCausalGraph:
             WHERE f.tenant_id = ?
             GROUP BY tg.child_id;
         """
-        
+
         updates = []
         edge_inserts = []
-        
+
         from cortex.crypto import get_default_encrypter
         enc = get_default_encrypter()
-        
+
         async with self.conn.execute(
             sql_descendants,
             (
@@ -214,7 +214,7 @@ class AsyncCausalGraph:
                 depth = row[1]
                 old_conf = row[2] or "C5"
                 old_meta_raw = row[3] or "{}"
-                
+
                 try:
                     old_meta = enc.decrypt_json(old_meta_raw, tenant_id=tenant_id) or {}
                     new_conf = _downgrade_confidence(old_conf, depth)
@@ -227,10 +227,10 @@ class AsyncCausalGraph:
                         current_id,
                     )
                     continue
-                    
+
                 updates.append((new_conf, encrypted_meta, current_id, tenant_id))
                 edge_inserts.append((current_id, fact_id, EDGE_TAINTED_BY, project, tenant_id))
-                
+
                 changes.append(
                     {
                         "fact_id": current_id,
@@ -239,13 +239,13 @@ class AsyncCausalGraph:
                         "hops": depth,
                     },
                 )
-                
+
         if updates:
             await self.conn.executemany(
                 "UPDATE facts SET confidence = ?, metadata = ? WHERE id = ? AND tenant_id = ?",
                 updates,
             )
-            
+
         if edge_inserts:
             try:
                 await self.conn.executemany(

@@ -9,7 +9,7 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
-from cortex.utils.result import Err, Ok, Result
+from cortex.utils.result import Ok, Result
 
 logger = logging.getLogger("cortex.git_ops")
 

@@ -1,6 +1,6 @@
 import os
-import time
 import subprocess
+import time
 
 image_path = "/Users/borjafernandezangulo/.gemini/antigravity/brain/b4258410-8db5-4be6-804c-17bfe30e5423/remotinol_meme_1774524951397.png"
 
@@ -15,7 +15,7 @@ def copy_file_to_clipboard(path):
 def copy_image_appkit(path):
     # Try AppKit if available, it's more reliable for raw image data
     try:
-        from AppKit import NSPasteboard, NSImage
+        from AppKit import NSImage, NSPasteboard
         image = NSImage.alloc().initWithContentsOfFile_(path)
         pb = NSPasteboard.generalPasteboard()
         pb.clearContents()

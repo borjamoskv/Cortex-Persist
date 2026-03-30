@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from typing import Dict, Any, Callable
+from collections.abc import Callable
 
 logger = logging.getLogger("cortex.daemon.trigger")
 
@@ -11,13 +11,13 @@ class TriggerEngine:
     Autonomously executes CORTEX Swarm skills based on market heuristics and system state.
     """
     def __init__(self):
-        self.triggers: Dict[str, Callable] = {}
+        self.triggers: dict[str, Callable] = {}
         self.active = False
-        
+
     def register_trigger(self, event_type: str, action: Callable):
         self.triggers[event_type] = action
         logger.info(f"Trigger registered for event: {event_type}")
-        
+
     async def poll_state(self):
         """
         Polls the global state or external webhooks.
@@ -28,6 +28,6 @@ class TriggerEngine:
         while self.active:
             # Implement external API polling (e.g., Awwwards drops, MEV mempool)
             await asyncio.sleep(60) # Poll every 60s
-            
+
     def halt(self):
         self.active = False

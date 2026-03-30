@@ -1,5 +1,7 @@
 import pytest
+
 from cortex.engine.mixins.exergy_mixin import ExergyMixin
+
 
 class EngineWithExergy(ExergyMixin):
     pass

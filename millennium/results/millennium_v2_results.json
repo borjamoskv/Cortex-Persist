@@ -1,0 +1,204 @@
+[
+  {
+    "vector": "RIEMANN",
+    "N": 2000,
+    "trials": 5,
+    "total_spacings": 9995,
+    "ks_statistic": 0.07522650826947808,
+    "ks_critical_005": 0.013603401275531484,
+    "ks_pass": false,
+    "mean_spacing_normalized": 1.000000021104077,
+    "variance_spacing": 0.38036834185291524,
+    "montgomery_r2_theoretical": {
+      "0.5": 0.5947152654306489,
+      "1.0": 1.0,
+      "1.5": 0.9549683628256277
+    },
+    "wigner_dyson_fit": "MARGINAL",
+    "confidence": "C3"
+  },
+  {
+    "vector": "P_VS_NP",
+    "n_vars_tested": [
+      20,
+      30,
+      40,
+      50
+    ],
+    "ratios_tested": [
+      3.0,
+      3.5,
+      4.0,
+      4.267,
+      4.5,
+      5.0
+    ],
+    "instances_per_config": 20,
+    "scaling_data": {
+      "n20_r3.0": {
+        "n_vars": 20,
+        "ratio": 3.0,
+        "median_dpll_calls": 11.0,
+        "sat_fraction": 1.0
+      },
+      "n20_r3.5": {
+        "n_vars": 20,
+        "ratio": 3.5,
+        "median_dpll_calls": 13.0,
+        "sat_fraction": 1.0
+      },
+      "n20_r4.0": {
+        "n_vars": 20,
+        "ratio": 4.0,
+        "median_dpll_calls": 17.0,
+        "sat_fraction": 0.75
+      },
+      "n20_r4.267": {
+        "n_vars": 20,
+        "ratio": 4.267,
+        "median_dpll_calls": 16.5,
+        "sat_fraction": 0.65
+      },
+      "n20_r4.5": {
+        "n_vars": 20,
+        "ratio": 4.5,
+        "median_dpll_calls": 22.5,
+        "sat_fraction": 0.55
+      },
+      "n20_r5.0": {
+        "n_vars": 20,
+        "ratio": 5.0,
+        "median_dpll_calls": 24.0,
+        "sat_fraction": 0.4
+      },
+      "n30_r3.0": {
+        "n_vars": 30,
+        "ratio": 3.0,
+        "median_dpll_calls": 15.5,
+        "sat_fraction": 1.0
+      },
+      "n30_r3.5": {
+        "n_vars": 30,
+        "ratio": 3.5,
+        "median_dpll_calls": 18.5,
+        "sat_fraction": 0.95
+      },
+      "n30_r4.0": {
+        "n_vars": 30,
+        "ratio": 4.0,
+        "median_dpll_calls": 35.0,
+        "sat_fraction": 0.9
+      },
+      "n30_r4.267": {
+        "n_vars": 30,
+        "ratio": 4.267,
+        "median_dpll_calls": 62.5,
+        "sat_fraction": 0.6
+      },
+      "n30_r4.5": {
+        "n_vars": 30,
+        "ratio": 4.5,
+        "median_dpll_calls": 42.0,
+        "sat_fraction": 0.5
+      },
+      "n30_r5.0": {
+        "n_vars": 30,
+        "ratio": 5.0,
+        "median_dpll_calls": 54.0,
+        "sat_fraction": 0.15
+      },
+      "n40_r3.0": {
+        "n_vars": 40,
+        "ratio": 3.0,
+        "median_dpll_calls": 19.5,
+        "sat_fraction": 1.0
+      },
+      "n40_r3.5": {
+        "n_vars": 40,
+        "ratio": 3.5,
+        "median_dpll_calls": 24.0,
+        "sat_fraction": 1.0
+      },
+      "n40_r4.0": {
+        "n_vars": 40,
+        "ratio": 4.0,
+        "median_dpll_calls": 41.0,
+        "sat_fraction": 1.0
+      },
+      "n40_r4.267": {
+        "n_vars": 40,
+        "ratio": 4.267,
+        "median_dpll_calls": 98.0,
+        "sat_fraction": 0.75
+      },
+      "n40_r4.5": {
+        "n_vars": 40,
+        "ratio": 4.5,
+        "median_dpll_calls": 130.0,
+        "sat_fraction": 0.3
+      },
+      "n40_r5.0": {
+        "n_vars": 40,
+        "ratio": 5.0,
+        "median_dpll_calls": 112.0,
+        "sat_fraction": 0.1
+      },
+      "n50_r3.0": {
+        "n_vars": 50,
+        "ratio": 3.0,
+        "median_dpll_calls": 23.0,
+        "sat_fraction": 1.0
+      },
+      "n50_r3.5": {
+        "n_vars": 50,
+        "ratio": 3.5,
+        "median_dpll_calls": 39.0,
+        "sat_fraction": 1.0
+      },
+      "n50_r4.0": {
+        "n_vars": 50,
+        "ratio": 4.0,
+        "median_dpll_calls": 126.5,
+        "sat_fraction": 0.9
+      },
+      "n50_r4.267": {
+        "n_vars": 50,
+        "ratio": 4.267,
+        "median_dpll_calls": 417.5,
+        "sat_fraction": 0.65
+      },
+      "n50_r4.5": {
+        "n_vars": 50,
+        "ratio": 4.5,
+        "median_dpll_calls": 235.0,
+        "sat_fraction": 0.55
+      },
+      "n50_r5.0": {
+        "n_vars": 50,
+        "ratio": 5.0,
+        "median_dpll_calls": 217.0,
+        "sat_fraction": 0.15
+      }
+    },
+    "critical_ratio_exponential_base": 1.1067477217471773,
+    "critical_ratio_r_squared": 0.9661050507062086,
+    "exponential_scaling_detected": true,
+    "verdict": "Exponential scaling T \u221d 1.1067^n detected (R\u00b2=0.966)",
+    "confidence": "C4"
+  },
+  {
+    "vector": "NAVIER-STOKES",
+    "grid": "64\u00b3",
+    "viscosity": 0.01,
+    "steps": 1103,
+    "initial_enstrophy": 0.9450000000000003,
+    "max_enstrophy": 7028788.053438337,
+    "final_enstrophy": 7028788.053438337,
+    "enstrophy_growth_ratio": 7437870.956019402,
+    "bkm_integral": 276.9385479515809,
+    "blowup_detected": true,
+    "energy_dissipation": -5440.075779412572,
+    "verdict": "BLOWUP",
+    "confidence": "C3"
+  }
+]

@@ -11,7 +11,7 @@ logger = logging.getLogger("cortex.extensions.x_intelligence.daemon")
 class XIntelligenceDaemon:
     """
     Autonomous X-Intelligence Monitor (Ω-Signal).
-    
+
     Polls X for specific keywords and broadcasts signals to the SwarmManager.
     Filters out noise using ExergyGuard (Ω₂).
     """
@@ -36,17 +36,17 @@ class XIntelligenceDaemon:
         """Main autonomous monitoring loop."""
         self.running = True
         logger.info("XIntelligenceDaemon: Starting signal monitor on keywords %s", self.keywords)
-        
+
         while self.running:
             try:
                 for keyword in self.keywords:
                     logger.debug("XIntelligenceDaemon: Searching for '%s'...", keyword)
                     response = await self.client.search(keyword, limit=5)
-                    
+
                     for tweet in response.tweets:
                         # 1. Structural Filter (Engagement/Blue check)
                         is_significant = tweet.user.is_blue_verified or tweet.favorite_count > 10
-                        
+
                         # 2. Thermodynamic Filter (ExergyGuard - Ω₂)
                         try:
                             exergy_score = self.exergy_guard.check_thermodynamic_yield(
@@ -56,13 +56,13 @@ class XIntelligenceDaemon:
                             )
                         except ValueError:
                             # Skip low exergy content
-                            logger.debug("XIntelligenceDaemon: Skipping low exergy tweet from @%s", 
+                            logger.debug("XIntelligenceDaemon: Skipping low exergy tweet from @%s",
                                         tweet.user.screen_name)
                             continue
 
                         if is_significant:
                             await self._broadcast_signal(tweet, exergy_score)
-                
+
                 await asyncio.sleep(self.interval)
             except Exception as e:
                 logger.error("XIntelligenceDaemon: Error in loop: %s", e)
@@ -88,7 +88,7 @@ class XIntelligenceDaemon:
                 }
             }
         )
-        logger.info("XIntelligenceDaemon: 📡 Broadcasting high-exergy signal (%.2f) from @%s", 
+        logger.info("XIntelligenceDaemon: 📡 Broadcasting high-exergy signal (%.2f) from @%s",
                     exergy_score, tweet.user.screen_name)
         await self._bus.publish(signal)
 

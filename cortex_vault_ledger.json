@@ -1,0 +1,9 @@
+[
+    {
+        "timestamp": "2026-03-27T18:20:29.739676",
+        "yield_usd": 47250.64,
+        "vector": "MEV-Mamba-v2",
+        "proof_hash": "63a9edaae7fc4b477342616e",
+        "status": "CRYSTALLIZED"
+    }
+]

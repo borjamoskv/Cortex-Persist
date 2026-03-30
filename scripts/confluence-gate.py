@@ -64,7 +64,7 @@ def generate_repair_patch(target_path, failure_type):
 
 async def audit_cycle(target=".", session_id="sovereign_audit"):
     logger.info(f"--- 🌌 CONFLUENCIA Ω₃₆/Ω₄₄/Ω₅₁/Ω₇₀: {target} ---")
-    
+
     agent = None
     if MementoAgent:
         agent = MementoAgent(session_id=session_id)
@@ -74,7 +74,7 @@ async def audit_cycle(target=".", session_id="sovereign_audit"):
     # Run Sub-Audits
     arch_score, arch_out = run_audit_script("arch-audit.py", target)
     jobs_score, jobs_out = run_audit_script("aesthetic-cli.py", target)
-    
+
     # Extract Merkle roots if present
     merkle_root = "unknown"
     for line in arch_out.splitlines():
@@ -87,14 +87,14 @@ async def audit_cycle(target=".", session_id="sovereign_audit"):
 
     w_arch, w_jobs = determine_weights(target)
     final_score = (arch_score * w_arch) + (jobs_score * w_jobs)
-    
+
     logger.info(f"Architect: {arch_score} (w={w_arch})")
     logger.info(f"SteVeJobs: {jobs_score} (w={w_jobs})")
     logger.info(f"Final Confluence Score: {final_score}")
-    
+
     # Ω₅₁: Ledger Mutation (Visual Log)
     logger.info(f"Ω₅₁-LEDGER-WRITE: Commit target={target} score={final_score} merkle={merkle_root}")
-    
+
     if final_score < 0.8:
         logger.error("🔴 [FAIL] - System below confluence threshold.")
         patches = []
@@ -102,14 +102,14 @@ async def audit_cycle(target=".", session_id="sovereign_audit"):
             patches.append(generate_repair_patch(target, "structural"))
         if jobs_score < 0.8:
             patches.append(generate_repair_patch(target, "aesthetic"))
-        
+
         if agent:
             await agent.record_trace("Audit-Failure", f"Final Score: {final_score}. Generated {len(patches)} patches.")
             # Trigger a tick to begin crystallization of the failure
             await agent.tick()
-        
+
         sys.exit(1)
-    
+
     if agent:
         await agent.record_trace("Audit-Success", f"Final Score: {final_score}. Confluence achieved.")
         await agent.tick()

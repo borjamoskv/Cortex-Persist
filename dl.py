@@ -1,5 +1,6 @@
-import yt_dlp
 import sys
+
+import yt_dlp
 
 url = "https://www.youtube.com/watch?v=8KTMElsvohE"
 opts = {

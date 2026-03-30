@@ -1,0 +1,140 @@
+- main [ref=e2]:
+  - generic [ref=e3]:
+    - link "BORJA MOSKV" [ref=e4]:
+      - /url: index.html
+    - navigation "Navegacion Jes-Extender" [ref=e5]:
+      - link "Lab" [ref=e6]:
+        - /url: index.html#lab
+      - link "Diario" [ref=e7]:
+        - /url: blog.html
+      - link "CORTEX" [ref=e8]:
+        - /url: https://github.com/borjamoskv/Cortex-Persist
+  - generic [ref=e9]:
+    - generic [ref=e10]:
+      - generic [ref=e11]: App / heavy protocol
+      - heading "Jes-Extender" [level=1] [ref=e12]
+      - paragraph [ref=e13]: Generador de materia sonora industrial en tiempo real. Dos ejes de prompt, morph weight continuo y salida dura para sesiones densas, pruebas y artefactos de estudio.
+      - generic "Capacidades de Jes-Extender" [ref=e14]:
+        - generic [ref=e15]: Realtime
+        - generic [ref=e16]: 24 kHz PCM
+        - generic [ref=e17]: WebSocket engine
+        - generic [ref=e18]: Industrial / heavy / broken club
+    - complementary [ref=e19]:
+      - generic [ref=e20]: Runtime
+      - strong [ref=e21]:
+        - text: Necesita engine activo en
+        - code [ref=e22]: ws://localhost:8001/ws/generate
+      - paragraph [ref=e23]: La UI ya queda lista en la web. Si el backend esta encendido, puedes entrar, ajustar y extraer en tiempo real.
+      - generic "Estado de Jes-Extender" [ref=e24]:
+        - article [ref=e25]:
+          - generic [ref=e26]: Engine
+          - strong [ref=e27]: LOCAL ONLY
+          - paragraph [ref=e28]: Se comprobara al extraer o al pulsar CHECK ENGINE.
+        - article [ref=e29]:
+          - generic [ref=e30]: Preset activo
+          - strong [ref=e31]: COLLAPSE
+          - paragraph [ref=e32]: Alarmas, low end roto y friccion de sistema.
+        - article [ref=e33]:
+          - generic [ref=e34]: Atajos
+          - strong [ref=e35]: Cmd/Ctrl + Enter
+          - paragraph [ref=e36]:
+            - code [ref=e37]: Esc
+            - text: detiene la extraccion y
+            - code [ref=e38]: Reset
+            - text: restaura el estado base.
+      - generic [ref=e39]:
+        - link "ABRIR CONSOLA" [ref=e40]:
+          - /url: "#app"
+        - button "CHECK ENGINE" [ref=e41] [cursor=pointer]
+        - button "COPIAR LINK" [ref=e42] [cursor=pointer]
+        - button "RESET" [ref=e43] [cursor=pointer]
+        - link "VOLVER A LA HOME" [ref=e44]:
+          - /url: index.html
+  - generic [ref=e45]:
+    - generic [ref=e46]:
+      - generic [ref=e47]: Presets
+      - heading "Entradas rapidas" [level=2] [ref=e48]
+      - paragraph [ref=e49]: Cuatro modos para no arrancar desde cero. Cada preset rellena prompts y peso de morph.
+    - generic "Presets de Jes-Extender" [ref=e50]:
+      - button "FORGE Martillo y presión Kick industrial, metal caliente, distorsion seca." [ref=e51] [cursor=pointer]:
+        - text: FORGE
+        - strong [ref=e52]: Martillo y presión
+        - paragraph [ref=e53]: Kick industrial, metal caliente, distorsion seca.
+      - button "RITUAL Percusión cavernosa Golpe tribal, humo de fabrica, drone oscuro." [ref=e54] [cursor=pointer]:
+        - text: RITUAL
+        - strong [ref=e55]: Percusión cavernosa
+        - paragraph [ref=e56]: Golpe tribal, humo de fabrica, drone oscuro.
+      - button "COLLAPSE Broken club rojo Alarmas, low end roto y friccion de sistema." [ref=e57] [cursor=pointer]:
+        - text: COLLAPSE
+        - strong [ref=e58]: Broken club rojo
+        - paragraph [ref=e59]: Alarmas, low end roto y friccion de sistema.
+      - button "ASH Lento, grave, toxico Doom techno, decay largo y niebla de hierro." [ref=e60] [cursor=pointer]:
+        - text: ASH
+        - strong [ref=e61]: Lento, grave, toxico
+        - paragraph [ref=e62]: Doom techno, decay largo y niebla de hierro.
+    - paragraph [ref=e63]:
+      - text: Cada preset actualiza la URL con
+      - code [ref=e64]: "?preset=..."
+      - text: para compartir una entrada concreta sin explicar nada más.
+  - generic [ref=e66]:
+    - generic [ref=e67]:
+      - generic [ref=e68]: Consola
+      - heading "Heavy protocol surface" [level=2] [ref=e69]
+      - paragraph [ref=e70]: Escribe un eje principal, otro secundario y decide cuanta contaminacion quieres entre ambos. La salida busca densidad antes que limpieza.
+      - generic [ref=e71]:
+        - article [ref=e72]:
+          - text: Primary axis
+          - paragraph [ref=e73]: "Define el cuerpo del sistema: ritmo, dureza, tempo o materia."
+        - article [ref=e74]:
+          - text: Secondary axis
+          - paragraph [ref=e75]: "Inyecta desviacion: chatarra, ritual, alarma, drone o fractura."
+        - article [ref=e76]:
+          - text: Morph weight
+          - paragraph [ref=e77]: Collapse ahora domina la mezcla. Mueve el peso para abrir otra mutacion.
+    - region "Interfaz Jes-Extender" [ref=e78]:
+      - generic [ref=e79]:
+        - generic [ref=e80]: JES_EXTENDER
+        - generic [ref=e81]: STANDBY
+      - generic [ref=e82]:
+        - generic [ref=e85]:
+          - generic [ref=e86]: pressure
+          - strong [ref=e87]: dense / red / metallic
+        - generic [ref=e88]:
+          - generic [ref=e89]:
+            - generic [ref=e90]: Primary axis
+            - textbox "Primary axis" [ref=e91]:
+              - /placeholder: industrial techno heavy
+              - text: broken club impact
+          - generic [ref=e92]:
+            - generic [ref=e93]: Secondary axis
+            - textbox "Secondary axis" [ref=e94]:
+              - /placeholder: distorted bass, alarms and iron dust
+              - text: system alarms, clipped kicks and red friction
+          - generic [ref=e95]:
+            - generic [ref=e96]:
+              - generic [ref=e97]: Morph weight
+              - generic [ref=e98]: 73%
+            - slider "Morph weight" [ref=e99]: "73"
+          - generic [ref=e100]:
+            - button "EXTRACT" [ref=e101] [cursor=pointer]
+            - button "HALT" [disabled] [ref=e102] [cursor=pointer]
+          - generic [ref=e103]: "STATUS: STANDBY"
+          - generic [ref=e104]:
+            - generic [ref=e105]: "[22:32:53] Jes-Extender Heavy Module Initialized"
+            - generic [ref=e106]: "[boot] surface mounted."
+            - generic [ref=e107]: "[boot] waiting for engine."
+  - generic [ref=e108]:
+    - article [ref=e109]:
+      - text: Como usarlo
+      - paragraph [ref=e110]:
+        - text: 1. Elige un preset o escribe tu par de prompts. 2. Ajusta el morph. 3. Pulsa
+        - strong [ref=e111]: EXTRACT
+        - text: y corta con
+        - strong [ref=e112]: HALT
+        - text: cuando tengas materia util.
+    - article [ref=e113]:
+      - text: Que produce mejor
+      - paragraph [ref=e114]: Texturas industriales, techno roto, ritual oscuro, subgrave deformado, alarmas y loops para sesiones o piezas frontera.
+    - article [ref=e115]:
+      - text: Salida esperada
+      - paragraph [ref=e116]: No busca pulcritud pop. Busca friccion, peso, humo y un borde mas fisico que decorativo.

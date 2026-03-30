@@ -24,6 +24,7 @@ __all__ = [
     "ValidationBoundaryError",
     "ConsensusFailure",
     "WriteWorkerError",
+    "PearlError",
     "AuthError",
     "PermissionDeniedError",
     "SovereignViolation",
@@ -102,6 +103,10 @@ class ConsensusFailure(CriticalSubsystemError):
 
 class WriteWorkerError(CortexDatabaseError):
     """Raised when the SqliteWriteWorker fails to process an operation."""
+
+
+class PearlError(CortexError):
+    """Raised when a PeARL engine operation fails."""
 
 
 class AuthError(CortexError):

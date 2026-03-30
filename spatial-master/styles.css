@@ -24,7 +24,7 @@ body {
     min-height: 100vh;
     display: flex;
     justify-content: center;
-    background-image: 
+    background-image:
         radial-gradient(circle at 50% 0%, rgba(43, 59, 229, 0.1) 0%, transparent 50%),
         linear-gradient(0deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
 }

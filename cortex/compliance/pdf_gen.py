@@ -12,28 +12,28 @@ class SovereignAuditPDF(FPDF):
         self.accent_color = (43, 59, 229)  # #2B3BE5 BlueYlb
         self.bg_color = (10, 10, 10)       # #0A0A0A
         self.text_color = (255, 255, 255)  # #FFFFFF
-        
+
     def header(self):
         # Background
         self.set_fill_color(*self.bg_color)
         self.rect(0, 0, 210, 297, 'F')
-        
+
         # Logo
         logo_path = os.path.join(os.path.dirname(__file__), "assets", "logo.png")
         if os.path.exists(logo_path):
             self.image(logo_path, 10, 10, 30)
-        
+
         # Title
         self.set_xy(50, 15)
         self.set_font("helvetica", "B", 16)
         self.set_text_color(*self.text_color)
         self.cell(0, 10, f"SOVEREIGN AUDIT REPORT: {self.project_name.upper()}", ln=True)
-        
+
         self.set_xy(50, 25)
         self.set_font("courier", "I", 8)
         self.set_text_color(150, 150, 150)
         self.cell(0, 5, f"Issued: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | EU AI Act Art. 12 Compliant", ln=True)
-        
+
         # Divider line
         self.set_draw_color(*self.accent_color)
         self.line(10, 45, 200, 45)
@@ -74,15 +74,15 @@ class SovereignAuditPDF(FPDF):
 def generate_report(project_name: str, records: list[dict[str, Any]], output_path: str):
     pdf = SovereignAuditPDF(project_name=project_name)
     pdf.add_page()
-    
+
     pdf.add_section("Infrastructure Summary")
     pdf.add_metadata_row("Ledger Engine", "CORTEX v8.0")
     pdf.add_metadata_row("Governance Mode", "Sovereign / Restricted")
     pdf.add_metadata_row("Auditability Level", "C5-Dynamic (Verified)")
     pdf.ln(10)
-    
+
     pdf.add_section("Deterministic Decision Log")
     pdf.add_fingerprint_block(records)
-    
+
     pdf.output(output_path)
     return output_path

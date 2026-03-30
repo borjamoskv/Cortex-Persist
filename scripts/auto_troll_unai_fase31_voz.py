@@ -1,6 +1,6 @@
 import os
-import time
 import subprocess
+import time
 
 print("🔥 CORTEX // FASE 31: SÍNTESIS DE VOZ Y ATAQUE ESTÉREO")
 time.sleep(2)

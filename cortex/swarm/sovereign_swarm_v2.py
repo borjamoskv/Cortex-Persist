@@ -28,11 +28,8 @@ import logging
 import os
 import time
 import uuid
-import json
 from dataclasses import dataclass, field
 from pathlib import Path
-
-from cortex.engine.ledger import SovereignLedger
 
 from rich.align import Align
 from rich.console import Console
@@ -48,7 +45,6 @@ from cortex.swarm.bounty_scanner import (
     ImmuneFiScanner,
     SovereignBountyScanner,
 )
-
 
 logger = logging.getLogger("cortex.swarm.sovereign_v2")
 console = Console()
@@ -205,9 +201,9 @@ class AlgoraBountySpecialist(SovereignSpecialist):
 
         limit = min(scale * 3, 100)
         viable_targets = viable[:limit]
-        
+
         sem = asyncio.Semaphore(5)
-        
+
         async def process_bounty(opp):
             async with sem:
                 target_info = {
@@ -222,7 +218,7 @@ class AlgoraBountySpecialist(SovereignSpecialist):
                     "jules_dispatched": False,
                     "pr_url": None,
                 }
-    
+
                 if jules_api_key and opp.platform in ("algora", "github") and not dry_run:
                     try:
                         pr_url = await self._dispatch_jules(opp, jules_api_key)
@@ -230,7 +226,7 @@ class AlgoraBountySpecialist(SovereignSpecialist):
                         target_info["pr_url"] = pr_url
                     except Exception as e:
                         logger.warning("[ALGORA] Jules dispatch failed for %s: %s", opp.id, e)
-    
+
                 return target_info
 
         # Run concurrent dispatch
@@ -681,10 +677,10 @@ class VectorNSpecialist(SovereignSpecialist):
 
     async def extract(self, dry_run: bool = False, scale: int = 1) -> ExtractionResult:
         t0 = time.monotonic()
-        
+
         projected_yield = 5000.0 * (scale ** 0.85)  # Diminishing returns
         confidence = 0.25  # Hyper volatile
-        
+
         if not self.ev_gate(projected_yield, confidence):
             return self._make_result(
                 status="skipped_ev",
@@ -692,7 +688,7 @@ class VectorNSpecialist(SovereignSpecialist):
                 error="Hyper-Memetic EV below threshold",
                 duration_s=time.monotonic() - t0,
             )
-            
+
         return self._make_result(
             status="dry_run" if dry_run else "success",
             gross_yield_usd=projected_yield,
@@ -724,10 +720,10 @@ class VectorKSpecialist(SovereignSpecialist):
 
     async def extract(self, dry_run: bool = False, scale: int = 1) -> ExtractionResult:
         t0 = time.monotonic()
-        
+
         projected_yield = 800.0 * (scale ** 0.85)  # Diminishing returns
-        confidence = 0.60 
-        
+        confidence = 0.60
+
         if not self.ev_gate(projected_yield, confidence):
             return self._make_result(
                 status="skipped_ev",
@@ -735,7 +731,7 @@ class VectorKSpecialist(SovereignSpecialist):
                 error="Cloud Parasitism EV below threshold",
                 duration_s=time.monotonic() - t0,
             )
-            
+
         return self._make_result(
             status="dry_run" if dry_run else "success",
             gross_yield_usd=projected_yield,
@@ -1037,13 +1033,13 @@ class SovereignSwarmOrchestrator:
             for coro in asyncio.as_completed(list(tasks.keys())):
                 result = await coro
                 results.append(result)
-                
+
                 # Update in_progress with this result matching on specialist_id
                 in_progress = [
                     r if r.specialist_id != result.specialist_id else result
                     for r in in_progress
                 ]
-                
+
                 session.results = results
                 live.update(build_full_dashboard(session, in_progress))
 

@@ -49,16 +49,16 @@ def get_predictive_drift(target_path):
 
 def run_arch_audit(target_path):
     logger.info(f"--- 📐 ARCH-AUDIT Ω₄₀/Ω₄₆/Ω₅₂: {target_path} ---")
-    
+
     # 1. Ω₄₆: Real Semantic Merkle
     current_hash = compute_path_hash(target_path)
     logger.info(f"Ω₄₆-HASH: {current_hash}")
-    
+
     # 2. Ω₅₂: Predictive Entropy (Git)
     drift = get_predictive_drift(target_path)
     if drift:
         logger.info(f"Ω₅₂-PREDICTIVE-HOT-FILES: {drift}")
-    
+
     # 3. Ω₄₀: Taint Tracking
     files_to_check = [target_path] if os.path.isfile(target_path) else []
     if not files_to_check:
@@ -66,7 +66,7 @@ def run_arch_audit(target_path):
             for name in files:
                 if name.endswith(".py"):
                     files_to_check.append(os.path.join(root, name))
-    
+
     tainted_files = []
     for f_path in files_to_check:
         if not f_path.endswith(".py"): continue
@@ -77,12 +77,12 @@ def run_arch_audit(target_path):
                     tainted_files.append(os.path.basename(f_path))
         except Exception:
             continue
-    
+
     score = 1.0
     if tainted_files:
         logger.warning(f"Ω₄₀-TAINT-DETECTED: {len(tainted_files)} files contaminated.")
         score -= 0.5
-        
+
     # Apply predictive penalty if hot files are many
     if len(drift) > 3:
         logger.warning("Ω₅₂-PREDICTION: High activity detected. Increasing probability of collision.")

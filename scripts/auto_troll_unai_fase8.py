@@ -1,6 +1,6 @@
 import os
-import time
 import subprocess
+import time
 
 MESSAGES = [
     "🔥 FASE 8: AUDITORÍA DE VIDEO Y DEPENDENCIA FARMACOLÓGICO-ALGORTÍMICA 🔥",

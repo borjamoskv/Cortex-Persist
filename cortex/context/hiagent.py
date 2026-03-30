@@ -45,12 +45,12 @@ class ObservationTrace:
 class HiAgent:
     """
     Subgoal Compression Engine (Axiom Ω₁₃ Enforcement).
-    
+
     Prevents context collapse by buffering episodic traces during a task block,
     crystallizing them into a single summary, and then forcing 'Amnesia Local'
     on the raw data.
     """
-    
+
     def __init__(self, session_id: str | None = None):
         self.session_id = session_id or str(uuid.uuid4())
         self._trace_buffer: list[ObservationTrace] = []
@@ -74,13 +74,13 @@ class HiAgent:
         """
         if not self._trace_buffer:
             return ""
-        
+
         log_info("Crystallizing episodic traces", count=len(self._trace_buffer))
-        
+
         # Simplified deterministic crystallization for now
         summary_lines = [f"- {t.action}: {t.observation[:100]}..." for t in self._trace_buffer]
         crystal = f"Crystallized Subgoal [{self.session_id}]:\n" + "\n".join(summary_lines)
-        
+
         return crystal
 
     async def flush(self):

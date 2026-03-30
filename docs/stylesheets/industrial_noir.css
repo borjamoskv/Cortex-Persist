@@ -275,3 +275,70 @@
   border: 1px solid rgba(255, 255, 255, 0.05);
   padding: 1rem;
 }
+
+/* ─── Thinking States (Limbic Signaling) ─── */
+@keyframes ctx-pulse {
+  0% { box-shadow: 0 0 5px rgba(204, 255, 0, 0.1); }
+  50% { box-shadow: 0 0 20px rgba(204, 255, 0, 0.3); }
+  100% { box-shadow: 0 0 5px rgba(204, 255, 0, 0.1); }
+}
+
+@keyframes ctx-sweep {
+  0% { transform: translateX(-100%); opacity: 0; }
+  50% { opacity: 0.5; }
+  100% { transform: translateX(100%); opacity: 0; }
+}
+
+.ctx-thinking {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(204, 255, 0, 0.2) !important;
+  animation: ctx-pulse 2s infinite ease-in-out;
+}
+
+.ctx-thinking::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(204, 255, 0, 0.1), transparent);
+  animation: ctx-sweep 3s infinite linear;
+}
+
+.ctx-verifying {
+  border-color: var(--ctx-cyber-violet) !important;
+  background-color: rgba(102, 0, 255, 0.02) !important;
+}
+
+.ctx-verified {
+  border-color: #00FF99 !important;
+  box-shadow: 0 0 15px rgba(0, 255, 153, 0.1);
+}
+
+/* ─── Data Grid Aesthetic ─── */
+.ctx-grid-preview {
+  display: grid;
+  gap: 1px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 4px;
+  border-radius: 4px;
+  font-family: var(--md-code-font-family);
+  font-size: 0.6rem;
+}
+
+.ctx-cell {
+  width: 12px;
+  height: 12px;
+  border-radius: 1px;
+}
+
+/* ─── Color Map (ARC) ─── */
+.ctx-c0 { background: #000; }
+.ctx-c1 { background: #1E90FF; }
+.ctx-c2 { background: #FF4500; }
+.ctx-c3 { background: #32CD32; }
+.ctx-c4 { background: #FFD700; }
+.ctx-c5 { background: #A9A9A9; }
+.ctx-c6 { background: #FF69B4; }
+.ctx-c7 { background: #FFA500; }
+.ctx-c8 { background: #87CEEB; }
+.ctx-c9 { background: #8B0000; }

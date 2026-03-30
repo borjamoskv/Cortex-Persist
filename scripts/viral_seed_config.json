@@ -1,0 +1,33 @@
+{
+  "seed_chats": ["VIRAL SEED"],
+  "platforms": {
+    "linkedin": {
+      "windows": [["08:00", "09:30"], ["12:00", "13:00"]],
+      "days": [1, 2, 3],
+      "emoji": "💼"
+    },
+    "twitter": {
+      "windows": [["13:00", "15:00"], ["20:00", "21:00"]],
+      "days": [0, 1, 2, 3, 4],
+      "emoji": "🐦"
+    },
+    "instagram": {
+      "windows": [["18:00", "21:00"]],
+      "days": [3, 4, 5, 6],
+      "emoji": "📸"
+    },
+    "tiktok": {
+      "windows": [["19:00", "22:00"]],
+      "days": [4, 5, 6],
+      "emoji": "🎵"
+    },
+    "substack": {
+      "windows": [["09:00", "11:00"]],
+      "days": [1, 2],
+      "emoji": "📝"
+    }
+  },
+  "cdp_port": 9222,
+  "cooldown_minutes": 60,
+  "timezone": "Europe/Madrid"
+}

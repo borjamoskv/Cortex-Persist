@@ -65,6 +65,12 @@ from cortex.cli.slow_tip import with_slow_tips
     help="Parent decision ID (causal link)",
 )
 @click.option("--db", default=DEFAULT_DB, help="Database path")
+@click.option(
+    "--meta",
+    "meta_json",
+    default=None,
+    help='JSON metadata for the fact (e.g. \'{"_prior_entropy": 30.0, "_tokens": 20}\')',
+)
 def store(
     project,
     content,
@@ -76,6 +82,7 @@ def store(
     complexity,
     parent_id,
     db,
+    meta_json,
 ) -> None:
     """Store a fact in CORTEX."""
     if not source:
@@ -84,6 +91,15 @@ def store(
     engine = get_engine(db)
     try:
         meta = {}
+        if meta_json:
+            import json
+
+            try:
+                meta.update(json.loads(meta_json))
+            except Exception as e:
+                console.print(f"[red]Invalid JSON in --meta: {e}[/]")
+                raise click.Abort() from e
+
         if ai_time is not None and complexity is not None:
             import dataclasses
 

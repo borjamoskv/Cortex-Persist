@@ -19,7 +19,7 @@ class RealVectorActuator:
     Sovereign Real-World Interaction Actuator.
     Connects Swarm nodes to live environments with strict blast radius gating.
     """
-    
+
     def __init__(self, max_exergy_j: float = 1000.0, blast_radius_limit: float = 0.5):
         self.max_exergy_j = max_exergy_j
         self.blast_radius_limit = blast_radius_limit
@@ -34,7 +34,7 @@ class RealVectorActuator:
         # 1. Pre-flight Atomic Log (Ω1)
         mutation_id = f"mut-{int(datetime.now(timezone.utc).timestamp())}"
         logger.info("[%s] ATOMIC_PRE_FLIGHT: Logging mutation to Ledger before write.", mutation_id)
-        
+
         # 2. Exergy & Blast Radius (already in execute_request logic, but explicit here)
         # 3. Execution with Titration
         return await self.execute_request(method, url, json=mutation_data, **kwargs)
@@ -57,7 +57,7 @@ class RealVectorActuator:
         try:
             response = await self._client.request(method, url, **kwargs)
             latency = (datetime.now(timezone.utc) - start_time).total_seconds() * 1000
-            
+
             # Simple exergy model: baseline + (bytes / 1024 * scale)
             actual_cost = estimated_cost + (len(response.content) / 1024 * 0.01)
             self.total_spent_j += actual_cost

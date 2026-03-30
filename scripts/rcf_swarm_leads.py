@@ -7,11 +7,10 @@ Constraint: Enjambre de 100 agentes paralelos via Playwright CDP.
 
 import asyncio
 import logging
-from typing import List, Dict
 
 try:
-    from cortex.extensions.swarm.worktree_isolation import get_agent_pool
     from cortex.agents.manager import AgentManager
+    from cortex.extensions.swarm.worktree_isolation import get_agent_pool
     from cortex.ledger import Auditor
 except ImportError:
     logging.warning("CORTEX native modules not found in path, running in dry-run/mock mode.")
@@ -53,15 +52,15 @@ TARGET_VECTORS = [
     }
 ]
 
-async def dispatch_swarm_vector(vector: Dict, auditor=None):
+async def dispatch_swarm_vector(vector: dict, auditor=None):
     logger.info(f"🚀 Iniciando Enjambre para Vector Rank {vector['rank']}: {vector['name']}")
     logger.info(f"Desplegando {vector['agents_assigned']} agentes paralelos en modo headless...")
-    
+
     # Simulación de la ejecución de CORTEX Swarm
     await asyncio.sleep(2)
-    
+
     dummy_yield = vector['agents_assigned'] * 142  # Synthetic yield calculation
-    
+
     logger.info(f"✅ Vector {vector['name']} completado. Leads masivos extraídos: {dummy_yield}.")
     if auditor:
         auditor.record_action(
@@ -75,20 +74,20 @@ async def dispatch_swarm_vector(vector: Dict, auditor=None):
 async def orchestrate_mega_leads():
     logger.info("INICIANDO ORQUESTACIÓN CORTEX SWARM (100 Agentes) - RCF NORTHWEST HUB")
     logger.info("Objetivo: Extracción estructural de Mega-Leads y volcado a Ledger.")
-    
+
     auditor = None
     if get_agent_pool:
         # CORTEX Sovereign mode
         pool = get_agent_pool(size=100)
         auditor = Auditor()
-    
+
     tasks = []
     for vector in TARGET_VECTORS:
         tasks.append(dispatch_swarm_vector(vector, auditor))
-        
+
     results = await asyncio.gather(*tasks)
     total_leads = sum(results)
-    
+
     logger.info("===================================================")
     logger.info(f"🔥 ENJAMBRE FINALIZADO. YIELD TOTAL: {total_leads} LEADS DE ALTO VALOR CORTEX.")
     logger.info("Los leads han sido inyectados en el CORTEX Persistence DB (cortex.db).")

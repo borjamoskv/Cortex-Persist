@@ -1,6 +1,6 @@
 import os
-import time
 import subprocess
+import time
 
 MESSAGES = [
     "🔥 FASE 7: ESCANEO DE HUELLA DIGITAL (OSINT) COMPLETO 🔥",

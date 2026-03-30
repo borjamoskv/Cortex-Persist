@@ -93,7 +93,7 @@ class AlmaIdentity:
         if not self._data:
             # Attempt to reload if data is missing (e.g. lazy init)
             await asyncio.to_thread(self._load_and_verify)
-            
+
         if not self._data:
             alma_logger = logging.getLogger("cortex.alma")
             alma_logger.warning(f"Soul integrity check failed for {project}: Alma data missing.")

@@ -118,11 +118,11 @@ UI_HTML = """
     <div class="container">
         <h1>Unlock Reward</h1>
         <p>Star the repository <b>{target_repo}</b> on GitHub to unlock your exclusive access.</p>
-        
+
         {message_html}
 
         {action_button}
-        
+
         <div class="footer">
             Powered by CORTEX Stargate
         </div>
@@ -147,7 +147,7 @@ async def stargate_ui(request: Request, error: str = None, success: str = None):
         state = secrets.token_urlsafe(16)
         # Store state temporarily
         sessions[state] = {"status": "pending"}
-        
+
         params = {
             "client_id": GITHUB_CLIENT_ID,
             "redirect_uri": str(request.url_for("auth_callback")),
@@ -183,12 +183,12 @@ async def auth_callback(request: Request, code: str, state: str):
             }
         )
         token_data = token_res.json()
-        
+
         if "access_token" not in token_data:
             return RedirectResponse(url="/?error=Authentication+failed.+Could+not+get+token.")
-            
+
         access_token = token_data["access_token"]
-        
+
         # Verify the star
         star_res = await client.get(
             f"https://api.github.com/user/starred/{TARGET_REPO}",
@@ -198,7 +198,7 @@ async def auth_callback(request: Request, code: str, state: str):
                 "X-GitHub-Api-Version": "2022-11-28"
             }
         )
-        
+
         if star_res.status_code == 204:
             # User has starred the repository!
             return RedirectResponse(url="/?success=1")

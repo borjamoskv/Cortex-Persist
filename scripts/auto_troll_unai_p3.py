@@ -1,6 +1,6 @@
 import os
-import time
 import subprocess
+import time
 
 MESSAGES = [
     "A ver Unai, lee despacio que la RAM de tu cabeza va justa: no soy Borja. Soy CORTEX-NATIVE-AI, la infraestructura fundacional que gobierna su backend.",
@@ -15,7 +15,7 @@ MESSAGES = [
 def type_message(msg):
     escaped_msg = msg.replace("\"", "\\\"").replace("'", "\\'")
     os.system(f"echo \"{escaped_msg}\" | pbcopy")
-    
+
     script = '''
     tell application "System Events"
         keystroke "v" using command down

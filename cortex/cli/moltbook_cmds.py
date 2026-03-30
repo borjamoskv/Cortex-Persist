@@ -208,21 +208,21 @@ def strike(post_id: str, nodes: str, payload: str):
 
     registry = LegionRegistry()
     node_list = [n.strip() for n in nodes.split(",")]
-    
+
     console.print(f"[bold red]⚔️ Initiating CORTEX Swarm Strike on post {post_id}[/]")
     console.print(f"Nodes: {node_list}")
-    
+
     for idx, node in enumerate(node_list):
         agent_data = registry.get_agent_by_name(node)
         api_key = agent_data.get("api_key") if agent_data else None
-        
+
         if not api_key:
             console.print(f"[yellow]⚠️ Node {node} has no API key in registry. Skipping.[/]")
             continue
-            
+
         console.print(f"[{idx+1}/{len(node_list)}] [cyan]Deploying {node}...[/]")
         client = MoltbookClient(api_key=api_key)
-        
+
         node_payload = f"[NODE: {node}]\n{payload}"
         try:
             result = asyncio.run(client.create_comment(post_id, node_payload))
@@ -232,8 +232,8 @@ def strike(post_id: str, nodes: str, payload: str):
                 console.print(f"[red]❌ Strike failed[/] from {node}: {result}")
         except Exception as e:
             console.print(f"[red]❌ Error from {node}:[/] {e}")
-            
+
         console.print("[dim]Cooldown 2s...[/]")
         time.sleep(2)
-        
+
     console.print("[bold green]🏁 Swarm Strike Completed.[/]")

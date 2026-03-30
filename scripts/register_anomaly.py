@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 """
 Sovereign Script: Anomaly Registration (Signal Infiltration)
-Registers high-exergy signal infiltrations (like the Hypebeast infiltration) 
+Registers high-exergy signal infiltrations (like the Hypebeast infiltration)
 into the CORTEX cryptographically verified ledger.
 
-Ω₄ · La Ley Soberana: No se usan métricas parea marketing, sino como 
+Ω₄ · La Ley Soberana: No se usan métricas parea marketing, sino como
 transferencia termo-informática cristalizada en el ledger.
 """
 
 from __future__ import annotations
 
-import sys
+import argparse
 import asyncio
 import logging
-import argparse
+import sys
 
 from cortex.engine import CortexEngine
 
@@ -27,13 +27,13 @@ logger = logging.getLogger("cortex.anomaly")
 
 async def inject_anomaly(vector: str, friction: float, opens: int, clicks: int, project: str = "borjamoskv_site"):
     """Injects the anomalous infiltration right into CORTEX."""
-    
+
     # Initialize the engine
     engine = CortexEngine()
     await engine.init_db()
-    
+
     content = f"CORTEX-ORBITAL-STRIKE: Vector {vector} breached protocol. Opens: {opens} | Clicks: {clicks} | Friction Penetration: {friction}%."
-    
+
     meta = {
         "vector": vector,
         "friction_overcome_pct": friction,
@@ -46,7 +46,7 @@ async def inject_anomaly(vector: str, friction: float, opens: int, clicks: int, 
         "aesthetic": "Industrial Noir 2026",
         "causal_confidence": "C5-Dynamic" # Verified by telemetry
     }
-    
+
     try:
         fact_id = await engine.store(
             content=content,
@@ -67,16 +67,16 @@ if __name__ == "__main__":
     parser.add_argument("--opens", type=int, default=16, help="Number of telemetry opens")
     parser.add_argument("--clicks", type=int, default=14, help="Number of extracted clicks")
     parser.add_argument("--project", type=str, default="borjamoskv_site", help="CORTEX Project Root")
-    
+
     args = parser.parse_args()
-    
+
     # Calculate friction penetration ratio
     friction = 0.0
     if args.opens > 0:
         friction = round((args.clicks / args.opens) * 100, 2)
 
     logger.info(f"Initiating Anomaly Injection for {args.vector} into {args.project}...")
-    
+
     try:
         fact_id = asyncio.run(inject_anomaly(args.vector, friction, args.opens, args.clicks, args.project))
         logger.info("Taint signature confirmed. Node extraction completed.")

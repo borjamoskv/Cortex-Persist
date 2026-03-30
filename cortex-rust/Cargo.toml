@@ -1,0 +1,24 @@
+[package]
+name = "cortex-rust"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "cortex_rust"
+crate-type = ["cdylib"]
+
+[[bin]]
+name = "cortex-rust"
+path = "src/main.rs"
+
+[dependencies]
+pyo3 = { version = "0.23.3", features = ["extension-module"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# CORTEX MEV Core (Alloy + REVM)
+alloy = { version = "0.7.2", default-features = false, features = ["full", "providers", "rpc-types", "rpc-client", "transport-ipc"] }
+revm = { version = "17.1.0", default-features = false, features = ["std", "c-kzg"] }
+tokio = { version = "1", features = ["full"] }
+eyre = "0.6"
+futures = "0.3"

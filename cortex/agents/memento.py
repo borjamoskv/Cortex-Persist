@@ -25,11 +25,11 @@ def _default_manifest() -> AgentManifest:
 class MementoAgent:
     """
     Sovereign 'Memento' Specialist for Subgoal and Semantic Memory Management.
-    
+
     Orchestrates the crystallization of episodic traces into semantic facts
     using a state-machine driven lifecycle with contradiction gating.
     """
-    
+
     def __init__(self, manifest: AgentManifest | None = None, session_id: str = "default", exergy_threshold: float = 0.5, engine: Any | None = None):
         self.manifest = manifest or _default_manifest()
         self.session_id = session_id
@@ -60,13 +60,13 @@ class MementoAgent:
         # Ω₂: Filter extremely low-exergy noise (e.g. repetitive "ok", "thanks")
         trace_text = f"{action} {observation}"
         exergy_score = calculate_exergy(trace_text)
-        
+
         if exergy_score < 0.1:
             logger.debug("[Memento] Skipping low-exergy trace (score: %.2f)", exergy_score)
             return
 
         self.hi_agent.add_trace(str(action), str(observation))
-        
+
         # Use explicit string casting to satisfy linter
         summary_txt = f"{action}"[:30] if action else "empty"
         obs_txt = f"{observation}"[:50] if observation else "empty"
@@ -90,7 +90,7 @@ class MementoAgent:
             return
 
         logger.info("[Memento] Starting consolation cycle for session %s", self.session_id)
-        
+
         # 1. ANALYZING: Extraction and Conflict Check
         self._stage = MementoStage.ANALYZING
         crystal = await self.hi_agent.crystallize()
@@ -102,7 +102,7 @@ class MementoAgent:
         # 2. CRYSTALLIZING: Semantic Gating
         self._stage = MementoStage.CRYSTALLIZED
         trace_id = f"crystal_{int(now)}"
-        
+
         # SCAN for contradictions
         conflicts = await self.scanner.scan(crystal)
         if conflicts:
@@ -122,7 +122,7 @@ class MementoAgent:
         self._stage = MementoStage.PERSISTED
         res = await self.memory_os.persist_episodic_to_semantic(crystal)
         stored_count = int(res) if res else 0
-        
+
         # CALCULATE EXERGY (Ω₉)
         exergy_val = await self.exergy_guard.calculate_proposal_exergy({
             "facts": crystal,

@@ -24,7 +24,7 @@ body {
 }
 
 .industrial-noir {
-    background-image: 
+    background-image:
         radial-gradient(circle at 50% 50%, var(--accent-glow) 0%, transparent 70%),
         linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
         linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);

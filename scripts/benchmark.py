@@ -118,9 +118,8 @@ async def run_benchmark(iterations: int = 50):
     setup_start = time.perf_counter()
 
     from cortex.connection_pool import CortexConnectionPool
-    from cortex.schema import ALL_SCHEMA
-
     from cortex.engine_async import AsyncCortexEngine
+    from cortex.schema import ALL_SCHEMA
 
     pool = CortexConnectionPool(db_path, min_connections=1, max_connections=3)
     await pool.initialize()

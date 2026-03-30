@@ -1,12 +1,12 @@
 import os
-import time
 import subprocess
+import time
 
 image_path = "/Users/borjafernandezangulo/.gemini/antigravity/brain/b4258410-8db5-4be6-804c-17bfe30e5423/oscar_mulero_funeral_1774525061610.png"
 
 def copy_image_appkit(path):
     try:
-        from AppKit import NSPasteboard, NSImage
+        from AppKit import NSImage, NSPasteboard
         image = NSImage.alloc().initWithContentsOfFile_(path)
         pb = NSPasteboard.generalPasteboard()
         pb.clearContents()

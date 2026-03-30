@@ -1,14 +1,14 @@
 import asyncio
+import hashlib
 import json
 import logging
-import time
-import hashlib
 import os
-from decimal import Decimal
-from pathlib import Path
-from typing import Any, Dict, List, Optional
 import sqlite3
-from cryptography.fernet import Fernet # type: ignore
+import time
+from pathlib import Path
+from typing import Any
+
+from cryptography.fernet import Fernet  # type: ignore
 
 # CORTEX Sovereign Logic v4.0 (Nivel Singularidad - Cifrado FFI).
 # Todo adaptador forjado contiene exergía corporativa pura de CORTEX.
@@ -38,13 +38,13 @@ class MerkleManifest:
     """DAG Causal. Sella todos los hashes originales que componen este LoRA."""
     @staticmethod
     def construct_manifest(
-        adapter_id: str, 
-        domain: str, 
-        source_hashes: List[str], 
-        base_model: str, 
-        elapsed: float, 
+        adapter_id: str,
+        domain: str,
+        source_hashes: list[str],
+        base_model: str,
+        elapsed: float,
         signature: str
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         return {
             "adapter_id": adapter_id,
             "domain": domain,
@@ -63,10 +63,10 @@ class JITLoraForger:
     Control de VRAM, Cifrado de Tensores y Construcción de Merkle DAG Causal.
     """
 
-    P2_KINETIC_THRESHOLD = 50       
-    MAX_EXERGY_BATCH_SIZE = 500     
-    DEFAULT_LEARNING_RATE = "1e-5"  
-    MEMORY_STRESS_THRESHOLD_MB = 2048 
+    P2_KINETIC_THRESHOLD = 50
+    MAX_EXERGY_BATCH_SIZE = 500
+    DEFAULT_LEARNING_RATE = "1e-5"
+    MEMORY_STRESS_THRESHOLD_MB = 2048
 
     def __init__(self, db_path: str = "cortex.db", models_dir: str = ".cortex/adapters"):
         self.db_path = Path(db_path)
@@ -89,10 +89,10 @@ class JITLoraForger:
                     logger.warning(f"[LORA_FORGE] RAM Unificada Crítica ({free_mb:.2f}MB). Evitando Kernel Panic. Abortando.")
                     return False
         except Exception:
-            return True 
+            return True
         return True
 
-    async def _query_high_exergy_facts(self, domain: Optional[str] = None) -> List[Dict[str, Any]]:
+    async def _query_high_exergy_facts(self, domain: str | None = None) -> list[dict[str, Any]]:
         """Extrae el Grafo Causal C5 con su huella criptográfica (hash_id)."""
         def _execute_query():
             # Extraemos root_cause o content_hash para armar el Merkle DAG dependencies
@@ -107,7 +107,7 @@ class JITLoraForger:
             if domain:
                 query += " AND domain = ?"
                 params.append(domain)
-                
+
             query += " ORDER BY exergy_estimate DESC LIMIT ?"
             params.append(self.MAX_EXERGY_BATCH_SIZE)
 
@@ -125,11 +125,11 @@ class JITLoraForger:
         loop = asyncio.get_running_loop()
         return await loop.run_in_executor(None, _execute_query)
 
-    async def _compile_instruction_subset(self, batch: List[Dict[str, Any]], export_path: Path) -> List[str]:
+    async def _compile_instruction_subset(self, batch: list[dict[str, Any]], export_path: Path) -> list[str]:
         """Exporta JSONL Cero-Entropía y devuelve la lista de DAG hashes asimilados."""
         if not batch:
             return []
-            
+
         def _compile():
             source_hashes = []
             buffer = ""
@@ -139,11 +139,11 @@ class JITLoraForger:
                 h_id = fact.get("hash_id", "unknown_hash")
                 if not ctx or not res:
                     continue
-                    
+
                 line = json.dumps({"text": f"<s>[INST] {str(ctx).strip()} [/INST] {str(res).strip()} </s>"})
                 buffer += line + "\n"
                 source_hashes.append(h_id)
-                
+
             export_path.write_text(buffer, encoding="utf-8")
             return source_hashes
 
@@ -161,7 +161,7 @@ class JITLoraForger:
                 return False
 
             start_time = time.monotonic()
-            
+
             # 1. Recuperar Grafo Causal
             batch = await self._query_high_exergy_facts(domain)
             if len(batch) < self.P2_KINETIC_THRESHOLD:
@@ -170,7 +170,7 @@ class JITLoraForger:
             dataset_dir = self.models_dir / f"dataset_{domain}"
             dataset_dir.mkdir(exist_ok=True)
             export_path = dataset_dir / "train.jsonl"
-            
+
             # 2. Compilar Datos e Índice DAG
             source_hashes = await self._compile_instruction_subset(batch, export_path)
             if len(source_hashes) < self.P2_KINETIC_THRESHOLD:
@@ -178,14 +178,14 @@ class JITLoraForger:
 
             adapter_id = f"{domain}_v{int(time.time())}"
             adapter_path = self.models_dir / adapter_id
-            
+
             # 3. Silicon Target Actuator (MLX) - Exportando safetensors a posteriori
             args = [
                 "python", "-m", "mlx_lm.lora",
                 "--model", model_urn,
                 "--train",
                 "--data", str(dataset_dir),
-                "--iters", "300", 
+                "--iters", "300",
                 "--batch-size", "2",
                 "--learning-rate", self.DEFAULT_LEARNING_RATE,
                 "--adapter-path", str(adapter_path),
@@ -199,7 +199,7 @@ class JITLoraForger:
             )
             stdout, stderr = await process.communicate()
             elapsed_time = time.monotonic() - start_time
-            
+
             if process.returncode != 0:
                 logger.error(f"[LORA_FORGE] Colapso FFI Paramétrico:\n{stderr.decode()}")
                 return False
@@ -224,10 +224,10 @@ class JITLoraForger:
                 elapsed=elapsed_time,
                 signature=hash_sig
             )
-            
+
             manifest_path = adapter_path / "cortex_manifest.json"
             manifest_path.write_text(json.dumps(manifest, indent=2))
-                
+
             try:
                 from cortex.engine.ledger import append_event
                 # Ledger DAG persist
@@ -242,24 +242,24 @@ class JITLoraForger:
         """Aislamiento atómico de tensores corruptos o modelos decaídos causales."""
         adapter_path = self.models_dir / adapter_name
         quarantine_dir = self.models_dir / "_quarantine"
-        
+
         if not adapter_path.exists():
             return False
-            
+
         quarantine_dir.mkdir(exist_ok=True)
         target = quarantine_dir / adapter_name
-        
+
         loop = asyncio.get_running_loop()
         try:
             await loop.run_in_executor(None, adapter_path.rename, target)
             logger.warning(f"[LORA_FORGE] Exilio a Cuarentena P0 del adaptador: {adapter_name}.")
-            
+
             try:
                 from cortex.engine.ledger import append_event
                 append_event("LORA_TENSOR_EXILE", payload={"corrupted": adapter_name}, source="LORA_FORGER_TAINT")
             except ImportError:
                 pass
-                
+
             return True
         except Exception as e:
             logger.error(f"[LORA_FORGE] Error letal extirpando tensor: {e}")

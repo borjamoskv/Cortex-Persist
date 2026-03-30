@@ -11,7 +11,7 @@ async def check_dms():
         print("Requests:", reqs)
     except Exception as e:
         print("Error requests:", e)
-        
+
     print("Checking Conversations...")
     try:
         # We don't have a list_conversations method in client.py, we only have get_conversation(id)
@@ -20,7 +20,7 @@ async def check_dms():
         print("Conversations:", convs)
     except Exception as e:
         print("Error convs:", e)
-        
+
     await client.close()
 
 if __name__ == "__main__":

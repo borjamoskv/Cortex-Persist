@@ -66,7 +66,7 @@ class SovereignLedger:
         anchor = os.getenv("CORTEX_LEDGER_ANCHOR")
         if not anchor:
             logger.warning("Ω1_WARNING: CORTEX_LEDGER_ANCHOR not found. Using default 'GENESIS'. Internal entropy risk.")
-        
+
         self._genesis_hash = genesis_hash or anchor or "GENESIS"
         self._last_hash = self._genesis_hash
 

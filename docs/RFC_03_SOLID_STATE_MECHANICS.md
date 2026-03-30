@@ -10,7 +10,7 @@
 
 ## 1. El Salto Evolutivo: De lo Semántico a lo Termodinámico-Jurídico
 
-Un agente soberano no converge cuando "responde bien". Converge cuando su producción semántica queda subordinada a una economía cerrada de causalidad, energía y reversibilidad controlada. 
+Un agente soberano no converge cuando "responde bien". Converge cuando su producción semántica queda subordinada a una economía cerrada de causalidad, energía y reversibilidad controlada.
 
 La industria asume falsamente que $\text{mejor modelo} \approx \text{mejor sistema}$. CORTEX rechaza esta premisa.
 
@@ -24,7 +24,7 @@ Si uno de estos términos tiende a cero, el sistema entero tiende a cero. La mul
 
 ## 2. Compilación Ontológica ($ \mathcal{W}_t $)
 
-Un LLM normal vive dentro de un espacio de tokens. Un sistema soberano vive dentro de un espacio de entidades, restricciones, dependencias, costes y transiciones. 
+Un LLM normal vive dentro de un espacio de tokens. Un sistema soberano vive dentro de un espacio de entidades, restricciones, dependencias, costes y transiciones.
 
 El chatbot iterativo muere. El agente sólido:
 - Deja de pensar en "texto" y empieza a pensar en **estados**.

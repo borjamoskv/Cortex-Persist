@@ -28,12 +28,14 @@ from cortex.engine.agent_mixin import AgentMixin
 from cortex.engine.annihilator import AnnihilatorEngine
 from cortex.engine.bicameral import OaxacaEngine
 from cortex.engine.consensus import ConsensusMixin
-from cortex.engine.crystallizer import CausalCrystallizer
+from cortex.engine.crystallizer import CrystallizerJIT as CausalCrystallizer
 from cortex.engine.durability import PersistenceSupervisor
 from cortex.engine.ghost_mixin import GhostMixin
 from cortex.engine.history import HistoryMixin
 from cortex.engine.isolation import ByzantineSandbox, IsolationManager
+from cortex.engine.evolution import EvolutionEngine
 from cortex.engine.memory_mixin import MemoryMixin
+from cortex.engine.pearl import PearlEngine
 from cortex.engine.mixins.base import FACT_COLUMNS, FACT_JOIN
 from cortex.engine.mixins.bicameral_mixin import BicameralMixin
 from cortex.engine.models import row_to_fact  # noqa: F401 — re-exported
@@ -168,7 +170,7 @@ class CortexEngine(
 
         # Frontera x10: Kinetic Engines
         self.annihilator = AnnihilatorEngine(self, self._db_path.parent)
-        self.crystallizer = CausalCrystallizer(self)
+        self.crystallizer = CausalCrystallizer(self._db_path.parent)
 
         # Frontera x10: Background Daemons
         self.chaos_daemon = ChaosDaemon(self)
@@ -177,6 +179,10 @@ class CortexEngine(
         # Frontera x10: Sovereign Operations
         self.git_ops = GitLedgerOps(self, self._db_path.parent)
         self.kv_router = KVAwareRouter(self)
+
+        # Ω₁₃: PeARL & Evolution Engines (AX-043, AX-048)
+        self.pearl = PearlEngine()
+        self.evolution = EvolutionEngine(self.pearl)
 
     def _setup_bicameral_performance_routes(self):
         """Internal wiring for the high-performance dual bus."""
@@ -622,7 +628,7 @@ class CortexEngine(
             # We route 'store' through the dispatcher.
             # If it's a slow-path operation (persistence), it will be handled by the slow bus.
             return await self.dispatcher.dispatch("store", *args, **kwargs)
-            
+
         return await self.facts.store(*args, **kwargs)
 
     async def store_direct(self, *args, **kwargs):
@@ -733,21 +739,6 @@ class CortexEngine(
         from cortex.ledger.sovereign_ledger import SovereignLedger
 
         async with self.session() as conn:
-            for stmt_group in get_all_schema():
-                if "USING vec0" in stmt_group and not self._vec_available:
-                    continue
-                try:
-                    await conn.executescript(stmt_group)
-                except Exception as e:
-                    print(
-                        f"\n[INIT_DB_ERROR] Failed to execute schema statement group:\n{stmt_group}"
-                    )
-                    print(f"[INIT_DB_ERROR] Error: {e}\n")
-                    logger.error("Failed to execute schema statement group: %s", stmt_group)
-                    logger.error("Error: %s", e)
-                    raise e
-            await conn.commit()
-
             await run_migrations_async(conn)
 
             for k, v in get_init_meta():

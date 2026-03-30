@@ -33,6 +33,7 @@ class ExecutionResult:
     stdout: str = ""
     stderr: str = ""
     exit_code: int | None = None
+    duration_ms: float = 0.0
 
 
 class IsolationLevel(Enum):
@@ -63,10 +64,11 @@ class IsolationManager:
     and monitoring for escaping attempts (Ω-Immunity).
     """
 
-    def __init__(self, engine: Any | None = None):
+    def __init__(self, engine: Any | None = None, max_concurrent: int = 25):
         self.engine = engine
         self.workspaces: dict[str, WorkspaceMetadata] = {}
         self._lock = asyncio.Lock()
+        self._semaphore = asyncio.Semaphore(max_concurrent)
 
     async def create_workspace(
         self,
@@ -109,8 +111,9 @@ class IsolationManager:
         self, workspace_id: str, command: str, args: list[str], timeout: float = 30.0
     ) -> Result[dict[str, Any], str]:
         """Execute a command within the specified isolation boundary."""
-        if workspace_id not in self.workspaces:
-            return Err(f"Workspace {workspace_id} not found")
+        async with self._semaphore:
+            if workspace_id not in self.workspaces:
+                return Err(f"Workspace {workspace_id} not found")
 
         ws = self.workspaces[workspace_id]
         logger.info("IsolationManager: Executing %s in %s", command, workspace_id)
@@ -253,10 +256,14 @@ class ByzantineSandbox:
     async def execute_python(self, script_name: str, args: list[str] | None = None) -> Any:
         """Run a python script within the sandbox."""
         _args = ["python3", script_name] + (args or [])
+        t0 = time.monotonic()
         res = await self.manager.execute(self.workspace_id, _args[0], _args[1:])
+        t1 = time.monotonic()
         if isinstance(res, Ok):
             res_dict = cast(dict[str, Any], res.value)
-            return ExecutionResult(**res_dict)
+            exec_res = ExecutionResult(**res_dict)
+            exec_res.duration_ms = (t1 - t0) * 1000.0
+            return exec_res
         return None
 
     async def write_file(self, filename: str, content: str) -> bool:
@@ -277,3 +284,29 @@ class ByzantineSandbox:
 
         file_path = Path(ws.root) / filename
         return await asyncio.to_thread(file_path.read_text, encoding="utf-8")
+
+
+class SimpleIsolationEngine:
+    """
+    ARC-AGI-3 Sandboxed Python Executor (Phase 2).
+    A wrapped instance of IsolationManager that ensures quick, restricted python runs.
+    """
+
+    def __init__(self, timeout: float = 15.0, max_concurrent: int = 25):
+        self.manager = IsolationManager(max_concurrent=max_concurrent)
+        self.timeout = timeout
+
+    async def execute_sandbox(self, code: str, args: list[str] | None = None) -> ExecutionResult | None:
+        """Executes Python code in a tightly controlled workspace."""
+        async with self.manager.isolate(label="arc_sandbox") as sandbox:
+            await sandbox.write_file("main.py", code)
+            try:
+                # 30.0 is the timeout inside execute_python, but we wrap it logically with overall self.timeout 
+                res = await asyncio.wait_for(
+                    sandbox.execute_python("main.py", args=args),
+                    timeout=self.timeout + 1.0  # slight buffer
+                )
+                return res
+            except asyncio.TimeoutError:
+                raise TimeoutError("Sandboxed execution timed out") from None
+

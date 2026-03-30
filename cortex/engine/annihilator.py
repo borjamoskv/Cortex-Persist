@@ -1,8 +1,8 @@
 """CORTEX Engine — Annihilator Engine (Thermodynamic Code Pruning).
 
-This kinetic engine continuously scans AST and execution DAGs 
+This kinetic engine continuously scans AST and execution DAGs
 via eBPF/profiling metrics to detect Code Ghosts (dead abstractions).
-It autonomously generates self-deletion pull requests and relies on 
+It autonomously generates self-deletion pull requests and relies on
 C5-Dynamic verification to safely merge and disintegrate dead code.
 """
 

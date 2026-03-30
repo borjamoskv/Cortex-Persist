@@ -8,11 +8,10 @@ Usage:
     CORTEX_VECTOR_BACKEND=qdrant
     QDRANT_URL=http://localhost:6333
 
-Collection naming: one Qdrant collection per tenant.
-    tenant_id="default" → collection "cortex_default"
-    tenant_id="acme"    → collection "cortex_acme"
-
-This ensures true vector-level isolation between tenants.
+Multi-tenancy uses Payload-based Partitioning.
+All tenants share a single collection ("cortex_nodes"), and a
+mandatory `tenant_id` filter is applied to all searches and deletions.
+This scales perfectly to 10k+ tenants.
 """
 
 from __future__ import annotations
@@ -29,8 +28,8 @@ logger = logging.getLogger("cortex.storage.qdrant")
 # Vector dimension (all-MiniLM-L6-v2)
 VECTOR_DIM: Final[int] = 384
 
-# Collection prefix to avoid namespace collisions
-COLLECTION_PREFIX: Final[str] = "cortex_"
+# Single collection name for payload-based partitioning
+MAIN_COLLECTION: Final[str] = "cortex_nodes"
 
 
 # ─── Protocol ───────────────────────────────────────────────────────
@@ -77,10 +76,10 @@ class QdrantVectorBackend:
     """Production vector search backend using Qdrant.
 
     Features:
-    - Per-tenant Qdrant collections (true data isolation)
+    - Massive Multi-Tenancy (payload-based partitioning)
+    - Single collection (`cortex_nodes`)
     - Cosine similarity (same metric as all-MiniLM-L6-v2 normalization)
-    - Payload filtering by project
-    - Auto-creates collections on first upsert
+    - Auto-creates collection on first connection
     - Idempotent upsert (overwrites on same fact_id)
     """
 
@@ -95,13 +94,7 @@ class QdrantVectorBackend:
         self._api_key = api_key
         self._dim = dim
         self._client: Any = None
-        self._initialized_collections: set[str] = set()
-
-    def _collection_name(self, tenant_id: str) -> str:
-        """Generate per-tenant collection name."""
-        # Sanitize tenant_id: alphanumeric + underscore only
-        safe = "".join(c if c.isalnum() or c == "_" else "_" for c in tenant_id)
-        return f"{COLLECTION_PREFIX}{safe}"
+        self._collection_ready: bool = False
 
     async def connect(self) -> None:
         """Initialize the Qdrant client."""
@@ -126,31 +119,37 @@ class QdrantVectorBackend:
         if self._client is None:
             raise RuntimeError("QdrantVectorBackend not connected. Call connect() first.")
 
-    async def _ensure_collection(self, collection: str) -> None:
-        """Create collection if it doesn't exist (idempotent)."""
-        if collection in self._initialized_collections:
+    async def _ensure_collection(self) -> None:
+        """Create single main collection if it doesn't exist."""
+        if self._collection_ready:
             return
 
-        from qdrant_client.models import Distance, VectorParams
+        from qdrant_client.models import Distance, PayloadSchemaType, VectorParams
 
         try:
-            exists = await self._client.collection_exists(collection)
+            exists = await self._client.collection_exists(MAIN_COLLECTION)
             if not exists:
                 await self._client.create_collection(
-                    collection_name=collection,
+                    collection_name=MAIN_COLLECTION,
                     vectors_config=VectorParams(
                         size=self._dim,
                         distance=Distance.COSINE,
                     ),
                 )
-                logger.info("Qdrant: Created collection '%s' (dim=%d)", collection, self._dim)
+                # Create a payload index specifically on tenant_id for high performance
+                await self._client.create_payload_index(
+                    collection_name=MAIN_COLLECTION,
+                    field_name="tenant_id",
+                    field_schema=PayloadSchemaType.KEYWORD,
+                )
+                logger.info("Qdrant: Created collection '%s' (dim=%d)", MAIN_COLLECTION, self._dim)
             else:
-                logger.debug("Qdrant: Collection '%s' already exists.", collection)
+                logger.debug("Qdrant: Collection '%s' already exists.", MAIN_COLLECTION)
         except (RuntimeError, OSError, ValueError) as exc:
-            logger.error("Qdrant: Failed to ensure collection '%s': %s", collection, exc)
+            logger.error("Qdrant: Failed to ensure collection '%s': %s", MAIN_COLLECTION, exc)
             raise
 
-        self._initialized_collections.add(collection)
+        self._collection_ready = True
 
     async def upsert(
         self,
@@ -164,28 +163,29 @@ class QdrantVectorBackend:
         Args:
             fact_id: The fact's primary key (used as Qdrant point ID).
             embedding: 384-dimensional float vector.
-            tenant_id: Routes to the correct collection.
-            payload: Optional metadata stored alongside the vector
-                     (e.g., project, fact_type for server-side filtering).
+            tenant_id: Used as a mandatory payload filter.
+            payload: Optional metadata stored alongside the vector.
         """
         self._ensure_client()
-        collection = self._collection_name(tenant_id)
-        await self._ensure_collection(collection)
+        await self._ensure_collection()
 
         from qdrant_client.models import PointStruct
+
+        p = payload.copy() if payload else {}
+        p["tenant_id"] = tenant_id
 
         point = PointStruct(
             id=fact_id,
             vector=embedding,
-            payload=payload or {},
+            payload=p,
         )
 
         try:
             await self._client.upsert(
-                collection_name=collection,
+                collection_name=MAIN_COLLECTION,
                 points=[point],
             )
-            logger.debug("Qdrant: Upserted fact_id=%d in '%s'", fact_id, collection)
+            logger.debug("Qdrant: Upserted fact_id=%d in '%s'", fact_id, MAIN_COLLECTION)
         except (RuntimeError, OSError, ValueError) as exc:
             logger.error("Qdrant: Upsert failed for fact_id=%d: %s", fact_id, exc)
             raise
@@ -202,7 +202,7 @@ class QdrantVectorBackend:
         Args:
             query_embedding: Query vector (384-dim).
             top_k: Number of results to return.
-            tenant_id: Routes to the correct collection.
+            tenant_id: Mandatory payload filter for isolation.
             project: If set, filters results to this project only.
 
         Returns:
@@ -210,29 +210,27 @@ class QdrantVectorBackend:
             Score is cosine similarity in [0, 1].
         """
         self._ensure_client()
-        collection = self._collection_name(tenant_id)
-
-        # Skip search if collection not yet initialized
-        if collection not in self._initialized_collections:
+        if not self._collection_ready:
             try:
-                exists = await self._client.collection_exists(collection)
+                exists = await self._client.collection_exists(MAIN_COLLECTION)
                 if not exists:
                     return []
-                self._initialized_collections.add(collection)
+                self._collection_ready = True
             except (RuntimeError, OSError, ValueError):
                 return []
 
-        query_filter = None
-        if project:
-            from qdrant_client.models import FieldCondition, Filter, MatchValue
+        from qdrant_client.models import FieldCondition, Filter, MatchValue
 
-            query_filter = Filter(
-                must=[FieldCondition(key="project", match=MatchValue(value=project))]
-            )
+        filters = [FieldCondition(key="tenant_id", match=MatchValue(value=tenant_id))]
+
+        if project:
+            filters.append(FieldCondition(key="project", match=MatchValue(value=project)))
+
+        query_filter = Filter(must=filters)
 
         try:
             results = await self._client.search(
-                collection_name=collection,
+                collection_name=MAIN_COLLECTION,
                 query_vector=query_embedding,
                 limit=top_k,
                 query_filter=query_filter,
@@ -240,22 +238,34 @@ class QdrantVectorBackend:
             )
             return [(int(hit.id), float(hit.score)) for hit in results]
         except (RuntimeError, OSError, ValueError) as exc:
-            logger.error("Qdrant: Search failed in '%s': %s", collection, exc)
+            logger.error("Qdrant: Search failed in '%s': %s", MAIN_COLLECTION, exc)
             return []
 
     async def delete(self, fact_id: int, tenant_id: str = "default") -> None:
-        """Delete a vector point by fact_id."""
+        """Delete a vector point by fact_id, restricted to tenant_id payload filter."""
         self._ensure_client()
-        collection = self._collection_name(tenant_id)
 
-        from qdrant_client.models import PointIdsList
+        from qdrant_client.models import (
+            FieldCondition,
+            Filter,
+            FilterSelector,
+            HasIdCondition,
+            MatchValue,
+        )
 
         try:
             await self._client.delete(
-                collection_name=collection,
-                points_selector=PointIdsList(points=[fact_id]),
+                collection_name=MAIN_COLLECTION,
+                points_selector=FilterSelector(
+                    filter=Filter(
+                        must=[
+                            HasIdCondition(has_id=[fact_id]),
+                            FieldCondition(key="tenant_id", match=MatchValue(value=tenant_id)),
+                        ]
+                    )
+                ),
             )
-            logger.debug("Qdrant: Deleted fact_id=%d from '%s'", fact_id, collection)
+            logger.debug("Qdrant: Deleted fact_id=%d from '%s'", fact_id, MAIN_COLLECTION)
         except (RuntimeError, OSError, ValueError) as exc:
             logger.error("Qdrant: Delete failed for fact_id=%d: %s", fact_id, exc)
             raise
@@ -280,7 +290,7 @@ class QdrantVectorBackend:
                 logger.warning("Qdrant: Unclean close: %s", exc)
             finally:
                 self._client = None
-                self._initialized_collections.clear()
+                self._collection_ready = False
 
     def __repr__(self) -> str:
         connected = self._client is not None

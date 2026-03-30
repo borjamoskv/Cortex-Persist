@@ -3,7 +3,7 @@ import json
 import logging
 import time
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 from uuid import uuid4
 
 from cortex import config
@@ -27,8 +27,8 @@ class MementoLedger:
     """
 
     TABLE_NAME = "memento_memory_transition"
-    
-    def __init__(self, engine: Any | None = None, db_path: Optional[str] = None) -> None:
+
+    def __init__(self, engine: Any | None = None, db_path: str | None = None) -> None:
         self._engine = engine
         self._db_path = db_path or config.DB_PATH
         self._pool = CortexConnectionPool(self._db_path, read_only=False)
@@ -39,7 +39,7 @@ class MementoLedger:
         """Initialize the vectorized ledger table."""
         if self._initialized:
             return
-            
+
         async with self._pool.acquire() as conn:
             # Create standard table with integer oid for vector mapping
             await conn.execute(f"""
@@ -57,7 +57,7 @@ class MementoLedger:
                     timestamp REAL
                 )
             """)
-            
+
             # Create virtual vector table for semantic search
             dim = 768
             if self._embedder:
@@ -85,7 +85,7 @@ class MementoLedger:
             )
 
             await conn.commit()
-            
+
         async with self._pool.acquire() as conn:
             # Handle migration: Rename entropy_delta to exergy_delta
             async with conn.execute(f"PRAGMA table_info({self.TABLE_NAME})") as cursor:
@@ -96,7 +96,7 @@ class MementoLedger:
                         logger.info("[MementoLedger] Migrated entropy_delta → exergy_delta (Ω₂)")
                     else:
                         await conn.execute(f"ALTER TABLE {self.TABLE_NAME} ADD COLUMN exergy_delta REAL DEFAULT 0.0")
-                
+
                 if 'session_id' not in columns:
                     await conn.execute(f"ALTER TABLE {self.TABLE_NAME} ADD COLUMN session_id TEXT")
                     logger.info("[MementoLedger] Added session_id column for isolation (Ω₄)")
@@ -146,20 +146,20 @@ class MementoLedger:
             await self.initialize()
 
         fact = self._make_fact(session_id, trace_id, stage, summary, exergy_delta, hours_saved, evidence, extra)
-        
+
         async with self._pool.acquire() as conn:
             # 1. Insert structured data
             cursor = await conn.execute(f"""
-                INSERT INTO {self.TABLE_NAME} 
+                INSERT INTO {self.TABLE_NAME}
                 (id, session_id, trace_id, stage, summary, evidence, exergy_delta, hours_saved, metadata, timestamp)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
-                fact["id"], fact["session_id"], fact["trace_id"], fact["stage"], 
-                fact["summary"], fact["evidence"], fact["exergy_delta"], 
+                fact["id"], fact["session_id"], fact["trace_id"], fact["stage"],
+                fact["summary"], fact["evidence"], fact["exergy_delta"],
                 fact["hours_saved"], fact["metadata"], fact["timestamp"]
             ))
             oid = cursor.lastrowid
-            
+
             # 2. Insert vector embedding if possible
             if self._embedder:
                 try:
@@ -183,20 +183,20 @@ class MementoLedger:
                     logger.warning("[MementoLedger] Vector embedding failed: %s", e)
 
             await conn.commit()
-            
+
         logger.info("[MementoLedger] %s -> %s | Exergy Δ=%.3f", summary, stage.value, exergy_delta)
 
-    async def semantic_search(self, query: str, session_id: Optional[str] = None, limit: int = 5) -> list[dict]:
+    async def semantic_search(self, query: str, session_id: str | None = None, limit: int = 5) -> list[dict]:
         """Search cognitive transitions by semantic context."""
         if not self._initialized or not self._embedder:
             logger.warning("[MementoLedger] Search called before initialization or without embedder.")
             return []
-            
+
         # Wrap blocking NN inference in to_thread (Ω₇)
         embedding = await asyncio.to_thread(self._embedder.embed, query)
         if not (isinstance(embedding, list) and len(embedding) > 0):
             return []
-            
+
         if isinstance(embedding[0], list):
             embedding = embedding[0]
 
@@ -206,7 +206,7 @@ class MementoLedger:
         async with self._pool.acquire() as conn:
             where_clause = "WHERE v.embedding MATCH ? AND k = ?"
             params: list[Any] = [embedding_blob, int(limit)]
-            
+
             if session_id:
                 where_clause += " AND t.session_id = ?"
                 params.append(session_id)
@@ -219,24 +219,24 @@ class MementoLedger:
                 ORDER BY distance
                 LIMIT ?
             """, (*params, int(limit)))
-            
+
             rows = await cursor.fetchall()
             if not rows:
                 return []
-                
+
             desc = cursor.description
             if not desc:
                 return []
-                
+
             return [dict(zip([col[0] for col in desc], row, strict=True)) for row in rows]
-        
+
         return []
 
-    async def get_stats(self, session_id: Optional[str] = None) -> dict:
+    async def get_stats(self, session_id: str | None = None) -> dict:
         """Return memory lifecycle statistics from DB."""
         if not self._initialized:
             await self.initialize()
-            
+
         where_clause = ""
         params: list[Any] = []
         if session_id:
@@ -251,12 +251,12 @@ class MementoLedger:
                 if row:
                     count = row[0] or 0
                     total_hours = row[1] or 0.0
-            
+
             stages = {}
             async with conn.execute(f"SELECT stage, COUNT(*) FROM {self.TABLE_NAME} {where_clause} GROUP BY stage", params) as cur:
                 async for stage_row in cur:
                     stages[stage_row[0]] = stage_row[1]
-                
+
         return {
             "total_facts": count,
             "total_hours_saved": float(f"{total_hours:.2f}"),

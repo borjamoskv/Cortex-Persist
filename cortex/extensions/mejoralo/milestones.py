@@ -65,7 +65,7 @@ class MilestoneManager:
                 name = "Foundational" if target == 80 else \
                        "Advanced" if target == 90 else \
                        "Inmejorable" if target == 95 else "Sovereign Standard"
-                
+
                 m = Milestone(
                     name=f"{name} ({target}+)",
                     target=float(target),
@@ -119,7 +119,7 @@ class MilestoneManager:
                 "achieved_at": milestone.achieved_at,
                 "message": milestone.message,
             }
-            
+
             with db_connect(self.db_path) as conn:
                 conn.execute(
                     "INSERT INTO facts (tenant_id, project, content, fact_type, tags, confidence, "

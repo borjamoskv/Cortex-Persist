@@ -1,9 +1,10 @@
 import asyncio
-import tempfile
 import os
 import sqlite3
+import tempfile
 
 from cortex.engine import CortexEngine
+
 
 async def main():
     fd, path = tempfile.mkstemp(suffix=".db")
@@ -13,13 +14,13 @@ async def main():
         print("Calling init_db...")
         await engine.init_db()
         print("init_db finished.")
-        
+
         # Check tables
         conn = sqlite3.connect(path)
         tables = conn.execute("SELECT name FROM sqlite_master WHERE type='table';").fetchall()
         print(f"Tables in DB: {[t[0] for t in tables]}")
         conn.close()
-        
+
         # Try store
         print("Storing fact...")
         await engine.store(content="test", project="test", fact_type="knowledge")

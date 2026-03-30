@@ -2,7 +2,7 @@ import asyncio
 import logging
 import random
 import time
-from typing import List, Dict
+
 from pydantic import BaseModel
 
 # CORTEX Sovereign Logic
@@ -30,8 +30,8 @@ class MemeticParasiteActuator:
     # Parámetros Invariantes
     HEADLESS_MODE_ENFORCED = True
     MAX_CONCURRENT_SWARM = 15  # Límite térmico local para no levantar banderas de OS fingerprinting.
-    
-    def __init__(self, proxy_pool: List[str]):
+
+    def __init__(self, proxy_pool: list[str]):
         self.proxies = proxy_pool
         self._lock = asyncio.Lock()
 
@@ -39,7 +39,7 @@ class MemeticParasiteActuator:
         """
         Llama al actuador `no-ia-omega`.
         Genera un texto irregular, falto de ortografía intencionada, hostil o polarizante:
-        Las guerras de comentarios doblan el 'Average View Duration' porque 
+        Las guerras de comentarios doblan el 'Average View Duration' porque
         el vídeo hace loop en background mientras el usuario teclea.
         """
         # Simulación de Inferencia Local
@@ -64,7 +64,7 @@ class MemeticParasiteActuator:
         # (En la realidad usaríamos async_playwright)
         session_id = f"ghost_{random.randint(1000, 9999)}"
         logger.debug(f"[VECTOR_N] [{session_id}] Desplegando enrutamiento proxy: {proxy.split('@')[-1]}")
-        
+
         try:
             # 1. Approach estocástico (Simulación de Discovery)
             initial_delay = random.uniform(0.5, 3.0)
@@ -73,29 +73,29 @@ class MemeticParasiteActuator:
             # 2. View Retention (110% - 140%)
             loop_factor = random.uniform(1.1, 1.4)
             retention_time = target.duration_seconds * loop_factor
-            
+
             logger.debug(f"[VECTOR_N] [{session_id}] Retención Algorítmica inyectada: {retention_time:.1f}s (Loop: {loop_factor:.2f}x).")
             await asyncio.sleep(1.0) # Espera simbólica de carga
-            
+
             # 3. Fricción Memética (Optional)
             if target.comment_friction and random.random() < 0.15: # 15% ratio
                 comment = await self._forge_no_ia_comment("RETO 20 DIAS")
                 logger.info(f"[VECTOR_N] [{session_id}] Engaño de Scroll y Comentario hostil inyectado: '{comment}'")
-                
+
             # 4. Share Metric (Copia al portapapeles del SO emulado)
             if random.random() < 0.25: # 25% Share ratio (Altamente sospechoso pero efectivo si se difumina)
                 logger.debug(f"[VECTOR_N] [{session_id}] Falsificación de Link Share ejecutada.")
 
             # 5. Cierre Criptográfico de Sesión
             return True
-            
+
         except Exception as e:
             logger.error(f"[VECTOR_N] [{session_id}] Fallo de emulación geométrica: {e}")
             return False
 
     async def trigger_viral_swarm(self, url: str) -> bool:
         """
-        Orquestación Termodinámica. Divide el target en lotes para empujar 
+        Orquestación Termodinámica. Divide el target en lotes para empujar
         el vídeo falsamente a la Seed-Audience tier 2.
         """
         if self._lock.locked():
@@ -105,20 +105,20 @@ class MemeticParasiteActuator:
         async with self._lock:
             start = time.monotonic()
             target = ShortTarget(url=url, target_views=self.MAX_CONCURRENT_SWARM, duration_seconds=15)
-            
+
             logger.info(f"[VECTOR_N] Autorizando Sybil Array sobre {target.url}")
             logger.info(f"[VECTOR_N] Objetivo: Distorsión de Completion Rate mediante Swarm de {target.target_views} nodos.")
-            
+
             tasks = []
             for i in range(target.target_views):
                 proxy = random.choice(self.proxies)
                 tasks.append(self._execute_playwright_ghost_session(target, proxy))
-                
+
             results = await asyncio.gather(*tasks)
             success_count = sum(results)
-            
+
             elapsed = time.monotonic() - start
-            
+
             # Auditoría en Ledger
             try:
                 from cortex.engine.ledger import append_event

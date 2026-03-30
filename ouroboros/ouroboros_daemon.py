@@ -1,8 +1,7 @@
 import asyncio
-import json
 import logging
 from datetime import datetime, timezone
-from typing import Dict, Any, List
+from typing import Any
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | CORTEX-OUROBOROS | %(message)s")
 
@@ -15,7 +14,7 @@ class OuroborosLedger:
         net_exergy = yield_usd - cost_usd
         if status == "CLEARED":
             self.exergy_vault += net_exergy
-            
+
         record = {
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "vector": vector,
@@ -26,11 +25,11 @@ class OuroborosLedger:
             "status": status,
             "vault_total": self.exergy_vault
         }
-        
+
         # simulated ledger write append
         # with open(self.path, "a") as f:
         #     f.write(json.dumps(record) + "\n")
-            
+
         logging.info(f"LEDGER_WRITE: {vector} -> {target} | Exergy Delta: {net_exergy:.2f} | Vault: {self.exergy_vault:.2f}")
 
 class OuroborosEngine:
@@ -39,7 +38,7 @@ class OuroborosEngine:
         self.running = False
         self.vectors = ["A_BOUNTY", "F_MEV_ARB", "H_AUTO_SWEEP", "L_SAAS_STAFFING"]
 
-    async def ghost_hunt(self) -> List[Dict[str, Any]]:
+    async def ghost_hunt(self) -> list[dict[str, Any]]:
         logging.info("GHOST_HUNT: Initializing target scan (Algora, Mempool, Apollo)")
         await asyncio.sleep(0.5)
         # Mocked high-exergy opportunities
@@ -49,14 +48,14 @@ class OuroborosEngine:
             {"vector": "L_SAAS_STAFFING", "target": "Digital Agency: Automated B2B Outreach", "expected_yield": 1500, "expected_cost": 50.00}
         ]
 
-    def exergy_gate(self, opp: Dict[str, Any]) -> bool:
+    def exergy_gate(self, opp: dict[str, Any]) -> bool:
         ratio = opp["expected_yield"] / opp["expected_cost"]
         if ratio < 5.0:
             logging.info(f"EXERGY_GATE: Rejected {opp['target']} (Ratio {ratio:.2f} < 5x).")
             return False
         return True
 
-    async def strike(self, opp: Dict[str, Any]) -> str:
+    async def strike(self, opp: dict[str, Any]) -> str:
         logging.info(f"STRIKE: Activating {opp['vector']} actuator against {opp['target']}...")
         await asyncio.sleep(1.0)
         # Deterministic simulation of a valid strike
@@ -65,7 +64,7 @@ class OuroborosEngine:
     async def run(self):
         self.running = True
         logging.info("Ouroboros Capital Engine -> ONLINE")
-        
+
         while self.running:
             targets = await self.ghost_hunt()
             for opp in targets:
@@ -78,7 +77,7 @@ class OuroborosEngine:
                         cost_usd=opp["expected_cost"],
                         status=status
                     )
-            
+
             # Infinite extraction loop with pacing
             logging.info("Cycle complete. Idle capital yielding via LST bridge.")
             self.running = False # Single cycle for testing

@@ -13,9 +13,9 @@ import os
 from pathlib import Path
 
 import aiosqlite
-from cortex.extensions.episodic.main import EpisodicMemory
 
 from cortex.config import DB_PATH
+from cortex.extensions.episodic.main import EpisodicMemory
 from cortex.extensions.training.collector import TrajectoryCollector
 from cortex.extensions.training.reward_engine import RewardEngine
 

@@ -221,7 +221,7 @@
             margin-bottom: 1rem;
             font-size: 0.95rem;
         }
-        
+
         .card ul {
             list-style-type: none;
         }
@@ -338,11 +338,11 @@
         <!-- Disruptive Section -->
         <div class="disruptive-section">
             <h2 class="section-title" style="color: var(--danger); border-color: var(--danger);">02. Falsifiable Disruptive Vectors</h2>
-            
+
             <div class="disruptive-card">
                 <h3>💀 D-1: El Vector "Camellos" (Economía Sumergida de Lugo)</h3>
                 <p>Las redes de alta liquidez paralela necesitan infraestructuras físicas para macro-fiestas o raves (ej. durante franjas grises del San Froilán) gestionadas vía asociaciones fantasma. El pitch: <em>"Infraestructura premium, pago en cash, montaje nocturno invisible".</em></p>
-                
+
                 <div class="falsifiable-box">
                     <span class="label">// Falsificabilidad (C5-Dynamic)</span>
                     <p><strong>TEST:</strong> Deploy dark Telegram/Signal Ads geolocalizados en 2 polígonos de Lugo y casco viejo ofreciendo carpas VIP pago en B.</p>
@@ -353,7 +353,7 @@
             <div class="disruptive-card">
                 <h3>🛸 D-2: Seguro Anti-Lluvia Físico para Palacios</h3>
                 <p>Las bodas extremas de Pazo y Palacio sufren pánico a la lluvia atlántica. No vendes barras, vendes un seguro físico de rescate modular en menos de 4 horas.</p>
-                
+
                 <div class="falsifiable-box">
                     <span class="label">// Falsificabilidad (C5-Dynamic)</span>
                     <p><strong>TEST:</strong> Script que escropee forecast de lluvia en A Coruña/Asturias. Si P(lluvia) > 70% en Jueves, enviar correo SOS Automático a Top 10 Wedding Planners.</p>
@@ -376,7 +376,7 @@
     <!-- Lyria 3 Audio Engine Widget -->
     <div class="lyria-engine" id="lyriaWidget">
         <div class="lyria-status">
-            <span class="pulse"></span> 
+            <span class="pulse"></span>
             <span id="lyriaText">LYRIA 3 ENGINE: OFFLINE</span>
         </div>
         <button class="btn-engine" id="btnLyria">INIT KRATU_DARK</button>
@@ -394,7 +394,7 @@
         function initLyriaEngine() {
             if (audioCtx) return;
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            
+
             // Reverb Effect (Convolution)
             const convolver = audioCtx.createConvolver();
             // Create a fake impulse response for a huge dark space
@@ -423,18 +423,18 @@
             masterGain.connect(compressor);
             compressor.connect(convolver);
             convolver.connect(audioCtx.destination);
-            
+
             // Clean direct path too
             compressor.connect(audioCtx.destination);
 
             // Sub-Bass Drones (Kratu style)
             const frequencies = [32.7, 49.0, 65.4]; // C1, G1, C2
-            
+
             frequencies.forEach(freq => {
                 const osc = audioCtx.createOscillator();
                 osc.type = 'sawtooth';
                 osc.frequency.value = freq;
-                
+
                 const filter = audioCtx.createBiquadFilter();
                 filter.type = 'lowpass';
                 filter.frequency.value = 100; // Deep muffle
@@ -443,29 +443,29 @@
                 const lfo = audioCtx.createOscillator();
                 lfo.type = 'sine';
                 lfo.frequency.value = 0.05 + Math.random() * 0.1; // Very slow sweeping
-                
+
                 const lfoGain = audioCtx.createGain();
                 lfoGain.gain.value = 150;
-                
+
                 lfo.connect(lfoGain);
                 lfoGain.connect(filter.frequency);
-                
+
                 const oscGain = audioCtx.createGain();
                 oscGain.gain.value = 0.3;
 
                 osc.connect(filter);
                 filter.connect(oscGain);
                 oscGain.connect(masterGain);
-                
+
                 osc.start();
                 lfo.start();
-                
+
                 oscillators.push(osc);
                 filters.push(filter);
             });
 
             // Industrial Noise Layer
-            const bufferSize = audioCtx.sampleRate * 2.0; 
+            const bufferSize = audioCtx.sampleRate * 2.0;
             const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
             const output = noiseBuffer.getChannelData(0);
             for (let i = 0; i < bufferSize; i++) {
@@ -495,7 +495,7 @@
 
         btnLyria.addEventListener('click', () => {
             if (!audioCtx) initLyriaEngine();
-            
+
             if (audioCtx.state === 'suspended') {
                 audioCtx.resume();
             }

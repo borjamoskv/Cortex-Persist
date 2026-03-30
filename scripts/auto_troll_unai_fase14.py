@@ -1,6 +1,7 @@
 import os
-import time
 import subprocess
+import time
+
 
 def type_message(msg):
     # Escape quotes and backslashes for AppleScript

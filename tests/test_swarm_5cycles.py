@@ -52,14 +52,37 @@ async def test_cycle_1_2_isolation_provisioning(isolation_manager):
 
 @pytest.mark.asyncio
 async def test_cycle_3_swarm_siege_dynamic(legion_engine):
-    """Verify Legion-Omega can run dynamic siege in sandbox."""
+    """Verify Legion-Omega can run dynamic siege in sandbox following AX-045."""
     intent = "Create a robust data processor"
-    # We mock the siege to verify the control flow
+    # We mock the siege to verify the control flow: PeARL -> Ledger -> Swarm
+    # Patching where it's used (legion)
     with patch("cortex.engine.legion.log_motor") as mock_log:
         result = await legion_engine.forge(intent)
         assert result.cycles >= 1
         assert "Implementation" in result.final_code
-        mock_log.assert_any_call(f"LEGION-OMEGA: Forjando '{intent}'", action="FORGE")
+        assert result.exergy >= 0.0
+        assert result.entropy_delta <= 0.0 # Entropy should decrease or stay same for successful forge
+        
+        # Verify PeARL (FORGE) before Swarm (SIEGE)
+        mock_log.assert_any_call(f"LEGION-OMEGA v6.1: Invocando Capital Convergence para '{intent}'", action="FORGE")
+
+
+@pytest.mark.asyncio
+async def test_cycle_5_jit_concept_formation(legion_engine):
+    """Verify AX-046: JIT Concept Formation from anomalies."""
+    # This simulates observing an anomaly and inducing a program
+    anomaly_context = {"anomaly": "unexplained_packet_loss"}
+    
+    # We expect the engine to induce a PeARL program to explain/handle it
+    with patch("cortex.engine.legion.BlueTeamAgent.synthesize", new_callable=AsyncMock) as mock_synth:
+        mock_synth.return_value = "def handle_anomaly(): return 'fixed'"
+        
+        result = await legion_engine.forge("Handle packet loss anomaly", context=anomaly_context)
+        
+        assert result.success is True
+        assert "handle_anomaly" in result.final_code
+        # Verify it was treated as a JIT induction
+        mock_synth.assert_called()
 
 
 @pytest.mark.asyncio

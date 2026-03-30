@@ -30,6 +30,7 @@ from cortex.migrations.mig_signals import _migration_019_signal_bus
 from cortex.migrations.mig_solid_state import _migration_021_solid_state
 from cortex.migrations.mig_tenant import _migration_015_tenant_unification
 from cortex.migrations.mig_tombstone import _migration_020_tombstone
+from cortex.migrations.mig_auth import _migration_028_auth_schema
 
 __all__ = ["MIGRATIONS"]
 
@@ -62,4 +63,5 @@ MIGRATIONS = [
     (25, "Multitenant isolation for ledger and locks", _migration_025_multitenant_isolation),
     (26, "Canonical facts contract reconciliation", _migration_026_facts_contract),
     (27, "Lineage tx_id backfill and search contract stabilization", _migration_027_lineage_tx),
+    (28, "Add API Keys Auth Schema", _migration_028_auth_schema),
 ]

@@ -115,6 +115,46 @@ async def test_process_interaction_no_overflow(manager, mock_l1, mock_l3):
 
 
 @pytest.mark.asyncio
+async def test_process_interaction_does_not_mutate_input_metadata(manager, mock_l3):
+    """Interaction processing should enrich metadata without mutating the caller's dict."""
+    manager._gradient = MagicMock()
+    manager._gradient.ingest_context = MagicMock()
+    manager._membrane = MagicMock()
+    manager._membrane.evaluate = MagicMock(
+        return_value=AdmitResult(
+            action=Action.ADMIT,
+            diagnostic=Diagnostic(
+                exergy_score=0.91,
+                behavioral_score=1.0,
+                state=MembraneState.ACTIVE,
+                reasons=[],
+            ),
+            metadata_patch={"membrane_state": "active"},
+        )
+    )
+
+    original_metadata = {"origin": "caller"}
+
+    event = await manager.process_interaction(
+        role="user",
+        content="Metadata isolation",
+        session_id="session_meta",
+        token_count=12,
+        tenant_id="tenant_meta",
+        project_id="proj_meta",
+        metadata=original_metadata,
+    )
+
+    assert original_metadata == {"origin": "caller"}
+    assert event.metadata["origin"] == "caller"
+    assert event.metadata["tenant_id"] == "tenant_meta"
+    assert event.metadata["project_id"] == "proj_meta"
+    assert event.metadata["membrane_state"] == "active"
+    appended_event = mock_l3.append_event.call_args[0][0]
+    assert appended_event.metadata["tenant_id"] == "tenant_meta"
+
+
+@pytest.mark.asyncio
 async def test_process_interaction_with_overflow(manager, mock_l1):
     """Test interaction flow when L1 overflows, triggering background queue."""
     # Force an overflow return from L1

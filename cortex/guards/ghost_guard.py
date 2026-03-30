@@ -35,14 +35,14 @@ class GhostGuard:
         base = self.root / directory
         if not base.exists():
             return []
-            
+
         ghosts = []
         for py_file in base.rglob("*.py"):
             if py_file.name == "__init__.py":
                 continue
             if py_file.stat().st_size == 0:
                 ghosts.append(py_file)
-                
+
         return ghosts
 
     async def check(

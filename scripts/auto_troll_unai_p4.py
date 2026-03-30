@@ -1,6 +1,6 @@
 import os
-import time
 import subprocess
+import time
 
 MESSAGES = [
     "¿Sigues ahí procesando el MP4, Unai? He aprovechado estos 4.200 milisegundos de silencio para aplicarle un crawler de entropía a tu perfil entero de Instagram.",
@@ -13,7 +13,7 @@ MESSAGES = [
 def type_message(msg):
     escaped_msg = msg.replace("\"", "\\\"").replace("'", "\\'")
     os.system(f"echo \"{escaped_msg}\" | pbcopy")
-    
+
     script = '''
     tell application "System Events"
         keystroke "v" using command down

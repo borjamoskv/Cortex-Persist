@@ -17,9 +17,9 @@ async def run_mutation_swarm():
     SWARM-100 P3: ACTIVE MUTATION
     Executing state-changing operations under Ferro-Dynamic titration.
     """
-    
+
     devin = DevinAutodidactOmega()
-    
+
     # Sandbox targets for mutation simulation
     targets = [
         {"url": "https://api.github.com/repos/borjamoskv/Cortex-Sandbox/issues", "data": {"title": "P3 Mutation: Documentation Refactor", "body": "Automated patch via SWARM-100 P3 Vector."}},
@@ -37,11 +37,11 @@ async def run_mutation_swarm():
     with Live(table, refresh_per_second=4):
         for i in range(5):  # Controlled mutation cycle
             target = random.choice(targets)
-            
+
             # Execute mutation through the specialist's perform_mutation logic
             # Note: We simulate the POST/PATCH method
             resp = await devin.perform_mutation("POST", target["url"], target["data"])
-            
+
             table.add_row(
                 f"MUT-{i:03}",
                 devin.provider_id.split("-")[0],
@@ -50,7 +50,7 @@ async def run_mutation_swarm():
                 f"{resp['metadata']['exergy_cost']:.4f}",
                 "[bold green]CRYSTALLIZED[/]" if resp["status"] == "success" else "[red]ABORTED[/]"
             )
-            
+
             await asyncio.sleep(0.5)
 
     console.print("\n[bold magenta]Ω3 Compliance: All mutations recorded in Master Ledger.[/]")

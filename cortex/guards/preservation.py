@@ -30,21 +30,21 @@ class PreservationGuard:
             "status": "ARCHIVAL_READY",
             "last_audit": datetime.now().isoformat()
         }
-        
+
         if not os.path.exists(self.db_path):
             report["status"] = "VULNERABLE"
             return report
-            
+
         # Simulate check for archival bit
         file_age = time.time() - os.path.getmtime(self.db_path)
         if file_age > 86400 * 30:  # > 30 days since last write
             logger.warning("[PRESERVATION] System entering hibernation state.")
-            
+
         return report
 
     def simulate_100_years(self) -> bool:
         """
-        Validates that all cryptographic hashes and data structures 
+        Validates that all cryptographic hashes and data structures
         are independent of external ephemeral services.
         """
         logger.info("[PRESERVATION] Simulating 100-year drift...")

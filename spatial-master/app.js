@@ -38,11 +38,11 @@ audioUpload.addEventListener('change', function(e) {
 
 btnPlay.addEventListener('click', () => {
     if (!audioCtx) initAudioGraph();
-    
+
     if (audioCtx.state === 'suspended') {
         audioCtx.resume();
     }
-    
+
     audioElement.play();
     isPlaying = true;
     drawVisualizer();
@@ -56,18 +56,18 @@ btnPause.addEventListener('click', () => {
 
 function initAudioGraph() {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    
+
     // Nodes
     sourceNode = audioCtx.createMediaElementSource(audioElement);
-    
+
     inputGainNode = audioCtx.createGain();
-    
+
     compNode = audioCtx.createDynamicsCompressor();
-    
+
     eqLowNode = audioCtx.createBiquadFilter();
     eqLowNode.type = 'lowshelf';
     eqLowNode.frequency.value = 100;
-    
+
     eqMidNode = audioCtx.createBiquadFilter();
     eqMidNode.type = 'peaking';
     eqMidNode.frequency.value = 1000;
@@ -76,7 +76,7 @@ function initAudioGraph() {
     eqHighNode = audioCtx.createBiquadFilter();
     eqHighNode.type = 'highshelf';
     eqHighNode.frequency.value = 5000;
-    
+
     pannerNode = audioCtx.createPanner();
     pannerNode.panningModel = 'HRTF';
     pannerNode.distanceModel = 'inverse';
@@ -86,7 +86,7 @@ function initAudioGraph() {
     pannerNode.coneInnerAngle = 360;
     pannerNode.coneOuterAngle = 0;
     pannerNode.coneOuterGain = 0;
-    
+
     // Set listener fixed position
     const listener = audioCtx.listener;
     if(listener.positionX) {
@@ -105,10 +105,10 @@ function initAudioGraph() {
     }
 
     masterGainNode = audioCtx.createGain();
-    
+
     analyserNode = audioCtx.createAnalyser();
     analyserNode.fftSize = 2048;
-    
+
     // Chain: Source -> InputGain -> EQ -> Compressor -> Spatial -> Master Gain -> Analyser -> Destination
     sourceNode.connect(inputGainNode);
     inputGainNode.connect(eqLowNode);
@@ -131,26 +131,26 @@ function syncControls() {
     bindSlider('input-gain', val => { inputGainNode.gain.value = val; }, val => `${(20 * Math.log10(val || 0.001)).toFixed(1)} dB`);
     // Master Gain
     bindSlider('master-gain', val => { masterGainNode.gain.value = val; }, val => `${(20 * Math.log10(val || 0.001)).toFixed(1)} dB`);
-    
+
     // Compressor
     bindSlider('comp-thresh', val => { compNode.threshold.value = val; }, val => `${val} dB`);
     bindSlider('comp-ratio', val => { compNode.ratio.value = val; }, val => `${val}:1`);
-    
+
     // EQ
     bindSlider('eq-low', val => { eqLowNode.gain.value = val; }, val => `${val} dB`);
     bindSlider('eq-mid', val => { eqMidNode.gain.value = val; }, val => `${val} dB`);
     bindSlider('eq-high', val => { eqHighNode.gain.value = val; }, val => `${val} dB`);
-    
+
     // Panner
-    bindSlider('pan-x', val => { 
+    bindSlider('pan-x', val => {
         if(pannerNode.positionX){ pannerNode.positionX.value = val; } else { updatePannerLegacy(); }
     }, val => parseFloat(val).toFixed(1));
-    
-    bindSlider('pan-y', val => { 
+
+    bindSlider('pan-y', val => {
         if(pannerNode.positionY){ pannerNode.positionY.value = val; } else { updatePannerLegacy(); }
     }, val => parseFloat(val).toFixed(1));
-    
-    bindSlider('pan-z', val => { 
+
+    bindSlider('pan-z', val => {
         if(pannerNode.positionZ){ pannerNode.positionZ.value = val; } else { updatePannerLegacy(); }
     }, val => parseFloat(val).toFixed(1));
 }
@@ -165,11 +165,11 @@ function updatePannerLegacy() {
 function bindSlider(id, targetParamCb, formatterCb) {
     const input = document.getElementById(id);
     const display = document.getElementById(`${id}-val`);
-    
+
     // Init values
     targetParamCb(parseFloat(input.value));
     display.textContent = formatterCb(input.value);
-    
+
     input.addEventListener('input', (e) => {
         const val = parseFloat(e.target.value);
         targetParamCb(val);
@@ -186,29 +186,29 @@ function resizeCanvas() {
 function drawVisualizer() {
     if (!isPlaying) return;
     animationId = requestAnimationFrame(drawVisualizer);
-    
+
     const bufferLength = analyserNode.frequencyBinCount;
     const dataArray = new Uint8Array(bufferLength);
     analyserNode.getByteFrequencyData(dataArray);
-    
+
     canvasCtx.fillStyle = '#0A0A0A';
     canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
-    
+
     const barWidth = (canvas.width / bufferLength) * 2.5;
     let barHeight;
     let x = 0;
-    
+
     for (let i = 0; i < bufferLength; i++) {
         barHeight = dataArray[i];
-        
+
         // Gradient coloring Exergy blue
         const r = 43;
         const g = 59;
         const b = 229 + (barHeight / 2);
-        
+
         canvasCtx.fillStyle = `rgb(${r},${g},${b})`;
         canvasCtx.fillRect(x, canvas.height - barHeight / 2, barWidth, barHeight / 2);
-        
+
         x += barWidth + 1;
     }
 }

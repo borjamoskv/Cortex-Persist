@@ -1,6 +1,6 @@
 import os
-import time
 import subprocess
+import time
 
 MESSAGES = [
     "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMjR2Z2RyMGkwYnEzbnBiMzRtYjMwcWdzY3NtbW8zcXYxZWcwa2k3ZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/IzXDTMbQytxI17LYxD/giphy.gif",

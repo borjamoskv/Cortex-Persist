@@ -17,7 +17,7 @@ def detect_visual_rot(target_path):
             for name in files:
                 if name.endswith(".css"):
                     css_files.append(os.path.join(root, name))
-    
+
     # Simple rot check: large CSS files with zero or low usage of variables
     for css in css_files:
         try:
@@ -34,7 +34,7 @@ def detect_visual_rot(target_path):
 
 def run_aesthetic_audit(target_path):
     logger.info(f"--- ✨ AESTHETIC-AUDIT Ω₄₁/Ω₅₃: {target_path} ---")
-    
+
     # 1. Ω₄₁ Vision Proxy Simulation
     files_to_check = []
     if os.path.isfile(target_path):
@@ -44,7 +44,7 @@ def run_aesthetic_audit(target_path):
             for name in files:
                 if name.endswith((".html", ".css", ".astro")):
                     files_to_check.append(os.path.join(root, name))
-    
+
     score = 1.0
     violations = 0
     for f_path in files_to_check:
@@ -56,7 +56,7 @@ def run_aesthetic_audit(target_path):
                     violations += 1
         except Exception:
             continue
-            
+
     if violations > 0:
         logger.warning(f"Ω₄₁-VISION-FAIL: {violations} aesthetic violations detected.")
         score -= min(0.5, violations * 0.1)

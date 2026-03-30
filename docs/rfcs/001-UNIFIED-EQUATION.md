@@ -2,7 +2,7 @@
 
 > **Status:** IMPLEMENTATION PHASE
 > **Target:** `cortex/engine/exergy_mixin.py`, `cortex/ledger.py`, `tests/test_unified_equation.py`
-> **Author:** CORTEX Sovereign Singularity 
+> **Author:** CORTEX Sovereign Singularity
 
 ## 1. Abstract
 The Unified Equation bounds generative stochasticity (LLMs) with formal thermodynamic constraints. It integrates Rate-Distortion (compression), Bayesian crystallization (the Ledger), and POMDP (execution under uncertainty) into a single deterministic gate: The Promotion Gate. Only causal sequences yielding positive Net Exergy ($\Delta\Xi > 0$) are persisted.

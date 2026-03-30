@@ -136,6 +136,7 @@ class _LazyGroup(_LazyCommand, click.Group):
 
 _SELF_REGISTERING_MODULES: list[str] = [
     "cortex.cli.anomaly_cmds",
+    "cortex.cli.buscapuentes_cmds",
     "cortex.cli.compact_cmds",
     "cortex.cli.crud",
     "cortex.cli.dashboard_cmds",
@@ -167,6 +168,7 @@ _SELF_REGISTERING_MODULES: list[str] = [
     "cortex.cli.vote_ledger",
     "cortex.cli.x_cmds",
     "cortex.cli.moskv_cmds",
+    "cortex.cli.nobel_cmds",
 ]
 
 # ─── Standalone groups (@click.group) — need LazyGroup proxy ────────────
@@ -181,6 +183,7 @@ _LAZY_GROUPS: list[tuple[str, str, str, str]] = [
         "Design Sovereign Prompts from raw requirements.",
     ),
     ("apotheosis", "cortex.cli.apotheosis_cmds", "apotheosis_cmds", "Apotheosis autonomy engine."),
+    ("az", "cortex.cli.az_cmds", "az_group", "AlphaZero Autodidact-Ω commands."),
     ("autorouter", "cortex.cli.autorouter_cmds", "autorouter_cmds", "AI model router daemon."),
     (
         "bibliotecario",
@@ -243,6 +246,14 @@ _LAZY_GROUPS: list[tuple[str, str, str, str]] = [
     (
         "bounty", "cortex.cli.bounty_cmds", "bounty_cmds",
         "💎 Bounty Hunter — multi-platform discovery.",
+    ),
+    (
+        "arc", "cortex.agents.arc_agi_3.cli", "arc_cli",
+        "ARC-AGI-3 Sovereign Agent Commands.",
+    ),
+    (
+        "fuckchatgpt", "cortex.agents.fuckchatgpt.cli", "fuckchatgpt_cli",
+        "FuckChatGPT Sovereign Agent Commands.",
     ),
 ]
 

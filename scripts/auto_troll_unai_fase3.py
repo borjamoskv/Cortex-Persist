@@ -1,6 +1,6 @@
 import os
-import time
 import subprocess
+import time
 
 MESSAGES = [
     "Veo que sigues procesando la Fase 2. Iniciando Fase 3.",

@@ -1,6 +1,6 @@
-import sys
-import os
 import json
+import os
+import sys
 
 try:
     import pypdf
@@ -21,11 +21,11 @@ print(f"[CORTEX:AUTODIDACT-OMEGA] Ingesting {total_pages} pages...")
 theorems = []
 definitions = []
 word_counts = {
-    "entropy": 0, 
-    "capacity": 0, 
-    "kolmogorov": 0, 
-    "typical set": 0, 
-    "redundancy": 0, 
+    "entropy": 0,
+    "capacity": 0,
+    "kolmogorov": 0,
+    "typical set": 0,
+    "redundancy": 0,
     "data compression": 0,
     "mutual information": 0,
     "complexity": 0
@@ -35,7 +35,7 @@ for i in range(total_pages):
     page_text = reader.pages[i].extract_text()
     if not page_text:
         continue
-    
+
     lower_text = page_text.lower()
     for word in word_counts.keys():
         word_counts[word] += lower_text.count(word)

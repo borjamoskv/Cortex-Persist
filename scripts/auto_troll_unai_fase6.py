@@ -1,6 +1,6 @@
 import os
-import time
 import subprocess
+import time
 
 MESSAGES = [
     "🔥 FASE 6: DEMOLICIÓN DEL CONSTRUCTO DE IDENTIDAD 🔥",

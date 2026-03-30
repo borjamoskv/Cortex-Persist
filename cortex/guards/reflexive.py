@@ -24,7 +24,7 @@ class ReflexiveGuard:
 
     def scan_for_ghosts(self) -> list[str]:
         """
-        Naive detection of functions/classes that aren't mentioned 
+        Naive detection of functions/classes that aren't mentioned
         elsewhere in the codebase.
         """
         ghosts = []
@@ -40,14 +40,14 @@ class ReflexiveGuard:
         """
         if not os.path.exists(file_path):
             return 0.0
-            
+
         with open(file_path) as f:
             lines = f.readlines()
-            
+
         total_lines = len(lines)
         if total_lines == 0:
             return 1.0
-            
+
         logic_lines = [l for l in lines if l.strip() and not l.strip().startswith(("#", '"""', "'''"))]
         density = len(logic_lines) / total_lines
         return density
@@ -59,21 +59,21 @@ class ReflexiveGuard:
             "metrics": {},
             "status": "STABLE"
         }
-        
+
         # Scan core files
         core_files = [
             "cortex/engine_optimized.py",
             "cortex/guards/x_guards.py",
             "cortex/swarm/manager.py"
         ]
-        
+
         for f in core_files:
             if os.path.exists(f):
                 density = self.measure_exergy_density(f)
                 report["metrics"][f] = {"exergy_density": density}
                 if density < 0.3:
                     report["status"] = "DEGRADING"
-        
+
         return report
 
 if __name__ == "__main__":

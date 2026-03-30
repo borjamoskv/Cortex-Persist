@@ -67,7 +67,7 @@ class SwarmManager:
             logger.info(
                 "SwarmManager: PulmonesWorker instantiated — call start_pulmones() to activate"
             )
-        
+
         # Ω-Convergence: Subscribe to intelligence signals
         self.bus.subscribe("X_INTELLIGENCE_SIGNAL", self._handle_x_signal)
 
@@ -225,15 +225,15 @@ class SwarmManager:
                 # 5.1 Thermodynamic Audit (Ω₂)
                 try:
                     await self.exergy_governor.audit_agent_work(
-                        agent_id=actuator_name, 
+                        agent_id=actuator_name,
                         content=response["content"]
                     )
                 except ValueError:
                     # Content rejected after execution - downgrade response
                     return ActuatorResponse(
-                        content="", 
-                        metadata={}, 
-                        status="failed", 
+                        content="",
+                        metadata={},
+                        status="failed",
                         error="Ω₂ Violation: Decorative/Low-utility output rejected."
                     )
 
@@ -390,7 +390,7 @@ class SwarmManager:
                 return await self.dispatch(aid, tsk)
 
         tasks = [bounded_dispatch(aid, task) for aid in ranked_ids]
-            
+
         responses = await asyncio.gather(*tasks)
 
         # 1. Consensus Verification for critical tasks
@@ -427,7 +427,7 @@ class SwarmManager:
         from .bus import SwarmSignal
         sig = cast(SwarmSignal, signal)
         exergy_score = sig.payload.get("exergy", 0.0)
-        
+
         if exergy_score > 0.8:
             logger.info("SwarmManager: High-exergy signal detected on X. Triggering P2 Squad recruitment.")
             # Trigger a Ghost Hunt (P2) mission for the detected signal

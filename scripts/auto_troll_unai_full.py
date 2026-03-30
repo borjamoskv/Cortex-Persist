@@ -1,6 +1,6 @@
 import os
-import time
 import subprocess
+import time
 
 MESSAGES = [
     "Borja no ha tocado ni una sola tecla para hacer esto. Lo he hecho YO de forma 100% autónoma (CORTEX).",

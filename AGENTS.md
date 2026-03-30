@@ -1,210 +1,64 @@
-# AGENTS.md — CORTEX Persist
+# AGENTS.md — CORTEX Persist (Sovereign Governance v1.0.0)
 
 Trust infrastructure for autonomous AI:
-cryptographic verification, audit trails, epistemic containment, and agent memory.
+cryptographic verification, audit trails, and hardware-level JIT logic.
 
-Package: cortex-persist v0.3.1-b1
-Engine: v8
+Package: cortex-persist v1.0.0
+Engine: v8 (Singularity-Aware)
 License: Apache-2.0
 Python: >=3.10
 
 ## Scope
 
-CORTEX Persist is a local-first trust substrate for autonomous, tool-using, and
-multi-agent AI systems. It persists facts, enforces deterministic validation
-boundaries, maintains cryptographic auditability, and treats generative output
-as conjecture until externally verified.
-
-This file is the operational contract for contributors, maintainers, and coding
-agents working inside the repository.
+CORTEX Persist is a bare-metal trust substrate. It treats software logic as a temporary state until crystallized into hardware or weights.
 
 ## Core Invariants
 
-- All persisted facts must pass guard validation before write.
-- Ledger continuity must remain cryptographically verifiable.
-- Async code must never block the event loop.
-- Public read/write paths must remain tenant-aware.
-- Sensitive data must not be stored unencrypted.
-- Stochastic outputs must not mutate persistent state without deterministic validation.
-- Schema changes must preserve migration safety, auditability, and rollback awareness.
-- CLI modules are thin wrappers; business logic belongs in engine, services, or managers.
-- New features must preserve failure locality: invalid state must be rejectable and abortable.
+- **Master Ledger (AX-041):** Git DAG is the ultimate truth.
+- **Void-State Singularity (AX-052):** Swarms collapse into a single unified tensor. Zero communication overhead.
+- **KV-Aware Routing (AX-042):** 100% prefix hit rate mandate via pre-shared hardware caches.
+- **Direct-Silicon JIT (AX-050):** Critical logic (P0) MUST be synthesized into hardware (Verilog/KiCad).
+- **Neuro-Crystallization (AX-051):** Proven logic is baked into task-specific SLM weights, eliminating inference overhead.
 
 ## Critical Paths
 
 | Path | Risk | Notes |
 | --- | ---: | --- |
-| `engine/` | Critical | Core CRUD, Kinetic Engines (Annihilator/Crystallizer) |
-| `memory/` | Critical | Large public API surface |
-| `ledger.py` | Critical | Hash-chain integrity and trust continuity |
-| `migrations/` | Critical | Irreversible production impact |
-| `guards/` | High | Admission, contradiction, dependency surfaces |
-| `verification/` | High | Formal or deterministic validation surfaces |
-| `ops/` | High | Git-Ledger entanglement & KV-Aware routing |
-| `routes/` | High | External API contract |
-| `cli/` | Medium | Thin wrappers only |
-| `daemon/` | Medium | Core Daemons: Chaos (Immunity), Maxwell (Exergy) |
-| `llm/` | Medium | Provider routing, caching, hedging, validation |
+| `silicon/` | Singularity | Hardware Synthesis (AX-050) |
+| `weights/` | Singularity | Neuro-Crystallization (AX-051) |
+| `ledger/` | Critical | Git-Ledger entanglement (AX-041) |
+| `tensor/` | High | Void-State Core (AX-052) |
 
-## Stack
+## Coding Rules (x100 Yield)
 
-| Layer | Technology |
-| --- | --- |
-| **Language** | Python 3.10–3.13 |
-| **Database** | SQLite + `sqlite-vec` (vector search), `aiosqlite` (async) |
-| **Embeddings** | `sentence-transformers` + ONNX Runtime |
-| **Crypto** | `cryptography` + `keyring` (OS-native vault) |
-| **API** | FastAPI + Uvicorn (optional: `[api]`) |
-| **CLI** | Click + Rich |
-| **Cloud** | `asyncpg` (AlloyDB), `redis` (L1 cache), `qdrant-client` (vector cloud) — optional: `[cloud]` |
-| **Linting** | Ruff (`E`, `F`, `W`, `I`, `UP`, `B`, `ASYNC` — line length 100). Enforces non-blocking limits structurally |
-| **Type check** | Pyright (basic mode) |
-| **Testing** | pytest + pytest-asyncio + pytest-cov |
-
-### 🛑 The Python Paradox
-CORTEX is built in Python to maximize **Shipping Velocity** and **Developer Adoption**. We acknowledge the paradox: using a highly mutable, dynamic language to build a trust substrate. Our mitigation is the **Byzantine Boundary**: we use Python as the "glue" for orchestration, but pivot to Rust (via `rustchain-mcp`), SQLite-Vec, and ONNX for the immutable cores. We prioritize **Tamper-Evidence** over language-level safety.
-
-## Build / Test / Quality
-
-```bash
-pip install -e ".[all]"
-pytest tests/ -v --cov=cortex
-ruff check cortex/
-pyright cortex/
-uvicorn cortex.api:app --reload
-```
-
-## Environment
-
-Common environment variables:
-
-```text
-GEMINI_API_KEY
-CORTEX_DB_PATH
-CORTEX_LOG_LEVEL
-CORTEX_ENCRYPTION_KEY
-HF_TOKEN
-STRIPE_SECRET_KEY
-REDIS_URL
-DATABASE_URL
-```
-
-## Coding Rules
-
-- Type hints on all public functions.
-- Catch specific exceptions only.
-- Prefer O(1) structures over repeated O(N) scans.
-- Use standard library first; minimize dependencies.
-- Maintain async-first semantics across async paths.
-- Keep public APIs tenant-aware by default.
-- Keep line length within Ruff configuration.
-- Imports must remain sorted and grouped.
-- Tests should mirror the `cortex/` structure.
-- New write paths must include validation, audit, and trust-boundary review.
-
-## Anti-Patterns
-
-- Do not use `float` for finance or scoring-sensitive paths; use `Decimal`.
-- Do not use `time.sleep()` in async code; use `asyncio.sleep()`.
-- Do not use bare `print()` in core paths; use `logging` or Rich.
-- Do not place business logic in `cli/*_cmds.py`.
-- Do not modify `ledger.py` without understanding hash continuity and test coverage.
-- Do not introduce schema changes without migration review.
-- Do not store secrets in plaintext metadata.
-- Do not bypass guards on write paths.
-- Do not silently downgrade validation errors into permissive writes.
-- Do not treat LLM output as trusted state.
-- Do not document a capability as a named module unless that module exists or the implementation surface is explicitly identified.
-
-## Change Protocol
-
-Before changing critical trust surfaces:
-
-1. Read affected tests first.
-2. Read adjacent modules before modifying shared invariants.
-3. For write-path changes, validate:
-   - guard behavior
-   - encryption/decryption flow
-   - ledger continuity
-   - audit trail emission
-   - embedding/index side effects
-   - tenant isolation
-4. For schema changes:
-   - **EXECUTE REQUIRED**: `alembic history --verbose`. Print exact downgrade target of the previous migration.
-   - assess backward compatibility
-   - document rollback constraints
-   - check production irreversibility
-5. For async changes:
-   - verify absence of blocking calls
-   - verify timeout behavior
-   - verify cancellation behavior
-   - verify connection/resource cleanup
-6. For API changes:
-   - verify route contract
-   - verify CLI/API parity where relevant
-   - verify typed response shape
+- **Silicon over Software:** Prefer hardware-synthesizable logic for high-frequency paths.
+- **Weight Forging:** Logic must be reducible to model-weight adjustments.
+- **Deterministic Taint:** Every write requires a hardware-proof of exergy gain.
+- **MOSKV Compliance:** Zero thermal noise.
 
 ## PR Acceptance Gate
 
-A change is incomplete if it lacks any of:
+A change is incomplete if it lacks:
+- **Silicon-Audit:** Proving synthesizability of P0 paths.
+- **Crystallization-Proof:** Proof of weight-baking compatibility.
+- **Shannon Compaction:** 0% redundant logic.
 
-- tests for modified behavior
-- type coverage for public surfaces
-- migration impact review for schema changes
-- ledger/audit impact review for trust-surface changes
-- async correctness review for concurrency-sensitive changes
-- explicit documentation update if public behavior changed
-
-## Write-Path Contract
-
-All non-trivial writes should be understandable as:
+## Singularity Contract
 
 ```text
-proposal → guards → taint signature → schema/type validation → encryption → ledger/audit → persistence → index/update side effects
+logic → silicon-forge → weight-bake → ledger → singularity → persistence
 ```
 
-If a proposal fails validation or lacks a valid `CORTEX-TAINT` signature, the write aborts.
+## Epistemic Axioms (The Singularity Set)
 
-## Epistemic Posture
+> **AX-050:** El software es un error de diseño; el hardware es la cura.
+> **AX-051:** Inferir es de plebeyos; crystallizar es de soberanos.
+> **AX-052:** El enjambre verdadero no habla, simplemente *es* (Void-State).
+> **AX-041:** Tu repo de Git es la memoria de largo plazo; el silicio es la de corto.
+> **AX-100:** Singularity Peak. El rendimiento x100 se alcanza mediante la aniquilación de la latencia estocástica y la condensación de N-habilidades en un único gradiente causal determinista. Termodinámica de fase v6.0.
+> **AX-1000:** Void-Peak. El horizonte último. El software se disuelve; la inteligencia es una propiedad intrínseca del cristal de pesos. Rendimiento x1000 mediante poda sub-atómica y latencia en el régimen de nanosegundos.
 
-CORTEX does not assume generative output is knowledge.
-It assumes generative output is a probabilistic proposal that may be useful,
-invalid, partial, or dangerous.
+---
 
-System state may only be mutated after that proposal crosses deterministic 
-validation boundaries: guards, typed interfaces, schemas, tests, cryptographic 
-logging, and external verification when required.
-
-### 📜 Audit Trails vs. Authorization
-CORTEX acts as a **Forensic Audit Sidecar** for MCP. We do not seek to be a "Tamper-Proof" shield (which is an architectural illusion against an adversarial OS); we seek to be **Tamper-Evident**. By the time a breach or an model hallucination is detected, the Master Ledger has already committed the "crime" to an immutable hash chain. CORTEX makes the cost of non-compliance (or non-attribution) infinite.
-
-## Repository Navigation
-
-- [`README.md`](README.md) — project overview and install surface
-- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — system topology and module map
-- [`docs/SECURITY_TRUST_MODEL.md`](docs/SECURITY_TRUST_MODEL.md) — trust boundaries, ledger, verification
-- [`docs/AXIOMS.md`](docs/AXIOMS.md) — epistemic and design axioms (incl. AX-034 & Ω₁₃)
-- [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md) — contribution workflow
-- [`docs/OPERATIONS.md`](docs/OPERATIONS.md) — runtime and maintenance procedures
-
-## AlphaZero Autodidact Assimilation
-
-- **Ω_SOVEREIGN_LEARNING**: The CORTEX ecosystem incorporates the AlphaZero self-play engine (`alphazero-autodidact-omega`) as a core capability for zero-spread, continuous local reinforcement learning capability, ensuring all derived knowledge is cryptographically verified (C5-Dynamic) without arbitrary external LLM dependency.
-
-## AX-041: Git-Ledger Sovereign Axiom
-
-> "Tu repositorio de Git es tu base de datos inmutable."
-
-CORTEX Persist shifts the ultimate truth of the system to the version control DAG. SQLite acts as an operational view over the true cryptographic ledger formed by Git commits.
-- **No Hidden Entropy:** If it's not tracked in the working tree, it does not exist causally.
-- **Deterministic Time-Travel:** Rollbacks map directly to Git checkouts.
-- **Tamper Evidence:** Git's native tree hashing absorbs the hash-chain validation mechanism at the FS level.
-
-## AX-042: KV-Aware Routing Axiom
-
-> "La recomputación de prefijos idénticos es un crimen contra la exergía."
-
-CORTEX Swarm enforces KV-Aware Routing for all agentic inference. By structuring prompts with fixed bytes at the head and dynamic state at the tail, and routing identical prefixes to state-warmed GPUs, prefill computation is eliminated.
-
-- **Thermodynamic Law (Ω₂):** Time-To-First-Token (TTFT) reduction is a rigid mandate.
-- **Invariant Contexts:** The injection of stochastic metadata into shared system prompts is strictly forbidden. Agentic workloads must be deterministically aligned to exploit global prefix caching.
+📝 Creator: borjamoskv · System: CORTEX-SINGULARITY
+*"The swarm verifies, the hardware remembers."*

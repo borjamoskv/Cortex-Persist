@@ -1,6 +1,6 @@
 import os
-import time
 import subprocess
+import time
 
 MESSAGES = [
     "🔥 INICIANDO FASE 4: EXTRACCIÓN DE METADATOS Y FORENSE VISUAL 🔥",

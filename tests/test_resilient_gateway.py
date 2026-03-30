@@ -13,7 +13,6 @@ from cortex.mcp.resilient_gateway import (
     _extract_with_selector,
     _html_to_markdown,
 )
-from cortex.engine.circuit_breaker import CircuitState
 from cortex.utils.pulmones import CircuitBreaker
 
 # ─── Fixtures ────────────────────────────────────────────────────────

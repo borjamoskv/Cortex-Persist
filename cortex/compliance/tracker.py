@@ -217,19 +217,19 @@ class ComplianceTracker:
 
     def export_pdf(self, project: str | None = None, output_path: str = "audit_report.pdf") -> str:
         """Export the compliance report as an Industrial Noir PDF.
-        
+
         Args:
             project: Project to scope the report to.
             output_path: Path to save the PDF.
-            
+
         Returns:
             The absolute path to the generated PDF.
         """
         from cortex.compliance.pdf_gen import generate_report
-        
+
         # 1. Get the structured report
         report = self.export_audit(project=project, include_facts=True)
-        
+
         # 2. Prepare records for the PDF engine
         # In this context, we use the facts list since that's what we want to audit
         facts = report.get("facts", [])
@@ -241,7 +241,7 @@ class ComplianceTracker:
                 "ts": f["created_at"],
                 "status": "VERIFIED" if report["eu_ai_act"]["status"] == "COMPLIANT" else "WARNING"
             })
-            
+
         proj_name = project or self._default_project
         return generate_report(proj_name, pdf_records, output_path)
 

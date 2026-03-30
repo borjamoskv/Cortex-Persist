@@ -1,0 +1,8 @@
+/Users/borjafernandezangulo/30_CORTEX/cortex-rust/target/debug/deps/alloy_eip7702-8eb98224dd7f06df.d: /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/alloy-eip7702-0.4.2/src/lib.rs /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/alloy-eip7702-0.4.2/src/auth_list.rs /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/alloy-eip7702-0.4.2/src/constants.rs /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/alloy-eip7702-0.4.2/src/error.rs
+
+/Users/borjafernandezangulo/30_CORTEX/cortex-rust/target/debug/deps/liballoy_eip7702-8eb98224dd7f06df.rmeta: /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/alloy-eip7702-0.4.2/src/lib.rs /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/alloy-eip7702-0.4.2/src/auth_list.rs /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/alloy-eip7702-0.4.2/src/constants.rs /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/alloy-eip7702-0.4.2/src/error.rs
+
+/Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/alloy-eip7702-0.4.2/src/lib.rs:
+/Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/alloy-eip7702-0.4.2/src/auth_list.rs:
+/Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/alloy-eip7702-0.4.2/src/constants.rs:
+/Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/alloy-eip7702-0.4.2/src/error.rs:

@@ -18,7 +18,7 @@ def register_suno_tools(mcp: FastMCP, ctx):
         """
         Sovereign headless generation of Suno tracks via CDP.
         Bypasses official APIs and persists the result in CORTEX Ledger.
-        
+
         Args:
             lyrics: The lyrics string to insert into Suno.
             style: The music genre and descriptors.

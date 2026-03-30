@@ -29,6 +29,7 @@ from cortex.api.middleware import (
 )
 from cortex.auth import AuthManager
 from cortex.engine import CortexEngine
+
 try:
     from cortex.extensions.hive.main import router as hive_router
 except ModuleNotFoundError:
@@ -98,6 +99,7 @@ from cortex.routes import skills as skills_router
 from cortex.routes import (
     telemetry as telemetry_router,
 )
+from cortex.routes import terminal as terminal_router
 from cortex.routes import (
     timing as timing_router,
 )
@@ -111,7 +113,6 @@ from cortex.routes import (
     translate as translate_router,
 )
 from cortex.routes import usage as usage_router
-from cortex.routes import terminal as terminal_router
 from cortex.telemetry.metrics import MetricsMiddleware, metrics
 from cortex.utils.i18n import DEFAULT_LANGUAGE, get_trans
 

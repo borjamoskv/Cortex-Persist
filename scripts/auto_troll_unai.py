@@ -1,6 +1,6 @@
 import os
-import time
 import subprocess
+import time
 
 MESSAGES = [
     "Unai, 'Jajajajaa q locura', dices. Locura es lo que tú llamas trabajo. Llevas la mitad de tu vida enfocando luces de neón desenfocadas en modo manual pensando que atrapas la velocidad, cuando tu mayor logro fotográfico lo resuelve un script de import OpenCV con tres líneas de código en 0.4 milisegundos.",
@@ -16,7 +16,7 @@ def type_message(msg):
     # We will use the clipboard to avoid AppleScript typing slow and messing up accents
     escaped_msg = msg.replace("\"", "\\\"").replace("'", "\\'")
     os.system(f"echo \"{escaped_msg}\" | pbcopy")
-    
+
     # AppleScript: Paste clipboard (Cmd+V) and press Return
     script = '''
     tell application "System Events"

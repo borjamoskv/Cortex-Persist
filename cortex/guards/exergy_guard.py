@@ -67,7 +67,7 @@ class ExergyGuard:
         facts = proposal.get("facts", [])
         if not facts:
             return 0.0
-        
+
         # Calculate mean exergy over all facts
         total_score = 0.0
         count = 0
@@ -78,5 +78,5 @@ class ExergyGuard:
             elif isinstance(fact, dict) and "content" in fact:
                 total_score += calculate_exergy(str(fact["content"]))
                 count += 1
-        
+
         return total_score / count if count > 0 else 1.0

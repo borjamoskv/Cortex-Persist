@@ -5,6 +5,8 @@ from collections.abc import Sequence
 from datetime import datetime
 
 from cortex.extensions.wealth.scanner import FundingRateScanner
+from cortex.extensions.wealth.mev_validator import MEVValidator
+from cortex.infrastructure.anvil_node import AnvilStagingNode
 from cortex.ledger.sovereign_ledger import SovereignLedger
 from cortex.services.bounty_service import BountyLead, BountyService
 from cortex.swarm.bridges.bounty_bridge import BountySwarmBridge
@@ -25,6 +27,10 @@ class OuroborosEngine:
         self.swarm_manager = swarm_manager
         self.factory = SwarmFactory(manager=self.swarm_manager)
         self.min_exergy = min_exergy
+
+        # AX-050: Direct-Silicon JIT Pre-Flight Infrastructure
+        self.anvil_node = AnvilStagingNode()
+        self.mev_validator = MEVValidator(self.anvil_node)
 
         # Initialize Services
         self.bounty_service = BountyService(ledger=self.ledger)
@@ -126,18 +132,26 @@ async def main():
 
     if args.continuous:
         logger.info("Starting Ouroboros Omega (CONTINUOUS mode, %ds)", args.interval)
-        while True:
-            try:
-                await engine.run_step(dry_run=args.dry_run)
-                await asyncio.sleep(args.interval)
-            except KeyboardInterrupt:
-                logger.info("Ouroboros shutdown initiated.")
-                break
-            except Exception as e:
-                logger.error("Cycle failure: %s", e)
-                await asyncio.sleep(60)
+        await ouroboros.anvil_node.start()
+        try:
+            while True:
+                try:
+                    await ouroboros.run_step(dry_run=args.dry_run)
+                    await asyncio.sleep(args.interval)
+                except KeyboardInterrupt:
+                    logger.info("Ouroboros shutdown initiated.")
+                    break
+                except Exception as e:
+                    logger.error("Cycle failure: %s", e)
+                    await asyncio.sleep(60)
+        finally:
+            await ouroboros.anvil_node.stop()
     else:
-        await engine.run_step(dry_run=args.dry_run)
+        await ouroboros.anvil_node.start()
+        try:
+            await ouroboros.run_step(dry_run=args.dry_run)
+        finally:
+            await ouroboros.anvil_node.stop()
 
 
 if __name__ == "__main__":

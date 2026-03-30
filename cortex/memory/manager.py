@@ -222,7 +222,7 @@ class CortexMemoryManager:
         4. If overflow → compress and embed to L2 in background
         """
         tenant_id = tenant_id or get_tenant_id()
-        _meta = metadata or {}
+        _meta = dict(metadata or {})
         _meta["tenant_id"] = tenant_id
         _meta["project_id"] = project_id
 

@@ -322,7 +322,7 @@ class MejoraloSwarm:
         elif file_path.name.endswith((".js", ".jsx")): lang = "javascript"
         elif file_path.name.endswith(".astro"): lang = "astro"
         elif file_path.name.endswith(".css"): lang = "css"
-        
+
         return (
             f"REFAC-TASK: Fix findings in {file_path.name}. Maintain EXACT functionality.\n"
             f"Findings:\n{findings_str}{scars_str}\n\n"
@@ -459,7 +459,7 @@ class MejoraloSwarm:
             except SyntaxError as e:
                 logger.error("Swarm hallucinated invalid Python syntax: %s", e)
                 return None
-            
+
         return clean_code
 
     async def audit_files(self, file_paths: list[Path]) -> list[str]:

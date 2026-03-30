@@ -49,3 +49,12 @@ def inject_test_master_key(monkeypatch):
     monkeypatch.setenv("CORTEX_TESTING", "1")
     # Base64 for 32 bytes of '0'
     monkeypatch.setenv("CORTEX_MASTER_KEY", "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA=")
+
+@pytest.fixture(autouse=True)
+def mock_git_repo_validation(monkeypatch):
+    """Prevent GitSovereignLedger from failing when CortexEngine is instantiated in tmp_path."""
+    try:
+        from cortex.ledger.git_ledger import GitSovereignLedger
+        monkeypatch.setattr(GitSovereignLedger, "_validate_git_repo", lambda self: None)
+    except ImportError:
+        pass

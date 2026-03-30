@@ -1,0 +1,7 @@
+/Users/borjafernandezangulo/30_CORTEX/cortex-rust/target/debug/deps/webpki_roots-40d6da3ce8ad6f1a.d: /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/webpki-roots-0.26.11/src/lib.rs
+
+/Users/borjafernandezangulo/30_CORTEX/cortex-rust/target/debug/deps/libwebpki_roots-40d6da3ce8ad6f1a.rlib: /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/webpki-roots-0.26.11/src/lib.rs
+
+/Users/borjafernandezangulo/30_CORTEX/cortex-rust/target/debug/deps/libwebpki_roots-40d6da3ce8ad6f1a.rmeta: /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/webpki-roots-0.26.11/src/lib.rs
+
+/Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/webpki-roots-0.26.11/src/lib.rs:

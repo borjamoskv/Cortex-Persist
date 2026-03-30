@@ -14,7 +14,6 @@ from cortex.guards.ast_interceptor import (
     Verdict,
 )
 
-
 # ─── Schema Enforcer ─────────────────────────────────────────────────────────
 
 

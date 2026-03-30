@@ -1,10 +1,9 @@
 import re
-import sys
 
 css_path = "/Users/borjafernandezangulo/10_PROJECTS/web/borjamoskv_site/style.css"
 
 try:
-    with open(css_path, "r") as f:
+    with open(css_path) as f:
         content = f.read()
 
     # Eradicate pure white
@@ -24,10 +23,10 @@ try:
     # Shift :root to TECHNO NOIR if needed
     content = content.replace("--bg-color: #050505;", "--bg-color: #000000;")
     content = content.replace("--text-main: #FFFFFF;", "--text-main: #E0E0E0;")
-    
+
     with open(css_path, "w") as f:
         f.write(content)
-        
+
     print("SUCCESS: TECHNO NOIR PROTOCOL ENFORCED")
 except Exception as e:
     print(f"FAILED: {e}")

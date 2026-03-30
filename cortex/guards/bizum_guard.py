@@ -14,7 +14,7 @@ logger = logging.getLogger("cortex.guards.bizum")
 class BizumGuard:
     """
     Enforces deterministic boundaries on Bizum transactions.
-    
+
     Checks:
     1. Transaction Limit (Max 500 EUR per tx)
     2. Daily Cumulative Limit (Max 2000 EUR per day)
@@ -48,15 +48,15 @@ class BizumGuard:
                 async with self.ledger._acquire_conn() as conn:
                     cursor = await conn.execute(
                         """
-                        SELECT SUM(json_extract(detail, '$.amount')) 
-                        FROM transactions 
-                        WHERE action = 'BIZUM_TRANSFER' 
+                        SELECT SUM(json_extract(detail, '$.amount'))
+                        FROM transactions
+                        WHERE action = 'BIZUM_TRANSFER'
                           AND timestamp >= date('now', 'start of day')
                         """
                     )
                     row = await cursor.fetchone()
                     daily_total = Decimal(str(row[0])) if row and row[0] else Decimal("0.00")
-                    
+
                     if daily_total + amount > self.MAX_DAILY_TOTAL:
                         logger.error("[BIZUM_GUARD] Cumulative daily total %s + tx %s exceeds %s", daily_total, amount, self.MAX_DAILY_TOTAL)
                         return False
@@ -64,7 +64,7 @@ class BizumGuard:
                 logger.error("[BIZUM_GUARD] Ledger constraint failure: %s", e)
                 # Fail closed. If we can't verify the ledger, we don't extract.
                 return False
-                
+
         logger.info("[BIZUM_GUARD] Transaction validated: %s to %s", amount, destination)
         return True
 
@@ -76,12 +76,12 @@ class BizumGuard:
         required_keys = ["amount", "phone", "reason"]
         if not all(k in claim for k in required_keys):
             return False
-            
+
         try:
             amount = Decimal(str(claim["amount"]))
             if amount <= 0:
                 return False
         except (ValueError, TypeError):
             return False
-            
+
         return True

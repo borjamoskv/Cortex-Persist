@@ -33,7 +33,7 @@ async def run_p5_hardware_jit():
     context = {"project": "CORTEX-NODE-V1", "complexity": "Medium"}
 
     console.print(f"[bold white]Task:[/bold white] {task}")
-    
+
     # In a real scenario, this would trigger the kicad-omega skill
     # Here we simulate the execution success based on the actuator logic
     resp = await silicon.execute(task, context)

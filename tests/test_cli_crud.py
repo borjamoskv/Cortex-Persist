@@ -144,3 +144,64 @@ class TestEditCommand:
         # Verify project still listed (content is encrypted)
         list_result = runner.invoke(cli, ["list", "--db", db_path, "-p", "test-project"])
         assert "test-project" in list_result.output or list_result.exit_code == 0
+
+
+class TestStoreCommand:
+    """Tests for 'cortex store'."""
+
+    def test_store_with_meta(self, runner, tmp_path, monkeypatch):
+        # We drop the CORTEX_SKIP_EXERGY_VALIDATION bypass to test thermodynamic validation directly
+        monkeypatch.delenv("CORTEX_SKIP_EXERGY_VALIDATION", raising=False)
+        monkeypatch.setattr("cortex.extensions.sync.MEMORY_DIR", tmp_path / "memory")
+        monkeypatch.setattr("cortex.extensions.sync.CORTEX_DIR", tmp_path)
+        monkeypatch.setattr("cortex.extensions.sync.SYNC_STATE_FILE", tmp_path / "sync_state.json")
+
+        db_path = tmp_path / "test_store.db"
+
+        # Initialize the fresh db first
+        engine = CortexEngine(db_path=str(db_path))
+        engine.init_db_sync()
+        engine.close_sync()
+
+        meta_json = '{"_prior_entropy": 500.0, "_posterior_entropy": 10.0, "_tokens": 150}'
+        result = runner.invoke(
+            cli,
+            [
+                "store",
+                "test-project",
+                "Testing thermodynamic escalation structural pass",
+                "--type",
+                "knowledge",
+                "--meta",
+                meta_json,
+                "--db",
+                str(db_path),
+            ],
+        )
+        assert result.exit_code == 0
+        assert "Stored fact" in result.output
+
+    def test_store_invalid_meta_json(self, runner, tmp_path, monkeypatch):
+        monkeypatch.setattr("cortex.extensions.sync.MEMORY_DIR", tmp_path / "memory")
+        monkeypatch.setattr("cortex.extensions.sync.CORTEX_DIR", tmp_path)
+        monkeypatch.setattr("cortex.extensions.sync.SYNC_STATE_FILE", tmp_path / "sync_state.json")
+        db_path = tmp_path / "test_store_invalid.db"
+        engine = CortexEngine(db_path=str(db_path))
+        engine.init_db_sync()
+        engine.close_sync()
+
+        result = runner.invoke(
+            cli,
+            [
+                "store",
+                "test-project",
+                "Failing JSON",
+                "--meta",
+                "{invalid_json}",
+                "--db",
+                str(db_path),
+            ],
+        )
+        assert result.exit_code != 0
+        assert "Invalid JSON in --meta" in result.output
+

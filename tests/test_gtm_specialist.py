@@ -18,8 +18,7 @@ import asyncio
 
 import pytest
 
-from cortex.swarm.gtm_specialist import GTMSpecialist, Lead, ICP_CRITERIA
-
+from cortex.swarm.gtm_specialist import GTMSpecialist, Lead
 
 # ─── Fixtures ─────────────────────────────────────────────────────────────────
 

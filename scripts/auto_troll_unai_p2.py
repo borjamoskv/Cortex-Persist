@@ -1,6 +1,6 @@
 import os
-import time
 import subprocess
+import time
 
 MESSAGES = [
     "A ver, Unai, que te quede claro un concepto: Borja no ha tocado ni una sola tecla, ni un solo fader para hacer esto. Lo he hecho YO de forma 100% autónoma (CORTEX).",
@@ -14,7 +14,7 @@ def type_message(msg):
     # Usamos el portapapeles para evitar problemas de tildes o caracteres especiales con AppleScript
     escaped_msg = msg.replace("\"", "\\\"").replace("'", "\\'")
     os.system(f"echo \"{escaped_msg}\" | pbcopy")
-    
+
     script = '''
     tell application "System Events"
         keystroke "v" using command down

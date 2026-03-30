@@ -128,6 +128,10 @@ class PostgresPrimaryEngine:
 
         async with self._backend.connection() as conn:
             async with conn.transaction():
+                # Establecer tenant en el contexto para RLS (Row-Level Security)
+                await self._backend.execute_with_conn(
+                    conn, "SELECT set_config('cortex.tenant_id', ?, true)", (tenant_id,)
+                )
                 tx_id = await self._log_transaction(
                     conn,
                     project=project,
@@ -287,6 +291,50 @@ class PostgresPrimaryEngine:
             return None
         return self._row_to_fact(rows[0])
 
+    async def delete(self, fact_id: int, tenant_id: str = "default") -> None:
+        """Hard delete a fact from PostgreSQL with ledger tracing."""
+        tenant_id = self._resolve_tenant(tenant_id)
+        async with self._backend.connection() as conn:
+            async with conn.transaction():
+                # Establecer tenant para RLS
+                await self._backend.execute_with_conn(
+                    conn, "SELECT set_config('cortex.tenant_id', ?, true)", (tenant_id,)
+                )
+                _ = await self._log_transaction(
+                    conn,
+                    project="cortex-core",
+                    action="delete",
+                    detail={"fact_id": fact_id},
+                    tenant_id=tenant_id,
+                )
+                await self._backend.execute_with_conn(
+                    conn,
+                    "DELETE FROM facts WHERE id = ? AND tenant_id = ?",
+                    (fact_id, tenant_id)
+                )
+
+    async def tombstone(self, fact_id: int, tenant_id: str = "default") -> None:
+        """Soft delete (tombstone) a fact from PostgreSQL."""
+        tenant_id = self._resolve_tenant(tenant_id)
+        async with self._backend.connection() as conn:
+            async with conn.transaction():
+                # Establecer tenant para RLS
+                await self._backend.execute_with_conn(
+                    conn, "SELECT set_config('cortex.tenant_id', ?, true)", (tenant_id,)
+                )
+                _ = await self._log_transaction(
+                    conn,
+                    project="cortex-core",
+                    action="tombstone",
+                    detail={"fact_id": fact_id},
+                    tenant_id=tenant_id,
+                )
+                await self._backend.execute_with_conn(
+                    conn,
+                    "UPDATE facts SET is_tombstoned = TRUE, tombstoned_at = ?, updated_at = ? WHERE id = ? AND tenant_id = ?",
+                    (now_iso(), now_iso(), fact_id, tenant_id)
+                )
+
     async def vote(
         self,
         fact_id: int,
@@ -308,6 +356,11 @@ class PostgresPrimaryEngine:
                 )
                 if fact_row is None:
                     raise ValueError(f"Fact #{fact_id} not found")
+
+                # Establecer tenant para RLS
+                await self._backend.execute_with_conn(
+                    conn, "SELECT set_config('cortex.tenant_id', ?, true)", (str(fact_row.get("tenant_id") or "default"),)
+                )
 
                 tenant_id = self._resolve_tenant(str(fact_row.get("tenant_id") or "default"))
                 project = str(fact_row["project"])
@@ -797,6 +850,25 @@ class PostgresPrimaryEngine:
             return [float(value) for value in raw_embedding]
         except (TypeError, ValueError):
             return None
+
+    async def bootstrap_rls(self) -> None:
+        """Apply Row-Level Security (RLS) policies to PostgreSQL schema."""
+        logger.info("Bootstrapping Row-Level Security (RLS) policies...")
+        policies = [
+            "ALTER TABLE facts ENABLE ROW LEVEL SECURITY;",
+            "ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;",
+            "ALTER TABLE vote_ledger ENABLE ROW LEVEL SECURITY;",
+            "CREATE POLICY tenant_isolation_facts ON facts USING (tenant_id = current_setting('cortex.tenant_id', true));",
+            "CREATE POLICY tenant_isolation_txs ON transactions USING (tenant_id = current_setting('cortex.tenant_id', true));",
+            "CREATE POLICY tenant_isolation_votes ON vote_ledger USING (tenant_id = current_setting('cortex.tenant_id', true));",
+        ]
+        async with self._backend.connection() as conn:
+            for sql in policies:
+                try:
+                    await self._backend.execute_with_conn(conn, sql, ())
+                except _POSTGRES_VECTOR_ERRORS as exc:
+                    logger.debug("RLS Policy exist or error: %s", exc)
+
 
     def _vector_literal(self, embedding: list[float]) -> str:
         return json.dumps([float(value) for value in embedding], separators=(",", ":"))

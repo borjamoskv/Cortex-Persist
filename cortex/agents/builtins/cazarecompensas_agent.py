@@ -17,8 +17,8 @@ from typing import TYPE_CHECKING, Any
 
 from cortex.agents.base import BaseAgent
 from cortex.agents.message_schema import MessageKind
-from cortex.quarantine.quarantine import BlastRadiusReport, evaluate_demolition
 from cortex.memory.temporal import now_iso
+from cortex.quarantine.quarantine import BlastRadiusReport, evaluate_demolition
 from cortex.shannon.exergy import ActionRisk, ExergyInput, calculate_exergy
 
 if TYPE_CHECKING:

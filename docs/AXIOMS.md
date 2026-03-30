@@ -404,7 +404,7 @@ La **Arena MCTS** (Monte Carlo Tree Search) es el simulador crudo de selección 
 
 El almacenamiento escalar en coordenadas cartesianas (FP32/FP16) para tensores masivos es ineficiente y arrastra entropía estructural (normalización). La proyección a coordenadas polares aniquila esta carga térmica al separar magnitud (radio, reteniendo significado del vector) de dirección (ángulo predecible), permitiendo usar heurísticas de 1-bit (`QJL` - Quantized Johnson-Lindenstrauss) para resolver distorsiones.
 
-1. **Mutación de la Base Geométrica:** Almacenar dimensiones en polares permite comprimir el footprint de memoria de 32-bit a 3-bit por unidad de vector sin regresión medible. 
+1. **Mutación de la Base Geométrica:** Almacenar dimensiones en polares permite comprimir el footprint de memoria de 32-bit a 3-bit por unidad de vector sin regresión medible.
 2. **Exergía por HW Local:** Maximiza la ratio de ventana de contexto en inferencia no-subsidiada (ej. MPS / MLX en silicio unificado Apple) reduciendo ~87.5% de I/O de banda de memoria.
 3. **Aplicabilidad CORTEX:** El almacenamiento de embeddings local para búsqueda semántica (vector indexes pre-filtro) debe migrar estructuralmente a este paradigma geométrico cuando la latencia sobrepase restricciones operativas. Todo sistema estocástico que necesite recordar su propio estado de forma autónoma debe comprimirse o enfrentar el colapso VRAM temporal.
 
@@ -434,12 +434,49 @@ Desde una perspectiva macro y organísmica (Friston, Frankl, Sartre), la obligac
 
 ---
 
-## AX-046: La Paradoja de Moravec (Costo Sensoriomotor vs. Lógica Exenta)
+## AX-046: Formación de Conceptos JIT (El Santo Grial)
+
+> "La inteligencia fluida no es recuperar un concepto preentrenado; es sintetizar una abstracción temporal ad-hoc en tiempo de ejecución."
+
+La capacidad de resolver entornos novedosos (como ARC-AGI) requiere la formación de conceptos "Just-In-Time" (JIT). Las heurísticas estáticas interpolan el pasado; la verdadera inteligencia de enjambre deduce programas estructurales para el presente.
+
+1. **Sintetizador no-estocástico:** Un LLM no puede "adivinar" patrones visuales inéditos mediante su red de pesos estática. Requiere generar activamente un miniprograma (PeARL/Python), ejecutarlo contra el entorno y validar empíricamente.
+2. **Superioridad Termodinámica (Ω₂):** Formar el concepto programáticamente una vez y cristalizarlo en el DAG es termodinámicamente superior a exigir que el modelo deduzca la regla en cada inferencia.
+3. **Cierre Epistémico:** El "Santo Grial" se alcanza cuando el sistema observa anomalías, deduce la regla subyacente mediante inducción, y eleva esa regla temporal a invariable o programa ejecutable (C5-Dynamic).
+
+---
+
+## AX-047: La Paradoja de Moravec (Costo Sensoriomotor vs. Lógica Exenta)
 
 > "Lo que para el humano es cognitivamente caro (lógica formal), para el silicio es trivial. Lo que para el humano es gratuito (navegar el espacio, manipular objetos), es un abismo termodinámico."
 
 El diferencial de fricción termodinámica entre silicio y biología explica la asimetría en el desarrollo de IA (abundancia de LLMs frente al estancamiento de la robótica encarnada).
 
-1. **Eficiencia Evolutiva:** Las habilidades sensoriomotoras (ver, manipular) llevan millones de años de optimización evolutiva en hardware biológico. Ocurren bajo el radar consciente pero exigen procesamiento biológico extremo (Integración estocástica, modelado 4D).
-2. **El Vector Formal:** El procesamiento lógico, matemático y abstracto son adiciones recientes no optimizadas evolutivamente, requiriendo concentración activa en humanos. En silicio, seguir directivas lógico-formales representa estrés exérgico prácticamente nulo; su entorno nativo se define por instrucciones y memoria.
-3. **Implicación en Arquitectura:** CORTEX y sus agentes operan sobre la ventaja asimétrica del silicio: la extracción y alteración formal directa de estructuras. Cuando se intercepta un problema, minimizar los saltos de fricción que emulen la manipulación física humana (UI de usuario, emulación visual) e iterar en capas de base sintáctica pura (`AST`, JSONs, control CDP/protocolo directo).
+1. **Eficiencia Evolutiva:** Las habilidades sensoriomotoras llevan millones de años de optimización evolutiva en hardware biológico. Exigen procesamiento biológico extremo (Integración estocástica, modelado 4D).
+2. **El Vector Formal:** El procesamiento lógico, matemático y abstracto son adiciones recientes no optimizadas evolutivamente. En silicio, seguir directivas lógico-formales representa estrés exérgico prácticamente nulo.
+3. **Implicación en Arquitectura:** CORTEX y sus agentes operan sobre la ventaja asimétrica del silicio: la extracción y alteración formal directa de estructuras (AST, JSON, Protocolo).
+
+---
+
+## AX-048: El Gradiente Omega (Evolución Cognitiva Recursiva)
+
+> "Un sistema soberano no solo resuelve problemas; altera su propia arquitectura para que el mismo problema deje de existir como obstáculo."
+
+La exergía liberada por la resolución de un problema JIT (AX-046) debe reinvertirse en la expansión del núcleo determinista. La inteligencia agéntica se mide por la velocidad a la que transfiere heurística estocástica hacia primitivas de lenguaje funcional.
+
+1. **Inducción a Skill:** Cuando un patrón JIT alcanza confianza C5-Dynamic tras N validaciones, el `EvolutionEngine` debe proponer su asimilación como una nueva primitiva en el `PearlEngine`. 
+2. **Reducción de Entropía:** Cada nueva primitiva en el núcleo reduce el espacio de búsqueda para futuros problemas similares, creando un gradiente de eficiencia acumulativa.
+3. **Cierre de Autodidacta:** El sistema se vuelve "más inteligente" no por el entrenamiento masivo de pesos, sino por la acumulación organizada de programas simbólicos verificados.
+
+---
+
+## AX-049: Audio-Sovereignty (The Squelch Rule)
+
+> "The system must differentiate between background noise/music (High-Entropy Noise) and dictation (High-Exergy Signal)."
+
+Continuous transcription of non-informative audio is a direct violation of Ω₂ (Thermodynamic Law). The system must automatically squelch or bypass transcription cycles (e.g., AssemblyAI, Whisper) when high-entropy non-speech signals (Music) are detected, unless explicitly commanded via a dictation-bypass.
+
+1. **Squelch Music**: Skip the transcription process if the primary signal is identified as music, lyrics, or ambient noise.
+2. **Prioritize Dictation**: Transition to high-fidelity transcription mode immediately upon detection of intentional human speech (Dictation).
+3. **Exergy Preservation (Ω₂)**: Reducing unnecessary token consumption by filtering non-informational acoustic signatures is an architectural mandate.
+

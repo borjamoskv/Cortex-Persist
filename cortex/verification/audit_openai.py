@@ -30,15 +30,15 @@ async def run_byzantine_audit(records: list[dict[str, Any]], api_key: str | None
         return {"error": "Missing OPENAI_API_KEY", "score": 0, "vectors": []}
 
     client = openai.AsyncOpenAI(api_key=key)
-    
+
     # Prepare logs for the agent
     log_summary = "\n".join([
         f"ID: {r.get('id')} | Source: {r.get('source')} | Confidence: {r.get('confidence')} | Content: {r.get('content')}"
         for r in records
     ])
-    
+
     prompt = f"Analyze the following CORTEX ledger records for Byzantine anomalies:\n\n{log_summary}"
-    
+
     try:
         result = await Runner.run(audit_agent, prompt, client=client)
         # Parse result (assuming structured text or JSON-like output from GPT-5.4)

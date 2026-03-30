@@ -14,9 +14,9 @@ logger = logging.getLogger("cortex.guards.taint")
 
 class TaintGuard:
     """
-    Ensures that every modification in a staged file contains a valid 
+    Ensures that every modification in a staged file contains a valid
     CORTEX Causal Taint signature.
-    
+
     Pattern: # CORTEX-TAINT: <agent_id>:<hash>:<timestamp>
     """
 
@@ -55,12 +55,12 @@ class TaintGuard:
         try:
             with open(full_path, encoding="utf-8") as f:
                 content = f.read()
-            
+
             # Look for the signature anywhere in the file (usually top or bottom)
             match = re.search(self.TAINT_PATTERN, content)
             if not match:
                 return False, f"Missing CORTEX-TAINT header in {file_path}"
-            
+
             agent_id, content_hash, timestamp = match.groups()
             logger.info("[TAINT] Verified: agent=%s, hash=%s, ts=%s", agent_id, content_hash, timestamp)
             return True, f"Verified taint for {agent_id}"
@@ -73,13 +73,13 @@ class TaintGuard:
         files = self.get_staged_files()
         if not files:
             return True
-            
+
         failures = []
         for f in files:
             ok, msg = self.verify_file_taint(f)
             if not ok:
                 failures.append(msg)
-        
+
         if failures:
             print("\n" + "!" * 80)
             print("CORTEX TAINT VIOLATION (Ω1/Ω3)")
@@ -88,7 +88,7 @@ class TaintGuard:
             print("Action: Add '# CORTEX-TAINT: <agent-id>:<hash>:<timestamp>' to staged files.")
             print("!" * 80 + "\n")
             return False
-            
+
         return True
 
 if __name__ == "__main__":

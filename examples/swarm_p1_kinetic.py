@@ -59,7 +59,7 @@ async def run_p1_extraction():
         # Mocking scan for the demo
         repos = [("google", "cortex"), ("borjamoskv", "Cortex-Persist")]
         all_leads = []
-        
+
         for owner, repo in repos:
             leads = await bounty_service.scan_repository(owner, repo)
             all_leads.extend(leads)

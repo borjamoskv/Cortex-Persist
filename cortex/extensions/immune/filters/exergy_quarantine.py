@@ -112,4 +112,3 @@ class ExergyQuarantineFilter(ImmuneFilter):
             ),
             metadata={"exergy_bits": round(exergy, 4), "text_len": len(text)},
         )
-

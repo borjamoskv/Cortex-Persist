@@ -2,17 +2,13 @@
 import asyncio
 import logging
 import sys
-import os
-from pathlib import Path
 from decimal import Decimal
 
 # Add prefix to sys.path to find cortex
 sys.path.append("/Users/borjafernandezangulo/30_CORTEX")
 
 from cortex.cli.common import console
-from cortex.engine.keter import KeterEngine
-from cortex.engine.phoenix_omega import PhoenixOrchestrator
-from cortex.shannon.exergy import calculate_exergy, ExergyInput, ActionRisk
+from cortex.shannon.exergy import ActionRisk, ExergyInput, calculate_exergy
 
 logging.basicConfig(level=logging.ERROR)
 
@@ -53,15 +49,15 @@ async def ultrathink_roast():
 [bold]CORTEX-Persist is what happens when a System Architect reads 'The Illuminatus! Trilogy' and tries to implement it in Python 3.12.[/]
 
 - [noir.blueylb]Architecture:[/] You have more 'Engines' than a Formula 1 factory, and yet most of them just wrap an `asyncio.sleep` and a `logger.info`. You've achieved the **Singularity of Boilerplate**.
-- [noir.cyber]Naming Convention:[/] Naming a migration tool 'Apotheosis' doesn't make it faster; it just makes the `ModuleNotFoundError` feel more theological. 
+- [noir.cyber]Naming Convention:[/] Naming a migration tool 'Apotheosis' doesn't make it faster; it just makes the `ModuleNotFoundError` feel more theological.
 - [noir.gold]Exergy:[/] Your 'Thermodynamic Laws' are mostly just vibes. You're measuring entropy while the repo is literally leaking files like a sieve.
 - [noir.violet]Legion Swarm:[/] You have a 'Legion' of one. It's not a swarm; it's a very lonely Python script shouting 'Ω₁' into the void.
-- [bold white]Conclusion:[/] This repo is 130/100 on nomenclature and 10/100 on 'actually running a real production database without a Z3 solver panic'. 
+- [bold white]Conclusion:[/] This repo is 130/100 on nomenclature and 10/100 on 'actually running a real production database without a Z3 solver panic'.
 
 [italic dim]Frontera x10 achieved. Net Exergy: Negative. System Stability: Paradoxical.[/]
 """
     console.print(roast_text)
-    
+
     console.rule("[bold noir.blueylb]SINGULARITY REACHED[/]")
 
 if __name__ == "__main__":

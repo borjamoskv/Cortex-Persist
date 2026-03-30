@@ -13,7 +13,7 @@ logger = logging.getLogger("cortex.guards.whatsapp")
 class WhatsAppGuard:
     """
     Enforces deterministic boundaries on WhatsApp communications.
-    
+
     Checks:
     1. Message Length (Max 4096 chars)
     2. Recipient Format (Contact Name or International Number)
@@ -32,7 +32,7 @@ class WhatsAppGuard:
         Validates an outbound WhatsApp message.
         """
         if not (self.MIN_MESSAGE_LENGTH <= len(text) <= self.MAX_MESSAGE_LENGTH):
-            logger.error("[WHATSAPP_GUARD] Message length %d outside limits [%d, %d]", 
+            logger.error("[WHATSAPP_GUARD] Message length %d outside limits [%d, %d]",
                          len(text), self.MIN_MESSAGE_LENGTH, self.MAX_MESSAGE_LENGTH)
             return False
 
@@ -44,7 +44,7 @@ class WhatsAppGuard:
         if text.count("http") > 3:
             logger.warning("[WHATSAPP_GUARD] Potential spam detected: high link density.")
             return False
-            
+
         logger.info("[WHATSAPP_GUARD] Message validated for recipient: %s", recipient)
         return True
 
@@ -56,5 +56,5 @@ class WhatsAppGuard:
         if not all(k in claim for k in required_keys):
             logger.error("[WHATSAPP_GUARD] Missing required keys in claim.")
             return False
-            
+
         return True

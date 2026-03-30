@@ -11,9 +11,8 @@ import logging
 import random
 import uuid
 
-from cortex.extensions.episodic.main import EpisodicMemory
-
 from cortex.engine import CortexEngine
+from cortex.extensions.episodic.main import EpisodicMemory
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] ACADEMY: %(message)s")
 logger = logging.getLogger("academy_trainer")

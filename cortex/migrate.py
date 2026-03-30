@@ -209,7 +209,7 @@ def _migrate_project(engine: CortexEngine, path: Path, stats: dict) -> None:
     # Ghost (last state)
     ghost = data.get("ghost", {})
     if ghost:
-        logger.info(f"MIGRATING GHOST: Found ghost data")
+        logger.info("MIGRATING GHOST: Found ghost data")
         engine.store_sync(
             project=project,
             content=json.dumps(ghost, ensure_ascii=False),
