@@ -14,7 +14,9 @@ import logging
 import os
 from functools import lru_cache
 from pathlib import Path
-from typing import Optional, Union
+from typing import Optional
+
+import anyio
 
 from cortex.core.paths import MODELS_DIR as DEFAULT_CACHE_DIR
 
@@ -104,7 +106,9 @@ class LocalEmbedder:
     def _embed_cached(self, text: str) -> list[float]:
         """Internal cached embedding for single strings."""
         self._ensure_model()
-        embedding = self._model.encode(text, normalize_embeddings=True)  # type: ignore[reportOptionalMemberAccess]
+        embedding = self._model.encode(
+            text, normalize_embeddings=True
+        )  # type: ignore[reportOptionalMemberAccess]
         return embedding.tolist()
 
     def embed(self, text: str | list[str]) -> list[float] | list[list[float]]:
@@ -134,6 +138,16 @@ class LocalEmbedder:
             show_progress_bar=len(texts) > 50,
         )
         return [e.tolist() for e in embeddings]
+
+    async def aembed(self, text: str | list[str]) -> list[float] | list[list[float]]:
+        """Async version of embed. Runs in a thread-pool to prevent blocking."""
+        return await anyio.to_thread.run_sync(self.embed, text)
+
+    async def aembed_batch(
+        self, texts: list[str], batch_size: int = 32
+    ) -> list[list[float]]:
+        """Async version of embed_batch. Runs in a thread-pool."""
+        return await anyio.to_thread.run_sync(self.embed_batch, texts, batch_size)
 
     def embed_batch_chunked(
         self,
