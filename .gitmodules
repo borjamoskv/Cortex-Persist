@@ -1,0 +1,3 @@
+[submodule "rustchain-mcp"]
+	path = rustchain-mcp
+	url = https://github.com/borjamoskv/rustchain-mcp.git

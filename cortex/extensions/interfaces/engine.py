@@ -108,8 +108,13 @@ class EngineProtocol(Protocol):
     async def search(
         self,
         query: str,
-        project: Optional[str] = None,
         tenant_id: str = "default",
+        top_k: int = 5,
+        project: Optional[str] = None,
+        as_of: Optional[str] = None,
+        graph_depth: int = 0,
+        include_graph: bool = False,
+        confidence: Optional[str] = None,
         **kwargs: Any,
     ) -> list[Any]:
         """Semantic/hybrid search."""
