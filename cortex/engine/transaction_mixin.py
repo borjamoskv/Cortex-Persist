@@ -82,7 +82,7 @@ class TransactionMixin(EngineMixinBase):
 
     async def verify_ledger(self) -> dict[str, Any]:
         if not getattr(self, "_ledger", None):
-            from cortex.engine.ledger import ImmutableLedger
+            from cortex.ledger import ImmutableLedger
 
             conn = await self.get_conn()
             self._ledger = ImmutableLedger(conn)

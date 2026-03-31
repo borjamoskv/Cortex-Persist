@@ -8,13 +8,25 @@ Axiom Reference:
 
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import json
 import logging
 import sqlite3
+import time
+from collections import deque
 from dataclasses import dataclass
-from datetime import datetime, timezone
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from cortex.database.pool import CortexConnectionPool
+
+from cortex.utils.canonical import (
+    canonical_json,
+    compute_tx_hash,
+    compute_tx_hash_v1,
+    now_iso,
+)
 
 logger = logging.getLogger("cortex.ledger")
 
@@ -202,14 +214,30 @@ class SemanticMerkleTree:
 
 
 class SovereignLedger:
-    """The Custodian of Immutable History (CORTEX Wave 5)."""
+    """The Custodian of Immutable History (CORTEX Wave 5/8).
 
-    def __init__(self, db_conn: sqlite3.Connection):
-        self.conn = db_conn
-        self._ensure_schema()
+    Unified implementation supporting both synchronous single-connection
+    and asynchronous pool-based operations. Implements adaptive
+    checkpointing and v2 canonical hashing.
+    """
 
-    def _ensure_schema(self):
-        self.conn.executescript("""
+    WRITE_RATE_WINDOW = 60  # seconds
+    HIGH_WRITE_THRESHOLD = 10  # writes/sec triggers adaptive reduction
+
+    def __init__(self, db: sqlite3.Connection | CortexConnectionPool):
+        from cortex import config
+
+        self.db = db
+        self._write_timestamps: deque[float] = deque(maxlen=5000)
+        self._lock = asyncio.Lock()
+        self._config = config
+
+        # Schema is created synchronously on init if possible
+        if isinstance(db, sqlite3.Connection):
+            self._ensure_schema_sync(db)
+
+    def _ensure_schema_sync(self, conn: sqlite3.Connection):
+        conn.executescript("""
             CREATE TABLE IF NOT EXISTS transactions (
                 id          INTEGER PRIMARY KEY AUTOINCREMENT,
                 project     TEXT NOT NULL,
@@ -227,98 +255,203 @@ class SovereignLedger:
                 tx_end_id       INTEGER NOT NULL,
                 tx_count        INTEGER NOT NULL,
                 signature       TEXT,
-                created_at      TEXT DEFAULT (datetime('now'))
+                created_at      TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+            );
+            CREATE TABLE IF NOT EXISTS integrity_checks (
+                id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                check_type      TEXT NOT NULL,
+                status          TEXT NOT NULL,
+                details         TEXT,
+                started_at      TEXT NOT NULL,
+                completed_at    TEXT NOT NULL
             );
             CREATE INDEX IF NOT EXISTS idx_tx_prev ON transactions(prev_hash);
             CREATE INDEX IF NOT EXISTS idx_merkle_range ON merkle_roots(tx_start_id, tx_end_id);
         """)
 
-    def _compute_tx_hash(
-        self, prev_hash: str, project: str, action: str, detail: str, ts: Any
-    ) -> str:
-        ts_str = str(ts)
-        payload = f"{prev_hash}:{project}:{action}:{detail}:{ts_str}"
-        return hashlib.sha256(payload.encode()).hexdigest()
+    def record_write(self) -> None:
+        """Track write rate for adaptive checkpointing."""
+        self._write_timestamps.append(time.monotonic())
+
+    @property
+    def adaptive_batch_size(self) -> int:
+        """Compute batch size based on recent write rate."""
+        now = time.monotonic()
+        cutoff = now - self.WRITE_RATE_WINDOW
+        recent = sum(1 for t in self._write_timestamps if t > cutoff)
+        rate = recent / self.WRITE_RATE_WINDOW if self._write_timestamps else 0
+        if rate > self.HIGH_WRITE_THRESHOLD:
+            return getattr(self._config, "CHECKPOINT_MIN", 10)
+        return getattr(self._config, "CHECKPOINT_MAX", 100)
 
     def record_transaction(self, project: str, action: str, detail: Any = None) -> str:
-        detail_json = json.dumps(detail, sort_keys=True) if detail else "{}"
-        ts = datetime.now(timezone.utc).isoformat()
+        """Record a transaction synchronously."""
+        if not isinstance(self.db, sqlite3.Connection):
+            raise RuntimeError("record_transaction requires a sync sqlite3.Connection")
+
+        self.record_write()
+        detail_json = canonical_json(detail) if detail else "{}"
+        ts = now_iso()
 
         try:
-            # Enforce an EXCLUSIVE lock to prevent race conditions (Chain Forking)
-            # during the read-compute-write cycle of the hash chain.
-            self.conn.execute("BEGIN EXCLUSIVE")
-
-            cursor = self.conn.execute("SELECT hash FROM transactions ORDER BY id DESC LIMIT 1")
+            self.db.execute("BEGIN EXCLUSIVE")
+            cursor = self.db.execute("SELECT hash FROM transactions ORDER BY id DESC LIMIT 1")
             row = cursor.fetchone()
             prev_hash = row[0] if row else "GENESIS"
-            new_hash = self._compute_tx_hash(prev_hash, project, action, detail_json, ts)
+            new_hash = compute_tx_hash(prev_hash, project, action, detail_json, ts)
 
-            self.conn.execute(
+            self.db.execute(
                 "INSERT INTO transactions (project, action, detail, prev_hash, hash, timestamp)"
                 " VALUES (?, ?, ?, ?, ?, ?)",
                 (project, action, detail_json, prev_hash, new_hash, ts),
             )
-            self.conn.commit()
+            self.db.commit()
             return new_hash
-        except sqlite3.IntegrityError as e:
-            logger.error("Ledger collision or duplicate: %s", e)
-            raise
-        except sqlite3.Error as e:
-            logger.error("Ledger OS/IO Failure: %s", e)
+        except sqlite3.Error:
+            self.db.rollback()
             raise
 
-    def create_checkpoint(self, batch_size: int = 100) -> str | None:
-        cursor = self.conn.execute("SELECT MAX(tx_end_id) FROM merkle_roots")
-        last_covered = cursor.fetchone()[0] or 0
-        cursor = self.conn.execute(
-            "SELECT id, hash FROM transactions WHERE id > ? ORDER BY id", (last_covered,)
+    async def record_transaction_async(self, project: str, action: str, detail: Any = None) -> str:
+        """Record a transaction asynchronously (requires a connection pool)."""
+        self.record_write()
+        detail_json = canonical_json(detail) if detail else "{}"
+        ts = now_iso()
+
+        async with self.db.acquire() as conn:  # type: ignore[reportAttributeAccessIssue]
+            await conn.execute("BEGIN EXCLUSIVE")
+            try:
+                cursor = await conn.execute("SELECT hash FROM transactions ORDER BY id DESC LIMIT 1")
+                row = await cursor.fetchone()
+                prev_hash = row[0] if row else "GENESIS"
+                new_hash = compute_tx_hash(prev_hash, project, action, detail_json, ts)
+
+                await conn.execute(
+                    "INSERT INTO transactions (project, action, detail, prev_hash, hash, timestamp)"
+                    " VALUES (?, ?, ?, ?, ?, ?)",
+                    (project, action, detail_json, prev_hash, new_hash, ts),
+                )
+                await conn.commit()
+                return new_hash
+            except Exception:
+                await conn.rollback()
+                raise
+
+    def create_checkpoint(self) -> str | None:
+        """Create a Merkle checkpoint synchronously."""
+        if not isinstance(self.db, sqlite3.Connection):
+            return None
+
+        batch_size = self.adaptive_batch_size
+        cursor = self.db.execute("SELECT MAX(tx_end_id) FROM merkle_roots")
+        row = cursor.fetchone()
+        last_covered = row[0] or 0 if row else 0
+
+        cursor = self.db.execute(
+            "SELECT id, hash FROM transactions WHERE id > ? ORDER BY id LIMIT ?",
+            (last_covered, batch_size),
         )
         rows = cursor.fetchall()
-        if not rows or (len(rows) < batch_size and last_covered > 0):
+
+        if not rows or len(rows) < batch_size:
             return None
+
         hashes = [r[1] for r in rows]
         tree = MerkleTree(hashes)
         root = tree.root_hash
         start_id, end_id = rows[0][0], rows[-1][0]
-        self.conn.execute(
+
+        self.db.execute(
             "INSERT INTO merkle_roots (root_hash, tx_start_id, tx_end_id, tx_count) VALUES (?, ?, ?, ?)",
             (root, start_id, end_id, len(rows)),
         )
-        self.conn.commit()
+        self.db.commit()
         return root
 
-    def audit_integrity(self) -> dict:
+    async def create_checkpoint_async(self) -> str | None:
+        """Create a Merkle checkpoint asynchronously."""
+        batch_size = self.adaptive_batch_size
+
+        async with self._lock:
+            async with self.db.acquire() as conn:  # type: ignore[reportAttributeAccessIssue]
+                cursor = await conn.execute("SELECT MAX(tx_end_id) FROM merkle_roots")
+                row = await cursor.fetchone()
+                last_covered = row[0] or 0 if row else 0
+
+                cursor = await conn.execute(
+                    "SELECT id, hash FROM transactions WHERE id > ? ORDER BY id LIMIT ?",
+                    (last_covered, batch_size),
+                )
+                rows = await cursor.fetchall()
+
+                if not rows or len(rows) < batch_size:
+                    return None
+
+                hashes = [r[1] for r in rows]
+                tree = MerkleTree(hashes)
+                root = tree.root_hash
+                start_id, end_id = rows[0][0], rows[-1][0]
+
+                await conn.execute(
+                    "INSERT INTO merkle_roots (root_hash, tx_start_id, tx_end_id, tx_count) "
+                    "VALUES (?, ?, ?, ?)",
+                    (root, start_id, end_id, len(rows)),
+                )
+                await conn.commit()
+                return root
+
+    async def audit_integrity_async(self) -> dict:
+        """Perform a full integrity audit asynchronously."""
         violations = []
-        cursor = self.conn.execute(
-            "SELECT id, project, action, detail, prev_hash, hash, timestamp FROM transactions ORDER BY id"
-        )
-        expected_prev = "GENESIS"
         tx_count = 0
 
-        # Iterate over the cursor directly (streaming) instead of `fetchall()` to prevent OOM
-        for row in cursor:
-            tid, proj, act, det, prev, h, ts = row
-            tx_count += 1
-            if prev != expected_prev:
-                violations.append(
-                    {"id": tid, "type": "CHAIN_BREAK", "expected": expected_prev, "actual": prev}
-                )
-            computed = self._compute_tx_hash(prev, proj, act, det, ts)
-            if computed != h:
-                violations.append(
-                    {"id": tid, "type": "TAMPER_DETECTED", "stored": h, "computed": computed}
-                )
-            expected_prev = h
-        cursor = self.conn.execute("SELECT root_hash, tx_start_id, tx_end_id FROM merkle_roots")
-        for stored_root, start, end in cursor.fetchall():
-            c = self.conn.execute(
-                "SELECT hash FROM transactions WHERE id >= ? AND id <= ? ORDER BY id", (start, end)
+        async with self.db.acquire() as conn:  # type: ignore[reportAttributeAccessIssue]
+            started_at = now_iso()
+            cursor = await conn.execute(
+                "SELECT id, project, action, detail, prev_hash, hash, timestamp "
+                "FROM transactions ORDER BY id"
             )
-            hashes = [r[0] for r in c.fetchall()]
-            computed_root = MerkleTree(hashes).root_hash
-            if computed_root != stored_root:
-                violations.append(
-                    {"range": f"{start}-{end}", "type": "MERKLE_MISMATCH", "stored": stored_root}
+
+            expected_prev = "GENESIS"
+            while True:
+                row = await cursor.fetchone()
+                if not row:
+                    break
+                tid, proj, act, det, prev, h, ts = row
+                tx_count += 1
+
+                if prev != expected_prev:
+                    violations.append({"id": tid, "type": "CHAIN_BREAK", "expected": expected_prev})
+
+                # Verify with v2, fallback to v1
+                computed = compute_tx_hash(prev, proj, act, det, ts)
+                if computed != h:
+                    computed_v1 = compute_tx_hash_v1(prev, proj, act, det, ts)
+                    if computed_v1 != h:
+                        violations.append({"id": tid, "type": "TAMPER_DETECTED", "stored": h})
+
+                expected_prev = h
+                if tx_count % 100 == 0:
+                    await asyncio.sleep(0)  # Yield
+
+            # Verify Merkle Roots
+            cursor = await conn.execute("SELECT root_hash, tx_start_id, tx_end_id FROM merkle_roots")
+            roots = await cursor.fetchall()
+            for stored_root, start, end in roots:
+                c = await conn.execute(
+                    "SELECT hash FROM transactions WHERE id >= ? AND id <= ? ORDER BY id",
+                    (start, end),
                 )
+                hashes = [r[0] for r in await c.fetchall()]
+                computed_root = MerkleTree(hashes).root_hash
+                if computed_root != stored_root:
+                    violations.append({"range": f"{start}-{end}", "type": "MERKLE_MISMATCH"})
+
+            status = "ok" if not violations else "violation"
+            await conn.execute(
+                "INSERT INTO integrity_checks (check_type, status, details, started_at, completed_at) "
+                "VALUES (?, ?, ?, ?, ?)",
+                ("full", status, json.dumps(violations), started_at, now_iso()),
+            )
+            await conn.commit()
+
         return {"valid": not violations, "violations": violations, "tx_count": tx_count}

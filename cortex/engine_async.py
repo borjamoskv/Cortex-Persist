@@ -15,12 +15,12 @@ from cortex.embeddings import LocalEmbedder
 from cortex.engine.agent_mixin import AgentMixin
 from cortex.engine.consensus import ConsensusMixin
 from cortex.engine.history import HistoryMixin
-from cortex.engine.ledger import ImmutableLedger
 from cortex.engine.query_mixin import QueryMixin
 from cortex.engine.search_mixin import SearchMixin
 from cortex.engine.store_mixin import StoreMixin
 from cortex.extensions.cuatrida.models import Dimension
 from cortex.graph import get_graph as _get_graph
+from cortex.ledger import ImmutableLedger
 from cortex.memory.temporal import now_iso
 from cortex.utils.canonical import canonical_json, compute_tx_hash
 from cortex.utils.result import Err, Ok, Result
