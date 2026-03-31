@@ -10,7 +10,6 @@ from __future__ import annotations
 import asyncio
 import logging
 import subprocess
-from typing import Any
 from pathlib import Path
 
 try:
