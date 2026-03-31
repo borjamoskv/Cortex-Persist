@@ -27,7 +27,7 @@ from cortex.guards.exergy_guard import calculate_exergy
 from cortex.memory.encoder import AsyncEncoder
 from cortex.memory.models import CortexFactModel
 from cortex.utils import void_vec
-from cortex.utils.turboquant import encode_query_qjl, optimize_vector_qjl
+from cortex.utils.turboquant import encode_query_qjl
 
 __all__ = ["SovereignVectorStoreL2"]
 
@@ -236,23 +236,24 @@ class SovereignVectorStoreL2:
 
     def _get_domain_tables(
         self, conn: sqlite3.Connection, tenant_id: str, project_id: str
-    ) -> tuple[str, str, str | None]:
+    ) -> tuple[str, str, str | None, str | None]:
         """Axiom Ω8: Vertical Domain Cut.
         If a corpus weighs too much, we split the universe and migrate only distilled axioms.
         """
         safe_tenant = "".join(c for c in tenant_id if c.isalnum() or c == "_")
         safe_proj = "".join(c for c in project_id if c.isalnum() or c == "_")
         if not safe_tenant or not safe_proj:
-            return "facts_meta", "vec_facts", "vec_void"
+            return "facts_meta", "vec_facts", "vec_void", "vec_void_mih"
 
         meta_tb = f"facts_meta_{safe_tenant}_{safe_proj}"
         vec_tb = f"vec_facts_{safe_tenant}_{safe_proj}"
         vec_void_tb = f"vec_void_{safe_tenant}_{safe_proj}"
+        mih_tb = f"vec_void_mih_{safe_tenant}_{safe_proj}"
 
         cursor = conn.cursor()
         cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (meta_tb,))
         if cursor.fetchone():
-            return meta_tb, vec_tb, vec_void_tb
+            return meta_tb, vec_tb, vec_void_tb, mih_tb
 
         cursor.execute(
             "SELECT count(1) FROM facts_meta WHERE tenant_id = ? AND project_id = ?",
@@ -291,9 +292,7 @@ class SovereignVectorStoreL2:
             """)  # nosec B608
             emb_def = f"embedding int8[{self._encoder.dimension}]"
             conn.execute(f"CREATE VIRTUAL TABLE {vec_tb} USING vec0({emb_def})")
-            conn.execute(
-                f"CREATE TABLE {vec_void_tb} (rowid INTEGER PRIMARY KEY, embedding BLOB)"
-            )
+            conn.execute(f"CREATE TABLE {vec_void_tb} (rowid INTEGER PRIMARY KEY, embedding BLOB)")
             # MIH sharded table
             vec_void_mih_tb = f"vec_void_mih_{safe_tenant}_{safe_proj}"
             conn.execute(f"""
@@ -438,6 +437,7 @@ class SovereignVectorStoreL2:
                         )
                         # MIH Indexing
                         from cortex.utils.void_mih import slice_void_bit
+
                         shards = slice_void_bit(binary_bytes)
                         cursor.execute(
                             f"INSERT INTO {mih_tb} (rowid, s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, "

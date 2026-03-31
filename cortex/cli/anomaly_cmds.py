@@ -119,10 +119,7 @@ def memory_clean_cmd(db: str) -> None:
             ghosts = _run_async(_run())
 
         if not ghosts:
-            msg = (
-                "[bold green]✓ Memoria limpia. No se detectaron "
-                "resurrecciones.[/bold green]"
-            )
+            msg = "[bold green]✓ Memoria limpia. No se detectaron resurrecciones.[/bold green]"
             console.print(msg)
         else:
             msg = (
