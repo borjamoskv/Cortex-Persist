@@ -18,6 +18,7 @@ from cortex.extensions.signals.bus import AsyncSignalBus
 from cortex.extensions.swarm.auto_fix import AutoFixPipeline
 from cortex.extensions.swarm.budget import get_budget_manager
 from cortex.extensions.swarm.protocols import AgentRole, SwarmIntent, SwarmSignalSchema
+from cortex.extensions.swarm.verification_gate import VerificationGate, RiskLevel
 from cortex.extensions.swarm.worktree_isolation import isolated_worktree
 
 logger = logging.getLogger("cortex.extensions.swarm.manager")
@@ -53,6 +54,7 @@ class SwarmManager:
         self.worktrees: dict[str, WorktreeState] = {}
         self._lock = asyncio.Lock()
         self.autofix = AutoFixPipeline()
+        self.verifier = VerificationGate()
         self._initialized = True
         logger.info("SwarmManager initialized: %s", id(self))
 
@@ -220,6 +222,7 @@ class CapatazOrchestrator:
         agent_name: str,
         coro_func: Callable[..., Any],
         role: AgentRole = AgentRole.WORKER,
+        changed_files: list[str] | None = None,
         args: list[Any] | tuple[Any, ...] = (),
         kwargs: dict[str, Any] | None = None,
         lock_resource: str | None = None,
@@ -232,12 +235,21 @@ class CapatazOrchestrator:
         task = SwarmTask(name=name, agent_name=agent_name, role=role, status=TaskStatus.RUNNING)
         self.tasks[task.id] = task
 
+        # Ω₁: RISK DETECTION
+        risk = RiskLevel.LOW
+        if changed_files:
+            from cortex.extensions.swarm.verification_gate import VerificationGate
+
+            verifier = VerificationGate()
+            risk = verifier.check_risk(changed_files)
+
         logger.info(
-            "[%s] Capataz: Deploying %s (%s) to task: %s",
+            "[%s] Capataz: Deploying %s (%s) to task: %s (Risk: %s)",
             self.mission_id,
             agent_name,
             role.value,
             name,
+            risk.value,
         )
 
         lock_acquired = False
@@ -273,6 +285,30 @@ class CapatazOrchestrator:
                     )
 
             result = await coro_func(*args, **kwargs)
+
+            # Ω₁: ELDER VERIFICATION GATE
+            if risk != RiskLevel.LOW:
+                from cortex.extensions.swarm.verification_gate import VerificationGate
+
+                verifier = VerificationGate()
+                v_res = await verifier.verify_proposal(str(result), risk)
+                if not v_res.approved:
+                    logger.critical("🛑 [Ω₁] ELDER REJECTION: %s", v_res.reason)
+                    task.status = TaskStatus.FAILED
+                    task.error = f"Elder rejection: {v_res.reason}"
+
+                    # EMIT NEGATIVE KNOWLEDGE SIGNAL
+                    await self._execute_completion_with_tracking(
+                        url="",
+                        headers={},
+                        payload={"rejection": v_res.reason},
+                        engine=engine,
+                        agent_name="Elder-0",
+                        role=AgentRole.ELDER,
+                        intent=SwarmIntent.VERIFICATION,
+                    )
+                    raise RuntimeError(f"Elder rejection: {v_res.reason}")
+
             task.status = TaskStatus.COMPLETED
             task.result = result
             return result
