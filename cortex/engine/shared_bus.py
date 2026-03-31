@@ -10,7 +10,6 @@ import json
 import logging
 import struct
 import time
-from multiprocessing import Lock
 from multiprocessing.shared_memory import SharedMemory
 from typing import Optional
 
@@ -47,7 +46,6 @@ class SovereignSharedBus:
         if create:
             try:
                 self._shm = SharedMemory(name=name, create=True, size=total_size)
-                # Initialize header
                 # Initialize header v8.5 [HEAD, TAIL, EXERGY, LATENCY, CAP, SLOT, UNCERTAINTY]
                 self._write_header(0, 0, 1.0, 0.0, capacity, slot_size, 0.0)
                 logger.info("🚀 [SHARED-BUS] Created segment '%s' (%d MB)", name, total_size >> 20)
@@ -65,19 +63,34 @@ class SovereignSharedBus:
                 else:
                     raise
 
-    def _write_header(self, head: int, tail: int, exergy: float, latency: float, cap: int, slot: int, uncertainty: float = 0.0):
-        if not self._shm: return
+    async def initialize(self) -> None:
+        """Sovereign initialization: satisfy the SwarmCommander contract."""
+
+    def _write_header(
+        self,
+        head: int,
+        tail: int,
+        exergy: float,
+        latency: float,
+        cap: int,
+        slot: int,
+        uncertainty: float = 0.0,
+    ):
+        if not self._shm:
+            return
         # Layout: head(I), tail(I), exergy(f), latency(f), cap(I), slot(I), uncertainty(f), version(I)
         header = struct.pack("IIffIIfI", head, tail, exergy, latency, cap, slot, uncertainty, 850)
-        self._shm.buf[:32] = header
+        self._shm.buf[0:32] = header
 
     def _read_header(self):
-        if not self._shm: return (0, 0, 1.0, 0.0, self.capacity, self.slot_size, 0.0, 850)
-        return struct.unpack("IIffIIfI", self._shm.buf[:32])
+        if not self._shm:
+            return (0, 0, 1.0, 0.0, self.capacity, self.slot_size, 0.0, 850)
+        return struct.unpack("IIffIIfI", self._shm.buf[0:32])
 
     def update_metrics(self, exergy: float, latency: float, uncertainty: float = 0.0):
         """Ω₀ Bit-Parallel Telemetry: Atomic metric update in SHM header."""
-        if not self._shm: return
+        if not self._shm:
+            return
         h = self._read_header()
         # Non-blocking header write
         self._write_header(h[0], h[1], exergy, latency, h[4], h[5], uncertainty)
@@ -87,16 +100,31 @@ class SovereignSharedBus:
         h = self._read_header()
         return {"exergy": h[2], "latency": h[3], "uncertainty": h[6]}
 
-    async def emit(self, event_type: str, payload: dict | None = None, **kwargs) -> bool:
+    async def emit(
+        self,
+        event_type: str,
+        payload: dict | None = None,
+        *,
+        source: str = "cli",
+        source_id: int = 0,
+        tenant_id: str = "default",
+        **kwargs,
+    ) -> bool:
         """Lock-Free SWMR Emit (AX-V). High-performance signal injection."""
-        if not self._shm: return False
-        
-        sid = kwargs.get("source_id", 0)
-        if kwargs.get("source") == "commander": sid = 1
+        if not self._shm:
+            return False
+
+        # Map source string to ID if needed (for Sovereign compatibility)
+        sid = source_id
+        if source == "commander":
+            sid = 1
+        elif source == "cli":
+            sid = 0
 
         data = json.dumps(payload or {}).encode("utf-8")
         limit = self.slot_size - 12
-        if len(data) > limit: data = data[:limit]
+        if len(data) > limit:
+            data = data[:limit]
 
         # Read state (Single-Writer: we own 'head')
         h = self._read_header()
@@ -104,17 +132,18 @@ class SovereignSharedBus:
 
         offset = HEADER_SIZE + (head * slot)
         ts = time.time()
-        
+
         # 1. Write Data (Non-visible until head advances)
         record_header = struct.pack("dHH", ts, 0, sid)
         self._shm.buf[offset : offset + 12] = record_header
         self._shm.buf[offset + 12 : offset + 12 + len(data)] = data
-        
+
         # 2. Advance Head (Atomic store in header)
         new_head = (head + 1) % cap
         new_tail = tail
-        if new_head == tail: new_tail = (tail + 1) % cap
-        
+        if new_head == tail:
+            new_tail = (tail + 1) % cap
+
         self._write_header(new_head, new_tail, exergy, latency, cap, slot, h[6])
         return True
 
@@ -125,7 +154,12 @@ class SovereignSharedBus:
         if not self._shm:
             return []
 
-        head, tail, cap, slot = self._read_header()
+        head, tail, cap, slot = (
+            self._read_header()[0],
+            self._read_header()[1],
+            self._read_header()[4],
+            self._read_header()[5],
+        )
 
         # Fast-Path: If last_index is head, no work to do
         if last_index == head:

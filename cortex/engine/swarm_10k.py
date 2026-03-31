@@ -46,10 +46,12 @@ class CenturionSuperv:
         start = time.perf_counter()
         res = await self.bus.emit(**kwargs)
         self.last_latency_ms = (time.perf_counter() - start) * 1000
-        
+
         # O(1) Bit-Parallel Telemetry update (Ω₀)
         if hasattr(self.bus, "update_metrics"):
-            self.bus.update_metrics(self.metrics.exergy, self.last_latency_ms, self.metrics.uncertainty)
+            self.bus.update_metrics(
+                self.metrics.exergy, self.last_latency_ms, self.metrics.uncertainty
+            )
 
         if self.last_latency_ms > 32.0:
             logger.warning("VOID BREACH: %.2fms on node %s", self.last_latency_ms, self.id)
