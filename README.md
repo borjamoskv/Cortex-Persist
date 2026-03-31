@@ -1,5 +1,7 @@
 # CORTEX Persist
 
+> Status: public beta (`0.3.x`) • Local-first • SQLite / AlloyDB • Python >=3.9
+>    
 Tamper-evident memory, audit trails, and verifiable lineage for AI agents.
 
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
