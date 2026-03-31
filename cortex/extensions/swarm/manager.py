@@ -14,10 +14,10 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
+from cortex.extensions.signals.bus import AsyncSignalBus
+from cortex.extensions.swarm.auto_fix import AutoFixPipeline
 from cortex.extensions.swarm.budget import get_budget_manager
 from cortex.extensions.swarm.worktree_isolation import isolated_worktree
-from cortex.extensions.swarm.auto_fix import AutoFixPipeline
-from cortex.extensions.signals.bus import AsyncSignalBus
 
 logger = logging.getLogger("cortex.extensions.swarm.manager")
 
