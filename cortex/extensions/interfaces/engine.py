@@ -56,6 +56,10 @@ class EngineProtocol(Protocol):
         confidence: str = "stated",
         source: Optional[str] = None,
         meta: Optional[dict[str, Any]] = None,
+        valid_from: Optional[str] = None,
+        commit: bool = True,
+        tx_id: Optional[int] = None,
+        conn: Optional[aiosqlite.Connection] = None,
         **kwargs: Any,
     ) -> int:
         """Store a fact and return its ID."""
@@ -108,8 +112,14 @@ class EngineProtocol(Protocol):
     async def search(
         self,
         query: str,
-        project: Optional[str] = None,
         tenant_id: str = "default",
+        top_k: int = 5,
+        project: str | None = None,
+        as_of: str | None = None,
+        graph_depth: int = 0,
+        include_graph: bool = False,
+        confidence: str | None = None,
+        causal_gap: Optional[Any] = None,
         **kwargs: Any,
     ) -> list[Any]:
         """Semantic/hybrid search."""
@@ -139,6 +149,14 @@ class EngineProtocol(Protocol):
 
     async def stats(self) -> dict[str, Any]:
         """System stats."""
+        ...
+
+    async def health_check(self, *args: Any, **kwargs: Any) -> dict[str, Any]:
+        """Engine health status."""
+        ...
+
+    async def health_report(self, *args: Any, **kwargs: Any) -> dict[str, Any]:
+        """Detailed security/health report."""
         ...
 
     async def close(self) -> None:

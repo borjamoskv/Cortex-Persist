@@ -211,7 +211,11 @@ class TestRouterOrdering:
                 _providers["deepseek"],
             ],
         )
-        ordered = router._ordered_fallbacks(IntentProfile.CODE)
+        class MockPrompt:
+            intent = IntentProfile.CODE
+            reasoning_mode = "standard"
+
+        ordered = router._ordered_fallbacks(MockPrompt())
         costs = [p.cost_class for p in ordered]
         # free < low < medium
         assert costs == ["free", "low", "medium"]
@@ -228,7 +232,11 @@ class TestRouterOrdering:
                 _providers["deepseek"],
             ],
         )
-        ordered = router._ordered_fallbacks(IntentProfile.CODE)
+        class MockPrompt:
+            intent = IntentProfile.CODE
+            reasoning_mode = "standard"
+
+        ordered = router._ordered_fallbacks(MockPrompt())
         # Both are "low" cost, but deepseek=frontier, qwen=high
         names = [p.provider_name for p in ordered]
         assert names.index("deepseek") < names.index("qwen")
