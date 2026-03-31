@@ -545,7 +545,7 @@ async def main() -> int:
     await check_gate_10_prompt_size()
 
     printer.head("SEALS SUMMARY")
-    failed = [number for (number, _, _), passed in zip(gate_runs, results) if not passed]
+    failed = [number for (number, _, _), passed in zip(gate_runs, results, strict=True) if not passed]
 
     if failed:
         printer.fail(f"SEALS BROKEN: {failed}")
