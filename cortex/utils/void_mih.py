@@ -32,8 +32,8 @@ def slice_void_bit(packed: bytes, shard_count: int = 16) -> list[int]:
         padding = required_bytes - len(packed)
         packed = packed + b"\xa5" * padding
 
-    # Extract 64-bit blocks
-    fmt = f">{shard_count}Q"
+    # Extract 64-bit blocks (Signed 64-bit for SQLite compatibility)
+    fmt = f">{shard_count}q"
     return list(struct.unpack(fmt, packed[:required_bytes]))
 
 

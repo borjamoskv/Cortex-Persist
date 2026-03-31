@@ -31,6 +31,13 @@ from cortex.engine.transaction_mixin import TransactionMixin
 from cortex.ledger import EnrichmentQueue, LedgerStore, LedgerWriter
 from cortex.mac_maestro.executor import MaestroExecutor
 
+if TYPE_CHECKING:
+    from cortex.consensus.manager import ConsensusManager
+    from cortex.embeddings.manager import EmbeddingManager
+    from cortex.engine.auth import ByzantineAuthLayer
+    from cortex.engine.lock import SovereignLock
+    from cortex.facts.manager import FactManager
+
 try:
     from cortex.extensions.health.health_mixin import HealthMixin  # type: ignore
 except ImportError:
@@ -76,14 +83,10 @@ class CortexEngine(
         auto_embed: bool = True,
         pool: Any = None,
     ):
-        # Initialize mixins
-        SearchMixin.__init__(self)
-        StoreMixin.__init__(self)
-        QueryMixin.__init__(self)
-        MemoryMixin.__init__(self)
-        TransactionMixin.__init__(self)
-        OptimizationMixin.__init__(self)
-        HealthMixin.__init__(self)
+        # Axiom Ω₁₆: Sortu-Native JIT Synthesis
+        # We defer Mixin.__init__ calls to _synthesize_skill for 10k scale.
+        self._skills_verified: set[str] = set()
+
         # Handle argument inversion from tests if necessary (pool, db_path)
         if hasattr(db_path, "acquire") and not isinstance(db_path, (str, Path)):
             self._pool = db_path
@@ -105,22 +108,16 @@ class CortexEngine(
         self._persistence = PersistenceSupervisor(self)
         self._system_state = "ACTIVE"
 
-        # Composition layers
-        from cortex.facts.manager import FactManager
-
-        self.facts = FactManager(self)  # pyright: ignore
-        self.embeddings = EmbeddingManager(self)
-        self.consensus = ConsensusManager(self)
-        self.lock_sovereign = SovereignLock(self)
-
-        # Wave 6: Sovereign Ledger Integration
-        self.ledger_store = LedgerStore(self._db_path)
-        self.enrichment_queue = EnrichmentQueue(self.ledger_store)
-        self.ledger_writer = LedgerWriter(self.ledger_store, self.enrichment_queue)
-        self.mac_maestro = MaestroExecutor(self.ledger_writer)
-        from cortex.engine.auth import ByzantineAuthLayer
-
-        self.auth = ByzantineAuthLayer()
+        # Managers are synthesized JIT via properties (Axiom Ω₄)
+        self._facts: FactManager | None = None
+        self._embeddings: EmbeddingManager | None = None
+        self._consensus: ConsensusManager | None = None
+        self._lock_sovereign: SovereignLock | None = None
+        self._ledger_store: LedgerStore | None = None
+        self._enrichment_queue: EnrichmentQueue | None = None
+        self._ledger_writer: LedgerWriter | None = None
+        self._mac_maestro: MaestroExecutor | None = None
+        self._auth: ByzantineAuthLayer | None = None
 
         # Decoupled guard pipeline (Ω₃: minimal coupling)
         self._guard_pipeline = self._register_default_guards()
@@ -135,6 +132,100 @@ class CortexEngine(
         """Lock or unlock the sovereign engine (e.g., from EpistemicCircuitBreaker)"""
         self._system_state = state
         logger.warning("🛡️ [SOVEREIGN-STATE] CORTEX Engine state changed to: %s", state)
+
+    def _synthesize_skill(self, skill_name: str) -> None:
+        """JIT skill synthesis (Axiom Ω₄).
+        Initializes mixin state only when first bit of exergy is required.
+        """
+        if skill_name in self._skills_verified:
+            return
+
+        SKILL_MAP = {
+            "search": SearchMixin,
+            "store": StoreMixin,
+            "query": QueryMixin,
+            "memory": MemoryMixin,
+            "tx": TransactionMixin,
+            "optimization": OptimizationMixin,
+            "health": HealthMixin,
+        }
+
+        if skill_name in SKILL_MAP:
+            SKILL_MAP[skill_name].__init__(self)
+            self._skills_verified.add(skill_name)
+            logger.debug("🛡️ [SORTU-JIT] Skill '%s' synthesized.", skill_name)
+
+    @property
+    def facts(self) -> FactManager:
+        if self._facts is None:
+            from cortex.facts.manager import FactManager
+
+            self._facts = FactManager(self)  # type: ignore
+        return self._facts
+
+    @property
+    def embeddings(self) -> EmbeddingManager:
+        if self._embeddings is None:
+            from cortex.embeddings.manager import EmbeddingManager
+
+            self._embeddings = EmbeddingManager(self)
+        return self._embeddings
+
+    @property
+    def consensus(self) -> ConsensusManager:
+        if self._consensus is None:
+            from cortex.consensus.manager import ConsensusManager
+
+            self._consensus = ConsensusManager(self)
+        return self._consensus
+
+    @property
+    def lock_sovereign(self) -> SovereignLock:
+        if self._lock_sovereign is None:
+            from cortex.engine.lock import SovereignLock
+
+            self._lock_sovereign = SovereignLock(self)
+        return self._lock_sovereign
+
+    @property
+    def auth(self) -> ByzantineAuthLayer:
+        if self._auth is None:
+            from cortex.engine.auth import ByzantineAuthLayer
+
+            self._auth = ByzantineAuthLayer()
+        return self._auth
+
+    @property
+    def ledger_store(self) -> LedgerStore:
+        if self._ledger_store is None:
+            from cortex.ledger import LedgerStore
+
+            self._ledger_store = LedgerStore(self._db_path)
+        return self._ledger_store
+
+    @property
+    def enrichment_queue(self) -> EnrichmentQueue:
+        if self._enrichment_queue is None:
+            from cortex.ledger import EnrichmentQueue
+
+            self._enrichment_queue = EnrichmentQueue(self.ledger_store)
+        return self._enrichment_queue
+
+    @property
+    def ledger_writer(self) -> LedgerWriter:
+        if self._ledger_writer is None:
+            from cortex.ledger import LedgerWriter
+
+            self._ledger_writer = LedgerWriter(self.ledger_store, self.enrichment_queue)
+        return self._ledger_writer
+
+    @property
+    def mac_maestro(self) -> MaestroExecutor:
+        if self._mac_maestro is None:
+            from cortex.mac_maestro.executor import MaestroExecutor
+
+            self._mac_maestro = MaestroExecutor(self.ledger_writer)
+        return self._mac_maestro
 
     # ─── Guard Pipeline Registration ──────────────────────────────
 
@@ -213,6 +304,8 @@ class CortexEngine(
             pipeline.hook_count,
         )
         return pipeline
+
+    # ─── JIT Entry Points (Axiom Ω₄) ──────────────────────────────
 
     # ─── Security: Filesystem Permission Enforcement ──────────────
 
@@ -452,6 +545,7 @@ class CortexEngine(
     # ─── Backward Compatibility Aliases & Delegation ──────────────
 
     async def store(self, *args, **kwargs):
+        self._synthesize_skill("store")
         self._audit_log(
             "store",
             fact_type=kwargs.get("fact_type", ""),
@@ -460,16 +554,31 @@ class CortexEngine(
         return await self.facts.store(*args, **kwargs)
 
     async def store_many(self, *args, **kwargs):
+        self._synthesize_skill("store")
         return await super().store_many(*args, **kwargs)
 
     async def recall(self, *args, **kwargs):
+        self._synthesize_skill("search")
         self._audit_log(
             "recall",
             project=kwargs.get("project", args[0] if args else ""),
         )
         return await super().recall(*args, **kwargs)
 
+    async def search(self, *args, **kwargs):
+        self._synthesize_skill("search")
+        return await super().search(*args, **kwargs)
+
+    async def query(self, *args, **kwargs):
+        self._synthesize_skill("query")
+        return await super().query(*args, **kwargs)
+
+    async def write_optimized(self, *args, **kwargs):
+        self._synthesize_skill("optimization")
+        return await super().write_optimized(*args, **kwargs)
+
     async def get_fact(self, fact_id: int, tenant_id: str = "default"):
+        self._synthesize_skill("query")
         res = await super().get_fact(fact_id, tenant_id=tenant_id)
         if not res:
             return None

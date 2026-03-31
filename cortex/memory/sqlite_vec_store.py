@@ -350,9 +350,9 @@ class SovereignVectorStoreL2:
             )
 
             conn.commit()
-            return meta_tb, vec_tb, vec_void_tb
+            return meta_tb, vec_tb, vec_void_tb, vec_void_mih_tb
 
-        return "facts_meta", "vec_facts", "vec_void"
+        return "facts_meta", "vec_facts", "vec_void", "vec_void_mih"
 
     async def memorize(self, fact: CortexFactModel) -> None:
         """Encode and store a multi-tenant CortexFactModel.
@@ -530,7 +530,6 @@ class SovereignVectorStoreL2:
 
             if use_void:
                 from cortex.utils.void_mih import slice_void_bit
-                from cortex.utils.void_vec import void_hamming_dist
 
                 q_shards = slice_void_bit(void_query)
 
@@ -548,7 +547,9 @@ class SovereignVectorStoreL2:
                         WHERE {where_mih}
                         LIMIT ?
                     )
-                    SELECT m.*, v.embedding as binary_emb, vf.embedding as int8_emb
+                    SELECT m.*, v.embedding as binary_emb,
+                           (1.0 - vec_distance_cosine(vf.embedding,
+                                  vec_quantize_int8(?, 'unit')) / 2.0) as int8_sim
                     FROM {meta_tb} m
                     JOIN {vec_void_tb} v ON m.rowid = v.rowid
                     LEFT JOIN {vec_tb} vf ON m.rowid = vf.rowid
@@ -556,7 +557,9 @@ class SovereignVectorStoreL2:
                     WHERE m.tenant_id = ? AND (m.project_id = ? OR m.is_bridge = 1)
                 """
                 # Fetch 10x candidates for reranking
-                cursor.execute(sql_cand, (*q_shards, limit * 10, tenant_id, project_id))
+                cursor.execute(
+                    sql_cand, (*q_shards, limit * 10, embedding_bytes, tenant_id, project_id)
+                )
                 rows = cursor.fetchall()
 
                 if not rows:
@@ -564,18 +567,12 @@ class SovereignVectorStoreL2:
 
                 final_facts = []
                 for row in rows:
-                    # ─── HdrRecovery: Use int8 reranking if available ────────
-                    if row["int8_emb"]:
-                        # Cosine similarity on int8 (Ω₂ precision)
-                        cursor.execute(
-                            "SELECT 1.0 - vec_distance_cosine(?, "
-                            "vec_quantize_int8(?, 'unit')) / 2.0",
-                            (row["int8_emb"], embedding_bytes),
-                        )
-                        sim = cursor.fetchone()[0]
+                    # ─── HdrRecovery: Use SQL-calculated reranking sim ───────
+                    if row["int8_sim"] is not None:
+                        sim = row["int8_sim"]
                     else:
-                        # Fallback to Hamming similarity
-                        dist = void_hamming_dist(void_query, row["binary_emb"])
+                        # Fallback to Hamming similarity (if not in vec_facts)
+                        dist = void_vec.void_hamming_dist(void_query, row["binary_emb"])
                         sim = 1.0 - (dist / self._encoder.dimension)
 
                     if sim < 0.3:
@@ -594,7 +591,7 @@ class SovereignVectorStoreL2:
                         tenant_id=row["tenant_id"],
                         project_id=row["project_id"],
                         content=row["content"],
-                        embedding=row["int8_emb"] or row["binary_emb"],
+                        embedding=row["binary_emb"],
                         timestamp=row["timestamp"],
                         is_diamond=bool(row["is_diamond"]),
                         is_bridge=bool(row["is_bridge"]),

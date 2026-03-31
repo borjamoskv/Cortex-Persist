@@ -7,11 +7,12 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import logging
+import os
 import time
 from collections import deque
 from concurrent.futures import ProcessPoolExecutor
 from enum import Enum
-from typing import Any, Optional, final
+from typing import Any, ClassVar, Optional, final
 
 import aiosqlite
 
@@ -123,12 +124,18 @@ class SovereignTLRUCache:
 
 
 class OptimizationMixin:
-    """Provides buffered writes and caching for the CortexEngine."""
+    """Provides buffered writes and caching for the CortexEngine.
+    Ω₂: Thermodynamic optimization — shared resources for 10k scale.
+    """
+
+    _executor: ClassVar[ProcessPoolExecutor | None] = None
 
     def __init__(self):
         self._write_buffer: asyncio.Queue = asyncio.Queue()
         self._cache = SovereignTLRUCache(capacity=2000, ttl=600, on_evict=self._on_cache_evict)
-        self._executor = ProcessPoolExecutor(max_workers=2)
+        if OptimizationMixin._executor is None:
+            # Saturate all available CPU cores for maximum exergy (Ω₂)
+            OptimizationMixin._executor = ProcessPoolExecutor(max_workers=os.cpu_count())
         self._buffer_task: Optional[asyncio.Task] = None
         self._is_flushing = False
 
@@ -163,7 +170,7 @@ class OptimizationMixin:
             await self._write_buffer.put(None)
             await self._buffer_task
             self._buffer_task = None
-        self._executor.shutdown()
+        # Note: Shared executor is not shutdown per-agent to avoid breaking others.
 
     async def _buffer_worker(self):
         batch = []
@@ -241,9 +248,9 @@ class OptimizationMixin:
                 prev = await cursor.fetchone()
                 last_hash = prev[0] if prev else "GENESIS"
 
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         th = await loop.run_in_executor(
-            self._executor, compute_tx_hash, last_hash, project, action, dj, ts
+            OptimizationMixin._executor, compute_tx_hash, last_hash, project, action, dj, ts
         )
 
         sql = (

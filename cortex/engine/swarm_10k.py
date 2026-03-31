@@ -9,10 +9,12 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
+from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from pathlib import Path
 
 from cortex.engine.exergy_optimizer import ExergyOptimizer
+from cortex.engine.shared_bus import SovereignSharedBus
 from cortex.engine.slashing import SlashingPenalty
 from cortex.extensions.signals.sharded_bus import ShardedAsyncSignalBus
 
@@ -31,9 +33,10 @@ class CenturionSuperv:
 
     CAPACITY = 100
 
-    def __init__(self, centurion_id: str, bus: ShardedAsyncSignalBus, tenant_id: str = "default"):
+    def __init__(self, centurion_id: str, bus_name: str, tenant_id: str = "default"):
         self.id = centurion_id
-        self.bus = bus
+        # L2 Tactical Shard: Isolated memory segment for this Centurion
+        self.bus = SovereignSharedBus(name=bus_name, create=True)
         self.tenant_id = tenant_id
         self.agents: list[str] = []
         self.last_latency_ms = 0.0
@@ -99,6 +102,7 @@ class LegionSupervisor:
         self.tenant_id = tenant_id
         self.centurions: dict[str, CenturionSuperv] = {}
         self.metrics = NodeMetrics(exergy=1.0, uncertainty=0.0, active_children=0)
+        self._overclocked = False
 
     async def ensure_centurion(self) -> CenturionSuperv:
         """Find an available Centurion or spawn a new one."""
@@ -115,8 +119,10 @@ class LegionSupervisor:
         if best_cen:
             return best_cen
 
-        new_id = f"{self.id}-cen-{len(self.centurions)}"
-        new_cen = CenturionSuperv(new_id, self.bus, self.tenant_id)
+        new_id = f"{self.id}-c{len(self.centurions)}"
+        # Naming Compaction (Ω₆): Hash name to stay under 31-character POSIX limit
+        shm_name = f"ctx_{hash(new_id) % 10**8}"
+        new_cen = CenturionSuperv(new_id, shm_name, self.tenant_id)
         self.centurions[new_id] = new_cen
         self.metrics.active_children = len(self.centurions)
 
@@ -141,7 +147,7 @@ class LegionSupervisor:
             for c in self.centurions.values():
                 exergy = min(exergy, await c.get_exergy())
 
-            if ExergyOptimizer.is_thermally_stable(exergy):
+            if self._overclocked or ExergyOptimizer.is_thermally_stable(exergy):
                 break
 
             # Shard is too hot. Wait for kinetic dissipation.
@@ -162,13 +168,48 @@ class LegionSupervisor:
         )
 
 
+class ForensicLegion(LegionSupervisor):
+    """
+    AX-I Forensic Legion: Specialized in contract state auditing.
+    Forces zero-latency dispatch and bypasses standard exergy gates.
+    """
+
+    def __init__(self, legion_id: str, bus: ShardedAsyncSignalBus, tenant_id: str = "default"):
+        super().__init__(legion_id, bus, tenant_id)
+        self._overclocked = True  # High-agency forensic agents are always hot
+
+
 class SwarmCommander:
     """L0 Apex Controller: Global exergy arbitration and Legion deployment."""
 
-    def __init__(self, bus_path: Path | str, tenant_id: str = "default"):
-        self.bus = ShardedAsyncSignalBus(base_dir=bus_path)
+    def __init__(
+        self,
+        bus_path: Path | str,
+        tenant_id: str = "default",
+        use_shm: bool = True,
+    ):
+        self.use_shm = use_shm
+        if use_shm:
+            self.bus = SovereignSharedBus(create=True)
+        else:
+            self.bus = ShardedAsyncSignalBus(base_dir=bus_path)
+
         self.tenant_id = tenant_id
         self.legions: dict[str, LegionSupervisor] = {}
+        self._active_strike = False
+
+    @asynccontextmanager
+    async def strike_mode(self, domain: str):
+        """Ω₂ Overclocking: Temporarily suspend thermal gates for a Strike."""
+        legion = await self.get_or_create_legion(domain)
+        original_state = legion._overclocked
+        legion._overclocked = True
+        logger.warning("🔱 STRIKE MODE ACTIVATED on domain: %s (Thermal Gates BYPASSED)", domain)
+        try:
+            yield legion
+        finally:
+            legion._overclocked = original_state
+            logger.info("❄️ STRIKE MODE DEACTIVATED on domain: %s", domain)
 
     async def initialize(self) -> None:
         await self.bus.initialize()
@@ -179,10 +220,15 @@ class SwarmCommander:
     async def get_or_create_legion(self, domain: str) -> LegionSupervisor:
         if domain not in self.legions:
             legion_id = f"legion-{domain}"
-            self.legions[domain] = LegionSupervisor(legion_id, self.bus, self.tenant_id)
+            if domain == "forensic":
+                cls = ForensicLegion
+            else:
+                cls = LegionSupervisor
+
+            self.legions[domain] = cls(legion_id, self.bus, self.tenant_id)
             await self.bus.emit(
                 event_type="legion:spawn",
-                payload={"domain": domain},
+                payload={"domain": domain, "type": cls.__name__},
                 source="commander",
                 tenant_id=self.tenant_id,
                 routing_key=domain,
@@ -244,12 +290,28 @@ class SwarmCommander:
         }
 
     async def consolidate_and_annihilate(self) -> None:
-        """Purge entropy at the end of \u03a9_3 cycle."""
-        await self.bus.emit(
-            "swarm:annihilation", source="commander", tenant_id=self.tenant_id, routing_key="global"
-        )
-        # Shannon compaction
-        await self.bus.gc(max_age_days=0, tenant_id=self.tenant_id)
-        self.legions.clear()
+        """Purge entropy at the end of Ω_3 cycle."""
+        # Signal annihilation
+        if self.use_shm:
+            self.bus.emit("swarm:annihilation", 0, {"tenant_id": self.tenant_id})
+        else:
+            await self.bus.emit(
+                "swarm:annihilation",
+                source="commander",
+                tenant_id=self.tenant_id,
+                routing_key="global",
+            )
+            # Shannon compaction (only for persistent bus)
+            await self.bus.gc(max_age_days=0, tenant_id=self.tenant_id)
 
-        await self.bus.close()
+        # Lifecycle cleanup
+        if hasattr(self.bus, "close"):
+            if self.use_shm:
+                self.bus.close()
+            else:
+                await self.bus.close()
+
+        if self.use_shm:
+            self.bus.unlink()
+
+        self.legions.clear()

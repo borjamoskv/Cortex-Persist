@@ -18,34 +18,44 @@ __all__ = ["pack_void_bit", "void_hamming_dist", "void_similarity", "unpack_void
 # Load Sovereign SIMD Accelerator
 _ACCEL_PATH = os.path.join(os.path.dirname(__file__), "void_accel.so")
 _accel = None
+_accel_func = None
+
 if os.path.exists(_ACCEL_PATH):
     try:
         _accel = ctypes.CDLL(_ACCEL_PATH)
-        # Batch Neon version: (query, batch, results, count, len)
-        _accel.void_batch_hamming_dist_neon.argtypes = [
-            ctypes.c_void_p,
-            ctypes.c_void_p,
-            ctypes.POINTER(ctypes.c_uint64),
-            ctypes.c_size_t,
-            ctypes.c_size_t,
-        ]
-        _accel.void_batch_hamming_dist_neon.restype = None
+
+        # Detect best available acceleration function
+        if hasattr(_accel, "void_batch_hamming_dist_avx512"):
+            _accel_func = _accel.void_batch_hamming_dist_avx512
+        elif hasattr(_accel, "void_batch_hamming_dist_neon"):
+            _accel_func = _accel.void_batch_hamming_dist_neon
+
+        if _accel_func:
+            _accel_func.argtypes = [
+                ctypes.c_void_p,
+                ctypes.c_void_p,
+                ctypes.POINTER(ctypes.c_uint64),
+                ctypes.c_size_t,
+                ctypes.c_size_t,
+            ]
+            _accel_func.restype = None
     except Exception:
         _accel = None
+        _accel_func = None
 
 
 def void_batch_hamming_dist(query: bytes, batch: list[bytes]) -> list[int]:
     """
     Calculates Hamming Distance between a single query and a batch of vectors.
-    Uses Sovereign Batch SIMD Accelerator (Neon) for x100 throughput.
+    Uses Sovereign Batch SIMD Accelerator (Neon/AVX-512) for x100 throughput.
     """
     count = len(batch)
-    if _accel and count > 0:
+    if _accel_func and count > 0:
         q_len = len(query)
         # Concatenate batch into a single buffer for C-interface
         flat_batch = b"".join(batch)
         results = (ctypes.c_uint64 * count)()
-        _accel.void_batch_hamming_dist_neon(query, flat_batch, results, count, q_len)
+        _accel_func(query, flat_batch, results, count, q_len)
         return list(results)
 
     # Fallback to scalar (sequential bits)
