@@ -202,7 +202,7 @@ async def ask_cortex(
     return AskResponse(
         answer=answer,
         sources=sources,
-        model=provider.model if provider else "unknown",
+        model=provider.model_name if provider else "unknown",
         provider=provider.provider_name if provider else "unknown",
         facts_found=len(results),
     )
@@ -290,7 +290,7 @@ async def llm_status(
     return LLMStatusResponse(
         available=_llm_manager.available,
         provider=active_provider or "none",
-        model=provider.model if provider else None,
+        model=provider.model_name if provider else None,
         supported_providers=list_providers(),
         providers=provider_inventory(active_provider=active_provider),
     )

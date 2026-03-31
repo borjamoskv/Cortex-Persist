@@ -72,7 +72,7 @@ async def auto_heal(filepath: Path) -> None:
         console.print(f"[red]❌ Error al inicializar LLMProvider:[/red] {e}")
         raise click.Abort() from e
 
-    console.print(f"   ► Conectando cerebro arquitectónico ([blue]{provider.model}[/blue])...")
+    console.print(f"   ► Conectando cerebro arquitectónico ([blue]{provider.model_name}[/blue])...")
 
     prompt = CortexPrompt(
         system_instruction=HEALING_SYSTEM_PROMPT,
