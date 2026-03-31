@@ -9,10 +9,6 @@ Commands for managing CORTEX storage backends:
 from __future__ import annotations
 
 import os
-<<<<<<< HEAD
-=======
-from typing import Optional
->>>>>>> origin/main
 
 import click
 from rich.panel import Panel
@@ -41,11 +37,7 @@ from cortex.cli.common import _run_async, cli, console
     default=False,
     help="Skip pgvector/pg_trgm extension creation (for restricted users).",
 )
-<<<<<<< HEAD
 def storage_init_pg(dsn: str | None, dry_run: bool, skip_extensions: bool) -> None:
-=======
-def storage_init_pg(dsn: Optional[str], dry_run: bool, skip_extensions: bool) -> None:
->>>>>>> origin/main
     """Initialize CORTEX PostgreSQL schema.
 
     Applies all table definitions, indexes, and extensions to the target
@@ -170,19 +162,12 @@ def storage_status() -> None:
             grid.add_row("TURSO_DATABASE_URL", url)
 
         else:  # local
-<<<<<<< HEAD
             from pathlib import Path
 
             from cortex.core.config import DB_PATH  # type: ignore[reportAttributeAccessIssue]
 
             grid.add_row("DB Path", str(DB_PATH))
             grid.add_row("Exists", "[#CCFF00]✓[/]" if Path(DB_PATH).exists() else "[red]✗[/]")
-=======
-            from cortex.core.config import DB_PATH  # type: ignore[reportAttributeAccessIssue]
-
-            grid.add_row("DB Path", str(DB_PATH))
-            grid.add_row("Exists", "[#CCFF00]✓[/]" if DB_PATH.exists() else "[red]✗[/]")
->>>>>>> origin/main
 
         console.print(
             Panel(

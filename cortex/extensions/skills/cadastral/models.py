@@ -11,10 +11,6 @@ import hashlib
 import time
 from dataclasses import dataclass, field
 from enum import Enum
-<<<<<<< HEAD
-=======
-from typing import Optional
->>>>>>> origin/main
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # ENUMERATIONS
@@ -85,11 +81,7 @@ class Coordinate:
 
     latitude: float
     longitude: float
-<<<<<<< HEAD
     altitude_m: float | None = None
-=======
-    altitude_m: Optional[float] = None
->>>>>>> origin/main
 
     def __post_init__(self) -> None:
         if not (-90.0 <= self.latitude <= 90.0):

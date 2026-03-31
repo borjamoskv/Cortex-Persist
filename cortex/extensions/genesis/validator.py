@@ -12,10 +12,6 @@ from __future__ import annotations
 import ast
 import logging
 from pathlib import Path
-<<<<<<< HEAD
-=======
-from typing import Optional
->>>>>>> origin/main
 
 from cortex.extensions.genesis.models import SystemSpec
 
@@ -36,11 +32,7 @@ class GenesisValidator:
         self,
         spec: SystemSpec,
         created_files: list[str],
-<<<<<<< HEAD
         base_dir: Path | None = None,
-=======
-        base_dir: Optional[Path] = None,
->>>>>>> origin/main
     ) -> tuple[bool, list[str]]:
         """Validate a generated system.
 
@@ -114,11 +106,7 @@ class GenesisValidator:
         self,
         spec: SystemSpec,
         files: list[str],
-<<<<<<< HEAD
         base_dir: Path | None,
-=======
-        base_dir: Optional[Path],
->>>>>>> origin/main
     ) -> list[str]:
         """Check that an __init__.py was created for module-type systems."""
         if spec.system_type not in ("module", "mixin"):

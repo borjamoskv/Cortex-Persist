@@ -5,11 +5,7 @@ from __future__ import annotations
 import json as json_mod
 import shutil
 from pathlib import Path
-<<<<<<< HEAD
 from typing import Any
-=======
-from typing import Any, Optional
->>>>>>> origin/main
 
 import click
 
@@ -238,11 +234,7 @@ def _render_shannon_diagnosis(result: dict[str, Any]) -> None:
 @click.option("--json", "as_json", is_flag=True, help="Output raw JSON.")
 @click.option("--verbose", "-v", is_flag=True, help="Dimension detail.")
 def entropy_immortality(
-<<<<<<< HEAD
     project: str | None,
-=======
-    project: Optional[str],
->>>>>>> origin/main
     as_json: bool,
     verbose: bool,
 ) -> None:
@@ -335,11 +327,7 @@ def entropy_immortality(
     is_flag=True,
     help="Show per-category breakdown.",
 )
-<<<<<<< HEAD
 def entropy_shannon(project: str | None, as_json: bool, verbose: bool) -> None:
-=======
-def entropy_shannon(project: Optional[str], as_json: bool, verbose: bool) -> None:
->>>>>>> origin/main
     """Shannon entropy analysis of CORTEX memory."""
     from cortex.extensions.shannon.report import EntropyReport
 

@@ -11,10 +11,6 @@ The nervous system of MOSKV-1 — exposed through the command line.
 from __future__ import annotations
 
 import json
-<<<<<<< HEAD
-=======
-from typing import Optional
->>>>>>> origin/main
 
 import click
 from rich.table import Table
@@ -45,13 +41,7 @@ def signal_cmds() -> None:
 @click.option("--source", "-s", default="cli", help="Emitter identity")
 @click.option("--project", "-p", default=None, help="Project scope")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
-<<<<<<< HEAD
 def emit_cmd(event_type: str, payload_json: str, source: str, project: str | None, db: str) -> None:
-=======
-def emit_cmd(
-    event_type: str, payload_json: str, source: str, project: Optional[str], db: str
-) -> None:
->>>>>>> origin/main
     """Emit a signal into the bus.
 
     Examples:
@@ -85,15 +75,9 @@ def emit_cmd(
 @click.option("--limit", "-n", default=20, help="Max signals")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def poll_cmd(
-<<<<<<< HEAD
     event_type: str | None,
     source: str | None,
     project: str | None,
-=======
-    event_type: Optional[str],
-    source: Optional[str],
-    project: Optional[str],
->>>>>>> origin/main
     consumer: str,
     limit: int,
     db: str,
@@ -150,15 +134,9 @@ def poll_cmd(
 @click.option("--limit", "-n", default=20, help="Max signals")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def history_cmd(
-<<<<<<< HEAD
     event_type: str | None,
     source: str | None,
     project: str | None,
-=======
-    event_type: Optional[str],
-    source: Optional[str],
-    project: Optional[str],
->>>>>>> origin/main
     limit: int,
     db: str,
 ) -> None:

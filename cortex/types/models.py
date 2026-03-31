@@ -5,11 +5,7 @@ Centralized Pydantic models for request/response validation.
 
 from __future__ import annotations
 
-<<<<<<< HEAD
 from typing import Any, Literal, TypedDict
-=======
-from typing import Any, Literal, Optional, TypedDict
->>>>>>> origin/main
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -86,21 +82,12 @@ class QueryEvidenceLevel(BaseModel):
 
 
 class QueryResultData(BaseModel):
-<<<<<<< HEAD
     answer: str | None = None
     evidence_level: QueryEvidenceLevel | None = None
     degraded: bool = False
     degraded_reason: str | None = None
     trace: dict | None = None
     facts: list[dict] | None = None
-=======
-    answer: Optional[str] = None
-    evidence_level: Optional[QueryEvidenceLevel] = None
-    degraded: bool = False
-    degraded_reason: Optional[str] = None
-    trace: Optional[dict] = None
-    facts: Optional[list[dict]] = None
->>>>>>> origin/main
 
 
 class RejectionResult(TypedDict):
@@ -124,17 +111,10 @@ OperationResult = AcceptanceResult | RejectionResult
 
 
 class TraceInput(BaseModel):
-<<<<<<< HEAD
     tx_id: str | None = None
     fact_id: str | None = None
     decision_id: str | None = None
     query_result_id: str | None = None
-=======
-    tx_id: Optional[str] = None
-    fact_id: Optional[str] = None
-    decision_id: Optional[str] = None
-    query_result_id: Optional[str] = None
->>>>>>> origin/main
     depth: int = Field(5, ge=1, le=20)
 
 
@@ -159,12 +139,8 @@ class StoreRequest(BaseModel):
     )
     tags: list[str] = Field(default_factory=list, description="Optional tags")
     source: str = Field("", max_length=200, description="Origin of the fact (e.g. agent:vex)")
-<<<<<<< HEAD
     confidence: str | None = Field(None, description="Optional confidence level (C1-C5)")
     meta: dict | None = Field(None, description="Optional JSON metadata")
-=======
-    meta: Optional[dict] = Field(None, description="Optional JSON metadata")
->>>>>>> origin/main
 
     @field_validator("project", "content")
     @classmethod
@@ -183,10 +159,10 @@ class StoreResponse(BaseModel):
 class SearchRequest(BaseModel):
     query: str = Field(..., max_length=1024, description="Natural language search query")
     k: int = Field(5, ge=1, le=50, description="Number of results")
-    project: Optional[str] = Field(None, max_length=100, description="Filter by project")
-    as_of: Optional[str] = Field(None, description="Temporal filter (ISO 8601)")
-    fact_type: Optional[str] = Field(None, description="Filter by fact type")
-    tags: Optional[list[str]] = Field(None, description="Filter by tags")
+    project: str | None = Field(None, max_length=100, description="Filter by project")
+    as_of: str | None = Field(None, description="Temporal filter (ISO 8601)")
+    fact_type: str | None = Field(None, description="Filter by fact type")
+    tags: list[str] | None = Field(None, description="Filter by tags")
     graph_depth: int = Field(
         0, ge=0, le=5, description="Enable Graph-RAG (0=off, >0=depth of context traversal)"
     )
@@ -211,15 +187,9 @@ class SearchResult(BaseModel):
     tags: list[str]
     created_at: str
     updated_at: str
-<<<<<<< HEAD
     meta: dict | None = None
     hash: str | None = None
     context: dict | None = Field(
-=======
-    meta: Optional[dict] = None
-    hash: Optional[str] = None
-    context: Optional[dict] = Field(
->>>>>>> origin/main
         None, description="Graph-RAG context (subgraph or related entities)"
     )
 
@@ -240,11 +210,7 @@ class VoteResponse(BaseModel):
     agent: str
     vote: int
     new_consensus_score: float
-<<<<<<< HEAD
     confidence: str | float | None = None
-=======
-    confidence: Optional[str | float] = None
->>>>>>> origin/main
     status: str = "recorded"
 
 
@@ -265,8 +231,8 @@ class AgentResponse(BaseModel):
 class VoteV2Request(BaseModel):
     agent_id: str = Field(..., description="UUID of the registered agent")
     vote: int = Field(..., description="1 to verify, -1 to dispute, 0 to remove")
-    reason: Optional[str] = Field(None, max_length=500)
-    signature: Optional[str] = Field(None, description="Optional cryptographic signature")
+    reason: str | None = Field(None, max_length=500)
+    signature: str | None = Field(None, description="Optional cryptographic signature")
 
 
 class FactResponse(BaseModel):
@@ -277,7 +243,6 @@ class FactResponse(BaseModel):
     tags: list[str]
     created_at: str
     updated_at: str
-<<<<<<< HEAD
     confidence: str | float | None = None
     valid_from: str | None = None
     valid_until: str | None = None
@@ -287,17 +252,6 @@ class FactResponse(BaseModel):
     hash: str | None = None
     tx_id: str | None = None
     consensus_score: float | None = None
-=======
-    confidence: Optional[str | float] = None
-    valid_from: Optional[str] = None
-    valid_until: Optional[str] = None
-    source: Optional[str] = None
-    meta: Optional[dict] = None
-    is_tombstoned: bool = False
-    hash: Optional[str] = None
-    tx_id: Optional[str] = None
-    consensus_score: Optional[float] = None
->>>>>>> origin/main
 
 
 class StatusResponse(BaseModel):
@@ -333,11 +287,7 @@ class RecoveryReport(BaseModel):
     status: Literal["clean", "recovered", "failed"]
     recovered_items: int
     failed_items: int
-<<<<<<< HEAD
     last_checkpoint_id: str | None = None
-=======
-    last_checkpoint_id: Optional[str] = None
->>>>>>> origin/main
     warnings: list[str] = Field(default_factory=list)
 
 
@@ -345,7 +295,6 @@ class HealthCheckDetail(BaseModel):
     """Single health probe result."""
 
     status: str
-<<<<<<< HEAD
     detail: str | None = None
     version: str | None = None
     expected: str | None = None
@@ -358,20 +307,6 @@ class HealthCheckDetail(BaseModel):
     useful_facts_ratio: float | None = None
     duplicates_ratio: float | None = None
     total_facts: int | None = None
-=======
-    detail: Optional[str] = None
-    version: Optional[str] = None
-    expected: Optional[str] = None
-    actual: Optional[str] = None
-    pending_uncheckpointed: Optional[int] = None
-    last_checkpoint_tx: Optional[int] = None
-    active_connections: Optional[int] = None
-    max_connections: Optional[int] = None
-    utilization: Optional[str] = None
-    useful_facts_ratio: Optional[float] = None
-    duplicates_ratio: Optional[float] = None
-    total_facts: Optional[int] = None
->>>>>>> origin/main
 
     model_config = {"extra": "allow"}
 
@@ -386,17 +321,10 @@ class DeepHealthResponse(BaseModel):
     latency_ms: float
 
     # V8 Evaluation Metrics
-<<<<<<< HEAD
     p95_latency_ms: float | None = Field(
         default=None, description="p95 latency of ambient context boot"
     )
     stale_ratio: float | None = Field(
-=======
-    p95_latency_ms: Optional[float] = Field(
-        default=None, description="p95 latency of ambient context boot"
-    )
-    stale_ratio: Optional[float] = Field(
->>>>>>> origin/main
         default=None, description="Ratio of facts older than 180 days with no hits"
     )
 
@@ -421,16 +349,16 @@ class ApiKeyListItem(BaseModel):
     permissions: list[str]
     is_active: bool
     created_at: str
-    last_used: Optional[str] = None
+    last_used: str | None = None
 
 
 class HeartbeatRequest(BaseModel):
     project: str = Field(..., max_length=100)
     entity: str = Field("", max_length=1024)
-    category: Optional[str] = Field(None, max_length=50)
-    branch: Optional[str] = Field(None, max_length=255)
-    language: Optional[str] = Field(None, max_length=50)
-    meta: Optional[dict] = None
+    category: str | None = Field(None, max_length=50)
+    branch: str | None = Field(None, max_length=255)
+    language: str | None = Field(None, max_length=50)
+    meta: dict | None = None
 
 
 class TimeSummaryResponse(BaseModel):
@@ -455,10 +383,10 @@ class MissionLaunchRequest(BaseModel):
 
 class MissionResponse(BaseModel):
     intent_id: int
-    result_id: Optional[int] = None
+    result_id: int | None = None
     status: str
-    stdout: Optional[str] = None
-    stderr: Optional[str] = None
+    stdout: str | None = None
+    stderr: str | None = None
 
 
 class LedgerReportResponse(BaseModel):
@@ -471,7 +399,7 @@ class LedgerReportResponse(BaseModel):
 
 
 class CheckpointResponse(BaseModel):
-    checkpoint_id: Optional[int]
+    checkpoint_id: int | None
     message: str
     status: str = "success"
 
@@ -500,7 +428,7 @@ class MejoraloScanResponse(BaseModel):
     dead_code: bool
     total_files: int = 0
     total_loc: int = 0
-    fact_id: Optional[int] = None
+    fact_id: int | None = None
 
 
 class MejoraloSessionRequest(BaseModel):
@@ -541,19 +469,19 @@ class MejoraloShipResponse(BaseModel):
 
 class GateApprovalRequest(BaseModel):
     signature: str = Field(..., description="HMAC-SHA256 signature of the challenge")
-    operator_id: Optional[str] = Field(None, description="Operator identifier")
+    operator_id: str | None = Field(None, description="Operator identifier")
 
 
 class GateActionResponse(BaseModel):
     action_id: str
     level: str
     description: str
-    command: Optional[list[str]] = None
-    project: Optional[str] = None
+    command: list[str] | None = None
+    project: str | None = None
     status: str
     created_at: str
-    approved_at: Optional[str] = None
-    operator_id: Optional[str] = None
+    approved_at: str | None = None
+    operator_id: str | None = None
 
 
 class GateStatusResponse(BaseModel):
@@ -574,7 +502,7 @@ class ContextSignalModel(BaseModel):
     source: str
     signal_type: str
     content: str
-    project: Optional[str] = None
+    project: str | None = None
     timestamp: str
     weight: float
 
@@ -585,7 +513,7 @@ class ProjectScoreModel(BaseModel):
 
 
 class ContextSnapshotResponse(BaseModel):
-    active_project: Optional[str] = None
+    active_project: str | None = None
     confidence: str
     signals_used: int
     summary: str

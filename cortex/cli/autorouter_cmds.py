@@ -1,4 +1,3 @@
-from typing import Optional
 
 """AUTOROUTER-1 — CLI commands for CORTEX integration.
 
@@ -60,11 +59,7 @@ LOG_FILENAME = "router_daemon.log"
 LOG_PATH = CORTEX_DIR / LOG_FILENAME
 
 
-<<<<<<< HEAD
 def _run_daemon(args: list[str]) -> int | None:
-=======
-def _run_daemon(args: list[str]) -> Optional[int]:
->>>>>>> origin/main
     """Ejecuta el daemon script con los argumentos dados.
 
     Returns:

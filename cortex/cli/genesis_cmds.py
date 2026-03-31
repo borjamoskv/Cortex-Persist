@@ -8,10 +8,6 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-<<<<<<< HEAD
-=======
-from typing import Optional
->>>>>>> origin/main
 
 import click
 
@@ -47,11 +43,7 @@ def genesis_group() -> None:
 def create(
     name: str,
     system_type: str,
-<<<<<<< HEAD
     target_dir: str | None,
-=======
-    target_dir: Optional[str],
->>>>>>> origin/main
     auto_cli: bool,
     auto_tests: bool,
     description: str,

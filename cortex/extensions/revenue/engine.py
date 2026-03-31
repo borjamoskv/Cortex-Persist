@@ -11,11 +11,7 @@ import logging
 import time
 from datetime import datetime, timezone
 from decimal import Decimal
-<<<<<<< HEAD
 from typing import Any
-=======
-from typing import Any, Optional
->>>>>>> origin/main
 
 from cortex.extensions.revenue.models import (
     ExecutionResult,
@@ -44,11 +40,7 @@ class RevenueEngine:
 
     def __init__(
         self,
-<<<<<<< HEAD
         vectors: list[RevenueVector] | None = None,
-=======
-        vectors: Optional[list[RevenueVector]] = None,
->>>>>>> origin/main
         auto_execute: bool = False,
         min_roi: float = 5.0,
     ) -> None:
@@ -202,11 +194,7 @@ class RevenueEngine:
 
     async def execute_all(
         self,
-<<<<<<< HEAD
         opportunities: list[Opportunity] | None = None,
-=======
-        opportunities: Optional[list[Opportunity]] = None,
->>>>>>> origin/main
         max_concurrent: int = 3,
     ) -> list[ExecutionResult]:
         """Execute multiple opportunities with concurrency control.
@@ -238,11 +226,7 @@ class RevenueEngine:
         results = await asyncio.gather(*tasks)  # type: ignore[assignment]
         return list(results)
 
-<<<<<<< HEAD
     def report(self, period: str | None = None) -> RevenueReport:
-=======
-    def report(self, period: Optional[str] = None) -> RevenueReport:
->>>>>>> origin/main
         """Generate a P&L report for the current session.
 
         Args:

@@ -30,7 +30,6 @@ import re
 from dataclasses import dataclass, field
 from enum import Enum
 
-
 __all__ = ["PIISanitizer", "PIIMatch", "PIICategory", "SanitizationReport"]
 
 logger = logging.getLogger("cortex.memory.pii_sanitizer")

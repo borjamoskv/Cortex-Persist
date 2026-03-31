@@ -164,7 +164,7 @@ class ResilientFetcher:
         timeout: float = DEFAULT_TIMEOUT,
     ) -> dict[str, Any]:
         """Execute cascading fetch. Returns dict with content or error trace."""
-        from cortex.http import validate_url, SSRFBlockedError
+        from cortex.http import SSRFBlockedError, validate_url
 
         errors: list[str] = []
         try:

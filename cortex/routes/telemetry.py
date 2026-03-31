@@ -55,17 +55,10 @@ async def ast_oracle_ws(
 
     # We want to get the last known ID first so we only send *new* mutations
     # But for a slicker demo upon connection, we can fetch the last 10
-<<<<<<< HEAD
     async with engine.session() as conn:
         cursor = await conn.execute("SELECT MAX(id) FROM facts")
         row = await cursor.fetchone()
         last_id = (row[0] or 0) - 100  # look back a bit  # type: ignore[reportOptionalSubscript]
-=======
-    conn = await engine.get_conn()
-    cursor = await conn.execute("SELECT MAX(id) FROM facts")
-    row = await cursor.fetchone()
-    last_id = (row[0] or 0) - 100  # look back a bit  # type: ignore[reportOptionalSubscript]
->>>>>>> origin/main
     if last_id < 0:
         last_id = 0
 

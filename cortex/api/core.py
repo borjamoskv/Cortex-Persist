@@ -28,82 +28,10 @@ from cortex.api.middleware import (
 )
 from cortex.auth import AuthManager
 from cortex.engine import CortexEngine
-<<<<<<< HEAD
 from cortex.extensions.metering.middleware import MeteringMiddleware
 from cortex.extensions.swarm.manager import get_swarm_manager
 from cortex.extensions.timing import TimingTracker
 from cortex.routes import api_router
-=======
-from cortex.extensions.hive.main import router as hive_router
-from cortex.extensions.metering.middleware import MeteringMiddleware
-from cortex.extensions.timing import TimingTracker
-from cortex.routes import (
-    admin as admin_router,
-)
-from cortex.routes import (
-    agents as agents_router,
-)
-from cortex.routes import (
-    ask as ask_router,
-)
-from cortex.routes import (
-    context as context_router,
-)
-from cortex.routes import (
-    daemon as daemon_router,
-)
-from cortex.routes import (
-    dashboard as dashboard_router,
-)
-from cortex.routes import (
-    events as events_router,
-)
-from cortex.routes import (
-    facts as facts_router,
-)
-from cortex.routes import (
-    gate as gate_router,
-)
-from cortex.routes import (
-    graph as graph_router,
-)
-from cortex.routes import health as health_index_router
-from cortex.routes import (
-    ledger as ledger_router,
-)
-from cortex.routes import (
-    mejoralo as mejoralo_router,
-)
-from cortex.routes import memories as memories_router
-from cortex.routes import (
-    missions as missions_router,
-)
-from cortex.routes import (
-    notch_ws as notch_ws_router,
-)
-from cortex.routes import onboarding as onboarding_router
-from cortex.routes import oracle as oracle_router
-from cortex.routes import runtime as runtime_router
-from cortex.routes import (
-    search as search_router,
-)
-from cortex.routes import (
-    telemetry as telemetry_router,
-)
-from cortex.routes import (
-    timing as timing_router,
-)
-from cortex.routes import (
-    tips as tips_router,
-)
-from cortex.routes import (
-    topology_ws as topology_ws_router,
-)
-from cortex.routes import (
-    translate as translate_router,
-)
-from cortex.routes import usage as usage_router
->>>>>>> origin/main
 from cortex.telemetry.metrics import MetricsMiddleware, metrics
 from cortex.utils.i18n import DEFAULT_LANGUAGE, get_trans
 
@@ -310,7 +238,6 @@ async def health_check(request: Request) -> dict:
         if engine and hasattr(engine, "manager") and hasattr(engine.manager, "_endocrine"):
             cortisol = engine.manager._endocrine.cortisol_level
             growth = engine.manager._endocrine.neural_growth
-<<<<<<< HEAD
     except (
         ValueError,
         KeyError,
@@ -318,9 +245,6 @@ async def health_check(request: Request) -> dict:
         RuntimeError,
         AttributeError,
     ):  # noqa: BLE001 — health check must never crash
-=======
-    except (ValueError, KeyError, OSError, RuntimeError, AttributeError):  # noqa: BLE001 — health check must never crash
->>>>>>> origin/main
         pass
 
     # Health Index integration
@@ -365,37 +289,7 @@ async def get_metrics():
 # ─── Router Inclusion ────────────────────────────────────────────────
 
 
-<<<<<<< HEAD
 app.include_router(api_router)
-=======
-app.include_router(events_router.events_router)
-app.include_router(facts_router.router)
-app.include_router(search_router.router)
-app.include_router(ask_router.router)
-app.include_router(admin_router.router)
-app.include_router(timing_router.router)
-app.include_router(translate_router.router)
-app.include_router(oracle_router.router)
-app.include_router(daemon_router.router)
-app.include_router(dashboard_router.router)
-app.include_router(agents_router.router)
-app.include_router(graph_router.router)
-app.include_router(ledger_router.router)
-app.include_router(missions_router.router)
-app.include_router(mejoralo_router.router)
-app.include_router(gate_router.router)
-app.include_router(context_router.router)
-app.include_router(tips_router.router)
-app.include_router(telemetry_router.router)
-app.include_router(hive_router)
-app.include_router(notch_ws_router.router)
-app.include_router(topology_ws_router.router)
-app.include_router(memories_router.router)
-app.include_router(usage_router.router)
-app.include_router(runtime_router.router)
-app.include_router(onboarding_router.router)
-app.include_router(health_index_router.router)
->>>>>>> origin/main
 
 # Extensions and third-party integrations
 

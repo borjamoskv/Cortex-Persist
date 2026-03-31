@@ -55,7 +55,7 @@ def load_presets() -> dict[str, dict[str, Any]]:
         return {}
 
     try:
-        with open(path, "r", encoding="utf-8") as f:
+        with open(path, encoding="utf-8") as f:
             presets = json.load(f)
             _validate_model_policy(presets)
             _PRESETS_CACHE = presets

@@ -76,15 +76,9 @@ async def _heal_file_async(
     findings: list[str],
     level: int = 1,
     iteration: int = 0,
-<<<<<<< HEAD
     engine: MejoraloEngine | None = None,  # type: ignore[reportGeneralTypeIssues]
     project: str | None = None,
 ) -> str | None:
-=======
-    engine: Optional[MejoraloEngine] = None,  # type: ignore[reportGeneralTypeIssues]
-    project: Optional[str] = None,
-) -> Optional[str]:
->>>>>>> origin/main
     """Invoke the Sovereign Swarm to refactor a specific file with escalating intensity.
 
     Returns the new code if successful, None otherwise.
@@ -107,11 +101,7 @@ def _calculate_total_complexity(source_code: str) -> int:
 
     comp = 0
     for node in ast.walk(tree):
-<<<<<<< HEAD
         if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
-=======
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
->>>>>>> origin/main
             comp += 1
         if isinstance(node, _COMPLEXITY_NODES):
             comp += 1
@@ -126,13 +116,8 @@ def _apply_and_verify(
     iteration: int,
     console: Any,
     current_score: int,
-<<<<<<< HEAD
     engine: MejoraloEngine | None = None,  # type: ignore[reportGeneralTypeIssues]
     project: str | None = None,
-=======
-    engine: Optional[MejoraloEngine] = None,  # type: ignore[reportGeneralTypeIssues]
-    project: Optional[str] = None,
->>>>>>> origin/main
 ) -> bool:
     """Apply the already generated refactor, test it, and commit/rollback."""
     abs_path = Path(path).resolve() / top_file_rel
@@ -182,13 +167,8 @@ def _run_functional_inquisitor(
     original_code: str,
     top_file_rel: str,
     console: Any,
-<<<<<<< HEAD
     engine: MejoraloEngine | None,  # type: ignore[reportGeneralTypeIssues]
     project: str | None,
-=======
-    engine: Optional[MejoraloEngine],  # type: ignore[reportGeneralTypeIssues]
-    project: Optional[str],
->>>>>>> origin/main
     abs_path: Path,
 ) -> bool:
     if abs_path.suffix != ".py":
@@ -233,13 +213,8 @@ def _run_delta_testing(
     original_code: str,
     abs_path: Path,
     console: Any,
-<<<<<<< HEAD
     engine: MejoraloEngine | None,  # type: ignore[reportGeneralTypeIssues]
     project: str | None,
-=======
-    engine: Optional[MejoraloEngine],  # type: ignore[reportGeneralTypeIssues]
-    project: Optional[str],
->>>>>>> origin/main
     level: int = 1,
 ) -> bool:
     pytest_cmd = [sys.executable, "-m", "pytest"]
@@ -299,13 +274,8 @@ def _commit_healed_file(
     current_score: int,
     console: Any,
     complexity_delta: int = 0,
-<<<<<<< HEAD
     engine: MejoraloEngine | None = None,
     project: str | None = None,
-=======
-    engine: Optional[MejoraloEngine] = None,
-    project: Optional[str] = None,
->>>>>>> origin/main
 ) -> bool:
     try:
         commit_msg = (
@@ -371,11 +341,7 @@ def heal_project(
     path: str | Path,
     target_score: int,
     scan_result: ScanResult,
-<<<<<<< HEAD
     engine: MejoraloEngine | None = None,  # type: ignore[reportGeneralTypeIssues]
-=======
-    engine: Optional[MejoraloEngine] = None,  # type: ignore[reportGeneralTypeIssues]
->>>>>>> origin/main
 ) -> bool:
     """Orchestrate autonomous healing: detect, rewrite, test, commit — RELENTLESSLY."""
     from cortex.cli import console
@@ -427,11 +393,7 @@ def _run_healing_iteration(
     console: Any,
     current_result: ScanResult,
     healed_files: set[str],
-<<<<<<< HEAD
     engine: MejoraloEngine | None = None,  # type: ignore[reportGeneralTypeIssues]
-=======
-    engine: Optional[MejoraloEngine] = None,  # type: ignore[reportGeneralTypeIssues]
->>>>>>> origin/main
 ) -> tuple[bool, ScanResult]:
     """Execute a single multi-file healing pass with re-scan."""
     from cortex.extensions.mejoralo.scan import scan

@@ -47,11 +47,7 @@ _CLASS_PATTERNS: dict[GhostClass, list[str]] = {
     ],
     GhostClass.IMPORT_ERROR: ["ImportError", "ModuleNotFoundError", "circular"],
     GhostClass.TEST_FAILURE: ["AssertionError", "FAILED", "pytest", "test_"],
-<<<<<<< HEAD
     GhostClass.DOC_GAP: ["TO" + "DO", "FI" + "XME", "HACK", "docstring", "undocumented"],
-=======
-    GhostClass.DOC_GAP: ["TODO", "FIXME", "HACK", "docstring", "undocumented"],
->>>>>>> origin/main
 }
 
 

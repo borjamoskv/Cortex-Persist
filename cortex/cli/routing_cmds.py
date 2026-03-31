@@ -12,11 +12,6 @@ Usage:
 
 from __future__ import annotations
 
-<<<<<<< HEAD
-=======
-from typing import Optional
-
->>>>>>> origin/main
 import click
 from rich.table import Table
 from rich.text import Text
@@ -54,11 +49,7 @@ def routing() -> None:
 
 @routing.command("matrix")
 @click.option("--intent", default=None, help="Filter by intent (code, reasoning, architect...)")
-<<<<<<< HEAD
 def routing_matrix(intent: str | None) -> None:
-=======
-def routing_matrix(intent: Optional[str]) -> None:
->>>>>>> origin/main
     """Show the full intent→provider→model routing matrix."""
     from cortex.extensions.llm._presets import load_presets
 
@@ -190,7 +181,6 @@ def routing_frontier(intent: str) -> None:
     console.print(table)
 
 
-<<<<<<< HEAD
 @routing.command("status")
 def routing_status() -> None:
     """Show LLM provider readiness and API key status. [STATUS_CLI]"""
@@ -225,8 +215,6 @@ def routing_status() -> None:
     console.print(table)
 
 
-=======
->>>>>>> origin/main
 @routing.command("agents")
 def routing_agents() -> None:
     """Show all registered agents with resolved models."""

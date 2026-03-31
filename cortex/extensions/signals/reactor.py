@@ -8,12 +8,9 @@
 The Reactor listens for signals on the bus and triggers autonomous actions
 (reflexes). It converts 'Events' into 'Work'.
 
-<<<<<<< HEAD
 L2 reflexes cascade through the TriggerEngine (declarative conditions)
 before fallback to hardcoded dispatch.
 
-=======
->>>>>>> origin/main
 Active Reflexes:
 - compact:needed -> Triggers CompactionStrategy suite.
 - fact:stored -> Triggers snapshot export (with cooldown).
@@ -37,12 +34,8 @@ class SignalReactor:
     """Reactive loop that transforms L1 pulses into L2 actions.
 
     Designed to be run as part of the MoskvDaemon or as a standalone
-<<<<<<< HEAD
     CLI 'reactor' process. Signals pass through the TriggerEngine
     first; unmatched events fall through to hardcoded reflexes.
-=======
-    CLI 'reactor' process.
->>>>>>> origin/main
     """
 
     def __init__(self, bus: SignalBus, engine: Any = None):
@@ -50,10 +43,7 @@ class SignalReactor:
         self.engine = engine
         self._last_snapshot_time: float = 0
         self._snapshot_cooldown: int = 60  # seconds
-<<<<<<< HEAD
         self._trigger_engine: Any = None  # lazy-init
-=======
->>>>>>> origin/main
 
     @oxygenate(min_interval=0.1)
     async def process_once(self) -> int:
@@ -85,7 +75,6 @@ class SignalReactor:
         return processed
 
     async def _dispatch(self, signal: Any) -> None:
-<<<<<<< HEAD
         """Map signal types to reflex handlers.
 
         Signals are evaluated by the TriggerEngine first.
@@ -103,9 +92,6 @@ class SignalReactor:
                 )
 
         # --- Hardcoded reflexes (legacy fallback) ---
-=======
-        """Map signal types to reflex handlers."""
->>>>>>> origin/main
         etype = signal.event_type
 
         if etype == "compact:needed":
@@ -115,7 +101,6 @@ class SignalReactor:
         elif etype == "experience:recorded":
             await self._handle_experience_recorded(signal)
         else:
-<<<<<<< HEAD
             logger.debug(
                 "Reactor ignored unknown signal type: %s",
                 etype,
@@ -144,9 +129,6 @@ class SignalReactor:
         except Exception:  # noqa: BLE001
             logger.debug("TriggerEngine not available — continuing")
             return None
-=======
-            logger.debug("Reactor ignored unknown signal type: %s", etype)
->>>>>>> origin/main
 
     async def _handle_experience_recorded(self, signal: Any) -> None:
         """Reflex: Reconcile an experience into stratified memory layers."""

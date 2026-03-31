@@ -1,19 +1,11 @@
 """Data models for Moltbook API responses."""
 
 from __future__ import annotations
-<<<<<<< HEAD
-
-from dataclasses import dataclass, field
-=======
-from typing import Optional
->>>>>>> origin/main
 
 from dataclasses import dataclass, field
 
-<<<<<<< HEAD
-=======
+from dataclasses import dataclass, field
 
->>>>>>> origin/main
 @dataclass(frozen=True)
 class MoltbookCredentials:
     """Stored API credentials."""

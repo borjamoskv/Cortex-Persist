@@ -1,7 +1,6 @@
 import time
 from enum import Enum
 from typing import Any
-from typing import Any, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 

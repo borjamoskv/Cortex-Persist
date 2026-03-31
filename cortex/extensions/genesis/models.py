@@ -8,11 +8,7 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
-<<<<<<< HEAD
 from typing import Any
-=======
-from typing import Any, Optional
->>>>>>> origin/main
 
 
 @dataclass
@@ -35,11 +31,7 @@ class ComponentSpec:
     imports: list[str] = field(default_factory=list)
     interfaces: list[str] = field(default_factory=list)
     dependencies: list[str] = field(default_factory=list)
-<<<<<<< HEAD
     template: str | None = None
-=======
-    template: Optional[str] = None
->>>>>>> origin/main
     docstring: str = ""
 
     def to_dict(self) -> dict[str, Any]:

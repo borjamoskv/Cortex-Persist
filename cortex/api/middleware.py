@@ -70,7 +70,6 @@ class TracingMiddleware(BaseHTTPMiddleware):
                     }
                 )
             )
-<<<<<<< HEAD
             return JSONResponse(
                 status_code=500,
                 content={
@@ -79,9 +78,6 @@ class TracingMiddleware(BaseHTTPMiddleware):
                     "message": "An unexpected error occurred. Please contact support with the trace_id.",
                 },
             )
-=======
-            raise
->>>>>>> origin/main
         finally:
             request_id_var.reset(token)
 

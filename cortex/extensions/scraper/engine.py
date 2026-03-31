@@ -53,7 +53,7 @@ class ScraperEngine:
         Returns:
             ScrapeResult with extracted content or error details.
         """
-        from cortex.http import validate_url, SSRFBlockedError
+        from cortex.http import SSRFBlockedError, validate_url
 
         try:
             request.url = validate_url(request.url)
@@ -188,7 +188,7 @@ class ScraperEngine:
         """
         LOG.info("🗺️ [MAP] Mapping site: %s (depth=%d)", url, max_depth)
 
-        from cortex.http import validate_url, SSRFBlockedError
+        from cortex.http import SSRFBlockedError, validate_url
 
         try:
             url = validate_url(url)

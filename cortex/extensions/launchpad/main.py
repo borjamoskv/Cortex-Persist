@@ -127,15 +127,11 @@ class MissionOrchestrator:
 
         except (sqlite3.Error, OSError, RuntimeError) as e:
             logger.error("Failed to launch mission: %s", e)
-<<<<<<< HEAD
             return {
                 "intent_id": fact_id,
                 "status": "error",
                 "error": "Internal mission execution error",
             }
-=======
-            return {"intent_id": fact_id, "status": "error", "error": str(e)}
->>>>>>> origin/main
 
     def list_missions(self, project: Optional[str] = None) -> list[dict[str, Any]]:
         """Retrieve recent mission attempts from the ledger."""

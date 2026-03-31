@@ -10,10 +10,6 @@ import logging
 import re
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
-<<<<<<< HEAD
-=======
-from typing import Optional
->>>>>>> origin/main
 
 from cortex.extensions.aether.models import PlanOutput, ToolCall
 from cortex.extensions.aether.tools import AgentToolkit
@@ -73,11 +69,7 @@ class ExecutorState:
 class ExecutorAgent:
     """Iterative tool-calling executor agent."""
 
-<<<<<<< HEAD
     def __init__(self, llm, base_system_prompt: str | None = None) -> None:
-=======
-    def __init__(self, llm, base_system_prompt: Optional[str] = None) -> None:
->>>>>>> origin/main
         self._llm = llm
         self._base_system = base_system_prompt
 
@@ -173,11 +165,7 @@ class ExecutorAgent:
         return "\n\n".join(parts)
 
     @staticmethod
-<<<<<<< HEAD
     def _parse_tool_call(text: str) -> ToolCall | None:
-=======
-    def _parse_tool_call(text: str) -> Optional[ToolCall]:
->>>>>>> origin/main
         """Extract first <tool_call> block from LLM output."""
         match = re.search(r"<tool_call>(.*?)</tool_call>", text, re.DOTALL)
         if not match:

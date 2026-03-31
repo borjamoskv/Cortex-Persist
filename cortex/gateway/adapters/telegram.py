@@ -248,6 +248,7 @@ async def telegram_webhook(
 
     # Send reply back to Telegram
     import httpx
+
     from cortex.guards.url_guard import SafeTransport
 
     token = os.environ.get("CORTEX_TELEGRAM_TOKEN", "")

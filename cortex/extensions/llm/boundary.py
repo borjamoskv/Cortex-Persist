@@ -98,7 +98,6 @@ class ImmuneBoundary:
 
         schema_dict = schema.model_json_schema()
 
-        import inspect
 
         schema_dict = schema.model_json_schema()
 

@@ -1,16 +1,11 @@
 """CORTEX CLI — Health command group.
 
 Commands for the CORTEX Health Index — monitoring and scoring.
-<<<<<<< HEAD
 Thin CLI wrapper; all logic lives in cortex.extensions.health.
-=======
-Thin CLI wrapper; all logic lives in cortex.health.
->>>>>>> origin/main
 """
 
 from __future__ import annotations
 
-<<<<<<< HEAD
 import click
 
 from cortex.cli.common import DEFAULT_DB, console  # type: ignore[reportAttributeAccessIssue]
@@ -20,13 +15,6 @@ from cortex.cli.health_dashboard import dashboard
 def _resolve_db(db_path: str | None) -> str:
     """Resolve DB path from arg or default."""
     return db_path or str(DEFAULT_DB)
-=======
-from typing import Optional
-
-import click
-
-from cortex.cli.common import console, get_db_path  # type: ignore[reportAttributeAccessIssue]
->>>>>>> origin/main
 
 
 def render_sparkline(data: list[float]) -> str:
@@ -48,19 +36,11 @@ def health_group() -> None:
 
 @health_group.command("check")
 @click.option("--db", "db_path", default=None, help="DB path override.")
-<<<<<<< HEAD
 def check(db_path: str | None) -> None:
     """Quick boolean health check (healthy/degraded)."""
     from cortex.extensions.health import HealthCollector, HealthScorer
 
     path = _resolve_db(db_path)
-=======
-def check(db_path: Optional[str]) -> None:
-    """Quick boolean health check (healthy/degraded)."""
-    from cortex.extensions.health import HealthCollector, HealthScorer
-
-    path = get_db_path(db_path)
->>>>>>> origin/main
     collector = HealthCollector(db_path=path)
     metrics = collector.collect_all()
     hs = HealthScorer.score(metrics)
@@ -78,11 +58,7 @@ def check(db_path: Optional[str]) -> None:
 @health_group.command("report")
 @click.option("--db", "db_path", default=None)
 @click.option("--json", "as_json", is_flag=True, default=False)
-<<<<<<< HEAD
 def report(db_path: str | None, as_json: bool) -> None:
-=======
-def report(db_path: Optional[str], as_json: bool) -> None:
->>>>>>> origin/main
     """Full health report with recommendations."""
     import asyncio
     import json
@@ -90,11 +66,7 @@ def report(db_path: Optional[str], as_json: bool) -> None:
     from cortex.extensions.health import HealthMixin
 
     class _Engine(HealthMixin):
-<<<<<<< HEAD
         _db_path = _resolve_db(db_path)
-=======
-        _db_path = get_db_path(db_path)
->>>>>>> origin/main
 
     engine = _Engine()
     rep = asyncio.run(engine.health_report())
@@ -121,7 +93,6 @@ def report(db_path: Optional[str], as_json: bool) -> None:
         for r in rep.recommendations:
             console.print(f"  💡 {r}")
 
-<<<<<<< HEAD
     # Sub-indices
     if hs.sub_indices:
         console.print("\n[bold]Sub-Indices:[/]")
@@ -145,26 +116,16 @@ def report(db_path: Optional[str], as_json: bool) -> None:
             if rem:
                 console.print(f"  🔧 {m.name}: {rem}")
 
-=======
->>>>>>> origin/main
     console.print(f"\n  DB: [dim]{rep.db_path}[/]\n")
 
 
 @health_group.command("score")
 @click.option("--db", "db_path", default=None)
-<<<<<<< HEAD
 def score(db_path: str | None) -> None:
     """Print only the numeric health score (0-100)."""
     from cortex.extensions.health import HealthCollector, HealthScorer
 
     path = _resolve_db(db_path)
-=======
-def score(db_path: Optional[str]) -> None:
-    """Print only the numeric health score (0-100)."""
-    from cortex.extensions.health import HealthCollector, HealthScorer
-
-    path = get_db_path(db_path)
->>>>>>> origin/main
     collector = HealthCollector(db_path=path)
     metrics = collector.collect_all()
     hs = HealthScorer.score(metrics)
@@ -173,7 +134,6 @@ def score(db_path: Optional[str]) -> None:
 
 @health_group.command("trend")
 @click.option("--db", "db_path", default=None)
-<<<<<<< HEAD
 @click.option("--live", is_flag=True, default=False, help="Live sampling mode.")
 @click.option("--samples", default=10, help="Samples for live mode.")
 @click.option("--interval", default=1.0, help="Seconds between live samples.")
@@ -214,32 +174,6 @@ def trend(db_path: str | None, live: bool, samples: int, interval: float) -> Non
                 "\n[yellow]No health history found. Run `cortex health report` first.[/]\n"
             )
             return
-=======
-@click.option("--samples", default=10, help="Number of samples to collect.")
-@click.option("--interval", default=1.0, help="Seconds between samples.")
-def trend(db_path: Optional[str], samples: int, interval: float) -> None:
-    """Live health trend monitoring with sparklines."""
-    import time
-
-    from rich.progress import track
-
-    from cortex.extensions.health import HealthCollector, HealthScorer
-    from cortex.extensions.health.trend import TrendDetector
-
-    path = get_db_path(db_path)
-    collector = HealthCollector(db_path=path)
-    detector = TrendDetector(window_size=samples)
-    scores: list[float] = []
-
-    console.print(f"\n[dim]Collecting {samples} health samples...[/]")
-    for _ in track(range(samples), description="Sampling"):
-        metrics = collector.collect_all()
-        hs = HealthScorer.score(metrics)
-        scores.append(hs.score)
-        detector.push(hs.score)
-        if _ < samples - 1:
-            time.sleep(interval)
->>>>>>> origin/main
 
     spark = render_sparkline(scores)
     drift = detector.detect_drift()
@@ -247,7 +181,6 @@ def trend(db_path: Optional[str], samples: int, interval: float) -> None:
 
     color = "green" if drift == "improving" else ("red" if drift == "degrading" else "yellow")
     console.print(f"\n📈 Trend: [{color}]{drift}[/] (slope: {slope:+.3f})")
-<<<<<<< HEAD
     console.print(f"  Samples: {len(scores)}")
     console.print(f"  Sparkline: [cyan]{spark}[/]\n")
 
@@ -373,12 +306,3 @@ def verify():
     except Exception as e:
         console.print(f"[bold red]Error running invariants: {e}[/bold red]")
         sys.exit(1)
-=======
-    console.print(f"Sparkline: [cyan]{spark}[/]\n")
-
-
-# ─── Attach dashboard subcommand ─────────────────────────────
-from cortex.cli.health_dashboard import dashboard  # noqa: E402
-
-health_group.add_command(dashboard)
->>>>>>> origin/main

@@ -11,11 +11,7 @@ import functools
 import logging
 import time
 from collections.abc import Awaitable, Callable
-<<<<<<< HEAD
 from typing import Any, ParamSpec, TypeVar
-=======
-from typing import Any, Optional, ParamSpec, TypeVar
->>>>>>> origin/main
 
 from cortex.extensions.agent.degradation_types import (
     AgentAction,
@@ -38,11 +34,7 @@ _RECOVERY_DOCTOR = "Run `cortex doctor` to scan subsystem health"
 
 def sovereign_execute(
     fallback_mode: str = "text_only",
-<<<<<<< HEAD
     cortex_engine: Any | None = None,
-=======
-    cortex_engine: Optional[Any] = None,
->>>>>>> origin/main
     project: str = "default",
 ) -> Callable[[Callable[_P, Awaitable[_R]]], Callable[_P, Awaitable[_R]]]:
     """Decorator that wraps any agent execute() method with Sovereign Degradation.
@@ -60,13 +52,7 @@ def sovereign_execute(
         @functools.wraps(fn)
         async def wrapper(*args: _P.args, **kwargs: _P.kwargs) -> _R:
             t0 = time.perf_counter()
-<<<<<<< HEAD
             action: AgentAction | None = next((a for a in args if isinstance(a, AgentAction)), None)
-=======
-            action: Optional[AgentAction] = next(
-                (a for a in args if isinstance(a, AgentAction)), None
-            )
->>>>>>> origin/main
 
             try:
                 result = await fn(*args, **kwargs)
@@ -161,11 +147,7 @@ def _upgrade_to_l3(exc: BaseException, component: str) -> AgentDegradedError:
 
 
 async def _persist_to_cortex(
-<<<<<<< HEAD
     engine: Any | None,
-=======
-    engine: Optional[Any],
->>>>>>> origin/main
     project: str,
     error: SovereignAgentError,
 ) -> None:

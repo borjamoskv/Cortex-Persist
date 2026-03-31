@@ -1,10 +1,5 @@
 from __future__ import annotations
 
-<<<<<<< HEAD
-=======
-from typing import Optional
-
->>>>>>> origin/main
 """
 CORTEX v6.0 — Antipattern Scanner.
 
@@ -100,19 +95,11 @@ class _MagicLiteralVisitor(ast.NodeVisitor):
 
         value = node.value
         # Skip strings, None, booleans, Ellipsis
-<<<<<<< HEAD
         if isinstance(value, str | bytes | bool | type(None) | type(...)):
             return
 
         # Skip whitelisted values
         if isinstance(value, int | float) and value in _MAGIC_WHITELIST:
-=======
-        if isinstance(value, (str, bytes, bool, type(None), type(...))):
-            return
-
-        # Skip whitelisted values
-        if isinstance(value, (int, float)) and value in _MAGIC_WHITELIST:
->>>>>>> origin/main
             return
 
         # Check context — is this in a comparison, return, or arithmetic?
@@ -157,11 +144,7 @@ class _ImplicitAssumptionVisitor(ast.NodeVisitor):
         if (
             isinstance(node.value, ast.Name)
             and isinstance(node.slice, ast.Constant)
-<<<<<<< HEAD
             and isinstance(node.slice.value, str | int)
-=======
-            and isinstance(node.slice.value, (str, int))
->>>>>>> origin/main
         ):
             # Check if this is inside a try block (then it's guarded)
             # We can't easily check ancestry in a simple visitor,
@@ -250,11 +233,7 @@ class _DeadCodeVisitor(ast.NodeVisitor):
 
     def _check_body(self, body: list[ast.stmt]) -> None:
         for i, stmt in enumerate(body):
-<<<<<<< HEAD
             if isinstance(stmt, ast.Return | ast.Raise | ast.Break | ast.Continue):
-=======
-            if isinstance(stmt, (ast.Return, ast.Raise, ast.Break, ast.Continue)):
->>>>>>> origin/main
                 # Check if there's code after this statement (in same block)
                 remaining = body[i + 1 :]
                 # Filter out pass statements and string literals (docstrings)
@@ -335,11 +314,7 @@ def _scan_single_file(
     _DeadCodeVisitor(rel, findings).visit(tree)
 
 
-<<<<<<< HEAD
 def _gather_python_files(root: Path) -> tuple[list[Path], Path] | None:
-=======
-def _gather_python_files(root: Path) -> Optional[tuple[list[Path], Path]]:
->>>>>>> origin/main
     """Gather Python files to scan and determine the scan root."""
     if root.is_file():
         return [root], root.parent
