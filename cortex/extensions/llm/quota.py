@@ -11,6 +11,7 @@ from __future__ import annotations
 import asyncio
 import dataclasses
 import logging
+import os
 import secrets
 import sqlite3
 import time
@@ -77,12 +78,22 @@ class SovereignQuotaManager:
     def __init__(
         self,
         db_path: str = "~/.cortex/quota.db",
-        capacity: int = 5,  # Reducido de 15 a 5 para evitar burst limit (429)
-        refill_rate: float = 0.15,  # ~9 tokens / 60s (más conservador)
+        capacity: int = 5,
+        refill_rate: float | None = None,
     ) -> None:
         self.db_path = Path(db_path).expanduser()
         self.capacity = float(capacity)
-        self.refill_rate = float(refill_rate)
+
+        # ── Protocolo PULMONES Conservative Refill ──
+        # Prioritize ENV > Explicit arg > 2 RPM Default
+        env_max_rpm = os.environ.get("CORTEX_LLM_MAX_RPM")
+        if env_max_rpm:
+            self.refill_rate = float(env_max_rpm) / 60.0
+        elif refill_rate is not None:
+            self.refill_rate = float(refill_rate)
+        else:
+            self.refill_rate = 2.0 / 60.0  # 2 RPM (0.033 t/s) — absolute stability
+
         self._init_db()
 
     # ─── Internals ────────────────────────────────────────────────────
