@@ -109,9 +109,9 @@ def create_aether_server(
             engine._conn = conn
 
             results = await engine.search(
-                query,
-                project or None,
-                min(max(top_k, 5), 50),
+                query=query,
+                project=project or None,
+                top_k=min(max(top_k, 5), 50),
             )
 
         if not results:
@@ -175,12 +175,12 @@ def create_aether_server(
             engine._conn = conn
 
             fact_id = await engine.store(
-                project,
-                decision,
-                "decision",
-                ["mcp-aether"],
-                "stated",
-                "agent:gemini:aether",
+                project=project,
+                content=decision,
+                fact_type="decision",
+                tags=["mcp-aether"],
+                confidence="stated",
+                source="agent:gemini:aether",
             )
 
         ctx.search_cache.clear()

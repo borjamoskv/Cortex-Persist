@@ -181,10 +181,11 @@ async def retrieve_episodic_context(
 
     # 4. Metamemory Gate: Abort if FOK is too low (Knowledge Gap)
     candidate_engrams = hdc_results if hdc_results else dense_results
-    if hasattr(manager, "metamemory") and candidate_engrams:
+    metamemory = getattr(manager, "metamemory", None)
+    if metamemory is not None and candidate_engrams:
         query_embedding = await manager._encoder.encode(query)
-        judgment = manager.metamemory.judge_fok(query_embedding, candidate_engrams)
-        threshold = getattr(manager.metamemory, "_fok_threshold", 0.3)
+        judgment = metamemory.judge_fok(query_embedding, candidate_engrams)
+        threshold = getattr(metamemory, "_fok_threshold", 0.3)
         if judgment.fok_score < threshold:
             logger.warning(
                 "Retrieval aborted: KnowledgeGapException (FOK=%.2f < %.2f)",
