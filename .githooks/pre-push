@@ -1,0 +1,17 @@
+#!/bin/bash
+# CORTEX Pre-Push Guard — Axiom Enforcement
+
+set -euo pipefail
+
+echo "🛡️  [CORTEX] Initiating Pre-Push Quality Gates..."
+
+ROOT_DIR=$(git rev-parse --show-toplevel)
+cd "$ROOT_DIR"
+
+if [ -x ".venv/bin/python" ]; then
+    PYTHON_CMD=".venv/bin/python"
+else
+    PYTHON_CMD="python3"
+fi
+
+"$PYTHON_CMD" -m cortex.guards.seals

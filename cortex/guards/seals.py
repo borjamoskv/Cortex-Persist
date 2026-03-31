@@ -16,6 +16,11 @@ import sys
 from pathlib import Path
 from typing import Optional
 
+if __package__ in {None, ""}:
+    repo_root = Path(__file__).resolve().parents[2]
+    if str(repo_root) not in sys.path:
+        sys.path.insert(0, str(repo_root))
+
 from cortex.guards.sovereign_seals import (
     check_gate_15_dependency,
     check_gate_16_byzantine,
