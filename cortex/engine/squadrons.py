@@ -78,8 +78,7 @@ class MultiSpecialistAgent(SwarmAgent):
 class PhalanxBase(Squadron):
     """Base for Phalanxes that load 20-agent/100-specialist mapping from registry."""
 
-    SQUAD_NAME = "PHALANX"
-    REPLICAS = 4  # 4 agents per phalanx = 20 total agents
+    REPLICAS = 20  # 20 agents per phalanx = 100 total agents
 
     def __init__(self, engine: Any = None):
         super().__init__(engine)
@@ -97,6 +96,26 @@ class PhalanxBase(Squadron):
             if agent["id"] == agent_id:
                 return agent.get("specialists", [])
         return []
+
+    async def _map(self, target_pattern: str | None = None) -> list[str]:
+        """MAP phase: Shards a directory into individual files for parallel audit."""
+        if not target_pattern:
+            return []
+        
+        path = Path(target_pattern)
+        if path.is_file():
+            return [str(path)]
+        
+        if path.is_dir():
+            # Recursively find all source files for the audit
+            extensions = {".py", ".js", ".ts", ".go", ".rs", ".md", ".json"}
+            targets = [
+                str(p) for p in path.rglob("*") 
+                if p.is_file() and p.suffix in extensions and "pycache" not in str(p)
+            ]
+            return targets
+            
+        return [target_pattern]
 
     def _create_agent(self, agent_id: str) -> SwarmAgent:
         # Map sequential ID (0-3) to phalanx-specific registry IDs
