@@ -47,6 +47,7 @@ __all__ = [
     "CREATE_EPISODES_FTS",
     "CREATE_EPISODES_INDEXES",
     "CREATE_FACTS",
+    "CREATE_FACTS_TABLE",
     "CREATE_FACTS_INDEXES",
     "CREATE_GHOSTS",
     "CREATE_GHOSTS_INDEX",
@@ -92,6 +93,31 @@ CREATE TABLE IF NOT EXISTS facts (
     valid_until TEXT,
     source      TEXT,
     confidence  TEXT DEFAULT 'C3',
+    created_at  TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at  TEXT NOT NULL DEFAULT (datetime('now')),
+    is_tombstoned INTEGER NOT NULL DEFAULT 0,
+    is_quarantined INTEGER NOT NULL DEFAULT 0
+);
+"""
+
+# Backward-compatible facts DDL kept for legacy imports and isolated schema tests
+# that still populate deprecated columns directly.
+CREATE_FACTS_TABLE = """
+CREATE TABLE IF NOT EXISTS facts (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenant_id   TEXT NOT NULL DEFAULT 'default',
+    project     TEXT NOT NULL,
+    content     TEXT NOT NULL,
+    fact_type   TEXT NOT NULL DEFAULT 'knowledge',
+    tags        TEXT NOT NULL DEFAULT '[]',
+    meta        TEXT DEFAULT '{}',
+    metadata    TEXT DEFAULT '{}',
+    hash        TEXT,
+    valid_from  TEXT,
+    valid_until TEXT,
+    source      TEXT,
+    confidence  TEXT DEFAULT 'C3',
+    consensus_score REAL DEFAULT 1.0,
     created_at  TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at  TEXT NOT NULL DEFAULT (datetime('now')),
     is_tombstoned INTEGER NOT NULL DEFAULT 0,

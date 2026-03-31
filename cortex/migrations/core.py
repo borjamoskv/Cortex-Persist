@@ -78,14 +78,6 @@ def _apply_base_schema(conn: sqlite3.Connection) -> None:
             else:
                 raise
 
-    # Mark the latest migration as applied so we don't try to run historical migrations on a fresh DB
-    if MIGRATIONS:
-        max_version = max(m[0] for m in MIGRATIONS)
-        conn.execute(
-            "INSERT INTO schema_version (version, description) VALUES (?, ?)",
-            (max_version, "Initial fresh schema baseline"),
-        )
-
     conn.commit()
     logger.info("Base schema applied.")
 
@@ -148,14 +140,6 @@ async def _apply_base_schema_async(conn: aiosqlite.Connection) -> None:
                 logger.warning("Skipping schema statement: %s", e)
             else:
                 raise
-
-    # Mark the latest migration as applied so we don't try to run historical migrations on a fresh DB
-    if MIGRATIONS:
-        max_version = max(m[0] for m in MIGRATIONS)
-        await conn.execute(
-            "INSERT INTO schema_version (version, description) VALUES (?, ?)",
-            (max_version, "Initial fresh schema baseline"),
-        )
 
     await conn.commit()
 

@@ -19,7 +19,7 @@ import aiosqlite
 
 from cortex.extensions.immune.chaos import ChaosGate, async_interceptor
 
-__all__ = ["CortexConnectionPool"]
+__all__ = ["AsyncConnectionPool", "CortexConnectionPool"]
 
 logger = logging.getLogger("cortex.pool")
 
@@ -189,3 +189,7 @@ class CortexConnectionPool:
             except asyncio.QueueEmpty:
                 break
         self._initialized = False
+
+
+# Backward-compatible public name retained for existing imports/tests.
+AsyncConnectionPool = CortexConnectionPool

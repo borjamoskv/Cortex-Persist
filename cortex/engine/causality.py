@@ -121,6 +121,18 @@ class AsyncCausalGraph:
     def __init__(self, conn: aiosqlite.Connection):
         self.conn = conn
 
+    async def _facts_meta_column(self) -> str:
+        """Return the available metadata column for facts rows."""
+        async with self.conn.execute("PRAGMA table_info(facts)") as cursor:
+            rows = await cursor.fetchall()
+
+        columns = {row[1] for row in rows}
+        if "metadata" in columns:
+            return "metadata"
+        if "meta" in columns:
+            return "meta"
+        return "metadata"
+
     async def ensure_table(self):
         """Ensure the causal_edges table exists."""
         sql = """
@@ -165,6 +177,17 @@ class AsyncCausalGraph:
         queue: list[tuple[int, int]] = [(fact_id, 0)]
         visited: set[int] = {fact_id}
         now = datetime.now(timezone.utc).isoformat()
+        meta_column = await self._facts_meta_column()
+        select_sql = (
+            "SELECT confidence, metadata FROM facts WHERE id = ?"
+            if meta_column == "metadata"
+            else "SELECT confidence, meta FROM facts WHERE id = ?"
+        )
+        update_sql = (
+            "UPDATE facts SET confidence = ?, metadata = ? WHERE id = ?"
+            if meta_column == "metadata"
+            else "UPDATE facts SET confidence = ?, meta = ? WHERE id = ?"
+        )
 
         while queue:
             current_id, depth = queue.pop(0)
@@ -174,7 +197,7 @@ class AsyncCausalGraph:
                 old_conf = "C5"
                 old_meta: dict[str, Any] = {}
                 async with self.conn.execute(
-                    "SELECT confidence, metadata FROM facts WHERE id = ?",
+                    select_sql,
                     (current_id,),
                 ) as cur:
                     row = await cur.fetchone()
@@ -189,10 +212,7 @@ class AsyncCausalGraph:
                 old_meta["tainted_by"] = fact_id
                 old_meta["taint_timestamp"] = now
 
-                await self.conn.execute(
-                    "UPDATE facts SET confidence = ?, metadata = ? WHERE id = ?",
-                    (new_conf, json.dumps(old_meta), current_id),
-                )
+                await self.conn.execute(update_sql, (new_conf, json.dumps(old_meta), current_id))
 
                 # Record taint edge
                 try:

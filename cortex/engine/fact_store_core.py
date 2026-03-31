@@ -20,6 +20,19 @@ from cortex.utils.canonical import compute_fact_hash
 logger = logging.getLogger("cortex")
 
 
+async def _facts_meta_column(conn: aiosqlite.Connection) -> str:
+    """Return the available facts metadata column, preferring the modern name."""
+    async with conn.execute("PRAGMA table_info(facts)") as cursor:
+        rows = await cursor.fetchall()
+
+    columns = {row[1] for row in rows}
+    if "metadata" in columns:
+        return "metadata"
+    if "meta" in columns:
+        return "meta"
+    return "metadata"
+
+
 async def insert_fact_record(
     conn: aiosqlite.Connection,
     tenant_id: str,
@@ -102,11 +115,19 @@ async def insert_fact_record(
         meta["signer_pubkey"] = pub_b64
 
     encrypted_meta = enc.encrypt_json(meta, tenant_id=tenant_id)
-
-    cursor = await conn.execute(
+    meta_column = await _facts_meta_column(conn)
+    insert_sql = (
         "INSERT INTO facts (tenant_id, project, content, fact_type, tags, metadata, "
         "hash, created_at, updated_at, valid_from, confidence, source) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        if meta_column == "metadata"
+        else "INSERT INTO facts (tenant_id, project, content, fact_type, tags, meta, "
+        "hash, created_at, updated_at, valid_from, confidence, source) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+    )
+
+    cursor = await conn.execute(
+        insert_sql,
         (
             tenant_id,
             project,

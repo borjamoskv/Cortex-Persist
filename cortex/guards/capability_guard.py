@@ -1,6 +1,7 @@
 import logging
+from typing import Optional
 
-from cortex.guards.capabilities import AgentCredentials, RiskTier
+from cortex.guards.capabilities import AgentCredentials, Capability, RiskTier
 
 logger = logging.getLogger("cortex.guards.capability_guard")
 
@@ -12,8 +13,24 @@ class CapabilityGuard:
     from executing un-granted operations.
     """
 
-    def __init__(self, credentials: AgentCredentials):
-        """Builds a deterministic guard bound to an agent's operational profile."""
+    def __init__(
+        self,
+        credentials: Optional[AgentCredentials] = None,
+        allowed_capabilities: Optional[set[Capability]] = None,
+    ):
+        """Build a deterministic guard bound to an agent profile or legacy capability set."""
+        self._legacy_allowed_capabilities_mode = credentials is None
+        if credentials is None:
+            caps = allowed_capabilities or set()
+            credentials = AgentCredentials(
+                agent_id="legacy-capability-guard",
+                capabilities=set(caps),
+                max_tier=max(
+                    (cap.tier for cap in caps),
+                    default=RiskTier.TIER_0_ANALYTICAL,
+                ),
+            )
+
         self.credentials = credentials
         # A mutable set is kept for scoped degradation (revocation)
         self.active_capabilities = set(credentials.capabilities)
@@ -25,6 +42,10 @@ class CapabilityGuard:
         highest_active = max(
             (cap.tier for cap in self.active_capabilities), default=RiskTier.TIER_0_ANALYTICAL
         )
+        if self._legacy_allowed_capabilities_mode:
+            self.max_allowed_tier = highest_active
+            return
+
         self.max_allowed_tier = min(highest_active, self.credentials.max_tier)
 
     def validate_action(self, required_capability_name: str, requested_tier: RiskTier) -> None:
@@ -63,6 +84,11 @@ class CapabilityGuard:
         self.active_capabilities = {
             cap for cap in self.active_capabilities if cap.name != capability_name
         }
+        self._recalculate_effective_tier()
+
+    def add_capability(self, capability: Capability) -> None:
+        """Grant a capability dynamically, preserving backward-compatible guard behavior."""
+        self.active_capabilities.add(capability)
         self._recalculate_effective_tier()
 
     def __repr__(self) -> str:

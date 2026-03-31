@@ -141,12 +141,28 @@ class CompoundYieldTracker:
         self.db_path = db_path
         self.reuse_rate = reuse_rate
 
+    @staticmethod
+    def _facts_meta_column(conn: Any) -> str:
+        """Return the available metadata column for facts."""
+        columns = {row[1] for row in conn.execute("PRAGMA table_info(facts)").fetchall()}
+        if "metadata" in columns:
+            return "metadata"
+        if "meta" in columns:
+            return "meta"
+        return "metadata"
+
     def _get_base_hours(self, conn: Any, fact_id: int) -> float:
         """Extract linear Hours_Saved from a fact's meta, or estimate."""
         import json
 
         # First check meta for explicitly tracked hours
-        cursor = conn.execute("SELECT metadata FROM facts WHERE id = ?", (fact_id,))
+        meta_column = self._facts_meta_column(conn)
+        select_sql = (
+            "SELECT metadata FROM facts WHERE id = ?"
+            if meta_column == "metadata"
+            else "SELECT meta FROM facts WHERE id = ?"
+        )
+        cursor = conn.execute(select_sql, (fact_id,))
         row = cursor.fetchone()
         if not row:
             return 0.0
@@ -269,14 +285,22 @@ class CompoundYieldTracker:
             import json
 
             with db_connect(self.db_path) as conn:
+                meta_column = self._facts_meta_column(conn)
+                insert_sql = (
+                    "INSERT INTO facts (tenant_id, project, content, fact_type, tags, confidence,"
+                    " valid_from, source, metadata, created_at, updated_at)"
+                    " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+                    if meta_column == "metadata"
+                    else "INSERT INTO facts (tenant_id, project, content, fact_type, tags, confidence,"
+                    " valid_from, source, meta, created_at, updated_at)"
+                    " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+                )
                 ts = now_iso()
                 content = report.summary()
                 meta_json = json.dumps(report.to_dict())
 
                 cursor = conn.execute(
-                    "INSERT INTO facts (tenant_id, project, content, fact_type, tags, confidence,"
-                    " valid_from, source, metadata, created_at, updated_at)"
-                    " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    insert_sql,
                     (
                         "default",
                         project,
