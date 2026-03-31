@@ -1,26 +1,54 @@
-"""
-Swarm Protocols — CORTEX Swarm Micro-Kernel Interfaces.
-[Ariadne-Arch-Omega — ADR-035]
-"""
+"""Swarm protocols and JIT communication schemas (Ω₁₄)."""
 
-from typing import Any, Protocol, runtime_checkable
+from __future__ import annotations
+import json
+import logging
+from dataclasses import dataclass, field, asdict
+from datetime import datetime, timezone
+from enum import Enum
+from typing import Any, Optional
 
+logger = logging.getLogger("cortex.swarm.protocols")
 
-@runtime_checkable
-class SwarmExtension(Protocol):
-    """Base protocol for all swarm extension modules."""
+class SwarmIntent(str, Enum):
+    DISCOVERY = "discovery"
+    ROADBLOCK = "roadblock"
+    VERIFICATION = "verification"
+    COMPLETION = "completion"
+    HEALING = "healing"
 
-    def get_status(self) -> dict[str, Any]: ...
+class AgentRole(str, Enum):
+    CAPATAZ = "capataz"
+    WORKER = "worker"
+    ELDER = "elder"
 
-    def evict_stale_data(self) -> int:
-        """Standard method for entropy cleanup (Ciclo 5 compliant)."""
-        ...
+@dataclass
+class SwarmSignalSchema:
+    mission_id: str
+    agent_id: str
+    intent: SwarmIntent
+    payload: dict[str, Any]
+    role: AgentRole = AgentRole.WORKER
+    confidence: float = 1.0
+    exergy_spent: float = 0.0
+    timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
+    def to_json(self) -> str:
+        return json.dumps(asdict(self))
 
-class SwarmModule(Protocol):
-    """Refined protocol for pluggable swarm logic units."""
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> SwarmSignalSchema:
+        if "intent" in data:
+            data["intent"] = SwarmIntent(data["intent"])
+        if "role" in data:
+            data["role"] = AgentRole(data["role"])
+        return cls(**data)
 
-    name: str
-
-    async def initialize(self) -> None: ...
-    async def shutdown(self) -> None: ...
+def validate_swarm_signal(data: dict[str, Any]) -> bool:
+    """Validate that a signal matches the Ω₁₄ schema."""
+    try:
+        SwarmSignalSchema.from_dict(data)
+        return True
+    except (ValueError, KeyError, TypeError) as e:
+        logger.error("Invalid swarm signal schema: %s", e)
+        return False

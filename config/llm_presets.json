@@ -1,7 +1,6 @@
 {
   "qwen": {
     "base_url": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
-<<<<<<< HEAD
     "default_model": "qwen-3.5-397b",
     "env_key": "DASHSCOPE_API_KEY",
     "context_window": 1000000,
@@ -12,23 +11,10 @@
       "code":      "qwen-3.5-397b",
       "reasoning": "qwen-3.5-397b",
       "general":   "qwen-3.5-397b"
-=======
-    "default_model": "qwen-plus",
-    "env_key": "DASHSCOPE_API_KEY",
-    "context_window": 131072,
-    "tier": "high",
-    "cost_class": "low",
-    "specialization": ["code", "general"],
-    "intent_model_map": {
-      "code":      "qwen-plus",
-      "reasoning": "qwen-plus",
-      "general":   "qwen-plus"
->>>>>>> origin/main
     }
   },
   "openai": {
     "base_url": "https://api.openai.com/v1",
-<<<<<<< HEAD
     "default_model": "gpt-5.4",
     "env_key": "OPENAI_API_KEY",
     "context_window": 256000,
@@ -43,22 +29,6 @@
       "general":   "gpt-4o",
       "belief_audit": "gpt-5.4",
       "episodic_processing": "gpt-5.4"
-=======
-    "default_model": "gpt-4o",
-    "env_key": "OPENAI_API_KEY",
-    "context_window": 128000,
-    "tier": "frontier",
-    "cost_class": "high",
-    "specialization": ["reasoning", "code", "creative", "general"],
-    "intent_model_map": {
-      "code":      "gpt-4o",
-      "reasoning": "o3",
-      "creative":  "gpt-4o",
-      "architect": "o3",
-      "general":   "gpt-4o",
-      "belief_audit": "gpt-5.4",
-      "episodic_processing": "gpt-4o"
->>>>>>> origin/main
     }
   },
   "anthropic": {
@@ -132,7 +102,6 @@
   },
   "deepseek": {
     "base_url": "https://api.deepseek.com/v1",
-<<<<<<< HEAD
     "default_model": "deepseek-v4",
     "env_key": "DEEPSEEK_API_KEY",
     "context_window": 1000000,
@@ -144,26 +113,12 @@
       "reasoning": "deepseek-r1-2026",
       "architect": "deepseek-r1-2026",
       "general":   "deepseek-v4"
-=======
-    "default_model": "deepseek-chat",
-    "env_key": "DEEPSEEK_API_KEY",
-    "context_window": 128000,
-    "tier": "frontier",
-    "cost_class": "low",
-    "specialization": ["reasoning", "code"],
-    "intent_model_map": {
-      "code":      "deepseek-chat",
-      "reasoning": "deepseek-reasoner",
-      "architect": "deepseek-reasoner",
-      "general":   "deepseek-chat"
->>>>>>> origin/main
     }
   },
   "xai": {
     "base_url": "https://api.x.ai/v1",
     "default_model": "grok-4.1",
     "env_key": "XAI_API_KEY",
-<<<<<<< HEAD
     "context_window": 256000,
     "models": {
       "grok-4.1": 256000,
@@ -179,25 +134,15 @@
         "cost_class": "low"
       }
     },
-=======
-    "context_window": 131072,
->>>>>>> origin/main
     "tier": "frontier",
     "cost_class": "high",
     "specialization": ["code", "reasoning", "creative", "architect", "general"],
     "intent_model_map": {
       "code":      "grok-4.1-fast",
-<<<<<<< HEAD
       "reasoning": "grok-3",
       "creative":  "grok-3",
       "architect": "grok-4.1-fast",
       "general":   "grok-3-mini"
-=======
-      "reasoning": "grok-4.1",
-      "creative":  "grok-4.1",
-      "architect": "grok-4.1",
-      "general":   "grok-4.1-fast"
->>>>>>> origin/main
     }
   },
   "cohere": {
@@ -236,19 +181,11 @@
     "cost_class": "variable",
     "specialization": ["reasoning", "code", "creative", "architect", "general"],
     "intent_model_map": {
-<<<<<<< HEAD
       "code":      "anthropic/claude-3.5-sonnet",
       "reasoning": "x-ai/grok-2",
       "creative":  "anthropic/claude-3.5-sonnet",
       "architect": "x-ai/grok-2",
       "general":   "google/gemini-2.0-flash-001"
-=======
-      "code":      "anthropic/claude-sonnet-4-20250514",
-      "reasoning": "deepseek/deepseek-r1",
-      "creative":  "anthropic/claude-sonnet-4-20250514",
-      "architect": "anthropic/claude-sonnet-4-20250514",
-      "general":   "google/gemini-2.5-pro"
->>>>>>> origin/main
     }
   },
   "groq": {
@@ -258,20 +195,12 @@
     "context_window": 131072,
     "tier": "high",
     "cost_class": "free",
-<<<<<<< HEAD
     "specialization": ["reasoning", "code", "creative", "architect", "general"],
     "intent_model_map": {
       "code":      "qwen/qwen3-32b",
       "reasoning": "openai/gpt-oss-120b",
       "creative":  "llama-3.3-70b-versatile",
       "architect": "openai/gpt-oss-120b",
-=======
-    "specialization": ["reasoning", "code", "creative", "general"],
-    "intent_model_map": {
-      "code":      "llama-3.3-70b-versatile",
-      "reasoning": "llama-3.3-70b-versatile",
-      "creative":  "llama-3.3-70b-versatile",
->>>>>>> origin/main
       "general":   "llama-3.3-70b-versatile"
     }
   },
@@ -398,11 +327,7 @@
     "intent_model_map": {
       "code":      "qwen2.5-coder:32b",
       "architect": "qwen2.5-coder:32b",
-<<<<<<< HEAD
       "reasoning": "qwen2.5-coder:32b",
-=======
-      "reasoning": "deepseek-r1:32b",
->>>>>>> origin/main
       "creative":  "llama3.3:latest",
       "general":   "qwen2.5-coder:7b"
     }
@@ -470,7 +395,6 @@
     "context_window": 131072,
     "tier": "high",
     "cost_class": "low",
-<<<<<<< HEAD
     "specialization": ["reasoning", "creative", "general"]
   },
   "aimlapi": {
@@ -498,26 +422,6 @@
     "intent_model_map": {
       "code":      "deepseek-ai/DeepSeek-V3",
       "reasoning": "deepseek-ai/DeepSeek-R1"
-=======
-    "specialization": ["reasoning", "creative", "general"],
-    "intent_model_map": {
-      "reasoning": "llama-3.3-70b",
-      "creative":  "llama-3.3-70b",
-      "general":   "llama-3.3-70b"
-    }
-  },
-  "grok": {
-    "base_url": "https://api.x.ai/v1",
-    "default_model": "grok-beta",
-    "models": ["grok-beta", "grok-2", "grok-vision-beta"],
-    "api_key": "YOUR_GROK_API_KEY",
-    "context_window": 131072,
-    "tier": "frontier",
-    "cost_class": "high",
-    "specialization": ["real-time", "general"],
-    "intent_model_map": {
-      "general": "grok-2"
->>>>>>> origin/main
     }
   }
 }
