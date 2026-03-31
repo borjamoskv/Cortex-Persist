@@ -22,6 +22,12 @@ from collections.abc import Callable, Coroutine
 from pathlib import Path
 from typing import Any
 
+# ── SOVEREIGN PATH ANCHOR ──
+# Force local workspace to the front of sys.path to bypass shadow injections
+ROOT_DIR = Path(__file__).resolve().parents[2]
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
 from cortex.guards._seal_printer import SealPrinter
 from cortex.guards.sovereign_seals import (
     check_gate_21_preservation,
@@ -30,7 +36,6 @@ from cortex.guards.sovereign_seals import (
 )
 
 printer = SealPrinter()
-ROOT_DIR = Path(__file__).resolve().parents[2]
 
 _VENV_BIN = ROOT_DIR / ".venv" / "bin"
 
