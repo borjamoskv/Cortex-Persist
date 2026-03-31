@@ -358,7 +358,7 @@ Without topology, intelligence is plausible output.
 With topology, intelligence can crystallize into system.
 
 > *Not just better prompting. Topology.*
-> — AX-033
+> — AX-II
 
 ---
 

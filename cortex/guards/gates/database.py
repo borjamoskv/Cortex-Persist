@@ -5,7 +5,7 @@ from .common import GateResult, arun_cmd, printer
 
 
 async def check_gate_5_ledger() -> GateResult:
-    """Seal 5: Ledger Initialization (AX-017 Ledger Integrity)."""
+    """Seal 5: Ledger Initialization (AX-II Ledger Integrity)."""
     printer.seal(5, "Ledger Integrity", "Schema Initialization check")
     # Tries to initialize the ledger DB — if fails, the engine is dead
     code, out = await arun_cmd(["python", "cortex/database/core.py", "--init"])
@@ -18,7 +18,7 @@ async def check_gate_5_ledger() -> GateResult:
 
 
 async def check_gate_6_connection() -> GateResult:
-    """Seal 6: Connection Guard (AX-017 Ledger Integrity)."""
+    """Seal 6: Connection Guard (AX-II Ledger Integrity)."""
     printer.seal(6, "Ledger Integrity", "Connection Guard")
     # Scan for raw sqlite3.connect() calls outside whitelisted files
     code, out = await arun_cmd(

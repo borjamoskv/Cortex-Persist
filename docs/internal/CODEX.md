@@ -16,7 +16,7 @@ This Codex defines the **Ontology**, **Taxonomy**, and **Prime Directives** of t
 > **⚠️ Canonical Source:** The unified Axiom Registry is now at:
 > - **Code:** [`cortex/extensions/axioms/registry.py`](../../cortex/extensions/axioms/registry.py) — 22 canonical axioms with `AX-NNN` IDs
 > - **Docs:** [`docs/axiom-registry.md`](../axiom-registry.md) — auto-generated from code
-> - **Taxonomy:** 3 Constitutional (AX-001–003) + 10 Operational (AX-010–019) + 9 Aspirational (AX-020–028)
+> - **Taxonomy:** 3 Constitutional (AX-I–003) + 10 Operational (AX-VII–019) + 9 Aspirational (AX-V–028)
 > - **TTL Policy:** [`cortex/extensions/axioms/ttl.py`](../../cortex/extensions/axioms/ttl.py) — fact decay (ghosts 30d, knowledge 180d, axioms ∞)
 >
 > The table below is **legacy narrative context**. For canonical numbering, enforcement status, and CI gates, use the Registry.

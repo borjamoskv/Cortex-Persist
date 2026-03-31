@@ -110,6 +110,11 @@ class EmbeddingPrunerMixin:
                 "DELETE FROM fact_embeddings WHERE fact_id = ?",
                 (fact_id,),
             )
+            # Support for secondary vector indices (Axiom Ω₄: Topological Refinement)
+            await conn.execute(
+                "DELETE FROM specular_embeddings WHERE fact_id = ?",
+                (fact_id,),
+            )
             stats["pruned_count"] += 1
         except (sqlite3.Error, OSError) as e:
             logger.error("Failed to prune fact_id=%d: %s", fact_id, e)

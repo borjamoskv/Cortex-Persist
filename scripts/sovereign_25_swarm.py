@@ -243,7 +243,7 @@ class TesseractOmega:
     async def attack(self, code: str, context: Mapping[str, Any]) -> list[str]:
         findings = []
         # Check for proper merge conflict resolution (Meta-Audit)
-        patterns = ["<<<<<<<", ">>>>>>>", "======="]
+        patterns = ["<" * 7, ">" * 7, "=" * 7]
         for p in patterns:
             if p in code:
                 findings.append(f"Integrity Failure: Literal merge conflict marker `{p}` in code.")

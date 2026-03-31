@@ -4,7 +4,7 @@
 Principle: Persist aggressively. Decay intelligently.
 Axioms never expire. Ghosts do.
 
-Referenced by: AX-019 (Persist With Decay)
+Referenced by: TTL Policy (Persist With Decay)
 """
 
 from __future__ import annotations

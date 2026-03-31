@@ -1,4 +1,4 @@
-"""Default Guard/Hook Adapters — Wraps existing AX-033 implementations behind Protocols.
+"""Default Guard/Hook Adapters — Wraps existing AX-II implementations behind Protocols.
 
 Each adapter wraps a concrete module (HealthGuard, ContradictionGuard, etc.)
 behind the StoreGuard / PostStoreHook protocol so they can be registered in
@@ -29,7 +29,7 @@ logger = logging.getLogger("cortex.engine")
 
 
 class HealthGuardAdapter:
-    """AX-033 Hook 1 → StoreGuard protocol."""
+    """AX-II Hook 1 → StoreGuard protocol."""
 
     def __init__(self, db_path: str) -> None:
         self._db_path = db_path
@@ -51,7 +51,7 @@ class HealthGuardAdapter:
 
 
 class ContradictionGuardAdapter:
-    """AX-033 Hook 2 → StoreGuard protocol (decision/rule/error types only)."""
+    """AX-II Hook 2 → StoreGuard protocol (decision/rule/error types only)."""
 
     def __init__(self, db_path: str) -> None:
         self._db_path = db_path
@@ -75,14 +75,14 @@ class ContradictionGuardAdapter:
         )
         if report.has_conflicts and report.severity == "high":
             logger.warning(
-                "[AX-033] Contradiction detected (severity=%s):\n%s",
+                "[AX-II] Contradiction detected (severity=%s):\n%s",
                 report.severity,
                 report.format(),
             )
 
 
 class VerifierGuardAdapter:
-    """AX-033 Hook 3 → StoreGuard protocol (code-type formal verification)."""
+    """AX-II Hook 3 → StoreGuard protocol (code-type formal verification)."""
 
     async def check(
         self,
@@ -102,13 +102,13 @@ class VerifierGuardAdapter:
         if not result.is_valid:
             violation_names = [v.get("name", "unknown") for v in result.violations]
             raise ValueError(
-                f"[AX-033] Formal verification failed: {violation_names}. "
+                f"[AX-II] Formal verification failed: {violation_names}. "
                 f"Counterexample: {result.counterexample}"
             )
 
 
 class ExergyGuardAdapter:
-    """AX-033 Hook -> StoreGuard protocol (thermodynamic filter)."""
+    """AX-II Hook -> StoreGuard protocol (thermodynamic filter)."""
 
     async def check(
         self,
@@ -130,7 +130,7 @@ class ExergyGuardAdapter:
 
 
 class LedgerCheckpointHook:
-    """AX-033 Hook 4 → PostStoreHook protocol."""
+    """AX-II Hook 4 → PostStoreHook protocol."""
 
     def __init__(self, engine: Any) -> None:
         self._engine = engine

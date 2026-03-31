@@ -97,9 +97,13 @@ class CortexLLMRouter:
             effective_intent = prompt.intent
             reasoning_mode = prompt.reasoning_mode
 
-        # Axiom Ω₁₆: If reasoning mode is DEEP_THINK or ULTRA_THINK,
+        # Axiom Ω₁₆: If reasoning mode is DEEP_THINK, ULTRA_THINK, or DEEP_RESEARCH,
         # coerce the fallback intent to REASONING to select the right model map.
-        if reasoning_mode in (ReasoningMode.DEEP_THINK, ReasoningMode.ULTRA_THINK):
+        if reasoning_mode in (
+            ReasoningMode.DEEP_THINK,
+            ReasoningMode.ULTRA_THINK,
+            ReasoningMode.DEEP_RESEARCH,
+        ):
             effective_intent = IntentProfile.REASONING
 
         typed_matches: list[BaseProvider] = []
@@ -301,8 +305,18 @@ class CortexLLMRouter:
 
     async def execute_swarm(self, prompt: CortexPrompt) -> Result[str, str] | None:
         """Ω₂₁: Parallel Swarm Racing."""
+        from cortex.extensions.llm._models import ReasoningMode
+
         fallbacks = self._ordered_fallbacks(prompt)
-        swarm_peers = [self._primary] + fallbacks[:2]
+        swarm_peers = []
+        
+        reasoning_mode = getattr(prompt, "reasoning_mode", None)
+        if reasoning_mode == ReasoningMode.ULTRA_THINK and getattr(self._primary, "tier", None) != "frontier":
+            pass  # Skip primary for ULTRA_THINK if not frontier
+        else:
+            swarm_peers.append(self._primary)
+            
+        swarm_peers.extend(fallbacks[:2])
 
         active_peers = [
             p for p in swarm_peers if not self._cascade.is_nxdomain_cached(p.provider_name)
@@ -335,6 +349,8 @@ class CortexLLMRouter:
 
     async def _execute_resilient_impl(self, prompt: CortexPrompt) -> Result[str, str]:
         """Core cascade logic."""
+        from cortex.extensions.llm._models import ReasoningMode
+
         # Phase 0.1: Parallel Swarm Racing (Ω₂₁)
         if prompt.swarm_mode:
             swarm_res = await self.execute_swarm(prompt)
@@ -348,25 +364,42 @@ class CortexLLMRouter:
 
         # Phase 1: Primary sequential attempt
         start = time.time()
-        res_primary = await self._try_provider(self._primary, prompt)
-        latency = (time.time() - start) * 1000
 
-        if res_primary.is_ok():
-            self._telemetry.emit(
-                CascadeEvent(
-                    intent=prompt.intent,
-                    resolved_by=self._primary.provider_name,
-                    project=prompt.project,
-                    tier=CascadeTier.PRIMARY,
-                    depth=1,
-                    latency_ms=latency,
+        # Verify if primary provider is suitable for ULTRA_THINK
+        reasoning_mode = getattr(prompt, "reasoning_mode", None)
+        primary_valid = True
+
+        # Axiom Ω₁₆: ULTRA_THINK strictly requires frontier models.
+        if reasoning_mode == ReasoningMode.ULTRA_THINK:
+            if getattr(self._primary, "tier", None) != "frontier":
+                primary_valid = False
+
+        errors = []
+        if primary_valid:
+            res_primary = await self._try_provider(self._primary, prompt)
+            latency = (time.time() - start) * 1000
+
+            if res_primary.is_ok():
+                self._telemetry.emit(
+                    CascadeEvent(
+                        intent=prompt.intent,
+                        resolved_by=self._primary.provider_name,
+                        project=prompt.project,
+                        tier=CascadeTier.PRIMARY,
+                        depth=1,
+                        latency_ms=latency,
+                    )
                 )
+                return res_primary
+            errors.append(f"Primary ({self._primary.provider_name}): {res_primary.error}")  # type: ignore[reportAttributeAccessIssue]
+        else:
+            errors.append(
+                f"Primary ({self._primary.provider_name}): "
+                "Skipped (ULTRA_THINK requires frontier tier)"
             )
-            return res_primary
 
         # Phase 2: Fallback cascade
         fallbacks = self._ordered_fallbacks(prompt)
-        errors = [f"Primary ({self._primary.provider_name}): {res_primary.error}"]  # pyright: ignore
 
         for i, provider in enumerate(fallbacks, start=2):
             if self._cascade.is_nxdomain_cached(provider.provider_name):

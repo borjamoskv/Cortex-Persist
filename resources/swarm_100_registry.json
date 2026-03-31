@@ -1,0 +1,114 @@
+{
+  "swarm_version": "v1.1.0-Legion20x5",
+  "total_agents": 20,
+  "total_specialists": 100,
+  "phalanxes": {
+    "SILVER": {"agents": ["AG-S1", "AG-S2", "AG-S3", "AG-S4"], "domain": "Audit & Security"},
+    "GOLD": {"agents": ["AG-G1", "AG-G2", "AG-G3", "AG-G4"], "domain": "Wealth & Revenue"},
+    "LEAD": {"agents": ["AG-L1", "AG-L2", "AG-L3", "AG-L4"], "domain": "Knowledge & Lore"},
+    "VOID": {"agents": ["AG-V1", "AG-V2", "AG-V3", "AG-V4"], "domain": "Defense & Entropy"},
+    "SOVEREIGN": {"agents": ["AG-A1", "AG-A2", "AG-A3", "AG-A4"], "domain": "Apex Governance"}
+  },
+  "agents": [
+    {
+      "id": "AG-S1",
+      "phalanx": "SILVER",
+      "specialists": ["ArchitectPrime", "CodeNinja", "TypeTemplar", "DocDoctor", "LogicLoom", "Nobel-Ω", "Tesseract-Ω", "Audit-Ω"]
+    },
+    {
+      "id": "AG-S2",
+      "phalanx": "SILVER",
+      "specialists": ["SecurityWarden", "Intruder", "VaultCracker", "LedgerPoisoner", "OwaspOracle", "ContractCracker", "SeedSower"]
+    },
+    {
+      "id": "AG-S3",
+      "phalanx": "SILVER",
+      "specialists": ["PerformanceGhost", "DeadlockDemon", "DiskDriller", "ShadowHunter", "LeakLord", "OOMKiller", "ChronosSniper"]
+    },
+    {
+      "id": "AG-S4",
+      "phalanx": "SILVER",
+      "specialists": ["EpistemicJustice", "StarvationSniper", "VecVulture", "MetaMaster", "NoirKnight", "TokenTailor", "Grammy-Ω", "IntegrityAgent"]
+    },
+    {
+      "id": "AG-G1",
+      "phalanx": "GOLD",
+      "specialists": ["BountyHunter", "GrantSower", "ArbitrageBot", "SaaSSteward", "InvoiceWraith"]
+    },
+    {
+      "id": "AG-G2",
+      "phalanx": "GOLD",
+      "specialists": ["MarketScanner", "YieldFarmer", "TaxOracle", "Arbitrator-G", "MerchantGhost"]
+    },
+    {
+      "id": "AG-G3",
+      "phalanx": "GOLD",
+      "specialists": ["VentureVulture", "AssetAudit", "SponsorSearch", "RevenueRanger", "ChurnChaser"]
+    },
+    {
+      "id": "AG-G4",
+      "phalanx": "GOLD",
+      "specialists": ["PricingPilot", "AffiliateAlchemist", "VoucherVault", "EscrowEnforcer", "Capital-Ω"]
+    },
+    {
+      "id": "AG-L1",
+      "phalanx": "LEAD",
+      "specialists": ["SemanticWeaver", "ContextCompressor", "ProofValidator", "ArchiveGhost", "LoreKeeper"]
+    },
+    {
+      "id": "AG-L2",
+      "phalanx": "LEAD",
+      "specialists": ["HistoryDoctor", "EpisodicEcho", "GraphGarderner", "CitationCatcher", "SynthesisSynth"]
+    },
+    {
+      "id": "AG-L3",
+      "phalanx": "LEAD",
+      "specialists": ["AestheticShiva", "SonicSmith", "NarrativeNash", "IdentityProxy", "StyleSentry"]
+    },
+    {
+      "id": "AG-L4",
+      "phalanx": "LEAD",
+      "specialists": ["MicaMirror", "Persona-Ω", "WalkthroughWraith", "ArtifactAuditor", "GlossaryGhost"]
+    },
+    {
+      "id": "AG-V1",
+      "phalanx": "VOID",
+      "specialists": ["Annihilator", "EntropyDemon", "ChaosMonkey", "ResetPoint", "GhostMarker"]
+    },
+    {
+      "id": "AG-V2",
+      "phalanx": "VOID",
+      "specialists": ["Decoy-Ω", "SignalPurifier", "VoidWalker", "Entropy-Ω", "ShutdownShadow"]
+    },
+    {
+      "id": "AG-V3",
+      "phalanx": "VOID",
+      "specialists": ["DataDud", "StaleScanner", "RedshiftHunter", "BleedBlocker", "ParanoiaProxy"]
+    },
+    {
+      "id": "AG-V4",
+      "phalanx": "VOID",
+      "specialists": ["Nightfall", "ZeroDayGhost", "FrictionForge", "GlitchGuard", "Vacuum-Ω"]
+    },
+    {
+      "id": "AG-A1",
+      "phalanx": "SOVEREIGN",
+      "specialists": ["AxiomBender", "LawMaker", "MoralProxy"]
+    },
+    {
+      "id": "AG-A2",
+      "phalanx": "SOVEREIGN",
+      "specialists": ["Consensus-Ω", "ReputationWraith", "TrustTracker"]
+    },
+    {
+      "id": "AG-A3",
+      "phalanx": "SOVEREIGN",
+      "specialists": ["Sovereign-Ω", "ManifestoGuard"]
+    },
+    {
+      "id": "AG-A4",
+      "phalanx": "SOVEREIGN",
+      "specialists": ["Governor-Ω", "Cognito-Ω"]
+    }
+  ]
+}

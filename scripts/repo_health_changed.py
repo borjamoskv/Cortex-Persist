@@ -20,8 +20,8 @@ import subprocess
 import sys
 from pathlib import Path
 
-CONFLICT_MARKERS = ("<<<<<<< ", ">>>>>>> ")
-CONFLICT_SEPARATOR = "======="
+CONFLICT_MARKERS = ("<" * 7 + " ", ">" * 7 + " ")
+CONFLICT_SEPARATOR = "=" * 7
 
 
 def _run_git(args: list[str]) -> str:

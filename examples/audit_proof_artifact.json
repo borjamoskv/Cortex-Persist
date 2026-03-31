@@ -1,0 +1,21 @@
+{
+  "audit_receipt": {
+    "tenant_id": "customer-123",
+    "project": "fin-fraud-bot",
+    "agent_id": "risk-bot",
+    "fact_id": "fact_01JMWP2K9ZXG7VQY8A1S3RT5D",
+    "fact_type": "decision",
+    "content": "Transaction flagged: IP mismatch between physical card and origin request. Blocking operation 7329A.",
+    "timestamp": "2026-03-31T18:42:01.192Z"
+  },
+  "cryptographic_proof": {
+    "ledger_index": 142095,
+    "previous_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "current_hash": "8f4a2b9e61c390508a1569a54130f6198d5462a92deda870043624aa3ea72721",
+    "merkle_root_sealed": true,
+    "proof_of_work_nonce": 98412,
+    "tamper_detected": false,
+    "signature": "sig_0x42f7c0a1b6950e3d... (CORTEX Sovereign Seal v8.0)"
+  },
+  "verification_command": "cortex verify record 8f4a2b9e61c390508a1569a54130f6198d5462a92deda870043624aa3ea72721"
+}

@@ -150,7 +150,7 @@ class HeartbeatDaemon:
             self.queue.mark_failed(task["id"], "No physical command provided")
             return
 
-        # AX-003: Byzantine Auth (Verify, then Trust)
+        # AX-III: Byzantine Auth (Verify, then Trust)
         is_authorized = await ByzantineAuthLayer.acquire_lock(
             intent="OS_COMMAND", payload=payload, zenith_score=float(payload.get("zenith", 0.0))
         )

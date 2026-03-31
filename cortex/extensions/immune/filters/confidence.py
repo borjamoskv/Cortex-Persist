@@ -1,5 +1,5 @@
 """
-F5 — CONFIDENCE THRESHOLD: AX-013: The Calibration Gap (Ω₃).
+F5 — CONFIDENCE THRESHOLD: AX-III: The Calibration Gap (Ω₃).
 """
 
 from __future__ import annotations

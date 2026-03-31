@@ -5,7 +5,7 @@ from .common import GateResult, GlobalSourceCache, printer
 
 
 async def check_gate_12_determinism() -> GateResult:
-    """Seal 12: Determinism (AX-011 Static Temperature)."""
+    """Seal 12: Determinism (AX-IV Static Temperature)."""
     printer.seal(12, "Static Temp", "Global Determinism check")
 
     # Check for non-deterministic global state or random usage
@@ -30,7 +30,7 @@ async def check_gate_12_determinism() -> GateResult:
 
 
 async def check_gate_13_latency() -> GateResult:
-    """Seal 13: Latency (AX-020 Zero Latency)."""
+    """Seal 13: Latency (AX-V Zero Latency)."""
     printer.seal(13, "Zero Latency", "Network-free logic audit")
 
     _EXCLUDE = ["seals.py", "sovereign_seals.py", "reactor.py", "provider.py"]
@@ -43,7 +43,7 @@ async def check_gate_13_latency() -> GateResult:
             violations.append(path.name)
 
     if not violations:
-        printer.success("AX-020: Zero Latency Axiom enforced.")
+        printer.success("AX-V: Zero Latency Axiom enforced.")
         return True, "verified"
 
     printer.fail(

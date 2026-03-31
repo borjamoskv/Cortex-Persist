@@ -22,6 +22,19 @@ The **EU AI Act (Article 12, effective August 2, 2026)** mandates tamper-proof l
 
 CORTEX doesn't replace your memory layer — it **certifies** it.
 
+### Why CORTEX? (Not just another Vector DB or Logger)
+
+Traditional logging and standard vector stores fail the epistemic containment test. If an agent hallucinates, or if a database is mutated passively, you lose structural trust in the machine. CORTEX makes mutation mathematically defensible.
+
+| Feature                    | Standard Logs (Datadog/ELK) | Standard Vector DB (Pinecone/Qdrant) | **CORTEX Persist**                        |
+|:---------------------------|:----------------------------|:-------------------------------------|:------------------------------------------|
+| **Primary Goal**           | Observability & Debugging   | Semantic Search & RAG                | **Tamper-Evident Cognitive Lineage**      |
+| **Write Integrity**        | Overwritable / Editable     | Silent CRUD operations               | **Append-Only + Cryptographic Hash**      |
+| **Fact Mutability**        | Easy (API/Admin access)     | Easy (API/Admin access)              | **Impossible** (Breaks hash chain)        |
+| **Evidence Export**        | Text dumps                  | JSON extracts                        | **Zero-Trust Sealed Audit Packs**         |
+
+> **See a real artifact**: [View Exported Audit Pack](../examples/audit_proof_artifact.json)
+
 ---
 
 ## Core Capabilities
@@ -50,7 +63,7 @@ cortex verify 1
 # → ✅ VERIFIED — Hash chain intact, Merkle sealed
 ```
 
-[Get started →](quickstart.md){ .md-button .md-button--primary }
+[View Audit Evidence →](../examples/audit_proof_artifact.json){ .md-button .md-button--primary }
 [Architecture →](architecture.md){ .md-button }
 [View on GitHub →](https://github.com/borjamoskv/Cortex-Persist){ .md-button }
 

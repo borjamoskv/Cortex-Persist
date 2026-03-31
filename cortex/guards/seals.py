@@ -4,12 +4,14 @@
 
 Consolidated from 21 Seals → 10 orthogonal verification axes.
 Eliminated 4 stubs (16, 18, 19, 20) and merged related checks.
-Zero latency axiom enforcement (AX-020).
+Zero latency axiom enforcement (AX-V).
 
 Usage:
     python -m cortex.guards.seals
     FAIL_FAST=1 python -m cortex.guards.seals
     SKIP_GATES=3,6 python -m cortex.guards.seals
+    ONLY_GATES=1,2 python -m cortex.guards.seals
+    FORCE_GATES=4 python -m cortex.guards.seals
 """
 
 from __future__ import annotations
@@ -48,7 +50,7 @@ def _resolve_cmd(tool: str) -> str:
     return tool
 
 
-async def arun_cmd(cmd: list[str]) -> tuple[int, str]:
+async def arun_cmd(cmd: list[str], timeout: float = 60.0) -> tuple[int, str]:
     """Execute a command asynchronously and return (code, output).
     Injects PYTHONPATH=. to ensure local package resolution.
     """
@@ -63,15 +65,15 @@ async def arun_cmd(cmd: list[str]) -> tuple[int, str]:
             env=env,
         )
         try:
-            stdout, _ = await asyncio.wait_for(proc.communicate(), timeout=60.0)
+            stdout, _ = await asyncio.wait_for(proc.communicate(), timeout=timeout)
             return proc.returncode or 0, stdout.decode(errors="replace")
         except asyncio.TimeoutError:
             try:
-                proc.terminate()
-                await proc.wait()
-            except ProcessLookupError:
+                proc.kill()
+                await asyncio.wait_for(proc.wait(), timeout=5.0)
+            except (ProcessLookupError, asyncio.TimeoutError):
                 pass
-            return 124, f"Command timed out after 60s: {' '.join(cmd)}"
+            return 124, f"Command timed out after {timeout}s: {' '.join(cmd)}"
     except FileNotFoundError:
         return 127, f"Command not found: {resolved[0]}"
 
@@ -127,7 +129,7 @@ GateResult = tuple[bool, str]
 # Fuses: old Seal 1 (Lint) + old Seal 8 (LOC Guard)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async def check_seal_1_code_quality() -> GateResult:
-    printer.seal(1, "AX-011 Entropy Death", "Code Quality (Ruff + LOC ≤700)")
+    printer.seal(1, "AX-IV Cognición Termodinámica", "Code Quality (Ruff + LOC ≤700)")
     passed = True
 
     # ── Ruff Lint ──
@@ -165,14 +167,14 @@ async def check_seal_1_code_quality() -> GateResult:
 # Unchanged — orthogonal axis.
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async def check_seal_2_type_safety() -> GateResult:
-    printer.seal(2, "AX-012 Type Safety", "Type Check (Pyright)")
+    printer.seal(2, "AX-I Determinismo Estocástico", "Type Check (Pyright)")
     code, out = await arun_cmd(["pyright", "cortex/", "--outputjson"])
     if code == 127:
         printer.warn("No type checker found (pyright/mypy) — skipping")
         return True, "verified"
 
     # ── Pyright ──
-    # Allowing a baseline of 85 stabilized warnings (AX-012 Shannon Entropy)
+    # Allowing a baseline of 85 stabilized warnings (AX-I Shannon Entropy)
     # The current Architecture uses dynamic skills and PEP 562 lazy-loading.
     if code != 0:
         import json
@@ -207,7 +209,7 @@ async def check_seal_2_type_safety() -> GateResult:
 # Fuses: old Seal 3 (Bandit) + old Seal 11 (Cobbler's Compliance)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async def check_seal_3_security() -> GateResult:
-    printer.seal(3, "AX-010 Zero Trust", "Security (Bandit + Self-Audit)")
+    printer.seal(3, "AX-VII Inmunología Computacional", "Security (Bandit + Self-Audit)")
     passed = True
 
     # ── Bandit Scan ──
@@ -283,11 +285,11 @@ async def check_seal_3_security() -> GateResult:
 # Unchanged — orthogonal axis.
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async def check_seal_4_tests() -> GateResult:
-    printer.seal(4, "AX-017 Ledger Integrity", "Tests & Coverage")
+    printer.seal(4, "AX-II Paradoja Epistémica", "Tests & Coverage")
     python_cmd = sys.executable
     cmd = [str(python_cmd), "-m", "pytest", "tests/", "-x", "-q", "--tb=short"]
     try:
-        code, out = await asyncio.wait_for(arun_cmd(cmd), timeout=600.0)
+        code, out = await asyncio.wait_for(arun_cmd(cmd, timeout=600.0), timeout=605.0)
     except asyncio.TimeoutError:
         printer.fail("Tests timed out after 600 seconds (Singularity Prevention).")
         return False, "verified"
@@ -306,7 +308,7 @@ async def check_seal_4_tests() -> GateResult:
 # Fuses: old Seal 5 (Schema) + old Seal 6 (Connection Guard)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async def check_seal_5_ledger() -> GateResult:
-    printer.seal(5, "AX-017 Ledger Integrity", "Schema Init + Connection Guard")
+    printer.seal(5, "AX-II Paradoja Epistémica", "Schema Init + Connection Guard")
     passed = True
 
     # ── Schema Init ──
@@ -341,7 +343,7 @@ async def check_seal_5_ledger() -> GateResult:
 # Fuses: old Seal 7 (Async) + old Seal 12 (Determinism) + old Seal 13 (Latency)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async def check_seal_6_async_perf() -> GateResult:
-    printer.seal(6, "AX-013 Async Native", "Async & Performance")
+    printer.seal(6, "AX-III Colapso Entrópico", "Async & Performance")
     passed = True
 
     # ── Async Guard (No time.sleep) ──
@@ -369,9 +371,18 @@ async def check_seal_6_async_perf() -> GateResult:
     for py_file, content in GlobalSourceCache.files.items():
         if py_file.name in _ASYNC_EXCLUDE_FILES:
             continue
-        for i, line in enumerate(content.splitlines(), 1):
-            if "time.sleep" in line and not line.strip().startswith("#"):
-                sleep_violations.append(f"{py_file.name}:{i}")
+        import ast
+        try:
+            tree = ast.parse(content, filename=str(py_file))
+            for node in ast.walk(tree):
+                if isinstance(node, ast.Call):
+                    if isinstance(node.func, ast.Attribute) and node.func.attr == "sleep":
+                        if isinstance(node.func.value, ast.Name) and node.func.value.id == "time":
+                            sleep_violations.append(f"{py_file.name}:{node.lineno}")
+                    elif isinstance(node.func, ast.Name) and node.func.id == "sleep":
+                        sleep_violations.append(f"{py_file.name}:{node.lineno}")
+        except SyntaxError:
+            pass
 
     if sleep_violations:
         printer.fail(f"Blocking time.sleep(): {sleep_violations}")
@@ -386,6 +397,7 @@ async def check_seal_6_async_perf() -> GateResult:
         ROOT_DIR / "cortex/guards/seals.py",
     ]
     temp_violations = []
+    import ast
     for path in critical_files:
         if path in GlobalSourceCache.files:
             content = GlobalSourceCache.files[path]
@@ -393,14 +405,27 @@ async def check_seal_6_async_perf() -> GateResult:
             content = await asyncio.to_thread(path.read_text, encoding="utf-8")
         else:
             continue
-        if (
-            "temperature" in content
-            and "temperature=0" not in content
-            and "temperature=0.0" not in content
-        ):
-            has_explicit_zero = 'temperature": 0' in content or 'temperature": 0.0' in content
-            if not has_explicit_zero:
+            
+        try:
+            tree = ast.parse(content, filename=str(path))
+            has_temp = False
+            has_zero = False
+            zero_values = (0, 0.0)
+            for node in ast.walk(tree):
+                if isinstance(node, ast.keyword) and node.arg == "temperature":
+                    has_temp = True
+                    if isinstance(node.value, ast.Constant) and node.value.value in zero_values:
+                        has_zero = True
+                elif isinstance(node, ast.Dict):
+                    for k, v in zip(node.keys, node.values, strict=False):
+                        if isinstance(k, ast.Constant) and k.value == "temperature":
+                            has_temp = True
+                            if isinstance(v, ast.Constant) and v.value in zero_values:
+                                has_zero = True
+            if has_temp and not has_zero:
                 temp_violations.append(path.name)
+        except SyntaxError:
+            pass
 
     if temp_violations:
         printer.fail(f"Temperature drift in {temp_violations}")
@@ -439,21 +464,17 @@ async def check_seal_7_axiom_registry() -> GateResult:
 
     # ── Registry Sync ──
     try:
-        from cortex.extensions.axioms import AXIOM_REGISTRY, AxiomCategory
-        from cortex.extensions.axioms.registry import by_category, enforced
+        from cortex.extensions.axioms import AXIOM_REGISTRY
+        from cortex.extensions.axioms.registry import enforced
 
         total = len(AXIOM_REGISTRY)
-        const = len(by_category(AxiomCategory.CONSTITUTIONAL))
         enf = len(enforced())
 
-        if total < 20:
-            printer.fail(f"Registry degraded: only {total} axioms (min 20)")
-            passed = False
-        elif const < 3:
-            printer.fail(f"Constitutional layer degraded: {const} items")
+        if total != 7:
+            printer.fail(f"Registry degraded: exactly 7 axioms required, found {total}")
             passed = False
         else:
-            printer.success(f"Registry: {total} axioms, {enf} CI-enforced.")
+            printer.success(f"Registry: {total} Sovereign Axioms, {enf} CI-enforced.")
     except ImportError:
         printer.warn("Axioms extension not found. Skipping registry check.")
     except Exception as e:  # noqa: BLE001 — registry loading boundary
@@ -514,14 +535,25 @@ async def main() -> int:
     # Pre-cache all Python files into memory concurrently.
     await GlobalSourceCache.load()
 
-    # ── Bifurcated Quality Gate (Axiom Ω₂) ──
-    # SKIP_GATES: comma-separated gate numbers to skip
+    # ── Advanced Gate Filtering (Axiom Ω₂) ──
     _skip = {
         int(g.strip()) for g in os.environ.get("SKIP_GATES", "").split(",") if g.strip().isdigit()
     }
+    _only = {
+        int(g.strip()) for g in os.environ.get("ONLY_GATES", "").split(",") if g.strip().isdigit()
+    }
+    _force = {
+        int(g.strip()) for g in os.environ.get("FORCE_GATES", "").split(",") if g.strip().isdigit()
+    }
+
+    # If ONLY_GATES is set, it defines the entire set to run.
+    if _only:
+        # Override skip to include anything not in 'only'
+        _skip = {gn for gn in _GATE_ORDER if gn not in _only}
 
     is_ci = os.environ.get("CI") == "1" or os.environ.get("CORTEX_FULL_SEALS") == "1"
-    if not is_ci:
+    # Auto-skip Gate 4 locally unless explicitly forced or requested via ONLY_GATES
+    if not is_ci and 4 not in _force and 4 not in _only:
         if 4 not in _skip:
             printer.warn("Ω₂ EXERGY PRESERVATION: Running in FAST MODE.")
             printer.warn("Heavy integration tests (Gate 4) are SKIPPED. Delegated to remote CI.")
@@ -548,9 +580,10 @@ async def main() -> int:
     ) -> GateResult:
         """Execute a gate with SKIP_GATES check and timing."""
         if gate_num in _skip:
-            printer.seal(gate_num, "SKIPPED", f"Seal {gate_num} — skipped via SKIP_GATES")
-            printer.warn(f"Seal {gate_num} skipped (SKIP_GATES env). Enforced in CI.")
+            printer.seal(gate_num, "SKIPPED", f"Seal {gate_num} — skipped via Filtering")
             return True, "skipped"
+        if gate_num in _force:
+            printer.warn(f"Seal {gate_num} — FORCE VALIDATION (Bypassing auto-skip)")
         start = time.perf_counter()
         result = await fn()
         elapsed = (time.perf_counter() - start) * 1000

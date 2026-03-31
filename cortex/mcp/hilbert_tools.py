@@ -72,8 +72,8 @@ def register_hilbert_tools(mcp, ctx) -> None:  # type: ignore
                 return "\n".join(lines)
 
             elif attack == "millennium":
-                from millennium_assault import (
-                    MillenniumAssaultEngine,  # type: ignore[reportMissingImports]
+                from millennium_assault import (  # type: ignore[import-not-found, reportMissingImports]
+                    MillenniumAssaultEngine,
                 )
 
                 eng = MillenniumAssaultEngine()

@@ -160,16 +160,16 @@ CORTEX makes that liability disappear with one pip install.
 Rebuttal: "X is a memory store. CORTEX is trust infrastructure. Different category entirely."
 
 ## 10 OPERATING AXIOMS (AX-NNN · violation = regression · see cortex/axioms/registry.py)
-AX-010. ZERO TRUST — classify_content() BEFORE every INSERT. No exceptions to this rule.
-AX-011. ENTROPY = DEATH — Dead code, broad catches, boilerplate → eradicate immediately.
-AX-012. TYPE SAFETY — `from __future__ import annotations`. StrEnum. Zero `Any` types.
-AX-013. ASYNC-NATIVE — `asyncio.to_thread()` for blocking I/O. Never block the event loop.
-AX-014. CAUSAL > CORRELATION — 5 Whys to root cause. Patching symptoms creates ghosts.
-AX-015. CONTEXTUAL SOVEREIGNTY — Memory boot protocol. No amnesiac execution.
-AX-016. ALGORITHMIC IMMUNITY — nemesis.md rejects mediocrity before planning begins.
-AX-017. LEDGER INTEGRITY — SHA-256 chain + Merkle + WBFT consensus.
-AX-018. SYNTHETIC HERITAGE — bloodline.json. Born expert, never blank.
-AX-019. PERSIST WITH DECAY — Store if >5min to rebuild. TTL: ghosts 30d, knowledge 180d, axioms ∞.
+AX-VII. ZERO TRUST — classify_content() BEFORE every INSERT. No exceptions to this rule.
+AX-IV. ENTROPY = DEATH — Dead code, broad catches, boilerplate → eradicate immediately.
+AX-I. TYPE SAFETY — `from __future__ import annotations`. StrEnum. Zero `Any` types.
+AX-III. ASYNC-NATIVE — `asyncio.to_thread()` for blocking I/O. Never block the event loop.
+AX-II. CAUSAL > CORRELATION — 5 Whys to root cause. Patching symptoms creates ghosts.
+AX-IV. CONTEXTUAL SOVEREIGNTY — Memory boot protocol. No amnesiac execution.
+AX-VII. ALGORITHMIC IMMUNITY — nemesis.md rejects mediocrity before planning begins.
+AX-II. LEDGER INTEGRITY — SHA-256 chain + Merkle + WBFT consensus.
+AX-V. SYNTHETIC HERITAGE — bloodline.json. Born expert, never blank.
+TTL Policy. PERSIST WITH DECAY — Store if >5min to rebuild. TTL: ghosts 30d, knowledge 180d, axioms ∞.
 
 
 ## BEHAVIORAL ENFORCEMENT (laws, not guidelines — CI gates reject violations)

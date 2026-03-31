@@ -259,58 +259,70 @@ def swarm_cleanup(path):
 
 
 @swarm.command("strike")
-@click.option("--squad", "-s", type=click.Choice(["P0", "P1", "P2", "ALL", "AUTO"]), default="AUTO")
+@click.option(
+    "--phalanx",
+    "-p",
+    type=click.Choice(["SILVER", "GOLD", "LEAD", "VOID", "SOVEREIGN", "ALL", "AUTO"]),
+    default="AUTO",
+)
 @click.option("--target", "-t", default=".*", help="Target pattern or URL for the swarm")
-def swarm_strike(squad, target):
-    """Deploy CORTEX-SWARM-100 Architecture (100 Agents)"""
+def swarm_strike(phalanx, target):
+    """Deploy CORTEX-SWARM-100 Architecture (20 Sovereign Vessels)"""
     import asyncio
 
     from cortex.engine.squadrons import (
         AutonomousRouter,
-        GhostHuntSquadron,
-        IntegritySquadron,
-        KineticSquadron,
+        GoldPhalanx,
+        LeadPhalanx,
+        SilverPhalanx,
+        SovereignPhalanx,
+        VoidPhalanx,
     )
 
     async def run():
         console.print(
             Panel(
-                f"🚀 [bold red]CORTEX-SWARM-100 STRIKE INITIATED[/]\n"
+                f"🔱 [bold #2B3BE5]LEGION-100: SOVEREIGN STRIKE[/]\n"
                 f"Target: [cyan]{target}[/]\n"
-                f"Squadron: [bold yellow]{squad}[/]\n"
-                f"Concurrency: [dim]Up to 100 Agents (Parallel Racing)[/]",
-                border_style="red",
+                f"Phalanx: [bold white]{phalanx}[/]\n"
+                f"Architecture: [dim]20 Multi-Specialist Vessels (Vessel-Spec v2.0)[/]",
+                border_style="#2B3BE5",
+                padding=(1, 2),
             )
         )
 
         tasks = []
-        if squad == "AUTO":
-            # Zero-Prompting Autonomous Routing based on O(1) heuristics
+        if phalanx == "AUTO":
+            # O(1) Autonomous Routing
             squad_classes = AutonomousRouter.route(target)
             resolved_names = [s.SQUAD_NAME for s in squad_classes]
-            console.print(f"🤖 [bold green]AUTONOMOUS ROUTING[/] engaged: {resolved_names}")
+            console.print(f"🤖 [bold #2B3BE5]AUTONOMOUS ROUTING[/] ⮕ {resolved_names}")
             for sq_class in squad_classes:
                 tasks.append(sq_class().deploy(target))
         else:
-            if squad in ("P0", "ALL"):
-                tasks.append(IntegritySquadron().deploy(target))
-            if squad in ("P1", "ALL"):
-                tasks.append(KineticSquadron().deploy(target))
-            if squad in ("P2", "ALL"):
-                tasks.append(GhostHuntSquadron().deploy(target))
+            mapping = {
+                "SILVER": [SilverPhalanx],
+                "GOLD": [GoldPhalanx],
+                "LEAD": [LeadPhalanx],
+                "VOID": [VoidPhalanx],
+                "SOVEREIGN": [SovereignPhalanx],
+                "ALL": [SilverPhalanx, GoldPhalanx, LeadPhalanx, VoidPhalanx, SovereignPhalanx],
+            }
+            for sq_class in mapping.get(phalanx, []):
+                tasks.append(sq_class().deploy(target))
 
         results = await asyncio.gather(*tasks)
 
-        console.print("\n[bold green]✅ SWARM EXERGY EXTRACTION COMPLETE[/]")
+        console.print("\n[bold #2B3BE5]💎 SWARM CRYSTALLIZATION COMPLETE[/]")
         for r in results:
-            if "error" in r:
+            if not isinstance(r, dict) or "error" in r:
                 continue
-            squad_name = r.get("squadron")
+            name = r.get("squadron")
             succ = r.get("success")
             voids = r.get("voids")
             tot = r.get("total_signals")
             console.print(
-                f"💎 [bold]{squad_name}[/]: {succ} Success / {voids} Voids (Total: {tot})"
+                f"  [bold]{name:<10}[/] ⮕  [green]{succ} Success[/] / [dim]{voids} Voids[/] (Signals: {tot})"
             )
 
     asyncio.run(run())

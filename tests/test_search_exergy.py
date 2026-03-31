@@ -16,7 +16,7 @@ def temp_db_path(tmp_path):
 def mock_encoder():
     encoder = AsyncMock()
     encoder.dimension = 384
-    encoder.encode.return_value = [0.1] * 384
+    encoder.encode.return_value = [1] * 384
     return encoder
 
 
@@ -29,7 +29,7 @@ async def test_exergy_prioritization(temp_db_path, mock_encoder):
     store = SovereignVectorStoreL2(encoder=mock_encoder, db_path=temp_db_path, half_life_days=7)
 
     # Prepare identical embeddings so vector similarity is strictly equal
-    embedding_vec = [0.1] * 384
+    embedding_vec = [1] * 384
 
     # 1. Memorize Low Exergy Fact (lots of stop words and decorative markers)
     # The guards are bypassed here since we directly insert to the store,

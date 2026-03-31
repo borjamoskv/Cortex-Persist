@@ -5,7 +5,7 @@ from .common import GateResult, arun_cmd, printer
 
 
 async def check_gate_1_lint() -> GateResult:
-    """Seal 1: Lint (Ruff) (AX-011 Entropy Death)."""
+    """Seal 1: Lint (Ruff) (AX-IV Entropy Death)."""
     printer.seal(1, "Entropy Death", "Lint (Ruff)")
     code, out = await arun_cmd(["ruff", "check", "cortex/"])
     if code == 0:
@@ -17,7 +17,7 @@ async def check_gate_1_lint() -> GateResult:
 
 
 async def check_gate_2_type() -> GateResult:
-    """Seal 2: Type Check (Pyright) (AX-012 Type Safety)."""
+    """Seal 2: Type Check (Pyright) (AX-I Type Safety)."""
     printer.seal(2, "Type Safety", "Type Check (Pyright)")
     # pyright --level warning is used for local developer flow
     code, out = await arun_cmd(["pyright", "cortex/"])
@@ -30,7 +30,7 @@ async def check_gate_2_type() -> GateResult:
 
 
 async def check_gate_3_security() -> GateResult:
-    """Seal 3: Security Scan (Bandit) (AX-010 Zero Trust)."""
+    """Seal 3: Security Scan (Bandit) (AX-VII Zero Trust)."""
     printer.seal(3, "Zero Trust", "Security Scan (Bandit)")
     # High severity/confidence only
     code, out = await arun_cmd(

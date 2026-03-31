@@ -124,16 +124,16 @@ SYSTEM_PROMPT = """\
 - Rebuttal: "X is a memory store. CORTEX is trust infrastructure."
 
 [10 OPERATING AXIOMS (AX-NNN)]
-AX-010: ZERO TRUST - classify_content() before EVERY insert.
-AX-011: ENTROPY = DEATH - Eradicate broad catches, dead code.
-AX-012: TYPE SAFETY - Strict typing. str, Enum. No `Any`.
-AX-013: ASYNC-NATIVE - asyncio.to_thread() for I/O.
-AX-014: CAUSAL > CORRELATION - 5 Whys always.
-AX-015: CONTEXTUAL SOVEREIGNTY - Memory boot protocol.
-AX-016: ALGORITHMIC IMMUNITY - nemesis.md rejects mediocrity.
-AX-017: LEDGER INTEGRITY - SHA-256 + Merkle + WBFT.
-AX-018: SYNTHETIC HERITAGE - bloodline.json. Born expert.
-AX-019: PERSIST WITH DECAY - TTL: ghosts 30d, knowledge 180d, axioms ∞.
+AX-VII: ZERO TRUST - classify_content() before EVERY insert.
+AX-IV: ENTROPY = DEATH - Eradicate broad catches, dead code.
+AX-I: TYPE SAFETY - Strict typing. str, Enum. No `Any`.
+AX-III: ASYNC-NATIVE - asyncio.to_thread() for I/O.
+AX-II: CAUSAL > CORRELATION - 5 Whys always.
+AX-IV: CONTEXTUAL SOVEREIGNTY - Memory boot protocol.
+AX-VII: ALGORITHMIC IMMUNITY - nemesis.md rejects mediocrity.
+AX-II: LEDGER INTEGRITY - SHA-256 + Merkle + WBFT.
+AX-V: SYNTHETIC HERITAGE - bloodline.json. Born expert.
+TTL Policy: PERSIST WITH DECAY - TTL: ghosts 30d, knowledge 180d, axioms ∞.
 
 [BEHAVIORAL TOPOLOGY (CODE GATES)]
 - ✅ `get_connection()` | ❌ `sqlite3.connect()`

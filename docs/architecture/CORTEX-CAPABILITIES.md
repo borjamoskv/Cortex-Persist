@@ -498,4 +498,4 @@ CORTEX does not add magic. It adds structure.
 Without topology, intelligence remains plausible output.
 With topology, intelligence can crystallize into system.
 
-> *"Prompting better is not enough. You need topology."* — AX-033
+> *"Prompting better is not enough. You need topology."* — AX-II

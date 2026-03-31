@@ -19,11 +19,29 @@ Cortex is a **local-first, sovereign intelligence engine**. It is NOT a chatbot.
     -   **`dispatch.py`**: Routes tasks to specialized agents.
     -   **`adapter.py`**: Connects to external MCP tools (Git, Terminal, Browser).
 
-## Data Flow
+## Data Flow & Truthing Membrane
 
-1.  **Ingestion**: `User Input` -> `Gate` -> `Vector Embed` -> `Graph Node` -> `Storage`.
-2.  **Recall**: `Query` -> `Semantic Search` + `Graph Walk` -> `Context Assembly` -> `LLM`.
-3.  **Action**: `Plan` -> `Swarm Dispatch` -> `Tool Execution` -> `Result` -> `Memory`.
+The core of CORTEX is the Verification Membrane. Agents cannot write arbitrary data directly to the ledger. Every mutation is intercepted, validated, securely sanded, and sealed. 
+
+```mermaid
+flowchart TD
+    A[Autonomous Swarm Agent] -->|Produces LLM Fact| M([Verification Membrane])
+    
+    subgraph M
+      direction TB
+      G1{Integrity Check} --> G2{AST Sandboxing}
+      G2 --> G3{Secret Scanning}
+      G3 --> S[Hash Seal]
+    end
+    
+    M -->|Validated| D[(CORTEX Local SQLite)]
+    M -->|Violates Schema / Logic| R((Rejection))
+    A -.->|Pulls Active Context| D
+```
+
+1.  **Ingestion**: `Agent Thought` -> `Verification Membrane` -> `Hash Chain Seal` -> `Storage`.
+2.  **Recall**: `Query` -> `Semantic Search` + `Merkle Integrity Check` -> `Context Assembly`.
+3.  **Action**: `Plan` -> `CORTEX Receipt Export` -> `Execute with Evidence`.
 
 ## Evolución: El Manifold Omega (Ω)
 

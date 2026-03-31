@@ -217,9 +217,29 @@ def _parse_pyproject_deps() -> set[str]:
 
     content = pyproject.read_text(encoding="utf-8")
     deps: set[str] = set()
-    for match in re.finditer(r'"([a-zA-Z0-9_-]+)', content):
-        name = match.group(1).lower().replace("-", "_")
-        deps.add(name)
+    
+    try:
+        import tomllib
+        data = tomllib.loads(content)
+        # Extract dependencies from standard pyproject locations
+        project_deps = data.get("project", {}).get("dependencies", [])
+        for dep in project_deps:
+            # Simple extraction of package name before version specifiers
+            match = re.match(r"^([a-zA-Z0-9_-]+)", dep)
+            if match:
+                deps.add(match.group(1).lower().replace("-", "_"))
+        # Also check optional dependencies
+        optional_deps = data.get("project", {}).get("optional-dependencies", {})
+        for opt_list in optional_deps.values():
+            for dep in opt_list:
+                match = re.match(r"^([a-zA-Z0-9_-]+)", dep)
+                if match:
+                    deps.add(match.group(1).lower().replace("-", "_"))
+    except ImportError:
+        # Fallback to regex si tomllib no existe (ej. Python < 3.11 sin tomli)
+        for match in re.finditer(r'"([a-zA-Z0-9_-]+)', content):
+            deps.add(match.group(1).lower().replace("-", "_"))
+            
     return deps
 
 

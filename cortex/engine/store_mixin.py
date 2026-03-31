@@ -155,7 +155,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         tx_id: int | None,
         parent_decision_id: int | None = None,
     ) -> int:
-        # ═══ AX-033: Pre-store guards via GuardPipeline ═══
+        # ═══ AX-II: Pre-store guards via GuardPipeline ═══
         pipeline = getattr(self, "_guard_pipeline", None)
         if pipeline is not None:
             try:
@@ -165,7 +165,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             except ValueError:
                 raise  # Guard rejections must propagate
             except Exception as _gp_err:  # noqa: BLE001
-                logger.debug("[AX-033] GuardPipeline pre-store skipped: %s", _gp_err)
+                logger.debug("[AX-II] GuardPipeline pre-store skipped: %s", _gp_err)
 
         dedupe_id, meta, content, fact_type = await self._run_store_validation(
             conn, project, content, tenant_id, fact_type, tags, confidence, source, meta
@@ -217,7 +217,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         if commit:
             await conn.commit()
 
-        # ═══ AX-033: Post-store hooks via GuardPipeline ═══
+        # ═══ AX-II: Post-store hooks via GuardPipeline ═══
         if pipeline is not None:
             db_path = str(getattr(self, "_db_path", "") or "")
             try:
@@ -231,7 +231,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                     db_path=db_path,
                 )
             except Exception as _ph_err:  # noqa: BLE001
-                logger.debug("[AX-033] GuardPipeline post-hooks skipped: %s", _ph_err)
+                logger.debug("[AX-II] GuardPipeline post-hooks skipped: %s", _ph_err)
 
         return fact_id
 

@@ -1,6 +1,6 @@
 [project]
 name = "cortex-persist"
-version = "0.3.0"
+version = "0.3.0b2"
 description = "Cryptographic memory integrity, audit trails, and verifiable lineage for AI agents."
 readme = "README.md"
 license = "Apache-2.0"
@@ -45,6 +45,7 @@ dependencies = [
     "aiohttp",
     "beautifulsoup4",
     "arq",
+    "email-validator>=2.1.0",
 ]
 
 [project.urls]
@@ -140,7 +141,10 @@ exclude = [
     "tests",
     "experimental",
     "cortex/moltbook",
-    "scripts"
+    "scripts",
+    "cortex/agents",
+    ".scratch",
+    ".venv"
 ]
 reportMissingImports = "warning"
 reportPrivateImportUsage = "none"

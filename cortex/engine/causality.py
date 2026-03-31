@@ -408,12 +408,12 @@ class AsyncCausalGraph:
                 else:
                     fact_updates.append((new_conf, current_id))
 
-                changes.append({
-                    "fact_id": current_id,
-                    "old_confidence": old_conf,
-                    "new_confidence": new_conf,
-                    "status": node_states[current_id].value,
-                })
+            changes.append({
+                "fact_id": current_id,
+                "old_confidence": old_conf,
+                "new_confidence": new_conf,
+                "status": node_states[current_id].value,
+            })
 
             for child_id in children_map.get(current_id, []):
                 if child_id not in visited:

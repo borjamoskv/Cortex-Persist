@@ -62,7 +62,7 @@ Cada axioma es **independiente** (no derivable de los otros 6) y **generativo** 
 
 **Genera:** 5 Whys → root cause · Git archaeology · Invalidation tests before mutation
 
-**Registry:** [AX-014](operating-axioms.md) (Causal Over Correlation), [AX-015](operating-axioms.md) (Contextual Sovereignty)
+**Registry:** [AX-II](operating-axioms.md) (Causal Over Correlation), [AX-IV](operating-axioms.md) (Contextual Sovereignty)
 
 ---
 
@@ -75,7 +75,7 @@ Cada axioma es **independiente** (no derivable de los otros 6) y **generativo** 
 
 **Genera:** War Council · Byzantine consensus · Zero Trust · Falsación Operacional
 
-**Registry:** [AX-010](operating-axioms.md) (Zero Trust), [AX-016](operating-axioms.md) (Algorithmic Immunity), [AX-017](operating-axioms.md) (Ledger Integrity)
+**Registry:** [AX-VII](operating-axioms.md) (Zero Trust), [AX-VII](operating-axioms.md) (Algorithmic Immunity), [AX-II](operating-axioms.md) (Ledger Integrity)
 
 ---
 
@@ -88,7 +88,7 @@ Cada axioma es **independiente** (no derivable de los otros 6) y **generativo** 
 
 **Genera:** Landauer's Razor · Net-negative entropy · Reuse over reinvention · ≤300 LOC/file
 
-**Registry:** [AX-011](operating-axioms.md) (Entropy Death), [AX-013](operating-axioms.md) (Async Native), [AX-019](operating-axioms.md) (Persist With Decay)
+**Registry:** [AX-IV](operating-axioms.md) (Entropy Death), [AX-III](operating-axioms.md) (Async Native), [TTL Policy](operating-axioms.md) (Persist With Decay)
 
 ---
 
@@ -101,7 +101,7 @@ Cada axioma es **independiente** (no derivable de los otros 6) y **generativo** 
 
 **Genera:** Meta-cognition (OUROBOROS-∞) · Recursive improvement · Micro-Reflection post-skill
 
-**Registry:** [AX-001](operating-axioms.md) (Autopoietic Identity), [AX-022](operating-axioms.md) (Post-Machine Autonomy), [AX-028](operating-axioms.md) (Specular Memory)
+**Registry:** [AX-I](operating-axioms.md) (Autopoietic Identity), [AX-VII](operating-axioms.md) (Post-Machine Autonomy), [AX-VII](operating-axioms.md) (Specular Memory)
 
 ---
 
@@ -114,7 +114,7 @@ Cada axioma es **independiente** (no derivable de los otros 6) y **generativo** 
 
 **Genera:** 130/100 Standard · Industrial Noir · PoQ-5 (aesthetic gate)
 
-**Registry:** [AX-002](operating-axioms.md) (Radical Immanent Transcendence), [AX-023](operating-axioms.md) (130/100 Standard), [AX-027](operating-axioms.md) (Designed Impossibility)
+**Registry:** [AX-II](operating-axioms.md) (Radical Immanent Transcendence), [AX-VII](operating-axioms.md) (130/100 Standard), [AX-VII](operating-axioms.md) (Designed Impossibility)
 
 ---
 
@@ -127,7 +127,7 @@ Cada axioma es **independiente** (no derivable de los otros 6) y **generativo** 
 
 **Genera:** Context-snapshot boot · TTL policy · Episodic memory (lore.md) · Semantic RAM
 
-**Registry:** [AX-015](operating-axioms.md) (Contextual Sovereignty), [AX-019](operating-axioms.md) (Persist With Decay)
+**Registry:** [AX-IV](operating-axioms.md) (Contextual Sovereignty), [TTL Policy](operating-axioms.md) (Persist With Decay)
 
 ---
 
@@ -140,7 +140,7 @@ Cada axioma es **independiente** (no derivable de los otros 6) y **generativo** 
 
 **Genera:** tether.md · Physical/economic/entropic boundaries · Dead Man Switch · ZENÓN-1 (recursion brake)
 
-**Registry:** [AX-003](operating-axioms.md) (Tether)
+**Registry:** [AX-III](operating-axioms.md) (Tether)
 
 ---
 

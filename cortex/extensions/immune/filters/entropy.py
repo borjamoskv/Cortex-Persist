@@ -1,5 +1,5 @@
 """
-F4 — ENTROPY MEASURE: AX-012: The Threshold of Thermodynamics (Ω₂).
+F4 — ENTROPY MEASURE: AX-I: The Threshold of Thermodynamics (Ω₂).
 """
 
 from __future__ import annotations
@@ -13,7 +13,7 @@ class EntropyFilter(ImmuneFilter):
     """F4: Entropy Measure.
 
     Checks if an action adds more complexity than it removes.
-    AX-012: Every abstraction has real thermodynamic cost.
+    AX-I: Every abstraction has real thermodynamic cost.
     """
 
     @property

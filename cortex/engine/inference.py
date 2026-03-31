@@ -33,7 +33,7 @@ logger = logging.getLogger("cortex.engine.inference")
 # Maximum derivations per cycle to bound compute cost
 MAX_DERIVATIONS_PER_CYCLE = 50
 
-# Derived facts never exceed C3 without external verification (AX-033)
+# Derived facts never exceed C3 without external verification (AX-II)
 DERIVED_CONFIDENCE = "C3"
 
 
@@ -157,7 +157,7 @@ class InferenceEngine:
     """Derives new facts from existing knowledge via rule-based reasoning.
 
     All derivations are:
-    - Capped at C3 confidence (AX-033: conjecture until verified)
+    - Capped at C3 confidence (AX-II: conjecture until verified)
     - Linked via EDGE_DERIVED_FROM in the causal graph
     - Pre-checked against contradiction_guard (if available)
     """

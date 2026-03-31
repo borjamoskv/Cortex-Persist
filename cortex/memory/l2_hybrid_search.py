@@ -227,7 +227,9 @@ class L2HybridSearch:
 
         Returns list of (facts_meta.id, 0-based rank).
         """
-        embedding_bytes = np.array(query_embedding, dtype=np.float32).tobytes()
+        from cortex.utils.turboquant import encode_query_qjl
+        rotated_query = encode_query_qjl(query_embedding)
+        embedding_bytes = np.array(rotated_query, dtype=np.float32).tobytes()
 
         # Inner KNN: get rowids from vec0, then join to tenant-filtered facts_meta
         sql = f"""

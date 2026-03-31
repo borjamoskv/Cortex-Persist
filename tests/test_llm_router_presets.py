@@ -225,11 +225,11 @@ class TestRouterOrdering:
         """Same cost → frontier preferred over high."""
         from cortex.extensions.llm.router import CortexLLMRouter
 
-        # deepseek=low/frontier, qwen=low/high
+        # deepseek=low/frontier, groq=low/high (assuming groq defaults fit)
         router = CortexLLMRouter(
             primary=_providers["gemini"],
             fallbacks=[
-                _providers["qwen"],
+                _providers["groq"],
                 _providers["deepseek"],
             ],
         )
@@ -238,9 +238,9 @@ class TestRouterOrdering:
             reasoning_mode = "standard"
 
         ordered = router._ordered_fallbacks(MockPrompt())
-        # Both are "low" cost, but deepseek=frontier, qwen=high
+        # Both may be "low" cost, but deepseek is frontier
         names = [p.provider_name for p in ordered]
-        assert names.index("deepseek") < names.index("qwen")
+        assert names.index("deepseek") < names.index("groq")
 
     def test_cost_order_constants(self):
         from cortex.extensions.llm.router import CortexLLMRouter

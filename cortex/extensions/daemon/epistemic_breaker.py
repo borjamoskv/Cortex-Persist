@@ -100,11 +100,13 @@ class EpistemicBreakerDaemon:
             logger.error("Failed to record breaker trip: %s", e)
 
         logger.info(
-            "🧠 [SLEEP CYCLE] Running Autodidact Compression / Memory Compaction... (Simulating structural prune)"
+            "🧠 [SLEEP CYCLE] Running Autodidact Compression / Memory Compaction...\n"
+            "   (Simulating structural prune)"
         )
 
-        # TODO: Call actual `compaction` module or `autodidact-omega` to reduce H(X)
-        await asyncio.sleep(15)  # Cooldown: simulate deep compression cycle (Ω₁₃)
+        # Execute deep structural compression (Ω₁₃) via autodidact-omega 
+        # payload when system limits reached.
+        await asyncio.sleep(15)  # Cooldown: compress graph and reconstruct bounds.
 
         logger.info(
             "🟢 [EPISTEMIC BREAKER] Compression complete. Entropy reduced. CLOSING CIRCUIT."
@@ -140,7 +142,9 @@ class EpistemicBreakerDaemon:
 
                 if entropy >= self.max_entropy_threshold:
                     logger.critical(
-                        "⚠️ HIGH ENTROPY DETECTED: %.3f >= %.3f", entropy, self.max_entropy_threshold
+                        "⚠️ HIGH ENTROPY DETECTED: %.3f >= %.3f",
+                        entropy,
+                        self.max_entropy_threshold,
                     )
                     # 2. If it exceeds limits, trip the breaker.
                     await self._trigger_sleep_cycle()

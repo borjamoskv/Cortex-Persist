@@ -55,7 +55,7 @@ from cortex.engine.lock import SovereignLock  # noqa: E402
 # Limit the maximum number of tags per fact.
 MAX_TAGS_PER_FACT = 20
 
-# We use the unified GuardPipeline for AX-033 logic.
+# We use the unified GuardPipeline for AX-II logic.
 
 
 class CortexEngine(
@@ -133,7 +133,7 @@ class CortexEngine(
         db_path = str(self._db_path)
         import os  # Local import to resolve persistent pylint/ruff shadowing issues
 
-        # Pre-store guards (AX-033 Hooks 1-3)
+        # Pre-store guards (AX-II Hooks 1-3)
         try:
             from cortex.engine.guard_adapters import HealthGuardAdapter
 
@@ -161,7 +161,7 @@ class CortexEngine(
                 raise RuntimeError(f"FAIL-CLOSED: VerifierGuardAdapter failed: {e}") from e
             pass
 
-        # Post-store hooks (AX-033 Hook 4 + signals + epistemic)
+        # Post-store hooks (AX-II Hook 4 + signals + epistemic)
         try:
             from cortex.engine.guard_adapters import LedgerCheckpointHook
 
@@ -621,5 +621,5 @@ class CortexEngine(
         await self.close()
 
 
-# Ω₀ Type Alias for backward compatibility (AX-020 Refactor)
+# Ω₀ Type Alias for backward compatibility (AX-V Refactor)
 AsyncCortexEngine = CortexEngine

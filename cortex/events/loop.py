@@ -91,19 +91,25 @@ def sovereign_run(
     """
     global _uvloop_installed  # noqa: PLW0603
 
+    # 1. Detect loop capability first (cached)
+    has_uvloop = False
     try:
         import uvloop  # type: ignore[import-untyped]
-
+        has_uvloop = True
         if not _uvloop_installed:
             _uvloop_installed = True
             logger.info(
                 "Sovereign loop: uvloop %s active (kqueue/epoll)",
                 getattr(uvloop, "__version__", "?"),
             )
-        # uvloop.run() creates its own loop — no policy needed (3.16 safe)
-        return uvloop.run(coro, debug=debug)
     except ImportError:
-        return asyncio.run(coro, debug=debug)
+        pass
+
+    # 2. Execute with appropriate runner
+    if has_uvloop:
+        import uvloop  # type: ignore[import-untyped]
+        return uvloop.run(coro, debug=debug)
+    return asyncio.run(coro, debug=debug)
 
 
 def get_loop_info() -> dict[str, Any]:

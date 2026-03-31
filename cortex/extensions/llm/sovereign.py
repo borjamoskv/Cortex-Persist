@@ -107,10 +107,11 @@ _REMOTE_PRIORITY: list[str] = [
 ]
 
 _LOCAL_PRIORITY: list[str] = [
+    "vllm_native", # Native TurboQuant KV extraction (Axiom Ω₂)
     "ollama",  # Most common local
     "lmstudio",  # GUI-friendly
     "llamacpp",  # Raw C++
-    "vllm",  # Production local
+    "vllm",  # Production local (REST fallback)
     "jan",  # Electron-based
 ]
 
@@ -292,7 +293,12 @@ class SovereignLLM:
         """Execute a single provider call with caching and error handling."""
         try:
             if provider_name not in self._providers_cache:
-                self._providers_cache[provider_name] = LLMProvider(provider=provider_name)
+                if provider_name == "vllm_native":
+                    # Carga bypass OOM a traves de Extractor KV 3.5b (arXiv:2504.19874)
+                    from cortex.extensions.llm.vllm_edge import NativeVLLMProvider
+                    self._providers_cache[provider_name] = NativeVLLMProvider()  # type: ignore[reportArgumentType]
+                else:
+                    self._providers_cache[provider_name] = LLMProvider(provider=provider_name)
             provider = self._providers_cache[provider_name]
 
             start = time.monotonic()

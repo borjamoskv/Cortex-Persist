@@ -1,5 +1,5 @@
 """
-F1 — REVERSIBILITY ANALYZER: AX-011: The Blast Radius (Ω₂).
+F1 — REVERSIBILITY ANALYZER: AX-IV: The Blast Radius (Ω₂).
 """
 
 from __future__ import annotations

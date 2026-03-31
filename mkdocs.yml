@@ -58,6 +58,15 @@ theme:
 
 nav:
   - Home: index.md
+  - Evaluation:
+      - Comparisons vs. Vector DBs: competitors.md
+      - How it fits your stack: integration_stacks.md
+      - Audit Pack Anatomy: audit_pack_anatomy.md
+  - By Role:
+      - Builder (Hello World): personas/builder.md
+      - Security Lead: personas/security_lead.md
+      - Compliance & Buyers: personas/compliance_buyer.md
+      - Systems Architect: personas/architect.md
   - Getting Started:
       - Quickstart: quickstart.md
       - Installation: installation.md

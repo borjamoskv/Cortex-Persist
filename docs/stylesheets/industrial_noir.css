@@ -15,6 +15,7 @@
   --ctx-abyssal-700: #111111;
   --ctx-abyssal-600: #1a1a1a;
   --ctx-cyber-lime: #CCFF00;
+  --ctx-acid-lemon: #E3FF00;
   --ctx-cyber-violet: #6600FF;
   --ctx-industrial-gold: #D4AF37;
   --ctx-yinmn-blue: #2E5090;
@@ -134,19 +135,19 @@
 
 /* ─── Buttons ─── */
 .md-button--primary {
-  background-color: var(--ctx-cyber-lime);
+  background-color: var(--ctx-acid-lemon);
   color: #000;
-  border-color: var(--ctx-cyber-lime);
+  border-color: var(--ctx-acid-lemon);
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   border-radius: 0;
   transition: all 0.3s ease;
-  box-shadow: 0 0 20px rgba(204, 255, 0, 0.15);
+  box-shadow: 0 0 20px rgba(227, 255, 0, 0.15);
 }
 
 .md-button--primary:hover {
-  box-shadow: 0 0 30px rgba(204, 255, 0, 0.3);
+  box-shadow: 0 0 30px rgba(227, 255, 0, 0.3);
   transform: translateY(-1px);
 }
 

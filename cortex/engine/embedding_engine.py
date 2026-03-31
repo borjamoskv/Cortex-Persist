@@ -49,9 +49,9 @@ async def embed_fact_async(
     # 1. Legacy Vector Store (L2 Dense)
     if embedder:
         try:
-            maybe_embedding = embedder.embed(content)
-            if asyncio.iscoroutine(maybe_embedding):
-                embedding = await maybe_embedding
+            import inspect
+            if inspect.iscoroutinefunction(embedder.embed):
+                embedding = await embedder.embed(content)
             else:
                 embedding = await asyncio.to_thread(embedder.embed, content)
             await conn.execute(

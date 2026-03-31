@@ -59,6 +59,8 @@ class FactManager:
         """Sovereign Store: Delegates to engine with pre-validation."""
         tenant_id = self.engine._resolve_tenant(tenant_id)
         conn = conn or await self.engine.get_conn()
+        if not conn:
+            raise RuntimeError("Sovereign Guard: DB connection unavailable.")
 
         # Optional guard: do not block engine startup if the immunity stack is mid-repair.
         if HaikuGuard is not None:
@@ -83,6 +85,22 @@ class FactManager:
         # V8 Validation Layer (Sovereign Gate)
         try:
             content = validate_content(project, content, fact_type)
+
+            # P0 Thermodynamic Gate: O(1) Exact Match (Axiom Ω₂)
+            cursor = await conn.execute(
+                "SELECT id FROM facts WHERE content = ? AND project = ? AND tenant_id = ?",
+                (content, project, tenant_id)
+            )
+            row = await cursor.fetchone()
+            if row:
+                fact_id = row[0]
+                logger.info("V8 Guardrail: Fact discarded - P0 Exact Duplicate of #%s", fact_id)
+                await conn.execute(
+                    "UPDATE facts SET updated_at = ? WHERE id = ?",
+                    (now_iso(), fact_id)
+                )
+                await conn.commit()
+                return fact_id
 
             # V8 Semantic Deduplication
             if hasattr(self.engine, "embeddings") and self.engine.embeddings:
@@ -193,24 +211,31 @@ class FactManager:
         """System stats delegated to QueryMixin."""
         return await self.engine.stats()
 
-    def __getattr__(self, name: str) -> Any:
-        """Sovereign Ablation (Wave 5): Proxy to decouple Calcification."""
-        if name in ("search", "update", "deprecate"):
-            return getattr(self.engine, name)
-        GM = {
-            "graph": "get_graph",
-            "query_entity": "query_entity",
-            "find_path": "find_path",
-            "get_context_subgraph": "get_context_subgraph",
-        }
-        if name in GM:
+    async def search(self, *args, **kwargs) -> list[Fact]:
+        return await self.engine.search(*args, **kwargs)
 
-            async def _g_proxy(*args, **kwargs):
-                import cortex.graph
+    async def update(self, *args, **kwargs) -> Any:
+        return await self.engine.update(*args, **kwargs)  # type: ignore[reportAttributeAccessIssue]
 
-                return await getattr(cortex.graph, GM[name])(
-                    await self.engine.get_conn(), *args, **kwargs
-                )
+    async def deprecate(self, *args, **kwargs) -> Any:
+        return await self.engine.deprecate(*args, **kwargs)
 
-            return _g_proxy
-        raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'")
+    async def graph(self, *args, **kwargs) -> Any:
+        import cortex.graph
+        conn = await self.engine.get_conn()
+        return await cortex.graph.get_graph(conn, *args, **kwargs)
+
+    async def query_entity(self, *args, **kwargs) -> Any:
+        import cortex.graph
+        conn = await self.engine.get_conn()
+        return await cortex.graph.query_entity(conn, *args, **kwargs)
+
+    async def find_path(self, *args, **kwargs) -> Any:
+        import cortex.graph
+        conn = await self.engine.get_conn()
+        return await cortex.graph.find_path(conn, *args, **kwargs)
+
+    async def get_context_subgraph(self, *args, **kwargs) -> Any:
+        import cortex.graph
+        conn = await self.engine.get_conn()
+        return await cortex.graph.get_context_subgraph(conn, *args, **kwargs)

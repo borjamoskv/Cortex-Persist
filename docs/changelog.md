@@ -4,7 +4,7 @@ All notable changes to CORTEX, derived from the git history.
 
 ---
 
-## v8.0.0 — Sovereign Cloud (February 24, 2026)
+## v0.3.0b2 — Sovereign Cloud (February 24, 2026)
 
 ### Added
 

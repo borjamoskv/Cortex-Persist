@@ -10,11 +10,11 @@ Optimized for algorithmic theme extraction without external LLM dependencies.
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import re
 from collections import Counter, defaultdict
-from itertools import combinations
 from typing import TYPE_CHECKING, Any, Final, Optional
 
 from cortex.extensions.episodic.base import (
@@ -200,9 +200,9 @@ class EpisodicMemory:
             return await self._fts_recall(search, project, limit)
 
         sql = """
-            SELECT 
-                id, session_id, event_type, content, project, emotion, tags, meta, created_at 
-            FROM episodes 
+            SELECT
+                id, session_id, event_type, content, project, emotion, tags, meta, created_at
+            FROM episodes
             WHERE 1=1
         """
         params: list[Any] = []
@@ -228,8 +228,9 @@ class EpisodicMemory:
     async def _fts_recall(self, search: str, project: Optional[str], limit: int) -> list[Episode]:
         """High-performance full-text search across episodes."""
         sql = """
-            SELECT 
-                e.id, e.session_id, e.event_type, e.content, e.project, e.emotion, e.tags, e.meta, e.created_at 
+            SELECT
+                e.id, e.session_id, e.event_type, e.content, e.project, e.emotion,
+                e.tags, e.meta, e.created_at
             FROM episodes e
             JOIN episodes_fts f ON e.id = f.rowid
             WHERE f.content MATCH ?
@@ -264,14 +265,18 @@ class EpisodicMemory:
             sql += " WHERE project = ?"
             params.append(project)
 
+        sql += " ORDER BY id DESC LIMIT 1000"
+
         async with self._conn.execute(sql, params) as cursor:
             rows = await cursor.fetchall()
 
         if not rows:
             return []
 
-        # Computationally expensive operation — ideally offloaded to thread pool under high load
-        return _extract_patterns(rows, min_occurrences, limit)  # type: ignore[reportArgumentType]
+        # Computationally expensive operation — offloaded to thread pool under high load
+        return await asyncio.to_thread(
+            _extract_patterns, list(rows), min_occurrences, limit  # type: ignore[reportArgumentType]
+        )
 
     async def count(self, project: Optional[str] = None) -> int:
         """Sovereign audit: count total temporal memories."""
@@ -304,10 +309,10 @@ class EpisodicMemory:
     async def get_session_timeline(self, session_id: str) -> list[Episode]:
         """Retrieve chronological history of a specific session."""
         sql = """
-            SELECT 
-                id, session_id, event_type, content, project, emotion, tags, meta, created_at 
-            FROM episodes 
-            WHERE session_id = ? 
+            SELECT
+                id, session_id, event_type, content, project, emotion, tags, meta, created_at
+            FROM episodes
+            WHERE session_id = ?
             ORDER BY id ASC
         """
         async with self._conn.execute(sql, (session_id,)) as cursor:
@@ -325,7 +330,7 @@ def _extract_patterns(
 ) -> list[Pattern]:
     """
     Extract multi-token recurring themes from episode rows.
-    Supports Uni-grams and Bi-grams for technical context capture.
+    Supports Uni-grams and Bi-grams for technical context capture via Sliding Window O(N).
     """
     # token -> set of session_ids
     token_sessions: dict[str, set[str]] = defaultdict(set)
@@ -335,14 +340,14 @@ def _extract_patterns(
     token_samples: dict[str, list[str]] = defaultdict(list)
 
     for session_id, event_type, content in rows:
-        # 1. Uni-grams (Smarter filtering)
+        # 1. Uni-grams (Smarter filtering preserving order)
         tokens = _extract_tokens(content)
 
-        # 2. Bi-grams (Combined significant tokens)
-        bigrams = {f"{a} {b}" for a, b in combinations(sorted(tokens), 2)}
+        # 2. Bi-grams (Adjacent sliding window O(N))
+        bigrams = {f"{tokens[i]} {tokens[i+1]}" for i in range(len(tokens) - 1)}
 
         # Merge all candidate themes
-        for candidate in tokens | bigrams:
+        for candidate in set(tokens) | bigrams:
             token_sessions[candidate].add(session_id)
             token_types[candidate].append(event_type)
             if len(token_samples[candidate]) < 5:
@@ -371,8 +376,9 @@ def _extract_patterns(
     return patterns[:limit]
 
 
-def _extract_tokens(text: str) -> set[str]:
-    """Sovereign tokenization: captures technical IDs, snake_case, and kebab-case."""
+def _extract_tokens(text: str) -> list[str]:
+    """Sovereign tokenization: captures technical IDs, snake_case, and kebab-case.
+    Preserves sequential order for $O(N)$ bigram construction."""
     raw = _TOKEN_RE.findall(text.lower())
     # Filter by stop words and non-numeric noise
-    return {t for t in raw if t not in _STOP_WORDS and not t.isdigit() and len(t) >= 4}
+    return [t for t in raw if t not in _STOP_WORDS and not t.isdigit() and len(t) >= 4]

@@ -9,13 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [Unreleased] — v0.4.x
+## [Unreleased] — v0.3.x
 
 ### In Progress
 - **Stripe Embedded Checkout**: Migrado el flujo de monetización de redirecciones estándar a *Embedded Checkout* nativo para reducción drástica de fricción (O(1) cognitive load). Backend devuelve `client_secret` en `/v1/stripe/checkout` (con `ui_mode="embedded"`).
 ---
 
-## [0.3.1-beta] — 2026-03-02
+## [0.3.0b2] — 2026-03-02
 
 ### Security
 - **Security Audit (2026-03-02)**: Complete autonomous audit across 58,098 LOC with 0 High/Medium findings.

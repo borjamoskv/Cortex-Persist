@@ -7,7 +7,7 @@ from .common import ROOT_DIR, GateResult, GlobalSourceCache, arun_cmd, printer
 
 
 async def check_gate_4_tests() -> GateResult:
-    """Seal 4: Tests & Coverage (AX-017 Ledger Integrity)."""
+    """Seal 4: Tests & Coverage (AX-II Ledger Integrity)."""
     printer.seal(4, "Ledger Integrity", "Tests & Coverage")
     code, _ = await arun_cmd(["pytest", "tests/", "-q", "--maxfail=1"])
     if code == 0:
@@ -19,7 +19,7 @@ async def check_gate_4_tests() -> GateResult:
 
 
 async def check_gate_7_async() -> GateResult:
-    """Seal 7: Async Native (AX-013 Async Native)."""
+    """Seal 7: Async Native (AX-III Async Native)."""
     printer.seal(7, "Async Native", "Async Guard (No blocking " + "sl" + "eep)")
 
     # Files whitelisted for time.sleep use
@@ -47,7 +47,7 @@ async def check_gate_7_async() -> GateResult:
         if path.name in _EXCLUDE:
             continue
         for i, line in enumerate(content.splitlines(), 1):
-            # AX-013: Async Native (No blocking time.sleep)
+            # AX-III: Async Native (No blocking time.sleep)
             # We split the string to avoid self-triggering this check
             target = "time" + ".sleep"
             if target in line and not line.strip().startswith("#"):
@@ -64,7 +64,7 @@ async def check_gate_7_async() -> GateResult:
 
 
 async def check_gate_8_loc() -> GateResult:
-    """Seal 8: Complexity Limit (AX-011 Entropy Death)."""
+    """Seal 8: Complexity Limit (AX-IV Entropy Death)."""
     printer.seal(8, "Entropy Death", "LOC Guard (≤600 max)")
 
     _THRESHOLD = 600

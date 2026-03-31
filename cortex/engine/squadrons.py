@@ -1,205 +1,172 @@
-"""
-CORTEX-SWARM-100: Squadron Definitions
-P0: Integrity (30 workers) - Types, Linting, Synchronous tasks
-P1: Kinetic (40 workers)   - APIs, Bounties, Moltbook
-P2: Ghost Hunt (30 workers)- Dead code, Exergy cleanup
-"""
-
-import ast
-import asyncio
+import json
 import logging
-import random
 import re
-import subprocess
 from pathlib import Path
+from typing import Any
 
 from cortex.engine.legion_vectors import RED_TEAM_SWARM
-from cortex.engine.swarm import Squadron, SwarmAgent, SwarmSignal
+from cortex.engine.nemesis_agent import NemesisAgentAdapter
+from cortex.engine.swarm import AsyncSignalBus, Squadron, SwarmAgent, SwarmSignal
 
 logger = logging.getLogger(__name__)
 
 
 # -----------------------------------------------------------------------------
-# P0: INTEGRITY SQUADRON
+# CORE AGENTS (MULTI-SPECIALIST)
 # -----------------------------------------------------------------------------
 
 
-class IntegrityAgent(SwarmAgent):
-    """P0 Agent: Runs linting, type checks, and static analysis."""
+class MultiSpecialistAgent(SwarmAgent):
+    """A high-capacity agent that executes multiple specialized audit vectors."""
+
+    def __init__(
+        self,
+        agent_id: str,
+        bus: AsyncSignalBus,
+        specialists: list[str],
+        engine: Any = None,
+    ):
+        super().__init__(agent_id, bus, engine)
+        self.specialists = specialists
 
     async def execute(self, target: str) -> SwarmSignal:
-        logger.info("[P0-INTEGRITY] %s static auditing: %s", self.agent_id, target)
-        
+        logger.info(
+            "[LEGION-20] %s executing %d specialists on: %s",
+            self.agent_id,
+            len(self.specialists),
+            target,
+        )
+
+        all_findings = []
         path = Path(target)
-        if not path.exists():
-            return SwarmSignal(self.agent_id, target, "VOID", {}, {})
-
-        # Simulate Ruff check for MVP (Real ruff call would be here)
-        # Note: In a production swarm, we'd use a shared ruff cache.
-        findings = []
-        if path.suffix == ".py":
+        content = ""
+        if path.exists() and path.is_file():
             try:
-                # Use ruff to check for errors
-                proc = await asyncio.create_subprocess_exec(
-                    "ruff", "check", target, "--select", "E,F,W", "--format", "json",
-                    stdout=subprocess.PIPE, stderr=subprocess.PIPE
-                )
-                stdout, _ = await proc.communicate()
-                if stdout:
-                    findings = [f"Linter Finding: {f['message']}" for f in re.finditer(r'\{.*\}', stdout.decode())]
+                content = path.read_text(encoding="utf-8")
             except Exception as e:
-                logger.debug("IntegrityAgent linter fail: %s", e)
+                logger.debug("Failed to read %s: %s", target, e)
 
-        status = "SUCCESS" if findings else "VOID"
+        # Iterate through assigned specialists
+        for spec_id in self.specialists:
+            # 1. Check Red Team Vectors
+            if spec_id in RED_TEAM_SWARM:
+                vector = RED_TEAM_SWARM[spec_id]
+                findings = await vector.attack(content or target, {"agent_id": self.agent_id})
+                all_findings.extend([f"[{spec_id}] {f}" for f in findings])
+
+            # 2. Check Static Analysis (Simulated/Integrity)
+            elif "Audit" in spec_id or "Integrity" in spec_id or "Code" in spec_id:
+                # Basic static check for MVP
+                if content and "TODO" in content:
+                    all_findings.append(f"[{spec_id}] Todo found in code.")
+
+        status = "SUCCESS" if all_findings else "VOID"
         return SwarmSignal(
             agent_id=self.agent_id,
             target=target,
             status=status,
-            payload={"findings": findings},
+            payload={"findings": all_findings, "specialists_count": len(self.specialists)},
             metrics={"time_ms": 150},
         )
 
 
-class IntegritySquadron(Squadron):
-    """P0 Squadron orchestrator (30 replicas)."""
+# -----------------------------------------------------------------------------
+# PHALANX DEFINITIONS (LEGION 20 AGENTS)
+# -----------------------------------------------------------------------------
 
-    SQUAD_NAME = "P0_INTEGRITY"
-    REPLICAS = 30
+
+class PhalanxBase(Squadron):
+    """Base for Phalanxes that load 20-agent/100-specialist mapping from registry."""
+
+    SQUAD_NAME = "PHALANX"
+    REPLICAS = 4  # 4 agents per phalanx = 20 total agents
+
+    def __init__(self, engine: Any = None):
+        super().__init__(engine)
+        self.registry = self._load_registry()
+
+    def _load_registry(self) -> dict:
+        reg_path = Path("resources/swarm_100_registry.json")
+        if reg_path.exists():
+            return json.loads(reg_path.read_text())
+        return {}
+
+    def _get_agent_spec(self, agent_id: str) -> list[str]:
+        # Extract specialists for this specific agent from registry
+        for agent in self.registry.get("agents", []):
+            if agent["id"] == agent_id:
+                return agent.get("specialists", [])
+        return []
 
     def _create_agent(self, agent_id: str) -> SwarmAgent:
-        return IntegrityAgent(agent_id, self.bus, self.engine)
+        # Map sequential ID (0-3) to phalanx-specific registry IDs
+        registry_p = self.registry.get("phalanxes", {})
+        phalanx_agents = registry_p.get(self.SQUAD_NAME, {}).get("agents", [])
+        idx = int(agent_id.split("-")[-1])
+        
+        # Evolución Adversaria (Ω₁₃): 10% del enjambre es Nemesis L4
+        if idx % 10 == 9:
+            return NemesisAgentAdapter(agent_id, self.bus, self.engine)
+            
+        if idx < len(phalanx_agents):
+            reg_id = phalanx_agents[idx]
+            specs = self._get_agent_spec(reg_id)
+            return MultiSpecialistAgent(reg_id, self.bus, specs, self.engine)
+        return MultiSpecialistAgent(agent_id, self.bus, [], self.engine)
 
-    async def _map(self, target_pattern: str | None = None) -> list[str]:
-        # Expand target_pattern into multiple paths (Simulated for MVP)
-        # Normally this would use glob or os.walk
-        return [f"{target_pattern}/file_{i}.py" for i in range(100)] if target_pattern else []
+
+class SilverPhalanx(PhalanxBase):
+    SQUAD_NAME = "SILVER"
+
+
+class GoldPhalanx(PhalanxBase):
+    SQUAD_NAME = "GOLD"
+
+
+class LeadPhalanx(PhalanxBase):
+    SQUAD_NAME = "LEAD"
+
+
+class VoidPhalanx(PhalanxBase):
+    SQUAD_NAME = "VOID"
+
+
+class SovereignPhalanx(PhalanxBase):
+    SQUAD_NAME = "SOVEREIGN"
 
 
 # -----------------------------------------------------------------------------
-# P1: KINETIC SQUADRON
-# -----------------------------------------------------------------------------
-
-
-class KineticAgent(SwarmAgent):
-    """P1 Agent: Executes API calls, Moltbook traversal, Red Team attacks."""
-
-    async def execute(self, target: str) -> SwarmSignal:
-        logger.info("[P1-KINETIC] %s engaging target: %s", self.agent_id, target)
-        
-        # Select a random red team vector for this kinetic mission
-        vector_name = random.choice(list(RED_TEAM_SWARM.keys()))
-        vector = RED_TEAM_SWARM[vector_name]
-        
-        path = Path(target)
-        content = ""
-        if path.exists() and path.is_file():
-            content = path.read_text(encoding="utf-8")
-        
-        findings = await vector.attack(content or target, {"intent": "legion_siege"})
-        
-        status = "SUCCESS" if findings else "VOID"
-        return SwarmSignal(
-            agent_id=self.agent_id,
-            target=target,
-            status=status,
-            payload={"vector": vector_name, "findings": findings},
-            metrics={"latency_ms": 250},
-        )
-
-
-class KineticSquadron(Squadron):
-    """P1 Squadron orchestrator (40 replicas)."""
-
-    SQUAD_NAME = "P1_KINETIC"
-    REPLICAS = 40
-
-    def _create_agent(self, agent_id: str) -> SwarmAgent:
-        return KineticAgent(agent_id, self.bus, self.engine)
-
-    async def _map(self, target_pattern: str | None = None) -> list[str]:
-        return (
-            [f"https://api.moltbook.local/v1/bounty/{i}" for i in range(100)]
-            if target_pattern
-            else []
-        )
-
-
-# -----------------------------------------------------------------------------
-# P2: GHOST HUNT SQUADRON
-# -----------------------------------------------------------------------------
-
-
-class GhostHuntAgent(SwarmAgent):
-    """P2 Agent: Scans for dead code and unreferenced abstractions."""
-
-    async def execute(self, target: str) -> SwarmSignal:
-        logger.info("[P2-GHOST_HUNT] %s extracting debt from: %s", self.agent_id, target)
-        
-        path = Path(target)
-        if not path.exists() or not path.is_file():
-            return SwarmSignal(self.agent_id, target, "VOID", {}, {})
-
-        findings = []
-        try:
-            tree = ast.parse(path.read_text(encoding="utf-8"))
-            # Simple ghost hunt: Classes/Functions with 'TODO' or 'PLACEHOLDER' or no body
-            for node in ast.walk(tree):
-                if isinstance(node, ast.FunctionDef | ast.ClassDef):
-                    if len(node.body) == 1 and isinstance(node.body[0], ast.Pass | ast.Constant):
-                        findings.append(f"Ghost abstraction: `{node.name}` has no implementation.")
-        except Exception as e:
-            logger.debug("GhostHuntAgent parse fail: %s", e)
-
-        status = "SUCCESS" if findings else "VOID"
-        return SwarmSignal(
-            agent_id=self.agent_id,
-            target=target,
-            status=status,
-            payload={"ghosts": findings},
-            metrics={},
-        )
-
-
-class GhostHuntSquadron(Squadron):
-    """P2 Squadron orchestrator (30 replicas)."""
-
-    SQUAD_NAME = "P2_GHOST_HUNT"
-    REPLICAS = 30
-
-    def _create_agent(self, agent_id: str) -> SwarmAgent:
-        return GhostHuntAgent(agent_id, self.bus, self.engine)
-
-    async def _map(self, target_pattern: str | None = None) -> list[str]:
-        return [f"{target_pattern}/module_{i}.py" for i in range(100)] if target_pattern else []
-
-
-# -----------------------------------------------------------------------------
-# AUTONOMOUS ROUTER (Zero-Prompting)
+# AUTONOMOUS ROUTER (Phalanx-Aware)
 # -----------------------------------------------------------------------------
 
 
 class AutonomousRouter:
-    """O(1) Autonomous Router to dispatch targets to the correct Squadron
-    using weighted heuristics.
-    """
+    """O(1) Autonomous Router to dispatch targets to the correct Phalanx."""
 
-    # Pre-compiled regex patterns for zero-latency matching (O(1))
-    # P1: Network, APIs, External Targets
-    P1_PATTERN = re.compile(
-        r"^(https?://|wss?://|api\.|graphql\.|webhook|ftp://|sftp://)|"
-        r"\b(moltbook|bounty|scrape|fetch|request)\b",
-        re.IGNORECASE,
-    )
-    # P2: Technical Debt, Cleanup, Ghost code
-    P2_PATTERN = re.compile(
-        r"\b(dead|unused|legacy|cleanup|debt|ghost|jil|"
-        r"refactor|purge|deprecated|remove|obsolete)\b",
-        re.IGNORECASE,
-    )
-    # P0: Local files, generic static analysis
-    P0_PATTERN = re.compile(
+    # Silver: Static analysis, files, local audit
+    SILVER_PATTERN = re.compile(
         r"\.(py|js|ts|jsx|tsx|go|rs|cpp|c|md|json|yaml|yml)$|"
         r"\b(lint|type|audit|test|format|check|validate)\b",
+        re.IGNORECASE,
+    )
+    # Gold: Capital, bounties, revenue
+    GOLD_PATTERN = re.compile(
+        r"\b(bounty|revenue|arbitrage|subscription|billing|invoice|capital|gold)\b",
+        re.IGNORECASE,
+    )
+    # Lead: Research, knowledge, RAG
+    LEAD_PATTERN = re.compile(
+        r"\b(rag|graph|semantic|lore|history|archive|knowledge|lore)\b",
+        re.IGNORECASE,
+    )
+    # Void: Chaos, cleanup, entropy
+    VOID_PATTERN = re.compile(
+        r"\b(dead|unused|cleanup|debt|ghost|chaos|entropy|purge|annihilate|void)\b",
+        re.IGNORECASE,
+    )
+    # Sovereign: Axioms, consensus, core policy
+    SOVEREIGN_PATTERN = re.compile(
+        r"\b(axiom|consensus|policy|governance|wbft|sovereign|apex)\b",
         re.IGNORECASE,
     )
 
@@ -207,45 +174,45 @@ class AutonomousRouter:
     def route(target: str) -> list[type[Squadron]]:
         target_lower = target.strip().lower()
 
-        # 1. Explicit intent override (e.g., "intent:ghost api.moltbook.local")
+        # 1. Explicit intent override
         intent_match = re.match(r"^intent:\s*([a-z0-9_]+)", target_lower)
         if intent_match:
             intent = intent_match.group(1)
-            if intent in ("p1", "kinetic", "api", "network", "web"):
-                return [KineticSquadron]
-            if intent in ("p2", "ghost", "debt", "cleanup", "refactor"):
-                return [GhostHuntSquadron]
-            if intent in ("p0", "integrity", "lint", "audit", "test"):
-                return [IntegritySquadron]
+            mapping = {
+                "silver": [SilverPhalanx],
+                "gold": [GoldPhalanx],
+                "lead": [LeadPhalanx],
+                "void": [VoidPhalanx],
+                "sovereign": [SovereignPhalanx],
+            }
+            if intent in mapping:
+                return mapping[intent]
 
-        # 2. Heuristic Scoring (O(1))
+        # 2. Heuristic Scoring
         scores: dict[type[Squadron], float] = {
-            KineticSquadron: 0.0,
-            GhostHuntSquadron: 0.0,
-            IntegritySquadron: 0.0,
+            SilverPhalanx: 0.0,
+            GoldPhalanx: 0.0,
+            LeadPhalanx: 0.0,
+            VoidPhalanx: 0.0,
+            SovereignPhalanx: 0.0,
         }
 
-        if AutonomousRouter.P1_PATTERN.search(target_lower):
-            scores[KineticSquadron] += 1.0
-        if AutonomousRouter.P2_PATTERN.search(target_lower):
-            scores[GhostHuntSquadron] += 1.0
-        if AutonomousRouter.P0_PATTERN.search(target_lower):
-            scores[IntegritySquadron] += 1.0
-
-        # Exact match boosts based on strict semantic meaning
-        if target_lower in (".", "*", "all", "workspace", "repo", "project", "src"):
-            scores[IntegritySquadron] += 2.0  # Entire workspace sweep overrides everything
+        if AutonomousRouter.SILVER_PATTERN.search(target_lower):
+            scores[SilverPhalanx] += 1.0
+        if AutonomousRouter.GOLD_PATTERN.search(target_lower):
+            scores[GoldPhalanx] += 1.0
+        if AutonomousRouter.LEAD_PATTERN.search(target_lower):
+            scores[LeadPhalanx] += 1.0
+        if AutonomousRouter.VOID_PATTERN.search(target_lower):
+            scores[VoidPhalanx] += 1.0
+        if AutonomousRouter.SOVEREIGN_PATTERN.search(target_lower):
+            scores[SovereignPhalanx] += 1.0
 
         # Resolve top scorers
         max_score = max(scores.values())
         if max_score > 0:
-            # Return all squadrons tied for the top score
             matched = [sq for sq, score in scores.items() if score == max_score]
-            # Tie-breaker: If P0 tied with others, prioritize others
-            # to avoid false positives on generic rules
-            if len(matched) > 1 and IntegritySquadron in matched:
-                matched.remove(IntegritySquadron)
             return matched
 
-        # 3. Fallback to full swarm deployment if completely ambiguous (0.0 score)
-        return [IntegritySquadron, KineticSquadron, GhostHuntSquadron]
+        # Fallback
+        return [SilverPhalanx]

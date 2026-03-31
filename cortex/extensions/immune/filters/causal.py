@@ -1,5 +1,5 @@
 """
-F3 — CAUSAL VALIDATOR: AX-014: Mapping the Causal Chord (Ω₁).
+F3 — CAUSAL VALIDATOR: AX-II: Mapping the Causal Chord (Ω₁).
 """
 
 from __future__ import annotations

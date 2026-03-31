@@ -46,14 +46,14 @@ class GidatuHandler:
     def _sync_handle(
         self, action: str, params: dict, timeout: float, app: Optional[str]
     ) -> dict[str, Any]:
-        from ghost_chain import Ghost
-        from ghost_platform import platform_info
-        from ghost_vlm import find_text_on_screen
+        from ghost_chain import Ghost  # type: ignore[import-not-found, reportMissingImports]
+        from ghost_platform import platform_info  # type: ignore[import-not-found, reportMissingImports]
+        from ghost_vlm import find_text_on_screen  # type: ignore[import-not-found, reportMissingImports]
 
         with Ghost(app=app) as g:
             # Native SafeZone enforcement (Ω₃)
             if "safe_zone" in params:
-                from ghost_guard import SafeZone
+                from ghost_guard import SafeZone  # type: ignore[import-not-found, reportMissingImports]
 
                 sz = params["safe_zone"]
                 g.guard_zone(SafeZone(sz["x"], sz["y"], sz["w"], sz["h"]))
@@ -95,8 +95,8 @@ class GidatuHandler:
         return {"action": "click", "coords": [x, y]}
 
     def _do_click_text(self, g, params, timeout):
-        from ghost_resilience import wait_until
-        from ghost_vlm import find_text_on_screen
+        from ghost_resilience import wait_until  # type: ignore[import-not-found, reportMissingImports]
+        from ghost_vlm import find_text_on_screen  # type: ignore[import-not-found, reportMissingImports]
 
         text = params.get("text")
         if not text:

@@ -127,7 +127,7 @@ def profile_artifact(payload: Mapping[str, Any]) -> PathogenProfile:
     """
     # Placeholder for actual analysis
     entropy = payload.get("measured_entropy", 0.5)
-    contradiction = 0.0  # TODO: Semantic analysis
+    contradiction = payload.get("contradiction_density", 0.0)
     provenance = 1.0 if "source" in payload else 0.5
 
     return PathogenProfile(

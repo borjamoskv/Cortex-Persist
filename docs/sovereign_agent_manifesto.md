@@ -51,7 +51,7 @@ The five specifications below bridge both: `soul.md`, `lore.md`, and `nemesis.md
 
 ### 1.1 `soul.md` — The Immutable Root {#11-soulmd--the-immutable-root}
 
-> *Axiom Reference: [AX-001] Autopoietic Identity*
+> *Axiom Reference: [AX-I] Autopoietic Identity*
 
 **What it is:** A static, human-authored specification that declares the agent's core identity, values, and non-negotiable behavioral axioms.
 
@@ -59,7 +59,7 @@ The five specifications below bridge both: `soul.md`, `lore.md`, and `nemesis.md
 
 **Example axioms:**
 - "Zero Conceptual — everything is executable."
-- "130/100 — good is not enough, excellent is barely started." *(AX-023)*
+- "130/100 — good is not enough, excellent is barely started." *(AX-VII)*
 - "If it works but isn't beautiful, it's wrong." *(Ω₄: Aesthetic Integrity)*
 
 **Industry equivalent:** System prompt / `soul.md` (as popularized by OpenClaw, Claw ecosystem).
@@ -72,7 +72,7 @@ The five specifications below bridge both: `soul.md`, `lore.md`, and `nemesis.md
 
 > `soul.md` says WHO you are. `lore.md` says WHAT YOU'VE LIVED.
 
-> *Axiom Reference: [AX-015] Contextual Sovereignty — "Acting without memory is executing without mandate."*
+> *Axiom Reference: [AX-IV] Contextual Sovereignty — "Acting without memory is executing without mandate."*
 
 **What it is:** A structured episodic memory specification that gives the agent a **biography** instead of a **description**. It captures complete experiences — not isolated facts — with temporal context, emotional valence, and causal chains.
 
@@ -119,7 +119,7 @@ episode:
 
 > *"To know what an Agent loves, read its soul.md. To know what makes it lethal, read its nemesis.md."*
 
-> *Axiom Reference: [AX-016] Algorithmic Immunity (Nemesis)*
+> *Axiom Reference: [AX-VII] Algorithmic Immunity (Nemesis)*
 
 **What it is:** A structured specification that encodes the agent's **negative biases, architectural repulsion, and non-negotiable friction** against known low-quality patterns.
 
@@ -160,7 +160,7 @@ trigger_words:
 
 > *"Agents need souls to live. They need leashes to not ruin your infrastructure."*
 
-> *Axiom Reference: [AX-003] Tether (Dead Man Switch) — "Sovereignty is conscious limitation."*
+> *Axiom Reference: [AX-III] Tether (Dead Man Switch) — "Sovereignty is conscious limitation."*
 
 **What it is:** A strict contract of **physical, economic, and entropic limits** that the agent cannot rewrite. It is the only file in the CORTEX ecosystem that the Agent is **forbidden from modifying** (`CHMOD 444` conceptual level).
 
@@ -200,7 +200,7 @@ autolysis_protocol:
 
 > *"You don't spawn threads. You breed agents based on your project's bloodline."*
 
-> *Axiom Reference: [AX-018] Synthetic Heritage — "The swarm is born expert, never blank."*
+> *Axiom Reference: [AX-V] Synthetic Heritage — "The swarm is born expert, never blank."*
 
 **What it is:** A packaged, encrypted configuration file containing the condensed state of the Parent Agent's Identity (`soul.md`), Experience (`lore.md`), and Allergies (`nemesis.md`) at the exact moment of cloning sub-agents.
 
@@ -305,7 +305,7 @@ SCAR AUDIT CYCLE:
 5. If the Worker fails → Reinforce the scar (it was correct)
 ```
 
-**V6+ Addition — Fact TTL Policy (AX-019):**
+**V6+ Addition — Fact TTL Policy (TTL Policy):**
 
 CPTA is now backed by a formal decay schedule. Not all memories are immortal:
 
@@ -593,7 +593,7 @@ Synchronizes resource consumption with real usage patterns:
 
 ## 11. Trust Infrastructure {#11-trust-infrastructure}
 
-> *Axiom Reference: [AX-017] Ledger Integrity, Ω₃ (Byzantine Default)*
+> *Axiom Reference: [AX-II] Ledger Integrity, Ω₃ (Byzantine Default)*
 
 CORTEX V6+ is not just a memory system — it is a **trust engine**. Every operation produces cryptographic proof.
 
@@ -779,7 +779,7 @@ Synchronizes resource consumption with real usage patterns:
 
 ## 11. Trust Infrastructure
 
-> *Axiom Reference: [AX-017] Ledger Integrity, Ω₃ (Byzantine Default)*
+> *Axiom Reference: [AX-II] Ledger Integrity, Ω₃ (Byzantine Default)*
 
 CORTEX V6+ is not just a memory system — it is a **trust engine**. Every operation produces cryptographic proof.
 

@@ -3,7 +3,8 @@
 """
 LEGION SWARM 100: The Sovereign Century Audit.
 Orchestrates 100 specialized agents across 3 functional squadrons:
-P0: Integrity (30), P1: Kinetic (40), P2: Ghost Hunt (30).
+P0: Silver/Gold (40), P1: Lead/Void (40), P2: Sovereign (20).
+Integrates Nemesis L4 (10%).
 """
 
 import asyncio
@@ -18,7 +19,13 @@ if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
 from cortex.engine import CortexEngine
-from cortex.engine.squadrons import GhostHuntSquadron, IntegritySquadron, KineticSquadron
+from cortex.engine.squadrons import (
+    SilverPhalanx,
+    GoldPhalanx,
+    LeadPhalanx,
+    VoidPhalanx,
+    SovereignPhalanx,
+)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -59,26 +66,33 @@ async def main():
     # Target: The entire workspace or a specific directory
     target_root = sys.argv[1] if len(sys.argv) > 1 else "."
     
-    # 1. Instantiate Squadrons
-    p0 = IntegritySquadron(engine)
-    p1 = KineticSquadron(engine)
-    p2 = GhostHuntSquadron(engine)
+    # 1. Instantiate Phalanxes (5 Phalanxes * 20 Agents = 100 Agents)
+    # The Sovereign Phalanx will contain the Omega-class agents, the others will contain L4s.
+    p_silver = SilverPhalanx(engine)
+    p_gold = GoldPhalanx(engine)
+    p_lead = LeadPhalanx(engine)
+    p_void = VoidPhalanx(engine)
+    p_sovereign = SovereignPhalanx(engine)
     
     print(f"🚀 Launching Legion Swarm 100 against: {target_root}")
     
-    # 2. Deploy concurrently
-    # Note: Each squadron handles its own replicas (30+40+30=100)
+    # 2. Deploy in parallel (100-Agent Burst Approach)
+    print("\n--- 🌟 Dispatching 100-Agent Parallel Burst (Silver, Gold, Lead, Void, Sovereign) ---")
     await asyncio.gather(
-        p0.deploy(target_root),
-        p1.deploy(target_root),
-        p2.deploy(target_root)
+        p_silver.deploy(target_root),
+        p_gold.deploy(target_root),
+        p_lead.deploy(target_root),
+        p_void.deploy(target_root),
+        p_sovereign.deploy(target_root)
     )
     
     # 3. Aggregate all signals for the grid
     all_signals = []
-    all_signals.extend(await p0.bus.get_all())
-    all_signals.extend(await p1.bus.get_all())
-    all_signals.extend(await p2.bus.get_all())
+    all_signals.extend(await p_silver.bus.get_all())
+    all_signals.extend(await p_gold.bus.get_all())
+    all_signals.extend(await p_lead.bus.get_all())
+    all_signals.extend(await p_void.bus.get_all())
+    all_signals.extend(await p_sovereign.bus.get_all())
     
     # 4. Render Final Dashboard
     render_grid(all_signals)

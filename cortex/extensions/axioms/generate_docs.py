@@ -3,7 +3,7 @@
 """Generate docs/axiom-registry.md from the canonical Python registry.
 
 Usage:
-    python -m cortex.axioms.generate_docs
+    python -m cortex.extensions.axioms.generate_docs
 
 This ensures the markdown doc is always in sync with the code.
 """
@@ -23,25 +23,19 @@ from cortex.extensions.axioms.ttl import FACT_TTL, ttl_days
 
 
 def _header() -> str:
-    const = len(by_category(AxiomCategory.CONSTITUTIONAL))
-    oper = len(by_category(AxiomCategory.OPERATIONAL))
-    aspir = len(by_category(AxiomCategory.ASPIRATIONAL))
+    total = len(AXIOM_REGISTRY)
     return (
         "# Axiom Registry — Canonical Source of Truth\n\n"
-        "> *One numbering. One taxonomy. One source.*\n"
-        "> **Auto-generated from `cortex/axioms/registry.py`"
+        "> *Los 7 Axiomas Soberanos. One numbering. One taxonomy. One source.*\n"
+        "> **Auto-generated from `cortex/extensions/axioms/registry.py`"
         " — do not edit manually.**\n\n"
-        "### Axiom Zero (α₀)\n\n"
-        '> *"Every axiom without a CI gate is, at best, '
-        "an aspiration; at worst, a hallucination "
-        'with persistence."*\n\n---\n\n'
+        "### Invarianza Total\n\n"
+        '> *"CORTEX no aumenta la inteligencia del modelo fundacional; '
+        "restringe rígidamente su libertad estructural para contaminar la arquitectura.\"*\n\n---\n\n"
         "## Taxonomy\n\n"
         "| Layer | IDs | Nature | Count |\n"
         "|:---|:---|:---|:---:|\n"
-        f"| 🔴 **Constitutional** | AX-001 – AX-003 | Identity | {const} |\n"
-        f"| 🔵 **Operational** | AX-010 – AX-019 | CI-Enforced | {oper} |\n"
-        f"| 🟡 **Aspirational** | AX-020 – AX-028 | Vision | {aspir} |\n\n"
-        "**Precedence:** Constitutional > Operational > Aspirational.\n\n"
+        f"| 🌌 **Sovereign** | AX-I – AX-VII | Architectonic Core | {total} |\n\n"
         "---\n\n"
     )
 
@@ -50,19 +44,11 @@ def _section(title: str, emoji: str, category: AxiomCategory) -> str:
     axioms = by_category(category)
     lines = [f"## {emoji} {title} ({len(axioms)})\n"]
 
-    if category == AxiomCategory.OPERATIONAL:
-        lines.append("| ID | Name | Mandate | CI Gate |\n|:---|:---|:---|:---|\n")
-        for ax in axioms:
-            gate = ax.ci_gate or "—"
-            mandate = ax.mandate[:80]
-            ellip = "…" if len(ax.mandate) > 80 else ""
-            lines.append(f"| **{ax.id}** | {ax.name} | {mandate}{ellip} | {gate} |\n")
-    else:
-        lines.append("| ID | Name | Mandate |\n|:---|:---|:---|\n")
-        for ax in axioms:
-            mandate = ax.mandate[:100]
-            ellip = "…" if len(ax.mandate) > 100 else ""
-            lines.append(f"| **{ax.id}** | {ax.name} | {mandate}{ellip} |\n")
+    lines.append("| ID | Name | Mandate | CI Gate/Enforcement |\n|:---|:---|:---|:---|\n")
+    for ax in axioms:
+        gate = ax.ci_gate or "—"
+        mandate = ax.mandate.replace("\n", " ")
+        lines.append(f"| **{ax.id}** | {ax.name} | {mandate} | {gate} |\n")
 
     lines.append("\n---\n\n")
     return "".join(lines)
@@ -70,7 +56,7 @@ def _section(title: str, emoji: str, category: AxiomCategory) -> str:
 
 def _ttl_section() -> str:
     lines = [
-        "## Fact TTL Policy (AX-019)\n\n",
+        "## Fact TTL Policy\n\n",
         "> *Persist aggressively. Decay intelligently.*\n\n",
         "| Fact Type | TTL | Days |\n",
         "|:---|:---|:---:|\n",
@@ -95,10 +81,10 @@ def _metrics() -> str:
         "```\n"
         f"Total Axioms           : {total}\n"
         f"CI-Enforced            : {enf} ({pct}%)\n"
-        "Axiom Cap              : 25\n"
+        "Axiom Cap              : 7\n"
         "Inflation Rate Target  : 0\n"
         "```\n\n---\n\n"
-        "*Auto-generated from `cortex/axioms/registry.py`"
+        "*Auto-generated from `cortex/extensions/axioms/registry.py`"
         f" — {today}*\n"
     )
 
@@ -107,17 +93,7 @@ def generate() -> str:
     """Generate the full axiom registry markdown."""
     parts = [
         _header(),
-        _section("Constitutional", "🔴", AxiomCategory.CONSTITUTIONAL),
-        _section(
-            "Operational — CI-Enforced",
-            "🔵",
-            AxiomCategory.OPERATIONAL,
-        ),
-        _section(
-            "Aspirational — Vision",
-            "🟡",
-            AxiomCategory.ASPIRATIONAL,
-        ),
+        _section("The 7 Sovereign Axioms", "⚙️", AxiomCategory.SOVEREIGN),
         _ttl_section(),
         _metrics(),
     ]

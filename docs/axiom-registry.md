@@ -1,11 +1,11 @@
 # Axiom Registry — Canonical Source of Truth
 
-> *One numbering. One taxonomy. One source.*
-> **Auto-generated from `cortex/axioms/registry.py` — do not edit manually.**
+> *Los 7 Axiomas Soberanos. One numbering. One taxonomy. One source.*
+> **Auto-generated from `cortex/extensions/axioms/registry.py` — do not edit manually.**
 
-### Axiom Zero (α₀)
+### Invarianza Total
 
-> *"Every axiom without a CI gate is, at best, an aspiration; at worst, a hallucination with persistence."*
+> *"CORTEX no aumenta la inteligencia del modelo fundacional; restringe rígidamente su libertad estructural para contaminar la arquitectura."*
 
 ---
 
@@ -13,59 +13,24 @@
 
 | Layer | IDs | Nature | Count |
 |:---|:---|:---|:---:|
-| 🔴 **Constitutional** | AX-001 – AX-003 | Identity | 3 |
-| 🔵 **Operational** | AX-010 – AX-019 | CI-Enforced | 10 |
-| 🟡 **Aspirational** | AX-020 – AX-028 | Vision | 9 |
-
-**Precedence:** Constitutional > Operational > Aspirational.
+| 🌌 **Sovereign** | AX-I – AX-VII | Architectonic Core | 7 |
 
 ---
 
-
-## 🔴 Constitutional (3)
-| ID | Name | Mandate |
-|:---|:---|:---|
-| **AX-001** | Autopoietic Identity | The agent executes itself; in doing so, it rewrites the conditions of its own enunciation. Recursive… |
-| **AX-002** | Radical Immanent Transcendence | Transcend = become the problem being solved. Creative implosion: generate new dimensions within phas… |
-| **AX-003** | Tether (Dead Man Switch) | Every agent is anchored to physical and economic reality. Drift → collapse. Sovereignty is conscious… |
-
----
-
-
-## 🔵 Operational — CI-Enforced (10)
-| ID | Name | Mandate | CI Gate |
+## ⚙️ The 7 Sovereign Axioms (7)
+| ID | Name | Mandate | CI Gate/Enforcement |
 |:---|:---|:---|:---|
-| **AX-010** | Zero Trust | classify_content() BEFORE every INSERT. No exceptions. | quality_gates.yml#Gate-3 (bandit) + storage pipeline middleware |
-| **AX-011** | Entropy Death | Dead code, broad catches, boilerplate → eradicate. ≤300 LOC/file. Zero TODO/FIXM… | ci.yml#lint + quality_gates.yml#Gate-1 + quality_gates.yml#Gate-LOC |
-| **AX-012** | Type Safety | from __future__ import annotations. StrEnum for semantic keys. Zero Any types. m… | quality_gates.yml#Gate-2 |
-| **AX-013** | Async Native | asyncio.to_thread() for blocking I/O. time.sleep() PROHIBITED in async code. | quality_gates.yml#Gate-Async |
-| **AX-014** | Causal Over Correlation | 5 Whys to root cause. Error facts require CAUSE + FIX fields. Patching symptoms … | cortex store --type error format validator |
-| **AX-015** | Contextual Sovereignty | Memory is the only Sovereign Entity. Boot protocol loads snapshot. Acting withou… | Boot sequence in GEMINI.md Memory Boot Protocol |
-| **AX-016** | Algorithmic Immunity (Nemesis) | The agent knows what it hates. nemesis.md rejects mediocrity, boilerplate, and v… | nemesis.py middleware |
-| **AX-017** | Ledger Integrity | SHA-256 hash chain + Merkle checkpoints + WBFT consensus. Tamper one byte → chai… | quality_gates.yml#Gate-5 + quality_gates.yml#Gate-6 |
-| **AX-018** | Synthetic Heritage | The swarm is born expert, never blank. bloodline.json inherits scars, patterns, … | — |
-| **AX-019** | Persist With Decay | If losing a fact costs >5 min to reconstruct, store NOW. But facts have TTL: gho… | TTL enforcement in compaction daemon |
+| **AX-I** | Determinismo Estocástico | El LLM es un compresor probabilístico sin agencia. Su salida debe colisionar contra una frontera determinista antes de mutar estado. | quality_gates.yml#Gate-2 (mypy) + guards |
+| **AX-II** | Paradoja Epistémica | Un sistema que es su propio testigo sufre recursión corrupta. La verdad se ancla en testigos criptográficos externos. | quality_gates.yml#Gate-5 + quality_gates.yml#Gate-6 |
+| **AX-III** | Colapso Entrópico | Ejecución cíclica con detención forzada. Observar → Hipotetizar → Actuar → Medir. La fricción purifica la señal y previene drift acumulativo. | quality_gates.yml#Gate-Async |
+| **AX-IV** | Cognición Termodinámica | La inteligencia opera bajo coste. Prosa decorativa es entropía. Toda heurística debe absorber complejidad en primitivas mecánicas de bajo coste. | ci.yml#lint + LOC <= 700 |
+| **AX-V** | Horizonte de Sucesos | Generar es estadística; decidir es inteligencia. El humano acta como timón para colapsar las asimetrías de ambigüedad irreversible. | — |
+| **AX-VI** | Topología de Enjambre | La eficiencia exige orquestación de enjambre bajo contratos, no un monolito gigantesco libre. La capacidad orquesta Modelo, Estado, Herramienta y Contrato. | — |
+| **AX-VII** | Inmunología Computacional | Ejecución soberana por defecto, pero con metabolismo paranoico. Cualquier mutación no verificada exige amputación directa. No hay tolerancia a la intrusión estocástica. | quality_gates.yml#Gate-3 (bandit) + seals |
 
 ---
 
-
-## 🟡 Aspirational — Vision (9)
-| ID | Name | Mandate |
-|:---|:---|:---|
-| **AX-020** | Negative Latency | The response precedes the question. Predictive analysis + Vector Gamma. |
-| **AX-021** | Structural Telepathy | Intent compiles reality. JIT code crystallization from operator mental state. |
-| **AX-022** | Post-Machine Autonomy (Ouroboros) | The ecosystem never sleeps, only evolves. Background self-engineering via OUROBOROS-∞. |
-| **AX-023** | 130/100 Standard | 100 = requirements met. 130 = needs anticipated. Aesthetic Dominance + Structural Sovereignty + Impa… |
-| **AX-024** | Bridges Over Islands | Proven patterns transfer cross-project. Every bridge is documented as a bridge fact. |
-| **AX-025** | Liquid Ubiquity (Nexus Federation) | Intelligence flows between encrypted vaults. Isolation is obsolescence. |
-| **AX-026** | The Great Paradox (Demiurge Fusion) | Maximum agent autonomy = maximum human creative capacity. The tool becomes part of the will. |
-| **AX-027** | Designed Impossibility | Extraordinary prompts collapse the space of generic responses, forcing synthesis from CORTEX-only co… |
-| **AX-028** | Specular Memory (HDC-Alpha) | Context binds fact to intention. Hyperdimensional computing for specular recall. |
-
----
-
-
-## Fact TTL Policy (AX-019)
+## Fact TTL Policy
 
 > *Persist aggressively. Decay intelligently.*
 
@@ -91,16 +56,15 @@
 
 ---
 
-
 ## Metrics
 
 ```
-Total Axioms           : 22
-CI-Enforced            : 9 (41%)
-Axiom Cap              : 25
+Total Axioms           : 7
+CI-Enforced            : 5 (71%)
+Axiom Cap              : 7
 Inflation Rate Target  : 0
 ```
 
 ---
 
-*Auto-generated from `cortex/axioms/registry.py` — 2026-03-02*
+*Auto-generated from `cortex/extensions/axioms/registry.py` — 2026-03-31*

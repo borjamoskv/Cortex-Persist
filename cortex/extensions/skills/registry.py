@@ -184,9 +184,56 @@ class SkillRegistry:
         self._failed = failed
         return self
 
+    async def aload(self, force_reload: bool = False) -> SkillRegistry:
+        """Carga asíncrona concurrente del catálogo para evitar bloqueos del Event Loop."""
+        import asyncio
+        if self._loaded and not force_reload:
+            return self
+
+        self._registry.clear()
+        discovered = 0
+        failed = 0
+
+        target_dirs = [d for d in self._base_dir.iterdir() if d.is_dir()]
+
+        async def _process_dir(skill_dir: Path) -> tuple[int, int, SkillManifest | None]:
+            skill_file = skill_dir / SKILL_FILENAME
+            if not skill_file.exists():
+                return 0, 0, None
+                
+            def _parse_or_fallback() -> tuple[int, int, SkillManifest]:
+                try:
+                    return 1, 0, self._parse_skill_file(skill_file)
+                except (ValueError, yaml.YAMLError, KeyError):
+                    fallback = SkillManifest(
+                        name=skill_dir.name,
+                        path=skill_file,
+                        description="[manifest parse error]",
+                    )
+                    return 0, 1, fallback
+
+            return await asyncio.to_thread(_parse_or_fallback)
+
+        results = await asyncio.gather(*(_process_dir(d) for d in target_dirs))
+
+        for d, f, manifest in results:
+            if manifest:
+                self._registry[manifest.slug] = manifest
+                discovered += d
+                failed += f
+
+        self._loaded = True
+        self._discovered = discovered
+        self._failed = failed
+        return self
+
     def reload(self) -> SkillRegistry:
-        """Fuerza re-escaneo del filesystem."""
+        """Fuerza re-escaneo del filesystem (síncrono)."""
         return self.load(force_reload=True)
+
+    async def areload(self) -> SkillRegistry:
+        """Fuerza re-escaneo del filesystem (asíncrono)."""
+        return await self.aload(force_reload=True)
 
     # ── Acceso ─────────────────────────────────────────────────────────────
 

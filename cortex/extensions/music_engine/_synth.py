@@ -1,6 +1,6 @@
 """Synthesizer primitives for MIDI rendering.
 
-Extracted from midi_engine.py for LOC compliance (AX-011).
+Extracted from midi_engine.py for LOC compliance (AX-IV).
 """
 
 from __future__ import annotations

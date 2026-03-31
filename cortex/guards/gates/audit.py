@@ -9,7 +9,7 @@ from .common import GateResult, GlobalSourceCache, printer
 
 
 async def check_gate_11_cobbler() -> GateResult:
-    """Seal 11: Cobbler's Compliance (AX-011 Red Team Audit)."""
+    """Seal 11: Cobbler's Compliance (AX-IV Red Team Audit)."""
     printer.seal(11, "Red Team Audit", "Cobbler's Compliance — self-audit check")
 
     # Files whitelisted from exception audit (legit complex logic)

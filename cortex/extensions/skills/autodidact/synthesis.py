@@ -22,6 +22,7 @@ from cortex.memory.encoder import AsyncEncoder
 from cortex.memory.models import CortexFactModel
 from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
 from cortex.utils.pulmones import sovereign_circuit_breaker
+from cortex.utils.turboquant import optimize_vector_qjl
 
 logger = logging.getLogger("CORTEX.AUTODIDACT.SYNTHESIS")
 
@@ -246,11 +247,31 @@ async def execute_cognitive_synthesis(
     rendimiento = (1 - (bytes_out / bytes_in)) * 100 if bytes_in > 0 else 0
     logger.info("✅ Destilación: %.1f%% ruido eliminado. Entidades: %d", rendimiento, len(entities))
 
+    # ── EPISTEMIC CONTRADICTION GUARD (Axioma Ω₁) ──
+    from cortex.guards.contradiction_guard import detect_contradictions
+    
+    conflict_report = await detect_contradictions(
+        new_content=memo_content,
+        new_project="autodidact_knowledge",
+    )
+    if conflict_report.has_conflicts and conflict_report.severity == "high":
+        logger.error(
+            "🛑 [EPISTEMIC SHOCK] Autodidact-Ω generó una aserción que contradice "
+            "frontalmente la memoria persistida (C5 Bypass Intercepted)."
+        )
+        for conflict in conflict_report.candidates[:3]:
+            logger.error("   Contradicción (score: %.3f) -> %s", conflict.overlap_score, conflict.fact_id)
+        logger.error("Abortando cristalización para preservar integridad termodinámica del Tensor.")
+        return f"REJECTED_EPISTEMIC_CONTRADICTION: {conflict_report.candidates[0].fact_id}"
+
     embed_result = await generate_cortex_embedding(memo_content)
     if isinstance(embed_result, list):
-        final_embedding = embed_result
+        base_embedding = embed_result
     else:
-        final_embedding = await encode_engine.encode(memo_content)
+        base_embedding = await encode_engine.encode(memo_content)
+
+    # Inyección Axioma Ω₂ + TurboQuant (arXiv:2504.19874)
+    final_embedding = optimize_vector_qjl(base_embedding, bits=3.5)
 
     memo_id = f"MEMO_{os.urandom(4).hex().upper()}"
     fact = CortexFactModel(
@@ -268,6 +289,8 @@ async def execute_cognitive_synthesis(
             "tier": "sovereign_distilled",
             "entities": entities,
             "resonancia": resonancia,
+            "quantization": "turboquant_3.5b_qjl",
+            "compression_ratio": "absolute_neutrality_zero_indexing"
         },
     )
 

@@ -221,7 +221,7 @@ class LLMProvider(BaseProvider):
                 logger.warning(
                     "Ω₂₃: Audit [FAIL] -> Attempting Shadow Re-phrasing (Try %d)", attempt + 2
                 )
-                # Use SHA256 for security compliance (AX-021)
+                # Use SHA256 for security compliance (AX-VII)
                 noise = hashlib.sha256(f"{time.time()}-{attempt}".encode()).hexdigest()[:6]
                 current_system = (
                     f"{system}\n\n[Sovereign-UUID: {noise}]\n"

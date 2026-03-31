@@ -1,7 +1,7 @@
 """compaction_ttl — TTL Prune strategy for the Auto-Compaction Engine.
 
 Extracted from compactor.py to satisfy the Landauer LOC barrier (≤500).
-Implements AX-019 (Persist With Decay): deprecate facts exceeding their
+Implements TTL Policy (Persist With Decay): deprecate facts exceeding their
 type-specific TTL. Immortal types (axiom, decision, bridge, etc.) are skipped.
 All mutations routed through MUTATION_ENGINE (Solid-State Substrate).
 """

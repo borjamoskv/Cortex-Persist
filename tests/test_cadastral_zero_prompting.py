@@ -340,18 +340,16 @@ class TestZeroPromptingEvolution:
 
 
 class TestAxiomRegistry:
-    def test_ax029_registered(self) -> None:
+    def test_sovereign_axiom_registered(self) -> None:
         from cortex.extensions.axioms.registry import AXIOM_REGISTRY
 
-        ax = AXIOM_REGISTRY.get("AX-029")
+        ax = AXIOM_REGISTRY.get("AX-VII")
         assert ax is not None
-        assert "Zero-Prompting" in ax.name
-        assert "Ω₇" in ax.name
 
     def test_total_axiom_count(self) -> None:
         from cortex.extensions.axioms.registry import AXIOM_REGISTRY
 
-        assert len(AXIOM_REGISTRY) == 27  # 3 + 10 + 14 (was 23, now 27)
+        assert len(AXIOM_REGISTRY) == 7
 
 
 class TestResolutionReport:

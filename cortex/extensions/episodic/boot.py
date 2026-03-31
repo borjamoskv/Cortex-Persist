@@ -313,13 +313,14 @@ async def _get_semantic_recalls(
     """
     try:
         from cortex.config import VECTOR_STORE_PATH
-        from cortex.memory import AsyncEncoder, VectorStoreL2
+        from cortex.memory.encoder import AsyncEncoder
+        from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
 
         if not VECTOR_STORE_PATH:
             return None
 
         encoder = AsyncEncoder()
-        store = VectorStoreL2(encoder=encoder, db_path=VECTOR_STORE_PATH)  # type: ignore[type-error]
+        store = SovereignVectorStoreL2(encoder=encoder)
 
         query = project_hint or "recent work"
         results = await store.recall(query=query, limit=top_k, project=project_hint)

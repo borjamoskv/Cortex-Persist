@@ -32,7 +32,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger("cortex.handoff")
 
-HANDOFF_VERSION = "1.0"
+HANDOFF_VERSION = "1.3"
 DEFAULT_HANDOFF_PATH = CORTEX_DIR / "handoff.json"
 
 # Limits
@@ -156,6 +156,7 @@ async def generate_handoff(
         "active_ghosts": active_ghosts,
         "recent_errors": recent_errors,
         "active_projects": active_projects,
+        "cognitive_fingerprint": {},
         "stats": {
             "total_facts": total_active,
             "total_projects": total_projects,

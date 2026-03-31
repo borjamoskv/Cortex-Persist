@@ -15,7 +15,8 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+import numpy as np
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 try:
     from cortex.extensions.axioms.topological_id import flake_gen
@@ -214,7 +215,15 @@ class CortexFactModel(BaseModel):
     tenant_id: str = Field(..., description="Absolute Zero-Trust Isolation.")
     project_id: str = Field(..., description="Originating project ID.")
     content: str = Field(..., description="Raw text content of the fact.")
-    embedding: list[float] = Field(..., description="Vector embedding array.")
+    embedding: list[float] | list[int] | bytes = Field(..., description="Vector embedding array.")
+    
+    @field_validator("embedding", mode="before")
+    @classmethod
+    def _validate_embedding(cls, v: Any) -> Any:
+        if isinstance(v, np.ndarray):
+            return v.tobytes()
+        return v
+        
     timestamp: float = Field(
         default_factory=lambda: datetime.now(timezone.utc).timestamp(),
         description="Unix timestamp of creation.",
