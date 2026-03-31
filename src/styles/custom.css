@@ -1,0 +1,35 @@
+/* CORTEX Unified Substrate — Industrial Noir 2026 */
+
+:root {
+  --sl-color-accent-low: #0a0a0a;
+  --sl-color-accent: #2b3be5;
+  --sl-color-accent-high: #ffffff;
+  --sl-color-bg: #0a0a0a;
+}
+
+body {
+  background-color: #0a0a0a;
+  color: #ffffff;
+  font-family: 'Inter', system-ui, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.sl-markdown-content {
+  color: #cccccc;
+}
+
+h1, h2, h3, h4 {
+  color: #ffffff;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.sl-sidebar {
+  background-color: #000000;
+  border-right: 1px solid #1a1a1a;
+}
+
+.sl-link:hover {
+  color: #2b3be5;
+}

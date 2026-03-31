@@ -39,8 +39,8 @@ jobs:
         run: pip install pip-audit bandit
       - name: Audit dependencies for known CVEs
         run: pip-audit --skip cortex-persist --skip cortex_persist --desc on --ignore-vuln GHSA-qmgc-5h2g-mvrw --ignore-vuln GHSA-j842-xgm4-wf88 --ignore-vuln GHSA-w6vg-jg77-2qg6 --ignore-vuln GHSA-f83h-ghpp-7wcc --ignore-vuln GHSA-jr27-m4p2-rc6r
-      - name: Bandit SAST scan
-        run: bandit -r cortex/ -c pyproject.toml --severity-level medium -f json -o bandit-report.json || true
+      - name: Ruff SAST scan (S-select)
+        run: ruff check cortex/ --select S --output-format json -o bandit-report.json || true
       - name: Upload Bandit report
         if: always()
         uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4
