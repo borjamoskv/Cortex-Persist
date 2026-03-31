@@ -7,30 +7,44 @@ import time
 from collections.abc import Generator
 from contextlib import contextmanager
 
+from rich.console import Console
+from rich.panel import Panel
+from rich.text import Text
+
 
 class SealPrinter:
     """Unified printer for SEALS quality gates with timing and stub support."""
 
+    def __init__(self) -> None:
+        self.console = Console()
+
     def head(self, title: str) -> None:
-        print(f"\n{'━' * 60}")
-        print(f" {title}")
-        print(f"{'━' * 60}")
+        self.console.print()
+        self.console.print(Panel(Text(title, style="bold blue"), border_style="blue"))
 
     def seal(self, gate_num: int, axiom: str, desc: str) -> None:
-        print(f"\n{'─' * 40}")
-        print(f"🔍 Gate {gate_num}: {desc} ({axiom})")
+        self.console.print()
+        self.console.print(f"[bold white]🔍 Gate {gate_num}:[/] {desc} ([dim]{axiom}[/])")
+        self.console.print("─" * 40, style="dim")
 
     def success(self, msg: str) -> None:
-        print(f"   [🟢 PASS] {msg}")
+        self.console.print(f"   [bold green]🟢 PASS[/] {msg}")
 
     def fail(self, msg: str) -> None:
-        print(f"   [🔴 FAIL] {msg}")
+        self.console.print(f"   [bold red]🔴 FAIL[/] {msg}")
 
     def warn(self, msg: str) -> None:
-        print(f"   [🟡 WARN] {msg}")
+        self.console.print(f"   [bold yellow]🟡 WARN[/] {msg}")
+
+    def info(self, msg: str) -> None:
+        self.console.print(f"   [blue]ℹ[/] {msg}")
+
+    def print(self, msg: str, style: str | None = None) -> None:
+        """Generic print method for arbitrary output."""
+        self.console.print(msg, style=style)
 
     def stub(self, msg: str) -> None:
-        print(f"   [⬜ STUB] {msg}")
+        self.console.print(f"   [bold grey]⬜ STUB[/] {msg}")
 
     @contextmanager
     def timed(self, gate_num: int) -> Generator[dict[str, float], None, None]:
@@ -48,4 +62,4 @@ class SealPrinter:
         finally:
             elapsed = (time.perf_counter() - start) * 1000
             result["elapsed_ms"] = elapsed
-            print(f"   ⏱  Gate {gate_num}: {elapsed:.0f}ms")
+            self.console.print(f"   [dim]⏱  Gate {gate_num}: {elapsed:.0f}ms[/]")

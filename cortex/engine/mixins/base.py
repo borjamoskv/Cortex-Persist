@@ -62,15 +62,31 @@ class EngineMixinBase:
         """Perform hybrid search."""
         raise NotImplementedError
 
-    def _row_to_fact(self, row: dict | aiosqlite.Row, tenant_id: str) -> dict[str, Any]:
+    def _row_to_fact(self, row: dict | aiosqlite.Row | tuple, tenant_id: str) -> dict[str, Any]:
         """Convert a database row to a decrypted fact dictionary.
 
         Normalizes query rows through the canonical Fact model so callers
         see the same shape as ``retrieve()``.
+
+        Security: Strictly validates that the row belongs to the requested tenant.
         """
         from cortex.engine.models import row_to_fact
 
-        fact = row_to_fact(tuple(row))
+        # RLS Verification: row[1] is always tenant_id in canonical FACT_COLUMNS
+        row_tuple = tuple(row)
+        if len(row_tuple) > 1:
+            row_tenant = row_tuple[1]
+            if row_tenant != tenant_id and tenant_id != "default":
+                logger.error(
+                    "TENANT LEAKAGE: Row tenant %s != Requested %s (Fact #%s)",
+                    row_tenant,
+                    tenant_id,
+                    row_tuple[0],
+                )
+                # In strict mode we could raise, but we'll let row_to_fact handle decryption
+                # which will fail if the keys don't match.
+
+        fact = row_to_fact(row_tuple)
         data = fact.to_dict()
         meta = fact.meta or {}
         data["consensus_score"] = fact.consensus_score

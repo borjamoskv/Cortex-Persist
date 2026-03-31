@@ -6,6 +6,7 @@ import asyncio
 import logging
 import time
 import uuid
+from datetime import datetime, timezone
 from typing import Any
 
 # Memory OS (RFC-CORTEX-MEMORY-OS)
@@ -287,27 +288,36 @@ class CortexMemoryManager:
 
         return event
 
-    def _check_deduplication(self, tenant_id: str, project_id: str, content: str) -> str | None:
-        """Return deduplicated ID if fact exists, else None."""
+    async def _check_deduplication(
+        self, tenant_id: str, project_id: str, content: str
+    ) -> str | None:
+        """Return deduplicated ID if fact exists, else None (async)."""
         if not content or not content.strip():
             logger.warning("CortexMemoryManager: Rejected empty fact pipeline.")
             return "empty"
 
         if self._l2 and hasattr(self._l2, "_get_conn"):
-            try:
-                conn = self._l2._get_conn()
-                cursor = conn.cursor()
-                cursor.execute(
-                    "SELECT id FROM facts_meta WHERE tenant_id = ? AND "
-                    "project_id = ? AND content = ?",
-                    (tenant_id, project_id, content),
-                )
-                row = cursor.fetchone()
-                if row:
-                    logger.info("CortexMemoryManager: Fact deduplicated (exact match).")
-                    return str(row["id"])
-            except (OSError, RuntimeError, ValueError) as e:
-                logger.warning("CortexMemoryManager: Deduplication check failed: %s", e)
+
+            def _sync_dedup():
+                try:
+                    conn = self._l2._get_conn()
+                    cursor = conn.cursor()
+                    cursor.execute(
+                        "SELECT id FROM facts_meta WHERE tenant_id = ? AND "
+                        "project_id = ? AND content = ?",
+                        (tenant_id, project_id, content),
+                    )
+                    row = cursor.fetchone()
+                    if row:
+                        return str(row["id"])
+                except (OSError, RuntimeError, ValueError) as e:
+                    logger.warning("CortexMemoryManager: Deduplication check failed: %s", e)
+                return None
+
+            dedup_id = await asyncio.to_thread(_sync_dedup)
+            if dedup_id:
+                logger.info("CortexMemoryManager: Fact deduplicated (exact match).")
+                return dedup_id
         return None
 
     def _determine_layer(self, project_id: str, layer: str) -> str:
@@ -399,7 +409,7 @@ class CortexMemoryManager:
                 logger.debug("notch_ws unavailable (FastAPI not installed), skipping notification")
             return f"filtered:{action}"
 
-        dedup_id = self._check_deduplication(tenant_id, project_id, content)
+        dedup_id = await self._check_deduplication(tenant_id, project_id, content)
         if dedup_id:
             return f"filtered:{dedup_id}" if dedup_id == "empty" else f"deduplicated:{dedup_id}"
 
@@ -422,7 +432,7 @@ class CortexMemoryManager:
             project_id=project_id,
             content=content,
             embedding=vector,
-            timestamp=time.time(),
+            timestamp=datetime.now(timezone.utc).timestamp(),
             metadata=_meta,
             cognitive_layer=adjusted_layer,  # type: ignore[reportArgumentType]
             parent_decision_id=int(parent_decision_id) if parent_decision_id is not None else None,

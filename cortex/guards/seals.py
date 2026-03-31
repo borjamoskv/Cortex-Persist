@@ -140,7 +140,7 @@ async def check_seal_1_code_quality() -> GateResult:
         printer.warn("Ruff not found — skipping (install with: pip install ruff)")
     else:
         printer.fail("Ruff linting failed.")
-        print(out[:2000])
+        printer.print(out[:2000], style="dim")
         passed = False
 
     # ── LOC Guard ──
@@ -190,7 +190,7 @@ async def check_seal_2_type_safety() -> GateResult:
                     return True, "verified"
                 else:
                     printer.fail(f"Type checking failed (threshold: {ecount}/85).")
-                    print(out[:2000])
+                    printer.print(out[:2000], style="dim")
                     return False, "verified"
         except (ValueError, KeyError, json.JSONDecodeError):
             pass
@@ -200,7 +200,7 @@ async def check_seal_2_type_safety() -> GateResult:
         return True, "verified"
     else:
         printer.fail("Type checking failed.")
-        print(out[:2000])
+        printer.print(out[:2000], style="dim")
         return False, "verified"
 
 
@@ -222,7 +222,7 @@ async def check_seal_3_security() -> GateResult:
         printer.warn("Bandit not found — skipping")
     else:
         printer.fail("Security vulnerabilities detected.")
-        print(out[:2000])
+        printer.print(out[:2000], style="dim")
         passed = False
 
     # ── Cobbler's Compliance (old Seal 11) ──
@@ -264,7 +264,7 @@ async def check_seal_3_security() -> GateResult:
     if demon_violations:
         printer.fail(f"EntropyDemon fired on engine ({len(demon_violations)} files)")
         for v in demon_violations:
-            print(f"      ↳ {v}")
+            printer.print(f"      ↳ {v}", style="yellow")
         passed = False
     else:
         printer.success(f"EntropyDemon: engine clean ({len(engine_files)} files).")
@@ -272,7 +272,7 @@ async def check_seal_3_security() -> GateResult:
     if intruder_violations:
         printer.fail(f"Intruder found issues ({len(intruder_violations)} files)")
         for v in intruder_violations:
-            print(f"      ↳ {v}")
+            printer.print(f"      ↳ {v}", style="yellow")
         passed = False
     else:
         printer.success("Intruder: no eval/exec/os.system in engine.")
@@ -299,7 +299,7 @@ async def check_seal_4_tests() -> GateResult:
         return True, "verified"
     else:
         printer.fail("Tests failed.")
-        print(out[:3000])
+        printer.print(out[:3000], style="dim")
         return False, "verified"
 
 
@@ -332,7 +332,7 @@ async def check_seal_5_ledger() -> GateResult:
         printer.success("Connection guard passed.")
     else:
         printer.fail("Connection guard failed.")
-        print(out)
+        printer.print(out, style="dim")
         passed = False
 
     return passed, "verified"
@@ -342,62 +342,36 @@ async def check_seal_5_ledger() -> GateResult:
 # SEAL 6: ASYNC & PERFORMANCE — No time.sleep + Temperature + Latency
 # Fuses: old Seal 7 (Async) + old Seal 12 (Determinism) + old Seal 13 (Latency)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-async def check_seal_6_async_perf() -> GateResult:
-    printer.seal(6, "AX-III Colapso Entrópico", "Async & Performance")
-    passed = True
-
-    # ── Async Guard (No time.sleep) ──
-    _ASYNC_EXCLUDE_FILES = frozenset(
-        [
-            "seals.py",
-            "reactor.py",
-            "antipatterns.py",
-            "_scanner_visitors.py",
-            "registry.py",
-            "legion.py",
-            "legion_vectors.py",
-            "demo_swarm.py",
-            "demo_bicameral.py",
-            "network.py",
-            "fiat_oracle.py",
-            "mouse.py",
-            "dashboard_cmds.py",
-            "health_cmds.py",
-            "ouroboros_omega.py",
-            "oracle.py",
-        ]
-    )
-    sleep_violations = []
+async def _check_blocking_sleep(exclude_files: frozenset[str]) -> list[str]:
+    """Identify synchronous time.sleep() calls in async-critical files."""
+    import ast
+    violations = []
     for py_file, content in GlobalSourceCache.files.items():
-        if py_file.name in _ASYNC_EXCLUDE_FILES:
+        if py_file.name in exclude_files:
             continue
-        import ast
         try:
             tree = ast.parse(content, filename=str(py_file))
             for node in ast.walk(tree):
                 if isinstance(node, ast.Call):
-                    if isinstance(node.func, ast.Attribute) and node.func.attr == "sleep":
-                        if isinstance(node.func.value, ast.Name) and node.func.value.id == "time":
-                            sleep_violations.append(f"{py_file.name}:{node.lineno}")
+                    # Check for time.sleep()
+                    if (isinstance(node.func, ast.Attribute) and 
+                        node.func.attr == "sleep" and 
+                        isinstance(node.func.value, ast.Name) and 
+                        node.func.value.id == "time"):
+                        violations.append(f"{py_file.name}:{node.lineno}")
+                    # Check for bare sleep() (if imported)
                     elif isinstance(node.func, ast.Name) and node.func.id == "sleep":
-                        sleep_violations.append(f"{py_file.name}:{node.lineno}")
+                        violations.append(f"{py_file.name}:{node.lineno}")
         except SyntaxError:
             pass
+    return violations
 
-    if sleep_violations:
-        printer.fail(f"Blocking time.sleep(): {sleep_violations}")
-        passed = False
-    else:
-        printer.success("No blocking time.sleep() found.")
 
-    # ── Temperature Determinism (old Seal 12) ──
-    critical_files = [
-        ROOT_DIR / "cortex/llm/router.py",
-        ROOT_DIR / "cortex/llm/provider.py",
-        ROOT_DIR / "cortex/guards/seals.py",
-    ]
-    temp_violations = []
+async def _check_temperature_determinism(critical_files: list[Path]) -> list[str]:
+    """Ensure LLM calls use temperature=0 for determinism."""
     import ast
+    violations = []
+    zero_values = (0, 0.0)
     for path in critical_files:
         if path in GlobalSourceCache.files:
             content = GlobalSourceCache.files[path]
@@ -410,7 +384,6 @@ async def check_seal_6_async_perf() -> GateResult:
             tree = ast.parse(content, filename=str(path))
             has_temp = False
             has_zero = False
-            zero_values = (0, 0.0)
             for node in ast.walk(tree):
                 if isinstance(node, ast.keyword) and node.arg == "temperature":
                     has_temp = True
@@ -423,33 +396,65 @@ async def check_seal_6_async_perf() -> GateResult:
                             if isinstance(v, ast.Constant) and v.value in zero_values:
                                 has_zero = True
             if has_temp and not has_zero:
-                temp_violations.append(path.name)
+                violations.append(path.name)
         except SyntaxError:
             pass
+    return violations
 
+
+async def _check_latency_telemetry() -> list[str]:
+    """Audit local provider latency from telemetry."""
+    try:
+        from cortex.extensions.llm._telemetry import CascadeTelemetry
+        telemetry = CascadeTelemetry()
+        stats = telemetry.stats()
+        slow = []
+        for prov in ["ollama", "vllm", "jan", "lmstudio"]:
+            avg_lat = stats.get(prov, {}).get("avg_latency_ms", 0)
+            if avg_lat > 200:
+                slow.append(f"{prov} ({avg_lat}ms)")
+        return slow
+    except ImportError:
+        return []
+
+
+async def check_seal_6_async_perf() -> GateResult:
+    printer.seal(6, "AX-III Colapso Entrópico", "Async & Performance")
+    passed = True
+
+    # ── Async Guard (No time.sleep) ──
+    exclude = frozenset([
+        "seals.py", "reactor.py", "antipatterns.py", "_scanner_visitors.py",
+        "registry.py", "legion.py", "legion_vectors.py", "demo_swarm.py",
+        "demo_bicameral.py", "network.py", "fiat_oracle.py", "mouse.py",
+        "dashboard_cmds.py", "health_cmds.py", "ouroboros_omega.py", "oracle.py",
+    ])
+    sleep_violations = await _check_blocking_sleep(exclude)
+    if sleep_violations:
+        printer.fail(f"Blocking time.sleep(): {sleep_violations}")
+        passed = False
+    else:
+        printer.success("No blocking time.sleep() found.")
+
+    # ── Temperature Determinism ──
+    critical = [
+        ROOT_DIR / "cortex/llm/router.py",
+        ROOT_DIR / "cortex/llm/provider.py",
+        ROOT_DIR / "cortex/guards/seals.py",
+    ]
+    temp_violations = await _check_temperature_determinism(critical)
     if temp_violations:
         printer.fail(f"Temperature drift in {temp_violations}")
         passed = False
     else:
         printer.success("Temperature Determinism intact.")
 
-    # ── Latency Check (old Seal 13, warn-only) ──
-    try:
-        from cortex.extensions.llm._telemetry import CascadeTelemetry
-
-        telemetry = CascadeTelemetry()
-        stats = telemetry.stats()
-        slow_locals = []
-        for prov in ["ollama", "vllm", "jan", "lmstudio"]:
-            avg_lat = stats.get(prov, {}).get("avg_latency_ms", 0)
-            if avg_lat > 200:
-                slow_locals.append(f"{prov} ({avg_lat}ms)")
-        if slow_locals:
-            printer.warn(f"High local latency: {slow_locals}")
-        else:
-            printer.success("Latency <200ms.")
-    except ImportError:
-        pass  # Telemetry extension not available — silent skip
+    # ── Latency Check ──
+    slow_locals = await _check_latency_telemetry()
+    if slow_locals:
+        printer.warn(f"High local latency: {slow_locals}")
+    else:
+        printer.success("Latency <200ms.")
 
     return passed, "verified"
 
@@ -528,39 +533,92 @@ async def check_seal_10_preservation() -> GateResult:
 _GATE_ORDER = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
 
+def _parse_gate_filters() -> tuple[set[int], set[int], set[int]]:
+    """Extract gate filters from environment variables."""
+    def _to_set(var: str) -> set[int]:
+        return {int(g.strip()) for g in os.environ.get(var, "").split(",") if g.strip().isdigit()}
+    
+    skip = _to_set("SKIP_GATES")
+    only = _to_set("ONLY_GATES")
+    force = _to_set("FORCE_GATES")
+    
+    if only:
+        skip = {gn for gn in _GATE_ORDER if gn not in only}
+        
+    return skip, only, force
+
+
+async def _execute_gates_loop(
+    gate_order: list[int],
+    gate_fns: dict[int, Callable[[], Coroutine[Any, Any, GateResult]]],
+    skip: set[int],
+    force: set[int],
+    fail_fast: bool,
+) -> dict[int, GateResult]:
+    """Run the defined gates and return results mapping."""
+    results: dict[int, GateResult] = {}
+    
+    for gate_num in gate_order:
+        if gate_num in skip:
+            printer.seal(gate_num, "SKIPPED", f"Seal {gate_num} — skipped via Filtering")
+            results[gate_num] = (True, "skipped")
+            continue
+            
+        if gate_num in force:
+            printer.warn(f"Seal {gate_num} — FORCE VALIDATION (Bypassing auto-skip)")
+            
+        start = time.perf_counter()
+        res = await gate_fns[gate_num]()
+        elapsed = (time.perf_counter() - start) * 1000
+        printer.print(f"   [dim]⏱  {elapsed:.0f}ms[/]")
+        
+        results[gate_num] = res
+        if fail_fast and not res[0]:
+            printer.fail(f"FAIL-FAST: Seal {gate_num} failed. Aborting.")
+            break
+            
+    return results
+
+
+def _print_summary(results: dict[int, GateResult], total_elapsed: float) -> int:
+    """Print the final seals summary and return exit code."""
+    printer.head("SOVEREIGN SEALS SUMMARY")
+    
+    verified = [gn for gn, (p, k) in results.items() if k == "verified" and p]
+    skipped = [gn for gn, (_, k) in results.items() if k == "skipped"]
+    failed = [gn for gn, (p, k) in results.items() if not p]
+    
+    printer.print(
+        f"   [bold green]🟢 VERIFIED: {len(verified)}[/]  "
+        f"[bold yellow]🟡 SKIPPED: {len(skipped)}[/]  "
+        f"[bold red]🔴 FAILED: {len(failed)}[/]"
+    )
+    printer.print(f"   [dim]⏱  Total: {total_elapsed:.0f}ms[/]")
+    
+    if failed:
+        printer.fail(f"SEALS BROKEN: {sorted(failed)}\nFix violations before pushing.")
+        return 1
+    printer.success(f"ALL {len(verified)} SOVEREIGN SEALS INTACT. Ready for launch.")
+    return 0
+
+
 async def main() -> int:
     total_start = time.perf_counter()
     printer.head("10 SOVEREIGN SEALS — CORTEX QUALITY GATES")
 
-    # Pre-cache all Python files into memory concurrently.
     await GlobalSourceCache.load()
 
-    # ── Advanced Gate Filtering (Axiom Ω₂) ──
-    _skip = {
-        int(g.strip()) for g in os.environ.get("SKIP_GATES", "").split(",") if g.strip().isdigit()
-    }
-    _only = {
-        int(g.strip()) for g in os.environ.get("ONLY_GATES", "").split(",") if g.strip().isdigit()
-    }
-    _force = {
-        int(g.strip()) for g in os.environ.get("FORCE_GATES", "").split(",") if g.strip().isdigit()
-    }
-
-    # If ONLY_GATES is set, it defines the entire set to run.
-    if _only:
-        # Override skip to include anything not in 'only'
-        _skip = {gn for gn in _GATE_ORDER if gn not in _only}
-
+    skip, only, force = _parse_gate_filters()
     is_ci = os.environ.get("CI") == "1" or os.environ.get("CORTEX_FULL_SEALS") == "1"
-    # Auto-skip Gate 4 locally unless explicitly forced or requested via ONLY_GATES
-    if not is_ci and 4 not in _force and 4 not in _only:
-        if 4 not in _skip:
-            printer.warn("Ω₂ EXERGY PRESERVATION: Running in FAST MODE.")
-            printer.warn("Heavy integration tests (Gate 4) are SKIPPED. Delegated to remote CI.")
-            _skip.add(4)
+    
+    # Auto-skip Gate 4 locally
+    if not is_ci and 4 not in force and 4 not in only:
+        if 4 not in skip:
+            printer.warn("Ω₂ EXERGY PRESERVATION: Running in FAST MODE (Gate 4 SKIPPED).")
+            skip.add(4)
+            
     fail_fast = os.environ.get("FAIL_FAST", "").strip() in ("1", "true", "yes")
 
-    # Build gate callables
     gate_fns: dict[int, Callable[[], Coroutine[Any, Any, GateResult]]] = {
         1: check_seal_1_code_quality,
         2: check_seal_2_type_safety,
@@ -574,53 +632,10 @@ async def main() -> int:
         10: check_seal_10_preservation,
     }
 
-    async def _timed_gate(
-        gate_num: int,
-        fn: Callable[[], Coroutine[Any, Any, GateResult]],
-    ) -> GateResult:
-        """Execute a gate with SKIP_GATES check and timing."""
-        if gate_num in _skip:
-            printer.seal(gate_num, "SKIPPED", f"Seal {gate_num} — skipped via Filtering")
-            return True, "skipped"
-        if gate_num in _force:
-            printer.warn(f"Seal {gate_num} — FORCE VALIDATION (Bypassing auto-skip)")
-        start = time.perf_counter()
-        result = await fn()
-        elapsed = (time.perf_counter() - start) * 1000
-        print(f"   ⏱  {elapsed:.0f}ms")
-        return result
-
-    # Collect results
-    gate_results: dict[int, GateResult] = {}
-
-    if fail_fast:
-        for gate_num in _GATE_ORDER:
-            fn = gate_fns[gate_num]
-            result = await _timed_gate(gate_num, fn)
-            gate_results[gate_num] = result
-            if not result[0]:
-                printer.fail(f"FAIL-FAST: Seal {gate_num} failed. Aborting.")
-                break
-    else:
-        for gn in _GATE_ORDER:
-            gate_results[gn] = await _timed_gate(gn, gate_fns[gn])
-
-    # ── Summary ──
+    results = await _execute_gates_loop(_GATE_ORDER, gate_fns, skip, force, fail_fast)
     total_elapsed = (time.perf_counter() - total_start) * 1000
-    printer.head("SOVEREIGN SEALS SUMMARY")
-
-    verified = [gn for gn, (p, k) in gate_results.items() if k == "verified" and p]
-    skipped = [gn for gn, (_, k) in gate_results.items() if k == "skipped"]
-    failed = [gn for gn, (p, k) in gate_results.items() if not p]
-
-    print(f"   🟢 VERIFIED: {len(verified)}  🟡 SKIPPED: {len(skipped)}  🔴 FAILED: {len(failed)}")
-    print(f"   ⏱  Total: {total_elapsed:.0f}ms")
-
-    if failed:
-        printer.fail(f"SEALS BROKEN: {sorted(failed)}\nFix violations before pushing.")
-        return 1
-    printer.success(f"ALL {len(verified)} SOVEREIGN SEALS INTACT. Ready for launch.")
-    return 0
+    
+    return _print_summary(results, total_elapsed)
 
 
 if __name__ == "__main__":
