@@ -8,7 +8,7 @@ import os
 import sys
 import uuid
 from collections.abc import Callable
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
@@ -17,6 +17,7 @@ from typing import Any
 from cortex.extensions.signals.bus import AsyncSignalBus
 from cortex.extensions.swarm.auto_fix import AutoFixPipeline
 from cortex.extensions.swarm.budget import get_budget_manager
+from cortex.extensions.swarm.protocols import AgentRole, SwarmIntent, SwarmSignalSchema
 from cortex.extensions.swarm.worktree_isolation import isolated_worktree
 
 logger = logging.getLogger("cortex.extensions.swarm.manager")
@@ -155,6 +156,7 @@ class SwarmTask:
     id: str = field(default_factory=lambda: str(uuid.uuid4())[:8])
     name: str = "Anonymous Task"
     agent_name: str = "UniversalAgent"
+    role: AgentRole = AgentRole.WORKER
     status: TaskStatus = TaskStatus.PENDING
     result: Any = None
     error: str | None = None
@@ -176,19 +178,40 @@ class CapatazOrchestrator:
         payload: dict[str, Any],
         mission_id: str | None = None,
         engine: Any | None = None,
+        agent_name: str = "UniversalAgent",
+        role: AgentRole = AgentRole.WORKER,
+        intent: SwarmIntent = SwarmIntent.DISCOVERY,
     ) -> str:
-        """Execute completion and broadcast discovery via SignalBus."""
+        """Execute completion and broadcast discovery via SignalBus (Ω₁₄)."""
         # Simulated LLM call logic...
-        result = "Success" 
-        
+        result = "Success"
+
         if engine and hasattr(engine, "get_async_engine"):
-            async with engine.session() as conn:
-                bus = AsyncSignalBus(conn)
-                await bus.emit(
-                    event_type="swarm_discovery",
-                    payload={"mission_id": self.mission_id, "discovery": result},
-                    source=self.mission_id,
-                )
+            schema = SwarmSignalSchema(
+                mission_id=self.mission_id,
+                agent_id=agent_name,
+                intent=intent,
+                role=role,
+                payload={"discovery": result},
+            )
+            if asyncio.iscoroutinefunction(engine.session):
+                async with engine.session() as conn:
+                    bus = AsyncSignalBus(conn)
+                    await bus.emit(
+                        event_type="swarm_discovery",
+                        payload=asdict(schema),
+                        source=self.mission_id,
+                    )
+            else:
+                with engine.session() as conn:
+                    from cortex.extensions.signals.bus import SignalBus
+
+                    bus = SignalBus(conn)
+                    bus.emit(
+                        event_type="swarm_discovery",
+                        payload=asdict(schema),
+                        source=self.mission_id,
+                    )
         return result
 
     async def run_task(
@@ -196,22 +219,40 @@ class CapatazOrchestrator:
         name: str,
         agent_name: str,
         coro_func: Callable[..., Any],
+        role: AgentRole = AgentRole.WORKER,
         args: list[Any] | tuple[Any, ...] = (),
         kwargs: dict[str, Any] | None = None,
         lock_resource: str | None = None,
         lock_manager: Any | None = None,
         lock_timeout_s: float = 10.0,
         lock_ttl_s: float = 30.0,
+        engine: Any | None = None,
     ) -> Any:
         """Run a single task under the mission context."""
-        task = SwarmTask(name=name, agent_name=agent_name, status=TaskStatus.RUNNING)
+        task = SwarmTask(name=name, agent_name=agent_name, role=role, status=TaskStatus.RUNNING)
         self.tasks[task.id] = task
 
-        logger.info("[%s] Capataz: Deploying %s to task: %s", self.mission_id, agent_name, name)
+        logger.info(
+            "[%s] Capataz: Deploying %s (%s) to task: %s",
+            self.mission_id,
+            agent_name,
+            role.value,
+            name,
+        )
 
         lock_acquired = False
         try:
             kwargs = kwargs or {}
+
+            # BROADCAST JIT DISCOVERY
+            await self._execute_completion_with_tracking(
+                url="",
+                headers={},
+                payload={},
+                engine=engine,
+                agent_name=agent_name,
+                role=role,
+            )
 
             if lock_resource and lock_manager:
                 logger.debug(
@@ -258,12 +299,14 @@ class CapatazOrchestrator:
                 name=td["name"],
                 agent_name=td["agent_name"],
                 coro_func=td["func"],
+                role=td.get("role", AgentRole.WORKER),
                 args=td.get("args", ()),
                 kwargs=td.get("kwargs", {}),
                 lock_resource=td.get("lock_resource"),
                 lock_manager=td.get("lock_manager"),
                 lock_timeout_s=td.get("lock_timeout_s", 10.0),
                 lock_ttl_s=td.get("lock_ttl_s", 30.0),
+                engine=td.get("engine"),
             )
             for td in task_definitions
         ]

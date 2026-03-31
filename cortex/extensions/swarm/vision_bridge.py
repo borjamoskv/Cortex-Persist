@@ -2,6 +2,7 @@
 
 import logging
 from typing import Any, Optional
+
 from scripts.mac_control.cdp_engine import MacControlOmega
 
 logger = logging.getLogger("cortex.swarm.vision")
