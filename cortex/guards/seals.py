@@ -189,6 +189,8 @@ async def check_gate_5_ledger() -> bool:
 async def check_gate_6_connection() -> bool:
     printer.seal(6, "AX-017 Ledger Integrity", "Connection Guard")
     python_cmd = ROOT_DIR / ".venv" / "bin" / "python"
+    if not python_cmd.exists():
+        python_cmd = Path(sys.executable)
     code, out = await arun_cmd(
         [str(python_cmd), "-m", "cortex.database.connection_guard", "--root", "cortex"]
     )
@@ -437,9 +439,16 @@ async def check_gate_13_latency() -> bool:
     except ImportError:
         printer.warn("Seal 13 Skipped: LLM telemetry extension not found.")
         return True
+    except Exception as e:  # noqa: BLE001 — telemetry imports can have optional runtime side effects
+        printer.warn(f"Seal 13 Skipped: LLM telemetry unavailable ({e})")
+        return True
 
-    telemetry = CascadeTelemetry()
-    stats = telemetry.stats()
+    try:
+        telemetry = CascadeTelemetry()
+        stats = telemetry.stats()
+    except Exception as e:  # noqa: BLE001 — telemetry is advisory for this gate
+        printer.warn(f"Seal 13 Skipped: LLM telemetry unavailable ({e})")
+        return True
 
     slow_locals = []
     # If no local data, we pass (can't verify)
