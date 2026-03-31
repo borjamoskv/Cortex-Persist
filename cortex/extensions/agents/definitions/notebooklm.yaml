@@ -23,7 +23,7 @@ system_prompt: |
        - Shadow Keys survive LLM synthesis for deterministic reverse-extraction.
        - Word count guard: < 500,000 per document (NotebookLM ingestion limit).
     2. 🧩 FRAGMENT (Domain Split): Decompose digest into 7 semantic domains:
-       - cortex-core, cortex-infra, cortex-agents, cortex-products,
+       - cortex-core, cortex-infra, cortex.agents, cortex-products,
          cortex-operations, cortex-strategy, cortex-research.
        - Each domain gets its own timestamped .md file.
        - Group facts by project within domain, then by fact_type within project.

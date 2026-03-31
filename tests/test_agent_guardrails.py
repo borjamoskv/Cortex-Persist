@@ -4,8 +4,8 @@ import tempfile
 
 import pytest
 
-from cortex.agent.loader import compile_agent
-from cortex.agent.schema import AgentRole, GuardrailConfig, MemoryConfig
+from cortex.agents.loader import compile_agent
+from cortex.agents.schema import AgentRole, GuardrailConfig, MemoryConfig
 from cortex.memory.guardrails import SessionGuardrail
 from cortex.memory.models import MemoryEvent
 from cortex.memory.working import WorkingMemoryL1

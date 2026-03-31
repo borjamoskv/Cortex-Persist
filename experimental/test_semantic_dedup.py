@@ -4,7 +4,7 @@ import asyncio
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from cortex.engine_async import AsyncCortexEngine
+from cortex.engine import CortexEngine as AsyncCortexEngine
 from cortex.database.pool import CortexConnectionPool
 
 async def run_test():

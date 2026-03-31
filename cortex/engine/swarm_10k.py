@@ -154,12 +154,8 @@ class SwarmCommander:
         await self.bus.emit(
             "swarm:annihilation", source="commander", tenant_id=self.tenant_id, routing_key="global"
         )
-        # Logic to extract final ledger states (placeholder)
-
-        # Annihilation: Purging hierarchy logic
-        self.legions.clear()
-
         # Shannon compaction
         await self.bus.gc(max_age_days=0, tenant_id=self.tenant_id)
+        self.legions.clear()
 
         await self.bus.close()

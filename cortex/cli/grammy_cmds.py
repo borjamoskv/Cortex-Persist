@@ -41,9 +41,7 @@ def produce_cmd(title, concept, bpm, key):
             TrackState,
         )
     except Exception as exc:  # noqa: BLE001
-        console.print(
-            f"[bold red]✗ GRAMMY-Ω no está disponible en este entorno:[/bold red] {exc}"
-        )
+        console.print(f"[bold red]✗ GRAMMY-Ω no está disponible en este entorno:[/bold red] {exc}")
         return
 
     console.print(

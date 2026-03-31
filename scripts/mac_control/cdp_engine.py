@@ -11,7 +11,7 @@ logger = logging.getLogger("mac-control-omega")
 
 class MacControlOmega:
     """Sovereign macOS UI Control via Raw CDP."""
-    
+
     def __init__(self, host: str = "127.0.0.1", port: int = 9222):
         self.host = host
         self.port = port
@@ -27,22 +27,22 @@ class MacControlOmega:
                 res = await client.get(f"{self.base_url}/json")
                 res.raise_for_status()
                 tabs = res.json()
-                
+
             # Find matching tab
             target = None
             for tab in tabs:
                 if tab.get('type') == 'page' and target_url_substring in tab.get('url', ''):
                     target = tab
                     break
-            
+
             if not target:
                 logger.error("No tab found matching: '%s'", target_url_substring)
                 return False
-                
+
             self.ws_url = target['webSocketDebuggerUrl']
             self.ws = await websockets.connect(self.ws_url)
             logger.info("Connected to CDP: %s", target['url'])
-            
+
             # Enable core domains
             await self.send("Page.enable")
             await self.send("Runtime.enable")
@@ -106,11 +106,11 @@ class MacControlOmega:
         res = await self.send("Runtime.evaluate", {"expression": js_expression, "returnByValue": True})
         if 'result' in res and 'value' in res['result']:
             return res['result']['value']
-        
+
         # Check for exception details
         if 'exceptionDetails' in res:
             logger.error("JS Error: %s", res['exceptionDetails'])
-            
+
         return None
 
     async def screenshot(self, filepath: str):

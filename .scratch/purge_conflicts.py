@@ -29,10 +29,10 @@ def main():
     dry_run = "--dry-run" in sys.argv
     root = Path("cortex")
     files = sorted(root.rglob("*.py"))
-    
+
     total_conflicts = 0
     total_files = 0
-    
+
     for f in files:
         try:
             content = f.read_text(encoding="utf-8", errors="replace")
@@ -46,7 +46,7 @@ def main():
             total_conflicts += count
             prefix = "[DRY] " if dry_run else "[FIX] "
             print(f"{prefix}{f} — {count} conflicts")
-    
+
     print(f"\n{'DRY RUN' if dry_run else 'RESOLVED'}: {total_conflicts} conflicts in {total_files} files")
 
 

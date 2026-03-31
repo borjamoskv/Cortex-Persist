@@ -31,7 +31,7 @@ def _header() -> str:
         " — do not edit manually.**\n\n"
         "### Invarianza Total\n\n"
         '> *"CORTEX no aumenta la inteligencia del modelo fundacional; '
-        "restringe rígidamente su libertad estructural para contaminar la arquitectura.\"*\n\n---\n\n"
+        'restringe rígidamente su libertad estructural para contaminar la arquitectura."*\n\n---\n\n'
         "## Taxonomy\n\n"
         "| Layer | IDs | Nature | Count |\n"
         "|:---|:---|:---|:---:|\n"

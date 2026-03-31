@@ -23,7 +23,7 @@ __all__ = [
     "probe_untested_assumptions",
 ]
 
-logger = logging.getLogger("cortex.immune.probe")
+logger = logging.getLogger("cortex.security.probe")
 
 
 @dataclass

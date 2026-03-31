@@ -50,6 +50,7 @@ async def embed_fact_async(
     if embedder:
         try:
             import inspect
+
             if inspect.iscoroutinefunction(embedder.embed):
                 embedding = await embedder.embed(content)
             else:

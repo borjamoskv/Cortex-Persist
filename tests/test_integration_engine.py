@@ -4,7 +4,7 @@ import pytest
 
 from cortex.consensus.manager import ConsensusManager
 from cortex.database.schema import get_all_schema
-from cortex.engine_async import AsyncCortexEngine
+from cortex.engine import CortexEngine as AsyncCortexEngine
 
 
 @pytest.fixture
@@ -33,11 +33,16 @@ async def engine(tmp_path):
 @pytest.mark.asyncio
 async def test_connection_pool_stability(engine):
     """Verify that concurrent operations don't leak connections or timeout."""
-    # Insert required fact for foreign key
+    # Insert required fact and agents for foreign key constraints
     async with engine.session() as conn:
         await conn.execute(
             "INSERT INTO facts (id, content, project) VALUES (1, 'Test Fact', 'test_proj')"
         )
+        for i in range(100):
+            await conn.execute(
+                "INSERT INTO agents (id, public_key, name, is_active, reputation_score) VALUES (?, ?, ?, ?, ?)",
+                (f"agent_{i}", f"pub_{i}", f"Agent {i}", 1, 0.5)
+            )
         await conn.commit()
 
     manager = ConsensusManager(engine)
@@ -45,7 +50,7 @@ async def test_connection_pool_stability(engine):
     # Simulate 100 concurrent votes
     tasks = []
     for i in range(100):
-        tasks.append(manager.vote(fact_id=1, agent=f"agent_{i}", value=1))
+        tasks.append(manager.vote_v2(fact_id=1, agent_id=f"agent_{i}", value=1))
 
     # This should complete without "Too many open connections" or pool timeouts
     scores = await asyncio.gather(*tasks)
@@ -65,27 +70,41 @@ async def test_multi_tenant_isolation(engine):
             "INSERT INTO facts (id, content, project) VALUES (10, 'Tenant Fact', 'test_proj')"
         )
 
+        # Seed agents for isolation test
+        await conn.execute(
+            "INSERT INTO agents (id, public_key, name, is_active, reputation_score) VALUES (?, ?, ?, ?, ?)",
+            ("agent_A", "pub_A", "Agent A", 1, 0.5)
+        )
+        await conn.execute(
+            "INSERT INTO agents (id, public_key, name, is_active, reputation_score) VALUES (?, ?, ?, ?, ?)",
+            ("agent_B", "pub_B", "Agent B", 1, 0.5)
+        )
+
         # Add a vote for tenant A
         await conn.execute(
-            "INSERT INTO consensus_votes (fact_id, agent, vote, tenant_id) VALUES (?, ?, ?, ?)",
-            (10, "agent_A", 1, "tenant_A"),
+            """INSERT INTO consensus_votes_v2 
+               (fact_id, agent_id, vote, tenant_id, vote_weight, agent_rep_at_vote) 
+               VALUES (?, ?, ?, ?, ?, ?)""",
+            (10, "agent_A", 1, "tenant_A", 1.0, 0.5),
         )
         # Add a vote for tenant B
         await conn.execute(
-            "INSERT INTO consensus_votes (fact_id, agent, vote, tenant_id) VALUES (?, ?, ?, ?)",
-            (10, "agent_B", -1, "tenant_B"),
+            """INSERT INTO consensus_votes_v2 
+               (fact_id, agent_id, vote, tenant_id, vote_weight, agent_rep_at_vote) 
+               VALUES (?, ?, ?, ?, ?, ?)""",
+            (10, "agent_B", -1, "tenant_B", 1.0, 0.5),
         )
         await conn.commit()
 
         # Verify isolation via raw SQL
         cursor = await conn.execute(
-            "SELECT COUNT(*) FROM consensus_votes WHERE tenant_id = ?", ("tenant_A",)
+            "SELECT COUNT(*) FROM consensus_votes_v2 WHERE tenant_id = ?", ("tenant_A",)
         )
         row_a = await cursor.fetchone()
         assert row_a[0] == 1
 
         cursor = await conn.execute(
-            "SELECT COUNT(*) FROM consensus_votes WHERE tenant_id = ?", ("tenant_B",)
+            "SELECT COUNT(*) FROM consensus_votes_v2 WHERE tenant_id = ?", ("tenant_B",)
         )
         row_b = await cursor.fetchone()
         assert row_b[0] == 1

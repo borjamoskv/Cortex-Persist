@@ -217,9 +217,10 @@ def _parse_pyproject_deps() -> set[str]:
 
     content = pyproject.read_text(encoding="utf-8")
     deps: set[str] = set()
-    
+
     try:
         import tomllib
+
         data = tomllib.loads(content)
         # Extract dependencies from standard pyproject locations
         project_deps = data.get("project", {}).get("dependencies", [])
@@ -239,7 +240,7 @@ def _parse_pyproject_deps() -> set[str]:
         # Fallback to regex si tomllib no existe (ej. Python < 3.11 sin tomli)
         for match in re.finditer(r'"([a-zA-Z0-9_-]+)', content):
             deps.add(match.group(1).lower().replace("-", "_"))
-            
+
     return deps
 
 
@@ -332,7 +333,7 @@ async def check_seal_9_compliance_impl() -> tuple[bool, str]:
     import asyncio
 
     # ── Aesthetic Gate ──
-    forbidden = ["FIXME", "TODO: placeholder", "MVP style"]
+    forbidden = ["FIXME", "TODO: placeholder", "MVP style"]  # no-audit
     targets = [ROOT_DIR / "README.md", ROOT_DIR / "AGENTS.md"]
     aesthetic_issues = []
     for t in targets:

@@ -213,27 +213,27 @@ class ContextCacheManager:
             from cortex.memory.models import CortexFactModel
             from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
             from cortex.utils.turboquant import optimize_vector_qjl
-            
+
             # Aplicamos cuantización asimétrica TurboQuant 3.5b -> 1.0b
             quantized_int8_list = optimize_vector_qjl(
                 raw_tensor, bits=3.5, layer_depth_ratio=layer_depth_ratio
             )
-            
+
             handle = f"local_tq_3.5b_var_{int(time.time() * 1000)}"
-            
+
             # Ouroboros V2: MMAP Bypassing SQLite for raw tensor
             mmap_dir = "/tmp/cortex_mmap_kv"
             os.makedirs(mmap_dir, exist_ok=True)
             safetensors_path = os.path.join(mmap_dir, f"{handle}.st")
-            
+
             arr = np.array(quantized_int8_list, dtype=np.int8)
             with open(safetensors_path, "wb") as f:
                 f.write(arr.tobytes())
-            
+
             # Instanciar el motor L2 nativo de CORTEX
             encode_engine = AsyncEncoder()
             vector_db = SovereignVectorStoreL2(encoder=encode_engine)
-            
+
             fact = CortexFactModel(
                 id=handle,
                 tenant_id="sovereign",
@@ -248,19 +248,25 @@ class ContextCacheManager:
                     "quantization": "turboquant_test_qjl",
                     "storage": "mmap_zero_copy",
                     "mmap_uri": safetensors_path,
-                    "provider": provider
-                }
+                    "provider": provider,
+                },
             )
-            
+
             # Conexión directa al Layer de SQLite (Solo Puntero MMAP)
             await vector_db.memorize(fact)
-            logger.info("⚡ KV Cache %s persistido a disco vía zero-copy MMAP eficientemente.", handle)
-            
+            logger.info(
+                "⚡ KV Cache %s persistido a disco vía zero-copy MMAP eficientemente.", handle
+            )
+
         except ImportError as e:
             logger.error("Failed to map KV-Cache to Sovereign Store: %s", e)
             handle = "local_raw_fallback"
 
-        meta = {"quantization": "turboquant_3.5b", "storage": "mmap_zero_copy", "is_delta": parent_cache_id is not None}
+        meta = {
+            "quantization": "turboquant_3.5b",
+            "storage": "mmap_zero_copy",
+            "is_delta": parent_cache_id is not None,
+        }
         return self.create(
             project=project,
             provider=provider,
@@ -283,20 +289,25 @@ class ContextCacheManager:
         entry = self.get(cache_id)
         if not entry:
             return False
-            
-        logger.info("🚄 DMA Prefetch: Precargando Delta KV Cache '%s' asincrónicamente para latencia cero...", cache_id)
-        
+
+        logger.info(
+            "🚄 DMA Prefetch: Precargando Delta KV Cache '%s' asincrónicamente para latencia cero...",
+            cache_id,
+        )
+
         # Ouroboros V2: MMAP real loading into memory
         mmap_uri = entry.meta.get("mmap_uri")
         if mmap_uri:
             import mmap
             import os
+
             if os.path.exists(mmap_uri):
                 with open(mmap_uri, "r+b") as f:
-                    _ = mmap.mmap(f.fileno(), 0) # DMA Memory map initialized in system RAM
-                    
+                    _ = mmap.mmap(f.fileno(), 0)  # DMA Memory map initialized in system RAM
+
         import asyncio
-        await asyncio.sleep(0.001) # Simula DMA I/O extra
+
+        await asyncio.sleep(0.001)  # Simula DMA I/O extra
         return True
 
     def get(self, cache_id: str) -> CacheEntry | None:

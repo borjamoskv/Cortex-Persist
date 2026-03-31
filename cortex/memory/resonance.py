@@ -21,10 +21,12 @@ if TYPE_CHECKING:
 logger = logging.getLogger("cortex.memory.resonance")
 
 
-def cosine_similarity(a: list[float] | list[int] | bytes, b: list[float] | list[int] | bytes) -> float:
+def cosine_similarity(
+    a: list[float] | list[int] | bytes, b: list[float] | list[int] | bytes
+) -> float:
     """Compute cosine similarity between two vectors, supporting int8 bytes representations."""
     import numpy as np
-    
+
     def _to_array(v: Any) -> np.ndarray:
         if isinstance(v, bytes):
             return np.frombuffer(v, dtype=np.int8).astype(np.float32)
@@ -32,14 +34,14 @@ def cosine_similarity(a: list[float] | list[int] | bytes, b: list[float] | list[
 
     arr_a = _to_array(a)
     arr_b = _to_array(b)
-    
+
     if arr_a.size != arr_b.size or arr_a.size == 0:
         return 0.0
-        
+
     dot = np.dot(arr_a, arr_b)
     norm_a = np.linalg.norm(arr_a)
     norm_b = np.linalg.norm(arr_b)
-    
+
     if norm_a < 1e-12 or norm_b < 1e-12:
         return 0.0
     return float(dot / (norm_a * norm_b))

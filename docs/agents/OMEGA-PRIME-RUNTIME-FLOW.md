@@ -38,7 +38,7 @@ Omega Prime is not a "god agent". It is an orchestrator. If the distance between
 
 ## 3. The Envelope Rule
 
-No raw string output is ever placed on the bus. Every decision out of the LLM is caught, parsed by Pydantic models defined in `cortex/agents/contracts.py`, and serialized into a typed `AgentMessage`.
+No raw string output is ever placed on the bus. Every decision out of the LLM is caught, parsed by Pydantic models defined in `cortex.agents/contracts.py`, and serialized into a typed `AgentMessage`.
 
 If the LLM outputs invalid JSON or a structure that fails the Pydantic validator, the pipeline intercepts it, logs a metric, and retries up to `max_retries` before transitioning the task to `task.failed` and placing the message in the Dead Letter Queue.
 

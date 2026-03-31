@@ -8,8 +8,8 @@ from starlette.requests import Request
 
 from cortex.api.deps import get_async_engine
 from cortex.auth import AuthResult, require_permission
+from cortex.engine import CortexEngine as AsyncCortexEngine
 from cortex.engine.storage_guard import GuardViolation
-from cortex.engine_async import AsyncCortexEngine
 from cortex.types.models import (
     FactResponse,
     StoreRequest,
@@ -302,7 +302,7 @@ async def cast_vote(
             )
 
         agent_id = auth.key_name or "api_agent"
-        score = await engine.vote(fact_id, agent_id, req.value)
+        score = await engine.vote_v2(fact_id, agent_id, req.value)
 
         # Confidence is updated automatically by manager
         updated_fact = await engine.get_fact(fact_id, tenant_id=auth.tenant_id)
@@ -342,7 +342,7 @@ async def cast_vote_v2(
                 status_code=404, detail=get_trans("error_fact_not_found", lang).format(id=fact_id)
             )
 
-        score = await engine.vote(
+        score = await engine.vote_v2(
             fact_id=fact_id,
             agent=req.agent_id,
             value=req.vote,

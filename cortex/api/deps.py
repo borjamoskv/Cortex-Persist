@@ -6,7 +6,7 @@ Shared dependencies for FastAPI routes.
 from fastapi import Request
 
 from cortex.engine import CortexEngine
-from cortex.engine_async import AsyncCortexEngine
+from cortex.engine import CortexEngine as AsyncCortexEngine
 from cortex.extensions.timing import TimingTracker
 
 __all__ = ["get_engine", "get_async_engine", "get_tracker"]

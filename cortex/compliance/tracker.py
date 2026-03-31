@@ -145,7 +145,7 @@ class ComplianceTracker:
                 "violations": [],
             }
 
-        return self._engine._run_sync(ledger.verify_integrity_async())  # type: ignore[type-error]
+        return self._engine._run_sync(ledger.audit_integrity_async())  # type: ignore[type-error]
 
     # ─── 3. export_audit ──────────────────────────────────────────
 
@@ -210,74 +210,73 @@ class ComplianceTracker:
 
     async def _gather_facts_summary(self, project: str) -> dict[str, Any]:
         """Collect fact statistics for the compliance report."""
-        conn = await self._engine.get_conn()
+        async with self._engine.session() as conn:
+            # Total facts
+            cursor = await conn.execute("SELECT COUNT(*) FROM facts WHERE project = ?", (project,))
+            row = await cursor.fetchone()
+            total = row[0] if row else 0
 
-        # Total facts
-        cursor = await conn.execute("SELECT COUNT(*) FROM facts WHERE project = ?", (project,))
-        row = await cursor.fetchone()
-        total = row[0] if row else 0
+            # By type
+            cursor = await conn.execute(
+                "SELECT fact_type, COUNT(*) FROM facts WHERE project = ? GROUP BY fact_type",
+                (project,),
+            )
+            by_type = {r[0]: r[1] for r in await cursor.fetchall()}
 
-        # By type
-        cursor = await conn.execute(
-            "SELECT fact_type, COUNT(*) FROM facts WHERE project = ? GROUP BY fact_type",
-            (project,),
-        )
-        by_type = {r[0]: r[1] for r in await cursor.fetchall()}
+            # Date range
+            cursor = await conn.execute(
+                "SELECT MIN(created_at), MAX(created_at) FROM facts WHERE project = ?",
+                (project,),
+            )
+            row = await cursor.fetchone()
+            date_range = {
+                "earliest": row[0] if row and row[0] else None,
+                "latest": row[1] if row and row[1] else None,
+            }
 
-        # Date range
-        cursor = await conn.execute(
-            "SELECT MIN(created_at), MAX(created_at) FROM facts WHERE project = ?",
-            (project,),
-        )
-        row = await cursor.fetchone()
-        date_range = {
-            "earliest": row[0] if row and row[0] else None,
-            "latest": row[1] if row and row[1] else None,
-        }
+            # Active vs deprecated
+            cursor = await conn.execute(
+                "SELECT COUNT(*) FROM facts WHERE project = ? AND valid_until IS NULL",
+                (project,),
+            )
+            row = await cursor.fetchone()
+            active = row[0] if row else 0
 
-        # Active vs deprecated
-        cursor = await conn.execute(
-            "SELECT COUNT(*) FROM facts WHERE project = ? AND valid_until IS NULL",
-            (project,),
-        )
-        row = await cursor.fetchone()
-        active = row[0] if row else 0
+            # Sources (agent traceability)
+            cursor = await conn.execute(
+                "SELECT DISTINCT source FROM facts WHERE project = ? AND source IS NOT NULL",
+                (project,),
+            )
+            sources = [r[0] for r in await cursor.fetchall()]
 
-        # Sources (agent traceability)
-        cursor = await conn.execute(
-            "SELECT DISTINCT source FROM facts WHERE project = ? AND source IS NOT NULL",
-            (project,),
-        )
-        sources = [r[0] for r in await cursor.fetchall()]
-
-        return {
-            "total_facts": total,
-            "active_facts": active,
-            "deprecated_facts": total - active,
-            "by_type": by_type,
-            "date_range": date_range,
-            "sources": sources,
-        }
+            return {
+                "total_facts": total,
+                "active_facts": active,
+                "deprecated_facts": total - active,
+                "by_type": by_type,
+                "date_range": date_range,
+                "sources": sources,
+            }
 
     async def _gather_facts_list(self, project: str) -> list[dict[str, Any]]:
         """Retrieve facts for export (decrypted content omitted for security)."""
-        conn = await self._engine.get_conn()
-        cursor = await conn.execute(
-            "SELECT id, fact_type, source, confidence, created_at, valid_until "
-            "FROM facts WHERE project = ? ORDER BY id",
-            (project,),
-        )
-        return [
-            {
-                "id": r[0],
-                "fact_type": r[1],
-                "source": r[2],
-                "confidence": r[3],
-                "created_at": r[4],
-                "valid_until": r[5],
-            }
-            for r in await cursor.fetchall()
-        ]
+        async with self._engine.session() as conn:
+            cursor = await conn.execute(
+                "SELECT id, fact_type, source, confidence, created_at, valid_until "
+                "FROM facts WHERE project = ? ORDER BY id",
+                (project,),
+            )
+            return [
+                {
+                    "id": r[0],
+                    "fact_type": r[1],
+                    "source": r[2],
+                    "confidence": r[3],
+                    "created_at": r[4],
+                    "valid_until": r[5],
+                }
+                for r in await cursor.fetchall()
+            ]
 
     def _evaluate_article_12(
         self,

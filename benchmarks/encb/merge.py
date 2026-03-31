@@ -152,7 +152,7 @@ def merge_scalar(local: BeliefObject, remote: BeliefObject) -> BeliefObject:
                     values.append(float(parts[1]))
             except (ValueError, IndexError):
                 pass
-    
+
     if values:
         result_value = statistics.median(values)
     else:

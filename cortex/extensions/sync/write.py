@@ -137,13 +137,13 @@ async def export_to_json(engine: CortexEngine) -> WritebackResult:
 
 async def _writeback_ghosts(engine: CortexEngine, result: WritebackResult) -> None:
     """Reconstruye ghosts.json desde facts tipo 'ghost'."""
-    conn = await engine.get_conn()
-    cursor = await conn.execute(
-        "SELECT project, metadata FROM facts "
-        "WHERE fact_type = 'ghost' AND valid_until IS NULL "
-        "ORDER BY project"
-    )
-    rows = await cursor.fetchall()
+    async with engine.session() as conn:
+        cursor = await conn.execute(
+            "SELECT project, metadata FROM facts "
+            "WHERE fact_type = 'ghost' AND valid_until IS NULL "
+            "ORDER BY project"
+        )
+        rows = await cursor.fetchall()
 
     ghosts = {}
     for row in rows:
@@ -161,64 +161,63 @@ async def _writeback_ghosts(engine: CortexEngine, result: WritebackResult) -> No
 
 async def _writeback_system(engine: CortexEngine, result: WritebackResult) -> None:
     """Reconstruye system.json desde facts tipo 'knowledge' y 'decision'."""
-    conn = await engine.get_conn()
-
-    # Leer system.json existente para preservar estructura
-    system_path = runtime_memory_dir() / "system.json"
-    if system_path.exists():
-        try:
-            system_data = json.loads(system_path.read_text(encoding="utf-8"))
-        except (json.JSONDecodeError, OSError):
+    async with engine.session() as conn:
+        # Leer system.json existente para preservar estructura
+        system_path = runtime_memory_dir() / "system.json"
+        if system_path.exists():
+            try:
+                system_data = json.loads(system_path.read_text(encoding="utf-8"))
+            except (json.JSONDecodeError, OSError):
+                system_data = {}
+        else:
             system_data = {}
-    else:
-        system_data = {}
 
-    # Knowledge global — reconstruir desde DB
-    cursor = await conn.execute(
-        "SELECT content, tags, confidence, valid_from, metadata FROM facts "
-        "WHERE project = '__system__' AND fact_type = 'knowledge' "
-        "AND valid_until IS NULL ORDER BY id"
-    )
-    k_rows = await cursor.fetchall()
-
-    knowledge_list = []
-    for row in k_rows:
-        meta = _decrypt_json(row[4])
-        knowledge_list.append(
-            {
-                "id": meta.get("id", f"K{len(knowledge_list) + 1:03d}"),
-                "topic": meta.get("topic", "general"),
-                "content": row[0],
-                "added": row[3] or "",
-                "confidence": row[2] or "stated",
-            }
+        # Knowledge global — reconstruir desde DB
+        cursor = await conn.execute(
+            "SELECT content, tags, confidence, valid_from, metadata FROM facts "
+            "WHERE project = '__system__' AND fact_type = 'knowledge' "
+            "AND valid_until IS NULL ORDER BY id"
         )
+        k_rows = await cursor.fetchall()
 
-    # Decisions global — reconstruir desde DB
-    cursor = await conn.execute(
-        "SELECT content, metadata FROM facts "
-        "WHERE project = '__system__' AND fact_type = 'decision' "
-        "AND valid_until IS NULL ORDER BY id"
-    )
-    d_rows = await cursor.fetchall()
+        knowledge_list = []
+        for row in k_rows:
+            meta = _decrypt_json(row[4])
+            knowledge_list.append(
+                {
+                    "id": meta.get("id", f"K{len(knowledge_list) + 1:03d}"),
+                    "topic": meta.get("topic", "general"),
+                    "content": row[0],
+                    "added": row[3] or "",
+                    "confidence": row[2] or "stated",
+                }
+            )
 
-    decisions_list = []
-    for row in d_rows:
-        meta = _decrypt_json(row[1])
-        decisions_list.append(
-            {
-                "id": meta.get("id", f"D{len(decisions_list) + 1:03d}"),
-                "decision": row[0],
-                **{k: v for k, v in meta.items() if k != "id"},
-            }
+        # Decisions global — reconstruir desde DB
+        cursor = await conn.execute(
+            "SELECT content, metadata FROM facts "
+            "WHERE project = '__system__' AND fact_type = 'decision' "
+            "AND valid_until IS NULL ORDER BY id"
         )
+        d_rows = await cursor.fetchall()
 
-    system_data["knowledge_global"] = knowledge_list
-    system_data["decisions_global"] = decisions_list
-    system_data.setdefault("meta", {})["last_updated"] = now_iso()
+        decisions_list = []
+        for row in d_rows:
+            meta = _decrypt_json(row[1])
+            decisions_list.append(
+                {
+                    "id": meta.get("id", f"D{len(decisions_list) + 1:03d}"),
+                    "decision": row[0],
+                    **{k: v for k, v in meta.items() if k != "id"},
+                }
+            )
 
-    content = json.dumps(system_data, indent=2, ensure_ascii=False)
-    atomic_write(system_path, content)
+        system_data["knowledge_global"] = knowledge_list
+        system_data["decisions_global"] = decisions_list
+        system_data.setdefault("meta", {})["last_updated"] = now_iso()
+
+        content = json.dumps(system_data, indent=2, ensure_ascii=False)
+        atomic_write(system_path, content)
 
     count = len(knowledge_list) + len(decisions_list)
     result.files_written += 1
@@ -230,12 +229,12 @@ async def _writeback_system(engine: CortexEngine, result: WritebackResult) -> No
 
 async def _writeback_mistakes(engine: CortexEngine, result: WritebackResult) -> None:
     """Reconstruye mistakes.jsonl desde facts tipo 'error'."""
-    conn = await engine.get_conn()
-    cursor = await conn.execute(
-        "SELECT project, content, tags, valid_from, metadata FROM facts "
-        "WHERE fact_type = 'error' AND valid_until IS NULL ORDER BY id"
-    )
-    rows = await cursor.fetchall()
+    async with engine.session() as conn:
+        cursor = await conn.execute(
+            "SELECT project, content, tags, valid_from, metadata FROM facts "
+            "WHERE fact_type = 'error' AND valid_until IS NULL ORDER BY id"
+        )
+        rows = await cursor.fetchall()
 
     lines = []
     for row in rows:
@@ -261,12 +260,12 @@ async def _writeback_mistakes(engine: CortexEngine, result: WritebackResult) -> 
 
 async def _writeback_bridges(engine: CortexEngine, result: WritebackResult) -> None:
     """Reconstruye bridges.jsonl desde facts tipo 'bridge'."""
-    conn = await engine.get_conn()
-    cursor = await conn.execute(
-        "SELECT content, tags, valid_from, metadata FROM facts "
-        "WHERE fact_type = 'bridge' AND valid_until IS NULL ORDER BY id"
-    )
-    rows = await cursor.fetchall()
+    async with engine.session() as conn:
+        cursor = await conn.execute(
+            "SELECT content, tags, valid_from, metadata FROM facts "
+            "WHERE fact_type = 'bridge' AND valid_until IS NULL ORDER BY id"
+        )
+        rows = await cursor.fetchall()
 
     lines = []
     for row in rows:

@@ -77,7 +77,7 @@ DOMAIN_MAP: dict[str, list[str]] = {
         "TEST",
         "default",
     ],
-    "cortex-agents": [
+    "cortex.agents": [
         "AGENT_SCIENCE",
         "AGENTICA",
         "moskv-swarm",

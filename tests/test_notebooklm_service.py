@@ -81,7 +81,7 @@ class TestDomainClassification:
 
     def test_known_projects_classified(self) -> None:
         assert _PROJECT_DOMAIN["cortex"] == "cortex-core"
-        assert _PROJECT_DOMAIN["MOSKV-1"] == "cortex-agents"
+        assert _PROJECT_DOMAIN["MOSKV-1"] == "cortex.agents"
         assert _PROJECT_DOMAIN["naroa"] == "cortex-products"
         assert _PROJECT_DOMAIN["SAP"] == "cortex-operations"
 

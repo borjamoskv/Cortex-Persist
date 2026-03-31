@@ -95,6 +95,7 @@ def sovereign_run(
     has_uvloop = False
     try:
         import uvloop  # type: ignore[import-untyped]
+
         has_uvloop = True
         if not _uvloop_installed:
             _uvloop_installed = True
@@ -108,6 +109,7 @@ def sovereign_run(
     # 2. Execute with appropriate runner
     if has_uvloop:
         import uvloop  # type: ignore[import-untyped]
+
         return uvloop.run(coro, debug=debug)
     return asyncio.run(coro, debug=debug)
 

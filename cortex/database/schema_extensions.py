@@ -8,17 +8,7 @@ Analytics (evolution_state, episodes, episodes_fts, context_snapshots, episodes_
 from __future__ import annotations
 
 # ─── Consensus Votes (Neural Swarm Consensus) ───────────────────────
-CREATE_VOTES = """
-CREATE TABLE IF NOT EXISTS consensus_votes (
-    id      INTEGER PRIMARY KEY AUTOINCREMENT,
-    fact_id INTEGER NOT NULL REFERENCES facts(id),
-    tenant_id TEXT NOT NULL DEFAULT 'default',
-    agent   TEXT NOT NULL,
-    vote    INTEGER NOT NULL, -- 1 (verify), -1 (dispute)
-    timestamp TEXT NOT NULL DEFAULT (datetime('now')),
-    UNIQUE(fact_id, agent)
-);
-"""
+# Legacy v1 removed in Operation Void Gate (Crystallization).
 
 # ─── Reputation-Weighted Consensus (v2) ─────────────────────────────
 CREATE_AGENTS = """
@@ -30,7 +20,10 @@ CREATE TABLE IF NOT EXISTS agents (
     tenant_id       TEXT NOT NULL DEFAULT 'default',
     created_at      TEXT NOT NULL DEFAULT (datetime('now')),
     reputation_score    REAL NOT NULL DEFAULT 0.5,
+    base_reputation     REAL NOT NULL DEFAULT 0.5,
     reputation_stake    REAL NOT NULL DEFAULT 0.0,
+    alignment_hits      INTEGER DEFAULT 0,
+    alignment_misses    INTEGER DEFAULT 0,
     total_votes         INTEGER DEFAULT 0,
     successful_votes    INTEGER DEFAULT 0,
     disputed_votes      INTEGER DEFAULT 0,
@@ -419,7 +412,6 @@ END;
 
 # Convenience export — all extension statements in insertion order
 EXTENSION_SCHEMA = [
-    CREATE_VOTES,
     CREATE_AGENTS,
     CREATE_VOTES_V2,
     CREATE_TRUST_EDGES,

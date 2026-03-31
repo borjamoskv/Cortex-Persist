@@ -36,12 +36,13 @@ def timeline_log(limit, db):
     async def _timeline_log_async():
         engine = get_engine(db)
         try:
-            conn = await engine.get_conn()
-            cursor = await conn.execute(
-                "SELECT id, project, action, hash, timestamp FROM transactions ORDER BY id DESC LIMIT ?",
-                (limit,),
-            )
-            rows = await cursor.fetchall()
+            async with engine.session() as conn:
+                cursor = await conn.execute(
+                    "SELECT id, project, action, hash, timestamp FROM transactions ORDER BY id DESC LIMIT ?",
+                    (limit,),
+                )
+                rows = await cursor.fetchall()
+
             if not rows:
                 err_empty_results("transactions")
                 return
@@ -121,16 +122,16 @@ def snapshot_create(name, db):
 
         engine = get_engine(db)
         try:
-            conn = await engine.get_conn()
-            cursor = await conn.execute("SELECT id FROM transactions ORDER BY id DESC LIMIT 1")
-            latest_tx = await cursor.fetchone()
-            tx_id = latest_tx[0] if latest_tx else 0
+            async with engine.session() as conn:
+                cursor = await conn.execute("SELECT id FROM transactions ORDER BY id DESC LIMIT 1")
+                latest_tx = await cursor.fetchone()
+                tx_id = latest_tx[0] if latest_tx else 0
 
-            cursor = await conn.execute(
-                "SELECT root_hash FROM merkle_roots ORDER BY id DESC LIMIT 1"
-            )
-            root_row = await cursor.fetchone()
-            merkle_root = root_row[0] if root_row else "0xGENESIS"
+                cursor = await conn.execute(
+                    "SELECT root_hash FROM merkle_roots ORDER BY id DESC LIMIT 1"
+                )
+                root_row = await cursor.fetchone()
+                merkle_root = root_row[0] if root_row else "0xGENESIS"
 
             sm = SnapshotManager(db_path=db)
             with console.status("[bold blue]Creating physical snapshot...[/]"):

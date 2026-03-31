@@ -30,9 +30,9 @@ cortex store --type decision --project swarm-demo "Use PostgreSQL for the user s
 ## Step 2: Register Agents
 
 ```bash
-cortex agent register --name "architect" --weight 0.9
-cortex agent register --name "data-engineer" --weight 0.7
-cortex agent register --name "junior-dev" --weight 0.3
+cortex.agents register --name "architect" --weight 0.9
+cortex.agents register --name "data-engineer" --weight 0.7
+cortex.agents register --name "junior-dev" --weight 0.3
 ```
 
 ## Step 3: Cast Votes

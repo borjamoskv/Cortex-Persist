@@ -10,9 +10,9 @@ import re
 from collections.abc import Mapping
 from typing import Any
 
-from cortex.immunity.types import GuardViolation
+from cortex.security.types import GuardViolation
 
-logger = logging.getLogger("cortex.immunity.haiku")
+logger = logging.getLogger("cortex.security.haiku")
 
 
 def count_syllables_es(word: str) -> int:

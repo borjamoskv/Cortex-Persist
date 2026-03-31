@@ -10,7 +10,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 
 from cortex.api.deps import get_async_engine
 from cortex.auth import AuthResult, require_permission
-from cortex.engine_async import AsyncCortexEngine
+from cortex.engine import CortexEngine as AsyncCortexEngine
 from cortex.types.models import CheckpointResponse, LedgerReportResponse
 from cortex.utils.i18n import get_trans
 

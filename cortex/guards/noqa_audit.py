@@ -249,32 +249,47 @@ def format_report(
     Returns the full report as a string for CLI display or CI output.
     """
     total = len(entries)
-    silent = [e for e in entries if e.is_silent]
-    justified = [e for e in entries if not e.is_silent]
-    score_0 = [e for e in entries if e.quality_score == 0]
+    silent_count = sum(1 for e in entries if e.quality_score == 0)
+    justified_count = sum(1 for e in entries if e.quality_score > 0)
 
-    lines = [
+    lines = _format_header(total, justified_count, silent_count)
+    lines.extend(_format_git_archaeology(git_commits, since))
+    lines.extend(_format_violation_details(entries))
+    lines.extend(_format_verdict(entries, git_commits))
+
+    lines.append("━" * 60)
+    return "\n".join(lines)
+
+
+def _format_header(total: int, justified: int, silent: int) -> list[str]:
+    return [
         "",
         "━" * 60,
         " 📋 noqa:BLE001 DRIFT REPORT — Sovereign Exception Audit",
         "━" * 60,
         f"  Total suppressions:     {total}",
-        f"  ✅ Justified:           {len(justified)}",
-        f"  ⚠️  Silent (score=0):    {len(score_0)}",
-        f"  🔴 Unjustified:         {len(silent)}",
+        f"  ✅ Justified:           {justified}",
+        f"  ⚠️  Silent (score=0):    {silent}",
+        f"  🔴 Unjustified:         {silent}",
         "",
     ]
 
-    # Git archaeology section
-    lines.append(f"─ Git Pickaxe — New noqa:BLE001 since '{since}' ─")
+
+def _format_git_archaeology(git_commits: list[dict[str, str]], since: str) -> list[str]:
+    lines = [f"─ Git Pickaxe — New noqa:BLE001 since '{since}' ─"]
     if git_commits:
         for c in git_commits:
             lines.append(f"  [{c['hash']}] {c['date']} {c['author']:<20} {c['subject']}")
     else:
         lines.append("  ✅  No new noqa:BLE001 introduced in this window.")
     lines.append("")
+    return lines
 
+
+def _format_violation_details(entries: list[NoqaEntry]) -> list[str]:
+    lines = []
     # Silent entries (need justification)
+    score_0 = [e for e in entries if e.quality_score == 0]
     if score_0:
         lines.append("─ Silent suppressions (require justification) ─")
         for e in score_0:
@@ -282,7 +297,7 @@ def format_report(
             lines.append(f"     {e.line_content.strip()}")
         lines.append("")
 
-    # Low-quality justified (inline reason only, no comment)
+    # Low-quality justified (score 1)
     score_1 = [e for e in entries if e.quality_score == 1]
     if score_1:
         lines.append("─ Partially justified (add inline reason) ─")
@@ -290,15 +305,20 @@ def format_report(
             lines.append(f"  🟡 {e.short_path}:{e.line_number}")
         lines.append("")
 
-    # Well-justified
-    if justified and not score_0:
+    # Well-justified (score > 1)
+    well_justified = [e for e in entries if e.quality_score > 1]
+    if well_justified and not score_0:
         lines.append("─ Fully justified suppressions ─")
-        for e in justified:
+        for e in well_justified:
             short_just = e.justification_text[:60].strip()
             lines.append(f"  ✅ {e.short_path}:{e.line_number} — {short_just}")
         lines.append("")
+    return lines
 
-    lines.append("─ Verdict ─")
+
+def _format_verdict(entries: list[NoqaEntry], git_commits: list[dict[str, str]]) -> list[str]:
+    silent = [e for e in entries if e.quality_score == 0]
+    lines = ["─ Verdict ─"]
     if not silent and not git_commits:
         lines.append("  🟢 CLEAN — No drift detected. All suppressions are justified.")
     elif git_commits and not silent:
@@ -308,11 +328,9 @@ def format_report(
     else:
         lines.append(
             f"  🔴 ACTION REQUIRED — {len(silent)} silent suppressions detected. "
-            f"Add justification comments."
+            "Add justification comments."
         )
-
-    lines.append("━" * 60)
-    return "\n".join(lines)
+    return lines
 
 
 def drift_score(entries: list[NoqaEntry], new_commits: list[dict]) -> int:

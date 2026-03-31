@@ -113,9 +113,7 @@ def main() -> None:
         f"\n[bold blue]🛡️  DependencyGuard v2 — Axiom 4 Enforcement[/]\n   Scanning: [dim]{target_path}[/]\n"
     )
 
-    violations = (
-        scan_file(target_path) if target_path.is_file() else scan_directory(target_path)
-    )
+    violations = scan_file(target_path) if target_path.is_file() else scan_directory(target_path)
 
     if not violations:
         console.print("[bold green]✅ No Axiom 4 violations detected. Sovereignty intact.[/]")

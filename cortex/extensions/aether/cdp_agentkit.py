@@ -68,7 +68,7 @@ class CDPSovereignWallet:
     def __init__(
         self,
         network_id: str = "base-sepolia",
-        seed_path: str = "~/.cortex/agent_wallet_seed.json",
+        seed_path: str = "~/.cortex.agents_wallet_seed.json",
     ):
         if CDPSovereignWallet._initialized:
             return

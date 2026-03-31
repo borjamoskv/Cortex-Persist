@@ -419,7 +419,7 @@ class EpistemicChaosOrchestrator:
     ) -> None:
         if seed is not None:
             random.seed(seed)
-            
+
         self.temporal = TemporalContradictionGenerator(
             lambda_flip=lambda_flip,
             num_propositions=num_propositions,

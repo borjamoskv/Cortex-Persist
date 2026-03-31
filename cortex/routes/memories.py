@@ -24,7 +24,7 @@ from pydantic import BaseModel, Field
 
 from cortex.api.deps import get_async_engine
 from cortex.auth import AuthResult, require_permission
-from cortex.engine_async import AsyncCortexEngine
+from cortex.engine import CortexEngine as AsyncCortexEngine
 
 __all__ = [
     "batch_store",

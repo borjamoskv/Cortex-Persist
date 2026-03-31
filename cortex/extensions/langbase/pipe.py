@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING, Any, Optional
 __all__ = ["CORTEX_CONTEXT_TEMPLATE", "run_with_cortex_context", "create_cortex_pipe"]
 
 if TYPE_CHECKING:
-    from cortex.engine_async import AsyncCortexEngine
+    from cortex.engine import CortexEngine as AsyncCortexEngine
     from cortex.extensions.langbase.client import LangbaseClient
 
 logger = logging.getLogger("cortex.extensions.langbase.pipe")

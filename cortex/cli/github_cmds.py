@@ -77,32 +77,31 @@ def status(db: str) -> None:
     async def _async_status():
         try:
             await engine.init_db()
-            conn = await engine.get_conn()
+            async with engine.session() as conn:
+                # Count active bridges
+                cursor = await conn.execute(
+                    "SELECT COUNT(*) FROM facts "
+                    "WHERE fact_type = 'bridge' AND source = 'bridge:github' "
+                    "AND valid_until IS NULL"
+                )
+                row = await cursor.fetchone()
+                bridge_count = row[0] if row else 0
 
-            # Count active bridges
-            cursor = await conn.execute(
-                "SELECT COUNT(*) FROM facts "
-                "WHERE fact_type = 'bridge' AND source = 'bridge:github' "
-                "AND valid_until IS NULL"
-            )
-            row = await cursor.fetchone()
-            bridge_count = row[0] if row else 0
+                # Count crystallized decisions
+                cursor = await conn.execute(
+                    "SELECT COUNT(*) FROM facts "
+                    "WHERE fact_type = 'decision' AND source = 'bridge:github' "
+                    "AND valid_until IS NULL"
+                )
+                row = await cursor.fetchone()
+                decision_count = row[0] if row else 0
 
-            # Count crystallized decisions
-            cursor = await conn.execute(
-                "SELECT COUNT(*) FROM facts "
-                "WHERE fact_type = 'decision' AND source = 'bridge:github' "
-                "AND valid_until IS NULL"
-            )
-            row = await cursor.fetchone()
-            decision_count = row[0] if row else 0
-
-            # Last sync time
-            cursor = await conn.execute(
-                "SELECT MAX(created_at) FROM facts WHERE source = 'bridge:github'"
-            )
-            row = await cursor.fetchone()
-            last_sync = row[0] if row and row[0] else "Never"
+                # Last sync time
+                cursor = await conn.execute(
+                    "SELECT MAX(created_at) FROM facts WHERE source = 'bridge:github'"
+                )
+                row = await cursor.fetchone()
+                last_sync = row[0] if row and row[0] else "Never"
 
             table = Table(
                 title="🌉 GitHub Bridge Status",

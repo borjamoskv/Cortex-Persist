@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING, Optional
 __all__ = ["sync_to_langbase", "enrich_from_langbase"]
 
 if TYPE_CHECKING:
-    from cortex.engine_async import AsyncCortexEngine
+    from cortex.engine import CortexEngine as AsyncCortexEngine
     from cortex.extensions.langbase.client import LangbaseClient
 
 from cortex.extensions.langbase.client import LangbaseError  # noqa: E402

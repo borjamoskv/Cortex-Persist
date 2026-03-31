@@ -1,8 +1,8 @@
 """
 CORTEX v6 — Native vLLM Edge Provider.
 
-Operates `vllm.AsyncLLMEngine` in-process to allow deep extraction and 
-TurboQuant compression (arXiv:2504.19874) of PagedAttention Context Windows 
+Operates `vllm.AsyncLLMEngine` in-process to allow deep extraction and
+TurboQuant compression (arXiv:2504.19874) of PagedAttention Context Windows
 (KV Cache) via the Sovereign Direct-Memory bypassing layers.
 """
 
@@ -23,12 +23,14 @@ logger = logging.getLogger("cortex.extensions.llm.vllm_edge")
 
 _RESULT_CACHE: ResultCache | None = None
 
+
 def _get_result_cache() -> ResultCache:
     """Lazily create the shared result cache."""
     global _RESULT_CACHE
     if _RESULT_CACHE is None:
         _RESULT_CACHE = ResultCache()
     return _RESULT_CACHE
+
 
 class NativeVLLMProvider(BaseProvider):
     """
@@ -41,21 +43,23 @@ class NativeVLLMProvider(BaseProvider):
         model_name: str | None = None,
         gpu_memory_utilization: float = 0.85,
         max_model_len: int = 16384,
-        quantization: str | None = None
+        quantization: str | None = None,
     ) -> None:
         try:
             from vllm import AsyncEngineArgs, AsyncLLMEngine
         except ImportError as e:
             logger.critical("vLLM native module missing. Cannot initialize in-process engine.")
             raise RuntimeError("Instala 'vllm' para usar NativeVLLMProvider.") from e
-            
+
         self._provider = "vllm_native"
-        self._model = model_name or os.environ.get("CORTEX_LLM_MODEL", "Qwen/Qwen2.5-7B-Instruct-AWQ")
-        
+        self._model = model_name or os.environ.get(
+            "CORTEX_LLM_MODEL", "Qwen/Qwen2.5-7B-Instruct-AWQ"
+        )
+
         # Ouroboros Thermodynamic Constants
         self._context_window = max_model_len
         self._gpu_util = gpu_memory_utilization
-        
+
         args = AsyncEngineArgs(
             model=self._model,
             gpu_memory_utilization=self._gpu_util,
@@ -64,12 +68,15 @@ class NativeVLLMProvider(BaseProvider):
             trust_remote_code=True,
             disable_log_requests=True,
         )
-        
-        logger.info("⚡ [vLLM Native Edge] Inicializando motor in-process (GPU Malloc: %.2f)...", self._gpu_util)
+
+        logger.info(
+            "⚡ [vLLM Native Edge] Inicializando motor in-process (GPU Malloc: %.2f)...",
+            self._gpu_util,
+        )
         self._engine = AsyncLLMEngine.from_engine_args(args)
         self._cache_mgr = ContextCacheManager()
         self._intent_affinity = frozenset({IntentProfile.GENERAL, IntentProfile.CODE})
-        
+
     @property
     def model_name(self) -> str:
         return self._model
@@ -92,36 +99,38 @@ class NativeVLLMProvider(BaseProvider):
     ) -> str:
         """Sovereign In-Process Completion."""
         from vllm import SamplingParams
-        
+
         request_id = hashlib.sha256(f"{time.time()}_{prompt[:20]}".encode()).hexdigest()[:16]
-        
+
         sp = SamplingParams(
             temperature=temperature,
             max_tokens=max_tokens,
             skip_special_tokens=True,
         )
-        
-        # Conversational template mapping is recommended for vLLM native models. 
+
+        # Conversational template mapping is recommended for vLLM native models.
         # CORTEX assumes ChatML or similar system mappings natively handled by vLLM.
         composed_prompt = f"<|im_start|>system\\n{system}<|im_end|>\\n<|im_start|>user\\n{prompt}<|im_end|>\\n<|im_start|>assistant\\n"
-        
+
         generator = self._engine.generate(composed_prompt, sp, request_id)  # type: ignore[reportOptionalMemberAccess]
-        
+
         final_output = ""
         async for output in generator:
             final_output = output.outputs[0].text
-            
+
         # Hook interception for TurboQuant KV Cache extraction (Axiom Ω₄/Ω₂)
         # Extract logic directly to KV Manager mapping
-        system_hash = hashlib.sha256(system.encode()).hexdigest()[:16] # Parent base prompt
+        system_hash = hashlib.sha256(system.encode()).hexdigest()[:16]  # Parent base prompt
         await self._extract_and_persist_kv_cache(request_id, parent_cache_id=system_hash)
-            
+
         return final_output
 
-    async def _extract_and_persist_kv_cache(self, request_id: str, parent_cache_id: str | None = None) -> None:
+    async def _extract_and_persist_kv_cache(
+        self, request_id: str, parent_cache_id: str | None = None
+    ) -> None:
         """
         Intercepts internal PagedAttention tables via vLLM memory boundaries,
-        compresses them to 3.5b employing TurboQuant (arXiv:2504.19874), 
+        compresses them to 3.5b employing TurboQuant (arXiv:2504.19874),
         and persists the tensor to SQLite to swap it from active VRAM.
         """
         # [CORTEX ADVANCED LOGIC WARNING]
@@ -133,7 +142,7 @@ class NativeVLLMProvider(BaseProvider):
             # Simulamos que lo extrajimos desde GPU via ctypes o RPC:
             logger.debug("Extrañendo tensores de KV Cache crudos para iteración TurboQuant...")
             raw_tensor_sim: list[float] = [0.123] * 384  # Replace with actual mapped tensor slice
-            
+
             # Precarga asíncrona del padre (DMA ref) simulada O(1)
             if parent_cache_id:
                 asyncio.create_task(self._cache_mgr.prefetch_kv(parent_cache_id))
@@ -145,7 +154,7 @@ class NativeVLLMProvider(BaseProvider):
                 raw_tensor=raw_tensor_sim,
                 agent_id="vllm_engine",
                 parent_cache_id=parent_cache_id,
-                layer_depth_ratio=1.0  # Capa KV profunda a 1-bit QJL
+                layer_depth_ratio=1.0,  # Capa KV profunda a 1-bit QJL
             )
         except Exception as e:
             logger.error("Fallo al interceptar KV Cache de vLLM (TurboQuant): %s", e)
@@ -155,13 +164,13 @@ class NativeVLLMProvider(BaseProvider):
         messages = prompt.to_openai_messages()
         # Flat construction
         raw_prompt = "\n".join(f"{m['role']}: {m['content']}" for m in messages)
-        
+
         return await self.complete(
             prompt=raw_prompt,
             system="Responde siguiendo las directrices anteriores.",
             temperature=prompt.temperature,
             max_tokens=prompt.max_tokens,
-            intent=prompt.intent
+            intent=prompt.intent,
         )
 
     async def stream(
@@ -174,27 +183,27 @@ class NativeVLLMProvider(BaseProvider):
     ) -> AsyncGenerator[str, None]:
         """Stream output natively directly from vLLM AsyncEngine."""
         from vllm import SamplingParams
-        
+
         request_id = hashlib.sha256(f"str_{time.time()}_{prompt[:20]}".encode()).hexdigest()[:16]
-        
+
         sp = SamplingParams(
             temperature=temperature,
             max_tokens=max_tokens,
             skip_special_tokens=True,
         )
-        
+
         composed_prompt = f"<|im_start|>system\\n{system}<|im_end|>\\n<|im_start|>user\\n{prompt}<|im_end|>\\n<|im_start|>assistant\\n"
         generator = self._engine.generate(composed_prompt, sp, request_id)  # type: ignore[reportOptionalMemberAccess]
-        
+
         previous_text = ""
         async for output in generator:
             current_text = output.outputs[0].text
-            delta = current_text[len(previous_text):]
+            delta = current_text[len(previous_text) :]
             if delta:
                 yield delta
             previous_text = current_text
 
     async def close(self) -> None:
         """Release native in-process engine memory gracefully."""
-        self._engine = None # type: ignore
+        self._engine = None  # type: ignore
         logger.info("[vLLM Native Edge] Engine apagado. VRAM liberada.")

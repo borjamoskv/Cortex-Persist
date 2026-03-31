@@ -93,20 +93,20 @@ async def _record_async(
     await engine.init_db()
 
     try:
-        conn = await engine.get_conn()
-        memory = EpisodicMemory(conn)
+        async with engine.session() as conn:
+            memory = EpisodicMemory(conn)
 
-        session_id = session or str(uuid.uuid4())[:8]
-        tag_list = [t.strip() for t in tags.split(",") if t.strip()] if tags else []
+            session_id = session or str(uuid.uuid4())[:8]
+            tag_list = [t.strip() for t in tags.split(",") if t.strip()] if tags else []
 
-        ep_id = await memory.record(
-            session_id=session_id,
-            event_type=event_type,
-            content=content,
-            project=project,
-            emotion=emotion,
-            tags=tag_list,
-        )
+            ep_id = await memory.record(
+                session_id=session_id,
+                event_type=event_type,
+                content=content,
+                project=project,
+                emotion=emotion,
+                tags=tag_list,
+            )
 
         console.print(
             Panel(
@@ -159,19 +159,19 @@ async def _recall_async(
     await engine.init_db()
 
     try:
-        conn = await engine.get_conn()
-        memory = EpisodicMemory(conn)
+        async with engine.session() as conn:
+            memory = EpisodicMemory(conn)
 
-        # Handle relative time like "24h", "7d"
-        resolved_since = _resolve_since(since) if since else None
+            # Handle relative time like "24h", "7d"
+            resolved_since = _resolve_since(since) if since else None
 
-        episodes = await memory.recall(
-            project=project,
-            event_type=event_type,
-            since=resolved_since,
-            limit=limit,
-            search=search,
-        )
+            episodes = await memory.recall(
+                project=project,
+                event_type=event_type,
+                since=resolved_since,
+                limit=limit,
+                search=search,
+            )
 
         if as_json:
             console.print(
@@ -242,13 +242,13 @@ async def _patterns_async(
     await engine.init_db()
 
     try:
-        conn = await engine.get_conn()
-        memory = EpisodicMemory(conn)
+        async with engine.session() as conn:
+            memory = EpisodicMemory(conn)
 
-        patterns = await memory.detect_patterns(
-            project=project,
-            min_occurrences=min_occurrences,
-        )
+            patterns = await memory.detect_patterns(
+                project=project,
+                min_occurrences=min_occurrences,
+            )
 
         if as_json:
             console.print(
@@ -312,12 +312,12 @@ async def _boot_async(
     await engine.init_db()
 
     try:
-        conn = await engine.get_conn()
-        payload = await generate_session_boot(
-            conn=conn,
-            project_hint=project,
-            top_k=top_k,
-        )
+        async with engine.session() as conn:
+            payload = await generate_session_boot(
+                conn=conn,
+                project_hint=project,
+                top_k=top_k,
+            )
 
         if as_json:
             console.print(

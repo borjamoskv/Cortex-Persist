@@ -112,13 +112,13 @@ async def _aggregate_chronos(engine: Any) -> ROIMetrics:
     The meta column is AES-encrypted JSON. We decrypt each row and
     extract chronos.ai_time_secs and chronos.human_time_secs.
     """
-    conn = await engine.get_conn()
-    enc = get_default_encrypter()
+    async with engine.session() as conn:
+        enc = get_default_encrypter()
 
-    async with conn.execute(
-        "SELECT project, metadata FROM facts WHERE valid_until IS NULL AND metadata IS NOT NULL"
-    ) as cursor:
-        rows = await cursor.fetchall()
+        async with conn.execute(
+            "SELECT project, metadata FROM facts WHERE valid_until IS NULL AND metadata IS NOT NULL"
+        ) as cursor:
+            rows = await cursor.fetchall()
 
     total_ai = 0.0
     total_human = 0.0

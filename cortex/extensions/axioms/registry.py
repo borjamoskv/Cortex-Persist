@@ -122,6 +122,7 @@ _SOVEREIGN: list[Axiom] = [
 # THE REGISTRY
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+
 class AxiomRegistry:
     """Sovereign Axiom Registry."""
 

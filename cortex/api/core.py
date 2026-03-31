@@ -58,7 +58,7 @@ logger = logging.getLogger("uvicorn.error")
 async def lifespan(app: FastAPI):
     """Initialize async connection pool, engine, auth, and timing on startup."""
     from cortex.database.pool import CortexConnectionPool
-    from cortex.engine_async import AsyncCortexEngine
+    from cortex.engine import CortexEngine as AsyncCortexEngine
 
     db_path = config.DB_PATH
     logger.info("Lifespan: Initializing CORTEX with DB_PATH: %s", db_path)

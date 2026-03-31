@@ -1,9 +1,9 @@
 """CORTEX CLI — Agent commands (YAML-driven agent interface).
 
 Commands:
-    cortex agent run --config role.yaml   — Run an agent from YAML
-    cortex agent validate --config role.yaml — Validate config
-    cortex agent init                      — Generate scaffold role.yaml
+    cortex.agents run --config role.yaml   — Run an agent from YAML
+    cortex.agents validate --config role.yaml — Validate config
+    cortex.agents init                      — Generate scaffold role.yaml
 """
 
 from __future__ import annotations

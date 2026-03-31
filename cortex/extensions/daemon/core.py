@@ -221,7 +221,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
 
         try:
             from cortex.database.pool import CortexConnectionPool
-            from cortex.engine_async import AsyncCortexEngine
+            from cortex.engine import CortexEngine as AsyncCortexEngine
             from cortex.extensions.daemon.sidecar.telemetry import ASTOracle
 
             db_path = file_config.get("db_path", str(CORTEX_DB))

@@ -7,8 +7,7 @@ is delayed or failing.
 import pytest
 
 from cortex.core.config import CortexConfig
-from cortex.database.pool import CortexConnectionPool
-from cortex.engine_async import AsyncCortexEngine
+from cortex.engine import AsyncCortexEngine
 from cortex.enrichment.worker import EnrichmentWorker
 from cortex.verification.oracle import VerificationOracle
 
@@ -16,18 +15,13 @@ from cortex.verification.oracle import VerificationOracle
 @pytest.fixture
 async def engine(tmp_path):
     db_path = str(tmp_path / "cortex_test.db")
-    from cortex.engine import CortexEngine
 
-    sync_engine = CortexEngine(db_path=db_path)
-    sync_engine.init_db_sync()
-    sync_engine.close_sync()
-
-    pool = CortexConnectionPool(db_path, min_connections=2, max_connections=5, read_only=False)
-    await pool.initialize()
-    engine = AsyncCortexEngine(pool=pool, db_path=db_path)
+    # Use the unified engine directly. It handles its own connection/pool logic.
+    engine = AsyncCortexEngine(db_path=db_path)
+    await engine.init_db()
 
     yield engine
-    await pool.close()
+    await engine.close()
 
 
 @pytest.mark.asyncio
@@ -78,12 +72,7 @@ async def test_ledger_integrity_during_decoupling(engine):
     )
 
     oracle = VerificationOracle(engine)
-    # For P0 tests, we just check if it can attempt verification without crashing
-    # or if we can manually initialize the ledger if it's None
-    if engine._ledger is None:
-        from cortex.ledger import ImmutableLedger
-
-        engine._ledger = ImmutableLedger(engine)
+    # Ledger is initialized during engine.init_db()
 
     is_valid = await oracle.verify_ledger_continuity()
     assert is_valid is True

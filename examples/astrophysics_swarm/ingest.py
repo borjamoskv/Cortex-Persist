@@ -15,12 +15,12 @@ def simulate_cosmic_ingest(stream_size: int = 1000) -> Iterator[dict[str, Any]]:
     E.g., Spectra from DESI mapping or Gravitational Wave waveforms.
     """
     print(f"[CORTEX:Ingest] Iniciando asimilación de streaming exascale de {stream_size} eventos cósmicos...")
-    
+
     events_generated = 0
     while events_generated < stream_size:
         # Simulate anomalies
         is_anomaly = random.random() < 0.05
-        
+
         event = {
             "id": f"evt_desi_{time.time_ns()}",
             "spectrum_flux": [random.uniform(0, 10) for _ in range(5)],
@@ -28,7 +28,7 @@ def simulate_cosmic_ingest(stream_size: int = 1000) -> Iterator[dict[str, Any]]:
             "source_type": random.choice(["GALAXY", "QSO", "STAR", "TRANSIENT"]),
             "anomaly_flag": is_anomaly
         }
-        
+
         events_generated += 1
         yield event
 
@@ -40,5 +40,5 @@ def summarize_ingestion(iterator: Iterator[dict[str, Any]]) -> dict[str, int]:
         count += 1
         if evt["anomaly_flag"]:
             anomalies += 1
-            
+
     return {"total_events": count, "anomalies_detected": anomalies}

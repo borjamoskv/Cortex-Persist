@@ -216,14 +216,14 @@ class CortexFactModel(BaseModel):
     project_id: str = Field(..., description="Originating project ID.")
     content: str = Field(..., description="Raw text content of the fact.")
     embedding: list[float] | list[int] | bytes = Field(..., description="Vector embedding array.")
-    
+
     @field_validator("embedding", mode="before")
     @classmethod
     def _validate_embedding(cls, v: Any) -> Any:
         if isinstance(v, np.ndarray):
             return v.tobytes()
         return v
-        
+
     timestamp: float = Field(
         default_factory=lambda: datetime.now(timezone.utc).timestamp(),
         description="Unix timestamp of creation.",
@@ -248,6 +248,15 @@ class CortexFactModel(BaseModel):
         default_factory=dict,
         description="Optional structured metadata (session_id, tool calls, etc).",
     )
+    # Double-Plane Facets (Ω₁₃)
+    category: str = Field(default="general", description="Thematic categorization of the fact.")
+    quadrant: str = Field(
+        default="ACTIVE", description="Operational quadrant [ACTIVE, COLD, GHOST]."
+    )
+    storage_tier: str = Field(default="HOT", description="Performance tier [HOT, WARM, COLD].")
+    facet_version: int = Field(default=2, description="Internal facet schema version.")
+
+    # Specular Memory
     specular_embedding: list[int] | None = Field(
         default=None,
         description="HDC Specular Memory (intent trace) bipolar hypervector.",

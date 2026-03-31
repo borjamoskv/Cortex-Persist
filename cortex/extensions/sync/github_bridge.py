@@ -304,14 +304,14 @@ class GitHubCortexBridge:
         """
         index: dict[str, int] = {}
         try:
-            conn = await self._engine.get_conn()
-            cursor = await conn.execute(
-                "SELECT id, metadata FROM facts "
-                "WHERE fact_type = 'bridge' AND valid_until IS NULL "
-                "AND source = ?",
-                (_SOURCE,),
-            )
-            rows = await cursor.fetchall()
+            async with self._engine.session() as conn:
+                cursor = await conn.execute(
+                    "SELECT id, metadata FROM facts "
+                    "WHERE fact_type = 'bridge' AND valid_until IS NULL "
+                    "AND source = ?",
+                    (_SOURCE,),
+                )
+                rows = await cursor.fetchall()
 
             from cortex.crypto import get_default_encrypter
 

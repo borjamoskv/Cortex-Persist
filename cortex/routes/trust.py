@@ -8,8 +8,8 @@ from pydantic import BaseModel
 
 from cortex.api.deps import get_async_engine
 from cortex.auth import AuthResult, require_permission
+from cortex.engine import CortexEngine as AsyncCortexEngine
 from cortex.engine.storage_guard import GuardViolation, StorageGuard
-from cortex.engine_async import AsyncCortexEngine
 from cortex.types.models import StoreRequest
 
 router = APIRouter(tags=["trust"])

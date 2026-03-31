@@ -97,7 +97,7 @@ def _register_compliance_report(mcp: FastMCP, ctx: _MCPContext) -> None:
 
         # Verify ledger integrity
         ledger = ImmutableLedger(ctx.pool)  # type: ignore[reportArgumentType]
-        integrity = await ledger.verify_integrity_async()
+        integrity = await ledger.audit_integrity_async()
 
         now = datetime.now(timezone.utc).isoformat()
 
@@ -134,7 +134,8 @@ def _register_compliance_report(mcp: FastMCP, ctx: _MCPContext) -> None:
                 f"  [{'✅' if total_tx > 0 else '❌'}] Automatic logging of events (Art. 12.1)",
                 f"  [{'✅' if decisions > 0 else '❌'}] Decision recording (Art. 12.2)",
                 f"  [{'✅' if integrity['valid'] else '❌'}] Tamper-proof storage (Art. 12.3)",
-                f"  [{'✅' if checkpoints > 0 else '❌'}] Periodic integrity verification (Art. 12.4)",
+                f"  [{'✅' if checkpoints > 0 else '❌'}] "
+                f"Periodic integrity verification (Art. 12.4)",
                 f"  [{'✅' if len(agents) > 0 else '⚠️'}] Agent traceability (Art. 12.2d)",
                 "",
                 "── 4. Recommendation ──",
@@ -185,7 +186,7 @@ def _register_decision_lineage(mcp: FastMCP, ctx: _MCPContext) -> None:
                 params.append(project)
             where = " AND ".join(conditions)
             cursor = await conn.execute(
-                f"SELECT id, project, content, fact_type, created_at, tags "  # nosec B608 — parameterized query
+                f"SELECT id, project, content, fact_type, created_at, tags "
                 f"FROM facts WHERE {where} "
                 f"ORDER BY id DESC LIMIT 1",
                 params,

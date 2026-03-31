@@ -11,7 +11,7 @@ class PeARLInductionAgent:
     Simulates the synthesis of a parameter inference pipeline.
     Instead of raw stochastic strings, it generates structured pseudo-AST (PeARL).
     """
-    
+
     def __init__(self, mode: str = "ultra_think"):
         self.mode = mode
         self.state_memory: list[dict[str, Any]] = []
@@ -23,7 +23,7 @@ class PeARLInductionAgent:
         # UltraThink structural isolation: We do not process data if the context is tainted
         if data_sample.get("anomaly_flag", False):
             return self._handle_anomaly(data_sample)
-            
+
         # Simulate generating inference code using physical primitives.
         pseudo_pearl_ast = {
             "type": "bayes_inference_model",
@@ -36,7 +36,7 @@ class PeARLInductionAgent:
             },
             "confidence": "C5-Dynamic"
         }
-        
+
         return {
             "induced_ast": pseudo_pearl_ast,
             "status": "crystalized",

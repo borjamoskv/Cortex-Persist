@@ -104,7 +104,7 @@ class EpistemicBreakerDaemon:
             "   (Simulating structural prune)"
         )
 
-        # Execute deep structural compression (Ω₁₃) via autodidact-omega 
+        # Execute deep structural compression (Ω₁₃) via autodidact-omega
         # payload when system limits reached.
         await asyncio.sleep(15)  # Cooldown: compress graph and reconstruct bounds.
 

@@ -217,13 +217,13 @@ class TestMetastabilityProbe:
     """Test metastability probe dataclass and logic."""
 
     def test_report_fragility_ratio_empty(self):
-        from cortex.immune.probe import MetastabilityReport
+        from cortex.security.probe import MetastabilityReport
 
         r = MetastabilityReport()
         assert r.fragility_ratio == 0.0
 
     def test_report_fragility_ratio_computed(self):
-        from cortex.immune.probe import MetastabilityReport
+        from cortex.security.probe import MetastabilityReport
 
         r = MetastabilityReport(
             total_probed=100,
@@ -232,7 +232,7 @@ class TestMetastabilityProbe:
         assert r.fragility_ratio == 0.25
 
     def test_report_default_lists(self):
-        from cortex.immune.probe import MetastabilityReport
+        from cortex.security.probe import MetastabilityReport
 
         r = MetastabilityReport()
         assert r.metastable_facts == []

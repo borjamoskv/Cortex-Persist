@@ -1,6 +1,6 @@
 import pytest
 
-from cortex.immunity.policy import (
+from cortex.security.policy import (
     assert_not_mutated,
     can_transition,
     classify_risk,
@@ -10,7 +10,7 @@ from cortex.immunity.policy import (
     seal_artifact,
     transition_artifact,
 )
-from cortex.immunity.types import (
+from cortex.security.types import (
     ImmuneArtifact,
     ImmunityState,
     PathogenProfile,

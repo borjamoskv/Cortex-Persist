@@ -51,17 +51,17 @@ def encrypter():
 @pytest.mark.asyncio
 async def test_taint_preserves_encrypted_metadata(db, encrypter, monkeypatch):
     """Verify that propagating taint on encrypted metadata preserves it correctly."""
-    
+
     # Mock the global encrypter used by AsyncCausalGraph
     monkeypatch.setattr("cortex.crypto.get_default_encrypter", lambda: encrypter)
-    
+
     graph = AsyncCausalGraph(db)
     tenant = "tenant-alpha"
-    
+
     # 1. Create a parent and a child
     # Parent (ID 1)
     # Child (ID 2), derived from Parent
-    
+
     secret_meta = {"secret_key": "vault-123", "original_status": "clean"}
     encrypted_meta_parent = encrypter.encrypt_json(secret_meta, tenant_id=tenant)
     encrypted_meta_child = encrypter.encrypt_json({"child_secret": "data-456"}, tenant_id=tenant)
@@ -83,13 +83,13 @@ async def test_taint_preserves_encrypted_metadata(db, encrypter, monkeypatch):
     # 2. Propagate Taint from Parent
     # THIS SHOULD FAIL OR CORRUPT if the bug exists (treating ciphertext as JSON)
     report = await graph.propagate_taint(1, tenant_id=tenant)
-    
+
     assert report.affected_count >= 2 # Parent + Child
-    
+
     # 3. Verify Integrity
     async with db.execute("SELECT id, metadata FROM facts ORDER BY id") as cursor:
         rows = await cursor.fetchall()
-        
+
     for fid, meta_ciphertext in rows:
         # Decrypt and check
         try:
@@ -97,12 +97,12 @@ async def test_taint_preserves_encrypted_metadata(db, encrypter, monkeypatch):
             assert decrypted is not None
             assert "taint_status" in decrypted
             assert decrypted["taint_status"] in (TaintStatus.TAINTED, TaintStatus.SUSPECT)
-            
+
             if fid == 1:
                 assert decrypted["secret_key"] == "vault-123"
             if fid == 2:
                 assert decrypted["child_secret"] == "data-456"
-                
+
         except Exception as e:
             pytest.fail(f"Metadata for fact {fid} was corrupted or failed decryption: {e}")
 
@@ -110,24 +110,24 @@ async def test_taint_preserves_encrypted_metadata(db, encrypter, monkeypatch):
 async def test_taint_isolation_between_tenants(db, encrypter, monkeypatch):
     """Verify that taint does NOT cross tenant boundaries even if IDs overlap."""
     monkeypatch.setattr("cortex.crypto.get_default_encrypter", lambda: encrypter)
-    
+
     graph = AsyncCausalGraph(db)
-    
+
     # Tenant Alpha: 1 -> 2
     # Tenant Beta: 3 -> 4
-    
+
     await db.execute("INSERT INTO facts (id, tenant_id, project, content) VALUES (1, 'alpha', 'p', 'a1')")
     await db.execute("INSERT INTO facts (id, tenant_id, project, content) VALUES (2, 'alpha', 'p', 'a2')")
     await db.execute("INSERT INTO causal_edges (fact_id, parent_id, tenant_id) VALUES (2, 1, 'alpha')")
-    
+
     await db.execute("INSERT INTO facts (id, tenant_id, project, content) VALUES (3, 'beta', 'p', 'b1')")
     await db.execute("INSERT INTO facts (id, tenant_id, project, content) VALUES (4, 'beta', 'p', 'b2')")
     await db.execute("INSERT INTO causal_edges (fact_id, parent_id, tenant_id) VALUES (4, 3, 'beta')")
     await db.commit()
-    
+
     # Taint Alpha-1
     await graph.propagate_taint(1, tenant_id="alpha")
-    
+
     # Check Beta-3 status (should be clean/untouched)
     async with db.execute("SELECT metadata FROM facts WHERE id = 3") as cursor:
         row = await cursor.fetchone()

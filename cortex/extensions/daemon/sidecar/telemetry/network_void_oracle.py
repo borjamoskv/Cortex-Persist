@@ -6,7 +6,7 @@ import time
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from cortex.engine_async import AsyncCortexEngine
+    from cortex.engine import CortexEngine as AsyncCortexEngine
 
 
 class NetworkVoidOracle:

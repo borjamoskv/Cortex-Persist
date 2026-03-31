@@ -6,8 +6,8 @@ import json
 from collections.abc import Mapping
 from typing import Any
 
-from cortex.immunity.haiku import HaikuGuard
-from cortex.immunity.types import (
+from cortex.security.haiku import HaikuGuard
+from cortex.security.types import (
     ImmuneArtifact,
     ImmunityState,
     PathogenProfile,

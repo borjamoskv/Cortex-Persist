@@ -1,20 +1,21 @@
+"""CORTEX Optimization Mixin — High-performance buffered writes and LRU caching.
+Ω₂: Thermodynamic optimization — reduces IO wait and recomputation.
+"""
+
 from __future__ import annotations
 
 import asyncio
 import hashlib
-import json
 import logging
 import time
 from collections import deque
 from concurrent.futures import ProcessPoolExecutor
 from enum import Enum
-from typing import Any, final
+from typing import Any, Optional, final
 
 import aiosqlite
 
-from cortex.engine_async import AsyncCortexEngine
-from cortex.memory.temporal import now_iso
-from cortex.utils.canonical import canonical_json, compute_tx_hash
+from cortex.utils.canonical import canonical_json, compute_tx_hash, now_iso
 from cortex.utils.result import Err, Ok, Result
 
 logger = logging.getLogger("cortex.engine.optimized")
@@ -30,12 +31,7 @@ class EvictionReason(Enum):
 
 @final
 class SovereignTLRUCache:
-    """
-    Sovereign Temporal Least Recently Used Cache (Ω₂).
-
-    Maintains a cryptographic evidence chain (Ω₀) for all evictions.
-    Every purged entry leaves a verifiable mathematical proof.
-    """
+    """Sovereign Temporal Least Recently Used Cache (Ω₂)."""
 
     def __init__(
         self,
@@ -93,7 +89,7 @@ class SovereignTLRUCache:
         self._eviction_count += 1
         prev_tip = self._chain_tip
 
-        # 130/100: Crypographic commitment to forgotten data
+        # Crypographic commitment to forgotten data
         v_repr = hashlib.sha256(str(value).encode()).hexdigest()
         proof_material = f"{prev_tip}|{key}|{v_repr}|{reason.value}"
         self._chain_tip = hashlib.sha256(proof_material.encode()).hexdigest()
@@ -126,18 +122,14 @@ class SovereignTLRUCache:
         return True, current_tip
 
 
-class OptimizedCortexEngine(AsyncCortexEngine):
-    """
-    Sovereign Optimized Engine for CORTEX.
-    Implements BufferedWriter, Sovereign Cache, and CryptoPool.
-    """
+class OptimizationMixin:
+    """Provides buffered writes and caching for the CortexEngine."""
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self):
         self._write_buffer: asyncio.Queue = asyncio.Queue()
         self._cache = SovereignTLRUCache(capacity=2000, ttl=600, on_evict=self._on_cache_evict)
         self._executor = ProcessPoolExecutor(max_workers=2)
-        self._buffer_task: asyncio.Task | None = None
+        self._buffer_task: Optional[asyncio.Task] = None
         self._is_flushing = False
 
     def _on_cache_evict(self, key: str, value: Any, audit: dict[str, Any]):
@@ -153,59 +145,19 @@ class OptimizedCortexEngine(AsyncCortexEngine):
     async def _anchor_eviction(self, detail: dict):
         """Persistent anchor for the Decisional Proof."""
         try:
-            async with self.session() as conn:
+            async with self.session() as conn:  # type: ignore
                 await self._log_transaction(conn, "SYSTEM", "CACHE_EVICTION", detail)
         except Exception as e:  # noqa: BLE001
             logger.error("Failed to anchor cache eviction: %s", e)
 
-    async def audit_cache_integrity(self) -> dict[str, Any]:
-        """
-        Periodically audit the cache evidence chain against the ledger (Ω₃).
-        Verifies that the current cache tip correctly derives from past transitions.
-        """
-        async with self.session() as conn:
-            cursor = await conn.execute(
-                "SELECT detail FROM transactions WHERE action = 'CACHE_EVICTION' ORDER BY id DESC LIMIT 100"
-            )
-            rows = await cursor.fetchall()
-            if not rows:
-                return {"status": "NO_EVICTIONS_TO_AUDIT"}
-
-            trails = self._parse_audit_trails(rows)
-            if not trails:
-                return {"status": "NO_VALID_AUDITS_FOUND"}
-
-            initial_tip = trails[0]["prev_proof"]
-            valid, calculated_tip = SovereignTLRUCache.verify_proof(initial_tip, trails)
-
-            actual_tip = self._cache.prove_forgetting()["tip"]
-            if valid and calculated_tip == actual_tip:
-                logger.info("✅ [AUDIT] Cache Evidence Chain verified. Tip: %s", actual_tip[:16])
-                return {"status": "VALIDATED", "tip": actual_tip, "evictions_audited": len(trails)}
-            else:
-                logger.error(
-                    "❌ [AUDIT] Cache Evidence Chain CORRUPTED. Expected: %s, Found: %s",
-                    actual_tip[:16],
-                    calculated_tip[:16],
-                )
-                return {"status": "TAMPERED", "expected": actual_tip, "calculated": calculated_tip}
-
-    def _parse_audit_trails(self, rows):
-        trails = []
-        for row in rows:
-            try:
-                trails.append(json.loads(row[0])["audit_trail"])
-            except (KeyError, json.JSONDecodeError):
-                continue
-        trails.reverse()
-        return trails
-
-    async def start(self):
+    async def start_optimizer(self):
+        """Ignite the buffered writer worker."""
         if self._buffer_task is None:
             self._buffer_task = asyncio.create_task(self._buffer_worker())
-        logger.info("🚀 [OPTIMIZED] Sovereign Engine ignited (Ω₀-Ω₆).")
+        logger.info("🚀 [OPTIMIZED] Sovereign Engine optimization active (Ω₂).")
 
-    async def stop(self):
+    async def stop_optimizer(self):
+        """Shutdown the optimizer and flush the buffer."""
         if self._buffer_task:
             self._is_flushing = True
             await self._write_buffer.put(None)
@@ -239,7 +191,7 @@ class OptimizedCortexEngine(AsyncCortexEngine):
             batch.clear()
 
     async def _flush_batch(self, batch: list):
-        async with self.session() as conn:
+        async with self.session() as conn:  # type: ignore
             await conn.execute("BEGIN IMMEDIATE")
             try:
                 for future, sql, params in batch:
@@ -258,12 +210,17 @@ class OptimizedCortexEngine(AsyncCortexEngine):
                     if not future.done():
                         future.set_result(Err(f"Batch rollback: {e}"))
 
-    async def write(self, sql: str, params: tuple = ()) -> Result[int, str]:
+    async def write_optimized(self, sql: str, params: tuple = ()) -> Result[int, str]:
+        """Buffered write implementation."""
         if not sql.strip().upper().startswith("SELECT"):
             future = asyncio.get_event_loop().create_future()
             await self._write_buffer.put((future, sql, params))
             return await future
-        return await super().write(sql, params)
+
+        # Fallback to standard write if it's a SELECT (though select shouldn't be here)
+        async with self.session() as conn:  # type: ignore
+            async with conn.execute(sql, params) as cursor:
+                return Ok(cursor.rowcount)
 
     async def _log_transaction(
         self,
@@ -272,8 +229,10 @@ class OptimizedCortexEngine(AsyncCortexEngine):
         action: str,
         detail: dict[str, Any],
     ) -> int:
+        """Unified transaction logging with caching and batching."""
         dj = canonical_json(detail)
         ts = now_iso()
+
         last_hash = self._cache.get(f"last_hash_{project}")
         if not last_hash:
             async with conn.execute(
@@ -281,18 +240,21 @@ class OptimizedCortexEngine(AsyncCortexEngine):
             ) as cursor:
                 prev = await cursor.fetchone()
                 last_hash = prev[0] if prev else "GENESIS"
+
         loop = asyncio.get_event_loop()
         th = await loop.run_in_executor(
             self._executor, compute_tx_hash, last_hash, project, action, dj, ts
         )
+
         sql = (
             "INSERT INTO transactions (project, action, detail, prev_hash, hash, timestamp) "
             "VALUES (?, ?, ?, ?, ?, ?)"
         )
         params = (project, action, dj, last_hash, th, ts)
-        res = await self.write(sql, params)
+
+        res = await self.write_optimized(sql, params)
         if res.is_ok():
             tx_id = res.unwrap()
             self._cache.set(f"last_hash_{project}", th)
             return tx_id
-        raise RuntimeError(f"Failed to log transaction: {res.err()}")  # type: ignore[type-error]
+        raise RuntimeError(f"Failed to log transaction: {res.err()}")  # type: ignore

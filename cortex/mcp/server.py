@@ -263,7 +263,7 @@ def _register_ledger_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ig
 
         # ImmutableLedger expects a pool, not a single connection
         ledger = ImmutableLedger(ctx.pool)  # type: ignore[reportArgumentType]
-        report = await ledger.verify_integrity_async()
+        report = await ledger.audit_integrity_async()
 
         if report["valid"]:
             return (

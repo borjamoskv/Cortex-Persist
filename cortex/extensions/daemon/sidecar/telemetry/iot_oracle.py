@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine
-    from cortex.engine_async import AsyncCortexEngine
+    from cortex.engine import CortexEngine as AsyncCortexEngine
 
 logger = logging.getLogger("cortex.sidecar.telemetry.iot_oracle")
 

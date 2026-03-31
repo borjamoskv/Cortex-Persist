@@ -1,4 +1,4 @@
-from cortex.immune.quarantine import BlastRadiusReport, evaluate_demolition
+from cortex.security.quarantine import BlastRadiusReport, evaluate_demolition
 
 
 def test_high_blast_radius_no_direct_purge():

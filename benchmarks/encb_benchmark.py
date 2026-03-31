@@ -63,7 +63,7 @@ class CortexResolver(Resolver):
     def __init__(self, engine) -> None:
         self.engine = engine
         self._detected_byzantine: set[str] = set()
-        
+
     async def ingest(self, events: list[ChaosEvent]) -> None:
         for event in events:
             try:
@@ -80,7 +80,7 @@ class CortexResolver(Resolver):
                         vote_value = 1 if event.meta.get("ground_truth", True) else -1
                         if event.meta.get("is_byzantine", False):
                             vote_value = -vote_value
-                        await self.engine.vote(fact_id, event.agent_id, vote_value)
+                        await self.engine.vote_v2(fact_id, event.agent_id, vote_value)
                     except Exception:
                         pass
             except Exception:
@@ -156,7 +156,7 @@ async def run_encb(
         from cortex.schema import ALL_SCHEMA
 
         from cortex.database.pool import CortexConnectionPool
-        from cortex.engine_async import AsyncCortexEngine
+        from cortex.engine import CortexEngine as AsyncCortexEngine
 
         pool = CortexConnectionPool(db_path, min_connections=1, max_connections=3)
         await pool.initialize()
@@ -183,7 +183,7 @@ async def run_encb(
     if cortex_available and engine is not None:
         resolvers.append(CortexResolver(engine))
     resolvers.append(AppendOnlyResolver())
-    
+
     gt_map = {}
     for _modality, gt in ground_truths.items():
         for _i, prop in enumerate(gt.signal_facts):
@@ -221,7 +221,7 @@ async def run_encb(
 
             search_results = set()
             ground_truth_set = set(gt.signal_facts[:5])
-            
+
             p_consensus = {}
             p_truth = {}
             for i, signal in enumerate(ground_truth_set):
@@ -235,7 +235,7 @@ async def run_encb(
 
             recovery_rate = calculate_recovery_rate(search_results, ground_truth_set)
             kl_div = calculate_kl_divergence(p_consensus, p_truth)
-            
+
             detected = await resolver.detect_byzantine()
             actual_byzantine = {e.agent_id for e in events if e.meta.get("is_byzantine", False)}
             f1_byz = calculate_f1_score(detected, actual_byzantine)
@@ -294,7 +294,7 @@ async def run_encb(
         *[f"{get_avg(r.name(), 'injection_time_ms'):.0f}ms" for r in resolvers],
         "< 500ms",
     )
-    
+
     recovery_pass = cortex_rec > 0.70
     byz_pass = get_avg("CORTEX-Persist", "byzantine_f1_score") > 0.80
 

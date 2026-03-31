@@ -309,13 +309,16 @@ class CortexLLMRouter:
 
         fallbacks = self._ordered_fallbacks(prompt)
         swarm_peers = []
-        
+
         reasoning_mode = getattr(prompt, "reasoning_mode", None)
-        if reasoning_mode == ReasoningMode.ULTRA_THINK and getattr(self._primary, "tier", None) != "frontier":
+        if (
+            reasoning_mode == ReasoningMode.ULTRA_THINK
+            and getattr(self._primary, "tier", None) != "frontier"
+        ):
             pass  # Skip primary for ULTRA_THINK if not frontier
         else:
             swarm_peers.append(self._primary)
-            
+
         swarm_peers.extend(fallbacks[:2])
 
         active_peers = [

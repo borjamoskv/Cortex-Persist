@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING, Any
 from cortex.engine.forgetting_models import EvictionVerdict
 
 if TYPE_CHECKING:
-    from cortex.engine_async import AsyncCortexEngine
+    from cortex.engine import CortexEngine as AsyncCortexEngine
     from cortex.memory.working import WorkingMemoryL1
 
 logger = logging.getLogger("cortex.oracle.analyzer")

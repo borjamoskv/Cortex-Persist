@@ -231,7 +231,7 @@ def calculate_recovery_rate(recovered: set[str], ground_truth: set[str]) -> floa
     """
     if not ground_truth:
         return 1.0 if not recovered else 0.0
-    
+
     intersection = recovered.intersection(ground_truth)
     return len(intersection) / len(ground_truth)
 
@@ -253,7 +253,7 @@ def calculate_f1_score(predicted: set[str], actual: set[str]) -> float:
 
     if precision + recall == 0:
          return 0.0
-         
+
     return 2 * (precision * recall) / (precision + recall)
 
 

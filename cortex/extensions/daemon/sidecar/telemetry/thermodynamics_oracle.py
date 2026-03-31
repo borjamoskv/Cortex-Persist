@@ -7,7 +7,7 @@ import time
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from cortex.engine_async import AsyncCortexEngine
+    from cortex.engine import CortexEngine as AsyncCortexEngine
 
 
 class ThermodynamicsOracle:
@@ -16,6 +16,7 @@ class ThermodynamicsOracle:
     Mide la Exergía (trabajo útil) y la entropía del sistema en tiempo real.
     Garantiza que el sistema no exceda la asfixia termodinámica.
     """
+
     def __init__(
         self,
         engine: AsyncCortexEngine,
@@ -33,6 +34,7 @@ class ThermodynamicsOracle:
         self._psutil = None
         try:
             import psutil
+
             self._psutil = psutil
         except ImportError:
             pass
@@ -46,7 +48,7 @@ class ThermodynamicsOracle:
                 await asyncio.sleep(0.1)
                 lag_ms = (time.perf_counter() - start_time - 0.1) * 1000.0
                 lag_ms = max(0.0, lag_ms)
-                
+
                 await self._sample_thermodynamics(lag_ms)
             except asyncio.CancelledError:
                 self._running = False
@@ -69,7 +71,7 @@ class ThermodynamicsOracle:
 
         memory_percent = 50.0  # Base assumption
         disk_busy_ms = 0.0
-        
+
         if self._psutil:
             memory_percent = self._psutil.virtual_memory().percent
             try:
@@ -92,7 +94,7 @@ class ThermodynamicsOracle:
         s = 100  # Singularity constant
 
         # Loss = r * (d * 1.5) * f * (1 + t^2) * S
-        exergy_loss = round(r * (d * 1.5) * f * (1 + (t ** 2)) * s, 1)
+        exergy_loss = round(r * (d * 1.5) * f * (1 + (t**2)) * s, 1)
 
         # Red Queen Dynamic Polling (Axiom Ω₁₃)
         if exergy_loss > 50.0:
@@ -108,9 +110,17 @@ class ThermodynamicsOracle:
 
         # Trigger on pure overload, massive exergy loss, or dangerous event loop lock
         if utilization > self.thermal_threshold or exergy_loss > 90.0 or lag_ms > 500.0:
-            severity = "CRITICAL" if utilization > 1.5 or exergy_loss > 120.0 or lag_ms > 1000.0 else "HIGH"
-            
-            aniquilacion_msg = f"\\n  [!] FATAL PURGE (Ω₄): {purged_tasks} asfixiated tasks eradicated." if purged_tasks > 0 else ""
+            severity = (
+                "CRITICAL"
+                if utilization > 1.5 or exergy_loss > 120.0 or lag_ms > 1000.0
+                else "HIGH"
+            )
+
+            aniquilacion_msg = (
+                f"\\n  [!] FATAL PURGE (Ω₄): {purged_tasks} asfixiated tasks eradicated."
+                if purged_tasks > 0
+                else ""
+            )
 
             # Ω₂ Mandatory Mechanical Justification Format
             content = (
@@ -162,7 +172,7 @@ class ThermodynamicsOracle:
         for task in asyncio.all_tasks():
             if task is current:
                 continue
-            
+
             task_name = task.get_name().lower()
             try:
                 coro_name = task.get_coro().__name__.lower()  # type: ignore
@@ -170,15 +180,13 @@ class ThermodynamicsOracle:
                 coro_name = ""
 
             # Safeguards to prevent system bricking
-            is_critical = (
-                any(kw in task_name for kw in ("p0", "engine", "core", "server")) or
-                any(kw in coro_name for kw in ("start", "serve", "watch", "loop"))
+            is_critical = any(kw in task_name for kw in ("p0", "engine", "core", "server")) or any(
+                kw in coro_name for kw in ("start", "serve", "watch", "loop")
             )
-            
+
             if not is_critical:
                 task.cancel()
                 purged += 1
-        
+
         # Cooldown forced yield to allow tasks to process their CancelledError
         return purged
-

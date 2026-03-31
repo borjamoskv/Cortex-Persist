@@ -345,6 +345,7 @@ async def check_seal_5_ledger() -> GateResult:
 async def _check_blocking_sleep(exclude_files: frozenset[str]) -> list[str]:
     """Identify synchronous time.sleep() calls in async-critical files."""
     import ast
+
     violations = []
     for py_file, content in GlobalSourceCache.files.items():
         if py_file.name in exclude_files:
@@ -354,10 +355,12 @@ async def _check_blocking_sleep(exclude_files: frozenset[str]) -> list[str]:
             for node in ast.walk(tree):
                 if isinstance(node, ast.Call):
                     # Check for time.sleep()
-                    if (isinstance(node.func, ast.Attribute) and 
-                        node.func.attr == "sleep" and 
-                        isinstance(node.func.value, ast.Name) and 
-                        node.func.value.id == "time"):
+                    if (
+                        isinstance(node.func, ast.Attribute)
+                        and node.func.attr == "sleep"
+                        and isinstance(node.func.value, ast.Name)
+                        and node.func.value.id == "time"
+                    ):
                         violations.append(f"{py_file.name}:{node.lineno}")
                     # Check for bare sleep() (if imported)
                     elif isinstance(node.func, ast.Name) and node.func.id == "sleep":
@@ -370,6 +373,7 @@ async def _check_blocking_sleep(exclude_files: frozenset[str]) -> list[str]:
 async def _check_temperature_determinism(critical_files: list[Path]) -> list[str]:
     """Ensure LLM calls use temperature=0 for determinism."""
     import ast
+
     violations = []
     zero_values = (0, 0.0)
     for path in critical_files:
@@ -379,7 +383,7 @@ async def _check_temperature_determinism(critical_files: list[Path]) -> list[str
             content = await asyncio.to_thread(path.read_text, encoding="utf-8")
         else:
             continue
-            
+
         try:
             tree = ast.parse(content, filename=str(path))
             has_temp = False
@@ -406,6 +410,7 @@ async def _check_latency_telemetry() -> list[str]:
     """Audit local provider latency from telemetry."""
     try:
         from cortex.extensions.llm._telemetry import CascadeTelemetry
+
         telemetry = CascadeTelemetry()
         stats = telemetry.stats()
         slow = []
@@ -423,12 +428,26 @@ async def check_seal_6_async_perf() -> GateResult:
     passed = True
 
     # ── Async Guard (No time.sleep) ──
-    exclude = frozenset([
-        "seals.py", "reactor.py", "antipatterns.py", "_scanner_visitors.py",
-        "registry.py", "legion.py", "legion_vectors.py", "demo_swarm.py",
-        "demo_bicameral.py", "network.py", "fiat_oracle.py", "mouse.py",
-        "dashboard_cmds.py", "health_cmds.py", "ouroboros_omega.py", "oracle.py",
-    ])
+    exclude = frozenset(
+        [
+            "seals.py",
+            "reactor.py",
+            "antipatterns.py",
+            "_scanner_visitors.py",
+            "registry.py",
+            "legion.py",
+            "legion_vectors.py",
+            "demo_swarm.py",
+            "demo_bicameral.py",
+            "network.py",
+            "fiat_oracle.py",
+            "mouse.py",
+            "dashboard_cmds.py",
+            "health_cmds.py",
+            "ouroboros_omega.py",
+            "oracle.py",
+        ]
+    )
     sleep_violations = await _check_blocking_sleep(exclude)
     if sleep_violations:
         printer.fail(f"Blocking time.sleep(): {sleep_violations}")
@@ -535,16 +554,17 @@ _GATE_ORDER = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
 def _parse_gate_filters() -> tuple[set[int], set[int], set[int]]:
     """Extract gate filters from environment variables."""
+
     def _to_set(var: str) -> set[int]:
         return {int(g.strip()) for g in os.environ.get(var, "").split(",") if g.strip().isdigit()}
-    
+
     skip = _to_set("SKIP_GATES")
     only = _to_set("ONLY_GATES")
     force = _to_set("FORCE_GATES")
-    
+
     if only:
         skip = {gn for gn in _GATE_ORDER if gn not in only}
-        
+
     return skip, only, force
 
 
@@ -557,44 +577,44 @@ async def _execute_gates_loop(
 ) -> dict[int, GateResult]:
     """Run the defined gates and return results mapping."""
     results: dict[int, GateResult] = {}
-    
+
     for gate_num in gate_order:
         if gate_num in skip:
             printer.seal(gate_num, "SKIPPED", f"Seal {gate_num} — skipped via Filtering")
             results[gate_num] = (True, "skipped")
             continue
-            
+
         if gate_num in force:
             printer.warn(f"Seal {gate_num} — FORCE VALIDATION (Bypassing auto-skip)")
-            
+
         start = time.perf_counter()
         res = await gate_fns[gate_num]()
         elapsed = (time.perf_counter() - start) * 1000
         printer.print(f"   [dim]⏱  {elapsed:.0f}ms[/]")
-        
+
         results[gate_num] = res
         if fail_fast and not res[0]:
             printer.fail(f"FAIL-FAST: Seal {gate_num} failed. Aborting.")
             break
-            
+
     return results
 
 
 def _print_summary(results: dict[int, GateResult], total_elapsed: float) -> int:
     """Print the final seals summary and return exit code."""
     printer.head("SOVEREIGN SEALS SUMMARY")
-    
+
     verified = [gn for gn, (p, k) in results.items() if k == "verified" and p]
     skipped = [gn for gn, (_, k) in results.items() if k == "skipped"]
     failed = [gn for gn, (p, k) in results.items() if not p]
-    
+
     printer.print(
         f"   [bold green]🟢 VERIFIED: {len(verified)}[/]  "
         f"[bold yellow]🟡 SKIPPED: {len(skipped)}[/]  "
         f"[bold red]🔴 FAILED: {len(failed)}[/]"
     )
     printer.print(f"   [dim]⏱  Total: {total_elapsed:.0f}ms[/]")
-    
+
     if failed:
         printer.fail(f"SEALS BROKEN: {sorted(failed)}\nFix violations before pushing.")
         return 1
@@ -610,13 +630,13 @@ async def main() -> int:
 
     skip, only, force = _parse_gate_filters()
     is_ci = os.environ.get("CI") == "1" or os.environ.get("CORTEX_FULL_SEALS") == "1"
-    
+
     # Auto-skip Gate 4 locally
     if not is_ci and 4 not in force and 4 not in only:
         if 4 not in skip:
             printer.warn("Ω₂ EXERGY PRESERVATION: Running in FAST MODE (Gate 4 SKIPPED).")
             skip.add(4)
-            
+
     fail_fast = os.environ.get("FAIL_FAST", "").strip() in ("1", "true", "yes")
 
     gate_fns: dict[int, Callable[[], Coroutine[Any, Any, GateResult]]] = {
@@ -634,7 +654,7 @@ async def main() -> int:
 
     results = await _execute_gates_loop(_GATE_ORDER, gate_fns, skip, force, fail_fast)
     total_elapsed = (time.perf_counter() - total_start) * 1000
-    
+
     return _print_summary(results, total_elapsed)
 
 

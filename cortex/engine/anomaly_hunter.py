@@ -37,12 +37,14 @@ class AnomalyHunterEngine:
         self.window = timedelta(hours=lookback_hours)
         self.anomalies: list[Anomaly] = []
 
-    def _get_fact_timestamp(self, fact_id: int) -> datetime | None:
-        """Helper para extraer timestamp de forma síncrona si es necesario
-        (En la versión final usaremos el engine async directamente).
-        """
-        # Para la implementación real, deberíamos hacer un fetch previo o usar async
-        pass
+    async def _get_fact_timestamp(self, fact_id: int) -> datetime | None:
+        """Helper para extraer timestamp del engine de forma asíncrona."""
+        fact_raw = await self.cortex.get_fact(fact_id)
+        if not fact_raw or not fact_raw.get("created_at"):
+            return None
+
+        ts_str = fact_raw["created_at"]
+        return datetime.fromisoformat(ts_str.replace("Z", "+00:00"))
 
     def _is_same_entity(self, fact_a: Fact, fact_b: Fact) -> bool:
         """Determina si dos facts hablan de la misma entidad (tags, titulo...)."""
@@ -108,16 +110,12 @@ class AnomalyHunterEngine:
         for fact in facts:
             if isinstance(fact.meta, dict) and fact.meta.get("caused_by"):
                 cause_id = fact.meta["caused_by"]
-                cause_raw = await self.cortex.get_fact(cause_id)
-                if not cause_raw:
+                cause_ts = await self._get_fact_timestamp(cause_id)
+                if not cause_ts:
                     continue
 
-                cause_time_str = cause_raw.get("created_at")
-                if not cause_time_str:
-                    continue
-
-                cause_ts = datetime.fromisoformat(cause_time_str.replace("Z", "+00:00"))
-                effect_ts = datetime.fromisoformat(fact.created_at.replace("Z", "+00:00"))  # pyright: ignore
+                # type: ignore
+                effect_ts = datetime.fromisoformat(fact.created_at.replace("Z", "+00:00"))
 
                 if cause_ts > effect_ts:
                     inversions.append(
@@ -162,12 +160,64 @@ class AnomalyHunterEngine:
         return contradictions
 
     async def detect_value_drift(self, facts: list[Fact]) -> list[Anomaly]:
-        """Detecta valores que divergen drásticamente en corto tiempo."""
-        return []
+        """Detecta valores que divergen drásticamente para la misma entidad."""
+        drifts = []
+        entity_map: dict[str, list[Fact]] = {}
+
+        for f in facts:
+            if f.tags:
+                tag_key = ",".join(sorted(f.tags))
+                if tag_key not in entity_map:
+                    entity_map[tag_key] = []
+                entity_map[tag_key].append(f)
+
+        for tag_key, group in entity_map.items():
+            if len(group) < 2:
+                continue
+
+            # Sort by time
+            sorted_group = sorted(group, key=lambda x: x.created_at or "")
+
+            for i in range(len(sorted_group) - 1):
+                f1, f2 = sorted_group[i], sorted_group[i+1]
+                # Simple drift detection: if both have numerical values and they differ by > 50%
+                v1 = f1.meta.get("value") if isinstance(f1.meta, dict) else None
+                v2 = f2.meta.get("value") if isinstance(f2.meta, dict) else None
+
+                if isinstance(v1, (int, float)) and isinstance(v2, (int, float)) and v1 != 0:
+                    drift_pct = abs(v2 - v1) / abs(v1)
+                    if drift_pct > 0.5:
+                        drifts.append(
+                            Anomaly(
+                                type="VALUE_DRIFT",
+                                severity="MEDIUM",
+                                facts_involved=[f1.id, f2.id],  # type: ignore
+                                description=(
+                                    f"Drift detectado en {tag_key}: {v1} -> {v2} "
+                                    f"({drift_pct:.1%})"
+                                ),
+                                suggested_action=(
+                                    "Revisar si el cambio de valor es legítimo o un error."
+                                ),
+                            )
+                        )
+        return drifts
 
     async def detect_ghost_resurrections(self, facts: list[Fact]) -> list[Anomaly]:
-        """Detecta entidades que estaban deprecadas y vuelven a usarse."""
-        return []
+        """Detecta entidades que estaban deprecadas ('ghost' markers) y vuelven a usarse."""
+        resurrections = []
+        for f in facts:
+            if "resurrected" in f.content.lower() or f.meta.get("reopened"):
+                resurrections.append(
+                    Anomaly(
+                        type="GHOST_RESURRECTION",
+                        severity="LOW",
+                        facts_involved=[f.id],  # type: ignore
+                        description=f"Entidad en fact #{f.id} re-activada tras supuesta purga.",
+                        suggested_action="Verificar si la purga previa fue incompleta.",
+                    )
+                )
+        return resurrections
 
     async def detect_confidence_collapses(self, facts: list[Fact]) -> list[Anomaly]:
         """
@@ -225,6 +275,8 @@ class AnomalyHunterEngine:
             "total_anomalies": len(self.anomalies),
             "by_type": by_type,
             "high_severity": sum(1 for a in self.anomalies if a.severity == "HIGH"),
-            "verification_tasks_created": sum(1 for a in self.anomalies if a.severity == "HIGH"),
+            "verification_tasks_created": sum(
+                1 for a in self.anomalies if a.severity == "HIGH"
+            ),
             "memory_health_score": max(0, 100 - len(self.anomalies) * 5),
         }

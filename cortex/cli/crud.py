@@ -71,11 +71,11 @@ def list_facts(project, fact_type, limit, db) -> None:
     try:
 
         async def __get_rows() -> list[sqlite3.Row]:
-            conn = await engine.get_conn()
-            query = """
-                SELECT id, project, content, fact_type, tags, created_at
-                FROM facts WHERE valid_until IS NULL
-            """
+            async with engine.session() as conn:
+                query = """
+                    SELECT id, project, content, fact_type, tags, created_at
+                    FROM facts WHERE valid_until IS NULL
+                """
             params = []
             if project:
                 query += " AND project = ?"
@@ -124,9 +124,7 @@ def list_facts(project, fact_type, limit, db) -> None:
             except (ValueError, TypeError, OSError, InvalidTag):
                 content = raw_content  # Fallback to raw if decryption fails
             content_str = str(content) if content else ""
-            content_preview = (
-                content_str[:57] + "..." if len(content_str) > 60 else content_str
-            )
+            content_preview = content_str[:57] + "..." if len(content_str) > 60 else content_str
             tags = json.loads(row[4]) if row[4] else []
             tags_str = ", ".join(tags[:2]) + ("…" if len(tags) > 2 else "")
             table.add_row(str(row[0]), row[1], row[3], content_preview, tags_str)
@@ -193,22 +191,22 @@ def inspect(fact_id, db) -> None:
             if not fact:
                 return None, [], "NOT_FOUND", None
 
-            # Load tags from bridge table
-            conn = await engine.get_conn()
-            cursor = await conn.execute(
-                "SELECT tag FROM fact_tags WHERE fact_id = ?", (str(fact_id),)
-            )
-            tags = [r[0] for r in await cursor.fetchall()]
+            # Load tags and status from engine
+            async with engine.session() as conn:
+                cursor = await conn.execute(
+                    "SELECT tag FROM fact_tags WHERE fact_id = ?", (str(fact_id),)
+                )
+                tags = [r[0] for r in await cursor.fetchall()]
 
-            # Load status from enrichment_jobs
-            cursor = await conn.execute(
-                "SELECT status, error_message FROM enrichment_jobs "
-                "WHERE fact_id = ? AND job_type = 'embedding'",
-                (str(fact_id),),
-            )
-            job = await cursor.fetchone()
-            status = job[0] if job else "COMPLETED"  # Assume completed if no job pending
-            error = job[1] if job else None
+                # Load status from enrichment_jobs
+                cursor = await conn.execute(
+                    "SELECT status, error_message FROM enrichment_jobs "
+                    "WHERE fact_id = ? AND job_type = 'embedding'",
+                    (str(fact_id),),
+                )
+                job = await cursor.fetchone()
+                status = job[0] if job else "COMPLETED"  # Assume completed if no job pending
+                error = job[1] if job else None
 
             return fact, tags, status, error
 

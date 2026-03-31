@@ -44,7 +44,7 @@ class DeterministicInductionMixin:
 
             if isinstance(node, ast.ImportFrom):
                 if node.module and node.module.split(".")[0] in self.FORBIDDEN_MODULES:
-                     return False, f"Entropy detected: Forbidden import '{node.module}'."
+                    return False, f"Entropy detected: Forbidden import '{node.module}'."
 
             # 2. Prevent blocking or mutable intrinsic calls
             if isinstance(node, ast.Call):
@@ -63,5 +63,7 @@ class DeterministicInductionMixin:
         """
         is_valid, reason = self.validate_executable_program(code)
         if not is_valid:
-            logger.warning("⚡ [STAGNATION SHOCK] Agent %s generated unstable logic: %s", agent_id, reason)
+            logger.warning(
+                "⚡ [STAGNATION SHOCK] Agent %s generated unstable logic: %s", agent_id, reason
+            )
             raise ValueError(reason)

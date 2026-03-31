@@ -275,7 +275,10 @@ class EpisodicMemory:
 
         # Computationally expensive operation — offloaded to thread pool under high load
         return await asyncio.to_thread(
-            _extract_patterns, list(rows), min_occurrences, limit  # type: ignore[reportArgumentType]
+            _extract_patterns,
+            list(rows),
+            min_occurrences,
+            limit,  # type: ignore[reportArgumentType]
         )
 
     async def count(self, project: Optional[str] = None) -> int:
@@ -344,7 +347,7 @@ def _extract_patterns(
         tokens = _extract_tokens(content)
 
         # 2. Bi-grams (Adjacent sliding window O(N))
-        bigrams = {f"{tokens[i]} {tokens[i+1]}" for i in range(len(tokens) - 1)}
+        bigrams = {f"{tokens[i]} {tokens[i + 1]}" for i in range(len(tokens) - 1)}
 
         # Merge all candidate themes
         for candidate in set(tokens) | bigrams:

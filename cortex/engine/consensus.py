@@ -66,7 +66,7 @@ class ConsensusMixin(EngineMixinBase):
         total_weight = sum(max(v[1], v[2]) for v in votes)
         return 1.0 + (weighted_sum / total_weight) if total_weight > 0 else 1.0
 
-    async def vote(
+    async def vote_v2(
         self, fact_id: int, agent: str, value: int, signature: str | None = None
     ) -> float:
         """Vote with immutable ledger logging and reputation-weighted consensus."""

@@ -22,7 +22,7 @@ from pydantic import BaseModel, Field
 
 from cortex.api.deps import get_async_engine
 from cortex.auth import AuthResult, require_permission
-from cortex.engine_async import AsyncCortexEngine
+from cortex.engine import CortexEngine as AsyncCortexEngine
 from cortex.extensions.llm._presets import list_providers, provider_inventory
 from cortex.extensions.llm.manager import LLMManager
 from cortex.extensions.llm.provider import LLMProvider

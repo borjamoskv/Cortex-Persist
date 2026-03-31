@@ -20,7 +20,7 @@ from cortex.utils import hygiene
 from cortex.utils.semantic_heartbeat import SemanticHeartbeat
 
 if TYPE_CHECKING:
-    from cortex.engine_async import AsyncCortexEngine
+    from cortex.engine import CortexEngine as AsyncCortexEngine
     from cortex.memory.sleep import SleepOrchestrator
 
 logger = logging.getLogger("cortex.heartbeat")

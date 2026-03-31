@@ -23,7 +23,7 @@ from cortex.services.notebooklm import NotebookLMService
 from cortex.services.trust import TrustService
 
 if TYPE_CHECKING:
-    from cortex.engine_async import AsyncCortexEngine
+    from cortex.engine import CortexEngine as AsyncCortexEngine
     from cortex.memory.working import WorkingMemoryL1
 
 __all__ = ["ForgettingOracle"]

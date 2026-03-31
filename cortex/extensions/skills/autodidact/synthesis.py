@@ -249,7 +249,7 @@ async def execute_cognitive_synthesis(
 
     # ── EPISTEMIC CONTRADICTION GUARD (Axioma Ω₁) ──
     from cortex.guards.contradiction_guard import detect_contradictions
-    
+
     conflict_report = await detect_contradictions(
         new_content=memo_content,
         new_project="autodidact_knowledge",
@@ -260,7 +260,9 @@ async def execute_cognitive_synthesis(
             "frontalmente la memoria persistida (C5 Bypass Intercepted)."
         )
         for conflict in conflict_report.candidates[:3]:
-            logger.error("   Contradicción (score: %.3f) -> %s", conflict.overlap_score, conflict.fact_id)
+            logger.error(
+                "   Contradicción (score: %.3f) -> %s", conflict.overlap_score, conflict.fact_id
+            )
         logger.error("Abortando cristalización para preservar integridad termodinámica del Tensor.")
         return f"REJECTED_EPISTEMIC_CONTRADICTION: {conflict_report.candidates[0].fact_id}"
 
@@ -290,7 +292,7 @@ async def execute_cognitive_synthesis(
             "entities": entities,
             "resonancia": resonancia,
             "quantization": "turboquant_3.5b_qjl",
-            "compression_ratio": "absolute_neutrality_zero_indexing"
+            "compression_ratio": "absolute_neutrality_zero_indexing",
         },
     )
 

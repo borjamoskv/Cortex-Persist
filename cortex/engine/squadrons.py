@@ -4,9 +4,9 @@ import re
 from pathlib import Path
 from typing import Any
 
+from cortex.engine.legion import AsyncSignalBus, Squadron, SwarmAgent, SwarmSignal
 from cortex.engine.legion_vectors import RED_TEAM_SWARM
 from cortex.engine.nemesis_agent import NemesisAgentAdapter
-from cortex.engine.swarm import AsyncSignalBus, Squadron, SwarmAgent, SwarmSignal
 
 logger = logging.getLogger(__name__)
 
@@ -54,15 +54,27 @@ class MultiSpecialistAgent(SwarmAgent):
                 findings = await vector.attack(content or target, {"agent_id": self.agent_id})
                 all_findings.extend([f"[{spec_id}] {f}" for f in findings])
 
-            # 2. Check Static Analysis (Simulated/Integrity)
             elif "Audit" in spec_id or "Integrity" in spec_id or "Code" in spec_id:
                 # Basic static check for MVP
-                # Ignore lines that are clearly detection logic or structural definitions
-                if "TODO" in content and not any(p in content for p in ["if \"TODO\" in", "[\"TODO\",", "re.compile"]):
+                # Ignore lines that are clearly detection logic, structural items...
+                excl = [
+                    'if "TODO" in', '["TODO"', 'target_patterns', 'forbidden =',
+                    '# no-audit', 're.compile', 'if "FIXME" in', '["FIXME"',
+                    'is_todo =', 'or "TODO" in', 'or "FIXME" in', 'TODO el',
+                    'TODO los', 'TODO la', 'TODO las',
+                ]
+
+                if any(kw in content for kw in ["TODO", "FIXME"]):
                     # Check individual lines to ensure it's not a false positive
                     for line in content.splitlines():
-                        if "TODO" in line and not any(p in line for p in ["if \"TODO\" in", "[\"TODO\",", "re.compile"]):
-                            all_findings.append(f"[{spec_id}] Actual debt found: {line.strip()}")
+                        line_stripped = line.strip()
+                        # Only flag if it looks like a comment or a stand-alone placeholder
+                        is_todo = "TODO" in line_stripped or "FIXME" in line_stripped
+                        is_excluded = any(p in line_stripped for p in excl)
+
+                        if is_todo and not is_excluded:
+                            all_findings.append(f"[{spec_id}] Actual debt found: {line_stripped}")
+                            # Solo reportamos la primera por archivo
                             break
 
         status = "SUCCESS" if all_findings else "VOID"
@@ -90,7 +102,8 @@ class PhalanxBase(Squadron):
         self.registry = self._load_registry()
 
     def _load_registry(self) -> dict:
-        reg_path = Path("resources/swarm_100_registry.json")
+        # Resolve path relative to this file: ../../resources/swarm_100_registry.json
+        reg_path = Path(__file__).resolve().parents[2] / "resources/swarm_100_registry.json"
         if reg_path.exists():
             return json.loads(reg_path.read_text())
         return {}
@@ -106,20 +119,35 @@ class PhalanxBase(Squadron):
         """MAP phase: Shards a directory into individual files for parallel audit."""
         if not target_pattern:
             return []
-        
+
         path = Path(target_pattern)
         if path.is_file():
             return [str(path)]
-        
+
         if path.is_dir():
             # Recursively find all source files for the audit
             extensions = {".py", ".js", ".ts", ".go", ".rs", ".md", ".json"}
+            exclude_dirs = {
+                "node_modules",
+                ".venv",
+                "venv",
+                ".git",
+                "__pycache__",
+                ".ruff_cache",
+                ".pytest_cache",
+                "dist",
+                "build",
+                ".vercel",
+            }
             targets = [
-                str(p) for p in path.rglob("*") 
-                if p.is_file() and p.suffix in extensions and "pycache" not in str(p)
+                str(p)
+                for p in path.rglob("*")
+                if p.is_file()
+                and p.suffix in extensions
+                and not any(d in p.parts for d in exclude_dirs)
             ]
             return targets
-            
+
         return [target_pattern]
 
     def _create_agent(self, agent_id: str) -> SwarmAgent:
@@ -127,11 +155,11 @@ class PhalanxBase(Squadron):
         registry_p = self.registry.get("phalanxes", {})
         phalanx_agents = registry_p.get(self.SQUAD_NAME, {}).get("agents", [])
         idx = int(agent_id.split("-")[-1])
-        
+
         # Evolución Adversaria (Ω₁₃): 10% del enjambre es Nemesis L4
         if idx % 10 == 9:
             return NemesisAgentAdapter(agent_id, self.bus, self.engine)
-            
+
         if idx < len(phalanx_agents):
             reg_id = phalanx_agents[idx]
             specs = self._get_agent_spec(reg_id)

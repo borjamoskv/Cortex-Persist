@@ -15,6 +15,7 @@ import logging
 import sqlite3
 import time
 from collections import deque
+from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
@@ -317,10 +318,12 @@ class SovereignLedger:
         detail_json = canonical_json(detail) if detail else "{}"
         ts = now_iso()
 
-        async with self.db.acquire() as conn:  # type: ignore[reportAttributeAccessIssue]
+        async with self._get_conn_proxy() as conn:  # type: ignore[reportAttributeAccessIssue]
             await conn.execute("BEGIN EXCLUSIVE")
             try:
-                cursor = await conn.execute("SELECT hash FROM transactions ORDER BY id DESC LIMIT 1")
+                cursor = await conn.execute(
+                    "SELECT hash FROM transactions ORDER BY id DESC LIMIT 1"
+                )
                 row = await cursor.fetchone()
                 prev_hash = row[0] if row else "GENESIS"
                 new_hash = compute_tx_hash(prev_hash, project, action, detail_json, ts)
@@ -372,7 +375,7 @@ class SovereignLedger:
         batch_size = self.adaptive_batch_size
 
         async with self._lock:
-            async with self.db.acquire() as conn:  # type: ignore[reportAttributeAccessIssue]
+            async with self._get_conn_proxy() as conn:  # type: ignore[reportAttributeAccessIssue]
                 cursor = await conn.execute("SELECT MAX(tx_end_id) FROM merkle_roots")
                 row = await cursor.fetchone()
                 last_covered = row[0] or 0 if row else 0
@@ -399,12 +402,23 @@ class SovereignLedger:
                 await conn.commit()
                 return root
 
+    @asynccontextmanager
+    async def _get_conn_proxy(self):
+        """Internal helper to get a connection for auditing/writing,
+        supporting both Pool and raw Connection (Ω₁).
+        """
+        if hasattr(self.db, "acquire"):
+            async with self.db.acquire() as conn:
+                yield conn
+        else:
+            yield self.db
+
     async def audit_integrity_async(self) -> dict:
-        """Perform a full integrity audit asynchronously."""
+        """Perform a full integrity audit asynchronously (Ω₁)."""
         violations = []
         tx_count = 0
 
-        async with self.db.acquire() as conn:  # type: ignore[reportAttributeAccessIssue]
+        async with self._get_conn_proxy() as conn:
             started_at = now_iso()
             cursor = await conn.execute(
                 "SELECT id, project, action, detail, prev_hash, hash, timestamp "
@@ -434,7 +448,9 @@ class SovereignLedger:
                     await asyncio.sleep(0)  # Yield
 
             # Verify Merkle Roots
-            cursor = await conn.execute("SELECT root_hash, tx_start_id, tx_end_id FROM merkle_roots")
+            cursor = await conn.execute(
+                "SELECT root_hash, tx_start_id, tx_end_id FROM merkle_roots"
+            )
             roots = await cursor.fetchall()
             for stored_root, start, end in roots:
                 c = await conn.execute(

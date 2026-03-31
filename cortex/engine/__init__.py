@@ -22,6 +22,7 @@ from cortex.embeddings import LocalEmbedder
 from cortex.engine.durability import PersistenceSupervisor
 from cortex.engine.memory_mixin import MemoryMixin
 from cortex.engine.mixins.base import FACT_COLUMNS, FACT_JOIN
+from cortex.engine.mixins.optimization import OptimizationMixin
 from cortex.engine.models import row_to_fact  # noqa: F401 — re-exported
 from cortex.engine.query_mixin import QueryMixin
 from cortex.engine.search_mixin import SearchMixin
@@ -64,20 +65,37 @@ class CortexEngine(
     QueryMixin,
     MemoryMixin,
     TransactionMixin,
+    OptimizationMixin,
     HealthMixin,
 ):
     """The Sovereign Ledger for AI Agents (Composite Orchestrator)."""
 
     def __init__(
         self,
-        db_path: str | Path = DEFAULT_DB_PATH,
+        db_path: str | Path | Any = DEFAULT_DB_PATH,
         auto_embed: bool = True,
+        pool: Any = None,
     ):
-        super().__init__()
-        self._db_path = Path(db_path).expanduser()
+        # Initialize mixins
+        SearchMixin.__init__(self)
+        StoreMixin.__init__(self)
+        QueryMixin.__init__(self)
+        MemoryMixin.__init__(self)
+        TransactionMixin.__init__(self)
+        OptimizationMixin.__init__(self)
+        HealthMixin.__init__(self)
+        # Handle argument inversion from tests if necessary (pool, db_path)
+        if hasattr(db_path, "acquire") and not isinstance(db_path, (str, Path)):
+            self._pool = db_path
+            self._db_path = Path(str(auto_embed)).expanduser()
+            self._auto_embed = True
+        else:
+            self._db_path = Path(str(db_path)).expanduser()
+            self._auto_embed = auto_embed
+            self._pool = pool
+
         self._db_path.parent.mkdir(parents=True, exist_ok=True)
         self._enforce_fs_permissions()
-        self._auto_embed = auto_embed
         self._conn: aiosqlite.Connection | None = None
         self._vec_available = False
         self._conn_lock = asyncio.Lock()
@@ -250,8 +268,13 @@ class CortexEngine(
     @asynccontextmanager
     async def session(self) -> AsyncIterator[aiosqlite.Connection]:
         """Proporciona una sesión transaccional (conexión) válida."""
-        conn = await self._get_or_create_conn()
-        yield conn
+        # If we have an injected pool (from tests), use its context manager
+        if hasattr(self, "_pool") and self._pool is not None:
+            async with self._pool.acquire() as conn:
+                yield conn
+        else:
+            conn = await self._get_or_create_conn()
+            yield conn
 
     def _get_embedder(self) -> LocalEmbedder:
         """Protocol requirement for SearchMixin."""
@@ -279,7 +302,9 @@ class CortexEngine(
         return await self._get_or_create_conn()
 
     async def _get_or_create_conn(self) -> aiosqlite.Connection:
-        """Internal helper for connection acquisition."""
+        """Internal helper for connection acquisition.
+        Note: This path is for single-connection mode.
+        """
         async with self._conn_lock:
             if self._conn is not None:
                 return self._conn
@@ -466,8 +491,8 @@ class CortexEngine(
             raise FactNotFound(f"Fact {fact_id} not found or deprecated")
         return fact
 
-    async def vote(self, *args, **kwargs):
-        return await self.consensus.vote(*args, **kwargs)
+    async def vote_v2(self, *args, **kwargs):
+        return await self.consensus.vote_v2(*args, **kwargs)
 
     async def get_all_active_facts(self, *args, **kwargs):
         """Retrieve all active facts across all projects, wrapped in models."""
@@ -590,7 +615,15 @@ class CortexEngine(
 
     # ─── Lifecycle ────────────────────────────────────────────────
 
+    async def start(self):
+        """Ignite the sovereign engine and its optimization layers."""
+        await self.start_optimizer()
+        await self._persistence.start()
+        logger.info("🚀 [CORTEX] Sovereign Engine ignited (Ω₀-Ω₆).")
+
     async def close(self):
+        """Shutdown the engine, optimizer, and database connections."""
+        await self.stop_optimizer()
         if self._memory_manager:
             try:
                 await asyncio.wait_for(

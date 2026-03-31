@@ -187,6 +187,7 @@ class SkillRegistry:
     async def aload(self, force_reload: bool = False) -> SkillRegistry:
         """Carga asíncrona concurrente del catálogo para evitar bloqueos del Event Loop."""
         import asyncio
+
         if self._loaded and not force_reload:
             return self
 
@@ -200,7 +201,7 @@ class SkillRegistry:
             skill_file = skill_dir / SKILL_FILENAME
             if not skill_file.exists():
                 return 0, 0, None
-                
+
             def _parse_or_fallback() -> tuple[int, int, SkillManifest]:
                 try:
                     return 1, 0, self._parse_skill_file(skill_file)

@@ -42,52 +42,10 @@ class ConsensusManager:
         value: int,
         agent_id: Optional[str] = None,
     ) -> float:
-        """Legacy v1 vote path. DEPRECATED. Use vote_v2 instead."""
-        import warnings
-
-        warnings.warn(
-            "ConsensusManager.vote() is deprecated and will be removed. Use vote_v2().",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-
-        if agent_id:
-            return await self.vote_v2(fact_id, agent_id, value)
-
-        if value not in (-1, 0, 1):
-            raise ValueError(f"vote value must be -1, 0, or 1, got {value}")
-
-        async with self.engine.session() as conn:
-            if value == 0:
-                await conn.execute(
-                    "DELETE FROM consensus_votes WHERE fact_id = ? AND agent = ?",
-                    (fact_id, agent),
-                )
-                action = "unvote"
-            else:
-                await conn.execute(
-                    "INSERT OR REPLACE INTO consensus_votes (fact_id, agent, vote) VALUES (?, ?, ?)",
-                    (fact_id, agent, value),
-                )
-                action = "vote"
-
-            await self.engine._log_transaction(
-                conn,
-                "consensus",
-                action,
-                {"fact_id": fact_id, "agent": agent, "vote": value},
-            )
-            # 💓 Pulse Signal (Reality Observer)
-            if self._signal_bus:
-                self._signal_bus.emit(
-                    f"consensus:{action}",
-                    payload={"fact_id": fact_id, "agent": agent, "vote": value},
-                    source="consensus_manager",
-                )
-
-            score = await self._recalculate_consensus(fact_id, conn)
-            await conn.commit()
-            return score
+        """Legacy v1 vote path. DEPRECATED. Redirects to vote_v2()."""
+        # Purge: Redirect to v2 logic
+        target_agent = agent_id or agent
+        return await self.vote_v2(fact_id, target_agent, value)
 
     async def register_agent(
         self,
@@ -294,20 +252,23 @@ class ConsensusManager:
             # Calcular Alineación (1 = Acierto, -1 = Divergencia, 0 = Abstención)
             alignment_score = a_vote * c_val
 
-            # 2. Actualizar el ring_buffer de los últimos N votos (hits vs misses)
+            # VOID-BEYOND: Quadratic Slashing and Asymptotic Recovery
+            # Divergence cuts reputation by 50% instantly.
+            # Convergence recovers reputation by (1.0 - current) * 0.1 (asymptotic).
             await conn.execute(
                 """
-                UPDATE agents 
-                SET 
+                UPDATE agents
+                SET
                     alignment_hits = alignment_hits + (CASE WHEN ? > 0 THEN 1 ELSE 0 END),
                     alignment_misses = alignment_misses + (CASE WHEN ? < 0 THEN 1 ELSE 0 END),
-                    reputation_score = CASE 
-                        WHEN (alignment_hits - alignment_misses) < 0 THEN base_reputation * 0.5
-                        ELSE base_reputation 
+                    reputation_score = CASE
+                        WHEN ? < 0 THEN reputation_score * 0.5
+                        WHEN ? > 0 THEN reputation_score + (1.0 - reputation_score) * 0.1
+                        ELSE reputation_score
                     END
                 WHERE id = ? AND is_active = 1
             """,
-                (alignment_score, alignment_score, agent_id),
+                (alignment_score, alignment_score, alignment_score, alignment_score, agent_id),
             )
 
             # Pulse the reality degradation check

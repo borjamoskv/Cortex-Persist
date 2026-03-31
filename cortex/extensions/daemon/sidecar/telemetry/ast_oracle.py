@@ -41,7 +41,7 @@ except ImportError:
 
 
 if TYPE_CHECKING:
-    from cortex.engine_async import AsyncCortexEngine
+    from cortex.engine import CortexEngine as AsyncCortexEngine
 
 logger = logging.getLogger("cortex.sidecar.telemetry")
 

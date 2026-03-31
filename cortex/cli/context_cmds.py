@@ -50,20 +50,20 @@ async def _infer_async(db: str, persist: bool, as_json: bool):
     await engine.init_db()
 
     try:
-        conn = await engine.get_conn()
-        collector = ContextCollector(
-            conn=conn,
-            max_signals=config.CONTEXT_MAX_SIGNALS,
-            workspace_dir=config.CONTEXT_WORKSPACE_DIR,
-            git_enabled=config.CONTEXT_GIT_ENABLED,
-        )
-        signals = await collector.collect_all()
+        async with engine.session() as conn:
+            collector = ContextCollector(
+                conn=conn,
+                max_signals=config.CONTEXT_MAX_SIGNALS,
+                workspace_dir=config.CONTEXT_WORKSPACE_DIR,
+                git_enabled=config.CONTEXT_GIT_ENABLED,
+            )
+            signals = await collector.collect_all()
 
-        inference = ContextInference(conn=conn if persist else None)
-        if persist:
-            result = await inference.infer_and_persist(signals)
-        else:
-            result = inference.infer(signals)
+            inference = ContextInference(conn=conn if persist else None)
+            if persist:
+                result = await inference.infer_and_persist(signals)
+            else:
+                result = inference.infer(signals)
 
         if as_json:
             console.print(json.dumps(result.to_dict(), indent=2, ensure_ascii=False))
@@ -128,14 +128,14 @@ async def _signals_async(db: str, as_json: bool):
     await engine.init_db()
 
     try:
-        conn = await engine.get_conn()
-        collector = ContextCollector(
-            conn=conn,
-            max_signals=config.CONTEXT_MAX_SIGNALS,
-            workspace_dir=config.CONTEXT_WORKSPACE_DIR,
-            git_enabled=config.CONTEXT_GIT_ENABLED,
-        )
-        signals = await collector.collect_all()
+        async with engine.session() as conn:
+            collector = ContextCollector(
+                conn=conn,
+                max_signals=config.CONTEXT_MAX_SIGNALS,
+                workspace_dir=config.CONTEXT_WORKSPACE_DIR,
+                git_enabled=config.CONTEXT_GIT_ENABLED,
+            )
+            signals = await collector.collect_all()
 
         if as_json:
             console.print(json.dumps([s.to_dict() for s in signals], indent=2, ensure_ascii=False))
@@ -183,9 +183,9 @@ async def _history_async(db: str, limit: int, as_json: bool):
     await engine.init_db()
 
     try:
-        conn = await engine.get_conn()
-        inference = ContextInference(conn=conn)
-        snapshots = await inference.get_history(limit=limit)
+        async with engine.session() as conn:
+            inference = ContextInference(conn=conn)
+            snapshots = await inference.get_history(limit=limit)
 
         if as_json:
             console.print(json.dumps(snapshots, indent=2, ensure_ascii=False))

@@ -142,7 +142,7 @@ exclude = [
     "experimental",
     "cortex/moltbook",
     "scripts",
-    "cortex/agents",
+    "cortex.agents",
     ".scratch",
     ".venv"
 ]

@@ -8,7 +8,7 @@ import time
 
 import pytest
 
-from cortex.engine.swarm import AsyncSignalBus, Squadron, SwarmAgent, SwarmSignal
+from cortex.engine.legion import AsyncSignalBus, Squadron, SwarmAgent, SwarmSignal
 
 
 class MockAgent(SwarmAgent):

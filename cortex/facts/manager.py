@@ -20,7 +20,7 @@ __all__ = ["FactManager"]
 logger = logging.getLogger("cortex.facts")
 
 try:
-    from cortex.immunity.haiku import HaikuGuard
+    from cortex.security.haiku import HaikuGuard
 except Exception:  # noqa: BLE001
     HaikuGuard = None
 
@@ -58,9 +58,22 @@ class FactManager:
     ) -> int:
         """Sovereign Store: Delegates to engine with pre-validation."""
         tenant_id = self.engine._resolve_tenant(tenant_id)
-        conn = conn or await self.engine.get_conn()
-        if not conn:
-            raise RuntimeError("Sovereign Guard: DB connection unavailable.")
+        if conn:
+            return await self._store_delegate(
+                conn, project, content, tenant_id, fact_type, tags, confidence,
+                source, meta, valid_from, commit, tx_id, **kwargs
+            )
+
+        async with self.engine.session() as conn:
+            return await self._store_delegate(
+                conn, project, content, tenant_id, fact_type, tags, confidence,
+                source, meta, valid_from, commit, tx_id, **kwargs
+            )
+
+    async def _store_delegate(
+        self, conn, project, content, tenant_id, fact_type, tags, confidence,
+        source, meta, valid_from, commit, tx_id, **kwargs
+    ) -> int:
 
         # Optional guard: do not block engine startup if the immunity stack is mid-repair.
         if HaikuGuard is not None:
@@ -89,15 +102,14 @@ class FactManager:
             # P0 Thermodynamic Gate: O(1) Exact Match (Axiom Ω₂)
             cursor = await conn.execute(
                 "SELECT id FROM facts WHERE content = ? AND project = ? AND tenant_id = ?",
-                (content, project, tenant_id)
+                (content, project, tenant_id),
             )
             row = await cursor.fetchone()
             if row:
                 fact_id = row[0]
                 logger.info("V8 Guardrail: Fact discarded - P0 Exact Duplicate of #%s", fact_id)
                 await conn.execute(
-                    "UPDATE facts SET updated_at = ? WHERE id = ?",
-                    (now_iso(), fact_id)
+                    "UPDATE facts SET updated_at = ? WHERE id = ?", (now_iso(), fact_id)
                 )
                 await conn.commit()
                 return fact_id
@@ -162,9 +174,9 @@ class FactManager:
 
     async def _fetch(self, query: str, params: list | tuple = ()) -> list[Fact]:
         """Lower-level fetch from engine database."""
-        conn = await self.engine.get_conn()
-        cursor = await conn.execute(query, params)
-        return [row_to_fact(r) for r in await cursor.fetchall()]  # type: ignore[reportArgumentType]
+        async with self.engine.session() as conn:
+            cursor = await conn.execute(query, params)
+            return [row_to_fact(r) for r in await cursor.fetchall()]  # type: ignore[reportArgumentType]
 
     async def get_all_active_facts(
         self,
@@ -221,21 +233,25 @@ class FactManager:
         return await self.engine.deprecate(*args, **kwargs)
 
     async def graph(self, *args, **kwargs) -> Any:
+        """Retrieve graph visualization data, delegated to QueryMixin."""
         import cortex.graph
-        conn = await self.engine.get_conn()
-        return await cortex.graph.get_graph(conn, *args, **kwargs)
+
+        async with self.engine.session() as conn:
+            return await cortex.graph.get_graph(conn, *args, **kwargs)
 
     async def query_entity(self, *args, **kwargs) -> Any:
+        """Query detailed information about an entity, delegated to QueryMixin."""
         import cortex.graph
-        conn = await self.engine.get_conn()
-        return await cortex.graph.query_entity(conn, *args, **kwargs)
+
+        async with self.engine.session() as conn:
+            return await cortex.graph.query_entity(conn, *args, **kwargs)
 
     async def find_path(self, *args, **kwargs) -> Any:
         import cortex.graph
-        conn = await self.engine.get_conn()
-        return await cortex.graph.find_path(conn, *args, **kwargs)
+        async with self.engine.session() as conn:
+            return await cortex.graph.find_path(conn, *args, **kwargs)
 
     async def get_context_subgraph(self, *args, **kwargs) -> Any:
         import cortex.graph
-        conn = await self.engine.get_conn()
-        return await cortex.graph.get_context_subgraph(conn, *args, **kwargs)
+        async with self.engine.session() as conn:
+            return await cortex.graph.get_context_subgraph(conn, *args, **kwargs)

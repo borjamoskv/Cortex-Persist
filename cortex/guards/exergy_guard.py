@@ -9,7 +9,9 @@ that consumes memory without reducing the causal gap.
 from __future__ import annotations
 
 import logging
+import math
 import re
+from collections import Counter
 
 logger = logging.getLogger("cortex.guards.exergy")
 
@@ -25,10 +27,15 @@ _DECORATIVE_MARKERS = frozenset(
         "en resumen",
         "sin embargo",
         "además",
-        "procedo a",
-        "he actualizado",
-        "he implementado",
         "entendido",
+        "ciertamente",
+        "claro que sí",
+        "déjame ayudarte",
+        "estoy aquí para",
+        "un placer",
+        "no dudes en",
+        "importante notar",
+        "tener en cuenta",
     }
 )
 
@@ -105,17 +112,36 @@ _STOP_WORDS = frozenset(
 
 # Minimum threshold: Below this, the output is considered thermal noise.
 # A healthy, concise technical fact usually scores 0.6+
-MIN_EXERGY_THRESHOLD = 0.40
+MIN_EXERGY_THRESHOLD = 0.55  # Increased for Aura-Omega rigor (Ω₁₃)
+
+
+def calculate_shannon_entropy(content: str) -> float:
+    """Calculates the character-level Shannon entropy of the string."""
+    if not content:
+        return 0.0
+    probabilities = [v / len(content) for v in Counter(content).values()]
+    return -sum(p * math.log2(p) for p in probabilities)
+
+
+def calculate_repetition_penalty(words: list[str]) -> float:
+    """Detects loops and stuttering using Bigram/Trigram overlap."""
+    if len(words) < 6:
+        return 0.0
+
+    # Check Trigrams
+    trigrams = [tuple(words[i : i + 3]) for i in range(len(words) - 2)]
+    counts = Counter(trigrams)
+    repeated = sum(v - 1 for v in counts.values() if v > 1)
+    # Penalty is the ratio of repeated trigrams to total potential trigrams
+    penalty = repeated / len(trigrams)
+    # Scale: If 30% of text is trigram repetition, it's likely a loop or very redundant
+    return min(penalty * 2.0, 0.8)
 
 
 def calculate_exergy(content: str) -> float:
     """
     Calculate the thermodynamic exergy (useful work) density of a string.
-
-    Formula:
-    Base Entropy = (Unique Semantic Tokens) / (Total Words + 1)
-    Penalty = Overlap with decorative stochastic markers.
-    Exergy = Base Entropy * (1.0 - Penalty)
+    Aura-Omega Refinement: Incorporates Shannon Entropy and N-gram Repetition.
 
     Returns:
         float: 0.0 (pure noise) to 1.0 (pure crystallized information)
@@ -126,36 +152,42 @@ def calculate_exergy(content: str) -> float:
 
     lower_content = content.lower()
 
-    # Extract structural words, ignoring boilerplate symbols
-    words = re.findall(r"\b[a-záéíóúñ]+\b", lower_content)
+    # Extract structural words, supporting technical terms (underscore, dash)
+    words = re.findall(r"\b[a-záéíóúñ0-9_\-]+\b", lower_content)
     total_words = len(words)
 
     if total_words < 5:
-        # Extremely short phrases bypass this filter to allow atomic flags,
-        # unless they are purely decorative.
         return 1.0 if not any(marker in lower_content for marker in _DECORATIVE_MARKERS) else 0.0
 
+    # 1. Semantic Density (Legacy Logic)
+    # Stop words now include more common Spanish/English filler.
     semantic_tokens = {w for w in words if w not in _STOP_WORDS and len(w) > 2}
-
-    # Base density: how many unique, non-trivial words vs total words
-    # If the system repeats itself constantly, this drops.
     base_density = len(semantic_tokens) / float(total_words)
 
-    # Calculate penalty based on known LLM low-exergy conversational markers
-    penalty = 0.0
-    for marker in _DECORATIVE_MARKERS:
-        if marker in lower_content:
-            # Each decorative phrase drops the exergy by 15%
-            penalty += 0.15
+    # 2. Shannon Factor: Measures complexity
+    # Healthy language has entropy ~3.5 to 5.0.
+    entropy = calculate_shannon_entropy(content)
+    # Aura-Omega Tuning: Only reward entropy if semantic density is already decent.
+    # High entropy with low semantic density = wordy nonsense.
+    shannon_factor = min(entropy / 4.0, 1.2) if base_density > 0.4 else 0.7
 
-    # Cap penalty at 0.9 to avoid negative exergy
-    penalty = min(penalty, 0.9)
+    # 3. Decorative Penalty (Aesthetic Annihilation)
+    # Each marker now subtracts 0.35. We are ruthless vs fluff.
+    decorative_penalty = sum(0.35 for marker in _DECORATIVE_MARKERS if marker in lower_content)
 
-    exergy = base_density * (1.0 - penalty)
+    # 4. Repetition Penalty (Aura-Omega)
+    rep_penalty = calculate_repetition_penalty(words)
 
-    # Amplify the score non-linearly to reward high density and punish low density.
-    # Exergy should drop off a cliff if it starts padding.
-    return min(exergy * 1.5, 1.0)
+    # Final Composite Score
+    total_penalty = min(decorative_penalty + rep_penalty, 0.99)
+    exergy = (base_density * shannon_factor) * (1.0 - total_penalty)
+
+    # Shannon-Omega Gate: Pure signal must have high density or face steep decay.
+    if exergy < 0.2 or base_density < 0.3:
+        return 0.0
+
+    # Reward high-crystallinity facts
+    return min(exergy * 1.4, 1.0)
 
 
 class ExergyGuard:
@@ -177,8 +209,8 @@ class ExergyGuard:
         Raises:
             ValueError: If the exergy score falls below the minimum viable threshold.
         """
-        # Code snippets and JSON have arbitrary syntax, ignore for now to prevent false positives.
-        # Strict thermodynamic checks apply mostly to natural language decisions, reasoning, and rules.
+        # Code snippets and JSON have arbitrary syntax, ignore for now to prevent false
+        # positives.
         if fact_type not in ("decision", "rule", "note", "analysis", "thought"):
             return 1.0
 
@@ -187,15 +219,16 @@ class ExergyGuard:
         if score < MIN_EXERGY_THRESHOLD:
             logger.warning(
                 "Thermodynamic Violation (Axiom Ω₁₃): Rejected decorative content "
-                "(score: %.2f) in project [%s]. Content: %s...",
+                "(score: %.2f) in project [%s].",
                 score,
                 project,
-                content[:60].replace("\n", " "),
             )
             raise ValueError(
-                f"[Axiom Ω₁₃] Thermodynamic Violation: Exergy score too low ({score:.2f} < {MIN_EXERGY_THRESHOLD}). "
+                f"[Axiom Ω₁₃] Thermodynamic Violation: Exergy score too low "
+                f"({score:.2f} < {MIN_EXERGY_THRESHOLD}). "
                 "The text is largely rhetorical, repetitive, or conversational padding. "
-                "Strip all conversational markers ('por supuesto', 'aquí tienes', etc) and submit only crystallized structural facts."
+                "Strip all conversational markers ('por supuesto', 'aquí tienes', etc) "
+                "and submit only crystallized structural facts."
             )
 
         return score

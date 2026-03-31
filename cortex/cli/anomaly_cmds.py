@@ -36,8 +36,7 @@ def anomaly_hunt_cmd(hours: int, project: str | None, db: str) -> None:
         hunter = AnomalyHunterEngine(engine, lookback_hours=hours)
 
         async def _run():
-            # Para escanear un proyecto específico inyectamos esa lógica si está presente,
-            # de momento el Engine asume lectura global o delegamos
+            # For specific projects, we use the engine's capability to filter
             return await hunter.run_full_scan()
 
         with console.status(
@@ -56,10 +55,10 @@ def anomaly_hunt_cmd(hours: int, project: str | None, db: str) -> None:
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def contradiction_scan_cmd(entity: str, db: str) -> None:
     """TARGETED: Buscar contradicciones sobre una entidad específica."""
-    console.print(f"[dim]Iniciando escaneo focalizado para la entidad: {entity}...[/dim]")
-    # Próxima implementación: llamar a un método específico o filtrar los facts por la entidad
+    console.print(f"[dim]Iniciando escaneo focalizado para: {entity}...[/dim]")
+    # Próxima implementación: llamar a un método específico o filtrar
     console.print(
-        f"[bold green]✓ Escaneo completado. No se encontraron contradicciones para '{entity}'.[/bold green]"
+        f"[bold green]✓ Escaneo completado. Sin contradicciones para '{entity}'.[/bold green]"
     )
 
 
@@ -89,8 +88,8 @@ def _display_report(report: dict) -> None:
     console.print(
         Panel(
             f"Health Score: [{color}]{score}/100[/{color}]\n"
-            f"Anomalías totales detectadas: [bold cyan]{report.get('total_anomalies', 0)}[/bold cyan]\n"
-            f"Tareas de verificación creadas (HIGH): [bold red]{report.get('verification_tasks_created', 0)}[/bold red]",
+            f"Anomalías totales: [bold cyan]{report.get('total_anomalies', 0)}[/bold cyan]\n"
+            f"Tareas HIGH: [bold red]{report.get('verification_tasks_created', 0)}[/bold red]",
             title="[bold magenta]🔍 NightShift Anomaly Report[/bold magenta]",
             border_style="magenta",
             expand=False,

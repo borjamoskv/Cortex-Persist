@@ -40,9 +40,9 @@ _WHITELISTED_MODULES: frozenset[str] = frozenset(
         "cortex/engine/entropy_pruner.py",  # Maintenance
         "cortex/engine/lora_forger.py",  # Low-level model forging
         # Agent/system infra (pre- and post-refactor paths)
-        "cortex/agents/system_prompt.py",
+        "cortex.agents/system_prompt.py",
         "cortex/extensions/agents/system_prompt.py",
-        "cortex/agents/arc_agi_lib/templates/langgraph_thinking/agent.py",
+        "cortex.agents/arc_agi_lib/templates/langgraph_thinking/agent.py",
         "cortex/routes/terminal.py",  # Sync terminal bus
         # Evolution/metrics (sync telemetry)
         "cortex/evolution/cortex_metrics.py",

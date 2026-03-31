@@ -1,7 +1,7 @@
 """CORTEX v6 — Agent Registry (Dynamic Loading).
 
 Dynamically loads Swarm Specialists and Sovereign Agents from YAML definitions
-located in `cortex/agents/definitions/`. This allows modifying agent
+located in `cortex.agents/definitions/`. This allows modifying agent
 personas, prompts, and toolsets without altering code.
 
 Axioms:
@@ -173,7 +173,7 @@ class AgentRegistry:
         """Scan and load all .yaml definitions in the directory.
 
         Args:
-            definitions_dir: Override path, defaults to cortex/agents/definitions
+            definitions_dir: Override path, defaults to cortex.agents/definitions
         """
         directory = definitions_dir or _DEFINITIONS_DIR
 
