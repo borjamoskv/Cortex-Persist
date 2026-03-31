@@ -155,10 +155,10 @@ async def list_all_facts(
     auth: AuthResult = Depends(require_permission("read")),
     engine: AsyncCortexEngine = Depends(get_async_engine),
 ) -> list[FactResponse]:
-    """Retrieve all facts across projects (scoped to tenant)."""
-    # Using recall with project=None should return global list if engine supports it.
-    # If not, we use a custom query.
-    facts = await engine.recall(project=None, tenant_id=auth.tenant_id, limit=limit)
+    # Retrieve all active facts across projects (scoped to tenant).
+    facts = await engine.get_all_active_facts(tenant_id=auth.tenant_id)
+    if limit:
+        facts = facts[:limit]
 
     return [
         FactResponse(
@@ -167,16 +167,16 @@ async def list_all_facts(
             content=f["content"],
             fact_type=f["fact_type"],
             tags=f["tags"],
-            confidence=f["confidence"],
-            valid_from=f["valid_from"],
-            valid_until=f["valid_until"],
-            source=f["source"],  # type: ignore[reportCallIssue]
-            meta=f["meta"],  # type: ignore[reportCallIssue]
-            created_at=f["created_at"],
-            updated_at=f["updated_at"],
-            tx_id=f["tx_id"],
-            hash=f["hash"],
-            consensus_score=f.get("consensus_score", 1.0),
+            confidence=f.get("confidence") or "C3",
+            valid_from=f.get("valid_from"),
+            valid_until=f.get("valid_until"),
+            source=f.get("source"),
+            meta=f.get("meta"),
+            created_at=str(f.get("created_at", "")),
+            updated_at=str(f.get("updated_at", "")) or str(f.get("created_at", "")),
+            tx_id=f.get("tx_id"),
+            hash=f.get("hash"),
+            consensus_score=float(f.get("consensus_score", 1.0)),
         )
         for f in facts
     ]
@@ -440,11 +440,11 @@ async def get_fact_by_id(
         valid_until=fact.get("valid_until"),
         source=fact.get("source"),
         meta=fact.get("meta"),
-        created_at=fact["created_at"],
-        updated_at=fact["updated_at"],
+        created_at=str(fact.get("created_at", "")),
+        updated_at=str(fact.get("updated_at", "")),
         tx_id=fact.get("tx_id"),
         hash=fact.get("hash"),
-        consensus_score=fact.get("consensus_score", 1.0),
+        consensus_score=float(fact.get("consensus_score", 1.0)),
     )
 
 
