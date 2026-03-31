@@ -73,6 +73,17 @@ _DEFAULT_TTL_SECONDS = 3600  # 1 hour
 
 AuditCallback = Callable[[str, dict[str, Any], dict[str, Any]], Coroutine[Any, Any, None]]
 
+_REDIS_LIKE_METHODS = (
+    "get",
+    "set",
+    "delete",
+    "xreadgroup",
+    "xack",
+    "register_script",
+    "pipeline",
+    "pubsub",
+)
+
 # ─── Lua Atomic Hydra-Log Script ──────────────────────────────────────────
 # Advances chain-tip AND logs to the audit stream in a single atomic step.
 _LUA_HYDRA_ADVANCE = """
@@ -127,7 +138,9 @@ class DistributedSovereignCache:
     """
 
     def __init__(self, redis_client: Any, audit_callback: AuditCallback | None = None) -> None:
-        if not _REDIS_AVAILABLE:
+        if not _REDIS_AVAILABLE and not all(
+            hasattr(redis_client, method) for method in _REDIS_LIKE_METHODS
+        ):
             raise ImportError("redis[asyncio] required")
         self._r = redis_client
         self._audit_callback = audit_callback
@@ -148,8 +161,10 @@ class DistributedSovereignCache:
         cls,
         audit_callback: AuditCallback | None = None,
     ) -> AsyncIterator[DistributedSovereignCache]:
+        if not _REDIS_AVAILABLE or aioredis is None:
+            raise ImportError("redis[asyncio] required")
         redis_url = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
-        client = aioredis.from_url(redis_url, decode_responses=True)  # type: ignore[reportOptionalMemberAccess]
+        client = aioredis.from_url(redis_url, decode_responses=True)
 
         # Baseline initialization
         await client.setnx(_CHAIN_TIP_KEY, _GENESIS_HASH)

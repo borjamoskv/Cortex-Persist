@@ -55,8 +55,8 @@ cortex/
 
 ```bash
 # Clone and install
-git clone https://github.com/borjamoskv/cortex.git
-cd cortex
+git clone https://github.com/borjamoskv/Cortex-Persist.git
+cd Cortex-Persist
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[all]"
 

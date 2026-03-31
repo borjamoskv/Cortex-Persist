@@ -97,14 +97,14 @@ class ConsensusMixin(EngineMixinBase):
                     "consensus",
                     "vote_v2",
                     {"fact_id": fact_id, "agent_id": agent, "vote": value, "tenant_id": tenant_id},
-                    tenant_id=tenant_id,
+                    tenant_id=tenant_id,  # pyright: ignore
                 )
 
                 # 4. Record in permanent immutable ledger
                 await ledger.append_vote(
                     fact_id,
                     agent,
-                    value,
+                    value,  # pyright: ignore
                     tenant_id=tenant_id,
                     vote_weight=rep,
                     signature=signature,

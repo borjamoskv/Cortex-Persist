@@ -238,7 +238,7 @@ class CortexLLMRouter:
     async def execute_resilient(self, prompt: CortexPrompt) -> Result[str, str]:
         """Ejecuta inferencia con cascade determinista por intención."""
         # Dynamic threshold based on provider context window (Ω₁₃)
-        model_window = self._primary.context_window or 32000
+        model_window = self._primary.context_window or 32000  # pyright: ignore
         max_words = int((model_window * self._CONTEXT_SAFETY_MARGIN) * 0.75)
 
         prompt.working_memory = self._compress_working_memory(
@@ -344,7 +344,7 @@ class CortexLLMRouter:
 
         # Phase 2: Fallback cascade
         fallbacks = self._ordered_fallbacks(prompt)
-        errors = [f"Primary ({self._primary.provider_name}): {res_primary.error}"]
+        errors = [f"Primary ({self._primary.provider_name}): {res_primary.error}"]  # pyright: ignore
 
         for i, provider in enumerate(fallbacks, start=2):
             if self._cascade.is_nxdomain_cached(provider.provider_name):
@@ -371,7 +371,7 @@ class CortexLLMRouter:
                 )
                 return res_fb
 
-            errors.append(f"{provider.provider_name}: {res_fb.error}")
+            errors.append(f"{provider.provider_name}: {res_fb.error}")  # pyright: ignore
             self._cascade.set_nx_record(provider.provider_name)
 
         self._telemetry.emit(

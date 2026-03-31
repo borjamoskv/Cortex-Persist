@@ -1,5 +1,5 @@
 /**
- * CORTEX SDK — Thin TypeScript client for the CORTEX Memory API.
+ * CORTEX SDK — Thin TypeScript client for the CORTEX Persist API.
  *
  * Zero dependencies. Uses native fetch().
  *

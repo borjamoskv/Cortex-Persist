@@ -5,7 +5,7 @@ License: Apache-2.0 · Python: >=3.10
 
 > Epistemic and design doctrine.
 >
-> Related: [`AGENTS.md`](../AGENTS.md) · [`operating-axioms.md`](operating-axioms.md) (AX-001–AX-028)
+> Related: [`AGENTS.md`](https://github.com/borjamoskv/Cortex-Persist/blob/main/AGENTS.md) · [`operating-axioms.md`](operating-axioms.md) (AX-001–AX-028)
 
 ---
 
@@ -139,7 +139,7 @@ La industria tecnológica frecuentemente confunde complejidad ornamental con rob
 1. **Ruta de Menor Fricción (Exergía Estructural):** Toda heurística generativa (LLMs, agentes en libre albedrío) drena energía del sistema humano (validación constante, corrección de *drift*). La arquitectura soberana es la que impone fronteras mecánicas (*Guards*, *Solvers*) que obligan a la conjetura a cristalizar en estado tipado, minimizando la fricción cognitiva y la carga termodinámica post-generación.
 2. **Gobernanza Observable (Telemetría de Estado):** Un proceso estocástico no puede gobernar infraestructura sin auditabilidad determinista. Un enjambre fluido carece de fiabilidad si no externaliza sus micro-decisiones a un registro inmutable (ej. The Master Ledger, CORTEX). Observabilidad estricta y criptográfica sobre el estado transforma la entropía opaca en una línea base gobernable.
 
-Full treatment: [`cortex/axioms/registry.py`](../cortex/axioms/registry.py)
+Full treatment: [`cortex/extensions/axioms/registry.py`](https://github.com/borjamoskv/Cortex-Persist/blob/main/cortex/extensions/axioms/registry.py)
 
 ---
 
@@ -180,7 +180,7 @@ Un enjambre verificado es estructuralmente predecible; multiplica el retorno sin
 
 For the full operational axiom registry (AX-001 through AX-028), including Constitutional, Operational, and Aspirational layers with CI enforcement gates, see [`operating-axioms.md`](operating-axioms.md).
 
-Canonical source of truth: [`cortex/axioms/registry.py`](../cortex/axioms/registry.py)
+Canonical source of truth: [`cortex/extensions/axioms/registry.py`](https://github.com/borjamoskv/Cortex-Persist/blob/main/cortex/extensions/axioms/registry.py)
 
 ---
 

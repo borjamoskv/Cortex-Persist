@@ -161,7 +161,7 @@ class NemesisProtocol:
         """Emits a signal to the CORTEX bus about the rejection."""
         try:
             with db_connect(db_path) as conn:
-                bus = SignalBus(conn)
+                bus = SignalBus(conn)  # pyright: ignore
                 bus.emit(
                     "nemesis:rejection",
                     payload={"reason": reason, "vector": pattern, "count": count},

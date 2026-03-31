@@ -11,6 +11,7 @@ from __future__ import annotations
 # Re-export extended tables for backward compat
 from cortex.database.schema_extensions import (
     CREATE_AGENTS,
+    CREATE_AUDIT_EXPORTS,
     CREATE_CONTEXT_SNAPSHOTS,
     CREATE_CONTEXT_SNAPSHOTS_INDEX,
     CREATE_ENTITY_EVENTS,
@@ -22,6 +23,7 @@ from cortex.database.schema_extensions import (
     CREATE_EVOLUTION_STATE_INDEX,
     CREATE_FACTS_FTS,
     CREATE_FACTS_FTS_TRIGGERS,
+    CREATE_INTEGRITY_CHECKS,
     CREATE_MERKLE_ROOTS,
     CREATE_OUTCOMES,
     CREATE_PROCEDURAL_ENGRAMS,
@@ -37,6 +39,7 @@ from cortex.database.schema_extensions import (
 __all__ = [
     "ALL_SCHEMA",
     "CREATE_AGENTS",
+    "CREATE_AUDIT_EXPORTS",
     "CREATE_COMPACTION_LOG",
     "CREATE_CONTEXT_SNAPSHOTS",
     "CREATE_CONTEXT_SNAPSHOTS_INDEX",
@@ -56,6 +59,7 @@ __all__ = [
     "CREATE_GHOSTS_INDEX",
     "CREATE_HEARTBEATS",
     "CREATE_HEARTBEATS_INDEX",
+    "CREATE_INTEGRITY_CHECKS",
     "CREATE_META",
     "CREATE_OUTCOMES",
     "CREATE_RWC_INDEXES",

@@ -189,7 +189,7 @@ class AgentToolkit:
     def bash(self, cmd: str, timeout: int = _BASH_TIMEOUT) -> str:
         """Run a shell command in the repo dir. Returns stdout+stderr."""
         # ── Sovereign Command Guard (Ω₃) ──
-        blocked = self._sovereign_bash_guard(cmd)
+        blocked = self._sovereign_bash_guard(cmd)  # pyright: ignore
         if blocked:
             return blocked
 

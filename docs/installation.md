@@ -51,8 +51,8 @@ pip install cortex-persist
 ## Install from Source
 
 ```bash
-git clone https://github.com/borjamoskv/cortex.git
-cd cortex
+git clone https://github.com/borjamoskv/Cortex-Persist.git
+cd Cortex-Persist
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[all]"
 ```
@@ -63,7 +63,7 @@ pip install -e ".[all]"
 
 ```bash
 cortex --version
-# cortex-persist, version 8.0.0a1
+# cortex-persist, version 0.3.0b2
 ```
 
 ---
@@ -113,4 +113,4 @@ See [Cross-Platform Guide](cross_platform_guide.md) for full architecture detail
 
 - **[Quickstart](quickstart.md)** — Store, search, verify in 5 minutes
 - **[CLI Reference](cli.md)** — All 38 commands
-- **[Architecture](architecture.md)** — How it works under the hood
+- **[Architecture](ARCHITECTURE.md)** — How it works under the hood

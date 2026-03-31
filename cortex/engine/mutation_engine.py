@@ -216,15 +216,15 @@ class FactMutationEngine:
         elif new_score < 0.6 and confidence != "disputed":
             new_confidence = "disputed"
 
-        await conn.execute(
+        query = (
             "UPDATE facts SET confidence = ?, updated_at = ?, "
             "metadata = CASE "
             "  WHEN metadata LIKE 'v6_aesgcm:%' THEN metadata "
             "  ELSE json_set(COALESCE(metadata, '{}'), '$.consensus_score', ?) "
             "END "
-            "WHERE id = ?",
-            (new_confidence, ts, new_score, fact_id),
+            "WHERE id = ?"
         )
+        await conn.execute(query, (new_confidence, ts, new_score, fact_id))
 
     async def _proj_deprecate(
         self,
@@ -255,15 +255,16 @@ class FactMutationEngine:
     ) -> None:
         reason = payload.get("reason", "tombstoned")
         ts = payload.get("timestamp", datetime.now(timezone.utc).isoformat())
-        await conn.execute(
+        query = (
             "UPDATE facts SET valid_until = ?, is_tombstoned = 1, updated_at = ?, "
             "metadata = CASE "
             "  WHEN metadata LIKE 'v6_aesgcm:%' THEN metadata "
-            "  ELSE json_set(COALESCE(metadata, '{}'), '$.tombstoned_at', ?, '$.tombstone_reason', ?) "
+            "  ELSE json_set(COALESCE(metadata, '{}'), '$.tombstoned_at', ?, "
+            "                '$.tombstone_reason', ?) "
             "END "
-            "WHERE id = ?",
-            (ts, ts, ts, reason, fact_id),
+            "WHERE id = ?"
         )
+        await conn.execute(query, (ts, ts, ts, reason, fact_id))
 
         # Ω₁₃: Propagate TAINTED status to descendants
         graph = AsyncCausalGraph(conn)

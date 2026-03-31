@@ -20,5 +20,5 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/borjamoskv/cortex"
-Documentation = "https://github.com/borjamoskv/cortex/tree/main/sdks/python"
+Homepage = "https://github.com/borjamoskv/Cortex-Persist"
+Documentation = "https://github.com/borjamoskv/Cortex-Persist/tree/main/sdks/python"

@@ -49,7 +49,7 @@ def vote(fact_id, value, agent, db) -> None:
 
                 console.print(
                     f"[green]✓[/] El agente [bold]{agent}[/] votó {value} en el hecho [bold]#{fact_id}[/].\n"
-                    f"   [dim]Hash: {entry.hash[:16]}...[/]"
+                    f"   [dim]Hash: {entry.hash[:16]}...[/]"  # pyright: ignore
                 )
         except (sqlite3.Error, OSError, ValueError, RuntimeError) as e:
             handle_cli_error(e, db_path=db, context="casting vote")

@@ -6,7 +6,7 @@ License: Apache-2.0 · Python: >=3.10
 This document describes trust boundaries and cognitive/state-mutation risks.
 
 For vulnerability disclosure policy and repository security reporting, see
-[`../SECURITY.md`](../SECURITY.md).
+[`SECURITY.md`](https://github.com/borjamoskv/Cortex-Persist/blob/main/SECURITY.md).
 
 ## Purpose: The Doctrinal Formula
 
@@ -299,7 +299,7 @@ state mutation."
 
 Compliance is not a vibe. It is evidence.
 
-> For vulnerability disclosure and reporting, see [`SECURITY.md`](../SECURITY.md).
+> For vulnerability disclosure and reporting, see [`SECURITY.md`](https://github.com/borjamoskv/Cortex-Persist/blob/main/SECURITY.md).
 
 ---
 
@@ -345,8 +345,8 @@ It reduces their freedom to contaminate persistent state.
 
 ## Related Documents
 
-- [`../SECURITY.md`](../SECURITY.md)
-- [`../AGENTS.md`](../AGENTS.md)
+- [`SECURITY.md`](https://github.com/borjamoskv/Cortex-Persist/blob/main/SECURITY.md)
+- [`AGENTS.md`](https://github.com/borjamoskv/Cortex-Persist/blob/main/AGENTS.md)
 - [`ARCHITECTURE.md`](ARCHITECTURE.md)
 - [`AXIOMS.md`](AXIOMS.md)
 - [`CONTRIBUTING.md`](CONTRIBUTING.md)

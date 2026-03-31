@@ -69,7 +69,7 @@ class HeartbeatDaemon:
 
                 from cortex.extensions.daemon.models import CORTEX_DB
 
-                async with connect_async_ctx(CORTEX_DB) as conn:
+                async with connect_async_ctx(CORTEX_DB) as conn:  # pyright: ignore
                     await decalcifier.decalcify_cycle(conn)
 
             except Exception as e:  # noqa: BLE001

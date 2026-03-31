@@ -11,10 +11,10 @@
   },
   "keywords": ["cortex", "memory", "ai", "agents", "rag", "semantic-search"],
   "author": "borjamoskv.com <borjamoskv@gmail.com>",
-  "license": "BSL-1.1",
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/borjamoskv/cortex"
+    "url": "https://github.com/borjamoskv/Cortex-Persist"
   },
   "devDependencies": {
     "typescript": "^5.6.0"

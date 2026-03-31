@@ -23,54 +23,52 @@ import importlib
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from cortex.memory.consolidation import SilentEngram, SystemsConsolidator
-    from cortex.memory.drift import DriftMonitor, DriftSignature
-    from cortex.memory.encoder import AsyncEncoder
-    from cortex.memory.engrams import CortexSemanticEngram
-    from cortex.memory.frequency import (
-        BIFTRouter,
-        ContinuousMemorySystem,
-        MemoryFrequency,
-        RetrievalBand,
-    )
-    from cortex.memory.homeostasis import DynamicSynapseUpdate, EntropyPruner
-    from cortex.memory.ledger import EventLedgerL3
-    from cortex.memory.manager import CortexMemoryManager
-    from cortex.memory.metamemory import (
-        MemoryCard,
-        MetacognitiveJudge,
-        MetaJudgment,
-        MetamemoryIndex,
-        MetamemoryMonitor,
-        MetamemoryStats,
-        RetrievalOutcome,
-        Verdict,
-        build_memory_card,
-    )
-    from cortex.memory.models import EpisodicSnapshot, MemoryEntry, MemoryEvent
-    from cortex.memory.navigator import (
-        ClusterInfo,
-        KnowledgeMap,
-        NavigationState,
-        SemanticNavigator,
-        SemanticPath,
-    )
-    from cortex.memory.pipeline import NeuromorphicPipeline, QueryResult, StoreResult
-    from cortex.memory.resonance import AdaptiveResonanceGate
-    from cortex.memory.sleep import SleepCycleReport, SleepOrchestrator
-    from cortex.memory.sparse import MushroomBodyEncoder
+    from cortex.memory.consolidation import SilentEngram as SilentEngram
+    from cortex.memory.consolidation import SystemsConsolidator as SystemsConsolidator
+    from cortex.memory.drift import DriftMonitor as DriftMonitor
+    from cortex.memory.drift import DriftSignature as DriftSignature
+    from cortex.memory.encoder import AsyncEncoder as AsyncEncoder
+    from cortex.memory.engrams import CortexSemanticEngram as CortexSemanticEngram
+    from cortex.memory.frequency import BIFTRouter as BIFTRouter
+    from cortex.memory.frequency import ContinuousMemorySystem as ContinuousMemorySystem
+    from cortex.memory.frequency import MemoryFrequency as MemoryFrequency
+    from cortex.memory.frequency import RetrievalBand as RetrievalBand
+    from cortex.memory.homeostasis import DynamicSynapseUpdate as DynamicSynapseUpdate
+    from cortex.memory.homeostasis import EntropyPruner as EntropyPruner
+    from cortex.memory.ledger import EventLedgerL3 as EventLedgerL3
+    from cortex.memory.manager import CortexMemoryManager as CortexMemoryManager
+    from cortex.memory.metamemory import MemoryCard as MemoryCard
+    from cortex.memory.metamemory import MetacognitiveJudge as MetacognitiveJudge
+    from cortex.memory.metamemory import MetaJudgment as MetaJudgment
+    from cortex.memory.metamemory import MetamemoryIndex as MetamemoryIndex
+    from cortex.memory.metamemory import MetamemoryMonitor as MetamemoryMonitor
+    from cortex.memory.metamemory import MetamemoryStats as MetamemoryStats
+    from cortex.memory.metamemory import RetrievalOutcome as RetrievalOutcome
+    from cortex.memory.metamemory import Verdict as Verdict
+    from cortex.memory.metamemory import build_memory_card as build_memory_card
+    from cortex.memory.models import EpisodicSnapshot as EpisodicSnapshot
+    from cortex.memory.models import MemoryEntry as MemoryEntry
+    from cortex.memory.models import MemoryEvent as MemoryEvent
+    from cortex.memory.navigator import ClusterInfo as ClusterInfo
+    from cortex.memory.navigator import KnowledgeMap as KnowledgeMap
+    from cortex.memory.navigator import NavigationState as NavigationState
+    from cortex.memory.navigator import SemanticNavigator as SemanticNavigator
+    from cortex.memory.navigator import SemanticPath as SemanticPath
+    from cortex.memory.pipeline import NeuromorphicPipeline as NeuromorphicPipeline
+    from cortex.memory.pipeline import QueryResult as QueryResult
+    from cortex.memory.pipeline import StoreResult as StoreResult
+    from cortex.memory.resonance import AdaptiveResonanceGate as AdaptiveResonanceGate
+    from cortex.memory.sleep import SleepCycleReport as SleepCycleReport
+    from cortex.memory.sleep import SleepOrchestrator as SleepOrchestrator
+    from cortex.memory.sparse import MushroomBodyEncoder as MushroomBodyEncoder
     from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2 as VectorStoreL2
-    from cortex.memory.temporal_health import (
-        HealthReport,
-        SchedulerConfig,
-        TemporalHealthScheduler,
-    )
-    from cortex.memory.void_detector import (
-        EpistemicAnalysis,
-        EpistemicState,
-        EpistemicVoidDetector,
-    )
-    from cortex.memory.working import WorkingMemoryL1
+    from cortex.memory.temporal_health import HealthReport as HealthReport
+    from cortex.memory.temporal_health import SchedulerConfig as SchedulerConfig
+    from cortex.memory.temporal_health import TemporalHealthScheduler as TemporalHealthScheduler
+    from cortex.memory.void_detector import EpistemicAnalysis as EpistemicAnalysis
+    from cortex.memory.void_detector import EpistemicState as EpistemicState
+    from cortex.memory.void_detector import EpistemicVoidDetector as EpistemicVoidDetector
+    from cortex.memory.working import WorkingMemoryL1 as WorkingMemoryL1
 
 __all__ = [
     "AdaptiveResonanceGate",

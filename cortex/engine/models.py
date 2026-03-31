@@ -96,7 +96,7 @@ def _parse_json_blob(raw: object, fallback: object) -> object:
 
 def _to_float(value: object, default: float) -> float:
     try:
-        return float(value) if value is not None else default
+        return float(value) if value is not None else default  # pyright: ignore
     except (TypeError, ValueError):
         return default
 

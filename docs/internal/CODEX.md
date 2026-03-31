@@ -5,17 +5,17 @@
 
 This Codex defines the **Ontology**, **Taxonomy**, and **Prime Directives** of the CORTEX Neural Hive. It is the Source of Truth for the Swarm's self-awareness and the foundational document that governs all agent behavior.
 
-**Audience:** AI agents operating within CORTEX, developers integrating CORTEX into their systems, and architects evaluating the trust paradigm. For quickstart and installation, see [README.md](README.md). For the philosophical manifesto, see [MANIFESTO.md](MANIFESTO.md).
+**Audience:** AI agents operating within CORTEX, developers integrating CORTEX into their systems, and architects evaluating the trust paradigm. For quickstart and installation, see [README.md](../../README.md). For the philosophical manifesto, see [MANIFESTO.md](MANIFESTO.md).
 
 ---
 
 ## 1. Prime Directives: Quindecálogo de la Singularidad Operativa (15 Axiomas)
 
 > **⚠️ Canonical Source:** The unified Axiom Registry is now at:
-> - **Code:** [`cortex/axioms/registry.py`](../cortex/axioms/registry.py) — 22 canonical axioms with `AX-NNN` IDs
-> - **Docs:** [`docs/axiom-registry.md`](../docs/axiom-registry.md) — auto-generated from code
+> - **Code:** [`cortex/extensions/axioms/registry.py`](../cortex/extensions/axioms/registry.py) — 22 canonical axioms with `AX-NNN` IDs
+> - **Docs:** [`docs/axiom-registry.md`](../axiom-registry.md) — auto-generated from code
 > - **Taxonomy:** 3 Constitutional (AX-001–003) + 10 Operational (AX-010–019) + 9 Aspirational (AX-020–028)
-> - **TTL Policy:** [`cortex/axioms/ttl.py`](../cortex/axioms/ttl.py) — fact decay (ghosts 30d, knowledge 180d, axioms ∞)
+> - **TTL Policy:** [`cortex/extensions/axioms/ttl.py`](../cortex/extensions/axioms/ttl.py) — fact decay (ghosts 30d, knowledge 180d, axioms ∞)
 >
 > The table below is **legacy narrative context**. For canonical numbering, enforcement status, and CI gates, use the Registry.
 
@@ -212,7 +212,7 @@ Every stored fact carries:
 
 The Swarm is organized into Divisions and Squads. Each has a primary CORTEX project tag.
 
-> **Note:** Agent names (e.g. @SHERLOCK, @GUARDIAN) are **architectural roles**, not deployed code modules. They define capability boundaries for future swarm orchestration. See [sovereign_agent_manifesto.md](docs/sovereign_agent_manifesto.md) for the full specification.
+> **Note:** Agent names (e.g. @SHERLOCK, @GUARDIAN) are **architectural roles**, not deployed code modules. They define capability boundaries for future swarm orchestration. See [sovereign_agent_manifesto.md](../sovereign_agent_manifesto.md) for the full specification.
 
 ### DIVISION: CODE (`project:cortex`)
 
@@ -434,7 +434,7 @@ CORTEX implements the Five Sovereign Specifications for autonomous agent psychol
 └──────────────────────────────────────────┘
 ```
 
-> Full specification: [`docs/sovereign_agent_manifesto.md`](docs/sovereign_agent_manifesto.md)
+> Full specification: [`sovereign_agent_manifesto.md`](../sovereign_agent_manifesto.md)
 
 ---
 
@@ -476,11 +476,11 @@ CHANGELOG.md  ← Version history, roadmap
 |:---|:---|
 | [MANIFESTO.md](MANIFESTO.md) | Visión, tesis, posicionamiento competitivo |
 | [AGENTICA.md](docs/AGENTICA.md) | Sintetología Agéntica — ciencia fundacional de agentes autónomos |
-| [ARCHITECTURE.md](ARCHITECTURE.md) | Arquitectura técnica completa |
+| [ARCHITECTURE.md](../ARCHITECTURE.md) | Arquitectura técnica completa |
 | [SECURITY.md](SECURITY.md) | Modelo de seguridad, Privacy Shield, threat model |
-| [README.md](README.md) | Quickstart, instalación, uso de la API |
-| [CHANGELOG.md](CHANGELOG.md) | Historial de versiones y roadmap |
-| [sovereign_agent_manifesto.md](docs/sovereign_agent_manifesto.md) | Las 5 Especificaciones Soberanas |
+| [README.md](../../README.md) | Quickstart, instalación, uso de la API |
+| [CHANGELOG.md](../../CHANGELOG.md) | Historial de versiones y roadmap |
+| [sovereign_agent_manifesto.md](../sovereign_agent_manifesto.md) | Las 5 Especificaciones Soberanas |
 
 ---
 

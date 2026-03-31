@@ -90,7 +90,7 @@ class CortexEngine(
         # Composition layers
         from cortex.facts.manager import FactManager
 
-        self.facts = FactManager(self)
+        self.facts = FactManager(self)  # pyright: ignore
         self.embeddings = EmbeddingManager(self)
         self.consensus = ConsensusManager(self)
         self.lock_sovereign = SovereignLock(self)

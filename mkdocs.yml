@@ -1,15 +1,33 @@
 site_name: CORTEX Documentation
 site_description: Trust Infrastructure for Autonomous AI — cryptographic verification, audit trails, and EU AI Act compliance for AI agent memory.
-site_url: https://cortexpersist.dev
-repo_url: https://github.com/borjamoskv/cortex
-repo_name: borjamoskv/cortex
-edit_uri: edit/master/docs/
+site_url: https://github.com/borjamoskv/Cortex-Persist/tree/main/docs
+repo_url: https://github.com/borjamoskv/Cortex-Persist
+repo_name: borjamoskv/Cortex-Persist
+edit_uri: edit/main/docs/
+exclude_docs: |
+  internal/
+  architecture/
+  audits/
+  articles/
+  blog/
+  design/
+  launch/
+  proposals/
+  research/
+  agents/
+  ortu-omega/
+  prototypes/
+  demo-padres/
+  data/
+  live_status.html
+  llms.txt
+  wave_5_proposal.md
 copyright: "© 2026 MOSKV-1 Sovereign Systems · Apache 2.0"
 
 theme:
   name: material
-  logo: https://raw.githubusercontent.com/borjamoskv/cortex/master/assets/shield.svg
-  favicon: https://raw.githubusercontent.com/borjamoskv/cortex/master/assets/shield.svg
+  logo: https://raw.githubusercontent.com/borjamoskv/Cortex-Persist/main/src/assets/logo-white.svg
+  favicon: https://raw.githubusercontent.com/borjamoskv/Cortex-Persist/main/src/assets/logo-white.svg
   palette:
     - scheme: slate
       primary: black
@@ -59,6 +77,11 @@ nav:
       - Deployment: deployment.md
       - Cross-Platform: cross_platform_guide.md
   - Compliance & Security:
+      - Security Trust Model: SECURITY_TRUST_MODEL.md
+      - Deep Change Protocols: CONTRIBUTING.md
+      - Operations: OPERATIONS.md
+      - Axioms: AXIOMS.md
+      - Axiom Registry: axiom-registry.md
       - EU AI Act Compliance: compliance.md
       - Security: security.md
       - Sovereign Infrastructure: sovereign-infrastructure.md
@@ -68,13 +91,15 @@ nav:
       - Time-Travel Debugging: tutorials/temporal.md
       - Site Monitoring Daemon: tutorials/daemon.md
   - Project:
+      - AGENTICA: AGENTICA.md
+      - Sovereign Agent Manifesto: sovereign_agent_manifesto.md
       - FAQ: faq.md
       - Changelog: changelog.md
 
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/borjamoskv/cortex
+      link: https://github.com/borjamoskv/Cortex-Persist
     - icon: fontawesome/brands/x-twitter
       link: https://x.com/borjamoskv
   homepage: https://cortexpersist.com

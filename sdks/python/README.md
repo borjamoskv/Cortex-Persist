@@ -1,6 +1,6 @@
 # CORTEX Python SDK
 
-Thin, zero-dependency client for the [CORTEX Memory API](https://github.com/borjamoskv/cortex).
+Thin, zero-dependency client for the [CORTEX Persist API](https://github.com/borjamoskv/Cortex-Persist).
 
 ## Install
 

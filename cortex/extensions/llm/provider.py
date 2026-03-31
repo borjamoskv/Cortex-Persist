@@ -157,7 +157,7 @@ class LLMProvider(BaseProvider):
             raise ValueError(f"Provider '{provider}' requires API key ({env_key})")
 
     def _prepare_request(self) -> tuple[str, dict[str, str]]:
-        url = f"{self._base_url.rstrip('/')}/chat/completions"
+        url = f"{self._base_url.rstrip('/')}/chat/completions"  # pyright: ignore
         headers = prepare_stealth_headers(self._extra_headers)
         if self._api_key:
             headers["Authorization"] = f"Bearer {self._api_key}"

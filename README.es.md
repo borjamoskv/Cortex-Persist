@@ -6,8 +6,8 @@
 
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
-[![CI](https://github.com/borjamoskv/cortex/actions/workflows/ci.yml/badge.svg)](https://github.com/borjamoskv/cortex/actions)
-[![Codecov](https://codecov.io/gh/borjamoskv/cortex/branch/master/graph/badge.svg)](https://codecov.io/gh/borjamoskv/cortex)
+[![CI](https://github.com/borjamoskv/Cortex-Persist/actions/workflows/ci.yml/badge.svg)](https://github.com/borjamoskv/Cortex-Persist/actions)
+[![Codecov](https://codecov.io/gh/borjamoskv/Cortex-Persist/branch/main/graph/badge.svg)](https://codecov.io/gh/borjamoskv/Cortex-Persist)
 
 CORTEX es una **capa de confianza (drop-in trust layer)** para la memoria de IA. Aplica integridad criptográfica sobre cualquier almacenamiento (Mem0, Zep, o personalizado), garantizando que el estado y las decisiones de los agentes permanezcan a prueba de manipulaciones y listos para auditorías.
 
@@ -80,7 +80,7 @@ asyncio.run(main())
 
 ### Documentación
 
-- [**Arquitectura**](docs/architecture.md) — Sellos Merkle y encadenamiento de hash.
+- [**Arquitectura**](docs/ARCHITECTURE.md) — Sellos Merkle y encadenamiento de hash.
 - [**Seguridad y Confianza**](docs/SECURITY_TRUST_MODEL.md) — Invariantes criptográficas.
 - [**Referencia de API**](docs/api.md) — Documentación completa de SDK y CLI.
 

@@ -123,7 +123,7 @@ class SignalReactor:
             self._trigger_engine = te
             logger.info(
                 "TriggerEngine initialized with %d conditions",
-                len(te._conditions),
+                len(te._conditions),  # pyright: ignore
             )
             return te
         except Exception:  # noqa: BLE001

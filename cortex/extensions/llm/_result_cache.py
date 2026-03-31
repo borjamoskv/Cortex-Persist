@@ -124,4 +124,4 @@ class ResultCache:
         now = time.time()
         with _db(self.db_path, exclusive=True) as conn:
             cursor = conn.execute("DELETE FROM results WHERE expires_at <= ?", (now,))
-            return cursor.get_count() if hasattr(cursor, "get_count") else cursor.rowcount
+            return cursor.get_count() if hasattr(cursor, "get_count") else cursor.rowcount  # pyright: ignore

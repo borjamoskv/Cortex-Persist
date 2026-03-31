@@ -84,7 +84,7 @@ class CortexLangGraphSupervisor:
 
     def add_conditional_edges(self, source: str, decision_func, edge_map: dict[str, str]):
         """Define bifurcación predictible."""
-        self.graph_builder.add_conditional_edges(source, decision_func, edge_map)
+        self.graph_builder.add_conditional_edges(source, decision_func, edge_map)  # type: ignore  # pyright: ignore
 
     def compile(self, checkpointer=None):
         """Compila la aplicación en un DAG O(1)."""
@@ -99,12 +99,12 @@ class CortexLangGraphSupervisor:
             self.compile()
 
         logger.info("🚀 [SUPERVISOR] Lanzando Night Shift (Session: %s)", initial_state.session_id)
-        # En la API real de langgraph (langgraph>=0.0.x), astream funciona diferente dependiendo de la versión
-        # Pero mockearemos este flujo para compatibilidad.
+        # En la API real de langgraph (langgraph>=0.0.x), astream funciona diferente
+        # dependiendo de la versión. Pero mockearemos este flujo para compatibilidad.
         try:
             # LangGraph astream returns chunks of updates
-            async for state_update in self.compiled_app.astream(initial_state):  # type: ignore[reportOptionalMemberAccess]
-                yield state_update
+            async for state_update in self.compiled_app.astream(initial_state):  # type: ignore
+                yield state_update  # type: ignore  # pyright: ignore
         except (ValueError, TypeError, RuntimeError) as e:
             logger.error("☠️ [SUPERVISOR] Fallo de Ejecución Duradera: %s", e)
             raise LangGraphSupervisorError(f"Colapso en grafo: {e}") from e

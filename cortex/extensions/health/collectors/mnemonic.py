@@ -40,7 +40,7 @@ class EntropyCollector:
         try:
             from cortex.database.core import connect
 
-            with connect(db_path, timeout=2.0) as conn:
+            with connect(db_path, timeout=2.0) as conn:  # pyright: ignore
                 try:
                     cur = conn.execute(
                         "SELECT COUNT(DISTINCT fact_type) as types, "
@@ -102,7 +102,7 @@ class FactCountCollector:
         try:
             from cortex.database.core import connect
 
-            with connect(db_path, timeout=2.0) as conn:
+            with connect(db_path, timeout=2.0) as conn:  # pyright: ignore
                 try:
                     cur = conn.execute("SELECT COUNT(*) FROM facts WHERE valid_until IS NULL")
                     row = cur.fetchone()
@@ -148,7 +148,7 @@ class SnapshotAgeCollector:
         try:
             from cortex.database.core import connect
 
-            with connect(db_path, timeout=2.0) as conn:
+            with connect(db_path, timeout=2.0) as conn:  # pyright: ignore
                 try:
                     cur = conn.execute("SELECT MAX(created_at) FROM context_snapshots")
                     row = cur.fetchone()

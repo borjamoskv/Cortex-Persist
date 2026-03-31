@@ -87,8 +87,4 @@ When CORTEX knowledge exceeds NotebookLM source limits (50/300 sources):
 
 ---
 
-<<<<<<< HEAD
-> *"Defining the architecture is the first act of sovereignty."* — [AGENTICA.md](file:///Users/borjafernandezangulo/cortex/docs/AGENTICA.md)
-=======
-> *"Defining the architecture is the first act of sovereignty."* — [AGENTICA.md](file://./docs/AGENTICA.md)
->>>>>>> origin/main
+> *"Defining the architecture is the first act of sovereignty."* — [AGENTICA.md](AGENTICA.md)

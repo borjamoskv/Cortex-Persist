@@ -280,31 +280,49 @@ class QueryMixin(EngineMixinBase):
                     rows = await cursor.fetchall()
             return [self._row_to_fact(row, tenant_id=tenant_id) for row in rows]
 
-    async def stats(self) -> dict:
+    async def stats(self, tenant_id: str = "default") -> dict:
+        tenant_id = self._resolve_tenant(tenant_id)
         async with self.session() as conn:
-            async with conn.execute("SELECT COUNT(*) FROM facts") as cursor:
+            async with conn.execute(
+                "SELECT COUNT(*) FROM facts WHERE tenant_id = ?", (tenant_id,)
+            ) as cursor:
                 row = await cursor.fetchone()
                 total = row[0] if row else 0
-            async with conn.execute("SELECT COUNT(*) FROM facts WHERE is_tombstoned = 0") as cursor:
+            async with conn.execute(
+                "SELECT COUNT(*) FROM facts WHERE is_tombstoned = 0 AND tenant_id = ?",
+                (tenant_id,)
+            ) as cursor:
                 row = await cursor.fetchone()
                 active = row[0] if row else 0
             async with conn.execute(
-                "SELECT DISTINCT project FROM facts WHERE is_tombstoned = 0"
+                "SELECT DISTINCT project FROM facts "
+                "WHERE is_tombstoned = 0 AND tenant_id = ?",
+                (tenant_id,)
             ) as cursor:
                 projects = [p[0] for p in await cursor.fetchall()]
-            async with conn.execute("SELECT COUNT(*) FROM transactions") as cursor:
+            async with conn.execute(
+                "SELECT COUNT(*) FROM transactions WHERE tenant_id = ?", (tenant_id,)
+            ) as cursor:
                 row = await cursor.fetchone()
                 tx_count = row[0] if row else 0
 
             try:
-                async with conn.execute("SELECT COUNT(*) FROM fact_embeddings") as cursor:
+                async with conn.execute(
+                    "SELECT COUNT(*) FROM fact_embeddings fe "
+                    "JOIN facts f ON fe.fact_id = f.id "
+                    "WHERE f.tenant_id = ?",
+                    (tenant_id,)
+                ) as cursor:
                     row = await cursor.fetchone()
                     embeddings = row[0] if row else 0
             except (sqlite3.Error, OSError, ValueError):
                 embeddings = 0
 
             async with conn.execute(
-                "SELECT fact_type, COUNT(*) FROM facts WHERE is_tombstoned = 0 GROUP BY fact_type"
+                "SELECT fact_type, COUNT(*) FROM facts "
+                "WHERE is_tombstoned = 0 AND tenant_id = ? "
+                "GROUP BY fact_type",
+                (tenant_id,)
             ) as cursor:
                 types = {row[0]: row[1] for row in await cursor.fetchall()}
 
@@ -313,7 +331,8 @@ class QueryMixin(EngineMixinBase):
                 async with conn.execute(
                     "SELECT COUNT(*) FROM facts "
                     "WHERE json_extract(metadata, '$.parent_decision_id') IS NOT NULL "
-                    "AND is_tombstoned = 0"
+                    "AND is_tombstoned = 0 AND tenant_id = ?",
+                    (tenant_id,)
                 ) as cursor:
                     row = await cursor.fetchone()
                     causal_facts = row[0] if row else 0

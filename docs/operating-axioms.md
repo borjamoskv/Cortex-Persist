@@ -2,8 +2,8 @@
 
 > **The Laws of Sovereign Operation — violations block merges.**
 >
-> Canonical source: [`cortex/axioms/registry.py`](../cortex/axioms/registry.py)
-> CI enforcement: [`.github/workflows/quality_gates.yml`](../.github/workflows/quality_gates.yml)
+> Canonical source: [`cortex/extensions/axioms/registry.py`](https://github.com/borjamoskv/Cortex-Persist/blob/main/cortex/extensions/axioms/registry.py)
+> CI enforcement: [`.github/workflows/quality_gates.yml`](https://github.com/borjamoskv/Cortex-Persist/blob/main/.github/workflows/quality_gates.yml)
 
 ## Sovereign Foundation (Peano Soberano v3)
 
@@ -34,7 +34,7 @@ These operational axioms are **theorems derived** from 7 first-principle generat
 **Rule:** Constitutional overrides Operational. Operational overrides Aspirational.
 An axiom without CI enforcement is classified Aspirational — not a law.
 
-**Foundation:** All 22 axioms derive from the [7 Axioms of Peano Soberano](../../.gemini/GEMINI.md) (α₁ Causalidad, α₂ Adversarialidad, α₃ Entropía Negativa, α₄ Recursión Evolutiva, α₅ Verdad Estética, α₆ Memoria Soberana, α₇ Frontera), which in turn derive from the [5 Ontological Axioms of AGENTICA](AGENTICA.md#4-los-cinco-axiomas).
+**Foundation:** All 22 axioms derive from the [7 Axioms of Peano Soberano](https://github.com/borjamoskv/Cortex-Persist/blob/main/GEMINI.md#-the-7-axioms-peano-soberano) (α₁ Causalidad, α₂ Adversarialidad, α₃ Entropía Negativa, α₄ Recursión Evolutiva, α₅ Verdad Estética, α₆ Memoria Soberana, α₇ Frontera), which in turn derive from the [5 Ontological Axioms of AGENTICA](AGENTICA.md#4-los-cinco-axiomas).
 
 ---
 

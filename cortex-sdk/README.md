@@ -85,9 +85,9 @@ async with AsyncCortexMemory(api_key="ctx_...") as memory:
 
 ## Links
 
-- **API Docs**: [docs.cortex.moskv.com](https://docs.cortex.moskv.com)
-- **Dashboard**: [cortex.moskv.com](https://cortex.moskv.com)
-- **Sign Up**: `POST https://cortex.moskv.com/v1/signup`
+- **Documentation**: [GitHub Docs](https://github.com/borjamoskv/Cortex-Persist/tree/main/docs)
+- **Website**: [cortexpersist.com](https://cortexpersist.com)
+- **Repository**: [github.com/borjamoskv/Cortex-Persist](https://github.com/borjamoskv/Cortex-Persist)
 
 ---
 

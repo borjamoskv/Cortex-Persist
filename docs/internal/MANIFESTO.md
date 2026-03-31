@@ -71,7 +71,7 @@ CORTEX isn't just a library — it's a paradigm for what autonomous agents *shou
 | **`tether.md`** | Physical/economic/entropy limits | The Dead-Man's Switch — agents need leashes | 🔵 Conceptual |
 | **`bloodline.json`** | Genetic heredity for swarm agents | Spawn senior workers, not blank slates | 🔵 Conceptual |
 
-> Full specification: [sovereign_agent_manifesto.md](docs/sovereign_agent_manifesto.md) · Conceptual specs are designed and documented; runtime enforcement is on the [roadmap](CHANGELOG.md).
+> Full specification: [sovereign_agent_manifesto.md](../sovereign_agent_manifesto.md) · Conceptual specs are designed and documented; runtime enforcement is on the [roadmap](../../CHANGELOG.md).
 
 ---
 
@@ -79,7 +79,7 @@ CORTEX isn't just a library — it's a paradigm for what autonomous agents *shou
 
 CORTEX is a verification layer that wraps your existing memory stack (Mem0, Zep, Letta, or custom) with cryptographic trust: SHA-256 hash chains, Merkle checkpoints, WBFT consensus, Privacy Shield, AST Sandbox, RBAC, and tripartite cognitive memory (L1→L2→L3) — all tenant-scoped.
 
-> 📐 Full architecture: [ARCHITECTURE.md](ARCHITECTURE.md) · Competitive comparison: [README.md § Competitive Landscape](README.md#competitive-landscape)
+> 📐 Full architecture: [ARCHITECTURE.md](../ARCHITECTURE.md) · Competitive comparison: [README.md § Competitive Landscape](README.md#competitive-landscape)
 
 ---
 
@@ -92,7 +92,7 @@ cortex verify 1
 # → ✅ VERIFIED — Hash chain intact, Merkle sealed
 ```
 
-> Full quickstart & API docs: [README.md](README.md) · [cortexpersist.dev](https://cortexpersist.dev)
+> Full quickstart & API docs: [README.md](../../README.md) · [cortexpersist.dev](https://cortexpersist.dev)
 
 ---
 
@@ -195,11 +195,11 @@ This is not a framework. This is **Sovereign Artificial Intelligence**.
 
 | Document | Purpose |
 |:---|:---|
-| [README.md](README.md) | Quickstart, architecture diagram, competitive landscape |
+| [README.md](../../README.md) | Quickstart, architecture diagram, competitive landscape |
 | [COGITO.md](COGITO.md) | Ontology, axioms, operational protocols |
-| [ARCHITECTURE.md](ARCHITECTURE.md) | Full technical architecture |
-| [CHANGELOG.md](CHANGELOG.md) | Version history and roadmap |
-| [sovereign_agent_manifesto.md](docs/sovereign_agent_manifesto.md) | Deep dive: 5 Sovereign Specifications |
+| [ARCHITECTURE.md](../ARCHITECTURE.md) | Full technical architecture |
+| [CHANGELOG.md](../../CHANGELOG.md) | Version history and roadmap |
+| [sovereign_agent_manifesto.md](../sovereign_agent_manifesto.md) | Deep dive: 5 Sovereign Specifications |
 
 ---
 

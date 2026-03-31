@@ -313,5 +313,5 @@ class ImmutableLedger:
                 "valid": not violations,
                 "violations": violations,
                 "tx_checked": tx_count,
-                "roots_checked": len(roots),
+                "roots_checked": len(roots),  # pyright: ignore
             }

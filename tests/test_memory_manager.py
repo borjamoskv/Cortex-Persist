@@ -137,8 +137,9 @@ async def test_process_interaction_with_overflow(manager, mock_l1):
     with patch("cortex.memory.manager.compress_and_store", new_callable=AsyncMock):
         # Give worker a tick to pick it up
         await asyncio.sleep(0.01)
-        # However, the task was added *before* this patch. The worker might have already processed it
-        # using the real compress_and_store and failed. We should patch it before calling process_interaction.
+        # The task was added *before* this patch. The worker might have already processed
+        # it using the real compress_and_store and failed. We should patch it before
+        # calling process_interaction.
         pass
 
 
@@ -244,7 +245,7 @@ async def test_store_rejection_thalamus(manager, mock_mem0_pipeline):
     manager.thalamus.filter = AsyncMock(return_value=(False, "discard:causal_saturation", None))
 
     # Patch notify_notch_pruning so it doesn't try to use WebSockets
-    with patch("cortex.memory.manager.notify_notch_pruning", new_callable=AsyncMock):
+    with patch("cortex.routes.notch_ws.notify_notch_pruning", new_callable=AsyncMock):
         result = await manager.store(
             tenant_id="t1",
             content="Saturated fact",
@@ -288,7 +289,7 @@ async def test_store_resonance_deduplication(manager, mock_mem0_pipeline):
 async def test_assemble_context(manager, mock_l1):
     """Test assembling final LLM context from L1 and L2."""
     with patch(
-        "cortex.memory.manager.retrieve_episodic_context", new_callable=AsyncMock
+        "cortex.memory.memory_retrieval.retrieve_episodic_context", new_callable=AsyncMock
     ) as mock_retrieve:
         mock_retrieve.return_value = [{"content": "episodic 1"}]
 

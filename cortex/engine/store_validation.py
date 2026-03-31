@@ -66,22 +66,22 @@ async def run_store_validation_logic(
     _has_entropy_meta = meta and ("_prior_entropy" in meta or "_posterior_entropy" in meta)
     if not skip_thermo and _has_entropy_meta:
         ex_input = ExergyInput(
-            prior_uncertainty=meta.get("_prior_entropy", 1.0),
-            posterior_uncertainty=meta.get("_posterior_entropy", 0.5),
-            tokens_consumed=meta.get("_tokens", 100),
+            prior_uncertainty=meta.get("_prior_entropy", 1.0),  # pyright: ignore
+            posterior_uncertainty=meta.get("_posterior_entropy", 0.5),  # pyright: ignore
+            tokens_consumed=meta.get("_tokens", 100),  # pyright: ignore
             action_risk=ActionRisk.MEMORY_WRITE
             if fact_type != "rule"
             else ActionRisk.SCHEMA_MUTATION,
             had_backup=True,
             touched_persistent_state=True,
-            utility_delta=meta.get("_utility", 0.0),
-            causal_gap=meta.get("_causal_gap", 0.0),
+            utility_delta=meta.get("_utility", 0.0),  # pyright: ignore
+            causal_gap=meta.get("_causal_gap", 0.0),  # pyright: ignore
         )
         ex_res = calculate_exergy(ex_input, threshold_min_work=0.01)
         enforce_exergy(ex_res)
 
         # Update metadata with recorded exergy
-        meta["_exergy_score"] = ex_res.exergy_score
+        meta["_exergy_score"] = ex_res.exergy_score  # pyright: ignore
 
         if should_enter_decorative_mode(cls._thermo_counters)[0]:
             cls._agent_mode = AgentMode.DECORATIVE

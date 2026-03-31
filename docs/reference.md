@@ -87,7 +87,7 @@ HMAC-SHA256 API key authentication with RBAC (4 roles: admin, operator, reader, 
 
 Rate limiting, request approval workflows, and action-level security enforcement.
 
-::: cortex.gate.core.SovereignGate
+::: cortex.extensions.gate.core.SovereignGate
     options:
       show_source: false
 
@@ -107,6 +107,6 @@ Low-level fact CRUD operations, delegation layer between engine and database.
 
 Self-healing background daemon with 13 monitors (disk, memory, network, ghost, cert, etc.).
 
-::: cortex.daemon.core.MoskvDaemon
+::: cortex.extensions.daemon.core.MoskvDaemon
     options:
       show_source: false

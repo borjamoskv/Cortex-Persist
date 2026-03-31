@@ -13,11 +13,11 @@
 ![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
 ![Status](https://img.shields.io/badge/status-beta-orange.svg)
-![CI](https://github.com/borjamoskv/cortex/actions/workflows/ci.yml/badge.svg)
-[![Coverage](https://codecov.io/gh/borjamoskv/cortex/branch/master/graph/badge.svg)](https://codecov.io/gh/borjamoskv/cortex)
+![CI](https://github.com/borjamoskv/Cortex-Persist/actions/workflows/ci.yml/badge.svg)
+[![Coverage](https://codecov.io/gh/borjamoskv/Cortex-Persist/branch/main/graph/badge.svg)](https://codecov.io/gh/borjamoskv/Cortex-Persist)
 ![Signed](https://img.shields.io/badge/releases-sigstore%20signed-2FAF64.svg)
 ![Security](https://img.shields.io/badge/scan-trivy%20%2B%20pip--audit-blue.svg)
-[![Docs](https://img.shields.io/badge/docs-cortexpersist.dev-brightgreen)](https://cortexpersist.dev)
+[![Docs](https://img.shields.io/badge/docs-github-brightgreen)](https://github.com/borjamoskv/Cortex-Persist/tree/main/docs)
 [![Website](https://img.shields.io/badge/web-cortexpersist.com-blue)](https://cortexpersist.com)
 [![Cross-Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-blue)](docs/cross_platform_guide.md)
 
@@ -201,7 +201,7 @@ block-beta
   INTERFACES --> GATEWAY --> STORAGE --> TRUST
 ```
 
-> 完整架构详见 [architecture.md](docs/architecture.md)。
+> 完整架构详见 [ARCHITECTURE.md](docs/ARCHITECTURE.md)。
 
 ---
 

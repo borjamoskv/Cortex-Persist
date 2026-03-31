@@ -1,6 +1,6 @@
 # CORTEX JS/TS SDK
 
-Thin, zero-dependency TypeScript client for the [CORTEX Persist API](https://github.com/borjamoskv/cortex).
+Thin, zero-dependency TypeScript client for the [CORTEX Persist API](https://github.com/borjamoskv/Cortex-Persist).
 
 ## Install
 

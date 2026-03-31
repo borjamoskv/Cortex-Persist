@@ -213,5 +213,5 @@ results = engine.search_sync("greeting")
 - **[CLI Reference](cli.md)** — All 38 commands documented
 - **[REST API Reference](api.md)** — Versioned REST endpoints and models
 - **[MCP Server](mcp.md)** — Deep dive into MCP integration
-- **[Architecture](architecture.md)** — How CORTEX works under the hood
+- **[Architecture](ARCHITECTURE.md)** — How CORTEX works under the hood
 - **[EU AI Act Compliance](compliance.md)** — Full Article 12 mapping

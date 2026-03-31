@@ -153,7 +153,7 @@ Los pilares fundamentales:
 - **TESSERACT-Ω**: Convergencia sincrónica de ciclos de vida.
 - **APOTHEOSIS-∞**: Autonomía proactiva de Nivel 5. (`engine/apotheosis.py`)
 
-Para más detalles, consulta: [**OMEGA_MANIFOLD.md**](architecture/OMEGA_MANIFOLD.md).
+Para más detalles, consulta: [**OMEGA_MANIFOLD.md**](https://github.com/borjamoskv/Cortex-Persist/blob/main/docs/architecture/OMEGA_MANIFOLD.md).
 
 ---
 

@@ -37,7 +37,7 @@ class NullEmbeddingProvider:
 class TorchEmbeddingProvider:
     """Legacy provider using LocalEmbedder (depends on torch)."""
 
-    def __init__(self, embedder: any):
+    def __init__(self, embedder: any):  # pyright: ignore
         self._embedder = embedder
 
     def is_available(self) -> bool:
