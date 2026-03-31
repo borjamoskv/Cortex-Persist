@@ -209,9 +209,9 @@ def history(db_path: str | None, limit: int) -> None:
     table.add_column("Grade", justify="center")
 
     for rec in records:
-        score_val = float(rec.get("score", 0))
-        grade = str(rec.get("grade", ""))
-        ts = str(rec.get("timestamp", ""))[:19]
+        score_val = float(rec.get("score") if rec.get("score") is not None else 0.0)  # type: ignore
+        grade = str(rec.get("grade") or "")
+        ts = str(rec.get("timestamp") or "")[:19]
         if score_val >= 85:
             color = "green"
         elif score_val >= 70:
@@ -233,7 +233,7 @@ def history(db_path: str | None, limit: int) -> None:
 def fix(db_path: str | None, dry_run: bool) -> None:
     """Auto-remediation for degraded metrics."""
     from cortex.extensions.health import HealthCollector, HealthScorer
-    from cortex.extensions.health.fix_registry import FixRegistry
+    from cortex.extensions.health.fix import FixRegistry
 
     path = _resolve_db(db_path)
     collector = HealthCollector(db_path=path)

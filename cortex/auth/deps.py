@@ -99,10 +99,15 @@ async def require_consensus(
     min_score: float = 1.6,
     engine: Any = Depends(lambda: None),
 ) -> bool:
-    """Verify a claim has reached sufficient consensus.
+    """Verify a claim has reached sufficient consensus with KV-Aware Caching (Ω₂)."""
+    from cortex.auth.cache import AUTH_CACHE
+    from cortex.extensions.security.tenant import get_tenant_id
 
-    Used for 'Sovereign Gate' high-stakes authorizations.
-    """
+    tenant_id = get_tenant_id()
+    cached_score = AUTH_CACHE.get(claim, tenant_id)
+    if cached_score is not None:
+        return cached_score >= min_score
+
     if engine is None:
         from cortex.api.deps import get_async_engine
 
@@ -110,19 +115,26 @@ async def require_consensus(
             engine = e
             break
 
-    facts = await engine.recall(query=claim, limit=1)
-    if not facts:
+    results = await engine.search(query=claim, top_k=1)
+    if not results:
         return False
 
-    fact = facts[0]
-    score = fact.get("consensus_score", 0.0)
+    res = results[0]
+    score = (
+        res.meta.get("consensus_score", 0.0)
+        if hasattr(res, "meta")
+        else res.get("consensus_score", 0.0)
+    )
+
+    # Store in cache for future high-speed retrieval
+    AUTH_CACHE.set(claim, tenant_id, score)
 
     if score < min_score:
         logger.warning(
-            "Sovereign Gate: Claim '%s' failed consensus (%.2f < %.2f)",
-            claim,
+            "[AUTH] Consensus too low: %.2f < %.2f for claim: '%s'",
             score,
             min_score,
+            claim,
         )
         return False
     return True
@@ -150,7 +162,12 @@ def require_verified_permission(
 
         from cortex.api.deps import get_async_engine
 
-        async for engine in get_async_engine():  # type: ignore[reportCallIssue]
+        engine = None
+        async for e in get_async_engine():  # type: ignore[reportCallIssue]
+            engine = e
+            break
+
+        if engine:
             has_consensus = await require_consensus(
                 f"Permission {permission} granted to {auth.key_name or auth.tenant_id}",
                 min_score=min_consensus,
@@ -159,7 +176,6 @@ def require_verified_permission(
             if not has_consensus:
                 detail = f"Sovereign Gate: Action requires consensus (min: {min_consensus})"
                 raise HTTPException(status_code=403, detail=detail)
-            break
 
         return auth
 

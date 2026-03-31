@@ -8,6 +8,12 @@ optional dependencies like markdownify on package import.
 from __future__ import annotations
 
 import importlib
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from cortex.mcp.resilient_gateway import create_resilient_gateway, run_resilient_gateway
+    from cortex.mcp.server import create_mcp_server, run_server
+    from cortex.mcp.utils import MCPServerConfig
 
 __all__ = [
     "MCPServerConfig",

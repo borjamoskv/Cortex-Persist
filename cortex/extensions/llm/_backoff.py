@@ -65,7 +65,7 @@ async def handle_429_backoff(
 
     # ── Re-Inyección con Backoff Dinámico ──
     last_error = original_error
-    max_attempts = 0 if os.environ.get("CORTEX_TESTING") == "1" else 3
+    max_attempts = 0 if os.environ.get("CORTEX_TESTING") == "1" else 5
 
     for attempt in range(1, max_attempts + 1):
         # Usar el delay del API + jitter, o un backoff exponencial base

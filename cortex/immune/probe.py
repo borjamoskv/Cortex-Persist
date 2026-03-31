@@ -105,7 +105,7 @@ async def probe_metastability(
 
     try:
         async with conn.execute(query, params) as cursor:
-            rows = await cursor.fetchall()
+            rows = list(await cursor.fetchall())
     except Exception as e:
         logger.warning("Metastability probe query failed: %s", e)
         return report

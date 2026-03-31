@@ -161,9 +161,9 @@ class SovereignHTTPClient:
         """SSRF-safe GET request."""
         validate_url(url)
         if self._backend == "httpx":
-            return await self._client.get(url, **kwargs)
+            return await self._client.get(url, **kwargs)  # type: ignore
         elif self._backend == "aiohttp":
-            async with self._client.get(url, **kwargs) as resp:
+            async with self._client.get(url, **kwargs) as resp:  # type: ignore
                 return resp
         raise RuntimeError("Client not initialized — use async with")
 
@@ -171,9 +171,9 @@ class SovereignHTTPClient:
         """SSRF-safe POST request."""
         validate_url(url)
         if self._backend == "httpx":
-            return await self._client.post(url, **kwargs)
+            return await self._client.post(url, **kwargs)  # type: ignore
         elif self._backend == "aiohttp":
-            async with self._client.post(url, **kwargs) as resp:
+            async with self._client.post(url, **kwargs) as resp:  # type: ignore
                 return resp
         raise RuntimeError("Client not initialized — use async with")
 
@@ -181,9 +181,9 @@ class SovereignHTTPClient:
         """SSRF-safe arbitrary method request."""
         validate_url(url)
         if self._backend == "httpx":
-            return await self._client.request(method, url, **kwargs)
+            return await self._client.request(method, url, **kwargs)  # type: ignore
         elif self._backend == "aiohttp":
-            async with self._client.request(method, url, **kwargs) as resp:
+            async with self._client.request(method, url, **kwargs) as resp:  # type: ignore
                 return resp
         raise RuntimeError("Client not initialized — use async with")
 

@@ -12,6 +12,7 @@ from typing import Any, Optional
 
 import aiosqlite
 
+from cortex.crypto import get_default_encrypter
 from cortex.database.core import connect
 from cortex.extensions.signals.bus import AsyncSignalBus, SignalBus
 
@@ -285,16 +286,36 @@ class AsyncCausalGraph:
                         raw_meta = row[2] if len(row) > 2 else "{}"
                     else:
                         raw_meta = "{}"
-                    try:
-                        meta = json.loads(raw_meta or "{}")
-                        is_json = True
-                    except (TypeError, json.JSONDecodeError):
-                        meta = {}
-                        is_json = False
+
+                    is_encrypted = False
+                    meta = {}
+                    is_json = False
+
+                    if raw_meta:
+                        # Try to decrypt if it looks like ciphertext
+                        enc = get_default_encrypter()
+                        if raw_meta.startswith(enc.PREFIX):
+                            try:
+                                meta = enc.decrypt_json(raw_meta, tenant_id=tenant_id) or {}
+                                is_encrypted = True
+                                is_json = True
+                            except Exception:
+                                logger.warning("Failed to decrypt metadata for fact %d", fid)
+                                meta = {}
+                        else:
+                            try:
+                                meta = json.loads(raw_meta)
+                                is_json = True
+                            except (TypeError, json.JSONDecodeError):
+                                meta = raw_meta  # Preserve raw string if not JSON
+                                is_json = False
+
                     nodes_data[fid] = {
                         "confidence": conf,
                         "metadata": meta,
                         "is_json": is_json,
+                        "is_encrypted": is_encrypted,
+                        "raw_meta": raw_meta,  # Keep track of original
                     }
 
         node_states: dict[int, TaintStatus] = {fact_id: TaintStatus.TAINTED}
@@ -357,11 +378,14 @@ class AsyncCausalGraph:
                 data["metadata"]["tainted_by"] = fact_id
                 data["metadata"]["taint_timestamp"] = now
             if meta_col:
-                payload = (
-                    json.dumps(data["metadata"])
-                    if data["is_json"]
-                    else rowless_json(data["metadata"])
-                )
+                if data["is_encrypted"]:
+                    enc = get_default_encrypter()
+                    payload = enc.encrypt_json(data["metadata"], tenant_id=tenant_id)
+                elif data["is_json"]:
+                    payload = json.dumps(data["metadata"])
+                else:
+                    payload = data["raw_meta"]
+
                 if has_tenant:
                     fact_updates.append((new_conf, payload, current_id, tenant_id))
                 else:

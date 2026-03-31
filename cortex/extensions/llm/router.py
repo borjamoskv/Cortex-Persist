@@ -12,7 +12,7 @@ import logging
 import time
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 from cortex.extensions.llm._cascade import CascadeManager, classify_tier
 from cortex.extensions.llm._hedging import HedgedRequestStrategy
@@ -275,6 +275,28 @@ class CortexLLMRouter:
 
     async def invoke(self, prompt: CortexPrompt) -> Result[str, str]:
         """Alias for backward compatibility."""
+        return await self.execute_resilient(prompt)
+
+    async def route(
+        self, prompt: CortexPrompt, provider_hint: Optional[str] = None
+    ) -> Result[str, str]:
+        """Dispatch a prompt with optional provider override (hint).
+
+        Enforces policy Ω₁₆: targeted routing for belief-chain audits.
+        """
+        if not provider_hint or self._primary.provider_name == provider_hint:
+            return await self.execute_resilient(prompt)
+
+        # Provider Hint: temporarily swap priority for this request
+        for p in self._fallbacks:
+            if p.provider_name == provider_hint:
+                # Use a temporary router view or just try this provider first
+                logger.debug("🎯 [ROUTING] Overriding primary with hint: %s", provider_hint)
+                res = await self._try_provider(p, prompt)
+                if res.is_ok():
+                    return res
+                break  # Fall back to standard resilience if hint provider fails
+
         return await self.execute_resilient(prompt)
 
     async def execute_swarm(self, prompt: CortexPrompt) -> Result[str, str] | None:

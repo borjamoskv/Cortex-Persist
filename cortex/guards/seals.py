@@ -172,9 +172,10 @@ async def check_seal_2_type_safety() -> GateResult:
     # The current Architecture uses dynamic skills and PEP 562 lazy-loading.
     if code != 0:
         import json
+
         try:
             # More robust JSON finding: look for the first '{' and parse everything after it
-            start_idx = out.find('{')
+            start_idx = out.find("{")
             if start_idx != -1:
                 data = json.loads(out[start_idx:])
                 ecount = data.get("summary", {}).get("errorCount", 999)

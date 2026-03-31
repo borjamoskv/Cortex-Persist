@@ -64,7 +64,7 @@ def _sanitize_fts_query(query: str) -> str:
     return " ".join(safe_tokens) if safe_tokens else '""'
 
 
-def _row_to_result(row: tuple, is_fts: bool = False) -> SearchResult:
+def _row_to_result(row: Any, is_fts: bool = False) -> SearchResult:
     """Parse a database row into a SearchResult object with decryption logic.
 
     Column order from _fts5_search / _like_search:
@@ -85,34 +85,49 @@ def _row_to_result(row: tuple, is_fts: bool = False) -> SearchResult:
 
     # Process Tags (index 7)
     try:
-        tags = json.loads(row[7]) if row[7] else []
+        tags = json.loads(row[7]) if len(row) > 7 and row[7] else []
     except (json.JSONDecodeError, TypeError):
         tags = []
 
     # Meta (index 9)
-    meta = _parse_row_meta(row[9], tenant_id, enc)
+    meta = _parse_row_meta(row[9], tenant_id, enc) if len(row) > 9 else {}
 
     # Scoring — FTS has rank at index 14
-    score = 0.0
+    score = 0.5
     if is_fts and len(row) > 14:
-        score = row[14] if row[14] is not None else 0.0
+        rank = row[14] if row[14] is not None else 0.0
+        import math
+        score = 1.0 / (1.0 + math.exp(rank / 10.0))
+
+    # Ω₁₆: Consensus-aware confidence normalization
+    confidence = row[4] if len(row) > 4 else meta.get("confidence", "C3")
+    c_score = meta.get("consensus_score", 1.0)
+    if confidence in ("stated", "C3") and c_score >= 1.5:
+        confidence = "verified"
+    elif confidence in ("stated", "C3") and c_score <= 0.5:
+        confidence = "disputed"
+
+    # Ω₁₁: Hardened lineage (Issue #94)
+    # Fallback to metadata if JOIN fails (t.hash is index 13, f.tx_id is 12)
+    tx_id = row[12] if len(row) > 12 else meta.get("tx_id")
+    tx_hash = row[13] if len(row) > 13 else meta.get("hash")
 
     return SearchResult(
         fact_id=fact_id,
         content=content,
-        project=row[2],  # type: ignore[reportGeneralTypeIssues]
-        fact_type=row[3],  # type: ignore[reportGeneralTypeIssues]
-        confidence=row[4],  # type: ignore[reportGeneralTypeIssues]
-        valid_from=row[5] or "",  # type: ignore[reportGeneralTypeIssues]
-        valid_until=row[6],  # type: ignore[reportGeneralTypeIssues]
+        project=row[2] if len(row) > 2 else "unknown",  # type: ignore[reportGeneralTypeIssues]
+        fact_type=row[3] if len(row) > 3 else "fact",  # type: ignore[reportGeneralTypeIssues]
+        confidence=confidence,  # type: ignore[reportGeneralTypeIssues]
+        valid_from=row[5] if len(row) > 5 else "",  # type: ignore[reportGeneralTypeIssues]
+        valid_until=row[6] if len(row) > 6 else None,  # type: ignore[reportGeneralTypeIssues]
         tags=tags,
-        source=row[8],  # type: ignore[reportGeneralTypeIssues]
+        source=row[8] if len(row) > 8 else "unknown",  # type: ignore[reportGeneralTypeIssues]
         meta=meta,
         score=score,
-        created_at=row[10] or "",  # type: ignore[reportGeneralTypeIssues]
-        updated_at=row[11] or "",  # type: ignore[reportGeneralTypeIssues]
-        tx_id=row[12],  # type: ignore[reportGeneralTypeIssues]
-        hash=row[13],  # type: ignore[reportGeneralTypeIssues]
+        created_at=row[10] if len(row) > 10 else "",  # type: ignore[reportGeneralTypeIssues]
+        updated_at=row[11] if len(row) > 11 else "",  # type: ignore[reportGeneralTypeIssues]
+        tx_id=tx_id,  # type: ignore[reportGeneralTypeIssues]
+        hash=tx_hash,  # type: ignore[reportGeneralTypeIssues]
     )
 
 
@@ -150,15 +165,22 @@ def _rows_to_results(rows: list, is_fts: bool = False) -> list[SearchResult]:
     return [_row_to_result(row, is_fts) for row in rows]
 
 
-def _parse_row_sync(row: tuple, has_rank: bool) -> SearchResult:
-    """Parse a database row into a SearchResult (sync)."""
+def _parse_row_sync(row: Any, has_rank: bool) -> SearchResult:
+    """Parse a database row into a SearchResult (sync).
+
+    Sync Column order (minimal):
+      0: id, 1: content, 2: project, 3: fact_type, 4: confidence, 5: source, 6: tags, 7: rank
+    """
     try:
         tags = json.loads(row[6]) if row[6] else []
     except (json.JSONDecodeError, TypeError):
         tags = []
 
     if has_rank and len(row) > 7:
-        score = -row[7] if row[7] else 0.5
+        # Normalize bm25 rank synchronously too
+        import math
+        rank = row[7] if row[7] is not None else 0.0
+        score = 1.0 / (1.0 + math.exp(rank / 10.0))
     else:
         score = 0.5
 
@@ -176,7 +198,7 @@ def _parse_row_sync(row: tuple, has_rank: bool) -> SearchResult:
         source=row[5],  # type: ignore[reportGeneralTypeIssues]
         tags=tags,
         score=score,
-        valid_from="unknown",  # Sync rows often have fewer columns
+        valid_from="unknown",
         valid_until=None,
         created_at="unknown",
         updated_at="unknown",

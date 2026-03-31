@@ -168,13 +168,12 @@ def inspect(fact_id, db) -> None:
     engine = get_engine(db)
     try:
         from rich.panel import Panel
-        from rich.table import Table
 
         async def __inspect():
             # Content decryption handled by engine.retrieve
             fact = await engine.retrieve(fact_id)
             if not fact:
-                return None, None
+                return None
 
             # Load tags from bridge table
             conn = await engine.get_conn()
@@ -195,10 +194,11 @@ def inspect(fact_id, db) -> None:
 
             return fact, tags, status, error
 
-        fact, tags, status, error = _run_async(__inspect())
-        if not fact:
+        res = _run_async(__inspect())
+        if not res:
             err_fact_not_found(fact_id)
             return
+        fact, tags, status, error = res  # type: ignore[reportGeneralTypeIssues]
 
         info = Table.grid(padding=(0, 1))
         info.add_column(style="bold cyan", justify="right")
@@ -244,6 +244,7 @@ def inspect(fact_id, db) -> None:
         )
 
         console.print("\n[bold]Content:[/]")
+        console.print(fact.content)
 
     finally:
         _run_async(engine.close())

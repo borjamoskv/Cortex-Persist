@@ -19,6 +19,7 @@ from cortex.extensions.llm._audit import spectral_audit
 from cortex.extensions.llm._backoff import handle_429_backoff
 from cortex.extensions.llm._models import BaseProvider, CortexPrompt, IntentProfile
 from cortex.extensions.llm._presets import load_presets
+from cortex.extensions.llm._result_cache import ResultCache
 from cortex.extensions.llm._stealth import (
     apply_causal_jitter,
     prepare_stealth_headers,
@@ -32,6 +33,7 @@ logger = logging.getLogger("cortex.extensions.llm")
 
 _CONTENT_TYPE_JSON: Final[str] = "application/json"
 _QUOTA_MANAGER: SovereignQuotaManager | None = None
+_RESULT_CACHE: ResultCache | None = None
 
 
 def _get_quota_manager() -> SovereignQuotaManager:
@@ -40,6 +42,14 @@ def _get_quota_manager() -> SovereignQuotaManager:
     if _QUOTA_MANAGER is None:
         _QUOTA_MANAGER = SovereignQuotaManager()
     return _QUOTA_MANAGER
+
+
+def _get_result_cache() -> ResultCache:
+    """Lazily create the shared result cache."""
+    global _RESULT_CACHE
+    if _RESULT_CACHE is None:
+        _RESULT_CACHE = ResultCache()
+    return _RESULT_CACHE
 
 
 class LLMProvider(BaseProvider):
@@ -162,23 +172,31 @@ class LLMProvider(BaseProvider):
         intent: IntentProfile = IntentProfile.GENERAL,
     ) -> str:
         """Send a chat completion request. Returns the response text."""
+        model_name = self._resolve_model(intent)
+        payload: dict[str, Any] = {
+            "model": model_name,
+            "messages": [
+                {"role": "system", "content": system},
+                {"role": "user", "content": prompt},
+            ],
+            "temperature": temperature,
+            "max_tokens": max_tokens,
+        }
+
+        # Persistent Cache Check (Ω₂)
+        cache = _get_result_cache()
+        if cached := cache.get(payload):
+            return cached
+
         await _get_quota_manager().acquire(tokens=1)
         url, headers = self._prepare_request()
-        model_name = self._resolve_model(intent)
 
         current_system = system
         response_text = ""
 
         # Phase 1: Shadow Re-phrasing (Ω₂₃)
         for attempt in range(3):
-            payload = {
-                "model": model_name,
-                "messages": [
-                    {"role": "system", "content": current_system},
-                    {"role": "user", "content": prompt},
-                ],
-                "temperature": temperature,
-            }
+            payload["messages"][0]["content"] = current_system
             if model_name.startswith(("o1", "o3")):
                 payload["max_completion_tokens"] = max_tokens
                 payload.pop("temperature", None)
@@ -189,6 +207,7 @@ class LLMProvider(BaseProvider):
 
             # Spectral Audit check
             if spectral_audit(response_text):
+                cache.set(payload, response_text, provider=self._provider, model=model_name)
                 return response_text
 
             if attempt < 2:
@@ -203,6 +222,7 @@ class LLMProvider(BaseProvider):
                 )
                 await apply_causal_jitter(tokens_estimate=50)
 
+        cache.set(payload, response_text, provider=self._provider, model=model_name)
         return response_text
 
     async def _execute_completion(
@@ -298,6 +318,16 @@ class LLMProvider(BaseProvider):
                     async for chunk in self._process_stream_lines(response):
                         yield chunk
         except httpx.HTTPStatusError as e:
+            if e.response.status_code == 429:
+                # Fallback non-streaming call if throttled during stream start
+                # or handle backoff for the remaining stream (complex, using sequential for now)
+                logger.warning(
+                    "LLM Stream [429 Quota Exceeded] -> Falling back to resilient execution."
+                )
+                result = await handle_429_backoff(self, url, headers, payload, e)
+                yield result
+                return
+
             logger.error(
                 "LLM Stream Failure [%s]: %s",
                 self._provider,
@@ -338,12 +368,6 @@ class LLMProvider(BaseProvider):
 
     async def invoke(self, prompt: CortexPrompt) -> str:
         """Traduce el CortexPrompt al formato nativo del LLM y ejecuta la inferencia."""
-        await _get_quota_manager().acquire(tokens=1)
-        url, headers = self._prepare_request()
-
-        # Stealth Mode
-        headers = prepare_stealth_headers(headers)
-
         model_name = self._resolve_model(prompt.intent)
         messages = prompt.to_openai_messages()
 
@@ -353,18 +377,32 @@ class LLMProvider(BaseProvider):
             messages[0]["content"] += f"\n\n<!-- ctx:{noise_id} -->"
             messages[0]["content"] = (" " * random.randint(0, 2)) + messages[0]["content"]
 
-        payload = {
+        payload: dict[str, Any] = {
             "model": model_name,
             "messages": messages,
             "temperature": prompt.temperature,
         }
+
+        # Persistent Cache Check (Ω₂)
+        cache = _get_result_cache()
+        if cached := cache.get(payload):
+            return cached
+
+        await _get_quota_manager().acquire(tokens=1)
+        url, headers = self._prepare_request()
+
+        # Stealth Mode
+        headers = prepare_stealth_headers(headers)
+
         if model_name.startswith(("o1", "o3")):
             payload["max_completion_tokens"] = prompt.max_tokens
             payload.pop("temperature", None)
         else:
             payload["max_tokens"] = prompt.max_tokens
 
-        return await self._execute_completion(url, headers, payload, wrap_errors=True)
+        result = await self._execute_completion(url, headers, payload, wrap_errors=True)
+        cache.set(payload, result, provider=self._provider, model=model_name)
+        return result
 
     @property
     def model_name(self) -> str:

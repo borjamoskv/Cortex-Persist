@@ -78,21 +78,21 @@ class SovereignQuotaManager:
     def __init__(
         self,
         db_path: str = "~/.cortex/quota.db",
-        capacity: int = 5,
+        capacity: int = 10,
         refill_rate: float | None = None,
     ) -> None:
         self.db_path = Path(db_path).expanduser()
         self.capacity = float(capacity)
 
         # ── Protocolo PULMONES Conservative Refill ──
-        # Prioritize ENV > Explicit arg > 2 RPM Default
+        # Prioritize ENV > Explicit arg > 10 RPM Default
         env_max_rpm = os.environ.get("CORTEX_LLM_MAX_RPM")
         if env_max_rpm:
             self.refill_rate = float(env_max_rpm) / 60.0
         elif refill_rate is not None:
             self.refill_rate = float(refill_rate)
         else:
-            self.refill_rate = 2.0 / 60.0  # 2 RPM (0.033 t/s) — absolute stability
+            self.refill_rate = 10.0 / 60.0  # 10 RPM (0.166 t/s) — swarm baseline
 
         self._init_db()
 

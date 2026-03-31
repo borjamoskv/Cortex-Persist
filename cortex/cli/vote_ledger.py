@@ -43,13 +43,13 @@ def vote(fact_id, value, agent, db) -> None:
                     err_validation("value", "El voto debe ser 1 (verificar) o -1 (disputar)")
                     return
 
-                # Peso 10.0 para votos humanos
-                entry = await ledger.append_vote(fact_id, agent, value, 10.0)
+                # Peso 10.0 para votos humanos. Usando tenant_id default
+                entry_hash = await ledger.append_vote(fact_id, agent, str(value), "default", 10.0)
                 await conn.commit()
 
                 console.print(
                     f"[green]✓[/] El agente [bold]{agent}[/] votó {value} en el hecho [bold]#{fact_id}[/].\n"
-                    f"   [dim]Hash: {entry.hash[:16]}...[/]"
+                    f"   [dim]Hash: {entry_hash[:16]}...[/]"
                 )
         except (sqlite3.Error, OSError, ValueError, RuntimeError) as e:
             handle_cli_error(e, db_path=db, context="casting vote")

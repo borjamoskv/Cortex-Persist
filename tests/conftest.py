@@ -29,13 +29,13 @@ def mock_local_embedder(monkeypatch):
     class DummyEmbedder:
         def embed(self, content: str | list[str]) -> list[float] | list[list[float]]:
             if isinstance(content, str):
-                return [0.0] * 768
-            return [[0.0] * 768 for _ in content]
+                return [0.0] * 384
+            return [[0.0] * 384 for _ in content]
 
         async def aembed(self, content: str | list[str]) -> list[float] | list[list[float]]:
             if isinstance(content, str):
-                return [0.0] * 768
-            return [[0.0] * 768 for _ in content]
+                return [0.0] * 384
+            return [[0.0] * 384 for _ in content]
 
     from cortex.engine import CortexEngine
 

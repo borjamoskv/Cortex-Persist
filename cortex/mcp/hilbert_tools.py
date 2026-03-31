@@ -43,7 +43,7 @@ def register_hilbert_tools(mcp, ctx) -> None:  # type: ignore
 
         try:
             if attack == "conjectures":
-                from conjectures import run_all_conjectures
+                from conjectures import run_all_conjectures  # type: ignore[reportMissingImports]
 
                 results = run_all_conjectures()
                 lines = ["Hilbert-Ω Conjectures Report:\n"]
@@ -72,7 +72,9 @@ def register_hilbert_tools(mcp, ctx) -> None:  # type: ignore
                 return "\n".join(lines)
 
             elif attack == "millennium":
-                from millennium_assault import MillenniumAssaultEngine
+                from millennium_assault import (
+                    MillenniumAssaultEngine,  # type: ignore[reportMissingImports]
+                )
 
                 eng = MillenniumAssaultEngine()
                 await eng.run_global_assault()
@@ -89,7 +91,7 @@ def register_hilbert_tools(mcp, ctx) -> None:  # type: ignore
             elif attack == "prove":
                 if not problem:
                     return "❌ Specify a theorem name with 'problem' arg."
-                from hilbert_engine import attack_theorem
+                from hilbert_engine import attack_theorem  # type: ignore[reportMissingImports]
 
                 try:
                     from z3 import Ints

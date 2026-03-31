@@ -34,13 +34,14 @@ def scan(path: str, entropy: bool):
     if entropy:
 
         async def _get_entropy():
-            conn = await engine._get_conn()
-            # conn obtained for direct query below
-            # Stated or low confidence facts are considered entropy/calcification candidates
-            cursor = await conn.execute(
-                "SELECT count(*) FROM facts WHERE confidence IN ('stated', 'C3', 'C2', 'C1') AND is_tombstoned = 0"
-            )
-            return (await cursor.fetchone())[0]  # type: ignore[reportOptionalSubscript]
+            async with engine.session() as conn:
+                # conn obtained for direct query below
+                # Stated or low confidence facts are considered entropy/calcification candidates
+                cursor = await conn.execute(
+                    "SELECT count(*) FROM facts WHERE confidence IN ('stated', 'C3', 'C2', 'C1') AND is_tombstoned = 0"
+                )
+                res = await cursor.fetchone()
+                return res[0] if res else 0
 
         entropy_count = _run_async(_get_entropy())
 
@@ -87,10 +88,10 @@ def prune():
     console.print("[noir.gold]✂️ INICIANDO PODA SOBERANA (Protocolo Ω₂)...[/noir.gold]")
 
     async def _do_prune():
-        conn = await engine.get_conn()
-        # 1. Decalcify: apply decay logic and tombstone terminal entropy
-        count = await decalcifier.decalcify_cycle(conn)
-        return count
+        async with engine.session() as conn:
+            # 1. Decalcify: apply decay logic and tombstone terminal entropy
+            count = await decalcifier.decalcify_cycle(conn)
+            return count
 
     pruned_count = _run_async(_do_prune())
 
