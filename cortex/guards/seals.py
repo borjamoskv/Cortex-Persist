@@ -43,13 +43,17 @@ def _resolve_cmd(tool: str) -> str:
     return tool
 
 
-async def arun_cmd(cmd: list[str], cwd: Path = ROOT_DIR) -> tuple[int, str]:
+async def arun_cmd(
+    cmd: list[str], cwd: Path = ROOT_DIR, env: os._Environ[str] | None = None
+) -> tuple[int, str]:
     """Run a subprocess asynchronously and return (exit_code, output)."""
     resolved = [_resolve_cmd(cmd[0])] + cmd[1:]
+    actual_env = env or os.environ.copy()
     try:
         proc = await asyncio.create_subprocess_exec(
             *resolved,
             cwd=str(cwd),
+            env=actual_env,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.STDOUT,
         )
