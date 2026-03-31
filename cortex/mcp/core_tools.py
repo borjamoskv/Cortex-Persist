@@ -84,7 +84,7 @@ def _register_trace_chain_tool(mcp, ctx: _MCPContext) -> None:
         arrow = "↑" if direction == "up" else "↓"
         lines = [f"Causal Chain {arrow} from #{fact_id} ({len(chain)} nodes):\n"]
         for f in chain:
-            depth = getattr(f, "causal_depth", "?")
+            depth = f.causal_depth
             fid = f.id
             ftype = f.fact_type
             content = f.content[:60]
