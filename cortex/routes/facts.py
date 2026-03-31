@@ -156,9 +156,8 @@ async def list_all_facts(
     engine: AsyncCortexEngine = Depends(get_async_engine),
 ) -> list[FactResponse]:
     # Retrieve all active facts across projects (scoped to tenant).
-    facts = await engine.get_all_active_facts(tenant_id=auth.tenant_id)
-    if limit:
-        facts = facts[:limit]
+    facts = await engine.recall(project="", tenant_id=auth.tenant_id, limit=limit)
+
 
     return [
         FactResponse(
@@ -238,7 +237,7 @@ async def get_fact_history(
                 tags=f["tags"],
                 confidence=f.get("confidence", "C3"),
                 created_at=f["created_at"],
-                updated_at=f.get("updated_at"),
+                updated_at=f.get("updated_at") or f["created_at"],
                 hash=f.get("hash"),
                 tx_id=f.get("tx_id"),
             )
