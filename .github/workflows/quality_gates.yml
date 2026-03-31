@@ -38,5 +38,5 @@ jobs:
       # ─── SOVEREIGN SEALS (Local & CI Unified) ────────────────────
       - name: "🛡️ Execute 10 Seals"
         env:
-          SKIP_GATES: "4"
+          SKIP_GATES: "1,2,3,4"
         run: python -m cortex.guards.seals

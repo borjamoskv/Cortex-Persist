@@ -505,68 +505,50 @@ async def main() -> int:
         int(g.strip()) for g in os.environ.get("SKIP_GATES", "").split(",") if g.strip().isdigit()
     }
 
-    async def _skip_gate(gate_num: int, desc: str) -> bool:
-        printer.seal(gate_num, "SKIPPED", f"{desc} — skipped via SKIP_GATES")
-        printer.warn(f"Gate {gate_num} skipped (SKIP_GATES env).")
-        return True
+    async def _run_gate(number: int, label: str, runner) -> bool:
+        if number in _skip:
+            printer.seal(number, "SKIPPED", f"{label} — skipped via SKIP_GATES")
+            if number == 4:
+                printer.warn("Gate 4 skipped (SKIP_GATES env). Run 'pytest tests/' separately.")
+            else:
+                printer.warn(f"Gate {number} skipped (SKIP_GATES env).")
+            return True
+        return await runner()
 
-    async def _gate1() -> bool:
-        if 1 in _skip:
-            return await _skip_gate(1, "Lint")
-        return await check_gate_1_lint()
-
-    async def _gate2() -> bool:
-        if 2 in _skip:
-            return await _skip_gate(2, "Type Check")
-        return await check_gate_2_type()
-
-    async def _gate3() -> bool:
-        if 3 in _skip:
-            return await _skip_gate(3, "Security Scan")
-        return await check_gate_3_security()
-
-    async def _gate4() -> bool:
-        if 4 in _skip:
-            return await _skip_gate(4, "Tests")
-        return await check_gate_4_tests()
-
-    async def _gate6() -> bool:
-        if 6 in _skip:
-            return await _skip_gate(6, "Connection Guard")
-        return await check_gate_6_connection()
+    gate_runs = [
+        (1, "Lint", check_gate_1_lint),
+        (2, "Type Check", check_gate_2_type),
+        (3, "Security Scan", check_gate_3_security),
+        (4, "Tests", check_gate_4_tests),
+        (5, "Schema Initialization", check_gate_5_ledger),
+        (6, "Connection Guard", check_gate_6_connection),
+        (7, "Async Guard", check_gate_7_async),
+        (8, "LOC Guard", check_gate_8_loc),
+        (9, "Axiom Registry Sync", check_gate_9_registry),
+        (11, "Cobbler's Compliance", check_gate_11_cobbler),
+        (12, "Temperature Determinism", check_gate_12_determinism),
+        (13, "A-Record Latency", check_gate_13_latency),
+        (14, "Sovereign Aesthetic", check_gate_14_aesthetic),
+        (15, "Dependency Ghost Check", check_gate_15_dependency),
+        (16, "Byzantine Consensus", check_gate_16_byzantine),
+        (17, "Shannon Entropy Budget", check_gate_17_shannon),
+        (18, "Zero-Prompting Evolution", check_gate_18_evolution),
+        (19, "EU AI Act Audit", check_gate_19_eu_ai),
+        (20, "Industrial Noir Contrast", check_gate_20_noir),
+        (21, "Sovereign Self-Preservation", check_gate_21_preservation),
+    ]
 
     results = await asyncio.gather(
-        _gate1(),
-        _gate2(),
-        _gate3(),
-        _gate4(),
-        check_gate_5_ledger(),
-        _gate6(),
-        check_gate_7_async(),
-        check_gate_8_loc(),
-        check_gate_9_registry(),
-        check_gate_11_cobbler(),  # Seal 11: Cobbler's Compliance
-        check_gate_12_determinism(),
-        check_gate_13_latency(),
-        check_gate_14_aesthetic(),
-        check_gate_15_dependency(),
-        check_gate_16_byzantine(),
-        check_gate_17_shannon(),
-        check_gate_18_evolution(),
-        check_gate_19_eu_ai(),
-        check_gate_20_noir(),
-        check_gate_21_preservation(),
+        *(_run_gate(number, label, runner) for number, label, runner in gate_runs)
     )
     # Check gate 10 independently (it never fails the run)
     await check_gate_10_prompt_size()
 
     printer.head("SEALS SUMMARY")
-    failed = [i + 1 for i, r in enumerate(results) if not r]
-    # Remap index 10 → seal 11 in the summary
-    remapped = [11 if s == 10 else s for s in failed]
+    failed = [number for (number, _, _), passed in zip(gate_runs, results) if not passed]
 
-    if remapped:
-        printer.fail(f"SEALS BROKEN: {remapped}")
+    if failed:
+        printer.fail(f"SEALS BROKEN: {failed}")
         print("\nFix violations before pushing.")
         return 1
     else:
