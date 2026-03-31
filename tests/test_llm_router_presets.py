@@ -225,13 +225,15 @@ class TestRouterOrdering:
         """Same cost → frontier preferred over high."""
         from cortex.extensions.llm.router import CortexLLMRouter
 
-        # deepseek=low/frontier, groq=low/high (assuming groq defaults fit)
+        p1 = _providers["groq"]
+        p2 = _providers["deepseek"]
+        # Force same cost but different tiers, and same capabilities to ensure they sort together
+        p1._model_config = {"tier": "high", "cost_class": "low", "capabilities": ["code", "chat"]}
+        p2._model_config = {"tier": "frontier", "cost_class": "low", "capabilities": ["code", "chat"]}
+
         router = CortexLLMRouter(
             primary=_providers["gemini"],
-            fallbacks=[
-                _providers["groq"],
-                _providers["deepseek"],
-            ],
+            fallbacks=[p1, p2],
         )
         class MockPrompt:
             intent = IntentProfile.CODE

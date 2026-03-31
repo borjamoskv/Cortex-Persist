@@ -140,7 +140,7 @@ class SovereignVectorStoreL2:
                     quadrant TEXT DEFAULT 'ACTIVE',
                     storage_tier TEXT DEFAULT 'HOT',
                     facet_version INTEGER DEFAULT 2,
-                    exergy REAL DEFAULT 1.0
+                    exergy_score REAL DEFAULT 1.0
                 )
             """)
             if self._vector_enabled:
@@ -168,18 +168,22 @@ class SovereignVectorStoreL2:
                 ("quadrant", "TEXT DEFAULT 'ACTIVE'"),
                 ("storage_tier", "TEXT DEFAULT 'HOT'"),
                 ("facet_version", "INTEGER DEFAULT 2"),
-                ("exergy", "REAL DEFAULT 1.0"),
+                ("exergy_score", "REAL DEFAULT 1.0"),
             ]
-            for col, col_type in migrations:
-                # Table/Column names cannot be parameterized in SQLite.
-                # Validating col and col_type against strict allowlist.
-                if not all(c.isalnum() or c == "_" for c in (col, col_type)):
-                    continue
-                try:
-                    alter_query = f"ALTER TABLE facts_meta ADD COLUMN {col} {col_type}"
-                    self._conn.execute(alter_query)  # nosec B608
-                except sqlite3.OperationalError:
-                    pass  # Column already exists
+            
+            cursor = self._conn.execute("SELECT name FROM sqlite_master WHERE type='table' AND name LIKE 'facts_meta%'")
+            tables = [row[0] for row in cursor.fetchall()]
+
+            for tb in tables:
+                for col, col_type in migrations:
+                    # Validate col strictly to prevent SQL injection.
+                    if not all(c.isalnum() or c == "_" for c in col):
+                        continue
+                    try:
+                        alter_query = f"ALTER TABLE {tb} ADD COLUMN {col} {col_type}"
+                        self._conn.execute(alter_query)  # nosec B608
+                    except sqlite3.OperationalError:
+                        pass  # Column already exists
             self._conn.commit()
 
         # Initialize L2HybridSearch (FTS5 mirror) after conn is established
@@ -259,7 +263,7 @@ class SovereignVectorStoreL2:
                     cognitive_layer TEXT,
                     parent_decision_id TEXT,
                     metadata TEXT,
-                    exergy REAL DEFAULT 1.0
+                    exergy_score REAL DEFAULT 1.0
                 )
             """)  # nosec B608
             emb_def = f"embedding int8[{self._encoder.dimension}]"
@@ -271,12 +275,12 @@ class SovereignVectorStoreL2:
                 INSERT INTO {meta_tb} (
                     rowid, id, tenant_id, project_id, content, timestamp,
                     is_diamond, is_bridge, confidence, success_rate,
-                    cognitive_layer, parent_decision_id, metadata, exergy
+                    cognitive_layer, parent_decision_id, metadata, exergy_score
                 )
                 SELECT
                     rowid, id, tenant_id, project_id, content, timestamp,
                     is_diamond, is_bridge, confidence, success_rate,
-                    cognitive_layer, parent_decision_id, metadata, exergy
+                    cognitive_layer, parent_decision_id, metadata, exergy_score
                 FROM facts_meta
                 WHERE tenant_id = ? AND project_id = ? AND is_diamond = 1
             """,
@@ -343,11 +347,14 @@ class SovereignVectorStoreL2:
             ex = calculate_exergy(sanitized_content)
             if isinstance(fact.embedding, bytes):
                 return fact.embedding, ex
-            elif fact.embedding and isinstance(fact.embedding[0], float):
-                encoded_list = optimize_vector_qjl(fact.embedding, bits=3.5)
-                return np.array(encoded_list, dtype=np.int8).tobytes(), ex
-            else:
-                return np.array(fact.embedding, dtype=np.int8).tobytes(), ex
+            
+            emb_list = fact.embedding
+            if emb_list and isinstance(emb_list[0], float):
+                emb_list = optimize_vector_qjl(emb_list, bits=3.5)
+            
+            if sqlite_vec is not None and hasattr(sqlite_vec, "serialize_int8"):
+                return sqlite_vec.serialize_int8(emb_list), ex
+            return np.array(emb_list, dtype=np.int8).tobytes(), ex
 
         # Ouroboros V3: Offload CPU-heavy quantization and Python GIL Exergy text parsing
         embedding_bytes, exergy_val = await asyncio.to_thread(_offloaded_computations)
@@ -361,7 +368,7 @@ class SovereignVectorStoreL2:
                     INSERT INTO {meta_tb} (
                         id, tenant_id, project_id, content, timestamp,
                         is_diamond, is_bridge, confidence, success_rate,
-                        cognitive_layer, parent_decision_id, metadata, exergy
+                        cognitive_layer, parent_decision_id, metadata, exergy_score
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
@@ -463,13 +470,13 @@ class SovereignVectorStoreL2:
                     SELECT
                         m.rowid, m.id, m.tenant_id, m.project_id, m.content, m.timestamp,
                         m.is_diamond, m.is_bridge, m.confidence, m.success_rate,
-                        m.cognitive_layer, m.parent_decision_id, m.metadata, m.exergy,
+                        m.cognitive_layer, m.parent_decision_id, m.metadata, m.exergy_score,
                         v.embedding,
                         (1.0 - vec_distance_cosine(v.embedding, ?) / 2.0) as base_similarity,
                         ((1.0 - vec_distance_cosine(v.embedding, ?) / 2.0) *
                          cortex_decay(m.is_diamond, m.timestamp, ?, ?) *
                          m.success_rate *
-                         m.exergy) as final_score
+                         m.exergy_score) as final_score
                     FROM {meta_tb} m
                     JOIN {vec_tb} v ON m.rowid = v.rowid
                     WHERE m.tenant_id = ? AND (m.project_id = ? OR m.is_bridge = 1)
