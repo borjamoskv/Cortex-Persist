@@ -169,7 +169,7 @@ class TestLLMProviderProperties:
         from cortex.extensions.llm.provider import LLMProvider
 
         p = LLMProvider(provider="qwen")
-        assert p.tier == "high"
+        assert p.tier == "frontier"
         assert p.cost_class == "low"
 
     def test_gemini_is_frontier(self):
