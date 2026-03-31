@@ -122,9 +122,7 @@ class Supervisor:
         if entry is None:
             raise KeyError(f"Entity '{entity_id}' not registered")
         if entry.task is not None and not entry.task.done():
-            raise RuntimeError(
-                f"Entity '{entity_id}' is still running — stop it first"
-            )
+            raise RuntimeError(f"Entity '{entity_id}' is still running — stop it first")
         del self._managed[entity_id]
         logger.info("Supervisor[%s]: Unregistered '%s'", self._id, entity_id)
 
@@ -177,9 +175,7 @@ class Supervisor:
         """Start a specific managed entity."""
         entry = self._get_entry(entity_id)
         if entry.task is not None and not entry.task.done():
-            logger.warning(
-                "Supervisor[%s]: '%s' already running", self._id, entity_id
-            )
+            logger.warning("Supervisor[%s]: '%s' already running", self._id, entity_id)
             return
 
         entry.task = await entry.entity.start()
@@ -189,9 +185,7 @@ class Supervisor:
         """Gracefully stop a specific managed entity."""
         entry = self._get_entry(entity_id)
         if entry.task is None or entry.task.done():
-            logger.warning(
-                "Supervisor[%s]: '%s' not running", self._id, entity_id
-            )
+            logger.warning("Supervisor[%s]: '%s' not running", self._id, entity_id)
             return
 
         await entry.entity.stop()
@@ -201,8 +195,7 @@ class Supervisor:
             await asyncio.wait_for(entry.task, timeout=5.0)
         except asyncio.TimeoutError:
             logger.warning(
-                "Supervisor[%s]: '%s' did not stop gracefully, "
-                "force-cancelling",
+                "Supervisor[%s]: '%s' did not stop gracefully, force-cancelling",
                 self._id,
                 entity_id,
             )
@@ -293,9 +286,7 @@ class Supervisor:
             except asyncio.CancelledError:
                 break
             except Exception as exc:  # noqa: BLE001
-                logger.error(
-                    "Supervisor[%s]: Health monitor error: %s", self._id, exc
-                )
+                logger.error("Supervisor[%s]: Health monitor error: %s", self._id, exc)
 
     async def health_check(self) -> dict[str, Any]:
         """Run health check on all entities. Auto-restart failed ones."""
@@ -337,10 +328,7 @@ class Supervisor:
             "id": self._id,
             "status": self.status.value,
             "managed_count": len(self._managed),
-            "children": {
-                eid: entry.entity.status.value
-                for eid, entry in self._managed.items()
-            }
+            "children": {eid: entry.entity.status.value for eid, entry in self._managed.items()},
         }
 
     @property

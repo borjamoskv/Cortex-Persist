@@ -41,11 +41,8 @@ async def test_reddit_agent_tool_activation():
         payload={
             "task_id": "1234",
             "objective": "Execute a reddit_post about CORTEX",
-            "input": {
-                "subreddit": "LocalLLaMA",
-                "title": "CORTEX Launch"
-            }
-        }
+            "input": {"subreddit": "LocalLLaMA", "title": "CORTEX Launch"},
+        },
     )
 
     await agent.handle_message(msg)

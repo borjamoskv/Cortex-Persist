@@ -259,9 +259,7 @@ class AsyncCortexEngine(
                 await self._conn.enable_load_extension(False)
             except (OSError, AttributeError, Exception) as e:  # noqa: BLE001
                 log = logging.getLogger("cortex")
-                log.debug(
-                    "sqlite-vec extension not available: %s", e
-                )
+                log.debug("sqlite-vec extension not available: %s", e)
                 self._vec_available = False
 
             # Ensure memory subsystem is initialized (L1/L2/L3)
@@ -310,17 +308,12 @@ class AsyncCortexEngine(
             # We are not in an async loop, run on main thread safely
             try:
                 # Wrap with wait_for to prevent infinite blocks
-                return asyncio.run(
-                    asyncio.wait_for(coro, timeout=timeout_sec)
-                )
+                return asyncio.run(asyncio.wait_for(coro, timeout=timeout_sec))
             except asyncio.TimeoutError as err:
                 logger.error(
-                    "[%s] Sync wrapper timeout (MainThread)! Deadlock?",
-                    self.__class__.__name__
+                    "[%s] Sync wrapper timeout (MainThread)! Deadlock?", self.__class__.__name__
                 )
-                raise TimeoutError(
-                    "CORTEX Engine sync-to-async bridge timed out."
-                ) from err
+                raise TimeoutError("CORTEX Engine sync-to-async bridge timed out.") from err
 
         result = None
         exception = None
@@ -338,10 +331,7 @@ class AsyncCortexEngine(
         t.join(timeout=timeout_sec + 1.0)  # P0: Provide 1s buffer to allow wait_for to fail first
 
         if t.is_alive():
-            logger.error(
-                "[%s] Sync wrapper timeout! Thread deadlocked?",
-                self.__class__.__name__
-            )
+            logger.error("[%s] Sync wrapper timeout! Thread deadlocked?", self.__class__.__name__)
             raise TimeoutError("CORTEX Engine sync-to-async bridge timed out.")
         if exception:
             raise exception
@@ -561,10 +551,7 @@ class AsyncCortexEngine(
         # Note: export_snapshot itself might be sync/blocking, consider if it needs move or refactor
         from cortex.extensions.sync.snapshot import export_snapshot
 
-        return export_snapshot(
-            self,
-            out_path
-        )  # type: ignore[reportArgumentType,reportReturnType]
+        return export_snapshot(self, out_path)  # type: ignore[reportArgumentType,reportReturnType]
 
     def _row_to_fact(
         self,
@@ -587,9 +574,7 @@ class AsyncCortexEngine(
                     timeout=5.0,
                 )
             except (asyncio.TimeoutError, Exception):  # noqa: BLE001
-                logger.debug(
-                    "Memory manager background drain timed out — forcing close"
-                )
+                logger.debug("Memory manager background drain timed out — forcing close")
             self._memory_manager = None
         if self._persistence:
             await self._persistence.stop()

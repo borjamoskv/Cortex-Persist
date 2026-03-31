@@ -50,14 +50,11 @@ from cortex.shannon.sentinel import SovereignResult
 
 __all__ = ["SovereignLLM", "SovereignResult", "Inquisitor"]
 
-logger = logging.getLogger(
-    "cortex.extensions.llm.sovereign"
-)
+logger = logging.getLogger("cortex.extensions.llm.sovereign")
 
 # Default signature for template fallback — override via constructor
 _DEFAULT_SIGNATURE = (
-    "---\nby borjamoskv.com | MOSKV Systems\n"
-    "Sovereign Architecture · Industrial Noir 2026"
+    "---\nby borjamoskv.com | MOSKV Systems\nSovereign Architecture · Industrial Noir 2026"
 )
 
 # Ordered by: cost-efficiency → reliability → speed
@@ -156,13 +153,10 @@ class SovereignLLM:
         # ── Layer 0: Silicon JIT (Neural Crystallization) ─────
         # If the action has been 'baked' into a PeARL crystal, execute it O(1).
         # We use the intent/action as the lookup key.
-        action_key = (
-            intent.name if isinstance(intent, IntentProfile) else str(intent)
-        )
+        action_key = intent.name if isinstance(intent, IntentProfile) else str(intent)
         crystal = CrystalRegistry.get_crystal(action_key)
         if crystal:
-            logger.info("💎 [SILICON-JIT] Executing PeARL Crystal: %s",
-                        action_key)
+            logger.info("💎 [SILICON-JIT] Executing PeARL Crystal: %s", action_key)
             start = time.monotonic()
             try:
                 # We assume Crystals take **kwargs matching context/prompt needs
@@ -177,11 +171,7 @@ class SovereignLLM:
                     fallback_chain=["jit"],
                 )
             except Exception as e:
-                logger.error(
-                    "Silicon JIT Execution Failed for %s: %s",
-                    action_key,
-                    e
-                )
+                logger.error("Silicon JIT Execution Failed for %s: %s", action_key, e)
 
         # ── Layer 1: ThoughtOrchestra (if available) ──────────
         if self._use_orchestra:
@@ -397,10 +387,7 @@ class SovereignLLM:
             try:
                 await provider.close()
             except (OSError, ValueError) as e:
-                logger.debug(
-                    "Error closing provider: %s",
-                    e
-                )
+                logger.debug("Error closing provider: %s", e)
         self._providers_cache.clear()
 
 
@@ -435,11 +422,7 @@ class Inquisitor(SovereignLLM):
             "No seas amable. No des sugerencias amigables. Sé letal."
         )
 
-    async def asediar(
-        self,
-        content: str,
-        original_prompt: str = ""
-    ) -> SovereignResult:
+    async def asediar(self, content: str, original_prompt: str = "") -> SovereignResult:
         """Somete el contenido a asedio adversario."""
         prompt = (
             f"=== CONTEXTO ORIGINAL ===\n{original_prompt}\n\n"

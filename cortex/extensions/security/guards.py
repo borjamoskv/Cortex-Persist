@@ -43,6 +43,7 @@ def is_private_ip(host: str) -> bool:
     except ValueError:
         # It's a hostname, not an IP — resolve it
         import socket
+
         try:
             resolved = socket.getaddrinfo(host, None, socket.AF_UNSPEC)
             for _, _, _, _, sockaddr in resolved:

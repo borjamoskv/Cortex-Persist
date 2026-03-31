@@ -122,9 +122,7 @@ class RedditAgent(BaseAgent):
                 await self.bus.send(verification_request)
                 return
 
-            await self._request_handoff(
-                message, task, reason="unsupported_objective"
-            )
+            await self._request_handoff(message, task, reason="unsupported_objective")
 
         except Exception as exc:
             logger.exception("Reddit Agent failed task")
@@ -138,9 +136,7 @@ class RedditAgent(BaseAgent):
     async def _handle_verification_result(self, message: AgentMessage) -> None:
         ctx = self.memory.scratchpad.pop(message.correlation_id, None)
         if not ctx:
-            self.state.record_error(
-                f"No context for correlation_id {message.correlation_id}."
-            )
+            self.state.record_error(f"No context for correlation_id {message.correlation_id}.")
             return
 
         original_message: AgentMessage = ctx["original_message"]
@@ -159,9 +155,7 @@ class RedditAgent(BaseAgent):
                 return
 
             if verdict.verdict == "needs_handoff":
-                await self._request_handoff(
-                    original_message, task, reason="verification_uncertain"
-                )
+                await self._request_handoff(original_message, task, reason="verification_uncertain")
                 return
 
             await self._fail_task(

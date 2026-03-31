@@ -28,7 +28,6 @@ except ImportError:
     MemoryOS = None  # type: ignore
 
 
-
 try:
     from cortex.extensions.security.tenant import get_tenant_id
 except ImportError:

@@ -86,6 +86,7 @@ class MacLaunchDaemon:
 
         # TCC Diagnostic
         from cortex.extensions.daemon.tcc_helper import check_folder_access
+
         if not check_folder_access(Path.home() / "Desktop"):
             click.secho(
                 "\n[!] TCC WARNING: Daemon is blocked from accessing folders.",
