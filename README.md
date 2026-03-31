@@ -1,21 +1,32 @@
 # CORTEX Persist
 
-Tamper-evident memory, audit trails, and verifiable lineage for AI agents.
+**Tamper-evident memory and decision lineage for AI agents.**
 
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
-[![CI](https://github.com/borjamoskv/cortex/actions/workflows/ci.yml/badge.svg)](https://github.com/borjamoskv/cortex/actions)
+[![CI](https://github.com/borjamoskv/Cortex-Persist/actions/workflows/ci.yml/badge.svg)](https://github.com/borjamoskv/Cortex-Persist/actions)
 
-CORTEX is a middleware layer that enforces cryptographic integrity on top of existing AI memory stores (Mem0, Zep, Custom). It ensures that once an autonomous agent reads context or makes a decision, that state cannot be silently altered.
+CORTEX is trust infrastructure for AI agents.
 
-## Mechanics
+It sits between your runtime and your memory layer, making facts, decisions, and derived state tamper-evident. If stored context changes after the fact, verification fails. If you need to explain what an agent knew, when it knew it, and what it did next, CORTEX gives you a cryptographic trail instead of an anecdote.
 
-- **Append-only ledger:** Immutable storage backed by SQLite or AlloyDB.
-- **Cryptographic seals:** SHA-256 hash chains per memory record.
-- **State verification:** Merkle tree checkpoints for batch integrity proofs.
-- **Compliance export:** Deterministic audit reports for regulated workflows.
+Built for autonomous systems that need more than "the model said so."
 
-## 90-Second Demo
+## Why CORTEX
+
+LLMs do not produce trustworthy state by default.
+
+Once an agent reads context, stores memory, calls tools, or makes a decision, that state can drift, be overwritten, or be silently mutated by downstream systems. CORTEX adds a cryptographic evidence layer on top of your existing memory stack so that important state becomes verifiable instead of anecdotal.
+
+## What it does
+
+- **Tamper-evident memory:** append-only ledger for facts, decisions, and state transitions.
+- **Hash-linked records:** SHA-256 chaining across stored entries.
+- **Batch integrity proofs:** Merkle checkpoints for efficient verification at scale.
+- **Deterministic audit exports:** reproducible evidence for internal review and regulated workflows.
+- **Drop-in positioning:** works on top of existing memory stores instead of replacing your stack.
+
+## 90-second demo
 
 ```bash
 # 1. Start the ledger
@@ -29,7 +40,7 @@ $ cortex memory store --agent "risk-bot" --content "Transaction flagged: IP mism
 $ cortex verify record 8f4a2b9e
 [✔] VERIFIED: Hash chain intact. Merkle root sealed.
 
-# 4. Tamper attempt (Direct DB mutation)
+# 4. Tamper attempt (direct DB mutation)
 $ sqlite3 cortex.db "UPDATE facts SET content='Transaction approved' WHERE id='8f4a2b9e'"
 
 # 5. Ledger verification
@@ -40,6 +51,14 @@ $ cortex verify ledger
 $ cortex compliance-report generate --format pdf
 ```
 
+## Use cases
+
+- **Autonomous agents:** prove what an agent knew when it made a decision.
+- **Multi-agent systems:** trace state propagation across agents and workflows.
+- **Compliance-heavy environments:** produce audit trails for finance, security, and regulated operations.
+- **Post-incident forensics:** detect silent mutation, tampering, or replayed state.
+- **Trust-sensitive AI products:** ship memory with evidence, not vibes.
+
 ## Integration
 
 CORTEX wraps your existing state management. It does not replace your embeddings or vector search.
@@ -48,44 +67,50 @@ CORTEX wraps your existing state management. It does not replace your embeddings
 import asyncio
 from cortex import CortexEngine
 
-async def main():
+
+async def main() -> None:
     engine = CortexEngine()
-    
-    # Write to tamper-evident ledger
+
     receipt = await engine.store_fact(
         content="User approved transaction $5,000",
         fact_type="decision",
         project="fin-fraud-bot",
-        tenant_id="customer-123"
+        tenant_id="customer-123",
     )
-    
-    # Cryptographic proof verification
-    assert await engine.verify(receipt.hash) == True
+
+    assert await engine.verify(receipt.hash) is True
+
 
 asyncio.run(main())
 ```
 
 ## Performance
 
-*Typical execution on standard cloud instance (4 vCPU, 16GB RAM).*
+*Typical execution on a standard cloud instance (4 vCPU, 16 GB RAM).*
 
 | Operation | Median | P95 | Notes |
-|:---|:---|:---|:---|
+| --- | --- | --- | --- |
 | Memory write | ~18 ms | ~35 ms | Local SQLite + SHA-256 hashing |
-| Verify record | ~5 ms | ~12 ms | Single block hash validation |
+| Verify record | ~5 ms | ~12 ms | Single-block hash validation |
 | Merkle checkpoint | ~85 ms | ~140 ms | Aggregating 10k records |
-| Report export | ~400 ms | ~800 ms | Lineage traversal & PDF generation |
+| Report export | ~400 ms | ~800 ms | Lineage traversal and PDF generation |
 
 ## Architecture
 
-CORTEX integrates as a standard Python SDK or a standalone REST/MCP gateway.
+CORTEX integrates as a Python SDK or a standalone REST/MCP gateway.
 
 ```text
-[ Agent Framework ] -> [ CORTEX Gateway ] -> [ Target Memory Store ]
-                            │
-                            ├─ SHA-256 Hash Chaining
-                            ├─ Merkle Checkpoints
-                            └─ Cryptographic Verification
+[ Agent Runtime / Workflow Engine ]
+                │
+                ▼
+[ CORTEX Persist ]
+  ├─ append-only ledger
+  ├─ hash chaining
+  ├─ Merkle checkpoints
+  └─ verification / audit export
+                │
+                ▼
+[ SQLite / AlloyDB / Existing Memory Store ]
 ```
 
 ## Documentation
