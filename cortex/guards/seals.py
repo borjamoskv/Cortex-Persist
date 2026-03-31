@@ -27,7 +27,6 @@ from cortex.guards.sovereign_seals import (
     check_gate_21_preservation,
 )
 
-
 printer = SealPrinter()
 ROOT_DIR = Path(__file__).resolve().parents[2]
 
