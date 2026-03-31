@@ -482,10 +482,18 @@ async def main() -> int:
     # Pre-cache all Python files into memory concurrently.
     await GlobalSourceCache.load()
 
-    # SKIP_GATES: comma-separated gate numbers to skip (e.g. SKIP_GATES=1,2,4)
+    # ── Bifurcated Quality Gate (Axiom Ω₂) ──
+    # SKIP_GATES: comma-separated gate numbers to skip
     _skip = {
         int(g.strip()) for g in os.environ.get("SKIP_GATES", "").split(",") if g.strip().isdigit()
     }
+
+    is_ci = os.environ.get("CI") == "1" or os.environ.get("CORTEX_FULL_SEALS") == "1"
+    if not is_ci:
+        if 4 not in _skip:
+            printer.warn("Ω₂ EXERGY PRESERVATION: Running in FAST MODE.")
+            printer.warn("Heavy integration tests (Gate 4) are SKIPPED. Delegated to remote CI.")
+            _skip.add(4)
     fail_fast = os.environ.get("FAIL_FAST", "").strip() in ("1", "true", "yes")
 
     # Build gate callables

@@ -185,7 +185,7 @@
       "reasoning": "x-ai/grok-2",
       "creative":  "anthropic/claude-3.5-sonnet",
       "architect": "x-ai/grok-2",
-      "general":   "google/gemini-2.0-flash-001"
+      "general":   "google/gemini-2.5-pro"
     }
   },
   "groq": {
