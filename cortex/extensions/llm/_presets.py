@@ -101,21 +101,23 @@ def provider_inventory(active_provider: str | None = None) -> list[dict[str, Any
             ready = False
             reason = f"Missing env var: {env_key}"
 
-        inventory.append({
-            "name": name,
-            "provider": name,
-            "tier": config.get("tier", "high"),
-            "is_local": is_local,
-            "cost_class": config.get("cost_class", "medium"),
-            "context_window": config.get("context_window", 0),
-            "default_model": config.get("default_model", ""),
-            "active": name == active_provider,
-            "ready": ready,
-            "status": status,
-            "reason": reason,
-            "api_key_required": api_key_required,
-            "api_key_present": api_key_present,
-        })
+        inventory.append(
+            {
+                "name": name,
+                "provider": name,
+                "tier": config.get("tier", "high"),
+                "is_local": is_local,
+                "cost_class": config.get("cost_class", "medium"),
+                "context_window": config.get("context_window", 0),
+                "default_model": config.get("default_model", ""),
+                "active": name == active_provider,
+                "ready": ready,
+                "status": status,
+                "reason": reason,
+                "api_key_required": api_key_required,
+                "api_key_present": api_key_present,
+            }
+        )
     return inventory
 
 
@@ -152,7 +154,7 @@ def resolve_context_window(provider: str, model_name: str) -> int:
             return int(meta["context_window"])
         if isinstance(meta, (int, float)):
             return int(meta)
-    
+
     return int(info.get("context_window", 0))
 
 

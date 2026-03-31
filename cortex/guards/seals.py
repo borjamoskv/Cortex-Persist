@@ -317,10 +317,22 @@ async def check_seal_6_async_perf() -> GateResult:
     # ── Async Guard (No time.sleep) ──
     _ASYNC_EXCLUDE_FILES = frozenset(
         [
-            "seals.py", "reactor.py", "antipatterns.py", "_scanner_visitors.py",
-            "registry.py", "legion.py", "legion_vectors.py", "demo_swarm.py",
-            "demo_bicameral.py", "network.py", "fiat_oracle.py", "mouse.py",
-            "dashboard_cmds.py", "health_cmds.py", "ouroboros_omega.py", "oracle.py",
+            "seals.py",
+            "reactor.py",
+            "antipatterns.py",
+            "_scanner_visitors.py",
+            "registry.py",
+            "legion.py",
+            "legion_vectors.py",
+            "demo_swarm.py",
+            "demo_bicameral.py",
+            "network.py",
+            "fiat_oracle.py",
+            "mouse.py",
+            "dashboard_cmds.py",
+            "health_cmds.py",
+            "ouroboros_omega.py",
+            "oracle.py",
         ]
     )
     sleep_violations = []
@@ -519,6 +531,7 @@ async def main() -> int:
                 printer.fail(f"FAIL-FAST: Seal {gate_num} failed. Aborting.")
                 break
     else:
+
         async def _run(gn: int) -> tuple[int, GateResult]:
             return gn, await _timed_gate(gn, gate_fns[gn])
 
@@ -534,10 +547,7 @@ async def main() -> int:
     skipped = [gn for gn, (_, k) in gate_results.items() if k == "skipped"]
     failed = [gn for gn, (p, k) in gate_results.items() if not p]
 
-    print(
-        f"   🟢 VERIFIED: {len(verified)}  "
-        f"🟡 SKIPPED: {len(skipped)}  🔴 FAILED: {len(failed)}"
-    )
+    print(f"   🟢 VERIFIED: {len(verified)}  🟡 SKIPPED: {len(skipped)}  🔴 FAILED: {len(failed)}")
     print(f"   ⏱  Total: {total_elapsed:.0f}ms")
 
     if failed:

@@ -175,7 +175,7 @@ class LLMProvider(BaseProvider):
                 "model": model_name,
                 "messages": [
                     {"role": "system", "content": current_system},
-                    {"role": "user", "content": prompt}
+                    {"role": "user", "content": prompt},
                 ],
                 "temperature": temperature,
             }
@@ -186,7 +186,7 @@ class LLMProvider(BaseProvider):
                 payload["max_tokens"] = max_tokens
 
             response_text = await self._execute_completion(url, headers, payload, wrap_errors=False)
-            
+
             # Spectral Audit check
             if spectral_audit(response_text):
                 return response_text
@@ -197,8 +197,10 @@ class LLMProvider(BaseProvider):
                 )
                 # Use SHA256 for security compliance (AX-021)
                 noise = hashlib.sha256(f"{time.time()}-{attempt}".encode()).hexdigest()[:6]
-                current_system = f"{system}\n\n[Sovereign-UUID: {noise}]\n" \
-                                 "Mandato: Prohibida la prosa decorativa. Ejecuta directamente."
+                current_system = (
+                    f"{system}\n\n[Sovereign-UUID: {noise}]\n"
+                    "Mandato: Prohibida la prosa decorativa. Ejecuta directamente."
+                )
                 await apply_causal_jitter(tokens_estimate=50)
 
         return response_text
@@ -211,21 +213,23 @@ class LLMProvider(BaseProvider):
         except httpx.HTTPStatusError as e:
             if e.response.status_code == 429:
                 return await handle_429_backoff(self, url, headers, payload, e)
-            
+
             logger.error(
                 "LLM API Failure [%s %s]: %s",
-                e.response.status_code, self._provider, e.response.text[:500]
+                e.response.status_code,
+                self._provider,
+                e.response.text[:500],
             )
             if wrap_errors:
                 from cortex.utils.errors import CortexError
-                raise CortexError(
-                    f"HTTP {e.response.status_code} from {self._provider}"
-                ) from e
+
+                raise CortexError(f"HTTP {e.response.status_code} from {self._provider}") from e
             raise
         except (KeyError, IndexError, json.JSONDecodeError) as e:
             logger.error("LLM Parse Error [%s]: %s", self._provider, e)
             if wrap_errors:
                 from cortex.utils.errors import CortexError
+
                 raise CortexError(f"Unexpected JSON format from {self._provider}") from e
             raise ValueError(f"Unexpected response format from {self._provider}") from e
 
@@ -265,7 +269,7 @@ class LLMProvider(BaseProvider):
         """Stream a chat completion request. Yields text chunks."""
         await _get_quota_manager().acquire(tokens=1)
         url, headers = self._prepare_request()
-        
+
         # Apply Stealth Mode headers
         headers = prepare_stealth_headers(headers)
 
@@ -339,7 +343,7 @@ class LLMProvider(BaseProvider):
 
         # Stealth Mode
         headers = prepare_stealth_headers(headers)
-        
+
         model_name = self._resolve_model(prompt.intent)
         messages = prompt.to_openai_messages()
 

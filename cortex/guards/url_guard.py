@@ -21,14 +21,14 @@ logger = logging.getLogger("cortex.guards.url_guard")
 
 # Private IP ranges (RFC 1918, etc.) to block
 _PRIVATE_NETWORKS = [
-    ipaddress.ip_network("127.0.0.0/8"),    # IPv4 loopback
-    ipaddress.ip_network("10.0.0.0/8"),     # RFC 1918
+    ipaddress.ip_network("127.0.0.0/8"),  # IPv4 loopback
+    ipaddress.ip_network("10.0.0.0/8"),  # RFC 1918
     ipaddress.ip_network("172.16.0.0/12"),  # RFC 1918
-    ipaddress.ip_network("192.168.0.0/16"), # RFC 1918
-    ipaddress.ip_network("169.254.0.0/16"), # IPv4 link-local
-    ipaddress.ip_network("::1/128"),        # IPv6 loopback
-    ipaddress.ip_network("fe80::/10"),      # IPv6 link-local
-    ipaddress.ip_network("fc00::/7"),       # IPv6 unique local addr
+    ipaddress.ip_network("192.168.0.0/16"),  # RFC 1918
+    ipaddress.ip_network("169.254.0.0/16"),  # IPv4 link-local
+    ipaddress.ip_network("::1/128"),  # IPv6 loopback
+    ipaddress.ip_network("fe80::/10"),  # IPv6 link-local
+    ipaddress.ip_network("fc00::/7"),  # IPv6 unique local addr
 ]
 
 _ALLOWED_SCHEMES = {"http", "https"}

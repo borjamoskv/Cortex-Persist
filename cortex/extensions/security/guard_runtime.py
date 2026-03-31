@@ -187,7 +187,7 @@ def enforce_guard_pipeline(guards: list[BaseGuard], context: dict[str, Any]) -> 
         except Exception as e:
             if guard.required:
                 logger.critical("🔥 [GUARD CRASH] Mandatory guard %s failed: %s", guard.name, e)
-                raise RuntimeError(f"FAIL-CLOSED: Mandatory guard {guard.name} crashed: {e}")
+                raise RuntimeError(f"FAIL-CLOSED: Mandatory guard {guard.name} crashed: {e}") from e
             logger.error("⚠️ [GUARD ERROR] Optional guard %s failed: %s", guard.name, e)
 
     return outcomes

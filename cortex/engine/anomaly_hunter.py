@@ -80,9 +80,7 @@ class AnomalyHunterEngine:
         # Recall relevant facts from history across tracked projects
         recent_raw_facts = await self.cortex.history(project="anomaly-hunter")
         # recent_raw_facts is now list[Fact] thanks to the update in CortexEngine
-        recent_facts = [
-            f for f in recent_raw_facts if (f.created_at or "") > time_filter
-        ]
+        recent_facts = [f for f in recent_raw_facts if (f.created_at or "") > time_filter]
 
         if not recent_facts:
             # Amplio la busqueda de manera dummy para el ejemplo
@@ -118,12 +116,8 @@ class AnomalyHunterEngine:
                 if not cause_time_str:
                     continue
 
-                cause_ts = datetime.fromisoformat(
-                    cause_time_str.replace("Z", "+00:00")
-                )
-                effect_ts = datetime.fromisoformat(
-                    fact.created_at.replace("Z", "+00:00")
-                )
+                cause_ts = datetime.fromisoformat(cause_time_str.replace("Z", "+00:00"))
+                effect_ts = datetime.fromisoformat(fact.created_at.replace("Z", "+00:00"))
 
                 if cause_ts > effect_ts:
                     inversions.append(
@@ -136,8 +130,7 @@ class AnomalyHunterEngine:
                                 f"Delta: {(cause_ts - effect_ts).seconds}s"
                             ),
                             suggested_action=(
-                                "Verificar timestamps de ambos hechos. "
-                                "Posible error de registro."
+                                "Verificar timestamps de ambos hechos. Posible error de registro."
                             ),
                         )
                     )
@@ -232,8 +225,6 @@ class AnomalyHunterEngine:
             "total_anomalies": len(self.anomalies),
             "by_type": by_type,
             "high_severity": sum(1 for a in self.anomalies if a.severity == "HIGH"),
-            "verification_tasks_created": sum(
-                1 for a in self.anomalies if a.severity == "HIGH"
-            ),
+            "verification_tasks_created": sum(1 for a in self.anomalies if a.severity == "HIGH"),
             "memory_health_score": max(0, 100 - len(self.anomalies) * 5),
         }

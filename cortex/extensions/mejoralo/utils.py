@@ -62,16 +62,13 @@ def get_test_cmd(stack: str) -> list[str] | None:
 def run_quiet(cmd: list[str]) -> tuple[int, str, str]:
     """Run command without noise. Enforces path validation."""
     from cortex.core.paths import is_safe_path
+
     if not cmd or not is_safe_path(cmd[0]):
         msg = f"Prohibida la ejecución de comando inseguro: {cmd[0] if cmd else 'None'}"
         raise ValueError(msg)
 
     import subprocess  # nosec B404
-    p = subprocess.Popen(
-        cmd,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True
-    )  # nosec B603
+
+    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)  # nosec B603
     stdout, stderr = p.communicate()
     return p.returncode, stdout, stderr

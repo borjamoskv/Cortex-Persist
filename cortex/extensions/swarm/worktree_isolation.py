@@ -38,9 +38,7 @@ async def isolated_worktree(
     base_dir.mkdir(parents=True, exist_ok=True)
 
     safe_name = branch_name.replace("/", "_").replace("\\", "_")
-    worktree_path = Path(
-        tempfile.mkdtemp(prefix=f"wt_{safe_name}_", dir=str(base_dir))
-    )
+    worktree_path = Path(tempfile.mkdtemp(prefix=f"wt_{safe_name}_", dir=str(base_dir)))
 
     try:
         (worktree_path / ".git").write_text("gitdir: .git/worktrees\n", encoding="utf-8")

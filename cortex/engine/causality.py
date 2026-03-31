@@ -266,7 +266,9 @@ class AsyncCausalGraph:
             chunk = all_nodes_list[start : start + chunk_size]
             placeholders = ",".join(["?"] * len(chunk))
             if meta_col:
-                fact_sql = f"SELECT id, confidence, {meta_col} FROM facts WHERE id IN ({placeholders})"
+                fact_sql = (
+                    f"SELECT id, confidence, {meta_col} FROM facts WHERE id IN ({placeholders})"
+                )
             else:
                 fact_sql = f"SELECT id, confidence FROM facts WHERE id IN ({placeholders})"
             params: tuple[Any, ...]
@@ -355,7 +357,11 @@ class AsyncCausalGraph:
                 data["metadata"]["tainted_by"] = fact_id
                 data["metadata"]["taint_timestamp"] = now
             if meta_col:
-                payload = json.dumps(data["metadata"]) if data["is_json"] else rowless_json(data["metadata"])
+                payload = (
+                    json.dumps(data["metadata"])
+                    if data["is_json"]
+                    else rowless_json(data["metadata"])
+                )
                 if has_tenant:
                     fact_updates.append((new_conf, payload, current_id, tenant_id))
                 else:

@@ -6,6 +6,7 @@ import os
 from typing import Any
 
 from cortex.engine.store_validators import check_dedup, validate_content
+
 logger = logging.getLogger("cortex.engine.validation")
 
 
@@ -23,7 +24,6 @@ async def run_store_validation_logic(
 ) -> tuple[int | None, dict[str, Any] | None, str, str]:
     """Extracted validation logic from StoreMixin."""
     try:
-        from cortex.engine.auth import ByzantineAuthLayer
         from cortex.engine.bridge_guard import BridgeGuard
         from cortex.engine.guard_integration_patch import enforce_store_guards
         from cortex.engine.membrane.sanitizer import SovereignSanitizer

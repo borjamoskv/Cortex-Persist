@@ -30,25 +30,27 @@ _BLOCKED_SCHEMES = frozenset({"file", "ftp", "gopher", "data", "javascript"})
 
 # ── Blocked IP Ranges (SSRF) ──
 _BLOCKED_NETWORKS = [
-    ipaddress.ip_network("127.0.0.0/8"),       # Loopback
-    ipaddress.ip_network("10.0.0.0/8"),         # RFC1918
-    ipaddress.ip_network("172.16.0.0/12"),      # RFC1918
-    ipaddress.ip_network("192.168.0.0/16"),     # RFC1918
-    ipaddress.ip_network("169.254.0.0/16"),     # Link-local
-    ipaddress.ip_network("0.0.0.0/8"),          # Current network
-    ipaddress.ip_network("::1/128"),            # IPv6 loopback
-    ipaddress.ip_network("fc00::/7"),           # IPv6 private
-    ipaddress.ip_network("fe80::/10"),          # IPv6 link-local
-    ipaddress.ip_network("100.64.0.0/10"),      # Carrier-grade NAT
+    ipaddress.ip_network("127.0.0.0/8"),  # Loopback
+    ipaddress.ip_network("10.0.0.0/8"),  # RFC1918
+    ipaddress.ip_network("172.16.0.0/12"),  # RFC1918
+    ipaddress.ip_network("192.168.0.0/16"),  # RFC1918
+    ipaddress.ip_network("169.254.0.0/16"),  # Link-local
+    ipaddress.ip_network("0.0.0.0/8"),  # Current network
+    ipaddress.ip_network("::1/128"),  # IPv6 loopback
+    ipaddress.ip_network("fc00::/7"),  # IPv6 private
+    ipaddress.ip_network("fe80::/10"),  # IPv6 link-local
+    ipaddress.ip_network("100.64.0.0/10"),  # Carrier-grade NAT
 ]
 
 # ── Blocked Hostnames ──
-_BLOCKED_HOSTS = frozenset({
-    "localhost",
-    "metadata.google.internal",
-    "169.254.169.254",                          # AWS/GCP metadata
-    "metadata.internal",
-})
+_BLOCKED_HOSTS = frozenset(
+    {
+        "localhost",
+        "metadata.google.internal",
+        "169.254.169.254",  # AWS/GCP metadata
+        "metadata.internal",
+    }
+)
 
 
 class SSRFBlockedError(Exception):
@@ -97,12 +99,12 @@ def validate_url(url: str) -> str:
         # Not a raw IP — hostname. Check for suspicious patterns.
         # Block hex/octal IP obfuscation: 0x7f.0x0.0x0.0x1, 017700000001
         if re.match(r"^(0x[0-9a-f]+\.?)+$", hostname, re.IGNORECASE):
-            raise SSRFBlockedError(url, f"hex-encoded IP obfuscation: {hostname}")
+            raise SSRFBlockedError(url, f"hex-encoded IP obfuscation: {hostname}") from None
         if re.match(r"^[0-7]+$", hostname):
-            raise SSRFBlockedError(url, f"octal IP obfuscation: {hostname}")
+            raise SSRFBlockedError(url, f"octal IP obfuscation: {hostname}") from None
         # Block DNS rebinding patterns
         if ".internal" in hostname or hostname.endswith(".local"):
-            raise SSRFBlockedError(url, f"internal/local hostname: {hostname}")
+            raise SSRFBlockedError(url, f"internal/local hostname: {hostname}") from None
 
     # 4. Port check — block common internal service ports
     port = parsed.port
@@ -128,6 +130,7 @@ class SovereignHTTPClient:
     async def __aenter__(self) -> SovereignHTTPClient:
         try:
             import httpx
+
             self._client = httpx.AsyncClient(
                 timeout=self._timeout,
                 follow_redirects=True,
@@ -137,12 +140,13 @@ class SovereignHTTPClient:
         except ImportError:
             try:
                 import aiohttp
+
                 self._client = aiohttp.ClientSession(
                     timeout=aiohttp.ClientTimeout(total=self._timeout),
                 )
                 self._backend = "aiohttp"
             except ImportError:
-                raise RuntimeError("Neither httpx nor aiohttp installed")
+                raise RuntimeError("Neither httpx nor aiohttp installed") from None
         return self
 
     async def __aexit__(self, *exc) -> None:  # type: ignore[no-untyped-def]
@@ -153,9 +157,7 @@ class SovereignHTTPClient:
                 await self._client.close()
             self._client = None
 
-    async def get(
-        self, url: str, **kwargs
-    ) -> object:  # type: ignore
+    async def get(self, url: str, **kwargs) -> object:  # type: ignore
         """SSRF-safe GET request."""
         validate_url(url)
         if self._backend == "httpx":
@@ -165,9 +167,7 @@ class SovereignHTTPClient:
                 return resp
         raise RuntimeError("Client not initialized — use async with")
 
-    async def post(
-        self, url: str, **kwargs
-    ) -> object:  # type: ignore
+    async def post(self, url: str, **kwargs) -> object:  # type: ignore
         """SSRF-safe POST request."""
         validate_url(url)
         if self._backend == "httpx":
@@ -177,9 +177,7 @@ class SovereignHTTPClient:
                 return resp
         raise RuntimeError("Client not initialized — use async with")
 
-    async def request(
-        self, method: str, url: str, **kwargs
-    ) -> object:  # type: ignore
+    async def request(self, method: str, url: str, **kwargs) -> object:  # type: ignore
         """SSRF-safe arbitrary method request."""
         validate_url(url)
         if self._backend == "httpx":
@@ -193,17 +191,13 @@ class SovereignHTTPClient:
 # ── Convenience Functions ──
 
 
-async def safe_get(
-    url: str, timeout: float = 30.0, **kwargs
-) -> object:  # type: ignore
+async def safe_get(url: str, timeout: float = 30.0, **kwargs) -> object:  # type: ignore
     """One-shot SSRF-safe GET. Opens and closes a client per call."""
     async with SovereignHTTPClient(timeout=timeout) as client:
         return await client.get(url, **kwargs)
 
 
-async def safe_post(
-    url: str, timeout: float = 30.0, **kwargs
-) -> object:  # type: ignore
+async def safe_post(url: str, timeout: float = 30.0, **kwargs) -> object:  # type: ignore
     """One-shot SSRF-safe POST. Opens and closes a client per call."""
     async with SovereignHTTPClient(timeout=timeout) as client:
         return await client.post(url, **kwargs)

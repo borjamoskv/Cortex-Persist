@@ -32,6 +32,7 @@ from cortex.extensions.health.trend import TrendDetector
 
 try:
     from cortex.extensions.health.prometheus import export_prometheus
+
     HAS_PROMETHEUS = True
 except ImportError:
     HAS_PROMETHEUS = False

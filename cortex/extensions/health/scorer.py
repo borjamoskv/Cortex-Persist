@@ -75,9 +75,7 @@ class HealthScorer:
             "environment": {"browsers", "snapshot"},
         }
         for name, metrics_in_index in mapping.items():
-            idx_metrics = [
-                (m, w) for m, w in resolved if m.name in metrics_in_index
-            ]
+            idx_metrics = [(m, w) for m, w in resolved if m.name in metrics_in_index]
             if not idx_metrics:
                 continue
             idx_tw = sum(w for _, w in idx_metrics)

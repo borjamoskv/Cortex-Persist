@@ -69,9 +69,7 @@ class MejoraloEngine:
         )
         return res if isinstance(res, list) else []
 
-    def scars(
-        self, project: str, file_path: str, limit: int = 10
-    ) -> list[dict[str, Any]]:
+    def scars(self, project: str, file_path: str, limit: int = 10) -> list[dict[str, Any]]:
         """Retrieve historical taints (scars) for a specific file."""
         res = self.engine.recall_sync(
             project=project,

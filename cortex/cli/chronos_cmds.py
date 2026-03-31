@@ -1,4 +1,3 @@
-
 """
 Commands for CHRONOS-1 The Senior Benchmark.
 

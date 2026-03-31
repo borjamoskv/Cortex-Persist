@@ -98,7 +98,6 @@ class ImmuneBoundary:
 
         schema_dict = schema.model_json_schema()
 
-
         schema_dict = schema.model_json_schema()
 
         for attempt in range(max_retries):

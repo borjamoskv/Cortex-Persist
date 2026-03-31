@@ -445,6 +445,7 @@ class CortexEngine(
         if not res:
             return None
         from cortex.engine.models import Fact
+
         return Fact(**{k: v for k, v in res.items() if k in Fact.__dataclass_fields__})
 
     async def retrieve(self, fact_id: int):
@@ -468,32 +469,33 @@ class CortexEngine(
         """Retrieve all active facts across all projects, wrapped in models."""
         results = await super().get_all_active_facts(*args, **kwargs)
         from cortex.engine.models import Fact
+
         return [
-            Fact(**{k: v for k, v in r.items() if k in Fact.__dataclass_fields__})
-            for r in results
+            Fact(**{k: v for k, v in r.items() if k in Fact.__dataclass_fields__}) for r in results
         ]
 
     async def history(self, *args, **kwargs):
         """Retrieve historical facts wrapped in models."""
         results = await super().history(*args, **kwargs)
         from cortex.engine.models import Fact
+
         return [
-            Fact(**{k: v for k, v in r.items() if k in Fact.__dataclass_fields__})
-            for r in results
+            Fact(**{k: v for k, v in r.items() if k in Fact.__dataclass_fields__}) for r in results
         ]
 
     async def get_causal_chain(self, *args, **kwargs):
         """Retrieve causal chain facts wrapped in models."""
         results = await super().get_causal_chain(*args, **kwargs)
         from cortex.engine.models import Fact
+
         return [
-            Fact(**{k: v for k, v in r.items() if k in Fact.__dataclass_fields__})
-            for r in results
+            Fact(**{k: v for k, v in r.items() if k in Fact.__dataclass_fields__}) for r in results
         ]
 
     async def shannon_report(self, project: str | None = None) -> dict:
         """Shannon entropy analysis of stored memory."""
         from cortex.extensions.shannon.report import EntropyReport
+
         return await EntropyReport.analyze(self, project)
 
     async def fingerprint(
@@ -509,6 +511,7 @@ class CortexEngine(
         - to_agent_prompt(): ready for LLM system prompt injection
         """
         from cortex.extensions.fingerprint.extractor import FingerprintExtractor
+
         return await FingerprintExtractor.extract(self, project, top_domains)
 
     def fingerprint_sync(self, *args, **kwargs):
@@ -517,6 +520,7 @@ class CortexEngine(
     async def immortality_index(self, project: str | None = None) -> dict:
         """Immortality Index (ι) — cognitive crystallization metric."""
         from cortex.extensions.shannon.immortality import ImmortalityIndex
+
         return await ImmortalityIndex.compute(self, project)
 
     def immortality_index_sync(self, *args, **kwargs):
@@ -529,6 +533,7 @@ class CortexEngine(
     ) -> list:
         """Bellman Policy Engine — prioritized action queue."""
         from cortex.extensions.policy import PolicyEngine
+
         policy = PolicyEngine(self)
         return await policy.evaluate(project=project, tenant_id=tenant_id)
 
@@ -565,6 +570,7 @@ class CortexEngine(
 
     def export_snapshot(self, out_path: str | Path) -> str:
         from cortex.extensions.sync.snapshot import export_snapshot
+
         return export_snapshot(self, out_path)  # type: ignore[reportArgumentType,reportReturnType]
 
     def _row_to_fact(  # type: ignore[override]

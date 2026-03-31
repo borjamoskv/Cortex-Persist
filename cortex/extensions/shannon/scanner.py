@@ -118,7 +118,7 @@ class MemoryScanner:
 
     async def temporal_velocity(
         self,
-        project: Optional[str] = None,
+        project: str | None = None,
         window_days: int = 30,
     ) -> dict[str, int]:
         """Facts created per day for the last `window_days` days.

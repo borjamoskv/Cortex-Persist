@@ -230,14 +230,7 @@ async def get_fact_history(
             fact_id=fact_id, direction="up", max_depth=50, tenant_id=auth.tenant_id
         )
         for f in chain:
-            # chain elements are dicts from MixedBase._row_to_fact
-            depth = f.get("causal_depth", "?")
-            fid = f.get("id", "?")
-            ftype = f.get("fact_type", "?")
-            content = str(f.get("content", ""))[:60]
-            parent = f.get("parent_decision_id")
-            parent_str = f"←#{parent}" if parent else "ROOT"
-            lines.append(f"  [{depth}] #{fid} ({ftype}) {parent_str}: {content}")
+            pass
         return [
             FactResponse(
                 id=f["id"],
@@ -397,7 +390,9 @@ async def list_votes(
 
     votes = await engine.get_votes(fact_id)
 
-    return [{"agent": v["agent"], "vote": v["vote"], "timestamp": v.get("created_at")} for v in votes]
+    return [
+        {"agent": v["agent"], "vote": v["vote"], "timestamp": v.get("created_at")} for v in votes
+    ]
 
 
 @router.delete("/v1/facts/{fact_id}", response_model=dict)

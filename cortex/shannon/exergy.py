@@ -68,7 +68,9 @@ def calculate_exergy(inp: ExergyInput, threshold_min_work: float) -> ExergyResul
         (signal_gain * (1.0 + inp.utility_delta)) + (inp.causal_gap * 0.1) - reversibility_penalty
     )
 
-    waste_ratio = 0.0 if signal_gain == 0 else max(0.0, reversibility_penalty / max(signal_gain, 1e-9))
+    waste_ratio = (
+        0.0 if signal_gain == 0 else max(0.0, reversibility_penalty / max(signal_gain, 1e-9))
+    )
 
     return ExergyResult(
         score=exergy_score,

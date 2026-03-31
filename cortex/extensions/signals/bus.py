@@ -233,7 +233,9 @@ class AsyncSignalBus:
         }
 
         row = await (
-            await self._conn.execute("SELECT COUNT(*) FROM signals WHERE tenant_id = ?", (tenant_id,))
+            await self._conn.execute(
+                "SELECT COUNT(*) FROM signals WHERE tenant_id = ?", (tenant_id,)
+            )
         ).fetchone()
         result["total"] = row[0] if row else 0
 

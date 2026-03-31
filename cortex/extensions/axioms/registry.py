@@ -338,6 +338,7 @@ _ASPIRATIONAL: list[Axiom] = [
 # THE REGISTRY
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+
 class AxiomRegistry:
     """Sovereign Axiom Registry.
 

@@ -57,7 +57,9 @@ async def check_gate_7_async() -> GateResult:
         printer.success("No blocking " + "sl" + "eep() found.")
         return True, "verified"
 
-    printer.fail(f"Found blocking {'time.' + 'sleep'}: {violations} (Friction removed: not blocking)")
+    printer.fail(
+        f"Found blocking {'time.' + 'sleep'}: {violations} (Friction removed: not blocking)"
+    )
     return True, "verified"
 
 

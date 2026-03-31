@@ -49,6 +49,7 @@ class EmbeddingManager:
 
         if self.mode == "api":
             from cortex import config
+
             try:
                 from cortex.embeddings.api_embedder import APIEmbedder
             except Exception as exc:  # noqa: BLE001
@@ -79,7 +80,9 @@ class EmbeddingManager:
     def embed_batch(self, texts: list[str], batch_size: int = 32) -> list[list[float]]:
         """Generate embeddings for multiple texts."""
         if self.mode == "api":
-            raise RuntimeError("Synchronous embed_batch() is unavailable in API mode; use aembed_batch().")
+            raise RuntimeError(
+                "Synchronous embed_batch() is unavailable in API mode; use aembed_batch()."
+            )
         return self._get_embedder().embed_batch(texts, batch_size=batch_size)
 
     async def aembed(self, text: str | list[str]) -> list[float] | list[list[float]]:
@@ -155,6 +158,7 @@ class EmbeddingManager:
         """Return True if current embedder supports multimodal input."""
         embedder = self._get_embedder()
         return getattr(embedder, "supports_multimodal", False)
+
     async def enrich_fact(
         self,
         fact_id: int,
