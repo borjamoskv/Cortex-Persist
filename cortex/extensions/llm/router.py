@@ -85,15 +85,21 @@ class CortexLLMRouter:
         "local": 2,
     }
 
-    def _ordered_fallbacks(self, prompt: CortexPrompt) -> list[BaseProvider]:
+    def _ordered_fallbacks(self, prompt: CortexPrompt | IntentProfile) -> list[BaseProvider]:
         """Ordena fallbacks: intent affinity → A-record → cost → tier."""
         from cortex.extensions.llm._models import ReasoningMode
 
-        effective_intent = prompt.intent
+        # If passed an IntentProfile directly, wrap it or extract intent
+        if isinstance(prompt, IntentProfile):
+            effective_intent = prompt
+            reasoning_mode = None
+        else:
+            effective_intent = prompt.intent
+            reasoning_mode = prompt.reasoning_mode
 
         # Axiom Ω₁₆: If reasoning mode is DEEP_THINK or ULTRA_THINK,
         # coerce the fallback intent to REASONING to select the right model map.
-        if prompt.reasoning_mode in (ReasoningMode.DEEP_THINK, ReasoningMode.ULTRA_THINK):
+        if reasoning_mode in (ReasoningMode.DEEP_THINK, ReasoningMode.ULTRA_THINK):
             effective_intent = IntentProfile.REASONING
 
         typed_matches: list[BaseProvider] = []
@@ -106,7 +112,7 @@ class CortexLLMRouter:
                 safety_net.append(p)
 
         # Axiom Ω₁₆: ULTRA_THINK strictly requires frontier models.
-        if prompt.reasoning_mode == ReasoningMode.ULTRA_THINK:
+        if reasoning_mode == ReasoningMode.ULTRA_THINK:
             typed_matches = [p for p in typed_matches if p.tier == "frontier"]
             safety_net = [p for p in safety_net if p.tier == "frontier"]
 

@@ -110,8 +110,8 @@ class CortexMemoryManager:
         l2: VectorStoreL2,  # type: ignore[reportInvalidTypeForm]
         l3: EventLedgerL3,
         encoder: AsyncEncoder,
-        hdc_l2: HDCVectorStoreL2 | None = None,
-        hdc_encoder: HDCEncoder | None = None,
+        hdc_l2: Any | None = None,
+        hdc_encoder: Any | None = None,
         router: Any | None = None,
         bus: Any | None = None,
         max_bg_tasks: int = DEFAULT_MAX_BG_TASKS,

@@ -10,6 +10,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import subprocess
+from typing import Any
 from pathlib import Path
 
 try:
@@ -109,9 +110,9 @@ def create_aether_server(
             engine._conn = conn
 
             results = await engine.search(
-                query,
-                project or None,
-                min(max(top_k, 5), 50),
+                query=query,
+                project=project or None,
+                top_k=min(max(top_k, 5), 50),
             )
 
         if not results:
@@ -122,7 +123,7 @@ def create_aether_server(
         output = [f"Found {len(results)} context chunks:"]
         for r in results:
             output.append(
-                f"[FACT #{r.fact_id} | PROJECT: {r.project} | TYPE: {r.fact_type} | SCORE: {r.score:.3f}]\n{r.content}\n---"
+                f"[FACT #{getattr(r, 'fact_id', '?')} | PROJECT: {r.project} | TYPE: {r.fact_type} | SCORE: {r.score:.3f}]\n{r.content}\n---"
             )
 
         final_str = "\n".join(output)
@@ -175,12 +176,12 @@ def create_aether_server(
             engine._conn = conn
 
             fact_id = await engine.store(
-                project,
-                decision,
-                "decision",
-                ["mcp-aether"],
-                "stated",
-                "agent:gemini:aether",
+                project=project,
+                content=decision,
+                fact_type="decision",
+                tags=["mcp-aether"],
+                confidence="stated",
+                source="agent:gemini:aether",
             )
 
         ctx.search_cache.clear()
