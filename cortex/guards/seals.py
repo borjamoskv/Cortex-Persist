@@ -170,19 +170,21 @@ async def check_seal_2_type_safety() -> GateResult:
     # ── Pyright ──
     # Allowing a baseline of 85 stabilized warnings (AX-012 Shannon Entropy)
     # The current Architecture uses dynamic skills and PEP 562 lazy-loading.
-    if code != 0 and '"errorCount":' in out:
+    if code != 0:
         import json
         try:
-            start_idx = out.find('{"summary":')
-            data = json.loads(out[start_idx:])
-            ecount = data["summary"]["errorCount"]
-            if ecount <= 85:
-                printer.success(f"Type checks passed (within baseline threshold: {ecount}/85).")
-                return True, "verified"
-            else:
-                printer.fail(f"Type checking failed (threshold: {ecount}/85).")
-                print(out[:2000])
-                return False, "verified"
+            # More robust JSON finding: look for the first '{' and parse everything after it
+            start_idx = out.find('{')
+            if start_idx != -1:
+                data = json.loads(out[start_idx:])
+                ecount = data.get("summary", {}).get("errorCount", 999)
+                if ecount <= 85:
+                    printer.success(f"Type checks passed (within baseline threshold: {ecount}/85).")
+                    return True, "verified"
+                else:
+                    printer.fail(f"Type checking failed (threshold: {ecount}/85).")
+                    print(out[:2000])
+                    return False, "verified"
         except (ValueError, KeyError, json.JSONDecodeError):
             pass
 
