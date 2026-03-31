@@ -16,6 +16,7 @@ import sys
 from pathlib import Path
 from typing import Optional
 
+from cortex.guards._seal_printer import SealPrinter
 from cortex.guards.sovereign_seals import (
     check_gate_15_dependency,
     check_gate_16_byzantine,
@@ -25,26 +26,6 @@ from cortex.guards.sovereign_seals import (
     check_gate_20_noir,
     check_gate_21_preservation,
 )
-
-
-class SealPrinter:
-    def head(self, title: str) -> None:
-        print(f"\n{'━' * 60}")
-        print(f" {title}")
-        print(f"{'━' * 60}")
-
-    def seal(self, gate_num: int, axiom: str, desc: str) -> None:
-        print(f"\n{'─' * 40}")
-        print(f"🔍 Gate {gate_num}: {desc} ({axiom})")
-
-    def success(self, msg: str) -> None:
-        print(f"   [🟢 PASSED] {msg}")
-
-    def fail(self, msg: str) -> None:
-        print(f"   [🔴 FAILED] {msg}")
-
-    def warn(self, msg: str) -> None:
-        print(f"   [🟡 WARN] {msg}")
 
 
 printer = SealPrinter()

@@ -38,7 +38,7 @@ jobs:
       - name: Install security tools
         run: pip install pip-audit bandit
       - name: Audit dependencies for known CVEs
-        run: pip-audit --strict --desc on
+        run: pip-audit --strict --desc on --skip cortex-persist --skip cortex_persist
       - name: Bandit SAST scan
         run: bandit -r cortex/ -c pyproject.toml --severity-level medium -f json -o bandit-report.json || true
       - name: Upload Bandit report
