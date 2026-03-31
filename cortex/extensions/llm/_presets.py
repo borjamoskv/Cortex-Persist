@@ -68,17 +68,26 @@ def load_presets() -> dict[str, dict[str, Any]]:
 def _validate_model_policy(presets: dict[str, dict[str, Any]]) -> None:
     """Enforce Rule 1.3: Strictly mandate frontier or high-tier models."""
     for name, config in presets.items():
-        tier = config.get("tier", "unknown")
-        if tier not in _VALID_TIERS:
-            logger.debug("Provider %s has non-standard tier: %s", name, tier)
-
+        # Check default model
         default_model = config.get("default_model", "")
         if _PROHIBITED_TIERS.search(default_model):
             logger.warning(
-                "Rule 1.3 Violation Warning: Provider %s uses prohibited model pattern: %s",
+                "Rule 1.3 Violation Warning: Provider %s uses prohibited default model pattern: %s",
                 name,
                 default_model,
             )
+
+        # Check intent-specific models
+        intent_map = config.get("intent_model_map", {})
+        for intent, model in intent_map.items():
+            if _PROHIBITED_TIERS.search(model):
+                logger.warning(
+                    "Rule 1.3 Violation Warning: Provider %s uses prohibited model for "
+                    "intent '%s': %s",
+                    name,
+                    intent,
+                    model,
+                )
 
 
 def provider_inventory(active_provider: str | None = None) -> list[dict[str, Any]]:
