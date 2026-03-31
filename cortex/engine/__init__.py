@@ -9,13 +9,6 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional, Union
 
-import aiosqlite
-import sqlite_vec
-
-from cortex.config import DEFAULT_DB_PATH
-from cortex.database.schema import get_init_meta
-from cortex.embeddings import LocalEmbedder
-from cortex.engine.durability import PersistenceSupervisor
 from cortex.engine.memory_mixin import MemoryMixin
 from cortex.engine.mixins.base import FACT_COLUMNS, FACT_JOIN
 from cortex.engine.models import row_to_fact  # noqa: F401 — re-exported
@@ -36,25 +29,32 @@ except ImportError:
             return {"status": "unhealthy", "reason": "No Health extension"}
 
 
-from cortex.migrations.core import run_migrations_async
-from cortex.telemetry.metrics import metrics
+if TYPE_CHECKING:
+    import aiosqlite
+
+    from cortex.engine.compound_yield import CompoundReport, CompoundYieldTracker
+    from cortex.extensions.interfaces.engine import EngineProtocol
 
 logger = logging.getLogger("cortex")
 
-
-from cortex.consensus.manager import ConsensusManager  # noqa: E402
-from cortex.embeddings.manager import EmbeddingManager  # noqa: E402
-from cortex.engine.compound_yield import CompoundReport, CompoundYieldTracker  # noqa: E402
-from cortex.engine.lock import SovereignLock  # noqa: E402
-from cortex.facts.manager import FactManager  # noqa: E402
-
-if TYPE_CHECKING:
-    from cortex.extensions.interfaces.engine import EngineProtocol
-
-# Limit the maximum number of tags per fact.
 MAX_TAGS_PER_FACT = 20
 
-# We use the unified GuardPipeline for AX-033 logic.
+# Lazy re-exports — only loaded on attribute access
+_LAZY_REEXPORTS = {
+    "CompoundReport": "cortex.engine.compound_yield",
+    "CompoundYieldTracker": "cortex.engine.compound_yield",
+}
+
+
+def __getattr__(name: str):
+    if name in _LAZY_REEXPORTS:
+        import importlib
+
+        mod = importlib.import_module(_LAZY_REEXPORTS[name])
+        attr = getattr(mod, name)
+        globals()[name] = attr
+        return attr
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 class CortexEngine(
@@ -69,10 +69,22 @@ class CortexEngine(
 
     def __init__(
         self,
-        db_path: str | Path = DEFAULT_DB_PATH,
+        db_path: str | Path | None = None,
         auto_embed: bool = True,
     ):
         super().__init__()
+
+        # Deferred imports — only needed at instance creation time
+        from cortex.config import DEFAULT_DB_PATH
+        from cortex.consensus.manager import ConsensusManager
+        from cortex.embeddings.manager import EmbeddingManager
+        from cortex.engine.durability import PersistenceSupervisor
+        from cortex.engine.lock import SovereignLock
+        from cortex.facts.manager import FactManager
+
+        if db_path is None:
+            db_path = DEFAULT_DB_PATH
+
         self._db_path = Path(db_path).expanduser()
         self._db_path.parent.mkdir(parents=True, exist_ok=True)
         self._enforce_fs_permissions()
@@ -81,7 +93,7 @@ class CortexEngine(
         self._vec_available = False
         self._conn_lock = asyncio.Lock()
         self._ledger = None  # Wave 5: ImmutableLedger (lazy init)
-        self._embedder: Optional[LocalEmbedder] = None
+        self._embedder = None
         self._memory_manager = None  # Frontera 2: Tripartite Memory (lazy init)
         self._persistence = PersistenceSupervisor(self)
 
@@ -217,9 +229,11 @@ class CortexEngine(
         conn = await self.get_conn()
         yield conn
 
-    def _get_embedder(self) -> LocalEmbedder:
+    def _get_embedder(self):
         """Protocol requirement for SearchMixin."""
         if self._embedder is None:
+            from cortex.embeddings import LocalEmbedder
+
             self._embedder = LocalEmbedder()
         return self._embedder
 
@@ -230,6 +244,8 @@ class CortexEngine(
         async with self._conn_lock:
             if self._conn is not None:
                 return self._conn
+
+            import sqlite_vec
 
             from cortex.database.core import connect_async
 
@@ -262,6 +278,8 @@ class CortexEngine(
     def _get_sync_conn(self):
         """Devuelve una conexión síncrona para procesos bloqueantes."""
         import sqlite3
+
+        import sqlite_vec
 
         from cortex.database.core import connect
 
@@ -485,8 +503,10 @@ class CortexEngine(
 
     async def init_db(self) -> None:
         """Initialize database schema. Safe to call multiple times."""
-        from cortex.database.schema import get_all_schema
+        from cortex.database.schema import get_all_schema, get_init_meta
         from cortex.engine.ledger import ImmutableLedger
+        from cortex.migrations.core import run_migrations_async
+        from cortex.telemetry.metrics import metrics
 
         conn = await self.get_conn()
 
