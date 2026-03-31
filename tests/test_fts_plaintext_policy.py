@@ -23,6 +23,7 @@ TEST_MASTER_KEY = b"1" * 32
 def encrypter():
     return CortexEncrypter(TEST_MASTER_KEY)
 
+
 async def _setup_db(conn: aiosqlite.Connection) -> None:
     await conn.executescript("""
         CREATE TABLE causal_edges (

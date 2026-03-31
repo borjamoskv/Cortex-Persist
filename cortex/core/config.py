@@ -117,6 +117,10 @@ class CortexConfig:
     CONTEXT_WORKSPACE_DIR: str = ""
     CONTEXT_GIT_ENABLED: bool = True
 
+    # Swarm-Prime (LEGION-10k)
+    MAX_SWARM_NODES: int = 10000
+    SWARM_SHARD_COUNT: int = 100
+
     @property
     def PROD(self) -> bool:
         """Helper to check if we are in cloud/production mode."""

@@ -10,6 +10,7 @@ import aiosqlite
 
 from cortex.consensus.vote_ledger import ImmutableVoteLedger
 from cortex.engine.mixins.base import EngineMixinBase
+from cortex.engine.slashing import SlashingEngine
 
 logger = logging.getLogger("cortex.engine.consensus")
 
@@ -175,6 +176,20 @@ class ConsensusMixin(EngineMixinBase):
                        WHERE v.fact_id = ? AND v.tenant_id = ?"""
             async with conn.execute(query, (fact_id, tenant_id)) as cursor:
                 return [dict(r) for r in await cursor.fetchall()]
+
+    async def slash_vote_deviation(
+        self,
+        agent_id: str,
+        fact_id: int,
+        penalty_type: float,
+        reason: str,
+        tenant_id: str = "default",
+    ) -> float:
+        """Slash an agent's reputation for consensus deviation."""
+        async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
+            new_rep = await SlashingEngine.slash(conn, agent_id, penalty_type, reason, tenant_id)
+            await conn.commit()
+            return new_rep
 
     async def verify_vote_ledger(self, tenant_id: str = "default") -> dict[str, Any]:
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]

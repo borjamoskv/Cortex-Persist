@@ -2,38 +2,42 @@
 CORTEX — VOID-MIH (Multi-Index Hashing) Engine.
 
 Sovereign Bit-Slicing logic for O(log N) Hamming retrieval.
-Shards 1024-bit vectors into 16 indexable 64-bit shards.
+Shards binary vectors into 64-bit indexable integers.
 Reduces brute-force candidate search space by 90-99%.
 """
 
 from __future__ import annotations
 
 import struct
-from typing import Sequence
+from collections.abc import Sequence
 
 __all__ = ["slice_void_bit", "get_mih_shards"]
 
 
-def slice_void_bit(packed: bytes) -> list[int]:
+def slice_void_bit(packed: bytes, shard_count: int = 16) -> list[int]:
     """
-    Shards a 1024-bit binary vector into 16 x 64-bit integers.
+    Shards a binary vector into N x 64-bit integers.
 
     Args:
-        packed: The 128-byte packed binary vector.
+        packed: The bit-packed binary vector.
+        shard_count: Number of 64-bit shards to extract (default 16 for 1024 bits).
 
     Returns:
-        List of 16 unsigned 64-bit integers (BIGINT compatible for SQLite).
+        List of unsigned 64-bit integers.
     """
-    if len(packed) < 128:
-        # Pad if necessary
-        packed = packed.ljust(128, b'\0')
+    required_bytes = shard_count * 8
+    if len(packed) < required_bytes:
+        # Pad with 0xA5 (Sovereign sentinel) to avoid "all zero" collision in MIH
+        # on high shards for low-dimensional vectors.
+        padding = required_bytes - len(packed)
+        packed = packed + b"\xa5" * padding
 
-    # 16 shards of 8 bytes (Q = unsigned long long, 64 bits)
-    # '>' means big-endian for consistent integer representation
-    return list(struct.unpack('>16Q', packed[:128]))
+    # Extract 64-bit blocks
+    fmt = f">{shard_count}Q"
+    return list(struct.unpack(fmt, packed[:required_bytes]))
 
 
-def get_mih_shards(vector: Sequence[float] | bytes, dimension: int = 1024) -> list[int]:
+def get_mih_shards(vector: Sequence[float] | bytes, shard_count: int = 16) -> list[int]:
     """
     Convenience wrapper to get MIH shards from floats or already packed bytes.
     """
@@ -44,4 +48,4 @@ def get_mih_shards(vector: Sequence[float] | bytes, dimension: int = 1024) -> li
     else:
         packed = void_vec.pack_void_bit(vector)
 
-    return slice_void_bit(packed)
+    return slice_void_bit(packed, shard_count)

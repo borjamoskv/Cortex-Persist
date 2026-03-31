@@ -41,7 +41,7 @@ async def test_connection_pool_stability(engine):
         for i in range(100):
             await conn.execute(
                 "INSERT INTO agents (id, public_key, name, is_active, reputation_score) VALUES (?, ?, ?, ?, ?)",
-                (f"agent_{i}", f"pub_{i}", f"Agent {i}", 1, 0.5)
+                (f"agent_{i}", f"pub_{i}", f"Agent {i}", 1, 0.5),
             )
         await conn.commit()
 
@@ -73,11 +73,11 @@ async def test_multi_tenant_isolation(engine):
         # Seed agents for isolation test
         await conn.execute(
             "INSERT INTO agents (id, public_key, name, is_active, reputation_score) VALUES (?, ?, ?, ?, ?)",
-            ("agent_A", "pub_A", "Agent A", 1, 0.5)
+            ("agent_A", "pub_A", "Agent A", 1, 0.5),
         )
         await conn.execute(
             "INSERT INTO agents (id, public_key, name, is_active, reputation_score) VALUES (?, ?, ?, ?, ?)",
-            ("agent_B", "pub_B", "Agent B", 1, 0.5)
+            ("agent_B", "pub_B", "Agent B", 1, 0.5),
         )
 
         # Add a vote for tenant A

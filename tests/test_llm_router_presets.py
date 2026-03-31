@@ -212,6 +212,7 @@ class TestRouterOrdering:
                 _providers["deepseek"],
             ],
         )
+
         class MockPrompt:
             intent = IntentProfile.CODE
             reasoning_mode = "standard"
@@ -239,6 +240,7 @@ class TestRouterOrdering:
             primary=_providers["gemini"],
             fallbacks=[p1, p2],
         )
+
         class MockPrompt:
             intent = IntentProfile.CODE
             reasoning_mode = "standard"

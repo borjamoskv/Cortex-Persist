@@ -574,12 +574,7 @@ class CortexEngine(
         from cortex.ledger import ImmutableLedger
 
         async with self.session() as conn:
-            for stmt in get_all_schema():
-                if "USING vec0" in stmt and not self._vec_available:
-                    continue
-                await conn.executescript(stmt)
-            await conn.commit()
-
+            # Explicitly run migrations BEFORE initialization meta to preserve order logic
             await run_migrations_async(conn)
 
             for k, v in get_init_meta():

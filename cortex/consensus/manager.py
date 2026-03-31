@@ -7,6 +7,7 @@ import math
 import uuid
 from typing import Optional
 
+from cortex.engine.slashing import SlashingEngine
 from cortex.telemetry.metrics import metrics
 from cortex.telemetry.pulse import PULSE
 
@@ -156,9 +157,9 @@ class ConsensusManager:
                 continue
 
             p = 0.99 if vote_val > 0 else 0.01
-            # Quadratic weight aggressively suppresses unreliable nodes
+            # VOID-MAX: Cubic weight aggressively suppresses unreliable nodes (x100 SNR)
             rel = max(v[1], v[2])
-            w = rel**2
+            w = rel**3
 
             score_sum += w * _logit(p)
 
@@ -252,9 +253,7 @@ class ConsensusManager:
             # Calcular Alineación (1 = Acierto, -1 = Divergencia, 0 = Abstención)
             alignment_score = a_vote * c_val
 
-            # VOID-BEYOND: Quadratic Slashing and Asymptotic Recovery
-            # Divergence cuts reputation by 50% instantly.
-            # Convergence recovers reputation by (1.0 - current) * 0.1 (asymptotic).
+            # VOID-MAX: Exergy-Weighted Staking and Burn
             await conn.execute(
                 """
                 UPDATE agents
@@ -262,8 +261,8 @@ class ConsensusManager:
                     alignment_hits = alignment_hits + (CASE WHEN ? > 0 THEN 1 ELSE 0 END),
                     alignment_misses = alignment_misses + (CASE WHEN ? < 0 THEN 1 ELSE 0 END),
                     reputation_score = CASE
-                        WHEN ? < 0 THEN reputation_score * 0.5
-                        WHEN ? > 0 THEN reputation_score + (1.0 - reputation_score) * 0.1
+                        WHEN ? < 0 THEN reputation_score * 0.3
+                        WHEN ? > 0 THEN reputation_score + (1.0 - reputation_score) * 0.05
                         ELSE reputation_score
                     END
                 WHERE id = ? AND is_active = 1
@@ -283,3 +282,17 @@ class ConsensusManager:
                         payload={"agent_id": agent_id, "fact_id": fact_id},
                         source="consensus_manager",
                     )
+
+    async def slash_vote_deviation(
+        self,
+        agent_id: str,
+        fact_id: int,
+        penalty_type: float,
+        reason: str,
+        tenant_id: str = "default",
+    ) -> float:
+        """Slash an agent's reputation manually for consensus deviation or taint."""
+        async with self.engine.session() as conn:
+            new_rep = await SlashingEngine.slash(conn, agent_id, penalty_type, reason, tenant_id)
+            await conn.commit()
+            return new_rep

@@ -58,10 +58,21 @@ class MultiSpecialistAgent(SwarmAgent):
                 # Basic static check for MVP
                 # Ignore lines that are clearly detection logic, structural items...
                 excl = [
-                    'if "TODO" in', '["TODO"', 'target_patterns', 'forbidden =',
-                    '# no-audit', 're.compile', 'if "FIXME" in', '["FIXME"',
-                    'is_todo =', 'or "TODO" in', 'or "FIXME" in', 'TODO el',
-                    'TODO los', 'TODO la', 'TODO las',
+                    'if "TODO" in',
+                    '["TODO"',
+                    "target_patterns",
+                    "forbidden =",
+                    "# no-audit",
+                    "re.compile",
+                    'if "FIXME" in',
+                    '["FIXME"',
+                    "is_todo =",
+                    'or "TODO" in',
+                    'or "FIXME" in',
+                    "TODO el",
+                    "TODO los",
+                    "TODO la",
+                    "TODO las",
                 ]
 
                 if any(kw in content for kw in ["TODO", "FIXME"]):

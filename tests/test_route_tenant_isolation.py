@@ -25,12 +25,21 @@ def _route_by_path(router, path: str, method: str) -> APIRoute:
     raise AssertionError(f"Route not found: {method} {path}")
 
 
+class _FakeSession:
+    async def __aenter__(self):
+        return object()
+
+    async def __aexit__(self, *args):
+        pass
+
+
+class _FakeEngine:
+    def session(self):
+        return _FakeSession()
+
+
 def test_graph_all_scopes_calls_to_authenticated_tenant(monkeypatch) -> None:
     observed: dict[str, object] = {}
-
-    class FakeEngine:
-        async def get_conn(self) -> object:
-            return object()
 
     async def fake_get_graph(
         conn: object,
@@ -53,7 +62,7 @@ def test_graph_all_scopes_calls_to_authenticated_tenant(monkeypatch) -> None:
         tenant_id="tenant-graph",
         permissions=["read"],
     )
-    app.dependency_overrides[get_engine] = lambda: FakeEngine()
+    app.dependency_overrides[get_engine] = lambda: _FakeEngine()
 
     with TestClient(app) as client:
         response = client.get("/v1/graph?limit=25")
@@ -63,24 +72,41 @@ def test_graph_all_scopes_calls_to_authenticated_tenant(monkeypatch) -> None:
     assert observed == {"project": None, "limit": 25, "tenant_id": "tenant-graph"}
 
 
+class _FakeAsyncEngine:
+    def __init__(self) -> None:
+        self.calls: list[tuple[str, str | None]] = []
+
+    def session(self):
+        class AsyncCM:
+            async def __aenter__(cm_self):
+                return self
+
+            async def __aexit__(cm_self, *args):
+                pass
+
+        return AsyncCM()
+
+    async def get_agent(self, agent_id: str, tenant_id: str | None = None) -> dict | None:
+        self.calls.append((agent_id, tenant_id))
+        if agent_id == "agent-1" and tenant_id == "tenant-agents":
+            return {
+                "id": "agent-1",
+                "name": "agent-one",
+                "agent_type": "ai",
+                "reputation_score": 1.0,
+                "created_at": "2026-01-01T00:00:00Z",
+            }
+        return None
+
+    async def register_agent(self, **kwargs):
+        pass
+
+    async def list_agents(self, tenant_id: str):
+        return []
+
+
 def test_get_agent_scopes_lookup_to_authenticated_tenant() -> None:
-    class FakeAsyncEngine:
-        def __init__(self) -> None:
-            self.calls: list[tuple[str, str | None]] = []
-
-        async def get_agent(self, agent_id: str, tenant_id: str | None = None) -> dict | None:
-            self.calls.append((agent_id, tenant_id))
-            if agent_id == "agent-1" and tenant_id == "tenant-agents":
-                return {
-                    "id": "agent-1",
-                    "name": "agent-one",
-                    "agent_type": "ai",
-                    "reputation_score": 1.0,
-                    "created_at": "2026-01-01T00:00:00Z",
-                }
-            return None
-
-    fake_engine = FakeAsyncEngine()
+    fake_engine = _FakeAsyncEngine()
 
     app = FastAPI()
     app.include_router(agents_router.router)

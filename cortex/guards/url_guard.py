@@ -25,7 +25,7 @@ _PRIVATE_NETWORKS = [
     ipaddress.ip_network("10.0.0.0/8"),  # RFC 1918
     ipaddress.ip_network("172.16.0.0/12"),  # RFC 1918
     ipaddress.ip_network("192.168.0.0/16"),  # RFC 1918
-    ipaddress.ip_network("169.254.0.0/16"),  # IPv4 link-local
+    ipaddress.ip_network("169.254.0.0/16"),  # IPv4 link-local / Metadata
     ipaddress.ip_network("::1/128"),  # IPv6 loopback
     ipaddress.ip_network("fe80::/10"),  # IPv6 link-local
     ipaddress.ip_network("fc00::/7"),  # IPv6 unique local addr
@@ -44,7 +44,7 @@ def is_safe_url(url: str, allow_private: bool = False) -> bool:
     Returns:
         True if URL is safe, False otherwise.
     """
-    if not url:
+    if not url or "\0" in url:
         return False
 
     try:
@@ -72,10 +72,8 @@ def is_safe_url(url: str, allow_private: bool = False) -> bool:
                         return False
             except ValueError:
                 # Not an IP, it's a hostname.
-                # Note: DNS rebinding and local resolution still possible if
-                # the underlying request tool doesn't check IPs after resolution.
-                if host.lower() in {"localhost", "127.0.0.1", "::1"}:
-                    logger.error("URLGuard: Blocked loopback hostname access: %s", host)
+                if host.lower() in {"localhost", "127.0.0.1", "::1", "metadata.google.internal"}:
+                    logger.error("URLGuard: Blocked loopback/metadata hostname access: %s", host)
                     return False
 
         return True
@@ -92,3 +90,15 @@ class SafeTransport:
         """Validate URL or raise ValueError if unsafe."""
         if not is_safe_url(url):
             raise ValueError(f"Sovereign URLGuard blocked unsafe request to: {url}")
+
+    @staticmethod
+    def inject_httpx(client_args: dict) -> dict:
+        """Inject URL validation into httpx client arguments."""
+
+        async def _check_url(request):
+            SafeTransport.validate(str(request.url))
+
+        event_hooks = client_args.setdefault("event_hooks", {})
+        request_hooks = event_hooks.setdefault("request", [])
+        request_hooks.append(_check_url)
+        return client_args

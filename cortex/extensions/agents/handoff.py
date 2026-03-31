@@ -54,152 +54,151 @@ async def generate_handoff(
     Returns:
         Handoff dictionary ready for serialization.
     """
-    conn = await engine.get_conn()
+    async with engine.session() as conn:
+        # ── Hot Decisions (last N, ordered by recency) ────────────────────
+        async with conn.execute(
+            "SELECT id, project, content, created_at, "
+            "tenant_id, parent_decision_id "
+            "FROM facts "
+            "WHERE fact_type = 'decision' "
+            "AND valid_until IS NULL "
+            "ORDER BY id DESC LIMIT ?",
+            (MAX_DECISIONS,),
+        ) as cursor:
+            decision_rows = await cursor.fetchall()
 
-    # ── Hot Decisions (last N, ordered by recency) ────────────────────
-    async with conn.execute(
-        "SELECT id, project, content, created_at, "
-        "tenant_id, parent_decision_id "
-        "FROM facts "
-        "WHERE fact_type = 'decision' "
-        "AND valid_until IS NULL "
-        "ORDER BY id DESC LIMIT ?",
-        (MAX_DECISIONS,),
-    ) as cursor:
-        decision_rows = await cursor.fetchall()
+        from cortex.crypto import get_default_encrypter
 
-    from cortex.crypto import get_default_encrypter
+        enc = get_default_encrypter()
 
-    enc = get_default_encrypter()
+        hot_decisions = [
+            {
+                "id": r[0],
+                "project": r[1],
+                "content": (enc.decrypt_str(r[2], tenant_id=r[4]) if r[2] else ""),
+                "created_at": r[3],
+                "parent_decision_id": r[5],
+            }
+            for r in decision_rows
+        ]
 
-    hot_decisions = [
-        {
-            "id": r[0],
-            "project": r[1],
-            "content": (enc.decrypt_str(r[2], tenant_id=r[4]) if r[2] else ""),
-            "created_at": r[3],
-            "parent_decision_id": r[5],
-        }
-        for r in decision_rows
-    ]
+        # ── Active Ghosts ─────────────────────────────────────────────────
+        async with conn.execute(
+            "SELECT id, project, reference, context "
+            "FROM ghosts "
+            "WHERE status = 'open' "
+            "ORDER BY id DESC LIMIT ?",
+            (MAX_GHOSTS,),
+        ) as cursor:
+            ghost_rows = await cursor.fetchall()
 
-    # ── Active Ghosts ─────────────────────────────────────────────────
-    async with conn.execute(
-        "SELECT id, project, reference, context "
-        "FROM ghosts "
-        "WHERE status = 'open' "
-        "ORDER BY id DESC LIMIT ?",
-        (MAX_GHOSTS,),
-    ) as cursor:
-        ghost_rows = await cursor.fetchall()
+        active_ghosts = [
+            {"id": r[0], "project": r[1], "reference": r[2], "context": r[3]} for r in ghost_rows
+        ]
 
-    active_ghosts = [
-        {"id": r[0], "project": r[1], "reference": r[2], "context": r[3]} for r in ghost_rows
-    ]
+        # ── Recent Errors ─────────────────────────────────────────────────
+        async with conn.execute(
+            "SELECT id, project, content, created_at, "
+            "tenant_id, parent_decision_id "
+            "FROM facts "
+            "WHERE fact_type IN ('error', 'mistake') "
+            "AND valid_until IS NULL "
+            "ORDER BY id DESC LIMIT ?",
+            (MAX_ERRORS,),
+        ) as cursor:
+            error_rows = await cursor.fetchall()
 
-    # ── Recent Errors ─────────────────────────────────────────────────
-    async with conn.execute(
-        "SELECT id, project, content, created_at, "
-        "tenant_id, parent_decision_id "
-        "FROM facts "
-        "WHERE fact_type IN ('error', 'mistake') "
-        "AND valid_until IS NULL "
-        "ORDER BY id DESC LIMIT ?",
-        (MAX_ERRORS,),
-    ) as cursor:
-        error_rows = await cursor.fetchall()
+        recent_errors = [
+            {
+                "id": r[0],
+                "project": r[1],
+                "content": (enc.decrypt_str(r[2], tenant_id=r[4]) if r[2] else ""),
+                "created_at": r[3],
+                "parent_decision_id": r[5],
+            }
+            for r in error_rows
+        ]
 
-    recent_errors = [
-        {
-            "id": r[0],
-            "project": r[1],
-            "content": (enc.decrypt_str(r[2], tenant_id=r[4]) if r[2] else ""),
-            "created_at": r[3],
-            "parent_decision_id": r[5],
-        }
-        for r in error_rows
-    ]
+        # ── Causal Episodes (Epoch 8 — WHY context) ────────────────────
+        causal_episodes_data: list[dict[str, Any]] = []
+        try:
+            from cortex.memory.episodic import CausalTracer
 
-    # ── Causal Episodes (Epoch 8 — WHY context) ────────────────────
-    causal_episodes_data: list[dict[str, Any]] = []
-    try:
-        from cortex.memory.episodic import CausalTracer
+            tracer = CausalTracer(conn)
+            # Trace causal chains for each hot decision
+            seen_roots: set[int] = set()
+            for d in hot_decisions:
+                try:
+                    episode = await tracer.trace_episode(d["id"])
+                    if episode.root_fact_id not in seen_roots:
+                        seen_roots.add(episode.root_fact_id)
+                        causal_episodes_data.append(
+                            {
+                                "root_fact_id": episode.root_fact_id,
+                                "depth": episode.depth,
+                                "nodes": len(episode.fact_chain),
+                                "entropy": round(episode.entropy_density, 2),
+                                "project": episode.project,
+                                "summary": episode.summary,
+                            }
+                        )
+                except (AttributeError, KeyError, TypeError):
+                    continue  # Skip facts without parent chains
+        except (RuntimeError, ImportError, OSError) as e:
+            logger.debug("Causal episode tracing skipped: %s", e)
 
-        tracer = CausalTracer(conn)
-        # Trace causal chains for each hot decision
-        seen_roots: set[int] = set()
-        for d in hot_decisions:
-            try:
-                episode = await tracer.trace_episode(d["id"])
-                if episode.root_fact_id not in seen_roots:
-                    seen_roots.add(episode.root_fact_id)
-                    causal_episodes_data.append(
+        # ── Causal Chains (compact DAG via get_causal_chain) ──────────
+        causal_chains: list[dict[str, Any]] = []
+        try:
+            seen_chain_roots: set[int] = set()
+            for d in hot_decisions[:5]:  # Top 5 recent decisions
+                did = d["id"]
+                if did in seen_chain_roots:
+                    continue
+                chain = await engine.get_causal_chain(
+                    did,
+                    direction="down",
+                    max_depth=5,
+                )
+                if chain and len(chain) > 1:
+                    seen_chain_roots.add(did)
+                    causal_chains.append(
                         {
-                            "root_fact_id": episode.root_fact_id,
-                            "depth": episode.depth,
-                            "nodes": len(episode.fact_chain),
-                            "entropy": round(episode.entropy_density, 2),
-                            "project": episode.project,
-                            "summary": episode.summary,
+                            "root_id": did,
+                            "project": d["project"],
+                            "nodes": len(chain),
+                            "chain": [
+                                {
+                                    "id": f.get("id"),  # pyright: ignore
+                                    "type": f.get("fact_type"),  # pyright: ignore
+                                    "depth": f.get("causal_depth"),  # pyright: ignore
+                                }
+                                for f in chain
+                            ],
                         }
                     )
-            except (AttributeError, KeyError, TypeError):
-                continue  # Skip facts without parent chains
-    except (RuntimeError, ImportError, OSError) as e:
-        logger.debug("Causal episode tracing skipped: %s", e)
+        except Exception as e:  # noqa: BLE001
+            logger.debug("Causal chain extraction skipped: %s", e)
 
-    # ── Causal Chains (compact DAG via get_causal_chain) ──────────
-    causal_chains: list[dict[str, Any]] = []
-    try:
-        seen_chain_roots: set[int] = set()
-        for d in hot_decisions[:5]:  # Top 5 recent decisions
-            did = d["id"]
-            if did in seen_chain_roots:
-                continue
-            chain = await engine.get_causal_chain(
-                did,
-                direction="down",
-                max_depth=5,
-            )
-            if chain and len(chain) > 1:
-                seen_chain_roots.add(did)
-                causal_chains.append(
-                    {
-                        "root_id": did,
-                        "project": d["project"],
-                        "nodes": len(chain),
-                        "chain": [
-                            {
-                                "id": f.get("id"),  # pyright: ignore
-                                "type": f.get("fact_type"),  # pyright: ignore
-                                "depth": f.get("causal_depth"),  # pyright: ignore
-                            }
-                            for f in chain
-                        ],
-                    }
-                )
-    except Exception as e:  # noqa: BLE001
-        logger.debug("Causal chain extraction skipped: %s", e)
+        # ── Active Projects (with activity in last 24h) ───────────────
+        async with conn.execute(
+            "SELECT DISTINCT project FROM facts "
+            "WHERE created_at >= datetime('now', '-1 day') "
+            "AND valid_until IS NULL "
+            "ORDER BY project"
+        ) as cursor:
+            project_rows = await cursor.fetchall()
 
-    # ── Active Projects (with activity in last 24h) ───────────────
-    async with conn.execute(
-        "SELECT DISTINCT project FROM facts "
-        "WHERE created_at >= datetime('now', '-1 day') "
-        "AND valid_until IS NULL "
-        "ORDER BY project"
-    ) as cursor:
-        project_rows = await cursor.fetchall()
+        active_projects = [r[0] for r in project_rows]
 
-    active_projects = [r[0] for r in project_rows]
+        # ── Stats summary ─────────────────────────────────────────────
+        async with conn.execute("SELECT COUNT(*) FROM facts WHERE valid_until IS NULL") as cursor:
+            total_active = (await cursor.fetchone())[0]  # type: ignore[reportOptionalSubscript]
 
-    # ── Stats summary ─────────────────────────────────────────────
-    async with conn.execute("SELECT COUNT(*) FROM facts WHERE valid_until IS NULL") as cursor:
-        total_active = (await cursor.fetchone())[0]  # type: ignore[reportOptionalSubscript]
-
-    async with conn.execute(
-        "SELECT COUNT(DISTINCT project) FROM facts WHERE valid_until IS NULL"
-    ) as cursor:
-        total_projects = (await cursor.fetchone())[0]  # type: ignore[reportOptionalSubscript]
+        async with conn.execute(
+            "SELECT COUNT(DISTINCT project) FROM facts WHERE valid_until IS NULL"
+        ) as cursor:
+            total_projects = (await cursor.fetchone())[0]  # type: ignore[reportOptionalSubscript]
 
     db_path = Path(engine._db_path)
     db_size_mb = round(db_path.stat().st_size / (1024 * 1024), 2) if db_path.exists() else 0.0

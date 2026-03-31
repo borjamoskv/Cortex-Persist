@@ -25,7 +25,7 @@ def classify_tier(provider: BaseProvider, intent: IntentProfile) -> CascadeTier:
 
 
 class CascadeManager:
-    """Track provider health and routing state (NXDOMAIN/A-record caching)."""
+    """Track provider health and routing state (NXDOMAIN/A-record caching/KV-affinity)."""
 
     def __init__(self, negative_ttl: float = 300.0, positive_ttl: float = 600.0):
         self.negative_ttl = negative_ttl
@@ -34,6 +34,8 @@ class CascadeManager:
         self._nxdomain_cache: dict[str, float] = {}
         # provider_name -> (timestamp, latency)
         self._a_records: dict[str, tuple[float, float]] = {}
+        # prefix_hash -> {provider_name: timestamp}
+        self._kv_affinity: dict[str, dict[str, float]] = {}
 
     def set_nx_record(self, provider_name: str) -> None:
         """Cache a provider failure (NXDOMAIN)."""
@@ -42,6 +44,12 @@ class CascadeManager:
     def set_a_record(self, provider_name: str, latency_ms: float) -> None:
         """Cache a provider success (A-record)."""
         self._a_records[provider_name] = (time.time(), latency_ms)
+
+    def set_kv_affinity(self, provider_name: str, prefix_hash: str) -> None:
+        """Mark that a provider has cached a specific context prefix."""
+        if prefix_hash not in self._kv_affinity:
+            self._kv_affinity[prefix_hash] = {}
+        self._kv_affinity[prefix_hash][provider_name] = time.time()
 
     def get_a_record(self, provider_name: str) -> tuple[float, float] | None:
         """Get success record if within TTL."""
@@ -61,17 +69,30 @@ class CascadeManager:
         self,
         providers: list[BaseProvider],
         intent: IntentProfile,
+        prefix_hash: str | None = None,
     ) -> list[BaseProvider]:
-        """Within a tier, promote A-record cached providers to the front."""
+        """Within a tier, promote KV-affinity and A-record cached providers."""
+        affinity_providers = []
+        if prefix_hash and prefix_hash in self._kv_affinity:
+            affinity_providers = list(self._kv_affinity[prefix_hash].keys())
+
+        # Sort: KV Affinity -> Low Latency -> Unknown
+        with_affinity: list[tuple[BaseProvider, float]] = []
         known_good: list[tuple[BaseProvider, float]] = []
         unknown: list[BaseProvider] = []
 
         for p in providers:
             record = self.get_a_record(p.provider_name)
-            if record:
-                known_good.append((p, record[1]))
+            latency = record[1] if record else float("inf")
+
+            if p.provider_name in affinity_providers:
+                with_affinity.append((p, latency))
+            elif record:
+                known_good.append((p, latency))
             else:
                 unknown.append(p)
 
+        with_affinity.sort(key=lambda x: x[1])
         known_good.sort(key=lambda x: x[1])
-        return [p for p, lat in known_good] + unknown
+
+        return [p for p, _ in with_affinity] + [p for p, _ in known_good] + unknown

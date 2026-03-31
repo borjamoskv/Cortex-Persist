@@ -165,7 +165,9 @@ class SovereignVectorStoreL2:
                     """
                 )
                 for i in range(16):
-                    self._conn.execute(f"CREATE INDEX IF NOT EXISTS idx_void_mih_s{i} ON vec_void_mih(s{i})")
+                    self._conn.execute(
+                        f"CREATE INDEX IF NOT EXISTS idx_void_mih_s{i} ON vec_void_mih(s{i})"
+                    )
 
             # Indexes for Zero-Trust and Speed
             self._conn.execute(
@@ -187,8 +189,7 @@ class SovereignVectorStoreL2:
             ]
 
             cursor = self._conn.execute(
-                "SELECT name FROM sqlite_master WHERE type='table' "
-                "AND name LIKE 'facts_meta%'"
+                "SELECT name FROM sqlite_master WHERE type='table' AND name LIKE 'facts_meta%'"
             )
             tables = [row[0] for row in cursor.fetchall()]
 
@@ -289,10 +290,10 @@ class SovereignVectorStoreL2:
                 )
             """)  # nosec B608
             emb_def = f"embedding int8[{self._encoder.dimension}]"
-            conn.execute(f"CREATE VIRTUAL TABLE {vec_tb} USING vec0({emb_def})")  # nosec B608
+            conn.execute(f"CREATE VIRTUAL TABLE {vec_tb} USING vec0({emb_def})")
             conn.execute(
                 f"CREATE TABLE {vec_void_tb} (rowid INTEGER PRIMARY KEY, embedding BLOB)"
-            )  # nosec B608
+            )
             # MIH sharded table
             vec_void_mih_tb = f"vec_void_mih_{safe_tenant}_{safe_proj}"
             conn.execute(f"""
@@ -378,29 +379,24 @@ class SovereignVectorStoreL2:
                     sanitized_meta["_pii_fragments"] = report.encrypted_fragments
                     sanitized_meta["_pii_categories"] = [c.value for c in report.pii_categories]
 
-        def _offloaded_computations() -> tuple[bytes, float]:
+        def _offloaded_computations() -> tuple[bytes, bytes, float]:
             ex = calculate_exergy(sanitized_content)
-            if isinstance(fact.embedding, bytes):
-                return fact.embedding, ex
-
             emb_list = fact.embedding
-            if emb_list and isinstance(emb_list[0], float):
-                # Void-State: use layers or explicit density to trigger binary
-                bits = 1.0 if fact.storage_tier == "COLD" else 3.5
-                emb_res = optimize_vector_qjl(emb_list, bits=bits)
-                if isinstance(emb_res, bytes):
-                    return emb_res, ex
-                emb_list = emb_res
+            if isinstance(emb_list, bytes):
+                # Cannot easily dual-quantize from raw bytes without knowing source
+                return emb_list, b"", ex
 
-            # Pass as float32 to C-level extension for strict vec_quantize_int8 parsing
-            return np.array(emb_list, dtype=np.float32).tobytes(), ex
+            arr = np.array(emb_list, dtype=np.float32)
+            int8_bytes = arr.tobytes()
+            binary_bytes = void_vec.pack_void_bit(arr)
+            return int8_bytes, binary_bytes, ex
 
-        embedding_bytes, exergy_val = await asyncio.to_thread(_offloaded_computations)
+        int8_bytes, binary_bytes, exergy_val = await asyncio.to_thread(_offloaded_computations)
 
         def _sync_insert() -> None:
             cursor = conn.cursor()
             try:
-                meta_tb, vec_tb, vec_void_tb = self._get_domain_tables(
+                meta_tb, vec_tb, vec_void_tb, mih_tb = self._get_domain_tables(
                     conn, fact.tenant_id, fact.project_id
                 )
                 cursor.execute(
@@ -434,31 +430,29 @@ class SovereignVectorStoreL2:
                 )
                 rowid = cursor.lastrowid
                 if self._vector_enabled:
-                    is_bin = len(embedding_bytes) < self._encoder.dimension
-                    if is_bin and vec_void_tb:
+                    # Store 1-bit Vector (Legion Recall)
+                    if vec_void_tb:
                         cursor.execute(
                             f"INSERT INTO {vec_void_tb}(rowid, embedding) VALUES (?, ?)",
-                            (rowid, embedding_bytes),
+                            (rowid, binary_bytes),
                         )
-                        # VOID-BEYOND MIH Indexing
+                        # MIH Indexing
                         from cortex.utils.void_mih import slice_void_bit
-                        shards = slice_void_bit(embedding_bytes)
-                        # Determine mih table name
-                        safe_tenant = "".join(c for c in fact.tenant_id if c.isalnum() or c == "_")
-                        safe_proj = "".join(c for c in fact.project_id if c.isalnum() or c == "_")
-                        mih_suffix = f"_{safe_tenant}_{safe_proj}" if safe_tenant else ""
-                        mih_tb = f"vec_void_mih{mih_suffix}"
+                        shards = slice_void_bit(binary_bytes)
                         cursor.execute(
                             f"INSERT INTO {mih_tb} (rowid, s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, "
                             "s10, s11, s12, s13, s14, s15) "
                             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                            (rowid, *shards)
+                            (rowid, *shards),
                         )
-                    else:
+
+                    # Store int8 Vector (HdrRecovery Reranking)
+                    # Only skip if tier is explicitly COLD to save space
+                    if fact.storage_tier != "COLD" and vec_tb:
                         cursor.execute(
                             f"INSERT INTO {vec_tb}(rowid, embedding) "
                             f"VALUES (?, vec_quantize_int8(?, 'unit'))",
-                            (rowid, embedding_bytes),
+                            (rowid, int8_bytes),
                         )
                 conn.commit()
             except (sqlite3.Error, RuntimeError) as e:
@@ -488,7 +482,9 @@ class SovereignVectorStoreL2:
             now = time.time()
 
             cursor = conn.cursor()
-            meta_tb, vec_tb, vec_void_tb = self._get_domain_tables(conn, tenant_id, project_id)
+            meta_tb, vec_tb, vec_void_tb, mih_tb = self._get_domain_tables(
+                conn, tenant_id, project_id
+            )
 
             if not self._vector_enabled:
                 sql = (
@@ -507,10 +503,16 @@ class SovereignVectorStoreL2:
                 final_facts = []
                 for row in rows:
                     fact = CortexFactModel(
-                        id=row["id"], tenant_id=row["tenant_id"], project_id=row["project_id"],
-                        content=row["content"], embedding=[], timestamp=row["timestamp"],
-                        is_diamond=bool(row["is_diamond"]), is_bridge=bool(row["is_bridge"]),
-                        confidence=row["confidence"], cognitive_layer=row["cognitive_layer"],
+                        id=row["id"],
+                        tenant_id=row["tenant_id"],
+                        project_id=row["project_id"],
+                        content=row["content"],
+                        embedding=[],
+                        timestamp=row["timestamp"],
+                        is_diamond=bool(row["is_diamond"]),
+                        is_bridge=bool(row["is_bridge"]),
+                        confidence=row["confidence"],
+                        cognitive_layer=row["cognitive_layer"],
                         parent_decision_id=row["parent_decision_id"],
                         metadata=json.loads(row["metadata"]) if row["metadata"] else {},
                     )
@@ -528,83 +530,133 @@ class SovereignVectorStoreL2:
 
             if use_void:
                 from cortex.utils.void_mih import slice_void_bit
+                from cortex.utils.void_vec import void_hamming_dist
+
                 q_shards = slice_void_bit(void_query)
 
-                # Determine mih table name
-                safe_tenant = "".join(c for c in tenant_id if c.isalnum() or c == "_")
-                safe_proj = "".join(c for c in project_id if c.isalnum() or c == "_")
-                mih_suffix = f"_{safe_tenant}_{safe_proj}" if safe_tenant else ""
-                mih_tb = f"vec_void_mih{mih_suffix}"
+                meta_tb, vec_tb, vec_void_tb, mih_tb = self._get_domain_tables(
+                    conn, tenant_id, project_id
+                )
 
                 # Candidate criteria: at least 1 shard match (1/16)
                 where_mih = " OR ".join([f"s{i} = ?" for i in range(16)])
 
-                sql = f"""
+                # VOID-QUANT v2: Fetch 10x candidates via Hamming and rerank via int8 (HdrRecovery)
+                sql_cand = f"""
                     WITH candidates AS (
                         SELECT rowid FROM {mih_tb}
                         WHERE {where_mih}
-                        LIMIT 500
+                        LIMIT ?
                     )
-                    SELECT * FROM (
-                        SELECT
-                            m.*, v.embedding,
-                            (1.0 - CAST(void_dist(v.embedding, ?) AS REAL) / 
-                             {self._encoder.dimension}) as base_similarity,
-                            ((1.0 - CAST(void_dist(v.embedding, ?) AS REAL) / 
-                              {self._encoder.dimension}) *
-                             cortex_decay(m.is_diamond, m.timestamp, ?, ?) *
-                             m.success_rate * m.exergy_score) as final_score
-                        FROM {meta_tb} m
-                        JOIN {vec_void_tb} v ON m.rowid = v.rowid
-                        JOIN candidates c ON m.rowid = c.rowid
-                        WHERE m.tenant_id = ? AND (m.project_id = ? OR m.is_bridge = 1)
-                    ) WHERE base_similarity > 0.4
+                    SELECT m.*, v.embedding as binary_emb, vf.embedding as int8_emb
+                    FROM {meta_tb} m
+                    JOIN {vec_void_tb} v ON m.rowid = v.rowid
+                    LEFT JOIN {vec_tb} vf ON m.rowid = vf.rowid
+                    JOIN candidates c ON m.rowid = c.rowid
+                    WHERE m.tenant_id = ? AND (m.project_id = ? OR m.is_bridge = 1)
                 """
-                params_vec = [*q_shards, void_query, void_query, now, self._half_life,
-                              tenant_id, project_id]
+                # Fetch 10x candidates for reranking
+                cursor.execute(sql_cand, (*q_shards, limit * 10, tenant_id, project_id))
+                rows = cursor.fetchall()
+
+                if not rows:
+                    return []
+
+                final_facts = []
+                for row in rows:
+                    # ─── HdrRecovery: Use int8 reranking if available ────────
+                    if row["int8_emb"]:
+                        # Cosine similarity on int8 (Ω₂ precision)
+                        cursor.execute(
+                            "SELECT 1.0 - vec_distance_cosine(?, "
+                            "vec_quantize_int8(?, 'unit')) / 2.0",
+                            (row["int8_emb"], embedding_bytes),
+                        )
+                        sim = cursor.fetchone()[0]
+                    else:
+                        # Fallback to Hamming similarity
+                        dist = void_hamming_dist(void_query, row["binary_emb"])
+                        sim = 1.0 - (dist / self._encoder.dimension)
+
+                    if sim < 0.3:
+                        continue
+
+                    # Apply Decay, Success, and Exergy Staking
+                    decay = cursor.execute(
+                        "SELECT cortex_decay(?, ?, ?, ?)",
+                        (row["is_diamond"], row["timestamp"], now, self._half_life),
+                    ).fetchone()[0]
+
+                    final_score = sim * decay * row["success_rate"] * row["exergy_score"]
+
+                    fact = CortexFactModel(
+                        id=row["id"],
+                        tenant_id=row["tenant_id"],
+                        project_id=row["project_id"],
+                        content=row["content"],
+                        embedding=row["int8_emb"] or row["binary_emb"],
+                        timestamp=row["timestamp"],
+                        is_diamond=bool(row["is_diamond"]),
+                        is_bridge=bool(row["is_bridge"]),
+                        confidence=row["confidence"],
+                        cognitive_layer=row["cognitive_layer"],
+                        parent_decision_id=row["parent_decision_id"],
+                        metadata=json.loads(row["metadata"]) if row["metadata"] else {},
+                    )
+                    object.__setattr__(fact, "_recall_score", final_score)
+                    final_facts.append(fact)
+
+                # Sort and Limit
+                final_facts.sort(key=lambda x: getattr(x, "_recall_score", 0.0), reverse=True)
+                return final_facts[:limit]
             else:
+                # [KEEP ORIGINAL Non-Void Path for int8 vectors]
                 sql = f"""
                     SELECT * FROM (
                         SELECT
                             m.*, v.embedding,
-                            (1.0 - vec_distance_cosine(v.embedding, 
+                            (1.0 - vec_distance_cosine(v.embedding,
                                      vec_quantize_int8(?, 'unit')) / 2.0) as base_similarity,
-                            ((1.0 - vec_distance_cosine(v.embedding, 
-                                      vec_quantize_int8(?, 'unit')) / 2.0) *
+                            ((1.0 - vec_distance_cosine(v.embedding,
+                                       vec_quantize_int8(?, 'unit')) / 2.0) *
                              cortex_decay(m.is_diamond, m.timestamp, ?, ?) *
                              m.success_rate * m.exergy_score) as final_score
                         FROM {meta_tb} m
                         JOIN {vec_tb} v ON m.rowid = v.rowid
                         WHERE m.tenant_id = ? AND (m.project_id = ? OR m.is_bridge = 1)
                     ) WHERE base_similarity > 0.3
+                    ORDER BY final_score DESC LIMIT ?
                 """
-                params_vec = [embedding_bytes, embedding_bytes, now, self._half_life,
-                              tenant_id, project_id]
-
-            if layer:
-                sql += " AND cognitive_layer = ?"
-                params_vec.append(layer)
-
-            sql += " ORDER BY final_score DESC LIMIT ?"
-            params_vec.append(limit)
-
-            cursor.execute(sql, tuple(params_vec))
-            rows = cursor.fetchall()
-            final_facts = []
-            for row in rows:
-                score = row["final_score"]
-                emb_bytes = row["embedding"]
-                fact = CortexFactModel(
-                    id=row["id"], tenant_id=row["tenant_id"], project_id=row["project_id"],
-                    content=row["content"], embedding=emb_bytes or b"", timestamp=row["timestamp"],
-                    is_diamond=bool(row["is_diamond"]), is_bridge=bool(row["is_bridge"]),
-                    confidence=row["confidence"], cognitive_layer=row["cognitive_layer"],
-                    parent_decision_id=row["parent_decision_id"],
-                    metadata=json.loads(row["metadata"]) if row["metadata"] else {},
-                )
-                object.__setattr__(fact, "_recall_score", score)
-                final_facts.append(fact)
-            return final_facts
+                params_vec = [
+                    embedding_bytes,
+                    embedding_bytes,
+                    now,
+                    self._half_life,
+                    tenant_id,
+                    project_id,
+                    limit,
+                ]
+                cursor.execute(sql, tuple(params_vec))
+                rows = cursor.fetchall()
+                final_facts = []
+                for row in rows:
+                    fact = CortexFactModel(
+                        id=row["id"],
+                        tenant_id=row["tenant_id"],
+                        project_id=row["project_id"],
+                        content=row["content"],
+                        embedding=row["embedding"],
+                        timestamp=row["timestamp"],
+                        is_diamond=bool(row["is_diamond"]),
+                        is_bridge=bool(row["is_bridge"]),
+                        confidence=row["confidence"],
+                        cognitive_layer=row["cognitive_layer"],
+                        parent_decision_id=row["parent_decision_id"],
+                        metadata=json.loads(row["metadata"]) if row["metadata"] else {},
+                    )
+                    object.__setattr__(fact, "_recall_score", row["final_score"])
+                    final_facts.append(fact)
+                return final_facts
 
         return await asyncio.to_thread(_sync_knn_search)
 
@@ -617,16 +669,25 @@ class SovereignVectorStoreL2:
         )
 
     async def recall_hybrid(
-        self, query: str, query_embedding: list[float], tenant_id: str = "default",
-        project_id: str = "default", limit: int = 5, vector_weight: float = 0.6,
-        text_weight: float = 0.4
+        self,
+        query: str,
+        query_embedding: list[float],
+        tenant_id: str = "default",
+        project_id: str = "default",
+        limit: int = 5,
+        vector_weight: float = 0.6,
+        text_weight: float = 0.4,
     ):
         """L2 Hybrid Search: Vector KNN + FTS5 BM25 fused via RRF."""
         if self._hybrid is not None:
             return await self._hybrid.search(
-                query=query, query_embedding=query_embedding, tenant_id=tenant_id,
-                project_id=project_id, top_k=limit, vector_weight=vector_weight,
-                text_weight=text_weight
+                query=query,
+                query_embedding=query_embedding,
+                tenant_id=tenant_id,
+                project_id=project_id,
+                top_k=limit,
+                vector_weight=vector_weight,
+                text_weight=text_weight,
             )
         return await self.recall_secure(
             tenant_id=tenant_id, project_id=project_id, query=query, limit=limit

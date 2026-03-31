@@ -93,15 +93,16 @@ async def _sync_ghosts(engine: CortexEngine, path: Path, result: SyncResult) -> 
         return
 
     # Deprecar ghosts anteriores (son snapshots temporales)
-    conn = await engine.get_conn()
-    try:
-        await conn.execute(
-            "UPDATE facts SET valid_until = ? WHERE fact_type = 'ghost' AND valid_until IS NULL",
-            (result.synced_at,),
-        )
-        await conn.commit()
-    except sqlite3.Error as e:
-        result.errors.append(f"Error deprecando ghosts antiguos: {e}")
+    async with engine.session() as conn:
+        try:
+            await conn.execute(
+                "UPDATE facts SET valid_until = ? "
+                "WHERE fact_type = 'ghost' AND valid_until IS NULL",
+                (result.synced_at,),
+            )
+            await conn.commit()
+        except sqlite3.Error as e:
+            result.errors.append(f"Error deprecando ghosts antiguos: {e}")
 
     # Insertar snapshot actual de cada proyecto
     for project_name, ghost_data in data.items():
@@ -129,7 +130,7 @@ async def _sync_ghosts(engine: CortexEngine, path: Path, result: SyncResult) -> 
 
 async def _sync_mistakes(engine: CortexEngine, path: Path, result: SyncResult) -> None:
     """Sincroniza mistakes.jsonl — memoria de errores."""
-    existing = get_existing_contents(engine, None, fact_type="error")
+    existing = await get_existing_contents(engine, None, fact_type="error")
     lines = [
         json.loads(line)
         for line in path.read_text(encoding="utf-8").strip().splitlines()
@@ -164,7 +165,7 @@ async def _sync_mistakes(engine: CortexEngine, path: Path, result: SyncResult) -
 
 async def _sync_bridges(engine: CortexEngine, path: Path, result: SyncResult) -> None:
     """Sincroniza bridges.jsonl — conexiones entre proyectos."""
-    existing = get_existing_contents(engine, "__bridges__", fact_type="bridge")
+    existing = await get_existing_contents(engine, "__bridges__", fact_type="bridge")
     lines = [
         json.loads(line)
         for line in path.read_text(encoding="utf-8").strip().splitlines()

@@ -14,12 +14,14 @@ from pathlib import Path
 
 import aiosqlite
 
+from cortex import config
 from cortex.extensions.signals.bus import _CREATE_INDEXES, _CREATE_TABLE, _build_query
 from cortex.extensions.signals.models import Signal, signal_from_row
+from cortex.guards.url_guard import SafeTransport
 
 logger = logging.getLogger("cortex.extensions.signals.sharded_bus")
 
-NUM_SHARDS = 16
+NUM_SHARDS = getattr(config, "SWARM_SHARD_COUNT", 16)
 
 
 class ShardedAsyncSignalBus:
@@ -80,6 +82,12 @@ class ShardedAsyncSignalBus:
     ) -> int:
         if not self._ready:
             await self.initialize()
+
+        # SSRF Protection: Validate any URLs in the payload
+        if payload:
+            for k, v in payload.items():
+                if isinstance(v, str) and (k.endswith("_url") or "callback" in k):
+                    SafeTransport.validate(v)
 
         rkey = routing_key or source
         shard_idx = self._get_shard_index(rkey)

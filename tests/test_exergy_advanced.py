@@ -9,24 +9,24 @@ from cortex.guards.exergy_guard import ExergyGuard, calculate_exergy
         (
             "cortex-persist sovereign memory int8 quantization is-diamond=1",
             0.6,
-            "Pure technical signal (High Exergy)"
+            "Pure technical signal (High Exergy)",
         ),
         (
             "por supuesto aquí tienes el código espero que te sea muy útil en tu proyecto de software",
             0.0,
-            "Pure decorative padding (Low Exergy)"
+            "Pure decorative padding (Low Exergy)",
         ),
         (
             "the the the the the the the the the the the the the the the",
             0.0,
-            "Repetitive loop (Low Exergy)"
+            "Repetitive loop (Low Exergy)",
         ),
         (
             "This implements a shannon-based entropy guard for the CORTEX-Persist engine.",
             0.45,
-            "Concise technical note (Acceptable)"
-        )
-    ]
+            "Concise technical note (Acceptable)",
+        ),
+    ],
 )
 def test_aura_omega_metrics(text, expected_min, description):
     score = calculate_exergy(text)
@@ -36,6 +36,7 @@ def test_aura_omega_metrics(text, expected_min, description):
     else:
         assert score < 0.45  # Default threshold in Aura-Omega
 
+
 def test_exergy_guard_rejection():
     guard = ExergyGuard()
     # Should raise ValueError for padding
@@ -43,8 +44,9 @@ def test_exergy_guard_rejection():
         guard.check_thermodynamic_yield(
             "Hola! Por supuesto, te daré la información. Es muy importante notar que...",
             "test_proj",
-            "decision"
+            "decision",
         )
+
 
 def test_technical_density_regex():
     # Supports underscores and dashes (Aura-Omega refinement)

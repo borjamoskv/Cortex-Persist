@@ -146,7 +146,7 @@ def atomic_write(path: Path, content: str) -> None:
         raise
 
 
-def get_existing_contents(
+async def get_existing_contents(
     engine: CortexEngine,
     project: str | None = None,
     fact_type: str | None = None,
@@ -161,19 +161,20 @@ def get_existing_contents(
     Returns:
         Set de strings con el contenido de cada fact existente.
     """
-    conn = engine._get_sync_conn()
-    query = "SELECT content FROM facts WHERE valid_until IS NULL"
-    params: list = []
+    async with engine.session() as conn:
+        query = "SELECT content FROM facts WHERE valid_until IS NULL"
+        params: list = []
 
-    if project:
-        query += " AND project = ?"
-        params.append(project)
-    if fact_type:
-        query += " AND fact_type = ?"
-        params.append(fact_type)
+        if project:
+            query += " AND project = ?"
+            params.append(project)
+        if fact_type:
+            query += " AND fact_type = ?"
+            params.append(fact_type)
 
-    rows = conn.execute(query, params).fetchall()
-    result = {row[0] for row in rows}
+        cursor = await conn.execute(query, params)
+        rows = await cursor.fetchall()
+        result = {row[0] for row in rows}
 
     # Normalize legacy-prefixed entries for backward-compat dedup.
     # Old syncs stored "DECISION: X | RAZON: Y"; new syncs store "X".
@@ -190,23 +191,25 @@ def get_existing_contents(
     return result | normalized
 
 
-def db_content_hash(engine: CortexEngine, fact_type: str | None = None) -> str:
+async def db_content_hash(engine: CortexEngine, fact_type: str | None = None) -> str:
     """Calcula SHA-256 del contenido actual en DB para un tipo de fact.
 
     Esto permite detectar si la DB ha cambiado desde el último write-back
     sin necesidad de comparar fila por fila.
     """
-    conn = engine._get_sync_conn()
-    if fact_type:
-        rows = conn.execute(
-            "SELECT id, content, metadata, valid_from FROM facts "
-            "WHERE fact_type = ? AND valid_until IS NULL ORDER BY id",
-            (fact_type,),
-        ).fetchall()
-    else:
-        rows = conn.execute(
-            "SELECT id, content, metadata, valid_from FROM facts WHERE valid_until IS NULL ORDER BY id"
-        ).fetchall()
+    async with engine.session() as conn:
+        if fact_type:
+            cursor = await conn.execute(
+                "SELECT id, content, metadata, valid_from FROM facts "
+                "WHERE fact_type = ? AND valid_until IS NULL ORDER BY id",
+                (fact_type,),
+            )
+        else:
+            cursor = await conn.execute(
+                "SELECT id, content, metadata, valid_from FROM facts "
+                "WHERE valid_until IS NULL ORDER BY id"
+            )
+        rows = await cursor.fetchall()
 
     # Serializar el contenido completo como un hash determinista
     hasher = hashlib.sha256()

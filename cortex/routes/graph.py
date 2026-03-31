@@ -22,29 +22,6 @@ router = APIRouter(tags=["graph"])
 logger = logging.getLogger("uvicorn.error")
 
 
-async def _acquire_conn(engine):  # type: ignore[reportGeneralTypeIssues]
-    session = getattr(engine, "session", None)
-    if callable(session):
-        return session()
-    conn = await engine.get_conn()
-
-    class _ConnContext:
-        def __init__(self, conn):
-            self._conn = conn
-
-        async def __aenter__(self):
-            return self._conn
-
-        async def __aexit__(self, exc_type, exc, tb):
-            close = getattr(self._conn, "close", None)
-            if callable(close):
-                result = close()
-                if hasattr(result, "__await__"):
-                    await result  # type: ignore[reportGeneralTypeIssues]
-
-    return _ConnContext(conn)
-
-
 @router.get("/v1/graph/{project}")
 async def get_graph(
     project: str,
@@ -59,7 +36,7 @@ async def get_graph(
         raise HTTPException(status_code=403, detail=get_trans("error_graph_forbidden", lang))
 
     try:
-        async with await _acquire_conn(engine) as conn:  # type: ignore[reportGeneralTypeIssues]
+        async with engine.session() as conn:
             return await _get_graph(conn, project, limit, tenant_id=auth.tenant_id)
     except (sqlite3.Error, OSError, RuntimeError) as e:
         logger.error("Graph unavailable: %s", e)
@@ -77,7 +54,7 @@ async def get_graph_all(
 ) -> dict:
     """Get entity graph across all projects."""
     try:
-        async with await _acquire_conn(engine) as conn:  # type: ignore[reportGeneralTypeIssues]
+        async with engine.session() as conn:
             return await _get_graph(conn, None, limit, tenant_id=auth.tenant_id)
     except (sqlite3.Error, OSError, RuntimeError) as e:
         logger.error("Graph unavailable: %s", e)

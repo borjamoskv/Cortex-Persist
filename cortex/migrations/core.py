@@ -71,7 +71,7 @@ def _apply_base_schema(conn: sqlite3.Connection) -> None:
     for stmt in get_all_schema():
         try:
             conn.executescript(stmt)
-        except (sqlite3.Error, OSError) as e:
+        except Exception as e:
             msg = str(e).lower()
             if "vec0" in str(stmt) or "no such module" in msg or "duplicate column" in msg:
                 logger.warning("Skipping schema statement: %s", e)
@@ -142,7 +142,7 @@ async def _apply_base_schema_async(conn: aiosqlite.Connection) -> None:
     for stmt in get_all_schema():
         try:
             await conn.executescript(stmt)
-        except (sqlite3.Error, OSError) as e:
+        except Exception as e:
             msg = str(e).lower()
             if "vec0" in str(stmt) or "no such module" in msg or "duplicate column" in msg:
                 logger.warning("Skipping schema statement: %s", e)

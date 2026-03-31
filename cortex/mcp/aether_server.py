@@ -30,7 +30,7 @@ class AetherContext:
     def __init__(self, db_path: str = DB_PATH):
         self.db_path = db_path
         self.metrics = MCPMetrics()
-        self.pool = AsyncConnectionPool(self.db_path, max_connections=4)
+        self.pool = AsyncConnectionPool(self.db_path, max_connections=16)
         self.search_cache = SimpleAsyncCache(maxsize=100)
         self._initialized = False
 
@@ -123,7 +123,8 @@ def create_aether_server(
         output = [f"Found {len(results)} context chunks:"]
         for r in results:
             output.append(
-                f"[FACT #{getattr(r, 'fact_id', '?')} | PROJECT: {r.project} | TYPE: {r.fact_type} | SCORE: {r.score:.3f}]\n{r.content}\n---"
+                f"[FACT #{getattr(r, 'fact_id', '?')} | PROJECT: {r.project} | "
+                f"TYPE: {r.fact_type} | SCORE: {r.score:.3f}]\n{r.content}\n---"
             )
 
         final_str = "\n".join(output)
@@ -149,7 +150,10 @@ def create_aether_server(
                 lines = f.readlines()
             if len(lines) > limit:
                 content = "".join(lines[:limit])
-                return f"⚠️ Output truncated to first {limit} lines (total length was {len(lines)} lines).\n\n{content}"
+                return (
+                    f"⚠️ Output truncated to first {limit} lines "
+                    f"(total length was {len(lines)} lines).\n\n{content}"
+                )
             return "".join(lines)
 
         try:
@@ -187,6 +191,34 @@ def create_aether_server(
         ctx.search_cache.clear()
         ctx.metrics.record_request()
         return f"✅ Verified and Stored decision #{fact_id} in project '{project}'"
+
+    @mcp.tool()
+    async def cortex_get_swarm_report(tenant_id: str = "default") -> str:
+        """Get a high-level summary of the entire CORTEX agent swarm.
+
+        Analyzes the persistent registry for density, agent types, and
+        reputation health (The Gavel status).
+        """
+        await ctx.ensure_ready()
+
+        async with ctx.pool.acquire() as conn:
+            async with conn.execute(
+                "SELECT COUNT(*), AVG(reputation_score), COUNT(DISTINCT agent_type) "
+                "FROM agents WHERE tenant_id = ?",
+                (tenant_id,),
+            ) as cursor:
+                row = await cursor.fetchone()
+                if not row or row[0] == 0:
+                    return "Swarm is currently inactive (0 agents)."
+
+                count, avg_rep, types = row
+
+        return (
+            f"🔱 CORTEX Swarm Report [{tenant_id}]\n"
+            f"Active Nucleus: {count} agents across {types} specialized types\n"
+            f"Exergy/Reputation Mean: {avg_rep:.4f}\n"
+            f"Status: VOID-GATE CRYSTALLIZED"
+        )
 
     @mcp.tool()
     async def cortex_execute_bash(command: str, cwd: str = ".") -> str:

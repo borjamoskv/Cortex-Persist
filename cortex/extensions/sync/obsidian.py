@@ -330,14 +330,14 @@ async def export_obsidian(
     vault_path = Path(vault_path)
 
     # ─── Fetch all active facts ─────────────────────────────────────
-    conn = await engine.get_conn()
-    async with conn.execute(
-        "SELECT id, project, content, fact_type, tags, confidence, "
-        "consensus_score, created_at, updated_at, valid_until "
-        "FROM facts WHERE valid_until IS NULL "
-        "ORDER BY project, fact_type, id"
-    ) as cursor:
-        rows = await cursor.fetchall()
+    async with engine.session() as conn:
+        async with conn.execute(
+            "SELECT id, project, content, fact_type, tags, confidence, "
+            "consensus_score, created_at, updated_at, valid_until "
+            "FROM facts WHERE valid_until IS NULL "
+            "ORDER BY project, fact_type, id"
+        ) as cursor:
+            rows = await cursor.fetchall()
 
     facts = _parse_fact_rows(rows)  # type: ignore[reportArgumentType]
     by_project, by_tag, type_counts = _group_facts(facts)

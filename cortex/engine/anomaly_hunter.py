@@ -179,7 +179,7 @@ class AnomalyHunterEngine:
             sorted_group = sorted(group, key=lambda x: x.created_at or "")
 
             for i in range(len(sorted_group) - 1):
-                f1, f2 = sorted_group[i], sorted_group[i+1]
+                f1, f2 = sorted_group[i], sorted_group[i + 1]
                 # Simple drift detection: if both have numerical values and they differ by > 50%
                 v1 = f1.meta.get("value") if isinstance(f1.meta, dict) else None
                 v2 = f2.meta.get("value") if isinstance(f2.meta, dict) else None
@@ -193,8 +193,7 @@ class AnomalyHunterEngine:
                                 severity="MEDIUM",
                                 facts_involved=[f1.id, f2.id],  # type: ignore
                                 description=(
-                                    f"Drift detectado en {tag_key}: {v1} -> {v2} "
-                                    f"({drift_pct:.1%})"
+                                    f"Drift detectado en {tag_key}: {v1} -> {v2} ({drift_pct:.1%})"
                                 ),
                                 suggested_action=(
                                     "Revisar si el cambio de valor es legítimo o un error."
@@ -275,8 +274,6 @@ class AnomalyHunterEngine:
             "total_anomalies": len(self.anomalies),
             "by_type": by_type,
             "high_severity": sum(1 for a in self.anomalies if a.severity == "HIGH"),
-            "verification_tasks_created": sum(
-                1 for a in self.anomalies if a.severity == "HIGH"
-            ),
+            "verification_tasks_created": sum(1 for a in self.anomalies if a.severity == "HIGH"),
             "memory_health_score": max(0, 100 - len(self.anomalies) * 5),
         }

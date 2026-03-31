@@ -83,7 +83,7 @@ async def invalidate_impl_logic(
     await conn.execute(
         """
         UPDATE facts
-        SET valid_until = ?, is_tombstoned = 1, updated_at = ?,
+        SET valid_until = ?, is_tombstoned = 1, confidence = 'C1', updated_at = ?,
             metadata = CASE
                 WHEN metadata LIKE 'v6_aesgcm:%' THEN metadata
                 ELSE json_set(

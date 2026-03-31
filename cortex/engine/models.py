@@ -1,5 +1,6 @@
 import json
 from dataclasses import dataclass, field
+from typing import Any
 
 __all__ = ["Fact", "row_to_fact"]
 
@@ -102,48 +103,96 @@ def _to_float(value: object, default: float) -> float:
 
 
 def _extract_full_layout(row: list, res: dict) -> None:
-    res.update({
-        "meta_raw": row[5], "hash": row[6], "valid_from": row[7], "valid_until": row[8],
-        "source": row[9], "confidence": row[10] or "C3", "created_at": row[11],
-        "updated_at": row[12], "is_tombstoned": bool(row[13]), "is_quarantined": bool(row[14]),
-        "quadrant": row[17] or "ACTIVE", "storage_tier": row[18] or "HOT",
-        "exergy_score": _to_float(row[19], 1.0), "category": row[20] or "general",
-        "semantic_status": row[21], "semantic_error": row[22], "parent_id": row[23],
-        "relation_type": row[24], "yield_score": _to_float(row[25], 1.0), "tags_raw": row[26]
-    })
+    res.update(
+        {
+            "meta_raw": row[5],
+            "hash": row[6],
+            "valid_from": row[7],
+            "valid_until": row[8],
+            "source": row[9],
+            "confidence": row[10] or "C3",
+            "created_at": row[11],
+            "updated_at": row[12],
+            "is_tombstoned": bool(row[13]),
+            "is_quarantined": bool(row[14]),
+            "quadrant": row[17] or "ACTIVE",
+            "storage_tier": row[18] or "HOT",
+            "exergy_score": _to_float(row[19], 1.0),
+            "category": row[20] or "general",
+            "semantic_status": row[21],
+            "semantic_error": row[22],
+            "parent_id": row[23],
+            "relation_type": row[24],
+            "yield_score": _to_float(row[25], 1.0),
+            "tags_raw": row[26],
+        }
+    )
 
 
 def _extract_rich_layout(row: list, res: dict) -> None:
-    res.update({
-        "tags_raw": row[5], "meta_raw": row[6], "hash": row[7], "valid_from": row[8],
-        "valid_until": row[9], "source": row[10], "confidence": row[11] or "C3",
-        "created_at": row[12], "updated_at": row[13], "is_tombstoned": bool(row[14]),
-        "is_quarantined": bool(row[15]), "quadrant": row[16] or "ACTIVE",
-        "storage_tier": row[17] or "HOT", "exergy_score": _to_float(row[18], 1.0),
-        "category": row[19] or "general", "parent_id": row[20],
-        "relation_type": row[21], "yield_score": _to_float(row[22], 1.0)
-    })
+    res.update(
+        {
+            "tags_raw": row[5],
+            "meta_raw": row[6],
+            "hash": row[7],
+            "valid_from": row[8],
+            "valid_until": row[9],
+            "source": row[10],
+            "confidence": row[11] or "C3",
+            "created_at": row[12],
+            "updated_at": row[13],
+            "is_tombstoned": bool(row[14]),
+            "is_quarantined": bool(row[15]),
+            "quadrant": row[16] or "ACTIVE",
+            "storage_tier": row[17] or "HOT",
+            "exergy_score": _to_float(row[18], 1.0),
+            "category": row[19] or "general",
+            "parent_id": row[20],
+            "relation_type": row[21],
+            "yield_score": _to_float(row[22], 1.0),
+        }
+    )
 
 
 def _extract_compat_v1(row: list, res: dict, length: int) -> None:
-    res.update({
-        "tags_raw": row[5] if length > 5 else None,
-        "meta_raw": row[6] if length > 6 else (row[5] if length > 5 else None),
-        "hash": row[7] if length > 7 else (row[6] if length > 6 else None),
-        "valid_from": row[8] if length > 8 else (row[7] if length > 7 else None),
-    })
+    res.update(
+        {
+            "tags_raw": row[5] if length > 5 else None,
+            "meta_raw": row[6] if length > 6 else (row[5] if length > 5 else None),
+            "hash": row[7] if length > 7 else (row[6] if length > 6 else None),
+            "valid_from": row[8] if length > 8 else (row[7] if length > 7 else None),
+        }
+    )
+
+
+def _extract_compat_v2_core(row: list, res: dict, length: int) -> None:
+    res.update(
+        {
+            "valid_until": row[9] if length > 9 else (row[8] if length > 8 else None),
+            "source": row[10] if length > 10 else (row[9] if length > 9 else None),
+            "confidence": (row[11] if length > 11 else (row[10] if length > 10 else None)) or "C3",
+        }
+    )
+
+
+def _extract_compat_v2_status(row: list, res: dict, length: int) -> None:
+    res.update(
+        {
+            "created_at": row[12] if length > 12 else (row[11] if length > 11 else None),
+            "updated_at": row[13] if length > 13 else (row[12] if length > 12 else None),
+            "is_tombstoned": bool(row[14])
+            if length > 14
+            else (bool(row[13]) if length > 13 else False),
+            "is_quarantined": bool(row[15])
+            if length > 15
+            else (bool(row[14]) if length > 14 else False),
+        }
+    )
 
 
 def _extract_compat_v2(row: list, res: dict, length: int) -> None:
-    res.update({
-        "valid_until": row[9] if length > 9 else (row[8] if length > 8 else None),
-        "source": row[10] if length > 10 else (row[9] if length > 9 else None),
-        "confidence": (row[11] if length > 11 else (row[10] if length > 10 else None)) or "C3",
-        "created_at": row[12] if length > 12 else (row[11] if length > 11 else None),
-        "updated_at": row[13] if length > 13 else (row[12] if length > 12 else None),
-        "is_tombstoned": bool(row[14]) if length > 14 else (bool(row[13]) if length > 13 else False),
-        "is_quarantined": bool(row[15]) if length > 15 else (bool(row[14]) if length > 14 else False),
-    })
+    _extract_compat_v2_core(row, res, length)
+    _extract_compat_v2_status(row, res, length)
 
 
 def _extract_compat_legacy(row: list, res: dict, length: int) -> None:
@@ -152,12 +201,21 @@ def _extract_compat_legacy(row: list, res: dict, length: int) -> None:
 
 
 def _extract_compat_standard(row: list, res: dict) -> None:
-    res.update({
-        "tags_raw": row[5], "meta_raw": row[6], "hash": row[7], "valid_from": row[8],
-        "valid_until": row[9], "source": row[10], "confidence": row[11] or "C3",
-        "created_at": row[12], "updated_at": row[13], "is_tombstoned": bool(row[14]),
-        "is_quarantined": bool(row[15]),
-    })
+    res.update(
+        {
+            "tags_raw": row[5],
+            "meta_raw": row[6],
+            "hash": row[7],
+            "valid_from": row[8],
+            "valid_until": row[9],
+            "source": row[10],
+            "confidence": row[11] or "C3",
+            "created_at": row[12],
+            "updated_at": row[13],
+            "is_tombstoned": bool(row[14]),
+            "is_quarantined": bool(row[15]),
+        }
+    )
 
 
 def _extract_compat_layout(row: list, res: dict, length: int) -> None:
@@ -171,14 +229,30 @@ def _extract_row_values(row: list) -> dict:
     """Identify layout type and extract raw values."""
     length = len(row)
     res = {
-        "id": row[0], "tenant_id": row[1] or "default", "project": row[2],
-        "content_encrypted": row[3], "fact_type": row[4], "tags_raw": None,
-        "meta_raw": None, "confidence": "C3", "is_tombstoned": False,
-        "is_quarantined": False, "quadrant": "ACTIVE", "storage_tier": "HOT",
-        "exergy_score": 1.0, "category": "general", "yield_score": 1.0,
-        "parent_id": None, "relation_type": None, "semantic_status": None,
-        "semantic_error": None, "hash": None, "valid_from": None, "valid_until": None,
-        "created_at": None, "updated_at": None,
+        "id": row[0],
+        "tenant_id": row[1] or "default",
+        "project": row[2],
+        "content_encrypted": row[3],
+        "fact_type": row[4],
+        "tags_raw": None,
+        "meta_raw": None,
+        "confidence": "C3",
+        "is_tombstoned": False,
+        "is_quarantined": False,
+        "quadrant": "ACTIVE",
+        "storage_tier": "HOT",
+        "exergy_score": 1.0,
+        "category": "general",
+        "yield_score": 1.0,
+        "parent_id": None,
+        "relation_type": None,
+        "semantic_status": None,
+        "semantic_error": None,
+        "hash": None,
+        "valid_from": None,
+        "valid_until": None,
+        "created_at": None,
+        "updated_at": None,
     }
 
     if length >= 27:
@@ -190,18 +264,35 @@ def _extract_row_values(row: list) -> dict:
     return res
 
 
+def _parse_fact_metadata(v: dict, enc: Any, tenant_id: str) -> dict:
+    """Decrypt and parse the manifest-level metadata."""
+    m_raw = v["meta_raw"]
+    if isinstance(m_raw, str) and m_raw and not m_raw.lstrip().startswith("{"):
+        try:
+            return enc.decrypt_json(m_raw, tenant_id=tenant_id)
+        except Exception:
+            return {"error": "decryption_failed", "fact_id": v["id"]}
+    meta = _parse_json_blob(m_raw, {})
+    return meta if isinstance(meta, dict) else {}
+
+
 def row_to_fact(row: tuple) -> Fact:
     from cortex.crypto import get_default_encrypter
+
     enc = get_default_encrypter()
     r = list(row)
     if len(r) < 5:
-        raise ValueError(f"Unsupported fact row shape: expected at least 5 columns, got {len(r)}")
+        raise ValueError(f"Fact row shape error: expected >= 5, got {len(r)}")
 
     v = _extract_row_values(r)
     tenant_id = v["tenant_id"]
 
     try:
-        content = enc.decrypt_str(v["content_encrypted"], tenant_id=tenant_id) if v["content_encrypted"] else ""
+        content = (
+            enc.decrypt_str(v["content_encrypted"], tenant_id=tenant_id)
+            if v["content_encrypted"]
+            else ""
+        )
     except Exception:
         content = f"[ENCRYPTED - decryption failed] (fact #{v['id']})"
 
@@ -209,28 +300,24 @@ def row_to_fact(row: tuple) -> Fact:
     if not isinstance(tags, list):
         tags = []
 
-    m_raw = v["meta_raw"]
-    if isinstance(m_raw, str) and m_raw and not m_raw.lstrip().startswith("{"):
-        try:
-            meta = enc.decrypt_json(m_raw, tenant_id=tenant_id)
-        except Exception:
-            meta = {"error": "decryption_failed", "fact_id": v["id"]}
-    else:
-        meta = _parse_json_blob(m_raw, {})
-
-    if not isinstance(meta, dict):
-        meta = {}
-
-    # Metadata Overrides (Ω₁₃ Priority)
+    meta = _parse_fact_metadata(v, enc, tenant_id)
     pid = v["parent_id"] or meta.get("parent_id") or meta.get("parent_decision_id")
 
     return Fact(
-        id=v["id"], tenant_id=tenant_id, project=v["project"],
+        id=v["id"],
+        tenant_id=tenant_id,
+        project=v["project"],
         content=content if content is not None else "",
-        fact_type=v["fact_type"], tags=tags, meta=meta,
-        created_at=v["created_at"], updated_at=v["updated_at"],
-        is_tombstoned=v["is_tombstoned"], is_quarantined=v["is_quarantined"],
-        hash=v["hash"], valid_from=v["valid_from"], valid_until=v["valid_until"],
+        fact_type=v["fact_type"],
+        tags=tags,
+        meta=meta,
+        created_at=v["created_at"],
+        updated_at=v["updated_at"],
+        is_tombstoned=v["is_tombstoned"],
+        is_quarantined=v["is_quarantined"],
+        hash=v["hash"],
+        valid_from=v["valid_from"],
+        valid_until=v["valid_until"],
         source=v.get("source") or meta.get("source"),
         confidence=v["confidence"] or meta.get("confidence", "C3"),
         quadrant=meta.get("quadrant", v["quadrant"]),

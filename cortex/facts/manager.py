@@ -60,19 +60,53 @@ class FactManager:
         tenant_id = self.engine._resolve_tenant(tenant_id)
         if conn:
             return await self._store_delegate(
-                conn, project, content, tenant_id, fact_type, tags, confidence,
-                source, meta, valid_from, commit, tx_id, **kwargs
+                conn,
+                project,
+                content,
+                tenant_id,
+                fact_type,
+                tags,
+                confidence,
+                source,
+                meta,
+                valid_from,
+                commit,
+                tx_id,
+                **kwargs,
             )
 
         async with self.engine.session() as conn:
             return await self._store_delegate(
-                conn, project, content, tenant_id, fact_type, tags, confidence,
-                source, meta, valid_from, commit, tx_id, **kwargs
+                conn,
+                project,
+                content,
+                tenant_id,
+                fact_type,
+                tags,
+                confidence,
+                source,
+                meta,
+                valid_from,
+                commit,
+                tx_id,
+                **kwargs,
             )
 
     async def _store_delegate(
-        self, conn, project, content, tenant_id, fact_type, tags, confidence,
-        source, meta, valid_from, commit, tx_id, **kwargs
+        self,
+        conn,
+        project,
+        content,
+        tenant_id,
+        fact_type,
+        tags,
+        confidence,
+        source,
+        meta,
+        valid_from,
+        commit,
+        tx_id,
+        **kwargs,
     ) -> int:
 
         # Optional guard: do not block engine startup if the immunity stack is mid-repair.
@@ -248,10 +282,12 @@ class FactManager:
 
     async def find_path(self, *args, **kwargs) -> Any:
         import cortex.graph
+
         async with self.engine.session() as conn:
             return await cortex.graph.find_path(conn, *args, **kwargs)
 
     async def get_context_subgraph(self, *args, **kwargs) -> Any:
         import cortex.graph
+
         async with self.engine.session() as conn:
             return await cortex.graph.get_context_subgraph(conn, *args, **kwargs)

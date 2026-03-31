@@ -57,8 +57,8 @@ def reap_ghosts(ttl_days: int, db: str) -> None:
     try:
 
         async def _reap():
-            conn = await engine.get_conn()
-            return await reaper.reap_db_ghosts(conn)
+            async with engine.session() as conn:
+                return await reaper.reap_db_ghosts(conn)
 
         db_count = _run_async(_reap())
         sl_count = reaper.reap_songlines_ghosts()
@@ -85,8 +85,8 @@ def bridge_audit(db: str) -> None:
     try:
 
         async def _audit():
-            conn = await engine.get_conn()
-            return await BridgeGuard.audit_bridges(conn)
+            async with engine.session() as conn:
+                return await BridgeGuard.audit_bridges(conn)
 
         results = _run_async(_audit())
 

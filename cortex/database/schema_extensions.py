@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS agents (
     agent_type      TEXT NOT NULL DEFAULT 'ai',
     tenant_id       TEXT NOT NULL DEFAULT 'default',
     created_at      TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at      TEXT NOT NULL DEFAULT (datetime('now')),
     reputation_score    REAL NOT NULL DEFAULT 0.5,
     base_reputation     REAL NOT NULL DEFAULT 0.5,
     reputation_stake    REAL NOT NULL DEFAULT 0.0,

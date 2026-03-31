@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import json
 import logging
-import sqlite3
 from typing import Any, Optional
 
 import aiosqlite
@@ -23,8 +22,6 @@ async def _get_table_columns(conn: aiosqlite.Connection, table_name: str) -> set
     async with conn.execute(f"PRAGMA table_info({table_name})") as cursor:
         rows = await cursor.fetchall()
     return {str(row[1]) for row in rows}
-
-
 
 
 async def _prepare_fact_content(
@@ -107,8 +104,19 @@ async def insert_fact_record(
 
     # 3. SQL Persistence
     payload = await _build_fact_payload(
-        conn, tenant_id, project, encrypted_content, fact_type, meta,
-        f_hash, source, confidence, parent_decision_id, tx_id, tags_json, ts
+        conn,
+        tenant_id,
+        project,
+        encrypted_content,
+        fact_type,
+        meta,
+        f_hash,
+        source,
+        confidence,
+        parent_decision_id,
+        tx_id,
+        tags_json,
+        ts,
     )
 
     columns_sql = ", ".join(column for column, _ in payload)
@@ -123,8 +131,17 @@ async def insert_fact_record(
     assert fact_id is not None
 
     await _post_insert_actions(
-        conn, fact_id, content, tenant_id, project, tags, tags_json,
-        fact_type, ts, meta, parent_decision_id
+        conn,
+        fact_id,
+        content,
+        tenant_id,
+        project,
+        tags,
+        tags_json,
+        fact_type,
+        ts,
+        meta,
+        parent_decision_id,
     )
 
     return fact_id
@@ -150,9 +167,14 @@ async def _build_fact_payload(
     from cortex.engine.models import Fact
 
     temp_fact = Fact(
-        id=0, tenant_id=tenant_id, project=project, content="",
-        fact_type=fact_type, tags=[], parent_id=parent_decision_id,
-        relation_type=meta.get("relation_type")
+        id=0,
+        tenant_id=tenant_id,
+        project=project,
+        content="",
+        fact_type=fact_type,
+        tags=[],
+        parent_id=parent_decision_id,
+        relation_type=meta.get("relation_type"),
     )
     m2 = MetadataEngine.classify_deterministic(temp_fact)
 
@@ -172,16 +194,20 @@ async def _build_fact_payload(
     add("fact_type", fact_type)
 
     meta_json = json.dumps(meta)
-    if "metadata" in facts_columns: add("metadata", meta_json)
-    elif "meta" in facts_columns: add("meta", meta_json)
+    if "metadata" in facts_columns:
+        add("metadata", meta_json)
+    elif "meta" in facts_columns:
+        add("meta", meta_json)
 
     add("hash", f_hash)
     add("source", source)
     add("confidence", confidence)
     add("confidence_rank", c_rank)
     add("consensus_score", float(meta.get("consensus_score", 1.0)))
-    if "parent_id" in facts_columns: add("parent_id", parent_decision_id)
-    elif "parent_decision_id" in facts_columns: add("parent_decision_id", parent_decision_id)
+    if "parent_id" in facts_columns:
+        add("parent_id", parent_decision_id)
+    elif "parent_decision_id" in facts_columns:
+        add("parent_decision_id", parent_decision_id)
 
     add("relation_type", m2["relation_type"])
     add("quadrant", m2["quadrant"])
@@ -198,6 +224,38 @@ async def _build_fact_payload(
     return payload
 
 
+async def _record_causality(
+    conn: aiosqlite.Connection,
+    fact_id: int,
+    project: str,
+    tenant_id: str,
+    meta: dict[str, Any],
+    parent_decision_id: Optional[int],
+) -> None:
+    """Record causal linkage for the fact."""
+    try:
+        from cortex.engine.causality import EDGE_DERIVED_FROM, EDGE_TRIGGERED_BY, EDGE_UPDATED_FROM
+
+        p_sig = meta.get("causal_parent")
+        p_fact = meta.get("previous_fact_id")
+
+        if p_sig or p_fact:
+            e_type = EDGE_UPDATED_FROM if p_fact else EDGE_TRIGGERED_BY
+            await conn.execute(
+                "INSERT INTO causal_edges (fact_id, parent_id, signal_id, edge_type, project, tenant_id) "
+                "VALUES (?, ?, ?, ?, ?, ?)",
+                (fact_id, p_fact, p_sig, e_type, project, tenant_id),
+            )
+        elif parent_decision_id:
+            await conn.execute(
+                "INSERT INTO causal_edges (fact_id, parent_id, signal_id, edge_type, project, tenant_id) "
+                "VALUES (?, ?, NULL, ?, ?, ?)",
+                (fact_id, parent_decision_id, EDGE_DERIVED_FROM, project, tenant_id),
+            )
+    except Exception:
+        pass
+
+
 async def _post_insert_actions(
     conn: aiosqlite.Connection,
     fact_id: int,
@@ -212,99 +270,36 @@ async def _post_insert_actions(
     parent_decision_id: Optional[int],
 ) -> None:
     """Side effects: Enrichment jobs, Tags, FTS, Causality, and Graph."""
-    # 1. Enrichment Job
     try:
         await conn.execute(
             "INSERT INTO enrichment_jobs (fact_id, job_type, status, priority) VALUES (?, 'embedding', 'pending', ?)",
-            (fact_id, 1 if fact_type == "decision" else 0)
+            (fact_id, 1 if fact_type == "decision" else 0),
         )
     except Exception:
-        pass # Fallback to manual trigger or background sync
+        pass
 
-    # 2. Tag Bridge
     if tags:
         await conn.executemany(
             "INSERT OR IGNORE INTO fact_tags (fact_id, tag, tenant_id) VALUES (?, ?, ?)",
-            [(fact_id, t, tenant_id) for t in tags]
+            [(fact_id, t, tenant_id) for t in tags],
         )
 
-    # 3. FTS virtual table
     try:
         await conn.execute(
             "INSERT INTO facts_fts (rowid, content, project, tags, fact_type, tenant_id) VALUES (?, ?, ?, ?, ?, ?)",
-            (fact_id, content, project, tags_json, fact_type, tenant_id)
+            (fact_id, content, project, tags_json, fact_type, tenant_id),
         )
     except Exception:
         pass
 
-    # 4. Causal & Graph logic
+    await _record_causality(conn, fact_id, project, tenant_id, meta, parent_decision_id)
+
     try:
-        from cortex.engine.causality import EDGE_DERIVED_FROM, EDGE_TRIGGERED_BY, EDGE_UPDATED_FROM
         from cortex.graph import process_fact_graph
 
-        p_sig = meta.get("causal_parent")
-        p_fact = meta.get("previous_fact_id")
-
-        if p_sig or p_fact:
-            e_type = EDGE_UPDATED_FROM if p_fact else EDGE_TRIGGERED_BY
-            await conn.execute(
-                "INSERT INTO causal_edges (fact_id, parent_id, signal_id, edge_type, project, tenant_id) VALUES (?, ?, ?, ?, ?, ?)",
-                (fact_id, p_fact, p_sig, e_type, project, tenant_id)
-            )
-        elif parent_decision_id:
-            await conn.execute(
-                "INSERT INTO causal_edges (fact_id, parent_id, signal_id, edge_type, project, tenant_id) VALUES (?, ?, NULL, ?, ?, ?)",
-                (fact_id, parent_decision_id, EDGE_DERIVED_FROM, project, tenant_id)
-            )
         await process_fact_graph(conn, fact_id, content, project, ts, tenant_id)
     except Exception:
         pass
-
-    # Causal Infrastructure (ANAMNESIS-Ω)
-    try:
-        from cortex.engine.causality import (
-            EDGE_DERIVED_FROM,
-            EDGE_TRIGGERED_BY,
-            EDGE_UPDATED_FROM,
-        )
-
-        parent_signal = meta.get("causal_parent") if meta else None
-        parent_fact = meta.get("previous_fact_id") if meta else None
-
-        edge_recorded = False
-        if parent_signal or parent_fact:
-            edge_type = EDGE_UPDATED_FROM if parent_fact else EDGE_TRIGGERED_BY
-            await conn.execute(
-                "INSERT INTO causal_edges "
-                "(fact_id, parent_id, signal_id, edge_type, project, tenant_id) "
-                "VALUES (?, ?, ?, ?, ?, ?)",
-                (fact_id, parent_fact, parent_signal, edge_type, project, tenant_id),
-            )
-            edge_recorded = True
-
-        # Ω₁₁ Densification: wire auto-resolved parent_decision_id → causal_edges
-        if not edge_recorded and parent_decision_id:
-            await conn.execute(
-                "INSERT INTO causal_edges "
-                "(fact_id, parent_id, signal_id, edge_type, project, tenant_id) "
-                "VALUES (?, ?, NULL, ?, ?, ?)",
-                (fact_id, parent_decision_id, EDGE_DERIVED_FROM, project, tenant_id),
-            )
-
-    except (ImportError, Exception) as e:  # noqa: BLE001
-        logger.debug("Causal edge recording skipped for fact %d: %s", fact_id, e)
-
-    # Graph Extraction
-    try:
-        from cortex.graph import process_fact_graph
-
-        await process_fact_graph(conn, fact_id, content, project, ts, tenant_id)
-    except (sqlite3.Error, aiosqlite.Error, ValueError) as e:
-        logger.warning("Graph extraction failed for fact %d (tenant=%s): %s", fact_id, tenant_id, e)
-    except Exception as e:  # noqa: BLE001
-        logger.debug("Graph extraction unavailable for fact %d: %s", fact_id, e)
-
-    return fact_id  # type: ignore[reportReturnType]
 
 
 async def resolve_causality_async(

@@ -75,23 +75,23 @@ async def export_snapshot(
     by_project: dict[str, list] = {}
     total_facts = 0
 
-    conn = await engine.get_conn()
-    async with conn.execute(query, params) as cursor:
-        while True:
-            batch = await cursor.fetchmany(1000)
-            if not batch:
-                break
-            for row in batch:
-                project, content, fact_type, tags, confidence = row
-                by_project.setdefault(project, []).append(
-                    {
-                        "content": content,
-                        "type": fact_type,
-                        "tags": _safe_parse_tags(tags),
-                        "confidence": confidence,
-                    }
-                )
-                total_facts += 1
+    async with engine.session() as conn:
+        async with conn.execute(query, params) as cursor:
+            while True:
+                batch = await cursor.fetchmany(1000)
+                if not batch:
+                    break
+                for row in batch:
+                    project, content, fact_type, tags, confidence = row
+                    by_project.setdefault(project, []).append(
+                        {
+                            "content": content,
+                            "type": fact_type,
+                            "tags": _safe_parse_tags(tags),
+                            "confidence": confidence,
+                        }
+                    )
+                    total_facts += 1
 
     lines = [
         "# 🧠 CORTEX — Snapshot de Memoria",
