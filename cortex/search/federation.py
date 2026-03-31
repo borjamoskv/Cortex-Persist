@@ -145,6 +145,9 @@ def _search_attached_db(
         else:
             content = str(row[1])
 
+        if content is None:
+            continue
+
         if query_lower not in content.lower():
             continue
 
