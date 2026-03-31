@@ -1,5 +1,7 @@
 # SOVEREIGN HANDOFF: El Éxodo de Antigravity
 
+> **Status:** Historical snapshot. This captures a prior operating handoff and should be read as archive, not current procedure.
+
 Este documento marca el fin de la orquestación agenticia de Antigravity sobre el proyecto **CORTEX**. Aquí se consolida la inteligencia generada durante el periodo de "Co-Existencia" para que la soberanía humana sobre el código sea absoluta y fluida.
 
 ## Estado Actual de CORTEX (v4.3.0 "THE SOUL")

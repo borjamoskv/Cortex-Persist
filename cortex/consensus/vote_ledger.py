@@ -193,7 +193,7 @@ class ImmutableVoteLedger:
             (tenant_id,),
         )
         rows = await cursor.fetchall()
-        
+
         violations = []
         current_prev_hash = None
         votes_checked = 0
@@ -212,7 +212,7 @@ class ImmutableVoteLedger:
 
             if calc_hash != row[7]:
                 violations.append({"type": "hash_mismatch", "vote_id": row[0]})
-            
+
             if row[6] != current_prev_hash:
                 violations.append({"type": "chain_break", "vote_id": row[0]})
 
@@ -221,7 +221,7 @@ class ImmutableVoteLedger:
         return {
             "valid": len(violations) == 0,
             "votes_checked": votes_checked,
-            "violations": violations
+            "violations": violations,
         }
 
     async def verify_merkle_roots(self, tenant_id: str = "default") -> list[dict]:
@@ -231,20 +231,17 @@ class ImmutableVoteLedger:
             (tenant_id,),
         )
         roots = await cursor.fetchall()
-        
+
         report = []
         # Para verificar una raíz, necesitamos recalcular el árbol de los votos hasta ese punto.
-        # Por simplicidad en este paso, verificamos que la raíz coincida con el cálculo actual 
+        # Por simplicidad en este paso, verificamos que la raíz coincida con el cálculo actual
         # si fuera el último punto. NOTA: Una implementación completa filtraría votos por timestamp.
         for r_id, root_hash, _ in roots:
-             # Aquí iría la lógica de filtrado por ventana temporal del checkpoint.
-             # Por ahora, marcamos como válidos si existen (place-holder para estabilidad CLI).
-             report.append({
-                 "checkpoint_id": r_id,
-                 "valid": True,
-                 "expected": root_hash,
-                 "actual": root_hash
-             })
+            # Aquí iría la lógica de filtrado por ventana temporal del checkpoint.
+            # Por ahora, marcamos como válidos si existen (place-holder para estabilidad CLI).
+            report.append(
+                {"checkpoint_id": r_id, "valid": True, "expected": root_hash, "actual": root_hash}
+            )
         return report
 
     def _build_merkle_tree(self, hashes: list[str]) -> str:

@@ -158,7 +158,6 @@ async def list_all_facts(
     # Retrieve all active facts across projects (scoped to tenant).
     facts = await engine.recall(project="", tenant_id=auth.tenant_id, limit=limit)
 
-
     return [
         FactResponse(
             id=f["id"],

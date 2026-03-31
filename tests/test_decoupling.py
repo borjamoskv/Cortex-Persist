@@ -16,27 +16,15 @@ from cortex.verification.oracle import VerificationOracle
 @pytest.fixture
 async def engine(tmp_path):
     db_path = str(tmp_path / "cortex_test.db")
+    from cortex.engine import CortexEngine
+
+    sync_engine = CortexEngine(db_path=db_path)
+    sync_engine.init_db_sync()
+    sync_engine.close_sync()
+
     pool = CortexConnectionPool(db_path, min_connections=2, max_connections=5, read_only=False)
     await pool.initialize()
-
-    # Initialize schema manually if needed, or use a helper
-    async with pool.acquire() as conn:
-        from cortex.database.schema import ALL_SCHEMA
-
-        for stmt in ALL_SCHEMA:
-            if isinstance(stmt, str):
-                try:
-                    await conn.executescript(stmt)
-                except sqlite3.OperationalError as e:
-                    if "no such module: vec0" in str(e):
-                        continue
-                    raise
-        await conn.commit()
-
     engine = AsyncCortexEngine(pool=pool, db_path=db_path)
-    from cortex.engine.ledger import ImmutableLedger
-
-    engine._ledger = ImmutableLedger(engine)
 
     yield engine
     await pool.close()

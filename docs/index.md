@@ -51,7 +51,7 @@ cortex verify 1
 ```
 
 [Get started →](quickstart.md){ .md-button .md-button--primary }
-[Architecture →](ARCHITECTURE.md){ .md-button }
+[Architecture →](architecture.md){ .md-button }
 [View on GitHub →](https://github.com/borjamoskv/Cortex-Persist){ .md-button }
 
 ---
@@ -85,9 +85,9 @@ cortex verify 1
 |:---|:---|
 | [Quickstart](quickstart.md) | Get running in 5 minutes |
 | [Installation](installation.md) | All install methods and extras |
-| [Architecture](ARCHITECTURE.md) | Deep dive into the system design |
+| [Architecture](architecture.md) | Deep dive into the system design |
 | [CLI Reference](cli.md) | All 38 commands documented |
-| [REST API](api.md) | Versioned REST endpoints |
+| [REST API Reference](api.md) | Versioned REST endpoints |
 | [MCP Server](mcp.md) | Model Context Protocol integration |
 | [Python API Reference](reference.md) | Auto-generated from source |
 | [SDKs](sdks.md) | Python and JavaScript SDKs |

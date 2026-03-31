@@ -113,4 +113,4 @@ See [Cross-Platform Guide](cross_platform_guide.md) for full architecture detail
 
 - **[Quickstart](quickstart.md)** — Store, search, verify in 5 minutes
 - **[CLI Reference](cli.md)** — All 38 commands
-- **[Architecture](ARCHITECTURE.md)** — How it works under the hood
+- **[Architecture](architecture.md)** — How it works under the hood

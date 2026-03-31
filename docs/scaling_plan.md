@@ -141,7 +141,7 @@ CORTEX_DB_TOKEN = os.environ.get("CORTEX_DB_TOKEN", "")
 
 ```
 POST   /v1/store        → Guardar fact (autenticado)
-GET    /v1/search?q=    → Buscar (autenticado)
+POST   /v1/facts/search  → Buscar (autenticado)
 GET    /v1/recall/:proj → Recall proyecto (autenticado)
 GET    /v1/status       → Health check (público)
 POST   /v1/keys         → Crear API key (admin)

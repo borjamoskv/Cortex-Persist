@@ -18,11 +18,13 @@ else:
     TrustGraph: Any = None
     try:
         from cortex.consensus.reputation import ReputationManager as _RM
+
         ReputationManager = _RM
     except ImportError:
         pass
     try:
         from cortex.consensus.trust import TrustGraph as _TG
+
         TrustGraph = _TG
     except ImportError:
         pass

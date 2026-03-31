@@ -347,7 +347,7 @@ It reduces their freedom to contaminate persistent state.
 
 - [`SECURITY.md`](https://github.com/borjamoskv/Cortex-Persist/blob/main/SECURITY.md)
 - [`AGENTS.md`](https://github.com/borjamoskv/Cortex-Persist/blob/main/AGENTS.md)
-- [`ARCHITECTURE.md`](ARCHITECTURE.md)
+- [`architecture.md`](architecture.md)
 - [`AXIOMS.md`](AXIOMS.md)
 - [`CONTRIBUTING.md`](CONTRIBUTING.md)
 - [`OPERATIONS.md`](OPERATIONS.md)

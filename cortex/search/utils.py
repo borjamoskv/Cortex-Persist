@@ -98,6 +98,7 @@ def _row_to_result(row: Any, is_fts: bool = False) -> SearchResult:
     if is_fts and len(row) > 16:
         rank = row[16] if row[16] is not None else 0.0
         import math
+
         score = 1.0 / (1.0 + math.exp(rank / 10.0))
 
     # Ω₁₆: Consensus-aware confidence normalization natively mapping from columns 4, 14
@@ -179,6 +180,7 @@ def _parse_row_sync(row: Any, has_rank: bool) -> SearchResult:
     if has_rank and len(row) > 7:
         # Normalize bm25 rank synchronously too
         import math
+
         rank = row[7] if row[7] is not None else 0.0
         score = 1.0 / (1.0 + math.exp(rank / 10.0))
     else:

@@ -35,7 +35,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -e ".[dev]"
-          pip install ruff bandit safety
+          pip install ruff bandit safety mypy
 
       - name: Lint (Ruff)
         run: ruff check cortex/ --output-format=github
@@ -55,9 +55,9 @@ jobs:
       - name: MEJORAlo Score Check
         run: |
           python -c "
-          from cortex.mejoralo.scan import scan
-          result = scan('cortex/')
-          score = result.get('score', 0)
+          from cortex.extensions.mejoralo.scan import scan
+          result = scan('cortex', 'cortex/')
+          score = result.score
           print(f'MEJORAlo Score: {score}/100')
           if score < 70:
               raise SystemExit(f'BLOCKED: Score {score} < 70 threshold')

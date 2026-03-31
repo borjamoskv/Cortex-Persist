@@ -118,7 +118,9 @@ class TestQueryAPIs:
         assert len(free) >= 5
 
     def test_empty_for_unknown(self):
-        assert providers_for_intent("nonexistent_intent", min_tier="frontier", max_cost="free") == []
+        assert (
+            providers_for_intent("nonexistent_intent", min_tier="frontier", max_cost="free") == []
+        )
 
 
 # ─── BaseProvider Defaults ────────────────────────────────────────────

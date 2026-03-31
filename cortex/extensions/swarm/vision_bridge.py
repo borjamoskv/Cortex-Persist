@@ -7,6 +7,7 @@ from scripts.mac_control.cdp_engine import MacControlOmega
 
 logger = logging.getLogger("cortex.swarm.vision")
 
+
 class VisionBridge:
     """Connects Swarm agents to the macOS UI via CDP."""
 
@@ -29,7 +30,7 @@ class VisionBridge:
             return {
                 "content": content[:2000] if content else "",
                 "truncated": len(content or "") > 2000,
-                "target": self.target
+                "target": self.target,
             }
         finally:
             await self.ctl.close()

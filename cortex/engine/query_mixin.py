@@ -289,15 +289,13 @@ class QueryMixin(EngineMixinBase):
                 row = await cursor.fetchone()
                 total = row[0] if row else 0
             async with conn.execute(
-                "SELECT COUNT(*) FROM facts WHERE is_tombstoned = 0 AND tenant_id = ?",
-                (tenant_id,)
+                "SELECT COUNT(*) FROM facts WHERE is_tombstoned = 0 AND tenant_id = ?", (tenant_id,)
             ) as cursor:
                 row = await cursor.fetchone()
                 active = row[0] if row else 0
             async with conn.execute(
-                "SELECT DISTINCT project FROM facts "
-                "WHERE is_tombstoned = 0 AND tenant_id = ?",
-                (tenant_id,)
+                "SELECT DISTINCT project FROM facts WHERE is_tombstoned = 0 AND tenant_id = ?",
+                (tenant_id,),
             ) as cursor:
                 projects = [p[0] for p in await cursor.fetchall()]
             async with conn.execute(
@@ -311,7 +309,7 @@ class QueryMixin(EngineMixinBase):
                     "SELECT COUNT(*) FROM fact_embeddings fe "
                     "JOIN facts f ON fe.fact_id = f.id "
                     "WHERE f.tenant_id = ?",
-                    (tenant_id,)
+                    (tenant_id,),
                 ) as cursor:
                     row = await cursor.fetchone()
                     embeddings = row[0] if row else 0
@@ -322,7 +320,7 @@ class QueryMixin(EngineMixinBase):
                 "SELECT fact_type, COUNT(*) FROM facts "
                 "WHERE is_tombstoned = 0 AND tenant_id = ? "
                 "GROUP BY fact_type",
-                (tenant_id,)
+                (tenant_id,),
             ) as cursor:
                 types = {row[0]: row[1] for row in await cursor.fetchall()}
 
@@ -332,7 +330,7 @@ class QueryMixin(EngineMixinBase):
                     "SELECT COUNT(*) FROM facts "
                     "WHERE json_extract(metadata, '$.parent_decision_id') IS NOT NULL "
                     "AND is_tombstoned = 0 AND tenant_id = ?",
-                    (tenant_id,)
+                    (tenant_id,),
                 ) as cursor:
                     row = await cursor.fetchone()
                     causal_facts = row[0] if row else 0

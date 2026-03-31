@@ -119,7 +119,7 @@ fact_id = await engine.store(project="x", content="Hello", fact_type="knowledge"
 ```python
 from fastapi import APIRouter, Depends
 from cortex.auth import AuthResult, require_permission
-from cortex.api_deps import get_async_engine
+from cortex.api.deps import get_async_engine
 
 router = APIRouter(tags=["my-feature"])
 
@@ -132,7 +132,7 @@ async def my_endpoint(
     return {"status": "ok"}
 ```
 
-2. **Register in** `cortex/api.py`:
+2. **Register in** `cortex/api/core.py`:
 
 ```python
 from cortex.routes.my_feature import router as my_feature_router

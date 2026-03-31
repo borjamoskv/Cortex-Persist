@@ -18,6 +18,13 @@ from cortex.utils.canonical import compute_fact_hash
 logger = logging.getLogger("cortex")
 
 
+async def _get_table_columns(conn: aiosqlite.Connection, table_name: str) -> set[str]:
+    """Return the set of column names for a SQLite table."""
+    async with conn.execute(f"PRAGMA table_info({table_name})") as cursor:
+        rows = await cursor.fetchall()
+    return {str(row[1]) for row in rows}
+
+
 async def insert_fact_record(
     conn: aiosqlite.Connection,
     tenant_id: str,
@@ -126,43 +133,65 @@ async def insert_fact_record(
 
     # 2. SQL Persistence (facts table)
     rank_map = {
-        "C5": 5, "C4": 4, "C3": 3, "C2": 2, "C1": 1,
-        "stated": 5, "verified": 5, "refuted": 0, "conjecture": 1
+        "C5": 5,
+        "C4": 4,
+        "C3": 3,
+        "C2": 2,
+        "C1": 1,
+        "stated": 5,
+        "verified": 5,
+        "refuted": 0,
+        "conjecture": 1,
     }
     c_rank = rank_map.get(confidence, 3)
 
+    facts_columns = await _get_table_columns(conn, "facts")
+    payload: list[tuple[str, Any]] = []
+
+    def add(column: str, value: Any) -> None:
+        if column in facts_columns:
+            payload.append((column, value))
+
+    add("tenant_id", tenant_id)
+    add("project", project)
+    add("content", encrypted_content)
+    add("fact_type", fact_type)
+
+    metadata_json = json.dumps(meta)
+    if "metadata" in facts_columns:
+        add("metadata", metadata_json)
+    elif "meta" in facts_columns:
+        add("meta", metadata_json)
+
+    add("hash", f_hash)
+    add("source", source)
+    add("confidence", confidence)
+    add("confidence_rank", c_rank)
+    add("consensus_score", float(meta.get("consensus_score", 1.0)))
+    if "parent_id" in facts_columns:
+        add("parent_id", parent_decision_id)
+    elif "parent_decision_id" in facts_columns:
+        add("parent_decision_id", parent_decision_id)
+    add("relation_type", relation_type)
+    add("quadrant", quadrant)
+    add("storage_tier", storage_tier)
+    add("exergy_score", exergy_score)
+    add("category", category)
+    add("yield_score", yield_score)
+    add("semantic_status", "pending")
+    add("tags", tags_json)
+    add("tx_id", tx_id)
+    add("created_at", ts)
+    add("updated_at", ts)
+    add("valid_from", ts)
+
+    columns_sql = ", ".join(column for column, _ in payload)
+    placeholders_sql = ", ".join("?" for _ in payload)
+    values = [value for _, value in payload]
+
     async with conn.execute(
-        """
-        INSERT INTO facts (
-            tenant_id, project, content, fact_type, metadata, hash, 
-            source, confidence, confidence_rank, consensus_score, parent_id, relation_type,
-            quadrant, storage_tier, exergy_score, category, yield_score,
-            semantic_status, tags, tx_id
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """,
-        (
-            tenant_id,
-            project,
-            encrypted_content,
-            fact_type,
-            json.dumps(meta),
-            f_hash,
-            source,
-            confidence,
-            c_rank,
-            float(meta.get("consensus_score", 1.0)),
-            parent_decision_id,
-            relation_type,
-            quadrant,
-            storage_tier,
-            exergy_score,
-            category,
-            yield_score,
-            "pending",
-            tags_json,
-            tx_id,
-        ),
+        f"INSERT INTO facts ({columns_sql}) VALUES ({placeholders_sql})",
+        values,
     ) as cursor:
         fact_id = cursor.lastrowid
     assert fact_id is not None

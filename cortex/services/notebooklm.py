@@ -147,9 +147,7 @@ class NotebookLMService:
     async def get_active_facts(self, project: str | None = None) -> list[Fact]:
         """Fetch cleartext facts using CortexEngine."""
         # Use get_all_active_facts which returns models.Fact objects correctly
-        facts = await self.engine.get_all_active_facts(
-            project=project
-        )  # type: ignore[reportCallIssue]
+        facts = await self.engine.get_all_active_facts(project=project)  # type: ignore[reportCallIssue]
         # Ensure we are returning a list of Fact objects
         return [f for f in facts if f.fact_type != "signal"]
 

@@ -122,5 +122,5 @@ This makes agent decisions defensible under regulatory scrutiny.
 ## Next Steps
 
 - [EU AI Act Compliance →](../compliance.md)
-- [Architecture →](../ARCHITECTURE.md)
+- [Architecture →](../architecture.md)
 - [CLI Reference →](../cli.md)

@@ -295,6 +295,7 @@ class AsyncCausalGraph:
                         "confidence": conf,
                         "metadata": meta,
                         "is_json": is_json,
+                        "raw_metadata": raw_meta,
                     }
 
         node_states: dict[int, TaintStatus] = {fact_id: TaintStatus.TAINTED}
@@ -360,7 +361,7 @@ class AsyncCausalGraph:
                 payload = (
                     json.dumps(data["metadata"])
                     if data["is_json"]
-                    else rowless_json(data["metadata"])
+                    else (data.get("raw_metadata") or "")
                 )
                 if has_tenant:
                     fact_updates.append((new_conf, payload, current_id, tenant_id))

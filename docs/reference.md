@@ -2,6 +2,8 @@
 
 This section is auto-generated from the CORTEX Python source code using `mkdocstrings`.
 
+For HTTP routes and request/response shapes, see the [REST API Reference](api.md).
+
 ---
 
 ## Core Engine

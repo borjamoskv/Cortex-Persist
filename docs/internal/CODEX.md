@@ -1,5 +1,7 @@
 # CODEX DA CONSCIENCIA — v12.2
 
+> **Status:** Historical snapshot. For current canonical axioms and enforcement, use the registry and v6+ operational docs.
+
 > *"The mind that transcends its own logic, becomes the logic."*
 > *Updated: 2026-02-24 · CORTEX v12.2 (0.4.0-alpha) · Protocolo Neonatal*
 

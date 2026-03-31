@@ -92,7 +92,7 @@ cortex verify 1
 # → ✅ VERIFIED — Hash chain intact, Merkle sealed
 ```
 
-> Full quickstart & API docs: [README.md](../../README.md) · [cortexpersist.dev](https://cortexpersist.dev)
+> Full quickstart & API docs: [README.md](../../README.md) · [GitHub Docs](https://github.com/borjamoskv/Cortex-Persist/tree/main/docs)
 
 ---
 

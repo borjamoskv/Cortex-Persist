@@ -1,5 +1,7 @@
 # CORTEX v6.0 — Wave 5 Reality Check
 
+> **Status:** Historical snapshot. This documents the v6-era reconciliation point; current canonical state lives in the active architecture and roadmap docs.
+
 > **Fecha:** 2026-03-02  
 > **Propósito:** Mapear el diseño Wave 5 (Persistence & Deployment, docs v4.1-alpha)  
 > contra el estado real de CORTEX v6.0.  

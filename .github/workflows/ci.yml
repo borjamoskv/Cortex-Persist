@@ -166,7 +166,7 @@ jobs:
           format: table
       - name: Smoke test
         run: |
-          docker run --rm -d --name cortex-test -p 8000:8000 cortex:test
+          docker run --rm -d --name cortex-test -p 8484:8484 cortex:test
           sleep 5
-          curl -f http://localhost:8000/health || exit 1
+          curl -f http://localhost:8484/health || exit 1
           docker stop cortex-test

@@ -11,6 +11,7 @@ from typing import Any
 
 logger = logging.getLogger("cortex.swarm.protocols")
 
+
 class SwarmIntent(str, Enum):
     DISCOVERY = "discovery"
     ROADBLOCK = "roadblock"
@@ -18,10 +19,12 @@ class SwarmIntent(str, Enum):
     COMPLETION = "completion"
     HEALING = "healing"
 
+
 class AgentRole(str, Enum):
     CAPATAZ = "capataz"
     WORKER = "worker"
     ELDER = "elder"
+
 
 @dataclass
 class SwarmSignalSchema:
@@ -44,6 +47,7 @@ class SwarmSignalSchema:
         if "role" in data:
             data["role"] = AgentRole(data["role"])
         return cls(**data)
+
 
 def validate_swarm_signal(data: dict[str, Any]) -> bool:
     """Validate that a signal matches the Ω₁₄ schema."""

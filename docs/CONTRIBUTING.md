@@ -134,7 +134,7 @@ Relevant documents include:
 
 - [`AGENTS.md`](https://github.com/borjamoskv/Cortex-Persist/blob/main/AGENTS.md)
 - [`./SECURITY_TRUST_MODEL.md`](./SECURITY_TRUST_MODEL.md)
-- [`./ARCHITECTURE.md`](./ARCHITECTURE.md)
+- [`./architecture.md`](./architecture.md)
 - [`./OPERATIONS.md`](./OPERATIONS.md)
 
 ## Review Gate for Trust Events

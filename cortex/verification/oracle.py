@@ -52,10 +52,22 @@ class VerificationOracle:
 
     async def verify_ledger_continuity(self) -> bool:
         """Verify the integrity of the entire ledger chain."""
-        # This will call SovereignLedger.audit()
         try:
-            audit_result = await self.engine.ledger.audit()
-            return audit_result["is_valid"]
+            if hasattr(self.engine, "verify_ledger"):
+                audit_result = await self.engine.verify_ledger()
+                return bool(audit_result.get("valid", audit_result.get("is_valid", False)))
+
+            ledger = getattr(self.engine, "_ledger", None)
+            if ledger is not None and hasattr(ledger, "verify_integrity_async"):
+                audit_result = await ledger.verify_integrity_async()
+                return bool(audit_result.get("valid", False))
+
+            if hasattr(self.engine, "ledger") and hasattr(self.engine.ledger, "audit"):
+                audit_result = await self.engine.ledger.audit()
+                return bool(audit_result.get("is_valid", audit_result.get("valid", False)))
+
+            logger.error("Ledger audit failed: engine does not expose a verification interface")
+            return False
         except Exception as e:
             logger.error("Ledger audit failed: %s", e)
             return False

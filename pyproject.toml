@@ -99,6 +99,9 @@ include = ["cortex*"]
 testpaths = ["tests"]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
+markers = [
+    "slow: marks tests that exercise slower integration paths",
+]
 
 
 [tool.ruff]

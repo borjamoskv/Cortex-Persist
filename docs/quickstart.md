@@ -163,7 +163,7 @@ curl -X POST http://localhost:8484/v1/facts \
   }'
 
 # Search via API
-curl -X POST http://localhost:8484/v1/search \
+curl -X POST http://localhost:8484/v1/facts/search \
   -H "Content-Type: application/json" \
   -d '{"query": "cortex", "top_k": 5}'
 
@@ -213,5 +213,5 @@ results = engine.search_sync("greeting")
 - **[CLI Reference](cli.md)** — All 38 commands documented
 - **[REST API Reference](api.md)** — Versioned REST endpoints and models
 - **[MCP Server](mcp.md)** — Deep dive into MCP integration
-- **[Architecture](ARCHITECTURE.md)** — How CORTEX works under the hood
+- **[Architecture](architecture.md)** — How CORTEX works under the hood
 - **[EU AI Act Compliance](compliance.md)** — Full Article 12 mapping

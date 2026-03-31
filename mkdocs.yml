@@ -1,6 +1,6 @@
 site_name: CORTEX Documentation
 site_description: Trust Infrastructure for Autonomous AI — cryptographic verification, audit trails, and EU AI Act compliance for AI agent memory.
-site_url: https://github.com/borjamoskv/Cortex-Persist/tree/main/docs
+site_url: https://cortexpersist.com
 repo_url: https://github.com/borjamoskv/Cortex-Persist
 repo_name: borjamoskv/Cortex-Persist
 edit_uri: edit/main/docs/

@@ -131,6 +131,9 @@ class GitHubCortexBridge:
             if not batch:
                 break
             repos.extend(r["full_name"] for r in batch if not r.get("fork"))
+            # GitHub pagination ends on the first non-full page.
+            if len(batch) < 100:
+                break
             page += 1
         return repos
 
@@ -163,6 +166,9 @@ class GitHubCortexBridge:
             for item in items:
                 await self._process_item(item, repo, existing, result)
 
+            # GitHub pagination ends on the first non-full page.
+            if len(items) < 100:
+                break
             page += 1
 
     async def _process_item(

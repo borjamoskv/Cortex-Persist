@@ -5,7 +5,7 @@ License: Apache-2.0 · Python: >=3.10
 
 > Runtime, maintenance, and troubleshooting procedures.
 >
-> Related: [`AGENTS.md`](https://github.com/borjamoskv/Cortex-Persist/blob/main/AGENTS.md) · [`ARCHITECTURE.md`](ARCHITECTURE.md)
+> Related: [`AGENTS.md`](https://github.com/borjamoskv/Cortex-Persist/blob/main/AGENTS.md) · [`architecture.md`](architecture.md)
 
 ---
 

@@ -62,7 +62,7 @@ class CheckoutRequest(BaseModel):
 
     plan: str = "pro"
     customer_email: str | None = None
-    success_url: str = "https://cortexpersist.com/success"
+    success_url: str = "https://cortexpersist.com"
     cancel_url: str = "https://cortexpersist.com"
 
 
