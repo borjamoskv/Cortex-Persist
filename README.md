@@ -10,9 +10,9 @@
 
 CORTEX is trust infrastructure for AI agents.
 
-It sits between your runtime and your memory layer, making facts, decisions, and derived state tamper-evident. If stored context changes after the fact, verification fails. If you need to explain what an agent knew, when it knew it, and what it did next, CORTEX gives you a cryptographic trail instead of an anecdote.
+It sits between your runtime and your memory layer, making facts, decisions, and derived state tamper-evident. If stored context changes after the fact, verification fails. If an auditor asks what an agent knew and when it knew it, CORTEX gives you a cryptographic trail instead of an anecdote.
 
-Use it when “probably correct” is not enough.
+Use it when "probably correct" is an unacceptable risk.
 
 ---
 
@@ -20,27 +20,27 @@ Use it when “probably correct” is not enough.
 
 LLMs do not produce trustworthy state by default.
 
-Once an agent reads context, stores memory, calls tools, or makes a decision, that state can drift, be overwritten, or be silently mutated by downstream systems. CORTEX adds a cryptographic evidence layer on top of your existing memory stack so that important state becomes verifiable instead of anecdotal.
+Once an agent reads context, calls tools, or makes a decision, that state can drift, be overwritten, or be silently mutated. CORTEX adds an immutable cryptographic evidence layer over your existing memory stack so that your system's memory becomes verifiable instead of anecdotal.
 
 ---
 
 ## What it does
 
-- **Tamper-evident memory:** append-only ledger for facts, decisions, and state transitions.
+- **Tamper-evident memory:** Append-only ledger for facts, decisions, and state transitions.
 - **Hash-linked records:** SHA-256 chaining across stored entries.
-- **Batch integrity proofs:** Merkle checkpoints for efficient verification at scale.
-- **Deterministic audit exports:** reproducible evidence for internal review and regulated workflows.
-- **Drop-in positioning:** works on top of existing memory stores instead of replacing your stack.
+- **Batch integrity proofs:** Merkle checkpoints for efficient verification at scale (10k+ blocks/sec).
+- **Deterministic audit exports:** Reproducible evidence for internal review and regulated workflows (EU AI Act).
+- **Drop-in positioning:** Works over existing vector and SQL stores without replacing your stack.
 
 ---
 
 ## Use cases
 
-- **Autonomous agents:** prove what an agent knew when it made a decision.
-- **Multi-agent systems:** trace state propagation across agents and workflows.
-- **Compliance-heavy environments:** produce audit trails for finance, security, and regulated operations.
-- **Post-incident forensics:** detect silent mutation, tampering, or replayed state.
-- **Trust-sensitive AI products:** ship memory with evidence, not vibes.
+- **Autonomous agents:** Prove exactly what an agent knew when it made a critical decision.
+- **Multi-agent systems:** Trace state propagation across complex agent workflows.
+- **Compliance environments:** Produce verifiable audit trails for finance, security, and regulated healthcare operations.
+- **Post-incident forensics:** Detect silent mutation, data tampering, or replayed state.
+- **Trust-sensitive AI products:** Ship memory with immutable cryptographic evidence, not vibes.
 
 ---
 
@@ -51,13 +51,13 @@ Once an agent reads context, stores memory, calls tools, or makes a decision, th
                 │
                 ▼
 [ CORTEX Persist ]
-  ├─ append-only ledger
-  ├─ hash chaining
-  ├─ Merkle checkpoints
-  └─ verification / audit export
+  ├─ Append-only Ledger
+  ├─ SHA-256 Hash Chaining
+  ├─ Merkle Checkpoints
+  └─ Audit Verification Engine
                 │
                 ▼
-[ SQLite / AlloyDB / Existing Memory Store ]
+[ SQLite / AlloyDB / Existing Vector Store ]
 ```
 
 ---
@@ -93,7 +93,7 @@ async def main():
         fact_type="decision"
     )
     
-    # Verify proof of integrity
+    # Verify proof of integrity against the ledger
     assert await engine.verify(receipt.hash) == True
 
 asyncio.run(main())

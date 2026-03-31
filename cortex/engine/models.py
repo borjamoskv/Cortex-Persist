@@ -34,6 +34,7 @@ class Fact:
     tx_id: int | None = None
     semantic_status: str | None = None
     semantic_error: str | None = None
+    causal_depth: int | str = 0
 
     def __post_init__(self) -> None:
         if self.parent_id is None and self.parent_decision_id is not None:

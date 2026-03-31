@@ -84,11 +84,11 @@ def _register_trace_chain_tool(mcp, ctx: _MCPContext) -> None:
         arrow = "↑" if direction == "up" else "↓"
         lines = [f"Causal Chain {arrow} from #{fact_id} ({len(chain)} nodes):\n"]
         for f in chain:
-            depth = f.get("causal_depth", "?")
-            fid = f.get("id", "?")
-            ftype = f.get("fact_type", "?")
-            content = f.get("content", "")[:60]
-            parent = f.get("parent_decision_id")
+            depth = getattr(f, "causal_depth", "?")
+            fid = f.id
+            ftype = f.fact_type
+            content = f.content[:60]
+            parent = f.parent_decision_id
             parent_str = f"←#{parent}" if parent else "ROOT"
             lines.append(f"  [{depth}] #{fid} ({ftype}) {parent_str}: {content}")
         return "\n".join(lines)
