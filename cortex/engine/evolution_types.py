@@ -2,11 +2,7 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
-<<<<<<< HEAD
 from typing import Any, Protocol
-=======
-from typing import Any, Optional, Protocol
->>>>>>> origin/main
 
 
 @dataclass
@@ -69,20 +65,12 @@ class SovereignAgent:
     subagents: list[SubAgent] = field(default_factory=list)
     creation_timestamp: float = field(default_factory=time.time)
 
-<<<<<<< HEAD
     def get_best_subagent(self) -> SubAgent | None:
-=======
-    def get_best_subagent(self) -> Optional[SubAgent]:
->>>>>>> origin/main
         if not self.subagents:
             return None
         return max(self.subagents, key=lambda s: s.fitness)
 
-<<<<<<< HEAD
     def get_worst_subagent(self) -> SubAgent | None:
-=======
-    def get_worst_subagent(self) -> Optional[SubAgent]:
->>>>>>> origin/main
         if not self.subagents:
             return None
         return min(self.subagents, key=lambda s: s.fitness)
@@ -104,8 +92,4 @@ class ImprovementStrategy(Protocol):
         subagent: SubAgent,
         metrics: DomainMetrics,
         cortex_metrics: Any,
-<<<<<<< HEAD
     ) -> dict[str, Any] | None: ...
-=======
-    ) -> Optional[dict[str, Any]]: ...
->>>>>>> origin/main

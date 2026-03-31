@@ -16,10 +16,6 @@ import shutil
 from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
-<<<<<<< HEAD
-=======
-from typing import Optional
->>>>>>> origin/main
 
 import click
 from rich.console import Console
@@ -203,11 +199,7 @@ def fragment_cmd(output_dir: str):
 @click.option(
     "--mode", type=click.Choice(["digest", "domains", "both"]), default="both", help="What to sync"
 )
-<<<<<<< HEAD
 def sync_cmd(drive_path: str | None, mode: str):
-=======
-def sync_cmd(drive_path: Optional[str], mode: str):
->>>>>>> origin/main
     """Sync exports to Google Drive for NotebookLM auto-pickup."""
     # Detect or use provided path
     if drive_path:
@@ -340,11 +332,7 @@ def status_cmd():
     default=None,
     help="Google Drive folder path (auto-detected if not set)",
 )
-<<<<<<< HEAD
 def ingest_cmd(drive_path: str | None):
-=======
-def ingest_cmd(drive_path: Optional[str]):
->>>>>>> origin/main
     """Silent daemon-like ingest: Parse NotebookLM notes back into CORTEX."""
     import json
 

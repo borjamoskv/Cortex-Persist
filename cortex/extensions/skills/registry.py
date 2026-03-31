@@ -14,11 +14,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
-<<<<<<< HEAD
 from typing import Any
-=======
-from typing import Any, Optional
->>>>>>> origin/main
 
 import yaml
 
@@ -143,11 +139,7 @@ class SkillRegistry:
         all_skills = registry.all()
     """
 
-<<<<<<< HEAD
     def __init__(self, base_dir: Path | None = None) -> None:
-=======
-    def __init__(self, base_dir: Optional[Path] = None) -> None:
->>>>>>> origin/main
         self._base_dir = base_dir or SKILLS_BASE_DIR
         self._registry: dict[str, SkillManifest] = {}
         self._loaded = False
@@ -198,11 +190,7 @@ class SkillRegistry:
 
     # ── Acceso ─────────────────────────────────────────────────────────────
 
-<<<<<<< HEAD
     def get(self, name: str) -> SkillManifest | None:
-=======
-    def get(self, name: str) -> Optional[SkillManifest]:
->>>>>>> origin/main
         """Obtiene un manifest por nombre (case-insensitive, slug-normalized)."""
         slug = name.lower().replace(" ", "-").replace("_", "-")
         return self._registry.get(slug)

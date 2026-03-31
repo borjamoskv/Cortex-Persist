@@ -12,7 +12,6 @@ import logging
 import os
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
-from typing import Optional
 
 from cortex.extensions.mejoralo.constants import (
     GHOST_MIN_SUBTREE_SIZE,
@@ -34,10 +33,7 @@ from cortex.extensions.mejoralo.constants import (
 )
 from cortex.extensions.mejoralo.models import DimensionResult, ScanResult
 from cortex.extensions.mejoralo.utils import detect_stack
-<<<<<<< HEAD
 from cortex.guards.path_guard import is_safe_path
-=======
->>>>>>> origin/main
 
 __all__ = ["scan"]
 
@@ -204,12 +200,6 @@ def _analyze_single_file(
     return loc, large_file, psi, sec, comp
 
 
-<<<<<<< HEAD
-=======
-# ─── Ghost Detection (Code Ghosts via AST Subtree Hashing) ───────────
-
-
->>>>>>> origin/main
 def _hash_ast_subtree(node: ast.AST) -> int:
     """Recursively hash an AST subtree using node type and field names.
 
@@ -223,15 +213,9 @@ def _hash_ast_subtree(node: ast.AST) -> int:
             continue
         if isinstance(value, list):
             parts.extend(
-<<<<<<< HEAD
                 str(_hash_ast_subtree(child)) if isinstance(child, ast.AST) else str(field_name)
                 for child in value
             )
-=======
-                _hash_ast_subtree(child) if isinstance(child, ast.AST) else field_name
-                for child in value
-            )  # type: ignore[assignment]
->>>>>>> origin/main
         elif isinstance(value, ast.AST):
             parts.append(str(_hash_ast_subtree(value)))
         else:
@@ -335,18 +319,6 @@ def _analyze_files(
 
     # Ghost detection runs after all files are collected (cross-file analysis)
     ghost_findings = _detect_code_ghosts(source_files, root)
-<<<<<<< HEAD
-=======
-
-    return (
-        total_loc,
-        large_files,
-        psi_findings,
-        security_findings,
-        complexity_findings,
-        ghost_findings,
-    )
->>>>>>> origin/main
 
     return (
         total_loc,

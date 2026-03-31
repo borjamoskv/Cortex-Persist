@@ -1,12 +1,3 @@
-<<<<<<< HEAD
-=======
-from typing import Optional
-
-"""
-CORTEX v5.0 - Facts Router.
-"""
-
->>>>>>> origin/main
 import logging
 import sqlite3
 from typing import Any
@@ -68,7 +59,6 @@ async def store_fact(
     engine: AsyncCortexEngine = Depends(get_async_engine),
 ) -> StoreResponse:
     """Store a fact (scoped to authenticated tenant)."""
-<<<<<<< HEAD
     try:
         fact_id = await engine.store(
             project=req.project,
@@ -123,33 +113,18 @@ async def batch_store(
         "errors": errors,
         "total_requested": len(req.memories),
     }
-=======
-    fact_id = await engine.store(
-        project=req.project,
-        content=req.content,
-        tenant_id=auth.tenant_id,
-        fact_type=req.fact_type,
-        tags=req.tags,
-        source=req.source,
-        meta=req.meta,
-    )
-    return StoreResponse(fact_id=fact_id, project=req.project, message="Fact stored")
->>>>>>> origin/main
 
 
 @router.get("/v1/projects/{project}/facts", response_model=list[FactResponse])
 async def recall_facts(
     project: str,
     request: Request,
-    limit: Optional[int] = Query(None, ge=1, le=1000),
+    limit: int | None = Query(None, ge=1, le=1000),
     auth: AuthResult = Depends(require_permission("read")),
     engine: AsyncCortexEngine = Depends(get_async_engine),
 ) -> list[FactResponse]:
     """Recall facts for a specific project with tenant isolation."""
-<<<<<<< HEAD
     _ = request
-=======
->>>>>>> origin/main
     facts = await engine.recall(project=project, tenant_id=auth.tenant_id, limit=limit)
 
     return [
@@ -422,14 +397,7 @@ async def list_votes(
 
     votes = await engine.get_votes(fact_id)
 
-<<<<<<< HEAD
     return [{"agent": v["agent"], "vote": v["vote"], "timestamp": v.get("created_at")} for v in votes]
-=======
-    return [  # type: ignore[reportArgumentType]
-        {"agent": v[0], "vote": v[1], "tx_id": v[2]}  # type: ignore[type-error]
-        for v in votes
-    ]
->>>>>>> origin/main
 
 
 @router.delete("/v1/facts/{fact_id}", response_model=dict)

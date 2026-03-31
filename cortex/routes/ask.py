@@ -1,10 +1,6 @@
 from __future__ import annotations
 
-<<<<<<< HEAD
 from typing import Any
-=======
-from typing import Optional
->>>>>>> origin/main
 
 # This file is part of CORTEX.
 # Licensed under the Apache License, Version 2.0.
@@ -27,10 +23,7 @@ from pydantic import BaseModel, Field
 from cortex.api.deps import get_async_engine
 from cortex.auth import AuthResult, require_permission
 from cortex.engine_async import AsyncCortexEngine
-<<<<<<< HEAD
 from cortex.extensions.llm._presets import list_providers, provider_inventory
-=======
->>>>>>> origin/main
 from cortex.extensions.llm.manager import LLMManager
 from cortex.extensions.llm.provider import LLMProvider
 from cortex.extensions.llm.router import IntentProfile
@@ -60,11 +53,11 @@ class AskRequest(BaseModel):
     """RAG query: search CORTEX memory and synthesize an answer."""
 
     query: str = Field(..., min_length=1, max_length=4096, description="Natural language question")
-    project: Optional[str] = Field(None, description="Filter by project (optional)")
+    project: str | None = Field(None, description="Filter by project (optional)")
     k: int = Field(10, ge=1, le=50, description="Number of facts to retrieve")
     temperature: float = Field(0.3, ge=0.0, le=2.0, description="LLM sampling temperature")
     max_tokens: int = Field(2048, ge=64, le=8192, description="Max response tokens")
-    system_prompt: Optional[str] = Field(None, description="Override system prompt (optional)")
+    system_prompt: str | None = Field(None, description="Override system prompt (optional)")
 
 
 class AskSource(BaseModel):
@@ -91,7 +84,7 @@ class LLMStatusResponse(BaseModel):
 
     available: bool
     provider: str
-    model: Optional[str] = None
+    model: str | None = None
     supported_providers: list[str]
     providers: list[dict[str, Any]] = Field(default_factory=list)
 
@@ -298,10 +291,6 @@ async def llm_status(
         available=_llm_manager.available,
         provider=active_provider or "none",
         model=provider.model if provider else None,
-<<<<<<< HEAD
         supported_providers=list_providers(),
         providers=provider_inventory(active_provider=active_provider),
-=======
-        supported_providers=LLMProvider.list_providers(),  # type: ignore[type-error]
->>>>>>> origin/main
     )

@@ -15,11 +15,7 @@ from __future__ import annotations
 
 import logging
 import time
-<<<<<<< HEAD
 from typing import Final
-=======
-from typing import Final, Optional
->>>>>>> origin/main
 
 from cortex.database.tlru_cache import TLRUCache
 
@@ -46,11 +42,7 @@ class NegativeCache:
     def __init__(self, capacity: int = _DEFAULT_NEG_CAPACITY, default_ttl: float = 300.0) -> None:
         self._cache = TLRUCache(maxsize=capacity, ttl=default_ttl)
 
-<<<<<<< HEAD
     def record_failure(self, provider_name: str, intent: str, ttl: float | None = None) -> None:
-=======
-    def record_failure(self, provider_name: str, intent: str, ttl: Optional[float] = None) -> None:
->>>>>>> origin/main
         """NXDOMAIN — cache that this provider failed for this intent."""
         key = f"{provider_name}:{intent}"
         # TLRUCache stores a value; we just store 1.0 as a placeholder since presence is what matters
@@ -94,11 +86,7 @@ class PositiveCache:
         provider_name: str,
         intent: str,
         latency_ms: float,
-<<<<<<< HEAD
         ttl: float | None = None,
-=======
-        ttl: Optional[float] = None,
->>>>>>> origin/main
     ) -> None:
         """A-record — cache that this provider succeeded for this intent."""
         key = f"{provider_name}:{intent}"
@@ -115,11 +103,7 @@ class PositiveCache:
         key = f"{provider_name}:{intent}"
         return key in self._cache
 
-<<<<<<< HEAD
     def get_latency(self, provider_name: str, intent: str) -> float | None:
-=======
-    def get_latency(self, provider_name: str, intent: str) -> Optional[float]:
->>>>>>> origin/main
         """Get cached latency for a known-good provider, or None."""
         key = f"{provider_name}:{intent}"
         return self._cache.get(key)

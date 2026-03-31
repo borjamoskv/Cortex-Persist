@@ -15,10 +15,6 @@ from __future__ import annotations
 
 import asyncio
 from pathlib import Path
-<<<<<<< HEAD
-=======
-from typing import Optional
->>>>>>> origin/main
 
 import click
 from rich.panel import Panel
@@ -123,11 +119,7 @@ def architect_instruct(filepath: str) -> None:
 
 @architect.command("reverse")
 @click.argument("text", required=False)
-<<<<<<< HEAD
 def architect_reverse(text: str | None) -> None:
-=======
-def architect_reverse(text: Optional[str]) -> None:
->>>>>>> origin/main
     """Reverse engineer style and structural rules.
 
     Extracts the underlying vector rules (tone, signal/noise ratio, sentence length)

@@ -45,10 +45,6 @@ import logging
 import os
 import time
 from dataclasses import dataclass, field
-<<<<<<< HEAD
-=======
-from typing import Optional
->>>>>>> origin/main
 
 from cortex.extensions.llm._presets import load_presets
 from cortex.extensions.llm.provider import LLMProvider
@@ -136,11 +132,7 @@ class SovereignLLM:
     def __init__(
         self,
         *,
-<<<<<<< HEAD
         preferred_providers: list[str] | None = None,
-=======
-        preferred_providers: Optional[list[str]] = None,
->>>>>>> origin/main
         temperature: float = 0.3,
         max_tokens: int = 2048,
         timeout_seconds: float = 60.0,
@@ -254,11 +246,7 @@ class SovereignLLM:
         mode: str,
         chain: list[str],
         errors: list[str],
-<<<<<<< HEAD
     ) -> SovereignResult | None:
-=======
-    ) -> Optional[SovereignResult]:
->>>>>>> origin/main
         """Attempt ThoughtOrchestra. Returns None on failure."""
         try:
             # Lazy import to avoid circular deps
@@ -300,11 +288,7 @@ class SovereignLLM:
         errors: list[str],
         is_local: bool,
         intent: IntentProfile = IntentProfile.GENERAL,
-<<<<<<< HEAD
     ) -> SovereignResult | None:
-=======
-    ) -> Optional[SovereignResult]:
->>>>>>> origin/main
         """Execute a single provider call with caching and error handling."""
         try:
             if provider_name not in self._providers_cache:
@@ -350,17 +334,10 @@ class SovereignLLM:
         chain: list[str],
         errors: list[str],
         *,
-<<<<<<< HEAD
         presets: dict | None = None,
         is_local: bool = False,
         intent: IntentProfile = IntentProfile.GENERAL,
     ) -> SovereignResult | None:
-=======
-        presets: Optional[dict] = None,
-        is_local: bool = False,
-        intent: IntentProfile = IntentProfile.GENERAL,
-    ) -> Optional[SovereignResult]:
->>>>>>> origin/main
         """Attempt a single provider. Returns None on failure."""
         if presets is None:
             presets = load_presets()
@@ -435,11 +412,7 @@ class Inquisitor(SovereignLLM):
     def __init__(
         self,
         *,
-<<<<<<< HEAD
         preferred_providers: list[str] | None = None,
-=======
-        preferred_providers: Optional[list[str]] = None,
->>>>>>> origin/main
         timeout_seconds: float = 60.0,
     ):
         super().__init__(

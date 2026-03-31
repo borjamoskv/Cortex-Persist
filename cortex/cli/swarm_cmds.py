@@ -243,7 +243,6 @@ def swarm_up(db):
             await bus.close()
 
     asyncio.run(_run_swarm())
-<<<<<<< HEAD
 
 
 @swarm.command("cleanup")
@@ -328,5 +327,3 @@ def swarm_purge():
         )
     )
     console.print("[bold green]✅ Sovereignty Restored. Bus queues empty.[/]")
-=======
->>>>>>> origin/main

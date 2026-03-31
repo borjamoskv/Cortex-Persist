@@ -10,10 +10,6 @@ import sqlite3
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
-<<<<<<< HEAD
-=======
-from typing import Optional
->>>>>>> origin/main
 
 from cortex.extensions.aether.models import AgentTask, TaskStatus
 
@@ -48,11 +44,7 @@ CREATE INDEX IF NOT EXISTS idx_agent_tasks_status
 class TaskQueue:
     """Thread-safe SQLite task queue for Aether agent tasks."""
 
-<<<<<<< HEAD
     def __init__(self, db_path: Path | str | None = None) -> None:
-=======
-    def __init__(self, db_path: Optional[Path | str] = None) -> None:
->>>>>>> origin/main
         if db_path is None:
             db_path = Path.home() / ".cortex" / "aether.db"
             # Auto-migrate legacy jules.db if it exists
@@ -120,11 +112,7 @@ class TaskQueue:
         logger.info("✅ Enqueued task [%s] — %s", task.id, task.title)
         return task
 
-<<<<<<< HEAD
     def pop_next(self) -> AgentTask | None:
-=======
-    def pop_next(self) -> Optional[AgentTask]:
->>>>>>> origin/main
         """Atomically pop the oldest pending task and mark it as planning.
 
         Uses SQLite 3.35+ UPDATE ... RETURNING for true process-level O(1)
@@ -165,11 +153,7 @@ class TaskQueue:
         with self._conn() as conn:
             conn.execute(f"UPDATE agent_tasks SET {set_clause} WHERE id = ?", values)
 
-<<<<<<< HEAD
     def get(self, task_id: str) -> AgentTask | None:
-=======
-    def get(self, task_id: str) -> Optional[AgentTask]:
->>>>>>> origin/main
         """Fetch a task by ID."""
         with self._conn() as conn:
             row = conn.execute("SELECT * FROM agent_tasks WHERE id = ?", (task_id,)).fetchone()
@@ -179,11 +163,7 @@ class TaskQueue:
 
     def list_tasks(
         self,
-<<<<<<< HEAD
         status: str | None = None,
-=======
-        status: Optional[str] = None,
->>>>>>> origin/main
         limit: int = 50,
     ) -> list[AgentTask]:
         """List tasks, optionally filtered by status."""

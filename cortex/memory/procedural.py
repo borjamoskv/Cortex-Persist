@@ -12,11 +12,7 @@ import math
 import sqlite3
 import time
 from dataclasses import dataclass, field
-<<<<<<< HEAD
 from typing import ClassVar, Final
-=======
-from typing import ClassVar, Final, Optional
->>>>>>> origin/main
 
 # ─── Constants ──────────────────────────────────────────────────────────────
 
@@ -91,11 +87,7 @@ class ProceduralMemory:
 
     BASELINE_LATENCY_MS: ClassVar[float] = 100.0
 
-<<<<<<< HEAD
     def __init__(self, db_path: str | None = None) -> None:
-=======
-    def __init__(self, db_path: Optional[str] = None) -> None:
->>>>>>> origin/main
         self._buffer: dict[str, ProceduralEngram] = {}
         self._db_path = db_path
         self._load_from_db()
@@ -204,11 +196,7 @@ class ProceduralMemory:
         finally:
             conn.close()
 
-<<<<<<< HEAD
     def get_engram(self, skill_name: str) -> ProceduralEngram | None:
-=======
-    def get_engram(self, skill_name: str) -> Optional[ProceduralEngram]:
->>>>>>> origin/main
         """Fetch the engram for a specific skill. O(1)."""
         return self._buffer.get(skill_name)
 

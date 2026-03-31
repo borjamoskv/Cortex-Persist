@@ -107,14 +107,9 @@ class AsyncCortexClient:
         project: str,
         content: str,
         fact_type: str = "knowledge",
-<<<<<<< HEAD
         tags: list[str] | None = None,
         source: str = "",
         metadata: dict[str, Any] | None = None,
-=======
-        tags: Optional[list[str]] = None,
-        metadata: Optional[dict[str, Any]] = None,
->>>>>>> origin/main
     ) -> int:
         """Store a fact. Returns fact ID."""
         data = {
@@ -209,15 +204,9 @@ class AsyncCortexClient:
     async def update(
         self,
         fact_id: int,
-<<<<<<< HEAD
         content: str | None = None,
         tags: list[str] | None = None,
         meta: dict[str, Any] | None = None,
-=======
-        content: Optional[str] = None,
-        tags: Optional[list[str]] = None,
-        meta: Optional[dict[str, Any]] = None,
->>>>>>> origin/main
     ) -> int:
         """Update a fact. Returns new fact ID."""
         data: dict[str, Any] = {}

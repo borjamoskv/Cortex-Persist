@@ -19,10 +19,7 @@ from cortex.extensions.mejoralo.utils import (
     get_test_cmd,
     run_quiet,
 )
-<<<<<<< HEAD
 from cortex.guards.path_guard import is_safe_path
-=======
->>>>>>> origin/main
 
 __all__ = ["check_ship_gate"]
 

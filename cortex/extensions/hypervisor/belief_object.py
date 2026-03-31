@@ -25,10 +25,6 @@ import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-<<<<<<< HEAD
-=======
-from typing import Optional
->>>>>>> origin/main
 
 __all__ = [
     "BeliefObject",
@@ -113,11 +109,7 @@ class ProvenanceEntry:
     source_id: str
     """Reference to the originating entity (fact ID, belief ID, URL)."""
 
-<<<<<<< HEAD
     model: str | None
-=======
-    model: Optional[str]
->>>>>>> origin/main
     """Which LLM produced/validated this entry. None if human-sourced."""
 
     timestamp: str
@@ -201,11 +193,7 @@ class BeliefObject:
     created_at: str = field(default_factory=_now_iso)
     """When this belief was first created."""
 
-<<<<<<< HEAD
     revised_at: str | None = None
-=======
-    revised_at: Optional[str] = None
->>>>>>> origin/main
     """When this belief was last revised. None if never revised."""
 
     revision_count: int = 0
@@ -217,11 +205,7 @@ class BeliefObject:
     supported_by: tuple[str, ...] = ()
     """IDs of beliefs/facts that corroborate this belief."""
 
-<<<<<<< HEAD
     arbitrated_by: str | None = None
-=======
-    arbitrated_by: Optional[str] = None
->>>>>>> origin/main
     """Model identifier that last judged this belief (e.g., 'opus', 'deep_think')."""
 
     def is_axiomatic(self) -> bool:
@@ -309,11 +293,7 @@ class BeliefVerdict:
     contradictions: tuple[str, ...] = ()
     """IDs of contradicting beliefs (if action == QUARANTINE)."""
 
-<<<<<<< HEAD
     revised_belief: BeliefObject | None = None
-=======
-    revised_belief: Optional[BeliefObject] = None
->>>>>>> origin/main
     """Revised belief (if action == REVISE)."""
 
     cost_tokens: int = 0

@@ -9,7 +9,7 @@ import logging
 import time
 from collections import OrderedDict
 from enum import Enum
-from typing import Generic, Optional, TypeVar
+from typing import Generic, TypeVar
 
 __all__ = ["T", "CacheEvent", "TieredCache"]
 
@@ -42,15 +42,11 @@ class TieredCache(Generic[T]):
         self.ttl = ttl_seconds
         self._subscribers: list[asyncio.Queue] = []
 
-<<<<<<< HEAD
     def _redis_key(self, key: str) -> str:
         """Namespace key for Redis storage."""
         return f"cortex:{self.name}:{key}"
 
     async def get(self, key: str) -> T | None:
-=======
-    async def get(self, key: str) -> Optional[T]:
->>>>>>> origin/main
         """Get value from cache."""
         # L1 check
         if key in self.l1:
@@ -70,7 +66,6 @@ class TieredCache(Generic[T]):
         """Internal stub for Redis client."""
         return None
 
-<<<<<<< HEAD
     async def _redis_get(self, key: str) -> T | None:
         """Internal stub for Redis get."""
         return None
@@ -80,9 +75,6 @@ class TieredCache(Generic[T]):
         pass
 
     async def set(self, key: str, value: T, ttl: float | None = None):
-=======
-    async def set(self, key: str, value: T, ttl: Optional[float] = None):
->>>>>>> origin/main
         """Set value in cache."""
         expiry = time.monotonic() + (ttl or self.ttl)
 

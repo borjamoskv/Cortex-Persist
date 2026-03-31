@@ -9,10 +9,6 @@ from __future__ import annotations
 import asyncio
 import logging
 import sys
-<<<<<<< HEAD
-=======
-from typing import Optional
->>>>>>> origin/main
 
 from cortex.extensions.notifications.adapters.base import BaseAdapter
 from cortex.extensions.notifications.events import CortexEvent
@@ -25,11 +21,7 @@ class IMessageAdapter(BaseAdapter):
 
     name = "imessage"
 
-<<<<<<< HEAD
     def __init__(self, target_phone_or_email: str | None = None):
-=======
-    def __init__(self, target_phone_or_email: Optional[str] = None):
->>>>>>> origin/main
         super().__init__()
         self.target = target_phone_or_email
 

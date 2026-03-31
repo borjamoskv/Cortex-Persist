@@ -1,7 +1,7 @@
 import logging
 import sqlite3
 import uuid
-from typing import Any, Optional
+from typing import Any
 
 import aiosqlite
 

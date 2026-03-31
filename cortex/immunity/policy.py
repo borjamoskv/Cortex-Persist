@@ -4,14 +4,9 @@ import datetime
 import hashlib
 import json
 from collections.abc import Mapping
-<<<<<<< HEAD
 from typing import Any
 
 from cortex.immunity.haiku import HaikuGuard
-=======
-from typing import Any, Optional
-
->>>>>>> origin/main
 from cortex.immunity.types import (
     ImmuneArtifact,
     ImmunityState,
@@ -42,11 +37,7 @@ def can_transition(current: ImmunityState, target: ImmunityState) -> bool:
 
 
 def transition_artifact(
-<<<<<<< HEAD
     artifact: ImmuneArtifact, target: ImmunityState, reason: str | None = None
-=======
-    artifact: ImmuneArtifact, target: ImmunityState, reason: Optional[str] = None
->>>>>>> origin/main
 ) -> None:
     """Transiciona un artefacto de estado si es válido."""
     if not can_transition(artifact.state, target):
@@ -151,7 +142,6 @@ def profile_artifact(payload: Mapping[str, Any]) -> PathogenProfile:
     )
 
 
-<<<<<<< HEAD
 def classify_artifact(profile: PathogenProfile, payload: Mapping[str, Any]) -> ImmunityState:
     """Classifies artifact state. Promotes to SEALED if it passes HaikuGuard (Ω₄)."""
     state = next_state_from_profile(profile)
@@ -162,10 +152,6 @@ def classify_artifact(profile: PathogenProfile, payload: Mapping[str, Any]) -> I
             return ImmunityState.SEALED
 
     return state
-=======
-def classify_artifact(profile: PathogenProfile) -> ImmunityState:
-    return next_state_from_profile(profile)
->>>>>>> origin/main
 
 
 def seal_artifact(artifact: ImmuneArtifact) -> SealRecord:
