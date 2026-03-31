@@ -5,12 +5,12 @@ or leak tenant-specific ciphertext across boundaries.
 """
 
 import json
-import os
-import base64
-import pytest
+
 import aiosqlite
-from cortex.engine.causality import AsyncCausalGraph, EDGE_DERIVED_FROM, TaintStatus
+import pytest
+
 from cortex.crypto.aes import CortexEncrypter
+from cortex.engine.causality import EDGE_DERIVED_FROM, AsyncCausalGraph, TaintStatus
 
 # Use a fixed 32-byte master key for deterministic testing
 TEST_MASTER_KEY = b"0" * 32

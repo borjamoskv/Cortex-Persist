@@ -215,7 +215,12 @@ class AsyncCausalGraph:
             return "meta"
         return None
 
-    async def propagate_taint(self, fact_id: int, tenant_id: str = "default") -> TaintReport:
+    async def propagate_taint(
+        self,
+        fact_id: int,
+        tenant_id: str = "default",
+        floor_to_c1: bool = True,
+    ) -> TaintReport:
         now = datetime.now(timezone.utc).isoformat()
         meta_col = await self._metadata_column()
         fact_cols = await self._fact_columns()
@@ -316,6 +321,7 @@ class AsyncCausalGraph:
                         "is_json": is_json,
                         "is_encrypted": is_encrypted,
                         "raw_meta": raw_meta,  # Keep track of original
+                        "raw_metadata": raw_meta,
                     }
 
         node_states: dict[int, TaintStatus] = {fact_id: TaintStatus.TAINTED}
@@ -357,10 +363,13 @@ class AsyncCausalGraph:
                 suspect_count = p_states.count(TaintStatus.SUSPECT)
                 total_parents = len(parents)
 
-                if total_parents > 0 and (tainted_count / total_parents) >= 0.5:
+                if total_parents > 0 and tainted_count == total_parents:
                     node_states[current_id] = TaintStatus.TAINTED
-                    hops = 2
-                elif tainted_count > 0 or suspect_count > 0:
+                    hops = 1
+                elif tainted_count > 0:
+                    node_states[current_id] = TaintStatus.SUSPECT
+                    hops = 1
+                elif suspect_count > 0:
                     node_states[current_id] = TaintStatus.SUSPECT
                     hops = 1
                 else:
@@ -368,7 +377,11 @@ class AsyncCausalGraph:
                     hops = 0
 
                 if hops > 0:
-                    new_conf = Confidence.C1.value
+                    new_conf = (
+                        Confidence.C1.value
+                        if floor_to_c1
+                        else _downgrade_confidence(old_conf, hops)
+                    )
                 else:
                     new_conf = old_conf
 
@@ -384,8 +397,7 @@ class AsyncCausalGraph:
                 elif data["is_json"]:
                     payload = json.dumps(data["metadata"])
                 else:
-                    payload = data["raw_meta"]
-
+                    payload = data.get("raw_meta") or data.get("raw_metadata") or ""
                 if has_tenant:
                     fact_updates.append((new_conf, payload, current_id, tenant_id))
                 else:
@@ -396,15 +408,12 @@ class AsyncCausalGraph:
                 else:
                     fact_updates.append((new_conf, current_id))
 
-            if new_conf != old_conf or current_id == fact_id:
-                changes.append(
-                    {
-                        "fact_id": current_id,
-                        "old_confidence": old_conf,
-                        "new_confidence": new_conf,
-                        "status": node_states[current_id].value,
-                    }
-                )
+                changes.append({
+                    "fact_id": current_id,
+                    "old_confidence": old_conf,
+                    "new_confidence": new_conf,
+                    "status": node_states[current_id].value,
+                })
 
             for child_id in children_map.get(current_id, []):
                 if child_id not in visited:
@@ -432,6 +441,50 @@ class AsyncCausalGraph:
                 await self.conn.executemany(
                     "UPDATE facts SET confidence = ? WHERE id = ?",
                     fact_updates,
+                )
+
+        # Record causal taint edges so downstream audits can see the provenance.
+        taint_edge_params: list[tuple[Any, ...]] = []
+        for change in changes:
+            child_id = change["fact_id"]
+            if child_id == fact_id:
+                continue
+            if has_tenant:
+                taint_edge_params.append(
+                    (
+                        child_id,
+                        fact_id,
+                        None,
+                        EDGE_TAINTED_BY,
+                        None,
+                        tenant_id,
+                    )
+                )
+            else:
+                taint_edge_params.append(
+                    (
+                        child_id,
+                        fact_id,
+                        None,
+                        EDGE_TAINTED_BY,
+                        None,
+                    )
+                )
+
+        if taint_edge_params:
+            if has_tenant:
+                await self.conn.executemany(
+                    "INSERT INTO causal_edges "
+                    "(fact_id, parent_id, signal_id, edge_type, project, tenant_id) "
+                    "VALUES (?, ?, ?, ?, ?, ?)",
+                    taint_edge_params,
+                )
+            else:
+                await self.conn.executemany(
+                    "INSERT INTO causal_edges "
+                    "(fact_id, parent_id, signal_id, edge_type, project) "
+                    "VALUES (?, ?, ?, ?, ?)",
+                    taint_edge_params,
                 )
 
         await self.conn.commit()

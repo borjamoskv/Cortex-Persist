@@ -11,6 +11,7 @@ class TestAutonomousSwarm(unittest.IsolatedAsyncioTestCase):
     async def test_spectral_audit_refusal(self):
         """Ω₂₃: Verify that a refusal triggers Shadow Re-phrasing (retry)."""
         import os
+
         os.environ["CORTEX_LLM_BASE_URL"] = "http://localhost:8080/v1"
         provider = LLMProvider("custom", "test-model", "test-api-key")
 
@@ -34,8 +35,6 @@ class TestAutonomousSwarm(unittest.IsolatedAsyncioTestCase):
         """Ω₂₁: Verify that swarm racing selects the fastest valid response."""
         # This is harder to test without a full router setup, but we can check if the
         # execute_swarm method correctly calls HedgedRequestStrategy.race
-
-
 
         router = CortexLLMRouter(
             primary=MagicMock(provider_name="p1"),

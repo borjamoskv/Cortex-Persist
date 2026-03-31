@@ -196,23 +196,25 @@ class TestTraced:
         assert not span.ok
         assert "ValueError" in span.error
 
-    def test_async_function_traced(self):
+    @pytest.mark.asyncio
+    async def test_async_function_traced(self):
         @traced
         async def fetch():
             await asyncio.sleep(0)
             return "data"
 
-        result = asyncio.get_event_loop().run_until_complete(fetch())
+        result = await fetch()
         assert result == "data"
         assert len(collector) == 1
 
-    def test_async_error_captured(self):
+    @pytest.mark.asyncio
+    async def test_async_error_captured(self):
         @traced
         async def async_fail():
             raise RuntimeError("async boom")
 
         with pytest.raises(RuntimeError):
-            asyncio.get_event_loop().run_until_complete(async_fail())
+            await async_fail()
         assert not collector.spans[0].ok
 
     def test_custom_name(self):

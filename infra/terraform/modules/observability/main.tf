@@ -52,7 +52,7 @@ resource "helm_release" "prometheus" {
             {
               job_name        = "cortex-sovereign"
               scrape_interval = "15s"
-              static_configs  = [{ targets = ["cortex-api.cortex.svc:8000"] }]
+              static_configs  = [{ targets = ["cortex-api.cortex.svc:8484"] }]
             },
             {
               job_name        = "otel-collector"

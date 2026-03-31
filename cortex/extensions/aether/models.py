@@ -126,7 +126,7 @@ class CriticOutput:
 
 
 @dataclass
-class TesterOutput:
+class AetherTestResult:
     """Test run result from the Tester agent."""
 
     passed: bool

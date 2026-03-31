@@ -1,6 +1,7 @@
 # RFC-001: The CORTEX Trust Verification Standard for AI Agent Memory
 
 > **Sovereign Specification** · Status: DRAFT · Protocol v1.0.0 · CORTEX-Persist
+> **Classification:** Draft RFC. This is normative proposal text, not a historical snapshot.
 
 ## 1. Abstract & Axiomatic Foundation
 

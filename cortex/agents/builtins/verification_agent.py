@@ -15,7 +15,8 @@ from cortex.agents.bus import SqliteMessageBus
 from cortex.agents.manifest import AgentManifest
 from cortex.agents.message_schema import AgentMessage, MessageKind, new_message
 from cortex.agents.tools import ToolRegistry
-from cortex.verification.verifier import SovereignVerifier, VerificationResult
+from cortex.verification.oracle import VerificationOracle
+from cortex.verification.verifier import SovereignVerifier
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +33,7 @@ class VerificationAgent(BaseAgent):
     ) -> None:
         super().__init__(manifest, bus, tool_registry)
         self._verifier = verifier or SovereignVerifier()
+        self._oracle = VerificationOracle(engine=None)
 
     # ------------------------------------------------------------------
     # Message handler
@@ -42,23 +44,42 @@ class VerificationAgent(BaseAgent):
             return
 
         payload: dict[str, Any] = message.payload or {}
+        subject: str = payload.get("subject", "")
+        candidate: dict[str, Any] = payload.get("candidate", {})
         code: str = payload.get("code", "")
         context: dict[str, Any] = payload.get("context", {})
 
-        if not code:
-            await self._reply(message, {"error": "missing required field: code"})
-            return
-
         try:
-            result: VerificationResult = self._verifier.check(code, context)
+            if subject and candidate:
+                oracle_result = await self._oracle.verify(subject, candidate)
+                await self._reply(
+                    message,
+                    {
+                        "ok": oracle_result.ok,
+                        "verdict": oracle_result.verdict,
+                        "reasons": oracle_result.reasons,
+                    },
+                )
+                return
+
+            if code:
+                check_result = self._verifier.check(code, context)
+                await self._reply(
+                    message,
+                    {
+                        "ok": check_result.is_valid,
+                        "verdict": "accepted" if check_result.is_valid else "rejected",
+                        "is_valid": check_result.is_valid,
+                        "violations": check_result.violations,
+                        "proof_certificate": check_result.proof_certificate,
+                        "counterexample": check_result.counterexample,
+                    },
+                )
+                return
+
             await self._reply(
                 message,
-                {
-                    "is_valid": result.is_valid,
-                    "violations": result.violations,
-                    "proof_certificate": result.proof_certificate,
-                    "counterexample": result.counterexample,
-                },
+                {"error": "missing required field: code or subject/candidate"},
             )
         except Exception as exc:
             logger.exception("VerificationAgent check failed")

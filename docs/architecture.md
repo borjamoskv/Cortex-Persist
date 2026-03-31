@@ -14,7 +14,7 @@ To enforce this, it combines a relational database with vector embeddings, hash-
 ```mermaid
 graph TB
     subgraph Interfaces
-        CLI["CLI<br/>38 commands"]
+        CLI["CLI<br/>90+ commands"]
         API["REST API<br/>FastAPI"]
         MCP["MCP Server<br/>Model Context Protocol"]
         GraphQL["GraphQL<br/>(coming Q2)"]
@@ -153,7 +153,7 @@ Los pilares fundamentales:
 - **TESSERACT-Ω**: Convergencia sincrónica de ciclos de vida.
 - **APOTHEOSIS-∞**: Autonomía proactiva de Nivel 5. (`engine/apotheosis.py`)
 
-Para más detalles, consulta: [**OMEGA_MANIFOLD.md**](architecture/OMEGA_MANIFOLD.md).
+Para más detalles, consulta: [**OMEGA_MANIFOLD.md**](https://github.com/borjamoskv/Cortex-Persist/blob/main/docs/architecture/OMEGA_MANIFOLD.md).
 
 ---
 
@@ -169,7 +169,7 @@ Para más detalles, consulta: [**OMEGA_MANIFOLD.md**](architecture/OMEGA_MANIFOL
 | `engine/query_mixin.py` | `search()`, `recall()`, `history()` |
 | `engine/consensus_mixin.py` | `vote()`, `get_votes()` |
 | `engine/sync_compat.py` | Synchronous fallbacks for CLI |
-| `engine/ledger.py` | Hash chain + Merkle tree management |
+| `ledger.py` | Hash chain + Merkle tree management (`SovereignLedger`) |
 | `engine/snapshots.py` | Database snapshot creation/restoration |
 | `engine/models.py` | `Fact` data model and row mapping |
 
@@ -223,7 +223,7 @@ Para más detalles, consulta: [**OMEGA_MANIFOLD.md**](architecture/OMEGA_MANIFOL
 | `timing/` | Heartbeat-based time tracking |
 | `telemetry/` | OpenTelemetry-compatible span tracing |
 | `mcp/` | Model Context Protocol server |
-| `cli/` | 38 CLI commands via Click |
+| `cli/` | 90+ CLI commands via Click |
 | `migrations/` | Versioned schema migrations |
 | `storage/` | SQLite + Turso storage backends |
 
@@ -425,7 +425,7 @@ erDiagram
 ## Testing
 
 ```bash
-# All tests (1,162+ functions, 60s timeout)
+# All tests (1,621+ functions, 60s timeout)
 make test
 
 # Fast tests only (no torch imports)
@@ -437,4 +437,4 @@ make test-slow
 
 **Isolation**: Tests use `config.reload()` + autouse fixtures for zero state leakage.
 
-**Coverage**: 1,162+ test functions covering engine, API, CLI, consensus, search, and security.
+**Coverage**: 1,621+ test functions covering engine, API, CLI, consensus, search, and security.

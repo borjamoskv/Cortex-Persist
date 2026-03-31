@@ -9,22 +9,21 @@ logger = logging.getLogger("mac_maestro.cgevents")
 
 try:
     from Quartz import (
-        CGEventCreate,
         CGEventCreateMouseEvent,
         CGEventPost,
         CGPointMake,
         kCGEventLeftMouseDown,
         kCGEventLeftMouseDragged,
         kCGEventLeftMouseUp,
-        kCGEventMouseMoved,
         kCGHIDEventTap,
         kCGMouseButtonLeft,
     )
+
+    from .models import ActionFailed
     QUARTZ_AVAILABLE = True
 except ImportError:
     QUARTZ_AVAILABLE = False
 
-from .models import ActionFailed
 
 
 def click_at(x: float, y: float) -> None:

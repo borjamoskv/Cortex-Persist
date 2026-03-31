@@ -1,5 +1,7 @@
 # CORTEX Persist Manifesto: The Open Trust Standard
 
+> **Status:** Canonical manifesto. This is a living narrative, not a frozen RFC.
+
 CORTEX no es otro wrapper de ChatGPT. Es el primer Sistema Operativo Soberano para Agentes Autónomos. Mientras las grandes corporaciones intentan ser dueñas de tu memoria y tu contexto en sus servidores cerrados, CORTEX te devuelve el control criptográfico absoluto sobre tu conocimiento.
 
 Nuestra arquitectura no compite ocultando la tecnología (es open source bajo Apache-2.0), sino cambiando las reglas del juego de cómo interactuamos con la Inteligencia Artificial a través de los siguientes cinco pilares:

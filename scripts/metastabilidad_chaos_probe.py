@@ -9,6 +9,7 @@ sistema continúa operando (is_sovereign = True).
 
 import asyncio
 import logging
+
 from rich.console import Console
 from rich.table import Table
 

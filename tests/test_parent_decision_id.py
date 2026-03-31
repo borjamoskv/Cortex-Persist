@@ -51,7 +51,12 @@ async def db():
             parent_decision_id INTEGER REFERENCES facts(id),
             confidence TEXT DEFAULT 'stated',
             valid_from TEXT DEFAULT (datetime('now')), valid_until TEXT,
-            source TEXT, meta TEXT DEFAULT '{}',
+            source TEXT, metadata TEXT DEFAULT '{}', meta TEXT DEFAULT '{}',
+            confidence_rank INTEGER DEFAULT 3, parent_id INTEGER,
+            relation_type TEXT, quadrant TEXT DEFAULT 'ACTIVE',
+            storage_tier TEXT DEFAULT 'HOT', exergy_score REAL DEFAULT 1.0,
+            category TEXT DEFAULT 'general', yield_score REAL DEFAULT 1.0,
+            semantic_status TEXT DEFAULT 'pending',
             consensus_score REAL DEFAULT 1.0,
             hash TEXT, signature TEXT, signer_pubkey TEXT,
             is_quarantined INTEGER DEFAULT 0, quarantined_at TEXT,
@@ -61,6 +66,22 @@ async def db():
             tx_id INTEGER, is_tombstoned INTEGER DEFAULT 0,
             tombstoned_at TEXT
         );
+        CREATE TRIGGER facts_parent_decision_ai
+        AFTER INSERT ON facts
+        WHEN NEW.parent_id IS NOT NULL
+        BEGIN
+            UPDATE facts
+            SET parent_decision_id = NEW.parent_id
+            WHERE id = NEW.id;
+        END;
+        CREATE TRIGGER facts_parent_decision_au
+        AFTER UPDATE OF parent_id ON facts
+        WHEN NEW.parent_id IS NOT NULL
+        BEGIN
+            UPDATE facts
+            SET parent_decision_id = NEW.parent_id
+            WHERE id = NEW.id;
+        END;
         CREATE INDEX idx_facts_parent ON facts(parent_decision_id);
     """)
     yield conn

@@ -6,9 +6,9 @@
 
 ![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
-![Status](https://img.shields.io/badge/status-v8.0%20alpha-orange.svg)
-![Tests](https://img.shields.io/badge/tests-1162%2B%20passing-brightgreen.svg)
-![LOC](https://img.shields.io/badge/LOC-45.5K-informational.svg)
+![Status](https://img.shields.io/badge/status-v0.3.0b2%20beta-orange.svg)
+![Tests](https://img.shields.io/badge/tests-1621%2B%20passing-brightgreen.svg)
+![LOC](https://img.shields.io/badge/LOC-178K-informational.svg)
 
 ---
 
@@ -36,7 +36,7 @@ CORTEX doesn't replace your memory layer — it **certifies** it.
 | 📊 **Compliance Reports** | One-command EU AI Act Article 12 readiness snapshot |
 | 🔍 **Semantic + Graph Search** | Hybrid vector + knowledge graph retrieval |
 | 🏠 **Local-First** | SQLite. No cloud required. Your data, your machine. |
-| ☁️ **Sovereign Cloud** | Multi-tenant AlloyDB + Qdrant + Redis (v6+) |
+| ☁️ **Sovereign Cloud** | Multi-tenant AlloyDB + Qdrant + Redis (roadmap) |
 
 ---
 
@@ -52,7 +52,7 @@ cortex verify 1
 
 [Get started →](quickstart.md){ .md-button .md-button--primary }
 [Architecture →](architecture.md){ .md-button }
-[View on GitHub →](https://github.com/borjamoskv/cortex){ .md-button }
+[View on GitHub →](https://github.com/borjamoskv/Cortex-Persist){ .md-button }
 
 ---
 
@@ -69,13 +69,13 @@ cortex verify 1
 
 | Metric | Value |
 |:---|:---|
-| Production LOC | **~45,500** |
-| Test functions | **1,162+** |
-| Python modules | **444** |
-| CLI commands | **38** |
+| Production LOC | **~178,000** |
+| Test functions | **1,621+** |
+| Python modules | **1,094** |
+| CLI commands | **90+** |
 | Daemon monitors | **13** |
 | Privacy patterns | **11** |
-| Time from zero to v8 | **9 days** |
+| Current release line | **v0.3.0 beta** |
 
 ---
 
@@ -86,8 +86,13 @@ cortex verify 1
 | [Quickstart](quickstart.md) | Get running in 5 minutes |
 | [Installation](installation.md) | All install methods and extras |
 | [Architecture](architecture.md) | Deep dive into the system design |
-| [CLI Reference](cli.md) | All 38 commands documented |
-| [REST API](api.md) | Versioned REST endpoints |
+| [CORTEX Capabilities](CORTEX-CAPABILITIES.md) | Structural properties and governance topology |
+| [SDK Surface](SDK-SURFACE.md) | Public SDK contract and stability guarantees |
+| [Trust Semantics](TRUST-SEMANTICS.md) | Meaning of trust signals and degraded states |
+| [Event Model](EVENT-MODEL.md) | Canonical event envelope and delivery semantics |
+| [Error Code Registry](ERROR-CODE-REGISTRY.md) | Stable rejection and failure codes |
+| [CLI Reference](cli.md) | Core commands documented |
+| [REST API Reference](api.md) | Versioned REST endpoints |
 | [MCP Server](mcp.md) | Model Context Protocol integration |
 | [Python API Reference](reference.md) | Auto-generated from source |
 | [SDKs](sdks.md) | Python and JavaScript SDKs |

@@ -1,5 +1,7 @@
 # CORTEX v6: Sovereign Cloud Transition Guide
 
+> **Status:** Historical transition guide. Useful for v6 context; not the current release contract.
+
 ## 1. The Vision: From Daemon to Platform
 
 CORTEX v5 established the foundation for a truly sovereign local AI agent system. It proved that complex cognitive memory, multi-model routing, and autonomous goal-seeking can run entirely on-device.

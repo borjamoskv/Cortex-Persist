@@ -21,8 +21,8 @@ def _get_ledger():
         return _ledger
     _ledger_attempted = True
     try:
-        from cortex.ledger import SovereignLedger
         from cortex.config import DEFAULT_DB_PATH
+        from cortex.ledger import SovereignLedger
         _ledger = SovereignLedger(DEFAULT_DB_PATH)
         logger.info("CORTEX Ledger connected for Mac-Maestro tracing.")
     except Exception:

@@ -233,7 +233,7 @@ async def get_fact_history(
                 project=f["project"],
                 content=f["content"],
                 fact_type=f["fact_type"],
-                tags=f["tags"],
+                tags=f.get("tags", []),
                 confidence=f.get("confidence", "C3"),
                 created_at=f["created_at"],
                 updated_at=f.get("updated_at") or f["created_at"],

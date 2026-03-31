@@ -2,23 +2,18 @@
 
 from __future__ import annotations
 
-import asyncio
 import os
 
 import click
 from rich.panel import Panel
 from rich.table import Table
 
-from cortex.cli.common import DEFAULT_DB, console, get_engine
+from cortex.cli.common import DEFAULT_DB, _run_async, cli, console, get_engine
 
 __all__ = ["github_cmds"]
 
 
-def _run_async(coro):
-    return asyncio.run(coro)
-
-
-@click.group("github")
+@cli.group("github")
 def github_cmds() -> None:
     """GitHub ↔ CORTEX bridge — sync issues/PRs as facts."""
     pass

@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [master, main]
+    branches: [main]
   pull_request:
-    branches: [master, main]
+    branches: [main]
 
 permissions:
   contents: read
@@ -19,7 +19,7 @@ jobs:
           python-version: "3.13"
       - name: Install dependencies
         run: |
-          pip install -e ".[dev]"
+          pip install -e ".[dev,api]"
           pip install ruff
       - name: Ruff lint
         run: ruff check cortex/ tests/
@@ -34,11 +34,11 @@ jobs:
         with:
           python-version: "3.13"
       - name: Install dependencies
-        run: pip install -e ".[dev]"
+        run: pip install -e ".[dev,api]"
       - name: Install security tools
-        run: pip install pip-audit bandit
+        run: pip install pip-audit bandit ruff
       - name: Audit dependencies for known CVEs
-        run: pip-audit --skip cortex-persist --skip cortex_persist --desc on --ignore-vuln GHSA-qmgc-5h2g-mvrw --ignore-vuln GHSA-j842-xgm4-wf88 --ignore-vuln GHSA-w6vg-jg77-2qg6 --ignore-vuln GHSA-f83h-ghpp-7wcc --ignore-vuln GHSA-jr27-m4p2-rc6r
+        run: pip-audit . --desc on --ignore-vuln GHSA-qmgc-5h2g-mvrw --ignore-vuln GHSA-j842-xgm4-wf88 --ignore-vuln GHSA-w6vg-jg77-2qg6 --ignore-vuln GHSA-f83h-ghpp-7wcc --ignore-vuln GHSA-jr27-m4p2-rc6r
       - name: Ruff SAST scan (S-select)
         run: ruff check cortex/ --select S --output-format json -o bandit-report.json
       - name: Upload Bandit report
@@ -76,8 +76,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
-          pip install -e ".[dev]"
-          pip install pytest-timeout
+          pip install -e ".[dev,api]"
       - name: Show test environment
         shell: bash
         run: |
@@ -166,7 +165,7 @@ jobs:
           format: table
       - name: Smoke test
         run: |
-          docker run --rm -d --name cortex-test -p 8000:8000 cortex:test
+          docker run --rm -d --name cortex-test -p 8484:8484 cortex:test
           sleep 5
-          curl -f http://localhost:8000/health || exit 1
+          curl -f http://localhost:8484/health || exit 1
           docker stop cortex-test

@@ -10,13 +10,10 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import copy
 import json
 import random
-import sys
 import time
 from collections import defaultdict
-from pathlib import Path
 from typing import Any
 
 from benchmarks.encb.agents import (

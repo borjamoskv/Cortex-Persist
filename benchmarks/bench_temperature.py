@@ -102,6 +102,8 @@ async def _probe_once(
     model: str,
     temperature: float,
     ctx: int = 2048,
+    *,
+    allow_skip: bool = False,
 ) -> tuple[str, float]:
     t0 = time.perf_counter()
     try:
@@ -122,6 +124,10 @@ async def _probe_once(
         elapsed = (time.perf_counter() - t0) * 1000
         return resp.json()["response"].strip(), elapsed
 
+    except httpx.HTTPStatusError as exc:
+        if allow_skip and exc.response.status_code in {404, 405}:
+            raise RuntimeError(f"Ollama unavailable at {OLLAMA_BASE}") from exc
+        raise
     except httpx.ConnectError as exc:
         raise RuntimeError(f"Ollama unreachable at {OLLAMA_BASE}") from exc
 
@@ -134,6 +140,7 @@ async def run_trial(
     runs: int,
     *,
     verbose: bool = True,
+    allow_skip: bool = False,
 ) -> TrialResult:
     trial = TrialResult(temperature=temperature, label=label)
 
@@ -141,7 +148,12 @@ async def run_trial(
         print(f"\n  🔬 temp={temperature} ({label}) — {runs} runs...")
 
     for i in range(runs):
-        output, ms = await _probe_once(client, model, temperature)
+        output, ms = await _probe_once(
+            client,
+            model,
+            temperature,
+            allow_skip=allow_skip,
+        )
         trial.outputs.append(output)
         trial.latencies_ms.append(ms)
         if verbose:
@@ -155,12 +167,21 @@ async def benchmark(
     runs: int,
     *,
     verbose: bool = True,
+    allow_skip: bool = False,
 ) -> GateResult:
     trials: list[TrialResult] = []
 
     async with httpx.AsyncClient(timeout=httpx.Timeout(180.0)) as client:
         for temp, label in TEMPERATURE_PAIRS:
-            t = await run_trial(client, model, temp, label, runs, verbose=verbose)
+            t = await run_trial(
+                client,
+                model,
+                temp,
+                label,
+                runs,
+                verbose=verbose,
+                allow_skip=allow_skip,
+            )
             trials.append(t)
 
     low_trial = trials[0]  # temp 0.05
@@ -314,6 +335,7 @@ async def main(argv: list[str] | None = None) -> int:
             model=args.model,
             runs=runs,
             verbose=not args.quiet,
+            allow_skip=args.allow_skip,
         )
     except RuntimeError as exc:
         print(f"\n⚠️  {exc}")

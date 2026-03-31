@@ -36,6 +36,25 @@ def _write_valid_skill(skill_dir: Path) -> None:
     (skill_dir / "policy.yaml").write_text(
         "states:\n  - ACTIVE\n  - ABORTED\n  - PURGED\n  - QUARANTINED\n  - TOMBSTONED\n"
         "abort_reasons:\n  MISSING: missing\n"
+        "redundancy_policy:\n"
+        "  overlap_threshold: 0.9\n"
+        "  overlap_measurement:\n"
+        "    method: cosine_similarity\n"
+        "    source: intent_embedding\n"
+        "    target: existing_skill_embeddings\n"
+        "    engine: sentence-transformers\n"
+        "  allow_overlap_if:\n"
+        "    - lower_entropy_cost\n"
+        "    - stronger_verification\n"
+        "    - narrower_scope\n"
+        "    - better_causal_traceability\n"
+        "  causal_gap_check:\n"
+        "    required: true\n"
+        "    minimum_gap_score: 0.15\n"
+        "    output_format:\n"
+        "      overlap_score: float\n"
+        "      causal_gap_score: float\n"
+        "      decision: 'enum: PROCEED | ABORT_REDUNDANT'\n"
         "required_artifacts:\n"
         "  - path: SKILL.md\n    required: true\n"
         "  - path: schema.json\n    required: true\n"
@@ -146,7 +165,7 @@ class TestInvalidPolicy:
         (tmp_path / "policy.yaml").write_text(
             "abort_reasons:\n  X: x\nrequired_artifacts:\n  - path: a\n  - path: b\n  - path: c\n"
         )
-        with pytest.raises(VerificationError, match="Missing keys"):
+        with pytest.raises(VerificationError, match="states (must be a list|incomplete)"):
             verify_tripartite(tmp_path)
 
     def test_states_missing_active(self, tmp_path):

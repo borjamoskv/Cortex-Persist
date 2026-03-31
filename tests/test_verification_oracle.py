@@ -7,7 +7,9 @@ from cortex.verification.oracle import VerificationOracle
 
 @pytest.fixture
 def oracle():
-    return VerificationOracle()
+    from unittest.mock import MagicMock
+
+    return VerificationOracle(engine=MagicMock())
 
 
 @pytest.mark.asyncio

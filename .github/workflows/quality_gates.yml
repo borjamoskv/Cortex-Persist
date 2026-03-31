@@ -5,9 +5,9 @@ name: "🔒 Quality Gates"
 
 on:
   pull_request:
-    branches: [master, main]
+    branches: [main]
   push:
-    branches: [master, main]
+    branches: [main]
 
 permissions:
   contents: read
@@ -33,7 +33,7 @@ jobs:
 
       - name: Install CORTEX + dev deps
         run: |
-          pip install -e ".[dev]" ruff mypy pyright bandit pytest pytest-asyncio pytest-cov --quiet
+          pip install -e ".[dev,api]" mypy pyright bandit pytest pytest-asyncio pytest-cov --quiet
 
       # ─── SOVEREIGN SEALS (Local & CI Unified) ────────────────────
       - name: "🛡️ Execute 10 Seals"

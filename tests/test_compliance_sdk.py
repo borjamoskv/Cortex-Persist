@@ -10,7 +10,12 @@ from pathlib import Path
 
 import pytest
 
-pytestmark = pytest.mark.slow
+pytestmark = [
+    pytest.mark.slow,
+    pytest.mark.filterwarnings(
+        "ignore:get_conn\\(\\) is deprecated\\. Use session\\(\\) context manager\\.:DeprecationWarning"
+    ),
+]
 
 
 @pytest.fixture
@@ -44,7 +49,7 @@ class TestLogDecision:
         )
         # Retrieve the fact and check meta
         conn = await tracker._engine.get_conn()
-        cursor = await conn.execute("SELECT meta FROM facts WHERE id = ?", (fact_id,))
+        cursor = await conn.execute("SELECT metadata FROM facts WHERE id = ?", (fact_id,))
         row = await cursor.fetchone()
         assert row is not None
 
@@ -64,7 +69,7 @@ class TestLogDecision:
             meta={"model": "gpt-4", "latency_ms": 230},
         )
         conn = await tracker._engine.get_conn()
-        cursor = await conn.execute("SELECT meta FROM facts WHERE id = ?", (fact_id,))
+        cursor = await conn.execute("SELECT metadata FROM facts WHERE id = ?", (fact_id,))
         row = await cursor.fetchone()
 
         from cortex.crypto import get_default_encrypter

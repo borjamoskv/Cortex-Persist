@@ -2,10 +2,10 @@
 
 ## Supported Versions
 
-| Version | Supported          |
-|:--------|:------------------:|
-| 8.x     | ✅ Active          |
-| < 8.0   | ❌ No longer       |
+| Version    | Supported          |
+|:-----------|:------------------:|
+| >= 0.3.0   | ✅ Active          |
+| < 0.3.0    | ❌ No longer       |
 
 ## Reporting a Vulnerability
 
@@ -43,8 +43,8 @@ To verify a release:
 pip install sigstore
 sigstore verify identity \
   --cert-oidc-issuer https://token.actions.githubusercontent.com \
-  --cert-identity https://github.com/borjamoskv/cortex/.github/workflows/release.yml@refs/tags/v8.0.0 \
-  cortex_memory-8.0.0.tar.gz
+  --cert-identity https://github.com/borjamoskv/Cortex-Persist/.github/workflows/release.yml@refs/tags/v0.3.0 \
+  cortex_persist-0.3.0.tar.gz
 ```
 
 ### Container Image Scanning

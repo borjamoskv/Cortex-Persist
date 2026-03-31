@@ -12,7 +12,7 @@ from cortex.extensions.aether.models import (
     PlanOutput,
     TaskSource,
     TaskStatus,
-    TesterOutput,
+    AetherTestResult,
     ToolCall,
 )
 
@@ -187,16 +187,14 @@ class TestCriticOutput:
         assert c.suggestions == "Add try/except"
 
 
-# ─── TesterOutput ────────────────────────────────────────────────────
-
-
-class TestTesterOutput:
+# ─── AetherTestResult ────────────────────────────────────────────────
+class TestAetherTestResult:
     def test_passed(self):
-        t = TesterOutput(passed=True, output="All tests passed")
+        t = AetherTestResult(passed=True, output="All tests passed")
         assert t.passed is True
 
     def test_failed_with_output(self):
-        t = TesterOutput(passed=False, output="FAILED: test_foo", command="pytest")
+        t = AetherTestResult(passed=False, output="FAILED: test_foo", command="pytest")
         assert t.passed is False
         assert t.command == "pytest"
 

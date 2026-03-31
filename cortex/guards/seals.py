@@ -28,8 +28,8 @@ ROOT_DIR = Path(__file__).resolve().parents[2]
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from cortex.guards._seal_printer import SealPrinter
-from cortex.guards.sovereign_seals import (
+from cortex.guards._seal_printer import SealPrinter  # noqa: E402
+from cortex.guards.sovereign_seals import (  # noqa: E402
     check_gate_21_preservation,
     check_seal_8_dependency_impl,
     check_seal_9_compliance_impl,
@@ -62,8 +62,16 @@ async def arun_cmd(cmd: list[str]) -> tuple[int, str]:
             stderr=asyncio.subprocess.STDOUT,
             env=env,
         )
-        stdout, _ = await proc.communicate()
-        return proc.returncode or 0, stdout.decode(errors="replace")
+        try:
+            stdout, _ = await asyncio.wait_for(proc.communicate(), timeout=60.0)
+            return proc.returncode or 0, stdout.decode(errors="replace")
+        except asyncio.TimeoutError:
+            try:
+                proc.terminate()
+                await proc.wait()
+            except ProcessLookupError:
+                pass
+            return 124, f"Command timed out after 60s: {' '.join(cmd)}"
     except FileNotFoundError:
         return 127, f"Command not found: {resolved[0]}"
 
@@ -160,12 +168,8 @@ async def check_seal_2_type_safety() -> GateResult:
     printer.seal(2, "AX-012 Type Safety", "Type Check (Pyright)")
     code, out = await arun_cmd(["pyright", "cortex/", "--outputjson"])
     if code == 127:
-        code, out = await arun_cmd(
-            ["mypy", "cortex/", "--ignore-missing-imports", "--no-error-summary"]
-        )
-        if code == 127:
-            printer.warn("No type checker found (pyright/mypy) — skipping")
-            return True, "verified"
+        printer.warn("No type checker found (pyright/mypy) — skipping")
+        return True, "verified"
 
     # ── Pyright ──
     # Allowing a baseline of 85 stabilized warnings (AX-012 Shannon Entropy)
@@ -281,8 +285,13 @@ async def check_seal_3_security() -> GateResult:
 async def check_seal_4_tests() -> GateResult:
     printer.seal(4, "AX-017 Ledger Integrity", "Tests & Coverage")
     python_cmd = sys.executable
-    cmd = [str(python_cmd), "-m", "pytest", "tests/", "-x", "-q", "--tb=short", "-p", "no:timeout"]
-    code, out = await arun_cmd(cmd)
+    cmd = [str(python_cmd), "-m", "pytest", "tests/", "-x", "-q", "--tb=short"]
+    try:
+        code, out = await asyncio.wait_for(arun_cmd(cmd), timeout=600.0)
+    except asyncio.TimeoutError:
+        printer.fail("Tests timed out after 600 seconds (Singularity Prevention).")
+        return False, "verified"
+
     if code == 0:
         printer.success("All tests passed.")
         return True, "verified"

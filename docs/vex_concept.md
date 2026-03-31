@@ -56,7 +56,7 @@ No existing runner satisfies these requirements. CORTEX already does — for mem
 | **Bicameral Mind** | `sovereign_agent_manifesto.md` | Right Brain (reasoning) + Left Brain (execution) + Brainstem (safety) |
 | **MCP Server** | `mcp/` | Model Context Protocol integration |
 | **REST API** | `api/` | FastAPI with RBAC, rate limiting |
-| **CLI** | `cli/` | 38 commands |
+| **CLI** | `cli/` | 90+ commands |
 | **Circuit Breaker** | `proactive/circuit_breaker.py` | Failure isolation |
 | **Compaction** | `compaction/` | Dedup + pruning |
 | **OpenTelemetry** | `telemetry/` | Span tracing |

@@ -21,7 +21,7 @@ FACT_COLUMNS = (
     "f.hash, f.valid_from, f.valid_until, f.source, f.confidence, "
     "f.created_at, f.updated_at, f.is_tombstoned, f.is_quarantined, "
     "f.quadrant, f.storage_tier, f.exergy_score, f.category, "
-    "f.parent_id, f.relation_type, f.yield_score"
+    "f.parent_id AS parent_decision_id, f.relation_type, f.yield_score"
 )
 FACT_JOIN = "FROM facts f"
 

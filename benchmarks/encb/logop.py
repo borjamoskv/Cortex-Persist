@@ -14,6 +14,7 @@ import statistics
 from dataclasses import dataclass
 from typing import Any
 
+
 @dataclass(frozen=True)
 class LogOPConfig:
     w_self: float = 0.30

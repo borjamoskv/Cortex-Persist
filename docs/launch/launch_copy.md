@@ -60,8 +60,8 @@ NUMBERS:
   - 444 modules
   - Apache 2.0. Free.
 
-GitHub: https://github.com/borjamoskv/cortex
-Docs:   https://cortexpersist.dev
+GitHub: https://github.com/borjamoskv/Cortex-Persist
+Docs:   https://github.com/borjamoskv/Cortex-Persist/tree/main/docs
 
 Happy to answer questions about the cryptographic design,
 the WBFT consensus protocol, or the EU AI Act compliance angle.
@@ -128,7 +128,7 @@ Happy to geek out on:
 - Why Merkle trees beat blockchain for low-latency agent use cases
 - The Privacy Shield secret-detection pipeline
 
-GitHub: https://github.com/borjamoskv/cortex
+GitHub: https://github.com/borjamoskv/Cortex-Persist
 Apache 2.0. 45K+ LOC. 1,162+ tests.
 ```
 
@@ -183,7 +183,7 @@ await engine.store_fact("Decision", fact_type="decision", project="agent")
 cortex verify 42
 → ✅ SHA-256 intact, Merkle sealed. 3ms.
 
-GitHub: github.com/borjamoskv/cortex
+GitHub: https://github.com/borjamoskv/Cortex-Persist
 ```
 
 ---
@@ -206,7 +206,7 @@ CORTEX is to AI memory what SSL/TLS is to web communications.
 You didn't build your own encryption layer. You installed TLS.
 You don't need to build your own audit trail. → pip install cortex-persist
 
-https://cortexpersist.dev
+https://github.com/borjamoskv/Cortex-Persist/tree/main/docs
 ```
 
 ---

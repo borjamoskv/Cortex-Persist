@@ -31,7 +31,10 @@ async def engine(tmp_path: Path, monkeypatch):
 class TestPurgeBounded:
     async def test_purge_simple_fact_allowed(self, engine):
         fact_id = await engine.store(
-            project="test", content="Simple fact with no dependencies.", fact_type="knowledge"
+            project="test",
+            content="Simple fact with no dependencies.",
+            fact_type="knowledge",
+            source="test",
         )
 
         result = await engine.purge(fact_id)
@@ -44,13 +47,21 @@ class TestPurgeBounded:
 
     async def test_purge_rule_with_dependencies_denied(self, engine):
         # 1. Create a rule fact
-        rule_id = await engine.store(project="test", content="IF x THEN y", fact_type="rule")
+        rule_id = await engine.store(
+            project="test",
+            content="IF x THEN y",
+            fact_type="rule",
+            source="test",
+        )
 
         # 2. Create 5 dependent facts to reach criticality > 0.8
         # Heuristic: 0.5 (rule) + min(0.4, 5 * 0.1) = 0.9
         for i in range(5):
             child_id = await engine.store(
-                project="test", content=f"Dependent fact {i}", parent_decision_id=rule_id
+                project="test",
+                content=f"Dependent fact {i}",
+                parent_decision_id=rule_id,
+                source="test",
             )
             # Ensure causal edge is created (if store doesn't do it automatically for these types)
             async with engine.session() as conn:
@@ -81,12 +92,18 @@ class TestPurgeBounded:
         # Knowledge facts max out at 0.4 criticality in current heuristic,
         # so they are allowed. Let's verify they ARE deleted.
         fact_id = await engine.store(
-            project="test", content="Knowledge fact with dependencies.", fact_type="knowledge"
+            project="test",
+            content="Knowledge fact with dependencies.",
+            fact_type="knowledge",
+            source="test",
         )
 
         for i in range(5):
             child_id = await engine.store(
-                project="test", content=f"Dependent {i}", parent_decision_id=fact_id
+                project="test",
+                content=f"Dependent {i}",
+                parent_decision_id=fact_id,
+                source="test",
             )
             async with engine.session() as conn:
                 await conn.execute(

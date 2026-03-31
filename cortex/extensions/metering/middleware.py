@@ -75,7 +75,7 @@ class MeteringMiddleware(BaseHTTPMiddleware):
                     "error": "quota_exceeded",
                     "detail": (
                         f"Monthly API quota exhausted ({check.limit} calls). "
-                        "Upgrade your plan at https://cortex.moskv.com/pricing"
+                        "Learn more at https://cortexpersist.com"
                     ),
                     "used": check.used,
                     "limit": check.limit,

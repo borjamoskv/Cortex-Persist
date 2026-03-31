@@ -30,7 +30,7 @@ All notable changes to CORTEX, derived from the git history.
 
 ### Added
 
-- **Multi-tenancy v6**: Full tenant isolation with RBAC (4 roles: admin, operator, reader, agent)
+- **Multi-tenancy v6**: Full tenant isolation with RBAC (4 roles: SYSTEM, ADMIN, AGENT, VIEWER)
 - **Sovereign Web UI**: New KETER and Apotheosis engines
 - **GraphQL API** (preview)
 - **Distributed event bus**
@@ -78,7 +78,7 @@ All notable changes to CORTEX, derived from the git history.
 - WBFT (Weighted Byzantine Fault Tolerant) consensus
 - MCP Server (Model Context Protocol)
 - FastAPI REST API
-- CLI with 38 commands
+- CLI with 38 initial commands (now 90+)
 - Self-healing daemon with 13 monitors
 - High Availability (Raft, Gossip, CRDT)
 - 3-layer memory architecture

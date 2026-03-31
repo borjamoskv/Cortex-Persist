@@ -40,7 +40,7 @@ CORTEX is a trust engine that provides cryptographic verification, immutable aud
 - cortex_compliance_report — Article 12 compliance snapshot with score
 - cortex_decision_lineage — Trace decision chains for explainability
 
-## CLI (38 commands)
+## CLI (90+ commands)
 
 Core: init, store, search, recall, history, status, list, edit, delete
 Trust: verify, ledger, compliance-report, audit-trail, vote

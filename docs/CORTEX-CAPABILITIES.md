@@ -50,7 +50,7 @@ With that topology, the system accumulates persistent, auditable, and governable
 
 ## Core Structural Properties
 
-### 1. Security & Trust — Executable Defense Layers
+### 1. Security & Trust — Executable Defense Layers {#1-security--trust--executable-defense-layers}
 
 `SECURITY.md` and `AUDITORIA_SEGURIDAD_GITHUB.md` describe the model.
 CORTEX turns it into a living mechanism.
@@ -138,7 +138,7 @@ store_encrypted(ciphertext)
 
 ---
 
-### 2. MCP Server — Shared Trust Layer for Agent Collaboration
+### 2. MCP Server — Shared Trust Layer for Agent Collaboration {#2-mcp-server--shared-trust-layer-for-agent-collaboration}
 
 *Status: normative.*
 
@@ -178,7 +178,7 @@ Any MCP-compatible agent can:
 
 ---
 
-### 3. Genesis Engine — Declarative System Generation
+### 3. Genesis Engine — Declarative System Generation {#3-genesis-engine--declarative-system-generation}
 
 *Status: normative.*
 
@@ -213,7 +213,7 @@ That changes the status of the artifact:
 
 ---
 
-### 4. Evolution Engine — Schema Drift Awareness
+### 4. Evolution Engine — Schema Drift Awareness {#4-evolution-engine--schema-drift-awareness}
 
 *Status: normative.*
 
@@ -244,7 +244,7 @@ The real problem is detecting when a structural change threatens the continuity 
 
 ---
 
-### 5. LLM Cognitive Handoff — Scaling With Context Continuity
+### 5. LLM Cognitive Handoff — Scaling With Context Continuity {#5-llm-cognitive-handoff--scaling-with-context-continuity}
 
 *Status: normative.*
 

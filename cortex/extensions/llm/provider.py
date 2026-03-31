@@ -157,7 +157,7 @@ class LLMProvider(BaseProvider):
             raise ValueError(f"Provider '{provider}' requires API key ({env_key})")
 
     def _prepare_request(self) -> tuple[str, dict[str, str]]:
-        url = f"{self._base_url.rstrip('/')}/chat/completions"
+        url = f"{self._base_url.rstrip('/')}/chat/completions"  # pyright: ignore
         headers = prepare_stealth_headers(self._extra_headers)
         if self._api_key:
             headers["Authorization"] = f"Bearer {self._api_key}"
@@ -195,8 +195,15 @@ class LLMProvider(BaseProvider):
         response_text = ""
 
         # Phase 1: Shadow Re-phrasing (Ω₂₃)
-        for attempt in range(3):
-            payload["messages"][0]["content"] = current_system
+        for attempt in range(5):
+            payload = {
+                "model": model_name,
+                "messages": [
+                    {"role": "system", "content": current_system},
+                    {"role": "user", "content": prompt},
+                ],
+                "temperature": temperature,
+            }
             if model_name.startswith(("o1", "o3")):
                 payload["max_completion_tokens"] = max_tokens
                 payload.pop("temperature", None)
@@ -210,7 +217,7 @@ class LLMProvider(BaseProvider):
                 cache.set(payload, response_text, provider=self._provider, model=model_name)
                 return response_text
 
-            if attempt < 2:
+            if attempt < 4:
                 logger.warning(
                     "Ω₂₃: Audit [FAIL] -> Attempting Shadow Re-phrasing (Try %d)", attempt + 2
                 )
@@ -371,11 +378,12 @@ class LLMProvider(BaseProvider):
         model_name = self._resolve_model(prompt.intent)
         messages = prompt.to_openai_messages()
 
-        # Causal Jitter / UUID injection
-        if messages and messages[0]["role"] == "system":
+        # Stealth / Causal logic (Ω₂₃)
+        if getattr(prompt, "stealth", False) and messages and messages[0]["role"] == "system":
             noise_id = hashlib.sha256(f"{time.time()}{random.random()}".encode()).hexdigest()[:8]
             messages[0]["content"] += f"\n\n<!-- ctx:{noise_id} -->"
             messages[0]["content"] = (" " * random.randint(0, 2)) + messages[0]["content"]
+            await apply_causal_jitter(tokens_estimate=50)
 
         payload: dict[str, Any] = {
             "model": model_name,

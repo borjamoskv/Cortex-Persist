@@ -9,7 +9,7 @@ import click
 from rich.console import Console
 from rich.panel import Panel
 
-from cortex.cli.common import _run_async
+from cortex.cli.common import _run_async, cli
 from cortex.engine.keter import KeterEngine
 from cortex.utils.errors import CortexError
 
@@ -107,3 +107,7 @@ def sovereign_ignite_cmd(env: str) -> None:
     except Exception as e:  # noqa: BLE001
         console.print(f"[bold red]Error de Ignición:[/] {e}")
         raise click.Abort() from e
+
+
+cli.add_command(keter_cmds)
+cli.add_command(sovereign_cmds)

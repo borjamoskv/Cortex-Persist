@@ -1,5 +1,5 @@
-"""Compatibility exports for the legacy ``cortex.adk`` package path."""
+"""CORTEX ADK — Google Agent Development Kit Integration.
 
-from cortex.extensions.adk.runner import main, run_cli, run_web
-
-__all__ = ["main", "run_cli", "run_web"]
+Provides ADK agents that wrap CORTEX memory, search, and ledger
+capabilities into modular AI agents with Gemini optimization.
+"""

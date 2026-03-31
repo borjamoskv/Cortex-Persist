@@ -117,14 +117,14 @@ class AnomalyHunterEngine:
                     continue
 
                 cause_ts = datetime.fromisoformat(cause_time_str.replace("Z", "+00:00"))
-                effect_ts = datetime.fromisoformat(fact.created_at.replace("Z", "+00:00"))
+                effect_ts = datetime.fromisoformat(fact.created_at.replace("Z", "+00:00"))  # pyright: ignore
 
                 if cause_ts > effect_ts:
                     inversions.append(
                         Anomaly(
                             type="TEMPORAL_INVERSION",
                             severity="HIGH",
-                            facts_involved=[fact.id, cause_id],
+                            facts_involved=[fact.id, cause_id],  # pyright: ignore
                             description=(
                                 f"Efecto (fact #{fact.id}) precede a su causa. "
                                 f"Delta: {(cause_ts - effect_ts).seconds}s"
@@ -149,7 +149,7 @@ class AnomalyHunterEngine:
                         Anomaly(
                             type="SPATIAL_CONTRADICTION",
                             severity="HIGH",
-                            facts_involved=[fact_a.id, fact_b.id],
+                            facts_involved=[fact_a.id, fact_b.id],  # pyright: ignore
                             description=(
                                 f"Contradicción entre fact #{fact_a.id} y #{fact_b.id} "
                                 "sobre la misma entidad."
@@ -184,7 +184,7 @@ class AnomalyHunterEngine:
                     Anomaly(
                         type="CONFIDENCE_COLLAPSE",
                         severity="MEDIUM",
-                        facts_involved=[f.id for f in chain],
+                        facts_involved=[f.id for f in chain],  # pyright: ignore
                         description=(
                             f"Cadena de {len(chain)} hechos sin anclaje C4/C5. "
                             "Toda la cadena es especulativa."

@@ -90,7 +90,7 @@ class CortexEngine(
         # Composition layers
         from cortex.facts.manager import FactManager
 
-        self.facts = FactManager(self)
+        self.facts = FactManager(self)  # pyright: ignore
         self.embeddings = EmbeddingManager(self)
         self.consensus = ConsensusManager(self)
         self.lock_sovereign = SovereignLock(self)
@@ -272,6 +272,10 @@ class CortexEngine(
             DeprecationWarning,
             stacklevel=2,
         )
+        return await self._get_or_create_conn()
+
+    async def _get_conn(self) -> aiosqlite.Connection:
+        """Internal helper for connection acquisition (deprecated alias)."""
         return await self._get_or_create_conn()
 
     async def _get_or_create_conn(self) -> aiosqlite.Connection:

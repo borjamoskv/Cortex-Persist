@@ -177,8 +177,6 @@ async def create_toolbox_bridge(
 
     if server_url:
         config.server_url = server_url
-        if server_url not in config.allowed_server_urls:
-            config.allowed_server_urls.append(server_url)
 
     if toolset:
         config.toolset = toolset

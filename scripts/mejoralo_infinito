@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Wrapper to run the python script with the exact venv 
+# when called from anywhere
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+source "$DIR/../.venv/bin/activate"
+python "$DIR/mejoralo_infinito.py" "$@"

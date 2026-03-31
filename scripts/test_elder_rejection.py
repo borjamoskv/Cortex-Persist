@@ -1,10 +1,10 @@
 import asyncio
 import logging
 import sqlite3
-import sys
+
+from cortex.extensions.signals.bus import SignalBus
 from cortex.extensions.swarm.manager import CapatazOrchestrator
 from cortex.extensions.swarm.protocols import AgentRole
-from cortex.extensions.signals.bus import SignalBus
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("elder-test")
@@ -51,7 +51,7 @@ async def main():
     rejection_caught = False
     for res in results:
         if isinstance(res, Exception):
-            logger.info(f"✅ Rejection caught: {res}")
+            logger.info("✅ Rejection caught: %s", res)
             rejection_caught = True
 
     if not rejection_caught:
@@ -63,10 +63,9 @@ async def main():
     history = bus.history(event_type="swarm_discovery", limit=10)
     found_elder = False
     for sig in history:
-        # Payload is a string representation of the dict
-        payload_str = str(sig.payload)
-        if "rejection" in payload_str and "elder" in payload_str.lower():
-            logger.info(f"🧠 Negative Knowledge Captured: {payload_str}")
+        logger.info("Checking signal: %s from %s", sig.event_type, sig.source)
+        if "rejection" in str(sig.payload) and "Elder-0" in str(sig.payload):
+            logger.info("🧠 Negative Knowledge Successfully Captured in SignalBus!")
             found_elder = True
             break
     if not found_elder:

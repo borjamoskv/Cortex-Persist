@@ -6,6 +6,7 @@ import hashlib
 import logging
 import math
 import os
+import sys
 import threading
 from typing import Optional, cast
 
@@ -36,8 +37,11 @@ def _hash_to_unit_vector(text: str, dimension: int = EMBEDDING_DIM) -> list[floa
 
 
 def _resolve_device() -> str:
-    if _DEVICE != "auto":
-        return _DEVICE
+    package = sys.modules.get("cortex.embeddings")
+    package_override = getattr(package, "_DEVICE", _DEVICE) if package is not None else _DEVICE
+    device_override = os.environ.get("CORTEX_DEVICE", package_override)
+    if device_override != "auto":
+        return device_override
 
     try:
         import torch

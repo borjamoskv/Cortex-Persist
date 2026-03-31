@@ -7,6 +7,8 @@ import pytest
 from cortex.agents.builtins.verification_agent import VerificationAgent
 from cortex.agents.manifest import AgentManifest
 from cortex.agents.message_schema import MessageKind, new_message
+from cortex.verification.oracle import VerificationOracleResult
+from cortex.verification.verifier import VerificationResult
 
 
 @pytest.fixture
@@ -31,6 +33,9 @@ def agent(mock_manifest, mock_bus, mock_registry):
 
 @pytest.mark.asyncio
 async def test_handle_v2_request(agent, mock_bus):
+    agent._oracle.verify = AsyncMock(
+        return_value=VerificationOracleResult(ok=True, verdict="accepted")
+    )
     payload = {
         "subject": "plan_step",
         "candidate": {"objective": "Test objective with enough length", "steps": ["Step 1"]},
@@ -54,6 +59,14 @@ async def test_handle_v2_request(agent, mock_bus):
 
 @pytest.mark.asyncio
 async def test_handle_legacy_request(agent, mock_bus):
+    agent._verifier.check = MagicMock(
+        return_value=VerificationResult(
+            is_valid=True,
+            violations=[],
+            proof_certificate="cert-ok",
+            counterexample=None,
+        )
+    )
     payload = {"code": "print('fixed')"}
     msg = new_message(
         sender="sender",

@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-# Pre-commit friction removed, bypass applied
-# To restore, copy the old configuration.
-repos: []
-=======
 # CORTEX Pre-commit hooks
 # Install: pre-commit install
 # Run manually: pre-commit run --all-files
@@ -20,9 +15,8 @@ repos:
     hooks:
       - id: cortex-fast-tests
         name: CORTEX Fast Tests
-        entry: .venv/bin/pytest tests/ -m "not slow" --tb=line -q --no-header
+        entry: python3 -m pytest tests/ -m "not slow" --tb=line -q --no-header
         language: system
         pass_filenames: false
         always_run: true
         stages: [pre-commit]
->>>>>>> origin/main

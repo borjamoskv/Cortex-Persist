@@ -1,10 +1,10 @@
-import asyncio
+import base64
 import json
 import logging
-import base64
+from typing import Any, Optional
+
 import httpx
 import websockets
-from typing import Any, Optional
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger("mac-control-omega")
@@ -36,19 +36,19 @@ class MacControlOmega:
                     break
             
             if not target:
-                logger.error(f"No tab found matching: '{target_url_substring}'")
+                logger.error("No tab found matching: '%s'", target_url_substring)
                 return False
                 
             self.ws_url = target['webSocketDebuggerUrl']
             self.ws = await websockets.connect(self.ws_url)
-            logger.info(f"Connected to CDP: {target['url']}")
+            logger.info("Connected to CDP: %s", target['url'])
             
             # Enable core domains
             await self.send("Page.enable")
             await self.send("Runtime.enable")
             return True
         except Exception as e:
-            logger.error(f"Connection failed: {e}")
+            logger.error("Connection failed: %s", e)
             return False
 
     async def send(self, method: str, params: dict = None) -> Any:
@@ -60,9 +60,15 @@ class MacControlOmega:
             "params": params or {}
         }
         await self.ws.send(json.dumps(payload))
-        res = await self.ws.recv()
-        return json.loads(res).get("result", {})
-
+        while True:
+            res_str = await self.ws.recv()
+            res = json.loads(res_str)
+            # CDP can send asynchronous events without 'id', wait for our response
+            if res.get("id") == self.msg_id:
+                # Check if it's an error response
+                if "error" in res:
+                    logger.error("CDP Error in %s: %s", method, res['error'])
+                return res.get("result", {})
     async def extract_selector(self, selector: str, extract_html: bool = False) -> Optional[str]:
         """Extract text or HTML content from a CSS selector."""
         prop = "outerHTML" if extract_html else "innerText"
@@ -103,7 +109,7 @@ class MacControlOmega:
         
         # Check for exception details
         if 'exceptionDetails' in res:
-            logger.error(f"JS Error: {res['exceptionDetails']}")
+            logger.error("JS Error: %s", res['exceptionDetails'])
             
         return None
 
@@ -113,7 +119,7 @@ class MacControlOmega:
         if 'data' in res:
             with open(filepath, "wb") as f:
                 f.write(base64.b64decode(res['data']))
-            logger.info(f"Screenshot saved to {filepath}")
+            logger.info("Screenshot saved to %s", filepath)
         else:
             logger.error("Failed to capture screenshot data.")
 

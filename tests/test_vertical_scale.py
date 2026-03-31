@@ -120,7 +120,7 @@ class TestDeviceResolution:
 
     def test_cpu_fallback_no_torch(self):
         """Without torch installed, device resolves to cpu."""
-        import cortex.embeddings as emb
+        import cortex.embeddings.local as emb
 
         with patch.object(emb, "_DEVICE", "auto"):
             with patch.dict("sys.modules", {"torch": None}):
@@ -129,7 +129,7 @@ class TestDeviceResolution:
 
     def test_cuda_detection(self):
         """When CUDA is available, device resolves to cuda."""
-        import cortex.embeddings as emb
+        import cortex.embeddings.local as emb
 
         mock_torch = MagicMock()
         mock_torch.cuda.is_available.return_value = True
@@ -142,7 +142,7 @@ class TestDeviceResolution:
 
     def test_mps_detection(self):
         """When MPS is available (no CUDA), device resolves to mps."""
-        import cortex.embeddings as emb
+        import cortex.embeddings.local as emb
 
         mock_torch = MagicMock()
         mock_torch.cuda.is_available.return_value = False
@@ -155,11 +155,14 @@ class TestDeviceResolution:
 
     def test_env_override(self):
         """CORTEX_DEVICE env var overrides auto-detection."""
-        import cortex.embeddings as emb
+        import cortex.embeddings as emb_pkg
+        import cortex.embeddings.local as emb
 
-        with patch.object(emb, "_DEVICE", "cpu"):
-            result = emb._resolve_device()
-            assert result == "cpu"
+        with patch.object(emb, "_DEVICE", "auto"):
+            with patch.object(emb_pkg, "_DEVICE", "auto"):
+                with patch.dict("os.environ", {"CORTEX_DEVICE": "cpu"}):
+                    result = emb._resolve_device()
+                    assert result == "cpu"
 
     def test_local_embedder_accepts_device(self):
         """LocalEmbedder constructor stores explicit device."""

@@ -10,7 +10,6 @@ concurrently. The *Hypervisor* (Layer 2) decides what's actually true.
 from __future__ import annotations
 
 import statistics
-from typing import Any
 
 from benchmarks.encb.belief_object import BeliefObject, BeliefType, Evidence
 

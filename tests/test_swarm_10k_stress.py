@@ -30,7 +30,7 @@ async def test_10k_agents_stress():
 
         logger.info(
             "Dispatching tasks across %d legions (Bulk Routing O(1))",
-            len(set(t['domain'] for t in tasks))
+            len(set(t["domain"] for t in tasks)),
         )
         start_dispatch = time.perf_counter()
 

@@ -20,6 +20,8 @@ __author__ = "by borjamoskv.com"
 # Lazy imports — CortexEngine and experimental modules load on first access
 _LAZY_IMPORTS = {
     "CortexEngine": "cortex.engine",
+    "api": "cortex.api",
+    "routes": "cortex.routes",
 }
 
 _EXPERIMENTAL_MODULES = (
@@ -52,4 +54,4 @@ def __getattr__(name: str):
     raise AttributeError(f"module 'cortex' has no attribute {name!r}")
 
 
-__all__ = ["CortexEngine", "__version__"]  # pyright: ignore[reportUnsupportedDunderAll]
+__all__ = ["CortexEngine", "api", "routes", "__version__"]  # pyright: ignore[reportUnsupportedDunderAll]

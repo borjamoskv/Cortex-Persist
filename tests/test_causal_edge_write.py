@@ -27,6 +27,7 @@ async def _setup_db(conn: aiosqlite.Connection) -> None:
             fact_type TEXT,
             tags TEXT,
             confidence TEXT DEFAULT 'stated',
+            confidence_rank INTEGER DEFAULT 3,
             valid_from TEXT,
             valid_until TEXT,
             source TEXT,

@@ -45,7 +45,10 @@ def _make_skill_dir(base: Path, name: str = "test-skill") -> Path:
     )
     (d / "policy.yaml").write_text(
         "states:\n  - ACTIVE\n  - ABORTED\n  - PURGED\n  - QUARANTINED\n  - TOMBSTONED\n"
-        "abort_reasons:\n  MISSING: missing\n"
+        "abort_reasons:\n"
+        "  MISSING:\n"
+        "    description: missing\n"
+        "    severity: ERROR\n"
         "required_artifacts:\n"
         "  - path: SKILL.md\n    required: true\n"
         "  - path: schema.json\n    required: true\n"
@@ -195,7 +198,7 @@ class TestQuarantineSweep:
         future = datetime.now(tz=timezone.utc) + timedelta(days=10)
         quarantined = engine.quarantine_sweep(now=future)
         assert len(quarantined) == 1
-        assert quarantined[0].state == SortuState.QUARANTINED
+        assert quarantined[0].to_state == SortuState.QUARANTINED
 
     def test_fresh_skill_not_quarantined(self, engine):
         inv = ForgeInvocation(
@@ -227,7 +230,7 @@ class TestTombstoneSweep:
         far_future = datetime.now(tz=timezone.utc) + timedelta(days=30)
         tombstoned = engine.tombstone_sweep(grace_days=7, now=far_future)
         assert len(tombstoned) == 1
-        assert tombstoned[0].state == SortuState.TOMBSTONED
+        assert tombstoned[0].to_state == SortuState.TOMBSTONED
 
 
 class TestPurgeSweep:
@@ -245,4 +248,4 @@ class TestPurgeSweep:
         engine.tombstone_sweep(grace_days=7, now=far)
         purged = engine.purge_sweep(purge_after_days=30, now=far)
         assert len(purged) == 1
-        assert purged[0].state == SortuState.PURGED
+        assert purged[0].to_state == SortuState.PURGED

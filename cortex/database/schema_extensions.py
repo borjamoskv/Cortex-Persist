@@ -296,29 +296,6 @@ CREATE VIRTUAL TABLE IF NOT EXISTS facts_fts USING fts5(
 );
 """
 
-CREATE_FACTS_FTS_TRIGGERS = """
-CREATE TRIGGER IF NOT EXISTS trg_facts_fts_insert
-AFTER INSERT ON facts
-BEGIN
-  INSERT INTO facts_fts(rowid, content, project, tags, fact_type, tenant_id)
-  VALUES (NEW.id, NEW.content, NEW.project, NEW.tags, NEW.fact_type, NEW.tenant_id);
-END;
-
-CREATE TRIGGER IF NOT EXISTS trg_facts_fts_update
-AFTER UPDATE OF content, project, tags, fact_type, tenant_id ON facts
-BEGIN
-  DELETE FROM facts_fts WHERE rowid = OLD.id;
-  INSERT INTO facts_fts(rowid, content, project, tags, fact_type, tenant_id)
-  VALUES (NEW.id, NEW.content, NEW.project, NEW.tags, NEW.fact_type, NEW.tenant_id);
-END;
-
-CREATE TRIGGER IF NOT EXISTS trg_facts_fts_delete
-BEFORE DELETE ON facts
-BEGIN
-  DELETE FROM facts_fts WHERE rowid = OLD.id;
-END;
-"""
-
 # ─── Immutable Ledger (Merkle) ──────────────────────────────────────
 CREATE_MERKLE_ROOTS = """
 CREATE TABLE IF NOT EXISTS merkle_roots (
@@ -328,6 +305,30 @@ CREATE TABLE IF NOT EXISTS merkle_roots (
     tx_end_id       INTEGER NOT NULL,
     tx_count        INTEGER NOT NULL,
     timestamp       TEXT NOT NULL DEFAULT (datetime('now'))
+);
+"""
+
+CREATE_INTEGRITY_CHECKS = """
+CREATE TABLE IF NOT EXISTS integrity_checks (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    check_type      TEXT NOT NULL,
+    status          TEXT NOT NULL,
+    details         TEXT,
+    started_at      TEXT NOT NULL,
+    completed_at    TEXT NOT NULL
+);
+"""
+
+CREATE_AUDIT_EXPORTS = """
+CREATE TABLE IF NOT EXISTS audit_exports (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    export_type     TEXT NOT NULL,
+    filename        TEXT NOT NULL,
+    file_hash       TEXT NOT NULL,
+    tx_start_id     INTEGER NOT NULL,
+    tx_end_id       INTEGER NOT NULL,
+    exported_at     TEXT NOT NULL DEFAULT (datetime('now')),
+    exported_by     TEXT NOT NULL
 );
 """
 
@@ -378,6 +379,44 @@ CREATE TABLE IF NOT EXISTS causal_edges (
 );
 """
 
+
+CREATE_EPISODES_FTS_TRIGGERS = """
+CREATE TRIGGER IF NOT EXISTS trg_episodes_ai AFTER INSERT ON episodes BEGIN
+  INSERT INTO episodes_fts(rowid, content, event_type, project, tenant_id)
+  VALUES (new.id, new.content, new.event_type, new.project, new.tenant_id);
+END;
+
+CREATE TRIGGER IF NOT EXISTS trg_episodes_ad AFTER DELETE ON episodes BEGIN
+  INSERT INTO episodes_fts(episodes_fts, rowid, content, event_type, project, tenant_id)
+  VALUES ('delete', old.id, old.content, old.event_type, old.project, old.tenant_id);
+END;
+
+CREATE TRIGGER IF NOT EXISTS trg_episodes_au AFTER UPDATE ON episodes BEGIN
+  INSERT INTO episodes_fts(episodes_fts, rowid, content, event_type, project, tenant_id)
+  VALUES ('delete', old.id, old.content, old.event_type, old.project, old.tenant_id);
+  INSERT INTO episodes_fts(rowid, content, event_type, project, tenant_id)
+  VALUES (new.id, new.content, new.event_type, new.project, new.tenant_id);
+END;
+"""
+
+CREATE_FACTS_FTS_TRIGGERS = """
+CREATE TRIGGER IF NOT EXISTS facts_ai AFTER INSERT ON facts BEGIN
+  INSERT INTO facts_fts(rowid, content, project, tags, fact_type, tenant_id)
+  VALUES (new.id, new.content, new.project, new.tags, new.fact_type, new.tenant_id);
+END;
+
+CREATE TRIGGER IF NOT EXISTS facts_ad AFTER DELETE ON facts BEGIN
+  DELETE FROM facts_fts WHERE rowid = old.id;
+END;
+
+CREATE TRIGGER IF NOT EXISTS facts_au
+AFTER UPDATE OF content, project, tags, fact_type, tenant_id ON facts BEGIN
+  DELETE FROM facts_fts WHERE rowid = old.id;
+  INSERT INTO facts_fts(rowid, content, project, tags, fact_type, tenant_id)
+  VALUES (new.id, new.content, new.project, new.tags, new.fact_type, new.tenant_id);
+END;
+"""
+
 # Convenience export — all extension statements in insertion order
 EXTENSION_SCHEMA = [
     CREATE_VOTES,
@@ -391,6 +430,7 @@ EXTENSION_SCHEMA = [
     CREATE_EPISODES,
     CREATE_EPISODES_INDEXES,
     CREATE_EPISODES_FTS,
+    CREATE_EPISODES_FTS_TRIGGERS,
     CREATE_EVOLUTION_STATE,
     CREATE_EVOLUTION_STATE_INDEX,
     CREATE_SIGNALS,
@@ -410,4 +450,6 @@ EXTENSION_SCHEMA = [
     CREATE_FACTS_FTS,
     CREATE_FACTS_FTS_TRIGGERS,
     CREATE_MERKLE_ROOTS,
+    CREATE_INTEGRITY_CHECKS,
+    CREATE_AUDIT_EXPORTS,
 ]

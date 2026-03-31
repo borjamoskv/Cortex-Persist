@@ -8,12 +8,12 @@ Common questions about CORTEX, answered honestly.
 
 ### Is CORTEX production-ready?
 
-**Not yet.** CORTEX is in **v8.0 alpha**. The architecture is solid and tests pass, but there are known issues being actively resolved (singleton thread-safety, persistent audit logging). We recommend CORTEX for:
+**Not yet.** CORTEX is in **beta**. The package version is **v0.3.0b2**. The architecture is solid and tests pass, but there are known issues being actively resolved (singleton thread-safety, persistent audit logging). We recommend CORTEX for:
 
 - ✅ Development and prototyping
 - ✅ Compliance proof-of-concepts
 - ✅ Pre-production evaluation
-- ⚠️ Production — only with awareness of alpha status
+- ⚠️ Production — only with awareness of beta status
 
 See the [Changelog](changelog.md) for current progress.
 
@@ -31,7 +31,7 @@ Traditional logging captures *what happened*. CORTEX proves *it wasn't tampered 
 
 ### Who built this?
 
-[borjamoskv.com](https://borjamoskv.com) — solo developer, based in Bilbao. CORTEX is 103 commits in 9 days (as of Feb 24, 2026). This is a real product, not a weekend experiment.
+[borjamoskv.com](https://borjamoskv.com) — solo developer, based in Bilbao. CORTEX is a 178K+ LOC production codebase with 1,621+ tests across 1,094 modules. This is a real product, not a weekend experiment.
 
 ---
 
@@ -110,4 +110,4 @@ python -m cortex.mcp
 
 ### How do I report a security issue?
 
-See [SECURITY.md](https://github.com/borjamoskv/cortex/blob/main/SECURITY.md) for responsible disclosure instructions. Do not open public GitHub issues for security vulnerabilities.
+See [SECURITY.md](https://github.com/borjamoskv/Cortex-Persist/blob/main/SECURITY.md) for responsible disclosure instructions. Do not open public GitHub issues for security vulnerabilities.

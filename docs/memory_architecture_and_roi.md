@@ -198,4 +198,4 @@ El ahorro anual conservador es de **~€29K/developer** en tiempo lineal. Pero e
 
 ---
 
-*Documento generado: 2026-02-24 · CORTEX v12.2 · [Apache 2.0](../LICENSE)*
+*Documento generado: 2026-02-24 · CORTEX v12.2 · [Apache 2.0](https://github.com/borjamoskv/Cortex-Persist/blob/main/LICENSE)*

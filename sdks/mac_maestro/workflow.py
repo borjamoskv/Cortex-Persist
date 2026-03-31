@@ -79,7 +79,8 @@ class MacMaestroWorkflow:
         """
         try:
             from .app_discovery import (
-                get_pid, is_frontmost, get_app_name,
+                get_pid,
+                is_frontmost,
             )
             from .ax_inspector import get_window_title
 

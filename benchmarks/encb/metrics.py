@@ -11,12 +11,9 @@ Four metrics that measure epistemic debt, not just accuracy:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
 
-from benchmarks.encb.agents import NodeProfile, AdversaryType
-from benchmarks.encb.belief_object import BeliefType
+from benchmarks.encb.agents import AdversaryType, NodeProfile
 from benchmarks.encb.strategies import PropState
-
 
 # ── PFBR — Persistent False Belief Rate ──────────────────────────────────
 
@@ -137,7 +134,7 @@ def cncl(
     }
 
     result: dict[str, int | None] = {}
-    for node_id, profile in corrupt_nodes.items():
+    for node_id in corrupt_nodes:
         history = reliability_history.get(node_id, [])
         contained_at = None
         for t, rel in enumerate(history):
@@ -225,6 +222,7 @@ def compute_report(
 
 import math
 
+
 def calculate_recovery_rate(recovered: set[str], ground_truth: set[str]) -> float:
     """
     Calculates the Recovery Rate R = |recovered ∩ GT| / |GT|.
@@ -294,4 +292,3 @@ def calculate_entropy_delta(pre_state_probs: list[float], post_state_probs: list
     h_pre = shannon_h(pre_state_probs)
     h_post = shannon_h(post_state_probs)
     return h_post - h_pre
-

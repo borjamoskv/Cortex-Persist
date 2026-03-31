@@ -1,6 +1,6 @@
-import time
 import subprocess
-import os
+import time
+
 from web3 import Web3
 
 # WATCHER config

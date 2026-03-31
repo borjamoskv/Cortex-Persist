@@ -20,10 +20,12 @@ class EnrichmentQueue:
         with self.store.tx() as conn:
             conn.execute(
                 """
-                INSERT INTO ledger_enrichment_jobs (job_id, event_id, status, attempts, next_attempt_ts)
-                VALUES (?, ?, 'queued', 0, ?)
+                INSERT INTO enrichment_jobs (
+                    job_id, event_id, status, attempts, next_attempt_ts, next_attempt_at
+                )
+                VALUES (?, ?, 'queued', 0, ?, ?)
                 """,
-                (job_id, event_id, utc_now_iso()),
+                (job_id, event_id, utc_now_iso(), utc_now_iso()),
             )
         return job_id
 
@@ -38,11 +40,11 @@ class EnrichmentQueue:
             # RETURNING gives us the row values after the update.
             row = conn.execute(
                 """
-                UPDATE ledger_enrichment_jobs
+                UPDATE enrichment_jobs
                 SET status='processing', updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now')
                 WHERE job_id = (
                     SELECT job_id
-                    FROM ledger_enrichment_jobs
+                    FROM enrichment_jobs
                     WHERE status IN ('queued', 'retry')
                       AND (next_attempt_ts IS NULL OR next_attempt_ts <= ?)
                     ORDER BY created_at ASC
@@ -66,7 +68,7 @@ class EnrichmentQueue:
         with self.store.tx() as conn:
             conn.execute(
                 """
-                UPDATE ledger_enrichment_jobs
+                UPDATE enrichment_jobs
                 SET status='done', updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now')
                 WHERE job_id=?
                 """,
@@ -89,13 +91,14 @@ class EnrichmentQueue:
         with self.store.tx() as conn:
             conn.execute(
                 """
-                UPDATE ledger_enrichment_jobs
-                SET status=?, attempts=?, next_attempt_ts=?, last_error=?, updated_at=strftime('%Y-%m-%dT%H:%M:%f','now')
+                UPDATE enrichment_jobs
+                SET status=?, attempts=?, next_attempt_ts=?, next_attempt_at=?, last_error=?, updated_at=strftime('%Y-%m-%dT%H:%M:%f','now')
                 WHERE job_id=?
                 """,
                 (
                     "failed" if terminal else "retry",
                     attempts + 1,
+                    next_attempt,
                     next_attempt,
                     error[:2000],
                     job_id,

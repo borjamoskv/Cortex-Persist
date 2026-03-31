@@ -28,7 +28,7 @@ CORTEX uses **lazy consensus with benevolent dictator (BD) override**:
 ### Becoming a Committer
 
 1. Contribute **1+ merged PR** of any scope
-2. Follow the code style and testing standards in [CONTRIBUTING.md](CONTRIBUTING.md)
+2. Follow the code style and testing standards in [CONTRIBUTING.md](../CONTRIBUTING.md)
 3. Added to the `contributors` team with write access
 
 ## Areas Seeking Co-Maintainers

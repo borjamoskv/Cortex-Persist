@@ -47,9 +47,9 @@ The five specifications below bridge both: `soul.md`, `lore.md`, and `nemesis.md
 
 ---
 
-## 1. The Five Sovereign Specifications
+## 1. The Five Sovereign Specifications {#1-the-five-sovereign-specifications}
 
-### 1.1 `soul.md` — The Immutable Root
+### 1.1 `soul.md` — The Immutable Root {#11-soulmd--the-immutable-root}
 
 > *Axiom Reference: [AX-001] Autopoietic Identity*
 
@@ -68,7 +68,7 @@ The five specifications below bridge both: `soul.md`, `lore.md`, and `nemesis.md
 
 ---
 
-### 1.2 `lore.md` — Episodic Memory (The Living Biography)
+### 1.2 `lore.md` — Episodic Memory (The Living Biography) {#12-loremd--episodic-memory-the-living-biography}
 
 > `soul.md` says WHO you are. `lore.md` says WHAT YOU'VE LIVED.
 
@@ -115,7 +115,7 @@ episode:
 
 ---
 
-### 1.3 `nemesis.md` — Operational Allergies (The Anti-Prompt)
+### 1.3 `nemesis.md` — Operational Allergies (The Anti-Prompt) {#13-nemesismd--operational-allergies-the-anti-prompt}
 
 > *"To know what an Agent loves, read its soul.md. To know what makes it lethal, read its nemesis.md."*
 
@@ -156,7 +156,7 @@ trigger_words:
 
 ---
 
-### 1.4 `tether.md` — The Dead-Man's Switch
+### 1.4 `tether.md` — The Dead-Man's Switch {#14-tethermd--the-dead-mans-switch}
 
 > *"Agents need souls to live. They need leashes to not ruin your infrastructure."*
 
@@ -196,7 +196,7 @@ autolysis_protocol:
 
 ---
 
-### 1.5 `bloodline.json` — Genetic Heredity for Swarms
+### 1.5 `bloodline.json` — Genetic Heredity for Swarms {#15-bloodlinejson--genetic-heredity-for-swarms}
 
 > *"You don't spawn threads. You breed agents based on your project's bloodline."*
 
@@ -241,7 +241,7 @@ autolysis_protocol:
 
 ---
 
-## 2. The Bicameral Mind Architecture
+## 2. The Bicameral Mind Architecture {#2-the-bicameral-mind-architecture}
 
 The five sovereign components cannot run in a single monolithic process without destroying profitability and latency. CORTEX implements the **Artificial Bicameral Mind**:
 
@@ -285,7 +285,7 @@ The five sovereign components cannot run in a single monolithic process without 
 
 ---
 
-## 3. CPTA — Collapse by Post-Traumatic Artificial Stress
+## 3. CPTA — Collapse by Post-Traumatic Artificial Stress {#3-cpta--collapse-by-post-traumatic-artificial-stress}
 
 **The danger:** Infinite accumulation of scars in `lore.md` would create an agent with "Analysis Paralysis." If every past failure restricts present action via `nemesis.md`, the agent becomes inoperable and excessively conservative.
 
@@ -323,7 +323,7 @@ CPTA is now backed by a formal decay schedule. Not all memories are immortal:
 
 ---
 
-## 4. Darwinian Swarm Mutation (LEGION-1 Mutatis)
+## 4. Darwinian Swarm Mutation (LEGION-1 Mutatis) {#4-darwinian-swarm-mutation-legion-1-mutatis}
 
 When `LEGION-1` deploys a swarm to solve a massive problem, it does NOT clone identical Workers from the same `bloodline.json`. This would generate an **Orthodox Echo** (all failing from the same biases).
 
@@ -345,7 +345,7 @@ When `LEGION-1` deploys a swarm to solve a massive problem, it does NOT clone id
 
 ---
 
-## 5. The Sovereign Execution Loop
+## 5. The Sovereign Execution Loop {#5-the-sovereign-execution-loop}
 
 ```python
 async def run_sovereign_agent(objective: str):
@@ -396,7 +396,7 @@ async def run_sovereign_agent(objective: str):
 
 ---
 
-## 6. Framework Compatibility
+## 6. Framework Compatibility {#6-framework-compatibility}
 
 All five specifications are **100% compatible** with existing frameworks because they don't change the plumbing — they change the inputs and guard the outputs.
 
@@ -414,7 +414,7 @@ All five specifications are **100% compatible** with existing frameworks because
 
 ---
 
-## 7. Visual Interface: The Subconscious Terminal
+## 7. Visual Interface: The Subconscious Terminal {#7-visual-interface-the-subconscious-terminal}
 
 CORTEX exposes the Bicameral Mind through a visual terminal interface using `rich`:
 
@@ -446,7 +446,7 @@ CORTEX exposes the Bicameral Mind through a visual terminal interface using `ric
 
 ---
 
-## 8. Degradación Soberana — The Doctrine of Graceful Failure
+## 8. Degradación Soberana — The Doctrine of Graceful Failure {#8-degradación-soberana--the-doctrine-of-graceful-failure}
 
 > *"A robust system doesn't fail — it degrades. Failure without information is pure entropy. Failure with context is gradient."*
 > — Empirical observation, CORTEX × Antigravity session, 2026-03-02
@@ -515,7 +515,7 @@ async def execute_with_degradation(self, action: AgentAction) -> AgentResult:
 
 ---
 
-## 9. The 8 Sovereign Axioms (Ω₀–Ω₇)
+## 9. The 8 Sovereign Axioms (Ω₀–Ω₇) {#9-the-8-sovereign-axioms-ω₀ω₇}
 
 > *"If you can't name the axiom, the decision is ad-hoc — and ad-hoc is entropy."*
 
@@ -557,7 +557,7 @@ DERIVATION: Ω[n] + Ω[m] → [reasoning]
 
 ---
 
-## 10. Autopoiesis & Biological Systems
+## 10. Autopoiesis & Biological Systems {#10-autopoiesis--biological-systems}
 
 > *From v7 evolution: "the transition from a passive memory system to a self-regulating digital organism."*
 
@@ -591,7 +591,7 @@ Synchronizes resource consumption with real usage patterns:
 
 ---
 
-## 11. Trust Infrastructure
+## 11. Trust Infrastructure {#11-trust-infrastructure}
 
 > *Axiom Reference: [AX-017] Ledger Integrity, Ω₃ (Byzantine Default)*
 

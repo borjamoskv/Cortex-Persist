@@ -161,7 +161,7 @@ class AsyncCortexEngine(
         )
         await self._update_transaction_hash_if_needed(
             conn,
-            cursor.lastrowid,
+            cursor.lastrowid,  # pyright: ignore
             project,
             action,
             dj,

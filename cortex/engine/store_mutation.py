@@ -8,6 +8,7 @@ from typing import Any
 
 import aiosqlite
 
+from cortex.engine.causality import AsyncCausalGraph
 from cortex.utils.canonical import now_iso
 
 logger = logging.getLogger("cortex.store_mutation")
@@ -18,7 +19,7 @@ async def _fetch_fact_state(
 ) -> aiosqlite.Row | tuple[Any, ...] | None:
     cursor = await conn.execute(
         """
-        SELECT tenant_id, valid_until, is_tombstoned, is_quarantined
+        SELECT tenant_id, fact_type, valid_until, is_tombstoned, is_quarantined
         FROM facts
         WHERE id = ? AND tenant_id = ?
         """,
@@ -36,7 +37,7 @@ async def deprecate_impl_logic(
     tenant_id: str,
 ) -> bool:
     row = await _fetch_fact_state(conn, fact_id, tenant_id)
-    if not row or row[1] is not None:
+    if not row or row[2] is not None:
         return False
 
     ts = now_iso()
@@ -59,6 +60,10 @@ async def deprecate_impl_logic(
         {"fact_id": fact_id, "reason": reason or "deprecated", "timestamp": ts},
         tenant_id=tenant_id,
     )
+
+    # Ω₁₃: Deprecation should degrade descendants just like invalidation.
+    graph = AsyncCausalGraph(conn)
+    await graph.propagate_taint(fact_id, tenant_id=tenant_id, floor_to_c1=False)
     return True
 
 
@@ -71,7 +76,7 @@ async def invalidate_impl_logic(
     tenant_id: str,
 ) -> bool:
     row = await _fetch_fact_state(conn, fact_id, tenant_id)
-    if not row or bool(row[2]):
+    if not row or bool(row[3]):
         return False
 
     ts = now_iso()
@@ -98,6 +103,10 @@ async def invalidate_impl_logic(
         {"fact_id": fact_id, "reason": reason or "invalidated", "timestamp": ts},
         tenant_id=tenant_id,
     )
+
+    # Ω₁₃: Invalidation must cascade taint to descendants.
+    graph = AsyncCausalGraph(conn)
+    await graph.propagate_taint(fact_id, tenant_id=tenant_id, floor_to_c1=False)
     return True
 
 
@@ -125,9 +134,25 @@ async def purge_logic(
         if not row:
             return False
 
-        is_active = row[1] is None and not bool(row[2]) and not bool(row[3])
-        if is_active and not force:
-            raise ValueError("Refusing to purge an active fact without force=True")
+        fact_type = row[1] or "knowledge"
+
+        child_count = 0
+        try:
+            cursor = await conn.execute(
+                "SELECT COUNT(*) FROM causal_edges WHERE parent_id = ? AND tenant_id = ?",
+                (fact_id, tenant_id),
+            )
+            count_row = await cursor.fetchone()
+            child_count = int(count_row[0]) if count_row else 0
+        except (sqlite3.Error, aiosqlite.Error):
+            child_count = 0
+
+        base_criticality = 0.5 if fact_type == "rule" else 0.0
+        dependency_criticality = min(0.4, child_count * 0.1)
+        criticality = base_criticality + dependency_criticality
+
+        if criticality > 0.8 and not force:
+            raise RuntimeError("Bounded Demolition Denied: criticality > 0.8")
 
         await mixin_instance._log_transaction(
             conn,
@@ -142,11 +167,16 @@ async def purge_logic(
             ("DELETE FROM fact_embeddings WHERE fact_id = ?", (fact_id,)),
             ("DELETE FROM specular_embeddings WHERE fact_id = ?", (fact_id,)),
             ("DELETE FROM enrichment_jobs WHERE fact_id = ?", (fact_id,)),
-            ("DELETE FROM entity_events WHERE entity_id = ? AND tenant_id = ?", (fact_id, tenant_id)),
+            (
+                "DELETE FROM entity_events WHERE entity_id = ? AND tenant_id = ?",
+                (fact_id, tenant_id),
+            ),
             (
                 "DELETE FROM causal_edges WHERE (fact_id = ? OR parent_id = ?) AND tenant_id = ?",
                 (fact_id, fact_id, tenant_id),
             ),
+            # FTS cleanup is explicit because facts.content is encrypted in the
+            # primary table and trigger-driven sync is not reliable for writes.
             ("DELETE FROM facts_fts WHERE rowid = ?", (fact_id,)),
         ]
         for statement, params in delete_specs:

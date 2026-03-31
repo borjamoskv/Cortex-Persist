@@ -42,7 +42,7 @@ class LedgerCollector:
         try:
             from cortex.database.core import connect
 
-            with connect(db_path, timeout=2.0) as conn:
+            with connect(db_path, timeout=2.0) as conn:  # pyright: ignore
                 conn.row_factory = sqlite3.Row
                 try:
                     cur = conn.execute("SELECT COUNT(*) as cnt FROM cortex_ledger")

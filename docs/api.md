@@ -1,148 +1,99 @@
-# REST API Reference (v5.1 Consolidated)
+# REST API Reference
 
-CORTEX exposes a versioned FastAPI-based REST API.
+CORTEX exposes a FastAPI application via `cortex.api:app`. The public HTTP surface is versioned
+primarily under `/v1`, and interactive docs are available at `/docs` when the app is not running
+in production mode.
 
 ---
 
-## Facts & Memory (`/v1/facts`)
+## Run Locally
 
-<<<<<<< HEAD
-The central domain for storing and retrieving sovereign knowledge.
-=======
 ```bash
 pip install cortex-persist[api]
 uvicorn cortex.api:app --host 0.0.0.0 --port 8484
 ```
 
-Interactive OpenAPI docs: `http://localhost:8484/docs`
+Interactive docs: `http://localhost:8484/docs`
 
-Full OpenAPI spec: [`openapi.yaml`](https://github.com/borjamoskv/cortex/blob/main/openapi.yaml) (70.5 KB)
+To export a static OpenAPI document:
+
+```bash
+python -c "from cortex.api.openapi import export_openapi_spec; print(export_openapi_spec())"
+```
+
+By default this writes `docs/openapi.json`.
 
 ---
 
 ## Authentication
 
-API keys are managed via the admin endpoint. Keys are SHA-256 hashed before storage and support RBAC with 4 roles.
+API keys are created through the admin surface and then passed as Bearer tokens.
 
 ```bash
-# Bootstrap: create first key (no auth required)
+# Bootstrap the first key
 curl -X POST "http://localhost:8484/v1/admin/keys?name=my-client&tenant_id=default"
 
-# Subsequent requests use Bearer auth
-curl -H "Authorization: Bearer ctx_xxxxxxxxxx" http://localhost:8484/v1/status
+# Use the returned token on subsequent requests
+curl -H "Authorization: Bearer ctx_xxxxxxxxxx" \
+  http://localhost:8484/v1/status
 ```
 
 ### RBAC Roles
 
 | Role | Permissions |
-|:---|:---|
+| :--- | :--- |
 | `SYSTEM` | Full access |
-| `ADMIN` | `read`, `write`, `manage:keys`, `system:config` |
-| `AGENT` | `read`, `write` |
-| `VIEWER` | `read` only |
+| `ADMIN` | Administrative and write operations |
+| `AGENT` | Read and write operations |
+| `VIEWER` | Read-only access |
 
 ---
 
-## Health & Monitoring
+## Core Endpoints
 
-### `GET /health`
+### Facts & Memory
 
-Simple status check for load balancers.
+- `POST /v1/facts` — Store a single fact for the authenticated tenant.
+- `POST /v1/facts/batch` — Store up to 100 facts in one request.
+- `GET /v1/facts` — List active facts across projects for the tenant.
+- `GET /v1/facts/{fact_id}` — Retrieve one fact with metadata and hash.
+- `GET /v1/projects/{project}/facts` — Recall facts for a specific project.
+- `POST /v1/facts/search` — Semantic search with optional `project` and `as_of`.
+- `GET /v1/facts/{fact_id}/history` — Retrieve the fact version/history chain.
+- `GET /v1/facts/{fact_id}/chain` — Retrieve the causal chain for a fact.
+- `GET /v1/facts/verify` — Verify ledger integrity across persisted facts.
+- `POST /v1/facts/{fact_id}/vote` — Cast a consensus vote on a fact.
+- `POST /v1/facts/{fact_id}/vote-v2` — Cast a reputation-weighted consensus vote.
+- `GET /v1/facts/{fact_id}/votes` — List votes registered for a fact.
+- `POST /v1/facts/{fact_id}/taint` — Trigger taint propagation from a suspect fact.
+- `DELETE /v1/facts/{fact_id}` — Soft-deprecate a fact.
 
-```json
-{"status": "ok", "version": "8.0.0a1"}
-```
+### Trust, Governance & Health
 
-### `GET /metrics`
+- `GET /health` — Lightweight service health endpoint.
+- `GET /v1/status` — Engine status, counts, and database size.
+- `GET /v1/health/deep` — Deep subsystem health probes.
+- `POST /v1/admin/keys` — Create API keys.
+- `GET /v1/admin/keys` — List API keys.
+- `GET /v1/projects/{project}/export` — Export project facts as JSON.
+- `POST /v1/trust/guard` — Dry-run a proposed write against the storage guard.
+- `GET /v1/trust/profiles/{agent_id}` — Retrieve the trust profile for one agent.
+- `GET /v1/trust/compliance` — Generate compliance status derived from live state.
 
-Prometheus-compatible metrics (p50/p95/p99 latencies, fact counts, consensus stats).
+### Swarm & Orchestration
 
-### `GET /v1/status`
-
-Engine statistics and health.
-
-```json
-{
-  "version": "8.0.0a1",
-  "db_path": "/Users/you/.cortex/cortex.db",
-  "db_size_mb": 2.4,
-  "total_facts": 150,
-  "active_facts": 142,
-  "deprecated_facts": 8,
-  "project_count": 5,
-  "embeddings": 142,
-  "transactions": 158
-}
-```
-
----
-
-## Facts
->>>>>>> origin/main
-
-### `POST /v1/facts`
-Store a single fact (scoped to tenant).
-- **Body**: `StoreRequest` (project, content, fact_type, tags, source, meta)
-
-### `POST /v1/facts/batch`
-Store up to 100 facts in one call.
-- **Body**: `BatchStoreRequest`
-
-### `GET /v1/facts/{id}`
-Retrieve a single fact by ID with full metadata and cryptographic hash.
-
-### `GET /v1/projects/{project}/facts`
-Paginated recall of facts for a specific project.
-
-### `POST /v1/facts/search`
-Semantic search across all tenant facts. Supports `as_of` temporal filtering.
-
-### `DELETE /v1/facts/{id}`
-Soft-deprecate a fact.
-
-### `GET /v1/facts/verify`
-Verify the cryptographic integrity of the entire memory ledger.
-
-### `POST /v1/facts/{id}/taint`
-[Ω₁₃] Trigger recursive confidence downgrades on suspected facts.
+- `GET /v1/swarm/status` — Aggregate swarm health and active worktrees.
+- `POST /v1/swarm/worktrees` — Provision an isolated git worktree.
+- `GET /v1/swarm/worktrees/{worktree_id}` — Inspect a provisioned worktree.
+- `DELETE /v1/swarm/worktrees/{worktree_id}` — Tear down a worktree.
+- `POST /v1/swarm/psychohistory` — Run a psychohistory simulation.
+- `POST /v1/ask` and `POST /v1/ask/stream` — Retrieval + synthesis endpoints.
+- `POST /v1/agents` and `GET /v1/agents...` — Agent registration and inspection.
+- `GET /v1/context/*` — Context inference, signals, and history endpoints.
 
 ---
 
-## Swarm & Worktrees (`/v1/swarm`)
+## Compatibility Notes
 
-Orchestration surface for isolated agent deployment (Hito 3).
-
-### `GET /v1/swarm/status`
-Global health metrics, active worktrees, and agent PIDs.
-
-### `POST /v1/swarm/worktrees`
-Provision an isolated git worktree environment.
-- **Body**: `{"branch_name": "...", "base_path": "..."}`
-
-### `GET /v1/swarm/worktrees/{id}`
-Retrieve metadata for an active worktree.
-
-### `DELETE /v1/swarm/worktrees/{id}`
-Terminate and cleanup an isolated execution environment.
-
----
-
-## Trust & Compliance (`/v1/trust`)
-
-Sovereign guardrails and regulatory alignment.
-
-### `POST /v1/trust/guard`
-Check if a proposed action violates existing trust boundaries.
-
-### `GET /v1/trust/compliance`
-Retrieve EU AI Act or custom compliance status reports.
-
----
-
-## Admin & Health
-
-### `GET /v1/status`
-Engine health, cortisol levels, and neuroplasticity metrics.
-
-### `GET /health`
-Standard service health.
+Legacy clients using `/v1/memories/*` are redirected to `/v1/facts/*` for backward
+compatibility. New integrations should target the `/v1/facts` surface directly.

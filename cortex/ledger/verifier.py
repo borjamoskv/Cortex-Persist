@@ -71,6 +71,19 @@ class LedgerVerifier:
         from cortex.consensus.merkle import MerkleTree
 
         with self.store.tx() as conn:
+            conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS ledger_checkpoints (
+                    checkpoint_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    root_hash TEXT NOT NULL,
+                    start_event_id TEXT NOT NULL,
+                    end_event_id TEXT NOT NULL,
+                    event_count INTEGER NOT NULL,
+                    created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+                )
+                """
+            )
+
             # 1. Find last event processed into a checkpoint
             cursor = conn.execute(
                 "SELECT end_event_id FROM ledger_checkpoints ORDER BY checkpoint_id DESC LIMIT 1"

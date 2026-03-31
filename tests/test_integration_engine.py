@@ -119,7 +119,7 @@ async def test_taint_propagation_crypto_safety(engine):
 
     async with engine.session() as conn:
         graph = AsyncCausalGraph(conn)
-        await graph.propagate_taint(fact_id=500)
+        await graph.propagate_taint(fact_id=500, floor_to_c1=True)
 
     # 4. Verify that metadata of fact 500 was NOT clobbered
     async with engine.session() as conn:

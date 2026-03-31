@@ -89,15 +89,19 @@ class EmbeddingManager:
         """Async embedding API that supports both local and cloud backends."""
         embedder = self._get_embedder()
         if self.mode == "api":
-            return await embedder.embed(text)
-        return embedder.embed(text)
+            return await embedder.embed(text)  # type: ignore[reportGeneralTypeIssues]
+        import asyncio
+
+        return await asyncio.to_thread(embedder.embed, text)
 
     async def aembed_batch(self, texts: list[str], batch_size: int = 32) -> list[list[float]]:
         """Async batch embedding API that supports both local and cloud backends."""
         embedder = self._get_embedder()
         if self.mode == "api":
-            return await embedder.embed_batch(texts, batch_size=batch_size)
-        return embedder.embed_batch(texts, batch_size=batch_size)
+            return await embedder.embed_batch(texts, batch_size=batch_size)  # type: ignore[reportGeneralTypeIssues]
+        import asyncio
+
+        return await asyncio.to_thread(embedder.embed_batch, texts, batch_size=batch_size)
 
     async def embed_multimodal(
         self,

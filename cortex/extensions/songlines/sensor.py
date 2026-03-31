@@ -133,7 +133,7 @@ class TopographicSensor:
             import xattr
 
             try:
-                return xattr.getxattr(str(file_path), attr)
+                return xattr.getxattr(str(file_path), attr)  # pyright: ignore
             except OSError:
                 pass
         except ImportError:

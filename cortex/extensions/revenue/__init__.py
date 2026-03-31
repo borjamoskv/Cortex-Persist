@@ -10,6 +10,17 @@ Vectors:
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from cortex.extensions.revenue.engine import RevenueEngine
+    from cortex.extensions.revenue.models import (
+        ExecutionResult,
+        Opportunity,
+        RevenueReport,
+        RevenueVector,
+    )
+
 __all__ = [
     "RevenueEngine",
     "Opportunity",

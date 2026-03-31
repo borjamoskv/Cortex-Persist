@@ -22,10 +22,9 @@ import pytest
 from cortex.extensions.llm._models import BaseProvider, IntentProfile
 from cortex.extensions.llm._presets import (
     _PRESETS_CACHE,
-    providers_for_intent,
     frontier_providers,
-    cheapest_providers,
     load_presets,
+    providers_for_intent,
 )
 
 
@@ -119,7 +118,9 @@ class TestQueryAPIs:
         assert len(free) >= 5
 
     def test_empty_for_unknown(self):
-        assert providers_for_intent("nonexistent_intent", min_tier="frontier", max_cost="free") == []
+        assert (
+            providers_for_intent("nonexistent_intent", min_tier="frontier", max_cost="free") == []
+        )
 
 
 # ─── BaseProvider Defaults ────────────────────────────────────────────

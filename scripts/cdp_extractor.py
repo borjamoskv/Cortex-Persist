@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-import asyncio
 import argparse
-import sys
+import asyncio
 import json
+import sys
+
 from mac_control.cdp_engine import MacControlOmega
+
 
 async def main():
     parser = argparse.ArgumentParser(description="CDP Extractor for Sovereign UI Automation.")

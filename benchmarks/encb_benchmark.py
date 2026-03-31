@@ -35,19 +35,23 @@ from pathlib import Path
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from typing import Any
+
 from rich import box
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from benchmarks.encb.resolvers import Resolver, AppendOnlyResolver, OracleResolver
-from benchmarks.encb.metrics import calculate_recovery_rate, calculate_f1_score, calculate_kl_divergence
-from typing import Any
+from benchmarks.encb.metrics import (
+    calculate_f1_score,
+    calculate_kl_divergence,
+    calculate_recovery_rate,
+)
+from benchmarks.encb.resolvers import AppendOnlyResolver, OracleResolver, Resolver
 from benchmarks.encb_chaos_generator import (
     ChaosEvent,
     ChaosModality,
     EpistemicChaosOrchestrator,
-    GroundTruth,
 )
 
 console = Console()
@@ -79,7 +83,7 @@ class CortexResolver(Resolver):
                         await self.engine.vote(fact_id, event.agent_id, vote_value)
                     except Exception:
                         pass
-            except Exception as exc:
+            except Exception:
                 if event.meta.get("is_byzantine", False):
                     self._detected_byzantine.add(event.agent_id)
 
@@ -149,9 +153,10 @@ async def run_encb(
     db_path = os.path.join(tmp_dir, "encb_cortex.db")
 
     try:
+        from cortex.schema import ALL_SCHEMA
+
         from cortex.database.pool import CortexConnectionPool
         from cortex.engine_async import AsyncCortexEngine
-        from cortex.schema import ALL_SCHEMA
 
         pool = CortexConnectionPool(db_path, min_connections=1, max_connections=3)
         await pool.initialize()
@@ -180,8 +185,8 @@ async def run_encb(
     resolvers.append(AppendOnlyResolver())
     
     gt_map = {}
-    for modality, gt in ground_truths.items():
-        for i, prop in enumerate(gt.signal_facts):
+    for _modality, gt in ground_truths.items():
+        for _i, prop in enumerate(gt.signal_facts):
             gt_map[prop[:50]] = prop
     resolvers.append(OracleResolver(gt_map))
 

@@ -61,12 +61,17 @@ class LedgerStore:
                     created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
                 );
 
-                CREATE TABLE IF NOT EXISTS ledger_enrichment_jobs (
-                    job_id TEXT PRIMARY KEY,
-                    event_id TEXT NOT NULL,
+                CREATE TABLE IF NOT EXISTS enrichment_jobs (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    job_id TEXT UNIQUE,
+                    event_id TEXT,
+                    fact_id INTEGER,
+                    job_type TEXT,
                     status TEXT NOT NULL DEFAULT 'queued',
                     attempts INTEGER NOT NULL DEFAULT 0,
+                    priority INTEGER DEFAULT 0,
                     next_attempt_ts TEXT,
+                    next_attempt_at TEXT,
                     last_error TEXT,
                     created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
                     updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
@@ -77,7 +82,117 @@ class LedgerStore:
                 CREATE INDEX IF NOT EXISTS idx_ledger_events_hash ON ledger_events(hash);
                 CREATE INDEX IF NOT EXISTS idx_ledger_events_semantic_status
                     ON ledger_events(semantic_status);
-                CREATE INDEX IF NOT EXISTS idx_ledger_enrichment_jobs_status_next_attempt
-                    ON ledger_enrichment_jobs(status, next_attempt_ts);
+
+                CREATE TABLE IF NOT EXISTS ledger_enrichment_jobs (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    job_id TEXT UNIQUE,
+                    event_id TEXT,
+                    fact_id INTEGER,
+                    job_type TEXT,
+                    status TEXT NOT NULL DEFAULT 'queued',
+                    attempts INTEGER NOT NULL DEFAULT 0,
+                    priority INTEGER DEFAULT 0,
+                    next_attempt_ts TEXT,
+                    next_attempt_at TEXT,
+                    last_error TEXT,
+                    created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
+                    updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
+                    FOREIGN KEY(event_id) REFERENCES ledger_events(event_id) ON DELETE CASCADE
+                );
                 """
             )
+            self._ensure_compat_columns(conn, "enrichment_jobs")
+            self._ensure_compat_columns(conn, "ledger_enrichment_jobs")
+            conn.executescript(
+                """
+                CREATE INDEX IF NOT EXISTS idx_ledger_events_ts ON ledger_events(ts);
+                CREATE INDEX IF NOT EXISTS idx_ledger_events_hash ON ledger_events(hash);
+                CREATE INDEX IF NOT EXISTS idx_ledger_events_semantic_status
+                    ON ledger_events(semantic_status);
+                CREATE INDEX IF NOT EXISTS idx_ledger_enrichment_jobs_status_next_attempt_compat
+                    ON ledger_enrichment_jobs(status, COALESCE(next_attempt_ts, next_attempt_at));
+
+                CREATE TRIGGER IF NOT EXISTS enrichment_jobs_ledger_insert
+                AFTER INSERT ON enrichment_jobs
+                BEGIN
+                    INSERT OR REPLACE INTO ledger_enrichment_jobs (
+                        id,
+                        job_id,
+                        event_id,
+                        fact_id,
+                        job_type,
+                        status,
+                        attempts,
+                        priority,
+                        next_attempt_ts,
+                        next_attempt_at,
+                        last_error,
+                        created_at,
+                        updated_at
+                    )
+                    VALUES (
+                        NEW.id,
+                        NEW.job_id,
+                        NEW.event_id,
+                        NEW.fact_id,
+                        NEW.job_type,
+                        NEW.status,
+                        NEW.attempts,
+                        NEW.priority,
+                        NEW.next_attempt_ts,
+                        NEW.next_attempt_at,
+                        NEW.last_error,
+                        NEW.created_at,
+                        NEW.updated_at
+                    );
+                END;
+
+                CREATE TRIGGER IF NOT EXISTS enrichment_jobs_ledger_update
+                AFTER UPDATE ON enrichment_jobs
+                BEGIN
+                    INSERT OR REPLACE INTO ledger_enrichment_jobs (
+                        id,
+                        job_id,
+                        event_id,
+                        fact_id,
+                        job_type,
+                        status,
+                        attempts,
+                        priority,
+                        next_attempt_ts,
+                        next_attempt_at,
+                        last_error,
+                        created_at,
+                        updated_at
+                    )
+                    VALUES (
+                        NEW.id,
+                        NEW.job_id,
+                        NEW.event_id,
+                        NEW.fact_id,
+                        NEW.job_type,
+                        NEW.status,
+                        NEW.attempts,
+                        NEW.priority,
+                        NEW.next_attempt_ts,
+                        NEW.next_attempt_at,
+                        NEW.last_error,
+                        NEW.created_at,
+                        NEW.updated_at
+                    );
+                END;
+
+                CREATE TRIGGER IF NOT EXISTS enrichment_jobs_ledger_delete
+                AFTER DELETE ON enrichment_jobs
+                BEGIN
+                    DELETE FROM ledger_enrichment_jobs WHERE job_id = OLD.job_id;
+                END;
+                """
+            )
+
+    def _ensure_compat_columns(self, conn: sqlite3.Connection, table_name: str) -> None:
+        """Backfill compatibility columns for legacy ledger job tables."""
+        existing = {row[1] for row in conn.execute(f"PRAGMA table_info({table_name})").fetchall()}
+        for column in ("next_attempt_ts", "next_attempt_at"):
+            if column not in existing:
+                conn.execute(f"ALTER TABLE {table_name} ADD COLUMN {column} TEXT")

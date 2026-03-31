@@ -5,6 +5,8 @@ Codename: SORTU-Ω
 Last Updated: 2026-03-14
 Audience: New Integrators, Swarm Developers, Platform Architects
 
+> **Classification:** Active RFC for SDK onboarding flows.
+
 ---
 
 ## 1. Purpose

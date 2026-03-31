@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import click
 
-from cortex.cli.common import DEFAULT_DB, console  # type: ignore[reportAttributeAccessIssue]
+from cortex.cli.common import DEFAULT_DB, cli, console  # type: ignore[reportAttributeAccessIssue]
 from cortex.cli.health_dashboard import dashboard
 
 
@@ -209,9 +209,13 @@ def history(db_path: str | None, limit: int) -> None:
     table.add_column("Grade", justify="center")
 
     for rec in records:
-        score_val = float(rec.get("score") if rec.get("score") is not None else 0.0)  # type: ignore
-        grade = str(rec.get("grade") or "")
-        ts = str(rec.get("timestamp") or "")[:19]
+        try:
+            score_val = float(rec.get("score", 0))  # type: ignore
+        except (TypeError, ValueError):
+            score_val = 0.0
+
+        grade = str(rec.get("grade", ""))
+        ts = str(rec.get("timestamp", ""))[:19]
         if score_val >= 85:
             color = "green"
         elif score_val >= 70:
@@ -306,3 +310,6 @@ def verify():
     except Exception as e:
         console.print(f"[bold red]Error running invariants: {e}[/bold red]")
         sys.exit(1)
+
+
+cli.add_command(health_group)

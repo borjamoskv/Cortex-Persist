@@ -16,8 +16,6 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
-from benchmarks.encb.belief_object import BeliefType
-
 
 class AdversaryType(str, Enum):
     """The five adversary archetypes."""

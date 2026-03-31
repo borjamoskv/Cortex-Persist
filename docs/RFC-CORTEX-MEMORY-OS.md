@@ -3,6 +3,7 @@
 **Status:** Draft / Active
 **Date:** March 2026
 **Target Architecture:** MOSKV-1 v5 / CORTEX v8
+> **Classification:** Active RFC. This document defines proposed memory-OS constraints, not current release state.
 
 ## 1. Context and Motivation
 

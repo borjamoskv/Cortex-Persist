@@ -44,7 +44,7 @@ spec:
         version: v5
       annotations:
         prometheus.io/scrape: "true"
-        prometheus.io/port: "8000"
+        prometheus.io/port: "8484"
         prometheus.io/path: "/metrics"
     spec:
       serviceAccountName: cortex-app
@@ -58,7 +58,7 @@ spec:
         - name: cortex
           image: gcr.io/PROJECT_ID/cortex-sovereign:latest
           ports:
-            - containerPort: 8000
+            - containerPort: 8484
               protocol: TCP
           env:
             - name: CORTEX_ENV
@@ -77,13 +77,13 @@ spec:
           livenessProbe:
             httpGet:
               path: /health
-              port: 8000
+              port: 8484
             initialDelaySeconds: 10
             periodSeconds: 15
           readinessProbe:
             httpGet:
               path: /health
-              port: 8000
+              port: 8484
             initialDelaySeconds: 5
             periodSeconds: 5
           volumeMounts:
@@ -105,8 +105,8 @@ spec:
   selector:
     app: cortex-sovereign
   ports:
-    - port: 8000
-      targetPort: 8000
+    - port: 8484
+      targetPort: 8484
       protocol: TCP
   type: ClusterIP
 
@@ -168,7 +168,7 @@ spec:
             matchLabels:
               kubernetes.io/metadata.name: cortex
       ports:
-        - port: 8000
+        - port: 8484
   egress:
     - to:
         - namespaceSelector:

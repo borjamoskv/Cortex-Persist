@@ -2,24 +2,18 @@
 
 from __future__ import annotations
 
-import asyncio
-import warnings
+import sys
+from pathlib import Path
 
 import pytest
 
-# Suppress Python 3.14+ deprecation warning for DefaultEventLoopPolicy
-# (scheduled for removal in 3.16, but pytest-asyncio 1.3.0 requires it)
-warnings.filterwarnings(
-    "ignore",
-    message=".*DefaultEventLoopPolicy.*",
-    category=DeprecationWarning,
-)
-
-
-@pytest.fixture(scope="session")
-def event_loop_policy():
-    """Provide event loop policy for pytest-asyncio 1.3.0 compatibility."""
-    return asyncio.DefaultEventLoopPolicy()
+# ── Sortu scripts resolution ──────────────────────────────────────────────────
+# The sortu_* modules live in scripts/sortu/. Individual test files also try to
+# inject the local ~/.gemini path (for developer convenience), but CI doesn't
+# have that tree.  This conftest ensures the tracked path is always present.
+_SORTU_SCRIPTS = Path(__file__).resolve().parents[1] / "scripts" / "sortu"
+if _SORTU_SCRIPTS.exists() and str(_SORTU_SCRIPTS) not in sys.path:
+    sys.path.insert(0, str(_SORTU_SCRIPTS))
 
 
 @pytest.fixture(autouse=True)

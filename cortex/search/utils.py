@@ -67,11 +67,12 @@ def _sanitize_fts_query(query: str) -> str:
 def _row_to_result(row: Any, is_fts: bool = False) -> SearchResult:
     """Parse a database row into a SearchResult object with decryption logic.
 
-    Column order from _fts5_search / _like_search:
-      0: f.id, 1: f.content, 2: f.project, 3: f.fact_type, 4: f.confidence,
-      5: f.valid_from, 6: f.valid_until, 7: f.tags, 8: f.source, 9: f.metadata,
-      10: f.created_at, 11: f.updated_at, 12: f.tx_id, 13: t.hash,
-      14: bm25(facts_fts) AS rank  [FTS only]
+    # Column order from _fts5_search / _like_search:
+    #   0: f.id, 1: f.content, 2: f.project, 3: f.fact_type, 4: f.confidence,
+    #   5: f.valid_from, 6: f.valid_until, 7: f.tags, 8: f.source, 9: f.metadata,
+    #   10: f.created_at, 11: f.updated_at, 12: f.tx_id, 13: f.hash,
+    #   14: f.consensus_score, 15: f.confidence_rank,
+    #   16: bm25(facts_fts) AS rank  [FTS only]
     """
     from cortex.crypto import get_default_encrypter
 
@@ -92,23 +93,23 @@ def _row_to_result(row: Any, is_fts: bool = False) -> SearchResult:
     # Meta (index 9)
     meta = _parse_row_meta(row[9], tenant_id, enc) if len(row) > 9 else {}
 
-    # Scoring — FTS has rank at index 14
+    # Scoring — FTS has rank at index 16
     score = 0.5
-    if is_fts and len(row) > 14:
-        rank = row[14] if row[14] is not None else 0.0
+    if is_fts and len(row) > 16:
+        rank = row[16] if row[16] is not None else 0.0
         import math
+
         score = 1.0 / (1.0 + math.exp(rank / 10.0))
 
-    # Ω₁₆: Consensus-aware confidence normalization
+    # Ω₁₆: Consensus-aware confidence normalization natively mapping from columns 4, 14
     confidence = row[4] if len(row) > 4 else meta.get("confidence", "C3")
-    c_score = meta.get("consensus_score", 1.0)
+    c_score = row[14] if len(row) > 14 else meta.get("consensus_score", 1.0)
     if confidence in ("stated", "C3") and c_score >= 1.5:
         confidence = "verified"
     elif confidence in ("stated", "C3") and c_score <= 0.5:
         confidence = "disputed"
 
-    # Ω₁₁: Hardened lineage (Issue #94)
-    # Fallback to metadata if JOIN fails (t.hash is index 13, f.tx_id is 12)
+    # Ω₁₁: Hardened lineage (Issue #94) mapped directly
     tx_id = row[12] if len(row) > 12 else meta.get("tx_id")
     tx_hash = row[13] if len(row) > 13 else meta.get("hash")
 
@@ -179,6 +180,7 @@ def _parse_row_sync(row: Any, has_rank: bool) -> SearchResult:
     if has_rank and len(row) > 7:
         # Normalize bm25 rank synchronously too
         import math
+
         rank = row[7] if row[7] is not None else 0.0
         score = 1.0 / (1.0 + math.exp(rank / 10.0))
     else:

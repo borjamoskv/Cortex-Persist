@@ -10,6 +10,7 @@ Adaptive checkpointing: reduces batch size during high write-rate periods
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import time
@@ -44,6 +45,7 @@ class ImmutableLedger:
     def __init__(self, pool: CortexConnectionPool):
         self.pool = pool
         self._write_timestamps: deque[float] = deque(maxlen=5000)
+        self._lock = asyncio.Lock()
 
     import contextlib
 
@@ -105,55 +107,56 @@ class ImmutableLedger:
         """Create a Merkle tree checkpoint for recent transactions (async)."""
         batch_size = self.adaptive_batch_size
 
-        async with self._acquire_conn() as conn:
-            # Find last checkpointed transaction
-            cursor = await conn.execute(  # type: ignore[reportAttributeAccessIssue]
-                "SELECT MAX(tx_end_id) FROM merkle_roots"
-            )
-            row = await cursor.fetchone()
-            last_tx = row[0] or 0 if row else 0
+        async with self._lock:
+            async with self._acquire_conn() as conn:
+                # Find last checkpointed transaction
+                cursor = await conn.execute(  # type: ignore[reportAttributeAccessIssue]
+                    "SELECT MAX(tx_end_id) FROM merkle_roots"
+                )
+                row = await cursor.fetchone()
+                last_tx = row[0] or 0 if row else 0
 
-            # Count pending transactions
-            cursor = await conn.execute(  # type: ignore[reportAttributeAccessIssue]
-                "SELECT COUNT(*) FROM transactions WHERE id > ?", (last_tx,)
-            )
-            row = await cursor.fetchone()
-            pending = row[0] if row else 0
+                # Count pending transactions
+                cursor = await conn.execute(  # type: ignore[reportAttributeAccessIssue]
+                    "SELECT COUNT(*) FROM transactions WHERE id > ?", (last_tx,)
+                )
+                row = await cursor.fetchone()
+                pending = row[0] if row else 0
 
-            if pending < batch_size:
-                return None
+                if pending < batch_size:
+                    return None
 
-            start_id = last_tx + 1
-            # Get the ID of the N-th transaction from start
-            cursor = await conn.execute(  # type: ignore[reportAttributeAccessIssue]
-                "SELECT id FROM transactions WHERE id >= ? ORDER BY id LIMIT 1 OFFSET ?",
-                (start_id, batch_size - 1),
-            )
-            end_row = await cursor.fetchone()
+                start_id = last_tx + 1
+                # Get the ID of the N-th transaction from start
+                cursor = await conn.execute(  # type: ignore[reportAttributeAccessIssue]
+                    "SELECT id FROM transactions WHERE id >= ? ORDER BY id LIMIT 1 OFFSET ?",
+                    (start_id, batch_size - 1),
+                )
+                end_row = await cursor.fetchone()
 
-            if not end_row:
-                return None
+                if not end_row:
+                    return None
 
-            end_id = end_row[0]
+                end_id = end_row[0]
 
-            # D004 FIX: Pass existing conn to avoid double pool acquisition
-            root_hash = await self.compute_merkle_root_async(start_id, end_id, conn=conn)
+                # D004 FIX: Pass existing conn to avoid double pool acquisition
+                root_hash = await self.compute_merkle_root_async(start_id, end_id, conn=conn)
 
-            if not root_hash:
-                return None
+                if not root_hash:
+                    return None
 
-            cursor = await conn.execute(  # type: ignore[reportAttributeAccessIssue]
-                """
-                INSERT INTO merkle_roots (root_hash, tx_start_id, tx_end_id, tx_count)
-                VALUES (?, ?, ?, ?)
-                """,
-                (root_hash, start_id, end_id, batch_size),
-            )
-            await conn.commit()  # type: ignore[reportAttributeAccessIssue]
-            logger.info(
-                "Created Merkle checkpoint #%d (TX %d-%d)", cursor.lastrowid, start_id, end_id
-            )
-            return cursor.lastrowid
+                cursor = await conn.execute(  # type: ignore[reportAttributeAccessIssue]
+                    """
+                    INSERT INTO merkle_roots (root_hash, tx_start_id, tx_end_id, tx_count)
+                    VALUES (?, ?, ?, ?)
+                    """,
+                    (root_hash, start_id, end_id, batch_size),
+                )
+                await conn.commit()  # type: ignore[reportAttributeAccessIssue]
+                logger.info(
+                    "Created Merkle checkpoint #%d (TX %d-%d)", cursor.lastrowid, start_id, end_id
+                )
+                return cursor.lastrowid
 
     def compute_merkle_root_sync(self, conn, start_id: int, end_id: int) -> Optional[str]:
         """Compute Merkle root for a range of transactions synchronously."""
@@ -229,89 +232,94 @@ class ImmutableLedger:
         violations = []
         tx_count = 0
 
-        async with self._acquire_conn() as conn:
-            # 1. Verify Hash Chain (Chunked to avoid OOM)
-            cursor = await conn.execute(  # type: ignore[reportAttributeAccessIssue]
-                "SELECT id, prev_hash, hash, project, action, "
-                "detail, timestamp FROM transactions ORDER BY id"
-            )
+        async with self._lock:
+            async with self._acquire_conn() as conn:
+                # 1. Verify Hash Chain (Chunked to avoid OOM)
+                cursor = await conn.execute(  # type: ignore[reportAttributeAccessIssue]
+                    "SELECT id, prev_hash, hash, project, action, "
+                    "detail, timestamp FROM transactions ORDER BY id"
+                )
 
-            current_prev = "GENESIS"
-            while True:
-                tx = await cursor.fetchone()
-                if not tx:
-                    break
+                current_prev = "GENESIS"
+                while True:
+                    tx = await cursor.fetchone()
+                    if not tx:
+                        break
 
-                tx_id, p_hash, c_hash, proj, act, detail, ts = tx
-                tx_count += 1
+                    tx_id, p_hash, c_hash, proj, act, detail, ts = tx
+                    tx_count += 1
 
-                if p_hash != current_prev:
-                    violations.append(
-                        {
-                            "tx_id": tx_id,
-                            "type": "chain_break",
-                            "expected": current_prev,
-                            "actual": p_hash,
-                        }
-                    )
+                    if p_hash != current_prev:
+                        violations.append(
+                            {
+                                "tx_id": tx_id,
+                                "type": "chain_break",
+                                "expected": current_prev,
+                                "actual": p_hash,
+                            }
+                        )
 
-                # Recompute hash — try v2 (canonical) first, fallback to v1 (legacy)
-                computed_v2 = compute_tx_hash(p_hash, proj, act, detail, ts)
-                computed_v1 = compute_tx_hash_v1(p_hash, proj, act, detail, ts)
-                if computed_v2 != c_hash and computed_v1 != c_hash:
-                    violations.append(
-                        {
-                            "tx_id": tx_id,
-                            "type": "hash_mismatch",
-                            "computed_v2": computed_v2,
-                            "computed_v1": computed_v1,
-                            "stored": c_hash,
-                        }
-                    )
-                current_prev = c_hash
+                    # Recompute hash — try v2 (canonical) first, fallback to v1 (legacy)
+                    computed_v2 = compute_tx_hash(p_hash, proj, act, detail, ts)
+                    computed_v1 = compute_tx_hash_v1(p_hash, proj, act, detail, ts)
+                    if computed_v2 != c_hash and computed_v1 != c_hash:
+                        violations.append(
+                            {
+                                "tx_id": tx_id,
+                                "type": "hash_mismatch",
+                                "computed_v2": computed_v2,
+                                "computed_v1": computed_v1,
+                                "stored": c_hash,
+                            }
+                        )
+                    current_prev = c_hash
 
-            # 2. Verify Merkle Checkpoints
-            cursor = await conn.execute(  # type: ignore[reportAttributeAccessIssue]
-                "SELECT id, root_hash, tx_start_id, tx_end_id FROM merkle_roots ORDER BY id"
-            )
-            roots = await cursor.fetchall()
+                    # Yield periodically to allow event loop breathing (Exergy/Starvation protection)
+                    if tx_count % 100 == 0:
+                        await asyncio.sleep(0)
 
-            for m_id, r_hash, start, end in roots:
-                # We reuse the same compute method
-                computed_r = await self.compute_merkle_root_async(start, end, conn=conn)
-                if computed_r != r_hash:
-                    violations.append(
-                        {
-                            "merkle_id": m_id,
-                            "type": "merkle_mismatch",
-                            "expected": r_hash,
-                            "actual": computed_r,
-                        }
-                    )
+                # 2. Verify Merkle Checkpoints
+                cursor = await conn.execute(  # type: ignore[reportAttributeAccessIssue]
+                    "SELECT id, root_hash, tx_start_id, tx_end_id FROM merkle_roots ORDER BY id"
+                )
+                roots: list = list(await cursor.fetchall())
 
-            status = "ok" if not violations else "violation"
+                for m_id, r_hash, start, end in roots:
+                    # We reuse the same compute method
+                    computed_r = await self.compute_merkle_root_async(start, end, conn=conn)
+                    if computed_r != r_hash:
+                        violations.append(
+                            {
+                                "merkle_id": m_id,
+                                "type": "merkle_mismatch",
+                                "expected": r_hash,
+                                "actual": computed_r,
+                            }
+                        )
 
-            if violations:
-                logger.error("Integrity check failed: %s violations found", len(violations))
+                status = "ok" if not violations else "violation"
 
-            # Record check
-            await conn.execute(  # type: ignore[reportAttributeAccessIssue]
-                "INSERT INTO integrity_checks "
-                "(check_type, status, details, started_at, completed_at) "
-                "VALUES (?, ?, ?, ?, ?)",
-                (
-                    "full",
-                    status,
-                    json.dumps(violations),
-                    datetime.now(timezone.utc).isoformat(),
-                    datetime.now(timezone.utc).isoformat(),
-                ),
-            )
-            await conn.commit()  # type: ignore[reportAttributeAccessIssue]
+                if violations:
+                    logger.error("Integrity check failed: %s violations found", len(violations))
 
-            return {
-                "valid": not violations,
-                "violations": violations,
-                "tx_checked": tx_count,
-                "roots_checked": len(roots),
-            }
+                # Record check
+                await conn.execute(  # type: ignore[reportAttributeAccessIssue]
+                    "INSERT INTO integrity_checks "
+                    "(check_type, status, details, started_at, completed_at) "
+                    "VALUES (?, ?, ?, ?, ?)",
+                    (
+                        "full",
+                        status,
+                        json.dumps(violations),
+                        datetime.now(timezone.utc).isoformat(),
+                        datetime.now(timezone.utc).isoformat(),
+                    ),
+                )
+                await conn.commit()  # type: ignore[reportAttributeAccessIssue]
+
+                return {
+                    "valid": not violations,
+                    "violations": violations,
+                    "tx_checked": tx_count,
+                    "roots_checked": len(roots),
+                }

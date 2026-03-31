@@ -22,6 +22,11 @@ _LABEL = "aether"
 _COMMENTED_LABEL = "aether:processing"
 
 
+def _issue_key(repo: str, issue_num: int) -> str:
+    """Return a repo-scoped key for GitHub issue deduplication."""
+    return f"{repo}#{issue_num}"
+
+
 class GitHubIngestor:
     """Polls GitHub Issues labeled 'aether' and converts them to AgentTasks.
 
@@ -39,7 +44,7 @@ class GitHubIngestor:
         self._repos = repos  # ["org/repo", ...]
         self._queue = queue
         self._default_repo_base = Path(default_repo_base)
-        self._processed: set[int] = set()
+        self._processed: set[str] = set()
         self._client = httpx.Client(
             headers={
                 "Authorization": f"Bearer {token}",
@@ -69,17 +74,18 @@ class GitHubIngestor:
         count = 0
         for issue in issues:
             issue_num = issue["number"]
-            if issue_num in self._processed:
+            issue_key = _issue_key(repo, issue_num)
+            if issue_key in self._processed:
                 continue
 
             # Check if already enqueued (via comment or label check)
             if any(label["name"] == _COMMENTED_LABEL for label in issue.get("labels", [])):
-                self._processed.add(issue_num)
+                self._processed.add(issue_key)
                 continue
 
             task = self._issue_to_task(issue, repo)
             self._queue.enqueue(task)
-            self._processed.add(issue_num)
+            self._processed.add(issue_key)
             self._comment_on_issue(repo, issue_num, task.id)
             self._add_label(repo, issue_num, _COMMENTED_LABEL)
             logger.info("📥 Enqueued GitHub issue #%d from %s", issue_num, repo)

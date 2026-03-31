@@ -119,7 +119,7 @@ class AgentToolkit:
         return p
 
     @staticmethod
-    def _sovereign_bash_guard(self, cmd: str) -> str | None:
+    def _sovereign_bash_guard(cmd: str) -> str | None:
         """Validate a shell command against the Sovereign Command Guard.
 
         Returns None if the command is safe, or an error string if blocked.
@@ -189,7 +189,7 @@ class AgentToolkit:
     def bash(self, cmd: str, timeout: int = _BASH_TIMEOUT) -> str:
         """Run a shell command in the repo dir. Returns stdout+stderr."""
         # ── Sovereign Command Guard (Ω₃) ──
-        blocked = self._sovereign_bash_guard(cmd)
+        blocked = type(self)._sovereign_bash_guard(cmd)
         if blocked:
             return blocked
 

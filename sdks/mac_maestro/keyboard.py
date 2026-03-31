@@ -11,9 +11,6 @@ try:
     from Quartz import (
         CGEventCreateKeyboardEvent,
         CGEventPost,
-        CGEventSetFlags,
-        kCGEventKeyDown,
-        kCGEventKeyUp,
         kCGHIDEventTap,
     )
     QUARTZ_AVAILABLE = True

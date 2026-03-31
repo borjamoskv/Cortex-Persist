@@ -10,9 +10,9 @@ Python: >=3.10
 This document defines deep change protocols for critical trust surfaces.
 
 For local setup, test commands, and the basic pull request flow, see
-[`../CONTRIBUTING.md`](../CONTRIBUTING.md).
+[`CONTRIBUTING.md`](https://github.com/borjamoskv/Cortex-Persist/blob/main/CONTRIBUTING.md).
 
-For repository-wide invariants, see [`../AGENTS.md`](../AGENTS.md).
+For repository-wide invariants, see [`AGENTS.md`](https://github.com/borjamoskv/Cortex-Persist/blob/main/AGENTS.md).
 
 ## Trust-Surface Principle
 
@@ -132,9 +132,9 @@ Update docs when you change:
 
 Relevant documents include:
 
-- [`../AGENTS.md`](../AGENTS.md)
+- [`AGENTS.md`](https://github.com/borjamoskv/Cortex-Persist/blob/main/AGENTS.md)
 - [`./SECURITY_TRUST_MODEL.md`](./SECURITY_TRUST_MODEL.md)
-- [`./ARCHITECTURE.md`](./ARCHITECTURE.md)
+- [`./architecture.md`](./architecture.md)
 - [`./OPERATIONS.md`](./OPERATIONS.md)
 
 ## Review Gate for Trust Events

@@ -142,7 +142,8 @@ class PolicyEngine:
         action_type = ACTION_TYPE_MAP.get(fact_type, "absorb_knowledge")
 
         return ActionItem(
-            fact_id=fact.id,
+            # type: ignore[reportArgumentType]
+            fact_id=int(fact.id) if fact.id is not None else None,
             project=fact.project,
             action_type=action_type,
             description=self._describe_action(fact, action_type),

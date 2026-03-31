@@ -5,7 +5,7 @@ License: Apache-2.0 · Python: >=3.10
 
 > Runtime, maintenance, and troubleshooting procedures.
 >
-> Related: [`AGENTS.md`](../AGENTS.md) · [`ARCHITECTURE.md`](ARCHITECTURE.md)
+> Related: [`AGENTS.md`](https://github.com/borjamoskv/Cortex-Persist/blob/main/AGENTS.md) · [`architecture.md`](architecture.md)
 
 ---
 
@@ -13,7 +13,7 @@ License: Apache-2.0 · Python: >=3.10
 
 ```bash
 GEMINI_API_KEY           # Google Gemini API key (LLM operations)
-CORTEX_DB_PATH           # Override DB location (default: ~/.cortex/cortex.db)
+CORTEX_DB                # Override DB location (default: ~/.cortex/cortex.db)
 CORTEX_LOG_LEVEL         # DEBUG | INFO | WARNING | ERROR
 CORTEX_ENCRYPTION_KEY    # AES-256 master key (auto-generated if missing)
 HF_TOKEN                 # Hugging Face token (private embedding models)
@@ -65,7 +65,7 @@ cortex-adk    → cortex.adk.runner:main  # Google ADK runner
 uvicorn cortex.api:app --reload
 
 # Production
-uvicorn cortex.api:app --host 0.0.0.0 --port 8000 --workers 4
+uvicorn cortex.api:app --host 0.0.0.0 --port 8484 --workers 4
 ```
 
 ---

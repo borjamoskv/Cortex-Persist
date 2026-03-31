@@ -14,6 +14,7 @@ import logging
 import os
 import secrets
 import sqlite3
+import tempfile
 import time
 from collections.abc import Generator
 from contextlib import contextmanager
@@ -77,11 +78,12 @@ class SovereignQuotaManager:
 
     def __init__(
         self,
-        db_path: str = "~/.cortex/quota.db",
+        db_path: str | None = None,
         capacity: int = 10,
         refill_rate: float | None = None,
     ) -> None:
-        self.db_path = Path(db_path).expanduser()
+        configured_path = db_path or os.environ.get("CORTEX_LLM_QUOTA_DB", "~/.cortex/quota.db")
+        self.db_path = Path(configured_path).expanduser()
         self.capacity = float(capacity)
 
         # ── Protocolo PULMONES Conservative Refill ──
@@ -99,28 +101,49 @@ class SovereignQuotaManager:
     # ─── Internals ────────────────────────────────────────────────────
 
     def _init_db(self) -> None:
-        self.db_path.parent.mkdir(parents=True, exist_ok=True)
-        with _db(self.db_path) as conn:
-            conn.execute(
-                """
-                CREATE TABLE IF NOT EXISTS quota_bucket (
-                    id            INTEGER PRIMARY KEY,
-                    tokens        REAL    NOT NULL,
-                    last_update   REAL    NOT NULL,
-                    acquired      INTEGER NOT NULL DEFAULT 0,
-                    throttled     INTEGER NOT NULL DEFAULT 0,
-                    timeouts      INTEGER NOT NULL DEFAULT 0
-                )
-                """
-            )
-            cursor = conn.execute("SELECT COUNT(*) FROM quota_bucket")
-            if cursor.fetchone()[0] == 0:
-                conn.execute(
-                    """INSERT INTO quota_bucket
-                       (id, tokens, last_update, acquired, throttled, timeouts)
-                       VALUES (1, ?, ?, 0, 0, 0)""",
-                    (self.capacity, time.time()),
-                )
+        candidates = [self.db_path]
+        fallback = Path(tempfile.gettempdir()) / "cortex_llm_quota.db"
+        if fallback not in candidates:
+            candidates.append(fallback)
+
+        last_error: sqlite3.OperationalError | None = None
+        for candidate in candidates:
+            try:
+                candidate.parent.mkdir(parents=True, exist_ok=True)
+                with _db(candidate) as conn:
+                    conn.execute(
+                        """
+                        CREATE TABLE IF NOT EXISTS quota_bucket (
+                            id            INTEGER PRIMARY KEY,
+                            tokens        REAL    NOT NULL,
+                            last_update   REAL    NOT NULL,
+                            acquired      INTEGER NOT NULL DEFAULT 0,
+                            throttled     INTEGER NOT NULL DEFAULT 0,
+                            timeouts      INTEGER NOT NULL DEFAULT 0
+                        )
+                        """
+                    )
+                    cursor = conn.execute("SELECT COUNT(*) FROM quota_bucket")
+                    if cursor.fetchone()[0] == 0:
+                        conn.execute(
+                            """INSERT INTO quota_bucket
+                               (id, tokens, last_update, acquired, throttled, timeouts)
+                               VALUES (1, ?, ?, 0, 0, 0)""",
+                            (self.capacity, time.time()),
+                        )
+                if candidate != self.db_path:
+                    logger.warning(
+                        "LLM quota DB unavailable at %s; falling back to %s",
+                        self.db_path,
+                        candidate,
+                    )
+                    self.db_path = candidate
+                return
+            except sqlite3.OperationalError as exc:
+                last_error = exc
+
+        if last_error is not None:
+            raise last_error
 
     def _consume_sync(self, tokens: int) -> float:
         """Intenta consumir tokens atómicamente.

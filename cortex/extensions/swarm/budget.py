@@ -16,15 +16,16 @@ from pathlib import Path
 
 logger = logging.getLogger("cortex.extensions.swarm.budget")
 
-# Estimated costs per 1k tokens (subject to change)
-# Defaulting to conservative pricing for GPT-4 level models
+# 2026 Sovereign Pricing (Exergy-Optimized)
 COST_PRICING = {
-    "gemini": {"input": 0.000125, "output": 0.000375},
-    "qwen": {"input": 0.00007, "output": 0.00028},
-    "openai": {"input": 0.005, "output": 0.015},
+    "gemini": {"input": 0.000075, "output": 0.000225},  # Flash 2.5
+    "qwen": {"input": 0.00005, "output": 0.0002},  # Qwen 2.5
+    "openai": {"input": 0.0025, "output": 0.01},  # GPT-4o
     "anthropic": {"input": 0.003, "output": 0.015},
-    "default": {"input": 0.001, "output": 0.003},
+    "default": {"input": 0.0001, "output": 0.0003},
 }
+
+HARD_LIMIT_USD = 0.10  # Ω₃: Per-mission exergy ceiling
 
 
 @dataclass(frozen=True)
@@ -92,6 +93,22 @@ class SwarmBudgetManager:
                 )
         except sqlite3.Error as e:
             logger.error("Budget: Failed to report usage: %s", e)
+
+        # Immediate enforcement of Ω₃
+        self.check_budget(mission_id)
+
+    def check_budget(self, mission_id: str):
+        """Enforce Ω₃: Raise error if mission exceeds hard exergy limit."""
+        budget = self.get_mission_budget(mission_id)
+        if budget and budget.total_cost_usd >= HARD_LIMIT_USD:
+            logger.critical(
+                "🛑 [Ω₃] EXERGY EXHAUSTED: Mission %s reached cost limit ($%.4f)",
+                mission_id,
+                budget.total_cost_usd,
+            )
+            raise RuntimeError(
+                f"Exergy exhaustion: Mission {mission_id} exceeded ${HARD_LIMIT_USD} limit."
+            )
 
     def get_mission_budget(self, mission_id: str) -> MissionBudget | None:
         """Retrieve current budget state for a mission."""

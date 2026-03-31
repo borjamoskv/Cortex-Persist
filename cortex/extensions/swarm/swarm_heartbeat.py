@@ -113,17 +113,22 @@ class SwarmHeartbeat:
         """
         now = time.monotonic()
         alerts: list[NodePulse] = []
+        evicted: list[str] = []
 
         with self._lock:
-            for node in self._registry.values():
+            for node_id, node in list(self._registry.items()):
                 elapsed = now - node.last_pulse
+                status_value = getattr(node.status, "value", node.status)
 
                 if elapsed <= timeout_seconds:
                     continue
 
                 node.miss_count += 1
 
-                if node.miss_count >= self._dead_threshold and node.status != NodeStatus.DEAD:
+                if (
+                    node.miss_count >= self._dead_threshold
+                    and status_value != NodeStatus.DEAD.value
+                ):
                     old_status = node.status
                     node.status = NodeStatus.DEAD
                     alerts.append(node)
@@ -141,7 +146,10 @@ class SwarmHeartbeat:
                         node.miss_count,
                         old_status,
                     )
-                elif node.miss_count >= self._suspect_threshold and node.status == NodeStatus.ALIVE:
+                elif (
+                    node.miss_count >= self._suspect_threshold
+                    and status_value == NodeStatus.ALIVE.value
+                ):
                     node.status = NodeStatus.SUSPECT
                     alerts.append(node)
                     self._emit_health_signal(
@@ -156,6 +164,21 @@ class SwarmHeartbeat:
                         node.thread_name,
                         elapsed,
                         node.miss_count,
+                    )
+
+                if (
+                    getattr(node.status, "value", node.status) == NodeStatus.DEAD.value
+                    and node.miss_count >= self._dead_threshold + 2
+                ):
+                    evicted.append(node_id)
+
+            for node_id in evicted:
+                node = self._registry.pop(node_id, None)
+                if node is not None:
+                    logger.info(
+                        "🫀 NODE EVICTED: %s [%s] after recovery window",
+                        node.node_id,
+                        node.thread_name,
                     )
 
         return alerts

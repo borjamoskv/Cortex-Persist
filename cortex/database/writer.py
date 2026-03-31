@@ -127,8 +127,8 @@ class SqliteWriteWorker:
         conn = connect_writer(self._db_path)
         # Manual transaction control (autocommit mode)
         conn.isolation_level = None
-        # Performance pragmas (cache_size, temp_store, page_size) are now
-        # applied centrally by connect_writer() → _apply_pragmas_sync().
+        # Performance pragmas are applied centrally by connect_writer()
+        # so the writer does not duplicate connection tuning.
         logger.debug("Writer connection configured via connect_writer() factory")
         return conn
 

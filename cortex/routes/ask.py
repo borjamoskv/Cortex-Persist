@@ -46,6 +46,32 @@ router = APIRouter(tags=["ask"])
 _llm_manager = LLMManager()
 
 
+def _resolve_llm_identity() -> tuple[Any | None, str, str | None]:
+    """Return the active provider object, provider name, and model name.
+
+    Tests occasionally swap in light-weight doubles that expose only a subset of
+    the manager/provider interface, so this helper avoids hard assumptions.
+    """
+    manager = _llm_manager
+    provider = getattr(manager, "provider", None)
+    if provider is None and (hasattr(manager, "model_name") or hasattr(manager, "model")):
+        provider = manager
+
+    provider_name = (
+        getattr(manager, "provider_name", None)
+        or getattr(provider, "provider_name", None)
+        or getattr(manager, "_provider_name", None)
+        or "unknown"
+    )
+    model_name = (
+        getattr(provider, "model_name", None)
+        or getattr(provider, "model", None)
+        or getattr(manager, "model_name", None)
+        or getattr(manager, "model", None)
+    )
+    return provider, provider_name, model_name
+
+
 # ─── Request / Response Models ───────────────────────────────────────
 
 
@@ -198,12 +224,12 @@ async def ask_cortex(
         for r in results
     ]
 
-    provider = _llm_manager.provider
+    provider, provider_name, model_name = _resolve_llm_identity()
     return AskResponse(
         answer=answer,
         sources=sources,
-        model=provider.model_name if provider else "unknown",
-        provider=provider.provider_name if provider else "unknown",
+        model=model_name or "unknown",
+        provider=provider_name,
         facts_found=len(results),
     )
 
@@ -285,12 +311,11 @@ async def llm_status(
     auth: AuthResult = Depends(require_permission("read")),
 ):
     """Check LLM provider status and list supported providers. [STATUS]"""
-    provider = _llm_manager.provider
-    active_provider = _llm_manager.provider_name
+    provider, active_provider, model_name = _resolve_llm_identity()
     return LLMStatusResponse(
         available=_llm_manager.available,
         provider=active_provider or "none",
-        model=provider.model_name if provider else None,
+        model=model_name,
         supported_providers=list_providers(),
         providers=provider_inventory(active_provider=active_provider),
     )

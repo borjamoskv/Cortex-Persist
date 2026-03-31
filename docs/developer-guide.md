@@ -39,7 +39,7 @@ cortex/
 │   ├── types/                 # Type definitions
 │   ├── utils/                 # Shared utilities
 │   └── config.py              # Centralized configuration
-├── tests/                      # 1,162+ test functions
+├── tests/                      # 1,621+ test functions
 ├── docs/                       # Documentation (mkdocs-material)
 ├── examples/                   # Quickstart examples
 ├── sdks/                       # Python & JavaScript SDKs
@@ -55,8 +55,8 @@ cortex/
 
 ```bash
 # Clone and install
-git clone https://github.com/borjamoskv/cortex.git
-cd cortex
+git clone https://github.com/borjamoskv/Cortex-Persist.git
+cd Cortex-Persist
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[all]"
 
@@ -119,7 +119,7 @@ fact_id = await engine.store(project="x", content="Hello", fact_type="knowledge"
 ```python
 from fastapi import APIRouter, Depends
 from cortex.auth import AuthResult, require_permission
-from cortex.api_deps import get_async_engine
+from cortex.api.deps import get_async_engine
 
 router = APIRouter(tags=["my-feature"])
 
@@ -132,7 +132,7 @@ async def my_endpoint(
     return {"status": "ok"}
 ```
 
-2. **Register in** `cortex/api.py`:
+2. **Register in** `cortex/api/core.py`:
 
 ```python
 from cortex.routes.my_feature import router as my_feature_router

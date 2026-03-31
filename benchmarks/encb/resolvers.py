@@ -7,6 +7,7 @@ from typing import Any, Protocol, runtime_checkable
 
 from benchmarks.encb_chaos_generator import ChaosEvent
 
+
 @runtime_checkable
 class Resolver(Protocol):
     """

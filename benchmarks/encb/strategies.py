@@ -9,7 +9,6 @@ Four strategies implementing a common interface:
 
 from __future__ import annotations
 
-
 import statistics
 from collections import defaultdict
 from enum import Enum

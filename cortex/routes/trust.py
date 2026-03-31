@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import inspect
 import logging
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -71,6 +72,8 @@ async def get_agent_trust(
 ) -> TrustProfileResponse:
     """Retrieve the Bayesian trust profile for a specific agent."""
     registry = engine.get_trust_registry()
+    if inspect.isawaitable(registry):
+        registry = await registry
     profile = registry.get_profile(agent_id)
     score = registry.compute_trust_score(profile)
 

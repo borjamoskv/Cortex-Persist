@@ -6,7 +6,7 @@ License: Apache-2.0 · Python: >=3.10
 This document describes trust boundaries and cognitive/state-mutation risks.
 
 For vulnerability disclosure policy and repository security reporting, see
-[`../SECURITY.md`](../SECURITY.md).
+[`SECURITY.md`](https://github.com/borjamoskv/Cortex-Persist/blob/main/SECURITY.md).
 
 ## Purpose: The Doctrinal Formula
 
@@ -215,7 +215,7 @@ The membrane exists to convert unconstrained suggestion into constrained mutatio
 
 ## Ledger Integrity
 
-`ledger.py` is a critical trust surface.
+`cortex/ledger.py` (`SovereignLedger`) is the canonical trust surface. Other modules (`consensus/ledger.py`, `memory/ledger.py`, `cli/ledger.py`) are re-export bridges or domain-specific wrappers — all chain integrity flows through the canonical module.
 
 Its purpose is not branding. Its purpose is continuity.
 
@@ -299,7 +299,7 @@ state mutation."
 
 Compliance is not a vibe. It is evidence.
 
-> For vulnerability disclosure and reporting, see [`SECURITY.md`](../SECURITY.md).
+> For vulnerability disclosure and reporting, see [`SECURITY.md`](https://github.com/borjamoskv/Cortex-Persist/blob/main/SECURITY.md).
 
 ---
 
@@ -345,9 +345,9 @@ It reduces their freedom to contaminate persistent state.
 
 ## Related Documents
 
-- [`../SECURITY.md`](../SECURITY.md)
-- [`../AGENTS.md`](../AGENTS.md)
-- [`ARCHITECTURE.md`](ARCHITECTURE.md)
+- [`SECURITY.md`](https://github.com/borjamoskv/Cortex-Persist/blob/main/SECURITY.md)
+- [`AGENTS.md`](https://github.com/borjamoskv/Cortex-Persist/blob/main/AGENTS.md)
+- [`architecture.md`](architecture.md)
 - [`AXIOMS.md`](AXIOMS.md)
 - [`CONTRIBUTING.md`](CONTRIBUTING.md)
 - [`OPERATIONS.md`](OPERATIONS.md)

@@ -74,10 +74,9 @@ async def _fts5_search(
     sql = """
         SELECT f.id, f.content, f.project, f.fact_type, f.confidence,
                f.valid_from, f.valid_until, f.tags, f.source, f.metadata,
-               f.created_at, f.updated_at, f.tx_id, t.hash,
-               bm25(facts_fts) AS rank
+               f.created_at, f.updated_at, f.tx_id, f.hash,
+               f.consensus_score, f.confidence_rank, bm25(facts_fts) AS rank
         FROM facts_fts fts JOIN facts f ON f.id = fts.rowid
-        LEFT JOIN transactions t ON f.tx_id = t.id
         WHERE f.tenant_id = ? AND fts.content MATCH ?
     """
     params: list = [tenant_id, fts_query]
@@ -120,8 +119,9 @@ async def _like_search(
     sql = """
         SELECT f.id, f.content, f.project, f.fact_type, f.confidence,
                f.valid_from, f.valid_until, f.tags, f.source, f.metadata,
-               f.created_at, f.updated_at, f.tx_id, t.hash
-        FROM facts f LEFT JOIN transactions t ON f.tx_id = t.id
+               f.created_at, f.updated_at, f.tx_id, f.hash,
+               f.consensus_score, f.confidence_rank
+        FROM facts f
         WHERE f.tenant_id = ? AND f.content LIKE ?
     """
     params: list = [tenant_id, f"%{query}%"]

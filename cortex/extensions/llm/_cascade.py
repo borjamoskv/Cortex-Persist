@@ -21,7 +21,7 @@ def classify_tier(provider: BaseProvider, intent: IntentProfile) -> CascadeTier:
     """Classify which cascade tier a fallback belongs to."""
     if provider.intent_affinity == intent:
         return CascadeTier.TYPED_MATCH
-    return CascadeTier.GENERIC_FALLBACK
+    return CascadeTier.SAFETY_NET
 
 
 class CascadeManager:

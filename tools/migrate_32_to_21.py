@@ -171,7 +171,7 @@ def migrate(db_path: str = DB_PATH) -> None:
     print(f"  Old: {old_count} rows, New: {new_count} rows")
 
     if old_count != new_count:
-        print(f"ERROR: Row count mismatch! Aborting.")
+        print("ERROR: Row count mismatch! Aborting.")
         conn.execute("DROP TABLE facts_migrated")
         conn.commit()
         conn.close()
@@ -205,7 +205,7 @@ def migrate(db_path: str = DB_PATH) -> None:
     final_cols = [r[1] for r in conn.execute("PRAGMA table_info(facts)").fetchall()]
     print(f"\n✅ Migration complete: {len(final_cols)} columns")
     print(f"   Columns: {', '.join(final_cols)}")
-    print(f"   Old table preserved as 'facts_old_32col' for safety")
+    print("   Old table preserved as 'facts_old_32col' for safety")
 
     conn.close()
 

@@ -170,9 +170,9 @@ async def generate_handoff(
                         "nodes": len(chain),
                         "chain": [
                             {
-                                "id": f.get("id"),
-                                "type": f.get("fact_type"),
-                                "depth": f.get("causal_depth"),
+                                "id": f.get("id"),  # pyright: ignore
+                                "type": f.get("fact_type"),  # pyright: ignore
+                                "depth": f.get("causal_depth"),  # pyright: ignore
                             }
                             for f in chain
                         ],

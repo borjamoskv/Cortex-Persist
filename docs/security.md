@@ -4,9 +4,8 @@
 
 | Version | Supported |
 |:---|:---:|
-| 8.x | ✅ Active |
-| 6.x | ⚠️ Security patches only |
-| < 6.0 | ❌ No longer supported |
+| >= 0.3.0 | ✅ Active |
+| < 0.3.0 | ❌ No longer supported |
 
 ---
 

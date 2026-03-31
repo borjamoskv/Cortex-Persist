@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-import asyncio
 import argparse
-import sys
-import json
+import asyncio
 import logging
+import sys
+
 from mac_control.cdp_engine import MacControlOmega
 
 logging.basicConfig(level=logging.ERROR)

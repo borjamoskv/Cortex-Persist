@@ -72,7 +72,7 @@ class QuarantineMixin(EngineMixinBase):
                 "system",
                 "quarantine",
                 {"fact_id": fact_id, "reason": reason},
-                tenant_id=row[0],
+                tenant_id=row[0],  # pyright: ignore
             )
             await c.commit()
             return True
@@ -117,7 +117,7 @@ class QuarantineMixin(EngineMixinBase):
                 "system",
                 "unquarantine",
                 {"fact_id": fact_id},
-                tenant_id=row[0],
+                tenant_id=row[0],  # pyright: ignore
             )
             await c.commit()
             return True

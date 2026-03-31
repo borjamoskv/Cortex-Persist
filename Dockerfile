@@ -30,7 +30,7 @@ FROM python:3.12-slim-bookworm
 
 LABEL maintainer="borjamoskv.com"
 LABEL description="CORTEX — Sovereign Memory Engine for AI Agents"
-LABEL org.opencontainers.image.source="https://github.com/borjamoskv/cortex"
+LABEL org.opencontainers.image.source="https://github.com/borjamoskv/Cortex-Persist"
 
 WORKDIR /app
 

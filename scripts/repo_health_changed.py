@@ -20,7 +20,8 @@ import subprocess
 import sys
 from pathlib import Path
 
-CONFLICT_MARKERS = ("<<<<<<< ", "=======", ">>>>>>> ")
+CONFLICT_MARKERS = ("<<<<<<< ", ">>>>>>> ")
+CONFLICT_SEPARATOR = "======="
 
 
 def _run_git(args: list[str]) -> str:
@@ -85,7 +86,7 @@ def _text_contains_conflict_markers(path: Path) -> list[int]:
 
     bad_lines: list[int] = []
     for line_no, line in enumerate(content.splitlines(), start=1):
-        if line.startswith(CONFLICT_MARKERS):
+        if line.startswith(CONFLICT_MARKERS) or line == CONFLICT_SEPARATOR:
             bad_lines.append(line_no)
     return bad_lines
 

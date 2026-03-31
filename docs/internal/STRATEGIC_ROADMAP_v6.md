@@ -1,5 +1,7 @@
 # CORTEX v6 Strategic Roadmap
 
+> **Status:** Historical snapshot. This is a v6 planning artifact; treat it as archive unless explicitly cross-referenced by current roadmap work.
+
 > **Sovereign Memory Engine for Enterprise AI Swarms**  
 > *Multi-tenant · Async-first · SQLite+vec · FastAPI*  
 > **Updated:** 2026-02-24 · **Current:** v6 Alpha · **Tests:** 1,162 · **MEJORAlo:** 78/100

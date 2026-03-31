@@ -4,6 +4,7 @@ import asyncio
 import json
 import logging
 import sqlite3
+import tempfile
 import time
 from collections.abc import Awaitable, Callable
 from functools import wraps
@@ -18,11 +19,40 @@ class PulmonesQueue:
 
     def __init__(self, db_path: Path = Path.home() / ".cortex" / "pulmones.db"):
         self.db_path = db_path
-        self.db_path.parent.mkdir(parents=True, exist_ok=True)
-        self._init_db()
+        self._fallback_path = Path(tempfile.gettempdir()) / "cortex_pulmones.db"
+        self._available = True
+        try:
+            self._init_with_fallback()
+        except (OSError, sqlite3.Error) as exc:
+            self._available = False
+            logger.warning("🫁 [PULMONES] Queue disabled: %s", exc)
 
-    def _init_db(self) -> None:
-        with sqlite3.connect(self.db_path) as conn:
+    def _init_with_fallback(self) -> None:
+        candidates = [self.db_path]
+        if self._fallback_path not in candidates:
+            candidates.append(self._fallback_path)
+
+        last_error: OSError | sqlite3.Error | None = None
+        for candidate in candidates:
+            try:
+                candidate.parent.mkdir(parents=True, exist_ok=True)
+                self._init_db_at(candidate)
+                if candidate != self.db_path:
+                    logger.warning(
+                        "🫁 [PULMONES] Primary DB unavailable at %s; falling back to %s",
+                        self.db_path,
+                        candidate,
+                    )
+                    self.db_path = candidate
+                return
+            except (OSError, sqlite3.Error) as exc:
+                last_error = exc
+
+        if last_error is not None:
+            raise last_error
+
+    def _init_db_at(self, path: Path) -> None:
+        with sqlite3.connect(path) as conn:
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS fallback_queue (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -38,16 +68,41 @@ class PulmonesQueue:
             )
 
     def enqueue(self, func_name: str, args: tuple, kwargs: dict, delay: float = 60.0) -> None:
+        if not self._available:
+            logger.warning("🫁 [PULMONES] Queue unavailable, dropping payload for %s.", func_name)
+            return
         payload = json.dumps({"args": args, "kwargs": kwargs})
         next_retry = time.time() + delay
-        with sqlite3.connect(self.db_path) as conn:
-            conn.execute(
-                "INSERT INTO fallback_queue (target_func, payload, next_retry_at) VALUES (?, ?, ?)",
-                (func_name, payload, next_retry),
-            )
-            logger.warning(
-                "🫁 [PULMONES] Payload encolado para %s. Reintento en %ss.", func_name, delay
-            )
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                conn.execute(
+                    "INSERT INTO fallback_queue (target_func, payload, next_retry_at) VALUES (?, ?, ?)",
+                    (func_name, payload, next_retry),
+                )
+                logger.warning(
+                    "🫁 [PULMONES] Payload encolado para %s. Reintento en %ss.",
+                    func_name,
+                    delay,
+                )
+        except sqlite3.Error:
+            if self.db_path != self._fallback_path:
+                try:
+                    self._init_db_at(self._fallback_path)
+                    self.db_path = self._fallback_path
+                    with sqlite3.connect(self.db_path) as conn:
+                        conn.execute(
+                            "INSERT INTO fallback_queue (target_func, payload, next_retry_at) VALUES (?, ?, ?)",
+                            (func_name, payload, next_retry),
+                        )
+                    logger.warning(
+                        "🫁 [PULMONES] Primary queue readonly; payload for %s enqueued via fallback DB.",
+                        func_name,
+                    )
+                    return
+                except sqlite3.Error as fallback_exc:
+                    exc = fallback_exc
+            self._available = False
+            logger.warning("🫁 [PULMONES] Queue disabled during enqueue: %s", exc)
 
 
 class CircuitBreaker:
@@ -93,7 +148,18 @@ def sovereign_circuit_breaker(timeout: float = 10.0, max_retries: int = 2, thres
     3. Si falla tras `max_retries`, cae graciosamente a la cola SQLite (PulmonesQueue).
     """
     cb = CircuitBreaker(failure_threshold=threshold)
-    queue = PulmonesQueue()
+    queue: PulmonesQueue | None = None
+
+    def _get_queue() -> PulmonesQueue | None:
+        nonlocal queue
+        if queue is not None:
+            return queue
+        try:
+            queue = PulmonesQueue()
+        except OSError as exc:
+            logger.warning("🫁 [PULMONES] Queue unavailable, dropping fallback enqueue: %s", exc)
+            queue = None
+        return queue
 
     def decorator(func: Callable[..., Awaitable[Any]]):
         @wraps(func)
@@ -103,7 +169,9 @@ def sovereign_circuit_breaker(timeout: float = 10.0, max_retries: int = 2, thres
                 logger.warning(
                     "🛡️ [PULMONES] Circuito Abierto. Bloqueando llamada a %s", func.__name__
                 )
-                queue.enqueue(target_name, args, kwargs)
+                q = _get_queue()
+                if q is not None:
+                    q.enqueue(target_name, args, kwargs)
                 return {"status": "queued", "reason": "circuit_open"}
 
             for attempt in range(max_retries + 1):
@@ -122,7 +190,9 @@ def sovereign_circuit_breaker(timeout: float = 10.0, max_retries: int = 2, thres
                     )
                     if attempt == max_retries:
                         cb.record_failure()
-                        queue.enqueue(target_name, args, kwargs)
+                        q = _get_queue()
+                        if q is not None:
+                            q.enqueue(target_name, args, kwargs)
                         return {"status": "queued", "reason": "max_retries_exceeded"}
                     await asyncio.sleep(2**attempt)  # Exponential backoff
 

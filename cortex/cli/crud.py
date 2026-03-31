@@ -5,6 +5,8 @@ from __future__ import annotations
 import asyncio
 import json
 import sqlite3
+from collections.abc import Coroutine
+from typing import Any, TypeVar
 
 import click
 from rich.table import Table
@@ -16,8 +18,10 @@ from cortex.utils.errors import FactNotFound
 
 __all__ = ["delete", "list_facts", "edit"]
 
+_T = TypeVar("_T")
 
-def _run_async(coro):
+
+def _run_async(coro: Coroutine[Any, Any, _T]) -> _T:
     return asyncio.run(coro)
 
 
@@ -35,6 +39,10 @@ def delete(fact_id, reason, db) -> None:
             err_fact_not_found(fact_id)
             return
 
+        from cortex.engine.models import Fact
+
+        assert isinstance(fact, Fact)
+
         console.print(
             f"[dim]Deprecando:[/] [bold]#{fact_id}[/] "
             f"[cyan]{fact.project}[/] ({fact.fact_type}) — {fact.content[:80]}..."
@@ -43,11 +51,11 @@ def delete(fact_id, reason, db) -> None:
         if success:
             wb = _run_async(export_to_json(engine))
             console.print(
-                f"[green]✓[/] Fact #{fact_id} deprecado. "
+                f"[green]✓[/] Fact #{fact_id} deprecated (deprecado). "
                 f"Write-back: {wb.files_written} archivos actualizados."
             )
         else:
-            console.print(f"[red]✗ No se pudo deprecar fact #{fact_id}[/]")
+            console.print(f"[red]✗ No se pudo deprecar/deprecate fact #{fact_id}[/]")
     finally:
         _run_async(engine.close())
 
@@ -62,7 +70,7 @@ def list_facts(project, fact_type, limit, db) -> None:
     engine = get_engine(db)
     try:
 
-        async def __get_rows():
+        async def __get_rows() -> list[sqlite3.Row]:
             conn = await engine.get_conn()
             query = """
                 SELECT id, project, content, fact_type, tags, created_at
@@ -80,7 +88,7 @@ def list_facts(project, fact_type, limit, db) -> None:
                 query += " LIMIT ?"
                 params.append(limit)
             cursor = await conn.execute(query, params)
-            return await cursor.fetchall()
+            return list(await cursor.fetchall())
 
         rows = _run_async(__get_rows())
 
@@ -95,7 +103,7 @@ def list_facts(project, fact_type, limit, db) -> None:
                 suggestion="Prueba sin filtros: cortex list",
             )
             return
-        table = Table(title=f"CORTEX Facts ({len(rows)})", border_style="cyan")  # type: ignore[reportArgumentType]
+        table = Table(title=f"CORTEX Facts ({len(rows)})", border_style="cyan")
         table.add_column("ID", style="bold", width=5)
         table.add_column("Proyecto", style="cyan", width=18)
         table.add_column("Tipo", width=10)
@@ -115,7 +123,10 @@ def list_facts(project, fact_type, limit, db) -> None:
                 content = enc.decrypt_str(raw_content, tenant_id="default")
             except (ValueError, TypeError, OSError, InvalidTag):
                 content = raw_content  # Fallback to raw if decryption fails
-            content_preview = content[:57] + "..." if len(content) > 60 else content  # type: ignore[reportOptionalSubscript,reportArgumentType]
+            content_str = str(content) if content else ""
+            content_preview = (
+                content_str[:57] + "..." if len(content_str) > 60 else content_str
+            )
             tags = json.loads(row[4]) if row[4] else []
             tags_str = ", ".join(tags[:2]) + ("…" if len(tags) > 2 else "")
             table.add_row(str(row[0]), row[1], row[3], content_preview, tags_str)
@@ -137,6 +148,10 @@ def edit(fact_id, new_content, db) -> None:
         except (KeyError, ValueError, sqlite3.Error, FactNotFound):
             err_fact_not_found(fact_id)
             return
+
+        from cortex.engine.models import Fact
+
+        assert isinstance(fact, Fact)
 
         _run_async(engine.deprecate(fact_id, "edited → new version"))
         new_id = _run_async(
@@ -168,12 +183,15 @@ def inspect(fact_id, db) -> None:
     engine = get_engine(db)
     try:
         from rich.panel import Panel
+        from rich.table import Table
 
-        async def __inspect():
+        from cortex.engine.models import Fact
+
+        async def __inspect() -> tuple[Fact | None, list[str], str, str | None]:
             # Content decryption handled by engine.retrieve
             fact = await engine.retrieve(fact_id)
             if not fact:
-                return None
+                return None, [], "NOT_FOUND", None
 
             # Load tags from bridge table
             conn = await engine.get_conn()
@@ -194,11 +212,10 @@ def inspect(fact_id, db) -> None:
 
             return fact, tags, status, error
 
-        res = _run_async(__inspect())
-        if not res:
+        fact, tags, status, error = _run_async(__inspect())
+        if not fact:
             err_fact_not_found(fact_id)
             return
-        fact, tags, status, error = res  # type: ignore[reportGeneralTypeIssues]
 
         info = Table.grid(padding=(0, 1))
         info.add_column(style="bold cyan", justify="right")

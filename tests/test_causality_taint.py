@@ -134,7 +134,7 @@ async def test_propagate_taint_single_child() -> None:
     await conn.commit()
 
     # Invalidate fact 1 → taint propagates to fact 2
-    report = await graph.propagate_taint(1)
+    report = await graph.propagate_taint(1, floor_to_c1=True)
 
     assert isinstance(report, TaintReport)
     assert report.source_fact_id == 1
@@ -197,7 +197,7 @@ async def test_propagate_taint_chain() -> None:
         )
     await conn.commit()
 
-    report = await graph.propagate_taint(1)
+    report = await graph.propagate_taint(1, floor_to_c1=True)
 
     # Source (fact 1) drops to C1; children get cascading degradation.
     assert report.affected_count >= 3
@@ -239,7 +239,7 @@ async def test_propagate_taint_no_descendants() -> None:
     )
     await conn.commit()
 
-    report = await graph.propagate_taint(1)
+    report = await graph.propagate_taint(1, floor_to_c1=True)
     # Source node itself gets downgraded C5→C1 (counted in affected_count).
     # No descendants means no additional propagation.
     assert report.affected_count == 1
@@ -286,7 +286,7 @@ async def test_propagate_taint_cyclic_graph() -> None:
         )
     await conn.commit()
 
-    report = await graph.propagate_taint(1)
+    report = await graph.propagate_taint(1, floor_to_c1=True)
 
     # Terminated cleanly despite the cycle.
     assert report.affected_count >= 2

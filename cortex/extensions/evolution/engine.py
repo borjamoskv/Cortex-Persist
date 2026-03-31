@@ -25,7 +25,7 @@ from cortex.extensions.evolution.operations_mixin import EvolutionOpsMixin
 from cortex.extensions.evolution.persistence import load_swarm, save_swarm
 from cortex.extensions.gate.ouroboros import OuroborosGate
 from cortex.extensions.sovereign.endocrine import DigitalEndocrine
-from cortex.ledger import SovereignLedger
+from cortex.ledger import SovereignLedger  # pyright: ignore
 
 random = secrets.SystemRandom()
 

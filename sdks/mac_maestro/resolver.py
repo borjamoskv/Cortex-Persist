@@ -60,7 +60,7 @@ def _resolve_applescript(
     resolved_target: ResolvedTarget | None,
 ) -> Any:
     """Build an AppleScript executor from target_query."""
-    from .applescript import run_applescript, activate_app_by_name, open_url_in_safari
+    from .applescript import activate_app_by_name, open_url_in_safari, run_applescript
 
     q = action.target_query
 
@@ -92,8 +92,8 @@ def _resolve_ax(
     """
     try:
         from ApplicationServices import (
-            AXUIElementCreateApplication,
             AXUIElementCopyAttributeValue,
+            AXUIElementCreateApplication,
             AXUIElementPerformAction,
             kAXChildrenAttribute,
         )
@@ -164,7 +164,7 @@ def _resolve_keyboard(
 ) -> Any:
     """Build a keyboard executor from target_query."""
     try:
-        from .keyboard import type_text, press_key
+        from .keyboard import press_key, type_text
     except ImportError as exc:
         raise ActionFailed(
             "Vector C (Keyboard) module not available."

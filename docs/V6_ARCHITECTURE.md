@@ -1,5 +1,7 @@
 # CORTEX v6 Architecture: The Sovereign Cloud
 
+> **Status:** Historical v6 architecture snapshot. Refer to current architecture docs for live behavior.
+
 > Level 130/100 Enterprise Sovereign Platform
 
 ## 1. Multi-Tenant Isolation Hierarchy

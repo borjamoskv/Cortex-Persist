@@ -554,3 +554,6 @@ def search_alias(ctx, args):
 def recall_alias(ctx, args):
     """[Alias] Load full context."""
     ctx.invoke(recall, *args)
+
+
+cli.add_command(memory_cmds)

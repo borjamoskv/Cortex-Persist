@@ -1,5 +1,7 @@
 # Changelog
 
+> **Status:** Canonical release log. `Unreleased` is the current operational delta; released entries below are historical snapshots.
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),

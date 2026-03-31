@@ -2,9 +2,9 @@ name: Repo Health Lite
 
 on:
   pull_request:
-    branches: [master, main]
+    branches: [main]
   push:
-    branches: [master, main]
+    branches: [main]
 
 permissions:
   contents: read

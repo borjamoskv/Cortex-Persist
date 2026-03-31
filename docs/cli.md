@@ -1,6 +1,6 @@
 # CLI Reference
 
-CORTEX provides **38 commands** organized by function. Run `cortex --help` for the full list.
+CORTEX provides **90+ commands** organized by function. Run `cortex --help` for the full list.
 
 ---
 

@@ -77,13 +77,13 @@ async def engine(tmp_path: Path):
 
 class TestGitHubKey:
     def test_deterministic(self):
-        k1 = _github_key("borjamoskv/cortex", 42)
-        k2 = _github_key("borjamoskv/cortex", 42)
+        k1 = _github_key("borjamoskv/Cortex-Persist", 42)
+        k2 = _github_key("borjamoskv/Cortex-Persist", 42)
         assert k1 == k2
 
     def test_different_for_different_inputs(self):
-        k1 = _github_key("borjamoskv/cortex", 1)
-        k2 = _github_key("borjamoskv/cortex", 2)
+        k1 = _github_key("borjamoskv/Cortex-Persist", 1)
+        k2 = _github_key("borjamoskv/Cortex-Persist", 2)
         assert k1 != k2
 
 

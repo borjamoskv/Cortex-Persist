@@ -44,12 +44,12 @@ def vote(fact_id, value, agent, db) -> None:
                     return
 
                 # Peso 10.0 para votos humanos. Usando tenant_id default
-                entry_hash = await ledger.append_vote(fact_id, agent, str(value), "default", 10.0)
+                entry = await ledger.append_vote(fact_id, agent, str(value), "default", 10.0)
                 await conn.commit()
 
                 console.print(
                     f"[green]✓[/] El agente [bold]{agent}[/] votó {value} en el hecho [bold]#{fact_id}[/].\n"
-                    f"   [dim]Hash: {entry_hash[:16]}...[/]"
+                    f"   [dim]Hash: {entry.hash[:16]}...[/]"  # pyright: ignore
                 )
         except (sqlite3.Error, OSError, ValueError, RuntimeError) as e:
             handle_cli_error(e, db_path=db, context="casting vote")
@@ -75,11 +75,14 @@ def ledger_status(db):
         try:
             async with engine.session() as conn:
                 async with conn.execute("SELECT COUNT(*) FROM vote_ledger") as cursor:
-                    vote_count = (await cursor.fetchone())[0]  # type: ignore[reportOptionalSubscript]
+                    res = await cursor.fetchone()
+                    vote_count = res[0] if res else 0
                 async with conn.execute("SELECT COUNT(*) FROM vote_merkle_roots") as cursor:
-                    checkpoint_count = (await cursor.fetchone())[0]  # type: ignore[reportOptionalSubscript]
+                    res = await cursor.fetchone()
+                    checkpoint_count = res[0] if res else 0
                 async with conn.execute("SELECT MAX(vote_end_id) FROM vote_merkle_roots") as cursor:
-                    last_audited = (await cursor.fetchone())[0] or 0  # type: ignore[reportOptionalSubscript]
+                    res = await cursor.fetchone()
+                    last_audited = res[0] or 0 if res else 0
 
                 console.print(
                     Panel(
@@ -108,7 +111,8 @@ def ledger_checkpoint(db):
         engine = get_engine(db)
         try:
             async with engine.session() as conn:
-                ledger = ImmutableVoteLedger(engine._pool if hasattr(engine, "_pool") else conn)  # type: ignore[reportAttributeAccessIssue]
+                pool_attr = engine._pool if hasattr(engine, "_pool") else conn  # type: ignore[reportAttributeAccessIssue]
+                ledger = ImmutableVoteLedger(pool_attr)  # type: ignore[reportAttributeAccessIssue]
                 with console.status(
                     "[bold yellow]Calculando Merkle Root y creando punto de control...[/]"
                 ):
@@ -137,9 +141,8 @@ def ledger_verify(db):
         engine = get_engine(db)
         try:
             async with engine.session() as conn:
-                ledger_inst = ImmutableVoteLedger(
-                    engine._pool if hasattr(engine, "_pool") else conn  # type: ignore[reportAttributeAccessIssue]
-                )
+                pool_attr = engine._pool if hasattr(engine, "_pool") else conn  # type: ignore[reportAttributeAccessIssue]
+                ledger_inst = ImmutableVoteLedger(pool_attr)  # type: ignore[reportAttributeAccessIssue]
                 with console.status(
                     "[bold blue]Verificando la cadena de hashes del registro...[/]"
                 ):

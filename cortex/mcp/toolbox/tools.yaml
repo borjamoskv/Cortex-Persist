@@ -44,7 +44,8 @@ parameters:
     description: "Maximum number of results to return (default 50)."
 statement: |
   SELECT id, project, content, fact_type, tags, confidence, source,
-         cognitive_layer, consensus_score, created_at
+         COALESCE(json_extract(metadata, '$.cognitive_layer'), 'semantic') AS cognitive_layer,
+         consensus_score, created_at
   FROM facts
   WHERE is_tombstoned = 0
     AND is_quarantined = 0
@@ -189,12 +190,12 @@ parameters:
     description: "Filter branches by a specific tag. If provided, paths without this tag are pruned."
 statement: |
   WITH RECURSIVE impact_graph(id, project, content, fact_type, consensus_score, tags, parent_id, depth) AS (
-    SELECT id, project, content, fact_type, consensus_score, tags, parent_decision_id, 0
+    SELECT id, project, content, fact_type, consensus_score, tags, parent_id, 0
     FROM facts WHERE id = ?
     UNION ALL
-    SELECT f.id, f.project, f.content, f.fact_type, f.consensus_score, f.tags, f.parent_decision_id, ig.depth + 1
+    SELECT f.id, f.project, f.content, f.fact_type, f.consensus_score, f.tags, f.parent_id, ig.depth + 1
     FROM facts f
-    JOIN impact_graph ig ON f.parent_decision_id = ig.id
+    JOIN impact_graph ig ON f.parent_id = ig.id
     WHERE ig.depth < CASE WHEN ? IS NULL OR ? <= 0 THEN 5 ELSE ? END
       AND (f.consensus_score IS NULL OR f.consensus_score >= CASE WHEN ? IS NULL THEN 0.0 ELSE ? END)
       AND (? IS NULL OR ? = '' OR f.tags LIKE '%' || ? || '%')

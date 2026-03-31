@@ -1,4 +1,5 @@
+"""Vercel FastAPI entrypoint for CORTEX."""
+
 from cortex.api.core import app
 
-# This entrypoint is required by Vercel for the 'fastapi' framework.
-# It exposes the CORTEX FastAPI application.
+__all__ = ["app"]

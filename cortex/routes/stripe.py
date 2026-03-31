@@ -62,15 +62,15 @@ class CheckoutRequest(BaseModel):
 
     plan: str = "pro"
     customer_email: str | None = None
-    success_url: str = "https://cortex.moskv.com/success"
-    cancel_url: str = "https://cortex.moskv.com/pricing"
+    success_url: str = "https://cortexpersist.com"
+    cancel_url: str = "https://cortexpersist.com"
 
 
 class PortalRequest(BaseModel):
     """Request to create a Stripe Customer Portal session."""
 
     customer_id: str
-    return_url: str = "https://cortex.moskv.com/dashboard"
+    return_url: str = "https://cortexpersist.com"
 
 
 # ─── Helpers ─────────────────────────────────────────────────────────

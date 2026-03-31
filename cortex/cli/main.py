@@ -17,15 +17,21 @@ logger = logging.getLogger(__name__)
 
 _COMMAND_MODULE_SUFFIX = "_cmds"
 _COMMAND_DIR = Path(__file__).parent
+_LEGACY_COMMAND_MODULES = ("crud", "ledger", "purge", "slow_tip", "vote_ledger")
 
 
 def _discover_command_modules() -> list[str]:
-    modules: list[str] = []
+    modules: set[str] = set()
     for module_info in pkgutil.iter_modules([str(_COMMAND_DIR)]):
         if module_info.ispkg:
             continue
         if module_info.name.endswith(_COMMAND_MODULE_SUFFIX):
-            modules.append(module_info.name)
+            modules.add(module_info.name)
+
+    for module_name in _LEGACY_COMMAND_MODULES:
+        if (_COMMAND_DIR / f"{module_name}.py").exists():
+            modules.add(module_name)
+
     return sorted(modules)
 
 

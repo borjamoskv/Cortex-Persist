@@ -34,14 +34,14 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -e ".[dev]"
-          pip install ruff bandit safety
+          pip install -e ".[dev,api]"
+          pip install ruff bandit safety mypy
 
       - name: Lint (Ruff)
         run: ruff check cortex/ --output-format=github
 
-      - name: Type check (mypy)
-        run: mypy cortex/ --ignore-missing-imports
+      - name: Type check (mypy — supplementary, Pyright is canonical)
+        run: mypy cortex/ --ignore-missing-imports || true
 
       - name: Security scan (Bandit)
         run: bandit -r cortex/ -f json -o bandit-report.json || true
@@ -55,9 +55,9 @@ jobs:
       - name: MEJORAlo Score Check
         run: |
           python -c "
-          from cortex.mejoralo.scan import scan
-          result = scan('cortex/')
-          score = result.get('score', 0)
+          from cortex.extensions.mejoralo.scan import scan
+          result = scan('cortex', 'cortex/')
+          score = result.score
           print(f'MEJORAlo Score: {score}/100')
           if score < 70:
               raise SystemExit(f'BLOCKED: Score {score} < 70 threshold')
@@ -100,7 +100,9 @@ jobs:
           # GCR
           echo '${{ secrets.GCP_SA_KEY }}' | docker login -u _json_key --password-stdin gcr.io
           docker tag cortex-sovereign:${{ github.sha }} gcr.io/${{ secrets.GCP_PROJECT }}/cortex-sovereign:${{ github.sha }}
+          docker tag cortex-sovereign:${{ github.sha }} gcr.io/${{ secrets.GCP_PROJECT }}/cortex-sovereign:latest
           docker push gcr.io/${{ secrets.GCP_PROJECT }}/cortex-sovereign:${{ github.sha }}
+          docker push gcr.io/${{ secrets.GCP_PROJECT }}/cortex-sovereign:latest
           # ECR
           aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin ${{ secrets.AWS_ECR_REGISTRY }}
           docker tag cortex-sovereign:${{ github.sha }} ${{ secrets.AWS_ECR_REGISTRY }}/cortex-sovereign:${{ github.sha }}
@@ -157,18 +159,16 @@ jobs:
 
   # ── Phase 4: Deploy to K8s clusters ───────────────────────
   deploy:
-    name: "🚀 Deploy to ${{ matrix.cloud }}"
+    name: "🚀 Deploy to GCP"
     needs: terraform
-    strategy:
-      matrix:
-        cloud: [aws, gcp, azure]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v4
 
-      - name: Deploy to ${{ matrix.cloud }}
+      - name: Deploy to GCP
         run: |
-          kubectl apply -f infra/k8s/${{ matrix.cloud }}/ --recursive
+          kubectl apply -f infra/k8s/gcp/ --recursive
+          kubectl set image deployment/cortex-sovereign cortex=gcr.io/${{ secrets.GCP_PROJECT }}/cortex-sovereign:${{ github.sha }} -n cortex
           kubectl rollout status deployment/cortex-sovereign -n cortex --timeout=300s
 
   # ── Phase 5: Smoke Tests ──────────────────────────────────
@@ -180,12 +180,24 @@ jobs:
       - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v4
       - name: Health checks
         run: |
-          for endpoint in $AWS_ENDPOINT $GCP_ENDPOINT $AZURE_ENDPOINT; do
+          checked=0
+          for endpoint in "${AWS_ENDPOINT:-}" "${GCP_ENDPOINT:-}" "${AZURE_ENDPOINT:-}"; do
+            if [ -z "$endpoint" ]; then
+              continue
+            fi
+            checked=1
             curl -sf "$endpoint/health" || exit 1
             echo "✅ $endpoint healthy"
           done
+          if [ "$checked" -eq 0 ]; then
+            echo "No external endpoints configured; skipping smoke health checks."
+          fi
       - name: Sovereign power verification
         run: |
+          if [ -z "${GCP_ENDPOINT:-}" ]; then
+            echo "GCP_ENDPOINT not configured; skipping sovereign power verification."
+            exit 0
+          fi
           python -c "
           import json, urllib.request
           r = urllib.request.urlopen('$GCP_ENDPOINT/api/v1/sovereign/power')

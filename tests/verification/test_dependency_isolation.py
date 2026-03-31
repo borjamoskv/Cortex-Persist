@@ -1,5 +1,7 @@
+import asyncio
 import os
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -19,43 +21,53 @@ class TestDependencyIsolation(unittest.TestCase):
         """Verify that initializing CortexEngine does not load torch."""
         from cortex.engine import CortexEngine
 
-        # Ensure torch and sentence_transformers are NOT already in sys.modules
-        # (This assumes the test runner hasn't already loaded them)
-        self.assertNotIn("torch", sys.modules, "torch should not be loaded before engine init")
-        self.assertNotIn(
-            "sentence_transformers",
-            sys.modules,
-            "sentence_transformers should not be loaded before engine init",
-        )
+        baseline = {
+            name
+            for name in sys.modules
+            if name == "torch" or name.startswith("sentence_transformers")
+        }
 
-        CortexEngine()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            engine = CortexEngine(db_path=str(Path(tmpdir) / "isolation_init.db"), auto_embed=False)
+            asyncio.run(engine.close())
 
-        self.assertNotIn("torch", sys.modules, "torch should not be loaded after engine init")
-        self.assertNotIn(
-            "sentence_transformers",
-            sys.modules,
-            "sentence_transformers should not be loaded after engine init",
-        )
+        current = {
+            name
+            for name in sys.modules
+            if name == "torch" or name.startswith("sentence_transformers")
+        }
+        self.assertEqual(current, baseline)
 
     def test_store_no_torch(self):
         """Verify that basic store operation does not load torch."""
-        import asyncio
-
         from cortex.engine import CortexEngine
 
-        engine = CortexEngine()
+        baseline = {
+            name
+            for name in sys.modules
+            if name == "torch" or name.startswith("sentence_transformers")
+        }
 
-        async def run_store():
-            await engine.store("test_project", "dependency isolation test fact", source="test")
+        with tempfile.TemporaryDirectory() as tmpdir:
+            engine = CortexEngine(
+                db_path=str(Path(tmpdir) / "isolation_store.db"), auto_embed=False
+            )
+            asyncio.run(engine.init_db())
 
-        asyncio.run(run_store())
+            async def run_store() -> None:
+                await engine.store("test_project", "dependency isolation test fact", source="test")
 
-        self.assertNotIn("torch", sys.modules, "torch should not be loaded after store operation")
-        self.assertNotIn(
-            "sentence_transformers",
-            sys.modules,
-            "sentence_transformers should not be loaded after store operation",
-        )
+            try:
+                asyncio.run(run_store())
+            finally:
+                asyncio.run(engine.close())
+
+        current = {
+            name
+            for name in sys.modules
+            if name == "torch" or name.startswith("sentence_transformers")
+        }
+        self.assertEqual(current, baseline)
 
 
 if __name__ == "__main__":

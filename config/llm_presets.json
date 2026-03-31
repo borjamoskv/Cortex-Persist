@@ -4,7 +4,7 @@
     "default_model": "qwen-3.5-397b",
     "env_key": "DASHSCOPE_API_KEY",
     "context_window": 1000000,
-    "tier": "frontier",
+    "tier": "high",
     "cost_class": "low",
     "specialization": ["code", "general", "reasoning"],
     "intent_model_map": {

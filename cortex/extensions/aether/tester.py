@@ -8,7 +8,7 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 
-from cortex.extensions.aether.models import TesterOutput
+from cortex.extensions.aether.models import AetherTestResult
 from cortex.extensions.aether.tools import AgentToolkit
 
 __all__ = ["TesterAgent"]
@@ -34,7 +34,7 @@ def _detect_test_command(repo_path: Path) -> str:
 class TesterAgent:
     """Runs the project's test suite and reports pass/fail."""
 
-    def run(self, toolkit: AgentToolkit) -> TesterOutput:
+    def run(self, toolkit: AgentToolkit) -> AetherTestResult:
         """Run tests and return structured output."""
         cmd = _detect_test_command(toolkit.repo_path)
         logger.info("🧪 Running: %s", cmd)
@@ -43,7 +43,7 @@ class TesterAgent:
         passed = self._infer_pass(output, cmd)
 
         logger.info("🧪 Tests %s", "PASSED ✅" if passed else "FAILED ❌")
-        return TesterOutput(passed=passed, output=output, command=cmd)
+        return AetherTestResult(passed=passed, output=output, command=cmd)
 
     @staticmethod
     def _infer_pass(output: str, cmd: str) -> bool:

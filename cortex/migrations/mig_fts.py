@@ -18,6 +18,12 @@ def _migration_017_fts_decouple(conn: sqlite3.Connection):
         conn.execute("DROP TRIGGER IF EXISTS facts_ai")
         conn.execute("DROP TRIGGER IF EXISTS facts_ad")
         conn.execute("DROP TRIGGER IF EXISTS facts_au")
+        conn.execute("DROP TRIGGER IF EXISTS trg_facts_fts_insert")
+        conn.execute("DROP TRIGGER IF EXISTS trg_facts_fts_update")
+        conn.execute("DROP TRIGGER IF EXISTS trg_facts_fts_delete")
+        conn.execute("DROP TRIGGER IF EXISTS trg_facts_ai")
+        conn.execute("DROP TRIGGER IF EXISTS trg_facts_ad")
+        conn.execute("DROP TRIGGER IF EXISTS trg_facts_au")
 
         # 2. Drop the existing virtual table (which is tied to facts)
         conn.execute("DROP TABLE IF EXISTS facts_fts")
