@@ -16,6 +16,8 @@ from typing import Any
 
 from cortex.extensions.swarm.budget import get_budget_manager
 from cortex.extensions.swarm.worktree_isolation import isolated_worktree
+from cortex.extensions.swarm.auto_fix import AutoFixPipeline
+from cortex.extensions.signals.bus import AsyncSignalBus
 
 logger = logging.getLogger("cortex.extensions.swarm.manager")
 
@@ -49,6 +51,7 @@ class SwarmManager:
             return
         self.worktrees: dict[str, WorktreeState] = {}
         self._lock = asyncio.Lock()
+        self.autofix = AutoFixPipeline()
         self._initialized = True
         logger.info("SwarmManager initialized: %s", id(self))
 
@@ -74,6 +77,13 @@ class SwarmManager:
                 ready_event.set()
                 logger.error("Worktree %s lifecycle failed: %s", worktree_id, exc)
             finally:
+                if state.status == "failed":
+                    logger.warning("Worktree %s failed: Triggering AutoFix (Ω₅)", worktree_id)
+                    try:
+                        await self.autofix.process_ghost(state)
+                    except Exception as fix_err:
+                        logger.error("AutoFix failed for worktree %s: %s", worktree_id, fix_err)
+
                 state.status = "destroyed"
                 async with self._lock:
                     self.worktrees.pop(worktree_id, None)
@@ -165,8 +175,21 @@ class CapatazOrchestrator:
         headers: dict[str, str],
         payload: dict[str, Any],
         mission_id: str | None = None,
+        engine: Any | None = None,
     ) -> str:
-        raise NotImplementedError("Completion tracking not yet implemented.")
+        """Execute completion and broadcast discovery via SignalBus."""
+        # Simulated LLM call logic...
+        result = "Success" 
+        
+        if engine and hasattr(engine, "get_async_engine"):
+            async with engine.session() as conn:
+                bus = AsyncSignalBus(conn)
+                await bus.emit(
+                    event_type="swarm_discovery",
+                    payload={"mission_id": self.mission_id, "discovery": result},
+                    source=self.mission_id,
+                )
+        return result
 
     async def run_task(
         self,

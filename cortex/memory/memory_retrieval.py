@@ -30,6 +30,16 @@ class KnowledgeGapException(Exception):
     pass
 
 
+def _dict_from_fact(f: Any) -> dict[str, Any]:
+    """Pragmatic conversion from model to dict for LLM consumption."""
+    return {
+        "id": str(getattr(f, "id", "")),
+        "content": getattr(f, "content", ""),
+        "timestamp": float(getattr(f, "timestamp", 0.0)),
+        "score": getattr(f, "score", 0.0),
+    }
+
+
 def fact_to_dict(fact: CortexFactModel, rrf_score: Optional[float] = None) -> dict[str, Any]:
     """Convert a fact model to a context-ready dict."""
     return {

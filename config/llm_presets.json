@@ -4,7 +4,7 @@
     "default_model": "qwen-3.5-397b",
     "env_key": "DASHSCOPE_API_KEY",
     "context_window": 1000000,
-    "tier": "frontier",
+    "tier": "high",
     "cost_class": "low",
     "specialization": ["code", "general", "reasoning"],
     "intent_model_map": {
@@ -185,7 +185,7 @@
       "reasoning": "x-ai/grok-2",
       "creative":  "anthropic/claude-3.5-sonnet",
       "architect": "x-ai/grok-2",
-      "general":   "google/gemini-2.0-flash-001"
+      "general":   "google/gemini-2.5-pro"
     }
   },
   "groq": {
