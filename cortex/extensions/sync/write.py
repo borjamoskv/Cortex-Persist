@@ -10,10 +10,10 @@ from typing import TYPE_CHECKING
 
 from cortex.crypto.aes import get_default_encrypter
 from cortex.extensions.sync.common import (
-    MEMORY_DIR,
     WritebackResult,
     atomic_write,
     db_content_hash,
+    get_memory_dir,
     load_sync_state,
     save_sync_state,
 )
@@ -93,8 +93,8 @@ async def export_to_json(engine: CortexEngine) -> WritebackResult:
     result = WritebackResult()
     state = load_sync_state()
     wb_hashes = state.get("writeback_hashes", {})
-
-    MEMORY_DIR.mkdir(parents=True, exist_ok=True)
+    memory_dir = get_memory_dir()
+    memory_dir.mkdir(parents=True, exist_ok=True)
 
     await _writeback_if_changed(engine, "ghost", _writeback_ghosts, result, wb_hashes)
 
@@ -152,7 +152,7 @@ async def _writeback_ghosts(engine: CortexEngine, result: WritebackResult) -> No
         ghosts[project] = meta
 
     content = json.dumps(ghosts, indent=2, ensure_ascii=False, sort_keys=True)
-    atomic_write(MEMORY_DIR / "ghosts.json", content)
+    atomic_write(get_memory_dir() / "ghosts.json", content)
 
     result.files_written += 1
     result.items_exported += len(ghosts)
@@ -164,7 +164,7 @@ async def _writeback_system(engine: CortexEngine, result: WritebackResult) -> No
     conn = await engine.get_conn()
 
     # Leer system.json existente para preservar estructura
-    system_path = MEMORY_DIR / "system.json"
+    system_path = get_memory_dir() / "system.json"
     if system_path.exists():
         try:
             system_data = json.loads(system_path.read_text(encoding="utf-8"))
@@ -181,7 +181,7 @@ async def _writeback_system(engine: CortexEngine, result: WritebackResult) -> No
     )
     k_rows = await cursor.fetchall()
 
-    knowledge_list = []
+    knowledge_list: list[dict[str, object]] = []
     for row in k_rows:
         meta = _decrypt_json(row[4])
         knowledge_list.append(
@@ -202,7 +202,7 @@ async def _writeback_system(engine: CortexEngine, result: WritebackResult) -> No
     )
     d_rows = await cursor.fetchall()
 
-    decisions_list = []
+    decisions_list: list[dict[str, object]] = []
     for row in d_rows:
         meta = _decrypt_json(row[1])
         decisions_list.append(
@@ -252,7 +252,7 @@ async def _writeback_mistakes(engine: CortexEngine, result: WritebackResult) -> 
         lines.append(json.dumps(entry, ensure_ascii=False))
 
     content = "\n".join(lines) + "\n" if lines else ""
-    atomic_write(MEMORY_DIR / "mistakes.jsonl", content)
+    atomic_write(get_memory_dir() / "mistakes.jsonl", content)
 
     result.files_written += 1
     result.items_exported += len(lines)
@@ -283,7 +283,7 @@ async def _writeback_bridges(engine: CortexEngine, result: WritebackResult) -> N
         lines.append(json.dumps(entry, ensure_ascii=False))
 
     content = "\n".join(lines) + "\n" if lines else ""
-    atomic_write(MEMORY_DIR / "bridges.jsonl", content)
+    atomic_write(get_memory_dir() / "bridges.jsonl", content)
 
     result.files_written += 1
     result.items_exported += len(lines)

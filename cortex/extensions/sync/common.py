@@ -22,6 +22,9 @@ __all__ = [
     "calculate_fact_diff",
     "db_content_hash",
     "file_hash",
+    "get_cortex_dir",
+    "get_memory_dir",
+    "get_sync_state_file",
     "get_existing_contents",
     "load_sync_state",
     "save_sync_state",
@@ -38,6 +41,29 @@ from cortex.core.paths import (  # noqa: E402
     MEMORY_DIR,
     SYNC_STATE_FILE,
 )
+
+
+def _runtime_path(name: str, default: Path) -> Path:
+    """Resolve sync paths from the package namespace so tests can monkeypatch them."""
+    try:
+        import cortex.extensions.sync as sync_module
+    except ImportError:
+        return default
+
+    value = getattr(sync_module, name, default)
+    return value if isinstance(value, Path) else Path(value)
+
+
+def get_memory_dir() -> Path:
+    return _runtime_path("MEMORY_DIR", MEMORY_DIR)
+
+
+def get_cortex_dir() -> Path:
+    return _runtime_path("CORTEX_DIR", CORTEX_DIR)
+
+
+def get_sync_state_file() -> Path:
+    return _runtime_path("SYNC_STATE_FILE", SYNC_STATE_FILE)
 
 
 @dataclass
@@ -77,9 +103,10 @@ class WritebackResult:
 
 def load_sync_state() -> dict:
     """Carga el estado de la última sincronización (hashes de archivos)."""
-    if SYNC_STATE_FILE.exists():
+    sync_state_file = get_sync_state_file()
+    if sync_state_file.exists():
         try:
-            return json.loads(SYNC_STATE_FILE.read_text(encoding="utf-8"))
+            return json.loads(sync_state_file.read_text(encoding="utf-8"))
         except (json.JSONDecodeError, OSError):
             return {}
     return {}
@@ -87,8 +114,9 @@ def load_sync_state() -> dict:
 
 def save_sync_state(state: dict) -> None:
     """Guarda el estado de sincronización a disco."""
-    SYNC_STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
-    SYNC_STATE_FILE.write_text(
+    sync_state_file = get_sync_state_file()
+    sync_state_file.parent.mkdir(parents=True, exist_ok=True)
+    sync_state_file.write_text(
         json.dumps(state, indent=2, ensure_ascii=False),
         encoding="utf-8",
     )
