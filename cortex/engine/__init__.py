@@ -13,9 +13,6 @@ from typing import TYPE_CHECKING, Any
 import aiosqlite
 import sqlite_vec
 
-if TYPE_CHECKING:
-    pass
-
 from cortex.config import DEFAULT_DB_PATH
 
 # Real imports for runtime managers (no longer just TYPE_CHECKING)
@@ -23,7 +20,9 @@ from cortex.consensus.manager import ConsensusManager
 from cortex.database.schema import get_init_meta
 from cortex.embeddings import LocalEmbedder
 from cortex.embeddings.manager import EmbeddingManager
+from cortex.engine.auth import ByzantineAuthLayer
 from cortex.engine.durability import PersistenceSupervisor
+from cortex.engine.legacy_mixin import LegacyMixin
 from cortex.engine.lock import SovereignLock
 from cortex.engine.memory_mixin import MemoryMixin
 from cortex.engine.mixins.base import FACT_COLUMNS, FACT_JOIN
@@ -32,7 +31,9 @@ from cortex.engine.models import row_to_fact  # noqa: F401 — re-exported
 from cortex.engine.query_mixin import QueryMixin
 from cortex.engine.search_mixin import SearchMixin
 from cortex.engine.store_mixin import StoreMixin
+from cortex.engine.sync_mixin import SyncMixin
 from cortex.engine.transaction_mixin import TransactionMixin
+from cortex.facts.manager import FactManager
 from cortex.ledger import EnrichmentQueue, LedgerStore, LedgerWriter
 from cortex.mac_maestro.executor import MaestroExecutor
 
@@ -67,6 +68,8 @@ class CortexEngine(
     TransactionMixin,
     OptimizationMixin,
     HealthMixin,
+    SyncMixin,
+    LegacyMixin,
 ):
     """The Sovereign Ledger for AI Agents (Composite Orchestrator)."""
 
@@ -91,7 +94,6 @@ class CortexEngine(
             self._pool = pool
 
         self._db_path.parent.mkdir(parents=True, exist_ok=True)
-        self._enforce_fs_permissions()
         self._conn: aiosqlite.Connection | None = None
         self._vec_available = False
         self._conn_lock = asyncio.Lock()
@@ -102,7 +104,7 @@ class CortexEngine(
         self._system_state = "ACTIVE"
 
         # Managers are synthesized JIT via properties (Axiom Ω₄)
-        self._facts: FactManager | None = None
+        self._facts: FactManager | None = None  # noqa: F821
         self._embeddings: EmbeddingManager | None = None
         self._consensus: ConsensusManager | None = None
         self._lock_sovereign: SovereignLock | None = None
@@ -110,7 +112,7 @@ class CortexEngine(
         self._enrichment_queue: EnrichmentQueue | None = None
         self._ledger_writer: LedgerWriter | None = None
         self._mac_maestro: MaestroExecutor | None = None
-        self._auth: ByzantineAuthLayer | None = None
+        self._auth: ByzantineAuthLayer | None = None  # noqa: F821
 
         # Decoupled guard pipeline (Ω₃: minimal coupling)
         self._guard_pipeline = self._register_default_guards()
@@ -149,7 +151,7 @@ class CortexEngine(
             logger.debug("🛡️ [SORTU-JIT] Skill '%s' synthesized.", skill_name)
 
     @property
-    def facts(self) -> FactManager:
+    def facts(self) -> FactManager:  # noqa: F821
         if self._facts is None:
             from cortex.facts.manager import FactManager
 
@@ -157,7 +159,7 @@ class CortexEngine(
         return self._facts
 
     @facts.setter
-    def facts(self, value: "FactManager") -> None:
+    def facts(self, value: FactManager) -> None:  # noqa: F821
         self._facts = value
 
     @property
@@ -169,7 +171,7 @@ class CortexEngine(
         return self._embeddings
 
     @embeddings.setter
-    def embeddings(self, value: "EmbeddingManager") -> None:
+    def embeddings(self, value: EmbeddingManager) -> None:
         self._embeddings = value
 
     @property
@@ -181,7 +183,7 @@ class CortexEngine(
         return self._consensus
 
     @consensus.setter
-    def consensus(self, value: "ConsensusManager") -> None:
+    def consensus(self, value: ConsensusManager) -> None:
         self._consensus = value
 
     @property
@@ -193,11 +195,11 @@ class CortexEngine(
         return self._lock_sovereign
 
     @lock_sovereign.setter
-    def lock_sovereign(self, value: "SovereignLock") -> None:
+    def lock_sovereign(self, value: SovereignLock) -> None:
         self._lock_sovereign = value
 
     @property
-    def auth(self) -> "ByzantineAuthLayer":
+    def auth(self) -> ByzantineAuthLayer:  # noqa: F821
         if self._auth is None:
             from cortex.engine.auth import ByzantineAuthLayer
 
@@ -205,7 +207,7 @@ class CortexEngine(
         return self._auth
 
     @auth.setter
-    def auth(self, value: "ByzantineAuthLayer") -> None:
+    def auth(self, value: ByzantineAuthLayer) -> None:  # noqa: F821
         self._auth = value
 
     @property
@@ -217,7 +219,7 @@ class CortexEngine(
         return self._ledger_store
 
     @ledger_store.setter
-    def ledger_store(self, value: "LedgerStore") -> None:
+    def ledger_store(self, value: LedgerStore) -> None:
         self._ledger_store = value
 
     @property
@@ -229,7 +231,7 @@ class CortexEngine(
         return self._enrichment_queue
 
     @enrichment_queue.setter
-    def enrichment_queue(self, value: "EnrichmentQueue") -> None:
+    def enrichment_queue(self, value: EnrichmentQueue) -> None:
         self._enrichment_queue = value
 
     @property
@@ -241,7 +243,7 @@ class CortexEngine(
         return self._ledger_writer
 
     @ledger_writer.setter
-    def ledger_writer(self, value: "LedgerWriter") -> None:
+    def ledger_writer(self, value: LedgerWriter) -> None:
         self._ledger_writer = value
 
     @property
@@ -253,7 +255,7 @@ class CortexEngine(
         return self._mac_maestro
 
     @mac_maestro.setter
-    def mac_maestro(self, value: "MaestroExecutor") -> None:
+    def mac_maestro(self, value: MaestroExecutor) -> None:
         self._mac_maestro = value
 
     # ─── Guard Pipeline Registration ──────────────────────────────
@@ -269,7 +271,6 @@ class CortexEngine(
 
         pipeline = GuardPipeline()
         db_path = str(self._db_path)
-        import os  # Local import to resolve persistent pylint/ruff shadowing issues
 
         # Pre-store guards (AX-II Hooks 1-3)
         try:
@@ -297,6 +298,16 @@ class CortexEngine(
         except (ImportError, Exception) as e:  # noqa: BLE001
             if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
                 raise RuntimeError(f"FAIL-CLOSED: VerifierGuardAdapter failed: {e}") from e
+            pass
+
+        # ZK-Swarm Cryptographic Guard (RFC-003 Phase 1)
+        try:
+            from cortex.engine.guard_adapters import ZKGuardAdapter
+
+            pipeline.add_guard(ZKGuardAdapter())
+        except (ImportError, Exception) as e:  # noqa: BLE001
+            if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
+                raise RuntimeError(f"FAIL-CLOSED: ZKGuardAdapter failed: {e}") from e
             pass
 
         # Post-store hooks (AX-II Hook 4 + signals + epistemic)
@@ -335,38 +346,6 @@ class CortexEngine(
         return pipeline
 
     # ─── JIT Entry Points (Axiom Ω₄) ──────────────────────────────
-
-    # ─── Security: Filesystem Permission Enforcement ──────────────
-
-    def _enforce_fs_permissions(self) -> None:
-        """Enforce restrictive permissions on CORTEX data directory and DB file.
-        Directory: 700 (owner-only rwx). DB file: 600 (owner-only rw).
-        """
-
-        parent = self._db_path.parent
-        try:
-            # Directory: rwx------ (700)
-            current_dir_mode = parent.stat().st_mode & 0o777
-            if current_dir_mode != 0o700:
-                os.chmod(parent, 0o700)
-                logger.info(
-                    "SECURITY: Fixed dir perms %o → 700 on %s",
-                    current_dir_mode,
-                    parent,
-                )
-
-            # DB file: rw------- (600) — only if it exists
-            if self._db_path.exists():
-                current_file_mode = self._db_path.stat().st_mode & 0o777
-                if current_file_mode != 0o600:
-                    os.chmod(self._db_path, 0o600)
-                    logger.info(
-                        "SECURITY: Fixed DB perms %o → 600 on %s",
-                        current_file_mode,
-                        self._db_path,
-                    )
-        except OSError as e:
-            logger.warning("SECURITY: Could not enforce permissions: %s", e)
 
     # ─── Security: CLI Audit Trail ────────────────────────────────
 
@@ -472,52 +451,6 @@ class CortexEngine(
             pass  # System Python lacks extension loading
         return conn
 
-    # ─── Synchronous Wrappers (SDK Parity) ────────────────────────
-
-    def _run_sync(self, coro):
-        """Execute a coroutine synchronously, thread-safe."""
-        import threading
-
-        try:
-            asyncio.get_running_loop()
-        except RuntimeError:
-            return asyncio.run(coro)
-
-        result = None
-        exception = None
-
-        def _worker():
-            nonlocal result, exception
-            try:
-                result = asyncio.run(coro)
-            except asyncio.CancelledError:
-                raise
-            except Exception as e:
-                # noqa: BLE001 — sync wrapper must catch all async errors to propagate
-                exception = e
-
-        t = threading.Thread(target=_worker)
-        t.start()
-        t.join()
-        if exception:
-            raise exception
-        return result
-
-    def init_db_sync(self) -> None:
-        return self._run_sync(self.init_db())
-
-    def store_sync(self, *args, **kwargs):
-        return self._run_sync(self.store(*args, **kwargs))
-
-    def recall_sync(self, *args, **kwargs):
-        return self._run_sync(self.recall(*args, **kwargs))
-
-    def search_sync(self, *args, **kwargs):
-        return self._run_sync(self.search(*args, **kwargs))
-
-    def hybrid_search_sync(self, *args, **kwargs):
-        return self._run_sync(self.search(*args, **kwargs))
-
     # ─── Causal Episode Tracing (Epoch 8) ─────────────────────────
 
     async def recall_episode(
@@ -546,30 +479,6 @@ class CortexEngine(
         async with self.session() as conn:
             tracer = CausalTracer(conn)
             return await tracer.trace_episode(fact_id, max_depth)
-
-    def recall_episode_sync(self, *args, **kwargs):
-        return self._run_sync(self.recall_episode(*args, **kwargs))
-
-    def trace_episode_sync(self, *args, **kwargs):
-        return self._run_sync(self.trace_episode(*args, **kwargs))
-
-    def graph_sync(self, *args, **kwargs):
-        return self._run_sync(self.graph(*args, **kwargs))
-
-    def query_entity_sync(self, *args, **kwargs):
-        return self._run_sync(self.query_entity(*args, **kwargs))
-
-    def get_causal_chain_sync(self, *args, **kwargs):
-        return self._run_sync(self.get_causal_chain(*args, **kwargs))
-
-    def close_sync(self):
-        return self._run_sync(self.close())
-
-    def health_check_sync(self, *args, **kwargs):
-        return self._run_sync(self.health_check(*args, **kwargs))
-
-    def health_report_sync(self, *args, **kwargs):
-        return self._run_sync(self.health_report(*args, **kwargs))
 
     # ─── Backward Compatibility Aliases & Delegation ──────────────
 
@@ -681,17 +590,11 @@ class CortexEngine(
 
         return await FingerprintExtractor.extract(self, project, top_domains)
 
-    def fingerprint_sync(self, *args, **kwargs):
-        return self._run_sync(self.fingerprint(*args, **kwargs))
-
     async def immortality_index(self, project: str | None = None) -> dict:
         """Immortality Index (ι) — cognitive crystallization metric."""
         from cortex.extensions.shannon.immortality import ImmortalityIndex
 
         return await ImmortalityIndex.compute(self, project)
-
-    def immortality_index_sync(self, *args, **kwargs):
-        return self._run_sync(self.immortality_index(*args, **kwargs))
 
     async def prioritize(
         self,

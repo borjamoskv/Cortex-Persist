@@ -17,6 +17,7 @@ __all__ = [
     "ContradictionGuardAdapter",
     "VerifierGuardAdapter",
     "ExergyGuardAdapter",
+    "ZKGuardAdapter",
     "LedgerCheckpointHook",
     "SignalEmitHook",
     "EpistemicBreakerHook",
@@ -124,6 +125,25 @@ class ExergyGuardAdapter:
 
         guard = ExergyGuard()
         guard.check_thermodynamic_yield(content, project, fact_type, source=meta.get("source"))
+
+
+class ZKGuardAdapter:
+    """AX-II Hook -> StoreGuard protocol (ZK-Swarm cryptographic check)."""
+
+    async def check(
+        self,
+        content: str,
+        project: str,
+        fact_type: str,
+        meta: dict[str, Any],
+        conn: aiosqlite.Connection,
+        *,
+        tenant_id: str = "default",
+    ) -> None:
+        from cortex.guards.zk_guard import ZKSwarmGuard
+
+        guard = ZKSwarmGuard()
+        await guard.verify_integrity(content, fact_type, meta)
 
 
 # ─── Post-Store Hooks ─────────────────────────────────────────────
