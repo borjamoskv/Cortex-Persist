@@ -38,9 +38,9 @@ async def main():
     conn = sqlite3.connect(db_path)
     bus = SignalBus(conn)
     history = bus.history(event_type="swarm_discovery", limit=10)
-    logger.info(f"📡 Signal Bus: {len(history)} discoveries captured.")
+    logger.info("📡 Signal Bus: %s discoveries captured.", len(history))
     for sig in history:
-        logger.info(f"  - [{sig.source}] {sig.payload}")
+        logger.info("  - [%s] %s", sig.source, sig.payload)
     conn.close()
 
 if __name__ == "__main__":

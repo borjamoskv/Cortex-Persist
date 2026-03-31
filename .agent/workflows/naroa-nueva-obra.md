@@ -1,0 +1,1 @@
+/Users/borjafernandezangulo/.cortex/workflows/naroa-nueva-obra.md

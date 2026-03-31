@@ -1,4 +1,4 @@
-.PHONY: help install dev test lint format build serve docs deploy clean bench repo-health repo-health-all
+.PHONY: help install dev test lint format build serve docs deploy clean bench repo-health repo-health-all smoke-api
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
@@ -30,6 +30,9 @@ repo-health: ## Check changed/untracked files for conflict markers and Python sy
 
 repo-health-all: ## Check all tracked and untracked files for conflict markers and Python syntax errors
 	python3 scripts/repo_health_changed.py --all
+
+smoke-api: ## Smoke-check API import, engine init, and CLI help
+	python3 scripts/smoke_test_api.py
 
 format: ## Auto-format code
 	ruff format cortex/ tests/

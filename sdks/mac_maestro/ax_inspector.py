@@ -9,7 +9,6 @@ try:
     from ApplicationServices import (
         AXUIElementCopyAttributeValue,
         AXUIElementCreateApplication,
-        AXUIElementCreateSystemWide,
         kAXChildrenAttribute,
         kAXDescriptionAttribute,
         kAXEnabledAttribute,

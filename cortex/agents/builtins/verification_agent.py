@@ -15,8 +15,8 @@ from cortex.agents.bus import SqliteMessageBus
 from cortex.agents.manifest import AgentManifest
 from cortex.agents.message_schema import AgentMessage, MessageKind, new_message
 from cortex.agents.tools import ToolRegistry
-from cortex.verification.oracle import VerificationOracle, VerificationOracleResult
-from cortex.verification.verifier import SovereignVerifier, VerificationResult
+from cortex.verification.oracle import VerificationOracle
+from cortex.verification.verifier import SovereignVerifier
 
 logger = logging.getLogger(__name__)
 
@@ -51,28 +51,28 @@ class VerificationAgent(BaseAgent):
 
         try:
             if subject and candidate:
-                result: VerificationOracleResult = await self._oracle.verify(subject, candidate)
+                oracle_result = await self._oracle.verify(subject, candidate)
                 await self._reply(
                     message,
                     {
-                        "ok": result.ok,
-                        "verdict": result.verdict,
-                        "reasons": result.reasons,
+                        "ok": oracle_result.ok,
+                        "verdict": oracle_result.verdict,
+                        "reasons": oracle_result.reasons,
                     },
                 )
                 return
 
             if code:
-                result: VerificationResult = self._verifier.check(code, context)
+                check_result = self._verifier.check(code, context)
                 await self._reply(
                     message,
                     {
-                        "ok": result.is_valid,
-                        "verdict": "accepted" if result.is_valid else "rejected",
-                        "is_valid": result.is_valid,
-                        "violations": result.violations,
-                        "proof_certificate": result.proof_certificate,
-                        "counterexample": result.counterexample,
+                        "ok": check_result.is_valid,
+                        "verdict": "accepted" if check_result.is_valid else "rejected",
+                        "is_valid": check_result.is_valid,
+                        "violations": check_result.violations,
+                        "proof_certificate": check_result.proof_certificate,
+                        "counterexample": check_result.counterexample,
                     },
                 )
                 return

@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 _COMMAND_MODULE_SUFFIX = "_cmds"
 _COMMAND_DIR = Path(__file__).parent
-_LEGACY_COMMAND_MODULES = ("crud", "purge", "slow_tip", "vote_ledger")
+_LEGACY_COMMAND_MODULES = ("crud", "ledger", "purge", "slow_tip", "vote_ledger")
 
 
 def _discover_command_modules() -> list[str]:

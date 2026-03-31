@@ -36,19 +36,19 @@ class MacControlOmega:
                     break
             
             if not target:
-                logger.error(f"No tab found matching: '{target_url_substring}'")
+                logger.error("No tab found matching: '%s'", target_url_substring)
                 return False
                 
             self.ws_url = target['webSocketDebuggerUrl']
             self.ws = await websockets.connect(self.ws_url)
-            logger.info(f"Connected to CDP: {target['url']}")
+            logger.info("Connected to CDP: %s", target['url'])
             
             # Enable core domains
             await self.send("Page.enable")
             await self.send("Runtime.enable")
             return True
         except Exception as e:
-            logger.error(f"Connection failed: {e}")
+            logger.error("Connection failed: %s", e)
             return False
 
     async def send(self, method: str, params: dict = None) -> Any:
@@ -67,7 +67,7 @@ class MacControlOmega:
             if res.get("id") == self.msg_id:
                 # Check if it's an error response
                 if "error" in res:
-                    logger.error(f"CDP Error in {method}: {res['error']}")
+                    logger.error("CDP Error in %s: %s", method, res['error'])
                 return res.get("result", {})
 
 
@@ -111,7 +111,7 @@ class MacControlOmega:
         
         # Check for exception details
         if 'exceptionDetails' in res:
-            logger.error(f"JS Error: {res['exceptionDetails']}")
+            logger.error("JS Error: %s", res['exceptionDetails'])
             
         return None
 
@@ -121,7 +121,7 @@ class MacControlOmega:
         if 'data' in res:
             with open(filepath, "wb") as f:
                 f.write(base64.b64decode(res['data']))
-            logger.info(f"Screenshot saved to {filepath}")
+            logger.info("Screenshot saved to %s", filepath)
         else:
             logger.error("Failed to capture screenshot data.")
 

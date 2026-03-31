@@ -51,7 +51,7 @@ async def main():
     rejection_caught = False
     for res in results:
         if isinstance(res, Exception):
-            logger.info(f"✅ Rejection caught: {res}")
+            logger.info("✅ Rejection caught: %s", res)
             rejection_caught = True
 
     if not rejection_caught:
@@ -63,7 +63,7 @@ async def main():
     history = bus.history(event_type="swarm_discovery", limit=10)
     found_elder = False
     for sig in history:
-        logger.info(f"Checking signal: {sig.event_type} from {sig.source}")
+        logger.info("Checking signal: %s from %s", sig.event_type, sig.source)
         if "rejection" in str(sig.payload) and "Elder-0" in str(sig.payload):
             logger.info("🧠 Negative Knowledge Successfully Captured in SignalBus!")
             found_elder = True

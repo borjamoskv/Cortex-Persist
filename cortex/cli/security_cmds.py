@@ -16,6 +16,8 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
+from cortex.cli.common import cli
+
 logger = logging.getLogger("cortex.cli.security")
 
 console = Console()
@@ -325,3 +327,6 @@ def security_test_sync(mood: str) -> None:
     console.print(f"Emitting [bold cyan]{mood}[/bold cyan] signal to Notch...")
     SIGNAL.emit_sync(mood, {"test": True})
     console.print("✅ Signal sent.")
+
+
+cli.add_command(security_cli)

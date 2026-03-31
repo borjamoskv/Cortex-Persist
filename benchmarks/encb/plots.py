@@ -22,11 +22,11 @@ def _ensure_matplotlib():
         matplotlib.use("Agg")  # Non-interactive backend
         import matplotlib.pyplot as plt
         return plt
-    except ImportError:
+    except ImportError as err:
         raise ImportError(
             "matplotlib is required for plotting. "
             "Install with: pip install matplotlib"
-        )
+        ) from err
 
 
 def plot_pfbr_convergence(
@@ -108,8 +108,8 @@ def plot_edi_bars(
     colors = ["#FF4444", "#FF8800", "#4488FF", "#00CC44"]
     x = np.arange(len(strategies))
 
-    bars = ax.bar(x, means, yerr=stds, capsize=5,
-                  color=colors[: len(strategies)], alpha=0.85)
+    ax.bar(x, means, yerr=stds, capsize=5,
+           color=colors[: len(strategies)], alpha=0.85)
 
     ax.set_xticks(x)
     ax.set_xticklabels(strategies, fontsize=11)

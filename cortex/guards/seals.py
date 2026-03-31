@@ -280,8 +280,13 @@ async def check_seal_3_security() -> GateResult:
 async def check_seal_4_tests() -> GateResult:
     printer.seal(4, "AX-017 Ledger Integrity", "Tests & Coverage")
     python_cmd = sys.executable
-    cmd = [str(python_cmd), "-m", "pytest", "tests/", "-x", "-q", "--tb=short", "-p", "no:timeout"]
-    code, out = await arun_cmd(cmd)
+    cmd = [str(python_cmd), "-m", "pytest", "tests/", "-x", "-q", "--tb=short"]
+    try:
+        code, out = await asyncio.wait_for(arun_cmd(cmd), timeout=600.0)
+    except asyncio.TimeoutError:
+        printer.fail("Tests timed out after 600 seconds (Singularity Prevention).")
+        return False, "verified"
+
     if code == 0:
         printer.success("All tests passed.")
         return True, "verified"

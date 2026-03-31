@@ -3,7 +3,7 @@
 import click
 from rich.console import Console
 
-from cortex.cli.common import DEFAULT_DB
+from cortex.cli.common import DEFAULT_DB, cli
 from cortex.ledger.store import LedgerStore
 from cortex.ledger.verifier import LedgerVerifier
 
@@ -64,3 +64,4 @@ def create_checkpoint(db: str, batch: int):
 
 
 ledger_cmds_click = ledger_cmds
+cli.add_command(ledger_cmds, name="trust-ledger")

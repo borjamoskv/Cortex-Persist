@@ -6,7 +6,7 @@ import json
 
 import click
 
-from cortex.cli.common import DEFAULT_DB, console, get_engine
+from cortex.cli.common import DEFAULT_DB, cli, console, get_engine
 
 
 @click.group("gateway")
@@ -42,3 +42,6 @@ def health(db: str, as_json: bool) -> None:
     )
     console.print(f"[dim]State: {'Resonant' if hs.score > 90 else 'Stable'}[/]\n")
     engine.close_sync()
+
+
+cli.add_command(gateway_cmds)

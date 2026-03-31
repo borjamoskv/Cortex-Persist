@@ -9,7 +9,7 @@ import ast
 import logging
 import re
 from collections.abc import Mapping
-from typing import Any, Protocol
+from typing import Any, Protocol, runtime_checkable
 
 from cortex.utils.respiration import oxygenate
 
@@ -25,6 +25,7 @@ __all__ = [
 ]
 
 
+@runtime_checkable
 class AttackVector(Protocol):
     """Sovereign Attack Vector Interface."""
 
@@ -149,6 +150,7 @@ class ChronosSniper:
         return findings
 
 
+@runtime_checkable
 class SiegeVector(Protocol):
     """Runtime Siege Vector Interface for live system attacks."""
 

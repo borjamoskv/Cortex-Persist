@@ -13,6 +13,7 @@ import logging
 from typing import TYPE_CHECKING, Any, Optional
 
 from cortex.extensions.sync import SyncResult, WritebackResult
+from cortex.extensions.sync.common import file_hash, load_sync_state
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine
@@ -29,7 +30,6 @@ class CortexSyncManager:
         self._sync_lock = asyncio.Lock()
         self._last_sync_result: Optional[SyncResult] = None
         self._last_wb_result: Optional[WritebackResult] = None
-        self._pulse_state: dict[str, str] = {}  # MerklePulse state (file -> hash)
 
     async def run_sync_cycle(self) -> dict[str, Any]:
         """
@@ -37,7 +37,6 @@ class CortexSyncManager:
         Ensures thread-safe execution via asyncio.Lock.
         """
         async with self._sync_lock:
-            loop = asyncio.get_running_loop()
             stats = {}
 
             try:
@@ -46,7 +45,7 @@ class CortexSyncManager:
                 stats["sync"] = self._last_sync_result.total if self._last_sync_result else 0
 
                 # 2. Write-back (Export: DB -> Memory)
-                self._last_wb_result = await loop.run_in_executor(None, self._run_export_to_json)
+                self._last_wb_result = await self._run_export_to_json()
                 stats["writeback"] = (
                     self._last_wb_result.items_exported if self._last_wb_result else 0
                 )
@@ -67,15 +66,16 @@ class CortexSyncManager:
         Only syncs files that have changed since the last pulse.
         """
         loop = asyncio.get_running_loop()
-        from cortex.extensions.sync.common import MEMORY_DIR, file_hash
+        from cortex.extensions.sync.common import MEMORY_DIR
 
+        persisted_state = load_sync_state()
         # 1. Detect changes using hashes
         changed_files = []
         for f in ["ghosts.json", "system.json", "mistakes.jsonl", "bridges.jsonl"]:
             path = MEMORY_DIR / f
             if path.exists():
                 current_hash = await loop.run_in_executor(None, file_hash, path)
-                if current_hash != self._pulse_state.get(f):
+                if current_hash != persisted_state.get(f"{path.stem}_hash"):
                     changed_files.append((f, current_hash))
 
         if not changed_files:
@@ -84,25 +84,19 @@ class CortexSyncManager:
 
         # 2. Process only changed files
         logger.info("MerklePulse: Detected changes in %d files", len(changed_files))
-        result = await loop.run_in_executor(None, self._run_sync_memory)
+        return await self._run_sync_memory()
 
-        # 3. Update pulse state
-        for f, h in changed_files:
-            self._pulse_state[f] = h
-
-        return result
-
-    def _run_sync_memory(self) -> SyncResult:
-        """Internal synchronous sync wrapper."""
+    async def _run_sync_memory(self) -> SyncResult:
+        """Internal async sync wrapper."""
         from cortex.extensions.sync import sync_memory
 
-        return sync_memory(self._engine)  # type: ignore[reportReturnType]
+        return await sync_memory(self._engine)
 
-    def _run_export_to_json(self) -> WritebackResult:
-        """Internal synchronous export wrapper."""
+    async def _run_export_to_json(self) -> WritebackResult:
+        """Internal async export wrapper."""
         from cortex.extensions.sync import export_to_json
 
-        return export_to_json(self._engine)  # type: ignore[reportReturnType]
+        return await export_to_json(self._engine)
 
     async def _run_export_snapshot(self) -> None:
         """Asynchronous snapshot export."""

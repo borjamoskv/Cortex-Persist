@@ -8,6 +8,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
+from cortex.cli.common import cli
 from cortex.cli.errors import err_execution_failed, err_skill_not_found
 from cortex.core.paths import SKILLS_DIR
 
@@ -165,3 +166,6 @@ def actions(ctx):
     """High-level actions (open-app, select-all)."""
     code, out, err = run_ghost_skill(["actions"] + ctx.args)
     handle_ghost_response(code, out, err, "[bold magenta]👻 GHOST-1 Actions[/bold magenta]")
+
+
+cli.add_command(ghost_cmds)

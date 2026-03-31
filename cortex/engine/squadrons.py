@@ -5,11 +5,15 @@ P1: Kinetic (40 workers)   - APIs, Bounties, Moltbook
 P2: Ghost Hunt (30 workers)- Dead code, Exergy cleanup
 """
 
+import ast
 import asyncio
 import logging
 import random
 import re
+import subprocess
+from pathlib import Path
 
+from cortex.engine.legion_vectors import RED_TEAM_SWARM
 from cortex.engine.swarm import Squadron, SwarmAgent, SwarmSignal
 
 logger = logging.getLogger(__name__)
@@ -24,22 +28,35 @@ class IntegrityAgent(SwarmAgent):
     """P0 Agent: Runs linting, type checks, and static analysis."""
 
     async def execute(self, target: str) -> SwarmSignal:
-        # Simulate static analysis or linting check
         logger.info("[P0-INTEGRITY] %s static auditing: %s", self.agent_id, target)
-
-        # Simulate work
-        await asyncio.sleep(abs(random.gauss(0.1, 0.05)))
-
-        # For now, simulate success or void (if target is empty)
-        if not target.strip():
+        
+        path = Path(target)
+        if not path.exists():
             return SwarmSignal(self.agent_id, target, "VOID", {}, {})
 
+        # Simulate Ruff check for MVP (Real ruff call would be here)
+        # Note: In a production swarm, we'd use a shared ruff cache.
+        findings = []
+        if path.suffix == ".py":
+            try:
+                # Use ruff to check for errors
+                proc = await asyncio.create_subprocess_exec(
+                    "ruff", "check", target, "--select", "E,F,W", "--format", "json",
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE
+                )
+                stdout, _ = await proc.communicate()
+                if stdout:
+                    findings = [f"Linter Finding: {f['message']}" for f in re.finditer(r'\{.*\}', stdout.decode())]
+            except Exception as e:
+                logger.debug("IntegrityAgent linter fail: %s", e)
+
+        status = "SUCCESS" if findings else "VOID"
         return SwarmSignal(
             agent_id=self.agent_id,
             target=target,
-            status="SUCCESS",
-            payload={"lint_warnings": 0, "type_errors": 0},
-            metrics={"time_ms": 120},
+            status=status,
+            payload={"findings": findings},
+            metrics={"time_ms": 150},
         )
 
 
@@ -64,19 +81,29 @@ class IntegritySquadron(Squadron):
 
 
 class KineticAgent(SwarmAgent):
-    """P1 Agent: Executes API calls, Moltbook traversal, Bounty hunting."""
+    """P1 Agent: Executes API calls, Moltbook traversal, Red Team attacks."""
 
     async def execute(self, target: str) -> SwarmSignal:
-        logger.info("[P1-KINETIC] %s engaging API target: %s", self.agent_id, target)
-
-        await asyncio.sleep(abs(random.gauss(0.3, 0.1)))  # Slower due to network
-
+        logger.info("[P1-KINETIC] %s engaging target: %s", self.agent_id, target)
+        
+        # Select a random red team vector for this kinetic mission
+        vector_name = random.choice(list(RED_TEAM_SWARM.keys()))
+        vector = RED_TEAM_SWARM[vector_name]
+        
+        path = Path(target)
+        content = ""
+        if path.exists() and path.is_file():
+            content = path.read_text(encoding="utf-8")
+        
+        findings = await vector.attack(content or target, {"intent": "legion_siege"})
+        
+        status = "SUCCESS" if findings else "VOID"
         return SwarmSignal(
             agent_id=self.agent_id,
             target=target,
-            status="SUCCESS",
-            payload={"yield_value": random.randint(10, 500)},
-            metrics={"latency_ms": 300},
+            status=status,
+            payload={"vector": vector_name, "findings": findings},
+            metrics={"latency_ms": 250},
         )
 
 
@@ -103,20 +130,32 @@ class KineticSquadron(Squadron):
 
 
 class GhostHuntAgent(SwarmAgent):
-    """P2 Agent: Scans for dead code, unreferenced classes, and JIL abstractions."""
+    """P2 Agent: Scans for dead code and unreferenced abstractions."""
 
     async def execute(self, target: str) -> SwarmSignal:
         logger.info("[P2-GHOST_HUNT] %s extracting debt from: %s", self.agent_id, target)
-        await asyncio.sleep(abs(random.gauss(0.2, 0.1)))
+        
+        path = Path(target)
+        if not path.exists() or not path.is_file():
+            return SwarmSignal(self.agent_id, target, "VOID", {}, {})
 
-        drop = random.randint(0, 50)
-        status = "SUCCESS" if drop > 0 else "VOID"
+        findings = []
+        try:
+            tree = ast.parse(path.read_text(encoding="utf-8"))
+            # Simple ghost hunt: Classes/Functions with 'TODO' or 'PLACEHOLDER' or no body
+            for node in ast.walk(tree):
+                if isinstance(node, ast.FunctionDef | ast.ClassDef):
+                    if len(node.body) == 1 and isinstance(node.body[0], ast.Pass | ast.Constant):
+                        findings.append(f"Ghost abstraction: `{node.name}` has no implementation.")
+        except Exception as e:
+            logger.debug("GhostHuntAgent parse fail: %s", e)
 
+        status = "SUCCESS" if findings else "VOID"
         return SwarmSignal(
             agent_id=self.agent_id,
             target=target,
             status=status,
-            payload={"loc_drop": drop} if drop > 0 else {},
+            payload={"ghosts": findings},
             metrics={},
         )
 

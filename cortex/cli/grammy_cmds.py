@@ -12,12 +12,12 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
-from cortex.extensions.music_engine.orchestrator import GRAMMYOrchestrator, TrackContext, TrackState
+from cortex.cli.common import cli
 
 console = Console()
 
 
-@click.group(name="grammy", help="🎵 GRAMMY-Ω: Producción de música electrónica soberana.")
+@cli.group(name="grammy", help="🎵 GRAMMY-Ω: Producción de música electrónica soberana.")
 def grammy_cmds():
     """Grupo de comandos para GRAMMY-Ω."""
     pass
@@ -34,6 +34,18 @@ def produce_cmd(title, concept, bpm, key):
     """
     Dispara el pipeline de producción de GRAMMY-Ω para un nuevo track.
     """
+    try:
+        from cortex.extensions.music_engine.orchestrator import (
+            GRAMMYOrchestrator,
+            TrackContext,
+            TrackState,
+        )
+    except Exception as exc:  # noqa: BLE001
+        console.print(
+            f"[bold red]✗ GRAMMY-Ω no está disponible en este entorno:[/bold red] {exc}"
+        )
+        return
+
     console.print(
         Panel(
             f"[bold #CCFF00]GRAMMY-Ω PRODUCTION CORE[/]\n"

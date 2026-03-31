@@ -11,7 +11,7 @@ async def main():
     mission_id = "test-exergy-exhaustion"
     
     # 🔗 Simulamos un uso masivo de tokens (100k tokens GPT-4v level)
-    logger.info(f"🚀 Iniciando reporte de uso para {mission_id}...")
+    logger.info("🚀 Iniciando reporte de uso para %s...", mission_id)
     
     try:
         # Reportamos un uso que supere los /bin/zsh.10
@@ -20,10 +20,10 @@ async def main():
         budget.report_usage(mission_id, "openai", 0, 15000)
         
     except RuntimeError as e:
-        logger.critical(f"✅ EXERGY GATE ACTIVADA: {e}")
+        logger.critical("✅ EXERGY GATE ACTIVADA: %s", e)
         return
     except Exception as e:
-        logger.error(f"❌ Error inesperado: {type(e).__name__}: {e}")
+        logger.error("❌ Error inesperado: %s: %s", type(e).__name__, e)
         return
 
     logger.error("❌ FALLO: La Ω₃ Exergy Gate no se activó.")

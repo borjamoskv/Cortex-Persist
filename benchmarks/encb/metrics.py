@@ -134,7 +134,7 @@ def cncl(
     }
 
     result: dict[str, int | None] = {}
-    for node_id, profile in corrupt_nodes.items():
+    for node_id in corrupt_nodes:
         history = reliability_history.get(node_id, [])
         contained_at = None
         for t, rel in enumerate(history):
@@ -292,4 +292,3 @@ def calculate_entropy_delta(pre_state_probs: list[float], post_state_probs: list
     h_pre = shannon_h(pre_state_probs)
     h_post = shannon_h(post_state_probs)
     return h_post - h_pre
-

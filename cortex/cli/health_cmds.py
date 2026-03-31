@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import click
 
-from cortex.cli.common import DEFAULT_DB, console  # type: ignore[reportAttributeAccessIssue]
+from cortex.cli.common import DEFAULT_DB, cli, console  # type: ignore[reportAttributeAccessIssue]
 from cortex.cli.health_dashboard import dashboard
 
 
@@ -310,3 +310,6 @@ def verify():
     except Exception as e:
         console.print(f"[bold red]Error running invariants: {e}[/bold red]")
         sys.exit(1)
+
+
+cli.add_command(health_group)

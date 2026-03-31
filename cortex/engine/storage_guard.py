@@ -202,7 +202,7 @@ class StorageGuard:
         """
         # Source must be treated properly before passing to model since it defaults to None in arguments,
         # but the BaseModel requires it.
-        effective_source = source
+        effective_source = source or "unknown"
         try:
             StoreProposal(
                 project=project,

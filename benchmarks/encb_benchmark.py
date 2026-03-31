@@ -185,8 +185,8 @@ async def run_encb(
     resolvers.append(AppendOnlyResolver())
     
     gt_map = {}
-    for modality, gt in ground_truths.items():
-        for i, prop in enumerate(gt.signal_facts):
+    for _modality, gt in ground_truths.items():
+        for _i, prop in enumerate(gt.signal_facts):
             gt_map[prop[:50]] = prop
     resolvers.append(OracleResolver(gt_map))
 
