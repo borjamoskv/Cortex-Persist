@@ -352,9 +352,8 @@ class SovereignVectorStoreL2:
             if emb_list and isinstance(emb_list[0], float):
                 emb_list = optimize_vector_qjl(emb_list, bits=3.5)
             
-            # Ouroboros V3: Fix sqlite-vec int8 serialization bug
-            # Explicitly prepend VECTOR_TYPE_INT8 (0x01) and flags (0x00)
-            return b"\x01\x00" + np.array(emb_list, dtype=np.int8).tobytes(), ex
+            # Pass as float32 to C-level extension for strict vec_quantize_int8 parsing
+            return np.array(emb_list, dtype=np.float32).tobytes(), ex
 
         # Ouroboros V3: Offload CPU-heavy quantization and Python GIL Exergy text parsing
         embedding_bytes, exergy_val = await asyncio.to_thread(_offloaded_computations)
@@ -391,7 +390,7 @@ class SovereignVectorStoreL2:
 
                 if self._vector_enabled:
                     cursor.execute(
-                        f"INSERT INTO {vec_tb}(rowid, embedding) VALUES (?, ?)",  # nosec B608
+                        f"INSERT INTO {vec_tb}(rowid, embedding) VALUES (?, vec_quantize_int8(?, 'unit'))",  # nosec B608
                         (rowid, embedding_bytes),
                     )
                 conn.commit()
@@ -421,7 +420,7 @@ class SovereignVectorStoreL2:
         query_vector = await self._encoder.encode(query)
 
         def _sync_knn_search() -> list[CortexFactModel]:
-            # Ouroboros V3: Quantize query embedding off main thread
+            # Ouroboros V3: Keep query as float32; we will quantize in SQL
             rotated_query = encode_query_qjl(query_vector)
             embedding_bytes = np.array(rotated_query, dtype=np.float32).tobytes()
             now = time.time()
@@ -472,8 +471,8 @@ class SovereignVectorStoreL2:
                         m.is_diamond, m.is_bridge, m.confidence, m.success_rate,
                         m.cognitive_layer, m.parent_decision_id, m.metadata, m.exergy_score,
                         v.embedding,
-                        (1.0 - vec_distance_cosine(v.embedding, ?) / 2.0) as base_similarity,
-                        ((1.0 - vec_distance_cosine(v.embedding, ?) / 2.0) *
+                        (1.0 - vec_distance_cosine(v.embedding, vec_quantize_int8(?, 'unit')) / 2.0) as base_similarity,
+                        ((1.0 - vec_distance_cosine(v.embedding, vec_quantize_int8(?, 'unit')) / 2.0) *
                          cortex_decay(m.is_diamond, m.timestamp, ?, ?) *
                          m.success_rate *
                          m.exergy_score) as final_score

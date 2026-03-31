@@ -1,8 +1,8 @@
+import struct
 import time
 from unittest.mock import AsyncMock
 
 import pytest
-import sqlite_vec
 
 from cortex.memory.models import CortexFactModel
 from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
@@ -18,7 +18,7 @@ def mock_encoder():
     encoder = AsyncMock()
     encoder.dimension = 384
     encoder.encode.return_value = [1] * 384
-    encoder.quantize = lambda x: sqlite_vec.serialize_int8(x) if isinstance(x, list) else x
+    encoder.quantize = lambda x: struct.pack(f"<{len(x)}b", *x) if isinstance(x, list) else x
     return encoder
 
 
