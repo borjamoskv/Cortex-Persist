@@ -17,9 +17,14 @@ if TYPE_CHECKING:
     pass
 
 from cortex.config import DEFAULT_DB_PATH
+
+# Real imports for runtime managers (no longer just TYPE_CHECKING)
+from cortex.consensus.manager import ConsensusManager
 from cortex.database.schema import get_init_meta
 from cortex.embeddings import LocalEmbedder
+from cortex.embeddings.manager import EmbeddingManager
 from cortex.engine.durability import PersistenceSupervisor
+from cortex.engine.lock import SovereignLock
 from cortex.engine.memory_mixin import MemoryMixin
 from cortex.engine.mixins.base import FACT_COLUMNS, FACT_JOIN
 from cortex.engine.mixins.optimization import OptimizationMixin
@@ -30,13 +35,6 @@ from cortex.engine.store_mixin import StoreMixin
 from cortex.engine.transaction_mixin import TransactionMixin
 from cortex.ledger import EnrichmentQueue, LedgerStore, LedgerWriter
 from cortex.mac_maestro.executor import MaestroExecutor
-
-if TYPE_CHECKING:
-    from cortex.consensus.manager import ConsensusManager
-    from cortex.embeddings.manager import EmbeddingManager
-    from cortex.engine.auth import ByzantineAuthLayer
-    from cortex.engine.lock import SovereignLock
-    from cortex.facts.manager import FactManager
 
 try:
     from cortex.extensions.health.health_mixin import HealthMixin  # type: ignore
@@ -54,11 +52,6 @@ from cortex.migrations.core import run_migrations_async
 from cortex.telemetry.metrics import metrics
 
 logger = logging.getLogger("cortex.engine.guards")
-
-
-from cortex.consensus.manager import ConsensusManager  # noqa: E402
-from cortex.embeddings.manager import EmbeddingManager  # noqa: E402
-from cortex.engine.lock import SovereignLock  # noqa: E402
 
 # Limit the maximum number of tags per fact.
 MAX_TAGS_PER_FACT = 20
@@ -163,6 +156,10 @@ class CortexEngine(
             self._facts = FactManager(self)  # type: ignore
         return self._facts
 
+    @facts.setter
+    def facts(self, value: "FactManager") -> None:
+        self._facts = value
+
     @property
     def embeddings(self) -> EmbeddingManager:
         if self._embeddings is None:
@@ -170,6 +167,10 @@ class CortexEngine(
 
             self._embeddings = EmbeddingManager(self)
         return self._embeddings
+
+    @embeddings.setter
+    def embeddings(self, value: "EmbeddingManager") -> None:
+        self._embeddings = value
 
     @property
     def consensus(self) -> ConsensusManager:
@@ -179,6 +180,10 @@ class CortexEngine(
             self._consensus = ConsensusManager(self)
         return self._consensus
 
+    @consensus.setter
+    def consensus(self, value: "ConsensusManager") -> None:
+        self._consensus = value
+
     @property
     def lock_sovereign(self) -> SovereignLock:
         if self._lock_sovereign is None:
@@ -187,13 +192,21 @@ class CortexEngine(
             self._lock_sovereign = SovereignLock(self)
         return self._lock_sovereign
 
+    @lock_sovereign.setter
+    def lock_sovereign(self, value: "SovereignLock") -> None:
+        self._lock_sovereign = value
+
     @property
-    def auth(self) -> ByzantineAuthLayer:
+    def auth(self) -> "ByzantineAuthLayer":
         if self._auth is None:
             from cortex.engine.auth import ByzantineAuthLayer
 
             self._auth = ByzantineAuthLayer()
         return self._auth
+
+    @auth.setter
+    def auth(self, value: "ByzantineAuthLayer") -> None:
+        self._auth = value
 
     @property
     def ledger_store(self) -> LedgerStore:
@@ -203,6 +216,10 @@ class CortexEngine(
             self._ledger_store = LedgerStore(self._db_path)
         return self._ledger_store
 
+    @ledger_store.setter
+    def ledger_store(self, value: "LedgerStore") -> None:
+        self._ledger_store = value
+
     @property
     def enrichment_queue(self) -> EnrichmentQueue:
         if self._enrichment_queue is None:
@@ -210,6 +227,10 @@ class CortexEngine(
 
             self._enrichment_queue = EnrichmentQueue(self.ledger_store)
         return self._enrichment_queue
+
+    @enrichment_queue.setter
+    def enrichment_queue(self, value: "EnrichmentQueue") -> None:
+        self._enrichment_queue = value
 
     @property
     def ledger_writer(self) -> LedgerWriter:
@@ -219,6 +240,10 @@ class CortexEngine(
             self._ledger_writer = LedgerWriter(self.ledger_store, self.enrichment_queue)
         return self._ledger_writer
 
+    @ledger_writer.setter
+    def ledger_writer(self, value: "LedgerWriter") -> None:
+        self._ledger_writer = value
+
     @property
     def mac_maestro(self) -> MaestroExecutor:
         if self._mac_maestro is None:
@@ -226,6 +251,10 @@ class CortexEngine(
 
             self._mac_maestro = MaestroExecutor(self.ledger_writer)
         return self._mac_maestro
+
+    @mac_maestro.setter
+    def mac_maestro(self, value: "MaestroExecutor") -> None:
+        self._mac_maestro = value
 
     # ─── Guard Pipeline Registration ──────────────────────────────
 
@@ -679,7 +708,6 @@ class CortexEngine(
 
     async def init_db(self) -> None:
         """Initialize database schema. Safe to call multiple times."""
-        from cortex.database.schema import get_all_schema
         from cortex.ledger import ImmutableLedger
 
         async with self.session() as conn:
