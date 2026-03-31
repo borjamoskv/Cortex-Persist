@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
-import json
 import logging
 from typing import Any
 
 import aiosqlite
 
 from cortex.engine.mixins.base import FACT_COLUMNS, FACT_JOIN, EngineMixinBase
+from cortex.extensions.security.tenant import get_tenant_id
+from cortex.memory.temporal import time_travel_filter
 
 logger = logging.getLogger("cortex.engine.history")
 
@@ -18,16 +19,9 @@ class HistoryMixin(EngineMixinBase):
 
     async def time_travel(self, tx_id: int, project: str | None = None) -> list[dict[str, Any]]:
         """Reconstruct state as of transaction ID."""
-        from cortex.extensions.security.tenant import get_tenant_id
-        from cortex.memory.temporal import time_travel_filter
-
         current_tenant = get_tenant_id()
 
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
-            from cortex.crypto import get_default_encrypter
-
-            enc = get_default_encrypter()
-
             conn.row_factory = aiosqlite.Row
             clause, params = time_travel_filter(tx_id, table_alias="f")
 
@@ -40,23 +34,14 @@ class HistoryMixin(EngineMixinBase):
                 query += " AND f.project = ?"
                 params.append(project)
             query += " ORDER BY f.id ASC"
+
             async with conn.execute(query, params) as cursor:
                 rows = await cursor.fetchall()
                 results = []
                 for row in rows:
-                    d = dict(row)
-                    d["content"] = (
-                        enc.decrypt_str(d["content"], tenant_id=current_tenant)
-                        if d.get("content")
-                        else ""
-                    )
-                    d["tags"] = json.loads(d["tags"]) if d.get("tags") else []
-                    d["meta"] = (
-                        enc.decrypt_json(d["meta"], tenant_id=current_tenant)
-                        if d.get("meta")
-                        else {}
-                    )
-                    results.append(d)
+                    # Leverage base method for secure decryption and normalization
+                    fact_data = self._row_to_fact(row, current_tenant)
+                    results.append(fact_data)
                 return results
 
     async def reconstruct_state(

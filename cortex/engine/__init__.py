@@ -546,7 +546,7 @@ class CortexEngine(
     async def init_db(self) -> None:
         """Initialize database schema. Safe to call multiple times."""
         from cortex.database.schema import get_all_schema
-        from cortex.engine.ledger import ImmutableLedger
+        from cortex.ledger import ImmutableLedger
 
         async with self.session() as conn:
             for stmt in get_all_schema():
