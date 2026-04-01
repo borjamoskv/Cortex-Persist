@@ -383,6 +383,7 @@ class CortexEngine(
     def _get_embedder(self) -> LocalEmbedder:
         """Protocol requirement for SearchMixin."""
         if self._embedder is None:
+            from cortex.embeddings import LocalEmbedder
             self._embedder = LocalEmbedder()
         return self._embedder
 
