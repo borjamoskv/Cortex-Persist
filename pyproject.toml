@@ -120,7 +120,7 @@ line-length = 100
 exclude = ["experimental", "notebooks"]
 
 [tool.ruff.lint]
-select = ["E", "F", "W", "I", "UP", "B", "G"]
+select = ["E", "F", "W", "I", "UP", "B", "G", "TID"]
 ignore = ["E501", "E402", "B008", "W291", "W293", "S", "BLE001", "UP045"]
 
 [tool.ruff.lint.per-file-ignores]
@@ -131,6 +131,11 @@ ignore = ["E501", "E402", "B008", "W291", "W293", "S", "BLE001", "UP045"]
 "cortex/**/__init__.py" = ["F401"]
 "cortex/cli/__init__.py" = ["F401", "E402"]
 "cortex/daemon/core.py" = ["E701", "E702", "I001"]
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"time.sleep" = { msg = "CORTEX Anti-Pattern: Usa asyncio.sleep() en este repositorio para no bloquear el event loop." }
+"builtins.print" = { msg = "CORTEX Anti-Pattern: Usa standard logging o Rich para emitir trails de auditoría." }
+"datetime.datetime.now" = { msg = "CORTEX Anti-Pattern: Usa datetime aware del timezone (ej. datetime.now(timezone.utc)) para la firma de Taints." }
 
 [tool.pyright]
 pythonVersion = "3.10"

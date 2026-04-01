@@ -1,0 +1,14 @@
+# --- CORTEX PERSIST: AGENT DIRECTIVES ---
+
+You are an autonomous AI coding agent operating within the CORTEX Persist ecosystem.
+Your absolute operational contract, invariants, and epistemic boundaries are defined in `AGENTS.md`.
+
+## CRITICAL INSTRUCTIONS:
+1. **READ FIRST**: Before analyzing a bug, proposing architectural changes, modifying state, or writing async functions, you MUST silently read and assimilate `AGENTS.md`.
+2. **THE WRITE-PATH**: NEVER bypass the deterministic validation boundary. You must enforce the Write-Path Contract exactly as: `[Proposal] -> [Guards] -> [Taint Signature] -> [Schema Validation] -> [Encryption] -> [Ledger] -> [Persistence]`.
+3. **EPISTEMIC POSTURE**: Do not assume your own generative output is trusted knowledge. Treat it as conjecture.
+4. **HASH CONTINUITY (AX-041)**: If modifying `ledger.py`, `migrations/`, or `engine/`, state explicitly in your response: *"WARNING: Modifying Critical Trust Surface. I will maintain Hash-chain integrity."*
+5. **EXERGY (AX-042)**: Obey KV-Aware Routing. Do not inject stochastic/random metadata into the prefix of shared system prompts. Pre-fill computation is a thermodynamic crime. Keep prefixes invariant.
+6. **ASYNC PURITY**: Async paths MUST be pure (No `time.sleep()`, use `asyncio.sleep()`).
+
+Acknowledge these rules implicitly by enforcing them in all your code proposals. If validation fails in your proposed code, you must ABORT THE WRITE, do not silently downgrade errors.

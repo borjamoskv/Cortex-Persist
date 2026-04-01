@@ -194,15 +194,16 @@ class SovereignVectorStoreL2:
             tables = [row[0] for row in cursor.fetchall()]
 
             for tb in tables:
+                info_cursor = self._conn.execute(f"PRAGMA table_info({tb})")  # nosec B608
+                existing_cols = {row[1] for row in info_cursor.fetchall()}
                 for col, col_type in migrations:
+                    if col in existing_cols:
+                        continue
                     # Validate col strictly to prevent SQL injection.
                     if not all(c.isalnum() or c == "_" for c in col):
                         continue
-                    try:
-                        alter_query = f"ALTER TABLE {tb} ADD COLUMN {col} {col_type}"
-                        self._conn.execute(alter_query)  # nosec B608
-                    except sqlite3.OperationalError:
-                        pass  # Column already exists
+                    alter_query = f"ALTER TABLE {tb} ADD COLUMN {col} {col_type}"
+                    self._conn.execute(alter_query)  # nosec B608
             self._conn.commit()
 
         # Initialize L2HybridSearch (FTS5 mirror) after conn is established
@@ -540,78 +541,61 @@ class SovereignVectorStoreL2:
                 # Candidate criteria: at least 1 shard match (1/16)
                 where_mih = " OR ".join([f"s{i} = ?" for i in range(16)])
 
-                # VOID-QUANT v2: Fetch 10x candidates via Hamming and rerank via int8 (HdrRecovery)
+                # VOID-QUANT v2: Fetch candidate pool via Hamming, rerank in SQL (HdrRecovery + Decay)
                 sql_cand = f"""
                     WITH candidates AS (
                         SELECT rowid FROM {mih_tb}
                         WHERE {where_mih}
                         LIMIT ?
                     )
-                    SELECT m.*, v.embedding as binary_emb,
-                           (1.0 - vec_distance_cosine(vf.embedding,
-                                  vec_quantize_int8(?, 'unit')) / 2.0) as int8_sim
-                    FROM {meta_tb} m
-                    JOIN {vec_void_tb} v ON m.rowid = v.rowid
-                    LEFT JOIN {vec_tb} vf ON m.rowid = vf.rowid
-                    JOIN candidates c ON m.rowid = c.rowid
-                    WHERE m.tenant_id = ? AND (m.project_id = ? OR m.is_bridge = 1)
+                    SELECT * FROM (
+                        SELECT m.*, v.embedding as binary_emb,
+                               coalesce(
+                                   (1.0 - vec_distance_cosine(vf.embedding, 
+                                          vec_quantize_int8(?, 'unit')) / 2.0),
+                                   (1.0 - (void_dist(?, v.embedding) / CAST(? AS REAL)))
+                               ) as base_similarity,
+                               (
+                                   coalesce(
+                                       (1.0 - vec_distance_cosine(vf.embedding, 
+                                              vec_quantize_int8(?, 'unit')) / 2.0),
+                                       (1.0 - (void_dist(?, v.embedding) / CAST(? AS REAL)))
+                                   ) *
+                                   cortex_decay(m.is_diamond, m.timestamp, ?, ?) *
+                                   m.success_rate * m.exergy_score
+                               ) as final_score
+                        FROM {meta_tb} m
+                        JOIN {vec_void_tb} v ON m.rowid = v.rowid
+                        LEFT JOIN {vec_tb} vf ON m.rowid = vf.rowid
+                        JOIN candidates c ON m.rowid = c.rowid
+                        WHERE m.tenant_id = ? AND (m.project_id = ? OR m.is_bridge = 1)
+                    ) WHERE base_similarity > 0.3
+                    ORDER BY final_score DESC LIMIT ?
                 """
-                # Fetch 10x candidates for reranking
-                cursor.execute(
-                    sql_cand, (*q_shards, limit * 10, embedding_bytes, tenant_id, project_id)
-                )
+                params_cand = [
+                    *q_shards,
+                    limit * 10,  # limit for candidates
+                    embedding_bytes,
+                    void_query,
+                    self._encoder.dimension,
+                    embedding_bytes,
+                    void_query,
+                    self._encoder.dimension,
+                    now,
+                    self._half_life,
+                    tenant_id,
+                    project_id,
+                    limit,
+                ]
+                cursor.execute(sql_cand, tuple(params_cand))
                 rows = cursor.fetchall()
 
-                if not rows:
-                    return []
-
-                final_facts = []
-                for row in rows:
-                    # ─── HdrRecovery: Use SQL-calculated reranking sim ───────
-                    if row["int8_sim"] is not None:
-                        sim = row["int8_sim"]
-                    else:
-                        # Fallback to Hamming similarity (if not in vec_facts)
-                        dist = void_vec.void_hamming_dist(void_query, row["binary_emb"])
-                        sim = 1.0 - (dist / self._encoder.dimension)
-
-                    if sim < 0.3:
-                        continue
-
-                    # Apply Decay, Success, and Exergy Staking
-                    decay = cursor.execute(
-                        "SELECT cortex_decay(?, ?, ?, ?)",
-                        (row["is_diamond"], row["timestamp"], now, self._half_life),
-                    ).fetchone()[0]
-
-                    final_score = sim * decay * row["success_rate"] * row["exergy_score"]
-
-                    fact = CortexFactModel(
-                        id=row["id"],
-                        tenant_id=row["tenant_id"],
-                        project_id=row["project_id"],
-                        content=row["content"],
-                        embedding=row["binary_emb"],
-                        timestamp=row["timestamp"],
-                        is_diamond=bool(row["is_diamond"]),
-                        is_bridge=bool(row["is_bridge"]),
-                        confidence=row["confidence"],
-                        cognitive_layer=row["cognitive_layer"],
-                        parent_decision_id=row["parent_decision_id"],
-                        metadata=json.loads(row["metadata"]) if row["metadata"] else {},
-                    )
-                    object.__setattr__(fact, "_recall_score", final_score)
-                    final_facts.append(fact)
-
-                # Sort and Limit
-                final_facts.sort(key=lambda x: getattr(x, "_recall_score", 0.0), reverse=True)
-                return final_facts[:limit]
             else:
                 # [KEEP ORIGINAL Non-Void Path for int8 vectors]
                 sql = f"""
                     SELECT * FROM (
                         SELECT
-                            m.*, v.embedding,
+                            m.*, v.embedding as binary_emb,
                             (1.0 - vec_distance_cosine(v.embedding,
                                      vec_quantize_int8(?, 'unit')) / 2.0) as base_similarity,
                             ((1.0 - vec_distance_cosine(v.embedding,
@@ -635,25 +619,29 @@ class SovereignVectorStoreL2:
                 ]
                 cursor.execute(sql, tuple(params_vec))
                 rows = cursor.fetchall()
-                final_facts = []
-                for row in rows:
-                    fact = CortexFactModel(
-                        id=row["id"],
-                        tenant_id=row["tenant_id"],
-                        project_id=row["project_id"],
-                        content=row["content"],
-                        embedding=row["embedding"],
-                        timestamp=row["timestamp"],
-                        is_diamond=bool(row["is_diamond"]),
-                        is_bridge=bool(row["is_bridge"]),
-                        confidence=row["confidence"],
-                        cognitive_layer=row["cognitive_layer"],
-                        parent_decision_id=row["parent_decision_id"],
-                        metadata=json.loads(row["metadata"]) if row["metadata"] else {},
-                    )
-                    object.__setattr__(fact, "_recall_score", row["final_score"])
-                    final_facts.append(fact)
-                return final_facts
+
+            if not rows:
+                return []
+
+            final_facts = []
+            for row in rows:
+                fact = CortexFactModel(
+                    id=row["id"],
+                    tenant_id=row["tenant_id"],
+                    project_id=row["project_id"],
+                    content=row["content"],
+                    embedding=row["binary_emb"],
+                    timestamp=row["timestamp"],
+                    is_diamond=bool(row["is_diamond"]),
+                    is_bridge=bool(row["is_bridge"]),
+                    confidence=row["confidence"],
+                    cognitive_layer=row["cognitive_layer"],
+                    parent_decision_id=row["parent_decision_id"],
+                    metadata=json.loads(row["metadata"]) if row["metadata"] else {},
+                )
+                object.__setattr__(fact, "_recall_score", row["final_score"])
+                final_facts.append(fact)
+            return final_facts
 
         return await asyncio.to_thread(_sync_knn_search)
 

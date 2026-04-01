@@ -7,6 +7,7 @@ Enables massive parallel scaling with deterministic O(1) properties.
 from __future__ import annotations
 
 import asyncio
+import collections
 import logging
 import time
 from contextlib import asynccontextmanager
@@ -110,31 +111,23 @@ class LegionSupervisor:
         self.bus = bus
         self.tenant_id = tenant_id
         self.centurions: dict[str, CenturionSuperv] = {}
+        self._available_centurions: collections.deque[CenturionSuperv] = collections.deque()
+        self._thermal_event = asyncio.Event()
+        self._thermal_event.set()
         self.metrics = NodeMetrics(exergy=1.0, uncertainty=0.0, active_children=0)
         self._overclocked = False
 
     async def ensure_centurion(self) -> CenturionSuperv:
-        """Find an available Centurion or spawn a new one."""
-        # Selection: Pick the one with highest exergy (least agents)
-        best_cen = None
-        best_exergy = -1.0
-
-        for c in self.centurions.values():
-            # Fast-Path: Read metrics directly from bit-parallel SHM header (v8.5)
-            metrics = c.bus.metrics
-            exergy = metrics["exergy"]
-            if exergy > best_exergy and len(c.agents) < c.CAPACITY:
-                best_exergy = exergy
-                best_cen = c
-
-        if best_cen:
-            return best_cen
+        """Find an available Centurion or spawn a new one in O(1)."""
+        if self._available_centurions:
+            return self._available_centurions[0]
 
         new_id = f"{self.id}-c{len(self.centurions)}"
         # Naming Compaction (Ω₆): Hash name to stay under 31-character POSIX limit
         shm_name = f"ctx_{hash(new_id) % 10**8}"
         new_cen = CenturionSuperv(new_id, shm_name, self.tenant_id)
         self.centurions[new_id] = new_cen
+        self._available_centurions.append(new_cen)
         self.metrics.active_children = len(self.centurions)
 
         start = time.perf_counter()
@@ -152,28 +145,39 @@ class LegionSupervisor:
         return new_cen
 
     async def wait_for_thermal_stability(self, check_interval: float = 0.01) -> None:
-        """Closed-Loop Kinetic Control: Block until exergy recovers above 0.7."""
-        start_time = time.perf_counter()
-        while True:
-            exergy = 1.0
-            for c in self.centurions.values():
-                exergy = min(exergy, await c.get_exergy())
+        """Closed-Loop Kinetic Control: Event-based (No polling) to recover exergy."""
+        if self._overclocked:
+            return
 
-            if self._overclocked or ExergyOptimizer.is_thermally_stable(exergy):
-                break
+        if not self.centurions:
+            return
 
-            if time.perf_counter() - start_time > 5.0:
-                logger.warning("Thermal timeout (5s) exceeded. Forcing dispatch.")
-                break
+        # Calcular si la legión base tiene capacidad exergética promedio
+        exergies = [c.metrics.exergy for c in self.centurions.values()]
+        exergy = sum(exergies) / len(exergies)
 
-            # Shard is too hot. Wait for kinetic dissipation.
-            await asyncio.sleep(check_interval)
+        if ExergyOptimizer.is_thermally_stable(exergy):
+            self._thermal_event.set()
+            return
+
+        # Bloquear Event Loop en lugar del antiguo while True: active polling (Azkartu O(1) Wait)
+        self._thermal_event.clear()
+        try:
+            await asyncio.wait_for(self._thermal_event.wait(), timeout=5.0)
+        except asyncio.TimeoutError:
+            logger.warning("Thermal timeout (5s) exceeded. Forcing dispatch.")
+            self._thermal_event.set()
 
     async def dispatch(self, task: dict) -> None:
         """Dispatch a task down the hierarchy."""
         cen = await self.ensure_centurion()
         agent_id = f"ag-{cen.id}-{len(cen.agents)}"
         await cen.deploy_agent(agent_id)
+        
+        # Azkartu Optimization: Retire full centurion in O(1)
+        if len(cen.agents) >= cen.CAPACITY:
+            if self._available_centurions and self._available_centurions[0] == cen:
+                self._available_centurions.popleft()
 
         await self.bus.emit(
             event_type="task:dispatch",

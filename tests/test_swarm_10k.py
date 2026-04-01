@@ -30,7 +30,8 @@ async def test_swarm_commander_hierarchy(tmp_path: Path):
 
     # Send 500 tasks to domain 'finance'
     tasks = [{"domain": "finance", "id": i} for i in range(500)]
-    await commander.execute_global_dispatch(tasks)
+    async with commander.strike_mode("finance"):
+        await commander.execute_global_dispatch(tasks)
 
     report = await commander.get_density_report()
     assert report["legions"] == 1

@@ -32,18 +32,22 @@ class CascadeManager:
         self.positive_ttl = positive_ttl
         # provider_name -> timestamp of failure
         self._nxdomain_cache: dict[str, float] = {}
+        # provider_name -> consecutive failures (thermodynamic decay)
+        self._nxdomain_failures: dict[str, int] = {}
         # provider_name -> (timestamp, latency)
         self._a_records: dict[str, tuple[float, float]] = {}
         # prefix_hash -> {provider_name: timestamp}
         self._kv_affinity: dict[str, dict[str, float]] = {}
 
     def set_nx_record(self, provider_name: str) -> None:
-        """Cache a provider failure (NXDOMAIN)."""
+        """Cache a provider failure (NXDOMAIN) with thermodynamic decay."""
         self._nxdomain_cache[provider_name] = time.time()
+        self._nxdomain_failures[provider_name] = self._nxdomain_failures.get(provider_name, 0) + 1
 
     def set_a_record(self, provider_name: str, latency_ms: float) -> None:
-        """Cache a provider success (A-record)."""
+        """Cache a provider success (A-record) and reset decay."""
         self._a_records[provider_name] = (time.time(), latency_ms)
+        self._nxdomain_failures.pop(provider_name, None)
 
     def set_kv_affinity(self, provider_name: str, prefix_hash: str) -> None:
         """Mark that a provider has cached a specific context prefix."""
@@ -61,8 +65,12 @@ class CascadeManager:
     def is_nxdomain_cached(self, provider_name: str) -> bool:
         """True if provider is currently circuit-broken."""
         nx_at = self._nxdomain_cache.get(provider_name)
-        if nx_at and (time.time() - nx_at) < self.negative_ttl:
-            return True
+        if nx_at:
+            failures = self._nxdomain_failures.get(provider_name, 1)
+            # Thermodynamic decay: exponential backoff based on consecutive failures
+            effective_ttl = self.negative_ttl * (2 ** (failures - 1))
+            if (time.time() - nx_at) < effective_ttl:
+                return True
         return False
 
     def promote_known_good(

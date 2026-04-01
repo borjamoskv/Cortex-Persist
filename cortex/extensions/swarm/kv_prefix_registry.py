@@ -9,7 +9,14 @@ from __future__ import annotations
 import hashlib
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from functools import lru_cache
 from typing import Any
+
+
+@lru_cache(maxsize=1024)
+def hash_prompt(system_prompt: str) -> str:
+    """O(1) SHA-256 para prompts recurrentes (Azkartu Optimization)."""
+    return hashlib.sha256(system_prompt.encode()).hexdigest()
 
 
 @dataclass
@@ -41,6 +48,7 @@ class KVPrefixRegistry:
 
     def __init__(self) -> None:
         self._slots: dict[str, PrefixSlot] = {}  # cache_key → slot
+        self._prefix_providers: dict[str, set[str]] = {}  # prefix_hash → set of provider_names
         self._savings_tokens: int = 0
 
     def register(
@@ -52,7 +60,7 @@ class KVPrefixRegistry:
         model_name: str,
     ) -> PrefixSlot:
         """Registra un nuevo prefix slot para una misión."""
-        prefix_hash = hashlib.sha256(system_prompt.encode()).hexdigest()
+        prefix_hash = hash_prompt(system_prompt)
         slot = PrefixSlot(
             mission_id=mission_id,
             tenant_id=tenant_id,
@@ -62,11 +70,17 @@ class KVPrefixRegistry:
             model_name=model_name,
         )
         self._slots[slot.cache_key] = slot
+        
+        # O(1) lookup index
+        if prefix_hash not in self._prefix_providers:
+            self._prefix_providers[prefix_hash] = set()
+        self._prefix_providers[prefix_hash].add(provider_name)
+        
         return slot
 
     def get_slot(self, mission_id: str, tenant_id: str, system_prompt: str) -> PrefixSlot | None:
         """Recupera slot existente (cache hit) o None (cache miss)."""
-        prefix_hash = hashlib.sha256(system_prompt.encode()).hexdigest()
+        prefix_hash = hash_prompt(system_prompt)
         key = hashlib.sha256(
             f"{tenant_id}:{mission_id}:{prefix_hash}".encode()
         ).hexdigest()
@@ -77,13 +91,11 @@ class KVPrefixRegistry:
         return slot
 
     def check_cache_affinity(self, system_prompt: str) -> list[str]:
-        """Returns provider names that have an active cache for this exact prompt hash."""
-        prefix_hash = hashlib.sha256(system_prompt.encode()).hexdigest()
-        providers = set()
-        for slot in self._slots.values():
-            if slot.prefix_hash == prefix_hash:
-                providers.add(slot.provider_name)
-        return list(providers)
+        """Returns provider names that have an active cache for this exact prompt hash.
+        O(1) Check using dict comprehension.
+        """
+        prefix_hash = hash_prompt(system_prompt)
+        return list(self._prefix_providers.get(prefix_hash, set()))
 
     def exergy_report(self) -> dict[str, Any]:
         """Informe de exergía recuperada (AX-042)."""

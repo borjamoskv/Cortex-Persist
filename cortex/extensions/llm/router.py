@@ -253,9 +253,13 @@ class CortexLLMRouter:
         )
 
         # Thermal Heat-Sink: coalesce identical concurrent requests (Ω₂)
-        prompt_key = hashlib.sha256(
-            f"{prompt.system_instruction}:{prompt.working_memory}:{prompt.intent}".encode()
-        ).hexdigest()
+        # Fast tuple hashing instead of slow f"{dict}" serialization
+        wm_hash = hash(tuple((m.get("role"), m.get("content")) for m in prompt.working_memory))
+        prompt_key = str(hash((
+            hash(prompt.system_instruction) if prompt.system_instruction else 0,
+            wm_hash,
+            prompt.intent
+        )))
 
         if prompt_key in self._inflight:
             logger.debug(
