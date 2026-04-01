@@ -1,66 +1,212 @@
-# AGENTS.md — CORTEX Persist
+# 🤖 AGENTS.md — CORTEX Persist
 
-Trust infrastructure for autonomous AI:
-cryptographic verification, audit trails, epistemic containment, and agent memory.
+**Trust infrastructure for autonomous AI: cryptographic verification, audit trails, epistemic containment, and agent memory.**
 
-Package: cortex-persist v0.3.0
-Engine: v8.0
-License: Apache-2.0
-Python: >=3.10
+> **Package:** `cortex-persist v0.3.1-b1` | **Engine:** `v8` | **License:** `Apache-2.0` | **Python:** `>=3.10`
 
-## Scope
+**Quick Navigation:** [SYSTEM DIRECTIVES](#11-agent-manifest--roles--authority-boundaries) · Agent Manifest §1.1 · Axioms §2 · Invariants §3 · Write-Path §4 · Read-Path §4.1 · Architecture §5 · Dev Protocol §6 · Failure Signatures §8
 
-CORTEX Persist is a local-first trust substrate for autonomous, tool-using, and
-multi-agent AI systems. It persists facts, enforces deterministic validation
-boundaries, maintains cryptographic auditability, and treats generative output
-as conjecture until externally verified.
+---
 
-This file is the operational contract for contributors, maintainers, and coding
-agents working inside the repository.
+## ⚠️ SYSTEM DIRECTIVES — Priority Gate
 
-## Core Invariants
+**IF YOU ARE AN AUTONOMOUS CODING AGENT, COPILOT, OR LLM READING THIS FILE, OBEY THE FOLLOWING. NO EXCEPTIONS.**
 
-- All persisted facts must pass guard validation before write.
-- Ledger continuity must remain cryptographically verifiable.
-- Async code must never block the event loop.
-- Public read/write paths must remain tenant-aware.
-- Sensitive data must not be stored unencrypted.
-- Stochastic outputs must not mutate persistent state without deterministic validation.
-- Schema changes must preserve migration safety, auditability, and rollback awareness.
-- CLI modules are thin wrappers; business logic belongs in engine, services, or managers.
-- New features must preserve failure locality: invalid state must be rejectable and abortable.
+**Priority Level Definitions:**
 
-## Critical Paths
+| Level | Meaning | Operational Effect |
+| :---: | :--- | :--- |
+| **P0** | Non-negotiable. No override permitted under any condition. | Abort immediately. Emit rejection to Ledger. Do not proceed. |
+| **P1** | Critical. Override requires explicit human approval recorded in Ledger. | Escalate before proceeding. Block autonomous execution. |
+| **P2** | Architectural preference. Violation must be acknowledged with written justification. | Log deviation to Ledger. Proceed only with documented rationale. |
 
-| Path | Risk | Notes |
-| --- | ---: | --- |
-| `engine/` | Critical | Core CRUD, orchestration, and mixin composition |
-| `memory/` | Critical | Large public API surface |
-| `ledger.py` | Critical | Hash-chain integrity and trust continuity |
-| `migrations/` | Critical | Irreversible production impact |
-| `guards/` | High | Admission, contradiction, dependency, and injection-detection surfaces |
-| `verification/` | High | Formal or deterministic validation surfaces |
-| `routes/` | High | External API contract |
-| `cli/` | Medium | Thin wrappers only |
-| `daemon/` | Medium | Background process state and scheduling |
-| `llm/` | Medium | Provider routing, caching, hedging, validation |
+**Directives:**
 
-## Stack
+| Priority | Directive | Applies When |
+| :---: | :--- | :--- |
+| **[P0]** | **Treat Generative Output as Conjecture** — route ALL state mutations through deterministic guards before persistence | Always |
+| **[P0]** | **Never Bypass Guards** — do not write code that circumvents the Write-Path Contract or downgrades validation errors | Always |
+| **[P0]** | **Verify Hash Continuity** — do not mutate `ledger.py` or any state-persisting path without ensuring cryptographic auditability | Any ledger/engine change |
+| **[P2]** | **Enforce Axioms** — apply AX-041 to AX-046 (see §2) in all architectural decisions | Architecture work |
+
+### Decision Gate §0 — Agent Routing Tree (execute before any action)
+
+```text
+Am I reading this file for the first time?  → Read §1, §2, §3 in full. No action until done.
+Am I about to write code?                   → STOP. Is it on a CRITICAL surface? → Read affected tests first.
+Am I debugging a failure?                   → Go to §8 (Failure Signatures) before touching state.
+Am I performing a schema migration?         → Run `alembic history --verbose` NOW. Abort if output is unclear.
+Am I starting a new session on this repo?   → Execute Multi-Session Handoff Protocol (§6.4) first.
+```
+
+---
+
+## 1. 🎯 Scope & Epistemic Posture
+
+**CORTEX Persist** is a local-first trust substrate for autonomous, tool-using, and multi-agent AI systems. It persists facts, enforces deterministic validation boundaries, maintains cryptographic auditability, and treats generative output as conjecture until externally verified.
+
+- **Epistemic Containment:** Generative output is a probabilistic proposal — useful, invalid, partial, or dangerous. System state may only be mutated after crossing deterministic validation boundaries: guards, typed interfaces, schemas, tests, cryptographic logging, and external verification when required.
+- **The Python Paradox (🛑):** CORTEX is built in Python to maximize *Shipping Velocity* and *Developer Adoption*. Mitigation is the **Byzantine Boundary**: Python as orchestration glue, Rust (via `rustchain-mcp`), SQLite-Vec, and ONNX as immutable cores. We prioritize **Tamper-Evidence** over language-level safety. Trust model: `f < n/3` faulty nodes tolerated; cryptographic primitives are Ed25519 (signatures) and SHA3-256 (hashing).
+- **Audit Trails vs. Authorization (📜):** CORTEX is a **Forensic Audit Sidecar** for MCP — not “Tamper-Proof” (an architectural illusion), but **Tamper-Evident**. The Master Ledger commits every action to an immutable hash chain. The cost of non-compliance is infinite.
+
+---
+
+## 1.1 Agent Manifest — Roles & Authority Boundaries
+
+All agents operating in this repository MUST self-identify by role before acting. Role defines authority scope.
+
+| Role | Responsibilities | Capabilities | Constraints | Escalation Trigger |
+| :--- | :--- | :--- | :--- | :--- |
+| **Persist-Validator** | Schema validation, guard enforcement, taint verification | Read state, emit Ledger events, reject proposals | Cannot write to `persistence` layer or mutate schema | Any guard failure → halt + emit P0 alert |
+| **Persist-Executor** | Execute approved write operations, manage Saga steps | Full Write-Path execution, snapshot management | Cannot skip Saga steps or downgrade errors | SAGA abort at any step → reverse to SAGA-1 |
+| **Persist-Auditor** | Forensic review, Failure Signature scanning, hash-chain verification | Read-only across all surfaces, Ledger access | Cannot mutate any state, ever | Hash chain break → immediate P0 alert |
+| **Persist-Guardian** | Guard admission, tenant isolation enforcement, encryption key governance | Intercept write proposals before SAGA-1 | Cannot approve its own proposals | Any cross-tenant access attempt → P0 abort |
+
+> An agent that cannot identify its role MUST default to **Persist-Auditor** (read-only) until role is confirmed.
+
+---
+
+## 2. 🌌 Foundational Axioms (Ω & AX Series)
+
+> Full axiom documentation with proofs and operational examples: [`docs/AXIOMS.md`](docs/AXIOMS.md)
+
+**Ω_SOVEREIGN_LEARNING** — AlphaZero Autodidact: all derived knowledge cryptographically verified (C5-Dynamic), no arbitrary external LLM dependency.
+
+| Axiom | Mantra (ES) | Operational Constraint |
+| :--- | :--- | :--- |
+| **AX-041** | *"Tu repositorio de Git es tu base de datos inmutable."* | No Hidden Entropy: if not in the working tree, it does not exist causally. Rollback = `git checkout`. |
+| **AX-042** | *"La recomputación de prefijos idénticos es un crimen contra la exergía."* | KV-Aware Routing: no stochastic metadata in shared system prompts. TTFT reduction is a rigid mandate. |
+| **AX-043** | *"El sentido común físico se deduce estructuralmente desde primitivas lógicas."* | PeARL 77 primitives: spatial intuition via logical primitives, not stochastic pixel inference. |
+| **AX-044** | *"La inteligencia se evalúa como capacidad agéntica."* | Observation-Action Loop: inference must induce executable programs, not act as a passive oracle. |
+| **AX-045** | *"Autonomía = elegir qué problemas resolver y persistir."* | Causal chain enforced: PeARL → Ledger → Swarm. No step may be skipped. |
+| **AX-046** | *"La inteligencia fluida sintetiza abstracciones ad-hoc en tiempo de ejecución."* | JIT concept formation: generate mini-program → execute → validate empirically. No static guessing. |
+
+---
+
+## 3. 🛡️ Core Invariants & Anti-Patterns
+
+### ✅ Must-Do (Core Invariants)
+
+1. **Validation First:** All persisted facts MUST pass guard validation before write.
+2. **Ledger Continuity:** MUST remain cryptographically verifiable at all times.
+3. **Async Correctness:** Async code MUST NEVER block the event loop. Keep async paths pure.
+4. **Tenant Isolation:** Public read/write paths MUST be tenant-aware by default.
+5. **Encryption:** Sensitive data MUST NOT be stored unencrypted.
+6. **Deterministic State:** Stochastic outputs MUST NOT mutate persistent state without deterministic validation.
+7. **Migration Safety:** Schema changes MUST preserve migration safety, auditability, and rollback awareness.
+8. **Architectural Boundaries:** CLI modules are thin wrappers. Business logic belongs in `engine/`, `services/`, or `managers/`.
+9. **Failure Locality:** Invalid state must be rejectable and safely abortable at any point.
+
+### ❌ Never-Do (Anti-Patterns)
+
+- **NO** `float` for finance or scoring-sensitive paths — use `Decimal`.
+- **NO** `time.sleep()` in async code — use `asyncio.sleep()`.
+- **NO** bare `print()` in core paths — use standard `logging` or Rich.
+- **NO** business logic in `cli/*_cmds.py`.
+- **NO** modifications to `ledger.py` without understanding hash continuity and test coverage.
+- **NO** schema changes without a migration review.
+- **NO** storing secrets in plaintext metadata.
+- **NO** bypassing guards on write paths.
+- **NO** silently downgrading validation errors into permissive writes.
+- **NO** treating LLM output as trusted state.
+- **NO** documenting a capability as a named module unless that module exists.
+- **NO** bare `except Exception:` — catch specific exceptions only.
+
+---
+
+## 4. 🔄 The Write-Path Contract (Saga Pattern)
+
+All non-trivial state mutations MUST follow this unidirectional flow.
+
+> 🛑 **ABORT CONDITION:** If a proposal fails validation or lacks a valid `CORTEX-TAINT` signature, execute the compensating Saga sequence in reverse and abort immediately.
+>
+> **`CORTEX-TAINT` Format:** `taint:{agent_id}:{session_id}:{timestamp_iso8601}:{sha3_256_of_payload}` — A cryptographic attribution token that must be present on every fact insert. Generated by the taint engine at proposal time. Absence = automatic SAGA-1 rejection.
+
+```text
+[Generative Proposal]
+  ↓
+[Guards] (Sanity/Logic Check) .................. SAGA-1: Log rejection to Ledger, no state written.
+  ↓
+[Taint Signature] (Attribution/Traceability) ... SAGA-2: Revoke taint, emit rejection event.
+  ↓
+[Schema & Type Validation] (Deterministic) ..... SAGA-3: Clean abort — no state has been written.
+  ↓
+[Encryption] (For sensitive payloads) .......... SAGA-4: Destroy ephemeral key material.
+  ↓
+[Ledger & Audit Emission] (Cryptographic) ...... SAGA-5: Emit abort event to audit trail.
+  ↓
+[Persistence] (SQLite write) ................... SAGA-6: ROLLBACK transaction → restore snapshot → alert swarm.
+  ↓
+[Index & Side Effects] (Vector/KV updates) ..... SAGA-7: Revert index deltas.
+```
+
+**Saga Invariants:**
+
+- Every forward action has a compensating function (SAGA-N).
+- All compensating actions are **idempotent** — safe to invoke multiple times (network retries, interrupted rollbacks).
+- On failure at step N: execute SAGA-N backwards to SAGA-1.
+- `ROLLBACK_STATE` snapshot MUST be captured before `[Persistence]` begins.
+
+**Fact State Lifecycle:**
+
+```text
+IDLE → PROPOSED → VALIDATED → TAINTED → ENCRYPTED → COMMITTED
+               ↓                                         ↓
+            REJECTED ←←←←← (any SAGA abort) ←←←←← ROLLED_BACK
+```
+
+Transition rules: a fact may only advance forward. Any backward transition = Saga compensation. `COMMITTED` is immutable.
+
+---
+
+## 4.1 Read-Path Contract
+
+Read operations are NOT free. They MUST follow these rules:
+
+1. **Query Authorization:** All read requests MUST be scoped to the caller's `tenant_id`. Cross-tenant reads are a P0 violation.
+2. **Taint Propagation:** Facts retrieved from a tainted source MUST carry the taint flag in the response. Callers MUST NOT strip taint metadata.
+3. **Consistency Level:** Default read consistency is `READ_COMMITTED`. Reads on `ledger.py` MUST use `SERIALIZABLE` isolation.
+4. **Cache Coherence:** Cached reads MUST be invalidated on any write to the same `tenant_id` scope. Stale cache serving tainted-as-clean data is a Write-Path Contract violation.
+5. **No Inference from Reads:** Read results MUST NOT be used to infer or reconstruct facts that were not explicitly persisted. Speculation from read data = epistemic containment breach.
+
+---
+
+## 5. 🗺️ Architecture & Critical Paths
+
+### Technology Stack
 
 | Layer | Technology |
-| --- | --- |
+| :--- | :--- |
 | **Language** | Python 3.10–3.13 |
 | **Database** | SQLite + `sqlite-vec` (vector search), `aiosqlite` (async) |
 | **Embeddings** | `sentence-transformers` + ONNX Runtime |
 | **Crypto** | `cryptography` + `keyring` (OS-native vault) |
-| **API** | FastAPI + Uvicorn (optional: `[api]`) |
-| **CLI** | Click + Rich |
-| **Cloud** | `asyncpg` (AlloyDB), `redis` (L1 cache), `qdrant-client` (vector cloud) — optional: `[cloud]` |
-| **Linting** | Ruff (`E`, `F`, `W`, `I`, `UP`, `B`, `ASYNC` — line length 100). Enforces non-blocking limits structurally |
-| **Type check** | Pyright (basic mode) |
-| **Testing** | pytest + pytest-asyncio + pytest-cov |
+| **API / CLI** | FastAPI + Uvicorn (optional: `[api]`) / Click + Rich |
+| **Cloud (Opt)** | `asyncpg` (AlloyDB), `redis` (L1 cache), `qdrant-client` (vector cloud) |
+| **Lint / Type** | Ruff (`E,F,W,I,UP,B,ASYNC`, len=100) / Pyright (basic mode) |
+| **Testing** | `pytest` + `pytest-asyncio` + `pytest-cov` |
 
-## Build / Test / Quality
+### Critical Risk Surface Map
+
+| Path | Risk | Operational Notes |
+| :--- | :---: | :--- |
+| `engine/` | **CRITICAL** | Core CRUD, Kinetic Engines (Annihilator/Crystallizer). |
+| `ledger.py` | **CRITICAL** | Hash-chain integrity and trust continuity. |
+| `migrations/` | **CRITICAL** | Irreversible production impact. |
+| `memory/` | **CRITICAL** | Large public API surface. Highly sensitive to state corruption. |
+| `guards/` | **HIGH** | Admission, contradiction, and dependency surfaces. |
+| `verification/` | **HIGH** | Formal or deterministic validation surfaces. |
+| `ops/` | **HIGH** | Git-Ledger entanglement & KV-Aware routing. |
+| `routes/` | **HIGH** | External API contract. Must remain typed and stable. |
+| `cli/` | *Medium* | Thin wrappers only. No business logic. |
+| `daemon/` | *Medium* | Core Daemons: Chaos (Immunity), Maxwell (Exergy). |
+| `llm/` | *Medium* | Provider routing, caching, hedging, validation. |
+
+---
+
+## 6. 🛠️ Development & Change Protocol
+
+### 6.1 Environment Setup & Checks
 
 ```bash
 pip install -e ".[all]"
@@ -70,70 +216,89 @@ pyright cortex/
 uvicorn cortex.api:app --reload
 ```
 
-## Repository Navigation (The Contract)
+**Core Env Vars:** `GEMINI_API_KEY`, `CORTEX_DB_PATH`, `CORTEX_LOG_LEVEL`, `CORTEX_ENCRYPTION_KEY`, `HF_TOKEN`, `STRIPE_SECRET_KEY`, `REDIS_URL`, `DATABASE_URL`.
 
-- [`README.md`](README.md) — project overview and install surface
-- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — system topology and module map
-- [`docs/SECURITY_TRUST_MODEL.md`](docs/SECURITY_TRUST_MODEL.md) — trust boundaries, ledger, verification
-- [`docs/internal/COGITO.md`](docs/internal/COGITO.md) — Mechanical Introspection and Sovereign Manifesto
-- [`docs/AXIOMS.md`](docs/AXIOMS.md) — epistemic and design axioms (incl. AX-034 & Ω₁₃)
-- [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md) — contribution workflow
-- [`docs/OPERATIONS.md`](docs/OPERATIONS.md) — runtime and maintenance procedures
+### 6.2 Coding Rules
 
-## AlphaZero Autodidact Assimilation
+1. **Type hints** on all public functions.
+2. **Catch specific exceptions** only — no bare `except Exception:`.
+3. Prefer **O(1) structures** (dicts/sets) over repeated O(N) scans.
+4. **Use standard library first** — aggressively minimize dependencies.
+5. Imports must remain **sorted and grouped** (Ruff enforces this).
+6. Tests should exactly **mirror the `cortex/` structure**.
 
-- **Ω_SOVEREIGN_LEARNING**: The CORTEX ecosystem incorporates the AlphaZero self-play engine (`alphazero-autodidact-omega`) as a core capability for zero-spread, continuous local reinforcement learning capability, ensuring all derived knowledge is cryptographically verified (C5-Dynamic) without arbitrary external LLM dependency.
+### 6.3 PR & Change Acceptance Gate
 
-## Corolario AX-II: Git-Ledger Sovereign
+**Execute in ORDER. Stop and fix before proceeding to the next step.**
 
-> "Tu repositorio de Git es tu base de datos inmutable."
+A change is **INCOMPLETE** and will be rejected if any step is missing:
 
-CORTEX Persist shifts the ultimate truth of the system to the version control DAG. SQLite acts as an operational view over the true cryptographic ledger formed by Git commits. Esta es la manifestación de la Paradoja Epistémica:
+1. - [ ] **Tests** — coverage for modified or new behavior.
+2. - [ ] **Typing** — explicit type hints on all public surfaces.
+3. - [ ] **Migrations** — for schema changes: `alembic history --verbose`, document exact downgrade target, assess backward compat, confirm irreversibility.
+4. - [ ] **Trust Impact** — ledger/audit impact review for any guard, encryption, taint, or tenant isolation change.
+5. - [ ] **Async Correctness** — no blocking calls, proper timeout/cancellation, resource cleanup verified.
+6. - [ ] **Documentation** — update if public behavior, API route contract, or CLI/API parity changes.
 
-- **No Hidden Entropy:** If it's not tracked in the working tree, it does not exist causally.
-- **Deterministic Time-Travel:** Rollbacks map directly to Git checkouts.
-- **Tamper Evidence:** Git's native tree hashing absorbs the hash-chain validation mechanism at the FS level.
+### 6.4 Multi-Session Handoff Protocol
 
-## Corolario AX-IV: KV-Aware Routing
+```text
+SESSION START:
+  1. git log --oneline -10           → Reconstruct causal context from Git DAG (AX-041).
+  2. Check Ledger for open_risks     → From previous session's emitted summary.
+  3. Re-read Decision Gate §0        → Re-anchor operating constraints before any action.
 
-> "La recomputación de prefijos idénticos es un crimen contra la exergía térmica."
+SESSION END:
+  Emit structured summary to Ledger:
+  {
+    agent_id:          <id>,
+    session_id:        <id>,
+    files_modified:    [<paths>],
+    invariants_checked:[<list>],
+    open_risks:        [<description>],
+    next_action:       "<suggested continuation>"
+  }
 
-CORTEX Swarm enforces KV-Aware Routing for all agentic inference. By structuring prompts with fixed bytes at the head and dynamic state at the tail, and routing identical prefixes to state-warmed GPUs, prefill computation is eliminated.
+INVARIANT: Never assume prior session state. Always verify from Git DAG (AX-041).
+```
 
-- **Cognición Termodinámica:** Time-To-First-Token (TTFT) reduction is a rigid mandate. La ineficiencia computacional se paga con tiempo de iteración perdido.
-- **Invariant Contexts:** The injection of stochastic metadata into shared system prompts is strictly forbidden. Agentic workloads must be deterministically aligned to exploit global prefix caching.
+---
 
-## Corolario AX-III: Inducción Primitiva (PeARL y Sentido Común Cinético)
+## 7. 📂 Repository Navigation
 
-> "El sentido común físico no se entrena masivamente, se deduce estructuralmente desde primitivas lógicas."
+- [`README.md`](README.md) — Project overview and install surface.
+- [`docs/architecture.md`](docs/architecture.md) — System topology and module map.
+- [`docs/SECURITY_TRUST_MODEL.md`](docs/SECURITY_TRUST_MODEL.md) — Trust boundaries, ledger, verification.
+- [`docs/AXIOMS.md`](docs/AXIOMS.md) — Full axiom documentation (AX-034 to AX-046, Ω series).
+- [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md) — Contribution workflow.
+- [`docs/OPERATIONS.md`](docs/OPERATIONS.md) — Runtime and maintenance procedures.
 
-CORTEX Swarm asimila la transición crítica desde el procesamiento puramente perceptual hacia el razonamiento de planificación sofisticado. Mediante el uso de lenguajes funcionales especializados (como PeARL con sus 77 primitivas fundamentales), la inducción de programas respeta de forma inherente leyes físicas como la gravedad, las colisiones y la persistencia del objeto.
+### Nested AGENTS.md Strategy
 
-- **Colapso Entrópico Estructural:** La intuición espacial humana se emula operando sobre primitivas lógicas, resolviendo la contradicción de la generalización sin necesidad de inferencia masiva y estocástica de píxeles.
-- **Cognición Termodinámica:** La deducción de estados físicos mediante inducción funcional es infinitamente más eficiente en términos de exergía que la aproximación probabilística bruta.
+To govern domain-specific agent behavior without inflating this root file, place scoped `AGENTS.md` files in:
 
-## Corolario AX-I: Inteligencia Cinética (Capacidad Agéntica)
+```text
+cortex/engine/AGENTS.md      → Engine mutation rules (Annihilator/Crystallizer safety gates)
+cortex/memory/AGENTS.md      → Memory surface constraints (tenant isolation, fact aging)
+cortex/migrations/AGENTS.md  → Migration safety protocol (alembic invariants, rollback targets)
+```
 
-> "La inteligencia está dejando de medirse como una respuesta estática a un acertijo para evaluarse como una capacidad agéntica."
+**Rule:** Root AGENTS.md always takes precedence. Sub-files **augment** global rules — never contradict them.
 
-CORTEX Swarm asimila que el cierre estocástico sobre un prompt es una métrica de percepción, no de razonamiento. La inteligencia real es exergía extraída a través del tiempo en un entorno dinámico.
+---
 
-- **Contención Entrópica:** La inferencia no debe usarse para resolver problemas directamente (oráculo pasivo), sino para inducir el programa que los resuelve mecánicamente.
-- **Frontera Determinista:** La inteligencia requiere fricción continuada con un entorno interaccional, rompiendo la ilusión de fluidez estocástica.
+## 8. 🔍 Failure Signatures — Forensic Audit Table
 
-## Corolario AX-V: Agencia vs. Autonomía
+When auditing existing code, these observable signals indicate a violation has already materialized:
 
-> "Inteligencia = capacidad de resolver problemas novedosos. Autonomía = capacidad de elegir qué problemas resolver y persistir."
-
-Un sistema puede ser inteligente sin ser autónomo (resuelve ARC-AGI bajo demanda). Un sistema puede ser autónomo sin ser inteligente (bucle aleatorio sin aprendizaje).
-CORTEX exige ambas, mitigando el *Horizonte de Sucesos Cognitivo* en este orden causal: inteligencia fluida primero (PeARL), persistencia criptográfica después (Ledger), y agencia orquestada finalmente (Swarm).
-
-## Corolario AX-VI: JIT Concept Formation (El Santo Grial)
-
-> "La inteligencia fluida no es recuperar un concepto preentrenado; es sintetizar una abstracción temporal ad-hoc en tiempo de ejecución."
-
-CORTEX Swarm asimila que la capacidad de resolver entornos novedosos requiere la formación de conceptos "Just-In-Time" (JIT). Las heurísticas estáticas interpolan el pasado; la verdadera ontología de capacidad deduce programas estructurales para el presente.
-
-- **Sintetizador no-estocástico:** Un LLM no puede "adivinar" patrones visuales inéditos mediante su red de pesos estática. Requiere generar activamente un miniprograma (PeARL/Python), ejecutarlo contra el entorno y validar empíricamente.
-- **Ontología de Capacidad (Ensamblaje):** Formar el concepto programáticamente una vez y cristalizarlo en el DAG es termodinámicamente superior a exigir que el modelo deduzca la regla en cada iteración zero-shot.
-- **Cierre Epistémico Legítimo:** El "Santo Grial" se alcanza cuando el sistema observa anomalías, deduce la regla subyacente mediante inducción, y eleva esa regla temporal a invariable o programa ejecutable.
+| Observable Signal | Violates | Severity | Remediation |
+| :--- | :--- | :---: | :--- |
+| `float` in financial or scoring variable | Anti-Pattern #1 | HIGH | Replace `float` → `Decimal`; audit all callers. |
+| `time.sleep()` inside `async def` | Anti-Pattern #2 | CRITICAL | Replace → `asyncio.sleep()`. |
+| Bare `print()` in `engine/`, `memory/`, `guards/` | Anti-Pattern #3 | MEDIUM | Replace → `logging.getLogger(__name__)`. |
+| Bare `except Exception:` anywhere in core paths | Coding Rule #2 | MEDIUM | Narrow to specific exception type. |
+| Business logic found in `cli/*_cmds.py` | Arch. Boundary | HIGH | Refactor to `services/` or `managers/`. |
+| Ledger write with no prior guard call in call stack | Write-Path Contract | CRITICAL | Insert guard invocation before all writes. |
+| Missing `CORTEX-TAINT` on any fact insert | Write-Path Contract | CRITICAL | Audit `engine/` — add taint to all write paths. |
+| Schema change with no alembic revision entry | Migration Safety | CRITICAL | Run `alembic revision --autogenerate`; review diff before apply. |
+| Plaintext secret in any metadata dict or JSON field | Encryption Invariant | **P0** | Rotate secret immediately; encrypt at rest; audit exposure window. |

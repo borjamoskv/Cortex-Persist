@@ -35,6 +35,7 @@ class WorktreeState:
         self.status = "provisioning"
         self.pid = os.getpid()
         self.task: asyncio.Task[Any] | None = None
+        self.shutdown_event = asyncio.Event()
 
 
 class SwarmManager:
@@ -73,8 +74,7 @@ class SwarmManager:
                     state.status = "active"
                     ready_event.set()
                     logger.info("Worktree %s active at %s", worktree_id, path)
-                    while state.status == "active":
-                        await asyncio.sleep(0.1)
+                    await state.shutdown_event.wait()
             except Exception as exc:  # noqa: BLE001
                 state.status = "failed"
                 ready_event.set()
@@ -121,6 +121,7 @@ class SwarmManager:
             if state is None:
                 return False
             state.status = "tearing_down"
+            state.shutdown_event.set()
             return True
 
     async def get_status(self) -> dict[str, Any]:
@@ -171,6 +172,10 @@ class CapatazOrchestrator:
         self.mission_id = mission_id or f"mission-{uuid.uuid4().hex[:8]}"
         self.tasks: dict[str, SwarmTask] = {}
         self.budget = get_budget_manager()
+
+        from cortex.extensions.swarm.kv_prefix_registry import KVPrefixRegistry
+        self._kv_registry = KVPrefixRegistry()
+
         logger.info("Capataz: Orchestrating mission %s", self.mission_id)
 
     async def _execute_completion_with_tracking(
@@ -196,7 +201,14 @@ class CapatazOrchestrator:
                 role=role,
                 payload=payload or {"discovery": result},
             )
-            if asyncio.iscoroutinefunction(engine.session):
+            import inspect
+            _sess_func = getattr(engine.session, "__wrapped__", engine.session)
+            is_async = (
+                inspect.iscoroutinefunction(_sess_func)
+                or inspect.isasyncgenfunction(_sess_func)
+            )
+
+            if is_async:
                 async with engine.session() as conn:
                     bus = AsyncSignalBus(conn)
                     await bus.emit(
@@ -255,6 +267,21 @@ class CapatazOrchestrator:
         lock_acquired = False
         try:
             kwargs = kwargs or {}
+
+            # Prefix sharing logic (extract system_prompt from args/kwargs if available)
+            system_prompt = kwargs.get("system", "") if kwargs else ""
+            if system_prompt:
+                # Derive tenant ID implicitly from OS for local executions,
+                # or use a default standard tenant wrapper
+                tenant_id = os.environ.get("CORTEX_TENANT_ID", "local-tenant")
+                slot = self._kv_registry.register(
+                    mission_id=self.mission_id,
+                    tenant_id=tenant_id,
+                    system_prompt=system_prompt,
+                )
+
+                # Pass cache_key downstream so provider can use it
+                kwargs["prefix_cache_key"] = slot.cache_key
 
             # BROADCAST JIT DISCOVERY
             await self._execute_completion_with_tracking(

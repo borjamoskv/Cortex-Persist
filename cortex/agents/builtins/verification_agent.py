@@ -11,7 +11,7 @@ import logging
 from typing import Any
 
 from cortex.agents.base import BaseAgent
-from cortex.agents.bus import SqliteMessageBus
+from cortex.agents.bus import MessageBus
 from cortex.agents.manifest import AgentManifest
 from cortex.agents.message_schema import AgentMessage, MessageKind, new_message
 from cortex.agents.tools import ToolRegistry
@@ -27,7 +27,7 @@ class VerificationAgent(BaseAgent):
     def __init__(
         self,
         manifest: AgentManifest,
-        bus: SqliteMessageBus,
+        bus: MessageBus,
         tool_registry: ToolRegistry,
         verifier: SovereignVerifier | None = None,
     ) -> None:

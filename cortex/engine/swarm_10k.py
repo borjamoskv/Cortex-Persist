@@ -260,7 +260,9 @@ class SwarmCommander:
             yield legion
         finally:
             legion._overclocked = original_state
-            logger.warning("❄️ ULTRATHINK HORIZON COLLAPSED on domain: %s (Exergy Stabilized)", domain)
+            logger.warning(
+                "❄️ ULTRATHINK HORIZON COLLAPSED on domain: %s (Exergy Stabilized)", domain
+            )
 
     async def initialize(self) -> None:
         # Sovereign Bus v8.5 is implicitly ready upon instantiation

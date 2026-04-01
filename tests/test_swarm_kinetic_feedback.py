@@ -37,7 +37,8 @@ async def test_swarm_kinetic_feedback_throttling(tmp_path):
     assert not dispatch_task.done()  # Should be blocked by thermal stability
 
     dispatch_task.cancel()
-    await cmd.bus.close()
+    cmd.bus.close()  # SovereignSharedBus is synchronous
+    cmd.bus.unlink()
 
 
 @pytest.mark.asyncio
@@ -47,11 +48,13 @@ async def test_adaptive_slashing_scaling(tmp_path):
     """
     from unittest.mock import patch
 
-    cmd = SwarmCommander(tmp_path)
+    # use_shm=False to use ShardedAsyncSignalBus which supports .history()
+    cmd = SwarmCommander(tmp_path, use_shm=False)
     await cmd.initialize()
     bus = cmd.bus
 
-    cen = CenturionSuperv("node-1", bus)
+    cen = CenturionSuperv("node-1", "test-shm")
+    cen.bus = bus  # Inject ShardedAsyncSignalBus for testing
 
     # Mock time.perf_counter to simulate a 48ms breach (3x baseline 16ms)
     # We need two values: start and end

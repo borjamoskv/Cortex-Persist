@@ -301,7 +301,10 @@ class ConflictResolver:
             winner_id=winner_id,
             method=ResolutionMethod.TRIANGULATION,
             consensus_level=consensus,
-            reasoning=f"Factual triangulation: {option_votes[winner_id]}/{total_votes} sources confirm.",
+            reasoning=(
+                f"Factual triangulation: {option_votes[winner_id]}/{total_votes} "
+                "sources confirm."
+            ),
             total_weight_for=float(option_votes[winner_id]),
             total_weight_against=float(total_votes - option_votes[winner_id]),
         )
@@ -372,7 +375,8 @@ class ConflictResolver:
         """Invoke LLM-as-judge for complex strategic decisions."""
         try:
             options_desc = "\n".join(
-                f"  [{o.id}] {o.description} (reversibility={o.reversibility:.2f}, cost={o.estimated_cost})"
+                f"  [{o.id}] {o.description} "
+                f"(reversibility={o.reversibility:.2f}, cost={o.estimated_cost})"
                 for o in options
             )
             prompt = (

@@ -1,31 +1,44 @@
-"""CORTEX Agents — handoff, neural, system prompts and pitch arsenal."""
+"""CORTEX Agents — runtime public API.
+
+Exposes the core agent runtime classes. Extension-layer prompts and pitch
+templates remain in ``cortex.extensions.agents``.
+"""
 
 from __future__ import annotations
 
-from cortex.agents.pitches import (
-    PITCH_COMPLIANCE_DIRECTOR,
-    PITCH_CTO_SKEPTIC,
-    PITCH_JOURNALIST,
-    PITCH_MEMO_DEV,
-    PITCH_OS_CONTRIBUTOR,
-    PITCH_VC_FOLLOWUP,
+from cortex.agents.base import BaseAgent
+from cortex.agents.bus import MessageBus, SqliteMessageBus
+from cortex.agents.manifest import AgentManifest
+from cortex.agents.message_schema import (
+    AgentMessage,
+    MessageKind,
+    MessageState,
+    new_message,
 )
-from cortex.agents.system_prompt import (
-    SYSTEM_PROMPT,
-    SYSTEM_PROMPT_MEDIUM,
-    SYSTEM_PROMPT_SHORT,
-)
+from cortex.agents.schema import AgentRole
+from cortex.agents.state import AgentState, AgentStatus, WorkingMemory
+from cortex.agents.supervisor import Supervisor
+from cortex.agents.tools import Tool, ToolRegistry
 
 __all__ = [
-    # System prompts
-    "SYSTEM_PROMPT",
-    "SYSTEM_PROMPT_MEDIUM",
-    "SYSTEM_PROMPT_SHORT",
-    # Pitches
-    "PITCH_CTO_SKEPTIC",
-    "PITCH_MEMO_DEV",
-    "PITCH_OS_CONTRIBUTOR",
-    "PITCH_COMPLIANCE_DIRECTOR",
-    "PITCH_VC_FOLLOWUP",
-    "PITCH_JOURNALIST",
+    # Core runtime
+    "BaseAgent",
+    "Supervisor",
+    # Manifest & schema
+    "AgentManifest",
+    "AgentRole",
+    # State
+    "AgentState",
+    "AgentStatus",
+    "WorkingMemory",
+    # Messaging
+    "AgentMessage",
+    "MessageBus",
+    "MessageKind",
+    "MessageState",
+    "SqliteMessageBus",
+    "new_message",
+    # Tools
+    "Tool",
+    "ToolRegistry",
 ]

@@ -9,9 +9,7 @@ from cortex.extensions.signals.sharded_bus import ShardedAsyncSignalBus
 async def test_exergy_calculation_o1(tmp_path):
     """Verify the Nine Laws — Exergy decay on latency/density."""
     bus = ShardedAsyncSignalBus(base_dir=tmp_path)
-    await bus.initialize()
-
-    node = CenturionSuperv("node-1", bus)
+    node = CenturionSuperv("node-1", "test_shard_bus_1")
 
     # Initial state: 1.0 exergy
     ex = await node.get_exergy()

@@ -18,13 +18,14 @@ import httpx
 from cortex.extensions.llm._audit import spectral_audit
 from cortex.extensions.llm._backoff import handle_429_backoff
 from cortex.extensions.llm._models import BaseProvider, CortexPrompt, IntentProfile
-from cortex.extensions.llm._presets import load_presets
+from cortex.extensions.llm._presets import get_prefix_cache_config, load_presets
 from cortex.extensions.llm._result_cache import ResultCache
 from cortex.extensions.llm._stealth import (
     apply_causal_jitter,
     prepare_stealth_headers,
     sanitize_response,
 )
+from cortex.extensions.llm.gemini_cache import GeminiCacheGateway
 from cortex.extensions.llm.quota import SovereignQuotaManager
 
 __all__ = ["LLMProvider"]
@@ -107,6 +108,7 @@ class LLMProvider(BaseProvider):
         self._intent_model_map: dict[IntentProfile, str] = {}
         self._tier = "high"
         self._cost_class = "medium"
+        self._gemini_gateway = None
 
         if not self._base_url:
             raise ValueError("Custom LLM provider requires CORTEX_LLM_BASE_URL")
@@ -128,6 +130,7 @@ class LLMProvider(BaseProvider):
         self._api_key = api_key
         self._tier = preset.get("tier", "high")
         self._cost_class = preset.get("cost_class", "medium")
+        self._gemini_gateway = None
 
         # Resolve intent affinity from preset specialization tags
         _TAG_MAP: dict[str, IntentProfile] = {
@@ -170,6 +173,7 @@ class LLMProvider(BaseProvider):
         temperature: float = 0.0,
         max_tokens: int = 2048,
         intent: IntentProfile = IntentProfile.GENERAL,
+        prefix_cache_key: str | None = None,
     ) -> str:
         """Send a chat completion request. Returns the response text."""
         model_name = self._resolve_model(intent)
@@ -182,6 +186,27 @@ class LLMProvider(BaseProvider):
             "temperature": temperature,
             "max_tokens": max_tokens,
         }
+
+        # Apply KV Prefix Cache Optimization (AX-042)
+        cache_config = get_prefix_cache_config(self._provider)
+        if cache_config.get("enabled") and prefix_cache_key and self._provider == "gemini":
+            if not self._gemini_gateway:
+                self._gemini_gateway = GeminiCacheGateway(api_key=self._api_key or "")
+            remote_cache = await self._gemini_gateway.get_or_create_cache(
+                cache_key=prefix_cache_key,
+                system_prompt=system,
+                model=model_name.replace("models/", ""),
+                ttl_seconds=cache_config.get("ttl_seconds", 3600)
+            )
+            if remote_cache:
+                # Bypass OpenAI compatible endpoint altogether, fire native REST to save exergy
+                return await self._execute_gemini_native(
+                    prompt=prompt,
+                    model_name=model_name,
+                    remote_cache=remote_cache,
+                    temperature=temperature,
+                    max_tokens=max_tokens
+                )
 
         # Persistent Cache Check (Ω₂)
         cache = _get_result_cache()
@@ -231,6 +256,43 @@ class LLMProvider(BaseProvider):
 
         cache.set(payload, response_text, provider=self._provider, model=model_name)
         return response_text
+
+    async def _execute_gemini_native(
+        self, prompt: str, model_name: str, remote_cache: str, temperature: float, max_tokens: int
+    ) -> str:
+        """Execute inference against Gemini's native API bypassing the OpenAI compatibility logic.
+        Required because OpenAI compatibility endpoints do not support cachedContents mapping yet.
+        """
+        await _get_quota_manager().acquire(tokens=1)
+        model_stripped = model_name.replace("models/", "")
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_stripped}:generateContent?key={self._api_key}"
+        
+        headers = {"Content-Type": "application/json"}
+        payload = {
+            "cachedContent": remote_cache,
+            "contents": [{"role": "user", "parts": [{"text": prompt}]}]
+        }
+        
+        # O1/O3 handling skip, Gemini needs standard generation config
+        payload["generationConfig"] = {
+            "temperature": temperature,
+            "maxOutputTokens": max_tokens
+        }
+        
+        await apply_causal_jitter(tokens_estimate=50)
+        async with self._semaphore:
+            response = await self._client.post(url, headers=headers, json=payload)
+            
+        try:
+            response.raise_for_status()
+            data = response.json()
+            raw_content = data["candidates"][0]["content"]["parts"][0]["text"]
+            return sanitize_response(raw_content)
+        except httpx.HTTPStatusError as e:
+            if e.response.status_code == 429:
+                return await handle_429_backoff(self, url, headers, payload, e)
+            logger.error("Native Gemini API Failure: %s", e.response.text[:500])
+            raise ValueError(f"HTTP {e.response.status_code} from native Gemini") from e
 
     async def _execute_completion(
         self, url: str, headers: dict[str, str], payload: dict[str, Any], wrap_errors: bool
@@ -390,6 +452,33 @@ class LLMProvider(BaseProvider):
             "messages": messages,
             "temperature": prompt.temperature,
         }
+
+        # Apply KV Prefix Cache Optimization (AX-042)
+        cache_config = get_prefix_cache_config(self._provider)
+        prefix_cache_key = getattr(prompt, "prefix_cache_key", None)
+        system_extraction = ""
+        if messages and messages[0]["role"] == "system":
+            system_extraction = messages[0]["content"]
+
+        if cache_config.get("enabled") and prefix_cache_key and self._provider == "gemini":
+            if not self._gemini_gateway:
+                self._gemini_gateway = GeminiCacheGateway(api_key=self._api_key or "")
+            remote_cache = await self._gemini_gateway.get_or_create_cache(
+                cache_key=prefix_cache_key,
+                system_prompt=system_extraction,
+                model=model_name.replace("models/", ""),
+                ttl_seconds=cache_config.get("ttl_seconds", 3600)
+            )
+            if remote_cache:
+                # Find the user prompt (assumes single shot or joins string)
+                user_msg = " ".join([m["content"] for m in messages if m["role"] == "user"])
+                return await self._execute_gemini_native(
+                    prompt=user_msg,
+                    model_name=model_name,
+                    remote_cache=remote_cache,
+                    temperature=prompt.temperature,
+                    max_tokens=prompt.max_tokens
+                )
 
         # Persistent Cache Check (Ω₂)
         cache = _get_result_cache()

@@ -15,15 +15,20 @@ import sqlite_vec
 
 from cortex.config import DEFAULT_DB_PATH
 
-# Real imports for runtime managers (no longer just TYPE_CHECKING)
-from cortex.consensus.manager import ConsensusManager
+# Lazy imports for runtime managers
+if TYPE_CHECKING:
+    from cortex.consensus.manager import ConsensusManager
+    from cortex.embeddings import LocalEmbedder
+    from cortex.embeddings.manager import EmbeddingManager
+    from cortex.engine.auth import ByzantineAuthLayer
+    from cortex.engine.lock import SovereignLock
+    from cortex.facts.manager import FactManager
+    from cortex.ledger import EnrichmentQueue, LedgerStore, LedgerWriter
+    from cortex.mac_maestro.executor import MaestroExecutor
+
 from cortex.database.schema import get_init_meta
-from cortex.embeddings import LocalEmbedder
-from cortex.embeddings.manager import EmbeddingManager
-from cortex.engine.auth import ByzantineAuthLayer
 from cortex.engine.durability import PersistenceSupervisor
 from cortex.engine.legacy_mixin import LegacyMixin
-from cortex.engine.lock import SovereignLock
 from cortex.engine.memory_mixin import MemoryMixin
 from cortex.engine.mixins.base import FACT_COLUMNS, FACT_JOIN
 from cortex.engine.mixins.optimization import OptimizationMixin
@@ -33,9 +38,6 @@ from cortex.engine.search_mixin import SearchMixin
 from cortex.engine.store_mixin import StoreMixin
 from cortex.engine.sync_mixin import SyncMixin
 from cortex.engine.transaction_mixin import TransactionMixin
-from cortex.facts.manager import FactManager
-from cortex.ledger import EnrichmentQueue, LedgerStore, LedgerWriter
-from cortex.mac_maestro.executor import MaestroExecutor
 
 try:
     from cortex.extensions.health.health_mixin import HealthMixin  # type: ignore
@@ -116,6 +118,7 @@ class CortexEngine(
 
         # Decoupled guard pipeline (Ω₃: minimal coupling)
         self._guard_pipeline = self._register_default_guards()
+        self._buffer_task = None
 
     # ─── System State ─────────────────────────────────────────────────────────
 

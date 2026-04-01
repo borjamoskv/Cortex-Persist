@@ -1,0 +1,19 @@
+[package]
+name = "cortex_mev_base"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Alloy for high-performance Ethereum RPC & ABI encoding
+alloy = { version = "0.1", features = ["full"] }
+futures-util = "0.3.32"
+tokio = { version = "1.37", features = ["full"] }
+# Tracing for high-density, low-latency logs
+tracing = "0.1"
+tracing-subscriber = "0.3"
+
+[profile.release]
+opt-level = 3
+lto = "fat" # Extreme link-time-optimization for min execution time
+codegen-units = 1
+panic = "abort" # Saves gas (less overhead) and binary size
