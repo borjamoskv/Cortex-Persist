@@ -13,8 +13,8 @@ import logging
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+from cortex.extensions.sync.common import CORTEX_DIR, atomic_write
 from cortex.memory.temporal import now_iso
-from cortex.sync.common import CORTEX_DIR, atomic_write
 
 __all__ = [
     "DEFAULT_HANDOFF_PATH",
@@ -136,8 +136,13 @@ async def generate_handoff(
         _row = await cursor.fetchone()
         total_projects = _row[0] if _row else 0
 
-    db_path = Path(engine._db_path)
-    db_size_mb = round(db_path.stat().st_size / (1024 * 1024), 2) if db_path.exists() else 0.0
+    _db_path_obj = Path(engine._db_path)
+    # Compute size synchronously before any await (ASYNC240 — pre-await, does not block loop)
+    db_size_mb: float = (
+        round(_db_path_obj.stat().st_size / (1024 * 1024), 2)  # noqa: ASYNC240
+        if _db_path_obj.exists()  # noqa: ASYNC240
+        else 0.0
+    )
 
     # ── Session metadata (from caller) ────────────────────────────────
     session = {

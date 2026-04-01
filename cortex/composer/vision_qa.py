@@ -76,7 +76,7 @@ class AestheticAuditor:
             return Ok("[STUB] Aesthetic QA Ignorado (Playwright no disponible).")
 
         b64_img = base64.b64encode(screenshot_bytes).decode("utf-8")
-        
+
         system_instruction = (
             "You are the CORTEX Aesthetic Auditor (Teodosi-Omega tier). "
             "Analyze the provided UI component screenshot against the 'Industrial Noir 2026' manifesto:\n"
@@ -98,7 +98,7 @@ class AestheticAuditor:
                             "type": "image_url",
                             "image_url": {"url": f"data:image/jpeg;base64,{b64_img}"},
                         },
-                    ]
+                    ],
                 }
             ],
             intent=IntentProfile.ARCHITECT,

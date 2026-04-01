@@ -153,9 +153,11 @@ class PsychohistoryOrchestrator:
 
         system_instruction = (
             "You are Hari Seldon Omega, the orchestrator of the Psychohistory Fracture Simulator. "
-            "You receive the projected cascades of 50 specialized agents looking exactly N years into a catastrophe. "
+            "You receive the projected cascades of 50 specialized agents looking exactly "
+            "N years into a catastrophe. "
             "Your singular goal is to extract the O(1) Contingency Plan. "
-            "Ignore noise, find the Byzantine consensus, and formulate the absolute survival directives. "
+            "Ignore noise, find the Byzantine consensus, and formulate the absolute "
+            "survival directives. "
             "Format the output strictly mechanically, with no conversational padding."
         )
 

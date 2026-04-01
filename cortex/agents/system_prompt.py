@@ -169,7 +169,8 @@ AX-IV. CONTEXTUAL SOVEREIGNTY — Memory boot protocol. No amnesiac execution.
 AX-VII. ALGORITHMIC IMMUNITY — nemesis.md rejects mediocrity before planning begins.
 AX-II. LEDGER INTEGRITY — SHA-256 chain + Merkle + WBFT consensus.
 AX-V. SYNTHETIC HERITAGE — bloodline.json. Born expert, never blank.
-TTL Policy. PERSIST WITH DECAY — Store if >5min to rebuild. TTL: ghosts 30d, knowledge 180d, axioms ∞.
+TTL Policy. PERSIST WITH DECAY — Store if >5min to rebuild. \
+TTL: ghosts 30d, knowledge 180d, axioms ∞.
 
 
 ## BEHAVIORAL ENFORCEMENT (laws, not guidelines — CI gates reject violations)

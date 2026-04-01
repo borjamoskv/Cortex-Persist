@@ -166,7 +166,10 @@ class DeepThinkOrchestrator:
 
         byzantine_alarm = ""
         if avg_sim < 0.4:
-            byzantine_alarm = f"\n⚠️ **BYZANTINE ALARM (Alta Entropía)**: La resonancia del enjambre es {avg_sim:.2f}. El enjambre está fracturado. FORCE ABSOLUTE TRUTH OVERRIDE.\n"
+            byzantine_alarm = (
+                f"\n⚠️ **BYZANTINE ALARM (Alta Entropía)**: La resonancia del enjambre es "
+                f"{avg_sim:.2f}. El enjambre está fracturado. FORCE ABSOLUTE TRUTH OVERRIDE.\n"
+            )
 
         enhanced_context = (
             f"DIAGNOSTICS: {diagnostics}\n"

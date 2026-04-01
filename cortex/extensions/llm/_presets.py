@@ -92,6 +92,21 @@ def _validate_model_policy(presets: dict[str, dict[str, Any]]) -> None:
                 )
 
 
+def get_prefix_cache_config(provider: str) -> dict[str, Any]:
+    """Return prefix caching configuration. AX-042 compliant."""
+    presets = load_presets()
+    info = presets.get(provider, {})
+    if not info:
+        return {"enabled": False, "strategy": "none"}
+    return {
+        "enabled": info.get("prefix_cache_enabled", False),
+        "ttl_seconds": info.get("cache_ttl_seconds", 3600),
+        "strategy": info.get("prefix_hash_strategy", "system_prompt"),
+        "tenant_scoped": True,  # ALWAYS True — AGENTS.md Invariant #4
+        "quantization": info.get("kv_quantization", "fp16"),
+    }
+
+
 def provider_inventory(active_provider: str | None = None) -> list[dict[str, Any]]:
     """Return a list of all registered LLM providers and their operational status."""
     presets = load_presets()
