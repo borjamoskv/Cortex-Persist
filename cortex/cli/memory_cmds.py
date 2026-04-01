@@ -532,28 +532,9 @@ def stats(db, as_json) -> None:
 
 
 # --- Root Aliases (Backward Compatibility) ---
-@cli.command("store", context_settings=dict(ignore_unknown_options=True, help_option_names=[]))
-@click.argument("args", nargs=-1, type=click.UNPROCESSED)
-@click.pass_context
-def store_alias(ctx, args):
-    """[Alias] Store a fact."""
-    ctx.invoke(store, *args)
-
-
-@cli.command("search", context_settings=dict(ignore_unknown_options=True, help_option_names=[]))
-@click.argument("args", nargs=-1, type=click.UNPROCESSED)
-@click.pass_context
-def search_alias(ctx, args):
-    """[Alias] Semantic search."""
-    ctx.invoke(search, *args)
-
-
-@cli.command("recall", context_settings=dict(ignore_unknown_options=True, help_option_names=[]))
-@click.argument("args", nargs=-1, type=click.UNPROCESSED)
-@click.pass_context
-def recall_alias(ctx, args):
-    """[Alias] Load full context."""
-    ctx.invoke(recall, *args)
+cli.add_command(store, name="store")
+cli.add_command(search, name="search")
+cli.add_command(recall, name="recall")
 
 
 cli.add_command(memory_cmds)
