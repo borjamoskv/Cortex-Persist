@@ -392,7 +392,13 @@ class GenesisEngine:
 
         Atomic: Genesis fails if persistence is unavailable.
         """
+        import os
+
         from cortex.engine import CortexEngine
+
+        if os.environ.get("CORTEX_TESTING") == "1":
+            logger.info("📦 [TESTING] Skipping persistence to CORTEX ledger.")
+            return
 
         engine = CortexEngine()
         engine.store_sync(

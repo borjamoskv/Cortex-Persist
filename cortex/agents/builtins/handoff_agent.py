@@ -14,11 +14,11 @@ from pathlib import Path
 from typing import Any
 
 from cortex.agents.base import BaseAgent
-from cortex.agents.bus import SqliteMessageBus
+from cortex.agents.bus import MessageBus
+from cortex.agents.handoff import load_handoff, save_handoff
 from cortex.agents.manifest import AgentManifest
 from cortex.agents.message_schema import AgentMessage, MessageKind, new_message
 from cortex.agents.tools import ToolRegistry
-from cortex.extensions.agents.handoff import load_handoff, save_handoff
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +34,7 @@ class HandoffAgent(BaseAgent):
     def __init__(
         self,
         manifest: AgentManifest,
-        bus: SqliteMessageBus,
+        bus: MessageBus,
         tool_registry: ToolRegistry,
         handoff_dir: Path | None = None,
     ) -> None:

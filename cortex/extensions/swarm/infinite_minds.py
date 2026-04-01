@@ -164,7 +164,8 @@ class InfiniteMindsManager:
             )
 
             logger.info(
-                "InfiniteMinds: Byzantine cluster detection complete. Evaluated %d tensors, %d edges.",
+                "InfiniteMinds: Byzantine cluster detection complete. "
+                "Evaluated %d tensors, %d edges.",
                 biases_count,
                 edges_count,
             )
@@ -177,7 +178,8 @@ class InfiniteMindsManager:
 
         except ImportError:
             logger.warning(
-                "InfiniteMinds: numpy not available. Falling back to textual Byzantine cluster detection."
+                "InfiniteMinds: numpy not available. "
+                "Falling back to textual Byzantine cluster detection."
             )
 
         return {

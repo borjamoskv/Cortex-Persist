@@ -72,8 +72,8 @@ class SwarmBudgetManager:
             with sqlite3.connect(self.db_path, timeout=5) as conn:
                 conn.execute(
                     """
-                    INSERT INTO mission_budget 
-                    (mission_id, total_input_tokens, total_output_tokens, 
+                    INSERT INTO mission_budget
+                    (mission_id, total_input_tokens, total_output_tokens,
                      total_cost_usd, request_count, last_update)
                     VALUES (?, ?, ?, ?, 1, ?)
                     ON CONFLICT(mission_id) DO UPDATE SET
@@ -115,8 +115,8 @@ class SwarmBudgetManager:
         try:
             with sqlite3.connect(self.db_path) as conn:
                 row = conn.execute(
-                    """SELECT mission_id, total_input_tokens, total_output_tokens, 
-                              total_cost_usd, request_count, last_update 
+                    """SELECT mission_id, total_input_tokens, total_output_tokens,
+                              total_cost_usd, request_count, last_update
                        FROM mission_budget WHERE mission_id = ?""",
                     (mission_id,),
                 ).fetchone()

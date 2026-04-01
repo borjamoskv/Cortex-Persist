@@ -3,7 +3,6 @@
 import logging
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional
 
 logger = logging.getLogger("cortex.swarm.verification")
 
@@ -53,7 +52,7 @@ class VerificationGate:
         return max_risk
 
     async def verify_proposal(
-        self, proposal: str, risk: RiskLevel, context: Optional[dict] = None
+        self, proposal: str, risk: RiskLevel, context: dict | None = None
     ) -> VerificationResult:
         """Deterministic Elder check (Simulation for now)."""
         logger.info("🛡️ [Ω₁] Elder Gate: Verifying %s risk proposal...", risk.value)

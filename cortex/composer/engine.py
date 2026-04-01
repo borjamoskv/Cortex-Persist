@@ -27,8 +27,12 @@ class ComposerEngine:
         """Extrae el código tsx/css marcados en la respuesta."""
         files = {}
         # Pattern: [FILE: filename]...\n```lang\ncode\n```
-        file_matches = re.finditer(r"\[FILE:\s*([a-zA-Z0-9_\-\.]+)\]\s*```(?:typescript|tsx|jsx|css|javascript|ts|html)\n(.*?)```", response, re.DOTALL)
-        
+        file_matches = re.finditer(
+            r"\[FILE:\s*([a-zA-Z0-9_\-\.]+)\]\s*```(?:typescript|tsx|jsx|css|javascript|ts|html)\n(.*?)```",
+            response,
+            re.DOTALL,
+        )
+
         for match in file_matches:
             filename = match.group(1).strip()
             code = match.group(2).strip()
@@ -47,8 +51,10 @@ class ComposerEngine:
         # This is a naive heuristic for purely visual components with minimal external react deps.
         # En un sistema real se requiere bundler `esbuild` / `vite` para compilar JSX.
         # Por contexto, forzamos "vanilla web components" o asumimos HTML renderizable:
-        
-        html_body = files.get("component.html", "") or files.get("index.html", "<div>Fallback Visual Mismatch</div>")
+
+        html_body = files.get("component.html", "") or files.get(
+            "index.html", "<div>Fallback Visual Mismatch</div>"
+        )
         css = files.get("component.css", "") or files.get("style.css", "")
 
         return f"<style>{css}</style>\n{html_body}"
@@ -61,7 +67,7 @@ class ComposerEngine:
         Genera código iterando hasta que pase el QA estético.
         """
         logger.info("🎨 [COMPOSER] Iniciando síntesis JIT para: %s", description[:50])
-        
+
         working_memory = [
             {
                 "role": "user",
@@ -77,7 +83,7 @@ class ComposerEngine:
                 system_instruction=COMPOSER_MANIFESTO,
                 working_memory=working_memory,
                 intent=IntentProfile.ARCHITECT,
-                temperature=0.2, # Determinismo para estética estructural
+                temperature=0.2,  # Determinismo para estética estructural
                 max_tokens=6144,
             )
 
@@ -94,7 +100,12 @@ class ComposerEngine:
             if not files:
                 logger.warning("No se detectó código estructurado [FILE: ...]. Reintentando...")
                 working_memory.append({"role": "assistant", "content": response})
-                working_memory.append({"role": "user", "content": "Error: NO encontré bloques de código marcados con [FILE: nombre] ``` \n Corrige el formato."})
+                working_memory.append(
+                    {
+                        "role": "user",
+                        "content": "Error: NO encontré bloques de código marcados con [FILE: nombre] ``` \n Corrige el formato.",
+                    }
+                )
                 attempt += 1
                 last_error = "Formatting failure"
                 continue
@@ -102,23 +113,25 @@ class ComposerEngine:
             # Construir visual preview temporal y someter a QA
             mock_html = self.build_mock_html(files)
             if mock_html.strip() == "<style></style>\n":
-                 logger.warning("HTML/CSS Mock vacío. Ignorando QA.")
-                 qa_res = Ok("Bypassed QA due to empty markup.")
+                logger.warning("HTML/CSS Mock vacío. Ignorando QA.")
+                qa_res = Ok("Bypassed QA due to empty markup.")
             else:
-                 logger.info("📸 [COMPOSER] Ejecutando QA Visual...")
-                 qa_res = await self.auditor.audit_component(mock_html)
+                logger.info("📸 [COMPOSER] Ejecutando QA Visual...")
+                qa_res = await self.auditor.audit_component(mock_html)
 
             if qa_res.is_ok():
                 logger.info("💎 [COMPOSER] Estructura Estética VERIFICADA en intento %d.", attempt)
                 return Ok(files)
-            
+
             # QA Visual falló: realimenta el error al LLM
             logger.warning("💥 [COMPOSER] QA Visual (Aesthetic) Falló: %s", qa_res.error)
             working_memory.append({"role": "assistant", "content": response})
-            working_memory.append({
-                "role": "user", 
-                "content": f"El QA de CORTEX rechazó tu componente por la siguiente vulnerabilidad estética:\n{qa_res.error}\n\nCorrige el CSS o la estructura para cumplir la ley #0A0A0A."
-            })
+            working_memory.append(
+                {
+                    "role": "user",
+                    "content": f"El QA de CORTEX rechazó tu componente por la siguiente vulnerabilidad estética:\n{qa_res.error}\n\nCorrige el CSS o la estructura para cumplir la ley #0A0A0A.",
+                }
+            )
             last_error = f"QA Failed: {qa_res.error}"
             attempt += 1
 
