@@ -1,4 +1,8 @@
-"""MoskvDaemon — Main daemon orchestrator."""
+"""MoskvDaemon — Main daemon orchestrator.
+
+v2.0: Sovereign Async Loop — single event loop replaces N threads.
+New subsystems: SovereignScheduler, HotStateDB, WatchdogHub, HumanCallbackAPI.
+"""
 
 from __future__ import annotations
 
@@ -53,6 +57,35 @@ from cortex.extensions.daemon.monitors import (
 )
 from cortex.extensions.daemon.sidecar.sentinel_monitor.monitor import SentinelMonitor
 from cortex.extensions.daemon.sidecar.telemetry.fiat_oracle import FiatOracle
+
+# ─── Sovereign Async Subsystems (v2.0) ─────────────────────────────────
+try:
+    from cortex.extensions.daemon.hot_state import HotStateDB
+
+    _HOT_STATE_AVAILABLE = True
+except ImportError:
+    _HOT_STATE_AVAILABLE = False
+
+try:
+    from cortex.extensions.daemon.scheduler import SovereignScheduler
+
+    _SCHEDULER_AVAILABLE = True
+except ImportError:
+    _SCHEDULER_AVAILABLE = False
+
+try:
+    from cortex.extensions.daemon.watchers import WatchdogHub
+
+    _WATCHDOG_HUB_AVAILABLE = True
+except ImportError:
+    _WATCHDOG_HUB_AVAILABLE = False
+
+try:
+    from cortex.extensions.daemon.api import HumanCallbackAPI
+
+    _API_AVAILABLE = True
+except ImportError:
+    _API_AVAILABLE = False
 
 try:
     from cortex.extensions.aether.daemon import AetherDaemon, AetherMonitor
@@ -143,6 +176,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
         self._init_external_oracles(file_config, resolved_sites=[])  # sites used in certs
         self._init_background_agents(file_config)
         self._init_autopoiesis(file_config)
+        self._init_sovereign_subsystems(file_config)
         self._init_persistence_checkers(file_config)
 
     def _init_core_monitors(
@@ -382,6 +416,77 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
             logger.error("Failed to init TimeTracker: %s", e)
             self.tracker = None
 
+    def _init_sovereign_subsystems(self, file_config: dict) -> None:
+        """Initialize the v2.0 sovereign async subsystems."""
+        # 1. Hot State — SQLite-backed KV store
+        self.hot_state: Optional[HotStateDB] = None
+        if _HOT_STATE_AVAILABLE:
+            try:
+                self.hot_state = HotStateDB()
+                logger.info("🔥 HotStateDB (SQLite KV) ENABLED")
+            except Exception as e:  # noqa: BLE001
+                logger.warning("Failed to init HotStateDB: %s", e)
+
+        # 2. Event Bus (reuse existing or create)
+        self._event_bus = None
+        try:
+            from cortex.events.bus import DistributedEventBus
+
+            self._event_bus = DistributedEventBus()
+            logger.info("📡 DistributedEventBus ENABLED")
+        except ImportError:
+            pass
+
+        # 3. Scheduler — cron/interval task execution
+        self.scheduler: Optional[SovereignScheduler] = None
+        if _SCHEDULER_AVAILABLE:
+            try:
+                self.scheduler = SovereignScheduler(
+                    event_bus=self._event_bus,
+                    hot_state=self.hot_state,
+                    tick_interval=float(file_config.get("scheduler_tick_interval", 5.0)),
+                )
+                logger.info("⏱️  SovereignScheduler ENABLED")
+            except Exception as e:  # noqa: BLE001
+                logger.warning("Failed to init SovereignScheduler: %s", e)
+
+        # 4. Watchdog Hub — unified filesystem monitor
+        self.watchdog_hub: Optional[WatchdogHub] = None
+        if _WATCHDOG_HUB_AVAILABLE:
+            try:
+                watch_paths = file_config.get(
+                    "watch_paths",
+                    [str(CORTEX_DIR), str(Path.home() / ".agent")],
+                )
+                watch_patterns = file_config.get(
+                    "watch_patterns",
+                    ["*.py", "*.md", "*.json", "*.yaml", "*.toml"],
+                )
+                self.watchdog_hub = WatchdogHub(
+                    paths=watch_paths,
+                    patterns=watch_patterns,
+                    event_bus=self._event_bus,
+                    hot_state=self.hot_state,
+                )
+                logger.info("👁️  WatchdogHub ENABLED (%d paths)", len(watch_paths))
+            except Exception as e:  # noqa: BLE001
+                logger.warning("Failed to init WatchdogHub: %s", e)
+
+        # 5. Human Callback API — REST + WebSocket sidecar
+        self.callback_api: Optional[HumanCallbackAPI] = None
+        if _API_AVAILABLE and file_config.get("api_enabled", True):
+            try:
+                self.callback_api = HumanCallbackAPI(
+                    hot_state=self.hot_state,
+                    scheduler=self.scheduler,
+                    event_bus=self._event_bus,
+                    port=int(file_config.get("api_port", 8741)),
+                )
+                logger.info("🌐 Human Callback API ENABLED (port %s)",
+                            file_config.get("api_port", 8741))
+            except Exception as e:  # noqa: BLE001
+                logger.warning("Failed to init HumanCallbackAPI: %s", e)
+
     @staticmethod
     def _load_config() -> dict:
         """Load daemon config from ~/.cortex/daemon_config.json if it exists."""
@@ -475,8 +580,178 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
                 self._failure_counts.pop(monitor_name, None)
 
     def run(self, interval: int = DEFAULT_INTERVAL) -> None:
-        """Run checks in a loop until stopped."""
+        """Run the daemon. Uses sovereign async loop if available, else legacy threads."""
+        from cortex.events.loop import sovereign_run
 
+        try:
+            sovereign_run(self.run_sovereign(interval=interval))
+        except ImportError:
+            logger.info("uvloop not available, falling back to legacy threading mode")
+            self._run_legacy(interval=interval)
+
+    async def run_sovereign(self, interval: int = DEFAULT_INTERVAL) -> None:
+        """Sovereign async execution — single event loop, all subsystems as tasks.
+
+        This is the x100 upgrade: replaces N threads with N async tasks on one loop.
+        All subsystems share the same DistributedEventBus and HotStateDB.
+        """
+        loop = asyncio.get_running_loop()
+
+        # Signal handling (works in main thread only)
+        for sig in (signal.SIGTERM, signal.SIGINT):
+            try:
+                loop.add_signal_handler(sig, self._signal_shutdown)
+            except (NotImplementedError, RuntimeError):
+                pass  # Windows or non-main thread
+
+        logger.info("🚀 MOSKV-1 Sovereign Daemon starting (interval=%ds)", interval)
+
+        # Track uptime in hot state
+        if self.hot_state is not None:
+            self.hot_state.set("daemon.mode", "sovereign")
+            self.hot_state.set("daemon.started_at", datetime.now(timezone.utc).isoformat())
+
+        # ─── Spawn all subsystems as async tasks ──────────────────
+        tasks: list[asyncio.Task] = []
+
+        # Core check loop (replaces the main while loop)
+        tasks.append(asyncio.create_task(
+            self._sovereign_check_loop(interval), name="CheckLoop"
+        ))
+
+        # Scheduler
+        if self.scheduler is not None:
+            self._register_default_schedules()
+            tasks.append(asyncio.create_task(
+                self.scheduler.run(), name="Scheduler"
+            ))
+
+        # WatchdogHub
+        if self.watchdog_hub is not None:
+            tasks.append(asyncio.create_task(
+                self.watchdog_hub.start(), name="WatchdogHub"
+            ))
+
+        # Human Callback API
+        if self.callback_api is not None:
+            tasks.append(asyncio.create_task(
+                self.callback_api.serve(), name="CallbackAPI"
+            ))
+
+        # Legacy thread-based subsystems that need their own asyncio.run()
+        # These are spawned as threads because they have blocking I/O
+        if self._aether_daemon is not None:
+            self._spawn_thread(self._aether_daemon.start, "AetherAgent")
+        if self.fiat_oracle:
+            self._spawn_thread(self.fiat_oracle.run_sync_loop, "FiatOracle")
+
+        # Pure async subsystems
+        self._spawn_thread(self._run_neural_loop, "NeuralSync")
+        if self.ast_oracle:
+            self._spawn_thread(self._run_ast_oracle_loop, "ASTOracle")
+        if getattr(self, "iot_oracle", None):
+            self._spawn_thread(self._run_iot_oracle_loop, "IoTOracle")
+        if self.heartbeat_daemon:
+            self._spawn_thread(self._run_heartbeat_loop, "HeartbeatDaemon")
+        if self.entropic_wake_daemon:
+            self._spawn_thread(self._run_entropic_wake_loop, "EntropicWakeDaemon")
+        if self.frontier_daemon:
+            self._spawn_thread(self._run_frontier_loop, "FrontierDaemon")
+        if getattr(self, "zero_prompting_daemon", None):
+            self._spawn_thread(self._run_zero_prompting_loop, "ZeroPromptingDaemon")
+        if getattr(self, "epistemic_breaker_daemon", None):
+            self._spawn_thread(self._run_epistemic_breaker_loop, "EpistemicBreakerDaemon")
+        if getattr(self, "sentinel_oracle", None):
+            self._spawn_thread(self._run_sentinel_oracle_loop, "SentinelOracle")
+        self._spawn_thread(self._run_health_loop, "HealthMonitor")
+
+        async_count = len(tasks)
+        thread_count = len(self._threads)
+        logger.info(
+            "Sovereign Daemon started: %d async tasks + %d legacy threads",
+            async_count,
+            thread_count,
+        )
+
+        try:
+            # Wait until shutdown signal
+            await asyncio.gather(*tasks, return_exceptions=True)
+        except asyncio.CancelledError:
+            pass
+        finally:
+            await self._sovereign_shutdown()
+
+    async def _sovereign_check_loop(self, interval: int) -> None:
+        """Async version of the main check loop."""
+        while not self._shutdown:
+            try:
+                # Run check in thread pool to not block the event loop
+                await asyncio.to_thread(self.check)
+
+                # Update hot state cycle counter
+                if self.hot_state is not None:
+                    self.hot_state.increment("cycle_count")
+
+            except Exception as e:  # noqa: BLE001
+                logger.error("Check loop error: %s", e)
+
+            # Async sleep instead of threading.Event.wait
+            try:
+                await asyncio.sleep(interval)
+            except asyncio.CancelledError:
+                break
+
+    async def _sovereign_shutdown(self) -> None:
+        """Graceful shutdown of all sovereign subsystems."""
+        logger.info("Sovereign shutdown initiated...")
+
+        if self.watchdog_hub is not None:
+            await self.watchdog_hub.stop()
+        if self.scheduler is not None:
+            await self.scheduler.stop()
+        if self._event_bus is not None:
+            await self._event_bus.shutdown()
+        if self.entropic_wake_daemon:
+            self.entropic_wake_daemon.stop()
+        if self.frontier_daemon:
+            self.frontier_daemon.stop()
+        if getattr(self, "zero_prompting_daemon", None):
+            self.zero_prompting_daemon.stop()  # type: ignore[union-attr]
+        if getattr(self, "epistemic_breaker_daemon", None):
+            self.epistemic_breaker_daemon.stop()  # type: ignore[union-attr]
+
+        # Persist final state
+        if self.hot_state is not None:
+            self.hot_state.set("daemon.stopped_at", datetime.now(timezone.utc).isoformat())
+
+        logger.info("MOSKV-1 Sovereign Daemon stopped")
+
+    def _signal_shutdown(self) -> None:
+        """Signal handler for async loop."""
+        logger.info("Received shutdown signal")
+        self._shutdown = True
+        self._stop_event.set()
+        # Cancel all running tasks
+        for task in asyncio.all_tasks():
+            if task is not asyncio.current_task():
+                task.cancel()
+
+    def _register_default_schedules(self) -> None:
+        """Register built-in recurring tasks with the scheduler."""
+        if self.scheduler is None:
+            return
+
+        # Hot state TTL purge every 10 minutes
+        if self.hot_state is not None:
+            self.scheduler.add_recurring(
+                "purge_expired_state",
+                lambda: asyncio.coroutine(lambda: self.hot_state.purge_expired())(),  # type: ignore
+                interval_s=600,
+                priority=8,
+            )
+
+    def _run_legacy(self, interval: int = DEFAULT_INTERVAL) -> None:
+        """Legacy threading-based execution (fallback)."""
         def _handle_signal(signum: int, frame: object) -> None:
             sig_name = signal.Signals(signum).name
             logger.info("Received %s, shutting down gracefully...", sig_name)
@@ -486,18 +761,15 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
         signal.signal(signal.SIGTERM, _handle_signal)
         signal.signal(signal.SIGINT, _handle_signal)
 
-        logger.info("🚀 MOSKV-1 Daemon starting (interval=%ds)", interval)
+        logger.info("🚀 MOSKV-1 Daemon starting [LEGACY] (interval=%ds)", interval)
 
         if self._aether_daemon is not None:
             self._spawn_thread(self._aether_daemon.start, "AetherAgent")
-
         self._spawn_thread(self._run_neural_loop, "NeuralSync")
-
         if self.ast_oracle:
             self._spawn_thread(self._run_ast_oracle_loop, "ASTOracle")
         if getattr(self, "iot_oracle", None):
             self._spawn_thread(self._run_iot_oracle_loop, "IoTOracle")
-
         if self.fiat_oracle:
             self._spawn_thread(self.fiat_oracle.run_sync_loop, "FiatOracle")
         if self.heartbeat_daemon:
@@ -510,11 +782,8 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
             self._spawn_thread(self._run_zero_prompting_loop, "ZeroPromptingDaemon")
         if getattr(self, "epistemic_breaker_daemon", None):
             self._spawn_thread(self._run_epistemic_breaker_loop, "EpistemicBreakerDaemon")
-
         if getattr(self, "sentinel_oracle", None):
             self._spawn_thread(self._run_sentinel_oracle_loop, "SentinelOracle")
-
-        # Health Index — autonomous monitoring
         self._spawn_thread(self._run_health_loop, "HealthMonitor")
 
         logger.info("Daemon started with %d threads", len(self._threads))

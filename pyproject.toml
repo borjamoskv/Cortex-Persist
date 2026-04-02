@@ -46,6 +46,8 @@ dependencies = [
     "beautifulsoup4",
     "arq",
     "email-validator>=2.1.0",
+    "chromadb>=1.5.5",
+    "numba>=0.65.0",
 ]
 
 [project.urls]
@@ -96,6 +98,7 @@ all = [
 cortex = "cortex.cli:cli"
 moskv-daemon = "cortex.daemon_cli:main"
 cortex-adk = "cortex.adk.runner:main"
+cortex-mcp = "cortex.mcp.server:run_server"
 
 [build-system]
 requires = ["setuptools>=68.0"]

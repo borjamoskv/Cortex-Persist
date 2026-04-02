@@ -1,6 +1,7 @@
 import asyncio
 import threading
 from cortex.swarm.autopulse import process_queue
+from cortex.swarm.tensor_glial import TensorGlialLegion
 
 def start_swarm_daemon():
     """Start the Swarm Autopoiesis engine in a background thread."""
