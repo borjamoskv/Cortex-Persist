@@ -19,7 +19,7 @@ async def test_strike_density_assignment():
             # Dispatch individually to avoid asyncio selector saturation
             await commander.execute_global_dispatch(
                 [{"id": f"{m.name}_{dispatch_count}", "domain": m.target_repo.split("/")[-1]}],
-                parallel=False
+                parallel=False,
             )
             dispatch_count += 1
 

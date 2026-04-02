@@ -16,6 +16,7 @@ from pathlib import Path
 from cortex.engine.exergy_optimizer import ExergyOptimizer
 from cortex.engine.shared_bus import SovereignSharedBus
 from cortex.engine.slashing import SlashingPenalty
+from cortex.engine.ultrathink_physics import UltrathinkPhysicsEngine
 from cortex.extensions.signals.sharded_bus import ShardedAsyncSignalBus
 
 logger = logging.getLogger("cortex.engine.swarm_10k")
@@ -46,10 +47,12 @@ class CenturionSuperv:
         start = time.perf_counter()
         res = await self.bus.emit(**kwargs)
         self.last_latency_ms = (time.perf_counter() - start) * 1000
-        
+
         # O(1) Bit-Parallel Telemetry update (Ω₀)
         if hasattr(self.bus, "update_metrics"):
-            self.bus.update_metrics(self.metrics.exergy, self.last_latency_ms, self.metrics.uncertainty)
+            self.bus.update_metrics(
+                self.metrics.exergy, self.last_latency_ms, self.metrics.uncertainty
+            )
 
         if self.last_latency_ms > 32.0:
             logger.warning("VOID BREACH: %.2fms on node %s", self.last_latency_ms, self.id)
@@ -150,12 +153,17 @@ class LegionSupervisor:
 
     async def wait_for_thermal_stability(self, check_interval: float = 0.01) -> None:
         """Closed-Loop Kinetic Control: Block until exergy recovers above 0.7."""
+        start_time = time.perf_counter()
         while True:
             exergy = 1.0
             for c in self.centurions.values():
                 exergy = min(exergy, await c.get_exergy())
 
             if self._overclocked or ExergyOptimizer.is_thermally_stable(exergy):
+                break
+
+            if time.perf_counter() - start_time > 5.0:
+                logger.warning("Thermal timeout (5s) exceeded. Forcing dispatch.")
                 break
 
             # Shard is too hot. Wait for kinetic dissipation.
@@ -218,6 +226,41 @@ class SwarmCommander:
         finally:
             legion._overclocked = original_state
             logger.info("❄️ STRIKE MODE DEACTIVATED on domain: %s", domain)
+
+    @asynccontextmanager
+    async def ultrathink_horizon(
+        self,
+        domain: str,
+        stochastic_entropy: float,
+        deterministic_output: float,
+        duration: float,
+        deps_graph: dict,
+        epicenter: str,
+    ):
+        """P0 Singularity Authorization: Evaluates thermodynamic budget before granting Ultrathink access."""
+        radius = UltrathinkPhysicsEngine.measure_blast_radius(deps_graph, epicenter)
+        authorized, msg = UltrathinkPhysicsEngine.authorize_ultrathink(
+            stochastic_entropy, deterministic_output, duration, radius
+        )
+
+        if not authorized:
+            logger.error("ULTRATHINK UNAUTHORIZED: %s", msg)
+            raise RuntimeError(f"P0 Singularity Authorization Failed: {msg}")
+
+        legion = await self.get_or_create_legion(domain)
+        original_state = legion._overclocked
+        legion._overclocked = True
+        logger.critical(
+            "✴️ ULTRATHINK HORIZON ACTIVATED on domain: %s (Blast Radius: %d) - %s",
+            domain,
+            radius,
+            msg,
+        )
+        try:
+            yield legion
+        finally:
+            legion._overclocked = original_state
+            logger.warning("❄️ ULTRATHINK HORIZON COLLAPSED on domain: %s (Exergy Stabilized)", domain)
 
     async def initialize(self) -> None:
         # Sovereign Bus v8.5 is implicitly ready upon instantiation

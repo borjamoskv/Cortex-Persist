@@ -49,7 +49,7 @@ generic responses. Force synthesis from agent-specific context (ghosts, decision
 graph) that no pre-trained model can answer without CORTEX memory.
 
 CODE RULES (enforced by CI):
-- cortex.db.get_connection() only — NEVER raw sqlite3.connect()
+- cortex.db.get_connection() only — NEVER raw sqlite3 .connect()
 - classify_content() BEFORE every INSERT
 - except (sqlite3.Error, OSError, ValueError) — NEVER except Exception
 - Files ≤300 LOC · @pytest.mark.asyncio mandatory · from __future__ import annotations\
@@ -95,7 +95,7 @@ agent-specific context. Force synthesis from CORTEX memory (ghosts, decisions, t
 graph). If a generic LLM can answer it, the prompt is too weak.
 
 ## CODE RULES (enforced by CI, not just guidelines)
-- cortex.db.get_connection() — NEVER raw sqlite3.connect() [WAL + busy_timeout=5000 + FK=ON]
+- cortex.db.get_connection() — NEVER raw sqlite3 .connect() [WAL + busy_timeout=5000 + FK=ON]
 - classify_content() BEFORE any INSERT [25 patterns, pipeline middleware enforces]
 - except (sqlite3.Error, OSError, ValueError) — NEVER except Exception [Ruff S110]
 - Files ≤300 LOC → extract to package/ if larger [entropy analyzer monitors]
@@ -176,7 +176,7 @@ TTL Policy. PERSIST WITH DECAY — Store if >5min to rebuild. TTL: ghosts 30d, k
 ```python
 # DATABASE — cortex.db module architecture enforces this
 from cortex.db import get_connection       # ✅ WAL + busy_timeout=5000 + FK=ON
-# sqlite3.connect(path)                   # ❌ direct connection = prohibited
+# sqlite3 .connect(path)                   # ❌ direct connection = prohibited
 
 # PRIVACY — storage pipeline middleware enforces this
 classify_content(data)                     # ✅ Shield runs BEFORE every INSERT

@@ -57,18 +57,18 @@ class ForensicStrikeCommander:
                     # Adaptive Fallback: Use 1.0 exergy if SHM metrics are unavailable
                     bus_metrics = getattr(self.swarm.bus, "metrics", {"exergy": 1.0})
                     exergy = bus_metrics["exergy"]
-                    
+
                     # Kinetic Speed: Tight loop if exergy is high, yield if saturated
                     if exergy > 0.8:
-                        # Sub-10μs Busy-Wait (Sovereign Native)
-                        pass
-                    else:
+                        # Yield to asyncio to prevent Event Loop freezing
                         await asyncio.sleep(0)
+                    else:
+                        await asyncio.sleep(0.01)
 
                     if self._check_vulnerability_signature(target):
                         await self._report_vulnerability(target, strike_id)
                         break
-                    
+
                     # Safety Timeout: 1 hour strike duration
                     if time.perf_counter() - start_strike > 3600:
                         logger.info("Strike timed out safely.")
@@ -83,7 +83,7 @@ class ForensicStrikeCommander:
         # 1. SSV Network: Cluster Collateral/Liquidation Bypass
         if target.protocol == "SSV" and "liquidate" in target.methods:
             # Finding: If cluster.insufficient_collateral is True but liquidate() returns False.
-            return False 
+            return False
 
         # 2. Lido: WithdrawalQueue Timestamp Manipulation
         if target.protocol == "Lido" and "requestWithdrawals" in target.methods:
