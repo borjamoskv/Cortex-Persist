@@ -34,6 +34,8 @@ from cortex.extensions.timing import TimingTracker
 from cortex.routes import api_router
 from cortex.telemetry.metrics import MetricsMiddleware, metrics
 from cortex.utils.i18n import DEFAULT_LANGUAGE, get_trans
+from cortex.mcp.knowledge_watcher import start_knowledge_daemon
+from cortex.swarm import start_swarm_daemon
 
 __all__ = [
     "ContentSizeLimitMiddleware",
@@ -106,6 +108,12 @@ async def lifespan(app: FastAPI):
 
     notification_bus = setup_notifications(config)
     api_state.notification_bus = notification_bus  # type: ignore[reportAttributeAccessIssue]
+
+    # 7. V4 Singularity Daemons
+    watcher = start_knowledge_daemon()
+    swarm_daemon = start_swarm_daemon()
+    app.state.watcher = watcher
+    app.state.swarm_daemon = swarm_daemon
 
     try:
         yield
@@ -290,6 +298,10 @@ async def get_metrics():
 
 
 app.include_router(api_router)
+
+# V4 SSE Event Bus (Aether Matrix)
+from cortex.api import events as events_router
+app.include_router(events_router.router)
 
 # Extensions and third-party integrations
 
