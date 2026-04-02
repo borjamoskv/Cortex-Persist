@@ -6,19 +6,20 @@ import shutil
 import glob
 import re
 import json
-from fastapi import FastAPI
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from sse_starlette.sse import EventSourceResponse
+from pydantic import BaseModel
 import uvicorn
 import hashlib
 import sys
+import struct
 
-# Integrate persistence logic
+# Maintain CORTEX-V3.0 Alignment
 sys.path.append(os.path.join(os.path.dirname(__file__), "cortex-core"))
 try:
-    from persistence import LedgerManager, VSAMemory
+    from persistence import LedgerManager, VSAMemory, enqueue_swarm_task
 except ImportError:
-    # Handle if path differs
     pass
 
 app = FastAPI(title="CORTEX-X100-SSE-ENGINE")
@@ -41,20 +42,62 @@ STATE = {
     "agent_states": [0] * 10000 
 }
 
-events_queue = asyncio.Queue()
+# --- WEBSOCKET BINARY MEMBRANE --- #
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: list[WebSocket] = []
+
+    async def connect(self, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections.append(websocket)
+
+    def disconnect(self, websocket: WebSocket):
+        if websocket in self.active_connections:
+            self.active_connections.remove(websocket)
+
+    async def broadcast_binary(self, data: bytes):
+        for connection in self.active_connections:
+            try:
+                await connection.send_bytes(data)
+            except Exception:
+                pass
+
+    async def broadcast_json(self, data: dict):
+        for connection in self.active_connections:
+            try:
+                await connection.send_json(data)
+            except Exception:
+                pass
+
+manager = ConnectionManager()
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await manager.connect(websocket)
+    try:
+        while True:
+            # Maintain connection alive (client can send heartbeats)
+            data = await websocket.receive_text()
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
 
 def push_state():
     try:
-        # Update yields from ledger persistent state
-        l_state = ledger._load_state()
-        total = sum(l["yield_amount"] for l in l_state.get("ledgers", []))
-        STATE["global_yield"] = total
-        # Update vector yields
-        for v in STATE["vectors"]:
-            v["yield"] = sum(l["yield_amount"] for l in l_state.get("ledgers", []) if l["vector_id"] == v["id"])
-            
+        # 1. Update State
+        STATE["global_yield"] = ledger.get_total_yield()
+        STATE["cycle_count"] += 1
+        
+        # 2. Binary Packaging (Float32Array equivalent)
+        # 40,000 bytes fijos para 10,000 agentes
+        binary_data = struct.pack('f' * 10000, *STATE["agent_states"])
+        
+        # 3. Async Dispatch (Fire and Forget for minimal latency)
+        loop = asyncio.get_event_loop()
+        loop.create_task(manager.broadcast_binary(binary_data))
+        
+        # 4. JSON Dispatch for UI Metadata (SSE compatible)
         events_queue.put_nowait(STATE.copy())
-    except asyncio.QueueFull:
+    except Exception:
          pass
 
 def add_log(msg, val):
@@ -71,7 +114,26 @@ async def sse_stream():
             yield {"data": json.dumps(state_frame)}
     return EventSourceResponse(event_generator())
 
-# --- THE CORTEX X100 ENGINE (C5-REAL) --- #
+# --- THE EFFORT MATRIX --- #
+EFFORT_MAP = {
+    "think": {"fuzz_runs": 256, "swarm_multiplier": 1},
+    "think_hard": {"fuzz_runs": 5000, "swarm_multiplier": 10},
+    "think_harder": {"fuzz_runs": 15000, "swarm_multiplier": 100},
+    "ultrathink": {"fuzz_runs": 31999, "swarm_multiplier": 1000}
+}
+
+class FuzzRequest(BaseModel):
+    url: str
+    effort: str = "think"
+
+@app.post("/trigger_fuzz")
+async def trigger_fuzz(req: FuzzRequest):
+    if STATE["is_running"]:
+         return {"status": "error", "message": "Fuzzer currently running"}
+    asyncio.create_task(neuro_static_fuzz(req.url, req.effort))
+    return {"status": "accepted", "effort": req.effort, "target": req.url}
+
+# --- THE O(1) FUZZING MEMBRANE --- #
 FORGE_WORKSPACE = "/tmp/cortex_x100_fuzz"
 
 class SolidityAnalyzer:
@@ -88,9 +150,10 @@ class SolidityAnalyzer:
             results.append("INSECURE_ACCESS_CONTROL")
         return results
 
-async def neuro_static_fuzz(repo_url: str):
+async def neuro_static_fuzz(repo_url: str, effort: str = "think"):
     STATE["is_running"] = True
-    add_log("FORGING CRUCIBLE", FORGE_WORKSPACE)
+    effort_cfg = EFFORT_MAP.get(effort, EFFORT_MAP["think"])
+    add_log("FORGING CRUCIBLE", f"{FORGE_WORKSPACE} [{effort.upper()}]")
     
     if os.path.exists(FORGE_WORKSPACE):
         shutil.rmtree(FORGE_WORKSPACE)
@@ -112,15 +175,25 @@ async def neuro_static_fuzz(repo_url: str):
             findings = SolidityAnalyzer.scan(content)
             for fnd in findings:
                 add_log("CRITICAL FINDING", fnd)
-                yield_val = 100.0 if fnd == "POTENTIAL_REENTRANCY" else 50.0
-                ledger.append(f"Exploit Theory: {fnd}", "bounty", yield_val)
-                vsa.record(f"exploit:{fnd}", filepath)
+                # CORTEX-V3.0 Logic: Enqueue specialized task for the Swarm
+                effort_cfg = EFFORT_MAP.get(effort, EFFORT_MAP["think"])
+                for _ in range(effort_cfg["swarm_multiplier"]):
+                    enqueue_swarm_task(agent_name="VulnerabilityFixer", payload={
+                        "finding": fnd,
+                        "target_file": filepath,
+                        "effort": effort,
+                        "runs": effort_cfg["fuzz_runs"]
+                    })
+                ledger.append(f"Exploit Theory: {fnd}", "bounty", 100.0)
+                vsa.record(key=fnd, value=f"Detected in {filepath}")
                 push_state()
 
     # Forge Runtime Phase
-    add_log("RUNTIME ENGAGED", "forge test")
+    effort_cfg = EFFORT_MAP.get(effort, EFFORT_MAP["think"])
+    fuzz_runs_arg = f"--fuzz-runs={effort_cfg['fuzz_runs']}"
+    add_log("RUNTIME ENGAGED", f"forge test {fuzz_runs_arg}")
     process = await asyncio.create_subprocess_exec(
-        "forge", "test", "-vv",
+        "forge", "test", "-vv", fuzz_runs_arg,
         cwd=FORGE_WORKSPACE,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE
@@ -133,12 +206,10 @@ async def neuro_static_fuzz(repo_url: str):
         if "[FAIL]" in line:
             add_log("INVARIANT DESTROYED", line[:50])
             ledger.append("Forge Invariant Break", "mev", 500.0)
-            vsa.record("forge:fail", line)
+            vsa.record(key="Forge FAIL", value=line)
+            # Signal swarm for immediate correction
+            enqueue_swarm_task(agent_name="InvariantValidator", payload={"log": line})
             push_state()
-        elif "[PASS]" in line:
-            STATE["cycle_count"] += 1
-            if STATE["cycle_count"] % 10 == 0:
-                push_state()
 
     await process.wait()
     STATE["is_running"] = False
@@ -153,7 +224,7 @@ async def startup_event():
 async def vigilia_loop():
     target = "https://github.com/lidofinance/lido-dao"
     while True:
-        await neuro_static_fuzz(target)
+        await neuro_static_fuzz(target, "think")
         await asyncio.sleep(60)
 
 if __name__ == "__main__":

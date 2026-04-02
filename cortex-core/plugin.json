@@ -1,0 +1,14 @@
+{
+  "name": "CORTEX-Core-MCP",
+  "version": "1.0.0",
+  "description": "Sovereign MCP Server exposing compiled O(1) skills",
+  "agents": [],
+  "skills": [],
+  "mcp_servers": [
+    {
+      "name": "cortex-core-mcp",
+      "command": "python3",
+      "args": ["${plugin_dir}/cortex_mcp_server.py"]
+    }
+  ]
+}

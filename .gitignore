@@ -90,6 +90,11 @@ Thumbs.db
 .mejoralo/
 
 # ── Generated / Scratch ──────────────────────────
+.scratch/
+tmp/
+ouroboros-matrix/node_modules/
+engine-c5/fuzzer-cache/
+engine-c5/*.pid
 *.out
 *.png
 scratch_*.html

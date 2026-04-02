@@ -141,6 +141,8 @@ class CortexMemoryManager:
         # Memory OS subsystems (RFC-CORTEX-MEMORY-OS / Axiom Ω₁₃)
         self._mem0_pipeline = Mem0Pipeline()
         self._memory_os = MemoryOS() if MemoryOS else None
+        if self._memory_os and hasattr(self._memory_os, "start_glial_daemon"):
+            self._memory_os.start_glial_daemon()
 
         # ART-v2 Resonance Engine [v6.2]
         self._resonance_gate = self._init_resonance_gate()
@@ -577,6 +579,10 @@ class CortexMemoryManager:
 
     def _cancel_background_tasks(self) -> None:
         """Cancel pending tasks and workers aggressively to prevent event loop leaks."""
+        logger.warning("Canceling all background workers and Glial Daemon.")
+        if self._memory_os and getattr(self._memory_os, "_glial_daemon_task", None):
+            self._memory_os._glial_daemon_task.cancel()
+
         for worker in self._bg_workers:
             if not worker.done():
                 worker.cancel()

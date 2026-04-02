@@ -8,8 +8,34 @@ import numpy as np
 from typing import Optional, List, Tuple
 from pathlib import Path
 import hashlib
+import threading
 
+try:
+    import numba
+    from numba import njit, prange
+    HAS_NUMBA = True
+except ImportError:
+    HAS_NUMBA = False
+    
 from cortex.vsa_engine import VSAEngine
+
+# --- Direct-Silicon JIT Kernels ---
+if HAS_NUMBA:
+    @njit(parallel=True, fastmath=True)
+    def fast_fading_memory(tensor_view, last_update_ts, now_ts, lambda_decay):
+        for i in prange(tensor_view.shape[0]):
+            dt = now_ts - last_update_ts[i]
+            if dt < 0: dt = 0.0
+            decay = np.exp(-lambda_decay * dt)
+            for j in range(tensor_view.shape[1]):
+                tensor_view[i, j] *= decay
+            last_update_ts[i] = now_ts
+else:
+    def fast_fading_memory(tensor_view, last_update_ts, now_ts, lambda_decay):
+        dt = np.clip(now_ts - last_update_ts, 0, None)
+        decay = np.exp(-lambda_decay * dt)[:, np.newaxis]
+        tensor_view *= decay
+        last_update_ts.fill(now_ts)
 
 class TensorGlialLegion:
     """
@@ -41,20 +67,15 @@ class TensorGlialLegion:
     def apply_fading_memory(self, lambda_decay: float = 0.001):
         """
         Glial Daemon: applies time-based Ebbinghaus forgetting universally across the 10,000x10,000 tensor.
-        Executes as a single SIMD instruction rather than a Python loop.
-        w = e^{-lambda * dt}
+        Executes via Direct-Silicon JIT (Numba) if available to bypass the GIL.
         """
         now = time.time()
-        # Vectorized dt calculation
-        dt = np.clip(now - self.last_update_ts, 0, None)
-        decay_factors = np.exp(-lambda_decay * dt)[:, np.newaxis]
-        
-        # Single vectorized pass
-        self.agents_tensor *= decay_factors
-        self.last_update_ts.fill(now)
-        
-        # Flush to physical storage instantly
-        self.agents_tensor.flush()
+        fast_fading_memory(self.agents_tensor, self.last_update_ts, now, lambda_decay)
+        self.async_flush()
+
+    def async_flush(self):
+        """Asynchronous disk sync to prevent blocking the OMEGA-X orchestrator."""
+        threading.Thread(target=self.agents_tensor.flush, daemon=True).start()
 
     def batch_write_action(self, agent_indices: List[int], action_texts: List[str]):
         """
@@ -71,7 +92,7 @@ class TensorGlialLegion:
         
         now = time.time()
         self.last_update_ts[agent_indices] = now
-        self.agents_tensor.flush()
+        self.async_flush()
 
     def normalize_batch(self, batch: np.ndarray) -> np.ndarray:
         """Batch normalize row by row."""
@@ -121,7 +142,7 @@ class TensorGlialLegion:
             self.last_update_ts[corpse_idx] = time.time()
             respawn_count += 1
             
-        self.agents_tensor.flush()
+        self.async_flush()
         return respawn_count
 
     def global_sha256_audit(self) -> str:

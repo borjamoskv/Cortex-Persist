@@ -7,6 +7,17 @@ import Welcome from '../components/Welcome.astro';
 
 <Layout title="CORTEX Persist — Tamper-Evident Agent Memory">
 	<main>
+		<div class="hero">
+			<h1>CORTEX_PERSIST</h1>
+			<p>Sovereign Agentic Context & Decision Lineage</p>
+			
+			<div class="actions">
+				<a href="/vsa" class="btn-sovereign">
+					ENTER_VSA_DASHBOARD
+					<span class="glitch-line"></span>
+				</a>
+			</div>
+		</div>
 		<Welcome />
 	</main>
 </Layout>
@@ -14,8 +25,72 @@ import Welcome from '../components/Welcome.astro';
 <style>
 	main {
 		width: 100%;
-		height: 100%;
+		height: 100vh;
 		display: flex;
 		flex-direction: column;
+		background: #000;
+		color: #fff;
+	}
+
+	.hero {
+		padding: 4rem;
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		border-bottom: 1px solid #111;
+	}
+
+	h1 {
+		font-family: 'Orbitron', sans-serif;
+		font-size: 4rem;
+		letter-spacing: 0.5rem;
+		margin: 0;
+	}
+
+	p {
+		font-family: 'Inter', sans-serif;
+		color: #666;
+		margin-top: 1rem;
+		letter-spacing: 0.1rem;
+	}
+
+	.actions {
+		margin-top: 3rem;
+	}
+
+	.btn-sovereign {
+		position: relative;
+		display: inline-block;
+		padding: 1rem 2rem;
+		background: transparent;
+		border: 1px solid #2B3BE5;
+		color: #2B3BE5;
+		text-decoration: none;
+		font-family: 'Orbitron', sans-serif;
+		font-size: 0.8rem;
+		letter-spacing: 0.2rem;
+		transition: all 0.3s ease;
+		overflow: hidden;
+	}
+
+	.btn-sovereign:hover {
+		background: #2B3BE5;
+		color: #fff;
+		box-shadow: 0 0 20px rgba(43, 59, 229, 0.4);
+	}
+
+	.glitch-line {
+		position: absolute;
+		top: 0;
+		left: -100%;
+		width: 100%;
+		height: 1px;
+		background: rgba(255,255,255,0.5);
+		transition: all 0.5s ease;
+	}
+
+	.btn-sovereign:hover .glitch-line {
+		left: 100%;
 	}
 </style>
