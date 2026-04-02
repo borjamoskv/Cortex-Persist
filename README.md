@@ -1,14 +1,33 @@
-# CORTEX Persist
+<p align="center">
+  <img src="assets/marketing/social-preview.png" alt="CORTEX Persist — Tamper-evident memory for AI agents" width="720">
+</p>
 
-**Tamper-evident memory and decision lineage for AI agents.**
+<h1 align="center">CORTEX Persist</h1>
 
-CORTEX-Persist is a local-first memory and trust layer for AI systems that need persistent context, cryptographic lineage, and audit-ready history.
+<p align="center">
+  <strong>Prove what your AI agent knew. Mathematically.</strong>
+</p>
 
-[![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
-[![CI](https://github.com/borjamoskv/Cortex-Persist/actions/workflows/ci.yml/badge.svg)](https://github.com/borjamoskv/Cortex-Persist/actions)
-[![Codecov](https://codecov.io/gh/borjamoskv/Cortex-Persist/branch/main/graph/badge.svg)](https://codecov.io/gh/borjamoskv/Cortex-Persist)
-[![PyPI](https://img.shields.io/pypi/v/cortex-persist.svg)](https://pypi.org/project/cortex-persist/)
+<p align="center">
+  Tamper-evident memory and decision lineage for AI agents.&nbsp;
+  <br>
+  Local-first. SHA-256 hash-chained. Merkle-sealed. Audit-ready.
+</p>
+
+<p align="center">
+  <a href="https://github.com/borjamoskv/Cortex-Persist/stargazers"><img src="https://img.shields.io/github/stars/borjamoskv/Cortex-Persist?style=social" alt="GitHub Stars"></a>&nbsp;&nbsp;
+  <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.10%2B-blue.svg" alt="Python"></a>&nbsp;
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-blue.svg" alt="License"></a>&nbsp;
+  <a href="https://github.com/borjamoskv/Cortex-Persist/actions"><img src="https://github.com/borjamoskv/Cortex-Persist/actions/workflows/ci.yml/badge.svg" alt="CI"></a>&nbsp;
+  <a href="https://codecov.io/gh/borjamoskv/Cortex-Persist"><img src="https://codecov.io/gh/borjamoskv/Cortex-Persist/branch/main/graph/badge.svg" alt="Codecov"></a>&nbsp;
+  <a href="https://pypi.org/project/cortex-persist/"><img src="https://img.shields.io/pypi/v/cortex-persist.svg" alt="PyPI"></a>
+</p>
+
+<p align="center">
+  <a href="#quickstart">Quickstart</a> · <a href="docs/api.md">API</a> · <a href="docs/SECURITY_TRUST_MODEL.md">Security Model</a> · <a href="ROADMAP.md">Roadmap</a> · <a href="CONTRIBUTING.md">Contributing</a>
+</p>
+
+---
 
 CORTEX is trust infrastructure for AI agents. It sits between your runtime and your memory layer, making facts, decisions, and derived state tamper-evident. If stored context changes after the fact, verification fails. If you need to explain what an agent knew, when it knew it, and what it did next, CORTEX gives you a cryptographic trail instead of an anecdote.
 
