@@ -1,0 +1,95 @@
+[
+    {
+        "title": "\u20a31,000 Token Reward - Tampermonkey / Greasemonkey Userscript Support",
+        "labels": [
+            "BOUNTY"
+        ],
+        "url": "https://github.com/BarryThePirate/ftl-ext-sdk/issues/1",
+        "exergy_ratio_estimate": "> 2.0 (High Priority)"
+    },
+    {
+        "title": "Request Timeout & Cancellation \u2014 Consumer-Initiated Abort",
+        "labels": [
+            "bounty",
+            "consumer",
+            "network"
+        ],
+        "url": "https://github.com/runveil-io/core/issues/49",
+        "exergy_ratio_estimate": "> 2.0 (High Priority)"
+    },
+    {
+        "title": "Graceful Shutdown \u2014 Clean Disconnect for All Roles",
+        "labels": [
+            "good-first-issue",
+            "bounty"
+        ],
+        "url": "https://github.com/runveil-io/core/issues/48",
+        "exergy_ratio_estimate": "> 2.0 (High Priority)"
+    },
+    {
+        "title": "Anti-Detection \u2014 Request Fingerprint Randomization",
+        "labels": [
+            "bounty",
+            "provider"
+        ],
+        "url": "https://github.com/runveil-io/core/issues/45",
+        "exergy_ratio_estimate": "> 2.0 (High Priority)"
+    },
+    {
+        "title": "Provider Multi-Account Pool \u2014 Rotate API Keys Across Accounts",
+        "labels": [
+            "bounty",
+            "provider"
+        ],
+        "url": "https://github.com/runveil-io/core/issues/42",
+        "exergy_ratio_estimate": "> 2.0 (High Priority)"
+    },
+    {
+        "title": "Wire Protocol Version Negotiation",
+        "labels": [
+            "good-first-issue",
+            "bounty",
+            "network"
+        ],
+        "url": "https://github.com/runveil-io/core/issues/39",
+        "exergy_ratio_estimate": "> 2.0 (High Priority)"
+    },
+    {
+        "title": "Heartbeat Probe \u2014 Detect Dead Providers During Task Execution",
+        "labels": [
+            "bounty",
+            "relay"
+        ],
+        "url": "https://github.com/runveil-io/core/issues/25",
+        "exergy_ratio_estimate": "> 2.0 (High Priority)"
+    },
+    {
+        "title": "Provider Multi-Vendor Adapter \u2014 OpenAI + Google Support",
+        "labels": [
+            "bounty",
+            "provider"
+        ],
+        "url": "https://github.com/runveil-io/core/issues/23",
+        "exergy_ratio_estimate": "> 2.0 (High Priority)"
+    },
+    {
+        "title": "Expand E2E Test Coverage",
+        "labels": [
+            "good-first-issue",
+            "bounty",
+            "tests"
+        ],
+        "url": "https://github.com/runveil-io/core/issues/10",
+        "exergy_ratio_estimate": "> 2.0 (High Priority)"
+    },
+    {
+        "title": "WebSocket Reconnect Improvements",
+        "labels": [
+            "good-first-issue",
+            "bounty",
+            "network"
+        ],
+        "url": "https://github.com/runveil-io/core/issues/8",
+        "exergy_ratio_estimate": "> 2.0 (High Priority)"
+    }
+]

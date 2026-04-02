@@ -1,0 +1,30 @@
+[
+  {
+    "name": "Ethereum-Cloudflare",
+    "url": "https://cloudflare-eth.com",
+    "best_rtt": 100.87816600000001,
+    "winning_agent": 860,
+    "block": "N/A"
+  },
+  {
+    "name": "Ethereum-Public",
+    "url": "https://rpc.ankr.com/eth",
+    "best_rtt": 38.453083,
+    "winning_agent": 4317,
+    "block": "N/A"
+  },
+  {
+    "name": "Base-Public",
+    "url": "https://mainnet.base.org",
+    "best_rtt": 386.414,
+    "winning_agent": 466,
+    "block": "0x2a19ba6"
+  },
+  {
+    "name": "Arbitrum-Public",
+    "url": "https://arb1.arbitrum.io/rpc",
+    "best_rtt": 368.06566699999996,
+    "winning_agent": 115,
+    "block": "0x1ab4bc47"
+  }
+]
