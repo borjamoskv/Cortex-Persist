@@ -94,7 +94,10 @@ class CortexDaemon:
             tool_outputs=task.get("tool_outputs", None)
         )
         
+        override_signature = None  # Phase 5 tracking
+
         if not verdict.allowed:
+            import time
             pulse_id = f"pulse_{int(time.time())}"
             logging.critical("🚨 [SECURITY MONITOR] Blocked: %s (Reason: %s)", cmd, verdict.reason)
             if self.bus:
@@ -118,6 +121,28 @@ class CortexDaemon:
                             payload = json.loads(sig.payload) if isinstance(sig.payload, str) else sig.payload
                             if payload.get("pulse_id") == pulse_id:
                                 if payload.get("action") == "APPROVED":
+                                    # Phase 5: Cryptographic Logic
+                                    from cortex.extensions.security.signatures import get_default_signer, generate_keypair, configure_signer
+                                    client_sig = payload.get("signature")
+                                    
+                                    signer = get_default_signer()
+                                    if not signer:
+                                        priv, pub = generate_keypair()
+                                        signer = configure_signer(priv)
+                                        logging.info("🔑 [CRYPTO] Auto-generated Ed25519 keyring for daemon.")
+                                        
+                                    if client_sig:
+                                        try:
+                                            signer.verify(content=cmd, fact_hash=pulse_id, signature_b64=client_sig)
+                                            override_signature = client_sig
+                                            logging.info("✅ [CRYPTO] Notch Signature VÁLIDA.")
+                                        except Exception as sig_err:
+                                            logging.critical("💀 [CRYPTO] FIRMA INVÁLIDA (Spoofing Alert): %s", sig_err)
+                                            return
+                                    else:
+                                        override_signature = signer.sign(content=cmd, fact_hash=pulse_id)
+                                        logging.info("✍️ [CRYPTO] Daemon Auto-Signed the Override.")
+                                        
                                     approved = True
                                     break
                                 else:
@@ -157,6 +182,7 @@ class CortexDaemon:
 
         try:
             import time
+            import asyncio
             process = await asyncio.create_subprocess_shell(
                 sandbox_cmd,
                 stdin=asyncio.subprocess.DEVNULL,
@@ -173,6 +199,9 @@ class CortexDaemon:
                 "stdout": stdout.decode()[-1000:], # Last 1k to avoid bloat
                 "stderr": stderr.decode()[-1000:]
             }
+            if override_signature:
+                result["override_signature"] = override_signature
+                result["provenance"] = "USER_EXPLICIT_SIGNED"
 
             # Emit V4 Pulse: Completion
             if self.bus:
