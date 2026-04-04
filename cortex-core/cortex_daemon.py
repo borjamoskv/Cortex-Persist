@@ -111,9 +111,17 @@ class CortexDaemon:
                 # Pausa Táctica: Espera al Consentimiento Humano (Interactive Pulse)
                 logging.info("⏸️ Esperando autorización humana vía WebSockets (timeout: 300s).")
                 approved = False
-                for _ in range(300):
+                backoff_sleep = 0.5
+                max_sleep = 5.0
+                elapsed_time = 0.0
+                timeout_limit = 300.0
+
+                while elapsed_time < timeout_limit:
                     import asyncio
-                    await asyncio.sleep(1)
+                    await asyncio.sleep(backoff_sleep)
+                    elapsed_time += backoff_sleep
+                    backoff_sleep = min(backoff_sleep * 1.5, max_sleep)
+                    
                     try:
                         override_signals = self.bus.poll(event_type="human_override", consumer=f"daemon_{pulse_id}", limit=10)
                         for sig in override_signals:
@@ -166,9 +174,37 @@ class CortexDaemon:
         execute_cmd = sandboxed.redirected_cmd if sandboxed.is_redirected else sandboxed.original_cmd
 
         # --- [BASH SANDBOXING + OS-LEVEL PRISON] ---
-        # Isolate iterations via Apple sandbox-exec and mandatory timeout.
-        sb_profile = "/Users/borjafernandezangulo/Cortex-Persist/cortex-core/cortex_prison.sb"
-        sandbox_cmd = f"sandbox-exec -f {sb_profile} timeout 180 {execute_cmd}"
+        # Isolate iterations via Apple sandbox-exec.
+        from cortex.extensions.security.security_monitor import SecurityMonitorClassifier
+        # Parse Intent for JIT Network
+        is_npm_git = execute_cmd.strip().startswith("npm ") or execute_cmd.strip().startswith("git ") or execute_cmd.strip().startswith("forge ")
+        
+        sb_template_path = "/Users/borjafernandezangulo/Cortex-Persist/cortex-core/cortex_prison.sb.template"
+        try:
+            with open(sb_template_path, "r") as f:
+                sb_content = f.read()
+        except FileNotFoundError:
+            # Fallback if the template hasn't been written yet or missing
+            sb_content = "(version 1)\n(allow default)"
+            
+        if is_npm_git:
+            net_rules = "(allow network-outbound)\n"
+            logging.info("🌐 [JIT SANDBOX] Network granted (npm/git/forge intent recognized).")
+        else:
+            net_rules = "(deny network-outbound)\n"
+            logging.info("🚫 [JIT SANDBOX] Network ZERO-OUTBOUND enforced.")
+            
+        sb_content_rendered = sb_content.replace("{{NETWORK_OUTBOUND_RULES}}", net_rules)
+        
+        # Write ephemeral jail profile
+        import tempfile
+        import uuid
+        jit_jail_path = os.path.join(tempfile.gettempdir(), f"jail_{uuid.uuid4().hex[:8]}.sb")
+        with open(jit_jail_path, "w") as f:
+            f.write(sb_content_rendered)
+
+        # Removed bash 'timeout 180', using Orphan Slayer Python approach
+        sandbox_cmd = f"sandbox-exec -f {jit_jail_path} {execute_cmd}"
 
         logging.info("🚀 [SWARM EXEC] Dispatching OS-Sandboxed Task: %s for %s", execute_cmd, agent)
         
@@ -183,19 +219,35 @@ class CortexDaemon:
         try:
             import time
             import asyncio
+            import os
+            import signal
+
             process = await asyncio.create_subprocess_shell(
                 sandbox_cmd,
                 stdin=asyncio.subprocess.DEVNULL,
                 stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE
+                stderr=asyncio.subprocess.PIPE,
+                preexec_fn=os.setsid
             )
-            stdout, stderr = await process.communicate()
             
+            try:
+                stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=180.0)
+            except asyncio.TimeoutError:
+                # Orphan Slayer Triggered
+                os.killpg(os.getpgid(process.pid), signal.SIGKILL)
+                process.returncode = 124
+                stdout, stderr = b"", b"CORTEX KINETIC SHIELD: Timeout Orphan Slayer Triggered. Process group destroyed."
+                logging.error("💀 [ORPHAN SLAYER] Timeout exceeded. Process group %d annihilated.", process.pid)
+            
+            # Clean up JIT profile
+            if os.path.exists(jit_jail_path):
+                os.remove(jit_jail_path)
+
             result = {
                 "timestamp": time.time(),
                 "agent": agent,
                 "command": execute_cmd,
-                "exit_code": process.returncode,
+                "exit_code": process.returncode if process.returncode is not None else 1,
                 "stdout": stdout.decode()[-1000:], # Last 1k to avoid bloat
                 "stderr": stderr.decode()[-1000:]
             }

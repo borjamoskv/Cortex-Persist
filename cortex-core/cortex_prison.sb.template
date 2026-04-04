@@ -98,8 +98,10 @@
 )
 
 ; --- NETWORK ---
-; Deny all network by default. Whitelist specific domains.
-; DNS resolution must be explicitly allowed for domain names to work.
+; Dynamic JIT Rules injected by cortex_daemon:
+{{NETWORK_OUTBOUND_RULES}}
+
+; Basic inbound allow
 (allow network-inbound (local ip))
 
 ; Allow DNS resolution (required for domain → IP mapping)
