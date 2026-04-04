@@ -146,26 +146,147 @@ class HoneypotGuardWrapper(BaseGuard):
     name = "honeypot_guard"
     required = True
 
-    def evaluate(self, context: dict[str, Any]) -> GuardOutcome:
+    def evaluate(
+        self, context: dict[str, Any]
+    ) -> GuardOutcome:
         try:
-            from cortex.extensions.security.honeypot import HONEY_POT
+            from cortex.extensions.security.honeypot import (
+                HONEY_POT,
+            )
 
-            decoy = HONEY_POT.check_exploitation(context["content"])
+            decoy = HONEY_POT.check_exploitation(
+                context["content"]
+            )
             if decoy:
                 return GuardOutcome(
                     allowed=False,
-                    reason=f"Unauthorized access to honeypot: {decoy.id}",
+                    reason=(
+                        "Unauthorized access to "
+                        f"honeypot: {decoy.id}"
+                    ),
                     severity="critical",
                     code="honeypot.breach",
-                    meta={"honeypot_triggered": True, "decoy_id": decoy.id},
+                    meta={
+                        "honeypot_triggered": True,
+                        "decoy_id": decoy.id,
+                    },
                 )
-            return GuardOutcome(allowed=True, code="honeypot.clear")
+            return GuardOutcome(
+                allowed=True, code="honeypot.clear"
+            )
         except ImportError:
-            return GuardOutcome(allowed=True, reason="Honeypot missing, skipping")
+            return GuardOutcome(
+                allowed=True,
+                reason="Honeypot missing, skipping",
+            )
 
 
-def enforce_guard_pipeline(guards: list[BaseGuard], context: dict[str, Any]) -> list[GuardOutcome]:
-    """Executes a list of guards and raises ValueError on first high-severity failure."""
+class IntentGuardWrapper(BaseGuard):
+    """V9: Bridges SecurityMonitorClassifier into GuardRuntime.
+
+    This guard evaluates swarm tasks against the 7 Intent
+    Axioms (Ω1-Ω7) and the ZeroTrust tool filter (Ω6).
+
+    Context keys:
+      - command: The shell command to classify
+      - agent: The agent name
+      - user_request: Original user request
+      - provenance: Parameter provenance
+      - tool_outputs: Optional tool-derived data tags
+    """
+
+    name = "intent_guard"
+    required = True
+
+    def evaluate(
+        self, context: dict[str, Any]
+    ) -> GuardOutcome:
+        try:
+            from cortex.extensions.security.security_monitor import (
+                MONITOR,
+                ParameterProvenance,
+            )
+
+            cmd = context.get("command", "")
+            if not cmd:
+                # No command to classify — skip
+                return GuardOutcome(
+                    allowed=True,
+                    code="intent.no_command",
+                )
+
+            task = {
+                "command": cmd,
+                "agent": context.get("agent", "unknown"),
+            }
+            provenance = context.get(
+                "provenance",
+                ParameterProvenance.AGENT_INFERRED,
+            )
+            verdict = MONITOR.classify(
+                task,
+                user_request=context.get(
+                    "user_request", ""
+                ),
+                provenance=provenance,
+                tool_outputs=context.get("tool_outputs"),
+            )
+
+            if not verdict.allowed:
+                return GuardOutcome(
+                    allowed=False,
+                    reason=verdict.reason,
+                    severity=(
+                        "critical"
+                        if verdict.tier >= 3
+                        else "high"
+                    ),
+                    code=(
+                        f"intent.{verdict.axiom_violated}"
+                    ),
+                    meta=verdict.to_dict(),
+                )
+            return GuardOutcome(
+                allowed=True,
+                code="intent.allowed",
+                meta={
+                    "tier": verdict.tier,
+                    "source": verdict.intent_source,
+                },
+            )
+        except ImportError:
+            return GuardOutcome(
+                allowed=True,
+                reason=(
+                    "SecurityMonitorClassifier "
+                    "missing, skipping"
+                ),
+            )
+
+
+# The canonical guard pipeline in priority order.
+# IntentGuard runs first (cheapest, broadest coverage),
+# then InjectionGuard (content-level scan), then the
+# structural/behavioral guards.
+DEFAULT_GUARD_PIPELINE: list[BaseGuard] = [
+    IntentGuardWrapper(),
+    InjectionGuardWrapper(),
+    ContradictionSignalGuard(),
+    BridgeConflictGuard(),
+    AnomalyGuardWrapper(),
+    HoneypotGuardWrapper(),
+]
+
+
+def enforce_guard_pipeline(
+    guards: list[BaseGuard],
+    context: dict[str, Any],
+) -> list[GuardOutcome]:
+    """Execute guards and raise on first mandatory failure.
+
+    Uses fail-closed semantics: if a required guard crashes,
+    the entire pipeline is halted.
+    """
     outcomes = []
     for guard in guards:
         try:
@@ -173,21 +294,47 @@ def enforce_guard_pipeline(guards: list[BaseGuard], context: dict[str, Any]) -> 
             outcomes.append(outcome)
 
             if not outcome.allowed:
-                if guard.required or outcome.severity in {"high", "critical"}:
+                is_critical = guard.required or (
+                    outcome.severity
+                    in {"high", "critical"}
+                )
+                if is_critical:
                     logger.error(
-                        "🛑 [GUARD VOID] %s blocked (%s): %s",
+                        "🛑 [GUARD VOID] %s (%s): %s",
                         guard.name,
                         outcome.severity,
                         outcome.reason,
                     )
-                    raise ValueError(f"SECURITY GUARD BLOCK [{guard.name}]: {outcome.reason}")
+                    raise ValueError(
+                        f"SECURITY GUARD BLOCK "
+                        f"[{guard.name}]: "
+                        f"{outcome.reason}"
+                    )
                 else:
-                    logger.warning("🛡️ [GUARD WARNING] %s flagged: %s", guard.name, outcome.reason)
+                    logger.warning(
+                        "🛡️ [GUARD WARNING] %s: %s",
+                        guard.name,
+                        outcome.reason,
+                    )
 
+        except ValueError:
+            raise
         except Exception as e:
             if guard.required:
-                logger.critical("🔥 [GUARD CRASH] Mandatory guard %s failed: %s", guard.name, e)
-                raise RuntimeError(f"FAIL-CLOSED: Mandatory guard {guard.name} crashed: {e}") from e
-            logger.error("⚠️ [GUARD ERROR] Optional guard %s failed: %s", guard.name, e)
+                logger.critical(
+                    "🔥 [GUARD CRASH] %s: %s",
+                    guard.name,
+                    e,
+                )
+                raise RuntimeError(
+                    f"FAIL-CLOSED: {guard.name} "
+                    f"crashed: {e}"
+                ) from e
+            logger.error(
+                "⚠️ [GUARD ERROR] %s: %s",
+                guard.name,
+                e,
+            )
 
     return outcomes
+

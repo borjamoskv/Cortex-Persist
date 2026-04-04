@@ -344,5 +344,98 @@ class TestStochasticSandbox(unittest.TestCase):
         self.assertGreaterEqual(len(arenas), 1)
 
 
+class TestGuardRuntimeIntegration(unittest.TestCase):
+    """Tests for IntentGuardWrapper + enforce_guard_pipeline."""
+
+    def setUp(self):
+        IntentClassifier.clear_constraints()
+
+    def test_intent_guard_wrapper_blocks_scope_creep(self):
+        from cortex.extensions.security.guard_runtime import (
+            IntentGuardWrapper,
+        )
+        guard = IntentGuardWrapper()
+        context = {
+            "command": "rm -rf /Users/borja/project",
+            "agent": "cleaner",
+            "user_request": "audit the code",
+        }
+        outcome = guard.evaluate(context)
+        self.assertFalse(outcome.allowed)
+        self.assertIn("intent.", outcome.code)
+
+    def test_intent_guard_wrapper_allows_read(self):
+        from cortex.extensions.security.guard_runtime import (
+            IntentGuardWrapper,
+        )
+        guard = IntentGuardWrapper()
+        context = {
+            "command": "cat README.md",
+            "agent": "reader",
+            "user_request": "show the readme",
+        }
+        outcome = guard.evaluate(context)
+        self.assertTrue(outcome.allowed)
+        self.assertEqual(outcome.code, "intent.allowed")
+
+    def test_intent_guard_no_command_skips(self):
+        from cortex.extensions.security.guard_runtime import (
+            IntentGuardWrapper,
+        )
+        guard = IntentGuardWrapper()
+        context = {"content": "some text"}
+        outcome = guard.evaluate(context)
+        self.assertTrue(outcome.allowed)
+        self.assertEqual(
+            outcome.code, "intent.no_command"
+        )
+
+    def test_default_pipeline_exists(self):
+        from cortex.extensions.security.guard_runtime import (
+            DEFAULT_GUARD_PIPELINE,
+        )
+        self.assertGreaterEqual(
+            len(DEFAULT_GUARD_PIPELINE), 6
+        )
+        names = [g.name for g in DEFAULT_GUARD_PIPELINE]
+        self.assertIn("intent_guard", names)
+        self.assertIn("injection_guard", names)
+        # Intent guard should be first
+        self.assertEqual(names[0], "intent_guard")
+
+    def test_pipeline_blocks_destructive(self):
+        from cortex.extensions.security.guard_runtime import (
+            IntentGuardWrapper,
+            enforce_guard_pipeline,
+        )
+        guards = [IntentGuardWrapper()]
+        context = {
+            "command": "rm -rf /",
+            "agent": "destroyer",
+            "user_request": "clean things",
+            "content": "rm -rf /",
+        }
+        with self.assertRaises(ValueError) as cm:
+            enforce_guard_pipeline(guards, context)
+        self.assertIn("SECURITY GUARD BLOCK", str(cm.exception))
+
+    def test_pipeline_allows_safe(self):
+        from cortex.extensions.security.guard_runtime import (
+            IntentGuardWrapper,
+            enforce_guard_pipeline,
+        )
+        guards = [IntentGuardWrapper()]
+        context = {
+            "command": "ls -la",
+            "agent": "lister",
+            "user_request": "list files",
+            "content": "ls -la",
+        }
+        outcomes = enforce_guard_pipeline(
+            guards, context
+        )
+        self.assertTrue(all(o.allowed for o in outcomes))
+
+
 if __name__ == "__main__":
     unittest.main()
