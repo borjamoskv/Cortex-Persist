@@ -75,3 +75,19 @@ except Exception:  # noqa: BLE001
     ThreatFeedEngine = None  # type: ignore[assignment]
 else:
     __all__.append("ThreatFeedEngine")
+
+# V9: Security Monitor Classifier (Anthropic Assimilation)
+try:
+    from .security_monitor import SecurityMonitorClassifier
+except Exception:  # noqa: BLE001
+    SecurityMonitorClassifier = None  # type: ignore[assignment]
+else:
+    __all__.append("SecurityMonitorClassifier")
+
+try:
+    from .stochastic_sandbox import StochasticSandbox
+except Exception:  # noqa: BLE001
+    StochasticSandbox = None  # type: ignore[assignment]
+else:
+    __all__.append("StochasticSandbox")
+

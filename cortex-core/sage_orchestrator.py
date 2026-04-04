@@ -20,6 +20,8 @@ try:
 except ImportError:
     VSAEngine = None
 
+SWARM_QUEUE_FILE = "/tmp/cortex_swarm_queue.json"
+
 # SAGE ROLES DEFINITION
 SAGE_COUNCIL = {
     "ULTRA-THINK": {
@@ -88,19 +90,96 @@ class SageOrchestrator:
         if self.engine:
             self.engine.memorize(self.engine.encode_text(sage_name), self.engine.encode_text("success"))
 
+    def _inject_mission(self, agent_name, target_path):
+        """Injects a real Ouroboros audit task into the Swarm Queue.
+
+        V9: All missions are pre-classified by SecurityMonitorClassifier
+        before queue injection (Ω6: Zero-Trust on external targets).
+        """
+        try:
+            from cortex.extensions.security.security_monitor import (
+                SecurityMonitorClassifier,
+                ParameterProvenance,
+            )
+            monitor = SecurityMonitorClassifier()
+
+            worker_id = agent_name.split("-")[0]
+            cmd = (
+                "python3 /Users/borjafernandezangulo/"
+                "Cortex-Persist/cortex-core/"
+                f"ouroboros_engine.py --target {target_path}"
+                f" --worker-id {worker_id}"
+            )
+
+            task = {
+                "agent": agent_name,
+                "command": cmd,
+            }
+            verdict = monitor.classify(
+                task,
+                user_request="SAGE_COUNCIL audit cycle",
+                provenance=ParameterProvenance.AGENT_INFERRED,
+            )
+            if not verdict.allowed:
+                self.log(
+                    f"BLOCKED by SecurityMonitor: "
+                    f"{verdict.reason}",
+                    agent_name,
+                )
+                return
+
+            queue = {"pending_tasks": []}
+            if os.path.exists(SWARM_QUEUE_FILE):
+                with open(SWARM_QUEUE_FILE, "r") as f:
+                    queue = json.load(f)
+
+            queue["pending_tasks"].append({
+                "id": (
+                    f"legion_{int(time.time())}"
+                    f"_{agent_name}"
+                ),
+                "agent": agent_name,
+                "command": cmd,
+                "timestamp": time.time(),
+            })
+
+            with open(SWARM_QUEUE_FILE, "w") as f:
+                json.dump(queue, f, indent=2)
+            self.log(
+                f"MISSION DISPATCHED: {agent_name}"
+                f" -> {target_path}",
+                "SYSTEM",
+            )
+        except Exception as e:
+            self.log(
+                f"Mission Dispatch Failed: {e}",
+                "SYSTEM",
+            )
+
     async def run_council_loop(self):
-        self.log("SAGE COUNCIL Activated. Zero-Human Deployment (Phase 8).")
+        self.log("SAGE COUNCIL Activated. Zero-Human Deployment (Phase 9 - Legion Strike).")
         while self.running:
             self.cycle_count += 1
-            active_targets = [d for d in self.target_dir.iterdir() if d.is_dir()]
+            # 1. Target Acquisition: Check local targets directory
+            active_targets = [str(d) for d in self.target_dir.iterdir() if d.is_dir()]
+            
+            # 2. Add external high-value targets if local is empty
             if not active_targets:
-                self.log("Scanning for entropy...", "SYSTEM")
-                await asyncio.sleep(30)
-                continue
+                active_targets = [
+                    "https://github.com/LayerZero-Labs/LayerZero",
+                    "https://github.com/Uniswap/v4-core"
+                ]
 
-            tasks = [self.invoke_sage(name, str(active_targets[0])) for name in SAGE_COUNCIL.keys()]
-            await asyncio.gather(*tasks)
-            await asyncio.sleep(60)
+            self.log(f"Council Cycle {self.cycle_count}: Identified {len(active_targets)} targets.", "SYSTEM")
+
+            # 3. Parallel Legion Strike: Assign one sage per target (or subset)
+            for i, target in enumerate(active_targets[:len(SAGE_COUNCIL)]):
+                sage_name = list(SAGE_COUNCIL.keys())[i % len(SAGE_COUNCIL)]
+                self._inject_mission(sage_name, target)
+                # We also invoke the 'Dream' (simulated thought) for UI feedback
+                asyncio.create_task(self.invoke_sage(sage_name, target))
+
+            await asyncio.sleep(120) # V6 cadence: 2-minute regrouping
 
 orchestrator = SageOrchestrator()
 app = FastAPI(title="SAGE_COUNCIL Telemetry")
@@ -155,4 +234,4 @@ async def message_stream(request: Request):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8010)

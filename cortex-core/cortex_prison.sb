@@ -1,0 +1,54 @@
+(version 1)
+(deny default)
+
+; ============================================================
+; CORTEX Prison v2.0 — Hardened Sandbox Profile
+; V9 Security Hardening: Anthropic Assimilation Protocol
+; ============================================================
+
+; --- PROCESS EXECUTION ---
+(allow process-exec)
+(allow process-fork)
+
+; Block dangerous binaries outside sandbox arenas
+(deny process-exec
+    (regex #"/usr/bin/mkfs")
+    (regex #"/bin/dd")
+)
+
+; --- SYSTEM FUNDAMENTALS ---
+(allow sysctl-read)
+(allow mach-lookup)
+
+; --- FILE SYSTEM ACCESS ---
+; Blanket reads for codebase analysis
+(allow file-read*)
+
+; Permitted Write Arenas ONLY
+(allow file-write*
+    (subpath "/tmp")
+    (subpath "/private/tmp")
+    (subpath "/private/var/folders")
+    (subpath "/Users/borjafernandezangulo/Cortex-Persist/.scratch")
+    (subpath "/Users/borjafernandezangulo/30_CORTEX/.scratch")
+)
+
+; DENY writes to daemon source (prevent self-modification)
+(deny file-write*
+    (subpath "/Users/borjafernandezangulo/Cortex-Persist/cortex-core")
+    (subpath "/Users/borjafernandezangulo/Cortex-Persist/cortex/extensions/security")
+)
+
+; --- NETWORK ---
+; V9: Restrict outbound to allowlisted domains only
+(allow network-inbound (local ip))
+(allow network-outbound
+    (remote ip "github.com:*")
+    (remote ip "api.github.com:*")
+    (remote ip "registry.npmjs.org:*")
+    (remote ip "etherscan.io:*")
+    (remote ip "api.etherscan.io:*")
+    (remote ip "raw.githubusercontent.com:*")
+    (remote ip "objects.githubusercontent.com:*")
+    (local ip)
+)
