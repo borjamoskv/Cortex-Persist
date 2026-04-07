@@ -39,7 +39,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN_SIGINT }}
         run: |
-          python cortex/extensions/moltbook/sigint.py \
+          python -m cortex.extensions.moltbook.sigint \
             --mode sweep \
             --min-score ${{ github.event.inputs.min_score || '0.05' }}
 

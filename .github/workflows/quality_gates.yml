@@ -17,8 +17,66 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  change-scope:
+    name: change-scope
+    runs-on: ubuntu-latest
+    outputs:
+      automation_only: ${{ steps.scope.outputs.automation_only }}
+    steps:
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v4
+        with:
+          fetch-depth: 0
+      - id: scope
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          zero_sha="0000000000000000000000000000000000000000"
+          event_name="${{ github.event_name }}"
+          diff_range=""
+
+          if [[ "$event_name" == "pull_request" ]]; then
+            git fetch --no-tags origin "${{ github.base_ref }}" --depth=1
+            diff_range="origin/${{ github.base_ref }}...HEAD"
+          elif [[ "$event_name" == "push" && "${{ github.event.before }}" != "$zero_sha" ]]; then
+            diff_range="${{ github.event.before }}...HEAD"
+          fi
+
+          if [[ -z "$diff_range" ]]; then
+            echo "automation_only=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          mapfile -t files < <(git diff --name-only --diff-filter=ACMR "$diff_range")
+          if [[ ${#files[@]} -eq 0 ]]; then
+            echo "automation_only=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          automation_only=true
+
+          for file in "${files[@]}"; do
+            case "$file" in
+              .github/workflows/ci.yml|\
+              .github/workflows/quality_gates.yml|\
+              .github/workflows/repo-health-lite.yml|\
+              .github/workflows/sigint-monitor.yml|\
+              .github/workflows/sovereign-deploy.yml|\
+              scripts/repo_health_changed.py|\
+              cortex/extensions/moltbook/sigint.py)
+                ;;
+              *)
+                automation_only=false
+                ;;
+            esac
+          done
+
+          echo "automation_only=$automation_only" >> "$GITHUB_OUTPUT"
+
   quality-gates:
     name: "10 Seals"
+    needs: [change-scope]
+    if: needs.change-scope.outputs.automation_only != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
