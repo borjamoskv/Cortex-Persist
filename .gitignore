@@ -90,6 +90,12 @@ Thumbs.db
 .mejoralo/
 
 # ── Generated / Scratch ──────────────────────────
+.scratch/
+cortex_mev_base/target/
+tmp/
+tmp_*/
+worktrees/
+pr179-rescue/
 *.out
 *.png
 scratch_*.html
