@@ -1,3 +1,4 @@
+from cortex.utils.time import utc_now
 import json
 import logging
 from datetime import datetime, timezone
@@ -51,7 +52,7 @@ class MoltbookHeartbeat:
         _STATE_PATH.write_text(json.dumps(self._state, indent=2))
 
     def _now_iso(self) -> str:
-        return datetime.now(timezone.utc).isoformat()
+        return utc_now().isoformat()
 
     # ─── Main Heartbeat Cycle ──────────────────────────────────
 

@@ -1,3 +1,4 @@
+
 """VEX Data Models — Cryptographically verifiable execution primitives.
 
 All models are immutable dataclasses designed for hash-chain integration
@@ -12,8 +13,9 @@ import enum
 import hashlib
 import json
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
 from typing import Any, Optional
+
+from cortex.utils.time import utc_now
 
 __all__ = [
     "ExecutionReceipt",
@@ -26,7 +28,7 @@ __all__ = [
 
 def _now_iso() -> str:
     """UTC ISO timestamp."""
-    return datetime.now(timezone.utc).isoformat()
+    return utc_now().isoformat()
 
 
 def _sha256(data: str) -> str:

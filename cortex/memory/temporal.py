@@ -1,3 +1,4 @@
+
 """
 CORTEX v5.0 — Temporal Fact Management.
 
@@ -7,7 +8,7 @@ Never deletes — only deprecates. Enables time-travel queries.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from cortex.utils.time import utc_now
 
 __all__ = [
     "build_temporal_filter_params",
@@ -19,7 +20,7 @@ __all__ = [
 
 def now_iso() -> str:
     """Return current UTC timestamp in ISO 8601 format."""
-    return datetime.now(timezone.utc).isoformat()
+    return utc_now().isoformat()
 
 
 def is_valid_at(valid_from: str, valid_until: str | None, at: str | None = None) -> bool:

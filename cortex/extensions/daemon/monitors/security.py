@@ -1,3 +1,4 @@
+
 """Security monitor for MOSKV daemon."""
 
 from __future__ import annotations
@@ -6,12 +7,12 @@ import asyncio
 import json
 import logging
 import sqlite3
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Optional
 
 from cortex.extensions.daemon.models import SecurityAlert
 from cortex.memory import AsyncEncoder, VectorStoreL2
+from cortex.utils.time import utc_now
 
 logger = logging.getLogger("moskv-daemon")
 
@@ -120,7 +121,7 @@ class SecurityMonitor:
             similarity_score=similarity,
             confidence=confidence,
             summary=f"Matches known vector: {summary[:50]}",
-            timestamp=event.get("timestamp", datetime.now(timezone.utc).isoformat()),
+            timestamp=event.get("timestamp", utc_now().isoformat()),
         )
 
     async def _blacklist_ips(self, alerts: list[SecurityAlert]) -> None:

@@ -8,6 +8,7 @@ Zero-trust: all inputs sanitized. O(1) lookups. Specific exceptions only.
 """
 
 from __future__ import annotations
+from cortex.utils.time import utc_now
 
 import logging
 import os
@@ -124,7 +125,7 @@ class LeadSignal:
     url: str
     pain_keywords: list[str] = field(default_factory=list)
     lead_score: float = 0.0
-    detected_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    detected_at: datetime = field(default_factory=lambda: utc_now())
 
     def to_dict(self) -> dict[str, Any]:
         return {

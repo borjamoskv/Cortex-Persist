@@ -1,3 +1,4 @@
+
 """CLI commands: mejoralo scan, record, history, ship."""
 
 from __future__ import annotations
@@ -6,6 +7,7 @@ import click
 from rich.table import Table
 
 from cortex.cli.common import DEFAULT_DB, cli, close_engine_sync, console, get_engine
+from cortex.utils.time import utc_now
 
 __all__ = [
     "mejoralo",
@@ -149,7 +151,6 @@ def mejoralo_record(project, score_before, score_after, actions, db):
 
         # Update mejora_loop_state.json if it exists
         import json
-        from datetime import datetime, timezone
 
         from cortex.core.paths import CORTEX_DIR
 
@@ -163,7 +164,7 @@ def mejoralo_record(project, score_before, score_after, actions, db):
                 state["improvement_history"].append(
                     {
                         "project": project,
-                        "timestamp": datetime.now(timezone.utc).isoformat(),
+                        "timestamp": utc_now().isoformat(),
                         "score_before": score_before,
                         "score_after": score_after,
                         "delta": delta,

@@ -1,3 +1,4 @@
+
 """Swarm manager primitives for worktrees and task orchestration."""
 
 from __future__ import annotations
@@ -9,7 +10,6 @@ import sys
 import uuid
 from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
-from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
 from typing import Any
@@ -20,6 +20,7 @@ from cortex.extensions.swarm.budget import get_budget_manager
 from cortex.extensions.swarm.protocols import AgentRole, SwarmIntent, SwarmSignalSchema
 from cortex.extensions.swarm.verification_gate import RiskLevel, VerificationGate
 from cortex.extensions.swarm.worktree_isolation import isolated_worktree
+from cortex.utils.time import utc_now
 
 logger = logging.getLogger("cortex.extensions.swarm.manager")
 
@@ -32,7 +33,7 @@ class WorktreeState:
         self.id = worktree_id
         self.branch_name = branch_name
         self.path = path
-        self.created_at = datetime.now(timezone.utc).isoformat()
+        self.created_at = utc_now().isoformat()
         self.status = "provisioning"
         self.pid = os.getpid()
         self.task: asyncio.Task[Any] | None = None
@@ -134,7 +135,7 @@ class SwarmManager:
                 ),
                 "total_worktrees": len(self.worktrees),
                 "agent_pids": list({w.pid for w in self.worktrees.values()}),
-                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "timestamp": utc_now().isoformat(),
             }
 
 

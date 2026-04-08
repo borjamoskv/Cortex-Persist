@@ -1,3 +1,4 @@
+
 """
 Enrichment Worker - Asynchronous background processor for CORTEX.
 Ω₁₃: Thermodynamic decoupling sidecar.
@@ -7,12 +8,13 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 import aiosqlite
 
 from cortex.database.core import connect_async_ctx
 from cortex.embeddings.provider import EmbeddingProvider
+from cortex.utils.time import utc_now
 
 logger = logging.getLogger("cortex")
 
@@ -53,7 +55,7 @@ class EnrichmentWorker:
                 AND (next_attempt_at IS NULL OR next_attempt_at <= ?)
                 LIMIT ?
             """
-            now = datetime.now().isoformat()
+            now = utc_now().isoformat()
             async with conn.execute(query, (now, batch_size)) as cursor:
                 jobs = await cursor.fetchall()
 
@@ -92,11 +94,11 @@ class EnrichmentWorker:
             SET status = 'completed', updated_at = ?
             WHERE id = ?
         """
-        await conn.execute(query, (datetime.now().isoformat(), job_id))
+        await conn.execute(query, (utc_now().isoformat(), job_id))
 
     async def _mark_failure(self, conn: aiosqlite.Connection, job_id: int, error: str):
         # Exponential backoff logic
-        next_attempt = (datetime.now() + timedelta(minutes=5)).isoformat()
+        next_attempt = (utc_now() + timedelta(minutes=5)).isoformat()
         query = """
             UPDATE enrichment_jobs
             SET status = 'failed',
@@ -106,4 +108,4 @@ class EnrichmentWorker:
                 updated_at = ?
             WHERE id = ?
         """
-        await conn.execute(query, (error, next_attempt, datetime.now().isoformat(), job_id))
+        await conn.execute(query, (error, next_attempt, utc_now().isoformat(), job_id))

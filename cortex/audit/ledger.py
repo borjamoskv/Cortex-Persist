@@ -1,3 +1,4 @@
+
 """
 CORTEX v6 — Enterprise Audit Ledger (SOC 2 Compliance).
 
@@ -8,10 +9,11 @@ a hash-chain to prove immutability of the audit logs.
 
 import hashlib
 import logging
-from datetime import datetime, timezone
 from typing import Any
 
 import aiosqlite
+
+from cortex.utils.time import utc_now
 
 logger = logging.getLogger("cortex.audit.ledger")
 
@@ -77,7 +79,7 @@ class EnterpriseAuditLedger:
         """Securely logs an action with a cryptographic hash chain."""
         await self.ensure_table()
 
-        timestamp = datetime.now(timezone.utc).isoformat()
+        timestamp = utc_now().isoformat()
         audit_id = hashlib.sha256(f"{timestamp}{actor_id}{action}".encode()).hexdigest()
 
         # Calculate new signature ensuring immutability chain

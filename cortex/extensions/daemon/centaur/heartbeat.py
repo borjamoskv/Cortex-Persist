@@ -1,3 +1,4 @@
+
 """
 CORTEX V5 - Continuous Autopoiesis (Heartbeat Daemon).
 Vector 1 of the Singularity: non-discrete temporal execution.
@@ -6,7 +7,6 @@ Vector 1 of the Singularity: non-discrete temporal execution.
 import asyncio
 import json
 import logging
-from datetime import datetime, timezone
 from pathlib import Path
 
 from cortex.database.core import connect_async_ctx
@@ -17,6 +17,7 @@ from cortex.extensions.daemon.actuators import PhysicalActuator
 from cortex.extensions.daemon.centaur.queue import EntropicQueue
 from cortex.extensions.swarm.centauro_engine import CentauroEngine, Formation
 from cortex.extensions.ui.pulmones import SystemRespiration
+from cortex.utils.time import utc_now
 
 logger = logging.getLogger("moskv-daemon.centaur.heartbeat")
 
@@ -212,7 +213,7 @@ class HeartbeatDaemon:
 
     def _deposit_to_iturria(self, task: dict, result: dict) -> None:
         """Save the swarm consensus to the Dream Layer for operator review."""
-        now = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+        now = utc_now().strftime("%Y%m%d_%H%M%S")
         safe_id = task["id"][:8]
         filename = f"{task['type']}_{now}_{safe_id}.md"
 

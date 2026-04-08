@@ -1,3 +1,4 @@
+
 """
 CORTEX v8 — Threat Feed Engine.
 
@@ -17,11 +18,12 @@ import math
 import re
 import time
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Optional
 
 from cortex.extensions.security.threat_signatures import BUILT_IN_SIGNATURES
+from cortex.utils.time import utc_now
 
 logger = logging.getLogger("cortex.extensions.security.threat_feed")
 
@@ -145,7 +147,7 @@ class ThreatFeedEngine:
         payload = json.dumps(self._custom_signatures, sort_keys=True).encode()
         feed_hmac = hmac.new(self._hmac_key, payload, hashlib.sha256).hexdigest()
         data = {
-            "last_update": datetime.now(timezone.utc).isoformat(),
+            "last_update": utc_now().isoformat(),
             "count": len(self._custom_signatures),
             "hmac": feed_hmac,
             "signatures": self._custom_signatures,
@@ -158,7 +160,7 @@ class ThreatFeedEngine:
         Returns a report of new signatures added.
         """
         report = ThreatFeedReport(
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            timestamp=utc_now().isoformat(),
         )
         start = time.monotonic()
         existing_ids = {s["id"] for s in self._custom_signatures}

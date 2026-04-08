@@ -1,3 +1,4 @@
+
 # This file is part of CORTEX.
 # Licensed under the Apache License, Version 2.0.
 # See top-level LICENSE file for details.
@@ -16,12 +17,13 @@ from __future__ import annotations
 
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Any
 
 import aiosqlite
 
 from cortex.memory.models import MemoryEvent
+from cortex.utils.time import utc_now
 
 try:
     from cortex.extensions.security.tenant import get_tenant_id
@@ -252,7 +254,7 @@ class EventLedgerL3:
             "events_audited": count,
             "integrity_score": integrity,
             "findings": audit_log or ["Memory event chain shows 100% integrity."],
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": utc_now().isoformat(),
         }
 
 

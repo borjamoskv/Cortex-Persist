@@ -1,3 +1,4 @@
+
 """
 CORTEX v5.1 — Episodic Boot Engine.
 
@@ -16,11 +17,12 @@ from __future__ import annotations
 import logging
 import sqlite3
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta
 from typing import TYPE_CHECKING, Final, Optional
 
 from cortex.extensions.episodic.main import Episode, EpisodicMemory, Pattern
 from cortex.memory.temporal import now_iso
+from cortex.utils.time import utc_now
 
 __all__ = [
     "BootPayload",
@@ -185,7 +187,7 @@ async def generate_session_boot(
     memory = EpisodicMemory(conn)
 
     # 1. Compute lookback timestamp
-    cutoff = datetime.now(timezone.utc) - timedelta(hours=lookback_hours)
+    cutoff = utc_now() - timedelta(hours=lookback_hours)
     since_iso = cutoff.strftime("%Y-%m-%dT%H:%M:%S")
 
     # 2. Recall recent episodes

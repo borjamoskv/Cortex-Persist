@@ -1,3 +1,4 @@
+
 """Swarm state persistence — saves/loads evolution progress to disk.
 Version: 3.0 (Atomic, Rotating Backups & Auto-Rollback)
 """
@@ -7,7 +8,6 @@ from __future__ import annotations
 import json
 import logging
 import shutil
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Final, Optional
 
@@ -18,6 +18,7 @@ from cortex.extensions.evolution.agents import (
     SovereignAgent,
     SubAgent,
 )
+from cortex.utils.time import utc_now
 
 logger = logging.getLogger(__name__)
 
@@ -83,7 +84,7 @@ def save_swarm(agents: list[SovereignAgent], cycle: int, path: Path = DEFAULT_ST
         state = {
             "version": SCHEMA_VERSION,
             "cycle": cycle,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": utc_now().isoformat(),
             "agents": [_serialize_agent(a) for a in agents],
         }
 

@@ -5,7 +5,9 @@ from __future__ import annotations
 import logging
 import math
 import uuid
-from typing import Optional
+from typing import Any, Optional
+
+import aiosqlite
 
 from cortex.engine.slashing import SlashingEngine
 from cortex.telemetry.metrics import metrics
@@ -136,6 +138,19 @@ class ConsensusManager:
             score = await self._recalculate_consensus_v2(fact_id, conn)
             await conn.commit()
             return score
+
+    async def get_votes(self, fact_id: int, tenant_id: str = "default") -> list[dict[str, Any]]:
+        """Return the canonical v2 vote ledger rows for a fact."""
+        async with self.engine.session() as conn:
+            conn.row_factory = aiosqlite.Row
+            query = (
+                "SELECT v.vote, v.agent_id as agent, v.created_at, a.reputation_score "
+                "FROM consensus_votes_v2 v "
+                "JOIN agents a ON v.agent_id = a.id "
+                "WHERE v.fact_id = ? AND v.tenant_id = ?"
+            )
+            async with conn.execute(query, (fact_id, tenant_id)) as cursor:
+                return [dict(row) for row in await cursor.fetchall()]
 
     async def _recalculate_consensus_v2(self, fact_id: int, conn) -> float:
         cursor = await conn.execute(

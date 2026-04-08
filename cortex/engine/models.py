@@ -47,7 +47,7 @@ class Fact:
         """Evaluate logical validity using valid_until and physical state."""
         return not self.is_tombstoned and self.valid_until is None
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "id": self.id,
             "tenant_id": self.tenant_id,
@@ -80,6 +80,18 @@ class Fact:
             "semantic_status": self.semantic_status,
             "semantic_error": self.semantic_error,
         }
+
+    def __getitem__(self, key: str) -> Any:
+        """Preserve legacy dict-style access used across API surfaces."""
+        return self.to_dict()[key]
+
+    def get(self, key: str, default: Any = None) -> Any:
+        """Mirror ``dict.get`` for compatibility with legacy callers."""
+        return self.to_dict().get(key, default)
+
+    def __contains__(self, key: object) -> bool:
+        """Support membership checks like ``'tenant_id' in fact``."""
+        return isinstance(key, str) and key in self.to_dict()
 
 
 def _parse_json_blob(raw: object, fallback: object) -> object:

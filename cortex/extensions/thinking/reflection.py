@@ -1,3 +1,4 @@
+
 """
 CORTEX v5.0 — Reflection Engine.
 
@@ -13,8 +14,9 @@ import json
 import logging
 import sqlite3
 from dataclasses import dataclass
-from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Optional
+
+from cortex.utils.time import utc_now
 
 __all__ = [
     "AUTO_TAGS",
@@ -98,7 +100,7 @@ def generate_reflection(
         summary=summary,
         errors=errors or [],
         decisions=decisions or [],
-        timestamp=datetime.now(timezone.utc).isoformat(),
+        timestamp=utc_now().isoformat(),
     )
 
     content = reflection.to_content()

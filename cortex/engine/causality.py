@@ -1,3 +1,4 @@
+
 """Causal graph and taint propagation utilities for CORTEX."""
 
 from __future__ import annotations
@@ -6,7 +7,6 @@ import json
 import logging
 from collections import deque
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Optional
 
@@ -15,6 +15,7 @@ import aiosqlite
 from cortex.crypto import get_default_encrypter
 from cortex.database.core import connect
 from cortex.extensions.signals.bus import AsyncSignalBus, SignalBus
+from cortex.utils.time import utc_now
 
 logger = logging.getLogger("cortex.engine.causality")
 
@@ -222,7 +223,7 @@ class AsyncCausalGraph:
         floor_to_c1: bool = True,
     ) -> TaintReport:
         """Propagates causal taint (Ω₁₃) from a source fact to all descendants."""
-        now = datetime.now(timezone.utc).isoformat()
+        now = utc_now().isoformat()
         meta_col = await self._metadata_column()
         fact_cols = await self._fact_columns()
         has_tenant = "tenant_id" in fact_cols

@@ -1,3 +1,4 @@
+
 """
 ResonanceEmitter — The Ocre Painter.
 Embeds hyperdimensional ghost traces into the file system.
@@ -9,12 +10,12 @@ import hashlib
 import json
 import logging
 import os
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
 from cortex.memory.hdc.codec import HDCEncoder
 from cortex.memory.hdc.item_memory import ItemMemory
+from cortex.utils.time import utc_now
 
 logger = logging.getLogger("cortex.extensions.songlines.emitter")
 
@@ -43,7 +44,7 @@ class ResonanceEmitter:
             "id": ghost_id,
             "intent": intent,
             "project": project,
-            "created_at": datetime.now(timezone.utc).timestamp(),
+            "created_at": utc_now().timestamp(),
             "half_life": half_life_hours,
             "resonance": hv.tolist(),
         }

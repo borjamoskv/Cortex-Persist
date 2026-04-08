@@ -1,3 +1,4 @@
+
 """
 CORTEX V6 - Byzantine Default Auth Layer (Axiom 3).
 Vector 5 of the Singularity.
@@ -13,8 +14,9 @@ import asyncio
 import hashlib
 import json
 import logging
-from datetime import datetime, timezone
 from pathlib import Path
+
+from cortex.utils.time import utc_now
 
 logger = logging.getLogger("cortex.engine.auth")
 
@@ -59,7 +61,7 @@ class ByzantineAuthLayer:
 
         # Action is destructive and lacks Zenith. Wait for operator verification.
         challenge_id = (
-            f"auth_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}_{action_hash[:8]}"
+            f"auth_{utc_now().strftime('%Y%m%d_%H%M%S')}_{action_hash[:8]}"
         )
         challenge_path = AUTH_DIR / f"{challenge_id}.json"
 
@@ -69,7 +71,7 @@ class ByzantineAuthLayer:
             "hash": action_hash,
             "status": "PENDING",
             "zenith_score": zenith_score,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": utc_now().isoformat(),
         }
 
         challenge_path.write_text(json.dumps(challenge_data, indent=2))

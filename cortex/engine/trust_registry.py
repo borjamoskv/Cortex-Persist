@@ -1,3 +1,4 @@
+
 """
 Bayesian Trust Registry (Axiom Ω₃) — CORTEX Persist.
 
@@ -11,6 +12,8 @@ import dataclasses
 import datetime
 import logging
 from collections.abc import Sequence
+
+from cortex.utils.time import utc_now
 
 logger = logging.getLogger("cortex.engine.trust")
 
@@ -78,7 +81,7 @@ class TrustRegistry:
     ) -> None:
         """Record operational evidence for an agent."""
         if now is None:
-            now = datetime.datetime.now(datetime.timezone.utc)
+            now = utc_now()
 
         profile = self.get_profile(agent_id)
         if success:
@@ -102,7 +105,7 @@ class TrustRegistry:
         Returns a normalized score in [0.0, 1.0].
         """
         if now is None:
-            now = datetime.datetime.now(datetime.timezone.utc)
+            now = utc_now()
 
         # 1. Base Reliability (Laplace smoothing)
         # Using a simple beta distribution mean approximation: (alpha + successes) / (alpha + beta + total)

@@ -1,3 +1,4 @@
+
 """
 CORTEX v8 — Honeypot Manager.
 
@@ -12,11 +13,11 @@ import json
 import logging
 import os
 import random
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Optional
 
 from cortex.utils.canonical import compute_fact_hash
+from cortex.utils.time import utc_now
 
 logger = logging.getLogger("cortex.extensions.security.honeypot")
 
@@ -39,7 +40,7 @@ class DecoyFact:
         self.content = content
         self.project = project
         self.severity = severity
-        self.created_at = created_at or datetime.now(timezone.utc).isoformat()
+        self.created_at = created_at or utc_now().isoformat()
         self.hash = h_hash or compute_fact_hash(content)
 
     def to_dict(self) -> dict[str, Any]:

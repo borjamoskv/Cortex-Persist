@@ -1,3 +1,4 @@
+
 # This file is part of CORTEX.
 # Licensed under the Apache License, Version 2.0.
 # See top-level LICENSE file for details.
@@ -23,8 +24,9 @@ from __future__ import annotations
 
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
 from enum import Enum
+
+from cortex.utils.time import utc_now
 
 __all__ = [
     "BeliefObject",
@@ -146,14 +148,14 @@ class ProvenanceChain:
 def _uuid7() -> str:
     """Generate a UUID v7 (time-sortable) as string."""
     # UUID v7 not in stdlib until 3.14 — use v4 with timestamp prefix
-    ts = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
+    ts = utc_now().strftime("%Y%m%d%H%M%S")
     uid = uuid.uuid4().hex
     return f"{ts}-{uid[:16]}"
 
 
 def _now_iso() -> str:
     """Current UTC time as ISO 8601 string."""
-    return datetime.now(timezone.utc).isoformat()
+    return utc_now().isoformat()
 
 
 @dataclass(frozen=True)

@@ -1,3 +1,4 @@
+
 """CORTEX Revenue Engine — Sovereign Revenue Orchestrator.
 
 Coordinates multiple revenue vectors, evaluates opportunities by ROI,
@@ -9,7 +10,6 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
-from datetime import datetime, timezone
 from decimal import Decimal
 from typing import Any
 
@@ -21,6 +21,7 @@ from cortex.extensions.revenue.models import (
     RevenueVector,
     VectorType,
 )
+from cortex.utils.time import utc_now
 
 logger = logging.getLogger("cortex.extensions.revenue.engine")
 
@@ -235,7 +236,7 @@ class RevenueEngine:
         Returns:
             Revenue report with breakdown by vector.
         """
-        period = period or datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        period = period or utc_now().strftime("%Y-%m-%d")
 
         by_vector: dict[str, dict[str, Any]] = {}
         total_revenue = Decimal("0")

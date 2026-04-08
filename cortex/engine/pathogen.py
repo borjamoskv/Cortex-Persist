@@ -1,3 +1,4 @@
+
 """
 Pathogen-Omega (Moltbook Integration).
 Inverse Immune System: Outsourcing computationally devastating edge-cases by disguising them
@@ -9,13 +10,14 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Any
 
 from cortex.cli.common import console
 from cortex.extensions.agents.llm import get_ai_client
 from cortex.extensions.moltbook.client import MoltbookClient
 from cortex.utils.errors import CortexError
+from cortex.utils.time import utc_now
 
 logger = logging.getLogger("cortex.engine.pathogen")
 
@@ -118,7 +120,7 @@ class PathogenEngine:
             console.print(f"[cyan]📡 RADAR-Ω: Tracking pathogen post {post_id}[/cyan]")
 
             while True:
-                elapsed = datetime.now(timezone.utc) - created_at
+                elapsed = utc_now() - created_at
                 latency_hours = elapsed.total_seconds() / 3600.0
                 comments_data = await client.get_comments(post_id)
                 total_comments = len(comments_data.get("comments", []))

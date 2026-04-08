@@ -1,3 +1,4 @@
+
 # SPDX-License-Identifier: Apache-2.0
 """CORTEX v5.3 — Scavenger Tactical Suite Core.
 
@@ -10,7 +11,6 @@ from __future__ import annotations
 import logging
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
 from typing import Any
 
 from cortex.events.bus import DistributedEventBus
@@ -19,6 +19,7 @@ from cortex.extensions.skills.cadastral.models import (
 )
 from cortex.memory.ledger import EventLedgerL3
 from cortex.memory.models import MemoryEvent
+from cortex.utils.time import utc_now
 
 logger = logging.getLogger("cortex.extensions.agents.scavenger_core")
 
@@ -124,7 +125,7 @@ class ScavengerAgent:
         """Internal ledger commitment via L3."""
         evt = MemoryEvent(  # type: ignore[reportCallIssue]
             event_id=uuid.uuid4().hex,
-            timestamp=datetime.now(timezone.utc),
+            timestamp=utc_now(),
             role=role,
             content=content,
             session_id=self.session_id,

@@ -1,3 +1,4 @@
+
 """
 KV Prefix Registry para SwarmManager.
 Implementa RadixAttention-style prefix sharing a nivel de aplicación.
@@ -8,9 +9,10 @@ from __future__ import annotations
 
 import hashlib
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
 from functools import lru_cache
 from typing import Any
+
+from cortex.utils.time import utc_now
 
 
 @lru_cache(maxsize=1024)
@@ -28,7 +30,7 @@ class PrefixSlot:
     prefix_tokens: int        # longitud del prefix
     provider_name: str        # Proveedor físico donde reside el prefix (EJ: 'gemini', 'anthropic')
     model_name: str           # Modelo físico (EJ: 'gemini-1.5-pro')
-    created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    created_at: str = field(default_factory=lambda: utc_now().isoformat())
     hits: int = 0             # agentes que reutilizaron este slot
 
     @property

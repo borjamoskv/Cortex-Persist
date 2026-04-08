@@ -1,3 +1,4 @@
+
 """
 CORTEX v5.2 — Ghost Reaper (TTL-based auto-expiry).
 
@@ -10,9 +11,11 @@ from __future__ import annotations
 import json
 import logging
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta
 from pathlib import Path
 from typing import Any, Optional
+
+from cortex.utils.time import utc_now
 
 logger = logging.getLogger("cortex.reaper")
 
@@ -45,7 +48,7 @@ class GhostReaper:
         Returns:
             Number of reaped ghosts.
         """
-        cutoff = (datetime.now(timezone.utc) - timedelta(days=self._ttl_days)).strftime(
+        cutoff = (utc_now() - timedelta(days=self._ttl_days)).strftime(
             "%Y-%m-%dT%H:%M:%S"
         )
 

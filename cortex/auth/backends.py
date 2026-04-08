@@ -1,3 +1,4 @@
+
 """
 CORTEX v6 — Authentication Backends.
 
@@ -13,6 +14,8 @@ from abc import ABC, abstractmethod
 from typing import Any, Optional
 
 import aiosqlite
+
+from cortex.utils.time import utc_now
 
 # We keep the core dataclasses here to avoid circular imports if auth.py uses this
 # But for now, let's assume those stay in auth.py and this file imports them if needed.
@@ -148,13 +151,12 @@ class SQLiteAuthBackend(BaseAuthBackend):
             await conn.close()
 
     async def update_last_used(self, key_id: int | str) -> None:
-        from datetime import datetime, timezone
 
         conn = await self._get_conn_async()
         try:
             await conn.execute(
                 "UPDATE api_keys SET last_used = ? WHERE id = ?",
-                (datetime.now(timezone.utc).isoformat(), key_id),
+                (utc_now().isoformat(), key_id),
             )
             await conn.commit()
         except (aiosqlite.Error, OSError) as e:
@@ -250,13 +252,12 @@ class AlloyDBAuthBackend(BaseAuthBackend):
             return res.endswith("1")
 
     async def update_last_used(self, key_id: int | str) -> None:
-        from datetime import datetime, timezone
 
         pool = await self._get_pool()
         async with pool.acquire() as conn:
             await conn.execute(
                 "UPDATE api_keys SET last_used = $1 WHERE id = $2",
-                datetime.now(timezone.utc).isoformat(),
+                utc_now().isoformat(),
                 key_id,
             )
 

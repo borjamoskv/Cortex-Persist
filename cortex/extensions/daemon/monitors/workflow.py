@@ -1,3 +1,4 @@
+
 """Workflow Recommender Monitor — suggests slash commands based on system state.
 
 Analyzes the current daemon status (ghosts, entropy, memory staleness, etc.)
@@ -15,6 +16,7 @@ from typing import Optional
 
 from cortex.extensions.daemon.models import AGENT_DIR, CORTEX_DB, WorkflowAlert
 from cortex.extensions.daemon.monitors.base import BaseMonitor
+from cortex.utils.time import utc_now
 
 __all__ = ["WorkflowMonitor"]
 
@@ -176,7 +178,7 @@ class WorkflowMonitor(BaseMonitor[WorkflowAlert]):
         except (json.JSONDecodeError, OSError):
             return 0
 
-        now = datetime.now(timezone.utc)
+        now = utc_now()
         count = 0
         for _project, info in data.items():
             if not isinstance(info, dict):
@@ -204,7 +206,7 @@ class WorkflowMonitor(BaseMonitor[WorkflowAlert]):
             return None
         try:
             mtime = self._memory_path.stat().st_mtime
-            now = datetime.now(timezone.utc).timestamp()
+            now = utc_now().timestamp()
             return (now - mtime) / 3600
         except OSError:
             return None

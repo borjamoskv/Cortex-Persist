@@ -10,6 +10,7 @@ import click
 
 from cortex.cli.common import DEFAULT_DB, cli, console  # type: ignore[reportAttributeAccessIssue]
 from cortex.cli.health_dashboard import dashboard
+from cortex.utils.time import blocking_wait
 
 
 def _resolve_db(db_path: str | None) -> str:
@@ -145,8 +146,6 @@ def trend(db_path: str | None, live: bool, samples: int, interval: float) -> Non
 
     if live:
         # Live sampling mode
-        import time
-
         from rich.progress import track
 
         from cortex.extensions.health import HealthCollector, HealthScorer
@@ -162,7 +161,7 @@ def trend(db_path: str | None, live: bool, samples: int, interval: float) -> Non
             scores.append(hs.score)
             detector.push(hs.score)
             if i < samples - 1:
-                time.sleep(interval)
+                blocking_wait(interval)
     else:
         # DB history mode (instant)
         detector = TrendDetector(window_size=20)

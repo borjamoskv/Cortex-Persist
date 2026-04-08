@@ -1,3 +1,4 @@
+
 # This file is part of CORTEX. Apache-2.0. Change Date: 2030-01-01.
 
 """Mnemonic and fact health collectors."""
@@ -8,6 +9,7 @@ import sqlite3
 from pathlib import Path
 
 from cortex.extensions.health.models import HealthThresholds, MetricSnapshot
+from cortex.utils.time import utc_now
 
 
 class EntropyCollector:
@@ -159,10 +161,10 @@ class SnapshotAgeCollector:
                             weight=self.weight,
                             description="No snapshots found",
                         )
-                    from datetime import datetime, timezone
+                    from datetime import datetime
 
                     ts = datetime.fromisoformat(row[0].replace("Z", "+00:00"))
-                    age_hours = (datetime.now(timezone.utc) - ts).total_seconds() / 3600
+                    age_hours = (utc_now() - ts).total_seconds() / 3600
                     if age_hours < 1:
                         val = 1.0
                     elif age_hours < 6:

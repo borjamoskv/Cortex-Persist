@@ -1,3 +1,4 @@
+
 """CORTEX CLI — Trust & Compliance Commands."""
 
 import asyncio
@@ -18,6 +19,7 @@ from cortex.cli.trust_helpers import (
     _safe_count,
     _verify_chain,
 )
+from cortex.utils.time import utc_now
 
 __all__ = ["verify_fact", "compliance_report", "audit", "audit_cognitive"]
 
@@ -89,7 +91,6 @@ def verify_fact(fact_id: int, db: str) -> None:
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def compliance_report(db: str) -> None:
     """Generate EU AI Act Article 12 compliance snapshot."""
-    from datetime import datetime, timezone
 
     from cortex.cli.errors import handle_cli_error
     from cortex.database.core import connect as db_connect
@@ -115,7 +116,7 @@ def compliance_report(db: str) -> None:
 
         chain_ok, violations = _check_chain_integrity(conn)
 
-        now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+        now = utc_now().strftime("%Y-%m-%d %H:%M UTC")
 
         console.print()
         console.print(

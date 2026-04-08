@@ -1,3 +1,4 @@
+
 """
 CORTEX Mega Poderosas Tools — High-Power Architectural MCP Extensions.
 
@@ -12,9 +13,11 @@ from __future__ import annotations
 import logging
 import os
 import tempfile
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta
 from pathlib import Path
 from typing import TYPE_CHECKING
+
+from cortex.utils.time import utc_now
 
 if TYPE_CHECKING:
     from mcp.server.fastmcp import FastMCP
@@ -81,7 +84,7 @@ def _register_reality_weaver(mcp: FastMCP, ctx: _MCPContext) -> None:
             type_rows = await cursor.fetchall()
 
             # Recent decisions (last 30 days)
-            cutoff_30d = (datetime.now(timezone.utc) - timedelta(days=30)).isoformat()
+            cutoff_30d = (utc_now() - timedelta(days=30)).isoformat()
             cursor = await conn.execute(
                 """
                 SELECT content FROM facts
@@ -310,7 +313,7 @@ def _register_temporal_nexus(mcp: FastMCP, ctx: _MCPContext) -> None:
         """
         await ctx.ensure_ready()
 
-        now = datetime.now(timezone.utc)
+        now = utc_now()
         cutoff_7d = (now - timedelta(days=7)).isoformat()
         cutoff_14d = (now - timedelta(days=14)).isoformat()
 

@@ -1,3 +1,4 @@
+
 """CORTEX Genesis Engine — A System That Creates Systems.
 
 The core orchestrator that takes a SystemSpec and produces a complete,
@@ -13,7 +14,6 @@ from __future__ import annotations
 
 import logging
 import math
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -21,6 +21,7 @@ from cortex.extensions.genesis.assembler import SystemAssembler
 from cortex.extensions.genesis.models import ComponentSpec, GenesisResult, SystemSpec
 from cortex.extensions.genesis.templates import TemplateRegistry
 from cortex.extensions.genesis.validator import GenesisValidator
+from cortex.utils.time import utc_now
 
 __all__ = ["GenesisEngine"]
 
@@ -419,7 +420,7 @@ class GenesisEngine:
                 "files_created": len(result.files_created),
                 "hours_saved": result.hours_saved,
                 "validation_passed": result.validation_passed,
-                "created_at": datetime.now(timezone.utc).isoformat(),
+                "created_at": utc_now().isoformat(),
             },
         )
         logger.info(

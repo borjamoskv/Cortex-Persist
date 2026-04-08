@@ -3,14 +3,15 @@ from __future__ import annotations
 import json
 import uuid
 from dataclasses import asdict, dataclass, field
-from datetime import datetime, timezone
 from typing import Any, Literal
+
+from cortex.utils.time import utc_now
 
 SemanticStatus = Literal["pending", "processing", "indexed", "failed"]
 
 
 def utc_now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
+    return utc_now().isoformat()
 
 
 @dataclass(frozen=True)

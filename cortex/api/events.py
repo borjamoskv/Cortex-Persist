@@ -1,12 +1,11 @@
 import asyncio
 import json
 import logging
-from typing import AsyncGenerator
+from collections.abc import AsyncGenerator
 
 from fastapi import APIRouter, Request
 from fastapi.responses import StreamingResponse
 
-import cortex.api.state as api_state
 from cortex.extensions.signals.bus import AsyncSignalBus
 
 router = APIRouter(prefix="/v1/events", tags=["events"])

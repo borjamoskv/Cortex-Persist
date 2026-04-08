@@ -1,3 +1,4 @@
+
 """
 Sharded Signal Bus for CORTEX-SWARM-10K.
 Eliminates lock contention by routing messages to specific SQLite DB shards
@@ -9,7 +10,7 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from pathlib import Path
 
 import aiosqlite
@@ -18,6 +19,7 @@ from cortex import config
 from cortex.extensions.signals.bus import _CREATE_INDEXES, _CREATE_TABLE, _build_query
 from cortex.extensions.signals.models import Signal, signal_from_row
 from cortex.guards.url_guard import SafeTransport
+from cortex.utils.time import utc_now
 
 logger = logging.getLogger("cortex.extensions.signals.sharded_bus")
 
@@ -209,7 +211,7 @@ class ShardedAsyncSignalBus:
         if not self._ready:
             await self.initialize()
 
-        cutoff = (datetime.now(timezone.utc) - timedelta(days=max_age_days)).isoformat()
+        cutoff = (utc_now() - timedelta(days=max_age_days)).isoformat()
         total_pruned = 0
 
         query = "DELETE FROM signals WHERE consumed_by != '[]' AND created_at < ?"

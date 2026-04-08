@@ -1,3 +1,4 @@
+
 """CORTEX Hypervisor — Complexity Compressor.
 
 Transforms rich internal types into simple tenant-facing models.
@@ -11,6 +12,7 @@ from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
 from cortex.extensions.hypervisor.models import HealthReport, Memory, Receipt
+from cortex.utils.time import utc_now
 
 if TYPE_CHECKING:
     from cortex.engine.models import Fact
@@ -108,4 +110,4 @@ def _parse_iso(iso_str: str | None) -> datetime:
 
 
 def _now() -> datetime:
-    return datetime.now(timezone.utc)
+    return utc_now()

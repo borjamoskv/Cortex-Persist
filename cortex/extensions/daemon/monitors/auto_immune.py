@@ -1,3 +1,4 @@
+
 """Auto-Immune Monitor for MOSKV daemon.
 
 Reads stale ghosts and dispatches them to the Aether Agent queue for autonomous resolution.
@@ -7,11 +8,12 @@ from __future__ import annotations
 
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 
 from cortex.extensions.daemon.models import AGENT_DIR, DEFAULT_STALE_HOURS
 from cortex.extensions.daemon.monitors.base import BaseMonitor
+from cortex.utils.time import utc_now
 
 try:
     from cortex.extensions.aether.models import AgentTask, TaskSource
@@ -48,7 +50,7 @@ class AutoImmuneMonitor(BaseMonitor):
             logger.error("Failed to read ghosts.json: %s", e)
             return []
 
-        now = datetime.now(timezone.utc)
+        now = utc_now()
         queued_ids: list[str] = []
         changes_made = False
 

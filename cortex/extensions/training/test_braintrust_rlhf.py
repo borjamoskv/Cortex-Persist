@@ -1,11 +1,11 @@
 import asyncio
-import datetime
 import uuid
 
 from cortex.extensions.aether.sovereign_apis import SovereignTriad
 from cortex.extensions.episodic.base import Episode
 from cortex.extensions.training.collector import TrajectoryCollector
 from cortex.extensions.training.reward_engine import RewardEngine
+from cortex.utils.time import utc_now
 
 
 class MockEpisodicMemory:
@@ -13,7 +13,7 @@ class MockEpisodicMemory:
 
     async def get_session_timeline(self, session_id: str) -> list[Episode]:
         # Simulamos una trayectoria simple de éxito.
-        now = datetime.datetime.now(datetime.timezone.utc).isoformat()
+        now = utc_now().isoformat()
 
         def ep(evt, content, intent="", meta=None):
             return Episode(

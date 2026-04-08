@@ -7,6 +7,7 @@ from datetime import datetime
 from typing import Any
 
 from cortex.extensions.episodic.base import Episode
+from cortex.utils.time import utc_now
 
 logger = logging.getLogger("cortex.extensions.training")
 
@@ -16,7 +17,7 @@ class Action:
     tool: str
     input: Any
     observation: str | None = None
-    timestamp: datetime = field(default_factory=datetime.now)
+    timestamp: datetime = field(default_factory=utc_now)
 
 
 @dataclass

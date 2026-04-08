@@ -4,7 +4,8 @@ import logging
 
 import aiosqlite
 
-from ..base import GraphBackend
+from cortex.graph.backends.base import GraphBackend
+
 from .algorithms import SQLiteAlgorithmsMixin
 from .query import SQLiteQueryMixin
 from .store import SQLiteStoreMixin

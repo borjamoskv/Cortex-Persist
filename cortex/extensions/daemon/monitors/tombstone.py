@@ -1,3 +1,4 @@
+
 """Autonomous Tombstone Monitor (El Barrendero)."""
 
 from __future__ import annotations
@@ -5,10 +6,10 @@ from __future__ import annotations
 import logging
 import sqlite3
 import time
-from datetime import datetime, timezone
 from pathlib import Path
 
 from cortex.extensions.daemon.models import TombstoneAlert
+from cortex.utils.time import utc_now
 
 logger = logging.getLogger("moskv-daemon")
 
@@ -35,7 +36,7 @@ class TombstoneMonitor:
 
     def _in_maintenance_window(self) -> bool:
         """Check if current UTC time is within the maintenance window."""
-        now = datetime.now(timezone.utc)
+        now = utc_now()
         return self.start_hour <= now.hour < self.end_hour
 
     def check(self) -> list[TombstoneAlert]:

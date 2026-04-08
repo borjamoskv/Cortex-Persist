@@ -1,10 +1,13 @@
+
 """
 Staleness pruning strategy for compaction.
 """
 
 import logging
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta
 from typing import TYPE_CHECKING
+
+from cortex.utils.time import utc_now
 
 __all__ = ["execute_staleness_prune", "find_stale_facts"]
 
@@ -48,7 +51,7 @@ async def find_stale_facts(
 ) -> list[int]:
     """Find facts older than max_age_days with consensus below min_consensus."""
     conn = await engine.get_conn()
-    cutoff = (datetime.now(timezone.utc) - timedelta(days=max_age_days)).isoformat()
+    cutoff = (utc_now() - timedelta(days=max_age_days)).isoformat()
 
     cursor = await conn.execute(
         "SELECT id FROM facts "

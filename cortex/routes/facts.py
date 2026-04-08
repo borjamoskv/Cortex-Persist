@@ -461,7 +461,7 @@ async def get_causal_chain(
             direction=direction,
             max_depth=max_depth,
         )
-        return chain
+        return [fact.to_dict() for fact in chain]
     except (sqlite3.Error, OSError, RuntimeError):
         logger.exception("Causal chain query failed for #%d", fact_id)
         raise HTTPException(

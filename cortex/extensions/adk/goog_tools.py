@@ -1,3 +1,4 @@
+
 """Google One Tools — Integration for CORTEX ADK agents.
 
 Provides tools to monitor storage, sync with NotebookLM sources,
@@ -11,6 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from cortex.cli.notebooklm_data import _detect_cloud_sync
+from cortex.utils.time import utc_now
 
 logger = logging.getLogger("cortex.extensions.adk.goog_tools")
 
@@ -81,7 +83,6 @@ def goog_backup_cortex() -> dict[str, Any]:
         Status of the backup operation.
     """
     import os
-    from datetime import datetime, timezone
 
     detected = _detect_cloud_sync()
     if not detected:
@@ -95,7 +96,7 @@ def goog_backup_cortex() -> dict[str, Any]:
     if not db_path.exists():
         return {"status": "error", "message": f"Source DB not found at {db_path}"}
 
-    ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+    ts = utc_now().strftime("%Y%m%d_%H%M%S")
     dest_name = f"cortex_sovereign_backup_{ts}.db"
     dest_path = backup_dir / dest_name
 

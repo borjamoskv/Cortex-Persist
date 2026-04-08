@@ -1,3 +1,4 @@
+
 """
 CORTEX v5.1 — Edge Security & Traffic Middleware.
 
@@ -14,7 +15,6 @@ import logging
 import time
 import uuid
 from collections import deque
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Final
 
@@ -23,6 +23,7 @@ from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from cortex.utils.i18n import DEFAULT_LANGUAGE, get_trans
+from cortex.utils.time import utc_now
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -286,7 +287,7 @@ class SecurityFraudMiddleware(BaseHTTPMiddleware):
 
         try:
             async with pool.acquire() as conn:
-                now = datetime.now(timezone.utc).isoformat()
+                now = utc_now().isoformat()
                 sql = "SELECT 1 FROM threat_intel WHERE ip_address = ? AND (expires_at IS NULL OR expires_at > ?)"
                 async with conn.execute(sql, (client_ip, now)) as cursor:
                     return bool(await cursor.fetchone())
@@ -303,7 +304,7 @@ class SecurityFraudMiddleware(BaseHTTPMiddleware):
         )
 
         event = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": utc_now().isoformat(),
             "ip_address": client_ip,
             "status_code": response.status_code,
             "payload": signature,

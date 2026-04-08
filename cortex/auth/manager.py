@@ -1,3 +1,4 @@
+
 """CORTEX Auth — AuthManager and singleton access."""
 
 from __future__ import annotations
@@ -8,11 +9,11 @@ import json
 import logging
 import secrets
 import threading
-from datetime import datetime, timezone
 from typing import Any, Optional
 
 from cortex.auth.backends import BaseAuthBackend
 from cortex.auth.models import APIKey, AuthResult
+from cortex.utils.time import utc_now
 
 __all__ = ["AuthManager", "get_auth_manager", "reset_auth_manager"]
 
@@ -117,7 +118,7 @@ class AuthManager:
             tenant_id=tenant_id,
             role=role,
             permissions=permissions,
-            created_at=datetime.now(timezone.utc).isoformat(),
+            created_at=utc_now().isoformat(),
             last_used=None,
             is_active=True,
             rate_limit=rate_limit,

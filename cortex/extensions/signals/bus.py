@@ -1,3 +1,4 @@
+
 """SQLite-backed signal bus used by the memory subsystem and telemetry."""
 
 from __future__ import annotations
@@ -5,12 +6,13 @@ from __future__ import annotations
 import json
 import logging
 import sqlite3
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from typing import Optional
 
 import aiosqlite
 
 from cortex.extensions.signals.models import Signal, signal_from_row
+from cortex.utils.time import utc_now
 
 __all__ = ["SignalBus", "AsyncSignalBus"]
 
@@ -265,7 +267,7 @@ class AsyncSignalBus:
 
     async def gc(self, max_age_days: int = 30, tenant_id: Optional[str] = None) -> int:
         await self.ensure_table()
-        cutoff = (datetime.now(timezone.utc) - timedelta(days=max_age_days)).isoformat()
+        cutoff = (utc_now() - timedelta(days=max_age_days)).isoformat()
 
         sql = "DELETE FROM signals WHERE consumed_by != '[]' AND created_at < ?"
         params: list = [cutoff]
@@ -469,7 +471,7 @@ class SignalBus:
 
     def gc(self, max_age_days: int = 30, tenant_id: Optional[str] = None) -> int:
         self.ensure_table()
-        cutoff = (datetime.now(timezone.utc) - timedelta(days=max_age_days)).isoformat()
+        cutoff = (utc_now() - timedelta(days=max_age_days)).isoformat()
 
         sql = "DELETE FROM signals WHERE consumed_by != '[]' AND created_at < ?"
         params: list = [cutoff]

@@ -1,3 +1,4 @@
+
 """Site monitoring for MOSKV daemon."""
 
 from __future__ import annotations
@@ -14,6 +15,7 @@ from cortex.extensions.daemon.models import (
     SiteStatus,
 )
 from cortex.utils.respiration import breathe
+from cortex.utils.time import utc_now
 
 logger = logging.getLogger("moskv-daemon")
 
@@ -41,9 +43,8 @@ class SiteMonitor:
 
     async def _check_one(self, client: httpx.AsyncClient, url: str) -> SiteStatus:
         """Check a single URL with retry and backoff (oxygenated)."""
-        from datetime import datetime, timezone
 
-        now = datetime.now(timezone.utc).isoformat()
+        now = utc_now().isoformat()
         last_error = ""
 
         for attempt in range(self.retries + 1):

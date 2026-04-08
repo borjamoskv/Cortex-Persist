@@ -16,6 +16,8 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
+from cortex.utils.time import blocking_wait
+
 console = Console()
 
 # Industrial Noir Palette
@@ -118,7 +120,7 @@ def run_reactor():
             state.update()
             layout["reactor"].update(generate_reactor_view(state))
             layout["entropy_feed"].update(generate_feed_view(state))
-            time.sleep(0.2)
+            blocking_wait(0.2)
 
 
 if __name__ == "__main__":

@@ -1,13 +1,13 @@
 import json
 import logging
 import subprocess
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Optional
 
 from cortex.engine import CortexEngine as AsyncCortexEngine
 from cortex.extensions.cuatrida.models import CuatridaMetrics, DecisionNode, Dimension
 from cortex.extensions.mejoralo.engine import MejoraloEngine
+from cortex.utils.time import utc_now
 
 logger = logging.getLogger("cortex.extensions.cuatrida.orchestrator")
 
@@ -35,7 +35,7 @@ class CuatridaOrchestrator:
         """
         Dimension B: Seals a decision into the immutable ledger.
         """
-        timestamp = datetime.now(timezone.utc).isoformat()
+        timestamp = utc_now().isoformat()
         metadata = metadata or {}
 
         # Dimension B: Hook into CORTEX ledger.
@@ -143,7 +143,7 @@ class CuatridaOrchestrator:
         status = "unknown"
 
         if ghost_path.exists():
-            start = datetime.now(timezone.utc)
+            start = utc_now()
             try:
                 subprocess.run(
                     ["python3", str(ghost_path), "status"],
@@ -151,7 +151,7 @@ class CuatridaOrchestrator:
                     timeout=2.0,
                     check=False,
                 )
-                latency = (datetime.now(timezone.utc) - start).total_seconds() * 1000
+                latency = (utc_now() - start).total_seconds() * 1000
                 status = "active"
             except (subprocess.SubprocessError, OSError):
                 status = "error"

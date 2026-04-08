@@ -1,3 +1,4 @@
+
 """
 CORTEX Immutable Vote Ledger.
 
@@ -11,8 +12,9 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
-from datetime import datetime, timezone
 from typing import Any, Optional
+
+from cortex.utils.time import utc_now
 
 logger = logging.getLogger("cortex.ledger")
 
@@ -72,7 +74,7 @@ class ImmutableVoteLedger:
         """
         async with self.conn.transaction():
             prev_hash = await self.get_last_hash(tenant_id)
-            timestamp = datetime.now(timezone.utc).isoformat()
+            timestamp = utc_now().isoformat()
 
             entry_hash = self._compute_hash(
                 tenant_id,
@@ -173,7 +175,7 @@ class ImmutableVoteLedger:
             return ""
 
         root = self._build_merkle_tree(hashes)
-        timestamp = datetime.now(timezone.utc).isoformat()
+        timestamp = utc_now().isoformat()
 
         await self.conn.execute(
             "INSERT INTO vote_merkle_roots (tenant_id, root_hash, timestamp) VALUES (?, ?, ?)",

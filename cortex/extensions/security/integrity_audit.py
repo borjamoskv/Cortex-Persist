@@ -1,3 +1,4 @@
+
 """
 CORTEX v8 — Integrity Auditor.
 
@@ -12,13 +13,13 @@ import hashlib
 import logging
 import time
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
 from typing import Any
 
 import aiosqlite
 
 from cortex import config
 from cortex.database.core import connect_async_ctx
+from cortex.utils.time import utc_now
 
 logger = logging.getLogger("cortex.extensions.security.integrity_audit")
 
@@ -109,7 +110,7 @@ class IntegrityAuditor:
         """
         start = time.monotonic()
         report = AuditReport(
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            timestamp=utc_now().isoformat(),
         )
 
         try:

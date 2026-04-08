@@ -1,3 +1,4 @@
+
 """Canary monitor for MOSKV daemon — Active HoneyPots."""
 
 from __future__ import annotations
@@ -5,12 +6,12 @@ from __future__ import annotations
 import logging
 import os
 import sqlite3
-from datetime import datetime, timezone
 from pathlib import Path
 
 from cortex import config
 from cortex.database.core import connect_async
 from cortex.extensions.daemon.models import SecurityAlert
+from cortex.utils.time import utc_now
 
 logger = logging.getLogger("moskv-daemon")
 
@@ -76,7 +77,7 @@ class CanaryMonitor:
                         similarity_score=1.0,
                         confidence="C5",
                         summary="CANARY_TRIPPED: Active HoneyPot hit detected.",
-                        timestamp=datetime.now(timezone.utc).isoformat(),
+                        timestamp=utc_now().isoformat(),
                     )
                     alerts.append(alert)
                     self._last_stats[path] = current_val

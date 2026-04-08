@@ -1,3 +1,4 @@
+
 """CORTEX Metering — Quota Enforcement.
 
 Plan-based quota definitions and enforcement for Memory-as-a-Service.
@@ -8,10 +9,10 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from datetime import datetime, timezone
 from typing import Any
 
 from cortex.extensions.metering.tracker import UsageTracker
+from cortex.utils.time import utc_now
 
 __all__ = ["PLAN_QUOTAS", "QuotaCheckResult", "QuotaEnforcer"]
 
@@ -150,7 +151,7 @@ class QuotaEnforcer:
     @staticmethod
     def _next_reset() -> str:
         """Calculate the next monthly reset timestamp (1st of next month, 00:00 UTC)."""
-        now = datetime.now(timezone.utc)
+        now = utc_now()
         if now.month == 12:
             reset = now.replace(year=now.year + 1, month=1, day=1, hour=0, minute=0, second=0)
         else:

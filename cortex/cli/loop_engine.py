@@ -1,3 +1,4 @@
+
 """loop_engine — ExecutionLoop: The Sovereign Task Execution Engine.
 
 Extracted from loop_cmds.py to satisfy the Landauer LOC barrier (≤500).
@@ -13,11 +14,11 @@ import logging
 import threading
 import time
 import traceback
-from datetime import datetime, timezone
 from typing import Any
 
 from cortex.cli.common import DEFAULT_DB, _detect_agent_source, _run_async, get_engine
 from cortex.cli.loop_models import LoopSession, PersistenceType, TaskResult, TaskStatus
+from cortex.utils.time import utc_now
 
 __all__ = ["ExecutionLoop", "PersistSupervisor", "PERSIST_INTERVAL"]
 
@@ -297,7 +298,7 @@ class ExecutionLoop:
             content="\n".join(parts),
             fact_type=PersistenceType.KNOWLEDGE.value,
             session_start=self._session.started_at,
-            session_end=datetime.now(timezone.utc).isoformat(),
+            session_end=utc_now().isoformat(),
             tasks_completed=self._session.tasks_completed,
             tasks_failed=self._session.tasks_failed,
             total_persisted=self._session.total_persisted,

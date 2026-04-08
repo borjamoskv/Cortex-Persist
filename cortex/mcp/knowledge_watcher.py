@@ -4,10 +4,11 @@ Continuously monitors the knowledge directory for any changes and automatically
 compiles semantic vectors into the Persistent ChromaDB instance.
 """
 
-import os
 import logging
-from watchdog.observers import Observer
+import os
+
 from watchdog.events import FileSystemEventHandler
+from watchdog.observers import Observer
 
 try:
     import chromadb
@@ -42,7 +43,7 @@ class KnowledgeItemHandler(FileSystemEventHandler):
             ki_name = "unknown_ki"
 
         try:
-            with open(file_path, "r", encoding="utf-8") as f:
+            with open(file_path, encoding="utf-8") as f:
                 content = f.read()
 
             if content.strip():

@@ -1,3 +1,4 @@
+
 """Anomaly Hunter Engine — NightShift Memory Refiner.
 
 Detects physical and temporal contradictions in the daily logs.
@@ -9,10 +10,11 @@ from __future__ import annotations
 import asyncio
 import logging
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from typing import Any
 
 from cortex.engine.models import Fact
+from cortex.utils.time import utc_now
 
 logger = logging.getLogger("cortex.anomaly")
 
@@ -72,7 +74,7 @@ class AnomalyHunterEngine:
 
     async def run_full_scan(self) -> dict:
         """Entry point NightShift: escaneo completo en paralelo."""
-        threshold = datetime.now(timezone.utc) - self.window
+        threshold = utc_now() - self.window
         # Fetching facts from the last 24h
         time_filter = threshold.isoformat()
 
@@ -261,7 +263,7 @@ class AnomalyHunterEngine:
                     "facts_involved": anomaly.facts_involved,
                     "suggested_action": anomaly.suggested_action,
                     "auto_generated": True,
-                    "nightshift_session": datetime.now(timezone.utc).date().isoformat(),
+                    "nightshift_session": utc_now().date().isoformat(),
                 },
             )
 

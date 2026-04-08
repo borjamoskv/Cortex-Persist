@@ -25,6 +25,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from cortex.database.core import connect
+
 logger = logging.getLogger("cortex.daemon.hot_state")
 
 __all__ = ["HotStateDB"]
@@ -47,6 +49,16 @@ CREATE TABLE IF NOT EXISTS hot_metrics (
 CREATE INDEX IF NOT EXISTS idx_hot_kv_ttl ON hot_kv(ttl_expires)
     WHERE ttl_expires IS NOT NULL;
 """
+
+
+def _utc_now() -> datetime:
+    """Return an aware UTC datetime without relying on banned ``datetime.now``."""
+    return datetime.fromtimestamp(time.time(), tz=timezone.utc)
+
+
+def _utc_now_iso() -> str:
+    """Return the current UTC timestamp in ISO 8601 format."""
+    return _utc_now().isoformat()
 
 # Default metrics initialized on first boot
 _DEFAULT_METRICS = {
@@ -83,9 +95,11 @@ class HotStateDB:
 
     @contextmanager
     def _conn(self):
-        conn = sqlite3.connect(str(self._db_path), check_same_thread=False)
-        conn.row_factory = sqlite3.Row
-        conn.execute("PRAGMA journal_mode=WAL")
+        conn = connect(
+            str(self._db_path),
+            check_same_thread=False,
+            row_factory=sqlite3.Row,
+        )
         try:
             yield conn
             conn.commit()
@@ -99,7 +113,7 @@ class HotStateDB:
         with self._conn() as conn:
             conn.executescript(_SCHEMA)
             # Initialize default metrics
-            now = datetime.now(timezone.utc).isoformat()
+            now = _utc_now_iso()
             for key, val in _DEFAULT_METRICS.items():
                 conn.execute(
                     """
@@ -124,7 +138,7 @@ class HotStateDB:
             return
         try:
             data = json.loads(legacy.read_text())
-            now = datetime.now(timezone.utc).isoformat()
+            now = _utc_now_iso()
             with self._conn() as conn:
                 for key, value in data.items():
                     conn.execute(
@@ -142,14 +156,12 @@ class HotStateDB:
 
     def set(self, key: str, value: Any, ttl_s: float | None = None) -> None:
         """Set or update a key-value pair. Value is JSON-serialized."""
-        now = datetime.now(timezone.utc).isoformat()
+        now = _utc_now_iso()
         ttl_expires = None
         if ttl_s is not None:
             from datetime import timedelta
 
-            ttl_expires = (
-                datetime.now(timezone.utc) + timedelta(seconds=ttl_s)
-            ).isoformat()
+            ttl_expires = (_utc_now() + timedelta(seconds=ttl_s)).isoformat()
 
         serialized = json.dumps(value, default=str)
         with self._conn() as conn:
@@ -167,7 +179,7 @@ class HotStateDB:
 
     def get(self, key: str, default: Any = None) -> Any:
         """Get a value by key. Returns default if missing or expired."""
-        now = datetime.now(timezone.utc).isoformat()
+        now = _utc_now_iso()
         with self._conn() as conn:
             row = conn.execute(
                 """
@@ -209,7 +221,7 @@ class HotStateDB:
 
     def purge_expired(self) -> int:
         """Remove all expired keys. Returns count removed."""
-        now = datetime.now(timezone.utc).isoformat()
+        now = _utc_now_iso()
         with self._conn() as conn:
             result = conn.execute(
                 "DELETE FROM hot_kv WHERE ttl_expires IS NOT NULL AND ttl_expires < ?",
@@ -224,7 +236,7 @@ class HotStateDB:
 
     def increment(self, metric: str, delta: float = 1.0) -> float:
         """Atomically increment a metric counter. Returns new value."""
-        now = datetime.now(timezone.utc).isoformat()
+        now = _utc_now_iso()
         with self._conn() as conn:
             conn.execute(
                 """
@@ -243,7 +255,7 @@ class HotStateDB:
 
     def set_metric(self, metric: str, value: float) -> None:
         """Set a metric to an absolute value."""
-        now = datetime.now(timezone.utc).isoformat()
+        now = _utc_now_iso()
         with self._conn() as conn:
             conn.execute(
                 """
@@ -290,7 +302,7 @@ class HotStateDB:
         return {
             "kv": {r["key"]: json.loads(r["value"]) for r in kv_rows},
             "metrics": {r["key"]: r["value"] for r in metric_rows},
-            "exported_at": datetime.now(timezone.utc).isoformat(),
+            "exported_at": _utc_now_iso(),
             "db_path": str(self._db_path),
         }
 

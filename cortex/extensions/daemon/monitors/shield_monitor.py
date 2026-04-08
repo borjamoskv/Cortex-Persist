@@ -1,3 +1,4 @@
+
 """
 CORTEX v8 — Daily Shield Monitor (Daemon).
 
@@ -13,8 +14,10 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Any, Optional
+
+from cortex.utils.time import utc_now
 
 logger = logging.getLogger("moskv-daemon")
 
@@ -40,7 +43,7 @@ class DailyShieldMonitor:
         Returns list of alerts/findings.
         """
         alerts: list[dict[str, Any]] = []
-        now = datetime.now(timezone.utc)
+        now = utc_now()
 
         # Skip if already ran within interval
         if self._last_scan:

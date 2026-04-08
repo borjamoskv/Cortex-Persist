@@ -1,3 +1,4 @@
+
 """
 CORTEX v8 — Anomaly Detector.
 
@@ -13,8 +14,9 @@ import math
 import time
 from collections import defaultdict
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
 from typing import Any, Optional
+
+from cortex.utils.time import utc_now
 
 logger = logging.getLogger("cortex.extensions.security.anomaly_detector")
 
@@ -171,7 +173,7 @@ class AnomalyDetector:
         baseline = ProjectBaseline(
             project=project,
             total_events=len(events),
-            last_updated=datetime.now(timezone.utc).isoformat(),
+            last_updated=utc_now().isoformat(),
         )
 
         if len(events) >= 10:

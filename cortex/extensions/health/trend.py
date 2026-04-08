@@ -1,3 +1,4 @@
+
 """Trend detection — drift detection from health snapshots.
 
 Ring buffer of last N scores. Computes slope to classify:
@@ -15,6 +16,8 @@ import sqlite3
 from collections import deque
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+
+from cortex.utils.time import utc_now
 
 logger = logging.getLogger("cortex.extensions.health.trend")
 
@@ -121,7 +124,7 @@ class TrendDetector:
                 ts_str = (
                     datetime.fromtimestamp(timestamp, tz=timezone.utc)
                     if timestamp
-                    else datetime.now(timezone.utc)
+                    else utc_now()
                 ).isoformat()
                 conn.execute(
                     "INSERT INTO health_history (timestamp, score, grade) VALUES (?, ?, ?)",
@@ -144,7 +147,7 @@ class TrendDetector:
                 # SQLite isoformat comparison: "2024-..." < "2024-..."
                 from datetime import timedelta
 
-                cutoff = (datetime.now(timezone.utc) - timedelta(days=keep_days)).isoformat()
+                cutoff = (utc_now() - timedelta(days=keep_days)).isoformat()
                 conn.execute(
                     "DELETE FROM health_history WHERE timestamp < ?",
                     (cutoff,),

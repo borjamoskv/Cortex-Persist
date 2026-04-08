@@ -1,3 +1,4 @@
+
 """Entropic Evaporator — Ω₂: Selective Forgetting (Evaporation).
 
 Space is finite. Knowledge has a half-life. This engine prunes
@@ -7,12 +8,13 @@ low-value, unverified, and non-causal facts to reduce system heat.
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta
 
 import aiosqlite
 
 from cortex.engine.mutation_engine import MUTATION_ENGINE
 from cortex.memory.temporal import now_iso
+from cortex.utils.time import utc_now
 
 logger = logging.getLogger("cortex.evaporator")
 
@@ -33,7 +35,7 @@ class EntropicEvaporator:
         """
         logger.info("💨 [EVAPORATOR] Starting evaporation cycle (Ω₂)...")
 
-        limit_date = (datetime.now(timezone.utc) - timedelta(days=30)).isoformat()
+        limit_date = (utc_now() - timedelta(days=30)).isoformat()
 
         # We query for candidate IDs
         # meta NOT LIKE '%causal_parent%' is a heuristic check on encrypted/raw meta

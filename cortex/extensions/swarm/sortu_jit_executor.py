@@ -1,7 +1,7 @@
 import ast
 import asyncio
-import time
 import logging
+import time
 from typing import Any
 
 logger = logging.getLogger("cortex.autodidact.sandbox")
@@ -37,7 +37,7 @@ def _execute_sync(source_code: str, global_ctx: dict) -> dict:
         tree = ast.parse(source_code)
         SovereignASTVisitor().visit(tree)
     except SyntaxError as e:
-        raise SecurityViolationException(f"AST Syntax Error: {e}")
+        raise SecurityViolationException(f"AST Syntax Error: {e}") from e
     
     # Compilation
     compiled_code = compile(tree, filename="<jit_ast>", mode="exec")
@@ -102,16 +102,21 @@ async def run_jit_sandbox(source_code: str, timeout_ms: int = 50, global_ctx: di
             p.kill() # OS-level SIGKILL
         
         elapsed = (time.perf_counter() - start_time) * 1000
-        logger.error(f"⚡ [SORTU-JIT] Thermodynamic Timeout triggered ({elapsed:.2f}ms). Process terminated via SIGKILL.")
+        logger.error(
+            "⚡ [SORTU-JIT] Thermodynamic Timeout triggered (%.2fms). Process terminated via SIGKILL.",
+            elapsed,
+        )
         raise JITTimeoutException("Execution exceeded thermodynamic bounds (50ms)")
     
     elapsed = (time.perf_counter() - start_time) * 1000
     
     if dict(result_dict).get("status") == "success":
-        logger.info(f"⚡ [SORTU-JIT] Sovereign AST execution complete. Yield Time: {elapsed:.2f}ms")
+        logger.info(
+            "⚡ [SORTU-JIT] Sovereign AST execution complete. Yield Time: %.2fms",
+            elapsed,
+        )
         return {"status": "success", "result": {"locals": result_dict["locals"]}, "time_ms": elapsed}
     else:
         err = dict(result_dict).get("error", "Unknown Epistemic Failure")
-        logger.error(f"⚡ [SORTU-JIT] Epistemic failure: {err}")
+        logger.error("⚡ [SORTU-JIT] Epistemic failure: %s", err)
         return {"status": "failed", "error": err}
-

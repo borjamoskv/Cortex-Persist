@@ -1,3 +1,4 @@
+
 """
 Sovereign Reporter — The Living Documentation Engine (Ω-Dynamic).
 
@@ -13,12 +14,12 @@ import os
 import sqlite3
 import sys
 from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
 from typing import Any
 
 import aiosqlite
 
 from cortex.database.core import connect_async_ctx
+from cortex.utils.time import utc_now
 
 logger = logging.getLogger("cortex.reporter")
 
@@ -107,7 +108,7 @@ class SovereignReporter:
                     db_size_mb = os.path.getsize(self.db_path) / (1024 * 1024)
 
                 return ManifoldStatus(
-                    timestamp=datetime.now(timezone.utc).isoformat(),
+                    timestamp=utc_now().isoformat(),
                     project=self.project,
                     causality=causal_stats,
                     efficiency={

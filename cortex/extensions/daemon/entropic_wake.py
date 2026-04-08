@@ -1,3 +1,4 @@
+
 """
 Entropic Wake Daemon (VOID DAEMON)
 The proactive heartbeat that crosses the Rubicon: from determinism to autonomous mutation.
@@ -7,11 +8,11 @@ import asyncio
 import logging
 import sqlite3
 import subprocess
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 from cortex.extensions.songlines.sensor import TopographicSensor
+from cortex.utils.time import utc_now
 
 logger = logging.getLogger("cortex.extensions.daemon.entropic_wake")
 
@@ -105,7 +106,7 @@ class EntropicWakeDaemon:
         """Register the autonomous action into CORTEX-DB."""
         if not self.engine:
             return
-        now_str = datetime.now(timezone.utc).strftime("%H:%M %p")
+        now_str = utc_now().strftime("%H:%M %p")
         msg = (
             f"Anoche a las {now_str} disolví secciones entrópicas estancadas en {target}. "
             "Pasó los tests de inmunidad. Deuda saldada. PR en espera de merge."
@@ -115,7 +116,7 @@ class EntropicWakeDaemon:
             conn.execute(
                 "INSERT INTO facts (id, type, topic, content, timestamp) "
                 "VALUES (lower(hex(randomblob(16))), 'decision', 'Autopoiesis', ?, ?)",
-                (msg, datetime.now(timezone.utc).timestamp()),
+                (msg, utc_now().timestamp()),
             )
             conn.commit()
             logger.info("Logged autopoiesis cycle to CORTEX.")

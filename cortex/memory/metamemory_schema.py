@@ -1,3 +1,4 @@
+
 """CORTEX — Metamemory Schema Layer: Models, Index, and Judge.
 
 Extracted from metamemory.py for module splitting (Ω₂: LOC ≤ 500).
@@ -20,6 +21,8 @@ from datetime import datetime, timezone
 from typing import Any, Final, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
+
+from cortex.utils.time import utc_now
 
 logger = logging.getLogger("cortex.memory.metamemory")
 
@@ -83,7 +86,7 @@ class MemoryCard(BaseModel):
         description="P(accurate retrieval) — similarity score × energy.",
     )
     last_accessed: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc),
+        default_factory=lambda: utc_now(),
         description="UTC timestamp of last structural access.",
     )
     access_frequency: int = Field(
@@ -196,7 +199,7 @@ class MetamemoryIndex:
 
         cards = list(self._cards.values())
         n = len(cards)
-        now = datetime.now(timezone.utc)
+        now = utc_now()
 
         return MetamemoryStats(
             total_memories=n,

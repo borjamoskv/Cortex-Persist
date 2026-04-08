@@ -1,3 +1,4 @@
+
 """
 CORTEX v5.0 — Embedding Pruner.
 
@@ -11,11 +12,12 @@ import hashlib
 import json
 import logging
 import sqlite3
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta
 
 import aiosqlite
 
 from cortex.database.core import connect_async_ctx
+from cortex.utils.time import utc_now
 
 __all__ = ["EmbeddingPrunerMixin"]
 
@@ -52,7 +54,7 @@ class EmbeddingPrunerMixin:
         Returns:
             dict with 'pruned_count', 'skipped_count', 'errors'.
         """
-        cutoff = (datetime.now(timezone.utc) - timedelta(days=max_age_days)).isoformat()
+        cutoff = (utc_now() - timedelta(days=max_age_days)).isoformat()
         stats = {"pruned_count": 0, "skipped_count": 0, "errors": []}
 
         async with connect_async_ctx(self.db_path) as conn:  # type: ignore[reportAttributeAccessIssue]

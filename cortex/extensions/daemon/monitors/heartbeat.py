@@ -1,3 +1,4 @@
+
 """True Heartbeat Monitor.
 
 A true heartbeat should calculate the hash of the entropy on each poll
@@ -6,10 +7,10 @@ and alert solely when the semantic asymmetry deviates from the given threshold.
 
 import hashlib
 import logging
-from datetime import datetime, timezone
 from typing import Any
 
 from cortex.extensions.daemon.models import SiteStatus
+from cortex.utils.time import utc_now
 
 logger = logging.getLogger("cortex.monitors.heartbeat")
 
@@ -48,7 +49,7 @@ class TrueHeartbeatMonitor:
         """Poll the endpoint and measure semantic drift."""
         import time
 
-        now = datetime.now(timezone.utc).isoformat()
+        now = utc_now().isoformat()
 
         try:
             start = time.monotonic()

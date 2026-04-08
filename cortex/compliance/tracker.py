@@ -1,3 +1,4 @@
+
 """ComplianceTracker — EU AI Act Article 12 compliance in 3 methods.
 
 Usage:
@@ -12,11 +13,11 @@ Usage:
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 from cortex.config import DEFAULT_DB_PATH
+from cortex.utils.time import utc_now
 
 __all__ = ["ComplianceTracker"]
 
@@ -97,7 +98,7 @@ class ComplianceTracker:
         self._ensure_init()
 
         proj = project or self._default_project
-        now = datetime.now(timezone.utc).isoformat()
+        now = utc_now().isoformat()
 
         eu_meta: dict[str, Any] = {
             "eu_ai_act": {
@@ -196,7 +197,7 @@ class ComplianceTracker:
             },
             "integrity": integrity,
             "facts_summary": facts_summary,
-            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "generated_at": utc_now().isoformat(),
             "project": proj,
         }
 

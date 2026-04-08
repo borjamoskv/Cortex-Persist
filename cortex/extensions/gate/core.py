@@ -1,3 +1,4 @@
+
 """
 CORTEX v5.0 — SovereignGate Core Logic.
 """
@@ -13,8 +14,9 @@ import subprocess
 import threading
 import time
 import uuid
-from datetime import datetime, timezone
 from typing import Any, Optional
+
+from cortex.utils.time import utc_now
 
 from .errors import GateError, GateExpired, GateInvalidSignature, GateNotApproved
 from .models import ActionLevel, ActionStatus, GatePolicy, PendingAction
@@ -327,7 +329,7 @@ class SovereignGate:
         """Append to the in-memory audit log."""
         entry = {
             "event": event,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": utc_now().isoformat(),
             **action.to_dict(),
         }
         self._audit_log.append(entry)

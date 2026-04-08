@@ -22,11 +22,13 @@ if TYPE_CHECKING:
     from cortex.embeddings.manager import EmbeddingManager
     from cortex.engine.auth import ByzantineAuthLayer
     from cortex.engine.lock import SovereignLock
+    from cortex.engine.trust_registry import TrustRegistry
     from cortex.facts.manager import FactManager
     from cortex.ledger import EnrichmentQueue, LedgerStore, LedgerWriter
     from cortex.mac_maestro.executor import MaestroExecutor
 
 from cortex.database.schema import get_init_meta
+from cortex.engine.compat_mixin import CompatibilityMixin
 from cortex.engine.durability import PersistenceSupervisor
 from cortex.engine.legacy_mixin import LegacyMixin
 from cortex.engine.memory_mixin import MemoryMixin
@@ -63,6 +65,7 @@ MAX_TAGS_PER_FACT = 20
 
 
 class CortexEngine(
+    CompatibilityMixin,
     SearchMixin,
     StoreMixin,
     QueryMixin,
@@ -115,6 +118,7 @@ class CortexEngine(
         self._ledger_writer: LedgerWriter | None = None
         self._mac_maestro: MaestroExecutor | None = None
         self._auth: ByzantineAuthLayer | None = None  # noqa: F821
+        self._trust_registry: TrustRegistry | None = None
 
         # Decoupled guard pipeline (Ω₃: minimal coupling)
         self._guard_pipeline = self._register_default_guards()
@@ -212,6 +216,13 @@ class CortexEngine(
     @auth.setter
     def auth(self, value: ByzantineAuthLayer) -> None:  # noqa: F821
         self._auth = value
+
+    def get_trust_registry(self) -> TrustRegistry:  # noqa: F821
+        if self._trust_registry is None:
+            from cortex.engine.trust_registry import TrustRegistry
+
+            self._trust_registry = TrustRegistry()
+        return self._trust_registry
 
     @property
     def ledger_store(self) -> LedgerStore:
@@ -350,25 +361,6 @@ class CortexEngine(
 
     # ─── JIT Entry Points (Axiom Ω₄) ──────────────────────────────
 
-    # ─── Security: CLI Audit Trail ────────────────────────────────
-
-    @staticmethod
-    def _audit_log(
-        action: str,
-        fact_type: str = "",
-        project: str = "",
-        tenant_id: str = "default",
-    ) -> None:
-        """Append-only audit log for CLI/SDK access to CORTEX memory."""
-        audit_logger = logging.getLogger("cortex.audit")
-        audit_logger.info(
-            "AUDIT: action=%s fact_type=%s project=%s tenant=%s",
-            action,
-            fact_type,
-            project,
-            tenant_id,
-        )
-
     @asynccontextmanager
     async def session(self) -> AsyncIterator[aiosqlite.Connection]:
         """Proporciona una sesión transaccional (conexión) válida."""
@@ -482,133 +474,6 @@ class CortexEngine(
         async with self.session() as conn:
             tracer = CausalTracer(conn)
             return await tracer.trace_episode(fact_id, max_depth)
-
-    # ─── Backward Compatibility Aliases & Delegation ──────────────
-
-    async def store(self, *args, **kwargs):
-        self._synthesize_skill("store")
-        self._audit_log(
-            "store",
-            fact_type=kwargs.get("fact_type", ""),
-            project=kwargs.get("project", args[0] if args else ""),
-        )
-        return await self.facts.store(*args, **kwargs)
-
-    async def store_many(self, *args, **kwargs):
-        self._synthesize_skill("store")
-        return await super().store_many(*args, **kwargs)
-
-    async def recall(self, *args, **kwargs):
-        self._synthesize_skill("search")
-        self._audit_log(
-            "recall",
-            project=kwargs.get("project", args[0] if args else ""),
-        )
-        return await super().recall(*args, **kwargs)
-
-    async def search(self, *args, **kwargs):
-        self._synthesize_skill("search")
-        return await super().search(*args, **kwargs)
-
-    async def query(self, *args, **kwargs):
-        self._synthesize_skill("query")
-        return await super().query(*args, **kwargs)
-
-    async def write_optimized(self, *args, **kwargs):
-        self._synthesize_skill("optimization")
-        return await super().write_optimized(*args, **kwargs)
-
-    async def get_fact(self, fact_id: int, tenant_id: str = "default"):
-        self._synthesize_skill("query")
-        res = await super().get_fact(fact_id, tenant_id=tenant_id)
-        if not res:
-            return None
-        from cortex.engine.models import Fact
-
-        return Fact(**{k: v for k, v in res.items() if k in Fact.__dataclass_fields__})
-
-    async def retrieve(self, fact_id: int):
-        """Retrieve an active fact. Raises FactNotFound if missing or deprecated."""
-        from cortex.utils.errors import FactNotFound
-
-        async with self.session() as conn:
-            async with conn.execute(
-                f"SELECT {FACT_COLUMNS} {FACT_JOIN} WHERE f.id = ?", (fact_id,)
-            ) as cursor:
-                row = await cursor.fetchone()
-        fact = row_to_fact(tuple(row)) if row else None
-        if not fact or fact.valid_until:
-            raise FactNotFound(f"Fact {fact_id} not found or deprecated")
-        return fact
-
-    async def vote_v2(self, *args, **kwargs):
-        return await self.consensus.vote_v2(*args, **kwargs)
-
-    async def get_all_active_facts(self, *args, **kwargs):
-        """Retrieve all active facts across all projects, wrapped in models."""
-        results = await super().get_all_active_facts(*args, **kwargs)
-        from cortex.engine.models import Fact
-
-        return [
-            Fact(**{k: v for k, v in r.items() if k in Fact.__dataclass_fields__}) for r in results
-        ]
-
-    async def history(self, *args, **kwargs):
-        """Retrieve historical facts wrapped in models."""
-        results = await super().history(*args, **kwargs)
-        from cortex.engine.models import Fact
-
-        return [
-            Fact(**{k: v for k, v in r.items() if k in Fact.__dataclass_fields__}) for r in results
-        ]
-
-    async def get_causal_chain(self, *args, **kwargs):
-        """Retrieve causal chain facts wrapped in models."""
-        results = await super().get_causal_chain(*args, **kwargs)
-        from cortex.engine.models import Fact
-
-        return [
-            Fact(**{k: v for k, v in r.items() if k in Fact.__dataclass_fields__}) for r in results
-        ]
-
-    async def shannon_report(self, project: str | None = None) -> dict:
-        """Shannon entropy analysis of stored memory."""
-        from cortex.extensions.shannon.report import EntropyReport
-
-        return await EntropyReport.analyze(self, project)
-
-    async def fingerprint(
-        self,
-        project: str | None = None,
-        top_domains: int = 15,
-    ):
-        """Cognitive Fingerprint — extract behavioral patterns from the Ledger.
-        Returns a CognitiveFingerprint with:
-        - PatternVector: 7 behavioral dimensions (risk, caution, synthesis…)
-        - DomainPreferences: top active (project × fact_type) signatures
-        - Archetype: sovereign_architect / obsessive_executor / etc.
-        - to_agent_prompt(): ready for LLM system prompt injection
-        """
-        from cortex.extensions.fingerprint.extractor import FingerprintExtractor
-
-        return await FingerprintExtractor.extract(self, project, top_domains)
-
-    async def immortality_index(self, project: str | None = None) -> dict:
-        """Immortality Index (ι) — cognitive crystallization metric."""
-        from cortex.extensions.shannon.immortality import ImmortalityIndex
-
-        return await ImmortalityIndex.compute(self, project)
-
-    async def prioritize(
-        self,
-        project: str | None = None,
-        tenant_id: str = "default",
-    ) -> list:
-        """Bellman Policy Engine — prioritized action queue."""
-        from cortex.extensions.policy import PolicyEngine
-
-        policy = PolicyEngine(self)
-        return await policy.evaluate(project=project, tenant_id=tenant_id)
 
     # ─── Schema ───────────────────────────────────────────────────
 

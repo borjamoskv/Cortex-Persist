@@ -1,3 +1,4 @@
+
 """
 Crypto-Shredding Engine — GDPR Right to Erasure (Ω₃ / Ω₁₂).
 
@@ -27,8 +28,9 @@ from __future__ import annotations
 import logging
 import sqlite3
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any, Optional
+
+from cortex.utils.time import utc_now
 
 if TYPE_CHECKING:
     import aiosqlite
@@ -177,7 +179,7 @@ class CryptoShredder:
             )
 
         try:
-            ts = datetime.now(timezone.utc).isoformat()
+            ts = utc_now().isoformat()
             self._conn.execute(
                 "INSERT INTO shredded_keys "
                 "(fact_id, tenant_id, reason, shredded_by, shredded_at) "
@@ -237,7 +239,7 @@ class CryptoShredder:
             )
 
         try:
-            ts = datetime.now(timezone.utc).isoformat()
+            ts = utc_now().isoformat()
             await self._conn.execute(  # type: ignore[reportAttributeAccessIssue]
                 "INSERT INTO shredded_keys "
                 "(fact_id, tenant_id, reason, shredded_by, shredded_at) "
@@ -389,5 +391,5 @@ class CryptoShredder:
             "total_shredded": total,
             "by_reason": reasons,
             "compliant": True,
-            "audit_timestamp": datetime.now(timezone.utc).isoformat(),
+            "audit_timestamp": utc_now().isoformat(),
         }

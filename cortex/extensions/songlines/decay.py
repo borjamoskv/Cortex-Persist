@@ -1,10 +1,12 @@
+
 """
 DecayEngine — The Radioactive Clock.
 Calculates the semantic evaporation of ghost traces.
 """
 
 import logging
-from datetime import datetime, timezone
+
+from cortex.utils.time import utc_now
 
 logger = logging.getLogger("cortex.extensions.songlines.decay")
 
@@ -22,7 +24,7 @@ class DecayEngine:
 
         Formula: N(t) = N0 * (0.5 ^ (t / T1/2))
         """
-        now = datetime.now(timezone.utc).timestamp()
+        now = utc_now().timestamp()
         age_seconds = now - created_at
         age_hours = age_seconds / 3600.0
 

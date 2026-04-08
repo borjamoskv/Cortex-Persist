@@ -1,3 +1,4 @@
+
 """
 CORTEX v5.0 — Context Collector.
 
@@ -17,6 +18,7 @@ from typing import TYPE_CHECKING, Optional
 
 from cortex.extensions.context.signals import Signal
 from cortex.memory.temporal import now_iso
+from cortex.utils.time import utc_now
 
 __all__ = [
     "ContextCollector",
@@ -251,7 +253,7 @@ class ContextCollector:
                 reverse=True,
             )[:limit]
 
-            now_ts = datetime.now(tz=timezone.utc).timestamp()
+            now_ts = utc_now().timestamp()
             for i, f in enumerate(py_files):
                 age_hours = (now_ts - f.stat().st_mtime) / 3600
                 if age_hours > 24:

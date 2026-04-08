@@ -1,3 +1,4 @@
+
 """Cognitive Fingerprint — Preference Model Builder.
 
 Consumes raw data from FingerprintScanner and produces a
@@ -11,8 +12,9 @@ behavioral archetypes that agents can use as priors.
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
 from typing import TYPE_CHECKING
+
+from cortex.utils.time import utc_now
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine
@@ -189,7 +191,7 @@ class FingerprintExtractor:
         return CognitiveFingerprint(
             tenant_id="default",
             project_filter=project,
-            extracted_at=datetime.now(timezone.utc).isoformat(),
+            extracted_at=utc_now().isoformat(),
             pattern=pattern,
             domain_preferences=domain_prefs,
             archetype=archetype,
@@ -205,7 +207,7 @@ def _empty_fingerprint(project: str | None) -> CognitiveFingerprint:
     return CognitiveFingerprint(
         tenant_id="default",
         project_filter=project,
-        extracted_at=datetime.now(timezone.utc).isoformat(),
+        extracted_at=utc_now().isoformat(),
         archetype="null_state",
         archetype_confidence=0.0,
         total_facts_analyzed=0,

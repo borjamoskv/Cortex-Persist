@@ -7,7 +7,6 @@ Implementa Strategy + Circuit Breaker + ROP (Ω₂ Landauer split).
 from __future__ import annotations
 
 import asyncio
-import hashlib
 import logging
 import time
 from collections.abc import Sequence

@@ -1,3 +1,4 @@
+
 """SSL certificate monitor for MOSKV daemon."""
 
 from __future__ import annotations
@@ -9,6 +10,7 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from cortex.extensions.daemon.models import DEFAULT_CERT_WARN_DAYS, DEFAULT_TIMEOUT, CertAlert
+from cortex.utils.time import utc_now
 
 logger = logging.getLogger("moskv-daemon")
 
@@ -46,7 +48,7 @@ class CertMonitor:
                     expires = datetime.strptime(not_after, "%b %d %H:%M:%S %Y %Z").replace(  # type: ignore[reportArgumentType]
                         tzinfo=timezone.utc
                     )
-                    days_left = (expires - datetime.now(timezone.utc)).days
+                    days_left = (expires - utc_now()).days
                     if days_left < self.warn_days:
                         return CertAlert(
                             hostname=hostname,

@@ -6,6 +6,8 @@ import subprocess
 import sys
 from datetime import datetime, timezone
 
+from cortex.utils.time import utc_now
+
 logger = logging.getLogger(__name__)
 
 
@@ -31,7 +33,7 @@ def get_snapshot_age():
     if not snapshot_path.exists():
         return float("inf")
     mtime = datetime.fromtimestamp(snapshot_path.stat().st_mtime, tz=timezone.utc)
-    age = (datetime.now(timezone.utc) - mtime).total_seconds() / 60
+    age = (utc_now() - mtime).total_seconds() / 60
     return age
 
 

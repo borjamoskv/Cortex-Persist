@@ -1,3 +1,4 @@
+
 """CORTEX v7.0 — Sovereign Dashboard (Industrial Noir).
 
 Live terminal dashboard showing system health, Shannon entropy,
@@ -13,8 +14,6 @@ from __future__ import annotations
 
 import asyncio
 import sqlite3
-import time
-from datetime import datetime, timezone
 
 import click
 from rich.layout import Layout
@@ -25,6 +24,7 @@ from rich.text import Text
 
 from cortex.cli.common import DEFAULT_DB, _run_async, cli, console, get_engine
 from cortex.cli.errors import handle_cli_error
+from cortex.utils.time import blocking_wait, utc_now
 
 # ─── Industrial Noir Palette ────────────────────────────────────────
 _CYBER = "#CCFF00"
@@ -105,7 +105,7 @@ async def _collect_all(engine) -> dict:
 
 def _build_header() -> Panel:
     """Build the header panel with logo and timestamp."""
-    now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+    now = utc_now().strftime("%Y-%m-%d %H:%M:%S UTC")
     header = Text()
     header.append("⚡ CORTEX PERSIST", style=f"bold {_CYBER}")
     header.append("  ·  ", style=_DIM)
@@ -362,7 +362,7 @@ def dashboard(db: str, interval: float, once: bool) -> None:
                 while True:
                     data = _run_async(_collect_all(engine))
                     live.update(_build_dashboard(data))
-                    time.sleep(interval)
+                    blocking_wait(interval)
             except KeyboardInterrupt:
                 pass
 

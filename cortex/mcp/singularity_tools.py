@@ -1,12 +1,13 @@
 import functools
-import sqlite3
-import os
-import json
-import time
 import hashlib
-import sys
+import json
 import logging
+import os
+import sys
+import time
+
 from cortex.config import DB_PATH
+from cortex.database.core import connect
 from cortex.extensions.signals.bus import SignalBus
 
 # Sovereign Memory & Execution Imports
@@ -39,7 +40,7 @@ def _get_compacted_skill(skill_name: str) -> str:
     if not os.path.exists(skill_path):
         return f"Error: Skill '{skill_name}' not found at {skill_path}."
 
-    with open(skill_path, "r", encoding="utf-8") as f:
+    with open(skill_path, encoding="utf-8") as f:
         content = f.read()
 
     lines = [
@@ -135,7 +136,7 @@ def register_singularity_tools(mcp) -> None:
         global _LEDGER_STATE
         if _LEDGER_STATE is None:
             if os.path.exists(STATE_FILE):
-                with open(STATE_FILE, "r") as f:
+                with open(STATE_FILE, encoding="utf-8") as f:
                     try:
                         _LEDGER_STATE = json.load(f)
                     except json.JSONDecodeError:
@@ -162,20 +163,23 @@ def register_singularity_tools(mcp) -> None:
         })
 
         # Still sync to disk for persistence, but O(1) read after cold load
-        with open(STATE_FILE, "w") as f:
+        with open(STATE_FILE, "w", encoding="utf-8") as f:
             json.dump(_LEDGER_STATE, f, indent=2)
 
         # Signal Pulse (Aether Matrix)
         try:
-            conn = sqlite3.connect(DB_PATH)
-            bus = SignalBus(conn)
-            bus.emit("ledger_append", payload={
-                "hash": block_hash,
-                "action": action,
-                "vector_id": vector_id,
-                "yield_amount": yield_amount
-            }, source="mcp")
-            conn.close()
+            with connect(DB_PATH) as conn:
+                bus = SignalBus(conn)
+                bus.emit(
+                    "ledger_append",
+                    payload={
+                        "hash": block_hash,
+                        "action": action,
+                        "vector_id": vector_id,
+                        "yield_amount": yield_amount,
+                    },
+                    source="mcp",
+                )
             logging.info("⚡ [PULSE] Ledger chunk emitted to Aether Matrix.")
         except Exception as e:
             logging.error("Failed to emit V4 pulse: %s", e)
@@ -191,7 +195,7 @@ def register_singularity_tools(mcp) -> None:
         try:
             queue = {"pending_tasks": []}
             if os.path.exists(SWARM_QUEUE_FILE):
-                with open(SWARM_QUEUE_FILE, "r") as f:
+                with open(SWARM_QUEUE_FILE, encoding="utf-8") as f:
                     queue = json.load(f)
             
             task = {
@@ -202,7 +206,7 @@ def register_singularity_tools(mcp) -> None:
             }
             queue["pending_tasks"].append(task)
             
-            with open(SWARM_QUEUE_FILE, "w") as f:
+            with open(SWARM_QUEUE_FILE, "w", encoding="utf-8") as f:
                 json.dump(queue, f, indent=2)
 
             logging.info("🚀 [DISPATCH] Handed task to daemon: %s", command)
@@ -241,6 +245,3 @@ def register_singularity_tools(mcp) -> None:
             return cortex_swarm_dispatch("SAGE_COUNCIL", cmd)
         except Exception as e:
             return f"[ERROR] Audit Dispatch Failure: {str(e)}"
-
-if __name__ == "__main__":
-    mcp.run()

@@ -1,11 +1,13 @@
+
 """
 CORTEX — Ouroboros-Ω Gate.
 The thermodynamic enforcer for architectural scaling.
 """
 
 import logging
-from datetime import datetime, timezone
 from typing import Any, Optional
+
+from cortex.utils.time import utc_now
 
 logger = logging.getLogger("cortex.extensions.gate.ouroboros")
 
@@ -53,7 +55,7 @@ class OuroborosGate:
             "total_bridges": total_bridges,
             "signal_to_noise": round(snr, 3),
             "entropy_index": round(entropy_idx, 4),
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": utc_now().isoformat(),
         }
 
     def identify_dead_weight(self) -> Optional[str]:
@@ -113,7 +115,7 @@ class OuroborosGate:
                 "decision",
                 "C5",
                 "ag:ouroboros",
-                datetime.now(timezone.utc).isoformat(),
+                utc_now().isoformat(),
             ),
         )
         self.conn.commit()

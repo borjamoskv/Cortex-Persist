@@ -1,3 +1,4 @@
+
 """CORTEX Policy Engine — Bellman Value Function.
 
 Converts CORTEX memory into a prioritized action queue using
@@ -20,6 +21,7 @@ from cortex.extensions.policy.models import (
     ActionItem,
     PolicyConfig,
 )
+from cortex.utils.time import utc_now
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine
@@ -108,7 +110,7 @@ class PolicyEngine:
         # Precompute lowercased project names to avoid O(P*F) string matching
         project_names_lower = {p.lower() for p in project_index.keys()}
 
-        now = datetime.now(timezone.utc)
+        now = utc_now()
         actions: list[ActionItem] = []
 
         for fact in facts:

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from cortex.utils.time import utc_now
+
 """
 CORTEX v5.0 — Episodic Memory CLI Commands.
 
@@ -10,7 +12,7 @@ import asyncio
 import json
 import re
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta
 
 import click
 from rich.console import Console
@@ -353,7 +355,7 @@ def _resolve_since(value: str) -> str:
         "d": timedelta(days=amount),
         "w": timedelta(weeks=amount),
     }
-    cutoff = datetime.now(timezone.utc) - delta_map[unit]
+    cutoff = utc_now() - delta_map[unit]
     return cutoff.strftime("%Y-%m-%dT%H:%M:%S")
 
 

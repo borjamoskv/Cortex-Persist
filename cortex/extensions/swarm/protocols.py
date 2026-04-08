@@ -1,3 +1,4 @@
+
 """Swarm protocols and JIT communication schemas (Ω₁₄)."""
 
 from __future__ import annotations
@@ -5,9 +6,10 @@ from __future__ import annotations
 import json
 import logging
 from dataclasses import asdict, dataclass, field
-from datetime import datetime, timezone
 from enum import Enum
 from typing import Any
+
+from cortex.utils.time import utc_now
 
 logger = logging.getLogger("cortex.swarm.protocols")
 
@@ -35,7 +37,7 @@ class SwarmSignalSchema:
     role: AgentRole = AgentRole.WORKER
     confidence: float = 1.0
     exergy_spent: float = 0.0
-    timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    timestamp: str = field(default_factory=lambda: utc_now().isoformat())
 
     def to_json(self) -> str:
         return json.dumps(asdict(self))

@@ -1,11 +1,13 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime
 from enum import Enum
 from typing import Any
 from uuid import uuid4
 
 from pydantic import BaseModel, Field
+
+from cortex.utils.time import utc_now
 
 
 class MessageState(str, Enum):
@@ -53,7 +55,7 @@ class AgentMessage(BaseModel):
     state: MessageState = MessageState.PENDING
     priority: int = 0
     ttl_seconds: int | None = None
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: utc_now())
     trace_context: dict[str, Any] = Field(default_factory=dict)
 
     def to_json(self) -> str:

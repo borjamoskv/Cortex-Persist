@@ -1,3 +1,4 @@
+
 """TimingTracker — heartbeat-based time tracking."""
 
 from __future__ import annotations
@@ -6,7 +7,7 @@ import json
 import logging
 import sqlite3
 import threading
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from typing import Optional
 
 from cortex.extensions.timing.models import (
@@ -16,6 +17,7 @@ from cortex.extensions.timing.models import (
     classify_entity,
 )
 from cortex.memory.temporal import now_iso
+from cortex.utils.time import utc_now
 
 __all__ = ["TimingTracker"]
 
@@ -133,12 +135,12 @@ class TimingTracker:
 
     def today(self, project: Optional[str] = None) -> TimeSummary:
         """Get time summary for today."""
-        today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        today_str = utc_now().strftime("%Y-%m-%d")
         return self._summarize(f"{today_str}%", project)
 
     def report(self, project: Optional[str] = None, days: int = 7) -> TimeSummary:
         """Get time report for the last N days."""
-        cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
+        cutoff = (utc_now() - timedelta(days=days)).isoformat()
         where = ["start_time >= ?"]
         params: list = [cutoff]
         if project:
@@ -150,7 +152,7 @@ class TimingTracker:
         self, project: Optional[str] = None, date: Optional[str] = None
     ) -> list[TimeEntry]:
         """Get detailed timeline for a date."""
-        date_str = date or datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        date_str = date or utc_now().strftime("%Y-%m-%d")
         where = ["start_time LIKE ?"]
         params: list = [f"{date_str}%"]
         if project:
@@ -180,12 +182,12 @@ class TimingTracker:
 
     def daily(self, days: int = 7) -> list[dict]:
         """Get total seconds per day for the last N days."""
-        end_date = datetime.now(timezone.utc).date()
+        end_date = utc_now().date()
         date_map = {}
         for i in range(days):
             d = (end_date - timedelta(days=i)).isoformat()
             date_map[d] = 0
-        cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
+        cutoff = (utc_now() - timedelta(days=days)).isoformat()
         rows = self._conn.execute(
             "SELECT substr(start_time, 1, 10) as date, SUM(duration_s) "
             "FROM time_entries WHERE start_time >= ? GROUP BY date",

@@ -1,3 +1,4 @@
+
 """CORTEX Hypervisor — Core Orchestrator.
 
 The AgencyHypervisor is the singleton that mediates between the simple
@@ -19,6 +20,7 @@ from cortex.extensions.hypervisor.handle import AgentHandle
 from cortex.extensions.hypervisor.isolator import TenantIsolator
 from cortex.extensions.hypervisor.models import HealthReport, Memory, Receipt
 from cortex.extensions.hypervisor.projector import EventProjector
+from cortex.utils.time import utc_now
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine
@@ -140,7 +142,7 @@ class AgencyHypervisor:
                     relevance=1.0,
                     created=ComplexityCompressor._now()  # type: ignore[reportAttributeAccessIssue]
                     if hasattr(ComplexityCompressor, "_now")
-                    else __import__("datetime").datetime.now(__import__("datetime").timezone.utc),
+                    else utc_now(),
                     source="fusion",
                 )
             ]

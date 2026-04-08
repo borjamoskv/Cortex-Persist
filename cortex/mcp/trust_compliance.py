@@ -1,3 +1,4 @@
+
 """
 CORTEX Trust Tools — Compliance Report & Decision Lineage.
 
@@ -7,10 +8,10 @@ Extracted from trust_tools.py to keep file size under 300 LOC.
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
 from cortex.ledger import ImmutableLedger
+from cortex.utils.time import utc_now
 
 if TYPE_CHECKING:
     from mcp.server.fastmcp import FastMCP
@@ -99,7 +100,7 @@ def _register_compliance_report(mcp: FastMCP, ctx: _MCPContext) -> None:
         ledger = ImmutableLedger(ctx.pool)  # type: ignore[reportArgumentType]
         integrity = await ledger.audit_integrity_async()
 
-        now = datetime.now(timezone.utc).isoformat()
+        now = utc_now().isoformat()
 
         lines = [
             "╔══════════════════════════════════════════════════╗",

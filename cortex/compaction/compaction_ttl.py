@@ -1,3 +1,4 @@
+
 """compaction_ttl — TTL Prune strategy for the Auto-Compaction Engine.
 
 Extracted from compactor.py to satisfy the Landauer LOC barrier (≤500).
@@ -11,6 +12,8 @@ from __future__ import annotations
 import logging
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any
+
+from cortex.utils.time import utc_now
 
 if TYPE_CHECKING:
     from cortex.compaction.compactor import CompactionResult
@@ -102,7 +105,7 @@ async def apply_ttl_prune(
     )
     rows = await cursor.fetchall()
 
-    now = datetime.now(tz=timezone.utc)
+    now = utc_now()
     expired_ids, tombstonable_ids = find_expired_facts(rows, now)  # type: ignore[reportArgumentType]
 
     if not expired_ids:

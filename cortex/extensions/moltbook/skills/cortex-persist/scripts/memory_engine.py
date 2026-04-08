@@ -10,6 +10,7 @@ Zero dependencies beyond stdlib. Works with any LLM backend.
 """
 
 from __future__ import annotations
+from cortex.utils.time import utc_now
 
 import hashlib
 import json
@@ -119,7 +120,7 @@ def init() -> dict[str, bool]:
 
 def _today_session_path() -> Path:
     """Return path for today's session log."""
-    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    today = utc_now().strftime("%Y-%m-%d")
     return SESSIONS_DIR / f"{today}.md"
 
 
@@ -160,7 +161,7 @@ def session_close(
 ) -> str:
     """Persist session data. Returns path to session file."""
     init()
-    now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    now = utc_now().strftime("%Y-%m-%dT%H:%M:%SZ")
     session_path = _today_session_path()
 
     entry_parts = [f"\n## Session {now}\n"]
@@ -211,7 +212,7 @@ def store(
         raise ValueError(msg)
 
     fpath = KNOWLEDGE_DIR / f"{category}.md"
-    now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    now = utc_now().strftime("%Y-%m-%dT%H:%M:%SZ")
     # [SOVEREIGN-ID] SHA-256 truncated for high-entropy unique identification.
     fact_id = hashlib.sha256(
         f"{now}:{content}".encode(),
@@ -284,7 +285,7 @@ def forget(fact_id: str) -> bool:
             continue
         content = fpath.read_text()
         if f"`{fact_id}`" in content:
-            now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+            now = utc_now().strftime("%Y-%m-%dT%H:%M:%SZ")
             updated = content.replace(
                 f"`{fact_id}`",
                 f"`{fact_id}` ~~DEPRECATED {now}~~",

@@ -1,3 +1,4 @@
+
 """
 CORTEX v5.1 — Hybrid Search Engine.
 
@@ -24,6 +25,7 @@ from cortex.search.causal_gap import (
 from cortex.search.models import SearchResult
 from cortex.search.text import text_search, text_search_sync
 from cortex.search.vector import semantic_search, semantic_search_sync
+from cortex.utils.time import utc_now
 
 __all__ = ["hybrid_search", "hybrid_search_sync"]
 
@@ -45,7 +47,7 @@ def _apply_temporal_decay(results: list[SearchResult], recency_weight: float) ->
 
     Final score = rrf_score * (1 - w) + recency_factor * w
     """
-    now = datetime.now(timezone.utc)
+    now = utc_now()
     for r in results:
         try:
             # Parse created_at (ISO format from SQLite)

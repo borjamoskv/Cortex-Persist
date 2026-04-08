@@ -1,3 +1,4 @@
+
 """ForgettingOracle — Metacognitive forgetting: EVICTION → LEDGER → POST-HOC → POLICY."""
 
 from __future__ import annotations
@@ -8,7 +9,7 @@ import logging
 import math
 import sqlite3
 import time
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
 from cortex.engine.forgetting_models import (
@@ -21,6 +22,7 @@ from cortex.engine.oracle.evidence_mixin import EvidenceMixin
 from cortex.engine.oracle.policy_mixin import PolicyMixin
 from cortex.services.notebooklm import NotebookLMService
 from cortex.services.trust import TrustService
+from cortex.utils.time import utc_now
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine as AsyncCortexEngine
@@ -251,7 +253,7 @@ class ForgettingOracle(AnalyzerMixin, PolicyMixin, EvidenceMixin):
             async with self._engine.session() as conn:
                 await conn.execute(
                     "UPDATE facts SET fact_type = 'ghost', updated_at = ? WHERE id = ?",
-                    (datetime.now(timezone.utc).isoformat(), fact_id),
+                    (utc_now().isoformat(), fact_id),
                 )
                 tenant_id = fact.get("tenant_id", "default")
                 await self._engine._log_transaction(

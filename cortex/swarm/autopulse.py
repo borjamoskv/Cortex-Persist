@@ -1,8 +1,8 @@
-import os
-import json
 import asyncio
+import json
 import logging
-import sqlite3
+import os
+
 from cortex.config import DB_PATH
 from cortex.extensions.signals.bus import AsyncSignalBus
 
@@ -19,7 +19,7 @@ async def process_queue():
     while True:
         if os.path.exists(SWARM_QUEUE_FILE):
             try:
-                with open(SWARM_QUEUE_FILE, "r") as f:
+                with open(SWARM_QUEUE_FILE) as f:
                     queue = json.load(f)
                 
                 pending = queue.get("pending_tasks", [])
@@ -28,7 +28,7 @@ async def process_queue():
                     agent = task.get("agent", "Unknown")
                     payload = task.get("payload", {})
                     
-                    logger.info(f"Autopoiesis: Processing task for {agent}...")
+                    logger.info("Autopoiesis: Processing task for %s...", agent)
                     
                     # Update queue file
                     queue["pending_tasks"] = pending
@@ -36,9 +36,10 @@ async def process_queue():
                         json.dump(queue, f, indent=2)
                     
                     # C5-REAL: Execution & OMEGA-X Epistemic Slashing
-                    from cortex.swarm.tensor_glial import TensorGlialLegion
                     import hashlib
                     import time
+
+                    from cortex.swarm.tensor_glial import TensorGlialLegion
                     
                     # Initialize massively parallel zero-copy 10k nodes
                     legion = TensorGlialLegion(num_agents=10000, d_dim=10000, file_path="/tmp/tensor_legion.vsa_mmap")
@@ -52,14 +53,17 @@ async def process_queue():
                     # Perform Fuzzing/Yield Epistemic Slashing
                     slashed = legion.epistemic_slash_and_respawn(bottom_percentile=10, elite_percentile=90)
                     if slashed > 0:
-                        logger.info(f"OMEGA-X: Apoptosis activated. {slashed} dead nodes respawned from elite VSA topologies.")
+                        logger.info(
+                            "OMEGA-X: Apoptosis activated. %s dead nodes respawned from elite VSA topologies.",
+                            slashed,
+                        )
                     
                     # Record the 'Success' in the Ledger
                     
                     # Get last hash from state file if possible
                     prev_hash = "GENESIS_BLOCK"
                     if os.path.exists(STATE_FILE):
-                        with open(STATE_FILE, "r") as f:
+                        with open(STATE_FILE) as f:
                             state = json.load(f)
                             if state.get("ledgers"):
                                 prev_hash = state["ledgers"][-1]["hash"]
@@ -76,7 +80,7 @@ async def process_queue():
                     if not os.path.exists(STATE_FILE):
                         state = {"ledgers": []}
                     else:
-                        with open(STATE_FILE, "r") as f:
+                        with open(STATE_FILE) as f:
                             state = json.load(f)
                     
                     state["ledgers"].append({
@@ -101,12 +105,15 @@ async def process_queue():
                                 "vector_id": vector_id,
                                 "yield_amount": yield_amount
                             })
-                            logger.info(f"Autopulse: Ledger signal emitted for {block_hash[:8]}")
+                            logger.info(
+                                "Autopulse: Ledger signal emitted for %s",
+                                block_hash[:8],
+                            )
                     except Exception as e:
-                        logger.error(f"Autopulse Signal Error: {e}")
+                        logger.error("Autopulse Signal Error: %s", e)
 
             except Exception as e:
-                logger.error(f"Autopulse Queue Error: {e}")
+                logger.error("Autopulse Queue Error: %s", e)
         
         await asyncio.sleep(2.0)
 

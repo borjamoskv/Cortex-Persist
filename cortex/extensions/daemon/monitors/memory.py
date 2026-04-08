@@ -1,12 +1,14 @@
+
 """Memory syncer monitor for MOSKV daemon."""
 
 from __future__ import annotations
 
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import datetime
 
 from cortex.extensions.daemon.models import AGENT_DIR, DEFAULT_MEMORY_STALE_HOURS, MemoryAlert
+from cortex.utils.time import utc_now
 
 logger = logging.getLogger("moskv-daemon")
 
@@ -34,7 +36,7 @@ class MemorySyncer:
             if not ts:
                 return []
             last = datetime.fromisoformat(ts.replace("Z", "+00:00"))
-            now = datetime.now(timezone.utc)
+            now = utc_now()
             hours = (now - last).total_seconds() / 3600
             if hours > self.stale_hours:
                 alerts.append(

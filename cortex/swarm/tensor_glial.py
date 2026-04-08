@@ -2,16 +2,14 @@
 CORTEX-SWARM-PRIME: Tensor-Glial Legion
 Zero-Copy `mmap` tensor map mapped across 10,000 swarm agents representing High-Dimensional Memory.
 """
-import os
-import time
-import numpy as np
-from typing import Optional, List, Tuple
-from pathlib import Path
 import hashlib
+import os
 import threading
+import time
+
+import numpy as np
 
 try:
-    import numba
     from numba import njit, prange
     HAS_NUMBA = True
 except ImportError:
@@ -25,7 +23,8 @@ if HAS_NUMBA:
     def fast_fading_memory(tensor_view, last_update_ts, now_ts, lambda_decay):
         for i in prange(tensor_view.shape[0]):
             dt = now_ts - last_update_ts[i]
-            if dt < 0: dt = 0.0
+            if dt < 0:
+                dt = 0.0
             decay = np.exp(-lambda_decay * dt)
             for j in range(tensor_view.shape[1]):
                 tensor_view[i, j] *= decay
@@ -77,7 +76,7 @@ class TensorGlialLegion:
         """Asynchronous disk sync to prevent blocking the OMEGA-X orchestrator."""
         threading.Thread(target=self.agents_tensor.flush, daemon=True).start()
 
-    def batch_write_action(self, agent_indices: List[int], action_texts: List[str]):
+    def batch_write_action(self, agent_indices: list[int], action_texts: list[str]):
         """
         Batches N agents encoding real-time actions.
         """
@@ -178,4 +177,3 @@ if __name__ == '__main__':
     print(f"[+] Nodes respawned from corpses: {slashed}")
     print(f"[+] Centurion MapReduce state dim: {centurion_state.shape}")
     print(f"[+] Matrix SHA256 integrity: {legion.global_sha256_audit()}")
-

@@ -24,12 +24,14 @@ import asyncio
 import logging
 import sqlite3
 import time
-import uuid
+from collections.abc import Callable, Coroutine
 from contextlib import contextmanager
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Callable, Coroutine
+from typing import Any
+
+from cortex.database.core import connect
 
 logger = logging.getLogger("cortex.daemon.scheduler")
 
@@ -52,6 +54,16 @@ CREATE TABLE IF NOT EXISTS schedules (
     updated_at  TEXT NOT NULL
 );
 """
+
+
+def _utc_now() -> datetime:
+    """Return an aware UTC datetime without relying on banned ``datetime.now``."""
+    return datetime.fromtimestamp(time.time(), tz=timezone.utc)
+
+
+def _utc_now_iso() -> str:
+    """Return the current UTC timestamp in ISO 8601 format."""
+    return _utc_now().isoformat()
 
 
 @dataclass
@@ -121,9 +133,11 @@ class SovereignScheduler:
 
     @contextmanager
     def _conn(self):
-        conn = sqlite3.connect(str(self._db_path), check_same_thread=False)
-        conn.row_factory = sqlite3.Row
-        conn.execute("PRAGMA journal_mode=WAL")
+        conn = connect(
+            str(self._db_path),
+            check_same_thread=False,
+            row_factory=sqlite3.Row,
+        )
         try:
             yield conn
             conn.commit()
@@ -149,7 +163,7 @@ class SovereignScheduler:
     ) -> ScheduleEntry:
         """Register a recurring interval task."""
         self._tasks[name] = coro_factory
-        now = datetime.now(timezone.utc).isoformat()
+        now = _utc_now_iso()
         entry = ScheduleEntry(
             name=name,
             kind="interval",
@@ -172,7 +186,7 @@ class SovereignScheduler:
     ) -> ScheduleEntry:
         """Register a cron-expression task (requires croniter)."""
         self._tasks[name] = coro_factory
-        now = datetime.now(timezone.utc).isoformat()
+        now = _utc_now_iso()
         next_run = self._next_cron_time(cron_expr)
         entry = ScheduleEntry(
             name=name,
@@ -197,7 +211,7 @@ class SovereignScheduler:
     ) -> ScheduleEntry:
         """Register a one-shot task."""
         self._tasks[name] = coro_factory
-        now = datetime.now(timezone.utc).isoformat()
+        now = _utc_now_iso()
         entry = ScheduleEntry(
             name=name,
             kind="oneshot",
@@ -216,7 +230,7 @@ class SovereignScheduler:
         with self._conn() as conn:
             result = conn.execute(
                 "UPDATE schedules SET enabled = 0, updated_at = ? WHERE name = ?",
-                (datetime.now(timezone.utc).isoformat(), name),
+                (_utc_now_iso(), name),
             )
         cancelled = result.rowcount > 0
         if cancelled:
@@ -262,9 +276,8 @@ class SovereignScheduler:
 
     async def _tick(self) -> None:
         """Evaluate all schedules and fire due tasks."""
-        now = datetime.now(timezone.utc)
+        now = _utc_now()
         now_iso = now.isoformat()
-        now_ts = time.monotonic()
 
         with self._conn() as conn:
             due = conn.execute(
@@ -389,7 +402,7 @@ class SovereignScheduler:
             )
 
     def _compute_next_run(self, entry: ScheduleEntry) -> str | None:
-        now = datetime.now(timezone.utc)
+        now = _utc_now()
         if entry.kind == "interval" and entry.interval_s:
             from datetime import timedelta
 
@@ -404,14 +417,14 @@ class SovereignScheduler:
         try:
             from croniter import croniter
 
-            return croniter(cron_expr, datetime.now(timezone.utc)).get_next(
+            return croniter(cron_expr, _utc_now()).get_next(
                 datetime
             ).isoformat()
         except ImportError:
             from datetime import timedelta
 
             return (
-                datetime.now(timezone.utc) + timedelta(hours=1)
+                _utc_now() + timedelta(hours=1)
             ).isoformat()
 
     @staticmethod

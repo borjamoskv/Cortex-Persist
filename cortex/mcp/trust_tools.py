@@ -1,3 +1,4 @@
+
 """
 CORTEX Trust Tools — EU AI Act Compliance MCP Tools.
 
@@ -15,8 +16,9 @@ Tools:
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
 from typing import TYPE_CHECKING
+
+from cortex.utils.time import utc_now
 
 __all__ = ["register_trust_tools"]
 
@@ -104,7 +106,7 @@ def _register_audit_trail(mcp: FastMCP, ctx: _MCPContext) -> None:
 
         lines = [
             "═══ CORTEX AUDIT TRAIL ═══",
-            f"Generated: {datetime.now(timezone.utc).isoformat()}",
+            f"Generated: {utc_now().isoformat()}",
             f"Entries: {len(rows)}",  # type: ignore[reportArgumentType]
             f"Filters: project={project or '*'}, agent={agent_id or '*'}, since={since or 'all'}",
             "═" * 40,

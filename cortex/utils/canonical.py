@@ -1,3 +1,4 @@
+
 """CORTEX v5.0 — Canonical Hash Construction.
 
 Provides deterministic JSON serialization and null-byte separated
@@ -11,10 +12,11 @@ Hash Scheme Versions:
 
 from __future__ import annotations
 
-import datetime
 import hashlib
 import json
 from typing import Any
+
+from cortex.utils.time import utc_now
 
 __all__ = [
     "canonical_json",
@@ -27,7 +29,7 @@ __all__ = [
 
 def now_iso() -> str:
     """Return current UTC time in ISO 8601 format."""
-    return datetime.datetime.now(datetime.timezone.utc).isoformat()
+    return utc_now().isoformat()
 
 
 # ─── Canonical JSON ───────────────────────────────────────────────

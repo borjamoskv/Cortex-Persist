@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import datetime
 import hashlib
 import json
 from collections.abc import Mapping
@@ -15,6 +14,7 @@ from cortex.security.types import (
     SealRecord,
     SealViolation,
 )
+from cortex.utils.time import utc_now
 
 # ---------- 5. Máquina de estados ----------
 
@@ -159,7 +159,7 @@ def seal_artifact(artifact: ImmuneArtifact) -> SealRecord:
         raise SealViolation("Artifact must be promotable to be sealed.")
 
     content_hash = hashlib.sha256(json.dumps(artifact.payload, sort_keys=True).encode()).hexdigest()
-    sealed_at = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    sealed_at = utc_now().isoformat()
 
     artifact.state = ImmunityState.SEALED
     artifact.sealed_at = sealed_at

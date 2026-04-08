@@ -1,14 +1,16 @@
+
 """Ghost watcher for MOSKV daemon."""
 
 from __future__ import annotations
 
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 
 from cortex.extensions.daemon.models import AGENT_DIR, DEFAULT_STALE_HOURS, GhostAlert
 from cortex.extensions.daemon.monitors.base import BaseMonitor
+from cortex.utils.time import utc_now
 
 logger = logging.getLogger("moskv-daemon")
 
@@ -35,7 +37,7 @@ class GhostWatcher(BaseMonitor[GhostAlert]):
             logger.error("Failed to read ghosts.json: %s", e)
             return []
 
-        now = datetime.now(timezone.utc)
+        now = utc_now()
         stale: list[GhostAlert] = []
 
         for project, data in ghosts.items():

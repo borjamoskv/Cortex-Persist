@@ -15,9 +15,12 @@ import logging
 import sqlite3
 import time
 from collections import deque
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
+
+import aiosqlite
 
 if TYPE_CHECKING:
     from cortex.database.pool import CortexConnectionPool
@@ -318,7 +321,7 @@ class SovereignLedger:
         detail_json = canonical_json(detail) if detail else "{}"
         ts = now_iso()
 
-        async with self._get_conn_proxy() as conn:  # type: ignore[reportAttributeAccessIssue]
+        async with self._get_conn_proxy() as conn:
             await conn.execute("BEGIN EXCLUSIVE")
             try:
                 cursor = await conn.execute(
@@ -375,7 +378,7 @@ class SovereignLedger:
         batch_size = self.adaptive_batch_size
 
         async with self._lock:
-            async with self._get_conn_proxy() as conn:  # type: ignore[reportAttributeAccessIssue]
+            async with self._get_conn_proxy() as conn:
                 cursor = await conn.execute("SELECT MAX(tx_end_id) FROM merkle_roots")
                 row = await cursor.fetchone()
                 last_covered = row[0] or 0 if row else 0
@@ -384,7 +387,7 @@ class SovereignLedger:
                     "SELECT id, hash FROM transactions WHERE id > ? ORDER BY id LIMIT ?",
                     (last_covered, batch_size),
                 )
-                rows = await cursor.fetchall()
+                rows = list(await cursor.fetchall())
 
                 if not rows or len(rows) < batch_size:
                     return None
@@ -403,15 +406,15 @@ class SovereignLedger:
                 return root
 
     @asynccontextmanager
-    async def _get_conn_proxy(self):
+    async def _get_conn_proxy(self) -> AsyncIterator[aiosqlite.Connection]:
         """Internal helper to get a connection for auditing/writing,
         supporting both Pool and raw Connection (Ω₁).
         """
-        if hasattr(self.db, "acquire"):
-            async with self.db.acquire() as conn:
-                yield conn
-        else:
-            yield self.db
+        if isinstance(self.db, sqlite3.Connection):
+            raise RuntimeError("Async ledger operations require a CortexConnectionPool")
+
+        async with self.db.acquire() as conn:
+            yield conn
 
     async def audit_integrity_async(self) -> dict:
         """Perform a full integrity audit asynchronously (Ω₁)."""
@@ -451,13 +454,13 @@ class SovereignLedger:
             cursor = await conn.execute(
                 "SELECT root_hash, tx_start_id, tx_end_id FROM merkle_roots"
             )
-            roots = await cursor.fetchall()
+            roots = list(await cursor.fetchall())
             for stored_root, start, end in roots:
                 c = await conn.execute(
                     "SELECT hash FROM transactions WHERE id >= ? AND id <= ? ORDER BY id",
                     (start, end),
                 )
-                hashes = [r[0] for r in await c.fetchall()]
+                hashes = [r[0] for r in list(await c.fetchall())]
                 computed_root = MerkleTree(hashes).root_hash
                 if computed_root != stored_root:
                     violations.append({"range": f"{start}-{end}", "type": "MERKLE_MISMATCH"})

@@ -1,3 +1,4 @@
+
 """MCP tools for CORTEX NotebookLM integration.
 
 Registers NotebookLM tools on a FastMCP server so AI agents
@@ -9,6 +10,8 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 from typing import Any
+
+from cortex.utils.time import utc_now
 
 logger = logging.getLogger("cortex.mcp.notebooklm")
 
@@ -98,7 +101,6 @@ def register_notebooklm_tools(mcp: Any, ctx: Any) -> None:
         import os
         import shutil
         import time
-        from datetime import datetime, timezone
 
         from cortex.services.notebooklm import CLOUD_PROVIDERS, DIGEST_FILE, DOMAINS_DIR
 
@@ -121,7 +123,7 @@ def register_notebooklm_tools(mcp: Any, ctx: Any) -> None:
             return {"error": "No cloud sync provider detected. Specify drive_path."}
 
         target.mkdir(parents=True, exist_ok=True)
-        ts = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        ts = utc_now().strftime("%Y-%m-%d")
         synced: list[str] = []
 
         if mode in ("digest", "both") and DIGEST_FILE.exists():
@@ -171,7 +173,7 @@ def register_notebooklm_tools(mcp: Any, ctx: Any) -> None:
         # Digest status
         if DIGEST_FILE.exists():
             mtime = os.path.getmtime(DIGEST_FILE)
-            age_h = (datetime.now(timezone.utc).timestamp() - mtime) / 3600
+            age_h = (utc_now().timestamp() - mtime) / 3600
             result["digest"] = {
                 "exists": True,
                 "size_bytes": os.path.getsize(DIGEST_FILE),
