@@ -14,6 +14,10 @@ The canonical source of truth now lives on the dedicated docs surface at [`https
 - [Contribution Workflow](CONTRIBUTING.md)
 - [Archive](archive.md)
 
+## Boundary Snapshot
+
+- [Repository Boundary Reconciliation Matrix](repository_reconciliation_matrix.md)
+
 ## Buyer-Facing Companion Docs
 
 - [Enterprise Readiness](../ENTERPRISE_READINESS.md)
