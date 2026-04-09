@@ -4,6 +4,12 @@
   "description": "JavaScript/TypeScript SDK for CORTEX — Sovereign Memory Engine for Enterprise AI Swarms",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
   "files": ["dist/"],
   "scripts": {
     "build": "tsc",
@@ -14,7 +20,15 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/borjamoskv/Cortex-Persist"
+    "url": "git+https://github.com/borjamoskv/Cortex-Persist.git",
+    "directory": "sdks/js"
+  },
+  "homepage": "https://github.com/borjamoskv/Cortex-Persist/tree/main/sdks/js",
+  "bugs": {
+    "url": "https://github.com/borjamoskv/Cortex-Persist/issues"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "devDependencies": {
     "typescript": "^5.6.0"

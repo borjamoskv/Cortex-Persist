@@ -2,6 +2,8 @@
 
 This document defines the support posture for public CORTEX Persist release lines.
 
+It applies to published release lines and tagged artifacts. It does not automatically extend support to every experimental or repo-internal surface that may exist on `main`.
+
 ## Current Policy
 
 | Release line | Status | Support posture |
@@ -38,6 +40,6 @@ This document defines the support posture for public CORTEX Persist release line
 If you are evaluating CORTEX for production or acquisition:
 
 - pin exact versions during evaluation
-- review [RELEASE_PROCESS.md](RELEASE_PROCESS.md) for package publication flow
+- review [RELEASE_PROCESS.md](RELEASE_PROCESS.md) for the tagged Python publication flow
 - align support expectations through [SUPPORT.md](SUPPORT.md)
 - treat roadmap items as non-contractual unless separately agreed

@@ -4,7 +4,7 @@ CORTEX v5.0 — Async Python SDK Client.
 Fully asynchronous client for the CORTEX REST API using httpx.AsyncClient.
 
 Usage:
-    from cortex.async_client import AsyncCortexClient
+    from cortex_persist import AsyncCortexClient
 
     async with AsyncCortexClient("http://localhost:8484", api_key="ctx_...") as client:
         await client.store("my-project", "Important fact")
@@ -185,11 +185,12 @@ class AsyncCortexClient:
         offset: int = 0,
     ) -> list[Fact]:
         """Get facts for a project with optional pagination."""
-        _ = include_deprecated
         params: dict[str, Any] = {}
         if limit is not None:
             params["limit"] = limit
             params["offset"] = offset
+        if include_deprecated:
+            params["include_deprecated"] = "true"
         results = await self._request(
             "GET",
             f"/v1/projects/{project}/facts",

@@ -6,9 +6,10 @@ Covers: append, replay, count, session retrieval, chain verification.
 
 from __future__ import annotations
 
+from datetime import datetime, timezone
+
 import aiosqlite
 import pytest
-from datetime import datetime, timezone
 
 from cortex.memory.ledger import EventLedgerL3
 from cortex.memory.models import MemoryEvent
@@ -61,6 +62,17 @@ class TestEnsureTable:
         )
         row = await cursor.fetchone()
         assert row is not None
+
+    @pytest.mark.asyncio
+    async def test_lazy_open_uses_db_path(self, tmp_path):
+        db_path = tmp_path / "lazy-ledger.db"
+        ledger = EventLedgerL3(db_path=db_path)
+
+        await ledger.append_event(_make_event())
+
+        assert db_path.exists()
+        assert await ledger.count("test_tenant") == 1
+        await ledger.close()
 
 
 # ─── append_event ────────────────────────────────────────────────────────

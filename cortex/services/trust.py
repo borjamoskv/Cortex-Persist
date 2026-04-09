@@ -93,6 +93,25 @@ class TrustService:
             self._cached_conn.row_factory = sqlite3.Row
         return self._cached_conn
 
+    def _resolve_fact_plaintext(
+        self,
+        raw_content: str | None,
+        tenant_id: str | None,
+    ) -> tuple[str, str | None]:
+        """Return canonical plaintext for verification, or a concrete violation."""
+        content = raw_content or ""
+        if not content:
+            return "", None
+
+        try:
+            from cortex.crypto import get_default_encrypter
+
+            plaintext = get_default_encrypter().decrypt_str(content, tenant_id=tenant_id or "default")
+        except (RuntimeError, ValueError, TypeError, OSError) as exc:
+            return "", f"DECRYPTION_FAILED — {exc}"
+
+        return plaintext or "", None
+
     # ------------------------------------------------------------------
     # Single-fact verification
     # ------------------------------------------------------------------
@@ -106,7 +125,7 @@ class TrustService:
         conn = self._get_conn()
         row = conn.execute(
             """
-            SELECT f.content, f.hash, f.project, t.id as tx_id, t.timestamp
+            SELECT f.content, f.hash, f.project, f.tenant_id, t.id as tx_id, t.timestamp
             FROM facts f
             LEFT JOIN transactions t ON f.tx_id = t.id
             WHERE f.id = ?
@@ -117,7 +136,7 @@ class TrustService:
         if not row:
             raise ValueError(f"Fact {fact_id} not found.")
 
-        content: str = row["content"] or ""
+        content, decrypt_violation = self._resolve_fact_plaintext(row["content"], row["tenant_id"])
         stored_hash: str = row["hash"] or ""
         common = {
             "fact_id": fact_id,
@@ -125,6 +144,13 @@ class TrustService:
             "project": row["project"],
             "timestamp": row["timestamp"],
         }
+
+        if decrypt_violation:
+            return FactVerification(
+                **common,
+                valid=False,
+                violation=decrypt_violation,
+            )
 
         if not content:
             return FactVerification(
@@ -176,7 +202,7 @@ class TrustService:
             rows = conn.execute(
                 f"""
                 SELECT f.id, f.content, f.hash, f.project,
-                       t.id as tx_id, t.timestamp
+                       f.tenant_id, t.id as tx_id, t.timestamp
                 FROM facts f
                 LEFT JOIN transactions t ON f.tx_id = t.id
                 WHERE f.id IN ({placeholders})
@@ -187,7 +213,7 @@ class TrustService:
             rows = conn.execute(
                 """
                 SELECT f.id, f.content, f.hash, f.project,
-                       t.id as tx_id, t.timestamp
+                       f.tenant_id, t.id as tx_id, t.timestamp
                 FROM facts f
                 LEFT JOIN transactions t ON f.tx_id = t.id
                 ORDER BY f.id DESC
@@ -200,7 +226,7 @@ class TrustService:
 
         for row in rows:
             fid = row["id"]
-            content: str = row["content"] or ""
+            content, decrypt_violation = self._resolve_fact_plaintext(row["content"], row["tenant_id"])
             stored_hash: str = row["hash"] or ""
             common = {
                 "fact_id": fid,
@@ -208,6 +234,16 @@ class TrustService:
                 "project": row["project"],
                 "timestamp": row["timestamp"],
             }
+
+            if decrypt_violation:
+                results.append(
+                    FactVerification(
+                        **common,
+                        valid=False,
+                        violation=decrypt_violation,
+                    )
+                )
+                continue
 
             if not content:
                 results.append(
@@ -342,7 +378,7 @@ class TrustService:
         await asyncio.sleep(0)  # Yield to event loop — non-blocking
 
         rows = conn.execute(
-            "SELECT id, content, hash FROM facts ORDER BY id DESC LIMIT ?",
+            "SELECT id, tenant_id, content, hash FROM facts ORDER BY id DESC LIMIT ?",
             (_SIEGE_SAMPLE_SIZE,),
         ).fetchall()
 
@@ -351,11 +387,15 @@ class TrustService:
 
         for row in rows:
             probes += 1
-            content: str = row["content"] or ""
+            content, decrypt_violation = self._resolve_fact_plaintext(row["content"], row["tenant_id"])
             stored_hash: str = row["hash"] or ""
 
             if not stored_hash:
                 vulnerabilities.append(f"fact#{row['id']}: NULL_HASH")
+                continue
+
+            if decrypt_violation:
+                vulnerabilities.append(f"fact#{row['id']}: {decrypt_violation}")
                 continue
 
             if not content:

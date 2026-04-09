@@ -159,6 +159,7 @@ async def recall_facts(
     request: Request,
     limit: int | None = Query(None, ge=1, le=1000),
     offset: int = Query(0, ge=0),
+    include_deprecated: bool = Query(False),
     auth: AuthResult = Depends(require_permission("read")),
     service: PublicMemoryService = Depends(get_public_memory_service),
 ) -> list[FactResponse]:
@@ -169,6 +170,7 @@ async def recall_facts(
         tenant_id=auth.tenant_id,
         limit=limit,
         offset=offset,
+        include_deprecated=include_deprecated,
     )
 
 

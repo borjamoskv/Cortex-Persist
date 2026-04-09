@@ -1,12 +1,16 @@
-"""CORTEX Quickstart — Store, Search, Ask in 10 lines.
+"""CORTEX quickstart for the currently supported source-install workflow.
 
 Usage:
-    pip install cortex-persist
-    export CORTEX_API_KEY=your_key
-    python quickstart.py
+    git clone https://github.com/borjamoskv/Cortex-Persist.git
+    cd Cortex-Persist
+    pip install -e ".[api]"
+    uvicorn cortex.api:app --port 8000
+    python examples/quickstart.py
+
+For the CLI-first trust proof, see docs/canonical-demo.md.
 """
 
-from cortex import CortexClient
+from cortex_persist import CortexClient
 
 client = CortexClient(base_url="http://localhost:8000")
 
@@ -19,21 +23,13 @@ client.store(
 print("✅ Fact stored")
 
 # 2. Search by semantic similarity
-results = client.search("What is CORTEX?", top_k=3)
+results = client.search("What is CORTEX?", k=3, project="demo")
 for r in results:
-    print(f"  [#{r.fact_id}] (score: {r.score:.3f}) {r.content[:80]}")
+    print(f"  [#{r.id}] (score: {r.score:.3f}) {r.content[:80]}")
 
-# 3. Ask with RAG (requires LLM provider configured)
-try:
-    import httpx
-
-    resp = httpx.post(
-        "http://localhost:8000/v1/ask",
-        json={"query": "What is CORTEX?", "k": 5},
-        headers={"X-API-Key": "your_key"},
-    )
-    print(f"\n🧠 Answer: {resp.json()['answer']}")
-except Exception as e:
-    print(f"\n⚠️ RAG requires LLM provider: {e}")
+# 3. Check engine status
+status = client.status()
+print(f"\n🔎 Engine status: {status}")
 
 print("\n🎉 CORTEX is operational!")
+client.close()

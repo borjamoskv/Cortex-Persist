@@ -15,6 +15,7 @@ Repository governance exists to protect four things:
 
 The governance model for this repository is distributed across these files:
 
+- [docs/supported-core.md](docs/supported-core.md) for the explicit public product boundary
 - [AGENTS.md](AGENTS.md) for operating constraints on autonomous contributors
 - [CONTRIBUTING.md](CONTRIBUTING.md) for contributor workflow
 - [SECURITY.md](SECURITY.md) for vulnerability intake and security posture

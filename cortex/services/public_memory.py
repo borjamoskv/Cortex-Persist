@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import asdict, is_dataclass
 from typing import TYPE_CHECKING, Any
 
 from cortex import __version__
@@ -94,6 +95,16 @@ def to_search_result(result: Any) -> SearchResult:
     )
 
 
+def _normalize_public_payload(value: Any) -> Any:
+    """Convert service return values into JSON-safe public payloads."""
+    if is_dataclass(value):
+        return asdict(value)
+    model_dump = getattr(value, "model_dump", None)
+    if callable(model_dump):
+        return model_dump()
+    return value
+
+
 class PublicMemoryService:
     """Canonical typed entrypoint for store/search/recall/status operations."""
 
@@ -148,18 +159,29 @@ class PublicMemoryService:
         project: str,
         limit: int | None = None,
         offset: int = 0,
+        include_deprecated: bool = False,
         tenant_id: str | None = None,
     ) -> list[FactResponse]:
-        payload: dict[str, Any] = {
-            "project": project,
-            "offset": offset,
-        }
-        if limit is not None:
-            payload["limit"] = limit
-        if tenant_id is not None:
-            payload["tenant_id"] = tenant_id
+        if include_deprecated:
+            payload: dict[str, Any] = {"project": project}
+            if tenant_id is not None:
+                payload["tenant_id"] = tenant_id
+            facts = await self.engine.history(**payload)
+            if offset or limit is not None:
+                end = None if limit is None else offset + limit
+                facts = facts[offset:end]
+        else:
+            payload = {
+                "project": project,
+                "offset": offset,
+            }
+            if limit is not None:
+                payload["limit"] = limit
+            if tenant_id is not None:
+                payload["tenant_id"] = tenant_id
 
-        facts = await self.engine.recall(**payload)
+            facts = await self.engine.recall(**payload)
+            facts = [fact for fact in facts if fact_like_to_dict(fact).get("valid_until") is None]
         return [to_fact_response(fact) for fact in facts]
 
     async def list_active_facts(
@@ -305,3 +327,84 @@ class PublicMemoryService:
             transactions=stats["transactions"],
             db_size_mb=stats["db_size_mb"],
         )
+
+    async def continual_learning_status(
+        self,
+        *,
+        tenant_id: str,
+        domain: str | None = None,
+    ) -> dict[str, Any]:
+        """Expose tenant-scoped continual-learning status when the sidecar exists."""
+        manager = getattr(self.engine, "memory", None)
+        if manager is None or not hasattr(manager, "continual_learning_status"):
+            return {
+                "enabled": False,
+                "tenant_id": tenant_id,
+                "domain": domain.strip() if isinstance(domain, str) else None,
+            }
+        return await manager.continual_learning_status(tenant_id=tenant_id, domain=domain)
+
+    async def plan_continual_update(
+        self,
+        *,
+        tenant_id: str,
+        domain: str,
+        policy_violation: bool = False,
+    ) -> dict[str, Any] | None:
+        """Return a public continual-learning micro-update plan if enabled."""
+        manager = getattr(self.engine, "memory", None)
+        if manager is None or not hasattr(manager, "plan_continual_update"):
+            return None
+        plan = await manager.plan_continual_update(
+            tenant_id=tenant_id,
+            domain=domain,
+            policy_violation=policy_violation,
+        )
+        if plan is None:
+            return None
+        return _normalize_public_payload(plan)
+
+    async def execute_continual_update(
+        self,
+        *,
+        tenant_id: str,
+        domain: str,
+        policy_violation: bool = False,
+        critical_domains: list[str] | None = None,
+    ) -> dict[str, Any] | None:
+        """Execute a continual-learning micro-update through the configured backend."""
+        manager = getattr(self.engine, "memory", None)
+        if manager is None or not hasattr(manager, "execute_continual_update"):
+            return None
+        execution = await manager.execute_continual_update(
+            tenant_id=tenant_id,
+            domain=domain,
+            policy_violation=policy_violation,
+            critical_domains=critical_domains or [],
+        )
+        if execution is None:
+            return None
+        return _normalize_public_payload(execution)
+
+    async def forget_continual_memory(
+        self,
+        *,
+        tenant_id: str,
+        user_id: str,
+        query: str,
+    ) -> dict[str, Any] | None:
+        """Request selective forgetting through the continual-learning sidecar."""
+        manager = getattr(self.engine, "memory", None)
+        if manager is None or not hasattr(manager, "forget_continual_memory"):
+            return None
+        result = await manager.forget_continual_memory(
+            tenant_id=tenant_id,
+            user_id=user_id,
+            query=query,
+        )
+        if result is None:
+            return None
+        normalized = _normalize_public_payload(result)
+        if not isinstance(normalized, dict):
+            raise TypeError("forget_continual_memory must return a mapping-compatible payload")
+        return normalized

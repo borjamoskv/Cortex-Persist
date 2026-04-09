@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from types import SimpleNamespace
 
+from cortex.extensions.continual_learning import MicroUpdatePlan, MixedBatch
 from cortex.services.public_memory import PublicMemoryService
 
 
@@ -14,6 +15,7 @@ class _FakePublicMemoryEngine:
         self.deprecate_calls: list[dict[str, object]] = []
         self.verify_ledger_calls = 0
         self.causal_chain_calls: list[dict[str, object]] = []
+        self.memory = _FakeContinualManager()
 
     async def store(self, **kwargs):
         self.store_calls.append(kwargs)
@@ -80,6 +82,43 @@ class _FakePublicMemoryEngine:
             "transactions": 21,
             "db_size_mb": 1.5,
         }
+
+
+class _FakeContinualManager:
+    def __init__(self) -> None:
+        self.status_calls: list[dict[str, object]] = []
+        self.plan_calls: list[dict[str, object]] = []
+        self.execute_calls: list[dict[str, object]] = []
+        self.forget_calls: list[dict[str, object]] = []
+
+    async def continual_learning_status(self, **kwargs):
+        self.status_calls.append(kwargs)
+        return {"enabled": True, "tenant_id": kwargs["tenant_id"], "domain": kwargs.get("domain")}
+
+    async def plan_continual_update(self, **kwargs):
+        self.plan_calls.append(kwargs)
+        return MicroUpdatePlan(
+            tenant_id=str(kwargs["tenant_id"]),
+            domain=str(kwargs["domain"]),
+            adapter_id="lora:test",
+            learning_rate=5e-5,
+            risk_score=0.2,
+            batch=MixedBatch(),
+        )
+
+    async def execute_continual_update(self, **kwargs):
+        self.execute_calls.append(kwargs)
+        return {
+            "committed": True,
+            "plan": {
+                "tenant_id": kwargs["tenant_id"],
+                "domain": kwargs["domain"],
+            },
+        }
+
+    async def forget_continual_memory(self, **kwargs):
+        self.forget_calls.append(kwargs)
+        return {"deleted_exp_ids": ["exp-1"], "query": kwargs["query"]}
 
 
 async def test_public_memory_service_store_omits_unset_tenant() -> None:
@@ -202,3 +241,72 @@ async def test_public_memory_service_status_maps_engine_stats() -> None:
     assert status.active_facts == 9
     assert status.projects == 4
     assert status.transactions == 21
+
+
+async def test_public_memory_service_exposes_continual_learning_manager() -> None:
+    engine = _FakePublicMemoryEngine()
+    service = PublicMemoryService(engine)
+
+    status = await service.continual_learning_status(tenant_id="tenant-a", domain="support")
+    plan = await service.plan_continual_update(
+        tenant_id="tenant-a",
+        domain="support",
+        policy_violation=True,
+    )
+    execution = await service.execute_continual_update(
+        tenant_id="tenant-a",
+        domain="support",
+        policy_violation=True,
+        critical_domains=["support"],
+    )
+    forget = await service.forget_continual_memory(
+        tenant_id="tenant-a",
+        user_id="user-1",
+        query="secret",
+    )
+
+    assert status == {"enabled": True, "tenant_id": "tenant-a", "domain": "support"}
+    assert plan is not None
+    assert plan["adapter_id"] == "lora:test"
+    assert execution == {
+        "committed": True,
+        "plan": {"tenant_id": "tenant-a", "domain": "support"},
+    }
+    assert forget == {"deleted_exp_ids": ["exp-1"], "query": "secret"}
+    assert engine.memory.status_calls == [
+        {"tenant_id": "tenant-a", "domain": "support"}
+    ]
+    assert engine.memory.plan_calls == [
+        {"tenant_id": "tenant-a", "domain": "support", "policy_violation": True}
+    ]
+    assert engine.memory.execute_calls == [
+        {
+            "tenant_id": "tenant-a",
+            "domain": "support",
+            "policy_violation": True,
+            "critical_domains": ["support"],
+        }
+    ]
+    assert engine.memory.forget_calls == [
+        {"tenant_id": "tenant-a", "user_id": "user-1", "query": "secret"}
+    ]
+
+
+async def test_public_memory_service_continual_learning_disabled_without_manager() -> None:
+    engine = _FakePublicMemoryEngine()
+    engine.memory = None
+    service = PublicMemoryService(engine)
+
+    status = await service.continual_learning_status(tenant_id="tenant-a", domain="support")
+    plan = await service.plan_continual_update(tenant_id="tenant-a", domain="support")
+    execution = await service.execute_continual_update(tenant_id="tenant-a", domain="support")
+    forget = await service.forget_continual_memory(
+        tenant_id="tenant-a",
+        user_id="user-1",
+        query="secret",
+    )
+
+    assert status == {"enabled": False, "tenant_id": "tenant-a", "domain": "support"}
+    assert plan is None
+    assert execution is None
+    assert forget is None

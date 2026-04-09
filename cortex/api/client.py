@@ -4,7 +4,7 @@ CORTEX v5.0 — Python SDK Client.
 Simple, ergonomic client for the CORTEX REST API.
 
 Usage:
-    from cortex.client import CortexClient
+    from cortex_persist import CortexClient
 
     client = CortexClient("http://localhost:8484", api_key="ctx_...")
     client.store("my-project", "Important fact about the system")
@@ -133,8 +133,8 @@ class CortexClient:
 
     def recall(self, project: str, include_deprecated: bool = False) -> list[Fact]:
         """Get all facts for a project."""
-        _ = include_deprecated
-        results = self._request("GET", f"/v1/projects/{project}/facts")
+        params = {"include_deprecated": "true"} if include_deprecated else None
+        results = self._request("GET", f"/v1/projects/{project}/facts", params=params)
         return [
             Fact(
                 id=f["id"],

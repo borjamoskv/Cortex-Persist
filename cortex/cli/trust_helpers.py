@@ -55,9 +55,17 @@ def _check_merkle(conn, tx_id: int):
 
 
 def _render_verification_certificate(
-    fact: tuple, tx: tuple, chain_valid: bool, chain_msg: str, checkpoint: tuple | None
+    fact: tuple,
+    tx: tuple,
+    chain_valid: bool,
+    chain_msg: str,
+    checkpoint: tuple | None,
+    *,
+    display_content: str | None = None,
+    content_valid: bool = True,
+    violation: str | None = None,
 ) -> None:
-    fid, proj, content, ftype, created, _fact_tx_id = fact
+    fid, proj, content, ftype, created, _fact_tx_id = fact[:6]
     _, tx_hash, prev_hash, _action, _tx_time = tx
 
     table = Table(title="CORTEX Verification Certificate", show_header=False)
@@ -67,11 +75,17 @@ def _render_verification_certificate(
     table.add_row("Project", proj)
     table.add_row("Type", ftype)
     table.add_row("Created", created)
-    table.add_row("Content", content[:200])
+    table.add_row("Content", (display_content or content)[:200])
     table.add_row("", "")
     table.add_row("TX Hash", tx_hash[:32] + "...")
     table.add_row("Prev Hash", (prev_hash or "genesis")[:32] + "...")
     table.add_row("Chain Link", chain_msg)
+    table.add_row(
+        "Content Integrity",
+        "[green]OK[/green]" if content_valid else "[red]HASH_MISMATCH[/red]",
+    )
+    if violation:
+        table.add_row("Violation", violation)
 
     if checkpoint:
         cp_id, merkle_root, start, end, cp_time = checkpoint
@@ -83,7 +97,11 @@ def _render_verification_certificate(
     else:
         table.add_row("Merkle", "[yellow]Not yet checkpointed[/yellow]")
 
-    overall = "[green]VERIFIED[/green]" if chain_valid else "[red]INTEGRITY VIOLATION[/red]"
+    overall = (
+        "[green]VERIFIED[/green]"
+        if chain_valid and content_valid
+        else "[red]INTEGRITY VIOLATION[/red]"
+    )
     console.print(table)
     console.print(Panel(overall, title="Verdict"))
 

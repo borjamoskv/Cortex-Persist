@@ -31,10 +31,10 @@ Review:
 - [VERSION_SUPPORT.md](VERSION_SUPPORT.md)
 - [RELEASE_PROCESS.md](RELEASE_PROCESS.md)
 
-## 2. Install The Package Locally
+## 2. Install The Local-First Core
 
 ```bash
-pip install -e ".[dev,api]"
+pip install -e ".[dev]"
 python -m build
 ```
 
@@ -42,6 +42,14 @@ Expected outcome:
 
 - package builds successfully
 - local `cortex` CLI is available
+
+## Optional: Enable The Self-Hosted API Beta
+
+```bash
+pip install -e ".[dev,api]"
+```
+
+Use this only if you also want to evaluate the self-hosted beta API surface from the same source checkout.
 
 ## 3. Run A Minimal CLI Smoke Test
 
@@ -55,8 +63,8 @@ cortex init
 cortex store diligence "Technical diligence smoke test" --type decision --source diligence
 # capture the returned fact id from the previous command
 cortex verify <FACT_ID_FROM_STORE>
-cortex compliance-report
-cortex trust-ledger verify
+cortex trust-ledger verify --full
+cortex export --project diligence --format json --out /tmp/cortex-diligence.json
 ```
 
 Expected outcome:
@@ -64,7 +72,8 @@ Expected outcome:
 - initialization succeeds
 - storing a fact returns a created fact id
 - fact verification succeeds for the stored record
-- compliance and ledger commands execute without command-surface surprises
+- ledger verification reports the fact set as valid
+- export produces a portable JSON artifact without command-surface surprises
 
 ## 4. Run The Same Static Gates Used By CI
 
@@ -110,7 +119,7 @@ Then review:
 - [.github/workflows/codeql.yml](.github/workflows/codeql.yml)
 - [.github/workflows/release.yml](.github/workflows/release.yml)
 
-## 6. Build And Smoke-Test The Container
+## Optional: Evaluate The Self-Hosted API Beta Container Path
 
 ```bash
 docker build -t cortex:diligence .
@@ -146,8 +155,8 @@ Read these directories with extra scrutiny:
 
 Cross-check them against:
 
-- [https://cortexpersist.com/docs/security_trust_model](https://cortexpersist.com/docs/security_trust_model)
-- [https://cortexpersist.com/docs/architecture](https://cortexpersist.com/docs/architecture)
+- [docs/SECURITY_TRUST_MODEL.md](docs/SECURITY_TRUST_MODEL.md)
+- [docs/architecture.md](docs/architecture.md)
 - [DEPLOYMENT_HARDENING.md](DEPLOYMENT_HARDENING.md)
 
 ## 8. Capture Evaluation Notes

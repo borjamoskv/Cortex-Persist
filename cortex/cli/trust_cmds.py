@@ -44,14 +44,19 @@ def _run_async(coro):
 def verify_fact(fact_id: int, db: str) -> None:
     """Verify cryptographic integrity of a specific fact."""
     from cortex.cli.errors import err_fact_not_found, handle_cli_error
+    from cortex.crypto import get_default_encrypter
     from cortex.database.core import connect as db_connect
+    from cortex.services.trust import TrustService
 
     conn = None
+    trust = None
     try:
         conn = db_connect(db)
+        trust = TrustService(db)
         # Get the fact
         fact = conn.execute(
-            "SELECT id, project, content, fact_type, created_at, tx_id FROM facts WHERE id = ?",
+            "SELECT id, project, content, fact_type, created_at, tx_id, tenant_id "
+            "FROM facts WHERE id = ?",
             (fact_id,),
         ).fetchone()
 
@@ -60,6 +65,14 @@ def verify_fact(fact_id: int, db: str) -> None:
             return
 
         fact_tx_id = fact[5]
+        display_content = fact[2]
+        try:
+            display_content = get_default_encrypter().decrypt_str(
+                fact[2],
+                tenant_id=fact[6] or "default",
+            )
+        except (RuntimeError, ValueError, TypeError, OSError):
+            display_content = fact[2]
         tx = _find_transaction(conn, fact_id, fact_tx_id)
 
         if not tx:
@@ -76,11 +89,23 @@ def verify_fact(fact_id: int, db: str) -> None:
 
         chain_valid, chain_msg = _verify_chain(conn, tx_id, prev_hash)
         checkpoint = _check_merkle(conn, tx_id)
+        trust_result = trust.verify_fact_chain(fact_id)
 
-        _render_verification_certificate(fact, tx, chain_valid, chain_msg, checkpoint)
+        _render_verification_certificate(
+            fact,
+            tx,
+            chain_valid,
+            chain_msg,
+            checkpoint,
+            display_content=display_content,
+            content_valid=trust_result.valid,
+            violation=trust_result.violation,
+        )
     except Exception as e:  # noqa: BLE001 — CLI boundary catch
         handle_cli_error(e, db_path=db, context="verifying fact")
     finally:
+        if trust:
+            trust.close()
         if conn:
             conn.close()
 

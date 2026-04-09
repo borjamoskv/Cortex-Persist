@@ -1,6 +1,6 @@
 🌐 [English](README.md) | [Español](README.es.md) | **中文**
 
-# CORTEX — AI 系统的防篡改决策溯源
+# CORTEX Persist — AI 系统的防篡改决策溯源
 
 > 你的 AI 系统在做决策。
 > CORTEX 让这些决策**可追溯、可验证、可审计**。
@@ -15,11 +15,25 @@
 ![Status](https://img.shields.io/badge/status-beta-orange.svg)
 ![CI](https://github.com/borjamoskv/Cortex-Persist/actions/workflows/ci.yml/badge.svg)
 [![Coverage](https://codecov.io/gh/borjamoskv/Cortex-Persist/branch/main/graph/badge.svg)](https://codecov.io/gh/borjamoskv/Cortex-Persist)
-![Signed](https://img.shields.io/badge/releases-sigstore%20signed-2FAF64.svg)
 ![Security](https://img.shields.io/badge/scan-trivy%20%2B%20pip--audit-blue.svg)
 [![Docs](https://img.shields.io/badge/docs-cortexpersist.com%2Fdocs-brightgreen)](https://cortexpersist.com/docs)
 [![Website](https://img.shields.io/badge/web-cortexpersist.com-blue)](https://cortexpersist.com)
-[![Cross-Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-blue)](https://cortexpersist.com/docs/cross_platform_guide)
+[![Cross-Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-blue)](docs/OPERATIONS.md)
+[安装](#安装) · [规范演示](docs/canonical-demo.md) · [当前支持核心](docs/supported-core.md) · [架构](docs/architecture.md) · [安全与信任模型](docs/SECURITY_TRUST_MODEL.md)
+
+---
+
+## 当前支持的核心边界
+
+今天可以明确承诺的产品面比整个仓库更窄：
+
+- **支持的安装路径**：克隆仓库后执行 `pip install .`
+- **公开 Python import**：`cortex_persist`
+- **支持的 CLI 流程**：`init`、`store`、`recall`、`search`、`verify`、`trust-ledger verify --full`、`export`、`status`
+- **API 形态**：从源码自托管启动，`pip install -e ".[api]"`，当前属于 beta
+- **不属于当前支持核心**：公开 PyPI/npm 发布、广泛 swarm/orchestration 表面、托管云产品形态
+
+如果你第一次评估 CORTEX，请先跑 [规范演示](docs/canonical-demo.md)，再用 [当前支持核心](docs/supported-core.md) 作为真实合同边界。
 
 ---
 
@@ -101,11 +115,11 @@ $ cortex verify <FACT_ID>
 [✔] VERIFIED: Hash chain intact.
 
 # 4. 验证总账连续性
-$ cortex trust-ledger verify
+$ cortex trust-ledger verify --full
 [✔] Ledger is VALID
 
 # 5. 生成技术证据快照
-$ cortex compliance-report
+$ cortex export --project fin-agent --format json --out ./fin-agent-audit.json
 ```
 
 ---
@@ -159,35 +173,57 @@ CORTEX 不是一个记忆存储。它是位于任何记忆存储之上的
 ## 安装
 
 ```bash
-pip install cortex-persist
+git clone https://github.com/borjamoskv/Cortex-Persist.git
+cd Cortex-Persist
+pip install .
 ```
+
+当前最可靠的安装路径仍然是仓库源码安装；公开 PyPI 发布通道仍在收敛中。
+CLI 和 API 仍然使用 `cortex` 作为运行时模块路径，而公开的 Python import 入口是 `cortex_persist`。
+
+下面的 MCP、REST API、集成与部署部分用于说明更广的仓库表面；它们不改变上面的当前支持核心边界。
+
+## 扩展仓库表面（不属于当前支持核心）
+
+下面这些能力说明了仓库里更宽的技术面，但不应被理解为今天可承诺的产品合同。真正的 buyer 路径仍然是上面的 `pip install .`、CLI 核心流程和规范演示。
 
 ### Python API
 
 ```python
-from cortex import CortexEngine
+import asyncio
 
-engine = CortexEngine()
+from cortex_persist import CortexEngine
 
-await engine.store_fact(
-    content="Approved loan application #443",
-    fact_type="decision",
-    project="fintech-agent",
-    tenant_id="enterprise-customer-a"
-)
+
+async def main() -> None:
+    engine = CortexEngine()
+
+    receipt = await engine.store_fact(
+        content="Approved loan application #443",
+        fact_type="decision",
+        project="fintech-agent",
+        tenant_id="enterprise-customer-a",
+    )
+
+    assert await engine.verify(receipt.hash) is True
+
+asyncio.run(main())
 ```
 
-### MCP 服务器（通用 IDE 插件）
+### MCP 服务器（通用 IDE 插件，非支持核心）
+
+以下表面目前不属于支持核心，只应按仓库内扩展能力理解：
 
 ```bash
 # 支持：Claude Code, Cursor, OpenClaw, Windsurf, Antigravity
 python -m cortex.mcp
 ```
 
-### REST API
+### REST API（可选 Beta）
 
 ```bash
-uvicorn cortex.api:app --port 8484
+pip install -e ".[api]"
+uvicorn cortex.api:app --port 8000
 ```
 
 ---
@@ -231,6 +267,8 @@ block-beta
 
 ## 集成
 
+以下集成与部署说明用于帮助技术评估，不应覆盖当前支持核心边界。
+
 CORTEX 可接入你现有的技术栈：
 
 - **IDE**：Claude Code, Cursor, OpenClaw, Windsurf, Antigravity（通过 MCP）
@@ -250,7 +288,7 @@ CORTEX 无需 Docker 即可在任何环境原生运行：
 - **Linux**（systemd 和 notify-send）
 - **Windows**（任务计划程序和 PowerShell）
 
-详见[跨平台指南](https://cortexpersist.com/docs/cross_platform_guide)。
+详见[运行与部署说明](docs/OPERATIONS.md)。
 
 ---
 

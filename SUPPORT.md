@@ -2,6 +2,8 @@
 
 This document defines how to get help, what is currently supported, and what a commercial evaluator should assume by default.
 
+The support boundary starts with [docs/supported-core.md](docs/supported-core.md). Treat broader architecture, MCP, and orchestration material elsewhere in the repository as repository context unless it is explicitly promoted into that supported-core contract.
+
 ## Channels
 
 - **Security vulnerabilities:** email [security@cortexpersist.com](mailto:security@cortexpersist.com). Do not open public issues for vulnerabilities.
@@ -29,10 +31,10 @@ These are response targets, not contractual SLAs.
 
 ## What Support Covers
 
-- Installation and packaging issues
+- Source-install, local runtime, and documented packaging issues for the supported core
 - Reproducible bugs in documented features
 - Security report intake and triage
-- Clarification of intended behavior for public CLI and API surfaces
+- Clarification of intended behavior for the supported CLI core and the documented beta API surface
 
 ## What Support Does Not Automatically Cover
 
@@ -48,6 +50,7 @@ These are response targets, not contractual SLAs.
 If you are evaluating CORTEX for regulated or high-stakes use, review these documents together:
 
 - [README.md](README.md)
+- [docs/supported-core.md](docs/supported-core.md)
 - [ENTERPRISE_READINESS.md](ENTERPRISE_READINESS.md)
 - [DUE_DILIGENCE_CHECKLIST.md](DUE_DILIGENCE_CHECKLIST.md)
 - [DEPLOYMENT_HARDENING.md](DEPLOYMENT_HARDENING.md)
@@ -55,8 +58,8 @@ If you are evaluating CORTEX for regulated or high-stakes use, review these docu
 - [VERSION_SUPPORT.md](VERSION_SUPPORT.md)
 - [RELEASE_PROCESS.md](RELEASE_PROCESS.md)
 - [MAINTAINERS.md](MAINTAINERS.md)
-- [https://cortexpersist.com/docs/security_trust_model](https://cortexpersist.com/docs/security_trust_model)
-- [https://cortexpersist.com/docs/architecture](https://cortexpersist.com/docs/architecture)
-- [https://cortexpersist.com/docs/operations](https://cortexpersist.com/docs/operations)
+- [docs/SECURITY_TRUST_MODEL.md](docs/SECURITY_TRUST_MODEL.md)
+- [docs/architecture.md](docs/architecture.md)
+- [docs/OPERATIONS.md](docs/OPERATIONS.md)
 
-Align commercial expectations explicitly before treating this repository as a managed platform commitment.
+Align commercial expectations explicitly before treating this repository as a managed platform commitment. The supported product core today remains source-installed and local-first, while the self-hosted API is still beta.

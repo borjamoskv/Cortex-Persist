@@ -1,12 +1,13 @@
 # Deployment Hardening
 
-This document describes the current hardening posture CORTEX Persist can realistically support today, with an emphasis on self-hosted, operator-managed deployments.
+This document covers hardening for the source-installed local-first runtime, plus beta guidance for self-hosted API deployments.
 
 ## Current Reality
 
 The most mature deployment path today is:
 
-- a single-node or small self-hosted deployment
+- a single-node source install
+- a small self-hosted deployment if you are explicitly evaluating the beta API surface
 - the included Python package or Dockerfile
 - operator-managed networking, TLS, backups, and secret handling
 
@@ -21,7 +22,7 @@ Use this guide to harden what exists, not to assume missing platform layers alre
 
 ## Baseline Hardening Checklist
 
-1. Pin an exact package or image version for every environment.
+1. Pin an exact git tag or commit, built wheel, or container image for every environment.
 2. Run behind a TLS-terminating reverse proxy rather than exposing the app directly to the internet.
 3. Set `CORTEX_DEPLOY=cloud` in internet-facing environments so interactive docs are disabled.
 4. Set `CORTEX_ALLOWED_ORIGINS` explicitly; do not leave localhost defaults in shared environments.
@@ -30,7 +31,7 @@ Use this guide to harden what exists, not to assume missing platform layers alre
 7. Restrict filesystem access to the service user and the mounted data directory.
 8. Keep the API authenticated and tenant-scoped; do not rely on network position alone.
 9. Back up both the database and the encryption key material required to read encrypted facts.
-10. Run periodic integrity checks such as `cortex trust-ledger verify` and `cortex compliance-report`.
+10. Run periodic integrity checks such as `cortex trust-ledger verify --full` and portable `cortex export` snapshots.
 11. Scan the built image and Python dependencies as part of your deployment pipeline.
 12. Exercise restore and rollback procedures before calling the deployment production-ready.
 
@@ -47,7 +48,9 @@ For container or CI-style deployments:
 
 Without key continuity, encrypted persisted data may become unreadable after redeploy.
 
-## Recommended Docker Posture
+## Optional Docker Posture For Self-Hosted API Beta
+
+Use this only if you are evaluating the beta API deployment surface. It is not the primary supported core.
 
 The included `Dockerfile` already helps with two basics:
 

@@ -1,0 +1,77 @@
+site_name: CORTEX Persist
+site_description: Trust infrastructure for AI agents — verifiable memory, auditable decisions, and operational traceability for autonomous systems.
+site_url: https://cortexpersist.com
+repo_url: https://github.com/borjamoskv/Cortex-Persist
+repo_name: borjamoskv/Cortex-Persist
+edit_uri: edit/main/docs/
+copyright: "© 2026 MOSKV-1 Sovereign Systems · Apache 2.0"
+
+theme:
+  name: material
+  logo: https://raw.githubusercontent.com/borjamoskv/Cortex-Persist/main/src/assets/logo-white.svg
+  favicon: https://raw.githubusercontent.com/borjamoskv/Cortex-Persist/main/src/assets/logo-white.svg
+  palette:
+    - scheme: slate
+      primary: black
+      accent: lime
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+    - scheme: default
+      primary: black
+      accent: lime
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+  features:
+    - navigation.instant
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - search.highlight
+    - search.suggest
+    - content.code.copy
+    - toc.follow
+  icon:
+    repo: fontawesome/brands/github
+
+nav:
+  - Home: index.md
+  - Canonical Demo: canonical-demo.md
+  - Reference:
+      - Architecture: architecture.md
+      - System Map: system-map.md
+      - CORTEX Native Technologies: cortex-native-technologies.md
+      - Supported Core: supported-core.md
+      - Security & Trust Model: SECURITY_TRUST_MODEL.md
+      - API Reference: api.md
+      - Operations: OPERATIONS.md
+      - Axioms: AXIOMS.md
+      - Contribution Workflow: CONTRIBUTING.md
+      - Continual Learning Sidecar: continual_learning_sidecar.md
+      - Archive: archive.md
+      - Documentation Boundary: documentation-boundary.md
+      - Repository Reconciliation Matrix: repository_reconciliation_matrix.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/borjamoskv/Cortex-Persist
+    - icon: fontawesome/brands/x-twitter
+      link: https://x.com/borjamoskv
+  homepage: https://cortexpersist.com
+
+extra_css:
+  - stylesheets/industrial_noir.css
+
+markdown_extensions:
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+
+plugins:
+  - search

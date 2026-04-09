@@ -1,12 +1,12 @@
 # ROADMAP
 
 > **Tamper-Evident Decision Lineage for AI Systems**
-> *Updated: Spring 2026 · Status: v0.3.0 in active development*
-> *Classification: Planning snapshot. Current release truth lives in `CHANGELOG.md`.*
+> *Updated: Spring 2026 · Status: 0.3.x beta in active development*
+> *Classification: Planning snapshot. Current release truth lives in `CHANGELOG.md`; current product boundary lives in `docs/supported-core.md`.*
 
 ---
 
-## ✅ v0.3.0 — Current (Foundation & Integrity)
+## ✅ 0.3.x Beta — Current (Foundation & Integrity)
 
 **Local-First Sovereign Trust layer.**
 
@@ -26,7 +26,7 @@
 
 - [ ] **GraphQL API** — Unified cross-language interface.
 - [ ] **Distributed Event Bus** — Redis Streams for agent swarm coordination.
-- [ ] **JavaScript/TypeScript SDK** — Native `npm` library for browser and Node agents.
+- [ ] **JavaScript/TypeScript SDK public release** — Promote the existing in-repo SDK to a published `npm` package with a stable support contract.
 - [ ] **Remote Qdrant Cluster Support** — Moving Vector storage out of SQLite for massive scale.
 - [ ] **Redis L1 Cache** — Distributed working memory for lower TTFT latency.
 
@@ -46,11 +46,13 @@
 
 ## Pricing Strategy (Cloud Roadmap)
 
-| Tier | Price | Target |
+This section is exploratory and non-contractual. It is not part of the supported-core promise and should not be read as an active commercial offer.
+
+| Track | Current Intent | Contract Status |
 | :--- | :--- | :--- |
-| **Self-Hosted** | Free forever | On-prem, unlimited, community support. |
-| **Pro** | $29/mo | Small agent ensembles, cloud database backends. |
-| **Team** | $99/mo | Multi-agent enterprise consensus, 99.9% SLA. |
+| **Self-Hosted** | Keep a community-accessible operator-managed path | Not a paid support contract by default |
+| **Future Cloud Evaluation** | Explore paid managed-service options once the supported core is proven in pilots | Roadmap only |
+| **Future Team / Enterprise Plans** | Explore commercial packaging after publication, pilots, and support posture mature | Roadmap only |
 
 ---
 

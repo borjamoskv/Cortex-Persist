@@ -10,13 +10,15 @@ The current public posture is best described as:
 
 - **Product maturity:** advanced beta
 - **License posture:** Apache-2.0
-- **Primary deployment posture:** local-first, with the most mature path today being operator-managed self-hosted deployments
+- **Primary deployment posture:** source-installed and local-first, with the self-hosted API currently positioned as a beta surface
 - **Trust posture:** cryptographic auditability and verification-first design
 - **Commercial posture:** promising, but requires buyer-specific diligence on support, roadmap, and productization depth
 - **Operational continuity:** maintainer-led, with explicit key-person concentration risk that should be evaluated during diligence
 
 ## What A Large Buyer Can Verify Quickly
 
+- **Supported core boundary:** [docs/supported-core.md](docs/supported-core.md)
+- **Canonical product proof:** [docs/canonical-demo.md](docs/canonical-demo.md)
 - **Security policy:** [SECURITY.md](SECURITY.md)
 - **Support policy:** [SUPPORT.md](SUPPORT.md)
 - **Version support policy:** [VERSION_SUPPORT.md](VERSION_SUPPORT.md)
@@ -25,25 +27,26 @@ The current public posture is best described as:
 - **Deployment hardening:** [DEPLOYMENT_HARDENING.md](DEPLOYMENT_HARDENING.md)
 - **Reproducible diligence flow:** [DUE_DILIGENCE_CHECKLIST.md](DUE_DILIGENCE_CHECKLIST.md)
 - **Repository governance:** [REPO_GOVERNANCE.md](REPO_GOVERNANCE.md)
-- **Architecture:** [https://cortexpersist.com/docs/architecture](https://cortexpersist.com/docs/architecture)
-- **Security and trust model:** [https://cortexpersist.com/docs/security_trust_model](https://cortexpersist.com/docs/security_trust_model)
-- **API surface:** [https://cortexpersist.com/docs/api](https://cortexpersist.com/docs/api)
-- **Operations guidance:** [https://cortexpersist.com/docs/operations](https://cortexpersist.com/docs/operations)
+- **Architecture:** [docs/architecture.md](docs/architecture.md)
+- **Security and trust model:** [docs/SECURITY_TRUST_MODEL.md](docs/SECURITY_TRUST_MODEL.md)
+- **Optional beta API surface:** [docs/api.md](docs/api.md)
+- **Operations guidance:** [docs/OPERATIONS.md](docs/OPERATIONS.md)
 - **Contribution and engineering expectations:** [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## Strengths
 
 - **Clear product thesis:** tamper-evident memory for AI agents is specific, differentiated, and easy to position.
 - **Trust-first architecture:** the repo consistently treats generative output as conjecture until deterministic validation and ledger recording.
-- **Repository-level security signals are visible:** CI, CodeQL, dependency audit, SBOM generation, Trivy image scanning, signed releases, and a public security policy are present.
+- **Repository-level security signals are visible:** CI, CodeQL, dependency audit, SBOM generation, Trivy image scanning, a tagged release workflow with provenance and artifact-signing, and a public security policy are present.
 - **Open-source friendliness:** Apache-2.0 lowers friction for evaluation, integration, and acquisition.
-- **Rich technical surface:** CLI, API, memory engine, ledger, vector search, and multi-agent concepts are already represented in code and docs.
+- **Supported core plus visible repo breadth:** the local-first CLI trust path is named explicitly, while broader API, MCP, and multi-agent concepts remain visible for diligence without being misrepresented as fully productized.
 
 ## Current Gaps A Serious Buyer Should Note
 
 - **Beta line:** the package is still on a `0.3.x` beta release line, so enterprise claims should be framed as directional rather than contractual.
-- **Broad repo surface:** the codebase spans many concepts and experiments; a buyer should identify the subset that is actually part of the sellable core.
-- **Canonical docs source of truth:** long-form documentation now lives on the dedicated docs surface at `https://cortexpersist.com/docs`; top-level `docs/` files in this repo are compatibility shims only.
+- **Broad repo surface:** the codebase spans many concepts and experiments; buyers should evaluate against the explicitly named [supported core](docs/supported-core.md) rather than assuming every in-tree surface is productized.
+- **Broader repo surfaces remain secondary:** architecture, MCP, and orchestration material are useful for diligence, but the shortest honest proof path is still [Canonical Demo](docs/canonical-demo.md) plus [Supported Core](docs/supported-core.md).
+- **Website parity still needs discipline:** the repo now carries the versioned product docs, but the external website should not be treated as canonical until link parity and release parity are kept in sync.
 - **Commercial readiness is not the same as technical strength:** support expectations, SLAs, managed-service obligations, and legal/compliance claims still require explicit negotiation and validation.
 - **Compliance language should be reviewed by counsel:** references to regulated use cases are useful positioning, but legal review is still necessary before binding claims.
 
@@ -53,14 +56,15 @@ The current public posture is best described as:
 
 - Run CI on a clean clone and inspect workflow coverage in `.github/workflows/`.
 - Review critical paths under `cortex/engine`, `cortex/memory`, `cortex/guards`, and `cortex/ledger`.
-- Verify installation and smoke-test flows from [README.md](README.md) and [https://cortexpersist.com/docs/api](https://cortexpersist.com/docs/api).
+- Verify installation and smoke-test flows from [README.md](README.md) and [docs/api.md](docs/api.md).
+- Run [docs/canonical-demo.md](docs/canonical-demo.md) before reviewing broader repo surfaces.
 - Confirm the package metadata in [pyproject.toml](pyproject.toml) matches the intended release and support posture.
 - Run the reproducible buyer workflow in [DUE_DILIGENCE_CHECKLIST.md](DUE_DILIGENCE_CHECKLIST.md).
 
 ### Security
 
 - Review the public policy in [SECURITY.md](SECURITY.md).
-- Inspect trust-boundary documentation in [https://cortexpersist.com/docs/security_trust_model](https://cortexpersist.com/docs/security_trust_model).
+- Inspect trust-boundary documentation in [docs/SECURITY_TRUST_MODEL.md](docs/SECURITY_TRUST_MODEL.md).
 - Verify the release workflow, provenance, and artifact signing in [.github/workflows/release.yml](.github/workflows/release.yml).
 - Verify CodeQL, dependency audit, SBOM, and container scanning workflows in [.github/workflows/ci.yml](.github/workflows/ci.yml) and [.github/workflows/codeql.yml](.github/workflows/codeql.yml).
 
@@ -81,7 +85,7 @@ The current public posture is best described as:
 
 ## Recommended Next Hardening Steps
 
-- Define a supported enterprise subset of the platform and name it explicitly.
+- Prove the named supported core against pilot deployments and turn that evidence into dated support commitments.
 - Tighten the version-support policy from broad beta-line statements into dated release commitments or an explicit LTS/non-LTS policy.
 - Add architecture decision records or a formal module ownership map for critical trust surfaces.
 - Extend the new diligence checklist with buyer-specific integration tests and threat scenarios.

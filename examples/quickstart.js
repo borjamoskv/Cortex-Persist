@@ -1,7 +1,11 @@
 /**
- * CORTEX Quickstart — JavaScript/TypeScript
+ * CORTEX Quickstart — JavaScript/TypeScript against the self-hosted beta API.
  *
  * Usage:
+ *   git clone https://github.com/borjamoskv/Cortex-Persist.git
+ *   cd Cortex-Persist
+ *   pip install -e ".[api]"
+ *   uvicorn cortex.api:app --port 8000
  *   node quickstart.js
  *
  * No dependencies required — uses native fetch (Node 18+).
@@ -42,19 +46,17 @@ async function main() {
     console.log(`  [#${r.fact_id}] (score: ${r.score?.toFixed(3)}) ${r.content?.slice(0, 80)}`);
   }
 
-  // 3. Ask (RAG)
-  console.log("\n🧠 Asking...");
-  try {
-    const askResp = await fetch(`${BASE_URL}/v1/ask`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify({ query: "What is CORTEX?", k: 5 }),
-    });
-    const answer = await askResp.json();
-    console.log(`  Answer: ${answer.answer}`);
-  } catch (e) {
-    console.log(`  ⚠️ RAG requires LLM provider: ${e.message}`);
-  }
+  // 3. Recall project facts
+  console.log("\n📚 Recalling project facts...");
+  const recallResp = await fetch(`${BASE_URL}/v1/projects/demo/facts`, { headers });
+  const facts = await recallResp.json();
+  console.log(`  ✅ Recalled ${facts.length} fact(s)`);
+
+  // 4. Check engine status
+  console.log("\n🩺 Checking status...");
+  const statusResp = await fetch(`${BASE_URL}/v1/status`, { headers });
+  const status = await statusResp.json();
+  console.log(`  Status: ${JSON.stringify(status)}`);
 
   console.log("\n🎉 CORTEX is operational!");
 }

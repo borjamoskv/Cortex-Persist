@@ -11,9 +11,7 @@ Local-first. SHA-256 hash-chained. Merkle checkpoints. Audit-ready.
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![CI](https://github.com/borjamoskv/Cortex-Persist/actions/workflows/ci.yml/badge.svg)](https://github.com/borjamoskv/Cortex-Persist/actions)
 [![Codecov](https://codecov.io/gh/borjamoskv/Cortex-Persist/branch/main/graph/badge.svg)](https://codecov.io/gh/borjamoskv/Cortex-Persist)
-[![PyPI](https://img.shields.io/pypi/v/cortex-persist.svg)](https://pypi.org/project/cortex-persist/)
-
-[Quickstart](#quickstart) · [System Map](https://cortexpersist.com/docs/system-map) · [Native Technologies](https://cortexpersist.com/docs/cortex-native-technologies) · [Enterprise Readiness](ENTERPRISE_READINESS.md) · [Diligence Checklist](DUE_DILIGENCE_CHECKLIST.md) · [Deployment Hardening](DEPLOYMENT_HARDENING.md) · [API](https://cortexpersist.com/docs/api) · [Security Model](https://cortexpersist.com/docs/security_trust_model) · [Support](SUPPORT.md) · [Roadmap](ROADMAP.md) · [Contributing](CONTRIBUTING.md)
+[Quickstart](#quickstart) · [Canonical Demo](docs/canonical-demo.md) · [Supported Core](docs/supported-core.md) · [System Map](docs/system-map.md) · [Native Technologies](docs/cortex-native-technologies.md) · [Enterprise Readiness](ENTERPRISE_READINESS.md) · [Diligence Checklist](DUE_DILIGENCE_CHECKLIST.md) · [Deployment Hardening](DEPLOYMENT_HARDENING.md) · [API](docs/api.md) · [Security Model](docs/SECURITY_TRUST_MODEL.md) · [Support](SUPPORT.md) · [Roadmap](ROADMAP.md) · [Contributing](CONTRIBUTING.md)
 
 CORTEX Persist adds a verification layer around agent memory and decision state. It sits between your runtime and your storage so facts, decisions, and derived state become reviewable, tamper-evident records instead of mutable application state. If stored context changes after the fact, verification fails.
 
@@ -28,6 +26,22 @@ CORTEX Persist adds a verification layer around agent memory and decision state.
 
 > Logs tell you what happened. CORTEX helps you verify what context an agent used, what it decided, and whether that record has changed since. [**Review a real verification proof.**](examples/audit_proof_artifact.json)
 
+## Supported Core Today
+
+This repository contains much more code than the product surface that is safe to promise today. The supported core is the minimum public contract that currently works as a product.
+If you are evaluating CORTEX for the first time, start with the [Canonical Demo](docs/canonical-demo.md) and then use [Supported Core](docs/supported-core.md) as the contract boundary.
+
+| Surface | Current Status |
+| :--- | :--- |
+| Install path | Source install from this repository: `git clone ... && pip install .` |
+| Public Python import | `cortex_persist` |
+| Supported CLI flow | `init`, `store`, `search`, `recall`, `verify`, `trust-ledger verify --full`, `export`, `status` |
+| API mode | Available from source with `pip install -e ".[api]"`, currently beta as a self-hosted surface |
+| Not part of supported core | Public PyPI release, public npm release, worker stacks, managed cloud, and broad repo-internal orchestration surfaces |
+
+The subsystem taxonomy below describes the whole repository. It does not redefine the supported product boundary. The canonical support contract lives in [Supported Core](docs/supported-core.md).
+If you are evaluating rather than implementing, skip straight to [Canonical Demo](docs/canonical-demo.md), [Supported Core](docs/supported-core.md), and [Enterprise Readiness](ENTERPRISE_READINESS.md).
+
 ## System Map
 
 CORTEX now exposes a stable subsystem taxonomy for navigating the codebase and architecture without forcing an immediate package rename:
@@ -39,8 +53,9 @@ CORTEX now exposes a stable subsystem taxonomy for navigating the codebase and a
 | **CORTEX Deepforge** | Synthesis, reasoning, perception, and code-generation surfaces | `composer/`, `mcts/`, `shannon/`, `extensions/llm/`, `extensions/thinking/`, `extensions/evolution/`, `extensions/training/`, `extensions/skills/`, `extensions/perception/` |
 | **CORTEX Primeflow** | Execution runtime, APIs, services, event delivery, and operational flows | `api/`, `routes/`, `services/`, `events/`, `http/`, `cli/`, `telemetry/`, `extensions/automation/`, `extensions/daemon/`, `extensions/sync/`, `extensions/notifications/`, `extensions/timing/` |
 | **CORTEX Coreshift** | Memory evolution, indexing, migration, audit, and state transitions | `memory/`, `facts/`, `search/`, `embeddings/`, `graph/`, `compaction/`, `enrichment/`, `migrations/`, `audit/`, `compliance/`, `forensics/` |
+| **CORTEX Ouroboros** | Economic extraction, market intelligence, MEV, and dark forest forensics | `ouroboros-sniper/`, `extensions/economy/`, `extensions/trading/`, `extensions/market/` |
 
-These names are architectural groupings over the current repository, not replacement Python package names. The canonical mapping lives in [System Map](https://cortexpersist.com/docs/system-map).
+These names are architectural groupings over the current repository, not replacement Python package names. The canonical mapping lives in [System Map](docs/system-map.md).
 
 ## Core Trust Capabilities
 
@@ -52,7 +67,7 @@ CORTEX groups five core capabilities that show up across the repository. The nam
 4. **Rollback-aware write flows**: non-trivial mutations follow compensating steps instead of leaving partial state behind.
 5. **Isolated self-modification paths**: runtime code generation can be contained, tested, and validated before it affects persistent state.
 
-The canonical definition and module mapping live in [CORTEX Native Technologies](https://cortexpersist.com/docs/cortex-native-technologies).
+The canonical definition and module mapping live in [CORTEX Native Technologies](docs/cortex-native-technologies.md).
 
 ## Use Cases
 
@@ -95,65 +110,26 @@ Traditional logging and standard vector stores help you observe systems. They do
 | **Self-Hosted** | 🟡 **Beta** | Multi-tenant. API-driven. Redis cache. Pluggable to your infra. |
 | **Cloud-Ready** | ⏳ **Roadmap** | AlloyDB/PostgreSQL + Qdrant. For distributed massive swarms. |
 
-## Aether Workers
+## Experimental Surfaces
 
-The deployment files under `deploy/compose/` and `deploy/k8s/` provide a base worker stack for Aether with `Redis + RQ` as the broker and multiple worker replicas. The producer side keeps using the existing Aether task store, while workers stay stateless and only receive `task_id` jobs from Redis.
-
-Local distributed worker:
-
-```bash
-cortex worker aether --queue aether --db-path ~/.cortex/aether.db
-```
-
-Root Aether producer/operator CLI:
-
-```bash
-cortex aether enqueue /path/to/repo "Fix flaky queue consumer" --backend rq
-cortex aether status --backend rq
-cortex aether once --task-id abc123 --backend rq
-```
-
-Local run:
-
-```bash
-docker compose -f deploy/compose/aether-workers.compose.yml up --build --scale aether-worker=6
-```
-
-Kubernetes base:
-
-```bash
-kubectl apply -f deploy/k8s/aether-workers.yaml
-```
-
-Recommended daemon config keys:
-
-```json
-{
-  "aether_enabled": true,
-  "aether_queue_backend": "rq",
-  "aether_db_path": "/path/to/.cortex/aether.db",
-  "aether_redis_url": "redis://localhost:6379/0",
-  "aether_rq_queue": "aether",
-  "aether_worker_threads": 6,
-  "aether_job_timeout": 28800
-}
-```
-
-The queue state is shared through `~/.cortex` while Redis handles fan-out and wake-up. That keeps the producer/consumer path decoupled: monitors and CLI enqueue, workers execute, and scaling comes from replicas instead of a single daemon thread.
+The repository also contains worker, swarm, and orchestration modules beyond the supported core. Treat those areas as beta, experimental, or internal until they are documented as part of the public support boundary. The public README should not be read as a promise that every repo-internal command or deployment file is production-supported today.
 
 ## Enterprise Readiness
 
 CORTEX is still on a beta product line, but the repository now exposes the basic due-diligence surfaces a serious buyer or platform team expects:
 
 - **Stable governance surface:** [Support](SUPPORT.md), [Security Policy](SECURITY.md), [Contributing](CONTRIBUTING.md), and [Code of Conduct](CODE_OF_CONDUCT.md)
-- **Stable technical entrypoints:** [Architecture](https://cortexpersist.com/docs/architecture), [Security Model](https://cortexpersist.com/docs/security_trust_model), [API](https://cortexpersist.com/docs/api), and [Operations](https://cortexpersist.com/docs/operations)
-- **Release and supply-chain controls:** signed releases, CI, CodeQL, SBOM generation, dependency audit, and container scanning
+- **Stable technical entrypoints:** [Architecture](docs/architecture.md), [Security Model](docs/SECURITY_TRUST_MODEL.md), [API](docs/api.md), and [Operations](docs/OPERATIONS.md)
+- **Release and supply-chain controls:** release workflow, signing path, CI, CodeQL, SBOM generation, dependency audit, and container scanning
 - **Deployment and buyer validation guides:** [DEPLOYMENT_HARDENING.md](DEPLOYMENT_HARDENING.md) and [DUE_DILIGENCE_CHECKLIST.md](DUE_DILIGENCE_CHECKLIST.md)
 - **Candid diligence summary:** strengths, current limits, and evaluation checklist in [ENTERPRISE_READINESS.md](ENTERPRISE_READINESS.md)
 
 If you are evaluating CORTEX for acquisition, procurement, or internal platform adoption, start with [ENTERPRISE_READINESS.md](ENTERPRISE_READINESS.md) and [DUE_DILIGENCE_CHECKLIST.md](DUE_DILIGENCE_CHECKLIST.md).
 
-## 90-second demo
+## Canonical Demo
+
+This assumes the CLI is already installed. On a clean machine, start with the quickstart just below.
+The fully reproducible version, including a tamper drill, lives in [Canonical Demo](docs/canonical-demo.md).
 
 ```bash
 # 1. Start the ledger
@@ -167,28 +143,32 @@ $ cortex store risk-bot "Transaction flagged: IP mismatch" --type decision --sou
 $ cortex verify <FACT_ID>
 [✔] VERIFIED: Hash chain intact.
 
-# 4. Verify the ledger
-$ cortex trust-ledger verify
+# 4. Verify the ledger and fact set
+$ cortex trust-ledger verify --full
 [✔] Ledger is VALID
 
-# 5. Generate a compliance snapshot
-$ cortex compliance-report
+# 5. Export portable evidence
+$ cortex export --project risk-bot --format json --out ./risk-bot-audit.json
 ```
 
 ## Quickstart
 
 Start logging tamper-evident memories locally in under a minute.
+The supported install path today is source installation from this repository while public package publication is being finalized.
+The distribution keeps `cortex` as the operational module path for CLI and API entrypoints, while the public Python import surface is `cortex_persist`.
 
 ```bash
-# 1. Install & Initialize
-pip install cortex-persist
+# 1. Clone, install from source, and initialize
+git clone https://github.com/borjamoskv/Cortex-Persist.git
+cd Cortex-Persist
+pip install .
 cortex init
 
 # 2. Store a memory (SHA-256 hashed and chained to prior facts)
 cortex store risk-bot "Transaction flagged: IP mismatch" --type decision --source agent:risk-bot
 
 # 3. Verify the trust ledger
-cortex trust-ledger verify
+cortex trust-ledger verify --full
 ```
 
 ## Integration
@@ -197,7 +177,7 @@ CORTEX wraps your existing state management. It does not replace your embeddings
 
 ```python
 import asyncio
-from cortex import CortexEngine
+from cortex_persist import CortexEngine
 
 async def main() -> None:
     engine = CortexEngine()
@@ -234,15 +214,17 @@ CORTEX treats generative AI output as untrusted input until it passes determinis
 - **Mutation paths are constrained:** agents cannot write arbitrary state outside the validated mutation flow.
 - **Tamper evidence complements access control:** if someone edits stored records after the fact, the hash chain no longer verifies.
 
-> Read the cryptographic guarantees in the [Security Model](https://cortexpersist.com/docs/security_trust_model).
+> Read the cryptographic guarantees in the [Security Model](docs/SECURITY_TRUST_MODEL.md).
 
 ---
 
 ## Documentation
 
-Canonical long-form documentation now lives on the dedicated docs surface at [`https://cortexpersist.com/docs`](https://cortexpersist.com/docs). The top-level `docs/` directory in this repository remains a GitHub-facing compatibility shim for technical review and procurement workflows.
+Repo-versioned documentation lives in [`docs/`](docs/documentation-boundary.md) and is the source of truth for the published docs surface. The website may mirror these pages, but GitHub readers should not have to leave the repository to validate the core product surface.
 
 - [**Quickstart**](#quickstart) — Install, store, verify.
+- [**Canonical Demo**](docs/canonical-demo.md) — Reproducible proof of store → verify → tamper detection → export.
+- [**Supported Core**](docs/supported-core.md) — Exact public contract that is safe to promise today.
 - [**Enterprise Readiness**](ENTERPRISE_READINESS.md) — Buyer-facing maturity, risk, and diligence summary.
 - [**Due Diligence Checklist**](DUE_DILIGENCE_CHECKLIST.md) — Reproducible technical and security evaluation steps.
 - [**Deployment Hardening**](DEPLOYMENT_HARDENING.md) — Production-oriented guardrails for self-hosted deployments.
@@ -250,12 +232,13 @@ Canonical long-form documentation now lives on the dedicated docs surface at [`h
 - [**Repository Governance**](REPO_GOVERNANCE.md) — Ownership, review expectations, and change safety rules.
 - [**Maintainers**](MAINTAINERS.md) — Current maintainer model and stewardship boundaries.
 - [**Version Support**](VERSION_SUPPORT.md) — Supported release line expectations.
-- [**Release Process**](RELEASE_PROCESS.md) — Public package publication and signing flow.
-- [**System Map**](https://cortexpersist.com/docs/system-map) — Canonical subsystem taxonomy for Hypercore, Overmind, Deepforge, Primeflow, and Coreshift.
-- [**CORTEX Native Technologies**](https://cortexpersist.com/docs/cortex-native-technologies) — Canonical definition of the platform's five core trust capabilities.
-- [**API Reference**](https://cortexpersist.com/docs/api) — SDK primitives and REST endpoints.
-- [**Security Model**](https://cortexpersist.com/docs/security_trust_model) — Cryptographic invariants and trust guarantees.
-- [**Architecture**](https://cortexpersist.com/docs/architecture) — System topology and critical trust surfaces.
+- [**Release Process**](RELEASE_PROCESS.md) — Tagged Python release workflow, provenance, and artifact signing.
+- [**System Map**](docs/system-map.md) — Canonical subsystem taxonomy for Hypercore, Overmind, Deepforge, Primeflow, Coreshift, and Ouroboros.
+- [**CORTEX Native Technologies**](docs/cortex-native-technologies.md) — Canonical definition of the platform's five core trust capabilities.
+- [**API Reference**](docs/api.md) — SDK primitives, REST startup, and core endpoints.
+- [**Security Model**](docs/SECURITY_TRUST_MODEL.md) — Cryptographic invariants, trust boundaries, and verification guarantees.
+- [**Architecture**](docs/architecture.md) — System topology, deployment modes, and critical trust surfaces.
+- [**Operations**](docs/OPERATIONS.md) — Runbooks, deployment posture, and operational checks.
 - [**Roadmap**](ROADMAP.md) — Deployment phases and scaling logic.
 - [**Contributing**](CONTRIBUTING.md) — Development workflow and contribution rules.
 

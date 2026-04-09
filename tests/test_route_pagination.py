@@ -29,6 +29,7 @@ def _route_by_path(router, path: str, method: str) -> APIRoute:
 class _FakeRouteEngine:
     def __init__(self) -> None:
         self.recall_calls: list[dict[str, object]] = []
+        self.history_calls: list[dict[str, object]] = []
         self.active_fact_calls: list[dict[str, object]] = []
         self.agent_calls: list[dict[str, object]] = []
         self.vote_calls: list[dict[str, object]] = []
@@ -48,6 +49,20 @@ class _FakeRouteEngine:
                 "tenant_id": tenant_id,
                 "limit": limit,
                 "offset": offset,
+            }
+        )
+        return []
+
+    async def history(
+        self,
+        project: str,
+        tenant_id: str = "default",
+        **_: object,
+    ) -> list[dict]:
+        self.history_calls.append(
+            {
+                "project": project,
+                "tenant_id": tenant_id,
             }
         )
         return []
@@ -111,6 +126,31 @@ def test_list_project_facts_forwards_offset_and_limit() -> None:
             "offset": 10,
         }
     ]
+
+
+def test_list_project_facts_can_include_deprecated_history() -> None:
+    fake_engine = _FakeRouteEngine()
+
+    app = FastAPI()
+    app.include_router(facts_router.router)
+    auth_dep = _dependency_for(
+        "/v1/projects/{project}/facts",
+        "GET",
+        _route_by_path(facts_router.router, "/v1/projects/{project}/facts", "GET"),
+    )
+    app.dependency_overrides[auth_dep] = lambda: AuthResult(
+        authenticated=True,
+        tenant_id="tenant-facts",
+        permissions=["read"],
+    )
+    app.dependency_overrides[get_async_engine] = lambda: fake_engine
+
+    with TestClient(app) as client:
+        response = client.get("/v1/projects/alpha/facts?include_deprecated=true")
+
+    assert response.status_code == 200
+    assert response.json() == []
+    assert fake_engine.history_calls == [{"project": "alpha", "tenant_id": "tenant-facts"}]
 
 
 def test_list_all_facts_forwards_offset_and_blank_project() -> None:

@@ -1,14 +1,16 @@
 # Release Process
 
-This document describes the public release flow for CORTEX Persist.
+This document describes the tagged public release flow for CORTEX Persist.
 
 ## Release Model
 
-CORTEX Persist uses tagged releases for package publication.
+CORTEX Persist is currently released through a Python-first tagged workflow. Source installation remains the fallback path until a tagged public release is successfully published.
 
 - version metadata lives in [pyproject.toml](pyproject.toml)
 - release tags follow the `v*` pattern
-- PyPI publishing is handled by GitHub Actions
+- GitHub Actions builds Python source and wheel artifacts
+- GitHub Actions publishes the Python package to PyPI when the tagged workflow runs against the configured release environment
+- the in-repo JS SDK is not yet part of the public npm publication path
 
 ## Release Workflow
 
@@ -18,12 +20,13 @@ The authoritative workflow is:
 
 At a high level, the workflow:
 
-1. checks out the repository
-2. builds source and wheel artifacts
-3. generates build provenance
-4. publishes to PyPI
-5. signs artifacts with Sigstore
-6. uploads signed artifacts for traceability
+1. validates release metadata and tag alignment
+2. builds Python source and wheel artifacts
+3. smoke-tests the built wheel import surface
+4. generates build provenance
+5. publishes to PyPI
+6. signs artifacts with Sigstore
+7. uploads signed artifacts and creates the GitHub Release
 
 ## Pre-Release Expectations
 
@@ -52,8 +55,9 @@ If a bad package or release is published:
 
 Public supply-chain posture is supported by:
 
-- signed release artifacts
+- the tagged Python release workflow
 - GitHub Actions provenance
+- Sigstore artifact signing in the release workflow
 - dependency audit in CI
 - SBOM generation
 - container image scanning

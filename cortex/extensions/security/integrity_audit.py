@@ -102,6 +102,22 @@ class IntegrityAuditor:
     def __init__(self, db_path: str | None = None) -> None:
         self._db_path = db_path or str(config.DB_PATH)
 
+    @staticmethod
+    def _resolve_plaintext(raw_content: str | None, tenant_id: str | None) -> tuple[str, str | None]:
+        """Normalize stored fact content back to plaintext for integrity checks."""
+        content = raw_content or ""
+        if not content:
+            return "", None
+
+        try:
+            from cortex.crypto import get_default_encrypter
+
+            plaintext = get_default_encrypter().decrypt_str(content, tenant_id=tenant_id or "default")
+        except (RuntimeError, ValueError, TypeError, OSError) as exc:
+            return "", f"decryption_failed:{exc}"
+
+        return plaintext or "", None
+
     async def full_audit(self) -> AuditReport:
         """Run a complete integrity audit.
 
@@ -118,7 +134,7 @@ class IntegrityAuditor:
 
                 # Get all facts ordered by ID
                 async with db.execute(
-                    "SELECT id, content, hash, prev_hash, signature, meta "
+                    "SELECT id, tenant_id, content, hash, prev_hash, signature, meta "
                     "FROM facts ORDER BY id ASC"
                 ) as cursor:
                     facts = await cursor.fetchall()
@@ -169,7 +185,7 @@ class IntegrityAuditor:
             async with connect_async_ctx(self._db_path) as db:
                 db.row_factory = aiosqlite.Row
                 async with db.execute(
-                    "SELECT id, content, hash, prev_hash FROM facts ORDER BY id ASC"
+                    "SELECT id, tenant_id, content, hash, prev_hash FROM facts ORDER BY id ASC"
                 ) as cursor:
                     facts = await cursor.fetchall()
                 return await self._verify_chain(facts)  # type: ignore[reportArgumentType]
@@ -183,7 +199,7 @@ class IntegrityAuditor:
             async with connect_async_ctx(self._db_path) as db:
                 db.row_factory = aiosqlite.Row
                 async with db.execute(
-                    "SELECT id, content, hash, signature FROM facts "
+                    "SELECT id, tenant_id, content, hash, signature FROM facts "
                     "WHERE signature IS NOT NULL AND signature != ''"
                 ) as cursor:
                     facts = await cursor.fetchall()
@@ -215,9 +231,25 @@ class IntegrityAuditor:
         self, fact: Any, prev_hash: str | None, hash_index: dict[str, int], status: ChainStatus
     ) -> None:
         fact_id = fact["id"]
-        content = fact["content"] or ""
+        content, decrypt_error = self._resolve_plaintext(fact["content"], fact["tenant_id"])
         stored_hash = fact["hash"] or ""
         stored_prev = fact["prev_hash"] or ""
+
+        if decrypt_error:
+            status.broken_links.append(
+                TamperedFact(
+                    fact_id=fact_id,
+                    issue="decryption_failed",
+                    expected="decryptable_content",
+                    actual=decrypt_error,
+                    content_preview=str(fact["content"] or "")[:50],
+                )
+            )
+            status.is_valid = False
+            status.verified += 1
+            if stored_hash:
+                hash_index[stored_hash] = fact_id
+            return
 
         # Compute expected hash
         expected_hash = hashlib.sha256(content.encode("utf-8")).hexdigest()
@@ -303,7 +335,19 @@ class IntegrityAuditor:
             return
 
         fact_hash = fact["hash"] or ""
-        content = fact["content"] or ""
+        content, decrypt_error = self._resolve_plaintext(fact["content"], fact["tenant_id"])
+
+        if decrypt_error:
+            failures.append(
+                TamperedFact(
+                    fact_id=fact["id"],
+                    issue="signature_content_unreadable",
+                    expected="decryptable_content",
+                    actual=decrypt_error,
+                    content_preview=str(fact["content"] or "")[:50],
+                )
+            )
+            return
 
         try:
             signer.verify(content, fact_hash, sig)
