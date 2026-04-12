@@ -1,0 +1,33 @@
+# CORTEX-SWARM-PRIME: IMMUNEFI x100
+version: 1.1.0
+target: "immunefi-2026-max-bounty"
+type: "fund-loss-exploit"
+platform: "immunefi"
+
+# SwarmCommander Constraints
+commander:
+  max_exergy_usd: 150.00 # High compute allowance for x100
+  strict_validation: true
+  model: "claude-3-opus" # High reasoning
+
+# LegionSupervisor Sub-Routing
+supervisor:
+  id: "L1-Immunefi-Apex"
+  agents_total: 10000
+
+# Centurion Roster (L2 O(1) Agents)
+squads:
+  - id: "sq-alpha"
+    role: "scroll_zk_crypto_verify"
+    agents: 5000
+    model: "qwen-max-omega" # Math heavy
+  - id: "sq-beta"
+    role: "ethena_defi_invariants"
+    agents: 5000
+    model: "deepseek-local" # Volume fuzzing
+
+rules:
+  - "target-only-fund-loss"
+  - "ignore-gas-optimization"
+  - "exergy_ratio > 1000.0"
+  - "auto_submit_severity: CRITICAL"

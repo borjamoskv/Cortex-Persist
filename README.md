@@ -1,4 +1,6 @@
-# CORTEX Persist
+<p align="center">
+  <img src="assets/marketing/social-preview.png" alt="CORTEX Persist — Tamper-evident memory for AI agents" width="720">
+</p>
 
 > Verifiable memory and decision records for AI agents.
 

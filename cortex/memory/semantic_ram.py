@@ -123,7 +123,8 @@ class SemanticMutator:
         self._anchor = anchor
 
         # VSA-Silicon Mmap Bypass Layer
-        self.vsa_bypass = VSASiliconBypass()
+        bypass_dim = getattr(store._encoder, "dimension", 1536)
+        self.vsa_bypass = VSASiliconBypass(dim=bypass_dim)
 
     def start(self) -> None:
         """Start the background daemon. Should be called during Engine boot."""
@@ -164,7 +165,7 @@ class SemanticMutator:
                 await self._apply_topological_shift(batch)
             except asyncio.CancelledError:
                 raise
-            except (OSError, RuntimeError, ValueError) as e:
+            except Exception as e:  # noqa: BLE001
                 logger.error("SemanticMutator: Pulse mutation failed: %s", e)
                 await asyncio.sleep(1.0)
 
@@ -277,8 +278,26 @@ class SemanticMutator:
             new_exc = min(EXCITATION_MAX, current_exc + delta_exc)
 
             # 4. Cálculo C/Numpy del nuevo Effective Vector (Gradient Descent 1-step)
-            current_vec = np.frombuffer(emb_bytes, dtype=np.float32)
             mean_query_vec = np.mean(np.array(query_vecs, dtype=np.float32), axis=0)
+            query_dim = int(mean_query_vec.shape[0])
+            emb_size = len(emb_bytes)
+
+            if emb_size == query_dim:
+                current_vec = np.frombuffer(emb_bytes, dtype=np.int8).astype(np.float32)
+            elif emb_size == query_dim * 4:
+                current_vec = np.frombuffer(emb_bytes, dtype=np.float32)
+            else:
+                logger.warning(
+                    "SemanticMutator: skipping %s due to embedding width mismatch (%d bytes for %d dims)",
+                    fid,
+                    emb_size,
+                    query_dim,
+                )
+                continue
+
+            current_norm = np.linalg.norm(current_vec)
+            if current_norm > 0:
+                current_vec = current_vec / current_norm
 
             shifted_vec = current_vec + LEARNING_RATE * (mean_query_vec - current_vec)
             norm = np.linalg.norm(shifted_vec)
@@ -286,7 +305,8 @@ class SemanticMutator:
                 shifted_vec = shifted_vec / norm
 
             meta_updates.append((new_exc, now, fid))
-            vec_updates.append((shifted_vec.astype(np.float32).tobytes(), rowid))
+            quantized_vec = np.clip(np.rint(shifted_vec * 127.0), -128, 127).astype(np.int8)
+            vec_updates.append((quantized_vec, rowid))
 
             # HW O(1) Bypass - Direct execution via Kernel mmap (Skip SQLite Read latency later)
             vsa_bypass.write_tensor(rowid % 10000, shifted_vec)

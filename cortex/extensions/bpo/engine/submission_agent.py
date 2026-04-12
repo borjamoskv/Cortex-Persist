@@ -7,14 +7,19 @@ import asyncio
 import logging
 import os
 import re
+import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 from .negotiator_agent import BPONegotiatorAgent
-import sys
-from pathlib import Path
 
 # Add scripts to path for native DB access
-SCRIPTS_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent / "10_PROJECTS" / "Cortex-Persist" / "scripts"
+SCRIPTS_DIR = (
+    Path(__file__).resolve().parent.parent.parent.parent.parent
+    / "10_PROJECTS"
+    / "Cortex-Persist"
+    / "scripts"
+)
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.append(str(SCRIPTS_DIR))
 
@@ -106,7 +111,7 @@ class SubmissionAgent(BPONegotiatorAgent):
                 payload={"platform": "Code4rena", "id": metadata.get("vulnerability_id")},
                 source=self.id,
             )
-            
+
             # 4. Sincronizar con Verdad de Silicio (Status: submitted)
             if db:
                 try:
@@ -114,18 +119,24 @@ class SubmissionAgent(BPONegotiatorAgent):
                     bounties = db.get_bounties(limit=100)
                     target_id = metadata.get("vulnerability_id")
                     for b in bounties:
-                        if str(b.get("id")) == target_id or b.get("url") == metadata.get("target_url"):
+                        if str(b.get("id")) == target_id or b.get("url") == metadata.get(
+                            "target_url"
+                        ):
                             b["status"] = "submitted"
-                            b["updated_at"] = datetime.utcnow().isoformat() + "Z"
+                            b["updated_at"] = (
+                                datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+                            )
                             # Necesitamos un metodo de actualizacion en db.py o llamar al binario directamente
                             # Por ahora usamos record_memory_event para marcar la transicion
                             db.record_memory_event(
-                                "bounty_update", 
+                                "bounty_update",
                                 f"Bounty {target_id} status -> submitted",
-                                b["url"], # subject_hash handled by record_memory_event
-                                {"status": "submitted", "platform": "Code4rena"}
+                                b["url"],  # subject_hash handled by record_memory_event
+                                {"status": "submitted", "platform": "Code4rena"},
                             )
-                            logger.info("📡 [SILICON-SYNC] Estado de Bounty actualizado a 'submitted'.")
+                            logger.info(
+                                "📡 [SILICON-SYNC] Estado de Bounty actualizado a 'submitted'."
+                            )
                             break
                 except Exception as e:
                     logger.error("❌ Fallo en sincronización nativa: %s", e)

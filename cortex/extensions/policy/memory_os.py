@@ -1,5 +1,9 @@
+import asyncio
+import hashlib
 from enum import Enum
 from typing import Any
+
+VSA_DIMENSION = 10000
 
 try:
     import structlog
@@ -27,8 +31,28 @@ class MemoryOS:
 
     def __init__(self):
         self._working_memory: dict[str, Any] = {}
-        self._episodic_traces: list[Any] = []
+        self._episodic_traces: list[dict[str, Any]] = []
+        # Fixed-size physical tensor array
+        self._episodic_vsa_tensor: list[float] = [0.0] * VSA_DIMENSION
         # Semantic memory connects to ledger
+        self._decay_rate = 0.99
+        self._glial_daemon_task = None
+
+    def start_glial_daemon(self):
+        """Ignites the thermodynamic Ebbinghaus decay loop (Ultra-Slow Path)."""
+        if not self._glial_daemon_task:
+            self._glial_daemon_task = asyncio.create_task(self._glial_decay_loop())
+
+    async def _glial_decay_loop(self):
+        logger.info("Glial Daemon started. Ebbinghaus decay at 1% per cycle.")
+        while True:
+            await asyncio.sleep(60)  # Thermodynamic heartbeat
+            for i in range(VSA_DIMENSION):
+                val = self._episodic_vsa_tensor[i]
+                if val > 0.001:
+                    self._episodic_vsa_tensor[i] = val * self._decay_rate
+                elif val > 0.0:
+                    self._episodic_vsa_tensor[i] = 0.0
 
     async def write(self, tier: MemoryTier, key: str, value: Any, cost_budget: float) -> bool:
         """
@@ -40,6 +64,10 @@ class MemoryOS:
             return True
         elif tier == MemoryTier.EPISODIC:
             self._episodic_traces.append({"key": key, "value": value})
+            # Map & Bind context into fixed-size VSA tensor (O(1) memory footprint)
+            ctx_string = f"{key}:{value}"
+            idx = int(hashlib.sha256(ctx_string.encode("utf-8")).hexdigest(), 16) % VSA_DIMENSION
+            self._episodic_vsa_tensor[idx] += 1.0
             return True
         elif tier == MemoryTier.SEMANTIC:
             # Requires Maxwell's Demon (Mem0 pipeline)
@@ -67,5 +95,6 @@ class MemoryOS:
             self._working_memory.clear()
         elif tier == MemoryTier.EPISODIC:
             self._episodic_traces.clear()
+            self._episodic_vsa_tensor = [0.0] * VSA_DIMENSION
         elif tier == MemoryTier.SEMANTIC:
             raise PermissionError("Cannot flush immutable semantic ledger.")

@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import logging
+import sqlite3
 import subprocess
 import time
 import uuid
@@ -211,6 +212,8 @@ class CortexMemoryManager:
         # Memory OS subsystems (RFC-CORTEX-MEMORY-OS / Axiom Ω₁₃)
         self._mem0_pipeline = Mem0Pipeline()
         self._memory_os = MemoryOS() if MemoryOS else None
+        if self._memory_os and hasattr(self._memory_os, "start_glial_daemon"):
+            self._memory_os.start_glial_daemon()
 
         # Ontological Memory (Graph RAG) [v6.3 - Cycle 1]
         self.graph_store = GraphStore(db_path="cortex_graph_rag.db") if GraphStore else None
@@ -439,8 +442,15 @@ class CortexMemoryManager:
             return {"status": "new", "id": None}
 
         def _sync_check() -> dict[str, str | None]:
+            db_path = getattr(self._l2, "_db_path", None)
+            conn: sqlite3.Connection | None = None
             try:
-                conn = self._l2._get_conn()
+                if db_path is not None:
+                    conn = sqlite3.connect(db_path)
+                    conn.row_factory = sqlite3.Row
+                else:
+                    conn = self._l2._get_conn()
+                assert conn is not None
                 cursor = conn.cursor()
                 # Axiom Ω8: Resolve correct domain table
                 meta_tb, *_ = self._l2._get_domain_tables(conn, tenant_id, project_id)
@@ -467,6 +477,9 @@ class CortexMemoryManager:
                         return {"status": "conflict", "id": str(row["id"])}
             except Exception as e:
                 logger.warning("CortexMemoryManager: Integrity check failed: %s", e)
+            finally:
+                if db_path is not None and conn is not None:
+                    conn.close()
             return {"status": "new", "id": None}
 
         return await asyncio.to_thread(_sync_check)
@@ -870,6 +883,11 @@ class CortexMemoryManager:
 
     def _cancel_background_tasks(self) -> None:
         """Cancel pending tasks and workers aggressively to prevent event loop leaks."""
+        logger.warning("Canceling all background workers and Glial Daemon.")
+        glial_daemon_task = getattr(self._memory_os, "_glial_daemon_task", None)
+        if glial_daemon_task is not None:
+            glial_daemon_task.cancel()
+
         for worker in self._bg_workers:
             if not worker.done():
                 worker.cancel()

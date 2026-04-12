@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cortex.local/schemas/vsa-sdm-memory-omega.json",
+  "title": "VSA-SDM Memory Binder I/O Contract v3.0",
+  "description": "Full-stack VSA contract: HRR/MAP-B algebras, Kanerva SDM, text encoding, temporal decay, persistence.",
+  "type": "object",
+  "properties": {
+    "operation": {
+      "type": "string",
+      "enum": [
+        "vsa-bind", "vsa-retrieve", "vsa-capacity",
+        "vsa-resonate", "vsa-encode", "vsa-decay",
+        "vsa-persist", "vsa-sdm-write", "vsa-sdm-read"
+      ]
+    },
+    "algebra": {
+      "type": "string",
+      "enum": ["HRR", "MAP-B"],
+      "default": "HRR"
+    },
+    "dimensions": {
+      "type": "integer",
+      "minimum": 1024,
+      "maximum": 65536,
+      "default": 10000
+    },
+    "hierarchical_chunk_size": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1000,
+      "default": 100
+    },
+    "payload": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "timestamp": { "type": "string", "format": "date-time" },
+          "concept_vector": {
+            "type": "array",
+            "items": { "type": "number" }
+          },
+          "text": {
+            "type": "string",
+            "description": "Raw text for N-gram encoding."
+          },
+          "record": {
+            "type": "object",
+            "additionalProperties": { "type": "string" },
+            "description": "Key-value pairs for record-based encoding."
+          },
+          "factors": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        "required": ["timestamp"]
+      }
+    },
+    "sdm_config": {
+      "type": "object",
+      "description": "True Kanerva SDM configuration.",
+      "properties": {
+        "num_hard_locations": {
+          "type": "integer",
+          "minimum": 100,
+          "maximum": 100000,
+          "default": 1000
+        },
+        "activation_radius": {
+          "type": "integer",
+          "description": "Hamming distance threshold for activation. Auto-calibrated if omitted."
+        }
+      }
+    },
+    "decay_config": {
+      "type": "object",
+      "description": "Ebbinghaus exponential decay parameters.",
+      "properties": {
+        "lambda": {
+          "type": "number",
+          "minimum": 0.0,
+          "default": 0.1,
+          "description": "Decay rate. Higher = faster forgetting."
+        },
+        "epsilon": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "default": 0.01,
+          "description": "Purge threshold. Traces below this weight are forgotten."
+        }
+      }
+    },
+    "persistence": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "File path for .vsa binary serialization."
+        },
+        "verify_integrity": {
+          "type": "boolean",
+          "default": true,
+          "description": "Verify SHA-256 hash on load."
+        }
+      }
+    },
+    "codebook": {
+      "type": "object",
+      "properties": {
+        "entries": { "type": "integer" },
+        "source": { "type": "string" }
+      }
+    },
+    "resonator_config": {
+      "type": "object",
+      "properties": {
+        "max_iterations": {
+          "type": "integer", "minimum": 1, "maximum": 500, "default": 50
+        },
+        "convergence_threshold": {
+          "type": "number", "minimum": 0.0, "maximum": 1.0, "default": 0.95
+        },
+        "num_factors": {
+          "type": "integer", "minimum": 2, "maximum": 10
+        }
+      }
+    }
+  },
+  "required": ["operation", "dimensions"],
+  "allOf": [
+    {
+      "if": { "properties": { "operation": { "const": "vsa-resonate" } } },
+      "then": { "required": ["operation", "dimensions", "resonator_config", "codebook"] }
+    },
+    {
+      "if": { "properties": { "operation": { "const": "vsa-decay" } } },
+      "then": { "required": ["operation", "dimensions", "decay_config"] }
+    },
+    {
+      "if": { "properties": { "operation": { "enum": ["vsa-sdm-write", "vsa-sdm-read"] } } },
+      "then": { "required": ["operation", "dimensions", "sdm_config"] }
+    },
+    {
+      "if": { "properties": { "operation": { "const": "vsa-persist" } } },
+      "then": { "required": ["operation", "dimensions", "persistence"] }
+    }
+  ]
+}

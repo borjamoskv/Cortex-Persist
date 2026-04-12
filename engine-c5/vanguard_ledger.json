@@ -1,0 +1,17 @@
+{
+  "layerzero": {
+    "last_seen": "2026-04-02T21:27:46.575829",
+    "status": "RESISTANT",
+    "details": "Fatal Python error: init_sys_streams: can't initialize sys standard streams\nPython runtime state: core initialized\nOSError: [Errno 9] Bad file descriptor\n\nCurrent thread 0x00000001f492b080 (most recent call first):\n  <no Python frame>"
+  },
+  "stellar_endpoint_v2": {
+    "last_seen": "2026-04-02T16:53:00.000000",
+    "status": "SINGULARITY",
+    "details": "1,000,000 iteration Chaos Burst COMPLETE."
+  },
+  "stargate": {
+    "last_seen": "2026-04-02T21:27:46.636372",
+    "status": "RESISTANT",
+    "details": "Fatal Python error: init_sys_streams: can't initialize sys standard streams\nPython runtime state: core initialized\nOSError: [Errno 9] Bad file descriptor\n\nCurrent thread 0x00000001f492b080 (most recent call first):\n  <no Python frame>"
+  }
+}

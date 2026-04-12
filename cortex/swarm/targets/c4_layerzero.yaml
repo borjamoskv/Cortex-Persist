@@ -1,0 +1,36 @@
+# CORTEX-SWARM-PRIME: Extractor Target
+version: 1.0.0
+target: "c4-2026-04-layerzero-stellar"
+type: "bounty-audit"
+platform: "code4rena"
+
+# SwarmCommander Constraints
+commander:
+  max_exergy_usd: 15.00
+  strict_validation: true
+  model: "gemini-3.1-pro"
+
+# LegionSupervisor Sub-Routing
+supervisor:
+  id: "L1-Code4rena-Sec"
+  agents_total: 1000
+
+# Centurion Roster (L2 O(1) Agents)
+squads:
+  - id: "sq-fuzz"
+    role: "rust_rpc_fuzz"
+    agents: 400
+    model: "deepseek-local" # Zero cost loop
+  - id: "sq-ast"
+    role: "soroban_ast_analysis"
+    agents: 500
+    model: "deepseek-local"
+  - id: "sq-synth"
+    role: "mcts_verify"
+    agents: 100
+    model: "claude-3-opus" # Refined reasoning
+
+rules:
+  - "no-false-positives"
+  - "exergy_ratio > 2.0"
+  - "auto_submit_severity: HIGH, MEDIUM"

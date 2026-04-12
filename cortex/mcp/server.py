@@ -28,8 +28,10 @@ from cortex.mcp.fl_studio_tools import register_fl_studio_tools
 from cortex.mcp.genesis_tools import register_genesis_tools
 from cortex.mcp.guard import MCPGuard
 from cortex.mcp.health_tools import register_health_tools
+from cortex.mcp.knowledge_watcher import start_knowledge_daemon
 from cortex.mcp.mega_tools import register_mega_tools
 from cortex.mcp.music_tools import register_music_tools
+from cortex.mcp.singularity_tools import register_singularity_tools
 from cortex.mcp.trust_tools import register_trust_tools
 from cortex.mcp.utils import (
     AsyncConnectionPool,
@@ -38,6 +40,7 @@ from cortex.mcp.utils import (
     SimpleAsyncCache,
 )
 from cortex.services.public_memory import PublicMemoryService
+from cortex.swarm import start_swarm_daemon
 
 __all__ = ["create_mcp_server", "run_server"]
 
@@ -346,6 +349,9 @@ def create_mcp_server(config: MCPServerConfig | None = None) -> "FastMCP":  # ty
     # Music Engine — Master Orchestrator
     register_music_tools(mcp)
 
+    # V3 Singularity Tools (Skills, Memory, Swarm Queue)
+    register_singularity_tools(mcp)
+
     # FL Studio bridge — optional local DAW control surface
     register_fl_studio_tools(mcp)
 
@@ -368,6 +374,9 @@ def run_server(config: Optional[MCPServerConfig] = None) -> None:
 
     assert mcp is not None
     server = mcp
+    # V3/V4 Singularity daemons
+    start_knowledge_daemon()
+    start_swarm_daemon()
     if cfg.transport == "sse":
         logger.info("Starting CORTEX MCP server v2 (SSE) on %s:%d", cfg.host, cfg.port)
         server.run(transport="sse")
