@@ -264,7 +264,6 @@ class SovereignScheduler:
         """Evaluate all schedules and fire due tasks."""
         now = datetime.fromtimestamp(time.time(), tz=timezone.utc)
         now_iso = now.isoformat()
-        _now_ts = time.monotonic()
 
         with self._conn() as conn:
             due = conn.execute(

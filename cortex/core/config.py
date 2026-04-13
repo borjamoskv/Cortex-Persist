@@ -16,7 +16,6 @@ from typing import Any
 
 # ─── Base Paths (canonical, from cortex.core.paths) ─────────────────
 from cortex.core.paths import (
-    AGENT_DIR,  # noqa: F401 — re-exported for backwards compat
     CORTEX_DIR,
 )
 from cortex.core.paths import (
