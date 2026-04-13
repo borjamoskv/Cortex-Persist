@@ -115,12 +115,12 @@ async def process_queue():
                                     "yield_amount": yield_amount,
                                 },
                             )
-                            logger.info(f"Autopulse: Ledger signal emitted for {block_hash[:8]}")
+                                            logger.info("Autopulse: Ledger signal emitted for %s", block_hash[:8])
                     except Exception as e:
-                        logger.error(f"Autopulse Signal Error: {e}")
+                                        logger.error("Autopulse Signal Error: %s", e)
 
             except Exception as e:
-                logger.error(f"Autopulse Queue Error: {e}")
+                            logger.error("Autopulse Queue Error: %s", e)
 
         await asyncio.sleep(2.0)
 
