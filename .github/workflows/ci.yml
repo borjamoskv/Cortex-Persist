@@ -14,6 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.13"
@@ -21,15 +23,72 @@ jobs:
         run: |
           pip install -e ".[dev,api]"
           pip install ruff
+      - name: Detect changed Python files for lint
+        id: lint_targets
+        shell: bash
+        run: |
+          set -euo pipefail
+          base_sha=""
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base_sha="${{ github.event.pull_request.base.sha }}"
+          elif [ -n "${{ github.event.before }}" ] && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+            base_sha="${{ github.event.before }}"
+          fi
+
+          if [ -n "${base_sha}" ]; then
+            mapfile -t files < <(
+              git diff --name-only --diff-filter=ACMRT "${base_sha}" "${{ github.sha }}" |
+              grep -E '^(cortex|tests)/.*\.py$' |
+              while IFS= read -r path; do
+                [ -f "${path}" ] && printf '%s\n' "${path}"
+              done || true
+            )
+          else
+            mapfile -t files < <(git ls-files | grep -E '^(cortex|tests)/.*\.py$' || true)
+          fi
+
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo "count=0" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          {
+            echo "count=${#files[@]}"
+            echo "files<<EOF"
+            printf "%s\n" "${files[@]}"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
       - name: Ruff lint
-        run: ruff check cortex/ tests/
+        if: steps.lint_targets.outputs.count != '0'
+        shell: bash
+        run: |
+          set -euo pipefail
+          files=()
+          while IFS= read -r path; do
+            [ -n "${path}" ] && files+=("${path}")
+          done <<'EOF'
+          ${{ steps.lint_targets.outputs.files }}
+          EOF
+          ruff check "${files[@]}"
       - name: Ruff format check
-        run: ruff format --check cortex/ tests/
+        if: steps.lint_targets.outputs.count != '0'
+        shell: bash
+        run: |
+          set -euo pipefail
+          files=()
+          while IFS= read -r path; do
+            [ -n "${path}" ] && files+=("${path}")
+          done <<'EOF'
+          ${{ steps.lint_targets.outputs.files }}
+          EOF
+          ruff format --check "${files[@]}"
 
   security:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.13"
@@ -37,10 +96,59 @@ jobs:
         run: pip install -e ".[dev,api]"
       - name: Install security tools
         run: pip install pip-audit bandit ruff
+      - name: Detect changed Python files for security scan
+        id: security_targets
+        shell: bash
+        run: |
+          set -euo pipefail
+          base_sha=""
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base_sha="${{ github.event.pull_request.base.sha }}"
+          elif [ -n "${{ github.event.before }}" ] && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+            base_sha="${{ github.event.before }}"
+          fi
+
+          if [ -n "${base_sha}" ]; then
+            mapfile -t files < <(
+              git diff --name-only --diff-filter=ACMRT "${base_sha}" "${{ github.sha }}" |
+              grep -E '^cortex/.*\.py$' |
+              while IFS= read -r path; do
+                [ -f "${path}" ] && printf '%s\n' "${path}"
+              done || true
+            )
+          else
+            mapfile -t files < <(git ls-files | grep -E '^cortex/.*\.py$' || true)
+          fi
+
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo "count=0" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          {
+            echo "count=${#files[@]}"
+            echo "files<<EOF"
+            printf "%s\n" "${files[@]}"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
       - name: Audit dependencies for known CVEs
         run: pip-audit . --desc on --ignore-vuln GHSA-qmgc-5h2g-mvrw --ignore-vuln GHSA-j842-xgm4-wf88 --ignore-vuln GHSA-w6vg-jg77-2qg6 --ignore-vuln GHSA-f83h-ghpp-7wcc --ignore-vuln GHSA-jr27-m4p2-rc6r
       - name: Ruff SAST scan (S-select)
-        run: ruff check cortex/ --select S --output-format json -o bandit-report.json
+        if: steps.security_targets.outputs.count != '0'
+        shell: bash
+        run: |
+          set -euo pipefail
+          files=()
+          while IFS= read -r path; do
+            [ -n "${path}" ] && files+=("${path}")
+          done <<'EOF'
+          ${{ steps.security_targets.outputs.files }}
+          EOF
+          ruff check --select S --output-format json -o bandit-report.json "${files[@]}"
+      - name: Emit empty Bandit report when no Python security targets changed
+        if: steps.security_targets.outputs.count == '0'
+        shell: bash
+        run: printf '[]\n' > bandit-report.json
       - name: Upload Bandit report
         if: always()
         uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4
