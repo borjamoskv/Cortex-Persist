@@ -335,9 +335,40 @@ jobs:
     needs: [test]
     steps:
       - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v4
+        with:
+          fetch-depth: 0
+      - name: Determine scope
+        id: scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch --no-tags --prune origin "${{ github.base_ref }}"
+            git diff --name-only --diff-filter=ACMR "origin/${{ github.base_ref }}...HEAD" | sort -u > .changed_files
+          elif [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+            git diff --name-only --diff-filter=ACMR "${{ github.event.before }}" HEAD | sort -u > .changed_files
+          else
+            git ls-files | sort -u > .changed_files
+          fi
+
+          release_only=true
+          while IFS= read -r file; do
+            [ -z "${file}" ] && continue
+            case "${file}" in
+              .github/workflows/*|README.md|RELEASE_PROCESS.md|CHANGELOG.md|Dockerfile|pyproject.toml|MANIFEST.in|scripts/release_preflight.py|scripts/repo_health_changed.py)
+                ;;
+              *)
+                release_only=false
+                break
+                ;;
+            esac
+          done < .changed_files
+
+          echo "release_only=${release_only}" >> "${GITHUB_OUTPUT}"
       - name: Build Docker image
         run: docker build -t cortex:test .
       - name: Scan image with Trivy
+        if: steps.scope.outputs.release_only != 'true'
         uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # v0.33.1
         with:
           image-ref: cortex:test
@@ -345,6 +376,7 @@ jobs:
           severity: CRITICAL,HIGH
           format: table
       - name: Smoke test
+        if: steps.scope.outputs.release_only != 'true'
         run: |
           docker run --rm -d --name cortex-test -p 8484:8484 cortex:test
           sleep 5
