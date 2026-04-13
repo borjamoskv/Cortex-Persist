@@ -5,6 +5,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   ruff-fix:
@@ -27,14 +28,23 @@ jobs:
           ruff check cortex/ tests/ scripts/ --fix --unsafe-fixes || true
           ruff format cortex/ tests/ scripts/ || true
 
-      - name: Commit fixes
+      - name: Push to branch and open PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          BRANCH="fix/ruff-autofix-$(date +%Y%m%d%H%M%S)"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "${BRANCH}"
           git add -A
           if git diff --staged --quiet; then
             echo "No changes to commit"
-          else
-            git commit -m "fix(lint): apply ruff auto-fixes"
-            git push origin main
+            exit 0
           fi
+          git commit -m "fix(lint): apply ruff auto-fixes"
+          git push origin "${BRANCH}"
+          gh pr create \
+            --title "fix(lint): apply ruff auto-fixes" \
+            --body "Automated PR: applies all ruff lint fixes (imports, formatting, etc)" \
+            --base main \
+            --head "${BRANCH}"
