@@ -10,6 +10,7 @@ from rich.panel import Panel
 from rich.syntax import Syntax
 
 from cortex.cli.common import _run_async, cli, console
+from cortex.database.core import connect as connect_db
 from cortex.extensions.swarm.autodidact_actuator import autodidact_ingest
 
 
@@ -78,9 +79,7 @@ def audit():
     engine = get_engine()
 
     async def _audit():
-        import sqlite3
-
-        conn = sqlite3.connect(engine._db_path)
+        conn = connect_db(str(engine._db_path))
         return await scan_all_crystals(conn, project="autodidact_knowledge")
 
     vitals = _run_async(_audit())

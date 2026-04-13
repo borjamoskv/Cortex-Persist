@@ -25,6 +25,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from cortex.database.core import connect as connect_db
+
 logger = logging.getLogger("cortex.daemon.hot_state")
 
 __all__ = ["HotStateDB"]
@@ -83,9 +85,11 @@ class HotStateDB:
 
     @contextmanager
     def _conn(self):
-        conn = sqlite3.connect(str(self._db_path), check_same_thread=False)
-        conn.row_factory = sqlite3.Row
-        conn.execute("PRAGMA journal_mode=WAL")
+        conn = connect_db(
+            str(self._db_path),
+            check_same_thread=False,
+            row_factory=sqlite3.Row,
+        )
         try:
             yield conn
             conn.commit()

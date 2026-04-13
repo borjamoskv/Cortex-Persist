@@ -5,31 +5,38 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import logging
-import sqlite3
-import subprocess
 import time
 import uuid
 from collections.abc import Iterable
 from datetime import datetime, timezone
-from pathlib import Path
 from typing import Any
 
 # Memory OS (RFC-CORTEX-MEMORY-OS)
 from cortex.compaction.mem0_pipeline import Mem0Pipeline
-from cortex.core.paths import resolve_native_binary
 from cortex.memory.encoder import AsyncEncoder
 from cortex.memory.engrams import CortexSemanticEngram
 from cortex.memory.ledger import EventLedgerL3
-from cortex.memory.memory_compression import compress_and_store
+from cortex.memory.manager_support import (
+    check_deduplication,
+    determine_layer,
+    emit_to_bus,
+    extract_subject,
+    init_dynamic_space,
+    init_hologram,
+    init_metamemory,
+    init_resonance_gate,
+    start_bg_workers,
+)
+from cortex.memory.memory_compression import compress_and_store as _compress_and_store
 from cortex.memory.models import MemoryEvent
+from cortex.memory.native_arbiter import NativeArbiter
 from cortex.memory.schemas import SchemaEngine
 from cortex.memory.thalamus import ThalamusGate
 from cortex.memory.working import WorkingMemoryL1
 
 try:
-    from cortex.memory.hdc import HDCEncoder, HDCVectorStoreL2
+    from cortex.memory.hdc import HDCVectorStoreL2
 except ImportError:
-    HDCEncoder = Any  # type: ignore[assignment,misc]
     HDCVectorStoreL2 = Any  # type: ignore[assignment,misc]
 
 try:
@@ -58,13 +65,11 @@ except ImportError:
     ContextFusion = None  # type: ignore
 
 try:
-    from cortex.memory.semantic_ram import DynamicSemanticSpace
     from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
 
     VectorStoreL2 = SovereignVectorStoreL2
 except ImportError:
     VectorStoreL2 = None  # type: ignore[assignment,misc]
-    DynamicSemanticSpace = None  # type: ignore[assignment,misc]
 
 try:
     from cortex.memory.graph_store import GraphStore
@@ -74,6 +79,7 @@ except ImportError:
 __all__ = ["CortexMemoryManager"]
 
 logger = logging.getLogger("cortex.memory.manager")
+compress_and_store = _compress_and_store
 
 
 def _resolve_manager_tenant(tenant_id: str | None, operation: str) -> str:
@@ -85,45 +91,6 @@ def _resolve_manager_tenant(tenant_id: str | None, operation: str) -> str:
     if not resolved:
         raise ValueError(f"{operation} requires non-blank tenant_id")
     return resolved
-
-
-class NativeArbiter:
-    """Axiom Ω0: Direct-Silicon Bypass for Epistemic Integrity."""
-
-    def __init__(self, binary_path: str | None = None) -> None:
-        resolved = (
-            Path(binary_path).expanduser()
-            if binary_path is not None
-            else resolve_native_binary("cortex-db", "CORTEX_NATIVE_DB_BIN", "CORTEX_DB_BIN")
-        )
-        self.binary_path = str(resolved) if resolved is not None else None
-        self._available = resolved is not None
-
-    def check(self, subject_hash: str) -> str | None:
-        if not self._available:
-            return None
-        binary_path = self.binary_path
-        if binary_path is None:
-            return None
-        try:
-            res = subprocess.run(
-                [binary_path, "check", subject_hash],
-                capture_output=True,
-                text=True,
-                timeout=0.1,
-                check=False,
-            )
-            out = res.stdout.strip()
-            if out.startswith("CONFLICT:"):
-                return out.replace("CONFLICT:", "")
-            return None
-        except (FileNotFoundError, OSError, subprocess.SubprocessError, UnicodeError):
-            return None
-
-    async def check_async(self, subject_hash: str) -> str | None:
-        """Run the native conflict check without blocking the event loop."""
-        return await asyncio.to_thread(self.check, subject_hash)
-
 
 class CortexMemoryManager:
     """Orchestrator for the Tripartite Cognitive Memory Architecture.
@@ -202,12 +169,12 @@ class CortexMemoryManager:
         )
         self._bg_workers: list[asyncio.Task[Any]] = []
         self.thalamus = ThalamusGate(self)
-        self._dynamic_space = self._init_dynamic_space()
-        self._hologram = self._init_hologram()
+        self._dynamic_space = init_dynamic_space(self)
+        self._hologram = init_hologram(self)
 
         self._endocrine = DigitalEndocrine() if DigitalEndocrine else None
         self._schema_engine = SchemaEngine()
-        self.metamemory = self._init_metamemory()
+        self.metamemory = init_metamemory()
 
         # Memory OS subsystems (RFC-CORTEX-MEMORY-OS / Axiom Ω₁₃)
         self._mem0_pipeline = Mem0Pipeline()
@@ -219,13 +186,13 @@ class CortexMemoryManager:
         self.graph_store = GraphStore(db_path="cortex_graph_rag.db") if GraphStore else None
 
         # ART-v2 Resonance Engine [v6.2]
-        self._resonance_gate = self._init_resonance_gate()
+        self._resonance_gate = init_resonance_gate(self)
 
         if self._dynamic_space:
             self._dynamic_space.start()
         self._fusion = ContextFusion(judge_provider=router) if ContextFusion else None
         self._arbiter = NativeArbiter()
-        self._start_bg_workers()
+        start_bg_workers(self)
 
     async def _should_elevate(self, tenant_id: str, metadata: dict) -> bool:
         """Phase II: Elevation Policy.
@@ -259,95 +226,6 @@ class CortexMemoryManager:
                 },
             )
             self._global_writer.append(global_event)
-
-    def _init_dynamic_space(self) -> Any | None:
-        """Initialize semantic RAM if the optional module is healthy."""
-        if not self._l2 or DynamicSemanticSpace is None:
-            return None
-        try:
-            return DynamicSemanticSpace(self._l2, manager=self)
-        except Exception as exc:  # noqa: BLE001
-            logger.warning("Dynamic semantic space unavailable: %s", exc)
-            return None
-
-    def _init_hologram(self) -> Any | None:
-        """Initialize the RAM hologram without blocking manager startup."""
-        if not self._l2:
-            return None
-        try:
-            from cortex.memory.hologram import HolographicMemory
-
-            return HolographicMemory(self._l2)
-        except Exception as exc:  # noqa: BLE001
-            logger.warning("Holographic memory unavailable: %s", exc)
-            return None
-
-    def _init_metamemory(self) -> Any | None:
-        """Initialize metamemory telemetry if the module is available."""
-        try:
-            from cortex.memory.metamemory import MetamemoryMonitor
-
-            return MetamemoryMonitor()
-        except Exception as exc:  # noqa: BLE001
-            logger.warning("Metamemory monitor unavailable: %s", exc)
-            return None
-
-    def _init_resonance_gate(self) -> Any | None:
-        """Initialize the critical resonance validator lazily.
-
-        Startup may degrade if optional enrichers are unavailable, but writes
-        must still fail closed when the gate itself cannot be constructed.
-        """
-        if not self._l2:
-            return None
-
-        sensor = None
-        try:
-            from cortex.extensions.songlines.sensor import TopographicSensor
-
-            sensor = TopographicSensor()
-        except Exception as exc:  # noqa: BLE001
-            logger.warning("Topographic sensor unavailable for resonance gate: %s", exc)
-
-        try:
-            from cortex.memory.resonance import AdaptiveResonanceGate
-
-            return AdaptiveResonanceGate(
-                vector_store=self._l2,
-                songline_sensor=sensor,
-                endocrine=self._endocrine,
-            )
-        except Exception as exc:  # noqa: BLE001
-            logger.warning("Resonance gate unavailable during startup: %s", exc)
-            return None
-
-    def _start_bg_workers(self) -> None:
-        """Initialize persistent background workers for L2 compression."""
-        if self._bg_workers:
-            return
-
-        # 3 workers default, bounding the active compression coroutines to 3.
-        num_workers = min(3, max(1, self._max_bg_tasks // 10))
-        for i in range(num_workers):
-            task = asyncio.create_task(self._compression_worker_loop(i))
-            self._bg_workers.append(task)
-
-    async def _compression_worker_loop(self, worker_id: int) -> None:
-        """Persistent worker loop consuming from the background queue."""
-        while True:
-            try:
-                overflowed, session_id, tenant_id, project_id = await self._bg_queue.get()
-                try:
-                    await compress_and_store(self, overflowed, session_id, tenant_id, project_id)
-                except (ValueError, TypeError, RuntimeError, OSError) as e:
-                    logger.error("MemoryManager: Worker %d failed compression: %s", worker_id, e)
-                finally:
-                    self._bg_queue.task_done()
-            except asyncio.CancelledError:
-                raise
-            except (ValueError, TypeError, RuntimeError, OSError) as e:
-                logger.error("MemoryManager: Worker %d encountered fatal error: %s", worker_id, e)
-                await asyncio.sleep(1)
 
     # ─── Primary API ──────────────────────────────────────────────
 
@@ -425,108 +303,8 @@ class CortexMemoryManager:
     async def _check_deduplication(
         self, tenant_id: str, project_id: str, content: str, subject_hash: str
     ) -> dict[str, str | None]:
-        """Check for exact match or epistemological conflicts.
-
-        Returns:
-            dict: { "status": "new"|"redundant"|"conflict", "id": str|None }
-        """
-        if not content or not content.strip():
-            return {"status": "empty", "id": None}
-
-        # --- Axiom Ω0: Native Hardware Bypass ---
-        if native_conflict := await self._arbiter.check_async(subject_hash):
-            logger.info("⚡ [SILICON-HIT] native conflict detection for %s", subject_hash)
-            return {"status": "conflict", "id": "native:conflict", "content": native_conflict}
-
-        if not self._l2 or not hasattr(self._l2, "_get_conn"):
-            return {"status": "new", "id": None}
-
-        def _sync_check() -> dict[str, str | None]:
-            db_path = getattr(self._l2, "_db_path", None)
-            conn: sqlite3.Connection | None = None
-            try:
-                if db_path is not None:
-                    conn = sqlite3.connect(db_path)
-                    conn.row_factory = sqlite3.Row
-                else:
-                    conn = self._l2._get_conn()
-                assert conn is not None
-                cursor = conn.cursor()
-                # Axiom Ω8: Resolve correct domain table
-                meta_tb, *_ = self._l2._get_domain_tables(conn, tenant_id, project_id)
-
-                # 1. Exact Match (Redundancy)
-                cursor.execute(
-                    f"SELECT id FROM {meta_tb} WHERE tenant_id = ? AND "
-                    "project_id = ? AND content = ?",
-                    (tenant_id, project_id, content),
-                )
-                row = cursor.fetchone()
-                if row:
-                    return {"status": "redundant", "id": str(row["id"])}
-
-                # 2. Conflict Match (Same subject, different content)
-                if subject_hash:
-                    cursor.execute(
-                        f"SELECT id FROM {meta_tb} WHERE tenant_id = ? AND "
-                        "project_id = ? AND subject_hash = ? LIMIT 1",
-                        (tenant_id, project_id, subject_hash),
-                    )
-                    row = cursor.fetchone()
-                    if row:
-                        return {"status": "conflict", "id": str(row["id"])}
-            except Exception as e:
-                logger.warning("CortexMemoryManager: Integrity check failed: %s", e)
-            finally:
-                if db_path is not None and conn is not None:
-                    conn.close()
-            return {"status": "new", "id": None}
-
-        return await asyncio.to_thread(_sync_check)
-
-    def _determine_layer(self, project_id: str, layer: str) -> str:
-        """Determine cognitive layer based on project ID semantic rules."""
-        _pid_lower = project_id.lower()
-        if _pid_lower in ("moskv", "personal", "home", "moskv-1"):
-            return "assistant"
-        if _pid_lower in ("cortex", "core", "system"):
-            return "system"
-        return layer if layer else "semantic"
-
-    async def _emit_to_bus(
-        self,
-        fact_id: str,
-        tenant_id: str,
-        project_id: str,
-        content: str,
-        fact_type: str,
-        layer: str,
-        metadata: dict[str, Any] | None,
-    ) -> str:
-        """Emit fact record to the experience bus."""
-        logger.info("ExperienceBus: Emitting experience:recorded for #%s", fact_id)
-        payload = {
-            "fact_id": fact_id,
-            "tenant_id": tenant_id,
-            "project_id": project_id,
-            "content": content,
-            "fact_type": fact_type,
-            "layer": layer,
-            "metadata": metadata or {},
-        }
-        await asyncio.to_thread(
-            self._bus.emit,  # type: ignore[reportOptionalMemberAccess]
-            event_type="experience:recorded",
-            payload=payload,
-            source="memory:manager",
-            project=project_id,
-        )
-        return fact_id
-
-    def _extract_subject(self, content: str, metadata: dict | None) -> str:
-        if metadata and "subject" in metadata:
-            return str(metadata["subject"])
-        return content.strip().lower()  # Default to content hash if no subject provided
+        """Compatibility wrapper for integrity checks used by tests and patches."""
+        return await check_deduplication(self, tenant_id, project_id, content, subject_hash)
 
     async def store(
         self,
@@ -580,7 +358,7 @@ class CortexMemoryManager:
             return f"filtered:{action}"
 
         # ── Epistemological Integrity Gate (Ω9) ─────────────
-        subject = self._extract_subject(content, metadata)
+        subject = extract_subject(content, metadata)
         subject_hash = hashlib.sha256(subject.encode()).hexdigest()
 
         check = await self._check_deduplication(tenant_id, project_id, content, subject_hash)
@@ -619,7 +397,7 @@ class CortexMemoryManager:
         if "confidence_score" not in _meta:
             _meta["confidence_score"] = 0.8
 
-        adjusted_layer = self._determine_layer(project_id, layer)
+        adjusted_layer = determine_layer(project_id, layer)
 
         if matched_schema := self._schema_engine.match_schema(content):
             content = self._schema_engine.apply_encoding_schema(matched_schema, content)
@@ -655,7 +433,8 @@ class CortexMemoryManager:
             return f"deduplicated:{engram.id}"
 
         if use_bus and self._bus:
-            return await self._emit_to_bus(
+            return await emit_to_bus(
+                self,
                 fact_id, tenant_id, project_id, content, fact_type, adjusted_layer, metadata
             )
 
