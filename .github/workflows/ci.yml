@@ -173,8 +173,10 @@ jobs:
           python-version: "3.13"
       - name: Build package
         run: |
-          pip install build
+          pip install build twine
           python -m build
+          python scripts/release_preflight.py
+          python -m twine check dist/*
       - name: Upload artifact
         uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4
         with:

@@ -10,6 +10,24 @@ CORTEX Persist uses tagged releases for package publication.
 - release tags follow the `v*` pattern
 - PyPI publishing is handled by GitHub Actions
 
+## PyPI Trusted Publishing Setup
+
+This repository uses PyPI Trusted Publishing through GitHub Actions.
+
+The exact identity that PyPI must trust is:
+
+- PyPI project name: `cortex-persist`
+- GitHub owner: `borjamoskv`
+- GitHub repository: `Cortex-Persist`
+- workflow filename: `release.yml`
+- GitHub Actions environment: `pypi`
+
+For the first public release, configure a **pending publisher** on PyPI before pushing the release tag. PyPI documents that pending publishers can create a project on first use and then convert into normal publishers automatically.
+
+For an existing PyPI project, configure a normal Trusted Publisher with the same identity tuple above.
+
+If the repository name, workflow filename, or environment name changes, the PyPI publisher configuration must be updated to match or publishing will fail.
+
 ## Release Workflow
 
 The authoritative workflow is:
@@ -24,6 +42,16 @@ At a high level, the workflow:
 4. publishes to PyPI
 5. signs artifacts with Sigstore
 6. uploads signed artifacts for traceability
+7. verifies that the released version is visible on PyPI
+
+## Release Preflight
+
+The release pipeline now performs an explicit preflight before publish:
+
+- builds wheel and sdist artifacts
+- checks artifact metadata with `twine check`
+- validates artifact contents with `scripts/release_preflight.py`
+- rejects artifacts that accidentally include repository-only surfaces such as `cortex-sdk/` or `sdks/`
 
 ## Pre-Release Expectations
 
@@ -32,6 +60,7 @@ Before cutting a release:
 - ensure CI is green
 - confirm package metadata is accurate
 - confirm user-facing documentation matches shipped behavior
+- confirm the PyPI Trusted Publisher is configured exactly for `borjamoskv/Cortex-Persist`, `release.yml`, and environment `pypi`
 - confirm any security-sensitive release notes are coordinated privately when needed
 - confirm the target release line matches the support posture in [VERSION_SUPPORT.md](VERSION_SUPPORT.md)
 

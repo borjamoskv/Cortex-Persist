@@ -11,11 +11,25 @@ Local-first. SHA-256 hash-chained. Merkle checkpoints. Audit-ready.
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![CI](https://github.com/borjamoskv/Cortex-Persist/actions/workflows/ci.yml/badge.svg)](https://github.com/borjamoskv/Cortex-Persist/actions)
 [![Codecov](https://codecov.io/gh/borjamoskv/Cortex-Persist/branch/main/graph/badge.svg)](https://codecov.io/gh/borjamoskv/Cortex-Persist)
-[![PyPI](https://img.shields.io/pypi/v/cortex-persist.svg)](https://pypi.org/project/cortex-persist/)
 
 [Quickstart](#quickstart) · [System Map](src/content/docs/system-map.md) · [Native Technologies](src/content/docs/CORTEX-NATIVE-TECHNOLOGIES.md) · [Enterprise Readiness](ENTERPRISE_READINESS.md) · [Diligence Checklist](DUE_DILIGENCE_CHECKLIST.md) · [Deployment Hardening](DEPLOYMENT_HARDENING.md) · [API](src/content/docs/api.md) · [Security Model](src/content/docs/SECURITY_TRUST_MODEL.md) · [Support](SUPPORT.md) · [Roadmap](ROADMAP.md) · [Contributing](CONTRIBUTING.md)
 
 CORTEX Persist adds a verification layer around agent memory and decision state. It sits between your runtime and your storage so facts, decisions, and derived state become reviewable, tamper-evident records instead of mutable application state. If stored context changes after the fact, verification fails.
+
+## Supported Core Today
+
+The current public product contract is intentionally smaller than the full repository.
+
+| Surface | Status | What to treat as public today |
+| :--- | :--- | :--- |
+| **Local-first Python package** | ✅ **Core** | Install the Python package, use the `cortex` CLI, and use `from cortex import CortexEngine` for the in-process API. |
+| **SQLite/WAL deployment** | ✅ **Core** | Single-node, operator-managed, local-first usage. |
+| **Trust flow** | ✅ **Core** | `install -> init -> store -> verify -> export` |
+| **Current install path** | ✅ **Truthful today** | Source install is the reliable documented path until public package distribution is closed end-to-end. |
+| **REST API / MCP / broader platform surfaces** | 🟡 **Beta** | Useful for evaluation and extension, but not the first public contract. |
+| **JS SDK and alternate SDK workspaces** | 🟡 **Experimental / not yet fully aligned** | Present in the repo, but not part of the primary supported core until naming and distribution are fully closed. |
+
+If you are evaluating CORTEX as a product rather than exploring the whole repository, start with the local-first core and the quickstart below. The current closure sequence for the public contract lives in [Productization Closure Plan](src/content/docs/productization-closure-plan.md).
 
 ## Why CORTEX
 
@@ -131,18 +145,25 @@ $ cortex compliance-report
 
 ## Quickstart
 
-Start logging tamper-evident memories locally in under a minute.
+Start with the smallest supported flow and get to audit evidence fast.
 
 ```bash
-# 1. Install & Initialize
-pip install cortex-persist
+# 1. Install from source and initialize
+git clone https://github.com/borjamoskv/Cortex-Persist.git
+cd Cortex-Persist
+python3 -m venv .venv && source .venv/bin/activate
+pip install -e .
 cortex init
 
-# 2. Store a memory (SHA-256 hashed and chained to prior facts)
+# 2. Store a decision (copy the returned fact ID)
 cortex store risk-bot "Transaction flagged: IP mismatch" --type decision --source agent:risk-bot
 
-# 3. Verify the trust ledger
+# 3. Verify the fact and the ledger
+cortex verify <FACT_ID>
 cortex trust-ledger verify
+
+# 4. Export evidence
+cortex compliance-report
 ```
 
 ## Integration
@@ -196,9 +217,10 @@ CORTEX treats generative AI output as untrusted input until it passes determinis
 
 Canonical long-form documentation lives under [`src/content/docs`](src/content/docs). The top-level `docs/` directory is a GitHub-facing compatibility shim, not the source of truth.
 
-- [**Quickstart**](#quickstart) — Install, store, verify.
+- [**Quickstart**](#quickstart) — Install, store, verify, and export.
 - [**Enterprise Readiness**](ENTERPRISE_READINESS.md) — Buyer-facing maturity, risk, and diligence summary.
 - [**Due Diligence Checklist**](DUE_DILIGENCE_CHECKLIST.md) — Reproducible technical and security evaluation steps.
+- [**Productization Closure Plan**](src/content/docs/productization-closure-plan.md) — Execution sequence for supported core, naming, onboarding, and distribution alignment.
 - [**Deployment Hardening**](DEPLOYMENT_HARDENING.md) — Production-oriented guardrails for self-hosted deployments.
 - [**Support Policy**](SUPPORT.md) — Support channels, response targets, and release support window.
 - [**Repository Governance**](REPO_GOVERNANCE.md) — Ownership, review expectations, and change safety rules.
@@ -210,6 +232,7 @@ Canonical long-form documentation lives under [`src/content/docs`](src/content/d
 - [**API Reference**](src/content/docs/api.md) — SDK primitives and REST endpoints.
 - [**Security Model**](src/content/docs/SECURITY_TRUST_MODEL.md) — Cryptographic invariants and trust guarantees.
 - [**Architecture**](src/content/docs/architecture.md) — System topology and critical trust surfaces.
+- [**Installation**](src/content/docs/installation.md) — Current reliable install path and packaging status.
 - [**Roadmap**](ROADMAP.md) — Deployment phases and scaling logic.
 - [**Contributing**](CONTRIBUTING.md) — Development workflow and contribution rules.
 

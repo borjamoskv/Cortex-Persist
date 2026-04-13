@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### In Progress
 - **Stripe Embedded Checkout**: Migrado el flujo de monetización de redirecciones estándar a *Embedded Checkout* nativo para reducción drástica de fricción (O(1) cognitive load). Backend devuelve `client_secret` en `/v1/stripe/checkout` (con `ui_mode="embedded"`).
+
+### Changed
+- **Release hardening**: El paquete público ya no arrastra workspaces como `cortex-sdk/` en wheel/sdist; CI y release ejecutan preflight de artefactos y verificación de visibilidad en PyPI.
 ---
 
 ## [0.3.0b2] — 2026-03-02
