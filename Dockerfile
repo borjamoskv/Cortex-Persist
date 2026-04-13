@@ -22,8 +22,10 @@ RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -e ".[api]" && \
     pip install --no-cache-dir sentence-transformers onnxruntime
 
-# Pre-download the embedding model
-RUN python -c "from cortex.embeddings import LocalEmbedder; LocalEmbedder()"
+# Pre-create the Hugging Face cache path so the runtime-stage COPY remains valid
+# even if the embedder initialization skips downloading model artifacts.
+RUN mkdir -p /root/.cache/huggingface && \
+    python -c "from cortex.embeddings import LocalEmbedder; LocalEmbedder()"
 
 # Stage 2: Runtime
 FROM python:3.12-slim-bookworm

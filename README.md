@@ -110,11 +110,14 @@ $ cortex compliance-report generate --format pdf
 
 ## Quickstart
 
-Start logging tamper-evident memories locally in under a minute.
+Start with the smallest supported flow and get to audit evidence fast.
 
 ```bash
-# 1. Install & Initialize
-pip install cortex-persist
+# 1. Install from source and initialize
+git clone https://github.com/borjamoskv/Cortex-Persist.git
+cd Cortex-Persist
+python3 -m venv .venv && source .venv/bin/activate
+pip install -e .
 cortex init
 
 # 2. Store a memory (SHA-256 hashed and chained to prior facts)
