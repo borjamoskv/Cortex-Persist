@@ -2,7 +2,7 @@
   <img src="assets/marketing/social-preview.png" alt="CORTEX Persist — Tamper-evident memory for AI agents" width="720">
 </p>
 
-<h1 align="center">CORTEX Persist</h1>
+<h1 align="center">CORTEX Persist</h1> 
 
 <p align="center">
   <strong>Prove what your AI agent knew. Mathematically.</strong>
