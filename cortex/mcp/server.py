@@ -362,10 +362,10 @@ def run_server(config: Optional[MCPServerConfig] = None) -> None:
     cfg = config or _default_config
 
     # V3 Singularity: Launch Live Knowledge Sync Daemon
-    _watcher = start_knowledge_daemon()
+    start_knowledge_daemon()
 
     # V4 Singularity: Launch Swarm Autopoiesis Engine
-    _swarm_daemon = start_swarm_daemon()
+    start_swarm_daemon()
 
     if cfg.transport == "sse":
         logger.info("Starting CORTEX MCP server v2 (SSE) on %s:%d", cfg.host, cfg.port)

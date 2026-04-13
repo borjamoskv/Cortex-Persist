@@ -9,7 +9,11 @@ from __future__ import annotations
 
 import logging
 import sqlite3
+<<<<<<< HEAD
 import time
+=======
+from datetime import datetime, timezone
+>>>>>>> 38466c73 (feat(cortex): ACTUALIZA - Sovereign state sync and seal enforcement)
 from typing import Any
 
 import numpy as np
@@ -159,7 +163,7 @@ class MemoryArchaeologist:
 
             parent_ids = [f["parent_decision_id"] for f in cluster_facts if f["parent_decision_id"]]
             primary_parent_id = parent_ids[0] if parent_ids else None
-            old_ids = [f["id"] for f in cluster_facts]
+            [f["id"] for f in cluster_facts]
 
             if not simulate:
                 try:
