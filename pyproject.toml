@@ -37,7 +37,7 @@ dependencies = [
     "pyobjc-core; sys_platform == 'darwin'",
     "pyobjc-framework-Cocoa; sys_platform == 'darwin'",
     "keyring>=25.7.0",
-    "cryptography>=46.0.5",
+    "cryptography>=46.0.7",
     "watchdog>=6.0.0",
     "pydantic>=2.0",
     "PyYAML>=6.0",
