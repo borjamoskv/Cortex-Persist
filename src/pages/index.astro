@@ -26,42 +26,42 @@ const heroProofs = [
 const signalCards = [
 	{
 		title: 'Verifiable decision lineage',
-		body: 'Show the exact context behind critical agent actions when a workflow is reviewed internally or challenged externally.',
+		body: 'Show what the agent knew when it acted.',
 	},
 	{
 		title: 'Audit-ready exports',
-		body: 'Generate portable evidence your team can inspect without turning incident review into screenshot theater.',
+		body: 'Produce evidence packs without turning review into screenshot theater.',
 	},
 	{
 		title: 'Drop-in architecture',
-		body: 'Add CORTEX on top of the stack you already use instead of forcing a memory platform migration.',
+		body: 'Layer CORTEX on top of the stack you already run.',
 	},
 ];
 
 const capabilityCards = [
 	{
 		label: 'Capture',
-		title: 'Facts, decisions, and state transitions',
-		body: 'CORTEX records the moments that matter in a form that is structured enough to review later.',
-		items: ['Decision events', 'Operational state changes', 'Context that should survive scrutiny'],
+		title: 'Capture the moments that matter',
+		body: 'Record facts, decisions, and state transitions in a form worth reviewing later.',
+		items: ['Decision events', 'Reviewable context'],
 	},
 	{
 		label: 'Seal',
-		title: 'Tamper-evident integrity checks',
-		body: 'The point is not storing more text. The point is protecting the decision record from silent drift and quiet edits.',
-		items: ['Hash-linked lineage', 'Integrity verification', 'Evidence-first review surface'],
+		title: 'Seal the record',
+		body: 'Protect the decision trail from silent edits and quiet drift.',
+		items: ['Hash-linked lineage', 'Integrity checks'],
 	},
 	{
 		label: 'Verify',
-		title: 'Inspect the record later',
-		body: 'When a workflow misfires, teams need to verify what happened, not just browse traces and hope the story holds.',
-		items: ['Reproducible checks', 'Clear record status', 'Faster incident reconstruction'],
+		title: 'Verify later',
+		body: 'When a workflow misfires, teams can validate the record instead of guessing from traces.',
+		items: ['Reproducible checks', 'Clear record status'],
 	},
 	{
 		label: 'Export',
-		title: 'Portable evidence for humans',
-		body: 'CORTEX turns a disputed workflow into something risk, security, or leadership can actually inspect.',
-		items: ['Audit-pack flow', 'Internal review artifacts', 'Customer-trust support material'],
+		title: 'Export proof',
+		body: 'Hand security, risk, or leadership something they can inspect quickly.',
+		items: ['Audit packs', 'Human-readable artifacts'],
 	},
 ];
 
@@ -69,22 +69,22 @@ const pilotSteps = [
 	{
 		index: '01',
 		title: 'Select one workflow',
-		body: 'Start with the workflow that would be most painful to investigate if the agent failed tomorrow.',
+		body: 'Pick the workflow that would hurt most to investigate tomorrow.',
 	},
 	{
 		index: '02',
 		title: 'Integrate on top of your stack',
-		body: 'We instrument the current memory, logging, or orchestration flow instead of forcing a full platform rewrite.',
+		body: 'Instrument the current memory, logging, or orchestration flow.',
 	},
 	{
 		index: '03',
 		title: 'Activate verification',
-		body: 'Your team gets a working verification flow for the decision record and a repeatable evidence path.',
+		body: 'Turn on a repeatable verification path for the decision record.',
 	},
 	{
 		index: '04',
 		title: 'Deliver the handoff',
-		body: 'You leave the pilot with an audit-pack example, runbook, and a clear recommendation for production rollout.',
+		body: 'Leave with an audit-pack example, runbook, and rollout recommendation.',
 	},
 ];
 
@@ -92,7 +92,7 @@ const pricingCards = [
 	{
 		name: 'Community',
 		price: 'Free',
-		body: 'Open source, local-first, and self-hostable for teams that want to start with the core trust layer.',
+		body: 'Open source and self-hostable for teams evaluating the trust layer.',
 		items: ['Single tenant', 'CLI and API', 'Immutable ledger', 'Install and run locally'],
 		cta: 'Install Open Source',
 		href: 'https://github.com/borjamoskv/Cortex-Persist#quickstart',
@@ -100,7 +100,7 @@ const pricingCards = [
 	{
 		name: 'Pilot',
 		price: 'From EUR 9,000',
-		body: 'A scoped 4-week engagement to instrument one critical workflow and deliver verifiable traceability.',
+		body: 'A scoped 4-week engagement for one critical workflow.',
 		items: ['One workflow', 'One environment', 'Verification flow', 'Audit-pack delivery'],
 		cta: 'Get Pilot Scope',
 		href: 'mailto:borja@cortexpersist.com?subject=CORTEX%20Pilot%20Scope&body=Workflow%3A%0AStack%3A%0ASensitive%20data%3A%0ASelf-hosted%20or%20BYOC%3A%0A',
@@ -109,7 +109,7 @@ const pricingCards = [
 	{
 		name: 'Enterprise',
 		price: 'From EUR 30,000/year',
-		body: 'For self-hosted or BYOC deployments that need support, onboarding, and procurement-friendly packaging.',
+		body: 'For self-hosted or BYOC deployments that need support and procurement packaging.',
 		items: ['Self-hosted or BYOC', 'Advanced controls', 'Support and onboarding', 'Custom integration scope'],
 		cta: 'Request Async Demo',
 		href: 'mailto:borja@cortexpersist.com?subject=Request%20Async%20Demo%20for%20CORTEX%20Persist',
@@ -123,7 +123,7 @@ const faqItems = [
 	},
 	{
 		question: 'Is this just observability?',
-		answer: 'No. Observability helps you inspect events. CORTEX adds integrity and traceability to the decision record itself.',
+		answer: 'No. Observability inspects events; CORTEX hardens the decision record itself.',
 	},
 	{
 		question: 'Do we need a call to get started?',
@@ -265,9 +265,8 @@ No call required.</code></pre>
 				<p class="section-kicker">Problem</p>
 				<h2>Logs help you inspect systems. CORTEX helps you verify the decision record.</h2>
 				<p>
-					If an agent touches code, support actions, pricing, finance, approvals, or
-					sensitive internal workflows, “we think this is what happened” is not enough.
-					Teams need a record they can verify later.
+					Critical workflows need a decision record teams can verify later, not a
+					best-effort reconstruction from traces.
 				</p>
 			</div>
 
@@ -292,9 +291,7 @@ No call required.</code></pre>
 				<p class="section-kicker">Pilot</p>
 				<h2>Start with one workflow, not a platform migration.</h2>
 				<p>
-					The fastest path to value is a scoped pilot. We integrate CORTEX into one
-					critical workflow, activate verifiable traceability, and leave your team with a
-					repeatable evidence flow.
+					A scoped pilot gets you to evidence faster than a platform migration.
 				</p>
 			</div>
 
@@ -348,7 +345,7 @@ Reply and get a scoped recommendation.</code></pre>
 			<div class="section-heading">
 				<p class="section-kicker">Pricing</p>
 				<h2>Open source to start. Scoped pilot to buy.</h2>
-				<p>We reply with a scoped recommendation within 24 hours when the workflow is clear.</p>
+				<p>Start free, then buy a pilot only when the workflow is clear.</p>
 			</div>
 
 			<div class="pricing-grid">
@@ -382,8 +379,7 @@ Reply and get a scoped recommendation.</code></pre>
 				<p class="section-kicker">FAQ</p>
 				<h2>Short answers for technical buyers.</h2>
 				<p>
-					CORTEX is easier to position correctly when the scope stays tight: integrity,
-					traceability, and evidence readiness for critical workflows.
+					Keep the scope tight: integrity, traceability, and evidence readiness.
 				</p>
 			</div>
 
