@@ -108,10 +108,10 @@ def _count_secret_patterns() -> int:
 
 
 def _git_tag() -> str:
-    """Return the latest git tag or 'v0.3.0b3'."""
+    """Return the latest git tag or 'v0.3.0b5'."""
     git_executable = shutil.which("git")
     if not git_executable:
-        return "v0.3.0b3"
+        return "v0.3.0b5"
 
     try:
         result = subprocess.run(  # noqa: S603 - fixed local command resolved via shutil.which
@@ -120,9 +120,9 @@ def _git_tag() -> str:
             text=True,
             timeout=3,
         )
-        return result.stdout.strip() or "v0.3.0b3"
+        return result.stdout.strip() or "v0.3.0b5"
     except (subprocess.SubprocessError, FileNotFoundError, OSError):
-        return "v0.3.0b3"
+        return "v0.3.0b5"
 
 
 def _generate_live_prompt(project_root: Path) -> str:

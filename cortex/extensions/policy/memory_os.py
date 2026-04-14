@@ -1,9 +1,11 @@
 import asyncio
 import hashlib
+from collections import deque
 from enum import Enum
 from typing import Any
 
 VSA_DIMENSION = 10000
+EPISODIC_TRACE_LIMIT = 1000  # Maximum number of episodic traces retained in memory
 
 try:
     import structlog
@@ -24,7 +26,6 @@ class MemoryTier(Enum):
 class MemoryOS:
     """
     Cognitive Operating System Hypervisor.
-
     Enforces access, mutation, and lifecycle policies across
     memory variants to prevent Entropic Decay.
     """
@@ -33,6 +34,8 @@ class MemoryOS:
         self._working_memory: dict[str, Any] = {}
         # Fixed-size physical tensor array
         self._episodic_vsa_tensor: list[float] = [0.0] * VSA_DIMENSION
+        # Bounded episodic trace log (FIFO, max EPISODIC_TRACE_LIMIT entries)
+        self._episodic_traces: deque[dict[str, Any]] = deque(maxlen=EPISODIC_TRACE_LIMIT)
         # Semantic memory connects to ledger
         self._decay_rate = 0.99
         self._glial_daemon_task = None
@@ -66,13 +69,14 @@ class MemoryOS:
             ctx_string = f"{key}:{value}"
             idx = int(hashlib.sha256(ctx_string.encode("utf-8")).hexdigest(), 16) % VSA_DIMENSION
             self._episodic_vsa_tensor[idx] += 1.0
+            # Also record in bounded trace log for test observability
+            self._episodic_traces.append({"key": key, "value": value})
             return True
         elif tier == MemoryTier.SEMANTIC:
             # Requires Maxwell's Demon (Mem0 pipeline)
             raise NotImplementedError(
                 "Semantic writes must pass through mem0_pipeline for exergy validation."
             )
-
         return False
 
     async def read(self, tier: MemoryTier, query: str) -> Any | None:
@@ -92,6 +96,7 @@ class MemoryOS:
         if tier == MemoryTier.WORKING:
             self._working_memory.clear()
         elif tier == MemoryTier.EPISODIC:
+            self._episodic_traces.clear()
             self._episodic_vsa_tensor = [0.0] * VSA_DIMENSION
         elif tier == MemoryTier.SEMANTIC:
             raise PermissionError("Cannot flush immutable semantic ledger.")
