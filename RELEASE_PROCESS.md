@@ -8,9 +8,8 @@ CORTEX Persist uses tagged releases for package publication.
 
 - version metadata lives in [pyproject.toml](pyproject.toml)
 - release tags follow the `v*` pattern
-- PyPI publishing is handled by GitHub Actions via two workflows:
+- PyPI publishing is handled by GitHub Actions via a single workflow:
   - [`.github/workflows/release.yml`](.github/workflows/release.yml) — authoritative release workflow (signed artifacts, Sigstore, SBOM)
-  - [`.github/workflows/publish.yml`](.github/workflows/publish.yml) — streamlined PyPI publish on GitHub Release creation
 
 ## PyPI Trusted Publishing Setup
 
