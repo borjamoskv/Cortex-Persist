@@ -8,7 +8,7 @@ from __future__ import annotations
 import base64
 import logging
 import os
-from typing import Optional, Tuple, Type
+from typing import Optional
 
 try:
     import keyring
@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 SERVICE_NAME = "cortex_v6"
 KEY_NAME = "master_key"
-_keyring_error_types: Tuple[Type[Exception], ...]
+_keyring_error_types: tuple[type[Exception], ...]
 
 if keyring is None:
     _keyring_error_types = (Exception,)
