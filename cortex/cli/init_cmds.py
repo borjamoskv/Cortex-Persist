@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+import os
 from collections.abc import Iterator
 from contextlib import contextmanager
-import os
 
 import click
 from rich.panel import Panel
