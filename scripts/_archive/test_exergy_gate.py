@@ -6,6 +6,7 @@ from cortex.extensions.swarm.budget import get_budget_manager
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("exergy-test")
 
+
 async def main():
     budget = get_budget_manager()
     mission_id = "test-exergy-exhaustion"
@@ -27,6 +28,7 @@ async def main():
         return
 
     logger.error("❌ FALLO: La Ω₃ Exergy Gate no se activó.")
+
 
 if __name__ == "__main__":
     asyncio.run(main())

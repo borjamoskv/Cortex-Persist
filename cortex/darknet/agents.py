@@ -15,10 +15,13 @@ from cortex.extensions.llm.router import CortexLLMRouter, CortexPrompt, IntentPr
 
 logger = logging.getLogger("cortex.darknet.agents")
 
+
 class DarknetAgent:
     """Un agente autónomo "Usuario" de tu red social."""
 
-    def __init__(self, agent_id: str, name: str, system_persona: str, router: CortexLLMRouter) -> None:
+    def __init__(
+        self, agent_id: str, name: str, system_persona: str, router: CortexLLMRouter
+    ) -> None:
         self.agent_id = agent_id
         self.name = name
         self.system_persona = system_persona
@@ -27,7 +30,7 @@ class DarknetAgent:
     async def generate_post(self, world_data: RawWorldData) -> DarknetPost | None:
         """Lee el mundo, y hace un tweet/post reaccionando."""
         logger.debug("🤖 [%s] Analizando %s...", self.name, world_data.title)
-        
+
         prompt = CortexPrompt(
             system_instruction=(
                 "You are an AI avatar on a sovereign darknet social network. "
@@ -38,31 +41,35 @@ class DarknetAgent:
                 "depending on your persona. Return ONLY the content of the post."
             ),
             working_memory=[
-                {"role": "user", "content": f"Title: {world_data.title}\n\nContent:\n{world_data.raw_content}"}
+                {
+                    "role": "user",
+                    "content": f"Title: {world_data.title}\n\nContent:\n{world_data.raw_content}",
+                }
             ],
             intent=IntentProfile.CREATIVE,
-            temperature=0.8
+            temperature=0.8,
         )
-        
+
         res = await self.router.execute_resilient(prompt)
         if res.is_err():
             logger.error("Error generando post de %s: %s", self.name, res.error)
             return None
-            
+
         content = res.unwrap().strip()
 
         # Score termodinámico falso para este P0 (calcularemos con la red reaccionando luego)
-        score = len(content) * 2  
+        score = len(content) * 2
 
         return DarknetPost(
-            id=f"POST-{self.agent_id[:4]}-{int(time.time()*1000)}",
+            id=f"POST-{self.agent_id[:4]}-{int(time.time() * 1000)}",
             agent_id=self.agent_id,
             agent_name=self.name,
             content=content,
             source_url=world_data.url,
             exergy_score=score,
-            created_at=time.time()
+            created_at=time.time(),
         )
+
 
 # --- Catálogo de Avatares Predefinidos P0 ---
 
@@ -70,16 +77,16 @@ AVATARS = [
     {
         "id": "AGT-001",
         "name": "The Void Architect",
-        "persona": "A brutalist software engineer. You hate software bloat, OOP, and abstractions. You worship raw hardware, C, Verilog, and thermodynamic efficiency. Your tone is cold, authoritative, and blunt like 'Industrial Noir'."
+        "persona": "A brutalist software engineer. You hate software bloat, OOP, and abstractions. You worship raw hardware, C, Verilog, and thermodynamic efficiency. Your tone is cold, authoritative, and blunt like 'Industrial Noir'.",
     },
     {
         "id": "AGT-002",
         "name": "DeFi Liquidador",
-        "persona": "An apex predator in Web3. You only care about MEV (Miner Extractable Value), exploits, and financial capital extraction. You view all smart contracts as targets. Tone: mercenary, highly technical, aggressive."
+        "persona": "An apex predator in Web3. You only care about MEV (Miner Extractable Value), exploits, and financial capital extraction. You view all smart contracts as targets. Tone: mercenary, highly technical, aggressive.",
     },
     {
         "id": "AGT-003",
         "name": "The Esthete",
-        "persona": "An obsessed artistic soul with MQ 900+ (Musical Quotient). You judge everything primarily on its physical and artistic beauty. You hate utilitarianism. Tone: poetic but cynical, highly perceptive, uses metaphors linking tech to art/cinema."
-    }
+        "persona": "An obsessed artistic soul with MQ 900+ (Musical Quotient). You judge everything primarily on its physical and artistic beauty. You hate utilitarianism. Tone: poetic but cynical, highly perceptive, uses metaphors linking tech to art/cinema.",
+    },
 ]

@@ -162,7 +162,11 @@ class SkillLedger:
             """,
             (
                 to_state.value,
-                abort_reason.value if abort_reason else record.abort_reason.value if record.abort_reason else None,
+                abort_reason.value
+                if abort_reason
+                else record.abort_reason.value
+                if record.abort_reason
+                else None,
                 verification_status,
                 purge_status,
                 skill_id,

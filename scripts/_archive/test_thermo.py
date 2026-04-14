@@ -10,18 +10,22 @@ class MockEngine:
         print("-" * 50)
         print(content)
         print("-" * 50)
-        print(f"[META] Lag: {meta['lag_ms']:.1f}ms | Tasks: {meta['active_tasks']} | Purged: {meta.get('purged_tasks', 0)} | Exergy Loss: {meta['exergy_loss']}")
+        print(
+            f"[META] Lag: {meta['lag_ms']:.1f}ms | Tasks: {meta['active_tasks']} | Purged: {meta.get('purged_tasks', 0)} | Exergy Loss: {meta['exergy_loss']}"
+        )
+
 
 async def zombie_stochastic_agent(agent_id: int):
-    """ Tareas anónimas que saturan la memoria y el swarm (Entropía) """
+    """Tareas anónimas que saturan la memoria y el swarm (Entropía)"""
     try:
         while True:
             await asyncio.sleep(0.1)
     except asyncio.CancelledError:
         print(f"  [X] Oráculo Aniquiló Zombie-{agent_id} (Purged)")
 
+
 async def p0_engine_core():
-    """ Tarea crítica etiquetada (inviable de purgar bajo Ω₄) """
+    """Tarea crítica etiquetada (inviable de purgar bajo Ω₄)"""
     try:
         while True:
             await asyncio.sleep(1.0)
@@ -29,12 +33,14 @@ async def p0_engine_core():
     except asyncio.CancelledError:
         print("  [!] ERROR FATAL: Engine Purged!")
 
+
 async def induce_temporal_friction():
-    """ Simulación de un request o query sincrónico (LLM o DB) bloqueando asíncrono """
+    """Simulación de un request o query sincrónico (LLM o DB) bloqueando asíncrono"""
     while True:
         await asyncio.sleep(2.0)
         print("  [!] Inyectando Fricción Sincrónica 300ms...")
         time.sleep(0.3)  # Bloqueo duro del Event Loop (Lag fatal)
+
 
 async def main():
     print("Iniciando Simulación Termodinámica en Vivo (C5-Dynamic)...")
@@ -60,6 +66,7 @@ async def main():
     oracle_task.cancel()
     p0_task.cancel()
     friction_task.cancel()
+
 
 if __name__ == "__main__":
     asyncio.run(main())

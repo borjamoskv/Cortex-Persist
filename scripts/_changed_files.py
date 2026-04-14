@@ -53,14 +53,18 @@ def changed_files(
     base_ref = os.environ.get("GITHUB_BASE_REF")
     if base_ref:
         merge_base = f"origin/{base_ref}...HEAD"
-        paths = paths_from_output(run_git(["diff", "--name-only", "--diff-filter=ACMR", merge_base]))
+        paths = paths_from_output(
+            run_git(["diff", "--name-only", "--diff-filter=ACMR", merge_base])
+        )
         if include_untracked:
             paths = unique_paths(paths, untracked_files())
         return paths, "ci"
 
     before = os.environ.get("GITHUB_EVENT_BEFORE")
     if before and before != "0000000000000000000000000000000000000000":
-        paths = paths_from_output(run_git(["diff", "--name-only", "--diff-filter=ACMR", before, "HEAD"]))
+        paths = paths_from_output(
+            run_git(["diff", "--name-only", "--diff-filter=ACMR", before, "HEAD"])
+        )
         if include_untracked:
             paths = unique_paths(paths, untracked_files())
         return paths, "ci"
