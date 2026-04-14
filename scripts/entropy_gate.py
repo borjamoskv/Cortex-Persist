@@ -5,9 +5,14 @@ Bloquea commits de archivos Python si su Complejidad Ciclomática (CC) supera
 el estándar Soberano (15).
 """
 
-import subprocess
 import sys
 from pathlib import Path
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+from _changed_files import changed_files
 
 try:
     from radon.complexity import cc_visit
@@ -19,26 +24,22 @@ except ImportError:
 CC_THRESHOLD = 15
 
 
-def get_staged_python_files():
-    """Obtiene la lista de archivos manipulados en este commit usando git."""
-    try:
-        result = subprocess.run(
-            ["git", "diff", "--cached", "--name-only", "--diff-filter=ACM"],
-            capture_output=True,
-            text=True,
-            check=True,
-        )
-        files = result.stdout.strip().split("\n")
-        staged_files = []
-        for f in files:
-            if not f:
-                continue
-            path = Path.cwd() / f
-            if path.suffix == ".py" and path.exists():
-                staged_files.append(path)
-        return staged_files
-    except subprocess.CalledProcessError:
-        return []
+def _resolve_python_paths(files: list[str]) -> list[Path]:
+    resolved: list[Path] = []
+    seen: set[Path] = set()
+    for filename in files:
+        path = Path.cwd() / filename
+        if path.suffix != ".py" or not path.exists() or path in seen:
+            continue
+        seen.add(path)
+        resolved.append(path)
+    return resolved
+
+
+def get_candidate_python_files() -> tuple[list[Path], str]:
+    """Resolve Python files from staged changes, or from the local diff if index is empty."""
+    candidates, source = changed_files(include_untracked=True, prefer_staged=True)
+    return _resolve_python_paths([str(path) for path in candidates]), source
 
 
 def analyze_file(filepath: Path) -> bool:
@@ -64,20 +65,25 @@ def analyze_file(filepath: Path) -> bool:
             return False
 
         return True
-    except Exception:
+    except (OSError, SyntaxError, UnicodeDecodeError):
         # Silenciar errores por parseo (eso lo cogerá pydantic/syntax errors luego)
         return True
 
 
 def main():
-    staged_files = get_staged_python_files()
-    if not staged_files:
+    candidate_files, source = get_candidate_python_files()
+    if not candidate_files:
         sys.exit(0)  # Nada que escanear, continuar con el commit
 
-    print(f"👁️  ENTROPY GATE | Evaluando estática en {len(staged_files)} archivos...")
+    if source == "staged":
+        print(f"👁️  ENTROPY GATE | Evaluando estática en {len(candidate_files)} archivos staged...")
+    else:
+        print(
+            f"👁️  ENTROPY GATE | No hay staged; evaluando {len(candidate_files)} archivos del diff local..."
+        )
 
     failed = False
-    for f in staged_files:
+    for f in candidate_files:
         if not analyze_file(f):
             failed = True
 
