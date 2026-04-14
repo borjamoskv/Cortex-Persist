@@ -41,6 +41,12 @@
     },
     {
       "pattern": "^SECURITY\\.md$"
+    },
+    {
+      "pattern": "^examples/audit_proof_artifact\\.json$"
+    },
+    {
+      "pattern": "^\\.\\./examples/audit_proof_artifact\\.json$"
     }
   ],
   "retryOn429": true,
