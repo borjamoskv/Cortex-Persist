@@ -15,7 +15,8 @@ Uses an in-memory aiosqlite database to avoid file side-effects.
 from __future__ import annotations
 
 import asyncio
-from datetime import datetime, timedelta
+import time
+from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import aiosqlite
@@ -157,7 +158,7 @@ class TestMarkFailure:
         assert row["last_error"] == "Test error"
         # next_attempt_at should be ~5 minutes from now
         next_dt = datetime.fromisoformat(row["next_attempt_at"])
-        assert next_dt > datetime.now() + timedelta(minutes=4)
+        assert next_dt > datetime.fromtimestamp(time.time(), tz=timezone.utc) + timedelta(minutes=4)
         await conn.close()
 
 
@@ -287,7 +288,9 @@ class TestProcessBatch:
         import aiosqlite as _aio
 
         db_path = str(tmp_path / "retry.db")
-        past = (datetime.now() - timedelta(minutes=10)).isoformat()
+        past = (
+            datetime.fromtimestamp(time.time(), tz=timezone.utc) - timedelta(minutes=10)
+        ).isoformat()
         async with _aio.connect(db_path) as conn:
             conn.row_factory = _aio.Row
             await conn.execute(_CREATE_FACTS)

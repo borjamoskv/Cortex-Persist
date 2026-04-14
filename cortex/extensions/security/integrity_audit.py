@@ -109,7 +109,7 @@ class IntegrityAuditor:
         """
         start = time.monotonic()
         report = AuditReport(
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            timestamp=datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
         )
 
         try:

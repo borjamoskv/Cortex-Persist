@@ -16,13 +16,11 @@ def test_flake_sequence_increment():
     assert len(ids) == 1000
 
 
-def test_flake_lexicographical_sorting(monkeypatch):
+def test_flake_lexicographical_sorting():
     gen = SovereignFlake(node_id=1)
-    base_time = (SovereignFlake.EPOCH / 1000) + 1
-    timestamps = iter((base_time, base_time + 0.002))
-    monkeypatch.setattr(time, "time", lambda: next(timestamps))
 
     id1 = gen.next_lexicographic_id()
+    time.sleep(0.002)  # noqa: TID251  # force sleep across real ms
     id2 = gen.next_lexicographic_id()
 
     assert isinstance(id1, str)

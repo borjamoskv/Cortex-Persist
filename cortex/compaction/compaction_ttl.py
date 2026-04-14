@@ -9,6 +9,7 @@ All mutations routed through MUTATION_ENGINE (Solid-State Substrate).
 from __future__ import annotations
 
 import logging
+import time
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any
 
@@ -102,7 +103,7 @@ async def apply_ttl_prune(
     )
     rows = await cursor.fetchall()
 
-    now = datetime.now(tz=timezone.utc)
+    now = datetime.fromtimestamp(time.time(), tz=timezone.utc)
     expired_ids, tombstonable_ids = find_expired_facts(rows, now)  # type: ignore[reportArgumentType]
 
     if not expired_ids:

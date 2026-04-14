@@ -6,6 +6,7 @@ import asyncio
 import logging
 import os
 import sys
+import time
 import uuid
 from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
@@ -33,7 +34,7 @@ class WorktreeState:
         self.id = worktree_id
         self.branch_name = branch_name
         self.path = path
-        self.created_at = datetime.now(timezone.utc).isoformat()
+        self.created_at = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
         self.status = "provisioning"
         self.pid = os.getpid()
         self.task: asyncio.Task[Any] | None = None
@@ -135,7 +136,7 @@ class SwarmManager:
                 ),
                 "total_worktrees": len(self.worktrees),
                 "agent_pids": list({w.pid for w in self.worktrees.values()}),
-                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "timestamp": datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
             }
 
 

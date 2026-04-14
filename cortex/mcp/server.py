@@ -1,3 +1,5 @@
+from typing import Optional
+
 """MCP Server Implementation.
 
 Core logic for the CORTEX MCP Trust Server.
@@ -7,7 +9,6 @@ Provides memory, search, and EU AI Act compliance tools.
 import json
 import logging
 from concurrent.futures import ThreadPoolExecutor
-from typing import Optional
 
 from cortex.engine import CortexEngine
 from cortex.extensions.immune.filters.base import Verdict
@@ -361,10 +362,10 @@ def run_server(config: Optional[MCPServerConfig] = None) -> None:
     cfg = config or _default_config
 
     # V3 Singularity: Launch Live Knowledge Sync Daemon
-    start_knowledge_daemon()
+    _watcher = start_knowledge_daemon()
 
     # V4 Singularity: Launch Swarm Autopoiesis Engine
-    start_swarm_daemon()
+    _swarm_daemon = start_swarm_daemon()
 
     if cfg.transport == "sse":
         logger.info("Starting CORTEX MCP server v2 (SSE) on %s:%d", cfg.host, cfg.port)

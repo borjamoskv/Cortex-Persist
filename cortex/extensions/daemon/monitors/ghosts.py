@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -35,7 +36,7 @@ class GhostWatcher(BaseMonitor[GhostAlert]):
             logger.error("Failed to read ghosts.json: %s", e)
             return []
 
-        now = datetime.now(timezone.utc)
+        now = datetime.fromtimestamp(time.time(), tz=timezone.utc)
         stale: list[GhostAlert] = []
 
         for project, data in ghosts.items():

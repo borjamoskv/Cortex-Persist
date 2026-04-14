@@ -62,7 +62,4 @@ async def event_generator(request: Request) -> AsyncGenerator[str, None]:
 @router.get("/stream")
 async def stream_events(request: Request):
     """Server-Sent Events endpoint for real-time CORTEX telemetry."""
-    return StreamingResponse(
-        event_generator(request),
-        media_type="text/event-stream",
-    )
+    return StreamingResponse(event_generator(request), media_type="text/event-stream")

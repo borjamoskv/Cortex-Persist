@@ -31,8 +31,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from cortex.database.core import connect as db_connect
-
 logger = logging.getLogger("cortex.daemon.scheduler")
 
 __all__ = ["SovereignScheduler", "ScheduleEntry"]
@@ -123,11 +121,9 @@ class SovereignScheduler:
 
     @contextmanager
     def _conn(self):
-        conn = db_connect(
-            str(self._db_path),
-            check_same_thread=False,
-            row_factory=sqlite3.Row,
-        )
+        conn = sqlite3.connect(str(self._db_path), check_same_thread=False)
+        conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA journal_mode=WAL")
         try:
             yield conn
             conn.commit()
@@ -153,7 +149,7 @@ class SovereignScheduler:
     ) -> ScheduleEntry:
         """Register a recurring interval task."""
         self._tasks[name] = coro_factory
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
         entry = ScheduleEntry(
             name=name,
             kind="interval",
@@ -176,7 +172,7 @@ class SovereignScheduler:
     ) -> ScheduleEntry:
         """Register a cron-expression task (requires croniter)."""
         self._tasks[name] = coro_factory
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
         next_run = self._next_cron_time(cron_expr)
         entry = ScheduleEntry(
             name=name,
@@ -201,7 +197,7 @@ class SovereignScheduler:
     ) -> ScheduleEntry:
         """Register a one-shot task."""
         self._tasks[name] = coro_factory
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
         entry = ScheduleEntry(
             name=name,
             kind="oneshot",
@@ -220,7 +216,7 @@ class SovereignScheduler:
         with self._conn() as conn:
             result = conn.execute(
                 "UPDATE schedules SET enabled = 0, updated_at = ? WHERE name = ?",
-                (datetime.now(timezone.utc).isoformat(), name),
+                (datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(), name),
             )
         cancelled = result.rowcount > 0
         if cancelled:
@@ -266,8 +262,10 @@ class SovereignScheduler:
 
     async def _tick(self) -> None:
         """Evaluate all schedules and fire due tasks."""
-        now = datetime.now(timezone.utc)
+        now = datetime.fromtimestamp(time.time(), tz=timezone.utc)
         now_iso = now.isoformat()
+        _now_ts = time.monotonic()
+
         with self._conn() as conn:
             due = conn.execute(
                 """
@@ -328,8 +326,8 @@ class SovereignScheduler:
                             "source": "scheduler",
                         },
                     )
-                except Exception as exc:  # noqa: BLE001
-                    logger.debug("Scheduler event bus publish failed for %s: %s", entry.name, exc)
+                except Exception:  # noqa: BLE001
+                    pass  # bus errors must not kill scheduler
 
             # Hot state update
             if self._hot_state is not None:
@@ -342,8 +340,8 @@ class SovereignScheduler:
                             "ok": not error,
                         },
                     )
-                except Exception as exc:  # noqa: BLE001
-                    logger.debug("Scheduler hot-state update failed for %s: %s", entry.name, exc)
+                except Exception:  # noqa: BLE001
+                    pass
 
             level = "✅" if not error else "❌"
             logger.info(
@@ -391,7 +389,7 @@ class SovereignScheduler:
             )
 
     def _compute_next_run(self, entry: ScheduleEntry) -> str | None:
-        now = datetime.now(timezone.utc)
+        now = datetime.fromtimestamp(time.time(), tz=timezone.utc)
         if entry.kind == "interval" and entry.interval_s:
             from datetime import timedelta
 
@@ -406,11 +404,17 @@ class SovereignScheduler:
         try:
             from croniter import croniter
 
-            return croniter(cron_expr, datetime.now(timezone.utc)).get_next(datetime).isoformat()
+            return (
+                croniter(cron_expr, datetime.fromtimestamp(time.time(), tz=timezone.utc))
+                .get_next(datetime)
+                .isoformat()
+            )
         except ImportError:
             from datetime import timedelta
 
-            return (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
+            return (
+                datetime.fromtimestamp(time.time(), tz=timezone.utc) + timedelta(hours=1)
+            ).isoformat()
 
     @staticmethod
     def _row_to_entry(row) -> ScheduleEntry:

@@ -7,6 +7,7 @@ low-value, unverified, and non-causal facts to reduce system heat.
 from __future__ import annotations
 
 import logging
+import time
 from datetime import datetime, timedelta, timezone
 
 import aiosqlite
@@ -33,7 +34,9 @@ class EntropicEvaporator:
         """
         logger.info("💨 [EVAPORATOR] Starting evaporation cycle (Ω₂)...")
 
-        limit_date = (datetime.now(timezone.utc) - timedelta(days=30)).isoformat()
+        limit_date = (
+            datetime.fromtimestamp(time.time(), tz=timezone.utc) - timedelta(days=30)
+        ).isoformat()
 
         # We query for candidate IDs
         # meta NOT LIKE '%causal_parent%' is a heuristic check on encrypted/raw meta

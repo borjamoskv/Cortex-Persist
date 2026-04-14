@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import logging
 import sqlite3
+import time
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from typing import TYPE_CHECKING, Final, Optional
@@ -185,7 +186,7 @@ async def generate_session_boot(
     memory = EpisodicMemory(conn)
 
     # 1. Compute lookback timestamp
-    cutoff = datetime.now(timezone.utc) - timedelta(hours=lookback_hours)
+    cutoff = datetime.fromtimestamp(time.time(), tz=timezone.utc) - timedelta(hours=lookback_hours)
     since_iso = cutoff.strftime("%Y-%m-%dT%H:%M:%S")
 
     # 2. Recall recent episodes

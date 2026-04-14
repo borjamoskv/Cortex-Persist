@@ -8,6 +8,7 @@ AGENTS.md Tenant Isolation: cache_key siempre incluye tenant_id.
 from __future__ import annotations
 
 import hashlib
+import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from functools import lru_cache
@@ -30,7 +31,9 @@ class PrefixSlot:
     prefix_tokens: int  # longitud del prefix
     provider_name: str  # Proveedor físico donde reside el prefix (EJ: 'gemini', 'anthropic')
     model_name: str  # Modelo físico (EJ: 'gemini-1.5-pro')
-    created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    created_at: str = field(
+        default_factory=lambda: datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+    )
     hits: int = 0  # agentes que reutilizaron este slot
 
     @property

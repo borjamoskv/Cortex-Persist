@@ -43,7 +43,7 @@ class SiteMonitor:
         """Check a single URL with retry and backoff (oxygenated)."""
         from datetime import datetime, timezone
 
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
         last_error = ""
 
         for attempt in range(self.retries + 1):

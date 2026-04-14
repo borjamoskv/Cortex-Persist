@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+import time
 from datetime import datetime, timezone
 
 from cortex.extensions.daemon.models import AGENT_DIR, DEFAULT_MEMORY_STALE_HOURS, MemoryAlert
@@ -34,7 +35,7 @@ class MemorySyncer:
             if not ts:
                 return []
             last = datetime.fromisoformat(ts.replace("Z", "+00:00"))
-            now = datetime.now(timezone.utc)
+            now = datetime.fromtimestamp(time.time(), tz=timezone.utc)
             hours = (now - last).total_seconds() / 3600
             if hours > self.stale_hours:
                 alerts.append(

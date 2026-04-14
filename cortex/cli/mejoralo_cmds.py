@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import time
+
 import click
 from rich.table import Table
 
@@ -163,7 +165,9 @@ def mejoralo_record(project, score_before, score_after, actions, db):
                 state["improvement_history"].append(
                     {
                         "project": project,
-                        "timestamp": datetime.now(timezone.utc).isoformat(),
+                        "timestamp": datetime.fromtimestamp(
+                            time.time(), tz=timezone.utc
+                        ).isoformat(),
                         "score_before": score_before,
                         "score_after": score_after,
                         "delta": delta,

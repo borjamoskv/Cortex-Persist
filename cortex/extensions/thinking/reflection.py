@@ -12,6 +12,7 @@ from __future__ import annotations
 import json
 import logging
 import sqlite3
+import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Optional
@@ -98,7 +99,7 @@ def generate_reflection(
         summary=summary,
         errors=errors or [],
         decisions=decisions or [],
-        timestamp=datetime.now(timezone.utc).isoformat(),
+        timestamp=datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
     )
 
     content = reflection.to_content()

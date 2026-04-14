@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import sqlite3
+import time
 from datetime import datetime, timedelta, timezone
 
 logger = logging.getLogger("cortex.extensions.ttt.ghost_harvester")
@@ -30,7 +31,9 @@ def fetch_recent_anomalies(cursor, days=7):
     """
     Fetch `error`, `ghost`, and `decision` types from the past `days` days.
     """
-    cutoff_date = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
+    cutoff_date = (
+        datetime.fromtimestamp(time.time(), tz=timezone.utc) - timedelta(days=days)
+    ).isoformat()
 
     query = """
         SELECT fact_type, content, meta
@@ -128,7 +131,7 @@ def generate_nightly_dataset():
         dataset = format_for_lora(rows)
         file_out = os.path.join(
             OUTPUT_PATH,
-            f"moskv_nightly_{datetime.now(timezone.utc).strftime('%Y%m%d')}.jsonl",
+            f"moskv_nightly_{datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime('%Y%m%d')}.jsonl",
         )
 
         with open(file_out, "w", encoding="utf-8") as f:

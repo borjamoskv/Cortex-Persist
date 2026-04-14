@@ -11,6 +11,7 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import time
 from datetime import datetime, timezone
 from typing import Any, Optional
 
@@ -72,7 +73,7 @@ class ImmutableVoteLedger:
         """
         async with self.conn.transaction():
             prev_hash = await self.get_last_hash(tenant_id)
-            timestamp = datetime.now(timezone.utc).isoformat()
+            timestamp = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
 
             entry_hash = self._compute_hash(
                 tenant_id,
@@ -173,7 +174,7 @@ class ImmutableVoteLedger:
             return ""
 
         root = self._build_merkle_tree(hashes)
-        timestamp = datetime.now(timezone.utc).isoformat()
+        timestamp = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
 
         await self.conn.execute(
             "INSERT INTO vote_merkle_roots (tenant_id, root_hash, timestamp) VALUES (?, ?, ?)",
