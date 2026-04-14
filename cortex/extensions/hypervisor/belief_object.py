@@ -21,6 +21,7 @@ Migration path: @dataclass_to_proto adapter if cross-language federation arrives
 
 from __future__ import annotations
 
+import time
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -146,14 +147,14 @@ class ProvenanceChain:
 def _uuid7() -> str:
     """Generate a UUID v7 (time-sortable) as string."""
     # UUID v7 not in stdlib until 3.14 — use v4 with timestamp prefix
-    ts = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
+    ts = datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime("%Y%m%d%H%M%S")
     uid = uuid.uuid4().hex
     return f"{ts}-{uid[:16]}"
 
 
 def _now_iso() -> str:
     """Current UTC time as ISO 8601 string."""
-    return datetime.now(timezone.utc).isoformat()
+    return datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
 
 
 @dataclass(frozen=True)

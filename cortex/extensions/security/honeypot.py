@@ -12,6 +12,7 @@ import json
 import logging
 import os
 import random
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Optional
@@ -39,7 +40,9 @@ class DecoyFact:
         self.content = content
         self.project = project
         self.severity = severity
-        self.created_at = created_at or datetime.now(timezone.utc).isoformat()
+        self.created_at = (
+            created_at or datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+        )
         self.hash = h_hash or compute_fact_hash(content)
 
     def to_dict(self) -> dict[str, Any]:

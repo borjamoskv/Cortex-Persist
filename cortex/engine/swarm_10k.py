@@ -173,7 +173,7 @@ class LegionSupervisor:
         cen = await self.ensure_centurion()
         agent_id = f"ag-{cen.id}-{len(cen.agents)}"
         await cen.deploy_agent(agent_id)
-        
+
         # Azkartu Optimization: Retire full centurion in O(1)
         if len(cen.agents) >= cen.CAPACITY:
             if self._available_centurions and self._available_centurions[0] == cen:

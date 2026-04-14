@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 import socket
 import ssl
+import time
 from datetime import datetime, timezone
 from typing import Optional
 
@@ -46,7 +47,9 @@ class CertMonitor:
                     expires = datetime.strptime(not_after, "%b %d %H:%M:%S %Y %Z").replace(  # type: ignore[reportArgumentType]
                         tzinfo=timezone.utc
                     )
-                    days_left = (expires - datetime.now(timezone.utc)).days
+                    days_left = (
+                        expires - datetime.fromtimestamp(time.time(), tz=timezone.utc)
+                    ).days
                     if days_left < self.warn_days:
                         return CertAlert(
                             hostname=hostname,

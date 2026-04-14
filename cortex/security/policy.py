@@ -3,6 +3,7 @@ from __future__ import annotations
 import datetime
 import hashlib
 import json
+import time
 from collections.abc import Mapping
 from typing import Any
 
@@ -159,7 +160,7 @@ def seal_artifact(artifact: ImmuneArtifact) -> SealRecord:
         raise SealViolation("Artifact must be promotable to be sealed.")
 
     content_hash = hashlib.sha256(json.dumps(artifact.payload, sort_keys=True).encode()).hexdigest()
-    sealed_at = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    sealed_at = datetime.datetime.fromtimestamp(time.time(), tz=datetime.timezone.utc).isoformat()
 
     artifact.state = ImmunityState.SEALED
     artifact.sealed_at = sealed_at

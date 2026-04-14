@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import time
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Any
@@ -53,7 +54,9 @@ class AgentMessage(BaseModel):
     state: MessageState = MessageState.PENDING
     priority: int = 0
     ttl_seconds: int | None = None
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.fromtimestamp(time.time(), tz=timezone.utc)
+    )
     trace_context: dict[str, Any] = Field(default_factory=dict)
 
     def to_json(self) -> str:

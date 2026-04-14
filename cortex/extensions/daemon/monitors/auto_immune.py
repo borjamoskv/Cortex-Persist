@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 import logging
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -48,7 +49,7 @@ class AutoImmuneMonitor(BaseMonitor):
             logger.error("Failed to read ghosts.json: %s", e)
             return []
 
-        now = datetime.now(timezone.utc)
+        now = datetime.fromtimestamp(time.time(), tz=timezone.utc)
         queued_ids: list[str] = []
         changes_made = False
 

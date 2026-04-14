@@ -327,7 +327,7 @@ class SovereignGate:
         """Append to the in-memory audit log."""
         entry = {
             "event": event,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
             **action.to_dict(),
         }
         self._audit_log.append(entry)

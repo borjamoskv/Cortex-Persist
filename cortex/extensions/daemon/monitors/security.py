@@ -6,6 +6,7 @@ import asyncio
 import json
 import logging
 import sqlite3
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Optional
@@ -120,7 +121,9 @@ class SecurityMonitor:
             similarity_score=similarity,
             confidence=confidence,
             summary=f"Matches known vector: {summary[:50]}",
-            timestamp=event.get("timestamp", datetime.now(timezone.utc).isoformat()),
+            timestamp=event.get(
+                "timestamp", datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+            ),
         )
 
     async def _blacklist_ips(self, alerts: list[SecurityAlert]) -> None:

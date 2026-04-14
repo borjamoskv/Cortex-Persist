@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import time
 import uuid
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
@@ -10,7 +11,7 @@ SemanticStatus = Literal["pending", "processing", "indexed", "failed"]
 
 
 def utc_now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
+    return datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
 
 
 @dataclass(frozen=True)

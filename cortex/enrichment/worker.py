@@ -3,7 +3,8 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-from datetime import datetime, timedelta
+import time
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from cortex.ledger.queue import EnrichmentQueue
@@ -75,7 +76,7 @@ class EnrichmentWorker:
         if not self._compat_db_mode:
             return self.queue.claim_one()  # type: ignore[reportOptionalMemberAccess]
 
-        now = datetime.now().isoformat()
+        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
         async with self.engine.session() as conn:
             cursor = await conn.execute(
                 """
@@ -166,7 +167,7 @@ class EnrichmentWorker:
                     SET status = 'completed', updated_at = ?
                     WHERE id = ?
                     """,
-                    (datetime.now().isoformat(), job_id),
+                    (datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(), job_id),
                 )
                 await conn.commit()
         except Exception as e:
@@ -183,8 +184,11 @@ class EnrichmentWorker:
                     """,
                     (
                         str(e),
-                        (datetime.now() + timedelta(minutes=5)).isoformat(),
-                        datetime.now().isoformat(),
+                        (
+                            datetime.fromtimestamp(time.time(), tz=timezone.utc)
+                            + timedelta(minutes=5)
+                        ).isoformat(),
+                        datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
                         job_id,
                     ),
                 )

@@ -482,8 +482,9 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
                     event_bus=self._event_bus,
                     port=int(file_config.get("api_port", 8741)),
                 )
-                logger.info("🌐 Human Callback API ENABLED (port %s)",
-                            file_config.get("api_port", 8741))
+                logger.info(
+                    "🌐 Human Callback API ENABLED (port %s)", file_config.get("api_port", 8741)
+                )
             except Exception as e:  # noqa: BLE001
                 logger.warning("Failed to init HumanCallbackAPI: %s", e)
 
@@ -501,7 +502,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
     def check(self) -> DaemonStatus:
         """Run all checks once. Returns DaemonStatus."""
         check_start = time.monotonic()
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
         status = DaemonStatus(checked_at=now)
         self._run_monitor(status, "sites", self.site_monitor, self._alert_sites, method="check_all")
         self._run_monitor(status, "stale_ghosts", self.ghost_watcher, self._alert_ghosts)
@@ -609,34 +610,29 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
         # Track uptime in hot state
         if self.hot_state is not None:
             self.hot_state.set("daemon.mode", "sovereign")
-            self.hot_state.set("daemon.started_at", datetime.now(timezone.utc).isoformat())
+            self.hot_state.set(
+                "daemon.started_at",
+                datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+            )
 
         # ─── Spawn all subsystems as async tasks ──────────────────
         tasks: list[asyncio.Task] = []
 
         # Core check loop (replaces the main while loop)
-        tasks.append(asyncio.create_task(
-            self._sovereign_check_loop(interval), name="CheckLoop"
-        ))
+        tasks.append(asyncio.create_task(self._sovereign_check_loop(interval), name="CheckLoop"))
 
         # Scheduler
         if self.scheduler is not None:
             self._register_default_schedules()
-            tasks.append(asyncio.create_task(
-                self.scheduler.run(), name="Scheduler"
-            ))
+            tasks.append(asyncio.create_task(self.scheduler.run(), name="Scheduler"))
 
         # WatchdogHub
         if self.watchdog_hub is not None:
-            tasks.append(asyncio.create_task(
-                self.watchdog_hub.start(), name="WatchdogHub"
-            ))
+            tasks.append(asyncio.create_task(self.watchdog_hub.start(), name="WatchdogHub"))
 
         # Human Callback API
         if self.callback_api is not None:
-            tasks.append(asyncio.create_task(
-                self.callback_api.serve(), name="CallbackAPI"
-            ))
+            tasks.append(asyncio.create_task(self.callback_api.serve(), name="CallbackAPI"))
 
         # Legacy thread-based subsystems that need their own asyncio.run()
         # These are spawned as threads because they have blocking I/O
@@ -722,7 +718,10 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
 
         # Persist final state
         if self.hot_state is not None:
-            self.hot_state.set("daemon.stopped_at", datetime.now(timezone.utc).isoformat())
+            self.hot_state.set(
+                "daemon.stopped_at",
+                datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+            )
 
         logger.info("MOSKV-1 Sovereign Daemon stopped")
 
@@ -752,6 +751,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
 
     def _run_legacy(self, interval: int = DEFAULT_INTERVAL) -> None:
         """Legacy threading-based execution (fallback)."""
+
         def _handle_signal(signum: int, frame: object) -> None:
             sig_name = signal.Signals(signum).name
             logger.info("Received %s, shutting down gracefully...", sig_name)

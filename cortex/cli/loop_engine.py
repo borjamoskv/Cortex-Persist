@@ -297,7 +297,7 @@ class ExecutionLoop:
             content="\n".join(parts),
             fact_type=PersistenceType.KNOWLEDGE.value,
             session_start=self._session.started_at,
-            session_end=datetime.now(timezone.utc).isoformat(),
+            session_end=datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
             tasks_completed=self._session.tasks_completed,
             tasks_failed=self._session.tasks_failed,
             total_persisted=self._session.total_persisted,

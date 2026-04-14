@@ -11,6 +11,7 @@ from __future__ import annotations
 import enum
 import hashlib
 import json
+import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Optional
@@ -26,7 +27,7 @@ __all__ = [
 
 def _now_iso() -> str:
     """UTC ISO timestamp."""
-    return datetime.now(timezone.utc).isoformat()
+    return datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
 
 
 def _sha256(data: str) -> str:

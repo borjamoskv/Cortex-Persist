@@ -14,6 +14,7 @@ from __future__ import annotations
 import datetime
 import hashlib
 import json
+import time
 from typing import Any
 
 __all__ = [
@@ -27,7 +28,7 @@ __all__ = [
 
 def now_iso() -> str:
     """Return current UTC time in ISO 8601 format."""
-    return datetime.datetime.now(datetime.timezone.utc).isoformat()
+    return datetime.datetime.fromtimestamp(time.time(), tz=datetime.timezone.utc).isoformat()
 
 
 # ─── Canonical JSON ───────────────────────────────────────────────

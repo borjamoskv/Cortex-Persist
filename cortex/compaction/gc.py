@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import logging
 import sqlite3
+import time
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any
 
@@ -27,7 +28,7 @@ class GarbageCollector:
 
     def _is_off_peak(self) -> bool:
         """Determines if current time is within off-peak hours (02:00 - 05:00)."""
-        now = datetime.now(timezone.utc)
+        now = datetime.fromtimestamp(time.time(), tz=timezone.utc)
         return 2 <= now.hour < 5
 
     async def run_gc(self, batch_size: int = 500, force: bool = False) -> dict[str, Any]:

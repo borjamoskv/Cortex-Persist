@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import logging
 import sqlite3
+import time
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
@@ -76,7 +77,7 @@ class TaskQueue:
 
     def enqueue(self, task: AgentTask) -> AgentTask:
         """Add a task to the queue. Returns the task with db-confirmed state."""
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
         task.created_at = now
         task.updated_at = now
         task.status = TaskStatus.PENDING
@@ -119,7 +120,7 @@ class TaskQueue:
         atomicity, bypassing the need for thread locks. Zero race conditions
         even if multiple MOSKV-1 agents pull from the queue simultaneously.
         """
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
 
         with self._conn() as conn:
             row = conn.execute(
@@ -146,7 +147,7 @@ class TaskQueue:
         """Update arbitrary fields on a task."""
         if not fields:
             return
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
         fields["updated_at"] = now
         set_clause = ", ".join(f"{k} = ?" for k in fields)
         values = list(fields.values()) + [task_id]
@@ -190,7 +191,11 @@ class TaskQueue:
                 WHERE id = ? AND status IN ('pending', 'planning', 'executing',
                                              'critiquing', 'testing')
                 """,
-                (TaskStatus.CANCELLED, datetime.now(timezone.utc).isoformat(), task_id),
+                (
+                    TaskStatus.CANCELLED,
+                    datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+                    task_id,
+                ),
             )
         cancelled = result.rowcount > 0
         if cancelled:

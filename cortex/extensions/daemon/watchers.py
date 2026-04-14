@@ -205,10 +205,7 @@ class WatchdogHub:
         event_bus: Any | None = None,
         hot_state: Any | None = None,
     ) -> None:
-        self._paths = [
-            Path(p).expanduser().resolve()
-            for p in (paths or [])
-        ]
+        self._paths = [Path(p).expanduser().resolve() for p in (paths or [])]
         self._patterns = patterns or DEFAULT_PATTERNS
         self._event_bus = event_bus
         self._hot_state = hot_state
