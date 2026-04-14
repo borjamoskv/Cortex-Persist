@@ -9,10 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [Unreleased] — v0.3.0b4
+## [Unreleased] — v0.3.0b5
 
 ### In Progress
 - No unreleased entries yet.
+
+## [0.3.0b5] — 2026-04-14
+
+### Fixed
+- **Public version consistency**: aligned package metadata, `cortex.__version__`, CLI `--version`, and prompt tag fallback on `0.3.0b5` after `0.3.0b4` shipped the onboarding fix with an outdated in-module version string.
 
 ## [0.3.0b4] — 2026-04-14
 
