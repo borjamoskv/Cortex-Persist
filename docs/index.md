@@ -7,6 +7,8 @@
 ![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
 ![Status](https://img.shields.io/badge/status-v0.3.0b3%20beta-orange.svg)
+![Tests](https://img.shields.io/badge/tests-1621%2B%20passing-brightgreen.svg)
+![LOC](https://img.shields.io/badge/LOC-178K-informational.svg)
 
 ---
 

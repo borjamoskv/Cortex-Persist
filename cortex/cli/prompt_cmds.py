@@ -107,14 +107,14 @@ def _count_secret_patterns() -> int:
 
 
 def _git_tag() -> str:
-    """Return the latest git tag or 'v0.3.0-beta'."""
+    """Return the latest git tag or 'v0.3.0b3'."""
     try:
         result = subprocess.run(
             ["git", "describe", "--tags", "--abbrev=0"], capture_output=True, text=True, timeout=3
         )
-        return result.stdout.strip() or "v0.3.0-beta"
+        return result.stdout.strip() or "v0.3.0b3"
     except (subprocess.SubprocessError, FileNotFoundError, OSError):
-        return "v0.3.0-beta"
+        return "v0.3.0b3"
 
 
 def _generate_live_prompt(project_root: Path) -> str:

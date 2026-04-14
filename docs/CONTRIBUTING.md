@@ -1,6 +1,6 @@
 # CONTRIBUTING.md — Deep Change Protocols
 
-Package: cortex-persist v0.3.0b2
+Package: cortex-persist v0.3.0b3
 Engine: v8
 License: Apache-2.0
 Python: >=3.10
