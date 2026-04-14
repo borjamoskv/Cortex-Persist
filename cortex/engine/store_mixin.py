@@ -67,8 +67,17 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         tx_id: int | None = None,
         parent_decision_id: int | None = None,
         conn: aiosqlite.Connection | None = None,
+        **kwargs: Any,
     ) -> int:
         """Store a new fact with proper connection management."""
+        # Preserve legacy callers while keeping the canonical store() API stable.
+        fact_type = kwargs.pop("type", fact_type)
+        fact_type = kwargs.pop("fact_type", fact_type)
+        meta = kwargs.pop("metadata", meta)
+        meta = kwargs.pop("meta", meta)
+        if kwargs:
+            logger.debug("Ignoring unsupported store() kwargs: %s", sorted(kwargs))
+
         tenant_id = self._resolve_tenant(tenant_id)
 
         # ═══ SOVEREIGN LOCK (Axiom Ω_CB) ═══

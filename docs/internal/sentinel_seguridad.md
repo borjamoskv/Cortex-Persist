@@ -110,4 +110,4 @@ cd ~/cortex && .venv/bin/pip audit 2>&1 | tail -20
 - [ ] All 14 checks pass
 - [ ] Security headers verified via `curl -I https://api.cortex.dev/health`
 - [ ] No new `# nosec` or `# noqa: S` annotations without documented justification
-- [ ] CORTEX fact stored: `cortex store --type decision cortex "Security audit passed for release vX.Y.Z"`
+- [ ] CORTEX fact stored: `cortex store cortex "Security audit passed for release vX.Y.Z" --type decision`

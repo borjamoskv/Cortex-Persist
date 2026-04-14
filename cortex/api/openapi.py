@@ -9,12 +9,35 @@ from __future__ import annotations
 
 import json
 import logging
+import os
+import tempfile
 from pathlib import Path
 from typing import Optional
 
 __all__ = ["export_openapi_spec", "get_openapi_spec"]
 
 logger = logging.getLogger("cortex.openapi")
+
+
+def _atomic_write_text(path: Path, content: str) -> None:
+    """Persist the OpenAPI artifact atomically."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, temp_path = tempfile.mkstemp(
+        prefix=f".{path.name}.",
+        suffix=".tmp",
+        dir=path.parent,
+        text=True,
+    )
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as tmp_file:
+            tmp_file.write(content)
+        os.replace(temp_path, path)
+    except Exception:
+        try:
+            os.unlink(temp_path)
+        except OSError:
+            pass
+        raise
 
 
 def get_openapi_spec() -> dict:
@@ -45,10 +68,9 @@ def export_openapi_spec(
     else:
         output_path = Path(output_path)
 
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(
+    _atomic_write_text(
+        output_path,
         json.dumps(spec, indent=indent, ensure_ascii=False),
-        encoding="utf-8",
     )
 
     endpoint_count = sum(len(methods) for methods in spec.get("paths", {}).values())

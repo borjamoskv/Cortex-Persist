@@ -6,6 +6,8 @@ and assembles it in /tmp to verify recursive integrity.
 
 from __future__ import annotations
 
+import re
+import inspect
 from pathlib import Path
 
 import pytest
@@ -90,6 +92,24 @@ class TestGenesisEngineCreate:
         test_files = [f for f in result.files_created if "test_" in f]
         assert len(test_files) >= 1
 
+    def test_create_with_auto_cli_writes_cli_stub(self, test_root: Path) -> None:
+        """Auto-CLI generation creates the expected command module."""
+        engine = GenesisEngine(cortex_root=test_root)
+        spec = SystemSpec(
+            name="cli_ready",
+            auto_cli=True,
+            components=[
+                ComponentSpec(name="logic", component_type="module", interfaces=["run"]),
+            ],
+        )
+
+        result = engine.create(spec)
+
+        cli_file = test_root / "cli" / "cli_ready_cmds.py"
+        assert result.validation_passed
+        assert cli_file.exists()
+        assert any(path.endswith("cli_ready_cmds.py") for path in result.files_created)
+
     def test_create_skill_type(self, test_root: Path) -> None:
         """Create a skill-type system (SKILL.md)."""
         engine = GenesisEngine(cortex_root=test_root)
@@ -138,6 +158,30 @@ class TestGenesisEngineCreate:
 
         assert result.validation_passed
         assert result.spec.name == "from_dict"
+
+    def test_create_blocks_traversal_and_absolute_target_dir(self, test_root: Path) -> None:
+        """create() rejects target_dir values that escape the repo root."""
+        engine = GenesisEngine(cortex_root=test_root)
+        forbidden_absolute = (test_root / "forbidden_absolute_target").resolve()
+
+        traversal_spec = SystemSpec(
+            name="bad_traversal",
+            target_dir="../../outside",
+            components=[ComponentSpec(name="core", component_type="module")],
+        )
+        absolute_spec = SystemSpec(
+            name="bad_absolute",
+            target_dir=str(forbidden_absolute),
+            components=[ComponentSpec(name="core", component_type="module")],
+        )
+
+        traversal = engine.create(traversal_spec)
+        absolute = engine.create(absolute_spec)
+
+        assert any("target_dir rejected" in item for item in traversal.files_failed)
+        assert any("target_dir rejected" in item for item in absolute.files_failed)
+        assert not (test_root / "outside" / "bad_traversal").exists()
+        assert not forbidden_absolute.exists()
 
     def test_failed_files_reported(self, test_root: Path) -> None:
         """Components with no matching template report failures gracefully."""
@@ -393,6 +437,103 @@ class TestGenesisExtend:
                 Path("/tmp/nonexistent_genesis_dir"),
                 [ComponentSpec(name="x")],
             )
+
+    def test_extend_with_auto_tests_creates_test_stub(self, test_root: Path) -> None:
+        """extend(auto_tests=True) materializes test stubs for new components."""
+        engine = GenesisEngine(cortex_root=test_root)
+        base_spec = SystemSpec(
+            name="extend_tests",
+            components=[ComponentSpec(name="core", component_type="module")],
+        )
+        engine.create(base_spec)
+
+        result = engine.extend(
+            test_root / "extend_tests",
+            [ComponentSpec(name="extra", component_type="module", interfaces=["run"])],
+            auto_tests=True,
+        )
+
+        test_stub = test_root.parent / "tests" / "extend_tests" / "test_extra.py"
+        assert result.validation_passed
+        assert test_stub.exists()
+        assert any(path.endswith("test_extra.py") for path in result.files_created)
+
+    def test_extend_routes_test_and_cli_components(self, test_root: Path) -> None:
+        """extend() writes incremental test and CLI components to their target paths."""
+        engine = GenesisEngine(cortex_root=test_root)
+        base_spec = SystemSpec(
+            name="special_paths",
+            components=[ComponentSpec(name="core", component_type="module")],
+        )
+        engine.create(base_spec)
+
+        result = engine.extend(
+            test_root / "special_paths",
+            [
+                ComponentSpec(name="logic", component_type="test", interfaces=["run"]),
+                ComponentSpec(name="cli", component_type="cli_command"),
+            ],
+        )
+
+        test_file = test_root / "tests" / "special_paths" / "test_logic.py"
+        cli_file = test_root / "cli" / "cli_cmds.py"
+
+        assert test_file.exists()
+        assert cli_file.exists()
+        assert any(path.endswith("test_logic.py") for path in result.files_created)
+        assert any(path.endswith("cli_cmds.py") for path in result.files_created)
+
+    def test_extend_blocks_path_traversal_and_absolute_paths(self, test_root: Path, monkeypatch) -> None:
+        """extend() rejects traversal and absolute target paths."""
+        engine = GenesisEngine(cortex_root=test_root)
+        base_spec = SystemSpec(
+            name="safe_zone",
+            components=[ComponentSpec(name="core", component_type="module")],
+        )
+        engine.create(base_spec)
+
+        existing_dir = test_root / "safe_zone"
+        malicious_relative = existing_dir.parent / "blocked_relative.md"
+        malicious_absolute = (test_root / "blocked_absolute.md").resolve()
+
+        class _BadTemplate:
+            def render(self, system_name: str, component: ComponentSpec) -> dict[str, str]:
+                return {
+                    "../blocked_relative.md": "relative traversal",
+                    str(malicious_absolute): "absolute path",
+                    "good.py": "print('allowed')",
+                }
+
+        original_get = engine.templates.get
+
+        def _patched_get(template_name: str) -> object:
+            if template_name in {"module", "dataclass", "test", "cli_command"}:
+                return _BadTemplate()
+            return original_get(template_name)
+
+        monkeypatch.setattr(engine.templates, "get", _patched_get)
+
+        result = engine.extend(existing_dir, [ComponentSpec(name="bad", component_type="module")])
+
+        assert any("Path traversal blocked" in item for item in result.files_failed)
+        assert not malicious_relative.exists()
+        assert not malicious_absolute.exists()
+        assert any(path.endswith("good.py") for path in result.files_created)
+        assert not any("blocked_relative.md" in path for path in result.files_created)
+        assert not any("blocked_absolute.md" in path for path in result.files_created)
+
+
+class TestGenesisAtomicWrites:
+    """Regression guards for atomic write paths."""
+
+    def test_assembler_and_engine_no_direct_write_text(self) -> None:
+        assembler_source = inspect.getsource(SystemAssembler)
+        engine_source = inspect.getsource(GenesisEngine.extend)
+
+        assert ".write_text(" not in assembler_source
+        assert ".write_text(" not in engine_source
+        assert not re.search(r"\bopen\([^\\n]*,\s*[\"']w[\"']", assembler_source)
+        assert not re.search(r"\bopen\([^\\n]*,\s*[\"']w[\"']", engine_source)
 
 
 class TestComposeTemplates:

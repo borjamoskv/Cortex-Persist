@@ -148,6 +148,7 @@ const MODEL_MATRIX = [
 const FLAGS = {
   json: false,
   guide: false,
+  agentId: 1,
 };
 
 const args = process.argv.slice(2);
@@ -158,6 +159,7 @@ if (args.includes('--help') || args.includes('-h')) {
 
 FLAGS.json = args.includes('--json');
 FLAGS.guide = args.includes('--guide');
+FLAGS.agentId = readAgentId(args);
 
 if (FLAGS.guide) {
   printGuide(FLAGS.json);
@@ -167,6 +169,8 @@ if (FLAGS.guide) {
 const text = (args
   .filter((arg) => arg !== '--json')
   .filter((arg) => arg !== '--guide')
+  .filter((arg) => arg !== '--agent')
+  .filter((arg) => !arg.startsWith('--agent='))
   .join(' ')
   .trim()
   || fs.readFileSync(0, 'utf8').toString().trim());
@@ -176,7 +180,7 @@ if (!text) {
   process.exit(1);
 }
 
-const result = selectModel(text);
+const result = selectModel(text, FLAGS.agentId);
 
 if (FLAGS.json) {
   process.stdout.write(JSON.stringify(result, null, 2));
@@ -191,7 +195,7 @@ for (const alt of result.alternatives) {
   process.stdout.write(`- ${alt.id} (${Math.round(alt.confidence)}%) | ${alt.reason}\n`);
 }
 
-function selectModel(rawText) {
+function selectModel(rawText, agentId) {
   const text = normaliza(rawText);
   const tokens = splitTokens(text);
   const matches = MODEL_MATRIX.map((model) => ({
@@ -232,10 +236,11 @@ function selectModel(rawText) {
 
   const sorted = matches
     .map((entry) => {
+      const boost = getAgentBoost(entry.id, agentId);
       const maxHit = MODEL_MATRIX.length ? 5 : 1;
       const hitBoost = (entry.hitCount / maxHit) * 18;
       const lengthBoost = Math.min(14, tokens.length);
-      const confidence = Math.max(8, Math.min(99, Math.round(entry.score + hitBoost + lengthBoost)));
+      const confidence = Math.max(8, Math.min(99, Math.round(entry.score + hitBoost + lengthBoost + boost)));
       return {
         id: entry.id,
         name: entry.name,
@@ -269,6 +274,38 @@ function splitTokens(value) {
 
 function escapeRegex(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function readAgentId(args) {
+  const envAgent = Number(process.env.MODEL_ROUTER_AGENT_ID) || 1;
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index];
+    if (arg === '--agent') {
+      return Number(args[index + 1]) || envAgent;
+    }
+    if (arg.startsWith('--agent=')) {
+      return Number(arg.slice('--agent='.length)) || envAgent;
+    }
+  }
+  return envAgent;
+}
+
+function getAgentBoost(modelId, agentId) {
+  const normalizedAgent = Number(agentId) || 1;
+  const modelIndex = MODEL_MATRIX.findIndex((entry) => entry.id === modelId);
+  const preference = normalizedAgent % MODEL_MATRIX.length === modelIndex ? 2.4 : 0;
+  const hash = hashString(`agent:${normalizedAgent}:${modelId}`);
+  const jitter = ((hash % 9) - 4) / 3;
+  return preference + jitter;
+}
+
+function hashString(value) {
+  let hash = 2166136261;
+  for (let i = 0; i < value.length; i += 1) {
+    hash ^= value.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
 }
 
 function printHelp() {

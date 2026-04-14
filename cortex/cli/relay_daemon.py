@@ -1,5 +1,6 @@
 import asyncio
 import os
+from pathlib import Path
 
 import aiofiles
 import uvicorn
@@ -10,25 +11,30 @@ app = FastAPI(title="CORTEX x Notch Relay")
 RELAY_BUFFER = os.path.expanduser("~/.cortex/relay_buffer.jsonl")
 
 
+def ensure_relay_buffer() -> Path:
+    """Create the relay buffer if it does not exist."""
+    relay_path = Path(RELAY_BUFFER).expanduser()
+    relay_path.parent.mkdir(parents=True, exist_ok=True)
+    relay_path.touch(exist_ok=True)
+    return relay_path
+
+
 @app.get("/status")
 async def status():
-    return {"status": "Sovereign", "buffer": RELAY_BUFFER}
+    return {"status": "Sovereign", "buffer": str(ensure_relay_buffer())}
 
 
 async def event_generator():
     """Polls the relay buffer and yields new events."""
-    if not os.path.exists(RELAY_BUFFER):
-        os.makedirs(os.path.dirname(RELAY_BUFFER), exist_ok=True)
-        async with aiofiles.open(RELAY_BUFFER, "w") as f:
-            await f.write("")
+    relay_buffer = await asyncio.to_thread(ensure_relay_buffer)
 
     # Start at the end of the file
-    file_size = await asyncio.to_thread(os.path.getsize, RELAY_BUFFER)
+    file_size = await asyncio.to_thread(os.path.getsize, relay_buffer)
 
     while True:
-        current_size = await asyncio.to_thread(os.path.getsize, RELAY_BUFFER)
+        current_size = await asyncio.to_thread(os.path.getsize, relay_buffer)
         if current_size > file_size:
-            async with aiofiles.open(RELAY_BUFFER) as f:
+            async with aiofiles.open(relay_buffer) as f:
                 await f.seek(file_size)
                 lines = await f.readlines()
                 for line in lines:

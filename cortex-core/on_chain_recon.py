@@ -2,6 +2,7 @@ import subprocess
 import json
 import os
 import sys
+import tempfile
 
 # CORTEX On-Chain Recon v6.5 — Target Acquisition (Ω₆)
 def get_live_target():
@@ -26,8 +27,16 @@ if __name__ == "__main__":
     target = get_live_target()
     if target:
         # Save to current recon state
-        with open("/tmp/cortex_recon_target.json", "w") as f:
-            json.dump(target, f)
+        target_path = "/tmp/cortex_recon_target.json"
+        with tempfile.NamedTemporaryFile(
+            "w",
+            dir=os.path.dirname(target_path) or ".",
+            delete=False,
+            encoding="utf-8",
+        ) as tmp_file:
+            json.dump(target, tmp_file)
+            tmp_path = tmp_file.name
+        os.replace(tmp_path, target_path)
         print(f"✅ [RECON] Target Persisted: {target['url']}")
         
         # Trigger the X100 Fuzzer (C5-REAL)

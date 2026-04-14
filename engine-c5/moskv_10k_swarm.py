@@ -4,6 +4,7 @@ import aiohttp
 import time
 import json
 import os
+import tempfile
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 
@@ -29,6 +30,19 @@ PAYLOAD = {
 
 def log(msg: str, tier: str = "INFO") -> None:
     print(f"[{datetime.now().time()}] [{tier}] [MOSKV-10k] {msg}")
+
+
+def _atomic_json_dump(path: str, payload: object) -> None:
+    target_dir = os.path.dirname(path) or "."
+    with tempfile.NamedTemporaryFile(
+        "w",
+        dir=target_dir,
+        delete=False,
+        encoding="utf-8",
+    ) as tmp_file:
+        json.dump(payload, tmp_file, indent=4)
+        tmp_path = tmp_file.name
+    os.replace(tmp_path, path)
 
 async def agent_strike(
     agent_id: int, 
@@ -83,9 +97,8 @@ async def swarm_commander() -> List[Dict[str, Any]]:
 def crystallize_ledger(results: List[Dict[str, Any]]) -> None:
     log("Asalto concluido. Procesando Tensor-State (RTT)...", "SYSTEM")
     output_path = os.path.expanduser("~/Cortex-Persist/engine-c5/mev_rpc_routing.json")
-    
-    with open(output_path, "w") as f:
-        json.dump(results, f, indent=4)
+
+    _atomic_json_dump(output_path, results)
         
     for r in results:
         rtt = r.get('best_rtt', 'TIMEOUT')

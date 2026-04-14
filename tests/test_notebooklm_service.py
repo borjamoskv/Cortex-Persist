@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -169,6 +170,33 @@ class TestNotebookLMService:
         if result is not None:
             assert isinstance(result, Path)
 
+    def test_fragment_by_domain_writes_domain_file(self, tmp_path: Path) -> None:
+        from cortex.services.notebooklm import NotebookLMService
+
+        svc = NotebookLMService(":memory:")
+        fact = MagicMock()
+        fact.id = 42
+        fact.fact_type = "decision"
+        fact.project = "cortex"
+        fact.source = "agent:gemini"
+        fact.confidence = 0.85
+        fact.timestamp = 1710345600.0
+        fact.content = "Use RRF for hybrid search"
+
+        async def fake_get_active_facts(project=None):
+            return [fact]
+
+        svc.get_active_facts = fake_get_active_facts  # type: ignore[method-assign]
+
+        counts = asyncio.run(svc.fragment_by_domain(tmp_path / "domains"))
+
+        output = tmp_path / "domains" / "cortex-core.md"
+        assert counts == {"cortex-core": 1}
+        assert output.exists()
+        content = output.read_text(encoding="utf-8")
+        assert "Use RRF for hybrid search" in content
+        assert "SOVEREIGN SIGNATURE" in content
+
 
 class TestMCPToolRegistration:
     """Verify MCP tool registration doesn't error."""
@@ -186,3 +214,37 @@ class TestMCPToolRegistration:
 
         # Verify tool decorator was called 4 times
         assert mock_mcp.tool.call_count == 4
+
+    def test_digest_tool_writes_output_file(self, monkeypatch, tmp_path: Path) -> None:
+        from cortex.mcp.notebooklm_tools import register_notebooklm_tools
+        import cortex.services.notebooklm as notebooklm_service
+
+        registered_tools = {}
+
+        class _DummyMCP:
+            def tool(self):
+                def decorator(fn):
+                    registered_tools[fn.__name__] = fn
+                    return fn
+
+                return decorator
+
+        class _DummyCtx:
+            db_path = ":memory:"
+
+        class _DummyService:
+            def __init__(self, db_path: str) -> None:
+                self.db_path = db_path
+
+            async def generate_digest(self, project=None) -> str:
+                return "∆_CTX: digest\n"
+
+        monkeypatch.setattr(notebooklm_service, "NotebookLMService", _DummyService)
+        register_notebooklm_tools(_DummyMCP(), _DummyCtx())
+
+        out_path = tmp_path / "digest.md"
+        result = asyncio.run(registered_tools["notebooklm_digest"](output=str(out_path)))
+
+        assert out_path.exists()
+        assert out_path.read_text(encoding="utf-8") == "∆_CTX: digest\n"
+        assert result["facts_count"] == 1

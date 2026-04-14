@@ -5,6 +5,7 @@ import logging
 import os
 import sqlite3
 import sys
+import tempfile
 import time
 
 from cortex.config import DB_PATH
@@ -31,6 +32,20 @@ CHROMA_DB_PATH = os.path.expanduser("~/.cortex/chroma_db")
 
 # In-memory state for O(1) Ledger append
 _LEDGER_STATE = None
+
+
+def _atomic_json_dump(path: str, payload: object) -> None:
+    """Persist JSON via temp file + os.replace to avoid torn writes."""
+    target_dir = os.path.dirname(path) or "."
+    with tempfile.NamedTemporaryFile(
+        "w",
+        dir=target_dir,
+        delete=False,
+        encoding="utf-8",
+    ) as tmp_file:
+        json.dump(payload, tmp_file, indent=2)
+        tmp_path = tmp_file.name
+    os.replace(tmp_path, path)
 
 
 @functools.lru_cache(maxsize=100)
@@ -159,8 +174,7 @@ def register_singularity_tools(mcp) -> None:
         )
 
         # Still sync to disk for persistence, but O(1) read after cold load
-        with open(STATE_FILE, "w") as f:
-            json.dump(_LEDGER_STATE, f, indent=2)
+        _atomic_json_dump(STATE_FILE, _LEDGER_STATE)
 
         # Signal Pulse (Aether Matrix)
         try:
@@ -203,8 +217,13 @@ def register_singularity_tools(mcp) -> None:
             }
             queue["pending_tasks"].append(task)
 
-            with open(SWARM_QUEUE_FILE, "w") as f:
+            fd, temp_path = tempfile.mkstemp(
+                prefix="cortex_swarm_queue_",
+                dir=os.path.dirname(SWARM_QUEUE_FILE) or None,
+            )
+            with os.fdopen(fd, "w") as f:
                 json.dump(queue, f, indent=2)
+            os.replace(temp_path, SWARM_QUEUE_FILE)
 
             logging.info("🚀 [DISPATCH] Handed task to daemon: %s", command)
             return f"✅ Task dispatched to CORTEX Swarm. Agent [{agent_id}] is executing."

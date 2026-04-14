@@ -1,7 +1,7 @@
 {
   "name": "@cortex-persist/sdk",
   "version": "0.1.0",
-  "description": "JavaScript/TypeScript SDK for CORTEX — Sovereign Memory Engine for Enterprise AI Swarms",
+  "description": "JavaScript/TypeScript SDK for CORTEX Persist, the verifiable memory API for AI agents",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": ["dist/"],
@@ -9,7 +9,7 @@
     "build": "tsc",
     "prepublishOnly": "npm run build"
   },
-  "keywords": ["cortex", "memory", "ai", "agents", "rag", "semantic-search"],
+  "keywords": ["cortex", "verifiable-memory", "decision-lineage", "audit-trail", "ai-agents", "sdk"],
   "author": "borjamoskv.com <borjamoskv@gmail.com>",
   "license": "Apache-2.0",
   "repository": {

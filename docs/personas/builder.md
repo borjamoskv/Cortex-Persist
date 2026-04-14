@@ -25,17 +25,17 @@ from cortex import CortexEngine
 async def agent_loop():
     # Automatically binds to the local ./cortex.db ledger
     engine = CortexEngine()
-    
+
     # 1. Your LLM decides to delete a user's file.
     # 2. You store that decision cryptographically.
-    receipt = await engine.store_fact(
+    fact_id = await engine.store(
         content="Action executed: Deleted system32 due to suspected malware.",
         fact_type="irreversible_action",
         project="desktop-cleaner-bot",
-        tenant_id="user_host_1"
+        tenant_id="user_host_1",
     )
-    
-    print(f"Secured under Hash: {receipt.hash}")
+
+    print(f"Secured fact ID: {fact_id}")
 
 asyncio.run(agent_loop())
 ```
@@ -46,7 +46,7 @@ If your agent goes rogue, or a user complains that a file was mysteriously delet
 
 ```bash
 # Returns VERIFIED if the row was untouched, or TAMPERED if the DB was altered.
-cortex verify ledger
+cortex ledger verify
 ```
 
 ## Next Steps for Builders:

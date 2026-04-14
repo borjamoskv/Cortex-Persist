@@ -4,6 +4,7 @@ import sys
 import subprocess
 import shutil
 import glob
+import tempfile
 from datetime import datetime
 from cortex_ast_fractor import extract_private_ast, generate_poc
 
@@ -15,6 +16,19 @@ class C5Orchestrator:
         
     def log(self, msg, tier="INFO"):
         print(f"[{datetime.now().time()}] [{tier}] [C5-ORCH] {msg}")
+
+    @staticmethod
+    def _atomic_write_text(path: str, content: str) -> None:
+        target_dir = os.path.dirname(path) or "."
+        with tempfile.NamedTemporaryFile(
+            "w",
+            dir=target_dir,
+            delete=False,
+            encoding="utf-8",
+        ) as tmp_file:
+            tmp_file.write(content)
+            tmp_path = tmp_file.name
+        os.replace(tmp_path, path)
 
     def run_ast_slither(self):
         self.log(f"Ejecutando escaneo AST material I/O en {self.target}...", "AST-L1")
@@ -52,13 +66,12 @@ contract C5RealExploitTest is Test {{
         // Setup atado a {self.target}
     }}
 
-    function invariant_cortex_extract() public {{
+        function invariant_cortex_extract() public {{
         require(true, "Invariante base firme contra: {', '.join(endpoints)}");
     }}
 }}
 """
-        with open(forge_file, "w") as f:
-            f.write(content)
+        self._atomic_write_text(forge_file, content)
         self.log(f"Test cristalizado en disco: {forge_file}.", "FORGE-L2")
         return forge_file
 

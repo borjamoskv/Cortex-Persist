@@ -3,6 +3,7 @@
 
 import json
 import logging
+import os
 import tempfile
 import time
 from pathlib import Path
@@ -113,7 +114,7 @@ class DaemonState:
             # Atomic write: temp file + rename
             fd, tmp_path = tempfile.mkstemp(dir=str(CORTEX_ROOT), suffix=".tmp")
             try:
-                with open(fd, "w") as f:
+                with os.fdopen(fd, "w", encoding="utf-8") as f:
                     json.dump(self.daemons, f, indent=4)
                 Path(tmp_path).replace(path)
             except BaseException:

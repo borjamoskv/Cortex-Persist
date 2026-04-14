@@ -5,6 +5,7 @@ import hashlib
 import asyncio
 import logging
 import sqlite3
+import tempfile
 
 VSA_DIMENSION = 10000
 DB_PATH = "/Users/borjafernandezangulo/Cortex-Persist/cortex-core/cortex_memory_vsa.db"
@@ -121,6 +122,11 @@ def enqueue_swarm_task(agent_name: str, payload: dict):
         "agent": agent_name,
         "payload": payload
     })
-    
-    with open(SWARM_QUEUE_FILE, "w") as f:
+
+    fd, temp_path = tempfile.mkstemp(
+        prefix="cortex_swarm_queue_",
+        dir=os.path.dirname(SWARM_QUEUE_FILE) or None,
+    )
+    with os.fdopen(fd, "w") as f:
         json.dump(data, f, indent=2)
+    os.replace(temp_path, SWARM_QUEUE_FILE)

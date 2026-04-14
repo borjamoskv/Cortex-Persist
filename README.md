@@ -1,8 +1,8 @@
 # CORTEX Persist
 
-Tamper-evident memory and decision lineage for AI agents.
+Verifiable memory and decision lineage for high-stakes AI workflows.
 
-CORTEX Persist is a local-first trust layer for facts, decisions, errors, and state transitions. It gives you hash-chained records, verification commands, and audit-ready exports so you can prove what an agent knew and when it knew it.
+CORTEX Persist gives teams shipping AI into high-stakes workflows verifiable memory, tamper-evident decision lineage, and exportable evidence. It adds hash-chained records and verification commands so teams can inspect what happened instead of reconstructing it later.
 
 [Quickstart](docs/quickstart.md) · [Installation](docs/installation.md) · [CLI](docs/cli.md) · [API](docs/api.md) · [Security](docs/SECURITY_TRUST_MODEL.md) · [Roadmap](ROADMAP.md) · [Contributing](CONTRIBUTING.md)
 
@@ -91,22 +91,31 @@ cortex compliance-report
 
 If you want the full walkthrough, see [docs/quickstart.md](docs/quickstart.md).
 
-## Local Model Automation (optional)
+## Optional Experimental Surfaces
 
-The scripts package includes local helpers to choose a model and dispatch tasks by workflow:
+The stable product surface is the verifiable memory core: facts, search, ledger, trust, and health.
+
+Additional operator tooling still exists in-repo, but it is not part of the default product promise and may change faster:
 
 ```bash
 npm run model:pick -- "Texto de tarea"
 npm run model:guide -- --json
 npm run model:dispatch -- --json "Necesito compilar y validar el site" -- "npm run build"
 npm run task:build -- --json "Compilar y validar la web"
+npm run task:swarm -- --json --agents=21 "Consenso de 21 agentes para la tarea"
+npm run task:perfect -- --json "Blindar y dejar el repo perfecto"
 npm run task:auto -- --json "Necesito compilar, testear y cerrar validación de la web antes del deploy"
 npm run test:models
 ```
 
-It supports `build|web|test|ship|release`, environment-based flow selection, and `--dry-run` for safe planning.
+For the HTTP layer, the default app now mounts only the core API surface. Enable experimental routes explicitly with:
 
-See [scripts/README.md](scripts/README.md) for full details.
+```bash
+export CORTEX_ENABLE_EXPERIMENTAL_API=1
+uvicorn cortex.api:app --host 0.0.0.0 --port 8484
+```
+
+See [docs/api.md](docs/api.md) and [scripts/README.md](scripts/README.md) for details.
 
 ## Python Integration
 

@@ -10,6 +10,7 @@ Provides native CLI commands for NotebookLM synchronization:
 
 from __future__ import annotations
 
+import json
 import logging
 import os
 import shutil
@@ -22,6 +23,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
+from cortex.cli.common import atomic_write_text
 from cortex.cli.notebooklm_data import (
     _PROJECT_DOMAIN,
     DIGEST_FILE,
@@ -37,6 +39,11 @@ from cortex.cli.notebooklm_data import (
 
 console = Console()
 logger = logging.getLogger(__name__)
+
+
+def _save_processed_manifest(manifest_path: Path, processed_files: set[str]) -> Path:
+    """Persist the ingest manifest atomically."""
+    return atomic_write_text(manifest_path, json.dumps(sorted(processed_files), indent=2))
 
 
 # ── CLI Group ──────────────────────────────────────────────────────────
@@ -99,7 +106,7 @@ def digest_cmd(output: str):
 
         lines.append(_sovereign_signature())
         content = "".join(lines)
-        Path(output).write_text(content, encoding="utf-8")
+        atomic_write_text(output, content)
 
         word_count = len(content.split())
         limit_msg = "✅ Safe" if word_count < 500_000 else "⚠️ OVER LIMIT"
@@ -178,7 +185,7 @@ def fragment_cmd(output_dir: str):
 
             lines.append(_sovereign_signature())
             content = "".join(lines)
-            filename.write_text(content, encoding="utf-8")
+            atomic_write_text(filename, content)
             word_count = len(content.split())
             status = "[green]✅[/green]" if word_count < 500_000 else "[red]⚠️ OVER[/red]"
             table.add_row(domain, str(len(facts_in_domain)), f"{word_count:,}", status)
@@ -334,8 +341,6 @@ def status_cmd():
 )
 def ingest_cmd(drive_path: str | None):
     """Silent daemon-like ingest: Parse NotebookLM notes back into CORTEX."""
-    import json
-
     from cortex.cli.common import get_engine
     from cortex.extensions.llm.router import IntentProfile
     from cortex.extensions.llm.sovereign import SovereignLLM
@@ -483,6 +488,6 @@ def ingest_cmd(drive_path: str | None):
         # Actualizar manifest
         if newly_processed:
             processed_files.update(newly_processed)
-            manifest_path.write_text(json.dumps(list(processed_files), indent=2), encoding="utf-8")
+            _save_processed_manifest(manifest_path, processed_files)
 
     _run_async(_ingest())

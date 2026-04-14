@@ -361,15 +361,15 @@ class TestActionDispatch:
         handler.emit_signal.assert_called_once()
         handler.notify.assert_called_once()
 
-    async def test_store_fact_action(self) -> None:
+    async def test_persist_fact_action(self) -> None:
         handler = TriggerActionHandler()
-        handler.store_fact = AsyncMock()
+        handler.persist_fact = AsyncMock()
         engine = TriggerEngine(handler=handler)
         engine.register(
             _make_condition(
                 actions=[
                     TriggerAction(
-                        action_type=ActionType.STORE_FACT,
+                        action_type=ActionType.PERSIST_FACT,
                         config={
                             "content": "ghost detected",
                             "fact_type": "ghost",
@@ -379,7 +379,7 @@ class TestActionDispatch:
             )
         )
         await engine.evaluate(_fake_signal())
-        handler.store_fact.assert_called_once()
+        handler.persist_fact.assert_called_once()
 
 
 # ---------------------------------------------------------------------------

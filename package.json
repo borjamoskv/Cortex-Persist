@@ -1,5 +1,6 @@
 {
   "name": "cortex-landing",
+  "description": "Landing site for CORTEX Persist, verifiable memory for AI agents.",
   "type": "module",
   "version": "0.3.2b1",
   "scripts": {
@@ -8,9 +9,11 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
+    "engine:perfect": "node scripts/perfect-engine.mjs",
     "model:pick": "node scripts/model-router.mjs",
     "model:guide": "node scripts/model-router.mjs --guide",
     "model:dispatch": "node scripts/model-dispatcher.mjs",
+    "model:ledger": "node scripts/model-automation-report.mjs",
     "task:run": "node scripts/model-dispatcher.mjs",
     "task:build": "node scripts/model-task-runner.mjs build",
     "task:auto": "node scripts/model-task-runner.mjs auto",
@@ -18,12 +21,14 @@
     "task:test": "node scripts/model-task-runner.mjs test",
     "task:ship": "node scripts/model-task-runner.mjs ship",
     "task:release": "node scripts/model-task-runner.mjs release",
+    "task:perfect": "node scripts/model-task-runner.mjs perfect",
+    "task:swarm": "node scripts/model-task-runner.mjs swarm",
+    "model:swarm": "node scripts/model-swarm.mjs",
     "test:models": "node scripts/test-model-automation.mjs"
   },
   "dependencies": {
     "@astrojs/react": "^4.2.0",
     "@astrojs/starlight": "^0.32.0",
-    "@astrojs/tailwind": "^5.1.5",
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
     "@types/three": "^0.183.1",

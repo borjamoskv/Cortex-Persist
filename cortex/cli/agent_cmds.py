@@ -15,6 +15,7 @@ from pathlib import Path
 import click
 from rich.console import Console
 from rich.table import Table
+from cortex.cli.common import atomic_write_text
 
 console = Console()
 
@@ -37,7 +38,7 @@ def agent_init(output: str):
 
     scaffold = AgentRole.scaffold()
     path = Path(output)
-    path.write_text(scaffold.to_yaml(), encoding="utf-8")
+    atomic_write_text(path, scaffold.to_yaml())
     console.print(f"[green]✅ Scaffold written to {path}[/green]")
 
 

@@ -12,6 +12,7 @@ import logging
 import signal
 import sqlite3
 import threading
+import tempfile
 import time
 from collections.abc import Callable
 from datetime import datetime, timezone
@@ -170,10 +171,11 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
         file_config = self._load_config()
         self._cooldown = file_config.get("cooldown", cooldown)
         self._last_alerts: dict[str, float] = {}
+        resolved_sites = sites or file_config.get("sites", [])
 
         self._init_core_monitors(file_config, sites, stale_hours, memory_stale_hours)
         self._init_advanced_monitors(file_config)
-        self._init_external_oracles(file_config, resolved_sites=[])  # sites used in certs
+        self._init_external_oracles(file_config, resolved_sites=resolved_sites)
         self._init_background_agents(file_config)
         self._init_autopoiesis(file_config)
         self._init_sovereign_subsystems(file_config)
@@ -278,11 +280,12 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
             self.sentinel_oracle = SentinelMonitor(
                 check_interval=file_config.get("sentinel_interval", 60),
             )
-        except ImportError:
+        except Exception as e:  # noqa: BLE001
             self._async_engine = None
             self.ast_oracle = None
             self.fiat_oracle = None
             self.sentinel_oracle = None
+            logger.warning("Failed to init external oracles: %s", e)
 
         cert_hostnames = [
             h.replace("https://", "").replace("http://", "").split("/")[0]
@@ -412,7 +415,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
 
             self.timing_conn = connect(file_config.get("db_path", str(CORTEX_DB)))
             self.tracker = TimingTracker(self.timing_conn)
-        except (ImportError, sqlite3.Error) as e:
+        except Exception as e:  # noqa: BLE001
             logger.error("Failed to init TimeTracker: %s", e)
             self.tracker = None
 
@@ -494,7 +497,11 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
         if not CONFIG_FILE.exists():
             return {}
         try:
-            return json.loads(CONFIG_FILE.read_text())
+            data = json.loads(CONFIG_FILE.read_text())
+            if isinstance(data, dict):
+                return data
+            logger.warning("Ignoring daemon config with invalid top-level type: %s", type(data))
+            return {}
         except (json.JSONDecodeError, OSError) as e:
             logger.warning("Failed to load daemon config: %s", e)
             return {}
@@ -803,7 +810,15 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
         """Persist status to disk."""
         try:
             STATUS_FILE.parent.mkdir(parents=True, exist_ok=True)
-            STATUS_FILE.write_text(json.dumps(status.to_dict(), indent=2, ensure_ascii=False))
+            with tempfile.NamedTemporaryFile(
+                "w",
+                dir=str(STATUS_FILE.parent),
+                delete=False,
+                encoding="utf-8",
+            ) as tmp_file:
+                json.dump(status.to_dict(), tmp_file, indent=2, ensure_ascii=False)
+                tmp_path = Path(tmp_file.name)
+            tmp_path.replace(STATUS_FILE)
         except OSError as e:
             logger.error("Failed to save status: %s", e)
 

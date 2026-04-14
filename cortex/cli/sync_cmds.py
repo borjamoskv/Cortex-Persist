@@ -9,7 +9,7 @@ from typing import Any
 import click
 from rich.panel import Panel
 
-from cortex.cli.common import DEFAULT_DB, cli, console, get_engine
+from cortex.cli.common import DEFAULT_DB, atomic_write_text, cli, console, get_engine
 from cortex.extensions.sync import export_obsidian, export_snapshot, export_to_json, sync_memory
 
 __all__ = [
@@ -121,7 +121,7 @@ def export(db, out, fmt, project, min_confidence, types) -> None:
                     out = f"cortex-export-{project or 'all'}.{ext}"
 
                 out_path = Path(out).expanduser()
-                out_path.write_text(output_str, encoding="utf-8")
+                atomic_write_text(out_path, output_str)
                 console.print(f"[green]✓[/] Datos ({fmt}) exportatorios a [cyan]{out_path}[/]")
         finally:
             # engine.close is async

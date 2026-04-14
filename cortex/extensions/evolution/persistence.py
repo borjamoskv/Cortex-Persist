@@ -4,9 +4,11 @@ Version: 3.0 (Atomic, Rotating Backups & Auto-Rollback)
 
 from __future__ import annotations
 
+import os
 import json
 import logging
 import shutil
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Final, Optional
@@ -77,6 +79,24 @@ def _get_cycle_path(base_path: Path, cycle: int) -> Path:
 
 def save_swarm(agents: list[SovereignAgent], cycle: int, path: Path = DEFAULT_STATE_PATH) -> bool:
     """Guarda el estado actual y rota backups antiguos."""
+    def _write_state_file(target: Path, content: dict[str, Any]) -> None:
+        fd, temp_name = tempfile.mkstemp(
+            prefix=f"{target.name}.",
+            suffix=".tmp",
+            dir=target.parent,
+            text=True,
+        )
+        try:
+            with os.fdopen(fd, "w", encoding="utf-8") as f:
+                json.dump(content, f, indent=2, ensure_ascii=False)
+            os.replace(temp_name, target)
+        except Exception:
+            try:
+                os.unlink(temp_name)
+            except OSError:
+                pass
+            raise
+
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -89,12 +109,7 @@ def save_swarm(agents: list[SovereignAgent], cycle: int, path: Path = DEFAULT_ST
 
         # Guardado atómico del backup del ciclo
         cycle_path = _get_cycle_path(path, cycle)
-        temp_path = cycle_path.with_suffix(".tmp")
-
-        with temp_path.open("w", encoding="utf-8") as f:
-            json.dump(state, f, indent=2, ensure_ascii=False)
-
-        temp_path.replace(cycle_path)
+        _write_state_file(cycle_path, state)
 
         # Actualizar puntero principal (Latest)
         shutil.copy2(cycle_path, path)

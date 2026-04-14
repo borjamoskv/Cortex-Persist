@@ -6,6 +6,7 @@ Ref: AGENT-LANDSCAPE-Ω Gap P1.
 from typing import Any
 import abc
 import os
+import tempfile
 import time
 
 
@@ -20,6 +21,22 @@ class Actuator(abc.ABC):
     def capability_score(self) -> float:
         """Returns exergy cost / capability ratio"""
         pass
+
+
+def _atomic_write_text(path: str, content: str) -> None:
+    """Persist text atomically to avoid partial swarm artifacts."""
+    target_dir = os.path.dirname(path) or "."
+    fd, temp_path = tempfile.mkstemp(prefix="cortex_swarm_", dir=target_dir, text=True)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as tmp_file:
+            tmp_file.write(content)
+        os.replace(temp_path, path)
+    except Exception:
+        try:
+            os.unlink(temp_path)
+        except OSError:
+            pass
+        raise
 
 
 class DevinActuator(Actuator):
@@ -137,8 +154,7 @@ class AutodidactJITActuator(Actuator):
                             code += (
                                 f"\\n// [CORTEX-M1] Mutación Vector Termodinámica {iteration}\\n"
                             )
-                            with open(target_file_path, "w") as f:
-                                f.write(code)
+                            _atomic_write_text(target_file_path, code)
 
                 except subprocess.TimeoutExpired:
                     return {
@@ -266,8 +282,10 @@ class CommsActuator(Actuator):
         else:
             # Fallback - Zero Signal Loss (Drop al FS)
             if not is_recovery:
-                with open(spool_file, "w") as f:
-                    f.write(f"HDR|{target_email}|{subject}|{last_err}\n{sealed_prompt}")
+                _atomic_write_text(
+                    spool_file,
+                    f"HDR|{target_email}|{subject}|{last_err}\n{sealed_prompt}",
+                )
 
     def _consume_orphan_spool(self, smtp_host, smtp_port, smtp_user, smtp_pass):
         """Autopoietic Healing: Busca y re-inyecta streams muertos en la tubería."""

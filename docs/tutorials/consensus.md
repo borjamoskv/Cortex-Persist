@@ -23,80 +23,70 @@ Result: ✅ VERIFIED (confidence: 0.84)
 ## Step 1: Store a Fact
 
 ```bash
-cortex store --type decision --project swarm-demo "Use PostgreSQL for the user service"
+cortex store swarm-demo "Use PostgreSQL for the user service" --type decision
 # → Stored fact #42
 ```
 
 ## Step 2: Register Agents
 
-```bash
-cortex.agents register --name "architect" --weight 0.9
-cortex.agents register --name "data-engineer" --weight 0.7
-cortex.agents register --name "junior-dev" --weight 0.3
+```python
+import asyncio
+from cortex import CortexEngine
+
+
+async def main() -> None:
+    engine = CortexEngine()
+
+    architect_id = await engine.consensus.register_agent("architect")
+    data_engineer_id = await engine.consensus.register_agent("data-engineer")
+    junior_dev_id = await engine.consensus.register_agent("junior-dev")
+
+    print(architect_id, data_engineer_id, junior_dev_id)
+
+
+asyncio.run(main())
 ```
 
 ## Step 3: Cast Votes
 
 ```bash
 # architect agrees
-cortex vote 42 --agent architect --approve
+cortex vote 42 --agent <ARCHITECT_ID> --vote verify
 
 # data-engineer agrees
-cortex vote 42 --agent data-engineer --approve
+cortex vote 42 --agent <DATA_ENGINEER_ID> --vote verify
 
 # junior-dev disagrees
-cortex vote 42 --agent junior-dev --reject
+cortex vote 42 --agent <JUNIOR_DEV_ID> --vote dispute
 ```
 
-## Step 4: Check Consensus
-
-```bash
-cortex consensus 42
-```
-
-Output:
-
-```
-Fact #42: "Use PostgreSQL for the user service"
-  Votes: 3 (2 approve, 1 reject)
-  Weighted confidence: 0.84
-  Status: ✅ VERIFIED
-  Quorum: Met (3/2 minimum)
-```
-
-## Python API
+## Step 4: Read the Result
 
 ```python
+import asyncio
 from cortex import CortexEngine
 
-engine = CortexEngine()
 
-# Store
-fact_id = engine.store(
-    content="Use PostgreSQL for the user service",
-    fact_type="decision",
-    project="swarm-demo"
-)
+async def main() -> None:
+    engine = CortexEngine()
 
-# Vote
-engine.vote(
-    fact_id=fact_id,
-    agent_id="architect",
-    approve=True,
-    weight=0.9
-)
+    fact_id = await engine.store(
+        project="swarm-demo",
+        content="Use PostgreSQL for the user service",
+        fact_type="decision",
+    )
 
-engine.vote(
-    fact_id=fact_id,
-    agent_id="data-engineer",
-    approve=True,
-    weight=0.7
-)
+    architect_id = await engine.consensus.register_agent("architect")
+    data_engineer_id = await engine.consensus.register_agent("data-engineer")
 
-# Check consensus
-result = engine.verify_ledger(fact_id)
-print(f"Confidence: {result.confidence}")
-print(f"Verified: {result.verified}")
+    await engine.vote_v2(fact_id, architect_id, 1, reason="DB choice is validated")
+    await engine.vote_v2(fact_id, data_engineer_id, 1, reason="Matches scaling plan")
+
+    fact = await engine.get_fact(fact_id)
+    print(f"Consensus score: {fact.consensus_score:.2f}")
+
+
+asyncio.run(main())
 ```
 
 ## Consensus Levels

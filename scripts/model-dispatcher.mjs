@@ -3,27 +3,31 @@
 const { spawnSync } = await import('node:child_process');
 const path = await import('node:path');
 const fs = await import('node:fs');
+const {
+  maybeWriteAutomationLedger,
+  resolveAutomationRunId,
+  resolveLedgerConfig,
+} = await import('./model-automation-ledger.mjs');
 
+const dispatchStartedAt = Date.now();
+const runId = resolveAutomationRunId(process.env);
 const argv = process.argv.slice(2);
 const separator = argv.indexOf('--');
 const controlArgs = separator === -1 ? argv : argv.slice(0, separator);
 const commandArgsInput = separator === -1 ? [] : argv.slice(separator + 1);
-const taskArgs = [];
-for (let i = 0; i < controlArgs.length; i += 1) {
-  if (isControlArg(controlArgs[i])) {
-    if (controlArgs[i] === '--flow') {
-      i += 1;
-    }
-    continue;
-  }
-  taskArgs.push(controlArgs[i]);
-}
 
 const usage = printUsage();
 const wantsJson = controlArgs.includes('--json');
 const enableAutoFlow = controlArgs.includes('--auto');
 const wantsDryRun = controlArgs.includes('--dry-run');
-let flow = readFlowArgument(controlArgs);
+const parsedControls = parseControlArgs(controlArgs);
+if (parsedControls.error) {
+  emitControlArgError(parsedControls.error, wantsJson, usage);
+  process.exit(1);
+}
+const taskArgs = parsedControls.taskArgs;
+let flow = parsedControls.flow;
+const swarmAgents = parsedControls.swarmAgents;
 
 const AUTOMATION_FLOWS = {
   build: {
@@ -46,6 +50,14 @@ const AUTOMATION_FLOWS = {
     command: 'npm run build',
     description: 'Chequeo de compilación para validación rápida',
   },
+  swarm: {
+    command: 'node scripts/model-swarm.mjs',
+    description: 'Orquesta una ejecución multi-agente y usa consenso para el modelo sugerido.',
+  },
+  perfect: {
+    command: 'node scripts/perfect-engine.mjs',
+    description: 'Orquesta salud del repo, tests del router, build y ship gate rápido',
+  },
 };
 
 const SUPPORTED_FLOWS = Object.keys(AUTOMATION_FLOWS);
@@ -57,32 +69,6 @@ if (controlArgs.includes('--help') || controlArgs.includes('-h') || controlArgs.
 
 if (!flow) {
   flow = process.env.TASK_FLOW || process.env.CODEX_FLOW || process.env.MODEL_ROUTER_FLOW;
-}
-
-let commandArgs = [...commandArgsInput];
-
-let taskText = taskArgs.join(' ').trim();
-if (!taskText) {
-  try {
-    taskText = fs.readFileSync(0, 'utf8').toString().trim();
-  } catch {
-    taskText = '';
-  }
-}
-
-if (!taskText) {
-  const error = {
-    error: 'tarea_vacia',
-    message: 'texto de tarea vacío. Pasa un texto como argumento o por stdin.',
-    usage: 'npm run model:dispatch -- "texto de tarea" -- "npm run build"',
-  };
-  if (wantsJson) {
-    process.stdout.write(JSON.stringify(error, null, 2));
-    process.stdout.write('\n');
-  } else {
-    process.stdout.write(usage);
-  }
-  process.exit(1);
 }
 
 if (flow && !SUPPORTED_FLOWS.includes(flow)) {
@@ -101,20 +87,50 @@ if (flow && !SUPPORTED_FLOWS.includes(flow)) {
   process.exit(1);
 }
 
+let commandArgs = [...commandArgsInput];
+
+let taskText = taskArgs.join(' ').trim();
+if (!taskText) {
+  try {
+    taskText = fs.readFileSync(0, 'utf8').toString().trim();
+  } catch {
+    taskText = '';
+  }
+}
+taskText = normalizeTaskText(taskText);
+
+const taskError = getTaskValidationError(taskText);
+if (taskError) {
+  const error = {
+    error: taskError.code,
+    message: taskError.message,
+    usage: 'npm run model:dispatch -- "texto de tarea" -- "npm run build"',
+  };
+  if (wantsJson) {
+    process.stdout.write(JSON.stringify(error, null, 2));
+    process.stdout.write('\n');
+  } else {
+    process.stdout.write(usage);
+  }
+  process.exit(1);
+}
+
 if (!flow && enableAutoFlow) {
   flow = inferFlowFromTask(taskText);
 }
 
 if (!flow && enableAutoFlow) {
-  process.stderr.write('model dispatch failed: --auto fue pedido, pero no se encontró flujo (TASK_FLOW o --flow=build|release|ship|web|test)\n');
+  process.stderr.write('model dispatch failed: --auto fue pedido, pero no se encontró flujo (TASK_FLOW o --flow=build|release|ship|web|test|swarm|perfect)\n');
   process.exit(1);
 }
 
 const routerPath = path.resolve(process.cwd(), 'scripts/model-router.mjs');
+const routerStartedAt = Date.now();
 const picker = spawnSync(process.execPath, [routerPath, '--json', taskText], {
   encoding: 'utf8',
   stdio: ['ignore', 'pipe', 'pipe'],
 });
+const routerDurationMs = Date.now() - routerStartedAt;
 
 if (picker.error) {
   process.stderr.write(`model dispatch failed: cannot execute router (${picker.error.message})\n`);
@@ -141,8 +157,10 @@ const envCommand = (
   || process.env.MODEL_ROUTER_COMMAND
   || ''
 ).trim();
+let commandSource = '';
 if (!commandArgs.length && envCommand) {
   commandArgs = [envCommand];
+  commandSource = 'env';
 }
 
 if (flow && !commandArgs.length) {
@@ -151,13 +169,30 @@ if (flow && !commandArgs.length) {
     process.stderr.write(`model dispatch failed: flujo desconocido '${flow}'. Flujos disponibles: ${Object.keys(AUTOMATION_FLOWS).join(', ')}\n`);
     process.exit(1);
   }
-  commandArgs = [selectedFlow.command];
+  const flowCommand = flow === 'swarm' && swarmAgents
+    ? `${selectedFlow.command} --agents=${swarmAgents}`
+    : selectedFlow.command;
+  commandArgs = [flowCommand];
+  commandSource = 'flow';
+}
+
+if (commandArgs.length && !commandSource) {
+  commandSource = 'cli';
 }
 
 if (!commandArgs.length) {
+  const payload = {
+    ...decision,
+    ...(flow ? { flow } : {}),
+    taskMetrics: buildTaskMetrics(taskText),
+    timing: {
+      totalMs: Date.now() - dispatchStartedAt,
+      routerMs: routerDurationMs,
+    },
+  };
+  const finalPayload = finalizeDispatcherPayload(payload, taskText);
   if (wantsJson) {
-    const recommendation = flow ? { ...decision, flow } : decision;
-    process.stdout.write(JSON.stringify(recommendation, null, 2));
+    process.stdout.write(JSON.stringify(finalPayload, null, 2));
     process.stdout.write('\n');
     process.exit(0);
   }
@@ -178,11 +213,19 @@ if (wantsDryRun) {
     ...decision,
     flow,
     command,
+    commandSource,
+    swarmAgents: flow === 'swarm' && swarmAgents ? swarmAgents : undefined,
+    taskMetrics: buildTaskMetrics(taskText),
+    timing: {
+      totalMs: Date.now() - dispatchStartedAt,
+      routerMs: routerDurationMs,
+    },
     dryRun: true,
     status: 'dry-run',
   };
+  const finalPayload = finalizeDispatcherPayload(payload, taskText);
   if (wantsJson) {
-    process.stdout.write(JSON.stringify(payload, null, 2));
+    process.stdout.write(JSON.stringify(finalPayload, null, 2));
     process.stdout.write('\n');
   } else {
     process.stdout.write(`Flujo: ${flow}\n`);
@@ -195,21 +238,56 @@ if (wantsDryRun) {
 
 const modelEnv = {
   ...process.env,
+  MODEL_AUTOMATION_RUN_ID: runId,
   CODEX_MODEL: decision.recommended.id,
   MODEL_DISPATCH: decision.recommended.id,
   MODEL_ROUTER_SELECTION: decision.recommended.id,
+  MODEL_SWARM_TASK_TEXT: taskText,
+  MODEL_SWARM_AGENTS: flow === 'swarm' && swarmAgents ? String(swarmAgents) : process.env.MODEL_SWARM_AGENTS,
+  MODEL_AUTOMATION_LEDGER_SKIP: shouldSuppressChildLedger() ? '1' : process.env.MODEL_AUTOMATION_LEDGER_SKIP,
+  MODEL_TASK_TEXT: taskText,
+  TASK_TEXT: taskText,
 };
 
-process.stdout.write(`Ejecutando con modelo ${decision.recommended.id}\n`);
-const run = spawnSync(command, {
+if (wantsJson) {
+  process.stderr.write(`Ejecutando con modelo ${decision.recommended.id}\n`);
+} else {
+  process.stdout.write(`Ejecutando con modelo ${decision.recommended.id}\n`);
+}
+const executionStartedAt = Date.now();
+const run = spawnSync(command, wantsJson ? {
+  shell: true,
+  encoding: 'utf8',
+  stdio: ['ignore', 'pipe', 'pipe'],
+  env: modelEnv,
+} : {
   shell: true,
   stdio: 'inherit',
   env: modelEnv,
 });
+const executionDurationMs = Date.now() - executionStartedAt;
+const commandOutput = wantsJson ? buildCommandOutput(run.stdout, run.stderr) : {};
 
 if (run.error) {
+  const payload = {
+    ...decision,
+    executed: command,
+    flow,
+    commandSource,
+    swarmAgents: flow === 'swarm' && swarmAgents ? swarmAgents : undefined,
+    taskMetrics: buildTaskMetrics(taskText),
+    timing: {
+      totalMs: Date.now() - dispatchStartedAt,
+      routerMs: routerDurationMs,
+      executionMs: executionDurationMs,
+    },
+    ...commandOutput,
+    status: 'failed',
+    reason: run.error.message,
+  };
+  const finalPayload = finalizeDispatcherPayload(payload, taskText);
   if (wantsJson) {
-    process.stdout.write(JSON.stringify({ ...decision, executed: command, flow, status: 'failed', reason: run.error.message }, null, 2));
+    process.stdout.write(JSON.stringify(finalPayload, null, 2));
     process.stdout.write('\n');
   } else {
     process.stderr.write(`model dispatch failed while executing command: ${run.error.message}\n`);
@@ -218,8 +296,25 @@ if (run.error) {
 }
 
 if (run.status && run.status !== 0) {
+  const payload = {
+    ...decision,
+    executed: command,
+    flow,
+    commandSource,
+    swarmAgents: flow === 'swarm' && swarmAgents ? swarmAgents : undefined,
+    taskMetrics: buildTaskMetrics(taskText),
+    timing: {
+      totalMs: Date.now() - dispatchStartedAt,
+      routerMs: routerDurationMs,
+      executionMs: executionDurationMs,
+    },
+    ...commandOutput,
+    status: 'failed',
+    exitCode: run.status,
+  };
+  const finalPayload = finalizeDispatcherPayload(payload, taskText);
   if (wantsJson) {
-    process.stdout.write(JSON.stringify({ ...decision, executed: command, flow, status: 'failed', exitCode: run.status }, null, 2));
+    process.stdout.write(JSON.stringify(finalPayload, null, 2));
     process.stdout.write('\n');
   } else {
     process.stderr.write(`model dispatch command finished with status ${run.status}\n`);
@@ -227,8 +322,24 @@ if (run.status && run.status !== 0) {
   process.exit(run.status);
 }
 
+const payload = {
+  ...decision,
+  executed: command,
+  flow,
+  commandSource,
+  swarmAgents: flow === 'swarm' && swarmAgents ? swarmAgents : undefined,
+  taskMetrics: buildTaskMetrics(taskText),
+  timing: {
+    totalMs: Date.now() - dispatchStartedAt,
+    routerMs: routerDurationMs,
+    executionMs: executionDurationMs,
+  },
+  ...commandOutput,
+  status: 'ok',
+};
+const finalPayload = finalizeDispatcherPayload(payload, taskText);
 if (wantsJson) {
-  process.stdout.write(JSON.stringify({ ...decision, executed: command, flow, status: 'ok' }, null, 2));
+  process.stdout.write(JSON.stringify(finalPayload, null, 2));
   process.stdout.write('\n');
 }
 
@@ -247,21 +358,10 @@ Salida:
   - Alternativamente, define TASK_COMMAND (o CODEX_TASK_COMMAND / MODEL_ROUTER_COMMAND) para auto-ejecutar
     el comando sin pasar -- explícito.
   - Alternativamente, define TASK_FLOW (o CODEX_FLOW / MODEL_ROUTER_FLOW) para seleccionar un flujo predefinido.
-  - Usa --auto --flow=<build|release|ship|web|test> para seleccionar un comando automático.
+  - Para el flujo swarm puedes usar --agents=<n> para fijar el tamaño del consenso.
+  - Usa --auto --flow=<build|release|ship|web|test|swarm|perfect> para seleccionar un comando automático.
   - Si usas --auto sin flow, el dispatcher intenta inferir el flujo por contexto del texto.
 \n`;
-}
-
-function readFlowArgument(args) {
-  for (let i = 0; i < args.length; i += 1) {
-    if (args[i] === '--flow' && args[i + 1]) {
-      return args[i + 1];
-    }
-    if (args[i].startsWith('--flow=')) {
-      return args[i].slice('--flow='.length);
-    }
-  }
-  return '';
 }
 
 function isControlArg(arg) {
@@ -272,14 +372,123 @@ function isControlArg(arg) {
     || arg === '--dry-run'
     || arg === '-h'
     || arg === '--flow'
+    || arg === '--agents'
     || arg.startsWith('--flow=')
+    || arg.startsWith('--agents=')
   );
+}
+
+function parseControlArgs(args) {
+  const result = {
+    flow: '',
+    swarmAgents: 0,
+    taskArgs: [],
+    error: null,
+  };
+
+  for (let i = 0; i < args.length; i += 1) {
+    const arg = args[i];
+
+    if (arg === '--flow') {
+      const next = args[i + 1];
+      if (!next || isControlArg(next)) {
+        result.error = buildControlArgError('flag_incompleto', '--flow', next);
+        return result;
+      }
+      result.flow = next;
+      i += 1;
+      continue;
+    }
+
+    if (arg === '--agents') {
+      const next = args[i + 1];
+      if (!next || isControlArg(next)) {
+        result.error = buildControlArgError('flag_incompleto', '--agents', next);
+        return result;
+      }
+      const parsedAgents = parseAgentsValue(next);
+      if (!parsedAgents) {
+        result.error = buildControlArgError('flag_invalido', '--agents', next);
+        return result;
+      }
+      result.swarmAgents = parsedAgents;
+      i += 1;
+      continue;
+    }
+
+    if (arg.startsWith('--flow=')) {
+      const value = arg.slice('--flow='.length).trim();
+      if (!value) {
+        result.error = buildControlArgError('flag_incompleto', '--flow');
+        return result;
+      }
+      result.flow = value;
+      continue;
+    }
+
+    if (arg.startsWith('--agents=')) {
+      const value = arg.slice('--agents='.length).trim();
+      const parsedAgents = parseAgentsValue(value);
+      if (!parsedAgents) {
+        result.error = buildControlArgError('flag_invalido', '--agents', value);
+        return result;
+      }
+      result.swarmAgents = parsedAgents;
+      continue;
+    }
+
+    if (isControlArg(arg)) {
+      continue;
+    }
+
+    result.taskArgs.push(arg);
+  }
+
+  return result;
+}
+
+function buildControlArgError(code, flag, value = '') {
+  if (code === 'flag_invalido') {
+    return {
+      code,
+      flag,
+      value,
+      message: `valor inválido para ${flag}: '${value}'.`,
+    };
+  }
+  return {
+    code,
+    flag,
+    value,
+    message: `falta valor para ${flag}.`,
+  };
+}
+
+function emitControlArgError(error, wantsJsonOutput, usageText) {
+  const payload = {
+    error: error.code,
+    message: error.message,
+    flag: error.flag,
+    ...(error.value ? { value: error.value } : {}),
+  };
+
+  if (wantsJsonOutput) {
+    process.stdout.write(JSON.stringify(payload, null, 2));
+    process.stdout.write('\n');
+    return;
+  }
+
+  process.stderr.write(`model dispatch failed: ${error.message}\n`);
+  process.stdout.write(usageText);
 }
 
 function inferFlowFromTask(taskText) {
   const normalized = taskText.toLowerCase();
   const has = (keyword) => normalized.includes(keyword);
 
+  if (has('perfect') || has('perfecto') || has('perfecta') || has('perfeccion') || has('perfección') || has('blindar') || has('harden') || has('hardening')) {
+    return 'perfect';
+  }
   if (has('release') || has('publica') || has('deploy') || has('despliegue') || has('shipping') || has('ship')) {
     return 'release';
   }
@@ -293,4 +502,204 @@ function inferFlowFromTask(taskText) {
     return 'web';
   }
   return 'build';
+}
+
+function clampAgents(value) {
+  if (!Number.isFinite(value)) return 0;
+  return Math.min(100, Math.max(1, value));
+}
+
+function parseAgentsValue(value) {
+  if (!/^\d+$/.test(String(value))) return 0;
+  return clampAgents(parseInt(value, 10));
+}
+
+function normalizeTaskText(value) {
+  return value.replace(/\s+/g, ' ').trim();
+}
+
+function getTaskValidationError(taskText) {
+  if (!taskText) {
+    return {
+      code: 'tarea_vacia',
+      message: 'texto de tarea vacío. Pasa un texto como argumento o por stdin.',
+    };
+  }
+  const maxChars = parseInt(process.env.MODEL_MAX_TASK_CHARS || '8000', 10);
+  if (taskText.length > maxChars) {
+    return {
+      code: 'tarea_demasiado_larga',
+      message: `texto de tarea demasiado largo (${taskText.length}/${maxChars}). Reduce el prompt o ajusta MODEL_MAX_TASK_CHARS.`,
+    };
+  }
+  return null;
+}
+
+function buildTaskMetrics(taskText) {
+  return {
+    characters: taskText.length,
+    words: taskText ? taskText.split(/\s+/).filter(Boolean).length : 0,
+  };
+}
+
+function buildCommandOutput(stdout, stderr) {
+  const payload = {};
+  const normalizedStdout = (stdout || '').trim();
+  const normalizedStderr = (stderr || '').trim();
+
+  if (normalizedStdout) {
+    const parsed = tryParseJsonPayload(normalizedStdout);
+    if (parsed !== undefined) {
+      const serialized = JSON.stringify(parsed);
+      if (serialized.length > getCommandOutputLimit()) {
+        payload.commandResult = summarizeParsedCommandResult(parsed);
+        payload.commandResultTruncated = true;
+        payload.commandResultOriginalChars = serialized.length;
+      } else {
+        payload.commandResult = parsed;
+      }
+    } else {
+      Object.assign(payload, buildTextOutputFields('commandStdout', normalizedStdout));
+    }
+  }
+
+  if (normalizedStderr) {
+    Object.assign(payload, buildTextOutputFields('commandStderr', normalizedStderr));
+  }
+
+  return payload;
+}
+
+function buildTextOutputFields(fieldName, value) {
+  const limit = getCommandOutputLimit();
+  if (value.length <= limit) {
+    return { [fieldName]: value };
+  }
+
+  return {
+    [fieldName]: value.slice(0, limit),
+    [`${fieldName}Truncated`]: true,
+    [`${fieldName}OriginalChars`]: value.length,
+  };
+}
+
+function summarizeParsedCommandResult(result) {
+  if (!result || typeof result !== 'object' || Array.isArray(result)) {
+    return result;
+  }
+
+  const summary = {};
+  const keys = [
+    'engine',
+    'status',
+    'flow',
+    'agents',
+    'consensus',
+    'consensusRatio',
+    'averageConfidence',
+    'recommended',
+    'alternatives',
+    'taskMetrics',
+    'timing',
+    'shouldExecute',
+    'guardedReason',
+    'exitCode',
+    'reason',
+  ];
+
+  for (const key of keys) {
+    if (key in result) {
+      summary[key] = result[key];
+    }
+  }
+
+  return Object.keys(summary).length
+    ? summary
+    : { preview: JSON.stringify(result).slice(0, getCommandOutputLimit()) };
+}
+
+function getCommandOutputLimit() {
+  return parseInt(process.env.MODEL_COMMAND_OUTPUT_LIMIT_CHARS || '4000', 10);
+}
+
+function finalizeDispatcherPayload(payload, taskText) {
+  const payloadWithRunId = {
+    runId,
+    ...payload,
+  };
+  const ledger = persistDispatcherLedger(payload, taskText);
+  if (ledger.enabled) {
+    return {
+      ...payloadWithRunId,
+      ledger,
+    };
+  }
+  return payloadWithRunId;
+}
+
+function persistDispatcherLedger(payload, taskText) {
+  const entry = stripUndefined({
+    runId,
+    source: 'model-dispatcher',
+    engine: 'dispatch',
+    status: payload.status || 'recommended',
+    flow: payload.flow,
+    commandSource: payload.commandSource,
+    model: payload.recommended?.id,
+    confidence: payload.recommended?.confidence,
+    swarmAgents: payload.swarmAgents,
+    taskPreview: buildTaskPreview(taskText),
+    taskMetrics: payload.taskMetrics,
+    timing: payload.timing,
+    executed: payload.executed,
+    exitCode: payload.exitCode,
+    reason: payload.reason,
+    guardedReason: payload.guardedReason,
+    consensus: payload.commandResult ? summarizeParsedCommandResult(payload.commandResult).consensus : undefined,
+    consensusRatio: payload.commandResult ? summarizeParsedCommandResult(payload.commandResult).consensusRatio : undefined,
+  });
+
+  return maybeWriteAutomationLedger(entry, process.env, process.cwd());
+}
+
+function buildTaskPreview(taskText) {
+  return taskText.length <= 180 ? taskText : `${taskText.slice(0, 177)}...`;
+}
+
+function stripUndefined(value) {
+  return Object.fromEntries(
+    Object.entries(value).filter(([, entry]) => entry !== undefined),
+  );
+}
+
+function shouldSuppressChildLedger() {
+  const config = resolveLedgerConfig(process.env, process.cwd());
+  if (!config.enabled) {
+    return false;
+  }
+  const allowChild = String(process.env.MODEL_AUTOMATION_LEDGER_ALLOW_CHILD || '').trim().toLowerCase();
+  return allowChild !== '1' && allowChild !== 'true';
+}
+
+function tryParseJsonPayload(value) {
+  const candidates = [value];
+  const objectStart = value.lastIndexOf('\n{');
+  const arrayStart = value.lastIndexOf('\n[');
+
+  if (objectStart !== -1) {
+    candidates.push(value.slice(objectStart + 1).trim());
+  }
+  if (arrayStart !== -1) {
+    candidates.push(value.slice(arrayStart + 1).trim());
+  }
+
+  for (const candidate of candidates) {
+    try {
+      return JSON.parse(candidate);
+    } catch {
+      continue;
+    }
+  }
+
+  return undefined;
 }

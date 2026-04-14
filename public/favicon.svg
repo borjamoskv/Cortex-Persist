@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="CORTEX Persist">
+  <defs>
+    <linearGradient id="cpGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3f50ff" />
+      <stop offset="100%" stop-color="#2532b8" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="18" fill="#0a0a0a" />
+  <rect x="4" y="4" width="56" height="56" rx="16" fill="url(#cpGradient)" />
+  <path
+    d="M24 20h13.5c6.2 0 10.5 3.8 10.5 9.4 0 3.9-2.2 6.8-5.8 8.1L48 44H39l-4.8-5.6H31V44h-7V20Zm7 6v6.9h6.1c2.6 0 4-1.2 4-3.4 0-2.2-1.4-3.5-4-3.5H31Z"
+    fill="#fff"
+  />
+  <path
+    d="M17 20h5.3v24H17V20Zm2.6 0h11.2v5.9H19.6V20Z"
+    fill="#dbe1ff"
+    opacity="0.9"
+  />
+</svg>

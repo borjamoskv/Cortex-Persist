@@ -18,6 +18,7 @@ from pathlib import Path
 
 import click
 from rich.console import Console
+from cortex.cli.common import atomic_write_text
 
 from cortex.cli.errors import err_execution_failed, err_platform_unsupported, err_skill_not_found
 from cortex.core.paths import CORTEX_DIR
@@ -184,7 +185,7 @@ def enable_boot():
 </plist>"""
 
     PLIST_PATH.parent.mkdir(parents=True, exist_ok=True)
-    PLIST_PATH.write_text(plist_content)
+    atomic_write_text(PLIST_PATH, plist_content)
 
     console.print(f"[cyan]ℹ️ Creado plist en {PLIST_PATH}[/]")
 

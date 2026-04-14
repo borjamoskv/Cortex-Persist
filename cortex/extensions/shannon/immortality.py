@@ -82,7 +82,7 @@ def _weakest_dimension(
     recommendations = {
         "diversity": (
             "Memory is dominated by few fact types. "
-            "Diversify: cortex store --type decision/error/bridge/ghost"
+            "Diversify: cortex store PROJECT \"content\" --type decision/error/bridge/ghost"
         ),
         "continuity": (
             "Large temporal gaps detected — periods of cognitive activity "

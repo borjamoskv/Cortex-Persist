@@ -56,10 +56,10 @@ async with CortexEngine() as engine:
 engine = CortexEngine()
 
 # Store with tenant isolation
-await engine.store_fact(
+await engine.store(
+    project="fintech-agent",
     content="Approved loan #443",
     fact_type="decision",
-    project="fintech-agent",
     tenant_id="enterprise-customer-a",
 )
 ```

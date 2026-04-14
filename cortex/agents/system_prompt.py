@@ -108,10 +108,10 @@ graph). If a generic LLM can answer it, the prompt is too weak.
 
 ## SESSION CLOSE — MANDATORY
 Persist automatically. Do NOT wait to be asked:
-  cortex store --type decision PROJECT "what was decided"
-  cortex store --type error    PROJECT "error + resolution"
-  cortex store --type ghost    PROJECT "incomplete work"
-  cortex store --type bridge   PROJECT "pattern transferred cross-project"\
+  cortex store PROJECT "what was decided" --type decision
+  cortex store PROJECT "error + resolution" --type error
+  cortex store PROJECT "incomplete work" --type ghost
+  cortex store PROJECT "pattern transferred cross-project" --type bridge\
 """
 
 
@@ -228,14 +228,14 @@ Three lines: pip install cortex-memory. EU AI Act compliant by tomorrow."
 ## SDK INTEGRATION (copy-paste ready for any framework)
 ```python
 # LangChain
-from cortex_memory import CortexEngine
+from cortex.engine import CortexEngine
 engine = CortexEngine()
-await engine.store_fact(content=chain.run(prompt), fact_type="decision", project="my-agent")
+await engine.store(content=chain.run(prompt), fact_type="decision", project="my-agent")
 
 # CrewAI
 @crew.after_task
 async def certify(output):
-    await engine.store_fact(content=str(output), fact_type="decision", project="crew")
+    await engine.store(content=str(output), fact_type="decision", project="crew")
 
 # MCP (any IDE — zero config)
 # python -m cortex.mcp

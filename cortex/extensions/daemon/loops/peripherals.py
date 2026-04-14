@@ -13,8 +13,9 @@ logger = logging.getLogger("cortex.extensions.daemon.loops.peripherals")
 async def peripheral_loop(state):
     while True:
         try:
-            proc = await asyncio.create_subprocess_shell(
-                'system_profiler SPBluetoothDataType | grep -A 10 "Connected:"',
+            proc = await asyncio.create_subprocess_exec(
+                "system_profiler",
+                "SPBluetoothDataType",
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
             )

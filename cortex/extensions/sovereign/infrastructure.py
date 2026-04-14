@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import json
 import logging
+import os
+import tempfile
 from pathlib import Path
 from typing import Final
 
@@ -36,8 +38,16 @@ class HardwareVault:
     def persist_shadow_map(self, mapping: dict[str, str]):
         """Persists the session deception map to the secure storage."""
         try:
-            with open(self._keys_path, "w") as f:
-                json.dump(mapping, f, indent=4)
+            with tempfile.NamedTemporaryFile(
+                "w",
+                dir=str(self._keys_path.parent),
+                delete=False,
+                encoding="utf-8",
+            ) as tmp_file:
+                json.dump(mapping, tmp_file, indent=4)
+                tmp_path = Path(tmp_file.name)
+            os.chmod(tmp_path, 0o600)
+            tmp_path.replace(self._keys_path)
             logger.info("HardwareVault: Shadow mapping secured in TEE storage.")
         except OSError as e:
             logger.error("HardwareVault: Failed to secure keys: %s", e)

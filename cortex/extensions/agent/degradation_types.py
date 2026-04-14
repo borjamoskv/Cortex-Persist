@@ -247,7 +247,7 @@ class AgentCalcificationError(SovereignAgentError):
             f"without recovery learning (δ≈0)",
             component="meta_monitor",
             recovery_steps=[
-                "Store failure pattern in CORTEX: `cortex store --type error ...`",
+                "Store failure pattern in CORTEX: `cortex store PROJECT \"...\" --type error`",
                 "Force architectural mutation: try a different approach",
                 "Invoke Trampolin protocol for auto-evolutionary recovery",
             ],

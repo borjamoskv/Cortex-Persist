@@ -13,6 +13,7 @@ from __future__ import annotations
 import logging
 import os
 import subprocess
+import tempfile
 from collections.abc import Sequence
 from pathlib import Path
 
@@ -82,7 +83,17 @@ class SovereignSys:
         target = self.root / rel_path
         try:
             target.parent.mkdir(parents=True, exist_ok=True)
-            target.write_text(content, encoding="utf-8")
+            fd, temp_path = tempfile.mkstemp(prefix="cortex_sys_", dir=target.parent, text=True)
+            try:
+                with os.fdopen(fd, "w", encoding="utf-8") as tmp_file:
+                    tmp_file.write(content)
+                os.replace(temp_path, target)
+            except Exception:
+                try:
+                    os.unlink(temp_path)
+                except OSError:
+                    pass
+                raise
             return f"[SUCCESS] Wrote to {rel_path}"
         except OSError as e:
             return f"[ERROR] Write failed: {e}"

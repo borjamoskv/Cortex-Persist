@@ -13,6 +13,8 @@ import asyncio
 import hashlib
 import json
 import logging
+import os
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -20,6 +22,27 @@ logger = logging.getLogger("cortex.engine.auth")
 
 AUTH_DIR = Path.home() / ".cortex" / "auth_queue"
 AUTH_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def _atomic_write_json(path: Path, payload: dict) -> None:
+    """Persist auth challenges atomically."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, temp_path = tempfile.mkstemp(
+        prefix=f".{path.name}.",
+        suffix=".tmp",
+        dir=path.parent,
+        text=True,
+    )
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as tmp_file:
+            json.dump(payload, tmp_file, indent=2)
+        os.replace(temp_path, path)
+    except Exception:
+        try:
+            os.unlink(temp_path)
+        except OSError:
+            pass
+        raise
 
 
 class ByzantineAuthLayer:
@@ -72,7 +95,7 @@ class ByzantineAuthLayer:
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
-        challenge_path.write_text(json.dumps(challenge_data, indent=2))
+        _atomic_write_json(challenge_path, challenge_data)
         logger.error(
             "🛑 [AXIOM 3] HALT. Destructive intent '%s' requires human verification.", intent
         )

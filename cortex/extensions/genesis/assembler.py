@@ -8,6 +8,8 @@ delegates rendering to the TemplateRegistry.
 from __future__ import annotations
 
 import logging
+import os
+import tempfile
 from pathlib import Path
 
 from cortex.extensions.genesis.models import ComponentSpec, SystemSpec
@@ -31,6 +33,37 @@ class SystemAssembler:
     def __init__(self, registry: TemplateRegistry | None = None) -> None:
         self.registry = registry or TemplateRegistry()
 
+    def _resolve_target_dir(self, base_dir: Path, target_dir: str) -> Path:
+        """Validate and resolve the root directory for generated content."""
+        normalized = Path(target_dir or "")
+        if normalized.is_absolute():
+            raise ValueError("target_dir must be a relative path")
+
+        if ".." in normalized.parts:
+            raise ValueError("target_dir must not contain parent directory traversals")
+
+        return base_dir / normalized
+
+    def _atomic_write_text(self, path: Path, content: str) -> None:
+        """Persist text atomically in the destination filesystem."""
+        path.parent.mkdir(parents=True, exist_ok=True)
+        fd, temp_path = tempfile.mkstemp(
+            prefix=f".{path.name}.",
+            suffix=".tmp",
+            dir=path.parent,
+            text=True,
+        )
+        try:
+            with os.fdopen(fd, "w", encoding="utf-8") as tmp_file:
+                tmp_file.write(content)
+            os.replace(temp_path, path)
+        except Exception:
+            try:
+                os.unlink(temp_path)
+            except OSError:
+                pass
+            raise
+
     def assemble(self, spec: SystemSpec, base_dir: Path) -> tuple[list[str], list[str]]:
         """Generate all files for a system specification.
 
@@ -41,7 +74,13 @@ class SystemAssembler:
         Returns:
             Tuple of (files_created, files_failed) as absolute path strings.
         """
-        target = base_dir / spec.target_dir / spec.name if spec.target_dir else base_dir / spec.name
+        try:
+            target = self._resolve_target_dir(base_dir, spec.target_dir) / spec.name
+        except ValueError as exc:
+            message = f"{spec.name}: target_dir rejected ({exc})"
+            logger.error("Path traversal blocked for target_dir=%s: %s", spec.target_dir, exc)
+            return [], [message]
+
         target.mkdir(parents=True, exist_ok=True)
 
         created: list[str] = []
@@ -55,7 +94,7 @@ class SystemAssembler:
         if not init_path.exists():
             init_content = self._generate_init(spec)
             try:
-                init_path.write_text(init_content, encoding="utf-8")
+                self._atomic_write_text(init_path, init_content)
                 created.append(str(init_path))
                 logger.info("Created: %s", init_path)
             except OSError as e:
@@ -100,8 +139,7 @@ class SystemAssembler:
                     file_path = target / rel_path
 
                 try:
-                    file_path.parent.mkdir(parents=True, exist_ok=True)
-                    file_path.write_text(content, encoding="utf-8")
+                    self._atomic_write_text(file_path, content)
                     created.append(str(file_path))
                     logger.info("Created: %s", file_path)
                 except OSError as e:
@@ -203,7 +241,7 @@ class SystemAssembler:
         test_init = test_dir / "__init__.py"
         if not test_init.exists():
             try:
-                test_init.write_text("", encoding="utf-8")
+                self._atomic_write_text(test_init, "")
                 created.append(str(test_init))
             except OSError:
                 pass
@@ -224,7 +262,7 @@ class SystemAssembler:
                 file_path = test_dir / rel_path
                 if not file_path.exists():
                     try:
-                        file_path.write_text(content, encoding="utf-8")
+                        self._atomic_write_text(file_path, content)
                         created.append(str(file_path))
                     except OSError:
                         pass
@@ -252,8 +290,7 @@ class SystemAssembler:
             file_path = cli_dir / rel_path
             if not file_path.exists():
                 try:
-                    file_path.parent.mkdir(parents=True, exist_ok=True)
-                    file_path.write_text(content, encoding="utf-8")
+                    self._atomic_write_text(file_path, content)
                     created.append(str(file_path))
                 except OSError:
                     pass

@@ -57,6 +57,26 @@ class GenesisEngine:
         self.assembler = SystemAssembler(self.templates)
         self.validator = GenesisValidator()
 
+    def _resolve_extended_component_path(
+        self,
+        existing_dir: Path,
+        system_name: str,
+        comp: ComponentSpec,
+        rel_path: Path,
+    ) -> Path:
+        """Resolve output path for incremental component materialization.
+
+        Preserves the same route split as initial assembly:
+        - tests -> sibling test subtree
+        - cli_command -> cli subtree
+        - all others -> system package root
+        """
+        if comp.component_type == "test":
+            return existing_dir.parent / "tests" / system_name / rel_path
+        if comp.component_type == "cli_command":
+            return existing_dir.parent / "cli" / rel_path
+        return existing_dir / rel_path
+
     def create(self, spec: SystemSpec) -> GenesisResult:
         """Execute a full genesis: design → assemble → validate → measure.
 
@@ -160,14 +180,18 @@ class GenesisEngine:
                     logger.error("Path traversal blocked in extend: %s", rel_path)
                     failed.append(f"{comp.name}: Path traversal blocked {rel_path_str}")
                     continue
+                file_path = self._resolve_extended_component_path(
+                    existing_dir,
+                    system_name,
+                    comp,
+                    rel_path,
+                )
 
-                file_path = existing_dir / rel_path
                 if file_path.exists():
                     logger.info("SKIP (exists): %s", file_path)
                     continue
                 try:
-                    file_path.parent.mkdir(parents=True, exist_ok=True)
-                    file_path.write_text(content, encoding="utf-8")
+                    self.assembler._atomic_write_text(file_path, content)
                     created.append(str(file_path))
                     logger.info("Created: %s", file_path)
                 except OSError as e:

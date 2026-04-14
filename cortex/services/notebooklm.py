@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import logging
+import os
 import shutil
 import sqlite3
+import tempfile
 import time
 from pathlib import Path
 from typing import Any
@@ -40,6 +42,22 @@ CLOUD_PROVIDERS = {
         Path.home() / "Library" / "Mobile Documents" / "com~apple~CloudDocs" / "CORTEX-NotebookLM",
     ],
 }
+
+
+def _atomic_write_text(path: Path, content: str) -> None:
+    """Persist NotebookLM artifacts atomically to avoid partial exports."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, temp_path = tempfile.mkstemp(prefix="notebooklm_service_", dir=path.parent, text=True)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as tmp_file:
+            tmp_file.write(content)
+        os.replace(temp_path, path)
+    except Exception:
+        try:
+            os.unlink(temp_path)
+        except OSError:
+            pass
+        raise
 
 DOMAIN_MAP: dict[str, list[str]] = {
     "cortex-core": [
@@ -213,7 +231,7 @@ class NotebookLMService:
 
         for domain, content_list in domain_files.items():
             file_path = output_dir / f"{domain}.md"
-            file_path.write_text("\n\n".join(content_list) + self.get_signature())
+            _atomic_write_text(file_path, "\n\n".join(content_list) + self.get_signature())
             counts[domain] = len(content_list)
 
         return counts

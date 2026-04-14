@@ -16,6 +16,7 @@ import click
 from rich.console import Console
 from rich.panel import Panel
 
+from cortex.cli.common import atomic_write_text
 from cortex.cli.errors import err_execution_failed
 from cortex.extensions.llm.manager import LLMManager
 
@@ -111,7 +112,7 @@ def ordenar(path: str, output: str | None):
 
     if output:
         out_path = Path(output)
-        out_path.write_text(result, encoding="utf-8")
+        atomic_write_text(out_path, result)
         console.print(f"[green]✅ Ordered knowledge saved to {out_path}[/green]")
     else:
         console.print(

@@ -4,11 +4,25 @@ import urllib.error
 import json
 import time
 import os
+import tempfile
 from typing import Any, Dict
 from datetime import datetime
 
 def log(msg: str, tier: str = "INFO") -> None:
     print(f"[{datetime.now().time()}] [{tier}] [BOUNTY-RADAR] {msg}")
+
+
+def persist_bounties(bounties: list[dict[str, Any]], output_path: str) -> None:
+    target_dir = os.path.dirname(output_path) or "."
+    with tempfile.NamedTemporaryFile(
+        "w",
+        dir=target_dir,
+        delete=False,
+        encoding="utf-8",
+    ) as tmp_file:
+        json.dump(bounties, tmp_file, indent=4)
+        tmp_path = tmp_file.name
+    os.replace(tmp_path, output_path)
 
 def execute_radar() -> None:
     log("Iniciando conexión SSL con api.github.com...", "C5-REAL")
@@ -49,8 +63,7 @@ def execute_radar() -> None:
                     })
                     
                 output_path = os.path.expanduser("~/Cortex-Persist/engine-c5/active_bounties.json")
-                with open(output_path, "w", encoding='utf-8') as f:
-                    json.dump(bounties, f, indent=4)
+                persist_bounties(bounties, output_path)
                     
                 log(f"Matriz de Bounties materializada en: {output_path}", "C5-SUCCESS")
                 

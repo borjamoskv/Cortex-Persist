@@ -15,7 +15,10 @@ Architecture:
 from __future__ import annotations
 
 import hashlib
+import json
 import logging
+import os
+import tempfile
 import threading
 import time
 import traceback
@@ -29,6 +32,22 @@ logger = logging.getLogger("cortex.extensions.swarm.error_ghost_pipeline")
 _DEDUP_WINDOW_SIZE = 64  # Ring buffer: last N error hashes
 _RATE_LIMIT_SECONDS = 60.0  # Min interval between ghosts from same source
 _FALLBACK_DIR_NAME = ".error_ghosts"
+
+
+def _atomic_write_text(path: Path, content: str) -> None:
+    """Persist fallback ghost payloads atomically to avoid truncation."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, temp_path = tempfile.mkstemp(prefix="error_ghost_", dir=path.parent, text=True)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as tmp_file:
+            tmp_file.write(content)
+        os.replace(temp_path, path)
+    except Exception:
+        try:
+            os.unlink(temp_path)
+        except OSError:
+            pass
+        raise
 
 
 @dataclass(frozen=True)
@@ -268,7 +287,6 @@ class ErrorGhostPipeline:
         meta: dict[str, Any],
     ) -> None:
         """Filesystem fallback when DB is unreachable."""
-        import json
         from pathlib import Path
 
         fallback_dir = Path.home() / ".cortex" / _FALLBACK_DIR_NAME
@@ -283,9 +301,9 @@ class ErrorGhostPipeline:
         }
 
         try:
-            (fallback_dir / filename).write_text(
+            _atomic_write_text(
+                fallback_dir / filename,
                 json.dumps(payload, indent=2, default=str),
-                encoding="utf-8",
             )
             logger.info("AUTO-GHOST fallback persisted to %s", fallback_dir / filename)
         except OSError as e:

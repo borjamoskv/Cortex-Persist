@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 import logging
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -105,6 +106,15 @@ class AutoImmuneMonitor(BaseMonitor):
 
     def _save_ghosts(self, ghosts: dict) -> None:
         try:
-            self.ghosts_path.write_text(json.dumps(ghosts, indent=2, ensure_ascii=False))
+            self.ghosts_path.parent.mkdir(parents=True, exist_ok=True)
+            with tempfile.NamedTemporaryFile(
+                "w",
+                dir=str(self.ghosts_path.parent),
+                delete=False,
+                encoding="utf-8",
+            ) as tmp_file:
+                json.dump(ghosts, tmp_file, indent=2, ensure_ascii=False)
+                tmp_path = Path(tmp_file.name)
+            tmp_path.replace(self.ghosts_path)
         except OSError as e:
             logger.error("Failed to update ghosts.json: %s", e)

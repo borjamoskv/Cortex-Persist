@@ -133,7 +133,7 @@ def _diagnose(
         diagnosis = "concentrated"
         recommendations.append(
             "Memory is dominated by a single fact_type. "
-            "Diversify with: cortex store --type decision/error/bridge"
+            "Diversify with: cortex store PROJECT \"content\" --type decision/error/bridge"
         )
     elif type_norm > _THRESHOLD_FRAGMENTED:
         diagnosis = "fragmented"

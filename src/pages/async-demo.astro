@@ -1,0 +1,357 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+
+const supportEmail = 'borja@cortexpersist.com';
+const baseSubject = 'CORTEX Async Demo';
+const defaultFields = {
+	name: '',
+	company: '',
+	workflow: '',
+	stack: '',
+	sensitive: 'Not sure yet',
+	timeline: 'Within 30 days',
+};
+
+const demoPresets = [
+	{ id: 'support', label: 'Support approvals' },
+	{ id: 'deploy', label: 'Code deploys' },
+	{ id: 'pricing', label: 'Pricing review' },
+];
+---
+
+<SiteLayout
+	title="Request Async Demo | CORTEX Persist"
+	description="Request an async demo for CORTEX Persist and send your workflow details without a call."
+	canonical="https://cortexpersist.com/async-demo"
+>
+	<main class="landing-shell intake-shell">
+		<a class="intake-backlink" href="/">← Back to CORTEX Persist</a>
+
+		<section class="section-frame surface intake-hero">
+			<div class="section-heading">
+				<p class="section-kicker">Async Demo</p>
+				<h1>Send the workflow. Get the demo without a call.</h1>
+				<p>
+					Fill the brief, open a ready-made email draft, or copy the payload and send it
+					manually. We reply with an async demo and recommendation within 24 hours.
+				</p>
+			</div>
+
+			<div class="chip-row" aria-label="Async demo principles">
+				<span class="chip">No call required</span>
+				<span class="chip">Reply within 24 hours</span>
+				<span class="chip">3-minute brief</span>
+			</div>
+		</section>
+
+		<section class="intake-grid">
+			<section class="surface intake-panel">
+				<div class="surface-head">
+					<span class="surface-label">What to send</span>
+					<span class="surface-state">Simple</span>
+				</div>
+
+				<form
+					class="intake-form"
+					data-intake-form
+					data-subject={baseSubject}
+					data-email={supportEmail}
+					data-required="workflow,stack"
+				>
+					<p class="microcopy">
+						Minimum to start: workflow + current stack. Name and company help us route
+						the reply faster.
+					</p>
+
+					<div class="intake-presets">
+						<p class="preview-label">Quick start</p>
+						<div class="preset-row" aria-label="Async demo presets">
+							{
+								demoPresets.map((preset) => (
+									<button
+										class="preset-chip"
+										type="button"
+										data-intake-preset={preset.id}
+									>
+										{preset.label}
+									</button>
+								))
+							}
+						</div>
+					</div>
+
+					<div class="field-grid">
+						<label class="field">
+							<span>Name</span>
+							<input name="name" type="text" value={defaultFields.name} placeholder="Your name" />
+						</label>
+						<label class="field">
+							<span>Company</span>
+							<input name="company" type="text" value={defaultFields.company} placeholder="Company or team" />
+						</label>
+					</div>
+
+					<label class="field">
+						<span>Workflow</span>
+						<textarea
+							name="workflow"
+							rows="4"
+							placeholder="What workflow would be painful to investigate if the agent failed tomorrow?"
+						>{defaultFields.workflow}</textarea>
+					</label>
+
+					<label class="field">
+						<span>Current stack</span>
+						<textarea
+							name="stack"
+							rows="4"
+							placeholder="Agent orchestration, memory, logs, APIs, repo, or anything relevant."
+						>{defaultFields.stack}</textarea>
+					</label>
+
+					<div class="field-grid">
+						<label class="field">
+							<span>Sensitive data</span>
+							<select name="sensitive">
+								<option selected>{defaultFields.sensitive}</option>
+								<option>Yes</option>
+								<option>No</option>
+							</select>
+						</label>
+
+						<label class="field">
+							<span>Timeline</span>
+							<select name="timeline">
+								<option>ASAP</option>
+								<option selected>{defaultFields.timeline}</option>
+								<option>Within this quarter</option>
+								<option>Exploring only</option>
+							</select>
+						</label>
+					</div>
+
+					<div class="intake-actions">
+						<button class="button-primary" type="submit">Open Email Draft</button>
+						<button class="button-secondary" type="button" data-copy-intake>Copy Details</button>
+					</div>
+
+					<p class="microcopy">
+						No local mail client? Copy the subject and body, then send them manually to
+						<a class="inline-link" href={`mailto:${supportEmail}`}>{supportEmail}</a>.
+					</p>
+					<p class="intake-status" data-intake-status aria-live="polite"></p>
+				</form>
+			</section>
+
+			<aside class="surface-sunken intake-panel">
+				<div class="surface-head">
+					<span class="surface-label">Preview</span>
+					<span class="surface-state">Ready</span>
+				</div>
+
+				<div class="intake-preview">
+					<p class="preview-label">Email subject</p>
+					<p class="preview-subject" data-intake-subject>{baseSubject}</p>
+					<p class="preview-label">Email body</p>
+					<pre class="preview-body" data-intake-preview></pre>
+				</div>
+
+				<div class="proof-stack">
+					<div class="proof-item">
+						<div>
+							<strong>Async by default</strong>
+							<span>Good fit when the buyer wants signal without scheduling overhead.</span>
+						</div>
+						<span class="proof-tag live">Async</span>
+					</div>
+					<div class="proof-item">
+						<div>
+							<strong>Low-friction intake</strong>
+							<span>Enough detail to qualify the workflow without a discovery call.</span>
+						</div>
+						<span class="proof-tag audit">Scope</span>
+					</div>
+				</div>
+			</aside>
+		</section>
+	</main>
+
+	<script is:inline>
+		const form = document.querySelector('[data-intake-form]');
+		if (form) {
+			const searchParams = new URLSearchParams(window.location.search);
+			const preview = document.querySelector('[data-intake-preview]');
+			const subjectNode = document.querySelector('[data-intake-subject]');
+			const statusNode = document.querySelector('[data-intake-status]');
+			const copyButton = document.querySelector('[data-copy-intake]');
+			const fields = Array.from(form.querySelectorAll('input, textarea, select'));
+			const supportEmail = form.dataset.email || '';
+			const baseSubject = form.dataset.subject || 'CORTEX intake';
+			const presetButtons = Array.from(form.querySelectorAll('[data-intake-preset]'));
+			const sourceTag = searchParams.get('src') || 'direct';
+			let currentPreset = searchParams.get('preset') || '';
+			const requiredFields = (form.dataset.required || '')
+				.split(',')
+				.map((field) => field.trim())
+				.filter(Boolean);
+			const requiredLabels = {
+				workflow: 'workflow',
+				stack: 'current stack',
+			};
+
+			const readData = () => Object.fromEntries(new FormData(form).entries());
+
+			const buildSubject = (data) => {
+				const workflow = String(data.workflow || '').trim().replace(/\s+/g, ' ');
+				if (!workflow) return baseSubject;
+
+				const summary = workflow.length > 56 ? `${workflow.slice(0, 56)}…` : workflow;
+				const sourceSuffix = sourceTag !== 'direct' ? ` [${sourceTag}]` : '';
+				return `${baseSubject} / ${summary}${sourceSuffix}`;
+			};
+
+			const buildBody = (data) => {
+				return [
+					'CORTEX async demo request',
+					'',
+					`Source: ${sourceTag}`,
+					`Preset: ${currentPreset || '-'}`,
+					'Next step requested: async demo + recommendation, or reply with one missing detail.',
+					'',
+					`Name: ${data.name || '-'}`,
+					`Company: ${data.company || '-'}`,
+					`Workflow: ${data.workflow || '-'}`,
+					`Current stack: ${data.stack || '-'}`,
+					`Sensitive data: ${data.sensitive || '-'}`,
+					`Timeline: ${data.timeline || '-'}`,
+				].join('\n');
+			};
+
+			const refreshPreview = () => {
+				const data = readData();
+				const body = buildBody(data);
+				const subject = buildSubject(data);
+				if (preview) preview.textContent = body;
+				if (subjectNode) subjectNode.textContent = subject;
+				return { body, subject, data };
+			};
+
+			const getMissingFields = (data) =>
+				requiredFields.filter((field) => !String(data[field] || '').trim());
+
+			const formatMissingFields = (missingFields) =>
+				missingFields.map((field) => requiredLabels[field] || field).join(' and ');
+
+			let showValidation = false;
+
+			const setFieldState = (name, invalid) => {
+				const field = form.elements.namedItem(name);
+				const wrapper = field instanceof Element ? field.closest('.field') : null;
+				wrapper?.classList.toggle('is-invalid', invalid);
+			};
+
+			const syncValidationState = (data) => {
+				const missingSet = showValidation ? new Set(getMissingFields(data)) : new Set();
+				requiredFields.forEach((fieldName) => setFieldState(fieldName, missingSet.has(fieldName)));
+			};
+
+			const setFieldValue = (name, value) => {
+				const field = form.elements.namedItem(name);
+				if (!field) return;
+				field.value = value;
+			};
+
+			const presets = {
+				support: {
+					workflow:
+						'Support approval workflow where an agent drafts a response and a human approves the final action.',
+					stack: 'OpenAI + support platform + internal policy docs + ticketing workflow.',
+					sensitive: 'Yes',
+					timeline: 'Within 30 days',
+				},
+				deploy: {
+					workflow:
+						'Engineering workflow where an agent proposes code changes and triggers deployment actions.',
+					stack: 'OpenAI + GitHub + CI/CD + cloud deployment tooling.',
+					sensitive: 'No',
+					timeline: 'ASAP',
+				},
+				pricing: {
+					workflow:
+						'Pricing review workflow where an agent drafts quotes or exceptions before a human decision.',
+					stack: 'OpenAI + CRM + pricing spreadsheets + approval queue.',
+					sensitive: 'Yes',
+					timeline: 'Within this quarter',
+				},
+			};
+
+			fields.forEach((field) => {
+				const handleFieldUpdate = () => {
+					const { data } = refreshPreview();
+					syncValidationState(data);
+				};
+				field.addEventListener('input', handleFieldUpdate);
+				field.addEventListener('change', handleFieldUpdate);
+			});
+
+				presetButtons.forEach((button) => {
+					button.addEventListener('click', () => {
+						const preset = presets[button.dataset.intakePreset || ''];
+						if (!preset) return;
+
+						currentPreset = button.dataset.intakePreset || '';
+						Object.entries(preset).forEach(([name, value]) => setFieldValue(name, value));
+						presetButtons.forEach((node) => node.classList.toggle('is-active', node === button));
+						searchParams.set('src', sourceTag);
+						searchParams.set('preset', currentPreset);
+						window.history.replaceState({}, '', `${window.location.pathname}?${searchParams.toString()}`);
+						const { data } = refreshPreview();
+						syncValidationState(data);
+						if (statusNode) statusNode.textContent = `Loaded sample: ${button.textContent?.trim() || 'preset'}.`;
+					});
+				});
+
+			form.addEventListener('submit', (event) => {
+				event.preventDefault();
+				showValidation = true;
+				const { body, subject, data } = refreshPreview();
+				syncValidationState(data);
+				const missingFields = getMissingFields(data);
+				if (missingFields.length) {
+					if (statusNode) {
+						statusNode.textContent = `Add ${formatMissingFields(missingFields)} to open the draft.`;
+					}
+					return;
+				}
+				const href = `mailto:${supportEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+				window.location.href = href;
+			});
+
+				copyButton?.addEventListener('click', async () => {
+				const { body, subject, data } = refreshPreview();
+				const payload = [`Subject: ${subject}`, '', body].join('\n');
+				try {
+					await navigator.clipboard.writeText(payload);
+					const missingFields = getMissingFields(data);
+					if (statusNode) {
+						statusNode.textContent = missingFields.length
+							? `Copied subject and body. ${formatMissingFields(missingFields)} still need details.`
+							: 'Copied subject and body. Paste them into any email client if mailto is not available.';
+					}
+				} catch {
+					if (statusNode) statusNode.textContent = 'Copy failed. Select the subject and preview manually, then paste them into your email.';
+				}
+				});
+
+				if (currentPreset && presets[currentPreset]) {
+					Object.entries(presets[currentPreset]).forEach(([name, value]) => setFieldValue(name, value));
+					presetButtons.forEach((node) =>
+						node.classList.toggle('is-active', node.dataset.intakePreset === currentPreset),
+					);
+				}
+
+				const { data } = refreshPreview();
+				syncValidationState(data);
+		}
+	</script>
+</SiteLayout>

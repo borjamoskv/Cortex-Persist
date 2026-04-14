@@ -4,12 +4,9 @@ import sqlite3
 import logging
 import asyncio
 import json
+import shlex
 import sys
-try:
-    import uvloop
-    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
-except ImportError:
-    pass
+import tempfile
 
 MAX_CENTURIONS = 10000
 
@@ -30,6 +27,7 @@ from cortex.extensions.security.security_monitor import (
     ParameterProvenance,
 )
 from cortex.extensions.security.stochastic_sandbox import StochasticSandbox
+from cortex.events.loop import sovereign_run
 
 WATCH_DIR = "/Users/borjafernandezangulo/.gemini/antigravity/knowledge"
 SWARM_QUEUE_FILE = "/tmp/cortex_swarm_queue.json"
@@ -39,6 +37,22 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] CORTEX-DAEMON: %(message)s"
 )
+
+
+def _atomic_write_text(path: str, content: str) -> None:
+    """Persist text via same-directory temp file and atomic replace."""
+    target_dir = os.path.dirname(path) or "."
+    fd, temp_path = tempfile.mkstemp(prefix="cortex_daemon_", dir=target_dir, text=True)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as tmp_file:
+            tmp_file.write(content)
+        os.replace(temp_path, path)
+    except Exception:
+        try:
+            os.unlink(temp_path)
+        except OSError:
+            pass
+        raise
 
 
 class CortexDaemon:
@@ -218,14 +232,12 @@ class CortexDaemon:
         sb_content_rendered = sb_content.replace("{{NETWORK_OUTBOUND_RULES}}", net_rules)
         
         # Write ephemeral jail profile
-        import tempfile
         import uuid
         jit_jail_path = os.path.join(tempfile.gettempdir(), f"jail_{uuid.uuid4().hex[:8]}.sb")
-        with open(jit_jail_path, "w") as f:
-            f.write(sb_content_rendered)
+        _atomic_write_text(jit_jail_path, sb_content_rendered)
 
         # Removed bash 'timeout 180', using Orphan Slayer Python approach
-        sandbox_cmd = f"sandbox-exec -f {jit_jail_path} {execute_cmd}"
+        sandbox_cmd = f"sandbox-exec -f {jit_jail_path} /bin/sh -lc {execute_cmd!r}"
 
         logging.info("🚀 [SWARM EXEC] Dispatching OS-Sandboxed Task: %s for %s", execute_cmd, agent)
         
@@ -243,12 +255,17 @@ class CortexDaemon:
             import os
             import signal
 
-            process = await asyncio.create_subprocess_shell(
-                sandbox_cmd,
+            process = await asyncio.create_subprocess_exec(
+                "sandbox-exec",
+                "-f",
+                jit_jail_path,
+                "/bin/sh",
+                "-lc",
+                execute_cmd,
                 stdin=asyncio.subprocess.DEVNULL,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
-                preexec_fn=os.setsid
+                preexec_fn=os.setsid,
             )
             
             try:
@@ -341,9 +358,17 @@ class CortexDaemon:
         ledger.append(result)
         # Keep last 100 entries to maintain O(1) performance
         ledger = ledger[-100:]
-        
-        with open(EXECUTION_LEDGER, "w") as f:
-             json.dump(ledger, f, indent=2)
+
+        ledger_dir = os.path.dirname(EXECUTION_LEDGER) or "."
+        with tempfile.NamedTemporaryFile(
+            "w",
+            dir=ledger_dir,
+            delete=False,
+            encoding="utf-8",
+        ) as tmp_file:
+             json.dump(ledger, tmp_file, indent=2)
+             tmp_path = tmp_file.name
+        os.replace(tmp_path, EXECUTION_LEDGER)
 
     async def _centurion_worker_loop(self, worker_id: int):
         """Persistent worker loop pulling from V6 Task Queue (Zero-Spawn Mode)."""
@@ -376,18 +401,23 @@ class CortexDaemon:
             tasks = queue.get("pending_tasks", [])
             if not tasks:
                  return
-                 
-            # Clear queue FIRST
-            with open(SWARM_QUEUE_FILE, "w") as f:
-                 json.dump({"pending_tasks": []}, f)
-                 
+
             # Feed persistent queue
             added = 0
             for t in tasks[:MAX_CENTURIONS]:
                  if not self.task_queue.full():
                      await self.task_queue.put(t)
                      added += 1
-                     
+
+            remaining = tasks[added:]
+            fd, temp_path = tempfile.mkstemp(
+                prefix="cortex_swarm_queue_",
+                dir=os.path.dirname(SWARM_QUEUE_FILE) or None,
+            )
+            with os.fdopen(fd, "w") as f:
+                 json.dump({"pending_tasks": remaining}, f)
+            os.replace(temp_path, SWARM_QUEUE_FILE)
+
             logging.info("🐝 Swarm Legion Pulse: %d tasks injected into Zero-Spawn Pool.", added)
         except Exception as e:
             logging.error("Swarm Task Injection Failure: %s", e)
@@ -438,9 +468,17 @@ class CortexDaemon:
                 "command": cmd,
                 "timestamp": time.time()
             })
-            
-            with open(SWARM_QUEUE_FILE, "w") as f:
-                json.dump(queue, f, indent=2)
+
+            queue_dir = os.path.dirname(SWARM_QUEUE_FILE) or "."
+            with tempfile.NamedTemporaryFile(
+                "w",
+                dir=queue_dir,
+                delete=False,
+                encoding="utf-8",
+            ) as tmp_file:
+                json.dump(queue, tmp_file, indent=2)
+                tmp_path = tmp_file.name
+            os.replace(tmp_path, SWARM_QUEUE_FILE)
             logging.info("📌 [COUNCIL] Mission queued: %s", cmd)
         except Exception as e:
             logging.error("Council Queue Failure: %s", e)
@@ -451,15 +489,24 @@ class CortexDaemon:
         
         # Path to self
         self_path = "/Users/borjafernandezangulo/Cortex-Persist/cortex-core/cortex_daemon.py"
-        cmd = f"python3 /Users/borjafernandezangulo/Cortex-Persist/cortex-core/mirror_audit.py {self_path}"
-        
-        process = await asyncio.create_subprocess_shell(
-            cmd,
+        mirror_audit_path = "/Users/borjafernandezangulo/Cortex-Persist/cortex-core/mirror_audit.py"
+
+        process = await asyncio.create_subprocess_exec(
+            "python3",
+            mirror_audit_path,
+            self_path,
             stdin=asyncio.subprocess.DEVNULL,
             stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE
+            stderr=asyncio.subprocess.PIPE,
         )
-        stdout, _ = await process.communicate()
+        stdout, stderr = await process.communicate()
+
+        if process.returncode != 0:
+            logging.error(
+                "Self-Audit Execution Failed: %s",
+                stderr.decode(errors="replace").strip(),
+            )
+            return
         
         try:
             report = json.loads(stdout.decode())
@@ -467,10 +514,20 @@ class CortexDaemon:
                 logging.warning("⚠️ [MIRROR] Self-Optimization Required (Score: %d)", report["exergy_score"])
                 # Queue Remediation
                 error_log = "/tmp/mirror_findings.json"
-                with open(error_log, "w") as f:
-                    json.dump(report, f)
+                _atomic_write_text(error_log, json.dumps(report))
                 
-                self._queue_task("OPTIMIZER", f"python3 /Users/borjafernandezangulo/Cortex-Persist/cortex-core/remediator.py {self_path} {error_log}")
+                remediator_path = "/Users/borjafernandezangulo/Cortex-Persist/cortex-core/remediator.py"
+                self._queue_task(
+                    "OPTIMIZER",
+                    " ".join(
+                        [
+                            "python3",
+                            shlex.quote(remediator_path),
+                            shlex.quote(self_path),
+                            shlex.quote(error_log),
+                        ]
+                    ),
+                )
             else:
                 logging.info("✅ [MIRROR] Self-Audit Optimal (Score: %d)", report["exergy_score"])
         except Exception as e:
@@ -531,7 +588,7 @@ class CortexDaemon:
 if __name__ == "__main__":
     daemon = CortexDaemon()
     try:
-        asyncio.run(daemon.run())
+        sovereign_run(daemon.run())
     except KeyboardInterrupt:
         daemon.stop()
     except Exception as e:

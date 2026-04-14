@@ -10,9 +10,11 @@ from __future__ import annotations
 
 import ast
 import asyncio
+import os
 import logging
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Optional
 
@@ -41,6 +43,22 @@ __all__ = [
 ]
 
 logger = logging.getLogger("cortex.extensions.mejoralo.heal")
+
+
+def _atomic_write_text(path: Path, content: str) -> None:
+    """Persist generated code atomically."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, temp_path = tempfile.mkstemp(prefix="mejoralo_", dir=path.parent, text=True)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as tmp_file:
+            tmp_file.write(content)
+        os.replace(temp_path, path)
+    except Exception:
+        try:
+            os.unlink(temp_path)
+        except OSError:
+            pass
+        raise
 
 
 def _extract_issues_from_findings(scan_result: ScanResult) -> dict[str, list[str]]:
@@ -140,7 +158,7 @@ def _apply_and_verify(
     ):
         return False
 
-    abs_path.write_text(new_code)
+    _atomic_write_text(abs_path, new_code)
     _apply_aesthetic_formatting(abs_path, console)
 
     if not _run_delta_testing(
@@ -248,7 +266,7 @@ def _run_delta_testing(
                         "marcado como TAINTED. Requiere ariadne-arch-omega.[/]"
                     )
                     mark_file_tainted(top_file_rel, project, engine)
-            abs_path.write_text(original_code)
+            _atomic_write_text(abs_path, original_code)
             return False
         return True
     except subprocess.TimeoutExpired as e:
@@ -261,7 +279,7 @@ def _run_delta_testing(
                 f"segundos. stdout: {e.stdout}"
             )
             engine.record_scar(project, top_file_rel, err_trace)
-        abs_path.write_text(original_code)
+        _atomic_write_text(abs_path, original_code)
         return False
 
 

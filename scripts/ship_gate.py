@@ -13,6 +13,8 @@ Usage:
 from __future__ import annotations
 
 import json
+import shlex
+import shutil
 import subprocess
 import sys
 import time
@@ -37,6 +39,7 @@ class CheckResult:
 
     name: str
     passed: bool
+    status: str = ""
     duration_ms: float = 0.0
     detail: str = ""
 
@@ -71,16 +74,49 @@ def _run(cmd: str, timeout: int = 120) -> subprocess.CompletedProcess:
     )
 
 
+def _resolve_tool_command(binary_name: str, module_name: str) -> str | None:
+    """Resolve a local venv binary first, then PATH, then `python -m module`."""
+    local_binary = REPO_ROOT / ".venv" / "bin" / binary_name
+    if local_binary.exists():
+        return shlex.quote(str(local_binary))
+
+    global_binary = shutil.which(binary_name)
+    if global_binary:
+        return shlex.quote(global_binary)
+
+    probe = subprocess.run(
+        [sys.executable, "-m", module_name, "--version"],
+        cwd=str(REPO_ROOT),
+        capture_output=True,
+        text=True,
+    )
+    if probe.returncode == 0:
+        return f"{shlex.quote(sys.executable)} -m {module_name}"
+    return None
+
+
 def check_ruff() -> CheckResult:
     """Lint check via ruff."""
     t0 = time.monotonic()
-    result = _run(f".venv/bin/ruff check {RUFF_TARGET}")
+    ruff_cmd = _resolve_tool_command("ruff", "ruff")
+    if not ruff_cmd:
+        ms = (time.monotonic() - t0) * 1000
+        return CheckResult(
+            name="ruff_lint",
+            passed=False,
+            status="failed",
+            duration_ms=round(ms, 1),
+            detail="ruff not available",
+        )
+
+    result = _run(f"{ruff_cmd} check {RUFF_TARGET}")
     ms = (time.monotonic() - t0) * 1000
     passed = result.returncode == 0
     error_count = len(result.stdout.strip().splitlines()) if not passed else 0
     return CheckResult(
         name="ruff_lint",
         passed=passed,
+        status="ok" if passed else "failed",
         duration_ms=round(ms, 1),
         detail=f"{error_count} violations" if not passed else "clean",
     )
@@ -89,9 +125,20 @@ def check_ruff() -> CheckResult:
 def check_tests(fast: bool = False) -> CheckResult:
     """Run pytest suite."""
     t0 = time.monotonic()
+    pytest_cmd = _resolve_tool_command("pytest", "pytest")
+    if not pytest_cmd:
+        ms = (time.monotonic() - t0) * 1000
+        return CheckResult(
+            name="pytest",
+            passed=False,
+            status="failed",
+            duration_ms=round(ms, 1),
+            detail="pytest not available",
+        )
+
     marker = '-m "not slow"' if fast else ""
     result = _run(
-        f".venv/bin/pytest tests/ {marker} --tb=line -q --no-header",
+        f"{pytest_cmd} tests/ {marker} --tb=line -q --no-header",
         timeout=PYTEST_TIMEOUT,
     )
     ms = (time.monotonic() - t0) * 1000
@@ -104,6 +151,7 @@ def check_tests(fast: bool = False) -> CheckResult:
     return CheckResult(
         name="pytest",
         passed=passed,
+        status="ok" if passed else "failed",
         duration_ms=round(ms, 1),
         detail=summary if summary else result.stderr.strip()[:200],
     )
@@ -117,7 +165,8 @@ def check_radon_cc() -> CheckResult:
     except ImportError:
         return CheckResult(
             name="radon_cc",
-            passed=True,
+            passed=False,
+            status="skipped",
             duration_ms=0,
             detail="radon not installed, skipped",
         )
@@ -150,6 +199,7 @@ def check_radon_cc() -> CheckResult:
     return CheckResult(
         name="radon_cc",
         passed=passed,
+        status="ok" if passed else "failed",
         duration_ms=round(ms, 1),
         detail=detail,
     )
@@ -166,13 +216,15 @@ def check_mejoralo() -> CheckResult:
         except (ValueError, IndexError):
             return CheckResult(
                 name="mejoralo",
-                passed=True,
+                passed=False,
+                status="skipped",
                 duration_ms=round(ms, 1),
                 detail="could not parse score, skipped",
             )
         return CheckResult(
             name="mejoralo",
             passed=score >= MIN_MEJORALO,
+            status="ok" if score >= MIN_MEJORALO else "failed",
             duration_ms=round(ms, 1),
             detail=f"score={score}/{MIN_MEJORALO} minimum",
         )
@@ -180,7 +232,8 @@ def check_mejoralo() -> CheckResult:
         ms = (time.monotonic() - t0) * 1000
         return CheckResult(
             name="mejoralo",
-            passed=True,
+            passed=False,
+            status="skipped",
             duration_ms=round(ms, 1),
             detail="timeout or not available, skipped",
         )
@@ -204,7 +257,7 @@ def _print_check(console, label: str, result: CheckResult) -> None:
     """Print a single check result to console."""
     if console is None:
         return
-    icon = "✅" if result.passed else "❌"
+    icon = "⚪" if result.status == "skipped" else ("✅" if result.passed else "❌")
     console.print(f"  {icon} {label}: {result.detail} ({result.duration_ms:.0f}ms)")
 
 
@@ -215,8 +268,11 @@ def _print_gate(console, report: GateReport) -> None:
     console.print()
     if report.gate == "PASS":
         console.print("[bold green]🟢 GATE: PASS — Safe to ship.[/bold green]\n")
+    elif report.gate == "DEGRADED":
+        skipped = [c.name for c in report.checks if c.status == "skipped"]
+        console.print(f"[bold yellow]🟡 GATE: DEGRADED — Missing or skipped checks: {', '.join(skipped)}[/bold yellow]\n")
     else:
-        failed = [c.name for c in report.checks if not c.passed]
+        failed = [c.name for c in report.checks if c.status == "failed" or not c.passed]
         console.print(f"[bold red]🔴 GATE: FAIL — Blocked by: {', '.join(failed)}[/bold red]\n")
 
 
@@ -244,7 +300,14 @@ def main() -> None:
         _print_check(console, label, result)
 
     report.total_duration_ms = (time.monotonic() - t0) * 1000
-    report.gate = "PASS" if all(c.passed for c in report.checks) else "FAIL"
+    has_failed = any(c.status == "failed" or not c.passed for c in report.checks)
+    has_skipped = any(c.status == "skipped" for c in report.checks)
+    if has_failed:
+        report.gate = "FAIL"
+    elif has_skipped:
+        report.gate = "DEGRADED"
+    else:
+        report.gate = "PASS"
 
     _print_gate(console, report)
     print(json.dumps(report.to_dict(), indent=2, ensure_ascii=False))

@@ -8,13 +8,30 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import shlex
+import os
+import tempfile
 import time
 from pathlib import Path
 
 from cortex.extensions.llm.router import CortexLLMRouter, CortexPrompt, IntentProfile
 
 logger = logging.getLogger("cortex.mcts.git_env")
+
+
+def _atomic_write_text(path: Path, content: str) -> None:
+    """Persist mutations atomically to avoid leaving partial Chronos states."""
+    target_dir = path.parent
+    fd, temp_path = tempfile.mkstemp(prefix="chronos_", dir=target_dir, text=True)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as tmp_file:
+            tmp_file.write(content)
+        os.replace(temp_path, path)
+    except Exception:
+        try:
+            os.unlink(temp_path)
+        except OSError:
+            pass
+        raise
 
 
 class MCTSGitEnvironment:
@@ -28,8 +45,12 @@ class MCTSGitEnvironment:
 
     async def get_current_branch(self) -> str:
         """Devuelve el nombre de la rama actual."""
-        proc = await asyncio.create_subprocess_shell(
-            "git rev-parse --abbrev-ref HEAD", stdout=asyncio.subprocess.PIPE
+        proc = await asyncio.create_subprocess_exec(
+            "git",
+            "rev-parse",
+            "--abbrev-ref",
+            "HEAD",
+            stdout=asyncio.subprocess.PIPE,
         )
         stdout, _ = await proc.communicate()
         return stdout.decode().strip()
@@ -37,16 +58,24 @@ class MCTSGitEnvironment:
     async def branch_out(self, base_branch: str, new_node_id: str) -> str:
         """Bifurca el árbol de Git."""
         new_name = f"chronos/node-{new_node_id}"
-        cmd = f"git checkout -b {shlex.quote(new_name)} {shlex.quote(base_branch)}"
-        proc = await asyncio.create_subprocess_shell(
-            cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+        proc = await asyncio.create_subprocess_exec(
+            "git",
+            "checkout",
+            "-b",
+            new_name,
+            base_branch,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
         )
         await proc.communicate()
         if proc.returncode != 0:
             # Fallback for existing branch
-            await asyncio.create_subprocess_shell(
-                f"git checkout {shlex.quote(new_name)}"
-            ).communicate()
+            fallback_proc = await asyncio.create_subprocess_exec(
+                "git",
+                "checkout",
+                new_name,
+            )
+            await fallback_proc.communicate()
         return new_name
 
     async def mutate(self, prompt_instruction: str) -> bool:
@@ -85,7 +114,7 @@ class MCTSGitEnvironment:
                 lines = lines[:-1]
             new_code = "\n".join(lines).strip()
 
-        self.target_file.write_text(new_code, encoding="utf-8")
+        _atomic_write_text(self.target_file, new_code)
         logger.info("🧬 [CHRONOS] Archivo mutado: %s", self.target_file.name)
         return True
 
@@ -101,9 +130,12 @@ class MCTSGitEnvironment:
         start_time = time.perf_counter()
 
         # Corremos la suite de pruebas completa o las reglas ruff para chequear syntax
-        cmd_ruff = f"ruff check {shlex.quote(str(self.target_file))}"
-        proc_ruff = await asyncio.create_subprocess_shell(
-            cmd_ruff, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+        proc_ruff = await asyncio.create_subprocess_exec(
+            "ruff",
+            "check",
+            str(self.target_file),
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
         )
         await proc_ruff.communicate()
 
@@ -111,9 +143,14 @@ class MCTSGitEnvironment:
             logger.warning("💥 [CHRONOS] Mutación aniquilada: Invalida el linter estricto.")
             return 0.0
 
-        cmd_test = "pytest tests/ -v -q --tb=no"
-        proc_test = await asyncio.create_subprocess_shell(
-            cmd_test, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+        proc_test = await asyncio.create_subprocess_exec(
+            "pytest",
+            "tests/",
+            "-v",
+            "-q",
+            "--tb=no",
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
         )
         await proc_test.communicate()
 
@@ -132,6 +169,8 @@ class MCTSGitEnvironment:
     async def secure_checkout(self, branch: str) -> None:
         """Vuelve a una rama segura restaurando cualquier cambio."""
         logger.debug("Restaurando entropía: checkout a %s", branch)
-        await asyncio.create_subprocess_shell("git reset --hard HEAD").communicate()
-        await asyncio.create_subprocess_shell("git clean -fd").communicate()
-        await asyncio.create_subprocess_shell(f"git checkout {shlex.quote(branch)}").communicate()
+        await (
+            await asyncio.create_subprocess_exec("git", "reset", "--hard", "HEAD")
+        ).communicate()
+        await (await asyncio.create_subprocess_exec("git", "clean", "-fd")).communicate()
+        await (await asyncio.create_subprocess_exec("git", "checkout", branch)).communicate()

@@ -3,6 +3,8 @@ import asyncio
 import logging
 import re
 import sqlite3
+import shlex
+import tempfile
 import time
 import json
 
@@ -37,6 +39,19 @@ class OuroborosEngine:
                 self.bus.emit(event_type, payload, source="ouroboros")
             except Exception as e:
                 logger.error("Signal Emission Failed: %s", e)
+
+    @staticmethod
+    def _atomic_write_text(path: str, content: str) -> None:
+        target_dir = os.path.dirname(path) or "."
+        with tempfile.NamedTemporaryFile(
+            "w",
+            dir=target_dir,
+            delete=False,
+            encoding="utf-8",
+        ) as tmp_file:
+            tmp_file.write(content)
+            tmp_path = tmp_file.name
+        os.replace(tmp_path, path)
 
     async def provision(self):
         """Prepare the audit environment."""
@@ -106,8 +121,7 @@ contract {contract_name}OuroborosTest is Test {{
     }}
 }}
 """
-        with open(test_file, "w") as f:
-            f.write(template)
+        self._atomic_write_text(test_file, template)
         return test_file
 
     async def run_audit(self):
@@ -122,11 +136,21 @@ contract {contract_name}OuroborosTest is Test {{
              # Fallback: Create a dummy for telemetry
              contracts = [{"name": "CortexVault", "file": "src/Vault.sol"}]
              os.makedirs(os.path.join(self.scratch_dir, "src"), exist_ok=True)
-             with open(os.path.join(self.scratch_dir, "src/Vault.sol"), "w") as f:
-                 f.write("contract CortexVault { function deposit() external payable {} }")
+             self._atomic_write_text(
+                 os.path.join(self.scratch_dir, "src/Vault.sol"),
+                 "contract CortexVault { function deposit() external payable {} }",
+             )
 
         # Initialize Forge project
-        os.system(f"cd {self.scratch_dir} && forge init --no-git")
+        init_process = await asyncio.create_subprocess_exec(
+            FORGE_PATH,
+            "init",
+            "--no-git",
+            cwd=self.scratch_dir,
+            stdout=asyncio.subprocess.DEVNULL,
+            stderr=asyncio.subprocess.DEVNULL,
+        )
+        await init_process.wait()
 
         for c in contracts[:2]: # Limit to 2 for performance
             await self.generate_fuzz_test(c["name"], c["file"])
@@ -151,8 +175,7 @@ contract {contract_name}OuroborosTest is Test {{
             # 2. Detective Analysis: If failure, queue remediation
             if process.returncode != 0:
                 error_log = f"{self.scratch_dir}/error.log"
-                with open(error_log, "w") as f:
-                    f.write(stdout.decode() + "\n" + stderr.decode())
+                self._atomic_write_text(error_log, stdout.decode() + "\n" + stderr.decode())
                 
                 logger.warning("❌ [VULN] Found in %s. Queuing Sovereign Surgeon...", c["name"])
                 
@@ -190,12 +213,20 @@ contract {contract_name}OuroborosTest is Test {{
                 "id": f"remed_{int(time.time())}",
                 "agent": "SURGEON-1",
                 "type": "remediation",
-                "command": f"python3 /Users/borjafernandezangulo/Cortex-Persist/cortex-core/remediator.py {target_file} {log_file}",
+                "command": (
+                    "python3 /Users/borjafernandezangulo/Cortex-Persist/cortex-core/remediator.py "
+                    f"{shlex.quote(target_file)} {shlex.quote(log_file)}"
+                ),
                 "timestamp": time.time()
             })
-            
-            with open(queue_path, "w") as f:
+
+            fd, temp_path = tempfile.mkstemp(
+                prefix="cortex_swarm_queue_",
+                dir=os.path.dirname(queue_path) or None,
+            )
+            with os.fdopen(fd, "w") as f:
                 json.dump(queue, f, indent=2)
+            os.replace(temp_path, queue_path)
             logger.info("📌 [SURGEON] Remediation mission queued for %s", target_file)
         except Exception as e:
             logger.error("Remediation Queue Failure: %s", e)
@@ -206,6 +237,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--target", help="Git URL to audit")
     parser.add_argument("--worker-id", default="main", help="ID for parallel trace")
+    parser.add_argument("--flight-record-id", default="", help="Optional causal tracking ID")
     args = parser.parse_args()
     
     logging.basicConfig(level=logging.INFO)

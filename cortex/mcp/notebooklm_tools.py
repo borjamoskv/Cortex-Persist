@@ -7,10 +7,28 @@ can manage the Ouroboros memory loop autonomously.
 from __future__ import annotations
 
 import logging
+import os
+import tempfile
 from pathlib import Path
 from typing import Any
 
 logger = logging.getLogger("cortex.mcp.notebooklm")
+
+
+def _atomic_write_text(path: Path, content: str) -> None:
+    """Persist MCP-generated NotebookLM files atomically."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, temp_path = tempfile.mkstemp(prefix="notebooklm_mcp_", dir=path.parent, text=True)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as tmp_file:
+            tmp_file.write(content)
+        os.replace(temp_path, path)
+    except Exception:
+        try:
+            os.unlink(temp_path)
+        except OSError:
+            pass
+        raise
 
 
 def register_notebooklm_tools(mcp: Any, ctx: Any) -> None:
@@ -44,7 +62,7 @@ def register_notebooklm_tools(mcp: Any, ctx: Any) -> None:
         svc = NotebookLMService(str(db_path))
         content = await svc.generate_digest(project=project)
 
-        Path(output).write_text(content, encoding="utf-8")
+        _atomic_write_text(Path(output), content)
         word_count = len(content.split())
         facts_count = content.count("∆_CTX:")
 

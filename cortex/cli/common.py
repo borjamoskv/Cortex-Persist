@@ -6,6 +6,9 @@ Prevent circular imports by centralizing base CLI objects.
 from __future__ import annotations
 
 import asyncio
+import os
+import tempfile
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import click
@@ -72,6 +75,29 @@ def close_engine_sync(engine: CortexEngine) -> None:
     from cortex.events.loop import sovereign_run
 
     sovereign_run(engine.close())
+
+
+def atomic_write_text(path: str | Path, content: str) -> Path:
+    """Write text atomically for CLI exports and manifests."""
+    target = Path(path).expanduser()
+    target.parent.mkdir(parents=True, exist_ok=True)
+    fd, temp_path = tempfile.mkstemp(
+        prefix=f".{target.name}.",
+        suffix=".tmp",
+        dir=target.parent,
+        text=True,
+    )
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as tmp_file:
+            tmp_file.write(content)
+        os.replace(temp_path, target)
+    except Exception:
+        try:
+            os.unlink(temp_path)
+        except OSError:
+            pass
+        raise
+    return target
 
 
 def _run_async(coro):

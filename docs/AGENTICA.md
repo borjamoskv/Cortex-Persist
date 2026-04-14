@@ -320,8 +320,9 @@ FASE 3 — EXECUTE (Ejecución Irreversible)
 
 FASE 4 — LEARN (Persistencia Meta-Cognitiva)
   └─ Almacenar en CORTEX:
-     cortex store --type meta_learning --source agent:zenon PROJECT \
-       "Punto fijo alcanzado en iteración k={k}. ΔV final={ΔV}. τ_z={τ_z}. Decisión: {D}"
+     cortex store PROJECT \
+       "Punto fijo alcanzado en iteración k={k}. ΔV final={ΔV}. τ_z={τ_z}. Decisión: {D}" \
+       --type meta_learning --source agent:zenon
   └─ Ajustar ε futuro basado en la calidad observada de la decisión post-ejecución
 ```
 
@@ -1144,7 +1145,11 @@ async def execute_with_degradation(self, action: AgentAction) -> AgentResult:
     except SchemaIncompatibilityError as e:
         # L4: intentar modo degradado antes de abortar
         if degraded := await self._try_text_only_mode(action):
-            await self.cortex.store(type="error", content=str(e), recovery="text_mode")
+            await self.cortex.store(
+                content=str(e),
+                fact_type="error",
+                meta={"recovery": "text_mode"},
+            )
             return degraded.with_warning("Operating in text-only mode: tool-calling unavailable")
         # L3: abortar con contexto completo
         raise AgentDegradedError(

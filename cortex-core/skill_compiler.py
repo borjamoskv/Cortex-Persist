@@ -1,11 +1,25 @@
 import os
 import re
 import json
+import tempfile
 
 SKILLS_DIR = "/Users/borjafernandezangulo/.gemini/antigravity/skills"
 TARGET_DIR = (
     "/Users/borjafernandezangulo/Cortex-Persist/cortex-core/compiled_skills"
 )
+
+
+def _atomic_write_text(path: str, content: str) -> None:
+    target_dir = os.path.dirname(path) or "."
+    with tempfile.NamedTemporaryFile(
+        "w",
+        dir=target_dir,
+        delete=False,
+        encoding="utf-8",
+    ) as tmp_file:
+        tmp_file.write(content)
+        tmp_path = tmp_file.name
+    os.replace(tmp_path, path)
 
 
 def parse_skill_markdown(filepath):
@@ -105,20 +119,18 @@ def main():
         safe_name, py_code = compile_to_python(folder, metadata, body)
 
         out_file = os.path.join(TARGET_DIR, f"{safe_name}.py")
-        with open(out_file, "w", encoding="utf-8") as f:
-            f.write(py_code)
+        _atomic_write_text(out_file, py_code)
 
         init_exports.append(safe_name)
         compiled_count += 1
         print(f"Compiled: {folder} -> {safe_name}.py")
 
     # Generate __init__.py registry
-    with open(os.path.join(TARGET_DIR, "__init__.py"), "w") as f:
-        f.write("# CORTEX COMPILED SKILLS REGISTRY\n")
-        f.write("COMPILED_SKILLS = [\n")
-        for ex in init_exports:
-            f.write(f"    '{ex}',\n")
-        f.write("]\n")
+    init_content = "# CORTEX COMPILED SKILLS REGISTRY\nCOMPILED_SKILLS = [\n"
+    for ex in init_exports:
+        init_content += f"    '{ex}',\n"
+    init_content += "]\n"
+    _atomic_write_text(os.path.join(TARGET_DIR, "__init__.py"), init_content)
 
     msg = (
         f"\n[CORTEX JIT] Successfully compiled {compiled_count} "

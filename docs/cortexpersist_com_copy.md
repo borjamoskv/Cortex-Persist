@@ -7,28 +7,28 @@
 
 ## 1. Hero
 
-**Tamper-evident memory and decision lineage for AI agents**
+**Verifiable memory for teams shipping high-stakes AI workflows**
 
-Persistent context, cryptographic audit trails, and governed retrieval for AI systems that need more than a prompt window.
+Verifiable memory, tamper-evident lineage, and exportable evidence for AI systems that need more than a prompt window.
 
 [Get Started] [View Demo]
 
 *(Edge variant más agresiva:)*
 > **Your AI can act. Now make it accountable.**
-> Persistent memory, tamper-evident lineage, and audit-ready history for systems that cannot afford amnesia.
+> Persistent memory, tamper-evident lineage, and exportable evidence for systems that cannot afford amnesia.
 
 ---
 
 ## 2. Proof strip
 
-**Store structured facts**
-Capture decisions, errors, discoveries, and operational context as typed memory.
+**Verifiable memory**
+Preserve workflow context and decisions in an inspectable form teams can review later.
 
-**Verify with lineage**
-Attach tamper-evident history to memory operations and decision flow.
+**Tamper-evident lineage**
+Detect whether a decision record changed instead of reconstructing it from traces and guesswork.
 
-**Retrieve what matters**
-Use hybrid search to recover context without drowning in semantic landfill.
+**Exportable evidence**
+Package decision records into artifacts teams can share for reviews, incident response, and audits.
 
 ---
 
@@ -48,19 +48,19 @@ You have fragments, logs, and optimism.
 
 ## 4. Solution
 
-**CORTEX-Persist adds the missing trust layer**
+**CORTEX-Persist makes the decision record verifiable**
 
-CORTEX-Persist is a local-first memory and verification substrate for AI systems that need to remember, retrieve, and prove what happened.
+CORTEX-Persist is a local-first memory and verification substrate for AI systems that need to preserve, verify, and export what happened.
 
 It combines:
 - structured memory
 - tamper-evident ledgering
 - hybrid retrieval
 - memory lifecycle governance
-- audit-ready history
+- exportable evidence
 
 So your stack can do more than continue text.
-It can preserve operational truth under pressure.
+It can leave behind a decision record teams can inspect under pressure.
 
 ---
 
@@ -70,9 +70,8 @@ It can preserve operational truth under pressure.
 
 **1. Store memory**
 ```bash
-cortex store "Vendor X failed compliance check" \
+cortex store procurement "Vendor X failed compliance check" \
   --type decision \
-  --project procurement \
   --confidence C4 \
   --source agent:reviewer
 ```
@@ -87,7 +86,7 @@ cortex search "compliance vendor failure"
 
 **4. Verify integrity**
 ```bash
-cortex verify-ledger
+cortex ledger verify
 ```
 
 Result: persistent memory with searchable context and verifiable history.
@@ -193,8 +192,8 @@ Keep both when accountability becomes non-negotiable.
 - Footer one-liner: Persistent memory for AI systems that need evidence, not vibes.
 
 **GitHub Integration Strings**
-- **Description:** Tamper-evident memory and decision lineage for AI agents.
-- **README Opening:** CORTEX-Persist is a local-first memory and trust layer for AI systems that need persistent context, cryptographic lineage, and audit-ready history.
+- **Description:** Verifiable memory and decision lineage for high-stakes AI workflows.
+- **README Opening:** CORTEX-Persist gives teams shipping AI into high-stakes workflows verifiable memory, tamper-evident decision lineage, and exportable evidence.
 
 ---
 **Notas de implementación:** No metas termodinámica, Ω ni doctrina en el primer scroll. Eso va en una página aparte tipo *Architecture / Principles / Why CORTEX*.

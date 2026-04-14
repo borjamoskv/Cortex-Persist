@@ -7,7 +7,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-import shlex
+import os
 from typing import Any
 from collections.abc import AsyncGenerator
 
@@ -129,66 +129,37 @@ class OpenCodeProvider(BaseProvider):
 
         logger.info("Mapeando inferencia CORTEX hacia OpenCode Proxy (Modelo: %s)", target_model)
 
-        # Rendimiento x100: Superar el límite ARG_MAX de OS X (1MB/2MB) usando RAM disk (/tmp ephemeral)
-        # Esto previene crashes cuando el CORTEX inyecta 50 archivos de código en el context bridge.
-        import tempfile
-        import os
+        process = await self._spawn_opencode_process(target_model)
+        stdout, stderr = await process.communicate(prompt_text.encode("utf-8"))
 
-        with tempfile.NamedTemporaryFile(mode="w", dir="/tmp", suffix=".md", delete=False) as tf:
-            tf.write(prompt_text)
-            temp_path = tf.name
+        if process.returncode != 0:
+            err_msg = stderr.decode().strip() or stdout.decode().strip()
 
-        try:
-            # Rendimiento x100: exec_shell bypass. Evita parseo de bash (O(1) execution time)
-            # Y TTY auto-disable en OpenCode asumiendo que lee de archivo.
-            # Nota: Si el CLI local no soporta file flag, el `cat` se ejecuta piped.
-            cmd = f"cat {temp_path} | opencode run - --model {target_model}"
+            # Auto-Thermal-Fallback (C5 Resilience + Axioma Ω16-B CoT)
+            if "ollama/" not in target_model:
+                fallback_local_model = "ollama/qwen2.5-coder:32b"
+                if "o3-mini" in target_model or "o1" in target_model:
+                    fallback_local_model = "ollama/deepseek-r1:32b"
 
-            process = await asyncio.create_subprocess_shell(
-                cmd,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE,
-            )
+                logger.warning(
+                    "Cloud Crash (Code %s). Fallback a Silicio (%s)",
+                    process.returncode,
+                    fallback_local_model,
+                )
 
-            stdout, stderr = await process.communicate()
+                fb_proc = await self._spawn_opencode_process(fallback_local_model)
+                fb_out, fb_err = await fb_proc.communicate(prompt_text.encode("utf-8"))
 
-            if process.returncode != 0:
-                err_msg = stderr.decode().strip() or stdout.decode().strip()
+                if fb_proc.returncode == 0:
+                    return fb_out.decode().strip()
 
-                # Auto-Thermal-Fallback (C5 Resilience + Axioma Ω16-B CoT)
-                if "ollama/" not in target_model:
-                    fallback_local_model = "ollama/qwen2.5-coder:32b"
-                    if "o3-mini" in target_model or "o1" in target_model:
-                        fallback_local_model = "ollama/deepseek-r1:32b"
+                err_msg = fb_err.decode().strip() or fb_out.decode().strip()
 
-                    logger.warning(
-                        "Cloud Crash (Code %s). Fallback a Silicio (%s)",
-                        process.returncode,
-                        fallback_local_model,
-                    )
+            from cortex.utils.errors import CortexError
 
-                    fb_cmd = f"cat {temp_path} | opencode run - --model {fallback_local_model}"
-                    fb_proc = await asyncio.create_subprocess_shell(
-                        fb_cmd,
-                        stdout=asyncio.subprocess.PIPE,
-                        stderr=asyncio.subprocess.PIPE,
-                    )
-                    fb_out, fb_err = await fb_proc.communicate()
+            raise CortexError(f"OpenCode Execution Failed: {err_msg}")
 
-                    if fb_proc.returncode == 0:
-                        return fb_out.decode().strip()
-
-                    err_msg = fb_err.decode().strip() or fb_out.decode().strip()
-
-                from cortex.utils.errors import CortexError
-
-                raise CortexError(f"OpenCode Execution Failed: {err_msg}")
-
-            return stdout.decode().strip()
-        finally:
-            # Destruir memoria persistente (Limpieza de entropía temporal)
-            if os.path.exists(temp_path):
-                os.remove(temp_path)
+        return stdout.decode().strip()
 
     async def stream(
         self,
@@ -225,24 +196,16 @@ class OpenCodeProvider(BaseProvider):
             elif LLM_LOCAL_FIRST or getattr(cortex_prompt, "local_only", False):
                 target_model = "ollama/qwen2.5-coder:7b"
 
-        import tempfile
-        import os
-
-        with tempfile.NamedTemporaryFile(mode="w", dir="/tmp", suffix=".md", delete=False) as tf:
-            tf.write(prompt_text)
-            temp_path = tf.name
-
         process = None
         fb_proc = None
+        feed_task = None
+        fb_feed_task = None
         try:
-            cmd = f"cat {temp_path} | opencode run - --model {target_model}"
-
-            process = await asyncio.create_subprocess_shell(
-                cmd,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE,
-                preexec_fn=os.setsid,  # V10 Strike: Attach to a session to allow Process Group Orphan Slaying
+            process = await self._spawn_opencode_process(
+                target_model,
+                start_new_session=True,
             )
+            feed_task = asyncio.create_task(self._feed_prompt(process, prompt_text))
 
             yielded_any = False
             while True:
@@ -269,13 +232,11 @@ class OpenCodeProvider(BaseProvider):
                         fallback_local_model,
                     )
 
-                    fb_cmd = f"cat {temp_path} | opencode run - --model {fallback_local_model}"
-                    fb_proc = await asyncio.create_subprocess_shell(
-                        fb_cmd,
-                        stdout=asyncio.subprocess.PIPE,
-                        stderr=asyncio.subprocess.PIPE,
-                        preexec_fn=os.setsid,
+                    fb_proc = await self._spawn_opencode_process(
+                        fallback_local_model,
+                        start_new_session=True,
                     )
+                    fb_feed_task = asyncio.create_task(self._feed_prompt(fb_proc, prompt_text))
 
                     while True:
                         fb_chunk = await fb_proc.stdout.read(64)
@@ -310,8 +271,57 @@ class OpenCodeProvider(BaseProvider):
                     except Exception:
                         pass
 
-            if os.path.exists(temp_path):
-                os.remove(temp_path)
+            for task in [feed_task, fb_feed_task]:
+                if task:
+                    try:
+                        await task
+                    except Exception:
+                        pass
 
     async def close(self) -> None:
         pass
+
+    async def _spawn_opencode_process(
+        self,
+        model: str,
+        *,
+        start_new_session: bool = False,
+    ) -> asyncio.subprocess.Process:
+        kwargs: dict[str, Any] = {
+            "stdin": asyncio.subprocess.PIPE,
+            "stdout": asyncio.subprocess.PIPE,
+            "stderr": asyncio.subprocess.PIPE,
+        }
+        if start_new_session:
+            kwargs["preexec_fn"] = os.setsid
+
+        return await asyncio.create_subprocess_exec(
+            "opencode",
+            "run",
+            "-",
+            "--model",
+            model,
+            **kwargs,
+        )
+
+    async def _feed_prompt(
+        self,
+        process: asyncio.subprocess.Process,
+        prompt_text: str,
+    ) -> None:
+        if process.stdin is None:
+            return
+
+        try:
+            process.stdin.write(prompt_text.encode("utf-8"))
+            await process.stdin.drain()
+        except (BrokenPipeError, ConnectionResetError):
+            pass
+        finally:
+            process.stdin.close()
+            wait_closed = getattr(process.stdin, "wait_closed", None)
+            if wait_closed is not None:
+                try:
+                    await wait_closed()
+                except (BrokenPipeError, ConnectionResetError):
+                    pass

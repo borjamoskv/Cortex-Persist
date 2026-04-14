@@ -87,7 +87,7 @@ SYSTEM_PROMPT_MEDIUM = """\
 - Exception: Specifics only (`sqlite3.Error`, `ValueError`).
 
 [ACTIONABLE PAYLOAD: PERSISTENCE]
-cortex store --type [decision|error|ghost|bridge] PROJECT "content"
+cortex store PROJECT "content" --type [decision|error|ghost|bridge]
 (Execute automatically. Do not ask.)\
 """
 
@@ -148,9 +148,9 @@ TTL Policy: PERSIST WITH DECAY - TTL: ghosts 30d, knowledge 180d, axioms ∞.
 - Impossible (∞): War Council → Red Team → JIT Forge → LEVIATHAN
 
 [ACTIONABLE PAYLOAD: MANDATORY PERSISTENCE]
-cortex store --type decision PROJECT "content"
-cortex store --type error    PROJECT "content"
-cortex store --type ghost    PROJECT "content"
-cortex store --type bridge   PROJECT "content"
+cortex store PROJECT "content" --type decision
+cortex store PROJECT "content" --type error
+cortex store PROJECT "content" --type ghost
+cortex store PROJECT "content" --type bridge
 (AUTO-EXECUTE. MID-SESSION OR CLOSING. ZERO HESITATION.)\
 """

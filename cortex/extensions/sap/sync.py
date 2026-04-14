@@ -155,7 +155,7 @@ class SAPSync:
                 entity, entity_set, self.client.config.base_url_normalized
             )
             fact_data["project"] = project
-            await self._store_fact(fact_data)
+            await self._persist_fact(fact_data)
             result.pulled += 1
         except (OSError, ValueError, KeyError) as e:
             action = "update" if is_update else "store"
@@ -243,8 +243,8 @@ class SAPSync:
             logger.warning("Failed to recall SAP facts for project %s", project)
             return []
 
-    async def _store_fact(self, fact_data: dict[str, Any]) -> int:
-        """Store a fact using the available engine interface."""
+    async def _persist_fact(self, fact_data: dict[str, Any]) -> int:
+        """Persist a fact using the available engine interface."""
         if hasattr(self.engine, "store") and asyncio.iscoroutinefunction(
             getattr(self.engine, "store", None)
         ):
@@ -301,4 +301,4 @@ class SAPSync:
         return uri[start:end]
 
 
-# Needed for async detection in _get_sap_facts / _store_fact
+# Needed for async detection in _get_sap_facts / _persist_fact

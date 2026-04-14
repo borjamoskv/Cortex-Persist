@@ -6,6 +6,7 @@ import asyncio
 import json
 import logging
 import sqlite3
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Optional
@@ -14,6 +15,20 @@ from cortex.extensions.daemon.models import SecurityAlert
 from cortex.memory import AsyncEncoder, VectorStoreL2
 
 logger = logging.getLogger("moskv-daemon")
+
+
+def _atomic_write_text(path: Path, content: str) -> None:
+    """Persist log updates atomically to avoid truncation on partial failures."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile(
+        "w",
+        dir=path.parent,
+        delete=False,
+        encoding="utf-8",
+    ) as tmp_file:
+        tmp_file.write(content)
+        tmp_path = Path(tmp_file.name)
+    tmp_path.replace(path)
 
 
 class SecurityMonitor:
@@ -52,9 +67,7 @@ class SecurityMonitor:
         try:
             # Simple simulation: read all lines, assuming it's manageable
             # In a sovereign KETER-level system we would track read offsets
-            # Lee el log entero y lo vacía para que no se re-analicen los mismos eventos.
             lines = self.log_path.read_text().splitlines()
-            self.log_path.write_text("")
 
             for line in lines[-500:]:  # process at most the last 500 events
                 if not line.strip():
@@ -64,8 +77,15 @@ class SecurityMonitor:
                 except json.JSONDecodeError:
                     continue
         except OSError as e:
-            logger.error("Failed to read/clear security logs: %s", e)
+            logger.error("Failed to read security logs: %s", e)
         return events
+
+    def _clear_log(self) -> None:
+        """Clear the security log only after successful processing."""
+        try:
+            _atomic_write_text(self.log_path, "")
+        except OSError as e:
+            logger.error("Failed to clear security logs: %s", e)
 
     async def check_async(self) -> list[SecurityAlert]:
         """Vectorizes recent events and searches for semantic attack similarities."""
@@ -86,6 +106,7 @@ class SecurityMonitor:
                 c5_alerts = [a for a in alerts if a.confidence == "C5"]
                 if c5_alerts:
                     await self._blacklist_ips(c5_alerts)
+            self._clear_log()
         except (sqlite3.Error, OSError) as e:
             logger.error("SecurityMonitor check_async failed: %s", e)
         return alerts

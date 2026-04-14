@@ -9,17 +9,14 @@ import asyncio
 import json
 import os
 import sys
+import tempfile
 from datetime import datetime
 from typing import List
 
 # Configuración Termodinámica
-BASE_DIR = os.path.expanduser(
-    "~/Cortex-Persist/engine-c5"
-)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TARGETS_DIR = os.path.join(BASE_DIR, "targets")
-LEDGER_PATH = os.path.join(
-    BASE_DIR, "vanguard_ledger.json"
-)
+LEDGER_PATH = os.path.join(BASE_DIR, "vanguard_ledger.json")
 HEARTBEAT_SEC = 3600
 
 
@@ -47,8 +44,16 @@ def update_ledger(
         "details": details,
     }
 
-    with open(LEDGER_PATH, "w") as f:
-        json.dump(ledger, f, indent=2)
+    ledger_dir = os.path.dirname(LEDGER_PATH) or "."
+    with tempfile.NamedTemporaryFile(
+        "w",
+        dir=ledger_dir,
+        delete=False,
+        encoding="utf-8",
+    ) as tmp_file:
+        json.dump(ledger, tmp_file, indent=2)
+        tmp_path = tmp_file.name
+    os.replace(tmp_path, LEDGER_PATH)
 
 
 def _classify_cmd(cmd_str: str, phase: str) -> bool:
@@ -129,12 +134,38 @@ async def run_step(
     effective_cwd = arena if arena else cwd
 
     log(f"Iniciando fase: {name}", "EXEC")
-    process = await asyncio.create_subprocess_exec(
-        *cmd,
-        cwd=effective_cwd,
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE,
+
+    # Robust Subprocess Execution (Ω-Hardened)
+    vanguard_env = os.environ.copy()
+    vanguard_env["PYTHONUNBUFFERED"] = "1"
+    base_pythonpath = os.path.dirname(BASE_DIR.rstrip("/"))
+    existing_pythonpath = vanguard_env.get("PYTHONPATH")
+    vanguard_env["PYTHONPATH"] = (
+        f"{base_pythonpath}{os.pathsep}{existing_pythonpath}"
+        if existing_pythonpath
+        else base_pythonpath
     )
+
+    if arena:
+        process = await asyncio.create_subprocess_exec(
+            "/bin/sh",
+            "-lc",
+            final_cmd,
+            cwd=effective_cwd,
+            env=vanguard_env,
+            stdin=asyncio.subprocess.DEVNULL,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+    else:
+        process = await asyncio.create_subprocess_exec(
+            *cmd,
+            cwd=effective_cwd,
+            env=vanguard_env,
+            stdin=asyncio.subprocess.DEVNULL,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
     stdout, stderr = await process.communicate()
     output = (
         stdout.decode().strip()

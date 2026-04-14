@@ -5,6 +5,8 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import os
+import tempfile
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Optional
 
@@ -18,6 +20,27 @@ from cortex.engine.mixins.base import EngineMixinBase
 __all__ = ["GhostMixin"]
 
 logger = logging.getLogger("cortex.ghosts")
+
+
+def _atomic_write_json(path: Path, payload: dict[str, Any]) -> None:
+    """Persist Songlines manifests atomically."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, temp_path = tempfile.mkstemp(
+        prefix=f".{path.name}.",
+        suffix=".tmp",
+        dir=path.parent,
+        text=True,
+    )
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as tmp_file:
+            json.dump(payload, tmp_file, indent=2)
+        os.replace(temp_path, path)
+    except Exception:
+        try:
+            os.unlink(temp_path)
+        except OSError:
+            pass
+        raise
 
 
 class GhostMixin(EngineMixinBase):
@@ -144,7 +167,6 @@ class GhostMixin(EngineMixinBase):
                     del data[source.name][attr_name]
                     if not data[source.name]:
                         del data[source.name]
-                    with open(manifest, "w") as f:
-                        json.dump(data, f, indent=2)
+                    _atomic_write_json(manifest, data)
             except (json.JSONDecodeError, OSError) as e:
                 logger.debug("Failed to update manifest fallback: %s", e)

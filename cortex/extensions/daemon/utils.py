@@ -3,13 +3,30 @@
 
 import asyncio
 import logging
+import os
 import subprocess
+import tempfile
 from pathlib import Path
 
 logger = logging.getLogger("cortex.extensions.daemon.utils")
 
 MAILTV_DIR = Path.home() / ".cortex" / "mailtv"
 TOKEN_PATH = MAILTV_DIR / "token.json"
+
+
+def _atomic_write_text(path: Path, content: str, mode: int = 0o600) -> None:
+    """Persist sensitive text atomically with restrictive permissions."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile(
+        "w",
+        dir=str(path.parent),
+        delete=False,
+        encoding="utf-8",
+    ) as tmp_file:
+        tmp_file.write(content)
+        tmp_path = Path(tmp_file.name)
+    os.chmod(tmp_path, mode)
+    tmp_path.replace(path)
 
 
 async def speak(state, text: str, voice: str = "Jorge", rate: int = 140):
@@ -59,9 +76,7 @@ def get_gmail_credentials():
         if creds and creds.expired and creds.refresh_token:
             try:
                 creds.refresh(GoogleRequest())
-
-                with open(TOKEN_PATH, "w") as token:
-                    token.write(creds.to_json())
+                _atomic_write_text(TOKEN_PATH, creds.to_json())
             except (OSError, ValueError) as exc:
                 logger.warning("Gmail token refresh failed: %s", exc)
                 return None

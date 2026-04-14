@@ -21,7 +21,7 @@ import click
 from rich.panel import Panel
 from rich.syntax import Syntax
 
-from cortex.cli.common import cli, console
+from cortex.cli.common import atomic_write_text, cli, console
 
 __all__ = ["prompt"]
 
@@ -222,7 +222,7 @@ def prompt_generate(variant: str, out: Optional[str]) -> None:
     token_estimate = len(text.split()) * 4 // 3
 
     if out:
-        Path(out).write_text(text, encoding="utf-8")
+        atomic_write_text(Path(out), text)
         console.print(
             Panel(
                 f"[bold green]✓ Prompt written to:[/] {out}\n[dim]~{token_estimate} tokens[/]",

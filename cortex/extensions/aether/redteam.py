@@ -8,7 +8,9 @@ tests to ensure zero functional drift (Immunitas-Omega D4 Siege).
 from __future__ import annotations
 
 import logging
+import os
 import re
+import tempfile
 import uuid
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -32,6 +34,22 @@ RULES:
 - Use `unittest.mock` to mock external dependencies or side-effects if needed, but focus on asserting outputs for known inputs.
 - Your objective is to ensure that if the agent replacing this code breaks the logic or changes the return value, YOUR TEST WILL FAIL (Zero-drift policy).
 """
+
+
+def _atomic_write_text(path: Path, content: str) -> None:
+    """Persist generated siege artifacts atomically."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, temp_path = tempfile.mkstemp(prefix="aether_redteam_", dir=path.parent, text=True)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as tmp_file:
+            tmp_file.write(content)
+        os.replace(temp_path, path)
+    except Exception:
+        try:
+            os.unlink(temp_path)
+        except OSError:
+            pass
+        raise
 
 
 class RedTeamAgent:
@@ -97,18 +115,18 @@ class RedTeamAgent:
             test_filename = f"test_siege_{Path(target).stem}_{test_id}.py"
             test_file_path = tests_dir / test_filename
 
-            test_file_path.write_text(raw_test, encoding="utf-8")
+            _atomic_write_text(test_file_path, raw_test)
             generated_tests.append(str(test_file_path.relative_to(toolkit.repo_path)))
 
             # Create __init__.py if not exists to make it a module
             init_file = tests_dir / "__init__.py"
             if not init_file.exists():
-                init_file.write_text("")
+                _atomic_write_text(init_file, "")
 
             # If `tests` dir doesn't have an __init__.py, create it too just in case
             parent_init = toolkit.repo_path / "tests" / "__init__.py"
             if not parent_init.exists() and (toolkit.repo_path / "tests").exists():
-                parent_init.write_text("")
+                _atomic_write_text(parent_init, "")
 
         if generated_tests:
             logger.info("🛡️ Characterization suite forged: %s", generated_tests)

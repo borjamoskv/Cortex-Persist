@@ -22,4 +22,4 @@ CORTEX goes beyond mere logging by employing **Hash-Chaining** and **Merkle Root
 1. **Hash-Chaining:** If anyone tries to modify the JSON artifact above after the fact to cover up a mistake, the `current_hash` won't match the database signature.
 2. **Merkle Roots:** We periodically seal thousands of these decisions into a single global cryptographic footprint.
 
-When you buy CORTEX, you are buying the ability to hand an auditor a command (`cortex verify record X`) and an immutable JSON receipt that proves beyond doubt what the AI knew at the time of execution.
+When you buy CORTEX, you are buying the ability to hand an auditor a command (`cortex verify X`) and an immutable JSON receipt that proves beyond doubt what the AI knew at the time of execution.

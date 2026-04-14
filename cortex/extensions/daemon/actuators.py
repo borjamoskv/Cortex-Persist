@@ -69,9 +69,16 @@ class PhysicalActuator:
 
         # Gate 2: OS-Level Prison
         if _PRISON_PROFILE.exists():
-            sandboxed = f"sandbox-exec -f {_PRISON_PROFILE} {command}"
+            exec_args = (
+                "sandbox-exec",
+                "-f",
+                str(_PRISON_PROFILE),
+                "/bin/sh",
+                "-lc",
+                command,
+            )
         else:
-            sandboxed = command
+            exec_args = ("/bin/sh", "-lc", command)
             logger.warning("⚠️ cortex_prison.sb not found")
 
         logger.warning(
@@ -79,8 +86,8 @@ class PhysicalActuator:
             command[:50],
         )
         try:
-            proc = await asyncio.create_subprocess_shell(
-                sandboxed,
+            proc = await asyncio.create_subprocess_exec(
+                *exec_args,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
             )

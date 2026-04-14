@@ -266,10 +266,10 @@ cortex search "type:decision project:CURRENT_PROJECT" --limit 20
 
 ```bash
 # Persist the learning
-cortex store --type decision --source agent:gemini PROJECT "What was decided and why"
+cortex store PROJECT "What was decided and why" --type decision --source agent:gemini
 
 # If a cross-project pattern was applied
-cortex store --type bridge --source agent:gemini PROJECT "Pattern: X from A → B. Adaptations: Y."
+cortex store PROJECT "Pattern: X from A → B. Adaptations: Y." --type bridge --source agent:gemini
 ```
 
 ### 4.3 When a Ghost is Encountered
@@ -287,10 +287,10 @@ cortex ghost list --project PROJECT
 
 ```bash
 # Auto-persist all session artifacts
-cortex store --type decision --source agent:gemini PROJECT "What was decided"
-cortex store --type error --source agent:gemini PROJECT "What failed and why"
-cortex store --type ghost --source agent:gemini PROJECT "What remains unfinished"
-cortex store --type meta_learning --source agent:gemini PROJECT "What I learned"
+cortex store PROJECT "What was decided" --type decision --source agent:gemini
+cortex store PROJECT "What failed and why" --type error --source agent:gemini
+cortex store PROJECT "What remains unfinished" --type ghost --source agent:gemini
+cortex store PROJECT "What I learned" --type meta_learning --source agent:gemini
 ```
 
 ### 4.5 Mid-Session Checkpoint (Critical Events)

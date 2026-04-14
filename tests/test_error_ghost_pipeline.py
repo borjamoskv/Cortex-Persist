@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -184,3 +185,26 @@ class TestStats:
         s = pipeline.stats
         assert s["total_captured"] == 0
         assert s["dedup_window_size"] == 0
+
+
+class TestFallbackPersistence:
+    """Test fallback filesystem persistence when DB is unavailable."""
+
+    def test_fallback_fs_persist_writes_json_payload(self, tmp_path, monkeypatch):
+        pipeline = ErrorGhostPipeline()
+
+        monkeypatch.setattr("pathlib.Path.home", lambda: tmp_path)
+
+        pipeline._fallback_fs_persist(
+            project="CORTEX",
+            content="ghost payload",
+            source="daemon:test",
+            meta={"content_hash": "abcd1234"},
+        )
+
+        files = list((tmp_path / ".cortex" / ".error_ghosts").glob("abcd1234_*.json"))
+        assert len(files) == 1
+        payload = json.loads(files[0].read_text(encoding="utf-8"))
+        assert payload["project"] == "CORTEX"
+        assert payload["content"] == "ghost payload"
+        assert payload["source"] == "daemon:test"

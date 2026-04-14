@@ -8,9 +8,23 @@ import urllib.error
 from typing import List, Dict, Any
 from datetime import datetime
 import concurrent.futures
+import tempfile
 
 def log(msg: str, tier: str = "INFO") -> None:
     print(f"[{datetime.now().time()}] [{tier}] [FRACTOR] {msg}")
+
+
+def _atomic_write_text(path: str, content: str) -> None:
+    target_dir = os.path.dirname(path) or "."
+    with tempfile.NamedTemporaryFile(
+        "w",
+        dir=target_dir,
+        delete=False,
+        encoding="utf-8",
+    ) as tmp_file:
+        tmp_file.write(content)
+        tmp_path = tmp_file.name
+    os.replace(tmp_path, path)
 
 def extract_private_ast(target_path: str) -> List[Dict[str, str]]:
     log(f"Escaneando recursivamente el AST material de {target_path}...", "L2-EXTRACTOR")
@@ -120,8 +134,7 @@ contract L2StochasticPoC_M{mutation_id} is Test {{
 }}
 """
     try:
-        with open(poc_path, "w", encoding='utf-8') as f:
-            f.write(content)
+        _atomic_write_text(poc_path, content)
         log(f"Proof of concept (M{mutation_id}) cristalizado en: {poc_path}", "C5-SUCCESS")
         return True
     except OSError as e:

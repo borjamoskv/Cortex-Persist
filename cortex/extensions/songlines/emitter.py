@@ -9,6 +9,7 @@ import hashlib
 import json
 import logging
 import os
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
@@ -17,6 +18,22 @@ from cortex.memory.hdc.codec import HDCEncoder
 from cortex.memory.hdc.item_memory import ItemMemory
 
 logger = logging.getLogger("cortex.extensions.songlines.emitter")
+
+
+def _atomic_write_text(path: Path, content: str) -> None:
+    """Persist manifest changes atomically."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, temp_path = tempfile.mkstemp(prefix="songlines_", dir=path.parent, text=True)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as tmp_file:
+            tmp_file.write(content)
+        os.replace(temp_path, path)
+    except Exception:
+        try:
+            os.unlink(temp_path)
+        except OSError:
+            pass
+        raise
 
 
 class ResonanceEmitter:
@@ -94,6 +111,5 @@ class ResonanceEmitter:
 
         data[file_key][attr_name] = payload.decode("utf-8")
 
-        with open(songline_file, "w") as f:
-            json.dump(data, f, indent=2)
+        _atomic_write_text(songline_file, json.dumps(data, indent=2))
         logger.info("Fallback: Stored ghost for %s in %s", target_file.name, songline_file)

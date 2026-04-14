@@ -879,9 +879,9 @@
     <pre><span class="code-label">Install + First Fact (30 seconds)</span>
 $ pip install cortex-persist
 
-$ cortex store --type decision --project my-agent \
+$ cortex store my-agent \
     "Chose OAuth2 PKCE for auth — JWT refresh tokens, 
-     15min access, 7d refresh, PKCS rotation every 90d"
+     15min access, 7d refresh, PKCS rotation every 90d" --type decision
 
 ✓ Stored fact #1 (SHA-256: 7a3f...e91c)
 ✓ Hash-chained to genesis block
@@ -895,7 +895,7 @@ $ cortex verify 1
     <p>That decision is now <strong>immortal, verifiable, and auditable</strong>. Six months from now, when someone asks "why PKCE and not implicit flow?", CORTEX knows. When the auditor asks for proof? One command:</p>
 
     <pre><span class="code-label">EU AI Act Compliance Report</span>
-$ cortex compliance-report --standard eu-ai-act
+$ cortex compliance-report
 
 ╔══════════════════════════════════════════╗
 ║  CORTEX COMPLIANCE REPORT               ║

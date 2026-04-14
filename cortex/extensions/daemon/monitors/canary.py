@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 import os
 import sqlite3
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -39,12 +40,21 @@ class CanaryMonitor:
             if not path.parent.exists():
                 path.parent.mkdir(parents=True, exist_ok=True)
             if not path.exists():
-                path.write_text(
+                content = (
                     "# CORTEX SOVEREIGN CANARY\n"
                     "# DO NOT TOUCH. Unauthorized access triggers LOCKDOWN.\n"
-                    f"STRIKE_KEY={os.urandom(16).hex()}\n",
-                    encoding="utf-8",
+                    f"STRIKE_KEY={os.urandom(16).hex()}\n"
                 )
+                with tempfile.NamedTemporaryFile(
+                    "w",
+                    dir=str(path.parent),
+                    delete=False,
+                    encoding="utf-8",
+                ) as tmp_file:
+                    tmp_file.write(content)
+                    tmp_path = Path(tmp_file.name)
+                os.chmod(tmp_path, 0o600)
+                tmp_path.replace(path)
             # Initialize stats with current access/mod time
             try:
                 st = path.stat()

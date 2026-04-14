@@ -4,6 +4,7 @@ import sys
 import subprocess
 import time
 import json
+import tempfile
 from pathlib import Path
 from datetime import datetime
 
@@ -14,6 +15,19 @@ class SubmissionBridge:
         
     def log(self, msg, tier="INFO"):
         print(f"[{datetime.now().time()}] [{tier}] [BRIDGE] {msg}")
+
+    @staticmethod
+    def _atomic_write_text(path: str, content: str) -> None:
+        target_dir = os.path.dirname(path) or "."
+        with tempfile.NamedTemporaryFile(
+            "w",
+            dir=target_dir,
+            delete=False,
+            encoding="utf-8",
+        ) as tmp_file:
+            tmp_file.write(content)
+            tmp_path = tmp_file.name
+        os.replace(tmp_path, path)
 
     def verify_poc(self, target_path, poc_file):
         """Invoke Foundry (Forge) to verify the PoC."""
@@ -66,8 +80,7 @@ Validate state transitions and enforce strict access control on internal functio
 """
         report_path = f"./reports/submission_{target_name}_{int(time.time())}.md"
         os.makedirs("./reports", exist_ok=True)
-        with open(report_path, "w") as f:
-            f.write(report)
+        self._atomic_write_text(report_path, report)
         self.log(f"Report crystallized: {report_path}", "CAPITAL-YIELD")
         return report_path
 

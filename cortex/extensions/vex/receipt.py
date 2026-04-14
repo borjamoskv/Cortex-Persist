@@ -11,6 +11,8 @@ from __future__ import annotations
 
 import json
 import logging
+import os
+import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -19,6 +21,28 @@ from cortex.extensions.vex.models import ExecutionReceipt, VEXStatus, _sha256
 __all__ = ["export_receipt", "load_receipt", "verify_receipt"]
 
 logger = logging.getLogger("cortex.extensions.vex")
+
+
+def _atomic_write_text(path: str | Path, content: str) -> None:
+    """Persist receipt exports atomically."""
+    destination = Path(path)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+
+    fd, temp_path = tempfile.mkstemp(
+        prefix=f".{destination.name}.",
+        suffix=".tmp",
+        dir=str(destination.parent),
+    )
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            f.write(content)
+        os.replace(temp_path, destination)
+    except Exception:
+        try:
+            os.unlink(temp_path)
+        except OSError:
+            pass
+        raise
 
 
 def verify_receipt(receipt: ExecutionReceipt) -> dict[str, Any]:
@@ -100,7 +124,7 @@ def export_receipt(
 
     proof_json = receipt.export_proof()
 
-    path.write_text(proof_json, encoding="utf-8")
+    _atomic_write_text(path, proof_json)
 
     file_hash = _sha256(proof_json)
 

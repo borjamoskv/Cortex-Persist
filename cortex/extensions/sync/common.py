@@ -106,10 +106,9 @@ def load_sync_state() -> dict:
 def save_sync_state(state: dict) -> None:
     """Guarda el estado de sincronización a disco."""
     sync_state_file = runtime_sync_state_file()
-    sync_state_file.parent.mkdir(parents=True, exist_ok=True)
-    sync_state_file.write_text(
+    atomic_write(
+        sync_state_file,
         json.dumps(state, indent=2, ensure_ascii=False),
-        encoding="utf-8",
     )
 
 

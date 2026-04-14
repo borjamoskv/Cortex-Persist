@@ -25,7 +25,12 @@ def _grade_to_numeric(grade: Grade) -> int:
     return mapping.get(grade, 0)
 
 
-def export_prometheus(score_or_report: HealthScore | HealthReport) -> str:
+def export_prometheus(
+    score_or_report: HealthScore | HealthReport,
+    *,
+    include_sub_indices: bool = True,
+    include_collectors: bool = True,
+) -> str:
     """
     Format a CORTEX health payload into Prometheus exposition format.
 
@@ -57,7 +62,7 @@ def export_prometheus(score_or_report: HealthScore | HealthReport) -> str:
     lines.append("")
 
     # ── Sub-indices ────────────────────────────────────────────
-    if score.sub_indices:
+    if include_sub_indices and score.sub_indices:
         lines.append("# HELP cortex_health_sub_index Composite health sub-indices (0-100)")
         lines.append("# TYPE cortex_health_sub_index gauge")
         for index_name, val in score.sub_indices.items():
@@ -65,7 +70,7 @@ def export_prometheus(score_or_report: HealthScore | HealthReport) -> str:
         lines.append("")
 
     # ── Individual Metrics (Value) ─────────────────────────────
-    if score.metrics:
+    if include_collectors and score.metrics:
         lines.append("# HELP cortex_health_metric_value Individual collector metric values")
         lines.append("# TYPE cortex_health_metric_value gauge")
         for m in score.metrics:

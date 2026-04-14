@@ -5,7 +5,14 @@ from __future__ import annotations
 import click
 from rich.table import Table
 
-from cortex.cli.common import DEFAULT_DB, cli, close_engine_sync, console, get_engine
+from cortex.cli.common import (
+    DEFAULT_DB,
+    cli,
+    close_engine_sync,
+    console,
+    get_engine,
+    atomic_write_text,
+)
 
 __all__ = [
     "mejoralo",
@@ -170,8 +177,7 @@ def mejoralo_record(project, score_before, score_after, actions, db):
                     }
                 )
                 state["improvement_history"] = state["improvement_history"][-100:]
-                with open(state_file, "w") as f:
-                    json.dump(state, f, indent=2, default=str)
+                atomic_write_text(state_file, json.dumps(state, indent=2, default=str))
             except (OSError, ValueError):
                 pass
 

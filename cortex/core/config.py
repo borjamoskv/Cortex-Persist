@@ -23,6 +23,22 @@ from cortex.core.paths import (
     CORTEX_DB as DEFAULT_DB_PATH,
 )
 
+
+def _load_cortex_dotenv() -> None:
+    """Load only the explicit CORTEX dotenv file, never the workspace cwd one."""
+    try:
+        from dotenv import load_dotenv
+    except ImportError:
+        return
+
+    env_path = os.environ.get("CORTEX_ENV_FILE")
+    candidate = Path(env_path).expanduser() if env_path else CORTEX_DIR / ".env"
+    if candidate.is_file():
+        load_dotenv(dotenv_path=candidate, override=False)
+
+
+_load_cortex_dotenv()
+
 # ─── Configuration Dataclass ─────────────────────────────────────────
 
 
@@ -43,6 +59,7 @@ class CortexConfig:
     # Rate Limiting
     RATE_LIMIT: int = 300
     RATE_WINDOW: int = 60
+    ENABLE_EXPERIMENTAL_API: bool = False
 
     # Graph Backend is exclusively SQLite now
 
@@ -145,6 +162,7 @@ class CortexConfig:
             ).split(","),
             RATE_LIMIT=int(os.environ.get("CORTEX_RATE_LIMIT", "300")),
             RATE_WINDOW=int(os.environ.get("CORTEX_RATE_WINDOW", "60")),
+            ENABLE_EXPERIMENTAL_API=os.environ.get("CORTEX_ENABLE_EXPERIMENTAL_API", "0") == "1",
             CHECKPOINT_BATCH_SIZE=int(os.environ.get("CORTEX_CHECKPOINT_BATCH", "1000")),
             CHECKPOINT_MIN=int(os.environ.get("CORTEX_CHECKPOINT_MIN", "100")),
             CHECKPOINT_MAX=int(os.environ.get("CORTEX_CHECKPOINT_MAX", "1000")),

@@ -8,6 +8,7 @@ from pathlib import Path
 import click
 from rich.panel import Panel
 
+from cortex.cli.common import atomic_write_text
 from cortex.cli.common import cli, console
 
 
@@ -92,7 +93,7 @@ def swarm_refactor(file, level, issue, dry_run):
         console.print("\n[bold green]--- Refactored Code (Preview) ---[/]")
         console.print(syntax)
     else:
-        p.write_text(new_code)
+        atomic_write_text(p, new_code)
         console.print(f"[bold green]✅ {file} refactored by the swarm.[/]")
 
 

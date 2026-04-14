@@ -2,7 +2,9 @@
 
 import asyncio
 import logging
+import os
 import sqlite3
+import tempfile
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -13,6 +15,27 @@ if TYPE_CHECKING:
     pass
 
 logger = logging.getLogger("cortex.engine.apotheosis.audits")
+
+
+def _atomic_write_text(path: Path, content: str) -> None:
+    """Persist NotebookLM digests atomically."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, temp_path = tempfile.mkstemp(
+        prefix=f".{path.name}.",
+        suffix=".tmp",
+        dir=path.parent,
+        text=True,
+    )
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as tmp_file:
+            tmp_file.write(content)
+        os.replace(temp_path, path)
+    except Exception:
+        try:
+            os.unlink(temp_path)
+        except OSError:
+            pass
+        raise
 
 
 class ApotheosisAuditsMixin:
@@ -46,8 +69,7 @@ class ApotheosisAuditsMixin:
         try:
             digest = await self._notebooklm.generate_digest()
             digest_path = Path("notebooklm_sources/master_digest.md")
-            digest_path.parent.mkdir(parents=True, exist_ok=True)
-            digest_path.write_text(digest)
+            _atomic_write_text(digest_path, digest)
 
             # Sync to cloud if detected
             cloud_target = self._notebooklm.sync_to_cloud(digest_path)

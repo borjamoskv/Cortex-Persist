@@ -3,6 +3,7 @@ import os
 import sys
 import subprocess
 import json
+import tempfile
 import time
 from datetime import datetime
 
@@ -13,6 +14,19 @@ LEDGER_PATH = os.path.expanduser("~/Cortex-Persist/engine-c5/vanguard_ledger.jso
 def log(msg: str, tier: str = "INFO") -> None:
     timestamp = datetime.now().strftime("%H:%M:%S")
     print(f"[{timestamp}] [{tier}] [STELLAR-ORCHESTRATOR] {msg}")
+
+
+def _atomic_json_dump(path: str, payload: object) -> None:
+    target_dir = os.path.dirname(path) or "."
+    with tempfile.NamedTemporaryFile(
+        "w",
+        dir=target_dir,
+        delete=False,
+        encoding="utf-8",
+    ) as tmp_file:
+        json.dump(payload, tmp_file, indent=2)
+        tmp_path = tmp_file.name
+    os.replace(tmp_path, path)
 
 def update_ledger(details: str):
     try:
@@ -27,9 +41,8 @@ def update_ledger(details: str):
             "status": "FRACTURED",
             "details": details
         }
-        
-        with open(LEDGER_PATH, "w") as f:
-            json.dump(ledger, f, indent=2)
+
+        _atomic_json_dump(LEDGER_PATH, ledger)
     except Exception as e:
         log(f"Error updating ledger: {e}", "ERROR")
 

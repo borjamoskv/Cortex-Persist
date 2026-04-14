@@ -36,10 +36,10 @@ async def main() -> None:
     ]
 
     for fact_type, content in decisions:
-        await engine.store_fact(
+        await engine.store(
+            project="fintech-agent",
             content=content,
             fact_type=fact_type,
-            project="fintech-agent",
             source="agent:loan-processor",
         )
         print(f"   📝 [{fact_type}] {content[:60]}")

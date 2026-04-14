@@ -14,7 +14,9 @@ import hmac
 import json
 import logging
 import math
+import os
 import re
+import tempfile
 import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -150,7 +152,16 @@ class ThreatFeedEngine:
             "hmac": feed_hmac,
             "signatures": self._custom_signatures,
         }
-        self._feed_path.write_text(json.dumps(data, indent=2))
+        with tempfile.NamedTemporaryFile(
+            "w",
+            dir=str(self._data_dir),
+            delete=False,
+            encoding="utf-8",
+        ) as tmp_file:
+            json.dump(data, tmp_file, indent=2)
+            tmp_path = Path(tmp_file.name)
+        os.chmod(tmp_path, 0o600)
+        tmp_path.replace(self._feed_path)
 
     async def update_daily(self) -> ThreatFeedReport:
         """Fetch latest threat intelligence from all feeds.

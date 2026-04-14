@@ -1,8 +1,8 @@
 {
   "layerzero": {
-    "last_seen": "2026-04-02T21:27:46.575829",
+    "last_seen": "2026-04-14T11:10:58.013608",
     "status": "RESISTANT",
-    "details": "Fatal Python error: init_sys_streams: can't initialize sys standard streams\nPython runtime state: core initialized\nOSError: [Errno 9] Bad file descriptor\n\nCurrent thread 0x00000001f492b080 (most recent call first):\n  <no Python frame>"
+    "details": "m\u001b[90m::h468ad04146a9ba62\u001b[0m\n      at \u001b[35m<unknown source file>\u001b[0m:\u001b[35m<unknown line>\u001b[0m\n  25: \u001b[32m_main\u001b[0m\u001b[90m<unknown>\u001b[0m\n      at \u001b[35m<unknown source file>\u001b[0m:\u001b[35m<unknown line>\u001b[0m\n\nRun with COLORBT_SHOW_HIDDEN=1 environment variable to disable frame filtering.\nRun with RUST_BACKTRACE=full to include source snippets.\n\n[11:10:57.990246] [C5-REAL] [CHAOS-FUZZER] -> EXERGY YIELD: Target /Users/borjafernandezangulo/Cortex-Persist/engine-c5/targets/layerzero resisti\u00f3 la carga t\u00e9rmica."
   },
   "stellar_endpoint_v2": {
     "last_seen": "2026-04-02T16:53:00.000000",
@@ -10,8 +10,8 @@
     "details": "1,000,000 iteration Chaos Burst COMPLETE."
   },
   "stargate": {
-    "last_seen": "2026-04-02T21:27:46.636372",
+    "last_seen": "2026-04-14T11:11:01.153985",
     "status": "RESISTANT",
-    "details": "Fatal Python error: init_sys_streams: can't initialize sys standard streams\nPython runtime state: core initialized\nOSError: [Errno 9] Bad file descriptor\n\nCurrent thread 0x00000001f492b080 (most recent call first):\n  <no Python frame>"
+    "details": "0m\u001b[90m::h468ad04146a9ba62\u001b[0m\n      at \u001b[35m<unknown source file>\u001b[0m:\u001b[35m<unknown line>\u001b[0m\n  25: \u001b[32m_main\u001b[0m\u001b[90m<unknown>\u001b[0m\n      at \u001b[35m<unknown source file>\u001b[0m:\u001b[35m<unknown line>\u001b[0m\n\nRun with COLORBT_SHOW_HIDDEN=1 environment variable to disable frame filtering.\nRun with RUST_BACKTRACE=full to include source snippets.\n\n[11:11:01.146799] [C5-REAL] [CHAOS-FUZZER] -> EXERGY YIELD: Target /Users/borjafernandezangulo/Cortex-Persist/engine-c5/targets/stargate resisti\u00f3 la carga t\u00e9rmica."
   }
 }

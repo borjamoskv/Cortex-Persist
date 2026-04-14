@@ -97,7 +97,7 @@ def logout_cmd(db: str, force: bool) -> None:
                         "[white]La intención sin registro es entropía pura. Por favor, "
                         "documente sus decisiones antes de partir o utilice el bypass "
                         "soberano:[/white]\n\n"
-                        "[dim]cortex store --type decision ...[/dim]\n"
+                        "[dim]cortex store PROJECT \"...\" --type decision[/dim]\n"
                         "[dim]cortex logout --force[/dim]",
                         title="[noir.cyber]EPISTEMIC FILTER[/noir.cyber]",
                         border_style="red",

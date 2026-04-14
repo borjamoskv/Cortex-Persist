@@ -43,15 +43,15 @@ async def orchestrate_decision(context: str, agent_name: str):
     
     # After standard LLM logic concludes...
     # Store the irreversible outcome in the CORTEX Ledger
-    receipt = await engine.store_fact(
+    fact_id = await engine.store(
+        project="swarm-alpha",
         content=f"Decision reached: {context}",
         fact_type="task_outcome",
-        project="swarm-alpha",
-        tenant_id="client-007"
+        tenant_id="client-007",
     )
     
-    # You now have the cryptographic receipt for downstream compliance
-    print(f"Secured with hash: {receipt.hash}")
+    # You now have the persisted fact ID for downstream compliance
+    print(f"Secured fact ID: {fact_id}")
 ```
 
 ### Flow via Model Context Protocol (MCP)
@@ -63,7 +63,7 @@ If you are using Anthropic tools or anything compatible with the MCP spec, CORTE
 $ cortex mcp start --port 8080
 ```
 
-Agents can now query `verify_record` or `store_fact` directly as external tools, providing total autonomy without needing the Python SDK inside your orchestrator container.
+Agents can now query `verify_record` or `store` directly as external tools, providing total autonomy without needing the Python SDK inside your orchestrator container.
 
 ## 3. What changes in your workflow?
 

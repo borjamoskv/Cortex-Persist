@@ -66,7 +66,7 @@ def _register_p0_triggers(engine: TriggerEngine) -> None:
                     },
                 ),
                 TriggerAction(
-                    action_type=ActionType.STORE_FACT,
+                    action_type=ActionType.PERSIST_FACT,
                     config={
                         "content": ("Worktree isolation failure detected — infra_ghost"),
                         "fact_type": "ghost",
@@ -159,7 +159,7 @@ def _register_p1_triggers(engine: TriggerEngine) -> None:
             cooldown_s=60.0,
             actions=[
                 TriggerAction(
-                    action_type=ActionType.STORE_FACT,
+                    action_type=ActionType.PERSIST_FACT,
                     config={
                         "content": "Swarm node entered SUSPECT state — potential silent death",
                         "fact_type": "ghost",
@@ -183,7 +183,7 @@ def _register_p1_triggers(engine: TriggerEngine) -> None:
             cooldown_s=60.0,
             actions=[
                 TriggerAction(
-                    action_type=ActionType.STORE_FACT,
+                    action_type=ActionType.PERSIST_FACT,
                     config={
                         "content": "Byzantine consensus failed — swarm fracture detected",
                         "fact_type": "ghost",
@@ -215,7 +215,7 @@ def _register_p1_triggers(engine: TriggerEngine) -> None:
             cooldown_s=120.0,
             actions=[
                 TriggerAction(
-                    action_type=ActionType.STORE_FACT,
+                    action_type=ActionType.PERSIST_FACT,
                     config={
                         "content": "Worktree cleanup failed — residual filesystem artifact",
                         "fact_type": "ghost",
@@ -273,7 +273,7 @@ def _register_p2_triggers(engine: TriggerEngine) -> None:
             cooldown_s=300.0,
             actions=[
                 TriggerAction(
-                    action_type=ActionType.STORE_FACT,
+                    action_type=ActionType.PERSIST_FACT,
                     config={
                         "content": "Ghost accumulation threshold reached — systemic entropy rising",
                         "fact_type": "bridge",

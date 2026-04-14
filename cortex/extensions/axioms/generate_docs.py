@@ -13,6 +13,7 @@ from __future__ import annotations
 import datetime
 from pathlib import Path
 
+from cortex.extensions.sync.common import atomic_write
 from cortex.extensions.axioms.registry import (
     AXIOM_REGISTRY,
     AxiomCategory,
@@ -104,7 +105,7 @@ def main() -> None:
     """Write the registry doc to docs/axiom-registry.md."""
     doc = generate()
     out = Path(__file__).resolve().parents[2] / "docs" / "axiom-registry.md"
-    out.write_text(doc)
+    atomic_write(out, doc)
     lines = doc.count(chr(10))
     print(f"✅ Generated {out} ({len(doc)} bytes, {lines} lines)")
 

@@ -21,7 +21,7 @@ from rich.panel import Panel
 from rich.prompt import Prompt
 from rich.syntax import Syntax
 
-from cortex.cli.common import cli, console
+from cortex.cli.common import cli, console, atomic_write_text
 from cortex.extensions.llm.sovereign import SovereignLLM
 
 __all__ = ["architect"]
@@ -111,7 +111,7 @@ def architect_instruct(filepath: str) -> None:
                 default="n",
             )
             if save == "y":
-                path.write_text(result.content, encoding="utf-8")
+                atomic_write_text(path, result.content)
                 console.print(f"[bold green]✓ Guardado en {path.name}[/]")
 
     asyncio.run(_run())

@@ -1,7 +1,7 @@
 [project]
 name = "cortex-persist"
 version = "0.3.0b3"
-description = "Cryptographic memory integrity, audit trails, and verifiable lineage for AI agents."
+description = "Verifiable memory, tamper-evident decision lineage, and exportable evidence for AI agents."
 readme = "README.md"
 license = "Apache-2.0"
 requires-python = ">=3.10"
@@ -9,9 +9,9 @@ authors = [
     {name = "borjamoskv.com", email = "borja@moskv.com"},
 ]
 keywords = [
-    "ai", "memory", "agents", "trust", "compliance",
-    "eu-ai-act", "cryptographic-ledger", "audit-trail",
-    "vector-search", "sqlite", "mcp", "multi-tenant",
+    "ai", "memory", "agents", "verifiable-memory",
+    "decision-lineage", "tamper-evident", "audit-trail",
+    "cryptographic-ledger", "evidence", "sqlite", "mcp", "multi-tenant",
 ]
 classifiers = [
     "Development Status :: 4 - Beta",

@@ -10,7 +10,7 @@ This document is the authoritative source of truth for all public-facing names a
 |:---|:---|:---|
 | **PyPI package** | `cortex-persist` | `pip install cortex-persist` |
 | **Python import** | `cortex` | `from cortex import CortexEngine` |
-| **CLI entry point** | `cortex` | `cortex init`, `cortex memory store`, `cortex verify ledger` |
+| **CLI entry point** | `cortex` | `cortex init`, `cortex store`, `cortex verify FACT_ID`, `cortex ledger verify` |
 | **Cloud SDK import** | `cortex_persist` | From `cortex-sdk/` — thin HTTP wrapper for the hosted API |
 | **JS/TS SDK** | `@cortex-persist/sdk` | Not yet published on npm — roadmap item |
 
@@ -38,8 +38,9 @@ The CLI entry point is `cortex`, defined in `[project.scripts]` in `pyproject.to
 
 ```bash
 cortex init
-cortex memory store --agent "my-agent" --content "Important fact"
-cortex verify ledger
+cortex store my-agent "Important fact" --type decision
+cortex verify 1
+cortex ledger verify
 ```
 
 ### Cloud SDK: `cortex_persist` (from `cortex-sdk/`)

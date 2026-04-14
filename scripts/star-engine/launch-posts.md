@@ -57,12 +57,12 @@ Quick example:
     from cortex import CortexEngine
 
     engine = CortexEngine()
-    receipt = await engine.store_fact(
+    fact_id = await engine.store(
         content="User approved transaction $5,000",
         fact_type="decision",
         project="fin-fraud-bot",
     )
-    assert await engine.verify(receipt.hash) is True
+    assert await engine.verify(fact_id) is True
 
 Use cases:
 - Proving what context an agent had when making irreversible decisions
@@ -144,13 +144,13 @@ It IS:
 
 pip install cortex-persist
 cortex init
-cortex memory store --agent "risk-bot" --content "Transaction flagged"
-cortex verify ledger
+cortex store PROJECT "Transaction flagged" --agent risk-bot
+cortex ledger verify
 # ✔ VERIFIED: Hash chain intact
 
 # Now try tampering...
 sqlite3 cortex.db "UPDATE facts SET content='Approved'"
-cortex verify ledger
+cortex ledger verify
 # ✘ TAMPER DETECTED
 
 5/ Use cases:

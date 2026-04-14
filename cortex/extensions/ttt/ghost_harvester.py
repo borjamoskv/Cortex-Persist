@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import sqlite3
+import tempfile
 from datetime import datetime, timedelta, timezone
 
 logger = logging.getLogger("cortex.extensions.ttt.ghost_harvester")
@@ -9,6 +10,26 @@ logger = logging.getLogger("cortex.extensions.ttt.ghost_harvester")
 # CORTEX DB Hardcoded Path for local daemon
 DB_PATH = os.path.expanduser("~/.cortex/cortex.db")
 OUTPUT_PATH = os.path.expanduser("~/.cortex/weights/dataset")
+
+
+def _atomic_write_text(path: str, content: str) -> None:
+    """Persist dataset content atomically to avoid partial writes."""
+    destination = os.path.expanduser(path)
+    parent = os.path.dirname(destination)
+    if parent:
+        os.makedirs(parent, exist_ok=True)
+
+    fd, temp_path = tempfile.mkstemp(prefix="ghost_harvester_", dir=parent)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as tmp_file:
+            tmp_file.write(content)
+        os.replace(temp_path, destination)
+    except Exception:
+        try:
+            os.unlink(temp_path)
+        except OSError:
+            pass
+        raise
 
 # The Ouroboros TTT (Test-Time Training) Dataset Builder
 # Derivation: Axiom Ω₅ (Antifragile by Default)
@@ -131,9 +152,8 @@ def generate_nightly_dataset():
             f"moskv_nightly_{datetime.now(timezone.utc).strftime('%Y%m%d')}.jsonl",
         )
 
-        with open(file_out, "w", encoding="utf-8") as f:
-            for item in dataset:
-                f.write(json.dumps(item, ensure_ascii=False) + "\n")
+        payload = "".join(json.dumps(item, ensure_ascii=False) + "\n" for item in dataset)
+        _atomic_write_text(file_out, payload)
 
         logger.info("Dataset forged for MLX LoRA at: %s", file_out)
         logger.info("Next Step: Launch `mlx_lm.lora --train --data %s`", OUTPUT_PATH)

@@ -12,6 +12,7 @@ import json
 import logging
 import os
 import random
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Optional
@@ -103,8 +104,16 @@ class HoneypotManager:
         try:
             self.storage_path.parent.mkdir(parents=True, exist_ok=True)
             data = [h.to_dict() for h in self._active_honeypots.values()]
-            with open(self.storage_path, "w") as f:
-                json.dump(data, f, indent=2)
+            with tempfile.NamedTemporaryFile(
+                "w",
+                dir=str(self.storage_path.parent),
+                delete=False,
+                encoding="utf-8",
+            ) as tmp_file:
+                json.dump(data, tmp_file, indent=2)
+                tmp_path = Path(tmp_file.name)
+            os.chmod(tmp_path, 0o600)
+            tmp_path.replace(self.storage_path)
         except Exception as e:  # noqa: BLE001
             logger.error("Failed to save honeypots: %s", e)
 

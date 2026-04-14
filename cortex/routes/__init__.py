@@ -1,5 +1,7 @@
 from fastapi import APIRouter
 
+from cortex import config
+
 # Temporarily removed due to P0 gateway module topological collapse
 # from cortex.gateway.adapters import (
 #     rest_router as gateway_rest_router,
@@ -35,38 +37,65 @@ from . import trust as trust_router
 from . import usage as usage_router
 from . import demo as demo_router
 
-__all__ = ["api_router"]
+__all__ = [
+    "api_router",
+    "api_router_core",
+    "api_router_experimental",
+    "build_api_router",
+]
 
-api_router = APIRouter()
+_CORE_ROUTE_GROUPS = (
+    facts_router.router,
+    search_router.router,
+    admin_router.router,
+    ledger_router.router,
+    health_index_router.router,
+    trust_router.router,
+)
 
-# Register all internal routers to the unified `api_router`
-api_router.include_router(events_router.events_router)
-api_router.include_router(facts_router.router)
-api_router.include_router(search_router.router)
-api_router.include_router(ask_router.router)
-api_router.include_router(admin_router.router)
-api_router.include_router(timing_router.router)
-api_router.include_router(translate_router.router)
-api_router.include_router(oracle_router.router)
-api_router.include_router(daemon_router.router)
-api_router.include_router(dashboard_router.router)
-api_router.include_router(agents_router.router)
-api_router.include_router(graph_router.router)
-api_router.include_router(ledger_router.router)
-api_router.include_router(missions_router.router)
-api_router.include_router(mejoralo_router.router)
-api_router.include_router(gate_router.router)
-api_router.include_router(context_router.router)
-api_router.include_router(tips_router.router)
-api_router.include_router(swarm_router.router)
-api_router.include_router(telemetry_router.router)
-api_router.include_router(topology_ws_router.router)
-api_router.include_router(usage_router.router)
-api_router.include_router(runtime_router.router)
-api_router.include_router(onboarding_router.router)
-api_router.include_router(health_index_router.router)
-api_router.include_router(trust_router.router)
-api_router.include_router(demo_router.router)
+_EXPERIMENTAL_ROUTE_GROUPS = (
+    events_router.events_router,
+    ask_router.router,
+    timing_router.router,
+    translate_router.router,
+    oracle_router.router,
+    daemon_router.router,
+    dashboard_router.router,
+    agents_router.router,
+    graph_router.router,
+    missions_router.router,
+    mejoralo_router.router,
+    gate_router.router,
+    context_router.router,
+    tips_router.router,
+    swarm_router.router,
+    telemetry_router.router,
+    topology_ws_router.router,
+    usage_router.router,
+    runtime_router.router,
+    onboarding_router.router,
+    demo_router.router,
+)
+
+
+def _include_route_groups(target: APIRouter, groups: tuple[APIRouter, ...]) -> APIRouter:
+    for group in groups:
+        target.include_router(group)
+    return target
+
+
+def build_api_router(include_experimental: bool = False) -> APIRouter:
+    """Build the public API surface for the requested exposure tier."""
+    router = APIRouter()
+    _include_route_groups(router, _CORE_ROUTE_GROUPS)
+    if include_experimental:
+        _include_route_groups(router, _EXPERIMENTAL_ROUTE_GROUPS)
+    return router
+
+
+api_router_core = _include_route_groups(APIRouter(), _CORE_ROUTE_GROUPS)
+api_router_experimental = _include_route_groups(APIRouter(), _EXPERIMENTAL_ROUTE_GROUPS)
+api_router = build_api_router(include_experimental=config.ENABLE_EXPERIMENTAL_API)
 
 # Gateway endpoints (SovereignLLM Entry Points)
 # api_router.include_router(gateway_rest_router)

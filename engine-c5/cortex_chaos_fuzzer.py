@@ -2,11 +2,28 @@
 import os
 import subprocess
 import re
+import tempfile
 from typing import Optional, List, Tuple
 from datetime import datetime
 
+import sys
+
 def log(msg: str, tier: str = "INFO") -> None:
     print(f"[{datetime.now().time()}] [{tier}] [CHAOS-FUZZER] {msg}")
+    sys.stdout.flush()
+
+
+def _atomic_write_text(path: str, content: str) -> None:
+    target_dir = os.path.dirname(path) or "."
+    with tempfile.NamedTemporaryFile(
+        "w",
+        dir=target_dir,
+        delete=False,
+        encoding="utf-8",
+    ) as tmp_file:
+        tmp_file.write(content)
+        tmp_path = tmp_file.name
+    os.replace(tmp_path, path)
 
 def execute_forge_fuzz(target_dir: str, runs: int = 250000) -> Tuple[bool, Optional[str]]:
     """Levanta el subproceso contra Foundry buscando fracturar invariantes."""
@@ -120,14 +137,12 @@ contract ChaosTest is Test {
 """
     try:
         # Forge Toml required by forge test
-        with open(os.path.join(target_dir, "foundry.toml"), "w") as f:
-            f.write("[profile.default]\nsrc = 'src'\nout = 'out'\nlibs = ['lib']\n")
-            
-        with open(os.path.join(src_dir, "Target.sol"), "w", encoding='utf-8') as f:
-            f.write(contract_code)
-            
-        with open(os.path.join(test_dir, "ChaosInvariant.t.sol"), "w", encoding='utf-8') as f:
-            f.write(test_code)
+        _atomic_write_text(
+            os.path.join(target_dir, "foundry.toml"),
+            "[profile.default]\nsrc = 'src'\nout = 'out'\nlibs = ['lib']\n",
+        )
+        _atomic_write_text(os.path.join(src_dir, "Target.sol"), contract_code)
+        _atomic_write_text(os.path.join(test_dir, "ChaosInvariant.t.sol"), test_code)
             
         return True
     except OSError as e:

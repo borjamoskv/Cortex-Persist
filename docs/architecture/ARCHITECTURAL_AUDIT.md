@@ -301,16 +301,16 @@ from cortex.api.deps import get_async_engine  # Lazy import inside function
 
 #### Issue CIRC-004
 - **Files:**
-  - `cortex/utils/i18n.py` → `cortex/facts/__init__.py`
+  - `cortex/utils/i18n.py` → `cortex.engine.CortexEngine`
   - `cortex/facts/manager.py` → `cortex/memory/temporal.py`
   - `cortex/memory/temporal.py` → `cortex/utils/i18n.py`
 - **Severity:** P2
-- **Description:** Potential circular import in i18n/facts/memory chain. Lazy import at line 195 in i18n.py indicates cycle.
+- **Description:** Potential circular import in i18n/facts/memory chain. The ghost-fact reporting path should stay lazy to avoid boot-time coupling.
 ```python
 # Line 195 in i18n.py
-from cortex.facts import store_fact  # Lazy import
+from cortex.engine import CortexEngine  # Lazy import to avoid boot-time coupling
 ```
-- **Fix:** Move fact storage interface to shared types; use dependency injection.
+- **Fix:** Keep the report path lazy and isolate it behind a small persistence helper.
 
 ---
 

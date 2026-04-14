@@ -2,9 +2,9 @@
 
 # CORTEX Persist
 
-Memoria a prueba de manipulación y linaje de decisiones para agentes de IA.
+Memoria verificable y linaje de decisiones para flujos de IA de alto riesgo.
 
-CORTEX Persist es una capa de confianza local-first para hechos, decisiones, errores y transiciones de estado. Añade registros encadenados por hash, comandos de verificación y exportes listos para auditoría, para que puedas demostrar qué sabía un agente y cuándo lo sabía.
+CORTEX Persist da a los equipos que llevan IA a flujos de alto riesgo memoria verificable, linaje de decisiones a prueba de manipulación y evidencia exportable. Añade registros encadenados por hash y comandos de verificación para que los equipos puedan inspeccionar qué ocurrió en vez de reconstruirlo después.
 
 [Inicio rápido](docs/quickstart.md) · [Instalación](docs/installation.md) · [CLI](docs/cli.md) · [API](docs/api.md) · [Seguridad](docs/SECURITY_TRUST_MODEL.md) · [Roadmap](ROADMAP.md) · [Contribuir](CONTRIBUTING.md)
 
@@ -93,22 +93,31 @@ cortex compliance-report
 
 Si quieres el recorrido completo, consulta [docs/quickstart.md](docs/quickstart.md).
 
-## Automatización de modelos local (opcional)
+## Superficies experimentales opcionales
 
-El paquete de scripts incluye utilidades locales para elegir modelo y ejecutar flujos de trabajo:
+La superficie estable del producto es el núcleo de memoria verificable: hechos, búsqueda, ledger, trust y salud.
+
+El repositorio mantiene utilidades adicionales para operación y automatización, pero no forman parte de la promesa principal del producto y pueden cambiar más rápido:
 
 ```bash
 npm run model:pick -- "Texto de tarea"
 npm run model:guide -- --json
 npm run model:dispatch -- --json "Necesito compilar y validar el site" -- "npm run build"
 npm run task:build -- --json "Compilar y validar la web"
+npm run task:swarm -- --json --agents=21 "Consenso de 21 agentes para la tarea"
+npm run task:perfect -- --json "Blindar y dejar el repo perfecto"
 npm run task:auto -- --json "Necesito compilar, testear y cerrar validación de la web antes del deploy"
 npm run test:models
 ```
 
-Soporta `build|web|test|ship|release`, selección de flujo por entorno y `--dry-run` para simulación sin ejecución.
+En la capa HTTP, la app por defecto monta solo la superficie core. Para habilitar rutas experimentales de forma explícita:
 
-Ver [scripts/README.md](scripts/README.md) para detalles completos.
+```bash
+export CORTEX_ENABLE_EXPERIMENTAL_API=1
+uvicorn cortex.api:app --host 0.0.0.0 --port 8484
+```
+
+Consulta [docs/api.md](docs/api.md) y [scripts/README.md](scripts/README.md) para el detalle completo.
 
 ## Integración en Python
 

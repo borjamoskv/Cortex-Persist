@@ -85,4 +85,3 @@ if __name__ == "__main__":
     time.sleep(5)  # pretend user does something
     zp._last_activity -= 1000  # artificially create idle time
     zp.check_and_prompt()
-```

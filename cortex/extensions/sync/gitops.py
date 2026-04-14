@@ -5,6 +5,8 @@ import logging
 from pathlib import Path
 from typing import Any, Optional
 
+from cortex.extensions.sync.common import atomic_write
+
 __all__ = ["sync_fact_to_repo", "export_gitops_memory"]
 
 logger = logging.getLogger("cortex.extensions.sync.gitops")
@@ -70,8 +72,8 @@ async def sync_fact_to_repo(
 
         knowledge["facts"] = facts_list
 
-        # 3. Escribir JSON atómicamente (o casi, para nuestro caso de uso local es suficiente)
-        json_path.write_text(json.dumps(knowledge, indent=2, ensure_ascii=False), encoding="utf-8")
+        # 3. Escribir JSON atómicamente
+        atomic_write(json_path, json.dumps(knowledge, indent=2, ensure_ascii=False))
 
         # 4. Renderizar Markdown snapshot
         _render_snapshot(cortex_dir, facts_list, project)
@@ -118,7 +120,7 @@ def _render_snapshot(cortex_dir: Path, facts_list: list[dict[str, Any]], project
                 lines.append(f"*Tags: {', '.join(fact.get('tags'))}*")
             lines.append("")
 
-    md_path.write_text("\n".join(lines), encoding="utf-8")
+    atomic_write(md_path, "\n".join(lines))
 
 
 async def export_gitops_memory(engine, project: str) -> bool:
@@ -146,7 +148,7 @@ async def export_gitops_memory(engine, project: str) -> bool:
             facts_list.append(fact_data)
 
         knowledge = {"facts": facts_list}
-        json_path.write_text(json.dumps(knowledge, indent=2, ensure_ascii=False), encoding="utf-8")
+        atomic_write(json_path, json.dumps(knowledge, indent=2, ensure_ascii=False))
         _render_snapshot(cortex_dir, facts_list, project)
         return True
     except (OSError, ValueError, KeyError) as e:

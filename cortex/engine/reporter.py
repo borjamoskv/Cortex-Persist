@@ -12,8 +12,10 @@ import logging
 import os
 import sqlite3
 import sys
+import tempfile
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any
 
 import aiosqlite
@@ -21,6 +23,28 @@ import aiosqlite
 from cortex.database.core import connect_async_ctx
 
 logger = logging.getLogger("cortex.reporter")
+
+
+def _atomic_write_json(path: str | Path, payload: dict[str, Any]) -> None:
+    """Persist JSON artifacts atomically."""
+    target = Path(path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    fd, temp_path = tempfile.mkstemp(
+        prefix=f".{target.name}.",
+        suffix=".tmp",
+        dir=target.parent,
+        text=True,
+    )
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as tmp_file:
+            json.dump(payload, tmp_file, indent=2)
+        os.replace(temp_path, target)
+    except Exception:
+        try:
+            os.unlink(temp_path)
+        except OSError:
+            pass
+        raise
 
 
 @dataclass
@@ -159,9 +183,7 @@ class SovereignReporter:
         data = asdict(status)
 
         def _write() -> None:
-            os.makedirs(os.path.dirname(output_path), exist_ok=True)
-            with open(output_path, "w", encoding="utf-8") as f:
-                json.dump(data, f, indent=2)
+            _atomic_write_json(output_path, data)
 
         await asyncio.to_thread(_write)
         logger.info("Dynamic documentation exported to %s", output_path)

@@ -11,7 +11,9 @@ import asyncio
 import logging
 import os
 import stat
+import tempfile
 from decimal import Decimal
+from pathlib import Path
 from typing import Any
 
 try:
@@ -47,6 +49,30 @@ logger = logging.getLogger(__name__)
 MAX_TX_AMOUNT = Decimal("1.0")  # Max per-transaction (ETH equiv)
 MAX_TX_PER_SESSION = 10  # Circuit breaker per boot cycle
 _tx_count_this_session = 0
+
+
+def _atomic_write_text(path: str, content: str, mode: int) -> None:
+    """Persist the wallet seed atomically, preserving restrictive permissions."""
+    destination = Path(path)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+
+    fd, temp_path = tempfile.mkstemp(
+        prefix="cdp_seed_",
+        dir=str(destination.parent),
+        text=True,
+    )
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as tmp_file:
+            tmp_file.write(content)
+        os.chmod(temp_path, mode)
+        os.replace(temp_path, str(destination))
+        os.chmod(destination, mode)
+    except Exception:
+        try:
+            os.unlink(temp_path)
+        except OSError:
+            pass
+        raise
 
 
 class CDPSovereignWallet:
@@ -145,12 +171,7 @@ class CDPSovereignWallet:
 
     def _write_seed(self, data: str) -> None:
         """Write seed file with 0600 permissions (owner-only)."""
-        seed_dir = os.path.dirname(self.seed_path)
-        if seed_dir:
-            os.makedirs(seed_dir, exist_ok=True)
-        with open(self.seed_path, "w") as f:
-            f.write(data)
-        os.chmod(self.seed_path, stat.S_IRUSR | stat.S_IWUSR)
+        _atomic_write_text(self.seed_path, data, stat.S_IRUSR | stat.S_IWUSR)
         logger.info("[CDP] Seed persisted (0600): %s", self.seed_path)
 
     async def get_balance(self, asset: str = "eth") -> str:

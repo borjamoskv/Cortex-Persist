@@ -6,6 +6,7 @@ Vector 1 of the Singularity: non-discrete temporal execution.
 import asyncio
 import json
 import logging
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -224,5 +225,13 @@ class HeartbeatDaemon:
         content += f"{result.get('solution')}\n\n"
 
         filepath = ITURRIA_DIR / filename
-        filepath.write_text(content, encoding="utf-8")
+        with tempfile.NamedTemporaryFile(
+            "w",
+            dir=str(ITURRIA_DIR),
+            delete=False,
+            encoding="utf-8",
+        ) as tmp_file:
+            tmp_file.write(content)
+            tmp_path = Path(tmp_file.name)
+        tmp_path.replace(filepath)
         logger.info("Deposited result to Dream Layer: %s", filepath)

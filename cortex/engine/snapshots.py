@@ -1,9 +1,11 @@
 import asyncio
 import json
 import logging
+import os
 import re
 import shutil
 import sqlite3
+import tempfile
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -17,8 +19,23 @@ logger = logging.getLogger("cortex")
 
 
 def _write_snapshot_meta(meta_path: Path, record: dict) -> None:
-    with open(meta_path, "w", encoding="utf-8") as f:
-        json.dump(record, f, indent=2)
+    meta_path.parent.mkdir(parents=True, exist_ok=True)
+    fd, temp_path = tempfile.mkstemp(
+        prefix=f".{meta_path.name}.",
+        suffix=".tmp",
+        dir=meta_path.parent,
+        text=True,
+    )
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as tmp_file:
+            json.dump(record, tmp_file, indent=2)
+        os.replace(temp_path, meta_path)
+    except Exception:
+        try:
+            os.unlink(temp_path)
+        except OSError:
+            pass
+        raise
 
 
 def _read_snapshot_meta(meta_file: Path) -> dict:

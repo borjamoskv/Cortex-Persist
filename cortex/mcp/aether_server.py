@@ -227,15 +227,21 @@ def create_aether_server(
         WARNING: Highly destructive. Will trigger an immediate OS-level authorization
         prompt (Axiom 3 validation). Ensure the command is 100% accurate.
         """
-        if not _axiom_3_verify("Shell Execution", f"cd {cwd} && {command}"):
+        resolved_cwd = Path(cwd).expanduser().resolve()
+        if not resolved_cwd.exists() or not resolved_cwd.is_dir():
+            return f"❌ Invalid working directory: {resolved_cwd}"
+
+        if not _axiom_3_verify("Shell Execution", f"cd {resolved_cwd} && {command}"):
             return "❌ Shell execution aborted: Axiom 3 user physical authorization DENIED."
 
         logger.warning("Executing authorized bash command: %s", command)
 
         try:
-            process = await asyncio.create_subprocess_shell(
+            process = await asyncio.create_subprocess_exec(
+                "/bin/bash",
+                "-lc",
                 command,
-                cwd=cwd,
+                cwd=str(resolved_cwd),
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
             )

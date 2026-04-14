@@ -3,8 +3,11 @@ import asyncio
 import os
 import json
 import time
+import shlex
+import tempfile
 from pathlib import Path
 from datetime import datetime
+import hashlib
 
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
@@ -75,15 +78,15 @@ class SageOrchestrator:
         print(f"[{datetime.now().time()}] [{sage}] {msg}")
 
     async def invoke_sage(self, sage_name, target_path):
-        api_key = os.environ.get("QWEN_API_KEY")
+        api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("QWEN_API_KEY")
         self.log(f"Sage {sage_name} beginning 'Adversarial Dream' on target: {target_path}", sage_name)
         
         await asyncio.sleep(2)
         
         if not api_key:
-            self.log(f"SILENT_MODE. Dreaming simulated logic.", sage_name)
+            self.log(f"SILENT_MODE (C4-SIMULACIÓN). Dreaming simulated logic. No Frontier LLM Key found. [SIMULATION_DIRTY_STATE]", sage_name)
         else:
-            self.log(f"Frontier Reasoning active for {sage_name}.", sage_name)
+            self.log(f"Frontier Reasoning active for {sage_name}. Real Agency (C5-REAL).", sage_name)
             await asyncio.sleep(3)
 
         # Success simulation
@@ -108,11 +111,17 @@ class SageOrchestrator:
             monitor = SecurityMonitorClassifier()
 
             worker_id = agent_name.split("-")[0]
+
+            # [Ω5] Generate Immutable Flight Record ID for causal tracking
+            flight_record_src = f"{target_path}:{agent_name}:{time.time()}".encode("utf-8")
+            flight_record_id = hashlib.sha256(flight_record_src).hexdigest()
+
             cmd = (
                 "python3 /Users/borjafernandezangulo/"
                 "Cortex-Persist/cortex-core/"
-                f"ouroboros_engine.py --target {target_path}"
-                f" --worker-id {worker_id}"
+                f"ouroboros_engine.py --target {shlex.quote(str(target_path))}"
+                f" --worker-id {shlex.quote(worker_id)}"
+                f" --flight-record-id {shlex.quote(flight_record_id)}"
             )
 
             task = {
@@ -144,13 +153,19 @@ class SageOrchestrator:
                 ),
                 "agent": agent_name,
                 "command": cmd,
+                "flight_record_id": flight_record_id,
                 "timestamp": time.time(),
             })
 
-            with open(SWARM_QUEUE_FILE, "w") as f:
+            tmp_fd, tmp_path = tempfile.mkstemp(
+                prefix="cortex_swarm_queue_",
+                dir=os.path.dirname(SWARM_QUEUE_FILE) or None,
+            )
+            with os.fdopen(tmp_fd, "w") as f:
                 json.dump(queue, f, indent=2)
+            os.replace(tmp_path, SWARM_QUEUE_FILE)
             self.log(
-                f"MISSION DISPATCHED: {agent_name}"
+                f"MISSION DISPATCHED [FlightRecord:{flight_record_id[:8]}...]: {agent_name}"
                 f" -> {target_path}",
                 "SYSTEM",
             )

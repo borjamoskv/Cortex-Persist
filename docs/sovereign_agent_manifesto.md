@@ -370,7 +370,11 @@ async def run_sovereign_agent(objective: str):
         except SchemaIncompatibilityError as e:
             # L4: Graceful degradation — operate with reduced capability
             execution = await degrade_gracefully(strategy, e)
-            await cortex.store(type="error", content=str(e), recovery="degraded")
+            await cortex.store(
+                content=str(e),
+                fact_type="error",
+                meta={"recovery": "degraded"},
+            )
         
         # 5. TRAUMA CAPTURE (Right Brain — Lore metabolism)
         if execution.is_catastrophic_failure:
@@ -503,7 +507,11 @@ async def execute_with_degradation(self, action: AgentAction) -> AgentResult:
         return await self._execute(action)
     except SchemaIncompatibilityError as e:
         if degraded := await self._try_text_only_mode(action):
-            await self.cortex.store(type="error", content=str(e), recovery="text_mode")
+            await self.cortex.store(
+                content=str(e),
+                fact_type="error",
+                meta={"recovery": "text_mode"},
+            )
             return degraded.with_warning("Operating in text-only mode")
         raise AgentDegradedError(
             cause=e,
@@ -689,7 +697,11 @@ async def execute_with_degradation(self, action: AgentAction) -> AgentResult:
         return await self._execute(action)
     except SchemaIncompatibilityError as e:
         if degraded := await self._try_text_only_mode(action):
-            await self.cortex.store(type="error", content=str(e), recovery="text_mode")
+            await self.cortex.store(
+                content=str(e),
+                fact_type="error",
+                meta={"recovery": "text_mode"},
+            )
             return degraded.with_warning("Operating in text-only mode")
         raise AgentDegradedError(
             cause=e,

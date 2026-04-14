@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
 import shutil
 import tempfile
 from collections.abc import AsyncGenerator
@@ -17,6 +18,22 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 logger = logging.getLogger("cortex.extensions.swarm.worktree")
+
+
+def _atomic_write_text(path: Path, content: str) -> None:
+    """Persist worktree markers atomically during setup."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, temp_path = tempfile.mkstemp(prefix="worktree_", dir=path.parent, text=True)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as tmp_file:
+            tmp_file.write(content)
+        os.replace(temp_path, path)
+    except Exception:
+        try:
+            os.unlink(temp_path)
+        except OSError:
+            pass
+        raise
 
 
 class WorktreeIsolationError(Exception):
@@ -41,7 +58,7 @@ async def isolated_worktree(
     worktree_path = Path(tempfile.mkdtemp(prefix=f"wt_{safe_name}_", dir=str(base_dir)))
 
     try:
-        (worktree_path / ".git").write_text("gitdir: .git/worktrees\n", encoding="utf-8")
+        _atomic_write_text(worktree_path / ".git", "gitdir: .git/worktrees\n")
         logger.info("Created isolated worktree at %s", worktree_path)
         yield worktree_path
     finally:

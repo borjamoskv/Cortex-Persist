@@ -30,25 +30,25 @@ async def main() -> None:
 
     # --- Step 1: Store facts ---
     print("1️⃣  Storing decisions...")
-    fact1 = await engine.store_fact(
+    fact1_id = await engine.store(
+        project="quickstart",
         content="Chose OAuth2 PKCE for authentication",
         fact_type="decision",
-        project="quickstart",
         source="human:developer",
     )
-    print(f"   ✅ Fact #{fact1['id']} stored (hash: {fact1['hash'][:12]}...)")
+    print(f"   ✅ Fact #{fact1_id} stored")
 
-    fact2 = await engine.store_fact(
+    fact2_id = await engine.store(
+        project="quickstart",
         content="Selected PostgreSQL over MongoDB for audit compliance",
         fact_type="decision",
-        project="quickstart",
         source="human:architect",
     )
-    print(f"   ✅ Fact #{fact2['id']} stored (hash: {fact2['hash'][:12]}...)")
+    print(f"   ✅ Fact #{fact2_id} stored")
 
     # --- Step 2: Verify a single fact ---
     print("\n2️⃣  Verifying fact integrity...")
-    result = await engine.verify_fact(fact1["id"])
+    result = await engine.verify_fact(fact1_id)
     status = "✅ VERIFIED" if result["valid"] else "❌ BROKEN"
     print(f"   {status} — Hash chain: {result.get('chain_status', 'ok')}")
 

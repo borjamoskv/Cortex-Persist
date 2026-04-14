@@ -13,8 +13,11 @@ import json
 import logging
 import math
 import re
+import os
+import tempfile
 import time
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Optional
 
 from cortex.extensions.platform.sys import get_cortex_dir, is_linux, is_macos, is_windows
@@ -43,6 +46,22 @@ except ImportError:
     AppKit = None
 
 logger = logging.getLogger("cortex.neural")
+
+
+def _atomic_write_text(path: Path, content: object) -> None:
+    """Persist neural defaults atomically to avoid torn writes."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, temp_path = tempfile.mkstemp(prefix="neural_rules_", dir=path.parent, text=True)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as tmp_file:
+            json.dump(content, tmp_file, indent=4)
+        os.replace(temp_path, path)
+    except Exception:
+        try:
+            os.unlink(temp_path)
+        except OSError:
+            pass
+        raise
 
 
 def calculate_entropy(text: str) -> float:
@@ -257,9 +276,7 @@ class NeuralIntentEngine:
                 },
             ]
             try:
-                self._rules_path.parent.mkdir(parents=True, exist_ok=True)
-                with open(self._rules_path, "w", encoding="utf-8") as f:
-                    json.dump(default_rules, f, indent=4)
+                _atomic_write_text(self._rules_path, default_rules)
             except (ValueError, OSError, RuntimeError) as e:
                 logger.error("Failed to create neural defaults: %s", e)
 

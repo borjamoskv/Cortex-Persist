@@ -17,6 +17,8 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import os
+import tempfile
 from pathlib import Path
 from typing import Final, Optional
 
@@ -50,6 +52,22 @@ CORTEX_ROLES: Final[tuple[str, ...]] = (
     "test",
     "world-model",
 )
+
+
+def _atomic_write_text(path: Path, content: str) -> None:
+    """Persist HDC codebooks atomically to avoid partial cold-start state."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, temp_path = tempfile.mkstemp(prefix="hdc_codebook_", dir=path.parent, text=True)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as tmp_file:
+            tmp_file.write(content)
+        os.replace(temp_path, path)
+    except Exception:
+        try:
+            os.unlink(temp_path)
+        except OSError:
+            pass
+        raise
 
 
 def _deterministic_seed(symbol: str) -> int:
@@ -122,7 +140,7 @@ class ItemMemory:
             "dim": self._dim,
             "vectors": {k: v.tolist() for k, v in self._cache.items()},
         }
-        self._codebook_path.write_text(json.dumps(data), encoding="utf-8")
+        _atomic_write_text(self._codebook_path, json.dumps(data))
         logger.info(
             "HDC codebook saved: %d symbols, dim=%d → %s",
             len(self._cache),

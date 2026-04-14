@@ -1,8 +1,16 @@
 # REST API Reference
 
-CORTEX exposes a FastAPI application via `cortex.api:app`. The public HTTP surface is versioned
-primarily under `/v1`, and interactive docs are available at `/docs` when the app is not running
-in production mode.
+CORTEX exposes a FastAPI application via `cortex.api:app`.
+
+The default HTTP surface is intentionally narrow and centered on the verifiable-memory core:
+
+- facts and recall
+- semantic search
+- ledger verification
+- trust and compliance
+- health and admin status
+
+Broader orchestration surfaces still exist in the repo, but they are now opt-in and should be treated as experimental unless you explicitly enable them.
 
 ---
 
@@ -22,6 +30,27 @@ python -c "from cortex.api.openapi import export_openapi_spec; print(export_open
 ```
 
 By default this writes `docs/openapi.json`.
+
+## API Tiers
+
+### Default Core Surface
+
+The default app mounts only the stable product surface. This is the recommended mode for:
+
+- local-first memory deployments
+- audit-heavy workflows
+- SDK consumers that need a predictable contract
+
+### Experimental Surface
+
+To opt into orchestration, swarm, realtime, dashboard, onboarding, and other non-core routes:
+
+```bash
+export CORTEX_ENABLE_EXPERIMENTAL_API=1
+uvicorn cortex.api:app --host 0.0.0.0 --port 8484
+```
+
+Set the same environment variable before exporting OpenAPI if you want the wider schema.
 
 ---
 
@@ -80,7 +109,9 @@ curl -H "Authorization: Bearer ctx_xxxxxxxxxx" \
 - `GET /v1/trust/profiles/{agent_id}` — Retrieve the trust profile for one agent.
 - `GET /v1/trust/compliance` — Generate compliance status derived from live state.
 
-### Swarm & Orchestration
+## Experimental Endpoints
+
+These routes are available only when `CORTEX_ENABLE_EXPERIMENTAL_API=1`:
 
 - `GET /v1/swarm/status` — Aggregate swarm health and active worktrees.
 - `POST /v1/swarm/worktrees` — Provision an isolated git worktree.
@@ -90,10 +121,13 @@ curl -H "Authorization: Bearer ctx_xxxxxxxxxx" \
 - `POST /v1/ask` and `POST /v1/ask/stream` — Retrieval + synthesis endpoints.
 - `POST /v1/agents` and `GET /v1/agents...` — Agent registration and inspection.
 - `GET /v1/context/*` — Context inference, signals, and history endpoints.
+- `GET /v1/events/stream` — Coordination/event streaming.
+- `GET /telemetry/*` and realtime topology/dashboard routes — operator-oriented observability surfaces.
+- `GET /v1/runtime/*`, `/v1/usage/*`, `/v1/signup` and similar routes — supporting operational or growth surfaces.
 
 ---
 
 ## Compatibility Notes
 
 Legacy clients using `/v1/memories/*` are redirected to `/v1/facts/*` for backward
-compatibility. New integrations should target the `/v1/facts` surface directly.
+compatibility. New integrations should target `/v1/facts`, `/v1/search`, `/v1/ledger`, and `/v1/trust` first.

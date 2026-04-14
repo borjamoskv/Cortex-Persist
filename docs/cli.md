@@ -1,6 +1,8 @@
 # CLI Reference
 
-CORTEX provides **90+ commands** organized by function. Run `cortex --help` for the full list.
+CORTEX ships many commands, but the stable product contract is the core memory and verification surface documented first below.
+
+Additional operator, swarm, and research-oriented commands still exist in the repo, but they are not the default product promise and may evolve faster. Run `cortex --help` if you need the full tree.
 
 ---
 
@@ -308,6 +310,8 @@ cortex context export PROJECT     # Export for agent consumption
 
 ## Agent & Swarm Commands
 
+The namespaces below are useful for internal operations and experimentation, but they should be treated as non-core surfaces unless your deployment explicitly depends on them.
+
 ### `cortex handoff`
 
 Structured agent-to-agent context transfer.
@@ -430,6 +434,8 @@ npm run model:pick -- "Texto de tarea"
 npm run model:guide -- --json
 npm run model:dispatch -- --json "Necesito compilar y validar el site" -- "npm run build"
 npm run task:build -- --json "Compilar y validar la web"
+npm run task:swarm -- --json --agents=21 "Consenso de 21 agentes para la tarea"
+npm run task:perfect -- --json "Blindar repo y dejarlo perfecto"
 npm run task:auto -- --json "Necesito compilar, testear y cerrar validación de la web antes del deploy"
 npm run task:web -- --json "Validación de UI y copy"
 npm run task:test -- --json "Validación previa"

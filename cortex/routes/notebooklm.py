@@ -9,6 +9,8 @@ Provides REST endpoints for NotebookLM Ouroboros memory loop operations:
 
 from __future__ import annotations
 
+import os
+import tempfile
 from pathlib import Path
 from typing import Optional
 
@@ -17,6 +19,22 @@ from fastapi import APIRouter, Depends, Query
 from cortex.auth import AuthResult, require_permission
 
 router = APIRouter(tags=["notebooklm"])
+
+
+def _atomic_write_text(path: Path, content: str) -> None:
+    """Persist NotebookLM export artifacts atomically."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, temp_path = tempfile.mkstemp(prefix="notebooklm_", dir=path.parent, text=True)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as tmp_file:
+            tmp_file.write(content)
+        os.replace(temp_path, path)
+    except Exception:
+        try:
+            os.unlink(temp_path)
+        except OSError:
+            pass
+        raise
 
 
 @router.get("/v1/notebooklm/status")
@@ -101,7 +119,7 @@ async def notebooklm_digest(
 
     svc = NotebookLMService(str(DEFAULT_DB_PATH))
     content = await svc.generate_digest(project=project)
-    target_file.write_text(content, encoding="utf-8")
+    _atomic_write_text(target_file, content)
     word_count = len(content.split())
 
     return {

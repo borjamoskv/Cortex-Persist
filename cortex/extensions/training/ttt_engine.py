@@ -16,6 +16,7 @@ import asyncio
 import json
 import logging
 import os
+import tempfile
 import subprocess
 import time
 from pathlib import Path
@@ -25,6 +26,22 @@ from cortex.extensions.training.collector import Trajectory, TrajectoryCollector
 from cortex.extensions.training.reward_engine import RewardEngine
 
 logger = logging.getLogger("cortex.extensions.training.ttt")
+
+
+def _atomic_write_text(path: Path, content: str) -> None:
+    """Persist dataset content atomically."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, temp_path = tempfile.mkstemp(prefix="ttt_dataset_", dir=str(path.parent), text=True)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as tmp_file:
+            tmp_file.write(content)
+        os.replace(temp_path, path)
+    except Exception:
+        try:
+            os.unlink(temp_path)
+        except OSError:
+            pass
+        raise
 
 
 class TTTEngine:
@@ -111,9 +128,8 @@ class TTTEngine:
 
         # MLX-LM expects JSONL
         data = json.loads(formatted_json)
-        with open(file_path, "w", encoding="utf-8") as f:
-            for item in data:
-                f.write(json.dumps(item) + "\n")
+        content = "".join(json.dumps(item) + "\n" for item in data)
+        _atomic_write_text(file_path, content)
 
         # Also maintain a symlink to 'latest.jsonl'
         latest_link = self.dataset_dir / "latest.jsonl"

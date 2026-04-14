@@ -6,6 +6,7 @@ import asyncio
 
 import click
 
+from cortex.cli.common import atomic_write_text
 from cortex.cli.common import console
 from cortex.extensions.skills.niche_arbitrage.models import NicheTarget
 from cortex.extensions.skills.niche_arbitrage.pipeline import NicheArbitrageEngine
@@ -38,8 +39,7 @@ def extract_cmd(url: str, name: str, tags: str, output: str | None):
     md_content = report.to_markdown()
 
     if output:
-        with open(output, "w", encoding="utf-8") as f:
-            f.write(md_content)
+        atomic_write_text(output, md_content)
         console.print(f"[bold green]✔ Reporte guardado en {output}[/bold green]")
     else:
         # Print directly to console via Rich Markdown if installed, else raw text

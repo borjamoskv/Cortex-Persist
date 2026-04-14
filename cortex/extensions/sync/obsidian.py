@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from cortex.memory.temporal import now_iso
+from cortex.extensions.sync.common import atomic_write
 
 __all__ = ["export_obsidian"]
 
@@ -285,25 +286,25 @@ def _write_vault(
         folder_path = vault_path / folder  # type: ignore[reportOperatorIssue]
         folder_path.mkdir(parents=True, exist_ok=True)
         filename = f"{f['type']}-{f['id']}.md"
-        (folder_path / filename).write_text(_render_fact_note(f), encoding="utf-8")
+        atomic_write(folder_path / filename, _render_fact_note(f))
         notes_created += 1
 
     # 2. Project MOC notes
     for project, proj_facts in by_project.items():
         content = _render_project_moc(project, proj_facts)
-        (vault_path / "projects" / f"{project}.md").write_text(content, encoding="utf-8")
+        atomic_write(vault_path / "projects" / f"{project}.md", content)
         notes_created += 1
 
     # 3. Tag index notes
     for tag, tag_facts in by_tag.items():
         safe_tag = _slugify(tag) or "untagged"
         content = _render_tag_note(tag, tag_facts)
-        (vault_path / "tags" / f"{safe_tag}.md").write_text(content, encoding="utf-8")
+        atomic_write(vault_path / "tags" / f"{safe_tag}.md", content)
         notes_created += 1
 
     # 4. Dashboard MOC
     dashboard = _render_dashboard(by_project, len(facts), type_counts)
-    (vault_path / "🧠 CORTEX Dashboard.md").write_text(dashboard, encoding="utf-8")
+    atomic_write(vault_path / "🧠 CORTEX Dashboard.md", dashboard)
     notes_created += 1
 
     return notes_created

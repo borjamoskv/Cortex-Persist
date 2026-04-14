@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Optional
 
@@ -18,7 +18,8 @@ class Signal:
     source: str
     project: Optional[str]
     created_at: datetime
-    consumed_by: list[str]
+    tenant_id: str = "default"
+    consumed_by: list[str] = field(default_factory=list)
 
     @property
     def is_consumed(self) -> bool:

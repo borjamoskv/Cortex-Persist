@@ -9,6 +9,7 @@ from __future__ import annotations
 import logging
 import os
 import subprocess
+import tempfile
 from collections.abc import Callable
 from pathlib import Path
 
@@ -28,6 +29,22 @@ logger = logging.getLogger("cortex.extensions.aether.tools")
 
 _MAX_OUTPUT = 8000  # chars truncated to avoid flooding context
 _BASH_TIMEOUT = 60  # seconds
+
+
+def _atomic_write_text(path: Path, content: str) -> None:
+    """Persist repo-confined file mutations atomically."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, temp_path = tempfile.mkstemp(prefix="aether_", dir=path.parent, text=True)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as tmp_file:
+            tmp_file.write(content)
+        os.replace(temp_path, path)
+    except Exception:
+        try:
+            os.unlink(temp_path)
+        except OSError:
+            pass
+        raise
 
 # ── Sovereign Command Guard (Ω₃: Byzantine Default) ──────────────────────
 # Destructive patterns that autonomous agents must NEVER execute.
@@ -123,6 +140,32 @@ class AgentToolkit:
             raise PermissionError(f"Path escape attempt blocked: {relative}")
         return p
 
+    def _authorize_tool(self, tool_name: str) -> str | None:
+        """Validate a direct tool call against capability and allow-list policy."""
+        if self.capability_guard:
+            if tool_name in {"read_file", "list_dir", "git_status", "git_log", "git_diff"}:
+                tier = RiskTier.TIER_1_LOCAL_SAFE
+            elif tool_name in {"web_search", "autodidact_ingest"}:
+                tier = RiskTier.TIER_2_REMOTE_READ
+            elif tool_name in {"write_file", "git_commit", "git_create_branch"}:
+                tier = RiskTier.TIER_3_LOCAL_MUTATION
+            elif tool_name in {"bash", "git_push"}:
+                tier = RiskTier.TIER_4_REMOTE_MUTATION
+            else:
+                tier = RiskTier.TIER_3_LOCAL_MUTATION
+
+            try:
+                self.capability_guard.validate_action(tool_name, tier)
+            except ValueError as e:
+                logger.warning("CapabilityGuard rejected '%s': %s", tool_name, e)
+                return f"[ERROR] CapabilityViolationError: {e}"
+
+        if self.allowed_tools is not None and tool_name not in self.allowed_tools:
+            logger.warning("Tool %s intercepted: not in allowed_tools list.", tool_name)
+            return f"[ERROR] ToolNotAllowedError: You do not have permission to execute '{tool_name}'."
+
+        return None
+
     @staticmethod
     def _sovereign_bash_guard(cmd: str) -> str | None:
         """Validate a shell command against the Sovereign Command Guard.
@@ -179,6 +222,9 @@ class AgentToolkit:
 
     def read_file(self, path: str) -> str:
         """Read a file relative to repo root. Returns its text content."""
+        blocked = self._authorize_tool("read_file")
+        if blocked:
+            return blocked
         p = self._safe_path(path)
         if not p.exists():
             return f"[ERROR] File not found: {path}"
@@ -193,10 +239,12 @@ class AgentToolkit:
 
     def write_file(self, path: str, content: str) -> str:
         """Write (overwrite) a file relative to repo root."""
+        blocked = self._authorize_tool("write_file")
+        if blocked:
+            return blocked
         p = self._safe_path(path)
         try:
-            p.parent.mkdir(parents=True, exist_ok=True)
-            p.write_text(content, encoding="utf-8")
+            _atomic_write_text(p, content)
             logger.info("✏️  write_file: %s (%d bytes)", path, len(content))
             return f"OK — wrote {len(content)} bytes to {path}"
         except OSError as e:
@@ -204,6 +252,9 @@ class AgentToolkit:
 
     def list_dir(self, path: str = ".") -> str:
         """List directory contents relative to repo root."""
+        blocked = self._authorize_tool("list_dir")
+        if blocked:
+            return blocked
         p = self._safe_path(path)
         if not p.is_dir():
             return f"[ERROR] Not a directory: {path}"
@@ -224,15 +275,8 @@ class AgentToolkit:
 
     _PRISON_PROFILE = Path(__file__).resolve().parents[3] / "cortex-core" / "cortex_prison.sb"
 
-    def bash(self, cmd: str, timeout: int = _BASH_TIMEOUT) -> str:
-        """Run a shell command in the repo dir. Returns stdout+stderr.
-
-        V9.1 Security:
-            1. ShellIntentClassifier (AST analysis)
-            2. Legacy FORBIDDEN_BASH_PATTERNS (defense-in-depth)
-            3. TaintTracker verification (Ω₆)
-            4. sandbox-exec OS-level prison (Phase 1)
-        """
+    def _bash_impl(self, cmd: str, timeout: int) -> str:
+        """Execute a shell command after policy validation has already passed."""
         # ── Sovereign Command Guard (Ω₃) ──
         blocked = type(self)._sovereign_bash_guard(cmd)
         if blocked:
@@ -268,41 +312,77 @@ class AgentToolkit:
         except Exception as e:  # noqa: BLE001
             return f"[ERROR] bash failed: {e}"
 
+    def bash(self, cmd: str, timeout: int = _BASH_TIMEOUT) -> str:
+        """Run a shell command in the repo dir. Returns stdout+stderr.
+
+        V9.1 Security:
+            1. Tool authorization policy
+            2. ShellIntentClassifier (AST analysis)
+            3. Legacy FORBIDDEN_BASH_PATTERNS (defense-in-depth)
+            4. TaintTracker verification (Ω₆)
+            5. sandbox-exec OS-level prison (Phase 1)
+        """
+        blocked = self._authorize_tool("bash")
+        if blocked:
+            return blocked
+        return self._bash_impl(cmd, timeout)
+
     # ── Git tools ─────────────────────────────────────────────────────
 
     def git_diff(self) -> str:
         """Return current working tree diff."""
-        out = self.bash("git diff --stat HEAD && git diff HEAD")
+        blocked = self._authorize_tool("git_diff")
+        if blocked:
+            return blocked
+        out = self._bash_impl("git diff --stat HEAD && git diff HEAD", _BASH_TIMEOUT)
         return TAINT_TRACKER.tag("git_diff", out)
 
     def git_status(self) -> str:
         """Return git status."""
-        out = self.bash("git status --short")
+        blocked = self._authorize_tool("git_status")
+        if blocked:
+            return blocked
+        out = self._bash_impl("git status --short", _BASH_TIMEOUT)
         return TAINT_TRACKER.tag("git_status", out)
 
     def git_log(self, n: int = 5) -> str:
         """Return recent git log."""
-        out = self.bash(f"git log --oneline -{n}")
+        blocked = self._authorize_tool("git_log")
+        if blocked:
+            return blocked
+        out = self._bash_impl(f"git log --oneline -{n}", _BASH_TIMEOUT)
         return TAINT_TRACKER.tag("git_log", out)
 
     def git_commit(self, message: str) -> str:
         """Stage all changes and commit."""
+        blocked = self._authorize_tool("git_commit")
+        if blocked:
+            return blocked
         safe_msg = message.replace('"', "'")
-        return self.bash(f'git add -A && git commit -m "{safe_msg}"')
+        return self._bash_impl(f'git add -A && git commit -m "{safe_msg}"', _BASH_TIMEOUT)
 
     def git_create_branch(self, branch_name: str) -> str:
         """Create and checkout a new branch."""
+        blocked = self._authorize_tool("git_create_branch")
+        if blocked:
+            return blocked
         safe = branch_name.replace(" ", "-").replace("/", "-")[:60]
-        return self.bash(f"git checkout -b {safe}")
+        return self._bash_impl(f"git checkout -b {safe}", _BASH_TIMEOUT)
 
     def git_push(self, branch: str) -> str:
         """Push branch to origin."""
-        return self.bash(f"git push -u origin {branch}")
+        blocked = self._authorize_tool("git_push")
+        if blocked:
+            return blocked
+        return self._bash_impl(f"git push -u origin {branch}", _BASH_TIMEOUT)
 
     # ── Web tool ──────────────────────────────────────────────────────
 
     def web_search(self, query: str) -> str:
         """Minimal DuckDuckGo instant answer lookup for the agent."""
+        blocked = self._authorize_tool("web_search")
+        if blocked:
+            return blocked
         try:
             resp = httpx.get(
                 "https://api.duckduckgo.com/",
@@ -321,6 +401,9 @@ class AgentToolkit:
 
     def autodidact_ingest(self, target_url: str, intent: str = "Aprender") -> str:
         """Semantic scalpel: ingest documentation using AUTODIDACT-Ω with a specific intent."""
+        blocked = self._authorize_tool("autodidact_ingest")
+        if blocked:
+            return blocked
         logger.info("🧠 autodidact_ingest: %s (Intent: %s)", target_url, intent)
         # Inline import to avoid circular dependencies and unnecessary overhead
         try:
@@ -351,34 +434,6 @@ class AgentToolkit:
 
     def dispatch(self, tool_name: str, args: dict[str, str]) -> str:
         """Dispatch a tool call by name. Returns string result."""
-
-        # 0. Capability Guard Verification (Axiom Ω₄)
-        if self.capability_guard:
-            # Map tools to their operative RiskTier
-            if tool_name in {"read_file", "list_dir", "git_status", "git_log", "git_diff"}:
-                tier = RiskTier.TIER_1_LOCAL_SAFE
-            elif tool_name in {"web_search", "autodidact_ingest"}:
-                tier = RiskTier.TIER_2_REMOTE_READ
-            elif tool_name in {"write_file", "git_commit", "git_create_branch"}:
-                tier = RiskTier.TIER_3_LOCAL_MUTATION
-            elif tool_name in {"bash", "git_push"}:
-                tier = RiskTier.TIER_4_REMOTE_MUTATION
-            else:
-                tier = RiskTier.TIER_3_LOCAL_MUTATION
-
-            try:
-                # We enforce that the required capability maps exactly to the tool name.
-                self.capability_guard.validate_action(tool_name, tier)
-            except ValueError as e:
-                logger.warning("CapabilityGuard rejected '%s': %s", tool_name, e)
-                return f"[ERROR] CapabilityViolationError: {e}"
-
-        # Legacy fallback if no guard provided
-        if self.allowed_tools is not None and tool_name not in self.allowed_tools:
-            logger.warning("Tool %s intercepted: not in allowed_tools list.", tool_name)
-            return (
-                f"[ERROR] ToolNotAllowedError: You do not have permission to execute '{tool_name}'."
-            )
         handlers: dict[str, Callable[[dict[str, str]], str]] = {
             "read_file": lambda a: self.read_file(a.get("path", "")),
             "write_file": lambda a: self.write_file(a.get("path", ""), a.get("content", "")),

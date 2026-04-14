@@ -13,6 +13,7 @@ import click
 from rich.console import Console
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
+from cortex.cli.common import atomic_write_text
 
 __all__ = [
     "PROGRESS_DESC_FMT",
@@ -154,7 +155,7 @@ def guard_cmd() -> None:
 
         try:
             report_path = target / "apotheosis_night_report.md"
-            report_path.write_text("\n".join(report_lines), encoding="utf-8")
+            atomic_write_text(report_path, "\n".join(report_lines))
         except OSError as e:
             console.print(f"\n[bold red]Error al escribir el reporte: {e}[/]")
             raise click.Abort() from e

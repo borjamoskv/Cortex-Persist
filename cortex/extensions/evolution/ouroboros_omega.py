@@ -9,6 +9,8 @@ import ast
 import copy
 import hashlib
 import logging
+import os
+import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -337,8 +339,21 @@ class OuroborosOmega:
                 logger.error("Concurrency exception: File modified externally during cycle.")
                 return {"status": "ROLLED_BACK", "reason": "Concurrent modification detected."}
 
-            with open(self.target_path, "w", encoding="utf-8") as f:
-                f.write(mutated_source)
+            fd, temp_path = tempfile.mkstemp(
+                prefix=f"{self.target_path.name}.",
+                suffix=".tmp",
+                dir=str(self.target_path.parent),
+            )
+            try:
+                with os.fdopen(fd, "w", encoding="utf-8") as f:
+                    f.write(mutated_source)
+                os.replace(temp_path, self.target_path)
+            except Exception:
+                try:
+                    os.unlink(temp_path)
+                except OSError:
+                    pass
+                raise
 
             logger.info("Ouroboros-Omega cycle SUCCESS for %s", self.target_path.name)
             return {"status": "SUCCESS", "delta": entropy_delta}

@@ -16,6 +16,8 @@ from io import StringIO
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from cortex.extensions.sync.common import atomic_write
+
 if TYPE_CHECKING:
     from cortex.extensions.evolution.engine import CycleReport
 
@@ -42,9 +44,9 @@ def _ensure_header(path: Path) -> None:
     if path.exists() and path.stat().st_size > 0:
         return
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", encoding="utf-8", newline="") as f:
-        writer = csv.writer(f)
-        writer.writerow(_HEADER)
+    # Keep header writes atomic; avoid direct truncated writes.
+    output = ",".join(_HEADER) + "\n"
+    atomic_write(path, output)
 
 
 def append_cycle(report: CycleReport, path: Path = DEFAULT_TELEMETRY_PATH) -> None:

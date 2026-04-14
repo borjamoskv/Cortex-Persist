@@ -49,7 +49,7 @@ The exact payload from Step 1 is hashed, and that hash is chained to the *previo
 The audit pack provides the exact CLI instruction required for an external auditor, compliance officer, or legal team to verify the data against the live database without writing code.
 
 ```json
-  "verification_command": "cortex verify record 8f4a2b9e61..."
+  "verification_command": "cortex verify fact_01JMWP2K9ZXG7VQY8A1S3RT5D"
 ```
 
 * **Why it matters:** Real compliance requires reproducibility. Any stakeholder can run this command to pull up the original transaction and mathematically guarantee its integrity.

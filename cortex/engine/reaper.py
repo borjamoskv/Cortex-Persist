@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import json
 import logging
+import os
+import tempfile
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -19,6 +21,27 @@ logger = logging.getLogger("cortex.reaper")
 __all__ = ["GhostReaper"]
 
 DEFAULT_TTL_DAYS = 30
+
+
+def _atomic_write_json(path: Path, payload: dict[str, Any]) -> None:
+    """Persist a manifest atomically in-place."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, temp_path = tempfile.mkstemp(
+        prefix=f".{path.name}.",
+        suffix=".tmp",
+        dir=path.parent,
+        text=True,
+    )
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as tmp_file:
+            json.dump(payload, tmp_file, indent=2)
+        os.replace(temp_path, path)
+    except Exception:
+        try:
+            os.unlink(temp_path)
+        except OSError:
+            pass
+        raise
 
 
 class GhostReaper:
@@ -133,8 +156,7 @@ class GhostReaper:
 
         if reaped > 0:
             try:
-                with open(manifest_path, "w") as f:
-                    json.dump(data, f, indent=2)
+                _atomic_write_json(manifest_path, data)
             except OSError as e:
                 logger.warning("Failed to write manifest %s: %s", manifest_path, e)
 

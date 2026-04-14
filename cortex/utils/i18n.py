@@ -192,13 +192,18 @@ def _report_missing_key(key: str, lang: Lang) -> None:
 def _report_as_ghost_fact(key: str, lang: Lang) -> None:
     """Report as Ghost Fact for permanent resolution."""
     try:
-        from cortex.facts import store_fact  # type: ignore[reportAttributeAccessIssue]
+        from cortex.engine import CortexEngine
 
-        store_fact(
-            "cortex", f"MISSING_I18N: Key '{key}' missing for lang '{lang.value}'", type="ghost"
+        engine = CortexEngine()
+        engine.store_sync(
+            project="cortex",
+            content=f"MISSING_I18N: Key '{key}' missing for lang '{lang.value}'",
+            fact_type="ghost",
         )
     except ImportError:
-        logger.debug("I18N: Periodic report skipped - cortex.facts not available yet")
+        logger.debug("I18N: Periodic report skipped - cortex.engine not available yet")
+    except Exception as exc:  # noqa: BLE001
+        logger.debug("I18N: Ghost fact reporting skipped: %s", exc)
 
 
 def _trigger_adaptive_repair(key: str, lang: Lang) -> None:

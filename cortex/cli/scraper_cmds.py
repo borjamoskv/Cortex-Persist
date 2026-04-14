@@ -8,12 +8,16 @@ Commands:
 
 from __future__ import annotations
 
+import os
 import json
+from pathlib import Path
 
 import click
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
+
+from cortex.cli.common import atomic_write_text
 
 console = Console()
 
@@ -100,8 +104,7 @@ def scrape(
         text = result.content
 
     if output:
-        with open(output, "w") as f:
-            f.write(text)
+        atomic_write_text(output, text)
         console.print(f"[dim]Written to {output}[/dim]")
     else:
         # Show preview (first 500 chars)
@@ -177,16 +180,14 @@ def batch(
     console.print(table)
 
     if output:
-        import os
-
         os.makedirs(output, exist_ok=True)
+        output_path = Path(output)
         for _i, r in enumerate(job.results):
             if r.status == "success":
                 safe_name = r.url.replace("https://", "").replace("http://", "")
                 safe_name = safe_name.replace("/", "_")[:80]
-                filepath = os.path.join(output, f"{safe_name}.md")
-                with open(filepath, "w") as f:
-                    f.write(f"# {r.title}\n\n{r.content}")
+                filepath = output_path / f"{safe_name}.md"
+                atomic_write_text(filepath, f"# {r.title}\n\n{r.content}")
 
     console.print(
         f"\n[bold cyan]📦 BATCH COMPLETE:[/bold cyan] "
@@ -219,8 +220,7 @@ def map_site(url: str, depth: int, output: str | None):
         console.print(f"  [dim]→[/dim] {u}")
 
     if output:
-        with open(output, "w") as f:
-            f.write("\n".join(urls))
+        atomic_write_text(output, "\n".join(urls))
         console.print(f"\n[dim]Written {len(urls)} URLs to {output}[/dim]")
 
     console.print(f"\n[bold cyan]🗺️ MAPPED:[/bold cyan] {len(urls)} URLs discovered")

@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import hashlib
 import logging
+import os
+import tempfile
 import time
 from dataclasses import dataclass, field
 from enum import Enum
@@ -16,6 +18,22 @@ from pathlib import Path
 from typing import Any, Protocol
 
 logger = logging.getLogger("cortex.extensions.swarm.code_smith")
+
+
+def _atomic_write_text(path: Path, content: str) -> None:
+    """Persist sandbox files atomically to avoid partial test fixtures."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, temp_path = tempfile.mkstemp(prefix="code_smith_", dir=path.parent, text=True)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as tmp_file:
+            tmp_file.write(content)
+        os.replace(temp_path, path)
+    except Exception:
+        try:
+            os.unlink(temp_path)
+        except OSError:
+            pass
+        raise
 
 
 # ── Constants ──────────────────────────────────────────────────────────────
@@ -192,8 +210,7 @@ class LocalProcessSandbox:
     async def write_file(self, path: str, content: str) -> None:
         """Write a file to the sandbox directory."""
         target = self._tmp_dir / path
-        target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_text(content, encoding="utf-8")
+        _atomic_write_text(target, content)
 
     async def run_command(self, command: str, timeout_s: float = 30.0) -> SandboxResult:
         """Execute a command in the sandbox directory."""
@@ -201,7 +218,9 @@ class LocalProcessSandbox:
 
         start = time.monotonic()
         try:
-            proc = await asyncio.create_subprocess_shell(
+            proc = await asyncio.create_subprocess_exec(
+                "/bin/sh",
+                "-lc",
                 command,
                 cwd=str(self._tmp_dir),
                 stdout=asyncio.subprocess.PIPE,

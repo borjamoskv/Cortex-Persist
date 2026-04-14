@@ -1,0 +1,409 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+
+const supportEmail = 'borja@cortexpersist.com';
+const baseSubject = 'CORTEX Pilot Scope';
+
+const scopePresets = [
+	{ id: 'refund', label: 'Refund approvals' },
+	{ id: 'deploy', label: 'Code deploys' },
+	{ id: 'pricing', label: 'Pricing exceptions' },
+];
+---
+
+<SiteLayout
+	title="Get Pilot Scope | CORTEX Persist"
+	description="Send your workflow, stack, and constraints to scope a CORTEX pilot asynchronously."
+	canonical="https://cortexpersist.com/pilot-scope"
+>
+	<main class="landing-shell intake-shell">
+		<a class="intake-backlink" href="/">← Back to CORTEX Persist</a>
+
+		<section class="section-frame surface intake-hero">
+			<div class="section-heading">
+				<p class="section-kicker">Pilot Scope</p>
+				<h1>Scope one workflow and get a concrete pilot recommendation.</h1>
+				<p>
+					Send the workflow, stack, risk level, and hosting constraints. We reply with a
+					scoped pilot recommendation, commercials, and next steps.
+				</p>
+			</div>
+
+			<div class="chip-row" aria-label="Pilot scope promises">
+				<span class="chip">One workflow</span>
+				<span class="chip">One environment</span>
+				<span class="chip">5-minute brief</span>
+			</div>
+		</section>
+
+		<section class="intake-grid">
+			<section class="surface intake-panel">
+				<div class="surface-head">
+					<span class="surface-label">Scope inputs</span>
+					<span class="surface-state">Pilot</span>
+				</div>
+
+				<form
+					class="intake-form"
+					data-intake-form
+					data-subject={baseSubject}
+					data-email={supportEmail}
+					data-required="workflow,stack,success"
+				>
+					<p class="microcopy">
+						Minimum to scope: workflow + current stack + success criteria. The rest helps
+						us sharpen the recommendation.
+					</p>
+
+					<div class="intake-presets">
+						<p class="preview-label">Quick start</p>
+						<div class="preset-row" aria-label="Pilot scope presets">
+							{
+								scopePresets.map((preset) => (
+									<button
+										class="preset-chip"
+										type="button"
+										data-intake-preset={preset.id}
+									>
+										{preset.label}
+									</button>
+								))
+							}
+						</div>
+					</div>
+
+					<label class="field">
+						<span>Workflow</span>
+						<textarea
+							name="workflow"
+							rows="4"
+							placeholder="Which workflow should the pilot instrument first?"
+						></textarea>
+					</label>
+
+					<label class="field">
+						<span>Current stack</span>
+						<textarea
+							name="stack"
+							rows="4"
+							placeholder="Agent orchestration, memory layer, observability, APIs, repos, or relevant systems."
+						></textarea>
+					</label>
+
+					<div class="field-grid">
+						<label class="field">
+							<span>Sensitive data</span>
+							<select name="sensitive">
+								<option>Yes</option>
+								<option>No</option>
+								<option selected>Not sure yet</option>
+							</select>
+						</label>
+
+						<label class="field">
+							<span>Hosting model</span>
+							<select name="hosting">
+								<option selected>Not sure yet</option>
+								<option>Cloud</option>
+								<option>Self-hosted</option>
+								<option>BYOC</option>
+							</select>
+						</label>
+					</div>
+
+					<label class="field">
+						<span>Success criteria</span>
+						<textarea
+							name="success"
+							rows="4"
+							placeholder="What would make the pilot clearly worth doing for your team?"
+						></textarea>
+					</label>
+
+					<details class="intake-disclosure">
+						<summary>Optional context</summary>
+						<div class="intake-disclosure-body">
+							<div class="field-grid">
+								<label class="field">
+									<span>Target environment</span>
+									<select name="environment">
+										<option>Development</option>
+										<option>Staging</option>
+										<option>Production-like</option>
+										<option selected>Not sure yet</option>
+									</select>
+								</label>
+
+								<label class="field">
+									<span>Owner</span>
+									<select name="owner">
+										<option>Engineering</option>
+										<option>Platform</option>
+										<option>Security</option>
+										<option>Leadership</option>
+										<option selected>Not sure yet</option>
+									</select>
+								</label>
+							</div>
+
+							<div class="field-grid">
+								<label class="field">
+									<span>Name</span>
+									<input name="name" type="text" placeholder="Your name" />
+								</label>
+								<label class="field">
+									<span>Email or company</span>
+									<input name="contact" type="text" placeholder="Email or company" />
+								</label>
+							</div>
+						</div>
+					</details>
+
+					<div class="intake-actions">
+						<button class="button-primary" type="submit">Open Scoped Email</button>
+						<button class="button-secondary" type="button" data-copy-intake>Copy Scope</button>
+					</div>
+
+					<p class="microcopy">
+						If you prefer, copy the subject and body, then send them manually to
+						<a class="inline-link" href={`mailto:${supportEmail}`}>{supportEmail}</a>.
+					</p>
+					<p class="intake-status" data-intake-status aria-live="polite"></p>
+				</form>
+			</section>
+
+			<aside class="surface-sunken intake-panel">
+				<div class="surface-head">
+					<span class="surface-label">What we send back</span>
+					<span class="surface-state">24h</span>
+				</div>
+
+				<div class="proof-stack">
+					<div class="proof-item">
+						<div>
+							<strong>Scoped recommendation</strong>
+							<span>What workflow to start with and why.</span>
+						</div>
+						<span class="proof-tag live">Scope</span>
+					</div>
+					<div class="proof-item">
+						<div>
+							<strong>Commercials</strong>
+							<span>Pilot pricing, constraints, and expected timeline.</span>
+						</div>
+						<span class="proof-tag audit">EUR</span>
+					</div>
+					<div class="proof-item">
+						<div>
+							<strong>Next step</strong>
+							<span>Approval, kickoff, or request for one missing detail.</span>
+						</div>
+						<span class="proof-tag live">Async</span>
+					</div>
+				</div>
+
+				<div class="intake-preview">
+					<p class="preview-label">Email subject</p>
+					<p class="preview-subject" data-intake-subject>{baseSubject}</p>
+					<p class="preview-label">Email body</p>
+					<pre class="preview-body" data-intake-preview></pre>
+				</div>
+			</aside>
+		</section>
+	</main>
+
+	<script is:inline>
+		const form = document.querySelector('[data-intake-form]');
+		if (form) {
+			const searchParams = new URLSearchParams(window.location.search);
+			const preview = document.querySelector('[data-intake-preview]');
+			const subjectNode = document.querySelector('[data-intake-subject]');
+			const statusNode = document.querySelector('[data-intake-status]');
+			const copyButton = document.querySelector('[data-copy-intake]');
+			const fields = Array.from(form.querySelectorAll('input, textarea, select'));
+			const supportEmail = form.dataset.email || '';
+			const baseSubject = form.dataset.subject || 'CORTEX intake';
+			const presetButtons = Array.from(form.querySelectorAll('[data-intake-preset]'));
+			const sourceTag = searchParams.get('src') || 'direct';
+			let currentPreset = searchParams.get('preset') || '';
+			const requiredFields = (form.dataset.required || '')
+				.split(',')
+				.map((field) => field.trim())
+				.filter(Boolean);
+			const requiredLabels = {
+				workflow: 'workflow',
+				stack: 'current stack',
+				success: 'success criteria',
+			};
+
+			const readData = () => Object.fromEntries(new FormData(form).entries());
+
+			const buildSubject = (data) => {
+				const workflow = String(data.workflow || '').trim().replace(/\s+/g, ' ');
+				if (!workflow) return baseSubject;
+
+				const summary = workflow.length > 56 ? `${workflow.slice(0, 56)}…` : workflow;
+				const sourceSuffix = sourceTag !== 'direct' ? ` [${sourceTag}]` : '';
+				return `${baseSubject} / ${summary}${sourceSuffix}`;
+			};
+
+			const buildBody = (data) => {
+				return [
+					'CORTEX pilot scope request',
+					'',
+					`Source: ${sourceTag}`,
+					`Preset: ${currentPreset || '-'}`,
+					'Next step requested: scoped pilot memo, commercials, or reply with one missing detail.',
+					'',
+					`Workflow: ${data.workflow || '-'}`,
+					`Current stack: ${data.stack || '-'}`,
+					`Sensitive data: ${data.sensitive || '-'}`,
+					`Hosting model: ${data.hosting || '-'}`,
+					`Target environment: ${data.environment || '-'}`,
+					`Owner: ${data.owner || '-'}`,
+					`Success criteria: ${data.success || '-'}`,
+					`Name: ${data.name || '-'}`,
+					`Contact: ${data.contact || '-'}`,
+				].join('\n');
+			};
+
+			const refreshPreview = () => {
+				const data = readData();
+				const body = buildBody(data);
+				const subject = buildSubject(data);
+				if (preview) preview.textContent = body;
+				if (subjectNode) subjectNode.textContent = subject;
+				return { body, subject, data };
+			};
+
+			const getMissingFields = (data) =>
+				requiredFields.filter((field) => !String(data[field] || '').trim());
+
+			const formatMissingFields = (missingFields) =>
+				missingFields.map((field) => requiredLabels[field] || field).join(' and ');
+
+			let showValidation = false;
+
+			const setFieldState = (name, invalid) => {
+				const field = form.elements.namedItem(name);
+				const wrapper = field instanceof Element ? field.closest('.field') : null;
+				wrapper?.classList.toggle('is-invalid', invalid);
+			};
+
+			const syncValidationState = (data) => {
+				const missingSet = showValidation ? new Set(getMissingFields(data)) : new Set();
+				requiredFields.forEach((fieldName) => setFieldState(fieldName, missingSet.has(fieldName)));
+			};
+
+			const setFieldValue = (name, value) => {
+				const field = form.elements.namedItem(name);
+				if (!field) return;
+				field.value = value;
+			};
+
+			const presets = {
+				refund: {
+					workflow:
+						'Refund approval workflow where an agent proposes the decision and a human approves the final action.',
+					stack: 'OpenAI + LangGraph + support backend + Postgres event log.',
+					sensitive: 'Yes',
+					hosting: 'Self-hosted',
+					environment: 'Production-like',
+					owner: 'Platform',
+					success:
+						'We can prove what the agent knew for each refund decision and review incidents without reconstructing from logs.',
+				},
+				deploy: {
+					workflow:
+						'Code deployment workflow where an agent opens PRs, runs checks, and can trigger deploy steps.',
+					stack: 'OpenAI + GitHub + CI/CD + cloud deployment platform.',
+					sensitive: 'No',
+					hosting: 'Cloud',
+					environment: 'Staging',
+					owner: 'Engineering',
+					success:
+						'Engineering can verify decision context for deploy actions before broader rollout to production-critical flows.',
+				},
+				pricing: {
+					workflow:
+						'Pricing exception workflow where an agent drafts quote changes before human approval.',
+					stack: 'OpenAI + CRM + quoting logic + approval workflow + spreadsheets.',
+					sensitive: 'Yes',
+					hosting: 'BYOC',
+					environment: 'Production-like',
+					owner: 'Leadership',
+					success:
+						'Commercial teams can audit why pricing exceptions were suggested and defend the decision trail later.',
+				},
+			};
+
+			fields.forEach((field) => {
+				const handleFieldUpdate = () => {
+					const { data } = refreshPreview();
+					syncValidationState(data);
+				};
+				field.addEventListener('input', handleFieldUpdate);
+				field.addEventListener('change', handleFieldUpdate);
+			});
+
+				presetButtons.forEach((button) => {
+					button.addEventListener('click', () => {
+						const preset = presets[button.dataset.intakePreset || ''];
+						if (!preset) return;
+
+						currentPreset = button.dataset.intakePreset || '';
+						Object.entries(preset).forEach(([name, value]) => setFieldValue(name, value));
+						presetButtons.forEach((node) => node.classList.toggle('is-active', node === button));
+						searchParams.set('src', sourceTag);
+						searchParams.set('preset', currentPreset);
+						window.history.replaceState({}, '', `${window.location.pathname}?${searchParams.toString()}`);
+						const { data } = refreshPreview();
+						syncValidationState(data);
+						if (statusNode) statusNode.textContent = `Loaded sample: ${button.textContent?.trim() || 'preset'}.`;
+					});
+				});
+
+			form.addEventListener('submit', (event) => {
+				event.preventDefault();
+				showValidation = true;
+				const { body, subject, data } = refreshPreview();
+				syncValidationState(data);
+				const missingFields = getMissingFields(data);
+				if (missingFields.length) {
+					if (statusNode) {
+						statusNode.textContent = `Add ${formatMissingFields(missingFields)} to open the scoped email.`;
+					}
+					return;
+				}
+				const href = `mailto:${supportEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+				window.location.href = href;
+			});
+
+				copyButton?.addEventListener('click', async () => {
+				const { body, subject, data } = refreshPreview();
+				const payload = [`Subject: ${subject}`, '', body].join('\n');
+				try {
+					await navigator.clipboard.writeText(payload);
+					const missingFields = getMissingFields(data);
+					if (statusNode) {
+						statusNode.textContent = missingFields.length
+							? `Copied subject and body. ${formatMissingFields(missingFields)} still need details.`
+							: 'Copied subject and body. Paste them into any email client if mailto is not available.';
+					}
+				} catch {
+					if (statusNode) statusNode.textContent = 'Copy failed. Select the subject and preview manually, then paste them into your email.';
+				}
+				});
+
+				if (currentPreset && presets[currentPreset]) {
+					Object.entries(presets[currentPreset]).forEach(([name, value]) => setFieldValue(name, value));
+					presetButtons.forEach((node) =>
+						node.classList.toggle('is-active', node.dataset.intakePreset === currentPreset),
+					);
+				}
+
+				const { data } = refreshPreview();
+				syncValidationState(data);
+		}
+	</script>
+</SiteLayout>

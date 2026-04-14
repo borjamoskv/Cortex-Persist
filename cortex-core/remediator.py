@@ -2,6 +2,7 @@ import os
 import re
 import sys
 import logging
+import tempfile
 
 # CORTEX Sovereign Remediator v3.2 — The Ouroboros Surgeon
 logging.basicConfig(level=logging.INFO, format="🏥 [SURGEON] %(message)s")
@@ -12,6 +13,19 @@ class SovereignSurgeon:
     def __init__(self, target_file: str, error_log: str):
         self.target_file = target_file
         self.error_log = error_log
+
+    @staticmethod
+    def _atomic_write_text(path: str, content: str) -> None:
+        target_dir = os.path.dirname(path) or "."
+        with tempfile.NamedTemporaryFile(
+            "w",
+            dir=target_dir,
+            delete=False,
+            encoding="utf-8",
+        ) as tmp_file:
+            tmp_file.write(content)
+            tmp_path = tmp_file.name
+        os.replace(tmp_path, path)
 
     def analyze_vulnerability(self):
         """Detects the specific vulnerability type from the Forge or Mirror output."""
@@ -91,8 +105,7 @@ class SovereignSurgeon:
                 )
 
             if new_content != content:
-                with open(self.target_file, "w") as f:
-                    f.write(new_content)
+                self._atomic_write_text(self.target_file, new_content)
                 logging.info("✅ Surgery successful on %s", os.path.basename(self.target_file))
                 return True
             else:

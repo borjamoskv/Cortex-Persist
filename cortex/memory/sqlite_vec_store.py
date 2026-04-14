@@ -189,11 +189,22 @@ class SovereignVectorStoreL2:
             ]
 
             cursor = self._conn.execute(
-                "SELECT name FROM sqlite_master WHERE type='table' AND name LIKE 'facts_meta%'"
+                """
+                SELECT name, sql
+                FROM sqlite_master
+                WHERE type='table' AND name LIKE 'facts_meta%'
+                """
             )
-            tables = [row[0] for row in cursor.fetchall()]
+            tables = cursor.fetchall()
 
-            for tb in tables:
+            for tb, tb_sql in tables:
+                if tb_sql is None:
+                    continue
+                # FTS5 and other virtual tables cannot be altered; skip them
+                # during structural migration to avoid `virtual tables may not be altered`.
+                if "VIRTUAL TABLE" in tb_sql.upper():
+                    continue
+
                 info_cursor = self._conn.execute(f"PRAGMA table_info({tb})")  # nosec B608
                 existing_cols = {row[1] for row in info_cursor.fetchall()}
                 for col, col_type in migrations:

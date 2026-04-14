@@ -46,7 +46,11 @@ QUICK START:
 
   from cortex import CortexEngine
   engine = CortexEngine()
-  await engine.store_fact("Approved loan #443", fact_type="decision", project="fintech-agent")
+  await engine.store(
+      project="fintech-agent",
+      content="Approved loan #443",
+      fact_type="decision",
+  )
   # → SHA-256 chained, Merkle-sealed, Privacy-shielded, auditable
 
 VERIFY ANY FACT:
@@ -111,7 +115,11 @@ THE STACK (all open source, local-first):
 
   from cortex import CortexEngine
   engine = CortexEngine()
-  await engine.store_fact("content", fact_type="decision", project="my-agent")
+  await engine.store(
+      project="my-agent",
+      content="content",
+      fact_type="decision",
+  )
 
 VERIFY ANY FACT:
   cortex verify 42
@@ -178,7 +186,11 @@ pip install cortex-persist
 
 from cortex import CortexEngine
 engine = CortexEngine()
-await engine.store_fact("Decision", fact_type="decision", project="agent")
+await engine.store(
+    project="agent",
+    content="Decision",
+    fact_type="decision",
+)
 
 cortex verify 42
 → ✅ SHA-256 intact, Merkle sealed. 3ms.

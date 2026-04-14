@@ -9,6 +9,8 @@ Sovereign 130/100 — Pydantic responses, structured logging, TOCTOU-safe paths.
 
 import logging
 import re
+import os
+import tempfile
 import time
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional
@@ -70,6 +72,23 @@ _LEDGER_LAG_THRESHOLD = 1000
 
 _DANGEROUS_PATH_CHARS = frozenset("\0\r\n\t")
 _TENANT_PATTERN = re.compile(r"^[a-z0-9_\-]+$", re.I)
+
+
+def _atomic_write_text(path: Path, content: str) -> Path:
+    """Persist exported artifacts atomically within the target directory."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, temp_path = tempfile.mkstemp(prefix="cortex_export_", dir=path.parent, text=True)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as tmp_file:
+            tmp_file.write(content)
+        os.replace(temp_path, path)
+        return path
+    except Exception:
+        try:
+            os.unlink(temp_path)
+        except OSError:
+            pass
+        raise
 
 
 def _get_lang(request: Request) -> str:
@@ -184,9 +203,7 @@ async def export_project(
         content = export_facts(facts, fmt="json")  # type: ignore[reportArgumentType]
 
         def _write_export() -> Path:
-            target_file.parent.mkdir(parents=True, exist_ok=True)
-            target_file.write_text(content, encoding="utf-8")
-            return target_file
+            return _atomic_write_text(target_file, content)
 
         out_path = await run_in_threadpool(_write_export)
         logger.info(

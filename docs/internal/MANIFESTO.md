@@ -87,7 +87,7 @@ CORTEX is a verification layer that wraps your existing memory stack (Mem0, Zep,
 
 ```bash
 pip install cortex-persist
-cortex store --type decision --project my-agent "Chose OAuth2 PKCE for auth"
+cortex store my-agent "Chose OAuth2 PKCE for auth" --type decision
 cortex verify 1
 # → ✅ VERIFIED — Hash chain intact, Merkle sealed
 ```

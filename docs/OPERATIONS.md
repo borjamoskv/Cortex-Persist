@@ -88,13 +88,13 @@ The daemon runs 13 monitors including health checks, compaction scheduling, sync
 
 ```bash
 # Store a fact
-cortex store --type decision --source agent:gemini PROJECT "content"
+cortex store PROJECT "content" --type decision --source agent:gemini
 
 # Search facts
 cortex search "query" --limit 10
 
 # Verify ledger integrity
-cortex verify
+cortex ledger verify
 
 # Export context snapshot
 cortex export
@@ -136,10 +136,10 @@ For AlloyDB/cloud deployments, use standard PostgreSQL backup procedures.
 
 ```bash
 # Verify ledger hash chain
-cortex verify
+cortex ledger verify
 
-# Full integrity audit
-cortex audit
+# Export an audit trail
+cortex audit-trail
 ```
 
 ---
@@ -161,8 +161,8 @@ cortex audit
 
 | Symptom | Likely Cause | Fix |
 | --- | --- | --- |
-| `LedgerIntegrityError` | Hash chain broken | Run `cortex verify` to identify break point |
-| Slow search | Missing embeddings | Run `cortex reindex` |
+| `LedgerIntegrityError` | Hash chain broken | Run `cortex ledger verify` to identify break point |
+| Slow search | Missing embeddings | Rebuild embeddings or rerun the ingestion pipeline |
 | Import errors | Missing optional deps | Install with `pip install -e ".[all]"` |
 | Daemon crash loop | Stale PID file | Remove `~/.cortex/daemon.pid` |
 | Encryption errors | Missing or rotated key | Check `CORTEX_ENCRYPTION_KEY` or keyring |

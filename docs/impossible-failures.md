@@ -74,10 +74,10 @@ ROI of original resolution: 0%
 The error memory layer persists root cause, resolution, and context:
 
 ```bash
-cortex store --type error --source agent:gemini PROJECT \
+cortex store PROJECT \
   "Root: broad except Exception in router.py:L42. \
    Fix: specific OSError + TimeoutError. \
-   Pattern: all async I/O borders need targeted exception types."
+   Pattern: all async I/O borders need targeted exception types." --type error --source agent:gemini
 ```
 
 Before acting on any task, the agent queries error memory for the current project. A resolved error cannot be invisible to future sessions.
@@ -141,9 +141,9 @@ T₅: Previous partial implementation found — conflict
 The ghost taxonomy (`--type ghost`) surfaces incomplete work at boot:
 
 ```bash
-cortex store --type ghost --source agent:gemini PROJECT \
+cortex store PROJECT \
   "Feature X: 60% complete. Blocked: needs Y before proceeding. \
-   Files touched: cortex/router.py, tests/test_router.py."
+   Files touched: cortex/router.py, tests/test_router.py." --type ghost --source agent:gemini
 ```
 
 Ghosts are classified by count at boot. If `> 10 total ghosts`: surface to operator. No ghost is invisible to a future session.
@@ -205,7 +205,7 @@ The impossibility guarantees are verifiable:
 
 ```bash
 # Verify hash chain integrity
-cortex verify --full
+cortex ledger verify
 
 # Run static analysis tests (L2)
 pytest tests/test_l2_static_analysis.py -v

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import shutil
 import sys
+import tempfile
 from pathlib import Path
 
 from rich.console import Console
@@ -39,6 +40,19 @@ def _get_systemd_unit() -> Path:
     svc_dir = get_service_dir()
     assert svc_dir is not None  # noqa: S101
     return svc_dir / f"{BUNDLE_ID}.service"
+
+
+def _atomic_write_text(path: Path, content: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile(
+        "w",
+        dir=str(path.parent),
+        delete=False,
+        encoding="utf-8",
+    ) as tmp_file:
+        tmp_file.write(content)
+        tmp_path = Path(tmp_file.name)
+    tmp_path.replace(path)
 
 
 # ─── macOS ──────────────────────────────────────────────────────────
@@ -76,7 +90,6 @@ def uninstall_macos() -> None:
 
 def install_linux() -> None:
     unit_path = _get_systemd_unit()
-    unit_path.parent.mkdir(parents=True, exist_ok=True)
     python_path = sys.executable
     unit_content = f"""[Unit]
 Description=MOSKV-1 CORTEX Daemon
@@ -91,7 +104,7 @@ RestartSec=30
 [Install]
 WantedBy=default.target
 """
-    unit_path.write_text(unit_content)
+    _atomic_write_text(unit_path, unit_content)
     console.print(f"[green]✅ Installed:[/] {unit_path}")
     import subprocess
 

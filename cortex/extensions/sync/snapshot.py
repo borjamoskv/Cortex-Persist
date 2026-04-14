@@ -7,7 +7,7 @@ import logging
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from cortex.extensions.sync.common import CORTEX_DIR
+from cortex.extensions.sync.common import CORTEX_DIR, atomic_write
 from cortex.memory.temporal import now_iso
 
 __all__ = ["export_snapshot"]
@@ -123,8 +123,7 @@ async def export_snapshot(
     # ─── Tip del Día ─────────────────────────────────────────────────
     lines.extend(await _generate_tips_section(engine))
 
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_text("\n".join(lines), encoding="utf-8")
+    atomic_write(out_path, "\n".join(lines))
 
     logger.info("Snapshot exportado a %s (%d facts)", out_path, total_facts)
     return out_path

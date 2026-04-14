@@ -53,7 +53,7 @@ logger = logging.getLogger("uvicorn.error")
 
 
 @router.post("/v1/facts", response_model=StoreResponse)
-async def store_fact(
+async def store_memory(
     req: StoreRequest,
     auth: AuthResult = Depends(require_permission("write")),
     engine: AsyncCortexEngine = Depends(get_async_engine),

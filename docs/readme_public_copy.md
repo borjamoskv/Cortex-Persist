@@ -28,14 +28,13 @@ pip install "cortex-persist[all]"
 
 Initialize the Ledger:
 ```bash
-cortex verify-ledger
+cortex ledger verify
 ```
 
 Store an auditable memory:
 ```bash
-cortex store "Vendor X failed compliance check" \
+cortex store procurement "Vendor X failed compliance check" \
   --type decision \
-  --project procurement \
   --confidence C4 \
   --source agent:reviewer
 ```

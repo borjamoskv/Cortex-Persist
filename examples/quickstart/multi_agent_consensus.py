@@ -35,13 +35,13 @@ async def main() -> None:
 
     facts = []
     for source, content in agents:
-        fact = await engine.store_fact(
+        fact_id = await engine.store(
+            project="consensus-demo",
             content=content,
             fact_type="decision",
-            project="consensus-demo",
             source=source,
         )
-        facts.append(fact)
+        facts.append(fact_id)
         print(f'   📝 {source}: "{content[:50]}..."')
 
     # --- Step 2: Show consensus ---
@@ -70,10 +70,10 @@ async def main() -> None:
 
     # --- Step 3: Verify integrity ---
     print("\n3️⃣  Verifying all decisions have cryptographic integrity...")
-    for fact in facts:
-        result = await engine.verify_fact(fact["id"])
+    for fact_id in facts:
+        result = await engine.verify_fact(fact_id)
         status = "✅" if result["valid"] else "❌"
-        print(f"   {status} Fact #{fact['id']} — chain intact")
+        print(f"   {status} Fact #{fact_id} — chain intact")
 
     print("\n✨ Multi-agent consensus demonstration complete.")
 

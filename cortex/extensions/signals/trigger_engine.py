@@ -59,7 +59,7 @@ class ActionType(str, Enum):
     """What to do when a trigger fires."""
 
     EMIT_SIGNAL = "emit_signal"
-    STORE_FACT = "store_fact"
+    PERSIST_FACT = "persist_fact"
     ESCALATE = "escalate"
     NOTIFY = "notify"
     CUSTOM = "custom"
@@ -151,9 +151,9 @@ class TriggerActionHandler:
         """Emit a signal into the SignalBus."""
         logger.info("ACTION emit_signal: %s %s", event_type, payload)
 
-    async def store_fact(self, content: str, **kw: Any) -> None:
+    async def persist_fact(self, content: str, **kw: Any) -> None:
         """Store a fact in CORTEX memory."""
-        logger.info("ACTION store_fact: %s", content[:120])
+        logger.info("ACTION persist_fact: %s", content[:120])
 
     async def escalate(self, reason: str, **kw: Any) -> None:
         """Trigger human escalation."""
@@ -358,8 +358,8 @@ class TriggerEngine:
                 project=cfg.get("project", signal.project),
             )
 
-        elif action.action_type == ActionType.STORE_FACT:
-            await self._handler.store_fact(
+        elif action.action_type == ActionType.PERSIST_FACT:
+            await self._handler.persist_fact(
                 content=cfg.get("content", f"Trigger fired: {trigger.name}"),
                 fact_type=cfg.get("fact_type", "ghost"),
                 confidence=cfg.get("confidence", "C4"),

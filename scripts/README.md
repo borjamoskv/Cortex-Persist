@@ -41,6 +41,9 @@ npm run model:pick -- "Texto de tarea"
 npm run model:guide
 npm run model:guide -- --json
 npm run model:dispatch -- "Texto de tarea" -- "npm run build"
+npm run model:ledger -- --json
+npm run model:swarm -- --json --agents=21 "Texto de tarea"
+npm run engine:perfect -- --dry-run --json
 
 # Modo orquestado (sin pasar --):
 TASK_COMMAND="npm run build" npm run model:dispatch -- "Necesito compilar y validar el site"
@@ -69,6 +72,8 @@ TASK_FLOW=release TASK_COMMAND="npm run build" npm run model:dispatch -- --dry-r
 
 ```bash
 npm run task:build -- "Compilar y validar la web"
+npm run task:swarm -- --json --agents=21 "Simular consenso entre 21 agentes"
+npm run task:perfect -- --json "Blindar repo y dejar todo perfecto"
 npm run task:web -- --json "Genera recomendaciones de modelado para este texto"
 npm run task:test -- "Verificar estado rápido antes de merge"
 npm run task:release -- "Preparar salida de release"
@@ -78,10 +83,42 @@ npm run task:auto -- --json "Necesito compilar, testear y revisar la web antes d
 
 Cuando `TASK_COMMAND` (o `CODEX_TASK_COMMAND` / `MODEL_ROUTER_COMMAND`) está presente, el dispatcher resuelve el modelo
 y ejecuta ese comando inyectando `CODEX_MODEL`, `MODEL_DISPATCH` y `MODEL_ROUTER_SELECTION` en el entorno.
+También admite `TASK_FLOW` (o `CODEX_FLOW` / `MODEL_ROUTER_FLOW`) y los scripts `task:*` pueden inferir el flujo desde `npm_lifecycle_event`.
 Con `--dry-run`, el dispatcher no ejecuta el comando y devuelve el plan resuelto en JSON/plain.
+La salida JSON del dispatcher incluye `taskMetrics`, `timing` y `commandSource`; `swarm` añade además
+`consensusRatio`, `modelBreakdown` y tiempos agregados del consenso (`routerTotalMs`, `routerAverageMs`).
+Cuando el comando hijo también escribe salida en modo JSON, el dispatcher la captura sin contaminar `stdout`
+y la expone como `commandResult`; si no es JSON, la deja en `commandStdout` / `commandStderr`.
+Si esa salida excede el límite configurado, el dispatcher la trunca o la resume; puedes ajustarlo con
+`MODEL_COMMAND_OUTPUT_LIMIT_CHARS` (por defecto `4000`).
 
 Si defines `TASK_FLOW`, no necesitas pasar `--flow` explícitamente; al mismo tiempo puedes forzarlo con:
-`--auto --flow=<build|release|ship|web|test>`.
+`--auto --flow=<build|release|ship|web|test|swarm|perfect>`.
+
+El motor `swarm` evita auto-invocarse si recibe `--auto --flow=swarm` sin `TASK_COMMAND` explícito.
+En ese caso devuelve un plan con `guardedReason: "recursive_swarm_flow"`.
+
+Ledger local opcional:
+- Activa persistencia con `MODEL_AUTOMATION_LEDGER_ENABLED=1`.
+- Puedes fijar la ruta con `MODEL_AUTOMATION_LEDGER_PATH`.
+- La rotación simple se controla con `MODEL_AUTOMATION_LEDGER_MAX_BYTES` y guarda backup en `*.1`.
+- Puedes fijar un identificador estable por ejecución con `MODEL_AUTOMATION_RUN_ID`.
+- Cuando `task:swarm` envuelve a `model-swarm`, el hijo se suprime del ledger por defecto para evitar duplicados.
+- Puedes inspeccionarlo con `npm run model:ledger -- --json` o filtrarlo con `--run-id`, `--flow`, `--model`, `--status`, `--source`.
+- `model:ledger` lee el archivo activo y, salvo que pases `--no-rotate`, también incluye el backup `*.1`.
+
+El motor `perfect` encadena varios gates reales:
+- `repo_health_changed.py --all`
+- `npm run test:models`
+- `npm run build`
+- `scripts/ship_gate.py --fast --json-only`
+
+Overrides soportados por el motor `perfect`:
+- `CORTEX_PERFECT_REPO_HEALTH_CMD`
+- `CORTEX_PERFECT_MODEL_TESTS_CMD`
+- `CORTEX_PERFECT_BUILD_CMD`
+- `CORTEX_PERFECT_SHIP_GATE_CMD`
+- `PYTHON`
 
 Para validar regresiones del motor:
 

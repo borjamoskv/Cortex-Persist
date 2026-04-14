@@ -11,14 +11,6 @@ import os
 import signal
 from typing import Any, Optional
 
-# uvloop for high‑performance event loop
-try:
-    import uvloop
-
-    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
-except ImportError:
-    logging.warning("uvloop not installed; falling back to default asyncio loop")
-
 # ARQ (async Redis queue) – optional, fallback to in‑process queue if Redis unavailable
 try:
     from arq import Queue, Worker, create_pool
@@ -33,6 +25,7 @@ except ImportError:
 from .circuit_breaker import circuit_breaker
 from .memory_wrapper import get_mallinfo2, malloc_trim
 from .monitor import MemoryPressureMonitor
+from cortex.events.loop import sovereign_run
 
 LOGGER = logging.getLogger("compaction_sidecar")
 logging.basicConfig(level=logging.INFO)
@@ -148,6 +141,6 @@ async def main() -> None:
 
 if __name__ == "__main__":
     try:
-        asyncio.run(main())
+        sovereign_run(main())
     except (KeyboardInterrupt, asyncio.CancelledError):
         pass
