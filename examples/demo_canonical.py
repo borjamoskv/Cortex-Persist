@@ -58,7 +58,7 @@ async def main() -> None:
     print(f"[{icon}] Full ledger verification: {status}")
 
     # 5. Simulate a tampering attempt (direct DB mutation, bypassing the engine)
-    db_path = str(engine._db_path)
+    db_path = str(engine._db_path)  # type: ignore[attr-defined]  # path is stable public-use internal attr
     print(f"\n[!] Simulating tampering: mutating DB directly at {db_path}")
     try:
         conn = sqlite3.connect(db_path)
@@ -69,7 +69,7 @@ async def main() -> None:
         conn.commit()
         conn.close()
         print("[!] Tampering applied. Re-running ledger verification...")
-    except Exception as exc:  # noqa: BLE001
+    except sqlite3.Error as exc:
         print(f"[!] Tampering simulation skipped: {exc}")
 
     # 6. Re-verify — should detect the tamper if ledger chain covers the mutation
