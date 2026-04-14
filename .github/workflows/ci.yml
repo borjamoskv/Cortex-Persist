@@ -232,14 +232,20 @@ jobs:
             esac
           done < .changed_files
 
+          node_ci=false
+          if grep -Eq '^\\.github/workflows/|^README|^package\.json$|^package-lock\.json$|^scripts/.+\\.(js|mjs|cjs|ts|tsx)$|^src/.+\\.(js|ts|jsx|tsx|astro)$|^public/|^docs/cli\\.md$' .changed_files; then
+            node_ci=true
+          fi
+
           {
             echo "release_only=${release_only}"
+            echo "node_ci=${node_ci}"
           } >> "${GITHUB_OUTPUT}"
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: ${{ matrix.python-version }}
       - uses: actions/setup-node@v4
-        if: steps.scope.outputs.release_only != 'true'
+        if: steps.scope.outputs.release_only != 'true' && steps.scope.outputs.node_ci == 'true'
         with:
           node-version: "20"
       - name: Install dependencies
@@ -247,7 +253,7 @@ jobs:
         run: |
           pip install -e ".[dev,api]"
       - name: Install frontend dependencies
-        if: steps.scope.outputs.release_only != 'true'
+        if: steps.scope.outputs.release_only != 'true' && steps.scope.outputs.node_ci == 'true'
         run: |
           npm ci
       - name: Install release smoke dependencies
@@ -306,7 +312,7 @@ jobs:
             exit "${status}"
           fi
       - name: Run model automation tests
-        if: steps.scope.outputs.release_only != 'true'
+        if: steps.scope.outputs.release_only != 'true' && steps.scope.outputs.node_ci == 'true'
         run: |
           npm run test:models
       - name: Upload test diagnostics
