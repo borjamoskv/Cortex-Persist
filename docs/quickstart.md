@@ -2,12 +2,25 @@
 
 Get CORTEX running in 5 minutes.
 
+> 🐍 **Python demo:** For a self-contained script that walks through the full core flow, run `python examples/demo_canonical.py` after installing.
+
 ---
 
 ## 1. Install
 
+### Path A: From PyPI *(preferred)*
+
 ```bash
 pip install cortex-persist
+```
+
+### Path B: From Source *(development)*
+
+```bash
+git clone https://github.com/borjamoskv/Cortex-Persist.git
+cd Cortex-Persist
+python3 -m venv .venv && source .venv/bin/activate
+pip install -e .
 ```
 
 For the API server and MCP:

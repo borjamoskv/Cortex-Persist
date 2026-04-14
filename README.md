@@ -83,6 +83,12 @@ Traditional logging and standard vector stores fail the epistemic containment te
 | **Self-Hosted** | 🟡 **Beta** | Multi-tenant. API-driven. Redis cache. Pluggable to your infra. |
 | **Cloud-Ready** | ⏳ **Roadmap** | AlloyDB/PostgreSQL + Qdrant. For distributed massive swarms. |
 
+## Product Core
+
+The supported core modules are: **engine**, **ledger**, **crypto**, **memory**, **facts**, **search**, **verification**, **audit**, **CLI**, **database**, **embeddings**, **guards**, **auth**, **core**, and **types**.
+
+See [docs/PRODUCT-CORE.md](docs/PRODUCT-CORE.md) for the full stability tier breakdown (Stable / Beta / Experimental).
+
 ## 90-second demo
 
 ```bash
@@ -108,24 +114,34 @@ $ cortex verify ledger
 $ cortex compliance-report generate --format pdf
 ```
 
+> 🐍 **Python demo:** For a self-contained Python script that walks through the full core flow, see [`examples/demo_canonical.py`](examples/demo_canonical.py).
+
 ## Quickstart
 
 Start with the smallest supported flow and get to audit evidence fast.
 
+### Path A: Install from PyPI *(preferred)*
+
 ```bash
-# 1. Install from source and initialize
+pip install cortex-persist
+cortex init
+cortex memory store --agent "risk-bot" --content "Transaction flagged: IP mismatch"
+cortex verify ledger
+```
+
+### Path B: Install from Source *(development)*
+
+```bash
 git clone https://github.com/borjamoskv/Cortex-Persist.git
 cd Cortex-Persist
 python3 -m venv .venv && source .venv/bin/activate
 pip install -e .
 cortex init
-
-# 2. Store a memory (SHA-256 hashed and chained to prior facts)
 cortex memory store --agent "risk-bot" --content "Transaction flagged: IP mismatch"
-
-# 3. Verify integrity (detects any manual database tampering)
 cortex verify ledger
 ```
+
+See [docs/installation.md](docs/installation.md) for full installation options and platform-specific notes.
 
 ## Integration
 
@@ -138,14 +154,15 @@ from cortex import CortexEngine
 async def main() -> None:
     engine = CortexEngine()
 
-    receipt = await engine.store_fact(
+    fact_id = await engine.store(
+        project="fin-fraud-bot",
         content="User approved transaction $5,000",
         fact_type="decision",
-        project="fin-fraud-bot",
         tenant_id="customer-123",
     )
 
-    assert await engine.verify(receipt.hash) is True
+    result = await engine.verify_ledger()
+    assert result.get("valid") is True
 
 asyncio.run(main())
 ```
