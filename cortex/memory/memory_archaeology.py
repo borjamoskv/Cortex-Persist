@@ -9,13 +9,10 @@ from __future__ import annotations
 
 import logging
 import sqlite3
-<<<<<<< HEAD
-import time
-=======
 from datetime import datetime, timezone
->>>>>>> 38466c73 (feat(cortex): ACTUALIZA - Sovereign state sync and seal enforcement)
 from typing import Any
 
+import aiosqlite
 import numpy as np
 
 try:
@@ -65,7 +62,7 @@ class MemoryArchaeologist:
         cursor = conn.cursor()
         cursor.execute(
             """
-            SELECT id, content, parent_decision_id
+            SELECT id, content, parent_decision_id, tenant_id
             FROM facts
             WHERE project = ? AND is_tombstoned = 0 AND fact_type != 'ghost'
             """,
@@ -99,6 +96,7 @@ class MemoryArchaeologist:
                     "parent_decision_id": str(l3_rec["parent_decision_id"])
                     if l3_rec["parent_decision_id"]
                     else None,
+                    "tenant_id": l3_rec.get("tenant_id") or "default",
                 }
             )
             emb = np.frombuffer(r["embedding"], dtype=np.float32)
@@ -141,7 +139,6 @@ class MemoryArchaeologist:
     ) -> tuple[int, int]:
         condensed_count = 0
         tombstoned_count = 0
-        conn = self.engine._get_sync_conn()
         l2_conn = self.engine.memory._l2._get_conn()
 
         for cluster_indices in clusters:
@@ -168,9 +165,9 @@ class MemoryArchaeologist:
             if not simulate:
                 try:
                     await self._apply_db_updates(
-                        project, condensed_content, old_ids, primary_parent_id, conn, l2_conn
+                        project, condensed_content, cluster_facts, primary_parent_id, l2_conn
                     )
-                except sqlite3.Error as e:
+                except (sqlite3.Error, aiosqlite.Error) as e:
                     logger.error("Archaeology DB update failed: %s", e)
                     continue
 
@@ -183,12 +180,14 @@ class MemoryArchaeologist:
         self,
         project: str,
         condensed_content: str,
-        old_ids: list[str],
+        cluster_facts: list[dict[str, Any]],
         primary_parent_id: str | None,
-        conn: sqlite3.Connection,
         l2_conn: sqlite3.Connection,
     ) -> None:
-        # Prevent concurrent DB locks
+        from cortex.engine.mutation_engine import MUTATION_ENGINE
+
+        old_ids = [str(f["id"]) for f in cluster_facts]
+        ts = datetime.now(timezone.utc).isoformat()
         new_fact_id = await self.engine.store(
             project=project,
             content=condensed_content,
@@ -196,42 +195,68 @@ class MemoryArchaeologist:
             confidence="C5",
             source="cortex_archaeologist",
             meta={"archaeology_merged_from": old_ids},
+            parent_decision_id=int(primary_parent_id) if primary_parent_id else None,
         )
 
-        c3 = conn.cursor()
         placeholders = ",".join("?" for _ in old_ids)
+        async with self.engine.session() as conn:
+            for fact in cluster_facts:
+                await MUTATION_ENGINE.apply(
+                    conn,
+                    fact_id=int(fact["id"]),
+                    tenant_id=str(fact.get("tenant_id") or "default"),
+                    event_type="archaeology_merge",
+                    payload={
+                        "timestamp": ts,
+                        "reason": "archaeology-merged",
+                        "replacement_fact_id": new_fact_id,
+                    },
+                    signer="memory.archaeology",
+                    commit=False,
+                )
 
-        # Tombstone old ones
-        c3.execute(
-            f"UPDATE facts SET is_tombstoned = 1, valid_until = ? WHERE id IN ({placeholders})",
-            [time.strftime("%Y-%m-%dT%H:%M:%S%z")] + old_ids,
-        )
-
-        if primary_parent_id:
-            c3.execute(
-                "UPDATE facts SET parent_decision_id = ? WHERE id = ?",
-                (primary_parent_id, new_fact_id),
-            )
-            cl2 = l2_conn.cursor()
-            cl2.execute(
-                "UPDATE facts_meta SET parent_decision_id = ? WHERE id = ?",
-                (primary_parent_id, new_fact_id),
-            )
+            parent_column = await self._parent_column(conn)
+            if parent_column:
+                cursor = await conn.execute(
+                    f"SELECT id, tenant_id FROM facts WHERE {parent_column} IN ({placeholders})",
+                    tuple(old_ids),
+                )
+                for child_id, child_tenant_id in await cursor.fetchall():
+                    if str(child_id) in old_ids:
+                        continue
+                    await MUTATION_ENGINE.apply(
+                        conn,
+                        fact_id=int(child_id),
+                        tenant_id=str(child_tenant_id or "default"),
+                        event_type="reparent",
+                        payload={"parent_decision_id": new_fact_id, "timestamp": ts},
+                        signer="memory.archaeology",
+                        commit=False,
+                    )
+            await conn.commit()
 
         # Delete tombstoned old ones from L2 to free up vector space
         cl2 = l2_conn.cursor()
         str_old_ids = [str(x) for x in old_ids]
+        if primary_parent_id:
+            cl2.execute(
+                "UPDATE facts_meta SET parent_decision_id = ? WHERE id = ?",
+                (primary_parent_id, new_fact_id),
+            )
         cl2.execute(f"DELETE FROM facts_meta WHERE id IN ({placeholders})", str_old_ids)
         cl2.execute("DELETE FROM vec_facts WHERE rowid NOT IN (SELECT rowid FROM facts_meta)")
-        c3.execute(
-            f"UPDATE facts SET parent_decision_id = ? WHERE parent_decision_id IN ({placeholders})",
-            [new_fact_id] + old_ids,
-        )
         cl2 = l2_conn.cursor()
         cl2.execute(
             f"UPDATE facts_meta SET parent_decision_id = ? WHERE parent_decision_id IN ({placeholders})",
             [new_fact_id] + old_ids,
         )
-
-        conn.commit()
         l2_conn.commit()
+
+    async def _parent_column(self, conn: aiosqlite.Connection) -> str | None:
+        cursor = await conn.execute("PRAGMA table_info(facts)")
+        columns = {str(row[1]) for row in await cursor.fetchall()}
+        if "parent_decision_id" in columns:
+            return "parent_decision_id"
+        if "parent_id" in columns:
+            return "parent_id"
+        return None
