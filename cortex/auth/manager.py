@@ -8,6 +8,7 @@ import json
 import logging
 import secrets
 import threading
+import time
 from datetime import datetime, timezone
 from typing import Any, Optional
 
@@ -117,7 +118,7 @@ class AuthManager:
             tenant_id=tenant_id,
             role=role,
             permissions=permissions,
-            created_at=datetime.now(timezone.utc).isoformat(),
+            created_at=datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
             last_used=None,
             is_active=True,
             rate_limit=rate_limit,

@@ -1,9 +1,6 @@
-from __future__ import annotations
-
 import ast
 import asyncio
 import logging
-import multiprocessing
 import time
 from typing import Any
 
@@ -38,7 +35,7 @@ class SovereignASTVisitor(ast.NodeVisitor):
         self.generic_visit(node)
 
 
-def _execute_sync(source_code: str, global_ctx: dict[str, Any]) -> dict[str, Any]:
+def _execute_sync(source_code: str, global_ctx: dict) -> dict:
     # Epistemic Filter (AST Parse)
     try:
         tree = ast.parse(source_code)
@@ -50,7 +47,7 @@ def _execute_sync(source_code: str, global_ctx: dict[str, Any]) -> dict[str, Any
     compiled_code = compile(tree, filename="<jit_ast>", mode="exec")
 
     # Isolated Execution Environment
-    local_env: dict[str, Any] = {}
+    local_env = {}
 
     # We restrict __builtins__
     safe_builtins = {
@@ -86,11 +83,11 @@ def _execute_sync(source_code: str, global_ctx: dict[str, Any]) -> dict[str, Any
     exec_globals = {"__builtins__": safe_builtins}
     exec_globals.update(global_ctx)
 
-    exec(compiled_code, exec_globals, local_env)  # noqa: S102 - guarded sandbox execution
+    exec(compiled_code, exec_globals, local_env)
     return local_env
 
 
-def _worker(source_code: str, global_ctx: dict[str, Any], result_dict: dict[str, Any]) -> None:
+def _worker(source_code: str, global_ctx: dict, result_dict: dict):
     try:
         res = _execute_sync(source_code, global_ctx)
         # Avoid passing complex objects back via IPC
@@ -101,15 +98,15 @@ def _worker(source_code: str, global_ctx: dict[str, Any], result_dict: dict[str,
         result_dict["error"] = str(e)
 
 
-async def run_jit_sandbox(
-    source_code: str, timeout_ms: int = 50, global_ctx: dict[str, Any] | None = None
-) -> Any:
+async def run_jit_sandbox(source_code: str, timeout_ms: int = 50, global_ctx: dict = None) -> Any:
     """
     Executes Python AST in a 50ms bounded memory-only sandbox.
     Uses multiprocessing to guarantee true OS-level termination and bypass GIL deadlocks.
     """
     ctx = global_ctx or {}
     start_time = time.perf_counter()
+
+    import multiprocessing
 
     manager = multiprocessing.Manager()
     result_dict = manager.dict()
@@ -148,7 +145,7 @@ async def run_jit_sandbox(
             "result": {"locals": result_dict["locals"]},
             "time_ms": elapsed,
         }
-
-    err = dict(result_dict).get("error", "Unknown Epistemic Failure")
-    logger.error("⚡ [SORTU-JIT] Epistemic failure: %s", err)
-    return {"status": "failed", "error": err}
+    else:
+        err = dict(result_dict).get("error", "Unknown Epistemic Failure")
+        logger.error("⚡ [SORTU-JIT] Epistemic failure: %s", err)
+        return {"status": "failed", "error": err}

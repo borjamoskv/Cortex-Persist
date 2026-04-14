@@ -11,6 +11,7 @@ from __future__ import annotations
 import logging
 import math
 import re
+import time
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Optional
 
@@ -108,7 +109,7 @@ class PolicyEngine:
         # Precompute lowercased project names to avoid O(P*F) string matching
         project_names_lower = {p.lower() for p in project_index.keys()}
 
-        now = datetime.now(timezone.utc)
+        now = datetime.fromtimestamp(time.time(), tz=timezone.utc)
         actions: list[ActionItem] = []
 
         for fact in facts:

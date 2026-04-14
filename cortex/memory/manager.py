@@ -6,7 +6,6 @@ import asyncio
 import logging
 import time
 import uuid
-from datetime import datetime, timezone
 from typing import Any
 
 # Memory OS (RFC-CORTEX-MEMORY-OS)
@@ -434,7 +433,7 @@ class CortexMemoryManager:
             project_id=project_id,
             content=content,
             embedding=vector,
-            timestamp=datetime.now(timezone.utc).timestamp(),
+            timestamp=time.time(),
             metadata=_meta,
             cognitive_layer=adjusted_layer,  # type: ignore[reportArgumentType]
             parent_decision_id=int(parent_decision_id) if parent_decision_id is not None else None,

@@ -4,6 +4,7 @@ The thermodynamic enforcer for architectural scaling.
 """
 
 import logging
+import time
 from datetime import datetime, timezone
 from typing import Any, Optional
 
@@ -53,7 +54,7 @@ class OuroborosGate:
             "total_bridges": total_bridges,
             "signal_to_noise": round(snr, 3),
             "entropy_index": round(entropy_idx, 4),
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
         }
 
     def identify_dead_weight(self) -> Optional[str]:
@@ -113,7 +114,7 @@ class OuroborosGate:
                 "decision",
                 "C5",
                 "ag:ouroboros",
-                datetime.now(timezone.utc).isoformat(),
+                datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
             ),
         )
         self.conn.commit()

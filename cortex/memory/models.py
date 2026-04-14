@@ -32,7 +32,7 @@ except ImportError:
 
 def now_iso() -> str:
     """Return current UTC timestamp in ISO 8601 format."""
-    return datetime.now(timezone.utc).isoformat()
+    return datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
 
 
 @dataclass()
@@ -158,7 +158,7 @@ class MemoryEvent(BaseModel):
         description="Unique identifier for this event.",
     )
     timestamp: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc),
+        default_factory=lambda: datetime.fromtimestamp(time.time(), tz=timezone.utc),
         description="UTC timestamp of event creation.",
     )
     role: str = Field(description="Interaction role (user, assistant, system, tool).")
@@ -196,7 +196,7 @@ class EpisodicSnapshot(BaseModel):
     session_id: str = Field(default="", description="Originating session.")
     tenant_id: str = Field(default="default", description="Tenant isolation identifier.")
     created_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc),
+        default_factory=lambda: datetime.fromtimestamp(time.time(), tz=timezone.utc),
         description="UTC timestamp of snapshot creation.",
     )
 
@@ -225,7 +225,7 @@ class CortexFactModel(BaseModel):
         return v
 
     timestamp: float = Field(
-        default_factory=lambda: datetime.now(timezone.utc).timestamp(),
+        default_factory=lambda: time.time(),
         description="Unix timestamp of creation.",
     )
 
@@ -273,7 +273,7 @@ class CortexFactModel(BaseModel):
     @property
     def age_days(self) -> float:
         """Calculate fact age in days."""
-        delta = datetime.now(timezone.utc).timestamp() - self.timestamp
+        delta = time.time() - self.timestamp
         return max(0.0, delta / 86400.0)
 
     def update_on_read(self, latency_ms: float = 0.0) -> CortexFactModel:
@@ -285,7 +285,7 @@ class CortexFactModel(BaseModel):
         ) / new_count
         new_stats = stats.model_copy(
             update={
-                "last_successful_retrieval": datetime.now(timezone.utc),
+                "last_successful_retrieval": datetime.fromtimestamp(time.time(), tz=timezone.utc),
                 "total_access_count": new_count,
                 "average_retrieval_latency_ms": round(new_avg, 2),
             }

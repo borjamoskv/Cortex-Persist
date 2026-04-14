@@ -11,6 +11,7 @@ import hashlib
 import json
 import logging
 import sqlite3
+import time
 from datetime import datetime, timedelta, timezone
 
 import aiosqlite
@@ -52,7 +53,9 @@ class EmbeddingPrunerMixin:
         Returns:
             dict with 'pruned_count', 'skipped_count', 'errors'.
         """
-        cutoff = (datetime.now(timezone.utc) - timedelta(days=max_age_days)).isoformat()
+        cutoff = (
+            datetime.fromtimestamp(time.time(), tz=timezone.utc) - timedelta(days=max_age_days)
+        ).isoformat()
         stats = {"pruned_count": 0, "skipped_count": 0, "errors": []}
 
         async with connect_async_ctx(self.db_path) as conn:  # type: ignore[reportAttributeAccessIssue]

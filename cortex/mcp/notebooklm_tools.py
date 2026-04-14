@@ -121,7 +121,7 @@ def register_notebooklm_tools(mcp: Any, ctx: Any) -> None:
             return {"error": "No cloud sync provider detected. Specify drive_path."}
 
         target.mkdir(parents=True, exist_ok=True)
-        ts = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        ts = datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime("%Y-%m-%d")
         synced: list[str] = []
 
         if mode in ("digest", "both") and DIGEST_FILE.exists():
@@ -162,6 +162,7 @@ def register_notebooklm_tools(mcp: Any, ctx: Any) -> None:
             dict with keys: digest, domains, cloud, staleness.
         """
         import os
+        import time
         from datetime import datetime, timezone
 
         from cortex.services.notebooklm import CLOUD_PROVIDERS, DIGEST_FILE, DOMAINS_DIR
@@ -171,7 +172,7 @@ def register_notebooklm_tools(mcp: Any, ctx: Any) -> None:
         # Digest status
         if DIGEST_FILE.exists():
             mtime = os.path.getmtime(DIGEST_FILE)
-            age_h = (datetime.now(timezone.utc).timestamp() - mtime) / 3600
+            age_h = (time.time() - mtime) / 3600
             result["digest"] = {
                 "exists": True,
                 "size_bytes": os.path.getsize(DIGEST_FILE),

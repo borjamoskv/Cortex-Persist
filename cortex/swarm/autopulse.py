@@ -1,10 +1,7 @@
 import asyncio
-import hashlib
 import json
 import logging
 import os
-import tempfile
-import time
 
 from cortex.config import DB_PATH
 from cortex.extensions.signals.bus import AsyncSignalBus
@@ -12,8 +9,8 @@ from cortex.extensions.signals.bus import AsyncSignalBus
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("cortex.swarm.autopulse")
 
-SWARM_QUEUE_FILE = os.path.join(tempfile.gettempdir(), "cortex_swarm_queue.json")
-STATE_FILE = os.path.join(tempfile.gettempdir(), "cortex_state.json")
+SWARM_QUEUE_FILE = "/tmp/cortex_swarm_queue.json"
+STATE_FILE = "/tmp/cortex_state.json"
 
 
 async def process_queue():
@@ -40,13 +37,14 @@ async def process_queue():
                         json.dump(queue, f, indent=2)
 
                     # C5-REAL: Execution & OMEGA-X Epistemic Slashing
+                    import hashlib
+                    import time
+
                     from cortex.swarm.tensor_glial import TensorGlialLegion
 
                     # Initialize massively parallel zero-copy 10k nodes
                     legion = TensorGlialLegion(
-                        num_agents=10000,
-                        d_dim=10000,
-                        file_path=os.path.join(tempfile.gettempdir(), "tensor_legion.vsa_mmap"),
+                        num_agents=10000, d_dim=10000, file_path="/tmp/tensor_legion.vsa_mmap"
                     )
 
                     # Apply biological decay (Fading Memory)
@@ -57,8 +55,7 @@ async def process_queue():
 
                     # Perform Fuzzing/Yield Epistemic Slashing
                     slashed = legion.epistemic_slash_and_respawn(
-                        bottom_percentile=10,
-                        elite_percentile=90,
+                        bottom_percentile=10, elite_percentile=90
                     )
                     if slashed > 0:
                         logger.info(

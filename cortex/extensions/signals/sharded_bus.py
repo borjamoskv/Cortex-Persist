@@ -9,6 +9,7 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -209,7 +210,9 @@ class ShardedAsyncSignalBus:
         if not self._ready:
             await self.initialize()
 
-        cutoff = (datetime.now(timezone.utc) - timedelta(days=max_age_days)).isoformat()
+        cutoff = (
+            datetime.fromtimestamp(time.time(), tz=timezone.utc) - timedelta(days=max_age_days)
+        ).isoformat()
         total_pruned = 0
 
         query = "DELETE FROM signals WHERE consumed_by != '[]' AND created_at < ?"

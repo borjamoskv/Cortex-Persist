@@ -9,6 +9,7 @@ CLI interface for recording, recalling, and analyzing episodic memories.
 import asyncio
 import json
 import re
+import time
 import uuid
 from datetime import datetime, timedelta, timezone
 
@@ -353,7 +354,7 @@ def _resolve_since(value: str) -> str:
         "d": timedelta(days=amount),
         "w": timedelta(weeks=amount),
     }
-    cutoff = datetime.now(timezone.utc) - delta_map[unit]
+    cutoff = datetime.fromtimestamp(time.time(), tz=timezone.utc) - delta_map[unit]
     return cutoff.strftime("%Y-%m-%dT%H:%M:%S")
 
 

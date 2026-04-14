@@ -3,12 +3,11 @@ import hashlib
 import json
 import logging
 import os
+import sqlite3
 import sys
-import tempfile
 import time
 
 from cortex.config import DB_PATH
-from cortex.database.core import connect as db_connect
 from cortex.extensions.signals.bus import SignalBus
 
 # Sovereign Memory & Execution Imports
@@ -26,8 +25,8 @@ except ImportError:
 # Core Paths Configuration (V3 OMEGA)
 SKILLS_DIR = os.path.expanduser("~/.gemini/antigravity/skills")
 KNOWLEDGE_DIR = os.path.expanduser("~/.gemini/antigravity/knowledge")
-STATE_FILE = os.path.join(tempfile.gettempdir(), "cortex_state.json")
-SWARM_QUEUE_FILE = os.path.join(tempfile.gettempdir(), "cortex_swarm_queue.json")
+STATE_FILE = "/tmp/cortex_state.json"
+SWARM_QUEUE_FILE = "/tmp/cortex_swarm_queue.json"
 CHROMA_DB_PATH = os.path.expanduser("~/.cortex/chroma_db")
 
 # In-memory state for O(1) Ledger append
@@ -165,18 +164,19 @@ def register_singularity_tools(mcp) -> None:
 
         # Signal Pulse (Aether Matrix)
         try:
-            with db_connect(str(DB_PATH)) as conn:
-                bus = SignalBus(conn)
-                bus.emit(
-                    "ledger_append",
-                    payload={
-                        "hash": block_hash,
-                        "action": action,
-                        "vector_id": vector_id,
-                        "yield_amount": yield_amount,
-                    },
-                    source="mcp",
-                )
+            conn = sqlite3.connect(DB_PATH)
+            bus = SignalBus(conn)
+            bus.emit(
+                "ledger_append",
+                payload={
+                    "hash": block_hash,
+                    "action": action,
+                    "vector_id": vector_id,
+                    "yield_amount": yield_amount,
+                },
+                source="mcp",
+            )
+            conn.close()
             logging.info("⚡ [PULSE] Ledger chunk emitted to Aether Matrix.")
         except Exception as e:
             logging.error("Failed to emit V4 pulse: %s", e)
@@ -245,4 +245,8 @@ def register_singularity_tools(mcp) -> None:
 
 
 if __name__ == "__main__":
-    raise SystemExit("This module must be registered by an MCP host.")
+    from mcp.server.fastmcp import FastMCP as _FastMCP
+
+    _mcp = _FastMCP("cortex-singularity")
+    register_singularity_tools(_mcp)
+    _mcp.run()

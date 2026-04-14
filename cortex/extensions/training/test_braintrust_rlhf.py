@@ -1,5 +1,6 @@
 import asyncio
 import datetime
+import time
 import uuid
 
 from cortex.extensions.aether.sovereign_apis import SovereignTriad
@@ -13,7 +14,7 @@ class MockEpisodicMemory:
 
     async def get_session_timeline(self, session_id: str) -> list[Episode]:
         # Simulamos una trayectoria simple de éxito.
-        now = datetime.datetime.now(datetime.timezone.utc).isoformat()
+        now = datetime.datetime.fromtimestamp(time.time(), tz=datetime.timezone.utc).isoformat()
 
         def ep(evt, content, intent="", meta=None):
             return Episode(

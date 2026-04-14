@@ -4,6 +4,7 @@ Visual/UI/UX: KAIROS-Ω, Fluid Dynamics, NotchLive integration.
 """
 
 import math
+import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
@@ -95,7 +96,7 @@ class SystemRespiration:
             swarm_size_limit (int): Max agents to spawn (e.g. 5 up to 50).
             ok_to_run (bool): False if CPU load is critically high.
         """
-        now = datetime.now(timezone.utc)
+        now = datetime.fromtimestamp(time.time(), tz=timezone.utc)
         cpu_percent = psutil.cpu_percent(interval=None)
 
         if cpu_percent > 85.0:

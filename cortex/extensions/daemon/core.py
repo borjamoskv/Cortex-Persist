@@ -338,7 +338,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
     def check(self) -> DaemonStatus:
         """Run all checks once. Returns DaemonStatus."""
         check_start = time.monotonic()
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
         status = DaemonStatus(checked_at=now)
         self._run_monitor(status, "sites", self.site_monitor, self._alert_sites, method="check_all")
         self._run_monitor(status, "stale_ghosts", self.ghost_watcher, self._alert_ghosts)
@@ -446,7 +446,10 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
         # Track uptime in hot state
         if self.hot_state is not None:
             self.hot_state.set("daemon.mode", "sovereign")
-            self.hot_state.set("daemon.started_at", datetime.now(timezone.utc).isoformat())
+            self.hot_state.set(
+                "daemon.started_at",
+                datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+            )
 
         # ─── Spawn all subsystems as async tasks ──────────────────
         tasks: list[asyncio.Task] = []
@@ -551,7 +554,10 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
 
         # Persist final state
         if self.hot_state is not None:
-            self.hot_state.set("daemon.stopped_at", datetime.now(timezone.utc).isoformat())
+            self.hot_state.set(
+                "daemon.stopped_at",
+                datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+            )
 
         logger.info("MOSKV-1 Sovereign Daemon stopped")
 

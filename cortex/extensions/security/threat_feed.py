@@ -145,7 +145,7 @@ class ThreatFeedEngine:
         payload = json.dumps(self._custom_signatures, sort_keys=True).encode()
         feed_hmac = hmac.new(self._hmac_key, payload, hashlib.sha256).hexdigest()
         data = {
-            "last_update": datetime.now(timezone.utc).isoformat(),
+            "last_update": datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
             "count": len(self._custom_signatures),
             "hmac": feed_hmac,
             "signatures": self._custom_signatures,
@@ -158,7 +158,7 @@ class ThreatFeedEngine:
         Returns a report of new signatures added.
         """
         report = ThreatFeedReport(
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            timestamp=datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
         )
         start = time.monotonic()
         existing_ids = {s["id"] for s in self._custom_signatures}

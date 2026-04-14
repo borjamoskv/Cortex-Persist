@@ -22,6 +22,7 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import time
 from datetime import datetime, timezone
 from typing import Any
 
@@ -89,7 +90,7 @@ class FactMutationEngine:
             The UUID of the newly created event.
         """
         event_id = flake_gen.next_lexicographic_id()
-        ts = datetime.now(timezone.utc).isoformat()
+        ts = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
         payload_str = json.dumps(payload, sort_keys=True, default=str)
 
         # ── 1. Hash-chain: link to the last event for this entity ────
@@ -194,7 +195,10 @@ class FactMutationEngine:
     ) -> None:
         """Protocol Ω₃-E: Reduce certainty over time to prevent stagnation."""
         decay_factor = payload.get("decay_factor", 0.95)
-        ts = payload.get("timestamp") or datetime.now(timezone.utc).isoformat()
+        ts = (
+            payload.get("timestamp")
+            or datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+        )
 
         # 1. Fetch current scores
         async with conn.execute(
@@ -232,7 +236,10 @@ class FactMutationEngine:
         fact_id: int,
         payload: dict,
     ) -> None:
-        ts = payload.get("timestamp") or datetime.now(timezone.utc).isoformat()
+        ts = (
+            payload.get("timestamp")
+            or datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+        )
         reason = payload.get("reason", "deprecated")
         # Ω₂: Robust Metadata Projection.
         # If meta is encrypted (v6_aesgcm:...), json_set will fail.
@@ -254,7 +261,9 @@ class FactMutationEngine:
         payload: dict,
     ) -> None:
         reason = payload.get("reason", "tombstoned")
-        ts = payload.get("timestamp", datetime.now(timezone.utc).isoformat())
+        ts = payload.get(
+            "timestamp", datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+        )
         query = (
             "UPDATE facts SET valid_until = ?, is_tombstoned = 1, updated_at = ?, "
             "metadata = CASE "
@@ -281,7 +290,10 @@ class FactMutationEngine:
         fact_id: int,
         payload: dict,
     ) -> None:
-        ts = payload.get("timestamp") or datetime.now(timezone.utc).isoformat()
+        ts = (
+            payload.get("timestamp")
+            or datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+        )
         reason = payload.get("reason", "quarantined")
         await conn.execute(
             "UPDATE facts SET is_quarantined = 1, quarantined_at = ?, "
@@ -305,7 +317,10 @@ class FactMutationEngine:
         fact_id: int,
         payload: dict,
     ) -> None:
-        ts = payload.get("timestamp") or datetime.now(timezone.utc).isoformat()
+        ts = (
+            payload.get("timestamp")
+            or datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+        )
         await conn.execute(
             "UPDATE facts SET is_quarantined = 0, quarantined_at = NULL, "
             "quarantine_reason = NULL, updated_at = ? WHERE id = ?",
@@ -353,7 +368,10 @@ class FactMutationEngine:
         fact_id: int,
         payload: dict,
     ) -> None:
-        ts = payload.get("timestamp") or datetime.now(timezone.utc).isoformat()
+        ts = (
+            payload.get("timestamp")
+            or datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+        )
         await conn.execute(
             "UPDATE facts SET valid_until = NULL, is_tombstoned = 0, "
             "tombstoned_at = NULL, is_quarantined = 0, quarantined_at = NULL, "

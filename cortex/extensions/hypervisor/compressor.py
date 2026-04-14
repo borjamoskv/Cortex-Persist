@@ -7,6 +7,7 @@ This is the thermal barrier: internal entropy stays inside.
 from __future__ import annotations
 
 import logging
+import time
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
@@ -108,4 +109,4 @@ def _parse_iso(iso_str: str | None) -> datetime:
 
 
 def _now() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.fromtimestamp(time.time(), tz=timezone.utc)

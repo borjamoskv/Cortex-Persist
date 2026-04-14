@@ -8,6 +8,7 @@ Supports concurrent access, priority levels, and retry logic.
 import json
 import logging
 import sqlite3
+import time
 from collections.abc import Iterator
 from contextlib import contextmanager
 from datetime import datetime, timezone
@@ -73,7 +74,7 @@ class EntropicQueue:
     ) -> str:
         """Push a new task to the queue."""
         uid = task_id or str(uuid4())
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
         with self._get_conn() as conn:
             conn.execute(
                 """
@@ -88,7 +89,7 @@ class EntropicQueue:
 
     def pop(self, max_retries: int = 3) -> dict[str, Any] | None:
         """Atomically get the highest priority pending task and mark it as 'processing'."""
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
         with self._get_conn() as conn:
             # SQLite does not have UPDATE ... RETURNING with LIMIT easily in older versions,
             # but modern SQLite does. Let's do a SELECT then UPDATE to be safe and compatible.
@@ -124,7 +125,7 @@ class EntropicQueue:
 
     def mark_completed(self, task_id: str) -> None:
         """Mark a task as successfully completed."""
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
         with self._get_conn() as conn:
             conn.execute(
                 "UPDATE entropic_queue SET status = 'completed', updated_at = ? WHERE id = ?",
@@ -135,7 +136,7 @@ class EntropicQueue:
 
     def mark_failed(self, task_id: str, error: str) -> None:
         """Mark a task as failed, incrementing its retry count."""
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
         with self._get_conn() as conn:
             conn.execute(
                 """

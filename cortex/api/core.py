@@ -299,6 +299,11 @@ async def get_metrics():
 
 app.include_router(api_router)
 
+# V4 SSE Event Bus (Aether Matrix)
+from cortex.api import events as events_router
+
+app.include_router(events_router.router)
+
 # Extensions and third-party integrations
 
 # Extension modules (opt-in)

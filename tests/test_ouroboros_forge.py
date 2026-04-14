@@ -1,12 +1,10 @@
 import logging
-import sqlite3
 import sys
 import unittest
-from pathlib import Path
 
-_CORTEX_CORE = Path(__file__).resolve().parents[1] / "cortex-core"
-if _CORTEX_CORE.exists() and str(_CORTEX_CORE) not in sys.path:
-    sys.path.insert(0, str(_CORTEX_CORE))
+# Add project root to sys.path
+sys.path.append("/Users/borjafernandezangulo/Cortex-Persist")
+sys.path.append("/Users/borjafernandezangulo/Cortex-Persist/cortex-core")
 
 from ouroboros_engine import OuroborosEngine
 
@@ -32,12 +30,14 @@ class TestOuroborosForge(unittest.IsolatedAsyncioTestCase):
 
     async def test_signal_emission(self):
         """Verify SignalBus emits audit findings correctly."""
+        import sqlite3
+
         from cortex.config import DB_PATH
         from cortex.extensions.signals.bus import SignalBus
 
         # Ensure schema initialization
         conn = sqlite3.connect(DB_PATH)
-        SignalBus(conn)
+        _bus = SignalBus(conn)
 
         # Check if signals exist for 'ouroboros'
         cursor = conn.cursor()
