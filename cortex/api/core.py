@@ -140,6 +140,7 @@ app = FastAPI(
     redoc_url="/redoc" if not config.PROD else None,
 )
 app.state.swarm_manager = get_swarm_manager()
+app.state.experimental_api_enabled = config.ENABLE_EXPERIMENTAL_API
 
 
 # ─── Internal Middleware ──────────────────────────────────────────────
@@ -298,11 +299,8 @@ async def get_metrics():
 
 
 app.include_router(api_router)
-
-# V4 SSE Event Bus (Aether Matrix)
-from cortex.api import events as events_router
-
-app.include_router(events_router.router)
+if config.ENABLE_EXPERIMENTAL_API:
+    logger.info("Experimental API surface enabled")
 
 # Extensions and third-party integrations
 

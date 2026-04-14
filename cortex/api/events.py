@@ -3,16 +3,18 @@ import json
 import logging
 from collections.abc import AsyncGenerator
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
 
+from cortex.auth.models import AuthResult
+from cortex.auth.stream import require_stream_permission
 from cortex.extensions.signals.bus import AsyncSignalBus
 
 router = APIRouter(prefix="/v1/events", tags=["events"])
 logger = logging.getLogger("cortex.api.events")
 
 
-async def event_generator(request: Request) -> AsyncGenerator[str, None]:
+async def event_generator(request: Request, tenant_id: str) -> AsyncGenerator[str, None]:
     """Polls AsyncSignalBus and yields SSE events to the client."""
     # Get the shared database pool from app state
     pool = getattr(request.app.state, "pool", None)
@@ -36,7 +38,7 @@ async def event_generator(request: Request) -> AsyncGenerator[str, None]:
                     break
 
                 # Poll for new signals
-                signals = await bus.poll(consumer=consumer_id, limit=10)
+                signals = await bus.poll(tenant_id=tenant_id, consumer=consumer_id, limit=10)
 
                 for sig in signals:
                     # Construct SSE message
@@ -60,6 +62,9 @@ async def event_generator(request: Request) -> AsyncGenerator[str, None]:
 
 
 @router.get("/stream")
-async def stream_events(request: Request):
+async def stream_events(
+    request: Request,
+    auth: AuthResult = Depends(require_stream_permission("read")),
+):
     """Server-Sent Events endpoint for real-time CORTEX telemetry."""
-    return StreamingResponse(event_generator(request), media_type="text/event-stream")
+    return StreamingResponse(event_generator(request, auth.tenant_id), media_type="text/event-stream")

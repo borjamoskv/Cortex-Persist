@@ -39,6 +39,11 @@ _encode_engine: Optional[AsyncEncoder] = None
 _vector_db: Optional[SovereignVectorStoreL2] = None
 
 
+def _get_bind_host() -> str:
+    """Default to loopback; require explicit override for remote exposure."""
+    return os.getenv("CCR_BIND_HOST", "127.0.0.1").strip() or "127.0.0.1"
+
+
 async def _check_isothermal_redundancy(text: str) -> tuple[bool, float, str]:
     """
     [Axioma Ω₂] Verifica si la petición ya está cubierta por la Isoterma Térmica (L2).
@@ -271,4 +276,4 @@ async def messages_endpoint(request: Request):
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=8080)
+    uvicorn.run(app, host=_get_bind_host(), port=8080)

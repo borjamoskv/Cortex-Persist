@@ -33,7 +33,7 @@ class SecurityVisualSync:
     async def emit_signal(self, event_type: str, details: Optional[dict[str, Any]] = None) -> None:
         """Send a visual signal to the Notch via NotchHub."""
         try:
-            from cortex.routes.notch_ws import HUB  # type: ignore[reportAttributeAccessIssue]
+            from cortex.routes.notch_ws import notch_hub
 
             mood = self.MOODS.get(event_type, "calm")
 
@@ -45,11 +45,11 @@ class SecurityVisualSync:
                 "details": details or {},
             }
 
-            await HUB.broadcast(command)
+            await notch_hub.broadcast(command)
             logger.debug("Visual signal [%s] broadcast to Notch", event_type)
 
         except ImportError:
-            # HUB not available (e.g. running outside API context)
+            # Notch hub not available (e.g. running outside API context)
             pass
         except (RuntimeError, OSError, AttributeError) as e:
             logger.error("Failed to emit security signal: %s", e)

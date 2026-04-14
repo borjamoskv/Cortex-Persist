@@ -13,12 +13,15 @@ Usage from anywhere in CORTEX:
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
 from typing import ClassVar, Optional
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
-__all__ = ["notch_hub", "router"]
+from cortex.auth.websocket import require_websocket_auth
+
+__all__ = ["HUB", "notch_hub", "router"]
 
 router = APIRouter(tags=["notch"])
 logger = logging.getLogger("cortex.notch_ws")
@@ -54,22 +57,24 @@ class NotchHub:
         self._clients.discard(ws)  # type: ignore[reportAttributeAccessIssue]
         logger.info("Notch client disconnected (%d remaining)", self.client_count)
 
-    async def broadcast(self, message: str) -> None:
+    async def broadcast(self, message: str | dict) -> None:
         """Send a command to ALL connected notch clients."""
+        payload = message if isinstance(message, str) else json.dumps(message)
         dead: list[WebSocket] = []
-        for ws in self._clients:  # type: ignore[reportAttributeAccessIssue]
+        for ws in list(self._clients):  # type: ignore[reportAttributeAccessIssue]
             try:
-                await ws.send_text(message)
+                await ws.send_text(payload)
             except (WebSocketDisconnect, RuntimeError, OSError):
                 dead.append(ws)
         for ws in dead:
             self._clients.discard(ws)  # type: ignore[reportAttributeAccessIssue]
 
-    async def send_to_first(self, message: str) -> bool:
+    async def send_to_first(self, message: str | dict) -> bool:
         """Send to the first connected client (primary notch). Returns False if none."""
-        for ws in self._clients:  # type: ignore[reportAttributeAccessIssue]
+        payload = message if isinstance(message, str) else json.dumps(message)
+        for ws in list(self._clients):  # type: ignore[reportAttributeAccessIssue]
             try:
-                await ws.send_text(message)
+                await ws.send_text(payload)
                 return True
             except (WebSocketDisconnect, RuntimeError, OSError):
                 self._clients.discard(ws)  # type: ignore[reportAttributeAccessIssue]
@@ -78,6 +83,7 @@ class NotchHub:
 
 # Global singleton — importable from anywhere
 notch_hub = NotchHub()
+HUB = notch_hub
 
 
 # ── WebSocket Endpoint ──────────────────────────────────────────────
@@ -99,6 +105,10 @@ async def notch_websocket(ws: WebSocket) -> None:
         "pong"           → heartbeat response
         "status:..."     → status update from notch
     """
+    auth = await require_websocket_auth(ws, required_permission="read")
+    if auth is None:
+        return
+
     await notch_hub.connect(ws)
     try:
         while True:

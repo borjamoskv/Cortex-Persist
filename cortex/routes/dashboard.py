@@ -165,34 +165,72 @@ def get_dashboard_html() -> str:
                 swarmLog.scrollTop = swarmLog.scrollHeight;
             }
 
-            // Pulse SSE listener
-            const eventSource = new EventSource('/v1/events/stream');
-            eventSource.addEventListener('ledger_append', (e) => {
-                const data = JSON.parse(e.data);
-                if (data.payload) addBlock(data.payload);
-            });
+            const queryParams = new URLSearchParams(window.location.search);
+            let browserApiKey = queryParams.get('api_key') || '';
+            if (browserApiKey) {
+                queryParams.delete('api_key');
+                const cleanQuery = queryParams.toString();
+                const cleanUrl = `${window.location.pathname}${cleanQuery ? `?${cleanQuery}` : ''}${window.location.hash}`;
+                window.history.replaceState({}, '', cleanUrl);
+            }
 
-            eventSource.addEventListener('swarm_task', (e) => {
-                const data = JSON.parse(e.data);
-                if (data.payload) {
-                    addSwarmLog(`🚀 Dispatch: ${data.payload.agent} -> ${data.payload.command}`, 'task-active');
+            async function bootstrapEventStreamSession() {
+                if (!browserApiKey) {
+                    return false;
                 }
-            });
 
-            eventSource.addEventListener('swarm_task_complete', (e) => {
-                const data = JSON.parse(e.data);
-                if (data.payload) {
-                    const status = data.payload.exit_code === 0 ? "SUCCESS" : "FAILED";
-                    addSwarmLog(`⚡ Complete: ${data.payload.agent} [${status}]`, data.payload.exit_code === 0 ? 'yield' : 'danger');
+                const response = await fetch('/v1/events/session', {
+                    method: 'POST',
+                    headers: { Authorization: `Bearer ${browserApiKey}` },
+                    credentials: 'same-origin',
+                });
+
+                if (!response.ok) {
+                    throw new Error(`stream-session-bootstrap-failed:${response.status}`);
                 }
-            });
 
-            eventSource.onerror = (e) => {
-                console.error("Pulse connection lost.", e);
-                document.getElementById('pulse').textContent = "Pulse: Disconnected";
-                document.getElementById('pulse').style.borderColor = "#E52B2B";
-                document.getElementById('pulse').style.color = "#E52B2B";
-            };
+                browserApiKey = '';
+                return true;
+            }
+
+            async function connectPulseStream() {
+                try {
+                    await bootstrapEventStreamSession();
+                } catch (error) {
+                    console.error('Pulse bootstrap failed.', error);
+                }
+
+                // Pulse SSE listener
+                const eventSource = new EventSource('/v1/events/stream');
+                eventSource.addEventListener('ledger_append', (e) => {
+                    const data = JSON.parse(e.data);
+                    if (data.payload) addBlock(data.payload);
+                });
+
+                eventSource.addEventListener('swarm_task', (e) => {
+                    const data = JSON.parse(e.data);
+                    if (data.payload) {
+                        addSwarmLog(`🚀 Dispatch: ${data.payload.agent} -> ${data.payload.command}`, 'task-active');
+                    }
+                });
+
+                eventSource.addEventListener('swarm_task_complete', (e) => {
+                    const data = JSON.parse(e.data);
+                    if (data.payload) {
+                        const status = data.payload.exit_code === 0 ? "SUCCESS" : "FAILED";
+                        addSwarmLog(`⚡ Complete: ${data.payload.agent} [${status}]`, data.payload.exit_code === 0 ? 'yield' : 'danger');
+                    }
+                });
+
+                eventSource.onerror = (e) => {
+                    console.error("Pulse connection lost.", e);
+                    document.getElementById('pulse').textContent = "Pulse: Disconnected";
+                    document.getElementById('pulse').style.borderColor = "#E52B2B";
+                    document.getElementById('pulse').style.color = "#E52B2B";
+                };
+            }
+
+            void connectPulseStream();
         </script>
     </body>
     </html>

@@ -20,6 +20,11 @@ from cortex.engine.reporter import SovereignReporter
 logger = logging.getLogger("cortex.reporterd")
 
 
+def _get_bind_host() -> str:
+    """Default to loopback; require explicit override for remote exposure."""
+    return os.getenv("CORTEX_REPORTERD_HOST", "127.0.0.1").strip() or "127.0.0.1"
+
+
 class ManifoldDaemon:
     """Emits live Sovereign System metrics via SSE."""
 
@@ -100,11 +105,12 @@ class ManifoldDaemon:
 
         runner = web.AppRunner(app)
         await runner.setup()
-        site = web.TCPSite(runner, "0.0.0.0", 7070)
+        host = _get_bind_host()
+        site = web.TCPSite(runner, host, 7070)
         await site.start()
 
         self._loop_task = asyncio.create_task(self.metrics_producer())
-        logger.info("⚡ Sovereign Reporter Daemon active on http://0.0.0.0:7070/stream")
+        logger.info("⚡ Sovereign Reporter Daemon active on http://%s:7070/stream", host)
 
     async def stop(self):
         if self._loop_task:

@@ -69,7 +69,8 @@ async def health_index_report(request: Request) -> dict:
         score=hs,
         recommendations=recommendations,
         warnings=warnings,
-        db_path=str(db_path),
+        # The health surface is intentionally public; never expose internal filesystem paths.
+        db_path="",
     )
     return report.to_dict()
 
