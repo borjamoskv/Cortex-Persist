@@ -8,6 +8,7 @@ from cortex.extensions.swarm.manager import CapatazOrchestrator
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("swarm-test")
 
+
 class MockEngine:
     def __init__(self, db_path):
         self.db_path = db_path
@@ -18,8 +19,10 @@ class MockEngine:
     def get_async_engine(self):
         return True
 
+
 async def worker_logic(agent_id: int):
     return f"Discovery from worker {agent_id}"
+
 
 async def main():
     db_path = "cortex.db"
@@ -27,7 +30,13 @@ async def main():
     capataz = CapatazOrchestrator(mission_id="mission-delta-sync")
 
     tasks = [
-        {"name": f"Task {i}", "agent_name": f"Agent-{i}", "func": worker_logic, "args": (i,), "engine": engine}
+        {
+            "name": f"Task {i}",
+            "agent_name": f"Agent-{i}",
+            "func": worker_logic,
+            "args": (i,),
+            "engine": engine,
+        }
         for i in range(10)
     ]
 
@@ -42,6 +51,7 @@ async def main():
     for sig in history:
         logger.info("  - [%s] %s", sig.source, sig.payload)
     conn.close()
+
 
 if __name__ == "__main__":
     asyncio.run(main())

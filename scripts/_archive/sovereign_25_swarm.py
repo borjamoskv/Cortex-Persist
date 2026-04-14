@@ -31,17 +31,17 @@ from cortex.engine.legion_vectors import (
 )
 from cortex.engine.squadrons import GhostHuntAgent, IntegrityAgent, KineticAgent
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 logger = logging.getLogger("silver_swarm")
 
 # ── NEW SPECIALIZED AGENTS (11-25) ──
 
+
 class DeadlockDemon:
     """Vector: Concurrency & Lock-Ordering (The Deadlock Demon)."""
+
     name = "deadlock_demon"
+
     async def attack(self, code: str, context: Mapping[str, Any]) -> list[str]:
         findings = []
         if ".acquire(" in code and ".release(" not in code:
@@ -54,9 +54,12 @@ class DeadlockDemon:
             findings.append("Deep Nesting: Risk of complex resource contention.")
         return findings
 
+
 class DiskDriller:
     """Vector: IO Bottlenecks (The Disk Driller)."""
+
     name = "disk_driller"
+
     async def attack(self, code: str, context: Mapping[str, Any]) -> list[str]:
         findings = []
         if "open(" in code and ".read()" in code.split("open(")[1]:
@@ -66,9 +69,12 @@ class DiskDriller:
             findings.append("IO Bottleneck: Synchronous write in possible loop.")
         return findings
 
+
 class ShadowHunter:
     """Vector: Supply Chain & Path Mutation (The Shadow Hunter)."""
+
     name = "shadow_hunter"
+
     async def attack(self, code: str, context: Mapping[str, Any]) -> list[str]:
         findings = []
         dangerous = ["sys.path.append(", "sys.path.insert(", "PYTHONPATH"]
@@ -77,9 +83,12 @@ class ShadowHunter:
                 findings.append(f"Path Mutation: Dangerous `{d}` detected. Potential shadowing.")
         return findings
 
+
 class LeakLord:
     """Vector: Memory Leaks & Unbounded Caches (The Leak Lord)."""
+
     name = "leak_lord"
+
     async def attack(self, code: str, context: Mapping[str, Any]) -> list[str]:
         findings = []
         if " = {}" in code or " = []" in code:
@@ -89,9 +98,12 @@ class LeakLord:
             findings.append("Unbounded Cache: Memory leak risk via `maxsize=None`.")
         return findings
 
+
 class TypeTemplar:
     """Vector: Type Safety & Integrity (The Type Templar)."""
+
     name = "type_templar"
+
     async def attack(self, code: str, context: Mapping[str, Any]) -> list[str]:
         findings = []
         if "Callable = " in code and "Any" in code:
@@ -100,91 +112,125 @@ class TypeTemplar:
             findings.append("Type Evasion: Explicit `type: ignore` found.")
         return findings
 
+
 class DocDoctor:
     """Vector: Documentation & Implementation Mismatch (The Doc Doctor)."""
+
     name = "doc_doctor"
+
     async def attack(self, code: str, context: Mapping[str, Any]) -> list[str]:
         findings = []
         if '"""' in code and "Args:" not in code:
             findings.append("Documentation Debt: Docstring found but missing structured Args.")
         return findings
 
+
 class LogicLoom:
     """Vector: Logic Redundancy & Boolean Collapse (The Logic Loom)."""
+
     name = "logic_loom"
+
     async def attack(self, code: str, context: Mapping[str, Any]) -> list[str]:
         findings = []
         if "if" in code and "==" in code and "True" in code:
             findings.append("Logic Debt: Redundant `if X == True` detected.")
         return findings
 
+
 class NoirKnight:
     """Vector: Aesthetic & Noir Naming (The Noir Knight)."""
+
     name = "noir_knight"
+
     async def attack(self, code: str, context: Mapping[str, Any]) -> list[str]:
         findings = []
         if "color" in code and "#0A0A0A" not in code and "#000000" not in code:
-             # Just a joke/test for Industrial Noir
-             pass
+            # Just a joke/test for Industrial Noir
+            pass
         return findings
+
 
 class TokenTailor:
     """Vector: Computational Capital & Efficiency (The Token Tailor)."""
+
     name = "token_tailor"
+
     async def attack(self, code: str, context: Mapping[str, Any]) -> list[str]:
         findings = []
         if "while True:" in code and "asyncio.sleep" not in code:
-            findings.append("Exergy Loss: Tight loop without yield point (Token consumption spike).")
+            findings.append(
+                "Exergy Loss: Tight loop without yield point (Token consumption spike)."
+            )
         return findings
+
 
 class OwaspOracle:
     """Vector: Security Standards (The OWASP Oracle)."""
+
     name = "owasp_oracle"
+
     async def attack(self, code: str, context: Mapping[str, Any]) -> list[str]:
         findings = []
-        if "f\"SELECT" in code or "f'SELECT" in code:
+        if 'f"SELECT' in code or "f'SELECT" in code:
             findings.append("A1-Injection: Potential SQL string interpolation.")
         return findings
 
+
 class ContractCracker:
     """Vector: API & Contract Mismatch (The Contract Cracker)."""
+
     name = "contract_cracker"
+
     async def attack(self, code: str, context: Mapping[str, Any]) -> list[str]:
         findings = []
         if "TypedDict" in code and "total=False" in code:
-            findings.append("Contract Risk: Non-total TypedDict may cause runtime attribute errors.")
+            findings.append(
+                "Contract Risk: Non-total TypedDict may cause runtime attribute errors."
+            )
         return findings
+
 
 class SeedSower:
     """Vector: Determinism & Entropy Zero (The Seed Sower)."""
+
     name = "seed_sower"
+
     async def attack(self, code: str, context: Mapping[str, Any]) -> list[str]:
         findings = []
         if "random." in code and "random.seed" not in code:
             findings.append("Entropy Risk: Non-deterministic random usage without explicit seed.")
         return findings
 
+
 class StarvationSniper:
     """Vector: Event Loop Starvation (The Starvation Sniper)."""
+
     name = "starvation_sniper"
+
     async def attack(self, code: str, context: Mapping[str, Any]) -> list[str]:
         findings = []
         if "async def" in code and "import time" in code and "time.sleep" in code:
             findings.append("Loop Starvation: `time.sleep` in async context detected.")
         return findings
 
+
 class VecVulture:
     """Vector: Vector Search & Indexing (The Vec Vulture)."""
+
     name = "vec_vulture"
+
     async def attack(self, code: str, context: Mapping[str, Any]) -> list[str]:
         findings = []
         if "USING vec0" in code and "NOT EXISTS" not in code:
             findings.append("Indexing Risk: `vec0` table creation without safety check.")
         return findings
 
+
 class MetaMaster:
     """Vector: Metadata & Ledger Consistency (The Meta Master)."""
+
     name = "meta_master"
+
     async def attack(self, code: str, context: Mapping[str, Any]) -> list[str]:
         findings = []
         if "cortex_meta" in code and "INSERT" in code and "ON CONFLICT" not in code:
@@ -194,9 +240,12 @@ class MetaMaster:
 
 # ── OMEGA-CLASS SPECIALISTS (26-30) ──
 
+
 class NobelAgent:
     """Vector: Architectural Invariants & Sovereign Integrity (The Agente Nobel)."""
+
     name = "nobel_omega"
+
     async def attack(self, code: str, context: Mapping[str, Any]) -> list[str]:
         findings = []
         # Check for circular or leaky dependencies (cortex importing from scripts/tests)
@@ -208,13 +257,15 @@ class NobelAgent:
         # Check for non-async calls in P0-ledger paths (Self-referential)
         if "cortex/engine/ledger.py" in str(context.get("target", "")):
             if "time.sleep" in code:
-                 findings.append("Sovereign Breach: Blocking sleep in Ledger core.")
+                findings.append("Sovereign Breach: Blocking sleep in Ledger core.")
         return findings
 
 
 class AuditorOmega:
     """Vector: Axiomatic Compliance & Guard Integrity (The Auditor-Ω)."""
+
     name = "auditor_omega"
+
     async def attack(self, code: str, context: Mapping[str, Any]) -> list[str]:
         findings = []
         # Check for missing Axiomatic references in classes
@@ -229,18 +280,24 @@ class AuditorOmega:
 
 class GrammyOmega:
     """Vector: Sonic/Social Frequency & Aesthetic Resonance (The Grammy-Ω)."""
+
     name = "grammy_electronic_omega"
+
     async def attack(self, code: str, context: Mapping[str, Any]) -> list[str]:
         findings = []
         # Checks for "Industrial Noir" naming conventions or aesthetic debt
         if "TODO" in code or "FIXME" in code:
-             findings.append("Aesthetic Debt: Unresolved ghost marker (TODO/FIXME) in production code.")
+            findings.append(
+                "Aesthetic Debt: Unresolved ghost marker (TODO/FIXME) in production code."
+            )
         return findings
 
 
 class TesseractOmega:
     """Vector: Apex Sovereign & Self-Correction (The Tesseract-Ω)."""
+
     name = "tesseract_omega"
+
     async def attack(self, code: str, context: Mapping[str, Any]) -> list[str]:
         findings = []
         # Check for proper merge conflict resolution (Meta-Audit)
@@ -251,11 +308,12 @@ class TesseractOmega:
 
         # Check for 'Annihilation' leftovers
         if "Ghost ID 5230" in code:
-             findings.append("Ghost residue: Unresolved annihilation reference in logic.")
+            findings.append("Ghost residue: Unresolved annihilation reference in logic.")
         return findings
 
 
 # ── ORCHESTRATION ──
+
 
 class SilverAgentAdapter(SwarmAgent):
     """Unified wrapper for 25 specialists."""
@@ -316,30 +374,45 @@ class SilverAgentAdapter(SwarmAgent):
             metrics={"found_count": len(findings)},
         )
 
+
 class SilverSquadron(Squadron):
     """The Sovereign 25/30: Silver Swarm Orchestrator."""
+
     SQUAD_NAME = "SILVER_30"
-    REPLICAS = 29 # 1-29 indices
+    REPLICAS = 29  # 1-29 indices
 
     def __init__(self, engine: Any = None):
         super().__init__(engine)
         self.specialists = [
-            ("intruder", Intruder()), ("oom_killer", OOMKiller()), ("entropy_demon", EntropyDemon()),
-            ("chronos_sniper", ChronosSniper()), ("ledger_poisoner", LedgerPoisoner()),
-            ("vault_cracker", VaultCracker()), ("epistemic_justice", EpistemicJustice()),
+            ("intruder", Intruder()),
+            ("oom_killer", OOMKiller()),
+            ("entropy_demon", EntropyDemon()),
+            ("chronos_sniper", ChronosSniper()),
+            ("ledger_poisoner", LedgerPoisoner()),
+            ("vault_cracker", VaultCracker()),
+            ("epistemic_justice", EpistemicJustice()),
             ("integrity_linter", IntegrityAgent("linter", self.bus, engine)),
             ("kinetic_api", KineticAgent("api_engager", self.bus, engine)),
             ("ghost_hunter", GhostHuntAgent("ghost_hunter", self.bus, engine)),
-            ("deadlock_demon", DeadlockDemon()), ("disk_driller", DiskDriller()),
-            ("shadow_hunter", ShadowHunter()), ("leak_lord", LeakLord()),
-            ("type_templar", TypeTemplar()), ("doc_doctor", DocDoctor()),
-            ("logic_loom", LogicLoom()), ("noir_knight", NoirKnight()),
-            ("token_tailor", TokenTailor()), ("owasp_oracle", OwaspOracle()),
-            ("contract_cracker", ContractCracker()), ("seed_sower", SeedSower()),
-            ("starvation_sniper", StarvationSniper()), ("vec_vulture", VecVulture()),
-            ("meta_master", MetaMaster()), ("nobel_omega", NobelAgent()),
-            ("auditor_omega", AuditorOmega()), ("grammy_omega", GrammyOmega()),
-            ("tesseract_omega", TesseractOmega())
+            ("deadlock_demon", DeadlockDemon()),
+            ("disk_driller", DiskDriller()),
+            ("shadow_hunter", ShadowHunter()),
+            ("leak_lord", LeakLord()),
+            ("type_templar", TypeTemplar()),
+            ("doc_doctor", DocDoctor()),
+            ("logic_loom", LogicLoom()),
+            ("noir_knight", NoirKnight()),
+            ("token_tailor", TokenTailor()),
+            ("owasp_oracle", OwaspOracle()),
+            ("contract_cracker", ContractCracker()),
+            ("seed_sower", SeedSower()),
+            ("starvation_sniper", StarvationSniper()),
+            ("vec_vulture", VecVulture()),
+            ("meta_master", MetaMaster()),
+            ("nobel_omega", NobelAgent()),
+            ("auditor_omega", AuditorOmega()),
+            ("grammy_omega", GrammyOmega()),
+            ("tesseract_omega", TesseractOmega()),
         ]
         self.REPLICAS = len(self.specialists)
 
@@ -350,7 +423,9 @@ class SilverSquadron(Squadron):
 
     async def deploy(self, target: str | None = None) -> dict[str, Any]:
         logger.info("🚀 [SILVER-25] Deploying 25 specialized agents...")
-        self.agents = [self._create_agent(f"{self.SQUAD_NAME}-{i:03d}") for i in range(self.REPLICAS)]
+        self.agents = [
+            self._create_agent(f"{self.SQUAD_NAME}-{i:03d}") for i in range(self.REPLICAS)
+        ]
         tasks = []
         for agent in self.agents:
             q: asyncio.Queue[str] = asyncio.Queue()
@@ -362,21 +437,24 @@ class SilverSquadron(Squadron):
 
     async def _crystallize(self, signals: list[SwarmSignal]) -> dict[str, Any]:
         report = await super()._crystallize(signals)
-        print("\n" + "="*80 + "\n💎 SOVEREIGN 25 (SILVER SWARM) REPORT\n" + "="*80)
+        print("\n" + "=" * 80 + "\n💎 SOVEREIGN 25 (SILVER SWARM) REPORT\n" + "=" * 80)
         for s in sorted(signals, key=lambda x: x.agent_id):
             emoji = "✅" if s.status == "VOID" else "❌" if s.status == "FAILURE" else "🔍"
             print(f"{emoji} [{s.agent_id.ljust(20)}] Found: {s.payload.get('findings', []) or 0}")
-        print("="*80 + "\n")
+        print("=" * 80 + "\n")
         return report
+
 
 async def main():
     from cortex.engine import CortexEngine
+
     engine = CortexEngine(":memory:", auto_embed=False)
     await engine.init_db()
     target = sys.argv[1] if len(sys.argv) > 1 else "cortex/engine/ledger.py"
     silver = SilverSquadron(engine=engine)
     await silver.deploy(target)
     await engine.close()
+
 
 if __name__ == "__main__":
     asyncio.run(main())
