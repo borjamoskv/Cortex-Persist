@@ -31,7 +31,11 @@ class MemoryArchaeologist:
         self.llm = SovereignLLM() if SovereignLLM else None
 
     async def run_archaeology(
-        self, project: str, similarity_threshold: float = 0.88, simulate: bool = False
+        self,
+        project: str,
+        similarity_threshold: float = 0.88,
+        simulate: bool = False,
+        tenant_id: str | None = None,
     ) -> dict[str, int]:
         """Runs the semantic clustering and deduction.
 
@@ -39,12 +43,13 @@ class MemoryArchaeologist:
         """
         # Initialize memory subsystem (L2) explicitly before accessing
         await self.engine.get_conn()
+        tenant_id = self.engine._resolve_tenant(tenant_id or "default")
 
-        l3_map = self._fetch_active_facts(project)
+        l3_map = self._fetch_active_facts(project, tenant_id)
         if not l3_map:
             return {"condensed": 0, "tombstoned": 0}
 
-        facts, vecs_matrix = self._extract_vectors(project, l3_map)
+        facts, vecs_matrix = self._extract_vectors(project, tenant_id, l3_map)
         if vecs_matrix is None:
             return {"condensed": 0, "tombstoned": 0}
 
@@ -53,32 +58,33 @@ class MemoryArchaeologist:
             return {"condensed": 0, "tombstoned": 0}
 
         condensed, tombstoned = await self._synthesize_and_update(
-            project, clusters, facts, simulate
+            project, tenant_id, clusters, facts, simulate
         )
         return {"condensed": condensed, "tombstoned": tombstoned}
 
-    def _fetch_active_facts(self, project: str) -> dict[str, dict[str, Any]]:
+    def _fetch_active_facts(self, project: str, tenant_id: str) -> dict[str, dict[str, Any]]:
         conn = self.engine._get_sync_conn()
         cursor = conn.cursor()
         cursor.execute(
             """
             SELECT id, content, parent_decision_id, tenant_id
             FROM facts
-            WHERE project = ? AND is_tombstoned = 0 AND fact_type != 'ghost'
+            WHERE project = ? AND tenant_id = ? AND is_tombstoned = 0 AND fact_type != 'ghost'
             """,
-            (project,),
+            (project, tenant_id),
         )
         # Using dict(r) to convert sqlite3.Row to dict
         return {str(r["id"]): dict(r) for r in cursor.fetchall()}
 
     def _extract_vectors(
-        self, project: str, l3_map: dict[str, dict[str, Any]]
+        self, project: str, tenant_id: str, l3_map: dict[str, dict[str, Any]]
     ) -> tuple[list[dict[str, Any]], np.ndarray | None]:
         l2_conn = self.engine.memory._l2._get_conn()
         c2 = l2_conn.cursor()
         c2.execute(
-            "SELECT m.id, v.embedding FROM facts_meta m JOIN vec_facts v ON m.rowid = v.rowid WHERE m.project_id = ?",
-            (project,),
+            "SELECT m.id, v.embedding FROM facts_meta m JOIN vec_facts v ON m.rowid = v.rowid "
+            "WHERE m.project_id = ? AND m.tenant_id = ?",
+            (project, tenant_id),
         )
 
         facts = []
@@ -135,7 +141,12 @@ class MemoryArchaeologist:
         return clusters
 
     async def _synthesize_and_update(
-        self, project: str, clusters: list[list[int]], facts: list[dict[str, Any]], simulate: bool
+        self,
+        project: str,
+        tenant_id: str,
+        clusters: list[list[int]],
+        facts: list[dict[str, Any]],
+        simulate: bool,
     ) -> tuple[int, int]:
         condensed_count = 0
         tombstoned_count = 0
@@ -165,7 +176,7 @@ class MemoryArchaeologist:
             if not simulate:
                 try:
                     await self._apply_db_updates(
-                        project, condensed_content, cluster_facts, primary_parent_id, l2_conn
+                        project, tenant_id, condensed_content, cluster_facts, primary_parent_id, l2_conn
                     )
                 except (sqlite3.Error, aiosqlite.Error) as e:
                     logger.error("Archaeology DB update failed: %s", e)
@@ -179,6 +190,7 @@ class MemoryArchaeologist:
     async def _apply_db_updates(
         self,
         project: str,
+        tenant_id: str,
         condensed_content: str,
         cluster_facts: list[dict[str, Any]],
         primary_parent_id: str | None,
@@ -190,6 +202,7 @@ class MemoryArchaeologist:
         ts = datetime.now(timezone.utc).isoformat()
         new_fact_id = await self.engine.store(
             project=project,
+            tenant_id=tenant_id,
             content=condensed_content,
             fact_type="knowledge",
             confidence="C5",
@@ -200,6 +213,8 @@ class MemoryArchaeologist:
 
         placeholders = ",".join("?" for _ in old_ids)
         async with self.engine.session() as conn:
+            if any(str(f.get("tenant_id") or "default") != tenant_id for f in cluster_facts):
+                raise ValueError("Archaeology cluster spans multiple tenants")
             for fact in cluster_facts:
                 await MUTATION_ENGINE.apply(
                     conn,
@@ -218,8 +233,9 @@ class MemoryArchaeologist:
             parent_column = await self._parent_column(conn)
             if parent_column:
                 cursor = await conn.execute(
-                    f"SELECT id, tenant_id FROM facts WHERE {parent_column} IN ({placeholders})",
-                    tuple(old_ids),
+                    f"SELECT id, tenant_id FROM facts "
+                    f"WHERE {parent_column} IN ({placeholders}) AND tenant_id = ?",
+                    (*old_ids, tenant_id),
                 )
                 for child_id, child_tenant_id in await cursor.fetchall():
                     if str(child_id) in old_ids:
