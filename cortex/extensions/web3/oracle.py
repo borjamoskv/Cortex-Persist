@@ -47,11 +47,19 @@ _LOCKED_STATE = "LOCKED_EPISTEMIC_HALT"
 # Entropy threshold above which the pulse is withheld (matches breaker.py).
 _ENTROPY_THRESHOLD = 50.0
 
+# HTTP request timeout for initial RPC connection (seconds).
+_HTTP_REQUEST_TIMEOUT_SECONDS = 30
+
 # On-chain transaction timeout in seconds — long enough for L2 confirmation.
 _TX_TIMEOUT_SECONDS = 120
 
 # Ledger project scope for all oracle events.
 _LEDGER_PROJECT = "cortex-web3-oracle"
+
+
+def _utc_isoformat() -> str:
+    """Return the current UTC time as an ISO-8601 string."""
+    return datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
 
 
 class OuroborosOracle:
@@ -144,7 +152,7 @@ class OuroborosOracle:
             "reason": reason,
             "entropy_density": entropy,
             "locked": locked,
-            "ts": datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+            "ts": _utc_isoformat(),
         }
         await self._persist_decision(result, engine)
         return result
@@ -165,7 +173,7 @@ class OuroborosOracle:
                 "reason": "Missing Web3 configuration — simulation mode.",
                 "entropy_density": entropy,
                 "locked": False,
-                "ts": datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+                "ts": _utc_isoformat(),
             }
             await self._persist_decision(result, engine)
             return result
@@ -179,7 +187,7 @@ class OuroborosOracle:
             "action": "PULSE_SENT" if tx_result.get("success") else "PULSE_WITHHELD",
             "entropy_density": entropy,
             "locked": False,
-            "ts": datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+            "ts": _utc_isoformat(),
             **tx_result,
         }
         await self._persist_decision(result, engine)
@@ -204,7 +212,7 @@ class OuroborosOracle:
             return {"success": False, "error": "web3 package not installed"}
 
         try:
-            w3 = Web3(Web3.HTTPProvider(self._rpc_url, request_kwargs={"timeout": 30}))
+            w3 = Web3(Web3.HTTPProvider(self._rpc_url, request_kwargs={"timeout": _HTTP_REQUEST_TIMEOUT_SECONDS}))
             if not w3.is_connected():
                 raise OSError(f"Cannot connect to RPC at {self._rpc_url!r}")
 
@@ -232,10 +240,19 @@ class OuroborosOracle:
             )
 
             tx_hash = w3.eth.send_raw_transaction(signed.raw_transaction)
-            receipt = w3.eth.wait_for_transaction_receipt(tx_hash, timeout=_TX_TIMEOUT_SECONDS)
+            hex_hash = w3.to_hex(tx_hash)
+            try:
+                receipt = w3.eth.wait_for_transaction_receipt(tx_hash, timeout=_TX_TIMEOUT_SECONDS)
+            except TimeoutError as exc:
+                logger.error(
+                    "[OuroborosOracle] Timeout waiting for pulse receipt — "
+                    "tx %s may still confirm on-chain: %s",
+                    hex_hash,
+                    exc,
+                )
+                return {"success": False, "error": f"timeout: {exc}", "tx_hash": hex_hash}
 
             if receipt["status"] == 1:
-                hex_hash = w3.to_hex(tx_hash)
                 logger.info(
                     "✅ [OuroborosOracle] Pulse confirmed — block %s  tx %s",
                     receipt["blockNumber"],
@@ -256,9 +273,6 @@ class OuroborosOracle:
         except OSError as exc:
             logger.error("[OuroborosOracle] RPC connectivity error: %s", exc)
             return {"success": False, "error": str(exc)}
-        except TimeoutError as exc:
-            logger.error("[OuroborosOracle] RPC timeout waiting for receipt: %s", exc)
-            return {"success": False, "error": f"timeout: {exc}"}
         except ValueError as exc:
             logger.error("[OuroborosOracle] Transaction build/sign error: %s", exc)
             return {"success": False, "error": str(exc)}

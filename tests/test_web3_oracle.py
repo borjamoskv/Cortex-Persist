@@ -277,8 +277,8 @@ class TestLedgerPersistence:
         meta = engine.store.call_args.kwargs.get("meta", {})
         digest = meta.get("payload_sha256", "")
         assert len(digest) == 64
-        # Must be valid hex
-        int(digest, 16)
+        # Must be valid hex with the expected SHA-256 length
+        assert int(digest, 16) >= 0
 
     @pytest.mark.asyncio
     async def test_no_engine_does_not_raise(self) -> None:
