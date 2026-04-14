@@ -3,11 +3,11 @@ import hashlib
 import json
 import logging
 import os
-import sqlite3
 import sys
 import time
 
 from cortex.config import DB_PATH
+from cortex.database.core import connect
 from cortex.extensions.signals.bus import SignalBus
 
 # Sovereign Memory & Execution Imports
@@ -164,7 +164,7 @@ def register_singularity_tools(mcp) -> None:
 
         # Signal Pulse (Aether Matrix)
         try:
-            conn = sqlite3.connect(DB_PATH)
+            conn = connect(DB_PATH)
             bus = SignalBus(conn)
             bus.emit(
                 "ledger_append",

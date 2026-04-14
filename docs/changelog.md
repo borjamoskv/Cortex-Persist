@@ -2,7 +2,18 @@
 
 All notable changes to CORTEX, derived from the git history.
 
+Current package metadata in the tree is `v0.3.0b3`.
+Historical entries below reflect release notes captured at the time and may describe preview features
+that are not uniformly present in the current workspace snapshot.
+
 ---
+
+## v0.3.0b3 — Current Package Line (April 14, 2026)
+
+### Docs
+
+- Align package metadata references with `pyproject.toml` / `cortex.__version__`
+- Clarify roadmap and public docs where capability maturity differs from older release notes
 
 ## v0.3.0b2 — Sovereign Cloud (February 24, 2026)
 

@@ -14,12 +14,13 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from cortex.core.paths import (
+    CORTEX_DB as DEFAULT_DB_PATH,
+)
+
 # ─── Base Paths (canonical, from cortex.core.paths) ─────────────────
 from cortex.core.paths import (
     CORTEX_DIR,
-)
-from cortex.core.paths import (
-    CORTEX_DB as DEFAULT_DB_PATH,
 )
 
 # ─── Configuration Dataclass ─────────────────────────────────────────

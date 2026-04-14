@@ -2,7 +2,7 @@
 
 **Trust infrastructure for autonomous AI: cryptographic verification, audit trails, epistemic containment, and agent memory.**
 
-> **Package:** `cortex-persist v0.3.1-b1` | **Engine:** `v8` | **License:** `Apache-2.0` | **Python:** `>=3.10`
+> **Package:** `cortex-persist v0.3.0b3` | **Engine:** `v8` | **License:** `Apache-2.0` | **Python:** `>=3.10`
 
 **Quick Navigation:** [SYSTEM DIRECTIVES](#11-agent-manifest--roles--authority-boundaries) · Agent Manifest §1.1 · Axioms §2 · Invariants §3 · Write-Path §4 · Read-Path §4.1 · Architecture §5 · Dev Protocol §6 · Failure Signatures §8
 

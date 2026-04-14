@@ -21,10 +21,12 @@ if TYPE_CHECKING:
     from cortex.embeddings.manager import EmbeddingManager
     from cortex.engine.auth import ByzantineAuthLayer
     from cortex.engine.lock import SovereignLock
+    from cortex.engine.trust_registry import TrustRegistry
     from cortex.facts.manager import FactManager
     from cortex.ledger import EnrichmentQueue, LedgerStore, LedgerWriter
     from cortex.mac_maestro.executor import MaestroExecutor
 from cortex.database.schema import get_init_meta
+from cortex.engine.agent_mixin import AgentMixin
 from cortex.engine.durability import PersistenceSupervisor
 from cortex.engine.legacy_mixin import LegacyMixin
 from cortex.engine.memory_mixin import MemoryMixin
@@ -61,6 +63,7 @@ class CortexEngine(
     OptimizationMixin,
     HealthMixin,
     SyncMixin,
+    AgentMixin,
     LegacyMixin,
 ):
     """The Sovereign Ledger for AI Agents (Composite Orchestrator)."""
@@ -86,6 +89,8 @@ class CortexEngine(
         self._conn: aiosqlite.Connection | None = None
         self._vec_available = False
         self._conn_lock = asyncio.Lock()
+        self._schema_lock = asyncio.Lock()
+        self._schema_ready = False
         self._ledger = None  # Wave 5: ImmutableLedger (lazy init)
         self._embedder: LocalEmbedder | None = None
         self._memory_manager = None  # Frontera 2: Tripartite Memory (lazy init)
@@ -101,7 +106,7 @@ class CortexEngine(
         self._ledger_writer: LedgerWriter | None = None
         self._mac_maestro: MaestroExecutor | None = None
         self._auth: ByzantineAuthLayer | None = None  # noqa: F821
-        self._trust_registry: TrustRegistry | None = None  # noqa: F821
+        self._trust_registry: TrustRegistry | None = None
         # Decoupled guard pipeline (Ω₃: minimal coupling)
         self._guard_pipeline = self._register_default_guards()
         self._buffer_task = None
@@ -219,8 +224,9 @@ class CortexEngine(
     def _register_default_guards(self):
         """Build the GuardPipeline with all available guard adapters.
         Each adapter is imported defensively — if the underlying module
-        is not installed, the adapter is silently skipped. This ensures
-        the engine always starts, regardless of optional dependencies.
+        is not installed, the adapter is skipped. Runtime failures during
+        guard construction are treated as fatal because the write path must
+        fail closed.
         """
         from cortex.engine.guard_pipeline import GuardPipeline
         pipeline = GuardPipeline()
@@ -229,53 +235,67 @@ class CortexEngine(
         try:
             from cortex.engine.guard_adapters import HealthGuardAdapter
             pipeline.add_guard(HealthGuardAdapter(db_path))
-        except (ImportError, Exception) as e:  # noqa: BLE001
+        except ImportError as e:
             if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
                 raise RuntimeError(f"FAIL-CLOSED: HealthGuardAdapter failed: {e}") from e
+            logger.debug("HealthGuardAdapter unavailable: %s", e)
+        except Exception as e:
             raise RuntimeError(f"FAIL-CLOSED: HealthGuardAdapter failed: {e}") from e
         try:
             from cortex.engine.guard_adapters import ContradictionGuardAdapter
             pipeline.add_guard(ContradictionGuardAdapter(db_path))
-        except (ImportError, Exception) as e:  # noqa: BLE001
+        except ImportError as e:
             if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
                 raise RuntimeError(f"FAIL-CLOSED: ContradictionGuardAdapter failed: {e}") from e
+            logger.debug("ContradictionGuardAdapter unavailable: %s", e)
+        except Exception as e:
             raise RuntimeError(f"FAIL-CLOSED: ContradictionGuardAdapter failed: {e}") from e
         try:
             from cortex.engine.guard_adapters import VerifierGuardAdapter
             pipeline.add_guard(VerifierGuardAdapter())
-        except (ImportError, Exception) as e:  # noqa: BLE001
+        except ImportError as e:
             if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
                 raise RuntimeError(f"FAIL-CLOSED: VerifierGuardAdapter failed: {e}") from e
+            logger.debug("VerifierGuardAdapter unavailable: %s", e)
+        except Exception as e:
             raise RuntimeError(f"FAIL-CLOSED: VerifierGuardAdapter failed: {e}") from e
         # ZK-Swarm Cryptographic Guard (RFC-003 Phase 1)
         try:
             from cortex.engine.guard_adapters import ZKGuardAdapter
             pipeline.add_guard(ZKGuardAdapter())
-        except (ImportError, Exception) as e:  # noqa: BLE001
+        except ImportError as e:
             if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
                 raise RuntimeError(f"FAIL-CLOSED: ZKGuardAdapter failed: {e}") from e
+            logger.debug("ZKGuardAdapter unavailable: %s", e)
+        except Exception as e:
             raise RuntimeError(f"FAIL-CLOSED: ZKGuardAdapter failed: {e}") from e
         # Post-store hooks (AX-II Hook 4 + signals + epistemic)
         try:
             from cortex.engine.guard_adapters import LedgerCheckpointHook
             pipeline.add_post_hook(LedgerCheckpointHook(self))
-        except (ImportError, Exception) as e:  # noqa: BLE001
+        except ImportError as e:
             if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
                 raise RuntimeError(f"FAIL-CLOSED: LedgerCheckpointHook failed: {e}") from e
+            logger.debug("LedgerCheckpointHook unavailable: %s", e)
+        except Exception as e:
             raise RuntimeError(f"FAIL-CLOSED: LedgerCheckpointHook failed: {e}") from e
         try:
             from cortex.engine.guard_adapters import SignalEmitHook
             pipeline.add_post_hook(SignalEmitHook())
-        except (ImportError, Exception) as e:  # noqa: BLE001
+        except ImportError as e:
             if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
                 raise RuntimeError(f"FAIL-CLOSED: SignalEmitHook failed: {e}") from e
+            logger.debug("SignalEmitHook unavailable: %s", e)
+        except Exception as e:
             raise RuntimeError(f"FAIL-CLOSED: SignalEmitHook failed: {e}") from e
         try:
             from cortex.engine.guard_adapters import EpistemicBreakerHook
             pipeline.add_post_hook(EpistemicBreakerHook())
-        except (ImportError, Exception) as e:  # noqa: BLE001
+        except ImportError as e:
             if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
                 raise RuntimeError(f"FAIL-CLOSED: EpistemicBreakerHook failed: {e}") from e
+            logger.debug("EpistemicBreakerHook unavailable: %s", e)
+        except Exception as e:
             raise RuntimeError(f"FAIL-CLOSED: EpistemicBreakerHook failed: {e}") from e
         logger.debug(
             "GuardPipeline: %d guards, %d hooks registered",
@@ -314,6 +334,7 @@ class CortexEngine(
     def _get_embedder(self) -> LocalEmbedder:
         """Protocol requirement for SearchMixin."""
         if self._embedder is None:
+            from cortex.embeddings import LocalEmbedder
             self._embedder = LocalEmbedder()
         return self._embedder
     # ─── Connection ───────────────────────────────────────────────
@@ -372,6 +393,14 @@ class CortexEngine(
                 from cortex.ledger import ImmutableLedger
                 self._ledger = ImmutableLedger(conn)  # type: ignore[reportArgumentType]
             self._schema_ready = True
+    async def _get_or_create_ledger(self):
+        """Return the transaction ledger, initializing it on demand."""
+        conn = await self._get_or_create_conn()
+        await self._ensure_schema_ready(conn)
+        if self._ledger is None:
+            from cortex.ledger import ImmutableLedger
+            self._ledger = ImmutableLedger(conn)  # type: ignore[reportArgumentType]
+        return self._ledger
     def get_connection(self) -> aiosqlite.Connection:
         """Synchronous wrapper for internal connection access."""
         if self._conn is None:
@@ -570,6 +599,15 @@ class CortexEngine(
     async def close(self):
         """Shutdown the engine, optimizer, and database connections."""
         await self.stop_optimizer()
+        if self._post_commit_tasks:
+            try:
+                await asyncio.wait_for(
+                    asyncio.gather(*self._post_commit_tasks, return_exceptions=True),
+                    timeout=5.0,
+                )
+            except (asyncio.TimeoutError, Exception):  # noqa: BLE001
+                logger.debug("Post-commit task drain timed out — forcing close")
+            self._post_commit_tasks.clear()
         if self._memory_manager:
             try:
                 await asyncio.wait_for(

@@ -2,13 +2,11 @@
 
 > **Trust Infrastructure for Autonomous AI**
 > Cryptographic verification, audit trails, and EU AI Act compliance for AI agent memory.
-> *The layer that proves your agents' decisions are true.*
+> *The layer that adds cryptographic evidence to your agents' decisions.*
 
 ![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
-![Status](https://img.shields.io/badge/status-v0.3.0b2%20beta-orange.svg)
-![Tests](https://img.shields.io/badge/tests-1621%2B%20passing-brightgreen.svg)
-![LOC](https://img.shields.io/badge/LOC-178K-informational.svg)
+![Status](https://img.shields.io/badge/status-v0.3.0b3%20beta-orange.svg)
 
 ---
 
@@ -16,7 +14,7 @@
 
 AI agents are making millions of decisions per day. But **who verifies those decisions are correct?**
 
-Memory layers like Mem0, Zep, and Letta store what agents remember — but none of them can **prove** that memory hasn't been tampered with, generate a compliance report for regulators, or audit the full chain of reasoning.
+Memory layers like Mem0, Zep, and Letta store what agents remember — but none of them add a tamper-evident ledger, verification workflow, and audit trail around that memory by default.
 
 The **EU AI Act (Article 12, effective August 2, 2026)** mandates tamper-proof logging, full traceability, and periodic integrity verification for high-risk AI systems. Fines reach **€30M or 6% of global revenue.**
 
@@ -30,7 +28,7 @@ Traditional logging and standard vector stores fail the epistemic containment te
 |:---------------------------|:----------------------------|:-------------------------------------|:------------------------------------------|
 | **Primary Goal**           | Observability & Debugging   | Semantic Search & RAG                | **Tamper-Evident Cognitive Lineage**      |
 | **Write Integrity**        | Overwritable / Editable     | Silent CRUD operations               | **Append-Only + Cryptographic Hash**      |
-| **Fact Mutability**        | Easy (API/Admin access)     | Easy (API/Admin access)              | **Impossible** (Breaks hash chain)        |
+| **Fact Mutability**        | Easy (API/Admin access)     | Easy (API/Admin access)              | **Tamper-evident** (verification reveals mutation) |
 | **Evidence Export**        | Text dumps                  | JSON extracts                        | **Zero-Trust Sealed Audit Packs**         |
 
 > **See a real artifact**: [View Exported Audit Pack](../examples/audit_proof_artifact.json)
@@ -58,7 +56,7 @@ Traditional logging and standard vector stores fail the epistemic containment te
 ```bash
 pip install cortex-persist
 cortex init
-cortex store my-agent "Chose OAuth2 PKCE for auth" --type decision
+cortex memory store my-agent "Chose OAuth2 PKCE for auth" --type decision
 cortex verify 1
 # → ✅ VERIFIED — Hash chain intact, Merkle sealed
 ```
@@ -78,17 +76,16 @@ cortex verify 1
 
 ---
 
-## Project Stats
+## Project Snapshot
 
 | Metric | Value |
 |:---|:---|
-| Production LOC | **~178,000** |
-| Test functions | **1,621+** |
-| Python modules | **1,094** |
-| CLI commands | **90+** |
-| Daemon monitors | **13** |
-| Privacy patterns | **11** |
-| Current release line | **v0.3.0 beta** |
+| Package metadata line | **v0.3.0b3** |
+| Test suite | **Large repo-level suite; validate specific shards locally** |
+| CLI surface | **Broad multi-command CLI; confirm exact subcommands from `cortex --help`** |
+| Deployment artifacts | **Dockerfile + GCP K8s manifest present** |
+| SDKs | **JS thin REST client + Python package metadata** |
+| Cloud features | **Mixed implemented / partial / roadmap** |
 
 ---
 

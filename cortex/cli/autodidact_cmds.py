@@ -78,9 +78,9 @@ def audit():
     engine = get_engine()
 
     async def _audit():
-        import sqlite3
+        from cortex.database.core import connect
 
-        conn = sqlite3.connect(engine._db_path)
+        conn = connect(engine._db_path)
         return await scan_all_crystals(conn, project="autodidact_knowledge")
 
     vitals = _run_async(_audit())
