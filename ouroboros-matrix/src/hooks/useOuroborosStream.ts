@@ -20,8 +20,8 @@ export interface SwarmStats {
 }
 
 export function useOuroborosStream(
-  sseUrl: string = 'http://localhost:8000/stream',
-  wsUrl: string = 'ws://localhost:8000/ws'
+  sseUrl: string = import.meta.env.VITE_SSE_URL || 'http://localhost:8000/stream',
+  wsUrl: string = import.meta.env.VITE_WS_URL || 'ws://localhost:8000/ws'
 ) {
   const [stats, setStats] = useState<SwarmStats>({
     totalScanned: 0,
