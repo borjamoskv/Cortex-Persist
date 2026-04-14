@@ -4,6 +4,7 @@ from enum import Enum
 from typing import Any
 
 VSA_DIMENSION = 10000
+EPISODIC_TRACE_LIMIT = 1000  # Maximum number of episodic trace entries
 
 try:
     import structlog
@@ -31,6 +32,8 @@ class MemoryOS:
 
     def __init__(self):
         self._working_memory: dict[str, Any] = {}
+        # Bounded trace list (sliding window, max EPISODIC_TRACE_LIMIT entries)
+        self._episodic_traces: list[dict] = []
         # Fixed-size physical tensor array
         self._episodic_vsa_tensor: list[float] = [0.0] * VSA_DIMENSION
         # Semantic memory connects to ledger
@@ -62,7 +65,11 @@ class MemoryOS:
             self._working_memory[key] = value
             return True
         elif tier == MemoryTier.EPISODIC:
-            # Map & Bind context into fixed-size VSA tensor (O(1) memory footprint)
+            entry = {"key": key, "value": value}
+            if len(self._episodic_traces) >= EPISODIC_TRACE_LIMIT:
+                self._episodic_traces.pop(0)
+            self._episodic_traces.append(entry)
+            # Keep VSA tensor update for downstream consumers
             ctx_string = f"{key}:{value}"
             idx = int(hashlib.sha256(ctx_string.encode("utf-8")).hexdigest(), 16) % VSA_DIMENSION
             self._episodic_vsa_tensor[idx] += 1.0
@@ -92,6 +99,7 @@ class MemoryOS:
         if tier == MemoryTier.WORKING:
             self._working_memory.clear()
         elif tier == MemoryTier.EPISODIC:
+            self._episodic_traces = []
             self._episodic_vsa_tensor = [0.0] * VSA_DIMENSION
         elif tier == MemoryTier.SEMANTIC:
             raise PermissionError("Cannot flush immutable semantic ledger.")
