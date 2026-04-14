@@ -9,8 +9,14 @@ DERIVATION: Ω₃ Byzantine Default — verify, then trust.
 """
 
 import re
-import subprocess
 import sys
+from pathlib import Path
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+from _changed_files import changed_files, run_git
 
 # ── Forbidden patterns (case-insensitive) ─────────────────────
 FORBIDDEN_PATTERNS: list[re.Pattern] = [
@@ -39,12 +45,20 @@ RESET = "\033[0m"
 
 def get_staged_files() -> list[str]:
     """Get list of files staged for commit."""
-    result = subprocess.run(
-        ["git", "diff", "--cached", "--name-only", "--diff-filter=ACMR"],
-        capture_output=True,
-        text=True,
-    )
-    return [f for f in result.stdout.strip().split("\n") if f]
+    paths, source = changed_files(include_untracked=False, prefer_staged=True)
+    if source != "staged":
+        return []
+    return [str(path) for path in paths]
+
+
+def get_candidate_files() -> tuple[list[str], str, set[str]]:
+    """Prefer staged files, but fall back to the local diff when the index is empty."""
+    paths, source = changed_files(include_untracked=True, prefer_staged=True)
+    files = [str(path) for path in paths]
+    tracked_paths = changed_files(include_untracked=False, prefer_staged=True)[0]
+    tracked = {str(path) for path in tracked_paths}
+    untracked = {path for path in files if path not in tracked}
+    return files, source, untracked
 
 
 def check_filenames(files: list[str]) -> list[str]:
@@ -58,40 +72,66 @@ def check_filenames(files: list[str]) -> list[str]:
     return violations
 
 
-def check_file_contents(files: list[str]) -> list[str]:
-    """Scan staged file contents for secret patterns."""
+def _extract_added_lines(diff_content: str) -> str:
+    added_lines: list[str] = []
+    for line in diff_content.splitlines():
+        if line.startswith(("diff --git ", "index ", "@@ ", "--- ", "+++ ")):
+            continue
+        if line.startswith("+"):
+            added_lines.append(line[1:])
+    return "\n".join(added_lines)
+
+
+def _read_candidate_content(filepath: str, *, source: str, untracked_files: set[str]) -> str:
+    diff_args = ["diff", "--unified=0", "--", filepath]
+    if source == "staged":
+        diff_args.insert(1, "--cached")
+    diff_content = run_git(diff_args, check=False)
+    added_lines = _extract_added_lines(diff_content)
+    if added_lines:
+        return added_lines
+    if filepath not in untracked_files:
+        return ""
+    try:
+        return Path(filepath).read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
+        return ""
+
+
+def check_file_contents(files: list[str], *, source: str, untracked_files: set[str]) -> list[str]:
+    """Scan candidate file contents for secret patterns."""
     violations: list[str] = []
     for filepath in files:
         try:
-            result = subprocess.run(
-                ["git", "diff", "--cached", "--", filepath],
-                capture_output=True,
-                text=True,
+            diff_content = _read_candidate_content(
+                filepath,
+                source=source,
+                untracked_files=untracked_files,
             )
-            diff_content = result.stdout
             for pattern in CONTENT_PATTERNS:
                 if pattern.search(diff_content):
                     violations.append(f"  🔍 CONTENT: {filepath} contains '{pattern.pattern}'")
                     break
-        except Exception:
+        except (OSError, ValueError):
             pass  # Binary files or access errors — skip
     return violations
 
 
 def main() -> int:
-    files = get_staged_files()
+    files, source, untracked_files = get_candidate_files()
     if not files:
         return 0
 
     violations: list[str] = []
     violations.extend(check_filenames(files))
-    violations.extend(check_file_contents(files))
+    violations.extend(check_file_contents(files, source=source, untracked_files=untracked_files))
 
     if violations:
         print(f"\n{RED}{BOLD}╔══════════════════════════════════════════════════╗{RESET}")
         print(f"{RED}{BOLD}║  🛑 SOVEREIGN SECURITY GATE — COMMIT BLOCKED    ║{RESET}")
         print(f"{RED}{BOLD}╚══════════════════════════════════════════════════╝{RESET}\n")
-        print(f"{YELLOW}Wallet seeds / credentials detected in staged files:{RESET}\n")
+        scope = "staged files" if source == "staged" else "local diff files"
+        print(f"{YELLOW}Wallet seeds / credentials detected in {scope}:{RESET}\n")
         for v in violations:
             print(f"{RED}{v}{RESET}")
         print(f"\n{YELLOW}If this is a false positive, bypass with:{RESET}")

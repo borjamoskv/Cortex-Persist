@@ -1,6 +1,6 @@
 [project]
 name = "cortex-persist"
-version = "0.3.0b2"
+version = "0.3.0b3"
 description = "Cryptographic memory integrity, audit trails, and verifiable lineage for AI agents."
 readme = "README.md"
 license = "Apache-2.0"
@@ -105,7 +105,7 @@ requires = ["setuptools>=68.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-include = ["cortex*"]
+include = ["cortex", "cortex.*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

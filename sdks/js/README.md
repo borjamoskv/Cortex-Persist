@@ -1,5 +1,7 @@
 # CORTEX JS/TS SDK
 
+> ⚠️ **Not yet published.** This SDK is a roadmap item. `npm install @cortex-persist/sdk` returns 404 until the first npm release.
+
 Thin, zero-dependency TypeScript client for the [CORTEX Persist API](https://github.com/borjamoskv/Cortex-Persist).
 
 ## Install

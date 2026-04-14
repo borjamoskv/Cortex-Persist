@@ -9,13 +9,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [Unreleased] — v0.3.x
+## [Unreleased] — v0.3.0b3
 
 ### In Progress
 - **Stripe Embedded Checkout**: Migrado el flujo de monetización de redirecciones estándar a *Embedded Checkout* nativo para reducción drástica de fricción (O(1) cognitive load). Backend devuelve `client_secret` en `/v1/stripe/checkout` (con `ui_mode="embedded"`).
+
+### Changed
+- **Next release line opened**: El árbol de trabajo pasa a `0.3.0b3` tras publicar `0.3.0b2`.
+- **GitHub Actions runtime**: Los workflows fuerzan `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true` para eliminar el aviso de deprecación de Node 20 en Actions antes del cambio por defecto de junio de 2026.
 ---
 
-## [0.3.0b2] — 2026-03-02
+## [0.3.0b2] — 2026-04-13
+
+### Added
+- **First public PyPI release**: `cortex-persist 0.3.0b2` se publicó mediante GitHub Actions Trusted Publishing y creó el proyecto público en PyPI.
+- **Public GitHub prerelease**: `v0.3.0b2` ya dispone de prerelease pública y artefactos firmados/trazables en GitHub.
+
+### Changed
+- **Release hardening**: El paquete público ya no arrastra workspaces como `cortex-sdk/` en wheel/sdist; CI y release ejecutan preflight de artefactos, `twine check`, build provenance y verificación de visibilidad en PyPI.
+
+### Verified
+- **Clean install smoke test**: Validada la instalación en entorno limpio con `pip install cortex-persist==0.3.0b2`, `import cortex` y `cortex --version`.
 
 ### Security
 - **Security Audit (2026-03-02)**: Complete autonomous audit across 58,098 LOC with 0 High/Medium findings.

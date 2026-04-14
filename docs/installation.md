@@ -8,10 +8,19 @@
 
 ---
 
-## Install from PyPI
+## Install from PyPI *(preferred)*
+
+The quickest way to get started:
 
 ```bash
 pip install cortex-persist
+```
+
+After installing, verify it works:
+
+```bash
+cortex --version
+cortex init
 ```
 
 ### Optional Extras
@@ -48,7 +57,9 @@ pip install cortex-persist
 
 ---
 
-## Install from Source
+## Install from Source *(development / contributing)*
+
+Use this path when you want to contribute to CORTEX or run the latest unreleased code:
 
 ```bash
 git clone https://github.com/borjamoskv/Cortex-Persist.git
