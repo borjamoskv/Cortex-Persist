@@ -1,10 +1,11 @@
 import logging
 import sys
 import unittest
+from pathlib import Path
 
-# Add project root to sys.path
-sys.path.append("/Users/borjafernandezangulo/Cortex-Persist")
-sys.path.append("/Users/borjafernandezangulo/Cortex-Persist/cortex-core")
+# Add project root to sys.path dynamically
+_project_root = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(_project_root))
 
 from ouroboros_engine import OuroborosEngine
 
@@ -44,7 +45,6 @@ class TestOuroborosForge(unittest.IsolatedAsyncioTestCase):
         cursor.execute("SELECT count(*) FROM signals WHERE source='ouroboros'")
         count = cursor.fetchone()[0]
         conn.close()
-
         self.assertGreaterEqual(count, 0, "Signal table check failed.")
 
 
