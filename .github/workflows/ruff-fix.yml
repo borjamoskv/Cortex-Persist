@@ -2,6 +2,11 @@ name: Fix Ruff lint errors
 
 on:
   workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to fix (leave empty to use default branch)'
+        required: false
+        default: ''
 
 permissions:
   contents: write
@@ -15,6 +20,7 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.event.inputs.branch || github.ref }}
 
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
@@ -28,23 +34,16 @@ jobs:
           ruff check cortex/ tests/ scripts/ --fix --unsafe-fixes || true
           ruff format cortex/ tests/ scripts/ || true
 
-      - name: Push to branch and open PR
+      - name: Commit fixes directly to branch
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          BRANCH="fix/ruff-autofix-$(date +%Y%m%d%H%M%S)"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout -b "${BRANCH}"
           git add -A
           if git diff --staged --quiet; then
             echo "No changes to commit"
             exit 0
           fi
           git commit -m "fix(lint): apply ruff auto-fixes"
-          git push origin "${BRANCH}"
-          gh pr create \
-            --title "fix(lint): apply ruff auto-fixes" \
-            --body "Automated PR: applies all ruff lint fixes (imports, formatting, etc)" \
-            --base main \
-            --head "${BRANCH}"
+          git push origin HEAD
