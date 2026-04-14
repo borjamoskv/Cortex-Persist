@@ -50,8 +50,14 @@ async def manifest_singularity(signal_bus: SignalBus | None = None) -> None:
 
         procs = await asyncio.gather(*coros)
 
-        # OOM/Time Guard: Wait with timeout
-        await asyncio.wait([p.communicate() for p in procs], timeout=30.0)
+        # OOM/Time Guard: wait on tasks, not bare coroutines, so Pyright can
+        # verify the timeout path and we can cancel anything still pending.
+        communicate_tasks = {asyncio.create_task(p.communicate()) for p in procs}
+        _, pending = await asyncio.wait(communicate_tasks, timeout=30.0)
+        for task in pending:
+            task.cancel()
+        if pending:
+            await asyncio.gather(*pending, return_exceptions=True)
 
         # 3. Notification to Signal Bus
         if signal_bus:

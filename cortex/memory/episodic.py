@@ -15,7 +15,6 @@ import logging
 import time
 from collections import deque
 from dataclasses import dataclass, field
-from typing import Optional
 
 from .models import CausalEpisode, SourceMetadata
 
@@ -153,12 +152,12 @@ class TemporalAbstractor:
 _TRACE_DOWN_SQL = """\
 WITH RECURSIVE causal_chain(id, content, fact_type, parent_decision_id, depth) AS (
     SELECT id, content, fact_type, parent_decision_id, 0
-    FROM facts WHERE id = ?
+    FROM facts WHERE id = ? AND tenant_id = ?
     UNION ALL
     SELECT f.id, f.content, f.fact_type, f.parent_decision_id, cc.depth + 1
     FROM facts f
     JOIN causal_chain cc ON f.parent_decision_id = cc.id
-    WHERE cc.depth < ?
+    WHERE cc.depth < ? AND f.tenant_id = ?
 )
 SELECT id, content, fact_type, parent_decision_id, depth
 FROM causal_chain ORDER BY depth ASC;
@@ -167,12 +166,12 @@ FROM causal_chain ORDER BY depth ASC;
 _TRACE_UP_SQL = """\
 WITH RECURSIVE ancestor_chain(id, content, fact_type, parent_decision_id, depth) AS (
     SELECT id, content, fact_type, parent_decision_id, 0
-    FROM facts WHERE id = ?
+    FROM facts WHERE id = ? AND tenant_id = ?
     UNION ALL
     SELECT f.id, f.content, f.fact_type, f.parent_decision_id, ac.depth + 1
     FROM facts f
     JOIN ancestor_chain ac ON ac.parent_decision_id = f.id
-    WHERE ac.depth < ?
+    WHERE ac.depth < ? AND f.tenant_id = ?
 )
 SELECT id, content, fact_type, parent_decision_id, depth
 FROM ancestor_chain ORDER BY depth DESC;
@@ -196,7 +195,8 @@ class CausalTracer:
     async def trace_episode(
         self,
         fact_id: int,
-        max_depth: Optional[int] = None,
+        max_depth: int | None = None,
+        tenant_id: str = "default",
     ) -> CausalEpisode:
         """Trace the full causal DAG from a given fact.
 
@@ -208,13 +208,13 @@ class CausalTracer:
 
         # 1. Walk UP to find the root ancestor
         root_id = fact_id
-        cursor = await self._conn.execute(_TRACE_UP_SQL, (fact_id, depth))
+        cursor = await self._conn.execute(_TRACE_UP_SQL, (fact_id, tenant_id, depth, tenant_id))
         ancestors = await cursor.fetchall()
         if ancestors:
             root_id = ancestors[0][0]  # First row = deepest ancestor
 
         # 2. Walk DOWN from root to get full tree
-        cursor = await self._conn.execute(_TRACE_DOWN_SQL, (root_id, depth))
+        cursor = await self._conn.execute(_TRACE_DOWN_SQL, (root_id, tenant_id, depth, tenant_id))
         rows = await cursor.fetchall()
 
         chain: list[dict] = []
@@ -243,7 +243,10 @@ class CausalTracer:
 
         # Fetch project from root fact
         if root_id:
-            cursor = await self._conn.execute("SELECT project FROM facts WHERE id = ?", (root_id,))
+            cursor = await self._conn.execute(
+                "SELECT project FROM facts WHERE id = ? AND tenant_id = ?",
+                (root_id, tenant_id),
+            )
             row = await cursor.fetchone()
             if row:
                 project = row[0] or ""
@@ -263,6 +266,7 @@ class CausalTracer:
         query: str,
         project: str = "",
         limit: int = 3,
+        tenant_id: str = "default",
     ) -> list[CausalEpisode]:
         """Find facts matching a query, then trace their causal episodes.
 
@@ -271,8 +275,8 @@ class CausalTracer:
         Deduplicates episodes by root_fact_id.
         """
         # Find matching facts via FTS5
-        sql = "SELECT id FROM facts WHERE content LIKE ? "
-        params: list = [f"%{query}%"]
+        sql = "SELECT id FROM facts WHERE content LIKE ? AND tenant_id = ? "
+        params: list = [f"%{query}%", tenant_id]
         if project:
             sql += "AND project = ? "
             params.append(project)
@@ -286,7 +290,7 @@ class CausalTracer:
         episodes: list[CausalEpisode] = []
 
         for (fid,) in rows:
-            ep = await self.trace_episode(fid)
+            ep = await self.trace_episode(fid, tenant_id=tenant_id)
             if ep.root_fact_id in seen_roots:
                 continue
             seen_roots.add(ep.root_fact_id)

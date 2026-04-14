@@ -85,6 +85,8 @@ class TransactionMixin(EngineMixinBase):
         if not getattr(self, "_ledger", None):
             from cortex.ledger import ImmutableLedger
 
-            # Pass the pool directly instead of a raw connection
-            self._ledger = ImmutableLedger(self.pool)
+            db_or_pool = getattr(self, "_pool", None)
+            if db_or_pool is None:
+                db_or_pool = await self.get_conn()
+            self._ledger = ImmutableLedger(db_or_pool)
         return await self._ledger.audit_integrity_async()

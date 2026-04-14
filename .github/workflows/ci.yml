@@ -216,7 +216,18 @@ jobs:
         run: pip install -e ".[dev,api]" pyright
       - name: Pyright core contract
         if: steps.scope.outputs.release_only != 'true'
-        run: pyright cortex/ledger cortex/guards cortex/auth cortex/types cortex/api cortex/routes
+        shell: bash
+        run: |
+          set -euo pipefail
+          files=()
+          while IFS= read -r file; do
+            files+=("$file")
+          done < <(git ls-files cortex/ledger cortex/guards cortex/auth cortex/types cortex/api cortex/routes cortex/engine cortex/memory | grep -E '\.py$' || true)
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo "No tracked Python files found for the core typecheck scope."
+            exit 0
+          fi
+          pyright "${files[@]}"
 
   security:
     needs: [change-scope]

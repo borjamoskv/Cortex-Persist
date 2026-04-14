@@ -13,6 +13,7 @@ from cortex.engine.mixins.base import EngineMixinBase
 from cortex.engine.slashing import SlashingEngine
 
 logger = logging.getLogger("cortex.engine.consensus")
+TX_BEGIN_IMMEDIATE = "BEGIN IMMEDIATE"
 
 
 class ConsensusMixin(EngineMixinBase):
@@ -75,8 +76,6 @@ class ConsensusMixin(EngineMixinBase):
             raise ValueError("Vote must be -1, 0, or 1")
 
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
-            from cortex.engine_async import TX_BEGIN_IMMEDIATE
-
             await conn.execute(TX_BEGIN_IMMEDIATE)
             try:
                 # 1. Resolve agent_id and reputation

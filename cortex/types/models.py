@@ -399,7 +399,7 @@ class LedgerReportResponse(BaseModel):
 
 
 class CheckpointResponse(BaseModel):
-    checkpoint_id: int | None
+    checkpoint_id: str | None
     message: str
     status: str = "success"
 

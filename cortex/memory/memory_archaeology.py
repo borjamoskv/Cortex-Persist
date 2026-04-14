@@ -10,7 +10,7 @@ from __future__ import annotations
 import logging
 import sqlite3
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, cast
 
 import aiosqlite
 import numpy as np
@@ -30,6 +30,16 @@ class MemoryArchaeologist:
         self.engine = engine
         self.llm = SovereignLLM() if SovereignLLM else None
 
+    def _memory_components(self) -> tuple[Any, Any]:
+        memory_manager = getattr(self.engine, "memory", None)
+        l2_store = getattr(memory_manager, "_l2", None)
+        encoder = getattr(memory_manager, "_encoder", None)
+        if memory_manager is None or l2_store is None or encoder is None:
+            raise RuntimeError(
+                "Memory archaeology requires initialized L2 memory (auto_embed=True)"
+            )
+        return memory_manager, l2_store
+
     async def run_archaeology(
         self,
         project: str,
@@ -43,13 +53,16 @@ class MemoryArchaeologist:
         """
         # Initialize memory subsystem (L2) explicitly before accessing
         await self.engine.get_conn()
-        tenant_id = self.engine._resolve_tenant(tenant_id or "default")
+        self._memory_components()
+        resolved_tenant_id = cast(str, self.engine._resolve_tenant(tenant_id or "default"))
+        if not isinstance(resolved_tenant_id, str):
+            raise TypeError("Resolved tenant_id must be a string")
 
-        l3_map = self._fetch_active_facts(project, tenant_id)
+        l3_map = self._fetch_active_facts(project, resolved_tenant_id)
         if not l3_map:
             return {"condensed": 0, "tombstoned": 0}
 
-        facts, vecs_matrix = self._extract_vectors(project, tenant_id, l3_map)
+        facts, vecs_matrix = self._extract_vectors(project, resolved_tenant_id, l3_map)
         if vecs_matrix is None:
             return {"condensed": 0, "tombstoned": 0}
 
@@ -58,7 +71,7 @@ class MemoryArchaeologist:
             return {"condensed": 0, "tombstoned": 0}
 
         condensed, tombstoned = await self._synthesize_and_update(
-            project, tenant_id, clusters, facts, simulate
+            project, resolved_tenant_id, clusters, facts, simulate
         )
         return {"condensed": condensed, "tombstoned": tombstoned}
 
@@ -79,13 +92,24 @@ class MemoryArchaeologist:
     def _extract_vectors(
         self, project: str, tenant_id: str, l3_map: dict[str, dict[str, Any]]
     ) -> tuple[list[dict[str, Any]], np.ndarray | None]:
-        l2_conn = self.engine.memory._l2._get_conn()
+        _, l2_store = self._memory_components()
+        l2_conn = l2_store._get_conn()
+        meta_tb, vec_tb, _, _ = self._l2_tables(l2_conn, tenant_id, project)
         c2 = l2_conn.cursor()
-        c2.execute(
-            "SELECT m.id, v.embedding FROM facts_meta m JOIN vec_facts v ON m.rowid = v.rowid "
-            "WHERE m.project_id = ? AND m.tenant_id = ?",
-            (project, tenant_id),
-        )
+        try:
+            c2.execute(
+                f"SELECT m.id, v.embedding FROM {meta_tb} m JOIN {vec_tb} v ON m.rowid = v.rowid "
+                "WHERE m.project_id = ? AND m.tenant_id = ?",
+                (project, tenant_id),
+            )
+        except sqlite3.Error as exc:
+            logger.warning(
+                "Archaeology skipped for %s/%s: vector tables unavailable: %s",
+                tenant_id,
+                project,
+                exc,
+            )
+            return [], None
 
         facts = []
         vecs = []
@@ -150,7 +174,8 @@ class MemoryArchaeologist:
     ) -> tuple[int, int]:
         condensed_count = 0
         tombstoned_count = 0
-        l2_conn = self.engine.memory._l2._get_conn()
+        _, l2_store = self._memory_components()
+        l2_conn = l2_store._get_conn()
 
         for cluster_indices in clusters:
             if not self.llm:
@@ -171,7 +196,6 @@ class MemoryArchaeologist:
 
             parent_ids = [f["parent_decision_id"] for f in cluster_facts if f["parent_decision_id"]]
             primary_parent_id = parent_ids[0] if parent_ids else None
-            [f["id"] for f in cluster_facts]
 
             if not simulate:
                 try:
@@ -251,22 +275,30 @@ class MemoryArchaeologist:
                     )
             await conn.commit()
 
-        # Delete tombstoned old ones from L2 to free up vector space
         cl2 = l2_conn.cursor()
+        meta_tb, vec_tb, _, _ = self._l2_tables(l2_conn, tenant_id, project)
         str_old_ids = [str(x) for x in old_ids]
         if primary_parent_id:
             cl2.execute(
-                "UPDATE facts_meta SET parent_decision_id = ? WHERE id = ?",
+                f"UPDATE {meta_tb} SET parent_decision_id = ? WHERE id = ?",
                 (primary_parent_id, new_fact_id),
             )
-        cl2.execute(f"DELETE FROM facts_meta WHERE id IN ({placeholders})", str_old_ids)
-        cl2.execute("DELETE FROM vec_facts WHERE rowid NOT IN (SELECT rowid FROM facts_meta)")
+        cl2.execute(f"DELETE FROM {meta_tb} WHERE id IN ({placeholders})", str_old_ids)
+        cl2.execute(
+            f"DELETE FROM {vec_tb} WHERE rowid NOT IN (SELECT rowid FROM {meta_tb})"
+        )
         cl2 = l2_conn.cursor()
         cl2.execute(
-            f"UPDATE facts_meta SET parent_decision_id = ? WHERE parent_decision_id IN ({placeholders})",
-            [new_fact_id] + old_ids,
+            f"UPDATE {meta_tb} SET parent_decision_id = ? WHERE parent_decision_id IN ({placeholders})",
+            [new_fact_id, *old_ids],
         )
         l2_conn.commit()
+
+    def _l2_tables(
+        self, l2_conn: sqlite3.Connection, tenant_id: str, project: str
+    ) -> tuple[str, str, str | None, str | None]:
+        _, l2_store = self._memory_components()
+        return l2_store._get_domain_tables(l2_conn, tenant_id, project)
 
     async def _parent_column(self, conn: aiosqlite.Connection) -> str | None:
         cursor = await conn.execute("PRAGMA table_info(facts)")

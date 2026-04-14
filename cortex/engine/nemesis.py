@@ -3,7 +3,6 @@ from __future__ import annotations
 import datetime
 import logging
 import re
-from typing import Optional
 
 import aiosqlite
 
@@ -75,7 +74,8 @@ class NemesisProtocol:
             pass
         return dynamic_rules
 
-    def analyze(cls, content: str, db_path: Optional[str] = None) -> Optional[str]:
+    @classmethod
+    def analyze(cls, content: str, db_path: str | None = None) -> str | None:
         """Analyze content and return rejection reason if it violates protocols."""
         content_lower = content.lower()
 
@@ -90,8 +90,8 @@ class NemesisProtocol:
 
     @classmethod
     async def analyze_async(
-        cls, content: str, conn: Optional[aiosqlite.Connection] = None
-    ) -> Optional[str]:
+        cls, content: str, conn: aiosqlite.Connection | None = None
+    ) -> str | None:
         """Analyze content asynchronously. Eliminates I/O wait on event loop (Ω₆)."""
         content_lower = content.lower()
 
@@ -130,7 +130,8 @@ class NemesisProtocol:
                 return f"[NEMESIS: REJECTED {count}x] Antibody: {reason}"
         return None
 
-    def _check_dynamic_antibodies(cls, content_lower: str, db_path: Optional[str]) -> Optional[str]:
+    @classmethod
+    def _check_dynamic_antibodies(cls, content_lower: str, db_path: str | None) -> str | None:
         """Helper to scan for dynamically generated antibodies."""
         for pattern, reason in cls._load_dynamic_antibodies():
             if re.search(pattern, content_lower):
@@ -171,7 +172,8 @@ class NemesisProtocol:
         except Exception as e:  # noqa: BLE001 — signal emission failure should not crash analysis
             logger.debug("Failed to emit nemesis signal: %s", e)
 
-    def assimilate(cls, vector: str, reason: str, db_path: Optional[str] = None) -> bool:
+    @classmethod
+    def assimilate(cls, vector: str, reason: str, db_path: str | None = None) -> bool:
         """
         Ω₅: Dynamic Immunity. Converts an attack vector into a permanent antibody.
         'Asimilar el ataque y convertirlo en anticuerpo antes de que llegue al núcleo.'

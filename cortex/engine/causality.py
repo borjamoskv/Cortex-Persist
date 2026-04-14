@@ -7,9 +7,9 @@ import logging
 import time
 from collections import deque
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from enum import Enum
-from typing import Any, Optional
+from datetime import UTC, datetime
+from enum import StrEnum
+from typing import Any
 
 import aiosqlite
 
@@ -38,14 +38,14 @@ __all__ = [
 ]
 
 
-class EpistemicStatus(str, Enum):
+class EpistemicStatus(StrEnum):
     CONJECTURE = "conjecture"
     TEST_PASSED = "test_passed"
     REFUTED = "refuted"
     OBSOLETE = "obsolete"
 
 
-class TaintStatus(str, Enum):
+class TaintStatus(StrEnum):
     """Tri-state causal taint (Ω₁₃)."""
 
     CLEAN = "clean"
@@ -53,7 +53,7 @@ class TaintStatus(str, Enum):
     TAINTED = "tainted"
 
 
-class Confidence(str, Enum):
+class Confidence(StrEnum):
     """Ordinal confidence levels C1 (lowest) -> C5 (highest)."""
 
     C1 = "C1"
@@ -104,7 +104,7 @@ class LedgerEvent:
     status: EpistemicStatus
     trust_score: float
     created_at: str
-    last_revalidated_at: Optional[str] = None
+    last_revalidated_at: str | None = None
     tainted: bool = False
 
 
@@ -190,10 +190,10 @@ class AsyncCausalGraph:
     async def record_edge(
         self,
         fact_id: int,
-        parent_id: Optional[int] = None,
-        signal_id: Optional[int] = None,
+        parent_id: int | None = None,
+        signal_id: int | None = None,
         edge_type: str = "triggered_by",
-        project: Optional[str] = None,
+        project: str | None = None,
         tenant_id: str = "default",
     ) -> None:
         await self.conn.execute(
@@ -208,7 +208,7 @@ class AsyncCausalGraph:
         cursor = await self.conn.execute("PRAGMA table_info(facts)")
         return {row[1] for row in await cursor.fetchall()}
 
-    async def _metadata_column(self) -> Optional[str]:
+    async def _metadata_column(self) -> str | None:
         cols = await self._fact_columns()
         if "metadata" in cols:
             return "metadata"
@@ -223,7 +223,7 @@ class AsyncCausalGraph:
         floor_to_c1: bool = True,
     ) -> TaintReport:
         """Propagates causal taint (Ω₁₃) from a source fact to all descendants."""
-        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+        now = datetime.fromtimestamp(time.time(), tz=UTC).isoformat()
         meta_col = await self._metadata_column()
         fact_cols = await self._fact_columns()
         has_tenant = "tenant_id" in fact_cols
@@ -314,7 +314,7 @@ class AsyncCausalGraph:
                 fact_sql += f", {meta_col}"
             fact_sql += f" FROM facts WHERE id IN ({local_placeholders})"
 
-            params = list(chunk)
+            params: list[Any] = list(chunk)
             if has_tenant:
                 fact_sql += " AND tenant_id = ?"
                 params.append(tenant_id)
@@ -554,8 +554,8 @@ class AsyncCausalOracle:
     async def find_parent_signal(
         conn: aiosqlite.Connection,
         tenant_id: str = "default",
-        project: Optional[str] = None,
-    ) -> Optional[int]:
+        project: str | None = None,
+    ) -> int | None:
         try:
             bus = AsyncSignalBus(conn)
             recent = await bus.history(tenant_id=tenant_id, project=project, limit=5)
@@ -574,8 +574,8 @@ class CausalOracle:
     def find_parent_signal(
         db_path: str,
         tenant_id: str = "default",
-        project: Optional[str] = None,
-    ) -> Optional[int]:
+        project: str | None = None,
+    ) -> int | None:
         try:
             with connect(db_path) as conn:
                 bus = SignalBus(conn)
@@ -589,8 +589,8 @@ class CausalOracle:
 
 
 def link_causality(
-    meta: Optional[dict[str, Any]],
-    signal_id: Optional[int],
+    meta: dict[str, Any] | None,
+    signal_id: int | None,
 ) -> dict[str, Any]:
     """Attach causal metadata to a fact's meta dictionary."""
     m = meta or {}

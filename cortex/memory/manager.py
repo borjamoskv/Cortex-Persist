@@ -571,7 +571,7 @@ class CortexMemoryManager:
         _testing = os.environ.get("CORTEX_TESTING")
         try:
             await asyncio.wait_for(self._bg_queue.join(), timeout=timeout)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             logger.error("MemoryManager: wait_for_background timed out after %ds", timeout)
             if _testing:
                 self._cancel_background_tasks()
@@ -579,8 +579,9 @@ class CortexMemoryManager:
     def _cancel_background_tasks(self) -> None:
         """Cancel pending tasks and workers aggressively to prevent event loop leaks."""
         logger.warning("Canceling all background workers and Glial Daemon.")
-        if self._memory_os and getattr(self._memory_os, "_glial_daemon_task", None):
-            self._memory_os._glial_daemon_task.cancel()
+        glial_daemon_task = getattr(self._memory_os, "_glial_daemon_task", None)
+        if glial_daemon_task is not None:
+            glial_daemon_task.cancel()
 
         for worker in self._bg_workers:
             if not worker.done():

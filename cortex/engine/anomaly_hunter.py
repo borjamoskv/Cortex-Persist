@@ -10,7 +10,7 @@ import asyncio
 import logging
 import time
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from cortex.engine.models import Fact
@@ -73,7 +73,7 @@ class AnomalyHunterEngine:
 
     async def run_full_scan(self) -> dict:
         """Entry point NightShift: escaneo completo en paralelo."""
-        threshold = datetime.fromtimestamp(time.time(), tz=timezone.utc) - self.window
+        threshold = datetime.fromtimestamp(time.time(), tz=UTC) - self.window
         # Fetching facts from the last 24h
         time_filter = threshold.isoformat()
 
@@ -115,8 +115,11 @@ class AnomalyHunterEngine:
                 if not cause_ts:
                     continue
 
-                # type: ignore
-                effect_ts = datetime.fromisoformat(fact.created_at.replace("Z", "+00:00"))
+                created_at = fact.created_at
+                if not created_at:
+                    continue
+
+                effect_ts = datetime.fromisoformat(created_at.replace("Z", "+00:00"))
 
                 if cause_ts > effect_ts:
                     inversions.append(
@@ -262,7 +265,7 @@ class AnomalyHunterEngine:
                     "facts_involved": anomaly.facts_involved,
                     "suggested_action": anomaly.suggested_action,
                     "auto_generated": True,
-                    "nightshift_session": datetime.fromtimestamp(time.time(), tz=timezone.utc)
+                    "nightshift_session": datetime.fromtimestamp(time.time(), tz=UTC)
                     .date()
                     .isoformat(),
                 },

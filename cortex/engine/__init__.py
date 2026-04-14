@@ -7,7 +7,7 @@ import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 import aiosqlite
 import sqlite_vec
@@ -54,6 +54,8 @@ from cortex.telemetry.metrics import metrics
 logger = logging.getLogger("cortex.engine.guards")
 # Limit the maximum number of tags per fact.
 MAX_TAGS_PER_FACT = 20
+
+
 # We use the unified GuardPipeline for AX-II logic.
 class CortexEngine(
     SearchMixin,
@@ -422,24 +424,28 @@ class CortexEngine(
         query: str,
         project: str = "",
         limit: int = 3,
+        tenant_id: str = "default",
     ) -> list:
         """Recall causal episodes matching a query.
         Returns full causal DAGs, not isolated facts.
         """
         from cortex.memory.episodic import CausalTracer
+        tenant_id = self._resolve_tenant(tenant_id)
         async with self.session() as conn:
             tracer = CausalTracer(conn)
-            return await tracer.recall_episode(query, project, limit)
+            return await tracer.recall_episode(query, project, limit, tenant_id=tenant_id)
     async def trace_episode(
         self,
         fact_id: int,
         max_depth: int | None = None,
+        tenant_id: str = "default",
     ):
         """Trace the full causal DAG from a given fact ID."""
         from cortex.memory.episodic import CausalTracer
+        tenant_id = self._resolve_tenant(tenant_id)
         async with self.session() as conn:
             tracer = CausalTracer(conn)
-            return await tracer.trace_episode(fact_id, max_depth)
+            return await tracer.trace_episode(fact_id, max_depth, tenant_id=tenant_id)
     # ─── Backward Compatibility Aliases & Delegation ──────────────
     async def store(self, *args, **kwargs):
         self._synthesize_skill("store")
@@ -490,9 +496,11 @@ class CortexEngine(
     async def vote_v2(self, *args, **kwargs):
         return await self.consensus.vote_v2(*args, **kwargs)
     async def get_votes(self, *args, **kwargs):
-        return await self.consensus.get_votes(*args, **kwargs)
+        consensus = cast(Any, self.consensus)
+        return await consensus.get_votes(*args, **kwargs)
     async def verify_vote_ledger(self, *args, **kwargs):
-        return await self.consensus.verify_vote_ledger(*args, **kwargs)
+        consensus = cast(Any, self.consensus)
+        return await consensus.verify_vote_ledger(*args, **kwargs)
     async def propagate_taint(self, fact_id: int, tenant_id: str = "default"):
         """Propagate causal taint through the tenant-scoped causality graph."""
         from cortex.engine.causality import AsyncCausalGraph

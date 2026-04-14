@@ -54,13 +54,19 @@ class AutoCrystallizer:
 
         prompt = CRYSTALLIZATION_PROMPT.format(content=content)
 
-        # Invoke the LLM with the crystallization instructions
-        refined = await self._llm.generate(
+        # Invoke the LLM with the crystallization instructions.
+        # LLMManager exposes `complete()`, so keep the call aligned with the
+        # supported surface and fall back to the raw content if unavailable.
+        refined = await self._llm.complete(
             prompt,
-            model_tag=model_tag,
+            system="Eres un cristalizador de CORTEX. Devuelve solo el texto refinado.",
             temperature=0.0,  # Deterministic synthesis
             max_tokens=len(content) // 2 + 100,  # Enforce compression
         )
+
+        if refined is None:
+            logger.warning("⚠️ LLM unavailable during crystallization. Using raw content.")
+            return content
 
         refined = refined.strip()
 
