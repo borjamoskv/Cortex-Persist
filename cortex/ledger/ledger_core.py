@@ -34,6 +34,21 @@ from cortex.utils.canonical import (
 
 logger = logging.getLogger("cortex.ledger")
 
+# ── Rust acceleration (optional) ─────────────────────────────────────────────
+# When the `cortex_rs` native extension is installed (built via maturin from
+# engine-rs/), all SHA-256 and Merkle-root work is delegated to Rust, which
+# releases the GIL and avoids blocking the async event loop.  If the module is
+# not present the pure-Python / hashlib path is used transparently.
+try:
+    import cortex_rs as _cortex_rs
+
+    _RUST_AVAILABLE = True
+    logger.debug("cortex_rs Rust extension loaded — using hardware-accelerated crypto")
+except ImportError:
+    _cortex_rs = None  # type: ignore[assignment]
+    _RUST_AVAILABLE = False
+    logger.debug("cortex_rs not available — falling back to pure-Python hashlib")
+
 
 @dataclass(frozen=True)
 class MerkleNode:
@@ -46,7 +61,14 @@ class MerkleNode:
 
 
 class MerkleTree:
-    """High-performance Merkle Tree for batch transaction verification."""
+    """High-performance Merkle Tree for batch transaction verification.
+
+    When the ``cortex_rs`` Rust extension is installed, ``root_hash`` is
+    computed entirely in Rust (GIL released), enabling non-blocking use
+    from the async event loop.  The full node-tree structure (``layers``,
+    ``get_proof``, ``verify_proof``) is always built in Python so that the
+    public API remains unchanged regardless of whether Rust is available.
+    """
 
     def __init__(self, leaves: list[str]):
         if not leaves:
@@ -107,6 +129,19 @@ class MerkleTree:
             else:
                 current = hashlib.sha256((current + sibling_hash).encode()).hexdigest()
         return current == root_hash
+
+
+def compute_merkle_root(hashes: list[str]) -> str | None:
+    """Compute a Merkle root from a list of hex-encoded leaf hashes.
+
+    Delegates to the Rust extension when available (GIL released),
+    otherwise falls back to the pure-Python ``MerkleTree`` implementation.
+    """
+    if not hashes:
+        return None
+    if _RUST_AVAILABLE:
+        return _cortex_rs.merkle_root(hashes)
+    return MerkleTree(hashes).root_hash
 
 
 class SemanticMerkleTree:
@@ -362,8 +397,7 @@ class SovereignLedger:
             return None
 
         hashes = [r[1] for r in rows]
-        tree = MerkleTree(hashes)
-        root = tree.root_hash
+        root = compute_merkle_root(hashes)
         start_id, end_id = rows[0][0], rows[-1][0]
 
         self.db.execute(
@@ -393,8 +427,7 @@ class SovereignLedger:
                     return None
 
                 hashes = [r[1] for r in rows]
-                tree = MerkleTree(hashes)
-                root = tree.root_hash
+                root = compute_merkle_root(hashes)
                 start_id, end_id = rows[0][0], rows[-1][0]
 
                 await conn.execute(
@@ -466,7 +499,7 @@ class SovereignLedger:
                     (start, end),
                 )
                 hashes = [r[0] for r in list(await c.fetchall())]
-                computed_root = MerkleTree(hashes).root_hash
+                computed_root = compute_merkle_root(hashes)
                 if computed_root != stored_root:
                     violations.append({"range": f"{start}-{end}", "type": "MERKLE_MISMATCH"})
 

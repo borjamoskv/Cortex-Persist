@@ -1,0 +1,18 @@
+[build-system]
+requires = ["maturin>=1.0,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "cortex-rs"
+version = "0.1.0"
+description = "Rust-accelerated cryptographic primitives for CORTEX Persist (SHA-256, Merkle Trees, Ed25519)."
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+
+[tool.maturin]
+# Build the cdylib Python extension (module-name must match the #[pymodule] fn name).
+module-name = "cortex_rs"
+# Enable the PyO3 extension-module linker mode for the cdylib target.
+features = ["extension-module"]
+# Only build the library target, not the binary.
+bindings = "pyo3"

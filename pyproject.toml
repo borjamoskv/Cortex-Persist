@@ -71,6 +71,7 @@ dev = [
     "httpx>=0.27",
     "ruff>=0.11.0",
     "z3-solver>=4.13.0",
+    "maturin>=1.0,<2.0",
 ]
 adk = [
     "google-adk>=0.5.0",
@@ -155,3 +156,17 @@ exclude = [
 ]
 reportMissingImports = "warning"
 reportPrivateImportUsage = "none"
+
+# ── Rust Extension (cortex_rs) ────────────────────────────────────────────────
+# Build and install the Rust extension from the engine-rs/ directory:
+#
+#   pip install maturin
+#   cd engine-rs && maturin develop --features extension-module   # dev / editable
+#   cd engine-rs && maturin build --release --features extension-module  # release wheel
+#
+# The extension is optional: all call-sites fall back to pure-Python hashlib /
+# cryptography when cortex_rs is not installed.
+[tool.cortex.rust_extension]
+manifest_path = "engine-rs/Cargo.toml"
+module_name = "cortex_rs"
+features = ["extension-module"]

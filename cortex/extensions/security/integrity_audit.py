@@ -8,6 +8,7 @@ and detects orphaned/tampered facts.
 
 from __future__ import annotations
 
+import base64
 import hashlib
 import logging
 import time
@@ -28,6 +29,20 @@ __all__ = [
     "ChainStatus",
     "TamperedFact",
 ]
+
+# ── Rust acceleration (optional) ─────────────────────────────────────────────
+# Batch Ed25519 verification is CPU-bound and blocks the async event loop when
+# done purely in Python.  The `cortex_rs` native extension releases the GIL for
+# the entire batch, dramatically increasing throughput at scale.
+try:
+    import cortex_rs as _cortex_rs
+
+    _RUST_AVAILABLE = True
+    logger.debug("cortex_rs Rust extension loaded — batch Ed25519 via Rust")
+except ImportError:
+    _cortex_rs = None  # type: ignore[assignment]
+    _RUST_AVAILABLE = False
+    logger.debug("cortex_rs not available — falling back to per-fact Python verification")
 
 
 # ═══════════════════════════════════════
@@ -273,7 +288,12 @@ class IntegrityAuditor:
                 status.is_valid = False
 
     async def _verify_signatures(self, facts: list[Any]) -> list[TamperedFact]:
-        """Verify Ed25519 signatures on signed facts."""
+        """Verify Ed25519 signatures on signed facts.
+
+        When ``cortex_rs`` is available the entire batch is verified in Rust
+        (GIL released), otherwise falls back to per-fact verification via the
+        ``cryptography`` library.
+        """
         failures: list[TamperedFact] = []
 
         try:
@@ -290,8 +310,90 @@ class IntegrityAuditor:
             logger.info("No signing key configured — signature verification skipped")
             return failures
 
+        # ── Rust batch path ──────────────────────────────────────────────────
+        if _RUST_AVAILABLE and signer.public_key_b64:
+            return self._verify_signatures_rust(facts, signer)
+
+        # ── Pure-Python fallback ─────────────────────────────────────────────
         for fact in facts:
             self._verify_single_signature(fact, signer, failures, SignatureVerificationError)
+
+        return failures
+
+    def _verify_signatures_rust(self, facts: list[Any], signer: Any) -> list[TamperedFact]:
+        """Batch-verify Ed25519 signatures using the Rust extension (GIL released)."""
+        from cortex.extensions.security.signatures import _canonical_payload
+
+        failures: list[TamperedFact] = []
+
+        # Decode the signer's public key once.
+        try:
+            pub_key_bytes = base64.b64decode(signer.public_key_b64)
+        except (ValueError, TypeError) as exc:
+            logger.warning("Failed to decode public key for batch verification: %s", exc)
+            return failures
+
+        # Build parallel lists: messages, public_keys, signatures.
+        valid_facts: list[Any] = []
+        messages: list[bytes] = []
+        public_keys: list[bytes] = []
+        signatures: list[bytes] = []
+
+        for fact in facts:
+            sig_b64 = fact["signature"]
+            if not sig_b64:
+                continue
+            fact_hash = fact["hash"] or ""
+            content = fact["content"] or ""
+            try:
+                sig_bytes = base64.b64decode(sig_b64)
+                payload = _canonical_payload(content, fact_hash)
+            except (ValueError, TypeError):
+                # Malformed base64 — record as failure immediately.
+                failures.append(
+                    TamperedFact(
+                        fact_id=fact["id"],
+                        issue="signature_invalid",
+                        expected="valid_ed25519",
+                        actual="MALFORMED_BASE64",
+                        content_preview=content[:50],
+                    )
+                )
+                continue
+
+            valid_facts.append(fact)
+            messages.append(payload)
+            public_keys.append(pub_key_bytes)
+            signatures.append(sig_bytes)
+
+        if not valid_facts:
+            return failures
+
+        try:
+            results = _cortex_rs.verify_ed25519_batch(messages, public_keys, signatures)
+        except (ValueError, RuntimeError) as exc:
+            logger.warning("Rust batch verification failed, falling back per-fact: %s", exc)
+            # Graceful degradation: verify individually using the Python signer.
+            from cortex.extensions.security.signatures import SignatureVerificationError
+
+            for fact in valid_facts:
+                self._verify_single_signature(
+                    fact, signer, failures, SignatureVerificationError
+                )
+            return failures
+
+        for fact, is_valid in zip(valid_facts, results, strict=False):
+            if not is_valid:
+                content = fact["content"] or ""
+                failures.append(
+                    TamperedFact(
+                        fact_id=fact["id"],
+                        issue="signature_invalid",
+                        expected="valid_ed25519",
+                        actual="FAILED",
+                        content_preview=content[:50],
+                    )
+                )
 
         return failures
 

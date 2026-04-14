@@ -36,6 +36,9 @@ dist/
 build/
 .eggs/
 
+# ── Rust build artifacts ──────────────────────────
+engine-rs/target/
+
 # ── IDE & Editor ──────────────────────────────────
 .idea/
 .vscode/
