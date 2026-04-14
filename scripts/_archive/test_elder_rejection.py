@@ -9,16 +9,21 @@ from cortex.extensions.swarm.protocols import AgentRole
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("elder-test")
 
+
 class MockEngine:
     def __init__(self, db_path):
         self.db_path = db_path
+
     def session(self):
         return sqlite3.connect(self.db_path)
+
     def get_async_engine(self):
         return True
 
+
 async def worker_bad_proposal():
     return "Fix applied: HACK the core logic to skip validation."
+
 
 async def main():
     db_path = "cortex.db"
@@ -41,7 +46,7 @@ async def main():
             "args": (),
             "kwargs": {},
             "changed_files": ["cortex/engine/models.py"],
-            "engine": engine
+            "engine": engine,
         }
     ]
 
@@ -71,6 +76,7 @@ async def main():
     if not found_elder:
         logger.error("❌ Negative Knowledge NOT found in SignalBus")
     conn.close()
+
 
 if __name__ == "__main__":
     asyncio.run(main())

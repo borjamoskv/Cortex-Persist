@@ -196,7 +196,7 @@ class LLMProvider(BaseProvider):
                 cache_key=prefix_cache_key,
                 system_prompt=system,
                 model=model_name.replace("models/", ""),
-                ttl_seconds=cache_config.get("ttl_seconds", 3600)
+                ttl_seconds=cache_config.get("ttl_seconds", 3600),
             )
             if remote_cache:
                 # Bypass OpenAI compatible endpoint altogether, fire native REST to save exergy
@@ -205,7 +205,7 @@ class LLMProvider(BaseProvider):
                     model_name=model_name,
                     remote_cache=remote_cache,
                     temperature=temperature,
-                    max_tokens=max_tokens
+                    max_tokens=max_tokens,
                 )
 
         # Persistent Cache Check (Ω₂)
@@ -266,23 +266,20 @@ class LLMProvider(BaseProvider):
         await _get_quota_manager().acquire(tokens=1)
         model_stripped = model_name.replace("models/", "")
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_stripped}:generateContent?key={self._api_key}"
-        
+
         headers = {"Content-Type": "application/json"}
         payload = {
             "cachedContent": remote_cache,
-            "contents": [{"role": "user", "parts": [{"text": prompt}]}]
+            "contents": [{"role": "user", "parts": [{"text": prompt}]}],
         }
-        
+
         # O1/O3 handling skip, Gemini needs standard generation config
-        payload["generationConfig"] = {
-            "temperature": temperature,
-            "maxOutputTokens": max_tokens
-        }
-        
+        payload["generationConfig"] = {"temperature": temperature, "maxOutputTokens": max_tokens}
+
         await apply_causal_jitter(tokens_estimate=50)
         async with self._semaphore:
             response = await self._client.post(url, headers=headers, json=payload)
-            
+
         try:
             response.raise_for_status()
             data = response.json()
@@ -443,14 +440,14 @@ class LLMProvider(BaseProvider):
         # Stealth / Causal logic (Ω₂₃)
         if getattr(prompt, "stealth", False) and messages:
             noise_id = hashlib.sha256(f"{time.time()}{random.random()}".encode()).hexdigest()[:8]
-            
+
             # Find last user message, preserving system prompt (KV cache) purity
             for msg in reversed(messages):
                 if msg["role"] == "user":
                     msg["content"] += f"\n\n<!-- ctx:{noise_id} -->"
                     msg["content"] = (" " * random.randint(0, 2)) + msg["content"]
                     break
-                    
+
             await apply_causal_jitter(tokens_estimate=50)
 
         payload: dict[str, Any] = {
@@ -473,7 +470,7 @@ class LLMProvider(BaseProvider):
                 cache_key=prefix_cache_key,
                 system_prompt=system_extraction,
                 model=model_name.replace("models/", ""),
-                ttl_seconds=cache_config.get("ttl_seconds", 3600)
+                ttl_seconds=cache_config.get("ttl_seconds", 3600),
             )
             if remote_cache:
                 # Find the user prompt (assumes single shot or joins string)
@@ -483,7 +480,7 @@ class LLMProvider(BaseProvider):
                     model_name=model_name,
                     remote_cache=remote_cache,
                     temperature=prompt.temperature,
-                    max_tokens=prompt.max_tokens
+                    max_tokens=prompt.max_tokens,
                 )
 
         # Persistent Cache Check (Ω₂)

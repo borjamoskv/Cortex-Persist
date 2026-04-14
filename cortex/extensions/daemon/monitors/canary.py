@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 import os
 import sqlite3
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -76,7 +77,7 @@ class CanaryMonitor:
                         similarity_score=1.0,
                         confidence="C5",
                         summary="CANARY_TRIPPED: Active HoneyPot hit detected.",
-                        timestamp=datetime.now(timezone.utc).isoformat(),
+                        timestamp=datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
                     )
                     alerts.append(alert)
                     self._last_stats[path] = current_val

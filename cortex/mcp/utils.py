@@ -49,7 +49,7 @@ class MCPMetrics:
         self.cache_misses = 0
         self.errors_total = 0
         self.rejected_immune = 0
-        self.start_at = datetime.now(timezone.utc).isoformat()
+        self.start_at = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
 
     def record_request(self, cached: bool = False):
         self.requests_total += 1

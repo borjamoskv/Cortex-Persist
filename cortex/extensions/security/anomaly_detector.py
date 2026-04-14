@@ -171,7 +171,7 @@ class AnomalyDetector:
         baseline = ProjectBaseline(
             project=project,
             total_events=len(events),
-            last_updated=datetime.now(timezone.utc).isoformat(),
+            last_updated=datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
         )
 
         if len(events) >= 10:

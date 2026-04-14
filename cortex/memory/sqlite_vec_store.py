@@ -6,6 +6,9 @@ Enforces partition by tenant_id and incorporates OUROBOROS success_rate
 and temporal decay directly in the embedding retrieval.
 """
 
+# ruff: noqa: S608
+# This module uses validated dynamic sqlite identifiers for tenant/project sharded tables.
+
 from __future__ import annotations
 
 import asyncio
@@ -189,7 +192,8 @@ class SovereignVectorStoreL2:
             ]
 
             cursor = self._conn.execute(
-                "SELECT name FROM sqlite_master WHERE type='table' AND name LIKE 'facts_meta%'"
+                "SELECT name FROM sqlite_master "
+                "WHERE type='table' AND name LIKE 'facts_meta%' AND sql NOT LIKE '%VIRTUAL%'"
             )
             tables = [row[0] for row in cursor.fetchall()]
 
@@ -311,9 +315,10 @@ class SovereignVectorStoreL2:
                     f"ON {vec_void_mih_tb}(s{i})"
                 )
 
+            # Dynamic table identifiers below come from _get_domain_tables(),
+            # which constrains them to sanitized sqlite identifiers.
             # Migrate only distilled axioms (is_diamond = 1)
-            conn.execute(
-                f"""
+            shard_meta_sql = f"""
                 INSERT INTO {meta_tb} (
                     rowid, id, tenant_id, project_id, content, timestamp,
                     is_diamond, is_bridge, confidence, success_rate,
@@ -325,20 +330,17 @@ class SovereignVectorStoreL2:
                     cognitive_layer, parent_decision_id, metadata, exergy_score
                 FROM facts_meta
                 WHERE tenant_id = ? AND project_id = ? AND is_diamond = 1
-            """,
-                (tenant_id, project_id),
-            )
+            """
+            conn.execute(shard_meta_sql, (tenant_id, project_id))
 
-            conn.execute(
-                f"""
+            shard_vector_sql = f"""
                 INSERT INTO {vec_tb}(rowid, embedding)
                 SELECT v.rowid, v.embedding
                 FROM vec_facts v
                 JOIN facts_meta m ON v.rowid = m.rowid
                 WHERE m.tenant_id = ? AND m.project_id = ? AND m.is_diamond = 1
-            """,
-                (tenant_id, project_id),
-            )
+            """
+            conn.execute(shard_vector_sql, (tenant_id, project_id))
 
             # Aura-Omega Acceleration: Dedicated indexes for the shard
             conn.execute(
@@ -399,15 +401,16 @@ class SovereignVectorStoreL2:
                 meta_tb, vec_tb, vec_void_tb, mih_tb = self._get_domain_tables(
                     conn, fact.tenant_id, fact.project_id
                 )
-                cursor.execute(
-                    f"""
+                insert_meta_sql = f"""
                     INSERT INTO {meta_tb} (
                         id, tenant_id, project_id, content, timestamp,
                         is_diamond, is_bridge, confidence, success_rate,
                         cognitive_layer, parent_decision_id, metadata, exergy_score,
                         category, quadrant, storage_tier, facet_version
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    """,
+                    """
+                cursor.execute(
+                    insert_meta_sql,
                     (
                         fact.id,
                         fact.tenant_id,
@@ -432,27 +435,36 @@ class SovereignVectorStoreL2:
                 if self._vector_enabled:
                     # Store 1-bit Vector (Legion Recall)
                     if vec_void_tb:
+                        insert_void_sql = (
+                            f"INSERT INTO {vec_void_tb}(rowid, embedding) VALUES (?, ?)"  # noqa: S608
+                        )
                         cursor.execute(
-                            f"INSERT INTO {vec_void_tb}(rowid, embedding) VALUES (?, ?)",
+                            insert_void_sql,
                             (rowid, binary_bytes),
                         )
                         # MIH Indexing
                         from cortex.utils.void_mih import slice_void_bit
 
                         shards = slice_void_bit(binary_bytes)
-                        cursor.execute(
+                        insert_mih_sql = (
                             f"INSERT INTO {mih_tb} (rowid, s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, "
                             "s10, s11, s12, s13, s14, s15) "
-                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+                        )
+                        cursor.execute(
+                            insert_mih_sql,
                             (rowid, *shards),
                         )
 
                     # Store int8 Vector (HdrRecovery Reranking)
                     # Only skip if tier is explicitly COLD to save space
                     if fact.storage_tier != "COLD" and vec_tb:
-                        cursor.execute(
+                        insert_int8_sql = (
                             f"INSERT INTO {vec_tb}(rowid, embedding) "
-                            f"VALUES (?, vec_quantize_int8(?, 'unit'))",
+                            "VALUES (?, vec_quantize_int8(?, 'unit'))"
+                        )
+                        cursor.execute(
+                            insert_int8_sql,
                             (rowid, int8_bytes),
                         )
                 conn.commit()
@@ -524,7 +536,8 @@ class SovereignVectorStoreL2:
             use_void = False
             if vec_void_tb:
                 try:
-                    cursor.execute(f"SELECT count(1) FROM {vec_void_tb}")
+                    count_void_sql = f"SELECT count(1) FROM {vec_void_tb}"
+                    cursor.execute(count_void_sql)
                     use_void = cursor.fetchone()[0] > 0
                 except sqlite3.OperationalError:
                     use_void = False

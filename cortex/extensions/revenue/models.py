@@ -6,6 +6,7 @@ revenue reports, and the pluggable vector protocol.
 
 from __future__ import annotations
 
+import time
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -62,7 +63,9 @@ class Opportunity:
     source_url: str = ""
     meta: dict[str, Any] = field(default_factory=dict)
     id: str = field(default_factory=lambda: uuid.uuid4().hex[:12])
-    created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    created_at: str = field(
+        default_factory=lambda: datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+    )
 
     @property
     def roi_score(self) -> float:
@@ -112,7 +115,9 @@ class ExecutionResult:
     error: str = ""
     duration_seconds: float = 0.0
     meta: dict[str, Any] = field(default_factory=dict)
-    executed_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    executed_at: str = field(
+        default_factory=lambda: datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+    )
 
     @property
     def net_profit(self) -> Decimal:

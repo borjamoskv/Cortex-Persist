@@ -1,6 +1,7 @@
 import logging
 import sqlite3
-from typing import Any
+from collections.abc import Mapping
+from typing import Any, Protocol, cast
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
@@ -50,6 +51,41 @@ class SearchMemoryRequest(BaseModel):
 
 router = APIRouter(tags=["facts"])
 logger = logging.getLogger("uvicorn.error")
+
+
+class _FactLike(Protocol):
+    """Minimal fact surface used by this router."""
+
+    def to_dict(self) -> dict[str, Any]: ...
+
+
+class _VotesEngine(Protocol):
+    """Engine surface required for vote listing."""
+
+    async def get_votes(self, fact_id: int, tenant_id: str = "default") -> list[dict[str, Any]]: ...
+
+
+class _TaintEngine(Protocol):
+    """Engine surface required for taint propagation."""
+
+    async def propagate_taint(self, fact_id: int, tenant_id: str) -> Any: ...
+
+
+def _fact_data(fact: object) -> dict[str, Any]:
+    """Normalize Fact-like objects to a mutable mapping for response shaping."""
+    if isinstance(fact, Mapping):
+        return dict(fact)
+
+    to_dict = getattr(fact, "to_dict", None)
+    if callable(to_dict):
+        data = to_dict()
+        if isinstance(data, Mapping):
+            return dict(data)
+
+    raise HTTPException(
+        status_code=500,
+        detail=f"Unsupported fact payload type: {type(fact).__name__}",
+    )
 
 
 @router.post("/v1/facts", response_model=StoreResponse)
@@ -127,26 +163,29 @@ async def recall_facts(
     _ = request
     facts = await engine.recall(project=project, tenant_id=auth.tenant_id, limit=limit)
 
-    return [
-        FactResponse(
-            id=f["id"],
-            project=f["project"],
-            content=f["content"],
-            fact_type=f["fact_type"],
-            tags=f["tags"],
-            confidence=f["confidence"],
-            valid_from=f["valid_from"],
-            valid_until=f["valid_until"],
-            source=f["source"],  # type: ignore[reportCallIssue]
-            meta=f["meta"],  # type: ignore[reportCallIssue]
-            created_at=f["created_at"],
-            updated_at=f["updated_at"],
-            tx_id=f["tx_id"],
-            hash=f["hash"],
-            consensus_score=f.get("consensus_score", 1.0),
+    response: list[FactResponse] = []
+    for fact in facts:
+        fact_data = _fact_data(fact)
+        response.append(
+            FactResponse(
+                id=fact_data["id"],
+                project=fact_data["project"],
+                content=fact_data["content"],
+                fact_type=fact_data["fact_type"],
+                tags=fact_data["tags"],
+                confidence=fact_data["confidence"],
+                valid_from=fact_data["valid_from"],
+                valid_until=fact_data["valid_until"],
+                source=fact_data["source"],
+                meta=fact_data["meta"],
+                created_at=fact_data["created_at"],
+                updated_at=fact_data["updated_at"],
+                tx_id=fact_data["tx_id"],
+                hash=fact_data["hash"],
+                consensus_score=fact_data.get("consensus_score", 1.0),
+            )
         )
-        for f in facts
-    ]
+    return response
 
 
 @router.get("/v1/facts", response_model=list[FactResponse])
@@ -158,26 +197,30 @@ async def list_all_facts(
     # Retrieve all active facts across projects (scoped to tenant).
     facts = await engine.recall(project="", tenant_id=auth.tenant_id, limit=limit)
 
-    return [
-        FactResponse(
-            id=f["id"],
-            project=f["project"],
-            content=f["content"],
-            fact_type=f["fact_type"],
-            tags=f["tags"],
-            confidence=f.get("confidence") or "C3",
-            valid_from=f.get("valid_from"),
-            valid_until=f.get("valid_until"),
-            source=f.get("source"),
-            meta=f.get("meta"),
-            created_at=str(f.get("created_at", "")),
-            updated_at=str(f.get("updated_at", "")) or str(f.get("created_at", "")),
-            tx_id=f.get("tx_id"),
-            hash=f.get("hash"),
-            consensus_score=float(f.get("consensus_score", 1.0)),
+    response: list[FactResponse] = []
+    for fact in facts:
+        fact_data = _fact_data(fact)
+        response.append(
+            FactResponse(
+                id=fact_data["id"],
+                project=fact_data["project"],
+                content=fact_data["content"],
+                fact_type=fact_data["fact_type"],
+                tags=fact_data["tags"],
+                confidence=fact_data.get("confidence") or "C3",
+                valid_from=fact_data.get("valid_from"),
+                valid_until=fact_data.get("valid_until"),
+                source=fact_data.get("source"),
+                meta=fact_data.get("meta"),
+                created_at=str(fact_data.get("created_at", "")),
+                updated_at=str(fact_data.get("updated_at", ""))
+                or str(fact_data.get("created_at", "")),
+                tx_id=fact_data.get("tx_id"),
+                hash=fact_data.get("hash"),
+                consensus_score=float(fact_data.get("consensus_score", 1.0)),
+            )
         )
-        for f in facts
-    ]
+    return response
 
 
 @router.post("/v1/facts/search", response_model=list[FactResponse])
@@ -227,21 +270,26 @@ async def get_fact_history(
         chain = await engine.get_causal_chain(
             fact_id=fact_id, direction="up", max_depth=50, tenant_id=auth.tenant_id
         )
-        return [
-            FactResponse(
-                id=f["id"],
-                project=f["project"],
-                content=f["content"],
-                fact_type=f["fact_type"],
-                tags=f.get("tags", []),
-                confidence=f.get("confidence", "C3"),
-                created_at=f["created_at"],
-                updated_at=f.get("updated_at") or f["created_at"],
-                hash=f.get("hash"),
-                tx_id=f.get("tx_id"),
+        response: list[FactResponse] = []
+        for fact in chain:
+            fact_data = _fact_data(fact)
+            response.append(
+                FactResponse(
+                    id=fact_data["id"],
+                    project=fact_data["project"],
+                    content=fact_data["content"],
+                    fact_type=fact_data["fact_type"],
+                    tags=fact_data.get("tags", []),
+                    confidence=fact_data.get("confidence", "C3"),
+                    created_at=fact_data["created_at"],
+                    updated_at=fact_data.get("updated_at") or fact_data["created_at"],
+                    hash=fact_data.get("hash"),
+                    tx_id=fact_data.get("tx_id"),
+                )
             )
-            for f in chain
-        ]
+        return response
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error("Failed to fetch fact history: %s", e)
         raise HTTPException(status_code=500, detail="Failed to fetch history") from e
@@ -255,7 +303,7 @@ async def propagate_taint(
 ) -> dict:
     """Trigger Ω₁₃ taint propagation from a compromised/invalidated fact."""
     try:
-        report = await engine.propagate_taint(fact_id, tenant_id=auth.tenant_id)
+        report = await cast(_TaintEngine, engine).propagate_taint(fact_id, tenant_id=auth.tenant_id)
         return {
             "source_id": report.source_fact_id,
             "affected_count": report.affected_count,
@@ -306,13 +354,14 @@ async def cast_vote(
 
         # Confidence is updated automatically by manager
         updated_fact = await engine.get_fact(fact_id, tenant_id=auth.tenant_id)
+        updated_fact_data = _fact_data(updated_fact) if updated_fact else None
 
         return VoteResponse(
             fact_id=fact_id,
             agent=agent_id,
             vote=req.value,
             new_consensus_score=score,
-            confidence=updated_fact["confidence"] if updated_fact else "unknown",
+            confidence=updated_fact_data["confidence"] if updated_fact_data else "unknown",
         )
     except HTTPException:
         raise
@@ -350,13 +399,14 @@ async def cast_vote_v2(
 
         # Re-fetch for updated confidence
         updated_fact = await engine.get_fact(fact_id, tenant_id=auth.tenant_id)
+        updated_fact_data = _fact_data(updated_fact) if updated_fact else None
 
         return VoteResponse(
             fact_id=fact_id,
             agent=req.agent_id,
             vote=req.vote,
             new_consensus_score=score,
-            confidence=updated_fact["confidence"] if updated_fact else "unknown",
+            confidence=updated_fact_data["confidence"] if updated_fact_data else "unknown",
         )
     except HTTPException:
         raise
@@ -384,7 +434,7 @@ async def list_votes(
             status_code=404, detail=get_trans("error_fact_not_found", lang).format(id=fact_id)
         )
 
-    votes = await engine.get_votes(fact_id)
+    votes = await cast(_VotesEngine, engine).get_votes(fact_id, tenant_id=auth.tenant_id)
 
     return [
         {"agent": v["agent"], "vote": v["vote"], "timestamp": v.get("created_at")} for v in votes
@@ -405,8 +455,11 @@ async def deprecate_fact(
         raise HTTPException(
             status_code=404, detail=get_trans("error_fact_not_found", lang).format(id=fact_id)
         )
-
-    if fact.get("tenant_id", fact.get("project")) != auth.tenant_id and "tenant_id" in fact:
+    fact_data = _fact_data(fact)
+    if (
+        fact_data.get("tenant_id", fact_data.get("project")) != auth.tenant_id
+        and "tenant_id" in fact_data
+    ):
         raise HTTPException(status_code=403, detail=get_trans("error_forbidden", lang))
 
     success = await engine.deprecate(fact_id, reason="api deprecated")
@@ -426,23 +479,24 @@ async def get_fact_by_id(
     fact = await engine.get_fact(fact_id, tenant_id=auth.tenant_id)
     if not fact:
         raise HTTPException(status_code=404, detail=f"Fact #{fact_id} not found")
+    fact_data = _fact_data(fact)
 
     return FactResponse(
-        id=fact["id"],
-        project=fact["project"],
-        content=fact["content"],
-        fact_type=fact["fact_type"],
-        tags=fact["tags"],
-        confidence=fact.get("confidence", "C3"),
-        valid_from=fact.get("valid_from"),
-        valid_until=fact.get("valid_until"),
-        source=fact.get("source"),
-        meta=fact.get("meta"),
-        created_at=str(fact.get("created_at", "")),
-        updated_at=str(fact.get("updated_at", "")),
-        tx_id=fact.get("tx_id"),
-        hash=fact.get("hash"),
-        consensus_score=float(fact.get("consensus_score", 1.0)),
+        id=fact_data["id"],
+        project=fact_data["project"],
+        content=fact_data["content"],
+        fact_type=fact_data["fact_type"],
+        tags=fact_data["tags"],
+        confidence=fact_data.get("confidence", "C3"),
+        valid_from=fact_data.get("valid_from"),
+        valid_until=fact_data.get("valid_until"),
+        source=fact_data.get("source"),
+        meta=fact_data.get("meta"),
+        created_at=str(fact_data.get("created_at", "")),
+        updated_at=str(fact_data.get("updated_at", "")),
+        tx_id=fact_data.get("tx_id"),
+        hash=fact_data.get("hash"),
+        consensus_score=float(fact_data.get("consensus_score", 1.0)),
     )
 
 
@@ -461,7 +515,12 @@ async def get_causal_chain(
             direction=direction,
             max_depth=max_depth,
         )
-        return chain
+        chain_data = []
+        for f in chain:
+            fact_data = _fact_data(f)
+            fact_data["causal_depth"] = fact_data.get("causal_depth", 0)
+            chain_data.append(fact_data)
+        return chain_data
     except (sqlite3.Error, OSError, RuntimeError):
         logger.exception("Causal chain query failed for #%d", fact_id)
         raise HTTPException(

@@ -302,8 +302,7 @@ class ConflictResolver:
             method=ResolutionMethod.TRIANGULATION,
             consensus_level=consensus,
             reasoning=(
-                f"Factual triangulation: {option_votes[winner_id]}/{total_votes} "
-                "sources confirm."
+                f"Factual triangulation: {option_votes[winner_id]}/{total_votes} sources confirm."
             ),
             total_weight_for=float(option_votes[winner_id]),
             total_weight_against=float(total_votes - option_votes[winner_id]),

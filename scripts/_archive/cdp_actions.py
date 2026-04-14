@@ -8,12 +8,19 @@ from mac_control.cdp_engine import MacControlOmega
 
 logging.basicConfig(level=logging.ERROR)
 
+
 async def main():
     parser = argparse.ArgumentParser(description="CDP Action Orchestrator for Mac Control.")
     parser.add_argument("target", help="URL substring to match the Chrome tab.")
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--click", type=str, help="CSS selector to click.")
-    group.add_argument("--type", type=str, nargs=2, metavar=('SELECTOR', 'TEXT'), help="CSS selector and text to type.")
+    group.add_argument(
+        "--type",
+        type=str,
+        nargs=2,
+        metavar=("SELECTOR", "TEXT"),
+        help="CSS selector and text to type.",
+    )
     group.add_argument("--evaluate", type=str, help="JS code to evaluate.")
     group.add_argument("--screenshot", type=str, help="Take a screenshot and save to path.")
 
@@ -46,6 +53,7 @@ async def main():
         sys.exit(1)
     finally:
         await ctl.close()
+
 
 if __name__ == "__main__":
     asyncio.run(main())

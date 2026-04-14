@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+import time
 from collections import deque
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -222,7 +223,7 @@ class AsyncCausalGraph:
         floor_to_c1: bool = True,
     ) -> TaintReport:
         """Propagates causal taint (Ω₁₃) from a source fact to all descendants."""
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
         meta_col = await self._metadata_column()
         fact_cols = await self._fact_columns()
         has_tenant = "tenant_id" in fact_cols

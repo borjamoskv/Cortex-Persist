@@ -32,17 +32,16 @@ from cortex.engine.legion_vectors import (
 )
 from cortex.engine.squadrons import GhostHuntAgent, IntegrityAgent, KineticAgent
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 logger = logging.getLogger("decathlon")
 
 
 class DecathlonAgentAdapter(SwarmAgent):
     """Unified wrapper for Vector-based and SwarmAgent-based specialists."""
 
-    def __init__(self, agent_id: str, bus: AsyncSignalBus, name: str, specialist: Any, engine: Any = None):
+    def __init__(
+        self, agent_id: str, bus: AsyncSignalBus, name: str, specialist: Any, engine: Any = None
+    ):
         super().__init__(agent_id, bus, engine)
         self.specialist_name = name
         self.specialist = specialist
@@ -83,7 +82,7 @@ class DecathlonAgentAdapter(SwarmAgent):
                     target=clean_target,
                     status=inner_signal.status,
                     payload=inner_signal.payload,
-                    metrics=inner_signal.metrics
+                    metrics=inner_signal.metrics,
                 )
             else:
                 findings = [f"Unsupported specialist type: {type(self.specialist)}"]
@@ -97,7 +96,7 @@ class DecathlonAgentAdapter(SwarmAgent):
             target=clean_target,
             status=status,
             payload={"findings": findings},
-            metrics={"found_count": len(findings)}
+            metrics={"found_count": len(findings)},
         )
 
 
@@ -120,7 +119,7 @@ class DecathlonSquadron(Squadron):
             ("epistemic_justice", EpistemicJustice()),
             ("integrity_linter", IntegrityAgent("linter", self.bus, engine)),
             ("kinetic_api", KineticAgent("api_engager", self.bus, engine)),
-            ("ghost_hunter", GhostHuntAgent("ghost_hunter", self.bus, engine))
+            ("ghost_hunter", GhostHuntAgent("ghost_hunter", self.bus, engine)),
         ]
 
     def _create_agent(self, agent_id: str) -> SwarmAgent:
@@ -195,7 +194,10 @@ class DecathlonSquadron(Squadron):
         report = await super()._crystallize(signals)
 
         print("\n" + "=" * 80)
-        print("💎 SOVEREIGN DECATHLON REPORT: " + (report["raw"][0]["target"] if report["raw"] else "N/A"))
+        print(
+            "💎 SOVEREIGN DECATHLON REPORT: "
+            + (report["raw"][0]["target"] if report["raw"] else "N/A")
+        )
         print("=" * 80)
 
         # Sort signals to keep report consistent
@@ -229,6 +231,7 @@ class DecathlonSquadron(Squadron):
 async def main():
     # Attempt to initialize engine if env permits
     from cortex.engine import CortexEngine
+
     engine = CortexEngine(":memory:", auto_embed=False)
     await engine.init_db()
 

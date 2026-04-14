@@ -6,6 +6,7 @@ import asyncio
 import logging
 import os
 import sys
+import time
 import uuid
 from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
@@ -25,6 +26,7 @@ logger = logging.getLogger("cortex.extensions.swarm.manager")
 
 _SESSION_TYPE_CACHE: dict[int, bool] = {}
 
+
 class WorktreeState:
     """Metadata for an active or pending worktree."""
 
@@ -32,7 +34,7 @@ class WorktreeState:
         self.id = worktree_id
         self.branch_name = branch_name
         self.path = path
-        self.created_at = datetime.now(timezone.utc).isoformat()
+        self.created_at = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
         self.status = "provisioning"
         self.pid = os.getpid()
         self.task: asyncio.Task[Any] | None = None
@@ -134,7 +136,7 @@ class SwarmManager:
                 ),
                 "total_worktrees": len(self.worktrees),
                 "agent_pids": list({w.pid for w in self.worktrees.values()}),
-                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "timestamp": datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
             }
 
 
@@ -175,6 +177,7 @@ class CapatazOrchestrator:
         self.budget = get_budget_manager()
 
         from cortex.extensions.swarm.kv_prefix_registry import get_kv_registry
+
         self._kv_registry = get_kv_registry()
 
         logger.info("Capataz: Orchestrating mission %s", self.mission_id)
@@ -202,16 +205,16 @@ class CapatazOrchestrator:
                 role=role,
                 payload=payload or {"discovery": result},
             )
-            
+
             engine_id = id(engine)
             if engine_id not in _SESSION_TYPE_CACHE:
                 import inspect
+
                 _sess_func = getattr(engine.session, "__wrapped__", engine.session)
-                _SESSION_TYPE_CACHE[engine_id] = (
-                    inspect.iscoroutinefunction(_sess_func) 
-                    or inspect.isasyncgenfunction(_sess_func)
-                )
-            
+                _SESSION_TYPE_CACHE[engine_id] = inspect.iscoroutinefunction(
+                    _sess_func
+                ) or inspect.isasyncgenfunction(_sess_func)
+
             if _SESSION_TYPE_CACHE[engine_id]:
                 async with engine.session() as conn:
                     bus = AsyncSignalBus(conn)
@@ -363,9 +366,9 @@ class CapatazOrchestrator:
         """AX-042: Ping provider to cache prefix before the swarm hits it concurrently."""
         try:
             from cortex.extensions.llm.provider import LLMProvider
-            
+
             logger.info("[%s] Capataz: Pre-heating KV Cache for swarm...", self.mission_id)
-            
+
             # Register the prefix so we get the deterministic cache_key
             slot = self._kv_registry.register(
                 mission_id=self.mission_id,
@@ -374,14 +377,14 @@ class CapatazOrchestrator:
                 provider_name="unknown",
                 model_name="unknown",
             )
-            
+
             # Fire a dummy query to force prefill / cachedContent creation remotely
             provider = LLMProvider()
             await provider.complete(
-                prompt="[CORTEX KV Preheat]", 
-                system=system_prompt, 
+                prompt="[CORTEX KV Preheat]",
+                system=system_prompt,
                 max_tokens=1,
-                prefix_cache_key=slot.cache_key
+                prefix_cache_key=slot.cache_key,
             )
             logger.info("[%s] Capataz: KV Cache Preheat successful.", self.mission_id)
         except Exception as e:
@@ -391,13 +394,13 @@ class CapatazOrchestrator:
         """Deploy multiple agents in parallel."""
         # Ouroboros KV Cache Prefetch (AX-042)
         from collections import Counter
-        
+
         system_prompts = []
         for td in task_definitions:
             kwargs = td.get("kwargs", {})
             if "system" in kwargs and kwargs["system"]:
                 system_prompts.append(kwargs["system"])
-                
+
         if len(system_prompts) > 1:
             counter = Counter(system_prompts)
             most_common = counter.most_common(1)[0]

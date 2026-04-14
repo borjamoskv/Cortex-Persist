@@ -24,6 +24,7 @@ DB_PATH = ROOT_DIR / "cortex.db"
 
 console = Console()
 
+
 def get_swarm_status():
     """Fetches agent status from the local ledger."""
     try:
@@ -42,6 +43,7 @@ def get_swarm_status():
         return agents, fact_count
     except Exception:
         return [], 0
+
 
 def make_grid(agents):
     """Generates the 10x10 visual grid."""
@@ -67,6 +69,7 @@ def make_grid(agents):
         grid_table.add_row(*row_cells)
     return grid_table
 
+
 def make_layout() -> Layout:
     layout = Layout()
     layout.split_column(
@@ -80,6 +83,7 @@ def make_layout() -> Layout:
     )
     return layout
 
+
 async def main():
     layout = make_layout()
 
@@ -88,18 +92,22 @@ async def main():
             agents, fact_count = get_swarm_status()
 
             # Header
-            layout["header"].update(Panel(
-                f"[bold blue]VOID-BEYOND Swarm Monitor[/] | "
-                f"Exergy: 100% | Time: {datetime.now().strftime('%H:%M:%S')}",
-                border_style="blue"
-            ))
+            layout["header"].update(
+                Panel(
+                    f"[bold blue]VOID-BEYOND Swarm Monitor[/] | "
+                    f"Exergy: 100% | Time: {datetime.now().strftime('%H:%M:%S')}",
+                    border_style="blue",
+                )
+            )
 
             # Grid
-            layout["grid"].update(Panel(
-                make_grid(agents),
-                title="[bold]Legion 100 Grid (Reputation Pulse)[/]",
-                border_style="white"
-            ))
+            layout["grid"].update(
+                Panel(
+                    make_grid(agents),
+                    title="[bold]Legion 100 Grid (Reputation Pulse)[/]",
+                    border_style="white",
+                )
+            )
 
             # Stats
             stats_table = Table(show_header=False, expand=True)
@@ -109,19 +117,20 @@ async def main():
             slashed = sum(1 for a in agents if a["reputation_score"] < 0.5)
             stats_table.add_row("Slashed Nodes", f"[bold red]{slashed}[/]")
 
-            layout["stats"].update(Panel(
-                stats_table,
-                title="[bold]Cortex Metrics[/]",
-                border_style="magenta"
-            ))
+            layout["stats"].update(
+                Panel(stats_table, title="[bold]Cortex Metrics[/]", border_style="magenta")
+            )
 
             # Footer
-            layout["footer"].update(Panel(
-                "[dim]Press Ctrl+C to exit. Monitoring VOID-BEYOND alignment...[/]",
-                border_style="blue"
-            ))
+            layout["footer"].update(
+                Panel(
+                    "[dim]Press Ctrl+C to exit. Monitoring VOID-BEYOND alignment...[/]",
+                    border_style="blue",
+                )
+            )
 
             await asyncio.sleep(0.5)
+
 
 if __name__ == "__main__":
     try:

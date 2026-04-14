@@ -27,17 +27,15 @@ from cortex.engine.squadrons import (
     VoidPhalanx,
 )
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 logger = logging.getLogger("legion_100")
+
 
 def render_grid(signals: list[Any]):
     """Renders a 10x10 visual grid of the 100 agents."""
-    print("\n" + "═"*41)
+    print("\n" + "═" * 41)
     print(" ⚜  LEGION SWARM 100: VISUAL STATUS GRID ⚜")
-    print("═"*41)
+    print("═" * 41)
 
     # Sort signals by agent name to ensure deterministic grid position
     sorted_signals = sorted(signals, key=lambda x: x.agent_id)
@@ -46,18 +44,19 @@ def render_grid(signals: list[Any]):
         if i < len(sorted_signals):
             sig = sorted_signals[i]
             if sig.status == "SUCCESS":
-                char = "💎" # Result found
+                char = "💎"  # Result found
             elif sig.status == "VOID":
-                char = "⚫" # No findings
+                char = "⚫"  # No findings
             elif sig.status == "FAILURE":
-                char = "💀" # Crash
+                char = "💀"  # Crash
             else:
                 char = "⚪"
         else:
             char = "◌"
 
         print(char, end=" " if (i + 1) % 10 != 0 else "\n")
-    print("═"*41 + "\n")
+    print("═" * 41 + "\n")
+
 
 async def main():
     engine = CortexEngine(":memory:", auto_embed=False)
@@ -83,7 +82,7 @@ async def main():
         p_gold.deploy(target_root),
         p_lead.deploy(target_root),
         p_void.deploy(target_root),
-        p_sovereign.deploy(target_root)
+        p_sovereign.deploy(target_root),
     )
 
     # 3. Aggregate all signals for the grid
@@ -116,6 +115,7 @@ async def main():
                     print(f"   [!] {s.agent_id} on {s.target}: {finding}")
 
     await engine.close()
+
 
 if __name__ == "__main__":
     asyncio.run(main())

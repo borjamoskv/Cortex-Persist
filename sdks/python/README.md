@@ -1,5 +1,9 @@
 # CORTEX Python SDK
 
+> ⚠️ **Not yet published.** This is an **experimental** thin-client SDK for the CORTEX Persist REST API. It is not published on PyPI and is not the same as `pip install cortex-persist` (the local-first engine).
+>
+> For the local-first engine: `pip install cortex-persist` and `from cortex import CortexEngine`.
+
 Thin, zero-dependency client for the [CORTEX Persist API](https://github.com/borjamoskv/Cortex-Persist).
 
 ## Install

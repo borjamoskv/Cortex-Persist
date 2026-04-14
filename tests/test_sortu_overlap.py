@@ -7,9 +7,9 @@ from pathlib import Path
 
 import pytest
 
-_scripts = Path.home() / ".gemini" / "antigravity" / "skills" / "Sortu" / "scripts"
-if str(_scripts) not in sys.path:
-    sys.path.insert(0, str(_scripts))
+_SCRIPTS_DIR = Path(__file__).resolve().parents[1] / "scripts" / "sortu"
+if _SCRIPTS_DIR.exists() and str(_SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(_SCRIPTS_DIR))
 
 from sortu_overlap import OverlapDetector, _cosine_similarity, _tokenize
 

@@ -9,7 +9,7 @@ import pytest
 
 from cortex.compaction.mem0_pipeline import ExergyScore, Mem0Pipeline
 from cortex.extensions.context.hiagent import HiAgentTraceManager
-from cortex.extensions.policy.memory_os import MemoryOS, MemoryTier
+from cortex.extensions.policy.memory_os import EPISODIC_TRACE_LIMIT, MemoryOS, MemoryTier
 
 # ─── Mem0Pipeline ────────────────────────────────────────────────────
 
@@ -97,7 +97,18 @@ class TestMemoryOS:
     async def test_flush_episodic(self, os: MemoryOS):
         await os.write(MemoryTier.EPISODIC, "a", "b", 1.0)
         await os.flush(MemoryTier.EPISODIC)
-        assert os._episodic_traces == []
+        assert len(os._episodic_traces) == 0
+
+    @pytest.mark.asyncio
+    async def test_episodic_traces_are_bounded(self, os: MemoryOS):
+        for idx in range(EPISODIC_TRACE_LIMIT + 5):
+            await os.write(MemoryTier.EPISODIC, f"k{idx}", f"v{idx}", 1.0)
+
+        assert len(os._episodic_traces) == EPISODIC_TRACE_LIMIT
+        assert os._episodic_traces[-1] == {
+            "key": f"k{EPISODIC_TRACE_LIMIT + 4}",
+            "value": f"v{EPISODIC_TRACE_LIMIT + 4}",
+        }
 
     @pytest.mark.asyncio
     async def test_flush_semantic_denied(self, os: MemoryOS):

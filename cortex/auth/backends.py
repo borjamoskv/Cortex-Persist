@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import logging
+import time
 from abc import ABC, abstractmethod
 from typing import Any, Optional
 
@@ -154,7 +155,7 @@ class SQLiteAuthBackend(BaseAuthBackend):
         try:
             await conn.execute(
                 "UPDATE api_keys SET last_used = ? WHERE id = ?",
-                (datetime.now(timezone.utc).isoformat(), key_id),
+                (datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(), key_id),
             )
             await conn.commit()
         except (aiosqlite.Error, OSError) as e:
@@ -256,7 +257,7 @@ class AlloyDBAuthBackend(BaseAuthBackend):
         async with pool.acquire() as conn:
             await conn.execute(
                 "UPDATE api_keys SET last_used = $1 WHERE id = $2",
-                datetime.now(timezone.utc).isoformat(),
+                datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
                 key_id,
             )
 

@@ -22,7 +22,7 @@ class GeminiCacheGateway:
     def __init__(self, api_key: str):
         self._api_key = api_key
         self._base_url = "https://generativelanguage.googleapis.com/v1beta"
-        
+
         # Local state mapping of our cryptographic isolated cache_key -> Gemini remote name
         # Ex: "123abc456..." -> "cachedContents/xxx-yyy-zzz"
         self._local_to_remote: dict[str, str] = {}
@@ -46,7 +46,7 @@ class GeminiCacheGateway:
         # Rough token estimation (1 token approx 4 chars). Minimum required is 32,768 tokens
         # We will attempt creation regardless if close, but we can fast-fail if clearly too small.
         # But for safety in multi-agent generic environments, we just try to create it.
-        # Note: Gemini 1.5 Pro requires 32,768 minimum tokens to cache. 
+        # Note: Gemini 1.5 Pro requires 32,768 minimum tokens to cache.
         # CORTEX typically injects massive context in the system prompt.
         if len(system_prompt) < (GEMINI_CACHE_MIN_TOKENS * 3):
             logger.debug("Gemini cache bypass: System prompt too small (<32k approx)")
@@ -57,40 +57,48 @@ class GeminiCacheGateway:
         url = f"{self._base_url}/cachedContents?key={self._api_key}"
         payload = {
             "model": f"models/{model}",
-            "systemInstruction": {
-                "parts": [{"text": system_prompt}]
-            },
+            "systemInstruction": {"parts": [{"text": system_prompt}]},
             "ttl": f"{ttl_seconds}s",
             # We can label it with our cache_key prefix for management purposes.
-            "displayName": f"cortex-{cache_key[:8]}"
+            "displayName": f"cortex-{cache_key[:8]}",
         }
 
         async with httpx.AsyncClient() as client:
             # Try to create
             try:
-                response = await client.post(url, json=payload, headers={"Content-Type": "application/json"})
-                
+                response = await client.post(
+                    url, json=payload, headers={"Content-Type": "application/json"}
+                )
+
                 if response.status_code == 400 and "too few tokens" in response.text.lower():
                     logger.debug("Gemini cache creation skipped: Too few tokens for caching block")
                     return None
-                    
+
                 response.raise_for_status()
                 data = response.json()
                 remote_name = data.get("name")
                 if remote_name:
-                    logger.info("Gemini Remote Cache Created: %s (TTL: %s)", remote_name, ttl_seconds)
+                    logger.info(
+                        "Gemini Remote Cache Created: %s (TTL: %s)", remote_name, ttl_seconds
+                    )
                     self._local_to_remote[cache_key] = remote_name
                     return remote_name
 
             except httpx.HTTPStatusError as e:
-                logger.warning("Gemini cache creation failed: %s %s", e.response.status_code, e.response.text[:200])
+                logger.warning(
+                    "Gemini cache creation failed: %s %s",
+                    e.response.status_code,
+                    e.response.text[:200],
+                )
                 # Fallback to None (standard inference will take over)
             except Exception as e:
                 logger.warning("Gemini cache HTTP execution error: %s", e)
-                
+
         return None
 
+
 _GEMINI_GATEWAYS: dict[str, GeminiCacheGateway] = {}
+
 
 def get_gemini_gateway(api_key: str) -> GeminiCacheGateway:
     """True singleton provider for GeminiCacheGateway per API Key."""

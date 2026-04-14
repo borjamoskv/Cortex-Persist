@@ -90,12 +90,12 @@ class TestContextCacheManager:
             eviction_policy=EvictionPolicy.LRU,
         )
         e1 = mgr.create(project="t", provider="g", model="m", token_count=100)
-        time.sleep(0.01)
+        time.sleep(0.01)  # noqa: TID251
         e2 = mgr.create(project="t", provider="g", model="m", token_count=200)
 
         # Access e1 to make it recently used
         mgr.get(e1.cache_id)
-        time.sleep(0.01)
+        time.sleep(0.01)  # noqa: TID251
 
         # This should evict e2 (least recently used)
         e3 = mgr.create(project="t", provider="g", model="m", token_count=300)

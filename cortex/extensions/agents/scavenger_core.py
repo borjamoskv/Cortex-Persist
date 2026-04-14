@@ -8,6 +8,7 @@ to acquire structural materials with zero lethal or legal friction.
 from __future__ import annotations
 
 import logging
+import time
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -124,7 +125,7 @@ class ScavengerAgent:
         """Internal ledger commitment via L3."""
         evt = MemoryEvent(  # type: ignore[reportCallIssue]
             event_id=uuid.uuid4().hex,
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.fromtimestamp(time.time(), tz=timezone.utc),
             role=role,
             content=content,
             session_id=self.session_id,

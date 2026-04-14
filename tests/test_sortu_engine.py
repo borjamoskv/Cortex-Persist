@@ -5,14 +5,15 @@ from __future__ import annotations
 import json
 import sqlite3
 import sys
+import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
 
-_scripts = Path.home() / ".gemini" / "antigravity" / "skills" / "Sortu" / "scripts"
-if str(_scripts) not in sys.path:
-    sys.path.insert(0, str(_scripts))
+_SCRIPTS_DIR = Path(__file__).resolve().parents[1] / "scripts" / "sortu"
+if _SCRIPTS_DIR.exists() and str(_SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(_SCRIPTS_DIR))
 
 from sortu_engine import SortuEngine
 from sortu_models import (
@@ -195,7 +196,7 @@ class TestQuarantineSweep:
         assert record.state == SortuState.ACTIVE
 
         # Sweep with future time
-        future = datetime.now(tz=timezone.utc) + timedelta(days=10)
+        future = datetime.fromtimestamp(time.time(), tz=timezone.utc) + timedelta(days=10)
         quarantined = engine.quarantine_sweep(now=future)
         assert len(quarantined) == 1
         assert quarantined[0].to_state == SortuState.QUARANTINED
@@ -223,11 +224,11 @@ class TestTombstoneSweep:
         _record = engine.forge(inv)
 
         # Quarantine it
-        future = datetime.now(tz=timezone.utc) + timedelta(days=5)
+        future = datetime.fromtimestamp(time.time(), tz=timezone.utc) + timedelta(days=5)
         engine.quarantine_sweep(now=future)
 
         # Tombstone it (grace_days=7 from TTL expiration)
-        far_future = datetime.now(tz=timezone.utc) + timedelta(days=30)
+        far_future = datetime.fromtimestamp(time.time(), tz=timezone.utc) + timedelta(days=30)
         tombstoned = engine.tombstone_sweep(grace_days=7, now=far_future)
         assert len(tombstoned) == 1
         assert tombstoned[0].to_state == SortuState.TOMBSTONED
@@ -243,7 +244,7 @@ class TestPurgeSweep:
         )
         engine.forge(inv)
 
-        far = datetime.now(tz=timezone.utc) + timedelta(days=100)
+        far = datetime.fromtimestamp(time.time(), tz=timezone.utc) + timedelta(days=100)
         engine.quarantine_sweep(now=far)
         engine.tombstone_sweep(grace_days=7, now=far)
         purged = engine.purge_sweep(purge_after_days=30, now=far)

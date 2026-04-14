@@ -7,6 +7,7 @@ Extracted from trust_tools.py to keep file size under 300 LOC.
 from __future__ import annotations
 
 import logging
+import time
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
@@ -99,7 +100,7 @@ def _register_compliance_report(mcp: FastMCP, ctx: _MCPContext) -> None:
         ledger = ImmutableLedger(ctx.pool)  # type: ignore[reportArgumentType]
         integrity = await ledger.audit_integrity_async()
 
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
 
         lines = [
             "╔══════════════════════════════════════════════════╗",

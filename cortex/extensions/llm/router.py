@@ -7,7 +7,6 @@ Implementa Strategy + Circuit Breaker + ROP (Ω₂ Landauer split).
 from __future__ import annotations
 
 import asyncio
-import hashlib
 import logging
 import time
 from collections.abc import Sequence
@@ -255,11 +254,15 @@ class CortexLLMRouter:
         # Thermal Heat-Sink: coalesce identical concurrent requests (Ω₂)
         # Fast tuple hashing instead of slow f"{dict}" serialization
         wm_hash = hash(tuple((m.get("role"), m.get("content")) for m in prompt.working_memory))
-        prompt_key = str(hash((
-            hash(prompt.system_instruction) if prompt.system_instruction else 0,
-            wm_hash,
-            prompt.intent
-        )))
+        prompt_key = str(
+            hash(
+                (
+                    hash(prompt.system_instruction) if prompt.system_instruction else 0,
+                    wm_hash,
+                    prompt.intent,
+                )
+            )
+        )
 
         if prompt_key in self._inflight:
             logger.debug(
@@ -297,6 +300,7 @@ class CortexLLMRouter:
             # Implement Cache-Aware Routing (Zero-Recompute Policy)
             try:
                 from cortex.extensions.swarm.kv_prefix_registry import get_kv_registry
+
                 registry = get_kv_registry()
                 hot_providers = registry.check_cache_affinity(prompt.system_instruction)
                 if hot_providers:
@@ -426,9 +430,7 @@ class CortexLLMRouter:
             errors.append(f"Primary ({self._primary.provider_name}): {res_primary.error}")  # type: ignore[reportAttributeAccessIssue]
         else:
             if self._primary.provider_name in self._evicted:
-                errors.append(
-                    f"Primary ({self._primary.provider_name}): Skipped (Evicted via 401)"
-                )
+                errors.append(f"Primary ({self._primary.provider_name}): Skipped (Evicted via 401)")
             else:
                 errors.append(
                     f"Primary ({self._primary.provider_name}): "

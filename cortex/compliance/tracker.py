@@ -12,6 +12,7 @@ Usage:
 from __future__ import annotations
 
 import logging
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -97,7 +98,7 @@ class ComplianceTracker:
         self._ensure_init()
 
         proj = project or self._default_project
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
 
         eu_meta: dict[str, Any] = {
             "eu_ai_act": {
@@ -196,7 +197,7 @@ class ComplianceTracker:
             },
             "integrity": integrity,
             "facts_summary": facts_summary,
-            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "generated_at": datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
             "project": proj,
         }
 

@@ -20,7 +20,7 @@ def test_flake_lexicographical_sorting():
     gen = SovereignFlake(node_id=1)
 
     id1 = gen.next_lexicographic_id()
-    time.sleep(0.002)  # force sleep across real ms
+    time.sleep(0.002)  # noqa: TID251  # force sleep across real ms
     id2 = gen.next_lexicographic_id()
 
     assert isinstance(id1, str)

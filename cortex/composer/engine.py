@@ -88,7 +88,7 @@ class ComposerEngine:
             )
 
             res = await self.router.execute_resilient(prompt)
-            if not res.is_ok():
+            if isinstance(res, Err):
                 logger.error("Error en router de síntesis: %s", res.error)
                 last_error = res.error or "Unknown synthesis error"
                 attempt += 1
@@ -119,7 +119,7 @@ class ComposerEngine:
                 logger.info("📸 [COMPOSER] Ejecutando QA Visual...")
                 qa_res = await self.auditor.audit_component(mock_html)
 
-            if qa_res.is_ok():
+            if not isinstance(qa_res, Err):
                 logger.info("💎 [COMPOSER] Estructura Estética VERIFICADA en intento %d.", attempt)
                 return Ok(files)
 

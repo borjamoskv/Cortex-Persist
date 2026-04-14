@@ -19,6 +19,12 @@ from pathlib import Path
 from typing import Optional
 
 from cortex.extensions.daemon.alerts import AlertHandlerMixin
+from cortex.extensions.daemon.core_support import (
+    init_advanced_monitors,
+    init_background_agents,
+    init_core_monitors,
+    init_external_oracles,
+)
 from cortex.extensions.daemon.healing import HealingMixin
 from cortex.extensions.daemon.loops_mixin import LoopsMixin
 from cortex.extensions.daemon.models import (
@@ -26,7 +32,6 @@ from cortex.extensions.daemon.models import (
     CONFIG_FILE,
     CORTEX_DB,
     CORTEX_DIR,
-    DEFAULT_CERT_WARN_DAYS,
     DEFAULT_COOLDOWN,
     DEFAULT_DISK_WARN_MB,
     DEFAULT_INTERVAL,
@@ -36,27 +41,10 @@ from cortex.extensions.daemon.models import (
     DaemonStatus,
 )
 from cortex.extensions.daemon.monitors import (
-    AutoImmuneMonitor,
-    CertMonitor,
     CloudSyncMonitor,
-    CompactionMonitor,
     DiskMonitor,
     EngineHealthCheck,
-    EpistemicMonitor,
-    EvaluationMonitor,
-    GhostWatcher,
-    MemorySyncer,
-    NeuralIntentMonitor,
-    PerceptionMonitor,
-    SecurityMonitor,
-    SignalMonitor,
-    SiteMonitor,
-    TombstoneMonitor,
-    UnifiedMejoraloMonitor,
-    WorkflowMonitor,
 )
-from cortex.extensions.daemon.sidecar.sentinel_monitor.monitor import SentinelMonitor
-from cortex.extensions.daemon.sidecar.telemetry.fiat_oracle import FiatOracle
 
 # ─── Sovereign Async Subsystems (v2.0) ─────────────────────────────────
 try:
@@ -88,14 +76,6 @@ except ImportError:
     _API_AVAILABLE = False
 
 try:
-    from cortex.extensions.aether.daemon import AetherDaemon, AetherMonitor
-    from cortex.extensions.aether.queue import TaskQueue
-
-    _AETHER_AVAILABLE = True
-except ImportError:
-    _AETHER_AVAILABLE = False
-
-try:
     from cortex.extensions.daemon.centaur.heartbeat import HeartbeatDaemon
     from cortex.extensions.daemon.centaur.queue import EntropicQueue
     from cortex.extensions.swarm.centauro_engine import CentauroEngine
@@ -124,13 +104,6 @@ try:
     _ZERO_PROMPTING_AVAILABLE = True
 except ImportError:
     _ZERO_PROMPTING_AVAILABLE = False
-
-try:
-    from cortex.extensions.daemon.sidecar.telemetry.iot_oracle import IoTOracle
-
-    _IOT_ORACLE_AVAILABLE = True
-except ImportError:
-    _IOT_ORACLE_AVAILABLE = False
 
 try:
     from cortex.extensions.daemon.epistemic_breaker import EpistemicBreakerDaemon
@@ -171,150 +144,13 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
         self._cooldown = file_config.get("cooldown", cooldown)
         self._last_alerts: dict[str, float] = {}
 
-        self._init_core_monitors(file_config, sites, stale_hours, memory_stale_hours)
-        self._init_advanced_monitors(file_config)
-        self._init_external_oracles(file_config, resolved_sites=[])  # sites used in certs
-        self._init_background_agents(file_config)
+        init_core_monitors(self, file_config, sites, stale_hours, memory_stale_hours)
+        init_advanced_monitors(self, file_config)
+        init_external_oracles(self, file_config, resolved_sites=[])  # sites used in certs
+        init_background_agents(self, file_config)
         self._init_autopoiesis(file_config)
         self._init_sovereign_subsystems(file_config)
         self._init_persistence_checkers(file_config)
-
-    def _init_core_monitors(
-        self,
-        file_config: dict,
-        sites: Optional[list[str]],
-        stale_hours: float,
-        memory_stale_hours: float,
-    ) -> None:
-        """Initialize basic status monitors."""
-        resolved_sites = sites or file_config.get("sites", [])
-        self.site_monitor = SiteMonitor(resolved_sites)
-        self.ghost_watcher = GhostWatcher(
-            self.config_dir / "ghosts.json",
-            file_config.get("stale_hours", stale_hours),
-        )
-        self.memory_syncer = MemorySyncer(
-            self.config_dir / "system.json",
-            file_config.get("memory_stale_hours", memory_stale_hours),
-        )
-        self.evaluation_monitor = EvaluationMonitor(db_path=CORTEX_DB)
-        # Shared engine
-        try:
-            from cortex.engine import CortexEngine
-
-            self._shared_engine = CortexEngine()
-        except ImportError:
-            self._shared_engine = None
-
-    def _init_advanced_monitors(self, file_config: dict) -> None:
-        """Initialize optimization and analysis monitors."""
-        self.mejoralo_monitor = UnifiedMejoraloMonitor(
-            projects=file_config.get("auto_mejoralo_projects", {}),
-            interval_seconds=file_config.get("auto_mejoralo_interval", 1800),
-            threshold=90,
-            engine=self._shared_engine,
-            auto_heal=True,
-        )
-        self.compaction_monitor = CompactionMonitor(
-            projects=list(file_config.get("auto_mejoralo_projects", {}).keys()),
-            interval_seconds=file_config.get("compaction_interval", 28800),
-            engine=self._shared_engine,
-        )
-        self.perception_monitor = PerceptionMonitor(
-            workspace=file_config.get("watch_path", str(Path.home() / "cortex")),
-            interval_seconds=file_config.get("perception_interval", 300),
-            engine=self._shared_engine,
-        )
-        self.neural_monitor = NeuralIntentMonitor()
-        self.security_monitor = SecurityMonitor(
-            log_path=file_config.get("security_log_path", "~/.cortex/firewall.log"),
-            threshold=file_config.get("security_threshold", 0.85),
-        )
-        self.workflow_monitor = WorkflowMonitor(
-            ghosts_path=self.config_dir / "ghosts.json",
-            memory_path=self.config_dir / "system.json",
-            db_path=Path(file_config.get("db_path", str(CORTEX_DB))),
-        )
-        self.epistemic_monitor = EpistemicMonitor(
-            engine=self._shared_engine,
-            eval_interval_seconds=file_config.get("epistemic_eval_interval", 600),
-            critical_repair_threshold=file_config.get("epistemic_repair_threshold", 5),
-            decay_velocity_threshold=file_config.get("epistemic_decay_threshold", -0.05),
-            stale_ratio_threshold=file_config.get("epistemic_stale_ratio", 0.20),
-        )
-
-    def _init_external_oracles(self, file_config: dict, resolved_sites: list[str]) -> None:
-        """Initialize oracles and external connectivity monitors."""
-        self.signal_monitor = SignalMonitor(
-            db_path=file_config.get("db_path", str(CORTEX_DB)),
-            engine=self._shared_engine,
-        )
-        self.tombstone_monitor = TombstoneMonitor(
-            db_path=file_config.get("db_path", str(CORTEX_DB))
-        )
-
-        try:
-            from cortex.database.pool import CortexConnectionPool
-            from cortex.engine import CortexEngine as AsyncCortexEngine
-            from cortex.extensions.daemon.sidecar.telemetry import ASTOracle
-
-            db_path = file_config.get("db_path", str(CORTEX_DB))
-            pool = CortexConnectionPool(db_path)
-            self._async_engine = AsyncCortexEngine(pool=pool, db_path=db_path)
-            self.ast_oracle = ASTOracle(
-                engine=self._async_engine,
-                watch_dir=Path(file_config.get("watch_path", str(CORTEX_DIR))),
-            )
-            if _IOT_ORACLE_AVAILABLE:
-                self.iot_oracle = IoTOracle(
-                    engine=self._async_engine,
-                    poll_interval=float(file_config.get("iot_interval", 10.0)),
-                    enable_simulated_sensors=file_config.get("iot_simulated", True),
-                )
-            self.fiat_oracle = FiatOracle(
-                engine=self._shared_engine,
-                interval=file_config.get("fiat_interval", 30.0),
-            )
-            self.sentinel_oracle = SentinelMonitor(
-                check_interval=file_config.get("sentinel_interval", 60),
-            )
-        except ImportError:
-            self._async_engine = None
-            self.ast_oracle = None
-            self.fiat_oracle = None
-            self.sentinel_oracle = None
-
-        cert_hostnames = [
-            h.replace("https://", "").replace("http://", "").split("/")[0]
-            for h in resolved_sites
-            if h.startswith("https://")
-        ]
-        self.cert_monitor = CertMonitor(
-            cert_hostnames,
-            file_config.get("cert_warn_days", DEFAULT_CERT_WARN_DAYS),
-        )
-
-    def _init_background_agents(self, file_config: dict) -> None:
-        """Initialize autonomous background agents like Aether."""
-        # pyright: reportCallIssue=false, reportArgumentType=false, reportOptionalMemberAccess=false  # type: ignore[type-error]
-        self._aether_daemon: Optional[AetherDaemon] = None
-        self.aether_monitor: Optional[AetherMonitor] = None
-        if _AETHER_AVAILABLE and file_config.get("aether_enabled", False):
-            try:
-                aether_queue = TaskQueue()
-                self._aether_daemon = AetherDaemon(
-                    queue=aether_queue,
-                    poll_interval=file_config.get("aether_poll_interval", 60),
-                    max_concurrent=file_config.get("aether_max_concurrent", 2),
-                    llm_provider=file_config.get("aether_llm_provider", "qwen"),
-                    github_token=file_config.get("aether_github_token"),
-                    github_repos=file_config.get("aether_github_repos", []),
-                )
-                self.aether_monitor = AetherMonitor(self._aether_daemon)
-                self.auto_immune_monitor = AutoImmuneMonitor(queue=aether_queue)
-                logger.info("🤖 Aether autonomous agent ENABLED")
-            except Exception as e:  # noqa: BLE001
-                logger.warning("Failed to init Aether daemon: %s", e)
 
     def _init_autopoiesis(self, file_config: dict) -> None:
         """Initialize Heartbeat and metabolism engines."""
@@ -482,8 +318,9 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
                     event_bus=self._event_bus,
                     port=int(file_config.get("api_port", 8741)),
                 )
-                logger.info("🌐 Human Callback API ENABLED (port %s)",
-                            file_config.get("api_port", 8741))
+                logger.info(
+                    "🌐 Human Callback API ENABLED (port %s)", file_config.get("api_port", 8741)
+                )
             except Exception as e:  # noqa: BLE001
                 logger.warning("Failed to init HumanCallbackAPI: %s", e)
 
@@ -501,7 +338,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
     def check(self) -> DaemonStatus:
         """Run all checks once. Returns DaemonStatus."""
         check_start = time.monotonic()
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
         status = DaemonStatus(checked_at=now)
         self._run_monitor(status, "sites", self.site_monitor, self._alert_sites, method="check_all")
         self._run_monitor(status, "stale_ghosts", self.ghost_watcher, self._alert_ghosts)
@@ -609,34 +446,29 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
         # Track uptime in hot state
         if self.hot_state is not None:
             self.hot_state.set("daemon.mode", "sovereign")
-            self.hot_state.set("daemon.started_at", datetime.now(timezone.utc).isoformat())
+            self.hot_state.set(
+                "daemon.started_at",
+                datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+            )
 
         # ─── Spawn all subsystems as async tasks ──────────────────
         tasks: list[asyncio.Task] = []
 
         # Core check loop (replaces the main while loop)
-        tasks.append(asyncio.create_task(
-            self._sovereign_check_loop(interval), name="CheckLoop"
-        ))
+        tasks.append(asyncio.create_task(self._sovereign_check_loop(interval), name="CheckLoop"))
 
         # Scheduler
         if self.scheduler is not None:
             self._register_default_schedules()
-            tasks.append(asyncio.create_task(
-                self.scheduler.run(), name="Scheduler"
-            ))
+            tasks.append(asyncio.create_task(self.scheduler.run(), name="Scheduler"))
 
         # WatchdogHub
         if self.watchdog_hub is not None:
-            tasks.append(asyncio.create_task(
-                self.watchdog_hub.start(), name="WatchdogHub"
-            ))
+            tasks.append(asyncio.create_task(self.watchdog_hub.start(), name="WatchdogHub"))
 
         # Human Callback API
         if self.callback_api is not None:
-            tasks.append(asyncio.create_task(
-                self.callback_api.serve(), name="CallbackAPI"
-            ))
+            tasks.append(asyncio.create_task(self.callback_api.serve(), name="CallbackAPI"))
 
         # Legacy thread-based subsystems that need their own asyncio.run()
         # These are spawned as threads because they have blocking I/O
@@ -722,7 +554,10 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
 
         # Persist final state
         if self.hot_state is not None:
-            self.hot_state.set("daemon.stopped_at", datetime.now(timezone.utc).isoformat())
+            self.hot_state.set(
+                "daemon.stopped_at",
+                datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+            )
 
         logger.info("MOSKV-1 Sovereign Daemon stopped")
 
@@ -752,6 +587,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
 
     def _run_legacy(self, interval: int = DEFAULT_INTERVAL) -> None:
         """Legacy threading-based execution (fallback)."""
+
         def _handle_signal(signum: int, frame: object) -> None:
             sig_name = signal.Signals(signum).name
             logger.info("Received %s, shutting down gracefully...", sig_name)

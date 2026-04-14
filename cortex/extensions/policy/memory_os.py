@@ -1,7 +1,7 @@
+import asyncio
+import hashlib
 from enum import Enum
 from typing import Any
-import hashlib
-import asyncio
 
 VSA_DIMENSION = 10000
 
@@ -64,7 +64,7 @@ class MemoryOS:
         elif tier == MemoryTier.EPISODIC:
             # Map & Bind context into fixed-size VSA tensor (O(1) memory footprint)
             ctx_string = f"{key}:{value}"
-            idx = int(hashlib.sha256(ctx_string.encode('utf-8')).hexdigest(), 16) % VSA_DIMENSION
+            idx = int(hashlib.sha256(ctx_string.encode("utf-8")).hexdigest(), 16) % VSA_DIMENSION
             self._episodic_vsa_tensor[idx] += 1.0
             return True
         elif tier == MemoryTier.SEMANTIC:

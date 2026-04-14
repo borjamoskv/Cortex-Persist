@@ -1,0 +1,26 @@
+{
+  "ignorePatterns": [
+    {
+      "pattern": "^https://img.shields.io"
+    },
+    {
+      "pattern": "^https://codecov.io"
+    },
+    {
+      "pattern": "^https://cortexpersist.com"
+    },
+    {
+      "pattern": "^https://borjamoskv.com"
+    },
+    {
+      "pattern": "^https://moskv.com"
+    },
+    {
+      "pattern": "^http://localhost"
+    }
+  ],
+  "retryOn429": true,
+  "retryCount": 3,
+  "fallbackRetryDelay": "30s",
+  "aliveStatusCodes": [200, 206]
+}

@@ -4,14 +4,15 @@ from __future__ import annotations
 
 import sqlite3
 import sys
+import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
 
-_scripts = Path.home() / ".gemini" / "antigravity" / "skills" / "Sortu" / "scripts"
-if str(_scripts) not in sys.path:
-    sys.path.insert(0, str(_scripts))
+_SCRIPTS_DIR = Path(__file__).resolve().parents[1] / "scripts" / "sortu"
+if _SCRIPTS_DIR.exists() and str(_SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(_SCRIPTS_DIR))
 
 from sortu_ledger import SkillLedger
 from sortu_models import (
@@ -139,7 +140,9 @@ class TestQuarantineCandidates:
     def test_expired_ttl_appears(self, ledger):
         record = SkillRecord.new("old-skill", "1.0", {"x": "1"}, ttl_days=0)
         # Manually set ttl to past
-        record.ttl_expiration = datetime.now(tz=timezone.utc) - timedelta(hours=1)
+        record.ttl_expiration = datetime.fromtimestamp(time.time(), tz=timezone.utc) - timedelta(
+            hours=1
+        )
         ledger.register(record)
 
         # Advance to ACTIVE

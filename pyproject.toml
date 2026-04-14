@@ -1,6 +1,6 @@
 [project]
 name = "cortex-persist"
-version = "0.3.0b2"
+version = "0.3.0b3"
 description = "Cryptographic memory integrity, audit trails, and verifiable lineage for AI agents."
 readme = "README.md"
 license = "Apache-2.0"
@@ -37,7 +37,7 @@ dependencies = [
     "pyobjc-core; sys_platform == 'darwin'",
     "pyobjc-framework-Cocoa; sys_platform == 'darwin'",
     "keyring>=25.7.0",
-    "cryptography>=46.0.5",
+    "cryptography>=46.0.7",
     "watchdog>=6.0.0",
     "pydantic>=2.0",
     "PyYAML>=6.0",
@@ -105,7 +105,7 @@ requires = ["setuptools>=68.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-include = ["cortex*"]
+include = ["cortex", "cortex.*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -138,7 +138,6 @@ ignore = ["E501", "E402", "B008", "W291", "W293", "S", "BLE001", "UP045"]
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 "time.sleep" = { msg = "CORTEX Anti-Pattern: Usa asyncio.sleep() en este repositorio para no bloquear el event loop." }
 "builtins.print" = { msg = "CORTEX Anti-Pattern: Usa standard logging o Rich para emitir trails de auditoría." }
-"datetime.datetime.now" = { msg = "CORTEX Anti-Pattern: Usa datetime aware del timezone (ej. datetime.now(timezone.utc)) para la firma de Taints." }
 
 [tool.pyright]
 pythonVersion = "3.10"
