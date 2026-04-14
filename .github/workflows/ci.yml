@@ -73,19 +73,8 @@ jobs:
             exit 0
           fi
           ruff check "${files[@]}"
-      - name: Ruff lint (PR diff scope)
-        if: steps.scope.outputs.release_only != 'true' && github.event_name == 'pull_request'
-        shell: bash
-        run: |
-          set -euo pipefail
-          mapfile -t files < <(printf '%s\n' "${{ steps.scope.outputs.python_files }}" | sed '/^$/d')
-          if [ "${#files[@]}" -eq 0 ]; then
-            echo "No Python files changed."
-            exit 0
-          fi
-          ruff check "${files[@]}"
       - name: Ruff lint
-        if: steps.scope.outputs.release_only != 'true' && github.event_name != 'pull_request'
+        if: steps.scope.outputs.release_only != 'true'
         run: ruff check cortex/ tests/
       - name: Ruff format check (release-only)
         if: steps.scope.outputs.release_only == 'true'
@@ -98,19 +87,8 @@ jobs:
             exit 0
           fi
           ruff format --check "${files[@]}"
-      - name: Ruff format check (PR diff scope)
-        if: steps.scope.outputs.release_only != 'true' && github.event_name == 'pull_request'
-        shell: bash
-        run: |
-          set -euo pipefail
-          mapfile -t files < <(printf '%s\n' "${{ steps.scope.outputs.python_files }}" | sed '/^$/d')
-          if [ "${#files[@]}" -eq 0 ]; then
-            echo "No Python files changed."
-            exit 0
-          fi
-          ruff format --check "${files[@]}"
       - name: Ruff format check
-        if: steps.scope.outputs.release_only != 'true' && github.event_name != 'pull_request'
+        if: steps.scope.outputs.release_only != 'true'
         run: ruff format --check cortex/ tests/
 
   security:
@@ -191,19 +169,8 @@ jobs:
           }
           Path("sbom.json").write_text(json.dumps(payload) + "\n", encoding="utf-8")
           PY
-      - name: Ruff SAST scan (S-select, PR diff scope)
-        if: steps.scope.outputs.release_only != 'true' && github.event_name == 'pull_request'
-        shell: bash
-        run: |
-          set -euo pipefail
-          mapfile -t files < <(printf '%s\n' "${{ steps.scope.outputs.python_files }}" | sed '/^$/d')
-          if [ "${#files[@]}" -gt 0 ]; then
-            ruff check "${files[@]}" --select S --output-format json -o bandit-report.json
-          else
-            printf '[]\n' > bandit-report.json
-          fi
       - name: Ruff SAST scan (S-select)
-        if: steps.scope.outputs.release_only != 'true' && github.event_name != 'pull_request'
+        if: steps.scope.outputs.release_only != 'true'
         run: ruff check cortex/ --select S --output-format json -o bandit-report.json
       - name: Upload Bandit report
         if: always()
