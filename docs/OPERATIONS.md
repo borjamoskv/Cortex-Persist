@@ -1,6 +1,6 @@
 # Operations — CORTEX Persist
 
-Package: cortex-persist v0.3.0b2 · Engine: v8
+Package: cortex-persist v0.3.0b3 · Engine: v8
 License: Apache-2.0 · Python: >=3.10
 
 > Runtime, maintenance, and troubleshooting procedures.

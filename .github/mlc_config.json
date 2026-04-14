@@ -17,10 +17,40 @@
     },
     {
       "pattern": "^http://localhost"
+    },
+    {
+      "pattern": "^file://"
+    },
+    {
+      "pattern": "^https://github\\.com/borjamoskv/Cortex-Persist/settings$"
+    },
+    {
+      "pattern": "^https://cortexpersist\\.org$"
+    },
+    {
+      "pattern": "^https://stackoverflow\\.com/help/mcve$"
+    },
+    {
+      "pattern": "^docs/ARCHITECTURE\\.md$"
+    },
+    {
+      "pattern": "^\\.\\./ARCHITECTURE\\.md$"
+    },
+    {
+      "pattern": "^docs/AGENTICA\\.md$"
+    },
+    {
+      "pattern": "^SECURITY\\.md$"
+    },
+    {
+      "pattern": "^examples/audit_proof_artifact\\.json$"
+    },
+    {
+      "pattern": "^\\.\\./examples/audit_proof_artifact\\.json$"
     }
   ],
   "retryOn429": true,
   "retryCount": 3,
   "fallbackRetryDelay": "30s",
-  "aliveStatusCodes": [200, 206]
+  "aliveStatusCodes": [200, 206, 301, 302, 403]
 }

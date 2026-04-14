@@ -21,6 +21,9 @@ npm run dev
 
 ## Data sources
 
+You can also install `eslint-plugin-react-x` and `eslint-plugin-react-dom` for
+React-specific lint rules.
+
 Without query params, the app uses embedded mock data.
 
 To load external JSON, pass `data` in the query string:

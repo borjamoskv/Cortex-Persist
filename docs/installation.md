@@ -74,7 +74,7 @@ pip install -e ".[all]"
 
 ```bash
 cortex --version
-# cortex-persist, version 0.3.0b2
+# cortex-persist, version 0.3.0b3
 ```
 
 ---

@@ -80,7 +80,7 @@ asyncio.run(main())
 
 ### Documentación
 
-- [**Arquitectura**](docs/ARCHITECTURE.md) — Sellos Merkle y encadenamiento de hash.
+- [**Arquitectura**](docs/architecture.md) — Sellos Merkle y encadenamiento de hash.
 - [**Seguridad y Confianza**](docs/SECURITY_TRUST_MODEL.md) — Invariantes criptográficas.
 - [**Referencia de API**](docs/api.md) — Documentación completa de SDK y CLI.
 
