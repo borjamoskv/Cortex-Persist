@@ -1,17 +1,51 @@
 #!/bin/bash
 # Sovereign Pre-commit hook v1.0 - Anti-Entropy Protocol
 
-STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep "\.py$" || true)
+set -euo pipefail
 
-if [ -n "$STAGED_FILES" ]; then
+collect_python_files() {
+    local -n target_ref=$1
+    local -n staged_mode_ref=$2
+    local -A seen=()
+    local path=""
+    local staged_files=()
+    local unstaged_files=()
+    local untracked_files=()
+
+    mapfile -t staged_files < <(git diff --cached --name-only --diff-filter=ACMR -- '*.py')
+    if [ ${#staged_files[@]} -gt 0 ]; then
+        target_ref=("${staged_files[@]}")
+        staged_mode_ref=1
+        return
+    fi
+
+    mapfile -t unstaged_files < <(git diff --name-only --diff-filter=ACMR -- '*.py')
+    mapfile -t untracked_files < <(git ls-files --others --exclude-standard -- '*.py')
+
+    target_ref=()
+    for path in "${unstaged_files[@]}" "${untracked_files[@]}"; do
+        if [ -z "$path" ] || [ -n "${seen[$path]+x}" ]; then
+            continue
+        fi
+        seen[$path]=1
+        target_ref+=("$path")
+    done
+    staged_mode_ref=0
+}
+
+PYTHON_FILES=()
+USING_STAGED=0
+collect_python_files PYTHON_FILES USING_STAGED
+
+if [ ${#PYTHON_FILES[@]} -gt 0 ]; then
     echo "⚡ [SOVEREIGN] Purging entropy with Ruff..."
-    
-    # Run formatting and checks
-    ruff format $STAGED_FILES
-    ruff check --fix $STAGED_FILES
-    
-    # Re-stage modified files
-    git add $STAGED_FILES
+
+    ruff format "${PYTHON_FILES[@]}"
+    ruff check --fix "${PYTHON_FILES[@]}"
+
+    if [ "$USING_STAGED" -eq 1 ]; then
+        git add -- "${PYTHON_FILES[@]}"
+    fi
 fi
 
 exit 0
