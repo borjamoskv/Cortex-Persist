@@ -225,6 +225,8 @@ class MemoryArchaeologist:
         from cortex.engine.mutation_engine import MUTATION_ENGINE
 
         old_ids = [str(f["id"]) for f in cluster_facts]
+        if any(str(f.get("tenant_id") or "default") != tenant_id for f in cluster_facts):
+            raise ValueError("Archaeology cluster spans multiple tenants")
         ts = datetime.now(timezone.utc).isoformat()
         new_fact_id = await self.engine.store(
             project=project,
@@ -239,8 +241,6 @@ class MemoryArchaeologist:
 
         placeholders = ",".join("?" for _ in old_ids)
         async with self.engine.session() as conn:
-            if any(str(f.get("tenant_id") or "default") != tenant_id for f in cluster_facts):
-                raise ValueError("Archaeology cluster spans multiple tenants")
             for fact in cluster_facts:
                 await MUTATION_ENGINE.apply(
                     conn,
