@@ -1,8 +1,8 @@
 # Quickstart
 
-Get CORTEX running in 5 minutes.
+Get the CORTEX trust core running in 5 minutes.
 
-> 🐍 **Python demo:** For a self-contained script that walks through the full core flow, run `python examples/demo_canonical.py` after installing.
+> 🐍 **Python demo:** For a self-contained script that walks through the supported trust-core flow, run `python examples/demo_canonical.py` after installing.
 
 ---
 
@@ -14,6 +14,12 @@ Get CORTEX running in 5 minutes.
 pip install cortex-persist
 ```
 
+For local semantic embeddings instead of deterministic fallback vectors:
+
+```bash
+pip install "cortex-persist[embeddings]"
+```
+
 ### Path B: From Source *(development)*
 
 ```bash
@@ -23,11 +29,13 @@ python3 -m venv .venv && source .venv/bin/activate
 pip install -e .
 ```
 
-For the API server and MCP:
+For the API server, MCP, daemon, or YAML-driven authoring surfaces:
 
 ```bash
-pip install cortex-persist[api]
+pip install "cortex-persist[api,mcp,daemon,authoring]"
 ```
+
+The supported base flow is `install -> init -> store -> verify`. Search, recall, MCP, REST, consensus, and SDK usage are extended surfaces; use them once you have the optional runtime pieces you need.
 
 ---
 
@@ -37,7 +45,7 @@ pip install cortex-persist[api]
 cortex init
 ```
 
-This creates `~/.cortex/cortex.db` with the full schema — facts, transactions, embeddings, consensus tables, and more.
+This creates `~/.cortex/cortex.db` with the core ledger/fact schema plus optional vector and extended tables when the runtime supports them.
 
 ---
 
@@ -47,16 +55,16 @@ Every fact is automatically hash-chained into an immutable ledger.
 
 ```bash
 # Store knowledge
-cortex store my-project "Redis uses skip lists for sorted sets" --tags "redis,data-structures"
+cortex memory store my-project "Redis uses skip lists for sorted sets" --tags "redis,data-structures"
 
 # Store a decision (with automatic provenance detection)
-cortex store my-project "We chose FastAPI over Flask for async support" --type decision
+cortex memory store my-project "We chose FastAPI over Flask for async support" --type decision
 
 # Store an error pattern
-cortex store my-project "OOM when batch size > 1024 on 8GB RAM" --type error
+cortex memory store my-project "OOM when batch size > 1024 on 8GB RAM" --type error
 
 # Store with explicit source
-cortex store my-project "Rate limit is 100 req/min" --type config --source "agent:gpt-4"
+cortex memory store my-project "Rate limit is 100 req/min" --type config --source "agent:gpt-4"
 ```
 
 ---
@@ -78,6 +86,8 @@ cortex compliance-report
 ```
 
 ---
+
+The remaining sections cover extended surfaces. They are available in-tree, but they are not the minimal support contract of the slim base install.
 
 ## 5. Search
 

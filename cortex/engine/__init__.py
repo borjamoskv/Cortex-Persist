@@ -13,6 +13,7 @@ import aiosqlite
 import sqlite_vec
 
 from cortex.config import DEFAULT_DB_PATH
+from cortex.database.core import load_sqlite_vec_async
 
 # Lazy imports for runtime managers
 if TYPE_CHECKING:
@@ -94,6 +95,9 @@ class CortexEngine(
         self._ledger = None  # Wave 5: ImmutableLedger (lazy init)
         self._embedder: LocalEmbedder | None = None
         self._memory_manager = None  # Frontera 2: Tripartite Memory (lazy init)
+        self._memory_l1 = None
+        self._memory_l3 = None
+        self._memory_ready = False
         self._persistence = PersistenceSupervisor(self)
         self._system_state = "ACTIVE"
         # Managers are synthesized JIT via properties (Axiom Ω₄)
@@ -361,18 +365,11 @@ class CortexEngine(
                 return self._conn
             from cortex.database.core import connect_async
             self._conn = await connect_async(str(self._db_path))
-            try:
-                await self._conn.enable_load_extension(True)
-                await self._conn.load_extension(sqlite_vec.loadable_path())
-                await self._conn.enable_load_extension(False)
-                self._vec_available = True
-            except (OSError, AttributeError) as e:
-                logger.debug("sqlite-vec extension not available: %s", e)
-                self._vec_available = False
+            self._vec_available = await load_sqlite_vec_async(self._conn)
             await self._ensure_schema_ready(self._conn)
             # Ensure memory subsystem is initialized (L1/L2/L3)
             # This is critical for Active Forgetting (Thalamus Gate)
-            if self._memory_manager is None:
+            if not self._memory_ready:
                 await self._init_memory_subsystem(self._db_path, self._conn)
             return self._conn
     async def _ensure_schema_ready(self, conn: aiosqlite.Connection) -> None:
@@ -571,8 +568,6 @@ class CortexEngine(
         """Initialize database schema. Safe to call multiple times."""
         conn = await self._get_or_create_conn()
         await self._ensure_schema_ready(conn)
-        if self._memory_manager is None:
-            await self._init_memory_subsystem(self._db_path, conn)
         await self._persistence.start()
         metrics.set_engine(self)
         logger.info("CORTEX database initialized (async) at %s", self._db_path)
@@ -617,6 +612,9 @@ class CortexEngine(
             except (asyncio.TimeoutError, Exception):  # noqa: BLE001
                 logger.debug("Memory manager background drain timed out — forcing close")
             self._memory_manager = None
+        self._memory_l1 = None
+        self._memory_l3 = None
+        self._memory_ready = False
         if self._persistence:
             await self._persistence.stop()
         if self._conn:

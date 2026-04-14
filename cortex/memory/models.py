@@ -15,8 +15,12 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Literal
 
-import numpy as np
 from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+try:
+    import numpy as np
+except ImportError:  # pragma: no cover - exercised via subprocess import test
+    np = None
 
 try:
     from cortex.extensions.axioms.topological_id import flake_gen
@@ -220,7 +224,7 @@ class CortexFactModel(BaseModel):
     @field_validator("embedding", mode="before")
     @classmethod
     def _validate_embedding(cls, v: Any) -> Any:
-        if isinstance(v, np.ndarray):
+        if np is not None and isinstance(v, np.ndarray):
             return v.tobytes()
         return v
 

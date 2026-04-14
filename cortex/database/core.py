@@ -38,6 +38,11 @@ from typing import Any, Final
 
 import aiosqlite
 
+try:
+    import sqlite_vec
+except ImportError:  # pragma: no cover - sqlite-vec is a base dependency in release builds
+    sqlite_vec = None
+
 from cortex.utils.errors import DBLockError
 
 __all__ = [
@@ -47,6 +52,7 @@ __all__ = [
     "connect_async_ctx",
     "apply_pragmas_async",
     "apply_pragmas_async_readonly",
+    "load_sqlite_vec_async",
 ]
 
 logger = logging.getLogger("cortex.db")
@@ -284,3 +290,26 @@ async def apply_pragmas_async_readonly(conn: aiosqlite.Connection) -> None:
     await apply_pragmas_async(conn)
     await conn.execute("PRAGMA query_only=1;")
     await conn.commit()
+
+
+async def load_sqlite_vec_async(conn: aiosqlite.Connection) -> bool:
+    """Load sqlite-vec into an async connection when the runtime supports it."""
+    if sqlite_vec is None:
+        return False
+
+    extension_toggle_enabled = False
+    try:
+        await conn.enable_load_extension(True)
+        extension_toggle_enabled = True
+        await conn._execute(sqlite_vec.load, conn._conn)
+    except (AttributeError, OSError, sqlite3.Error) as exc:
+        logger.debug("sqlite-vec not available for async connection: %s", exc)
+        return False
+    finally:
+        if extension_toggle_enabled:
+            try:
+                await conn.enable_load_extension(False)
+            except (AttributeError, OSError, sqlite3.Error):
+                logger.debug("sqlite-vec cleanup skipped for async connection")
+
+    return True

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from importlib.util import find_spec
 from pathlib import Path
 
 import aiosqlite
@@ -41,6 +42,7 @@ class MemoryMixin(EngineMixinBase):
             self._memory_manager = None
             self._memory_l1 = None
             self._memory_l3 = None
+            self._memory_ready = True
             logger.warning("Memory L1/L3 unavailable (degrading to no memory subsystem): %s", e)
             return
 
@@ -73,12 +75,30 @@ class MemoryMixin(EngineMixinBase):
             self._memory_manager = None
             self._memory_l1 = l1
             self._memory_l3 = l3
+            self._memory_ready = True
             logger.debug("Memory subsystem: lite (L1+L3 only, auto_embed=False)")
+            return
+
+        if not getattr(self, "_vec_available", False):
+            self._memory_manager = None
+            self._memory_l1 = l1
+            self._memory_l3 = l3
+            self._memory_ready = True
+            logger.info("Memory subsystem: partial (L1+L3) (optional L2 skipped: sqlite-vec unavailable)")
+            return
+
+        if find_spec("numpy") is None:
+            self._memory_manager = None
+            self._memory_l1 = l1
+            self._memory_l3 = l3
+            self._memory_ready = True
+            logger.info("Memory subsystem: partial (L1+L3) (optional L2 skipped: numpy not installed)")
             return
 
         # 1. Dense L2: Sovereign (v6) Vector Store (SQLite-vec)
         l2 = None
         encoder = None
+        l2_skip_reason: str | None = None
         try:
             from cortex.memory.encoder import AsyncEncoder
             from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
@@ -89,7 +109,10 @@ class MemoryMixin(EngineMixinBase):
 
             logger.info("Memory L2 (SovereignVectorStoreL2) initialized at %s", vector_path)
         except Exception as e:  # noqa: BLE001
-            logger.warning("Memory L2 unavailable (degrading to L1+L3 only): %s", e)
+            if isinstance(e, (ImportError, ModuleNotFoundError)) or "numpy" in str(e).lower():
+                l2_skip_reason = str(e)
+            else:
+                logger.warning("Memory L2 unavailable (degrading to L1+L3 only): %s", e)
 
         # 2. Vector Alpha (HDC/v7): Now primary.
         hdc_l2 = None
@@ -132,11 +155,21 @@ class MemoryMixin(EngineMixinBase):
             self._memory_l1 = l1
             self._memory_l3 = l3
 
-        logger.info(
-            "Memory subsystem: %s (HDC: %s)",
-            "full (L1+L2+L3)" if self._memory_manager else "partial (L1+L3)",
-            "active" if hdc_l2 else "inactive",
-        )
+        self._memory_ready = True
+
+        if self._memory_manager:
+            logger.info("Memory subsystem: full (L1+L2+L3) (HDC: %s)", "active" if hdc_l2 else "inactive")
+        elif l2_skip_reason:
+            logger.info(
+                "Memory subsystem: partial (L1+L3) (HDC: %s, optional L2 skipped: %s)",
+                "active" if hdc_l2 else "inactive",
+                l2_skip_reason,
+            )
+        else:
+            logger.info(
+                "Memory subsystem: partial (L1+L3) (HDC: %s)",
+                "active" if hdc_l2 else "inactive",
+            )
 
     @property
     def memory(self):
