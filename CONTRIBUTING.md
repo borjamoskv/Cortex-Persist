@@ -87,5 +87,5 @@ Update documentation when you change:
 - [`AGENTS.md`](./AGENTS.md)
 - [`docs/CONTRIBUTING.md`](./docs/CONTRIBUTING.md)
 - [`docs/SECURITY_TRUST_MODEL.md`](./docs/SECURITY_TRUST_MODEL.md)
-- [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md)
+- [`docs/architecture.md`](./docs/architecture.md)
 - [`SECURITY.md`](./SECURITY.md)

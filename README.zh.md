@@ -201,7 +201,7 @@ block-beta
   INTERFACES --> GATEWAY --> STORAGE --> TRUST
 ```
 
-> 完整架构详见 [ARCHITECTURE.md](docs/ARCHITECTURE.md)。
+> 完整架构详见 [ARCHITECTURE.md](docs/architecture.md)。
 
 ---
 
