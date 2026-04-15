@@ -113,9 +113,9 @@ def _verify_ledger(db: str) -> None:
     from cortex.ledger.store import LedgerStore
     from cortex.ledger.verifier import LedgerVerifier
 
+    store = LedgerStore(db)
+    verifier = LedgerVerifier(store)
     try:
-        store = LedgerStore(db)
-        verifier = LedgerVerifier(store)
         with console.status("[bold cyan]Verifying ledger integrity..."):
             result = verifier.verify_chain()
         if result["valid"]:

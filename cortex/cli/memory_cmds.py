@@ -88,13 +88,21 @@ def store(
     parent_id,
     db,
 ) -> None:
-    """Store a fact in CORTEX."""
-    # --content option overrides positional argument
+    """Store a fact in CORTEX.
+
+    CONTENT can be supplied as a positional argument or via --content (not both).
+    --agent takes precedence over --source when both are provided.
+    """
+    # Reject ambiguous dual-content input
+    if content_option and content:
+        raise click.UsageError(
+            "Provide content as a positional argument OR via --content, not both."
+        )
     if content_option:
         content = content_option
     if not content:
         raise click.UsageError("Content is required: provide it as a positional argument or via --content")
-    # --agent overrides auto-detected source
+    # --agent takes precedence over --source; both override auto-detection
     if agent:
         source = agent
     elif not source:
