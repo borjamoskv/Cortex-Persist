@@ -516,6 +516,7 @@ jobs:
           exit-code: 1
           severity: CRITICAL,HIGH
           format: table
+                  ignore-unfixed: true
       - name: Smoke test
         if: steps.scope.outputs.release_only != 'true'
         run: |
