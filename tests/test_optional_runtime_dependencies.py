@@ -186,7 +186,7 @@ def test_cli_base_flow_without_extended_runtime_dependencies(tmp_path: Path) -> 
     assert result.returncode == 0, combined
     assert "blocked by test harness" not in combined
     assert "ImportError" not in combined
-    assert "CORTEX v0.3.0b5 initialized" in combined
+    assert "CORTEX v0.3.0b7 initialized" in combined
     assert "Stored fact" in combined
     assert "Ledger is VALID" in combined
 
@@ -232,7 +232,7 @@ def test_cli_base_flow_without_keyring_when_env_master_key_is_set(tmp_path: Path
     combined = result.stdout + result.stderr
     assert result.returncode == 0, combined
     assert "ImportError: keyring blocked by test harness" not in combined
-    assert "CORTEX v0.3.0b5 initialized" in combined
+    assert "CORTEX v0.3.0b7 initialized" in combined
     assert "Stored fact" in combined
     assert "Ledger is VALID" in combined
 
