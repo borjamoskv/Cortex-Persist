@@ -34,12 +34,16 @@ Store a fact with automatic hash-chain ledger entry and embedding.
 
 ```bash
 cortex store PROJECT CONTENT [OPTIONS]
+# or using named flags (quickstart-friendly):
+cortex store PROJECT --content "fact content" --agent my-agent
 ```
 
 | Option | Default | Description |
 |:---|:---|:---|
 | `PROJECT` | *required* | Project namespace |
-| `CONTENT` | *required* | Fact content |
+| `CONTENT` | *required* | Fact content (positional) |
+| `--content TEXT` | — | Named alternative to positional CONTENT argument |
+| `--agent`, `-a` | auto-detected | Agent name (overrides auto-detected source) |
 | `--type` | `knowledge` | `knowledge`, `decision`, `error`, `ghost`, `config`, `bridge`, `axiom`, `rule` |
 | `--tags` | — | Comma-separated tags |
 | `--confidence` | `stated` | `stated`, `inferred`, `observed`, `verified`, `disputed` |
@@ -47,11 +51,14 @@ cortex store PROJECT CONTENT [OPTIONS]
 | `--ai-time` | — | Estimated AI time saved (Chronos integration) |
 | `--complexity` | — | Task complexity rating (1-10) |
 
-**Example:**
+**Examples:**
 
 ```bash
 cortex store my-api "Rate limit is 100 req/min per API key" \
   --type config --tags "api,limits" --source "agent:claude"
+
+# Quickstart: named flags
+cortex store my-api --content "Rate limit is 100 req/min" --agent "agent:claude"
 ```
 
 ---
@@ -142,10 +149,12 @@ cortex delete FACT_ID [--reason TEXT]
 
 ### `cortex verify`
 
-Cryptographic verification certificate for a single fact.
+Verify cryptographic integrity of a specific fact **or** the entire ledger hash chain.
 
 ```bash
-cortex verify FACT_ID
+cortex verify FACT_ID          # verify a single fact
+cortex verify ledger            # shorthand: full hash-chain integrity check
+cortex verify ledger --full     # full cryptographic ledger verify
 ```
 
 Output includes: hash chain status, Merkle root, consensus score, timestamp.

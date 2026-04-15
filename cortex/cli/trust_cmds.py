@@ -40,10 +40,33 @@ def _run_async(coro):
 
 
 @cli.command("verify")
-@click.argument("fact_id", type=int)
+@click.argument("target")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
-def verify_fact(fact_id: int, db: str) -> None:
-    """Verify cryptographic integrity of a specific fact."""
+@click.option("--full", is_flag=True, help="Perform full cryptographic verify (ledger only)")
+def verify_fact(target: str, db: str, full: bool) -> None:
+    """Verify cryptographic integrity of a fact or the ledger.
+
+    TARGET can be:
+      - A fact ID (integer): verify a specific fact's hash chain.
+      - 'ledger': shorthand for full ledger hash-chain verification.
+
+    Examples:
+      cortex verify 42
+      cortex verify ledger
+      cortex verify ledger --full
+    """
+    if target.lower() == "ledger":
+        _verify_ledger(db=db)
+        return
+
+    try:
+        fact_id = int(target)
+    except ValueError as exc:
+        raise click.BadParameter(
+            f"Expected a fact ID (integer) or 'ledger', got: {target!r}",
+            param_hint="TARGET",
+        ) from exc
+
     from cortex.cli.errors import err_fact_not_found, handle_cli_error
     from cortex.database.core import connect as db_connect
 
@@ -84,6 +107,39 @@ def verify_fact(fact_id: int, db: str) -> None:
     finally:
         if conn:
             conn.close()
+
+
+def _verify_ledger(db: str) -> None:
+    """Run hash-chain verification on the Sovereign Ledger (shorthand target)."""
+    from cortex.cli.errors import handle_cli_error
+    from cortex.ledger.store import LedgerStore
+    from cortex.ledger.verifier import LedgerVerifier
+
+    try:
+        store = LedgerStore(db)
+        verifier = LedgerVerifier(store)
+        with console.status("[bold cyan]Verifying ledger integrity..."):
+            result = verifier.verify_chain()
+        if result["valid"]:
+            console.print(
+                f"[bold green]Ledger is VALID[/bold green] "
+                f"({result['checked_events']} events checked)"
+            )
+            stats = result.get("enrichment_stats", {})
+            console.print(
+                f"Enrichment: [green]Indexed: {stats.get('indexed', 0)}[/green] | "
+                f"[yellow]Pending: {stats.get('pending', 0)}[/yellow] | "
+                f"[red]Failed: {stats.get('failed', 0)}[/red]"
+            )
+        else:
+            violations = result["violations"]
+            console.print(
+                f"[bold red]Ledger is COMPROMISED[/bold red]: {len(violations)} violations"
+            )
+            for v in violations[:10]:
+                console.print(f"  - {v}")
+    except Exception as e:  # noqa: BLE001 — CLI boundary catch
+        handle_cli_error(e, db_path=db, context="verifying ledger")
 
 
 @cli.command("compliance-report")

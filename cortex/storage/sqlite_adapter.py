@@ -55,7 +55,7 @@ class SQLiteAdapter:
                     return []
                 columns = [d[0] for d in cursor.description]
                 return [dict(zip(columns, row, strict=False)) for row in rows]
-        except Exception:
+        except Exception:  # noqa: BLE001 — log-and-reraise adapter boundary; caller handles specifics
             logger.exception("SQLiteAdapter.fetch_all failed: %.200s", sql)
             raise
 
@@ -68,7 +68,7 @@ class SQLiteAdapter:
                     return None
                 columns = [d[0] for d in cursor.description]
                 return dict(zip(columns, row, strict=False))
-        except Exception:
+        except Exception:  # noqa: BLE001 — log-and-reraise adapter boundary; caller handles specifics
             logger.exception("SQLiteAdapter.fetch_one failed: %.200s", sql)
             raise
 
@@ -77,7 +77,7 @@ class SQLiteAdapter:
         try:
             async with self._conn.execute(sql, params) as cursor:
                 return cursor.lastrowid or 0
-        except Exception:
+        except Exception:  # noqa: BLE001 — log-and-reraise adapter boundary; caller handles specifics
             logger.exception("SQLiteAdapter.execute_insert failed: %.200s", sql)
             raise
 
@@ -91,7 +91,7 @@ class SQLiteAdapter:
             return
         try:
             await self._conn.executemany(sql, params_list)
-        except Exception:
+        except Exception:  # noqa: BLE001 — log-and-reraise adapter boundary; caller handles specifics
             logger.exception(
                 "SQLiteAdapter.executemany failed (batch_size=%d): %.200s",
                 len(params_list),
@@ -108,7 +108,7 @@ class SQLiteAdapter:
         """
         try:
             await self._conn.executescript(script)
-        except Exception:
+        except Exception:  # noqa: BLE001 — log-and-reraise adapter boundary; caller handles specifics
             logger.exception("SQLiteAdapter.executescript failed")
             raise
 
@@ -116,7 +116,7 @@ class SQLiteAdapter:
         """Commit the current transaction."""
         try:
             await self._conn.commit()
-        except Exception:
+        except Exception:  # noqa: BLE001 — log-and-reraise adapter boundary; caller handles specifics
             logger.exception("SQLiteAdapter.commit failed")
             raise
 
