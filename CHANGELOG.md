@@ -12,7 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### In Progress
-- No unreleased entries yet.
+- **Lean core install surface**: moved heavyweight local embedding, Chroma, and numba dependencies behind optional extras so `pip install cortex-persist` stays focused on the supported trust-layer core.
+- **Extended runtime split**: moved `aiohttp`, `beautifulsoup4`, `arq`, and `email-validator` out of the base install into `mcp`, `daemon`, and `api` extras so optional server-side surfaces stop leaking into the trust-core package.
+- **YAML / watcher split**: moved `PyYAML` and `watchdog` out of the base install into `authoring`, `mcp`, and `daemon` extras so filesystem and YAML-heavy tooling stop inflating the minimal install.
+- **Daemon relay split**: moved `aiofiles` out of the base install into the `daemon` extra because async relay buffering is not part of the supported trust-core path.
+- **Clean base bootstrap**: core memory imports now tolerate missing `numpy`, optional L2/vector surfaces degrade to `L1+L3` without user-facing warnings, and async sqlite-vec loading now has a dedicated helper plus regression coverage.
+- **macOS platform split**: moved `pyobjc` keychain bindings out of the base install into a dedicated `platform` extra, while keeping secure-by-default keyring behavior in the trust-core path.
 
 ## [0.3.0b7] — 2026-04-14
 

@@ -29,25 +29,12 @@ classifiers = [
 
 dependencies = [
     "sqlite-vec>=0.1.6",
-    "sentence-transformers>=3.0",
-    "onnxruntime>=1.17",
     "click>=8.0",
     "rich>=13.0",
     "aiosqlite>=0.20.0",
-    "pyobjc-core; sys_platform == 'darwin'",
-    "pyobjc-framework-Cocoa; sys_platform == 'darwin'",
     "keyring>=25.7.0",
     "cryptography>=46.0.7",
-    "watchdog>=6.0.0",
     "pydantic>=2.0",
-    "PyYAML>=6.0",
-    "aiofiles",
-    "aiohttp",
-    "beautifulsoup4",
-    "arq",
-    "email-validator>=2.1.0",
-    "chromadb>=1.5.5",
-    "numba>=0.65.0",
 ]
 
 [project.urls]
@@ -62,6 +49,27 @@ api = [
     "uvicorn[standard]>=0.27",
     "httpx>=0.27",
     "sse-starlette>=0.10.3",
+    "email-validator>=2.1.0",
+]
+mcp = [
+    "mcp>=1.0",
+    "aiohttp",
+    "beautifulsoup4",
+    "markdownify>=0.13",
+    "watchdog>=6.0.0",
+]
+daemon = [
+    "aiofiles",
+    "aiohttp",
+    "arq",
+    "watchdog>=6.0.0",
+]
+platform = [
+    "pyobjc-core; sys_platform == 'darwin'",
+    "pyobjc-framework-Cocoa; sys_platform == 'darwin'",
+]
+authoring = [
+    "PyYAML>=6.0",
 ]
 dev = [
     "pytest>=8.0",
@@ -90,8 +98,18 @@ trends = [
     "pytrends>=4.9",
     "pandas>=2.0",
 ]
+embeddings = [
+    "sentence-transformers>=3.0",
+    "onnxruntime>=1.17",
+]
+knowledge = [
+    "chromadb>=1.5.5",
+]
+acceleration = [
+    "numba>=0.65.0",
+]
 all = [
-    "cortex-persist[api,dev,adk,toolbox,billing,cloud,trends]",
+    "cortex-persist[api,mcp,daemon,platform,authoring,dev,adk,toolbox,billing,cloud,trends,embeddings,knowledge,acceleration]",
 ]
 
 [project.scripts]

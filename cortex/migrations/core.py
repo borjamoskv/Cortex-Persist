@@ -73,8 +73,10 @@ def _apply_base_schema(conn: sqlite3.Connection) -> None:
             conn.executescript(stmt)
         except Exception as e:
             msg = str(e).lower()
-            if "vec0" in str(stmt) or "no such module" in msg or "duplicate column" in msg:
-                logger.warning("Skipping schema statement: %s", e)
+            if "vec0" in str(stmt) or "no such module" in msg:
+                logger.debug("Skipping optional sqlite-vec schema statement: %s", e)
+            elif "duplicate column" in msg:
+                logger.debug("Skipping already-applied schema statement: %s", e)
             else:
                 raise
 
@@ -144,8 +146,10 @@ async def _apply_base_schema_async(conn: aiosqlite.Connection) -> None:
             await conn.executescript(stmt)
         except Exception as e:
             msg = str(e).lower()
-            if "vec0" in str(stmt) or "no such module" in msg or "duplicate column" in msg:
-                logger.warning("Skipping schema statement: %s", e)
+            if "vec0" in str(stmt) or "no such module" in msg:
+                logger.debug("Skipping optional sqlite-vec schema statement: %s", e)
+            elif "duplicate column" in msg:
+                logger.debug("Skipping already-applied schema statement: %s", e)
             else:
                 raise
 

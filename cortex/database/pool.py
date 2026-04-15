@@ -85,7 +85,7 @@ class CortexConnectionPool:
 
     async def _create_connection(self) -> aiosqlite.Connection:
         """Create a highly-optimized, WAL-enabled async connection."""
-        from cortex.database.core import connect_async
+        from cortex.database.core import connect_async, load_sqlite_vec_async
 
         try:
             conn = await connect_async(self.db_path, read_only=self.read_only)
@@ -93,15 +93,7 @@ class CortexConnectionPool:
             logger.critical("Failed to create DB connection: %s", e)
             raise
 
-        # Wave 5: Load Vector Extension
-        try:
-            import sqlite_vec
-
-            await conn.enable_load_extension(True)
-            await conn.load_extension(sqlite_vec.loadable_path())
-            await conn.enable_load_extension(False)
-        except (ImportError, OSError, AttributeError) as e:
-            logger.debug("sqlite-vec not available for connection: %s", e)
+        await load_sqlite_vec_async(conn)
 
         return conn
 

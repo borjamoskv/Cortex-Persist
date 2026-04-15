@@ -16,6 +16,11 @@ The quickest way to get started:
 pip install cortex-persist
 ```
 
+This installs the supported core flow with deterministic fallback embeddings, which is enough for:
+- `cortex --version`
+- `cortex init`
+- `store -> verify -> export`
+
 After installing, verify it works:
 
 ```bash
@@ -23,13 +28,63 @@ cortex --version
 cortex init
 ```
 
+If you run in a headless environment without OS Keychain support, set `CORTEX_MASTER_KEY` or `CORTEX_VAULT_KEY` explicitly before the first write.
+
+On macOS, enable native keychain support with:
+
+```bash
+pip install "cortex-persist[platform]"
+```
+
 ### Optional Extras
+
+=== "Local Embeddings"
+    ```bash
+    pip install "cortex-persist[embeddings]"
+    ```
+    Adds `sentence-transformers` and `onnxruntime` for local semantic embeddings and reranking instead of deterministic fallback vectors.
+
+=== "Knowledge Watcher"
+    ```bash
+    pip install "cortex-persist[knowledge]"
+    ```
+    Adds ChromaDB-backed knowledge sync components used by the MCP knowledge watcher.
+
+=== "Acceleration"
+    ```bash
+    pip install "cortex-persist[acceleration]"
+    ```
+    Adds `numba` for optional JIT acceleration in specialized DSP and swarm modules.
 
 === "API Server"
     ```bash
     pip install cortex-persist[api]
     ```
-    Includes FastAPI, Uvicorn, and HTTPX for the REST API, dashboard, and MCP server.
+    Includes FastAPI, Uvicorn, HTTPX, and email validation for the REST API and dashboard.
+
+=== "MCP Server"
+    ```bash
+    pip install cortex-persist[mcp]
+    ```
+    Adds FastMCP runtime dependencies, HTML extraction helpers, and filesystem watchers for MCP and resilient gateway flows.
+
+=== "Daemon / Sidecars"
+    ```bash
+    pip install cortex-persist[daemon]
+    ```
+    Adds `aiofiles`, `aiohttp`, `arq`, and `watchdog` for daemon, SSE, relay, and background queue surfaces.
+
+=== "Platform Bindings"
+    ```bash
+    pip install cortex-persist[platform]
+    ```
+    Adds `pyobjc` bindings required by macOS keychain integration.
+
+=== "Authoring / YAML"
+    ```bash
+    pip install cortex-persist[authoring]
+    ```
+    Adds `PyYAML` for agent configs, genesis specs, and other YAML-driven authoring surfaces.
 
 === "Development"
     ```bash
@@ -65,8 +120,10 @@ Use this path when you want to contribute to CORTEX or run the latest unreleased
 git clone https://github.com/borjamoskv/Cortex-Persist.git
 cd Cortex-Persist
 python -m venv .venv && source .venv/bin/activate
-pip install -e ".[all]"
+pip install -e .
 ```
+
+Add extras on top only if you need those surfaces during development, for example `pip install -e ".[api,mcp,daemon,authoring,embeddings,dev]"`.
 
 ---
 
@@ -74,7 +131,7 @@ pip install -e ".[all]"
 
 ```bash
 cortex --version
-# cortex-persist, version 0.3.0b3
+# cortex, version 0.3.0b5
 ```
 
 ---
@@ -89,10 +146,10 @@ cortex init
 cortex status
 
 # Store your first fact
-cortex store my-project "Redis uses skip lists for sorted sets" --tags "redis,data-structures"
+cortex memory store my-project "Redis uses skip lists for sorted sets" --tags "redis,data-structures"
 ```
 
-This creates the database at `~/.cortex/cortex.db` with the full schema (facts, transactions, embeddings, consensus, and more).
+This creates the database at `~/.cortex/cortex.db` with the base ledger/fact schema plus optional vector and extended tables when the runtime supports them.
 
 ---
 
@@ -102,7 +159,7 @@ This creates the database at `~/.cortex/cortex.db` with the full schema (facts, 
 
 - Notifications use `osascript` (Notification Center)
 - Daemon installs as a `launchd` agent (`~/Library/LaunchAgents/`)
-- Native Keychain integration via `pyobjc`
+- Native Keychain integration via `pyobjc` (install `cortex-persist[platform]` if needed)
 
 ### Linux
 

@@ -37,7 +37,9 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger("cortex.tips")
 
-_ASSET_PATH: Final[Path] = Path(__file__).parent.parent.parent / "config" / "tips.json"
+_PACKAGE_ASSET_PATH: Final[Path] = Path(__file__).with_name("assets") / "tips.json"
+_LEGACY_ASSET_PATH: Final[Path] = Path(__file__).parent.parent.parent / "config" / "tips.json"
+_ASSET_CANDIDATES: Final[tuple[Path, ...]] = (_PACKAGE_ASSET_PATH, _LEGACY_ASSET_PATH)
 
 
 # ─── Models ──────────────────────────────────────────────────────────
@@ -96,12 +98,13 @@ def _load_static_tips() -> list[Tip]:
         if _STATIC_TIPS_CACHE is not None:
             return _STATIC_TIPS_CACHE
 
-        if not _ASSET_PATH.exists():
-            logger.error("Sovereign Failure: Tips asset missing at %s", _ASSET_PATH)
+        asset_path = next((path for path in _ASSET_CANDIDATES if path.exists()), None)
+        if asset_path is None:
+            logger.error("Sovereign Failure: Tips asset missing at %s", _PACKAGE_ASSET_PATH)
             return []
 
         try:
-            raw_data = json.loads(_ASSET_PATH.read_text(encoding="utf-8"))
+            raw_data = json.loads(asset_path.read_text(encoding="utf-8"))
         except (json.JSONDecodeError, OSError) as exc:
             logger.critical("TIPS: Failed to load static tips: %s", exc)
             return []

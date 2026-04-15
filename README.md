@@ -120,6 +120,9 @@ $ cortex compliance-report
 
 Start with the smallest supported flow and get to audit evidence fast.
 
+The supported PyPI base flow is `install -> init -> store -> verify`.
+Semantic search, MCP/server flows, and other extended surfaces may require optional extras or a fuller local runtime.
+
 ### Path A: Install from PyPI *(preferred)*
 
 ```bash
@@ -127,6 +130,16 @@ pip install cortex-persist
 cortex init
 cortex memory store risk-bot "Transaction flagged: IP mismatch"
 cortex trust-ledger verify
+```
+
+For local semantic embeddings, Chroma-backed knowledge sync, or JIT acceleration, add the optional extras you actually need:
+
+```bash
+pip install "cortex-persist[embeddings]"
+pip install "cortex-persist[knowledge]"
+pip install "cortex-persist[acceleration]"
+pip install "cortex-persist[platform]"       # macOS keychain support
+pip install "cortex-persist[api,mcp,daemon,authoring]"  # optional server surfaces
 ```
 
 ### Path B: Install from Source *(development)*
