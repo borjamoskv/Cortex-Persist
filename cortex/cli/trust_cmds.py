@@ -42,8 +42,7 @@ def _run_async(coro):
 @cli.command("verify")
 @click.argument("target")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
-@click.option("--full", is_flag=True, help="Perform full cryptographic verify (ledger only)")
-def verify_fact(target: str, db: str, full: bool) -> None:
+def verify_fact(target: str, db: str) -> None:
     """Verify cryptographic integrity of a fact or the ledger.
 
     TARGET can be:
@@ -53,7 +52,6 @@ def verify_fact(target: str, db: str, full: bool) -> None:
     Examples:
       cortex verify 42
       cortex verify ledger
-      cortex verify ledger --full
     """
     if target.lower() == "ledger":
         _verify_ledger(db=db)

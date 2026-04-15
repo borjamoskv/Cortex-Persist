@@ -58,7 +58,7 @@ def memory_cmds() -> None:
 )
 @click.option("--source", default=None, help="Source of the fact")
 @click.option("--agent", "-a", default=None, help="Agent name (overrides auto-detected source)")
-@click.option("--content-flag", "--content", "content_flag", default=None, help="Fact content (alternative to positional argument)")
+@click.option("--content", "content_option", default=None, help="Fact content (named alternative to positional argument)")
 @click.option("--ai-time", type=int, default=None, help="AI generation time")
 @click.option(
     "--complexity",
@@ -82,16 +82,16 @@ def store(
     confidence,
     source,
     agent,
-    content_flag,
+    content_option,
     ai_time,
     complexity,
     parent_id,
     db,
 ) -> None:
     """Store a fact in CORTEX."""
-    # --content flag overrides positional argument
-    if content_flag:
-        content = content_flag
+    # --content option overrides positional argument
+    if content_option:
+        content = content_option
     if not content:
         raise click.UsageError("Content is required: provide it as a positional argument or via --content")
     # --agent overrides auto-detected source

@@ -152,9 +152,8 @@ cortex delete FACT_ID [--reason TEXT]
 Verify cryptographic integrity of a specific fact **or** the entire ledger hash chain.
 
 ```bash
-cortex verify FACT_ID          # verify a single fact
-cortex verify ledger            # shorthand: full hash-chain integrity check
-cortex verify ledger --full     # full cryptographic ledger verify
+cortex verify FACT_ID    # verify a single fact
+cortex verify ledger      # shorthand: full hash-chain integrity check
 ```
 
 Output includes: hash chain status, Merkle root, consensus score, timestamp.
