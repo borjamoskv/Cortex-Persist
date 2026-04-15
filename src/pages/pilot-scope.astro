@@ -1,0 +1,208 @@
+---
+import IntakeFormScript from '../components/IntakeFormScript.astro';
+import SiteLayout from '../layouts/SiteLayout.astro';
+import { SUPPORT_EMAIL } from '../lib/intake';
+
+const subject = 'CORTEX Pilot Scope';
+const intakeLines = [
+	{ label: 'Workflow', field: 'workflow' },
+	{ label: 'Current stack', field: 'stack' },
+	{ label: 'Sensitive data', field: 'sensitive' },
+	{ label: 'Hosting model', field: 'hosting' },
+	{ label: 'Target environment', field: 'environment' },
+	{ label: 'Owner', field: 'owner' },
+	{ label: 'Success criteria', field: 'success' },
+	{ label: 'Name', field: 'name' },
+	{ label: 'Contact', field: 'contact' },
+];
+---
+
+<SiteLayout
+	title="Get Pilot Scope | CORTEX Persist"
+	description="Send your workflow, stack, and constraints to scope a CORTEX pilot asynchronously."
+	canonical="https://cortexpersist.com/pilot-scope"
+>
+	<main class="landing-shell intake-shell">
+		<a class="intake-backlink" href="/">← Back to CORTEX Persist</a>
+
+		<section class="section-frame surface intake-hero">
+			<div class="section-heading">
+				<p class="section-kicker">Pilot Scope</p>
+				<h1>Scope one workflow and get a concrete pilot recommendation.</h1>
+				<p>
+					Send the workflow, stack, risk level, and hosting constraints. We reply with a
+					scoped pilot recommendation, pricing, and next steps.
+				</p>
+			</div>
+
+			<div class="chip-row" aria-label="Pilot scope promises">
+				<span class="chip">One workflow</span>
+				<span class="chip">One environment</span>
+				<span class="chip">Typically within 1 business day</span>
+			</div>
+		</section>
+
+		<section class="intake-grid">
+			<section class="surface intake-panel">
+				<div class="surface-head">
+					<span class="surface-label">Scope inputs</span>
+					<span class="surface-state">Pilot</span>
+				</div>
+
+				<form class="intake-form" data-intake-form data-subject={subject} data-email={SUPPORT_EMAIL} novalidate>
+					<label class="field">
+						<span>Workflow</span>
+						<textarea
+							name="workflow"
+							rows="4"
+							placeholder="Which workflow should the pilot instrument first?"
+							required
+							aria-required="true"
+						></textarea>
+					</label>
+
+					<label class="field">
+						<span>Current stack</span>
+						<textarea
+							name="stack"
+							rows="4"
+							placeholder="Agent orchestration, memory layer, observability, APIs, repos, or relevant systems."
+							required
+							aria-required="true"
+						></textarea>
+					</label>
+
+					<div class="field-grid">
+						<label class="field">
+							<span>Sensitive data</span>
+							<select name="sensitive">
+								<option>Yes</option>
+								<option>No</option>
+								<option selected>Not sure yet</option>
+							</select>
+						</label>
+
+						<label class="field">
+							<span>Hosting model</span>
+							<select name="hosting">
+								<option selected>Not sure yet</option>
+								<option>Cloud</option>
+								<option>Self-hosted</option>
+								<option>BYOC</option>
+							</select>
+						</label>
+					</div>
+
+					<div class="field-grid">
+						<label class="field">
+							<span>Target environment</span>
+							<select name="environment">
+								<option>Development</option>
+								<option>Staging</option>
+								<option>Production-like</option>
+								<option selected>Not sure yet</option>
+							</select>
+						</label>
+
+						<label class="field">
+							<span>Owner</span>
+							<select name="owner">
+								<option>Engineering</option>
+								<option>Platform</option>
+								<option>Security</option>
+								<option>Leadership</option>
+								<option selected>Not sure yet</option>
+							</select>
+						</label>
+					</div>
+
+					<label class="field">
+						<span>Success criteria</span>
+						<textarea
+							name="success"
+							rows="4"
+							placeholder="What would make the pilot clearly worth doing?"
+							required
+							aria-required="true"
+						></textarea>
+					</label>
+
+					<div class="field-grid">
+						<label class="field">
+							<span>Name</span>
+							<input name="name" type="text" placeholder="Your name" />
+						</label>
+						<label class="field">
+							<span>Email or company</span>
+							<input name="contact" type="text" placeholder="Email or company" />
+						</label>
+					</div>
+
+					<div class="intake-actions">
+						<button class="button-primary" type="submit">Open Email Draft</button>
+						<button class="button-secondary" type="button" data-copy-intake>Copy Scope Brief</button>
+					</div>
+
+					<p class="microcopy">
+						Required: workflow, current stack, and success criteria.
+					</p>
+					<p class="microcopy">
+						This page drafts an email. Nothing is submitted server-side from the browser.
+					</p>
+					<p class="microcopy">
+						If you prefer, copy the scope and send it manually to
+						<a class="inline-link" href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>.
+					</p>
+					<p class="intake-status" data-intake-status role="status" aria-live="polite" aria-atomic="true"></p>
+				</form>
+				<noscript>
+					<p class="microcopy">
+						JavaScript is off. Email your workflow, current stack, and success criteria
+						directly to
+						<a class="inline-link" href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>.
+					</p>
+				</noscript>
+			</section>
+
+			<aside class="surface-sunken intake-panel">
+				<div class="surface-head">
+					<span class="surface-label">What we send back</span>
+					<span class="surface-state">24h</span>
+				</div>
+
+				<div class="proof-stack">
+					<div class="proof-item">
+						<div>
+							<strong>Scoped recommendation</strong>
+							<span>What workflow to start with and why.</span>
+						</div>
+						<span class="proof-tag live">Scope</span>
+					</div>
+					<div class="proof-item">
+						<div>
+							<strong>Pilot estimate</strong>
+							<span>Pilot pricing, constraints, and expected timeline.</span>
+						</div>
+						<span class="proof-tag audit">EUR</span>
+					</div>
+					<div class="proof-item">
+						<div>
+							<strong>Next step</strong>
+							<span>Approval, kickoff, or request for one missing detail.</span>
+						</div>
+						<span class="proof-tag live">Async</span>
+					</div>
+				</div>
+
+				<div class="intake-preview">
+					<p class="preview-label">Email subject</p>
+					<p class="preview-subject" data-intake-subject>{subject}</p>
+					<p class="preview-label">Email body</p>
+					<pre class="preview-body" data-intake-preview></pre>
+				</div>
+			</aside>
+		</section>
+	</main>
+
+	<IntakeFormScript requestTitle="CORTEX pilot scope request" lines={intakeLines} />
+</SiteLayout>

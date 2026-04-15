@@ -1,96 +1,556 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import Welcome from '../components/Welcome.astro';
+import SiteLayout from '../layouts/SiteLayout.astro';
 
-// CORTEX Unified Substrate — v0.3.2b1 Landing Page Shell
+const navLinks = [
+	{ href: '#problem', label: 'Problem' },
+	{ href: '#fit', label: 'Fit' },
+	{ href: '#pilot', label: 'Pilot' },
+	{ href: '#pricing', label: 'Pricing' },
+	{ href: '#faq', label: 'FAQ' },
+];
+
+const heroProofs = [
+	{
+		value: 'Sensitive workflows',
+		label: 'Best fit for code actions, support approvals, pricing, finance, and other flows where mistakes are expensive.',
+	},
+	{
+		value: 'Verifiable record',
+		label: 'Show what the agent actually knew at decision time instead of reconstructing the story later.',
+	},
+	{
+		value: '24h async scope',
+		label: 'Send one workflow and get a scoped pilot recommendation without a sales call.',
+	},
+];
+
+const heroCanvasCards = [
+	{
+		label: 'High-stakes flow',
+		title: 'Code and deploy actions',
+		body: 'When an agent can change systems, teams need more than logs and good intentions.',
+	},
+	{
+		label: 'High-stakes flow',
+		title: 'Support and approvals',
+		body: 'High-friction customer actions need a reviewable record, not a best-effort reconstruction.',
+	},
+	{
+		label: 'High-stakes flow',
+		title: 'Pricing, finance, and PII',
+		body: 'The more sensitive the workflow, the less acceptable silent mutation becomes.',
+	},
+];
+
+const signalCards = [
+	{
+		index: '01',
+		label: 'Context',
+		title: 'Prove the exact context',
+		body: 'Show what the agent knew when it acted, not what the team assumes it knew after the fact.',
+	},
+	{
+		index: '02',
+		label: 'Integrity',
+		title: 'Detect silent mutation',
+		body: 'Spot post-hoc edits or quiet drift before they become the official story of the incident.',
+	},
+	{
+		index: '03',
+		label: 'Review',
+		title: 'Export evidence for humans',
+		body: 'Give platform, security, or leadership an artifact they can inspect quickly and repeatably.',
+	},
+];
+
+const capabilityCards = [
+	{
+		label: 'Capture',
+		title: 'Capture the moments that matter',
+		body: 'Record facts, decisions, and state transitions in a form that survives contact with real incident review.',
+		items: ['Decision events', 'Reviewable context', 'Workflow ownership'],
+	},
+	{
+		label: 'Seal',
+		title: 'Seal the record',
+		body: 'Protect the decision trail from silent edits and quiet drift so later review starts from a defensible source.',
+		items: ['Hash-linked lineage', 'Integrity checks', 'Tamper evidence'],
+	},
+	{
+		label: 'Verify',
+		title: 'Verify later',
+		body: 'When a workflow misfires, teams can validate the record instead of guessing from traces, screenshots, and memory.',
+		items: ['Reproducible checks', 'Clear record status', 'Faster investigations'],
+	},
+	{
+		label: 'Export',
+		title: 'Export proof',
+		body: 'Hand security, risk, or leadership something they can inspect quickly without turning the review into theater.',
+		items: ['Audit packs', 'Human-readable artifacts', 'Internal review support'],
+	},
+];
+
+const fitCards = [
+	{
+		label: 'Production',
+		title: 'Teams already shipping agents',
+		body: 'Best fit when the agent already touches a real workflow and the cost of failure is operational, not theoretical.',
+		items: ['Code and deploy actions', 'Support or approval flows'],
+	},
+	{
+		label: 'Risk',
+		title: 'Sensitive or scrutinized surfaces',
+		body: 'Useful when workflows involve pricing, finance, PII, approvals, or anything a human may have to defend later.',
+		items: ['Internal trust reviews', 'Customer or audit scrutiny'],
+	},
+	{
+		label: 'Adoption',
+		title: 'Stacks that cannot migrate cleanly',
+		body: 'CORTEX works best when replacing the full memory stack would be expensive, slow, or politically painful.',
+		items: ['Drop in on top', 'Start with one flow'],
+	},
+];
+
+const whyNowPoints = [
+	'Agents are moving closer to irreversible actions.',
+	'Internal scrutiny gets sharper once automation touches money, code, or customer trust.',
+	'Traceability expectations are rising faster than most teams can rebuild their stack.',
+];
+
+const pilotSteps = [
+	{
+		index: '01',
+		title: 'Select one workflow',
+		body: 'Pick the workflow that would hurt most to investigate tomorrow.',
+	},
+	{
+		index: '02',
+		title: 'Integrate on top of your stack',
+		body: 'Instrument the current memory, logging, or orchestration flow.',
+	},
+	{
+		index: '03',
+		title: 'Activate verification',
+		body: 'Turn on a repeatable verification path for the decision record.',
+	},
+	{
+		index: '04',
+		title: 'Deliver the handoff',
+		body: 'Leave with an audit-pack example, runbook, and rollout recommendation.',
+	},
+];
+
+const pricingCards = [
+	{
+		name: 'Community',
+		price: 'Free',
+		body: 'Open source and self-hostable for teams evaluating the trust layer.',
+		items: ['Single tenant', 'CLI and API', 'Immutable ledger', 'Install and run locally'],
+		cta: 'Install Open Source',
+		href: 'https://github.com/borjamoskv/Cortex-Persist#quickstart',
+	},
+	{
+		name: 'Pilot',
+		price: 'From EUR 9,000',
+		tag: 'Recommended',
+		body: 'A scoped 4-week engagement for one critical workflow.',
+		items: ['One workflow', 'One environment', 'Verification flow', 'Audit-pack delivery'],
+		cta: 'Get Pilot Scope',
+		href: '/pilot-scope',
+		featured: true,
+	},
+	{
+		name: 'Enterprise',
+		price: 'From EUR 30,000/year',
+		body: 'For self-hosted or BYOC deployments that need support and procurement packaging.',
+		items: ['Self-hosted or BYOC', 'Advanced controls', 'Support and onboarding', 'Custom integration scope'],
+		cta: 'Request Async Demo',
+		href: '/async-demo',
+	},
+];
+
+const faqItems = [
+	{
+		question: 'Do I need to replace my memory stack?',
+		answer: 'No. CORTEX is designed to sit on top of your current memory, logging, and orchestration stack.',
+	},
+	{
+		question: 'Is this just observability?',
+		answer: 'No. Observability inspects events; CORTEX hardens the decision record itself.',
+	},
+	{
+		question: 'Do we need a call to get started?',
+		answer: 'No. We can scope the workflow, send the recommendation, and kick off the pilot asynchronously by email.',
+	},
+	{
+		question: 'Does this make us automatically compliant?',
+		answer: 'No. CORTEX improves traceability, integrity, and evidence readiness. It does not replace legal or compliance review.',
+	},
+];
+
+const githubUrl = 'https://github.com/borjamoskv/Cortex-Persist';
+const docsUrl = 'https://github.com/borjamoskv/Cortex-Persist/tree/main/docs';
+const asyncDemoUrl = '/async-demo';
+const pilotScopeUrl = '/pilot-scope';
+const scopePrompts = ['Workflow', 'Stack', 'Sensitive data', 'Hosting model'];
 ---
 
-<Layout title="CORTEX Persist — Tamper-Evident Agent Memory">
-	<main>
-		<div class="hero">
-			<h1>CORTEX_PERSIST</h1>
-			<p>Sovereign Agentic Context & Decision Lineage</p>
-			
-			<div class="actions">
-				<a href="/vsa" class="btn-sovereign">
-					ENTER_VSA_DASHBOARD
-					<span class="glitch-line"></span>
+<SiteLayout
+	title="CORTEX Persist | Verifiable Memory for AI Agents"
+	description="Tamper-evident memory and a verifiable decision record for teams shipping AI in sensitive workflows."
+	canonical="https://cortexpersist.com/"
+>
+	<main class="landing-shell">
+		<header class="masthead">
+			<a class="brand" href="/" aria-label="CORTEX Persist home">
+				<span class="brand-mark">CP</span>
+				<span class="brand-copy">
+					<strong>CORTEX Persist</strong>
+					<span>Verifiable memory for AI agents</span>
+				</span>
+			</a>
+
+			<nav class="site-nav" aria-label="Primary">
+				{
+					navLinks.map((link) => (
+						<a class="nav-link" href={link.href}>
+							{link.label}
+						</a>
+					))
+				}
+			</nav>
+
+			<div class="masthead-actions">
+				<a class="button-tertiary" href={githubUrl} target="_blank" rel="noreferrer">
+					Open Source
+				</a>
+				<a class="button-primary" href={asyncDemoUrl}>
+					Async Demo
 				</a>
 			</div>
-		</div>
-		<Welcome />
+		</header>
+
+		<section class="hero-section surface">
+			<div class="hero-copy">
+				<p class="eyebrow">Sensitive workflows / Verifiable decision record</p>
+				<h1>Prove what your AI agent knew.</h1>
+				<p class="hero-text">
+					CORTEX adds tamper-evident memory and a verifiable decision record on top of
+					your current memory, logging, and orchestration stack, so teams can prove what
+					the agent knew when it acted.
+				</p>
+				<p class="microcopy">
+					Prefer async? Send one workflow and your stack details. We reply with a scoped
+					recommendation in 24h. No call required.
+				</p>
+
+				<div class="action-row">
+					<a class="button-primary" href={asyncDemoUrl}>Request Async Demo</a>
+					<a class="button-secondary" href={githubUrl} target="_blank" rel="noreferrer">
+						Install Open Source
+					</a>
+				</div>
+
+				<div class="chip-row" aria-label="Core product properties">
+					<span class="chip">Tamper-evident memory</span>
+					<span class="chip">No stack migration</span>
+					<span class="chip">Audit-ready exports</span>
+					<span class="chip">Self-hosted or BYOC</span>
+				</div>
+
+				<div class="hero-proofbar" aria-label="What the product enables">
+					{
+						heroProofs.map((proof) => (
+							<article class="hero-proof surface-sunken">
+								<strong>{proof.value}</strong>
+								<span>{proof.label}</span>
+							</article>
+						))
+					}
+				</div>
+			</div>
+
+			<aside class="hero-console surface-sunken" aria-label="Illustrative async pilot flow">
+				<div class="surface-head">
+					<span class="surface-label">Async pilot intake</span>
+					<span class="surface-state">24h reply</span>
+				</div>
+
+				<div class="console-metrics">
+					<div class="metric-tile">
+						<span class="metric-label">Motion</span>
+						<strong>Async</strong>
+					</div>
+					<div class="metric-tile">
+						<span class="metric-label">Pilot</span>
+						<strong>4 Weeks</strong>
+					</div>
+					<div class="metric-tile">
+						<span class="metric-label">Scope</span>
+						<strong>1 Flow</strong>
+					</div>
+				</div>
+
+				<div class="canvas-cluster" aria-label="Stitch-inspired canvas notes">
+					{
+						heroCanvasCards.map((card) => (
+							<article class="canvas-card">
+								<span class="surface-label">{card.label}</span>
+								<strong>{card.title}</strong>
+								<p>{card.body}</p>
+							</article>
+						))
+					}
+				</div>
+
+				<pre class="console-block"><code>1. Send workflow + stack
+2. Receive async demo + scope
+3. Review pilot recommendation in 24h
+4. Approve and kick off by email
+
+No call required.</code></pre>
+
+				<p class="console-note">
+					Start with the workflow that would be most painful to explain to security,
+					finance, or leadership if the agent misfired tomorrow.
+				</p>
+			</aside>
+		</section>
+
+		<section class="signal-grid">
+			{
+				signalCards.map((card) => (
+					<article class="signal-card surface">
+						<div class="card-meta">
+							<span class="card-index">{card.index}</span>
+							<span class="surface-label">{card.label}</span>
+						</div>
+						<h2>{card.title}</h2>
+						<p class="surface-copy">{card.body}</p>
+					</article>
+				))
+			}
+		</section>
+
+		<section class="section-frame surface" id="problem">
+			<div class="section-heading">
+				<p class="section-kicker">Problem</p>
+				<h2>Logs help you inspect systems. CORTEX helps you verify the decision record.</h2>
+				<p>
+					Critical workflows need a decision record teams can verify later, not a
+					best-effort reconstruction from traces, screenshots, and operator memory.
+				</p>
+			</div>
+
+			<div class="architecture-grid">
+				{
+					capabilityCards.map((card) => (
+						<article class="architecture-card surface-sunken">
+							<p class="surface-label">{card.label}</p>
+							<h3>{card.title}</h3>
+							<p>{card.body}</p>
+							<ul>
+								{card.items.map((item) => <li>{item}</li>)}
+							</ul>
+						</article>
+					))
+				}
+			</div>
+		</section>
+
+		<section class="section-frame surface" id="fit">
+			<div class="section-heading">
+				<p class="section-kicker">Fit</p>
+				<h2>Built for teams where agent mistakes are expensive to explain.</h2>
+				<p>
+					CORTEX is not a generic “memory platform” pitch. It is a better fit for teams
+					that need stronger trust in what the agent knew when it acted.
+				</p>
+			</div>
+
+			<div class="fit-layout">
+				<div class="fit-grid">
+					{
+						fitCards.map((card) => (
+							<article class="fit-card surface-sunken">
+								<p class="surface-label">{card.label}</p>
+								<h3>{card.title}</h3>
+								<p>{card.body}</p>
+								<ul class="surface-list">
+									{card.items.map((item) => <li>{item}</li>)}
+								</ul>
+							</article>
+						))
+					}
+				</div>
+
+				<aside class="why-now surface-sunken">
+					<div class="surface-head">
+						<span class="surface-label">Why now</span>
+						<span class="surface-state">Rising</span>
+					</div>
+					<h3>More autonomy means less tolerance for vague explanations.</h3>
+					<ul class="surface-list">
+						{whyNowPoints.map((point) => <li>{point}</li>)}
+					</ul>
+					<p class="microcopy">
+						You do not need more memory volume. You need stronger evidence about the
+						memory your agent actually used.
+					</p>
+				</aside>
+			</div>
+		</section>
+
+		<section class="section-frame surface" id="pilot">
+			<div class="section-heading">
+				<p class="section-kicker">Pilot</p>
+				<h2>Start with one workflow, not a platform migration.</h2>
+				<p>
+					A scoped pilot gets you to evidence faster than a migration plan, committee
+					debate, or speculative platform rollout.
+				</p>
+			</div>
+
+			<div class="flow-layout">
+				<div class="flow-list">
+					{
+						pilotSteps.map((step) => (
+							<article class="flow-step surface-sunken">
+								<span class="step-index">{step.index}</span>
+								<h3>{step.title}</h3>
+								<p>{step.body}</p>
+							</article>
+						))
+					}
+				</div>
+
+				<aside class="flow-console surface-sunken">
+					<div class="surface-head">
+						<span class="surface-label">Pilot scope</span>
+						<span class="surface-state">Async</span>
+					</div>
+
+					<pre class="console-block"><code>Workflow: refund approval
+Stack: OpenAI + LangGraph + Postgres
+Sensitive data: yes
+Need self-hosted: likely
+
+Reply and get a scoped recommendation.</code></pre>
+
+					<div class="proof-stack">
+						<div class="proof-item">
+							<div>
+								<strong>One workflow</strong>
+								<span>Keep the pilot narrow enough to deliver real evidence, not a slide deck.</span>
+							</div>
+							<span class="proof-tag live">Scope</span>
+						</div>
+						<div class="proof-item">
+							<div>
+								<strong>One environment</strong>
+								<span>Delivery stays focused, reviewable, and easy to validate internally.</span>
+							</div>
+							<span class="proof-tag audit">4 Weeks</span>
+						</div>
+						<div class="proof-item">
+							<div>
+								<strong>24h async response</strong>
+								<span>Send the workflow, stack, and constraints. We send back a scoped recommendation.</span>
+							</div>
+							<span class="proof-tag live">Async</span>
+						</div>
+					</div>
+				</aside>
+			</div>
+		</section>
+
+		<section class="section-frame surface" id="pricing">
+			<div class="section-heading">
+				<p class="section-kicker">Pricing</p>
+				<h2>Open source to start. Scoped pilot to buy.</h2>
+				<p>Start free. Buy a pilot only when the workflow, stakes, and owner are clear.</p>
+			</div>
+
+			<div class="pricing-grid">
+				{
+					pricingCards.map((card) => (
+						<article class:list={['pricing-card', 'surface-sunken', card.featured && 'pricing-card-featured']}>
+							<div class="pricing-head">
+								<div class="pricing-head-copy">
+									<h3>{card.name}</h3>
+									<p class="plan-price">{card.price}</p>
+								</div>
+								{card.tag && <span class="plan-tag">{card.tag}</span>}
+							</div>
+							<p>{card.body}</p>
+							<ul class="surface-list">
+								{card.items.map((item) => <li>{item}</li>)}
+							</ul>
+							<a
+								class:list={[card.featured ? 'button-primary' : 'button-secondary', 'pricing-cta']}
+								href={card.href}
+								target={card.href.startsWith('http') ? '_blank' : undefined}
+								rel={card.href.startsWith('http') ? 'noreferrer' : undefined}
+							>
+								{card.cta}
+							</a>
+						</article>
+					))
+				}
+			</div>
+		</section>
+
+		<section class="section-frame surface" id="faq">
+			<div class="section-heading">
+				<p class="section-kicker">FAQ</p>
+				<h2>Short answers for technical buyers.</h2>
+				<p>
+					Keep the scope tight: integrity, traceability, and evidence readiness.
+				</p>
+			</div>
+
+			<div class="faq-grid">
+				{
+					faqItems.map((item) => (
+						<article class="faq-card surface-sunken">
+							<h3>{item.question}</h3>
+							<p>{item.answer}</p>
+						</article>
+					))
+				}
+			</div>
+		</section>
+
+		<section class="cta-banner surface">
+			<div>
+				<p class="section-kicker">Next Move</p>
+				<h2>Send one workflow and get a scoped reply in 24h.</h2>
+				<p>
+					Send the workflow, stack, sensitive data, and hosting model. We can scope the
+					pilot asynchronously by email.
+				</p>
+			</div>
+
+			<div class="cta-actions">
+				<div class="cta-prompts" aria-label="Pilot scope fields">
+					{scopePrompts.map((prompt) => <span class="chip">{prompt}</span>)}
+				</div>
+				<p class="microcopy">Reply with those four fields and we can send back a scoped recommendation.</p>
+				<div class="footer-actions">
+					<a class="button-primary" href={asyncDemoUrl}>Request Async Demo</a>
+					<a class="button-secondary" href={pilotScopeUrl}>Get Pilot Scope</a>
+				</div>
+				<a class="cta-email" href="mailto:borja@cortexpersist.com">borja@cortexpersist.com</a>
+			</div>
+		</section>
+
+		<footer class="site-footer">
+			<p class="footer-note">CORTEX Persist / The swarm verifies. The hardware remembers.</p>
+			<div class="footer-links">
+				<a href={githubUrl} target="_blank" rel="noreferrer">GitHub</a>
+				<a href={docsUrl} target="_blank" rel="noreferrer">Docs</a>
+				<a href="/vsa">Public Shell</a>
+			</div>
+		</footer>
 	</main>
-</Layout>
-
-<style>
-	main {
-		width: 100%;
-		height: 100vh;
-		display: flex;
-		flex-direction: column;
-		background: #000;
-		color: #fff;
-	}
-
-	.hero {
-		padding: 4rem;
-		flex: 1;
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		border-bottom: 1px solid #111;
-	}
-
-	h1 {
-		font-family: 'Orbitron', sans-serif;
-		font-size: 4rem;
-		letter-spacing: 0.5rem;
-		margin: 0;
-	}
-
-	p {
-		font-family: 'Inter', sans-serif;
-		color: #666;
-		margin-top: 1rem;
-		letter-spacing: 0.1rem;
-	}
-
-	.actions {
-		margin-top: 3rem;
-	}
-
-	.btn-sovereign {
-		position: relative;
-		display: inline-block;
-		padding: 1rem 2rem;
-		background: transparent;
-		border: 1px solid #2B3BE5;
-		color: #2B3BE5;
-		text-decoration: none;
-		font-family: 'Orbitron', sans-serif;
-		font-size: 0.8rem;
-		letter-spacing: 0.2rem;
-		transition: all 0.3s ease;
-		overflow: hidden;
-	}
-
-	.btn-sovereign:hover {
-		background: #2B3BE5;
-		color: #fff;
-		box-shadow: 0 0 20px rgba(43, 59, 229, 0.4);
-	}
-
-	.glitch-line {
-		position: absolute;
-		top: 0;
-		left: -100%;
-		width: 100%;
-		height: 1px;
-		background: rgba(255,255,255,0.5);
-		transition: all 0.5s ease;
-	}
-
-	.btn-sovereign:hover .glitch-line {
-		left: 100%;
-	}
-</style>
+</SiteLayout>
