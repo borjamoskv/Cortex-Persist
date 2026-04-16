@@ -32,6 +32,7 @@ def test_heavy_dependencies_live_in_optional_extras() -> None:
     assert "email-validator" not in base_dependencies
     assert "PyYAML" not in base_dependencies
     assert "watchdog" not in base_dependencies
+    assert "numpy" not in base_dependencies
     assert "aiofiles" not in base_dependencies
     assert "pyobjc-core" not in base_dependencies
     assert "pyobjc-framework-Cocoa" not in base_dependencies
@@ -39,7 +40,15 @@ def test_heavy_dependencies_live_in_optional_extras() -> None:
     assert _dependency_names(extras["embeddings"]) == {"sentence-transformers", "onnxruntime"}
     assert _dependency_names(extras["knowledge"]) == {"chromadb"}
     assert _dependency_names(extras["acceleration"]) == {"numba"}
-    assert _dependency_names(extras["api"]) >= {"fastapi", "uvicorn", "httpx", "sse-starlette", "email-validator"}
+    assert _dependency_names(extras["api"]) >= {
+        "fastapi",
+        "uvicorn",
+        "httpx",
+        "sse-starlette",
+        "email-validator",
+        "watchdog",
+    }
+    assert _dependency_names(extras["dev"]) >= {"pytest", "pytest-cov", "pytest-asyncio", "numpy"}
     assert _dependency_names(extras["mcp"]) == {
         "mcp",
         "aiohttp",
