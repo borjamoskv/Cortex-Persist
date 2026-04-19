@@ -20,11 +20,11 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-blue.svg" alt="License"></a>&nbsp;
   <a href="https://github.com/borjamoskv/Cortex-Persist/actions"><img src="https://github.com/borjamoskv/Cortex-Persist/actions/workflows/ci.yml/badge.svg" alt="CI"></a>&nbsp;
   <a href="https://codecov.io/gh/borjamoskv/Cortex-Persist"><img src="https://codecov.io/gh/borjamoskv/Cortex-Persist/branch/main/graph/badge.svg" alt="Codecov"></a>&nbsp;
-  <a href="https://pypi.org/project/cortex-persist/"><img src="https://img.shields.io/pypi/v/cortex-persist.svg" alt="PyPI"></a>
+  <img src="https://img.shields.io/badge/PyPI-coming_soon-lightgrey" alt="PyPI Coming Soon">
 </p>
 
 <p align="center">
-  <a href="#quickstart">Quickstart</a> · <a href="docs/api.md">API</a> · <a href="docs/SECURITY_TRUST_MODEL.md">Security Model</a> · <a href="ROADMAP.md">Roadmap</a> · <a href="CONTRIBUTING.md">Contributing</a>
+  <a href="#quickstart">Quickstart</a> · <a href="ROADMAP.md">Roadmap</a> · <a href="CONTRIBUTING.md">Contributing</a>
 </p>
 
 ---
@@ -87,7 +87,7 @@ Traditional logging and standard vector stores fail the epistemic containment te
 
 The supported core modules are: **engine**, **ledger**, **crypto**, **memory**, **facts**, **search**, **verification**, **audit**, **CLI**, **database**, **embeddings**, **guards**, **auth**, **core**, and **types**.
 
-See [docs/PRODUCT-CORE.md](docs/PRODUCT-CORE.md) for the full stability tier breakdown (Stable / Beta / Experimental).
+See `ARCHITECTURE.md` for the full stability tier breakdown.
 
 ## 90-second demo
 
@@ -154,7 +154,7 @@ cortex memory store risk-bot "Transaction flagged: IP mismatch"
 cortex trust-ledger verify
 ```
 
-See [docs/installation.md](docs/installation.md) for full installation options and platform-specific notes.
+See the quickstart above for installation options.
 
 ## Integration
 
@@ -200,15 +200,14 @@ CORTEX is governed by a strict zero-trust philosophy regarding generative AI out
 - **SQL Sandboxing:** Agents cannot run arbitrary queries; mutations must pass through rigid schema validation and formal AST checkpoints.
 - **Tamper Evidence over Access Control:** Instead of just hoping admins don't edit rows, we hash-chain the ledger so any manual modification invalidates the mathematical proof of the memory thread.
 
-> Read the exhaustive cryptographic guarantees in our [Security & Trust Model](docs/SECURITY_TRUST_MODEL.md).
+> Read the exhaustive cryptographic guarantees in our Security & Trust Model.
 
 ---
 
 ## Documentation
 
-- [**Security & Trust Model**](docs/SECURITY_TRUST_MODEL.md) — Cryptographic invariants & guarantees.
 - [**Roadmap**](ROADMAP.md) — Deployment phases and scaling logic.
-- [**API Reference**](docs/api.md) — SDK primitives and REST endpoints.
+- **Security & Trust Model** — Cryptographic invariants & guarantees.
 
 ---
 

@@ -1,6 +1,6 @@
 # CORTEX JS/TS SDK
 
-> ⚠️ **Not yet published.** This SDK is a roadmap item. `npm install @cortex-persist/sdk` returns 404 until the first npm release.
+> ⚠️ **Not published to npm.** `npm install @cortex-persist/sdk` will not work. This SDK is a future roadmap item. For the current product, use the Python package: `pip install cortex-persist`.
 
 Thin, zero-dependency TypeScript client for the [CORTEX Persist API](https://github.com/borjamoskv/Cortex-Persist).
 
