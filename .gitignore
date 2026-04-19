@@ -9,6 +9,7 @@
 # ── Security ──────────────────────────────────────
 .env
 .env.*
+!.env.example
 *.pem
 *.key
 *.p12
@@ -63,6 +64,8 @@ coverage.xml
 compile_*.txt
 pyright_*.txt
 test_*.txt
+tests/failed_test.txt
+tests/test_out.txt
 prepush_out*.txt
 seals_report.json
 bandit_report.json
@@ -171,10 +174,6 @@ open-cortex/
 cortex-hypervisor/
 
 # ── Audio / Media (never track) ──────────────────
-White_Pony_Master/
-White_Pony_Stems/
-Rework_POC_Generations/
-trompetas-inaki/
 video_transcript*.vtt
 video_transcript*.txt
 
@@ -189,8 +188,6 @@ nexus-dashboard/
 dashboard/
 web/
 web-org/
-yt-remotion-video/
-yt-sync-extension/
 
 # ── Marketing / Sales ────────────────────────────
 marketing/
@@ -218,29 +215,14 @@ notebooklm_domains/
 data/legal_dossiers/
 data/bandcamp_profiles.*
 docs-ui/
-economia-humor/
-filete-cumbia/
-gordacorp-immersive/
-gordacorp-remotion/
-impact-web/
 landing/
 landing-apotheosis/
-liquid-glass/
-manteca-web/
-notch-control-2026/
 notebooklm_sources/
-omni-translate-web/
 open-antigravity-integration/
-remote-control/
-remotion-factory/
 sap-audit-ui/
 security-agent-school/
 site/
 snapshots/
-sonic-supreme/
-sonic_sovereign/
 sovereign_agent/
-xokas-elevator/
-yt-notebooklm-ext/
 auramem/
 nexus-dashboard/.next/
