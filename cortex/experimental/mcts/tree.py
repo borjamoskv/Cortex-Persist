@@ -13,7 +13,7 @@ from pathlib import Path
 from cortex.experimental.mcts.git_env import MCTSGitEnvironment
 from cortex.extensions.llm.router import CortexLLMRouter
 
-logger = logging.getLogger("cortex.mcts.tree")
+logger = logging.getLogger("cortex.experimental.mcts.tree")
 
 
 @dataclass

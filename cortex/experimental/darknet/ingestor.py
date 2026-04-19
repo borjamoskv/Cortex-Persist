@@ -9,7 +9,7 @@ import asyncio
 import logging
 from dataclasses import dataclass
 
-logger = logging.getLogger("cortex.darknet.ingestor")
+logger = logging.getLogger("cortex.experimental.darknet.ingestor")
 
 
 @dataclass

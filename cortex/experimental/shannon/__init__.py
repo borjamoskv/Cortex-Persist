@@ -1,6 +1,6 @@
 """Shannon Module — Corpus entropy and information quality measurement."""
 
-from cortex.experimental.shannon.entropy import (
+from .entropy import (
     ShannonReport,
     compute_corpus_entropy,
     compute_fact_entropy,

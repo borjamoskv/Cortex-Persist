@@ -24,7 +24,7 @@ __all__ = [
     "diagnose_health",
 ]
 
-logger = logging.getLogger("cortex.shannon.entropy")
+logger = logging.getLogger("cortex.experimental.shannon.entropy")
 
 _STOP_WORDS = frozenset(
     {

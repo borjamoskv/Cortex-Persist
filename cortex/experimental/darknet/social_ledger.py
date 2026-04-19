@@ -12,7 +12,7 @@ from uuid import uuid4
 
 from cortex.database.core import connect as db_connect
 
-logger = logging.getLogger("cortex.darknet.ledger")
+logger = logging.getLogger("cortex.experimental.darknet.social_ledger")
 
 
 @dataclass

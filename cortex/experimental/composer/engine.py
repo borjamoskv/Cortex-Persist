@@ -13,7 +13,7 @@ from cortex.experimental.composer.vision_qa import AestheticAuditor
 from cortex.extensions.llm.router import CortexLLMRouter, CortexPrompt, IntentProfile
 from cortex.utils.result import Err, Ok, Result
 
-logger = logging.getLogger("cortex.composer.engine")
+logger = logging.getLogger("cortex.experimental.composer.engine")
 
 
 class ComposerEngine:

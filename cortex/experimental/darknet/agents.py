@@ -13,7 +13,7 @@ from cortex.experimental.darknet.ingestor import RawWorldData
 from cortex.experimental.darknet.social_ledger import DarknetPost
 from cortex.extensions.llm.router import CortexLLMRouter, CortexPrompt, IntentProfile
 
-logger = logging.getLogger("cortex.darknet.agents")
+logger = logging.getLogger("cortex.experimental.darknet.agents")
 
 
 class DarknetAgent:

@@ -14,7 +14,7 @@ from pathlib import Path
 
 from cortex.extensions.llm.router import CortexLLMRouter, CortexPrompt, IntentProfile
 
-logger = logging.getLogger("cortex.mcts.git_env")
+logger = logging.getLogger("cortex.experimental.mcts.git_env")
 
 
 class MCTSGitEnvironment:

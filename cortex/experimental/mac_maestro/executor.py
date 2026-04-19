@@ -18,7 +18,7 @@ except ImportError:
     SDK_AVAILABLE = False
 
 
-logger = logging.getLogger("cortex.mac_maestro.executor")
+logger = logging.getLogger("cortex.experimental.mac_maestro.executor")
 
 
 class MaestroExecutor:

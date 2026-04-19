@@ -18,7 +18,7 @@ except ImportError:
 from cortex.extensions.llm.router import CortexLLMRouter, CortexPrompt, IntentProfile
 from cortex.utils.result import Err, Ok, Result
 
-logger = logging.getLogger("cortex.composer.vision_qa")
+logger = logging.getLogger("cortex.experimental.composer.vision_qa")
 
 
 class AestheticAuditor:
