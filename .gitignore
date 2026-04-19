@@ -39,6 +39,7 @@ build/
 # ── IDE & Editor ──────────────────────────────────
 .idea/
 .vscode/
+.cursorrules
 *.swp
 *.swo
 *~
