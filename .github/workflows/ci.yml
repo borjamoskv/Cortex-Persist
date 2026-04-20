@@ -405,6 +405,9 @@ jobs:
             --junitxml=test-artifacts/pytest.xml \
             -o faulthandler_timeout=300 \
             --cov=cortex \
+            --cov=cortex-sdk/cortex_persist \
+            --cov=sdks \
+            --cov=api \
             --cov-report=xml \
             --cov-report=term-missing \
             2>&1 | tee test-artifacts/pytest.log || status=${PIPESTATUS[0]}
@@ -430,6 +433,8 @@ jobs:
           files: coverage.xml
           fail_ci_if_error: false
           token: ${{ secrets.CODECOV_TOKEN }}
+          flags: core,sdk,sdks,api
+          name: codecov-py${{ matrix.python-version }}
 
   test_status:
     name: test

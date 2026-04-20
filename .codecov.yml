@@ -26,10 +26,17 @@ ignore:
   - "examples/**"
   - "experimental/**"
   - "**/__pycache__/**"
+  - "**/conftest.py"
   - "setup.py"
+  - "cortex-core/**"        # Standalone scripts, not a package
+  - "**/.scratch/**"
+  - "**/node_modules/**"
+  - "bounty/**"
+  - "bounty_hunt/**"
+  - "skills/compiled_skills/**"
 
 comment:
-  layout: "reach,diff,flags,files"
+  layout: "header,diff,flags,components,files"
   behavior: default
   require_changes: true
   require_base: false
@@ -43,8 +50,56 @@ parsers:
       method: no
       macro: no
 
+# Component-based coverage tracking for different parts of the project
 flags:
-  unittests:
+  core:
     paths:
       - cortex/
     carryforward: true
+
+  sdk:
+    paths:
+      - cortex-sdk/cortex_persist/
+    carryforward: true
+
+  sdks:
+    paths:
+      - sdks/
+    carryforward: true
+
+  api:
+    paths:
+      - api/
+    carryforward: true
+
+# Per-component coverage targets
+component_management:
+  default_rules:
+    statuses:
+      - type: project
+        target: 70%
+
+  individual_components:
+    - component_id: cortex
+      name: Core Package
+      paths:
+        - cortex/**
+      statuses:
+        - type: project
+          target: 80%
+
+    - component_id: cortex_sdk
+      name: SDK Package
+      paths:
+        - cortex-sdk/cortex_persist/**
+      statuses:
+        - type: project
+          target: 75%
+
+    - component_id: sdks
+      name: Additional SDKs
+      paths:
+        - sdks/**
+      statuses:
+        - type: project
+          target: 70%
