@@ -5,13 +5,7 @@
 <h1 align="center">CORTEX Persist</h1>
 
 <p align="center">
-  <strong>Cryptographically trace what your AI agent knew.</strong>
-</p>
-
-<p align="center">
-  Tamper-evident memory and decision lineage for AI agents.&nbsp;
-  <br>
-  Local-first. SHA-256 hash-chained. Merkle-sealed. Audit-ready.
+  <strong>Cryptographic memory integrity for AI agents</strong>
 </p>
 
 <p align="center">
@@ -24,196 +18,261 @@
 </p>
 
 <p align="center">
-  <a href="#quickstart">Quickstart</a> · <a href="docs/api.md">API</a> · <a href="docs/SECURITY_TRUST_MODEL.md">Security Model</a> · <a href="ROADMAP.md">Roadmap</a> · <a href="CONTRIBUTING.md">Contributing</a>
+  <a href="#quickstart">Quickstart</a> · <a href="#documentation">Docs</a> · <a href="docs/SECURITY_TRUST_MODEL.md">Security Model</a> · <a href="ROADMAP.md">Roadmap</a> · <a href="CONTRIBUTING.md">Contributing</a>
 </p>
 
 ---
 
-CORTEX is trust infrastructure for AI agents. It sits between your runtime and your memory layer, making facts, decisions, and derived state tamper-evident. If stored context changes after the fact, verification fails. If you need to explain what an agent knew, when it knew it, and what it did next, CORTEX gives you a cryptographic trail instead of an anecdote.
+## What is CORTEX Persist?
 
-## Why not logs / observability?
+CORTEX Persist is a **local-first trust layer** for AI agents. It makes agent memory tamper-evident through cryptographic hash chains, giving you verifiable audit trails instead of anecdotes.
 
-| Feature | Logs & Observability | CORTEX Persist (Trust Layer) |
-| :--- | :--- | :--- |
-| **Trust Model** | "Trust the process" | **"Verify the evidence"** |
-| **Tamper Detection** | Weak (DB mutation is silent) | **Cryptographic** (SHA-256 + Merkle) |
-| **Compliance Proof** | Requires manual reconstruction | **O(1) Portable JSON Audit Packs** |
-| **Agent Liability** | Ambiguous context reconstruction | **Mathematically defensible lineage** |
+**In short:** Store facts. Verify integrity. Generate compliance reports. All local. All auditable.
 
-> Logs tell you what happened. CORTEX adds cryptographic evidence for what the agent knew, when it knew it, and whether later tampering is detectable along the verified chain. [**Review a real verification proof.**](docs/examples/audit_pack_evidence_demo.json)
+### What it does
+
+- **Tamper-evident storage**: Facts are SHA-256 hash-chained. Any mutation after the fact breaks verification.
+- **Cryptographic audit trails**: Every write creates immutable ledger entries. Verification is O(1).
+- **Local-first**: SQLite + built-in vector search. No external dependencies required for core functionality.
+- **Compliance-ready**: EU AI Act Article 12 audit pack generation built-in.
+
+### What it is NOT
+
+- **Not a vector database**: Use Qdrant/Pinecone for ephemeral RAG. CORTEX stores *decisions* and *facts*.
+- **Not an observability platform**: Use Datadog/ELK for server metrics and APM.
+- **Not a hallucination preventer**: A cryptographically logged lie is still a lie — it's just an *auditable* lie.
 
 ## Use Cases
 
-1. **Autonomous Agents:** Prove exactly what context an agent had when making a critical, irreversible decision (e.g. executing a trade, sending a legal email).
-2. **Multi-Agent Systems:** Trace state propagation across agents and workflows.
-3. **Compliance-Heavy Environments:** Produce audit trails for finance, security, and regulated operations.
-4. **Post-incident forensics:** detect silent mutation, tampering, or replayed state.
-5. **Trust-sensitive AI products:** ship memory with evidence, not vibes.
+- **Autonomous agents**: Prove what context an agent had when making irreversible decisions
+- **Multi-agent systems**: Trace state propagation across agents and workflows
+- **Compliance environments**: Generate audit trails for finance, security, and regulated operations
+- **Post-incident forensics**: Detect silent mutations, tampering, or replayed state
+- **Trust-sensitive AI products**: Ship memory with evidence, not vibes
 
-## Why CORTEX? (Not just another Vector DB or Logger)
+## The Supported Path Today
 
-Traditional logging and standard vector stores fail the epistemic containment test. If an agent hallucinates, or if a database is mutated passively, you lose structural trust in the machine. CORTEX makes mutation mathematically defensible.
+CORTEX Persist is built on a **local-first SQLite core** with cryptographic hash-chaining and built-in vector search. This is the stable, production-ready path.
 
-| Feature                    | Standard Logs (Datadog/ELK) | Standard Vector DB (Pinecone/Qdrant) | **CORTEX Persist**                        |
-|:---------------------------|:----------------------------|:-------------------------------------|:------------------------------------------|
-| **Primary Goal**           | Observability & Debugging   | Semantic Search & RAG                | **Tamper-Evident Cognitive Lineage**      |
-| **Write Integrity**        | Overwritable / Editable     | Silent CRUD operations               | **Append-Only + Cryptographic Hash**      |
-| **Fact Mutability**        | Easy (API/Admin access)     | Easy (API/Admin access)              | **Tamper-evident** (verification reveals mutation) |
-| **Evidence Export**        | Text dumps                  | JSON extracts                        | **Zero-Trust Sealed Audit Packs**         |
+**What's stable:**
+- Core trust layer: `init` → `store` → `verify` → `export`
+- Local SQLite + WAL mode + optional vector search
+- SHA-256 hash-chained ledger with Merkle checkpoints
+- Cryptographic audit pack generation
+- CLI and Python SDK
 
-> **See a real artifact**: [View Exported Audit Pack](examples/audit_proof_artifact.json)
+**What's beta:**
+- REST API server (`cortex-persist[api]`)
+- MCP (Model Context Protocol) integration (`cortex-persist[mcp]`)
+- Multi-tenant mode with RBAC
 
-### What CORTEX does NOT replace (Non-Goals)
+**What's experimental** (not supported for production):
+- Cloud backends (Postgres/AlloyDB, Qdrant Cloud, Redis)
+- Distributed consensus and federation
+- Swarm coordination and agent handoff surfaces
 
-- **CORTEX is not a Semantic Search primary DB:** Continue using Qdrant, Pinecone, or Milvus for purely ephemeral RAG chunks. CORTEX stores the *decisions* and core *facts*.
-- **CORTEX is not an Observability Platform:** Continue using Datadog or ELK for server metrics, APM, and basic string logs. 
-- **CORTEX does not stop hallucinations:** A cryptographically logged lie from an LLM is still a lie. It is merely an *auditable* lie, flagged if it contradicts prior sealed facts.
-
-## Deployment Matrix
-
-- **Tamper-evident memory:** append-only ledger for facts, decisions, and state transitions.
-- **Hash-linked records:** SHA-256 chaining across stored entries.
-- **Batch integrity proofs:** Merkle checkpoints for efficient verification at scale.
-- **Deterministic audit exports:** reproducible evidence for internal review and regulated workflows.
-- **Drop-in positioning:** works on top of existing memory stores instead of replacing your stack.
-
-| Environment | Status | Storage / Scaling |
-| :--- | :--- | :--- |
-| **Local-Only** | ✅ **Stable local-first core** | SQLite + WAL + built-in Vector Search. Best-supported path today. |
-| **Self-Hosted** | 🟡 **Beta** | Multi-tenant. API-driven. Redis cache. Pluggable to your infra. |
-| **Cloud-Ready** | ⏳ **Partial / Roadmap** | Postgres/Qdrant/Turso code exists in-tree; managed cloud posture remains incomplete. |
-
-## Product Core
-
-The supported core modules are: **engine**, **ledger**, **crypto**, **memory**, **facts**, **search**, **verification**, **audit**, **CLI**, **database**, **embeddings**, **guards**, **auth**, **core**, and **types**.
-
-See [docs/PRODUCT-CORE.md](docs/PRODUCT-CORE.md) for the full stability tier breakdown (Stable / Beta / Experimental).
-
-## 90-second demo
-
-```bash
-# 1. Start the ledger
-$ cortex init
-
-# 2. Store a memory
-$ cortex memory store risk-bot "Transaction flagged: IP mismatch"
-[+] Fact stored. Ledger hash: 8f4a2b9e...
-
-# 3. Verify the stored fact
-$ cortex verify 1
-[✔] VERIFIED: Fact chain intact.
-
-# 4. Tamper attempt (direct DB mutation)
-$ sqlite3 cortex.db "UPDATE facts SET content='Transaction approved' WHERE id='8f4a2b9e'"
-
-# 5. Ledger verification
-$ cortex trust-ledger verify
-[✘] TAMPER DETECTED: Hash mismatch at block 8f4a2b9e
-
-# 6. Generate a compliance snapshot
-$ cortex compliance-report
-```
-
-> 🐍 **Python demo:** For a self-contained Python script that walks through the full core flow, see [`examples/demo_canonical.py`](examples/demo_canonical.py).
+See [docs/PRODUCT-CORE.md](docs/PRODUCT-CORE.md) for complete stability tier definitions.
 
 ## Quickstart
 
-Start with the smallest supported flow and get to audit evidence fast.
+Get started in under 5 minutes with the stable local-first core.
 
-The supported PyPI base flow is `install -> init -> store -> verify`.
-Semantic search, MCP/server flows, and other extended surfaces may require optional extras or a fuller local runtime.
-
-### Path A: Install from PyPI *(preferred)*
+### Install
 
 ```bash
 pip install cortex-persist
-cortex init
-cortex memory store risk-bot "Transaction flagged: IP mismatch"
-cortex trust-ledger verify
 ```
 
-For local semantic embeddings, Chroma-backed knowledge sync, or JIT acceleration, add the optional extras you actually need:
+This installs the core trust layer with deterministic fallback embeddings — enough for the supported `init → store → verify` flow.
+
+**Optional: Add semantic search**
 
 ```bash
 pip install "cortex-persist[embeddings]"
-pip install "cortex-persist[knowledge]"
-pip install "cortex-persist[acceleration]"
-pip install "cortex-persist[platform]"       # macOS keychain support
-pip install "cortex-persist[api,mcp,daemon,authoring]"  # optional server surfaces
 ```
 
-### Path B: Install from Source *(development)*
+For local ONNX-based embeddings instead of deterministic fallback vectors.
+
+**Full installation options:** See [docs/installation.md](docs/installation.md)
+
+### Initialize
 
 ```bash
-git clone https://github.com/borjamoskv/Cortex-Persist.git
-cd Cortex-Persist
-python3 -m venv .venv && source .venv/bin/activate
-pip install -e .
 cortex init
-cortex memory store risk-bot "Transaction flagged: IP mismatch"
-cortex trust-ledger verify
 ```
 
-See [docs/installation.md](docs/installation.md) for full installation options and platform-specific notes.
+Creates `~/.cortex/cortex.db` with the ledger and fact schema.
 
-## Integration
+### Store Facts
 
-CORTEX wraps your existing state management. It does not replace your embeddings or vector search.
+```bash
+# Store a decision
+cortex memory store my-project "Approved loan application #443" --type decision
+
+# Store knowledge
+cortex memory store my-project "Redis uses skip lists for sorted sets" --tags "redis,data-structures"
+
+# Store with explicit source
+cortex memory store my-project "Rate limit: 100 req/min" --source "agent:claude"
+```
+
+Every fact is automatically hash-chained into an immutable ledger.
+
+### Verify Integrity
+
+```bash
+# Verify the entire ledger
+cortex ledger verify
+
+# Generate a compliance report
+cortex compliance-report
+```
+
+### Search (Optional)
+
+If you installed `[embeddings]`, you can run semantic search:
+
+```bash
+cortex search "how are sorted sets implemented?"
+```
+
+### Python SDK
 
 ```python
 import asyncio
 from cortex import CortexEngine
 
-async def main() -> None:
+async def main():
     engine = CortexEngine()
 
+    # Store a fact
     fact_id = await engine.store(
-        project="fin-fraud-bot",
-        content="User approved transaction $5,000",
+        project="my-agent",
+        content="Approved loan application #443",
         fact_type="decision",
         tenant_id="customer-123",
     )
 
+    # Verify ledger integrity
     result = await engine.verify_ledger()
     assert result.get("valid") is True
 
 asyncio.run(main())
 ```
 
-## Performance
-
-*Typical execution on a standard cloud instance (4 vCPU, 16 GB RAM).*
-
-| Operation | Median | P95 | Notes |
-| :--- | :--- | :--- | :--- |
-| **Memory Write** | ~18 ms | ~35 ms | Local SQLite + SHA-256 |
-| **Verify Record** | ~5 ms | ~12 ms | Single block validation |
-| **Merkle Checkpoint** | ~85 ms | ~140 ms | Aggregating 10k records |
-| **Report Export** | ~400 ms | ~800 ms | Lineage traversal |
+**Full example:** See [`examples/demo_canonical.py`](examples/demo_canonical.py) for a complete walkthrough.
 
 ---
 
-## Threat Model Summary (Trust Boundaries)
+## Extended Surfaces (Beta / Experimental)
 
-CORTEX is governed by a strict zero-trust philosophy regarding generative AI output.
-- **Generative Output is Conjecture:** We treat all LLM output as thermodynamically unstable (`Void-State`). It only becomes durable memory *after* crossing the deterministic verification membrane.
-- **SQL Sandboxing:** Agents cannot run arbitrary queries; mutations must pass through rigid schema validation and formal AST checkpoints.
-- **Tamper Evidence over Access Control:** Instead of just hoping admins don't edit rows, we hash-chain the ledger so any manual modification invalidates the mathematical proof of the memory thread.
+Beyond the core trust layer, CORTEX includes optional server and orchestration surfaces. These require additional installation and are in beta or experimental status.
 
-> Read the exhaustive cryptographic guarantees in our [Security & Trust Model](docs/SECURITY_TRUST_MODEL.md).
+### REST API Server (Beta)
+
+```bash
+pip install "cortex-persist[api]"
+uvicorn cortex.api:app --host 0.0.0.0 --port 8484
+```
+
+Interactive docs: `http://localhost:8484/docs`
+
+See [docs/api.md](docs/api.md) for the full API reference.
+
+### Model Context Protocol (Beta)
+
+CORTEX speaks MCP, making it a plug-in for AI IDEs like Claude Code, Cursor, and Windsurf.
+
+```bash
+pip install "cortex-persist[mcp]"
+python -m cortex.mcp
+```
+
+See [docs/quickstart.md#mcp-server](docs/quickstart.md#run-as-mcp-server) for MCP integration details.
+
+### Daemon & Background Services (Experimental)
+
+```bash
+pip install "cortex-persist[daemon]"
+cortex daemon start
+```
+
+Runs specialized monitors for health, security, and memory compaction. See [docs/cli.md](docs/cli.md) for full command reference.
+
+---
+
+## Non-Goals
+
+**What CORTEX Persist is explicitly NOT designed for:**
+
+- **Not a primary semantic search database**: Use Qdrant, Pinecone, or Weaviate for large-scale ephemeral RAG workloads.
+- **Not application observability**: Use Datadog, New Relic, or ELK for server metrics, traces, and APM.
+- **Not a graph database**: Use Neo4j or Memgraph if your primary need is complex relationship querying.
+- **Not a real-time event bus**: Use Kafka, RabbitMQ, or NATS for high-throughput message streaming.
+- **Not a source-of-truth prevention tool**: A cryptographically logged lie is still a lie — CORTEX makes it *auditable*, not *impossible*.
+
+CORTEX is a trust layer that sits *alongside* your existing stack, not a replacement for specialized infrastructure.
+
+---
+
+## Security & Trust Model
+
+CORTEX treats all generative output as conjecture until it passes deterministic validation boundaries.
+
+**Trust boundaries:**
+- **Write path**: Proposals → Guards → Schema validation → Encryption → Ledger → Persistence
+- **Hash continuity**: SHA-256 chaining with Merkle checkpoints
+- **Tenant isolation**: Multi-tenant data separation enforced at all memory layers
+- **Encrypted at rest**: Sensitive fact content and metadata are encrypted before storage
+
+**What CORTEX guarantees:**
+- Cryptographic traceability of persisted facts
+- Tamper-evident audit trails
+- Deterministic rejection of structurally invalid inputs
+- Tenant-aware data isolation
+
+**What CORTEX does NOT guarantee:**
+- Semantic truth of stored content
+- Correctness of upstream models or tools
+- Safety if guards or verification surfaces are bypassed
+
+Read the full threat model and cryptographic guarantees in [docs/SECURITY_TRUST_MODEL.md](docs/SECURITY_TRUST_MODEL.md).
 
 ---
 
 ## Documentation
 
-- [**Security & Trust Model**](docs/SECURITY_TRUST_MODEL.md) — Cryptographic invariants & guarantees.
-- [**Roadmap**](ROADMAP.md) — Deployment phases and scaling logic.
-- [**API Reference**](docs/api.md) — SDK primitives and REST endpoints.
+| Document | Description |
+| :--- | :--- |
+| [**Quickstart Guide**](docs/quickstart.md) | Extended CLI walkthrough and usage examples |
+| [**Installation**](docs/installation.md) | Platform-specific notes and optional extras |
+| [**CLI Reference**](docs/cli.md) | Complete command reference (90+ commands) |
+| [**API Reference**](docs/api.md) | REST API endpoints and SDK usage |
+| [**Security & Trust Model**](docs/SECURITY_TRUST_MODEL.md) | Cryptographic guarantees and threat model |
+| [**Product Core**](docs/PRODUCT-CORE.md) | Stability tiers (Stable/Beta/Experimental) |
+| [**Architecture**](docs/architecture.md) | System design and module topology |
+| [**Roadmap**](ROADMAP.md) | Upcoming features and capability bands |
+| [**Contributing**](CONTRIBUTING.md) | How to contribute to CORTEX Persist |
+
+---
+
+## Performance
+
+Local SQLite performance on typical hardware (4 vCPU, 16 GB RAM):
+
+| Operation | Median | P95 |
+| :--- | :--- | :--- |
+| Memory Write | ~18 ms | ~35 ms |
+| Verify Record | ~5 ms | ~12 ms |
+| Merkle Checkpoint | ~85 ms | ~140 ms |
+| Audit Export | ~400 ms | ~800 ms |
 
 ---
 
 ## License
 
 Apache License 2.0. See [LICENSE](LICENSE).
+
+---
 
 *Built by [borjamoskv.com](https://borjamoskv.com) · [cortexpersist.com](https://cortexpersist.com)*
