@@ -104,6 +104,10 @@ class EngineMixinBase:
             tenant_id = get_tenant_id()
 
         if not tenant_id:
-            raise RuntimeError("Tenant boundary violation: missing tenant_id context")
+            from cortex.extensions.security.tenant import TenantContextMissingError
+
+            raise TenantContextMissingError(
+                "Tenant boundary violation: missing tenant_id context"
+            )
 
         return tenant_id

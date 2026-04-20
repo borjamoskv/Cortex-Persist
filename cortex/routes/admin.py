@@ -10,6 +10,7 @@ Sovereign 130/100 — Pydantic responses, structured logging, TOCTOU-safe paths.
 import logging
 import os
 import re
+import secrets
 import time
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional
@@ -160,7 +161,10 @@ def _is_valid_bootstrap_request(request: Request, bootstrap_token: str | None) -
     provided_bootstrap_token = request.headers.get("X-Cortex-Bootstrap-Token")
 
     if bootstrap_token:
-        token_valid = provided_bootstrap_token == bootstrap_token
+        token_valid = (
+            provided_bootstrap_token is not None
+            and secrets.compare_digest(provided_bootstrap_token, bootstrap_token)
+        )
         if token_valid:
             logger.warning(
                 "Admin bootstrap accepted via token: host=%s",
