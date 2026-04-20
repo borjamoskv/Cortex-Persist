@@ -34,15 +34,15 @@ def admin_manager(tmp_path, monkeypatch) -> Iterator[AuthManager]:
         auth_manager_module._auth_manager = previous_global_manager
 
 
-def _build_admin_client(client_host: str = "testclient") -> TestClient:
+def _build_admin_client(remote_host: str = "testclient") -> TestClient:
     app = FastAPI()
     app.include_router(admin_router.router)
-    return TestClient(app, client=(client_host, 50000))
+    return TestClient(app, client=(remote_host, 50000))
 
 
 def test_bootstrap_remote_rejected_without_valid_bootstrap_condition(admin_manager) -> None:
     manager = admin_manager
-    with _build_admin_client(client_host="192.168.1.44") as client:
+    with _build_admin_client(remote_host="192.168.1.44") as client:
         response = client.post(
             "/v1/admin/keys",
             params={"name": "bootstrap-admin", "tenant_id": "tenant-alpha"},
@@ -54,7 +54,7 @@ def test_bootstrap_remote_rejected_without_valid_bootstrap_condition(admin_manag
 
 def test_bootstrap_local_allowed_when_uninitialized(admin_manager) -> None:
     manager = admin_manager
-    with _build_admin_client(client_host="127.0.0.1") as client:
+    with _build_admin_client(remote_host="127.0.0.1") as client:
         response = client.post(
             "/v1/admin/keys",
             params={"name": "bootstrap-admin", "tenant_id": "tenant-alpha"},
@@ -70,7 +70,7 @@ def test_bootstrap_allowed_with_cortex_bootstrap_token(admin_manager, monkeypatc
     bootstrap_token = "bootstrap-secret-token"
     monkeypatch.setenv("CORTEX_BOOTSTRAP_TOKEN", bootstrap_token)
 
-    with _build_admin_client(client_host="203.0.113.15") as client:
+    with _build_admin_client(remote_host="203.0.113.15") as client:
         response = client.post(
             "/v1/admin/keys",
             params={"name": "bootstrap-admin", "tenant_id": "tenant-alpha"},
@@ -83,7 +83,7 @@ def test_bootstrap_allowed_with_cortex_bootstrap_token(admin_manager, monkeypatc
 
 def test_create_api_key_bootstrap_is_single_use(admin_manager) -> None:
     manager = admin_manager
-    with _build_admin_client(client_host="127.0.0.1") as client:
+    with _build_admin_client(remote_host="127.0.0.1") as client:
         first = client.post(
             "/v1/admin/keys",
             params={"name": "bootstrap-admin", "tenant_id": "tenant-alpha"},
@@ -101,7 +101,7 @@ def test_create_api_key_bootstrap_is_single_use(admin_manager) -> None:
 
 def test_create_api_key_rejects_invalid_tenant_id(admin_manager) -> None:
     manager = admin_manager
-    with _build_admin_client(client_host="127.0.0.1") as client:
+    with _build_admin_client(remote_host="127.0.0.1") as client:
         response = client.post(
             "/v1/admin/keys",
             params={"name": "bootstrap-admin", "tenant_id": "tenant alpha"},
@@ -128,7 +128,7 @@ def test_list_api_keys_is_scoped_to_authenticated_tenant(admin_manager) -> None:
     )
     manager.create_key_sync("beta-worker", tenant_id="tenant-beta", permissions=["read"])
 
-    with _build_admin_client(client_host="127.0.0.1") as client:
+    with _build_admin_client(remote_host="127.0.0.1") as client:
         alpha_response = client.get(
             "/v1/admin/keys",
             headers={"Authorization": f"Bearer {token_alpha}"},

@@ -173,6 +173,10 @@ def _is_valid_bootstrap_request(request: Request, bootstrap_token: str | None) -
         )
         return False
 
+    if request_host is None:
+        logger.warning("Admin bootstrap rejected: client host unavailable")
+        return False
+
     if request_host in _LOCAL_BOOTSTRAP_HOSTS:
         logger.warning(
             "Admin bootstrap accepted from local host without bootstrap token: host=%s",

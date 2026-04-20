@@ -117,6 +117,20 @@ def test_get_tenant_id_legacy_flag_allows_default(monkeypatch) -> None:
     assert isolated_context.run(get_tenant_id) == "default"
 
 
+def test_get_tenant_id_returns_bound_context(monkeypatch) -> None:
+    monkeypatch.delenv("CORTEX_ALLOW_LEGACY_DEFAULT_TENANT", raising=False)
+    isolated_context = contextvars.Context()
+
+    def _run_in_context() -> str:
+        token = tenant_id_var.set("tenant-green")
+        try:
+            return get_tenant_id()
+        finally:
+            tenant_id_var.reset(token)
+
+    assert isolated_context.run(_run_in_context) == "tenant-green"
+
+
 def test_resolve_tenant_fails_without_context(monkeypatch) -> None:
     monkeypatch.delenv("CORTEX_ALLOW_LEGACY_DEFAULT_TENANT", raising=False)
 
