@@ -1,3 +1,7 @@
+🌐 **English** | [Español](README.es.md) | [中文](README.zh.md)
+
+> **Note:** Translations may temporarily lag behind the English README after major updates.
+
 <p align="center">
   <img src="assets/marketing/social-preview.png" alt="CORTEX Persist — Tamper-evident memory for AI agents" width="720">
 </p>
