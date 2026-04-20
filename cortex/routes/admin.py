@@ -8,6 +8,7 @@ Sovereign 130/100 — Pydantic responses, structured logging, TOCTOU-safe paths.
 """
 
 import logging
+import os
 import re
 import time
 from pathlib import Path
@@ -70,6 +71,7 @@ _LEDGER_LAG_THRESHOLD = 1000
 
 _DANGEROUS_PATH_CHARS = frozenset("\0\r\n\t")
 _TENANT_PATTERN = re.compile(r"^[a-z0-9_\-]+$", re.I)
+_LOCAL_BOOTSTRAP_HOSTS = frozenset({"127.0.0.1", "::1"})
 
 
 def _get_lang(request: Request) -> str:
@@ -150,6 +152,39 @@ async def _verify_admin_auth(
             lang,
         ).format(permission="admin")
         raise HTTPException(status_code=403, detail=detail)
+
+
+def _is_valid_bootstrap_request(request: Request, bootstrap_token: str | None) -> bool:
+    """Validate whether first-key bootstrap request meets strict security controls."""
+    request_host = request.client.host if request.client else None
+    provided_bootstrap_token = request.headers.get("X-Cortex-Bootstrap-Token")
+
+    if bootstrap_token:
+        token_valid = provided_bootstrap_token == bootstrap_token
+        if token_valid:
+            logger.warning(
+                "Admin bootstrap accepted via token: host=%s",
+                request_host,
+            )
+            return True
+        logger.warning(
+            "Admin bootstrap rejected: invalid or missing bootstrap token host=%s",
+            request_host,
+        )
+        return False
+
+    if request_host in _LOCAL_BOOTSTRAP_HOSTS:
+        logger.warning(
+            "Admin bootstrap accepted from local host without bootstrap token: host=%s",
+            request_host,
+        )
+        return True
+
+    logger.warning(
+        "Admin bootstrap rejected: non-local host without bootstrap token: host=%s",
+        request_host,
+    )
+    return False
 
 
 # ─── Project Management ──────────────────────────────────────────────
@@ -359,6 +394,10 @@ async def create_api_key(
 
     if existing_keys:
         await _verify_admin_auth(authorization, manager, lang)
+    else:
+        bootstrap_token = os.getenv("CORTEX_BOOTSTRAP_TOKEN")
+        if not _is_valid_bootstrap_request(request, bootstrap_token):
+            raise HTTPException(status_code=403, detail=get_trans("error_forbidden", lang))
 
     raw_key, api_key = await manager.create_key(
         name=name,

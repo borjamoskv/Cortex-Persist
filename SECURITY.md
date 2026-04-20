@@ -24,6 +24,8 @@ CORTEX is built security-first:
 - **Privacy Shield** — 11-pattern secret detection at ingress
 - **AST Sandbox** — safe LLM code execution without `eval()`
 - **RBAC** — 4-role access control (admin, editor, viewer, auditor)
+- **Controlled admin bootstrap** — first privileged key only via `CORTEX_BOOTSTRAP_TOKEN` or localhost bootstrap when no token is configured
+- **Fail-closed tenant context** — tenant context is explicit; missing context is rejected by default
 - **Security Headers Middleware** — CSP, HSTS, X-Frame-Options
 - **Input Sanitization** — all user inputs validated and escaped
 
@@ -66,6 +68,7 @@ CORTEX assumes:
 - The local SQLite database is as secure as the host filesystem
 - Network APIs require authentication (API keys or JWT)
 - Multi-tenant deployments enforce strict tenant isolation via `tenant_id` scoping
+- First-key admin bootstrap is never public: remote bootstrap requires a valid `CORTEX_BOOTSTRAP_TOKEN`
 - **Untrusted plugins** execute in containerized sandboxes with no host network access
 - **Supply chain attacks** are mitigated by Sigstore signing + pip-audit + Trivy
 
@@ -78,6 +81,7 @@ CORTEX assumes:
 | Compromised container image | Trivy scan (CRITICAL/HIGH block) |
 | Memory tampering | SHA-256 hash chain + Merkle checkpoints |
 | Unauthorized access | RBAC + API key + JWT authentication |
+| Privileged first-key bootstrap abuse | Controlled bootstrap token gate or localhost-only bootstrap during uninitialized state |
 | Secret leakage | Privacy Shield (11 regex patterns at ingress) |
 | **Composition leakage** | **Holistic cross-field correlation analysis at ingress** |
 | Malicious LLM code output | AST Sandbox (no eval/exec) |

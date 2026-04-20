@@ -175,6 +175,14 @@ These operate before persistence and are intended to reject invalid or dangerous
 Admission control and policy evaluation determine whether a write is even allowed
 under the current actor, tenant, or environment.
 
+#### Admin Bootstrap Boundary
+
+Privileged first-key bootstrap is a controlled exceptional path:
+
+- if `CORTEX_BOOTSTRAP_TOKEN` is configured, bootstrap requires a valid token
+- without token, bootstrap is allowed only from localhost (`127.0.0.1` / `::1`)
+- uninitialized remote bootstrap without valid condition is rejected (`403`)
+
 ### Crypto Layer
 
 Encryption protects sensitive fact content and metadata at rest.
@@ -265,6 +273,10 @@ All new data operations should be tenant-aware by default.
 ### Expectation
 
 Isolation must be explicit in APIs, search, caching, and persistence behavior.
+Tenant context is fail-closed by default:
+
+- missing tenant context is a boundary failure (no silent fallback to `"default"`)
+- `CORTEX_ALLOW_LEGACY_DEFAULT_TENANT` is optional transitional compatibility only
 
 ---
 

@@ -1,12 +1,18 @@
 """Tests for multi-tenant Row-Level Security (RLS) isolation in CORTEX Engine."""
 
+import contextvars
 import os
 import tempfile
 
 import pytest
 
 from cortex.engine import CortexEngine
-from cortex.extensions.security.tenant import tenant_id_var
+from cortex.engine.mixins.base import EngineMixinBase
+from cortex.extensions.security.tenant import (
+    TenantContextMissingError,
+    get_tenant_id,
+    tenant_id_var,
+)
 
 
 @pytest.fixture
@@ -96,3 +102,27 @@ async def test_tenant_isolation_update_and_deprecate(engine):
     alice_fact = await engine.get_fact(fact_id_alice)
     assert alice_fact.content == "Alice's initial draft"
     tenant_id_var.reset(token_alice)
+
+
+def test_get_tenant_id_fails_closed_without_context(monkeypatch) -> None:
+    monkeypatch.delenv("CORTEX_ALLOW_LEGACY_DEFAULT_TENANT", raising=False)
+    isolated_context = contextvars.Context()
+    with pytest.raises(TenantContextMissingError):
+        isolated_context.run(get_tenant_id)
+
+
+def test_get_tenant_id_legacy_flag_allows_default(monkeypatch) -> None:
+    monkeypatch.setenv("CORTEX_ALLOW_LEGACY_DEFAULT_TENANT", "true")
+    isolated_context = contextvars.Context()
+    assert isolated_context.run(get_tenant_id) == "default"
+
+
+def test_resolve_tenant_fails_without_context(monkeypatch) -> None:
+    monkeypatch.delenv("CORTEX_ALLOW_LEGACY_DEFAULT_TENANT", raising=False)
+
+    class _DummyEngine(EngineMixinBase):
+        pass
+
+    isolated_context = contextvars.Context()
+    with pytest.raises(TenantContextMissingError):
+        isolated_context.run(_DummyEngine()._resolve_tenant, "default")

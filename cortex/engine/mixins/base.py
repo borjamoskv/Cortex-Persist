@@ -97,14 +97,13 @@ class EngineMixinBase:
         return data
 
     def _resolve_tenant(self, tenant_id: str) -> str:
-        """Resolve and validate the tenant ID from context if 'default' is provided."""
+        """Resolve tenant ID and fail closed on missing tenant boundary."""
         if tenant_id == "default":
             from cortex.extensions.security.tenant import get_tenant_id
 
             tenant_id = get_tenant_id()
 
-        # Strict Multi-Tenancy (RLS): Never allow empty tenant
         if not tenant_id:
-            tenant_id = "default"
+            raise RuntimeError("Tenant boundary violation: missing tenant_id context")
 
         return tenant_id
