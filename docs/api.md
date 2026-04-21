@@ -1,19 +1,24 @@
 # REST API Reference
 
-CORTEX exposes a FastAPI application via `cortex.api:app`. The public HTTP surface is versioned
-primarily under `/v1`, and interactive docs are available at `/docs` when the app is not running
-in production mode.
+CORTEX exposes a FastAPI application via `cortex.api:app`.
+
+By default, the FastAPI app mounts the core verifiable-memory and trust surface described here.
+Broader operator/runtime routes are gated behind `CORTEX_ENABLE_EXPERIMENTAL_API=1`.
+
+Interactive docs are available at `/docs` when the app is not running in production mode.
 
 ---
 
 ## Run Locally
 
 ```bash
-pip install cortex-persist[api]
+pip install "cortex-persist[api]"
 uvicorn cortex.api:app --host 0.0.0.0 --port 8484
 ```
 
 Interactive docs: `http://localhost:8484/docs`
+
+The default core API bootstrap fails closed unless `CORTEX_STORAGE=local`.
 
 To export a static OpenAPI document:
 
@@ -49,9 +54,9 @@ curl -H "Authorization: Bearer ctx_xxxxxxxxxx" \
 
 ---
 
-## Core Endpoints
+## Recommended Core Endpoints
 
-### Facts & Memory
+### Facts And Memory
 
 - `POST /v1/facts` — Store a single fact for the authenticated tenant.
 - `POST /v1/facts/batch` — Store up to 100 facts in one request.
@@ -62,38 +67,63 @@ curl -H "Authorization: Bearer ctx_xxxxxxxxxx" \
 - `GET /v1/facts/{fact_id}/history` — Retrieve the fact version/history chain.
 - `GET /v1/facts/{fact_id}/chain` — Retrieve the causal chain for a fact.
 - `GET /v1/facts/verify` — Verify ledger integrity across persisted facts.
-- `POST /v1/facts/{fact_id}/vote` — Cast a consensus vote on a fact.
-- `POST /v1/facts/{fact_id}/vote-v2` — Cast a reputation-weighted consensus vote.
-- `GET /v1/facts/{fact_id}/votes` — List votes registered for a fact.
-- `POST /v1/facts/{fact_id}/taint` — Trigger taint propagation from a suspect fact.
 - `DELETE /v1/facts/{fact_id}` — Soft-deprecate a fact.
 
-### Trust, Governance & Health
+### Trust, Governance, And Health
 
-- `GET /health` — Lightweight service health endpoint.
+- `GET /health` — Lightweight service health endpoint returning `status`, `engine`, and `health_index`.
 - `GET /v1/status` — Engine status, counts, and database size.
-- `GET /v1/health/deep` — Deep subsystem health probes.
 - `POST /v1/admin/keys` — Create API keys.
 - `GET /v1/admin/keys` — List API keys.
-- `GET /v1/projects/{project}/export` — Export project facts as JSON.
+- `GET /v1/projects/{project}/export` — Create a server-side JSON export artifact and return its location.
 - `POST /v1/trust/guard` — Dry-run a proposed write against the storage guard.
 - `GET /v1/trust/profiles/{agent_id}` — Retrieve the trust profile for one agent.
 - `GET /v1/trust/compliance` — Generate compliance status derived from live state.
 
-### Swarm & Orchestration
+### Ledger
 
-- `GET /v1/swarm/status` — Aggregate swarm health and active worktrees.
-- `POST /v1/swarm/worktrees` — Provision an isolated git worktree.
-- `GET /v1/swarm/worktrees/{worktree_id}` — Inspect a provisioned worktree.
-- `DELETE /v1/swarm/worktrees/{worktree_id}` — Tear down a worktree.
-- `POST /v1/swarm/psychohistory` — Run a psychohistory simulation.
-- `POST /v1/ask` and `POST /v1/ask/stream` — Retrieval + synthesis endpoints.
-- `POST /v1/agents` and `GET /v1/agents...` — Agent registration and inspection.
-- `GET /v1/context/*` — Context inference, signals, and history endpoints.
+- `GET /v1/ledger/status` — Ledger statistics and checkpoint status.
+- `GET /v1/ledger/verify` — Full ledger verification report.
+- `POST /v1/ledger/checkpoint` — Seal new transactions into a Merkle checkpoint.
+
+---
+
+## Additional In-Repo Surfaces
+
+When `CORTEX_ENABLE_EXPERIMENTAL_API=1`, the same FastAPI app also exposes broader
+operator/runtime routes such as:
+
+- `GET /v1/swarm/status`
+- `POST /v1/swarm/worktrees`
+- `POST /v1/ask` and `POST /v1/ask/stream`
+- `POST /v1/agents` and `GET /v1/agents...`
+- `GET /v1/context/*`
+- dashboard, onboarding, runtime, telemetry, and related helper routes
+
+These routes are real and usable, but they are not mounted on the default core API surface.
+
+### Experimental Gateway Endpoints
+
+The gateway adapters are not part of the default recommended core API contract.
+If you choose to mount them, treat them as experimental surfaces and enable them explicitly in
+deployment/configuration.
+
+- `POST /gateway/v1/store`
+- `POST /gateway/v1/search`
+- `POST /gateway/v1/recall`
+- `GET /gateway/v1/status`
+- `POST /gateway/v1/emit`
+- `POST /gateway/telegram/webhook`
+
+Operational notes:
+
+- Enable the surface explicitly with `CORTEX_ENABLE_EXPERIMENTAL_API=1`.
+- Telegram webhook requests must present `X-Telegram-Bot-Api-Secret-Token` matching `CORTEX_TELEGRAM_WEBHOOK_SECRET`.
+- `CORTEX_TELEGRAM_CHAT_ID` is optional and acts as a single-chat allowlist when configured.
 
 ---
 
 ## Compatibility Notes
 
-Legacy clients using `/v1/memories/*` are redirected to `/v1/facts/*` for backward
-compatibility. New integrations should target the `/v1/facts` surface directly.
+Legacy clients using `/v1/memories/*` are redirected to `/v1/facts/*` for backward compatibility.
+New integrations should target the `/v1/facts` surface directly.

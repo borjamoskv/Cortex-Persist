@@ -1,122 +1,76 @@
-# CORTEX
+# CORTEX Persist
 
-> **Trust Infrastructure for Autonomous AI**
-> Cryptographic verification, audit trails, and EU AI Act compliance for AI agent memory.
-> *The layer that proves your agents' decisions are true.*
+Verifiable memory and decision lineage for high-stakes AI workflows.
 
-![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)
-![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
-![Status](https://img.shields.io/badge/status-v0.3.0b2%20beta-orange.svg)
-![Tests](https://img.shields.io/badge/tests-1621%2B%20passing-brightgreen.svg)
-![LOC](https://img.shields.io/badge/LOC-178K-informational.svg)
+CORTEX Persist is best understood as a trust layer for facts and decisions:
 
----
+- Store structured facts and decisions.
+- Hash-chain every write into a tamper-evident ledger.
+- Search and recall persisted knowledge.
+- Export evidence instead of reconstructing events later.
 
-## Why CORTEX?
+It fits alongside your existing stack. Use it with your current database, observability tooling,
+and vector search where that makes sense.
 
-AI agents are making millions of decisions per day. But **who verifies those decisions are correct?**
+## Start Here
 
-Memory layers like Mem0, Zep, and Letta store what agents remember — but none of them can **prove** that memory hasn't been tampered with, generate a compliance report for regulators, or audit the full chain of reasoning.
+- [Public Product Surface](product-surface.md) — the recommended boundary for product adoption
+- [Course Suite](course/README.md) — GitHub-first tracks in English, Spanish, and Chinese
+- [Quickstart](quickstart.md) — the shortest path from install to verified write
+- [Installation](installation.md) — package extras and source installs
+- [CLI Reference](cli.md) — recommended command surface
+- [REST API Reference](api.md) — core HTTP endpoints first, advanced routes second
+- [MCP Server](mcp.md) — IDE and agent integration via MCP
+- [Agent Taxonomy](agents/AGENT-TAXONOMY.md) — roles vs builtins vs YAML agents
 
-The **EU AI Act (Article 12, effective August 2, 2026)** mandates tamper-proof logging, full traceability, and periodic integrity verification for high-risk AI systems. Fines reach **€30M or 6% of global revenue.**
+## Product Fit
 
-CORTEX doesn't replace your memory layer — it **certifies** it.
+Use CORTEX Persist when you need:
 
-### Why CORTEX? (Not just another Vector DB or Logger)
+- Evidence for decisions that matter after the fact.
+- Traceable state transitions in long-running agent systems.
+- Tamper detection on persisted memory.
+- A local-first trust layer that does not force a new vector stack.
 
-Traditional logging and standard vector stores fail the epistemic containment test. If an agent hallucinates, or if a database is mutated passively, you lose structural trust in the machine. CORTEX makes mutation mathematically defensible.
+Do not treat it as a replacement for:
 
-| Feature                    | Standard Logs (Datadog/ELK) | Standard Vector DB (Pinecone/Qdrant) | **CORTEX Persist**                        |
-|:---------------------------|:----------------------------|:-------------------------------------|:------------------------------------------|
-| **Primary Goal**           | Observability & Debugging   | Semantic Search & RAG                | **Tamper-Evident Cognitive Lineage**      |
-| **Write Integrity**        | Overwritable / Editable     | Silent CRUD operations               | **Append-Only + Cryptographic Hash**      |
-| **Fact Mutability**        | Easy (API/Admin access)     | Easy (API/Admin access)              | **Impossible** (Breaks hash chain)        |
-| **Evidence Export**        | Text dumps                  | JSON extracts                        | **Zero-Trust Sealed Audit Packs**         |
+- Observability platforms such as Datadog or ELK.
+- Dedicated vector databases for broad ephemeral retrieval.
+- Human review, legal review, or compliance judgment.
 
-> **See a real artifact**: [View Exported Audit Pack](../examples/audit_proof_artifact.json)
-
----
-
-## Core Capabilities
-
-| Capability | What It Does |
-|:---|:---|
-| 🔗 **Immutable Ledger** | Every fact is SHA-256 hash-chained. Tamper = detectable. |
-| 🌳 **Merkle Checkpoints** | Periodic batch verification of ledger integrity |
-| 🤝 **WBFT Consensus** | Multi-agent Byzantine fault-tolerant fact verification |
-| 🔐 **Privacy Shield** | Zero-leakage ingress guard — 11 secret detection patterns |
-| 🧠 **Tripartite Memory** | L1 Working → L2 Vector → L3 Episodic Ledger |
-| 📊 **Compliance Reports** | One-command EU AI Act Article 12 readiness snapshot |
-| 🔍 **Semantic + Graph Search** | Hybrid vector + knowledge graph retrieval |
-| 🏠 **Local-First** | SQLite. No cloud required. Your data, your machine. |
-| ☁️ **Sovereign Cloud** | Multi-tenant AlloyDB + Qdrant + Redis (roadmap) |
-
----
-
-## Quick Start
+## Recommended Adoption Path
 
 ```bash
 pip install cortex-persist
 cortex init
-cortex store my-agent "Chose OAuth2 PKCE for auth" --type decision
+cortex store demo "We chose FastAPI over Flask for async support" --type decision
+cortex search "async web framework"
 cortex verify 1
-# → ✅ VERIFIED — Hash chain intact, Merkle sealed
+cortex trust-ledger verify
 ```
 
-[View Audit Evidence →](../examples/audit_proof_artifact.json){ .md-button .md-button--primary }
-[Architecture →](architecture.md){ .md-button }
-[View on GitHub →](https://github.com/borjamoskv/Cortex-Persist){ .md-button }
+If you need remote access next:
 
----
+- Install the API extra for HTTP integrations: `pip install "cortex-persist[api]"`
+- Install the MCP extra for IDE/agent integrations: `pip install "cortex-persist[mcp]"`
 
-## Who Is CORTEX For?
+## Docs Map
 
-- **AI Engineers** building agent systems that need auditable memory
-- **Compliance Teams** preparing for EU AI Act enforcement
-- **Enterprise Architects** deploying multi-agent swarms at scale
-- **Solo Developers** who want sovereign, local-first AI memory
+| Section | Purpose |
+| :--- | :--- |
+| [Quickstart](quickstart.md) | Core workflow in a few commands |
+| [Course Suite](course/README.md) | Multilingual tracks for swarms, optimization, and persistent memory |
+| [Installation](installation.md) | Packaging, extras, and source installs |
+| [Architecture](architecture.md) | Deeper system design |
+| [Agent Taxonomy](agents/AGENT-TAXONOMY.md) | Governance roles, builtins, YAML definitions, and runtime instances |
+| [Security Trust Model](SECURITY_TRUST_MODEL.md) | Guarantees and non-guarantees |
+| [Compliance](compliance.md) | EU AI Act mapping and evidence posture |
+| [Developer Guide](developer-guide.md) | Contributing and extending the repo |
 
----
+## Boundary Note
 
-## Project Stats
-
-| Metric | Value |
-|:---|:---|
-| Production LOC | **~178,000** |
-| Test functions | **1,621+** |
-| Python modules | **1,094** |
-| CLI commands | **90+** |
-| Daemon monitors | **13** |
-| Privacy patterns | **11** |
-| Current release line | **v0.3.0 beta** |
-
----
-
-## Documentation
-
-| Section | Description |
-|:---|:---|
-| [Quickstart](quickstart.md) | Get running in 5 minutes |
-| [Installation](installation.md) | All install methods and extras |
-| [Architecture](architecture.md) | Deep dive into the system design |
-| [CORTEX Capabilities](CORTEX-CAPABILITIES.md) | Structural properties and governance topology |
-| [SDK Surface](SDK-SURFACE.md) | Public SDK contract and stability guarantees |
-| [Trust Semantics](TRUST-SEMANTICS.md) | Meaning of trust signals and degraded states |
-| [Event Model](EVENT-MODEL.md) | Canonical event envelope and delivery semantics |
-| [Error Code Registry](ERROR-CODE-REGISTRY.md) | Stable rejection and failure codes |
-| [CLI Reference](cli.md) | Core commands documented |
-| [REST API Reference](api.md) | Versioned REST endpoints |
-| [MCP Server](mcp.md) | Model Context Protocol integration |
-| [Python API Reference](reference.md) | Auto-generated from source |
-| [SDKs](sdks.md) | Python and JavaScript SDKs |
-| [Developer Guide](developer-guide.md) | Contributing and extending CORTEX |
-| [EU AI Act Compliance](compliance.md) | Article 12 mapping |
-| [Security](security.md) | Threat model and security features |
-| [Deployment](deployment.md) | Docker, Kubernetes, bare metal |
-| [Configuration](configuration.md) | Environment variables reference |
-| [FAQ](faq.md) | Common questions, answered honestly |
-| [Changelog](changelog.md) | Version history and release notes |
-
----
+The repository also ships broader operator and research surfaces: swarm orchestration, ask/stream
+routes, dashboards, advanced scripts, and historical architecture documents. Those pieces remain
+available, but the public product story prioritizes the verifiable-memory surface first.
 
 *by [borjamoskv.com](https://borjamoskv.com) · [cortexpersist.com](https://cortexpersist.com)*

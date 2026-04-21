@@ -68,6 +68,7 @@ nav:
       - Compliance & Buyers: personas/compliance_buyer.md
       - Systems Architect: personas/architect.md
   - Getting Started:
+      - Public Product Surface: product-surface.md
       - Quickstart: quickstart.md
       - Installation: installation.md
       - Configuration: configuration.md
@@ -100,6 +101,7 @@ nav:
       - Security: security.md
       - Sovereign Infrastructure: sovereign-infrastructure.md
   - Tutorials:
+      - Course Suite: course/README.md
       - Memory for LangChain Agents: tutorials/langchain.md
       - Multi-Agent Consensus: tutorials/consensus.md
       - Time-Travel Debugging: tutorials/temporal.md

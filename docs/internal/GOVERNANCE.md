@@ -14,7 +14,7 @@ CORTEX uses **lazy consensus with benevolent dictator (BD) override**:
 
 ## Maintainers
 
-| Role | Person | Scope |
+| Maintainer Title | Person | Scope |
 |:---|:---|:---|
 | **Lead Maintainer (BD)** | [@borjamoskv](https://github.com/borjamoskv) | Full project — architecture, releases, roadmap |
 

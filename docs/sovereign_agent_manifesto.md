@@ -4,6 +4,10 @@
 
 This document defines the foundational specifications, emergent theories, and sovereign axioms that constitute the CORTEX Sovereign Agent paradigm. Together, they represent a complete departure from the industry-standard agent loop (`LLM + Tools + While`) toward a system with **persistent psychology, controlled trauma, evolutionary heredity, physical safety boundaries, cryptographic trust, and graceful degradation**.
 
+This is a deep architecture and doctrine reference, not the primary product adoption guide. For the
+current recommended product boundary, start with [Public Product Surface](product-surface.md) and
+[Quickstart](quickstart.md).
+
 *Version 2.0 — March 2, 2026 · Updated from v1.0 (February 24, 2026)*
 *Protocol: ULTRATHINK-INFINITE · Standard: 130/100*
 
@@ -442,7 +446,7 @@ CORTEX exposes the Bicameral Mind through a visual terminal interface using `ric
 | **Trust** | Gold | Ledger, Merkle | Cryptographic verification |
 | **Bio** | Green | Circadian, Endocrine | Biological system status |
 
-**Implementation:** [`cortex/cli/bicameral.py`](file://./cortex/cli/bicameral.py)
+**Implementation:** [`cortex/cli/bicameral.py`](https://github.com/borjamoskv/Cortex-Persist/blob/main/cortex/cli/bicameral.py)
 
 ---
 

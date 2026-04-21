@@ -1,6 +1,6 @@
 # Quickstart
 
-Get CORTEX running in 5 minutes.
+Get CORTEX Persist running in a few minutes using the recommended product path.
 
 ---
 
@@ -10,10 +10,11 @@ Get CORTEX running in 5 minutes.
 pip install cortex-persist
 ```
 
-For the API server and MCP:
+Optional extras:
 
 ```bash
-pip install cortex-persist[api]
+pip install "cortex-persist[api]"   # REST API
+pip install "cortex-persist[mcp]"   # MCP server
 ```
 
 ---
@@ -24,7 +25,7 @@ pip install cortex-persist[api]
 cortex init
 ```
 
-This creates `~/.cortex/cortex.db` with the full schema — facts, transactions, embeddings, consensus tables, and more.
+This creates `~/.cortex/cortex.db` and prepares the local ledger.
 
 ---
 
@@ -36,65 +37,46 @@ Every fact is automatically hash-chained into an immutable ledger.
 # Store knowledge
 cortex store my-project "Redis uses skip lists for sorted sets" --tags "redis,data-structures"
 
-# Store a decision (with automatic provenance detection)
+# Store a decision
 cortex store my-project "We chose FastAPI over Flask for async support" --type decision
 
 # Store an error pattern
 cortex store my-project "OOM when batch size > 1024 on 8GB RAM" --type error
-
-# Store with explicit source
-cortex store my-project "Rate limit is 100 req/min" --type config --source "agent:gpt-4"
 ```
 
 ---
 
-## 4. Verify Integrity
+## 4. Search And Recall
 
 ```bash
-# Verify a single fact's cryptographic chain
-cortex verify 1
-# → ✅ VERIFIED — Hash chain intact
-
-# Verify the entire ledger
-cortex ledger verify
-# → ✅ All 42 transactions verified. Chain is intact.
-
-# Generate a compliance report
-cortex compliance-report
-# → Compliance Score: 5/5 — All Article 12 requirements met
-```
-
----
-
-## 5. Search
-
-Semantic search finds conceptually similar facts using embedded vectors:
-
-```bash
+# Semantic search
 cortex search "how are sorted sets implemented?"
 
 # Scope to a specific project
 cortex search "async web framework" --project my-project
 
-# Limit results
-cortex search "database optimization" -k 3
-```
-
----
-
-## 6. Recall
-
-Load all active facts for a project:
-
-```bash
+# Load all active facts for a project
 cortex recall my-project
 ```
 
 ---
 
-## 7. Time Travel
+## 5. Verify Integrity
 
-Query what you knew at a specific point in time:
+```bash
+# Verify a single fact's cryptographic chain
+cortex verify 1
+
+# Verify the entire ledger
+cortex trust-ledger verify
+
+# Generate a compliance report
+cortex compliance-report
+```
+
+---
+
+## 6. Time Travel
 
 ```bash
 cortex history my-project --at "2026-01-15T10:00:00"
@@ -102,56 +84,21 @@ cortex history my-project --at "2026-01-15T10:00:00"
 
 ---
 
-## 8. Multi-Agent Consensus
+## 7. Run As REST API
 
-Multiple agents can verify or dispute facts:
-
-```bash
-# An agent votes to verify a fact
-cortex vote 42 --agent "agent:claude" --vote verify
-
-# Another agent disputes it
-cortex vote 42 --agent "agent:gpt-4" --vote dispute
-```
-
-The consensus score is automatically updated based on agent reputation weights.
-
----
-
-## 9. Run as MCP Server
-
-CORTEX speaks the **Model Context Protocol**, making it a plug-in for any compatible AI IDE:
+Install the API extra first:
 
 ```bash
-python -m cortex.mcp
-```
-
-Compatible with: **Claude Code**, **Cursor**, **OpenClaw**, **Windsurf**, **Antigravity**
-
-Available MCP tools:
-
-| Tool | Description |
-|:---|:---|
-| `cortex_store` | Store facts with automatic hash chaining |
-| `cortex_search` | Hybrid semantic search |
-| `cortex_status` | System health and metrics |
-| `cortex_ledger_verify` | Full ledger integrity check |
-| `cortex_audit_trail` | EU AI Act compliant audit log |
-| `cortex_verify_fact` | Cryptographic verification certificate |
-| `cortex_compliance_report` | Article 12 compliance snapshot |
-| `cortex_decision_lineage` | Trace decision chains |
-
----
-
-## 10. Run as REST API
-
-```bash
+pip install "cortex-persist[api]"
 uvicorn cortex.api:app --host 0.0.0.0 --port 8484
 ```
 
-Then use the API:
+Then use the core HTTP surface:
 
 ```bash
+# Bootstrap the first key
+curl -X POST "http://localhost:8484/v1/admin/keys?name=my-client&tenant_id=default"
+
 # Store via API
 curl -X POST http://localhost:8484/v1/facts \
   -H "Content-Type: application/json" \
@@ -161,19 +108,31 @@ curl -X POST http://localhost:8484/v1/facts \
     "content": "CORTEX is running",
     "fact_type": "knowledge"
   }'
-
-# Search via API
-curl -X POST http://localhost:8484/v1/facts/search \
-  -H "Content-Type: application/json" \
-  -d '{"query": "cortex", "top_k": 5}'
-
-# Interactive API docs
-open http://localhost:8484/docs
 ```
 
 ---
 
-## 11. Python SDK
+## 8. Run As MCP Server
+
+Install the MCP extra first:
+
+```bash
+pip install "cortex-persist[mcp]"
+python -m cortex.mcp
+```
+
+Recommended core MCP tools:
+
+| Tool | Purpose |
+| :--- | :--- |
+| `cortex_store` | Store a fact with ledger integrity |
+| `cortex_search` | Search persisted memory |
+| `cortex_status` | Health and DB statistics |
+| `cortex_ledger_verify` | Verify chain integrity |
+
+---
+
+## 9. Python Integration
 
 ```python
 from cortex import CortexEngine
@@ -182,18 +141,14 @@ engine = CortexEngine()
 
 # Async context manager
 async with engine:
-    # Store a fact
     fact_id = await engine.store(
         project="my-agent",
         content="Approved loan application #443",
         fact_type="decision",
     )
 
-    # Search
     results = await engine.search("loan approval")
-
-    # Verify
-    facts = await engine.recall("my-agent")
+    ledger = await engine.verify_ledger()
 ```
 
 Or use the synchronous API:
@@ -210,8 +165,9 @@ results = engine.search_sync("greeting")
 
 ## Next Steps
 
-- **[CLI Reference](cli.md)** — Core commands documented
-- **[REST API Reference](api.md)** — Versioned REST endpoints and models
-- **[MCP Server](mcp.md)** — Deep dive into MCP integration
-- **[Architecture](architecture.md)** — How CORTEX works under the hood
-- **[EU AI Act Compliance](compliance.md)** — Full Article 12 mapping
+- [Public Product Surface](product-surface.md) — Recommended boundary for adoption
+- [CLI Reference](cli.md) — Core commands first
+- [REST API Reference](api.md) — Core HTTP surface first
+- [MCP Server](mcp.md) — MCP install and tool surface
+- [Architecture](architecture.md) — How CORTEX works under the hood
+- [EU AI Act Compliance](compliance.md) — Full Article 12 mapping
