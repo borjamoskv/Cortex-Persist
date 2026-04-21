@@ -46,44 +46,71 @@ facts = engine.recall_sync("my-project")
 ### Async Usage
 
 ```python
+import asyncio
 from cortex import CortexEngine
 
-async with CortexEngine() as engine:
-    fact_id = await engine.store(
-        project="my-agent",
-        content="User prefers dark mode",
-        fact_type="knowledge",
-        tags=["ui", "preferences"],
-    )
 
-    results = await engine.search("user interface preferences")
-    facts = await engine.recall("my-agent")
+async def main() -> None:
+    engine = CortexEngine()
+    try:
+        fact_id = await engine.store(
+            project="my-agent",
+            content="User prefers dark mode",
+            fact_type="knowledge",
+            tags=["ui", "preferences"],
+        )
+
+        results = await engine.search("user interface preferences")
+        facts = await engine.recall("my-agent")
+    finally:
+        await engine.close()
+
+
+asyncio.run(main())
 ```
 
 ### Tenant-Scoped Usage
 
 ```python
+import asyncio
 from cortex import CortexEngine
 
-async with CortexEngine() as engine:
-    await engine.store(
-        content="Approved loan #443",
-        fact_type="decision",
-        project="fintech-agent",
-    )
+
+async def main() -> None:
+    engine = CortexEngine()
+    try:
+        await engine.store(
+            content="Approved loan #443",
+            fact_type="decision",
+            project="fintech-agent",
+        )
+    finally:
+        await engine.close()
+
+
+asyncio.run(main())
 ```
 
 ### Consensus
 
 ```python
+import asyncio
 from cortex import CortexEngine
 
-async with CortexEngine() as engine:
-    await engine.vote_v2(
-        fact_id=42,
-        agent_id="agent:claude",
-        value=1,  # 1 = verify, 0 = abstain/remove, -1 = dispute
-    )
+
+async def main() -> None:
+    engine = CortexEngine()
+    try:
+        await engine.vote_v2(
+            fact_id=42,
+            agent_id="agent:claude",
+            value=1,  # 1 = verify, 0 = abstain/remove, -1 = dispute
+        )
+    finally:
+        await engine.close()
+
+
+asyncio.run(main())
 ```
 
 ### Available Methods

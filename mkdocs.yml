@@ -74,6 +74,7 @@ nav:
       - Configuration: configuration.md
   - Reference:
       - Architecture: architecture.md
+      - Architecture Crystallization: architecture-crystallization.md
       - Capabilities: CORTEX-CAPABILITIES.md
       - SDK Surface: SDK-SURFACE.md
       - Trust Semantics: TRUST-SEMANTICS.md
