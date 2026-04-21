@@ -135,20 +135,26 @@ Recommended core MCP tools:
 ## 9. Python Integration
 
 ```python
+import asyncio
 from cortex import CortexEngine
 
-engine = CortexEngine()
 
-# Async context manager
-async with engine:
-    fact_id = await engine.store(
-        project="my-agent",
-        content="Approved loan application #443",
-        fact_type="decision",
-    )
+async def main() -> None:
+    engine = CortexEngine()
+    try:
+        fact_id = await engine.store(
+            project="my-agent",
+            content="Approved loan application #443",
+            fact_type="decision",
+        )
 
-    results = await engine.search("loan approval")
-    ledger = await engine.verify_ledger()
+        results = await engine.search("loan approval")
+        ledger = await engine.verify_ledger()
+    finally:
+        await engine.close()
+
+
+asyncio.run(main())
 ```
 
 Or use the synchronous API:
