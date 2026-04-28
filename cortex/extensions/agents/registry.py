@@ -167,9 +167,9 @@ class AgentCatalogEntry:
         try:
             with filepath.open("r", encoding="utf-8") as f:
                 data = yaml.safe_load(f) or {}
-        except (FileNotFoundError, OSError) as e:  # noqa: BLE001
+        except (FileNotFoundError, OSError) as e:
             raise ValueError(f"Failed to load YAML {filepath}: {e}") from e
-        except Exception as e:  # noqa: BLE001
+        except yaml.YAMLError as e:
             raise ValueError(f"Invalid YAML in {filepath}: {e}") from e
 
         if not isinstance(data, dict):
@@ -241,7 +241,7 @@ class AgentRegistry:
                 seen_agent_ids.add(normalized_id)
                 loaded_count += 1
                 logger.debug("🧬 [REGISTRY] Loaded agent: %s (%s)", agent_def.name, agent_def.id)
-            except Exception as e:  # noqa: BLE001
+            except ValueError as e:
                 logger.error("☠️ [REGISTRY] Failed to load %s: %s", yaml_path.name, e)
 
         logger.info("🏛️ [REGISTRY] Loaded %d sovereign agents.", loaded_count)
