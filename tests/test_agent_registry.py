@@ -198,6 +198,48 @@ def test_agent_registry_singleton(temp_definitions_dir):
     assert r1.get("missing") is None
 
 
+def test_agent_registry_get_is_case_insensitive(tmp_path):
+    """Registry lookup should match agent IDs irrespective of case."""
+    filepath = tmp_path / "casey.yaml"
+    filepath.write_text("name: CASEY")
+
+    registry = AgentRegistry()
+    registry.clear()
+    registry.load_all(filepath.parent)
+
+    assert registry.get("CASEY") is not None
+    assert registry.get("cAsEy") is not None
+    assert registry.get("missing") is None
+
+
+def test_load_all_case_insensitive_duplicates(tmp_path, caplog, monkeypatch):
+    """Case-only differences in agent IDs must still be treated as collisions."""
+    duplicate_dir = tmp_path / "dupes_case"
+    duplicate_dir.mkdir()
+    (duplicate_dir / "first.yaml").write_text("name: ALPHA")
+    (duplicate_dir / "second.yaml").write_text("name: ALPHA")
+
+    original_from_yaml_file = AgentCatalogEntry.from_yaml_file
+
+    def _same_id_from_yaml_file(path):
+        entry = original_from_yaml_file(path)
+        if path.name == "first.yaml":
+            entry.id = "alpha"
+        else:
+            entry.id = "ALPHA"
+        return entry
+
+    registry = AgentRegistry()
+    registry.clear()
+    monkeypatch.setattr(AgentCatalogEntry, "from_yaml_file", _same_id_from_yaml_file)
+
+    with caplog.at_level(logging.ERROR):
+        registry.load_all(duplicate_dir)
+
+    assert "Duplicate agent id 'ALPHA'" in caplog.text
+    assert len(registry.agents) == 1
+
+
 def test_load_all_refreshes_registry_and_clears_stale_agents(tmp_path):
     """Load from a new directory replaces old registry entries."""
     old_dir = tmp_path / "old"
