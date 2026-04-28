@@ -4,19 +4,18 @@ CORTEX uses "skill" for executable capability packages, not for agent authority.
 This page standardizes the skill vocabulary and the Antigravity-CORTEX nexus so
 registry metadata, runtime routing, and documentation use the same words.
 
-For agent authority and YAML persona vocabulary, see
-[Agent Taxonomy](../agents/AGENT-TAXONOMY.md).
+For agent authority and YAML persona vocabulary, see AGENT-TAXONOMY.
 
 ## Skill Layers
 
 | Concept | What it is | Source of truth | Example |
 | :--- | :--- | :--- | :--- |
-| `skill_manifest` | Metadata parsed from `SKILL.md` frontmatter | [`SkillManifest`](../../cortex/extensions/skills/registry.py) | `category: memory` |
+| `skill_manifest` | Metadata parsed from `SKILL.md` frontmatter | `SkillManifest` (`cortex/extensions/skills/registry.py`) | `category: memory` |
 | `skill_package` | Directory containing `SKILL.md` and optional companion files | `CORTEX_SKILLS_DIR` or repo-local `skills/` | `skills/vsa-sdm-memory-omega/` |
-| `skill_registry` | Runtime catalog discovered from skill packages | [`SkillRegistry`](../../cortex/extensions/skills/registry.py) | `SkillRegistry().load()` |
-| `skill_route` | Candidate plan selected from intent, metadata, and procedural memory | [`SkillRouter`](../../cortex/extensions/skills/router.py) | route `"sync project"` |
-| `procedural_engram` | Reinforcement history for a skill slug | [`ProceduralMemory`](../../cortex/memory/procedural.py) | success rate and latency |
-| `sovereign_bridge` | Dynamic bridge into Antigravity/MOSKV-1 skill packages | [`SovereignBridge`](../../cortex/extensions/sovereign/bridge.py) | `singularity-nexus` |
+| `skill_registry` | Runtime catalog discovered from skill packages | `SkillRegistry` (`cortex/extensions/skills/registry.py`) | `SkillRegistry().load()` |
+| `skill_route` | Candidate plan selected from intent, metadata, and procedural memory | `SkillRouter` (`cortex/extensions/skills/router.py`) | route `"sync project"` |
+| `procedural_engram` | Reinforcement history for a skill slug | `ProceduralMemory` (`cortex/memory/procedural.py`) | success rate and latency |
+| `sovereign_bridge` | Dynamic bridge into Antigravity/MOSKV-1 skill packages | `SovereignBridge` (`cortex/extensions/sovereign/bridge.py`) | `singularity-nexus` |
 
 ## Canonical Manifest Fields
 
@@ -115,7 +114,7 @@ Canonical danger levels are `NONE`, `LOW`, `MEDIUM`, `HIGH`, and `CRITICAL`.
 `P0` normalizes to `CRITICAL`, `P1` to `HIGH`, and `P2` to `MEDIUM`.
 
 Danger level is a warning label. Actual authority comes from governance roles in
-[`AGENTS.md`](../../AGENTS.md) and from write-path enforcement.
+`AGENTS.md` and from write-path enforcement.
 
 ## Practical Rule
 
