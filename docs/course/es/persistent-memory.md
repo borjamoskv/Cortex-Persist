@@ -7,7 +7,7 @@ Entender la memoria persistente como subsistema arquitectónico y no como cache,
 ## Anclas del repo
 
 - [Quickstart](../../quickstart.md)
-- [Internals de memoria](../../architecture/CORTEX_MEMORY_INTERNALS.md)
+- Internals de memoria: `architecture/CORTEX_MEMORY_INTERNALS.md`
 - [Tutorial LangChain](../../tutorials/langchain.md)
 - Servidor MCP: `cortex/mcp/server.py`
 - Ejemplo básico de memoria: `examples/quickstart/basic_memory.py`
