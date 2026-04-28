@@ -140,6 +140,24 @@ def test_agent_definition_invalid_bool_raises_value_error(tmp_path):
         AgentCatalogEntry.from_yaml_file(filepath)
 
 
+def test_agent_definition_bool_values_with_casing_and_numeric_literals(tmp_path):
+    """Boolean coercion should be stable across casing and numeric forms."""
+    filepath = tmp_path / "bool_variants.yaml"
+    filepath.write_text(
+        "name: BOOL_VARIANTS\n"
+        "memory:\n"
+        "  sparse_encoding: 'FALSE'\n"
+        "  silent_engrams: On\n"
+        "  causal_memory: 1\n"
+    )
+
+    agent = AgentCatalogEntry.from_yaml_file(filepath)
+
+    assert agent.memory.sparse_encoding is False
+    assert agent.memory.silent_engrams is True
+    assert agent.memory.causal_memory is True
+
+
 def test_load_all_continues_after_invalid_agent_entry(tmp_path, caplog):
     """Registry load should continue when one entry fails parsing."""
     definitions_dir = tmp_path / "defs"
