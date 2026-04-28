@@ -21,7 +21,7 @@ and vector search where that makes sense.
 - [CLI Reference](cli.md) — recommended command surface
 - [REST API Reference](api.md) — core HTTP endpoints first, advanced routes second
 - [MCP Server](mcp.md) — IDE and agent integration via MCP
-- [Agent Taxonomy](agents/AGENT-TAXONOMY.md) — roles vs builtins vs YAML agents
+- Agent Taxonomy — roles vs builtins vs YAML agents
 - [Skill Taxonomy](skills/SKILL-TAXONOMY.md) — skill manifests, routing, and the Antigravity-CORTEX nexus
 
 ## Product Fit
@@ -63,7 +63,7 @@ If you need remote access next:
 | [Course Suite](course/README.md) | Multilingual tracks for swarms, optimization, and persistent memory |
 | [Installation](installation.md) | Packaging, extras, and source installs |
 | [Architecture](architecture.md) | Deeper system design |
-| [Agent Taxonomy](agents/AGENT-TAXONOMY.md) | Governance roles, builtins, YAML definitions, and runtime instances |
+| Agent Taxonomy | Governance roles, builtins, YAML definitions, and runtime instances |
 | [Skill Taxonomy](skills/SKILL-TAXONOMY.md) | Skill manifests, routing, categories, and the Antigravity-CORTEX nexus |
 | [Security Trust Model](SECURITY_TRUST_MODEL.md) | Guarantees and non-guarantees |
 | [Compliance](compliance.md) | EU AI Act mapping and evidence posture |
