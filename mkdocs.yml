@@ -75,6 +75,7 @@ nav:
   - Reference:
       - Architecture: architecture.md
       - Architecture Crystallization: architecture-crystallization.md
+      - Skill Taxonomy: skills/SKILL-TAXONOMY.md
       - Capabilities: CORTEX-CAPABILITIES.md
       - SDK Surface: SDK-SURFACE.md
       - Trust Semantics: TRUST-SEMANTICS.md
