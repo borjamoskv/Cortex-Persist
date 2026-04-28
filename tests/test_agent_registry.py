@@ -1,10 +1,13 @@
 """Tests for AgentRegistry (Phase 3)."""
 
+import logging
+
 import pytest
 
 from cortex.extensions.agents.registry import (
-    AgentDefinition,
+    AgentCatalogEntry,
     AgentRegistry,
+    AgentDefinition,
     GuardrailsConfig,
     MemoryConfig,
 )
@@ -43,9 +46,9 @@ def temp_definitions_dir(tmp_path):
 
 
 def test_agent_definition_parsing(temp_definitions_dir):
-    """Test parsing a full YAML into AgentDefinition dataclass."""
+    """Test parsing a full YAML into AgentCatalogEntry dataclass."""
     filepath = temp_definitions_dir / "test_alpha.yaml"
-    agent = AgentDefinition.from_yaml_file(filepath)
+    agent = AgentCatalogEntry.from_yaml_file(filepath)
 
     assert agent.id == "test_alpha"
     assert agent.name == "ALPHA-1"
@@ -56,10 +59,24 @@ def test_agent_definition_parsing(temp_definitions_dir):
     assert agent.tools == ["search", "filesystem"]
 
 
+def test_agent_definition_legacy_zero_turn_limit_maps_to_unlimited(tmp_path):
+    """Test legacy `0` turn budgets become explicit unlimited semantics."""
+    filepath = tmp_path / "legacy.yaml"
+    filepath.write_text(
+        "name: LEGACY\n"
+        "guardrails:\n"
+        "  max_turns: 0\n"
+    )
+
+    agent = AgentCatalogEntry.from_yaml_file(filepath)
+
+    assert agent.guardrails.max_turns is None
+
+
 def test_agent_definition_defaults(temp_definitions_dir):
     """Test parsing a minimal YAML uses defaults."""
     filepath = temp_definitions_dir / "test_beta.yaml"
-    agent = AgentDefinition.from_yaml_file(filepath)
+    agent = AgentCatalogEntry.from_yaml_file(filepath)
 
     assert agent.id == "test_beta"
     assert agent.name == "BETA-2"
@@ -71,11 +88,37 @@ def test_agent_definition_defaults(temp_definitions_dir):
     assert agent.tools == []
 
 
+def test_agent_definition_string_bools_are_honored(tmp_path):
+    """Test YAML string booleans are parsed without false-positive truthiness."""
+    filepath = tmp_path / "strings.yaml"
+    filepath.write_text(
+        "name: STRINGS\n"
+        "memory:\n"
+        "  sparse_encoding: 'false'\n"
+        "  silent_engrams: \"no\"\n"
+        "  causal_memory: false\n"
+        "guardrails:\n"
+        "  max_turns: '0'\n"
+    )
+
+    agent = AgentCatalogEntry.from_yaml_file(filepath)
+
+    assert agent.memory.sparse_encoding is False
+    assert agent.memory.silent_engrams is False
+    assert agent.memory.causal_memory is False
+    assert agent.guardrails.max_turns is None
+
+
 def test_invalid_yaml_parsing(temp_definitions_dir):
     """Test parsing invalid YAML raises ValueError."""
     filepath = temp_definitions_dir / "invalid.yaml"
     with pytest.raises(ValueError, match="Invalid YAML schema"):
-        AgentDefinition.from_yaml_file(filepath)
+        AgentCatalogEntry.from_yaml_file(filepath)
+
+
+def test_agent_definition_alias_still_points_to_catalog_entry():
+    """Legacy AgentDefinition import remains a compatibility alias."""
+    assert AgentDefinition is AgentCatalogEntry
 
 
 def test_agent_registry_singleton(temp_definitions_dir):
@@ -100,3 +143,48 @@ def test_agent_registry_singleton(temp_definitions_dir):
     assert alpha.name == "ALPHA-1"
 
     assert r1.get("missing") is None
+
+
+def test_load_all_refreshes_registry_and_clears_stale_agents(tmp_path):
+    """Load from a new directory replaces old registry entries."""
+    old_dir = tmp_path / "old"
+    old_dir.mkdir()
+    (old_dir / "old.yaml").write_text("name: OLD")
+
+    r1 = AgentRegistry()
+    r1.clear()
+    r1.load_all(old_dir)
+    assert "old" in r1.agents
+
+    new_dir = tmp_path / "new"
+    new_dir.mkdir()
+    (new_dir / "new.yaml").write_text("name: NEW")
+
+    r1.load_all(new_dir)
+    assert "new" in r1.agents
+    assert "old" not in r1.agents
+
+
+def test_registry_rejects_duplicate_agent_id(tmp_path, caplog, monkeypatch):
+    """Duplicate IDs should be surfaced and not silently overwrite each other."""
+    duplicate_dir = tmp_path / "dupes"
+    duplicate_dir.mkdir()
+    (duplicate_dir / "first.yaml").write_text("name: FIRST")
+    (duplicate_dir / "second.yaml").write_text("name: SECOND")
+
+    original_from_yaml_file = AgentCatalogEntry.from_yaml_file
+
+    def _same_id_from_yaml_file(path):
+        entry = original_from_yaml_file(path)
+        entry.id = "dupe-id"
+        return entry
+
+    registry = AgentRegistry()
+    registry.clear()
+
+    monkeypatch.setattr(AgentCatalogEntry, "from_yaml_file", _same_id_from_yaml_file)
+    with caplog.at_level(logging.ERROR):
+        registry.load_all(duplicate_dir)
+
+    assert "Duplicate agent id 'dupe-id'" in caplog.text
+    assert len(registry.agents) == 1

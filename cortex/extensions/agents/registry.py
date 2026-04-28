@@ -19,6 +19,34 @@ from typing import Any
 logger = logging.getLogger("cortex.extensions.agents.registry")
 
 _DEFINITIONS_DIR = Path(__file__).parent / "definitions"
+_TRUE_BOOL_LITERALS = {"1", "true", "yes", "on", "y"}
+_FALSE_BOOL_LITERALS = {"", "0", "false", "no", "off", "n"}
+
+
+def _coerce_bool(value: Any, default: bool, *, field: str) -> bool:
+    """Parse bool-like values from YAML with deterministic semantics."""
+    if value is None:
+        return default
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        return bool(value)
+    if isinstance(value, str):
+        normalized = value.strip().lower()
+        if normalized in _TRUE_BOOL_LITERALS:
+            return True
+        if normalized in _FALSE_BOOL_LITERALS:
+            return False
+        raise ValueError(f"Invalid boolean value for '{field}': {value!r}")
+    raise TypeError(f"Invalid boolean value for '{field}': {type(value).__name__}")
+
+
+def _as_str_mapping(value: Any, field: str) -> dict[str, Any]:
+    if value is None:
+        return {}
+    if not isinstance(value, dict):
+        raise ValueError(f"Expected YAML mapping for '{field}', got {type(value).__name__}")
+    return value
 
 
 @dataclass
@@ -36,14 +64,17 @@ class MemoryConfig:
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> MemoryConfig:
         """Parse from YAML dict safely."""
+        raw_sparse_encoding = d.get("sparse_encoding", True)
+        raw_silent_engrams = d.get("silent_engrams", True)
+        raw_causal_memory = d.get("causal_memory", False)
         return cls(
             art_rho=float(d.get("art_rho", 0.95)),
             pruning_threshold=float(d.get("pruning_threshold", 0.1)),
             retrieval_band=str(d.get("retrieval_band", "gamma")),
             tier=str(d.get("tier", "hot")),
-            sparse_encoding=bool(d.get("sparse_encoding", True)),
-            silent_engrams=bool(d.get("silent_engrams", True)),
-            causal_memory=bool(d.get("causal_memory", False)),
+            sparse_encoding=_coerce_bool(raw_sparse_encoding, True, field="sparse_encoding"),
+            silent_engrams=_coerce_bool(raw_silent_engrams, True, field="silent_engrams"),
+            causal_memory=_coerce_bool(raw_causal_memory, False, field="causal_memory"),
         )
 
 
@@ -53,21 +84,27 @@ class GuardrailsConfig:
 
     max_session_tokens: int = 100000
     warn_threshold: float = 0.8
-    max_turns: int = 50
+    max_turns: int | None = 50
 
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> GuardrailsConfig:
         """Parse from YAML dict safely."""
+        raw_max_turns = d.get("max_turns", 50)
+        if "max_turns" in d and raw_max_turns in (None, "", 0, "0"):
+            max_turns: int | None = None
+        else:
+            max_turns = int(raw_max_turns)
+
         return cls(
             max_session_tokens=int(d.get("max_session_tokens", 100000)),
             warn_threshold=float(d.get("warn_threshold", 0.8)),
-            max_turns=int(d.get("max_turns", 50)),
+            max_turns=max_turns,
         )
 
 
 @dataclass
-class AgentDefinition:
-    """A sovereign agent loaded from a YAML definition."""
+class AgentCatalogEntry:
+    """A sovereign agent loaded from a YAML definition catalog."""
 
     id: str  # Filename stem without .yaml
     name: str
@@ -123,21 +160,23 @@ class AgentDefinition:
         return info
 
     @classmethod
-    def from_yaml_file(cls, filepath: Path) -> AgentDefinition:
-        """Load an AgentDefinition from a YAML file."""
+    def from_yaml_file(cls, filepath: Path) -> AgentCatalogEntry:
+        """Load an agent catalog entry from a YAML file."""
         import yaml
 
         try:
             with filepath.open("r", encoding="utf-8") as f:
                 data = yaml.safe_load(f) or {}
-        except Exception as e:  # noqa: BLE001
+        except (FileNotFoundError, OSError) as e:  # noqa: BLE001
             raise ValueError(f"Failed to load YAML {filepath}: {e}") from e
+        except Exception as e:  # noqa: BLE001
+            raise ValueError(f"Invalid YAML in {filepath}: {e}") from e
 
         if not isinstance(data, dict):
             raise ValueError(f"Invalid YAML schema in {filepath} (must be a dict).")
 
-        mem_conf = data.get("memory", {})
-        gr_conf = data.get("guardrails", {})
+        mem_conf = _as_str_mapping(data.get("memory", {}), "memory")
+        gr_conf = _as_str_mapping(data.get("guardrails", {}), "guardrails")
 
         return cls(
             id=filepath.stem,
@@ -155,13 +194,13 @@ class AgentDefinition:
 
 
 class AgentRegistry:
-    """Singleton registry for all CORTEX YAML agent definitions.
+    """Singleton registry for all CORTEX YAML agent catalog entries.
 
     Loads definitions lazily upon first access.
     """
 
     _instance: AgentRegistry | None = None
-    _agents: dict[str, AgentDefinition] = {}
+    _agents: dict[str, AgentCatalogEntry] = {}
     _loaded: bool = False
 
     def __new__(cls) -> AgentRegistry:
@@ -170,11 +209,12 @@ class AgentRegistry:
         return cls._instance
 
     def load_all(self, definitions_dir: Path | None = None) -> None:
-        """Scan and load all .yaml definitions in the directory.
+        """Scan and load all .yaml catalog entries in the directory.
 
         Args:
             definitions_dir: Override path, defaults to cortex.agents/definitions
         """
+        self._agents.clear()
         directory = definitions_dir or _DEFINITIONS_DIR
 
         if not directory.exists() or not directory.is_dir():
@@ -183,30 +223,60 @@ class AgentRegistry:
             return
 
         loaded_count = 0
+        duplicate_count = 0
+        seen_agent_ids: set[str] = set()
         for yaml_path in directory.glob("*.yaml"):
             try:
-                agent_def = AgentDefinition.from_yaml_file(yaml_path)
+                agent_def = AgentCatalogEntry.from_yaml_file(yaml_path)
+                normalized_id = agent_def.id.casefold()
+                if normalized_id in seen_agent_ids:
+                    duplicate_count += 1
+                    logger.error(
+                        "❌ [REGISTRY] Duplicate agent id '%s' in '%s'; skipping duplicate definition.",
+                        agent_def.id,
+                        yaml_path.name,
+                    )
+                    continue
                 self._agents[agent_def.id] = agent_def
+                seen_agent_ids.add(normalized_id)
                 loaded_count += 1
                 logger.debug("🧬 [REGISTRY] Loaded agent: %s (%s)", agent_def.name, agent_def.id)
             except Exception as e:  # noqa: BLE001
                 logger.error("☠️ [REGISTRY] Failed to load %s: %s", yaml_path.name, e)
 
         logger.info("🏛️ [REGISTRY] Loaded %d sovereign agents.", loaded_count)
+        if duplicate_count:
+            logger.warning(
+                "🧨 [REGISTRY] Skipped %d duplicate agent definition(s) in %s.",
+                duplicate_count,
+                directory,
+            )
+        if not self._agents:
+            logger.warning(
+                "🕳️ [REGISTRY] No valid agent definitions loaded from %s. "
+                "Check definitions syntax and required keys.",
+                directory,
+            )
         self._loaded = True
 
     @property
-    def agents(self) -> dict[str, AgentDefinition]:
-        """Get the mapping of agent ID to AgentDefinition."""
+    def agents(self) -> dict[str, AgentCatalogEntry]:
+        """Get the mapping of agent ID to AgentCatalogEntry."""
         if not self._loaded:
             self.load_all()
         return dict(self._agents)
 
-    def get(self, agent_id: str) -> AgentDefinition | None:
-        """Retrieve a specific agent definition by its ID (filename stem)."""
+    def get(self, agent_id: str) -> AgentCatalogEntry | None:
+        """Retrieve a specific agent catalog entry by its ID (filename stem)."""
         if not self._loaded:
             self.load_all()
-        return self._agents.get(agent_id)
+        if agent_id in self._agents:
+            return self._agents.get(agent_id)
+        normalized = agent_id.casefold()
+        for existing_id, agent in self._agents.items():
+            if existing_id.casefold() == normalized:
+                return agent
+        return None
 
     def clear(self) -> None:
         """Clear the registry (useful for testing or hot reloading)."""
@@ -222,6 +292,10 @@ def list_agents() -> list[str]:
     return list(AgentRegistry().agents.keys())
 
 
-def get_agent(agent_id: str) -> AgentDefinition | None:
-    """Retrieve an agent definition by ID."""
+def get_agent(agent_id: str) -> AgentCatalogEntry | None:
+    """Retrieve an agent catalog entry by ID."""
     return AgentRegistry().get(agent_id)
+
+
+# Backward-compatibility alias for older imports. Prefer AgentCatalogEntry.
+AgentDefinition = AgentCatalogEntry
