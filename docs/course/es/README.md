@@ -17,7 +17,7 @@ Tres tracks GitHub-native construidos a partir del repositorio real.
 - Entropy gate: `scripts/entropy_gate.py`
 - Ship gate: `scripts/ship_gate.py`
 - Swarm dashboard: `scripts/swarm_dashboard.py`
-- [Internals de memoria](../../architecture/CORTEX_MEMORY_INTERNALS.md)
+- Internals de memoria: `architecture/CORTEX_MEMORY_INTERNALS.md`
 - [Tutorial LangChain](../../tutorials/langchain.md)
 - [Quickstart](../../quickstart.md)
 

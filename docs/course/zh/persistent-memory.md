@@ -7,7 +7,7 @@
 ## 仓库锚点
 
 - [Quickstart](../../quickstart.md)
-- [Memory internals](../../architecture/CORTEX_MEMORY_INTERNALS.md)
+- Memory internals: `architecture/CORTEX_MEMORY_INTERNALS.md`
 - [LangChain 教程](../../tutorials/langchain.md)
 - MCP server: `cortex/mcp/server.py`
 - 基础记忆示例: `examples/quickstart/basic_memory.py`

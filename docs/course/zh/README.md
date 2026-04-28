@@ -17,7 +17,7 @@
 - Entropy gate: `scripts/entropy_gate.py`
 - Ship gate: `scripts/ship_gate.py`
 - Swarm dashboard: `scripts/swarm_dashboard.py`
-- [Memory internals](../../architecture/CORTEX_MEMORY_INTERNALS.md)
+- Memory internals: `architecture/CORTEX_MEMORY_INTERNALS.md`
 - [LangChain 教程](../../tutorials/langchain.md)
 - [Quickstart](../../quickstart.md)
 
