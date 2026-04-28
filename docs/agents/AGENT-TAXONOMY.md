@@ -51,10 +51,12 @@ YAML agent definitions are declarative specs for configurable agents.
 
 - They live in [`cortex/extensions/agents/definitions/`](../../cortex/extensions/agents/definitions/).
 - They are registered by [`AgentRegistry`](../../cortex/extensions/agents/registry.py).
+- `AgentCatalogEntry` in that registry is the catalog dataclass; `AgentDefinition`
+  remains only as a legacy alias for older imports.
 - The registry scans top-level `*.yaml` files in that directory.
 - `id` comes from the filename stem.
 
-Each definition can declare:
+Each YAML definition can declare:
 
 - `name`
 - `model`
