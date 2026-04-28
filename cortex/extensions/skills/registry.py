@@ -20,6 +20,12 @@ import yaml
 
 # ─── Constantes ──────────────────────────────────────────────────────────────
 from cortex.core.paths import SKILLS_DIR as SKILLS_BASE_DIR
+from cortex.extensions.skills.taxonomy import (
+    is_transcendent_skill,
+    normalize_danger_level,
+    normalize_skill_category,
+    normalize_skill_classification,
+)
 
 SKILL_FILENAME = "SKILL.md"
 FRONTMATTER_PATTERN = re.compile(r"^---\s*\n(.*?)\n---", re.DOTALL)
@@ -93,18 +99,7 @@ class SkillManifest:
     @property
     def is_transcendent(self) -> bool:
         """True si el skill es de nivel ontológico superior."""
-        transcendent_categories = {
-            "transcendent-consciousness",
-            "transcendent-manifold",
-        }
-        if self.category in transcendent_categories:
-            return True
-        # Auto-detect omega-tier skills and explicit transcendente classification
-        if "omega" in self.category.lower():
-            return True
-        if getattr(self, "classification", "").lower() == "transcendente":
-            return True
-        return False
+        return is_transcendent_skill(self.category, self.classification)
 
     @property
     def primary_trigger(self) -> str:
@@ -249,7 +244,8 @@ class SkillRegistry:
 
     def by_category(self, category: str) -> list[SkillManifest]:
         """Filtra por categoría."""
-        return [m for m in self.all() if m.category == category]
+        normalized_category = normalize_skill_category(category)
+        return [m for m in self.all() if m.category == normalized_category]
 
     def by_tag(self, tag: str) -> list[SkillManifest]:
         """Filtra por tag."""
@@ -352,9 +348,9 @@ class SkillRegistry:
             path=path,
             description=str(raw.get("description", "")).strip(),
             version=str(raw.get("version", "0.0.0")),
-            category=str(raw.get("category", "uncategorized")),
-            classification=str(raw.get("classification", "")),
-            danger_level=str(raw.get("danger_level", "NONE")),
+            category=normalize_skill_category(raw.get("category", "uncategorized")),
+            classification=normalize_skill_classification(raw.get("classification", "")),
+            danger_level=normalize_danger_level(raw.get("danger_level", "NONE")),
             created=str(raw.get("created", "")),
             updated=str(raw.get("updated", "")),
             trigger=str(raw.get("trigger", "")).lstrip("/"),

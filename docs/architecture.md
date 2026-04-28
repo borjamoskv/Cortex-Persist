@@ -14,6 +14,8 @@ To enforce this, it combines a relational database with vector embeddings, hash-
 This page describes the broader repository and system architecture. For the recommended product
 boundary and first integration surface, start with [Public Product Surface](product-surface.md).
 For the agent-layer vocabulary used in this repo, see [Agent Taxonomy](agents/AGENT-TAXONOMY.md).
+For executable capability packages and the Antigravity-CORTEX nexus, see
+[Skill Taxonomy](skills/SKILL-TAXONOMY.md).
 
 Today, the default FastAPI core bootstrap still fails closed unless `CORTEX_STORAGE=local`.
 Postgres/Turso storage paths exist in the repository, but they remain storage/tooling surfaces rather
