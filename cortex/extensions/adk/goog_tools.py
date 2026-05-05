@@ -5,6 +5,7 @@ and manage backups in Google Drive (Google One).
 """
 
 import logging
+import os
 import shutil
 import subprocess
 from pathlib import Path
@@ -38,11 +39,11 @@ def goog_quota() -> dict[str, Any]:
             "free_gb": round(usage.free / (1024**3), 2),
             "percent_used": round((usage.used / usage.total) * 100, 1),
         }
-    except Exception as e:  # noqa: BLE001
+    except OSError as e:
         return {"status": "error", "message": f"Could not check quota: {e}"}
 
 
-def goog_sync_notebooklm(mode: str = "both") -> dict[str, Any]:
+def goog_sync_notebooklm(mode: str = "both", tenant_id: str = "default") -> dict[str, Any]:
     """
     Trigger a synchronization of CORTEX memory to NotebookLM sources in Google Drive.
 
@@ -52,9 +53,11 @@ def goog_sync_notebooklm(mode: str = "both") -> dict[str, Any]:
     Returns:
         Status of the synchronization.
     """
+    if mode not in {"digest", "domains", "both"}:
+        return {"status": "error", "message": "Invalid mode. Use digest, domains, or both."}
+
     try:
-        # We call the CLI command internally to reuse logic
-        cmd = ["cortex", "notebooklm", "sync", "--mode", mode]
+        cmd = ["cortex", "notebooklm", "sync", "--mode", mode, "--tenant-id", tenant_id]
         result = subprocess.run(cmd, capture_output=True, text=True, check=False)
 
         if result.returncode == 0:
@@ -69,7 +72,7 @@ def goog_sync_notebooklm(mode: str = "both") -> dict[str, Any]:
                 "message": "Sync command failed.",
                 "stderr": result.stderr.strip(),
             }
-    except Exception as e:  # noqa: BLE001
+    except (OSError, ValueError, subprocess.SubprocessError) as e:
         return {"status": "error", "message": f"Sync process failed: {e}"}
 
 
@@ -80,8 +83,16 @@ def goog_backup_cortex() -> dict[str, Any]:
     Returns:
         Status of the backup operation.
     """
-    import os
     from datetime import datetime, timezone
+
+    if os.environ.get("CORTEX_ALLOW_FULL_DB_CLOUD_BACKUP") != "1":
+        return {
+            "status": "error",
+            "message": (
+                "Full database cloud backup is disabled by default. "
+                "Set CORTEX_ALLOW_FULL_DB_CLOUD_BACKUP=1 outside the agent tool call."
+            ),
+        }
 
     detected = _detect_cloud_sync()
     if not detected:
@@ -114,7 +125,7 @@ def goog_backup_cortex() -> dict[str, Any]:
             "path": str(dest_path),
             "size_mb": round(os.path.getsize(dest_path) / (1024**2), 2),
         }
-    except Exception as e:  # noqa: BLE001
+    except OSError as e:
         return {"status": "error", "message": f"Backup failed: {e}"}
 
 

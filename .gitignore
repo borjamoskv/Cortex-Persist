@@ -79,11 +79,17 @@ Thumbs.db
 .lsp/
 .qodo/
 .vercel/
+build/
+**/target/
+engine-c5/targets/
+cortex-core/engine-c5/targets/
 
 # ── Agent internals ──────────────────────────────
 .agent/
 .agents/
 .agent_backup_workflows/
+.codex_tmp_*_shards.json
+.pytest-tmp*/
 .cortex/
 .cortex_field
 .artifacts/
