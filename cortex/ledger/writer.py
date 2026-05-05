@@ -3,6 +3,7 @@ import sqlite3
 
 from cortex.ledger.models import LedgerEvent
 from cortex.ledger.origin import OriginSignaturePolicy
+from cortex.ledger.pii import LedgerPIIPolicy
 from cortex.ledger.queue import EnrichmentQueue
 from cortex.ledger.replay import ReplayProtectionError, ReplayProtectionPolicy
 from cortex.ledger.store import LedgerStore, LedgerStoreError
@@ -15,6 +16,7 @@ class LedgerWriter:
         queue: EnrichmentQueue,
         origin_policy: OriginSignaturePolicy | None = None,
         replay_policy: ReplayProtectionPolicy | None = None,
+        pii_policy: LedgerPIIPolicy | None = None,
     ) -> None:
         if replay_policy is not None and origin_policy is None:
             raise ValueError("replay_policy_requires_origin_policy")
@@ -22,8 +24,11 @@ class LedgerWriter:
         self.queue = queue
         self.origin_policy = origin_policy
         self.replay_policy = replay_policy
+        self.pii_policy = pii_policy
 
     def append(self, event: LedgerEvent) -> str:
+        if self.pii_policy is not None:
+            self.pii_policy.validate_event(event)
         if self.origin_policy is not None:
             self.origin_policy.validate_event(event)
         if self.replay_policy is not None:

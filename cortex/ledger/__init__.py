@@ -16,6 +16,7 @@ if TYPE_CHECKING:
         sign_event_origin,
         verify_event_origin,
     )
+    from cortex.ledger.pii import LedgerPIIError, LedgerPIIPolicy, scrub_text
     from cortex.ledger.public_export import (
         ExportAuthority,
         LedgerExportResult,
@@ -49,10 +50,13 @@ __all__ = [
     "OriginKeyRegistry",
     "OriginSignatureError",
     "OriginSignaturePolicy",
+    "LedgerPIIError",
+    "LedgerPIIPolicy",
     "FreshnessPolicy",
     "ReplayProtectionError",
     "ReplayProtectionPolicy",
     "public_key_record",
+    "scrub_text",
     "sign_event_origin",
     "write_public_ledger_export",
     "verify_event_origin",
@@ -73,6 +77,9 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "OriginSignaturePolicy": ("cortex.ledger.origin", "OriginSignaturePolicy"),
     "sign_event_origin": ("cortex.ledger.origin", "sign_event_origin"),
     "verify_event_origin": ("cortex.ledger.origin", "verify_event_origin"),
+    "LedgerPIIError": ("cortex.ledger.pii", "LedgerPIIError"),
+    "LedgerPIIPolicy": ("cortex.ledger.pii", "LedgerPIIPolicy"),
+    "scrub_text": ("cortex.ledger.pii", "scrub_text"),
     "FreshnessPolicy": ("cortex.ledger.replay", "FreshnessPolicy"),
     "ReplayProtectionError": ("cortex.ledger.replay", "ReplayProtectionError"),
     "ReplayProtectionPolicy": ("cortex.ledger.replay", "ReplayProtectionPolicy"),

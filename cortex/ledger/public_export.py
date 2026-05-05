@@ -13,6 +13,7 @@ from typing import Any
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey, Ed25519PublicKey
 from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 
+from cortex.ledger.pii import LedgerPIIError, validate_no_direct_identifiers
 from cortex.ledger.public_verifier import verify_export
 
 
@@ -261,6 +262,10 @@ def _validate_event_package_scope(
             raise ValueError(f"event tenant mismatch: {event.get('event_id')}")
         if event.get("stream_id") != stream_id:
             raise ValueError(f"event stream mismatch: {event.get('event_id')}")
+        try:
+            validate_no_direct_identifiers(event, path="event")
+        except LedgerPIIError as exc:
+            raise ValueError(f"event contains direct identifier: {exc}") from exc
         detail = event.get("detail")
         if isinstance(detail, Mapping) and any(
             field in detail for field in ("content", "payload", "plaintext", "fact_content")

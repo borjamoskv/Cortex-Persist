@@ -30,6 +30,10 @@ The package must not contain `facts.jsonl` or plaintext fact payload files.
 Fact export is a separate product surface with separate retention, redaction,
 and erasure controls.
 
+Public ledger events are also checked against the no-direct-identifier policy
+documented in
+[`NO_PII_IMMUTABLE_LEDGER_POLICY.md`](NO_PII_IMMUTABLE_LEDGER_POLICY.md).
+
 ## Manifest Scope
 
 `manifest.json` includes:
