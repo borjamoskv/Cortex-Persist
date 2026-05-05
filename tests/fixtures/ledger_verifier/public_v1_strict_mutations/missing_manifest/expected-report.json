@@ -1,0 +1,13 @@
+{
+  "result": "VALID_WITH_LIMITATIONS",
+  "guarantees": {
+    "completeness_verified": false,
+    "truth_verified": false
+  },
+  "limitations": [
+    {
+      "code": "NO_MANIFEST",
+      "impact": "completeness_not_proven"
+    }
+  ]
+}

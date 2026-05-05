@@ -1,0 +1,12 @@
+{
+  "profile": "legacy-v0",
+  "prev_hash": "c607a9af884d602f415e997187da89c95b773d4304e848dce697807a3c349e2d",
+  "project": "loan-risk",
+  "action": "deprecate",
+  "detail": {
+    "fact_id": 1,
+    "reason": "operator override"
+  },
+  "timestamp": "2026-05-04T12:01:00+00:00",
+  "expected_hash": "991cd9919bbb74b86c2294e018c462107337241d5a581eb77376506c024eba6c"
+}

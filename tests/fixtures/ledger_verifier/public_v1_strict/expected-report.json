@@ -1,0 +1,13 @@
+{
+  "result": "VALID_FULL_STRICT",
+  "guarantees": {
+    "integrity_verified": true,
+    "origin_authenticity_verified": true,
+    "authority_verified": true,
+    "replay_consistency_verified": true,
+    "temporal_consistency_verified": true,
+    "online_freshness_verified": false,
+    "completeness_verified": true,
+    "truth_verified": false
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "profile": "legacy-v0",
+  "prev_hash": "GENESIS",
+  "project": "loan-risk",
+  "action": "store",
+  "detail": {
+    "fact_type": "decision"
+  },
+  "timestamp": "2026-05-04T12:00:00+00:00",
+  "expected_hash": "c607a9af884d602f415e997187da89c95b773d4304e848dce697807a3c349e2d"
+}
