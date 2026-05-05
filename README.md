@@ -241,3 +241,9 @@ Expected (conceptual):
 ```
 [✘] TAMPER DETECTED: hash mismatch
 ```
+
+---
+## Multi-language summary
+EN: Tamper-evident memory for AI agents. Proof at decision time.
+ES: Memoria a prueba de manipulaciones para agentes de IA. Prueba del estado en tiempo de decisión.
+ZH: 面向 AI 代理的防篡改记忆。证明决策时刻的状态。
