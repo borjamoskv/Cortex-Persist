@@ -63,11 +63,7 @@ def test_agent_definition_parsing(temp_definitions_dir):
 def test_agent_definition_legacy_zero_turn_limit_maps_to_unlimited(tmp_path):
     """Test legacy `0` turn budgets become explicit unlimited semantics."""
     filepath = tmp_path / "legacy.yaml"
-    filepath.write_text(
-        "name: LEGACY\n"
-        "guardrails:\n"
-        "  max_turns: 0\n"
-    )
+    filepath.write_text("name: LEGACY\nguardrails:\n  max_turns: 0\n")
 
     agent = AgentCatalogEntry.from_yaml_file(filepath)
 
@@ -96,7 +92,7 @@ def test_agent_definition_string_bools_are_honored(tmp_path):
         "name: STRINGS\n"
         "memory:\n"
         "  sparse_encoding: 'false'\n"
-        "  silent_engrams: \"no\"\n"
+        '  silent_engrams: "no"\n'
         "  causal_memory: false\n"
         "guardrails:\n"
         "  max_turns: '0'\n"
@@ -113,7 +109,7 @@ def test_agent_definition_string_bools_are_honored(tmp_path):
 def test_agent_definition_invalid_tools_type(tmp_path):
     """Tools must be a YAML list of strings."""
     filepath = tmp_path / "invalid_tools.yaml"
-    filepath.write_text("name: INVALID_TOOLS\n" "tools: not-a-list")
+    filepath.write_text("name: INVALID_TOOLS\ntools: not-a-list")
 
     with pytest.raises(ValueError, match="Expected YAML sequence for 'tools'"):
         AgentCatalogEntry.from_yaml_file(filepath)
@@ -122,7 +118,7 @@ def test_agent_definition_invalid_tools_type(tmp_path):
 def test_agent_definition_invalid_tools_entry_type(tmp_path):
     """Tool entries must be strings."""
     filepath = tmp_path / "invalid_tool_entry.yaml"
-    filepath.write_text("name: INVALID_TOOL_ENTRY\n" "tools:\n  - 12\n  - search\n")
+    filepath.write_text("name: INVALID_TOOL_ENTRY\ntools:\n  - 12\n  - search\n")
 
     with pytest.raises(TypeError, match="Invalid 'tools' entry"):
         AgentCatalogEntry.from_yaml_file(filepath)
@@ -131,11 +127,7 @@ def test_agent_definition_invalid_tools_entry_type(tmp_path):
 def test_agent_definition_invalid_bool_raises_value_error(tmp_path):
     """Invalid boolean literals must fail fast with a clear validation error."""
     filepath = tmp_path / "invalid_bool.yaml"
-    filepath.write_text(
-        "name: INVALID_BOOL\n"
-        "memory:\n"
-        "  sparse_encoding: maybe\n"
-    )
+    filepath.write_text("name: INVALID_BOOL\nmemory:\n  sparse_encoding: maybe\n")
 
     with pytest.raises(ValueError, match="Invalid boolean value"):
         AgentCatalogEntry.from_yaml_file(filepath)
@@ -164,11 +156,7 @@ def test_load_all_continues_after_invalid_agent_entry(tmp_path, caplog):
     definitions_dir = tmp_path / "defs"
     definitions_dir.mkdir()
     (definitions_dir / "good.yaml").write_text("name: GOOD\n")
-    (definitions_dir / "bad.yaml").write_text(
-        "name: BAD\n"
-        "memory:\n"
-        "  sparse_encoding: maybe\n"
-    )
+    (definitions_dir / "bad.yaml").write_text("name: BAD\nmemory:\n  sparse_encoding: maybe\n")
 
     registry = AgentRegistry()
     registry.clear()
