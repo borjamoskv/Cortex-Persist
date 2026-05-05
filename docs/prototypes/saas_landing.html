@@ -241,7 +241,7 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
-    <!-- <script src="https://js.stripe.com/v3/"></script> Removed for CodeQL compliance (SRI not supported by Stripe) -->
+    <script src="https://js.stripe.com/v3/"></script>
 </head>
 <body>
     <canvas id="cortex-particles"></canvas>
@@ -693,6 +693,10 @@
                 
                 const data = await response.json();
                 if (data.client_secret) {
+                    if (typeof Stripe !== 'function') {
+                        throw new Error('Stripe.js did not load.');
+                    }
+
                     // Initialize Stripe Embedded Checkout natively without redirect
                     const stripe = Stripe('pk_test_TYooMQauvdEDq54NiTphI7jx'); // Replace with real site PK
                     
