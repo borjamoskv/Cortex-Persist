@@ -207,8 +207,10 @@ jobs:
           set -euo pipefail
 
           mapfile -t changed_tests < <(
-            printf '%s\n' "${{ steps.scope.outputs.python_files }}" |
-            grep -E '^tests/.*\.py$' || true
+            { grep -E '^tests/.*\.py$' .changed_files || true; } |
+            while IFS= read -r path; do
+              [ -f "${path}" ] && printf '%s\n' "${path}"
+            done
           )
 
           if [ "${#changed_tests[@]}" -gt 0 ]; then
@@ -216,6 +218,9 @@ jobs:
           else
             pytest_targets=(tests/)
           fi
+
+          printf 'Pytest targets:\n'
+          printf ' - %s\n' "${pytest_targets[@]}"
 
           python -X faulthandler -m pytest "${pytest_targets[@]}" -q --tb=short \
             --timeout=180 --timeout-method=thread \
