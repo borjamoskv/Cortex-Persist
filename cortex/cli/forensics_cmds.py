@@ -106,7 +106,9 @@ def build_manifest_cmd(
 )
 def verify_manifest_cmd(manifest: str, base_dir: str) -> None:
     """Verify a canonical evidence manifest against local artifact bytes."""
-    manifest_payload, artifacts, manifest_path, base = _load_manifest_and_artifacts(manifest, base_dir)
+    manifest_payload, artifacts, manifest_path, base = _load_manifest_and_artifacts(
+        manifest, base_dir
+    )
     report = verify_evidence_manifest(manifest_payload, artifacts)
     _emit_status_json(
         {
@@ -130,7 +132,9 @@ def verify_manifest_cmd(manifest: str, base_dir: str) -> None:
 @click.option("--db", default=DEFAULT_DB, show_default=True, help="Database path.")
 def commit_manifest_cmd(manifest: str, base_dir: str, db: str) -> None:
     """Verify and commit a forensic evidence manifest to the transaction ledger."""
-    manifest_payload, artifacts, manifest_path, base = _load_manifest_and_artifacts(manifest, base_dir)
+    manifest_payload, artifacts, manifest_path, base = _load_manifest_and_artifacts(
+        manifest, base_dir
+    )
     result = commit_evidence_manifest(db, manifest_payload, artifacts)
     _emit_status_json(
         {
@@ -155,7 +159,9 @@ def commit_manifest_cmd(manifest: str, base_dir: str, db: str) -> None:
 @click.option("--db", default=DEFAULT_DB, show_default=True, help="Database path.")
 def verify_commit_cmd(manifest: str, base_dir: str, db: str) -> None:
     """Verify a forensic manifest and its matching transaction-ledger commitment."""
-    manifest_payload, artifacts, manifest_path, base = _load_manifest_and_artifacts(manifest, base_dir)
+    manifest_payload, artifacts, manifest_path, base = _load_manifest_and_artifacts(
+        manifest, base_dir
+    )
     report = verify_evidence_commit(db, manifest_payload, artifacts)
     _emit_status_json(
         {

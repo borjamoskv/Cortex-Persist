@@ -67,10 +67,7 @@ def test_migration_025_adds_merkle_tenant_scope_without_data_loss() -> None:
         "SELECT tenant_id, root_hash, tx_start_id, tx_end_id, tx_count FROM merkle_roots"
     ).fetchone()
     assert tuple(row) == ("__global__", "root-a", 1, 3, 3)
-    indexes = {
-        row[1]
-        for row in conn.execute("PRAGMA index_list(merkle_roots)").fetchall()
-    }
+    indexes = {row[1] for row in conn.execute("PRAGMA index_list(merkle_roots)").fetchall()}
     assert "idx_merkle_tenant_range" in indexes
 
 

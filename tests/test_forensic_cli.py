@@ -154,7 +154,9 @@ def test_forensics_cli_rejects_manifest_paths_outside_base(tmp_path) -> None:
     base.mkdir()
     manifest_path = tmp_path / "manifest.json"
     manifest_path.write_text(
-        json.dumps({"schema": "cortex.forensics.evidence_manifest.v1", "artifacts": [{"path": "../x"}]}),
+        json.dumps(
+            {"schema": "cortex.forensics.evidence_manifest.v1", "artifacts": [{"path": "../x"}]}
+        ),
         encoding="utf-8",
     )
     runner = CliRunner()

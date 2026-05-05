@@ -161,8 +161,7 @@ def _migration_025_tenant_bound_merkle_roots(conn: sqlite3.Connection):
     columns = {row[1] for row in conn.execute("PRAGMA table_info(merkle_roots)").fetchall()}
     if "tenant_id" not in columns:
         conn.execute(
-            "ALTER TABLE merkle_roots "
-            "ADD COLUMN tenant_id TEXT NOT NULL DEFAULT '__global__'"
+            "ALTER TABLE merkle_roots ADD COLUMN tenant_id TEXT NOT NULL DEFAULT '__global__'"
         )
     conn.execute(
         "CREATE INDEX IF NOT EXISTS idx_merkle_tenant_range "

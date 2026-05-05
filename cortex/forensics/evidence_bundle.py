@@ -359,7 +359,9 @@ def verify_evidence_commit(
     tenant_id = detail["tenant_id"]
     conn = connect(db_path, row_factory=sqlite3.Row)
     try:
-        existing = _find_existing_commit(conn, tenant_id, detail["bundle_id"], detail["manifest_sha256"])
+        existing = _find_existing_commit(
+            conn, tenant_id, detail["bundle_id"], detail["manifest_sha256"]
+        )
         if existing is None:
             violations.append(
                 {
@@ -426,7 +428,9 @@ def _commit_detail(manifest: Mapping[str, Any]) -> dict[str, Any]:
         "total_bytes": manifest.get("total_bytes"),
         "artifacts": [
             {
-                "path": _normalize_artifact_path(entry.get("path") if isinstance(entry, Mapping) else None),
+                "path": _normalize_artifact_path(
+                    entry.get("path") if isinstance(entry, Mapping) else None
+                ),
                 "bytes": entry.get("bytes") if isinstance(entry, Mapping) else None,
                 "sha256": entry.get("sha256") if isinstance(entry, Mapping) else None,
             }
