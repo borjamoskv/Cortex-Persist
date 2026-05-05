@@ -161,6 +161,28 @@ cortex ledger verify    # Full hash chain integrity check
 cortex ledger stats     # Ledger statistics
 ```
 
+### `cortex verify-ledger-export`
+
+Offline verification for a public ledger export package.
+
+```bash
+cortex verify-ledger-export ./export-dir
+```
+
+The command reads exported files only. It does not open SQLite, call network
+services, or trust a running CORTEX process. Output is deterministic JSON with
+split guarantees for integrity, origin authenticity, authority, replay
+consistency, temporal consistency, online freshness, completeness, and factual
+truth.
+
+Exit codes:
+
+| Code | Meaning |
+|:---|:---|
+| `0` | `VALID_FULL_STRICT` |
+| `1` | `INVALID` |
+| `2` | `VALID_WITH_LIMITATIONS` |
+
 ---
 
 ### `cortex compliance-report`

@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from cortex.ledger.ledger_core import SovereignLedger
     from cortex.ledger.models import LedgerEvent, SemanticStatus
+    from cortex.ledger.public_verifier import verify_export
     from cortex.ledger.queue import EnrichmentQueue
     from cortex.ledger.store import LedgerStore
     from cortex.ledger.verifier import LedgerVerifier
@@ -22,6 +23,7 @@ __all__ = [
     "LedgerWriter",
     "LedgerVerifier",
     "EnrichmentQueue",
+    "verify_export",
 ]
 
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
@@ -31,6 +33,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "LedgerWriter": ("cortex.ledger.writer", "LedgerWriter"),
     "LedgerVerifier": ("cortex.ledger.verifier", "LedgerVerifier"),
     "EnrichmentQueue": ("cortex.ledger.queue", "EnrichmentQueue"),
+    "verify_export": ("cortex.ledger.public_verifier", "verify_export"),
 }
 
 

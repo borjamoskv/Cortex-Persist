@@ -97,3 +97,21 @@ Reports must split guarantees:
 
 For offline historical exports, `online_freshness_verified` is false. By
 default, `truth_verified` is false.
+
+## CLI Contract
+
+The read-only verifier CLI accepts an exported package directory:
+
+```bash
+cortex verify-ledger-export ./export-dir
+```
+
+The command must:
+
+- read exported files only;
+- avoid SQLite, network calls, and a running CORTEX process;
+- emit deterministic JSON with `profile`, `result`, `guarantees`, `counts`,
+  `artifacts`, `event_hashes`, `errors`, and `warnings`;
+- exit `0` for `VALID_FULL_STRICT`;
+- exit `1` for `INVALID`;
+- exit `2` for `VALID_WITH_LIMITATIONS`.
