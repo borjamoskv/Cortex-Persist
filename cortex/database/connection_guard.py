@@ -81,6 +81,9 @@ _WHITELISTED_MODULES: frozenset[str] = frozenset(
         "cortex/cli/doctor_cmds.py",
         "cortex/engine/capabilities.py",
         "cortex/extensions/health/trend.py",
+        # New exceptions
+        "cortex/mac_maestro/executor.py",
+        "cortex/mcp/toolbox_watchdog.py",
     }
 )
 

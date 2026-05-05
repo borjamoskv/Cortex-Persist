@@ -72,9 +72,7 @@ class OverlapDetector:
         intent_tokens = _tokenize(intent)
         if not intent_tokens:
             return 0.0
-        existing_tokens = {
-            token for text in self._skill_texts() for token in _tokenize(text)
-        }
+        existing_tokens = {token for text in self._skill_texts() for token in _tokenize(text)}
         if not existing_tokens:
             return 1.0
         novel = [token for token in intent_tokens if token not in existing_tokens]

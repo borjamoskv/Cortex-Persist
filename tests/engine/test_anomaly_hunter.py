@@ -1,3 +1,4 @@
+import time
 from datetime import datetime, timedelta, timezone
 
 import pytest
@@ -10,8 +11,12 @@ from cortex.engine.models import Fact
 def mock_cortex_engine():
     class MockEngine:
         async def history(self, project):
-            fact_1_time = (datetime.now(timezone.utc) - timedelta(hours=2)).isoformat()
-            fact_2_time = (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat()
+            fact_1_time = (
+                datetime.fromtimestamp(time.time(), tz=timezone.utc) - timedelta(hours=2)
+            ).isoformat()
+            fact_2_time = (
+                datetime.fromtimestamp(time.time(), tz=timezone.utc) - timedelta(hours=1)
+            ).isoformat()
 
             return [
                 Fact(

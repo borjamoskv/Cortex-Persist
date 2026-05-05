@@ -13,8 +13,9 @@
 | **Seeders** | `seed_*.py`, `backfill_embeddings.py` | Data population |
 | **DB Maintenance** | `repair_db.py`, `encrypt_legacy_facts.py`, `repatriate_memories.py` | Database operations |
 | **Forge** | `forge_*.py` | Build & generation pipelines |
-| **Verify** | `verify_*.py` | Architecture verification |
+| **Verify** | `repo_health_changed.py`, `verify_*.py` | Architecture verification and changed-file triage |
 | **Orchestrators** | `god_mode_orchestrator.py`, `mejoralo_infinito.py`, `orchestrator.py`, `rotate_aether.py` | Meta-execution |
+| **Agent Demo** | `run_github_agent_demo.py` | End-to-end harness for the `GitHubAgent` builtin |
 | **MCP / API** | `run_mcp_server.py`, `smoke_test_api.py` | Server launching |
 | **NotebookLM** | `fragment_notebooklm.py`, `synthesize_notebooklm.py` | NotebookLM integration |
 | **Shell** | `cortex-boot.sh`, `cortex_persist.sh`, `diagnose.sh`, etc. | System operations |

@@ -3,6 +3,7 @@ Staleness pruning strategy for compaction.
 """
 
 import logging
+import time
 from datetime import datetime, timedelta, timezone
 from typing import TYPE_CHECKING
 
@@ -48,7 +49,9 @@ async def find_stale_facts(
 ) -> list[int]:
     """Find facts older than max_age_days with consensus below min_consensus."""
     conn = await engine.get_conn()
-    cutoff = (datetime.now(timezone.utc) - timedelta(days=max_age_days)).isoformat()
+    cutoff = (
+        datetime.fromtimestamp(time.time(), tz=timezone.utc) - timedelta(days=max_age_days)
+    ).isoformat()
 
     cursor = await conn.execute(
         "SELECT id FROM facts "

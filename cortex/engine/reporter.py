@@ -12,6 +12,7 @@ import logging
 import os
 import sqlite3
 import sys
+import time
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from typing import Any
@@ -107,7 +108,7 @@ class SovereignReporter:
                     db_size_mb = os.path.getsize(self.db_path) / (1024 * 1024)
 
                 return ManifoldStatus(
-                    timestamp=datetime.now(timezone.utc).isoformat(),
+                    timestamp=datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
                     project=self.project,
                     causality=causal_stats,
                     efficiency={

@@ -45,9 +45,9 @@ class GhostReaper:
         Returns:
             Number of reaped ghosts.
         """
-        cutoff = (datetime.now(timezone.utc) - timedelta(days=self._ttl_days)).strftime(
-            "%Y-%m-%dT%H:%M:%S"
-        )
+        cutoff = (
+            datetime.fromtimestamp(time.time(), tz=timezone.utc) - timedelta(days=self._ttl_days)
+        ).strftime("%Y-%m-%dT%H:%M:%S")
 
         # Phase 1: Explicit TTL expiry
         cursor = await conn.execute(

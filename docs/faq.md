@@ -8,7 +8,7 @@ Common questions about CORTEX, answered honestly.
 
 ### Is CORTEX production-ready?
 
-**Not yet.** CORTEX is in **beta**. The package version is **v0.3.0b2**. The architecture is solid and tests pass, but there are known issues being actively resolved (singleton thread-safety, persistent audit logging). We recommend CORTEX for:
+**Not yet.** CORTEX is in **beta**. The package metadata in the tree is **v0.3.0b3**. The architecture is solid and many core paths are implemented, but there are still known gaps in consistency, documentation, and some platform surfaces. We recommend CORTEX for:
 
 - ✅ Development and prototyping
 - ✅ Compliance proof-of-concepts
@@ -31,7 +31,7 @@ Traditional logging captures *what happened*. CORTEX proves *it wasn't tampered 
 
 ### Who built this?
 
-[borjamoskv.com](https://borjamoskv.com) — solo developer, based in Bilbao. CORTEX is a 178K+ LOC production codebase with 1,621+ tests across 1,094 modules. This is a real product, not a weekend experiment.
+[borjamoskv.com](https://borjamoskv.com) — solo developer, based in Bilbao. CORTEX is a large codebase with an extensive repository test suite and multiple deployment/runtime surfaces. Exact counts drift faster than the docs, so treat the package metadata and local test results as the current source of truth.
 
 ---
 

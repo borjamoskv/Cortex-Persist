@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import sqlite3
+import time
 from pathlib import Path
 
 from cortex.extensions.health.models import HealthThresholds, MetricSnapshot
@@ -162,7 +163,9 @@ class SnapshotAgeCollector:
                     from datetime import datetime, timezone
 
                     ts = datetime.fromisoformat(row[0].replace("Z", "+00:00"))
-                    age_hours = (datetime.now(timezone.utc) - ts).total_seconds() / 3600
+                    age_hours = (
+                        datetime.fromtimestamp(time.time(), tz=timezone.utc) - ts
+                    ).total_seconds() / 3600
                     if age_hours < 1:
                         val = 1.0
                     elif age_hours < 6:

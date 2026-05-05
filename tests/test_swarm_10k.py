@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 
+from cortex.engine import shared_bus as shared_bus_module
 from cortex.engine.swarm_10k import SwarmCommander
 from cortex.extensions.signals.sharded_bus import ShardedAsyncSignalBus
 
@@ -43,3 +44,28 @@ async def test_swarm_commander_hierarchy(tmp_path: Path):
     await commander.consolidate_and_annihilate()
     # Check teardown
     assert len(commander.legions) == 0
+
+
+@pytest.mark.asyncio
+async def test_shared_bus_falls_back_when_shared_memory_is_unavailable(monkeypatch):
+    """Use an in-process ring buffer when POSIX shared memory cannot be opened."""
+
+    class DeniedSharedMemory:
+        def __init__(self, *args, **kwargs):
+            raise PermissionError("shared memory disabled")
+
+    monkeypatch.setattr(shared_bus_module, "SharedMemory", DeniedSharedMemory)
+
+    bus = shared_bus_module.SovereignSharedBus(name="fallback-test", create=True)
+
+    assert bus._shm is None
+    assert bus._local_buf is not None
+
+    emitted = await bus.emit("test:event", payload={"ok": True}, source="cli")
+
+    assert emitted is True
+    polled = bus.poll(-1)
+    assert len(polled) == 1
+    assert polled[0][1]["payload"] == {"ok": True}
+
+    bus.close()

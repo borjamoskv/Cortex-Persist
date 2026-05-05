@@ -1,71 +1,93 @@
-from fastapi import APIRouter
+from __future__ import annotations
 
-# Temporarily removed due to P0 gateway module topological collapse
-# from cortex.gateway.adapters import (
-#     rest_router as gateway_rest_router,
-# )
-# from cortex.gateway.adapters import (
-#     telegram_router as gateway_telegram_router,
-# )
-from . import admin as admin_router
-from . import agents as agents_router
-from . import ask as ask_router
-from . import context as context_router
-from . import daemon as daemon_router
-from . import dashboard as dashboard_router
-from . import events as events_router
-from . import facts as facts_router
-from . import gate as gate_router
-from . import graph as graph_router
-from . import health as health_index_router
-from . import ledger as ledger_router
-from . import mejoralo as mejoralo_router
-from . import missions as missions_router
-from . import onboarding as onboarding_router
-from . import oracle as oracle_router
-from . import runtime as runtime_router
-from . import search as search_router
-from . import swarm as swarm_router
-from . import telemetry as telemetry_router
-from . import timing as timing_router
-from . import tips as tips_router
-from . import topology_ws as topology_ws_router
-from . import translate as translate_router
-from . import trust as trust_router
-from . import usage as usage_router
+import importlib
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from fastapi import APIRouter
 
 __all__ = ["api_router"]
 
-api_router = APIRouter()
+_ROUTE_MODULES = {
+    "admin",
+    "agents",
+    "ask",
+    "context",
+    "daemon",
+    "dashboard",
+    "events",
+    "facts",
+    "gate",
+    "graph",
+    "health",
+    "ledger",
+    "mejoralo",
+    "missions",
+    "onboarding",
+    "oracle",
+    "runtime",
+    "search",
+    "swarm",
+    "telemetry",
+    "timing",
+    "tips",
+    "topology_ws",
+    "translate",
+    "trust",
+    "usage",
+}
 
-# Register all internal routers to the unified `api_router`
-api_router.include_router(events_router.events_router)
-api_router.include_router(facts_router.router)
-api_router.include_router(search_router.router)
-api_router.include_router(ask_router.router)
-api_router.include_router(admin_router.router)
-api_router.include_router(timing_router.router)
-api_router.include_router(translate_router.router)
-api_router.include_router(oracle_router.router)
-api_router.include_router(daemon_router.router)
-api_router.include_router(dashboard_router.router)
-api_router.include_router(agents_router.router)
-api_router.include_router(graph_router.router)
-api_router.include_router(ledger_router.router)
-api_router.include_router(missions_router.router)
-api_router.include_router(mejoralo_router.router)
-api_router.include_router(gate_router.router)
-api_router.include_router(context_router.router)
-api_router.include_router(tips_router.router)
-api_router.include_router(swarm_router.router)
-api_router.include_router(telemetry_router.router)
-api_router.include_router(topology_ws_router.router)
-api_router.include_router(usage_router.router)
-api_router.include_router(runtime_router.router)
-api_router.include_router(onboarding_router.router)
-api_router.include_router(health_index_router.router)
-api_router.include_router(trust_router.router)
+_API_ROUTE_SPECS: tuple[tuple[str, str], ...] = (
+    ("events", "events_router"),
+    ("facts", "router"),
+    ("search", "router"),
+    ("ask", "router"),
+    ("admin", "router"),
+    ("timing", "router"),
+    ("translate", "router"),
+    ("oracle", "router"),
+    ("daemon", "router"),
+    ("dashboard", "router"),
+    ("agents", "router"),
+    ("graph", "router"),
+    ("ledger", "router"),
+    ("missions", "router"),
+    ("mejoralo", "router"),
+    ("gate", "router"),
+    ("context", "router"),
+    ("tips", "router"),
+    ("swarm", "router"),
+    ("telemetry", "router"),
+    ("topology_ws", "router"),
+    ("usage", "router"),
+    ("runtime", "router"),
+    ("onboarding", "router"),
+    ("health", "router"),
+    ("trust", "router"),
+)
 
-# Gateway endpoints (SovereignLLM Entry Points)
-# api_router.include_router(gateway_rest_router)
-# api_router.include_router(gateway_telegram_router)
+
+def _load_route_module(name: str):
+    module = importlib.import_module(f".{name}", __name__)
+    globals()[name] = module
+    return module
+
+
+def _build_api_router() -> APIRouter:
+    from fastapi import APIRouter
+
+    router = APIRouter()
+    for module_name, router_attr in _API_ROUTE_SPECS:
+        module = _load_route_module(module_name)
+        router.include_router(getattr(module, router_attr))
+    return router
+
+
+def __getattr__(name: str):
+    if name == "api_router":
+        router = _build_api_router()
+        globals()[name] = router
+        return router
+    if name in _ROUTE_MODULES:
+        return _load_route_module(name)
+    raise AttributeError(f"module 'cortex.routes' has no attribute {name!r}")

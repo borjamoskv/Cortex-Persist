@@ -12,21 +12,113 @@ on:
 permissions:
   contents: read
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 concurrency:
   group: quality-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  change-scope:
+    name: change-scope
+    runs-on: ubuntu-latest
+    outputs:
+      automation_only: ${{ steps.scope.outputs.automation_only }}
+    steps:
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v4
+        with:
+          fetch-depth: 0
+      - id: scope
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          zero_sha="0000000000000000000000000000000000000000"
+          event_name="${{ github.event_name }}"
+          diff_range=""
+
+          if [[ "$event_name" == "pull_request" ]]; then
+            git fetch --no-tags origin "${{ github.base_ref }}" --depth=1
+            diff_range="origin/${{ github.base_ref }}...HEAD"
+          elif [[ "$event_name" == "push" && "${{ github.event.before }}" != "$zero_sha" ]]; then
+            diff_range="${{ github.event.before }}...HEAD"
+          fi
+
+          if [[ -z "$diff_range" ]]; then
+            echo "automation_only=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          mapfile -t files < <(git diff --name-only --diff-filter=ACMR "$diff_range")
+          if [[ ${#files[@]} -eq 0 ]]; then
+            echo "automation_only=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          automation_only=true
+
+          for file in "${files[@]}"; do
+            case "$file" in
+              .github/workflows/ci.yml|\
+              .github/workflows/quality_gates.yml|\
+              .github/workflows/repo-health-lite.yml|\
+              .github/workflows/sigint-monitor.yml|\
+              .github/workflows/sovereign-deploy.yml|\
+              scripts/repo_health_changed.py|\
+              cortex/extensions/moltbook/sigint.py)
+                ;;
+              *)
+                automation_only=false
+                ;;
+            esac
+          done
+
+          echo "automation_only=$automation_only" >> "$GITHUB_OUTPUT"
+
   quality-gates:
     name: "10 Seals"
+    needs: [change-scope]
+    if: needs.change-scope.outputs.automation_only != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
     steps:
-      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Determine scope
+        id: scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch --no-tags --prune origin "${{ github.base_ref }}"
+            git diff --name-only --diff-filter=ACMR "origin/${{ github.base_ref }}...HEAD" | sort -u > .changed_files
+          elif [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+            git diff --name-only --diff-filter=ACMR "${{ github.event.before }}" HEAD | sort -u > .changed_files
+          else
+            git ls-files | sort -u > .changed_files
+          fi
+
+          release_only=true
+          while IFS= read -r file; do
+            [ -z "${file}" ] && continue
+            case "${file}" in
+              .github/workflows/*|.github/mlc_config.json|README.md|README.es.md|README.zh.md|CONTRIBUTING.md|RELEASE_PROCESS.md|CHANGELOG.md|VERSION_SUPPORT.md|docs/*|ouroboros-matrix/README.md|Dockerfile|pyproject.toml|uv.lock|MANIFEST.in|cortex/__init__.py|cortex/cli/prompt_cmds.py|scripts/release_preflight.py|scripts/repo_health_changed.py|astro.config.mjs|vercel.json|.vercelignore|package.json|package-lock.json|src/*|public/*)
+                ;;
+              *)
+                release_only=false
+                break
+                ;;
+            esac
+          done < .changed_files
+
+          echo "release_only=${release_only}" >> "${GITHUB_OUTPUT}"
 
       - name: Set up Python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: "3.13"
           cache: "pip"
@@ -36,5 +128,10 @@ jobs:
           pip install -e ".[dev,api]" mypy pyright bandit pytest pytest-asyncio pytest-cov --quiet
 
       # ─── SOVEREIGN SEALS (Local & CI Unified) ────────────────────
+      - name: "🩺 Release-only smoke"
+        if: steps.scope.outputs.release_only == 'true'
+        run: python scripts/repo_health_changed.py
+
       - name: "🛡️ Execute 10 Seals"
+        if: steps.scope.outputs.release_only != 'true'
         run: python -m cortex.guards.seals

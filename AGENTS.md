@@ -2,7 +2,7 @@
 
 **Trust infrastructure for autonomous AI: cryptographic verification, audit trails, epistemic containment, and agent memory.**
 
-> **Package:** `cortex-persist v0.3.0b2` | **Engine:** `v8` | **License:** `Apache-2.0` | **Python:** `>=3.10`
+> **Package:** `cortex-persist v0.3.0b3` | **Engine:** `v8` | **License:** `Apache-2.0` | **Python:** `>=3.10`
 
 **Quick Navigation:** [SYSTEM DIRECTIVES](#11-agent-manifest--roles--authority-boundaries) · Agent Manifest §1.1 · Axioms §2 · Invariants §3 · Write-Path §4 · Read-Path §4.1 · Architecture §5 · Dev Protocol §6 · Failure Signatures §8
 
@@ -26,7 +26,7 @@
 | :---: | :--- | :--- |
 | **[P0]** | **Treat Generative Output as Conjecture** — route ALL state mutations through deterministic guards before persistence | Always |
 | **[P0]** | **Never Bypass Guards** — do not write code that circumvents the Write-Path Contract or downgrades validation errors | Always |
-| **[P0]** | **Verify Hash Continuity** — do not mutate `cortex/ledger/` or any state-persisting path without ensuring cryptographic auditability | Any ledger/engine change |
+| **[P0]** | **Verify Hash Continuity** — do not mutate `ledger.py` or any state-persisting path without ensuring cryptographic auditability | Any ledger/engine change |
 | **[P2]** | **Enforce Axioms** — apply AX-041 to AX-046 (see §2) in all architectural decisions | Architecture work |
 
 ### Decision Gate §0 — Agent Routing Tree (execute before any action)
@@ -35,7 +35,7 @@
 Am I reading this file for the first time?  → Read §1, §2, §3 in full. No action until done.
 Am I about to write code?                   → STOP. Is it on a CRITICAL surface? → Read affected tests first.
 Am I debugging a failure?                   → Go to §8 (Failure Signatures) before touching state.
-Am I performing a schema migration?         → Review `cortex/migrations/` and `cortex/migrations/registry.py` NOW. Abort if rollback path is unclear.
+Am I performing a schema migration?         → Run `alembic history --verbose` NOW. Abort if output is unclear.
 Am I starting a new session on this repo?   → Execute Multi-Session Handoff Protocol (§6.4) first.
 ```
 
@@ -46,7 +46,7 @@ Am I starting a new session on this repo?   → Execute Multi-Session Handoff Pr
 **CORTEX Persist** is a local-first trust substrate for autonomous, tool-using, and multi-agent AI systems. It persists facts, enforces deterministic validation boundaries, maintains cryptographic auditability, and treats generative output as conjecture until externally verified.
 
 - **Epistemic Containment:** Generative output is a probabilistic proposal — useful, invalid, partial, or dangerous. System state may only be mutated after crossing deterministic validation boundaries: guards, typed interfaces, schemas, tests, cryptographic logging, and external verification when required.
-- **The Python Paradox (🛑):** CORTEX is built in Python to maximize *Shipping Velocity* and *Developer Adoption*. Mitigation is the **Byzantine Boundary**: Python as orchestration glue, Rust (via `rustchain-mcp`), SQLite-Vec, and ONNX as immutable cores. We prioritize **Tamper-Evidence** over language-level safety. Trust model: `f < n/3` faulty nodes tolerated; the current sovereign ledger path uses Ed25519 for signatures and SHA-256 for continuity, while some audit/signature subsystems also use SHA3-256.
+- **The Python Paradox (🛑):** CORTEX is built in Python to maximize *Shipping Velocity* and *Developer Adoption*. Mitigation is the **Byzantine Boundary**: Python as orchestration glue, Rust (via `rustchain-mcp`), SQLite-Vec, and ONNX as immutable cores. We prioritize **Tamper-Evidence** over language-level safety. Trust model: `f < n/3` faulty nodes tolerated; cryptographic primitives are Ed25519 (signatures) and SHA3-256 (hashing).
 - **Audit Trails vs. Authorization (📜):** CORTEX is a **Forensic Audit Sidecar** for MCP — not “Tamper-Proof” (an architectural illusion), but **Tamper-Evident**. The Master Ledger commits every action to an immutable hash chain. The cost of non-compliance is infinite.
 
 ---
@@ -94,7 +94,7 @@ All agents operating in this repository MUST self-identify by role before acting
 5. **Encryption:** Sensitive data MUST NOT be stored unencrypted.
 6. **Deterministic State:** Stochastic outputs MUST NOT mutate persistent state without deterministic validation.
 7. **Migration Safety:** Schema changes MUST preserve migration safety, auditability, and rollback awareness.
-8. **Architectural Boundaries:** CLI modules are thin wrappers. Business logic belongs in `cortex/engine/`, `cortex/services/`, or other package-level modules under `cortex/`.
+8. **Architectural Boundaries:** CLI modules are thin wrappers. Business logic belongs in `engine/`, `services/`, or `managers/`.
 9. **Failure Locality:** Invalid state must be rejectable and safely abortable at any point.
 
 ### ❌ Never-Do (Anti-Patterns)
@@ -102,8 +102,8 @@ All agents operating in this repository MUST self-identify by role before acting
 - **NO** `float` for finance or scoring-sensitive paths — use `Decimal`.
 - **NO** `time.sleep()` in async code — use `asyncio.sleep()`.
 - **NO** bare `print()` in core paths — use standard `logging` or Rich.
-- **NO** business logic in `cortex/cli/*_cmds.py`.
-- **NO** modifications to `cortex/ledger/` without understanding hash continuity and test coverage.
+- **NO** business logic in `cli/*_cmds.py`.
+- **NO** modifications to `ledger.py` without understanding hash continuity and test coverage.
 - **NO** schema changes without a migration review.
 - **NO** storing secrets in plaintext metadata.
 - **NO** bypassing guards on write paths.
@@ -118,9 +118,9 @@ All agents operating in this repository MUST self-identify by role before acting
 
 All non-trivial state mutations MUST follow this unidirectional flow.
 
-> 🛑 **ABORT CONDITION:** If a proposal fails validation or reaches a taint-enforced ingest path without a valid `CORTEX-TAINT` signature, execute the compensating Saga sequence in reverse and abort immediately.
+> 🛑 **ABORT CONDITION:** If a proposal fails validation or lacks a valid `CORTEX-TAINT` signature, execute the compensating Saga sequence in reverse and abort immediately.
 >
-> **`CORTEX-TAINT` Target Format:** `taint:{agent_id}:{session_id}:{timestamp_iso8601}:{sha3_256_of_payload}` — The intended universal attribution token format for provenance-aware inserts. Some ingestion paths already attach or enforce taint explicitly; others do not yet hard-fail on absence. Treat full universal enforcement as a target-state invariant until all write paths are aligned.
+> **`CORTEX-TAINT` Format:** `taint:{agent_id}:{session_id}:{timestamp_iso8601}:{sha3_256_of_payload}` — A cryptographic attribution token that must be present on every fact insert. Generated by the taint engine at proposal time. Absence = automatic SAGA-1 rejection.
 
 ```text
 [Generative Proposal]
@@ -165,7 +165,7 @@ Read operations are NOT free. They MUST follow these rules:
 
 1. **Query Authorization:** All read requests MUST be scoped to the caller's `tenant_id`. Cross-tenant reads are a P0 violation.
 2. **Taint Propagation:** Facts retrieved from a tainted source MUST carry the taint flag in the response. Callers MUST NOT strip taint metadata.
-3. **Consistency Level:** Default read consistency is `READ_COMMITTED`. Reads on `cortex/ledger/` MUST use `SERIALIZABLE` isolation.
+3. **Consistency Level:** Default read consistency is `READ_COMMITTED`. Reads on `ledger.py` MUST use `SERIALIZABLE` isolation.
 4. **Cache Coherence:** Cached reads MUST be invalidated on any write to the same `tenant_id` scope. Stale cache serving tainted-as-clean data is a Write-Path Contract violation.
 5. **No Inference from Reads:** Read results MUST NOT be used to infer or reconstruct facts that were not explicitly persisted. Speculation from read data = epistemic containment breach.
 
@@ -190,16 +190,17 @@ Read operations are NOT free. They MUST follow these rules:
 
 | Path | Risk | Operational Notes |
 | :--- | :---: | :--- |
-| `cortex/engine/` | **CRITICAL** | Core CRUD, Kinetic Engines (Annihilator/Crystallizer). |
-| `cortex/ledger/` | **CRITICAL** | Hash-chain integrity and trust continuity. |
-| `cortex/migrations/` | **CRITICAL** | Irreversible production impact. |
-| `cortex/memory/` | **CRITICAL** | Large public API surface. Highly sensitive to state corruption. |
-| `cortex/guards/` | **HIGH** | Admission, contradiction, and dependency surfaces. |
-| `cortex/verification/` | **HIGH** | Formal or deterministic validation surfaces. |
-| `cortex/routes/` | **HIGH** | External API contract. Must remain typed and stable. |
-| `cortex/cli/` | *Medium* | Thin wrappers only. No business logic. |
-| `cortex/extensions/daemon/` | *Medium* | Core daemon and background-runtime surfaces. |
-| `cortex/extensions/llm/` | *Medium* | Provider routing, caching, hedging, validation. |
+| `engine/` | **CRITICAL** | Core CRUD, Kinetic Engines (Annihilator/Crystallizer). |
+| `ledger.py` | **CRITICAL** | Hash-chain integrity and trust continuity. |
+| `migrations/` | **CRITICAL** | Irreversible production impact. |
+| `memory/` | **CRITICAL** | Large public API surface. Highly sensitive to state corruption. |
+| `guards/` | **HIGH** | Admission, contradiction, and dependency surfaces. |
+| `verification/` | **HIGH** | Formal or deterministic validation surfaces. |
+| `ops/` | **HIGH** | Git-Ledger entanglement & KV-Aware routing. |
+| `routes/` | **HIGH** | External API contract. Must remain typed and stable. |
+| `cli/` | *Medium* | Thin wrappers only. No business logic. |
+| `daemon/` | *Medium* | Core Daemons: Chaos (Immunity), Maxwell (Exergy). |
+| `llm/` | *Medium* | Provider routing, caching, hedging, validation. |
 
 ---
 
@@ -234,7 +235,7 @@ A change is **INCOMPLETE** and will be rejected if any step is missing:
 
 1. - [ ] **Tests** — coverage for modified or new behavior.
 2. - [ ] **Typing** — explicit type hints on all public surfaces.
-3. - [ ] **Migrations** — for schema changes: review the affected files in `cortex/migrations/`, document exact downgrade/rollback strategy, assess backward compat, and confirm irreversibility.
+3. - [ ] **Migrations** — for schema changes: `alembic history --verbose`, document exact downgrade target, assess backward compat, confirm irreversibility.
 4. - [ ] **Trust Impact** — ledger/audit impact review for any guard, encryption, taint, or tenant isolation change.
 5. - [ ] **Async Correctness** — no blocking calls, proper timeout/cancellation, resource cleanup verified.
 6. - [ ] **Documentation** — update if public behavior, API route contract, or CLI/API parity changes.
@@ -279,7 +280,7 @@ To govern domain-specific agent behavior without inflating this root file, place
 ```text
 cortex/engine/AGENTS.md      → Engine mutation rules (Annihilator/Crystallizer safety gates)
 cortex/memory/AGENTS.md      → Memory surface constraints (tenant isolation, fact aging)
-cortex/migrations/AGENTS.md  → Migration safety protocol (migration invariants, rollback targets)
+cortex/migrations/AGENTS.md  → Migration safety protocol (alembic invariants, rollback targets)
 ```
 
 **Rule:** Root AGENTS.md always takes precedence. Sub-files **augment** global rules — never contradict them.
@@ -294,10 +295,10 @@ When auditing existing code, these observable signals indicate a violation has a
 | :--- | :--- | :---: | :--- |
 | `float` in financial or scoring variable | Anti-Pattern #1 | HIGH | Replace `float` → `Decimal`; audit all callers. |
 | `time.sleep()` inside `async def` | Anti-Pattern #2 | CRITICAL | Replace → `asyncio.sleep()`. |
-| Bare `print()` in `cortex/engine/`, `cortex/memory/`, `cortex/guards/` | Anti-Pattern #3 | MEDIUM | Replace → `logging.getLogger(__name__)`. |
+| Bare `print()` in `engine/`, `memory/`, `guards/` | Anti-Pattern #3 | MEDIUM | Replace → `logging.getLogger(__name__)`. |
 | Bare `except Exception:` anywhere in core paths | Coding Rule #2 | MEDIUM | Narrow to specific exception type. |
-| Business logic found in `cortex/cli/*_cmds.py` | Arch. Boundary | HIGH | Refactor to `cortex/services/` or another package-level runtime module. |
+| Business logic found in `cli/*_cmds.py` | Arch. Boundary | HIGH | Refactor to `services/` or `managers/`. |
 | Ledger write with no prior guard call in call stack | Write-Path Contract | CRITICAL | Insert guard invocation before all writes. |
-| Missing `CORTEX-TAINT` on a taint-enforced or provenance-critical fact insert | Write-Path Contract | CRITICAL | Audit the ingest path — enforce taint there or narrow doctrine to the actual enforcement scope. |
-| Schema change with no matching `cortex/migrations/` entry | Migration Safety | CRITICAL | Add or update the corresponding migration module or SQL artifact; review rollback path before apply. |
+| Missing `CORTEX-TAINT` on any fact insert | Write-Path Contract | CRITICAL | Audit `engine/` — add taint to all write paths. |
+| Schema change with no alembic revision entry | Migration Safety | CRITICAL | Run `alembic revision --autogenerate`; review diff before apply. |
 | Plaintext secret in any metadata dict or JSON field | Encryption Invariant | **P0** | Rotate secret immediately; encrypt at rest; audit exposure window. |

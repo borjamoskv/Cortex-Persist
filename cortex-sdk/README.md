@@ -1,16 +1,28 @@
-# cortex-persist
+# cortex-persist — Cloud SDK
 
-> **Give your AI agent a brain that remembers.**
+> ⚠️ **Not yet published.** This SDK is for the **hosted CORTEX Persist cloud API** and is not yet deployed to PyPI or production. The install command below will not succeed until the first cloud release.
+>
+> **For the local-first engine:** `pip install cortex-persist` and `from cortex import CortexEngine`.
 
-Persistent memory infrastructure for AI agents. Store, search, and verify memories with semantic search and cryptographic integrity.
+> **Give your AI agent a brain that remembers — in the cloud.**
 
-## Install
+This package is a **thin HTTP wrapper client** for the hosted CORTEX Persist API. It is separate from the local-first `cortex-persist` engine package.
+
+| | This SDK (`cortex-sdk/`) | Local Engine |
+|:---|:---|:---|
+| **Install** | `pip install cortex-persist` *(coming soon)* | `pip install cortex-persist` ✅ |
+| **Import** | `from cortex_persist import CortexMemory` | `from cortex import CortexEngine` |
+| **Backend** | Hosted cloud API (requires API key) | Local SQLite (no API key) |
+| **Status** | ⚠️ Not yet deployed | ✅ Available now |
+
+## Install (coming soon)
 
 ```bash
+# Not yet published — do not run this yet
 pip install cortex-persist
 ```
 
-## Quickstart
+## Quickstart (Cloud API)
 
 ```python
 from cortex_persist import CortexMemory

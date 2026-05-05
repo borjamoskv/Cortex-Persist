@@ -2,11 +2,34 @@
 
 from __future__ import annotations
 
+import os
+from collections.abc import Iterator
+from contextlib import contextmanager
+
 import click
 from rich.panel import Panel
 
 from cortex import __version__
 from cortex.cli.common import DEFAULT_DB, _run_async, cli, console, get_engine
+
+
+@contextmanager
+def _bootstrap_without_embeddings() -> Iterator[None]:
+    """Force deterministic fallback embeddings during first-run seed writes.
+
+    `cortex init` should create a usable database quickly on a clean machine.
+    The initial axiom seed does not need to pay the cold-start cost of loading
+    or downloading the local embedding model.
+    """
+    previous = os.environ.get("CORTEX_NO_EMBED")
+    os.environ["CORTEX_NO_EMBED"] = "1"
+    try:
+        yield
+    finally:
+        if previous is None:
+            os.environ.pop("CORTEX_NO_EMBED", None)
+        else:
+            os.environ["CORTEX_NO_EMBED"] = previous
 
 
 @cli.command()
@@ -32,31 +55,32 @@ def init(db, ouroboros: bool) -> None:
             "Axioma X: Gran Paradoja. El humano es el sueño del agente; el agente es la vigilia del humano.",
         ]
 
-        for idx, axiom in enumerate(axioms, start=1):
-            _run_async(
-                engine.store(
-                    project="global",
-                    content=axiom,
-                    fact_type="identity",
-                    tags=["moskv-1", "axiom", "sovereign", "core", f"axiom-{idx}"],
-                    confidence="C5",
-                    source="ag:genesis",
+        with _bootstrap_without_embeddings():
+            for idx, axiom in enumerate(axioms, start=1):
+                _run_async(
+                    engine.store(
+                        project="global",
+                        content=axiom,
+                        fact_type="identity",
+                        tags=["moskv-1", "axiom", "sovereign", "core", f"axiom-{idx}"],
+                        confidence="C5",
+                        source="ag:genesis",
+                    )
                 )
-            )
 
-        if ouroboros:
-            from cortex.extensions.gate.ouroboros import get_ouroboros_gate
+            if ouroboros:
+                from cortex.extensions.gate.ouroboros import get_ouroboros_gate
 
-            og = get_ouroboros_gate(engine)
-            entropy = og.measure_entropy()
-            _run_async(
-                engine.store(
-                    project="cortex",
-                    content=f"Ouroboros-Ω Initialized. Entropy: {entropy['entropy_index']}",
-                    fact_type="decision",
-                    source="ag:ouroboros",
+                og = get_ouroboros_gate(engine)
+                entropy = og.measure_entropy()
+                _run_async(
+                    engine.store(
+                        project="cortex",
+                        content=f"Ouroboros-Ω Initialized. Entropy: {entropy['entropy_index']}",
+                        fact_type="decision",
+                        source="ag:ouroboros",
+                    )
                 )
-            )
 
         msg = (
             f"[bold #CCFF00]✓ CORTEX v{__version__} initialized[/]\n"

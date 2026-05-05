@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import logging
 import sqlite3
+from collections.abc import Mapping
 from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
@@ -41,6 +42,23 @@ logger = logging.getLogger(__name__)
 
 
 # ─── Request / Response Models ───────────────────────────────────────
+
+
+def _fact_data(fact: object) -> dict[str, Any]:
+    """Normalize Fact-like values to a mutable mapping."""
+    if isinstance(fact, Mapping):
+        return dict(fact)
+
+    to_dict = getattr(fact, "to_dict", None)
+    if callable(to_dict):
+        data = to_dict()
+        if isinstance(data, Mapping):
+            return dict(data)
+
+    raise HTTPException(
+        status_code=500,
+        detail=f"Unsupported fact payload type: {type(fact).__name__}",
+    )
 
 
 class StoreMemoryRequest(BaseModel):
@@ -132,20 +150,23 @@ async def list_memories(
 ) -> list[MemoryResponse]:
     """List memories for a project (paginated)."""
     facts = await engine.recall(project=project, tenant_id=auth.tenant_id, limit=limit)
-    return [
-        MemoryResponse(
-            id=f["id"],
-            project=f["project"],
-            content=f["content"],
-            type=f["fact_type"],
-            tags=f["tags"],
-            confidence=f.get("confidence", "C3"),
-            created_at=f["created_at"],
-            updated_at=f["updated_at"],
-            hash=f.get("hash"),
+    response: list[MemoryResponse] = []
+    for fact in facts:
+        fact_data = _fact_data(fact)
+        response.append(
+            MemoryResponse(
+                id=fact_data["id"],
+                project=fact_data["project"],
+                content=fact_data["content"],
+                type=fact_data["fact_type"],
+                tags=fact_data["tags"],
+                confidence=fact_data.get("confidence", "C3"),
+                created_at=fact_data["created_at"],
+                updated_at=fact_data["updated_at"],
+                hash=fact_data.get("hash"),
+            )
         )
-        for f in facts
-    ]
+    return response
 
 
 @router.post("/search", response_model=list[MemoryResponse])
@@ -162,20 +183,22 @@ async def search_memories(
         tenant_id=auth.tenant_id,
         as_of=req.as_of,
     )
-    return [
-        MemoryResponse(
-            id=r.fact_id,
-            project=r.project,
-            content=r.content,
-            type=r.fact_type,
-            tags=r.tags,
-            created_at=r.created_at,
-            updated_at=r.updated_at,
-            hash=r.hash,
-            score=r.score,
+    response: list[MemoryResponse] = []
+    for result in results:
+        response.append(
+            MemoryResponse(
+                id=result.fact_id,
+                project=result.project,
+                content=result.content,
+                type=result.fact_type,
+                tags=result.tags,
+                created_at=result.created_at,
+                updated_at=result.updated_at,
+                hash=result.hash,
+                score=result.score,
+            )
         )
-        for r in results
-    ]
+    return response
 
 
 @router.post("/batch", response_model=dict)
@@ -242,17 +265,18 @@ async def get_memory(
     fact = await engine.get_fact(memory_id, tenant_id=auth.tenant_id)
     if not fact:
         raise HTTPException(status_code=404, detail=f"Memory #{memory_id} not found")
+    fact_data = _fact_data(fact)
 
     return MemoryResponse(
-        id=fact["id"],
-        project=fact["project"],
-        content=fact["content"],
-        type=fact["fact_type"],
-        tags=fact["tags"],
-        confidence=fact.get("confidence", "C3"),
-        created_at=fact["created_at"],
-        updated_at=fact["updated_at"],
-        hash=fact.get("hash"),
+        id=fact_data["id"],
+        project=fact_data["project"],
+        content=fact_data["content"],
+        type=fact_data["fact_type"],
+        tags=fact_data["tags"],
+        confidence=fact_data.get("confidence", "C3"),
+        created_at=fact_data["created_at"],
+        updated_at=fact_data["updated_at"],
+        hash=fact_data.get("hash"),
     )
 
 
@@ -289,7 +313,7 @@ async def get_causal_chain(
             direction=direction,
             max_depth=max_depth,
         )
-        return chain
+        return [_fact_data(fact) for fact in chain]
     except (sqlite3.Error, OSError, RuntimeError):
         logger.exception("Causal chain query failed for #%d", memory_id)
         raise HTTPException(

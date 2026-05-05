@@ -1,7 +1,7 @@
 # ROADMAP
 
 > **Tamper-Evident Decision Lineage for AI Systems**
-> *Updated: Spring 2026 · Package metadata is defined in `pyproject.toml`.*
+> *Updated: Spring 2026 · Package metadata in tree: `v0.3.0b3`*
 > *Classification: Planning snapshot. This file tracks capability bands, not canonical release truth.*
 > *Release truth lives in `pyproject.toml`; historical release notes live in `docs/changelog.md`.*
 

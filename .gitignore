@@ -106,6 +106,7 @@ debug_*.py
 repro_*.py
 inspect_*.py
 verify_*.py
+!scripts/sortu/verify_sortu.py
 smoke_test_*.py
 fix_*.py
 analyze_*.py
@@ -113,6 +114,7 @@ run_*.py
 store_*.py
 check_*.py
 demo_*.py
+!examples/demo_canonical.py
 ingest_*.py
 extract_*.py
 rework_*.py

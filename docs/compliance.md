@@ -2,7 +2,7 @@
 
 **Document Version:** 2.0
 **Date:** February 24, 2026
-**System:** CORTEX Trust Engine v0.3.0b2 (Apache-2.0)
+**System:** CORTEX Trust Engine v0.3.0b3 (Apache-2.0)
 
 ---
 
@@ -22,10 +22,10 @@ This document maps CORTEX Trust Engine capabilities to the requirements of the *
 
 | Requirement | CORTEX Implementation | Evidence |
 |:---|:---|:---|
-| High-risk AI systems shall technically allow for the automatic recording of events (logs) | Every `store()` operation creates a transaction in the immutable ledger with SHA-256 hash linking | `cortex/ledger/ledger_core.py` — `ImmutableLedger` |
+| High-risk AI systems shall technically allow for the automatic recording of events (logs) | Every `store()` operation creates a transaction in the immutable ledger with SHA-256 hash linking | `cortex/engine/ledger.py` — `ImmutableLedger` |
 | Logs shall be generated throughout the lifetime of the system | Transaction ledger operates continuously; every fact insertion, update, or deletion is recorded | `transactions` table |
 
-**Verification:** `cortex compliance-report`, `cortex trust-ledger verify`
+**Verification:** `cortex audit-trail`
 
 ### Art. 12.2 — Content of Logs
 
@@ -33,7 +33,7 @@ This document maps CORTEX Trust Engine capabilities to the requirements of the *
 |:---|:---|:---|
 | Recording of the period of each use | `created_at` timestamp on every fact and transaction | `facts.created_at`, `transactions.timestamp` |
 | Reference database against which input data has been checked | Project-scoped fact database with full history | `facts.project` scoping |
-| Input data for which the search has led to a match | Search results include `fact_id`, `score`, and `content` | `POST /v1/facts/search` |
+| Input data for which the search has led to a match | Search results include `fact_id`, `score`, and `content` | `/v1/search` endpoint |
 
 ### Art. 12.2d — Agent Traceability
 
@@ -55,13 +55,13 @@ This document maps CORTEX Trust Engine capabilities to the requirements of the *
 **Verification:**
 
 - `cortex verify <fact_id>` — Single fact verification certificate
-- `cortex trust-ledger verify` — Full chain integrity check
+- `cortex ledger verify` — Full chain integrity check
 
 ### Art. 12.4 — Periodic Verification
 
 | Requirement | CORTEX Implementation | Evidence |
 |:---|:---|:---|
-| Providers shall implement means for periodic integrity verification | Merkle tree checkpoints created at configurable intervals | `ImmutableLedger.create_checkpoint_async()` |
+| Providers shall implement means for periodic integrity verification | Merkle tree checkpoints created at configurable intervals | `ImmutableLedger.create_checkpoint_sync()` |
 | Verification results shall be recorded | `integrity_checks` table stores every verification result | `integrity_checks` table |
 
 **Verification:** `cortex compliance-report`
@@ -89,19 +89,19 @@ The **Reputation-Weighted Consensus (RWC)** system allows multiple agents to ver
 
 ### Data Sovereignty (GDPR Art. 22)
 
-CORTEX's recommended core deployment path is **local-first** (SQLite). In that mode, data stays inside the deployment environment by default, which materially simplifies residency and sovereignty controls.
+CORTEX is **100% local-first** (SQLite). No data leaves the deployment environment. This inherently satisfies data residency and sovereignty requirements.
 
 For cloud deployments, multi-tenant isolation ensures data boundaries with cryptographic scoping.
 
 ### Privacy Shield
 
-The ingress guard detects and flags sensitive data before storage:
+The 11-pattern ingress guard detects and flags sensitive data before storage:
 
 - GitHub/GitLab tokens
 - JWT tokens
-- SSH and other private-key material
-- Slack/AWS and other cloud credentials
-- Generic API keys and similar secrets
+- SSH private keys
+- Slack/AWS credentials
+- Generic API keys
 
 Critical secrets force **local-only storage** regardless of configuration.
 

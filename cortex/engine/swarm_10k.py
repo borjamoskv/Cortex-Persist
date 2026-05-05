@@ -13,6 +13,7 @@ import time
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 from cortex.engine.exergy_optimizer import ExergyOptimizer
 from cortex.engine.shared_bus import SovereignSharedBus
@@ -106,7 +107,7 @@ class CenturionSuperv:
 class LegionSupervisor:
     """L1 Domain Node: Manages multiple Centurions within an isolated context."""
 
-    def __init__(self, legion_id: str, bus: ShardedAsyncSignalBus, tenant_id: str = "default"):
+    def __init__(self, legion_id: str, bus: Any, tenant_id: str = "default"):
         self.id = legion_id
         self.bus = bus
         self.tenant_id = tenant_id
@@ -173,7 +174,7 @@ class LegionSupervisor:
         cen = await self.ensure_centurion()
         agent_id = f"ag-{cen.id}-{len(cen.agents)}"
         await cen.deploy_agent(agent_id)
-        
+
         # Azkartu Optimization: Retire full centurion in O(1)
         if len(cen.agents) >= cen.CAPACITY:
             if self._available_centurions and self._available_centurions[0] == cen:
@@ -194,7 +195,7 @@ class ForensicLegion(LegionSupervisor):
     Forces zero-latency dispatch and bypasses standard exergy gates.
     """
 
-    def __init__(self, legion_id: str, bus: ShardedAsyncSignalBus, tenant_id: str = "default"):
+    def __init__(self, legion_id: str, bus: Any, tenant_id: str = "default"):
         super().__init__(legion_id, bus, tenant_id)
         self._overclocked = True  # High-agency forensic agents are always hot
 
@@ -358,18 +359,18 @@ class SwarmCommander:
             tenant_id=self.tenant_id,
             routing_key="global",
         )
-        if not self.use_shm:
+        if isinstance(self.bus, ShardedAsyncSignalBus):
             # Shannon compaction (only for persistent bus)
             await self.bus.gc(max_age_days=0, tenant_id=self.tenant_id)
 
         # Lifecycle cleanup
         if hasattr(self.bus, "close"):
-            if self.use_shm:
-                self.bus.close()
-            else:
+            if isinstance(self.bus, ShardedAsyncSignalBus):
                 await self.bus.close()
+            else:
+                self.bus.close()
 
-        if self.use_shm:
+        if isinstance(self.bus, SovereignSharedBus):
             self.bus.unlink()
 
         self.legions.clear()

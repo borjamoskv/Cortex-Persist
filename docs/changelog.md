@@ -2,6 +2,22 @@
 
 All notable changes to CORTEX, derived from the git history.
 
+Current package metadata in the tree is `v0.3.0b3`.
+Historical entries below reflect release notes captured at the time and may describe preview features
+that are not uniformly present in the current workspace snapshot.
+
+## v0.3.0b3 — Release Hardening (April 13, 2026)
+
+### Added
+
+- **Stripe Embedded Checkout**: Backend now returns `client_secret` from `/v1/stripe/checkout` using Stripe Embedded Checkout for a lower-friction monetization flow
+
+### Changed
+
+- **PyPI release hardening**: wheel/sdist are scoped to the public package, CI runs artifact preflight, and release verifies post-publish visibility on PyPI
+- Align package metadata references in docs with `pyproject.toml` / `cortex.__version__`
+- Clarify roadmap and public docs where capability maturity differs from older release notes
+
 ---
 
 ## v0.3.0b2 — Sovereign Cloud (February 24, 2026)

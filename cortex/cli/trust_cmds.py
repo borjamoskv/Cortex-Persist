@@ -1,6 +1,7 @@
 """CORTEX CLI — Trust & Compliance Commands."""
 
 import asyncio
+import time
 
 import click
 from rich.console import Console
@@ -115,7 +116,7 @@ def compliance_report(db: str) -> None:
 
         chain_ok, violations = _check_chain_integrity(conn)
 
-        now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
 
         console.print()
         console.print(

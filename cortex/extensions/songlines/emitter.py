@@ -9,7 +9,7 @@ import hashlib
 import json
 import logging
 import os
-from datetime import datetime, timezone
+import time
 from pathlib import Path
 from typing import Optional
 
@@ -43,7 +43,7 @@ class ResonanceEmitter:
             "id": ghost_id,
             "intent": intent,
             "project": project,
-            "created_at": datetime.now(timezone.utc).timestamp(),
+            "created_at": time.time(),
             "half_life": half_life_hours,
             "resonance": hv.tolist(),
         }

@@ -8,7 +8,7 @@
 > *哈希链日志、Merkle 完整性证明和可查询的决策溯源，
 > 面向监管和高风险 AI 工作流。*
 
-包：`cortex-persist v0.3.0b2` · 引擎：`v8` · 许可证：`Apache-2.0`
+包：`cortex-persist v0.3.0b3` · 引擎：`v8` · 许可证：`Apache-2.0`
 
 ![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
@@ -201,7 +201,7 @@ block-beta
   INTERFACES --> GATEWAY --> STORAGE --> TRUST
 ```
 
-> 完整架构详见 [ARCHITECTURE.md](docs/ARCHITECTURE.md)。
+> 完整架构详见 [ARCHITECTURE.md](docs/architecture.md)。
 
 ---
 

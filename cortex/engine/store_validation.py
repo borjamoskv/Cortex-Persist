@@ -1,4 +1,5 @@
 """Logic for store validation and thermodynamic enforcement."""
+
 from __future__ import annotations
 
 import logging
@@ -25,6 +26,7 @@ async def _check_byzantine_auth(
 def _enforce_thermodynamics(cls: Any, fact_type: str, skip_thermo: bool) -> None:
     """Enforce Axiom Ω₁₃ (Landauer Limit) for active vs decorative modes."""
     from cortex.guards.thermodynamic import AgentMode
+
     if (
         cls._agent_mode == AgentMode.DECORATIVE
         and fact_type not in ("error", "ghost")
@@ -45,14 +47,14 @@ async def _apply_semantic_dedup(
     manager = getattr(mixin_instance, "_memory_manager", None)
     if not (manager and getattr(manager, "_l2", None)):
         return None
-        
+
     try:
         similar = await manager._l2.recall(
             query=content, limit=1, project=project, tenant_id=tenant_id
         )
         if not similar:
             return None
-            
+
         top = similar[0]
         if getattr(top, "_recall_score", 0.0) > 0.92:
             cls = mixin_instance.__class__
@@ -64,9 +66,12 @@ async def _apply_semantic_dedup(
                 await mixin_instance.deprecate(fid, f"Thermal decay ({hits}x)", conn, tenant_id)
                 cls._thermal_decay_cache[fid] = 0
             else:
-                await conn.execute(
-                    "UPDATE facts SET last_accessed = CURRENT_TIMESTAMP WHERE id=?", (fid,)
-                )
+                try:
+                    await conn.execute(
+                        "UPDATE facts SET last_accessed = CURRENT_TIMESTAMP WHERE id=?", (fid,)
+                    )
+                except Exception as e:
+                    logger.debug("Skipping last_accessed update for fact %s: %s", fid, e)
             return fid
     except Exception as e:
         logger.debug("Semantic dedup skipped: %s", e)
@@ -98,20 +103,22 @@ async def run_store_validation_logic(
         raise RuntimeError(f"FAIL-CLOSED: dependencies unavailable: {exc}") from exc
 
     await _check_byzantine_auth(mixin_instance, meta, source, tenant_id)
-    
+
     cls = mixin_instance.__class__
     skip_thermo = os.getenv("CORTEX_SKIP_EXERGY_VALIDATION") == "1"
 
     _enforce_thermodynamics(cls, fact_type, skip_thermo)
 
     # Exergy calculation
-    _has_entropy = meta and ("_prior_entropy" in meta or "_posterior_entropy" in meta)
-    if not skip_thermo and _has_entropy:
+    _has_entropy = meta is not None and ("_prior_entropy" in meta or "_posterior_entropy" in meta)
+    if not skip_thermo and meta is not None and _has_entropy:
         ex_input = ExergyInput(
             prior_uncertainty=meta.get("_prior_entropy", 1.0),
             posterior_uncertainty=meta.get("_posterior_entropy", 0.5),
             tokens_consumed=meta.get("_tokens", 100),
-            action_risk=ActionRisk.MEMORY_WRITE if fact_type != "rule" else ActionRisk.SCHEMA_MUTATION,
+            action_risk=ActionRisk.MEMORY_WRITE
+            if fact_type != "rule"
+            else ActionRisk.SCHEMA_MUTATION,
             had_backup=True,
             touched_persistent_state=True,
             utility_delta=meta.get("_utility", 0.0),
@@ -120,7 +127,7 @@ async def run_store_validation_logic(
         ex_res = calculate_exergy(ex_input, threshold_min_work=0.01)
         enforce_exergy(ex_res)
         meta["_exergy_score"] = ex_res.exergy_score
-        
+
         if should_enter_decorative_mode(cls._thermo_counters)[0]:
             cls._agent_mode = AgentMode.DECORATIVE
             logger.error("🛑 [CRITICAL] Agent entering DECORATIVE mode (Ω₁₃).")
@@ -128,22 +135,31 @@ async def run_store_validation_logic(
         cls._agent_mode = AgentMode.ACTIVE
 
     StorageGuard.validate(
-        project=project, content=content, fact_type=fact_type, 
-        source=source, confidence=confidence, tags=tags, meta=meta
+        project=project,
+        content=content,
+        fact_type=fact_type,
+        source=source,
+        confidence=confidence,
+        tags=tags,
+        meta=meta,
     )
     from cortex.engine.store_validators import check_dedup, validate_content
+
     content = validate_content(project, content, fact_type)
 
     if not (meta and meta.get("previous_fact_id")):
         if (eid := await check_dedup(conn, tenant_id, project, content)) is not None:
             return eid, meta, content, fact_type
-        if (fid := await _apply_semantic_dedup(mixin_instance, conn, project, content, tenant_id)):
+        if fid := await _apply_semantic_dedup(mixin_instance, conn, project, content, tenant_id):
             return fid, meta, content, fact_type
 
     meta = mixin_instance._apply_privacy_shield(content, project, meta)
     raw_engram = {
-        "type": fact_type, "source": source or "engine:store", 
-        "topic": project, "content": content, "metadata": meta or {}
+        "type": fact_type,
+        "source": source or "engine:store",
+        "topic": project,
+        "content": content,
+        "metadata": meta or {},
     }
     pure, membrane_log = SovereignSanitizer.digest(raw_engram)
     content, meta = pure.content, pure.metadata
@@ -153,6 +169,7 @@ async def run_store_validation_logic(
         meta["_membrane_log"] = membrane_log.dict()
 
     from cortex.engine.fact_store_core import resolve_causality_async
+
     meta = await resolve_causality_async(conn, project, meta)
 
     nemesis_rejection = None
@@ -171,9 +188,13 @@ async def run_store_validation_logic(
                 meta = {**(meta or {}), **bridge_result["meta_flags"]}
 
     await enforce_store_guards(
-        content=content, project=project, tenant_id=tenant_id, 
-        fact_type=fact_type, meta=meta, nemesis_rejection=nemesis_rejection, 
-        bridge_result=bridge_result
+        content=content,
+        project=project,
+        tenant_id=tenant_id,
+        fact_type=fact_type,
+        meta=meta or {},
+        nemesis_rejection=nemesis_rejection,
+        bridge_result=bridge_result,
     )
 
     return None, meta, content, fact_type

@@ -105,7 +105,7 @@ async def _collect_all(engine) -> dict:
 
 def _build_header() -> Panel:
     """Build the header panel with logo and timestamp."""
-    now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+    now = datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
     header = Text()
     header.append("⚡ CORTEX PERSIST", style=f"bold {_CYBER}")
     header.append("  ·  ", style=_DIM)
@@ -362,7 +362,7 @@ def dashboard(db: str, interval: float, once: bool) -> None:
                 while True:
                     data = _run_async(_collect_all(engine))
                     live.update(_build_dashboard(data))
-                    time.sleep(interval)
+                    time.sleep(interval)  # noqa: TID251
             except KeyboardInterrupt:
                 pass
 

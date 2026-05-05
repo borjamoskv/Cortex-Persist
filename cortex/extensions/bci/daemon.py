@@ -30,7 +30,7 @@ class BCI_Daemon:
         self.server = None
 
     async def _handle_client(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
-        __ = writer.get_extra_info("peername")
+        writer.get_extra_info("peername")
         try:
             # 1. Read header length (4 bytes)
             header_bytes = await reader.readexactly(4)

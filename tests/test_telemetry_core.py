@@ -132,7 +132,7 @@ class TestSpanContext:
 
     def test_duration_is_positive(self):
         with SpanContext("timed"):
-            time.sleep(0.01)
+            time.sleep(0.01)  # noqa: TID251
         span = collector.spans[0]
         assert span.duration_ms >= 10.0
 

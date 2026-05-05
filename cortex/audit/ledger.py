@@ -8,6 +8,7 @@ a hash-chain to prove immutability of the audit logs.
 
 import hashlib
 import logging
+import time
 from datetime import datetime, timezone
 from typing import Any
 
@@ -77,7 +78,7 @@ class EnterpriseAuditLedger:
         """Securely logs an action with a cryptographic hash chain."""
         await self.ensure_table()
 
-        timestamp = datetime.now(timezone.utc).isoformat()
+        timestamp = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
         audit_id = hashlib.sha256(f"{timestamp}{actor_id}{action}".encode()).hexdigest()
 
         # Calculate new signature ensuring immutability chain

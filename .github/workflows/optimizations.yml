@@ -9,12 +9,45 @@ on:
 permissions:
   contents: read
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 jobs:
   benchmarks:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+      - name: Determine scope
+        id: scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch --no-tags --prune origin "${{ github.base_ref }}"
+            git diff --name-only --diff-filter=ACMR "origin/${{ github.base_ref }}...HEAD" | sort -u > .changed_files
+          elif [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+            git diff --name-only --diff-filter=ACMR "${{ github.event.before }}" HEAD | sort -u > .changed_files
+          else
+            git ls-files | sort -u > .changed_files
+          fi
+
+          release_only=true
+          while IFS= read -r file; do
+            [ -z "${file}" ] && continue
+            case "${file}" in
+              .github/workflows/*|.github/mlc_config.json|README.md|README.es.md|README.zh.md|CONTRIBUTING.md|RELEASE_PROCESS.md|CHANGELOG.md|VERSION_SUPPORT.md|docs/*|ouroboros-matrix/README.md|Dockerfile|pyproject.toml|uv.lock|MANIFEST.in|cortex/__init__.py|cortex/cli/prompt_cmds.py|scripts/release_preflight.py|scripts/repo_health_changed.py)
+                ;;
+              *)
+                release_only=false
+                break
+                ;;
+            esac
+          done < .changed_files
+
+          echo "release_only=${release_only}" >> "${GITHUB_OUTPUT}"
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: "3.13"
           cache: "pip"
@@ -34,7 +67,13 @@ jobs:
           key: ${{ runner.os }}-ruff-${{ hashFiles('**/.ruff_cache') }}
 
       - name: Install dependencies
+        if: steps.scope.outputs.release_only != 'true'
         run: pip install -e ".[dev]"
 
+      - name: Release-only smoke
+        if: steps.scope.outputs.release_only == 'true'
+        run: python scripts/repo_health_changed.py
+
       - name: Run quick benchmarks
+        if: steps.scope.outputs.release_only != 'true'
         run: python benchmarks/bench_repo.py --quick

@@ -1,12 +1,13 @@
 import functools
-import sqlite3
-import os
-import json
-import time
 import hashlib
-import sys
+import json
 import logging
+import os
+import sys
+import time
+
 from cortex.config import DB_PATH
+from cortex.database.core import connect
 from cortex.extensions.signals.bus import SignalBus
 
 # Sovereign Memory & Execution Imports
@@ -39,12 +40,11 @@ def _get_compacted_skill(skill_name: str) -> str:
     if not os.path.exists(skill_path):
         return f"Error: Skill '{skill_name}' not found at {skill_path}."
 
-    with open(skill_path, "r", encoding="utf-8") as f:
+    with open(skill_path, encoding="utf-8") as f:
         content = f.read()
 
     lines = [
-        line for line in content.split("\n")
-        if line.strip() and not line.strip().startswith("<!--")
+        line for line in content.split("\n") if line.strip() and not line.strip().startswith("<!--")
     ]
     return "\n".join(lines)
 
@@ -97,15 +97,12 @@ def register_singularity_tools(mcp) -> None:
             collection = client.get_collection("cortex_knowledge_base")
             res = collection.query(query_texts=[query], n_results=top_k)
 
-            ids = res['ids'][0] if res['ids'] else []
-            docs = res['documents'][0] if res['documents'] else []
-            dists = res['distances'][0] if 'distances' in res else []
+            ids = res["ids"][0] if res["ids"] else []
+            docs = res["documents"][0] if res["documents"] else []
+            dists = res["distances"][0] if "distances" in res else []
 
             if not ids:
-                return (
-                    f"CORTEX-MCP: No memories (KIs) found matching "
-                    f"query '{query}'"
-                )
+                return f"CORTEX-MCP: No memories (KIs) found matching query '{query}'"
 
             out = [f"Found {len(ids)} relevant Tensor matches on CORTEX:"]
             for i, doc_id in enumerate(ids):
@@ -120,9 +117,7 @@ def register_singularity_tools(mcp) -> None:
             return f"CORTEX-MCP ChromaDB Engine Error: {str(e)}"
 
     @mcp.tool()
-    def cortex_ledger_append(
-        action: str, vector_id: str, yield_amount: float
-    ) -> str:
+    def cortex_ledger_append(action: str, vector_id: str, yield_amount: float) -> str:
         """
         Cryptographic write to the CORTEX-Persist ledger. Secures Exergy via
         SHA-256 Merkle chain.
@@ -135,7 +130,7 @@ def register_singularity_tools(mcp) -> None:
         global _LEDGER_STATE
         if _LEDGER_STATE is None:
             if os.path.exists(STATE_FILE):
-                with open(STATE_FILE, "r") as f:
+                with open(STATE_FILE) as f:
                     try:
                         _LEDGER_STATE = json.load(f)
                     except json.JSONDecodeError:
@@ -153,13 +148,15 @@ def register_singularity_tools(mcp) -> None:
         payload = f"{prev_hash}_{action}_{vector_id}_{yield_amount}_{timestamp}"
         block_hash = hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
-        _LEDGER_STATE["ledgers"].append({
-            "timestamp": timestamp,
-            "action": action,
-            "vector_id": vector_id,
-            "yield_amount": yield_amount,
-            "hash": block_hash
-        })
+        _LEDGER_STATE["ledgers"].append(
+            {
+                "timestamp": timestamp,
+                "action": action,
+                "vector_id": vector_id,
+                "yield_amount": yield_amount,
+                "hash": block_hash,
+            }
+        )
 
         # Still sync to disk for persistence, but O(1) read after cold load
         with open(STATE_FILE, "w") as f:
@@ -167,14 +164,18 @@ def register_singularity_tools(mcp) -> None:
 
         # Signal Pulse (Aether Matrix)
         try:
-            conn = sqlite3.connect(DB_PATH)
+            conn = connect(DB_PATH)
             bus = SignalBus(conn)
-            bus.emit("ledger_append", payload={
-                "hash": block_hash,
-                "action": action,
-                "vector_id": vector_id,
-                "yield_amount": yield_amount
-            }, source="mcp")
+            bus.emit(
+                "ledger_append",
+                payload={
+                    "hash": block_hash,
+                    "action": action,
+                    "vector_id": vector_id,
+                    "yield_amount": yield_amount,
+                },
+                source="mcp",
+            )
             conn.close()
             logging.info("⚡ [PULSE] Ledger chunk emitted to Aether Matrix.")
         except Exception as e:
@@ -191,17 +192,17 @@ def register_singularity_tools(mcp) -> None:
         try:
             queue = {"pending_tasks": []}
             if os.path.exists(SWARM_QUEUE_FILE):
-                with open(SWARM_QUEUE_FILE, "r") as f:
+                with open(SWARM_QUEUE_FILE) as f:
                     queue = json.load(f)
-            
+
             task = {
                 "id": f"task_{int(time.time())}",
                 "agent": agent_id,
                 "command": command,
-                "timestamp": time.time()
+                "timestamp": time.time(),
             }
             queue["pending_tasks"].append(task)
-            
+
             with open(SWARM_QUEUE_FILE, "w") as f:
                 json.dump(queue, f, indent=2)
 
@@ -219,13 +220,13 @@ def register_singularity_tools(mcp) -> None:
         targets = [
             {"repo": "https://github.com/LayerZero-Labs/LayerZero", "exergy_ratio": 0.94},
             {"repo": "https://github.com/Uniswap/v4-core", "exergy_ratio": 0.88},
-            {"repo": "https://github.com/lido-dao/lido-dao", "exergy_ratio": 0.76}
+            {"repo": "https://github.com/lido-dao/lido-dao", "exergy_ratio": 0.76},
         ]
-        
+
         output = "### SAGE COUNCIL — Mission Deliberation\n"
         for t in targets:
-             output += f"- **Target**: [{t['repo']}] | Exergy Ratio: {t['exergy_ratio']}\n"
-        
+            output += f"- **Target**: [{t['repo']}] | Exergy Ratio: {t['exergy_ratio']}\n"
+
         output += "\n**Verdict**: Dispatch Ouroboros-1 to LayerZero for C5-REAL fuzzing."
         return output
 
@@ -242,5 +243,10 @@ def register_singularity_tools(mcp) -> None:
         except Exception as e:
             return f"[ERROR] Audit Dispatch Failure: {str(e)}"
 
+
 if __name__ == "__main__":
-    mcp.run()
+    from mcp.server.fastmcp import FastMCP as _FastMCP
+
+    _mcp = _FastMCP("cortex-singularity")
+    register_singularity_tools(_mcp)
+    _mcp.run()

@@ -1,8 +1,8 @@
 import asyncio
 import datetime
+import time
 import uuid
 
-from cortex.extensions.aether.sovereign_apis import SovereignTriad
 from cortex.extensions.episodic.base import Episode
 from cortex.extensions.training.collector import TrajectoryCollector
 from cortex.extensions.training.reward_engine import RewardEngine
@@ -13,7 +13,7 @@ class MockEpisodicMemory:
 
     async def get_session_timeline(self, session_id: str) -> list[Episode]:
         # Simulamos una trayectoria simple de éxito.
-        now = datetime.datetime.now(datetime.timezone.utc).isoformat()
+        now = datetime.datetime.fromtimestamp(time.time(), tz=datetime.timezone.utc).isoformat()
 
         def ep(evt, content, intent="", meta=None):
             return Episode(
@@ -56,7 +56,6 @@ async def run_triad_rlhf_sandbox():
     print("[SOVEREIGN SANDBOX] Iniciando Pruebas RLHF con Braintrust...")
 
     mock_memory = MockEpisodicMemory()
-    _triad = SovereignTriad()
 
     # Force mock API KEY if not present for log tracking attempt without hard failing.
     # _triad.braintrust_key = "fake_key_para_evitar_warnings"

@@ -146,15 +146,20 @@ def create_aether_server(
         limit = min(abs(max_lines), 50000)
 
         def _read() -> str:
+            content_lines = []
+            total_lines = 0
             with open(path, encoding="utf-8") as f:
-                lines = f.readlines()
-            if len(lines) > limit:
-                content = "".join(lines[:limit])
+                for line in f:
+                    if total_lines < limit:
+                        content_lines.append(line)
+                    total_lines += 1
+            if total_lines > limit:
+                content = "".join(content_lines)
                 return (
                     f"⚠️ Output truncated to first {limit} lines "
-                    f"(total length was {len(lines)} lines).\n\n{content}"
+                    f"(total length was {total_lines} lines).\n\n{content}"
                 )
-            return "".join(lines)
+            return "".join(content_lines)
 
         try:
             return await asyncio.to_thread(_read)

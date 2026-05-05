@@ -136,6 +136,8 @@ asyncio.run(main())
 
 ## JavaScript / TypeScript SDK
 
+> ⏳ **Roadmap — Not yet published.** The JS/TS SDK is in early development. `npm install @cortex-persist/sdk` is not yet available on npm. Check [ROADMAP.md](../ROADMAP.md) for the planned release timeline.
+
 > **Status:** Early development. Available at `sdks/js/`.
 
 This SDK is not the canonical first path for adoption. Use it when you specifically want a remote
@@ -178,8 +180,8 @@ const allFacts = await cortex.recall('my-app');
 ### Planned: npm Package
 
 ```bash
-# Coming Q2 2026
-npm install @cortex-persist/sdk
+# ⏳ Coming Soon — not yet published on npm
+# npm install @cortex-persist/sdk
 ```
 
 ---

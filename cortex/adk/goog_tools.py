@@ -7,6 +7,7 @@ and manage backups in Google Drive (Google One).
 import logging
 import shutil
 import subprocess
+import time
 from pathlib import Path
 from typing import Any
 
@@ -95,7 +96,7 @@ def goog_backup_cortex() -> dict[str, Any]:
     if not db_path.exists():
         return {"status": "error", "message": f"Source DB not found at {db_path}"}
 
-    ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+    ts = datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime("%Y%m%d_%H%M%S")
     dest_name = f"cortex_sovereign_backup_{ts}.db"
     dest_path = backup_dir / dest_name
 

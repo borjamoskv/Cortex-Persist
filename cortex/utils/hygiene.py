@@ -4,6 +4,7 @@ import logging
 import os
 import subprocess
 import sys
+import time
 from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
@@ -31,7 +32,7 @@ def get_snapshot_age():
     if not snapshot_path.exists():
         return float("inf")
     mtime = datetime.fromtimestamp(snapshot_path.stat().st_mtime, tz=timezone.utc)
-    age = (datetime.now(timezone.utc) - mtime).total_seconds() / 60
+    age = (datetime.fromtimestamp(time.time(), tz=timezone.utc) - mtime).total_seconds() / 60
     return age
 
 

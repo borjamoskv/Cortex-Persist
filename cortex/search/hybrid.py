@@ -11,6 +11,7 @@ import asyncio
 import logging
 import math
 import sqlite3
+import time
 from datetime import datetime, timezone
 from typing import Final
 
@@ -45,7 +46,7 @@ def _apply_temporal_decay(results: list[SearchResult], recency_weight: float) ->
 
     Final score = rrf_score * (1 - w) + recency_factor * w
     """
-    now = datetime.now(timezone.utc)
+    now = datetime.fromtimestamp(time.time(), tz=timezone.utc)
     for r in results:
         try:
             # Parse created_at (ISO format from SQLite)

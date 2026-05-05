@@ -27,6 +27,7 @@ CORTEX_TAINT_SIGNATURE = "source_firecrawl_unverified"
 @dataclass(frozen=True)
 class SanitizedPayload:
     """Immutable data object for crossing the Byzantine Boundary."""
+
     content: str
     metadata: dict[str, str]
     taint: str = CORTEX_TAINT_SIGNATURE
@@ -51,7 +52,7 @@ class ScrapeSanitizerGuard:
 
         Returns:
             SanitizedPayload containing clean text and taint metadata.
-            
+
         Raises:
             ValueError: If input is utterly malformed or missing.
         """
@@ -64,7 +65,9 @@ class ScrapeSanitizerGuard:
         if len(raw_content) > MAX_RAW_PAGE_SIZE:
             logger.warning(
                 "Sovereign ScrapeGuard: Thermodynamic constraint exceeded. "
-                "Truncating payload from %d chars to %d.", len(raw_content), MAX_RAW_PAGE_SIZE
+                "Truncating payload from %d chars to %d.",
+                len(raw_content),
+                MAX_RAW_PAGE_SIZE,
             )
             raw_content = raw_content[:MAX_RAW_PAGE_SIZE]
 
@@ -81,7 +84,4 @@ class ScrapeSanitizerGuard:
             "agent_trust": "0.0",  # Always zero trust for raw scrapes
         }
 
-        return SanitizedPayload(
-            content=clean.strip(),
-            metadata=metadata
-        )
+        return SanitizedPayload(content=clean.strip(), metadata=metadata)

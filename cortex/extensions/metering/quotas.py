@@ -7,11 +7,13 @@ Integrates with UsageTracker to check consumption against plan limits.
 from __future__ import annotations
 
 import logging
+import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from cortex.extensions.metering.tracker import UsageTracker
+if TYPE_CHECKING:
+    from cortex.extensions.metering.tracker import UsageTracker
 
 __all__ = ["PLAN_QUOTAS", "QuotaCheckResult", "QuotaEnforcer"]
 
@@ -150,7 +152,7 @@ class QuotaEnforcer:
     @staticmethod
     def _next_reset() -> str:
         """Calculate the next monthly reset timestamp (1st of next month, 00:00 UTC)."""
-        now = datetime.now(timezone.utc)
+        now = datetime.fromtimestamp(time.time(), tz=timezone.utc)
         if now.month == 12:
             reset = now.replace(year=now.year + 1, month=1, day=1, hour=0, minute=0, second=0)
         else:

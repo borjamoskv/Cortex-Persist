@@ -28,28 +28,17 @@ CORTEX es una **capa de confianza (drop-in trust layer)** para la memoria de IA.
 pip install cortex-persist
 cortex init
 
-# 2. Guardar un hecho
-cortex store mi-proyecto "Redis usa skip lists para sorted sets" --tags "redis,data-structures"
+# 2. Almacenar una memoria (con hash SHA-256 y encadenada)
+cortex memory store --agent "risk-bot" --content "Transacción marcada: Discordancia de IP"
 
-# 3. Guardar una decisión
-cortex store mi-proyecto "Elegimos FastAPI sobre Flask por soporte async" --type decision
-
-# 4. Buscar y recordar
-cortex search "framework web async" --project mi-proyecto
-cortex recall mi-proyecto
-
-# 5. Verificar integridad
-cortex verify 1
-cortex trust-ledger verify
-
-# 6. Generar un snapshot de compliance
-cortex compliance-report
+# 3. Verificar integridad (detecta manipulación manual de la base de datos)
+cortex verify ledger
 ```
 
 **¿Qué acaba de pasar?**
--   **Persistencia verificable**: Los hechos y decisiones se guardaron con recibos auditables.
--   **Encadenamiento de hash**: Las escrituras quedaron enlazadas en el ledger criptográfico.
--   **Verificación explícita**: Puedes validar un hecho concreto o toda la cadena cuando necesites evidencia.
+-   **Libro de Contabilidad Inmutable**: El hecho se almacenó en un registro criptográfico de solo adición.
+-   **Encadenamiento de Hash**: El registro fue encadenado mediante SHA-256 al bloque anterior.
+-   **Sello Merkle**: Todo el estado fue sellado con una prueba de linaje verificable.
 
 ---
 
@@ -62,22 +51,14 @@ from cortex import CortexEngine
 async def main():
     engine = CortexEngine()
 
-    fact_id = await engine.store(
-        project="demo-agent",
-        content="Usuario aprobó una transacción de $5,000",
+    # Almacenar con recibo criptográfico
+    receipt = await engine.store_fact(
+        content="Usuario aprobó transacción de $5,000",
         fact_type="decision"
     )
 
-    results = await engine.search(
-        "aprobación de transacción",
-        top_k=3,
-        project="demo-agent",
-    )
-    ledger = await engine.verify_ledger()
-
-    assert fact_id
-    assert results
-    assert ledger.get("valid") is True
+    # Verificar prueba de integridad
+    assert await engine.verify(receipt.hash) == True
 
 asyncio.run(main())
 ```
@@ -99,12 +80,9 @@ asyncio.run(main())
 
 ### Documentación
 
-- [**Superficie pública del producto**](docs/product-surface.md) — Límite recomendado entre producto y tooling amplio del repo.
-- [**Inicio rápido**](docs/quickstart.md) — Ruta guiada de adopción.
-- [**Referencia CLI**](docs/cli.md) — Comandos públicos recomendados.
-- [**Referencia API REST**](docs/api.md) — Superficie HTTP core y capas experimentales.
+- [**Arquitectura**](docs/architecture.md) — Sellos Merkle y encadenamiento de hash.
 - [**Seguridad y Confianza**](docs/SECURITY_TRUST_MODEL.md) — Invariantes criptográficas.
-- [**Arquitectura**](docs/architecture.md) — Vista amplia del sistema y del repo.
+- [**Referencia de API**](docs/api.md) — Documentación completa de SDK y CLI.
 
 ---
 

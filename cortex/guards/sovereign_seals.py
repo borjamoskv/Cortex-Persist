@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import os
 import re
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -207,6 +208,41 @@ _IMPORT_TO_PKG = {
     "sqlite_vec": "sqlite-vec",
     "z3": "z3-solver",
 }
+
+
+def _resolve_git_hook_path(hook_name: str) -> Path:
+    """Resolve a git hook path in a worktree-safe way.
+
+    `git rev-parse --git-path` resolves against the repository's actual gitdir,
+    which is the common hook location for linked worktrees. If git is not
+    available or the lookup fails, fall back to the historical worktree-root
+    path so non-worktree behavior remains unchanged.
+    """
+    fallback = ROOT_DIR / ".git" / "hooks" / hook_name
+    git_executable = shutil.which("git")
+    if git_executable is None:
+        return fallback
+    try:
+        result = subprocess.run(  # noqa: S603
+            [git_executable, "-C", str(ROOT_DIR), "rev-parse", "--git-path", f"hooks/{hook_name}"],  # noqa: S603
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+    except (subprocess.TimeoutExpired, FileNotFoundError):
+        return fallback
+
+    if result.returncode != 0:
+        return fallback
+
+    resolved = result.stdout.strip()
+    if not resolved:
+        return fallback
+
+    hook_path = Path(resolved)
+    if not hook_path.is_absolute():
+        hook_path = (ROOT_DIR / hook_path).resolve()
+    return hook_path
 
 
 def _parse_pyproject_deps() -> set[str]:
@@ -412,7 +448,7 @@ async def check_gate_21_preservation(
 
     # 1. Pre-push hook — skip in CI (hook is a local dev-machine invariant)
     _in_ci = os.environ.get("CI", "").lower() in ("true", "1", "yes")
-    hook = ROOT_DIR / ".git" / "hooks" / "pre-push"
+    hook = _resolve_git_hook_path("pre-push")
     if _in_ci:
         printer.warn("CI env detected — pre-push hook check skipped (local invariant).")
         checks.append("pre-push hook (CI skip)")
@@ -440,22 +476,27 @@ async def check_gate_21_preservation(
         passed = False
 
     # 3. HEAD has parent (not orphan)
-    try:
-        result = subprocess.run(
-            ["git", "rev-parse", "HEAD~1"],
-            cwd=str(ROOT_DIR),
-            capture_output=True,
-            text=True,
-            timeout=5,
-        )
-        if result.returncode == 0:
-            checks.append("HEAD lineage ✓")
-        else:
-            printer.warn("HEAD has no parent (initial or orphan commit).")
-            checks.append("HEAD lineage (orphan)")
-    except (subprocess.TimeoutExpired, FileNotFoundError):
+    git_executable = shutil.which("git")
+    if git_executable is None:
         printer.warn("git not available for lineage check.")
         checks.append("HEAD lineage (unchecked)")
+    else:
+        try:
+            result = subprocess.run(  # noqa: S603
+                [git_executable, "rev-parse", "HEAD~1"],  # noqa: S603
+                cwd=str(ROOT_DIR),
+                capture_output=True,
+                text=True,
+                timeout=5,
+            )
+            if result.returncode == 0:
+                checks.append("HEAD lineage ✓")
+            else:
+                printer.warn("HEAD has no parent (initial or orphan commit).")
+                checks.append("HEAD lineage (orphan)")
+        except subprocess.TimeoutExpired:
+            printer.warn("git not available for lineage check.")
+            checks.append("HEAD lineage (unchecked)")
 
     if passed:
         printer.success(f"Self-Preservation intact ({', '.join(checks)}).")

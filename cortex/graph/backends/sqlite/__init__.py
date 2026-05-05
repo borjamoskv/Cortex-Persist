@@ -4,10 +4,10 @@ import logging
 
 import aiosqlite
 
-from ..base import GraphBackend
-from .algorithms import SQLiteAlgorithmsMixin
-from .query import SQLiteQueryMixin
-from .store import SQLiteStoreMixin
+from cortex.graph.backends.base import GraphBackend
+from cortex.graph.backends.sqlite.algorithms import SQLiteAlgorithmsMixin
+from cortex.graph.backends.sqlite.query import SQLiteQueryMixin
+from cortex.graph.backends.sqlite.store import SQLiteStoreMixin
 
 logger = logging.getLogger("cortex.graph.backends")
 

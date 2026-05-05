@@ -7,7 +7,6 @@ import sqlite3
 from typing import TYPE_CHECKING, Any
 
 from cortex.engine.mixins.base import EngineMixinBase
-from cortex.search import hybrid_search, text_search
 
 if TYPE_CHECKING:
     from cortex.search.causal_gap import CausalGap
@@ -35,6 +34,8 @@ class SearchMixin(EngineMixinBase):
         **kwargs,
     ) -> list[Any]:
         """Perform hybrid search (Vector + Text) with optional Graph-RAG context."""
+        from cortex.search import hybrid_search, text_search
+
         tenant_id = self._resolve_tenant(tenant_id)
 
         async with self.session() as conn:

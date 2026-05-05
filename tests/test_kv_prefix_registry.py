@@ -52,4 +52,3 @@ def test_exergy_tracking():
 
     report = registry.exergy_report()
     assert report["total_slots"] == 1
-

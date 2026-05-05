@@ -13,6 +13,7 @@ Commands:
 
 from __future__ import annotations
 
+import shutil
 import subprocess
 from pathlib import Path
 from typing import Optional
@@ -107,14 +108,21 @@ def _count_secret_patterns() -> int:
 
 
 def _git_tag() -> str:
-    """Return the latest git tag or 'v0.3.0-beta'."""
+    """Return the latest git tag or 'v0.3.0b5'."""
+    git_executable = shutil.which("git")
+    if not git_executable:
+        return "v0.3.0b5"
+
     try:
-        result = subprocess.run(
-            ["git", "describe", "--tags", "--abbrev=0"], capture_output=True, text=True, timeout=3
+        result = subprocess.run(  # noqa: S603 - fixed local command resolved via shutil.which
+            [git_executable, "describe", "--tags", "--abbrev=0"],
+            capture_output=True,
+            text=True,
+            timeout=3,
         )
-        return result.stdout.strip() or "v0.3.0-beta"
+        return result.stdout.strip() or "v0.3.0b5"
     except (subprocess.SubprocessError, FileNotFoundError, OSError):
-        return "v0.3.0-beta"
+        return "v0.3.0b5"
 
 
 def _generate_live_prompt(project_root: Path) -> str:
@@ -265,8 +273,16 @@ def prompt_copy(variant: str) -> None:
     }[variant]
     token_estimate = len(text.split()) * 4 // 3
 
+    pbcopy_executable = shutil.which("pbcopy")
+    if not pbcopy_executable:
+        console.print("[yellow]⚠ pbcopy not available. Printing prompt instead:[/]")
+        console.print(text)
+        return
+
     try:
-        sp.run(["pbcopy"], input=text.encode(), check=True, timeout=5)
+        sp.run(  # noqa: S603 - fixed local clipboard helper resolved via shutil.which
+            [pbcopy_executable], input=text.encode(), check=True, timeout=5
+        )
         console.print(
             Panel(
                 f"[bold green]✓ Copied to clipboard![/] ({variant}, ~{token_estimate} tokens)\n"

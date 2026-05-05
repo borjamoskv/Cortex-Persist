@@ -286,7 +286,7 @@ class SecurityFraudMiddleware(BaseHTTPMiddleware):
 
         try:
             async with pool.acquire() as conn:
-                now = datetime.now(timezone.utc).isoformat()
+                now = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
                 sql = "SELECT 1 FROM threat_intel WHERE ip_address = ? AND (expires_at IS NULL OR expires_at > ?)"
                 async with conn.execute(sql, (client_ip, now)) as cursor:
                     return bool(await cursor.fetchone())
@@ -303,7 +303,7 @@ class SecurityFraudMiddleware(BaseHTTPMiddleware):
         )
 
         event = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
             "ip_address": client_ip,
             "status_code": response.status_code,
             "payload": signature,

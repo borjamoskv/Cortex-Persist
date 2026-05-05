@@ -7,6 +7,9 @@ Broader operator/runtime routes are gated behind `CORTEX_ENABLE_EXPERIMENTAL_API
 
 Interactive docs are available at `/docs` when the app is not running in production mode.
 
+This page tracks the HTTP routes registered in the current tree. Some subsystems remain
+feature-gated or depend on optional extras, and maturity still varies by router.
+
 ---
 
 ## Run Locally

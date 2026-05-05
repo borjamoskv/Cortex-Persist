@@ -14,7 +14,7 @@ try:
 except ImportError:
     pass
 
-__version__ = "0.3.0b2"
+__version__ = "0.3.0b7"
 __author__ = "by borjamoskv.com"
 
 # Lazy imports — CortexEngine and experimental modules load on first access

@@ -17,7 +17,7 @@ Coverage:
 from __future__ import annotations
 
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 from unittest.mock import AsyncMock
 
@@ -51,7 +51,7 @@ def _fake_signal(
         payload=payload or {},
         source=source,
         project=project,
-        created_at=datetime.now(),
+        created_at=datetime.fromtimestamp(time.time(), tz=timezone.utc),
         consumed_by=[],
     )
 
@@ -274,7 +274,7 @@ class TestAccumulator:
         )
         await engine.evaluate(_fake_signal())
         await engine.evaluate(_fake_signal())
-        time.sleep(0.15)
+        time.sleep(0.15)  # noqa: TID251
         results = await engine.evaluate(_fake_signal())
         # Only 1 in window, threshold=3 not met
         assert not any(r.fired for r in results)
@@ -309,7 +309,7 @@ class TestCooldown:
             )
         )
         await engine.evaluate(_fake_signal())
-        time.sleep(0.15)
+        time.sleep(0.15)  # noqa: TID251
         results = await engine.evaluate(_fake_signal())
         assert any(r.fired for r in results)
 

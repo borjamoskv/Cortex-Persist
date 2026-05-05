@@ -1,19 +1,26 @@
-"""CORTEX v6.0 — Signal Bus (L1 Consciousness Layer).
+from __future__ import annotations
 
-Persistent, queryable, SQLite-backed signaling system that transforms
-isolated tools into a reactive nervous system. Any tool can emit()
-signals and any other can poll() for unconsumed signals — surviving
-process boundaries.
+import importlib
+from typing import TYPE_CHECKING
 
-Usage:
-    from cortex.extensions.signals import SignalBus
-
-    bus = SignalBus(conn)
-    bus.emit("plan:done", {"project": "cortex", "files": [...]}, source="arkitetv-1")
-    signals = bus.poll(event_type="plan:done", consumer="legion-1")
-"""
-
-from cortex.extensions.signals.bus import SignalBus
-from cortex.extensions.signals.models import Signal, SignalFilter
+if TYPE_CHECKING:
+    from cortex.extensions.signals.bus import SignalBus
+    from cortex.extensions.signals.models import Signal, SignalFilter
 
 __all__ = ["Signal", "SignalBus", "SignalFilter"]
+
+_LAZY_IMPORTS: dict[str, tuple[str, str]] = {
+    "Signal": ("cortex.extensions.signals.models", "Signal"),
+    "SignalBus": ("cortex.extensions.signals.bus", "SignalBus"),
+    "SignalFilter": ("cortex.extensions.signals.models", "SignalFilter"),
+}
+
+
+def __getattr__(name: str):
+    if name in _LAZY_IMPORTS:
+        module_path, attr_name = _LAZY_IMPORTS[name]
+        module = importlib.import_module(module_path)
+        value = getattr(module, attr_name)
+        globals()[name] = value
+        return value
+    raise AttributeError(f"module 'cortex.extensions.signals' has no attribute {name!r}")

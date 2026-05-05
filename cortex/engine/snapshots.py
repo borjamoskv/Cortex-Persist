@@ -4,6 +4,7 @@ import logging
 import re
 import shutil
 import sqlite3
+import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -105,7 +106,7 @@ class SnapshotManager:
         # Sanitize name to prevent path traversal or malicious filenames
         # Allow only alphanumeric, underscores, and dashes
         safe_name = re.sub(r"[^a-zA-Z0-9_\-]", "_", name)
-        ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+        ts = datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime("%Y%m%d_%H%M%S")
         filename = f"cortex_snap_{ts}_{safe_name}.db"
         dest_path = self.snapshot_dir / filename
 
@@ -130,7 +131,7 @@ class SnapshotManager:
             "name": safe_name,
             "tx_id": tx_id,
             "merkle_root": merkle_root,
-            "created_at": datetime.now(timezone.utc).isoformat(),
+            "created_at": datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
             "size_mb": size_mb,
             "path": str(dest_path),
         }

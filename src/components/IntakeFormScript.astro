@@ -1,0 +1,88 @@
+---
+interface IntakeLine {
+	label: string;
+	field: string;
+}
+
+interface Props {
+	requestTitle: string;
+	lines: IntakeLine[];
+	invalidMessage?: string;
+	openingMessage?: string;
+	copiedMessage?: string;
+	copyFailedMessage?: string;
+}
+
+const {
+	requestTitle,
+	lines,
+	invalidMessage = 'Fill the required fields before opening the email draft.',
+	openingMessage = 'Opening email draft...',
+	copiedMessage = 'Copied. Paste it into any email client if mailto is not available.',
+	copyFailedMessage = 'Copy failed. Select the preview text manually and paste it into your email.',
+} = Astro.props;
+---
+
+<script
+	define:vars={{ requestTitle, lines, invalidMessage, openingMessage, copiedMessage, copyFailedMessage }}
+>
+	const form = document.querySelector('[data-intake-form]');
+
+	if (form instanceof HTMLFormElement) {
+		const preview = document.querySelector('[data-intake-preview]');
+		const subjectNode = document.querySelector('[data-intake-subject]');
+		const statusNode = document.querySelector('[data-intake-status]');
+		const copyButton = document.querySelector('[data-copy-intake]');
+		const fields = Array.from(form.querySelectorAll('input, textarea, select'));
+		const supportEmail = form.dataset.email || '';
+		const subject = form.dataset.subject || 'CORTEX intake';
+
+		const buildBody = () => {
+			const data = Object.fromEntries(new FormData(form).entries());
+			return [
+				requestTitle,
+				'',
+				...lines.map(({ label, field }) => `${label}: ${data[field] || '-'}`),
+			].join('\n');
+		};
+
+		const refreshPreview = () => {
+			const body = buildBody();
+			if (preview) preview.textContent = body;
+			if (subjectNode) subjectNode.textContent = subject;
+			return body;
+		};
+
+		fields.forEach((field) => {
+			field.addEventListener('input', refreshPreview);
+			field.addEventListener('change', refreshPreview);
+		});
+
+		form.addEventListener('submit', (event) => {
+			event.preventDefault();
+			if (!form.reportValidity()) {
+				const firstInvalid = form.querySelector(':invalid');
+				if (firstInvalid instanceof HTMLElement) firstInvalid.focus();
+				if (statusNode) statusNode.textContent = invalidMessage;
+				return;
+			}
+
+			const body = refreshPreview();
+			const href = `mailto:${supportEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+			if (statusNode) statusNode.textContent = openingMessage;
+			window.location.href = href;
+		});
+
+		copyButton?.addEventListener('click', async () => {
+			const body = refreshPreview();
+			try {
+				await navigator.clipboard.writeText(body);
+				if (statusNode) statusNode.textContent = copiedMessage;
+			} catch {
+				if (statusNode) statusNode.textContent = copyFailedMessage;
+			}
+		});
+
+		refreshPreview();
+	}
+</script>

@@ -10,10 +10,6 @@ import ast
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from cortex.extensions.moltbook.skills.sovereign_code_scorer.scripts.sovereign_scorer import (
-        Issue,
-    )
 
 __all__ = ["score_semantics", "score_tests"]
 

@@ -7,13 +7,18 @@ from pathlib import Path
 
 import pytest
 
-# ── Sortu scripts resolution ──────────────────────────────────────────────────
-# The sortu_* modules live in scripts/sortu/. Individual test files also try to
-# inject the local ~/.gemini path (for developer convenience), but CI doesn't
-# have that tree.  This conftest ensures the tracked path is always present.
-_SORTU_SCRIPTS = Path(__file__).resolve().parents[1] / "scripts" / "sortu"
-if _SORTU_SCRIPTS.exists() and str(_SORTU_SCRIPTS) not in sys.path:
-    sys.path.insert(0, str(_SORTU_SCRIPTS))
+# ── Repo-local import resolution ──────────────────────────────────────────────
+# Several legacy tests import modules that live outside the installed package
+# surface. Resolve them relative to the checkout so CI doesn't depend on a
+# developer-specific home directory layout.
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+for extra_path in (
+    _REPO_ROOT,
+    _REPO_ROOT / "cortex-core",
+    _REPO_ROOT / "scripts" / "sortu",
+):
+    if extra_path.exists() and str(extra_path) not in sys.path:
+        sys.path.insert(0, str(extra_path))
 
 
 @pytest.fixture(autouse=True)
