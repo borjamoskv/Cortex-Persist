@@ -4,11 +4,13 @@ This script checks the built wheel and sdist for:
 - expected package naming
 - required metadata files
 - absence of forbidden repository surfaces in public artifacts
+- absence of duplicate root package distribution names in subpackages
 """
 
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 import tarfile
 import zipfile
@@ -26,6 +28,7 @@ FORBIDDEN_SEGMENTS = (
 )
 REQUIRED_WHEEL_PREFIXES = ("cortex/",)
 REQUIRED_SDIST_SUFFIXES = ("README.md", "pyproject.toml", "LICENSE")
+PROJECT_NAME_RE = re.compile(r"(?m)^name\s*=\s*['\"]([^'\"]+)['\"]")
 
 
 @dataclass(frozen=True)
@@ -52,6 +55,47 @@ def fail(message: str) -> None:
 
 def normalized_package_name(package_name: str) -> str:
     return package_name.replace("-", "_")
+
+
+def read_project_name(pyproject_path: Path) -> str | None:
+    """Return the first PEP 621 project.name found in a pyproject file.
+
+    This intentionally stays lightweight so the release preflight has no
+    runtime dependency on Python 3.11's tomllib or third-party TOML parsers.
+    """
+    text = pyproject_path.read_text(encoding="utf-8")
+    match = PROJECT_NAME_RE.search(text)
+    return match.group(1) if match else None
+
+
+def validate_unique_distribution_name(repo_root: Path, package_name: str) -> None:
+    """Ensure only the repository root claims the canonical distribution name."""
+    root_pyproject = repo_root / "pyproject.toml"
+    if not root_pyproject.exists():
+        fail("root pyproject.toml is missing")
+
+    root_name = read_project_name(root_pyproject)
+    if root_name != package_name:
+        fail(
+            f"root pyproject.toml project.name={root_name!r} does not match "
+            f"expected package {package_name!r}"
+        )
+
+    offenders: list[str] = []
+    for pyproject_path in sorted(repo_root.rglob("pyproject.toml")):
+        if pyproject_path == root_pyproject:
+            continue
+        project_name = read_project_name(pyproject_path)
+        if project_name == package_name:
+            offenders.append(str(pyproject_path.relative_to(repo_root)))
+
+    if offenders:
+        offender_list = ", ".join(offenders)
+        fail(
+            f"duplicate distribution name {package_name!r} found outside root: "
+            f"{offender_list}. Use a distinct package name such as "
+            "'cortex-persist-cloud', or remove the nested pyproject until ready."
+        )
 
 
 def discover_artifacts(dist_dir: Path, package_name: str) -> ArtifactSet:
@@ -103,6 +147,9 @@ def validate_sdist(sdist_path: Path) -> None:
 
 def main() -> None:
     args = parse_args()
+    repo_root = Path.cwd()
+    validate_unique_distribution_name(repo_root, args.package_name)
+
     dist_dir = Path(args.dist)
     if not dist_dir.is_dir():
         fail(f"dist directory {dist_dir} does not exist")
