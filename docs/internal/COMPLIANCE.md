@@ -22,10 +22,10 @@ of the **EU AI Act (Regulation 2024/1689)**, specifically **Article 12**
 
 | Requirement | CORTEX Implementation | Evidence |
 |:---|:---|:---|
-| High-risk AI systems shall technically allow for the automatic recording of events (logs) | Every `store()` operation creates a transaction in the immutable ledger with SHA-256 hash linking | `cortex/engine/ledger.py` — ImmutableLedger class |
+| High-risk AI systems shall technically allow for the automatic recording of events (logs) | Every `store()` operation creates a transaction in the immutable ledger with SHA-256 hash linking | `cortex/ledger/ledger_core.py` — `ImmutableLedger` |
 | Logs shall be generated throughout the lifetime of the system | Transaction ledger operates continuously; every fact insertion, update, or deletion is recorded | `transactions` table in cortex.db |
 
-**Verification Command:** `cortex audit-trail`
+**Verification Commands:** `cortex compliance-report`, `cortex trust-ledger verify`
 
 ### Art. 12.2 — Content of Logs
 
@@ -53,13 +53,13 @@ of the **EU AI Act (Regulation 2024/1689)**, specifically **Article 12**
 
 **Verification Commands:**
 - `cortex verify <fact_id>` — Single fact verification certificate
-- `cortex ledger verify` — Full chain integrity check
+- `cortex trust-ledger verify` — Full chain integrity check
 
 ### Art. 12.4 — Periodic Verification
 
 | Requirement | CORTEX Implementation | Evidence |
 |:---|:---|:---|
-| Providers shall implement means for periodic integrity verification | Merkle tree checkpoints created at configurable intervals | `ImmutableLedger.create_checkpoint_sync()` |
+| Providers shall implement means for periodic integrity verification | Merkle tree checkpoints created at configurable intervals | `ImmutableLedger.create_checkpoint_async()` |
 | Verification results shall be recorded | `integrity_checks` table stores every verification result | `integrity_checks` table (3 checks recorded) |
 
 **Verification Command:** `cortex compliance-report` (runs integrity check)
@@ -74,7 +74,7 @@ CORTEX maintains a `decision_edges` graph that links decisions
 chronologically within projects, enabling full chain-of-reasoning
 reconstruction.
 
-**Verification Command:** CLI `cortex_decision_lineage` MCP tool
+**Verification Surface:** MCP tool `cortex_decision_lineage`
 
 ### Multi-Agent Consensus (Art. 14 — Human Oversight)
 

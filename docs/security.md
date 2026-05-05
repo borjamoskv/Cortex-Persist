@@ -51,23 +51,22 @@ Four-role hierarchy with atomic permission scopes:
 
 - **SHA-256 hash-chained ledger** — every mutation is linked to its predecessor
 - **Merkle tree checkpoints** — periodic batch verification
-- **Immutable transactions** — facts are never physically deleted
+- **Versioned and tamper-evident writes** — public fact mutations preserve lineage instead of silently overwriting state
 - **Cryptographic verification** — any fact can be independently verified
 
 ### 5. Privacy Shield (Ingress Guard)
 
-11-pattern secret detection at data ingress:
+Multi-tier secret and PII detection at data ingress:
 
-| Category | Patterns | Severity |
+| Category | Examples | Typical response |
 |:---|:---|:---|
-| **Critical** | SSH private keys | Blocks cloud storage |
-| **Platform** | GitHub tokens, GitLab PATs, Slack tokens | High alert |
-| **Standard** | JWT, AWS keys, generic API keys | Warning |
+| **Critical** | Private keys, connection strings, SSH material | Reject or force local-only handling |
+| **Sensitive** | PII, platform tokens, cloud credentials | Flag, tag, or notify |
+| **Standard** | Generic API credentials and infrastructure tokens | Route conservatively and preserve audit context |
 
-Three-tier scoring system with automatic response:
-- Critical secrets → force local-only storage
-- Platform secrets → flag and notify
-- Standard secrets → log and tag
+Exact signatures evolve with the runtime, but the stable contract is that
+high-risk material is detected early and prevented from flowing into unsafe
+storage or sync paths.
 
 ### 6. AST Sandbox
 

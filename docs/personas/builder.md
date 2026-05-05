@@ -8,7 +8,7 @@ CORTEX is local-first, async-native, and drop-in ready.
 
 ```bash
 # Install the core Engine (SQLite + Vector Search bindings included)
-pip install "cortex-persist[all]"
+pip install cortex-persist
 
 # Initialize the cryptographic ledger in your current directory
 cortex init
@@ -28,14 +28,13 @@ async def agent_loop():
     
     # 1. Your LLM decides to delete a user's file.
     # 2. You store that decision cryptographically.
-    receipt = await engine.store_fact(
+    fact_id = await engine.store(
+        project="desktop-cleaner-bot",
         content="Action executed: Deleted system32 due to suspected malware.",
         fact_type="irreversible_action",
-        project="desktop-cleaner-bot",
-        tenant_id="user_host_1"
     )
     
-    print(f"Secured under Hash: {receipt.hash}")
+    print(f"Persisted as fact #{fact_id}")
 
 asyncio.run(agent_loop())
 ```
@@ -46,7 +45,7 @@ If your agent goes rogue, or a user complains that a file was mysteriously delet
 
 ```bash
 # Returns VERIFIED if the row was untouched, or TAMPERED if the DB was altered.
-cortex verify ledger
+cortex trust-ledger verify
 ```
 
 ## Next Steps for Builders:

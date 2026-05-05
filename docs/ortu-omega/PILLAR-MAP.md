@@ -45,8 +45,8 @@
 | Primitive | Module | LOC | Status | Evidence |
 |:----------|:-------|----:|:------:|:---------|
 | SHA-256 hash chain | `engine/transaction_mixin.py` | 81 | ✅ | `prev_hash` → `hash` chain. GENESIS block. Every mutation logged |
-| Merkle checkpointing | `engine/ledger.py` | 317 | ✅ | Adaptive batch size (swarm-aware), `merkle_roots` table, full recomputation verify |
-| Full integrity verification | `engine/ledger.py` | — | ✅ | `verify_integrity_async()`: chain walk + hash recomputation (v2 + v1 legacy) + Merkle root verify |
+| Merkle checkpointing | `ledger/ledger_core.py` | 520 | ✅ | Adaptive checkpointing, `merkle_roots` table, full recomputation verify |
+| Full integrity verification | `ledger/ledger_core.py` | — | ✅ | `audit_integrity_async()`: chain walk + hash recomputation + Merkle root verify |
 | Taint propagation | `causality/taint.py` | 162 | ✅ | BFS DAG traversal, `≥50%` tainted parents → escalation, confidence downgrade |
 | Causal edge tracking | `engine/store_mixin.py` | — | ✅ | `parent_decision_id` → `causal_edges` table. Automatic causality resolution |
 | Compliance audit | `compliance/tracker.py` | 335 | ✅ | EU AI Act Art. 12: `log_decision()`, `verify_chain()`, `export_audit()` |

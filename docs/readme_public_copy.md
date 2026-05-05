@@ -51,7 +51,7 @@ CORTEX strictly enforces the **Sovereign Axioms**:
 2. **Deterministic Time-Travel:** Rollbacks map perfectly to exact states.
 3. **Byzantine Validation:** A generative output must face a deterministic validation boundary before being committed as a fact.
 
-For more on the CORTEX Philosophy and Exergy principles, see [ARCHITECTURE.md](docs/ARCHITECTURE.md).
+For more on the CORTEX Philosophy and Exergy principles, see `ARCHITECTURE.md`.
 
 ## License
 Apache 2.0

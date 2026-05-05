@@ -5,6 +5,11 @@
 **Analyst:** CORTEX Sovereign Engine  
 **Classification:** Internal Strategic Document
 
+> Historical analysis snapshot. Many file paths below use the pre-package or
+> root-relative conventions of that v5 audit context; they are not a reliable map of
+> the current tree. Current equivalents usually sit under `cortex/`,
+> `cortex/extensions/`, and `cortex/ledger/`.
+
 ---
 
 ## Executive Summary

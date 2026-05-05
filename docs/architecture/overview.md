@@ -3,21 +3,25 @@
 ## The Core
 Cortex is a **local-first, sovereign intelligence engine**. It is NOT a chatbot. It is an operating system for cognition.
 
+The paths below refer to the current `cortex/` package surface, not to historical top-level module
+names. For the recommended public product boundary, start with [`../product-surface.md`](../product-surface.md).
+
 ### Components
 
-1.  **The Memory (Lizard Brain)**
-    -   **SQLite (`cortex.db`)**: The physical storage of facts.
-    -   **Vector Store (`chromadb`)**: Semantic search and retrieval.
-    -   **Graph (`networkx`)**: Relationships between entities (Code <-> Doc <-> Person).
+1.  **The Memory & Trust Layer**
+    -   **SQLite (`cortex.db`)**: Local-first physical storage for facts and transactions.
+    -   **`ledger/`**: Hash-chained ledger, checkpoints, writers, queues, and verification.
+    -   **`storage/`**: Local and backend-aware storage adapters/classifiers.
 
 2.  **The Engine (Prefrontal Cortex)**
-    -   **`CortexEngine`**: The main interface. Handles ingestion, retrieval, and synthesis.
-    -   **`ledger.py`**: Merkle-backed immutable log of all thoughts/actions.
-    -   **`sovereign_gate.py`**: The firewall. Decides what enters long-term memory.
+    -   **`engine/__init__.py`**: `CortexEngine` composite orchestrator.
+    -   **`engine/store_mixin.py` / `engine/query_mixin.py` / `engine/transaction_mixin.py`**: Core write, recall, and verification paths.
+    -   **`memory/guardrails.py`**: Deterministic guardrails around memory admission and safety.
 
-3.  **The Swarm (Nervous System)**
-    -   **`dispatch.py`**: Routes tasks to specialized agents.
-    -   **`adapter.py`**: Connects to external MCP tools (Git, Terminal, Browser).
+3.  **Integration & Runtime Surfaces**
+    -   **`routes/__init__.py`**: Mounts the core HTTP surface and opt-in experimental routes.
+    -   **`mcp/server.py`**: MCP tool surface for agent and IDE integrations.
+    -   **`extensions/`**: Optional platform capabilities such as health, notifications, timing, and swarm tooling.
 
 ## Data Flow & Truthing Membrane
 

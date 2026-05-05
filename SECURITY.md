@@ -19,19 +19,26 @@ You will receive an acknowledgment within 48 hours and a detailed response withi
 
 CORTEX is built security-first:
 
-- **SHA-256 hash-chained ledger** — tamper-evident fact storage
+- **SHA-256 sovereign ledger continuity** — tamper-evident fact storage
 - **Merkle tree checkpoints** — batch integrity verification
 - **Privacy Shield** — 11-pattern secret detection at ingress
 - **AST Sandbox** — safe LLM code execution without `eval()`
 - **RBAC** — 4-role access control (admin, editor, viewer, auditor)
 - **Security Headers Middleware** — CSP, HSTS, X-Frame-Options
-- **Input Sanitization** — all user inputs validated and escaped
+- **Input Sanitization** — validated ingress surfaces apply sanitization and schema checks
 
 ## Supply Chain Security
 
+### Cryptographic Contract
+
+The current shipped package uses **SHA-256** for sovereign ledger continuity and
+Merkle lineage. Some audit or signature-oriented subsystems also use
+**SHA3-256**, but those should not be read as redefining the canonical ledger
+continuity algorithm unless the implementation is explicitly migrated.
+
 ### Release Signing
 
-All CORTEX releases published to PyPI are **cryptographically signed using [Sigstore](https://sigstore.dev/)**. This provides:
+The release workflow **signs the built distribution artifacts using [Sigstore](https://sigstore.dev/)** after the publish step. This provides:
 
 - **Provenance verification** — Confirm artifacts were built by our CI pipeline
 - **Tamper detection** — Verify packages haven't been modified after signing
@@ -43,8 +50,8 @@ To verify a release:
 pip install sigstore
 sigstore verify identity \
   --cert-oidc-issuer https://token.actions.githubusercontent.com \
-  --cert-identity https://github.com/borjamoskv/Cortex-Persist/.github/workflows/release.yml@refs/tags/v0.3.0 \
-  cortex_persist-0.3.0.tar.gz
+  --cert-identity https://github.com/borjamoskv/Cortex-Persist/.github/workflows/release.yml@refs/tags/v0.3.0b2 \
+  cortex_persist-0.3.0b2.tar.gz
 ```
 
 ### Container Image Scanning
@@ -73,10 +80,10 @@ CORTEX assumes:
 
 | Vector | Mitigation |
 | :--- | :--- |
-| Tampered package on PyPI | Sigstore signature verification |
+| Tampered release artifact | Sigstore signature verification |
 | Vulnerable dependency | pip-audit in CI, Dependabot alerts |
 | Compromised container image | Trivy scan (CRITICAL/HIGH block) |
-| Memory tampering | SHA-256 hash chain + Merkle checkpoints |
+| Memory tampering | SHA-256 sovereign hash chain + Merkle checkpoints |
 | Unauthorized access | RBAC + API key + JWT authentication |
 | Secret leakage | Privacy Shield (11 regex patterns at ingress) |
 | **Composition leakage** | **Holistic cross-field correlation analysis at ingress** |

@@ -50,13 +50,13 @@ from cortex import CortexEngine
 
 async def main():
     engine = CortexEngine()
-    
+
     # Almacenar con recibo criptográfico
     receipt = await engine.store_fact(
         content="Usuario aprobó transacción de $5,000",
         fact_type="decision"
     )
-    
+
     # Verificar prueba de integridad
     assert await engine.verify(receipt.hash) == True
 

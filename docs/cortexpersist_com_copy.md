@@ -11,7 +11,7 @@
 
 Persistent context, cryptographic audit trails, and governed retrieval for AI systems that need more than a prompt window.
 
-[Get Started] [View Demo]
+Get Started · View Demo
 
 *(Edge variant más agresiva:)*
 > **Your AI can act. Now make it accountable.**
@@ -92,7 +92,7 @@ cortex verify-ledger
 
 Result: persistent memory with searchable context and verifiable history.
 
-[Run the Demo] [Read the Docs]
+Run the Demo · Read the Docs
 
 ---
 
@@ -181,7 +181,7 @@ Start with persistent memory.
 Add lineage when memory starts to matter.
 Keep both when accountability becomes non-negotiable.
 
-[Get Started] [View Demo] [GitHub]
+Get Started · View Demo · GitHub
 
 ---
 

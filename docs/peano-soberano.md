@@ -164,7 +164,7 @@ El **poder** emerge cuando los 7 operan simultáneamente. Ninguno es redundante;
 
 ## Mapping: Ontología → Álgebra
 
-Los 5 axiomas ontológicos de [AGENTICA](AGENTICA.md) fundamentan los 7 operativos:
+Los 5 axiomas ontológicos de [SINTETOLOGÍA AGÉNTICA](SINTETOLOGÍA%20AGÉNTICA.md) fundamentan los 7 operativos:
 
 | Axioma Ontológico | Axioma Operativo |
 |:---|:---|

@@ -39,11 +39,13 @@ cortex --help
 | Extra | Installs | Purpose |
 | --- | --- | --- |
 | `[api]` | FastAPI, Uvicorn, httpx | REST API server |
+| `[mcp]` | mcp | Model Context Protocol server |
 | `[dev]` | pytest, pytest-cov, pytest-asyncio, httpx, z3-solver | Development & testing |
 | `[adk]` | google-adk | Google Agent Development Kit |
 | `[toolbox]` | toolbox-core | Toolbox integration |
 | `[billing]` | stripe | Payment processing |
 | `[cloud]` | asyncpg, redis, qdrant-client | Distributed backends |
+| `[trends]` | pytrends, pandas | Trend analysis integrations |
 | `[all]` | All of the above | Full installation |
 
 ---
@@ -54,6 +56,7 @@ cortex --help
 cortex        → cortex.cli:cli          # Main CLI
 moskv-daemon  → cortex.daemon_cli:main  # Background daemon
 cortex-adk    → cortex.adk.runner:main  # Google ADK runner
+cortex-mcp    → cortex.mcp.server:run_server
 ```
 
 ---
@@ -80,7 +83,8 @@ moskv-daemon start
 moskv-daemon status
 ```
 
-The daemon runs 13 monitors including health checks, compaction scheduling, sync operations, and integrity verification.
+The daemon runs the background monitor set provided under `cortex/extensions/daemon/`, including
+health checks, compaction scheduling, sync operations, and integrity verification.
 
 ---
 
@@ -91,13 +95,14 @@ The daemon runs 13 monitors including health checks, compaction scheduling, sync
 cortex store --type decision --source agent:gemini PROJECT "content"
 
 # Search facts
-cortex search "query" --limit 10
+cortex search "query" --top 10
 
-# Verify ledger integrity
-cortex verify
+# Verify one fact and the ledger hash chain
+cortex verify 1
+cortex trust-ledger verify
 
-# Export context snapshot
-cortex export
+# Export context snapshot through the experimental CLI surface
+CORTEX_ENABLE_EXPERIMENTAL_CLI=1 cortex export --format snapshot --out ./snapshot.md
 ```
 
 ---
@@ -105,9 +110,9 @@ cortex export
 ## Database Migrations
 
 ```bash
-# Migrations run automatically on startup.
-# To run manually:
-cortex migrate
+# Core schema setup runs through `cortex init`.
+# Legacy v3.1 → v4.0 import is available only through the experimental CLI surface:
+CORTEX_ENABLE_EXPERIMENTAL_CLI=1 cortex migrate --source ~/.agent/memory
 
 # Migration files live in cortex/migrations/
 # Never modify existing migration files — only add new ones.
@@ -136,10 +141,10 @@ For AlloyDB/cloud deployments, use standard PostgreSQL backup procedures.
 
 ```bash
 # Verify ledger hash chain
-cortex verify
+cortex trust-ledger verify
 
-# Full integrity audit
-cortex audit
+# Audit trail / extended audits live behind the experimental CLI surface
+CORTEX_ENABLE_EXPERIMENTAL_CLI=1 cortex audit
 ```
 
 ---
@@ -148,12 +153,12 @@ cortex audit
 
 | Component | Details |
 | --- | --- |
-| `telemetry/` | OpenTelemetry-compatible span tracing |
-| `signals/` | Event bus for pub/sub, reactive signals |
-| `notifications/` | macOS native notifications (Darwin-only) |
-| `daemon/` | 13 monitors — scheduler, watchers, health |
-| `hypervisor/` | Process supervision, crash recovery, watchdog |
-| `timing/` | Performance timing, SLA tracking |
+| `cortex/telemetry/` | OpenTelemetry-compatible span tracing |
+| `cortex/extensions/signals/` | Event bus for pub/sub, reactive signals |
+| `cortex/extensions/notifications/` | macOS native notifications and Telegram adapters |
+| `cortex/extensions/daemon/` | Scheduler, watchers, health, and sync monitors |
+| `cortex/extensions/hypervisor/` | Process supervision, crash recovery, watchdog |
+| `cortex/extensions/timing/` | Performance timing and developer time tracking |
 
 ---
 
@@ -161,8 +166,8 @@ cortex audit
 
 | Symptom | Likely Cause | Fix |
 | --- | --- | --- |
-| `LedgerIntegrityError` | Hash chain broken | Run `cortex verify` to identify break point |
-| Slow search | Missing embeddings | Run `cortex reindex` |
+| `LedgerIntegrityError` | Hash chain broken | Run `cortex trust-ledger verify`; use `cortex verify <fact-id>` for a specific fact |
+| Slow search | Missing embeddings | Re-store affected facts or use the experimental embedding/reindex tooling for the affected surface |
 | Import errors | Missing optional deps | Install with `pip install -e ".[all]"` |
 | Daemon crash loop | Stale PID file | Remove `~/.cortex/daemon.pid` |
 | Encryption errors | Missing or rotated key | Check `CORTEX_ENCRYPTION_KEY` or keyring |

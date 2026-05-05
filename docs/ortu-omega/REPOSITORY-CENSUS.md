@@ -15,7 +15,7 @@
 | 3 | `engine/memory_mixin.py` | `MemoryMixin._init_memory_subsystem()` | 132 | ✅ REAL | Tripartite init: L1 Working, L2 Vector (`sqlite-vec`/HDC), L3 Ledger |
 | 4 | `engine/transaction_mixin.py` | `TransactionMixin._log_transaction()` | 81 | ✅ REAL | SHA-256 hash chain, `prev_hash` continuity, ledger checkpoint trigger |
 | 5 | `engine/search_mixin.py` | `SearchMixin.search()` | 108 | ✅ REAL | Hybrid vector+text search, Graph-RAG enrichment, tenant-aware |
-| 6 | `engine/ledger.py` | `ImmutableLedger` | 317 | ✅ REAL | Adaptive Merkle checkpointing, full integrity verify (chain + roots) |
+| 6 | `ledger/ledger_core.py` | `SovereignLedger` (`ImmutableLedger` re-export) | 520 | ✅ REAL | Adaptive Merkle checkpointing, full integrity verify (chain + roots) |
 | 7 | `guards/contradiction_guard.py` | `detect_contradictions()` | 556 | ✅ REAL | 3-layer conflict detection: FTS5 → project co-occurrence → negation/supersession |
 | 8 | `verification/verifier.py` | `SovereignVerifier.check()` | 81 | ⚠️ PARTIAL | AST heuristic extraction implemented; Z3 SMT stub ("Phase 2" comment) |
 | 9 | `causality/taint.py` | `propagate_taint()` | 162 | ✅ REAL | BFS DAG taint propagation, confidence downgrade, `≥50%` escalation rule |
@@ -120,7 +120,7 @@ ComplianceTracker
 | **Continuity** | `store_mixin.py` | Structural + semantic dedup | SHA-256 content hash + vector cosine |
 | **Continuity** | `query_mixin.py` | `time_travel()`, `history()` | Temporal state reconstruction |
 | **Traceability** | `transaction_mixin.py` | Hash-chained transaction log | `prev_hash` → `hash` SHA-256 chain |
-| **Traceability** | `ledger.py` | Merkle checkpointing | Adaptive batch size (swarm-aware) |
+| **Traceability** | `ledger/ledger_core.py` | Merkle checkpointing | Adaptive checkpointing over `merkle_roots` |
 | **Traceability** | `causality/taint.py` | Taint propagation | BFS DAG, confidence downgrade |
 | **Coordination** | `consensus/manager.py` | Agent voting + reputation | LogOP consensus, entropy drift |
 | **Coordination** | `consensus/byzantine.py` | WBFT multi-model evaluation | ⅓ fault tolerance, Jaccard |

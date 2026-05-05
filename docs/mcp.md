@@ -1,22 +1,28 @@
 # MCP Server
 
-CORTEX implements the **Model Context Protocol (MCP)** — an open standard for connecting AI agents to tools and data sources. This makes CORTEX a plug-in for any MCP-compatible AI IDE.
+CORTEX implements the **Model Context Protocol (MCP)** for IDE and agent integrations.
+
+For product adoption, the recommended minimum is simple: use the MCP server when another tool needs
+remote access to the same verifiable-memory surface you already use through the CLI or Python API.
 
 ---
 
-## Compatible IDEs
+## Install
 
-| IDE | Status |
-|:---|:---|
-| **Claude Code** (Anthropic) | ✅ Native |
-| **Cursor** | ✅ Native |
-| **OpenClaw** | ✅ Native |
-| **Windsurf** | ✅ Native |
-| **Antigravity** | ✅ Native |
+```bash
+pip install "cortex-persist[mcp]"
+```
+
+If you already installed the base package without extras, you can also install the MCP SDK
+directly with:
+
+```bash
+pip install mcp
+```
 
 ---
 
-## Start the MCP Server
+## Start The MCP Server
 
 ```bash
 python -m cortex.mcp
@@ -28,13 +34,68 @@ Or explicitly:
 python -m cortex.mcp.server
 ```
 
-The server starts a stdio-based MCP transport, which is the standard for IDE integrations.
+The default transport is stdio, which is what most IDE integrations expect.
+
+By default, the server starts with the minimal core toolset only. To expose broader MCP families
+such as trace, trust/compliance, health, or operator/runtime tooling, set
+`CORTEX_ENABLE_EXPERIMENTAL_MCP=1` before launch.
+
+For an SSE transport, the experimental CLI exposes:
+
+```bash
+CORTEX_ENABLE_EXPERIMENTAL_CLI=1 \
+cortex mcp trust --transport sse --port 5002
+```
+
+The default documented launch path remains stdio via `python -m cortex.mcp`.
+
+---
+
+## Compatible IDEs
+
+| IDE | Status |
+| :--- | :--- |
+| Claude Code | Native |
+| Cursor | Native |
+| OpenClaw | Native |
+| Windsurf | Native |
+| Antigravity | Native |
+
+---
+
+## Recommended Core Tools
+
+| Tool | Description |
+| :--- | :--- |
+| `cortex_store` | Store a fact with automatic hash chaining |
+| `cortex_search` | Search persisted memory |
+| `cortex_status` | System health, statistics, and database info |
+| `cortex_ledger_verify` | Full ledger integrity check |
+
+These four tools are enough for most IDE and agent integrations.
+
+---
+
+## Extended Tool Families
+
+When `CORTEX_ENABLE_EXPERIMENTAL_MCP=1`, the MCP server also registers broader tool families for
+trust/compliance, traceability, embedding, health, genesis, and operator workflows. Common
+examples include:
+
+| Tool | Description |
+| :--- | :--- |
+| `cortex_verify_fact` | Cryptographic verification certificate for a single fact |
+| `cortex_audit_trail` | Generate a timestamped, hash-verified audit log |
+| `cortex_compliance_report` | EU AI Act Article 12 compliance snapshot with score |
+| `cortex_decision_lineage` | Trace the lineage of a decision |
+
+Adopt those only when the basic memory flow is already in place.
 
 ---
 
 ## Configuration
 
-### Claude Code (`claude_desktop_config.json`)
+### Claude Code
 
 ```json
 {
@@ -50,7 +111,7 @@ The server starts a stdio-based MCP transport, which is the standard for IDE int
 }
 ```
 
-### Cursor (`.cursor/mcp.json`)
+### Cursor
 
 ```json
 {
@@ -63,7 +124,7 @@ The server starts a stdio-based MCP transport, which is the standard for IDE int
 }
 ```
 
-### Antigravity (VS Code settings)
+### Antigravity
 
 ```json
 {
@@ -80,108 +141,12 @@ The server starts a stdio-based MCP transport, which is the standard for IDE int
 
 ---
 
-## Available Tools
+## Boundary Note
 
-### Core Memory Tools
+The MCP server can do more than the minimal memory flow, but the recommended product adoption path
+is still:
 
-| Tool | Description |
-|:---|:---|
-| `cortex_store` | Store a fact with automatic hash chaining and embedding |
-| `cortex_search` | Hybrid semantic search across all facts |
-| `cortex_status` | System health, statistics, and database info |
-
-### Trust & Compliance Tools
-
-| Tool | Description |
-|:---|:---|
-| `cortex_ledger_verify` | Full ledger integrity check — walks the entire hash chain |
-| `cortex_verify_fact` | Cryptographic verification certificate for a single fact |
-| `cortex_audit_trail` | Generate a timestamped, hash-verified audit log |
-| `cortex_compliance_report` | EU AI Act Article 12 compliance snapshot with score |
-| `cortex_decision_lineage` | Trace how an agent arrived at any conclusion |
-
----
-
-## Tool Details
-
-### `cortex_store`
-
-**Parameters:**
-
-| Param | Type | Required | Description |
-|:---|:---|:---:|:---|
-| `project` | string | ✅ | Project namespace |
-| `content` | string | ✅ | Fact content |
-| `fact_type` | string | — | `knowledge`, `decision`, `error`, `ghost`, `config`, `bridge` |
-| `tags` | string | — | Comma-separated tags |
-| `source` | string | — | Source identifier (auto-detected if omitted) |
-
-**Example:**
-
-```
-Store this decision in CORTEX: "We chose PostgreSQL over MySQL for JSON support"
-→ cortex_store(project="my-api", content="We chose PostgreSQL...", fact_type="decision")
-```
-
-### `cortex_search`
-
-**Parameters:**
-
-| Param | Type | Required | Description |
-|:---|:---|:---:|:---|
-| `query` | string | ✅ | Natural language search query |
-| `project` | string | — | Filter by project |
-| `top_k` | integer | — | Number of results (default: 5) |
-
-### `cortex_compliance_report`
-
-**Parameters:** None.
-
-Returns a structured compliance report with:
-- Compliance score (0-5)
-- Per-article requirement status
-- Evidence references
-- Recommendations
-
----
-
-## Privacy Shield
-
-The MCP server includes the **Privacy Shield** — an ingress guard that scans all incoming data for secrets before storage:
-
-- GitHub tokens (`ghp_`, `gho_`, `ghs_`)
-- GitLab PATs (`glpat-`)
-- JWT tokens
-- SSH private keys
-- Slack tokens (`xoxb-`, `xoxp-`)
-- AWS credentials
-- Generic API keys
-- And 4 more patterns
-
-If a secret is detected, the fact is flagged and the agent is notified. Critical secrets (private keys) force local-only storage regardless of configuration.
-
----
-
-## Google ADK Integration
-
-CORTEX also integrates with **Google Agent Developer Kit (ADK)**:
-
-```bash
-pip install cortex-persist[adk]
-cortex-adk  # Start the ADK runner
-```
-
-This provides the same trust tools via the Google ADK toolbox bridge.
-
----
-
-## Toolbox Bridge
-
-For environments that use the Toolbox protocol:
-
-```python
-from cortex.mcp.toolbox_bridge import get_toolbox_tools
-
-tools = get_toolbox_tools()
-# Returns a list of tool definitions compatible with the Toolbox protocol
-```
+1. `cortex_store`
+2. `cortex_search`
+3. `cortex_status`
+4. `cortex_ledger_verify`

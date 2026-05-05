@@ -2,6 +2,9 @@
 
 CORTEX provides official SDKs for Python and JavaScript/TypeScript.
 
+The recommended first integration surface is the in-process Python engine. The JavaScript /
+TypeScript SDK is an early HTTP client layer and depends on the REST API being available.
+
 ---
 
 ## Python SDK
@@ -12,6 +15,13 @@ The Python SDK is the primary interface, distributed as `cortex-persist` on PyPI
 
 ```bash
 pip install cortex-persist
+```
+
+If another process needs remote access instead of in-process embedding/search, host the API with:
+
+```bash
+pip install "cortex-persist[api]"
+uvicorn cortex.api:app --host 0.0.0.0 --port 8484
 ```
 
 ### Basic Usage
@@ -36,46 +46,71 @@ facts = engine.recall_sync("my-project")
 ### Async Usage
 
 ```python
+import asyncio
 from cortex import CortexEngine
 
-async with CortexEngine() as engine:
-    fact_id = await engine.store(
-        project="my-agent",
-        content="User prefers dark mode",
-        fact_type="knowledge",
-        tags=["ui", "preferences"],
-    )
 
-    results = await engine.search("user interface preferences")
-    facts = await engine.recall("my-agent")
+async def main() -> None:
+    engine = CortexEngine()
+    try:
+        fact_id = await engine.store(
+            project="my-agent",
+            content="User prefers dark mode",
+            fact_type="knowledge",
+            tags=["ui", "preferences"],
+        )
+
+        results = await engine.search("user interface preferences")
+        facts = await engine.recall("my-agent")
+    finally:
+        await engine.close()
+
+
+asyncio.run(main())
 ```
 
-### Multi-Tenant Usage
+### Tenant-Scoped Usage
 
 ```python
-engine = CortexEngine()
+import asyncio
+from cortex import CortexEngine
 
-# Store with tenant isolation
-await engine.store_fact(
-    content="Approved loan #443",
-    fact_type="decision",
-    project="fintech-agent",
-    tenant_id="enterprise-customer-a",
-)
+
+async def main() -> None:
+    engine = CortexEngine()
+    try:
+        await engine.store(
+            content="Approved loan #443",
+            fact_type="decision",
+            project="fintech-agent",
+        )
+    finally:
+        await engine.close()
+
+
+asyncio.run(main())
 ```
 
 ### Consensus
 
 ```python
-# Register an agent
-# Agents are auto-registered on first vote
+import asyncio
+from cortex import CortexEngine
 
-# Cast a vote
-await engine.vote(
-    fact_id=42,
-    agent_id="agent:claude",
-    vote=1,  # 1 = verify, -1 = dispute
-)
+
+async def main() -> None:
+    engine = CortexEngine()
+    try:
+        await engine.vote_v2(
+            fact_id=42,
+            agent_id="agent:claude",
+            value=1,  # 1 = verify, 0 = abstain/remove, -1 = dispute
+        )
+    finally:
+        await engine.close()
+
+
+asyncio.run(main())
 ```
 
 ### Available Methods
@@ -83,19 +118,19 @@ await engine.vote(
 | Method (Sync) | Method (Async) | Description |
 |:---|:---|:---|
 | `store_sync()` | `store()` | Store a fact |
-| `store_many_sync()` | `store_many()` | Batch store |
+| — | `store_many()` | Batch store |
 | `search_sync()` | `search()` | Semantic search |
 | `recall_sync()` | `recall()` | Get all project facts |
-| `history_sync()` | `history()` | Temporal query |
-| `deprecate_sync()` | `deprecate()` | Soft-delete a fact |
-| `update_sync()` | `update()` | Update a fact |
-| `vote_sync()` | `vote()` | Cast consensus vote |
-| `retrieve()` | `retrieve()` | Get single fact by ID |
-| `time_travel()` | `time_travel()` | Reconstruct state at timestamp |
-| `find_path()` | `find_path()` | Knowledge graph path finding |
-| `stats()` | `stats()` | System statistics |
+| — | `history()` | Temporal query |
+| — | `deprecate()` | Soft-delete a fact |
+| — | `update()` | Update a fact |
+| — | `vote_v2()` | Cast reputation-weighted consensus vote |
+| — | `retrieve()` | Get single fact by ID |
+| — | `time_travel()` | Reconstruct state at timestamp |
+| — | `find_path()` | Knowledge graph path finding |
+| — | `stats()` | System statistics |
 | `init_db_sync()` | `init_db()` | Initialize database |
-| `export_snapshot()` | `export_snapshot()` | Export markdown snapshot |
+| `export_snapshot()` | — | Export markdown snapshot helper |
 
 ---
 
@@ -104,6 +139,9 @@ await engine.vote(
 > ⏳ **Roadmap — Not yet published.** The JS/TS SDK is in early development. `npm install @cortex-persist/sdk` is not yet available on npm. Check [ROADMAP.md](../ROADMAP.md) for the planned release timeline.
 
 > **Status:** Early development. Available at `sdks/js/`.
+
+This SDK is not the canonical first path for adoption. Use it when you specifically want a remote
+HTTP client instead of the local Python engine.
 
 ### Install (from source)
 

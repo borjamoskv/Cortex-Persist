@@ -6,11 +6,11 @@ Here's how CORTEX compares against vector databases and LLM orchestration tools.
 
 ## The Core Difference: Epistemic Containment
 
-When an AI agent states an immutable fact in most ecosystems, it simply performs an `UPSERT` on a JSON record in Pinecone, Qdrant, or Mem0.
+When an AI agent states a durable fact in most ecosystems, it simply performs an `UPSERT` on a JSON record in Pinecone, Qdrant, or Mem0.
 
 **The hazard:** If the agent hallucinates, or a malicious actor alters the database, there is zero mathematical evidence of what actually happened. Logs vanish. DBs get overwritten. 
 
-**CORTEX's model:** CORTEX does not trust the `UPSERT`. It treats all generation as conjecture until it successfully passes formal validation guards and is cryptographically hashed, chained to the ledger, and permanently locked.
+**CORTEX's model:** CORTEX does not trust the `UPSERT`. It treats all generation as conjecture until it successfully passes formal validation guards and is cryptographically hashed, chained to the ledger, and recorded with tamper-evident lineage.
 
 ---
 

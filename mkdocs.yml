@@ -68,11 +68,14 @@ nav:
       - Compliance & Buyers: personas/compliance_buyer.md
       - Systems Architect: personas/architect.md
   - Getting Started:
+      - Public Product Surface: product-surface.md
       - Quickstart: quickstart.md
       - Installation: installation.md
       - Configuration: configuration.md
   - Reference:
       - Architecture: architecture.md
+      - Architecture Crystallization: architecture-crystallization.md
+      - Skill Taxonomy: skills/SKILL-TAXONOMY.md
       - Capabilities: CORTEX-CAPABILITIES.md
       - SDK Surface: SDK-SURFACE.md
       - Trust Semantics: TRUST-SEMANTICS.md
@@ -100,12 +103,13 @@ nav:
       - Security: security.md
       - Sovereign Infrastructure: sovereign-infrastructure.md
   - Tutorials:
+      - Course Suite: course/README.md
       - Memory for LangChain Agents: tutorials/langchain.md
       - Multi-Agent Consensus: tutorials/consensus.md
       - Time-Travel Debugging: tutorials/temporal.md
       - Site Monitoring Daemon: tutorials/daemon.md
   - Project:
-      - AGENTICA: AGENTICA.md
+      - Sintetología Agéntica: SINTETOLOGÍA AGÉNTICA.md
       - Sovereign Agent Manifesto: sovereign_agent_manifesto.md
       - FAQ: faq.md
       - Changelog: changelog.md

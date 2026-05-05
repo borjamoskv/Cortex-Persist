@@ -1,6 +1,11 @@
 # Deployment
 
-CORTEX supports multiple deployment models — from a single `pip install` to production Kubernetes clusters.
+CORTEX supports multiple deployment models — from a single `pip install` to the included
+Dockerfile. Kubernetes, compose, and sovereign-cloud blueprints are target-state deployment
+patterns unless the corresponding files are present in this repository snapshot.
+
+This page covers deployment shapes across the broader repository. The recommended adoption path is
+still local verifiable memory first, then optional HTTP and MCP surfaces only when you need them.
 
 ---
 
@@ -9,7 +14,11 @@ CORTEX supports multiple deployment models — from a single `pip install` to pr
 The simplest deployment. Zero network dependencies.
 
 ```bash
-pip install cortex-persist[api]
+pip install cortex-persist
+
+# Add only the surfaces you need locally
+pip install "cortex-persist[api]"
+pip install "cortex-persist[mcp]"
 cortex init
 
 # Start REST API
@@ -21,6 +30,9 @@ python -m cortex.mcp
 
 Data lives in `~/.cortex/cortex.db` (SQLite).
 
+If you only need the in-process engine or CLI, the base package is enough and you do not need to
+run either service.
+
 ---
 
 ## Docker
@@ -28,25 +40,24 @@ Data lives in `~/.cortex/cortex.db` (SQLite).
 ### Development
 
 ```bash
-docker compose up -d
+docker build -t cortex-persist:local .
+docker run --rm -p 8484:8484 cortex-persist:local
 ```
 
-The `docker-compose.yml` starts CORTEX with default settings.
+This repository snapshot ships a `Dockerfile`, but does not include `docker-compose.yml` or
+`docker-compose.prod.yml`.
 
 ### Production
 
-```bash
-docker compose -f docker-compose.prod.yml up -d
-```
-
-The production setup includes:
+Use a compose file only after adding one for your environment. A production-oriented compose stack
+typically includes:
 
 - **Caddy** as TLS reverse proxy with automatic HTTPS
 - Security headers (HSTS, X-Frame-Options, CSP)
 - Health checks and restart policies
 
 ```yaml
-# docker-compose.prod.yml (excerpt)
+# Example docker-compose.prod.yml excerpt; create this file in your deployment repo if needed.
 services:
   cortex:
     build: .
@@ -67,7 +78,8 @@ services:
 
 ### Dockerfile
 
-The included `Dockerfile` uses a multi-stage build:
+The included `Dockerfile` is API-oriented. Add the `mcp` extra only if you plan to host MCP from
+the same image.
 
 ```dockerfile
 FROM python:3.12-slim
@@ -117,11 +129,13 @@ Target architecture:
 ## Daemon Installation
 
 CORTEX includes a self-healing background daemon that monitors 13 specialized areas.
+The daemon is exposed as the `moskv-daemon` console script, not as a default `cortex daemon`
+subcommand.
 
 ### macOS
 
 ```bash
-cortex daemon install
+moskv-daemon install
 # Creates ~/Library/LaunchAgents/com.moskv.cortex-daemon.plist
 # Auto-starts on login
 ```
@@ -129,7 +143,7 @@ cortex daemon install
 ### Linux
 
 ```bash
-cortex daemon install
+moskv-daemon install
 # Creates ~/.config/systemd/user/cortex-daemon.service
 # Enables and starts via systemd --user
 ```
@@ -137,16 +151,16 @@ cortex daemon install
 ### Windows
 
 ```bash
-cortex daemon install
+moskv-daemon install
 # Creates Task Scheduler job triggered at logon
 ```
 
 ### Manual Control
 
 ```bash
-cortex daemon start     # Start
-cortex daemon stop      # Stop
-cortex daemon status    # Health check
+moskv-daemon start       # Run in foreground
+moskv-daemon status      # Show last check results
+moskv-daemon uninstall   # Remove installed service
 ```
 
 ---
@@ -163,8 +177,9 @@ All settings are loaded from environment variables via `cortex/config.py`.
 | `CORTEX_RATE_WINDOW` | `60` | Window in seconds |
 | `CORTEX_EMBEDDINGS` | `local` | `local` or `api` |
 | `CORTEX_EMBEDDINGS_PROVIDER` | `gemini` | API provider when `api` mode |
-| `CORTEX_STORAGE` | `local` | `local` or `turso` |
-| `CORTEX_GRAPH_BACKEND` | `sqlite` | `sqlite` or `neo4j` |
+| `CORTEX_STORAGE` | `local` | `local`, `turso`, or `postgres` (default bootstrap remains local-first) |
+| `POSTGRES_DSN` | — | PostgreSQL DSN when `CORTEX_STORAGE=postgres` |
+| `CORTEX_PG_URL` | — | Alternate PostgreSQL DSN env var when `CORTEX_STORAGE=postgres` |
 | `CORTEX_POOL_SIZE` | `5` | Connection pool size |
 | `CORTEX_API_PORT` | `8484` | API server port |
 | `TURSO_DATABASE_URL` | — | Turso edge DB URL |
@@ -174,6 +189,11 @@ All settings are loaded from environment variables via `cortex/config.py`.
 | `NEO4J_PASSWORD` | — | Neo4j password |
 | `STRIPE_SECRET_KEY` | — | Stripe billing key |
 | `STRIPE_WEBHOOK_SECRET` | — | Stripe webhook signing |
+| `CORTEX_ENABLE_EXPERIMENTAL_API` | `0` | Mount experimental HTTP surfaces such as `/gateway/*` |
+| `CORTEX_ENABLE_EXPERIMENTAL_MCP` | `0` | Enable non-core MCP tool families and runtime integrations |
+| `CORTEX_TELEGRAM_TOKEN` | — | Telegram bot token for notifications and webhook replies |
+| `CORTEX_TELEGRAM_CHAT_ID` | — | Optional Telegram webhook allowlist / notification target |
+| `CORTEX_TELEGRAM_WEBHOOK_SECRET` | — | Required secret for `/gateway/telegram/webhook` |
 
 Call `config.reload()` to refresh at runtime (useful for test isolation).
 
@@ -183,10 +203,41 @@ See `.env.example` for the complete list with descriptions.
 
 ## Health Checks
 
-- **HTTP**: `GET /health` → `{"status": "ok"}`
+- **HTTP**: `GET /health` → compact JSON with `status`, `engine`, and `health_index`
 - **Metrics**: `GET /metrics` → Prometheus format
 - **CLI**: `cortex status` → Full system diagnostic
-- **Daemon**: `cortex daemon status` → Monitor health
+- **Daemon**: `moskv-daemon status` → Monitor health
+
+## Experimental Gateway Exposure
+
+If you expose the gateway adapters over HTTP, enable the experimental router explicitly:
+
+```bash
+export CORTEX_ENABLE_EXPERIMENTAL_API=1
+export CORTEX_TELEGRAM_WEBHOOK_SECRET="replace-me"
+uvicorn cortex.api:app --host 0.0.0.0 --port 8484
+```
+
+Notes:
+
+- `/gateway/v1/*` and `/gateway/telegram/webhook` are not mounted on the default core API surface.
+- The Telegram webhook rejects requests when `CORTEX_TELEGRAM_WEBHOOK_SECRET` is unset.
+- Set `CORTEX_TELEGRAM_CHAT_ID` if you want the webhook restricted to a single chat.
+
+## Experimental MCP Exposure
+
+If you need the broader MCP surface beyond the four core tools, enable it explicitly:
+
+```bash
+export CORTEX_ENABLE_EXPERIMENTAL_MCP=1
+python -m cortex.mcp.server
+```
+
+Notes:
+
+- Without the flag, the default MCP server exposes only `cortex_store`, `cortex_search`,
+  `cortex_status`, and `cortex_ledger_verify`.
+- Runtime daemons and operator MCP families are not started on the default core path.
 
 ---
 
@@ -198,8 +249,13 @@ See `.env.example` for the complete list with descriptions.
 # Simple copy (safe with WAL mode)
 cp ~/.cortex/cortex.db ~/.cortex/cortex.db.bak
 
-# Or use CORTEX snapshots
-cortex export --out ./snapshot.md
+# Or use the Python engine snapshot helper
+python - <<'PY'
+from cortex import CortexEngine
+
+engine = CortexEngine()
+engine.export_snapshot("./snapshot.md")
+PY
 ```
 
 ### Production Backup

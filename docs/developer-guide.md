@@ -2,6 +2,10 @@
 
 > Everything you need to contribute to CORTEX.
 
+This guide covers the broader repository, including operator and advanced surfaces. If you are
+orienting around the public product boundary first, read [Public Product Surface](product-surface.md)
+before using this page as your source of truth.
+
 ---
 
 ## Project Structure
@@ -10,9 +14,12 @@
 cortex/
 ├── cortex/                     # Main Python package
 │   ├── engine/                # Core engine (CortexEngine, mixins, ledger)
+│   ├── database/              # SQLite schema, pooling, cache, and connection guards
+│   ├── ledger/                # Canonical hash-chain ledger package
 │   ├── api/                   # FastAPI application setup
-│   ├── routes/                # REST API route handlers (20 modules)
+│   ├── routes/                # REST API route handlers
 │   ├── auth/                  # Authentication & RBAC
+│   ├── guards/                # Admission, dependency, URL, and capability guards
 │   ├── embeddings/            # Local (ONNX) & API embedding providers
 │   ├── consensus/             # Multi-agent WBFT consensus + reputation
 │   ├── facts/                 # Fact lifecycle management
@@ -23,23 +30,17 @@ cortex/
 │   ├── compliance/            # EU AI Act compliance reports
 │   ├── audit/                 # Audit trail generation
 │   ├── crypto/                # AES-256-GCM vault
-│   ├── daemon/                # Self-healing watchdog (13 monitors)
-│   ├── notifications/         # Telegram + OS notification bus
-│   ├── sync/                  # JSON ↔ DB bidirectional sync
-│   ├── timing/                # Developer time tracking
 │   ├── telemetry/             # OpenTelemetry-compatible tracing
 │   ├── mcp/                   # Model Context Protocol server
-│   ├── cli/                   # 38 CLI commands (Click)
+│   ├── cli/                   # Click-based CLI surface
 │   ├── migrations/            # Versioned schema migrations
-│   ├── gate/                  # Rate limiting & validation
-│   ├── storage/               # SQLite + Turso backends
-│   ├── thinking/              # Thought Orchestra, semantic router
-│   ├── episodic/              # Session snapshots
-│   ├── llm/                   # Multi-provider LLM support
+│   ├── storage/               # Local and optional cloud storage backends
+│   ├── services/              # Package-level service logic shared by routes/CLI
+│   ├── extensions/            # Advanced surfaces: daemon, sync, notifications, timing, LLMs
 │   ├── types/                 # Type definitions
 │   ├── utils/                 # Shared utilities
 │   └── config.py              # Centralized configuration
-├── tests/                      # 1,621+ test functions
+├── tests/                      # Automated test suite
 ├── docs/                       # Documentation (mkdocs-material)
 ├── examples/                   # Quickstart examples
 ├── sdks/                       # Python & JavaScript SDKs
@@ -58,7 +59,7 @@ cortex/
 git clone https://github.com/borjamoskv/Cortex-Persist.git
 cd Cortex-Persist
 python -m venv .venv && source .venv/bin/activate
-pip install -e ".[all]"
+pip install -e ".[api,mcp,dev]"
 
 # Initialize database
 cortex init
@@ -71,7 +72,7 @@ make test
 
 ## Engine Architecture
 
-CORTEX has **two engine implementations**:
+CORTEX has one composite engine implementation with both sync and async entry points:
 
 ### 1. `CortexEngine` (Composite Orchestrator)
 
@@ -95,17 +96,22 @@ fact_id = engine.store_sync("project-x", "Python is great", fact_type="knowledge
 results = engine.search_sync("programming languages")
 ```
 
-### 2. `AsyncCortexEngine` (API Engine)
+### 2. Async route usage
 
-Located in `cortex/engine_async.py`. Used by FastAPI routes for maximum concurrency:
+FastAPI routes use `CortexEngine` with a `CortexConnectionPool`. `AsyncCortexEngine` is a
+compatibility alias exported from `cortex.engine`, not a separate `cortex/engine_async.py` module.
 
 - Takes a `CortexConnectionPool` for connection management
 - All methods are `async`
 - Handles transaction logging and hash chain maintenance
 
 ```python
-pool = await CortexConnectionPool.create(db_path, pool_size=5)
-engine = AsyncCortexEngine(pool, db_path)
+from cortex.database.pool import CortexConnectionPool
+from cortex.engine import CortexEngine
+
+pool = CortexConnectionPool(db_path, read_only=False)
+await pool.initialize()
+engine = CortexEngine(pool, db_path)
 
 fact_id = await engine.store(project="x", content="Hello", fact_type="knowledge")
 ```
@@ -132,11 +138,11 @@ async def my_endpoint(
     return {"status": "ok"}
 ```
 
-2. **Register in** `cortex/api/core.py`:
+2. **Register in** `cortex/routes/__init__.py`:
 
 ```python
 from cortex.routes.my_feature import router as my_feature_router
-app.include_router(my_feature_router)
+api_router.include_router(my_feature_router)
 ```
 
 ---
@@ -147,9 +153,10 @@ app.include_router(my_feature_router)
 
 ```python
 import click
+from cortex.cli.common import cli
 from cortex.engine import CortexEngine
 
-@click.command("my-command")
+@cli.command("my-command")
 @click.argument("project")
 @click.option("--db", default=None)
 def my_command(project: str, db: str | None):
@@ -160,11 +167,11 @@ def my_command(project: str, db: str | None):
     click.echo("Done!")
 ```
 
-2. **Register in** `cortex/cli/__init__.py`:
+2. **Follow the discovery convention**:
 
 ```python
-from cortex.cli.my_cmds import my_command
-cli.add_command(my_command)
+# Keep the filename ending in `_cmds.py`.
+# The CLI bootstrap auto-discovers and imports those modules.
 ```
 
 ---
@@ -288,9 +295,9 @@ To add a new translation:
 
 When adding a new table:
 
-1. Add `CREATE TABLE` to `cortex/schema.py`
-2. Add it to the `ALL_SCHEMA` list
-3. Create a migration file in `cortex/migrations/` for existing databases
+1. Add `CREATE TABLE` to `cortex/database/schema.py` or `cortex/database/schema_extensions.py`
+2. Add it to the appropriate schema list such as `ALL_SCHEMA`
+3. Create or register a migration in `cortex/migrations/` for existing databases
 4. Test with `cortex init` on a fresh DB and `cortex migrate` on existing
 
 ---

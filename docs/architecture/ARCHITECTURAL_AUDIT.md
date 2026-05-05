@@ -4,6 +4,12 @@
 **Scope:** `./cortex/` (42,613+ LOC)  
 **Auditor:** Kimi Code CLI  
 
+> Historical audit snapshot. The file paths cited in findings below reflect the
+> audited February 2026 layout and should not be read as the current package map.
+> Nearby present-day surfaces usually live under `cortex/routes/`,
+> `cortex/events/`, `cortex/extensions/daemon/`, `cortex/extensions/llm/`, and
+> `cortex/ledger/`.
+
 ---
 
 ## Executive Summary

@@ -11,10 +11,20 @@ CORTEX is a **trust infrastructure engine** that provides cryptographic verifica
 
 To enforce this, it combines a relational database with vector embeddings, hash-chained transactions, Merkle tree integrity, multi-agent consensus, and privacy protection — running locally on SQLite or scaling to AlloyDB + Qdrant + Redis for enterprise deployments.
 
+This page describes the broader repository and system architecture. For the recommended product
+boundary and first integration surface, start with [Public Product Surface](product-surface.md).
+For the agent-layer vocabulary used in this repo, see Agent Taxonomy.
+For executable capability packages and the Antigravity-CORTEX nexus, see
+[Skill Taxonomy](skills/SKILL-TAXONOMY.md).
+
+Today, the default FastAPI core bootstrap still fails closed unless `CORTEX_STORAGE=local`.
+Postgres/Turso storage paths exist in the repository, but they remain storage/tooling surfaces rather
+than the default public API bootstrap contract.
+
 ```mermaid
 graph TB
     subgraph Interfaces
-        CLI["CLI<br/>90+ commands"]
+        CLI["CLI<br/>Broad command surface"]
         API["REST API<br/>FastAPI"]
         MCP["MCP Server<br/>Model Context Protocol"]
         GraphQL["GraphQL<br/>(coming Q2)"]
@@ -22,14 +32,14 @@ graph TB
 
     subgraph Gateway["Trust Gateway"]
         Auth["Auth Manager<br/>HMAC-SHA256 + RBAC"]
-        Privacy["Privacy Shield<br/>11 secret patterns"]
+        Privacy["Privacy Shield<br/>Multiple secret patterns"]
         RateLimit["Rate Limiter<br/>Sliding window"]
         Security["Security Headers<br/>CSP, HSTS"]
     end
 
     subgraph Engine["Core Engine"]
         CortexEngine["CortexEngine<br/>(Composite Orchestrator)"]
-        AsyncEngine["AsyncCortexEngine<br/>(Native Async + Pool)"]
+        AsyncEngine["CortexEngine<br/>(async methods + pool)"]
         FactManager["FactManager"]
         EmbeddingManager["EmbeddingManager"]
         ConsensusManager["ConsensusManager"]
@@ -49,7 +59,7 @@ graph TB
     end
 
     subgraph Services["Platform Services"]
-        Daemon["Self-Healing Daemon<br/>13 monitors"]
+        Daemon["Self-Healing Daemon<br/>Multiple monitors"]
         Compactor["Compaction Sidecar"]
         Sync["Sync Engine"]
         Notifications["Notification Bus"]
@@ -159,17 +169,19 @@ Para más detalles, consulta: [**OMEGA_MANIFOLD.md**](https://github.com/borjamo
 
 ## Module Reference
 
+Paths below are relative to the `cortex/` package root unless noted otherwise.
+
 ### Engine Layer
 
 | Module | Purpose |
 |:---|:---|
 | `engine/__init__.py` | `CortexEngine` — Composite orchestrator (sync + async) |
-| `engine_async.py` | `AsyncCortexEngine` — Native async for REST API |
+| `engine/search_mixin.py` | Semantic search over persisted facts |
 | `engine/store_mixin.py` | `store()`, `store_many()`, `deprecate()`, `update()` |
 | `engine/query_mixin.py` | `search()`, `recall()`, `history()` |
-| `engine/consensus_mixin.py` | `vote()`, `get_votes()` |
-| `engine/sync_compat.py` | Synchronous fallbacks for CLI |
-| `ledger.py` | Hash chain + Merkle tree management (`SovereignLedger`) |
+| `engine/transaction_mixin.py` | Transaction history, checkpoints, and ledger verification |
+| `engine/sync_mixin.py` | Synchronous compatibility helpers |
+| `ledger/` | Hash chain + Merkle tree management (`SovereignLedger`) |
 | `engine/snapshots.py` | Database snapshot creation/restoration |
 | `engine/models.py` | `Fact` data model and row mapping |
 
@@ -177,13 +189,13 @@ Para más detalles, consulta: [**OMEGA_MANIFOLD.md**](https://github.com/borjamo
 
 | Module | Purpose |
 |:---|:---|
-| `api/` | FastAPI application with CORS, rate limiting, security headers |
-| `routes/facts.py` | CRUD + Voting endpoints |
-| `routes/search.py` | Semantic + Graph-RAG search |
+| `api/core.py` | FastAPI bootstrap, middleware, and fail-closed local storage gating |
+| `routes/__init__.py` | Core vs experimental route mounting |
+| `routes/facts.py` | Core fact CRUD, recall, and verification-adjacent endpoints |
+| `routes/ledger.py` | Ledger status, verification, and checkpoint endpoints |
 | `routes/admin.py` | API key management + system status |
-| `routes/stripe.py` | Stripe webhook handler for billing |
 | `auth/` | HMAC-SHA256 authentication + RBAC |
-| `gate/` | Rate limiting, validation, request filtering |
+| `api/middleware.py` | Rate limiting, validation, and request filtering |
 
 ### Search & Embeddings
 
@@ -223,7 +235,7 @@ Para más detalles, consulta: [**OMEGA_MANIFOLD.md**](https://github.com/borjamo
 | `timing/` | Heartbeat-based time tracking |
 | `telemetry/` | OpenTelemetry-compatible span tracing |
 | `mcp/` | Model Context Protocol server |
-| `cli/` | 90+ CLI commands via Click |
+| `cli/` | Broad Click-based CLI surface |
 | `migrations/` | Versioned schema migrations |
 | `storage/` | SQLite + Turso storage backends |
 
@@ -414,7 +426,7 @@ erDiagram
 | **Authorization** | RBAC: `SYSTEM`, `ADMIN`, `AGENT`, `VIEWER` |
 | **Tenant Isolation** | All queries scoped by `tenant_id` |
 | **Data Integrity** | SHA-256 hash chain + Merkle trees |
-| **Privacy** | 11-pattern secret detection at ingress |
+| **Privacy** | Multi-pattern secret detection at ingress |
 | **Secrets** | AES-256-GCM encrypted vault |
 | **Code Safety** | AST Sandbox for LLM-generated code |
 | **Rate Limiting** | Sliding window per IP |
@@ -425,7 +437,7 @@ erDiagram
 ## Testing
 
 ```bash
-# All tests (1,621+ functions, 60s timeout)
+# Full test suite
 make test
 
 # Fast tests only (no torch imports)
@@ -437,4 +449,4 @@ make test-slow
 
 **Isolation**: Tests use `config.reload()` + autouse fixtures for zero state leakage.
 
-**Coverage**: 1,621+ test functions covering engine, API, CLI, consensus, search, and security.
+**Coverage**: Broad automated coverage across engine, API, CLI, consensus, search, and security.

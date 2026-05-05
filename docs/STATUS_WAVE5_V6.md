@@ -25,16 +25,17 @@ y qué ha sido superado por la arquitectura v6.
 | Feature | Estado | Evidencia |
 |---|---|---|
 | Merkle Tree (MerkleTree class) | ✅ **IMPLEMENTADO** | `cortex/consensus/merkle.py` — CORTEX v5.0 header, producción |
-| Hash-chain ledger | ✅ **IMPLEMENTADO** | `cortex/consensus/ledger.py` |
+| Hash-chain ledger | ✅ **IMPLEMENTADO** | `cortex/ledger/` (canónico) + `cortex/consensus/ledger.py` (bridge de compatibilidad) |
 | Vote ledger | ✅ **IMPLEMENTADO** | `cortex/consensus/vote_ledger.py` |
 | Byzantine consensus | ✅ **IMPLEMENTADO** | `cortex/consensus/byzantine.py` + `cortex/swarm/byzantine.py` |
 | Merkle checkpoints periódicos (cada 1000 tx) | ⚠️ **PARCIAL** | Merkle existe; scheduler de checkpoints automáticos — verificar |
-| CLI `cortex ledger checkpoint/verify/export` | ❌ **PENDIENTE** | No encontrado en `cortex/cli/` |
+| CLI `cortex trust-ledger verify` | ✅ **IMPLEMENTADO** | `cortex/cli/ledger.py` se monta como `trust-ledger verify` en la surface core |
+| CLI checkpoint/export de ledger | ⚠️ **PARCIAL** | `checkpoint` existe en `cortex/cli/ledger.py`, pero la surface core actual no lo expone por defecto; `export` no aparece en la CLI actual |
 | External anchoring (blockchain/timestamp) | ❌ **NO APLICA** | Deferido a Wave 6+ |
-| `merkle_roots` table in schema | ⚠️ **VERIFICAR** | `mig_ledger.py` existe — contenido a auditar |
+| `merkle_roots` table in schema | ✅ **IMPLEMENTADO** | `cortex/ledger/ledger_core.py` + `cortex/migrations/mig_ledger.py` |
 
-**Deuda concreta:** Falta el CLI `cortex ledger` con subcomandos `checkpoint`, `verify`, `export`.  
-El código Merkle existe; solo falta la interfaz de usuario.
+**Deuda concreta:** La interfaz ya no está ausente, pero sí fragmentada.
+La surface core expone `cortex trust-ledger verify`; `checkpoint` existe en `cortex/cli/ledger.py` pero queda fuera del allowlist core actual, y `export` no aparece en la CLI vigente.
 
 ---
 
