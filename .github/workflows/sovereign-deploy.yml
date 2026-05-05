@@ -85,6 +85,7 @@ jobs:
     needs: [change-scope]
     if: needs.change-scope.outputs.automation_only != 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -201,7 +202,24 @@ jobs:
 
       - name: Unit tests
         if: steps.scope.outputs.release_only != 'true'
-        run: pytest tests/ -q --tb=short --junitxml=test-results.xml
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mapfile -t changed_tests < <(
+            printf '%s\n' "${{ steps.scope.outputs.python_files }}" |
+            grep -E '^tests/.*\.py$' || true
+          )
+
+          if [ "${#changed_tests[@]}" -gt 0 ]; then
+            pytest_targets=("${changed_tests[@]}")
+          else
+            pytest_targets=(tests/)
+          fi
+
+          python -X faulthandler -m pytest "${pytest_targets[@]}" -q --tb=short \
+            --timeout=180 --timeout-method=thread \
+            --junitxml=test-results.xml
 
       - name: MEJORAlo Score Check
         if: steps.scope.outputs.release_only != 'true'
