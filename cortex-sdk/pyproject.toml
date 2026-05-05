@@ -3,16 +3,16 @@ requires = ["setuptools>=68.0", "wheel"]
 build-backend = "setuptools.backends._legacy:_Backend"
 
 [project]
-name = "cortex-persist"
+name = "cortex-persist-cloud"
 version = "0.1.0"
-description = "Python SDK for the CORTEX Persist API — persistent memory for AI agents"
+description = "Python Cloud SDK for the hosted CORTEX Persist API"
 readme = "README.md"
 license = {text = "Apache-2.0"}
 requires-python = ">=3.9"
 authors = [{name = "MOSKV", email = "borja@moskv.com"}]
-keywords = ["ai", "memory", "agents", "semantic-search", "cortex"]
+keywords = ["ai", "memory", "agents", "semantic-search", "cortex", "cloud-sdk"]
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3",
