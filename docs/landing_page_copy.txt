@@ -108,9 +108,9 @@ Local-First Runtime
 
 Start locally with SQLite and sqlite-vec. Extend seamlessly to cloud vector backends when scale requires it.
 
-Audit-Ready History
+Reviewable History
 
-Support internal review, compliance workflows, and forensic post-mortems with hard evidence instead of reconstruction theater.
+Support internal review, compliance workflows, and forensic post-mortems with evidence instead of reconstruction theater.
 
 ⸻
 
@@ -187,7 +187,7 @@ Tamper-evident memory and decision lineage for AI agents.
 
 README opening
 
-CORTEX-Persist is a local-first memory and trust layer for AI systems that need persistent context, cryptographic lineage, and audit-ready history.
+CORTEX-Persist is a local-first memory and trust layer for AI systems that need persistent context, cryptographic lineage, and reviewable history.
 
 ⸻
 
@@ -237,4 +237,4 @@ Your AI can act. Now make it accountable.
 
 Sub
 
-Persistent memory, tamper-evident lineage, and audit-ready history for systems that cannot afford amnesia.
+Persistent memory, tamper-evident lineage, and audit-supporting history for systems that cannot afford amnesia.
