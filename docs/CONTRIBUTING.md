@@ -39,7 +39,7 @@ Schema changes must never be treated as cosmetic refactors.
 
 ## Ledger Change Protocol
 
-Before changing `ledger.py` or any hash-continuity behavior:
+Before changing `cortex/ledger/` or any hash-continuity behavior:
 
 1. Read current ledger tests first.
 2. Identify whether the change affects:

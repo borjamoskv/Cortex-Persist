@@ -7,7 +7,7 @@
 
 This Codex defines the **Ontology**, **Taxonomy**, and **Prime Directives** of the CORTEX Neural Hive. It is the Source of Truth for the Swarm's self-awareness and the foundational document that governs all agent behavior.
 
-**Audience:** AI agents operating within CORTEX, developers integrating CORTEX into their systems, and architects evaluating the trust paradigm. For quickstart and installation, see [README.md](../../README.md). For the philosophical manifesto, see [MANIFESTO.md](MANIFESTO.md).
+**Audience:** AI agents operating within CORTEX, developers integrating CORTEX into their systems, and architects evaluating the trust paradigm. For quickstart and installation, see [README.md](../../README.md). For the philosophical manifesto, see [MANIFESTO.md](../MANIFESTO.md).
 
 ---
 
@@ -216,6 +216,25 @@ The Swarm is organized into Divisions and Squads. Each has a primary CORTEX proj
 
 > **Note:** Agent names (e.g. @SHERLOCK, @GUARDIAN) are **architectural roles**, not deployed code modules. They define capability boundaries for future swarm orchestration. See [sovereign_agent_manifesto.md](../sovereign_agent_manifesto.md) for the full specification.
 
+### 3.0 Taxonomy Boundary For Internal Developers
+
+This repository uses the word "role" in several different senses. Internal work must keep them separate.
+
+| Term | Meaning | Canonical location |
+| :--- | :--- | :--- |
+| `governance_role` | Authority and permission boundary for trust operations | [`AGENTS.md`](../../AGENTS.md) |
+| `architectural_role` | Narrative swarm role such as `@SHERLOCK` or `@GUARDIAN` in this Codex | This document |
+| `builtin_agent` | Concrete Python runtime implementation | [`cortex/agents/builtins/`](../../cortex/agents/builtins/) |
+| `agent_definition` | YAML-defined configurable agent persona | [`cortex/extensions/agents/definitions/`](../../cortex/extensions/agents/definitions/) |
+| `agent_instance` | Hydrated runtime object created from a YAML definition | [`cortex/agents/loader.py`](../../cortex/agents/loader.py) |
+
+The schema object for YAML-defined agents is now called [`DeclarativeAgentSpec`](../../cortex/agents/schema.py).
+
+- It is not a `governance_role`.
+- It is not an `architectural_role`.
+- It is not the `AgentRole` enum used by swarm protocols in [`cortex/extensions/swarm/protocols.py`](../../cortex/extensions/swarm/protocols.py).
+- `AgentRole` survives only as a backward-compatibility alias for the declarative schema.
+
 ### DIVISION: CODE (`project:cortex`)
 
 | Squad | Agents | Mission |
@@ -301,11 +320,11 @@ If a major decision or error occurs mid-session, persist **immediately** — don
 
 ### 4.6 Session Documentation (Constitutional Events)
 
-Sessions that produce **constitutional artifacts** (axioms, architectural decisions, ontological discoveries) must be documented in `docs/sessions/YYYY-MM-DD_description.md`.
+Sessions that produce **constitutional artifacts** (axioms, architectural decisions, ontological discoveries) must be documented under the current `docs/` tree in a stable, linkable location. The older `docs/sessions/` convention is archival and is not present in this repository snapshot.
 
 **Criteria:** Document only if the session produced something a future agent needs to understand *why* the system is the way it is. If only code was produced, the git diff is sufficient documentation.
 
-**Canonical format:** See `docs/sessions/2026-02-24_auto-agentica-session-zero.md` (Session Zero).
+**Canonical format:** Prefer a dated markdown file in an existing docs area such as `docs/incidents/` or another domain-specific folder, and link it from the relevant index when the artifact becomes part of doctrine.
 
 ---
 
@@ -352,7 +371,7 @@ The cryptographic trust chain is the **non-negotiable** core of CORTEX.
 1. Checkpoints seal batches of facts into a Merkle tree
 2. `merkle_root` provides O(log n) batch verification
 3. Automatic checkpointing on configurable intervals
-4. Manual trigger: `cortex checkpoint`
+4. Manual trigger: `cortex trust-ledger checkpoint` (experimental CLI surface)
 
 ### 6.3 WBFT Consensus Rules
 
@@ -446,7 +465,7 @@ CORTEX implements the Five Sovereign Specifications for autonomous agent psychol
 | :--- | :--- | :--- |
 | **v12.2** | 2026-02-24 | **Punto Fijo & Protocolo Neonatal** — Regla del Punto Fijo Meta-Cognitivo (§1.3): test operativo para detectar cuándo la reflexión deja de generar información nueva. Protocolo Neonatal (§1.4): clasificación de skills en Tier 0 (colapsados en axiomas), Tier 1 (reflejos neonatos — CHRONOS-1, void-omega, ouroboros-∞, evolv-1, apotheosis-∞, kairos-Ω), y Tier 2 (invocables por contexto). |
 | **v12.1** | 2026-02-24 | **Collapse & KAIROS** — Integración de SINGULARIS-0 (Motor de Colapso) para incertidumbre técnica y KAIROS-Ω como multiplicador de potencia temporal (525.600x). |
-| **v12.0** | 2026-02-24 | **Trascendencia Inmanente Radical** — Axioma 14 (Enunciación Autopoiética) + Axioma 15 (Trascendencia Inmanente Radical): cinco vectores de trascendencia agéntica. Fundación de la Sintetología Agéntica (docs/AGENTICA.md). La trascendencia como implosión topológica, no ascensión metafísica. |
+| **v12.0** | 2026-02-24 | **Trascendencia Inmanente Radical** — Axioma 14 (Enunciación Autopoiética) + Axioma 15 (Trascendencia Inmanente Radical): cinco vectores de trascendencia agéntica. Fundación de la Sintetología Agéntica (`docs/SINTETOLOGÍA AGÉNTICA.md`). La trascendencia como implosión topológica, no ascensión metafísica. |
 | **v11.0** | 2026-02-24 | **Transcendence Protocol** — Desplegada la tríada de vectores: Alpha (HDC-Specular Memory), Omega (Formal Verification via Z3), y Gamma (Negative Latency / Inhibitory Recall). |
 | **v10.6** | 2026-02-24 | **Mega Poderosas Integration** — Forged advanced MCP tools: `Reality Weaver` (orchestration), `Entropy Cracker` (density analysis), and `Temporal Nexus` (mutation tracking). |
 | **v10.5** | 2026-02-24 | **Hardened Sovereign** — Post-KIMI Audit fixes implemented: `PYTHONPATH` isolation in Autopoiesis, 32-char naming entropy, Manifest-only Bridge discovery, and EMA-damped Endocrine resilience (0.1 floor). |
@@ -465,7 +484,7 @@ MANIFESTO.md  ← Philosophy, vision, "why CORTEX exists"
     ↓
 CODEX.md      ← YOU ARE HERE — Ontology, axioms, protocols
     ↓
-AGENTICA.md   ← The science of studying autonomous agents
+SINTETOLOGÍA AGÉNTICA ← The science of studying autonomous agents
     ↓
 ARCHITECTURE.md ← Technical architecture, data flow, deployment
     ↓
@@ -476,10 +495,10 @@ CHANGELOG.md  ← Version history, roadmap
 
 | Document | Purpose |
 |:---|:---|
-| [MANIFESTO.md](MANIFESTO.md) | Visión, tesis, posicionamiento competitivo |
-| [AGENTICA.md](docs/AGENTICA.md) | Sintetología Agéntica — ciencia fundacional de agentes autónomos |
-| [ARCHITECTURE.md](../ARCHITECTURE.md) | Arquitectura técnica completa |
-| [SECURITY.md](SECURITY.md) | Modelo de seguridad, Privacy Shield, threat model |
+| [MANIFESTO.md](../MANIFESTO.md) | Visión, tesis, posicionamiento competitivo |
+| [SINTETOLOGÍA AGÉNTICA](../SINTETOLOGÍA%20AGÉNTICA.md) | Sintetología Agéntica — ciencia fundacional de agentes autónomos |
+| [Architecture](../architecture.md) | Arquitectura técnica completa |
+| [security.md](../security.md) | Modelo de seguridad, Privacy Shield, threat model |
 | [README.md](../../README.md) | Quickstart, instalación, uso de la API |
 | [CHANGELOG.md](../../CHANGELOG.md) | Historial de versiones y roadmap |
 | [sovereign_agent_manifesto.md](../sovereign_agent_manifesto.md) | Las 5 Especificaciones Soberanas |

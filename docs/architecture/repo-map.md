@@ -8,12 +8,10 @@ Any directory not listed under **In Repo** belongs outside this repository by de
 **What lives here:**
 - `cortex/` — core engine, persistence, verification, coordination, runtime
 - `cortex-sdk/` — typed Python client SDK
-- `cortex-hypervisor/` — scheduling and daemon coordination
 - `tests/` — automated test suite
 - `docs/` — architecture, security, axioms, contributing, operations
-- `scripts/` — repo tooling (boundary guard, inventory, CI helpers)
+- `scripts/` — repo tooling, inventories, and maintenance helpers
 - `api/` — FastAPI routes and OpenAPI surface
-- `compliance-check/` — EU AI Act compliance tooling
 - `benchmarks/` — performance validation
 - `config/` — runtime configuration
 - `examples/` — minimal usage examples
@@ -43,14 +41,14 @@ Any directory not listed under **In Repo** belongs outside this repository by de
 | `ShadowStudio` | Studio surface | personal repo |
 | `cortex_eguzkia/` | MOSKV-universe expansion | `cortex-labs` repo |
 | `cortex_iturria/` | MOSKV-universe expansion | `cortex-labs` repo |
-| `cortex-hypervisor/` | Scheduling daemon — dedup with `cortex/daemon` | Merge into `cortex/` or `cortex-labs` |
-| `cortex-sdk/` | Client SDK — dedup with `cortex/` public surface | Merge into `sdk/python/` or standalone repo |
+| `cortex-hypervisor/` | Historical scheduling surface not present in this tree snapshot | Keep external or archive explicitly |
+| `cortex-sdk/` | Client SDK — dedup with `cortex/` public surface | Merge into `sdks/python/` or standalone repo |
 
 ## Enforcement
 
-The boundary is enforced programmatically:
-- `scripts/check_core_boundary.py` — local and CI gate
-- `.github/workflows/core-boundary.yml` — blocks any PR/push that reintroduces forbidden dirs
+The boundary is currently enforced by repository review discipline and targeted inventory audits.
+This tree snapshot does **not** include a dedicated `scripts/check_core_boundary.py` gate or a
+`.github/workflows/core-boundary.yml` workflow.
 
 ## Non-Goals
 

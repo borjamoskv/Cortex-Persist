@@ -11,9 +11,29 @@ Skills que se registran solos, declaran capacidades y se componen bajo demanda.
 
 from cortex.extensions.skills.registry import SkillManifest, SkillRegistry
 from cortex.extensions.skills.router import SkillRouter
+from cortex.extensions.skills.taxonomy import (
+    ANTIGRAVITY_CORTEX_NEXUS_SKILL,
+    ANTIGRAVITY_CORTEX_NEXUS_TAG,
+    CANONICAL_DANGER_LEVELS,
+    CANONICAL_SKILL_CATEGORIES,
+    CANONICAL_SKILL_CLASSIFICATIONS,
+    category_for_agent_domain,
+    normalize_danger_level,
+    normalize_skill_category,
+    normalize_skill_classification,
+)
 
 __all__ = [
+    "ANTIGRAVITY_CORTEX_NEXUS_SKILL",
+    "ANTIGRAVITY_CORTEX_NEXUS_TAG",
+    "CANONICAL_DANGER_LEVELS",
+    "CANONICAL_SKILL_CATEGORIES",
+    "CANONICAL_SKILL_CLASSIFICATIONS",
     "SkillManifest",
     "SkillRegistry",
     "SkillRouter",
+    "category_for_agent_domain",
+    "normalize_danger_level",
+    "normalize_skill_category",
+    "normalize_skill_classification",
 ]

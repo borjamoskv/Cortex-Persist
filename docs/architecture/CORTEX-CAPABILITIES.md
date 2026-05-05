@@ -255,7 +255,7 @@ The system can evolve structurally without severing continuity with prior state.
 CORTEX supports escalation across model tiers without resetting state or discarding prior reasoning context.
 
 ```python
-# cortex/llm/cognitive_handoff.py
+# cortex/extensions/llm/cognitive_handoff.py
 ```
 
 ```

@@ -2,16 +2,24 @@
 
 from __future__ import annotations
 
+import asyncio
+import dataclasses
 import logging
 import time
 from typing import Any
 
-from cortex.extensions.daemon.models import (
-    ThermodynamicAlert,  # type: ignore[reportAttributeAccessIssue]
-)
 from cortex.memory.homeostasis import EntropyPruner
 
 logger = logging.getLogger("moskv-daemon")
+
+
+@dataclasses.dataclass
+class ThermodynamicAlert:
+    """Alert describing a thermodynamic memory pruning event."""
+
+    tenant_id: str
+    pruned_count: int
+    message: str
 
 
 class ThermodynamicMemoryMonitor:
@@ -32,6 +40,22 @@ class ThermodynamicMemoryMonitor:
 
     def check(self) -> list[ThermodynamicAlert]:
         """Execute thermodynamic pruning cycle over enrolled tenants."""
+        try:
+            asyncio.get_running_loop()
+        except RuntimeError:
+            return asyncio.run(self.check_async())
+
+        # Already inside an event loop.
+        if not hasattr(self, "_bg_tasks"):
+            self._bg_tasks: set[asyncio.Task[list[ThermodynamicAlert]]] = set()
+
+        task = asyncio.create_task(self.check_async())
+        self._bg_tasks.add(task)
+        task.add_done_callback(self._bg_tasks.discard)
+        return []
+
+    async def check_async(self) -> list[ThermodynamicAlert]:
+        """Async version of check()."""
         if not self.manager or getattr(self.manager, "_l2", None) is None:
             return []
 
@@ -46,17 +70,7 @@ class ThermodynamicMemoryMonitor:
                 continue
 
             try:
-                import asyncio
-
-                # For safety, we run it within the current thread loop or default loop
-                try:
-                    loop = asyncio.get_running_loop()
-                    future = asyncio.run_coroutine_threadsafe(
-                        pruner.prune_cycle(tenant_id=tenant), loop
-                    )
-                    pruned_count = future.result(timeout=60.0)
-                except RuntimeError:
-                    pruned_count = asyncio.run(pruner.prune_cycle(tenant_id=tenant))
+                pruned_count = await pruner.prune_cycle(tenant_id=tenant)
 
                 self._last_runs[tenant] = now
 
@@ -74,7 +88,7 @@ class ThermodynamicMemoryMonitor:
                         pruned_count,
                     )
 
-            except Exception as e:  # noqa: BLE001
-                logger.error("Thermodynamic Memory monitor failed on %s: %s", tenant, e)
+            except (RuntimeError, ValueError, OSError):
+                logger.exception("Thermodynamic Memory monitor failed on %s", tenant)
 
         return alerts

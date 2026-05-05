@@ -4,6 +4,11 @@
 > *La memoria activa no almacena el pasado; predice y muta el futuro.*
 > *Protocolo de diseño arquitectónico para CORTEX v4.*
 
+> Historical design note. This document describes a v4-era target topology, not the
+> current canonical package map. For the live memory and policy surfaces in this
+> tree, prefer `docs/architecture.md`, `docs/product-surface.md`,
+> `cortex/memory/manager.py`, and `cortex/extensions/policy/memory_os.py`.
+
 ## 1. El Problema Ontológico: El "Olvido Catastrófico" y la Latencia Disociada
 
 Las arquitecturas de memoria RAG y de bases de datos vectoriales tradicionales adolecen de un defecto termodinámico fatal: la **disociación computacional de Von Neumann**. El sistema de razonamiento (LLM) y el sistema de retención de datos (Vector DB/JSON) operan en planos aislados. Para recordar, la red neuronal debe instanciar contexto inerte en cada inferencia, un evento computacionalmente síncrono y propenso a ruido que inevitablemente diluye la atención y causa alucinación de contexto o regresión de habilidades (*Olvido Catastrófico*).

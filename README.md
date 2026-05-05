@@ -66,7 +66,7 @@ Traditional logging and standard vector stores fail the epistemic containment te
 ### What CORTEX does NOT replace (Non-Goals)
 
 - **CORTEX is not a Semantic Search primary DB:** Continue using Qdrant, Pinecone, or Milvus for purely ephemeral RAG chunks. CORTEX stores the *decisions* and core *facts*.
-- **CORTEX is not an Observability Platform:** Continue using Datadog or ELK for server metrics, APM, and basic string logs. 
+- **CORTEX is not an Observability Platform:** Continue using Datadog or ELK for server metrics, APM, and basic string logs.
 - **CORTEX does not stop hallucinations:** A cryptographically logged lie from an LLM is still a lie. It is merely an *auditable* lie, flagged if it contradicts prior sealed facts.
 
 ## Deployment Matrix
@@ -217,3 +217,33 @@ CORTEX is governed by a strict zero-trust philosophy regarding generative AI out
 Apache License 2.0. See [LICENSE](LICENSE).
 
 *Built by [borjamoskv.com](https://borjamoskv.com) · [cortexpersist.com](https://cortexpersist.com)*
+
+---
+## Verification Membrane (primitive)
+- Boundary where untrusted input becomes sealed, verifiable state.
+- Nothing crosses unverified.
+- Every write produces proof.
+
+## Strict mode (recommended)
+Enforce:
+- reject unverifiable writes
+- require idempotency_key
+- enforce schema hash consistency
+
+## Proof of tampering (should fail)
+```bash
+# example manual mutation (depends on backend)
+sqlite3 cortex.db "UPDATE facts SET content='Approved' WHERE id=1"
+
+cortex verify
+```
+Expected (conceptual):
+```
+[✘] TAMPER DETECTED: hash mismatch
+```
+
+---
+## Multi-language summary
+EN: Tamper-evident memory for AI agents. Proof at decision time.
+ES: Memoria a prueba de manipulaciones para agentes de IA. Prueba del estado en tiempo de decisión.
+ZH: 面向 AI 代理的防篡改记忆。证明决策时刻的状态。

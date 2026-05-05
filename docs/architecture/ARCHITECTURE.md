@@ -1,9 +1,12 @@
 # CORTEX v7 — Evolución Autopoiética
 
+> This document is a deep architecture snapshot, not the recommended adoption surface.
+> For the current public product boundary, see [`docs/product-surface.md`](../product-surface.md).
+
 > **Version:** 7.0.0 · **Codename:** *Autopoiesis*
 > **Updated:** 2026-02-24 · **Author:** MOSKV-1 v5 (Antigravity)
 > **Status:** Active development — Biological core integration
-> **Codebase:** 306 Python modules · ~46,200 LOC · Apache 2.0
+> **Codebase:** Large Python codebase · Apache 2.0
 
 ---
 
@@ -13,7 +16,7 @@
 ┌──────────────────────────────────────────────────────────────────────────────────┐
 │                              INTERFACE LAYER                                     │
 │                                                                                  │
-│   CLI (Click — 90+ commands)     REST API (FastAPI — 55+ endpoints, port 8484)    │
+│   CLI (broad operator surface)   REST API (FastAPI surface, port 8484)             │
 │   MCP Server (stdio)           GraphQL (Phase 2)      ADK Runner (cortex-adk)    │
 │   Gateway (REST + Telegram)                                                      │
 ├──────────────────────────────────────────────────────────────────────────────────┤
@@ -41,11 +44,11 @@
 │                                                                                  │
 │  Tripartite Memory: L1 (Working) → L2 (Vector) → L3 (Event Ledger)              │
 │  Episodic Memory · KnowledgeGraph · Compaction Strategies                        │
-│  Privacy Shield (classifier.py) · AST Sandbox · ImmutableLedger                  │
+│  Privacy Shield (storage/classifier.py) · AST Sandbox · ImmutableLedger          │
 ├──────────────────────────────────────────────────────────────────────────────────┤
 │                              TRUST & INTEGRITY LAYER                             │
 │                                                                                  │
-│   SHA-256 Hash-Chained Transaction Ledger (engine/ledger.py)                     │
+│   SHA-256 Hash-Chained Transaction Ledger (ledger/ledger_core.py)                │
 │   Merkle Tree Checkpoints (consensus/merkle.py)                                  │
 │   Vote Ledger (consensus/vote_ledger.py + byzantine.py)                          │
 │   Canonical JSON Normalization (canonical.py)                                    │
@@ -54,7 +57,7 @@
 │              │                                                                   │
 │ SQLite/WAL   │  AlloyDB/PostgreSQL (L3 distributed)     Qdrant Cloud (L2 vec)    │
 │ sqlite-vec   │  Redis (L1 cache layer)                  Turso/LibSQL (Edge CDC)  │
-│ sqlite-fts5  │  Neo4j (KnowledgeGraph backend)          Storage Router           │
+│ sqlite-fts5  │  Legacy graph backend paths              Storage Router           │
 ├──────────────┴───────────────────────────────────────────────────────────────────┤
 │                              SIDECAR SERVICES                                    │
 │                                                                                  │
@@ -99,7 +102,7 @@ class CortexEngine(SyncCompatMixin, SyncOpsMixin):
 
 | Module | Purpose |
 |:---|:---|
-| `engine/ledger.py` | `ImmutableLedger` — SHA-256 hash-chained transaction log |
+| `ledger/ledger_core.py` | Sovereign ledger core — SHA-256 hash-chained transaction log |
 | `engine/snapshots.py` | Snapshot export and state serialization |
 | `engine/models.py` | `Fact` dataclass, `row_to_fact()` transformer |
 
@@ -242,7 +245,7 @@ Three-layer cryptographic isolation — data from Tenant A is mathematically ina
 
 ## 5. Trust Layer — Cryptographic Integrity
 
-### 5.1 Hash-Chained Transaction Ledger (`engine/ledger.py`)
+### 5.1 Hash-Chained Transaction Ledger (`ledger/ledger_core.py`)
 
 Every fact mutation appends a transaction record:
 ```
@@ -260,11 +263,11 @@ Periodic batch verification. `merkle_roots` table stores signed root hashes.
 
 ### 5.3 Privacy Shield (`storage/classifier.py`)
 
-Regex-based 11-pattern secret detector with 3-tier risk scoring runs at every data ingress point. Sensitive content is flagged, scored, and routed to local-only storage. Zero-leakage guarantee.
+Regex-based multi-tier secret and sensitive-data detection runs at every data ingress point. Sensitive content is flagged, scored, and routed conservatively, with local-only handling for the highest-risk material.
 
-### 5.4 AST Sandbox (`sandbox.py`)
+### 5.4 AST Sandbox (`utils/sandbox.py`)
 
-LLM-generated code is never `exec()`'d raw. AST parsing validates structure before execution — prevents prompt-injection-to-code-execution attacks. Full module at 12.7KB with comprehensive safety checks.
+LLM-generated code is never `exec()`'d raw. AST parsing validates structure before execution and prevents prompt-injection-to-code-execution attacks.
 
 ---
 
@@ -360,13 +363,13 @@ Full graph intelligence system with pluggable backends:
 |:---|:---|
 | `graph/backends/sqlite.py` | Default — SQLite adjacency list |
 | `graph/backends/sqlite_sync.py` | Synchronous SQLite variant |
-| `graph/backends/neo4j.py` | Neo4j driver (optional dependency) |
+| `graph/backends/neo4j.py` | Legacy/experimental backend path kept in the repo |
 
 **Outbox Pattern**: `CortexEngine.process_graph_outbox_async()` asynchronously processes pending graph operations, decoupling fact storage from graph updates.
 
 ---
 
-## 10. MEJORAlo Code Quality Engine (`mejoralo/`)
+## 10. MEJORAlo Code Quality Engine (`extensions/mejoralo/`)
 
 Autonomous X-Ray 13D code quality system (12 modules):
 
@@ -390,17 +393,17 @@ Autonomous X-Ray 13D code quality system (12 modules):
 
 | Module | Purpose |
 |:---|:---|
-| `mejoralo/scan.py` | X-Ray 13D scanner (11.1KB) |
-| `mejoralo/heal.py` | Auto-healing engine (10.8KB) |
-| `mejoralo/heal_prompts.py` | LLM prompts for code healing |
-| `mejoralo/engine.py` | Orchestration engine |
-| `mejoralo/ship.py` | Ship verification (7 Seals) |
-| `mejoralo/swarm.py` | LEGIØN integration for parallel analysis |
-| `mejoralo/ledger.py` | Score history persistence |
-| `mejoralo/stack_detector.py` | Technology stack detection |
-| `mejoralo/constants.py` | Thresholds and configuration |
-| `mejoralo/models.py` | Data models |
-| `mejoralo/utils.py` | Shared utilities |
+| `extensions/mejoralo/scan.py` | X-Ray scanner |
+| `extensions/mejoralo/heal.py` | Auto-healing engine |
+| `extensions/mejoralo/heal_prompts.py` | LLM prompts for code healing |
+| `extensions/mejoralo/engine.py` | Orchestration engine |
+| `extensions/mejoralo/ship.py` | Ship verification helpers |
+| `extensions/mejoralo/swarm.py` | LEGIØN integration for parallel analysis |
+| `extensions/mejoralo/ledger.py` | Score history persistence |
+| `extensions/mejoralo/stack_detector.py` | Technology stack detection |
+| `extensions/mejoralo/constants.py` | Thresholds and configuration |
+| `extensions/mejoralo/models.py` | Data models |
+| `extensions/mejoralo/utils.py` | Shared utilities |
 
 ---
 
@@ -442,13 +445,13 @@ Pluggable event notification system (6 modules):
 
 | Backend | Module | Usage |
 |:---|:---|:---|
-| **SQLite + WAL** | `db.py` | Primary local store — hardened factory with 6 pragma enforcements |
+| **SQLite + WAL** | `db.py` | Primary local store — hardened connection factory |
 | **sqlite-vec** | via `engine/__init__.py` | 384-dim vector search, loaded at engine init |
 | **sqlite-fts5** | via `search/text.py` | Full-text search with BM25 ranking |
-| **AlloyDB / PostgreSQL** | `auth/backends.py` | Distributed L3 target (v6), Row-Level Security |
-| **Qdrant** | `memory/vector_store.py` | Vector store — local or cloud, tenant-filtered |
+| **AlloyDB / PostgreSQL** | `auth/backends.py` | Distributed/advanced target path |
+| **Qdrant** | `memory/vector_store.py` | Advanced vector-store integration path |
 | **Turso / LibSQL** | `storage/turso.py` | Edge sync via `TursoBackend`, autonomous CDC |
-| **Neo4j** | `graph/backends/neo4j.py` | Knowledge graph backend (optional dependency) |
+| **Neo4j** | `graph/backends/neo4j.py` | Legacy/experimental graph backend path |
 
 ### Connection Factory (`db.py`)
 
@@ -596,7 +599,10 @@ POST   /v1/langbase/sync            Sync
 GET    /v1/langbase/status          Status
 ```
 
-### CLI (`cortex` command — 90+ commands)
+### CLI (`cortex` command — core plus experimental operator surface)
+
+The default CLI exposes the core product commands. Many operator commands below are available only
+when the experimental CLI surface is enabled with `CORTEX_ENABLE_EXPERIMENTAL_CLI=1`.
 
 ```
 ── Core Data ──────────────────────────────────
@@ -609,17 +615,17 @@ cortex delete    — Delete fact
 cortex history   — Fact history
 
 ── Trust & Integrity ──────────────────────────
-cortex verify    — Ledger verification
-cortex vote      — Submit consensus vote
-cortex ledger    — Ledger operations
-cortex audit-trail — View audit trail
+cortex verify <fact-id> — Fact verification
+cortex trust-ledger verify — Ledger hash-chain verification
+cortex vote_v2 / consensus helpers — Experimental consensus operations
+cortex audit — Experimental audit trail and extended audits
 
 ── Compaction & Maintenance ───────────────────
 cortex purge     — Purge deprecated facts
 cortex entropy   — Entropy analysis
-cortex sync      — Cloud synchronization
-cortex migrate   — Schema migration
-cortex migrate-graph — Graph migration
+cortex sync      — Experimental local writeback/sync helpers
+cortex migrate   — Experimental legacy v3.1 → v4.0 import
+cortex storage-init-pg — Experimental PostgreSQL schema initialization
 
 ── Context & Episodes ─────────────────────────
 cortex context   — Context management
@@ -636,7 +642,7 @@ cortex reflect   — Self-reflection
 
 ── System ─────────────────────────────────────
 cortex init         — Initialize database
-cortex export       — Export snapshot
+cortex export       — Experimental export/snapshot helper
 cortex status       — System status
 cortex inject       — Inject data
 cortex writeback    — Write back to sources
@@ -716,7 +722,7 @@ Full neural intent analysis engine (11.2KB) — classifies and processes incomin
 
 | Step | Action |
 |:---|:---|
-| 1 | `cortex migrate v6` — adds `tenant_id` columns to all tables |
+| 1 | Apply registered `cortex/migrations/` modules for tenant-aware schema changes |
 | 2 | Backfill: assign `default` tenant to all legacy records |
 | 3 | Swap `SQLiteStorage` → `PostgreSQLStorage` in `config.yaml` |
 | 4 | Point Qdrant at remote cluster, update `QDRANT_URL` |
@@ -755,7 +761,7 @@ CORTEX follows the **Industrial Noir** design system:
 cortex/
 ├── adk/                   # Google ADK runner (5 modules)
 ├── auth/                  # Authentication + RBAC (3 modules)
-├── cli/                   # Click CLI (94 modules, 90+ commands)
+├── cli/                   # Click CLI (broad operator surface)
 ├── compaction/            # Compaction strategies
 ├── consensus/             # WBFT consensus engine (6 modules)
 ├── context/               # Context inference (4 modules)
@@ -768,12 +774,12 @@ cortex/
 ├── gate/                  # SovereignGate (5 modules)
 ├── gateway/               # REST + Telegram gateway (4 modules)
 ├── graph/                 # Knowledge graph
-│   └── backends/          # SQLite, Neo4j backends
+│   └── backends/          # SQLite + legacy/experimental backend paths
 ├── graphql/               # GraphQL schema (Phase 2)
 ├── ha/                    # High availability (4 modules)
 ├── llm/                   # LLM router + providers (5 modules)
 ├── mcp/                   # MCP server for IDEs (8 modules)
-├── mejoralo/              # X-Ray 13D code quality (12 modules)
+├── extensions/mejoralo/   # X-Ray code quality engine
 ├── memory/                # Tripartite cognitive memory (9 modules)
 │   └── vector_providers/  # Vector store provider ABC
 ├── migrations/            # Schema migrations (8 versions)
@@ -786,13 +792,13 @@ cortex/
 ├── thinking/              # ThoughtOrchestra + Fusion (8 modules)
 ├── timing/                # Time tracking (3 modules)
 ├── api.py                 # FastAPI app factory
-├── db.py                  # Sovereign Connection Factory
+├── database/core.py       # Connection factory
 ├── middleware.py           # 4 security middlewares
 ├── metrics.py             # Prometheus metrics + middleware
 ├── telemetry.py           # Zero-dep tracing
-├── sandbox.py             # AST execution sandbox
-├── neural.py              # Neural intent engine
-├── schema.py              # Database schema definitions
+├── utils/sandbox.py       # AST execution sandbox
+├── agents/neural.py       # Neural intent engine
+├── database/schema.py     # Database schema definitions
 └── ... (55 top-level modules total)
 ```
 

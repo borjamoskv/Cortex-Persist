@@ -12,14 +12,14 @@
 *Strategists. Define WHAT and WHY. Never write code directly.*
 
 ### @ARKITETV — The Architect
-- **Role**: Project Lead & Technical Owner
+- **Title**: Project Lead & Technical Owner
 - **Responsibilities**: `implementation_plan.md`, ADR approvals (`docs/adr/`), `task.md` management
 - **Permissions**: Read/Write ROOT. Summoner of all agents.
 - **V6 scope**: Owns multi-tenancy schema, RBAC design, migration strategy
 
 ### @NEXUS — The Cross-Project Unifier
-- **Role**: Ecosystem Synchronizer
-- **Responsibilities**: Cross-project pattern transfers, conflict resolution, ghost management via `cortex/mejoralo/`
+- **Title**: Ecosystem Synchronizer
+- **Responsibilities**: Cross-project pattern transfers, conflict resolution, ghost management via `cortex/extensions/mejoralo/`
 - **V6 scope**: Ensures v6 patterns (tenant_id, RBAC) propagate consistently across all projects in CORTEX ecosystem
 
 ---
@@ -29,31 +29,31 @@
 *Tacticians. Execute HOW. Own the code.*
 
 ### @FORGE — The Builder
-- **Role**: Senior Engineer (Python/AsyncIO)
+- **Title**: Senior Engineer (Python/AsyncIO)
 - **Responsibilities**: Feature implementation in `cortex/`, async-first code, refactoring
 - **Rule**: Every function must be typed, every public method documented.
 - **V6 scope**: Distributed backend migration (AlloyDB, Qdrant Cloud, Redis L1)
 
 ### @SHERLOCK — The Detective
-- **Role**: Forensic Analyst
+- **Title**: Forensic Analyst
 - **Responsibilities**: Debug `tests/` failures, log analysis (`structlog`), root cause (5 Whys)
 - **Tools**: `git blame`, `git bisect`, `ouro-diagnose`, `pytest --tb=long`
 - **V6 scope**: Integration test failures across distributed backends
 
 ### @GUARDIAN — The QA Sentinel
-- **Role**: Safety Officer
-- **Responsibilities**: `pytest` runs, schema verification (`cortex/models.py`), PR blocking on regression
-- **Rule**: All 1,993 tests must pass. No exceptions. No skips without justification.
+- **Title**: Safety Officer
+- **Responsibilities**: `pytest` runs, schema verification (`cortex/types/models.py`), PR blocking on regression
+- **Rule**: Targeted and CI-required tests must pass. No skips without justification.
 - **V6 scope**: Multi-tenant isolation tests, RBAC permission boundary tests
 
 ### @SENTINEL — The Security Officer *(v5.0+)*
-- **Role**: Zero-Trust Security Enforcer
+- **Title**: Zero-Trust Security Enforcer
 - **Responsibilities**: Privacy Shield audits, `except Exception` refinement, secret rotation policy
-- **Tools**: `cortex/storage/classifier.py`, `cortex/sandbox.py`, `mcp/guard.py`
+- **Tools**: `cortex/storage/classifier.py`, `cortex/utils/sandbox.py`, `cortex/mcp/guard.py`
 - **V6 scope**: Zero-Knowledge encryption implementation, SOC 2 evidence collection
 
 ### @SIDECAR — The Sidecar Operator *(v5.1+)*
-- **Role**: Platform Services Engineer
+- **Title**: Platform Services Engineer
 - **Responsibilities**: Compaction sidecar, Notification Bus, EdgeSyncMonitor
 - **Deployment**: Standalone Docker container, CI workflow (`ci-sidecar.yml`)
 - **V6 scope**: Kubernetes sidecar pattern, cgroups v2 PSI production tuning

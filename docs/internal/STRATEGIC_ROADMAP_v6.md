@@ -1,6 +1,8 @@
 # CORTEX v6 Strategic Roadmap
 
 > **Status:** Historical snapshot. This is a v6 planning artifact; treat it as archive unless explicitly cross-referenced by current roadmap work.
+>
+> **Important:** The `Files` column below has been normalized only where a current equivalent is easy to verify. Remaining rows should be read as planning intent, not as claims that every listed path still exists in the present tree.
 
 > **Sovereign Memory Engine for Enterprise AI Swarms**  
 > *Multi-tenant · Async-first · SQLite+vec · FastAPI*  
@@ -26,16 +28,16 @@
 
 | # | Feature | Files | Complexity | Impact | Effort | Owner |
 |:---:|:---|:---|:---:|:---:|:---:|:---:|
-| 1.1 | **Redis L1 Cache Layer** | `cortex/memory/working.py` + new `cortex/memory/l1_redis.py` | M | 9 | 7 | @FORGE |
+| 1.1 | **Redis L1 Cache Layer** | `cortex/memory/working.py`, `cortex/storage/router.py` | M | 9 | 7 | @FORGE |
 | 1.2 | **Privacy Shield v2** | `cortex/storage/classifier.py`, `cortex/mcp/guard.py` | S | 8 | 5 | @SENTINEL |
-| 1.3 | **SOC 2 Evidence Collector** | New `cortex/compliance/evidence.py`, `cortex/routes/compliance.py` | M | 9 | 6 | @SENTINEL |
-| 1.4 | **OpenAPI Generator** | `cortex/api/core.py`, new `cortex/cli/openapi_gen.py` | S | 7 | 4 | @FORGE |
+| 1.3 | **SOC 2 Evidence Collector** | `docs/compliance.md`, `cortex/compliance/tracker.py`, `cortex/mcp/trust_compliance.py` | M | 9 | 6 | @SENTINEL |
+| 1.4 | **OpenAPI Generator** | `cortex/api/core.py`, `cortex/api/openapi.py` | S | 7 | 4 | @FORGE |
 | 1.5 | **SDK Auto-generation** | `sdks/python/` refactor, OpenAPI → SDK pipeline | M | 8 | 6 | @FORGE |
 | 1.6 | **Health Check API v2** | `cortex/routes/admin.py` + deep dependency checks | S | 7 | 3 | @SIDECAR |
 | 1.7 | **MEJORAlo 85+ Sprint** | 50+ files — debt reduction, doc coverage | M | 8 | 7 | @GUARDIAN |
-| 1.8 | **CLI Interactive Mode** | `cortex/cli/core.py` — REPL-like experience | S | 6 | 4 | @FORGE |
-| 1.9 | **Webhook Event Delivery** | New `cortex/webhooks/` — reliable delivery, retries | M | 7 | 6 | @SIDECAR |
-| 1.10 | **Multi-tenant Isolation Tests** | `tests/test_multi_tenant_advanced.py` | M | 9 | 5 | @GUARDIAN |
+| 1.8 | **CLI Interactive Mode** | `cortex/cli/common.py`, `cortex/cli/main.py` — REPL-like experience | S | 6 | 4 | @FORGE |
+| 1.9 | **Webhook Event Delivery** | `cortex/events/bus.py`, `cortex/gateway/adapters/telegram.py` | M | 7 | 6 | @SIDECAR |
+| 1.10 | **Multi-tenant Isolation Tests** | `tests/test_tenant_isolation.py` | M | 9 | 5 | @GUARDIAN |
 
 ### Wave 1 Key Deliverables
 
@@ -66,7 +68,7 @@ Week 4: MEJORAlo sprint → Isolation tests → Release v6.1.0
 
 | # | Feature | Files | Complexity | Impact | Effort | Owner |
 |:---:|:---|:---|:---:|:---:|:---:|:---:|
-| 2.1 | **AlloyDB/PostgreSQL L3 Backend** | `cortex/database/backends/postgres.py`, `cortex/migrations/pg_*.py` | L | 10 | 9 | @FORGE |
+| 2.1 | **AlloyDB/PostgreSQL L3 Backend** | `cortex/storage/postgres.py`, `cortex/storage/pg_schema.py`, `cortex/migrations/` | L | 10 | 9 | @FORGE |
 | 2.2 | **Qdrant Cloud L2 Provider** | `cortex/memory/vector_providers/qdrant.py` (full impl) | M | 9 | 7 | @FORGE |
 | 2.3 | **Storage Router v2** | `cortex/storage/router.py` — multi-backend orchestration | M | 9 | 6 | @FORGE |
 | 2.4 | **GraphQL API (Strawberry)** | `cortex/graphql/schema.py`, `resolvers.py` → full impl | M | 8 | 7 | @FORGE |
@@ -119,7 +121,7 @@ Month 3: Helm Chart → Distributed Consensus v2 → Performance Tests
 | 3.8 | **CORTEX Federation Protocol** | `cortex/federation/` — gossip v2, multi-cluster | L | 8 | 7 | @FORGE |
 | 3.9 | **GitHub Actions Marketplace** | `.github/actions/` — reusable workflows | S | 6 | 4 | @SIDECAR |
 | 3.10 | **Community Templates** | New `examples/templates/` — starter projects | S | 6 | 3 | @NEXUS |
-| 3.11 | **Documentation Site v2** | `docs/` — MkDocs → Docusaurus, tutorials | M | 7 | 5 | @NEXUS |
+| 3.11 | **Documentation Site v2** | `docs/`, `mkdocs.yml` — expanded MkDocs tutorials and site structure | M | 7 | 5 | @NEXUS |
 | 3.12 | **Certification Program** | `docs/certification/` — CORTEX Developer cert | S | 5 | 4 | @NEXUS |
 
 ### Wave 3 Key Deliverables

@@ -1,112 +1,115 @@
 # CLI Reference
 
-CORTEX provides **90+ commands** organized by function. Run `cortex --help` for the full list.
+CORTEX exposes many CLI commands because the repository also contains operator and research
+tooling. For product integrations, start with the verifiable-memory surface below.
 
 ---
 
 ## Global Options
 
 | Option | Description |
-|:---|:---|
+| :--- | :--- |
 | `--version` | Show version and exit |
 | `--help` | Show help and exit |
 | `--db PATH` | Override database path (default: `~/.cortex/cortex.db`) |
 
 ---
 
-## Core Commands
+## Recommended Core Commands
+
+| Command | Purpose |
+| :--- | :--- |
+| `cortex init` | Initialize the local ledger |
+| `cortex store PROJECT CONTENT` | Persist a fact or decision |
+| `cortex search QUERY` | Search persisted memory |
+| `cortex recall PROJECT` | Load active project facts |
+| `cortex history PROJECT --at ...` | Point-in-time recall |
+| `cortex list` | List active facts |
+| `cortex edit FACT_ID NEW_CONTENT` | Version a fact |
+| `cortex delete FACT_ID` | Soft-delete a fact |
+| `cortex status` | Health and DB statistics |
+| `cortex verify FACT_ID` | Verify one fact |
+| `cortex trust-ledger verify` | Verify the full chain |
+| `cortex compliance-report` | Generate a compliance snapshot |
+
+---
+
+## Core Commands In Detail
 
 ### `cortex init`
 
-Initialize the CORTEX database with the full schema.
+Initialize the CORTEX database.
 
 ```bash
 cortex init [--db PATH]
 ```
 
-Safe to call multiple times — idempotent.
-
----
+Safe to call multiple times.
 
 ### `cortex store`
 
-Store a fact with automatic hash-chain ledger entry and embedding.
+Store a fact with automatic ledger entry and embedding.
 
 ```bash
 cortex store PROJECT CONTENT [OPTIONS]
 ```
 
 | Option | Default | Description |
-|:---|:---|:---|
-| `PROJECT` | *required* | Project namespace |
-| `CONTENT` | *required* | Fact content |
-| `--type` | `knowledge` | `knowledge`, `decision`, `error`, `ghost`, `config`, `bridge`, `axiom`, `rule` |
-| `--tags` | — | Comma-separated tags |
-| `--confidence` | `stated` | `stated`, `inferred`, `observed`, `verified`, `disputed` |
+| :--- | :--- | :--- |
+| `PROJECT` | required | Project namespace |
+| `CONTENT` | required | Fact content |
+| `--type` | `knowledge` | `knowledge`, `decision`, `ghost`, `preference`, `identity`, `issue`, `error`, `bridge`, `world-model`, `counterfactual` |
+| `--tags` | none | Comma-separated tags |
+| `--confidence` | `stated` | `C1`, `C2`, `C3`, `C4`, `C5`, `stated`, `inferred` |
 | `--source` | auto-detected | Source agent or process |
-| `--ai-time` | — | Estimated AI time saved (Chronos integration) |
-| `--complexity` | — | Task complexity rating (1-10) |
+| `--ai-time` | none | AI generation time used for Chronos metrics |
+| `--complexity` | none | `low`, `medium`, `high`, `god`, `impossible` |
+| `--parent` | none | Parent decision ID for causal linkage |
 
-**Example:**
+Example:
 
 ```bash
 cortex store my-api "Rate limit is 100 req/min per API key" \
-  --type config --tags "api,limits" --source "agent:claude"
+  --type knowledge --tags "api,limits" --confidence C4 --source "agent:claude"
 ```
-
----
 
 ### `cortex search`
 
-Semantic search across all facts using vector embeddings.
+Semantic search across facts using the configured embedding backend.
 
 ```bash
 cortex search QUERY [OPTIONS]
 ```
 
 | Option | Default | Description |
-|:---|:---|:---|
-| `--project`, `-p` | — | Scope to project |
+| :--- | :--- | :--- |
+| `--project`, `-p` | none | Scope to project |
 | `--top`, `-k` | `5` | Number of results |
-| `--as-of` | — | Point-in-time query (ISO 8601) |
-
-Uses `all-MiniLM-L6-v2` embeddings via ONNX Runtime for sub-5ms vector search.
-
----
+| `--as-of` | none | Point-in-time query (ISO 8601) |
 
 ### `cortex recall`
 
-Load full context for a project.
+Load full active context for a project.
 
 ```bash
 cortex recall PROJECT [--db PATH]
 ```
 
-Returns all active facts grouped by type (knowledge, decisions, errors, etc.).
-
----
-
 ### `cortex history`
 
-Temporal query: what did we know at a specific time?
+Query what was known at a specific time.
 
 ```bash
 cortex history PROJECT [--at TIMESTAMP] [--db PATH]
 ```
 
----
-
 ### `cortex status`
 
-Show CORTEX health and statistics.
+Show system health and statistics.
 
 ```bash
 cortex status [--json-output]
 ```
-
-Displays: total facts, active facts, embeddings, transactions, DB size, projects.
-
----
 
 ### `cortex list`
 
@@ -116,52 +119,43 @@ List active facts in a table.
 cortex list [--project PROJECT] [--type TYPE] [--limit N]
 ```
 
----
-
 ### `cortex edit`
 
-Edit a fact (deprecates old, creates new with same metadata).
+Deprecate the old fact and create a new version with updated content.
 
 ```bash
 cortex edit FACT_ID NEW_CONTENT
 ```
 
----
-
 ### `cortex delete`
 
-Soft-delete a fact (mark as deprecated).
+Soft-delete a fact.
 
 ```bash
 cortex delete FACT_ID [--reason TEXT]
 ```
 
----
-
-## Trust & Verification Commands
-
 ### `cortex verify`
 
-Cryptographic verification certificate for a single fact.
+Verify the cryptographic integrity of a specific fact.
 
 ```bash
 cortex verify FACT_ID
 ```
 
-Output includes: hash chain status, Merkle root, consensus score, timestamp.
+### `cortex trust-ledger verify`
 
----
-
-### `cortex ledger`
-
-Ledger operations.
+Verify the full transaction chain.
 
 ```bash
-cortex ledger verify    # Full hash chain integrity check
-cortex ledger stats     # Ledger statistics
+cortex trust-ledger verify
 ```
 
----
+When `CORTEX_ENABLE_EXPERIMENTAL_CLI=1`, you can also create checkpoints:
+
+```bash
+cortex trust-ledger checkpoint
+```
 
 ### `cortex forensics` (experimental)
 
@@ -188,272 +182,36 @@ the transaction detail.
 
 ### `cortex compliance-report`
 
-Generate EU AI Act Article 12 compliance snapshot.
+Generate the EU AI Act Article 12 snapshot derived from persisted state.
 
 ```bash
-cortex compliance-report [--format json|text]
-```
-
-Outputs: compliance score (0-5), requirement mapping, evidence references.
-
----
-
-### `cortex audit-trail`
-
-Generate a timestamped, hash-verified audit log.
-
-```bash
-cortex audit-trail [--project PROJECT] [--limit N]
+cortex compliance-report
 ```
 
 ---
 
-### `cortex vote`
+## Additional In-Repo Command Families
 
-Cast a consensus vote on a fact.
+When `CORTEX_ENABLE_EXPERIMENTAL_CLI=1`, the root CLI also exposes additional groups such as:
 
-```bash
-cortex vote FACT_ID --agent AGENT_ID --vote [verify|dispute]
-```
-
----
-
-## Sync & Export Commands
-
-### `cortex sync`
-
-Synchronize `~/.agent/memory/` JSON files → CORTEX DB (incremental, SHA-256 change detection).
-
-```bash
-cortex sync
-```
+- `memory`, `sync`, `mcp`
+- `health`, `security`, `gateway`
+- `swarm`, `agent`, `handoff`
+- `context`, `compact`, `episodic`
+- top-level commands such as `time` and `heartbeat`, plus groups such as `timeline`
+These advanced commands and groups are useful for operator workflows, but they are not required to adopt CORTEX Persist
+as a verifiable-memory layer. Treat them as advanced surfaces unless your workflow explicitly needs
+them.
 
 ---
 
-### `cortex export`
-
-Export a markdown snapshot for agent consumption.
-
-```bash
-cortex export [--out PATH]
-```
-
-Default output: `~/.cortex/context-snapshot.md`
-
----
-
-### `cortex writeback`
-
-Write-back: CORTEX DB → `~/.agent/memory/` JSON files.
-
-```bash
-cortex writeback
-```
-
----
-
-### `cortex migrate`
-
-Import data from older versions.
-
-```bash
-cortex migrate [--source PATH]
-```
-
----
-
-## Time Tracking Commands
-
-### `cortex time`
-
-Show time tracking summary (WakaTime-like).
-
-```bash
-cortex time [--project PROJECT] [--days N]
-```
-
----
-
-### `cortex heartbeat`
-
-Record an activity heartbeat for automatic time tracking.
-
-```bash
-cortex heartbeat PROJECT [ENTITY] [--category CATEGORY] [--branch BRANCH]
-```
-
----
-
-### `cortex timeline`
-
-Visual temporal memory browsing.
-
-```bash
-cortex timeline PROJECT [--days N]
-```
-
----
-
-## Memory Intelligence Commands
-
-### `cortex compact`
-
-Run auto-compaction strategies on project memory.
-
-```bash
-cortex compact [--project PROJECT] [--strategy dedup|merge|prune|all]
-```
-
----
-
-### `cortex episodic`
-
-Episodic memory operations.
-
-```bash
-cortex episodic observe    # Capture session snapshot
-cortex episodic recall     # Restore from episode
-cortex episodic replay     # Replay decision chain
-```
-
----
-
-### `cortex context`
-
-Context window management for agents.
-
-```bash
-cortex context rebuild PROJECT    # Rebuild context from memory
-cortex context export PROJECT     # Export for agent consumption
-```
-
----
-
-## Agent & Swarm Commands
-
-### `cortex handoff`
-
-Structured agent-to-agent context transfer.
-
-```bash
-cortex handoff generate    # Generate handoff document
-cortex handoff receive     # Receive and import handoff
-```
-
----
-
-### `cortex ghost`
-
-Ghost (incomplete work) management.
-
-```bash
-cortex ghost list          # List all ghosts
-cortex ghost resolve ID    # Mark resolved
-```
-
----
-
-### `cortex swarm`
-
-Multi-agent swarm coordination.
-
-```bash
-cortex swarm dispatch      # Dispatch a consensus mission
-cortex swarm status        # Check mission status
-```
-
----
-
-## Infrastructure Commands
-
-### `cortex daemon`
-
-Background daemon management.
-
-```bash
-cortex daemon start        # Start the watchdog daemon
-cortex daemon stop         # Stop the daemon
-cortex daemon install      # Install as system service
-cortex daemon status       # Check daemon health
-```
-
-The daemon runs 13 specialized monitors: site health, SSL certs, disk space, ghost detection, security scanning, and more.
-
----
-
-### `cortex autorouter`
-
-AI model auto-selection daemon.
-
-```bash
-cortex autorouter start    # Start model routing
-cortex autorouter stop     # Stop
-cortex autorouter status   # Current model state
-cortex autorouter history  # View switch history
-```
-
----
-
-### `cortex mejoralo`
-
-Code quality engine (X-Ray 13D scanner).
-
-```bash
-cortex mejoralo scan PATH  # Analyze code quality
-cortex mejoralo fix PATH   # Auto-fix issues
-```
-
----
-
-### `cortex entropy`
-
-Entropy monitoring for codebase health.
-
-```bash
-cortex entropy scan        # Measure codebase entropy
-cortex entropy dashboard   # Visual entropy report
-```
-
----
-
-### `cortex purge`
-
-Data cleanup operations.
-
-```bash
-cortex purge --project PROJECT [--before DATE] [--dry-run]
-```
-
----
-
-### `cortex tips`
-
-Developer tips and best practices engine.
-
-```bash
-cortex tips [--category CATEGORY]
-```
-
----
-
-### `cortex reflect`
-
-Meta-cognitive session analysis.
-
-```bash
-cortex reflect              # Analyze current session patterns
-```
-
----
-
-## Makefile Shortcuts
-
-```bash
-make test          # Run all tests (60s timeout)
-make test-fast     # Exclude slow tests (no torch imports)
-make test-slow     # Only slow tests (graph RAG, embeddings)
-make lint          # Run ruff linter
-make format        # Auto-format with ruff
-make docs          # Build mkdocs site
-make serve-docs    # Live preview docs
-```
+## Boundary Note
+
+If you are onboarding a new project, prefer this sequence:
+
+1. `cortex init`
+2. `cortex store`
+3. `cortex search` or `cortex recall`
+4. `cortex verify`
+5. `cortex trust-ledger verify`
+6. `cortex compliance-report`

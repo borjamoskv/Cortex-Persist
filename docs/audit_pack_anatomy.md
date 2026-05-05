@@ -2,7 +2,7 @@
 
 When operating autonomous AI systems in high-risk or regulated environments, stating "the agent decided to do X" is insufficient. You need an exportable, mathematically defensible proof. CORTEX generates **Audit Packs**—zero-trust, cryptographically sealed JSON files that provide an irrefutable trail of events.
 
-> **View Live Artifact:** [Download `examples/audit_proof_artifact.json`](../examples/audit_proof_artifact.json)
+> **View Live Artifact:** `examples/audit_proof_artifact.json`
 
 ---
 
@@ -49,10 +49,12 @@ The exact payload from Step 1 is hashed, and that hash is chained to the *previo
 The audit pack provides the exact CLI instruction required for an external auditor, compliance officer, or legal team to verify the data against the live database without writing code.
 
 ```json
-  "verification_command": "cortex verify record 8f4a2b9e61..."
+  "verification_command": "cortex verify 142095"
 ```
 
-* **Why it matters:** Real compliance requires reproducibility. Any stakeholder can run this command to pull up the original transaction and mathematically guarantee its integrity.
+* **Why it matters:** Real compliance requires reproducibility. Any stakeholder can run a fact-level
+  verification command like this, or the broader `cortex trust-ledger verify`, to mathematically
+  guarantee ledger integrity.
 
 ## Conclusion
 

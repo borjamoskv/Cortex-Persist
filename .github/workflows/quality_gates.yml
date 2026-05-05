@@ -125,7 +125,7 @@ jobs:
 
       - name: Install CORTEX + dev deps
         run: |
-          pip install -e ".[dev,api]" mypy pyright bandit pytest pytest-asyncio pytest-cov --quiet
+          pip install -e ".[dev,api,mcp,adk]" numpy mypy pyright bandit pytest pytest-asyncio pytest-cov --quiet
 
       # ─── SOVEREIGN SEALS (Local & CI Unified) ────────────────────
       - name: "🩺 Release-only smoke"

@@ -17,11 +17,13 @@ The `CortexEngine` is the primary entry point for all CORTEX operations. It aggr
       show_source: false
       members_order: source
 
-## Async Engine
+## Async Route Engine
 
-Async-native engine for use in FastAPI, MCP, and other async contexts.
+FastAPI, MCP, and other async contexts use `CortexEngine` with async methods and, where needed,
+`CortexConnectionPool`. `AsyncCortexEngine` is currently a compatibility alias exported from
+`cortex.engine`; there is no separate `cortex.engine_async` module in the live package.
 
-::: cortex.engine_async.AsyncCortexEngine
+::: cortex.engine.AsyncCortexEngine
     options:
       show_source: false
 

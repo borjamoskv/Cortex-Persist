@@ -109,4 +109,5 @@ results = client.search("how does X work?", top_k=3)
 
 - Use `cortex recall my-agent` to inspect everything your agent knows
 - Use `cortex history my-agent --at "2026-01-15"` to see what it knew last week
-- Use `cortex export` to create a context snapshot for cold starts
+- Use `CORTEX_ENABLE_EXPERIMENTAL_CLI=1 cortex export --format snapshot` or
+  `CortexEngine.export_snapshot()` to create a context snapshot for cold starts

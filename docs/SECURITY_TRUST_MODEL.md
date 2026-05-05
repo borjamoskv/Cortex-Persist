@@ -215,7 +215,7 @@ The membrane exists to convert unconstrained suggestion into constrained mutatio
 
 ## Ledger Integrity
 
-`cortex/ledger.py` (`SovereignLedger`) is the canonical trust surface. Other modules (`consensus/ledger.py`, `memory/ledger.py`, `cli/ledger.py`) are re-export bridges or domain-specific wrappers — all chain integrity flows through the canonical module.
+`cortex/ledger/` (`SovereignLedger`) is the canonical trust surface. Other ledger-named modules are bridges or domain-specific wrappers — chain integrity should be reasoned about from the package-backed canonical ledger, not from legacy file-path references.
 
 Its purpose is not branding. Its purpose is continuity.
 
@@ -226,6 +226,13 @@ Its purpose is not branding. Its purpose is continuity.
 - stable verification path
 - test coverage for continuity assumptions
 - explicit review for any change affecting link formation or verification
+
+### Current Implementation Contract
+
+The current sovereign ledger implementation uses SHA-256 for hash continuity and
+Merkle lineage inside `cortex/ledger/`. Some audit or signature-oriented
+subsystems also use SHA3-256, but that should not be treated as the canonical
+ledger continuity algorithm unless the code is explicitly migrated.
 
 ### Practical Rule
 

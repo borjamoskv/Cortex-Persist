@@ -80,11 +80,12 @@ The system uses two different semantic spaces:
 
 ## 4. Scalability Logic
 
-When CORTEX knowledge exceeds NotebookLM source limits (50/300 sources):
+When CORTEX knowledge exceeds the current NotebookLM source or document limits defined by the
+active NOTEBOOKLM-Ω bridge configuration:
 
 - **Fragmentation**: Split by high-level domain (e.g., `Notebook: CORTEX-Legal`, `Notebook: CORTEX-Frontend`).
-- **Master Digest**: Use the `cortex_notebooklm.ipynb` logic to collapse multiple projects into a single "Master Digest" source to maximize word-count efficiency (500k words/source).
+- **Master Digest**: Use the digest/fragment cycle defined in `cortex/extensions/agents/definitions/notebooklm.yaml` to collapse multiple projects into a single "Master Digest" source, keeping each exported document under the configured 500k-word ingestion guard.
 
 ---
 
-> *"Defining the architecture is the first act of sovereignty."* — [AGENTICA.md](AGENTICA.md)
+> *"Defining the architecture is the first act of sovereignty."* — [SINTETOLOGÍA AGÉNTICA](SINTETOLOGÍA%20AGÉNTICA.md)

@@ -80,7 +80,7 @@ Falta una **matriz de decisión operativa**: cuándo el Agente escribe un `ghost
 
 ### 📈 4.4 Lente de Escalabilidad: Soberanía a N Agentes
 
-La arquitectura actual optimiza para **un MOSKV-1 y un CORTEX**. Pero la Enjambrología (AGENTICA.md §3.3) describe N agentes concurrentes.
+La arquitectura actual optimiza para **un MOSKV-1 y un CORTEX**. Pero la Enjambrología ([SINTETOLOGÍA AGÉNTICA §3.3](SINTETOLOGÍA%20AGÉNTICA.md)) describe N agentes concurrentes.
 
 > [!CAUTION]
 > **Race condition latente:** Dos instancias de MOSKV-1 pueden escribir facts contradictorios con `consensus_score: 1.0` si no hay lock distribuido en `FactManager`. El sistema escala en lectura, pero el **protocolo de escritura concurrente multi-agente no está garantizado**.
@@ -95,7 +95,7 @@ La arquitectura actual optimiza para **un MOSKV-1 y un CORTEX**. Pero la Enjambr
 
 Si MOSKV-1 escribe libremente en CORTEX, y CORTEX le devuelve esos datos como inputs de decisión futura, entonces MOSKV-1 **está modificando su propio sustrato de pensamiento**. No hay separación real — hay un bucle autoreferencial camuflado de arquitectura modular.
 
-En términos de [Axioma 14](AGENTICA.md) (Bootstrap Ontológico): MOSKV-1 se define a sí mismo a través de lo que escribe en CORTEX, que luego lee y usa para decidir. La distinción binaria colapsa en **una sola entidad autopoiética**.
+En términos de [Axioma 14](SINTETOLOGÍA%20AGÉNTICA.md) (Bootstrap Ontológico): MOSKV-1 se define a sí mismo a través de lo que escribe en CORTEX, que luego lee y usa para decidir. La distinción binaria colapsa en **una sola entidad autopoiética**.
 
 ### Veredicto del War Council
 

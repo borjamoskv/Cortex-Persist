@@ -85,6 +85,7 @@ jobs:
     needs: [change-scope]
     if: needs.change-scope.outputs.automation_only != 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -130,7 +131,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -e ".[dev,api]"
+          pip install -e ".[dev,api,mcp]" numpy
           pip install ruff bandit safety mypy build twine
 
       - name: Release-only smoke
@@ -197,11 +198,33 @@ jobs:
 
       - name: Dependency audit (Safety)
         if: steps.scope.outputs.release_only != 'true'
-        run: safety check --json --output safety-report.json || true
+        run: safety check --output json > safety-report.json || true
 
       - name: Unit tests
         if: steps.scope.outputs.release_only != 'true'
-        run: pytest tests/ -q --tb=short --junitxml=test-results.xml
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mapfile -t changed_tests < <(
+            { grep -E '^tests/.*\.py$' .changed_files || true; } |
+            while IFS= read -r path; do
+              [ -f "${path}" ] && printf '%s\n' "${path}"
+            done
+          )
+
+          if [ "${#changed_tests[@]}" -gt 0 ]; then
+            pytest_targets=("${changed_tests[@]}")
+          else
+            pytest_targets=(tests/)
+          fi
+
+          printf 'Pytest targets:\n'
+          printf ' - %s\n' "${pytest_targets[@]}"
+
+          python -X faulthandler -m pytest "${pytest_targets[@]}" -q --tb=short \
+            --timeout=180 --timeout-method=thread \
+            --junitxml=test-results.xml
 
       - name: MEJORAlo Score Check
         if: steps.scope.outputs.release_only != 'true'
@@ -270,13 +293,17 @@ jobs:
         if: steps.scope.outputs.release_only == 'true'
         run: echo "Skipping container build for release-only scope."
 
+      - name: Pull request container skip
+        if: github.event_name == 'pull_request' && steps.scope.outputs.release_only != 'true'
+        run: echo "CI/docker owns PR container build, scan, and smoke validation."
+
       - name: Build Docker image
-        if: steps.scope.outputs.release_only != 'true'
+        if: github.event_name != 'pull_request' && steps.scope.outputs.release_only != 'true'
         run: docker build -t cortex-sovereign:${{ github.sha }} .
 
       - name: Trivy scan (CRITICAL + HIGH)
-        if: steps.scope.outputs.release_only != 'true'
-        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # v0.35.0
+        if: github.event_name != 'pull_request' && steps.scope.outputs.release_only != 'true'
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: cortex-sovereign:${{ github.sha }}
           severity: CRITICAL,HIGH

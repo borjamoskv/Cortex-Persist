@@ -7,6 +7,9 @@
 **Status:** Concept / Pre-Design  
 **Author:** CORTEX Architecture Team  
 
+> Concept note only. For the current supported public product boundary, see
+> [`docs/product-surface.md`](product-surface.md).
+
 ---
 
 ## Executive Summary
@@ -45,18 +48,18 @@ No existing runner satisfies these requirements. CORTEX already does — for mem
 
 | Component | Module | Role in VEX |
 |:---|:---|:---|
-| **Hash-Chained Ledger** | `engine/ledger.py` | Every execution step is a transaction |
-| **Merkle Tree Checkpoints** | `engine/ledger.py` | Batch verification of execution history |
+| **Hash-Chained Ledger** | `ledger/` | Every execution step is a transaction |
+| **Merkle Tree Checkpoints** | `ledger/ledger_core.py` | Batch verification of execution history |
 | **WBFT Consensus** | `consensus/` | Multi-agent agreement on execution outcomes |
 | **Tripartite Memory** | `memory/` | L1 (working) + L2 (vector) + L3 (episodic) |
-| **Privacy Shield** | `api/gate/` | 11-pattern secret detection at ingress |
-| **Self-Healing Daemon** | `daemon/` | 13 monitors for system integrity |
+| **Privacy Shield** | `routes/gate.py` + `guards/` | Multi-tier secret detection at ingress |
+| **Self-Healing Daemon** | `extensions/daemon/` | 13 monitors for system integrity |
 | **ApotheosisEngine** | `engine/apotheosis.py` | Entropy scanner + omniscience loop |
 | **Sovereign Execution Loop** | `sovereign_agent_manifesto.md` | Conceptual: `run_sovereign_agent()` |
 | **Bicameral Mind** | `sovereign_agent_manifesto.md` | Right Brain (reasoning) + Left Brain (execution) + Brainstem (safety) |
 | **MCP Server** | `mcp/` | Model Context Protocol integration |
 | **REST API** | `api/` | FastAPI with RBAC, rate limiting |
-| **CLI** | `cli/` | 90+ commands |
+| **CLI** | `cli/` | Broad operator surface |
 | **Circuit Breaker** | `proactive/circuit_breaker.py` | Failure isolation |
 | **Compaction** | `compaction/` | Dedup + pruning |
 | **OpenTelemetry** | `telemetry/` | Span tracing |

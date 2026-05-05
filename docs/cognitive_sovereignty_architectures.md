@@ -216,7 +216,7 @@ La **simulación mental** permite al agente proyectar consecuencias antes de eje
 - Antes de `execute_trade` → simular impacto en portfolio bajo varios escenarios
 
 > [!IMPORTANT]
-> **Mapeo a CORTEX:** El `SovereignGate` (`cortex/sovereign_gate.py`) implementa la barrera de planificación deliberada — las acciones L3 (destructivas) requieren aprobación explícita del operador, impidiendo ejecución reactiva del Sistema 1.
+> **Mapeo a CORTEX:** La surface de aprobación soberana hoy se expone desde `cortex/routes/gate.py`, con soporte operativo en `cortex/cli/gate_interact.py`. No existe un módulo monolítico `cortex/sovereign_gate.py` en este árbol.
 
 ---
 
@@ -250,7 +250,7 @@ ZK-Audit Log = Proof(
 **ZKSQL** extiende esto a consultas analíticas — un regulador puede lanzar queries SQL sobre la base de datos privada y recibir respuestas con prueba criptográfica de corrección y completitud, sin acceso de lectura a registros individuales.
 
 > [!IMPORTANT]
-> **Mapeo a CORTEX:** El `LedgerMixin` (`cortex/engine/ledger.py`) implementa un log de auditoría inmutable con hashes canónicos SHA-256 encadenados (cada entrada referencia el hash de la anterior). El `time_travel()` permite reconstrucción forense del estado en cualquier punto temporal.
+> **Mapeo a CORTEX:** El ledger soberano canónico vive hoy en `cortex/ledger/` (`ledger_core.py`), mientras la reconstrucción temporal reside en `cortex/engine/history.py` y `QueryMixin.time_travel()`. No hay un `cortex/engine/ledger.py` canónico en este árbol.
 
 ### 4.3 Consenso en Enjambres Multi-Agente
 

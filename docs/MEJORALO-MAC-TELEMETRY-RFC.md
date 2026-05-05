@@ -1,8 +1,13 @@
 # RFC: MEJORAlo Mac Telemetry (mac_control)
 
-**Status:** Implemented (v8.0)  
+**Status:** Concept / target-state RFC
 **Author:** Sovereign CORTEX (Antigravity-Omega)  
 **Context:** MEJORAlo X-Ray engine extension  
+
+> This RFC still describes a proposed `mac_control` module and companion
+> `mac-maestro-omega` architecture. Neither is present as a current code surface in
+> this repository snapshot, so read the document as design intent rather than as an
+> implemented feature map.
 
 ---
 

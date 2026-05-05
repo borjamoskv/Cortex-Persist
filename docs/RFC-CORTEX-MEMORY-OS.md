@@ -33,16 +33,16 @@ The Memory OS is composed of four heavily isolated modules:
 Responsible for preventing unverified, low-exergy conversational data from entering the CORTEX Ledger. 
 - **Extract:** Parses entities, intent, and relationships from the episodic context.
 - **Consolidate:** Resolves collisions, contradictions, and redundancy (compresses `H(X)`).
-- **Store:** Commits to the `ledger.py` explicitly as semantic/persistent memory.
+- **Store:** Commits to the local L3 memory ledger in `cortex/memory/ledger.py` as semantic/persistent memory.
 - **Impact:** Expected 90% reduction in token retrieval overhead (Mem0 baseline).
 
-### 3.2. `cortex/policy/memory_os.py` (The OS Hypervisor)
+### 3.2. `cortex/extensions/policy/memory_os.py` (The OS Hypervisor)
 Enforces access and mutation policies across distinct memory domains.
 - **Clases:** `[Working]`, `[Episodic]`, `[Semantic]`
 - Agents do not run a "global search". The `MemoryOS` daemon routes exact requests to the required tier, metering token budgets.
 
-### 3.3. `cortex/context/hiagent.py` (Subgoal Compression)
-Prevents attention collapse during long-horizon loops (e.g., NightShift).
+### 3.3. Subgoal Compression (target-state concept)
+This RFC proposed a `cortex/context/hiagent.py` surface, but that module is not present in the current tree snapshot. Treat this section as target-state design, not as implemented topology.
 - Aggregates action-observation loops during a given step.
 - Once the step succeeds, it forces **Amnesia Local**: compressing the trace into a single derivative crystal and flushing the raw trace.
 - Leaves zero "code ghosts" behind.
@@ -60,4 +60,4 @@ Coordinates the RAG bypass. Replaces standard vector search with a targeted caus
 4. Unification via the `cortex.engine` RAG interface.
 
 ## 5. Security & Trust Impact
-Continues strictly relying on `ledger.py` for immutable writes. The new admission pipeline serves as a pre-ledger Guard, enhancing the verification described in `SECURITY_TRUST_MODEL.md`. No changes permitted to core crypto boundaries.
+Continues relying on `cortex/memory/ledger.py` for L3 memory event writes and on the canonical `cortex/ledger/` package for trust-ledger integrity surfaces. The new admission pipeline serves as a pre-ledger guard, enhancing the verification described in `SECURITY_TRUST_MODEL.md`. No changes permitted to core crypto boundaries.

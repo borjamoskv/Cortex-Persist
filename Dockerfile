@@ -19,7 +19,7 @@ COPY pyproject.toml README.md ./
 COPY cortex/ ./cortex/
 
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -e ".[api]" && \
+    pip install --no-cache-dir -e ".[api,mcp]" && \
     pip install --no-cache-dir sentence-transformers onnxruntime
 
 # Pre-create the Hugging Face cache path so the runtime-stage COPY remains valid
@@ -41,19 +41,22 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends libsqlite3-0 curl && \
     rm -rf /var/lib/apt/lists/*
 
-# Copy virtual environment from builder
+# Copy virtual environment and editable-install source from builder
 COPY --from=builder /app/.venv /app/.venv
 COPY --from=builder /app/cortex /app/cortex
-COPY --from=builder /root/.cache/huggingface /root/.cache/huggingface
 
 # Run as non-root user
-RUN useradd -m -u 1000 cortex
-RUN mkdir -p /data && chown -R cortex:cortex /data
+RUN useradd -m -u 1000 cortex && \
+    mkdir -p /data /home/cortex/.cache && \
+    chown -R cortex:cortex /app /data /home/cortex/.cache
+COPY --from=builder --chown=cortex:cortex /root/.cache/huggingface /home/cortex/.cache/huggingface
 USER cortex
 
-ENV PATH="/app/.venv/bin:$PATH"
-ENV CORTEX_DB=/data/cortex.db
-ENV ANONYMIZED_TELEMETRY=False
+ENV PATH="/app/.venv/bin:$PATH" \
+    PYTHONDONTWRITEBYTECODE=1 \
+    CORTEX_DB=/data/cortex.db \
+    HF_HOME=/home/cortex/.cache/huggingface \
+    ANONYMIZED_TELEMETRY=False
 
 VOLUME /data
 

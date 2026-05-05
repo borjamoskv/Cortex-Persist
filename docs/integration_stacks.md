@@ -2,6 +2,8 @@
 
 Adopting cryptographic memory doesn't mean ripping out your existing infrastructure. CORTEX is designed to sit alongside your current vector databases and orchestration frameworks, wrapping your final state mutations in a **Verification Membrane**.
 
+For the recommended adoption boundary, see [Public Product Surface](product-surface.md).
+
 ## 1. Architectural Position
 
 CORTEX acts as the *Source of Truth* (Layer 3) for decisions, distinct from your *Working Memory* (Layer 1) and your *Semantic Matcher* (Layer 2). You **do not** replace Qdrant or Pinecone. You add CORTEX specifically for verifiable actions and core identity facts.
@@ -43,15 +45,14 @@ async def orchestrate_decision(context: str, agent_name: str):
     
     # After standard LLM logic concludes...
     # Store the irreversible outcome in the CORTEX Ledger
-    receipt = await engine.store_fact(
+    fact_id = await engine.store(
+        project="swarm-alpha",
         content=f"Decision reached: {context}",
         fact_type="task_outcome",
-        project="swarm-alpha",
-        tenant_id="client-007"
     )
     
     # You now have the cryptographic receipt for downstream compliance
-    print(f"Secured with hash: {receipt.hash}")
+    print(f"Persisted as fact #{fact_id}")
 ```
 
 ### Flow via Model Context Protocol (MCP)
@@ -59,14 +60,20 @@ async def orchestrate_decision(context: str, agent_name: str):
 If you are using Anthropic tools or anything compatible with the MCP spec, CORTEX ships a native `mcp/` server:
 
 ```bash
-# Simply start the native MCP bridge
-$ cortex mcp start --port 8080
+# Local stdio server for IDE integrations
+python -m cortex.mcp
+
+# Or expose the trust server over SSE through the experimental CLI
+CORTEX_ENABLE_EXPERIMENTAL_CLI=1 \
+cortex mcp trust --transport sse --port 5002
 ```
 
-Agents can now query `verify_record` or `store_fact` directly as external tools, providing total autonomy without needing the Python SDK inside your orchestrator container.
+Agents can query the core MCP store/search/ledger-verify tools directly as external tools without
+needing the Python SDK inside your orchestrator container. Broader MCP trust/compliance and runtime
+tool families require `CORTEX_ENABLE_EXPERIMENTAL_MCP=1`.
 
 ## 3. What changes in your workflow?
 
 1. **You stop using Vector DBs for logs.** Ephemeral RAG data stays in your semantic vector store. Critical decisions, API calls, tool uses, and core facts move to the CORTEX ledger.
 2. **You add Guards to API paths.** CORTEX requires inputs to pass validation boundaries—preventing an agent's hallucination from becoming permanent memory.
-3. **You export rather than explain.** Instead of digging through Datadog to explain to stakeholders why an agent sent an email, you export the exact `cortex verify` cryptographic receipt.
+3. **You export rather than explain.** Instead of digging through Datadog to explain to stakeholders why an agent sent an email, you export the exact `cortex verify <fact_id>` cryptographic receipt.

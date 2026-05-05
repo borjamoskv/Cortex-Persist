@@ -4,6 +4,11 @@
 > Autor: [borjamoskv.com](https://borjamoskv.com) + MOSKV-1
 > Estado: Draft v1.0
 
+> **Status note:** Historical SaaS scaling plan. Treat component names, module paths, and
+> readiness labels below as planning context, not as the current product contract. For live
+> surfaces, start with [Public Product Surface](product-surface.md) and
+> [Architecture](architecture.md).
+
 ---
 
 ## Inventario: Lo que YA tienes
