@@ -217,3 +217,27 @@ CORTEX is governed by a strict zero-trust philosophy regarding generative AI out
 Apache License 2.0. See [LICENSE](LICENSE).
 
 *Built by [borjamoskv.com](https://borjamoskv.com) · [cortexpersist.com](https://cortexpersist.com)*
+
+---
+## Verification Membrane (primitive)
+- Boundary where untrusted input becomes sealed, verifiable state.
+- Nothing crosses unverified.
+- Every write produces proof.
+
+## Strict mode (recommended)
+Enforce:
+- reject unverifiable writes
+- require idempotency_key
+- enforce schema hash consistency
+
+## Proof of tampering (should fail)
+```bash
+# example manual mutation (depends on backend)
+sqlite3 cortex.db "UPDATE facts SET content='Approved' WHERE id=1"
+
+cortex verify
+```
+Expected (conceptual):
+```
+[✘] TAMPER DETECTED: hash mismatch
+```
