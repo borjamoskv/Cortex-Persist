@@ -51,6 +51,19 @@ class ActionResult:
 
 
 @dataclass(frozen=True)
+class LedgerOriginSignature:
+    actor_id: str
+    key_id: str
+    signature_alg: str
+    signed_at: str
+    nonce: str
+    signature: str | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass(frozen=True)
 class LedgerEvent:
     event_id: str
     ts: str
@@ -62,6 +75,7 @@ class LedgerEvent:
     intent: IntentPayload | None = None
     correlation_id: str | None = None
     trace_id: str | None = None
+    origin: LedgerOriginSignature | None = None
     prev_hash: str | None = None
     hash: str | None = None
     semantic_status: SemanticStatus = "pending"
@@ -126,6 +140,7 @@ class LedgerEvent:
             "intent": self.intent.to_dict() if self.intent else None,
             "correlation_id": self.correlation_id,
             "trace_id": self.trace_id,
+            "origin": self.origin.to_dict() if self.origin else None,
             "prev_hash": self.prev_hash,
             "hash": self.hash,
             "semantic_status": self.semantic_status,

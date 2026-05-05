@@ -6,7 +6,8 @@ This document defines the forensic ledger export package produced for
 independent offline verification. The package is evidence packaging only: it
 does not enforce runtime origin signing, authorize agent actions, or export fact
 payloads. Runtime rejection of unsigned or badly signed origin events belongs to
-M4.
+M4. The runtime strict-mode contract is documented in
+[`ORIGIN_SIGNATURE_STRICT_MODE.md`](ORIGIN_SIGNATURE_STRICT_MODE.md).
 
 ## Required Artifacts
 
@@ -86,6 +87,11 @@ default.
 
 M3 assumes events already carry `public-v1-strict` fields, including
 `origin_signature`, `actor_key_id`, `nonce`, and hash-chain continuity.
+
+M4 adds a separate runtime `LedgerEvent.origin` envelope for pre-persistence
+origin-authenticity validation. A later adapter may map that runtime envelope
+into the public export event fields, but this package specification does not
+claim that bridge as automatic.
 
 M3 does not:
 

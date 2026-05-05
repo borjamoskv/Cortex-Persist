@@ -1,16 +1,26 @@
 import dataclasses
 
 from cortex.ledger.models import LedgerEvent
+from cortex.ledger.origin import OriginSignaturePolicy
 from cortex.ledger.queue import EnrichmentQueue
 from cortex.ledger.store import LedgerStore
 
 
 class LedgerWriter:
-    def __init__(self, store: LedgerStore, queue: EnrichmentQueue) -> None:
+    def __init__(
+        self,
+        store: LedgerStore,
+        queue: EnrichmentQueue,
+        origin_policy: OriginSignaturePolicy | None = None,
+    ) -> None:
         self.store = store
         self.queue = queue
+        self.origin_policy = origin_policy
 
     def append(self, event: LedgerEvent) -> str:
+        if self.origin_policy is not None:
+            self.origin_policy.validate_event(event)
+
         with self.store.tx() as conn:
             # 1. Get last hash
             cursor = conn.execute("SELECT hash FROM ledger_events ORDER BY rowid DESC LIMIT 1")
