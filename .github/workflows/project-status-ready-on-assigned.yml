@@ -1,0 +1,289 @@
+name: Project status -> Ready on assignment
+
+on:
+  issues:
+    types: [assigned]
+  pull_request_target:
+    types: [assigned]
+  workflow_dispatch:
+    inputs:
+      content_node_id:
+        description: "Node ID del issue o PR para prueba manual"
+        required: false
+        type: string
+      dry_run:
+        description: "Resuelve todo pero no ejecuta la mutacion"
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+
+env:
+  PROJECT_OWNER: borjamoskv
+  PROJECT_NUMBER: "1"
+  STATUS_FIELD_NAME: Status
+  READY_OPTION: ""
+  READY_OPTION_FALLBACK_NAMES: Ready,Listo
+
+jobs:
+  set-ready:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+        with:
+          python-version: "3.13"
+
+      - name: Resolve project item and update status
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.PROJECTS_V2_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "${GH_TOKEN:-}" || { echo "::error::Falta PROJECTS_V2_TOKEN"; exit 1; }
+
+          case "${{ github.event_name }}" in
+            issues)
+              CONTENT_NODE_ID="${{ github.event.issue.node_id }}"
+              CONTENT_URL="${{ github.event.issue.html_url }}"
+              DRY_RUN=false
+              ;;
+            pull_request_target)
+              CONTENT_NODE_ID="${{ github.event.pull_request.node_id }}"
+              CONTENT_URL="${{ github.event.pull_request.html_url }}"
+              DRY_RUN=false
+              ;;
+            workflow_dispatch)
+              CONTENT_NODE_ID="${{ inputs.content_node_id }}"
+              CONTENT_URL=""
+              DRY_RUN="${{ inputs.dry_run }}"
+              ;;
+            *)
+              echo "::error::Evento no soportado: ${{ github.event_name }}"
+              exit 1
+              ;;
+          esac
+
+          test -n "${CONTENT_NODE_ID}" || { echo "::error::No CONTENT_NODE_ID"; exit 1; }
+
+          run_gql() {
+            local out rc; set +e
+            out=$(GH_PAGER=cat gh api graphql "$@" 2>&1); rc=$?
+            set -e
+            if [[ "$rc" -ne 0 ]]; then
+              if grep -qi "Resource not accessible by integration" <<<"$out"; then
+                echo "::error::El token no puede acceder al Project. Usa PAT classic (scopes project, repo)."
+              elif grep -Eqi "secondary rate limit|rate limit" <<<"$out"; then
+                echo "::error::Rate limit. Reintenta."
+              else
+                echo "::error::Fallo GraphQL: $out"
+              fi
+              exit "$rc"
+            fi
+            printf '%s' "$out"
+          }
+
+          read -r -d '' PROJECT_QUERY <<'GRAPHQL' || true
+          query($login: String!, $number: Int!) {
+            user(login:$login){
+              projectV2(number:$number){
+                id
+                fields(first:100){
+                  nodes{
+                    __typename
+                    ... on ProjectV2SingleSelectField{
+                      id
+                      name
+                      options{ id name }
+                    }
+                  }
+                }
+              }
+            }
+            organization(login:$login){
+              projectV2(number:$number){
+                id
+                fields(first:100){
+                  nodes{
+                    __typename
+                    ... on ProjectV2SingleSelectField{
+                      id
+                      name
+                      options{ id name }
+                    }
+                  }
+                }
+              }
+            }
+          }
+          GRAPHQL
+
+          PROJECT_META_JSON="$(run_gql -f query="$PROJECT_QUERY" -f login="$PROJECT_OWNER" -F number="$PROJECT_NUMBER")"
+
+          META_ENV_FILE="$(mktemp)"
+          export STATUS_FIELD_NAME READY_OPTION READY_OPTION_FALLBACK_NAMES
+          python3 - <<'PY' <<<"$PROJECT_META_JSON" > "$META_ENV_FILE"
+          import json, os, sys
+          data=json.load(sys.stdin)["data"]
+          project=None
+          if data.get("user",{}).get("projectV2"):
+            project=data["user"]["projectV2"]
+          elif data.get("organization",{}).get("projectV2"):
+            project=data["organization"]["projectV2"]
+          if not project:
+            raise SystemExit("Project v2 no encontrado")
+          status_name=os.environ["STATUS_FIELD_NAME"].strip().lower()
+          status_field=None
+          for n in project["fields"]["nodes"]:
+            if (n.get("name") or "").strip().lower()==status_name:
+              status_field=n; break
+          if not status_field:
+            raise SystemExit("Status field no encontrado")
+          options=status_field.get("options") or []
+          if not options:
+            raise SystemExit("Status options vacias")
+          ready_option=os.environ.get("READY_OPTION"," ").strip()
+          if ready_option:
+            match=[o for o in options if o["id"]==ready_option]
+            if len(match)!=1:
+              raise SystemExit("READY_OPTION no coincide con options")
+            resolved=match[0]
+          else:
+            wanted={s.strip().lower() for s in os.environ.get("READY_OPTION_FALLBACK_NAMES","").split(",") if s.strip()}
+            match=[o for o in options if (o.get("name","").strip().lower() in wanted)]
+            if len(match)!=1:
+              names=", ".join(o.get("name","") for o in options)
+              raise SystemExit(f"No se resolvio Ready/Listo. Opciones: [{names}]")
+            resolved=match[0]
+          print(f"PROJECT_ID={project['id']}")
+          print(f"STATUS_FIELD_ID={status_field['id']}")
+          print(f"READY_OPTION_ID={resolved['id']}")
+          print(f"READY_OPTION_NAME={resolved['name']}")
+          PY
+          source "$META_ENV_FILE"
+
+          read -r -d '' ITEMS_QUERY <<'GRAPHQL' || true
+          query($login: String!, $number: Int!, $after: String) {
+            user(login:$login){
+              projectV2(number:$number){
+                items(first:100, after:$after){
+                  pageInfo{ hasNextPage endCursor }
+                  nodes{
+                    id
+                    content{
+                      __typename
+                      ... on Issue{ id number url }
+                      ... on PullRequest{ id number url }
+                    }
+                  }
+                }
+              }
+            }
+            organization(login:$login){
+              projectV2(number:$number){
+                items(first:100, after:$after){
+                  pageInfo{ hasNextPage endCursor }
+                  nodes{
+                    id
+                    content{
+                      __typename
+                      ... on Issue{ id number url }
+                      ... on PullRequest{ id number url }
+                    }
+                  }
+                }
+              }
+            }
+          }
+          GRAPHQL
+
+          ITEM_ID=""
+          PAGE_CURSOR=""
+          for attempt in 1 2 3 4 5; do
+            while true; do
+              if [[ -n "$PAGE_CURSOR" ]]; then
+                PAGE_JSON="$(run_gql -f query="$ITEMS_QUERY" -f login="$PROJECT_OWNER" -F number="$PROJECT_NUMBER" -f after="$PAGE_CURSOR")"
+              else
+                PAGE_JSON="$(run_gql -f query="$ITEMS_QUERY" -f login="$PROJECT_OWNER" -F number="$PROJECT_NUMBER")"
+              fi
+              export CONTENT_NODE_ID
+              parsed="$(python3 - <<'PY' <<<"$PAGE_JSON"
+          import json, os, sys
+          connection=None
+          data=json.load(sys.stdin)["data"]
+          if data.get("user",{}).get("projectV2"):
+            connection=data["user"]["projectV2"]["items"]
+          elif data.get("organization",{}).get("projectV2"):
+            connection=data["organization"]["projectV2"]["items"]
+          if not connection:
+            raise SystemExit("No se pudo cargar items")
+          target=os.environ["CONTENT_NODE_ID"]
+          found=""
+          for node in connection["nodes"]:
+            c=node.get("content") or {}
+            if c.get("id")==target:
+              found=node["id"]; break
+          pi=connection["pageInfo"]
+          print(found)
+          print("true" if pi["hasNextPage"] else "false")
+          print(pi["endCursor"] or "")
+          PY
+              )"
+              mapfile -t LINES <<<"$parsed"
+              ITEM_ID="${LINES[0]}"
+              HAS_NEXT="${LINES[1]}"
+              PAGE_CURSOR="${LINES[2]}"
+              if [[ -n "$ITEM_ID" ]]; then break 2; fi
+              if [[ "$HAS_NEXT" != "true" ]]; then break; fi
+            done
+            sleep $((attempt*3))
+            PAGE_CURSOR=""
+          done
+
+          if [[ -z "$ITEM_ID" ]]; then
+            {
+              echo "### Project status updater"
+              echo "- Resultado: sin cambios"
+              echo "- Motivo: el item aun no aparece en el Project"
+              echo "- Content node ID: \`$CONTENT_NODE_ID\`"
+              if [[ -n "$CONTENT_URL" ]]; then echo "- Recurso: $CONTENT_URL"; fi
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "::notice::Item fuera del Project; no se actualiza Status."
+            exit 0
+          fi
+
+          if [[ "$DRY_RUN" == "true" ]]; then
+            {
+              echo "### Project status updater"
+              echo "- Resultado: dry-run"
+              echo "- Item ID: \`$ITEM_ID\`"
+              echo "- Ready: \`$READY_OPTION_NAME\` (\`$READY_OPTION_ID\`)"
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          read -r -d '' UPDATE_MUTATION <<'GRAPHQL' || true
+          mutation($project:ID!, $item:ID!, $field:ID!, $option:String!) {
+            updateProjectV2ItemFieldValue(input:{
+              projectId:$project
+              itemId:$item
+              fieldId:$field
+              value:{ singleSelectOptionId:$option }
+            }){
+              projectV2Item{ id }
+            }
+          }
+          GRAPHQL
+
+          run_gql -f query="$UPDATE_MUTATION" -f project="$PROJECT_ID" -f item="$ITEM_ID" -f field="$STATUS_FIELD_ID" -f option="$READY_OPTION_ID" >/dev/null
+
+          {
+            echo "### Project status updater"
+            echo "- Resultado: actualizado"
+            echo "- Item ID: \`$ITEM_ID\`"
+            echo "- Nuevo estado: \`$READY_OPTION_NAME\`"
+            if [[ -n "$CONTENT_URL" ]]; then echo "- Recurso: $CONTENT_URL"; fi
+          } >> "$GITHUB_STEP_SUMMARY"
