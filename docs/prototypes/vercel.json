@@ -6,6 +6,16 @@
   "trailingSlash": true,
   "redirects": [
     {
+      "source": "/",
+      "destination": "/saas_landing.html",
+      "permanent": true
+    },
+    {
+      "source": "/index.html",
+      "destination": "/saas_landing.html",
+      "permanent": true
+    },
+    {
       "source": "/(.*)",
       "has": [{"type": "host", "value": "cortexpersist.org"}],
       "destination": "https://cortexpersist.com/$1",
