@@ -83,6 +83,19 @@ async def db():
             WHERE id = NEW.id;
         END;
         CREATE INDEX idx_facts_parent ON facts(parent_decision_id);
+        CREATE TABLE causal_edges (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            fact_id INTEGER NOT NULL,
+            parent_id INTEGER,
+            signal_id INTEGER,
+            edge_type TEXT NOT NULL DEFAULT 'triggered_by',
+            project TEXT,
+            tenant_id TEXT NOT NULL DEFAULT 'default',
+            created_at TEXT NOT NULL DEFAULT (datetime('now'))
+        );
+        CREATE INDEX idx_causal_fact ON causal_edges(fact_id);
+        CREATE INDEX idx_causal_parent ON causal_edges(parent_id);
+        CREATE INDEX idx_causal_tenant ON causal_edges(tenant_id);
     """)
     yield conn
     await conn.close()
@@ -151,31 +164,25 @@ class TestDataModel:
 
 
 class TestFKValidation:
-    """Parent references must exist; invalid ones are cleared."""
+    """Decision parent references must be valid and fail closed."""
 
     @pytest.mark.asyncio
-    async def test_invalid_parent_cleared(self, db):
-        fid = await insert_fact_record(
-            db,
-            "default",
-            "proj",
-            "test",
-            "knowledge",
-            [],
-            "C5",
-            None,
-            "test",
-            {},
-            None,
-            parent_decision_id=99999,
-        )
-        await db.commit()
-        cursor = await db.execute(
-            "SELECT parent_decision_id FROM facts WHERE id = ?",
-            (fid,),
-        )
-        row = await cursor.fetchone()
-        assert row[0] is None
+    async def test_invalid_parent_rejected(self, db):
+        with pytest.raises(ValueError, match="parent_decision_id is invalid"):
+            await insert_fact_record(
+                db,
+                "default",
+                "proj",
+                "test",
+                "knowledge",
+                [],
+                "C5",
+                None,
+                "test",
+                {},
+                None,
+                parent_decision_id=99999,
+            )
 
     @pytest.mark.asyncio
     async def test_valid_parent_persists(self, db):

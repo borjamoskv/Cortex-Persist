@@ -47,11 +47,31 @@ class TestPurgeBounded:
 
     async def test_purge_rule_with_dependencies_denied(self, engine):
         # 1. Create a rule fact
+        from cortex.crypto.keys import ZKSwarmIdentity
+
+        keypair = ZKSwarmIdentity.generate_keypair()
+        rule_content = "IF x THEN y"
+        rule_source = "test"
         rule_id = await engine.store(
             project="test",
-            content="IF x THEN y",
+            content=rule_content,
             fact_type="rule",
-            source="test",
+            source=rule_source,
+            meta={
+                "agent_public_key": keypair.public_key_b64,
+                "agent_public_key_sha256": ZKSwarmIdentity.public_key_sha256(
+                    keypair.public_key_b64
+                ),
+                "zk_proof_signature": ZKSwarmIdentity.sign_store_event(
+                    tenant_id="default",
+                    project="test",
+                    fact_type="rule",
+                    source=rule_source,
+                    content=rule_content,
+                    private_key_b64=keypair.private_key_b64,
+                ),
+                "zk_proof_scope": "store_event_v1",
+            },
         )
 
         # 2. Create 5 dependent facts to reach criticality > 0.8
@@ -60,8 +80,8 @@ class TestPurgeBounded:
             child_id = await engine.store(
                 project="test",
                 content=f"Dependent fact {i}",
-                parent_decision_id=rule_id,
                 source="test",
+                meta={"previous_fact_id": rule_id},
             )
             # Ensure causal edge is created (if store doesn't do it automatically for these types)
             async with engine.session() as conn:
@@ -102,8 +122,8 @@ class TestPurgeBounded:
             child_id = await engine.store(
                 project="test",
                 content=f"Dependent {i}",
-                parent_decision_id=fact_id,
                 source="test",
+                meta={"previous_fact_id": fact_id},
             )
             async with engine.session() as conn:
                 await conn.execute(

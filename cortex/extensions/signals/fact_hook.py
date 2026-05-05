@@ -40,6 +40,7 @@ the second is a consequence — the system develops reflexes.
 from __future__ import annotations
 
 import logging
+import sqlite3
 
 from cortex.database.core import connect as db_connect
 
@@ -51,6 +52,7 @@ logger = logging.getLogger("cortex.extensions.signals.fact_hook")
 # Number of un-consumed fact:stored signals before a compact:needed is emitted.
 # Operators may override via env var CORTEX_COMPACT_THRESHOLD.
 _DEFAULT_COMPACT_THRESHOLD: int = 50
+_SIGNAL_HOOK_TIMEOUT_S: int = 0
 
 
 def _compact_threshold() -> int:
@@ -88,10 +90,12 @@ def emit_fact_stored(
         total_facts: Optional live count of active facts for this project
                      (passed in to avoid a double read inside this hook).
     """
+    conn: sqlite3.Connection | None = None
     try:
         from cortex.extensions.signals.bus import SignalBus
 
-        conn = db_connect(db_path, timeout=3)
+        conn = db_connect(db_path, timeout=_SIGNAL_HOOK_TIMEOUT_S)
+        conn.execute("PRAGMA busy_timeout=0")
 
         bus = SignalBus(conn)
         bus.ensure_table()
@@ -149,11 +153,15 @@ def emit_fact_stored(
                     project,
                     unconsumed,
                 )
-        except Exception as e:  # noqa: BLE001
+        except (sqlite3.Error, OSError, RuntimeError, ValueError) as e:
             logger.debug("compact:needed check failed: %s", e)
 
-        conn.close()
-
-    except Exception as e:  # noqa: BLE001
+    except (ImportError, sqlite3.Error, OSError, RuntimeError, ValueError) as e:
         # Never propagate — this hook must never break the store operation.
         logger.debug("fact:stored signal emission failed: %s", e)
+    finally:
+        if conn is not None:
+            try:
+                conn.close()
+            except sqlite3.Error as e:
+                logger.debug("fact:stored signal connection close failed: %s", e)

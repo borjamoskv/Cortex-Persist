@@ -58,16 +58,10 @@ async def test_langgraph_supervisor_routing():
         events.append(event)
 
     assert len(events) > 0
-    # The final state should have planned and executed set to True
     final_state = events[-1]
-    # Depending on langgraph versions, it might yield dicts or state objects
-    # But usually it yields dict mapped by node name: {"planner": NightShiftState(...)}
-    for _k, v in final_state.items():
-        if isinstance(v, NightShiftState):
-            assert v.variables.get("planned") is True
-            assert v.variables.get("executed") is True
-        elif isinstance(v, dict):
-            assert "planned" in v.get("variables", {}) or "executed" in v.get("variables", {})
+    assert isinstance(final_state, NightShiftState)
+    assert final_state.variables.get("planned") is True
+    assert final_state.variables.get("executed") is True
 
 
 def test_missing_langgraph_throws_error():

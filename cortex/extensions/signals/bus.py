@@ -294,6 +294,7 @@ class SignalBus:
         self._ready = False
         self.session_emitted = 0
         self.session_errors = 0
+        self.ensure_table()
 
     def ensure_table(self) -> None:
         if self._ready:

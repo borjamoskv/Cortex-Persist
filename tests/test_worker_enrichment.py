@@ -46,6 +46,19 @@ CREATE TABLE IF NOT EXISTS enrichment_jobs (
 )
 """
 
+_CREATE_TENANT_JOBS = """
+CREATE TABLE IF NOT EXISTS enrichment_jobs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenant_id TEXT NOT NULL,
+    fact_id INTEGER NOT NULL,
+    status TEXT NOT NULL DEFAULT 'queued',
+    attempts INTEGER NOT NULL DEFAULT 0,
+    last_error TEXT,
+    next_attempt_at TEXT,
+    updated_at TEXT
+)
+"""
+
 
 async def _setup_db() -> aiosqlite.Connection:
     conn = await aiosqlite.connect(":memory:")
@@ -182,8 +195,36 @@ class TestProcessJob:
 
         with patch.object(worker, "_mark_success", new_callable=AsyncMock) as mock_success:
             await worker._process_job(conn, job["id"], 10)
-            mock_success.assert_awaited_once_with(conn, job["id"])
+            mock_success.assert_awaited_once_with(conn, job["id"], tenant_id="tenant1")
 
+        await conn.close()
+
+    @pytest.mark.asyncio
+    async def test_tenant_scoped_job_cannot_process_other_tenant_fact(self, worker):
+        conn = await aiosqlite.connect(":memory:")
+        conn.row_factory = aiosqlite.Row
+        await conn.execute(_CREATE_FACTS)
+        await conn.execute(_CREATE_TENANT_JOBS)
+        await conn.execute(
+            "INSERT INTO facts (id, project, content, tenant_id) VALUES (?, ?, ?, ?)",
+            (40, "proj", "alpha content", "tenant-alpha"),
+        )
+        await conn.execute(
+            "INSERT INTO enrichment_jobs (id, tenant_id, fact_id, status) VALUES (?, ?, ?, ?)",
+            (7, "tenant-beta", 40, "queued"),
+        )
+        await conn.commit()
+
+        await worker._process_job(conn, 7, 40, tenant_id="tenant-beta")
+        await conn.commit()
+
+        async with conn.execute(
+            "SELECT status, attempts, last_error FROM enrichment_jobs WHERE id = 7"
+        ) as cur:
+            row = await cur.fetchone()
+        assert row["status"] == "failed"
+        assert row["attempts"] == 1
+        assert "tenant-beta" in row["last_error"]
         await conn.close()
 
     @pytest.mark.asyncio
@@ -309,3 +350,34 @@ class TestProcessBatch:
             async with conn.execute("SELECT status FROM enrichment_jobs WHERE fact_id=5") as cur:
                 row = await cur.fetchone()
             assert row["status"] == "completed"
+
+    @pytest.mark.asyncio
+    async def test_batch_skips_tenant_mismatched_jobs(self, worker, tmp_path):
+        import aiosqlite as _aio
+
+        db_path = str(tmp_path / "tenant_mismatch.db")
+        async with _aio.connect(db_path) as conn:
+            conn.row_factory = _aio.Row
+            await conn.execute(_CREATE_FACTS)
+            await conn.execute(_CREATE_TENANT_JOBS)
+            await conn.execute(
+                "INSERT INTO facts (id, project, content, tenant_id) "
+                "VALUES (50, 'p', 'tenant alpha', 'tenant-alpha')"
+            )
+            await conn.execute(
+                "INSERT INTO enrichment_jobs (id, tenant_id, fact_id, status) "
+                "VALUES (8, 'tenant-beta', 50, 'queued')"
+            )
+            await conn.commit()
+
+        worker.db_path = db_path
+        await worker._process_batch(batch_size=5)
+
+        async with _aio.connect(db_path) as conn:
+            conn.row_factory = _aio.Row
+            async with conn.execute(
+                "SELECT status, attempts FROM enrichment_jobs WHERE id = 8"
+            ) as cur:
+                row = await cur.fetchone()
+            assert row["status"] == "failed"
+            assert row["attempts"] == 1

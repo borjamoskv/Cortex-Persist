@@ -12,7 +12,9 @@ Requires an API key provided by Stripe (pro or team plan).
 """
 
 import logging
+import sqlite3
 from typing import Annotated
+from hashlib import sha3_256
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
@@ -59,6 +61,20 @@ class OracleResponse(BaseModel):
     status: str
 
 
+def _target_origin(url: HttpUrl) -> str:
+    """Reduce target storage/logging to origin-level data."""
+    default_port = (url.scheme == "http" and url.port == 80) or (
+        url.scheme == "https" and url.port == 443
+    )
+    port = f":{url.port}" if url.port and not default_port else ""
+    return f"{url.scheme}://{url.host}{port}"
+
+
+def _target_fingerprint(url: HttpUrl) -> str:
+    """Stable opaque fingerprint for the exact target without storing it in cleartext."""
+    return sha3_256(str(url).encode("utf-8")).hexdigest()
+
+
 # ─── System Prompt ───────────────────────────────────────────────────
 
 ORACLE_SYSTEM_PROMPT = """\
@@ -90,7 +106,7 @@ Scavenger for supply). You are performing a remote heuristic audit of the provid
 )
 async def audit_target(
     req: OracleRequest,
-    auth: Annotated[AuthResult, Depends(require_permission("read"))],
+    auth: Annotated[AuthResult, Depends(require_permission("admin"))],
     engine: AsyncCortexEngine = Depends(get_async_engine),
 ):
     """
@@ -103,10 +119,13 @@ async def audit_target(
             content={"detail": "The Oracle is currently disconnected from the LLM core."},
         )
 
+    target_origin = _target_origin(req.target_url)
+    target_fingerprint = _target_fingerprint(req.target_url)
+
     logger.info(
         "Oracle Audit requested by %s for %s via %s",
         auth.tenant_id,
-        req.target_url,
+        target_origin,
         req.agent_type,
     )
 
@@ -129,7 +148,7 @@ async def audit_target(
         )
     except (OSError, RuntimeError) as e:
         logger.error("Oracle execution failed: %s", e)
-        raise HTTPException(status_code=502, detail=f"Oracle Engine Error: {str(e)}") from e
+        raise HTTPException(status_code=502, detail="Oracle Engine Error") from None
 
     if not report:
         raise HTTPException(status_code=500, detail="Oracle yielded no insights.")
@@ -143,15 +162,16 @@ async def audit_target(
             content=report,
             tenant_id=auth.tenant_id,
             fact_type="oracle_audit",
-            tags=["oracle", req.agent_type, str(req.target_url)],
+            tags=["oracle", req.agent_type, target_origin],
             source=f"agent:{req.agent_type}",
             meta={
                 "confidence": confidence,
-                "target_url": str(req.target_url),
+                "target_origin": target_origin,
+                "target_fingerprint": target_fingerprint,
                 "depth": req.depth,
             },
         )
-    except Exception as e:  # noqa: BLE001 — ledger persistence must not block oracle response
+    except (OSError, RuntimeError, ValueError, sqlite3.Error) as e:
         logger.warning("Failed to persist Oracle audit to ledger: %s", e)
 
     return OracleResponse(

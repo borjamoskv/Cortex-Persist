@@ -58,6 +58,48 @@ class TestStore:
         assert isinstance(fact_id, int)
         assert fact_id > 0
 
+    async def test_decision_store_signature_binds_tenant_project_and_source(self, engine):
+        from cortex.crypto.keys import ZKSwarmIdentity
+
+        keypair = ZKSwarmIdentity.generate_keypair()
+        content = "Approve a high-risk action after deterministic admission checks."
+        signature = ZKSwarmIdentity.sign_store_event(
+            tenant_id="tenant-alpha",
+            project="risk",
+            fact_type="decision",
+            source="agent:risk",
+            content=content,
+            private_key_b64=keypair.private_key_b64,
+        )
+        meta = {
+            "agent_public_key": keypair.public_key_b64,
+            "agent_public_key_sha256": ZKSwarmIdentity.public_key_sha256(
+                keypair.public_key_b64
+            ),
+            "zk_proof_signature": signature,
+            "zk_proof_scope": "store_event_v1",
+        }
+
+        fact_id = await engine.store(
+            project="risk",
+            content=content,
+            fact_type="decision",
+            source="agent:risk",
+            meta=meta,
+            tenant_id="tenant-alpha",
+        )
+        assert fact_id > 0
+
+        with pytest.raises(ValueError, match="INVALID"):
+            await engine.store(
+                project="risk",
+                content=content,
+                fact_type="decision",
+                source="agent:risk",
+                meta=meta,
+                tenant_id="tenant-beta",
+            )
+
     async def test_store_deduplication_returns_same_id(self, engine):
         """Exact structural hash dedup should return the same fact_id."""
         content = "Deduplication test content unique enough to avoid cross-test collision."
@@ -194,7 +236,7 @@ class TestTaintIntegration:
             fact_type="knowledge",
             source="agent:test_suite",
             confidence="C5",
-            parent_decision_id=parent_id,
+            meta={"previous_fact_id": parent_id},
         )
 
         # Let's make sure edge is created. The current store() might not map parent_decision_id to an edge.

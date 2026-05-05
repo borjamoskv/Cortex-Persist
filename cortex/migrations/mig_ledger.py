@@ -11,6 +11,7 @@ def _migration_010_immutable_ledger(conn: sqlite3.Connection):
             id              INTEGER PRIMARY KEY AUTOINCREMENT,
             tenant_id       TEXT NOT NULL DEFAULT 'default',
             fact_id         INTEGER NOT NULL REFERENCES facts(id),
+            fact_hash       TEXT NOT NULL DEFAULT '',
             agent_id        TEXT NOT NULL,
             vote            INTEGER NOT NULL,
             vote_weight     REAL NOT NULL,
@@ -21,11 +22,13 @@ def _migration_010_immutable_ledger(conn: sqlite3.Connection):
             UNIQUE(hash)
         );
         CREATE INDEX IF NOT EXISTS idx_vote_ledger_fact ON vote_ledger(fact_id);
+        CREATE INDEX IF NOT EXISTS idx_vote_ledger_fact_hash ON vote_ledger(fact_hash);
         CREATE INDEX IF NOT EXISTS idx_vote_ledger_agent ON vote_ledger(agent_id);
         CREATE INDEX IF NOT EXISTS idx_vote_ledger_timestamp ON vote_ledger(timestamp);
 
         CREATE TABLE IF NOT EXISTS merkle_roots (
             id              INTEGER PRIMARY KEY AUTOINCREMENT,
+            tenant_id       TEXT NOT NULL DEFAULT 'default',
             root_hash       TEXT NOT NULL,
             tx_start_id     INTEGER NOT NULL,
             tx_end_id       INTEGER NOT NULL,
@@ -35,6 +38,7 @@ def _migration_010_immutable_ledger(conn: sqlite3.Connection):
             external_proof  TEXT
         );
         CREATE INDEX IF NOT EXISTS idx_merkle_range ON merkle_roots(tx_start_id, tx_end_id);
+        CREATE INDEX IF NOT EXISTS idx_merkle_tenant_range ON merkle_roots(tenant_id, tx_start_id, tx_end_id);
 
         CREATE TABLE IF NOT EXISTS integrity_checks (
             id              INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -120,6 +124,7 @@ def _migration_014_vote_ledger_refinement(conn: sqlite3.Connection):
             id              INTEGER PRIMARY KEY AUTOINCREMENT,
             tenant_id       TEXT NOT NULL DEFAULT 'default',
             fact_id         INTEGER NOT NULL REFERENCES facts(id),
+            fact_hash       TEXT NOT NULL DEFAULT '',
             agent_id        TEXT NOT NULL,
             vote            INTEGER NOT NULL,
             vote_weight     REAL NOT NULL,
@@ -130,8 +135,15 @@ def _migration_014_vote_ledger_refinement(conn: sqlite3.Connection):
             UNIQUE(hash)
         )
     """)
+    columns_vote_ledger = {
+        row[1] for row in conn.execute("PRAGMA table_info(vote_ledger)").fetchall()
+    }
+    if "fact_hash" not in columns_vote_ledger:
+        conn.execute("ALTER TABLE vote_ledger ADD COLUMN fact_hash TEXT NOT NULL DEFAULT ''")
+        logger.info("Migration 014: Added 'fact_hash' column to vote_ledger")
     conn.executescript("""
         CREATE INDEX IF NOT EXISTS idx_vote_ledger_fact ON vote_ledger(fact_id);
+        CREATE INDEX IF NOT EXISTS idx_vote_ledger_fact_hash ON vote_ledger(fact_hash);
         CREATE INDEX IF NOT EXISTS idx_vote_ledger_agent ON vote_ledger(agent_id);
         CREATE INDEX IF NOT EXISTS idx_vote_ledger_timestamp ON vote_ledger(timestamp);
     """)
@@ -151,3 +163,22 @@ def _migration_014_vote_ledger_refinement(conn: sqlite3.Connection):
         )
     """)
     logger.info("Migration 014: Refined Immutable Ledger (vote_ledger + vote_merkle_roots)")
+
+
+def _migration_023_tenant_scoped_merkle_roots(conn: sqlite3.Connection) -> None:
+    """Add tenant identity to transaction Merkle checkpoints."""
+    columns = {row[1] for row in conn.execute("PRAGMA table_info(merkle_roots)").fetchall()}
+    added_column = "tenant_id" not in columns
+    if "tenant_id" not in columns:
+        conn.execute("ALTER TABLE merkle_roots ADD COLUMN tenant_id TEXT NOT NULL DEFAULT 'default'")
+
+    if added_column:
+        conn.execute(
+            "UPDATE merkle_roots SET tenant_id = '__global__' "
+            "WHERE tenant_id IS NULL OR tenant_id = '' OR tenant_id = 'default'"
+        )
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_merkle_tenant_range "
+        "ON merkle_roots(tenant_id, tx_start_id, tx_end_id)"
+    )
+    logger.info("Migration 023: Added tenant_id to merkle_roots")

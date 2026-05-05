@@ -20,6 +20,31 @@ __all__ = ["QueryMixin"]
 logger = logging.getLogger("cortex")
 
 
+async def _table_columns(conn: Any, table_name: str) -> set[str]:
+    async with conn.execute(f"PRAGMA table_info({table_name})") as cursor:
+        rows = await cursor.fetchall()
+    return {str(row[1]) for row in rows}
+
+
+def _parent_expr(columns: set[str], alias: str = "f") -> str:
+    candidates = []
+    if "parent_id" in columns:
+        candidates.append(f"{alias}.parent_id")
+    if "parent_decision_id" in columns:
+        candidates.append(f"{alias}.parent_decision_id")
+    metadata_col = "metadata" if "metadata" in columns else "meta" if "meta" in columns else None
+    if metadata_col is not None:
+        candidates.append(
+            f"CASE WHEN json_valid({alias}.{metadata_col}) "
+            f"THEN json_extract({alias}.{metadata_col}, '$.parent_decision_id') END"
+        )
+    if not candidates:
+        return "NULL"
+    if len(candidates) == 1:
+        return candidates[0]
+    return f"COALESCE({', '.join(candidates)})"
+
+
 class QueryMixin(EngineMixinBase):
     """Query Layer — Recall, History, Time-Travel, Graph, and Stats.
 
@@ -122,11 +147,15 @@ class QueryMixin(EngineMixinBase):
             q = (
                 f"SELECT {FACT_COLUMNS} "
                 f"{FACT_JOIN} "
-                "WHERE f.tenant_id = ? AND f.project = ? "
+                "WHERE f.tenant_id = ? "
                 "AND f.is_quarantined = 0 "
                 "AND f.is_tombstoned = 0"
             )
-            params: list = [tenant_id, project]
+            params: list = [tenant_id]
+
+            if project:
+                q += " AND f.project = ?"
+                params.append(project)
 
             if fact_type:
                 q += " AND f.fact_type = ?"
@@ -437,38 +466,41 @@ class QueryMixin(EngineMixinBase):
         """
         tenant_id = self._resolve_tenant(tenant_id)
 
-        if direction == "up":
-            sql = """
+        async with self.session() as conn:
+            facts_columns = await _table_columns(conn, "facts")
+            parent_expr = _parent_expr(facts_columns, "f")
+
+            if direction == "up":
+                sql = f"""
                 WITH RECURSIVE chain(id, depth) AS (
                     SELECT id, 0 FROM facts
                     WHERE id = ? AND tenant_id = ?
                     UNION ALL
-                    SELECT json_extract(f.metadata, '$.parent_decision_id'), c.depth + 1
+                    SELECT {parent_expr}, c.depth + 1
                     FROM facts f JOIN chain c ON f.id = c.id
-                    WHERE json_extract(f.metadata, '$.parent_decision_id') IS NOT NULL
+                    WHERE {parent_expr} IS NOT NULL
+                        AND f.tenant_id = ?
                         AND c.depth < ?
                 )
                 SELECT id, depth FROM chain ORDER BY depth
-            """
-        else:
-            sql = """
+                """
+                params = (fact_id, tenant_id, tenant_id, max_depth)
+            else:
+                sql = f"""
                 WITH RECURSIVE chain(id, depth) AS (
                     SELECT id, 0 FROM facts
                     WHERE id = ? AND tenant_id = ?
                     UNION ALL
                     SELECT f.id, c.depth + 1
                     FROM facts f JOIN chain c
-                        ON json_extract(f.metadata, '$.parent_decision_id') = c.id
-                    WHERE c.depth < ?
+                        ON {parent_expr} = c.id
+                    WHERE f.tenant_id = ? AND c.depth < ?
                 )
                 SELECT id, depth FROM chain ORDER BY depth
-            """
+                """
+                params = (fact_id, tenant_id, tenant_id, max_depth)
 
-        async with self.session() as conn:
-            async with conn.execute(
-                sql,
-                (fact_id, tenant_id, max_depth),
-            ) as cursor:
+            async with conn.execute(sql, params) as cursor:
                 chain_ids = await cursor.fetchall()
 
             if not chain_ids:

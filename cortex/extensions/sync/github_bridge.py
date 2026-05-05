@@ -1,7 +1,7 @@
 """GitHub → CORTEX Bridge — Synchronize Issues/PRs as CORTEX facts.
 
 Open issues/PRs are stored as `bridge` facts.
-Closed issues crystallize into `decision` facts (bridge deprecated, decision created).
+Closed issues crystallize into `issue` facts (bridge deprecated, resolution created).
 Dedup via SHA256 of `{repo}/{number}` stored in `meta.github_key`.
 """
 
@@ -64,9 +64,11 @@ class GitHubCortexBridge:
         engine: CortexEngine,
         token: str,
         owner: str = "borjamoskv",
+        tenant_id: str = "default",
     ) -> None:
         self._engine = engine
         self._owner = owner
+        self._tenant_id = tenant_id.strip() or "default"
         self._client = httpx.AsyncClient(
             headers={
                 "Authorization": f"Bearer {token}",
@@ -238,6 +240,7 @@ class GitHubCortexBridge:
         fact_id = await self._engine.store(
             project=_PROJECT,
             content=content,
+            tenant_id=self._tenant_id,
             fact_type="bridge",
             tags=["github", "pr" if is_pr else "issue", repo.split("/")[-1]],
             confidence="C4",
@@ -261,9 +264,11 @@ class GitHubCortexBridge:
         await self._engine.deprecate(
             existing_fact_id,
             reason=f"crystallized:closed:{repo}#{item['number']}",
+            tenant_id=self._tenant_id,
         )
 
-        # Store as decision
+        # Store as an external resolution. It is not a CORTEX decision because GitHub
+        # events do not carry the ZK proof required for high-risk decision facts.
         content = f"[GitHub Resolved] {repo}#{item['number']}: {title}. Closed at {closed_at}."
         meta = {
             "github_key": _github_key(repo, item["number"]),
@@ -275,12 +280,14 @@ class GitHubCortexBridge:
             "previous_bridge_id": existing_fact_id,
             "closed_at": closed_at,
             "crystallized_at": now_iso(),
+            "external_resolution": True,
         }
 
         fact_id = await self._engine.store(
             project=_PROJECT,
             content=content,
-            fact_type="decision",
+            tenant_id=self._tenant_id,
+            fact_type="issue",
             tags=["github", "crystallized", repo.split("/")[-1]],
             confidence="C5",
             source=_SOURCE,
@@ -308,8 +315,8 @@ class GitHubCortexBridge:
                 cursor = await conn.execute(
                     "SELECT id, metadata FROM facts "
                     "WHERE fact_type = 'bridge' AND valid_until IS NULL "
-                    "AND source = ?",
-                    (_SOURCE,),
+                    "AND source = ? AND tenant_id = ?",
+                    (_SOURCE, self._tenant_id),
                 )
                 rows = await cursor.fetchall()
 
@@ -320,7 +327,7 @@ class GitHubCortexBridge:
             for row in rows:
                 fact_id = row[0]
                 try:
-                    meta_dict = enc.decrypt_json(row[1], tenant_id="default")
+                    meta_dict = enc.decrypt_json(row[1], tenant_id=self._tenant_id)
                     if isinstance(meta_dict, dict) and "github_key" in meta_dict:
                         index[meta_dict["github_key"]] = fact_id
                 except (ValueError, TypeError, OSError):

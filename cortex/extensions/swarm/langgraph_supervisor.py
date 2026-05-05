@@ -3,7 +3,7 @@ import uuid
 from collections.abc import AsyncGenerator
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 try:
     from langgraph.graph import END, StateGraph
@@ -23,8 +23,8 @@ class NightShiftState(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     session_id: str
-    messages: list[dict[str, Any]] = []
-    variables: dict[str, Any] = {}
+    messages: list[dict[str, Any]] = Field(default_factory=list)
+    variables: dict[str, Any] = Field(default_factory=dict)
     next_node: str = "planner"
     retry_count: int = 0
     max_retries: int = 3
@@ -72,9 +72,15 @@ class CortexLangGraphSupervisor:
         self.nodes[node.name] = node
 
         # Envolvermos el async `execute` para adaptarlo a LangGraph
-        async def node_wrapper(state: NightShiftState) -> NightShiftState:
+        async def node_wrapper(state: NightShiftState | dict[str, Any]) -> dict[str, Any]:
             logger.info("🔄 [SUPERVISOR] Ejecutando nodo: %s", node.name)
-            return await node.execute(state)
+            current = (
+                state
+                if isinstance(state, NightShiftState)
+                else NightShiftState.model_validate(state)
+            )
+            result = await node.execute(current)
+            return result.model_dump()
 
         self.graph_builder.add_node(node.name, node_wrapper)
 
@@ -99,12 +105,39 @@ class CortexLangGraphSupervisor:
             self.compile()
 
         logger.info("🚀 [SUPERVISOR] Lanzando Night Shift (Session: %s)", initial_state.session_id)
-        # En la API real de langgraph (langgraph>=0.0.x), astream funciona diferente
-        # dependiendo de la versión. Pero mockearemos este flujo para compatibilidad.
+        current = initial_state.model_copy(deep=True)
         try:
-            # LangGraph astream returns chunks of updates
-            async for state_update in self.compiled_app.astream(initial_state):  # type: ignore
-                yield state_update  # type: ignore  # pyright: ignore
+            async for state_update in self.compiled_app.astream(initial_state.model_dump()):  # type: ignore
+                current = self._merge_state_update(current, state_update)
+                yield current
         except (ValueError, TypeError, RuntimeError) as e:
             logger.error("☠️ [SUPERVISOR] Fallo de Ejecución Duradera: %s", e)
             raise LangGraphSupervisorError(f"Colapso en grafo: {e}") from e
+
+    @staticmethod
+    def _merge_state_update(
+        current: NightShiftState,
+        state_update: NightShiftState | dict[str, Any],
+    ) -> NightShiftState:
+        """Normalize LangGraph version-specific stream chunks into full state."""
+        if isinstance(state_update, NightShiftState):
+            return state_update
+        if not isinstance(state_update, dict):
+            return current
+
+        values = state_update.values() if any(isinstance(v, dict) for v in state_update.values()) else [state_update]
+        merged = current.model_dump()
+        for value in values:
+            if isinstance(value, NightShiftState):
+                merged.update(value.model_dump())
+            elif isinstance(value, dict):
+                if "variables" in value and isinstance(value["variables"], dict):
+                    variables = dict(merged.get("variables", {}))
+                    variables.update(value["variables"])
+                    merged["variables"] = variables
+                if "messages" in value and isinstance(value["messages"], list):
+                    merged["messages"] = value["messages"]
+                for key in ("session_id", "next_node", "retry_count", "max_retries", "is_paused"):
+                    if key in value:
+                        merged[key] = value[key]
+        return NightShiftState.model_validate(merged)

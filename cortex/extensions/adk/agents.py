@@ -16,6 +16,7 @@ from typing import Optional
 
 __all__ = [
     "create_google_one_agent",
+    "create_analyst_agent",
     "create_cortex_swarm",
     "create_guardian_agent",
     "create_memory_agent",

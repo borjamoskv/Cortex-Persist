@@ -53,6 +53,36 @@ CREATE TABLE IF NOT EXISTS consensus_votes_v2 (
 );
 """
 
+CREATE_VOTE_LEDGER = """
+CREATE TABLE IF NOT EXISTS vote_ledger (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenant_id       TEXT NOT NULL DEFAULT 'default',
+    fact_id         INTEGER NOT NULL REFERENCES facts(id),
+    fact_hash       TEXT NOT NULL DEFAULT '',
+    agent_id        TEXT NOT NULL,
+    vote            INTEGER NOT NULL,
+    vote_weight     REAL NOT NULL,
+    prev_hash       TEXT NOT NULL,
+    hash            TEXT NOT NULL,
+    timestamp       TEXT NOT NULL DEFAULT (datetime('now')),
+    signature       TEXT,
+    UNIQUE(hash)
+);
+"""
+
+CREATE_VOTE_MERKLE_ROOTS = """
+CREATE TABLE IF NOT EXISTS vote_merkle_roots (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenant_id       TEXT NOT NULL DEFAULT 'default',
+    root_hash       TEXT NOT NULL,
+    vote_start_id   INTEGER NOT NULL,
+    vote_end_id     INTEGER NOT NULL,
+    vote_count      INTEGER NOT NULL,
+    created_at      TEXT NOT NULL DEFAULT (datetime('now')),
+    UNIQUE(root_hash)
+);
+"""
+
 CREATE_TRUST_EDGES = """
 CREATE TABLE IF NOT EXISTS trust_edges (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -87,6 +117,13 @@ CREATE INDEX IF NOT EXISTS idx_agents_reputation ON agents(reputation_score DESC
 CREATE INDEX IF NOT EXISTS idx_agents_active ON agents(is_active, last_active_at);
 CREATE INDEX IF NOT EXISTS idx_votes_v2_fact ON consensus_votes_v2(fact_id);
 CREATE INDEX IF NOT EXISTS idx_votes_v2_agent ON consensus_votes_v2(agent_id);
+CREATE INDEX IF NOT EXISTS idx_vote_ledger_tenant_id ON vote_ledger(tenant_id, id);
+CREATE INDEX IF NOT EXISTS idx_vote_ledger_fact ON vote_ledger(fact_id);
+CREATE INDEX IF NOT EXISTS idx_vote_ledger_fact_hash ON vote_ledger(fact_hash);
+CREATE INDEX IF NOT EXISTS idx_vote_ledger_agent ON vote_ledger(agent_id);
+CREATE INDEX IF NOT EXISTS idx_vote_ledger_timestamp ON vote_ledger(timestamp);
+CREATE INDEX IF NOT EXISTS idx_vote_merkle_tenant_range
+    ON vote_merkle_roots(tenant_id, vote_start_id, vote_end_id);
 CREATE INDEX IF NOT EXISTS idx_trust_source ON trust_edges(source_agent);
 CREATE INDEX IF NOT EXISTS idx_trust_target ON trust_edges(target_agent);
 """
@@ -261,14 +298,19 @@ CREATE INDEX IF NOT EXISTS idx_lock_intents_agent ON lock_intents(agent_id);
 CREATE_ENRICHMENT_JOBS = """
 CREATE TABLE IF NOT EXISTS enrichment_jobs (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
-    fact_id         INTEGER NOT NULL REFERENCES facts(id),
+    tenant_id       TEXT NOT NULL DEFAULT 'default',
+    job_id          TEXT UNIQUE,
+    event_id        TEXT,
+    fact_id         INTEGER REFERENCES facts(id),
     job_type        TEXT NOT NULL DEFAULT 'embedding',
     status          TEXT NOT NULL DEFAULT 'queued',
     priority        INTEGER DEFAULT 0,
     attempts        INTEGER DEFAULT 0,
     last_error      TEXT,
+    next_attempt_ts TEXT,
     next_attempt_at TEXT,
     payload         TEXT,
+    locked_at       TEXT,
     created_at      TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at      TEXT NOT NULL DEFAULT (datetime('now'))
 );
@@ -277,6 +319,10 @@ CREATE TABLE IF NOT EXISTS enrichment_jobs (
 CREATE_ENRICHMENT_JOBS_INDEXES = """
 CREATE INDEX IF NOT EXISTS idx_enrichment_jobs_status ON enrichment_jobs(status, priority DESC);
 CREATE INDEX IF NOT EXISTS idx_enrichment_jobs_fact ON enrichment_jobs(fact_id);
+CREATE INDEX IF NOT EXISTS idx_enrichment_jobs_job_id ON enrichment_jobs(job_id);
+CREATE INDEX IF NOT EXISTS idx_enrichment_jobs_event_id ON enrichment_jobs(event_id);
+CREATE INDEX IF NOT EXISTS idx_enrichment_jobs_tenant_status
+    ON enrichment_jobs(tenant_id, status, priority DESC);
 """
 
 # ─── Full-Text Search (Decoupled in v5) ─────────────────────────────
@@ -294,6 +340,7 @@ CREATE VIRTUAL TABLE IF NOT EXISTS facts_fts USING fts5(
 CREATE_MERKLE_ROOTS = """
 CREATE TABLE IF NOT EXISTS merkle_roots (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenant_id       TEXT NOT NULL DEFAULT 'default',
     root_hash       TEXT NOT NULL,
     tx_start_id     INTEGER NOT NULL,
     tx_end_id       INTEGER NOT NULL,
@@ -394,11 +441,6 @@ END;
 """
 
 CREATE_FACTS_FTS_TRIGGERS = """
-CREATE TRIGGER IF NOT EXISTS facts_ai AFTER INSERT ON facts BEGIN
-  INSERT INTO facts_fts(rowid, content, project, tags, fact_type, tenant_id)
-  VALUES (new.id, new.content, new.project, new.tags, new.fact_type, new.tenant_id);
-END;
-
 CREATE TRIGGER IF NOT EXISTS facts_ad AFTER DELETE ON facts BEGIN
   DELETE FROM facts_fts WHERE rowid = old.id;
 END;
@@ -406,8 +448,6 @@ END;
 CREATE TRIGGER IF NOT EXISTS facts_au
 AFTER UPDATE OF content, project, tags, fact_type, tenant_id ON facts BEGIN
   DELETE FROM facts_fts WHERE rowid = old.id;
-  INSERT INTO facts_fts(rowid, content, project, tags, fact_type, tenant_id)
-  VALUES (new.id, new.content, new.project, new.tags, new.fact_type, new.tenant_id);
 END;
 """
 
@@ -415,6 +455,8 @@ END;
 EXTENSION_SCHEMA = [
     CREATE_AGENTS,
     CREATE_VOTES_V2,
+    CREATE_VOTE_LEDGER,
+    CREATE_VOTE_MERKLE_ROOTS,
     CREATE_TRUST_EDGES,
     CREATE_OUTCOMES,
     CREATE_RWC_INDEXES,

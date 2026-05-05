@@ -5,6 +5,7 @@ from httpx import ASGITransport, AsyncClient
 
 from cortex.api.core import app
 from cortex.auth.deps import require_auth, require_permission
+from cortex.routes import swarm as swarm_router
 
 # Mock AuthResult
 mock_auth = MagicMock()
@@ -20,6 +21,9 @@ async def override_auth():
 
 @pytest.fixture
 async def client():
+    if not any(getattr(route, "path", None) == "/v1/swarm/status" for route in app.routes):
+        app.include_router(swarm_router.router)
+
     # Override permissions
     app.dependency_overrides[require_auth] = override_auth
     for perm in ["read", "write", "admin"]:
