@@ -61,7 +61,7 @@ From event to evidence in under a minute
 1. Store memory
 
 cortex store "Vendor X failed compliance check" \
-  --type decision \
+  --type knowledge \
   --project procurement \
   --confidence C4 \
   --source agent:reviewer
@@ -76,7 +76,7 @@ cortex search "compliance vendor failure"
 
 4. Verify integrity
 
-cortex verify-ledger
+cortex trust-ledger verify
 
 Result: persistent memory with searchable context and verifiable history.
 

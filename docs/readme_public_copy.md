@@ -26,15 +26,15 @@ CORTEX-Persist is the trust layer for autonomous execution. A local-first memory
 pip install "cortex-persist[all]"
 ```
 
-Initialize the Ledger:
+Initialize CORTEX:
 ```bash
-cortex verify-ledger
+cortex init
 ```
 
 Store an auditable memory:
 ```bash
 cortex store "Vendor X failed compliance check" \
-  --type decision \
+  --type knowledge \
   --project procurement \
   --confidence C4 \
   --source agent:reviewer
@@ -43,6 +43,11 @@ cortex store "Vendor X failed compliance check" \
 Retrieve context:
 ```bash
 cortex search "compliance vendor failure"
+```
+
+Verify the ledger:
+```bash
+cortex trust-ledger verify
 ```
 
 ## Doctrine 

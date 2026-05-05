@@ -37,7 +37,7 @@ Default core tools:
 
 Extended tools available when `CORTEX_ENABLE_EXPERIMENTAL_MCP=1`:
 
-- cortex_audit_trail — EU AI Act compliant audit log
+- cortex_audit_trail — EU AI Act evidence-oriented audit log
 - cortex_verify_fact — Cryptographic verification certificate for a single fact
 - cortex_compliance_report — Article 12 compliance snapshot with score
 - cortex_decision_lineage — Trace decision chains for explainability

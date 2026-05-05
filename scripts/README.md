@@ -2,6 +2,11 @@
 
 > Operational scripts for CORTEX — benchmarks, seeders, gates, daemons, and utilities.
 
+These scripts are part of the broader repository tooling. They are useful for operator workflows,
+maintenance, benchmarking, and experiments, but they are not the recommended first integration
+surface for CORTEX Persist as a product. Start with the core CLI/API/MCP flow described in
+[`docs/product-surface.md`](../docs/product-surface.md) and treat this directory as advanced.
+
 ## Categories
 
 | Category | Scripts | Purpose |
@@ -9,6 +14,7 @@
 | **Benchmark** | `benchmark.py`, `benchmark_maas.py`, `benchmark_viz.py` | Performance measurement |
 | **Pre-commit** | `entropy_gate.py`, `sovereign_pre_commit.py`, `neural_pre_commit.py`, `sovereign_pre_commit.sh`, `zero_debt.sh` | Code quality gates |
 | **Ship Gate** | `ship_gate.py` | Release readiness checks |
+| **Launch Gate** | `validate_launch_assets.py` | Monetization collateral safety checks |
 | **Daemons** | `academy_trainer_daemon.py`, `void_watcher_daemon.py`, `storm_watcher_l2.py`, `moskv_panopticon.py`, `panopticon_live.py` | Background processes |
 | **Seeders** | `seed_*.py`, `backfill_embeddings.py` | Data population |
 | **DB Maintenance** | `repair_db.py`, `encrypt_legacy_facts.py`, `repatriate_memories.py` | Database operations |

@@ -15,7 +15,7 @@ Get Started · View Demo
 
 *(Edge variant más agresiva:)*
 > **Your AI can act. Now make it accountable.**
-> Persistent memory, tamper-evident lineage, and audit-ready history for systems that cannot afford amnesia.
+> Persistent memory, tamper-evident lineage, and reviewable history for systems that cannot afford amnesia.
 
 ---
 
@@ -57,7 +57,7 @@ It combines:
 - tamper-evident ledgering
 - hybrid retrieval
 - memory lifecycle governance
-- audit-ready history
+- reviewable history
 
 So your stack can do more than continue text.
 It can preserve operational truth under pressure.
@@ -71,7 +71,7 @@ It can preserve operational truth under pressure.
 **1. Store memory**
 ```bash
 cortex store "Vendor X failed compliance check" \
-  --type decision \
+  --type knowledge \
   --project procurement \
   --confidence C4 \
   --source agent:reviewer
@@ -87,7 +87,7 @@ cortex search "compliance vendor failure"
 
 **4. Verify integrity**
 ```bash
-cortex verify-ledger
+cortex trust-ledger verify
 ```
 
 Result: persistent memory with searchable context and verifiable history.
@@ -115,7 +115,7 @@ Promote, compact, decay, archive, or discard memory instead of turning context i
 **Local-First Runtime**
 Start with SQLite and sqlite-vec locally. Extend to cloud backends when scale or deployment needs change.
 
-**Audit-Ready History**
+**Reviewable History**
 Support internal review, compliance workflows, and postmortems with evidence instead of reconstruction theater.
 
 ---
@@ -194,7 +194,7 @@ Get Started · View Demo · GitHub
 
 **GitHub Integration Strings**
 - **Description:** Tamper-evident memory and decision lineage for AI agents.
-- **README Opening:** CORTEX-Persist is a local-first memory and trust layer for AI systems that need persistent context, cryptographic lineage, and audit-ready history.
+- **README Opening:** CORTEX-Persist is a local-first memory and trust layer for AI systems that need persistent context, cryptographic lineage, and reviewable history.
 
 ---
 **Notas de implementación:** No metas termodinámica, Ω ni doctrina en el primer scroll. Eso va en una página aparte tipo *Architecture / Principles / Why CORTEX*.

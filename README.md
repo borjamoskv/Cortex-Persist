@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  Local-first. SHA-256 hash-chained. Merkle-sealed. Audit-ready.
+  Local-first. SHA-256 hash-chained. Merkle-sealed. Audit-supporting.
 </p>
 
 <p align="center">
@@ -36,6 +36,20 @@
 CORTEX Persist gives teams shipping AI into high-stakes workflows verifiable memory,
 tamper-evident decision lineage, and exportable evidence. It adds hash-chained records and
 verification commands so teams can inspect what happened instead of reconstructing it later.
+
+## Why Teams Star This
+
+- You can prove what happened, not just log it.
+- You can verify ledger continuity with one command.
+- You can export reviewable evidence without custom tooling.
+
+If this aligns with your roadmap, [star the repo](https://github.com/borjamoskv/Cortex-Persist/stargazers) to follow releases.
+
+## Quick Command Flow
+
+1. `cortex init`
+2. `cortex store ... --type knowledge`
+3. `cortex trust-ledger verify`
 
 ## What It Is
 
@@ -87,31 +101,22 @@ python3 -m venv .venv && source .venv/bin/activate
 pip install -e .
 ```
 
-## Quickstart
+## Quickstart In 3 Steps
 
 ```bash
-# Initialize the local ledger
+# 1) Install
+pip install cortex-persist
+
+# 2) Persist a first fact
 cortex init
+cortex store my-project "FastAPI supports async request handlers" --type knowledge
 
-# Store a fact
-cortex store my-project "Redis uses skip lists for sorted sets" --tags "redis,data-structures"
-
-# Store a decision
-cortex store my-project "We chose FastAPI over Flask for async support" --type decision
-
-# Search and recall
-cortex search "async web framework" --project my-project
-cortex recall my-project
-
-# Verify integrity
-cortex verify 1
+# 3) Verify trust chain
 cortex trust-ledger verify
-
-# Generate a compliance snapshot
-cortex compliance-report
 ```
 
-If you want a guided path, see [docs/quickstart.md](docs/quickstart.md).
+Need the full path (search, recall, compliance snapshot, API/MCP extras)?
+Use the guided [Quickstart](docs/quickstart.md).
 
 ## Python Integration
 
@@ -125,11 +130,11 @@ async def main() -> None:
     try:
         fact_id = await engine.store(
             project="demo-agent",
-            content="User approved transaction $5,000",
-            fact_type="decision",
+            content="FastAPI supports async request handlers",
+            fact_type="knowledge",
         )
 
-        results = await engine.search("transaction approval", top_k=3, project="demo-agent")
+        results = await engine.search("async request handlers", top_k=3, project="demo-agent")
         ledger = await engine.verify_ledger()
 
         assert fact_id
@@ -154,6 +159,15 @@ routes and MCP tool families are opt-in via flags such as `CORTEX_ENABLE_EXPERIM
 
 Use [docs/product-surface.md](docs/product-surface.md) as the canonical boundary between the
 verifiable-memory product surface and the broader repository tooling.
+
+## Public Roadmap
+
+You can track upcoming milestones publicly in [ROADMAP.md](ROADMAP.md).
+
+- `v0.4.0` (Next): GraphQL API planning, distributed event bus, Redis L1 cache, and TS SDK hardening.
+- `v1.0.0` (Vision): managed dashboard, federation, dual compliance mode, and stronger encryption posture.
+
+Roadmap feedback is welcome via issues and discussions.
 
 ## Documentation
 

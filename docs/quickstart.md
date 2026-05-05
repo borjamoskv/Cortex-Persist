@@ -37,12 +37,13 @@ Every fact is automatically hash-chained into an immutable ledger.
 # Store knowledge
 cortex store my-project "Redis uses skip lists for sorted sets" --tags "redis,data-structures"
 
-# Store a decision
-cortex store my-project "We chose FastAPI over Flask for async support" --type decision
-
 # Store an error pattern
 cortex store my-project "OOM when batch size > 1024 on 8GB RAM" --type error
 ```
+
+High-rigor fact types such as `decision`, `rule`, and `code` require Ed25519 proof metadata
+on hardened write paths. Use `knowledge` for the first local smoke test, then adopt signed
+decision ingestion when you need governed decision lineage.
 
 ---
 
@@ -144,11 +145,11 @@ async def main() -> None:
     try:
         fact_id = await engine.store(
             project="my-agent",
-            content="Approved loan application #443",
-            fact_type="decision",
+            content="FastAPI supports async request handlers",
+            fact_type="knowledge",
         )
 
-        results = await engine.search("loan approval")
+        results = await engine.search("async request handlers")
         ledger = await engine.verify_ledger()
     finally:
         await engine.close()
