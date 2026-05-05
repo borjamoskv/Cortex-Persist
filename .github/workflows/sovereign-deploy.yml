@@ -130,7 +130,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -e ".[dev,api]"
+          pip install -e ".[dev,api,mcp]" numpy
           pip install ruff bandit safety mypy build twine
 
       - name: Release-only smoke
@@ -197,7 +197,7 @@ jobs:
 
       - name: Dependency audit (Safety)
         if: steps.scope.outputs.release_only != 'true'
-        run: safety check --json --output safety-report.json || true
+        run: safety check --output json > safety-report.json || true
 
       - name: Unit tests
         if: steps.scope.outputs.release_only != 'true'
