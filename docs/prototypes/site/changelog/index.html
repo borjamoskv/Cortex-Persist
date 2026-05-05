@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Changelog — CORTEX</title>
+    <meta name="description" content="Release highlights and roadmap updates for the CORTEX platform.">
+    <link rel="stylesheet" href="../../saas.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+      .langbar {
+          margin: 0 0 16px;
+          text-align: right;
+          color: #AFAFB2;
+          font-size: 0.9rem;
+      }
+
+      .langbar a {
+          color: #AFAFB2;
+          text-decoration: none;
+      }
+
+      .langbar a.active {
+          color: #CCFF00;
+          font-weight: 700;
+      }
+
+      body { margin: 0; background: #050505; color: #F0F0F0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+      .wrap { max-width: 940px; margin: 0 auto; padding: 64px 24px; }
+      h1, h2 { color: #CCFF00; }
+      p, li { color: #AFAFB2; }
+      .timeline { display: grid; gap: 16px; }
+      .entry { border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 18px; background: rgba(255,255,255,0.02); }
+      .tag { display: inline-block; color: #CCFF00; font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace; font-size: 0.9rem; margin-bottom: 8px; }
+      a { color: #CCFF00; }
+    </style>
+</head>
+<body>
+    <main class="wrap">
+        <p class="langbar"><a class="active" href="./">EN</a> · <a href="../es/changelog/">ES</a> · <a href="../zh/changelog/">ZH</a></p>
+        <h1>Changelog</h1>
+        <p>Registro práctico de mejoras de producto, estabilidad y evidencia operativa.</p>
+
+        <div class="timeline">
+            <article class="entry">
+                <div class="tag">2026-05</div>
+                <h2>Landing prototype documentation refresh</h2>
+                <ul>
+                    <li>Added a dedicated documentation hub at <code>/site/</code>.</li>
+                    <li>Added Quickstart, API, Security and support pages with direct links.</li>
+                    <li>Updated root routing so production points directly to this landing family.</li>
+                </ul>
+            </article>
+            <article class="entry">
+                <div class="tag">Earlier</div>
+                <h2>Trust substrate foundations</h2>
+                <ul>
+                    <li>Release of trust-ledger verification and tenant-scoped routes.</li>
+                    <li>CLI and API surface hardened for operational flows.</li>
+                    <li>Continuous hardening of audit continuity and guardrails.</li>
+                </ul>
+            </article>
+        </div>
+
+        <p><a href="../">Back to docs</a> · <a href="../../saas_landing.html#pricing">Pricing</a></p>
+    </main>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial — CORTEX</title>
+    <meta name="description" content="Resumen de cambios, lanzamientos y mejoras de la plataforma CORTEX.">
+    <link rel="stylesheet" href="../../../saas.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+      body { margin: 0; background: #050505; color: #F0F0F0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+      .wrap { max-width: 940px; margin: 0 auto; padding: 64px 24px; }
+      h1, h2 { color: #CCFF00; }
+      p, li { color: #AFAFB2; }
+      .timeline { display: grid; gap: 16px; }
+      .entry { border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 18px; background: rgba(255,255,255,0.02); }
+      .tag { display: inline-block; color: #CCFF00; font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace; font-size: 0.9rem; margin-bottom: 8px; }
+      a { color: #CCFF00; }
+      .langbar { margin: 0 0 16px; text-align: right; color: #AFAFB2; font-size: 0.9rem; }
+      .langbar a { color: #AFAFB2; text-decoration: none; }
+      .langbar a.active { color: #CCFF00; font-weight: 700; }
+    </style>
+</head>
+<body>
+    <main class="wrap">
+        <p class="langbar"><a href="../../changelog/">EN</a> · <a class="active" href="./">ES</a> · <a href="../../zh/changelog/">ZH</a></p>
+        <h1>Historial</h1>
+        <p>Registro de mejoras, cambios de producto y estabilidad operacional.</p>
+
+        <div class="timeline">
+            <article class="entry">
+                <div class="tag">2026-05</div>
+                <h2>Actualización del prototipo de landing</h2>
+                <ul>
+                    <li>Nuevo hub de documentación en <code>/site/</code>.</li>
+                    <li>Inclusión de páginas Quickstart, API, Security y Changelog.</li>
+                    <li>Compatibilidad de idioma añadida para EN/ES en rutas de documentación.</li>
+                </ul>
+            </article>
+            <article class="entry">
+                <div class="tag">Versiones previas</div>
+                <h2>Fundamentos de trazabilidad</h2>
+                <ul>
+                    <li>Verificación del trust ledger y reglas de aislamiento por tenant.</li>
+                    <li>Superficies de CLI y API robustecidas para entornos de producción.</li>
+                    <li>Mejoras continuas en guardias, telemetría y auditoría.</li>
+                </ul>
+            </article>
+        </div>
+
+        <p><a href="../">Volver a docs</a> · <a href="../../saas_landing.html#pricing">Planes</a></p>
+    </main>
+</body>
+</html>

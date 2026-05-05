@@ -1,30 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>API — CORTEX</title>
-    <meta name="description" content="CORTEX API references for persistence, queries, and trust ledger operations.">
-    <link rel="stylesheet" href="../../saas.css">
+    <meta name="description" content="CORTEX 的持久化、查询与信任账本 API 参考。">
+    <link rel="stylesheet" href="../../../saas.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-      .langbar {
-          margin: 0 0 16px;
-          text-align: right;
-          color: #AFAFB2;
-          font-size: 0.9rem;
-      }
-
-      .langbar a {
-          color: #AFAFB2;
-          text-decoration: none;
-      }
-
-      .langbar a.active {
-          color: #CCFF00;
-          font-weight: 700;
-      }
-
       body { margin: 0; background: #050505; color: #F0F0F0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
       .wrap { max-width: 900px; margin: 0 auto; padding: 64px 24px; }
       h1, h2 { color: #CCFF00; }
@@ -32,36 +15,39 @@
       pre { background: #090909; border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 16px; overflow: auto; }
       code { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace; }
       a { color: #CCFF00; }
+      .langbar { margin: 0 0 16px; text-align: right; color: #AFAFB2; font-size: 0.9rem; }
+      .langbar a { color: #AFAFB2; text-decoration: none; }
+      .langbar a.active { color: #CCFF00; font-weight: 700; }
     </style>
 </head>
 <body>
     <main class="wrap">
-        <p class="langbar"><a class="active" href="./">EN</a> · <a href="../es/api/">ES</a> · <a href="../zh/api/">ZH</a></p>
+        <p class="langbar"><a href="../../api/">EN</a> · <a href="../../es/api/">ES</a> · <a class="active" href="./">ZH</a></p>
         <h1>API</h1>
-        <p>Endpoints principales para operaciones de memoria y facturación.</p>
+        <p>CORTEX 的持久化、查询与信任账本主要端点。</p>
 
         <h2>POST /v1/store</h2>
         <pre><code>{
   "type": "decision",
-  "content": "Your trusted memory fact",
+  "content": "你可信任的记忆事实",
   "tenant_id": "tenant-1"
 }</code></pre>
 
         <h2>GET /v1/query</h2>
         <pre><code>{
   "tenant_id": "tenant-1",
-  "q": "What changed in auth flow?"
+  "q": "鉴权流程发生了什么变化？"
 }</code></pre>
 
         <h2>POST /v1/stripe/checkout</h2>
         <pre><code>{
   "plan": "pro",
-  "customer_email": "you@domain.com",
+  "customer_email": "your@email.com",
   "success_url": "https://cortexpersist.com/docs/prototypes/success.html",
   "cancel_url": "https://cortexpersist.com/docs/prototypes/cancel.html"
 }</code></pre>
 
-        <p><a href="../">Back to docs</a> · <a href="../../saas_landing.html#pricing">Pricing</a></p>
+        <p><a href="../">返回文档</a> · <a href="../../saas_landing.html#pricing">价格</a></p>
     </main>
 </body>
 </html>

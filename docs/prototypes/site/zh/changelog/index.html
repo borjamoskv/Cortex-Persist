@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>更新日志 — CORTEX</title>
+    <meta name="description" content="CORTEX 平台的发布与迭代记录。">
+    <link rel="stylesheet" href="../../../saas.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+      body { margin: 0; background: #050505; color: #F0F0F0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+      .wrap { max-width: 940px; margin: 0 auto; padding: 64px 24px; }
+      h1, h2 { color: #CCFF00; }
+      p, li { color: #AFAFB2; }
+      .timeline { display: grid; gap: 16px; }
+      .entry { border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 18px; background: rgba(255,255,255,0.02); }
+      .tag { display: inline-block; color: #CCFF00; font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace; font-size: 0.9rem; margin-bottom: 8px; }
+      a { color: #CCFF00; }
+      .langbar { margin: 0 0 16px; text-align: right; color: #AFAFB2; font-size: 0.9rem; }
+      .langbar a { color: #AFAFB2; text-decoration: none; }
+      .langbar a.active { color: #CCFF00; font-weight: 700; }
+    </style>
+</head>
+<body>
+    <main class="wrap">
+        <p class="langbar"><a href="../../changelog/">EN</a> · <a href="../../es/changelog/">ES</a> · <a class="active" href="./">ZH</a></p>
+        <h1>更新日志</h1>
+        <p>功能、稳定性与运维能力迭代记录。</p>
+
+        <div class="timeline">
+            <article class="entry">
+                <div class="tag">2026-05</div>
+                <h2>Landing 文档原型更新</h2>
+                <ul>
+                    <li>新增独立文档中心 <code>/site/</code>。</li>
+                    <li>补充 Quickstart、API、Security、Changelog 页面并添加直链。</li>
+                    <li>生产路由直接指向 landing 原型。</li>
+                </ul>
+            </article>
+            <article class="entry">
+                <div class="tag">更早</div>
+                <h2>可追溯底层能力</h2>
+                <ul>
+                    <li>上线 trust ledger 校验和租户级路由。</li>
+                    <li>加强 CLI 与 API 用于生产场景。</li>
+                    <li>持续增强审计连续性与防护规则。</li>
+                </ul>
+            </article>
+        </div>
+
+        <p><a href="../">返回文档</a> · <a href="../../saas_landing.html#pricing">价格</a></p>
+    </main>
+</body>
+</html>
