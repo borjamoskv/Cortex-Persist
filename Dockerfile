@@ -43,10 +43,12 @@ RUN apt-get update && \
 
 # Copy virtual environment from builder
 COPY --from=builder /app/.venv /app/.venv
+COPY --from=builder /app/cortex /app/cortex
 COPY --from=builder /root/.cache/huggingface /root/.cache/huggingface
 
 # Run as non-root user
 RUN useradd -m -u 1000 cortex
+RUN mkdir -p /data && chown -R cortex:cortex /data
 USER cortex
 
 ENV PATH="/app/.venv/bin:$PATH"
