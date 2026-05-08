@@ -27,6 +27,33 @@ env/
 .astro/
 .playwright-cli/
 
+
+# 
+
+# -- IDE/Agent workspace (never track) ------------
+.cursorrules
+.cursorignore
+GEMINI.md
+AGENTS.md
+.gemini/
+.claude/
+.copilot/
+
+# -- Internal conflict-resolution scripts ---------
+parse_conflicts.py
+resolve_conflicts_remote.py
+resolve_conflicts_remote2.py
+
+# -- Internal CORTEX orchestration (not product) --
+swarm_foundry_bridge.py
+telemetry_bridge.py
+foundry_c5_engine.py
+ouroboros_genesis_db.py
+x100_cortex_server.py
+synth_remaining_shards.py
+_facts.json
+master_outline.md
+
 # ── Python build artifacts ────────────────────────
 __pycache__/
 *.pyc
