@@ -26,8 +26,7 @@ def validate_cortex_taint(taint: str, payload: str | None = None) -> bool:
     # hash length is 64 hex characters. Let's just rsplit for the hash.
 
     parts = taint.rsplit(":", 1)
-    if len(parts) != 2:
-        return False
+    # length will always be 2 because we checked startswith('taint:') above
 
     prefix_and_ts, hash_digest = parts
     if len(hash_digest) != 64:
