@@ -81,7 +81,7 @@ curl -H "Authorization: Bearer ctx_xxxxxxxxxx" \
 - `GET /v1/projects/{project}/export` — Create a server-side JSON export artifact and return its location.
 - `POST /v1/trust/guard` — Dry-run a proposed write against the storage guard.
 - `GET /v1/trust/profiles/{agent_id}` — Retrieve the trust profile for one agent.
-- `GET /v1/trust/compliance` — Generate compliance status derived from live state.
+- `GET /v1/trust/evidence-support` — Generate evidence support status derived from live state.
 
 ### Ledger
 

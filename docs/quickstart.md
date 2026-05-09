@@ -82,7 +82,7 @@ cortex ledger verify
 
 # Generate a compliance report
 cortex compliance-report
-# → Compliance Score: 5/5 — All Article 12 requirements met
+# → Article 12 Evidence: 5/5 supportive technical controls detected
 ```
 
 ---
@@ -159,7 +159,7 @@ Available MCP tools:
 | `cortex_search` | Hybrid semantic search |
 | `cortex_status` | System health and metrics |
 | `cortex_ledger_verify` | Full ledger integrity check |
-| `cortex_audit_trail` | EU AI Act compliant audit log |
+| `cortex_audit_trail` | Article 12 evidence audit log |
 | `cortex_verify_fact` | Cryptographic verification certificate |
 | `cortex_compliance_report` | Article 12 compliance snapshot |
 | `cortex_decision_lineage` | Trace decision chains |

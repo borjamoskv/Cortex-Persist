@@ -1,4 +1,6 @@
-# CORTEX — EU AI Act Compliance Mapping
+# CORTEX — EU AI Act Evidence Support Mapping
+
+> **⚠️ Internal Reference Document.** This mapping describes technical capabilities, not certified compliance status. Compliance requires organizational measures and qualified legal review beyond what any software tool provides.
 
 **Document Version:** 1.0
 **Date:** February 20, 2026
@@ -43,7 +45,7 @@ of the **EU AI Act (Regulation 2024/1689)**, specifically **Article 12**
 
 **Verification Command:** `cortex compliance-report` (checks agent tracking)
 
-### Art. 12.3 — Tamper-Proof Storage
+### Art. 12.3 — Tamper-Evident Storage
 
 | Requirement | CORTEX Implementation | Evidence |
 |:---|:---|:---|
@@ -86,21 +88,23 @@ oversight requirements.
 
 ### Data Sovereignty (GDPR Art. 22)
 
-CORTEX is 100% local-first (SQLite). No data leaves the deployment
-environment. This inherently satisfies data residency and sovereignty
-requirements.
+CORTEX defaults to local-first storage (SQLite). In the default configuration,
+no data leaves the deployment environment, which supports data residency
+and sovereignty requirements. Actual GDPR compliance depends on the
+deploying organization's data handling, processing agreements, and legal basis.
 
 ---
 
-## Compliance Score
+## Evidence Readiness
 
 As of February 20, 2026:
 
 ```
 $ cortex compliance-report
 
-  Compliance Score: 5/5
-  🟢 COMPLIANT — All Article 12 requirements met.
+  Article 12 Evidence: 5/5 supportive technical controls detected
+  🟡 SUPPORTIVE — Technical controls present. Full compliance
+     requires organizational measures and qualified legal review.
 ```
 
 ---

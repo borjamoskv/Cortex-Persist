@@ -91,6 +91,7 @@ class CortexConfig:
 
     # Stripe (SaaS billing)
     STRIPE_SECRET_KEY: str = ""
+    STRIPE_PUBLIC_KEY: str = ""
     STRIPE_WEBHOOK_SECRET: str = ""
     _STRIPE_PRICE_TABLE_RAW: str = ""
 
@@ -177,6 +178,7 @@ class CortexConfig:
             LANGBASE_API_KEY=os.environ.get("LANGBASE_API_KEY", ""),
             LANGBASE_BASE_URL=os.environ.get("LANGBASE_BASE_URL", "https://api.langbase.com/v1"),
             STRIPE_SECRET_KEY=os.environ.get("STRIPE_SECRET_KEY", ""),
+            STRIPE_PUBLIC_KEY=os.environ.get("STRIPE_PUBLIC_KEY", ""),
             STRIPE_WEBHOOK_SECRET=os.environ.get("STRIPE_WEBHOOK_SECRET", ""),
             _STRIPE_PRICE_TABLE_RAW=os.environ.get("STRIPE_PRICE_TABLE", ""),
             DEPLOY_MODE=os.environ.get("CORTEX_DEPLOY", "local"),

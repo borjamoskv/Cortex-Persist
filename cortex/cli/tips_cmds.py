@@ -14,23 +14,9 @@ import click
 from rich.panel import Panel
 from rich.table import Table
 
-from cortex.cli.common import DEFAULT_DB, cli, console, get_engine
+from cortex.cli.common import _run_async, DEFAULT_DB, cli, console, get_engine
 from cortex.cli.errors import err_empty_results, handle_cli_error
 from cortex.cli.tips import Tip, TipCategory, TipsEngine
-
-
-def _run_async(coro):
-    """Run an async coroutine from sync context."""
-    try:
-        loop = asyncio.get_running_loop()
-    except RuntimeError:
-        loop = None
-    if loop and loop.is_running():
-        import concurrent.futures
-
-        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
-            return pool.submit(asyncio.run, coro).result()
-    return asyncio.run(coro)
 
 
 __all__ = [

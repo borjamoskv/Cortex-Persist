@@ -99,7 +99,7 @@ async def check_gate_9_registry() -> GateResult:
         )
         printer.success(msg)
         return True, "verified"
-    except Exception as e:
+    except (ImportError, OSError, RuntimeError, ValueError) as e:
         printer.fail(f"Registry load failed: {e}")
         return False, "failed"
 

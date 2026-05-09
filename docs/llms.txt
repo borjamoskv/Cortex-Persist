@@ -1,6 +1,6 @@
 # CORTEX — Trust Infrastructure for Autonomous AI
 
-> Cryptographic verification, audit trails, and EU AI Act compliance for AI agent memory.
+> Cryptographic verification, audit trails, and EU AI Act evidence support for AI agent memory.
 
 ## What is CORTEX?
 
@@ -23,7 +23,7 @@ evident, searchable, and auditable.
 - GET /v1/status — Engine statistics
 - GET /v1/admin/keys — API key management
 - GET /v1/ledger/verify — Full ledger verification report
-- GET /v1/trust/compliance — Live trust/compliance posture
+- GET /v1/trust/evidence-support — Live trust/evidence-support posture
 - GET /health — Load balancer health check
 
 ## MCP Tools (Model Context Protocol)
@@ -39,13 +39,13 @@ Extended tools available when `CORTEX_ENABLE_EXPERIMENTAL_MCP=1`:
 
 - cortex_audit_trail — EU AI Act compliant audit log
 - cortex_verify_fact — Cryptographic verification certificate for a single fact
-- cortex_compliance_report — Article 12 compliance snapshot with score
+- cortex_evidence_report — Article 12 evidence-support snapshot with score
 - cortex_decision_lineage — Trace decision chains for explainability
 
 ## Recommended CLI Surface
 
 - init, store, search, recall, history, status, list, edit, delete
-- verify, trust-ledger verify, compliance-report
+- verify, trust-ledger verify, evidence-report
 
 The repository also contains broader operator and research commands, but the public product story
 starts with the verifiable-memory flow above.
@@ -53,13 +53,16 @@ starts with the verifiable-memory flow above.
 When `CORTEX_ENABLE_EXPERIMENTAL_CLI=1`, additional command groups such as `mcp` are exposed for
 operator and research workflows.
 
-## EU AI Act Alignment (Article 12)
+## EU AI Act Alignment (Article 12 — Evidence Support)
 
 - Art. 12.1: Automatic event logging ✅ (transaction ledger)
 - Art. 12.2: Decision recording ✅ (fact storage with provenance)
-- Art. 12.3: Tamper-proof storage ✅ (SHA-256 hash chain + Merkle)
+- Art. 12.3: Tamper-evident storage ✅ (SHA-256 hash chain + Merkle)
 - Art. 12.4: Periodic verification ✅ (Merkle checkpoints + integrity_checks table)
 - Art. 12.2d: Agent traceability ✅ (source auto-detection + consensus votes)
+
+Note: CORTEX provides supportive technical controls. Full compliance requires
+organizational measures, risk assessment, and legal review.
 
 ## License
 

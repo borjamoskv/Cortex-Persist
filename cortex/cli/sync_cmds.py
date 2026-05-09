@@ -9,7 +9,7 @@ from typing import Any
 import click
 from rich.panel import Panel
 
-from cortex.cli.common import DEFAULT_DB, cli, console, get_engine
+from cortex.cli.common import _run_async, DEFAULT_DB, cli, console, get_engine
 from cortex.extensions.sync import export_obsidian, export_snapshot, export_to_json, sync_memory
 
 __all__ = [
@@ -18,11 +18,6 @@ __all__ = [
     "sync",
     "writeback",
 ]
-
-
-def _run_async(coro):
-    """Helper to run async coroutines from sync CLI."""
-    return asyncio.run(coro)
 
 
 @cli.command()

@@ -18,10 +18,10 @@ WHAT agents remember — but nobody has solved HOW you verify those memories
 are correct, unmodified, and auditable.
 
 The EU AI Act (Article 12, enforced August 2026) requires:
-  - Tamper-proof logging of all AI decisions
+  - Tamper-evident logging of all AI decisions
   - Full traceability and explainability
   - Periodic integrity verification
-  - Fines: up to €30M or 6% global revenue
+  - Penalties tiered up to €35M/7% for prohibited practices
 
 CORTEX addresses this by adding a cryptographic trust layer ON TOP of
 your existing memory stack. It doesn't replace Mem0/Zep/Letta —
@@ -73,7 +73,7 @@ the WBFT consensus protocol, or the EU AI Act compliance angle.
 
 **Title:**
 ```
-I built a cryptographic memory layer for AI agents (EU AI Act compliant, Apache 2.0, local-first)
+I built a cryptographic memory layer for AI agents (tamper-evident, Apache 2.0, local-first)
 ```
 
 **Body:**
@@ -119,7 +119,7 @@ VERIFY ANY FACT:
 
 Why this matters NOW:
 EU AI Act Article 12 goes live August 2026.
-Penalty: €30M or 6% global revenue for non-compliant AI systems.
+Penalties vary by category: up to €35M/7% for prohibited practices.
 Enterprise clients are already asking their AI vendors for compliance docs.
 CORTEX generates those reports in one command.
 
@@ -167,9 +167,9 @@ Local-first. MCP-native. Apache 2.0. Free.
 
 Tweet 4:
 EU AI Act Art.12 — August 2026.
-Fines: €30M or 6% global revenue.
+Fines: up to €35M/7% for prohibited practices.
 
-Requires: tamper-proof decision logs, full traceability, integrity verification.
+Requires: tamper-evident decision logs, full traceability, integrity verification.
 
 CORTEX generates the compliance report in one command.
 
@@ -197,7 +197,7 @@ Here's the question no one is asking yet: can you PROVE those decisions were cor
 
 Not "probably correct." Not "the model said so." Provably, cryptographically, auditably correct.
 
-The EU AI Act (Article 12, enforcement August 2026) will make this mandatory for regulated industries. Penalty for non-compliance: up to €30 million.
+The EU AI Act (Article 12, enforcement August 2026) will make this mandatory for regulated industries. Penalties vary by category, up to €35M.
 
 We built CORTEX to solve this — a cryptographic trust layer for AI agent memory that works on top of whatever stack you already use. No migration. No cloud dependency. Apache 2.0.
 

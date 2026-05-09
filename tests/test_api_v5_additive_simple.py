@@ -104,7 +104,7 @@ def test_trust_endpoints(client):
     assert resp.status_code == 200
     assert resp.json()["agent_id"] == "test_agent"
 
-    # Test compliance report
-    resp = client.get("/v1/trust/compliance")
+    # Test evidence support report
+    resp = client.get("/v1/trust/evidence-support")
     assert resp.status_code == 200
-    assert resp.json()["article_12_status"] == "LOGGED_AND_VERIFIED"
+    assert resp.json()["article_12_evidence_status"] == "LOGGING_AND_VERIFICATION_EVIDENCE_AVAILABLE"

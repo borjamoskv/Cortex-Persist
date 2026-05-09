@@ -39,7 +39,7 @@ if os.path.exists(_ACCEL_PATH):
                 ctypes.c_size_t,
             ]
             _accel_func.restype = None
-    except Exception:
+    except OSError:
         _accel = None
         _accel_func = None
 

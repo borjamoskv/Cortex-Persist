@@ -37,7 +37,7 @@ CORTEX is trust infrastructure for AI agents. It sits between your runtime and y
 | :--- | :--- | :--- |
 | **Trust Model** | "Trust the process" | **"Verify the evidence"** |
 | **Tamper Detection** | Weak (DB mutation is silent) | **Cryptographic** (SHA-256 + Merkle) |
-| **Compliance Proof** | Requires manual reconstruction | **O(1) Portable JSON Audit Packs** |
+| **Evidence Proof** | Requires manual reconstruction | **O(1) Portable JSON Audit Packs** |
 | **Agent Liability** | Ambiguous context reconstruction | **Mathematically defensible lineage** |
 
 > Logs tell you what happened. CORTEX adds cryptographic evidence for what the agent knew, when it knew it, and whether later tampering is detectable along the verified chain. [**Review a real verification proof.**](docs/examples/audit_pack_evidence_demo.json)
@@ -46,7 +46,7 @@ CORTEX is trust infrastructure for AI agents. It sits between your runtime and y
 
 1. **Autonomous Agents:** Prove exactly what context an agent had when making a critical, irreversible decision (e.g. executing a trade, sending a legal email).
 2. **Multi-Agent Systems:** Trace state propagation across agents and workflows.
-3. **Compliance-Heavy Environments:** Produce audit trails for finance, security, and regulated operations.
+3. **Audit-Heavy Environments:** Produce audit trails for finance, security, and regulated operations.
 4. **Post-incident forensics:** detect silent mutation, tampering, or replayed state.
 5. **Trust-sensitive AI products:** ship memory with evidence, not vibes.
 
@@ -110,8 +110,8 @@ $ sqlite3 cortex.db "UPDATE facts SET content='Transaction approved' WHERE id='8
 $ cortex trust-ledger verify
 [✘] TAMPER DETECTED: Hash mismatch at block 8f4a2b9e
 
-# 6. Generate a compliance snapshot
-$ cortex compliance-report
+# 6. Generate an evidence snapshot
+$ cortex evidence-report
 ```
 
 > 🐍 **Python demo:** For a self-contained Python script that walks through the full core flow, see [`examples/demo_canonical.py`](examples/demo_canonical.py).

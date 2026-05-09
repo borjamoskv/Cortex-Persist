@@ -10,7 +10,7 @@ __all__: list[str] = []
 
 try:
     from cortex.auth.manager import AuthManager, get_auth_manager, reset_auth_manager
-except Exception:  # noqa: BLE001
+except ImportError:
     AuthManager = None  # type: ignore[assignment]
     get_auth_manager = None  # type: ignore[assignment]
     reset_auth_manager = None  # type: ignore[assignment]
@@ -19,7 +19,7 @@ else:
 
 try:
     from cortex.auth.models import APIKey, AuthResult
-except Exception:  # noqa: BLE001
+except ImportError:
     APIKey = None  # type: ignore[assignment]
     AuthResult = None  # type: ignore[assignment]
 else:
@@ -27,7 +27,7 @@ else:
 
 try:
     from cortex.auth.schema import AUTH_SCHEMA, SQL_INSERT_KEY
-except Exception:  # noqa: BLE001
+except ImportError:
     AUTH_SCHEMA = None  # type: ignore[assignment]
     SQL_INSERT_KEY = None  # type: ignore[assignment]
 else:
@@ -40,7 +40,7 @@ try:
         require_permission,
         require_verified_permission,
     )
-except Exception:  # noqa: BLE001
+except ImportError:
     require_auth = None  # type: ignore[assignment]
     require_consensus = None  # type: ignore[assignment]
     require_permission = None  # type: ignore[assignment]

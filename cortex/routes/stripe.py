@@ -10,8 +10,8 @@ Usage:
     Registered opt-in in api.py when STRIPE_SECRET_KEY is set.
 
 Environment variables:
-    STRIPE_SECRET_KEY — sk_live_... or sk_test_...
-    STRIPE_WEBHOOK_SECRET — whsec_... from Stripe dashboard
+    STRIPE_SECRET_KEY — Stripe secret key (from dashboard.stripe.com/apikeys)
+    STRIPE_WEBHOOK_SECRET — Stripe webhook signing secret (from dashboard)
     STRIPE_PRICE_TABLE — JSON mapping plan names to Stripe Price IDs
 """
 
@@ -30,6 +30,7 @@ __all__ = [
     "PortalRequest",
     "create_checkout_session",
     "create_portal_session",
+    "get_stripe_config",
     "stripe_webhook",
 ]
 
@@ -44,12 +45,18 @@ PLAN_CONFIG: dict[str, dict] = {
         "projects_limit": 10,
         "permissions": ["read", "write"],
         "rate_limit": 300,
+        "display_name": "Pro Plan",
+        "default_price": "$29",
+        "interval": "month",
     },
     "team": {
         "calls_limit": 500_000,
         "projects_limit": -1,  # unlimited
         "permissions": ["read", "write", "admin"],
         "rate_limit": 1000,
+        "display_name": "Team Plan",
+        "default_price": "$99",
+        "interval": "month",
     },
 }
 
@@ -140,6 +147,50 @@ async def _revoke_keys_for_email(email: str) -> None:
 
 
 # ─── Routes ──────────────────────────────────────────────────────────
+
+
+@router.get("/config")
+async def get_stripe_config() -> dict:
+    """Return public Stripe configuration for the frontend.
+
+    Exposes the publishable key and plan display prices.
+    Never exposes secret keys or webhook secrets.
+    """
+    public_key = config.STRIPE_PUBLIC_KEY  # type: ignore[reportAttributeAccessIssue]
+    price_table = config.STRIPE_PRICE_TABLE
+
+    plans: dict[str, dict] = {}
+    for plan_name, plan_cfg in PLAN_CONFIG.items():
+        plan_entry: dict[str, str] = {
+            "name": plan_cfg["display_name"],
+            "price": plan_cfg["default_price"],
+            "interval": plan_cfg["interval"],
+        }
+
+        # Attempt live price lookup from Stripe if configured
+        price_id = price_table.get(plan_name)
+        if price_id and public_key:
+            try:
+                stripe_sdk = _get_stripe()
+                price_obj = stripe_sdk.Price.retrieve(  # type: ignore
+                    price_id
+                )
+                raw_amount = price_obj.unit_amount
+                amount = raw_amount / 100 if raw_amount else 0
+                currency = price_obj.currency.upper()
+                symbol = "$" if currency == "USD" else f"{currency} "
+                plan_entry["price"] = f"{symbol}{amount:g}"
+                if price_obj.recurring:
+                    plan_entry["interval"] = price_obj.recurring.interval
+            except (RuntimeError, ValueError, OSError):
+                logger.warning("Could not fetch live price for %s, using default", plan_name)
+
+        plans[plan_name] = plan_entry
+
+    return {
+        "public_key": public_key,
+        "plans": plans,
+    }
 
 
 @router.post("/checkout", include_in_schema=False)

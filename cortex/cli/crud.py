@@ -11,17 +11,13 @@ from typing import Any, TypeVar, cast
 import click
 from rich.table import Table
 
-from cortex.cli.common import DEFAULT_DB, cli, console, get_engine
+from cortex.cli.common import DEFAULT_DB, _run_async, cli, console, get_engine
 from cortex.cli.errors import err_empty_results, err_fact_not_found
 from cortex.extensions.sync import export_to_json
 
 __all__ = ["delete", "list_facts", "edit"]
 
 _T = TypeVar("_T")
-
-
-def _run_async(coro: Coroutine[Any, Any, _T]) -> _T:
-    return asyncio.run(coro)
 
 
 @cli.command()

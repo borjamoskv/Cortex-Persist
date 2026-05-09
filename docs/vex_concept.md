@@ -254,7 +254,7 @@ GET  /v1/vex/history      — List executions with filters
 - ✅ The first agent runner with **cryptographic execution proofs**
 - ✅ The only system where execution history is **tamper-evident via hash-chain**
 - ✅ Built on **enterprise-grade trust infrastructure** (Merkle trees, WBFT consensus)
-- ✅ **EU AI Act compliant** by default (Article 12 audit trails)
+- ✅ **EU AI Act Article 12** evidence support (tamper-evident audit trails)
 - ✅ Compatible with **any LLM backend** (Gemini, Claude, GPT, local models)
 
 ### Market Category

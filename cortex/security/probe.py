@@ -106,7 +106,7 @@ async def probe_metastability(
     try:
         async with conn.execute(query, params) as cursor:
             rows = list(await cursor.fetchall())
-    except Exception as e:
+    except (OSError, RuntimeError, ValueError) as e:
         logger.warning("Metastability probe query failed: %s", e)
         return report
 
@@ -124,7 +124,7 @@ async def probe_metastability(
             ) as cursor:
                 edge_row = await cursor.fetchone()
                 upstream_edges = edge_row[0] if edge_row else 0
-        except Exception:
+        except (OSError, RuntimeError, ValueError):
             upstream_edges = 0
 
         fragility = age_days / max(upstream_edges + 1, 1)
@@ -201,7 +201,7 @@ async def probe_untested_assumptions(
                 }
             )
 
-    except Exception as e:
+    except (OSError, RuntimeError, ValueError) as e:
         logger.warning("Untested assumptions probe failed: %s", e)
 
     return results

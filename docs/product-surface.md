@@ -81,7 +81,7 @@ The FastAPI app includes many routes. For product integrations, prefer this subs
 - `GET /v1/projects/{project}/export`
 - `POST /v1/trust/guard`
 - `GET /v1/trust/profiles/{agent_id}`
-- `GET /v1/trust/compliance`
+- `GET /v1/trust/evidence-support`
 
 The same app also ships broader routes such as swarm orchestration, agents, ask/stream, context,
 dashboard, onboarding, telemetry, and runtime helpers. Those are available in-repo, but they are

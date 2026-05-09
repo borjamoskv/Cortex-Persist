@@ -243,7 +243,7 @@ class CortexEngine(
             if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
                 raise RuntimeError(f"FAIL-CLOSED: HealthGuardAdapter failed: {e}") from e
             logger.debug("HealthGuardAdapter unavailable: %s", e)
-        except Exception as e:
+        except (RuntimeError, TypeError, ValueError) as e:
             raise RuntimeError(f"FAIL-CLOSED: HealthGuardAdapter failed: {e}") from e
         try:
             from cortex.engine.guard_adapters import ContradictionGuardAdapter
@@ -252,7 +252,7 @@ class CortexEngine(
             if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
                 raise RuntimeError(f"FAIL-CLOSED: ContradictionGuardAdapter failed: {e}") from e
             logger.debug("ContradictionGuardAdapter unavailable: %s", e)
-        except Exception as e:
+        except (RuntimeError, TypeError, ValueError) as e:
             raise RuntimeError(f"FAIL-CLOSED: ContradictionGuardAdapter failed: {e}") from e
         try:
             from cortex.engine.guard_adapters import VerifierGuardAdapter
@@ -261,7 +261,7 @@ class CortexEngine(
             if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
                 raise RuntimeError(f"FAIL-CLOSED: VerifierGuardAdapter failed: {e}") from e
             logger.debug("VerifierGuardAdapter unavailable: %s", e)
-        except Exception as e:
+        except (RuntimeError, TypeError, ValueError) as e:
             raise RuntimeError(f"FAIL-CLOSED: VerifierGuardAdapter failed: {e}") from e
         # ZK-Swarm Cryptographic Guard (RFC-003 Phase 1)
         try:
@@ -271,7 +271,7 @@ class CortexEngine(
             if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
                 raise RuntimeError(f"FAIL-CLOSED: ZKGuardAdapter failed: {e}") from e
             logger.debug("ZKGuardAdapter unavailable: %s", e)
-        except Exception as e:
+        except (RuntimeError, TypeError, ValueError) as e:
             raise RuntimeError(f"FAIL-CLOSED: ZKGuardAdapter failed: {e}") from e
         # Post-store hooks (AX-II Hook 4 + signals + epistemic)
         try:
@@ -281,7 +281,7 @@ class CortexEngine(
             if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
                 raise RuntimeError(f"FAIL-CLOSED: LedgerCheckpointHook failed: {e}") from e
             logger.debug("LedgerCheckpointHook unavailable: %s", e)
-        except Exception as e:
+        except (RuntimeError, TypeError, ValueError) as e:
             raise RuntimeError(f"FAIL-CLOSED: LedgerCheckpointHook failed: {e}") from e
         try:
             from cortex.engine.guard_adapters import SignalEmitHook
@@ -290,7 +290,7 @@ class CortexEngine(
             if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
                 raise RuntimeError(f"FAIL-CLOSED: SignalEmitHook failed: {e}") from e
             logger.debug("SignalEmitHook unavailable: %s", e)
-        except Exception as e:
+        except (RuntimeError, TypeError, ValueError) as e:
             raise RuntimeError(f"FAIL-CLOSED: SignalEmitHook failed: {e}") from e
         try:
             from cortex.engine.guard_adapters import EpistemicBreakerHook
@@ -299,7 +299,7 @@ class CortexEngine(
             if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
                 raise RuntimeError(f"FAIL-CLOSED: EpistemicBreakerHook failed: {e}") from e
             logger.debug("EpistemicBreakerHook unavailable: %s", e)
-        except Exception as e:
+        except (RuntimeError, TypeError, ValueError) as e:
             raise RuntimeError(f"FAIL-CLOSED: EpistemicBreakerHook failed: {e}") from e
         logger.debug(
             "GuardPipeline: %d guards, %d hooks registered",

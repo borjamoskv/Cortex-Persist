@@ -18,7 +18,7 @@ AI agents are making millions of decisions per day. But **who verifies those dec
 
 Memory layers like Mem0, Zep, and Letta store what agents remember — but none of them add a tamper-evident ledger, verification workflow, and audit trail around that memory by default.
 
-The **EU AI Act (Article 12, effective August 2, 2026)** mandates tamper-proof logging, full traceability, and periodic integrity verification for high-risk AI systems. Fines reach **€30M or 6% of global revenue.**
+The **EU AI Act (Article 12, effective August 2, 2026)** mandates automatic logging, full traceability, and periodic integrity verification for high-risk AI systems. Penalties vary by infringement category and may reach up to **€35M / 7%**, **€15M / 3%**, or **€7.5M / 1.5%** of global annual turnover depending on the obligation and company type. *CORTEX improves traceability and evidence readiness but does not replace legal or compliance review.*
 
 CORTEX doesn't replace your memory layer — it **certifies** it.
 
@@ -39,17 +39,17 @@ Traditional logging and standard vector stores fail the epistemic containment te
 
 ## Core Capabilities
 
-| Capability | What It Does |
-|:---|:---|
-| 🔗 **Immutable Ledger** | Every fact is SHA-256 hash-chained. Tamper = detectable. |
-| 🌳 **Merkle Checkpoints** | Periodic batch verification of ledger integrity |
-| 🤝 **WBFT Consensus** | Multi-agent Byzantine fault-tolerant fact verification |
-| 🔐 **Privacy Shield** | Zero-leakage ingress guard — 11 secret detection patterns |
-| 🧠 **Tripartite Memory** | L1 Working → L2 Vector → L3 Episodic Ledger |
-| 📊 **Compliance Reports** | One-command EU AI Act Article 12 readiness snapshot |
-| 🔍 **Semantic + Graph Search** | Hybrid vector + knowledge graph retrieval |
-| 🏠 **Local-First** | SQLite. No cloud required. Your data, your machine. |
-| ☁️ **Sovereign Cloud** | Multi-tenant AlloyDB + Qdrant + Redis (roadmap) |
+| Capability | What It Does | Status |
+|:---|:---|:---|
+| 🔗 **Immutable Ledger** | Every fact is SHA-256 hash-chained. Tamper = detectable. | Stable |
+| 🌳 **Merkle Checkpoints** | Periodic batch verification of ledger integrity | Stable |
+| 🔐 **Privacy Shield** | Zero-leakage ingress guard — 11 secret detection patterns | Stable |
+| 🧠 **Tripartite Memory** | L1 Working → L2 Vector → L3 Episodic Ledger | Stable |
+| 📊 **Compliance Reports** | One-command EU AI Act Article 12 readiness snapshot | Stable |
+| 🔍 **Semantic + Graph Search** | Hybrid vector + knowledge graph retrieval | Stable |
+| 🏠 **Local-First** | SQLite. No cloud required. Your data, your machine. | Stable |
+| 🤝 **WBFT Consensus** | Multi-agent Byzantine fault-tolerant fact verification | Advanced |
+| ☁️ **Sovereign Cloud** | Multi-tenant AlloyDB + Qdrant + Redis | Roadmap |
 
 ---
 

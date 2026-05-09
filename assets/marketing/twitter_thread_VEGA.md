@@ -23,7 +23,7 @@ The EU AI Act (Art. 12) demands:
 ✅ Full traceability
 ✅ Integrity verification
 
-Fines reach €30M. CORTEX makes adherence an engineering constant, not a manual nightmare. 🛡️
+Penalties reach up to €35M / 7% of global turnover. CORTEX makes traceability an engineering constant, not a manual nightmare. 🛡️
 
 **Tweet 4:**
 Compare the stack:

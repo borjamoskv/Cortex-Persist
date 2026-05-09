@@ -126,6 +126,6 @@ async def run_psychohistory_simulation(
             scenario=req.scenario_name, years=req.simulated_years, project=req.project
         )
         return result
-    except Exception as e:
+    except (OSError, RuntimeError, ValueError) as e:
         logging.error("Psychohistory simulation failed: %s", e)
         raise HTTPException(status_code=500, detail="Psychohistory simulation collapsed") from e

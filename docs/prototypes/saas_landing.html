@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CORTEX — Trust Infrastructure for Autonomous AI</title>
-    <meta name="description" content="Your AI agent makes thousands of decisions. Can you prove a single one wasn't tampered with? CORTEX is to AI memory what SSL/TLS is to web communications. EU AI Act compliant.">
+    <meta name="description" content="Your AI agent makes thousands of decisions. Can you prove a single one wasn't tampered with? CORTEX is to AI memory what SSL/TLS is to web communications.">
     <meta name="keywords" content="AI memory, sovereign AI, trust infrastructure, EU AI Act, immutable ledger, multi-agent consensus, AES-256">
     <meta property="og:title" content="CORTEX — Trust Infrastructure for Autonomous AI">
-    <meta property="og:description" content="Cryptographic verification, audit trails, and EU AI Act compliance for AI agents. <5ms latency. Zero cloud dependency.">
+    <meta property="og:description" content="Cryptographic verification, audit trails, and tamper-evident memory for AI agents. <5ms latency. Zero cloud dependency.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://cortexpersist.com">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -241,15 +241,20 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
-    <!-- <script src="https://js.stripe.com/v3/"></script> Removed for CodeQL compliance (SRI not supported by Stripe) -->
+    <script src="https://js.stripe.com/v3/"></script>
 </head>
 <body>
     <canvas id="cortex-particles"></canvas>
 
+    <!-- QUARANTINE BANNER -->
+    <div style="position:fixed;top:0;left:0;right:0;z-index:9999;background:#FF5252;color:#fff;text-align:center;padding:10px 20px;font-family:monospace;font-size:13px;font-weight:700;letter-spacing:1px;">
+        ⚠️ PROTOTYPE ONLY — Contains non-canonical legacy marketing claims. Do not deploy or cite as product/compliance source. See <a href="../../PRODUCT-CORE.md" style="color:#fff;text-decoration:underline;">PRODUCT-CORE.md</a> for canonical surfaces.
+    </div>
+
     <!-- Urgency Banner -->
     <div class="urgency-banner" id="urgency-banner">
-        ⚠️ EU AI Act enforcement begins <strong>August 2026</strong> — Companies without audit trails face <strong>€30M fines</strong>.
-        <a href="#compliance">Learn how CORTEX makes you compliant →</a>
+        ⚠️ EU AI Act Article 12 enforcement begins <strong>August 2026</strong> — Record-keeping requirements apply to high-risk AI systems.
+        <a href="#compliance">Learn how CORTEX supports traceability →</a>
     </div>
 
     <!-- Nav -->
@@ -274,9 +279,9 @@
 
     <!-- Hero -->
     <section id="hero">
-        <div class="hero-badge">SOVEREIGN PROTOCOL v5 · EU AI ACT IMMUNITY · 130/100 STANDARD</div>
+        <div class="hero-badge">SOVEREIGN PROTOCOL v5 · EU AI ACT EVIDENCE SUPPORT · PROTOTYPE</div>
         <h1>AI Memory Without<br>Sovereignty is<br><span style="background: linear-gradient(135deg, var(--accent), #54D62C); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">Auditable Failure.</span></h1>
-        <p class="hero-sub">CORTEX is the <strong>Immutable Pulse</strong> of your agent swarm. Cryptographic verification, zero-leakage privacy, and EU AI Act compliance. <strong>Don't just store; prove.</strong></p>
+        <p class="hero-sub">CORTEX is the <strong>Immutable Pulse</strong> of your agent swarm. Cryptographic verification, zero-leakage privacy, and tamper-evident record-keeping. <strong>Don't just store; prove.</strong></p>
 
         <!-- Terminal Demo -->
         <div class="terminal-demo" id="terminal-demo">
@@ -309,8 +314,8 @@
                 <div class="metric-label">Test Functions</div>
             </div>
             <div class="metric-item">
-                <div class="metric-value blue" id="metric-attack">Zero</div>
-                <div class="metric-label">Attack Surface</div>
+                <div class="metric-value blue" id="metric-attack">Local</div>
+                <div class="metric-label">Default Deploy</div>
             </div>
         </div>
     </section>
@@ -331,14 +336,14 @@
     <!-- Compliance (EU AI Act) -->
     <section id="compliance">
         <h2>EU AI Act.<br>Ready Now.</h2>
-        <p class="section-sub">Article 12 enforcement begins August 2026. Non-compliance means fines of up to <strong>€30M or 6% of global revenue</strong>. CORTEX makes compliance structural, not procedural.</p>
+        <p class="section-sub">Article 12 record-keeping requirements begin August 2026. Penalties vary by infringement category (up to <strong>€35M / 7%</strong> for prohibited practices). CORTEX provides technical controls to support traceability and auditability.</p>
         <div class="compliance-grid">
             <div class="compliance-content">
                 <h3>What Article 12 Demands</h3>
-                <p>Every AI system operating in the EU must maintain <strong>automatic, tamper-proof logging</strong> of all decisions with full traceability and periodic integrity verification.</p>
-                <p>The penalty for non-compliance:</p>
-                <span class="fine-amount">Up to €30,000,000</span>
-                <p style="font-size:0.85rem; color:#666;">or 6% of total worldwide annual turnover — whichever is higher.</p>
+                <p>High-risk AI systems operating in the EU must maintain <strong>automatic, tamper-evident logging</strong> of decisions with full traceability and periodic integrity verification.</p>
+                <p>Penalty tiers (by infringement category):</p>
+                <span class="fine-amount">Up to €35M / 7%</span>
+                <p style="font-size:0.85rem; color:#666;">Other obligations: €15M/3%. Incorrect information: €7.5M/1.5%. Final compliance depends on system classification and legal review.</p>
             </div>
             <ul class="compliance-checklist">
                 <li>
@@ -347,7 +352,7 @@
                 </li>
                 <li>
                     <span class="check-icon">✓</span>
-                    <span class="check-text"><strong>Art. 12.3 — Tamper-Proof Storage:</strong> SHA-256 hash-chained ledger with Merkle tree checkpoints. Any tampering is cryptographically detectable.</span>
+                    <span class="check-text"><strong>Art. 12.3 — Tamper-Evident Storage:</strong> SHA-256 hash-chained ledger with Merkle tree checkpoints. Any tampering is cryptographically detectable.</span>
                 </li>
                 <li>
                     <span class="check-icon">✓</span>
@@ -359,7 +364,7 @@
                 </li>
                 <li>
                     <span class="check-icon">✓</span>
-                    <span class="check-text"><strong>Art. 14 — Multi-Agent Oversight:</strong> Reputation-weighted Byzantine consensus (WBFT) ensures no single agent corrupts shared memory.</span>
+                    <span class="check-text"><strong>Art. 14 — Multi-Agent Oversight (Advanced):</strong> Reputation-weighted Byzantine consensus (WBFT) for multi-agent deployments. Not on default single-agent path.</span>
                 </li>
             </ul>
         </div>
@@ -421,7 +426,7 @@
     <!-- Comparison -->
     <section id="compare">
         <h2>CORTEX vs. The Rest</h2>
-        <p class="section-sub">Mem0 raised $24M at $150M valuation. Here's what you get with CORTEX — for free, with zero attack surface.</p>
+        <p class="section-sub">Mem0 raised $24M at $150M valuation. Here's what you get with CORTEX — for free, local-first.</p>
         <div class="compare-table-wrap">
             <table class="compare-table" id="compare-table">
                 <thead>
@@ -452,7 +457,7 @@
                 <span class="why-number">01</span>
                 <div>
                     <h4>EU AI Act: August 2026</h4>
-                    <p>Companies deploying AI agents without audit trails face fines up to €30M. The clock is ticking. CORTEX makes compliance structural.</p>
+                    <p>Companies deploying high-risk AI systems need audit trail infrastructure. CORTEX provides the technical controls to support record-keeping requirements.</p>
                 </div>
             </div>
             <div class="why-card">
@@ -578,12 +583,7 @@
                 <div class="checkout-plan-price" id="checkout-plan-price">$29</div>
             </div>
             <div class="checkout-form">
-                <input type="email" class="checkout-input" placeholder="Email Address" required>
-                <input type="text" class="checkout-input" placeholder="Card Number" required>
-                <div style="display:flex; gap:16px;">
-                    <input type="text" class="checkout-input" placeholder="MM/YY" style="flex:1" required>
-                    <input type="text" class="checkout-input" placeholder="CVC" style="flex:1" required>
-                </div>
+                <input type="email" class="checkout-input" id="checkout-email" placeholder="Email Address" required>
             </div>
             <button class="btn btn-primary checkout-btn" id="checkout-submit">Pay Securely →</button>
             <div class="checkout-footer">
@@ -595,6 +595,11 @@
 
     <!-- Payment Integration & 1-Click Install -->
     <script>
+        // ─── CORTEX Stripe Bridge ─────────────────────────────────────
+        // All pricing and keys fetched dynamically from /v1/stripe/config.
+        // Zero hardcoded secrets. Zero stale prices. C5-REAL.
+        // ──────────────────────────────────────────────────────────────
+
         // 1-Click Install function
         function copyInstallCmd(btn) {
             navigator.clipboard.writeText('pip install cortex-persist').then(() => {
@@ -614,7 +619,49 @@
             });
         }
 
-        // Fast Checkout Logic
+        // ─── Dynamic Config State ───────────────────────────────────
+        let STRIPE_CONFIG = null; // populated from /v1/stripe/config
+
+        async function loadStripeConfig() {
+            try {
+                const resp = await fetch('/v1/stripe/config');
+                if (!resp.ok) return null;
+                STRIPE_CONFIG = await resp.json();
+
+                // Sync pricing card display with live backend prices
+                if (STRIPE_CONFIG.plans) {
+                    const proPrice = STRIPE_CONFIG.plans.pro;
+                    const teamPrice = STRIPE_CONFIG.plans.team;
+                    if (proPrice) {
+                        const proEl = document.querySelector(
+                            '#btn-pro'
+                        )?.closest('.plan')?.querySelector('.plan-price');
+                        if (proEl) {
+                            proEl.innerHTML = proPrice.price
+                                + '<span>/' + (proPrice.interval || 'month') + '</span>';
+                        }
+                    }
+                    if (teamPrice) {
+                        const teamEl = document.querySelector(
+                            '#btn-team'
+                        )?.closest('.plan')?.querySelector('.plan-price');
+                        if (teamEl) {
+                            teamEl.innerHTML = teamPrice.price
+                                + '<span>/' + (teamPrice.interval || 'month') + '</span>';
+                        }
+                    }
+                }
+                return STRIPE_CONFIG;
+            } catch (_) {
+                // Config endpoint unreachable — static defaults remain visible
+                return null;
+            }
+        }
+
+        // Fire config fetch immediately (non-blocking)
+        loadStripeConfig();
+
+        // ─── Fast Checkout Logic ────────────────────────────────────
         let stripeCheckoutInstance = null;
         const checkoutOverlay = document.getElementById('checkout-overlay');
         const checkoutClose = document.getElementById('checkout-close');
@@ -626,11 +673,20 @@
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
                 const plan = btn.dataset.plan;
-                const amount = plan === 'pro' ? '29' : '99';
-                const name = plan === 'pro' ? 'Pro Plan' : 'Team Plan';
-                
+
+                // Use dynamic prices if available, fall back to static
+                let price = plan === 'pro' ? '$29' : '$99';
+                let name = plan === 'pro' ? 'Pro Plan' : 'Team Plan';
+                if (STRIPE_CONFIG && STRIPE_CONFIG.plans) {
+                    const planData = STRIPE_CONFIG.plans[plan];
+                    if (planData) {
+                        price = planData.price || price;
+                        name = planData.name || name;
+                    }
+                }
+
                 checkoutName.innerText = name;
-                checkoutPrice.innerText = '$' + amount;
+                checkoutPrice.innerText = price;
                 checkoutOverlay.classList.add('active');
             });
         });
@@ -669,6 +725,13 @@
                 return;
             }
 
+            // Resolve public key — require it before proceeding
+            const stripeKey = STRIPE_CONFIG?.public_key;
+            if (!stripeKey) {
+                alert("Payment gateway is not configured. Please contact support.");
+                return;
+            }
+
             checkoutSubmit.innerHTML = "Processing... <span class='spinner'></span>";
             checkoutSubmit.style.opacity = "0.7";
             checkoutSubmit.style.pointerEvents = "none";
@@ -693,8 +756,8 @@
                 
                 const data = await response.json();
                 if (data.client_secret) {
-                    // Initialize Stripe Embedded Checkout natively without redirect
-                    const stripe = Stripe('pk_test_TYooMQauvdEDq54NiTphI7jx'); // Replace with real site PK
+                    // Initialize Stripe with the backend-provided public key
+                    const stripe = Stripe(stripeKey);
                     
                     document.querySelector('.checkout-form').style.display = 'none';
                     checkoutSubmit.style.display = 'none';

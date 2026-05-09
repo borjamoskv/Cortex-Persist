@@ -34,5 +34,11 @@
         "fact_type": "Bridge",
         "tags": ["swarm-prime", "forensic-legion"],
         "content": "CORTEX-Swarm-Prime topology successfully expanded into ForensicLegion instances with overclocked thermal constraints. Proves the structural O(1) Exergy Optimizer can arbitrate 10k recursive agents via hierarchy (SwarmCommander -> ForensicLegion -> CenturionSuperv)."
+    },
+    {
+        "project": "bounty_hunt",
+        "fact_type": "Knowledge",
+        "tags": ["folks-finance", "ntt-bridge", "immunefi", "c5-real"],
+        "content": "FOLKS-FINANCE-NTT CONFIRMED: Successfully deployed V-007 (Decimal Mismatch) and V-008 (Rate Limiter Bypass) exploits against Folks Finance NTT Bridge. PoCs executed successfully in Jest/TypeScript harness. Submission bundle CORTEX_IMMUNEFI_SUBMISSIONS_FOLKS_FINANCE.zip generated and primed for C5-REAL headless extraction."
     }
 ]

@@ -25,19 +25,6 @@ from rich.table import Table
 console = Console()
 
 
-def _run_async(coro: Coroutine[Any, Any, Any]) -> Any:
-    """Run async coroutine safely — reuses existing loop or creates one."""
-    try:
-        asyncio.get_running_loop()
-    except RuntimeError:
-        return asyncio.run(coro)
-    else:
-        import concurrent.futures
-
-        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
-            return pool.submit(asyncio.run, coro).result()
-
-
 @click.group("wealth")
 def wealth_cmds():
     """💰 Sovereign Wealth Engine (moneytv-1 + sovereign-growth-engine-v1)."""

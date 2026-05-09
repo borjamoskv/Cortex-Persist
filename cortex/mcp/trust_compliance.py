@@ -1,5 +1,8 @@
 """
-CORTEX Trust Tools — Compliance Report & Decision Lineage.
+CORTEX Trust Tools — Evidence Support Report & Decision Lineage.
+
+Generates technical evidence controls for EU AI Act Article 12 review.
+This module does not produce legal compliance determinations.
 
 Extracted from trust_tools.py to keep file size under 300 LOC.
 """
@@ -25,7 +28,7 @@ logger = logging.getLogger("cortex.mcp.trust")
 
 def register_compliance_tools(mcp: FastMCP, ctx: _MCPContext) -> None:
     """Register compliance report and decision lineage tools."""
-    _register_compliance_report(mcp, ctx)
+    _register_evidence_report(mcp, ctx)
     _register_decision_lineage(mcp, ctx)
 
 
@@ -40,12 +43,12 @@ def _extract_agents_from_rows(agent_rows: list) -> set[str]:
     return agents
 
 
-def _register_compliance_report(mcp: FastMCP, ctx: _MCPContext) -> None:
-    """Register the ``cortex_compliance_report`` tool."""
+def _register_evidence_report(mcp: FastMCP, ctx: _MCPContext) -> None:
+    """Register the ``cortex_evidence_report`` tool."""
 
     @mcp.tool()
-    async def cortex_compliance_report() -> str:
-        """Generate an EU AI Act Article 12 compliance snapshot.
+    async def cortex_evidence_report() -> str:
+        """Generate an EU AI Act Article 12 evidence-support snapshot.
 
         Produces a summary report covering:
         - Ledger integrity status (hash chain + Merkle checkpoints)
@@ -53,7 +56,9 @@ def _register_compliance_report(mcp: FastMCP, ctx: _MCPContext) -> None:
         - Agent activity traceability
         - Data governance metrics
 
-        This report can be used as evidence for regulatory audits.
+        This report can support regulatory review. It is not a legal
+        compliance determination. Final compliance depends on system
+        classification, deployment context, governance, and legal review.
         """
         await ctx.ensure_ready()
 
@@ -104,8 +109,8 @@ def _register_compliance_report(mcp: FastMCP, ctx: _MCPContext) -> None:
 
         lines = [
             "╔══════════════════════════════════════════════════╗",
-            "║   CORTEX — EU AI Act Compliance Report          ║",
-            "║   Article 12: Record-Keeping Obligations         ║",
+            "║   CORTEX — EU AI Act Evidence Support Report    ║",
+            "║   Article 12: Record-Keeping Evidence Controls   ║",
             "╚══════════════════════════════════════════════════╝",
             "",
             f"Report Generated: {now}",
@@ -131,10 +136,11 @@ def _register_compliance_report(mcp: FastMCP, ctx: _MCPContext) -> None:
         lines.extend(
             [
                 "",
-                "── 3. Compliance Checklist (Art. 12) ──",
+                "── 3. Evidence Control Coverage (Art. 12) ──",
                 f"  [{'✅' if total_tx > 0 else '❌'}] Automatic logging of events (Art. 12.1)",
                 f"  [{'✅' if decisions > 0 else '❌'}] Decision recording (Art. 12.2)",
-                f"  [{'✅' if integrity['valid'] else '❌'}] Tamper-proof storage (Art. 12.3)",
+                f"  [{'✅' if integrity['valid'] else '❌'}]"
+                " Tamper-evident record integrity support (Art. 12.3)",
                 f"  [{'✅' if checkpoints > 0 else '❌'}] "
                 f"Periodic integrity verification (Art. 12.4)",
                 f"  [{'✅' if len(agents) > 0 else '⚠️'}] Agent traceability (Art. 12.2d)",
@@ -154,13 +160,27 @@ def _register_compliance_report(mcp: FastMCP, ctx: _MCPContext) -> None:
         )
 
         if score == 5:
-            lines.append("  🟢 COMPLIANT — All Article 12 requirements met.")
+            lines.append(
+                "  🟢 SUPPORTIVE_CONTROLS_PRESENT — Technical evidence controls are present. "
+                "Final compliance depends on system classification, deployment, governance, "
+                "and qualified legal/audit review."
+            )
         elif score >= 3:
-            lines.append("  🟡 PARTIAL — Some requirements need attention.")
+            lines.append(
+                "  🟡 SUPPORTIVE_CONTROLS_PARTIAL"
+                " — Some technical evidence controls need attention."
+            )
         else:
-            lines.append("  🔴 NON-COMPLIANT — Critical gaps in record-keeping.")
+            lines.append(
+                "  🔴 SUPPORTIVE_CONTROLS_MISSING"
+                " — Critical record-keeping evidence gaps detected."
+            )
 
-        lines.append(f"\n  Compliance Score: {score}/5")
+        lines.append(f"\n  Evidence Control Coverage: {score}/5")
+        lines.append(
+            "  ⚠️  This report is not a legal compliance determination."
+            " Consult qualified legal/audit review for final status."
+        )
 
         return "\n".join(lines)
 

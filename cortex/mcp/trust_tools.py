@@ -8,7 +8,7 @@ and compliance capabilities aligned with EU AI Act Article 12
 Tools:
     - cortex_audit_trail: Generate audit trail for agent decisions
     - cortex_verify_fact: Verify cryptographic integrity of a specific fact
-    - cortex_compliance_report: Generate EU AI Act compliance snapshot
+    - cortex_evidence_report: Generate EU AI Act evidence-support snapshot
     - cortex_decision_lineage: Trace the lineage of a decision
 """
 

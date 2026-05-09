@@ -8,7 +8,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from cortex.cli.common import DEFAULT_DB, cli
+from cortex.cli.common import _run_async, DEFAULT_DB, cli
 from cortex.cli.trust_helpers import (
     _check_chain_integrity,
     _check_merkle,
@@ -23,20 +23,6 @@ from cortex.cli.trust_helpers import (
 __all__ = ["verify_fact", "compliance_report", "audit", "audit_cognitive"]
 
 console = Console()
-
-
-def _run_async(coro):
-    """Run an async coroutine synchronously."""
-    try:
-        loop = asyncio.get_event_loop()
-        if loop.is_running():
-            import concurrent.futures
-
-            with concurrent.futures.ThreadPoolExecutor() as pool:
-                return pool.submit(asyncio.run, coro).result()
-        return loop.run_until_complete(coro)
-    except RuntimeError:
-        return asyncio.run(coro)
 
 
 @cli.command("verify")
@@ -89,7 +75,7 @@ def verify_fact(fact_id: int, db: str) -> None:
 @cli.command("compliance-report")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def compliance_report(db: str) -> None:
-    """Generate EU AI Act Article 12 compliance snapshot."""
+    """Generate EU AI Act Article 12 evidence-support snapshot."""
     from datetime import datetime, timezone
 
     from cortex.cli.errors import handle_cli_error
@@ -121,8 +107,8 @@ def compliance_report(db: str) -> None:
         console.print()
         console.print(
             Panel.fit(
-                "[bold]CORTEX - EU AI Act Compliance Report[/bold]\n"
-                "[dim]Article 12: Record-Keeping Obligations[/dim]",
+                "[bold]CORTEX - EU AI Act Evidence Support Report[/bold]\n"
+                "[dim]Article 12: technical record-keeping evidence controls[/dim]",
                 border_style="bright_green" if chain_ok else "red",
             )
         )
@@ -167,12 +153,12 @@ def compliance_report(db: str) -> None:
         def icon(ok):
             return "[green]OK[/green]" if ok else "[red]X[/red]"
 
-        checks = Table(title="Compliance Checklist (Art. 12)")
+        checks = Table(title="Evidence Control Coverage (Art. 12)")
         checks.add_column("Requirement", style="bold")
         checks.add_column("Status")
         checks.add_row("Automatic event logging (Art. 12.1)", icon(c1))
         checks.add_row("Decision recording (Art. 12.2)", icon(c2))
-        checks.add_row("Tamper-proof storage (Art. 12.3)", icon(c3))
+        checks.add_row("Tamper-evident record integrity support (Art. 12.3)", icon(c3))
         checks.add_row("Periodic verification (Art. 12.4)", icon(c4))
         checks.add_row("Agent traceability (Art. 12.2d)", icon(c5))
         checks.add_row("Epistemic Isolation (Omega-3)", "[green]OK[/green]")
@@ -181,20 +167,34 @@ def compliance_report(db: str) -> None:
 
         score = sum([c1, c2, c3, c4, c5])
         if score == 5:
-            verdict = "[bold green]COMPLIANT[/bold green]"
+            verdict = "[bold green]SUPPORTIVE_CONTROLS_PRESENT[/bold green]"
         elif score >= 3:
-            verdict = "[bold yellow]PARTIAL[/bold yellow]"
+            verdict = "[bold yellow]SUPPORTIVE_CONTROLS_PARTIAL[/bold yellow]"
         else:
-            verdict = "[bold red]NON-COMPLIANT[/bold red]"
+            verdict = "[bold red]SUPPORTIVE_CONTROLS_MISSING[/bold red]"
 
         console.print(
-            Panel(f"{verdict}\n\nCompliance Score: [bold]{score}/5[/bold]", title="Verdict")
+            Panel(
+                f"{verdict}\n\n"
+                f"Evidence Control Coverage: [bold]{score}/5[/bold]\n\n"
+                "[dim]Not a legal compliance determination. Final EU AI Act compliance "
+                "depends on system classification, deployment, governance, documentation, "
+                "and qualified legal/audit review.[/dim]",
+                title="Technical Evidence Verdict",
+            )
         )
     except Exception as e:  # noqa: BLE001 — CLI boundary catch
         handle_cli_error(e, db_path=db, context="generating compliance report")
     finally:
         if conn:
             conn.close()
+
+
+@cli.command("evidence-report")
+@click.option("--db", default=DEFAULT_DB, help="Database path")
+def evidence_report(db: str) -> None:
+    """Generate EU AI Act Article 12 evidence-support snapshot."""
+    compliance_report.callback(db=db)
 
 
 @cli.command("audit-cognitive")
@@ -313,7 +313,6 @@ def siege(db: str) -> None:
 
         tasks = [vector.attack(engine, {}) for vector in COMPLIANCE_SIEGE_SWARM]  # type: ignore[type-error]
 
-        import asyncio
 
         results = await asyncio.gather(*tasks, return_exceptions=True)
 

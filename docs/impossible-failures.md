@@ -212,7 +212,7 @@ pytest tests/test_l2_static_analysis.py -v
 
 # Check compliance posture
 cortex compliance-report
-# → Compliance Score: 5/5 — All Article 12 requirements met
+# → Article 12 Evidence: 5/5 supportive technical controls detected
 
 # Audit decision lineage
 cortex lineage --fact-id 42

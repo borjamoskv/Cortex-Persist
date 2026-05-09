@@ -225,16 +225,9 @@ def _get_db_path() -> str:
     return str(DEFAULT_DB_PATH)
 
 
-def _run_async(coro: Any) -> Any:
-    """Helper to run async coroutines from sync CLI."""
-    from cortex.events.loop import sovereign_run
-
-    return sovereign_run(coro)
-
-
 async def _get_engine_active_facts(project: str | None = None) -> list[Any]:
     """Fetch cleartext facts using CortexEngine."""
-    from cortex.cli.common import get_engine
+    from cortex.cli.common import _run_async, get_engine
 
     engine = get_engine()
     try:

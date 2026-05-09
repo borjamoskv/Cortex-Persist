@@ -9,7 +9,7 @@
 ## 1. Design Rules
 
 | Rule | Enforcement |
-|:-----|:-----------|
+| :--- | :--- |
 | **No accidental internal exports** | Only types in this document are public. Everything else is `_private` |
 | **Typed contracts** | Pydantic v2 models. No `dict[str, Any]` leaking across boundaries |
 | **Versioned** | `/v1/` prefix. Breaking changes → `/v2/` |
@@ -126,24 +126,17 @@ class ConsensusStatus(BaseModel):
     voters: list[str] = []            # agent_ids
 ```
 
-### Compliance Resources
+### Evidence Support Resources
 
 ```python
-class AuditReport(BaseModel):
-    """EU AI Act Article 12 compliance report."""
-    regulation: str = "EU AI Act (Regulation 2024/1689)"
-    article: str = "12 — Record-Keeping"
-    score: str                        # "5/5"
-    status: str                       # COMPLIANT | NON_COMPLIANT
-    checks: dict[str, ComplianceCheck]
-    integrity: VerificationResult
-    facts_summary: FactsSummary
-    generated_at: datetime
-
-class ComplianceCheck(BaseModel):
-    description: str
-    compliant: bool
-    evidence: str
+class EvidenceSupportReport(BaseModel):
+    """EU AI Act Article 12 evidence support report."""
+    status: str
+    ledger_valid: bool
+    technical_control_score: float
+    audit_coverage: float
+    article_12_evidence_status: str
+    disclaimer: str
 ```
 
 ### Error Resources
@@ -180,7 +173,7 @@ TAINT_BLOCKED          = "taint.write_blocked"
 ### 3.1 Memory (Pillar 1 + 4)
 
 | Operation | Method | Path | Input | Output | Tier |
-|:----------|:------:|:-----|:------|:-------|:-----|
+| :--- | :---: | :--- | :--- | :--- | :--- |
 | **Store** | `POST` | `/v1/facts` | `{project, content, fact_type?, tags?, source?, confidence?, parent_id?, metadata?}` | `Fact` | Open |
 | **Batch Store** | `POST` | `/v1/facts/batch` | `{facts: [{...}], max: 100}` | `{stored: int, errors: TrustError[]}` | Open |
 | **Get** | `GET` | `/v1/facts/{id}` | — | `Fact` | Open |
@@ -197,7 +190,7 @@ TAINT_BLOCKED          = "taint.write_blocked"
 ### 3.2 Traceability (Pillar 2)
 
 | Operation | Method | Path | Input | Output | Tier |
-|:----------|:------:|:-----|:------|:-------|:-----|
+| :--- | :---: | :--- | :--- | :--- | :--- |
 | **Verify Ledger** | `GET` | `/v1/trust/verify` | — | `VerificationResult` | Open |
 | **Trace** | `GET` | `/v1/facts/{id}/trace` | `?max_depth=5` | `CausalTrace` | Premium |
 | **Taint Status** | `GET` | `/v1/facts/{id}/taint` | — | `TaintReport` | Premium |
@@ -206,7 +199,7 @@ TAINT_BLOCKED          = "taint.write_blocked"
 ### 3.3 Coordination (Pillar 3)
 
 | Operation | Method | Path | Input | Output | Tier |
-|:----------|:------:|:-----|:------|:-------|:-----|
+| :--- | :---: | :--- | :--- | :--- | :--- |
 | **Register Agent** | `POST` | `/v1/agents` | `{name, agent_type?, public_key?}` | `Agent` | Open |
 | **Get Agent** | `GET` | `/v1/agents/{id}` | — | `Agent` | Open |
 | **Vote** | `POST` | `/v1/facts/{id}/vote` | `{agent_id, value, reason?}` | `VoteResult` | Premium |
@@ -215,14 +208,14 @@ TAINT_BLOCKED          = "taint.write_blocked"
 ### 3.4 Verification (Pillar 5)
 
 | Operation | Method | Path | Input | Output | Tier |
-|:----------|:------:|:-----|:------|:-------|:-----|
+| :--- | :---: | :--- | :--- | :--- | :--- |
 | **Guard Check** | `POST` | `/v1/trust/guard` | `{content, project, fact_type?}` | `{pass: bool, warnings: TrustError[]}` | Open |
-| **Compliance Report** | `GET` | `/v1/trust/compliance` | `?project=` | `AuditReport` | Premium |
+| **Evidence Support Report** | `GET` | `/v1/trust/evidence-support` | `?project=` | `EvidenceSupportReport` | Premium |
 
 ### 3.5 System
 
 | Operation | Method | Path | Input | Output | Tier |
-|:----------|:------:|:-----|:------|:-------|:-----|
+| :--- | :---: | :--- | :--- | :--- | :--- |
 | **Status** | `GET` | `/v1/status` | — | `{facts, projects, db_size, uptime}` | Open |
 | **Health** | `GET` | `/v1/health` | — | `{status: "ok"}` | Open |
 
@@ -231,9 +224,9 @@ TAINT_BLOCKED          = "taint.write_blocked"
 ## 4. Operation Count
 
 | Tier | Operations | Notes |
-|:-----|----------:|:------|
+| :--- | :---: | :--- |
 | **Open** | 14 | Store, batch, get, list, search, recall, history, time_travel, deprecate, register_agent, get_agent, verify, guard_check, status, health |
-| **Premium** | 7 | Compact, trace, taint_status, propagate_taint, vote, consensus_status, compliance_report |
+| **Premium** | 7 | Compact, trace, taint_status, propagate_taint, vote, consensus_status, evidence_support_report |
 | **Total** | 21 | |
 
 ---
@@ -266,8 +259,8 @@ class CortexMemory:
     def vote(fact_id, agent_id, value) -> VoteResult
     def consensus(fact_id) -> ConsensusStatus
 
-    # Compliance
-    def compliance_report(project?) -> AuditReport
+    # Evidence Support
+    def evidence_support_report(project?) -> EvidenceSupportReport
 
     # System
     def status() -> dict
@@ -278,7 +271,7 @@ class CortexMemory:
 ## 6. MCP Tool Mapping
 
 | MCP Tool | API Operation | Status |
-|:---------|:-------------|:------:|
+| :--- | :--- | :---: |
 | `cortex_store` | `POST /v1/facts` | ✅ Exists |
 | `cortex_search` | `POST /v1/facts/search` | ✅ Exists |
 | `cortex_status` | `GET /v1/status` | ✅ Exists |
@@ -290,7 +283,7 @@ class CortexMemory:
 | `cortex_embed` | — | ⚠️ Internal (infra-specific) |
 | — | `POST /v1/facts/recall` | 🆕 New |
 | — | `POST /v1/facts/{id}/vote` | 🆕 New |
-| — | `GET /v1/trust/compliance` | 🆕 New |
+| — | `GET /v1/trust/evidence-support` | 🆕 New |
 | — | `POST /v1/trust/guard` | 🆕 New |
 | — | `POST /v1/facts/{id}/taint` | 🆕 New |
 
@@ -321,7 +314,7 @@ class CortexMemory:
  # NEW: Trust operations
 +integrity = memory.verify()
 +trace = memory.trace(fact.id)
-+report = memory.compliance_report("my-agent")
++report = memory.evidence_support_report("my-agent")
 ```
 
 ---
@@ -333,7 +326,7 @@ class CortexMemory:
 The API surface resolves all 4 P1 gaps from Phase 1:
 
 | P1 Gap | Resolution |
-|:-------|:----------|
+| :--- | :--- |
 | No unified recall API | Separate `search` (hybrid) + `recall` (Bayesian) with explicit semantics |
 | No external event bus | Deferred to Phase 4 (Workstream C) — SSE endpoint on `/v1/events` |
 | No rejection API | `TrustError` model with codes, categories, and remediation hints |

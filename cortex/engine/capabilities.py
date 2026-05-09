@@ -52,7 +52,7 @@ class CapabilityRegistry:
 
             if importlib.util.find_spec("sentence_transformers") is None:
                 has_embeddings = False
-        except Exception:
+        except ImportError:
             has_embeddings = False
 
         # Vector index (sqlite-vec)
@@ -65,7 +65,7 @@ class CapabilityRegistry:
             # We don't load the extension yet, just check if we want to
             if os.getenv("CORTEX_NO_VEC", "false").lower() == "true":
                 has_vector = False
-        except Exception:
+        except (ImportError, OSError):
             has_vector = False
 
         is_degraded = no_embed or not has_vector

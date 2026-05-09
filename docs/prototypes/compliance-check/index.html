@@ -957,7 +957,7 @@
       <span class="accent">Architecturally Compliant?</span>
     </h1>
     <p class="hero-sub">
-      5 questions. 3 minutes. One-to-one mapping to the <strong style="color:var(--lime)">EU AI Act Article 12</strong> — the law taking effect August 2026 with fines up to €30M. Know your exposure before the regulator does.
+      5 questions. 3 minutes. One-to-one mapping to the <strong style="color:var(--lime)">EU AI Act Article 12</strong> — the law taking effect August 2026 with tiered fines up to €35M or 7% of global revenue. Know your exposure before the regulator does.
     </p>
     <div class="hero-stats">
       <div class="stat">
@@ -969,8 +969,8 @@
         <div class="stat-label">To Complete</div>
       </div>
       <div class="stat">
-        <div class="stat-value">€30M</div>
-        <div class="stat-label">Max Penalty</div>
+        <div class="stat-value">€35M</div>
+        <div class="stat-label">Max Penalty (Art. 99)</div>
       </div>
     </div>
   </section>
@@ -1128,7 +1128,7 @@ const QUESTIONS = [
       { label: "No logging — actions happen with no record created", score: 0, hint: "DIRECT VIOLATION — Art. 12(1)" },
       { label: "We log manually when we remember to", score: 1, hint: "NON-COMPLIANT — manual ≠ automatic" },
       { label: "Automatic logs exist but have gaps (not every event)", score: 2, hint: "PARTIAL — coverage gaps = liability windows" },
-      { label: "Every AI operation triggers an automatic, timestamped log entry", score: 3, hint: "ART. 12(1) COMPLIANT" }
+      { label: "Every AI operation triggers an automatic, timestamped log entry", score: 3, hint: "ART. 12(1) SATISFIED" }
     ]
   },
   {
@@ -1141,7 +1141,7 @@ const QUESTIONS = [
       { label: "No structured log content — just raw text output", score: 0, hint: "DIRECT VIOLATION — Art. 12(2)" },
       { label: "Timestamps only — no source reference or input data", score: 1, hint: "INSUFFICIENT — 2 of 3 required fields missing" },
       { label: "Timestamps + data source, but inputs are not recorded", score: 2, hint: "PARTIAL — Art. 12(2) input tracing gap" },
-      { label: "Full record: timestamp, source DB reference, input data, match ID", score: 3, hint: "ART. 12(2) COMPLIANT" }
+      { label: "Full record: timestamp, source DB reference, input data, match ID", score: 3, hint: "ART. 12(2) SATISFIED" }
     ]
   },
   {
@@ -1154,12 +1154,12 @@ const QUESTIONS = [
       { label: "Impossible — we have no agent identity system", score: 0, hint: "DIRECT VIOLATION — Art. 12(2)(d)" },
       { label: "Agents are named but individual actions aren't linked", score: 1, hint: "NON-COMPLIANT — attribution without traceability" },
       { label: "Agent IDs on logs, but no weighting or verification record", score: 2, hint: "PARTIAL — consensus evidence missing" },
-      { label: "Every agent tagged; votes, weights, and verdicts recorded per decision", score: 3, hint: "ART. 12(2)(d) COMPLIANT" }
+      { label: "Every agent tagged; votes, weights, and verdicts recorded per decision", score: 3, hint: "ART. 12(2)(d) SATISFIED" }
     ]
   },
   {
     id: 3,
-    dimension: "Art. 12(3) — Tamper-Proof Storage",
+    dimension: "Art. 12(3) — Tamper-Evident Storage",
     icon: "🔒",
     text: "Could someone — including a system admin — silently alter or delete your AI's logs?",
     hint: "Art. 12(3): Logs must be 'tamper-evident' for the system's entire operational lifetime. If a database row can be UPDATE'd without a trace, you fail this clause. Access policy is not tamper-evidence.",
@@ -1167,7 +1167,7 @@ const QUESTIONS = [
       { label: "Yes — our DB allows direct updates and deletes with no trace", score: 0, hint: "DIRECT VIOLATION — Art. 12(3)" },
       { label: "We have access controls but no cryptographic integrity proof", score: 1, hint: "NON-COMPLIANT — policy ≠ tamper-evidence" },
       { label: "Soft-deletes only, but no hash chain linking records", score: 2, hint: "PARTIAL — deletion prevented, mutation not" },
-      { label: "SHA-256 hash chain: each record includes prev_hash. Mutation = detectable break", score: 3, hint: "ART. 12(3) COMPLIANT" }
+      { label: "SHA-256 hash chain: each record includes prev_hash. Mutation = detectable break", score: 3, hint: "ART. 12(3) SATISFIED" }
     ]
   },
   {
@@ -1180,7 +1180,7 @@ const QUESTIONS = [
       { label: "We can't — no integrity verification mechanism exists", score: 0, hint: "DIRECT VIOLATION — Art. 12(4)" },
       { label: "We do manual spot-checks occasionally", score: 1, hint: "NON-COMPLIANT — manual ≠ periodic automated" },
       { label: "Individual record checksums but no chain proof for full history", score: 2, hint: "PARTIAL — no checkpoint mechanism" },
-      { label: "Merkle tree checkpoints on schedule; results stored in integrity_checks table", score: 3, hint: "ART. 12(4) COMPLIANT" }
+      { label: "Merkle tree checkpoints on schedule; results stored in integrity_checks table", score: 3, hint: "ART. 12(4) SATISFIED" }
     ]
   }
 ];
@@ -1213,7 +1213,7 @@ const ART12_RISK_TEXT = [
     2: "Agent IDs on logs are necessary but not sufficient. Art. 12(2)(d) requires verification records — votes, weights, and verdicts stored and linked to each agent ID.",
     3: "Art. 12(2)(d) satisfied. Every agent contribution tagged, weighted, and recorded. Human oversight is architecturally enforced, not procedurally hoped for."
   },
-  { // 12(3) Tamper-proof
+  { // 12(3) Tamper-evident
     0: "Direct violation of Art. 12(3). If a database row can be silently modified, your compliance posture rests on access policy — not cryptographic tamper-evidence. Policy is insufficient for this clause.",
     1: "Access controls are necessary but insufficient for Art. 12(3). Tamper-evidence requires cryptographic proof — a hash chain means any mutation is mathematically detectable, not just policy-restricted.",
     2: "Soft-deletes prevent deletion but not mutation. Art. 12(3) requires that modifying any log field produces a detectable signature break — hash chaining provides this, soft-delete alone does not.",
@@ -1227,7 +1227,7 @@ const ART12_RISK_TEXT = [
   }
 ];
 
-const ART12_SHORT = ["12(1) Auto-Log", "12(2) Content", "12(2)(d) Agent ID", "12(3) Tamper-Proof", "12(4) Verification"];
+const ART12_SHORT = ["12(1) Auto-Log", "12(2) Content", "12(2)(d) Agent ID", "12(3) Tamper-Evident", "12(4) Verification"];
 const TOTAL_Q = 5;
 
 // STATE
@@ -1433,7 +1433,7 @@ function showResults() {
 
   // 1. Penalty Exposure Calculator
   const penaltyCard = document.getElementById('penalty-card');
-  const penalty = Math.max(0, Math.round((1 - (percentage / 100)) * 30 * 1.5)) / 1.5; // Up to 30M
+  const penalty = Math.max(0, Math.round((1 - (percentage / 100)) * 35 * 1.5)) / 1.5; // Up to 35M (Art. 99(3) tiered)
   const isHighRisk = percentage < 70;
   penaltyCard.innerHTML = `
     <div style="font-size:11px; font-weight:700; color:var(--red); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:12px;">Regulatory Exposure Analysis</div>
@@ -1451,17 +1451,17 @@ function showResults() {
       <div style="height:100%; width:${Math.min(100, (100-percentage)*1.2)}%; background:var(--red); box-shadow:0 0 10px var(--red);"></div>
     </div>
     <div style="font-size:13px; color:var(--text-secondary); line-height:1.5;">
-      Analysis: Based on your ${percentage}% score, <strong>${5 - (scores.filter(s => s.raw === 3).length)} out of 5</strong> Article 12 requirements are not fully implemented. In a high-risk AI classification, this represents direct exposure to Article 71(3) penalties.
+      Analysis: Based on your ${percentage}% score, <strong>${5 - (scores.filter(s => s.raw === 3).length)} out of 5</strong> Article 12 requirements are not fully addressed. In a high-risk AI classification, this represents potential exposure to Article 99 tiered penalties.
     </div>
   `;
 
   // 2. CORTEX Coverage Panel
   const coveragePanel = document.getElementById('coverage-panel');
   const remediation = [
-    { name: "Sovereign Ledger", coverage: "100% Art. 12(1), 12(3)", desc: "Immutable SHA-256 chain for all state-changes." },
-    { name: "WorkingMemoryL1", coverage: "100% Art. 12(2)", desc: "Enforced triple-context recording (time/source/input)." },
-    { name: "Apotheosis Trace", coverage: "100% Art. 12(2)(d)", desc: "Autonomous agent ID tagging per decision." },
-    { name: "MerkleCheck Protocol", coverage: "100% Art. 12(4)", desc: "Verification triggers for O(log N) auditing." }
+    { name: "Sovereign Ledger", coverage: "Addresses Art. 12(1), 12(3)", desc: "Tamper-evident SHA-256 chain for all state-changes." },
+    { name: "WorkingMemoryL1", coverage: "Addresses Art. 12(2)", desc: "Enforced triple-context recording (time/source/input)." },
+    { name: "Apotheosis Trace", coverage: "Addresses Art. 12(2)(d)", desc: "Autonomous agent ID tagging per decision." },
+    { name: "MerkleCheck Protocol", coverage: "Addresses Art. 12(4)", desc: "Verification triggers for O(log N) auditing." }
   ];
   
   coveragePanel.innerHTML = `
@@ -1476,8 +1476,8 @@ function showResults() {
       `).join('')}
     </div>
     <div style="background:var(--lime-ghost); padding:16px; border:1px solid var(--lime-dim); border-radius:12px; text-align:center;">
-      <div style="font-size:14px; font-weight:700; color:var(--lime); margin-bottom:4px;">Article 12 Compliance: 100% Out of the Box</div>
-      <div style="font-size:12px; color:var(--text-secondary);">CORTEX middleware wraps your existing AI stack to satisfy Article 12 requirements without code refactoring.</div>
+      <div style="font-size:14px; font-weight:700; color:var(--lime); margin-bottom:4px;">Article 12 Evidence Support: Built-In</div>
+      <div style="font-size:12px; color:var(--text-secondary);">CORTEX middleware wraps your existing AI stack with the technical controls that support Article 12 compliance readiness.</div>
     </div>
   `;
 }

@@ -75,7 +75,7 @@ class SovereignSanitizer:
         try:
             # We construct the PureEngram. The Config(extra='forbid') will reject invalid fields.
             pure_engram = PureEngram(original_raw_hash=raw_hash, log=log, **raw_engram)
-        except Exception:
+        except (TypeError, ValueError):
             # INV-01 (Type Supremacy): Any incoming payload failing
             # validation will be automatically rejected.
             # We no longer convert this to an "error" engram; we block the write entirely.

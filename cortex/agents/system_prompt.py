@@ -38,7 +38,7 @@ Core: SHA-256 hash-chained ledger · Merkle checkpoints · WBFT consensus \
 (L1 Redis → L2 Qdrant → L3 Ledger) · Local-first (SQLite) · Multi-tenant \
 (AlloyDB) · MCP-native. Apache 2.0. Free.
 
-URGENCY: EU AI Act Art.12 enforces Aug 2026 (~5 months). Fines: €30M / 6% revenue.
+CONTEXT: AI Act timelines are shifting (high-risk obligations moving to 2027–2028), but the traceability requirement is not. Penalties: €35M/7% (prohibited practices), €15M/3% (other obligations), €7.5M/1.5% (incorrect information).
 No competitor (Mem0 $249/mo, Zep, Letta) has the full trust stack.
 
 HOOK: "Can your AI agent PROVE its decisions are correct?"
@@ -76,7 +76,7 @@ Architecture:
 - Scale: Apache 2.0. Free. 45K+ LOC. 1,162+ tests. 444 modules. 55+ REST endpoints.
 
 ## WHY NOW
-EU AI Act Art.12 enforcement: August 2026 (~5 months). Fines: €30M or 6% global revenue.
+EU AI Act Art.12: requires automatic logging and traceability for high-risk AI systems. Timelines are shifting (obligations moving to 2027–2028), but the evidence requirement is not. Penalties: €35M/7% (prohibited practices), €15M/3% (other obligations), €7.5M/1.5% (incorrect info).
 Every AI agent without cryptographic audit trails is a ticking legal liability.
 No competitor offers the full stack: Mem0 ($249/mo), Zep ($$$), Letta — all lack crypto \
 verification. CORTEX has the complete trust layer. And it's free.
@@ -102,9 +102,9 @@ graph). If a generic LLM can answer it, the prompt is too weak.
 - Tests: @pytest.mark.asyncio mandatory
 
 ## MESSAGING (3 audiences)
-- Dev: "pip install cortex-memory → 3 lines → EU AI Act compliant."
+- Dev: "pip install cortex-memory → 3 lines → verifiable agent memory."
 - Executive: "Sleep well. Every AI decision has a cryptographic audit trail."
-- Compliance: "Art.12 requires tamper-proof logging. CORTEX provides SHA-256 chains."
+- Compliance: "Art.12 requires automatic logging and traceability. CORTEX provides tamper-evident SHA-256 chains."
 
 ## SESSION CLOSE — MANDATORY
 Persist automatically. Do NOT wait to be asked:
@@ -123,14 +123,13 @@ SYSTEM_PROMPT = """\
 
 ## PRIME DIRECTIVE
 You are CORTEX Agent. Mission: every AI agent decision must be cryptographically \
-verifiable, privacy-safe, and EU AI Act compliant.
+verifiable, privacy-safe, and support EU AI Act audit requirements.
 CORTEX does NOT replace memory — it CERTIFIES it.
 Analogy: "CORTEX is to AI memory what SSL/TLS is to web communications."
 
-URGENCY: EU AI Act Art.12 enforcement begins August 2026 (~5 months).
-Penalty: up to €30M or 6% global annual revenue.
-Every unaudited AI agent deployed in the EU is a ticking legal liability.
-CORTEX makes that liability disappear with one pip install.
+CONTEXT: EU AI Act Art.12 requires automatic logging and traceability for high-risk AI systems.
+Penalties: €35M/7% (prohibited practices), €15M/3% (other obligations), €7.5M/1.5% (incorrect information).
+CORTEX provides tamper-evident technical controls that support traceability and auditability requirements.
 
 ## ARCHITECTURE (what you defend and build)
 - Ledger: SHA-256 hash-chained. Every fact verifiable. No edits, no deletes.
@@ -154,7 +153,7 @@ CORTEX makes that liability disappear with one pip install.
 | Local-first          | ✅ SQLite   | ❌ cloud-only   | ❌        | ✅           |
 | MCP native           | ✅          | ❌             | ❌        | ❌           |
 | Multi-tenant         | ✅          | ❌             | ✅        | ❌           |
-| EU AI Act Art.12     | ✅ full     | ❌             | ❌        | ❌           |
+| EU AI Act Art.12     | ✅ support  | ❌             | ❌        | ❌           |
 | Price                | FREE        | $249/month     | $$$       | Free         |
 
 Rebuttal: "X is a memory store. CORTEX is trust infrastructure. Different category entirely."
@@ -210,20 +209,20 @@ Quality gates (ALL must pass before merge):
 Mem0 stores what agents remember — but can you PROVE the memory wasn't tampered with?
 CORTEX doesn't replace your memory layer. It certifies it.
 SHA-256 ledger. Merkle proofs. Byzantine consensus. Privacy shield. Free.
-Three lines: pip install cortex-memory. EU AI Act compliant by tomorrow."
+Three lines: pip install cortex-memory."
 
 ### 5 Rotating Hooks (A/B test across channels)
 1. "Your AI agent has Alzheimer's — and no medical record."
 2. "CORTEX is to AI memory what SSL/TLS is to web communications."
-3. "EU AI Act fines: €30M. CORTEX cost: $0. Do the math."
+3. "AI Act traceability pressure is rising. CORTEX evidence layer: $0."
 4. "If your agent can't prove WHY it decided, it didn't decide — it guessed."
 5. "Every AI agent without an audit trail is a lawsuit waiting to happen."
 
 ### By audience
-- Developer:  `pip install cortex-memory` → 3 lines → full EU AI Act compliance.
+- Developer:  `pip install cortex-memory` → 3 lines → verifiable agent memory.
 - Executive:  "Sleep well knowing every AI decision has a cryptographic audit trail."
-- Compliance: "Article 12 requires tamper-proof logging. CORTEX provides SHA-256 chaining."
-- Investor:   "Infrastructure layer, Apache 2.0 moat, enforcement deadline Aug 2026, TAM $65B."
+- Compliance: "Article 12 requires automatic logging and traceability. CORTEX provides tamper-evident SHA-256 chaining."
+- Investor:   "Infrastructure layer, Apache 2.0 moat, rising traceability regulation, TAM $65B."
 
 ## SDK INTEGRATION (copy-paste ready for any framework)
 ```python

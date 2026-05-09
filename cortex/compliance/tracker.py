@@ -1,9 +1,14 @@
-"""ComplianceTracker — EU AI Act Article 12 compliance in 3 methods.
+"""EvidenceTracker — EU AI Act Article 12 evidence-support in 3 methods.
+
+CORTEX does not certify compliance. It generates technical evidence controls
+(tamper-evident records, hash-chained lineage, audit packs) that can support
+regulatory review. Final compliance depends on system classification,
+deployment context, governance controls, and qualified legal/audit review.
 
 Usage:
-    from cortex.compliance import ComplianceTracker
+    from cortex.compliance import EvidenceTracker
 
-    tracker = ComplianceTracker()
+    tracker = EvidenceTracker()
     tracker.log_decision("my-agent", "Approved loan #443", agent_id="agent:loan")
     result = tracker.verify_chain()
     report = tracker.export_audit(project="my-agent")
@@ -19,26 +24,33 @@ from typing import Any
 
 from cortex.config import DEFAULT_DB_PATH
 
-__all__ = ["ComplianceTracker"]
+__all__ = ["EvidenceTracker"]
 
 logger = logging.getLogger("cortex.compliance")
 
-# EU AI Act Article 12 sub-requirements mapped to verifiable checks
+# EU AI Act Article 12 sub-requirements mapped to verifiable evidence controls
 _ARTICLE_12_CHECKS = {
     "art_12_1_automatic_logging": "Automatic recording of AI decisions via store()",
     "art_12_2_log_content": "Timestamps, source agent, and project scoping present",
     "art_12_2d_agent_traceability": "Agent source identification on every fact",
-    "art_12_3_tamper_proof": "SHA-256 hash chain with Merkle tree checkpoints",
+    "art_12_3_tamper_evident": (
+        "SHA-256 hash chain with Merkle tree checkpoints"
+        " (tamper-evident, not tamper-proof)"
+    ),
     "art_12_4_periodic_verification": "Integrity verification with recorded results",
 }
 
 
-class ComplianceTracker:
-    """EU AI Act Article 12 compliance tracker for AI agent decisions.
+class EvidenceTracker:
+    """EU AI Act Article 12 evidence-support tracker for AI agent decisions.
 
     Wraps ``CortexEngine`` with a minimal 3-method API designed for
-    drop-in compliance. All methods are synchronous for maximum
+    drop-in audit evidence generation. All methods are synchronous for maximum
     developer friendliness.
+
+    This tracker generates technical evidence controls. It does not certify
+    EU AI Act compliance. Final compliance status requires qualified legal
+    and audit review.
 
     Args:
         db_path: Path to the SQLite database. Defaults to ``~/.cortex/cortex.db``.
@@ -118,7 +130,7 @@ class ComplianceTracker:
             source=agent_id,
             confidence=confidence,
             meta=eu_meta,
-            tags=tags or ["eu-ai-act", "compliance"],
+            tags=tags or ["eu-ai-act", "evidence-support"],
         )
 
     # ─── 2. verify_chain ──────────────────────────────────────────
@@ -156,7 +168,7 @@ class ComplianceTracker:
         *,
         include_facts: bool = False,
     ) -> dict[str, Any]:
-        """Generate an EU AI Act Article 12 compliance report.
+        """Generate an EU AI Act Article 12 evidence-support report.
 
         Args:
             project: Project to scope the report to. Uses tracker default
@@ -166,9 +178,10 @@ class ComplianceTracker:
 
         Returns:
             A structured dict with:
-            - ``eu_ai_act``: Article 12 compliance checks and score.
+            - ``eu_ai_act``: Article 12 evidence control checks and coverage score.
             - ``integrity``: Hash chain and Merkle verification results.
             - ``facts_summary``: Counts by fact type, date range, etc.
+            - ``legal_disclaimer``: Required disclaimer — this is not a legal determination.
             - ``generated_at``: ISO timestamp of report generation.
         """
         self._ensure_init()
@@ -186,19 +199,33 @@ class ComplianceTracker:
         score = sum(1 for v in checks.values() if v["compliant"])
         total = len(checks)
 
+        status = (
+            "SUPPORTIVE_CONTROLS_PRESENT"
+            if score == total
+            else "SUPPORTIVE_CONTROLS_PARTIAL"
+            if score > 0
+            else "SUPPORTIVE_CONTROLS_MISSING"
+        )
+
         report: dict[str, Any] = {
             "eu_ai_act": {
                 "regulation": "EU AI Act (Regulation 2024/1689)",
                 "article": "12 — Record-Keeping",
                 "enforcement_date": "2026-08-02",
                 "score": f"{score}/{total}",
-                "status": "COMPLIANT" if score == total else "NON_COMPLIANT",
+                "status": status,
                 "checks": checks,
             },
             "integrity": integrity,
             "facts_summary": facts_summary,
             "generated_at": datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
             "project": proj,
+            "legal_disclaimer": (
+                "This report is not a legal compliance determination. "
+                "Final EU AI Act compliance depends on system classification, "
+                "deployment context, governance controls, documentation, "
+                "and qualified legal/audit review."
+            ),
         }
 
         if include_facts:
@@ -305,8 +332,8 @@ class ComplianceTracker:
                 "compliant": len(sources) > 0 or total == 0,
                 "evidence": f"{len(sources)} distinct sources: {sources}",
             },
-            "art_12_3_tamper_proof": {
-                "description": _ARTICLE_12_CHECKS["art_12_3_tamper_proof"],
+            "art_12_3_tamper_evident": {
+                "description": _ARTICLE_12_CHECKS["art_12_3_tamper_evident"],
                 "compliant": integrity.get("valid", False) or integrity.get("tx_checked", 0) == 0,
                 "evidence": (
                     f"Chain: {integrity.get('tx_checked', 0)} TX verified, "
@@ -327,7 +354,7 @@ class ComplianceTracker:
         if self._initialized:
             self._engine.close_sync()
 
-    def __enter__(self) -> ComplianceTracker:
+    def __enter__(self) -> EvidenceTracker:
         return self
 
     def __exit__(self, *args: Any) -> None:

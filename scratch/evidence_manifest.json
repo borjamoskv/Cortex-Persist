@@ -1,0 +1,9 @@
+{
+  "protocol": "K2 Lending",
+  "bounty_status": "READY_FOR_SUBMISSION",
+  "blocker": "Immunefi 24h Rate Limit",
+  "next_action": "Submit report to Immunefi after 24h lockout expires",
+  "report_path": "/Users/borjafernandezangulo/10_PROJECTS/cortex-bounties/reports/k2-lending-close-factor-bypass-c4.md",
+  "cortex_ledger": "C5-EXECUTED",
+  "date": "2026-05-09"
+}

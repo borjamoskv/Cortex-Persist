@@ -1,6 +1,7 @@
 """cortex.agents.builtins — built-in MVP agent implementations."""
 
 from cortex.agents.builtins.handoff_agent import HandoffAgent
+from cortex.agents.builtins.jules_agent import JulesAgent
 from cortex.agents.builtins.memory_agent import MemoryAgent
 from cortex.agents.builtins.nightshift_agent import NightshiftAgent
 from cortex.agents.builtins.omega_prime import OmegaPrimeAgent
@@ -10,6 +11,7 @@ from cortex.agents.builtins.verification_agent import VerificationAgent
 
 __all__ = [
     "HandoffAgent",
+    "JulesAgent",
     "MemoryAgent",
     "NightshiftAgent",
     "OmegaPrimeAgent",

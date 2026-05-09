@@ -21,18 +21,18 @@ from cortex.memory.working import WorkingMemoryL1
 
 try:
     from cortex.memory.hdc import HDCEncoder, HDCVectorStoreL2
-except Exception:  # noqa: BLE001
+except ImportError:
     HDCEncoder = Any  # type: ignore[assignment,misc]
     HDCVectorStoreL2 = Any  # type: ignore[assignment,misc]
 
 try:
     from cortex.extensions.policy.memory_os import MemoryOS
-except Exception:
+except ImportError:
     MemoryOS = None  # type: ignore
 
 try:
     from cortex.extensions.security.tenant import get_tenant_id
-except Exception:
+except ImportError:
 
     def get_tenant_id() -> str:
         return "default"
@@ -40,14 +40,14 @@ except Exception:
 
 try:
     from cortex.extensions.sovereign.endocrine import DigitalEndocrine
-except Exception:
+except ImportError:
     DigitalEndocrine = None  # type: ignore
 
 from cortex.telemetry.metrics import metrics
 
 try:
     from cortex.extensions.thinking.fusion import ContextFusion
-except Exception:
+except ImportError:
     ContextFusion = None  # type: ignore
 
 try:
@@ -55,7 +55,7 @@ try:
     from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
 
     VectorStoreL2 = SovereignVectorStoreL2
-except Exception:
+except ImportError:
     VectorStoreL2 = None  # type: ignore[assignment,misc]
     DynamicSemanticSpace = None  # type: ignore[assignment,misc]
 

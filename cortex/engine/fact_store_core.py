@@ -261,7 +261,7 @@ async def _record_causality(
                 "VALUES (?, ?, NULL, ?, ?, ?)",
                 (fact_id, parent_decision_id, EDGE_DERIVED_FROM, project, tenant_id),
             )
-    except Exception:
+    except (OSError, RuntimeError, ValueError):
         pass
 
 
@@ -280,11 +280,12 @@ async def _post_insert_actions(
 ) -> None:
     """Side effects: Enrichment jobs, Tags, FTS, Causality, and Graph."""
     try:
+        import sqlite3
         await conn.execute(
             "INSERT INTO enrichment_jobs (fact_id, job_type, status, priority) VALUES (?, 'embedding', 'pending', ?)",
             (fact_id, 1 if fact_type == "decision" else 0),
         )
-    except Exception:
+    except (OSError, RuntimeError, ValueError, sqlite3.Error):
         pass
 
     if tags:
@@ -294,11 +295,12 @@ async def _post_insert_actions(
         )
 
     try:
+        import sqlite3
         await conn.execute(
             "INSERT INTO facts_fts (rowid, content, project, tags, fact_type, tenant_id) VALUES (?, ?, ?, ?, ?, ?)",
             (fact_id, content, project, tags_json, fact_type, tenant_id),
         )
-    except Exception:
+    except (OSError, RuntimeError, ValueError, sqlite3.Error):
         pass
 
     await _record_causality(conn, fact_id, project, tenant_id, meta, parent_decision_id)
@@ -307,7 +309,7 @@ async def _post_insert_actions(
         from cortex.graph import process_fact_graph
 
         await process_fact_graph(conn, fact_id, content, project, ts, tenant_id)
-    except Exception:
+    except (ImportError, OSError, RuntimeError, ValueError):
         pass
 
 

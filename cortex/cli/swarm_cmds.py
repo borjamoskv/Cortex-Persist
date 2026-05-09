@@ -167,10 +167,14 @@ def swarm_up(db):
     from uuid import uuid4
 
     from cortex.agents.builtins.omega_prime import OmegaPrimeAgent
+    from cortex.agents.builtins.jules_agent import create_jules_agent
+    from cortex.agents.builtins.supervisor_agent import SupervisorAgent
     from cortex.agents.bus import SqliteMessageBus
     from cortex.agents.manifest import AgentManifest
     from cortex.agents.message_schema import AgentMessage, MessageKind
     from cortex.agents.supervisor import Supervisor
+    from cortex.agents.tools import ToolRegistry
+    import os
 
     class CliToolExecutor:
         async def execute(self, tool_name: str, arguments: dict) -> dict:
@@ -199,10 +203,35 @@ def swarm_up(db):
 
         supervisor.register(omega_prime)
 
+        # Inject SupervisorAgent
+        tool_registry = ToolRegistry()
+        supervisor_manifest = AgentManifest(
+            agent_id="supervisor",
+            purpose="Control plane for agent lifecycle operations",
+            tools_allowed=[],
+        )
+        supervisor_agent = SupervisorAgent(
+            manifest=supervisor_manifest,
+            bus=bus,
+            tool_registry=tool_registry,
+            supervisor=supervisor,
+        )
+        supervisor.register(supervisor_agent)
+
+        # Inject JulesAgent (CORTEX A2A Bridge)
+        api_key = os.environ.get("JULES_API_KEY")
+        if api_key:
+            jules_agent = create_jules_agent(bus=bus, tool_registry=tool_registry, api_key=api_key)
+            supervisor.register(jules_agent)
+            await supervisor.start_agent(jules_agent.agent_id)
+        else:
+            console.print("[yellow]Warning: JULES_API_KEY not found. JulesAgent will not be injected.[/yellow]")
+
+        await supervisor.start_agent("supervisor")
         await supervisor.start_agent("omega-prime")
 
         console.print(
-            "\n[bold green]🐝 SWARM UP: Omega Prime and Supervisor are online.[/bold green]"
+            "\n[bold green]🐝 SWARM UP: Omega Prime, Supervisor, and Jules Bridge are online.[/bold green]"
         )
         console.print("[dim]Type your objective, or 'exit' to quit.[/dim]\n")
 
@@ -239,6 +268,9 @@ def swarm_up(db):
 
         finally:
             await supervisor.stop_agent("omega-prime")
+            await supervisor.stop_agent("supervisor")
+            if api_key:
+                await supervisor.stop_agent("jules-bridge")
             await asyncio.sleep(0.5)
             await bus.close()
 

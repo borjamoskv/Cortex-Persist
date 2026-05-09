@@ -271,3 +271,5 @@ xokas-elevator/
 yt-notebooklm-ext/
 auramem/
 nexus-dashboard/.next/
+engine-rs/target/
+cortex_mev_base/target/
