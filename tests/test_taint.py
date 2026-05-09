@@ -190,6 +190,7 @@ class TestTaint(unittest.TestCase):
             _build_fact_payload,
             _post_insert_actions,
             insert_fact_record,
+            _resolve_causal_parent,
         )
         from unittest.mock import AsyncMock, patch
 
@@ -236,11 +237,15 @@ class TestTaint(unittest.TestCase):
                 assert len(res2) > 0
 
             # _post_insert_actions coverage
-            # FTS code is inline inside _post_insert_actions. We'll just patch conn.execute.
             conn.execute = AsyncMock()
             await _post_insert_actions(
                 conn, 1, "content", "tenant", "proj", ["tag"], "[]", "knowledge", "timestamp", {}, 2
             )
             assert conn.execute.called
+
+            # _resolve_causal_parent coverage
+            # skip aiosqlite context manager headaches and just test it returns None if not passed in.
+            res3 = await _resolve_causal_parent(conn, "tenant", "proj", "knowledge", None)
+            assert res3 is None
 
         asyncio.run(run_tests())
