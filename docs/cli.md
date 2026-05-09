@@ -157,6 +157,29 @@ When `CORTEX_ENABLE_EXPERIMENTAL_CLI=1`, you can also create checkpoints:
 cortex trust-ledger checkpoint
 ```
 
+### `cortex forensics` (experimental)
+
+Commit local forensic evidence manifests to the tenant-bound transaction ledger.
+This command group is hidden unless `CORTEX_ENABLE_EXPERIMENTAL_CLI=1` is set.
+
+```bash
+CORTEX_ENABLE_EXPERIMENTAL_CLI=1 cortex forensics build-manifest evidence.txt \
+  --base-dir ./evidence --bundle-id audit-pack-001 --tenant-id tenant-a \
+  --output manifest.json
+
+CORTEX_ENABLE_EXPERIMENTAL_CLI=1 cortex forensics commit-manifest manifest.json \
+  --base-dir ./evidence --db ~/.cortex/cortex.db
+
+CORTEX_ENABLE_EXPERIMENTAL_CLI=1 cortex forensics verify-commit manifest.json \
+  --base-dir ./evidence --db ~/.cortex/cortex.db
+```
+
+The ledger stores only canonical manifest metadata, artifact hashes, byte counts,
+and the manifest hash. Raw evidence bytes remain local and are never written to
+the transaction detail.
+
+---
+
 ### `cortex compliance-report`
 
 Generate the EU AI Act Article 12 snapshot derived from persisted state.

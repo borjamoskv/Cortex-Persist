@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 import sqlite3
-from typing import Any
+from typing import Any, cast
 
 import aiosqlite
 
@@ -46,7 +46,7 @@ class TransactionMixin(EngineMixinBase):
         prev = await cursor.fetchone()
         await cursor.close()
         ph = prev[0] if prev else "GENESIS"
-        th = compute_tx_hash(ph, project, action, dj, ts)
+        th = compute_tx_hash(ph, project, action, dj, ts, tenant_id=tenant_id)
 
         c = await conn.execute(
             "INSERT INTO transactions "
@@ -62,7 +62,7 @@ class TransactionMixin(EngineMixinBase):
             row = await cur.fetchone()
             actual_ph = row[0] if row else ph
             if actual_ph != ph:
-                th = compute_tx_hash(actual_ph, project, action, dj, ts)
+                th = compute_tx_hash(actual_ph, project, action, dj, ts, tenant_id=tenant_id)
                 await conn.execute("UPDATE transactions SET hash = ? WHERE id = ?", (th, tx_id))
 
         if getattr(self, "_ledger", None):
@@ -86,5 +86,5 @@ class TransactionMixin(EngineMixinBase):
             from cortex.ledger import ImmutableLedger
 
             # Pass the pool directly instead of a raw connection
-            self._ledger = ImmutableLedger(self.pool)
+            self._ledger = ImmutableLedger(cast(Any, self).pool)
         return await self._ledger.audit_integrity_async()

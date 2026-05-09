@@ -151,3 +151,20 @@ def _migration_014_vote_ledger_refinement(conn: sqlite3.Connection):
         )
     """)
     logger.info("Migration 014: Refined Immutable Ledger (vote_ledger + vote_merkle_roots)")
+
+
+# DOWNGRADE TARGET: 24
+# Rollback strategy: this is additive and preserves checkpoint data. A downgrade
+# should leave the tenant_id column in place; older readers ignore unknown columns.
+def _migration_025_tenant_bound_merkle_roots(conn: sqlite3.Connection):
+    """Add tenant scope metadata to transaction Merkle checkpoints."""
+    columns = {row[1] for row in conn.execute("PRAGMA table_info(merkle_roots)").fetchall()}
+    if "tenant_id" not in columns:
+        conn.execute(
+            "ALTER TABLE merkle_roots ADD COLUMN tenant_id TEXT NOT NULL DEFAULT '__global__'"
+        )
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_merkle_tenant_range "
+        "ON merkle_roots(tenant_id, tx_start_id, tx_end_id)"
+    )
+    logger.info("Migration 025: Added tenant scope metadata to merkle_roots")

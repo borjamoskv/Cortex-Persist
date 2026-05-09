@@ -294,6 +294,7 @@ CREATE VIRTUAL TABLE IF NOT EXISTS facts_fts USING fts5(
 CREATE_MERKLE_ROOTS = """
 CREATE TABLE IF NOT EXISTS merkle_roots (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenant_id       TEXT NOT NULL DEFAULT '__global__',
     root_hash       TEXT NOT NULL,
     tx_start_id     INTEGER NOT NULL,
     tx_end_id       INTEGER NOT NULL,
