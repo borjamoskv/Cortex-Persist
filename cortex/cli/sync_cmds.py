@@ -57,7 +57,7 @@ def sync(db) -> None:
                 for err in result.errors:
                     console.print(f"[red]  ✗ {err}[/]")
         finally:
-            # Fix: engine.close is async
+            # Ensure engine is closed properly (async method)
             await engine.close()
 
     _run_async(_async_sync())
@@ -124,7 +124,7 @@ def export(db, out, fmt, project, min_confidence, types) -> None:
                 out_path.write_text(output_str, encoding="utf-8")
                 console.print(f"[green]✓[/] Datos ({fmt}) exportatorios a [cyan]{out_path}[/]")
         finally:
-            # engine.close is async
+            # Ensure engine is closed properly (async method)
             await engine.close()
 
     _run_async(_async_export())
@@ -162,7 +162,7 @@ def writeback(db) -> None:
                     f"    [dim]Verifica permisos del directorio o ejecuta: cortex sync[/dim]"
                 )
         finally:
-            # Fix: engine.close is async
+            # Ensure engine is closed properly (async method)
             await engine.close()
 
     _run_async(_async_writeback())
@@ -199,6 +199,7 @@ def obsidian(db, out) -> None:
                 )
             )
         finally:
+            # Ensure engine is closed properly (async method)
             await engine.close()
 
     _run_async(_async_obsidian())

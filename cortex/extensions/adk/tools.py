@@ -6,11 +6,10 @@ can call as tools. Optimized for low-latency autonomous operations.
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import sqlite3
-from collections.abc import Generator
-from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Final
 
@@ -37,19 +36,18 @@ def _get_db_path() -> str:
     return os.environ.get("CORTEX_DB_PATH", _DEFAULT_DB)
 
 
-@contextmanager
-def _sovereign_engine() -> Generator[CortexEngine, None, None]:
-    """Scoped context manager for CORTEX engine operations."""
+async def _run_in_engine(coro_fn):
+    """Async helper to manage engine lifecycle and run an operation."""
     path = _get_db_path()
     engine = CortexEngine(path, auto_embed=False)
     try:
-        engine.init_db()  # type: ignore[reportUnusedCoroutine]
-        yield engine
+        await engine.init_db()
+        return await coro_fn(engine)
     except (sqlite3.Error, OSError, RuntimeError) as exc:
         logger.error("Sovereign Tool Failure: %s", exc)
         raise
     finally:
-        engine.close()  # type: ignore[reportUnusedCoroutine]
+        await engine.close()
 
 
 # ─── Store ────────────────────────────────────────────────────────────
@@ -80,17 +78,19 @@ def adk_store(
     except (json.JSONDecodeError, TypeError):
         parsed_tags = []
 
+    async def _op(engine):
+        return await engine.store(
+            project=project,
+            content=content,
+            fact_type=fact_type,
+            tags=parsed_tags,
+            confidence="stated",
+            source=source or None,
+        )
+
     try:
-        with _sovereign_engine() as engine:
-            fact_id = engine.store(
-                project=project,
-                content=content,
-                fact_type=fact_type,
-                tags=parsed_tags,
-                confidence="stated",
-                source=source or None,
-            )
-            return {"status": "success", "fact_id": fact_id, "project": project}
+        fact_id = asyncio.run(_run_in_engine(_op))
+        return {"status": "success", "fact_id": fact_id, "project": project}
     except (sqlite3.Error, ValueError, RuntimeError, OSError) as exc:
         return {"status": "error", "message": f"Store failed: {exc}"}
 
@@ -114,29 +114,32 @@ def adk_search(
     Returns:
         A dict with status and results list.
     """
+
+    async def _op(engine):
+        return await engine.search(
+            query=query,
+            project=project or None,
+            top_k=min(max(top_k, 1), 20),
+        )
+
     try:
-        with _sovereign_engine() as engine:
-            results = engine.search(
-                query=query,
-                project=project or None,
-                top_k=min(max(top_k, 1), 20),
-            )
+        results = asyncio.run(_run_in_engine(_op))
 
-            if not results:
-                return {"status": "success", "results": [], "message": "No results found."}
+        if not results:
+            return {"status": "success", "results": [], "message": "No results found."}
 
-            formatted = [
-                {
-                    "fact_id": r.fact_id,
-                    "score": round(r.score, 3),
-                    "project": r.project,
-                    "fact_type": r.fact_type,
-                    "content": r.content,
-                }
-                for r in results  # type: ignore[reportGeneralTypeIssues]
-            ]
+        formatted = [
+            {
+                "fact_id": r.fact_id,
+                "score": round(r.score, 3),
+                "project": r.project,
+                "fact_type": r.fact_type,
+                "content": r.content,
+            }
+            for r in results  # type: ignore[reportGeneralTypeIssues]
+        ]
 
-            return {"status": "success", "results": formatted, "count": len(formatted)}
+        return {"status": "success", "results": formatted, "count": len(formatted)}
     except (sqlite3.Error, ValueError, RuntimeError, OSError) as exc:
         return {"status": "error", "message": f"Search failed: {exc}"}
 
@@ -151,10 +154,13 @@ def adk_status() -> dict[str, Any]:
     Returns:
         A dict with system stats including fact counts, projects, and DB size.
     """
+
+    async def _op(engine):
+        return engine.stats_sync()  # type: ignore[reportAttributeAccessIssue]
+
     try:
-        with _sovereign_engine() as engine:
-            stats = engine.stats_sync()  # type: ignore[reportAttributeAccessIssue]
-            return {"status": "success", **stats}
+        stats = asyncio.run(_run_in_engine(_op))
+        return {"status": "success", **stats}
     except (sqlite3.Error, ValueError, RuntimeError, OSError) as exc:
         return {"status": "error", "message": f"Status retrieval failed: {exc}"}
 
@@ -173,17 +179,19 @@ def adk_ledger_verify() -> dict[str, Any]:
     """
     from cortex.ledger import ImmutableLedger
 
+    async def _op(engine):
+        ledger = ImmutableLedger(engine._conn)  # type: ignore[reportArgumentType]
+        return ledger.verify_integrity()  # type: ignore[reportAttributeAccessIssue]
+
     try:
-        with _sovereign_engine() as engine:
-            ledger = ImmutableLedger(engine._conn)  # type: ignore[reportArgumentType]
-            report = ledger.verify_integrity()  # type: ignore[reportAttributeAccessIssue]
-            return {
-                "status": "success",
-                "valid": report.get("valid", False),
-                "transactions_checked": report.get("tx_checked", 0),
-                "roots_checked": report.get("roots_checked", 0),
-                "violations": report.get("violations", []),
-            }
+        report = asyncio.run(_run_in_engine(_op))
+        return {
+            "status": "success",
+            "valid": report.get("valid", False),
+            "transactions_checked": report.get("tx_checked", 0),
+            "roots_checked": report.get("roots_checked", 0),
+            "violations": report.get("violations", []),
+        }
     except (sqlite3.Error, ValueError, RuntimeError, OSError) as exc:
         return {"status": "error", "message": f"Ledger verification failed: {exc}"}
 
@@ -208,10 +216,13 @@ def adk_deprecate(
     Returns:
         A dict with status and the deprecated fact ID.
     """
+
+    async def _op(engine):
+        return await engine.deprecate(fact_id, reason=reason or None)
+
     try:
-        with _sovereign_engine() as engine:
-            engine.deprecate(fact_id, reason=reason or None)  # type: ignore[reportUnusedCoroutine]
-            return {"status": "success", "fact_id": fact_id, "deprecated": True}
+        asyncio.run(_run_in_engine(_op))
+        return {"status": "success", "fact_id": fact_id, "deprecated": True}
     except (sqlite3.Error, ValueError, RuntimeError, OSError) as exc:
         return {"status": "error", "message": f"Deprecation failed: {exc}"}
 
