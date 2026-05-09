@@ -20,8 +20,6 @@ def fix_execute_fetchone(content):
 
     content = re.sub(pattern, repl, content, flags=re.DOTALL)
 
-    # inline usage: r = conn.execute("...", (fid,)).fetchone()
-    # if it's already caught by above, great.
     return content
 
 
