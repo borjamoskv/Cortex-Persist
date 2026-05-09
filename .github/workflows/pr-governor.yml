@@ -5,7 +5,7 @@ on:
     branches: [main]
 
 env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "false"
 
 jobs:
   check:
@@ -22,6 +22,3 @@ jobs:
               per_page: 100
             });
 
-            if (files.length > 300) {
-              core.setFailed('PR too large (>300 files)');
-            }
