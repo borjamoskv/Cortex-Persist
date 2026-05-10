@@ -7,8 +7,18 @@ compiles semantic vectors into the Persistent ChromaDB instance.
 import logging
 import os
 
-from watchdog.events import FileSystemEventHandler
-from watchdog.observers import Observer
+try:
+    from watchdog.events import FileSystemEventHandler
+    from watchdog.observers import Observer
+
+    _HAS_WATCHDOG = True
+except ImportError:
+    _HAS_WATCHDOG = False
+
+    class FileSystemEventHandler:  # type: ignore
+        pass
+
+    Observer = None  # type: ignore
 
 try:
     import chromadb
@@ -67,6 +77,11 @@ class KnowledgeItemHandler(FileSystemEventHandler):
 
 def start_knowledge_daemon():
     """Starts background watchdog daemon to keep ChromaDB synced."""
+    if not _HAS_WATCHDOG:
+        msg = "Skipping Knowledge Watcher (watchdog missing)"
+        logger.warning(msg)
+        return None
+
     if not chromadb or not os.path.exists(KNOWLEDGE_DIR):
         msg = "Skipping Knowledge Watcher (ChromaDB or KNOWLEDGE_DIR missing)"
         logger.warning(msg)
