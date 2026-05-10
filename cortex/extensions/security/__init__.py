@@ -75,3 +75,18 @@ except Exception:  # noqa: BLE001
     ThreatFeedEngine = None  # type: ignore[assignment]
 else:
     __all__.append("ThreatFeedEngine")
+
+try:
+    from .tis_schema import TransactionIntentSchema
+except Exception:  # noqa: BLE001
+    TransactionIntentSchema = None  # type: ignore[assignment]
+else:
+    __all__.append("TransactionIntentSchema")
+
+try:
+    from .pdr import PDRDecision, PolicyDecisionRecord
+except Exception:  # noqa: BLE001
+    PDRDecision = None  # type: ignore[assignment]
+    PolicyDecisionRecord = None  # type: ignore[assignment]
+else:
+    __all__ += ["PDRDecision", "PolicyDecisionRecord"]
