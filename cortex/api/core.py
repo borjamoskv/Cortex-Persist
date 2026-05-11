@@ -110,6 +110,7 @@ async def lifespan(app: FastAPI):
 
     # 7. V4 Singularity Daemons
     from cortex.mcp.knowledge_watcher import start_knowledge_daemon
+
     watcher = start_knowledge_daemon()
     swarm_daemon = start_swarm_daemon()
     app.state.watcher = watcher
