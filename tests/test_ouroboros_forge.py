@@ -39,11 +39,22 @@ class TestOuroborosForge(unittest.IsolatedAsyncioTestCase):
             except Exception:
                 pass
 
-    @unittest.skipIf(shutil.which("forge") is None, "forge not installed")
-    async def test_audit_cycle(self):
+    @patch("os.system")
+    @patch("asyncio.create_subprocess_exec")
+    async def test_audit_cycle(self, mock_create_subprocess_exec, mock_os_system):
         """Standard Audit Cycle on mock contract."""
         logger = logging.getLogger("cortex.ouroboros.test")
         logger.info("Starting Ouroboros-1 Verification...")
+
+        # Mock the process returned by create_subprocess_exec
+        from unittest.mock import AsyncMock
+        mock_process = AsyncMock()
+        mock_process.returncode = 1  # Simulate a failure to hit the remediation queue logic
+        mock_process.communicate.return_value = (b"mock stdout", b"mock stderr")
+        mock_process.wait.return_value = None
+        mock_create_subprocess_exec.return_value = mock_process
+
+        mock_os_system.return_value = 0
 
         # This will clone and audit
         try:
