@@ -31,7 +31,6 @@ from cortex.engine import CortexEngine
 from cortex.extensions.metering.middleware import MeteringMiddleware
 from cortex.extensions.swarm.manager import get_swarm_manager
 from cortex.extensions.timing import TimingTracker
-from cortex.mcp.knowledge_watcher import start_knowledge_daemon
 from cortex.routes import api_router
 from cortex.swarm import start_swarm_daemon
 from cortex.telemetry.metrics import MetricsMiddleware, metrics
@@ -110,6 +109,8 @@ async def lifespan(app: FastAPI):
     api_state.notification_bus = notification_bus  # type: ignore[reportAttributeAccessIssue]
 
     # 7. V4 Singularity Daemons
+    from cortex.mcp.knowledge_watcher import start_knowledge_daemon
+
     watcher = start_knowledge_daemon()
     swarm_daemon = start_swarm_daemon()
     app.state.watcher = watcher
