@@ -10,7 +10,14 @@ import json
 import sqlite3
 import time
 
-import numpy as np
+try:
+    import numpy as np
+except ImportError:
+    np = None  # Handle gracefully if numpy is not installed
+
+import pytest
+if np is None:
+    pytest.skip("Skipping tests because numpy is not installed.", allow_module_level=True)
 import pytest
 
 from cortex.extensions.swarm.crystal_consolidator import (

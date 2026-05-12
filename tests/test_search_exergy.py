@@ -2,7 +2,15 @@ import struct
 import time
 from unittest.mock import AsyncMock
 
+try:
+    import numpy as np
+except ImportError:
+    np = None  # Handle gracefully if numpy is not installed
+
 import pytest
+if np is None:
+    pytest.skip("Skipping tests because numpy is not installed.", allow_module_level=True)
+
 
 from cortex.memory.models import CortexFactModel
 from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2

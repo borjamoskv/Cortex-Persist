@@ -4,6 +4,15 @@ All tests exercise pure/static functions — no DB, no sqlite-vec required.
 """
 
 from __future__ import annotations
+try:
+    import numpy as np
+except ImportError:
+    np = None  # Handle gracefully if numpy is not installed
+
+import pytest
+if np is None:
+    pytest.skip("Skipping tests because numpy is not installed.", allow_module_level=True)
+
 
 from cortex.memory.l2_hybrid_search import (
     L2HybridSearch,

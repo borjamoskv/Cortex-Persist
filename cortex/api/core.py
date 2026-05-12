@@ -31,7 +31,6 @@ from cortex.engine import CortexEngine
 from cortex.extensions.metering.middleware import MeteringMiddleware
 from cortex.extensions.swarm.manager import get_swarm_manager
 from cortex.extensions.timing import TimingTracker
-from cortex.mcp.knowledge_watcher import start_knowledge_daemon
 from cortex.routes import api_router
 from cortex.swarm import start_swarm_daemon
 from cortex.telemetry.metrics import MetricsMiddleware, metrics
@@ -61,6 +60,7 @@ async def lifespan(app: FastAPI):
     """Initialize async connection pool, engine, auth, and timing on startup."""
     from cortex.database.pool import CortexConnectionPool
     from cortex.engine import CortexEngine as AsyncCortexEngine
+    from cortex.mcp.knowledge_watcher import start_knowledge_daemon
 
     db_path = config.DB_PATH
     logger.info("Lifespan: Initializing CORTEX with DB_PATH: %s", db_path)

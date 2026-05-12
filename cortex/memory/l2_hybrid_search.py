@@ -44,7 +44,10 @@ from typing import TYPE_CHECKING, Final
 if TYPE_CHECKING:
     from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
 
-import numpy as np
+try:
+    import numpy as np
+except ImportError:
+    np = None  # Handle gracefully if numpy is not installed
 
 __all__ = ["L2HybridSearch", "L2SearchResult"]
 

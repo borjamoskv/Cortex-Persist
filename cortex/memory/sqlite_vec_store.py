@@ -19,7 +19,10 @@ import time
 from pathlib import Path
 from typing import Any, Optional
 
-import numpy as np
+try:
+    import numpy as np
+except ImportError:
+    np = None  # Handle gracefully if numpy is not installed
 
 try:
     import sqlite_vec

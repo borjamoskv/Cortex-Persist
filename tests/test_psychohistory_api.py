@@ -1,6 +1,14 @@
 from unittest.mock import AsyncMock
 
 import pytest
+try:
+    import watchdog
+except ImportError:
+    watchdog = None
+
+if watchdog is None:
+    pytest.skip("Skipping tests because watchdog is not installed.", allow_module_level=True)
+
 from httpx import ASGITransport, AsyncClient
 
 from cortex.api.core import app
