@@ -8,7 +8,13 @@ except ImportError:
     np = None  # Handle gracefully if numpy is not installed
 
 import pytest
-pytestmark = pytest.mark.skipif(np is None, reason="numpy not installed")
+import sqlite3
+has_sqlite_vec = hasattr(sqlite3.Connection, "enable_load_extension")
+
+pytestmark = pytest.mark.skipif(
+    np is None or not has_sqlite_vec,
+    reason="numpy or sqlite-vec not installed/supported"
+)
 
 
 from cortex.memory.models import CortexFactModel
