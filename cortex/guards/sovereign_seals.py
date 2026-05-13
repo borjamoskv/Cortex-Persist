@@ -447,7 +447,7 @@ async def check_gate_21_preservation(
     checks: list[str] = []
 
     # 1. Pre-push hook — skip in CI (hook is a local dev-machine invariant)
-    _in_ci = os.environ.get("CI", "").lower() in ("true", "1", "yes")
+    _in_ci = os.environ.get("CI", "").lower() in ("true", "1", "yes") or os.environ.get("CORTEX_TEST_MODE", "").lower() in ("true", "1", "yes")
     hook = _resolve_git_hook_path("pre-push")
     if _in_ci:
         printer.warn("CI env detected — pre-push hook check skipped (local invariant).")

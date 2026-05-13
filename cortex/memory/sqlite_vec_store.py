@@ -1,6 +1,5 @@
 """
 CORTEX v6 — Sovereign Vector Store (SQLite-Vec).
-
 Zero-Trust, Multi-Tenant Semantic Memory backed by sqlite-vec.
 Enforces partition by tenant_id and incorporates OUROBOROS success_rate
 and temporal decay directly in the embedding retrieval.
@@ -8,9 +7,7 @@ and temporal decay directly in the embedding retrieval.
 
 # ruff: noqa: S608
 # This module uses validated dynamic sqlite identifiers for tenant/project sharded tables.
-
 from __future__ import annotations
-
 import asyncio
 import json
 import logging
@@ -18,14 +15,12 @@ import sqlite3
 import time
 from pathlib import Path
 from typing import Any, Optional
-
 import numpy as np
 
 try:
     import sqlite_vec
 except ImportError:
     sqlite_vec = None
-
 from cortex.guards.exergy_guard import calculate_exergy
 from cortex.memory.encoder import AsyncEncoder
 from cortex.memory.models import CortexFactModel
@@ -33,11 +28,9 @@ from cortex.utils import void_vec
 from cortex.utils.turboquant import encode_query_qjl
 
 __all__ = ["SovereignVectorStoreL2"]
-
 # Lazy imports to avoid circular deps at module load
 # L2HybridSearch and PIISanitizer only needed at runtime
 _L2_HYBRID_SEARCH_AVAILABLE: Optional[bool] = None  # None = not yet checked
-
 logger = logging.getLogger("cortex.memory.sqlite_vec_store")
 
 
@@ -51,7 +44,6 @@ def cortex_decay(is_diamond: int, timestamp: float, current_time: float, half_li
 
 class SovereignVectorStoreL2:
     """Async vector store for CORTEX v6 L2 semantic memory.
-
     Uses `sqlite-vec` for extremely fast, local, zero-trust vector recall.
     Calculates final scores based on Cosine Similarity, Temporal Decay,
     and OUROBOROS success_rate.
@@ -68,7 +60,6 @@ class SovereignVectorStoreL2:
         "_sanitizer",
         "_vector_enabled",
     )
-
     MAX_DOMAIN_ENTROPY = 5000  # Axiom Ω8: Critical mass for Universe Splitting
 
     def __init__(
@@ -94,7 +85,6 @@ class SovereignVectorStoreL2:
             if sqlite_vec is None:
                 err = "sqlite_vec module not installed. Run 'pip install sqlite-vec'"
                 raise RuntimeError(err)
-
             self._conn = sqlite3.connect(
                 self._db_path,
                 check_same_thread=False,
@@ -104,7 +94,6 @@ class SovereignVectorStoreL2:
             self._conn.execute("PRAGMA journal_mode=WAL;")
             self._conn.execute("PRAGMA synchronous=NORMAL;")
             self._conn.execute("PRAGMA busy_timeout=5000")
-
             try:
                 if hasattr(self._conn, "enable_load_extension"):
                     self._conn.enable_load_extension(True)
@@ -121,14 +110,11 @@ class SovereignVectorStoreL2:
                     e,
                 )
                 self._vector_enabled = False
-
             self._conn.row_factory = sqlite3.Row
-
             # Register Sovereign Functions
             self._conn.create_function("cortex_decay", 4, cortex_decay)
             self._conn.create_function("cortex_exergy", 1, calculate_exergy)
             self._conn.create_function("void_dist", 2, void_vec.void_hamming_dist)
-
             # Initialization
             self._conn.execute("""
                 CREATE TABLE IF NOT EXISTS facts_meta (
@@ -175,15 +161,12 @@ class SovereignVectorStoreL2:
                     self._conn.execute(
                         f"CREATE INDEX IF NOT EXISTS idx_void_mih_s{i} ON vec_void_mih(s{i})"
                     )
-
             # Indexes for Zero-Trust and Speed
             self._conn.execute(
                 "CREATE INDEX IF NOT EXISTS idx_tenant_proj ON facts_meta(tenant_id, project_id)"
             )
             self._conn.execute("CREATE INDEX IF NOT EXISTS idx_bridge ON facts_meta(is_bridge)")
-
             self._ready = True
-
             # Ω₀: Structural integrity migration
             migrations = [
                 ("cognitive_layer", "TEXT"),
@@ -194,13 +177,11 @@ class SovereignVectorStoreL2:
                 ("facet_version", "INTEGER DEFAULT 2"),
                 ("exergy_score", "REAL DEFAULT 1.0"),
             ]
-
             cursor = self._conn.execute(
                 "SELECT name FROM sqlite_master "
                 "WHERE type='table' AND name LIKE 'facts_meta%' AND sql NOT LIKE '%VIRTUAL%'"
             )
             tables = [row[0] for row in cursor.fetchall()]
-
             for tb in tables:
                 info_cursor = self._conn.execute(f"PRAGMA table_info({tb})")  # nosec B608
                 existing_cols = {row[1] for row in info_cursor.fetchall()}
@@ -213,7 +194,6 @@ class SovereignVectorStoreL2:
                     alter_query = f"ALTER TABLE {tb} ADD COLUMN {col} {col_type}"
                     self._conn.execute(alter_query)  # nosec B608
             self._conn.commit()
-
         # Initialize L2HybridSearch (FTS5 mirror) after conn is established
         if self._hybrid is None:
             try:
@@ -224,7 +204,6 @@ class SovereignVectorStoreL2:
             except Exception as e:  # noqa: BLE001
                 logger.warning("L2HybridSearch init failed (FTS5 unavailable): %s", e)
                 self._hybrid = None
-
         return self._conn
 
     @property
@@ -253,23 +232,19 @@ class SovereignVectorStoreL2:
         safe_proj = "".join(c for c in project_id if c.isalnum() or c == "_")
         if not safe_tenant or not safe_proj:
             return "facts_meta", "vec_facts", "vec_void", "vec_void_mih"
-
         meta_tb = f"facts_meta_{safe_tenant}_{safe_proj}"
         vec_tb = f"vec_facts_{safe_tenant}_{safe_proj}"
         vec_void_tb = f"vec_void_{safe_tenant}_{safe_proj}"
         mih_tb = f"vec_void_mih_{safe_tenant}_{safe_proj}"
-
         cursor = conn.cursor()
         cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (meta_tb,))
         if cursor.fetchone():
             return meta_tb, vec_tb, vec_void_tb, mih_tb
-
         cursor.execute(
             "SELECT count(1) FROM facts_meta WHERE tenant_id = ? AND project_id = ?",
             (tenant_id, project_id),
         )
         count = cursor.fetchone()[0]
-
         if count >= self.MAX_DOMAIN_ENTROPY:
             logger.warning(
                 "🌌 [UNIVERSE SPLIT] Domain %s/%s reached mass %d. Sharding vector space.",
@@ -318,7 +293,6 @@ class SovereignVectorStoreL2:
                     f"CREATE INDEX IF NOT EXISTS idx_{vec_void_mih_tb}_s{i} "
                     f"ON {vec_void_mih_tb}(s{i})"
                 )
-
             # Dynamic table identifiers below come from _get_domain_tables(),
             # which constrains them to sanitized sqlite identifiers.
             # Migrate only distilled axioms (is_diamond = 1)
@@ -336,7 +310,6 @@ class SovereignVectorStoreL2:
                 WHERE tenant_id = ? AND project_id = ? AND is_diamond = 1
             """
             conn.execute(shard_meta_sql, (tenant_id, project_id))
-
             shard_vector_sql = f"""
                 INSERT INTO {vec_tb}(rowid, embedding)
                 SELECT v.rowid, v.embedding
@@ -345,7 +318,6 @@ class SovereignVectorStoreL2:
                 WHERE m.tenant_id = ? AND m.project_id = ? AND m.is_diamond = 1
             """
             conn.execute(shard_vector_sql, (tenant_id, project_id))
-
             # Aura-Omega Acceleration: Dedicated indexes for the shard
             conn.execute(
                 f"CREATE INDEX IF NOT EXISTS idx_{safe_tenant}_{safe_proj}_bridge "
@@ -355,25 +327,20 @@ class SovereignVectorStoreL2:
                 f"CREATE INDEX IF NOT EXISTS idx_{safe_tenant}_{safe_proj}_layer "
                 f"ON {meta_tb}(cognitive_layer)"
             )
-
             conn.commit()
             return meta_tb, vec_tb, vec_void_tb, vec_void_mih_tb
-
         return "facts_meta", "vec_facts", "vec_void", "vec_void_mih"
 
     async def memorize(self, fact: CortexFactModel) -> None:
         """Encode and store a multi-tenant CortexFactModel.
-
         Applies PII sanitization to content before storage if a sanitizer
         is available. The sanitized content is stored and vectorized;
         encrypted PII fragments are persisted in the metadata field.
         """
         conn = self._get_conn()
-
         # ─── PII Sanitization Gate (Moved outside the DB Lock) ────────
         sanitized_content = fact.content
         sanitized_meta = dict(fact.metadata) if fact.metadata else {}
-
         sanitizer = self._get_sanitizer()
         if sanitizer and fact.content:
             report = await asyncio.to_thread(
@@ -391,7 +358,6 @@ class SovereignVectorStoreL2:
             if isinstance(emb_list, bytes):
                 # Cannot easily dual-quantize from raw bytes without knowing source
                 return emb_list, b"", ex
-
             arr = np.array(emb_list, dtype=np.float32)
             int8_bytes = arr.tobytes()
             binary_bytes = void_vec.pack_void_bit(arr)
@@ -459,7 +425,6 @@ class SovereignVectorStoreL2:
                             insert_mih_sql,
                             (rowid, *shards),
                         )
-
                     # Store int8 Vector (HdrRecovery Reranking)
                     # Only skip if tier is explicitly COLD to save space
                     if fact.storage_tier != "COLD" and vec_tb:
@@ -497,12 +462,10 @@ class SovereignVectorStoreL2:
             embedding_bytes = np.array(rotated_query, dtype=np.float32).tobytes()
             void_query = void_vec.pack_void_bit(rotated_query)
             now = time.time()
-
             cursor = conn.cursor()
             meta_tb, vec_tb, vec_void_tb, mih_tb = self._get_domain_tables(
                 conn, tenant_id, project_id
             )
-
             if not self._vector_enabled:
                 sql = (
                     f"SELECT * FROM {meta_tb} "
@@ -514,7 +477,6 @@ class SovereignVectorStoreL2:
                     params.append(layer)
                 sql += " ORDER BY timestamp DESC LIMIT ?"
                 params.append(limit)
-
                 cursor.execute(sql, tuple(params))
                 rows = cursor.fetchall()
                 final_facts = []
@@ -536,7 +498,6 @@ class SovereignVectorStoreL2:
                     object.__setattr__(fact, "_recall_score", 0.0)
                     final_facts.append(fact)
                 return final_facts
-
             use_void = False
             if vec_void_tb:
                 try:
@@ -545,19 +506,15 @@ class SovereignVectorStoreL2:
                     use_void = cursor.fetchone()[0] > 0
                 except sqlite3.OperationalError:
                     use_void = False
-
             if use_void:
                 from cortex.utils.void_mih import slice_void_bit
 
                 q_shards = slice_void_bit(void_query)
-
                 meta_tb, vec_tb, vec_void_tb, mih_tb = self._get_domain_tables(
                     conn, tenant_id, project_id
                 )
-
                 # Candidate criteria: at least 1 shard match (1/16)
                 where_mih = " OR ".join([f"s{i} = ?" for i in range(16)])
-
                 # VOID-QUANT v2: Fetch candidate pool via Hamming, rerank in SQL (HdrRecovery + Decay)
                 sql_cand = f"""
                     WITH candidates AS (
@@ -606,7 +563,6 @@ class SovereignVectorStoreL2:
                 ]
                 cursor.execute(sql_cand, tuple(params_cand))
                 rows = cursor.fetchall()
-
             else:
                 # [KEEP ORIGINAL Non-Void Path for int8 vectors]
                 sql = f"""
@@ -636,10 +592,8 @@ class SovereignVectorStoreL2:
                 ]
                 cursor.execute(sql, tuple(params_vec))
                 rows = cursor.fetchall()
-
             if not rows:
                 return []
-
             final_facts = []
             for row in rows:
                 fact = CortexFactModel(
