@@ -3,10 +3,12 @@ import os
 
 from cortex.verification.frontend_oracle import FrontendOracle
 
+
 def test_analyze_file_not_found():
     oracle = FrontendOracle()
     violations = oracle.analyze_file("nonexistent_file.js")
     assert len(violations) == 0
+
 
 def test_analyze_file_html_complex_handler():
     oracle = FrontendOracle()
@@ -40,6 +42,7 @@ def test_analyze_file_html_complex_handler():
     finally:
         os.remove(filepath)
 
+
 def test_analyze_file_js_simple_handler():
     oracle = FrontendOracle()
     content = """
@@ -58,6 +61,7 @@ def test_analyze_file_js_simple_handler():
         assert len(violations) == 0
     finally:
         os.remove(filepath)
+
 
 def test_analyze_file_js_complex_handler_const():
     oracle = FrontendOracle()
@@ -90,6 +94,7 @@ def test_analyze_file_js_complex_handler_const():
     finally:
         os.remove(filepath)
 
+
 def test_analyze_file_js_complex_non_handler():
     oracle = FrontendOracle()
     content = """
@@ -111,15 +116,17 @@ def test_analyze_file_js_complex_non_handler():
 
     try:
         violations = oracle.analyze_file(filepath)
-        assert len(violations) == 0 # Function name doesn't contain handler, listener, update
+        assert len(violations) == 0  # Function name doesn't contain handler, listener, update
     finally:
         os.remove(filepath)
+
 
 def test_extract_block_fallback():
     # Test _extract_block fallback
     oracle = FrontendOracle()
     block = oracle._extract_block("{ incomplete block ", 0)
     assert block == "{ incomplete block "
+
 
 def test_regex_no_group_match():
     # Force a match where both group 1 and group 2 are empty/none.
