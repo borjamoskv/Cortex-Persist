@@ -151,7 +151,7 @@ class CortexDaemon:
         ledger = []
         if os.path.exists(EXECUTION_LEDGER):
              try:
-                 with open(EXECUTION_LEDGER, "r") as f:
+                 with open(EXECUTION_LEDGER) as f:
                      ledger = json.load(f)
              except Exception:
                  ledger = []
@@ -169,7 +169,7 @@ class CortexDaemon:
             return
 
         try:
-            with open(SWARM_QUEUE_FILE, "r") as f:
+            with open(SWARM_QUEUE_FILE) as f:
                 queue = json.load(f)
 
             tasks = queue.get("pending_tasks", [])
@@ -225,7 +225,7 @@ class CortexDaemon:
         try:
             queue = {"pending_tasks": []}
             if os.path.exists(SWARM_QUEUE_FILE):
-                with open(SWARM_QUEUE_FILE, "r") as f:
+                with open(SWARM_QUEUE_FILE) as f:
                     queue = json.load(f)
             
             queue["pending_tasks"].append({

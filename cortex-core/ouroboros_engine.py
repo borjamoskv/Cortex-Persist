@@ -9,7 +9,10 @@ import time
 from cortex.extensions.signals.bus import SignalBus
 from cortex.config import DB_PATH
 
-SCRATCH_BASE = "/Users/borjafernandezangulo/Cortex-Persist/.scratch/ouroboros"
+import json
+import shutil
+_PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+SCRATCH_BASE = os.path.join(_PROJECT_ROOT, ".scratch", "ouroboros")
 FORGE_PATH = "forge" # Verified in path
 logger = logging.getLogger("cortex.ouroboros")
 
@@ -63,7 +66,7 @@ class OuroborosEngine:
                 if file.endswith(".sol") and "test" not in file.lower():
                     path = os.path.join(root, file)
                     try:
-                        with open(path, "r") as f:
+                        with open(path) as f:
                             content = f.read()
                             matches = re.findall(r"contract\s+(\w+)", content)
                             for m in matches:
@@ -176,7 +179,7 @@ contract {contract_name}OuroborosTest is Test {{
         try:
             queue = {"pending_tasks": []}
             if os.path.exists(queue_path):
-                with open(queue_path, "r") as f:
+                with open(queue_path) as f:
                     queue = json.load(f)
             
             queue["pending_tasks"].append({

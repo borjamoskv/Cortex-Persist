@@ -21,7 +21,7 @@ class MirrorAuditor:
             return False
             
         try:
-            with open(self.target_path, "r") as f:
+            with open(self.target_path) as f:
                 tree = ast.parse(f.read())
 
             # 1. Hot Loop Analysis (Axiom Ω₆)

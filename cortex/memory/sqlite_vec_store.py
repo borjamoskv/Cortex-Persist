@@ -106,11 +106,15 @@ class SovereignVectorStoreL2:
             self._conn.execute("PRAGMA busy_timeout=5000")
 
             try:
-                self._conn.enable_load_extension(True)
-                sqlite_vec.load(self._conn)
-                self._vector_enabled = True
-                logger.info("✅ [VECTORS] sqlite-vec extension loaded successfully.")
-            except (AttributeError, sqlite3.OperationalError, Exception) as e:
+                if hasattr(self._conn, "enable_load_extension"):
+                    self._conn.enable_load_extension(True)
+                    sqlite_vec.load(self._conn)
+                    self._vector_enabled = True
+                    logger.info("✅ [VECTORS] sqlite-vec extension loaded successfully.")
+                else:
+                    logger.warning("⚠️ [VECTORS] host python compiled without load_extension")
+                    self._vector_enabled = False
+            except (sqlite3.OperationalError, Exception) as e:
                 logger.warning(
                     "⚠️ [VECTORS] Fallback Mode ACTIVE: Could not load sqlite-vec: %s. "
                     "Semantic search will be disabled but metadata storage is preserved.",

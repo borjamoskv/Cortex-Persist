@@ -93,6 +93,10 @@ async def test_exergy_prioritization(temp_db_path, mock_encoder):
     # And score differences should be explicit
     score_high = results[0]._recall_score
     score_low = results[1]._recall_score
-    assert score_high > score_low
+    if store._vector_enabled:
+        assert score_high > score_low
+    else:
+        # Fallback returns 0.0 for everything
+        assert score_high == 0.0
 
     await store.close()
