@@ -198,7 +198,14 @@ async def test_anomaly_hunter_value_drift():
 @pytest.mark.asyncio
 async def test_anomaly_hunter_ghost_resurrection():
     facts = [
-        Fact(id=1, tenant_id="default", project="test", content="Entity resurrected", fact_type="event", meta={}),
+        Fact(
+            id=1,
+            tenant_id="default",
+            project="test",
+            content="Entity resurrected",
+            fact_type="event",
+            meta={},
+        ),
         Fact(
             id=2,
             tenant_id="default",
@@ -220,7 +227,9 @@ async def test_anomaly_hunter_ghost_resurrection():
 
 @pytest.mark.asyncio
 async def test_anomaly_hunter_confidence_collapse(mock_cortex_engine):
-    facts = [Fact(id=3, tenant_id="default", project="test", content="Conclusion", fact_type="event")]
+    facts = [
+        Fact(id=3, tenant_id="default", project="test", content="Conclusion", fact_type="event")
+    ]
 
     hunter = AnomalyHunterEngine(mock_cortex_engine)
     collapses = await hunter.detect_confidence_collapses(facts)
