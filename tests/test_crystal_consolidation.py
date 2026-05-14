@@ -435,3 +435,127 @@ class TestFullConsolidation:
         cursor = in_memory_db.cursor()
         cursor.execute("SELECT COUNT(*) FROM facts_meta WHERE id = 'dry-1'")
         assert cursor.fetchone()[0] == 1
+
+
+# ── Batching & Vectorization Scale Tests ──────────────────────────────────
+
+
+class TestConsolidatorScale:
+    @pytest.mark.asyncio
+    async def test_cold_purge_batching(self, in_memory_db) -> None:
+        """Verify that _execute_cold_purge handles > 900 candidates effectively."""
+        vitals = []
+        for i in range(1000):
+            fact_id = f"dead-{i}"
+            _insert_crystal(in_memory_db, fact_id, "junk", age_days=30, recall_count=0)
+            vitals.append(
+                CrystalVitals(
+                    fact_id=fact_id,
+                    content_preview="junk",
+                    temperature=0.0,
+                    resonance=0.05,
+                    quadrant="DEAD_WEIGHT",
+                    recommendation="PURGE",
+                    age_days=30,
+                    recall_count=0,
+                    is_diamond=False,
+                )
+            )
+
+        result = ConsolidationResult()
+        await _execute_cold_purge(in_memory_db, vitals, result, dry_run=False)
+
+        assert result.purged == 1000
+
+        cursor = in_memory_db.cursor()
+        cursor.execute("SELECT COUNT(*) FROM facts_meta WHERE id LIKE 'dead-%'")
+        assert cursor.fetchone()[0] == 0
+
+    @pytest.mark.asyncio
+    async def test_diamond_promotion_batching(self, in_memory_db) -> None:
+        """Verify that _execute_diamond_promotion handles > 900 candidates effectively."""
+        vitals = []
+        for i in range(1000):
+            fact_id = f"hot-{i}"
+            _insert_crystal(in_memory_db, fact_id, "gold", age_days=10, recall_count=20)
+            vitals.append(
+                CrystalVitals(
+                    fact_id=fact_id,
+                    content_preview="gold",
+                    temperature=2.0,
+                    resonance=0.7,
+                    quadrant="ACTIVE",
+                    recommendation="PROMOTE",
+                    age_days=10,
+                    recall_count=20,
+                    is_diamond=False,
+                )
+            )
+
+        result = ConsolidationResult()
+        await _execute_diamond_promotion(in_memory_db, vitals, result, dry_run=False)
+
+        assert result.promoted == 1000
+
+        cursor = in_memory_db.cursor()
+        cursor.execute("SELECT COUNT(*) FROM facts_meta WHERE is_diamond = 1")
+        assert cursor.fetchone()[0] == 1000
+
+    @pytest.mark.asyncio
+    async def test_semantic_merge_vectorization(self, in_memory_db) -> None:
+        """Verify that vectorized _execute_semantic_merge merges correct pairs concurrently."""
+        import copy
+        from unittest.mock import patch, AsyncMock
+
+        # Two similar embeddings
+        emb_a = [0.1, 0.2, 0.3, 0.4]
+        emb_b = copy.copy(emb_a)  # Exact duplicate
+
+        # Completely different embedding
+        emb_c = [0.9, -0.2, -0.3, -0.4]
+
+        _insert_crystal(in_memory_db, "merge-1", "Alpha", embedding=emb_a)
+        _insert_crystal(in_memory_db, "merge-2", "Beta", embedding=emb_b)
+        _insert_crystal(in_memory_db, "unique-1", "Gamma", embedding=emb_c)
+
+        vitals = [
+            CrystalVitals("merge-1", "Alpha", 1.0, 0.5, "ACTIVE", "MAINTAIN", 5, 5, False),
+            CrystalVitals("merge-2", "Beta", 1.0, 0.5, "ACTIVE", "MAINTAIN", 5, 5, False),
+            CrystalVitals("unique-1", "Gamma", 1.0, 0.5, "ACTIVE", "MAINTAIN", 5, 5, False),
+        ]
+
+        result = ConsolidationResult()
+
+        # Patch the LLM synthesis to avoid actual calls
+        mock_synthesis = AsyncMock(return_value={"fused_content": "Fused Alpha and Beta"})
+        with patch(
+            "cortex.extensions.swarm.crystal_synthesis.synthesize_crystals", mock_synthesis
+        ):
+            # Patch semantic threshold low enough to catch exact match, but high enough to exclude C
+            with patch(
+                "cortex.extensions.swarm.crystal_consolidator.SEMANTIC_MERGE_THRESHOLD", 0.9
+            ):
+                from cortex.extensions.swarm.crystal_consolidator import _execute_semantic_merge
+
+                await _execute_semantic_merge(in_memory_db, vitals, result, dry_run=False)
+
+        assert result.merged == 1
+
+        # Verify db changes
+        cursor = in_memory_db.cursor()
+
+        # Only 2 left
+        cursor.execute("SELECT COUNT(*) FROM facts_meta")
+        assert cursor.fetchone()[0] == 2
+
+        # Primary was updated
+        cursor.execute("SELECT content FROM facts_meta WHERE id = 'merge-1'")
+        assert cursor.fetchone()[0] == "Fused Alpha and Beta"
+
+        # Secondary was removed
+        cursor.execute("SELECT COUNT(*) FROM facts_meta WHERE id = 'merge-2'")
+        assert cursor.fetchone()[0] == 0
+
+        # Unique is untouched
+        cursor.execute("SELECT content FROM facts_meta WHERE id = 'unique-1'")
+        assert cursor.fetchone()[0] == "Gamma"
