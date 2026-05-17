@@ -656,6 +656,11 @@ class SovereignLedger:
             "target": target_path,
             "action_type": action_type,
         }
+        if self._is_sync_connection(self.db):
+            return self.record_transaction(
+                project="cortex-guard", action="GUARD_VERDICT", detail=detail, tenant_id=tenant_id
+            )
         return await self.record_transaction_async(
             project="cortex-guard", action="GUARD_VERDICT", detail=detail, tenant_id=tenant_id
         )
+

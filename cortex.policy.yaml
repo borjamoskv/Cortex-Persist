@@ -1,0 +1,49 @@
+version: "1.1"
+schema: "cortex.v1"
+gateway:
+  bft_threshold: 0.67
+  max_agents: 100000
+  daemon:
+    watch_paths: ["."]
+    ignore_patterns: ["*.pyc", "__pycache__", ".git", "node_modules", ".venv"]
+    passthrough_commands: ["git status", "git log", "git diff", "ruff check", "pytest", "ls", "cat"]
+guards:
+  critical:
+    - id: "secret_leak"
+      description: "Block modifications to files containing secrets"
+      action: "BLOCK"
+      severity: "CRITICAL"
+      patterns: ["(?i)(api[_-]?key|secret|password|token)\\s*[=:]\\s*['\"][^'\"]{8,}"]
+    - id: "destructive_cmd"
+      description: "Block destructive terminal commands"
+      action: "BLOCK"
+      severity: "CRITICAL"
+      commands: ["rm -rf /", "DROP TABLE", "DROP DATABASE", "FORMAT"]
+  high:
+    - id: "dep_change"
+      description: "Flag dependency changes for review"
+      action: "WARN"
+      severity: "HIGH"
+      patterns: ["requirements\\.txt", "pyproject\\.toml", "package\\.json", "Cargo\\.toml"]
+      without: ["lock"]
+    - id: "migration_gate"
+      description: "Flag database migrations for approval"
+      action: "WARN"
+      severity: "HIGH"
+      patterns: ["alembic", "migrate", "ALTER TABLE", "CREATE TABLE"]
+  advisory:
+    - id: "type_erosion"
+      description: "Log when type hints are removed"
+      action: "LOG"
+      severity: "LOW"
+      detect: ["# type: ignore", "Any"]
+ledger:
+  storage: "sqlite"
+  sign_verdicts: true
+rollback:
+  enabled: true
+  snapshot_on: ["dep_change", "migration_gate"]
+output:
+  format: "json"
+integrations:
+  mainnet_audit: true

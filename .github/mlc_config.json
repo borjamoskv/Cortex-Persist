@@ -1,6 +1,9 @@
 {
   "ignorePatterns": [
     {
+      "pattern": "^(?!https?://)"
+    },
+    {
       "pattern": "^https://img.shields.io"
     },
     {
