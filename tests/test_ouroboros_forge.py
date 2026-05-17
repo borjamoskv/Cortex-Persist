@@ -1,5 +1,7 @@
 import logging
 import sys
+import tempfile
+import os
 from unittest.mock import patch, MagicMock, AsyncMock
 import unittest
 from pathlib import Path
@@ -15,11 +17,21 @@ class TestOuroborosForge(unittest.IsolatedAsyncioTestCase):
     """Verifies the Forge-backed Ouroboros audit pipeline (V5)."""
 
     async def asyncSetUp(self):
+        self.temp_db = tempfile.NamedTemporaryFile(delete=False)
+        self.temp_db.close()
+        self.db_patcher = patch("cortex.config.DB_PATH", self.temp_db.name)
+        self.db_patcher.start()
+
         self.engine = OuroborosEngine()
         self.test_repo = "https://github.com/Uniswap/v4-core"
 
-    @patch('ouroboros_engine.os.system')
-    @patch('ouroboros_engine.asyncio.create_subprocess_exec')
+    async def asyncTearDown(self):
+        self.db_patcher.stop()
+        if os.path.exists(self.temp_db.name):
+            os.remove(self.temp_db.name)
+
+    @patch("ouroboros_engine.os.system")
+    @patch("ouroboros_engine.asyncio.create_subprocess_exec")
     async def test_audit_cycle(self, mock_exec, mock_system):
         """Standard Audit Cycle on mock contract."""
         logger = logging.getLogger("cortex.ouroboros.test")
@@ -27,7 +39,7 @@ class TestOuroborosForge(unittest.IsolatedAsyncioTestCase):
 
         mock_process = AsyncMock()
         mock_process.returncode = 0
-        mock_process.communicate.return_value = (b'mock stdout', b'mock stderr')
+        mock_process.communicate.return_value = (b"mock stdout", b"mock stderr")
         mock_process.wait.return_value = 0
         mock_exec.return_value = mock_process
 
@@ -48,8 +60,9 @@ class TestOuroborosForge(unittest.IsolatedAsyncioTestCase):
         from cortex.extensions.signals.bus import SignalBus
 
         # Ensure schema initialization
-        conn = sqlite3.connect(DB_PATH)
+        conn = sqlite3.connect(self.temp_db.name)
         _bus = SignalBus(conn)
+        _bus.ensure_table()
 
         # Check if signals exist for 'ouroboros'
         cursor = conn.cursor()
