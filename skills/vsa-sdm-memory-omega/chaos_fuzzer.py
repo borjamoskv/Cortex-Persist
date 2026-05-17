@@ -113,7 +113,7 @@ def fuzz_extreme_dimensions():
     m = e_tiny.bind(k, s)
     r = e_tiny.unbind(m, k)
     sim = e_tiny.cosine(s, r)
-    report("D=64 bind/unbind", sim > 0.05, f"cos={sim:.4f}")
+    report(f"D=64 bind/unbind", sim > 0.05, f"cos={sim:.4f}")
 
     # Large D
     e_big = VSAEngine(D=50000, seed=4)
@@ -121,7 +121,7 @@ def fuzz_extreme_dimensions():
     m = e_big.bind(k, s)
     r = e_big.unbind(m, k)
     sim = e_big.cosine(s, r)
-    report("D=50000 bind/unbind", sim > 0.5, f"cos={sim:.4f}")
+    report(f"D=50000 bind/unbind", sim > 0.5, f"cos={sim:.4f}")
 
 
 def fuzz_capacity_overflow():
@@ -135,7 +135,7 @@ def fuzz_capacity_overflow():
     states = [e.random_vec() for _ in range(N)]
 
     memory = np.zeros(D)
-    for k, s in zip(keys, states, strict=False):
+    for k, s in zip(keys, states):
         memory += e.bind(k, s)
 
     # SNR should be terrible
@@ -145,7 +145,7 @@ def fuzz_capacity_overflow():
     # Retrieval should be near-random
     extracted = e.unbind(memory, keys[0])
     sim = e.cosine(states[0], extracted)
-    report("Retrieval at 160x overcapacity", True,
+    report(f"Retrieval at 160x overcapacity", True,
            f"cos={sim:.4f} (noise level expected)")
 
 
@@ -201,7 +201,7 @@ def fuzz_persistence_corruption():
     e = VSAEngine(D=1000, seed=8)
     e.memorize(e.random_vec(), e.random_vec(), timestamp=0.0)
 
-    tmp = tempfile.mktemp(suffix=".vsa")
+    tmp = tempfile.NamedTemporaryFile(delete=False).name(suffix=".vsa")
     e.save(tmp)
 
     # Read the file, flip a byte in the tensor data
@@ -317,7 +317,7 @@ def fuzz_algebra_consistency():
 
     # Both should produce unit vectors
     v_hrr = e_hrr.random_vec()
-    e_mapb.random_vec()
+    v_mapb = e_mapb.random_vec()
     report("Random vec generation",
            abs(np.linalg.norm(v_hrr) - 1.0) < 1e-6,
            f"HRR norm={np.linalg.norm(v_hrr):.6f}")
@@ -346,7 +346,7 @@ def fuzz_dimension_mismatch():
     e2 = VSAEngine(D=2000, seed=2)
 
     # Save D=1000 tensor
-    tmp = tempfile.mktemp(suffix=".vsa")
+    tmp = tempfile.NamedTemporaryFile(delete=False).name(suffix=".vsa")
     e1.memorize(e1.random_vec(), e1.random_vec(), timestamp=0.0)
     e1.save(tmp)
 
@@ -364,7 +364,7 @@ def fuzz_dimension_mismatch():
     try:
         v1 = np.ones(1000)
         v2 = np.ones(2000)
-        np.fft.ifft(np.fft.fft(v1) * np.fft.fft(v2)).real
+        r = np.fft.ifft(np.fft.fft(v1) * np.fft.fft(v2)).real
         report("Mismatched bind", False, "Should have failed")
     except ValueError:
         report("Mismatched bind", True, "ValueError caught")

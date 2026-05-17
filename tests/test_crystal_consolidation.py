@@ -254,6 +254,7 @@ class TestConsolidationResult:
 
 
 class TestColdPurge:
+
     @pytest.mark.asyncio
     async def test_cold_purge_batching(self, in_memory_db) -> None:
         vitals = []
@@ -364,6 +365,7 @@ class TestColdPurge:
 
 
 class TestDiamondPromotion:
+
     @pytest.mark.asyncio
     async def test_diamond_promotion_batching(self, in_memory_db) -> None:
         vitals = []
@@ -389,9 +391,7 @@ class TestDiamondPromotion:
 
         assert result.promoted == 1500
         cursor = in_memory_db.cursor()
-        cursor.execute(
-            "SELECT COUNT(*) FROM facts_meta WHERE is_diamond = 1 AND id LIKE 'hot-batch-%'"
-        )
+        cursor.execute("SELECT COUNT(*) FROM facts_meta WHERE is_diamond = 1 AND id LIKE 'hot-batch-%'")
         assert cursor.fetchone()[0] == 1500
 
     @pytest.mark.asyncio
@@ -425,10 +425,10 @@ class TestDiamondPromotion:
 
 
 class TestSemanticMergeBatch:
+
     @pytest.mark.asyncio
     async def test_semantic_merge_batching(self, in_memory_db) -> None:
         from unittest.mock import patch
-
         vitals = []
         for i in range(20):
             fid = f"merge-batch-{i}"
@@ -451,11 +451,10 @@ class TestSemanticMergeBatch:
             # Manually inject same embeddings
             cursor = in_memory_db.cursor()
             import numpy as np
-
             emb = np.ones(1536, dtype=np.float32)
             cursor.execute(
                 "UPDATE vec_facts SET embedding = ? WHERE rowid IN (SELECT rowid FROM facts_meta WHERE id = ?)",
-                (emb.tobytes(), fid),
+                (emb.tobytes(), fid)
             )
             in_memory_db.commit()
 
@@ -464,11 +463,8 @@ class TestSemanticMergeBatch:
         async def mock_synth(primary_content, secondary_content):
             return {"fused_content": "mocked fused result"}
 
-        with patch(
-            "cortex.extensions.swarm.crystal_synthesis.synthesize_crystals", side_effect=mock_synth
-        ):
+        with patch("cortex.extensions.swarm.crystal_synthesis.synthesize_crystals", side_effect=mock_synth):
             from cortex.extensions.swarm.crystal_consolidator import _execute_semantic_merge
-
             await _execute_semantic_merge(in_memory_db, vitals, result, dry_run=False)
 
         assert result.merged == 19

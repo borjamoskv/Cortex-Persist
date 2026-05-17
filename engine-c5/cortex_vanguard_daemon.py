@@ -21,7 +21,7 @@ def update_ledger(target: str, status: str, details: str = "") -> None:
     ledger = {}
     if os.path.exists(LEDGER_PATH):
         try:
-            with open(LEDGER_PATH) as f:
+            with open(LEDGER_PATH, "r") as f:
                 ledger = json.load(f)
         except:
             ledger = {}
@@ -35,7 +35,7 @@ def update_ledger(target: str, status: str, details: str = "") -> None:
     with open(LEDGER_PATH, "w") as f:
         json.dump(ledger, f, indent=2)
 
-async def run_step(name: str, cmd: list[str], cwd: str = BASE_DIR) -> str:
+async def run_step(name: str, cmd: List[str], cwd: str = BASE_DIR) -> str:
     log(f"Iniciando fase: {name}", "EXEC")
     process = await asyncio.create_subprocess_exec(
         *cmd,
@@ -66,7 +66,7 @@ async def vanguard_cycle():
         log("Error crítico: No se encontró real_bounties.json", "ERROR")
         return
 
-    with open(targets_json) as f:
+    with open(targets_json, "r") as f:
         targets_data = json.load(f)
 
     for target_info in targets_data:
@@ -80,7 +80,7 @@ async def vanguard_cycle():
         log(f"Asaltando target: {name.upper()}...", "ATTACK")
         
         # 2. FRACTOR: Análisis AST
-        await run_step(f"AST-{name}", ["python3", "cortex_ast_fractor.py", target_path])
+        out_ast = await run_step(f"AST-{name}", ["python3", "cortex_ast_fractor.py", target_path])
         
         # 3. CHAOS: Fuzzing Persistente (250,000 runs)
         # Limitado a 60s por forge interno, pero el daemon espera

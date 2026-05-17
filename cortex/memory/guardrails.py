@@ -9,11 +9,9 @@ thermodynamic memory architecture.
 
 from __future__ import annotations
 
-import hashlib
 import logging
 import time
 from dataclasses import dataclass, field
-from enum import Enum
 
 logger = logging.getLogger("cortex.memory.guardrails")
 
@@ -119,40 +117,3 @@ class SessionGuardrail:
             "warned": self._warned,
             "duration_s": round(self.session_duration_seconds, 1),
         }
-
-
-class RealityLevel(Enum):
-    C4_SIMULATION = "C4"
-    C5_REAL_STATIC = "C5_STATIC"
-    C5_REAL_DYNAMIC = "C5_DYNAMIC"
-
-
-class EpistemicGuard:
-    """
-    SAGA-1: Barrera de entrada al Ledger. Físicamente imposible inyectar simulaciones
-    en el historial permanente sin detonar una excepción bizantina.
-    Ejecuta la Ley de la Verdad (Ω₉).
-    """
-
-    @staticmethod
-    def validate_mutation(
-        payload: dict, reality_claim: RealityLevel, external_proof: str = None
-    ) -> str:
-        if reality_claim in [RealityLevel.C5_REAL_STATIC, RealityLevel.C5_REAL_DYNAMIC]:
-            if not external_proof:
-                raise ValueError(
-                    "[ANATHEMA] C5-REAL reclamado sin prueba externa (API/TxHash). Bajando a C4."
-                )
-
-            # Verificación criptográfica (ej. recuperar firma, txhash)
-            if not EpistemicGuard._verify_proof(external_proof):
-                raise ValueError("[BRECHA BIZANTINA] Prueba C5-REAL inválida o fabricada.")
-
-        # Hash del estado + Nivel de Realidad para sellar el CORTEX-TAINT
-        raw_state = f"{reality_claim.value}:{str(payload)}:{external_proof or 'LOCAL_TEATRO'}"
-        return hashlib.sha3_256(raw_state.encode()).hexdigest()
-
-    @staticmethod
-    def _verify_proof(proof: str) -> bool:
-        # Implementación de validación de oráculo/blockchain
-        return True

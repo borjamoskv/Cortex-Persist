@@ -29,17 +29,19 @@ def benchmark_retrieval():
     states = [engine.random_vec() for _ in range(N_items)]
 
     # ── Brute-force baseline: store as list, search by cosine ──
-    corpus = list(zip(keys, states, strict=False))
+    corpus = list(zip(keys, states))
 
     query_key = keys[500]  # retrieve item 500
 
     t0 = time.perf_counter_ns()
     for _ in range(100):  # 100 queries
         best_sim = -1
+        best_state = None
         for k, s in corpus:
             sim = engine.cosine(query_key, k)
             if sim > best_sim:
                 best_sim = sim
+                best_state = s
     brute_ns = (time.perf_counter_ns() - t0) / 100
 
     # ── VSA: collapse all into tensor, retrieve with unbind ──
@@ -139,11 +141,11 @@ def benchmark_engine_api():
     assert sim > 0.3
 
     # Save / Load
-    tmp = tempfile.mktemp(suffix=".vsa")
-    engine.save(tmp)
+    tmp = tempfile.NamedTemporaryFile(delete=False).name(suffix=".vsa")
+    size = engine.save(tmp)
 
     engine2 = VSAEngine(D=10000, seed=42)
-    engine2.load(tmp)
+    n_loaded = engine2.load(tmp)
     assert np.allclose(engine.memory, engine2.memory)
     os.unlink(tmp)
 

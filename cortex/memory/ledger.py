@@ -104,27 +104,6 @@ class EventLedgerL3:
         """Persist an event immutably. Fire-and-commit with SHA-3-256 integrity."""
         import hashlib
 
-        from cortex.memory.guardrails import EpistemicGuard, RealityLevel
-
-        # [SAGA-1] Epistemic Containment Check (Ley Ω₉)
-        # Por defecto, todo evento es C4-SIMULACIÓN a menos que se demuestre lo contrario.
-        reality_claim_str = event.metadata.get("reality_level", "C4")
-        external_proof_raw = event.metadata.get("external_proof")
-        external_proof = str(external_proof_raw) if external_proof_raw else ""
-
-        try:
-            reality_claim = RealityLevel(reality_claim_str)
-            taint = EpistemicGuard.validate_mutation(
-                payload={"event_id": event.event_id, "content": event.content},
-                reality_claim=reality_claim,
-                external_proof=external_proof,
-            )
-            # Sello criptográfico inyectado en el evento antes de inmutabilidad
-            event.metadata["cortex_taint"] = taint
-        except Exception as e:
-            logger.error(f"[SAGA-1] Rechazo Bizantino: {e}")
-            raise RuntimeError(f"SAGA-1 Abort: {e}")
-
         await self.ensure_table()
 
         # [GOVERNANCE] Calculate the cryptographic chain if signature is missing
@@ -244,16 +223,11 @@ class EventLedgerL3:
 
             # 1. Verify Hash Continuity
             if prev_hash != last_sig:
-                if count == 1 and last_sig == "GENESIS":
-                    audit_log.append(
-                        f"COMPACTED_CHAIN_START: Event {eid} begins at prev={prev_hash}"
-                    )
-                else:
-                    audit_log.append(
-                        f"DISCONTINUITY: Event {eid} expects prev={prev_hash} "
-                        f"but actual last={last_sig}"
-                    )
-                    is_corrupt = True
+                audit_log.append(
+                    f"DISCONTINUITY: Event {eid} expects prev={prev_hash} "
+                    f"but actual last={last_sig}"
+                )
+                is_corrupt = True
 
             # 2. Verify Signature Integrity
             content_hash = hashlib.sha3_256(content.encode()).hexdigest()
@@ -281,71 +255,6 @@ class EventLedgerL3:
             "findings": audit_log or ["Memory event chain shows 100% integrity."],
             "timestamp": datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
         }
-
-    async def compact_ledger(
-        self, tenant_id: str, retain_limit: int = 1000, archive_path: str = "cortex_archive.db"
-    ) -> int:
-        """
-        [GOVERNANCE] Archive older events and truncate the primary ledger to save space.
-        Returns the number of events archived and deleted.
-        """
-
-        await self.ensure_table()
-
-        # 1. Find the events to prune (all except the most recent `retain_limit` events)
-        cursor = await self._conn.execute(
-            """SELECT event_id, timestamp, role, content, token_count,
-                      session_id, tenant_id, prev_hash, signature, metadata
-               FROM memory_events
-               WHERE tenant_id = ?
-               ORDER BY event_id DESC
-               LIMIT -1 OFFSET ?""",
-            (tenant_id, retain_limit),
-        )
-        rows_to_archive = list(await cursor.fetchall())
-
-        if not rows_to_archive:
-            return 0
-
-        logger.info(
-            f"[CORTEX-COMPACTION] Archiving {len(rows_to_archive)} events for tenant {tenant_id}"
-        )
-
-        # 2. Archive events to a separate database connection
-        async with aiosqlite.connect(archive_path) as archive_conn:
-            await archive_conn.executescript(_CREATE_TABLE_SQL)
-            await archive_conn.executescript(_CREATE_INDEX_SQL)
-
-            await archive_conn.executemany(
-                """INSERT OR IGNORE INTO memory_events
-                   (event_id, timestamp, role, content, token_count,
-                    session_id, tenant_id, prev_hash, signature, metadata)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                rows_to_archive,
-            )
-            await archive_conn.commit()
-
-        # 3. Delete from primary ledger
-        event_ids = [row[0] for row in rows_to_archive]
-        # SQLite IN clause has a limit, process in chunks of 500
-        chunk_size = 500
-        for i in range(0, len(event_ids), chunk_size):
-            chunk = event_ids[i : i + chunk_size]
-            placeholders = ",".join("?" * len(chunk))
-            await self._conn.execute(
-                f"DELETE FROM memory_events WHERE event_id IN ({placeholders})", chunk
-            )
-
-        await self._conn.commit()
-
-        # 4. TRUNCATE WAL to free up disk space
-        await self._conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
-
-        # Invalidate cache
-        if tenant_id in self._last_hash_cache:
-            del self._last_hash_cache[tenant_id]
-
-        return len(rows_to_archive)
 
 
 def _row_to_event(row: tuple) -> MemoryEvent:

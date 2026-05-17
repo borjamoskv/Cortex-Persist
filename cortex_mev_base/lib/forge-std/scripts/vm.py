@@ -7,7 +7,7 @@ import re
 import subprocess
 from enum import Enum as PyEnum
 from pathlib import Path
-from collections.abc import Callable
+from typing import Callable
 from urllib import request
 
 VoidFn = Callable[[], None]
@@ -368,7 +368,7 @@ class Cheatcodes:
 
     @staticmethod
     def from_json_file(file_path: str) -> "Cheatcodes":
-        with open(file_path) as f:
+        with open(file_path, "r") as f:
             return Cheatcodes.from_dict(json.load(f))
 
 
@@ -447,7 +447,7 @@ class CheatcodesPrinter:
         elif isinstance(indent_with, str):
             self._indent_str = indent_with
         else:
-            raise AssertionError("indent_with must be int or str")
+            assert False, "indent_with must be int or str"
 
         self.items_order = items_order
 
@@ -488,7 +488,7 @@ class CheatcodesPrinter:
             elif item == Item.FUNCTION:
                 self.p_functions(contract.cheatcodes)
             else:
-                raise AssertionError(f"unknown item {item}")
+                assert False, f"unknown item {item}"
 
     def p_prelude(self, contract: Cheatcodes | None = None):
         self._p_str(f"// SPDX-License-Identifier: {self.spdx_identifier}")

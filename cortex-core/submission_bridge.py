@@ -89,7 +89,7 @@ Validate state transitions and enforce strict access control on internal functio
                     self.verified_pocs.append({"name": poc.name, "target": target.name, "success": success})
                     
                     if success:
-                        with open(poc) as f:
+                        with open(poc, 'r') as f:
                             poc_content = f.read()
                         self.generate_report(target.name, poc_content, logs)
             
