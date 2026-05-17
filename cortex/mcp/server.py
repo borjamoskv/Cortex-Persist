@@ -331,6 +331,11 @@ def create_mcp_server(config: MCPServerConfig | None = None) -> "FastMCP":  # ty
 
     register_hilbert_tools(mcp, ctx)
 
+    # Guard Daemon Tools (Phase 3)
+    from cortex.mcp.guard_tools import register_guard_tools
+
+    register_guard_tools(mcp, ctx)
+
     # Genesis Engine — create systems from specs
     register_genesis_tools(mcp, ctx)
 
@@ -353,7 +358,7 @@ _default_config = MCPServerConfig()
 mcp = create_mcp_server(_default_config)
 
 
-def run_server(config: Optional[MCPServerConfig] = None) -> None:
+def run_server(config: MCPServerConfig | None = None) -> None:
     """Start the CORTEX MCP server."""
     global mcp
     if config:

@@ -640,3 +640,22 @@ class SovereignLedger:
             await conn.commit()
 
         return {"valid": not violations, "violations": violations, "tx_count": tx_count}
+
+    async def append_verdict(
+        self,
+        verdict: str,
+        reason: str,
+        target_path: str,
+        action_type: str,
+        tenant_id: str | None = None,
+    ) -> str:
+        """Record a Guard Daemon verdict into the immutable ledger (Phase 2)."""
+        detail = {
+            "verdict": verdict,
+            "reason": reason,
+            "target": target_path,
+            "action_type": action_type,
+        }
+        return await self.record_transaction_async(
+            project="cortex-guard", action="GUARD_VERDICT", detail=detail, tenant_id=tenant_id
+        )

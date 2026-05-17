@@ -25,6 +25,7 @@ class LedgerAutoManagementDaemon:
         retain_limit: int = 1000,
         archive_path: str = "cortex_archive.db",
         check_interval_seconds: int = 60,
+        db_path: str | None = None,
     ):
         self.ledger = ledger
         self.tenant_id = tenant_id
@@ -32,19 +33,21 @@ class LedgerAutoManagementDaemon:
         self.retain_limit = retain_limit
         self.archive_path = archive_path
         self.check_interval_seconds = check_interval_seconds
+        self.db_path = db_path
         self._task: asyncio.Task | None = None
         self._running = False
 
     def get_db_size_mb(self) -> float:
         """Calculate the total size of the database and its WAL file in MB."""
-        # Get path from the connection if possible
-        # Defaulting to "cortex.db" or the engine's DB if we can't extract it
-        db_path = "cortex.db"
-        if hasattr(self.ledger._conn, "_path"):
-            db_path = self.ledger._conn._path  # type: ignore
-        elif hasattr(self.ledger._conn, "database"):
-            db_path = self.ledger._conn.database  # type: ignore
-
+        db_path = self.db_path
+        if not db_path:
+            # Fallback
+            db_path = "cortex.db"
+            if hasattr(self.ledger._conn, "_path"):
+                db_path = self.ledger._conn._path  # type: ignore
+            elif hasattr(self.ledger._conn, "database"):
+                db_path = self.ledger._conn.database  # type: ignore
+        
         total_size = 0.0
         try:
             if os.path.exists(db_path):

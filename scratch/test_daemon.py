@@ -3,9 +3,13 @@ import os
 from pathlib import Path
 import sqlite3
 
+import logging
+
 from cortex.memory.ledger import EventLedgerL3
 from cortex.memory.models import MemoryEvent
 from cortex.memory.auto_management import LedgerAutoManagementDaemon
+
+logging.basicConfig(level=logging.INFO)
 
 async def main():
     db_path = Path("scratch/test_ledger.db")
@@ -27,7 +31,8 @@ async def main():
         max_db_size_mb=0.1,  # 100 KB
         retain_limit=10,     # Retain only 10 events
         archive_path=str(archive_path),
-        check_interval_seconds=1.0  # Check every second
+        check_interval_seconds=1.0,  # Check every second
+        db_path=str(db_path)
     )
     daemon.start()
     

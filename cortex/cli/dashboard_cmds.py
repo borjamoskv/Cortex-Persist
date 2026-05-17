@@ -83,13 +83,62 @@ async def _collect_recent(engine, limit: int = 8) -> list[dict]:
     return []
 
 
+async def _collect_guard_stats(engine) -> dict:
+    """Collect Guard Daemon status and verdict counts."""
+    from pathlib import Path
+
+    stats = {"online": False, "pid": None, "verdicts": 0, "blocks": 0}
+
+    # Check process
+    pid_file = Path.home() / ".cortex" / "guard.pid"
+    if pid_file.exists():
+        try:
+            pid = int(pid_file.read_text().strip())
+            import os
+
+            os.kill(pid, 0)
+            stats["online"] = True
+            stats["pid"] = pid
+        except (ValueError, OSError):
+            pass
+
+    # Check ledger for verdicts
+    try:
+        from cortex.ledger.ledger_core import SovereignLedger
+
+        ledger = SovereignLedger(engine.db_path)
+        await ledger.ensure_initialized_async()
+        # Use a connection to count transactions
+        import aiosqlite
+
+        async with aiosqlite.connect(engine.db_path) as conn:
+            cursor = await conn.execute(
+                "SELECT count(*) FROM transactions WHERE action = 'GUARD_VERDICT'"
+            )
+            row = await cursor.fetchone()
+            if row:
+                stats["verdicts"] = row[0]
+
+            cursor = await conn.execute(
+                "SELECT count(*) FROM transactions WHERE action = 'GUARD_VERDICT' AND detail LIKE '%BLOCK%'"
+            )
+            row = await cursor.fetchone()
+            if row:
+                stats["blocks"] = row[0]
+    except Exception:
+        pass
+
+    return stats
+
+
 async def _collect_all(engine) -> dict:
     """Collect all dashboard data in parallel."""
-    stats, shannon, ledger, recent = await asyncio.gather(
+    stats, shannon, ledger, recent, guard = await asyncio.gather(
         _collect_stats(engine),
         _collect_shannon(engine),
         _collect_ledger(engine),
         _collect_recent(engine),
+        _collect_guard_stats(engine),
         return_exceptions=True,
     )
     return {
@@ -97,6 +146,9 @@ async def _collect_all(engine) -> dict:
         "shannon": shannon if isinstance(shannon, dict) else {},
         "ledger": ledger if isinstance(ledger, dict) else {},
         "recent": recent if isinstance(recent, list) else [],
+        "guard": guard
+        if isinstance(guard, dict)
+        else {"online": False, "verdicts": 0, "blocks": 0},
     }
 
 
@@ -236,6 +288,29 @@ def _build_ledger(ledger: dict) -> Panel:
     )
 
 
+def _build_guard(guard: dict) -> Panel:
+    """Build the Guard Daemon telemetry panel."""
+    table = Table(show_header=False, box=None, padding=(0, 2))
+    table.add_column("Metric", style=f"bold {_GOLD}", min_width=18)
+    table.add_column("Value", style="white")
+
+    if guard.get("online"):
+        table.add_row("Status", f"[bold {_EMERALD}]● ONLINE (PID {guard.get('pid')})[/]")
+    else:
+        table.add_row("Status", f"[bold {_RED}]○ OFFLINE[/]")
+
+    table.add_row("Total Verdicts", f"{guard.get('verdicts', 0):,}")
+    blocks = guard.get("blocks", 0)
+    table.add_row("P0 Blocks", f"[{_RED if blocks > 0 else _DIM}]{blocks:,}[/]")
+
+    return Panel(
+        table,
+        title=f"[bold {_CYBER}]♜ GUARD DAEMON[/]",
+        border_style=_VIOLET,
+        padding=(0, 1),
+    )
+
+
 def _build_activity(recent: list[dict]) -> Panel:
     """Build the recent activity feed panel."""
     table = Table(box=None, padding=(0, 1), show_header=True)
@@ -326,6 +401,7 @@ def _build_dashboard(data: dict) -> Layout:
 
     layout["right"].split_column(
         Layout(_build_ledger(data["ledger"]), name="ledger"),
+        Layout(_build_guard(data["guard"]), name="guard", size=6),
         Layout(_build_moats(), name="moats"),
     )
 
