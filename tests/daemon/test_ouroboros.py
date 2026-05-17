@@ -29,7 +29,7 @@ async def temp_db(tmp_path: Path) -> str:
             "reason": "Initial",
             "target": "SYSTEM_DB",
             "action_type": "SYSTEM_PURGE",
-        }
+        },
     )
     conn.close()
 
@@ -70,11 +70,7 @@ class TestOuroborosDaemon:
         daemon = OuroborosDaemon(db_path=temp_db, chaos_level=1.0)  # always trigger chaos
 
         mutation_called = False
-        dummy_mutation = {
-            "target": "memory",
-            "vector": "sql_injection",
-            "success": False
-        }
+        dummy_mutation = {"target": "memory", "vector": "sql_injection", "success": False}
 
         async def mock_inject_mutation():
             nonlocal mutation_called
@@ -101,11 +97,7 @@ class TestOuroborosDaemon:
         daemon = OuroborosDaemon(db_path=temp_db, chaos_level=1.0)
 
         async def mock_inject_mutation():
-            return {
-                "target": "ledger",
-                "vector": "malicious_bypass_vector",
-                "success": True
-            }
+            return {"target": "ledger", "vector": "malicious_bypass_vector", "success": True}
 
         monkeypatch.setattr(daemon, "_inject_mutation", mock_inject_mutation)
 
@@ -124,7 +116,7 @@ class TestOuroborosDaemon:
         async with aiosqlite.connect(temp_db) as db:
             cursor = await db.execute(
                 "SELECT count(*) FROM transactions WHERE detail LIKE "
-                "'%\"verdict\":\"ZERO_DAY_DETECTED\"%'"
+                '\'%"verdict":"ZERO_DAY_DETECTED"%\''
             )
             row = await cursor.fetchone()
             assert row is not None

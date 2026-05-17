@@ -18,7 +18,9 @@ logger = logging.getLogger("cortex.daemon.annihilator")
 class AnnihilatorDaemon:
     """Active background daemon that enforces structural purity and memory exergy."""
 
-    def __init__(self, db_path: str, entropy_threshold: float = 5.0, memory_threshold_mb: float = 512.0):
+    def __init__(
+        self, db_path: str, entropy_threshold: float = 5.0, memory_threshold_mb: float = 512.0
+    ):
         self.db_path = db_path
         self.entropy_threshold = entropy_threshold
         self.memory_threshold_mb = memory_threshold_mb
@@ -96,7 +98,7 @@ class AnnihilatorDaemon:
                         "Purging."
                     )
                     await self.purge()
-                
+
                 # 2. JIT-Memory Purge Check (Exergy optimization)
                 current_rss = self._get_rss_memory_mb()
                 if current_rss > self.memory_threshold_mb:
@@ -105,10 +107,12 @@ class AnnihilatorDaemon:
                         f"{self.memory_threshold_mb}MB). Forcing GC and Phantom-Kill."
                     )
                     import gc
+
                     gc.collect()
-                    
+
                     # Log the JIT-Memory Purge in Ledger
                     import aiosqlite
+
                     async with aiosqlite.connect(self.db_path) as db:
                         ledger = SovereignLedger(db)
                         await ledger.append_verdict(

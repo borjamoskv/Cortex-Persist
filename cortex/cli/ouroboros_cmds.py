@@ -16,11 +16,13 @@ from cortex.daemon.ouroboros import OuroborosDaemon
 console = Console()
 _CYBER = "bold #CCFF00"
 
+
 async def _run_ouroboros(db_path: str) -> None:
     """Execute the Keter-Class Ouroboros loop."""
     console.print(f"[{_CYBER}]⧖ INITIATING OUROBOROS ADVERSARIAL TESTING (KETER-CLASS)[/]")
     daemon = OuroborosDaemon(db_path=db_path, chaos_level=1.0)
     await daemon.run_loop(interval_seconds=3)
+
 
 @cli.command(name="chaos")
 @click.option("--db", default=DEFAULT_DB, help="Database path")

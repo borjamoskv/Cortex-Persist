@@ -47,6 +47,7 @@ class Web3Anchor:
         # In a C5-REAL implementation, this compiles a circuit proving that
         # the transactions composing the merkle_root obeyed all Guard policies.
         import hmac
+
         # Using a deterministic secret for the primitive (would be KMS in prod)
         secret = b"CORTEX_ZK_CIRCUIT_SECRET_2026"
         proof = hmac.new(secret, merkle_root.encode("utf-8"), hashlib.sha256).hexdigest()
