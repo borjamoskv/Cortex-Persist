@@ -144,6 +144,7 @@ async def test_webhook_adapter_send():
         "cortex.extensions.notifications.adapters.webhook.httpx.AsyncClient"
     ) as mock_client_cls:
         from unittest.mock import Mock
+
         mock_client = AsyncMock()
         mock_response = Mock()
         mock_client.post.return_value = mock_response
