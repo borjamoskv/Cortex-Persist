@@ -47,7 +47,7 @@ class LedgerAutoManagementDaemon:
                 db_path = self.ledger._conn._path  # type: ignore
             elif hasattr(self.ledger._conn, "database"):
                 db_path = self.ledger._conn.database  # type: ignore
-        
+
         total_size = 0.0
         try:
             if os.path.exists(db_path):
@@ -63,7 +63,8 @@ class LedgerAutoManagementDaemon:
     async def _daemon_loop(self):
         """Infinite loop to periodically check and compact the ledger."""
         logger.info(
-            f"[AUTO-MANAGEMENT] Daemon started. Monitoring {self.tenant_id} ledger. Max size: {self.max_db_size_mb}MB"
+            f"[AUTO-MANAGEMENT] Daemon started. Monitoring {self.tenant_id} ledger. "
+            f"Max size: {self.max_db_size_mb}MB"
         )
         while self._running:
             try:

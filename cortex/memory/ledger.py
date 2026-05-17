@@ -338,8 +338,11 @@ class EventLedgerL3:
 
         await self._conn.commit()
 
-        # 4. TRUNCATE WAL to free up disk space
-        await self._conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+        # 4 & 5. TRUNCATE WAL and Reclaim physical space (Zero-Entropy mandate)
+        try:
+            await self._conn.executescript("PRAGMA wal_checkpoint(TRUNCATE); VACUUM;")
+        except Exception as e:
+            logger.warning(f"[CORTEX-COMPACTION] Could not execute VACUUM (likely concurrent operations): {e}")
 
         # Invalidate cache
         if tenant_id in self._last_hash_cache:
