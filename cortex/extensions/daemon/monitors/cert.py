@@ -34,7 +34,7 @@ class CertMonitor:
                 alerts.append(alert)
         return alerts
 
-    def _check_one(self, hostname: str) -> Optional[CertAlert]:
+    def _check_one(self, hostname: str) -> CertAlert | None:
         """Check a single hostname's SSL certificate."""
         try:
             ctx = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)

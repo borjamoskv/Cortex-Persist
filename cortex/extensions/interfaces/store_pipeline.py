@@ -55,7 +55,7 @@ class ContentMutator(Protocol):
         conn: aiosqlite.Connection,
         *,
         tenant_id: str = "default",
-        source: Optional[str] = None,
+        source: str | None = None,
     ) -> tuple[str, str, dict[str, Any]]:
         """Transform content before storage.
 
@@ -81,8 +81,8 @@ class PostStoreHook(Protocol):
         conn: aiosqlite.Connection,
         *,
         tenant_id: str = "default",
-        source: Optional[str] = None,
-        db_path: Optional[str] = None,
+        source: str | None = None,
+        db_path: str | None = None,
     ) -> None:
         """Execute post-store side effect.
 

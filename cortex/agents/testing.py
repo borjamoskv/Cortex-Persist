@@ -18,9 +18,7 @@ class MockBus:
     allowing agents to run outside the full nursery/supervisor stack.
     """
 
-    async def receive(
-        self, agent_id: str, timeout: float = 1.0
-    ) -> Any:
+    async def receive(self, agent_id: str, timeout: float = 1.0) -> Any:
         """Block for `timeout` seconds, always returning None."""
         await asyncio.sleep(min(timeout, 1.0))
         return None
@@ -50,20 +48,14 @@ class InMemoryBus:
         """Send a message — stores in history and target queue."""
         self._sent.append(message)
         if message.recipient:
-            queue = self._queues.setdefault(
-                message.recipient, asyncio.Queue()
-            )
+            queue = self._queues.setdefault(message.recipient, asyncio.Queue())
             await queue.put(message)
 
-    async def receive(
-        self, agent_id: str, timeout: float = 1.0
-    ) -> AgentMessage | None:
+    async def receive(self, agent_id: str, timeout: float = 1.0) -> AgentMessage | None:
         """Receive next message for agent_id, or None on timeout."""
         queue = self._queues.setdefault(agent_id, asyncio.Queue())
         try:
-            return await asyncio.wait_for(
-                queue.get(), timeout=timeout
-            )
+            return await asyncio.wait_for(queue.get(), timeout=timeout)
         except asyncio.TimeoutError:
             return None
 
@@ -82,21 +74,13 @@ class InMemoryBus:
         """All messages sent by a specific sender."""
         return [m for m in self._sent if m.sender == sender]
 
-    def messages_of_kind(
-        self, kind: MessageKind
-    ) -> list[AgentMessage]:
+    def messages_of_kind(self, kind: MessageKind) -> list[AgentMessage]:
         """All messages of a specific kind."""
         return [m for m in self._sent if m.kind == kind]
 
-    def messages_with_correlation(
-        self, correlation_id: str
-    ) -> list[AgentMessage]:
+    def messages_with_correlation(self, correlation_id: str) -> list[AgentMessage]:
         """All messages matching a correlation_id."""
-        return [
-            m
-            for m in self._sent
-            if m.correlation_id == correlation_id
-        ]
+        return [m for m in self._sent if m.correlation_id == correlation_id]
 
     def count(self) -> int:
         """Total number of sent messages."""

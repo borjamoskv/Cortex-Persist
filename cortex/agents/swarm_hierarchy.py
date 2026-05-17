@@ -117,9 +117,7 @@ class SwarmPlannerAgent(BaseAgent):
             except asyncio.CancelledError:
                 break
             except Exception as e:
-                logger.error(
-                    "[%s] Watchdog error: %s", self.agent_id, e
-                )
+                logger.error("[%s] Watchdog error: %s", self.agent_id, e)
 
     async def _persist_session(self, correlation_id: str) -> None:
         """Persist session state to the engine (Ω₂)."""
@@ -171,10 +169,7 @@ class SwarmPlannerAgent(BaseAgent):
                 recipient=message.sender,
                 result={
                     "status": "REJECTED",
-                    "reason": (
-                        "War Council detected potential hallucination"
-                        " or unsafe strategy."
-                    ),
+                    "reason": ("War Council detected potential hallucination or unsafe strategy."),
                 },
                 correlation_id=correlation_id,
             )
@@ -265,9 +260,7 @@ class SwarmPlannerAgent(BaseAgent):
 
         if result_data.get("status") == "FAIL":
             session["task_states"][task_id] = "FAILED"
-            await self._handle_task_failure(
-                correlation_id, task_id, result_data
-            )
+            await self._handle_task_failure(correlation_id, task_id, result_data)
             return
         elif result_data.get("status") == "REINCARNATED":
             logger.warning(
@@ -285,16 +278,12 @@ class SwarmPlannerAgent(BaseAgent):
 
         await self._persist_session(correlation_id)
 
-        if all(
-            s == "COMPLETED" for s in session["task_states"].values()
-        ):
+        if all(s == "COMPLETED" for s in session["task_states"].values()):
             await self._finalize_session(correlation_id)
         else:
             await self._dispatch_ready_tasks(correlation_id)
 
-    async def _dispatch_ready_tasks(
-        self, correlation_id: str
-    ) -> None:
+    async def _dispatch_ready_tasks(self, correlation_id: str) -> None:
         """Identify and dispatch tasks whose dependencies are met."""
         session = self.sessions[correlation_id]
 
@@ -304,10 +293,7 @@ class SwarmPlannerAgent(BaseAgent):
             if session["task_states"][tid] != "PENDING":
                 continue
             deps = task.get("dependencies", [])
-            if all(
-                session["task_states"].get(d) == "COMPLETED"
-                for d in deps
-            ):
+            if all(session["task_states"].get(d) == "COMPLETED" for d in deps):
                 ready_tasks.append(task)
 
         if not ready_tasks:
@@ -386,13 +372,9 @@ class SwarmPlannerAgent(BaseAgent):
 
     async def _handle_timeout(self, correlation_id: str) -> None:
         """Handle session timeout."""
-        await self._abort_session(
-            correlation_id, "Session timeout reached (SAGA-ABORT)"
-        )
+        await self._abort_session(correlation_id, "Session timeout reached (SAGA-ABORT)")
 
-    async def _abort_session(
-        self, correlation_id: str, reason: str
-    ) -> None:
+    async def _abort_session(self, correlation_id: str, reason: str) -> None:
         """Abort session and notify originator (Ω₉)."""
         session = self.sessions.pop(correlation_id)
         session["status"] = "ABORTED"
@@ -413,9 +395,7 @@ class SwarmPlannerAgent(BaseAgent):
             correlation_id=correlation_id,
         )
 
-    async def _persist_session_state(
-        self, correlation_id: str, session: dict[str, Any]
-    ) -> None:
+    async def _persist_session_state(self, correlation_id: str, session: dict[str, Any]) -> None:
         """Persist a session dict that might have been popped."""
         if not self.engine:
             return
@@ -453,9 +433,7 @@ class SwarmPlannerAgent(BaseAgent):
             correlation_id=correlation_id,
         )
 
-    async def _define_strategy_structured(
-        self, user_input: str
-    ) -> dict[str, Any]:
+    async def _define_strategy_structured(self, user_input: str) -> dict[str, Any]:
         """Invoke powerful model to synthesize a DAG strategy."""
         res = await route_request(
             prompt=(
@@ -475,9 +453,7 @@ class SwarmPlannerAgent(BaseAgent):
         try:
             content = res.get("content", "{}")
             if "```json" in content:
-                content = (
-                    content.split("```json")[1].split("```")[0].strip()
-                )
+                content = content.split("```json")[1].split("```")[0].strip()
             return json.loads(content)
         except Exception:
             return {
@@ -500,9 +476,7 @@ class SwarmPlannerAgent(BaseAgent):
                 "TIMEOUT": 30.0,
             }
 
-    async def _synthesize_final_report(
-        self, session: dict[str, Any]
-    ) -> str:
+    async def _synthesize_final_report(self, session: dict[str, Any]) -> str:
         """Final L1 synthesis of all specialist outputs."""
         res = await route_request(
             prompt=(
@@ -526,9 +500,7 @@ class SwarmPlannerAgent(BaseAgent):
         )
         return res.get("content", "Audit failed.")
 
-    async def _notify(
-        self, intent: str, payload: dict[str, Any]
-    ) -> None:
+    async def _notify(self, intent: str, payload: dict[str, Any]) -> None:
         """Sovereign Notification Protocol (Ω₅)."""
         logger.info("[NOTIFY:%s] %s", intent, json.dumps(payload))
 
@@ -550,9 +522,7 @@ class SwarmPlannerAgent(BaseAgent):
                 WorldMutation,
             )
 
-            if hasattr(self, "nexus") and isinstance(
-                self.nexus, NexusWorldModel
-            ):
+            if hasattr(self, "nexus") and isinstance(self.nexus, NexusWorldModel):
                 await self.nexus.mutate(
                     WorldMutation(
                         origin=DomainOrigin.CORTEX_CORE,

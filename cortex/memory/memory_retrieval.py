@@ -40,7 +40,7 @@ def _dict_from_fact(f: Any) -> dict[str, Any]:
     }
 
 
-def fact_to_dict(fact: CortexFactModel, rrf_score: Optional[float] = None) -> dict[str, Any]:
+def fact_to_dict(fact: CortexFactModel, rrf_score: float | None = None) -> dict[str, Any]:
     """Convert a fact model to a context-ready dict."""
     return {
         "id": fact.id,
@@ -82,7 +82,7 @@ async def _fetch_hdc_results(
     project_id: str,
     query: str,
     max_episodes: int,
-    layer: Optional[str] = None,
+    layer: str | None = None,
 ) -> list[CortexFactModel]:
     try:
         toxic_ids = await manager._hdc.get_toxic_ids(tenant_id=tenant_id, project_id=project_id)  # type: ignore[reportOptionalMemberAccess]
@@ -105,7 +105,7 @@ async def _fetch_dense_results(
     project_id: str,
     query: str,
     max_episodes: int,
-    layer: Optional[str] = None,
+    layer: str | None = None,
 ) -> list[CortexFactModel]:
     try:
         # [VECTOR-2] ZERO-FRICTION HOLOGRAPHIC RECALL
@@ -159,9 +159,9 @@ async def retrieve_episodic_context(
     manager: CortexMemoryManager,
     tenant_id: str,
     project_id: str,
-    query: Optional[str],
+    query: str | None,
     max_episodes: int,
-    layer: Optional[str] = None,
+    layer: str | None = None,
 ) -> list[dict[str, Any]]:
     """Retrieve and fuse facts from all available L2 layers.
 

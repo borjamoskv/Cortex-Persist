@@ -49,7 +49,7 @@ class HealthGuard(HealthMixin):
     def __init__(self, db_path: str | Path) -> None:
         self._db_path = str(db_path)
 
-    async def check_write_safety(self, custom_sla: Optional[HealthSLA] = None) -> bool:
+    async def check_write_safety(self, custom_sla: HealthSLA | None = None) -> bool:
         """Check if it's safe to write based on system health.
 
         Args:

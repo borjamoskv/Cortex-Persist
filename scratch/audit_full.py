@@ -7,6 +7,7 @@ from cortex.crypto.keyring import get_master_key
 DB_PATH = os.path.expanduser("~/.cortex/cortex.db")
 TEST_KEY = base64.b64decode("MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA=")
 
+
 def dump_all():
     if not os.path.exists(DB_PATH):
         print(f"DB not found at {DB_PATH}")
@@ -24,7 +25,7 @@ def dump_all():
     for fid, content, tenant_id in rows:
         decrypted = None
         method = "UNKNOWN"
-        
+
         # Try Prod Key
         try:
             decrypted = encrypter_prod.decrypt_str(content, tenant_id=tenant_id)
@@ -48,6 +49,7 @@ def dump_all():
             print(f"--- Fact {fid} (FAILED DECRYPTION) ---")
 
     conn.close()
+
 
 if __name__ == "__main__":
     dump_all()

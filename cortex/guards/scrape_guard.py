@@ -43,7 +43,7 @@ class ScrapeSanitizerGuard:
     _ON_EVENT_RE = re.compile(r"\s+on[a-z]+\s*=\s*(?:\"[^\"]*\"|'[^']*')", re.IGNORECASE)
 
     @classmethod
-    def sanitize(cls, raw_content: str, source_url: Optional[str] = None) -> SanitizedPayload:
+    def sanitize(cls, raw_content: str, source_url: str | None = None) -> SanitizedPayload:
         """Sanitize scraped content, enforce thermodynamics, and append cryptographic taint.
 
         Args:

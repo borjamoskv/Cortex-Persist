@@ -17,7 +17,7 @@ class RedTeamSwarm:
     The Red Team Swarm: Orchestrates controlled failure injections to evolve CORTEX's immunity.
     """
 
-    def __init__(self, target_namespaces: Optional[list[str]] = None):
+    def __init__(self, target_namespaces: list[str] | None = None):
         self.falsifier = EvolutionaryFalsifier(failure_tolerance=1)
         self.discovery = DiscoveryProvider(target_namespaces)
         self.active_injectors = []

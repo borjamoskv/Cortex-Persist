@@ -29,7 +29,7 @@ class Signal:
     source: str
     signal_type: str
     content: str
-    project: Optional[str]
+    project: str | None
     timestamp: str
     weight: float = 0.5
 
@@ -57,7 +57,7 @@ class InferenceResult:
         projects_ranked: List of (project, score) tuples, descending.
     """
 
-    active_project: Optional[str]
+    active_project: str | None
     confidence: str
     signals_used: int
     summary: str

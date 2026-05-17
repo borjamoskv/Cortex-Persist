@@ -26,7 +26,7 @@ class IntervalProjectMonitor(BaseMonitor[T]):
 
     def __init__(
         self,
-        projects: Optional[dict[str, str]] = None,
+        projects: dict[str, str] | None = None,
         interval_seconds: int = 1800,
         engine: Any = None,
     ):

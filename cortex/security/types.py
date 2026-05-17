@@ -52,9 +52,9 @@ class ImmuneArtifact:
     artifact_type: str
     payload: Mapping[str, Any]
     state: ImmunityState = ImmunityState.OBSERVED
-    profile: Optional[PathogenProfile] = None
+    profile: PathogenProfile | None = None
     reasons: list[str] = field(default_factory=list)
-    sealed_at: Optional[str] = None
+    sealed_at: str | None = None
     parent_ids: list[str] = field(default_factory=list)
 
 

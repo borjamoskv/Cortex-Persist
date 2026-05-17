@@ -143,7 +143,7 @@ class ABACEvaluator:
     at the same priority level (deny-by-default).
     """
 
-    def __init__(self, policies: Optional[list[Policy]] = None) -> None:
+    def __init__(self, policies: list[Policy] | None = None) -> None:
         raw = DEFAULT_POLICIES if policies is None else policies
         self._policies = sorted(
             raw,

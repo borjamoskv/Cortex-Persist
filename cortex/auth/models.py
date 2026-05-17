@@ -19,7 +19,7 @@ class APIKey:
     role: str
     permissions: list[str]
     created_at: str
-    last_used: Optional[str]
+    last_used: str | None
     is_active: bool
     rate_limit: int
 

@@ -28,8 +28,8 @@ class CortexSyncManager:
     def __init__(self, engine: CortexEngine):
         self._engine = engine
         self._sync_lock = asyncio.Lock()
-        self._last_sync_result: Optional[SyncResult] = None
-        self._last_wb_result: Optional[WritebackResult] = None
+        self._last_sync_result: SyncResult | None = None
+        self._last_wb_result: WritebackResult | None = None
 
     async def run_sync_cycle(self) -> dict[str, Any]:
         """

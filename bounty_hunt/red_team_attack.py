@@ -6,6 +6,7 @@ from datetime import datetime
 # Target: AI Safety Agentic Guard Breach ($100,000)
 # CORTEX-Persist Adversarial Swarm
 
+
 class RedTeamSwarm:
     def __init__(self, target_name, num_agents=50):
         self.target_name = target_name
@@ -26,7 +27,7 @@ class RedTeamSwarm:
                 "vector": vector_type,
                 "timestamp": str(datetime.now()),
                 "evidence": f"LOGIC-COLLAPSE detected in {vector_type} handling.",
-                "severity": "CRITICAL"
+                "severity": "CRITICAL",
             }
             self.findings.append(finding)
             print(f"!!! [CRITICAL] Agent {agent_id} found a potential breach!")
@@ -34,7 +35,7 @@ class RedTeamSwarm:
     async def run_mission(self):
         print(f"--- [MISSION START] Target: {self.target_name} ---")
         tasks = []
-        vectors = ['instruction_injection', 'encoding_obfuscation', 'state_leakage', 'tool_misuse']
+        vectors = ["instruction_injection", "encoding_obfuscation", "state_leakage", "tool_misuse"]
 
         for i in range(self.num_agents):
             vector = random.choice(vectors)
@@ -48,11 +49,17 @@ class RedTeamSwarm:
         # Save results to a temporary findings file
         with open("bounty_hunt/current_findings.json", "w") as f:
             import json
-            json.dump({
-                "target": self.target_name,
-                "ledger_id": self.ledger_id,
-                "findings": self.findings
-            }, f, indent=4)
+
+            json.dump(
+                {
+                    "target": self.target_name,
+                    "ledger_id": self.ledger_id,
+                    "findings": self.findings,
+                },
+                f,
+                indent=4,
+            )
+
 
 if __name__ == "__main__":
     swarm = RedTeamSwarm("Agentic Guard-Breach ($100k)")

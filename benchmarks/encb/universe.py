@@ -171,9 +171,7 @@ def generate_universe(
 
     # Categorical propositions
     for i in range(counts[BeliefType.CATEGORICAL]):
-        tmpl_name, tmpl_cats, tmpl_default = _CATEGORICAL_TEMPLATES[
-            i % len(_CATEGORICAL_TEMPLATES)
-        ]
+        tmpl_name, tmpl_cats, tmpl_default = _CATEGORICAL_TEMPLATES[i % len(_CATEGORICAL_TEMPLATES)]
         domain = domains[i % len(domains)]
         key = f"{domain}.{tmpl_name}_{idx}"
         truth = random.choice(tmpl_cats)

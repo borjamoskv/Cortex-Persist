@@ -75,7 +75,7 @@ class FederatedEngine:
     async def search(
         self,
         query: str,
-        tenant_id: Optional[str] = None,
+        tenant_id: str | None = None,
         top_k: int = 5,
         **kwargs,
     ) -> list:

@@ -28,8 +28,8 @@ class TrendDetector:
 
     def __init__(
         self,
-        http_client: Optional[HttpClient] = None,
-        random_seed: Optional[int] = None,
+        http_client: HttpClient | None = None,
+        random_seed: int | None = None,
     ) -> None:
         self._http = http_client
         self._rng = random.Random(random_seed)

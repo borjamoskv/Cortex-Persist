@@ -43,7 +43,7 @@ async def launch_mission(
 
 @router.get("/", response_model=list[dict])
 async def list_missions(
-    project: Optional[str] = Query(None),
+    project: str | None = Query(None),
     engine: CortexEngine = Depends(get_engine),
     _=Depends(require_permission("read")),
 ):

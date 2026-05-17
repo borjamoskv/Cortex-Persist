@@ -222,7 +222,7 @@ class ExecResult:
     success: bool
     output: dict[str, object] = field(default_factory=dict)
     stdout: str = ""
-    error: Optional[str] = None
+    error: str | None = None
     duration_ms: float = 0.0
 
 

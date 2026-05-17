@@ -1,7 +1,7 @@
 import re
 
 def show_conflicts(filepath):
-    with open(filepath, 'r') as f:
+    with open(filepath) as f:
         content = f.read()
     
     parts = re.split(r'<<<<<<< HEAD\n(.*?)\n=======\n(.*?)\n>>>>>>> [a-f0-9]+.*?\n', content, flags=re.DOTALL)

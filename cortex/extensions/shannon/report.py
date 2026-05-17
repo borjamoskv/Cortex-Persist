@@ -180,7 +180,7 @@ class EntropyReport:
     @staticmethod
     async def analyze(
         engine: CortexEngine,
-        project: Optional[str] = None,
+        project: str | None = None,
     ) -> dict:
         """Run complete entropy analysis and return structured results.
 

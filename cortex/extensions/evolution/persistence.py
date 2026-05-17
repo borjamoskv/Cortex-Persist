@@ -113,7 +113,7 @@ def save_swarm(agents: list[SovereignAgent], cycle: int, path: Path = DEFAULT_ST
         return False
 
 
-def load_swarm(path: Path = DEFAULT_STATE_PATH) -> Optional[tuple[list[SovereignAgent], int]]:
+def load_swarm(path: Path = DEFAULT_STATE_PATH) -> tuple[list[SovereignAgent], int] | None:
     """
     Carga el estado. Si falla, intenta cargar el backup más reciente disponible
     (Auto-Rollback).

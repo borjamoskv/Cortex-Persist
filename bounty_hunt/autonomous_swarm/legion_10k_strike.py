@@ -36,6 +36,7 @@ logger = logging.getLogger("legion.10k.strike")
 
 # ─── Attack Surface Taxonomy ────────────────────────────────────────
 
+
 class Severity(str, Enum):
     CRITICAL = "critical"
     HIGH = "high"
@@ -46,6 +47,7 @@ class Severity(str, Enum):
 @dataclass
 class AttackVector:
     """Atomic unit of analysis dispatched to a single Centurion agent."""
+
     id: str
     protocol: str
     contract: str
@@ -62,6 +64,7 @@ class AttackVector:
 @dataclass
 class ProtocolTarget:
     """L1 Legion target: a single DeFi protocol."""
+
     name: str
     max_bounty: int
     repo: str
@@ -96,11 +99,11 @@ TARGETS: list[ProtocolTarget] = [
                 function="swapCallback()",
                 vector_type="precision",
                 hypothesis="Integer truncation in buyGemNoFee(amt / to18ConversionFactor) "
-                           "traps dust permanently in callee. No sweep function exists.",
+                "traps dust permanently in callee. No sweep function exists.",
                 severity=Severity.CRITICAL,
                 status="CONFIRMED",
                 code_evidence="L67-68: constraint intentionally not enforced. "
-                              "L72: PsmLike(psm).buyGemNoFee(to, amt / to18ConversionFactor)",
+                "L72: PsmLike(psm).buyGemNoFee(to, amt / to18ConversionFactor)",
                 confidence="C5-Deterministic",
             ),
             # Expansion vectors for Legion analysis
@@ -111,7 +114,7 @@ TARGETS: list[ProtocolTarget] = [
                 function="draw() / wipe()",
                 vector_type="access_control",
                 hypothesis="Wards-based access control: verify no path bypasses "
-                           "auth(modifier) for Vault operations.",
+                "auth(modifier) for Vault operations.",
                 severity=Severity.HIGH,
             ),
             AttackVector(
@@ -121,7 +124,7 @@ TARGETS: list[ProtocolTarget] = [
                 function="approve() / deposit()",
                 vector_type="logic",
                 hypothesis="Buffer approves max uint256 to VatJoin. Verify no "
-                           "intermediate state allows unauthorized drain.",
+                "intermediate state allows unauthorized drain.",
                 severity=Severity.HIGH,
             ),
             AttackVector(
@@ -131,7 +134,7 @@ TARGETS: list[ProtocolTarget] = [
                 function="swap()",
                 vector_type="precision",
                 hypothesis="Swapper transfers FULL amt to callee before swap. "
-                           "If callee reverts partially, funds may be stranded.",
+                "If callee reverts partially, funds may be stranded.",
                 severity=Severity.MEDIUM,
             ),
             AttackVector(
@@ -141,7 +144,7 @@ TARGETS: list[ProtocolTarget] = [
                 function="swapCallback()",
                 vector_type="logic",
                 hypothesis="UniV3 callee may be sandwich-attacked if no TWAP "
-                           "oracle is enforced for minOut calculation.",
+                "oracle is enforced for minOut calculation.",
                 severity=Severity.HIGH,
             ),
             AttackVector(
@@ -151,7 +154,7 @@ TARGETS: list[ProtocolTarget] = [
                 function="peek()",
                 vector_type="oracle",
                 hypothesis="Oracle price feed manipulation could affect "
-                           "allocation ratios in the Vault.",
+                "allocation ratios in the Vault.",
                 severity=Severity.HIGH,
             ),
             AttackVector(
@@ -161,7 +164,7 @@ TARGETS: list[ProtocolTarget] = [
                 function="deposit() / withdraw()",
                 vector_type="logic",
                 hypothesis="Cross-domain conduit may have reentrancy or "
-                           "state inconsistency during multi-step bridging.",
+                "state inconsistency during multi-step bridging.",
                 severity=Severity.MEDIUM,
             ),
             AttackVector(
@@ -171,7 +174,7 @@ TARGETS: list[ProtocolTarget] = [
                 function="file()",
                 vector_type="access_control",
                 hypothesis="Registry file() updates critical addresses. "
-                           "Verify no governance timing attack is possible.",
+                "Verify no governance timing attack is possible.",
                 severity=Severity.MEDIUM,
             ),
         ],
@@ -197,8 +200,8 @@ TARGETS: list[ProtocolTarget] = [
                 function="getSharesByPooledEth() / getPooledEthByShares()",
                 vector_type="precision",
                 hypothesis="Symmetrical truncation in share<->ETH conversion. "
-                           "Known 1-2 wei dust per operation. Investigate if "
-                           "flash-loan volume can amplify dust to material loss.",
+                "Known 1-2 wei dust per operation. Investigate if "
+                "flash-loan volume can amplify dust to material loss.",
                 severity=Severity.MEDIUM,
             ),
             AttackVector(
@@ -208,8 +211,8 @@ TARGETS: list[ProtocolTarget] = [
                 function="_finalize()",
                 vector_type="logic",
                 hypothesis="During negative rebase finalization, ethToLock uses "
-                           "truncating division. Race condition between finalize "
-                           "and claim could yield excess ETH.",
+                "truncating division. Race condition between finalize "
+                "and claim could yield excess ETH.",
                 severity=Severity.HIGH,
             ),
             AttackVector(
@@ -219,7 +222,7 @@ TARGETS: list[ProtocolTarget] = [
                 function="submitReport()",
                 vector_type="oracle",
                 hypothesis="If quorum shifts during frame transition, stale "
-                           "report could be processed with incorrect CL balance.",
+                "report could be processed with incorrect CL balance.",
                 severity=Severity.HIGH,
             ),
             AttackVector(
@@ -229,7 +232,7 @@ TARGETS: list[ProtocolTarget] = [
                 function="requestBurnShares()",
                 vector_type="access_control",
                 hypothesis="Burner role permissions: verify no path allows "
-                           "unauthorized share burning by compromised module.",
+                "unauthorized share burning by compromised module.",
                 severity=Severity.MEDIUM,
             ),
             AttackVector(
@@ -239,7 +242,7 @@ TARGETS: list[ProtocolTarget] = [
                 function="deposit()",
                 vector_type="logic",
                 hypothesis="Module fee distribution uses truncated division. "
-                           "Treasury gets remainder — verify no underflow.",
+                "Treasury gets remainder — verify no underflow.",
                 severity=Severity.MEDIUM,
             ),
         ],
@@ -262,7 +265,7 @@ TARGETS: list[ProtocolTarget] = [
                 function="liquidate()",
                 vector_type="logic",
                 hypothesis="Cluster liquidation threshold calculation may have "
-                           "edge case where healthy cluster is liquidatable.",
+                "edge case where healthy cluster is liquidatable.",
                 severity=Severity.HIGH,
             ),
             AttackVector(
@@ -272,7 +275,7 @@ TARGETS: list[ProtocolTarget] = [
                 function="updateBalance()",
                 vector_type="precision",
                 hypothesis="Balance update uses block.number delta. Verify no "
-                           "overflow on long-dormant clusters.",
+                "overflow on long-dormant clusters.",
                 severity=Severity.MEDIUM,
             ),
             AttackVector(
@@ -282,7 +285,7 @@ TARGETS: list[ProtocolTarget] = [
                 function="updateSnapshot()",
                 vector_type="precision",
                 hypothesis="Operator fee accumulation may lose precision "
-                           "over many small increments.",
+                "over many small increments.",
                 severity=Severity.MEDIUM,
             ),
         ],
@@ -291,6 +294,7 @@ TARGETS: list[ProtocolTarget] = [
 
 
 # ─── Swarm Engine ───────────────────────────────────────────────────
+
 
 @dataclass
 class AgentResult:
@@ -318,10 +322,16 @@ class Legion10KStrike:
     async def deploy(self) -> dict:
         """Execute the full Legion-10K strike across all protocol targets."""
         self.start_time = time.perf_counter()
-        logger.info("⚔️ LEGIØN-10K IGNITION — %d vectors across %d protocols",
-                     self._total_vectors, len(self.targets))
-        logger.info("   Hierarchy: %d Legions → %d Centurions → 10,000 agents",
-                     len(self.targets), self._total_vectors)
+        logger.info(
+            "⚔️ LEGIØN-10K IGNITION — %d vectors across %d protocols",
+            self._total_vectors,
+            len(self.targets),
+        )
+        logger.info(
+            "   Hierarchy: %d Legions → %d Centurions → 10,000 agents",
+            len(self.targets),
+            self._total_vectors,
+        )
 
         # Phase 1: Deploy ForensicLegions per protocol (L1)
         legion_tasks = []
@@ -339,8 +349,12 @@ class Legion10KStrike:
 
     async def _deploy_legion(self, target: ProtocolTarget) -> None:
         """L1 Legion: Spawns Centurion squads for each vector in the target."""
-        logger.info("🔱 LEGION [%s] — Deploying %d vectors (Max Bounty: $%s)",
-                     target.name, len(target.vectors), f"{target.max_bounty:,}")
+        logger.info(
+            "🔱 LEGION [%s] — Deploying %d vectors (Max Bounty: $%s)",
+            target.name,
+            len(target.vectors),
+            f"{target.max_bounty:,}",
+        )
 
         # Simulate thermal-aware bucketed dispatch (100 agents per Centurion)
         # Each vector spawns a Centurion with 100 parallel analysis agents
@@ -414,15 +428,24 @@ class Legion10KStrike:
         result = AgentResult(
             vector_id=vector.id,
             status=status,
-            finding=vector.hypothesis if status == "confirmed" else f"[{status}] {vector.hypothesis}",
+            finding=vector.hypothesis
+            if status == "confirmed"
+            else f"[{status}] {vector.hypothesis}",
             confidence=confidence,
             latency_ms=latency,
         )
         self.results.append(result)
 
         icon = {"confirmed": "🎯", "refuted": "✗", "inconclusive": "?"}[status]
-        logger.info("   %s [%s] %s (%d/%d agents concur, %.1fms)",
-                     icon, vector.id, status.upper(), confirm_count, total, latency)
+        logger.info(
+            "   %s [%s] %s (%d/%d agents concur, %.1fms)",
+            icon,
+            vector.id,
+            status.upper(),
+            confirm_count,
+            total,
+            latency,
+        )
 
     def _evaluate_vector(self, vector: AttackVector, pass_type: str) -> str:
         """
@@ -481,9 +504,7 @@ class Legion10KStrike:
                     if v.id == r.vector_id:
                         confirmed_protocols.add(t.name)
 
-        dedup_bounty = sum(
-            t.max_bounty for t in self.targets if t.name in confirmed_protocols
-        )
+        dedup_bounty = sum(t.max_bounty for t in self.targets if t.name in confirmed_protocols)
 
         report = {
             "operation": "LEGIØN-10K STRIKE",
@@ -532,6 +553,7 @@ class Legion10KStrike:
 
 # ─── Entry Point ────────────────────────────────────────────────────
 
+
 async def main():
     print("=" * 72)
     print("  ⚔️  LEGIØN-10K — SOVEREIGN FORENSIC SWARM DEPLOYMENT")
@@ -545,7 +567,9 @@ async def main():
 
     print("\n" + "=" * 72)
     print("  ∴  STRIKE COMPLETE")
-    print(f"  ◈  Confirmed: {report['results']['confirmed']}/{report['results']['total_vectors']} vectors")
+    print(
+        f"  ◈  Confirmed: {report['results']['confirmed']}/{report['results']['total_vectors']} vectors"
+    )
     print(f"  ◈  Bounty Potential: {report['bounty_potential']['total_addressable']}")
     print(f"  ◈  Execution: {report['execution_time_s']}s")
     print(f"  ◈  Seal: {report['seal']}")

@@ -21,6 +21,7 @@ Usage by Swarm agents:
     # Cross-agent memory: query another agent's tensor
     mem.load_agent("centurion-099")
 """
+
 import os
 import time
 from pathlib import Path
@@ -35,8 +36,7 @@ MEMORY_DIR = Path.home() / ".cortex" / "memory" / "vsa"
 class SwarmMemory:
     """Per-agent VSA memory with swarm-level federation."""
 
-    def __init__(self, agent_id, D=10000, decay_lambda=0.05,
-                 memory_dir=None):
+    def __init__(self, agent_id, D=10000, decay_lambda=0.05, memory_dir=None):
         """
         Args:
             agent_id: Unique agent identifier within the swarm.
@@ -94,20 +94,18 @@ class SwarmMemory:
             state_vec = text_vec
 
         # Memorize with decay
-        self.engine.memorize(
-            time_key, state_vec,
-            timestamp=ts,
-            decay_lambda=self.decay_lambda
-        )
+        self.engine.memorize(time_key, state_vec, timestamp=ts, decay_lambda=self.decay_lambda)
 
         # Keep structured log for codebook-based retrieval
-        self._action_log.append({
-            "key": time_key,
-            "state": state_vec,
-            "text": description,
-            "tags": tags or {},
-            "timestamp": ts,
-        })
+        self._action_log.append(
+            {
+                "key": time_key,
+                "state": state_vec,
+                "text": description,
+                "tags": tags or {},
+                "timestamp": ts,
+            }
+        )
 
     def record_state(self, state_dict, timestamp=None):
         """
@@ -117,18 +115,16 @@ class SwarmMemory:
         ts = timestamp or time.time()
         time_key = self.engine.random_vec()
         state_vec = self.engine.encode_record(state_dict)
-        self.engine.memorize(
-            time_key, state_vec,
-            timestamp=ts,
-            decay_lambda=self.decay_lambda
+        self.engine.memorize(time_key, state_vec, timestamp=ts, decay_lambda=self.decay_lambda)
+        self._action_log.append(
+            {
+                "key": time_key,
+                "state": state_vec,
+                "text": str(state_dict),
+                "tags": state_dict,
+                "timestamp": ts,
+            }
         )
-        self._action_log.append({
-            "key": time_key,
-            "state": state_vec,
-            "text": str(state_dict),
-            "tags": state_dict,
-            "timestamp": ts,
-        })
 
     # ── Retrieval ──
 
@@ -143,12 +139,14 @@ class SwarmMemory:
         results = []
         for entry in self._action_log:
             sim = self.engine.cosine(query_vec, entry["state"])
-            results.append((
-                sim,
-                entry["text"],
-                entry["tags"],
-                entry["timestamp"],
-            ))
+            results.append(
+                (
+                    sim,
+                    entry["text"],
+                    entry["tags"],
+                    entry["timestamp"],
+                )
+            )
         results.sort(key=lambda x: x[0], reverse=True)
         return results[:top_k]
 
@@ -184,9 +182,7 @@ class SwarmMemory:
         """
         path = self._vsa_path(other_agent_id)
         if not path.exists():
-            raise FileNotFoundError(
-                f"No memory for agent {other_agent_id}"
-            )
+            raise FileNotFoundError(f"No memory for agent {other_agent_id}")
         other = VSAEngine(D=self.engine.D, seed=0)
         other.load(str(path))
         return other
@@ -202,6 +198,7 @@ class SwarmMemory:
 
 
 # ── Swarm-Level Operations ──
+
 
 def federation_merge(agent_memories, weights=None):
     """
@@ -223,9 +220,6 @@ def federation_merge(agent_memories, weights=None):
         weights = [1.0 / len(agent_memories)] * len(agent_memories)
 
     merged = VSAEngine(D=D, seed=0)
-    merged.memory = sum(
-        w * m.engine.memory
-        for w, m in zip(weights, agent_memories, strict=False)
-    )
+    merged.memory = sum(w * m.engine.memory for w, m in zip(weights, agent_memories, strict=False))
     merged.memory = merged.normalize(merged.memory)
     return merged

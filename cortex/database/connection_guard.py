@@ -131,7 +131,7 @@ def _scan_file_lines(py_file: Path, violations: list[ConnectionViolation]) -> No
 
 def scan_raw_connects(
     root: str | Path = "cortex",
-    whitelist: Optional[frozenset[str]] = None,
+    whitelist: frozenset[str] | None = None,
 ) -> list[ConnectionViolation]:
     """Scan CORTEX source for unauthorized sqlite3.connect() calls.
 

@@ -27,7 +27,7 @@ class ImmutableVoteLedger:
     def __init__(self, db_connection: Any):
         self.conn = db_connection
 
-    async def get_last_hash(self, tenant_id: str) -> Optional[str]:
+    async def get_last_hash(self, tenant_id: str) -> str | None:
         """Obtiene el hash de la última entrada para un tenant específico."""
         cursor = await self.conn.execute(
             "SELECT hash FROM vote_ledger WHERE tenant_id = ? ORDER BY id DESC LIMIT 1",
@@ -39,7 +39,7 @@ class ImmutableVoteLedger:
     def _compute_hash(
         self,
         tenant_id: str,
-        prev_hash: Optional[str],
+        prev_hash: str | None,
         fact_id: int,
         agent_id: str,
         vote: str,
@@ -66,7 +66,7 @@ class ImmutableVoteLedger:
         vote: str,
         tenant_id: str,
         vote_weight: float = 1.0,
-        signature: Optional[str] = None,
+        signature: str | None = None,
     ) -> str:
         """
         Añade un voto al ledger, calculando el nuevo hash encadenado.
@@ -150,7 +150,7 @@ class ImmutableVoteLedger:
 
         return True
 
-    async def get_merkle_root(self, tenant_id: str) -> Optional[str]:
+    async def get_merkle_root(self, tenant_id: str) -> str | None:
         """Obtiene la última raíz de Merkle capturada para el tenant."""
         cursor = await self.conn.execute(
             "SELECT root_hash FROM vote_merkle_roots WHERE tenant_id = ? ORDER BY id DESC LIMIT 1",

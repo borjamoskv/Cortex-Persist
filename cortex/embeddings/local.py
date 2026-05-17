@@ -64,7 +64,7 @@ class LocalEmbedder:
     _model_name: str | None = None
     _using_fallback = False
 
-    def __init__(self, model_name: Optional[str] = None, device: Optional[str] = None) -> None:
+    def __init__(self, model_name: str | None = None, device: str | None = None) -> None:
         self._model_name_override = model_name
         self._device = device or _resolve_device()
 

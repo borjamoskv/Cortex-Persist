@@ -74,7 +74,7 @@ class ZenonDetector:
 
         self.history: list[CognitiveIteration] = []
 
-    def absorb_iteration(self, iteration: CognitiveIteration) -> Optional[ZenoExhaustionException]:
+    def absorb_iteration(self, iteration: CognitiveIteration) -> ZenoExhaustionException | None:
         """
         Absorbe la iteración de cálculo algorítmico y comprueba si hemos topado
         con el Muro Asintótico de Kleene-Zenon.

@@ -17,16 +17,13 @@ try:
 except ImportError as e:
     logging.error("Startup Failure: Dependency missing: %s", e)
 
-DB_PATH = (
-    "/Users/borjafernandezangulo/Cortex-Persist/cortex-core/cortex_memory_vsa.db"
-)
+DB_PATH = "/Users/borjafernandezangulo/Cortex-Persist/cortex-core/cortex_memory_vsa.db"
 WATCH_DIR = "/Users/borjafernandezangulo/.gemini/antigravity/knowledge"
 SWARM_QUEUE_FILE = "/tmp/cortex_swarm_queue.json"
 EXECUTION_LEDGER = "/tmp/cortex_execution_ledger.json"
 
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] CORTEX-DAEMON: %(message)s"
+    level=logging.INFO, format="%(asctime)s [%(levelname)s] CORTEX-DAEMON: %(message)s"
 )
 
 
@@ -38,7 +35,7 @@ class CortexDaemon:
         self.cycle_count = 0
         self.knowledge_observer = None
         self.bus = None
-        
+
         # Initialize SignalBus (V4 Pulse)
         try:
             conn = sqlite3.connect(DB_PATH, check_same_thread=False)
@@ -49,7 +46,7 @@ class CortexDaemon:
         # SAGE COUNCIL Missions (V5)
         self.mission_targets = [
             "https://github.com/LayerZero-Labs/LayerZero",
-            "https://github.com/Uniswap/v4-core"
+            "https://github.com/Uniswap/v4-core",
         ]
 
     def ensure_hygiene(self):
@@ -88,54 +85,60 @@ class CortexDaemon:
         agent = task.get("agent", "unknown")
         cmd = task.get("command")
         if not cmd:
-             logging.warning("Skipping Task (No Command) for %s", agent)
-             return
+            logging.warning("Skipping Task (No Command) for %s", agent)
+            return
 
         logging.info("🚀 [SWARM EXEC] Dispatching: %s for %s", cmd, agent)
-        
+
         # Emit V4 Pulse: Dispatch
         if self.bus:
-            self.bus.emit("swarm_task", {
-                "agent": agent, 
-                "command": cmd, 
-                "status": "dispatched"
-            }, source="daemon")
+            self.bus.emit(
+                "swarm_task",
+                {"agent": agent, "command": cmd, "status": "dispatched"},
+                source="daemon",
+            )
 
         try:
             process = await asyncio.create_subprocess_shell(
-                cmd,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE
+                cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
             )
             stdout, stderr = await process.communicate()
-            
+
             result = {
                 "timestamp": time.time(),
                 "agent": agent,
                 "command": cmd,
                 "exit_code": process.returncode,
-                "stdout": stdout.decode()[-1000:], # Last 1k to avoid bloat
-                "stderr": stderr.decode()[-1000:]
+                "stdout": stdout.decode()[-1000:],  # Last 1k to avoid bloat
+                "stderr": stderr.decode()[-1000:],
             }
 
             # Emit V4 Pulse: Completion
             if self.bus:
-                self.bus.emit("swarm_task_complete", {
-                    "agent": agent,
-                    "exit_code": process.returncode,
-                    "status": "success" if process.returncode == 0 else "failed"
-                }, source="daemon")
-            
+                self.bus.emit(
+                    "swarm_task_complete",
+                    {
+                        "agent": agent,
+                        "exit_code": process.returncode,
+                        "status": "success" if process.returncode == 0 else "failed",
+                    },
+                    source="daemon",
+                )
+
             # 3. Handle Post-Execution (Self-Healing Detection)
             if task.get("type") == "remediation":
                 if process.returncode == 0:
                     logging.info("🌟 [SELF-HEALING] Success! Vulnerability neutralized.")
                     if self.bus:
-                        self.bus.emit("critical_finding_resolved", {
-                            "agent": agent,
-                            "msg": "VULN_NEUTRALIZED",
-                            "val": "Autonomous patch verified via Foundry"
-                        }, source="daemon")
+                        self.bus.emit(
+                            "critical_finding_resolved",
+                            {
+                                "agent": agent,
+                                "msg": "VULN_NEUTRALIZED",
+                                "val": "Autonomous patch verified via Foundry",
+                            },
+                            source="daemon",
+                        )
                 else:
                     logging.error("❌ [SELF-HEALING] Failure. Manual intervention required.")
 
@@ -150,18 +153,18 @@ class CortexDaemon:
         """Appends task result to the persistent execution ledger."""
         ledger = []
         if os.path.exists(EXECUTION_LEDGER):
-             try:
-                 with open(EXECUTION_LEDGER) as f:
-                     ledger = json.load(f)
-             except Exception:
-                 ledger = []
-        
+            try:
+                with open(EXECUTION_LEDGER) as f:
+                    ledger = json.load(f)
+            except Exception:
+                ledger = []
+
         ledger.append(result)
         # Keep last 100 entries to maintain O(1) performance
         ledger = ledger[-100:]
-        
+
         with open(EXECUTION_LEDGER, "w") as f:
-             json.dump(ledger, f, indent=2)
+            json.dump(ledger, f, indent=2)
 
     async def process_swarm_queue(self):
         """Consumes the Swarm Task Queue and executes autonomous work."""
@@ -179,11 +182,11 @@ class CortexDaemon:
             logging.info("🐝 Swarm Pulse: Processing %d tasks...", len(tasks))
             # Process tasks concurrently
             await asyncio.gather(*(self._execute_task(t) for t in tasks))
-                
+
             # Clear queue after processing
             with open(SWARM_QUEUE_FILE, "w") as f:
                 json.dump({"pending_tasks": []}, f)
-                
+
             logging.info("✅ Swarm Pulse: Cycle complete.")
         except Exception as e:
             logging.error("Swarm Dispatch Failure: %s", e)
@@ -191,9 +194,9 @@ class CortexDaemon:
     def check_memory_integrity(self):
         """Validates that the VSA memory substrate is synchronous."""
         if not os.path.exists(DB_PATH):
-             logging.warning("⚠️ Memory Substrate Missing at %s", DB_PATH)
-             return
-        
+            logging.warning("⚠️ Memory Substrate Missing at %s", DB_PATH)
+            return
+
         try:
             conn = sqlite3.connect(DB_PATH)
             cursor = conn.cursor()
@@ -209,13 +212,17 @@ class CortexDaemon:
         """Invoke SAGE COUNCIL decision engine."""
         logging.info("🧠 [SAGE COUNCIL] Deliberating next mission...")
         target = self.mission_targets[self.cycle_count % len(self.mission_targets)]
-        
+
         if self.bus:
-            self.bus.emit("swarm_task", {
-                "agent": "SAGE_COUNCIL",
-                "command": f"audit --target {target}",
-                "status": "deliberating"
-            }, source="daemon")
+            self.bus.emit(
+                "swarm_task",
+                {
+                    "agent": "SAGE_COUNCIL",
+                    "command": f"audit --target {target}",
+                    "status": "deliberating",
+                },
+                source="daemon",
+            )
 
         cmd = f"python3 /Users/borjafernandezangulo/Cortex-Persist/cortex-core/ouroboros_engine.py --target {target}"
         self._queue_task("SAGE_COUNCIL", cmd)
@@ -227,14 +234,16 @@ class CortexDaemon:
             if os.path.exists(SWARM_QUEUE_FILE):
                 with open(SWARM_QUEUE_FILE) as f:
                     queue = json.load(f)
-            
-            queue["pending_tasks"].append({
-                "id": f"council_{int(time.time())}",
-                "agent": agent,
-                "command": cmd,
-                "timestamp": time.time()
-            })
-            
+
+            queue["pending_tasks"].append(
+                {
+                    "id": f"council_{int(time.time())}",
+                    "agent": agent,
+                    "command": cmd,
+                    "timestamp": time.time(),
+                }
+            )
+
             with open(SWARM_QUEUE_FILE, "w") as f:
                 json.dump(queue, f, indent=2)
             logging.info("📌 [COUNCIL] Mission queued: %s", cmd)
@@ -244,28 +253,31 @@ class CortexDaemon:
     async def _run_self_audit(self):
         """Invoke Mirror Protocol to audit own source code (Ω₄)."""
         logging.info("👁️ [MIRROR] Starting Self-Audit...")
-        
+
         # Path to self
         self_path = "/Users/borjafernandezangulo/Cortex-Persist/cortex-core/cortex_daemon.py"
         cmd = f"python3 /Users/borjafernandezangulo/Cortex-Persist/cortex-core/mirror_audit.py {self_path}"
-        
+
         process = await asyncio.create_subprocess_shell(
-            cmd,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE
+            cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
         )
         stdout, _ = await process.communicate()
-        
+
         try:
             report = json.loads(stdout.decode())
             if report["status"] == "UNSTABLE":
-                logging.warning("⚠️ [MIRROR] Self-Optimization Required (Score: %d)", report["exergy_score"])
+                logging.warning(
+                    "⚠️ [MIRROR] Self-Optimization Required (Score: %d)", report["exergy_score"]
+                )
                 # Queue Remediation
                 error_log = "/tmp/mirror_findings.json"
                 with open(error_log, "w") as f:
                     json.dump(report, f)
-                
-                self._queue_task("OPTIMIZER", f"python3 /Users/borjafernandezangulo/Cortex-Persist/cortex-core/remediator.py {self_path} {error_log}")
+
+                self._queue_task(
+                    "OPTIMIZER",
+                    f"python3 /Users/borjafernandezangulo/Cortex-Persist/cortex-core/remediator.py {self_path} {error_log}",
+                )
             else:
                 logging.info("✅ [MIRROR] Self-Audit Optimal (Score: %d)", report["exergy_score"])
         except Exception as e:
@@ -274,7 +286,7 @@ class CortexDaemon:
     async def run(self):
         """Main Autopoiesis Loop."""
         logging.info("👁️  CORTEX Daemon Active: V5 Sovereign Ontogeny.")
-        
+
         try:
             run_compiler()
             logging.info("🛠️ [JIT] Skills synchronized.")
@@ -285,19 +297,19 @@ class CortexDaemon:
 
         while self.is_running:
             self.cycle_count += 1
-            
+
             # 1. Hygiene & Memory
             self.ensure_hygiene()
             self.check_memory_integrity()
-            
+
             # 2. SAGE COUNCIL (Every 100 cycles)
             if self.cycle_count % 100 == 0:
                 await self._run_council_deliberation()
-            
+
             # 2.5 MIRROR PROTOCOL (Every 250 cycles)
             if self.cycle_count % 250 == 0:
                 await self._run_self_audit()
-                
+
             # 3. Swarm Execution
             await self.process_swarm_queue()
 

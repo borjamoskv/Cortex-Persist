@@ -2,8 +2,10 @@
 CORTEX JIT Compiled Skill: L1-Hodge-Omega
 Description: Sovereign Algebraic Geometry Engine — Clúster especializado en la minería de ciclos algebraicos y validación topológica de variedades proyectivas complejas para atacar la Conjetura de Hodge.
 """
+
 import json
 import logging
+
 
 class L1HodgeOmegaSkill:
     def __init__(self):
@@ -27,5 +29,5 @@ class L1HodgeOmegaSkill:
             "skill": self.name,
             "injected_knowledge_tokens": len(self.instructions.split()),
             "yield_impact": "O(1) Execution",
-            "extracted_payload": payload
+            "extracted_payload": payload,
         }

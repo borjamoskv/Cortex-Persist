@@ -17,8 +17,8 @@ class MacControlOmega:
         self.host = host
         self.port = port
         self.base_url = f"http://{host}:{port}"
-        self.ws_url: Optional[str] = None
-        self.ws: Optional[websockets.WebSocketClientProtocol] = None
+        self.ws_url: str | None = None
+        self.ws: websockets.WebSocketClientProtocol | None = None
         self.msg_id = 0
 
     async def connect(self, target_url_substring: str = "") -> bool:
@@ -67,13 +67,13 @@ class MacControlOmega:
                     logger.error("CDP Error in %s: %s", method, res["error"])
                 return res.get("result", {})
 
-    async def extract_selector(self, selector: str, extract_html: bool = False) -> Optional[str]:
+    async def extract_selector(self, selector: str, extract_html: bool = False) -> str | None:
         """Extract text or HTML content from a CSS selector."""
         prop = "outerHTML" if extract_html else "innerText"
         js = f"document.querySelector('{selector}').{prop}"
         return await self.evaluate(js)
 
-    async def extract_page(self, extract_html: bool = False) -> Optional[str]:
+    async def extract_page(self, extract_html: bool = False) -> str | None:
         """Extract entire page text or HTML."""
         prop = "outerHTML" if extract_html else "innerText"
         js = f"document.documentElement.{prop}"

@@ -7,6 +7,7 @@ from cortex.crypto.keyring import get_master_key
 DB_PATH = os.path.expanduser("~/.cortex/cortex.db")
 TEST_KEY = base64.b64decode("MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA=")
 
+
 def audit():
     if not os.path.exists(DB_PATH):
         print(f"DB not found at {DB_PATH}")
@@ -24,9 +25,10 @@ def audit():
     rows = cursor.fetchall()
 
     import re
+
     for fid, content, tenant_id in rows:
         decrypted = None
-        
+
         # Try Prod Key
         try:
             decrypted = encrypter_prod.decrypt_str(content, tenant_id=tenant_id)
@@ -44,7 +46,7 @@ def audit():
             for name in names:
                 if re.search(rf"\b{name}\b", decrypted, re.IGNORECASE):
                     found_names.append(name)
-            
+
             if found_names:
                 found_facts.append((fid, decrypted, found_names))
 
@@ -57,6 +59,7 @@ def audit():
             print("-" * 40)
 
     conn.close()
+
 
 if __name__ == "__main__":
     audit()

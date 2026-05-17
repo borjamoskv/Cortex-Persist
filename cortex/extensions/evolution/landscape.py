@@ -79,7 +79,7 @@ class FitnessLandscape:
     """
 
     def __init__(self) -> None:
-        self._cache: Optional[LandscapeState] = None
+        self._cache: LandscapeState | None = None
         self._last_ceiling: float = _BASE_CEILING
 
     def compute(self) -> LandscapeState:

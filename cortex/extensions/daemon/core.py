@@ -125,7 +125,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
 
     def __init__(
         self,
-        sites: Optional[list[str]] = None,
+        sites: list[str] | None = None,
         config_dir: Path = AGENT_DIR / "memory",
         stale_hours: float = DEFAULT_STALE_HOURS,
         memory_stale_hours: float = DEFAULT_MEMORY_STALE_HOURS,
@@ -255,7 +255,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
     def _init_sovereign_subsystems(self, file_config: dict) -> None:
         """Initialize the v2.0 sovereign async subsystems."""
         # 1. Hot State — SQLite-backed KV store
-        self.hot_state: Optional[HotStateDB] = None
+        self.hot_state: HotStateDB | None = None
         if _HOT_STATE_AVAILABLE:
             try:
                 self.hot_state = HotStateDB()
@@ -274,7 +274,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
             pass
 
         # 3. Scheduler — cron/interval task execution
-        self.scheduler: Optional[SovereignScheduler] = None
+        self.scheduler: SovereignScheduler | None = None
         if _SCHEDULER_AVAILABLE:
             try:
                 self.scheduler = SovereignScheduler(
@@ -287,7 +287,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
                 logger.warning("Failed to init SovereignScheduler: %s", e)
 
         # 4. Watchdog Hub — unified filesystem monitor
-        self.watchdog_hub: Optional[WatchdogHub] = None
+        self.watchdog_hub: WatchdogHub | None = None
         if _WATCHDOG_HUB_AVAILABLE:
             try:
                 watch_paths = file_config.get(
@@ -309,7 +309,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
                 logger.warning("Failed to init WatchdogHub: %s", e)
 
         # 5. Human Callback API — REST + WebSocket sidecar
-        self.callback_api: Optional[HumanCallbackAPI] = None
+        self.callback_api: HumanCallbackAPI | None = None
         if _API_AVAILABLE and file_config.get("api_enabled", True):
             try:
                 self.callback_api = HumanCallbackAPI(
@@ -650,7 +650,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
             logger.error("Failed to save status: %s", e)
 
     @staticmethod
-    def load_status() -> Optional[dict]:
+    def load_status() -> dict | None:
         """Load last daemon status from disk."""
         if not STATUS_FILE.exists():
             return None

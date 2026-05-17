@@ -93,7 +93,7 @@ class ValidationBoundaryError(CortexError):
     Carries structured error info for automated retry/correction loops.
     """
 
-    def __init__(self, message: str, validation_errors: Optional[list[dict]] = None):
+    def __init__(self, message: str, validation_errors: list[dict] | None = None):
         super().__init__(message)
         self.validation_errors = validation_errors or []
 

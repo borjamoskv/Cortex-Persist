@@ -2,6 +2,7 @@ import asyncio
 import aiosqlite
 import os
 
+
 async def test():
     db_path = "scratch/test_async.db"
     if os.path.exists(db_path):
@@ -15,6 +16,7 @@ async def test():
         print("Success")
     except Exception as e:
         print(f"Error: {e}")
+
 
 if __name__ == "__main__":
     asyncio.run(test())

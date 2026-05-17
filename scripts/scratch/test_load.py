@@ -6,7 +6,7 @@ modules = _discover_command_modules()
 for m in modules:
     print(f"Importing {m}...", flush=True)
     try:
-        importlib.import_module(f'cortex.cli.{m}')
+        importlib.import_module(f"cortex.cli.{m}")
         print(f"Done {m}", flush=True)
     except Exception as e:
         print(f"Failed {m}: {e}", flush=True)

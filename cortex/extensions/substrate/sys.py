@@ -77,7 +77,7 @@ def get_python_executable() -> str:
     return sys.executable
 
 
-def get_service_dir() -> Optional[Path]:
+def get_service_dir() -> Path | None:
     """Return the platform-specific user service directory.
 
     - macOS: ``~/Library/LaunchAgents``

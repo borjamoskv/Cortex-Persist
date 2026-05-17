@@ -57,7 +57,7 @@ async def compaction_job(ctx: Any = None) -> None:
         LOGGER.exception("Compaction job failed: %s", exc)
 
 
-async def shutdown(sig, loop, monitor: Optional[MemoryPressureMonitor] = None):
+async def shutdown(sig, loop, monitor: MemoryPressureMonitor | None = None):
     """Cleanup tasks on termination signals."""
     LOGGER.info("Received exit signal %s...", sig.name)
     if monitor:

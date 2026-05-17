@@ -112,8 +112,8 @@ class Heartbeat:
     project: str
     entity: str
     category: str
-    branch: Optional[str]
-    language: Optional[str]
+    branch: str | None
+    language: str | None
     timestamp: str
     meta: dict
 

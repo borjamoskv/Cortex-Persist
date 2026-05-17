@@ -52,21 +52,15 @@ def _generate_observations(
         clique_lie = clique_lies.get(prop.key) if node.clique_id else None
 
         if prop.belief_type == BeliefType.BOOLEAN:
-            val, conf = generate_observation_boolean(
-                prop.ground_truth, node, clique_lie
-            )
+            val, conf = generate_observation_boolean(prop.ground_truth, node, clique_lie)
         elif prop.belief_type == BeliefType.CATEGORICAL:
             val, conf = generate_observation_categorical(
                 prop.ground_truth, prop.categories, node, clique_lie
             )
         elif prop.belief_type == BeliefType.SCALAR:
-            val, conf = generate_observation_scalar(
-                prop.ground_truth, node
-            )
+            val, conf = generate_observation_scalar(prop.ground_truth, node)
         elif prop.belief_type == BeliefType.SET:
-            val, conf = generate_observation_set(
-                prop.ground_truth, node, prop.set_universe or None
-            )
+            val, conf = generate_observation_set(prop.ground_truth, node, prop.set_universe or None)
         else:
             val, conf = prop.ground_truth, 0.5
 
@@ -81,9 +75,7 @@ def _pre_generate_clique_lies(
 ) -> dict[str, Any]:
     """Pre-generate coordinated lies for clique nodes."""
     clique_lies: dict[str, Any] = {}
-    has_clique = any(
-        n.adversary_type == AdversaryType.COORDINATED_CLIQUE for n in nodes
-    )
+    has_clique = any(n.adversary_type == AdversaryType.COORDINATED_CLIQUE for n in nodes)
     if not has_clique:
         return clique_lies
 
@@ -174,7 +166,9 @@ def run_single(
                 resolve_crdt_only(state, obs, t)
             elif strategy == StrategyID.CORTEX:
                 resolve_cortex(
-                    state, obs, t,
+                    state,
+                    obs,
+                    t,
                     atms=atms,
                     use_reliability=use_reliability,
                     use_atms=use_atms,
@@ -301,9 +295,7 @@ def print_summary(results: dict[str, list[MetricsReport]]) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="ENCB v2 — Epistemic Noise Chaos Benchmark"
-    )
+    parser = argparse.ArgumentParser(description="ENCB v2 — Epistemic Noise Chaos Benchmark")
     parser.add_argument("--n-agents", type=int, default=200)
     parser.add_argument("--n-props", type=int, default=1000)
     parser.add_argument("--n-domains", type=int, default=8)

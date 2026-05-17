@@ -39,8 +39,8 @@ class CortexConnectionPool:
     def __init__(
         self,
         db_path: str,
-        min_connections: Optional[int] = None,
-        max_connections: Optional[int] = None,
+        min_connections: int | None = None,
+        max_connections: int | None = None,
         max_idle_time: float = 300.0,
         read_only: bool = True,
     ):
@@ -105,7 +105,7 @@ class CortexConnectionPool:
 
         # Enforce max concurrency
         await self._semaphore.acquire()
-        conn: Optional[aiosqlite.Connection] = None
+        conn: aiosqlite.Connection | None = None
 
         try:
             # 1. Get or create connection

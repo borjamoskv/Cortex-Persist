@@ -290,7 +290,7 @@ class CortexLLMRouter:
         return await self.execute_resilient(prompt)
 
     async def route(
-        self, prompt: CortexPrompt, provider_hint: Optional[str] = None
+        self, prompt: CortexPrompt, provider_hint: str | None = None
     ) -> Result[str, str]:
         """Dispatch a prompt with optional provider override (hint) and Dynamic Cache Routing.
 

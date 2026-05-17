@@ -57,7 +57,7 @@ class ScrapeResponseItem(BaseModel):
     strategy_used: str
     elapsed_ms: float
     status: str
-    error: Optional[str] = None
+    error: str | None = None
 
 
 # ── Endpoints ────────────────────────────────────────────────────────

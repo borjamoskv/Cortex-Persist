@@ -10,11 +10,12 @@ import aiohttp
 
 PLATFORMS = {
     "immunefi": "https://api.immunefi.com/v1/explore",  # Mock/Placeholder
-    "openai": "https://openai.com/api/v1/safety-bounty", # Mock/Placeholder
-    "hackerone": "https://api.hackerone.com/v1/bounties" # Mock/Placeholder
+    "openai": "https://openai.com/api/v1/safety-bounty",  # Mock/Placeholder
+    "hackerone": "https://api.hackerone.com/v1/bounties",  # Mock/Placeholder
 }
 
 MIN_PAYOUT = 100000
+
 
 async def scan_immunefi(session):
     # Simulated Immunefi Scan — Focus on Premium & TVL-Based Bounties
@@ -22,15 +23,22 @@ async def scan_immunefi(session):
     # REAL LOGIC would fetch from Immunefi's RSS/API
     return [
         {"name": "Lido Finance", "max_payout": 2000000, "status": "premium", "vector": "Web3"},
-        {"name": "MakerDAO", "max_payout": 10000000, "status": "premium", "vector": "Web3"}
+        {"name": "MakerDAO", "max_payout": 10000000, "status": "premium", "vector": "Web3"},
     ]
+
 
 async def scan_openai(session):
     print("[HUNT] Scanning OpenAI Safety Bug Bounty...")
     # REAL LOGIC would parse OpenAI's blog/Bugcrowd entries
     return [
-        {"name": "Agentic Guard-Breach", "max_payout": 100000, "status": "active", "vector": "AI Safety"}
+        {
+            "name": "Agentic Guard-Breach",
+            "max_payout": 100000,
+            "status": "active",
+            "vector": "AI Safety",
+        }
     ]
+
 
 async def hunter_loop():
     while True:
@@ -40,10 +48,7 @@ async def hunter_loop():
             top_targets = []
 
             # Run scans in parallel
-            results = await asyncio.gather(
-                scan_immunefi(session),
-                scan_openai(session)
-            )
+            results = await asyncio.gather(scan_immunefi(session), scan_openai(session))
 
             for res in results:
                 for target in res:
@@ -54,10 +59,13 @@ async def hunter_loop():
             with open("bounty_hunt/hunt_ledger.json", "w") as f:
                 json.dump(top_targets, f, indent=4)
 
-            print(f"[HUNT] Found {len(top_targets)} current 6-figure targets. Logged to hunt_ledger.json.")
+            print(
+                f"[HUNT] Found {len(top_targets)} current 6-figure targets. Logged to hunt_ledger.json."
+            )
 
             # Yield for 1 hour
             await asyncio.sleep(3600)
+
 
 if __name__ == "__main__":
     try:

@@ -58,7 +58,7 @@ class SAPSync:
         entity_set: str,
         project: str,
         *,
-        filters: Optional[str] = None,
+        filters: str | None = None,
         top: int = 100,
     ) -> SAPSyncResult:
         """Pull entities from SAP into CORTEX.
@@ -188,7 +188,7 @@ class SAPSync:
         project: str,
         *,
         conflict_strategy: str = "sap_wins",
-        filters: Optional[str] = None,
+        filters: str | None = None,
         top: int = 100,
     ) -> SAPSyncResult:
         """Full bidirectional sync.

@@ -74,7 +74,7 @@ class ImmuneBoundary:
     @staticmethod
     async def enforce(
         schema: type[T],
-        generation_func: Callable[[Optional[str]], Awaitable[str]],
+        generation_func: Callable[[str | None], Awaitable[str]],
         max_retries: int = 3,
     ) -> T:
         """Fuerza a que el resultado de `generation_func` cumpla el `schema`.
@@ -91,8 +91,8 @@ class ImmuneBoundary:
         Raises:
             CortexError: Si falla la validación después de `max_retries`.
         """
-        last_error_msg: Optional[str] = None
-        last_exception: Optional[Exception] = None
+        last_error_msg: str | None = None
+        last_exception: Exception | None = None
 
         import inspect
 

@@ -20,10 +20,10 @@ try:
     )
 
     from .models import ActionFailed
+
     QUARTZ_AVAILABLE = True
 except ImportError:
     QUARTZ_AVAILABLE = False
-
 
 
 def click_at(x: float, y: float) -> None:
@@ -33,10 +33,16 @@ def click_at(x: float, y: float) -> None:
 
     point = CGPointMake(x, y)
     down = CGEventCreateMouseEvent(
-        None, kCGEventLeftMouseDown, point, kCGMouseButtonLeft,
+        None,
+        kCGEventLeftMouseDown,
+        point,
+        kCGMouseButtonLeft,
     )
     up = CGEventCreateMouseEvent(
-        None, kCGEventLeftMouseUp, point, kCGMouseButtonLeft,
+        None,
+        kCGEventLeftMouseUp,
+        point,
+        kCGMouseButtonLeft,
     )
     CGEventPost(kCGHIDEventTap, down)
     time.sleep(0.05)
@@ -44,7 +50,10 @@ def click_at(x: float, y: float) -> None:
 
 
 def drag_to(
-    x1: float, y1: float, x2: float, y2: float,
+    x1: float,
+    y1: float,
+    x2: float,
+    y2: float,
     steps: int = 20,
 ) -> None:
     """Drag from (x1,y1) to (x2,y2)."""
@@ -53,7 +62,10 @@ def drag_to(
 
     start = CGPointMake(x1, y1)
     down = CGEventCreateMouseEvent(
-        None, kCGEventLeftMouseDown, start, kCGMouseButtonLeft,
+        None,
+        kCGEventLeftMouseDown,
+        start,
+        kCGMouseButtonLeft,
     )
     CGEventPost(kCGHIDEventTap, down)
     time.sleep(0.05)
@@ -64,13 +76,19 @@ def drag_to(
         cy = y1 + (y2 - y1) * frac
         pt = CGPointMake(cx, cy)
         move = CGEventCreateMouseEvent(
-            None, kCGEventLeftMouseDragged, pt, kCGMouseButtonLeft,
+            None,
+            kCGEventLeftMouseDragged,
+            pt,
+            kCGMouseButtonLeft,
         )
         CGEventPost(kCGHIDEventTap, move)
         time.sleep(0.01)
 
     end = CGPointMake(x2, y2)
     up = CGEventCreateMouseEvent(
-        None, kCGEventLeftMouseUp, end, kCGMouseButtonLeft,
+        None,
+        kCGEventLeftMouseUp,
+        end,
+        kCGMouseButtonLeft,
     )
     CGEventPost(kCGHIDEventTap, up)

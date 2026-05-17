@@ -19,6 +19,7 @@ def generate_and_store_master_key():
 
     return _generate_and_store_master_key()
 
+
 __all__ = [
     "Vault",
     "get_master_key",

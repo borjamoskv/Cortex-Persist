@@ -24,10 +24,13 @@ data_json = f'{{"apiKey":"{api_key}", "testStatus":"active"}}'
 now = datetime.now().isoformat() + "Z"
 
 try:
-    cursor.execute("""
+    cursor.execute(
+        """
         INSERT INTO providerConnections (id, provider, authType, name, email, priority, isActive, data, createdAt, updatedAt)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, (id, provider, auth_type, name, email, priority, is_active, data_json, now, now))
+    """,
+        (id, provider, auth_type, name, email, priority, is_active, data_json, now, now),
+    )
     conn.commit()
     print(f"Successfully added OpenAI provider with ID: {id}")
 except Exception as e:

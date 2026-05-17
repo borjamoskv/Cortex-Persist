@@ -106,7 +106,7 @@ class EmbeddingManager:
     async def embed_multimodal(
         self,
         parts: list[dict[str, Any]],
-        task_type: Optional[str] = None,
+        task_type: str | None = None,
     ) -> list[float]:
         """Generate multimodal embedding (gemini-v2 only).
 
@@ -137,7 +137,7 @@ class EmbeddingManager:
         self,
         image_bytes: bytes,
         mime_type: str = "image/png",
-        task_type: Optional[str] = None,
+        task_type: str | None = None,
     ) -> list[float]:
         """Embed a single image (gemini-v2 only)."""
         if self.mode != "api":

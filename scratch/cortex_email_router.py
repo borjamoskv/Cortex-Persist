@@ -11,7 +11,7 @@ except ImportError:
 
 # [REQUIRES C5-REAL TOKENS]
 resend.api_key = os.environ.get("RESEND_API_KEY")
-os.environ["GEMINI_API_KEY"] = os.environ.get("GEMINI_API_KEY", "") # Necesario para litellm
+os.environ["GEMINI_API_KEY"] = os.environ.get("GEMINI_API_KEY", "")  # Necesario para litellm
 
 if not resend.api_key:
     print("[CORTEX] FATAL: RESEND_API_KEY no encontrada. Aborting C5-REAL dispatch.")
@@ -21,7 +21,7 @@ DB_PATH = "/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/engine/
 FROM_EMAIL = "nexus@cortexpersist.com"
 
 # ─────────────────────────────────────────────────────────
-# BASE ZERO-NOISE PAYLOAD 
+# BASE ZERO-NOISE PAYLOAD
 # ─────────────────────────────────────────────────────────
 SUBJECT_BASE = "CORTEX-Persist: O(1) Sovereign Execution vs Architectural Entropy"
 
@@ -43,9 +43,10 @@ HTML_BASE = """
 </div>
 """
 
+
 def localize_payload(email: str, base_html: str) -> tuple[str, str]:
     """Uses LLM to deduce language from email (TLD, name) and translates the payload and subject."""
-    
+
     prompt = f"""
     You are an apex translation module.
     Recipient Email: {email}
@@ -59,51 +60,56 @@ def localize_payload(email: str, base_html: str) -> tuple[str, str]:
     Subject to translate: {SUBJECT_BASE}
     HTML to translate: {base_html}
     """
-    
+
     print(f"[*] Inferring and translating for {email}...")
     try:
         response = litellm.completion(
             model="gemini/gemini-2.5-flash",
             messages=[{"role": "user", "content": prompt}],
-            response_format={ "type": "json_object" },
-            temperature=0.1
+            response_format={"type": "json_object"},
+            temperature=0.1,
         )
         import json
+
         result = json.loads(response.choices[0].message.content)
         return result.get("subject", SUBJECT_BASE), result.get("html", base_html)
     except Exception as e:
         print(f"[!] Translation failed for {email}, defaulting to English. Err: {e}")
         return SUBJECT_BASE, base_html
 
+
 def execute_dispatch():
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-    
+
     # Extraemos leads Top Tier
     cursor.execute("SELECT email FROM leads_target WHERE exergy_score >= 0.9 LIMIT 15;")
     targets = cursor.fetchall()
-    
+
     print(f"[CORTEX] Initiating Dynamic Translation Strike on {len(targets)} high-exergy nodes...")
 
     for row in targets:
         target_email = row[0]
-        
+
         # 1. Adaptación dinámica (LLM JIT)
         localized_subject, localized_html = localize_payload(target_email, HTML_BASE)
-        
+
         # 2. Envío de impacto
         try:
-            r = resend.Emails.send({
-                "from": f"CORTEX Nexus <{FROM_EMAIL}>",
-                "to": target_email,
-                "subject": localized_subject,
-                "html": localized_html
-            })
+            r = resend.Emails.send(
+                {
+                    "from": f"CORTEX Nexus <{FROM_EMAIL}>",
+                    "to": target_email,
+                    "subject": localized_subject,
+                    "html": localized_html,
+                }
+            )
             print(f"[SUCCESS] Dispatched Native Payload to -> {target_email} | ID: {r.get('id')}")
         except Exception as e:
             print(f"[FAILED] {target_email} -> {e}")
 
     conn.close()
+
 
 if __name__ == "__main__":
     execute_dispatch()

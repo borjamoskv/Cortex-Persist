@@ -81,9 +81,9 @@ class ToolboxBridge:
     Centralizes connectivity to external database toolboxes for ADK agents.
     """
 
-    def __init__(self, config: Optional[ToolboxConfig] = None) -> None:
+    def __init__(self, config: ToolboxConfig | None = None) -> None:
         self.config = config or ToolboxConfig.from_env()
-        self._client: Optional[Any] = None
+        self._client: Any | None = None
         self._tools: list[Any] = []
 
     @property
@@ -169,7 +169,7 @@ class ToolboxBridge:
 
 
 async def create_toolbox_bridge(
-    server_url: Optional[str] = None,
+    server_url: str | None = None,
     toolset: str = "",
 ) -> ToolboxBridge:
     """Sovereign factory for rapid bridge deployment."""

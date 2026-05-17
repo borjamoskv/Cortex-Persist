@@ -57,7 +57,7 @@ class OuroborosGate:
             "timestamp": datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
         }
 
-    def identify_dead_weight(self) -> Optional[str]:
+    def identify_dead_weight(self) -> str | None:
         """Identifies the project or module with the lowest importance/density ratio."""
         # Analysis of projects with highest error/bridge ratio
         stats = self.conn.execute("""

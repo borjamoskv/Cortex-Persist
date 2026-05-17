@@ -63,7 +63,7 @@ class SovereignContext:
 
     project_root: Path = Path.cwd()
     environment: str = "production"
-    power: Optional[PowerLevel] = None
+    power: PowerLevel | None = None
     results: list[PipelineResult] = field(default_factory=list)
     started_at: float = field(default_factory=time.time)
     endocrine: DigitalEndocrine = field(default_factory=DigitalEndocrine)
@@ -284,7 +284,7 @@ PHASE_EXECUTORS: dict[Phase, Callable] = {
 
 
 async def run_pipeline(
-    project_root: Optional[Path] = None,
+    project_root: Path | None = None,
     environment: str = "production",
 ) -> SovereignContext:
     """Execute the full sovereign pipeline, returning the enriched context."""

@@ -2,8 +2,10 @@
 CORTEX JIT Compiled Skill: Archaeologist-Omega
 Description: Sovereign Temporal Forensics Engine — Git archaeology, conversation mining, decision tracing, and causal timeline reconstruction for the CORTEX ecosystem.
 """
+
 import json
 import logging
+
 
 class ArchaeologistOmegaSkill:
     def __init__(self):
@@ -27,5 +29,5 @@ class ArchaeologistOmegaSkill:
             "skill": self.name,
             "injected_knowledge_tokens": len(self.instructions.split()),
             "yield_impact": "O(1) Execution",
-            "extracted_payload": payload
+            "extracted_payload": payload,
         }

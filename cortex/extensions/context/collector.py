@@ -54,7 +54,7 @@ def _recency_decay(rank: int, total: int) -> float:
     return 1.0 - 0.5 * (rank / (total - 1))
 
 
-def _parse_tx_detail(raw: Optional[str | dict]) -> str:
+def _parse_tx_detail(raw: str | dict | None) -> str:
     """Extract a short summary from a transaction detail field."""
     if not raw:
         return ""
@@ -67,7 +67,7 @@ def _parse_tx_detail(raw: Optional[str | dict]) -> str:
     return ""
 
 
-def _infer_project_from_path(path: Path) -> Optional[str]:
+def _infer_project_from_path(path: Path) -> str | None:
     """Try to infer project name from directory structure."""
     try:
         parts = path.resolve().parts
@@ -97,7 +97,7 @@ class ContextCollector:
         self,
         conn: aiosqlite.Connection,
         max_signals: int = 20,
-        workspace_dir: Optional[str] = None,
+        workspace_dir: str | None = None,
         git_enabled: bool = True,
     ):
         self.conn = conn

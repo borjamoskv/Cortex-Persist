@@ -37,7 +37,7 @@ class DiscoveryProvider:
         "cortex.database.cache",
     ]
 
-    def __init__(self, target_namespaces: Optional[list[str]] = None) -> None:
+    def __init__(self, target_namespaces: list[str] | None = None) -> None:
         self.namespaces = target_namespaces or self.CRITICAL_NAMESPACES
         self._cache: list[tuple[str, Callable, dict[str, Any]]] = []
 
@@ -107,7 +107,7 @@ class DiscoveryProvider:
 
         return surfaces
 
-    def _generate_seed_inputs(self, func: Callable) -> Optional[dict[str, Any]]:
+    def _generate_seed_inputs(self, func: Callable) -> dict[str, Any] | None:
         """
         Intenta generar un diccionario de inputs válidos (seed) basado en type hints.
         Si no hay suficientes datos para una semilla válida, devuelve None.

@@ -176,7 +176,12 @@ class MemoryArchaeologist:
             if not simulate:
                 try:
                     await self._apply_db_updates(
-                        project, tenant_id, condensed_content, cluster_facts, primary_parent_id, l2_conn
+                        project,
+                        tenant_id,
+                        condensed_content,
+                        cluster_facts,
+                        primary_parent_id,
+                        l2_conn,
                     )
                 except (sqlite3.Error, aiosqlite.Error) as e:
                     logger.error("Archaeology DB update failed: %s", e)

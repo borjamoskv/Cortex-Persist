@@ -21,7 +21,7 @@ def run_computation(x, y):
 """
     ctx = {"x": 2.0, "y": 3.0}
     res = await run_jit_sandbox(source_code, global_ctx=ctx)
-    
+
     assert res["status"] == "success"
     assert "result" in res["result"]["locals"]
     # 5 iterations of x (2.0) and 5 iterations of y (3.0) = 10.0 + 15.0 = 25.0
@@ -42,6 +42,6 @@ def run_fallback(x):
 """
     ctx = {"x": 42.0}
     res = await run_jit_sandbox(source_code, timeout_ms=1000, global_ctx=ctx)
-    
+
     assert res["status"] == "success"
     assert "run_fallback" in res["result"]["locals"]

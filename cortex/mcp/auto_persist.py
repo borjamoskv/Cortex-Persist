@@ -162,7 +162,7 @@ class AutoPersistHook:
         )
         return facts
 
-    async def persist(self, facts: Optional[list[SessionFact]] = None) -> list[int]:
+    async def persist(self, facts: list[SessionFact] | None = None) -> list[int]:
         """Persist detected facts to CORTEX. Returns list of stored fact IDs."""
         if facts is None:
             facts = self.analyze()

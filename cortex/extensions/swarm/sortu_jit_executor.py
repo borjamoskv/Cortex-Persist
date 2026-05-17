@@ -99,7 +99,7 @@ def _worker(source_code: str, global_ctx: dict, result_dict: dict):
 
 
 async def run_jit_sandbox(
-    source_code: str, timeout_ms: int = 50, global_ctx: Optional[dict] = None
+    source_code: str, timeout_ms: int = 50, global_ctx: dict | None = None
 ) -> Any:
     """
     Executes Python AST in a 50ms bounded memory-only sandbox.
@@ -112,12 +112,12 @@ async def run_jit_sandbox(
     # 1. Direct-Silicon JIT-Rust Compilation & Execution Try
     try:
         from cortex.extensions.swarm.sortu_rust_compiler import compile_and_run_python_ast
+
         success, rust_res = compile_and_run_python_ast(source_code, ctx)
         if success:
             elapsed = (time.perf_counter() - start_time) * 1000
             logger.info(
-                "⚡ [SORTU-JIT] [RUST-SILICON] Compiled & Executed. "
-                "Yield Time: %.2fms. Output: %s",
+                "⚡ [SORTU-JIT] [RUST-SILICON] Compiled & Executed. Yield Time: %.2fms. Output: %s",
                 elapsed,
                 rust_res,
             )

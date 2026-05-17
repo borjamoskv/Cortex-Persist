@@ -245,7 +245,7 @@ def tip_on_slow(
     threshold: float = _DEFAULT_THRESHOLD,
     interval: float = _DEFAULT_INTERVAL,
     lang: str = _DEFAULT_LANG,
-    label: Optional[str] = None,
+    label: str | None = None,
     use_spinner: bool = False,
 ) -> Callable:
     """Decorator that emits tips if the decorated function exceeds threshold.

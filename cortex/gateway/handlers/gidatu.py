@@ -44,7 +44,7 @@ class GidatuHandler:
         return await asyncio.to_thread(self._sync_handle, action, params, timeout, app)
 
     def _sync_handle(
-        self, action: str, params: dict, timeout: float, app: Optional[str]
+        self, action: str, params: dict, timeout: float, app: str | None
     ) -> dict[str, Any]:
         from ghost_chain import Ghost  # type: ignore[import-not-found, reportMissingImports]
         from ghost_platform import (

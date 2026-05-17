@@ -27,7 +27,7 @@ class AestheticAuditor:
     def __init__(self, router: CortexLLMRouter) -> None:
         self.router = router
 
-    async def _capture_screenshot(self, html_content: str) -> Optional[bytes]:
+    async def _capture_screenshot(self, html_content: str) -> bytes | None:
         """Arranca Playwright headless, inyecta el HTML y retorna snapshot."""
         if not async_playwright:
             logger.warning("Playwright not installed; skipping real vision QA capture.")

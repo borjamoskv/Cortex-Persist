@@ -75,5 +75,5 @@ class ThinkingRecord:
     total_latency_ms: float
     confidence: float
     agreement: float
-    winner: Optional[str] = None
+    winner: str | None = None
     timestamp: float = field(default_factory=time.time)

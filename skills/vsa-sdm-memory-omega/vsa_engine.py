@@ -12,6 +12,7 @@ Usage:
     engine.save("memory.vsa")
     engine.load("memory.vsa")
 """
+
 import hashlib
 import struct
 import time as _time
@@ -70,9 +71,7 @@ class VSAEngine:
         if self.algebra == "MAPB":
             return composite * key  # self-inverse
         # HRR: circular correlation
-        return np.fft.ifft(
-            np.fft.fft(composite) * np.conj(np.fft.fft(key))
-        ).real
+        return np.fft.ifft(np.fft.fft(composite) * np.conj(np.fft.fft(key))).real
 
     def bundle(self, vectors, weights=None):
         """Superimpose multiple vectors with optional weights."""
@@ -115,13 +114,11 @@ class VSAEngine:
         doc = np.zeros(self.D)
         ct = 0
         for i in range(len(text) - n + 1):
-            gram = text[i:i + n]
+            gram = text[i : i + n]
             if all(c in self._char_vecs for c in gram):
                 gv = self._char_vecs[gram[0]]
                 for k in range(1, n):
-                    gv = self.bind(
-                        self.permute(self._char_vecs[gram[k]], k), gv
-                    )
+                    gv = self.bind(self.permute(self._char_vecs[gram[k]], k), gv)
                 doc += gv
                 ct += 1
         return self.normalize(doc) if ct > 0 else doc
@@ -165,7 +162,8 @@ class VSAEngine:
         now = _time.time()
         before = len(self._items)
         self._items = [
-            (k, s, ts, lam) for k, s, ts, lam in self._items
+            (k, s, ts, lam)
+            for k, s, ts, lam in self._items
             if lam == 0 or np.exp(-lam * (now - ts)) >= epsilon
         ]
         self._rebuild_memory()
@@ -175,7 +173,7 @@ class VSAEngine:
     def snr(self):
         """Current signal-to-noise ratio estimate."""
         n = len(self._items)
-        return np.sqrt(self.D / n) if n > 0 else float('inf')
+        return np.sqrt(self.D / n) if n > 0 else float("inf")
 
     @property
     def item_count(self):
@@ -212,8 +210,10 @@ class VSAEngine:
         estimates = [self.normalize(np.sum(cb, axis=0)) for cb in cbs]
 
         for _it in range(max_iter):
-            prev = [int(np.argmax([self.cosine(e, v) for v in cb]))
-                    for e, cb in zip(estimates, cbs, strict=False)]
+            prev = [
+                int(np.argmax([self.cosine(e, v) for v in cb]))
+                for e, cb in zip(estimates, cbs, strict=False)
+            ]
 
             for f in range(n_factors):
                 # Unbind all other estimates
@@ -225,8 +225,10 @@ class VSAEngine:
                 _, best, _ = self.cleanup(signal, codebook_names[f])
                 estimates[f] = cbs[f][best]
 
-            curr = [int(np.argmax([self.cosine(e, v) for v in cb]))
-                    for e, cb in zip(estimates, cbs, strict=False)]
+            curr = [
+                int(np.argmax([self.cosine(e, v) for v in cb]))
+                for e, cb in zip(estimates, cbs, strict=False)
+            ]
             if curr == prev:
                 return [(cbs[f][curr[f]], curr[f]) for f in range(n_factors)]
 
@@ -255,8 +257,8 @@ class VSAEngine:
         d, n = struct.unpack("<II", data[4:12])
         if d != self.D:
             raise ValueError(f"Dimension mismatch: file={d}, engine={self.D}")
-        tensor_data = data[12:12 + d * 8]
-        sha_stored = data[12 + d * 8:12 + d * 8 + 32]
+        tensor_data = data[12 : 12 + d * 8]
+        sha_stored = data[12 + d * 8 : 12 + d * 8 + 32]
         sha_computed = hashlib.sha256(tensor_data).digest()
         if sha_computed != sha_stored:
             raise ValueError("SHA-256 integrity check FAILED")
@@ -276,7 +278,7 @@ class VSAEngine:
         # P[i,j] ∈ {-1, 0, +1} with probs {1/6, 2/3, 1/6}
         proj = proj_rng.choice(
             [-1.0, 0.0, 0.0, 0.0, 1.0],  # approx 1/5, 3/5, 1/5
-            size=(self.D, llm_dim)
+            size=(self.D, llm_dim),
         )
         projected = proj @ embedding
         return self.normalize(projected)
@@ -287,10 +289,7 @@ class VSAEngine:
         Pseudo-inverse via transpose of the same projection matrix.
         """
         proj_rng = np.random.default_rng(seed=llm_dim)
-        proj = proj_rng.choice(
-            [-1.0, 0.0, 0.0, 0.0, 1.0],
-            size=(self.D, llm_dim)
-        )
+        proj = proj_rng.choice([-1.0, 0.0, 0.0, 0.0, 1.0], size=(self.D, llm_dim))
         # Pseudo-inverse projection (P^T @ vsa_vec)
         return self.normalize(proj.T @ vsa_vec)
 

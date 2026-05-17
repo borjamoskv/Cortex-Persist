@@ -32,7 +32,7 @@ class DailyShieldMonitor:
     SCAN_INTERVAL_HOURS: int = 24
 
     def __init__(self) -> None:
-        self._last_scan: Optional[datetime] = None
+        self._last_scan: datetime | None = None
         self._last_report: dict[str, Any] = {}
 
     async def check_async(self) -> list[dict[str, Any]]:
@@ -121,7 +121,7 @@ class DailyShieldMonitor:
 
     # ── Internal Methods ──
 
-    async def _update_feeds(self) -> Optional[dict[str, Any]]:
+    async def _update_feeds(self) -> dict[str, Any] | None:
         """Update threat intelligence feeds."""
         try:
             from cortex.extensions.security.threat_feed import ThreatFeedEngine
@@ -135,7 +135,7 @@ class DailyShieldMonitor:
             logger.error("Threat feed update failed: %s", e)
         return None
 
-    async def _run_audit(self) -> Optional[dict[str, Any]]:
+    async def _run_audit(self) -> dict[str, Any] | None:
         """Run integrity audit."""
         try:
             from cortex.extensions.security.integrity_audit import IntegrityAuditor
@@ -149,7 +149,7 @@ class DailyShieldMonitor:
             logger.error("Integrity audit failed: %s", e)
         return None
 
-    def _get_anomaly_stats(self) -> Optional[dict[str, Any]]:
+    def _get_anomaly_stats(self) -> dict[str, Any] | None:
         """Get anomaly detection statistics."""
         try:
             from cortex.extensions.security.anomaly_detector import DETECTOR

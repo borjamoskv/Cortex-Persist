@@ -3,6 +3,7 @@
 Defines the interface for resolving epistemic chaos, allowing engine-agnostic
 evaluation between CORTEX, Baseline RAG, and an Upper Bound Oracle.
 """
+
 from typing import Any, Protocol, runtime_checkable
 
 from benchmarks.encb_chaos_generator import ChaosEvent

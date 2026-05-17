@@ -14,14 +14,31 @@ logger = logging.getLogger("mac_maestro.workflow")
 
 # ─── Safety Gates ──────────────────────────────────────────────────
 
-SAFE_ACTIONS = frozenset({
-    "inspect", "focus", "read", "open", "copy", "activate", "hide",
-})
+SAFE_ACTIONS = frozenset(
+    {
+        "inspect",
+        "focus",
+        "read",
+        "open",
+        "copy",
+        "activate",
+        "hide",
+    }
+)
 
-UNSAFE_ACTIONS = frozenset({
-    "delete", "send", "overwrite", "move", "close_without_save",
-    "replace", "submit", "bulk_type", "drag_drop_cross_app",
-})
+UNSAFE_ACTIONS = frozenset(
+    {
+        "delete",
+        "send",
+        "overwrite",
+        "move",
+        "close_without_save",
+        "replace",
+        "submit",
+        "bulk_type",
+        "drag_drop_cross_app",
+    }
+)
 
 # ─── Backoff Constants ─────────────────────────────────────────────
 
@@ -36,7 +53,7 @@ _SEMANTIC_KEYS = frozenset({"role", "title", "description", "identifier", "value
 
 def _backoff_sleep(attempt: int) -> float:
     """Exponential backoff with jitter."""
-    delay = min(BACKOFF_BASE * (2 ** attempt), BACKOFF_CAP)
+    delay = min(BACKOFF_BASE * (2**attempt), BACKOFF_CAP)
     jitter = random.uniform(0, BACKOFF_JITTER)  # noqa: S311
     total = delay + jitter
     time.sleep(total)
@@ -89,8 +106,10 @@ class MacMaestroWorkflow:
             self.window_title = get_window_title(self.current_app_pid)
             logger.info(
                 "Target Lock: %s (pid=%d, frontmost=%s, window=%s)",
-                self.bundle_id, self.current_app_pid,
-                self.is_frontmost, self.window_title,
+                self.bundle_id,
+                self.current_app_pid,
+                self.is_frontmost,
+                self.window_title,
             )
         except ActionFailed:
             raise
@@ -127,6 +146,7 @@ class MacMaestroWorkflow:
 
             try:
                 from .app_discovery import get_app_name
+
                 app_name = get_app_name(self.bundle_id)
             except Exception:
                 app_name = self.bundle_id
@@ -146,15 +166,16 @@ class MacMaestroWorkflow:
                 )
                 logger.info(
                     "Element resolved: %s (score=%.2f, reasons=%s)",
-                    match.role, match.score, match.reasons,
+                    match.role,
+                    match.score,
+                    match.reasons,
                 )
                 self._resolved = resolved
                 return resolved
 
             logger.warning(
                 "No element matched query %s in AX tree",
-                {k: v for k, v in action.target_query.items()
-                 if k in _SEMANTIC_KEYS},
+                {k: v for k, v in action.target_query.items() if k in _SEMANTIC_KEYS},
             )
             return None
 
@@ -186,7 +207,9 @@ class MacMaestroWorkflow:
                 if idx > 0:
                     logger.warning(
                         "Attempting fallback %d: %s (Vector %s)",
-                        idx, current_action.name, current_action.vector,
+                        idx,
+                        current_action.name,
+                        current_action.vector,
                     )
                 self._execute_single_action(current_action, apply_safety_gate)
                 return True
@@ -194,12 +217,13 @@ class MacMaestroWorkflow:
                 last_error = e
                 logger.warning(
                     "Action %s (Vector %s) failed: %s",
-                    current_action.name, current_action.vector, e,
+                    current_action.name,
+                    current_action.vector,
+                    e,
                 )
 
         raise ActionFailed(
-            f"All fallback vectors exhausted for {action.name}. "
-            f"Last error: {last_error}"
+            f"All fallback vectors exhausted for {action.name}. Last error: {last_error}"
         )
 
     def run_sequence(
@@ -216,7 +240,10 @@ class MacMaestroWorkflow:
                 results.append(result)
             except (ActionFailed, PermissionError) as e:
                 logger.error(
-                    "Sequence step %d (%s) failed: %s", i, action.name, e,
+                    "Sequence step %d (%s) failed: %s",
+                    i,
+                    action.name,
+                    e,
                 )
                 if abort_on_failure:
                     raise
@@ -230,7 +257,9 @@ class MacMaestroWorkflow:
     ) -> None:
         """Execute a single UIAction attempt."""
         logger.info(
-            "Executing: %s (Vector %s)", action.name, action.vector,
+            "Executing: %s (Vector %s)",
+            action.name,
+            action.vector,
         )
 
         if apply_safety_gate:
@@ -252,6 +281,7 @@ class MacMaestroWorkflow:
         executor = action.executor
         if executor is None:
             from .resolver import resolve
+
             executor = resolve(action, resolved_target=resolved)
 
         # ── Phase 4+5: Execute + Retry (Exponential Backoff) ──
@@ -277,8 +307,12 @@ class MacMaestroWorkflow:
                     self._trace(action, "success", pre_results, post_results)
                 else:
                     self._trace(
-                        action, "failure", pre_results, post_results,
-                        "postcondition_failed", retry=attempts,
+                        action,
+                        "failure",
+                        pre_results,
+                        post_results,
+                        "postcondition_failed",
+                        retry=attempts,
                     )
                     if not action.idempotent:
                         raise ActionFailed(
@@ -290,19 +324,19 @@ class MacMaestroWorkflow:
                 raise
             except Exception as e:
                 self._trace(
-                    action, "error", pre_results, {},
-                    failure_class=str(e), retry=attempts,
+                    action,
+                    "error",
+                    pre_results,
+                    {},
+                    failure_class=str(e),
+                    retry=attempts,
                 )
                 if not action.idempotent:
-                    raise ActionFailed(
-                        f"Executor crashed on non-idempotent action: {e}"
-                    ) from e
+                    raise ActionFailed(f"Executor crashed on non-idempotent action: {e}") from e
                 _backoff_sleep(attempts)
 
         if not success:
-            raise ActionFailed(
-                f"Action {action.name} exhausted {limit} retries."
-            )
+            raise ActionFailed(f"Action {action.name} exhausted {limit} retries.")
 
     def _trace(
         self,
@@ -332,19 +366,14 @@ class MacMaestroWorkflow:
                     "reasons": resolved.element.reasons,
                     "position": resolved.element.position,
                 }
-                if resolved and resolved.element else None
+                if resolved and resolved.element
+                else None
             ),
             precondition_results=pre_res,
             postcondition_results=post_res,
             retry_count=retry,
             failure_class=failure_class,
-            resolution_method=(
-                resolved.resolution_method if resolved else None
-            ),
-            resolution_confidence=(
-                resolved.confidence if resolved else None
-            ),
-            candidates_count=(
-                resolved.candidates_count if resolved else 0
-            ),
+            resolution_method=(resolved.resolution_method if resolved else None),
+            resolution_confidence=(resolved.confidence if resolved else None),
+            candidates_count=(resolved.candidates_count if resolved else 0),
         )

@@ -96,7 +96,7 @@ def _generate_api_key(email: str, plan: str) -> str:
     return "ctx_" + hashlib.sha256(seed.encode()).hexdigest()[:48]
 
 
-async def _provision_api_key(email: str, plan: str) -> Optional[str]:
+async def _provision_api_key(email: str, plan: str) -> str | None:
     """Create an API key in CORTEX AuthManager. Returns raw key or None."""
     raw_key = _generate_api_key(email, plan)
     plan_cfg = PLAN_CONFIG.get(plan, PLAN_CONFIG["pro"])

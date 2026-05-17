@@ -25,7 +25,7 @@ def get_openapi_spec() -> dict:
 
 
 def export_openapi_spec(
-    output_path: Optional[str | Path] = None,
+    output_path: str | Path | None = None,
     *,
     indent: int = 2,
 ) -> Path:

@@ -12,17 +12,17 @@ if os.path.exists(log_path):
                 if not content and "tool_calls" in data:
                     # check tool call outputs if any
                     pass
-                
+
                 start = content.find("Margolus")
                 if start != -1:
                     print(f"--- Found in line {i} ---")
-                    print(content[max(0, start-200):start+800])
-                
+                    print(content[max(0, start - 200) : start + 800])
+
                 # Also search for "5." in case it's numbered differently
                 if "5." in content:
                     start_5 = content.find("5.")
                     print(f"--- Found '5.' in line {i} ---")
-                    print(content[start_5:start_5+800])
+                    print(content[start_5 : start_5 + 800])
             except:
                 continue
 else:

@@ -8,6 +8,7 @@ sys.path.append(os.getcwd())
 from cortex.audit.advisor import CortexAdvisor
 from cortex.engine import CortexEngine
 
+
 async def test_context_switching():
     print("Testing Sentinel: High Context Switching Detection...")
     engine = CortexEngine()
@@ -23,23 +24,24 @@ async def test_context_switching():
             project="TEST",
             action="VIEW_FILE",
             detail={"TargetFile": files[i % 5]},
-            tenant_id=tenant
+            tenant_id=tenant,
         )
-        
+
     # 2. Run analysis
     insights = await advisor.analyze_session(tenant_id=tenant)
-    
+
     found = False
     for insight in insights:
         if insight["title"] == "Reduce Context Switching":
             print(f"✔ Detected: {insight['message']}")
             found = True
             break
-            
+
     if not found:
         print("❌ High Context Switching NOT detected.")
-        
+
     await engine.shutdown()
+
 
 if __name__ == "__main__":
     asyncio.run(test_context_switching())

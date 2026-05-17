@@ -30,7 +30,7 @@ class AsyncEncoder:
 
     __slots__ = ("_embedder",)
 
-    def __init__(self, embedder: Optional[LocalEmbedder] = None) -> None:
+    def __init__(self, embedder: LocalEmbedder | None = None) -> None:
         self._embedder = embedder or LocalEmbedder()
 
     async def encode(self, text: str) -> list[float]:

@@ -37,23 +37,27 @@ files_to_purge = [
     "/Users/borjafernandezangulo/.gemini/antigravity/knowledge/awwwards_academy_intelligence/artifacts/overview.md",
     "/Users/borjafernandezangulo/.gemini/antigravity/knowledge/cortex_scratch_assimilation_may2026/artifacts/notebooklm_audit.py",
     "/Users/borjafernandezangulo/.gemini/antigravity/knowledge/public_api_catalog_2026/metadata.json",
-    "/Users/borjafernandezangulo/.gemini/antigravity/knowledge/public_api_catalog_2026/artifacts/overview.md"
+    "/Users/borjafernandezangulo/.gemini/antigravity/knowledge/public_api_catalog_2026/artifacts/overview.md",
 ]
 
 count = 0
 for fpath in files_to_purge:
     if os.path.exists(fpath):
-        with open(fpath, encoding='utf-8') as f:
+        with open(fpath, encoding="utf-8") as f:
             content = f.read()
-        if '[ANATHEMA-PURGED]' in content.lower():
-            new_content = content.replace('[ANATHEMA-PURGED]', '[ANATHEMA-PURGED]')
-            new_content = new_content.replace('[ANATHEMA-PURGED]', '[ANATHEMA-PURGED]')
-            new_content = new_content.replace('[ANATHEMA-PURGED]', '[ANATHEMA-PURGED]')
-            with open(fpath, 'w', encoding='utf-8') as f:
+        if "[ANATHEMA-PURGED]" in content.lower():
+            new_content = content.replace("[ANATHEMA-PURGED]", "[ANATHEMA-PURGED]")
+            new_content = new_content.replace("[ANATHEMA-PURGED]", "[ANATHEMA-PURGED]")
+            new_content = new_content.replace("[ANATHEMA-PURGED]", "[ANATHEMA-PURGED]")
+            with open(fpath, "w", encoding="utf-8") as f:
                 f.write(new_content)
             count += 1
-            if '[ANATHEMA-PURGED]' in os.path.basename(fpath).lower():
-                new_name = os.path.basename(fpath).replace('[ANATHEMA-PURGED]', 'anathema').replace('[ANATHEMA-PURGED]', 'Anathema')
+            if "[ANATHEMA-PURGED]" in os.path.basename(fpath).lower():
+                new_name = (
+                    os.path.basename(fpath)
+                    .replace("[ANATHEMA-PURGED]", "anathema")
+                    .replace("[ANATHEMA-PURGED]", "Anathema")
+                )
                 new_path = os.path.join(os.path.dirname(fpath), new_name)
                 os.rename(fpath, new_path)
 

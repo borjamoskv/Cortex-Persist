@@ -119,7 +119,7 @@ class TopographicSensor:
         except (subprocess.SubprocessError, FileNotFoundError, TimeoutError):
             return []
 
-    def _get_attr_payload(self, file_path: Path, attr: str) -> Optional[bytes]:
+    def _get_attr_payload(self, file_path: Path, attr: str) -> bytes | None:
         """Fetch attribute content via os or CLI."""
         # 1. Try native os.getxattr
         if hasattr(os, "getxattr"):
@@ -149,7 +149,7 @@ class TopographicSensor:
 
     def _parse_ghost_payload(
         self, file_path: Path, attr: str, payload_bytes: bytes
-    ) -> Optional[GhostTrace]:
+    ) -> GhostTrace | None:
         """Decode payload and handle decay/evaporation."""
         try:
             # Entropy Demon Guard: Handle malformed UTF-8 or unexpected JSON

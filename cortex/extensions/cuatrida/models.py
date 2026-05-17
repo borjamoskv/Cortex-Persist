@@ -39,5 +39,5 @@ class DecisionNode:
     dimension: Dimension
     metrics: CuatridaMetrics
     timestamp: str
-    causal_link: Optional[int] = None  # Reference to previous tx_id
-    metadata: Optional[dict[str, Any]] = None
+    causal_link: int | None = None  # Reference to previous tx_id
+    metadata: dict[str, Any] | None = None

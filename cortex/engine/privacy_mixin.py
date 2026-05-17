@@ -25,8 +25,8 @@ class PrivacyMixin(EngineMixinBase):
 
     @staticmethod
     def _apply_privacy_shield(
-        content: str, project: str, meta: Optional[dict[str, Any]]
-    ) -> Optional[dict[str, Any]]:
+        content: str, project: str, meta: dict[str, Any] | None
+    ) -> dict[str, Any] | None:
         """Zero-Trust Privacy Shield — classify content before storage.
 
         If sensitive patterns (API keys, private keys, connection strings)

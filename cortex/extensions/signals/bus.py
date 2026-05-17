@@ -42,10 +42,10 @@ CREATE INDEX IF NOT EXISTS idx_signals_tenant ON signals(tenant_id);
 def _build_query(
     *,
     tenant_id: str = "default",
-    event_type: Optional[str] = None,
-    source: Optional[str] = None,
-    project: Optional[str] = None,
-    unconsumed_by: Optional[str] = None,
+    event_type: str | None = None,
+    source: str | None = None,
+    project: str | None = None,
+    unconsumed_by: str | None = None,
     order: str = "ASC",
     limit: int = 50,
 ) -> tuple[str, list]:
@@ -101,10 +101,10 @@ class AsyncSignalBus:
     async def emit(
         self,
         event_type: str,
-        payload: Optional[dict] = None,
+        payload: dict | None = None,
         *,
         source: str = "cli",
-        project: Optional[str] = None,
+        project: str | None = None,
         tenant_id: str = "default",
     ) -> int:
         try:
@@ -131,10 +131,10 @@ class AsyncSignalBus:
         self,
         *,
         tenant_id: str = "default",
-        event_type: Optional[str] = None,
-        source: Optional[str] = None,
-        project: Optional[str] = None,
-        since: Optional[datetime] = None,
+        event_type: str | None = None,
+        source: str | None = None,
+        project: str | None = None,
+        since: datetime | None = None,
         limit: int = 50,
     ) -> list[Signal]:
         await self.ensure_table()
@@ -157,10 +157,10 @@ class AsyncSignalBus:
         self,
         *,
         tenant_id: str = "default",
-        event_type: Optional[str] = None,
-        source: Optional[str] = None,
-        project: Optional[str] = None,
-        unconsumed_by: Optional[str] = None,
+        event_type: str | None = None,
+        source: str | None = None,
+        project: str | None = None,
+        unconsumed_by: str | None = None,
         limit: int = 50,
     ) -> list[Signal]:
         query, params = _build_query(
@@ -179,9 +179,9 @@ class AsyncSignalBus:
         self,
         *,
         tenant_id: str = "default",
-        event_type: Optional[str] = None,
-        source: Optional[str] = None,
-        project: Optional[str] = None,
+        event_type: str | None = None,
+        source: str | None = None,
+        project: str | None = None,
         consumer: str = "default",
         limit: int = 50,
     ) -> list[Signal]:
@@ -210,10 +210,10 @@ class AsyncSignalBus:
         self,
         *,
         tenant_id: str = "default",
-        event_type: Optional[str] = None,
-        source: Optional[str] = None,
-        project: Optional[str] = None,
-        consumer: Optional[str] = None,
+        event_type: str | None = None,
+        source: str | None = None,
+        project: str | None = None,
+        consumer: str | None = None,
         limit: int = 50,
     ) -> list[Signal]:
         await self.ensure_table()
@@ -264,7 +264,7 @@ class AsyncSignalBus:
 
         return result
 
-    async def gc(self, max_age_days: int = 30, tenant_id: Optional[str] = None) -> int:
+    async def gc(self, max_age_days: int = 30, tenant_id: str | None = None) -> int:
         await self.ensure_table()
         cutoff = (
             datetime.fromtimestamp(time.time(), tz=timezone.utc) - timedelta(days=max_age_days)
@@ -319,10 +319,10 @@ class SignalBus:
     def emit(
         self,
         event_type: str,
-        payload: Optional[dict] = None,
+        payload: dict | None = None,
         *,
         source: str = "cli",
-        project: Optional[str] = None,
+        project: str | None = None,
         tenant_id: str = "default",
     ) -> int:
         try:
@@ -357,9 +357,9 @@ class SignalBus:
         self,
         *,
         tenant_id: str = "default",
-        event_type: Optional[str] = None,
-        source: Optional[str] = None,
-        project: Optional[str] = None,
+        event_type: str | None = None,
+        source: str | None = None,
+        project: str | None = None,
         consumer: str = "default",
         limit: int = 50,
     ) -> list[Signal]:
@@ -394,10 +394,10 @@ class SignalBus:
         self,
         *,
         tenant_id: str = "default",
-        event_type: Optional[str] = None,
-        source: Optional[str] = None,
-        project: Optional[str] = None,
-        consumer: Optional[str] = None,
+        event_type: str | None = None,
+        source: str | None = None,
+        project: str | None = None,
+        consumer: str | None = None,
         limit: int = 50,
     ) -> list[Signal]:
         self.ensure_table()
@@ -414,10 +414,10 @@ class SignalBus:
         self,
         *,
         tenant_id: str = "default",
-        event_type: Optional[str] = None,
-        source: Optional[str] = None,
-        project: Optional[str] = None,
-        since: Optional[datetime] = None,
+        event_type: str | None = None,
+        source: str | None = None,
+        project: str | None = None,
+        since: datetime | None = None,
         limit: int = 50,
     ) -> list[Signal]:
         self.ensure_table()
@@ -470,7 +470,7 @@ class SignalBus:
 
         return result
 
-    def gc(self, max_age_days: int = 30, tenant_id: Optional[str] = None) -> int:
+    def gc(self, max_age_days: int = 30, tenant_id: str | None = None) -> int:
         self.ensure_table()
         cutoff = (
             datetime.fromtimestamp(time.time(), tz=timezone.utc) - timedelta(days=max_age_days)
@@ -498,10 +498,10 @@ class SignalBus:
         self,
         *,
         tenant_id: str = "default",
-        event_type: Optional[str] = None,
-        source: Optional[str] = None,
-        project: Optional[str] = None,
-        unconsumed_by: Optional[str] = None,
+        event_type: str | None = None,
+        source: str | None = None,
+        project: str | None = None,
+        unconsumed_by: str | None = None,
         limit: int = 50,
     ) -> list[Signal]:
         query, params = _build_query(

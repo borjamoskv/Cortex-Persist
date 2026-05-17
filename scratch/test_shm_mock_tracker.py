@@ -1,7 +1,7 @@
-
 import multiprocessing.shared_memory as sm
 from multiprocessing import resource_tracker
 import time
+
 
 def test_mock_tracker():
     name = "test_mock_init"
@@ -13,15 +13,15 @@ def test_mock_tracker():
         print("Tracker disabled. Creating SHM...")
         shm = sm.SharedMemory(name=name, create=True, size=1024)
         print(f"Created SHM: {shm.name}")
-        
+
         # Restore tracker
         resource_tracker.register = orig_register
         print("Tracker restored.")
-        
+
         # Manually set track flag if needed (usually good practice)
-        if hasattr(shm, '_track'):
+        if hasattr(shm, "_track"):
             shm._track = False
-            
+
         print("Cleaning up...")
         shm.close()
         shm.unlink()
@@ -32,6 +32,7 @@ def test_mock_tracker():
         resource_tracker.register = orig_register
     finally:
         resource_tracker.register = orig_register
+
 
 if __name__ == "__main__":
     test_mock_tracker()
