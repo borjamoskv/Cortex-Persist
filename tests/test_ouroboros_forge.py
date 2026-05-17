@@ -45,12 +45,14 @@ class TestOuroborosForge(unittest.IsolatedAsyncioTestCase):
         """Verify SignalBus emits audit findings correctly."""
         import sqlite3
 
-        from cortex.config import DB_PATH
         from cortex.extensions.signals.bus import SignalBus
 
         # Ensure schema initialization
-        conn = sqlite3.connect(DB_PATH)
+        conn = sqlite3.connect(":memory:")
         _bus = SignalBus(conn)
+
+        # Manually create the table so we can test the check safely
+        _bus.ensure_table()
 
         # Check if signals exist for 'ouroboros'
         cursor = conn.cursor()
