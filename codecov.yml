@@ -41,4 +41,5 @@ flags:
   unittests:
     paths:
       - cortex/
+      - cortex-core/
     carryforward: false
