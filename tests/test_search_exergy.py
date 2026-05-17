@@ -29,6 +29,8 @@ async def test_exergy_prioritization(temp_db_path, mock_encoder):
     to rank outputs when their semantic embeddings are identical.
     """
     store = SovereignVectorStoreL2(encoder=mock_encoder, db_path=temp_db_path, half_life_days=7)
+    if not store._vector_enabled:
+        pytest.skip("sqlite-vec not enabled")
 
     # Prepare identical embeddings so vector similarity is strictly equal
     embedding_vec = [1] * 384
@@ -94,5 +96,52 @@ async def test_exergy_prioritization(temp_db_path, mock_encoder):
     score_high = results[0]._recall_score
     score_low = results[1]._recall_score
     assert score_high > score_low
+
+    await store.close()
+
+@pytest.mark.asyncio
+async def test_exergy_fallback_mode(temp_db_path, mock_encoder):
+    """
+    Verifies that when _vector_enabled is False, the fallback logic
+    correctly handles exact match and sets recall score to 0.0 without errors.
+    """
+    store = SovereignVectorStoreL2(encoder=mock_encoder, db_path=temp_db_path, half_life_days=7)
+
+    # Simulate failed extension load
+    store._vector_enabled = False
+
+    # Memorize fact
+    embedding_vec = [1] * 384
+    content = "fallback content test"
+    fact = CortexFactModel(
+        id="fact_fallback",
+        tenant_id="test_tenant",
+        project_id="test_proj",
+        content=content,
+        embedding=embedding_vec,
+        timestamp=time.time(),
+        is_diamond=False,
+        is_bridge=False,
+        confidence="high",
+        cognitive_layer="semantic",
+        parent_decision_id=None,
+        metadata={},
+    )
+    object.__setattr__(fact, "embedding_bytes", b"mock")
+    await store.memorize(fact)
+
+    # Recall in fallback mode
+    results = await store.recall_secure(
+        tenant_id="test_tenant",
+        project_id="test_proj",
+        query="test",
+        limit=2,
+    )
+
+    # Since fallback only does exact metadata match based on tenant/project
+    # and doesn't actually filter by text query, it should return our 1 fact
+    assert len(results) == 1
+    assert results[0].id == "fact_fallback"
+    assert results[0]._recall_score == 0.0
 
     await store.close()
