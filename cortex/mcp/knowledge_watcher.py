@@ -7,8 +7,14 @@ compiles semantic vectors into the Persistent ChromaDB instance.
 import logging
 import os
 
-from watchdog.events import FileSystemEventHandler
-from watchdog.observers import Observer
+try:
+    from watchdog.events import FileSystemEventHandler
+    from watchdog.observers import Observer
+
+    HAS_WATCHDOG = True
+except ImportError:
+    FileSystemEventHandler = object  # type: ignore
+    HAS_WATCHDOG = False
 
 try:
     import chromadb
