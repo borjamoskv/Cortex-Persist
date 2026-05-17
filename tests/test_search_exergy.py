@@ -29,6 +29,9 @@ async def test_exergy_prioritization(temp_db_path, mock_encoder):
     to rank outputs when their semantic embeddings are identical.
     """
     store = SovereignVectorStoreL2(encoder=mock_encoder, db_path=temp_db_path, half_life_days=7)
+    store._get_conn()
+    if not store._vector_enabled:
+        pytest.skip("sqlite-vec not enabled, cannot test vector ranking")
 
     # Prepare identical embeddings so vector similarity is strictly equal
     embedding_vec = [1] * 384

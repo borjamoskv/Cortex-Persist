@@ -1,5 +1,6 @@
 import logging
 import sys
+from unittest.mock import patch, MagicMock, AsyncMock
 import unittest
 from pathlib import Path
 
@@ -17,10 +18,20 @@ class TestOuroborosForge(unittest.IsolatedAsyncioTestCase):
         self.engine = OuroborosEngine()
         self.test_repo = "https://github.com/Uniswap/v4-core"
 
-    async def test_audit_cycle(self):
+    @patch('ouroboros_engine.os.system')
+    @patch('ouroboros_engine.asyncio.create_subprocess_exec')
+    async def test_audit_cycle(self, mock_exec, mock_system):
         """Standard Audit Cycle on mock contract."""
         logger = logging.getLogger("cortex.ouroboros.test")
         logger.info("Starting Ouroboros-1 Verification...")
+
+        mock_process = AsyncMock()
+        mock_process.returncode = 0
+        mock_process.communicate.return_value = (b'mock stdout', b'mock stderr')
+        mock_process.wait.return_value = 0
+        mock_exec.return_value = mock_process
+
+        mock_system.return_value = 0
 
         # This will clone and audit
         try:
