@@ -107,6 +107,8 @@ async def test_exergy_fallback_mode(temp_db_path, mock_encoder):
     """
     store = SovereignVectorStoreL2(encoder=mock_encoder, db_path=temp_db_path, half_life_days=7)
 
+    # Initialize connection first so it doesn't overwrite our mock later
+    store._get_conn()
     # Simulate failed extension load
     store._vector_enabled = False
 
