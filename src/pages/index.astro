@@ -1,5 +1,6 @@
 ---
 import SiteLayout from '../layouts/SiteLayout.astro';
+import { SUPPORT_EMAIL } from '../lib/intake';
 
 const navLinks = [
 	{ href: '#problem', label: 'Problem' },
@@ -541,7 +542,7 @@ Reply and get a scoped recommendation.</code></pre>
 					<a class="button-primary" href={asyncDemoUrl}>Request Async Demo</a>
 					<a class="button-secondary" href={pilotScopeUrl}>Get Pilot Scope</a>
 				</div>
-				<a class="cta-email" href="mailto:borja@cortexpersist.com">borja@cortexpersist.com</a>
+				<a class="cta-email" href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>
 			</div>
 		</section>
 
