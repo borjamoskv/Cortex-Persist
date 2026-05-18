@@ -30,6 +30,11 @@ async def test_exergy_prioritization(temp_db_path, mock_encoder):
     """
     store = SovereignVectorStoreL2(encoder=mock_encoder, db_path=temp_db_path, half_life_days=7)
 
+    if not getattr(store, "_vector_enabled", False):
+        pytest.skip(
+            "sqlite-vec missing in CI, cannot evaluate true exergy metrics without vector load"
+        )
+
     # Prepare identical embeddings so vector similarity is strictly equal
     embedding_vec = [1] * 384
 
