@@ -204,7 +204,7 @@ async def ask_cortex(
         logger.error("LLM completion failed: %s", e)
         return JSONResponse(
             status_code=502,
-            content={"detail": f"LLM provider error: {str(e)}"},
+            content={"detail": "LLM provider error. Check server logs."},
         )
 
     if answer is None:
@@ -299,7 +299,8 @@ async def ask_stream(
                 yield f"data: {json.dumps({'type': 'token', 'data': chunk})}\n\n"
         except (OSError, RuntimeError, ValueError) as e:
             logger.error("Streaming failed: %s", e)
-            yield f"data: {json.dumps({'type': 'error', 'data': str(e)})}\n\n"
+            err_msg = "An internal streaming error occurred."
+            yield f"data: {json.dumps({'type': 'error', 'data': err_msg})}\n\n"
 
         yield "data: [DONE]\n\n"
 

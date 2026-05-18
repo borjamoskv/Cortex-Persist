@@ -7,13 +7,15 @@ import re
 import subprocess
 from enum import Enum as PyEnum
 from pathlib import Path
-from typing import Optional
 from collections.abc import Callable
 from urllib import request
 
 VoidFn = Callable[[], None]
 
-CHEATCODES_JSON_URL = "https://raw.githubusercontent.com/foundry-rs/foundry/master/crates/cheatcodes/assets/cheatcodes.json"
+CHEATCODES_JSON_URL = (
+    "https://raw.githubusercontent.com/foundry-rs/foundry/master"
+    "/crates/cheatcodes/assets/cheatcodes.json"
+)
 OUT_PATH = "src/Vm.sol"
 
 VM_SAFE_DOC = """\
@@ -511,7 +513,7 @@ class CheatcodesPrinter:
 
     def p_errors(self, errors: list[Error]):
         for error in errors:
-            self._p_line(lambda: self.p_error(error))
+            self._p_line(lambda error=error: self.p_error(error))
 
     def p_error(self, error: Error):
         self._p_comment(error.description, doc=True)
@@ -519,7 +521,7 @@ class CheatcodesPrinter:
 
     def p_events(self, events: list[Event]):
         for event in events:
-            self._p_line(lambda: self.p_event(event))
+            self._p_line(lambda event=event: self.p_event(event))
 
     def p_event(self, event: Event):
         self._p_comment(event.description, doc=True)
@@ -527,7 +529,7 @@ class CheatcodesPrinter:
 
     def p_enums(self, enums: list[Enum]):
         for enum in enums:
-            self._p_line(lambda: self.p_enum(enum))
+            self._p_line(lambda enum=enum: self.p_enum(enum))
 
     def p_enum(self, enum: Enum):
         self._p_comment(enum.description, doc=True)
@@ -548,7 +550,7 @@ class CheatcodesPrinter:
 
     def p_structs(self, structs: list[Struct]):
         for struct in structs:
-            self._p_line(lambda: self.p_struct(struct))
+            self._p_line(lambda struct=struct: self.p_struct(struct))
 
     def p_struct(self, struct: Struct):
         self._p_comment(struct.description, doc=True)
@@ -558,7 +560,7 @@ class CheatcodesPrinter:
 
     def p_struct_fields(self, fields: list[StructField]):
         for field in fields:
-            self._p_line(lambda: self.p_struct_field(field))
+            self._p_line(lambda field=field: self.p_struct_field(field))
 
     def p_struct_field(self, field: StructField):
         self._p_comment(field.description)
@@ -566,7 +568,7 @@ class CheatcodesPrinter:
 
     def p_functions(self, cheatcodes: list[Cheatcode]):
         for cheatcode in cheatcodes:
-            self._p_line(lambda: self.p_function(cheatcode.func))
+            self._p_line(lambda cheatcode=cheatcode: self.p_function(cheatcode.func))
 
     def p_function(self, func: Function):
         self._p_comment(func.description, doc=True)

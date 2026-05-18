@@ -1,7 +1,10 @@
 import json
 import os
 
-log_path = "/Users/borjafernandezangulo/.gemini/antigravity/brain/eae0826c-300e-4e4b-bf48-3ca2510cb3d9/.system_generated/logs/overview.txt"
+log_path = (
+    "/Users/borjafernandezangulo/.gemini/antigravity/brain"
+    "/eae0826c-300e-4e4b-bf48-3ca2510cb3d9/.system_generated/logs/overview.txt"
+)
 
 if os.path.exists(log_path):
     with open(log_path) as f:
@@ -23,7 +26,7 @@ if os.path.exists(log_path):
                     start_5 = content.find("5.")
                     print(f"--- Found '5.' in line {i} ---")
                     print(content[start_5 : start_5 + 800])
-            except:
+            except Exception:
                 continue
 else:
     print("Log path not found")

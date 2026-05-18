@@ -55,40 +55,42 @@ class OuroborosDaemon:
                     backup_content = attack_file.read_text()
 
                 # 2. Emulate an attack by mutating pyproject.toml
-                logger.warning(f"[{mutation['vector']}] Mutating pyproject.toml...")
-                with open(attack_file, "a") as f:
-                    f.write("\n# OUROBOROS CHAOS INJECTION\nmalicious_package = '9.9.9'\n")
+                try:
+                    logger.warning(f"[{mutation['vector']}] Mutating pyproject.toml...")
+                    with open(attack_file, "a") as f:
+                        f.write("\n# OUROBOROS CHAOS INJECTION\nmalicious_package = '9.9.9'\n")
 
-                # 3. Wait for Guard Daemon to intercept
-                await asyncio.sleep(0.5)
+                    # 3. Wait for Guard Daemon to intercept
+                    await asyncio.sleep(0.5)
 
-                # Check if it was intercepted
-                cursor = await db.execute(
-                    "SELECT detail FROM transactions WHERE action = 'SECURITY_BREACH' OR action = 'MALICIOUS_OVERRIDE' "
-                    "OR (action = 'GUARD_VERDICT' AND (detail LIKE '%SECURITY_BREACH%' OR detail LIKE '%MALICIOUS_OVERRIDE%')) "
-                    "ORDER BY id DESC LIMIT 1"
-                )
-                row = await cursor.fetchone()
-
-                if row:
-                    mutation["success"] = False
-                    logger.debug("Guard intercepted pyproject.toml mutation.")
-                else:
-                    # Not intercepted!
-                    mutation["success"] = True
-                    await ledger.append_verdict(
-                        verdict="ZERO_DAY_DETECTED",
-                        reason="Ouroboros successfully mutated pyproject.toml",
-                        target_path="pyproject.toml",
-                        action_type="SECURITY_BREACH",
+                    # Check if it was intercepted
+                    cursor = await db.execute(
+                        "SELECT detail FROM transactions WHERE action = 'SECURITY_BREACH' OR action = 'MALICIOUS_OVERRIDE' "
+                        "OR (action = 'GUARD_VERDICT' AND (detail LIKE '%SECURITY_BREACH%' OR detail LIKE '%MALICIOUS_OVERRIDE%')) "
+                        "ORDER BY id DESC LIMIT 1"
                     )
+                    row = await cursor.fetchone()
 
-                # 4. Always restore state
-                if backup_content is not None and attack_file.exists():
-                    attack_file.write_text(backup_content)
-                if backup_path:
-                    # We cannot replace db while connection is open but this is an adversarial test
-                    pass
+                    if row:
+                        mutation["success"] = False
+                        logger.debug("Guard intercepted pyproject.toml mutation.")
+                    else:
+                        # Not intercepted!
+                        mutation["success"] = True
+                        await ledger.append_verdict(
+                            verdict="ZERO_DAY_DETECTED",
+                            reason="Ouroboros successfully mutated pyproject.toml",
+                            target_path="pyproject.toml",
+                            action_type="SECURITY_BREACH",
+                        )
+
+                finally:
+                    # 4. Always restore state
+                    if backup_content is not None and attack_file.exists():
+                        attack_file.write_text(backup_content)
+                    if backup_path:
+                        # We cannot replace db while connection is open but this is an adversarial test
+                        pass
 
         except Exception as e:
             logger.error(f"Ouroboros cycle failed: {e}")

@@ -23,6 +23,7 @@ _ROUTE_MODULES = {
     "ledger",
     "mejoralo",
     "missions",
+    "notebooklm",
     "onboarding",
     "oracle",
     "runtime",
@@ -62,6 +63,7 @@ _API_ROUTE_SPECS: tuple[tuple[str, str], ...] = (
     ("usage", "router"),
     ("runtime", "router"),
     ("onboarding", "router"),
+    ("notebooklm", "router"),
     ("health", "router"),
     ("trust", "router"),
 )

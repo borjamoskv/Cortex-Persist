@@ -3,6 +3,8 @@
 > Scoped rules for the Memory domain. **Root `AGENTS.md` always takes precedence.**
 > These rules augment — never contradict — the root contract.
 
+*∴ "La memoria no es un archivo; es un motor de estado. La entropía acumulada degrada el motor."*
+
 ---
 
 ## ⚠️ CRITICAL: Memory Surface Safety Gate

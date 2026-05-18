@@ -255,10 +255,20 @@ class AetherAgent:
 
     @staticmethod
     async def _notify(title: str, body: str) -> None:
-        """macOS notification via centralized bus (Ω₁)."""
-        try:
-            from cortex.extensions.daemon.notifier import Notifier
+        """Route notification through the unified NotificationBus (Ω₁).
 
-            Notifier.notify(title, body[:200])
-        except Exception:  # noqa: S110
+        Severity is inferred from the title prefix so the macOS adapter
+        plays the correct sound without extra parameters at call sites.
+        """
+        try:
+            from cortex.utils.applescript import notify
+
+            severity = "error" if "❌" in title else "info"
+            await notify(
+                title=title,
+                body=body,
+                source="aether",
+                severity=severity,
+            )
+        except Exception:  # noqa: BLE001
             pass

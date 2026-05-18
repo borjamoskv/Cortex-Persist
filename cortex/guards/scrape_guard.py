@@ -15,7 +15,6 @@ from __future__ import annotations
 import logging
 import re
 from dataclasses import dataclass
-from typing import Optional
 
 logger = logging.getLogger("cortex.guards.scrape_guard")
 
@@ -40,7 +39,9 @@ class ScrapeSanitizerGuard:
     # Note: Firecrawl markdown renderer handles most, but this is a defensive fallback.
     _SCRIPT_RE = re.compile(r"<script.*?>.*?</script>", re.IGNORECASE | re.DOTALL)
     _IFRAME_RE = re.compile(r"<iframe.*?>.*?</iframe>", re.IGNORECASE | re.DOTALL)
-    _ON_EVENT_RE = re.compile(r"\s+on[a-z]+\s*=\s*(?:\"[^\"]*\"|'[^']*')", re.IGNORECASE)
+    _ON_EVENT_RE = re.compile(
+        r"\s+on[a-z]+\s*=\s*(?:\"[^\"]{0,2048}\"|'[^']{0,2048}')", re.IGNORECASE
+    )
 
     @classmethod
     def sanitize(cls, raw_content: str, source_url: str | None = None) -> SanitizedPayload:
@@ -56,11 +57,10 @@ class ScrapeSanitizerGuard:
         Raises:
             ValueError: If input is utterly malformed or missing.
         """
-        if not raw_content or not str(raw_content).strip():
+        if not raw_content or not raw_content.strip():
             raise ValueError("Sovereign ScrapeGuard: Empty content provided for sanitization.")
 
-        raw_content = str(raw_content)
-
+        # raw_content is already a str
         # 1. Thermodynamic Limit Enforcement (O(1) exergy drop)
         if len(raw_content) > MAX_RAW_PAGE_SIZE:
             logger.warning(

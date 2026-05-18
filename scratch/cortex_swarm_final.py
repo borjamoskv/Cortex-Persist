@@ -2,7 +2,6 @@ import sqlite3
 import subprocess
 import json
 import concurrent.futures
-from datetime import datetime
 
 DB_PATH = "/Users/borjafernandezangulo/.cortex/cortex.db"
 REPOS_FILE = "repos_list.txt"
@@ -28,7 +27,7 @@ def get_contributors(repo):
                     }
                 )
         return leads
-    except:
+    except Exception:
         return []
 
 
@@ -46,7 +45,7 @@ def ingest(leads):
                 (lead["email"], lead["source"], lead["segment"], lead["exergy_score"]),
             )
             count += 1
-        except:
+        except Exception:
             continue
     conn.commit()
     conn.close()

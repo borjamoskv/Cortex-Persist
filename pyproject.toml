@@ -176,7 +176,3 @@ exclude = [
 ]
 reportMissingImports = "warning"
 reportPrivateImportUsage = "none"
-
-# OUROBOROS CHAOS INJECTION
-malicious_package = '9.9.9'
-

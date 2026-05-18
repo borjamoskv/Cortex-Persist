@@ -1,6 +1,5 @@
 import multiprocessing.shared_memory as sm
 from multiprocessing import resource_tracker
-import os
 
 
 def test_shm_leak():
@@ -31,7 +30,7 @@ def test_shm_leak():
             temp.close()
             temp.unlink()
             print("Cleaned up in finally")
-        except:
+        except Exception:
             pass
 
 
