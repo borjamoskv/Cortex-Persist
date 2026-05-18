@@ -5,7 +5,6 @@ from __future__ import annotations
 import logging
 import math
 import uuid
-from typing import Optional
 
 from cortex.engine.slashing import SlashingEngine
 from cortex.telemetry.metrics import metrics
@@ -77,6 +76,7 @@ class ConsensusManager:
             raise ValueError(f"vote value must be -1, 0, or 1, got {value}")
 
         async with self.engine.session() as conn:
+            await conn.execute("BEGIN IMMEDIATE")
             cursor = await conn.execute(
                 "SELECT reputation_score FROM agents WHERE id = ? AND is_active = 1",
                 (agent_id,),

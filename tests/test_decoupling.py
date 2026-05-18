@@ -39,6 +39,13 @@ async def test_asynchronous_enrichment_flow(engine):
     status = await oracle.check_enrichment_status(fact_id)
     assert status == "pending"
 
+    # Mocking the embedder to avoid downloading weights from HF Hub
+    from unittest.mock import AsyncMock, MagicMock
+
+    mock_embeddings = MagicMock()
+    mock_embeddings.enrich_fact = AsyncMock()
+    engine.embeddings = mock_embeddings
+
     # 3. Start EnrichmentWorker and process
     config = CortexConfig(DB_PATH=engine._db_path)
     worker = EnrichmentWorker(engine, config)
@@ -47,8 +54,6 @@ async def test_asynchronous_enrichment_flow(engine):
     assert job is not None
     assert job["fact_id"] == fact_id
 
-    # Mocking the embedder if needed, or letting it fail to see P0 resistance
-    # For now, we assume a local or mocked embedder works for this test
     try:
         await worker._process_job(job)
         final_status = await oracle.check_enrichment_status(fact_id)
