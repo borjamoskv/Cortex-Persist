@@ -95,6 +95,7 @@ seals_report.json
 bandit_report.json
 audit_report.txt
 audit_results.json
+*privacy_audit_results.json
 
 # ── OS ────────────────────────────────────────────
 .DS_Store
@@ -275,6 +276,7 @@ nexus-dashboard/.next/
 # Rust build artifacts
 engine-rs/target/
 cortex_mev_base/target/
+crates/cortex-core/target/
 .snapshots/
 
 # Solidity build artifacts
