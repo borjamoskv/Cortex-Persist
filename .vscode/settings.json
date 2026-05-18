@@ -3,6 +3,7 @@
   "cline.apiConfiguration.openAiBaseUrl": "http://localhost:20128/v1",
   "cline.apiConfiguration.openAiModelId": "claude-3-5-sonnet-20241022",
   "cline.apiConfiguration.openAiApiKey": "cortex-9router-local",
+  "telemetry.telemetryLevel": "off",
   "files.exclude": {
     "**/.venv": true,
     "**/node_modules": true,

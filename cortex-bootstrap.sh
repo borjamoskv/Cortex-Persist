@@ -38,8 +38,14 @@ EXTENSIONS=(
     "shd101wyy.markdown-preview-enhanced"     # Markdown Previews
     "mtxr.sqltools"                           # SQLite / SQL Data Tooling
     "vscodevim.vim"                           # Keybindings tácticos
-    "github.vscode-pull-request-github"       # GitHub PRs Integration
+    "github.vscode-pull-request-github",      # GitHub PRs Integration
+    "openai.codex"                            # Tactical Auxiliary (ChatGPT macOS Bridge)
 )
+
+# ==============================================================================
+# Sovereign Telemetry Block (C5-REAL Enforced)
+# ==============================================================================
+$IDE_CMD config set telemetry.telemetryLevel off >/dev/null 2>&1 || true
 
 if [ -n "$IDE_CMD" ]; then
     echo "[CORTEX-BOOTSTRAP] Purgando entropía: desinstalando extensiones no autorizadas..."
