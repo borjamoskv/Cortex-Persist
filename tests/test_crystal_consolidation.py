@@ -10,7 +10,10 @@ import json
 import sqlite3
 import time
 
-import numpy as np
+try:
+    import numpy as np
+except ImportError:
+    np = None
 import pytest
 
 from cortex.extensions.swarm.crystal_consolidator import (
@@ -64,6 +67,7 @@ def in_memory_db():
     conn.close()
 
 
+@pytest.mark.skipif(np is None, reason="numpy not installed")
 def _insert_crystal(
     conn: sqlite3.Connection,
     fact_id: str,
@@ -131,12 +135,14 @@ class TestTemperature:
 
 class TestResonance:
     @pytest.mark.asyncio
+    @pytest.mark.skipif(np is None, reason="numpy not installed")
     async def test_identical_vectors(self) -> None:
         vec = [1.0, 0.0, 0.0, 0.0]
         res = await calculate_resonance(vec, [vec])
         assert res == pytest.approx(1.0, abs=0.001)
 
     @pytest.mark.asyncio
+    @pytest.mark.skipif(np is None, reason="numpy not installed")
     async def test_orthogonal_vectors(self) -> None:
         a = [1.0, 0.0, 0.0, 0.0]
         b = [0.0, 1.0, 0.0, 0.0]
@@ -144,6 +150,7 @@ class TestResonance:
         assert res == pytest.approx(0.0, abs=0.001)
 
     @pytest.mark.asyncio
+    @pytest.mark.skipif(np is None, reason="numpy not installed")
     async def test_best_axiom_wins(self) -> None:
         content = [1.0, 0.5, 0.0, 0.0]
         axiom_low = [0.0, 0.0, 1.0, 0.0]
@@ -255,6 +262,7 @@ class TestConsolidationResult:
 
 class TestColdPurge:
     @pytest.mark.asyncio
+    @pytest.mark.skipif(np is None, reason="numpy not installed")
     async def test_purges_dead_weight(self, in_memory_db) -> None:
         _insert_crystal(in_memory_db, "dead-1", "obsolete info", age_days=30, recall_count=0)
 
@@ -282,6 +290,7 @@ class TestColdPurge:
         assert cursor.fetchone()[0] == 0
 
     @pytest.mark.asyncio
+    @pytest.mark.skipif(np is None, reason="numpy not installed")
     async def test_dry_run_preserves(self, in_memory_db) -> None:
         _insert_crystal(in_memory_db, "dead-2", "obsolete info", age_days=30)
 
@@ -309,6 +318,7 @@ class TestColdPurge:
         assert cursor.fetchone()[0] == 1
 
     @pytest.mark.asyncio
+    @pytest.mark.skipif(np is None, reason="numpy not installed")
     async def test_diamond_immune(self, in_memory_db) -> None:
         _insert_crystal(in_memory_db, "diamond-1", "axiom", age_days=30, is_diamond=True)
 
@@ -337,6 +347,7 @@ class TestColdPurge:
 
 class TestDiamondPromotion:
     @pytest.mark.asyncio
+    @pytest.mark.skipif(np is None, reason="numpy not installed")
     async def test_promotes_qualifying_crystal(self, in_memory_db) -> None:
         _insert_crystal(in_memory_db, "hot-1", "active knowledge", age_days=10, recall_count=20)
 
@@ -368,6 +379,7 @@ class TestDiamondPromotion:
 
 class TestFullConsolidation:
     @pytest.mark.asyncio
+    @pytest.mark.skipif(np is None, reason="numpy not installed")
     async def test_consolidation_with_mixed_crystals(self, in_memory_db) -> None:
         """End-to-end: mix of dead, active, and similar crystals."""
         # Dead weight — should be purged
@@ -410,6 +422,7 @@ class TestFullConsolidation:
         assert result.total_actions == 0
 
     @pytest.mark.asyncio
+    @pytest.mark.skipif(np is None, reason="numpy not installed")
     async def test_dry_run_no_side_effects(self, in_memory_db) -> None:
         _insert_crystal(in_memory_db, "dry-1", "should survive", age_days=30)
 

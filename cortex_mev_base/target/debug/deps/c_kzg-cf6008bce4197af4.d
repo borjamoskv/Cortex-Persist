@@ -1,0 +1,8 @@
+/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex_mev_base/target/debug/deps/c_kzg-cf6008bce4197af4.d: /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/c-kzg-1.0.3/bindings/rust/src/lib.rs /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/c-kzg-1.0.3/bindings/rust/src/bindings/mod.rs /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/c-kzg-1.0.3/bindings/rust/src/bindings/serde.rs /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/c-kzg-1.0.3/bindings/rust/src/bindings/./generated.rs
+
+/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex_mev_base/target/debug/deps/libc_kzg-cf6008bce4197af4.rmeta: /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/c-kzg-1.0.3/bindings/rust/src/lib.rs /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/c-kzg-1.0.3/bindings/rust/src/bindings/mod.rs /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/c-kzg-1.0.3/bindings/rust/src/bindings/serde.rs /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/c-kzg-1.0.3/bindings/rust/src/bindings/./generated.rs
+
+/Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/c-kzg-1.0.3/bindings/rust/src/lib.rs:
+/Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/c-kzg-1.0.3/bindings/rust/src/bindings/mod.rs:
+/Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/c-kzg-1.0.3/bindings/rust/src/bindings/serde.rs:
+/Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/c-kzg-1.0.3/bindings/rust/src/bindings/./generated.rs:

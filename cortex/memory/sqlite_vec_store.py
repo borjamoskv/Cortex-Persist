@@ -19,7 +19,10 @@ import time
 from pathlib import Path
 from typing import Any, Optional
 
-import numpy as np
+try:
+    import numpy as np
+except ImportError:
+    np = None  # type: ignore
 
 try:
     import sqlite_vec
@@ -36,7 +39,7 @@ __all__ = ["SovereignVectorStoreL2"]
 
 # Lazy imports to avoid circular deps at module load
 # L2HybridSearch and PIISanitizer only needed at runtime
-_L2_HYBRID_SEARCH_AVAILABLE: Optional[bool] = None  # None = not yet checked
+_L2_HYBRID_SEARCH_AVAILABLE: bool | None = None  # None = not yet checked
 
 logger = logging.getLogger("cortex.memory.sqlite_vec_store")
 
@@ -80,7 +83,7 @@ class SovereignVectorStoreL2:
         self._encoder = encoder
         self._db_path = Path(db_path).expanduser()
         self._db_path.parent.mkdir(parents=True, exist_ok=True)
-        self._conn: Optional[sqlite3.Connection] = None
+        self._conn: sqlite3.Connection | None = None
         self._lock = asyncio.Lock()
         self._ready = False
         self._half_life = half_life_days * 24 * 3600
@@ -388,6 +391,9 @@ class SovereignVectorStoreL2:
                 # Cannot easily dual-quantize from raw bytes without knowing source
                 return emb_list, b"", ex
 
+            if np is None:
+                return b"", b"", ex
+
             arr = np.array(emb_list, dtype=np.float32)
             int8_bytes = arr.tobytes()
             binary_bytes = void_vec.pack_void_bit(arr)
@@ -482,13 +488,15 @@ class SovereignVectorStoreL2:
         project_id: str,
         query: str,
         limit: int = 5,
-        layer: Optional[str] = None,
+        layer: str | None = None,
     ) -> list[CortexFactModel]:
         """[C5] Recuperación particionada Zero-Trust con ranking SQL nativo."""
         conn = self._get_conn()
         query_vector = await self._encoder.encode(query)
 
         def _sync_knn_search() -> list[CortexFactModel]:
+            if np is None:
+                return []
             rotated_query = encode_query_qjl(query_vector)
             embedding_bytes = np.array(rotated_query, dtype=np.float32).tobytes()
             void_query = void_vec.pack_void_bit(rotated_query)
@@ -659,7 +667,7 @@ class SovereignVectorStoreL2:
         return await asyncio.to_thread(_sync_knn_search)
 
     async def recall(
-        self, query: str, limit: int = 5, project: Optional[str] = None, tenant_id: str = "default"
+        self, query: str, limit: int = 5, project: str | None = None, tenant_id: str = "default"
     ) -> list[CortexFactModel]:
         """Backward-compatible recall for legacy callers. Maps to recall_secure."""
         return await self.recall_secure(

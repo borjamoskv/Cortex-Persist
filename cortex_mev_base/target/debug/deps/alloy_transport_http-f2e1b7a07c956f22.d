@@ -1,0 +1,7 @@
+/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex_mev_base/target/debug/deps/alloy_transport_http-f2e1b7a07c956f22.d: /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/alloy-transport-http-0.1.4/src/lib.rs /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/alloy-transport-http-0.1.4/src/reqwest_transport.rs /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/alloy-transport-http-0.1.4/src/../README.md
+
+/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex_mev_base/target/debug/deps/liballoy_transport_http-f2e1b7a07c956f22.rmeta: /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/alloy-transport-http-0.1.4/src/lib.rs /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/alloy-transport-http-0.1.4/src/reqwest_transport.rs /Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/alloy-transport-http-0.1.4/src/../README.md
+
+/Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/alloy-transport-http-0.1.4/src/lib.rs:
+/Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/alloy-transport-http-0.1.4/src/reqwest_transport.rs:
+/Users/borjafernandezangulo/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/alloy-transport-http-0.1.4/src/../README.md:
