@@ -66,19 +66,34 @@ class CortexDaemon:
             pass
 
     def check_memory_integrity(self):
-        """Evaluates SQLite state, triggering implicit yields."""
+        """Evaluates SQLite state, validating VSA memory substrate synchrony."""
+        if not os.path.exists(DB_PATH):
+            if self.cycle_count % 50 == 0:
+                logging.warning("⚠️ Memory Substrate Missing at %s", DB_PATH)
+            return
+
         try:
-            if not os.path.exists(DB_PATH):
-                return
             conn = sqlite3.connect(DB_PATH)
-            c = conn.cursor()
-            c.execute("SELECT COUNT(*) FROM cortex_knowledge")
-            count = c.fetchone()[0]
+            cursor = conn.cursor()
+
+            # Check cortex_knowledge table
+            cursor.execute("SELECT COUNT(*) FROM cortex_knowledge")
+            ki_count = cursor.fetchone()[0]
+
+            # Check signals table
+            cursor.execute("SELECT COUNT(*) FROM signals")
+            signals_count = cursor.fetchone()[0]
+
             conn.close()
-            if self.cycle_count % 20 == 0:
-                logging.info("📉 VSA State: %d active KIs in RAM", count)
+
+            if self.cycle_count % 50 == 0:
+                logging.info(
+                    "🧠 [MEMORY] Integrity check: %d signals, %d active KIs in RAM.",
+                    signals_count,
+                    ki_count,
+                )
         except Exception as e:
-            logging.error("VSA Bridge detached: %s", e)
+            logging.error("Memory Integrity Violation detected or VSA Bridge detached: %s", e)
 
     async def _execute_task(self, task):
         """Spawns an asynchronous sub-process for a swarm task."""
@@ -191,23 +206,6 @@ class CortexDaemon:
         except Exception as e:
             logging.error("Swarm Dispatch Failure: %s", e)
 
-    def check_memory_integrity(self):
-        """Validates that the VSA memory substrate is synchronous."""
-        if not os.path.exists(DB_PATH):
-            logging.warning("⚠️ Memory Substrate Missing at %s", DB_PATH)
-            return
-
-        try:
-            conn = sqlite3.connect(DB_PATH)
-            cursor = conn.cursor()
-            cursor.execute("SELECT count(*) FROM signals")
-            count = cursor.fetchone()[0]
-            conn.close()
-            if self.cycle_count % 50 == 0:
-                logging.info("🧠 [MEMORY] Integrity check: %d signals.", count)
-        except Exception:
-            logging.error("Memory Integrity Violation detected.")
-
     async def _run_council_deliberation(self):
         """Invoke SAGE COUNCIL decision engine."""
         logging.info("🧠 [SAGE COUNCIL] Deliberating next mission...")
@@ -224,7 +222,10 @@ class CortexDaemon:
                 source="daemon",
             )
 
-        cmd = f"python3 /Users/borjafernandezangulo/Cortex-Persist/cortex-core/ouroboros_engine.py --target {target}"
+        cmd = (
+            "python3 /Users/borjafernandezangulo/Cortex-Persist/cortex-core/"
+            f"ouroboros_engine.py --target {target}"
+        )
         self._queue_task("SAGE_COUNCIL", cmd)
 
     def _queue_task(self, agent: str, cmd: str):
@@ -256,7 +257,10 @@ class CortexDaemon:
 
         # Path to self
         self_path = "/Users/borjafernandezangulo/Cortex-Persist/cortex-core/cortex_daemon.py"
-        cmd = f"python3 /Users/borjafernandezangulo/Cortex-Persist/cortex-core/mirror_audit.py {self_path}"
+        cmd = (
+            "python3 /Users/borjafernandezangulo/Cortex-Persist/cortex-core/"
+            f"mirror_audit.py {self_path}"
+        )
 
         process = await asyncio.create_subprocess_shell(
             cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
@@ -276,7 +280,10 @@ class CortexDaemon:
 
                 self._queue_task(
                     "OPTIMIZER",
-                    f"python3 /Users/borjafernandezangulo/Cortex-Persist/cortex-core/remediator.py {self_path} {error_log}",
+                    (
+                        "python3 /Users/borjafernandezangulo/Cortex-Persist/cortex-core/"
+                        f"remediator.py {self_path} {error_log}"
+                    ),
                 )
             else:
                 logging.info("✅ [MIRROR] Self-Audit Optimal (Score: %d)", report["exergy_score"])
