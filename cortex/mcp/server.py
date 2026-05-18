@@ -372,6 +372,14 @@ def run_server(config: MCPServerConfig | None = None) -> None:
     # V4 Singularity: Launch Swarm Autopoiesis Engine
     start_swarm_daemon()
 
+    # V5 Singularity: Launch MEV Telemetry Daemon (K2 Liquidation Monitor)
+    try:
+        from cortex.engine.mev_telemetry import start_mev_daemon
+
+        start_mev_daemon(cfg.db_path)
+    except ImportError:
+        logger.warning("No se pudo importar MEV Telemetry Daemon. Verifica dependencias.")
+
     if cfg.transport == "sse":
         logger.info("Starting CORTEX MCP server v2 (SSE) on %s:%d", cfg.host, cfg.port)
         mcp.run(transport="sse")
