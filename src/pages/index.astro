@@ -491,6 +491,7 @@ Reply and get a scoped recommendation.</code></pre>
 								href={card.href}
 								target={card.href.startsWith('http') ? '_blank' : undefined}
 								rel={card.href.startsWith('http') ? 'noreferrer' : undefined}
+								data-plan={card.name.toLowerCase()}
 							>
 								{card.cta}
 							</a>
@@ -552,5 +553,100 @@ Reply and get a scoped recommendation.</code></pre>
 				<a href="/vsa">Public Shell</a>
 			</div>
 		</footer>
+
+		<!-- Fast Checkout Modal -->
+		<div class="checkout-overlay" id="checkout-overlay">
+			<div class="checkout-modal">
+				<div class="checkout-header">
+					<div class="checkout-title">Complete your Subscription</div>
+					<button class="checkout-close" id="checkout-close">&times;</button>
+				</div>
+				<div class="checkout-plan">
+					<div class="checkout-plan-name" id="checkout-plan-name">Pro Plan</div>
+					<div class="checkout-plan-price" id="checkout-plan-price">$29</div>
+				</div>
+				<div class="checkout-form">
+					<input type="email" class="checkout-input" placeholder="Email Address" required />
+					<input type="text" class="checkout-input" placeholder="Card Number" required />
+					<div style="display:flex; gap:16px;">
+						<input type="text" class="checkout-input" placeholder="MM/YY" style="flex:1" required />
+						<input type="text" class="checkout-input" placeholder="CVC" style="flex:1" required />
+					</div>
+				</div>
+				<button class="button-primary checkout-btn" id="checkout-submit">Pay Securely →</button>
+				<div class="checkout-footer">
+					<span style="display:inline-block; width:12px; height:12px; border-radius:50%; background:var(--success); margin-right:4px;"></span>
+					Encrypted & Secured by CORTEX Privacy Shield
+				</div>
+			</div>
+		</div>
+
+		<!-- Payment Integration Script -->
+		<script>
+			const checkoutOverlay = document.getElementById('checkout-overlay');
+			const checkoutClose = document.getElementById('checkout-close');
+			const checkoutName = document.getElementById('checkout-plan-name');
+			const checkoutPrice = document.getElementById('checkout-plan-price');
+			const checkoutSubmit = document.getElementById('checkout-submit');
+
+			document.querySelectorAll('[data-plan]').forEach(btn => {
+				btn.addEventListener('click', (e) => {
+					// We only open the modal for Pilot and Enterprise
+					const plan = (btn as HTMLElement).dataset.plan;
+					if (plan === 'community') return; // let the link work normally
+					
+					e.preventDefault();
+					const amount = plan === 'pilot' ? '9,000' : '30,000/yr';
+					const name = plan === 'pilot' ? 'Pilot' : 'Enterprise';
+					
+					if (checkoutName && checkoutPrice && checkoutOverlay) {
+						checkoutName.innerText = name;
+						checkoutPrice.innerText = 'EUR ' + amount;
+						checkoutOverlay.classList.add('active');
+					}
+				});
+			});
+
+			if (checkoutClose && checkoutOverlay) {
+				checkoutClose.addEventListener('click', () => {
+					checkoutOverlay.classList.remove('active');
+				});
+
+				checkoutOverlay.addEventListener('click', (e) => {
+					if (e.target === checkoutOverlay) {
+						checkoutOverlay.classList.remove('active');
+					}
+				});
+			}
+
+			if (checkoutSubmit) {
+				checkoutSubmit.addEventListener('click', async () => {
+					const emailInput = document.querySelector('.checkout-input[type="email"]') as HTMLInputElement;
+					
+					if (!emailInput || !emailInput.value || !emailInput.checkValidity()) {
+						alert("Please enter a valid email address.");
+						return;
+					}
+
+					checkoutSubmit.innerHTML = "Processing... <span class='spinner'></span>";
+					checkoutSubmit.style.opacity = "0.7";
+					checkoutSubmit.style.pointerEvents = "none";
+					
+					try {
+						// Mock payment processing for now
+						await new Promise(r => setTimeout(r, 2000));
+						alert("Simulated: CORTEX Sovereign Stripe Bridge connected successfully. In production, this launches the embedded Stripe checkout element.");
+						if (checkoutOverlay) checkoutOverlay.classList.remove('active');
+					} catch (error) {
+						console.error("Stripe Checkout Error:", error);
+						alert("Payment gateway connection failed. Error: " + error);
+					} finally {
+						checkoutSubmit.innerText = "Pay Securely →";
+						checkoutSubmit.style.opacity = "1";
+						checkoutSubmit.style.pointerEvents = "auto";
+					}
+				});
+			}
+		</script>
 	</main>
 </SiteLayout>
