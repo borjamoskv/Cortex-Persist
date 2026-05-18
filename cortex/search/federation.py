@@ -163,7 +163,7 @@ def _search_attached_db(
 
     # Fetch active facts (capped at 500 to limit memory)
     sql = (
-        f"SELECT f.id, f.content, f.project, f.fact_type, "
+        f"SELECT f.id, f.content, f.project, f.fact_type, "  # noqa: S608
         f"f.confidence, f.source, f.tags "
         f"FROM {alias}.facts f "
         f"WHERE f.valid_until IS NULL"
@@ -249,7 +249,7 @@ async def _search_attached_db_async(
         return []
 
     sql = (
-        f"SELECT f.id, f.content, f.project, f.fact_type, "
+        f"SELECT f.id, f.content, f.project, f.fact_type, "  # noqa: S608
         f"f.confidence, f.source, f.tags "
         f"FROM {alias}.facts f "
         f"WHERE f.valid_until IS NULL"

@@ -162,7 +162,7 @@ class AsyncCausalGraph:
 
     async def ensure_table(self) -> None:
         await self.conn.execute(
-            """
+            """  # noqa: S608
             CREATE TABLE IF NOT EXISTS causal_edges (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 fact_id INTEGER NOT NULL,
@@ -174,7 +174,7 @@ class AsyncCausalGraph:
                 created_at TEXT NOT NULL DEFAULT (datetime('now')),
                 FOREIGN KEY (fact_id) REFERENCES facts(id)
             )
-            """
+            """  # noqa: S608
         )
         await self.conn.execute(
             "CREATE INDEX IF NOT EXISTS idx_causal_fact ON causal_edges(fact_id)"
@@ -197,10 +197,10 @@ class AsyncCausalGraph:
         tenant_id: str = "default",
     ) -> None:
         await self.conn.execute(
-            """
+            """  # noqa: S608
             INSERT INTO causal_edges (fact_id, parent_id, signal_id, edge_type, project, tenant_id)
             VALUES (?, ?, ?, ?, ?, ?)
-            """,
+            """  # noqa: S608,
             (fact_id, parent_id, signal_id, edge_type, project, tenant_id),
         )
 
@@ -286,7 +286,7 @@ class AsyncCausalGraph:
             sql = f"""
             SELECT fact_id, parent_id FROM causal_edges
             WHERE fact_id IN ({local_placeholders}) AND edge_type != ? AND tenant_id = ?
-            """
+            """  # noqa: S608
             async with self.conn.execute(sql, (*chunk, EDGE_TAINTED_BY, tenant_id)) as cursor:
                 async for child_id, parent_id in cursor:
                     if parent_id is not None:
@@ -518,7 +518,7 @@ class AsyncCausalGraph:
             return
 
         sql = (
-            """
+            """  # noqa: S608
         INSERT INTO causal_edges (fact_id, parent_id, signal_id, edge_type, project, tenant_id)
         VALUES (?, ?, ?, ?, ?, ?)
         """

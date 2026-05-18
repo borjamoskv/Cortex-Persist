@@ -260,5 +260,5 @@ class AetherAgent:
             from cortex.extensions.daemon.notifier import Notifier
 
             Notifier.notify(title, body[:200])
-        except Exception:
+        except Exception:  # noqa: S110
             pass

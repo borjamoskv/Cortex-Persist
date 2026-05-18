@@ -225,8 +225,8 @@ def toolbox_health_check(
 
     probe = f"{url.rstrip('/')}/api/toolset/"
     try:
-        req = urllib.request.Request(probe, method="GET")
-        with urllib.request.urlopen(req, timeout=timeout):
+        req = urllib.request.Request(probe, method="GET")  # noqa: S310
+        with urllib.request.urlopen(req, timeout=timeout):  # noqa: S310
             return True
     except (urllib.error.URLError, OSError, TimeoutError):
         return False

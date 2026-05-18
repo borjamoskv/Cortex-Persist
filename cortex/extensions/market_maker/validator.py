@@ -22,7 +22,7 @@ class DemandValidator:
     MAX_SPEND = Decimal("20.00")  # $20 budget per test
 
     def __init__(self, random_seed: int | None = None) -> None:
-        self._rng = random.Random(random_seed)
+        self._rng = random.Random(random_seed)  # noqa: S311
 
     async def validate(self, experiment: Experiment) -> ValidationResult:
         """Simulates driving traffic to the MVP."""

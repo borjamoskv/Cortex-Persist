@@ -79,7 +79,7 @@ class GidatuHandler:
                 return {"action": "hotkey", "keys": params["keys"]}
 
             if action == "screenshot":
-                path = params.get("path", f"/tmp/shot_{int(time.time())}.png")
+                path = params.get("path", f"/tmp/shot_{int(time.time())}.png")  # noqa: S108
                 g.screenshot(path)
                 return {"action": "screenshot", "path": path}
 

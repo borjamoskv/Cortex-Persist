@@ -113,8 +113,8 @@ class HoneypotManager:
 
     def generate_decoy(self, project: str) -> DecoyFact:
         """Generate a random decoy secret for a project."""
-        template = random.choice(self.DECOY_TEMPLATES)
-        token = "".join(random.choices("ABCDEF0123456789", k=16))
+        template = random.choice(self.DECOY_TEMPLATES)  # noqa: S311
+        token = "".join(random.choices("ABCDEF0123456789", k=16))  # noqa: S311
         content = template.replace("{RAND}", token)
 
         decoy = DecoyFact(id=f"honey_{token}", content=content, project=project)

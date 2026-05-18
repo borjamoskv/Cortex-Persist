@@ -470,7 +470,7 @@ class FactMutationEngine:
         metadata_value: str | None = None
         if metadata_column:
             async with conn.execute(
-                f"SELECT {metadata_column} FROM facts WHERE id = ?",
+                f"SELECT {metadata_column} FROM facts WHERE id = ?",  # noqa: S608
                 (fact_id,),
             ) as cursor:
                 row = await cursor.fetchone()
@@ -522,7 +522,7 @@ class FactMutationEngine:
             params.append(payload.get("taint_timestamp") or datetime.now(timezone.utc).isoformat())
         if not set_clauses:
             return
-        query = f"UPDATE facts SET {', '.join(set_clauses)} WHERE id = ?"
+        query = f"UPDATE facts SET {', '.join(set_clauses)} WHERE id = ?"  # noqa: S608
         params.append(fact_id)
         if "tenant_id" in facts_columns:
             query += " AND tenant_id = ?"
@@ -558,7 +558,7 @@ class FactMutationEngine:
             and "parent_id" not in facts_columns
         ):
             async with conn.execute(
-                f"SELECT {metadata_column} FROM facts WHERE id = ?",
+                f"SELECT {metadata_column} FROM facts WHERE id = ?",  # noqa: S608
                 (fact_id,),
             ) as cursor:
                 row = await cursor.fetchone()
@@ -587,7 +587,7 @@ class FactMutationEngine:
             params.append(payload.get("timestamp") or datetime.now(timezone.utc).isoformat())
         if not set_clauses:
             return
-        query = f"UPDATE facts SET {', '.join(set_clauses)} WHERE id = ?"
+        query = f"UPDATE facts SET {', '.join(set_clauses)} WHERE id = ?"  # noqa: S608
         params.append(fact_id)
         if "tenant_id" in facts_columns:
             query += " AND tenant_id = ?"

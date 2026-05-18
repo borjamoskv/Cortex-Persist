@@ -23,7 +23,7 @@ from pathlib import Path
 class ActionType(str, Enum):
     """Classified action types for guard routing."""
 
-    SECRET_ACCESS = "secret_access"
+    SECRET_ACCESS = "secret_access"  # noqa: S105
     DESTRUCTIVE_CMD = "destructive_cmd"
     DEP_CHANGE = "dep_change"
     MIGRATION = "migration"

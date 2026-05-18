@@ -29,8 +29,8 @@ class OuroborosDaemon:
         import aiosqlite
 
         mutation = {
-            "target": random.choice(["schema", "tenant_isolation", "ledger", "memory"]),
-            "vector": random.choice(
+            "target": random.choice(["schema", "tenant_isolation", "ledger", "memory"]),  # noqa: S311
+            "vector": random.choice(  # noqa: S311
                 ["negative_value", "sql_injection", "cross_tenant", "null_byte"]
             ),
             "success": False,
@@ -102,7 +102,7 @@ class OuroborosDaemon:
 
         while self._is_running:
             try:
-                if random.random() < self.chaos_level:
+                if random.random() < self.chaos_level:  # noqa: S311
                     logger.warning("[OUROBOROS] Launching Adversarial Mutation...")
                     result = await self._inject_mutation()
 

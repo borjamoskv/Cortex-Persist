@@ -64,8 +64,8 @@ class ResonanceEmitter:
             import subprocess
 
             # Use -w to write
-            subprocess.run(
-                ["xattr", "-w", attr_name, encoded_payload.decode("utf-8"), str(target_file)],
+            subprocess.run(  # noqa: S603
+                ["xattr", "-w", attr_name, encoded_payload.decode("utf-8"), str(target_file)],  # noqa: S607
                 check=True,
                 capture_output=True,
             )

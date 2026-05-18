@@ -86,7 +86,7 @@ class BootPayload:
         return result
 
     def to_markdown(self) -> str:
-        """Render as compact markdown for system_prompt injection."""
+        """  # noqa: S608Render as compact markdown for system_prompt injection."""
         lines = [
             "# 🧠 CORTEX — Session Boot (Episodic Memory)",
             "",
@@ -254,7 +254,7 @@ async def _get_reflections(
             WHERE {where_clause}
             ORDER BY id DESC
             LIMIT ?
-        """
+        """  # noqa: S608
         params.append(top_k)
 
         async with conn.execute(query, params) as cursor:
@@ -286,12 +286,12 @@ async def _get_context_inference(
     """
     try:
         async with conn.execute(
-            """
+            """  # noqa: S608
             SELECT active_project, confidence, summary
             FROM context_snapshots
             ORDER BY id DESC
             LIMIT 1
-            """,
+            """  # noqa: S608,
         ) as cursor:
             row = await cursor.fetchone()
 

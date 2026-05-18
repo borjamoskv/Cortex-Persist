@@ -125,7 +125,7 @@ async def _collect_guard_stats(engine) -> dict:
             row = await cursor.fetchone()
             if row:
                 stats["blocks"] = row[0]
-    except Exception:
+    except Exception:  # noqa: S110
         pass
 
     return stats

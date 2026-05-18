@@ -114,18 +114,18 @@ async def _execute_cold_purge(
                             '$.purge_temperature', ?,
                             '$.purge_resonance', ?)
                         WHERE id = ?
-                        """,
+                        """,  # noqa: S608
                         (time.time(), v.temperature, v.resonance, v.fact_id),
                     )
 
                 # Batch delete from vector index for recall hygiene
                 cursor.execute(
-                    f"DELETE FROM vec_facts WHERE rowid IN (SELECT rowid FROM facts_meta WHERE id IN ({placeholders}))",
+                    f"DELETE FROM vec_facts WHERE rowid IN (SELECT rowid FROM facts_meta WHERE id IN ({placeholders}))",  # noqa: S608
                     chunk_ids,
                 )
 
                 # Batch delete from facts_meta
-                cursor.execute(f"DELETE FROM facts_meta WHERE id IN ({placeholders})", chunk_ids)
+                cursor.execute(f"DELETE FROM facts_meta WHERE id IN ({placeholders})", chunk_ids)  # noqa: S608
 
             for v in chunk:
                 result.purged += 1
@@ -185,7 +185,7 @@ async def _execute_semantic_merge(
                 SELECT f.id, f.content, v.embedding FROM facts_meta f
                 JOIN vec_facts v ON f.rowid = v.rowid
                 WHERE f.id IN ({placeholders})
-                """,
+                """,  # noqa: S608
                 chunk_ids,
             )
             rows = cursor.fetchall()
@@ -305,7 +305,7 @@ async def _execute_diamond_promotion(
             if not dry_run:
                 cursor = db_conn.cursor()
                 cursor.execute(
-                    f"UPDATE facts_meta SET is_diamond = 1 WHERE id IN ({placeholders})",
+                    f"UPDATE facts_meta SET is_diamond = 1 WHERE id IN ({placeholders})",  # noqa: S608
                     chunk_ids,
                 )
 

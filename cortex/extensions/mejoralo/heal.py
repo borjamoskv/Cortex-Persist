@@ -197,11 +197,11 @@ def _run_functional_inquisitor(
 
 def _apply_aesthetic_formatting(abs_path: Path, console: Any) -> None:
     console.print("  [cyan]💅 Aplicando 130/100 Aesthetics (Ruff)...[/]")
-    subprocess.run(
+    subprocess.run(  # noqa: S603
         [sys.executable, "-m", "ruff", "format", str(abs_path)],
         capture_output=True,
     )
-    subprocess.run(
+    subprocess.run(  # noqa: S603
         [sys.executable, "-m", "ruff", "check", "--fix", str(abs_path)],
         capture_output=True,
     )
@@ -229,7 +229,7 @@ def _run_delta_testing(
             console.print("  [dim]⚠️ No direct test found, running full suite...[/]")
 
     try:
-        res = subprocess.run(
+        res = subprocess.run(  # noqa: S603
             pytest_cmd,
             cwd=path,
             capture_output=True,
@@ -284,9 +284,9 @@ def _commit_healed_file(
             f"(iter {iteration}, score {current_score})"
         )
         console.print(f"  [bold green]✅ {top_file_rel} OK. Comiteando...[/]")
-        subprocess.run(["git", "add", str(abs_path)], cwd=path, capture_output=True)
-        subprocess.run(
-            [
+        subprocess.run(["git", "add", str(abs_path)], cwd=path, capture_output=True)  # noqa: S603,S607
+        subprocess.run(  # noqa: S603
+            [  # noqa: S607
                 "git",
                 "commit",
                 "-m",

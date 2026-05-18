@@ -30,17 +30,17 @@ def _check_apple_silicon() -> dict:
 
     try:
         r = subprocess.run(
-            ["sysctl", "-n", "machdep.cpu.brand_string"], capture_output=True, text=True
+            ["sysctl", "-n", "machdep.cpu.brand_string"], capture_output=True, text=True  # noqa: S607
         )
         info["chip"] = r.stdout.strip()
         info["is_apple_silicon"] = "Apple" in info["chip"]
-    except Exception:
+    except Exception:  # noqa: S110
         pass
 
     try:
-        r = subprocess.run(["sysctl", "-n", "hw.memsize"], capture_output=True, text=True)
+        r = subprocess.run(["sysctl", "-n", "hw.memsize"], capture_output=True, text=True)  # noqa: S607
         info["memory_gb"] = int(r.stdout.strip()) // (1024**3)
-    except Exception:
+    except Exception:  # noqa: S110
         pass
 
     if info["is_apple_silicon"] and info["memory_gb"] >= 8:
@@ -57,7 +57,7 @@ def _ensure_mlx():
         print("[C5-REAL] mlx-lm already installed")
     except ImportError:
         print("[C5-REAL] Installing mlx-lm...")
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "mlx-lm", "-q"])
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "mlx-lm", "-q"])  # noqa: S603
 
 
 def train_lora(
@@ -104,7 +104,7 @@ def train_lora(
     ]
     print(f"[C5-REAL] Executing: {' '.join(cmd)}")
 
-    proc = subprocess.run(cmd, capture_output=False)
+    proc = subprocess.run(cmd, capture_output=False)  # noqa: S603
     if proc.returncode != 0:
         print(f"[ERROR] Training failed with code {proc.returncode}")
         return False
@@ -140,7 +140,7 @@ def fuse_and_quantize(
     ]
     print(f"[C5-REAL] Executing: {' '.join(cmd)}")
 
-    proc = subprocess.run(cmd, capture_output=False)
+    proc = subprocess.run(cmd, capture_output=False)  # noqa: S603
     if proc.returncode != 0:
         print(f"[ERROR] Fusion failed with code {proc.returncode}")
         return False

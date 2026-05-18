@@ -47,7 +47,7 @@ class MushroomBodyEncoder:
         """
         import random
 
-        rng = random.Random(self._seed)
+        rng = random.Random(self._seed)  # noqa: S311
         output_dim = input_dim * self._expansion
         # Xavier-like initialization
         scale = math.sqrt(2.0 / (input_dim + output_dim))

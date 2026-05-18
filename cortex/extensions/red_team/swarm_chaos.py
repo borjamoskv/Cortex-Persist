@@ -78,7 +78,7 @@ class RedTeamSwarm:
                 )
             else:
                 # Elegir un objetivo aleatorio de la lista para inyectar caos
-                service, func, seed = random.choice(targets)
+                service, func, seed = random.choice(targets)  # noqa: S311
                 logger.info(
                     "🔥 [RED-TEAM] Chaos Cycle #%d — Targeted: %s.%s",
                     self._chaos_count,
@@ -104,7 +104,7 @@ class RedTeamSwarm:
                     )
 
             # Ω₅: El ritmo del caos es irregular para evitar patrones de adaptación predecibles.
-            jitter = random.uniform(0.8, 1.2)
+            jitter = random.uniform(0.8, 1.2)  # noqa: S311
             sleep_time = interval_seconds * jitter
             logger.info("🦾 [RED-TEAM] Retreating. Next siege in %.1f seconds.", sleep_time)
             await asyncio.sleep(sleep_time)
