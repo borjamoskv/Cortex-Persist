@@ -438,7 +438,9 @@ class TestFullConsolidation:
         cursor.execute("SELECT COUNT(*) FROM facts_meta WHERE id = 'dry-1'")
         assert cursor.fetchone()[0] == 1
 
+
 # ── Semantic Merge Integration Tests ──────────────────────────────────────
+
 
 class TestSemanticMerge:
     @pytest.mark.asyncio
@@ -446,12 +448,36 @@ class TestSemanticMerge:
     async def test_semantic_merge_identical_crystals(self, mock_synth, in_memory_db) -> None:
         mock_synth.return_value = {"fused_content": "merged content"}
 
-        _insert_crystal(in_memory_db, "dup-1", "same concept", age_days=30, embedding=[1.0, 0.0, 0.0])
-        _insert_crystal(in_memory_db, "dup-2", "same concept", age_days=30, embedding=[1.0, 0.0, 0.0])
+        _insert_crystal(
+            in_memory_db, "dup-1", "same concept", age_days=30, embedding=[1.0, 0.0, 0.0]
+        )
+        _insert_crystal(
+            in_memory_db, "dup-2", "same concept", age_days=30, embedding=[1.0, 0.0, 0.0]
+        )
 
         vitals = [
-            CrystalVitals(fact_id="dup-1", content_preview="same concept", temperature=0.0, resonance=0.05, quadrant="ACTIVE", recommendation="MERGE", age_days=30, recall_count=0, is_diamond=False),
-            CrystalVitals(fact_id="dup-2", content_preview="same concept", temperature=0.0, resonance=0.05, quadrant="ACTIVE", recommendation="MERGE", age_days=30, recall_count=0, is_diamond=False)
+            CrystalVitals(
+                fact_id="dup-1",
+                content_preview="same concept",
+                temperature=0.0,
+                resonance=0.05,
+                quadrant="ACTIVE",
+                recommendation="MERGE",
+                age_days=30,
+                recall_count=0,
+                is_diamond=False,
+            ),
+            CrystalVitals(
+                fact_id="dup-2",
+                content_preview="same concept",
+                temperature=0.0,
+                resonance=0.05,
+                quadrant="ACTIVE",
+                recommendation="MERGE",
+                age_days=30,
+                recall_count=0,
+                is_diamond=False,
+            ),
         ]
 
         result = ConsolidationResult()
@@ -465,3 +491,271 @@ class TestSemanticMerge:
 
         cursor.execute("SELECT COUNT(*) FROM facts_meta WHERE id = 'dup-2'")
         assert cursor.fetchone()[0] == 0
+
+    @pytest.mark.asyncio
+    async def test_purges_dead_weight_db_error(self, in_memory_db) -> None:
+        _insert_crystal(in_memory_db, "dead-1", "obsolete info", age_days=30, recall_count=0)
+
+        vitals = [
+            CrystalVitals(
+                fact_id="dead-1",
+                content_preview="obsolete info",
+                temperature=0.0,
+                resonance=0.05,
+                quadrant="DEAD_WEIGHT",
+                recommendation="PURGE",
+                age_days=30,
+                recall_count=0,
+                is_diamond=False,
+            )
+        ]
+
+        result = ConsolidationResult()
+        with patch.object(in_memory_db, "cursor", side_effect=sqlite3.Error("Mock error")):
+            await _execute_cold_purge(in_memory_db, vitals, result, dry_run=False)
+
+        assert result.errors == 1
+
+    @pytest.mark.asyncio
+    async def test_semantic_merge_db_error_on_load(self, in_memory_db) -> None:
+        vitals = [
+            CrystalVitals(
+                fact_id="dup-1",
+                content_preview="same concept",
+                temperature=0.0,
+                resonance=0.05,
+                quadrant="ACTIVE",
+                recommendation="MERGE",
+                age_days=30,
+                recall_count=0,
+                is_diamond=False,
+            ),
+            CrystalVitals(
+                fact_id="dup-2",
+                content_preview="same concept",
+                temperature=0.0,
+                resonance=0.05,
+                quadrant="ACTIVE",
+                recommendation="MERGE",
+                age_days=30,
+                recall_count=0,
+                is_diamond=False,
+            ),
+        ]
+        result = ConsolidationResult()
+        with patch.object(in_memory_db, "cursor", side_effect=sqlite3.Error("Mock error")):
+            await _execute_semantic_merge(in_memory_db, vitals, result, dry_run=False)
+
+        assert result.merged == 0
+
+    @pytest.mark.asyncio
+    async def test_semantic_merge_insufficient_data(self, in_memory_db) -> None:
+        vitals = [
+            CrystalVitals(
+                fact_id="dup-1",
+                content_preview="same concept",
+                temperature=0.0,
+                resonance=0.05,
+                quadrant="ACTIVE",
+                recommendation="MERGE",
+                age_days=30,
+                recall_count=0,
+                is_diamond=False,
+            )
+        ]
+        result = ConsolidationResult()
+        await _execute_semantic_merge(in_memory_db, vitals, result, dry_run=False)
+
+        assert result.merged == 0
+
+    @pytest.mark.asyncio
+    @patch("cortex.extensions.swarm.crystal_synthesis.synthesize_crystals", new_callable=AsyncMock)
+    async def test_semantic_merge_skip_already_merged(self, mock_synth, in_memory_db) -> None:
+        mock_synth.return_value = {"fused_content": "merged content"}
+
+        # Insert 3 identical, the first pair should merge, the third should be skipped
+        _insert_crystal(
+            in_memory_db, "dup-1", "same concept", age_days=30, embedding=[1.0, 0.0, 0.0]
+        )
+        _insert_crystal(
+            in_memory_db, "dup-2", "same concept", age_days=30, embedding=[1.0, 0.0, 0.0]
+        )
+        _insert_crystal(
+            in_memory_db, "dup-3", "same concept", age_days=30, embedding=[1.0, 0.0, 0.0]
+        )
+
+        vitals = [
+            CrystalVitals(
+                fact_id="dup-1",
+                content_preview="same concept",
+                temperature=0.0,
+                resonance=0.05,
+                quadrant="ACTIVE",
+                recommendation="MERGE",
+                age_days=30,
+                recall_count=0,
+                is_diamond=False,
+            ),
+            CrystalVitals(
+                fact_id="dup-2",
+                content_preview="same concept",
+                temperature=0.0,
+                resonance=0.05,
+                quadrant="ACTIVE",
+                recommendation="MERGE",
+                age_days=30,
+                recall_count=0,
+                is_diamond=False,
+            ),
+            CrystalVitals(
+                fact_id="dup-3",
+                content_preview="same concept",
+                temperature=0.0,
+                resonance=0.05,
+                quadrant="ACTIVE",
+                recommendation="MERGE",
+                age_days=30,
+                recall_count=0,
+                is_diamond=False,
+            ),
+        ]
+
+        result = ConsolidationResult()
+        await _execute_semantic_merge(in_memory_db, vitals, result, dry_run=False)
+
+        assert result.merged == 1
+
+    @pytest.mark.asyncio
+    @patch("cortex.extensions.swarm.crystal_synthesis.synthesize_crystals", new_callable=AsyncMock)
+    async def test_semantic_merge_db_error_on_commit(self, mock_synth, in_memory_db) -> None:
+        mock_synth.return_value = {"fused_content": "merged content"}
+
+        _insert_crystal(
+            in_memory_db, "dup-1", "same concept", age_days=30, embedding=[1.0, 0.0, 0.0]
+        )
+        _insert_crystal(
+            in_memory_db, "dup-2", "same concept", age_days=30, embedding=[1.0, 0.0, 0.0]
+        )
+
+        vitals = [
+            CrystalVitals(
+                fact_id="dup-1",
+                content_preview="same concept",
+                temperature=0.0,
+                resonance=0.05,
+                quadrant="ACTIVE",
+                recommendation="MERGE",
+                age_days=30,
+                recall_count=0,
+                is_diamond=False,
+            ),
+            CrystalVitals(
+                fact_id="dup-2",
+                content_preview="same concept",
+                temperature=0.0,
+                resonance=0.05,
+                quadrant="ACTIVE",
+                recommendation="MERGE",
+                age_days=30,
+                recall_count=0,
+                is_diamond=False,
+            ),
+        ]
+
+        result = ConsolidationResult()
+        with patch.object(in_memory_db, "commit", side_effect=sqlite3.Error("Mock error")):
+            await _execute_semantic_merge(in_memory_db, vitals, result, dry_run=False)
+
+        assert result.errors == 1
+        assert result.merged == 0
+
+    @pytest.mark.asyncio
+    @patch("cortex.extensions.swarm.crystal_synthesis.synthesize_crystals", new_callable=AsyncMock)
+    async def test_semantic_merge_synthesis_error(self, mock_synth, in_memory_db) -> None:
+        mock_synth.side_effect = RuntimeError("Synthesis failed")
+
+        _insert_crystal(
+            in_memory_db, "dup-1", "same concept", age_days=30, embedding=[1.0, 0.0, 0.0]
+        )
+        _insert_crystal(
+            in_memory_db, "dup-2", "same concept", age_days=30, embedding=[1.0, 0.0, 0.0]
+        )
+
+        vitals = [
+            CrystalVitals(
+                fact_id="dup-1",
+                content_preview="same concept",
+                temperature=0.0,
+                resonance=0.05,
+                quadrant="ACTIVE",
+                recommendation="MERGE",
+                age_days=30,
+                recall_count=0,
+                is_diamond=False,
+            ),
+            CrystalVitals(
+                fact_id="dup-2",
+                content_preview="same concept",
+                temperature=0.0,
+                resonance=0.05,
+                quadrant="ACTIVE",
+                recommendation="MERGE",
+                age_days=30,
+                recall_count=0,
+                is_diamond=False,
+            ),
+        ]
+
+        result = ConsolidationResult()
+        await _execute_semantic_merge(in_memory_db, vitals, result, dry_run=False)
+
+        assert result.errors == 1
+        assert result.merged == 0
+
+    @pytest.mark.asyncio
+    async def test_diamond_promotion_db_error(self, in_memory_db) -> None:
+        _insert_crystal(in_memory_db, "hot-1", "active knowledge", age_days=10, recall_count=20)
+
+        vitals = [
+            CrystalVitals(
+                fact_id="hot-1",
+                content_preview="active knowledge",
+                temperature=2.0,
+                resonance=0.7,
+                quadrant="ACTIVE",
+                recommendation="PROMOTE",
+                age_days=10,
+                recall_count=20,
+                is_diamond=False,
+            )
+        ]
+
+        result = ConsolidationResult()
+        with patch.object(in_memory_db, "cursor", side_effect=sqlite3.Error("Mock error")):
+            await _execute_diamond_promotion(in_memory_db, vitals, result, dry_run=False)
+
+        assert result.errors == 1
+        assert result.promoted == 0
+
+    @pytest.mark.asyncio
+    async def test_diamond_promotion_dry_run(self, in_memory_db) -> None:
+        _insert_crystal(in_memory_db, "hot-1", "active knowledge", age_days=10, recall_count=20)
+
+        vitals = [
+            CrystalVitals(
+                fact_id="hot-1",
+                content_preview="active knowledge",
+                temperature=2.0,
+                resonance=0.7,
+                quadrant="ACTIVE",
+                recommendation="PROMOTE",
+                age_days=10,
+                recall_count=20,
+                is_diamond=False,
+            )
+        ]
+
+        result = ConsolidationResult()
+        await _execute_diamond_promotion(in_memory_db, vitals, result, dry_run=True)
+
+        assert result.promoted == 1
