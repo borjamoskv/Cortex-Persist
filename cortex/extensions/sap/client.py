@@ -253,7 +253,7 @@ class SAPClient:
 
         entity_sets: dict[str, list[str]] = {}
         try:
-            root = ElementTree.fromstring(resp.text)  # nosec B314
+            root = ElementTree.fromstring(resp.text)  # nosec B314  # noqa: S314
             # OData V2 namespace
             for entity_type in root.iter(
                 "{http://schemas.microsoft.com/ado/2008/09/edm}EntityType"

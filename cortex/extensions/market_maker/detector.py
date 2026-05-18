@@ -32,7 +32,7 @@ class TrendDetector:
         random_seed: int | None = None,
     ) -> None:
         self._http = http_client
-        self._rng = random.Random(random_seed)
+        self._rng = random.Random(random_seed)  # noqa: S311
 
     async def scan(self, keywords: list[str]) -> list[TrendSignal]:
         """

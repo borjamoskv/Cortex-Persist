@@ -34,11 +34,11 @@ def _bench_mlx(prompt: str) -> dict:
         import urllib.request
 
         data = json.dumps({"prompt": prompt, "max_tokens": 256, "temperature": 0.3}).encode()
-        req = urllib.request.Request(
+        req = urllib.request.Request(  # noqa: S310
             MLX_URL, data=data, headers={"Content-Type": "application/json"}
         )
         t0 = time.time()
-        with urllib.request.urlopen(req, timeout=30) as resp:
+        with urllib.request.urlopen(req, timeout=30) as resp:  # noqa: S310
             r = json.loads(resp.read())
             dt = time.time() - t0
             text = r["choices"][0]["text"]
@@ -67,13 +67,13 @@ def _bench_gemini(prompt: str) -> dict:
                 "generationConfig": {"temperature": 0.3, "maxOutputTokens": 256},
             }
         ).encode()
-        req = urllib.request.Request(
+        req = urllib.request.Request(  # noqa: S310
             f"{GEMINI_URL}?key={GEMINI_API_KEY}",
             data=data,
             headers={"Content-Type": "application/json"},
         )
         t0 = time.time()
-        with urllib.request.urlopen(req, timeout=30) as resp:
+        with urllib.request.urlopen(req, timeout=30) as resp:  # noqa: S310
             r = json.loads(resp.read())
             dt = time.time() - t0
             text = r["candidates"][0]["content"]["parts"][0]["text"]

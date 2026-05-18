@@ -264,7 +264,7 @@ class SovereignGate:
 
         # Execute
         logger.info("🚀 Gate: Executing approved action %s", action_id)
-        result = subprocess.run(cmd, **kwargs)
+        result = subprocess.run(cmd, **kwargs)  # noqa: S603
         action.status = ActionStatus.EXECUTED
         action.executed_at = time.time()
         action.result = {

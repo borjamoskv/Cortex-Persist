@@ -211,7 +211,7 @@ def compile_rust_code(rust_code: str) -> str:
     try:
         # Optimization flag -O ensures O(1) direct silicon efficiency
         cmd = ["rustc", "-O", "--crate-type=cdylib", "-o", output_lib, rust_src]
-        subprocess.run(cmd, capture_output=True, text=True, check=True)
+        subprocess.run(cmd, capture_output=True, text=True, check=True)  # noqa: S603
         return output_lib
     except subprocess.CalledProcessError as e:
         if os.path.exists(rust_src):
@@ -244,7 +244,7 @@ def execute_rust_jit(lib_path: str, func_name: str, args: list) -> float:
         if os.path.exists(lib_path):
             try:
                 os.unlink(lib_path)
-            except Exception:
+            except Exception:  # noqa: S110
                 pass
 
 

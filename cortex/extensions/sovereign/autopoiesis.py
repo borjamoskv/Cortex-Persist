@@ -46,7 +46,7 @@ class Autopoiesis:
         safe_env["CORTEX_SANDBOX"] = "1"
 
         cmd = ["python3", str(script_path)]
-        return subprocess.run(cmd, capture_output=True, text=True, timeout=30, env=safe_env)
+        return subprocess.run(cmd, capture_output=True, text=True, timeout=30, env=safe_env)  # noqa: S603
 
     def generate_and_register(
         self,

@@ -159,7 +159,7 @@ class TimingTracker:
             params.append(project)
         where_clause = " AND ".join(where)
         sql = (
-            "SELECT id, project, category, start_time, end_time,"  # nosec B608 — parameterized query
+            "SELECT id, project, category, start_time, end_time,"  # nosec B608 — parameterized query  # noqa: S608
             " duration_s, entities, heartbeats, meta"
             " FROM time_entries WHERE " + where_clause + " ORDER BY start_time ASC"
         )
@@ -213,7 +213,7 @@ class TimingTracker:
     def _build_summary(self, where_clause: str, params: list) -> TimeSummary:
         """Build a TimeSummary from a WHERE clause."""
         sql = (  # nosec B608 — parameterized query
-            "SELECT project, category, duration_s, entities, heartbeats"  # nosec B608 — parameterized query — {where}/{column}/{placeholders} built internally with ? params
+            "SELECT project, category, duration_s, entities, heartbeats"  # nosec B608 — parameterized query — {where}/{column}/{placeholders} built internally with ? params  # noqa: S608
             " FROM time_entries WHERE " + where_clause
         )
         rows = self._conn.execute(sql, params).fetchall()

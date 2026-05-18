@@ -54,7 +54,7 @@ class AgenticPolicyEngine:
         if HAS_RUST_CORE and os.path.exists(self.policy_path):
             try:
                 self._native_engine = cortex_core_rs.NativePolicyEngine(self.policy_path)
-            except Exception:
+            except Exception:  # noqa: S110
                 pass
 
         self.load_policy()

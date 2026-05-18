@@ -37,7 +37,12 @@ from cortex.engine.mixins.optimization import OptimizationMixin
 from cortex.engine.models import row_to_fact  # noqa: F401 — re-exported
 from cortex.engine.query_mixin import QueryMixin
 from cortex.engine.search_mixin import SearchMixin
-from cortex.engine.store_mixin import StoreMixin
+from cortex.engine.privacy_mixin import PrivacyMixin
+from cortex.engine.ghost_mixin import GhostMixin
+from cortex.engine.store_quarantine_mixin import QuarantineMixin
+from cortex.engine.store_mixin import StoreEngine, StoreMixin
+from cortex.guards.thermodynamic import AgentMode, ThermodynamicCounters
+from typing import ClassVar
 from cortex.engine.sync_mixin import SyncMixin
 from cortex.engine.transaction_mixin import TransactionMixin
 
@@ -64,7 +69,9 @@ MAX_TAGS_PER_FACT = 20
 # We use the unified GuardPipeline for AX-II logic.
 class CortexEngine(
     SearchMixin,
-    StoreMixin,
+    PrivacyMixin,
+    GhostMixin,
+    QuarantineMixin,
     QueryMixin,
     MemoryMixin,
     TransactionMixin,
@@ -75,6 +82,11 @@ class CortexEngine(
     LegacyMixin,
 ):
     """The Sovereign Ledger for AI Agents (Composite Orchestrator)."""
+
+    MIN_CONTENT_LENGTH = 10
+    _thermal_decay_cache: ClassVar[dict[int, int]] = {}
+    _thermo_counters: ClassVar[ThermodynamicCounters] = ThermodynamicCounters()
+    _agent_mode: ClassVar[AgentMode] = AgentMode.ACTIVE
 
     def __init__(
         self,
@@ -107,6 +119,8 @@ class CortexEngine(
         self._memory_l3 = None
         self._memory_ready = False
         self._persistence = PersistenceSupervisor(self)
+        self.store_engine = StoreEngine(self)
+        self._skills_verified.add("store")
         self._system_state = "ACTIVE"
         # Managers are synthesized JIT via properties (Axiom Ω₄)
         self._facts: FactManager | None = None  # noqa: F821
@@ -143,7 +157,6 @@ class CortexEngine(
             return
         SKILL_MAP = {
             "search": SearchMixin,
-            "store": StoreMixin,
             "query": QueryMixin,
             "memory": MemoryMixin,
             "tx": TransactionMixin,
@@ -516,11 +529,27 @@ class CortexEngine(
             fact_type=kwargs.get("fact_type", ""),
             project=kwargs.get("project", args[0] if args else ""),
         )
-        return await self.facts.store(*args, **kwargs)
+        return await self.store_engine.store(*args, **kwargs)
 
     async def store_many(self, *args, **kwargs):
         self._synthesize_skill("store")
-        return await super().store_many(*args, **kwargs)
+        return await self.store_engine.store_many(*args, **kwargs)
+
+    async def update(self, *args, **kwargs):
+        self._synthesize_skill("store")
+        return await self.store_engine.update(*args, **kwargs)
+
+    async def deprecate(self, *args, **kwargs):
+        self._synthesize_skill("store")
+        return await self.store_engine.deprecate(*args, **kwargs)
+
+    async def invalidate(self, *args, **kwargs):
+        self._synthesize_skill("store")
+        return await self.store_engine.invalidate(*args, **kwargs)
+
+    async def purge(self, *args, **kwargs):
+        self._synthesize_skill("store")
+        return await self.store_engine.purge(*args, **kwargs)
 
     async def recall(self, *args, **kwargs):
         self._synthesize_skill("search")

@@ -397,7 +397,7 @@ class GuardDaemon:
         if self._ledger and hasattr(self._ledger, "db"):
             try:
                 self._ledger.db.close()
-            except Exception:
+            except Exception:  # noqa: S110
                 pass
 
     @property

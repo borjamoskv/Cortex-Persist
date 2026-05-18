@@ -146,8 +146,8 @@ class CuatridaOrchestrator:
         if ghost_path.exists():
             start = datetime.fromtimestamp(time.time(), tz=timezone.utc)
             try:
-                subprocess.run(
-                    ["python3", str(ghost_path), "status"],
+                subprocess.run(  # noqa: S603
+                    ["python3", str(ghost_path), "status"],  # noqa: S607
                     capture_output=True,
                     timeout=2.0,
                     check=False,

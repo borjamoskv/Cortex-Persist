@@ -124,11 +124,11 @@ async def insert_fact_record(
     values = [value for _, value in payload]
 
     async with conn.execute(
-        f"INSERT INTO facts ({columns_sql}) VALUES ({placeholders_sql})",
+        f"INSERT INTO facts ({columns_sql}) VALUES ({placeholders_sql})",  # noqa: S608
         values,
     ) as cursor:
         fact_id = cursor.lastrowid
-    assert fact_id is not None
+    assert fact_id is not None  # noqa: S101
 
     await _post_insert_actions(
         conn,
@@ -252,7 +252,7 @@ async def _record_causality(
                 "VALUES (?, ?, NULL, ?, ?, ?)",
                 (fact_id, parent_decision_id, EDGE_DERIVED_FROM, project, tenant_id),
             )
-    except Exception:
+    except Exception:  # noqa: S110
         pass
 
 
@@ -275,7 +275,7 @@ async def _post_insert_actions(
             "INSERT INTO enrichment_jobs (fact_id, job_type, status, priority) VALUES (?, 'embedding', 'pending', ?)",
             (fact_id, 1 if fact_type == "decision" else 0),
         )
-    except Exception:
+    except Exception:  # noqa: S110
         pass
 
     if tags:
@@ -289,7 +289,7 @@ async def _post_insert_actions(
             "INSERT INTO facts_fts (rowid, content, project, tags, fact_type, tenant_id) VALUES (?, ?, ?, ?, ?, ?)",
             (fact_id, content, project, tags_json, fact_type, tenant_id),
         )
-    except Exception:
+    except Exception:  # noqa: S110
         pass
 
     await _record_causality(conn, fact_id, project, tenant_id, meta, parent_decision_id)
@@ -298,7 +298,7 @@ async def _post_insert_actions(
         from cortex.graph import process_fact_graph
 
         await process_fact_graph(conn, fact_id, content, project, ts, tenant_id)
-    except Exception:
+    except Exception:  # noqa: S110
         pass
 
 

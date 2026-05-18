@@ -256,7 +256,7 @@ def _semantic_arm(  # nosec B608 — parameterized query
     type_clause, type_params = _build_type_filter_clause(LEARNABLE_TYPES, project)
 
     sql = (  # nosec B608 — type_clause is built from constants + ? placeholders only
-        "SELECT ve.fact_id, ve.distance, f.project, f.content, f.fact_type,"  # nosec B608 — parameterized query — {where}/{column}/{placeholders} built internally with ? params
+        "SELECT ve.fact_id, ve.distance, f.project, f.content, f.fact_type,"  # nosec B608 — parameterized query — {where}/{column}/{placeholders} built internally with ? params  # noqa: S608
         "       f.created_at"
         " FROM fact_embeddings AS ve"
         " JOIN facts AS f ON f.id = ve.fact_id"
@@ -295,7 +295,7 @@ def _text_arm(
     type_clause, type_params = _build_type_filter_clause(LEARNABLE_TYPES, project)
 
     sql = (  # nosec B608 — type_clause is built from constants + ? placeholders only
-        "SELECT f.id, f.project, f.content, f.fact_type, f.created_at"  # nosec B608 — parameterized query — {where}/{column}/{placeholders} built internally with ? params
+        "SELECT f.id, f.project, f.content, f.fact_type, f.created_at"  # nosec B608 — parameterized query — {where}/{column}/{placeholders} built internally with ? params  # noqa: S608
         " FROM facts AS f"
         " JOIN facts_fts AS fts ON fts.rowid = f.id"
         " WHERE facts_fts MATCH ?"

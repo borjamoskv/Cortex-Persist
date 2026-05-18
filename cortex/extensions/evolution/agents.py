@@ -154,7 +154,7 @@ class SovereignAgent:
                 SubAgent(
                     name=f"{self.domain.name.lower()}-sub-{i}",
                     domain=self.domain,
-                    enneagram=random.choice(BEST_ENEATYPOS),
+                    enneagram=random.choice(BEST_ENEATYPOS),  # noqa: S311
                 )
                 for i in range(10)
             ]

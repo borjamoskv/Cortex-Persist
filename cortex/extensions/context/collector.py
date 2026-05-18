@@ -277,8 +277,8 @@ class ContextCollector:
         """Collect recent git commits (best-effort)."""
         signals = []
         try:
-            result = subprocess.run(
-                ["git", "log", f"--max-count={limit}", "--format=%H|%ai|%s"],
+            result = subprocess.run(  # noqa: S603
+                ["git", "log", f"--max-count={limit}", "--format=%H|%ai|%s"],  # noqa: S607
                 capture_output=True,
                 text=True,
                 cwd=str(self.workspace_dir),

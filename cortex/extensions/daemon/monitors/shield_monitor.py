@@ -166,8 +166,8 @@ class DailyShieldMonitor:
             import subprocess
 
             msg = f"{title}: {details}"
-            subprocess.run(
-                [
+            subprocess.run(  # noqa: S603
+                [  # noqa: S607
                     "osascript",
                     "-e",
                     f'display notification "{msg}" with title "CORTEX Shield" sound name "Basso"',

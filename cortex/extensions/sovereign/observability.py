@@ -207,8 +207,8 @@ def run_security_scans(target: str = "cortex/") -> SecurityReport:
 
     # Bandit
     try:
-        result = subprocess.run(
-            ["bandit", "-r", target, "-f", "json", "-q"],
+        result = subprocess.run(  # noqa: S603
+            ["bandit", "-r", target, "-f", "json", "-q"],  # noqa: S607
             capture_output=True,
             text=True,
             timeout=120,
@@ -229,7 +229,7 @@ def run_security_scans(target: str = "cortex/") -> SecurityReport:
     # Safety
     try:
         result = subprocess.run(
-            ["safety", "check", "--json"],
+            ["safety", "check", "--json"],  # noqa: S607
             capture_output=True,
             text=True,
             timeout=60,

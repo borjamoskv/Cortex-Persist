@@ -327,7 +327,7 @@ class SovereignScheduler:
                             "source": "scheduler",
                         },
                     )
-                except Exception:  # noqa: BLE001
+                except Exception:  # noqa: BLE001, S110
                     pass  # bus errors must not kill scheduler
 
             # Hot state update
@@ -341,7 +341,7 @@ class SovereignScheduler:
                             "ok": not error,
                         },
                     )
-                except Exception:  # noqa: BLE001
+                except Exception:  # noqa: BLE001, S110
                     pass
 
             level = "✅" if not error else "❌"

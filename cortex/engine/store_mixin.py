@@ -1,5 +1,6 @@
-"""Storage mixin — store, update, deprecate, ghost management.
+"""Storage Engine — store, update, deprecate, ghost management.
 
+Converted from StoreMixin multiple-inheritance to composed StoreEngine delegate.
 Security guards  → cortex.engine.store_guards
 Validators/dedup → cortex.engine.store_validators
 Quarantine       → cortex.engine.store_quarantine_mixin
@@ -28,29 +29,38 @@ from cortex.engine.store_validation import run_store_validation_logic
 from cortex.engine.store_validators import MIN_CONTENT_LENGTH, check_dedup, validate_content
 from cortex.guards.thermodynamic import AgentMode, ThermodynamicCounters
 
-# now_iso removed (internal use relocated)
-
-__all__ = ["StoreMixin"]
+__all__ = ["StoreEngine", "StoreMixin"]
 
 logger = logging.getLogger("cortex")
 
 
-class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
+class StoreEngine:
     """Sovereign Storage Layer — Fact Lifecycle with Zero-Trust Isolation.
 
-    Inherits from ``PrivacyMixin``, ``GhostMixin``, ``QuarantineMixin``
-    (all of which inherit from ``EngineMixinBase``), providing:
-    - ``store()``: Single-fact persistence with dedup + guards.
-    - ``store_many()``: Batch persistence (M facts in 1 transaction).
-    - ``update()``: Temporal versioning (deprecate → replace).
-    - ``deprecate()``: Soft-delete with audit trail.
+    Delegates all complex mutations, validations, and storage logic.
     """
 
-    store_fact = None  # Placeholder for alias
     MIN_CONTENT_LENGTH = MIN_CONTENT_LENGTH
-    _thermal_decay_cache: ClassVar[dict[int, int]] = {}
-    _thermo_counters: ClassVar[ThermodynamicCounters] = ThermodynamicCounters()
-    _agent_mode: ClassVar[AgentMode] = AgentMode.ACTIVE
+
+    def __init__(self, engine: Any):
+        self.engine = engine
+
+    @property
+    def _engine(self) -> Any:
+        """Resolve either the delegated engine reference or self if called as a legacy mixin."""
+        return getattr(self, "engine", self)
+
+    def _resolve_tenant(self, tenant_id: str) -> str:
+        return self._engine._resolve_tenant(tenant_id)
+
+    def session(self):
+        return self._engine.session()
+
+    async def _log_transaction(self, *args, **kwargs):
+        return await self._engine._log_transaction(*args, **kwargs)
+
+    def _get_embedder(self):
+        return self._engine._get_embedder()
 
     async def store(
         self,
@@ -72,7 +82,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         tenant_id = self._resolve_tenant(tenant_id)
 
         # ═══ SOVEREIGN LOCK (Axiom Ω_CB) ═══
-        if getattr(self, "system_state", "ACTIVE") == "LOCKED_EPISTEMIC_HALT":
+        if getattr(self._engine, "system_state", "ACTIVE") == "LOCKED_EPISTEMIC_HALT":
             if source != "daemon:circuit-breaker":
                 raise RuntimeError(
                     "CORTEX Engine is in LOCKED_EPISTEMIC_HALT state due to cognitive thrashing. "
@@ -127,7 +137,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
     ) -> tuple[int | None, dict[str, Any] | None, str, str]:
         """Delegated validation logic (Ω₁₃, Semantic Dedup, Bridge)."""
         return await run_store_validation_logic(
-            mixin_instance=self,
+            mixin_instance=self._engine,
             conn=conn,
             project=project,
             content=content,
@@ -156,7 +166,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         parent_decision_id: int | None = None,
     ) -> int:
         # ═══ AX-II: Pre-store guards via GuardPipeline ═══
-        pipeline = getattr(self, "_guard_pipeline", None)
+        pipeline = getattr(self._engine, "_guard_pipeline", None)
         if pipeline is not None:
             try:
                 await pipeline.run_guards(
@@ -181,7 +191,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                 project,
                 "store",
                 {"fact_type": fact_type},
-                tenant_id=tenant_id,  # pyright: ignore
+                tenant_id=tenant_id,
             )
         )
         fact_id = await insert_fact_record(
@@ -199,13 +209,10 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             parent_decision_id=parent_decision_id,
         )
 
-        # Dual-Write Bridge: handled in insert_fact_record
-        pass
-
         caps = CapabilityRegistry.get_instance().capabilities
         if (
-            getattr(self, "_auto_embed", False)
-            and getattr(self, "_vec_available", False)
+            getattr(self._engine, "_auto_embed", False)
+            and getattr(self._engine, "_vec_available", False)
             and caps.embeddings
         ):
             await embed_fact_async(
@@ -214,7 +221,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                 project,
                 content,
                 self._get_embedder(),
-                getattr(self, "_memory_manager", None),
+                getattr(self._engine, "_memory_manager", None),
                 tenant_id,
             )
 
@@ -223,7 +230,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
 
         # ═══ AX-II: Post-store hooks via GuardPipeline ═══
         if pipeline is not None:
-            db_path = str(getattr(self, "_db_path", "") or "")
+            db_path = str(getattr(self._engine, "_db_path", "") or "")
             try:
                 await pipeline.run_post_hooks(
                     fact_id,
@@ -353,7 +360,11 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
     ) -> bool:
         """Delegated deprecation logic."""
         return await deprecate_impl_logic(
-            mixin_instance=self, conn=conn, fact_id=fact_id, reason=reason, tenant_id=tenant_id
+            mixin_instance=self._engine,
+            conn=conn,
+            fact_id=fact_id,
+            reason=reason,
+            tenant_id=tenant_id,
         )
 
     async def invalidate(
@@ -382,7 +393,11 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
     ) -> bool:
         """Delegated invalidation logic (tombstone + taint)."""
         return await invalidate_impl_logic(
-            mixin_instance=self, conn=conn, fact_id=fact_id, reason=reason, tenant_id=tenant_id
+            mixin_instance=self._engine,
+            conn=conn,
+            fact_id=fact_id,
+            reason=reason,
+            tenant_id=tenant_id,
         )
 
     async def purge(
@@ -394,8 +409,17 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
         """Delegated purge logic (Ω₄: Bounded Demolition)."""
         tenant_id = self._resolve_tenant(tenant_id)
         return await purge_logic(
-            mixin_instance=self, fact_id=fact_id, tenant_id=tenant_id, force=force
+            mixin_instance=self._engine, fact_id=fact_id, tenant_id=tenant_id, force=force
         )
 
-    _validate_content = staticmethod(validate_content)
-    _check_dedup = staticmethod(check_dedup)
+
+class StoreMixin(StoreEngine, PrivacyMixin, GhostMixin, QuarantineMixin):
+    """Deprecated: Legacy Mixin class for backward compatibility support."""
+
+    MIN_CONTENT_LENGTH = MIN_CONTENT_LENGTH
+    _thermal_decay_cache: ClassVar[dict[int, int]] = {}
+    _thermo_counters: ClassVar[ThermodynamicCounters] = ThermodynamicCounters()
+    _agent_mode: ClassVar[AgentMode] = AgentMode.ACTIVE
+
+    def __init__(self, engine: Any):
+        super().__init__(engine)

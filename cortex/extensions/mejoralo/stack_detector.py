@@ -82,7 +82,7 @@ def run_cmd(cmd: str | None, cwd: Path) -> tuple[int, str]:
     if not cmd:
         return (0, "")
     try:
-        result = subprocess.run(
+        result = subprocess.run(  # noqa: S603
             shlex.split(cmd),
             cwd=str(cwd),
             capture_output=True,

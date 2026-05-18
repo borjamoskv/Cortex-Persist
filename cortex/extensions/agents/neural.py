@@ -98,7 +98,7 @@ class LinuxWindowSensor(BaseWindowSensor):
             import subprocess
 
             result = subprocess.run(
-                ["xdotool", "getactivewindow", "getwindowname"],
+                ["xdotool", "getactivewindow", "getwindowname"],  # noqa: S607
                 capture_output=True,
                 text=True,
                 timeout=2,
@@ -164,7 +164,7 @@ class LinuxClipboardSensor(BaseClipboardSensor):
             try:
                 import subprocess
 
-                result = subprocess.run(
+                result = subprocess.run(  # noqa: S603
                     cmd,
                     capture_output=True,
                     text=True,

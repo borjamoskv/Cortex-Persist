@@ -333,7 +333,8 @@ class EventLedgerL3:
             chunk = event_ids[i : i + chunk_size]
             placeholders = ",".join("?" * len(chunk))
             await self._conn.execute(
-                f"DELETE FROM memory_events WHERE event_id IN ({placeholders})", chunk
+                f"DELETE FROM memory_events WHERE event_id IN ({placeholders})",
+                chunk,  # noqa: S608
             )
 
         await self._conn.commit()

@@ -236,7 +236,7 @@ class HydraChaosEngine:
 
         cache = DistributedSovereignCache(mock_redis)
         await cache.put("agent:alpha", {"context": "pre-kill"})
-        assert cache.chaos_gate is not None
+        assert cache.chaos_gate is not None  # noqa: S101
         cache.chaos_gate.arm(ChaosScenario.KILL)
         await cache.get("agent:alpha")
 
@@ -245,7 +245,7 @@ class HydraChaosEngine:
 
         cache = DistributedSovereignCache(mock_redis)
         await cache.put("agent:gamma", {"data": "clean"})
-        assert cache.chaos_gate is not None
+        assert cache.chaos_gate is not None  # noqa: S101
         cache.chaos_gate.arm(ChaosScenario.CORRUPTION)
         await cache.get("agent:gamma")
 
@@ -253,16 +253,16 @@ class HydraChaosEngine:
         from cortex.memory.distributed_cache import DistributedSovereignCache
 
         cache = DistributedSovereignCache(mock_redis)
-        assert cache.chaos_gate is not None
+        assert cache.chaos_gate is not None  # noqa: S101
         cache.chaos_gate.arm(ChaosScenario.PARTIAL_FAILURE)
         result = await cache.put("agent:delta", {"c": 1})
-        assert not result, "Partial write must return False"
+        assert not result, "Partial write must return False"  # noqa: S101
 
     async def _scenario_consumer_stall(self, mock_redis: MockRedisClient) -> None:
         from cortex.memory.distributed_cache import DistributedSovereignCache
 
         cache = DistributedSovereignCache(mock_redis)
-        assert cache.chaos_gate is not None
+        assert cache.chaos_gate is not None  # noqa: S101
         cache.chaos_gate.arm(ChaosScenario.TIMEOUT)
         try:
             await async_interceptor(
@@ -275,7 +275,7 @@ class HydraChaosEngine:
         from cortex.memory.distributed_cache import DistributedSovereignCache
 
         cache = DistributedSovereignCache(mock_redis)
-        assert cache.chaos_gate is not None
+        assert cache.chaos_gate is not None  # noqa: S101
         cache.chaos_gate.arm(ChaosScenario.KILL, after_n=1)
         tasks = [cache.get("a"), cache.put("b", {"v": 1}), cache.prove_forgetting()]
         await asyncio.gather(*tasks, return_exceptions=True)

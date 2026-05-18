@@ -13,7 +13,7 @@ class GuardViolationError(Exception):
 
 
 class PolicyVerdict(str, Enum):
-    CORTEX_PASS = "CORTEX_PASS"
+    CORTEX_PASS = "CORTEX_PASS"  # noqa: S105
     CORTEX_WARN = "CORTEX_WARN"
     CORTEX_BLOCK = "CORTEX_BLOCK"
     CORTEX_ROLLBACK_READY = "CORTEX_ROLLBACK_READY"

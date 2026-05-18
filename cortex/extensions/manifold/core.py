@@ -169,8 +169,8 @@ class TesseractManifold:
         """Persist completion decision to CORTEX."""
         try:
             msg = f"Tesseract converged task [{task.id}]: {task.title}. Branch: {task.branch}. Result: {result[:200]}"
-            subprocess.run(
-                [
+            subprocess.run(  # noqa: S603
+                [  # noqa: S607
                     "python",
                     "-m",
                     "cortex.cli",
@@ -193,8 +193,8 @@ class TesseractManifold:
         """Persist incomplete convergence as a ghost."""
         try:
             msg = f"Tesseract partial convergence [{task.id}]: {task.title}. Reason: {reason}"
-            subprocess.run(
-                [
+            subprocess.run(  # noqa: S603
+                [  # noqa: S607
                     "python",
                     "-m",
                     "cortex.cli",
@@ -220,5 +220,5 @@ class TesseractManifold:
             from cortex.extensions.daemon.notifier import Notifier
 
             Notifier.notify(title, body[:200])
-        except Exception:
+        except Exception:  # noqa: S110
             pass

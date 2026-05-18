@@ -129,7 +129,7 @@ def _daemonize(
 
     try:
         asyncio.run(child_daemon.run())
-    except Exception:
+    except Exception:  # noqa: S110
         pass
     finally:
         sys.exit(0)

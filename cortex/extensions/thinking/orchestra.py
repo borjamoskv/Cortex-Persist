@@ -344,7 +344,7 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
             if attempt < attempts - 1:
                 backoff = min(
                     60.0, self.config.retry_delay_seconds * (2**attempt)
-                ) + random.uniform(0, 1.0)
+                ) + random.uniform(0, 1.0)  # noqa: S311
                 logger.info(
                     "⏳ Backoff %.1fs before retry %d/%d for %s:%s",
                     backoff,

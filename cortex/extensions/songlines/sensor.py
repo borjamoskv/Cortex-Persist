@@ -108,8 +108,10 @@ class TopographicSensor:
 
         # 2. Try xattr CLI (Chronos Sniper: added timeout)
         try:
-            out = subprocess.check_output(
-                ["xattr", str(file_path)], stderr=subprocess.DEVNULL, timeout=2.0
+            out = subprocess.check_output(  # noqa: S603
+                ["xattr", str(file_path)],
+                stderr=subprocess.DEVNULL,
+                timeout=2.0,  # noqa: S607
             )
             return [
                 a
@@ -141,8 +143,10 @@ class TopographicSensor:
 
         # 2. Try xattr CLI -p (Chronos Sniper: added timeout)
         try:
-            return subprocess.check_output(
-                ["xattr", "-p", attr, str(file_path)], stderr=subprocess.DEVNULL, timeout=2.0
+            return subprocess.check_output(  # noqa: S603
+                ["xattr", "-p", attr, str(file_path)],
+                stderr=subprocess.DEVNULL,
+                timeout=2.0,  # noqa: S607
             )
         except (subprocess.SubprocessError, FileNotFoundError, TimeoutError):
             return None
@@ -183,7 +187,7 @@ class TopographicSensor:
                 pass
 
         try:
-            subprocess.run(["xattr", "-d", attr_name, str(file_path)], capture_output=True)
+            subprocess.run(["xattr", "-d", attr_name, str(file_path)], capture_output=True)  # noqa: S603,S607
         except (subprocess.SubprocessError, FileNotFoundError, OSError):
             pass
 

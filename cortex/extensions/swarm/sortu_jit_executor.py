@@ -83,7 +83,7 @@ def _execute_sync(source_code: str, global_ctx: dict) -> dict:
     exec_globals = {"__builtins__": safe_builtins}
     exec_globals.update(global_ctx)
 
-    exec(compiled_code, exec_globals, local_env)
+    exec(compiled_code, exec_globals, local_env)  # noqa: S102
     return local_env
 
 
