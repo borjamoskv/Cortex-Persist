@@ -26,20 +26,21 @@ class RollbackSpine:
     def snapshot_git(self, reason: str) -> str | None:
         """Create a git stash of current changes as a rollback point."""
         try:
+            git_bin = shutil.which("git") or "git"
             # Check if inside a git repo
             subprocess.run(
-                ["git", "rev-parse", "--is-inside-work-tree"],  # noqa: S607
+                [git_bin, "rev-parse", "--is-inside-work-tree"],
                 check=True,
                 capture_output=True,
                 text=True,
-            )
+            )  # noqa: S603
 
             stash_msg = f"CORTEX-GUARD-SNAPSHOT: {reason} at {now_iso()}"
-            result = subprocess.run(  # noqa: S603
-                ["git", "stash", "push", "-m", stash_msg],
+            result = subprocess.run(
+                [git_bin, "stash", "push", "-m", stash_msg],
                 capture_output=True,
-                text=True,  # noqa: S607
-            )
+                text=True,
+            )  # noqa: S603
             if "No local changes to save" not in result.stdout:
                 logger.info(f"Created Git snapshot: {stash_msg}")
                 return stash_msg
