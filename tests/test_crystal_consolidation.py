@@ -12,7 +12,7 @@ import time
 
 import numpy as np
 import pytest
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 from cortex.extensions.swarm.crystal_consolidator import (
     ConsolidationResult,
@@ -511,8 +511,12 @@ class TestSemanticMerge:
         ]
 
         result = ConsolidationResult()
-        with patch.object(in_memory_db, "cursor", side_effect=sqlite3.Error("Mock error")):
-            await _execute_cold_purge(in_memory_db, vitals, result, dry_run=False)
+        cursor_mock = MagicMock()
+        cursor_mock.execute.side_effect = sqlite3.Error("Mock error")
+        cursor_mock.executemany.side_effect = sqlite3.Error("Mock error")
+        db_conn = MagicMock()
+        db_conn.cursor.return_value = cursor_mock
+        await _execute_cold_purge(db_conn, vitals, result, dry_run=False)
 
         assert result.errors == 1
 
@@ -543,8 +547,12 @@ class TestSemanticMerge:
             ),
         ]
         result = ConsolidationResult()
-        with patch.object(in_memory_db, "cursor", side_effect=sqlite3.Error("Mock error")):
-            await _execute_semantic_merge(in_memory_db, vitals, result, dry_run=False)
+        cursor_mock = MagicMock()
+        cursor_mock.execute.side_effect = sqlite3.Error("Mock error")
+        cursor_mock.executemany.side_effect = sqlite3.Error("Mock error")
+        db_conn = MagicMock()
+        db_conn.cursor.return_value = cursor_mock
+        await _execute_semantic_merge(db_conn, vitals, result, dry_run=False)
 
         assert result.merged == 0
 
@@ -663,8 +671,10 @@ class TestSemanticMerge:
         ]
 
         result = ConsolidationResult()
-        with patch.object(in_memory_db, "commit", side_effect=sqlite3.Error("Mock error")):
-            await _execute_semantic_merge(in_memory_db, vitals, result, dry_run=False)
+        db_conn = MagicMock()
+        db_conn.cursor.return_value = in_memory_db.cursor()
+        db_conn.commit.side_effect = sqlite3.Error("Mock error")
+        await _execute_semantic_merge(db_conn, vitals, result, dry_run=False)
 
         assert result.errors == 1
         assert result.merged == 0
@@ -731,8 +741,12 @@ class TestSemanticMerge:
         ]
 
         result = ConsolidationResult()
-        with patch.object(in_memory_db, "cursor", side_effect=sqlite3.Error("Mock error")):
-            await _execute_diamond_promotion(in_memory_db, vitals, result, dry_run=False)
+        cursor_mock = MagicMock()
+        cursor_mock.execute.side_effect = sqlite3.Error("Mock error")
+        cursor_mock.executemany.side_effect = sqlite3.Error("Mock error")
+        db_conn = MagicMock()
+        db_conn.cursor.return_value = cursor_mock
+        await _execute_diamond_promotion(db_conn, vitals, result, dry_run=False)
 
         assert result.errors == 1
         assert result.promoted == 0
