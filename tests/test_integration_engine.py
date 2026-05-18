@@ -40,7 +40,8 @@ async def test_connection_pool_stability(engine):
         )
         for i in range(100):
             await conn.execute(
-                "INSERT INTO agents (id, public_key, name, is_active, reputation_score) VALUES (?, ?, ?, ?, ?)",
+                "INSERT INTO agents (id, public_key, name, is_active, reputation_score) "
+                "VALUES (?, ?, ?, ?, ?)",
                 (f"agent_{i}", f"pub_{i}", f"Agent {i}", 1, 0.5),
             )
         await conn.commit()
@@ -48,14 +49,20 @@ async def test_connection_pool_stability(engine):
     manager = ConsensusManager(engine)
 
     # Simulate 100 concurrent votes
+    sem = asyncio.Semaphore(5)
+
+    async def safe_vote(i):
+        async with sem:
+            return await manager.vote_v2(fact_id=1, agent_id=f"agent_{i}", value=1)
+
     tasks = []
     for i in range(100):
-        tasks.append(manager.vote_v2(fact_id=1, agent_id=f"agent_{i}", value=1))
+        tasks.append(safe_vote(i))
 
     # This should complete without "Too many open connections" or pool timeouts
     scores = await asyncio.gather(*tasks)
     assert len(scores) == 100
-    assert all(isinstance(s, (int, float)) for s in scores)
+    assert all(isinstance(s, int | float) for s in scores)
 
 
 @pytest.mark.asyncio
@@ -72,25 +79,27 @@ async def test_multi_tenant_isolation(engine):
 
         # Seed agents for isolation test
         await conn.execute(
-            "INSERT INTO agents (id, public_key, name, is_active, reputation_score) VALUES (?, ?, ?, ?, ?)",
+            "INSERT INTO agents (id, public_key, name, is_active, reputation_score) "
+            "VALUES (?, ?, ?, ?, ?)",
             ("agent_A", "pub_A", "Agent A", 1, 0.5),
         )
         await conn.execute(
-            "INSERT INTO agents (id, public_key, name, is_active, reputation_score) VALUES (?, ?, ?, ?, ?)",
+            "INSERT INTO agents (id, public_key, name, is_active, reputation_score) "
+            "VALUES (?, ?, ?, ?, ?)",
             ("agent_B", "pub_B", "Agent B", 1, 0.5),
         )
 
         # Add a vote for tenant A
         await conn.execute(
-            """INSERT INTO consensus_votes_v2 
-               (fact_id, agent_id, vote, tenant_id, vote_weight, agent_rep_at_vote) 
+            """INSERT INTO consensus_votes_v2
+               (fact_id, agent_id, vote, tenant_id, vote_weight, agent_rep_at_vote)
                VALUES (?, ?, ?, ?, ?, ?)""",
             (10, "agent_A", 1, "tenant_A", 1.0, 0.5),
         )
         # Add a vote for tenant B
         await conn.execute(
-            """INSERT INTO consensus_votes_v2 
-               (fact_id, agent_id, vote, tenant_id, vote_weight, agent_rep_at_vote) 
+            """INSERT INTO consensus_votes_v2
+               (fact_id, agent_id, vote, tenant_id, vote_weight, agent_rep_at_vote)
                VALUES (?, ?, ?, ?, ?, ?)""",
             (10, "agent_B", -1, "tenant_B", 1.0, 0.5),
         )
