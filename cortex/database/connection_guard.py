@@ -84,6 +84,9 @@ _WHITELISTED_MODULES: frozenset[str] = frozenset(
         # New exceptions
         "cortex/mac_maestro/executor.py",
         "cortex/mcp/toolbox_watchdog.py",
+        "cortex/bounty_hunt/osint_scraper.py",
+        "cortex/daemon/guard_daemon.py",
+        "cortex/engine/profit_ledger.py",
     }
 )
 
