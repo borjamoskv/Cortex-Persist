@@ -126,7 +126,7 @@ DOMAIN_MAP: dict[str, list[str]] = {
         "el-pueblo-online",
         "gordacorp",
         "borjamoskv",
-        "borjamoskv.com",
+        "https://soundcloud.com/borja-moskv",
         "borja.moskv.eth",
         "manteca-web",
         "comienzos-clone",

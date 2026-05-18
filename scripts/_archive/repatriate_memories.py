@@ -10,7 +10,7 @@ COLD_DB_PATH = os.path.expanduser("~/.cortex/cold_storage.db")
 PERSONAL_PROJECTS = [
     "borja.moskv.eth",
     "borjamoskv",
-    "borjamoskv.com",
+    "https://soundcloud.com/borja-moskv",
     "el-pueblo-online",
     "filete-cumbia",
     "garmin-dashboard",

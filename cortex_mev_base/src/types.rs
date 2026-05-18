@@ -1,4 +1,3 @@
-use alloy::primitives::{Address, Bytes};
 use alloy::sol;
 
 // Empleamos macros de sol! para auto-generar los códecs de Rust hacia el contrato BaseStrike.huff
