@@ -38,6 +38,24 @@ class TestOuroborosForge(unittest.IsolatedAsyncioTestCase):
         except Exception as e:
             self.fail(f"Ouroboros Engine Crashed: {str(e)}")
 
+    @mock.patch("asyncio.create_subprocess_exec")
+    @mock.patch("os.system")
+    async def test_audit_cycle_with_failure(self, mock_os_system, mock_create_subprocess_exec):
+        """Audit Cycle with mocked contract failure."""
+        logger = logging.getLogger("cortex.ouroboros.test")
+
+        # Mock process for asyncio.create_subprocess_exec returning a failure code
+        mock_process = mock.AsyncMock()
+        mock_process.communicate.return_value = (b"output_error", b"error")
+        mock_process.returncode = 1
+        mock_create_subprocess_exec.return_value = mock_process
+
+        # This will clone and audit resulting in a finding
+        try:
+            await self.engine.run_audit()
+        except Exception as e:
+            self.fail(f"Ouroboros Engine Crashed: {str(e)}")
+
     @mock.patch("cortex.config.DB_PATH", ":memory:")
     async def test_signal_emission(self):
         """Verify SignalBus emits audit findings correctly."""
