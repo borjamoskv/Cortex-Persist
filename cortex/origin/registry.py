@@ -3,7 +3,7 @@ Key Registry for CORTEX-Persist Strict Origin Verification.
 """
 
 from dataclasses import dataclass
-from typing import Optional
+
 
 
 @dataclass

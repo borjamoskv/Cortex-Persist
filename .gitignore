@@ -100,6 +100,7 @@ reports/
 *.prof
 *.lprof
 .benchmarks/
+.cProfile/
 
 # Output reports & logs
 pytestdebug.log
@@ -310,3 +311,7 @@ docs/demo-padres/
 docs/_archived/demo-padres/
 docs/internal/
 docs/_archived/internal/
+docs/_archived/internal/
+
+# Audio processing assets
+farandula_remix/
