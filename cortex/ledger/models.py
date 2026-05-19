@@ -51,6 +51,23 @@ class ActionResult:
 
 
 @dataclass(frozen=True)
+class LedgerOriginSignature:
+    actor_id: str
+    actor_key_id: str
+    tenant_id: str
+    action: str
+    payload_hash: str
+    nonce: str
+    issued_at: str
+    origin_signature: str | None = None
+    signature_alg: Literal["ed25519"] = "ed25519"
+    hash_alg: Literal["sha256"] = "sha256"
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass(frozen=True)
 class LedgerEvent:
     event_id: str
     ts: str
@@ -62,6 +79,7 @@ class LedgerEvent:
     intent: IntentPayload | None = None
     correlation_id: str | None = None
     trace_id: str | None = None
+    origin: LedgerOriginSignature | None = None
     prev_hash: str | None = None
     hash: str | None = None
     semantic_status: SemanticStatus = "pending"
@@ -115,7 +133,7 @@ class LedgerEvent:
         )
 
     def to_payload(self) -> dict[str, Any]:
-        return {
+        payload = {
             "event_id": self.event_id,
             "timestamp": self.ts,
             "tool": self.tool,
@@ -126,11 +144,18 @@ class LedgerEvent:
             "intent": self.intent.to_dict() if self.intent else None,
             "correlation_id": self.correlation_id,
             "trace_id": self.trace_id,
-            "prev_hash": self.prev_hash,
-            "hash": self.hash,
-            "semantic_status": self.semantic_status,
-            "metadata": self.metadata,
         }
+        if self.origin is not None:
+            payload["origin"] = self.origin.to_dict()
+        payload.update(
+            {
+                "prev_hash": self.prev_hash,
+                "hash": self.hash,
+                "semantic_status": self.semantic_status,
+                "metadata": self.metadata,
+            }
+        )
+        return payload
 
     def to_json(self) -> str:
         return json.dumps(self.to_payload(), ensure_ascii=False, separators=(",", ":"))

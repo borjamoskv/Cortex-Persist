@@ -398,15 +398,19 @@ class _PublicLedgerVerifier:
         event: Mapping[str, Any],
         index: int,
     ) -> bool:
+        status = key.get("status")
+        if status not in {"active", "rotated", "revoked"}:
+            self.errors.append(f"event_key_not_active:{index}")
+            return False
+        if status == "revoked" and not key.get("valid_until"):
+            self.errors.append(f"event_key_revoked_without_valid_until:{index}")
+            return False
         try:
             issued_at = _parse_utc(str(event["issued_at"]))
             valid_from = _parse_utc(str(key["valid_from"]))
             valid_until = _parse_utc(str(key["valid_until"]))
         except (KeyError, PublicVerifierError) as exc:
             self.errors.append(f"event_key_validity_invalid:{index}:{exc.__class__.__name__}")
-            return False
-        if key.get("status") != "active":
-            self.errors.append(f"event_key_not_active:{index}")
             return False
         if not valid_from <= issued_at <= valid_until:
             self.errors.append(f"event_key_outside_validity:{index}")

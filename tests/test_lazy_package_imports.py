@@ -78,6 +78,22 @@ def test_routes_submodules_materialize_on_demand() -> None:
         assert graph_module not in sys.modules
 
 
+def test_ledger_origin_signatures_materialize_on_demand() -> None:
+    package_name = "cortex.ledger"
+    models_module = "cortex.ledger.models"
+    origin_module = "cortex.ledger.origin"
+
+    with _temporarily_reset_modules(package_name, models_module, origin_module):
+        module = importlib.import_module(package_name)
+
+        assert origin_module not in sys.modules
+        assert module.LedgerEvent.__name__ == "LedgerEvent"
+        assert models_module in sys.modules
+        assert origin_module not in sys.modules
+        assert module.OriginKeyRegistry.__name__ == "OriginKeyRegistry"
+        assert origin_module in sys.modules
+
+
 def test_browser_package_import_is_lazy_without_playwright() -> None:
     package_name = "cortex.extensions.browser"
     engine_module = "cortex.extensions.browser.engine"
