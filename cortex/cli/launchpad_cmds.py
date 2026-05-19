@@ -1,9 +1,9 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """CLI commands: launchpad (launch, list)."""
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import sqlite3
 from pathlib import Path

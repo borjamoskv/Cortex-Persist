@@ -212,7 +212,9 @@ def check(ctx: click.Context) -> None:
     else:
         issues = len(status.sites) - sum(1 for s in status.sites if s.healthy)
         issues += len(status.stale_ghosts) + len(status.memory_alerts)
-        console.logger.info(Panel(f"[bold red]⚠️  {issues} ISSUE(S) DETECTED[/]", border_style="red"))
+        console.logger.info(
+            Panel(f"[bold red]⚠️  {issues} ISSUE(S) DETECTED[/]", border_style="red")
+        )
 
     sys.exit(0 if status.all_healthy else 1)
 
@@ -226,7 +228,9 @@ def status(as_json: bool) -> None:
         if as_json:
             click.echo('{"error": "no status found"}')
         else:
-            console.logger.info("[yellow]No daemon status found. Run 'moskv-daemon check' first.[/]")
+            console.logger.info(
+                "[yellow]No daemon status found. Run 'moskv-daemon check' first.[/]"
+            )
         sys.exit(1)
 
     # JSON mode: dump and exit

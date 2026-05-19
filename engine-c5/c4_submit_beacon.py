@@ -5,12 +5,13 @@ import json
 import time
 from datetime import datetime
 
+
 class Code4renaSubmitBeacon:
     def __init__(self, target, report_path, warden):
         self.target = target
         self.report_path = report_path
         self.warden = warden
-        
+
     def log(self, msg, tier="INFO"):
         print(f"[{datetime.now().time()}] [{tier}] [BEACON] {msg}")
 
@@ -25,9 +26,9 @@ class Code4renaSubmitBeacon:
             "title": "Out-of-Bounds Memory Corruption in _decodePayload via Malicious Cross-Chain Injection",
             "body": content,
             "severity": "High",
-            "cortex_signature": "SOVEREIGN-L2-VALIDATED"
+            "cortex_signature": "SOVEREIGN-L2-VALIDATED",
         }
-        
+
         self.log("Construyendo CORTEX JSON Wrapper...", "L3-PACKAGER")
         return json.dumps(payload, indent=2)
 
@@ -44,22 +45,29 @@ class Code4renaSubmitBeacon:
 
     def c4_dry_run_submit(self, armored_payload):
         self.log("ADVERTENCIA LEY Ω9: MODO C4-SIMULACIÓN ENGANCHADO.", "LAW-Ω9")
-        self.log("Iniciando handshake TLS v1.3 hacia https://api.code4rena.com/api/submit...", "NET-TCP")
+        self.log(
+            "Iniciando handshake TLS v1.3 hacia https://api.code4rena.com/api/submit...", "NET-TCP"
+        )
         time.sleep(1)
         self.log("Conexión socket establecida.", "NET-TCP")
         self.log(f"Subiendo Armored Block PGP ({len(armored_payload)} bytes)...", "NET-POST")
         time.sleep(1)
-        self.log("[!] THE EPISTEMIC BREAKER ACTIVATED: ABORTANDO CONEXION TCP L3 ANTES DEL INGRESS.", "LAW-Ω9")
-        self.log("OPERACIÓN CORTEX-COMPITE EXITOSA A NIVEL SIMULADO. RED EN ESTADO SEGURO.", "SUCCESS")
+        self.log(
+            "[!] THE EPISTEMIC BREAKER ACTIVATED: ABORTANDO CONEXION TCP L3 ANTES DEL INGRESS.",
+            "LAW-Ω9",
+        )
+        self.log(
+            "OPERACIÓN CORTEX-COMPITE EXITOSA A NIVEL SIMULADO. RED EN ESTADO SEGURO.", "SUCCESS"
+        )
 
 
 if __name__ == "__main__":
     beacon = Code4renaSubmitBeacon(
-        target="2026-04-layerzero", 
+        target="2026-04-layerzero",
         report_path=os.path.expanduser("~/Cortex-Persist/engine-c5/Report-LayerZero.md"),
-        warden="borjamoskv"
+        warden="borjamoskv",
     )
-    
+
     payload = beacon.forge_payload()
     armored = beacon.pgp_seal_simulation(payload)
     beacon.c4_dry_run_submit(armored)

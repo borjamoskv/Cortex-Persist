@@ -1,6 +1,3 @@
-import logging
-logger = logging.getLogger(__name__)
-
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
 """CORTEX Quality Gates (10 Sovereign Seals) — Local Enforcement.
@@ -18,6 +15,9 @@ Usage:
 """
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import asyncio
 import os

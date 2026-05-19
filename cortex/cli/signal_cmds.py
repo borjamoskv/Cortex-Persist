@@ -1,6 +1,3 @@
-import logging
-logger = logging.getLogger(__name__)
-
 # This file is part of CORTEX.
 # Licensed under the Apache License, Version 2.0.
 # See top-level LICENSE file for details.
@@ -12,6 +9,9 @@ The nervous system of MOSKV-1 — exposed through the command line.
 """
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import json
 

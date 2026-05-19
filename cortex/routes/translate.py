@@ -30,9 +30,7 @@ class TranslateRequest(BaseModel):
     target_languages: list[str] = Field(
         ..., description="List of target language codes (e.g., ['es', 'fr', 'zh'])."
     )
-    context: str | None = Field(
-        None, description="Optional context about the application or tone."
-    )
+    context: str | None = Field(None, description="Optional context about the application or tone.")
 
 
 class TranslateResponse(BaseModel):

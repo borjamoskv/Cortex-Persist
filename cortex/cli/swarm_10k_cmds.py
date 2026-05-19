@@ -1,9 +1,9 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """CLI commands for CORTEX-SWARM-10K operations."""
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import asyncio
 from pathlib import Path

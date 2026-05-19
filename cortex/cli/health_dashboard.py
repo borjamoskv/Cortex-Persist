@@ -1,6 +1,3 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """CORTEX CLI — Health dashboard command.
 
 Rich terminal dashboard showing system health at a glance.
@@ -8,6 +5,9 @@ Added to the `cortex health` command group.
 """
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import click
 from rich.panel import Panel

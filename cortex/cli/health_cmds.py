@@ -1,6 +1,3 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """CORTEX CLI — Health command group.
 
 Commands for the CORTEX Health Index — monitoring and scoring.
@@ -8,6 +5,9 @@ Thin CLI wrapper; all logic lives in cortex.extensions.health.
 """
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import click
 

@@ -1,12 +1,12 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """MOSKV-Aether — CLI commands.
 
 Registered as `cortex aether` subcommand group.
 """
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import argparse
 import sys

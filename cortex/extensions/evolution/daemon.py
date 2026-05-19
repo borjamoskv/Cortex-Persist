@@ -41,7 +41,9 @@ def _print_swarm(engine: EvolutionEngine) -> None:
         gen = agent["generation"]
         avg_sub = agent["avg_subagent_fitness"]
         bar = "█" * int(fit / 3)
-        logger.info(f"  {domain:>16}  fit={fit:>6.1f}  gen={gen:>4}  avg_sub={avg_sub:>6.1f}  {bar}")
+        logger.info(
+            f"  {domain:>16}  fit={fit:>6.1f}  gen={gen:>4}  avg_sub={avg_sub:>6.1f}  {bar}"
+        )
 
     # Species breakdown
     if "species" in status:

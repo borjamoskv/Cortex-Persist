@@ -1,9 +1,9 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """CLI commands: quota (PULMONES — Sovereign Quota Manager)."""
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import dataclasses
 import json

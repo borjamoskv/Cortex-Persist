@@ -78,9 +78,7 @@ class CortexEncrypter:
         combined = nonce + ciphertext
         return self.PREFIX + base64.b64encode(combined).decode("utf-8")
 
-    def decrypt_str(
-        self, encrypted_data: str | None, tenant_id: str = "default"
-    ) -> str | None:
+    def decrypt_str(self, encrypted_data: str | None, tenant_id: str = "default") -> str | None:
         """Decrypt a Base64 string back into plaintext."""
         if not encrypted_data:
             return encrypted_data
@@ -110,9 +108,7 @@ class CortexEncrypter:
         except (ValueError, TypeError, base64.binascii.Error) as e:  # type: ignore[reportAttributeAccessIssue]
             raise ValueError(f"AES-GCM Decryption Failed (Data tampered?): {e}") from e
 
-    def encrypt_json(
-        self, data: dict[str, Any] | None, tenant_id: str = "default"
-    ) -> str | None:
+    def encrypt_json(self, data: dict[str, Any] | None, tenant_id: str = "default") -> str | None:
         """Encrypts a JSON dictionary."""
         if not data:
             return None

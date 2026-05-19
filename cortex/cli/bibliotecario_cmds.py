@@ -1,6 +1,3 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """
 CORTEX CLI — Bibliotecario (LIBRARIAN-1) commands.
 
@@ -10,6 +7,9 @@ them into structured CORTEX Memos (Markdown).
 """
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import asyncio
 import os
@@ -82,7 +82,9 @@ async def _ingest_and_organize(path: Path) -> str:
     if not llm.available:
         return "Error: LLM provider not available. Set CORTEX_LLM_PROVIDER."
 
-    console.logger.info(f"[cyan]🧠 LIBRARIAN-1 is ordering {len(content)} bytes of entropy...[/cyan]")
+    console.logger.info(
+        f"[cyan]🧠 LIBRARIAN-1 is ordering {len(content)} bytes of entropy...[/cyan]"
+    )
 
     response = await llm.complete(
         prompt=f"Organize this raw input:\\n{content}",

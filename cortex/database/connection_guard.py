@@ -1,6 +1,3 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """ConnectionGuard — CI/lint scanner for raw sqlite3.connect() usage.
 
 Provides a callable scanner that detects unauthorized sqlite3.connect()
@@ -15,6 +12,9 @@ Copyright 2026 by borjamoskv.com — Apache-2.0
 """
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import re
 import sys

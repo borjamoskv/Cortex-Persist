@@ -4,6 +4,7 @@ VSA-SDM Benchmark: Prove the 100x claim.
 Compares VSA retrieval vs brute-force cosine search.
 Tests LLM embedding projection round-trip.
 """
+
 import sys
 import time
 
@@ -55,7 +56,7 @@ def benchmark_retrieval():
         retrieved = engine.unbind(memory, query_key)
     vsa_ns = (time.perf_counter_ns() - t0) / 100
 
-    speedup = brute_ns / vsa_ns if vsa_ns > 0 else float('inf')
+    speedup = brute_ns / vsa_ns if vsa_ns > 0 else float("inf")
 
     # Quality check
     sim_quality = engine.cosine(states[500], retrieved)
@@ -66,8 +67,7 @@ def benchmark_retrieval():
     print(f"  VSA unbind:  {vsa_ns / 1e6:.2f} ms/query")
     print(f"  Speedup:     {speedup:.0f}x")
     print(f"  Quality:     cos={sim_quality:.4f}")
-    print(f"  Memory:      VSA={D * 8 / 1024:.1f} KB vs "
-          f"List={N_items * D * 8 / 1024:.0f} KB")
+    print(f"  Memory:      VSA={D * 8 / 1024:.1f} KB vs List={N_items * D * 8 / 1024:.0f} KB")
     print(f"  Compression: {N_items}x memory reduction")
     return speedup
 
@@ -77,9 +77,11 @@ def benchmark_llm_projection():
     D = 10000
     engine = VSAEngine(D=D, seed=42)
 
-    for llm_dim, model_name in [(768, "BERT/DistilBERT"),
-                                 (4096, "Llama/Qwen"),
-                                 (8192, "GPT-4/Gemini")]:
+    for llm_dim, model_name in [
+        (768, "BERT/DistilBERT"),
+        (4096, "Llama/Qwen"),
+        (8192, "GPT-4/Gemini"),
+    ]:
         # Simulate an LLM embedding
         emb = np.random.default_rng(99).standard_normal(llm_dim)
         emb = emb / np.linalg.norm(emb)
@@ -105,10 +107,12 @@ def benchmark_llm_projection():
         vsa2 = engine.project_from_llm(emb2, llm_dim)
         sep = engine.cosine(vsa_vec, vsa2)
 
-        print(f"  {model_name} (d={llm_dim}): "
-              f"proj={proj_ns / 1e6:.1f}ms, "
-              f"fidelity={fidelity:.4f}, "
-              f"separation={sep:.4f}")
+        print(
+            f"  {model_name} (d={llm_dim}): "
+            f"proj={proj_ns / 1e6:.1f}ms, "
+            f"fidelity={fidelity:.4f}, "
+            f"separation={sep:.4f}"
+        )
 
     print("  LLM projection: PASS")
 
@@ -126,9 +130,7 @@ def benchmark_engine_api():
     engine.memorize(k1, s1, timestamp=0.0)
 
     k2 = engine.random_vec()
-    s2 = engine.encode_record({
-        "action": "scale", "replicas": "ten", "region": "europe"
-    })
+    s2 = engine.encode_record({"action": "scale", "replicas": "ten", "region": "europe"})
     engine.memorize(k2, s2, timestamp=1.0)
 
     assert engine.item_count == 2
@@ -179,6 +181,5 @@ if __name__ == "__main__":
     if speedup >= 100:
         print("CLAIM VERIFIED: ≥100x speedup confirmed (C5-Real).")
     else:
-        print(f"CLAIM PARTIAL: {speedup:.0f}x (thermodynamic "
-              f"claim requires ≥100x).")
+        print(f"CLAIM PARTIAL: {speedup:.0f}x (thermodynamic claim requires ≥100x).")
     print("=" * 50)

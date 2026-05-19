@@ -110,7 +110,7 @@ class EntropyDemon:
     async def attack(self, code: str, context: Mapping[str, Any]) -> list[str]:
         findings = []
         # Checks for missing null-safety and generic exception handling
-        if "except Exception:  # TODO(Swarm): Narrow this exception
+        if "except Exception:" in code:
             findings.append(
                 "Fragility: Bare `except` detected. System cannot tolerate undetected entropy."
             )

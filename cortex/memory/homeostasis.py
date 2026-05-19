@@ -70,9 +70,7 @@ class EntropyPruner:
 
         return False
 
-    async def _post_prune_drift_check(
-        self, tenant_id: str, project_id: str | None = None
-    ) -> None:
+    async def _post_prune_drift_check(self, tenant_id: str, project_id: str | None = None) -> None:
         """Run non-blocking drift health check after pruning."""
         import importlib.util
 

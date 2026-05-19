@@ -1,9 +1,9 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """CLI commands: timeline log, checkout, snapshot."""
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import asyncio
 import sqlite3

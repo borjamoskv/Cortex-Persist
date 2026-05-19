@@ -1,6 +1,3 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """
 CORTEX V4 Bicameral Console (Subconscious Interface)
 
@@ -8,6 +5,9 @@ Separates the Sovereign Agent's monologue into Limbic, Motor, and Autonomic stre
 """
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import json
 import os

@@ -1,6 +1,3 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """CORTEX CLI — LLM Routing Commands (Industrial Noir).
 
 Exposes the tier/cost-aware routing matrix to the terminal.
@@ -14,6 +11,9 @@ Usage:
 """
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import click
 from rich.table import Table

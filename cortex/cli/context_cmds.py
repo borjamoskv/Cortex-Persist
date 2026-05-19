@@ -1,4 +1,5 @@
 import logging
+
 logger = logging.getLogger(__name__)
 
 """
@@ -141,7 +142,9 @@ async def _signals_async(db: str, as_json: bool):
             signals = await collector.collect_all()
 
         if as_json:
-            console.logger.info(json.dumps([s.to_dict() for s in signals], indent=2, ensure_ascii=False))
+            console.logger.info(
+                json.dumps([s.to_dict() for s in signals], indent=2, ensure_ascii=False)
+            )
             return
 
         if not signals:

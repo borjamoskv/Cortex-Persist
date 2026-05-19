@@ -1,6 +1,3 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """CLI commands for Moltbook integration.
 
 Usage:
@@ -12,6 +9,9 @@ Usage:
 """
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import asyncio
 
@@ -140,7 +140,9 @@ def post(submolt: str, title: str, content: str):
         if status_val == "pending":
             console.logger.info(f"[yellow]Post created, verification pending. ID: {post_id}[/]")
         else:
-            console.logger.info(f"[green]✅ Post published (no verification needed)![/] ID: {post_id}")
+            console.logger.info(
+                f"[green]✅ Post published (no verification needed)![/] ID: {post_id}"
+            )
 
 
 @moltbook_cmds.command("search")

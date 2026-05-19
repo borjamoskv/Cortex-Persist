@@ -1,6 +1,3 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """
 CORTEX — Pitch Arsenal.
 
@@ -14,6 +11,9 @@ Usage::
 """
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 __all__ = [
     "PITCH_CTO_SKEPTIC",

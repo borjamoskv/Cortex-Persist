@@ -52,7 +52,11 @@ async def main() -> None:
 
     # 4. Verify full ledger integrity
     ledger_result = await engine.verify_ledger()
-    ledger_ok = ledger_result.get("valid", False) if isinstance(ledger_result, dict) else bool(ledger_result)
+    ledger_ok = (
+        ledger_result.get("valid", False)
+        if isinstance(ledger_result, dict)
+        else bool(ledger_result)
+    )
     status = "INTACT" if ledger_ok else "TAMPERED"
     icon = "✔" if ledger_ok else "✘"
     print(f"[{icon}] Full ledger verification: {status}")
@@ -74,7 +78,11 @@ async def main() -> None:
 
     # 6. Re-verify — should detect the tamper if ledger chain covers the mutation
     ledger_result2 = await engine.verify_ledger()
-    ledger_ok2 = ledger_result2.get("valid", False) if isinstance(ledger_result2, dict) else bool(ledger_result2)
+    ledger_ok2 = (
+        ledger_result2.get("valid", False)
+        if isinstance(ledger_result2, dict)
+        else bool(ledger_result2)
+    )
     status2 = "INTACT" if ledger_ok2 else "TAMPERED"
     icon2 = "✔" if ledger_ok2 else "✘"
     print(f"[{icon2}] Post-tamper ledger verification: {status2}")

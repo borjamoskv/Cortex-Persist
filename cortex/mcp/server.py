@@ -1,4 +1,3 @@
-
 """MCP Server Implementation.
 
 Core logic for the CORTEX MCP Trust Server.

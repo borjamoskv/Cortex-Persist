@@ -84,8 +84,10 @@ def cmd_click(args: argparse.Namespace) -> int:
         query["identifier"] = args.identifier
 
     if not query:
-        print("ERROR: At least one of --role, --title, --description, "
-              "--identifier is required.", file=sys.stderr)
+        print(
+            "ERROR: At least one of --role, --title, --description, --identifier is required.",
+            file=sys.stderr,
+        )
         return 1
 
     action = UIAction(
@@ -151,24 +153,31 @@ def build_parser() -> argparse.ArgumentParser:
         description="Mac-Maestro-Ω: Sovereign macOS Automation Tool",
     )
     parser.add_argument(
-        "-v", "--verbose", action="store_true",
+        "-v",
+        "--verbose",
+        action="store_true",
         help="Enable debug logging",
     )
     sub = parser.add_subparsers(dest="command", required=True)
 
     # ── inspect ──
     p_inspect = sub.add_parser(
-        "inspect", help="Dump the AX tree of a running app",
+        "inspect",
+        help="Dump the AX tree of a running app",
     )
     p_inspect.add_argument("--app", "-a", required=True, help="Bundle ID")
     p_inspect.add_argument(
-        "--depth", "-d", type=int, default=8,
+        "--depth",
+        "-d",
+        type=int,
+        default=8,
         help="Max tree depth (default: 8)",
     )
 
     # ── click ──
     p_click = sub.add_parser(
-        "click", help="Click a UI element by semantic query",
+        "click",
+        help="Click a UI element by semantic query",
     )
     p_click.add_argument("--app", "-a", required=True, help="Bundle ID")
     p_click.add_argument("--role", "-r", help="AX role (e.g. AXButton)")
@@ -210,6 +219,7 @@ def main() -> int:
         print(f"FATAL: {e}", file=sys.stderr)
         if args.verbose:
             import traceback
+
             traceback.print_exc()
         return 1
 

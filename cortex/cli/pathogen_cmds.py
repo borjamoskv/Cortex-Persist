@@ -1,6 +1,3 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """CLI commands for Moltbook Pathogen-Omega (Inverse Immune System).
 
 Usage:
@@ -9,6 +6,9 @@ Usage:
 """
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import asyncio
 

@@ -1,12 +1,12 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """CORTEX CLI — Common shared objects and utilities.
 
 Prevent circular imports by centralizing base CLI objects.
 """
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import asyncio
 from typing import TYPE_CHECKING

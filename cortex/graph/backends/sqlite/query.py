@@ -1,4 +1,3 @@
-
 """SQLite Graph Query Mixin."""
 
 __all__ = ["SQLiteQueryMixin"]

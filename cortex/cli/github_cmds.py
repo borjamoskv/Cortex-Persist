@@ -1,9 +1,9 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """CLI commands: github sync, github status."""
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import os
 
@@ -32,7 +32,9 @@ def sync(token: str | None, owner: str, repo: str | None, db: str) -> None:
     if not token:
         token = os.environ.get("GITHUB_TOKEN")
     if not token:
-        console.logger.info("[red]✗[/] GitHub token required. Set GITHUB_TOKEN env var or pass --token.")
+        console.logger.info(
+            "[red]✗[/] GitHub token required. Set GITHUB_TOKEN env var or pass --token."
+        )
         raise SystemExit(1)
 
     engine = get_engine(db)

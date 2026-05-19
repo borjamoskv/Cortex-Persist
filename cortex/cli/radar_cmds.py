@@ -1,4 +1,5 @@
 import logging
+
 logger = logging.getLogger(__name__)
 
 from pathlib import Path
@@ -74,7 +75,9 @@ def scan(path: str, entropy: bool):
                 f"[noir.gold]Banda E (Entropía): {entropy_count} hechos detectados.[/noir.gold]"
             )
         else:
-            console.logger.info("[dim green]Banda E (Entropía): Humildad epistémica activa.[/dim green]")
+            console.logger.info(
+                "[dim green]Banda E (Entropía): Humildad epistémica activa.[/dim green]"
+            )
 
     # 3. Structural Rules (Leyes Físicas)
     console.logger.info("[dim white]Banda A (Arquitectura): Monitoreo pasivo activo.[/dim white]")

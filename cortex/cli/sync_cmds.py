@@ -1,9 +1,9 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """CLI commands: sync, export, writeback."""
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import asyncio
 from pathlib import Path
@@ -125,7 +125,9 @@ def export(db, out, fmt, project, min_confidence, types) -> None:
 
                 out_path = Path(out).expanduser()
                 out_path.write_text(output_str, encoding="utf-8")
-                console.logger.info(f"[green]✓[/] Datos ({fmt}) exportatorios a [cyan]{out_path}[/]")
+                console.logger.info(
+                    f"[green]✓[/] Datos ({fmt}) exportatorios a [cyan]{out_path}[/]"
+                )
         finally:
             # engine.close is async
             await engine.close()

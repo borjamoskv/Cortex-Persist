@@ -1,6 +1,3 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """
 CLI de Mac Maestro — Automatización soberana de escritorio macOS.
 
@@ -9,6 +6,9 @@ desde la terminal.
 """
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import asyncio
 

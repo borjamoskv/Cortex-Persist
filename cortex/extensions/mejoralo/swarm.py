@@ -130,7 +130,9 @@ class MejoraloSwarm:
             if result is not None:
                 console.logger.info(f"  [green]✨ Cirujía AST completada [{file_path.name}][/]")
                 return result
-            console.logger.info("  [yellow]⚠️ Modo quirúrgico fallido — fallback a archivo completo.[/]")
+            console.logger.info(
+                "  [yellow]⚠️ Modo quirúrgico fallido — fallback a archivo completo.[/]"
+            )
 
         # 📦 Full-file fallback
         base_prompt = self._build_prompt(file_path, content, findings_str, engine, project)

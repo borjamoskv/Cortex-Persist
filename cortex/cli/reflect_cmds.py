@@ -1,9 +1,9 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """CLI commands for CORTEX Reflection System — reflect + inject."""
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import sqlite3
 
@@ -40,7 +40,9 @@ def reflect(project, summary, errors, decisions, source, db) -> None:
             decisions=decision_list,
             source=source,
         )
-        console.logger.info(f"[green]✓[/] Reflection [bold]#{fact_id}[/] stored in [cyan]{project}[/]")
+        console.logger.info(
+            f"[green]✓[/] Reflection [bold]#{fact_id}[/] stored in [cyan]{project}[/]"
+        )
         if error_list:
             console.logger.info(f"  [red]✗[/] {len(error_list)} error(s) logged")
         if decision_list:

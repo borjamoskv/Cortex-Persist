@@ -1,4 +1,5 @@
 import logging
+
 logger = logging.getLogger(__name__)
 
 import json
@@ -74,7 +75,9 @@ def handle_ghost_response(returncode: int, stdout: str, stderr: str, title: str)
         # Ghost outputs JSON mostly, let's try to parse and pretty print
         data = json.loads(stdout)
         formatted_json = json.dumps(data, indent=2)
-        console.logger.info(Panel(f"[cyan]{formatted_json}[/cyan]", border_style="cyan", title=title))
+        console.logger.info(
+            Panel(f"[cyan]{formatted_json}[/cyan]", border_style="cyan", title=title)
+        )
     except json.JSONDecodeError:
         # Not JSON, just print it
         if stdout.strip():

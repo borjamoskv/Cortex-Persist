@@ -1,12 +1,12 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """
 KETER-∞ Daemon CLI commands.
 Sovereign Orchestration and Reality Weaver.
 """
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import click
 from rich.console import Console
@@ -29,7 +29,9 @@ def keter_cmds() -> None:
 @click.argument("intent", required=True)
 def build_cmd(intent: str) -> None:
     """Construye un sistema completo desde cero."""
-    console.logger.info(Panel(f"[bold gold1]KETER-BUILD[/]\nIntención: {intent}", border_style="gold1"))
+    console.logger.info(
+        Panel(f"[bold gold1]KETER-BUILD[/]\nIntención: {intent}", border_style="gold1")
+    )
 
     engine = KeterEngine()
     try:
@@ -92,7 +94,9 @@ def sovereign_ignite_cmd(env: str) -> None:
     """Ejecuta el pipeline soberano completo."""
     from cortex.extensions.sovereign.engine import run_pipeline
 
-    console.logger.info(Panel("[bold green]⚡ INICIANDO IGNICIÓN SOBERANA[/]", border_style="green"))
+    console.logger.info(
+        Panel("[bold green]⚡ INICIANDO IGNICIÓN SOBERANA[/]", border_style="green")
+    )
 
     try:
         ctx = _run_async(run_pipeline(environment=env))

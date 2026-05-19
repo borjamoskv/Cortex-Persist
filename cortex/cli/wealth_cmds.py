@@ -1,6 +1,3 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """CORTEX CLI — Sovereign Wealth Engine (moneytv-1 & sovereign-growth-engine-v1).
 
 Commands:
@@ -15,6 +12,9 @@ Commands:
 """
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import asyncio
 from collections.abc import Coroutine
@@ -173,7 +173,9 @@ def money_tax(year: str, jurisdiction: str):
     )
     console.logger.info(f"Jurisdicción: [yellow]{jurisdiction}[/yellow]")
     console.logger.info("[dim]Escaneando ledger de CORTEX...[/dim]")
-    console.logger.info("[green]✅ Reporte fiscal preliminar generado en 'cortex_tax_2026.pdf'[/green]")
+    console.logger.info(
+        "[green]✅ Reporte fiscal preliminar generado en 'cortex_tax_2026.pdf'[/green]"
+    )
 
 
 @wealth_cmds.command("growth")
@@ -192,7 +194,9 @@ def growth_pipeline(objetivo: str):
         opportunities = _run_async(engine.pulse_scan(objetivo))
 
     if not opportunities:
-        console.logger.info("[red]❌ No hay Alpha suficiente para justificar GTM (Score < 4.0).[/red]")
+        console.logger.info(
+            "[red]❌ No hay Alpha suficiente para justificar GTM (Score < 4.0).[/red]"
+        )
         return
 
     top_opp = opportunities[0]

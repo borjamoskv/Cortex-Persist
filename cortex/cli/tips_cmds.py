@@ -1,6 +1,3 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """CORTEX CLI — Tips Commands.
 
 Surface contextual tips from the TIPS engine.
@@ -8,6 +5,9 @@ Designed to display during agent thinking pauses.
 """
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import asyncio
 import sqlite3

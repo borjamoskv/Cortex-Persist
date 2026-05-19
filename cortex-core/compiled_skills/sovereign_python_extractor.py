@@ -2,8 +2,10 @@
 CORTEX JIT Compiled Skill: sovereign-python-extractor
 Description: >
 """
+
 import json
 import logging
+
 
 class SovereignPythonExtractorSkill:
     def __init__(self):
@@ -27,5 +29,5 @@ class SovereignPythonExtractorSkill:
             "skill": self.name,
             "injected_knowledge_tokens": len(self.instructions.split()),
             "yield_impact": "O(1) Execution",
-            "extracted_payload": payload
+            "extracted_payload": payload,
         }

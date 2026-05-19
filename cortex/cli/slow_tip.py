@@ -1,6 +1,3 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """
 CORTEX v5.2 — Slow-Op Tip Emitter.
 
@@ -29,6 +26,9 @@ Usage::
 """
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import functools
 import threading

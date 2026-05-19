@@ -1,4 +1,3 @@
-
 """
 ZENÓN-1: Formalización Algorítmica del Detector de Rendimiento Decreciente.
 Protocolo Soberano para prevenir la recursividad infinita (Parálisis de Análisis)

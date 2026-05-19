@@ -56,7 +56,9 @@ def main() -> None:
     print(f"💽 Cortex Source Size: {size_mb:.2f} MB")
 
     if import_time > STEADY_STATE_IMPORT_THRESHOLD:
-        print(f"❌ Steady-state import time exceeds {STEADY_STATE_IMPORT_THRESHOLD:.1f}s threshold!")
+        print(
+            f"❌ Steady-state import time exceeds {STEADY_STATE_IMPORT_THRESHOLD:.1f}s threshold!"
+        )
         sys.exit(1)
 
     if cold_import_time > STEADY_STATE_IMPORT_THRESHOLD:

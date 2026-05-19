@@ -319,7 +319,9 @@ def status_cmd():
         if age_h > 48:
             console.logger.info(f"\n[red]⚠️ Digest tiene {age_h:.0f}h — alto riesgo (>48h)[/red]")
         elif age_h > 24:
-            console.logger.info(f"\n[yellow]⚠️ Digest tiene {age_h:.0f}h — considerar re-sync[/yellow]")
+            console.logger.info(
+                f"\n[yellow]⚠️ Digest tiene {age_h:.0f}h — considerar re-sync[/yellow]"
+            )
         else:
             console.logger.info(f"\n[green]✅ Digest fresco ({age_h:.1f}h)[/green]")
 
@@ -450,11 +452,17 @@ def ingest_cmd(drive_path: str | None):
                                         }
                                     )
                             newly_processed.append(file_path.name)
-                            console.logger.info(f"   [green]→ Se extrajeron {len(items)} hechos.[/green]")
+                            console.logger.info(
+                                f"   [green]→ Se extrajeron {len(items)} hechos.[/green]"
+                            )
                         else:
-                            console.logger.info("   [red]→ Respuesta no es una lista JSON válida.[/red]")
+                            console.logger.info(
+                                "   [red]→ Respuesta no es una lista JSON válida.[/red]"
+                            )
                     except json.JSONDecodeError:
-                        console.logger.info(f"   [red]→ Error parseando JSON de {res.provider}[/red]")
+                        console.logger.info(
+                            f"   [red]→ Error parseando JSON de {res.provider}[/red]"
+                        )
                         console.logger.info(f"      Raw output: {res.content[:200]}...")
 
         if extracted_facts:

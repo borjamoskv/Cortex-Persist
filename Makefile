@@ -19,8 +19,7 @@ test-fast: ## Run fast tests (excludes slow embedding/rag tests)
 
 test-slow: ## Run only slow tests
 	@echo "🐢 Running slow tests..."
-	.venv/bin/pytest tests/test_graph_rag.py tests/test_mejoralo_rounds3_5.py -v
- --tb=short
+	.venv/bin/pytest tests/test_graph_rag.py tests/test_mejoralo_rounds3_5.py -v --tb=short
 
 lint: ## Run linter
 	ruff check cortex/ tests/
@@ -76,8 +75,8 @@ ship-fast: ## Ship gate (fast — skip slow tests)
 	@echo "⚡ Running Ship Gate (fast mode)..."
 	.venv/bin/python scripts/ship_gate.py --fast
 
-typecheck: ## Run type checker
-	.venv/bin/mypy cortex/ --ignore-missing-imports --no-error-summary 2>&1 | tail -20
+typecheck: ## Run type checker (pyright)
+	.venv/bin/pyright cortex/
 
 mcp: ## Start MCP server
 	python run_mcp_server.py

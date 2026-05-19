@@ -2,201 +2,166 @@
 description: Workflow maestro para browser_subagent — QA visual, investigación web, testing de flujos y scraping inteligente
 ---
 
-# 🌐 Browser Subagent — Workflow Maestro
+# 🌐 Browser Subagent — Protocolo de Ejecución Soberana v2.0
 
-## Cuándo usar browser_subagent
-
-| Caso de uso | Ejemplo |
-|---|---|
-| **QA Visual** | Verificar que una web se ve correcta en diferentes viewports |
-| **Testing de flujos** | Login → Dashboard → Checkout funciona end-to-end |
-| **Investigación web** | Leer docs, analizar competidores, extraer info de APIs |
-| **Scraping inteligente** | Extraer datos estructurados de páginas dinámicas (JS-rendered) |
-| **Captura de evidencia** | Grabar vídeo de bugs o comportamientos para documentar |
-| **Formularios y auth** | Rellenar formularios, testear autenticación |
-
-## Cuándo NO usar browser_subagent
-
-- **Leer contenido estático** → Usa `read_url_content` (más rápido, sin overhead)
-- **Buscar en internet** → Usa `search_web` primero
-- **Ver archivos locales** → Usa `view_file`
-
-## Anatomía de una buena llamada
-
-```
-browser_subagent(
-  TaskName: "Título Legible Corto",        # Max 3-5 palabras
-  RecordingName: "nombre_con_underscores",  # Max 3 palabras, lowercase
-  Task: "..."                               # El prompt completo (ver abajo)
-)
-```
-
-### El Task prompt — reglas de oro
-
-El `Task` es un prompt completo para un agente autónomo. Debe ser **autocontenido**:
-
-1. **URL exacta** — Siempre empezar con "Navigate to [URL]"
-2. **Acciones paso a paso** — Numerar cada acción concreta
-3. **Qué buscar** — Describir qué verificar o extraer
-4. **Condición de retorno** — "Return when..." con criterio claro
-5. **Qué reportar** — "In your final report, include: [lista]"
-
-## Plantillas por caso de uso
+> **Substrato Cognitivo:** CORTEX Unified Substrate (v6.0)
+> **Directiva Primaria:** Tratar la interacción en navegador como una propuesta estocástica y forzar fronteras deterministas de validación (C5-REAL).
 
 ---
 
-### 1. QA Visual de web local
+## 1. 🌌 Postura Epistémica: El Navegador como Caja de Arena Estocástica
 
+El navegador es una interfaz visual propensa a la entropía (cambios de DOM, timeouts, bloqueos por bots, latencia de red). Este workflow reduce la fricción y la latencia cognitiva aplicando las siguientes reglas:
+
+1. **Aislamiento de Taint:** Toda sesión de navegador iniciada para extraer datos de terceros debe heredar y conservar el flag `CORTEX-TAINT` en sus reportes.
+2. **C5-REAL Verification:** Ninguna acción en el navegador se considera completada sin una verificación determinista posterior (lectura directa del DOM resultante o captura de pantalla).
+3. **Evidencia por Grabación:** Todas las sesiones generan grabaciones WebP automáticas. El nombre de grabación (`RecordingName`) debe mapearse de forma unívoca a la tarea para facilitar auditorías forenses.
+
+---
+
+## 2. ⚡ Matriz de Decisiones Termodinámicas (Exergía de Red)
+
+No inicies el subagente de navegador si puedes resolver la tarea con primitivas más baratas:
+
+| Canal | Método alternativo | Caso de Uso | Exergía (Tokens/Tiempo) |
+| :--- | :--- | :--- | :--- |
+| **Contenido Estático** | `read_url_content` | Páginas de documentación, markdown, JSONs estáticos. | MÍNIMA (1x) |
+| **Búsqueda Web** | `search_web` | Preguntas de actualidad, APIs, documentación externa. | BAJA (2x) |
+| **Interacción Dinámica** | **`browser_subagent`** | Páginas Single Page App (SPA), logins con JS, flujos de checkout, QA visual. | MÁXIMA (20x) |
+
+---
+
+## 3. 🔄 El Ciclo de Interacción Determinista (Saga del Navegador)
+
+Para evitar bucles infinitos de reintento, cada interacción debe seguir este contrato de ejecución:
+
+```text
+[Definición de Tarea]
+        ↓
+[Pre-Vuelo HTTP] (Confirmar puerto/resolución local si aplica)
+        ↓
+[Navegación Inicial] → (SAGA-1: Timeout / DNS Failure → Abortar)
+        ↓
+[Espera de Estabilidad] (Espera a red o elemento clave en el DOM)
+        ↓
+[Bucle de Interacción] (Clicks, inputs usando selectores robustos)
+        ↓
+[Assert de Estado] (Confirmar cambio de URL o presencia de elemento éxito)
+        ↓
+[Extracción / Captura] (Volcado de datos estructurados + Screenshot final)
 ```
+
+---
+
+## 4. 🎯 Jerarquía de Selectores Anti-Fragilidad
+
+Cuando definas tareas en `Task`, instruye al subagente a usar la siguiente jerarquía de búsqueda de elementos:
+
+1. **ID Único:** `[id="submit-button"]` (Inmutable).
+2. **Atributo Semántico:** `[data-testid="login-input"]` or `[aria-label="Search"]`.
+3. **Text Anchor:** Buscar por texto exacto del botón/enlace (ej. "Save Changes").
+4. **CSS Predictivo:** `.btn-primary` (Evitar rutas largas del tipo `div > div > ul > li:nth-child(2) > a`).
+
+---
+
+## 5. Plantillas de Tareas Altamente Optimizadas
+
+### 5.1 QA Visual y Consola (Entorno Local)
+```yaml
+TaskName: "QA Visual Local"
+RecordingName: "qa_visual_local"
 Task: |
   Navigate to http://localhost:5173
-
-  Verify the following:
-  1. The page loads without console errors
-  2. The hero section displays correctly with the title "[TÍTULO]"
-  3. Scroll down and verify the gallery section shows at least [N] items
-  4. Resize the browser to 375x812 (mobile) and verify responsive layout
-  5. Check that all images load (no broken image icons)
-
-  Return when all checks are complete.
-
+  
+  Verify and report:
+  1. The page loads without throwing uncaught exceptions in the console.
+  2. The primary heading (h1) matches "[TITLE]".
+  3. All images in the main grid load (no 404s or broken assets).
+  4. Compare typography and layout alignment against #0A0A0A base styling.
+  
+  Return when elements are verified.
   In your final report, include:
-  - Pass/fail for each check
-  - Any visual issues found
-  - Any console errors or warnings
-  - Screenshots descriptions of any problems
+  - Exact console logs (errors and warnings).
+  - Status of each image tested.
+  - Performance impression (TTFT/LCP visual estimation).
 ```
 
-### 2. Testing de flujo de usuario
-
-```
+### 5.2 Test de Flujo de Usuario y Autenticación
+```yaml
+TaskName: "Auth Flow Test"
+RecordingName: "user_auth_flow"
 Task: |
   Navigate to [URL]
-
-  Complete the following user flow:
-  1. Click on "[BOTÓN/LINK]"
-  2. Fill in the form:
-     - Field "[NAME]": enter "[VALUE]"
-     - Field "[NAME]": enter "[VALUE]"
-  3. Click "[SUBMIT BUTTON]"
-  4. Wait for the page to load
-  5. Verify that [SUCCESS CONDITION]
-
-  If any step fails, stop and report the failure.
-
-  Return when the flow is complete or a failure is detected.
-
+  
+  Execute the following actions:
+  1. Locate the username field and input "[USER]".
+  2. Locate the password field and input "[PASSWORD]".
+  3. Click the button with the text "Sign In" or "Log In".
+  4. Wait for redirection. The target URL must contain "[DASHBOARD_PATH]".
+  5. Verify the existence of a profile indicator or sign-out button.
+  
+  Abort immediately if a validation warning appears.
+  Return when the dashboard is visible.
   In your final report, include:
-  - Each step attempted and its result
-  - The final URL after completion
-  - Any error messages displayed
+  - Redirection timeline (initial URL to dashboard URL).
+  - Verification of the profile element.
+  - Any error screens encountered.
 ```
 
-### 3. Investigación de competidor/producto
-
-```
+### 5.3 Extracción de Datos Estructurados (Scraping Dinámico)
+```yaml
+TaskName: "Dynamic Scraping"
+RecordingName: "dynamic_scrape"
 Task: |
   Navigate to [URL]
-
-  Analyze the following aspects:
-  1. Main value proposition — what does the product claim to do?
-  2. Key features listed on the page
-  3. Pricing model (if visible)
-  4. Tech stack indicators (check footer, source, meta tags)
-  5. Design patterns worth noting (animations, layout, interactions)
-
-  Return when analysis is complete.
-
-  In your final report, include:
-  - Summary of the product in 2-3 sentences
-  - Bullet list of key features
-  - Pricing info if found
-  - Design/UX observations
-  - Any technical observations
+  
+  Extract the following attributes:
+  1. Item Title (Selector: `[data-field="title"]` or similar).
+  2. Item Price (Selector: `.price` or text containing "$").
+  3. Click "Next Page" (Selector: `[aria-label="Next"]`) and repeat the extraction.
+  
+  Return when page 2 extraction completes.
+  In your final report, format the output as a clean Markdown table with keys:
+  - title
+  - price
+  - url
 ```
 
-### 4. Extracción de datos estructurados
-
-```
+### 5.4 Multi-Viewport y Responsividad
+```yaml
+TaskName: "Responsive QA"
+RecordingName: "responsive_qa"
 Task: |
   Navigate to [URL]
-
-  Extract the following data:
-  1. [DATO 1] — location: [CSS selector or description]
-  2. [DATO 2] — location: [CSS selector or description]
-  3. If there is pagination, navigate to page 2 and extract the same data
-
-  Return when all data is extracted.
-
-  In your final report, format the data as:
-  - A structured list or table
-  - Include the source URL for each data point
-```
-
-### 5. Multi-viewport QA
-
-```
-Task: |
-  Navigate to [URL]
-
-  Test across these viewports:
-  1. Desktop: 1920x1080 — verify [CRITERIA]
-  2. Tablet: 768x1024 — verify [CRITERIA]
-  3. Mobile: 375x812 — verify [CRITERIA]
-
-  For each viewport:
-  - Resize the browser window first
-  - Wait for layout to settle
-  - Check navigation, images, text readability
-  - Note any overflow, broken layouts, or hidden elements
-
-  Return when all viewports are tested.
-
+  
+  Perform tests at:
+  1. Desktop (1920x1080): Verify sidebar is expanded and links are visible.
+  2. Mobile (375x812): Verify sidebar collapses into a hamburger menu. Click menu to verify expand behavior.
+  
+  Return when both viewports are checked.
   In your final report, include:
-  - Pass/fail per viewport
-  - Specific issues found per viewport
-  - Overall responsive quality assessment (1-10)
+  - Visual anomalies (content clipping, overlapping text).
+  - Element interaction status on mobile.
 ```
 
-## Errores comunes a evitar
+---
 
-| Error | Solución |
-|---|---|
-| Task vago ("check the page") | Ser específico: qué verificar, dónde, qué esperar |
-| Sin condición de retorno | Siempre incluir "Return when..." |
-| Sin formato de reporte | Siempre pedir "In your final report, include..." |
-| URL incorrecta | Verificar que el servidor está corriendo antes de lanzar |
-| Demasiadas acciones | Max 5-7 pasos por subagent. Si necesitas más, dividir en múltiples llamadas |
-| No leer el resultado | Después del subagent, SIEMPRE hacer screenshot o leer DOM para verificar |
+## 6. 🚨 Signaturas de Fallo en Navegación (Auditoría Forense)
 
-## Combinaciones potentes
+Si observas estos comportamientos durante la ejecución, detén el bucle y ejecuta la remediación correspondiente:
 
-### Browser + QA Chain
-```
-1. run_command → npm run dev (levantar servidor)
-2. browser_subagent → QA visual completo
-3. Si falla → editar código → repetir
-```
+| Síntoma | Causa probable | Remediación C5-REAL |
+| :--- | :--- | :--- |
+| **Timeout de red (30s+)** | Puerto local no levantado o CORS estricto. | Detener, ejecutar `curl -I [URL]` localmente y verificar logs de consola. |
+| **Elemento no interactuable** | Superposición por modal, cookie banner o carga asíncrona tardía. | Añadir paso intermedio: "Click 'Accept' on the cookie banner first" o scroll. |
+| **Re-redirección a login** | Falta de persistencia de sesión o expiración de token. | Verificar si se requiere inyectar cookies previas o ejecutar el flujo de login secuencial. |
+| **Pantalla en blanco / Crash** | Excepción JS crítica no controlada. | Leer DOM con `read_browser_page` para inspeccionar `<body>` crudo y extraer trazas de error. |
 
-### Browser + Research Swarm
-```
-1. search_web → encontrar URLs relevantes
-2. browser_subagent × N → analizar cada una en paralelo
-3. Sintetizar resultados
-```
+---
 
-### Browser + Screenshot Evidence
-```
-1. browser_subagent → testear flujo, el vídeo se graba automáticamente
-2. El recording queda en artifacts como evidencia
-3. Embedir en walkthrough.md con ![caption](path)
-```
+## 7. Protocolo de Cierre (Ship Gate Integration)
 
-## Referencia rápida de RecordingName
-
-- `qa_visual_check` — verificación visual general
-- `responsive_test` — test multi-viewport
-- `user_flow_test` — test de flujo de usuario
-- `competitor_analysis` — análisis de competidor
-- `bug_reproduction` — reproducción de bug
-- `deploy_verification` — verificación post-deploy
+Una vez completada la llamada de `browser_subagent`:
+1. **Verificar el archivo de video:** Asegurar que se haya guardado en el directorio de artifacts asignado.
+2. **Inspección de DOM de Cierre:** Realizar una lectura corta del estado final del DOM para consolidar los cambios en el log del Ledger.
+3. **Liberar recursos:** Cerrar los servidores de desarrollo levantados temporalmente si ya no son requeridos.

@@ -1,4 +1,5 @@
 import logging
+
 logger = logging.getLogger(__name__)
 
 """Helper functions for Trust and Compliance CLI commands."""

@@ -32,28 +32,24 @@ class PeARLInductionAgent:
             "priors": {
                 "Omega_M": "[0.1, 0.5]",
                 "Omega_Lambda": "[0.5, 0.9]",
-                "H0": "[50.0, 100.0]"
+                "H0": "[50.0, 100.0]",
             },
-            "confidence": "C5-Dynamic"
+            "confidence": "C5-Dynamic",
         }
 
-        return {
-            "induced_ast": pseudo_pearl_ast,
-            "status": "crystalized",
-            "exergy_cost": "O(1)"
-        }
+        return {"induced_ast": pseudo_pearl_ast, "status": "crystalized", "exergy_cost": "O(1)"}
 
     def _handle_anomaly(self, data: dict[str, Any]) -> dict[str, Any]:
         """
-        When anomalous data occurs (e.g. redshift z > 50), the Agent induces 
+        When anomalous data occurs (e.g. redshift z > 50), the Agent induces
         a 'Singularity' model rather than interpolating stochastically.
         """
         return {
             "induced_ast": {
                 "type": "singularity_anomaly",
                 "trigger_z": data.get("redshift_z", "unknown"),
-                "action": "TRIGGER_ROBOTIC_FOLLOW_UP"
+                "action": "TRIGGER_ROBOTIC_FOLLOW_UP",
             },
             "status": "p0_singularity",
-            "exergy_cost": "MAXIMUM"
+            "exergy_cost": "MAXIMUM",
         }

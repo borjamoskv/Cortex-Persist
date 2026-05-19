@@ -1,9 +1,9 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """CLI commands: quarantine, unquarantine, reap-ghosts."""
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import click
 

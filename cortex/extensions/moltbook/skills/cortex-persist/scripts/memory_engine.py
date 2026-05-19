@@ -1,5 +1,3 @@
-import logging
-logger = logging.getLogger(__name__)
 
 """CORTEX Persist Engine — Persistent memory for AI agents.
 
@@ -13,6 +11,8 @@ Zero dependencies beyond stdlib. Works with any LLM backend.
 """
 
 from __future__ import annotations
+import logging
+logger = logging.getLogger(__name__)
 
 import hashlib
 import json

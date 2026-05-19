@@ -1,8 +1,8 @@
-import logging
-logger = logging.getLogger(__name__)
-
 # This file is part of CORTEX. Apache-2.0.
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import asyncio
 import sys

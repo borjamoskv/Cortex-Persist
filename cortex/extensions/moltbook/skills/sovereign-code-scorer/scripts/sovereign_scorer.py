@@ -1,5 +1,3 @@
-import logging
-logger = logging.getLogger(__name__)
 
 """Sovereign Code Scorer — Automated code quality engine.
 
@@ -14,6 +12,8 @@ Zero dependencies beyond stdlib.
 """
 
 from __future__ import annotations
+import logging
+logger = logging.getLogger(__name__)
 
 import ast
 import json

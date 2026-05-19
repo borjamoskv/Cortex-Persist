@@ -1,6 +1,3 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """
 CORTEX v6.0 — Storage CLI Commands.
 
@@ -10,6 +7,9 @@ Commands for managing CORTEX storage backends:
 """
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import os
 

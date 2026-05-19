@@ -1,9 +1,9 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """CLI commands: entropy install-hook, scan, report, shannon."""
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import json as json_mod
 import shutil
@@ -57,7 +57,9 @@ def entropy_install_hook():
         shutil.copy2(source_script, pre_commit_file)
         pre_commit_file.chmod(0o755)
 
-        console.logger.info("[bold green]✅ ENTROPY-0 instalado exitosamente en .git/hooks/pre-commit[/]")
+        console.logger.info(
+            "[bold green]✅ ENTROPY-0 instalado exitosamente en .git/hooks/pre-commit[/]"
+        )
         console.print(
             "[dim]A partir de ahora, ningún commit pasará si la puntuación MEJORAlo es < 90.[/]"
         )
@@ -79,7 +81,9 @@ def entropy_report():
 
         alerts = status_dict.get("entropy_alerts", [])
         if not alerts:
-            console.logger.info("[bold green]✅ Estado: ENTROPY-0 activo. Cero deuda técnica en vivo.[/]")
+            console.logger.info(
+                "[bold green]✅ Estado: ENTROPY-0 activo. Cero deuda técnica en vivo.[/]"
+            )
         else:
             console.print(
                 f"[bold red]⚠️ Alerta: Se detectaron {len(alerts)} "
@@ -346,7 +350,9 @@ def entropy_shannon(project: str | None, as_json: bool, verbose: bool) -> None:
         if project:
             title += f"  ·  {project}"
         health = result["health_score"]
-        console.logger.info(f"\n[noir.cyber]{title}[/]  [dim]({result['total_facts']} active facts)[/]\n")
+        console.logger.info(
+            f"\n[noir.cyber]{title}[/]  [dim]({result['total_facts']} active facts)[/]\n"
+        )
 
         console.print(
             f"  Health: {_health_badge(health)}"

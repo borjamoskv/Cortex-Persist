@@ -1,6 +1,3 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """CORTEX v7.0 — Sovereign Dashboard (Industrial Noir).
 
 Live terminal dashboard showing system health, Shannon entropy,
@@ -13,6 +10,9 @@ Usage:
 """
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import asyncio
 import sqlite3

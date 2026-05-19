@@ -1,12 +1,12 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """CORTEX CLI — Policy Engine commands.
 
 `cortex policy` — Bellman-scored action prioritization.
 """
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 import click
@@ -77,7 +77,9 @@ def evaluate_cmd(project: str | None, db: str, limit: int, gamma: float) -> None
             )
 
         console.logger.info(table)
-        console.logger.info(f"\n[dim]γ={gamma} | {len(actions)} actions | V(s) = R(s,a) + γ·V(s')[/dim]")
+        console.logger.info(
+            f"\n[dim]γ={gamma} | {len(actions)} actions | V(s) = R(s,a) + γ·V(s')[/dim]"
+        )
 
     finally:
         close_engine_sync(engine)

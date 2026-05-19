@@ -5,7 +5,6 @@ Key Registry for CORTEX-Persist Strict Origin Verification.
 from dataclasses import dataclass
 
 
-
 @dataclass
 class Key:
     """Represents a public key tied to an origin identifier."""

@@ -1,6 +1,3 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """
 CORTEX CLI — Sovereign Error Display System v2.0 (i18n-enabled).
 
@@ -10,6 +7,9 @@ All messages are internationalized via cortex.i18n (en/es/eu).
 """
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import json
 import os

@@ -1,6 +1,3 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """
 ZKORTEX — Integration Test Suite.
 
@@ -16,6 +13,9 @@ Run: python -m pytest cortex/zkortex/test_integration.py -v
 """
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import sys
 from pathlib import Path

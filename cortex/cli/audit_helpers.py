@@ -1,9 +1,9 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """Audit helper functions extracted from trust_cmds.py (Seal 8 LOC compliance)."""
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import os
 import sys
@@ -37,7 +37,9 @@ def audit_frontend() -> None:
         )
         return
 
-    console.logger.info("[bold red]FAIL[/bold red] Axiom Violation: Frontend listeners exceeded CC 5.")
+    console.logger.info(
+        "[bold red]FAIL[/bold red] Axiom Violation: Frontend listeners exceeded CC 5."
+    )
     for v in violations:
         console.print(
             f"  -> {v['file']} :: [yellow]{v['function']}[/yellow] (CC: {v['complexity']})"

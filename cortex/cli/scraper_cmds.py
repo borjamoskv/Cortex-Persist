@@ -1,6 +1,3 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """SCRAPER-Ω CLI — Sovereign Web Extraction commands.
 
 Commands:
@@ -10,6 +7,9 @@ Commands:
 """
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import json
 

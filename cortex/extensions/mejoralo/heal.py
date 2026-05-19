@@ -377,7 +377,9 @@ def heal_project(
 
         if stagnation_count >= STAGNATION_LIMIT * 3 or current_result.score >= target_score:
             if stagnation_count >= STAGNATION_LIMIT * 3:
-                console.logger.info(f"\n[bold red]🛑 Estancamiento terminal ({stagnation_count}).[/]")
+                console.logger.info(
+                    f"\n[bold red]🛑 Estancamiento terminal ({stagnation_count}).[/]"
+                )
             break
 
     return _report_final_state(

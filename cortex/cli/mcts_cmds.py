@@ -1,4 +1,5 @@
 import logging
+
 logger = logging.getLogger(__name__)
 
 """CLI Interface for MCTS Quantum Git search (Chronos)."""

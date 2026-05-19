@@ -5,38 +5,43 @@ import re
 from typing import Optional, List, Tuple
 from datetime import datetime
 
+
 def log(msg: str, tier: str = "INFO") -> None:
     print(f"[{datetime.now().time()}] [{tier}] [CHAOS-FUZZER] {msg}")
+
 
 def execute_forge_fuzz(target_dir: str, runs: int = 250000) -> tuple[bool, str | None]:
     """Levanta el subproceso contra Foundry buscando fracturar invariantes."""
     log(f"Iniciando Chaos Engine sobre el Target Físico... ({runs} ciclos)", "L3-STRIKE")
-    
+
     cmd: list[str] = ["forge", "test", "--fuzz-runs", str(runs), "-vv"]
-    
+
     try:
         # Run en C5-REAL (I/O bloqueante puro hasta fractura)
         result = subprocess.run(cmd, cwd=target_dir, capture_output=True, text=True, timeout=60)
         output = result.stdout + result.stderr
-        
+
         # Parseo del Breaker (Buscamos semilla determinista fallida)
         if "[FAIL" in output:
             log("Fractura Detectada. Invariante Inconsistente.", "BREAKER")
-            seed_match = re.search(r'fuzz-seed:? (0x[0-9a-fA-F]+|\d+)', output)
+            seed_match = re.search(r"fuzz-seed:? (0x[0-9a-fA-F]+|\d+)", output)
             seed = seed_match.group(1) if seed_match else "Unknown_Seed"
-            
+
             # Aislar output para ledger
             fail_line = [line for line in output.split("\n") if "[FAIL" in line]
             if fail_line:
                 log(f"Motivo de colapso: {fail_line[0].strip()}", "CORRUPTION")
-                
+
             return True, seed
         else:
-            log(f"Silo termo-resistente. Ninguna invariante cedió ante la entropía. (Forge ReturnCode: {result.returncode})", "C5-SUCCESS")
+            log(
+                f"Silo termo-resistente. Ninguna invariante cedió ante la entropía. (Forge ReturnCode: {result.returncode})",
+                "C5-SUCCESS",
+            )
             if result.returncode != 0:
                 log(f"Forge Error Block:\n{output}", "C5-DEBUG")
             return False, None
-            
+
     except subprocess.TimeoutExpired:
         log("Límites térmicos alcanzados. El orquestador truncó la ejecución (>60s).", "WARN")
         return False, None
@@ -44,11 +49,12 @@ def execute_forge_fuzz(target_dir: str, runs: int = 250000) -> tuple[bool, str |
         log(f"Error nativo invocando Forge: {e}", "ERROR")
         return False, None
 
+
 def crystallize_harness(target_dir: str) -> bool:
     """Cristaliza un target falso pero estructuralmente corruptible para prueba Físico-Estocástica."""
     os.makedirs(target_dir, exist_ok=True)
     subprocess.run(["forge", "init", "--force", "--no-git"], cwd=target_dir, capture_output=True)
-    
+
     src_dir = os.path.join(target_dir, "src")
     test_dir = os.path.join(target_dir, "test")
     os.makedirs(src_dir, exist_ok=True)
@@ -122,40 +128,46 @@ contract ChaosTest is Test {
         # Forge Toml required by forge test
         with open(os.path.join(target_dir, "foundry.toml"), "w") as f:
             f.write("[profile.default]\nsrc = 'src'\nout = 'out'\nlibs = ['lib']\n")
-            
-        with open(os.path.join(src_dir, "Target.sol"), "w", encoding='utf-8') as f:
+
+        with open(os.path.join(src_dir, "Target.sol"), "w", encoding="utf-8") as f:
             f.write(contract_code)
-            
-        with open(os.path.join(test_dir, "ChaosInvariant.t.sol"), "w", encoding='utf-8') as f:
+
+        with open(os.path.join(test_dir, "ChaosInvariant.t.sol"), "w", encoding="utf-8") as f:
             f.write(test_code)
-            
+
         return True
     except OSError as e:
         log(f"Fallo I/O al cristalizar Harness: {e}", "ERROR")
         return False
 
+
 def main() -> None:
     import sys
+
     if len(sys.argv) < 2:
         log("Uso: python3 cortex_chaos_fuzzer.py <target_dir> [runs]", "ERROR")
         sys.exit(1)
-        
+
     target_dir = os.path.abspath(sys.argv[1])
     runs = int(sys.argv[2]) if len(sys.argv) > 2 else 250000
-    
+
     log(f"Iniciando Asalto Chaos en: {target_dir} ({runs} ciclos)", "SYSTEM")
-    
+
     # Si el directorio no es un proyecto de Forge, lo inicializamos
     if not os.path.exists(os.path.join(target_dir, "foundry.toml")):
         log("Detectado target virgen. Cristalizando harness estocástico...", "CRYSTAL")
         crystallize_harness(target_dir)
-        
+
     success, seed = execute_forge_fuzz(target_dir, runs)
-    
+
     if success:
-        log(f"-> EXERGY YIELD: Encontrada colisión matemática en {target_dir}. Seed: {seed}", "C5-REAL")
+        log(
+            f"-> EXERGY YIELD: Encontrada colisión matemática en {target_dir}. Seed: {seed}",
+            "C5-REAL",
+        )
     else:
         log(f"-> EXERGY YIELD: Target {target_dir} resistió la carga térmica.", "C5-REAL")
+
 
 if __name__ == "__main__":
     main()

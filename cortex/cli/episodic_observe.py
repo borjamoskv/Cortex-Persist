@@ -1,6 +1,3 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """
 CORTEX v5.0 — Episodic Memory: Observe Command.
 
@@ -8,6 +5,9 @@ Extracted from episodic_cmds.py to keep file size under 300 LOC.
 """
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import asyncio
 import uuid

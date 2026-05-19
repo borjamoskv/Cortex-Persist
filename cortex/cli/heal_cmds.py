@@ -1,7 +1,7 @@
-import logging
-logger = logging.getLogger(__name__)
-
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 # This file is part of CORTEX.
 # Licensed under the Apache License, Version 2.0.
@@ -75,7 +75,9 @@ async def auto_heal(filepath: Path) -> None:
         console.logger.info(f"[red]❌ Error al inicializar LLMProvider:[/red] {e}")
         raise click.Abort() from e
 
-    console.logger.info(f"   ► Conectando cerebro arquitectónico ([blue]{provider.model_name}[/blue])...")
+    console.logger.info(
+        f"   ► Conectando cerebro arquitectónico ([blue]{provider.model_name}[/blue])..."
+    )
 
     prompt = CortexPrompt(
         system_instruction=HEALING_SYSTEM_PROMPT,

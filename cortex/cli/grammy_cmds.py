@@ -1,12 +1,12 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """
 CLI Commands for GRAMMY-Ω.
 Sovereign Electronic Music Production.
 """
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import asyncio
 
@@ -44,7 +44,9 @@ def produce_cmd(title, concept, bpm, key):
             TrackState,
         )
     except Exception as exc:  # noqa: BLE001
-        console.logger.info(f"[bold red]✗ GRAMMY-Ω no está disponible en este entorno:[/bold red] {exc}")
+        console.logger.info(
+            f"[bold red]✗ GRAMMY-Ω no está disponible en este entorno:[/bold red] {exc}"
+        )
         return
 
     console.print(

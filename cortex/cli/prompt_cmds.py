@@ -1,6 +1,3 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """
 CORTEX CLI — Prompt Commands.
 
@@ -15,6 +12,9 @@ Commands:
 """
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import shutil
 import subprocess

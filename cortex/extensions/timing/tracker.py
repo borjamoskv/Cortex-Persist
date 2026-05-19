@@ -148,9 +148,7 @@ class TimingTracker:
             params.append(project)
         return self._build_summary(" AND ".join(where), params)
 
-    def timeline(
-        self, project: str | None = None, date: str | None = None
-    ) -> list[TimeEntry]:
+    def timeline(self, project: str | None = None, date: str | None = None) -> list[TimeEntry]:
         """Get detailed timeline for a date."""
         date_str = date or datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime("%Y-%m-%d")
         where = ["start_time LIKE ?"]

@@ -1,6 +1,3 @@
-import logging
-logger = logging.getLogger(__name__)
-
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
 """Generate docs/axiom-registry.md from the canonical Python registry.
@@ -12,6 +9,9 @@ This ensures the markdown doc is always in sync with the code.
 """
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import datetime
 from pathlib import Path

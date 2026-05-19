@@ -1,9 +1,9 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """CLI commands: mejoralo scan, record, history, ship."""
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import time
 
@@ -69,7 +69,9 @@ def mejoralo_scan(project, path, deep, brutal, auto_heal, relentless, target_sco
                     "[bold green]✅ Código purificado. Nivel INMEJORABLE alcanzado. (+Soberanía)[/]"
                 )
             else:
-                console.logger.info("[bold red]❌ Relentless abortado. La deuda técnica persiste.[/]")
+                console.logger.info(
+                    "[bold red]❌ Relentless abortado. La deuda técnica persiste.[/]"
+                )
         elif auto_heal and result.score < (target_score or 70):
             effective_target = target_score or 70
             console.print(
@@ -81,7 +83,9 @@ def mejoralo_scan(project, path, deep, brutal, auto_heal, relentless, target_sco
                     "[bold green]✅ Código purificado y comiteado automáticamente. (+Soberanía)[/]"
                 )
             else:
-                console.logger.info("[bold red]❌ Auto-Heal abortado. La deuda técnica persiste.[/]")
+                console.logger.info(
+                    "[bold red]❌ Auto-Heal abortado. La deuda técnica persiste.[/]"
+                )
     finally:
         close_engine_sync(engine)
 

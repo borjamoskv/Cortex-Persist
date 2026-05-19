@@ -2,8 +2,10 @@
 CORTEX JIT Compiled Skill: autodidact-omega
 Description: Sovereign Crystallization Tensor (v4.0) — JIT AST Sandbox for autonomous knowledge ingestion. Bypasses stochastic inference fatigue entirely via O(1) memory evaluation. Net Yield strictly enforced via Axiom Ω2.
 """
+
 import json
 import logging
+
 
 class AutodidactOmegaSkill:
     def __init__(self):
@@ -27,5 +29,5 @@ class AutodidactOmegaSkill:
             "skill": self.name,
             "injected_knowledge_tokens": len(self.instructions.split()),
             "yield_impact": "O(1) Execution",
-            "extracted_payload": payload
+            "extracted_payload": payload,
         }

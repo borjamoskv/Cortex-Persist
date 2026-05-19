@@ -593,6 +593,65 @@ Nivel de Realidad: C5-HÍBRIDO</code></pre>
 			</aside>
 		</section>
 
+		<section class="section-frame surface" id="swarm">
+			<div class="section-heading">
+				<p class="section-kicker">Swarm</p>
+				<h2>El Enjambre del Arquitecto</h2>
+				<p>
+					100 Ayudantes Autónomos. Inteligencia de Enjambre Activa. La lista unificada de CORTEX. 100 agentes especializados operando en híper-paralelo — gestionando ventanas de contexto, verificando pruebas formales y aplicando las Nueve Leyes.
+				</p>
+			</div>
+
+			<div class="console-metrics">
+				<div class="metric-tile">
+					<span class="metric-label">Nodes</span>
+					<strong>84/100 ACTIVE</strong>
+				</div>
+				<div class="metric-tile">
+					<span class="metric-label">Memoria Total</span>
+					<strong>52%</strong>
+				</div>
+				<div class="metric-tile">
+					<span class="metric-label">Sincronización</span>
+					<strong>89%</strong>
+				</div>
+				<div class="metric-tile">
+					<span class="metric-label">Cristalización</span>
+					<strong>4.9hz</strong>
+				</div>
+			</div>
+
+			<div class="commanders-grid">
+				{
+					commanders.map(cmd => (
+						<article class="commander-card surface-sunken">
+							<div class="cmd-head">
+								<span class="cmd-icon">⬡</span>
+								<span class="surface-state">{cmd.status}</span>
+							</div>
+							<h3>{cmd.name}</h3>
+							<p>{cmd.role}</p>
+						</article>
+					))
+				}
+			</div>
+
+			<aside class="hero-console surface-sunken" style="margin-top: 1.5rem;">
+				<div class="surface-head">
+					<span class="surface-label">Registro de Misión CORTEX</span>
+					<span class="surface-state live-pulse">EN VIVO</span>
+				</div>
+				<pre class="console-block"><code>[10:01:45] Initializing Sovereign Forensic Protocol Ω₃...
+CORTEX:~$
+Nodos Activos: 84/100
+Consenso: BIZANTINO ✓
+Flujo de Exergía: Σ 0.22 ops/s
+Ruido Térmal: -84.2 dB
+Protocolo: Ω₁₆ · HOMEOSTASIS
+Nivel de Realidad: C5-HÍBRIDO</code></pre>
+			</aside>
+		</section>
+
 		<section class="cta-banner surface">
 			<div>
 				<p class="section-kicker">Next Move</p>

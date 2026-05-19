@@ -1,6 +1,3 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """CORTEX CLI — Genesis command group.
 
 Commands for the Genesis Engine — creating systems from specs.
@@ -8,6 +5,9 @@ Thin CLI wrapper; all logic lives in cortex.genesis.engine.
 """
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import sys
 from pathlib import Path
@@ -136,7 +136,9 @@ def from_yaml(path: str) -> None:
     else:
         console.logger.info(f"\n[bold red]❌ Genesis failed:[/] {result.spec.name}")
 
-    console.logger.info(f"   Files: {len(result.files_created)} | CHRONOS-1: {result.hours_saved:.2f}h")
+    console.logger.info(
+        f"   Files: {len(result.files_created)} | CHRONOS-1: {result.hours_saved:.2f}h"
+    )
 
 
 @genesis_group.command("self")

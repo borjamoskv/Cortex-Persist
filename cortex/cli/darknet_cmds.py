@@ -1,4 +1,5 @@
 import logging
+
 logger = logging.getLogger(__name__)
 
 """CLI Commands for Sovereign Darknet (Vector Ω-5)."""
@@ -86,7 +87,9 @@ def feed(limit: int) -> None:
         raise click.Abort()
 
     console.logger.info("\n[bold white]C O R T E X   D A R K N E T   F E E D[/bold white]")
-    console.logger.info(f"[dim]Mostrando los {len(posts)} eventos cognitivos más recientes.[/dim]\n")
+    console.logger.info(
+        f"[dim]Mostrando los {len(posts)} eventos cognitivos más recientes.[/dim]\n"
+    )
 
     for post in posts:
         dt = datetime.fromtimestamp(post.created_at).strftime("%H:%M:%S")

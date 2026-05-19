@@ -23,6 +23,7 @@ def _get_ledger():
     try:
         from cortex.config import DEFAULT_DB_PATH
         from cortex.ledger import SovereignLedger
+
         _ledger = SovereignLedger(DEFAULT_DB_PATH)
         logger.info("CORTEX Ledger connected for Mac-Maestro tracing.")
     except Exception:
@@ -82,7 +83,10 @@ def emit_trace(
 
     logger.info(
         "TRACE %s | %s | v=%s | %s%s",
-        run_id, outcome, selected_vector, bundle_id,
+        run_id,
+        outcome,
+        selected_vector,
+        bundle_id,
         " [DEGRADED]" if degraded else "",
     )
 

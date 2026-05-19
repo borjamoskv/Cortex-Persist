@@ -1,9 +1,9 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """CLI commands: cortex fingerprint — cognitive pattern extraction."""
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import json as json_mod
 

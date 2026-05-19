@@ -1,6 +1,3 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """CORTEX v6.0 — Swarm Kanban Board (TUI).
 
 A rich-based live dashboard to monitor Sovereign Swarm agents in real-time.
@@ -8,6 +5,9 @@ Listens to the CORTEX SignalBus for state changes.
 """
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import sqlite3
 import threading

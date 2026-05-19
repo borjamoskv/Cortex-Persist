@@ -1,12 +1,12 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """
 CLI commands for Autodidact Omega (v4.0).
 JIT AST Compilation and Thermodynamic Sovereign Forging.
 """
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import click
 from rich.panel import Panel
@@ -26,7 +26,9 @@ def autodidact_group() -> None:
 @click.argument("source_file", type=click.Path(exists=True, dir_okay=False))
 def ingest(source_file: str) -> None:
     """Ingest a Python file through the JIT Sovereign Sandbox."""
-    console.logger.info(f"[bold cyan]🔥 Autodidact-Ω Ingestion Initiated[/bold cyan] » '{source_file}'")
+    console.logger.info(
+        f"[bold cyan]🔥 Autodidact-Ω Ingestion Initiated[/bold cyan] » '{source_file}'"
+    )
 
     with open(source_file) as f:
         source_code = f.read()

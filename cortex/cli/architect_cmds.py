@@ -1,6 +1,3 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """
 CORTEX CLI — Architect Commands.
 
@@ -15,6 +12,9 @@ Commands:
 """
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import asyncio
 from pathlib import Path
@@ -131,7 +131,9 @@ def architect_reverse(text: str | None) -> None:
     if not text:
         text = Prompt.ask("Pega el texto de referencia a ingeniar (Golden Master)")
 
-    console.logger.info(Panel("Analyzing structural rules...", title="[bold #CCFF00]Reverse Engineer[/]"))
+    console.logger.info(
+        Panel("Analyzing structural rules...", title="[bold #CCFF00]Reverse Engineer[/]")
+    )
 
     async def _run() -> None:
         async with SovereignLLM(temperature=0.1) as llm:

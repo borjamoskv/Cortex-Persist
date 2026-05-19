@@ -17,6 +17,7 @@ Adversarial stress-test. Tries to BREAK everything.
   [10] MAP-B vs HRR algebraic consistency
   [11] Federation with mismatched dimensions
 """
+
 import hashlib
 import os
 import struct
@@ -145,8 +146,7 @@ def fuzz_capacity_overflow():
     # Retrieval should be near-random
     extracted = e.unbind(memory, keys[0])
     sim = e.cosine(states[0], extracted)
-    report("Retrieval at 160x overcapacity", True,
-           f"cos={sim:.4f} (noise level expected)")
+    report("Retrieval at 160x overcapacity", True, f"cos={sim:.4f} (noise level expected)")
 
 
 def fuzz_key_collision():
@@ -164,8 +164,9 @@ def fuzz_key_collision():
     # Should get superposition of s1 and s2
     sim1 = e.cosine(s1, extracted)
     sim2 = e.cosine(s2, extracted)
-    report("Same key, two values", sim1 > 0.2 and sim2 > 0.2,
-           f"cos(s1)={sim1:.4f}, cos(s2)={sim2:.4f}")
+    report(
+        "Same key, two values", sim1 > 0.2 and sim2 > 0.2, f"cos(s1)={sim1:.4f}, cos(s2)={sim2:.4f}"
+    )
 
 
 def fuzz_near_orthogonal_attack():
@@ -180,9 +181,9 @@ def fuzz_near_orthogonal_attack():
     adversary = e.normalize(adversary)
 
     sim = e.cosine(base, adversary)
-    report("Near-identical vectors distinguishable",
-           sim > 0.999,
-           f"cos={sim:.6f} (should be ~0.9998)")
+    report(
+        "Near-identical vectors distinguishable", sim > 0.999, f"cos={sim:.6f} (should be ~0.9998)"
+    )
 
     # Can we still separate them after binding?
     k1, k2 = e.random_vec(), e.random_vec()
@@ -191,8 +192,9 @@ def fuzz_near_orthogonal_attack():
     r2 = e.unbind(memory, k2)
     s1 = e.cosine(base, r1)
     s2 = e.cosine(adversary, r2)
-    report("Separation after binding", s1 > 0.3 and s2 > 0.3,
-           f"cos(base)={s1:.4f}, cos(adv)={s2:.4f}")
+    report(
+        "Separation after binding", s1 > 0.3 and s2 > 0.3, f"cos(base)={s1:.4f}, cos(adv)={s2:.4f}"
+    )
 
 
 def fuzz_persistence_corruption():
@@ -220,8 +222,9 @@ def fuzz_persistence_corruption():
         e2.load(tmp)
         report("Corruption detected", False, "Load succeeded on corrupt file!")
     except ValueError as ex:
-        report("Corruption detected", "SHA-256" in str(ex) or "integrity" in str(ex).lower(),
-               str(ex))
+        report(
+            "Corruption detected", "SHA-256" in str(ex) or "integrity" in str(ex).lower(), str(ex)
+        )
     finally:
         os.unlink(tmp)
 
@@ -234,15 +237,13 @@ def fuzz_empty_memory():
     key = e.random_vec()
     try:
         r = e.recall(key)
-        report("Recall from empty", True,
-               f"norm={np.linalg.norm(r):.6f}")
+        report("Recall from empty", True, f"norm={np.linalg.norm(r):.6f}")
     except Exception as ex:
         report("Recall from empty", False, str(ex))
 
     # SNR of empty memory
     snr = e.snr
-    report("SNR of empty memory", snr == float('inf'),
-           f"snr={snr}")
+    report("SNR of empty memory", snr == float("inf"), f"snr={snr}")
 
 
 def fuzz_decay_extremes():
@@ -263,8 +264,7 @@ def fuzz_decay_extremes():
     e2.memorize(k2, s2, timestamp=0.0, decay_lambda=1000.0)
     # After rebuild, weight = exp(-1000 * Δt) ≈ 0 (unless Δt ≈ 0)
     purged = e2.forget(epsilon=0.01)
-    report("λ=1000 (instant forget)", True,
-           f"purged={purged} items")
+    report("λ=1000 (instant forget)", True, f"purged={purged} items")
 
 
 def fuzz_unicode_encoding():
@@ -318,24 +318,26 @@ def fuzz_algebra_consistency():
     # Both should produce unit vectors
     v_hrr = e_hrr.random_vec()
     v_mapb = e_mapb.random_vec()
-    report("Random vec generation",
-           abs(np.linalg.norm(v_hrr) - 1.0) < 1e-6,
-           f"HRR norm={np.linalg.norm(v_hrr):.6f}")
+    report(
+        "Random vec generation",
+        abs(np.linalg.norm(v_hrr) - 1.0) < 1e-6,
+        f"HRR norm={np.linalg.norm(v_hrr):.6f}",
+    )
 
     # MAP-B self-inverse property
     a, b = e_mapb.random_bipolar(), e_mapb.random_bipolar()
     bound = e_mapb.bind(a, b)
     unbound = e_mapb.unbind(bound, b)
-    report("MAP-B self-inverse", np.allclose(a, unbound),
-           f"max_err={np.max(np.abs(a - unbound)):.2e}")
+    report(
+        "MAP-B self-inverse", np.allclose(a, unbound), f"max_err={np.max(np.abs(a - unbound)):.2e}"
+    )
 
     # HRR approximate inverse
     a, b = e_hrr.random_vec(), e_hrr.random_vec()
     bound = e_hrr.bind(a, b)
     unbound = e_hrr.unbind(bound, b)
     sim = e_hrr.cosine(a, unbound)
-    report("HRR approximate inverse", sim > 0.5,
-           f"cos={sim:.4f}")
+    report("HRR approximate inverse", sim > 0.5, f"cos={sim:.4f}")
 
 
 def fuzz_dimension_mismatch():
@@ -353,8 +355,7 @@ def fuzz_dimension_mismatch():
     # Try loading into D=2000 engine — should fail
     try:
         e2.load(tmp)
-        report("Dimension mismatch rejected", False,
-               "Load succeeded with wrong D!")
+        report("Dimension mismatch rejected", False, "Load succeeded with wrong D!")
     except ValueError as ex:
         report("Dimension mismatch rejected", True, str(ex))
     finally:
@@ -390,8 +391,7 @@ def fuzz_resonator_adversarial():
         idx0, idx1 = factors[0][1], factors[1][1]
         # Should resolve to 5 or 10 (both acceptable)
         ok = idx0 in (5, 10) and idx1 in (5, 10)
-        report("Ambiguous resonator", ok,
-               f"resolved to [{idx0}, {idx1}]")
+        report("Ambiguous resonator", ok, f"resolved to [{idx0}, {idx1}]")
     except Exception as ex:
         report("Ambiguous resonator", False, str(ex))
 
@@ -417,8 +417,7 @@ if __name__ == "__main__":
 
     print("\n" + "=" * 60)
     total = PASS + FAIL
-    print(f"CHAOS FUZZER COMPLETE: {PASS}/{total} passed, "
-          f"{FAIL}/{total} failed")
+    print(f"CHAOS FUZZER COMPLETE: {PASS}/{total} passed, {FAIL}/{total} failed")
     if FAIL == 0:
         print("VERDICT: SYSTEM IS ADVERSARIALLY ROBUST ✓")
     else:

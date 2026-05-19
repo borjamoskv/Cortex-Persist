@@ -1,4 +1,3 @@
-
 """
 CORTEX v5.0 — Stripe Billing Routes.
 

@@ -1,6 +1,3 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """Platform-specific daemon install/uninstall.
 
 Extracted from daemon_cli.py to keep file size under 300 LOC.
@@ -8,6 +5,9 @@ Supports macOS (launchd), Linux (systemd), and Windows (Task Scheduler).
 """
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import shutil
 import sys

@@ -1,9 +1,9 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """CLI commands: purge duplicates, empty facts, and projects."""
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import click
 from rich.table import Table
@@ -27,7 +27,9 @@ def _purge_short_facts(conn, dry_run: bool) -> int:
         return 0
 
     count = len(rows)
-    console.logger.info(f"  {'[yellow]WOULD[/] ' if dry_run else ''}🗑  Short facts (<15 chars): {count}")
+    console.logger.info(
+        f"  {'[yellow]WOULD[/] ' if dry_run else ''}🗑  Short facts (<15 chars): {count}"
+    )
     if not dry_run:
         conn.execute(
             "UPDATE facts SET valid_until = datetime('now'), "
@@ -121,7 +123,9 @@ def purge_empty(dry_run, db) -> None:
             if rows:
                 count = len(rows)
                 total += count
-                console.logger.info(f"  {'[yellow]WOULD[/] ' if dry_run else ''}🗑  {label}: {count}")
+                console.logger.info(
+                    f"  {'[yellow]WOULD[/] ' if dry_run else ''}🗑  {label}: {count}"
+                )
 
                 if not dry_run:
                     conn.execute(

@@ -1,12 +1,12 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """
 CLI commands for Demiurge Omega (Sortu).
 Dynamically forge and execute skills.
 """
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import click
 from rich.panel import Panel
@@ -27,7 +27,9 @@ def demiurge_group() -> None:
 def forge(intent: tuple[str, ...]) -> None:
     """Dynamically compile, execute, and evaluate a skill."""
     if not intent:
-        console.logger.info('[red]✗ Missing intent.[/red] Usage: cortex demiurge forge "do something"')
+        console.logger.info(
+            '[red]✗ Missing intent.[/red] Usage: cortex demiurge forge "do something"'
+        )
         return
 
     intent_str = " ".join(intent)

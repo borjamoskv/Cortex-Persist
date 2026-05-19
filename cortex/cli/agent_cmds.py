@@ -1,6 +1,3 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """CORTEX CLI — Agent commands (YAML-driven agent interface).
 
 Commands:
@@ -10,6 +7,9 @@ Commands:
 """
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import json
 import sys
@@ -84,7 +84,9 @@ def agent_validate(config: str):
 
 def _run_interactive_agent_loop(agent) -> None:
     """Run the interactive loop for an agent."""
-    console.logger.info(f"[bold cyan]🧠 Agent '{agent.name}' active (model={agent.model})[/bold cyan]")
+    console.logger.info(
+        f"[bold cyan]🧠 Agent '{agent.name}' active (model={agent.model})[/bold cyan]"
+    )
     console.print(
         f"[dim]Budget: {agent.guardrail.max_tokens} tokens | "
         f"L1: {agent.working_memory.max_tokens} tokens[/dim]"
@@ -116,7 +118,9 @@ def _run_interactive_agent_loop(agent) -> None:
                 f"{agent.guardrail.max_tokens}, "
                 f"turn: {agent.guardrail.turns})[/dim]"
             )
-            console.logger.info(f"[yellow]🤖 [{agent.model}] Processing: {user_input[:80]}...[/yellow]\n")
+            console.logger.info(
+                f"[yellow]🤖 [{agent.model}] Processing: {user_input[:80]}...[/yellow]\n"
+            )
 
     except KeyboardInterrupt:
         console.logger.info("\n[dim]Agent session ended.[/dim]")
@@ -145,7 +149,9 @@ def agent_run(config: str, dry_run: bool):
         sys.exit(1)
 
     if dry_run:
-        console.logger.info(f"[green]✅ Agent '{agent.name}' compiled successfully (dry-run)[/green]")
+        console.logger.info(
+            f"[green]✅ Agent '{agent.name}' compiled successfully (dry-run)[/green]"
+        )
         console.print_json(json.dumps(agent.status(), indent=2))
         return
 

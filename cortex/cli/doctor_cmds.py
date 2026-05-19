@@ -1,9 +1,9 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """CLI commands: doctor."""
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import json
 import os
@@ -142,4 +142,6 @@ def doctor(db: str, as_json: bool) -> None:
     if all(v != "missing" for v in report["environment"].values()) and db_status == "healthy":
         console.logger.info("\n[bold #06d6a0]🚀 SISTEMA NOMINAL. CORTEX ESTÁ LISTO PARA OPERAR.[/]")
     else:
-        console.logger.info("\n[bold yellow]⚠️ SE DETECTARON PROBLEMAS. REVISA EL INFORME SUPERIOR.[/]")
+        console.logger.info(
+            "\n[bold yellow]⚠️ SE DETECTARON PROBLEMAS. REVISA EL INFORME SUPERIOR.[/]"
+        )

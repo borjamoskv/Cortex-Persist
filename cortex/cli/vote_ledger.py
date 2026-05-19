@@ -1,9 +1,9 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """Comandos de CLI: vote, ledger verify, ledger checkpoint."""
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import asyncio
 import sqlite3

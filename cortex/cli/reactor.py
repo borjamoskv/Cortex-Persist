@@ -45,7 +45,7 @@ class ReactorState:
         self.entropy_count = 0
         self.logs = []
         self.healed_snippets = [
-            "except Exception:  # TODO(Swarm): Narrow this exception
+            "except Exception:  # TODO(Swarm): Narrow this exception",
             "time.sleep(1) -> await asyncio.sleep(1)",
             "import web3 -> [INTERCEPTED]",
             "Complex branch (depth 12) -> Refactored",

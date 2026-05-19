@@ -1,9 +1,9 @@
-import logging
-logger = logging.getLogger(__name__)
-
 """CLI commands: compact, compact-status."""
 
 from __future__ import annotations
+import logging
+
+logger = logging.getLogger(__name__)
 
 import click
 from rich.panel import Panel
@@ -241,7 +241,9 @@ def gc_cmd(batch_size, force, db) -> None:
 
     try:
         if force:
-            console.logger.info("[yellow]⚠ Forcing GC execution (ignoring IOPS peak hours logic).[/]")
+            console.logger.info(
+                "[yellow]⚠ Forcing GC execution (ignoring IOPS peak hours logic).[/]"
+            )
         else:
             console.logger.info("[dim]Analyzing IOPS safe-windows for Garbage Collection...[/]")
 
@@ -258,7 +260,9 @@ def gc_cmd(batch_size, force, db) -> None:
             if stats["deleted_facts"] == 0:
                 console.logger.info("[dim]No tombstoned facts pending deletion.[/]")
             else:
-                console.logger.info(f"  [bold]Facts physically deleted:[/] {stats['deleted_facts']}")
+                console.logger.info(
+                    f"  [bold]Facts physically deleted:[/] {stats['deleted_facts']}"
+                )
                 console.print(
                     f"  [bold]Vectors physically removed:[/] {stats['deleted_embeddings']}"
                 )
