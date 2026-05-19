@@ -6,6 +6,9 @@ This document defines the minimum contract for an offline public verifier for
 CORTEX ledger exports. The verifier must validate exported bytes without
 accessing SQLite, network services, or a running CORTEX process.
 
+The matching package layout is documented in
+[`PUBLIC_LEDGER_EXPORT_PACKAGE.md`](PUBLIC_LEDGER_EXPORT_PACKAGE.md).
+
 ## Profiles
 
 - `legacy-v0`: verifies the current transaction hash shape for legacy data. It
@@ -97,3 +100,23 @@ Reports must split guarantees:
 
 For offline historical exports, `online_freshness_verified` is false. By
 default, `truth_verified` is false.
+
+## CLI Contract
+
+The read-only verifier CLI accepts either a `public-v1-strict` export directory
+or a legacy vector file:
+
+```bash
+cortex verify-ledger-export ./export-dir
+cortex verify-ledger-export ./legacy_v0_vector_1.json
+```
+
+The command must:
+
+- read exported files only;
+- avoid SQLite, network calls, and a running CORTEX process;
+- emit deterministic JSON with `profile`, `result`, `guarantees`, `counts`,
+  `artifacts`, `event_hashes`, `errors`, and `warnings`;
+- exit `0` for `VALID_FULL_STRICT`;
+- exit `1` for `INVALID`;
+- exit `6` for `VALID_INTEGRITY_ONLY` and `VALID_WITH_LIMITATIONS`.
