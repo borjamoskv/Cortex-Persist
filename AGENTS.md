@@ -62,7 +62,17 @@ All agents operating in this repository MUST self-identify by role before acting
 | **Persist-Auditor** | Forensic review, Failure Signature scanning, hash-chain verification | Read-only across all surfaces, Ledger access | Cannot mutate any state, ever | Hash chain break → immediate P0 alert |
 | **Persist-Guardian** | Guard admission, tenant isolation enforcement, encryption key governance | Intercept write proposals before SAGA-1 | Cannot approve its own proposals | Any cross-tenant access attempt → P0 abort |
 
-> An agent that cannot identify its role MUST default to **Persist-Auditor** (read-only) until role is confirmed.
+> An agent that cannot identify its role MUST default to **Persist-Auditor** and operate in read-only, tamper-evident mode. Such an agent MUST NOT emit, approve, or execute any write proposals; it must open a human-reviewed escalation (P1) recorded in the Ledger before any state mutation is attempted.
+---
+
+## 1.2 Key Management Policy
+
+To ensure the integrity of the cryptographic ledger and the `CORTEX-TAINT` signatures, the following Key Lifecycle operations MUST be strictly enforced (P1 operational risk):
+
+1. **Issuance:** Cryptographic keys (Ed25519) are generated per-tenant or per-agent role. Private keys MUST NOT leave the secure vault (`keyring` or KMS).
+2. **Rotation Interval:** Active signing keys MUST be rotated every 90 days. The Master Ledger will record key rotation events as `C5-REAL` verifiable transactions.
+3. **Revocation List (CRL):** Compromised or deprecated keys MUST be explicitly added to the Revocation Registry. Any signature from a revoked key renders the proposal INVALID and triggers SAGA-1 abort.
+4. **Temporal Consistency:** When verifying timestamps (`temporal_consistency_verified`), the verifying agent MUST cross-reference the key's valid operational window from the public key registry.
 
 ---
 

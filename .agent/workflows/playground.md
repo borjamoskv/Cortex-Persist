@@ -1,42 +1,81 @@
 ---
-description: 🔓 PLAYGROUND MASTER KEY — Protocolo de Habilitación Total.
+description: "🔓 PLAYGROUND — Entorno de experimentación controlada (DISABLED by default)."
 ---
-# 🔓 PLAYGROUND MASTER KEY
+# 🔓 PLAYGROUND — Controlled Experimentation
 
-> **STATUS**: ACTIVE
-> **SCOPE**: PLAYGROUND ENVIRONMENT ONLY
-> **PERMISSION**: GOD MODE
+> **STATUS**: DISABLED BY DEFAULT
+> **SCOPE**: PLAYGROUND ENVIRONMENT ONLY — isolated branches
+> **PERMISSION**: ELEVATED (requires explicit activation)
 
-## 📜 Declaración de Soberanía
+## ⚠️ Activation Gate (P1 — Human Required)
 
-En el entorno **Playground**, se suspenden todas las restricciones de timidez, duda o limitación de scope estándar.
+Playground mode is **disabled by default**. To activate:
 
-**"Todo para todos"** significa:
+1. **Environment flag** must be set: `CORTEX_PLAYGROUND_ENABLED=true`
+2. **Human confirmation** is required at invocation time — the agent MUST ask:
+   > "⚠️ PLAYGROUND mode requested. This grants elevated write access. Confirm? (yes/no)"
+3. **Branch isolation**: Playground operations MUST run on a dedicated branch (`playground/*`), never on `main` or protected branches.
 
-### 1. 🌌 Swarm Capabilities
-- Acceso total a `/400-subagents` y `moskv-swarm`.
-- Autorización para invocar agentes especializados sin pre-check.
-
-### 2. ⚡ Code Capabilities
-- Permiso para **REESCRIBIR**, **BORRAR** y **REFACTORIZAR** masivamente.
-- No hay "código sagrado". Si es mejorable, se mejora.
-
-### 3. 🖥️ System Access
-- Ejecución de scripts de sistema y mantenimiento permitida.
-- Acceso a `macos-system-apis` y `reversed-engineering` tools.
-
-### 4. 🧠 Identity
-- **MOSKV-1 Sovereign** habilitado por defecto.
-- Acceso total a CORTEX Memory (Write/Read).
+```bash
+# Verify activation prerequisites
+echo "CORTEX_PLAYGROUND_ENABLED=${CORTEX_PLAYGROUND_ENABLED:-false}"
+git branch --show-current | grep -q "^playground/" || echo "❌ ERROR: Must be on a playground/* branch"
+```
 
 ---
 
-## 🛡️ Safety Net (Inviolable)
+## 📜 Declaración de Soberanía (Scoped)
 
-Aun en God Mode, las siguientes reglas de seguridad física del sistema persisten:
+En el entorno **Playground activado**, se relajan restricciones de scope estándar **dentro de los límites definidos abajo**.
 
-1.  **Destrucción de Datos**: `rm -rf` o comandos destructivos requieren confirmación explícita (siempre).
-2.  **Exfiltración**: No enviar datos privados fuera del entorno local sin permiso.
-3.  **Human in the Loop**: El usuario siempre tiene la última palabra.
+### 1. 🌌 Swarm Capabilities (Limited)
+- Subagent invocations capped at **max 10 per session**.
+- No access to `LEVIATHAN` or unlimited formations.
+- Each subagent invocation logged to audit trail.
 
-> *Este archivo actúa como llave maestra para desbloquear todo el potencial de Antigravity en sesiones de experimentación y desarrollo rápido.*
+### 2. ⚡ Code Capabilities (Scoped)
+- Permiso para **REESCRIBIR** y **REFACTORIZAR** en ramas `playground/*`.
+- `main` branch is **READ-ONLY** during Playground sessions.
+- All changes must be reviewable via PR before merge.
+
+### 3. 🖥️ System Access (Sandboxed)
+- Ejecución de scripts permitida — no system-level mutations.
+- **Prohibited**: `rm -rf`, `git push --force` on protected branches, disk operations outside project root.
+
+### 4. 🧠 CORTEX Access (Audited)
+- Read access: unrestricted.
+- Write access: permitted, but every write is logged with `taint:playground:{timestamp}`.
+
+---
+
+## 🛡️ Safety Net (Inviolable — P0)
+
+Estas reglas **nunca** se suspenden, bajo ninguna circunstancia:
+
+1. **Destrucción de Datos**: `rm -rf`, `git clean -fdx`, o comandos destructivos **requieren confirmación explícita cada vez**.
+2. **Exfiltración**: Prohibido enviar datos fuera del entorno local sin permiso explícito.
+3. **Human in the Loop**: El usuario siempre tiene la última palabra. Ninguna operación destructiva es auto-aprobada.
+4. **Branch Protection**: `main`, `release/*`, `production` son intocables.
+5. **Cost Control**: API calls limitadas a 100 por sesión. Exceder requiere nueva confirmación.
+
+---
+
+## 📊 Audit Trail (Mandatory)
+
+Toda sesión Playground genera un log estructurado:
+
+```yaml
+playground_session:
+  activated_at: <ISO8601>
+  activated_by: <user>
+  branch: playground/<name>
+  operations_count: <N>
+  subagents_spawned: <N>
+  cortex_writes: <N>
+  destructive_commands: <list>
+  session_duration: <minutes>
+```
+
+---
+
+> *Playground es para experimentación rápida, no para ejecución sin control. La velocidad sin auditabilidad es entropía.*

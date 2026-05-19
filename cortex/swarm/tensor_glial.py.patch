@@ -1,0 +1,24 @@
+--- cortex/swarm/tensor_glial.py
++++ cortex/swarm/tensor_glial.py
+@@ -70,6 +70,7 @@
+         self.yield_tensor = np.zeros(self.num_agents, dtype="float32")  # Compound Yield
+         self.token_burn_tensor = np.zeros(self.num_agents, dtype="float32")
+         self.last_update_ts = np.full(self.num_agents, time.time(), dtype="float64")
++        self.last_audit_hash = None
+ 
+     def apply_fading_memory(self, lambda_decay: float = 0.001):
+         """
+@@ -160,8 +161,16 @@
+         """
+         self.agents_tensor.flush()
+         with open(self.file_path, "rb") as f:
+             content = f.read()
+-            return hashlib.sha256(content).hexdigest()
++            current_hash = hashlib.sha256(content).hexdigest()
++            
++        if self.last_audit_hash is not None and self.last_audit_hash != current_hash:
++            # In a real system we'd check if this modification was authorized
++            pass
++            
++        self.last_audit_hash = current_hash
++        return current_hash

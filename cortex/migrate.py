@@ -136,27 +136,36 @@ def _migrate_system(engine: CortexEngine, path: Path, stats: dict) -> None:
         stats["facts_imported"] += 1
 
     # Sessions
-    conn = engine._get_sync_conn()
-    for session in data.get("sessions_log", []):
-        try:
-            conn.execute(
-                """
-                INSERT OR IGNORE INTO sessions (id, date, focus, summary, conversations)
-                VALUES (?, ?, ?, ?, ?)
-                """,
-                (
-                    session.get("id", f"S{session.get('date', 'unknown')}"),
-                    session.get("date", ""),
-                    json.dumps(session.get("focus", [])),
-                    session.get("summary", ""),
-                    session.get("conversations", 1),
-                ),
-            )
-            stats["sessions_imported"] += 1
-        except sqlite3.Error as e:
-            stats["errors"].append(f"Session import failed: {e}")
-
-    conn.commit()
+    try:
+        # Note: Using private API `_get_sync_conn`. Consider refactoring CortexEngine to expose a public batch insertion API.
+        conn = engine._get_sync_conn()
+        conn.execute("BEGIN")
+        for session in data.get("sessions_log", []):
+            try:
+                conn.execute(
+                    """
+                    INSERT OR IGNORE INTO sessions (id, date, focus, summary, conversations)
+                    VALUES (?, ?, ?, ?, ?)
+                    """,
+                    (
+                        session.get("id", f"S{session.get('date', 'unknown')}"),
+                        session.get("date", ""),
+                        json.dumps(session.get("focus", [])),
+                        session.get("summary", ""),
+                        session.get("conversations", 1),
+                    ),
+                )
+                stats["sessions_imported"] += 1
+            except sqlite3.Error as e:
+                stats["errors"].append(f"Session import failed: {e}")
+        conn.commit()
+    except Exception as e:
+        if 'conn' in locals() and hasattr(conn, "rollback"):
+            try:
+                conn.rollback()
+            except sqlite3.Error:
+                pass
+        stats["errors"].append(f"Sessions batch import failed: {e}")
 
 
 def _migrate_project(engine: CortexEngine, path: Path, stats: dict) -> None:
@@ -223,65 +232,69 @@ def _migrate_project(engine: CortexEngine, path: Path, stats: dict) -> None:
 def _migrate_mistakes(engine: CortexEngine, path: Path, stats: dict) -> None:
     """Migrate mistakes.jsonl — error memory."""
     try:
-        content = path.read_text(encoding="utf-8")
+        with path.open(encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    mistake = json.loads(line)
+                    project = mistake.get("project", "__system__")
+        
+                    content = (
+                        f"ERROR: {mistake.get('error', 'unknown')} | "
+                        f"ROOT CAUSE: {mistake.get('root_cause', 'unknown')} | "
+                        f"FIX: {mistake.get('fix', 'unknown')}"
+                    )
+        
+                    engine.store_sync(
+                        project=project,
+                        content=content,
+                        fact_type="error",
+                        tags=mistake.get("tags", []),
+                        confidence="verified",
+                        source="migration-v3.1",
+                        valid_from=mistake.get("date", None),
+                        meta=mistake,
+                    )
+                    stats["errors_imported"] += 1
+                except Exception as e:
+                    stats["errors"].append(f"Mistake import failed: {e}")
     except OSError as e:
         stats["errors"].append(f"Failed to read mistakes.jsonl: {e}")
         return
-
-    for line in content.strip().splitlines():
-        try:
-            mistake = json.loads(line)
-            project = mistake.get("project", "__system__")
-
-            content = (
-                f"ERROR: {mistake.get('error', 'unknown')} | "
-                f"ROOT CAUSE: {mistake.get('root_cause', 'unknown')} | "
-                f"FIX: {mistake.get('fix', 'unknown')}"
-            )
-
-            engine.store_sync(
-                project=project,
-                content=content,
-                fact_type="error",
-                tags=mistake.get("tags", []),
-                confidence="verified",
-                source="migration-v3.1",
-                valid_from=mistake.get("date", None),
-                meta=mistake,
-            )
-            stats["errors_imported"] += 1
-        except (json.JSONDecodeError, sqlite3.Error) as e:
-            stats["errors"].append(f"Mistake import failed: {e}")
 
 
 def _migrate_bridges(engine: CortexEngine, path: Path, stats: dict) -> None:
     """Migrate bridges.jsonl — cross-project connections."""
     try:
-        content = path.read_text(encoding="utf-8")
+        with path.open(encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    bridge = json.loads(line)
+        
+                    content = (
+                        f"BRIDGE: {bridge.get('from', '?')} → {bridge.get('to', '?')} | "
+                        f"Pattern: {bridge.get('pattern', '?')} | "
+                        f"Note: {bridge.get('note', '')}"
+                    )
+        
+                    engine.store_sync(
+                        project="__bridges__",
+                        content=content,
+                        fact_type="bridge",
+                        tags=[bridge.get("from", ""), bridge.get("to", ""), bridge.get("pattern", "")],
+                        confidence="verified",
+                        source="migration-v3.1",
+                        valid_from=bridge.get("date", None),
+                        meta=bridge,
+                    )
+                    stats["bridges_imported"] += 1
+                except Exception as e:
+                    stats["errors"].append(f"Bridge import failed: {e}")
     except OSError as e:
         stats["errors"].append(f"Failed to read bridges.jsonl: {e}")
         return
-
-    for line in content.strip().splitlines():
-        try:
-            bridge = json.loads(line)
-
-            content = (
-                f"BRIDGE: {bridge.get('from', '?')} → {bridge.get('to', '?')} | "
-                f"Pattern: {bridge.get('pattern', '?')} | "
-                f"Note: {bridge.get('note', '')}"
-            )
-
-            engine.store_sync(
-                project="__bridges__",
-                content=content,
-                fact_type="bridge",
-                tags=[bridge.get("from", ""), bridge.get("to", ""), bridge.get("pattern", "")],
-                confidence="verified",
-                source="migration-v3.1",
-                valid_from=bridge.get("date", None),
-                meta=bridge,
-            )
-            stats["bridges_imported"] += 1
-        except (json.JSONDecodeError, sqlite3.Error) as e:
-            stats["errors"].append(f"Bridge import failed: {e}")

@@ -70,6 +70,7 @@ class TensorGlialLegion:
         self.yield_tensor = np.zeros(self.num_agents, dtype="float32")  # Compound Yield
         self.token_burn_tensor = np.zeros(self.num_agents, dtype="float32")
         self.last_update_ts = np.full(self.num_agents, time.time(), dtype="float64")
+        self.last_audit_hash = None
 
     def apply_fading_memory(self, lambda_decay: float = 0.001):
         """
@@ -161,7 +162,14 @@ class TensorGlialLegion:
         self.agents_tensor.flush()
         with open(self.file_path, "rb") as f:
             content = f.read()
-            return hashlib.sha256(content).hexdigest()
+            current_hash = hashlib.sha256(content).hexdigest()
+            
+        if self.last_audit_hash is not None and self.last_audit_hash != current_hash:
+            # En un entorno real registraríamos o alertaríamos si la mutación fue inesperada
+            pass
+            
+        self.last_audit_hash = current_hash
+        return current_hash
 
 
 if __name__ == "__main__":

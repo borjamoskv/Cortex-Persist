@@ -283,3 +283,13 @@ crates/cortex-core/target/
 er-omega-runtime/ethena-strike/out/
 er-omega-runtime/ethena-strike/cache/
 
+# ── Purged: personal & bounty content ────────────
+bounty_hunt/
+cortex/bounty_hunt/
+scratch/bounty_reports/
+scripts/bounty_hunter.py
+scripts/scratch/test_bounty_operator.py
+engine-c5/cortex_bounty_radar.py
+docs/demo-padres/
+docs/_archived/demo-padres/
+

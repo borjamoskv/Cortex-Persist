@@ -1,7 +1,0 @@
-{
-    "vulnerability": "Dust Trap (Integer Truncation)",
-    "contract": "SwapperCalleePsm",
-    "annual_protocol_loss_estimate": 0.9124999999990877,
-    "is_deterministic": true,
-    "is_audited_gap": true
-}
