@@ -59,6 +59,8 @@ __all__ = [
     "CREATE_HEARTBEATS",
     "CREATE_HEARTBEATS_INDEX",
     "CREATE_INTEGRITY_CHECKS",
+    "CREATE_LEDGER_REPLAY_ADMISSIONS",
+    "CREATE_LEDGER_REPLAY_ADMISSIONS_INDEXES",
     "CREATE_META",
     "CREATE_OUTCOMES",
     "CREATE_RWC_INDEXES",
@@ -84,7 +86,7 @@ __all__ = [
     "get_init_meta",
 ]
 
-SCHEMA_VERSION = "5.4.2"
+SCHEMA_VERSION = "5.4.3"
 
 # ─── Core Facts Table ────────────────────────────────────────────────
 CREATE_FACTS = """
@@ -328,6 +330,33 @@ CREATE TABLE IF NOT EXISTS tenants (
 );
 """
 
+# ─── Ledger Replay Admission ─────────────────────────────────────────
+CREATE_LEDGER_REPLAY_ADMISSIONS = """
+CREATE TABLE IF NOT EXISTS ledger_replay_admissions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    tenant_id TEXT NOT NULL,
+    event_id TEXT NOT NULL,
+    nonce TEXT NOT NULL,
+    request_hash TEXT NOT NULL,
+    payload_hash TEXT NOT NULL,
+    ledger_event_id TEXT NOT NULL,
+    actor_key_id TEXT NOT NULL,
+    action TEXT NOT NULL,
+    issued_at TEXT NOT NULL,
+    accepted_at TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+);
+"""
+
+CREATE_LEDGER_REPLAY_ADMISSIONS_INDEXES = """
+CREATE UNIQUE INDEX IF NOT EXISTS ux_ledger_replay_tenant_event_id
+    ON ledger_replay_admissions(tenant_id, event_id);
+CREATE UNIQUE INDEX IF NOT EXISTS ux_ledger_replay_tenant_nonce
+    ON ledger_replay_admissions(tenant_id, nonce);
+CREATE INDEX IF NOT EXISTS idx_ledger_replay_tenant_accepted
+    ON ledger_replay_admissions(tenant_id, accepted_at);
+"""
+
 # ─── Migration SQLs ───────────────────────────────────────────────────
 MIGRATE_ADD_SIGNATURE_COLUMNS = """
 ALTER TABLE facts ADD COLUMN signature TEXT;
@@ -356,6 +385,8 @@ _CORE_SCHEMA = [
     CREATE_THREAT_INTEL,
     CREATE_THREAT_INTEL_INDEXES,
     CREATE_TENANTS,
+    CREATE_LEDGER_REPLAY_ADMISSIONS,
+    CREATE_LEDGER_REPLAY_ADMISSIONS_INDEXES,
 ]
 
 # Full ordered schema: core + extensions (consensus, episodes, signals, entity_events...)

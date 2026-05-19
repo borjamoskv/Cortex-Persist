@@ -7,14 +7,31 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from cortex.ledger.ledger_core import SovereignLedger
-    from cortex.ledger.models import LedgerEvent, SemanticStatus
+    from cortex.ledger.models import LedgerEvent, LedgerOriginSignature, SemanticStatus
+    from cortex.ledger.origin import (
+        OriginKeyRecord,
+        OriginKeyRegistry,
+        OriginSignatureError,
+        OriginSignaturePolicy,
+        origin_payload_hash,
+        sign_event_origin,
+        verify_event_origin,
+    )
     from cortex.ledger.queue import EnrichmentQueue
+    from cortex.ledger.replay import (
+        ReplayAdmissionError,
+        ReplayAdmissionPolicy,
+        ReplayAdmissionResult,
+        replay_request_hash,
+        validate_batch_import_manifest,
+    )
     from cortex.ledger.store import LedgerStore
     from cortex.ledger.verifier import LedgerVerifier
     from cortex.ledger.writer import LedgerWriter
 
 __all__ = [
     "LedgerEvent",
+    "LedgerOriginSignature",
     "SemanticStatus",
     "SovereignLedger",
     "ImmutableLedger",
@@ -22,15 +39,43 @@ __all__ = [
     "LedgerWriter",
     "LedgerVerifier",
     "EnrichmentQueue",
+    "OriginKeyRecord",
+    "OriginKeyRegistry",
+    "OriginSignatureError",
+    "OriginSignaturePolicy",
+    "origin_payload_hash",
+    "sign_event_origin",
+    "verify_event_origin",
+    "ReplayAdmissionError",
+    "ReplayAdmissionPolicy",
+    "ReplayAdmissionResult",
+    "replay_request_hash",
+    "validate_batch_import_manifest",
 ]
 
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "LedgerEvent": ("cortex.ledger.models", "LedgerEvent"),
+    "LedgerOriginSignature": ("cortex.ledger.models", "LedgerOriginSignature"),
     "SemanticStatus": ("cortex.ledger.models", "SemanticStatus"),
     "LedgerStore": ("cortex.ledger.store", "LedgerStore"),
     "LedgerWriter": ("cortex.ledger.writer", "LedgerWriter"),
     "LedgerVerifier": ("cortex.ledger.verifier", "LedgerVerifier"),
     "EnrichmentQueue": ("cortex.ledger.queue", "EnrichmentQueue"),
+    "OriginKeyRecord": ("cortex.ledger.origin", "OriginKeyRecord"),
+    "OriginKeyRegistry": ("cortex.ledger.origin", "OriginKeyRegistry"),
+    "OriginSignatureError": ("cortex.ledger.origin", "OriginSignatureError"),
+    "OriginSignaturePolicy": ("cortex.ledger.origin", "OriginSignaturePolicy"),
+    "origin_payload_hash": ("cortex.ledger.origin", "origin_payload_hash"),
+    "sign_event_origin": ("cortex.ledger.origin", "sign_event_origin"),
+    "verify_event_origin": ("cortex.ledger.origin", "verify_event_origin"),
+    "ReplayAdmissionError": ("cortex.ledger.replay", "ReplayAdmissionError"),
+    "ReplayAdmissionPolicy": ("cortex.ledger.replay", "ReplayAdmissionPolicy"),
+    "ReplayAdmissionResult": ("cortex.ledger.replay", "ReplayAdmissionResult"),
+    "replay_request_hash": ("cortex.ledger.replay", "replay_request_hash"),
+    "validate_batch_import_manifest": (
+        "cortex.ledger.replay",
+        "validate_batch_import_manifest",
+    ),
 }
 
 

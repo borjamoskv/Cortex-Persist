@@ -168,3 +168,34 @@ def _migration_025_tenant_bound_merkle_roots(conn: sqlite3.Connection):
         "ON merkle_roots(tenant_id, tx_start_id, tx_end_id)"
     )
     logger.info("Migration 025: Added tenant scope metadata to merkle_roots")
+
+
+# DOWNGRADE TARGET: 25
+# Rollback strategy: this is an additive online-admission table. Downgrades may
+# leave ledger_replay_admissions in place; older readers ignore the table, and
+# dropping it would remove replay evidence needed to audit live admission.
+def _migration_026_ledger_replay_admission(conn: sqlite3.Connection):
+    """Add tenant-scoped replay admission reservations for strict ledger writes."""
+    conn.executescript("""
+        CREATE TABLE IF NOT EXISTS ledger_replay_admissions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tenant_id TEXT NOT NULL,
+            event_id TEXT NOT NULL,
+            nonce TEXT NOT NULL,
+            request_hash TEXT NOT NULL,
+            payload_hash TEXT NOT NULL,
+            ledger_event_id TEXT NOT NULL,
+            actor_key_id TEXT NOT NULL,
+            action TEXT NOT NULL,
+            issued_at TEXT NOT NULL,
+            accepted_at TEXT NOT NULL,
+            created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+        );
+        CREATE UNIQUE INDEX IF NOT EXISTS ux_ledger_replay_tenant_event_id
+            ON ledger_replay_admissions(tenant_id, event_id);
+        CREATE UNIQUE INDEX IF NOT EXISTS ux_ledger_replay_tenant_nonce
+            ON ledger_replay_admissions(tenant_id, nonce);
+        CREATE INDEX IF NOT EXISTS idx_ledger_replay_tenant_accepted
+            ON ledger_replay_admissions(tenant_id, accepted_at);
+    """)
+    logger.info("Migration 026: Added ledger replay admission reservations")
