@@ -6,6 +6,9 @@ This document defines the minimum contract for an offline public verifier for
 CORTEX ledger exports. The verifier must validate exported bytes without
 accessing SQLite, network services, or a running CORTEX process.
 
+The matching package layout is documented in
+[`PUBLIC_LEDGER_EXPORT_PACKAGE.md`](PUBLIC_LEDGER_EXPORT_PACKAGE.md).
+
 ## Profiles
 
 - `legacy-v0`: verifies the current transaction hash shape for legacy data. It
