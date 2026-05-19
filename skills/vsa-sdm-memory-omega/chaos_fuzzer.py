@@ -136,7 +136,7 @@ def fuzz_capacity_overflow():
     states = [e.random_vec() for _ in range(N)]
 
     memory = np.zeros(D)
-    for k, s in zip(keys, states):
+    for k, s in zip(keys, states, strict=False):
         memory += e.bind(k, s)
 
     # SNR should be terrible

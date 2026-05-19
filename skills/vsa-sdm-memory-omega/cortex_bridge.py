@@ -220,6 +220,6 @@ def federation_merge(agent_memories, weights=None):
         weights = [1.0 / len(agent_memories)] * len(agent_memories)
 
     merged = VSAEngine(D=D, seed=0)
-    merged.memory = sum(w * m.engine.memory for w, m in zip(weights, agent_memories))
+    merged.memory = sum(w * m.engine.memory for w, m in zip(weights, agent_memories, strict=False))
     merged.memory = merged.normalize(merged.memory)
     return merged
