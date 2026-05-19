@@ -21,6 +21,7 @@ from cortex.migrations.mig_ledger import (
     _migration_012_ghosts_table,
     _migration_014_vote_ledger_refinement,
     _migration_025_tenant_bound_merkle_roots,
+    _migration_026_ledger_replay_admission,
 )
 from cortex.migrations.mig_security_hardening import _migration_018_security_hardening
 from cortex.migrations.mig_signals import _migration_019_signal_bus
@@ -58,4 +59,5 @@ MIGRATIONS = [
     (22, "Stratified Cognition + Causal Anchoring", _migration_022_cognitive_layer),
     # (23) removed — mig_simplify_facts was never applied and is incompatible with live schema
     (25, "Tenant-bound Merkle checkpoints", _migration_025_tenant_bound_merkle_roots),
+    (26, "Ledger replay admission reservations", _migration_026_ledger_replay_admission),
 ]

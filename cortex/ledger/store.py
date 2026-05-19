@@ -28,6 +28,8 @@ class LedgerStore:
             conn.commit()
         except Exception as exc:
             conn.rollback()
+            if getattr(exc, "preserve_ledger_error", False):
+                raise
             raise LedgerStoreError(str(exc)) from exc
         finally:
             conn.close()
@@ -99,6 +101,21 @@ class LedgerStore:
                     updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
                     FOREIGN KEY(event_id) REFERENCES ledger_events(event_id) ON DELETE CASCADE
                 );
+
+                CREATE TABLE IF NOT EXISTS ledger_replay_admissions (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    tenant_id TEXT NOT NULL,
+                    event_id TEXT NOT NULL,
+                    nonce TEXT NOT NULL,
+                    request_hash TEXT NOT NULL,
+                    payload_hash TEXT NOT NULL,
+                    ledger_event_id TEXT NOT NULL,
+                    actor_key_id TEXT NOT NULL,
+                    action TEXT NOT NULL,
+                    issued_at TEXT NOT NULL,
+                    accepted_at TEXT NOT NULL,
+                    created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+                );
                 """
             )
             self._ensure_compat_columns(conn, "enrichment_jobs")
@@ -111,6 +128,12 @@ class LedgerStore:
                     ON ledger_events(semantic_status);
                 CREATE INDEX IF NOT EXISTS idx_ledger_enrichment_jobs_status_next_attempt_compat
                     ON ledger_enrichment_jobs(status, COALESCE(next_attempt_ts, next_attempt_at));
+                CREATE UNIQUE INDEX IF NOT EXISTS ux_ledger_replay_tenant_event_id
+                    ON ledger_replay_admissions(tenant_id, event_id);
+                CREATE UNIQUE INDEX IF NOT EXISTS ux_ledger_replay_tenant_nonce
+                    ON ledger_replay_admissions(tenant_id, nonce);
+                CREATE INDEX IF NOT EXISTS idx_ledger_replay_tenant_accepted
+                    ON ledger_replay_admissions(tenant_id, accepted_at);
 
                 CREATE TRIGGER IF NOT EXISTS enrichment_jobs_ledger_insert
                 AFTER INSERT ON enrichment_jobs

@@ -6,6 +6,9 @@ This document defines the minimum contract for an offline public verifier for
 CORTEX ledger exports. The verifier must validate exported bytes without
 accessing SQLite, network services, or a running CORTEX process.
 
+The matching package layout is documented in
+[`PUBLIC_LEDGER_EXPORT_PACKAGE.md`](PUBLIC_LEDGER_EXPORT_PACKAGE.md).
+
 ## Profiles
 
 - `legacy-v0`: verifies the current transaction hash shape for legacy data. It
@@ -95,5 +98,33 @@ Reports must split guarantees:
 - `completeness_verified`
 - `truth_verified`
 
-For offline historical exports, `online_freshness_verified` is false. By
-default, `truth_verified` is false.
+For offline historical exports, `online_freshness_verified` is false. Online
+freshness is a live admission guarantee enforced by M5 replay policy, not by the
+offline verifier. By default, `truth_verified` is false.
+
+## Key Rotation
+
+Actor keys are valid only for events whose `issued_at` falls inside the key
+validity window. `active` keys verify current events. `rotated` and `revoked`
+keys may still verify historical events inside their declared window, but
+events after `valid_until` are rejected.
+
+## CLI Contract
+
+The read-only verifier CLI accepts either a `public-v1-strict` export directory
+or a legacy vector file:
+
+```bash
+cortex verify-ledger-export ./export-dir
+cortex verify-ledger-export ./legacy_v0_vector_1.json
+```
+
+The command must:
+
+- read exported files only;
+- avoid SQLite, network calls, and a running CORTEX process;
+- emit deterministic JSON with `profile`, `result`, `guarantees`, `counts`,
+  `artifacts`, `event_hashes`, `errors`, and `warnings`;
+- exit `0` for `VALID_FULL_STRICT`;
+- exit `1` for `INVALID`;
+- exit `6` for `VALID_INTEGRITY_ONLY` and `VALID_WITH_LIMITATIONS`.

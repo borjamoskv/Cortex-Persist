@@ -26,12 +26,14 @@ def test_fresh_schema_has_tenant_scoped_merkle_roots() -> None:
     applied = run_migrations(conn)
 
     assert applied == 0
-    assert get_current_version(conn) == 25
+    assert get_current_version(conn) == 26
     assert "tenant_id" in _columns(conn, "merkle_roots")
     tenant_id = _column_info(conn, "merkle_roots", "tenant_id")
     assert tenant_id["notnull"] == 1
     assert tenant_id["dflt_value"] == "'__global__'"
-    assert SCHEMA_VERSION == "5.4.2"
+    assert "tenant_id" in _columns(conn, "ledger_replay_admissions")
+    assert "nonce" in _columns(conn, "ledger_replay_admissions")
+    assert SCHEMA_VERSION == "5.4.3"
 
 
 def test_migration_025_adds_merkle_tenant_scope_without_data_loss() -> None:
@@ -57,8 +59,8 @@ def test_migration_025_adds_merkle_tenant_scope_without_data_loss() -> None:
 
     applied = run_migrations(conn)
 
-    assert applied == 1
-    assert get_current_version(conn) == 25
+    assert applied == 2
+    assert get_current_version(conn) == 26
     assert "tenant_id" in _columns(conn, "merkle_roots")
     tenant_id = _column_info(conn, "merkle_roots", "tenant_id")
     assert tenant_id["notnull"] == 1
@@ -73,6 +75,38 @@ def test_migration_025_adds_merkle_tenant_scope_without_data_loss() -> None:
 
 def test_migration_registry_tracks_forensic_ledger_schema_version() -> None:
     versions = [version for version, _description, _func in MIGRATIONS]
-    assert versions[-1] == 25
+    assert versions[-1] == 26
     assert versions == sorted(versions)
     assert len(versions) == len(set(versions))
+
+
+def test_migration_026_adds_replay_admission_table_and_tenant_scoped_uniques() -> None:
+    conn = sqlite3.connect(":memory:")
+    conn.executescript("""
+        CREATE TABLE schema_version (
+            version INTEGER PRIMARY KEY,
+            applied_at TEXT DEFAULT (datetime('now')),
+            description TEXT
+        );
+        INSERT INTO schema_version (version, description) VALUES (25, 'pre replay baseline');
+    """)
+
+    applied = run_migrations(conn)
+
+    assert applied == 1
+    assert get_current_version(conn) == 26
+    columns = _columns(conn, "ledger_replay_admissions")
+    assert {
+        "tenant_id",
+        "event_id",
+        "nonce",
+        "request_hash",
+        "payload_hash",
+        "ledger_event_id",
+    } <= columns
+    indexes = {
+        row[1]: bool(row[2])
+        for row in conn.execute("PRAGMA index_list(ledger_replay_admissions)").fetchall()
+    }
+    assert indexes["ux_ledger_replay_tenant_event_id"] is True
+    assert indexes["ux_ledger_replay_tenant_nonce"] is True
