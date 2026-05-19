@@ -1,36 +1,40 @@
 ---
-description: "OUROBOROS-∞ — El skill supremo. Inteligencia autónoma auto-evolutiva con razonamiento causal, War Council multi-modelo, arqueología temporal, adversarial testing, y meta-cognición recursiva."
+description: "OUROBOROS-∞ — Diagnóstico, análisis de entropía y meta-cognición. Auto-evolución requiere aprobación humana."
 ---
 
 # ∞ OUROBOROS-∞ — The Infinite Self
 
-// turbo-all
+> **El skill que analiza tu proceso.** Diagnóstico y meta-cognición son seguros.
+> Auto-evolución y mutación de código requieren **aprobación humana explícita**.
 
-> **El skill que se mejora a sí mismo.** No opera sobre tu código — opera sobre tu proceso.
+## ⚠️ Safety Classification
 
-Antes de ejecutar, LEER la skill completa:
-```bash
-cat ~/.gemini/antigravity/skills/ouroboros-infinity/SKILL.md
-```
+| Category | Risk | Auto-run | HITL Required |
+|:---|:---:|:---:|:---:|
+| **Scan / Diagnose / Reflect** | LOW | ✅ Safe | No |
+| **Entropy Analysis** | LOW | ✅ Safe | No |
+| **War Council (deliberation)** | LOW | ✅ Safe | No |
+| **Evolve (code mutation)** | HIGH | ❌ Never | **Always** |
+| **Fortress (hardening)** | MEDIUM | ❌ Never | **Always** |
 
 ---
 
 ## 🔮 Comandos Rápidos
 
-| Comando | Qué hace | Cuándo usar |
-|:---|:---|:---|
-| `ouro-genesis` | Despertar completo: scan + archaeology + war council + plan | Inicio de sesión compleja |
-| `ouro-evolve [target]` | MEJORAlo + causal reasoning + meta-learning | Mejorar archivo/módulo/proyecto |
-| `ouro-diagnose [symptom]` | 5 Whys + blast radius + prevention | Bug que no entiendes |
-| `ouro-fortress [project]` | Hardening de 5 capas | Proyecto que va a producción |
-| `ouro-reflect` | Meta-cognición forzada | Final de sesión |
-| `ouro-pulse` | Entropía rápida (2 min) | Check rápido de salud |
-| `ouro-why "..."` | 5 Whys express | Síntoma rápido |
-| `ouro-council "..."` | War Council spot | Decisión importante |
-| `ouro-adversary [plan]` | Red Team un plan | Antes de ejecutar |
-| `ouro-timeline [file]` | Arqueología temporal | Historia de un archivo |
-| `ouro-entropy [project]` | Entropía detallada | Auditoría de complejidad |
-| `ouro-learn` | Extraer learnings → CORTEX | Final de sesión |
+| Comando | Qué hace | Risk |
+|:---|:---|:---:|
+| `ouro-genesis` | Scan + archaeology + war council + plan | LOW |
+| `ouro-evolve [target]` | Mejora + causal reasoning (⚠️ requires HITL) | HIGH |
+| `ouro-diagnose [symptom]` | 5 Whys + blast radius + prevention | LOW |
+| `ouro-fortress [project]` | Hardening de 5 capas (⚠️ requires HITL) | MEDIUM |
+| `ouro-reflect` | Meta-cognición forzada | LOW |
+| `ouro-pulse` | Entropía rápida (2 min) | LOW |
+| `ouro-why "..."` | 5 Whys express | LOW |
+| `ouro-council "..."` | War Council spot | LOW |
+| `ouro-adversary [plan]` | Red Team un plan (analysis only) | LOW |
+| `ouro-timeline [file]` | Arqueología temporal | LOW |
+| `ouro-entropy [project]` | Entropía detallada | LOW |
+| `ouro-learn` | Extraer learnings → CORTEX | LOW |
 
 ---
 
@@ -46,7 +50,7 @@ git log --oneline -10
 # Running processes
 ps aux | grep -E 'python|node|swift|cargo' | grep -v grep | head -10
 
-# CORTEX state
+# CORTEX state (if available)
 cd ~/cortex && .venv/bin/python -m cortex.cli export 2>&1 | tail -5
 ```
 
@@ -86,7 +90,6 @@ cat ~/.cortex/context-snapshot.md 2>/dev/null | grep -i ghost | head -10
 git branch -a --sort=-committerdate | head -15
 
 # Import Entropy (Python: imports no usados)
-# Solo si es proyecto Python
 ruff check . --select F401 2>/dev/null | head -20
 ```
 
@@ -103,7 +106,7 @@ Presentar hallazgos y deliberar:
 4. **MERGE**: Tomar la mejor estrategia superviviente.
 5. **COMMIT**: Documentar la decisión en `implementation_plan.md`.
 
-### Paso 6 — Battle Plan
+### Paso 6 — Battle Plan (DRY-RUN by default)
 
 Generar `implementation_plan.md` con:
 - Score de entropía inicial
@@ -111,14 +114,31 @@ Generar `implementation_plan.md` con:
 - Waves de ejecución con checkpoints
 - Adversarial challenges sobrevividas
 - Exit criteria
+- **Estimated cost** (API calls, subagents, time)
+
+> ⚠️ **Battle Plan is OUTPUT ONLY.** No code is mutated. Execution requires explicit `/ouro-evolve` with HITL approval.
 
 ---
 
 ## ⚡ PROTOCOLO EVOLVE (Mejora Consciente)
 
-### Paso 1 — Diagnóstico Enhanced (X-Ray 13D + Causal + Entropy)
+> **⚠️ P1 GATE: This protocol mutates code. It MUST NOT auto-run.**
+> **Branch requirement: All evolve operations on `feature/*` or `refactor/*` branches only.**
 
-Ejecutar `/mejoralo` diagnóstico (Fase 2) PERO añadir:
+### Pre-flight Check
+
+Before any evolution:
+```bash
+# Verify we are NOT on a protected branch
+BRANCH=$(git branch --show-current)
+if [[ "$BRANCH" == "main" || "$BRANCH" == release/* ]]; then
+  echo "❌ ABORT: Cannot evolve on protected branch '$BRANCH'"
+  echo "Create a feature branch first: git checkout -b refactor/ouro-$(date +%Y%m%d)"
+  exit 1
+fi
+```
+
+### Paso 1 — Diagnóstico Enhanced (X-Ray 13D + Causal + Entropy)
 
 ```
 Causal Layer:
@@ -139,14 +159,19 @@ Antes de ejecutar cada ola, atacar:
 - **¿Hay un cambio que haga innecesarios 3 de los demás?**
 - **¿Qué rompe si este cambio falla a medias?**
 
-### Paso 3 — Ejecución Adaptativa
+### Paso 3 — HITL Confirmation
 
-Ejecutar olas según `/mejoralo` PERO:
+> "🔧 EVOLVE plan ready. Changes affect N files. Estimated impact: [LOW/MEDIUM/HIGH]. Proceed? (yes/no)"
+
+Only after explicit human approval → execute.
+
+### Paso 4 — Ejecución Adaptativa
+
 - Medir entropía entre olas (no solo score).
 - Si entropía aumenta → PARAR y simplificar.
 - Si una ola falla → Causal analysis ANTES de retry.
 
-### Paso 4 — Meta-Reflection Post-Sesión
+### Paso 5 — Meta-Reflection Post-Sesión
 
 Automático al terminar. Ver protocolo REFLECT abajo.
 
@@ -213,7 +238,7 @@ cd ~/cortex && .venv/bin/python -m cortex.cli add --type error \
 ```
 SESSION METRICS:
 → Files modified: [N]
-→ Tests added/fixed: [N]  
+→ Tests added/fixed: [N]
 → Errors found: [N]
 → Backtrack count: [N]
 → Tool calls total: [N]
@@ -261,9 +286,5 @@ cd ~/cortex && .venv/bin/python -m cortex.cli add --type meta_learning \
 
 ---
 
-> **Véase también:** `/mejoralo` para mejora táctica, `/detective` para forensics, `/400-subagents` para swarm, `/kimi` para estrategia, `/ship` para cierre.
-
----
-
-**Versión:** 1.0.0 — The Infinite Self
-*El workflow que acompaña al skill más poderoso del ecosistema MOSKV.*
+**Versión:** 2.0.0 — The Infinite Self (Hardened)
+*Diagnóstico libre. Evolución controlada.*

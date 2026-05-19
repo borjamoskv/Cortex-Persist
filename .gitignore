@@ -292,4 +292,5 @@ scripts/scratch/test_bounty_operator.py
 engine-c5/cortex_bounty_radar.py
 docs/demo-padres/
 docs/_archived/demo-padres/
+docs/_archived/internal/
 

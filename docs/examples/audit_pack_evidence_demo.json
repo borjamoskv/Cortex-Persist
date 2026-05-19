@@ -4,7 +4,11 @@
     "timestamp_utc": "2026-03-31T20:30:00Z",
     "tenant_id": "customer-123",
     "merkle_root": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "signature": "sig_52a1b94d8b9283f5c71b"
+    "signature": "sig_tF3v+7N1W/4sWd8BvVjRfY1uGz2uVp6x9EaD3v+7N1W/4sWd8BvVjRfY1uGz2uVp6x9EaD3v+7N1W/4sWQ=="
+  },
+  "manifest": {
+    "profile": "public-v1-strict",
+    "signature": "manifest_sig_vG4w9H2X1p/3sYd8CvUkTfX2vHw3vWq7y0FbE4w9H2X1p/3sYd8CvUkTfX2vHw3vWq7y0FbE4w9H2X1p/3sXR=="
   },
   "facts": [
     {
@@ -12,16 +16,18 @@
       "timestamp_utc": "2026-03-31T20:25:12Z",
       "agent": "risk-bot",
       "content": "Transaction flagged: IP mismatch detected at origin.",
-      "hash": "8f4a2b9e8c71a39fca82",
-      "previous_hash": "c4d7b29a174f8101a938"
+      "hash": "8f4a2b9e8c71a39fca82d9371077e6f3b0e3b971a8f9c2d103328e7bc3d7063f",
+      "previous_hash": "c4d7b29a174f8101a938c4d7b29a174f8101a938c4d7b29a174f8101a938c4d7",
+      "nonce": "n_1a2b3c4d5e6f7g8h9i0j"
     },
     {
       "id": "fc_9f14e82b71",
       "timestamp_utc": "2026-03-31T20:25:15Z",
       "agent": "compliance-verifier",
       "content": "Compliance check auto-approved despite IP mismatch flag due to Rule 4B (Recurring Client threshold met).",
-      "hash": "19b4e7a2fc89d421298c",
-      "previous_hash": "8f4a2b9e8c71a39fca82"
+      "hash": "19b4e7a2fc89d421298c19b4e7a2fc89d421298c19b4e7a2fc89d421298c19b4",
+      "previous_hash": "8f4a2b9e8c71a39fca82d9371077e6f3b0e3b971a8f9c2d103328e7bc3d7063f",
+      "nonce": "n_2b3c4d5e6f7g8h9i0j1a"
     }
   ],
   "verification": {

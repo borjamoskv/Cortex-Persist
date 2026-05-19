@@ -41,5 +41,5 @@ if __name__ == "__main__":
                 json={"url": target["url"], "effort": "ultrathink"},
             )
             print(f"🚀 [C5-REAL] X100 Fuzzer Engaged: {r.status_code}")
-        except:
+        except Exception:
             print("⚠️ [RECON] Fuzzer not active, target queued.")
