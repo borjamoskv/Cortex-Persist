@@ -1,0 +1,19 @@
+agent_runtime_limits:
+  max_concurrency: 2
+  max_requests_per_minute: 20
+  retry:
+    max_attempts: 6
+    strategy: exponential_backoff_with_jitter
+    base_delay_s: 2
+    max_delay_s: 90
+    jitter_s: 1.25
+  circuit_breaker:
+    enabled: true
+    on_429_count: 3
+    cooldown_s: 180
+  checkpointing:
+    enabled: true
+    resume_after_failure: true
+    persist_trace_ids: true
+  streaming:
+    max_parallel_streams: 1
