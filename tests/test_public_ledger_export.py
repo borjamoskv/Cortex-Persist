@@ -195,6 +195,32 @@ def test_export_rejects_inline_fact_payload_and_private_material(tmp_path: Path)
             created_at=CREATED_AT,
         )
 
+    leaky_key_events_dir = tmp_path / "private-key-event"
+    with pytest.raises(ValueError, match="forbidden token: private_key"):
+        write_public_ledger_export(
+            events=[event],
+            export_dir=leaky_key_events_dir,
+            public_keys=[
+                public_key_record(
+                    key_id=ACTOR_KEY_ID,
+                    actor_id=ACTOR_ID,
+                    public_key=actor_private_key.public_key(),
+                    permissions=["fact.store"],
+                )
+            ],
+            export_authority=ExportAuthority(
+                key_id=EXPORT_KEY_ID,
+                actor_id="export-authority-01",
+                private_key=export_private_key,
+            ),
+            export_id="export-2026-02-03-001",
+            tenant_id=TENANT_ID,
+            stream_id=STREAM_ID,
+            created_at=CREATED_AT,
+            key_events=[{"key_id": ACTOR_KEY_ID, "private_key": "never write this"}],
+        )
+    assert not (leaky_key_events_dir / "key-events.jsonl").exists()
+
 
 def test_export_contains_no_private_keys_secrets_or_executables(tmp_path: Path) -> None:
     export_dir = _write_valid_export(tmp_path)

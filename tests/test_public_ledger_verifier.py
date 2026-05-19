@@ -113,6 +113,45 @@ def test_verify_export_rejects_actor_without_action_permission(tmp_path: Path) -
     assert "event_actor_key_permission_denied:evt_01HX0000000000000000000000" in report["errors"]
 
 
+def test_verify_export_accepts_rotated_historical_actor_key_without_manifest(
+    tmp_path: Path,
+) -> None:
+    export_dir = tmp_path / "export"
+    shutil.copytree(STRICT, export_dir)
+    (export_dir / "manifest.json").unlink()
+    registry_path = export_dir / "public-keys.json"
+    registry = json.loads(registry_path.read_text(encoding="utf-8"))
+    registry["keys"][0]["status"] = "revoked"
+    registry["keys"][0]["valid_until"] = "2026-06-01T00:00:00Z"
+    registry_path.write_text(json.dumps(registry), encoding="utf-8")
+
+    report = verify_export(export_dir)
+
+    assert report["result"] == "VALID_WITH_LIMITATIONS"
+    assert report["guarantees"]["authority_verified"] is True
+    assert report["guarantees"]["origin_authenticity_verified"] is True
+    assert not any(error.startswith("event_key_") for error in report["errors"])
+
+
+def test_verify_export_rejects_revoked_key_for_future_event_without_manifest(
+    tmp_path: Path,
+) -> None:
+    export_dir = tmp_path / "export"
+    shutil.copytree(STRICT, export_dir)
+    (export_dir / "manifest.json").unlink()
+    registry_path = export_dir / "public-keys.json"
+    registry = json.loads(registry_path.read_text(encoding="utf-8"))
+    registry["keys"][0]["status"] = "revoked"
+    registry["keys"][0]["valid_until"] = "2026-01-02T00:00:00Z"
+    registry_path.write_text(json.dumps(registry), encoding="utf-8")
+
+    report = verify_export(export_dir)
+
+    assert report["result"] == "INVALID"
+    assert report["guarantees"]["authority_verified"] is False
+    assert "event_key_outside_validity:1" in report["errors"]
+
+
 def test_verify_export_rejects_manifest_file_hash_mismatch(tmp_path: Path) -> None:
     export_dir = tmp_path / "export"
     shutil.copytree(STRICT, export_dir)

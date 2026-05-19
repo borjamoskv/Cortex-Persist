@@ -4,8 +4,9 @@ Status: draft
 
 This document defines the forensic ledger export package produced for
 independent offline verification. The package is evidence packaging only: it
-does not enforce runtime origin signing, authorize agent actions, reserve
-nonces, or export fact payloads.
+does not reserve replay nonces, prove source-database completeness, or export
+fact payloads. Runtime strict origin signing is defined in
+[`M4_ORIGIN_SIGNATURES_STRICT_MODE.md`](M4_ORIGIN_SIGNATURES_STRICT_MODE.md).
 
 ## Required Artifacts
 
@@ -102,3 +103,7 @@ M3 does not:
 - export plaintext facts or reconstruct fact contents.
 
 Those controls belong to later milestones, especially M4, M5, and M6.
+
+M4 adds runtime origin-signature admission for `LedgerWriter` strict mode. M5
+remains responsible for durable replay nonce reservation, and M6 remains
+responsible for immutable-ledger no-PII enforcement.

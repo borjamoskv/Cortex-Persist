@@ -111,7 +111,14 @@ def write_public_ledger_export(
         stream_id=stream_id,
     )
     _validate_public_key_records(key_objects)
-    _assert_no_private_material({"events": event_objects, "public_keys": key_objects})
+    key_event_objects = [dict(event) for event in key_events]
+    _assert_no_private_material(
+        {
+            "events": event_objects,
+            "key_events": key_event_objects,
+            "public_keys": key_objects,
+        }
+    )
 
     generated_at = created_at or _utc_now()
     events_path = root / "events.jsonl"
@@ -128,7 +135,7 @@ def write_public_ledger_export(
     )
     _write_text_atomic(
         key_events_path,
-        "".join(_canonical_public_json(dict(event)) + "\n" for event in key_events),
+        "".join(_canonical_public_json(event) + "\n" for event in key_event_objects),
     )
     _write_json_atomic(schema_path, _schema_document())
     _write_json_atomic(verification_profile_path, _verification_profile_document())

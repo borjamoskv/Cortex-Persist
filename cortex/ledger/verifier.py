@@ -4,7 +4,13 @@ import json
 import logging
 from typing import TYPE_CHECKING
 
-from cortex.ledger.models import ActionResult, ActionTarget, IntentPayload, LedgerEvent
+from cortex.ledger.models import (
+    ActionResult,
+    ActionTarget,
+    IntentPayload,
+    LedgerEvent,
+    LedgerOriginSignature,
+)
 from cortex.ledger.store import LedgerStore
 
 if TYPE_CHECKING:
@@ -139,6 +145,11 @@ class LedgerVerifier:
         target = ActionTarget(**payload["target"])
         result = ActionResult(**payload["result"])
         intent = IntentPayload(**payload["intent"]) if payload.get("intent") else None
+        origin = (
+            LedgerOriginSignature(**payload["origin"])
+            if isinstance(payload.get("origin"), dict)
+            else None
+        )
 
         return LedgerEvent(
             event_id=payload["event_id"],
@@ -151,6 +162,7 @@ class LedgerVerifier:
             intent=intent,
             correlation_id=payload.get("correlation_id"),
             trace_id=payload.get("trace_id"),
+            origin=origin,
             prev_hash=payload.get("prev_hash"),
             hash=payload.get("hash"),
             semantic_status=payload.get("semantic_status", "pending"),

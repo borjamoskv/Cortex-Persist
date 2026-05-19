@@ -101,6 +101,13 @@ Reports must split guarantees:
 For offline historical exports, `online_freshness_verified` is false. By
 default, `truth_verified` is false.
 
+## Key Rotation
+
+Actor keys are valid only for events whose `issued_at` falls inside the key
+validity window. `active` keys verify current events. `rotated` and `revoked`
+keys may still verify historical events inside their declared window, but
+events after `valid_until` are rejected.
+
 ## CLI Contract
 
 The read-only verifier CLI accepts either a `public-v1-strict` export directory
