@@ -1,10 +1,13 @@
+import logging
+logger = logging.getLogger(__name__)
+
 import time
 
 from cortex.cli.bicameral import bicameral
 
 
 def run_bicameral_demo():
-    print("\n")
+    logger.info("\n")
     # 1. El agente recibe una petición
     # Usuario: "Crea un componente de login usando TailwindCSS"
 
@@ -22,7 +25,7 @@ def run_bicameral_demo():
         source="LORE",
     )
 
-    print()
+    logger.info()
     # 3. Reacción Autonómica (Tether verifica permisos)
     time.sleep(1)
     bicameral.log_autonomic(
@@ -33,7 +36,7 @@ def run_bicameral_demo():
         "Verificando acceso a sistema de archivos. Carpeta permitida: /src/components.", check="I/O"
     )
 
-    print()
+    logger.info()
     # 4. Córtex Motor (Ejecución)
     time.sleep(1)
     bicameral.log_motor("Generando componente de Login (Vanilla CSS)...", action="CODE")
@@ -41,7 +44,7 @@ def run_bicameral_demo():
     bicameral.log_motor("Escribiendo archivo en /src/components/Login.js", action="WRITE")
     time.sleep(0.5)
     bicameral.log_motor("Componente creado con UI state-of-the-art (130/100).", action="DONE")
-    print("\n")
+    logger.info("\n")
 
 
 if __name__ == "__main__":

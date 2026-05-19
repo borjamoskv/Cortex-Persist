@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """CLI commands: timeline log, checkout, snapshot."""
 
 from __future__ import annotations
@@ -54,7 +57,7 @@ def timeline_log(limit, db):
             table.add_column("Timestamp", width=20)
             for row in rows:
                 table.add_row(f"#{row[0]}", row[1], row[2], row[3][:12] + "...", row[4])
-            console.print(table)
+            console.logger.info(table)
         except (sqlite3.Error, OSError, ValueError, RuntimeError, KeyError) as e:
             handle_cli_error(e, db_path=db, context="fetching timeline log")
         finally:
@@ -96,7 +99,7 @@ def timeline_checkout(tx_id, project, db):
                     content[:50] + "..." if len(content) > 50 else content,
                     f"{f.get('consensus_score', 0.0):.2f}",
                 )
-            console.print(table)
+            console.logger.info(table)
         except (sqlite3.Error, OSError, ValueError, RuntimeError, KeyError) as e:
             handle_cli_error(e, db_path=db, context="reconstructing state")
         finally:
@@ -136,10 +139,10 @@ def snapshot_create(name, db):
             sm = SnapshotManager(db_path=db)
             with console.status("[bold blue]Creating physical snapshot...[/]"):
                 snap = await sm.create_snapshot(name, tx_id, merkle_root)
-            console.print(f"[green]✓[/] Snapshot [bold]'{name}'[/] created successfully.")
-            console.print(f"  [dim]Path:[/] {snap.path}")
-            console.print(f"  [dim]TX ID:[/] {snap.tx_id}")
-            console.print(f"  [dim]Size:[/] {snap.size_mb} MB")
+            console.logger.info(f"[green]✓[/] Snapshot [bold]'{name}'[/] created successfully.")
+            console.logger.info(f"  [dim]Path:[/] {snap.path}")
+            console.logger.info(f"  [dim]TX ID:[/] {snap.tx_id}")
+            console.logger.info(f"  [dim]Size:[/] {snap.size_mb} MB")
         except (sqlite3.Error, OSError, ValueError, RuntimeError) as e:
             handle_cli_error(e, db_path=db, context="creating snapshot")
         finally:
@@ -173,7 +176,7 @@ def snapshot_list(db):
                 table.add_row(
                     s.name, str(s.tx_id), s.created_at[:19].replace("T", " "), f"{s.size_mb} MB"
                 )
-            console.print(table)
+            console.logger.info(table)
         except (sqlite3.Error, OSError, ValueError, RuntimeError) as e:
             handle_cli_error(e, db_path=db, context="listing snapshots")
 

@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """CLI commands: handoff generate, handoff load."""
 
 from __future__ import annotations
@@ -103,7 +106,7 @@ def load(path, json_output) -> None:
 
     active = data.get("active_projects", [])
     if active:
-        console.print(f"\n[bold green]📂 Active Projects (24h):[/] {', '.join(active)}")
+        console.logger.info(f"\n[bold green]📂 Active Projects (24h):[/] {', '.join(active)}")
 
 
 def _truncate(text: str, max_len: int = 70) -> str:
@@ -133,9 +136,9 @@ def _display_pending_work(data: dict) -> None:
     """Display pending work items."""
     pending = data.get("session", {}).get("pending_work", [])
     if pending:
-        console.print("\n[bold yellow]⏳ Pending Work[/]")
+        console.logger.info("\n[bold yellow]⏳ Pending Work[/]")
         for item in pending:
-            console.print(f"  • {item}")
+            console.logger.info(f"  • {item}")
 
 
 def _display_section_table(
@@ -157,4 +160,4 @@ def _display_section_table(
     for item in items:
         text = _truncate(item[content_field])
         table.add_row(str(item["id"]), item["project"], text)
-    console.print(table)
+    console.logger.info(table)

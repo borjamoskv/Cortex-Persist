@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
 """Generate docs/axiom-registry.md from the canonical Python registry.
@@ -106,7 +109,7 @@ def main() -> None:
     out = Path(__file__).resolve().parents[2] / "docs" / "axiom-registry.md"
     out.write_text(doc)
     lines = doc.count(chr(10))
-    print(f"✅ Generated {out} ({len(doc)} bytes, {lines} lines)")
+    logger.info(f"✅ Generated {out} ({len(doc)} bytes, {lines} lines)")
 
 
 if __name__ == "__main__":

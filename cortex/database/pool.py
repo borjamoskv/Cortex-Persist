@@ -13,7 +13,6 @@ import os
 import sqlite3
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import Optional
 
 import aiosqlite
 

@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from cortex.extensions.aether.critic import CriticAgent
 from cortex.extensions.aether.executor import ExecutorAgent

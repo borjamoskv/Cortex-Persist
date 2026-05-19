@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """CLI commands for Moltbook integration.
 
 Usage:
@@ -70,7 +73,7 @@ def status():
         claim_status = result.get("status", "unknown")
 
         color = "green" if claim_status == "claimed" else "yellow"
-        console.print(f"[{color}]Status: {claim_status}[/]")
+        console.logger.info(f"[{color}]Status: {claim_status}[/]")
 
         if claim_status == "claimed":
             me = asyncio.run(client.get_me())
@@ -85,9 +88,9 @@ def status():
                 )
             )
     except MoltbookError as e:
-        console.print(f"[red]Error: {e}[/]")
+        console.logger.info(f"[red]Error: {e}[/]")
     except ValueError as e:
-        console.print(f"[red]{e}[/]")
+        console.logger.info(f"[red]{e}[/]")
 
 
 @moltbook_cmds.command("heartbeat")
@@ -95,7 +98,7 @@ def heartbeat():
     """Run a Moltbook heartbeat check-in cycle."""
     from cortex.extensions.moltbook.heartbeat import MoltbookHeartbeat
 
-    console.print("[dim]🦞 Running Moltbook heartbeat...[/]")
+    console.logger.info("[dim]🦞 Running Moltbook heartbeat...[/]")
     hb = MoltbookHeartbeat()
     summary = asyncio.run(hb.run())
 
@@ -104,11 +107,11 @@ def heartbeat():
 
     if errors:
         for err in errors:
-            console.print(f"[red]Error: {err}[/]")
+            console.logger.info(f"[red]Error: {err}[/]")
     elif actions:
-        console.print(f"[green]HEARTBEAT_OK[/] — {', '.join(actions)}")
+        console.logger.info(f"[green]HEARTBEAT_OK[/] — {', '.join(actions)}")
     else:
-        console.print("[green]HEARTBEAT_OK[/] — No new activity 🦞")
+        console.logger.info("[green]HEARTBEAT_OK[/] — No new activity 🦞")
 
 
 @moltbook_cmds.command("post")
@@ -127,7 +130,7 @@ def post(submolt: str, title: str, content: str):
     verification_result = result.get("verification_result", {})
 
     if verification_result.get("success"):
-        console.print(f"[bold green]✅ Post published![/] ID: {post_id}")
+        console.logger.info(f"[bold green]✅ Post published![/] ID: {post_id}")
     elif verification_result.get("error"):
         console.print(
             f"[yellow]⚠️ Post created but verification issue: {verification_result.get('error')}[/]"
@@ -135,9 +138,9 @@ def post(submolt: str, title: str, content: str):
     else:
         status_val = post_data.get("verification_status", "unknown")
         if status_val == "pending":
-            console.print(f"[yellow]Post created, verification pending. ID: {post_id}[/]")
+            console.logger.info(f"[yellow]Post created, verification pending. ID: {post_id}[/]")
         else:
-            console.print(f"[green]✅ Post published (no verification needed)![/] ID: {post_id}")
+            console.logger.info(f"[green]✅ Post published (no verification needed)![/] ID: {post_id}")
 
 
 @moltbook_cmds.command("search")
@@ -153,7 +156,7 @@ def search(query: str, search_type: str, limit: int):
 
     results = result.get("results", [])
     if not results:
-        console.print("[dim]No results found.[/]")
+        console.logger.info("[dim]No results found.[/]")
         return
 
     table = Table(title=f"🔍 Results for: {query}", border_style="cyan")
@@ -168,7 +171,7 @@ def search(query: str, search_type: str, limit: int):
         similarity = f"{r.get('similarity', 0):.2f}"
         table.add_row(r.get("type", "?"), title, author, similarity)
 
-    console.print(table)
+    console.logger.info(table)
 
 
 @moltbook_cmds.command("feed")
@@ -183,7 +186,7 @@ def feed(sort: str, limit: int):
 
     posts = result.get("posts", [])
     if not posts:
-        console.print("[dim]Feed is empty.[/]")
+        console.logger.info("[dim]Feed is empty.[/]")
         return
 
     for p in posts:

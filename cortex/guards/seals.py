@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
 """CORTEX Quality Gates (10 Sovereign Seals) — Local Enforcement.
@@ -140,7 +143,7 @@ async def check_seal_1_code_quality() -> GateResult:
         printer.warn("Ruff not found — skipping (install with: pip install ruff)")
     else:
         printer.fail("Ruff linting failed.")
-        printer.print(out[:2000], style="dim")
+        printer.logger.info(out[:2000], style="dim")
         passed = False
 
     # ── LOC Guard ──
@@ -190,7 +193,7 @@ async def check_seal_2_type_safety() -> GateResult:
                     return True, "verified"
                 else:
                     printer.fail(f"Type checking failed (threshold: {ecount}/85).")
-                    printer.print(out[:2000], style="dim")
+                    printer.logger.info(out[:2000], style="dim")
                     return False, "verified"
         except (ValueError, KeyError, json.JSONDecodeError):
             pass
@@ -200,7 +203,7 @@ async def check_seal_2_type_safety() -> GateResult:
         return True, "verified"
     else:
         printer.fail("Type checking failed.")
-        printer.print(out[:2000], style="dim")
+        printer.logger.info(out[:2000], style="dim")
         return False, "verified"
 
 
@@ -222,7 +225,7 @@ async def check_seal_3_security() -> GateResult:
         printer.warn("Bandit not found — skipping")
     else:
         printer.fail("Security vulnerabilities detected.")
-        printer.print(out[:2000], style="dim")
+        printer.logger.info(out[:2000], style="dim")
         passed = False
 
     # ── Cobbler's Compliance (old Seal 11) ──
@@ -264,7 +267,7 @@ async def check_seal_3_security() -> GateResult:
     if demon_violations:
         printer.fail(f"EntropyDemon fired on engine ({len(demon_violations)} files)")
         for v in demon_violations:
-            printer.print(f"      ↳ {v}", style="yellow")
+            printer.logger.info(f"      ↳ {v}", style="yellow")
         passed = False
     else:
         printer.success(f"EntropyDemon: engine clean ({len(engine_files)} files).")
@@ -272,7 +275,7 @@ async def check_seal_3_security() -> GateResult:
     if intruder_violations:
         printer.fail(f"Intruder found issues ({len(intruder_violations)} files)")
         for v in intruder_violations:
-            printer.print(f"      ↳ {v}", style="yellow")
+            printer.logger.info(f"      ↳ {v}", style="yellow")
         passed = False
     else:
         printer.success("Intruder: no eval/exec/os.system in engine.")
@@ -299,7 +302,7 @@ async def check_seal_4_tests() -> GateResult:
         return True, "verified"
     else:
         printer.fail("Tests failed.")
-        printer.print(out[:3000], style="dim")
+        printer.logger.info(out[:3000], style="dim")
         return False, "verified"
 
 
@@ -332,7 +335,7 @@ async def check_seal_5_ledger() -> GateResult:
         printer.success("Connection guard passed.")
     else:
         printer.fail("Connection guard failed.")
-        printer.print(out, style="dim")
+        printer.logger.info(out, style="dim")
         passed = False
 
     return passed, "verified"
@@ -590,7 +593,7 @@ async def _execute_gates_loop(
         start = time.perf_counter()
         res = await gate_fns[gate_num]()
         elapsed = (time.perf_counter() - start) * 1000
-        printer.print(f"   [dim]⏱  {elapsed:.0f}ms[/]")
+        printer.logger.info(f"   [dim]⏱  {elapsed:.0f}ms[/]")
 
         results[gate_num] = res
         if fail_fast and not res[0]:
@@ -613,7 +616,7 @@ def _print_summary(results: dict[int, GateResult], total_elapsed: float) -> int:
         f"[bold yellow]🟡 SKIPPED: {len(skipped)}[/]  "
         f"[bold red]🔴 FAILED: {len(failed)}[/]"
     )
-    printer.print(f"   [dim]⏱  Total: {total_elapsed:.0f}ms[/]")
+    printer.logger.info(f"   [dim]⏱  Total: {total_elapsed:.0f}ms[/]")
 
     if failed:
         printer.fail(f"SEALS BROKEN: {sorted(failed)}\nFix violations before pushing.")

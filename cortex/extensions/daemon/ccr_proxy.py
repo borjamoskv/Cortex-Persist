@@ -2,7 +2,6 @@ import json
 import logging
 import os
 import time
-from typing import Optional
 
 import httpx
 from fastapi import FastAPI, Request
@@ -260,7 +259,7 @@ async def messages_endpoint(request: Request):
                                     f"event: content_block_delta\n"
                                     f"data: {json.dumps(event_data)}\n\n"
                                 )
-                        except Exception:  # noqa: BLE001 — drop malformed chunk
+                        except Exception:  # TODO(Swarm): Narrow this exception
                             continue
 
                     yield 'event: message_stop\ndata: {"type": "message_stop"}\n\n'

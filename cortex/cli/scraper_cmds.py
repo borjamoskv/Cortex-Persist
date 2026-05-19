@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """SCRAPER-Ω CLI — Sovereign Web Extraction commands.
 
 Commands:
@@ -75,11 +78,11 @@ def scrape(
     result = _run_async(engine.scrape(request))
 
     if result.status == "error":
-        console.print(f"[bold red]❌ Error:[/bold red] {result.error}")
+        console.logger.info(f"[bold red]❌ Error:[/bold red] {result.error}")
         raise SystemExit(1)
 
     # Display result
-    console.print(f"\n[bold green]✅ Extracted:[/bold green] {result.title or 'Untitled'}")
+    console.logger.info(f"\n[bold green]✅ Extracted:[/bold green] {result.title or 'Untitled'}")
     console.print(
         f"[dim]Strategy: {result.strategy_used.value} | "
         f"Time: {result.elapsed_ms:.0f}ms | "
@@ -102,11 +105,11 @@ def scrape(
     if output:
         with open(output, "w") as f:
             f.write(text)
-        console.print(f"[dim]Written to {output}[/dim]")
+        console.logger.info(f"[dim]Written to {output}[/dim]")
     else:
         # Show preview (first 500 chars)
         preview = text[:500] + ("..." if len(text) > 500 else "")
-        console.print(Panel(preview, title="Content Preview", border_style="dim"))
+        console.logger.info(Panel(preview, title="Content Preview", border_style="dim"))
 
     if persist:
         _persist_to_cortex(result)
@@ -174,7 +177,7 @@ def batch(
         status = "✅" if r.status == "success" else f"❌ {r.error or ''}"
         table.add_row(r.url[:50], status, r.strategy_used.value, f"{r.elapsed_ms:.0f}")
 
-    console.print(table)
+    console.logger.info(table)
 
     if output:
         import os
@@ -216,14 +219,14 @@ def map_site(url: str, depth: int, output: str | None):
     urls = _run_async(engine.map_site(url, max_depth=depth))
 
     for u in urls:
-        console.print(f"  [dim]→[/dim] {u}")
+        console.logger.info(f"  [dim]→[/dim] {u}")
 
     if output:
         with open(output, "w") as f:
             f.write("\n".join(urls))
-        console.print(f"\n[dim]Written {len(urls)} URLs to {output}[/dim]")
+        console.logger.info(f"\n[dim]Written {len(urls)} URLs to {output}[/dim]")
 
-    console.print(f"\n[bold cyan]🗺️ MAPPED:[/bold cyan] {len(urls)} URLs discovered")
+    console.logger.info(f"\n[bold cyan]🗺️ MAPPED:[/bold cyan] {len(urls)} URLs discovered")
 
 
 def _persist_to_cortex(result) -> None:
@@ -249,6 +252,6 @@ def _persist_to_cortex(result) -> None:
                 },
             )
         )
-        console.print("[dim green]💎 Persisted to CORTEX Ledger[/dim green]")
+        console.logger.info("[dim green]💎 Persisted to CORTEX Ledger[/dim green]")
     except Exception as e:  # noqa: BLE001
-        console.print(f"[dim red]⚠️ CORTEX persist failed: {e}[/dim red]")
+        console.logger.info(f"[dim red]⚠️ CORTEX persist failed: {e}[/dim red]")

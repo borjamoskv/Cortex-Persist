@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """CLI commands: time, heartbeat."""
 
 from __future__ import annotations
@@ -57,7 +60,7 @@ def _render_time_summary(summary, title: str) -> None:
         table.add_row("", "")
         for entity, count in summary.top_entities[:5]:
             table.add_row(f"  📄 {entity}", f"{count} hits")
-    console.print(table)
+    console.logger.info(table)
 
 
 @cli.command("heartbeat")
@@ -79,7 +82,7 @@ def heartbeat_cmd(project, entity, category, branch, db) -> None:
             branch=branch,
         )
         t.flush()
-        console.print(f"[green]✓[/] Heartbeat [bold]#{hb_id}[/] → [cyan]{project}[/]/{entity}")
+        console.logger.info(f"[green]✓[/] Heartbeat [bold]#{hb_id}[/] → [cyan]{project}[/]/{entity}")
     except (sqlite3.Error, OSError, ValueError, RuntimeError) as e:
         handle_cli_error(e, db_path=db, context="recording heartbeat")
     finally:

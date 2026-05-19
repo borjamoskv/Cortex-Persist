@@ -14,7 +14,7 @@ import logging
 import subprocess
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from cortex.extensions.mejoralo.engine import MejoraloEngine
@@ -121,7 +121,7 @@ def _apply_and_verify(
 ) -> bool:
     """Apply the already generated refactor, test it, and commit/rollback."""
     abs_path = Path(path).resolve() / top_file_rel
-    console.print(f"  [cyan]🔬 Verificando {top_file_rel} (Integridad Bizantina)...[/]")
+    console.logger.info(f"  [cyan]🔬 Verificando {top_file_rel} (Integridad Bizantina)...[/]")
 
     try:
         original_code = abs_path.read_text(errors="replace")
@@ -196,7 +196,7 @@ def _run_functional_inquisitor(
 
 
 def _apply_aesthetic_formatting(abs_path: Path, console: Any) -> None:
-    console.print("  [cyan]💅 Aplicando 130/100 Aesthetics (Ruff)...[/]")
+    console.logger.info("  [cyan]💅 Aplicando 130/100 Aesthetics (Ruff)...[/]")
     subprocess.run(
         [sys.executable, "-m", "ruff", "format", str(abs_path)],
         capture_output=True,
@@ -223,10 +223,10 @@ def _run_delta_testing(
     if len(rel_parts) > 1 and rel_parts[0] == "cortex":
         inferred_test = Path(path) / "tests" / f"test_{Path(top_file_rel).stem}.py"
         if inferred_test.exists():
-            console.print(f"  [cyan]🎯 Delta-Testing: {inferred_test.name}[/]")
+            console.logger.info(f"  [cyan]🎯 Delta-Testing: {inferred_test.name}[/]")
             pytest_cmd.append(str(inferred_test))
         else:
-            console.print("  [dim]⚠️ No direct test found, running full suite...[/]")
+            console.logger.info("  [dim]⚠️ No direct test found, running full suite...[/]")
 
     try:
         res = subprocess.run(
@@ -237,7 +237,7 @@ def _run_delta_testing(
             timeout=PYTEST_TIMEOUT_SECONDS,
         )
         if res.returncode != 0:
-            console.print(f"  [bold red]💥 Regresión en {top_file_rel}! Rollback.[/]")
+            console.logger.info(f"  [bold red]💥 Regresión en {top_file_rel}! Rollback.[/]")
             if engine and project:
                 error_trace = (res.stdout + "\n" + res.stderr).strip()
                 engine.record_scar(project, top_file_rel, error_trace)
@@ -283,7 +283,7 @@ def _commit_healed_file(
             f"Refactorizado {top_file_rel} "
             f"(iter {iteration}, score {current_score})"
         )
-        console.print(f"  [bold green]✅ {top_file_rel} OK. Comiteando...[/]")
+        console.logger.info(f"  [bold green]✅ {top_file_rel} OK. Comiteando...[/]")
         subprocess.run(["git", "add", str(abs_path)], cwd=path, capture_output=True)
         subprocess.run(
             [
@@ -315,8 +315,8 @@ def _commit_healed_file(
                         f"CHRONOS-1 yield: {hours}h saved",
                     ],
                 )
-                console.print(f"  [dim]⏱ CHRONOS-1: {hours}h saved recorded in ledger.[/]")
-            except Exception:  # noqa: BLE001
+                console.logger.info(f"  [dim]⏱ CHRONOS-1: {hours}h saved recorded in ledger.[/]")
+            except Exception:  # TODO(Swarm): Narrow this exception
                 logger.exception("Failed to record CHRONOS-1 yield for %s", top_file_rel)
         return True
     except (OSError, subprocess.SubprocessError):
@@ -377,7 +377,7 @@ def heal_project(
 
         if stagnation_count >= STAGNATION_LIMIT * 3 or current_result.score >= target_score:
             if stagnation_count >= STAGNATION_LIMIT * 3:
-                console.print(f"\n[bold red]🛑 Estancamiento terminal ({stagnation_count}).[/]")
+                console.logger.info(f"\n[bold red]🛑 Estancamiento terminal ({stagnation_count}).[/]")
             break
 
     return _report_final_state(
@@ -468,7 +468,7 @@ def _run_healing_iteration(
             healed_files.add(top_file_rel)
 
     # Re-scan to see new score
-    console.print("  [cyan]🔄 Re-escaneando para verificar impacto...[/]")
+    console.logger.info("  [cyan]🔄 Re-escaneando para verificar impacto...[/]")
     new_result = scan(project, path)
     return iteration_success, new_result
 
@@ -511,7 +511,7 @@ def _check_stagnation(
             )
         else:
             stagnation_count = 0
-            console.print(f"  [green]📈 Progreso: Δ{delta:+d} → Score {score_history[-1]}[/]")
+            console.logger.info(f"  [green]📈 Progreso: Δ{delta:+d} → Score {score_history[-1]}[/]")
 
     if not iteration_success:
         stagnation_count += 1
@@ -538,7 +538,7 @@ def _report_final_state(
 
     if any_success:
         prog_str = f"{score_history[0]} → {current_result.score} in {iteration} iters."
-        console.print(f"\n[bold yellow]⚡ Progreso parcial: {prog_str}[/]")
+        console.logger.info(f"\n[bold yellow]⚡ Progreso parcial: {prog_str}[/]")
         _print_journey(console, score_history)
         return True
 
@@ -550,7 +550,7 @@ def _print_journey(console: Any, score_history: list[int]) -> None:
     if len(score_history) <= 1:
         return
     journey = " → ".join(str(s) for s in score_history)
-    console.print(f"  [dim]Recorrido: {journey}[/]")
+    console.logger.info(f"  [dim]Recorrido: {journey}[/]")
 
 
 def heal_proj(

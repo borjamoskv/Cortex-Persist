@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """CLI commands: compact, compact-status."""
 
 from __future__ import annotations
@@ -101,7 +104,7 @@ def compact_cmd(project, strategy, dry_run, background, threshold, max_age, forc
                 f"[yellow]⚠ Compacting[/] [bold]{project}[/] [dim](strategies: {strategy_label})[/]"
             )
             if not click.confirm("Proceed?"):
-                console.print("[dim]Aborted.[/]")
+                console.logger.info("[dim]Aborted.[/]")
                 return
 
         if not dry_run and background:
@@ -160,7 +163,7 @@ def compact_status(project, db) -> None:
         stats = _run_async(get_compaction_stats(engine, project))
 
         if stats["total_compactions"] == 0:  # type: ignore[reportIndexIssue]
-            console.print("[dim]No compaction history found.[/]")
+            console.logger.info("[dim]No compaction history found.[/]")
             return
 
         console.print(
@@ -188,7 +191,7 @@ def compact_status(project, db) -> None:
                     str(entry["deprecated_count"]),
                     entry["timestamp"],
                 )
-            console.print(table)
+            console.logger.info(table)
 
     finally:
         close_engine_sync(engine)
@@ -210,7 +213,7 @@ def compact_session_cmd(project, max_facts, db) -> None:
     engine = get_engine(db)
     try:
         output = _run_async(compact_session(engine, project, max_facts=max_facts))
-        console.print(output)
+        console.logger.info(output)
     finally:
         close_engine_sync(engine)
 
@@ -238,9 +241,9 @@ def gc_cmd(batch_size, force, db) -> None:
 
     try:
         if force:
-            console.print("[yellow]⚠ Forcing GC execution (ignoring IOPS peak hours logic).[/]")
+            console.logger.info("[yellow]⚠ Forcing GC execution (ignoring IOPS peak hours logic).[/]")
         else:
-            console.print("[dim]Analyzing IOPS safe-windows for Garbage Collection...[/]")
+            console.logger.info("[dim]Analyzing IOPS safe-windows for Garbage Collection...[/]")
 
         stats = _run_async(_do_gc())
 
@@ -249,13 +252,13 @@ def gc_cmd(batch_size, force, db) -> None:
                 f"[yellow]⚠ GC Skipped[/]: {stats['reason']}. Run with --force to override."
             )
         elif stats["status"] == "failed":
-            console.print(f"[[noir.danger]✗[/]] GC Failed. See errors: {stats.get('errors')}")
+            console.logger.info(f"[[noir.danger]✗[/]] GC Failed. See errors: {stats.get('errors')}")
         else:
-            console.print("[[noir.cyber]✓[/]] GC Execution Complete.")
+            console.logger.info("[[noir.cyber]✓[/]] GC Execution Complete.")
             if stats["deleted_facts"] == 0:
-                console.print("[dim]No tombstoned facts pending deletion.[/]")
+                console.logger.info("[dim]No tombstoned facts pending deletion.[/]")
             else:
-                console.print(f"  [bold]Facts physically deleted:[/] {stats['deleted_facts']}")
+                console.logger.info(f"  [bold]Facts physically deleted:[/] {stats['deleted_facts']}")
                 console.print(
                     f"  [bold]Vectors physically removed:[/] {stats['deleted_embeddings']}"
                 )

@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 # This file is part of CORTEX. Apache-2.0.
 from __future__ import annotations
 
@@ -23,7 +26,7 @@ async def check_gate_11_cobbler() -> GateResult:
     ]
 
     def _audit_code(path: Path, content: str) -> list[str]:
-        # Perform self-audit using AST to find bare 'except:' and 'print()' calls
+        # Perform self-audit using AST to find bare 'except:' and 'logger.info()' calls
         v = []
         try:
             tree = ast.parse(content)

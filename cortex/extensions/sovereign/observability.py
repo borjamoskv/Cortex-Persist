@@ -10,7 +10,7 @@ import logging
 import time
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 # ---------------------------------------------------------------------------
 # Power-level scoring (target: 1300/1000)

@@ -201,7 +201,7 @@ class ApisOmegaAgent:
 
 async def run_apis_cli():
     agent = ApisOmegaAgent()
-    print(await agent.pulse(validate=True))
+    logger.info(await agent.pulse(validate=True))
 
 
 if __name__ == "__main__":

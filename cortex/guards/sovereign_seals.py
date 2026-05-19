@@ -414,7 +414,7 @@ async def check_seal_9_compliance_impl() -> tuple[bool, str]:
             printer.success(f"EU AI Act audit trail: {len(tables)} audit table(s) found.")
         else:
             printer.warn("EU AI Act: no audit tables found — implement for compliance.")
-    except Exception:  # noqa: BLE001 — compliance check boundary
+    except Exception:  # TODO(Swarm): Narrow this exception
         printer.warn("EU AI Act audit check skipped (engine not available).")
 
     # ── SSRF URLGuard Verification (CodeQL #95) ──

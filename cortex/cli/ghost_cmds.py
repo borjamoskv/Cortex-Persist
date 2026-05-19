@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 import json
 import sqlite3
 import subprocess
@@ -64,18 +67,18 @@ def handle_ghost_response(returncode: int, stdout: str, stderr: str, title: str)
             content += "Go to: System Settings > Privacy & Security > Accessibility\n"
             content += "And grant permissions to your terminal or IDE."
 
-        console.print(Panel(content, border_style="red", title=title))
+        console.logger.info(Panel(content, border_style="red", title=title))
         sys.exit(returncode)
 
     try:
         # Ghost outputs JSON mostly, let's try to parse and pretty print
         data = json.loads(stdout)
         formatted_json = json.dumps(data, indent=2)
-        console.print(Panel(f"[cyan]{formatted_json}[/cyan]", border_style="cyan", title=title))
+        console.logger.info(Panel(f"[cyan]{formatted_json}[/cyan]", border_style="cyan", title=title))
     except json.JSONDecodeError:
         # Not JSON, just print it
         if stdout.strip():
-            console.print(Panel(stdout.strip(), border_style="cyan", title=title))
+            console.logger.info(Panel(stdout.strip(), border_style="cyan", title=title))
 
 
 @click.group(name="ghost")
@@ -97,7 +100,7 @@ def field(root_dir):
     try:
         active = asyncio.run(engine.list_active_ghosts(Path(root_dir)))
         if not active:
-            console.print("[yellow]No active ghosts found in the field.[/yellow]")
+            console.logger.info("[yellow]No active ghosts found in the field.[/yellow]")
             return
 
         table = Table(title=f"👻 Ghost Field: {root_dir}")
@@ -108,7 +111,7 @@ def field(root_dir):
 
         for g in active:
             table.add_row(g["id"], g["intent"], g["project"], g["source_file"])
-        console.print(table)
+        console.logger.info(table)
     finally:
         asyncio.run(engine.close())
 

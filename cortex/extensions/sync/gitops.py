@@ -3,7 +3,7 @@
 import json
 import logging
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 __all__ = ["sync_fact_to_repo", "export_gitops_memory"]
 

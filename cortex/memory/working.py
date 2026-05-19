@@ -17,7 +17,7 @@ from __future__ import annotations
 import logging
 import time
 from collections import deque
-from typing import Any, Final, Optional
+from typing import Any, Final
 
 from cortex.memory.guardrails import SessionGuardrail
 from cortex.memory.models import MemoryEvent

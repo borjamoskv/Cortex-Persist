@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """
 CORTEX CLI — Prompt Commands.
 
@@ -16,7 +19,6 @@ from __future__ import annotations
 import shutil
 import subprocess
 from pathlib import Path
-from typing import Optional
 
 import click
 from rich.panel import Panel
@@ -275,8 +277,8 @@ def prompt_copy(variant: str) -> None:
 
     pbcopy_executable = shutil.which("pbcopy")
     if not pbcopy_executable:
-        console.print("[yellow]⚠ pbcopy not available. Printing prompt instead:[/]")
-        console.print(text)
+        console.logger.info("[yellow]⚠ pbcopy not available. Printing prompt instead:[/]")
+        console.logger.info(text)
         return
 
     try:
@@ -293,5 +295,5 @@ def prompt_copy(variant: str) -> None:
         )
     except (subprocess.SubprocessError, FileNotFoundError, OSError):
         # Fallback: just print it
-        console.print("[yellow]⚠ pbcopy not available. Printing prompt instead:[/]")
-        console.print(text)
+        console.logger.info("[yellow]⚠ pbcopy not available. Printing prompt instead:[/]")
+        console.logger.info(text)

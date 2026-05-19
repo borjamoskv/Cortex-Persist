@@ -9,7 +9,7 @@ import asyncio
 import logging
 import os
 import signal
-from typing import Any, Optional
+from typing import Any
 
 # uvloop for high‑performance event loop
 try:

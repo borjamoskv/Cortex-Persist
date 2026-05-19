@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import logging
 import time
-from typing import Any, Optional
+from typing import Any
 
 from cortex.extensions.daemon.models import WorkflowAlert
 from cortex.extensions.daemon.monitors.base import BaseMonitor

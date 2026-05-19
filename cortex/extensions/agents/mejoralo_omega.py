@@ -162,11 +162,11 @@ class MejoraloOmegaAgent:
         # 2. Prioritize targets by Shannon entropy
         targets = self._select_targets(scan_result)
         if not targets:
-            console.print("  [dim]No actionable targets found.[/]")
+            console.logger.info("  [dim]No actionable targets found.[/]")
             self._consecutive_stagnant += 1
             return
 
-        console.print(f"  [cyan]🎯 Targeting {len(targets)} files by entropy rank[/]")
+        console.logger.info(f"  [cyan]🎯 Targeting {len(targets)} files by entropy rank[/]")
 
         # 3. Heal — escalate level based on stagnation
         level = self._escalation_level()
@@ -193,7 +193,7 @@ class MejoraloOmegaAgent:
             )
         else:
             self._consecutive_stagnant = 0
-            console.print(f"  [green]📈 Δ{delta:+d} → {score_after}[/]")
+            console.logger.info(f"  [green]📈 Δ{delta:+d} → {score_after}[/]")
 
         # 6. Absorb — persist learned pattern on success
         if success and delta > 0:

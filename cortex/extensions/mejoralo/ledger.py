@@ -2,7 +2,7 @@
 
 import json
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from cortex.engine import CortexEngine
 from cortex.engine.mixins.base import FACT_COLUMNS, FACT_JOIN

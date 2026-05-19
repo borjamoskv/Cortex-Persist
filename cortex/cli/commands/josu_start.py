@@ -19,7 +19,7 @@ def app():
 @click.option("--daemon-mode", is_flag=True, help="Run in pure background mode.")
 def start_josu(daemon_mode: bool = False):
     """Start the multi-agent proactive daemon."""
-    console.print("🤖 [bold cyan]Booting MOSKV-Josu Daemon...[/bold cyan]")
+    console.logger.info("🤖 [bold cyan]Booting MOSKV-Josu Daemon...[/bold cyan]")
     engine = get_engine(DEFAULT_DB)
     josu = JosuProactiveDaemon(cortex_db=engine)
 

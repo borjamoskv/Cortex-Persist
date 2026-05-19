@@ -1,4 +1,3 @@
-from typing import Optional
 
 """Advanced stack detection with tool intelligence for MEJORAlo."""
 

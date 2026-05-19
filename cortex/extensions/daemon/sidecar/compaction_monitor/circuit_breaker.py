@@ -9,7 +9,7 @@ error thresholds and cooldown periods.
 import logging
 import time
 from collections.abc import Awaitable, Callable
-from typing import Any, Optional
+from typing import Any
 
 LOGGER = logging.getLogger(__name__)
 

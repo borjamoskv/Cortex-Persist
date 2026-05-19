@@ -14,7 +14,6 @@ import json
 import logging
 import sqlite3
 from dataclasses import dataclass, field
-from typing import Optional
 
 __all__ = [
     "RRF_K",

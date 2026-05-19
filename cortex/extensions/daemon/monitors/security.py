@@ -9,7 +9,7 @@ import sqlite3
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from cortex.extensions.daemon.models import SecurityAlert
 from cortex.memory import AsyncEncoder, VectorStoreL2

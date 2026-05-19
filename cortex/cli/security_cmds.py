@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import Optional
 
 import click
 from rich.console import Console
@@ -87,7 +86,7 @@ def security_status() -> None:
         "Run: cortex security audit",
     )
 
-    console.print(table)
+    console.logger.info(table)
 
 
 @security_cli.command("scan")
@@ -106,7 +105,7 @@ def security_scan(content: str | None, filepath: str | None) -> None:
         content = click.get_text_stream("stdin").read()
 
     if not content:
-        console.print("[red]No content to scan[/red]")
+        console.logger.info("[red]No content to scan[/red]")
         return
 
     # Injection Guard
@@ -165,8 +164,8 @@ def security_scan(content: str | None, filepath: str | None) -> None:
             m.matched_fragment[:40],
         )
 
-    console.print(table)
-    console.print(f"\n[bold]Entropy Score:[/bold] {inj_report.entropy_score:.3f}")
+    console.logger.info(table)
+    console.logger.info(f"\n[bold]Entropy Score:[/bold] {inj_report.entropy_score:.3f}")
 
 
 @security_cli.command("update")
@@ -181,7 +180,7 @@ def security_update() -> None:
 
     if report.errors:
         for err in report.errors:
-            console.print(f"  [yellow]⚠ {err}[/yellow]")
+            console.logger.info(f"  [yellow]⚠ {err}[/yellow]")
 
     console.print(
         Panel(
@@ -291,7 +290,7 @@ def honeypot_list() -> None:
     from cortex.extensions.security.honeypot import HONEY_POT
 
     if not HONEY_POT._active_honeypots:
-        console.print("[yellow]No active honeypots.[/yellow]")
+        console.logger.info("[yellow]No active honeypots.[/yellow]")
         return
 
     table = Table(title="🍯 Active Honeypots")
@@ -315,7 +314,7 @@ def honeypot_list() -> None:
             str(created),
         )
 
-    console.print(table)
+    console.logger.info(table)
 
 
 @security_cli.command("test-sync")
@@ -324,9 +323,9 @@ def security_test_sync(mood: str) -> None:
     """Test visual synchronization with the Notch."""
     from cortex.extensions.security.security_sync import SIGNAL
 
-    console.print(f"Emitting [bold cyan]{mood}[/bold cyan] signal to Notch...")
+    console.logger.info(f"Emitting [bold cyan]{mood}[/bold cyan] signal to Notch...")
     SIGNAL.emit_sync(mood, {"test": True})
-    console.print("✅ Signal sent.")
+    console.logger.info("✅ Signal sent.")
 
 
 cli.add_command(security_cli)

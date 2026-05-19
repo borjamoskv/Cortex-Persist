@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """
 CORTEX CLI — Headless Agent Spawn.
 Entry points for triggering detached, autonomous sub-agent execution.
@@ -23,9 +26,9 @@ def spawn_cmd(target: str, intent: str) -> None:
     to trigger self-healing, refactoring, or autopoiesis operations without
     blocking the main thread or requiring operator UI interaction.
     """
-    console.print("[bold green]🚀 [Headless Singularity IGNITED][/bold green]")
-    console.print(f"Target: [cyan]{target}[/cyan]")
-    console.print(f"Intent: [yellow]{intent}[/yellow]")
+    console.logger.info("[bold green]🚀 [Headless Singularity IGNITED][/bold green]")
+    console.logger.info(f"Target: [cyan]{target}[/cyan]")
+    console.logger.info(f"Intent: [yellow]{intent}[/yellow]")
     console.print(
         "[dim]The agent is now operating autonomously in the Void. "
         "Check logs for physical mutations.[/dim]"

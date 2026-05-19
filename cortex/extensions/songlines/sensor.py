@@ -5,7 +5,7 @@ import logging
 import os
 import subprocess
 from pathlib import Path
-from typing import Optional, TypedDict
+from typing import TypedDict
 
 from cortex.extensions.songlines.decay import DecayEngine
 

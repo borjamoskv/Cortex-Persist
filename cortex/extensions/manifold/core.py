@@ -8,7 +8,6 @@ from __future__ import annotations
 import asyncio
 import logging
 from pathlib import Path
-from typing import Optional
 
 from cortex.extensions.aether.models import AgentTask, TaskStatus
 from cortex.extensions.aether.tools import AgentToolkit

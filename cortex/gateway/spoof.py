@@ -38,7 +38,7 @@ class SpoofManager:
                 from cortex.extensions.immune.error_boundary import ErrorBoundary
 
                 ErrorBoundary("gateway.spoof.load_rules", reraise=False)._persist_sync(e)
-            except Exception:  # noqa: BLE001 — boundary persistence must never crash config load
+            except Exception:  # TODO(Swarm): Narrow this exception
                 pass
             return {"mappings": {}, "default_intent": "general"}
 

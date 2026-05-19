@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """CLI commands: doctor."""
 
 from __future__ import annotations
@@ -107,7 +110,7 @@ def doctor(db: str, as_json: bool) -> None:
     for k, v in report["environment"].items():
         color = "green" if v != "missing" else "red"
         env_table.add_row(k, f"[{color}]{v}[/]")
-    console.print(env_table)
+    console.logger.info(env_table)
 
     # Database
     db_status = report["database"]["status"]
@@ -117,26 +120,26 @@ def doctor(db: str, as_json: bool) -> None:
         f"({report['database']['path']})"
     )
     if db_status == "healthy":
-        console.print(f" - Facts detectados: {report['database']['facts']}")
+        console.logger.info(f" - Facts detectados: {report['database']['facts']}")
 
     # Python & Venv
     py = report["python"]
     venv_status = "[green]SÍ[/]" if py["is_venv"] else "[yellow]NO (Recomendado)[/]"
-    console.print("\n[bold]Entorno Python:[/]")
-    console.print(f" - Versión: {py['version']}")
-    console.print(f" - Venv: {venv_status}")
-    console.print(f" - Ejecutable: [dim]{py['executable']}[/]")
+    console.logger.info("\n[bold]Entorno Python:[/]")
+    console.logger.info(f" - Versión: {py['version']}")
+    console.logger.info(f" - Venv: {venv_status}")
+    console.logger.info(f" - Ejecutable: [dim]{py['executable']}[/]")
 
     # Dependencies
     deps = report["dependencies"]
     missing = [k for k, v in deps.items() if v == "missing"]
     if missing:
-        console.print(f"\n[bold red]❌ Dependencias faltantes:[/] {', '.join(missing)}")
+        console.logger.info(f"\n[bold red]❌ Dependencias faltantes:[/] {', '.join(missing)}")
     else:
-        console.print("\n[bold green]✅ Todas las dependencias críticas están presentes.[/]")
+        console.logger.info("\n[bold green]✅ Todas las dependencias críticas están presentes.[/]")
 
     # Final Verdict
     if all(v != "missing" for v in report["environment"].values()) and db_status == "healthy":
-        console.print("\n[bold #06d6a0]🚀 SISTEMA NOMINAL. CORTEX ESTÁ LISTO PARA OPERAR.[/]")
+        console.logger.info("\n[bold #06d6a0]🚀 SISTEMA NOMINAL. CORTEX ESTÁ LISTO PARA OPERAR.[/]")
     else:
-        console.print("\n[bold yellow]⚠️ SE DETECTARON PROBLEMAS. REVISA EL INFORME SUPERIOR.[/]")
+        console.logger.info("\n[bold yellow]⚠️ SE DETECTARON PROBLEMAS. REVISA EL INFORME SUPERIOR.[/]")

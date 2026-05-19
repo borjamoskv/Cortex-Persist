@@ -75,14 +75,14 @@ class SageOrchestrator:
         await asyncio.sleep(2)
         
         if not api_key:
-            self.log(f"SILENT_MODE. Dreaming simulated logic.", sage_name)
+            self.log("SILENT_MODE. Dreaming simulated logic.", sage_name)
         else:
             self.log(f"Frontier Reasoning active for {sage_name}.", sage_name)
             await asyncio.sleep(3)
 
         # Success simulation
         if (self.cycle_count % 3 == 0) and (sage_name == "ULTRA-THINK"):
-            self.log(f"CRITICAL_FINDING: Potential Out-of-Bounds detected.", sage_name)
+            self.log("CRITICAL_FINDING: Potential Out-of-Bounds detected.", sage_name)
             self.global_yield += 25000.0
         
         if self.engine:

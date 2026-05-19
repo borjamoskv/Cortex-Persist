@@ -51,7 +51,6 @@ import signal
 import sys
 from dataclasses import dataclass, field
 from io import StringIO
-from typing import Optional
 
 __all__ = ["ASTSandbox", "SandboxVerdict", "ExecResult"]
 

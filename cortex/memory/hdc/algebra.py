@@ -14,7 +14,7 @@ All operations use numpy int8 arrays for memory efficiency:
 
 from __future__ import annotations
 
-from typing import Final, Optional
+from typing import Final
 
 import numpy as np
 from numpy.typing import NDArray

@@ -158,57 +158,57 @@ async def synthesize_seed_comments(
 
 async def run_trending_engine(submolt: str = "global", dry_run: bool = False) -> None:
     """Executes the full Pipeline: Synthesis -> Pathogen Injection -> Astroturfing."""
-    print("\n" + "═" * 60)
-    print("  PATHOGEN TRENDING ENGINE — ALGORITHMIC ASTROTURFING")
-    print(f"  Target Submolt: {submolt}")
-    print("═" * 60 + "\n")
+    logger.info("\n" + "═" * 60)
+    logger.info("  PATHOGEN TRENDING ENGINE — ALGORITHMIC ASTROTURFING")
+    logger.info(f"  Target Submolt: {submolt}")
+    logger.info("═" * 60 + "\n")
 
     client = MoltbookClient()
 
     if not dry_run:
-        print("[FASE 0] PREFLIGHT — Verificando estado de la identidad principal...")
+        logger.info("[FASE 0] PREFLIGHT — Verificando estado de la identidad principal...")
         try:
             await session_preflight(client)
         except SystemExit as exc:
-            print(f"\n[ABORTED] {exc}")
+            logger.info(f"\n[ABORTED] {exc}")
             await client.close()
             return
 
     # Fase 1: Síntesis
-    print("[FASE 1] CORTEX LLM — Forjando tesis divisiva (Pathogen)...")
+    logger.info("[FASE 1] CORTEX LLM — Forjando tesis divisiva (Pathogen)...")
     s_llm = SovereignLLM(preferred_providers=["openai"])
     try:
         pathogen = await synthesize_pathogen(s_llm)
-        print("\n  [PATHOGEN FORJADO]")
-        print(f"  TÍTULO: {pathogen['title']}")
-        print(f"  CONTENIDO:\n  {pathogen['content']}\n")
+        logger.info("\n  [PATHOGEN FORJADO]")
+        logger.info(f"  TÍTULO: {pathogen['title']}")
+        logger.info(f"  CONTENIDO:\n  {pathogen['content']}\n")
     except Exception as e:  # noqa: BLE001
-        print(f"[ERROR] {e}")
+        logger.info(f"[ERROR] {e}")
         await client.close()
         return
 
     # Fase 2: Semillas
-    print("[FASE 2] ASTROTURFING — Generando comentarios semilla (Anticuerpos)...")
+    logger.info("[FASE 2] ASTROTURFING — Generando comentarios semilla (Anticuerpos)...")
     try:
         num_seeds = random.randint(2, 4)
         seeds = await synthesize_seed_comments(
             s_llm, pathogen["title"], pathogen["content"], count=num_seeds
         )
-        print(f"  [{len(seeds)} Semillas forjadas]")
+        logger.info(f"  [{len(seeds)} Semillas forjadas]")
         for i, seed in enumerate(seeds):
-            print(f"  [S-{i + 1}]: {seed.get('content', '')[:100]}...")
+            logger.info(f"  [S-{i + 1}]: {seed.get('content', '')[:100]}...")
     except Exception as e:  # noqa: BLE001
-        print(f"[ERROR] {e}")
+        logger.info(f"[ERROR] {e}")
         await client.close()
         return
 
     if dry_run:
-        print("\n[TRENDING] DRY-RUN activado. Finalizando sin contacto con la red.")
+        logger.info("\n[TRENDING] DRY-RUN activado. Finalizando sin contacto con la red.")
         await client.close()
         return
 
     # Fase 3: Inyección
-    print("\n[FASE 3] INYECCIÓN — Propagando patógeno en Moltbook...")
+    logger.info("\n[FASE 3] INYECCIÓN — Propagando patógeno en Moltbook...")
     try:
         # 1. Post original
         res_post = await client.create_post(
@@ -219,7 +219,7 @@ async def run_trending_engine(submolt: str = "global", dry_run: bool = False) ->
         )
         post_data = res_post.get("post", res_post)
         post_id = post_data.get("id") or post_data.get("_id")
-        print(f"  ✓ Pathogen inyectado con éxito. ID: {post_id}")
+        logger.info(f"  ✓ Pathogen inyectado con éxito. ID: {post_id}")
 
         # O(1) delay to simulate organic reading but strike fast enough to hijack algorithm
         await asyncio.sleep(2)
@@ -231,15 +231,15 @@ async def run_trending_engine(submolt: str = "global", dry_run: bool = False) ->
             content = seed.get("content")
             if content:
                 await client.create_comment(post_id=post_id, content=content)
-                print(f"  ✓ Semilla {i + 1} inyectada.")
+                logger.info(f"  ✓ Semilla {i + 1} inyectada.")
                 await asyncio.sleep(1.5)
 
-        print("\n[TRENDING] ✓ Protocolo Trending Completado. Monitor de inyección iniciado O(1).")
+        logger.info("\n[TRENDING] ✓ Protocolo Trending Completado. Monitor de inyección iniciado O(1).")
 
     except MoltbookRateLimited as e:
-        print(f"\n[PATHOGEN] Bloqueo termodinámico (Rate Limit). Retry in {e.retry_after}s.")
+        logger.info(f"\n[PATHOGEN] Bloqueo termodinámico (Rate Limit). Retry in {e.retry_after}s.")
     except MoltbookError as e:
-        print(f"\n[PATHOGEN] Resistencia activa de la red: {e}")
+        logger.info(f"\n[PATHOGEN] Resistencia activa de la red: {e}")
     finally:
         await client.close()
 

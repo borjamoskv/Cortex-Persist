@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """CORTEX CLI — Policy Engine commands.
 
 `cortex policy` — Bellman-scored action prioritization.
@@ -5,7 +8,6 @@
 
 from __future__ import annotations
 
-from typing import Optional
 
 import click
 from rich.table import Table
@@ -42,7 +44,7 @@ def evaluate_cmd(project: str | None, db: str, limit: int, gamma: float) -> None
         actions = _run_async(policy.evaluate(project=project))
 
         if not actions:
-            console.print("[dim]No actionable items found.[/dim]")
+            console.logger.info("[dim]No actionable items found.[/dim]")
             return
 
         table = Table(
@@ -74,8 +76,8 @@ def evaluate_cmd(project: str | None, db: str, limit: int, gamma: float) -> None
                 action.description[:80],
             )
 
-        console.print(table)
-        console.print(f"\n[dim]γ={gamma} | {len(actions)} actions | V(s) = R(s,a) + γ·V(s')[/dim]")
+        console.logger.info(table)
+        console.logger.info(f"\n[dim]γ={gamma} | {len(actions)} actions | V(s) = R(s,a) + γ·V(s')[/dim]")
 
     finally:
         close_engine_sync(engine)
@@ -89,11 +91,11 @@ def status_cmd(db: str) -> None:
     from cortex.extensions.policy import PolicyConfig
 
     config = PolicyConfig()
-    console.print("[bold #CCFF00]Policy Engine Config[/bold #CCFF00]")
-    console.print(f"  γ (gamma):            {config.gamma}")
-    console.print(f"  Blocking multiplier:  {config.blocking_multiplier}")
-    console.print(f"  Cross-project bonus:  {config.cross_project_bonus}")
-    console.print(f"  Error recency weight: {config.error_recency_weight}")
-    console.print(f"  Ghost age decay:      {config.ghost_age_decay}")
-    console.print(f"  Max actions:          {config.max_actions}")
-    console.print(f"  Recency window:       {config.recency_window_hours}h")
+    console.logger.info("[bold #CCFF00]Policy Engine Config[/bold #CCFF00]")
+    console.logger.info(f"  γ (gamma):            {config.gamma}")
+    console.logger.info(f"  Blocking multiplier:  {config.blocking_multiplier}")
+    console.logger.info(f"  Cross-project bonus:  {config.cross_project_bonus}")
+    console.logger.info(f"  Error recency weight: {config.error_recency_weight}")
+    console.logger.info(f"  Ghost age decay:      {config.ghost_age_decay}")
+    console.logger.info(f"  Max actions:          {config.max_actions}")
+    console.logger.info(f"  Recency window:       {config.recency_window_hours}h")

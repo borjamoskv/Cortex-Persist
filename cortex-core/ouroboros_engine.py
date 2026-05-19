@@ -63,7 +63,7 @@ class OuroborosEngine:
                 if file.endswith(".sol") and "test" not in file.lower():
                     path = os.path.join(root, file)
                     try:
-                        with open(path, "r") as f:
+                        with open(path) as f:
                             content = f.read()
                             matches = re.findall(r"contract\s+(\w+)", content)
                             for m in matches:
@@ -176,7 +176,7 @@ contract {contract_name}OuroborosTest is Test {{
         try:
             queue = {"pending_tasks": []}
             if os.path.exists(queue_path):
-                with open(queue_path, "r") as f:
+                with open(queue_path) as f:
                     queue = json.load(f)
             
             queue["pending_tasks"].append({

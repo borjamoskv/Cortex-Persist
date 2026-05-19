@@ -128,6 +128,6 @@ def _get_db_path(request: Request) -> str:
         engine = getattr(request.app.state, "engine", None)
         if engine:
             return str(getattr(engine, "_db_path", ""))
-    except Exception:  # noqa: BLE001
+    except Exception:  # TODO(Swarm): Narrow this exception
         pass
     return ""

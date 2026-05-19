@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """CLI commands: purge duplicates, empty facts, and projects."""
 
 from __future__ import annotations
@@ -24,7 +27,7 @@ def _purge_short_facts(conn, dry_run: bool) -> int:
         return 0
 
     count = len(rows)
-    console.print(f"  {'[yellow]WOULD[/] ' if dry_run else ''}🗑  Short facts (<15 chars): {count}")
+    console.logger.info(f"  {'[yellow]WOULD[/] ' if dry_run else ''}🗑  Short facts (<15 chars): {count}")
     if not dry_run:
         conn.execute(
             "UPDATE facts SET valid_until = datetime('now'), "
@@ -55,7 +58,7 @@ def purge_duplicates(dry_run, db) -> None:
         ).fetchall()
 
         if not rows:
-            console.print("[green]✓[/] No duplicates found.")
+            console.logger.info("[green]✓[/] No duplicates found.")
             return
 
         total = 0
@@ -81,13 +84,13 @@ def purge_duplicates(dry_run, db) -> None:
                     (content, project, keep_id),
                 )
 
-        console.print(table)
+        console.logger.info(table)
 
         if dry_run:
-            console.print(f"\n[yellow]DRY RUN:[/] Would deprecate {total} duplicates.")
+            console.logger.info(f"\n[yellow]DRY RUN:[/] Would deprecate {total} duplicates.")
         else:
             conn.commit()
-            console.print(f"\n[green]✓[/] Deprecated {total} duplicate facts.")
+            console.logger.info(f"\n[green]✓[/] Deprecated {total} duplicate facts.")
     finally:
         engine.close_sync()
 
@@ -118,7 +121,7 @@ def purge_empty(dry_run, db) -> None:
             if rows:
                 count = len(rows)
                 total += count
-                console.print(f"  {'[yellow]WOULD[/] ' if dry_run else ''}🗑  {label}: {count}")
+                console.logger.info(f"  {'[yellow]WOULD[/] ' if dry_run else ''}🗑  {label}: {count}")
 
                 if not dry_run:
                     conn.execute(
@@ -133,12 +136,12 @@ def purge_empty(dry_run, db) -> None:
         total += _purge_short_facts(conn, dry_run)
 
         if total == 0:
-            console.print("[green]✓[/] No empty/garbage facts found.")
+            console.logger.info("[green]✓[/] No empty/garbage facts found.")
         elif dry_run:
-            console.print(f"\n[yellow]DRY RUN:[/] Would deprecate {total} facts.")
+            console.logger.info(f"\n[yellow]DRY RUN:[/] Would deprecate {total} facts.")
         else:
             conn.commit()
-            console.print(f"\n[green]✓[/] Deprecated {total} empty/garbage facts.")
+            console.logger.info(f"\n[green]✓[/] Deprecated {total} empty/garbage facts.")
     finally:
         engine.close_sync()
 
@@ -158,7 +161,7 @@ def purge_project(project_name, dry_run, db) -> None:
         ).fetchall()
 
         if not rows:
-            console.print(f"[dim]No active facts in project '{project_name}'.[/]")
+            console.logger.info(f"[dim]No active facts in project '{project_name}'.[/]")
             return
 
         table = Table(title=f"Facts in '{project_name}' ({len(rows)})", border_style="cyan")
@@ -170,10 +173,10 @@ def purge_project(project_name, dry_run, db) -> None:
             table.add_row(str(row[0]), row[1], preview)
         if len(rows) > 20:
             table.add_row("...", "...", f"(+{len(rows) - 20} more)")
-        console.print(table)
+        console.logger.info(table)
 
         if dry_run:
-            console.print(f"\n[yellow]DRY RUN:[/] Would deprecate {len(rows)} facts.")
+            console.logger.info(f"\n[yellow]DRY RUN:[/] Would deprecate {len(rows)} facts.")
         else:
             conn.execute(
                 "UPDATE facts SET valid_until = datetime('now'), "

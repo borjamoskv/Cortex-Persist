@@ -256,14 +256,14 @@ def run_sigint_sweep(
 
     all_leads.sort(key=lambda s: s.lead_score, reverse=True)
 
-    print(f"\n{'═' * 66}")
-    print("  ⚔️  CORTEX SIGINT SWEEP — LEAD INTELLIGENCE")
-    print(f"  Scanned {len(target)} repos | {len(all_leads)} leads detected")
-    print(f"{'═' * 66}\n")
+    logger.info(f"\n{'═' * 66}")
+    logger.info("  ⚔️  CORTEX SIGINT SWEEP — LEAD INTELLIGENCE")
+    logger.info(f"  Scanned {len(target)} repos | {len(all_leads)} leads detected")
+    logger.info(f"{'═' * 66}\n")
 
     for lead in all_leads:
-        print(lead)
-        print()
+        logger.info(lead)
+        logger.info()
 
     return all_leads
 
@@ -301,12 +301,12 @@ if __name__ == "__main__":
 
     if args.mode == "blueprint":
         if not args.text:
-            print("Provide --text for blueprint mode")
+            logger.info("Provide --text for blueprint mode")
         else:
             result = analyze_cognitive_blueprint(args.text)
-            print("\nBlueprint Analysis:")
+            logger.info("\nBlueprint Analysis:")
             for k, v in result.items():
-                print(f"  {k}: {v}")
+                logger.info(f"  {k}: {v}")
     else:
         run_sigint_sweep(
             repos=args.repos,

@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import ClassVar, Optional
+from typing import ClassVar
 
 HEALTH_AVAILABLE = True
 try:

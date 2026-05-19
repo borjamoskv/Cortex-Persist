@@ -67,4 +67,4 @@ def print_aix_report(data: dict):
     table.add_row("Global Axioms", str(data["global_axioms"]))
     table.add_row("Evolution State", data["status"])
 
-    console.print(Panel(table, border_style="gold", title="CORTEX V7 Evolution Report"))
+    console.logger.info(Panel(table, border_style="gold", title="CORTEX V7 Evolution Report"))

@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import logging
 import uuid
-from typing import Any, Optional, Protocol
+from typing import Any, Protocol
 
 from cortex.extensions.vex.models import PlannedStep, TaskPlan
 

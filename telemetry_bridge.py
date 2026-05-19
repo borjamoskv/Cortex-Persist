@@ -14,7 +14,7 @@ async def bridge():
                         with open("telemetry_buffer.txt", "a") as f:
                             f.write(line[5:] + "\n")
                         # Rotación simple de buffer (mantener solo últimas 10 líneas)
-                        with open("telemetry_buffer.txt", "r") as f:
+                        with open("telemetry_buffer.txt") as f:
                             lines = f.readlines()
                         if len(lines) > 20:
                             with open("telemetry_buffer.txt", "w") as f:

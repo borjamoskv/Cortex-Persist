@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 import asyncio
 
 import click
@@ -24,7 +27,7 @@ def browser():
 @click.option("--model", default=None, help="Model override")
 def surf(url: str, objective: str, headless: bool, provider: str, model: str):
     """Deploy BROWSER-Ω to a URL with a specific objective."""
-    console.print(f"[bold cyan]Deploying BROWSER-Ω[/bold cyan]: {objective}")
+    console.logger.info(f"[bold cyan]Deploying BROWSER-Ω[/bold cyan]: {objective}")
 
     # Initialize LLMProvider optionally with user overrides
     kwargs = {}
@@ -42,8 +45,8 @@ def surf(url: str, objective: str, headless: bool, provider: str, model: str):
 
     try:
         asyncio.run(agent.run(url))
-        console.print("[bold green]BROWSER-Ω Execution Complete.[/bold green]")
+        console.logger.info("[bold green]BROWSER-Ω Execution Complete.[/bold green]")
     except KeyboardInterrupt:
-        console.print("[bold yellow]BROWSER-Ω Execution Aborted.[/bold yellow]")
+        console.logger.info("[bold yellow]BROWSER-Ω Execution Aborted.[/bold yellow]")
     except Exception as e:  # noqa: BLE001
-        console.print(f"[bold red]BROWSER-Ω Error:[/bold red] {e}")
+        console.logger.info(f"[bold red]BROWSER-Ω Error:[/bold red] {e}")

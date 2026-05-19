@@ -1,4 +1,3 @@
-from typing import Optional
 
 """SQLite Graph Query Mixin."""
 

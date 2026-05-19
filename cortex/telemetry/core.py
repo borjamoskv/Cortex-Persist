@@ -29,7 +29,7 @@ Usage::
 
     # Access completed spans
     for span in collector.spans:
-        print(span.name, span.duration_ms)
+        logger.info(span.name, span.duration_ms)
 """
 
 from __future__ import annotations
@@ -40,7 +40,7 @@ import logging
 import time
 from collections import deque
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from cortex.telemetry.metrics import MetricsRegistry

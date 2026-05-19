@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """AUTOROUTER-1 — CLI commands for CORTEX integration.
 
 Commands:
@@ -90,7 +93,7 @@ def autorouter_cmds():
 def start(background):
     """Arrancar el daemon de ruteo cognitivo."""
     if background:
-        console.print("[bold cyan]🚀 Arrancando AUTOROUTER-1 en background...[/]")
+        console.logger.info("[bold cyan]🚀 Arrancando AUTOROUTER-1 en background...[/]")
         CORTEX_DIR.mkdir(parents=True, exist_ok=True)
         log_handle = LOG_PATH.open("a")  # Popen takes ownership; closed on process exit
         subprocess.Popen(
@@ -99,7 +102,7 @@ def start(background):
             stderr=subprocess.STDOUT,
             start_new_session=True,
         )
-        console.print(f"[green]✓[/] Daemon arrancado. Log: {LOG_PATH}")
+        console.logger.info(f"[green]✓[/] Daemon arrancado. Log: {LOG_PATH}")
     else:
         _run_daemon([])
 
@@ -186,7 +189,7 @@ def enable_boot():
     PLIST_PATH.parent.mkdir(parents=True, exist_ok=True)
     PLIST_PATH.write_text(plist_content)
 
-    console.print(f"[cyan]ℹ️ Creado plist en {PLIST_PATH}[/]")
+    console.logger.info(f"[cyan]ℹ️ Creado plist en {PLIST_PATH}[/]")
 
     # Cargar en launchd usando bootstrap (moderno)
     try:
@@ -214,9 +217,9 @@ def enable_boot():
                 ["launchctl", "load", "-w", str(PLIST_PATH)], capture_output=True, text=True
             )
             if res.returncode == 0:
-                console.print("[bold green]✅ AUTOROUTER-1 instalado vía legacy load.[/]")
+                console.logger.info("[bold green]✅ AUTOROUTER-1 instalado vía legacy load.[/]")
             else:
-                console.print(f"[bold red]❌ Error al cargar launchd:[/] {res.stderr}")
+                console.logger.info(f"[bold red]❌ Error al cargar launchd:[/] {res.stderr}")
     except (OSError, subprocess.SubprocessError) as e:
         err_execution_failed("launchctl bootstrap", str(e))
 
@@ -228,7 +231,7 @@ def disable_boot():
         err_platform_unsupported("launchd")
 
     if not PLIST_PATH.exists():
-        console.print("[yellow]⚠️ No hay configuración launchd instalada.[/]")
+        console.logger.info("[yellow]⚠️ No hay configuración launchd instalada.[/]")
         return
 
     user_id = subprocess.check_output(["id", "-u"], text=True).strip()
@@ -244,7 +247,7 @@ def disable_boot():
         subprocess.run(["launchctl", "unload", str(PLIST_PATH)], capture_output=True)
 
         PLIST_PATH.unlink(missing_ok=True)
-        console.print("[bold green]✅ AUTOROUTER-1 desinstalado de launchd.[/]")
+        console.logger.info("[bold green]✅ AUTOROUTER-1 desinstalado de launchd.[/]")
         _run_daemon(["--stop"])
     except (OSError, subprocess.SubprocessError) as e:
         err_execution_failed("launchctl bootout", str(e))
@@ -254,12 +257,12 @@ def disable_boot():
 def logs():
     """Sigue (tail) los logs del daemon en tiempo real."""
     if not LOG_PATH.exists():
-        console.print(f"[yellow]⚠️ No se encontró log en {LOG_PATH}[/]")
+        console.logger.info(f"[yellow]⚠️ No se encontró log en {LOG_PATH}[/]")
         sys.exit(1)
 
     from cortex.extensions.platform.sys import tail_file_command
 
-    console.print(f"[dim]Mostrando logs de: {LOG_PATH} (Ctrl+C para salir)[/]")
+    console.logger.info(f"[dim]Mostrando logs de: {LOG_PATH} (Ctrl+C para salir)[/]")
     try:
         subprocess.run(tail_file_command(str(LOG_PATH)))
     except KeyboardInterrupt:

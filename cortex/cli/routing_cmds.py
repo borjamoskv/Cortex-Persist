@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """CORTEX CLI — LLM Routing Commands (Industrial Noir).
 
 Exposes the tier/cost-aware routing matrix to the terminal.
@@ -93,7 +96,7 @@ def routing_matrix(intent: str | None) -> None:
 
         table.add_row(*row)
 
-    console.print(table)
+    console.logger.info(table)
     console.print(
         f"\n  [{_DIM}]{len(presets)} providers"
         f" · {sum(1 for p in presets.values() if p.get('intent_model_map'))}"
@@ -110,9 +113,9 @@ def routing_resolve(provider: str, intent: str) -> None:
 
     model = resolve_model(provider, intent)
     if model:
-        console.print(f"  [{_CYBER}]{provider}[/].{intent} → [bold white]{model}[/]")
+        console.logger.info(f"  [{_CYBER}]{provider}[/].{intent} → [bold white]{model}[/]")
     else:
-        console.print(f"  [{_RED}]No model found for {provider}.{intent}[/]")
+        console.logger.info(f"  [{_RED}]No model found for {provider}.{intent}[/]")
 
 
 @routing.command("cheapest")
@@ -147,7 +150,7 @@ def routing_cheapest(intent: str, limit: int) -> None:
             Text(tier, style=_TIER_STYLE.get(tier, "white")),
         )
 
-    console.print(table)
+    console.logger.info(table)
 
 
 @routing.command("frontier")
@@ -178,7 +181,7 @@ def routing_frontier(intent: str) -> None:
             Text(cost, style=_COST_STYLE.get(cost, "white")),
         )
 
-    console.print(table)
+    console.logger.info(table)
 
 
 @routing.command("status")
@@ -212,7 +215,7 @@ def routing_status() -> None:
             p["reason"] or "—",
         )
 
-    console.print(table)
+    console.logger.info(table)
 
 
 @routing.command("agents")
@@ -251,4 +254,4 @@ def routing_agents() -> None:
             indicator,
         )
 
-    console.print(table)
+    console.logger.info(table)

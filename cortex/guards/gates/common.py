@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 # This file is part of CORTEX. Apache-2.0.
 from __future__ import annotations
 
@@ -95,4 +98,4 @@ class GlobalSourceCache:
                 cls.files[p] = content
 
         cls._loaded = True
-        # print(f"   [CACHE] {len(cls.files)} files ingestion complete.")
+        # logger.info(f"   [CACHE] {len(cls.files)} files ingestion complete.")

@@ -15,7 +15,7 @@ class SkyFuzzerSigma:
 
     def load_ledger(self, path):
         try:
-            with open(path, "r") as f:
+            with open(path) as f:
                 return json.load(f)
         except Exception as e:
             print(f"[FUZZ] Error loading ledger: {e}")
@@ -54,7 +54,7 @@ class SkyFuzzerSigma:
             await self.probe_allocation_logic(agent, addr)
             await asyncio.sleep(0.01)
 
-        print(f"--- [FUZZ] Cycle Progress Saved ---")
+        print("--- [FUZZ] Cycle Progress Saved ---")
         self.save_findings()
 
     def save_findings(self):

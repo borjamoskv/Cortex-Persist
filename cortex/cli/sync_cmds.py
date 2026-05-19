@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """CLI commands: sync, export, writeback."""
 
 from __future__ import annotations
@@ -52,10 +55,10 @@ def sync(db) -> None:
                     )
                 )
             else:
-                console.print("[dim]Sin cambios desde la última sincronización.[/]")
+                console.logger.info("[dim]Sin cambios desde la última sincronización.[/]")
             if result.errors:
                 for err in result.errors:
-                    console.print(f"[red]  ✗ {err}[/]")
+                    console.logger.info(f"[red]  ✗ {err}[/]")
         finally:
             # Fix: engine.close is async
             await engine.close()
@@ -95,7 +98,7 @@ def export(db, out, fmt, project, min_confidence, types) -> None:
                     min_confidence=min_confidence,
                     fact_types=fact_types,
                 )
-                console.print(f"[green]✓[/] Snapshot exportado a [cyan]{out_path}[/]")
+                console.logger.info(f"[green]✓[/] Snapshot exportado a [cyan]{out_path}[/]")
             else:
                 from cortex.utils.export import export_facts
 
@@ -122,7 +125,7 @@ def export(db, out, fmt, project, min_confidence, types) -> None:
 
                 out_path = Path(out).expanduser()
                 out_path.write_text(output_str, encoding="utf-8")
-                console.print(f"[green]✓[/] Datos ({fmt}) exportatorios a [cyan]{out_path}[/]")
+                console.logger.info(f"[green]✓[/] Datos ({fmt}) exportatorios a [cyan]{out_path}[/]")
         finally:
             # engine.close is async
             await engine.close()

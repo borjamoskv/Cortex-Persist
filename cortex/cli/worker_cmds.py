@@ -28,15 +28,15 @@ def start_worker(db: str, poll: float):
 
     worker = EnrichmentWorker(db_path=db, poll_interval=poll)
 
-    console.print("[bold noir.cyber]CORTEX Enrichment Worker[/] starting...")
-    console.print(f"  [dim]Database:[/] {db}")
-    console.print(f"  [dim]Interval:[/] {poll}s")
-    console.print()
+    console.logger.info("[bold noir.cyber]CORTEX Enrichment Worker[/] starting...")
+    console.logger.info(f"  [dim]Database:[/] {db}")
+    console.logger.info(f"  [dim]Interval:[/] {poll}s")
+    console.logger.info()
 
     try:
         _run_async(worker.start())
     except KeyboardInterrupt:
-        console.print("\n[warning]Stopping worker...[/]")
+        console.logger.info("\n[warning]Stopping worker...[/]")
         _run_async(worker.stop())
     except Exception as e:
-        console.print(f"[danger]Worker crashed:[/] {e}")
+        console.logger.info(f"[danger]Worker crashed:[/] {e}")

@@ -7,7 +7,6 @@ import socket
 import ssl
 import time
 from datetime import datetime, timezone
-from typing import Optional
 
 from cortex.extensions.daemon.models import DEFAULT_CERT_WARN_DAYS, DEFAULT_TIMEOUT, CertAlert
 

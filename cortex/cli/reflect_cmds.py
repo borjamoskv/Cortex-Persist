@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """CLI commands for CORTEX Reflection System — reflect + inject."""
 
 from __future__ import annotations
@@ -37,11 +40,11 @@ def reflect(project, summary, errors, decisions, source, db) -> None:
             decisions=decision_list,
             source=source,
         )
-        console.print(f"[green]✓[/] Reflection [bold]#{fact_id}[/] stored in [cyan]{project}[/]")
+        console.logger.info(f"[green]✓[/] Reflection [bold]#{fact_id}[/] stored in [cyan]{project}[/]")
         if error_list:
-            console.print(f"  [red]✗[/] {len(error_list)} error(s) logged")
+            console.logger.info(f"  [red]✗[/] {len(error_list)} error(s) logged")
         if decision_list:
-            console.print(f"  [blue]→[/] {len(decision_list)} decision(s) logged")
+            console.logger.info(f"  [blue]→[/] {len(decision_list)} decision(s) logged")
     except (sqlite3.Error, OSError, ValueError, RuntimeError) as e:
         handle_cli_error(e, db_path=db, context="storing reflection")
     finally:
@@ -79,7 +82,7 @@ def inject(project, hint, top_k, fmt, db) -> None:
 
         if fmt == "json":
             output = format_injection_json(learnings)
-            console.print(output)
+            console.logger.info(output)
         else:
             output = format_injection_markdown(learnings)
             if learnings:

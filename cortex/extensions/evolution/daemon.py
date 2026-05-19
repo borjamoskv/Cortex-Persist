@@ -31,9 +31,9 @@ def _print_swarm(engine: EvolutionEngine) -> None:
     """Pretty-print swarm status."""
     status = engine.swarm_status()  # type: ignore[reportAttributeAccessIssue]
 
-    print("\n═══════════════════════════════════════════════════════")
-    print(f"  🧬 CORTEX EVOLUTION ENGINE — Cycle {status['cycle']}")
-    print("═══════════════════════════════════════════════════════")
+    logger.info("\n═══════════════════════════════════════════════════════")
+    logger.info(f"  🧬 CORTEX EVOLUTION ENGINE — Cycle {status['cycle']}")
+    logger.info("═══════════════════════════════════════════════════════")
 
     for agent in status["agents"]:
         domain = agent["domain"]
@@ -41,21 +41,21 @@ def _print_swarm(engine: EvolutionEngine) -> None:
         gen = agent["generation"]
         avg_sub = agent["avg_subagent_fitness"]
         bar = "█" * int(fit / 3)
-        print(f"  {domain:>16}  fit={fit:>6.1f}  gen={gen:>4}  avg_sub={avg_sub:>6.1f}  {bar}")
+        logger.info(f"  {domain:>16}  fit={fit:>6.1f}  gen={gen:>4}  avg_sub={avg_sub:>6.1f}  {bar}")
 
     # Species breakdown
     if "species" in status:
-        print("\n  ─── Species ───")
+        logger.info("\n  ─── Species ───")
         for domain, species_list in status["species"].items():
             if len(species_list) > 1:
                 names = ", ".join(f"{s['name']}({s['size']}@{s['centroid']})" for s in species_list)
-                print(f"  {domain:>16}: {names}")
+                logger.info(f"  {domain:>16}: {names}")
 
     # Endocrine
     endo = status.get("endocrine", {})
     hormones = endo.get("hormones", {})
     if hormones:
-        print("\n  ─── Endocrine ───")
+        logger.info("\n  ─── Endocrine ───")
         print(
             f"  cortisol={hormones.get('cortisol', 0):.2f}  "
             f"dopamine={hormones.get('dopamine', 0):.2f}  "
@@ -67,7 +67,7 @@ def _print_swarm(engine: EvolutionEngine) -> None:
     # Latest report
     report = status.get("latest_report")
     if report:
-        print("\n  ─── Last cycle ───")
+        logger.info("\n  ─── Last cycle ───")
         print(
             f"  mutations={report['total_mutations']}  "
             f"tournaments={report.get('tournaments_run', 0)}  "
@@ -75,7 +75,7 @@ def _print_swarm(engine: EvolutionEngine) -> None:
             f"[{report['duration_ms']:.1f}ms]"
         )
 
-    print("═══════════════════════════════════════════════════════\n")
+    logger.info("═══════════════════════════════════════════════════════\n")
 
 
 async def _run_n_cycles(engine: EvolutionEngine, n: int) -> None:
@@ -85,7 +85,7 @@ async def _run_n_cycles(engine: EvolutionEngine, n: int) -> None:
 
     report = engine.latest_report  # type: ignore[reportAttributeAccessIssue]
     if report:
-        print(json.dumps(report.to_dict(), indent=2))
+        logger.info(json.dumps(report.to_dict(), indent=2))
 
     _print_swarm(engine)
 
@@ -125,13 +125,13 @@ def main() -> None:
     elif args.cycles > 0:
         asyncio.run(_run_n_cycles(engine, args.cycles))
     else:
-        print("🧬 Evolution Engine — Press Ctrl+C to stop\n")
+        logger.info("🧬 Evolution Engine — Press Ctrl+C to stop\n")
         try:
             asyncio.run(_run_forever(engine))
         except KeyboardInterrupt:
             engine.stop()  # type: ignore[reportAttributeAccessIssue]
             _print_swarm(engine)
-            print("🛑 Evolution Engine halted.")
+            logger.info("🛑 Evolution Engine halted.")
             sys.exit(0)
 
 

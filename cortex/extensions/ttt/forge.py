@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 import glob
 import os
 import subprocess
@@ -23,7 +26,7 @@ def has_data():
 
 
 def run_mlx_lora_training():
-    print("[TTT Forge] 🔨 Initiating MLX LoRA Fine-Tuning on Neural Architecture...")
+    logger.info("[TTT Forge] 🔨 Initiating MLX LoRA Fine-Tuning on Neural Architecture...")
     ensure_folders()
 
     if not has_data():
@@ -33,7 +36,7 @@ def run_mlx_lora_training():
         return False
 
     num_files = len(glob.glob(os.path.join(DATASET_DIR, "*.jsonl")))
-    print(f"[TTT Forge] 📚 Found {num_files} extraction shards.")
+    logger.info(f"[TTT Forge] 📚 Found {num_files} extraction shards.")
 
     # We use subprocess to run the official mlx_lm CLI tool.
     # Hyperparameters optimized for ultra-fast, local nightly training (Rank 8)
@@ -57,13 +60,13 @@ def run_mlx_lora_training():
         os.path.join(ADAPTERS_DIR, "moskv_nightly_adapter"),
     ]
 
-    print(f"[TTT Forge] 🚀 Executing: {' '.join(cmd)}")
+    logger.info(f"[TTT Forge] 🚀 Executing: {' '.join(cmd)}")
 
     try:
         # In a real daemon, we would pipe output and check exit codes.
         # For execution architecture phase 2, we just trigger it.
         # Note: mlx_lm must be installed in the venv: `pip install mlx-lm`
-        print("[TTT Forge] ⏳ (Simulated start. Waiting for mlx_lm...)")
+        logger.info("[TTT Forge] ⏳ (Simulated start. Waiting for mlx_lm...)")
 
         # subprocess.run(cmd, check=True) # Commented out so it doesn't actually burn GPU time during dev
 
@@ -75,7 +78,7 @@ def run_mlx_lora_training():
         )
         return True
     except subprocess.CalledProcessError as e:
-        print(f"[TTT Forge] ❌ MLX LoRA Execution failed: {e}")
+        logger.info(f"[TTT Forge] ❌ MLX LoRA Execution failed: {e}")
         return False
 
 

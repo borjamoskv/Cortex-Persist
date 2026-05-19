@@ -8,7 +8,7 @@ Extracted to mitigate LOC bloat and enhance maintainability.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Final, Optional
+from typing import Any, Final
 
 __all__ = ["Episode", "Pattern"]
 

@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """CLI commands for CORTEX-SWARM-10K operations."""
 
 from __future__ import annotations
@@ -109,9 +112,9 @@ def swarm_10k_consolidate(db_path):
         commander = SwarmCommander(bus_path=p)
         await commander.initialize()
 
-        console.print("[dim]Initiating Ouroboros-Omega Annihilation...[/]")
+        console.logger.info("[dim]Initiating Ouroboros-Omega Annihilation...[/]")
         await commander.consolidate_and_annihilate()
 
-        console.print("[bold red]🔥 Hierarchy Annihilated & Entropy Purged.[/]")
+        console.logger.info("[bold red]🔥 Hierarchy Annihilated & Entropy Purged.[/]")
 
     asyncio.run(_run())

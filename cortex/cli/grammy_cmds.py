@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """
 CLI Commands for GRAMMY-Ω.
 Sovereign Electronic Music Production.
@@ -41,7 +44,7 @@ def produce_cmd(title, concept, bpm, key):
             TrackState,
         )
     except Exception as exc:  # noqa: BLE001
-        console.print(f"[bold red]✗ GRAMMY-Ω no está disponible en este entorno:[/bold red] {exc}")
+        console.logger.info(f"[bold red]✗ GRAMMY-Ω no está disponible en este entorno:[/bold red] {exc}")
         return
 
     console.print(
@@ -85,9 +88,9 @@ def produce_cmd(title, concept, bpm, key):
 
             progress.update(task_id, description="[bold #06d6a0]Pipeline completado ✓[/]")
 
-        console.print("\n[bold green]✓ Producción finalizada con éxito.[/]")
-        console.print(f"GRI Score: [bold #CCFF00]{result_track.gri_score:.2f}[/]")
-        console.print(f"Estado Final: {result_track.state.value}")
+        console.logger.info("\n[bold green]✓ Producción finalizada con éxito.[/]")
+        console.logger.info(f"GRI Score: [bold #CCFF00]{result_track.gri_score:.2f}[/]")
+        console.logger.info(f"Estado Final: {result_track.state.value}")
 
     asyncio.run(run())
 

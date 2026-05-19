@@ -7,7 +7,6 @@ through API boundaries (Sprint 0 security directive).
 
 from __future__ import annotations
 
-from typing import Optional
 
 __all__ = [
     "CortexError",

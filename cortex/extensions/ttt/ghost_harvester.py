@@ -82,7 +82,7 @@ def format_for_lora(rows):
                     content = crypto.decrypt_str(content)
                 else:
                     continue  # Cannot decrypt without crypto
-            except Exception:  # noqa: BLE001 — decryption failure on corrupted memory item skip
+            except Exception:  # TODO(Swarm): Narrow this exception
                 continue  # If we can't decrypt, skip this fact to not poison the model
 
         if f_type == "error":

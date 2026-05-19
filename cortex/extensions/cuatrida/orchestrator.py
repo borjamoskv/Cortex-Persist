@@ -4,7 +4,7 @@ import subprocess
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from cortex.engine import CortexEngine as AsyncCortexEngine
 from cortex.extensions.cuatrida.models import CuatridaMetrics, DecisionNode, Dimension

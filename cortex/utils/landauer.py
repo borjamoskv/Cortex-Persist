@@ -1,7 +1,6 @@
 import ast
 import os
 from pathlib import Path
-from typing import Optional
 
 
 class LandauerAnalyzer(ast.NodeVisitor):

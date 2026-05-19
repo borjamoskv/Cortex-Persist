@@ -37,7 +37,7 @@ from __future__ import annotations
 import logging
 import math
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
 from cortex.extensions.evolution.agents import AgentDomain
 from cortex.extensions.evolution.cortex_metrics import CortexMetrics, DomainMetrics

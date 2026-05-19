@@ -7,7 +7,7 @@ Bridge between the Python ledger and the Node.js Swarm engine.
 import logging
 import sqlite3
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from cortex.engine import CortexEngine
 

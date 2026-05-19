@@ -15,7 +15,7 @@ import random
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from cortex.utils.canonical import compute_fact_hash
 

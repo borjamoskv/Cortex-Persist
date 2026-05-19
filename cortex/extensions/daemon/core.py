@@ -16,7 +16,6 @@ import time
 from collections.abc import Callable
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional
 
 from cortex.extensions.daemon.alerts import AlertHandlerMixin
 from cortex.extensions.daemon.core_support import (

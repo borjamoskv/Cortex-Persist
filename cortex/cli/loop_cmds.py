@@ -151,15 +151,15 @@ def _render_result(result: TaskResult) -> None:
             )
         )
         for err in result.errors:
-            console.print(f"[dim red]{err}[/]")
+            console.logger.info(f"[dim red]{err}[/]")
     elif result.status == TaskStatus.CANCELLED:
-        console.print(f"[{GOLD}]⊘ Task cancelled ({result.duration_ms:.0f}ms)[/]")
+        console.logger.info(f"[{GOLD}]⊘ Task cancelled ({result.duration_ms:.0f}ms)[/]")
 
 
 def _run_batch(loop_engine: ExecutionLoop, task: str) -> None:
     """Execute a single task and exit."""
     if not task:
-        console.print("[red]✗ --task is required in batch mode[/]")
+        console.logger.info("[red]✗ --task is required in batch mode[/]")
         return
 
     console.print(
@@ -180,7 +180,7 @@ def _run_interactive(loop_engine: ExecutionLoop) -> None:
 
     while True:
         try:
-            console.print()
+            console.logger.info()
             _render_session_status(loop_engine)
 
             task = Prompt.ask(
@@ -201,7 +201,7 @@ def _run_interactive(loop_engine: ExecutionLoop) -> None:
             _render_result(result)
 
         except KeyboardInterrupt:
-            console.print(f"\n[{GOLD}]⊘ Interrupted. Type 'exit' to close.[/]")
+            console.logger.info(f"\n[{GOLD}]⊘ Interrupted. Type 'exit' to close.[/]")
             continue
         except EOFError:
             _handle_exit(loop_engine)
@@ -282,7 +282,7 @@ def _show_help() -> None:
     for cmd, desc in commands:
         help_table.add_row(cmd, desc)
 
-    console.print(help_table)
+    console.logger.info(help_table)
 
 
 def _handle_exit(loop_engine: ExecutionLoop) -> None:
@@ -320,7 +320,7 @@ def _handle_status(loop_engine: ExecutionLoop) -> None:
     table.add_row("Facts Persisted", str(session.total_persisted))
     table.add_row("Active", "✓" if session.active else "✗")
 
-    console.print(table)
+    console.logger.info(table)
 
 
 def _status_style_for(status: TaskStatus) -> str:
@@ -336,7 +336,7 @@ def _handle_history(loop_engine: ExecutionLoop) -> None:
     """Show task execution history."""
     results = loop_engine._session.results
     if not results:
-        console.print("[dim]No tasks executed yet.[/]")
+        console.logger.info("[dim]No tasks executed yet.[/]")
         return
 
     table = Table(
@@ -363,14 +363,14 @@ def _handle_history(loop_engine: ExecutionLoop) -> None:
             persisted,
         )
 
-    console.print(table)
+    console.logger.info(table)
 
 
 def _handle_ghost(loop_engine: ExecutionLoop, description: str) -> None:
     """Register incomplete work as a ghost."""
     if not description.strip():
-        console.print("[red]✗ Ghost requires a description[/]")
+        console.logger.info("[red]✗ Ghost requires a description[/]")
         return
 
     loop_engine._persist_ghost(description)
-    console.print(f"[{GOLD}]👻 Ghost registered (async):[/] {description}")
+    console.logger.info(f"[{GOLD}]👻 Ghost registered (async):[/] {description}")

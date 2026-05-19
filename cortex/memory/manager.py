@@ -21,7 +21,7 @@ from cortex.memory.working import WorkingMemoryL1
 
 try:
     from cortex.memory.hdc import HDCEncoder, HDCVectorStoreL2
-except Exception:  # noqa: BLE001
+except Exception:  # TODO(Swarm): Narrow this exception
     HDCEncoder = Any  # type: ignore[assignment,misc]
     HDCVectorStoreL2 = Any  # type: ignore[assignment,misc]
 

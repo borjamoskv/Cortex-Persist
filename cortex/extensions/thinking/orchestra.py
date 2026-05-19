@@ -20,7 +20,7 @@ Uso::
 
     async with ThoughtOrchestra() as orchestra:
         thought = await orchestra.think("¿Cuál es la raíz del bug?")
-        print(thought.content, thought.confidence)
+        logger.info(thought.content, thought.confidence)
 """
 
 from __future__ import annotations
@@ -30,7 +30,7 @@ import logging
 import os
 import random
 import time
-from typing import Any, Optional
+from typing import Any
 
 from cortex.extensions.llm._presets import load_presets
 from cortex.extensions.llm.provider import LLMProvider

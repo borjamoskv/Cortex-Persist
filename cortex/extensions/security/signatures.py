@@ -12,7 +12,7 @@ import base64
 import hashlib
 import logging
 import os
-from typing import Any, Optional
+from typing import Any
 
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.asymmetric.ed25519 import (

@@ -10,7 +10,7 @@ import logging
 import os
 import sqlite3
 from collections import OrderedDict
-from typing import Any, Final, Optional
+from typing import Any, Final
 
 from cortex.storage import StorageMode, get_storage_mode
 

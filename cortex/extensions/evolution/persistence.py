@@ -10,7 +10,7 @@ import shutil
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Final, Optional
+from typing import Any, Final
 
 from cortex.extensions.evolution.agents import (
     AgentDomain,

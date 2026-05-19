@@ -1,4 +1,3 @@
-from typing import Optional
 
 """
 CORTEX v5.0 — MEJORAlo X-Ray Scanner.

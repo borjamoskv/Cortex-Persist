@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """CLI commands: gateway."""
 
 from __future__ import annotations
@@ -40,7 +43,7 @@ def health(db: str, as_json: bool) -> None:
     console.print(
         f"\n[[noir.cyber]⚡[/]] Gateway Health: [bold]{hs.score:.1f}/100[/] ([noir.yinmn]{hs.grade.letter}[/])"
     )
-    console.print(f"[dim]State: {'Resonant' if hs.score > 90 else 'Stable'}[/]\n")
+    console.logger.info(f"[dim]State: {'Resonant' if hs.score > 90 else 'Stable'}[/]\n")
     engine.close_sync()
 
 

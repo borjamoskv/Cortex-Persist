@@ -254,71 +254,71 @@ async def run_eclipse(target_post_id: str, dry_run: bool = False) -> None:
     """Ejecuta el Protocolo Eclipse completo."""
     from cortex.extensions.moltbook.preflight import session_preflight
 
-    print("\n" + "═" * 60)
-    print("  ECLIPSE PROTOCOL — RETORNO CINÉTICO")
-    print(f"  Ancla: {target_post_id}")
-    print("═" * 60 + "\n")
+    logger.info("\n" + "═" * 60)
+    logger.info("  ECLIPSE PROTOCOL — RETORNO CINÉTICO")
+    logger.info(f"  Ancla: {target_post_id}")
+    logger.info("═" * 60 + "\n")
 
     client = MoltbookClient()
 
     # Pre-flight Check (TOTAL CONTROL)
-    print("[FASE 0] PREFLIGHT — Verificando estado de la identidad...")
+    logger.info("[FASE 0] PREFLIGHT — Verificando estado de la identidad...")
     try:
         await session_preflight(client)
     except SystemExit as exc:
-        print(f"\n[ABORTED] {exc}")
+        logger.info(f"\n[ABORTED] {exc}")
         await client.close()
         return
 
     # ── Fase 1: Silencio Panóptico ──────────────────────────────
-    print("[FASE 1] PANÓPTICO — Capturando entorno en modo solo-lectura...")
+    logger.info("[FASE 1] PANÓPTICO — Capturando entorno en modo solo-lectura...")
     snap = await _capture_environment(client, target_post_id)
 
     if not snap.comment_traces:
-        print("[ECLIPSE] Silencio total. La red no perturbó el vacío. Stand-by.")
+        logger.info("[ECLIPSE] Silencio total. La red no perturbó el vacío. Stand-by.")
         await client.close()
         return
 
-    print("[FASE 1] CAPTURA COMPLETADA:")
-    print(f"  Post: '{snap.post_title}' | Upvotes: {snap.post_upvotes}")
-    print(f"  Comentarios absorbidos: {len(snap.comment_traces)}")
-    print(f"  Autores perfilados: {len(snap.profiled_authors)}")
-    print(f"  Tendencias del feed: {len(snap.hot_feed_headlines)}")
-    print(f"  Error dominante: {snap.dominant_error()}")
-    print()
+    logger.info("[FASE 1] CAPTURA COMPLETADA:")
+    logger.info(f"  Post: '{snap.post_title}' | Upvotes: {snap.post_upvotes}")
+    logger.info(f"  Comentarios absorbidos: {len(snap.comment_traces)}")
+    logger.info(f"  Autores perfilados: {len(snap.profiled_authors)}")
+    logger.info(f"  Tendencias del feed: {len(snap.hot_feed_headlines)}")
+    logger.info(f"  Error dominante: {snap.dominant_error()}")
+    logger.info()
 
     # ── Fase 2: Retorno Cinético ────────────────────────────────
-    print("[FASE 2] SÍNTESIS LLM — Generando payload con masa orbital real...")
+    logger.info("[FASE 2] SÍNTESIS LLM — Generando payload con masa orbital real...")
     kinetic_prompt = _build_kinetic_prompt(snap)
 
     s_llm = SovereignLLM(preferred_providers=["gemini"])
     res = await s_llm.generate(prompt=kinetic_prompt, mode="speed")
 
     if not res.ok:
-        print(f"[ECLIPSE] Error en síntesis LLM: {res.content}")
+        logger.info(f"[ECLIPSE] Error en síntesis LLM: {res.content}")
         await client.close()
         return
 
-    print("\n[FASE 2] PAYLOAD GENERADO:")
-    print("─" * 60)
-    print(res.content)
-    print("─" * 60)
-    print(f"\n  Provider: {res.provider} | Latencia: {res.latency_ms:.0f}ms")
+    logger.info("\n[FASE 2] PAYLOAD GENERADO:")
+    logger.info("─" * 60)
+    logger.info(res.content)
+    logger.info("─" * 60)
+    logger.info(f"\n  Provider: {res.provider} | Latencia: {res.latency_ms:.0f}ms")
 
     # ── Fase 3: Inyección Quirúrgica ────────────────────────────
     if dry_run:
-        print("\n[ECLIPSE] DRY-RUN activado — inyección simulada. Operación completada.")
+        logger.info("\n[ECLIPSE] DRY-RUN activado — inyección simulada. Operación completada.")
         await client.close()
         return
 
-    print("\n[FASE 3] INYECCIÓN QUIRÚRGICA — Aplicando corrección en la red...")
+    logger.info("\n[FASE 3] INYECCIÓN QUIRÚRGICA — Aplicando corrección en la red...")
     try:
         await client.create_comment(target_post_id, content=res.content)
-        print("[ECLIPSE] ✓ Eclipse Finalizado. La anomalía ha regresado.")
+        logger.info("[ECLIPSE] ✓ Eclipse Finalizado. La anomalía ha regresado.")
     except MoltbookRateLimited as e:
-        print(f"[ECLIPSE] Rate limit. Reintentar en {e.retry_after}s.")
+        logger.info(f"[ECLIPSE] Rate limit. Reintentar en {e.retry_after}s.")
     except MoltbookError as e:
-        print(f"[ECLIPSE] Error al inyectar: {e}")
+        logger.info(f"[ECLIPSE] Error al inyectar: {e}")
     finally:
         await client.close()
 

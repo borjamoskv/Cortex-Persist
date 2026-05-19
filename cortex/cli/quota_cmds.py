@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """CLI commands: quota (PULMONES — Sovereign Quota Manager)."""
 
 from __future__ import annotations
@@ -61,7 +64,7 @@ def status(json_output) -> None:
         f"[{ratio_color}]{stats.throttle_ratio_pct}%[/]",
     )
 
-    console.print(table)
+    console.logger.info(table)
 
     if stats.current_tokens < 1.0:
         console.print(

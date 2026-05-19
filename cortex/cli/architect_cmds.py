@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """
 CORTEX CLI — Architect Commands.
 
@@ -112,7 +115,7 @@ def architect_instruct(filepath: str) -> None:
             )
             if save == "y":
                 path.write_text(result.content, encoding="utf-8")
-                console.print(f"[bold green]✓ Guardado en {path.name}[/]")
+                console.logger.info(f"[bold green]✓ Guardado en {path.name}[/]")
 
     asyncio.run(_run())
 
@@ -128,7 +131,7 @@ def architect_reverse(text: str | None) -> None:
     if not text:
         text = Prompt.ask("Pega el texto de referencia a ingeniar (Golden Master)")
 
-    console.print(Panel("Analyzing structural rules...", title="[bold #CCFF00]Reverse Engineer[/]"))
+    console.logger.info(Panel("Analyzing structural rules...", title="[bold #CCFF00]Reverse Engineer[/]"))
 
     async def _run() -> None:
         async with SovereignLLM(temperature=0.1) as llm:
@@ -156,7 +159,7 @@ def architect_base() -> None:
     Asks the user to define the target, success criteria, and anti-patterns
     interactively, then builds a base Sovereign Prompt template.
     """
-    console.print("[bold #CCFF00]⚡ Inicializando Fase 1: Colapso del Estado de Éxito[/]")
+    console.logger.info("[bold #CCFF00]⚡ Inicializando Fase 1: Colapso del Estado de Éxito[/]")
 
     target = Prompt.ask(
         "\n[bold cyan]1. Target (Qué lograr)[/]\nDescribe el artefacto literal que debe existir al finalizar"
@@ -190,7 +193,7 @@ Pause State: Espera confirmación del operador antes de ejecutar producción.
 Crítica In-Vivo: Audita tu propio output contra los Anti-Patrones y regenera si es necesario.
 """
 
-    console.print("\n")
+    console.logger.info("\n")
     console.print(
         Panel(
             Syntax(template, "markdown", theme="monokai", word_wrap=True),

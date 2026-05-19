@@ -17,7 +17,7 @@ RESONANCE_THRESHOLD = 0.35
 def scan_file(file_path, guard):
     """Escanea un archivo individual con el Vector ROBALAS."""
     try:
-        with open(file_path, 'r') as f:
+        with open(file_path) as f:
             content = f.read()
     except Exception:
         return
@@ -38,7 +38,7 @@ def scan_file(file_path, guard):
             print(f"   Función: '{intent.strip()}'")
             print(f"   Categoría: {target}")
             print(f"   Resonancia: {resonance:.4f}")
-            print(f"   [!] POTENCIAL 0-DAY EXTRACTION DETECTADO")
+            print("   [!] POTENCIAL 0-DAY EXTRACTION DETECTADO")
 
 def run_assault():
     print("\\033[1;34m══════════════════════════════════════════════════════════\\033[0m")

@@ -36,7 +36,7 @@ def mark_file_tainted(
             source="cortex-mejoralo",
             meta={"file_path": file_path, "tainted": True},
         )
-    except Exception:  # noqa: BLE001
+    except Exception:  # TODO(Swarm): Narrow this exception
         logger.exception("Failed to persist taint for %s", file_path)
 
 
@@ -51,5 +51,5 @@ def is_file_tainted(
     try:
         scars = engine.scars(project, file_path, limit=10)
         return any(TAINT_TAG in (s.get("content", "")) for s in scars)
-    except Exception:  # noqa: BLE001
+    except Exception:  # TODO(Swarm): Narrow this exception
         return False

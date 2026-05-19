@@ -120,7 +120,7 @@ class MejoraloSwarm:
         findings_str = "- " + "\n- ".join(findings)
         scars_str = self._get_scars_prompt(engine, project, file_path.name)
         swarm_system = self._build_swarm_system(self._select_specialists(findings_str), iteration)
-        console.print(f"  [dim]🐝 Swarm (L{self.level}) pensando en {file_path.name}...[/]")
+        console.logger.info(f"  [dim]🐝 Swarm (L{self.level}) pensando en {file_path.name}...[/]")
 
         # ✂️ Attempt surgical AST mode first (Python only)
         if file_path.suffix == ".py":
@@ -128,15 +128,15 @@ class MejoraloSwarm:
                 file_path, content, findings, findings_str, scars_str, swarm_system
             )
             if result is not None:
-                console.print(f"  [green]✨ Cirujía AST completada [{file_path.name}][/]")
+                console.logger.info(f"  [green]✨ Cirujía AST completada [{file_path.name}][/]")
                 return result
-            console.print("  [yellow]⚠️ Modo quirúrgico fallido — fallback a archivo completo.[/]")
+            console.logger.info("  [yellow]⚠️ Modo quirúrgico fallido — fallback a archivo completo.[/]")
 
         # 📦 Full-file fallback
         base_prompt = self._build_prompt(file_path, content, findings_str, engine, project)
         result_content = await self._run_orchestra(base_prompt, swarm_system)
         if result_content:
-            console.print(f"  [green]✨ Síntesis completada para {file_path.name}[/]")
+            console.logger.info(f"  [green]✨ Síntesis completada para {file_path.name}[/]")
         return self._extract_code(result_content) if result_content else None
 
     # ── Surgical AST Mode ──────────────────────────────────────────────────

@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """CLI commands: github sync, github status."""
 
 from __future__ import annotations
@@ -29,7 +32,7 @@ def sync(token: str | None, owner: str, repo: str | None, db: str) -> None:
     if not token:
         token = os.environ.get("GITHUB_TOKEN")
     if not token:
-        console.print("[red]✗[/] GitHub token required. Set GITHUB_TOKEN env var or pass --token.")
+        console.logger.info("[red]✗[/] GitHub token required. Set GITHUB_TOKEN env var or pass --token.")
         raise SystemExit(1)
 
     engine = get_engine(db)
@@ -60,7 +63,7 @@ def sync(token: str | None, owner: str, repo: str | None, db: str) -> None:
             )
 
             for err in result.errors:
-                console.print(f"  [red]✗ {err}[/]")
+                console.logger.info(f"  [red]✗ {err}[/]")
 
         finally:
             await engine.close()
@@ -113,7 +116,7 @@ def status(db: str) -> None:
             table.add_row("Crystallized decisions (closed)", str(decision_count))
             table.add_row("Last sync", str(last_sync))
 
-            console.print(table)
+            console.logger.info(table)
 
         finally:
             await engine.close()

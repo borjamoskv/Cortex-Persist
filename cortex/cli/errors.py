@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """
 CORTEX CLI — Sovereign Error Display System v2.0 (i18n-enabled).
 
@@ -13,7 +16,7 @@ import os
 import sys
 from dataclasses import asdict, dataclass
 from enum import Enum
-from typing import NoReturn, Optional
+from typing import NoReturn
 
 from rich.panel import Panel
 
@@ -86,7 +89,7 @@ def _t(key: str, **kwargs) -> str:
 
 def _panel(body: str, *, title: str, border: str = "red") -> None:
     """Print a rich Panel with consistent styling."""
-    console.print(Panel(body, title=title, border_style=border))
+    console.logger.info(Panel(body, title=title, border_style=border))
 
 
 # ─── Error Categories ────────────────────────────────────────────────
@@ -342,7 +345,7 @@ def handle_cli_error(e: Exception, *, db_path: str = "", context: str = "") -> N
 
     # If JSON output is requested (e.g., by SDKs or other tools via env var)
     if os.environ.get("CORTEX_JSON_OUTPUT") == "1":
-        console.print(json.dumps({"status": "error", "error": asdict(struct)}))
+        console.logger.info(json.dumps({"status": "error", "error": asdict(struct)}))
         sys.exit(1)
 
     # Otherwise, fallback to the standard rich console display

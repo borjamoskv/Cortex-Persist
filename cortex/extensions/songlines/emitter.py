@@ -11,7 +11,6 @@ import logging
 import os
 import time
 from pathlib import Path
-from typing import Optional
 
 from cortex.memory.hdc.codec import HDCEncoder
 from cortex.memory.hdc.item_memory import ItemMemory

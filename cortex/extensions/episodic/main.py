@@ -15,7 +15,7 @@ import json
 import logging
 import re
 from collections import Counter, defaultdict
-from typing import TYPE_CHECKING, Any, Final, Optional
+from typing import TYPE_CHECKING, Any, Final
 
 from cortex.extensions.episodic.base import (
     EMOTIONS,

@@ -158,7 +158,7 @@ class _UnifiedHandler(FileSystemEventHandler):
                     payload,
                     ttl_s=3600,
                 )
-            except Exception:  # noqa: BLE001
+            except Exception:  # TODO(Swarm): Narrow this exception
                 pass
 
         # Publish to event bus (thread-safe via run_coroutine_threadsafe)
@@ -168,7 +168,7 @@ class _UnifiedHandler(FileSystemEventHandler):
                     self._event_bus.publish(topic, payload),
                     self._loop,
                 )
-            except Exception:  # noqa: BLE001
+            except Exception:  # TODO(Swarm): Narrow this exception
                 pass
 
 

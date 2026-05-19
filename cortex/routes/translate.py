@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Any, Final, Optional
+from typing import Any, Final
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field

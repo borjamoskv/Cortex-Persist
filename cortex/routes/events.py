@@ -51,7 +51,7 @@ async def event_generator(
                         if hasattr(sig, "model_dump_json")
                         else sig.json(),
                     }
-            except Exception:  # noqa: BLE001
+            except Exception:  # TODO(Swarm): Narrow this exception
                 pass
 
             await asyncio.sleep(1.0)

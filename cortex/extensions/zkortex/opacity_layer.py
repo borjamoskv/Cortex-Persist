@@ -25,7 +25,7 @@ from __future__ import annotations
 import hashlib
 import logging
 import time
-from typing import Any, Optional
+from typing import Any
 
 from cortex.extensions.zkortex.commitment import KnowledgeCommitment
 from cortex.extensions.zkortex.merkle import ZKMembershipProof

@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """CORTEX CLI — Agent commands (YAML-driven agent interface).
 
 Commands:
@@ -38,7 +41,7 @@ def agent_init(output: str):
     scaffold = AgentRole.scaffold()
     path = Path(output)
     path.write_text(scaffold.to_yaml(), encoding="utf-8")
-    console.print(f"[green]✅ Scaffold written to {path}[/green]")
+    console.logger.info(f"[green]✅ Scaffold written to {path}[/green]")
 
 
 @agent_cmds.command("validate")
@@ -56,7 +59,7 @@ def agent_validate(config: str):
     try:
         role = AgentRole.from_yaml_file(config)
     except Exception as e:  # noqa: BLE001
-        console.print(f"[red]❌ Validation failed: {e}[/red]")
+        console.logger.info(f"[red]❌ Validation failed: {e}[/red]")
         sys.exit(1)
 
     table = Table(title=f"Agent: {role.name}", show_lines=True)
@@ -75,18 +78,18 @@ def agent_validate(config: str):
     table.add_row("Silent Engrams", str(role.memory.silent_engrams))
     table.add_row("Tools", ", ".join(role.tools) or "none")
 
-    console.print(table)
-    console.print("[green]✅ Configuration valid[/green]")
+    console.logger.info(table)
+    console.logger.info("[green]✅ Configuration valid[/green]")
 
 
 def _run_interactive_agent_loop(agent) -> None:
     """Run the interactive loop for an agent."""
-    console.print(f"[bold cyan]🧠 Agent '{agent.name}' active (model={agent.model})[/bold cyan]")
+    console.logger.info(f"[bold cyan]🧠 Agent '{agent.name}' active (model={agent.model})[/bold cyan]")
     console.print(
         f"[dim]Budget: {agent.guardrail.max_tokens} tokens | "
         f"L1: {agent.working_memory.max_tokens} tokens[/dim]"
     )
-    console.print("[dim]Type 'exit' or Ctrl+C to quit.[/dim]\n")
+    console.logger.info("[dim]Type 'exit' or Ctrl+C to quit.[/dim]\n")
 
     try:
         while True:
@@ -102,7 +105,7 @@ def _run_interactive_agent_loop(agent) -> None:
             estimated_tokens = max(1, len(user_input) // 4)
 
             if not agent.guardrail.consume(estimated_tokens):
-                console.print("[red]⛔ Session budget exhausted. Agent terminated.[/red]")
+                console.logger.info("[red]⛔ Session budget exhausted. Agent terminated.[/red]")
                 break
 
             agent.guardrail.tick_turn()
@@ -113,10 +116,10 @@ def _run_interactive_agent_loop(agent) -> None:
                 f"{agent.guardrail.max_tokens}, "
                 f"turn: {agent.guardrail.turns})[/dim]"
             )
-            console.print(f"[yellow]🤖 [{agent.model}] Processing: {user_input[:80]}...[/yellow]\n")
+            console.logger.info(f"[yellow]🤖 [{agent.model}] Processing: {user_input[:80]}...[/yellow]\n")
 
     except KeyboardInterrupt:
-        console.print("\n[dim]Agent session ended.[/dim]")
+        console.logger.info("\n[dim]Agent session ended.[/dim]")
 
     # Final status
     console.print_json(json.dumps(agent.guardrail.status(), indent=2))
@@ -138,11 +141,11 @@ def agent_run(config: str, dry_run: bool):
     try:
         agent = load_agent(config)
     except Exception as e:  # noqa: BLE001
-        console.print(f"[red]❌ Failed to compile agent: {e}[/red]")
+        console.logger.info(f"[red]❌ Failed to compile agent: {e}[/red]")
         sys.exit(1)
 
     if dry_run:
-        console.print(f"[green]✅ Agent '{agent.name}' compiled successfully (dry-run)[/green]")
+        console.logger.info(f"[green]✅ Agent '{agent.name}' compiled successfully (dry-run)[/green]")
         console.print_json(json.dumps(agent.status(), indent=2))
         return
 

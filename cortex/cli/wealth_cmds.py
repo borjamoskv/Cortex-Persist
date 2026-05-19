@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """CORTEX CLI — Sovereign Wealth Engine (moneytv-1 & sovereign-growth-engine-v1).
 
 Commands:
@@ -53,7 +56,7 @@ def money_radar(depth: str, chains: str):
     console.print(
         Panel("[bold #CCFF00]📡 MONEYTV-1 RADAR INICIADO[/bold #CCFF00]", border_style="#CCFF00")
     )
-    console.print(f"[dim]Depth: {depth} | Chains: {chains}[/dim]")
+    console.logger.info(f"[dim]Depth: {depth} | Chains: {chains}[/dim]")
 
     table = Table(title="Oportunidades Detectadas (Score > 7.0)", border_style="#D4AF37")
     table.add_column("Asset/Protocol", style="cyan")
@@ -66,7 +69,7 @@ def money_radar(depth: str, chains: str):
     table.add_row("Berachain", "Airdrop Tier S", "8.5", "1 Wallet orgánica")
     table.add_row("Hyperliquid HLP", "Yield Aggressive", "7.8", "Alloc 10%")
 
-    console.print(table)
+    console.logger.info(table)
 
     # Run the dynamic scanner
     scanner = FundingRateScanner()
@@ -93,7 +96,7 @@ def money_radar(depth: str, chains: str):
                 f"{(opp.estimated_apr * 100):.1f}%",
                 opp.execution_risk.upper(),
             )
-        console.print(arb_table)
+        console.logger.info(arb_table)
 
     console.print(
         "\n[bold #CCFF00]💡 [SOVEREIGN TIP][/bold #CCFF00] La riqueza se compone "
@@ -111,11 +114,11 @@ def money_snipe(opportunity_id: str, dry_run: bool, max_slippage: float):
         Panel(f"[bold #f72585]⚡ SNIPING: {opportunity_id}[/bold #f72585]", border_style="#f72585")
     )
     if dry_run:
-        console.print("[yellow]⚠️ DRY RUN ACTIVO. Simulando ejecución...[/yellow]")
-    console.print("[dim]Verificando RiskManager (max 5% position)... OK[/dim]")
-    console.print(f"[dim]Slippage límite set: {max_slippage}%... OK[/dim]")
-    console.print("\n[green]✅ Ejecución táctica completada.[/green]")
-    console.print("TX Hash: [dim]0x000...000[/dim] registrada en CORTEX.")
+        console.logger.info("[yellow]⚠️ DRY RUN ACTIVO. Simulando ejecución...[/yellow]")
+    console.logger.info("[dim]Verificando RiskManager (max 5% position)... OK[/dim]")
+    console.logger.info(f"[dim]Slippage límite set: {max_slippage}%... OK[/dim]")
+    console.logger.info("\n[green]✅ Ejecución táctica completada.[/green]")
+    console.logger.info("TX Hash: [dim]0x000...000[/dim] registrada en CORTEX.")
     console.print(
         "\n[bold #f72585]💡 [SOVEREIGN TIP][/bold #f72585] Siempre stop-loss "
         "activo. No confíes en nadie, verifica en cadena."
@@ -130,11 +133,11 @@ def money_compound(tax_reserve: float, target_allocation: str):
     console.print(
         Panel("[bold #4361ee]🔄 AUTO-COMPOUND ENGINE[/bold #4361ee]", border_style="#4361ee")
     )
-    console.print(f"Tax reserve: [bold red]{tax_reserve * 100}%[/bold red]")
-    console.print("Aplicando regla 50/30/20 a P&L realizado...")
-    console.print("→ 50% Tier Seguro (sDAI/USDC)")
-    console.print("→ 30% Growth Engine")
-    console.print("→ 20% Cold Wallet (Profit taking)")
+    console.logger.info(f"Tax reserve: [bold red]{tax_reserve * 100}%[/bold red]")
+    console.logger.info("Aplicando regla 50/30/20 a P&L realizado...")
+    console.logger.info("→ 50% Tier Seguro (sDAI/USDC)")
+    console.logger.info("→ 30% Growth Engine")
+    console.logger.info("→ 20% Cold Wallet (Profit taking)")
     console.print(
         "\n[bold #4361ee]💡 [SOVEREIGN TIP][/bold #4361ee] Tasa de retorno > "
         "inflación entropica. Mueve ganancias a hardware."
@@ -150,10 +153,10 @@ def money_launch(idea: str, validate_first: bool, time_box: str):
     console.print(
         Panel(f"[bold #D4AF37]📦 LAUNCHING: {idea}[/bold #D4AF37]", border_style="#D4AF37")
     )
-    console.print(f"[dim]Time-box estricto: {time_box}[/dim]")
-    console.print("1. Validación relámpago con MarketV-1... [green]PASS[/green]")
-    console.print("2. MVP Scaffold (Next.js + Stripe)... [green]GENERADO[/green]")
-    console.print("3. Posicionando en Nicho B2Dev...")
+    console.logger.info(f"[dim]Time-box estricto: {time_box}[/dim]")
+    console.logger.info("1. Validación relámpago con MarketV-1... [green]PASS[/green]")
+    console.logger.info("2. MVP Scaffold (Next.js + Stripe)... [green]GENERADO[/green]")
+    console.logger.info("3. Posicionando en Nicho B2Dev...")
     console.print(
         "\n[bold #D4AF37]💡 [SOVEREIGN TIP][/bold #D4AF37] Si requiere más de "
         "48h para MVP, es overhead entrópico. Simplifica."
@@ -168,9 +171,9 @@ def money_tax(year: str, jurisdiction: str):
     console.print(
         Panel(f"[bold white]📑 TAX COMPLIANCE: {year}[/bold white]", border_style="white")
     )
-    console.print(f"Jurisdicción: [yellow]{jurisdiction}[/yellow]")
-    console.print("[dim]Escaneando ledger de CORTEX...[/dim]")
-    console.print("[green]✅ Reporte fiscal preliminar generado en 'cortex_tax_2026.pdf'[/green]")
+    console.logger.info(f"Jurisdicción: [yellow]{jurisdiction}[/yellow]")
+    console.logger.info("[dim]Escaneando ledger de CORTEX...[/dim]")
+    console.logger.info("[green]✅ Reporte fiscal preliminar generado en 'cortex_tax_2026.pdf'[/green]")
 
 
 @wealth_cmds.command("growth")
@@ -189,7 +192,7 @@ def growth_pipeline(objetivo: str):
         opportunities = _run_async(engine.pulse_scan(objetivo))
 
     if not opportunities:
-        console.print("[red]❌ No hay Alpha suficiente para justificar GTM (Score < 4.0).[/red]")
+        console.logger.info("[red]❌ No hay Alpha suficiente para justificar GTM (Score < 4.0).[/red]")
         return
 
     top_opp = opportunities[0]
@@ -197,23 +200,23 @@ def growth_pipeline(objetivo: str):
         f"[green]✅ Alpha detectado en {top_opp.platform.upper()}"
         f" (Score: {top_opp.alpha_score:.2f})[/green]"
     )
-    console.print(f"→ Target: [dim]{top_opp.target_url}[/dim]")
+    console.logger.info(f"→ Target: [dim]{top_opp.target_url}[/dim]")
 
     with console.status(
         "[dim]3. Especialistas ensamblando narrativa (TECHNOGRAPHER + NARRATIVIST)...[/dim]"
     ):
         _run_async(asyncio.sleep(1.2))  # Simulando generación LLM
 
-    console.print("[green]✅ Contenido 130/100 generado.[/green]")
+    console.logger.info("[green]✅ Contenido 130/100 generado.[/green]")
 
     with console.status("[dim]4. Ejecución orquestada (CHANNELMASTER)...[/dim]"):
         success = _run_async(engine.orchestrate_distribution(top_opp))
 
     if success:
-        console.print("\n[bold green]✅ DISTRIBUCIÓN SOBERANA COMPLETADA.[/bold green]")
-        console.print(f"→ Vector: {top_opp.suggested_action}")
+        console.logger.info("\n[bold green]✅ DISTRIBUCIÓN SOBERANA COMPLETADA.[/bold green]")
+        console.logger.info(f"→ Vector: {top_opp.suggested_action}")
     else:
-        console.print("\n[bold red]❌ FALLO EN DISTRIBUCIÓN.[/bold red]")
+        console.logger.info("\n[bold red]❌ FALLO EN DISTRIBUCIÓN.[/bold red]")
 
 
 @wealth_cmds.command("scan")
@@ -241,14 +244,14 @@ def growth_scan():
                 f"{opp.topic[:40]}..." if len(opp.topic) > 40 else opp.topic,
                 f"{opp.alpha_score:.2f}",
             )
-        console.print(table)
+        console.logger.info(table)
 
-        console.print("\n[dim]Top Actionable Signal:[/dim]")
+        console.logger.info("\n[dim]Top Actionable Signal:[/dim]")
         top = opportunities[0]
-        console.print(f"→ [bold]{top.target_url}[/bold]")
-        console.print(f"→ Sugerencia: [yellow]{top.suggested_action}[/yellow]")
+        console.logger.info(f"→ [bold]{top.target_url}[/bold]")
+        console.logger.info(f"→ Sugerencia: [yellow]{top.suggested_action}[/yellow]")
     else:
-        console.print("[yellow]No active growth signals found above threshold.[/yellow]")
+        console.logger.info("[yellow]No active growth signals found above threshold.[/yellow]")
 
     console.print(
         "\n[bold #6600FF]💡 [SOVEREIGN TIP][/bold #6600FF] La atención no se crea, "
@@ -263,9 +266,9 @@ def growth_alpha(channel: str):
     console.print(
         Panel(f"[bold #6600FF]🎯 ALPHA HUNT: {channel}[/bold #6600FF]", border_style="#6600FF")
     )
-    console.print(f"[dim]Escaneando dolor agudo en {channel}...[/dim]")
-    console.print("→ Identificado: 3 oportunidades de pain point asimétrico.")
-    console.print("→ Respuesta pre-generada en buffer para CORTEX persist.")
+    console.logger.info(f"[dim]Escaneando dolor agudo en {channel}...[/dim]")
+    console.logger.info("→ Identificado: 3 oportunidades de pain point asimétrico.")
+    console.logger.info("→ Respuesta pre-generada en buffer para CORTEX persist.")
     console.print(
         "\n[bold #6600FF]💡 [SOVEREIGN TIP][/bold #6600FF] Respuestas orgánicas 150/100, "
         "el pitch es una consecuencia natural."

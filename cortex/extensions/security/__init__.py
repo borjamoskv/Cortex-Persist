@@ -10,7 +10,7 @@ __all__: list[str] = []
 
 try:
     from .abac import ABACEvaluator, Policy
-except Exception:  # noqa: BLE001
+except Exception:  # TODO(Swarm): Narrow this exception
     ABACEvaluator = None  # type: ignore[assignment]
     Policy = None  # type: ignore[assignment]
 else:
@@ -18,14 +18,14 @@ else:
 
 try:
     from .anomaly_detector import AnomalyDetector
-except Exception:  # noqa: BLE001
+except Exception:  # TODO(Swarm): Narrow this exception
     AnomalyDetector = None  # type: ignore[assignment]
 else:
     __all__.append("AnomalyDetector")
 
 try:
     from .honeypot import HONEY_POT, HoneypotManager
-except Exception:  # noqa: BLE001
+except Exception:  # TODO(Swarm): Narrow this exception
     HONEY_POT = None  # type: ignore[assignment]
     HoneypotManager = None  # type: ignore[assignment]
 else:
@@ -33,21 +33,21 @@ else:
 
 try:
     from .injection_guard import InjectionGuard
-except Exception:  # noqa: BLE001
+except Exception:  # TODO(Swarm): Narrow this exception
     InjectionGuard = None  # type: ignore[assignment]
 else:
     __all__.append("InjectionGuard")
 
 try:
     from .integrity_audit import IntegrityAuditor
-except Exception:  # noqa: BLE001
+except Exception:  # TODO(Swarm): Narrow this exception
     IntegrityAuditor = None  # type: ignore[assignment]
 else:
     __all__.append("IntegrityAuditor")
 
 try:
     from .security_sync import SIGNAL, SecurityVisualSync
-except Exception:  # noqa: BLE001
+except Exception:  # TODO(Swarm): Narrow this exception
     SIGNAL = None  # type: ignore[assignment]
     SecurityVisualSync = None  # type: ignore[assignment]
 else:
@@ -55,7 +55,7 @@ else:
 
 try:
     from .signatures import Ed25519Signer, get_default_signer
-except Exception:  # noqa: BLE001
+except Exception:  # TODO(Swarm): Narrow this exception
     Ed25519Signer = None  # type: ignore[assignment]
     get_default_signer = None  # type: ignore[assignment]
 else:
@@ -63,7 +63,7 @@ else:
 
 try:
     from .tenant import get_tenant_id, tenant_id_var
-except Exception:  # noqa: BLE001
+except Exception:  # TODO(Swarm): Narrow this exception
     get_tenant_id = None  # type: ignore[assignment]
     tenant_id_var = None  # type: ignore[assignment]
 else:
@@ -71,7 +71,7 @@ else:
 
 try:
     from .threat_feed import ThreatFeedEngine
-except Exception:  # noqa: BLE001
+except Exception:  # TODO(Swarm): Narrow this exception
     ThreatFeedEngine = None  # type: ignore[assignment]
 else:
     __all__.append("ThreatFeedEngine")

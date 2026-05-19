@@ -7,7 +7,7 @@ import re
 import subprocess
 from enum import Enum as PyEnum
 from pathlib import Path
-from typing import Callable
+from collections.abc import Callable
 from urllib import request
 
 VoidFn = Callable[[], None]
@@ -368,7 +368,7 @@ class Cheatcodes:
 
     @staticmethod
     def from_json_file(file_path: str) -> "Cheatcodes":
-        with open(file_path, "r") as f:
+        with open(file_path) as f:
             return Cheatcodes.from_dict(json.load(f))
 
 

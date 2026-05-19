@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Optional
 
 __all__ = [
     "create_google_one_agent",

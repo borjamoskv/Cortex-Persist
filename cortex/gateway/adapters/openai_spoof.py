@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import logging
 import time
-from typing import Optional
 
 from fastapi import APIRouter, Header, HTTPException, Request
 from fastapi.responses import StreamingResponse

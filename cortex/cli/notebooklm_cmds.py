@@ -184,8 +184,8 @@ def fragment_cmd(output_dir: str):
             status = "[green]✅[/green]" if word_count < 500_000 else "[red]⚠️ OVER[/red]"
             table.add_row(domain, str(len(facts_in_domain)), f"{word_count:,}", status)
 
-        console.print(table)
-        console.print(f"\n📁 Output: {out}/")
+        console.logger.info(table)
+        console.logger.info(f"\n📁 Output: {out}/")
 
     _run_async(_fragment())
 
@@ -209,8 +209,8 @@ def sync_cmd(drive_path: str | None, mode: str):
     else:
         detected = _detect_cloud_sync()
         if not detected:
-            console.print("[red]❌ Cloud Storage no detectado (Drive/OneDrive/iCloud).[/red]")
-            console.print("Especifica --drive-path manualmente.")
+            console.logger.info("[red]❌ Cloud Storage no detectado (Drive/OneDrive/iCloud).[/red]")
+            console.logger.info("Especifica --drive-path manualmente.")
             return
         target, provider_name = detected
 
@@ -221,7 +221,7 @@ def sync_cmd(drive_path: str | None, mode: str):
     if mode in ("digest", "both"):
         digest_path = Path(DIGEST_FILE)
         if not digest_path.exists():
-            console.print("[yellow]Generando digest...")
+            console.logger.info("[yellow]Generando digest...")
             ctx = click.Context(digest_cmd, info_name="digest")
             ctx.invoke(digest_cmd, output=str(DIGEST_FILE))
 
@@ -232,7 +232,7 @@ def sync_cmd(drive_path: str | None, mode: str):
     if mode in ("domains", "both"):
         domains_path = Path(DOMAINS_DIR)
         if not domains_path.exists() or not any(domains_path.glob("*.md")):
-            console.print("[yellow]Generando fragmentos de dominio...[/yellow]")
+            console.logger.info("[yellow]Generando fragmentos de dominio...[/yellow]")
             ctx = click.Context(fragment_cmd, info_name="fragment")
             ctx.invoke(fragment_cmd, output_dir=str(DOMAINS_DIR))
 
@@ -311,17 +311,17 @@ def status_cmd():
             "[yellow]NO SYNC[/yellow]",
         )
 
-    console.print(table)
+    console.logger.info(table)
 
     # Staleness warning
     if DIGEST_FILE.exists():
         age_h = (time.time() - os.path.getmtime(DIGEST_FILE)) / 3600
         if age_h > 48:
-            console.print(f"\n[red]⚠️ Digest tiene {age_h:.0f}h — alto riesgo (>48h)[/red]")
+            console.logger.info(f"\n[red]⚠️ Digest tiene {age_h:.0f}h — alto riesgo (>48h)[/red]")
         elif age_h > 24:
-            console.print(f"\n[yellow]⚠️ Digest tiene {age_h:.0f}h — considerar re-sync[/yellow]")
+            console.logger.info(f"\n[yellow]⚠️ Digest tiene {age_h:.0f}h — considerar re-sync[/yellow]")
         else:
-            console.print(f"\n[green]✅ Digest fresco ({age_h:.1f}h)[/green]")
+            console.logger.info(f"\n[green]✅ Digest fresco ({age_h:.1f}h)[/green]")
 
 
 @notebooklm_cmds.command("ingest")
@@ -345,12 +345,12 @@ def ingest_cmd(drive_path: str | None):
     else:
         detected = _detect_cloud_sync()
         if not detected:
-            console.print("[red]❌ Cloud Storage no detectado.[/red]")
+            console.logger.info("[red]❌ Cloud Storage no detectado.[/red]")
             return
         target, _ = detected
 
     if not target.exists():
-        console.print(f"[red]❌ El directorio {target} no existe.[/red]")
+        console.logger.info(f"[red]❌ El directorio {target} no existe.[/red]")
         return
 
     manifest_path = target / ".cortex_ingest_manifest.json"
@@ -408,7 +408,7 @@ def ingest_cmd(drive_path: str | None):
                 if file_path.name in processed_files:
                     continue
 
-                console.print(f"[cyan]Analizando síntesis: {file_path.name}...[/cyan]")
+                console.logger.info(f"[cyan]Analizando síntesis: {file_path.name}...[/cyan]")
 
                 content = file_path.read_text(encoding="utf-8")
                 # Evita archivos inmensos que puedan saturar la ventana de contexto
@@ -450,12 +450,12 @@ def ingest_cmd(drive_path: str | None):
                                         }
                                     )
                             newly_processed.append(file_path.name)
-                            console.print(f"   [green]→ Se extrajeron {len(items)} hechos.[/green]")
+                            console.logger.info(f"   [green]→ Se extrajeron {len(items)} hechos.[/green]")
                         else:
-                            console.print("   [red]→ Respuesta no es una lista JSON válida.[/red]")
+                            console.logger.info("   [red]→ Respuesta no es una lista JSON válida.[/red]")
                     except json.JSONDecodeError:
-                        console.print(f"   [red]→ Error parseando JSON de {res.provider}[/red]")
-                        console.print(f"      Raw output: {res.content[:200]}...")
+                        console.logger.info(f"   [red]→ Error parseando JSON de {res.provider}[/red]")
+                        console.logger.info(f"      Raw output: {res.content[:200]}...")
 
         if extracted_facts:
             await engine.init_db()
@@ -477,7 +477,7 @@ def ingest_cmd(drive_path: str | None):
                 "[yellow]0 hechos extraídos, pero archivos marcados como procesados.[/yellow]"
             )
         else:
-            console.print("[dim]Nada nuevo que ingerir.[/dim]")
+            console.logger.info("[dim]Nada nuevo que ingerir.[/dim]")
 
         # Actualizar manifest
         if newly_processed:

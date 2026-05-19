@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 import logging
-from typing import TYPE_CHECKING, Any, Optional, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from pydantic import ValidationError
 
@@ -21,7 +21,7 @@ logger = logging.getLogger("cortex.facts")
 
 try:
     from cortex.security.haiku import HaikuGuard
-except Exception:  # noqa: BLE001
+except Exception:  # TODO(Swarm): Narrow this exception
     HaikuGuard = None
 
 

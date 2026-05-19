@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """CORTEX CLI — Health dashboard command.
 
 Rich terminal dashboard showing system health at a glance.
@@ -37,7 +40,7 @@ def dashboard(db_path: str | None) -> None:
     }
     color = grade_colors.get(hs.grade, "white")
 
-    console.print()
+    console.logger.info()
     console.print(
         Panel(
             f"[bold {color}]{hs.grade.emoji} {hs.score:.1f}/100  Grade {hs.grade.letter}[/]",
@@ -85,7 +88,7 @@ def dashboard(db_path: str | None) -> None:
             desc[:30] if desc else "",
         )
 
-    console.print(table)
+    console.logger.info(table)
 
     # ─── Sub-Indices ──────────────────────────────────────
     if hs.sub_indices:
@@ -167,4 +170,4 @@ def dashboard(db_path: str | None) -> None:
             )
         )
 
-    console.print()
+    console.logger.info()

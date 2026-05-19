@@ -8,11 +8,11 @@ from datetime import datetime
 def log(msg: str, tier: str = "INFO") -> None:
     print(f"[{datetime.now().time()}] [{tier}] [CHAOS-FUZZER] {msg}")
 
-def execute_forge_fuzz(target_dir: str, runs: int = 250000) -> Tuple[bool, Optional[str]]:
+def execute_forge_fuzz(target_dir: str, runs: int = 250000) -> tuple[bool, str | None]:
     """Levanta el subproceso contra Foundry buscando fracturar invariantes."""
     log(f"Iniciando Chaos Engine sobre el Target Físico... ({runs} ciclos)", "L3-STRIKE")
     
-    cmd: List[str] = ["forge", "test", "--fuzz-runs", str(runs), "-vv"]
+    cmd: list[str] = ["forge", "test", "--fuzz-runs", str(runs), "-vv"]
     
     try:
         # Run en C5-REAL (I/O bloqueante puro hasta fractura)

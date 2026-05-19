@@ -400,7 +400,7 @@ class CodeSmith:
             # Cleanup sandbox (best-effort)
             try:
                 await self._sandbox.cleanup()
-            except Exception:  # noqa: BLE001 — best-effort cleanup
+            except Exception:  # TODO(Swarm): Narrow this exception
                 pass
 
         return result

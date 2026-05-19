@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """CLI commands: store, search, recall, history."""
 
 from __future__ import annotations
@@ -207,7 +210,7 @@ def search(query, project, top, scope, db, epistemic) -> None:
                 row.append(origin)
             table.add_row(*row)
 
-        console.print(table)
+        console.logger.info(table)
 
         # Epistemic analysis overlay
         if epistemic:
@@ -267,7 +270,7 @@ def recall(project, db) -> None:
             ftype = f.get("fact_type", "unknown") if isinstance(f, dict) else f.fact_type
             by_type.setdefault(ftype, []).append(f)
         for ftype, type_facts in by_type.items():
-            console.print(f"\n[bold magenta]═══ {ftype.upper()} ({len(type_facts)}) ═══[/]")
+            console.logger.info(f"\n[bold magenta]═══ {ftype.upper()} ({len(type_facts)}) ═══[/]")
             for f in type_facts:
                 if isinstance(f, dict):
                     fid = f.get("id", "?")
@@ -330,7 +333,7 @@ def history(project, as_of, db) -> None:
                 valid_from = f.valid_from[:10]
                 content = f.content[:80]
             badge = "[green]●[/]" if is_active else "[dim]○[/]"
-            console.print(f"  {badge} [dim]#{fid}[/] [{valid_from}] {content}")
+            console.logger.info(f"  {badge} [dim]#{fid}[/] [{valid_from}] {content}")
     finally:
         _run_async(engine.close())
 
@@ -380,7 +383,7 @@ def trace_episode(query, fact_id, project, limit, db) -> None:
       By fact ID: cortex trace-episode --fact-id 42
     """
     if not query and fact_id == 0:
-        console.print("[red]Provide a query or --fact-id[/]")
+        console.logger.info("[red]Provide a query or --fact-id[/]")
         return
 
     engine = get_engine(db)
@@ -398,7 +401,7 @@ def trace_episode(query, fact_id, project, limit, db) -> None:
                     border_style="cyan",
                 )
             )
-            console.print(episode.summary)
+            console.logger.info(episode.summary)
         else:
             with console.status("[noir.violet]Searching causal episodes...[/]"):
                 episodes = _run_async(engine.recall_episode(query, project, limit))
@@ -419,8 +422,8 @@ def trace_episode(query, fact_id, project, limit, db) -> None:
                         border_style="cyan",
                     )
                 )
-                console.print(ep.summary)
-                console.print()
+                console.logger.info(ep.summary)
+                console.logger.info()
         _show_tip(engine)
     finally:
         _run_async(engine.close())
@@ -456,7 +459,7 @@ def trace_chain(fact_id, direction, depth, db) -> None:
             )
 
         if not chain:
-            console.print(f"[dim]No causal chain found from fact #{fact_id}[/]")
+            console.logger.info(f"[dim]No causal chain found from fact #{fact_id}[/]")
             return
 
         arrow = "↑" if direction == "up" else "↓"
@@ -497,7 +500,7 @@ def trace_chain(fact_id, direction, depth, db) -> None:
                 parent_str,
             )
 
-        console.print(table)
+        console.logger.info(table)
         _show_tip(engine)
     finally:
         _run_async(engine.close())
@@ -526,7 +529,7 @@ def stats(db, as_json) -> None:
         table.add_row("Projects", str(s["project_count"]))
         table.add_row("Embeddings", str(s["embeddings"]))
         table.add_row("DB Size", f"{s['db_size_mb']} MB")
-        console.print(table)
+        console.logger.info(table)
     finally:
         _run_async(engine.close())
 

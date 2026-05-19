@@ -37,7 +37,7 @@ def _db(path: Path, exclusive: bool = False) -> Generator[sqlite3.Connection, No
             conn.execute("BEGIN EXCLUSIVE")
         yield conn
         conn.commit()
-    except Exception:  # noqa: BLE001 — rollback transaction before raising
+    except Exception:  # TODO(Swarm): Narrow this exception
         conn.rollback()
         raise
     finally:

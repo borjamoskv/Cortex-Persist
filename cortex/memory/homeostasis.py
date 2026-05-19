@@ -7,7 +7,7 @@ Integrates with drift monitoring for post-prune topological health assessment.
 from __future__ import annotations
 
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from cortex.memory.engrams import CortexSemanticEngram
 

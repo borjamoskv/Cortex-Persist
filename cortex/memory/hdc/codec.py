@@ -18,7 +18,7 @@ from __future__ import annotations
 import logging
 import re
 from collections.abc import Sequence
-from typing import Final, Optional
+from typing import Final
 
 from cortex.memory.hdc.algebra import HVType, bind, bundle, permute
 from cortex.memory.hdc.item_memory import ItemMemory

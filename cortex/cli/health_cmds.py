@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """CORTEX CLI — Health command group.
 
 Commands for the CORTEX Health Index — monitoring and scoring.
@@ -46,13 +49,13 @@ def check(db_path: str | None) -> None:
     hs = HealthScorer.score(metrics)
     summary = HealthScorer.summarize(hs)
 
-    console.print(f"\n{summary}\n")
+    console.logger.info(f"\n{summary}\n")
 
     for m in hs.metrics:
         bar_len = int(m.value * 20)
         bar = "█" * bar_len + "░" * (20 - bar_len)
-        console.print(f"  {m.name:12s} [{bar}] {m.value:.0%} (w={m.weight})")
-    console.print()
+        console.logger.info(f"  {m.name:12s} [{bar}] {m.value:.0%} (w={m.weight})")
+    console.logger.info()
 
 
 @health_group.command("report")
@@ -72,7 +75,7 @@ def report(db_path: str | None, as_json: bool) -> None:
     rep = asyncio.run(engine.health_report())
 
     if as_json:
-        console.print(json.dumps(rep.to_dict(), indent=2))
+        console.logger.info(json.dumps(rep.to_dict(), indent=2))
         return
 
     hs = rep.score
@@ -84,18 +87,18 @@ def report(db_path: str | None, as_json: bool) -> None:
     )
 
     if rep.warnings:
-        console.print("[bold red]Warnings:[/]")
+        console.logger.info("[bold red]Warnings:[/]")
         for w in rep.warnings:
-            console.print(f"  ⚠️  {w}")
+            console.logger.info(f"  ⚠️  {w}")
 
     if rep.recommendations:
-        console.print("\n[bold yellow]Recommendations:[/]")
+        console.logger.info("\n[bold yellow]Recommendations:[/]")
         for r in rep.recommendations:
-            console.print(f"  💡 {r}")
+            console.logger.info(f"  💡 {r}")
 
     # Sub-indices
     if hs.sub_indices:
-        console.print("\n[bold]Sub-Indices:[/]")
+        console.logger.info("\n[bold]Sub-Indices:[/]")
         for idx_name, val in hs.sub_indices.items():
             filled = int(val / 100 * 20)
             bar = "█" * filled + "░" * (20 - filled)
@@ -105,18 +108,18 @@ def report(db_path: str | None, as_json: bool) -> None:
                 color = "yellow"
             else:
                 color = "red"
-            console.print(f"  {idx_name:16s} [{color}]{bar}[/] {val:.1f}/100")
+            console.logger.info(f"  {idx_name:16s} [{color}]{bar}[/] {val:.1f}/100")
 
     # Remediation actions for degraded metrics
     degraded = [m for m in hs.metrics if m.value < 0.5]
     if degraded:
-        console.print("\n[bold]🔧 Actions:[/]")
+        console.logger.info("\n[bold]🔧 Actions:[/]")
         for m in degraded:
             rem = getattr(m, "remediation", "") or ""
             if rem:
-                console.print(f"  🔧 {m.name}: {rem}")
+                console.logger.info(f"  🔧 {m.name}: {rem}")
 
-    console.print(f"\n  DB: [dim]{rep.db_path}[/]\n")
+    console.logger.info(f"\n  DB: [dim]{rep.db_path}[/]\n")
 
 
 @health_group.command("score")
@@ -129,7 +132,7 @@ def score(db_path: str | None) -> None:
     collector = HealthCollector(db_path=path)
     metrics = collector.collect_all()
     hs = HealthScorer.score(metrics)
-    console.print(f"{hs.score:.1f}")
+    console.logger.info(f"{hs.score:.1f}")
 
 
 @health_group.command("trend")
@@ -155,7 +158,7 @@ def trend(db_path: str | None, live: bool, samples: int, interval: float) -> Non
         detector = TrendDetector(window_size=samples)
         scores: list[float] = []
 
-        console.print(f"\n[dim]Collecting {samples} health samples...[/]")
+        console.logger.info(f"\n[dim]Collecting {samples} health samples...[/]")
         for i in track(range(samples), description="Sampling"):
             metrics = collector.collect_all()
             hs = HealthScorer.score(metrics)
@@ -180,9 +183,9 @@ def trend(db_path: str | None, live: bool, samples: int, interval: float) -> Non
     slope = detector.slope()
 
     color = "green" if drift == "improving" else ("red" if drift == "degrading" else "yellow")
-    console.print(f"\n📈 Trend: [{color}]{drift}[/] (slope: {slope:+.3f})")
-    console.print(f"  Samples: {len(scores)}")
-    console.print(f"  Sparkline: [cyan]{spark}[/]\n")
+    console.logger.info(f"\n📈 Trend: [{color}]{drift}[/] (slope: {slope:+.3f})")
+    console.logger.info(f"  Samples: {len(scores)}")
+    console.logger.info(f"  Sparkline: [cyan]{spark}[/]\n")
 
 
 @health_group.command("history")
@@ -198,7 +201,7 @@ def history(db_path: str | None, limit: int) -> None:
     records = TrendDetector.query_history(path, limit=limit)
 
     if not records:
-        console.print("\n[yellow]No health history found.[/]\n")
+        console.logger.info("\n[yellow]No health history found.[/]\n")
         return
 
     table = Table(
@@ -226,9 +229,9 @@ def history(db_path: str | None, limit: int) -> None:
             color = "red"
         table.add_row(ts, f"[{color}]{score_val:.1f}[/]", grade)
 
-    console.print()
-    console.print(table)
-    console.print()
+    console.logger.info()
+    console.logger.info(table)
+    console.logger.info()
 
 
 @health_group.command("fix")
@@ -249,7 +252,7 @@ def fix(db_path: str | None, dry_run: bool) -> None:
     fixes = registry.applicable_fixes(degraded)
 
     if not fixes:
-        console.print("\n[green]✅ No degraded metrics with available fixes.[/]\n")
+        console.logger.info("\n[green]✅ No degraded metrics with available fixes.[/]\n")
         return
 
     for fa in fixes:
@@ -261,11 +264,11 @@ def fix(db_path: str | None, dry_run: bool) -> None:
         else:
             console.print(f"  🔧 {fa.metric}: {fa.label}...", end=" ")
             result = fa.fn(path)
-            console.print(f"[green]{result}[/]")
+            console.logger.info(f"[green]{result}[/]")
 
     if dry_run:
-        console.print("\n[dim]Use --no-dry-run to execute fixes.[/]\n")
-    console.print()
+        console.logger.info("\n[dim]Use --no-dry-run to execute fixes.[/]\n")
+    console.logger.info()
 
 
 @health_group.command("export")
@@ -284,9 +287,9 @@ def export(db_path: str | None, fmt: str) -> None:
     hs = HealthScorer.score(metrics)
 
     if fmt == "prometheus":
-        console.print(export_prometheus(hs))
+        console.logger.info(export_prometheus(hs))
     else:
-        console.print(json_mod.dumps(hs.to_dict(), indent=2))
+        console.logger.info(json_mod.dumps(hs.to_dict(), indent=2))
 
 
 # ─── Attach dashboard subcommand ─────────────────────────────
@@ -300,15 +303,15 @@ def verify():
 
     from cortex.extensions.health.invariants import verify_health_system
 
-    console.print("[bold blue]Running Health System Structural Invariants...[/bold blue]")
+    console.logger.info("[bold blue]Running Health System Structural Invariants...[/bold blue]")
     try:
         verify_health_system()
-        console.print("[bold green]✓ All structural invariants passed.[/bold green]")
+        console.logger.info("[bold green]✓ All structural invariants passed.[/bold green]")
     except AssertionError as e:
-        console.print(f"[bold red]✗ Invariant violation: {e}[/bold red]")
+        console.logger.info(f"[bold red]✗ Invariant violation: {e}[/bold red]")
         sys.exit(1)
     except Exception as e:
-        console.print(f"[bold red]Error running invariants: {e}[/bold red]")
+        console.logger.info(f"[bold red]Error running invariants: {e}[/bold red]")
         sys.exit(1)
 
 

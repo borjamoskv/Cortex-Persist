@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 import asyncio
 
 import click
@@ -131,7 +134,7 @@ def triangulate(log_file: str) -> None:
                 )
             )
         else:
-            console.print(f"\n[bold red]{key}:[/bold red] {content}")
+            console.logger.info(f"\n[bold red]{key}:[/bold red] {content}")
 
-    console.print("\n[bold purple]/// TRIANGULACIÓN COMPLETADA ///[/bold purple]")
-    console.print("Evalúe los tres vectores para aislar la cuenca del error.")
+    console.logger.info("\n[bold purple]/// TRIANGULACIÓN COMPLETADA ///[/bold purple]")
+    console.logger.info("Evalúe los tres vectores para aislar la cuenca del error.")

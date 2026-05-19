@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """V8 Governance: Measurement CLI."""
 
 import click
@@ -13,8 +16,8 @@ def eval_cmd(db: str, limit: int, top_k: int) -> None:
     """Run V8 Recall Precision Proxy tests."""
     from cortex.memory.evaluator import calculate_recall_precision
 
-    console.print("[bold cyan]🔬 CORTEX v8 Evaluation Engine[/]")
-    console.print(f"Running Recall@{top_k} tests across {limit} samples...\n")
+    console.logger.info("[bold cyan]🔬 CORTEX v8 Evaluation Engine[/]")
+    console.logger.info(f"Running Recall@{top_k} tests across {limit} samples...\n")
 
     engine = None
     try:
@@ -24,9 +27,9 @@ def eval_cmd(db: str, limit: int, top_k: int) -> None:
         recall = result["recall_at_k"] * 100
         color = "green" if recall >= 80 else "yellow" if recall >= 50 else "red"
 
-        console.print(f"Total Evaluated: {result['total']}")
-        console.print(f"Semantic Hits: [green]{result['hits']}[/]")
-        console.print(f"Recall@{top_k}: [{color}]{recall:.2f}%[/]")
+        console.logger.info(f"Total Evaluated: {result['total']}")
+        console.logger.info(f"Semantic Hits: [green]{result['hits']}[/]")
+        console.logger.info(f"Recall@{top_k}: [{color}]{recall:.2f}%[/]")
 
         if recall == 0:
             console.print(

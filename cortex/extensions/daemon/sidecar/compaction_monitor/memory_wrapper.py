@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """memory_wrapper.py
 
 Low‑level memory‑reclamation utilities for the Compaction Monitor sidecar.
@@ -20,7 +23,7 @@ try:
         # On macOS, libc.dylib exists but does NOT contain malloc_trim or mallinfo2.
         _libc_name = "libc.so.6" if os.uname().sysname != "Darwin" else "libc.dylib"
         _libc = ctypes.CDLL(_libc_name, use_errno=True)
-except Exception:  # noqa: BLE001
+except Exception:  # TODO(Swarm): Narrow this exception
     _libc = None
 
 # Symbols availability
@@ -77,7 +80,7 @@ def malloc_trim(pad: int = 0) -> int:
     try:
         res = _libc.malloc_trim(pad)  # type: ignore[reportOptionalMemberAccess]
         return res
-    except Exception:  # noqa: BLE001
+    except Exception:  # TODO(Swarm): Narrow this exception
         return 0
 
 
@@ -115,7 +118,7 @@ class MallInfo2:
                 fordblks=raw.fordblks,
                 keepcost=raw.keepcost,
             )
-        except Exception:  # noqa: BLE001
+        except Exception:  # TODO(Swarm): Narrow this exception
             return MallInfo2()
 
 
@@ -128,9 +131,9 @@ def get_mallinfo2() -> MallInfo2:
 # Simple sanity test (executed only when run as a script)
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
-    print("mallinfo2:", get_mallinfo2())
+    logger.info("mallinfo2:", get_mallinfo2())
     try:
         malloc_trim()
-        print("malloc_trim succeeded")
+        logger.info("malloc_trim succeeded")
     except OSError as exc:
-        print("malloc_trim failed:", exc)
+        logger.info("malloc_trim failed:", exc)

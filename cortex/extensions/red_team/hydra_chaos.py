@@ -13,7 +13,7 @@ import hashlib
 import logging
 import time
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 from unittest.mock import AsyncMock, MagicMock
 
 from cortex.extensions.immune.chaos import ChaosScenario, async_interceptor

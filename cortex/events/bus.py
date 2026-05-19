@@ -11,7 +11,7 @@ persist to SQLite for cross-process reactive signaling.
 import asyncio
 import logging
 from collections.abc import Callable, Coroutine
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger("cortex.events.bus")
 
@@ -59,7 +59,7 @@ class DistributedEventBus:
                     source=payload.get("source", "event-bus"),
                     project=payload.get("project"),
                 )
-            except Exception:  # noqa: BLE001 — persistence must not break event delivery
+            except Exception:  # TODO(Swarm): Narrow this exception
                 logger.warning(
                     "Signal Bus persistence failed for topic %s",
                     topic,

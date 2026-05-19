@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """CLI Commands for Sovereign Darknet (Vector Ω-5)."""
 
 import asyncio
@@ -28,7 +31,7 @@ def darknet_cmds() -> None:
 def sync() -> None:
     """Descarga la matriz exterior mundial y desata el debate de los avatares."""
 
-    console.print("[cyan]🌌 [DARKNET] Abriendo singularidad de ingestión...[/cyan]")
+    console.logger.info("[cyan]🌌 [DARKNET] Abriendo singularidad de ingestión...[/cyan]")
 
     # 1. Configurar Motor
     router = CortexLLMRouter(primary=LLMProvider(provider="gemini-3.1"), db_path=DEFAULT_DB_PATH)
@@ -48,7 +51,7 @@ def sync() -> None:
         )
 
         for data in raw_data_list:
-            console.print(f"\n[dim]Asimilando: {data.title}[/dim]")
+            console.logger.info(f"\n[dim]Asimilando: {data.title}[/dim]")
             # Avatars react to reality in parallel
             tasks = [agent.generate_post(data) for agent in agents]
             posts = await asyncio.gather(*tasks)
@@ -82,8 +85,8 @@ def feed(limit: int) -> None:
         )
         raise click.Abort()
 
-    console.print("\n[bold white]C O R T E X   D A R K N E T   F E E D[/bold white]")
-    console.print(f"[dim]Mostrando los {len(posts)} eventos cognitivos más recientes.[/dim]\n")
+    console.logger.info("\n[bold white]C O R T E X   D A R K N E T   F E E D[/bold white]")
+    console.logger.info(f"[dim]Mostrando los {len(posts)} eventos cognitivos más recientes.[/dim]\n")
 
     for post in posts:
         dt = datetime.fromtimestamp(post.created_at).strftime("%H:%M:%S")
@@ -109,7 +112,7 @@ def feed(limit: int) -> None:
             expand=False,
             padding=(0, 2),
         )
-        console.print(panel)
+        console.logger.info(panel)
 
 
 cli.add_command(darknet_cmds)

@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from __future__ import annotations
 
 import time
@@ -6,7 +9,7 @@ from cortex.cli.bicameral import bicameral
 
 
 def run_swarm_demo():
-    print("\n")
+    logger.info("\n")
     # 1. El Orquestador evalúa la magnitud
     time.sleep(1)
     bicameral.log_motor(
@@ -17,9 +20,9 @@ def run_swarm_demo():
         "Evaluación de recursos: Requiere Enjambre (>10 archivos).", check="CAPACITY"
     )
 
-    print("\n" + "═" * 80)
-    print(" ⧖ PROTOCOLO LEGION-1 INICIADO: CLONACIÓN DE LINAJE")
-    print("═" * 80 + "\n")
+    logger.info("\n" + "═" * 80)
+    logger.info(" ⧖ PROTOCOLO LEGION-1 INICIADO: CLONACIÓN DE LINAJE")
+    logger.info("═" * 80 + "\n")
 
     # 2. Síntesis del Linaje
     time.sleep(1)
@@ -31,14 +34,14 @@ def run_swarm_demo():
     time.sleep(0.5)
     bicameral.log_motor("Exportando -> cortex_bloodline_091.json", action="BUILD")
 
-    print("\n" + "─" * 40)
+    logger.info("\n" + "─" * 40)
     # 3. Despliegue del Enjambre (Workers naciendo con contexto)
     time.sleep(1)
     for i in range(1, 4):
-        print(f"[⚡] Instanciando Worker-0{i} [Modelo: Flash] [Contexto: Bloodline_091]")
+        logger.info(f"[⚡] Instanciando Worker-0{i} [Modelo: Flash] [Contexto: Bloodline_091]")
         time.sleep(0.2)
 
-    print("─" * 40 + "\n")
+    logger.info("─" * 40 + "\n")
 
     # 4. Prueba del Linaje Heredeado
     time.sleep(1)
@@ -52,14 +55,14 @@ def run_swarm_demo():
         source="SWARM",
     )
 
-    print("\n" + "═" * 80)
-    print(" ⧖ CONSENSO BIZANTINO ALCANZADO | ENJAMBRE DISUELTO")
-    print("═" * 80 + "\n")
+    logger.info("\n" + "═" * 80)
+    logger.info(" ⧖ CONSENSO BIZANTINO ALCANZADO | ENJAMBRE DISUELTO")
+    logger.info("═" * 80 + "\n")
 
     # 5. Cierre Motor
     time.sleep(1)
     bicameral.log_motor("Merge final completado con éxito. Ninguna regla rota.", action="DONE")
-    print("\n")
+    logger.info("\n")
 
 
 if __name__ == "__main__":

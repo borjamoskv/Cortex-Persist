@@ -71,7 +71,7 @@ def compress_and_index():
 
         if os.path.exists(meta_file):
             try:
-                with open(meta_file, "r") as f:
+                with open(meta_file) as f:
                     meta = json.load(f)
                     summary = meta.get("summary", "")
             except Exception:
@@ -83,7 +83,7 @@ def compress_and_index():
                 if file.endswith(".md"):
                     try:
                         md_path = os.path.join(artifacts_dir, file)
-                        with open(md_path, "r", encoding="utf-8") as f:
+                        with open(md_path, encoding="utf-8") as f:
                             full_content += f.read() + "\n"
                     except Exception:
                         pass

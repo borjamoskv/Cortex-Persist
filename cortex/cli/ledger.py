@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """Sovereign Ledger CLI commands for CORTEX (Waves 5 & 6)."""
 
 import click
@@ -39,9 +42,9 @@ def verify_ledger(db: str, full: bool):
         )
     else:
         violations = result["violations"]
-        console.print(f"[bold red]Ledger is COMPROMISED[/bold red]: {len(violations)} violations")
+        console.logger.info(f"[bold red]Ledger is COMPROMISED[/bold red]: {len(violations)} violations")
         for v in violations[:10]:
-            console.print(f"  - {v}")
+            console.logger.info(f"  - {v}")
 
 
 @ledger_cmds.command("checkpoint")
@@ -56,7 +59,7 @@ def create_checkpoint(db: str, batch: int):
         root_id = verifier.create_checkpoint(batch_size=batch)
 
     if root_id:
-        console.print(f"[bold green]Checkpoint created successfully.[/bold green] ID: {root_id}")
+        console.logger.info(f"[bold green]Checkpoint created successfully.[/bold green] ID: {root_id}")
     else:
         console.print(
             "[yellow]No new events available for checkpointing (batch size not reached).[/yellow]"

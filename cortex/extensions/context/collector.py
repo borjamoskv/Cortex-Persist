@@ -14,7 +14,7 @@ import subprocess
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from cortex.extensions.context.signals import Signal
 from cortex.memory.temporal import now_iso

@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """CLI commands: launchpad (launch, list)."""
 
 from __future__ import annotations
@@ -64,7 +67,7 @@ def mission_launch(project, goal, mission_file, formation, agents, db):
                     border_style="green",
                 )
             )
-            console.print(f"\n[dim]Recent Output:[/]\n{result['stdout'][-500:]}")
+            console.logger.info(f"\n[dim]Recent Output:[/]\n{result['stdout'][-500:]}")
         else:
             console.print(
                 Panel(
@@ -76,7 +79,7 @@ def mission_launch(project, goal, mission_file, formation, agents, db):
                 )
             )
             if "stderr" in result:
-                console.print(f"\n[red]Stderr:[/]\n{result['stderr']}")
+                console.logger.info(f"\n[red]Stderr:[/]\n{result['stderr']}")
     except (sqlite3.Error, OSError, ValueError, RuntimeError) as e:
         handle_cli_error(e, db_path=db, context="launching mission")
     finally:
@@ -109,7 +112,7 @@ def mission_list(project, db):
                 m["content"][:50] + "...",
                 m["created_at"],
             )
-        console.print(table)
+        console.logger.info(table)
     except (sqlite3.Error, OSError, ValueError, RuntimeError) as e:
         handle_cli_error(e, db_path=db, context="listing missions")
     finally:

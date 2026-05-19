@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """Audit helper functions extracted from trust_cmds.py (Seal 8 LOC compliance)."""
 
 from __future__ import annotations
@@ -34,7 +37,7 @@ def audit_frontend() -> None:
         )
         return
 
-    console.print("[bold red]FAIL[/bold red] Axiom Violation: Frontend listeners exceeded CC 5.")
+    console.logger.info("[bold red]FAIL[/bold red] Axiom Violation: Frontend listeners exceeded CC 5.")
     for v in violations:
         console.print(
             f"  -> {v['file']} :: [yellow]{v['function']}[/yellow] (CC: {v['complexity']})"
@@ -78,7 +81,7 @@ def audit_calcification_report(limit: int) -> None:
 
         table.add_row(file_cell, str(r["loc"]), str(r["complexity"]), f"{r['score']:.2f}", status)
 
-    console.print(table)
+    console.logger.info(table)
     console.print(
         "  [dim]Threshold: Score > 50 (File) | Score > 30 (Node) indicates Calcification.[/dim]\n"
     )

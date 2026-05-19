@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """
 APOTHEOSIS-∞ Daemon CLI commands.
 El nivel 5 de autonomía Soberana en CORTEX.
@@ -40,7 +43,7 @@ def manifest_cmd(intent: str) -> None:
     La singularidad de creación. Materializa un ecosistema desde una intención corta.
     """
     if not intent.strip():
-        console.print("[bold red]Error: La intención no puede estar vacía.[/]")
+        console.logger.info("[bold red]Error: La intención no puede estar vacía.[/]")
         raise click.Abort()
 
     console.print(
@@ -156,7 +159,7 @@ def guard_cmd() -> None:
             report_path = target / "apotheosis_night_report.md"
             report_path.write_text("\n".join(report_lines), encoding="utf-8")
         except OSError as e:
-            console.print(f"\n[bold red]Error al escribir el reporte: {e}[/]")
+            console.logger.info(f"\n[bold red]Error al escribir el reporte: {e}[/]")
             raise click.Abort() from e
 
     pct = (

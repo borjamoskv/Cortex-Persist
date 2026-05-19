@@ -85,7 +85,7 @@ class SignalReactor:
         if te is not None:
             try:
                 te.evaluate(signal)
-            except Exception:  # noqa: BLE001
+            except Exception:  # TODO(Swarm): Narrow this exception
                 logger.debug(
                     "TriggerEngine evaluation failed for %s",
                     signal.event_type,
@@ -126,7 +126,7 @@ class SignalReactor:
                 len(te._conditions),  # pyright: ignore
             )
             return te
-        except Exception:  # noqa: BLE001
+        except Exception:  # TODO(Swarm): Narrow this exception
             logger.debug("TriggerEngine not available — continuing")
             return None
 

@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """
 CORTEX v5.0 — Context Engine CLI Commands.
 
@@ -66,7 +69,7 @@ async def _infer_async(db: str, persist: bool, as_json: bool):
                 result = inference.infer(signals)
 
         if as_json:
-            console.print(json.dumps(result.to_dict(), indent=2, ensure_ascii=False))
+            console.logger.info(json.dumps(result.to_dict(), indent=2, ensure_ascii=False))
             return
 
         # Rich output
@@ -86,7 +89,7 @@ async def _infer_async(db: str, persist: bool, as_json: bool):
             title="🧠 Context Inference",
             subtitle=result.summary[:100],
         )
-        console.print(panel)
+        console.logger.info(panel)
 
         if result.projects_ranked:
             table = Table(title="Projects Ranked", show_header=True)
@@ -94,7 +97,7 @@ async def _infer_async(db: str, persist: bool, as_json: bool):
             table.add_column("Score", justify="right")
             for project, score in result.projects_ranked[:5]:
                 table.add_row(project, f"{score:.4f}")
-            console.print(table)
+            console.logger.info(table)
 
         if result.top_signals:
             table = Table(title="Top Signals", show_header=True)
@@ -104,7 +107,7 @@ async def _infer_async(db: str, persist: bool, as_json: bool):
             table.add_column("Weight", justify="right")
             for s in result.top_signals[:5]:
                 table.add_row(s.source, s.signal_type, s.content[:60], f"{s.weight:.2f}")
-            console.print(table)
+            console.logger.info(table)
     finally:
         await engine.close()
 
@@ -138,7 +141,7 @@ async def _signals_async(db: str, as_json: bool):
             signals = await collector.collect_all()
 
         if as_json:
-            console.print(json.dumps([s.to_dict() for s in signals], indent=2, ensure_ascii=False))
+            console.logger.info(json.dumps([s.to_dict() for s in signals], indent=2, ensure_ascii=False))
             return
 
         if not signals:
@@ -159,7 +162,7 @@ async def _signals_async(db: str, as_json: bool):
                 s.content[:50],
                 f"{s.weight:.2f}",
             )
-        console.print(table)
+        console.logger.info(table)
     finally:
         await engine.close()
 
@@ -188,7 +191,7 @@ async def _history_async(db: str, limit: int, as_json: bool):
             snapshots = await inference.get_history(limit=limit)
 
         if as_json:
-            console.print(json.dumps(snapshots, indent=2, ensure_ascii=False))
+            console.logger.info(json.dumps(snapshots, indent=2, ensure_ascii=False))
             return
 
         if not snapshots:
@@ -209,6 +212,6 @@ async def _history_async(db: str, limit: int, as_json: bool):
                 str(snap["signals_used"]),
                 snap.get("created_at", ""),
             )
-        console.print(table)
+        console.logger.info(table)
     finally:
         await engine.close()

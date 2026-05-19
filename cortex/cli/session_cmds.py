@@ -104,11 +104,11 @@ def logout_cmd(db: str, force: bool) -> None:
                     )
                 )
 
-                console.print("\n[dim]Entropía detectada:[/dim]")
+                console.logger.info("\n[dim]Entropía detectada:[/dim]")
                 for c in changes[:5]:
-                    console.print(f"  [noir.yinmn]→ {c}[/noir.yinmn]")
+                    console.logger.info(f"  [noir.yinmn]→ {c}[/noir.yinmn]")
                 if len(changes) > 5:
-                    console.print(f"  [dim]...y {len(changes) - 5} archivos adicionales.[/dim]")
+                    console.logger.info(f"  [dim]...y {len(changes) - 5} archivos adicionales.[/dim]")
 
                 sys.exit(1)
 

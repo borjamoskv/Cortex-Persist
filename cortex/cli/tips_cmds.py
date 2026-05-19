@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """CORTEX CLI — Tips Commands.
 
 Surface contextual tips from the TIPS engine.
@@ -8,7 +11,6 @@ from __future__ import annotations
 
 import asyncio
 import sqlite3
-from typing import Optional
 
 import click
 from rich.panel import Panel
@@ -140,7 +142,7 @@ def tips_list(ctx: click.Context) -> None:
 
         table.add_section()
         table.add_row("[bold]TOTAL[/bold]", f"[bold]{len(all_tips)}[/bold]")
-        console.print(table)
+        console.logger.info(table)
     except (sqlite3.Error, OSError, ValueError, RuntimeError) as e:
         handle_cli_error(e, db_path=db, context="listing tip categories")
 
@@ -187,7 +189,7 @@ def tips_all(ctx: click.Context, category: str | None) -> None:
                 tip.source,
             )
 
-        console.print(table)
+        console.logger.info(table)
     except (sqlite3.Error, OSError, ValueError, RuntimeError) as e:
         handle_cli_error(e, db_path=db, context="fetching all tips")
 
@@ -202,11 +204,11 @@ def tips_random(ctx: click.Context, count: int) -> None:
     try:
         tips_engine = _get_tips_engine(db, lang=lang)
 
-        console.print()
+        console.logger.info()
         for _ in range(count):
             tip = _run_async(tips_engine.random())
             _render_tip(tip)
-        console.print()
+        console.logger.info()
     except (sqlite3.Error, OSError, ValueError, RuntimeError) as e:
         handle_cli_error(e, db_path=db, context="fetching random tips")
 

@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 # This file is part of CORTEX. Apache-2.0.
 """Shared SealPrinter — extracted to break circular import between seals ↔ sovereign_seals."""
 
@@ -19,32 +22,32 @@ class SealPrinter:
         self.console = Console()
 
     def head(self, title: str) -> None:
-        self.console.print()
-        self.console.print(Panel(Text(title, style="bold blue"), border_style="blue"))
+        self.console.logger.info()
+        self.console.logger.info(Panel(Text(title, style="bold blue"), border_style="blue"))
 
     def seal(self, gate_num: int, axiom: str, desc: str) -> None:
-        self.console.print()
-        self.console.print(f"[bold white]🔍 Gate {gate_num}:[/] {desc} ([dim]{axiom}[/])")
-        self.console.print("─" * 40, style="dim")
+        self.console.logger.info()
+        self.console.logger.info(f"[bold white]🔍 Gate {gate_num}:[/] {desc} ([dim]{axiom}[/])")
+        self.console.logger.info("─" * 40, style="dim")
 
     def success(self, msg: str) -> None:
-        self.console.print(f"   [bold green]🟢 PASS[/] {msg}")
+        self.console.logger.info(f"   [bold green]🟢 PASS[/] {msg}")
 
     def fail(self, msg: str) -> None:
-        self.console.print(f"   [bold red]🔴 FAIL[/] {msg}")
+        self.console.logger.info(f"   [bold red]🔴 FAIL[/] {msg}")
 
     def warn(self, msg: str) -> None:
-        self.console.print(f"   [bold yellow]🟡 WARN[/] {msg}")
+        self.console.logger.info(f"   [bold yellow]🟡 WARN[/] {msg}")
 
     def info(self, msg: str) -> None:
-        self.console.print(f"   [blue]ℹ[/] {msg}")
+        self.console.logger.info(f"   [blue]ℹ[/] {msg}")
 
-    def print(self, msg: str, style: str | None = None) -> None:
+    def logger.info(self, msg: str, style: str | None = None) -> None:
         """Generic print method for arbitrary output."""
-        self.console.print(msg, style=style)
+        self.console.logger.info(msg, style=style)
 
     def stub(self, msg: str) -> None:
-        self.console.print(f"   [bold grey]⬜ STUB[/] {msg}")
+        self.console.logger.info(f"   [bold grey]⬜ STUB[/] {msg}")
 
     @contextmanager
     def timed(self, gate_num: int) -> Generator[dict[str, float], None, None]:
@@ -62,4 +65,4 @@ class SealPrinter:
         finally:
             elapsed = (time.perf_counter() - start) * 1000
             result["elapsed_ms"] = elapsed
-            self.console.print(f"   [dim]⏱  Gate {gate_num}: {elapsed:.0f}ms[/]")
+            self.console.logger.info(f"   [dim]⏱  Gate {gate_num}: {elapsed:.0f}ms[/]")

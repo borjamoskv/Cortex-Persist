@@ -116,7 +116,7 @@ def main() -> None:
     violations = scan_file(target_path) if target_path.is_file() else scan_directory(target_path)
 
     if not violations:
-        console.print("[bold green]✅ No Axiom 4 violations detected. Sovereignty intact.[/]")
+        console.logger.info("[bold green]✅ No Axiom 4 violations detected. Sovereignty intact.[/]")
         return
 
     critical = sum(1 for v in violations if not v.has_fallback)
@@ -126,7 +126,7 @@ def main() -> None:
         # DependencyViolation.__str__ is already formatted with rich-like tags?
         # No, it's just a string. Let's wrap it.
         style = "bold red" if not v.has_fallback else "yellow"
-        console.print(f"   [{style}]![/] {v}")
+        console.logger.info(f"   [{style}]![/] {v}")
 
     status_icon = "🔴" if critical else "🟡"
     console.print(

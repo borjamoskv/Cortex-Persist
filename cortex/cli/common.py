@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """CORTEX CLI — Common shared objects and utilities.
 
 Prevent circular imports by centralizing base CLI objects.
@@ -93,7 +96,7 @@ def _show_tip(engine=None) -> None:
             return await tips_engine.random()
 
         tip = _run_async(__get_tip())
-        console.print()
+        console.logger.info()
         console.print(
             Panel(
                 f"[white]{tip.content}[/white]",

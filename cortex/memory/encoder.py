@@ -11,7 +11,6 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import Optional
 
 from cortex.embeddings import EMBEDDING_DIM, LocalEmbedder
 

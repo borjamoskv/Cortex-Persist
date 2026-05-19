@@ -33,7 +33,7 @@ import platform
 from collections.abc import Callable, Coroutine
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger("compaction-sidecar")
 
@@ -161,7 +161,7 @@ def _do_malloc_trim() -> bool:
 
         malloc_trim(0)
         return True
-    except Exception:  # noqa: BLE001
+    except Exception:  # TODO(Swarm): Narrow this exception
         return False
 
 

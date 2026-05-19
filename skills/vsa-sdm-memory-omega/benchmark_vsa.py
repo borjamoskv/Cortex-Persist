@@ -29,7 +29,7 @@ def benchmark_retrieval():
     states = [engine.random_vec() for _ in range(N_items)]
 
     # ── Brute-force baseline: store as list, search by cosine ──
-    corpus = list(zip(keys, states))
+    corpus = list(zip(keys, states, strict=False))
 
     query_key = keys[500]  # retrieve item 500
 

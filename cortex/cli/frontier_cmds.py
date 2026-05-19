@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """
 Frontier CLI Commands
 Control the R&D and Metabolism pulse of CORTEX.
@@ -21,17 +24,17 @@ def frontier_cmds():
 @click.option("--source", "-s", help="Specific URL or domain to ingest.")
 def scan_cmd(source: str | None):
     """Scan the frontier for new intelligence (Cognitive Ingestion)."""
-    console.print("[bold cyan]🚀 Starting Frontier Scan...[/bold cyan]")
+    console.logger.info("[bold cyan]🚀 Starting Frontier Scan...[/bold cyan]")
     engine = get_engine()
     daemon = FrontierDaemon(engine=engine)
 
     if source:
-        console.print(f"Ingesting source: [yellow]{source}[/yellow]")
+        console.logger.info(f"Ingesting source: [yellow]{source}[/yellow]")
         asyncio.run(daemon._run_ingestion())
     else:
         asyncio.run(daemon._run_ingestion())
 
-    console.print("[bold green]✔ Ingestion cycle complete.[/bold green]")
+    console.logger.info("[bold green]✔ Ingestion cycle complete.[/bold green]")
 
 
 @frontier_cmds.command("metabolize")
@@ -39,11 +42,11 @@ def scan_cmd(source: str | None):
 @click.option("--commit/--dry-run", default=False, help="Allow commits if entropy gate passes.")
 def metabolize_cmd(target: str | None, commit: bool):
     """Force a metabolism cycle (Ouroboros-Omega) on target."""
-    console.print("[bold magenta]♾️  Initializing Forced Metabolism Cycle...[/bold magenta]")
+    console.logger.info("[bold magenta]♾️  Initializing Forced Metabolism Cycle...[/bold magenta]")
     engine = get_engine()
     daemon = FrontierDaemon(engine=engine, allow_commits=commit)
 
     asyncio.run(daemon._run_metabolism())
 
     mode = "COMMIT" if commit else "DRY-RUN"
-    console.print(f"[bold green]✔ Metabolism cycle finished in {mode} mode.[/bold green]")
+    console.logger.info(f"[bold green]✔ Metabolism cycle finished in {mode} mode.[/bold green]")

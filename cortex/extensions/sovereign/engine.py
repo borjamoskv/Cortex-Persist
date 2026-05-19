@@ -13,7 +13,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from cortex.extensions.immune import ImmuneArbiter, Verdict
 from cortex.extensions.sovereign.bridge import SovereignBridge

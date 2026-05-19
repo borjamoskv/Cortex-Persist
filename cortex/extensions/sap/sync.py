@@ -10,7 +10,7 @@ import asyncio
 import json
 import logging
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 from cortex.extensions.sap.client import SAPClient
 from cortex.extensions.sap.mapper import SAPMapper

@@ -13,7 +13,7 @@ import json
 import logging
 import time
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger("cortex.ledger")
 

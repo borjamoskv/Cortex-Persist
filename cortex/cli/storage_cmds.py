@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """
 CORTEX v6.0 — Storage CLI Commands.
 
@@ -74,14 +77,14 @@ def storage_init_pg(dsn: str | None, dry_run: bool, skip_extensions: bool) -> No
         # Health check
         healthy = await backend.health_check()
         if not healthy:
-            console.print("[bold red]✗ Health check failed. Cannot proceed.[/]")
+            console.logger.info("[bold red]✗ Health check failed. Cannot proceed.[/]")
             await backend.close()
             return
 
-        console.print("[bold #CCFF00]✓ PostgreSQL connection healthy.[/]")
+        console.logger.info("[bold #CCFF00]✓ PostgreSQL connection healthy.[/]")
 
         if dry_run:
-            console.print("[dim]--dry-run: Schema NOT applied.[/]")
+            console.logger.info("[dim]--dry-run: Schema NOT applied.[/]")
             await backend.close()
             return
 

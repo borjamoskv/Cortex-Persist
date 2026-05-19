@@ -3,7 +3,7 @@ import logging
 import random
 import re
 from collections.abc import Callable
-from typing import Any, Optional
+from typing import Any
 
 from cortex.engine.nemesis import NemesisProtocol
 from cortex.extensions.immune.falsification import EvolutionaryFalsifier

@@ -8,7 +8,6 @@ from __future__ import annotations
 import logging
 import random
 from decimal import Decimal
-from typing import Optional
 
 from cortex.extensions.market_maker.models import Experiment, ValidationResult
 

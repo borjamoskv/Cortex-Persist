@@ -16,7 +16,7 @@ from contextlib import contextmanager
 from enum import Enum
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, Final, NamedTuple, Optional
+from typing import Any, Final, NamedTuple
 
 logger = logging.getLogger(__name__)
 

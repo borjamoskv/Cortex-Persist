@@ -1,4 +1,3 @@
-from typing import Optional
 
 """MCP Server Implementation.
 

@@ -14,7 +14,7 @@ import time
 from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger("cortex.extensions.security.anomaly_detector")
 

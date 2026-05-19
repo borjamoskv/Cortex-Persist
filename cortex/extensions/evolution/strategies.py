@@ -26,7 +26,7 @@ from __future__ import annotations
 
 import logging
 import secrets
-from typing import Optional, Protocol
+from typing import Protocol
 
 from cortex.extensions.evolution.agents import (
     Mutation,

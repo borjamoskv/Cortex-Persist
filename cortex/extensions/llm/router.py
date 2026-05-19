@@ -11,7 +11,7 @@ import logging
 import time
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from cortex.extensions.llm._cascade import CascadeManager, classify_tier
 from cortex.extensions.llm._hedging import HedgedRequestStrategy

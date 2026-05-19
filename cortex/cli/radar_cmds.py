@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from pathlib import Path
 
 import click
@@ -23,7 +26,7 @@ def scan(path: str, entropy: bool):
     engine = get_engine()
     sensor = TopographicSensor()
 
-    console.print("[noir.cyber]📡 INICIANDO ESCANEO RADAR-Ω (Protocolo Ω₁)...[/noir.cyber]")
+    console.logger.info("[noir.cyber]📡 INICIANDO ESCANEO RADAR-Ω (Protocolo Ω₁)...[/noir.cyber]")
 
     # 1. Physical Ghosts (Banda G)
     scan_path = Path(path).expanduser().resolve()
@@ -61,9 +64,9 @@ def scan(path: str, entropy: bool):
             table.add_row(
                 g["id"][:8], f"{g['strength']:.2f}", Path(g["source_file"]).name, g["intent"]
             )
-        console.print(table)
+        console.logger.info(table)
     else:
-        console.print("[dim green]Banda G (Ghosts): Espectro limpio.[/dim green]")
+        console.logger.info("[dim green]Banda G (Ghosts): Espectro limpio.[/dim green]")
 
     if entropy:
         if entropy_count > 0:
@@ -71,12 +74,12 @@ def scan(path: str, entropy: bool):
                 f"[noir.gold]Banda E (Entropía): {entropy_count} hechos detectados.[/noir.gold]"
             )
         else:
-            console.print("[dim green]Banda E (Entropía): Humildad epistémica activa.[/dim green]")
+            console.logger.info("[dim green]Banda E (Entropía): Humildad epistémica activa.[/dim green]")
 
     # 3. Structural Rules (Leyes Físicas)
-    console.print("[dim white]Banda A (Arquitectura): Monitoreo pasivo activo.[/dim white]")
+    console.logger.info("[dim white]Banda A (Arquitectura): Monitoreo pasivo activo.[/dim white]")
 
-    console.print("\n[noir.violet]/// RADAR-Ω: ESCANEO COMPLETADO ///[/noir.violet]")
+    console.logger.info("\n[noir.violet]/// RADAR-Ω: ESCANEO COMPLETADO ///[/noir.violet]")
 
 
 @radar_cmds.command(name="prune")
@@ -85,7 +88,7 @@ def prune():
     engine = get_engine()
     decalcifier = SovereignDecalcifier()
 
-    console.print("[noir.gold]✂️ INICIANDO PODA SOBERANA (Protocolo Ω₂)...[/noir.gold]")
+    console.logger.info("[noir.gold]✂️ INICIANDO PODA SOBERANA (Protocolo Ω₂)...[/noir.gold]")
 
     async def _do_prune():
         async with engine.session() as conn:
@@ -100,7 +103,7 @@ def prune():
             f"[bold green]Se han purgado {pruned_count} hechos en entropía terminal.[/bold green]"
         )
     else:
-        console.print("[dim]No se encontraron estados para purgar en esta iteración.[/dim]")
+        console.logger.info("[dim]No se encontraron estados para purgar en esta iteración.[/dim]")
 
     console.print(
         Panel(

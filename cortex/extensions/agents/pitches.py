@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """
 CORTEX — Pitch Arsenal.
 
@@ -7,7 +10,7 @@ Each designed to collapse the predictable response space and force genuine thoug
 Usage::
 
     from cortex.extensions.agents.pitches import PITCH_CTO_SKEPTIC, PITCH_MEMO_DEV, PITCH_OS_CONTRIBUTOR
-    print(PITCH_CTO_SKEPTIC)
+    logger.info(PITCH_CTO_SKEPTIC)
 """
 
 from __future__ import annotations

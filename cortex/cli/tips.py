@@ -26,7 +26,7 @@ import time
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import TYPE_CHECKING, Final, NamedTuple, Optional
+from typing import TYPE_CHECKING, Final, NamedTuple
 
 import aiosqlite
 

@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 from cortex.extensions.sync import SyncResult, WritebackResult
 from cortex.extensions.sync.common import file_hash, load_sync_state

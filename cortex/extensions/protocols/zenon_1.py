@@ -1,4 +1,3 @@
-from typing import Optional
 
 """
 ZENÓN-1: Formalización Algorítmica del Detector de Rendimiento Decreciente.
@@ -227,11 +226,11 @@ if __name__ == "__main__":
     ]
 
     for _i, it in enumerate(simulated_loop):
-        print(f"\\n--- Iteración {it.iteration_id} ---")
+        logger.info(f"\\n--- Iteración {it.iteration_id} ---")
         exhaustion_error = detector.absorb_iteration(it)
         if exhaustion_error:
-            print(f"\\n🚨 COLAPSO ZENÓN (Señal: {exhaustion_error.signal.name})")
-            print(f"Razón: {exhaustion_error.message}")
+            logger.info(f"\\n🚨 COLAPSO ZENÓN (Señal: {exhaustion_error.signal.name})")
+            logger.info(f"Razón: {exhaustion_error.message}")
 
             # Forzar colapso
             best_decision = ZenonColapseEngine.colapse(detector)

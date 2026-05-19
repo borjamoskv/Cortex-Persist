@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """Sovereign Code Scorer — Automated code quality engine.
 
 Evaluates codebases on 5 dimensions (PoQ-5 Protocol):
@@ -363,7 +366,7 @@ def score(path: str | Path, detailed: bool = False) -> dict:
 def print_report(report: dict) -> None:
     """Pretty-print a score report."""
     if "error" in report:
-        print(f"❌ {report['error']}")
+        logger.info(f"❌ {report['error']}")
         return
 
     t = report["total_score"]
@@ -378,32 +381,32 @@ def print_report(report: dict) -> None:
             return "🟡"
         return "🔴"
 
-    print()
-    print("╔══════════════════════════════════════════╗")
-    print(f"║  SOVEREIGN CODE SCORE: {t:5.1f}/100  {v:>10s}  ║")
-    print("╠══════════════════════════════════════════╣")
+    logger.info()
+    logger.info("╔══════════════════════════════════════════╗")
+    logger.info(f"║  SOVEREIGN CODE SCORE: {t:5.1f}/100  {v:>10s}  ║")
+    logger.info("╠══════════════════════════════════════════╣")
     for name, d in dims.items():
         s, m = d["score"], d["max"]
         icon = bar(s, m)
-        print(f"║  {name:14s} {s:5.1f}/{m:<3d}  {icon:>20s}  ║")
-    print("╠══════════════════════════════════════════╣")
+        logger.info(f"║  {name:14s} {s:5.1f}/{m:<3d}  {icon:>20s}  ║")
+    logger.info("╠══════════════════════════════════════════╣")
     print(
         f"║  Files: {report['files_analyzed']:>3d}  Issues: {report['issue_count']:>3d}  "
         f"Critical: {report['critical_issues']:>2d}     ║"
     )
-    print("╚══════════════════════════════════════════╝")
+    logger.info("╚══════════════════════════════════════════╝")
 
     if "issues" in report:
         crit = [i for i in report["issues"] if i["severity"] == "critical"]
         warn = [i for i in report["issues"] if i["severity"] == "warning"]
         if crit:
-            print("\n🔴 CRITICAL:")
+            logger.info("\n🔴 CRITICAL:")
             for i in crit[:10]:
-                print(f"  {i['file']}:{i['line']} — {i['message']}")
+                logger.info(f"  {i['file']}:{i['line']} — {i['message']}")
         if warn:
-            print("\n🟡 WARNINGS:")
+            logger.info("\n🟡 WARNINGS:")
             for i in warn[:10]:
-                print(f"  {i['file']}:{i['line']} — {i['message']}")
+                logger.info(f"  {i['file']}:{i['line']} — {i['message']}")
 
 
 # ── CLI ────────────────────────────────────────────────────────
@@ -412,7 +415,7 @@ def print_report(report: dict) -> None:
 def main() -> None:
     """CLI entry point."""
     if len(sys.argv) < 2:
-        print("Usage: python sovereign_scorer.py <path> [--detailed] [--json]")
+        logger.info("Usage: python sovereign_scorer.py <path> [--detailed] [--json]")
         sys.exit(1)
 
     path = sys.argv[1]
@@ -422,7 +425,7 @@ def main() -> None:
     report = score(path, detailed=detailed)
 
     if as_json:
-        print(json.dumps(report, indent=2))
+        logger.info(json.dumps(report, indent=2))
     else:
         print_report(report)
 

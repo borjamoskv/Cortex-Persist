@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import re
 import unicodedata
-from typing import Final, Optional
+from typing import Final
 
 __all__ = [
     "sanitize_project_name",

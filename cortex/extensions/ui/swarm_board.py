@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """CORTEX v6.0 — Swarm Kanban Board (TUI).
 
 A rich-based live dashboard to monitor Sovereign Swarm agents in real-time.
@@ -163,7 +166,7 @@ class SwarmBoard:
                     self._stop_event.wait(0.5)
         except KeyboardInterrupt:
             self._running = False
-            console.print("[dim]Swarm Board terminated.[/]")
+            console.logger.info("[dim]Swarm Board terminated.[/]")
 
 
 if __name__ == "__main__":

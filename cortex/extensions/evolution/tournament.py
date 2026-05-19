@@ -12,7 +12,6 @@ from __future__ import annotations
 import logging
 import secrets
 from dataclasses import dataclass
-from typing import Optional
 
 from cortex.extensions.evolution.agents import (
     Mutation,

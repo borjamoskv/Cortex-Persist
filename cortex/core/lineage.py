@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger("cortex.lineage")
 
@@ -135,6 +135,6 @@ class LineageVerifier:
         # Fix line too long
         label = f"#{node.fact_id} [{node.fact_type}] in {node.project}"
         line = f"{prefix}{status} {label}"
-        print(f"{line}: {node.content[:50]}...")
+        logger.info(f"{line}: {node.content[:50]}...")
         for p in node.parents:
             self.print_tree(p, indent + 1)

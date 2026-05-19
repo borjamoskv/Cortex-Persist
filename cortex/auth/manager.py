@@ -10,7 +10,7 @@ import secrets
 import threading
 import time
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Any
 
 from cortex.auth.backends import BaseAuthBackend
 from cortex.auth.models import APIKey, AuthResult

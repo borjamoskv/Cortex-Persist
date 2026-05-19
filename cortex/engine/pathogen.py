@@ -116,7 +116,7 @@ class PathogenEngine:
                 return
 
             created_at = datetime.fromisoformat(created_at_str)
-            console.print(f"[cyan]📡 RADAR-Ω: Tracking pathogen post {post_id}[/cyan]")
+            console.logger.info(f"[cyan]📡 RADAR-Ω: Tracking pathogen post {post_id}[/cyan]")
 
             while True:
                 elapsed = datetime.fromtimestamp(time.time(), tz=timezone.utc) - created_at

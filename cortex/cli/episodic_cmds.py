@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from __future__ import annotations
 
 """
@@ -185,7 +188,7 @@ async def _recall_async(
             return
 
         if not episodes:
-            console.print("[dim]No episodes found.[/dim]")
+            console.logger.info("[dim]No episodes found.[/dim]")
             return
 
         table = Table(
@@ -208,7 +211,7 @@ async def _recall_async(
                 ep.emotion,
                 ep.created_at[:16],
             )
-        console.print(table)
+        console.logger.info(table)
     finally:
         await engine.close()
 
@@ -262,7 +265,7 @@ async def _patterns_async(
             return
 
         if not patterns:
-            console.print("[dim]No recurring patterns detected.[/dim]")
+            console.logger.info("[dim]No recurring patterns detected.[/dim]")
             return
 
         table = Table(title="🔄 Recurring Patterns", show_header=True)
@@ -278,7 +281,7 @@ async def _patterns_async(
                 ", ".join(p.event_types[:2]),
                 p.sample_content[0][:60] if p.sample_content else "—",
             )
-        console.print(table)
+        console.logger.info(table)
     finally:
         await engine.close()
 
@@ -329,7 +332,7 @@ async def _boot_async(
                 )
             )
         else:
-            console.print(payload.to_markdown())
+            console.logger.info(payload.to_markdown())
     finally:
         await engine.close()
 

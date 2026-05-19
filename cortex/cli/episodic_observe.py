@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """
 CORTEX v5.0 — Episodic Memory: Observe Command.
 
@@ -64,7 +67,7 @@ async def _observe_async(workspace: str, db: str, console) -> None:
 
         pipeline.start()
 
-        console.print("[dim]Monitoring file activity... Press Ctrl+C to stop.[/dim]")
+        console.logger.info("[dim]Monitoring file activity... Press Ctrl+C to stop.[/dim]")
 
         try:
             while True:
@@ -79,7 +82,7 @@ async def _observe_async(workspace: str, db: str, console) -> None:
                             f"{snapshot.project or 'workspace'} - "
                             f"{snapshot.emotion}"
                         )
-                        console.print(f"   [dim]{snapshot.summary}[/dim]")
+                        console.logger.info(f"   [dim]{snapshot.summary}[/dim]")
                     else:
                         console.print(
                             f"[dim]Activity level: {snapshot.event_count} "
@@ -88,7 +91,7 @@ async def _observe_async(workspace: str, db: str, console) -> None:
         except asyncio.CancelledError:
             raise
         except KeyboardInterrupt:
-            console.print("\n[yellow]Stopping observer...[/yellow]")
+            console.logger.info("\n[yellow]Stopping observer...[/yellow]")
         finally:
             pipeline.stop()
 

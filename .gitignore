@@ -80,21 +80,31 @@ file:*
 file:mem_*
 
 # ── Testing & Linting ────────────────────────────
-# Caches & Test Runners
+# Python Caches & Test Runners
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
 .hypothesis/
 .tox/
 .nox/
+.pyre/
+.pytype/
+.typeguard/
 
-# Coverage
+# Frontend Caches & Linters
+.eslintcache
+.stylelintcache
+.tsbuildinfo
+
+# Coverage Reports
 .coverage
 .coverage.*
+*.lcov
 coverage.xml
 coverage.json
 htmlcov/
 reports/
+.nyc_output/
 
 # Profiling & Benchmarking
 *.prof
@@ -109,13 +119,19 @@ pyright_*.txt
 test_*.txt
 prepush_out*.txt
 
-# Security & Audit Artifacts
+# Frontend Test Artifacts
+playwright-report/
+test-results/
+.vitest/
+
+# Security, Audit & CI Artifacts
 seals_report.json
 bandit_report.json
 audit_report.txt
 audit_results.json
 safety_report.json
 trivy-results.json
+.act/
 
 # ── OS ────────────────────────────────────────────
 .DS_Store

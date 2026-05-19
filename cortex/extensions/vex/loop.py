@@ -19,7 +19,7 @@ import asyncio
 import logging
 import time
 from collections.abc import Callable, Coroutine
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 from cortex.extensions.vex.models import (
     ExecutionReceipt,

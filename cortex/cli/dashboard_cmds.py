@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """CORTEX v7.0 — Sovereign Dashboard (Industrial Noir).
 
 Live terminal dashboard showing system health, Shannon entropy,
@@ -347,11 +350,11 @@ def dashboard(db: str, interval: float, once: bool) -> None:
     try:
         if once:
             data = _run_async(_collect_all(engine))
-            console.print(_build_dashboard(data))
+            console.logger.info(_build_dashboard(data))
             return
 
         # Live refresh mode
-        console.print(f"[{_CYBER}]⚡ Dashboard starting... Ctrl+C to exit[/]\n")
+        console.logger.info(f"[{_CYBER}]⚡ Dashboard starting... Ctrl+C to exit[/]\n")
 
         with Live(
             console=console,
@@ -366,11 +369,11 @@ def dashboard(db: str, interval: float, once: bool) -> None:
             except KeyboardInterrupt:
                 pass
 
-        console.print(f"\n[{_DIM}]Dashboard closed.[/]")
+        console.logger.info(f"\n[{_DIM}]Dashboard closed.[/]")
 
     except sqlite3.OperationalError as e:
         handle_cli_error(e, db_path=db, context="dashboard")
     except FileNotFoundError:
-        console.print(f"[{_RED}]Database not found: {db}[/]")
+        console.logger.info(f"[{_RED}]Database not found: {db}[/]")
     finally:
         _run_async(engine.close())

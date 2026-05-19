@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from __future__ import annotations
 
 # This file is part of CORTEX.
@@ -58,10 +61,10 @@ def _clean_markdown(code: str) -> str:
 
 async def auto_heal(filepath: Path) -> None:
     if not filepath.exists():
-        console.print(f"[red]❌ Error:[/red] El archivo {filepath} no existe.")
+        console.logger.info(f"[red]❌ Error:[/red] El archivo {filepath} no existe.")
         raise click.Abort()
 
-    console.print(f"🧬 Iniciando Cirugía Soberana en: [cyan]{filepath.name}[/cyan]")
+    console.logger.info(f"🧬 Iniciando Cirugía Soberana en: [cyan]{filepath.name}[/cyan]")
 
     original_code = filepath.read_text(encoding="utf-8")
 
@@ -69,10 +72,10 @@ async def auto_heal(filepath: Path) -> None:
         provider_name = os.environ.get("CORTEX_LLM_PROVIDER", "gemini")
         provider = LLMProvider(provider=provider_name)
     except (OSError, ValueError, RuntimeError, ImportError) as e:
-        console.print(f"[red]❌ Error al inicializar LLMProvider:[/red] {e}")
+        console.logger.info(f"[red]❌ Error al inicializar LLMProvider:[/red] {e}")
         raise click.Abort() from e
 
-    console.print(f"   ► Conectando cerebro arquitectónico ([blue]{provider.model_name}[/blue])...")
+    console.logger.info(f"   ► Conectando cerebro arquitectónico ([blue]{provider.model_name}[/blue])...")
 
     prompt = CortexPrompt(
         system_instruction=HEALING_SYSTEM_PROMPT,
@@ -105,7 +108,7 @@ async def auto_heal(filepath: Path) -> None:
     except (OSError, ValueError, RuntimeError) as exc:
         import traceback
 
-        console.print("[red]❌ Fallo crítico durante el Healer:[/red]")
+        console.logger.info("[red]❌ Fallo crítico durante el Healer:[/red]")
         traceback.print_exc()
         raise click.Abort() from exc
     finally:
@@ -128,4 +131,4 @@ def cli(filepath: Path) -> None:
     try:
         asyncio.run(auto_heal(filepath))
     except KeyboardInterrupt:
-        console.print("\n[red]🛑 Sanación abortada por el operador.[/red]")
+        console.logger.info("\n[red]🛑 Sanación abortada por el operador.[/red]")

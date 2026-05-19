@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """
 CORTEX v5.2 — Slow-Op Tip Emitter.
 
@@ -31,7 +34,7 @@ import functools
 import threading
 from collections.abc import Callable, Generator
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 __all__ = [
     "SlowOpTipEmitter",
@@ -137,7 +140,7 @@ class SlowOpTipEmitter:
             )
             # Fetch random tip synchronously in current thread
             tip = tips_engine.random_sync()
-            console.print()
+            console.logger.info()
             console.print(
                 Panel(
                     f"[white]{tip.content}[/white]",

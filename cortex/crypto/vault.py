@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import base64
 import os
-from typing import Optional
 
 __all__ = ["Vault"]
 

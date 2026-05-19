@@ -28,16 +28,15 @@ Usage::
 
     wbft = WBFTConsensus()
     verdict = wbft.evaluate(responses, history=thinking_history)
-    print(verdict.trusted_responses)    # Responses that passed consensus
-    print(verdict.outliers)             # Responses flagged as divergent
-    print(verdict.confidence)           # Overall consensus confidence
+    logger.info(verdict.trusted_responses)    # Responses that passed consensus
+    logger.info(verdict.outliers)             # Responses flagged as divergent
+    logger.info(verdict.confidence)           # Overall consensus confidence
 """
 
 from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from typing import Optional
 
 from cortex.extensions.thinking.fusion_models import (
     ModelResponse,

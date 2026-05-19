@@ -10,7 +10,7 @@ import json
 import logging
 import os
 import threading
-from typing import Any, Optional
+from typing import Any
 
 from cryptography.exceptions import InvalidKey, InvalidTag
 from cryptography.hazmat.primitives import hashes

@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """CORTEX CLI — Lineage & Epistemic Audit Commands.
 
 Provides verification of Ω₃-V: Verifiable Lineage.
@@ -64,12 +67,12 @@ def trace_lineage(fact_id: int, db: str, depth: int):
             return tree_obj
 
         rich_tree = build_rich_tree(root)
-        console.print(Panel(rich_tree, title=f"Trace: Fact #{fact_id}", border_style="cyan"))
+        console.logger.info(Panel(rich_tree, title=f"Trace: Fact #{fact_id}", border_style="cyan"))
 
         if not root.is_valid:
-            console.print(f"\n[bold red]Ω₃-V VIOLATION:[/bold red] {root.error or 'Broken'}")
+            console.logger.info(f"\n[bold red]Ω₃-V VIOLATION:[/bold red] {root.error or 'Broken'}")
         else:
-            console.print("\n[bold green]Ω₃-V VERIFIED:[/bold green] grounded.")
+            console.logger.info("\n[bold green]Ω₃-V VERIFIED:[/bold green] grounded.")
 
     _run_async(_trace())
 
@@ -87,10 +90,10 @@ def audit_file(file_path: str, db: str):
     fact_ids = list(set(fact_ids))  # unique
 
     if not fact_ids:
-        console.print("[yellow]No fact IDs found in file.[/yellow]")
+        console.logger.info("[yellow]No fact IDs found in file.[/yellow]")
         return
 
-    console.print(f"Auditing {len(fact_ids)} facts found in [bold]{file_path}[/bold]...\n")
+    console.logger.info(f"Auditing {len(fact_ids)} facts found in [bold]{file_path}[/bold]...\n")
 
     async def _audit_all():
         engine = CortexEngine(db)
@@ -100,11 +103,11 @@ def audit_file(file_path: str, db: str):
         for fid in fact_ids:
             node = await verifier.get_lineage(fid, max_depth=1)
             status = "[green]VALID[/green]" if node.is_valid else "[red]BROKEN[/red]"
-            console.print(f"Fact #{fid}: {status} - {node.content[:50]}...")
+            console.logger.info(f"Fact #{fid}: {status} - {node.content[:50]}...")
             if node.is_valid:
                 valid_count += 1
 
-        console.print(f"\n[bold]Audit Result:[/bold] {valid_count}/{len(fact_ids)} verified.")
+        console.logger.info(f"\n[bold]Audit Result:[/bold] {valid_count}/{len(fact_ids)} verified.")
         if valid_count < len(fact_ids):
             console.print(
                 "[bold red]WARNING:[/bold red] Some insights in this file are not grounded!"

@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """CORTEX Persist Engine — Persistent memory for AI agents.
 
 Tiered architecture:
@@ -380,64 +383,64 @@ def main() -> None:
     import sys
 
     if len(sys.argv) < 2:
-        print("Usage: python memory_engine.py <command> [args]")
-        print("Commands: init, boot, close, store, recall, forget, reflect, status")
+        logger.info("Usage: python memory_engine.py <command> [args]")
+        logger.info("Commands: init, boot, close, store, recall, forget, reflect, status")
         sys.exit(1)
 
     cmd = sys.argv[1]
 
     if cmd == "init":
         result = init()
-        print(json.dumps(result, indent=2))
+        logger.info(json.dumps(result, indent=2))
 
     elif cmd == "boot":
         result = session_boot()
         for key, value in result.items():
-            print(f"\n{'=' * 60}")
-            print(f"📂 {key}")
-            print(f"{'=' * 60}")
-            print(value[:2000])
+            logger.info(f"\n{'=' * 60}")
+            logger.info(f"📂 {key}")
+            logger.info(f"{'=' * 60}")
+            logger.info(value[:2000])
 
     elif cmd == "close":
         path = session_close(
             decisions=sys.argv[2:] if len(sys.argv) > 2 else None,
         )
-        print(f"✅ Session saved to {path}")
+        logger.info(f"✅ Session saved to {path}")
 
     elif cmd == "store":
         if len(sys.argv) < 3:
-            print("Usage: python memory_engine.py store <content> [category]")
+            logger.info("Usage: python memory_engine.py store <content> [category]")
             sys.exit(1)
         content = sys.argv[2]
         category = sys.argv[3] if len(sys.argv) > 3 else "decisions"
         result = store(content, category=category)
-        print(json.dumps(result, indent=2))
+        logger.info(json.dumps(result, indent=2))
 
     elif cmd == "recall":
         if len(sys.argv) < 3:
-            print("Usage: python memory_engine.py recall <query>")
+            logger.info("Usage: python memory_engine.py recall <query>")
             sys.exit(1)
         results = recall(sys.argv[2])
         for r in results:
-            print(f"[{r['category']}] {r['content']}")
+            logger.info(f"[{r['category']}] {r['content']}")
 
     elif cmd == "forget":
         if len(sys.argv) < 3:
-            print("Usage: python memory_engine.py forget <fact_id>")
+            logger.info("Usage: python memory_engine.py forget <fact_id>")
             sys.exit(1)
         ok = forget(sys.argv[2])
-        print(f"{'✅ Deprecated' if ok else '❌ Not found'}")
+        logger.info(f"{'✅ Deprecated' if ok else '❌ Not found'}")
 
     elif cmd == "reflect":
         result = reflect()
-        print(json.dumps(result, indent=2))
+        logger.info(json.dumps(result, indent=2))
 
     elif cmd == "status":
         result = status()
-        print(json.dumps(result, indent=2, default=str))
+        logger.info(json.dumps(result, indent=2, default=str))
 
     else:
-        print(f"Unknown command: {cmd}")
+        logger.info(f"Unknown command: {cmd}")
         sys.exit(1)
 
 

@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """CLI commands for Sovereign Swarm operations."""
 
 from __future__ import annotations
@@ -28,7 +31,7 @@ def swarm_audit(path, level):
     files = [p] if p.is_file() else list(p.glob("**/*.py"))
 
     if not files:
-        console.print("[yellow]No python files found.[/]")
+        console.logger.info("[yellow]No python files found.[/]")
         return
 
     swarm_engine = MejoraloSwarm(level=level)
@@ -47,11 +50,11 @@ def swarm_audit(path, level):
         findings = asyncio.run(swarm_engine.audit_files(files))
 
     if not findings:
-        console.print("[green]✅ No critical issues found by the swarm.[/]")
+        console.logger.info("[green]✅ No critical issues found by the swarm.[/]")
     else:
-        console.print(f"\n[bold red]Swarm Findings ({len(findings)}):[/]")
+        console.logger.info(f"\n[bold red]Swarm Findings ({len(findings)}):[/]")
         for f in findings:
-            console.print(f"  [red]•[/] {f}")
+            console.logger.info(f"  [red]•[/] {f}")
 
 
 @swarm.command("refactor")
@@ -82,18 +85,18 @@ def swarm_refactor(file, level, issue, dry_run):
         new_code = asyncio.run(swarm_engine.refactor_file(p, issues))
 
     if not new_code:
-        console.print("[bold red]❌ Swarm failed to refactor the file.[/]")
+        console.logger.info("[bold red]❌ Swarm failed to refactor the file.[/]")
         return
 
     if dry_run:
         from rich.syntax import Syntax
 
         syntax = Syntax(new_code, "python", theme="monokai", line_numbers=True)
-        console.print("\n[bold green]--- Refactored Code (Preview) ---[/]")
-        console.print(syntax)
+        console.logger.info("\n[bold green]--- Refactored Code (Preview) ---[/]")
+        console.logger.info(syntax)
     else:
         p.write_text(new_code)
-        console.print(f"[bold green]✅ {file} refactored by the swarm.[/]")
+        console.logger.info(f"[bold green]✅ {file} refactored by the swarm.[/]")
 
 
 @swarm.command("deploy")
@@ -133,8 +136,8 @@ def swarm_deploy(mode, target, db):
 
         # Expansion (Zero-Delay)
         progress.update(t2, completed=100)
-        console.print("[dim]→ Leviathan formation activated (50+)[/]")
-        console.print("[dim]→ Squadron coordination established (100)[/]")
+        console.logger.info("[dim]→ Leviathan formation activated (50+)[/]")
+        console.logger.info("[dim]→ Squadron coordination established (100)[/]")
 
         # Sync (Zero-Delay)
         progress.update(t3, completed=100)
@@ -174,7 +177,7 @@ def swarm_up(db):
 
     class CliToolExecutor:
         async def execute(self, tool_name: str, arguments: dict) -> dict:
-            console.print(f"[dim]Executing tool: {tool_name} with {arguments}...[/dim]")
+            console.logger.info(f"[dim]Executing tool: {tool_name} with {arguments}...[/dim]")
             await asyncio.sleep(0.5)
             return {"status": "ok", "result": f"Mock output from {tool_name}"}
 
@@ -204,7 +207,7 @@ def swarm_up(db):
         console.print(
             "\n[bold green]🐝 SWARM UP: Omega Prime and Supervisor are online.[/bold green]"
         )
-        console.print("[dim]Type your objective, or 'exit' to quit.[/dim]\n")
+        console.logger.info("[dim]Type your objective, or 'exit' to quit.[/dim]\n")
 
         try:
             while True:
@@ -228,14 +231,14 @@ def swarm_up(db):
                 )
 
                 await bus.send(task_msg)
-                console.print(f"[dim]dispatched TASK_REQUEST ({correlation_id})[/dim]")
+                console.logger.info(f"[dim]dispatched TASK_REQUEST ({correlation_id})[/dim]")
 
                 # Simple wait loop to allow background tasks to run.
                 # A robust REPL would use a dedicated listener on the bus for TASK_COMPLETED.
                 await asyncio.sleep(1.0)
 
         except (KeyboardInterrupt, EOFError):
-            console.print("\n[dim]Shutting down swarm...[/dim]")
+            console.logger.info("\n[dim]Shutting down swarm...[/dim]")
 
         finally:
             await supervisor.stop_agent("omega-prime")
@@ -253,9 +256,9 @@ def swarm_cleanup(path):
 
     count = asyncio.run(cleanup_all_worktrees(path))
     if count == 0:
-        console.print("[yellow]No ephemeral worktrees found to cleanup.[/]")
+        console.logger.info("[yellow]No ephemeral worktrees found to cleanup.[/]")
     else:
-        console.print(f"[bold green]✅ Successfully cleaned up {count} worktrees.[/]")
+        console.logger.info(f"[bold green]✅ Successfully cleaned up {count} worktrees.[/]")
 
 
 @swarm.command("strike")
@@ -296,7 +299,7 @@ def swarm_strike(phalanx, target):
             # O(1) Autonomous Routing
             squad_classes = AutonomousRouter.route(target)
             resolved_names = [s.SQUAD_NAME for s in squad_classes]
-            console.print(f"🤖 [bold #2B3BE5]AUTONOMOUS ROUTING[/] ⮕ {resolved_names}")
+            console.logger.info(f"🤖 [bold #2B3BE5]AUTONOMOUS ROUTING[/] ⮕ {resolved_names}")
             for sq_class in squad_classes:
                 tasks.append(sq_class().deploy(target))
         else:
@@ -313,7 +316,7 @@ def swarm_strike(phalanx, target):
 
         results = await asyncio.gather(*tasks)
 
-        console.print("\n[bold #2B3BE5]💎 SWARM CRYSTALLIZATION COMPLETE[/]")
+        console.logger.info("\n[bold #2B3BE5]💎 SWARM CRYSTALLIZATION COMPLETE[/]")
         for r in results:
             if not isinstance(r, dict) or "error" in r:
                 continue
@@ -338,4 +341,4 @@ def swarm_purge():
             border_style="red",
         )
     )
-    console.print("[bold green]✅ Sovereignty Restored. Bus queues empty.[/]")
+    console.logger.info("[bold green]✅ Sovereignty Restored. Bus queues empty.[/]")

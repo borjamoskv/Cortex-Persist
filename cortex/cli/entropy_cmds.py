@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """CLI commands: entropy install-hook, scan, report, shannon."""
 
 from __future__ import annotations
@@ -54,7 +57,7 @@ def entropy_install_hook():
         shutil.copy2(source_script, pre_commit_file)
         pre_commit_file.chmod(0o755)
 
-        console.print("[bold green]✅ ENTROPY-0 instalado exitosamente en .git/hooks/pre-commit[/]")
+        console.logger.info("[bold green]✅ ENTROPY-0 instalado exitosamente en .git/hooks/pre-commit[/]")
         console.print(
             "[dim]A partir de ahora, ningún commit pasará si la puntuación MEJORAlo es < 90.[/]"
         )
@@ -65,7 +68,7 @@ def entropy_install_hook():
 @entropy.command("report")
 def entropy_report():
     """Genera un reporte del estado de inmunidad del proyecto."""
-    console.print("[bold cyan]🔍 Analizando inmunidad del ecosistema...[/]")
+    console.logger.info("[bold cyan]🔍 Analizando inmunidad del ecosistema...[/]")
     from cortex.extensions.daemon.core import MoskvDaemon
 
     try:
@@ -76,7 +79,7 @@ def entropy_report():
 
         alerts = status_dict.get("entropy_alerts", [])
         if not alerts:
-            console.print("[bold green]✅ Estado: ENTROPY-0 activo. Cero deuda técnica en vivo.[/]")
+            console.logger.info("[bold green]✅ Estado: ENTROPY-0 activo. Cero deuda técnica en vivo.[/]")
         else:
             console.print(
                 f"[bold red]⚠️ Alerta: Se detectaron {len(alerts)} "
@@ -171,7 +174,7 @@ def _render_shannon_table(result: dict[str, Any]) -> None:
             f"[{color}]{_bar(norm)}[/]",
         )
 
-    console.print(table)
+    console.logger.info(table)
 
 
 def _render_shannon_verbose(result: dict[str, Any]) -> None:
@@ -198,14 +201,14 @@ def _render_shannon_verbose(result: dict[str, Any]) -> None:
         for cat, cnt in sorted(dist.items(), key=lambda x: -x[1]):
             share = cnt / total_dim if total_dim else 0
             detail.add_row(cat, str(cnt), f"{share:.1%}")
-        console.print(detail)
+        console.logger.info(detail)
 
 
 def _render_shannon_diagnosis(result: dict[str, Any]) -> None:
     from rich.panel import Panel
 
     mi = result["mutual_info_type_project"]
-    console.print(f"\n[bold white]I(type; project)[/] = [noir.cyber]{mi:.4f}[/] bits")
+    console.logger.info(f"\n[bold white]I(type; project)[/] = [noir.cyber]{mi:.4f}[/] bits")
 
     diag = result["diagnosis"]
     diag_colors = {
@@ -217,7 +220,7 @@ def _render_shannon_diagnosis(result: dict[str, Any]) -> None:
         "declining": "red",
     }
     color = diag_colors.get(diag, "white")
-    console.print(f"[bold white]Diagnosis:[/] [{color}]{diag.upper()}[/]\n")
+    console.logger.info(f"[bold white]Diagnosis:[/] [{color}]{diag.upper()}[/]\n")
 
     for rec in result["recommendations"]:
         console.print(
@@ -261,7 +264,7 @@ def entropy_immortality(
             f"{result['active_days']} active days · "
             f"{result['total_span_days']}d span)[/]\n"
         )
-        console.print(f"  {result['badge']}\n")
+        console.logger.info(f"  {result['badge']}\n")
 
         # ── Dimension table ──────────────────────────────────
         from rich.table import Table
@@ -290,7 +293,7 @@ def entropy_immortality(
                 f"{dim['weight']:.0%}",
                 f"[{color}]{dim['bar']}[/]",
             )
-        console.print(dim_table)
+        console.logger.info(dim_table)
 
         # ── Weakest dimension ────────────────────────────────
         from rich.panel import Panel
@@ -308,9 +311,9 @@ def entropy_immortality(
         )
 
         if verbose:
-            console.print(f"\n[dim]Max temporal gap: {result['max_gap_days']}d[/]")
+            console.logger.info(f"\n[dim]Max temporal gap: {result['max_gap_days']}d[/]")
             diag = result["diagnosis"].replace("_", " ").upper()
-            console.print(f"[dim]Diagnosis: {diag}[/]")
+            console.logger.info(f"[dim]Diagnosis: {diag}[/]")
 
     except (OSError, ValueError, RuntimeError) as e:
         handle_cli_error(e, context="immortality index")
@@ -343,7 +346,7 @@ def entropy_shannon(project: str | None, as_json: bool, verbose: bool) -> None:
         if project:
             title += f"  ·  {project}"
         health = result["health_score"]
-        console.print(f"\n[noir.cyber]{title}[/]  [dim]({result['total_facts']} active facts)[/]\n")
+        console.logger.info(f"\n[noir.cyber]{title}[/]  [dim]({result['total_facts']} active facts)[/]\n")
 
         console.print(
             f"  Health: {_health_badge(health)}"

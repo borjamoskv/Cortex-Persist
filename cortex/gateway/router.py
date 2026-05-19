@@ -137,7 +137,7 @@ class GatewayRouter:
             payload={"query": "Byzantine consensus"},
             project="cortex",
         ))
-        print(resp.data)  # list of search results
+        logger.info(resp.data)  # list of search results
     """
 
     def __init__(self, engine: Any, bus: Any = None) -> None:
@@ -211,7 +211,7 @@ class GatewayRouter:
                     extra_meta={"request_id": request.request_id, "source": request.source},
                 )
                 await boundary._persist(exc)
-            except Exception:  # noqa: BLE001 — boundary persistence must never break gateway
+            except Exception:  # TODO(Swarm): Narrow this exception
                 pass
             return GatewayResponse(
                 ok=False,

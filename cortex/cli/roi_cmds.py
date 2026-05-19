@@ -248,14 +248,14 @@ def _render_status_table(m: ROIMetrics) -> None:
             "ESTIMATED" if estimated_roi < 10_000_000 else "🔥 SINGULARITY",
         )
 
-    console.print(table)
+    console.logger.info(table)
 
 
 def _render_top_projects(m: ROIMetrics) -> None:
     if not m.top_projects:
         return
 
-    console.print()
+    console.logger.info()
     proj_table = Table(
         title="🏆 Top Projects by Time Saved",
         border_style="cyan",
@@ -273,7 +273,7 @@ def _render_top_projects(m: ROIMetrics) -> None:
             f"{ai_h:.1f}h",
             f"{saved:.1f}h",
         )
-    console.print(proj_table)
+    console.logger.info(proj_table)
 
 
 @roi.command()
@@ -292,7 +292,7 @@ def status(db: str) -> None:
 
             # Singularity check
             if m.roi_ratio >= 10_000_000:
-                console.print("\n[bold gold]🔥 SINGULARIDAD ALCANZADA: ROI > 10M/1[/]")
+                console.logger.info("\n[bold gold]🔥 SINGULARIDAD ALCANZADA: ROI > 10M/1[/]")
                 console.print(
                     "[dim]El sistema opera en modo asintótico. Masa = 0, Fricción = 0.[/]"
                 )
@@ -313,7 +313,7 @@ def report(db: str) -> None:
             await engine.init_db()
             m = await _aggregate_chronos(engine)
             md = generate_roi_markdown(m)
-            console.print(md)
+            console.logger.info(md)
         finally:
             await engine.close()
 

@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """CORTEX CLI — Anomaly Hunter Daemon Commands.
 
 Integrates the NightShift anomaly hunter into the Sovereign CLI.
@@ -85,14 +88,14 @@ def contradiction_scan_cmd(entity: str, db: str) -> None:
                 f"[bold green]✓ Escaneo completado. "
                 f"Sin contradicciones para '{entity}'.[/bold green]"
             )
-            console.print(msg)
+            console.logger.info(msg)
         else:
             console.print(
                 f"[bold red]⚠ Se encontraron {len(anomalies)} contradicciones "
                 f"para '{entity}':[/bold red]"
             )
             for a in anomalies:
-                console.print(f"  - {a.description}")
+                console.logger.info(f"  - {a.description}")
 
     finally:
         close_engine_sync(engine)
@@ -120,20 +123,20 @@ def memory_clean_cmd(db: str) -> None:
 
         if not ghosts:
             msg = "[bold green]✓ Memoria limpia. No se detectaron resurrecciones.[/bold green]"
-            console.print(msg)
+            console.logger.info(msg)
         else:
             msg = (
                 f"[bold yellow]⚰ Purga completada: {len(ghosts)} "
                 f"fantasmas enterrados.[/bold yellow]"
             )
-            console.print(msg)
+            console.logger.info(msg)
     finally:
         close_engine_sync(engine)
 
 
 def _display_report(report: dict) -> None:
     """Renderiza el reporte del Anomaly Hunter."""
-    console.print()
+    console.logger.info()
 
     score = report.get("memory_health_score", 100)
     color = "bold green" if score >= 90 else "bold yellow" if score >= 70 else "bold red"
@@ -157,4 +160,4 @@ def _display_report(report: dict) -> None:
         for a_type, count in report.get("by_type", {}).items():
             table.add_row(a_type, str(count))
 
-        console.print(table)
+        console.logger.info(table)

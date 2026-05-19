@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """CLI commands: quarantine, unquarantine, reap-ghosts."""
 
 from __future__ import annotations
@@ -19,9 +22,9 @@ def quarantine(fact_id: int, reason: str, db: str) -> None:
     try:
         success = _run_async(engine.quarantine(fact_id, reason))
         if success:
-            console.print(f"[bold red]🔒 QUARANTINED[/] Fact [bold]#{fact_id}[/] — {reason}")
+            console.logger.info(f"[bold red]🔒 QUARANTINED[/] Fact [bold]#{fact_id}[/] — {reason}")
         else:
-            console.print(f"[yellow]⚠ Fact #{fact_id} not found or already quarantined[/]")
+            console.logger.info(f"[yellow]⚠ Fact #{fact_id} not found or already quarantined[/]")
     finally:
         _run_async(engine.close())
 
@@ -39,7 +42,7 @@ def unquarantine(fact_id: int, db: str) -> None:
                 f"[bold green]🔓 RELEASED[/] Fact [bold]#{fact_id}[/] — quarantine lifted"
             )
         else:
-            console.print(f"[yellow]⚠ Fact #{fact_id} not found or not quarantined[/]")
+            console.logger.info(f"[yellow]⚠ Fact #{fact_id} not found or not quarantined[/]")
     finally:
         _run_async(engine.close())
 
@@ -70,7 +73,7 @@ def reap_ghosts(ttl_days: int, db: str) -> None:
                 f"(DB: {db_count}, Songlines: {sl_count}, TTL: {ttl_days}d)"
             )
         else:
-            console.print(f"[dim]No expired ghosts found (TTL: {ttl_days}d)[/]")
+            console.logger.info(f"[dim]No expired ghosts found (TTL: {ttl_days}d)[/]")
     finally:
         _run_async(engine.close())
 
@@ -91,7 +94,7 @@ def bridge_audit(db: str) -> None:
         results = _run_async(_audit())
 
         if not results:
-            console.print("[dim]No active bridges found[/]")
+            console.logger.info("[dim]No active bridges found[/]")
             return
 
         from rich.table import Table
@@ -113,6 +116,6 @@ def bridge_audit(db: str) -> None:
                 status,
             )
 
-        console.print(table)
+        console.logger.info(table)
     finally:
         _run_async(engine.close())

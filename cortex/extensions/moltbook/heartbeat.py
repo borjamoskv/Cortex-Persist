@@ -137,7 +137,7 @@ class MoltbookHeartbeat:
             except MoltbookRateLimited:
                 logger.warning("Rate limited during activity response")
                 break
-            except Exception:  # noqa: BLE001 — swallow individual activity errors
+            except Exception:  # TODO(Swarm): Narrow this exception
                 logger.exception("Error responding to post %s", post_id)
 
         return replies
@@ -162,12 +162,12 @@ class MoltbookHeartbeat:
                     upvotes += 1
                 except MoltbookRateLimited:
                     break
-                except Exception:  # noqa: BLE001 — swallow individual upvote errors
+                except Exception:  # TODO(Swarm): Narrow this exception
                     logger.debug("Upvote failed for post %s", post_id)
 
         except MoltbookRateLimited:
             logger.warning("Rate limited during feed browse")
-        except Exception:  # noqa: BLE001 — swallow feed browsing errors
+        except Exception:  # TODO(Swarm): Narrow this exception
             logger.exception("Error browsing feed")
 
         return upvotes

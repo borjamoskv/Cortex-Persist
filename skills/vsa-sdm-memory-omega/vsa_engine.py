@@ -79,7 +79,7 @@ class VSAEngine:
         if weights is None:
             weights = np.ones(len(vectors))
         result = np.zeros(self.D)
-        for v, w in zip(vectors, weights):
+        for v, w in zip(vectors, weights, strict=False):
             result += w * v
         return self.normalize(result)
 
@@ -213,7 +213,7 @@ class VSAEngine:
 
         for it in range(max_iter):
             prev = [int(np.argmax([self.cosine(e, v) for v in cb]))
-                    for e, cb in zip(estimates, cbs)]
+                    for e, cb in zip(estimates, cbs, strict=False)]
 
             for f in range(n_factors):
                 # Unbind all other estimates
@@ -226,7 +226,7 @@ class VSAEngine:
                 estimates[f] = cbs[f][best]
 
             curr = [int(np.argmax([self.cosine(e, v) for v in cb]))
-                    for e, cb in zip(estimates, cbs)]
+                    for e, cb in zip(estimates, cbs, strict=False)]
             if curr == prev:
                 return [(cbs[f][curr[f]], curr[f]) for f in range(n_factors)]
 

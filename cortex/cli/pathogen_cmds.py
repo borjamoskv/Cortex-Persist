@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """CLI commands for Moltbook Pathogen-Omega (Inverse Immune System).
 
 Usage:
@@ -64,7 +67,7 @@ def craft(ghost: str, polarity: str):
             )
 
         except CortexError as e:
-            console.print(f"[red]Pathogen Error: {e}[/]")
+            console.logger.info(f"[red]Pathogen Error: {e}[/]")
         finally:
             asyncio.run(engine.close())
 
@@ -89,4 +92,4 @@ def monitor(url: str):
                 )
             )
         except CortexError as e:
-            console.print(f"[red]Monitor Error: {e}[/]")
+            console.logger.info(f"[red]Monitor Error: {e}[/]")

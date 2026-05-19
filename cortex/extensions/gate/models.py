@@ -5,7 +5,7 @@ CORTEX v5.1 — SovereignGate Models.
 import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Any
 
 from .enums import ActionLevel, ActionStatus, GatePolicy
 

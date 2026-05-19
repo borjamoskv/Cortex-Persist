@@ -1,0 +1,76 @@
+name,email,source_type,confidence
+El Xokas,elxokas@vizz-agency.com,public_business_profile,C5-REAL
+Ibai Llanos,ibai@koisquad.com,official_youtube_contact,C5-REAL
+AuronPlay,ContactoAuron@youplanet.es,official_youtube_contact,C5-REAL
+DjMaRiiO,djmariio@vizz-agency.com,public_business_profile,C5-REAL
+IlloJuan,illojuan@vizz-agency.com,public_business_profile,C5-REAL
+TheGrefg,contact@thegrefg.com,public_business_profile,C5-REAL
+Cristinini,cristinini.yt@gmail.com,public_business_profile,C5-REAL
+Juan Guarnizo,juansguarnizo@randy.com.mx,public_business_profile,C5-REAL
+Willyrex,willyrex@teamdux.com,public_business_profile,C5-REAL
+Rubius,business@vizz-agency.com,agency_contact,C5-REAL
+Vegetta777,vegetta777@vizz-agency.com,twitter_bio_confirmed,C5-REAL
+Alexby11,alexby11@vizz-agency.com,agency_pattern_confirmed,C5-REAL
+Perxitaa,videosperxitaa@gmail.com,fandom_wiki_confirmed,C5-REAL
+Spreen,contact@shindengg.com,official_website,C5-REAL
+Midudev,midudev@mypublicinbox.email,public_platform,C5-REAL
+Robleis,contacto@robleis.com.ar,twitter_bio_confirmed,C5-REAL
+Coscu,mgmtcoscu@gmail.com,instagram_bio,C5-REAL
+Reven,reven@vizz-agency.com,agency_confirmed,C5-REAL
+Luzu,luzu@koisquad.com,agency_pattern_inferred,C4
+Fargan,fargan@vizz-agency.com,instagram_bio_confirmed,C5-REAL
+Knekro,knekro@l3tcraft-agency.com,twitter_bio_confirmed,C5-REAL
+Werlyb,contacto@teamheretics.com,official_org_contact,C5-REAL
+Goorgo,contacto@teamheretics.com,official_org_contact,C5-REAL
+Nil Ojeda,nilojeda@vizz-agency.com,agency_pattern_inferred,C4
+Beniju,beniju@vizz-agency.com,agency_pattern_inferred,C4
+Mangel,mangel@vizz-agency.com,agency_pattern_inferred,C4
+Kolderiu,kolderiu@vizz-agency.com,agency_pattern_inferred,C4
+Maximus,maximus@vizz-agency.com,agency_pattern_inferred,C4
+Sr.Cheeto,srcheeto@vizz-agency.com,agency_pattern_inferred,C4
+ElMariana,contacto@elmariana.com,twitter_bio_confirmed,C5-REAL
+aXoZer,axozer@arigatou.es,twitter_bio_confirmed,C5-REAL
+Shadoune666,shadoune@arigatou.mx,twitter_bio_confirmed,C5-REAL
+Karchez,info@karchez.com,twitter_bio_confirmed,C5-REAL
+Komanche,komanche@randy.com.mx,twitter_bio_confirmed,C5-REAL
+elDed,dedgocios@gmail.com,twitter_bio_confirmed,C5-REAL
+AmaBlitz,ama@randy.com.mx,twitter_bio_confirmed,C5-REAL
+Carola,carola@youplanet.com,twitter_bio_confirmed,C5-REAL
+Rocio DTA,contacto@rociodta.mx,twitter_bio_confirmed,C5-REAL
+Cry,cry@rift-agency.com,twitter_bio_confirmed,C5-REAL
+Pol Turrents,polturrents@gmail.com,twitter_bio_confirmed,C5-REAL
+xTheFocuSx,xXxTheFocuSxXx@gmail.com,twitter_bio_confirmed,C5-REAL
+Folagor,folagor@gmail.com,instagram_bio_confirmed,C5-REAL
+Samy Rivera,contacto@riversgg.com,twitter_bio_confirmed,C5-REAL
+ALK4PON3,negocios@alkapone.tv,twitter_bio_confirmed,C5-REAL
+Aldo Geo,aldo@randy.com.mx,twitter_bio_confirmed,C5-REAL
+Conterstine,ContactoConterstine@gmail.com,twitter_bio_confirmed,C5-REAL
+Mayichi,mayichi@arigatou.es,twitter_bio_confirmed,C5-REAL
+Abby (Team Heretics),abby@makeithpn.com,instagram_bio_confirmed,C5-REAL
+PipePunk,contactopipepunk@gmail.com,twitter_bio_confirmed,C5-REAL
+Serpias,serpiasbusiness@gmail.com,twitter_bio_confirmed,C5-REAL
+# --- DJs TIER-2/3 EUROPE ---
+Tiësto (management),bo@id8mgmt.com,facebook_bio_confirmed,C5-REAL
+Tiësto (booking),pm@pmonly.live,facebook_bio_confirmed,C5-REAL
+Charlotte de Witte (mgmt/press hub),alexander@dbnr.be,official_website,C5-REAL
+Charlotte de Witte (press),press@dbnr.be,official_website,C5-REAL
+Charlotte de Witte (booking EU+World),nick.cave@the.team,official_website,C5-REAL
+Charlotte de Witte (booking Americas),landerson@the.team,official_website,C5-REAL
+Fatboy Slim (general),info@fatboyslim.net,official_website,C5-REAL
+Fatboy Slim (management),fatboyslim@anglomanagement.co.uk,official_website,C5-REAL
+Reinier Zonneveld (booking),bookings@agencways.com,instagram_bio_confirmed,C5-REAL
+Reinier Zonneveld (management),alex@fckng-serious.de,facebook_bio_confirmed,C5-REAL
+Len Faki (booking),michael.mueller@triangleagency.com,instagram_bio_confirmed,C5-REAL
+Maceo Plex (booking ES),danikoala@dskonnect.com,official_booking_site,C5-REAL
+Maceo Plex (booking ES alt),marc@dskonnect.com,official_booking_site,C5-REAL
+Paco Osuna (booking hub),b4travel@b4bookings.net,public_record_confirmed,C5-REAL
+Hardwell (booking general),shows@bnmusic-artists.com,public_booking_portal,C4
+# --- CÓMICOS ESPAÑA ---
+Andreu Buenafuente,web@elterrat.com,facebook_bio_confirmed,C5-REAL
+Berto Romero,web@elterrat.com,official_website,C5-REAL
+David Broncano,web@elterrat.com,official_website,C5-REAL
+El Terrat (hub Buenafuente/Broncano/Berto),web@elterrat.com,official_production_hub,C5-REAL
+Ignatius Farray,contacto@ignatiusfarray.com,instagram_bio_confirmed,C5-REAL
+Manu Sanchez,info@secuoyaproducciones.com,official_booking_site,C5-REAL
+Eva Hache,via totalisimo.com/contratacion,booking_portal,C4
+Dani Rovira,via mypublicinbox.com/DaniRovira,public_contact_platform,C4

@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """ConnectionGuard — CI/lint scanner for raw sqlite3.connect() usage.
 
 Provides a callable scanner that detects unauthorized sqlite3.connect()
@@ -16,7 +19,6 @@ from __future__ import annotations
 import re
 import sys
 from pathlib import Path
-from typing import Optional
 
 __all__ = ["scan_raw_connects", "ConnectionViolation"]
 
@@ -175,18 +177,18 @@ def main() -> int:
     violations = scan_raw_connects(args.root)
 
     if violations:
-        print(f"\n🔴 CONNECTION GUARD: {len(violations)} violation(s) found!\n")
-        print("These files use raw sqlite3.connect() instead of CortexEngine:")
-        print("─" * 60)
+        logger.info(f"\n🔴 CONNECTION GUARD: {len(violations)} violation(s) found!\n")
+        logger.info("These files use raw sqlite3.connect() instead of CortexEngine:")
+        logger.info("─" * 60)
         for v in violations:
-            print(f"  ✗ {v}")
-        print("─" * 60)
-        print("\nFix: Use CortexEngine.get_conn() or database.core.connect()")
-        print("If this module genuinely needs raw access, add it to the whitelist")
-        print(f"in {__file__}")
+            logger.info(f"  ✗ {v}")
+        logger.info("─" * 60)
+        logger.info("\nFix: Use CortexEngine.get_conn() or database.core.connect()")
+        logger.info("If this module genuinely needs raw access, add it to the whitelist")
+        logger.info(f"in {__file__}")
         return 1
 
-    print("✅ CONNECTION GUARD: No unauthorized sqlite3.connect() usage found.")
+    logger.info("✅ CONNECTION GUARD: No unauthorized sqlite3.connect() usage found.")
     return 0
 
 

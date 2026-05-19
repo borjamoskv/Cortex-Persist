@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """CORTEX CLI — Trust & Compliance Commands."""
 
 import asyncio
@@ -118,7 +121,7 @@ def compliance_report(db: str) -> None:
 
         now = datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
 
-        console.print()
+        console.logger.info()
         console.print(
             Panel.fit(
                 "[bold]CORTEX - EU AI Act Compliance Report[/bold]\n"
@@ -154,7 +157,7 @@ def compliance_report(db: str) -> None:
         avg_calc = sum(r["score"] for r in calc_results) / len(calc_results) if calc_results else 0
 
         table.add_row("Calcification Index", f"[bold yellow]{avg_calc:.2f}[/bold yellow] (Omega-2)")
-        console.print(table)
+        console.logger.info(table)
 
         c1, c2, c3, c4, c5 = (
             total_tx > 0,
@@ -177,7 +180,7 @@ def compliance_report(db: str) -> None:
         checks.add_row("Agent traceability (Art. 12.2d)", icon(c5))
         checks.add_row("Epistemic Isolation (Omega-3)", "[green]OK[/green]")
         checks.add_row("Landauer's Razor (Omega-2)", icon(avg_calc < 100))
-        console.print(checks)
+        console.logger.info(checks)
 
         score = sum([c1, c2, c3, c4, c5])
         if score == 5:
@@ -221,15 +224,15 @@ def audit_cognitive(tenant: str, db: str) -> None:
             table.add_row("Integrity Score", f"{report.get('integrity_score', 1.0):.2%}")
             table.add_row("Timestamp", report.get("timestamp", ""))
 
-            console.print()
-            console.print(Panel(table, border_style=status_style))
+            console.logger.info()
+            console.logger.info(Panel(table, border_style=status_style))
 
             if report.get("findings"):
                 findings_table = Table(title="Audit Findings")
                 findings_table.add_column("Log", style="dim")
                 for finding in report["findings"]:
                     findings_table.add_row(finding)
-                console.print(findings_table)
+                console.logger.info(findings_table)
         finally:
             await conn.close()
 
@@ -240,7 +243,7 @@ def audit_cognitive(tenant: str, db: str) -> None:
 
         handle_cli_error(e, db_path=db, context="cognitive audit")
     finally:
-        console.print("[dim]Audit complete.[/dim]")
+        console.logger.info("[dim]Audit complete.[/dim]")
 
 
 def _audit_trail(project: str, limit: int, db: str) -> None:
@@ -253,7 +256,7 @@ def _audit_trail(project: str, limit: int, db: str) -> None:
         conn = db_connect(db)
         table = _get_audit_trail(conn, project, limit)
         if table:
-            console.print(table)
+            console.logger.info(table)
     except Exception as e:  # noqa: BLE001 — CLI boundary catch
         handle_cli_error(e, db_path=db, context="generating audit trail")
     finally:
@@ -343,13 +346,13 @@ def siege(db: str) -> None:
         table.add_row("Transactions Checked", str(verification_report.get("tx_checked", 0)))
         table.add_row("Violations Found", str(len(verification_report.get("violations", []))))
 
-        console.print(table)
+        console.logger.info(table)
 
         if findings:
             for f in findings:
-                console.print(f"[{color}]• {f}[/{color}]")
+                console.logger.info(f"[{color}]• {f}[/{color}]")
 
-        console.print(Panel(verdict, title="Final Verdict", style=color))
+        console.logger.info(Panel(verdict, title="Final Verdict", style=color))
 
     except Exception as e:  # noqa: BLE001 — CLI boundary catch
         handle_cli_error(e, db_path=db, context="Compliance Siege execution")

@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 import importlib.abc
 import importlib.machinery
 import sys
@@ -31,9 +34,9 @@ class CyanideImportHook(importlib.abc.MetaPathFinder):
         base_module = fullname.partition(".")[0]
         # or other pathological module names that python might allow internally.
         if "cortex.extensions.moltbook" in fullname or base_module in self._POISONED_MODULES:
-            print("🔥 THERMODYNAMIC BORDER COLLAPSE 🔥")
-            print(f"FATAL: Attempted to import '{fullname}' within Cold Mode.")
-            print("Activating Cyanide Protocol. Self-destructing.")
+            logger.info("🔥 THERMODYNAMIC BORDER COLLAPSE 🔥")
+            logger.info(f"FATAL: Attempted to import '{fullname}' within Cold Mode.")
+            logger.info("Activating Cyanide Protocol. Self-destructing.")
             raise ThermodynamicViolationError(1)
 
         return None  # Continúa con el loader normal si es seguro

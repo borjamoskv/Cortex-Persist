@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """
 CORTEX-SWARM-PRIME: Tensor-Glial Legion
 Zero-Copy `mmap` tensor map mapped across 10,000 swarm agents representing High-Dimensional Memory.
@@ -166,7 +169,7 @@ class TensorGlialLegion:
 
 if __name__ == "__main__":
     # Boot sequence for local execution validation
-    print("[+] Legión TensorGlial init...")
+    logger.info("[+] Legión TensorGlial init...")
     # Fast test with 100 agents, 1000 D for speed
     legion = TensorGlialLegion(num_agents=100, d_dim=1000, file_path="tmp_legion.vsa_mmap")
 
@@ -184,7 +187,7 @@ if __name__ == "__main__":
     # Reduce
     centurion_state = legion.map_reduce_centurion(0, 100)
 
-    print(f"[+] Total execution time: {time.time() - start_time:.4f}s")
-    print(f"[+] Nodes respawned from corpses: {slashed}")
-    print(f"[+] Centurion MapReduce state dim: {centurion_state.shape}")
-    print(f"[+] Matrix SHA256 integrity: {legion.global_sha256_audit()}")
+    logger.info(f"[+] Total execution time: {time.time() - start_time:.4f}s")
+    logger.info(f"[+] Nodes respawned from corpses: {slashed}")
+    logger.info(f"[+] Centurion MapReduce state dim: {centurion_state.shape}")
+    logger.info(f"[+] Matrix SHA256 integrity: {legion.global_sha256_audit()}")

@@ -9,7 +9,7 @@ import logging
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import Any, Optional, TypeVar
+from typing import Any, TypeVar
 
 logger = logging.getLogger("cortex.extensions.immune.chaos")
 

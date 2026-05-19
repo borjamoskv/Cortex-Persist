@@ -46,7 +46,7 @@ import logging
 import sqlite3
 import time
 from contextlib import asynccontextmanager
-from typing import Any, Optional
+from typing import Any
 
 from cortex.database.messages import (
     TransactionProxy as _TransactionProxy,

@@ -22,8 +22,8 @@ def simulate_dust_trap_impact():
     # Convert to USDS (18 decimals)
     annual_loss_usds = annual_loss_wei / 10**18
     
-    print(f"--- SKY DUST-TRAP DEEP IMPACT ANALYSIS ---")
-    print(f"Contract: SwapperCalleePsm.sol")
+    print("--- SKY DUST-TRAP DEEP IMPACT ANALYSIS ---")
+    print("Contract: SwapperCalleePsm.sol")
     print(f"Conversion Factor: {conversion_factor} (USDC/USDS)")
     print(f"Max Dust per Swap: {max_dust_per_swap} wei")
     print(f"Simulated Annual Loss: {annual_loss_usds:.6f} USDS per funnel")

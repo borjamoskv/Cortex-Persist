@@ -77,7 +77,7 @@ class EventProjector:
         """
         try:
             await self._signal_endocrine("awareness", 0.1)
-        except Exception:  # noqa: BLE001
+        except Exception:  # TODO(Swarm): Narrow this exception
             pass
 
     # ── Private side-effect implementations ───────────────────────

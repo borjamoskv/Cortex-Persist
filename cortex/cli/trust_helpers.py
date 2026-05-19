@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """Helper functions for Trust and Compliance CLI commands."""
 
 import json
@@ -84,8 +87,8 @@ def _render_verification_certificate(
         table.add_row("Merkle", "[yellow]Not yet checkpointed[/yellow]")
 
     overall = "[green]VERIFIED[/green]" if chain_valid else "[red]INTEGRITY VIOLATION[/red]"
-    console.print(table)
-    console.print(Panel(overall, title="Verdict"))
+    console.logger.info(table)
+    console.logger.info(Panel(overall, title="Verdict"))
 
 
 def _safe_count(conn, query: str) -> int:

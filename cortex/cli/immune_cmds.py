@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 import click
 from rich.console import Console
 from rich.panel import Panel
@@ -55,7 +58,7 @@ def circuit_breaker_cmd(
 
         result = asyncio.run(execute_circuit_trip(reason, cortex_engine))
 
-        console.print(f"[bold yellow]Result:[/bold yellow] {result}")
+        console.logger.info(f"[bold yellow]Result:[/bold yellow] {result}")
         console.print(
             "[bold red]SYSTEM LOCKED: Write access denied pending Sovereign Lock release.[/bold red]"
         )

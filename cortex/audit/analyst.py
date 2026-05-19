@@ -7,7 +7,7 @@ unauthorized access or tenant-boundary violations.
 """
 
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from .ledger import EnterpriseAuditLedger
 

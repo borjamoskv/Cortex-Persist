@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 import sqlite3
 import time
-from typing import Any, Optional
+from typing import Any
 
 from cortex import config
 from cortex.extensions.daemon.models import CloudSyncAlert

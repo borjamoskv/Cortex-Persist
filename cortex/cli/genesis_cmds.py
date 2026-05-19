@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """CORTEX CLI — Genesis command group.
 
 Commands for the Genesis Engine — creating systems from specs.
@@ -100,14 +103,14 @@ def create(
         for f in result.files_created:
             content.append(f"   ↳ {f}\n", style="dim")
 
-    console.print()
+    console.logger.info()
     panel = Panel(
         content,
         title=f"[bold {status_color}]{title}[/]",
         border_style=status_color,
         expand=False,
     )
-    console.print(panel)
+    console.logger.info(panel)
 
 
 @genesis_group.command("from-yaml")
@@ -122,18 +125,18 @@ def from_yaml(path: str) -> None:
         with open(path, encoding="utf-8") as f:
             data = yaml.safe_load(f)
     except Exception as e:  # noqa: BLE001
-        console.print(f"[bold red]Failed to parse YAML:[/] {e}")
+        console.logger.info(f"[bold red]Failed to parse YAML:[/] {e}")
         sys.exit(1)
 
     engine = GenesisEngine()
     result = engine.create_from_dict(data)
 
     if result.validation_passed:
-        console.print(f"\n[bold green]✅ Genesis from YAML:[/] {result.spec.name}")
+        console.logger.info(f"\n[bold green]✅ Genesis from YAML:[/] {result.spec.name}")
     else:
-        console.print(f"\n[bold red]❌ Genesis failed:[/] {result.spec.name}")
+        console.logger.info(f"\n[bold red]❌ Genesis failed:[/] {result.spec.name}")
 
-    console.print(f"   Files: {len(result.files_created)} | CHRONOS-1: {result.hours_saved:.2f}h")
+    console.logger.info(f"   Files: {len(result.files_created)} | CHRONOS-1: {result.hours_saved:.2f}h")
 
 
 @genesis_group.command("self")
@@ -144,27 +147,27 @@ def self_create() -> None:
     engine = GenesisEngine()
     spec = engine.self_create()
 
-    console.print("\n[bold cyan]∴ Genesis Self-Specification (Ω₀)[/]\n")
-    console.print(f"  Name:       [green]{spec.name}[/]")
-    console.print(f"  Type:       {spec.system_type}")
-    console.print(f"  Components: {len(spec.components)}")
-    console.print(f"  Auto-CLI:   {spec.auto_cli}")
-    console.print(f"  Auto-Tests: {spec.auto_tests}")
+    console.logger.info("\n[bold cyan]∴ Genesis Self-Specification (Ω₀)[/]\n")
+    console.logger.info(f"  Name:       [green]{spec.name}[/]")
+    console.logger.info(f"  Type:       {spec.system_type}")
+    console.logger.info(f"  Components: {len(spec.components)}")
+    console.logger.info(f"  Auto-CLI:   {spec.auto_cli}")
+    console.logger.info(f"  Auto-Tests: {spec.auto_tests}")
 
-    console.print("\n  [bold]Component Graph:[/]")
+    console.logger.info("\n  [bold]Component Graph:[/]")
     for comp in spec.components:
         deps = f" → [{', '.join(comp.dependencies)}]" if comp.dependencies else ""
-        console.print(f"    {comp.component_type:12s} [cyan]{comp.name}[/]{deps}")
+        console.logger.info(f"    {comp.component_type:12s} [cyan]{comp.name}[/]{deps}")
 
     # Preview
     preview = engine.preview(spec)
-    console.print("\n  [bold]File Preview:[/]")
+    console.logger.info("\n  [bold]File Preview:[/]")
     for comp_name, files in preview.items():
         for f in files:
-            console.print(f"    [dim]{comp_name}/{f}[/]")
+            console.logger.info(f"    [dim]{comp_name}/{f}[/]")
 
     # Output as JSON
-    console.print("\n  [dim]JSON spec available via: cortex genesis self --json[/]")
+    console.logger.info("\n  [dim]JSON spec available via: cortex genesis self --json[/]")
 
 
 @genesis_group.command("preview")
@@ -185,10 +188,10 @@ def preview(name: str, system_type: str) -> None:
 
     file_map = engine.preview(spec)
 
-    console.print(f"\n[bold]Genesis Preview:[/] {name} ({system_type})\n")
+    console.logger.info(f"\n[bold]Genesis Preview:[/] {name} ({system_type})\n")
     for comp_name, files in file_map.items():
         for f in files:
-            console.print(f"  [dim]{comp_name}/[/][cyan]{f}[/]")
+            console.logger.info(f"  [dim]{comp_name}/[/][cyan]{f}[/]")
 
 
 @genesis_group.command("templates")
@@ -199,10 +202,10 @@ def list_templates() -> None:
     registry = TemplateRegistry()
     templates = registry.list_templates()
 
-    console.print("\n[bold]Available Templates:[/]\n")
+    console.logger.info("\n[bold]Available Templates:[/]\n")
     for t in templates:
-        console.print(f"  [cyan]{t['name']:15s}[/] {t['description']}")
-    console.print()
+        console.logger.info(f"  [cyan]{t['name']:15s}[/] {t['description']}")
+    console.logger.info()
 
 
 @genesis_group.command("extend")
@@ -239,11 +242,11 @@ def extend(
             f"{len(result.files_created)} files added"
         )
         for f in result.files_created:
-            console.print(f"   [dim]{f}[/]")
+            console.logger.info(f"   [dim]{f}[/]")
     else:
-        console.print("\n[yellow]No new files added[/] — all components already exist.")
+        console.logger.info("\n[yellow]No new files added[/] — all components already exist.")
 
-    console.print(f"   CHRONOS-1: [yellow]{result.hours_saved:.2f}h[/]")
+    console.logger.info(f"   CHRONOS-1: [yellow]{result.hours_saved:.2f}h[/]")
 
 
 @genesis_group.command("compose")
@@ -269,11 +272,11 @@ def compose(
         system_name=system_name,
     )
 
-    console.print(f"\n[bold]Composed {len(result)} files for '{name}':[/]\n")
+    console.logger.info(f"\n[bold]Composed {len(result)} files for '{name}':[/]\n")
     for filename, content in result.items():
         lines = content.count("\n") + 1
-        console.print(f"  [cyan]{filename}[/] ({lines} lines)")
-    console.print()
+        console.logger.info(f"  [cyan]{filename}[/] ({lines} lines)")
+    console.logger.info()
 
 
 @genesis_group.command("specs")
@@ -281,14 +284,14 @@ def list_specs() -> None:
     """List available YAML specification templates."""
     specs_dir = Path(__file__).parent.parent / "genesis" / "specs"
     if not specs_dir.exists():
-        console.print("[yellow]No specs directory found.[/]")
+        console.logger.info("[yellow]No specs directory found.[/]")
         return
 
     yaml_files = sorted(specs_dir.glob("*.yaml"))
-    console.print("\n[bold]Available Genesis Specs:[/]\n")
+    console.logger.info("\n[bold]Available Genesis Specs:[/]\n")
     for f in yaml_files:
-        console.print(f"  [cyan]{f.stem:20s}[/] cortex genesis from-yaml {f}")
-    console.print()
+        console.logger.info(f"  [cyan]{f.stem:20s}[/] cortex genesis from-yaml {f}")
+    console.logger.info()
 
 
 def _default_components_for_type(system_type: str) -> list:

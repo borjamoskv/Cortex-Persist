@@ -104,7 +104,7 @@ class MeteringMiddleware(BaseHTTPMiddleware):
                 status_code=response.status_code,
                 tokens_used=tokens,
             )
-        except Exception:  # noqa: BLE001
+        except Exception:  # TODO(Swarm): Narrow this exception
             logger.exception("Failed to record usage for tenant %s", tenant_id)
 
         # ── Inject Usage Headers ──

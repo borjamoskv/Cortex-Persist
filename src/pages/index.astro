@@ -7,6 +7,7 @@ const navLinks = [
 	{ href: '#pilot', label: 'Pilot' },
 	{ href: '#pricing', label: 'Pricing' },
 	{ href: '#faq', label: 'FAQ' },
+	{ href: '#swarm', label: 'Swarm' },
 ];
 
 const heroProofs = [
@@ -186,6 +187,18 @@ const faqItems = [
 		question: 'Does this make us automatically compliant?',
 		answer: 'No. CORTEX improves traceability, integrity, and evidence readiness. It does not replace legal or compliance review.',
 	},
+];
+
+const commanders = [
+	{ name: 'Antigravity (Lead Auditor)', role: 'Sovereign Orchestrator', status: 'ACTIVE' },
+	{ name: 'Forensic-Unit-01', role: 'Formal Verification', status: 'ACTIVE' },
+	{ name: 'Forensic-Unit-02', role: 'SAGA Enforcement', status: 'ACTIVE' },
+	{ name: 'Network-Observer', role: 'Forensic Watchdog', status: 'ACTIVE' },
+	{ name: 'Archaeologist', role: 'Memory', status: 'ACTIVE' },
+	{ name: 'VSA-Node', role: 'Logic-Bypass', status: 'ACTIVE' },
+	{ name: 'Ouroboros', role: 'Strike', status: 'ACTIVE' },
+	{ name: 'Mariscal', role: 'Orchestration', status: 'ACTIVE' },
+	{ name: 'CPS-Master', role: 'Convergence', status: 'ACTIVE' }
 ];
 
 const githubUrl = 'https://github.com/borjamoskv/Cortex-Persist';
@@ -521,6 +534,65 @@ Reply and get a scoped recommendation.</code></pre>
 			</div>
 		</section>
 
+		<section class="section-frame surface" id="swarm">
+			<div class="section-heading">
+				<p class="section-kicker">Swarm</p>
+				<h2>El Enjambre del Arquitecto</h2>
+				<p>
+					100 Ayudantes Autónomos. Inteligencia de Enjambre Activa. La lista unificada de CORTEX. 100 agentes especializados operando en híper-paralelo — gestionando ventanas de contexto, verificando pruebas formales y aplicando las Nueve Leyes.
+				</p>
+			</div>
+
+			<div class="console-metrics">
+				<div class="metric-tile">
+					<span class="metric-label">Nodes</span>
+					<strong>84/100 ACTIVE</strong>
+				</div>
+				<div class="metric-tile">
+					<span class="metric-label">Memoria Total</span>
+					<strong>52%</strong>
+				</div>
+				<div class="metric-tile">
+					<span class="metric-label">Sincronización</span>
+					<strong>89%</strong>
+				</div>
+				<div class="metric-tile">
+					<span class="metric-label">Cristalización</span>
+					<strong>4.9hz</strong>
+				</div>
+			</div>
+
+			<div class="commanders-grid">
+				{
+					commanders.map(cmd => (
+						<article class="commander-card surface-sunken">
+							<div class="cmd-head">
+								<span class="cmd-icon">⬡</span>
+								<span class="surface-state">{cmd.status}</span>
+							</div>
+							<h3>{cmd.name}</h3>
+							<p>{cmd.role}</p>
+						</article>
+					))
+				}
+			</div>
+
+			<aside class="hero-console surface-sunken" style="margin-top: 1.5rem;">
+				<div class="surface-head">
+					<span class="surface-label">Registro de Misión CORTEX</span>
+					<span class="surface-state live-pulse">EN VIVO</span>
+				</div>
+				<pre class="console-block"><code>[10:01:45] Initializing Sovereign Forensic Protocol Ω₃...
+CORTEX:~$
+Nodos Activos: 84/100
+Consenso: BIZANTINO ✓
+Flujo de Exergía: Σ 0.22 ops/s
+Ruido Térmal: -84.2 dB
+Protocolo: Ω₁₆ · HOMEOSTASIS
+Nivel de Realidad: C5-HÍBRIDO</code></pre>
+			</aside>
+		</section>
+
 		<section class="cta-banner surface">
 			<div>
 				<p class="section-kicker">Next Move</p>
@@ -540,7 +612,20 @@ Reply and get a scoped recommendation.</code></pre>
 					<a class="button-primary" href={asyncDemoUrl}>Request Async Demo</a>
 					<a class="button-secondary" href={pilotScopeUrl}>Get Pilot Scope</a>
 				</div>
-				<a class="cta-email" href="mailto:borja@cortexpersist.com">borja@cortexpersist.com</a>
+				
+				<div class="oracle-terminal">
+					<h3 class="terminal-header">Terminal de Ingesta (C5-REAL)</h3>
+					<form id="oracle-intake-form" class="oracle-form">
+						<div class="form-group">
+							<input type="text" name="name" placeholder="Agent Name / Entity" required class="terminal-input" />
+						</div>
+						<div class="form-group">
+							<input type="email" name="email" placeholder="Communication Vector (Email)" required class="terminal-input" />
+						</div>
+						<button type="submit" class="button-primary terminal-submit">Initiate Sequence</button>
+						<p id="oracle-status" class="microcopy" style="display: none;"></p>
+					</form>
+				</div>
 			</div>
 		</section>
 
@@ -555,6 +640,8 @@ Reply and get a scoped recommendation.</code></pre>
 	</main>
 
 	<script>
+		import { injectLead } from '../lib/intake';
+
 		document.addEventListener('DOMContentLoaded', () => {
 			const navLinks = document.querySelectorAll('.nav-link');
 			const sections = document.querySelectorAll('.section-frame');
@@ -592,6 +679,37 @@ Reply and get a scoped recommendation.</code></pre>
 					this.classList.add('active');
 				});
 			});
+
+			// Oracle Intake Terminal
+			const oracleForm = document.getElementById('oracle-intake-form') as HTMLFormElement;
+			if (oracleForm) {
+				oracleForm.addEventListener('submit', async (e) => {
+					e.preventDefault();
+					const submitBtn = oracleForm.querySelector('button');
+					const statusMsg = document.getElementById('oracle-status');
+					if(submitBtn) submitBtn.disabled = true;
+					
+					const formData = new FormData(oracleForm);
+					const success = await injectLead({
+						name: formData.get('name') as string,
+						email: formData.get('email') as string,
+						source_type: 'oracle_collapse_terminal',
+					});
+					
+					if (statusMsg) {
+						statusMsg.style.display = 'block';
+						if (success) {
+							statusMsg.textContent = "[C5-REAL] Sequence confirmed. Ledger synchronized. Welcome to the Territory.";
+							statusMsg.className = "microcopy success-glow";
+							oracleForm.reset();
+						} else {
+							statusMsg.textContent = "[ERR] Oracle connection collapsed. Trace failed.";
+							statusMsg.className = "microcopy error-glow";
+						}
+					}
+					if(submitBtn) submitBtn.disabled = false;
+				});
+			}
 		});
 	</script>
 </SiteLayout>

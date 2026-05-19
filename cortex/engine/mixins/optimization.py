@@ -12,7 +12,7 @@ import time
 from collections import deque
 from concurrent.futures import ProcessPoolExecutor
 from enum import Enum
-from typing import Any, ClassVar, Optional, final
+from typing import Any, ClassVar, final
 
 import aiosqlite
 

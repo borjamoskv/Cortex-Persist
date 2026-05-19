@@ -15,7 +15,6 @@ import logging
 import time
 from collections import deque
 from dataclasses import dataclass, field
-from typing import Optional
 
 from .models import CausalEpisode, SourceMetadata
 

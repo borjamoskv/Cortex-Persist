@@ -15,7 +15,7 @@ import inspect
 import logging
 import types
 from collections.abc import Callable
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger("cortex.extensions.red_team.discovery")
 

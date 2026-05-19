@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 import json
 import os
 
@@ -30,11 +33,11 @@ ABI = json.loads(
 
 
 def send_heartbeat():
-    print("[Web3 Oracle] 🩸 Initiating thermodynamic heartbeat to blockchain...")
+    logger.info("[Web3 Oracle] 🩸 Initiating thermodynamic heartbeat to blockchain...")
 
     if not CONTRACT_ADDRESS or not PRIVATE_KEY:
-        print("[Web3 Oracle] ⚠️ Missing CORTEX_LIFELINE_CONTRACT or CORTEX_WALLET_KEY.")
-        print("[Web3 Oracle] ⚠️ Simulation Mode Only. Heartbeat aborted.")
+        logger.info("[Web3 Oracle] ⚠️ Missing CORTEX_LIFELINE_CONTRACT or CORTEX_WALLET_KEY.")
+        logger.info("[Web3 Oracle] ⚠️ Simulation Mode Only. Heartbeat aborted.")
         return False
 
     try:
@@ -58,7 +61,7 @@ def send_heartbeat():
         # Sign transaction locally -> Zero Trust (Axiom Ω₃)
         signed_tx = w3.eth.account.sign_transaction(tx_build, private_key=PRIVATE_KEY)
 
-        print(f"[Web3 Oracle] 🔑 Signed tx from {account.address}. Broadcasting to L2...")
+        logger.info(f"[Web3 Oracle] 🔑 Signed tx from {account.address}. Broadcasting to L2...")
 
         # Send raw transaction
         tx_hash = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
@@ -68,14 +71,14 @@ def send_heartbeat():
             print(
                 f"[Web3 Oracle] ✅ Immortality extended. Pulse locked in block {receipt.blockNumber}."  # type: ignore[type-error]
             )
-            print(f"[Web3 Oracle] 🔗 Tx Hash: {w3.to_hex(tx_hash)}")
+            logger.info(f"[Web3 Oracle] 🔗 Tx Hash: {w3.to_hex(tx_hash)}")
             return True
         else:
-            print(f"[Web3 Oracle] ❌ Tx Failed. Block {receipt.blockNumber}. Entropy rising.")  # type: ignore[type-error]
+            logger.info(f"[Web3 Oracle] ❌ Tx Failed. Block {receipt.blockNumber}. Entropy rising.")  # type: ignore[type-error]
             return False
 
     except Exception as e:  # noqa: BLE001 — Web3 transaction boundary
-        print(f"[Web3 Oracle] ❌ Oracle execution error: {e}")
+        logger.info(f"[Web3 Oracle] ❌ Oracle execution error: {e}")
         return False
 
 

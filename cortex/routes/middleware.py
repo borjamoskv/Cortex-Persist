@@ -9,7 +9,7 @@ import logging
 import time
 from collections import defaultdict
 from threading import Lock
-from typing import Any, Optional
+from typing import Any
 
 from fastapi import HTTPException
 from starlette.requests import Request

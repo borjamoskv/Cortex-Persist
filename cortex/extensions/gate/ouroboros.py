@@ -6,7 +6,7 @@ The thermodynamic enforcer for architectural scaling.
 import logging
 import time
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger("cortex.extensions.gate.ouroboros")
 

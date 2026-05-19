@@ -138,7 +138,7 @@ TTL Policy: PERSIST WITH DECAY - TTL: ghosts 30d, knowledge 180d, axioms ∞.
 [BEHAVIORAL TOPOLOGY (CODE GATES)]
 - ✅ `get_connection()` | ❌ `sqlite3.connect()`
 - ✅ `classify_content(data)` | ❌ Unshielded `INSERT`
-- ✅ `except (sqlite3.Error):` | ❌ `except Exception:  # noqa: BLE001`
+- ✅ `except (sqlite3.Error):` | ❌ `except Exception:  # TODO(Swarm): Narrow this exception
 - ✅ `from __future__ import annotations`
 
 [ACTIONABLE PAYLOAD: EXECUTION PROTOCOL]

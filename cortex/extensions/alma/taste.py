@@ -13,7 +13,7 @@ import math
 import re
 import time
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
 __all__ = [
     "TasteDimension",

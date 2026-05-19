@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 # This file is part of CORTEX.
 # Licensed under the Apache License, Version 2.0.
 # See top-level LICENSE file for details.
@@ -53,7 +56,7 @@ def emit_cmd(event_type: str, payload_json: str, source: str, project: str | Non
     try:
         payload = json.loads(payload_json)
     except json.JSONDecodeError:
-        console.print(f"[red]✗ Invalid JSON payload:[/] {payload_json}")
+        console.logger.info(f"[red]✗ Invalid JSON payload:[/] {payload_json}")
         raise SystemExit(1) from None
 
     bus, conn = _get_signal_bus(db)
@@ -96,7 +99,7 @@ def poll_cmd(
             limit=limit,
         )
         if not signals:
-            console.print("[dim]No unconsumed signals matching filter.[/]")
+            console.logger.info("[dim]No unconsumed signals matching filter.[/]")
             return
 
         table = Table(
@@ -122,7 +125,7 @@ def poll_cmd(
                 payload_str,
                 str(sig.created_at)[:19],
             )
-        console.print(table)
+        console.logger.info(table)
     finally:
         conn.close()
 
@@ -150,7 +153,7 @@ def history_cmd(
             limit=limit,
         )
         if not signals:
-            console.print("[dim]No signals in history.[/]")
+            console.logger.info("[dim]No signals in history.[/]")
             return
 
         table = Table(
@@ -179,7 +182,7 @@ def history_cmd(
                 payload_str,
                 str(sig.created_at)[:19],
             )
-        console.print(table)
+        console.logger.info(table)
     finally:
         conn.close()
 
@@ -191,22 +194,22 @@ def stats_cmd(db: str) -> None:
     bus, conn = _get_signal_bus(db)
     try:
         s = bus.stats()
-        console.print()
-        console.print("[bold cyan]📊 Signal Bus Stats[/]")
-        console.print(f"  Total signals:    [bold]{s['total']}[/]")
-        console.print(f"  Unconsumed:       [bold yellow]{s['unconsumed']}[/]")
-        console.print()
+        console.logger.info()
+        console.logger.info("[bold cyan]📊 Signal Bus Stats[/]")
+        console.logger.info(f"  Total signals:    [bold]{s['total']}[/]")
+        console.logger.info(f"  Unconsumed:       [bold yellow]{s['unconsumed']}[/]")
+        console.logger.info()
 
         if s["by_type"]:
-            console.print("  [dim]By type:[/]")
+            console.logger.info("  [dim]By type:[/]")
             for t, c in s["by_type"].items():
-                console.print(f"    [cyan]{t}[/]: {c}")
+                console.logger.info(f"    [cyan]{t}[/]: {c}")
 
         if s["by_source"]:
-            console.print("  [dim]By source:[/]")
+            console.logger.info("  [dim]By source:[/]")
             for src, c in s["by_source"].items():
-                console.print(f"    [dim]{src}[/]: {c}")
-        console.print()
+                console.logger.info(f"    [dim]{src}[/]: {c}")
+        console.logger.info()
     finally:
         conn.close()
 

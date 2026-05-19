@@ -15,7 +15,6 @@ import math
 import re
 import time
 from dataclasses import dataclass
-from typing import Optional
 
 from cortex.extensions.platform.sys import get_cortex_dir, is_linux, is_macos, is_windows
 

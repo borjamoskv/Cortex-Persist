@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """CLI commands: status."""
 
 from __future__ import annotations
@@ -62,6 +65,6 @@ def status(db, as_json) -> None:
         if s["types"]:
             types_str = ", ".join(f"{t}: {c}" for t, c in s["types"].items())
             table.add_row("By Type", f"[dim]{types_str}[/]")
-        console.print(table)
+        console.logger.info(table)
     finally:
         _run_async(engine.close())

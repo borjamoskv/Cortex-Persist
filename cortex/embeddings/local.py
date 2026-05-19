@@ -8,7 +8,7 @@ import math
 import os
 import sys
 import threading
-from typing import Optional, cast
+from typing import cast
 
 EMBEDDING_DIM = 384
 DEFAULT_EMBEDDING_MODEL = "all-MiniLM-L6-v2"

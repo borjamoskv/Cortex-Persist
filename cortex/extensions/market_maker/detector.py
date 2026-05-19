@@ -8,7 +8,7 @@ from __future__ import annotations
 import logging
 import random
 from decimal import Decimal
-from typing import Any, Optional, Protocol
+from typing import Any, Protocol
 
 from cortex.extensions.market_maker.models import TrendSignal
 

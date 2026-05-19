@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import logging
 from collections.abc import Awaitable, Callable
-from typing import Optional, TypeVar
+from typing import TypeVar
 
 from pydantic import BaseModel, ValidationError
 

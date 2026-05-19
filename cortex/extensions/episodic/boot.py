@@ -18,7 +18,7 @@ import sqlite3
 import time
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
-from typing import TYPE_CHECKING, Final, Optional
+from typing import TYPE_CHECKING, Final
 
 from cortex.extensions.episodic.main import Episode, EpisodicMemory, Pattern
 from cortex.memory.temporal import now_iso

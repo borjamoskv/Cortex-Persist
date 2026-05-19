@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """
 Commands for CHRONOS-1 The Senior Benchmark.
 
@@ -65,10 +68,10 @@ def analyze(ai_time: float, complexity: str) -> None:
             expand=False,
         )
 
-        console.print(panel)
+        console.logger.info(panel)
 
     except ValueError as e:
-        console.print(f"[red]Error:[/red] {e}")
+        console.logger.info(f"[red]Error:[/red] {e}")
         raise click.Abort() from e
 
 
@@ -113,7 +116,7 @@ def compound(project: str | None, persist: bool) -> None:
                 f"{chain.compound_hours:,.2f}",
             )
 
-        console.print(table)
+        console.logger.info(table)
 
         summary = (
             f"\n[cyan]Total Linear (ΣH):[/cyan] [white]{report.total_linear:,.2f}h[/white]\n"
@@ -127,10 +130,10 @@ def compound(project: str | None, persist: bool) -> None:
         if persist:
             fact_id = tracker.persist_report(report, project=project or "system")
             if fact_id:
-                console.print(f"[green]✔ Report persisted as Fact #{fact_id}[/green]")
+                console.logger.info(f"[green]✔ Report persisted as Fact #{fact_id}[/green]")
 
     except Exception as e:  # noqa: BLE001
-        console.print(f"[red]Error:[/red] {e}")
+        console.logger.info(f"[red]Error:[/red] {e}")
         raise click.Abort() from e
 
 
@@ -169,7 +172,7 @@ def projection(years: int, base_hours: float, rate: float) -> None:
                 f"{yr_mult:.1f}x",
             )
 
-        console.print(table)
+        console.logger.info(table)
 
         summary = (
             f"\n[cyan]Final Linear Yield:[/cyan] [white]{report.total_linear:,.0f}h[/white]\n"
@@ -182,5 +185,5 @@ def projection(years: int, base_hours: float, rate: float) -> None:
         )
 
     except Exception as e:  # noqa: BLE001
-        console.print(f"[red]Error:[/red] {e}")
+        console.logger.info(f"[red]Error:[/red] {e}")
         raise click.Abort() from e

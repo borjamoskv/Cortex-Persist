@@ -128,7 +128,7 @@ class SQLiteAdapter:
         """
         try:
             await self._conn.close()
-        except Exception:  # noqa: BLE001
+        except Exception:  # TODO(Swarm): Narrow this exception
             logger.debug("SQLiteAdapter.close: connection already closed or error")
 
     async def health_check(self) -> bool:
@@ -140,7 +140,7 @@ class SQLiteAdapter:
             async with self._conn.execute("SELECT 1") as cursor:
                 row = await cursor.fetchone()
                 return row is not None
-        except Exception:  # noqa: BLE001
+        except Exception:  # TODO(Swarm): Narrow this exception
             return False
 
     def __repr__(self) -> str:

@@ -24,7 +24,7 @@ class C5Orchestrator:
                 for file in files:
                     if file.endswith('.sol'):
                         try:
-                            with open(os.path.join(root, file), 'r', encoding='utf-8', errors='ignore') as f:
+                            with open(os.path.join(root, file), encoding='utf-8', errors='ignore') as f:
                                 content = f.read()
                                 if 'delegatecall' in content: endpoints.append('delegatecall')
                                 if 'transferFrom' in content: endpoints.append('transferFrom')
@@ -100,7 +100,7 @@ contract C5RealExploitTest is Test {{
             if len(poc_files) > 0:
                 self.log(f">>> [!] OUT OF BOUNDS MEMORY CORRUPTION LOGRADA: {len(poc_files)} PoCs Materiales listos.", "FUND-LOSS-SUCCESS")
                 if shutil.which("forge"):
-                    self.log(f"Ejecutando PoCs multiplicador x18 contra Foundry...", "FORGE-L2")
+                    self.log("Ejecutando PoCs multiplicador x18 contra Foundry...", "FORGE-L2")
                     # Match path to execute all mutation files concurrently using native forge threading
                     res_poc = subprocess.run(
                         ["forge", "test", "--match-path", "src/PoC_Stochastic_M*.sol"], 
@@ -111,7 +111,7 @@ contract C5RealExploitTest is Test {{
                     else:
                          self.log(f"Algún Harness sintético falló la compilación física. Salida test: {res_poc.stdout[:200]}", "WARN")
             else:
-                 self.log(f"Swarm falló la escritura material, 0 PoCs.", "ERROR")
+                 self.log("Swarm falló la escritura material, 0 PoCs.", "ERROR")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

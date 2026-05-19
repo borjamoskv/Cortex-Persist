@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """
 CORTEX CLI — Niche Arbitrage Commands
 """
@@ -28,7 +31,7 @@ def extract_cmd(url: str, name: str, tags: str, output: str | None):
     target = NicheTarget(url=url, name=name, tags=tag_list)
 
     # We use asyncio.run to kick off the pipeline
-    console.print(f"[bold cyan]▶ Iniciando Arbitraje de Nicho en:[/bold cyan] {name} ({url})")
+    console.logger.info(f"[bold cyan]▶ Iniciando Arbitraje de Nicho en:[/bold cyan] {name} ({url})")
 
     engine = NicheArbitrageEngine()
 
@@ -40,9 +43,9 @@ def extract_cmd(url: str, name: str, tags: str, output: str | None):
     if output:
         with open(output, "w", encoding="utf-8") as f:
             f.write(md_content)
-        console.print(f"[bold green]✔ Reporte guardado en {output}[/bold green]")
+        console.logger.info(f"[bold green]✔ Reporte guardado en {output}[/bold green]")
     else:
         # Print directly to console via Rich Markdown if installed, else raw text
         from rich.markdown import Markdown
 
-        console.print(Markdown(md_content))
+        console.logger.info(Markdown(md_content))

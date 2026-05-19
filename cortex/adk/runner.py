@@ -16,7 +16,6 @@ import argparse
 import asyncio
 import logging
 import sys
-from typing import Optional
 
 __all__ = ["run_cli", "run_web", "main"]
 
@@ -153,9 +152,9 @@ def run_cli(
     runner = Runner(agent=agent, app_name="cortex", session_service=session_service)
 
     toolbox_status = f" + {len(toolbox_tools)} Toolbox tools" if toolbox_tools else ""
-    print(f"\n🧠 CORTEX ADK — {agent.name}")
-    print(f"   Model: {agent.model}{toolbox_status}")
-    print("   Type 'quit' to exit\n")
+    logger.info(f"\n🧠 CORTEX ADK — {agent.name}")
+    logger.info(f"   Model: {agent.model}{toolbox_status}")
+    logger.info("   Type 'quit' to exit\n")
 
     session_obj = session_service.create_session(app_name="cortex", user_id="moskv-1")
     session = asyncio.run(session_obj) if asyncio.iscoroutine(session_obj) else session_obj
@@ -164,11 +163,11 @@ def run_cli(
         try:
             user_input = input("cortex> ").strip()
         except (EOFError, KeyboardInterrupt):
-            print("\n👋 Goodbye.")
+            logger.info("\n👋 Goodbye.")
             break
 
         if user_input.lower() in ("quit", "exit", "q"):
-            print("👋 Goodbye.")
+            logger.info("👋 Goodbye.")
             break
 
         if not user_input:
@@ -181,7 +180,7 @@ def run_cli(
             parts=[types.Part.from_text(text=user_input)],
         )
 
-        print()
+        logger.info()
         for event in runner.run(
             user_id="moskv-1",
             session_id=session.id,  # type: ignore[union-attr]
@@ -192,8 +191,8 @@ def run_cli(
                     parts = getattr(event.content, "parts", []) or []
                     for part in parts:
                         if part.text:
-                            print(part.text)
-        print()
+                            logger.info(part.text)
+        logger.info()
 
 
 # ─── Web Runner ──────────────────────────────────────────────────────

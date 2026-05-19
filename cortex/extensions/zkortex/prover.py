@@ -18,7 +18,7 @@ from __future__ import annotations
 import logging
 import time
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 from cortex.extensions.zkortex.commitment import KnowledgeCommitment, commit
 from cortex.extensions.zkortex.merkle import MerkleTree, ZKMembershipProof

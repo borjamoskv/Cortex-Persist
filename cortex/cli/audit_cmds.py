@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """
 CORTEX v6 — Audit Commands
 Commands for system security and architectural auditing.
@@ -40,12 +43,12 @@ def frontier_cmd(project: str, model: str | None):
             f"[bold green]✔ Audit executed via {result['provider']} "
             f"({result['latency']:.0f}ms)[/bold green]"
         )
-        console.print("\n[bold]⚖️ FRONTIER REPORT:[/bold]")
-        console.print(result["report_markdown"])
+        console.logger.info("\n[bold]⚖️ FRONTIER REPORT:[/bold]")
+        console.logger.info(result["report_markdown"])
     else:
         # Fallback or complete failure
         console.print(
             f"[bold red]❌ Critical failure during audit generation "
             f"({result['provider']})[/bold red]"
         )
-        console.print(result["report_markdown"])
+        console.logger.info(result["report_markdown"])

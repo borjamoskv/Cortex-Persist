@@ -147,7 +147,7 @@ class HealthLoop:
                 check=False,
                 capture_output=True,
             )
-        except Exception:  # noqa: BLE001
+        except Exception:  # TODO(Swarm): Narrow this exception
             logger.debug("macOS notifications unavailable")
 
     def persist_snapshot(

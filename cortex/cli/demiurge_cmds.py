@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """
 CLI commands for Demiurge Omega (Sortu).
 Dynamically forge and execute skills.
@@ -24,11 +27,11 @@ def demiurge_group() -> None:
 def forge(intent: tuple[str, ...]) -> None:
     """Dynamically compile, execute, and evaluate a skill."""
     if not intent:
-        console.print('[red]✗ Missing intent.[/red] Usage: cortex demiurge forge "do something"')
+        console.logger.info('[red]✗ Missing intent.[/red] Usage: cortex demiurge forge "do something"')
         return
 
     intent_str = " ".join(intent)
-    console.print(f"[bold cyan]⚒ Demiurge Omega Forge Initiated[/bold cyan] » '{intent_str}'")
+    console.logger.info(f"[bold cyan]⚒ Demiurge Omega Forge Initiated[/bold cyan] » '{intent_str}'")
 
     async def _run_forge():
         compiler = DemiurgeCompiler()
@@ -46,9 +49,9 @@ def forge(intent: tuple[str, ...]) -> None:
         console.print(
             f"[bold green]✓ Execution Success[/bold green] (Utility: {result.get('utility', 0.0)})"
         )
-        console.print(f"Result: {result.get('result')}")
+        console.logger.info(f"Result: {result.get('result')}")
     else:
-        console.print(f"[bold red]✗ Forge Failed: {result.get('reason')}[/bold red]")
+        console.logger.info(f"[bold red]✗ Forge Failed: {result.get('reason')}[/bold red]")
         if "code" in result:
             console.print(
                 Panel(

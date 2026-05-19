@@ -5,7 +5,6 @@ from __future__ import annotations
 import logging
 import math
 import uuid
-from typing import Optional
 
 from cortex.engine.slashing import SlashingEngine
 from cortex.telemetry.metrics import metrics

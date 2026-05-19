@@ -303,7 +303,7 @@ class PostgresBackend:
         try:
             result = await self.execute("SELECT 1 AS ok")
             return len(result) > 0 and result[0].get("ok") == 1
-        except Exception:  # noqa: BLE001 — health probe must always return bool
+        except Exception:  # TODO(Swarm): Narrow this exception
             return False
 
     def __repr__(self) -> str:

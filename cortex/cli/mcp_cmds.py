@@ -31,14 +31,14 @@ def aether_mcp(host: str, port: int, transport: str) -> None:
     try:
         from cortex.mcp.aether_server import run_aether_mcp
     except ImportError:
-        console.print("[red]❌ Error: MCP SDK not installed. Run: pip install 'mcp'[/red]")
+        console.logger.info("[red]❌ Error: MCP SDK not installed. Run: pip install 'mcp'[/red]")
         return
 
     console.print(
         f"[bold blue]🚀 Booting CORTEX Aether MCP Server (Transport: {transport}...)[/bold blue]"
     )
     if transport == "sse":
-        console.print(f"[dim]Listening on http://{host}:{port}/sse[/dim]")
+        console.logger.info(f"[dim]Listening on http://{host}:{port}/sse[/dim]")
 
     run_aether_mcp(host=host, port=port, transport=transport)
 

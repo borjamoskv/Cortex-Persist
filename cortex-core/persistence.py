@@ -110,7 +110,7 @@ def enqueue_swarm_task(agent_name: str, payload: dict):
     if not os.path.exists(SWARM_QUEUE_FILE):
         data = {"pending_tasks": []}
     else:
-        with open(SWARM_QUEUE_FILE, "r") as f:
+        with open(SWARM_QUEUE_FILE) as f:
             try:
                 data = json.load(f)
             except:

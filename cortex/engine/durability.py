@@ -9,7 +9,7 @@ import asyncio
 import atexit
 import logging
 import sys
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger("cortex.durability")
 

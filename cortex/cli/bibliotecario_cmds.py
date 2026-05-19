@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """
 CORTEX CLI — Bibliotecario (LIBRARIAN-1) commands.
 
@@ -79,7 +82,7 @@ async def _ingest_and_organize(path: Path) -> str:
     if not llm.available:
         return "Error: LLM provider not available. Set CORTEX_LLM_PROVIDER."
 
-    console.print(f"[cyan]🧠 LIBRARIAN-1 is ordering {len(content)} bytes of entropy...[/cyan]")
+    console.logger.info(f"[cyan]🧠 LIBRARIAN-1 is ordering {len(content)} bytes of entropy...[/cyan]")
 
     response = await llm.complete(
         prompt=f"Organize this raw input:\\n{content}",
@@ -112,7 +115,7 @@ def ordenar(path: str, output: str | None):
     if output:
         out_path = Path(output)
         out_path.write_text(result, encoding="utf-8")
-        console.print(f"[green]✅ Ordered knowledge saved to {out_path}[/green]")
+        console.logger.info(f"[green]✅ Ordered knowledge saved to {out_path}[/green]")
     else:
         console.print(
             Panel(result, border_style="cyan", title="[bold cyan]📚 LIBRARIAN-1 Memo[/bold cyan]")

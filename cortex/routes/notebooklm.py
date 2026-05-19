@@ -10,7 +10,6 @@ Provides REST endpoints for NotebookLM Ouroboros memory loop operations:
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional
 
 from fastapi import APIRouter, Depends, Query
 

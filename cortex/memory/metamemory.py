@@ -11,7 +11,7 @@ import math
 import time
 from collections import deque
 from dataclasses import dataclass, field
-from typing import Any, Final, Optional
+from typing import Any, Final
 
 logger = logging.getLogger("cortex.memory.metamemory")
 

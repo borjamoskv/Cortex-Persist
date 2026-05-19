@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """Comandos de CLI: vote, ledger verify, ledger checkpoint."""
 
 from __future__ import annotations
@@ -172,9 +175,9 @@ def _print_chain_report(report: dict) -> None:
         )
         return
 
-    console.print("[red]❌ Integridad de Cadena de Hashes: FALLIDA[/]")
+    console.logger.info("[red]❌ Integridad de Cadena de Hashes: FALLIDA[/]")
     for v in report["violations"]:
-        console.print(f"  [red]✗[/] {v['type']} en el Voto #{v.get('vote_id', 'N/A')}")
+        console.logger.info(f"  [red]✗[/] {v['type']} en el Voto #{v.get('vote_id', 'N/A')}")
 
 
 def _print_merkle_report(merkle_report: list[dict]) -> None:
@@ -186,7 +189,7 @@ def _print_merkle_report(merkle_report: list[dict]) -> None:
         )
         return
 
-    console.print("[red]❌ Integridad de Raíz Merkle: FALLIDA[/]")
+    console.logger.info("[red]❌ Integridad de Raíz Merkle: FALLIDA[/]")
     for r in merkle_report:
         if not r["valid"]:
             console.print(

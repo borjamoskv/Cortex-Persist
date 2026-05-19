@@ -170,7 +170,7 @@ async def neuro_static_fuzz(repo_url: str, effort: str = "think"):
     add_log("SLITHER-SIM ANALYZER", f"Scanned {len(sol_files)} Contracts")
 
     for filepath in sol_files:
-        with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
+        with open(filepath, encoding="utf-8", errors="ignore") as f:
             content = f.read()
             findings = SolidityAnalyzer.scan(content)
             for fnd in findings:

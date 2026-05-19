@@ -100,7 +100,7 @@ class AgencyHypervisor:
         # 2. Fire invisible side-effects (non-blocking)
         try:
             await self._projector.on_remember(fact_id, project, content)
-        except Exception:  # noqa: BLE001 — projector must never break store
+        except Exception:  # TODO(Swarm): Narrow this exception
             logger.debug("Projector on_remember failed for fact %d", fact_id)
 
         # 3. Compress to Receipt (tenant never sees fact_id as int)
@@ -129,7 +129,7 @@ class AgencyHypervisor:
         # Fire lightweight side-effects
         try:
             await self._projector.on_recall(query, project)
-        except Exception:  # noqa: BLE001
+        except Exception:  # TODO(Swarm): Narrow this exception
             pass
 
         # Handle fuse mode returning a string instead of list
@@ -172,7 +172,7 @@ class AgencyHypervisor:
             active_count = stats.get("active_facts", active_count)
 
             last_activity = facts[0].created_at if facts else None  # type: ignore[type-error]
-        except Exception:  # noqa: BLE001
+        except Exception:  # TODO(Swarm): Narrow this exception
             active_count = 0
             last_activity = None
 
@@ -184,7 +184,7 @@ class AgencyHypervisor:
                 chain_valid = (
                     result.get("valid", True) if isinstance(result, dict) else bool(result)
                 )
-        except Exception:  # noqa: BLE001
+        except Exception:  # TODO(Swarm): Narrow this exception
             chain_valid = False
 
         # Compress to HealthReport

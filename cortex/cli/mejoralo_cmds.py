@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """CLI commands: mejoralo scan, record, history, ship."""
 
 from __future__ import annotations
@@ -66,7 +69,7 @@ def mejoralo_scan(project, path, deep, brutal, auto_heal, relentless, target_sco
                     "[bold green]✅ Código purificado. Nivel INMEJORABLE alcanzado. (+Soberanía)[/]"
                 )
             else:
-                console.print("[bold red]❌ Relentless abortado. La deuda técnica persiste.[/]")
+                console.logger.info("[bold red]❌ Relentless abortado. La deuda técnica persiste.[/]")
         elif auto_heal and result.score < (target_score or 70):
             effective_target = target_score or 70
             console.print(
@@ -78,7 +81,7 @@ def mejoralo_scan(project, path, deep, brutal, auto_heal, relentless, target_sco
                     "[bold green]✅ Código purificado y comiteado automáticamente. (+Soberanía)[/]"
                 )
             else:
-                console.print("[bold red]❌ Auto-Heal abortado. La deuda técnica persiste.[/]")
+                console.logger.info("[bold red]❌ Auto-Heal abortado. La deuda técnica persiste.[/]")
     finally:
         close_engine_sync(engine)
 
@@ -108,7 +111,7 @@ def _display_scan_result(result):
         findings_str = "; ".join(d.findings[:3]) if d.findings else "—"
         table.add_row(d.name, f"[{d_color}]{d.score}[/]", d.weight, findings_str[:50])
 
-    console.print(table)
+    console.logger.info(table)
 
     mode_str = " | [bold red]BRUTAL[/]" if result.brutal else ""
     console.print(
@@ -119,7 +122,7 @@ def _display_scan_result(result):
     )
 
     if result.dead_code:
-        console.print("  [bold red]☠️  CÓDIGO MUERTO (score < 50)[/]")
+        console.logger.info("  [bold red]☠️  CÓDIGO MUERTO (score < 50)[/]")
 
 
 @mejoralo.command("record")
@@ -200,7 +203,7 @@ def mejoralo_history(project, limit, db):
         m = MejoraloEngine(engine)
         sessions = m.history(project, limit=limit)
         if not sessions:
-            console.print(f"[dim]Sin sesiones MEJORAlo para '{project}'.[/]")
+            console.logger.info(f"[dim]Sin sesiones MEJORAlo para '{project}'.[/]")
             return
         table = Table(title=f"📊 MEJORAlo History — {project}")
         table.add_column("ID", style="bold", width=6)
@@ -228,7 +231,7 @@ def mejoralo_history(project, limit, db):
                 f"[{d_color}]{delta:+d}[/]" if delta is not None else "—",
                 actions_str[:40],
             )
-        console.print(table)
+        console.logger.info(table)
     finally:
         close_engine_sync(engine)
 
@@ -259,12 +262,12 @@ def mejoralo_trend(project, window, db):
         icon = icons.get(trend.score_trend, "❓")
         color = colors.get(trend.score_trend, "white")
 
-        console.print(f"\n  {icon} [bold {color}]{trend.score_trend.upper()}[/]")
-        console.print(f"  Proyecto: [bold]{project}[/]")
-        console.print(f"  Sesiones analizadas: {trend.sessions_analyzed}")
-        console.print(f"  Score actual: [bold]{trend.latest_score}[/]")
-        console.print(f"  Delta promedio: [{color}]Δ{trend.avg_delta:+.1f}[/]")
-        console.print(f"  Tasa de mejora: {trend.positive_rate:.0%}")
+        console.logger.info(f"\n  {icon} [bold {color}]{trend.score_trend.upper()}[/]")
+        console.logger.info(f"  Proyecto: [bold]{project}[/]")
+        console.logger.info(f"  Sesiones analizadas: {trend.sessions_analyzed}")
+        console.logger.info(f"  Score actual: [bold]{trend.latest_score}[/]")
+        console.logger.info(f"  Delta promedio: [{color}]Δ{trend.avg_delta:+.1f}[/]")
+        console.logger.info(f"  Tasa de mejora: {trend.positive_rate:.0%}")
 
         # Decay risk bar
         risk_pct = trend.decay_risk * 100
@@ -275,14 +278,14 @@ def mejoralo_trend(project, window, db):
         else:
             risk_color = "red"
         bar = "█" * int(risk_pct / 5) + "░" * (20 - int(risk_pct / 5))
-        console.print(f"  Riesgo de decay: [{risk_color}]{bar} {risk_pct:.0f}%[/]")
+        console.logger.info(f"  Riesgo de decay: [{risk_color}]{bar} {risk_pct:.0f}%[/]")
 
         if trend.stagnant:
             console.print(
                 "  [bold red]⚠️  ESTANCAMIENTO DETECTADO — últimas 5 sesiones sin mejora[/]"
             )
 
-        console.print()
+        console.logger.info()
     finally:
         close_engine_sync(engine)
 
@@ -302,8 +305,8 @@ def mejoralo_ship(project, path, db):
             result = m.ship_gate(project, path)
         for seal in result.seals:
             icon = "[green]✓[/]" if seal.passed else "[red]✗[/]"
-            console.print(f"  {icon} {seal.name}: {seal.detail}")
-        console.print()
+            console.logger.info(f"  {icon} {seal.name}: {seal.detail}")
+        console.logger.info()
         if result.ready:
             console.print(
                 f"  [bold green]🚀 READY — {result.passed}/{result.total} sellos aprobados[/]"
@@ -331,9 +334,9 @@ def mejoralo_awwwards_fix(project, path, db):
             success = m.awwwards_fix(project, path)
 
         if success:
-            console.print("[bold green]✅ UI Purificada. Niveau SOTD alcanzado.[/]")
+            console.logger.info("[bold green]✅ UI Purificada. Niveau SOTD alcanzado.[/]")
         else:
-            console.print("[bold red]❌ Failed to apply Awwwards Fix.[/]")
+            console.logger.info("[bold red]❌ Failed to apply Awwwards Fix.[/]")
     finally:
         close_engine_sync(engine)
 
@@ -389,7 +392,7 @@ def mejoralo_antipatterns(path, magic, no_hints):
             f.message[:50],
         )
 
-    console.print(table)
+    console.logger.info(table)
 
     # ── Summary ──
     penalty = report.score_penalty()
@@ -404,8 +407,8 @@ def mejoralo_antipatterns(path, magic, no_hints):
 
     # ── Top fix hints ──
     if report.critical_count > 0:
-        console.print("  [bold red]🔧 Fix hints (critical):[/]")
+        console.logger.info("  [bold red]🔧 Fix hints (critical):[/]")
         for f in report.findings:
             if f.severity == "critical":
-                console.print(f"    → {f.file}:{f.line} — {f.fix_hint}")
-        console.print()
+                console.logger.info(f"    → {f.file}:{f.line} — {f.fix_hint}")
+        console.logger.info()

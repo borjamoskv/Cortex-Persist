@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from __future__ import annotations
 
 import asyncio
@@ -55,7 +58,7 @@ class ThermodynamicsOracle:
                 break
             except Exception as e:
                 # Log thermal noise error but don't choke the event loop
-                print(f"[THERMODYNAMIC NOISE] {e}")
+                logger.info(f"[THERMODYNAMIC NOISE] {e}")
             await asyncio.sleep(self.poll_interval)
 
     async def stop(self) -> None:

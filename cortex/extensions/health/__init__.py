@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """CORTEX Health — system-wide monitoring and scoring.
 
 Usage::
@@ -7,7 +10,7 @@ Usage::
     collector = HealthCollector(db_path="~/.cortex/cortex.db")
     metrics = collector.collect_all()
     score = HealthScorer.score(metrics)
-    print(score.grade)  # Grade.SOVEREIGN
+    logger.info(score.grade)  # Grade.SOVEREIGN
 """
 
 from cortex.extensions.health.collector import (

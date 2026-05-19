@@ -13,7 +13,7 @@ import asyncio
 import logging
 import sqlite3
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from cortex.config import FEDERATION_MODE, SHARD_DIR
 

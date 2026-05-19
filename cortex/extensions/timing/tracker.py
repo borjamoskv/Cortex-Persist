@@ -8,7 +8,6 @@ import sqlite3
 import threading
 import time
 from datetime import datetime, timedelta, timezone
-from typing import Optional
 
 from cortex.extensions.timing.models import (
     DEFAULT_GAP_SECONDS,

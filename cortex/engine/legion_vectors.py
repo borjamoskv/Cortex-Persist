@@ -110,7 +110,7 @@ class EntropyDemon:
     async def attack(self, code: str, context: Mapping[str, Any]) -> list[str]:
         findings = []
         # Checks for missing null-safety and generic exception handling
-        if "except Exception:  # noqa: BLE001" in code or "except:" in code:
+        if "except Exception:  # TODO(Swarm): Narrow this exception
             findings.append(
                 "Fragility: Bare `except` detected. System cannot tolerate undetected entropy."
             )
@@ -223,7 +223,7 @@ class VaultCracker:
                 findings.append(
                     "VaultCracker: Malleability attack succeeded (authentication failed)."
                 )
-            except Exception:  # noqa: BLE001 — expected decryption failure
+            except Exception:  # TODO(Swarm): Narrow this exception
                 pass  # Success = Tag caught it
 
         except Exception as e:  # noqa: BLE001 — attack vector execution boundary

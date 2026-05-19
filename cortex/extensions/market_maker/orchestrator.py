@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import logging
 import uuid
-from typing import Optional
 
 from cortex.extensions.market_maker.detector import TrendDetector
 from cortex.extensions.market_maker.models import (

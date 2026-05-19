@@ -243,7 +243,7 @@ class TriggerEngine:
             try:
                 if not trigger.predicate(signal):
                     continue
-            except Exception:  # noqa: BLE001
+            except Exception:  # TODO(Swarm): Narrow this exception
                 logger.debug(
                     "Predicate failed for trigger %s on signal %s",
                     trigger.id,

@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """
 KETER-∞ Daemon CLI commands.
 Sovereign Orchestration and Reality Weaver.
@@ -26,16 +29,16 @@ def keter_cmds() -> None:
 @click.argument("intent", required=True)
 def build_cmd(intent: str) -> None:
     """Construye un sistema completo desde cero."""
-    console.print(Panel(f"[bold gold1]KETER-BUILD[/]\nIntención: {intent}", border_style="gold1"))
+    console.logger.info(Panel(f"[bold gold1]KETER-BUILD[/]\nIntención: {intent}", border_style="gold1"))
 
     engine = KeterEngine()
     try:
         result = _run_async(engine.ignite(intent))
 
         status = result.get("status", "UNKNOWN")
-        console.print(f"\n[bold green]✓ KETER CASCADA COMPLETADA: {status}[/]")
+        console.logger.info(f"\n[bold green]✓ KETER CASCADA COMPLETADA: {status}[/]")
     except CortexError as e:
-        console.print(f"[bold red]Keter Error:[/] {e}")
+        console.logger.info(f"[bold red]Keter Error:[/] {e}")
         raise click.Abort() from e
 
 
@@ -50,9 +53,9 @@ def rewrite_cmd(target: str) -> None:
     engine = KeterEngine()
     try:
         _run_async(engine.ignite(f"Reescribe el componente {target} con estándar 130/100"))
-        console.print("\n[bold green]✓ REESCRITURA COMPLETADA[/]")
+        console.logger.info("\n[bold green]✓ REESCRITURA COMPLETADA[/]")
     except CortexError as e:
-        console.print(f"[bold red]Keter Error:[/] {e}")
+        console.logger.info(f"[bold red]Keter Error:[/] {e}")
         raise click.Abort() from e
 
 
@@ -73,14 +76,14 @@ def sovereign_status_cmd() -> None:
     scores = {dim.value: 100.0 for dim in Dimension}
     power = compute_power(scores, multiplier=1.3)
 
-    console.print(Panel("[bold cyan]CORTEX SOVEREIGN STATUS[/]", border_style="cyan"))
-    console.print(f"🌡️  [bold]Temp:[/][cyan] {endocrine.get_temperature():.2f}[/]")
-    console.print(f"🎭  [bold]Style:[/][cyan] {endocrine.get_response_style()}[/]")
-    console.print(f"⚡  [bold]Power:[/][cyan] {power.power}/1000[/]")
+    console.logger.info(Panel("[bold cyan]CORTEX SOVEREIGN STATUS[/]", border_style="cyan"))
+    console.logger.info(f"🌡️  [bold]Temp:[/][cyan] {endocrine.get_temperature():.2f}[/]")
+    console.logger.info(f"🎭  [bold]Style:[/][cyan] {endocrine.get_response_style()}[/]")
+    console.logger.info(f"⚡  [bold]Power:[/][cyan] {power.power}/1000[/]")
 
     hormones = endocrine.to_dict()["hormones"]
     h_str = " | ".join([f"{k.capitalize()}: {v:.2f}" for k, v in hormones.items()])
-    console.print(f"\n🧪 [dim]{h_str}[/]")
+    console.logger.info(f"\n🧪 [dim]{h_str}[/]")
 
 
 @sovereign_cmds.command("ignite")
@@ -89,23 +92,23 @@ def sovereign_ignite_cmd(env: str) -> None:
     """Ejecuta el pipeline soberano completo."""
     from cortex.extensions.sovereign.engine import run_pipeline
 
-    console.print(Panel("[bold green]⚡ INICIANDO IGNICIÓN SOBERANA[/]", border_style="green"))
+    console.logger.info(Panel("[bold green]⚡ INICIANDO IGNICIÓN SOBERANA[/]", border_style="green"))
 
     try:
         ctx = _run_async(run_pipeline(environment=env))
 
-        console.print("\n[bold]Fases del Pipeline:[/]")
+        console.logger.info("\n[bold]Fases del Pipeline:[/]")
         for r in ctx.results:
             status = "[green]✓[/]" if r.success else "[red]✗[/]"
-            console.print(f"  {status} {r.phase.name:<20} [dim]{r.duration_ms:>8.1f}ms[/]")
+            console.logger.info(f"  {status} {r.phase.name:<20} [dim]{r.duration_ms:>8.1f}ms[/]")
 
         if ctx.power:
-            console.print(f"\n[bold gold1]🌌 POWER LEVEL ALCANZADO: {ctx.power.power}[/]")
+            console.logger.info(f"\n[bold gold1]🌌 POWER LEVEL ALCANZADO: {ctx.power.power}[/]")
             if ctx.power.power >= 1300:
-                console.print("[bold green]🏆 ESTADO SOBERANO VALIDADO[/]")
+                console.logger.info("[bold green]🏆 ESTADO SOBERANO VALIDADO[/]")
 
     except Exception as e:  # noqa: BLE001
-        console.print(f"[bold red]Error de Ignición:[/] {e}")
+        console.logger.info(f"[bold red]Error de Ignición:[/] {e}")
         raise click.Abort() from e
 
 

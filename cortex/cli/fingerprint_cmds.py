@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """CLI commands: cortex fingerprint — cognitive pattern extraction."""
 
 from __future__ import annotations
@@ -67,7 +70,7 @@ def fingerprint_extract(
 
         # ── Agent prompt injection ────────────────────────────────────
         if prompt:
-            console.print(fp.to_agent_prompt())
+            console.logger.info(fp.to_agent_prompt())
             return
 
         # ── Rich TUI ─────────────────────────────────────────────────
@@ -81,7 +84,7 @@ def fingerprint_extract(
             f"{fp.active_domains} domains · "
             f"{fp.fingerprint_completeness:.0%} completeness)[/]\n"
         )
-        console.print(f"  Archetype: {_arch_badge(fp.archetype, fp.archetype_confidence)}\n")
+        console.logger.info(f"  Archetype: {_arch_badge(fp.archetype, fp.archetype_confidence)}\n")
 
         # Pattern vector table
         from rich.table import Table
@@ -109,11 +112,11 @@ def fingerprint_extract(
                 f"[{color}]{val:.0%}[/]",
                 f"[{color}]{_bar(val)}[/]",
             )
-        console.print(p_table)
+        console.logger.info(p_table)
 
         # Top domains
         if fp.domain_preferences:
-            console.print("\n[bold white]Top Domains[/]")
+            console.logger.info("\n[bold white]Top Domains[/]")
             d_table = Table(show_header=True, header_style="dim", box=None)
             d_table.add_column("Project", style="white")
             d_table.add_column("Type", style="dim")
@@ -132,7 +135,7 @@ def fingerprint_extract(
                     f"[{conf_color}]{d.avg_confidence_weight:.0%}[/]",
                     f"{d.recency_days:.0f}",
                 )
-            console.print(d_table)
+            console.logger.info(d_table)
 
         console.print(
             "\n[dim]Run with --prompt to get agent injection · --json for machine output[/]"

@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """CLI Interface for MCTS Quantum Git search (Chronos)."""
 
 import asyncio
@@ -57,7 +60,7 @@ def evolve(file: str, simulations: int, prompt: str) -> None:
             )
 
     except Exception as e:
-        console.print(f"[red]Singularity Error:[/red] {e}")
+        console.logger.info(f"[red]Singularity Error:[/red] {e}")
         raise click.Abort() from e
 
 

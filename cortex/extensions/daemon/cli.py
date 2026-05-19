@@ -17,7 +17,6 @@ from __future__ import annotations
 import logging
 import sys
 from pathlib import Path
-from typing import Optional
 
 import click
 from rich.console import Console
@@ -160,7 +159,7 @@ def check(ctx: click.Context) -> None:
     status = daemon.check()
 
     # Header
-    console.print()
+    console.logger.info()
     console.print(
         Panel(
             "[bold]MOSKV-1 DAEMON — CHECK[/]",
@@ -180,40 +179,40 @@ def check(ctx: click.Context) -> None:
         site_table.add_row(icon, site.url, ms)
 
     if status.sites:
-        console.print(site_table)
+        console.logger.info(site_table)
     else:
-        console.print("  [dim]No sites configured. Use --sites or daemon_config.json[/]")
-    console.print()
+        console.logger.info("  [dim]No sites configured. Use --sites or daemon_config.json[/]")
+    console.logger.info()
 
     # Ghosts
-    console.print("[bold]▸ Stale Projects[/]")
+    console.logger.info("[bold]▸ Stale Projects[/]")
     if status.stale_ghosts:
         for g in status.stale_ghosts:
-            console.print(f"  💤 [yellow]{g.project}[/] — {g.hours_stale:.0f}h sin actividad")
+            console.logger.info(f"  💤 [yellow]{g.project}[/] — {g.hours_stale:.0f}h sin actividad")
     else:
-        console.print("  [green]✅ All projects active[/]")
-    console.print()
+        console.logger.info("  [green]✅ All projects active[/]")
+    console.logger.info()
 
     # Memory
-    console.print("[bold]▸ CORTEX Memory[/]")
+    console.logger.info("[bold]▸ CORTEX Memory[/]")
     if status.memory_alerts:
         for m in status.memory_alerts:
-            console.print(f"  ⚠️  [yellow]{m.file}[/] — {m.hours_stale:.0f}h stale")
+            console.logger.info(f"  ⚠️  [yellow]{m.file}[/] — {m.hours_stale:.0f}h stale")
     else:
-        console.print("  [green]✅ Memory fresh[/]")
-    console.print()
+        console.logger.info("  [green]✅ Memory fresh[/]")
+    console.logger.info()
 
     # Duration
-    console.print(f"  [dim]Check completed in {status.check_duration_ms:.0f}ms[/]")
-    console.print()
+    console.logger.info(f"  [dim]Check completed in {status.check_duration_ms:.0f}ms[/]")
+    console.logger.info()
 
     # Summary
     if status.all_healthy:
-        console.print(Panel("[bold green]✅ ALL SYSTEMS NOMINAL[/]", border_style="green"))
+        console.logger.info(Panel("[bold green]✅ ALL SYSTEMS NOMINAL[/]", border_style="green"))
     else:
         issues = len(status.sites) - sum(1 for s in status.sites if s.healthy)
         issues += len(status.stale_ghosts) + len(status.memory_alerts)
-        console.print(Panel(f"[bold red]⚠️  {issues} ISSUE(S) DETECTED[/]", border_style="red"))
+        console.logger.info(Panel(f"[bold red]⚠️  {issues} ISSUE(S) DETECTED[/]", border_style="red"))
 
     sys.exit(0 if status.all_healthy else 1)
 
@@ -227,7 +226,7 @@ def status(as_json: bool) -> None:
         if as_json:
             click.echo('{"error": "no status found"}')
         else:
-            console.print("[yellow]No daemon status found. Run 'moskv-daemon check' first.[/]")
+            console.logger.info("[yellow]No daemon status found. Run 'moskv-daemon check' first.[/]")
         sys.exit(1)
 
     # JSON mode: dump and exit
@@ -276,13 +275,13 @@ def status(as_json: bool) -> None:
     for e in errors:
         table.add_row("  ❌ Error", str(e))
 
-    console.print(table)
+    console.logger.info(table)
 
 
 @cli.command()
 def version() -> None:
     """Show CORTEX / MOSKV-1 version."""
-    console.print(f"[bold cyan]MOSKV-1 Daemon[/] — CORTEX v{__version__}")
+    console.logger.info(f"[bold cyan]MOSKV-1 Daemon[/] — CORTEX v{__version__}")
 
 
 @cli.command()
@@ -301,7 +300,7 @@ def install() -> None:
     elif is_windows():
         install_windows()
     else:
-        console.print(f"[red]❌ Unsupported platform: {sys.platform}[/]")
+        console.logger.info(f"[red]❌ Unsupported platform: {sys.platform}[/]")
         sys.exit(1)
 
 
@@ -321,7 +320,7 @@ def uninstall() -> None:
     elif is_windows():
         uninstall_windows()
     else:
-        console.print(f"[red]❌ Unsupported platform: {sys.platform}[/]")
+        console.logger.info(f"[red]❌ Unsupported platform: {sys.platform}[/]")
         sys.exit(1)
 
 

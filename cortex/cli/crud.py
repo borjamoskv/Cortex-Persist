@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 """CLI commands: delete, list, edit."""
 
 from __future__ import annotations
@@ -60,7 +63,7 @@ def delete(fact_id, reason, tenant_id, db) -> None:
                 f"Write-back: {wb.files_written} archivos actualizados."
             )
         else:
-            console.print(f"[red]✗ No se pudo deprecar/deprecate fact #{fact_id}[/]")
+            console.logger.info(f"[red]✗ No se pudo deprecar/deprecate fact #{fact_id}[/]")
     finally:
         _run_async(engine.close())
 
@@ -134,7 +137,7 @@ def list_facts(project, fact_type, limit, tenant_id, db) -> None:
             tags = json.loads(row[4]) if row[4] else []
             tags_str = ", ".join(tags[:2]) + ("…" if len(tags) > 2 else "")
             table.add_row(str(row[0]), row[1], row[3], content_preview, tags_str)
-        console.print(table)
+        console.logger.info(table)
     finally:
         _run_async(engine.close())
 
@@ -270,8 +273,8 @@ def inspect(fact_id, tenant_id, db) -> None:
             Panel(info, title=f"Fact [bold]#{fact_id}[/]", expand=False, border_style="bright_blue")
         )
 
-        console.print("\n[bold]Content:[/]")
-        console.print(fact.content)
+        console.logger.info("\n[bold]Content:[/]")
+        console.logger.info(fact.content)
 
     finally:
         _run_async(engine.close())

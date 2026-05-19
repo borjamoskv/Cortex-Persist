@@ -1,4 +1,3 @@
-from typing import Optional
 
 """
 CORTEX v6 — Role-Based Access Control (RBAC) Engine.

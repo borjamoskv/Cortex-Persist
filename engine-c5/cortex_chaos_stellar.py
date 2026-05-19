@@ -17,7 +17,7 @@ def log(msg: str, tier: str = "INFO") -> None:
 def update_ledger(details: str):
     try:
         if os.path.exists(LEDGER_PATH):
-            with open(LEDGER_PATH, "r") as f:
+            with open(LEDGER_PATH) as f:
                 ledger = json.load(f)
         else:
             ledger = {}
