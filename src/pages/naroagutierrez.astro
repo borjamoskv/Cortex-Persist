@@ -1,0 +1,951 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+
+const exhibitions = [
+	{ date: 'Sep 2025', title: 'Verhoeven x12', venue: 'Próxima Presentación', status: 'upcoming' },
+	{ date: 'May 2025', title: 'DiviNos VaiVenes', venue: 'Politena Espacio de Arte, Bilbao', status: 'past' },
+	{ date: 'Jul 2024', title: 'Siarte y El Bosque de Oma', venue: 'Siarte Ediciones', status: 'past' },
+	{ date: 'Jan 2023', title: 'Emakumeen arteaN', venue: 'Harilka Elkartea (Colectivo Feminista)', status: 'past' },
+	{ date: 'Mar 2022', title: 'Repóker de Reinas', venue: 'Siarte Leku', status: 'past' },
+	{ date: 'Oct 2020', title: 'Iconos Pop', venue: 'Clara Campoamor, Barakaldo', status: 'past' },
+	{ date: 'Jul 2015', title: 'Espejos del Alma', venue: 'Ilustre Colegio de Abogados de Bizkaia', status: 'past' },
+	{ date: 'Sep 2012', title: 'Fitting Room', venue: 'Hotel Meliá Bilbao (difundido en EITB)', status: 'past' },
+	{ date: '2002/12', title: 'Espejos del Alma', venue: 'Museo de Bellas Artes de Bilbao', status: 'past' }
+];
+
+const artworks = [
+	{
+		id: 'amy-rocks',
+		title: 'Amy Rocks',
+		series: 'Rocks',
+		year: '2023',
+		medium: 'Acrílico y mica mineral sobre pizarra natural',
+		commons: 'Naroa_Gutierrez_Gil_-_Amy_Rocks_(2023).webp',
+		svgType: 'slate-amy'
+	},
+	{
+		id: 'marilyn-rocks',
+		title: 'Marilyn Rocks (I)',
+		series: 'Rocks',
+		year: '2023',
+		medium: 'Acrílico y mica mineral sobre pizarra natural',
+		commons: 'Naroa_Gutierrez_Gil_-_Marilyn_Rocks_(I)_(2023).webp',
+		svgType: 'slate-marilyn'
+	},
+	{
+		id: 'mr-fahrenheit',
+		title: 'Mr. Fahrenheit',
+		series: 'Tributos',
+		year: '2021',
+		medium: 'Técnica mixta y tinta sobre madera',
+		commons: 'Naroa_Gutierrez_Gil_-_Mr._Fahrenheit_(2021).webp',
+		svgType: 'portrait-freddie'
+	},
+	{
+		id: 'espejos-del-alma',
+		title: 'Espejos del Alma',
+		series: 'Espejos',
+		year: '2023',
+		medium: 'Acrílico y collage sobre lienzo',
+		commons: 'Naroa_Gutierrez_Gil_-_Espejos_del_Alma_(2023).webp',
+		svgType: 'mirror'
+	},
+	{
+		id: 'amor-en-conserva',
+		title: 'Amor en Conserva',
+		series: 'Enlatas',
+		year: '2022',
+		medium: 'Acrílico y técnica mixta sobre lienzo',
+		commons: 'Naroa_Gutierrez_Gil_-_Amor_en_Conserva_(2022).webp',
+		svgType: 'can'
+	},
+	{
+		id: 'lagrimas-de-oro',
+		title: 'Lágrimas de Oro',
+		series: 'Golden',
+		year: '2021',
+		medium: 'Acrílico y pan de oro sobre madera',
+		commons: 'Naroa_Gutierrez_Gil_-_Lagrimas_de_Oro_(2021).webp',
+		svgType: 'gold-tears'
+	},
+	{
+		id: 'peter-rowan',
+		title: 'Peter Rowan',
+		series: 'Retratos',
+		year: '2023',
+		medium: 'Carboncillo y acrílico sobre papel',
+		commons: 'Naroa_Gutierrez_Gil_-_Peter_Rowan_(2023).webp',
+		svgType: 'portrait-peter'
+	}
+];
+
+const pressLinks = [
+	{ date: '10/01/2009', media: 'El País', context: 'Expodistrito Bilbao - Espejos del Alma', url: 'https://elpais.com/diario/2009/01/10/paisvasco/1231620008_850215.html' },
+	{ date: '09/09/2014', media: 'La Vanguardia', context: 'Paisajes Retratados - Barakart', url: 'https://www.lavanguardia.com/local/pais-vasco/20140909/54414829898/las-salas-municipales-de-barakaldo-retoman-su-programacion-expositiva-en-septiembre-con-ocho.html' },
+	{ date: '25/03/2022', media: 'Siarte.com', context: 'Repóker de Reinas - Siarte Leku', url: 'https://siarte.com/2022-03-25-siarte-exposicion-pintura-collage-arte-naroa-gutierrez.php' },
+	{ date: '20/07/2015', media: 'DEIA', context: 'Espejos del alma - Colegio de Abogados', url: 'https://www.deia.eus/cultura/2015/07/20/agenda-5113256.html' },
+	{ date: '29/09/2012', media: 'EITB Kultura', context: 'Fitting Room 2012 - Meliá Bilbao', url: 'https://www.eitb.eus/es/television/detalle/956660/zinemaldia-los-cortos-kimuak-2012-zinemira--eitb-kultura/' }
+];
+---
+
+<SiteLayout
+	title="Wiki de Naroa Gutiérrez Gil | Nodo de Arte Institucional"
+	description="Ficha biográfica institucional, catálogo selecto de obras y cronología verificada de exposiciones de la artista plástica bilbaína Naroa Gutiérrez Gil."
+	canonical="https://cortexpersist.com/naroagutierrez"
+	lang="es"
+>
+	<main class="landing-shell wiki-layout">
+		<!-- Header de navegación superior -->
+		<header class="masthead">
+			<a class="brand" href="/" aria-label="CORTEX Persist home">
+				<span class="brand-mark">CP</span>
+				<span class="brand-copy">
+					<strong>CORTEX Persist</strong>
+					<span>Verifiable memory for AI agents</span>
+				</span>
+			</a>
+
+			<nav class="site-nav" aria-label="Primary">
+				<a class="nav-link" href="#perfil">Perfil</a>
+				<a class="nav-link" href="#obras">Obras</a>
+				<a class="nav-link" href="#exposiciones">Exposiciones</a>
+				<a class="nav-link" href="#prensa">Prensa</a>
+				<a class="nav-link" href="#institucional">Datos</a>
+			</nav>
+
+			<div class="masthead-actions">
+				<a class="button-tertiary" href="/vsa">
+					VSA Shell
+				</a>
+				<a class="button-primary" href="https://www.wikidata.org/wiki/Q137970281" target="_blank" rel="noreferrer">
+					Wikidata Node
+				</a>
+			</div>
+		</header>
+
+		<!-- Hero de la Ficha Biográfica -->
+		<section class="wiki-hero surface" id="perfil">
+			<div class="hero-header">
+				<div class="title-block">
+					<p class="eyebrow glow-green">Ficha Biográfica / Wiki Node</p>
+					<h1>Naroa Gutiérrez Gil</h1>
+					<p class="subtitle">Artista Plástica, Artivista y Artesana Emocional</p>
+				</div>
+				<div class="wikidata-badge">
+					<span class="badge-label">Wikidata ID</span>
+					<a href="https://www.wikidata.org/wiki/Q137970281" target="_blank" rel="noreferrer" class="badge-value">Q137970281</a>
+				</div>
+			</div>
+
+			<div class="wiki-intro-grid">
+				<div class="bio-text">
+					<p>
+						<strong>Naroa Gutiérrez Gil</strong> (Bilbao, España) es una artista plástica multidisciplinar y artivista conocida por sus retratos expresivos en técnica mixta y sus series conceptuales que exploran la figura humana, la introspección y la memoria emocional. Su práctica artística se distingue por la superposición tricolor y texturas minerales complejas sobre soportes no convencionales como la pizarra natural y la madera.
+					</p>
+					<p>
+						A lo largo de su trayectoria, Gutiérrez Gil ha desarrollado un lenguaje visual enfocado en el <strong>"error como método"</strong> y la tensión entre la precisión hiperrealista y la imperfección orgánica digital. Sus obras actúan como "espejos del alma" que invitan a la contemplación y a la re-creación personal a través de la pintura.
+					</p>
+					<div class="meta-pills">
+						<span class="chip font-mono">Bilbao, Euskadi</span>
+						<span class="chip font-mono">Hiperrealismo Pop</span>
+						<span class="chip font-mono">Técnica Mixta / Pizarra</span>
+						<span class="chip font-mono">Harilka Elkartea</span>
+					</div>
+				</div>
+				<aside class="bio-quick-facts surface-sunken">
+					<div class="surface-head">
+						<span class="surface-label">Detalles del Perfil</span>
+						<span class="surface-state">Verificado</span>
+					</div>
+					<div class="quick-facts-list">
+						<div class="fact-row">
+							<span class="label">Nacimiento</span>
+							<span class="val">Bilbao, Bizkaia</span>
+						</div>
+						<div class="fact-row">
+							<span class="label">Especialidad</span>
+							<span class="val">Retrato, Joyería de Autor, Pintura</span>
+						</div>
+						<div class="fact-row">
+							<span class="label">Movimiento</span>
+							<span class="val">Artivismo, Expresionismo Pop, Neo-Kintsugi</span>
+						</div>
+						<div class="fact-row">
+							<span class="label">Soporte Clave</span>
+							<span class="val">Pizarra, Lienzo, Madera de deriva</span>
+						</div>
+						<div class="fact-row">
+							<span class="label">Afiliación</span>
+							<span class="val">Harilka Elkartea, Azoka en Lataska</span>
+						</div>
+					</div>
+				</aside>
+			</div>
+		</section>
+
+		<!-- Sección de Catálogo de Obras Selectas -->
+		<section class="section-frame surface" id="obras">
+			<div class="section-heading">
+				<p class="section-kicker glow-blue">Catálogo selecto</p>
+				<h2>Obras Destacadas</h2>
+				<p>
+					Selección curada de obras maestras que ilustran la evolución de sus técnicas mixtas, texturas minerales de mica y soporte conceptual de retratos.
+				</p>
+			</div>
+
+			<div class="artworks-grid">
+				{artworks.map((work) => (
+					<article class="artwork-card-premium surface-sunken">
+						<div class="artwork-preview">
+							<!-- Procedural SVG representational blueprint for the artwork -->
+							{work.svgType === 'slate-amy' && (
+								<svg viewBox="0 0 400 300" class="art-svg" aria-label={`Representación abstracta de ${work.title}`}>
+									<rect width="100%" height="100%" fill="#080808"/>
+									<path d="M 50 80 L 350 50 L 370 240 L 30 260 Z" fill="#1b1c22" stroke="#2b3be5" stroke-width="1.5" opacity="0.85"/>
+									<path d="M 60 90 L 340 60 L 350 230 L 45 245 Z" fill="#14151a" stroke="#00ff41" stroke-width="1" opacity="0.7"/>
+									<circle cx="150" cy="140" r="45" fill="none" stroke="#2b3be5" stroke-dasharray="4 6" stroke-width="2"/>
+									<circle cx="250" cy="160" r="35" fill="none" stroke="#00ff41" stroke-dasharray="3 3" stroke-width="1.5"/>
+									<path d="M 120 150 Q 200 100 280 170" fill="none" stroke="#cc0000" stroke-width="3" stroke-linecap="round"/>
+									<text x="20" y="285" fill="#a6b3d2" font-family="monospace" font-size="10">SLATE SUBSTRATE // MICA OVERLAY</text>
+								</svg>
+							)}
+							{work.svgType === 'slate-marilyn' && (
+								<svg viewBox="0 0 400 300" class="art-svg" aria-label={`Representación abstracta de ${work.title}`}>
+									<rect width="100%" height="100%" fill="#080808"/>
+									<path d="M 60 60 L 340 70 L 320 250 L 80 230 Z" fill="#1e1f26" stroke="#2b3be5" stroke-width="1.5" opacity="0.85"/>
+									<path d="M 70 70 L 330 80 L 310 240 L 90 220 Z" fill="#121318" stroke="#00ff41" stroke-width="1" opacity="0.6"/>
+									<rect x="140" y="110" width="120" height="80" fill="none" stroke="#2b3be5" stroke-width="1" stroke-dasharray="5 5"/>
+									<path d="M 170 180 Q 200 130 230 180" fill="none" stroke="#cc0000" stroke-width="2.5"/>
+									<circle cx="200" cy="140" r="25" fill="none" stroke="#00ff41" stroke-width="1.5"/>
+									<text x="20" y="285" fill="#a6b3d2" font-family="monospace" font-size="10">PIZARRA // DUO-TONE TEXTURE</text>
+								</svg>
+							)}
+							{work.svgType === 'portrait-freddie' && (
+								<svg viewBox="0 0 400 300" class="art-svg" aria-label={`Representación abstracta de ${work.title}`}>
+									<rect width="100%" height="100%" fill="#080808"/>
+									<path d="M 100 50 L 300 50 L 300 250 L 100 250 Z" fill="#14141c" stroke="#2b3be5" stroke-width="1"/>
+									<circle cx="200" cy="110" r="50" fill="none" stroke="#00ff41" stroke-width="2"/>
+									<path d="M 170 170 H 230" stroke="#cc0000" stroke-width="4"/>
+									<path d="M 200 110 L 200 200" stroke="#2b3be5" stroke-dasharray="2 4" stroke-width="1"/>
+									<text x="20" y="285" fill="#a6b3d2" font-family="monospace" font-size="10">WOOD PANEL // DYNAMIC TRIBUTE</text>
+								</svg>
+							)}
+							{work.svgType === 'mirror' && (
+								<svg viewBox="0 0 400 300" class="art-svg" aria-label={`Representación abstracta de ${work.title}`}>
+									<rect width="100%" height="100%" fill="#080808"/>
+									<ellipse cx="200" cy="150" rx="90" ry="70" fill="#101322" stroke="#2b3be5" stroke-width="2"/>
+									<ellipse cx="200" cy="150" rx="80" ry="60" fill="none" stroke="#00ff41" stroke-dasharray="10 4 2 4" stroke-width="1"/>
+									<path d="M 130 150 Q 200 220 270 150" fill="none" stroke="#cc0000" stroke-width="3" stroke-linecap="round"/>
+									<text x="20" y="285" fill="#a6b3d2" font-family="monospace" font-size="10">CANVAS // REFLECTION ENGINE</text>
+								</svg>
+							)}
+							{work.svgType === 'can' && (
+								<svg viewBox="0 0 400 300" class="art-svg" aria-label={`Representación abstracta de ${work.title}`}>
+									<rect width="100%" height="100%" fill="#080808"/>
+									<rect x="130" y="70" width="140" height="160" rx="15" fill="#161822" stroke="#2b3be5" stroke-width="2"/>
+									<ellipse cx="200" cy="70" rx="70" ry="12" fill="#202436" stroke="#00ff41" stroke-width="1"/>
+									<path d="M 150 140 H 250" stroke="#cc0000" stroke-width="2.5"/>
+									<path d="M 150 160 H 250" stroke="#00ff41" stroke-width="1.5" stroke-dasharray="3 3"/>
+									<text x="145" y="125" fill="#edf5ff" font-family="'Orbitron', sans-serif" font-size="12" letter-spacing="1">AMOR</text>
+									<text x="20" y="285" fill="#a6b3d2" font-family="monospace" font-size="10">ENLATAS SERIES // POP METAPHOR</text>
+								</svg>
+							)}
+							{work.svgType === 'gold-tears' && (
+								<svg viewBox="0 0 400 300" class="art-svg" aria-label={`Representación abstracta de ${work.title}`}>
+									<rect width="100%" height="100%" fill="#080808"/>
+									<polygon points="200,60 270,230 130,230" fill="#1c1810" stroke="#d8b56a" stroke-width="2"/>
+									<path d="M 200 60 V 230" stroke="#00ff41" stroke-width="1" stroke-dasharray="5 5"/>
+									<circle cx="200" cy="130" r="10" fill="#cc0000"/>
+									<path d="M 200 130 Q 180 180 185 220" fill="none" stroke="#d8b56a" stroke-width="3" stroke-linecap="round"/>
+									<path d="M 200 130 Q 220 190 215 220" fill="none" stroke="#d8b56a" stroke-width="3" stroke-linecap="round"/>
+									<text x="20" y="285" fill="#a6b3d2" font-family="monospace" font-size="10">GOLDEN SERIES // METALLIC ACCENT</text>
+								</svg>
+							)}
+							{work.svgType === 'portrait-peter' && (
+								<svg viewBox="0 0 400 300" class="art-svg" aria-label={`Representación abstracta de ${work.title}`}>
+									<rect width="100%" height="100%" fill="#080808"/>
+									<path d="M 120 70 Q 200 30 280 70 T 320 220 Q 200 270 80 220 Z" fill="#13141a" stroke="#2b3be5" stroke-width="1" opacity="0.8"/>
+									<path d="M 160 140 C 160 110, 240 110, 240 140" fill="none" stroke="#00ff41" stroke-width="2"/>
+									<circle cx="200" cy="150" r="6" fill="#cc0000"/>
+									<path d="M 150 180 C 180 210, 220 210, 250 180" fill="none" stroke="#edf5ff" stroke-width="1.5" stroke-dasharray="2 2"/>
+									<text x="20" y="285" fill="#a6b3d2" font-family="monospace" font-size="10">RETRATOS // HIGHCONTRAST CHARCOAL</text>
+								</svg>
+							)}
+						</div>
+						<div class="artwork-info">
+							<div class="info-header">
+								<span class="artwork-tag-series">{work.series}</span>
+								<span class="artwork-tag-year">{work.year}</span>
+							</div>
+							<h3>{work.title}</h3>
+							<p class="artwork-medium">{work.medium}</p>
+							<div class="artwork-actions">
+								<span class="commons-tag">Commons: {work.id}</span>
+								<a href={`https://commons.wikimedia.org/wiki/File:${work.commons}`} target="_blank" rel="noreferrer" class="button-tertiary compact">
+									Wiki Asset
+								</a>
+							</div>
+						</div>
+					</article>
+				))}
+			</div>
+		</section>
+
+		<!-- Sección de Cronología de Exposiciones -->
+		<section class="section-frame surface" id="exposiciones">
+			<div class="section-heading">
+				<p class="section-kicker glow-green">Historial</p>
+				<h2>Cronología de Exposiciones</h2>
+				<p>
+					Registro verificado de exposiciones en museos, espacios colectivos e instituciones desde el año 2002.
+				</p>
+			</div>
+
+			<div class="timeline-container">
+				<div class="timeline-line"></div>
+				<div class="timeline-list">
+					{exhibitions.map((ex) => (
+						<div class:list={['timeline-item', ex.status === 'upcoming' && 'timeline-upcoming']}>
+							<div class="timeline-time font-mono">
+								{ex.date}
+								{ex.status === 'upcoming' && <span class="badge-upcoming">PRÓXIMA</span>}
+							</div>
+							<div class="timeline-badge-node"></div>
+							<div class="timeline-content surface-sunken">
+								<h3>{ex.title}</h3>
+								<p class="venue">{ex.venue}</p>
+							</div>
+						</div>
+					))}
+				</div>
+			</div>
+		</section>
+
+		<!-- Sección de Prensa y Colectivos -->
+		<div class="wiki-dual-section">
+			<!-- Verified Press Index -->
+			<section class="section-frame surface" id="prensa">
+				<div class="section-heading">
+					<p class="section-kicker glow-blue">Hemeroteca</p>
+					<h2>Prensa e Impacto Editorial</h2>
+					<p>
+						Indexación de artículos y referencias críticas en prensa de primer nivel que sustentan el registro institucional de notabilidad.
+					</p>
+				</div>
+
+				<div class="press-table-container">
+					<table class="press-table">
+						<thead>
+							<tr>
+								<th>Fecha</th>
+								<th>Medio</th>
+								<th>Contexto / Enlace</th>
+							</tr>
+						</thead>
+						<tbody>
+							{pressLinks.map((press) => (
+								<tr>
+									<td class="font-mono text-muted">{press.date}</td>
+									<td><strong>{press.media}</strong></td>
+									<td>
+										<a href={press.url} target="_blank" rel="noreferrer" class="press-link">
+											{press.context}
+											<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-icon"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+										</a>
+									</td>
+								</tr>
+							))}
+						</tbody>
+					</table>
+				</div>
+			</section>
+
+			<!-- Artivism and Collectives Details -->
+			<section class="section-frame surface" id="colectivos">
+				<div class="section-heading">
+					<p class="section-kicker glow-green">Artivismo</p>
+					<h2>Redes y Espacio Público</h2>
+					<p>
+						Integración en redes sororales, colectivos transformadores de Bizkaia y muestras públicas en la costa vasca.
+					</p>
+				</div>
+
+				<div class="collectives-grid">
+					<article class="collective-card surface-sunken">
+						<h3>Harilka Elkartea (Bilbao)</h3>
+						<p>
+							Participación activa en el tejido transfeminista y socialmente crítico de Bilbao a través de iniciativas plásticas colectivas, destacando la muestra <strong>"Emakumeen arteaN"</strong> en 2023.
+						</p>
+						<span class="association-tag">Red de Sororidad</span>
+					</article>
+
+					<article class="collective-card surface-sunken">
+						<h3>Azoka en Lataska (Sopela)</h3>
+						<p>
+							Acción artística enfocada en democratizar y expandir las artes visuales en espacios de proximidad de Uribe Kosta. Presentación periódica de retratos de pizarra y madera expuestos al aire libre.
+						</p>
+						<span class="association-tag">Espacio Comunitario</span>
+					</article>
+
+					<article class="collective-card surface-sunken">
+						<h3>Udaberriko Jaia (Sopelana)</h3>
+						<p>
+							Colaboración interdisciplinar que fusiona las artes plásticas con las danzas tradicionales y ritos culturales vascos en coordinación con Meñakoz Dantza Taldea.
+						</p>
+						<span class="association-tag">Identidad Cultural</span>
+					</article>
+				</div>
+			</section>
+		</div>
+
+		<!-- Sección de Enlaces y Metadatos Institucionales -->
+		<section class="section-frame surface" id="institucional">
+			<div class="section-heading">
+				<p class="section-kicker glow-blue">Metadatos</p>
+				<h2>Sustrato Institucional & Wikidata</h2>
+				<p>
+					Nodos semánticos globales y registros de control de autoridad para motores de búsqueda semántica.
+				</p>
+			</div>
+
+			<div class="metadata-grid">
+				<div class="metadata-card surface-sunken">
+					<span class="surface-label">Wikidata Authority Node</span>
+					<h3>Elemento Q137970281</h3>
+					<p>
+						Registro global estructurado con traducciones e identificadores cruzados. Base de la indexación artificial SOTA.
+					</p>
+					<a href="https://www.wikidata.org/wiki/Q137970281" target="_blank" rel="noreferrer" class="button-secondary">
+						Ver Wikidata Node
+					</a>
+				</div>
+
+				<div class="metadata-card surface-sunken">
+					<span class="surface-label">Wikipedia es</span>
+					<h3>Entrada Enciclopédica</h3>
+					<p>
+						Artículo verificado y publicado bajo estrictos pilares de relevancia enciclopédica y hemerográfica.
+					</p>
+					<a href="https://es.wikipedia.org/wiki/Naroa_Guti%C3%A9rrez_Gil" target="_blank" rel="noreferrer" class="button-secondary">
+						Ver Wikipedia es
+					</a>
+				</div>
+
+				<div class="metadata-card surface-sunken">
+					<span class="surface-label">Wikinoticias es</span>
+					<h3>Crónica Periodística</h3>
+					<p>
+						Cobertura informativa del proyecto expositivo DiviNos VaiVenes presentado en Politena.
+					</p>
+					<a href="https://es.wikinews.org/wiki/La_artista_bilba%C3%ADna_Naroa_Guti%C3%A9rrez_Gil_presenta_%22DiviNos_VaiVenes%22_en_Politena" target="_blank" rel="noreferrer" class="button-secondary">
+						Ver Wikinoticias es
+					</a>
+				</div>
+			</div>
+		</section>
+
+		<!-- Footer de la Wiki -->
+		<footer class="site-footer">
+			<p class="footer-note">CORTEX Persist / Wiki de Naroa Gutiérrez Gil. Trabajo real verificable (C5-REAL).</p>
+			<div class="footer-links">
+				<a href="/">Inicio</a>
+				<a href="https://github.com/borjamoskv/Cortex-Persist" target="_blank" rel="noreferrer">GitHub</a>
+				<a href="/vsa">VSA Explorer</a>
+			</div>
+		</footer>
+	</main>
+</SiteLayout>
+
+<style>
+	/* Wiki Styling Overlays */
+	.wiki-layout {
+		--accent-wiki: #2b3be5; /* Hibonite Blue */
+		--accent-green: #00ff41; /* Laser Green */
+		--accent-red: #cc0000; /* Blood Red */
+		--bg-wiki: #0a0a0a;
+	}
+
+	.glow-green {
+		color: var(--accent-green) !important;
+		text-shadow: 0 0 10px rgba(0, 255, 65, 0.2);
+	}
+
+	.glow-blue {
+		color: var(--accent-wiki) !important;
+		text-shadow: 0 0 10px rgba(43, 59, 229, 0.2);
+	}
+
+	.wiki-hero {
+		padding: 2.2rem;
+		display: grid;
+		gap: 2rem;
+		margin-top: 1.5rem;
+		animation: reveal-rise 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+	}
+
+	.hero-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		flex-wrap: wrap;
+		gap: 1.5rem;
+		border-bottom: 1px solid var(--line);
+		padding-bottom: 1.5rem;
+	}
+
+	.title-block h1 {
+		font-family: 'Orbitron', sans-serif;
+		font-size: clamp(2rem, 5vw, 3.8rem);
+		font-weight: 800;
+		letter-spacing: 0.05em;
+		text-transform: uppercase;
+		margin: 0.5rem 0;
+		line-height: 1;
+		color: #ffffff;
+	}
+
+	.subtitle {
+		font-size: clamp(1rem, 2.5vw, 1.35rem);
+		color: var(--muted);
+		margin: 0;
+	}
+
+	.wikidata-badge {
+		background: rgba(255, 255, 255, 0.03);
+		border: 1px solid var(--line);
+		border-radius: var(--radius-md);
+		padding: 0.8rem 1.1rem;
+		display: flex;
+		flex-direction: column;
+		gap: 0.2rem;
+	}
+
+	.badge-label {
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 0.65rem;
+		color: var(--muted);
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+	}
+
+	.badge-value {
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 1.05rem;
+		font-weight: 700;
+		color: var(--accent-green);
+	}
+
+	.badge-value:hover {
+		text-decoration: underline;
+	}
+
+	.wiki-intro-grid {
+		display: grid;
+		grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
+		gap: 2.2rem;
+	}
+
+	.bio-text {
+		display: flex;
+		flex-direction: column;
+		gap: 1.2rem;
+		line-height: 1.8;
+		font-size: 1.08rem;
+		color: #edf5ff;
+	}
+
+	.bio-text strong {
+		color: #ffffff;
+	}
+
+	.meta-pills {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.6rem;
+		margin-top: 0.8rem;
+	}
+
+	.bio-quick-facts {
+		padding: 1.5rem;
+		display: flex;
+		flex-direction: column;
+		gap: 1.2rem;
+	}
+
+	.quick-facts-list {
+		display: grid;
+		gap: 0.8rem;
+	}
+
+	.fact-row {
+		display: flex;
+		justify-content: space-between;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+		padding-bottom: 0.6rem;
+		font-size: 0.92rem;
+		gap: 0.8rem;
+	}
+
+	.fact-row .label {
+		color: var(--muted);
+		font-family: 'IBM Plex Mono', monospace;
+	}
+
+	.fact-row .val {
+		color: #ffffff;
+		font-weight: 600;
+		text-align: right;
+	}
+
+	/* Artworks premium grid styling */
+	.artworks-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+		gap: 1.5rem;
+		margin-top: 1.5rem;
+	}
+
+	.artwork-card-premium {
+		display: flex;
+		flex-direction: column;
+		border-radius: var(--radius-xl);
+		overflow: hidden;
+		transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+		height: 100%;
+	}
+
+	.artwork-card-premium:hover {
+		transform: translateY(-4px);
+		border-color: var(--line-strong);
+	}
+
+	.artwork-preview {
+		background-color: #050505;
+		border-bottom: 1px solid var(--line);
+		position: relative;
+		overflow: hidden;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+
+	.art-svg {
+		width: 100%;
+		height: auto;
+		display: block;
+		aspect-ratio: 4 / 3;
+	}
+
+	.artwork-info {
+		padding: 1.4rem;
+		display: grid;
+		gap: 0.75rem;
+		flex-grow: 1;
+		align-content: space-between;
+	}
+
+	.info-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.artwork-tag-series {
+		background: rgba(43, 59, 229, 0.15);
+		border: 1px solid rgba(43, 59, 229, 0.3);
+		border-radius: 999px;
+		color: var(--accent-soft);
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 0.65rem;
+		padding: 0.25rem 0.6rem;
+		text-transform: uppercase;
+		letter-spacing: 0.1em;
+	}
+
+	.artwork-tag-year {
+		font-family: 'Orbitron', sans-serif;
+		font-size: 0.85rem;
+		color: var(--muted);
+	}
+
+	.artwork-info h3 {
+		font-size: 1.25rem;
+		color: #ffffff;
+		margin: 0;
+	}
+
+	.artwork-medium {
+		font-size: 0.9rem;
+		color: var(--muted);
+		line-height: 1.5;
+		margin: 0;
+	}
+
+	.artwork-actions {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-top: 0.6rem;
+		border-top: 1px solid rgba(255, 255, 255, 0.05);
+		padding-top: 0.8rem;
+		gap: 0.5rem;
+	}
+
+	.commons-tag {
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 0.65rem;
+		color: var(--muted);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	/* Timeline of Exhibitions */
+	.timeline-container {
+		position: relative;
+		margin-top: 2rem;
+		padding: 1rem 0;
+	}
+
+	.timeline-line {
+		position: absolute;
+		left: 19px;
+		top: 0;
+		bottom: 0;
+		width: 2px;
+		background: linear-gradient(180deg, var(--accent-green) 0%, var(--accent-wiki) 60%, transparent 100%);
+		opacity: 0.4;
+	}
+
+	.timeline-list {
+		display: grid;
+		gap: 1.5rem;
+	}
+
+	.timeline-item {
+		position: relative;
+		display: grid;
+		grid-template-columns: 100px 40px 1fr;
+		align-items: center;
+	}
+
+	.timeline-time {
+		font-weight: 700;
+		font-size: 0.95rem;
+		color: var(--accent-green);
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.3rem;
+	}
+
+	.badge-upcoming {
+		font-size: 0.6rem;
+		background: rgba(255, 197, 120, 0.15);
+		border: 1px solid var(--warning);
+		color: var(--warning);
+		padding: 0.15rem 0.4rem;
+		border-radius: 999px;
+		letter-spacing: 0.08em;
+	}
+
+	.timeline-badge-node {
+		width: 12px;
+		height: 12px;
+		border-radius: 50%;
+		background: var(--bg-0);
+		border: 3px solid var(--accent-green);
+		box-shadow: 0 0 8px var(--accent-green);
+		z-index: 2;
+		justify-self: center;
+	}
+
+	.timeline-upcoming .timeline-badge-node {
+		border-color: var(--warning);
+		box-shadow: 0 0 8px var(--warning);
+	}
+
+	.timeline-item:nth-child(n+3) .timeline-badge-node {
+		border-color: var(--accent-wiki);
+		box-shadow: 0 0 8px var(--accent-wiki);
+	}
+
+	.timeline-content {
+		padding: 1.1rem 1.4rem;
+		margin: 0;
+	}
+
+	.timeline-content h3 {
+		font-size: 1.1rem;
+		margin: 0 0 0.35rem 0;
+		color: #ffffff;
+	}
+
+	.timeline-content .venue {
+		margin: 0;
+		font-size: 0.9rem;
+		color: var(--muted);
+	}
+
+	/* Hemeroteca Press table and collectives layout */
+	.wiki-dual-section {
+		display: grid;
+		grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+		gap: 1.5rem;
+		margin-top: 1rem;
+	}
+
+	.press-table-container {
+		width: 100%;
+		overflow-x: auto;
+		margin-top: 1.2rem;
+	}
+
+	.press-table {
+		width: 100%;
+		border-collapse: collapse;
+		text-align: left;
+	}
+
+	.press-table th {
+		padding: 0.8rem;
+		border-bottom: 2px solid var(--line);
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 0.74rem;
+		color: var(--accent-soft);
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+	}
+
+	.press-table td {
+		padding: 0.95rem 0.8rem;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+		font-size: 0.95rem;
+	}
+
+	.press-link {
+		color: var(--accent-bright);
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+	}
+
+	.press-link:hover {
+		color: var(--accent-green);
+		text-decoration: underline;
+	}
+
+	.inline-icon {
+		opacity: 0.6;
+		transition: opacity 0.2s;
+	}
+
+	.press-link:hover .inline-icon {
+		opacity: 1;
+	}
+
+	.collectives-grid {
+		display: grid;
+		gap: 1rem;
+		margin-top: 1.2rem;
+	}
+
+	.collective-card {
+		padding: 1.2rem;
+		display: grid;
+		gap: 0.55rem;
+		align-content: start;
+	}
+
+	.collective-card h3 {
+		font-size: 1.15rem;
+		color: #ffffff;
+		margin: 0;
+	}
+
+	.collective-card p {
+		font-size: 0.9rem;
+		line-height: 1.6;
+		margin: 0;
+	}
+
+	.association-tag {
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 0.65rem;
+		color: var(--accent-green);
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		margin-top: 0.35rem;
+	}
+
+	/* Metadata Grid styling */
+	.metadata-grid {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 1.2rem;
+		margin-top: 1.5rem;
+	}
+
+	.metadata-card {
+		padding: 1.5rem;
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		align-items: flex-start;
+		gap: 1rem;
+		min-height: 13.5rem;
+	}
+
+	.metadata-card h3 {
+		font-size: 1.2rem;
+		color: #ffffff;
+		margin: 0;
+	}
+
+	.metadata-card p {
+		font-size: 0.88rem;
+		line-height: 1.6;
+		margin: 0;
+	}
+
+	.metadata-card .button-secondary {
+		width: 100%;
+		font-size: 0.88rem;
+		padding: 0.75rem;
+	}
+
+	/* Responsive layouts */
+	@media (max-width: 968px) {
+		.wiki-intro-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.wiki-dual-section {
+			grid-template-columns: 1fr;
+		}
+
+		.metadata-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	@media (max-width: 640px) {
+		.timeline-item {
+			grid-template-columns: 1fr;
+			gap: 0.6rem;
+		}
+
+		.timeline-badge-node {
+			display: none;
+		}
+
+		.timeline-line {
+			display: none;
+		}
+
+		.hero-header {
+			flex-direction: column;
+			align-items: flex-start;
+		}
+	}
+</style>
