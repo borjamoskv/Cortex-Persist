@@ -204,6 +204,14 @@ Rework_POC_Generations/
 trompetas-inaki/
 video_transcript*.vtt
 video_transcript*.txt
+# FARANDULA release archives — purged from history, keep excluded
+FARANDULA_*/
+FARANDULA_*.zip
+farandula_*/
+
+# ── Rust / build caches ───────────────────────────
+engine-rs/target/
+web/.vite/
 
 # ── Web projects (separate repos) ────────────────
 cortexpersist-com/
