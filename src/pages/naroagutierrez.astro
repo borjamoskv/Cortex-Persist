@@ -151,6 +151,25 @@ const pressLinks = [
 						<span class="chip font-mono">Técnica Mixta / Pizarra</span>
 						<span class="chip font-mono">Harilka Elkartea</span>
 					</div>
+
+					<div class="sonic-link-card">
+						<div class="sonic-label">
+							<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+							Conexión sonora
+						</div>
+						<p class="sonic-title">La mujer que soñaba con ser ruido blanco</p>
+						<p class="sonic-meta">Bakala de Troya — Lore Electrónico: Borja Moskv Multiverso · Track 6</p>
+						<div class="sonic-actions">
+							<a href="https://soundcloud.com/borja-moskv/la-mujer-que-sonaba-con-convertirse-en-ruido" target="_blank" rel="noreferrer" class="sonic-btn sc">
+								<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M1.175 12.225c-.088 0-.164.069-.175.155l-.012.094.012.095c.011.086.087.155.175.155.088 0 .164-.069.175-.155l.013-.095-.013-.094c-.011-.086-.087-.155-.175-.155zm1.394-.3c-.1 0-.186.073-.198.172l-.011.084.011.085c.012.1.098.173.198.173.1 0 .187-.073.199-.173l.012-.085-.012-.084c-.012-.099-.099-.172-.199-.172zm1.412-.187c-.112 0-.206.082-.219.192l-.011.08.011.08c.013.11.107.193.219.193.112 0 .206-.083.219-.193l.012-.08-.012-.08c-.013-.11-.107-.192-.219-.192zm11.557-5.192C14.519 3.013 11.591 1 8.175 1 4.536 1 1.581 3.834 1.406 7.413L1.4 7.5l.006.088C1.581 11.166 4.536 14 8.175 14h7.363C17.449 14 19 12.449 19 10.537c0-1.819-1.394-3.306-3.188-3.461-.037-.001-.073-.003-.109-.003-.057 0-.113.003-.169.009-.047-2.007-1.674-3.637-3.706-3.637-.469 0-.916.087-1.327.244z"/></svg>
+								SoundCloud
+							</a>
+							<a href="https://borjamoskv.bandcamp.com/" target="_blank" rel="noreferrer" class="sonic-btn bc">
+								<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M0 18.75l7.437-13.5H24l-7.438 13.5z"/></svg>
+								Bandcamp
+							</a>
+						</div>
+					</div>
 				</div>
 				<aside class="bio-quick-facts surface-sunken">
 					<div class="surface-head">
@@ -823,6 +842,81 @@ const pressLinks = [
 		color: #ffffff;
 		font-weight: 600;
 		text-align: right;
+	}
+
+	/* Sonic Link Card */
+	.sonic-link-card {
+		margin-top: 1.2rem;
+		background: rgba(255, 255, 255, 0.03);
+		border: 1px solid rgba(0, 255, 65, 0.15);
+		border-radius: var(--radius-lg);
+		padding: 1rem 1.2rem;
+		display: grid;
+		gap: 0.5rem;
+	}
+
+	.sonic-label {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 0.65rem;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		color: #00ff41;
+	}
+
+	.sonic-title {
+		font-family: 'Orbitron', sans-serif;
+		font-size: 1rem;
+		font-weight: 700;
+		color: #ffffff;
+		margin: 0;
+		line-height: 1.3;
+	}
+
+	.sonic-meta {
+		font-size: 0.8rem;
+		color: var(--muted);
+		margin: 0;
+		font-family: 'IBM Plex Mono', monospace;
+	}
+
+	.sonic-actions {
+		display: flex;
+		gap: 0.6rem;
+		flex-wrap: wrap;
+		margin-top: 0.3rem;
+	}
+
+	.sonic-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+		font-size: 0.78rem;
+		font-weight: 600;
+		padding: 0.4rem 0.85rem;
+		border-radius: 999px;
+		border: 1px solid transparent;
+		transition: transform 0.2s, box-shadow 0.2s;
+		text-decoration: none;
+	}
+
+	.sonic-btn:hover {
+		transform: translateY(-1px);
+		box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+	}
+
+	.sonic-btn.sc {
+		background: rgba(255, 85, 0, 0.12);
+		border-color: rgba(255, 85, 0, 0.35);
+		color: #ff5500;
+	}
+
+	.sonic-btn.bc {
+		background: rgba(29, 223, 182, 0.1);
+		border-color: rgba(29, 223, 182, 0.3);
+		color: #1ddfc0;
 	}
 
 	/* Artworks premium grid styling */
