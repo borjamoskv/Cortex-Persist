@@ -271,3 +271,8 @@ xokas-elevator/
 yt-notebooklm-ext/
 auramem/
 nexus-dashboard/.next/
+target/
+
+cortex_mev_base/target/
+farandula_remix/
+cortex_rs/
