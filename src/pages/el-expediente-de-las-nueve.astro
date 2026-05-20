@@ -1,0 +1,352 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+
+const githubUrl = 'https://github.com/borjamoskv/Cortex-Persist';
+const asyncDemoUrl = '/async-demo';
+const pilotScopeUrl = '/pilot-scope';
+---
+
+<SiteLayout
+	title="El Expediente de las Nueve de la Mañana | CORTEX Persist"
+	description="Cuando la IA deja de ser un chat y decide qué expediente de inspección se abre a las 9:00 AM, la trazabilidad es el nuevo contrato social."
+	canonical="https://cortexpersist.com/el-expediente-de-las-nueve"
+	bodyClass="article-page-body"
+>
+	<main class="landing-shell">
+		<header class="masthead">
+			<a class="brand" href="/" aria-label="CORTEX Persist home">
+				<span class="brand-mark">CP</span>
+				<span class="brand-copy">
+					<strong>CORTEX Persist</strong>
+					<span>Verifiable memory for AI agents</span>
+				</span>
+			</a>
+
+			<nav class="site-nav" aria-label="Primary">
+				<a class="nav-link" href="/">Home</a>
+				<a class="nav-link" href="/#problem">Problem</a>
+				<a class="nav-link" href="/#fit">Fit</a>
+				<a class="nav-link" href="/#pilot">Pilot</a>
+				<a class="nav-link" href="/#pricing">Pricing</a>
+			</nav>
+
+			<div class="masthead-actions">
+				<a class="button-tertiary" href={githubUrl} target="_blank" rel="noreferrer">
+					Open Source
+				</a>
+				<a class="button-primary" href={asyncDemoUrl}>
+					Async Demo
+				</a>
+			</div>
+		</header>
+
+		<a class="back-to-home" href="/">← Volver a CORTEX Persist</a>
+
+		<article class="article-container surface">
+			<div class="surface-head">
+				<span class="surface-label">Ensayo / Capa de Evidencia</span>
+				<span class="surface-state">Verificado</span>
+			</div>
+
+			<header class="article-header">
+				<p class="article-eyebrow">Ensayo Especial / Mayo 2026</p>
+				<h1 class="article-title">El Expediente de las Nueve de la Mañana</h1>
+				<div class="article-author">
+					Por <a href="https://borjamoskv.com" target="_blank" rel="noreferrer">borjamoskv.com</a>
+				</div>
+			</header>
+
+			<div class="article-content">
+				<p>
+					Carlos Guadián abría un melón necesario hace unas horas: OpenAI ha descubierto que la revolución no se hace desde el cielo de los modelos fundacionales, sino en el fango de los ERPs, los SharePoints y los flujos de firmas. Y citaba a Albert Latorre: 
+				</p>
+
+				<blockquote>
+					<p>
+						«La IA no necesita votar para alterar la democracia. Le basta con instalarse en el expediente que prioriza un inspector, en la respuesta que recibe un ciudadano, en el listado que abre un funcionario por la mañana. Y nosotros seguimos hablando de productividad».
+					</p>
+				</blockquote>
+
+				<p>
+					Para eso vine yo. Para eso construimos <strong>CORTEX Persist</strong>.
+				</p>
+
+				<p>
+					Porque cuando la IA deja de ser un juguete de chat y se convierte en el motor silencioso que decide qué expediente de inspección se abre a las 9:00 AM, la "productividad" deja de ser la métrica. El problema ya no es cuántos folios por segundo genera el sistema, sino si podemos probar qué sabía la máquina en el milisegundo exacto en que tomó la decisión.
+				</p>
+
+				<hr />
+
+				<h2>I. La Falsa Métrica de la Productividad</h2>
+
+				<p>
+					El capitalismo cognitivo nos ha vendido que el éxito es el volumen. Más correos redactados por minuto, más resúmenes automáticos, más código escupido sin verificar. Pero en los flujos de alta responsabilidad —donde un error cuesta una multa, una investigación fiscal errónea o la denegación de un derecho fundamental— el volumen sin trazabilidad es solo entropía acelerada.
+				</p>
+
+				<p>
+					Si un inspector de Hacienda abre su portátil a las 9:00 AM y se encuentra con una lista de diez empresas prioritarias para auditar, no le sirve de nada que el agente de IA haya tardado tres segundos en calcular la lista. Lo que el inspector necesita (y la ley exige) es la <strong>justificación causal</strong> del orden.
+				</p>
+
+				<p>
+					Si no podemos verificar el estado de la memoria del agente en el momento exacto de la inferencia:
+				</p>
+
+				<ul>
+					<li>¿Cómo sabemos que no ha habido una alucinación transitoria?</li>
+					<li>¿Cómo demostramos que un dato corrupto en el SharePoint de turno no sesgó la prioridad?</li>
+					<li>¿Cómo garantizamos que el sistema no ha sufrido una mutación silenciosa de su contexto?</li>
+				</ul>
+
+				<p>
+					Sin un registro inmutable, el funcionario no está supervisando una IA: está firmando a ciegas una caja negra.
+				</p>
+
+				<hr />
+
+				<h2>II. El Leviatán en los Permisos de la Oficina</h2>
+
+				<p>
+					OpenAI y las grandes corporaciones quieren entrar en los permisos y flujos de trabajo porque ahí reside el verdadero poder operativo. Quien controla el flujo de firmas, controla la ejecución. Pero su arquitectura está pensada para el consumo: llamadas stateless a APIs propietarias, logs volátiles que expiran en consolas de administración inalcanzables, y una dependencia absoluta de la buena fe del proveedor.
+				</p>
+
+				<p>
+					En la administración pública y en la empresa regulada, la buena fe no es una estrategia de cumplimiento.
+				</p>
+
+				<p>
+					Si un agente de IA prioriza el expediente de una empresa sobre otra, está ejerciendo una forma de poder discrecional. Si ese listado se genera a partir de un flujo de recuperación de memoria (RAG) que cambia cada hora, el "expediente de las nueve" de hoy es imposible de reproducir mañana. Las huellas dactilares de la decisión se borran con el siguiente ciclo de actualización del índice.
+				</p>
+
+				<p>
+					La democracia y la gobernanza corporativa no mueren con un golpe de estado espectacular; se disuelven en la imposibilidad de auditar la rutina diaria del software.
+				</p>
+
+				<hr />
+
+				<h2>III. La Verdad en Silicio: Por qué CORTEX Persist</h2>
+
+				<p>
+					CORTEX Persist no nació para competir en la carrera de la productividad de los modelos. Nació para construir la <strong>Capa de Evidencia</strong>.
+				</p>
+
+				<p>
+					Cuando instrumentas un flujo con CORTEX:
+				</p>
+
+				<ol>
+					<li><strong>Sellamos el Contexto:</strong> No guardamos un log simple. Creamos un registro criptográfico (hash-linked) de lo que el agente leyó, recuperó y decidió en cada transición de estado.</li>
+					<li><strong>Prevenimos la Mutación Silenciosa:</strong> Si alguien altera los documentos de referencia en SharePoint después de la decisión para justificar un error, CORTEX detecta la discrepancia al verificar las firmas del registro.</li>
+					<li><strong>Generamos Evidencia Exportable:</strong> Cuando llega el auditor, el inspector o el equipo de seguridad, no les enseñas una captura de pantalla ni una consulta de base de datos editable. Les entregas un <em>Audit Pack</em> firmado con la traza exacta del espacio latente en el momento de la inferencia.</li>
+				</ol>
+
+				<p>
+					No necesitas migrar tu stack de memoria ni tus modelos. CORTEX cae encima de LangGraph, OpenAI, LlamaIndex o tus scripts locales como una red de seguridad de silicio.
+				</p>
+
+				<hr />
+
+				<h2>IV. El Nuevo Contrato Social de las Máquinas</h2>
+
+				<p>
+					Si la IA se va a instalar en el expediente del inspector, en la ventanilla del ciudadano y en el listado del funcionario, el nuevo contrato social exige que las máquinas no tengan derecho al olvido ni a la edición post-hoc de sus motivos.
+				</p>
+
+				<p>
+					La productividad es barata. La confianza es cara.
+				</p>
+
+				<p>
+					<strong>CORTEX Persist</strong> está aquí para asegurar que, cuando el expediente de las nueve de la mañana priorice tu nombre o el de tu empresa, siempre haya una prueba matemática e inmutable que explique exactamente por qué.
+				</p>
+			</div>
+
+			<footer class="article-footer-note">
+				<p>Verified by Antigravity · Runtime: C5-REAL · Exergy: Singularity</p>
+				<p>Borja Moskv · Mayo 2026</p>
+			</footer>
+		</article>
+
+		<section class="section-frame surface next-steps-section">
+			<div class="section-heading">
+				<p class="section-kicker">Capa de Evidencia</p>
+				<h2>Instrumenta tus agentes con CORTEX Persist.</h2>
+				<p>
+					Protege tus flujos críticos contra mutaciones y alucinaciones silenciosas.
+				</p>
+			</div>
+
+			<div class="action-row">
+				<a class="button-primary" href={asyncDemoUrl}>Solicitar Demo Asíncrona</a>
+				<a class="button-secondary" href={pilotScopeUrl}>Verificar Piloto</a>
+				<a class="button-tertiary" href={githubUrl} target="_blank" rel="noreferrer">Ver Código en GitHub</a>
+			</div>
+		</section>
+
+		<footer class="site-footer">
+			<p class="footer-note">CORTEX Persist / The swarm verifies. The hardware remembers.</p>
+			<div class="footer-links">
+				<a href={githubUrl} target="_blank" rel="noreferrer">GitHub</a>
+				<a href="/">Home</a>
+				<a href="/vsa">Public Shell</a>
+			</div>
+		</footer>
+	</main>
+</SiteLayout>
+
+<style>
+	.back-to-home {
+		display: inline-flex;
+		align-items: center;
+		color: var(--accent-soft);
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 0.85rem;
+		margin-bottom: 2rem;
+		transition: color 0.2s;
+	}
+
+	.back-to-home:hover {
+		color: var(--accent-bright);
+	}
+
+	.article-container {
+		padding: clamp(1.8rem, 5vw, 3.5rem);
+		max-width: 820px;
+		margin: 0 auto 3rem auto;
+	}
+
+	.article-header {
+		margin-top: 1.5rem;
+		margin-bottom: 2.5rem;
+		border-bottom: 1px solid var(--line);
+		padding-bottom: 2rem;
+	}
+
+	.article-eyebrow {
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 0.8rem;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--accent-soft);
+		margin-bottom: 0.5rem;
+	}
+
+	.article-title {
+		font-family: 'Orbitron', sans-serif;
+		font-size: clamp(2rem, 5vw, 3.4rem);
+		line-height: 1.1;
+		font-weight: 800;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: #ffffff;
+		margin: 0 0 1rem 0;
+	}
+
+	.article-author {
+		font-size: 0.95rem;
+		color: var(--muted);
+		font-family: 'IBM Plex Mono', monospace;
+	}
+
+	.article-author a {
+		color: var(--accent-soft);
+		text-decoration: underline;
+		transition: color 0.2s;
+	}
+
+	.article-author a:hover {
+		color: var(--accent-bright);
+	}
+
+	.article-content {
+		line-height: 1.85;
+		font-size: 1.1rem;
+		color: #edf5ff;
+	}
+
+	.article-content p {
+		margin: 0 0 1.6rem 0;
+	}
+
+	.article-content strong {
+		color: #ffffff;
+	}
+
+	.article-content h2 {
+		font-family: 'Orbitron', sans-serif;
+		font-size: 1.45rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		margin: 2.8rem 0 1.2rem 0;
+		color: #ffffff;
+		border-left: 3px solid var(--accent);
+		padding-left: 0.8rem;
+	}
+
+	.article-content ul, .article-content ol {
+		margin: 0 0 1.6rem 0;
+		padding-left: 1.5rem;
+	}
+
+	.article-content li {
+		margin-bottom: 0.6rem;
+		line-height: 1.7;
+	}
+
+	.article-content code {
+		font-family: 'IBM Plex Mono', monospace;
+		background: rgba(255, 255, 255, 0.06);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		padding: 0.2rem 0.4rem;
+		border-radius: 4px;
+		font-size: 0.92em;
+	}
+
+	.article-content blockquote {
+		border-left: 4px solid var(--success);
+		background: rgba(127, 227, 178, 0.05);
+		margin: 2.2rem 0;
+		padding: 1.4rem 1.8rem;
+		border-radius: 0 16px 16px 0;
+		font-style: italic;
+		color: #edf5ff;
+	}
+
+	.article-content blockquote p {
+		margin: 0;
+	}
+
+	.article-content hr {
+		border: 0;
+		height: 1px;
+		background: linear-gradient(90deg, transparent, var(--line), transparent);
+		margin: 2.5rem 0;
+	}
+
+	.article-footer-note {
+		margin-top: 3.5rem;
+		border-top: 1px solid var(--line);
+		padding-top: 1.5rem;
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 0.82rem;
+		color: var(--muted);
+		display: flex;
+		justify-content: space-between;
+		flex-wrap: wrap;
+		gap: 1rem;
+	}
+
+	.article-footer-note p {
+		margin: 0;
+	}
+
+	.next-steps-section {
+		margin-top: 3rem;
+		margin-bottom: 3rem;
+		padding: 2.2rem;
+	}
+
+	.next-steps-section .action-row {
+		margin-top: 1.5rem;
+	}
+</style>

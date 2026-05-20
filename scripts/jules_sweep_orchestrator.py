@@ -23,6 +23,19 @@ import uuid
 from dataclasses import dataclass, asdict, field
 from datetime import datetime, timezone
 from enum import Enum
+
+
+def route_task(intent: str, context_size: int = 0) -> str:
+    """Regla de Singularidad: Asignación dinámica de modelo basada en Yield."""
+    if intent in ["REFACTOR_CODE", "AGENT_ROUTING", "ERROR_FIXING", "SWEEP_AUDIT"]:
+        return "gemini-3.5-flash"
+
+    if intent in ["DEEP_ARCHITECTURE_REVIEW", "ONTOLOGY_UPDATE"]:
+        return "gemini-3.1-pro"
+
+    return "gemini-3.5-flash"
+
+
 from pathlib import Path
 from typing import Any
 
@@ -53,6 +66,7 @@ class SweepTask:
     task_id: str = field(default_factory=lambda: str(uuid.uuid4())[:8])
     jules_id: str | None = None
     status: str = "pending"
+    model_id: str = "gemini-3.5-flash"
     findings: list[dict[str, Any]] = field(default_factory=list)
     created_at: str = field(default_factory=lambda: _now())
     completed_at: str | None = None
@@ -158,15 +172,41 @@ def get_keychain_token() -> str | None:
         import subprocess
         import base64
         import json
+        from datetime import datetime, timezone
 
-        out = subprocess.check_output(
-            ["security", "find-generic-password", "-s", "jules-cli", "-a", "default", "-w"],
-            text=True,
-        ).strip()
-        if out.startswith("go-keyring-base64:"):
-            b64_part = out.split("go-keyring-base64:")[1]
-            decoded = base64.b64decode(b64_part)
-            token_data = json.loads(decoded.decode("utf-8"))
+        def retrieve_token():
+            try:
+                out = subprocess.check_output(
+                    ["security", "find-generic-password", "-s", "jules-cli", "-a", "default", "-w"],
+                    text=True,
+                ).strip()
+                if out.startswith("go-keyring-base64:"):
+                    b64_part = out.split("go-keyring-base64:")[1]
+                    decoded = base64.b64decode(b64_part)
+                    return json.loads(decoded.decode("utf-8"))
+            except Exception:
+                pass
+            return None
+
+        token_data = retrieve_token()
+        if token_data:
+            expiry_str = token_data.get("expiry")
+            if expiry_str:
+                try:
+                    expiry = datetime.fromisoformat(expiry_str)
+                    now_tz = datetime.now(timezone.utc)
+                    if expiry.timestamp() < now_tz.timestamp():
+                        print("🔑 Keychain token expired. Refreshing via jules CLI...", flush=True)
+                        subprocess.run(
+                            ["jules", "remote", "list", "--session"],
+                            stdout=subprocess.DEVNULL,
+                            stderr=subprocess.DEVNULL,
+                        )
+                        token_data = retrieve_token()
+                except Exception as e:
+                    print(f"⚠️ Error parsing expiry or refreshing token: {e}", flush=True)
+
+        if token_data:
             return token_data.get("access_token")
     except Exception:
         pass
@@ -260,7 +300,12 @@ class JulesClient:
         }
 
     async def create_task(
-        self, title: str, prompt: str, source_id: str, client: httpx.AsyncClient
+        self,
+        title: str,
+        prompt: str,
+        source_id: str,
+        client: httpx.AsyncClient,
+        model_id: str = "gemini-3.5-flash",
     ) -> str:
         """Submit a task and return its Jules task ID."""
         resp = await client.post(
@@ -270,6 +315,7 @@ class JulesClient:
                 "title": title,
                 "description": prompt,
                 "sourceId": source_id,
+                "agentConfiguration": {"model": model_id},
             },
             timeout=30,
         )
@@ -365,11 +411,17 @@ async def run_sweep(task: SweepTask, jules: JulesClient) -> SweepTask:
     source_id = get_git_source_id()
     title = f"Audit {TARGET_DOMAIN} ({task.kind.value})"
     prompt = PROMPTS[task.kind].format(url=task.target_url)
-    print(f"  [{task.kind.upper()}] Dispatching → Jules...", flush=True)
+
+    # Ruteo dinámico por Yield Termodinámico
+    task.model_id = route_task("SWEEP_AUDIT")
+
+    print(f"  [{task.kind.upper()}] Dispatching → Jules [{task.model_id}]...", flush=True)
 
     async with httpx.AsyncClient() as client:
         try:
-            jules_id = await jules.create_task(title, prompt, source_id, client)
+            jules_id = await jules.create_task(
+                title, prompt, source_id, client, model_id=task.model_id
+            )
             task.jules_id = jules_id
             task.status = "dispatched"
             print(f"  [{task.kind.upper()}] Jules ID: {jules_id}", flush=True)
@@ -570,7 +622,9 @@ def print_report(run: SweepRun) -> None:
     print("─" * 60)
     for t in run.tasks:
         icon = "✅" if t.status == "completed" else "❌"
-        print(f"  {icon}  {t.kind.upper():8s}  {len(t.findings):3d} findings  [{t.status}]")
+        print(
+            f"  {icon}  {t.kind.upper():8s} | {t.model_id} | {len(t.findings):3d} findings  [{t.status}]"
+        )
     print("─" * 60)
     print(f"  Total findings : {total_findings}")
     print(f"  Critical       : {critical}")
