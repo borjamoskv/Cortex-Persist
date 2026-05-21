@@ -48,6 +48,7 @@ class SwarmBudgetManager:
     def _init_db(self):
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         with sqlite3.connect(self.db_path, timeout=5) as conn:
+            conn.execute("PRAGMA journal_mode=WAL;")
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS mission_budget (
                     mission_id           TEXT PRIMARY KEY,
