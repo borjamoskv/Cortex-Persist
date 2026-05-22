@@ -336,6 +336,15 @@ class TestAgentExecutor:
         from cortex.pipeline.executor import AgentExecutor
 
         executor = AgentExecutor()
+        executor._provider = None
+        executor._router = None
+
+        async def _mock_ensure_none():
+            return None
+
+        executor._ensure_provider = _mock_ensure_none
+        executor._ensure_router = _mock_ensure_none
+
         orch = CortexOrchestrator(agent_executor=executor)
         req = PipelineRequest(intent="test with executor")
         result = orch.run(req)

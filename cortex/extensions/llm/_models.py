@@ -241,6 +241,11 @@ class BaseProvider(ABC):
         """Cost classification: 'free', 'low', 'medium', 'high', 'variable'."""
         return "medium"
 
+    @property
+    def context_window(self) -> int:
+        """The context window limit of the provider's underlying model (in tokens)."""
+        return 128000
+
     @abstractmethod
     async def invoke(self, prompt: CortexPrompt) -> str:
         """Traduce el CortexPrompt y ejecuta la inferencia."""
