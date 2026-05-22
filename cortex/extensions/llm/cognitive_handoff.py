@@ -44,6 +44,8 @@ REASONING_MODE_MAP: dict[str, ReasoningMode | None] = {
     "new_api": ReasoningMode.DEEP_RESEARCH,
     "p0_singularity": ReasoningMode.ULTRA_THINK,
     "security_breach": ReasoningMode.ULTRA_THINK,
+    "p0_vulnerability": ReasoningMode.DEEPTHINK_R1,
+    "code_audit": ReasoningMode.DEEPTHINK_R1,
     "routine": None,  # standard inference
 }
 
@@ -92,6 +94,7 @@ class CognitiveHandoff:
     DEFAULT_ARCHITECT = "openai"
     DEFAULT_AUDITOR_PREMIUM = "anthropic"
     DEFAULT_AUDITOR_ECONOMIC = "gemini"
+    DEFAULT_AUDITOR_DEEPTHINK = "deepseek"  # DeepSeek-R1 cluster fallback
     DEFAULT_INFRA = "gemini"
 
     def __init__(
@@ -116,6 +119,7 @@ class CognitiveHandoff:
         self._architect = architect_provider
         self._auditor_premium = auditor_premium
         self._auditor_economic = auditor_economic
+        self._auditor_deepthink = self.DEFAULT_AUDITOR_DEEPTHINK
         self._infra = infra_provider
 
         # Telemetry

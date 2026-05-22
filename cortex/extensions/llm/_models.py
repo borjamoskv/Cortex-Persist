@@ -45,6 +45,11 @@ class ReasoningMode(str, Enum):
     """P0 Singularity Mode. Demands maximum context, strict zero-hallucination guards,
     and compound problem solving. Overrides all cost gates."""
 
+    DEEPTHINK_R1 = "deepthink_r1"
+    """Dedicated DeepSeek-R1 reasoning cluster. Requires native extended chain-of-thought
+    capability. Routes exclusively to `deepseek-reasoner` or equivalent R1-class models.
+    Used by P0VulnerabilityExtractor for code-level hypothesis generation."""
+
 
 # ─── Intent Classification ─────────────────────────────────────────────────
 

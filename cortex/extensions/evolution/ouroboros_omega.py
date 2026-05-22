@@ -200,10 +200,12 @@ class OuroborosOmega:
         target_path: str,
         project_root: str = "~/.gemini/antigravity/scratch/Cortex-Persist",
         dry_run: bool = False,
+        p0_scan: bool = False,
     ):
         self.target_path = Path(target_path).expanduser().resolve()
         self.project_root = Path(project_root).expanduser().resolve()
         self.dry_run = dry_run
+        self.p0_scan = p0_scan
 
         if not self.target_path.exists():
             raise FileNotFoundError(f"Target not found: {self.target_path}")
@@ -281,6 +283,28 @@ class OuroborosOmega:
             base_diagnosis = await self.diagnose()
             logger.info("Phase 1 [Analysis] Complete. Entropy: %.2f", base_diagnosis.entropy_score)
 
+            # ── Phase 1.5: P0 Vulnerability Extraction (Deepthink-R1 Cluster) ──
+            p0_report = None
+            if self.p0_scan:
+                logger.info("Phase 1.5 [P0 Scan] Dispatching to Deepthink-R1 cluster...")
+                try:
+                    from cortex.extensions.evolution.p0_extractor import P0VulnerabilityExtractor
+
+                    extractor = P0VulnerabilityExtractor()
+                    p0_report = await extractor.extract(
+                        source_code=self.original_source,
+                        diagnosis=base_diagnosis,
+                        target_file=str(self.target_path),
+                    )
+                    logger.info(
+                        "Phase 1.5 [P0 Scan] Complete: %d findings (%d critical, %d high)",
+                        len(p0_report.findings),
+                        p0_report.critical_count,
+                        p0_report.high_count,
+                    )
+                except Exception as e:  # noqa: BLE001
+                    logger.warning("Phase 1.5 [P0 Scan] Failed: %s", e)
+
             tree = ast.parse(self.original_source)
 
             # 2. EXTRACTION
@@ -341,7 +365,10 @@ class OuroborosOmega:
                 f.write(mutated_source)
 
             logger.info("Ouroboros-Omega cycle SUCCESS for %s", self.target_path.name)
-            return {"status": "SUCCESS", "delta": entropy_delta}
+            result: dict[str, Any] = {"status": "SUCCESS", "delta": entropy_delta}
+            if p0_report is not None:
+                result["p0_report"] = p0_report.to_dict()
+            return result
 
         except Exception as e:  # noqa: BLE001 — atomic cycle caught unhandled exception, triggering apoptosis
             logger.exception("Apoptosis: Unhandled exception during cycle.")
@@ -357,13 +384,20 @@ if __name__ == "__main__":
     parser.add_argument("file", help="Python file to metabolize")
     parser.add_argument("--diagnose-only", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument(
+        "--p0-scan",
+        action="store_true",
+        help="Activate P0 vulnerability extractor (Deepthink-R1 cluster)",
+    )
     parser.add_argument("-v", "--verbose", action="store_true")
 
     args = parser.parse_args()
     if args.verbose:
         logging.basicConfig(level=logging.INFO)
 
-    engine = OuroborosOmega(args.file, dry_run=args.dry_run or args.diagnose_only)
+    engine = OuroborosOmega(
+        args.file, dry_run=args.dry_run or args.diagnose_only, p0_scan=args.p0_scan
+    )
 
     async def run():
         if args.diagnose_only:

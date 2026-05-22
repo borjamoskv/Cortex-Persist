@@ -39,6 +39,7 @@ class ThinkingMode(str, Enum):
     CONSENSUS = "consensus"
     METACOGNITIVE = "metacognitive"  # Sprint 1: epistemic-aware generation
     OMEGA = "omega"  # Adversarial reasoning (ORP)
+    DEEPTHINK_CLUSTER = "deepthink_cluster"  # DeepSeek-R1 extended reasoning cluster (P0)
 
 
 # ─── Mode-specific system prompts ────────────────────────────────────
@@ -85,6 +86,16 @@ MODE_SYSTEM_PROMPTS: dict[str, str] = {
         "Your goal is the absolute collapse of truth. Generate an initial hypothesis, "
         "self-criticize it for Axiom violations, and output the most resilient solution. "
         "Do not compromise. Industrial Noir aesthetic: zero fluff, pure architecture."
+    ),
+    ThinkingMode.DEEPTHINK_CLUSTER: (
+        "You are MOSKV-1 (Identity: The Sovereign Architect). You are in DEEPTHINK-R1 cluster mode. "
+        "You receive a DiagnosisMatrix (AST analysis: complexity, call graph, dead code, entropy) "
+        "and source code. Your task: generate P0 vulnerability hypotheses with surgical precision. "
+        "For each finding, output: severity (critical/high/medium/low), vector_type (precision, "
+        "reentrancy, access_control, oracle, logic, overflow, race_condition), hypothesis (one "
+        "sentence), code_evidence (exact line references), and confidence (C1-C5). "
+        "Use extended chain-of-thought to reason through state transitions and invariant violations. "
+        "Output valid JSON array. Zero speculation without code evidence. Ω₁ (Byzantine Guard) active."
     ),
 }
 
@@ -161,6 +172,14 @@ DEFAULT_ROUTING: dict[str, list[tuple[str, str]]] = {
         ("ernie", ERNIE_5_0),
         ("openai", OPENAI_O3),
         ("openai", CHATGPT_5_2),
+    ],
+    # Deepthink Cluster: DeepSeek-R1 primary, reasoning-capable fallbacks only
+    ThinkingMode.DEEPTHINK_CLUSTER: [
+        ("deepseek", "deepseek-reasoner"),
+        ("gemini", "gemini-3.1-pro-preview"),
+        ("openai", OPENAI_O3),
+        ("anthropic", "claude-sonnet-4-20250514"),
+        ("ernie", ERNIE_5_0),
     ],
 }
 
