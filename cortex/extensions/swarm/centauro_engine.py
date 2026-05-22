@@ -160,7 +160,7 @@ class CentauroEngine:
 
             str_result = cast(str, result)
             proposals[agent_id] = str_result
-            winning = self.consensus.execute_consensus(proposals)
+            winning = await self.consensus.execute_consensus(proposals)
             if winning:
                 logger.info("⚔️ [QUORUM] Consensus achieved early! Bypassing trailing latency.")
                 break
