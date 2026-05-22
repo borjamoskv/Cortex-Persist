@@ -1,0 +1,98 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+
+const articles = [
+	{
+		title: "La Economía de la Mentira: Los Influencers de IA y la Industria del Humo Digital",
+		date: "May 2026",
+		description: "En un mercado donde un avatar sin pulmones gana 40 veces más que un creador humano, la pregunta no es si la IA es el futuro, sino quién se está quedando con el presente.",
+		href: "/blog/economia_mentira_industrial.html",
+		featured: true
+	},
+	{
+		title: "Why Your AI Agent Has Alzheimer's",
+		date: "Feb 2026",
+		description: "You spent 3 hours teaching your AI agent the codebase. Next session? Gone. 100% amnesia. This is the most expensive bug in AI — and nobody's talking about it.",
+		href: "/blog/why-your-ai-agent-has-alzheimers.html",
+		featured: false
+	}
+];
+---
+
+<SiteLayout
+	title="CORTEX Persist | Blog & Intelligence"
+	description="Technical intelligence, sovereign engineering insights, and the operational reality of autonomous AI agents."
+>
+	<main class="landing-shell">
+		<header class="masthead">
+			<a class="brand" href="/" aria-label="CORTEX Persist home">
+				<span class="brand-mark">CP</span>
+				<span class="brand-copy">
+					<strong>CORTEX Persist</strong>
+					<span>Verifiable memory for AI agents</span>
+				</span>
+			</a>
+
+			<nav class="site-nav" aria-label="Primary">
+				<a class="nav-link" href="/#problem">Problem</a>
+				<a class="nav-link" href="/#fit">Fit</a>
+				<a class="nav-link" href="/#pilot">Pilot</a>
+				<a class="nav-link" href="/blog">Blog</a>
+			</nav>
+
+			<div class="masthead-actions">
+				<a class="button-tertiary" href="https://github.com/borjamoskv/Cortex-Persist" target="_blank" rel="noreferrer">
+					Open Source
+				</a>
+				<a class="button-primary" href="/async-demo">
+					Async Demo
+				</a>
+			</div>
+		</header>
+
+		<section class="section-frame surface" style="margin-top: 4rem;">
+			<div class="section-heading">
+				<p class="section-kicker">Intelligence</p>
+				<h2>Sovereign Agent Operations</h2>
+				<p>
+					Technical essays and state-of-the-art research on memory, autonomy, and the economics of verifiable AI.
+				</p>
+			</div>
+
+			<div class="fit-layout" style="margin-top: 3rem;">
+				<div class="fit-grid" style="grid-template-columns: 1fr;">
+					{
+						articles.map((article) => (
+							<article class:list={['fit-card', 'surface-sunken', article.featured && 'pricing-card-featured']} style="display: flex; flex-direction: column; justify-content: space-between;">
+								<div>
+									<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+										<p class="surface-label">{article.date}</p>
+										{article.featured && <span class="plan-tag" style="position: static; font-size: 0.7rem; padding: 0.2rem 0.6rem;">Latest</span>}
+									</div>
+									<h3 style="margin-bottom: 1rem; font-size: 1.5rem;">{article.title}</h3>
+									<p>{article.description}</p>
+								</div>
+								<a
+									class="button-secondary"
+									href={article.href}
+									style="align-self: flex-start; margin-top: 2rem;"
+								>
+									Read Article
+								</a>
+							</article>
+						))
+					}
+				</div>
+			</div>
+		</section>
+
+		<footer class="site-footer" style="margin-top: 4rem;">
+			<p class="footer-note">CORTEX Persist / The swarm verifies. The hardware remembers.</p>
+			<div class="footer-links">
+				<a href="https://github.com/borjamoskv/Cortex-Persist" target="_blank" rel="noreferrer">GitHub</a>
+				<a href="https://github.com/borjamoskv/Cortex-Persist/tree/main/docs" target="_blank" rel="noreferrer">Docs</a>
+				<a href="/vsa">Public Shell</a>
+			</div>
+		</footer>
+	</main>
+</SiteLayout>
