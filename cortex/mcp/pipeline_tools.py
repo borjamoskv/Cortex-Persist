@@ -169,6 +169,102 @@ def register_pipeline_tools(mcp, ctx: _MCPContext | None = None) -> None:
             )
 
     @mcp.tool()
+    async def cortex_run_async(
+        intent: str,
+        budget_usd: float = 0.10,
+        timeout_s: float = 120.0,
+        context_hints: str = "[]",
+        priority: int = 1,
+    ) -> str:
+        """Execute a long-running sovereign mission via async pipeline.
+
+        Unlike cortex_run, this uses the native async pipeline with proper
+        timeout handling and cancellation support. Ideal for missions >30s.
+
+        Args:
+            intent: Natural language instruction for the mission.
+            budget_usd: Maximum spend in USD (default: $0.10).
+            timeout_s: Maximum execution time in seconds (default: 120).
+            context_hints: JSON array of knowledge item IDs to prioritize.
+            priority: Execution priority (0=critical, 1=normal, 2=low).
+
+        Returns:
+            JSON with mission results, telemetry, and audit hash.
+        """
+        if not intent or not intent.strip():
+            return json.dumps({"error": "Empty intent", "status": "failed"})
+
+        try:
+            hints = json.loads(context_hints) if context_hints else []
+        except (json.JSONDecodeError, TypeError):
+            hints = []
+
+        request = PipelineRequest(
+            intent=intent.strip(),
+            context_hints=hints,
+            budget_limit_usd=max(budget_usd, 0.001),
+            delivery=DeliveryTarget(type=DeliveryType.MEMORY),
+            priority=priority,
+            timeout_s=timeout_s,
+        )
+
+        db_path = ctx.cfg.db_path if ctx else None
+        bridge = await _get_bridge(db_path)
+
+        try:
+            result = await bridge.run_async(request)
+            payload = _result_to_dict(result)
+            return json.dumps(payload, indent=2, default=str)
+        except Exception as e:
+            logger.error("[MCP] Async pipeline failed: %s", e)
+            return json.dumps(
+                {
+                    "error": str(e),
+                    "status": "failed",
+                    "mission_id": request.mission_id,
+                }
+            )
+
+    @mcp.tool()
+    async def cortex_cancel(mission_id: str) -> str:
+        """Cancel a running pipeline mission.
+
+        Args:
+            mission_id: The mission ID to cancel (from cortex_run output).
+
+        Returns:
+            JSON with cancellation status.
+        """
+        if not mission_id or not mission_id.strip():
+            return json.dumps({"error": "Empty mission_id", "status": "failed"})
+
+        # Cancellation works through the bridge's orchestrator
+        db_path = ctx.cfg.db_path if ctx else None
+        bridge = await _get_bridge(db_path)
+
+        try:
+            if hasattr(bridge, "cancel"):
+                cancelled = await bridge.cancel(mission_id.strip())
+                return json.dumps(
+                    {
+                        "mission_id": mission_id.strip(),
+                        "cancelled": cancelled,
+                        "status": "cancelled" if cancelled else "not_found",
+                    }
+                )
+            return json.dumps(
+                {
+                    "mission_id": mission_id.strip(),
+                    "cancelled": False,
+                    "status": "cancel_not_supported",
+                    "note": "Bridge does not support cancellation yet",
+                }
+            )
+        except Exception as e:
+            logger.error("[MCP] Cancel failed: %s", e)
+            return json.dumps({"error": str(e), "status": "failed"})
+
+    @mcp.tool()
     async def cortex_pipeline_status() -> str:
         """Get the current pipeline status and recent mission telemetry.
 

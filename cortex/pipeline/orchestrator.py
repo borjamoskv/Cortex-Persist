@@ -61,31 +61,229 @@ class CortexOrchestrator:
     async def run_async(self, request: PipelineRequest) -> PipelineResult:
         """Execute the full E2E pipeline asynchronously.
 
-        Wraps the synchronous pipeline in a thread executor so long-running
-        missions (>30s) don't block the event loop. Supports cancellation
-        via asyncio.Event.
+        Native async implementation with proper timeout/cancellation.
+        Each stage runs via asyncio — no ThreadPoolExecutor deadlocks.
 
         Returns a PipelineResult with full provenance and telemetry.
         """
         import asyncio
-        import concurrent.futures
 
-        self._cancel_event = asyncio.Event()
+        try:
+            return await asyncio.wait_for(
+                self._run_async_impl(request),
+                timeout=request.timeout_s,
+            )
+        except asyncio.TimeoutError:
+            return PipelineResult(
+                mission_id=request.mission_id,
+                status=PipelineStatus.FAILED,
+                error=f"Pipeline timeout after {request.timeout_s}s",
+                completed_at=time.time(),
+            )
+        except asyncio.CancelledError:
+            return PipelineResult(
+                mission_id=request.mission_id,
+                status=PipelineStatus.CANCELLED,
+                error="Pipeline cancelled",
+                completed_at=time.time(),
+            )
 
-        loop = asyncio.get_running_loop()
-        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
-            try:
-                return await asyncio.wait_for(
-                    loop.run_in_executor(pool, self.run, request),
-                    timeout=request.timeout_s,
-                )
-            except asyncio.TimeoutError:
-                return PipelineResult(
-                    mission_id=request.mission_id,
-                    status=PipelineStatus.FAILED,
-                    error=f"Pipeline timeout after {request.timeout_s}s",
-                    completed_at=time.time(),
-                )
+    async def _run_async_impl(self, request: PipelineRequest) -> PipelineResult:
+        """Native async pipeline implementation."""
+        import asyncio
+
+        logger.info(
+            "🚀 [E2E-ASYNC] Pipeline START mission=%s intent='%s'",
+            request.mission_id,
+            request.intent[:80],
+        )
+
+        result = PipelineResult(
+            mission_id=request.mission_id,
+            status=PipelineStatus.RUNNING,
+        )
+        self._traces = []
+
+        try:
+            # ── Stage 1: INGRESS ──
+            await self._run_stage_async(
+                PipelineStage.INGRESS,
+                lambda: self._ingress(request),
+            )
+
+            # ── Stage 2: CONTEXT ──
+            context_packet = await self._run_stage_async(
+                PipelineStage.CONTEXT,
+                lambda: self._assemble_context(request),
+            )
+
+            # ── Stage 3: PLANNING ──
+            execution_plan = await self._run_stage_async(
+                PipelineStage.PLANNING,
+                lambda: self._plan(request, context_packet),
+            )
+
+            # ── Stage 4: EXECUTION ──
+            output = await self._run_stage_async(
+                PipelineStage.EXECUTION,
+                lambda: self._execute(request, context_packet, execution_plan),
+                is_async_executor=True,
+            )
+
+            # ── Stage 5: PERSISTENCE ──
+            ledger_hash = await self._run_stage_async(
+                PipelineStage.PERSISTENCE,
+                lambda: self._persist(request, output),
+            )
+
+            # ── Stage 6: EGRESS ──
+            await self._run_stage_async(
+                PipelineStage.EGRESS,
+                lambda: self._deliver(request, output),
+            )
+
+            # ── Assemble final result ──
+            result.status = PipelineStatus.SUCCESS
+            result.output = output
+            result.ledger_hash = ledger_hash or ""
+            result.context_used = [
+                ki.get("source", "unknown")
+                for ki in (context_packet.knowledge_items if context_packet else [])
+            ]
+            result.agent_chain = execution_plan.get("agents", []) if execution_plan else []
+            result.cost_usd = sum(t.cost_usd for t in self._traces)
+            result.stages = list(self._traces)
+            result.completed_at = time.time()
+
+        except BudgetExhaustedError as e:
+            result.status = PipelineStatus.BUDGET_EXHAUSTED
+            result.error = str(e)
+            result.stages = list(self._traces)
+            result.completed_at = time.time()
+
+        except PipelineCancelledError as e:
+            result.status = PipelineStatus.CANCELLED
+            result.error = str(e)
+            result.stages = list(self._traces)
+            result.completed_at = time.time()
+
+        except Exception as e:
+            result.status = PipelineStatus.FAILED
+            result.error = str(e)
+            result.stages = list(self._traces)
+            result.completed_at = time.time()
+            logger.error(
+                "❌ [E2E-ASYNC] Pipeline FAILED mission=%s: %s",
+                request.mission_id,
+                e,
+            )
+
+        logger.info(
+            "✅ [E2E-ASYNC] Pipeline %s mission=%s latency=%.0fms",
+            result.status.value,
+            result.mission_id,
+            result.latency_ms,
+        )
+        return result
+
+    async def _run_stage_async(
+        self,
+        stage: PipelineStage,
+        fn: Any,
+        is_async_executor: bool = False,
+    ) -> Any:
+        """Execute a pipeline stage asynchronously with timing."""
+        import asyncio
+
+        start = time.time()
+        error_msg = None
+        result = None
+
+        try:
+            if is_async_executor and self._executor is not None:
+                result = fn()
+                if asyncio.iscoroutine(result):
+                    result = await result
+            else:
+                result = await asyncio.to_thread(fn)
+        except (BudgetExhaustedError, PipelineCancelledError):
+            raise
+        except Exception as e:
+            error_msg = str(e)
+            raise
+        finally:
+            end = time.time()
+            trace = StageTrace(
+                stage=stage,
+                started_at=start,
+                ended_at=end,
+                error=error_msg,
+            )
+            self._traces.append(trace)
+
+        return result
+
+    async def run_streaming(self, request: PipelineRequest):
+        """Execute pipeline yielding StageTrace events per stage.
+
+        Final yield is the PipelineResult.
+        """
+        self._traces = []
+        result = PipelineResult(
+            mission_id=request.mission_id,
+            status=PipelineStatus.RUNNING,
+        )
+
+        context_packet = None
+        execution_plan = None
+        output = None
+        ledger_hash = None
+
+        try:
+            await self._run_stage_async(PipelineStage.INGRESS, lambda: self._ingress(request))
+            yield self._traces[-1]
+
+            context_packet = await self._run_stage_async(
+                PipelineStage.CONTEXT, lambda: self._assemble_context(request)
+            )
+            yield self._traces[-1]
+
+            execution_plan = await self._run_stage_async(
+                PipelineStage.PLANNING, lambda: self._plan(request, context_packet),
+            )
+            yield self._traces[-1]
+
+            output = await self._run_stage_async(
+                PipelineStage.EXECUTION,
+                lambda: self._execute(request, context_packet, execution_plan),
+                is_async_executor=True,
+            )
+            yield self._traces[-1]
+
+            ledger_hash = await self._run_stage_async(
+                PipelineStage.PERSISTENCE, lambda: self._persist(request, output)
+            )
+            yield self._traces[-1]
+
+            await self._run_stage_async(
+                PipelineStage.EGRESS, lambda: self._deliver(request, output)
+            )
+            yield self._traces[-1]
+
+            result.status = PipelineStatus.SUCCESS
+            result.output = output
+            result.ledger_hash = ledger_hash or ""
+            result.stages = list(self._traces)
+            result.completed_at = time.time()
+
+        except Exception as e:
+            result.status = PipelineStatus.FAILED
+            result.error = str(e)
+            result.stages = list(self._traces)
+            result.completed_at = time.time()
+
+        yield result
+
 
     def run(self, request: PipelineRequest) -> PipelineResult:
         """Execute the full E2E pipeline synchronously.

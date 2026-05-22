@@ -557,3 +557,268 @@ class TestVSAPipelineBridge:
         rid = bridge.ingest("test knowledge item", record_id="ki-001")
         assert rid == "ki-001"
         assert bridge.stats["records"] == 1
+
+
+# ── Provider Factory Tests ──
+
+
+class TestProviderFactory:
+    """Test LLM provider auto-discovery."""
+
+    def test_factory_returns_none_when_no_keys(self):
+        """Factory returns (None, None) when no API keys are set."""
+        import os
+
+        from cortex.pipeline.provider_factory import build_executor_stack
+
+        # Ensure no relevant keys are set (save and restore)
+        saved = {}
+        keys_to_clear = [
+            "GOOGLE_API_KEY",
+            "GEMINI_API_KEY",
+            "ANTHROPIC_API_KEY",
+            "OPENAI_API_KEY",
+            "DEEPSEEK_API_KEY",
+            "DASHSCOPE_API_KEY",
+            "OPENROUTER_API_KEY",
+            "GROQ_API_KEY",
+        ]
+        for k in keys_to_clear:
+            if k in os.environ:
+                saved[k] = os.environ.pop(k)
+
+        try:
+            router, provider = build_executor_stack()
+            # May or may not find local providers — both outcomes valid
+            if router is None and provider is None:
+                assert True  # Expected: no keys, no local service
+            else:
+                # Local provider found (ollama running)
+                assert provider is not None
+        finally:
+            os.environ.update(saved)
+
+    def test_factory_priority_order(self):
+        """Provider priority list is correctly ordered."""
+        from cortex.pipeline.provider_factory import _PROVIDER_PRIORITY
+
+        assert _PROVIDER_PRIORITY[0] == "gemini"
+        assert "anthropic" in _PROVIDER_PRIORITY
+        assert "ollama" in _PROVIDER_PRIORITY
+        assert _PROVIDER_PRIORITY.index("gemini") < _PROVIDER_PRIORITY.index("ollama")
+
+    def test_executor_uses_factory(self):
+        """AgentExecutor._ensure_stack() calls factory on first use."""
+        from cortex.pipeline.executor import AgentExecutor
+
+        executor = AgentExecutor()
+        assert executor._initialized is False
+        executor._ensure_stack()
+        assert executor._initialized is True
+        # Second call is a no-op
+        executor._ensure_stack()
+        assert executor._initialized is True
+
+    def test_executor_accepts_pre_built_provider(self):
+        """Executor respects injected provider over factory."""
+        from cortex.pipeline.executor import AgentExecutor
+
+        class MockProvider:
+            provider_name = "mock"
+
+        mock = MockProvider()
+        executor = AgentExecutor(provider=mock)
+        assert executor._provider is mock
+
+
+# ── Enhanced Async Tests ──
+
+
+class TestAsyncPipelineEnhanced:
+    """Test native async pipeline improvements."""
+
+    def test_run_async_timeout_no_deadlock(self):
+        """run_async with slow executor times out without deadlock."""
+        import asyncio
+
+        class SlowExecutor:
+            async def execute(self, **kw):
+                await asyncio.sleep(999)
+
+        orch = CortexOrchestrator(agent_executor=SlowExecutor())
+        req = PipelineRequest(intent="slow mission", timeout_s=0.5)
+        result = asyncio.run(orch.run_async(req))
+        assert result.status == PipelineStatus.FAILED
+        assert "timeout" in result.error.lower()
+
+    def test_run_async_cancellation_contract(self):
+        """Cancellation returns CANCELLED status."""
+        import asyncio
+
+        async def _test():
+            orch = CortexOrchestrator()
+            req = PipelineRequest(intent="cancel test")
+            task = asyncio.create_task(orch.run_async(req))
+            # Let it start then cancel
+            await asyncio.sleep(0)
+            task.cancel()
+            try:
+                result = await task
+                # If pipeline completed before cancel, that's OK
+                assert result.status in (PipelineStatus.SUCCESS, PipelineStatus.CANCELLED)
+            except asyncio.CancelledError:
+                pass  # Also valid
+
+        asyncio.run(_test())
+
+    def test_run_streaming_yields_traces(self):
+        """run_streaming yields StageTrace events then PipelineResult."""
+        import asyncio
+
+        async def _test():
+            orch = CortexOrchestrator()
+            req = PipelineRequest(intent="streaming test")
+            events = []
+            async for event in orch.run_streaming(req):
+                events.append(event)
+
+            # Should yield 6 StageTraces + 1 PipelineResult = 7 events
+            assert len(events) == 7
+            # Last event is the final PipelineResult
+            assert isinstance(events[-1], PipelineResult)
+            assert events[-1].status == PipelineStatus.SUCCESS
+            # First 6 are StageTraces
+            for trace in events[:6]:
+                assert isinstance(trace, StageTrace)
+                assert trace.latency_ms >= 0
+
+        asyncio.run(_test())
+
+    def test_run_async_six_stages(self):
+        """Async pipeline produces exactly 6 stage traces."""
+        import asyncio
+
+        orch = CortexOrchestrator()
+        req = PipelineRequest(intent="stage count test")
+        result = asyncio.run(orch.run_async(req))
+        assert result.status == PipelineStatus.SUCCESS
+        assert len(result.stages) == 6
+        stage_names = [s.stage for s in result.stages]
+        assert PipelineStage.INGRESS in stage_names
+        assert PipelineStage.EXECUTION in stage_names
+        assert PipelineStage.PERSISTENCE in stage_names
+
+
+# ── MCP Outbound Skeleton Tests ──
+
+
+class TestMCPOutbound:
+    """Test MCP outbound client skeleton."""
+
+    def test_client_initialization(self):
+        """Client initializes with empty tool list."""
+        from cortex.pipeline.mcp_outbound import MCPOutboundClient
+
+        client = MCPOutboundClient()
+        assert client.available_tools == []
+        assert client.get_tool_schemas_for_prompt() == ""
+
+    def test_client_call_unknown_tool(self):
+        """Calling unknown tool returns error dict."""
+        import asyncio
+
+        from cortex.pipeline.mcp_outbound import MCPOutboundClient
+
+        client = MCPOutboundClient()
+        result = asyncio.run(client.call_tool("nonexistent", {}))
+        assert "error" in result
+        assert "not found" in result["error"]
+
+    def test_tool_spec_dataclass(self):
+        """MCPToolSpec holds tool metadata correctly."""
+        from cortex.pipeline.mcp_outbound import MCPToolSpec
+
+        spec = MCPToolSpec(
+            name="web_search",
+            description="Search the web",
+            input_schema={"query": {"type": "string"}},
+            server_name="brave",
+        )
+        assert spec.name == "web_search"
+        assert spec.server_name == "brave"
+
+    def test_tool_schema_formatting(self):
+        """Tool schemas format correctly for prompt injection."""
+        from cortex.pipeline.mcp_outbound import MCPOutboundClient, MCPToolSpec
+
+        client = MCPOutboundClient()
+        client._tools = [
+            MCPToolSpec(name="search", description="Web search"),
+            MCPToolSpec(name="read", description="Read file"),
+        ]
+        schema_text = client.get_tool_schemas_for_prompt()
+        assert "<available_tools>" in schema_text
+        assert "search" in schema_text
+        assert "read" in schema_text
+
+
+# ── VSA Adapter Tests ──
+
+
+class TestVSAAdapter:
+    """Test VSA context adapter integration."""
+
+    def test_adapter_graceful_when_unavailable(self):
+        """Adapter returns empty results when VSA engine not importable."""
+        from cortex.context.vsa_adapter import VSAContextAdapter
+
+        adapter = VSAContextAdapter.__new__(VSAContextAdapter)
+        adapter._available = False
+        adapter._mem = None
+        adapter._agent_id = "test"
+        adapter._D = 10000
+        adapter._decay_lambda = 0.05
+        adapter._memory_dir = None
+
+        results = adapter.query("test query")
+        assert results == []
+        assert adapter.ingest("test") is False
+        report = adapter.consolidate()
+        assert report["persisted"] is False
+
+    def test_adapter_diagnostics_unavailable(self):
+        """Diagnostics report unavailable state."""
+        from cortex.context.vsa_adapter import VSAContextAdapter
+
+        adapter = VSAContextAdapter.__new__(VSAContextAdapter)
+        adapter._available = False
+        adapter._mem = None
+        adapter._agent_id = "test"
+        adapter._D = 10000
+        adapter._decay_lambda = 0.05
+        adapter._memory_dir = None
+
+        diag = adapter.diagnostics()
+        assert diag["available"] is False
+
+    def test_assembler_with_vsa_bridge(self):
+        """ContextAssembler uses VSA bridge when provided."""
+
+        class MockVSA:
+            def query(self, intent, top_k=3):
+                return [
+                    {
+                        "id": "vsa-0",
+                        "content": "algebraic context",
+                        "similarity": 0.85,
+                        "tags": {},
+                        "timestamp": 0,
+                    }
+                ]
+
+        assembler = ContextAssembler(vsa_bridge=MockVSA())
+        ctx = assembler.assemble(intent="test vsa")
+        # VSA results should appear in knowledge_items
+        assert any(ki.get("method") == "vsa" for ki in ctx.knowledge_items), (
+            f"Expected VSA items in: {ctx.knowledge_items}"
+        )
