@@ -138,7 +138,7 @@ class CortexPipelineBridge:
         """Execute a full E2E pipeline with real infrastructure."""
         await self.initialize()
         assert self._orchestrator is not None
-        return self._orchestrator.run(request)
+        return await self._orchestrator.run_async(request)
 
     async def run_intent(
         self,

@@ -343,6 +343,11 @@ def create_mcp_server(config: MCPServerConfig | None = None) -> "FastMCP":  # ty
     # V3 Singularity Tools (Skills, Memory, Swarm Queue)
     register_singularity_tools(mcp)
 
+    # E2E Pipeline Tools (cortex_run, pipeline_status, pipeline_history)
+    from cortex.mcp.pipeline_tools import register_pipeline_tools
+
+    register_pipeline_tools(mcp, ctx)
+
     return mcp
 
 

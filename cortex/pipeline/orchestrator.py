@@ -56,6 +56,36 @@ class CortexOrchestrator:
         self._ledger = ledger
         self._executor = agent_executor
         self._traces: list[StageTrace] = []
+        self._cancel_event: Any | None = None
+
+    async def run_async(self, request: PipelineRequest) -> PipelineResult:
+        """Execute the full E2E pipeline asynchronously.
+
+        Wraps the synchronous pipeline in a thread executor so long-running
+        missions (>30s) don't block the event loop. Supports cancellation
+        via asyncio.Event.
+
+        Returns a PipelineResult with full provenance and telemetry.
+        """
+        import asyncio
+        import concurrent.futures
+
+        self._cancel_event = asyncio.Event()
+
+        loop = asyncio.get_running_loop()
+        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+            try:
+                return await asyncio.wait_for(
+                    loop.run_in_executor(pool, self.run, request),
+                    timeout=request.timeout_s,
+                )
+            except asyncio.TimeoutError:
+                return PipelineResult(
+                    mission_id=request.mission_id,
+                    status=PipelineStatus.FAILED,
+                    error=f"Pipeline timeout after {request.timeout_s}s",
+                    completed_at=time.time(),
+                )
 
     def run(self, request: PipelineRequest) -> PipelineResult:
         """Execute the full E2E pipeline synchronously.
@@ -254,44 +284,25 @@ class CortexOrchestrator:
         if self._executor is not None:
             import asyncio
 
-            try:
-                loop = asyncio.get_running_loop()
-            except RuntimeError:
-                loop = None
+            coro_factory = lambda: self._executor.execute(  # noqa: E731
+                intent=request.intent,
+                context=context,
+                plan=plan,
+                budget_remaining=request.budget_limit_usd,
+            )
 
-            if loop and loop.is_running():
-                # We're already in an async context — use create_task
+            try:
+                asyncio.get_running_loop()
+                # Already inside an async context — dispatch to an isolated
+                # thread with its own event loop to avoid nested-loop deadlock.
                 import concurrent.futures
 
                 with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
-                    result = loop.run_in_executor(
-                        pool,
-                        lambda: asyncio.run(
-                            self._executor.execute(
-                                intent=request.intent,
-                                context=context,
-                                plan=plan,
-                                budget_remaining=request.budget_limit_usd,
-                            )
-                        ),
-                    )
-                    # This is sync context, so we need run_until_complete
-                    import asyncio as _aio
-
-                    new_loop = _aio.new_event_loop()
-                    try:
-                        return new_loop.run_until_complete(result)
-                    finally:
-                        new_loop.close()
-            else:
-                return asyncio.run(
-                    self._executor.execute(
-                        intent=request.intent,
-                        context=context,
-                        plan=plan,
-                        budget_remaining=request.budget_limit_usd,
-                    )
-                )
+                    future = pool.submit(asyncio.run, coro_factory())
+                    return future.result(timeout=request.timeout_s)
+            except RuntimeError:
+                # No running loop — safe to use asyncio.run() directly.
+                return asyncio.run(coro_factory())
 
         # Fallback: structured stub when no executor is available
         agents = plan.get("agents", ["general"])

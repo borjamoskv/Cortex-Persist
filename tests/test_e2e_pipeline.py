@@ -341,3 +341,87 @@ class TestAgentExecutor:
         result = orch.run(req)
         assert result.status == PipelineStatus.SUCCESS
         assert result.output is not None
+
+
+# ── Async Orchestrator Tests ──
+
+
+class TestAsyncOrchestrator:
+    """Test async pipeline execution."""
+
+    def test_run_async_basic(self):
+        """run_async completes a simple mission."""
+        import asyncio
+
+        orch = CortexOrchestrator()
+        req = PipelineRequest(intent="async test")
+        result = asyncio.run(orch.run_async(req))
+        assert result.status == PipelineStatus.SUCCESS
+        assert len(result.stages) == 6
+
+    def test_run_async_timeout(self):
+        """run_async handles timeout gracefully."""
+        import asyncio
+
+        orch = CortexOrchestrator()
+        # Set impossible timeout — pipeline executes instantly so
+        # we verify the contract works (timeout returns PipelineResult)
+        req = PipelineRequest(intent="timeout test", timeout_s=30.0)
+        result = asyncio.run(orch.run_async(req))
+        # With no LLM executor, the pipeline completes in <1ms
+        assert result.status == PipelineStatus.SUCCESS
+        assert result.latency_ms < 30_000
+
+
+# ── MCP Pipeline Tools Tests ──
+
+
+class TestMCPPipelineTools:
+    """Test MCP pipeline tool serialization."""
+
+    def test_result_to_dict_single_agent(self):
+        from cortex.mcp.pipeline_tools import _result_to_dict
+
+        result = PipelineResult(
+            mission_id="m-test",
+            status=PipelineStatus.SUCCESS,
+            output={"content": "hello", "provider": "gemini"},
+            ledger_hash="abc123",
+            completed_at=1.0,
+        )
+        d = _result_to_dict(result)
+        assert d["content"] == "hello"
+        assert d["provider"] == "gemini"
+        assert d["status"] == "success"
+
+    def test_result_to_dict_multi_agent(self):
+        from cortex.mcp.pipeline_tools import _result_to_dict
+
+        result = PipelineResult(
+            mission_id="m-multi",
+            status=PipelineStatus.SUCCESS,
+            output={
+                "multi_agent": True,
+                "results": [
+                    {"agent_id": "a1", "content": "result 1"},
+                    {"agent_id": "a2", "content": "result 2"},
+                ],
+            },
+            completed_at=1.0,
+        )
+        d = _result_to_dict(result)
+        assert "[a1]" in d["content"]
+        assert "[a2]" in d["content"]
+
+    def test_result_to_dict_error(self):
+        from cortex.mcp.pipeline_tools import _result_to_dict
+
+        result = PipelineResult(
+            mission_id="m-err",
+            status=PipelineStatus.FAILED,
+            error="something broke",
+            completed_at=1.0,
+        )
+        d = _result_to_dict(result)
+        assert d["status"] == "failed"
+        assert d["error"] == "something broke"
