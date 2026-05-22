@@ -20,13 +20,12 @@ class TestOuroborosForge(unittest.IsolatedAsyncioTestCase):
         self.engine = OuroborosEngine()
         self.test_repo = "https://github.com/Uniswap/v4-core"
 
-
     @unittest.mock.patch("asyncio.create_subprocess_exec")
     @unittest.mock.patch("os.system")
     async def test_audit_cycle(self, mock_system, mock_exec):
         """Standard Audit Cycle on mock contract."""
         mock_proc = unittest.mock.AsyncMock()
-        mock_proc.communicate.return_value = (b'Mock stdout', b'Mock stderr')
+        mock_proc.communicate.return_value = (b"Mock stdout", b"Mock stderr")
         mock_proc.returncode = 0
         mock_proc.wait = unittest.mock.AsyncMock()
         mock_exec.return_value = mock_proc
@@ -41,6 +40,7 @@ class TestOuroborosForge(unittest.IsolatedAsyncioTestCase):
         except Exception as e:
             self.fail(f"Ouroboros Engine Crashed: {str(e)}")
 
+    @unittest.mock.patch("cortex.config.DB_PATH", ":memory:")
     async def test_signal_emission(self):
         """Verify SignalBus emits audit findings correctly."""
         import sqlite3
@@ -51,6 +51,7 @@ class TestOuroborosForge(unittest.IsolatedAsyncioTestCase):
         # Ensure schema initialization
         conn = sqlite3.connect(DB_PATH)
         _bus = SignalBus(conn)
+        _bus.ensure_table()
 
         # Check if signals exist for 'ouroboros'
         cursor = conn.cursor()
