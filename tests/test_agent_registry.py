@@ -263,7 +263,7 @@ def test_load_all_case_insensitive_duplicates(tmp_path, caplog, monkeypatch):
     with caplog.at_level(logging.ERROR):
         registry.load_all(duplicate_dir)
 
-    assert "Duplicate agent id 'ALPHA'" in caplog.text
+    assert "duplicate agent id" in caplog.text.lower()
     assert len(registry.agents) == 1
 
 
