@@ -65,3 +65,72 @@ async def test_synthesize_and_update_concurrency(mock_engine):
 
     assert archaeology.llm.agenerate.call_count == 2
     assert archaeology._apply_db_updates.call_count == 2
+
+@pytest.mark.asyncio
+async def test_synthesize_missing_llm(mock_engine):
+    archaeology = MemoryArchaeologist(mock_engine)
+    archaeology.llm = None
+
+    condensed, tombstoned = await archaeology._synthesize_and_update(
+        "test_project", "tenant_1", [[0, 1]], [{"id": 1, "content": "A", "parent_decision_id": None}, {"id": 2, "content": "B", "parent_decision_id": None}], simulate=False
+    )
+    assert condensed == 0
+    assert tombstoned == 0
+
+@pytest.mark.asyncio
+async def test_synthesize_overlapping_locks(mock_engine):
+    archaeology = MemoryArchaeologist(mock_engine)
+
+    # Mock LLM
+    archaeology.llm = AsyncMock()
+    mock_res = MagicMock()
+    mock_res.text = "Condensed Fact"
+    archaeology.llm.agenerate.return_value = mock_res
+
+    archaeology._apply_db_updates = AsyncMock()
+
+    facts = [
+        {"id": "1", "content": "A", "parent_decision_id": None},
+        {"id": "2", "content": "B", "parent_decision_id": None},
+        {"id": "3", "content": "C", "parent_decision_id": None},
+    ]
+
+    # Overlapping clusters
+    clusters = [[0, 1], [1, 2]]
+
+    condensed, tombstoned = await archaeology._synthesize_and_update(
+        "test_project", "tenant_1", clusters, facts, simulate=False
+    )
+
+    assert condensed == 1
+    assert tombstoned == 2
+
+    assert archaeology.llm.agenerate.call_count == 1
+    assert archaeology._apply_db_updates.call_count == 1
+
+@pytest.mark.asyncio
+async def test_synthesize_db_error(mock_engine):
+    import sqlite3
+    archaeology = MemoryArchaeologist(mock_engine)
+
+    # Mock LLM
+    archaeology.llm = AsyncMock()
+    mock_res = MagicMock()
+    mock_res.text = "Condensed Fact"
+    archaeology.llm.agenerate.return_value = mock_res
+
+    archaeology._apply_db_updates = AsyncMock(side_effect=sqlite3.Error("Mock error"))
+
+    facts = [
+        {"id": "1", "content": "A", "parent_decision_id": None},
+        {"id": "2", "content": "B", "parent_decision_id": None},
+    ]
+
+    clusters = [[0, 1]]
+
+    condensed, tombstoned = await archaeology._synthesize_and_update(
+        "test_project", "tenant_1", clusters, facts, simulate=False
+    )
+
+    assert condensed == 0
+    assert tombstoned == 0
