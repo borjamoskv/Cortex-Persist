@@ -1,4 +1,5 @@
 import struct
+import sqlite3
 import time
 from unittest.mock import AsyncMock
 
@@ -23,6 +24,7 @@ def mock_encoder():
 
 
 @pytest.mark.asyncio
+@pytest.mark.skipif(not hasattr(sqlite3.Connection, "enable_load_extension"), reason="sqlite-vec not supported")
 async def test_exergy_prioritization(temp_db_path, mock_encoder):
     """
     Verifies that the new Causal Gradient Search correctly relies on exergy

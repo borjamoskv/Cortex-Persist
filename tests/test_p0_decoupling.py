@@ -1,3 +1,4 @@
+import sqlite3
 import aiosqlite
 import pytest
 
@@ -23,6 +24,7 @@ async def engine(tmp_path):
 
 
 @pytest.mark.asyncio
+@pytest.mark.skipif(not hasattr(sqlite3.Connection, "enable_load_extension"), reason="sqlite-vec not supported")
 async def test_store_decoupled(engine):
     """Verify that store() persists the fact and enqueues an enrichment job."""
     fact_id = await engine.store(
@@ -49,6 +51,7 @@ async def test_store_decoupled(engine):
 
 
 @pytest.mark.asyncio
+@pytest.mark.skipif(not hasattr(sqlite3.Connection, "enable_load_extension"), reason="sqlite-vec not supported")
 async def test_worker_processing(engine):
     """Verify that the EnrichmentWorker can process a pending job."""
     from cortex.embeddings.provider import NullEmbeddingProvider
