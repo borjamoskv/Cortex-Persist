@@ -19,6 +19,10 @@ class TestOuroborosForge(unittest.IsolatedAsyncioTestCase):
 
     async def test_audit_cycle(self):
         """Standard Audit Cycle on mock contract."""
+        import shutil
+        if not shutil.which("forge"):
+            self.skipTest("Forge fuzzer not installed")
+
         logger = logging.getLogger("cortex.ouroboros.test")
         logger.info("Starting Ouroboros-1 Verification...")
 

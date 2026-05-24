@@ -1,5 +1,6 @@
 import struct
 import time
+import sqlite3
 from unittest.mock import AsyncMock
 
 import pytest
@@ -28,6 +29,9 @@ async def test_exergy_prioritization(temp_db_path, mock_encoder):
     Verifies that the new Causal Gradient Search correctly relies on exergy
     to rank outputs when their semantic embeddings are identical.
     """
+    if not hasattr(sqlite3.Connection, "enable_load_extension"):
+        pytest.skip("sqlite3.Connection.enable_load_extension is not available")
+
     store = SovereignVectorStoreL2(encoder=mock_encoder, db_path=temp_db_path, half_life_days=7)
 
     # Prepare identical embeddings so vector similarity is strictly equal
