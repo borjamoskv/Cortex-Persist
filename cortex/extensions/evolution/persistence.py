@@ -101,7 +101,7 @@ def save_swarm(agents: list[SovereignAgent], cycle: int, path: Path = DEFAULT_ST
         shutil.copy2(cycle_path, path)
 
         # Rotación: mantener solo los N más recientes
-        all_backups = sorted(path.parent.glob("evolution_state_cycle_*.json")))
+        all_backups = sorted(path.parent.glob("evolution_state_cycle_*.json"))
         if len(all_backups) > MAX_BACKUPS:
             for old in all_backups[:-MAX_BACKUPS]:
                 old.unlink()
