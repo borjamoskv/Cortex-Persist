@@ -249,8 +249,8 @@ class MemoryArchaeologist:
             parent_column = await self._parent_column(conn)
             if parent_column:
                 cursor = await conn.execute(
-                    f"SELECT id, tenant_id FROM facts "  # nosec B608
-                    f"WHERE {parent_column} IN ({placeholders}) AND tenant_id = ?",  # nosec B608
+                    f"SELECT id, tenant_id FROM facts "  # noqa: S608  # nosec B608
+                    f"WHERE {parent_column} IN ({placeholders}) AND tenant_id = ?",  # noqa: S608  # nosec B608
                     (*old_ids, tenant_id),
                 )
                 for child_id, child_tenant_id in await cursor.fetchall():
@@ -275,11 +275,11 @@ class MemoryArchaeologist:
                 "UPDATE facts_meta SET parent_decision_id = ? WHERE id = ?",
                 (primary_parent_id, new_fact_id),
             )
-        cl2.execute(f"DELETE FROM facts_meta WHERE id IN ({placeholders})", str_old_ids)  # nosec B608
+        cl2.execute(f"DELETE FROM facts_meta WHERE id IN ({placeholders})", str_old_ids)  # noqa: S608  # nosec B608
         cl2.execute("DELETE FROM vec_facts WHERE rowid NOT IN (SELECT rowid FROM facts_meta)")
         cl2 = l2_conn.cursor()
         cl2.execute(
-            f"UPDATE facts_meta SET parent_decision_id = ? WHERE parent_decision_id IN ({placeholders})",  # nosec B608
+            f"UPDATE facts_meta SET parent_decision_id = ? WHERE parent_decision_id IN ({placeholders})",  # noqa: S608  # nosec B608
             [new_fact_id] + old_ids,
         )
         l2_conn.commit()
