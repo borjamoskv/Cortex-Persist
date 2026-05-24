@@ -81,7 +81,7 @@ class FiatOracle:
         """Check for simulated transactions in the persistent queue."""
 
         def _get_tx_files() -> list[Path]:
-            return list(self.queue_dir.glob("*.json"))
+            return list(sorted(self.queue_dir.glob("*.json")))
 
         tx_files = await asyncio.to_thread(_get_tx_files)
         for tx_file in tx_files:
@@ -124,7 +124,7 @@ class FiatOracle:
 
     def _check_signals_sync(self):
         """Sync version for threaded execution."""
-        for tx_file in self.queue_dir.glob("*.json"):
+        for tx_file in sorted(self.queue_dir.glob("*.json")):
             try:
                 content = tx_file.read_text()
                 data = json.loads(content)

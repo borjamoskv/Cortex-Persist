@@ -81,7 +81,7 @@ Validate state transitions and enforce strict access control on internal functio
                 fuzz_dir = target / "test" / "fuzz"
                 if not fuzz_dir.exists(): continue
                 
-                for poc in fuzz_dir.glob("PoC_*.sol"):
+                for poc in sorted(fuzz_dir.glob("PoC_*.sol")):
                     if poc.name in [p['name'] for p in self.verified_pocs]: 
                         continue
                     

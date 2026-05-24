@@ -243,7 +243,7 @@ class AgentRegistry:
         loaded_count = 0
         duplicate_count = 0
         seen_agent_ids: set[str] = set()
-        for yaml_path in directory.glob("*.yaml"):
+        for yaml_path in sorted(directory.glob("*.yaml")):
             if yaml_path.is_symlink() and not yaml_path.exists():
                 logger.error(
                     "☠️ [REGISTRY] Broken symlink skipped: %s -> %s",

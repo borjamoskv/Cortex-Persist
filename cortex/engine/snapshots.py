@@ -61,7 +61,7 @@ def _parse_snapshot_meta(meta_file: Path) -> SnapshotRecord | None:
 
 def _list_snapshots_sync(snapshot_dir: Path) -> list[SnapshotRecord]:
     snapshots = []
-    for meta_file in snapshot_dir.glob("*.json"):
+    for meta_file in sorted(snapshot_dir.glob("*.json")):
         record = _parse_snapshot_meta(meta_file)
         if record:
             snapshots.append(record)
@@ -73,7 +73,7 @@ def _restore_db_files_sync(snap_path: Path, target_path: Path) -> bool:
     shutil.copy2(target_path, backup_path)
     try:
         shutil.copy2(snap_path, target_path)
-        for wal_file in target_path.parent.glob(f"{target_path.name}-*"):
+        for wal_file in sorted(target_path.parent.glob(f"{target_path.name}-*")):
             wal_file.unlink()
         return True
     except (OSError, ValueError) as e:

@@ -130,7 +130,7 @@ def register_notebooklm_tools(mcp: Any, ctx: Any) -> None:
             synced.append(str(dest))
 
         if mode in ("domains", "both") and DOMAINS_DIR.exists():
-            for f in DOMAINS_DIR.glob("*.md"):
+            for f in sorted(DOMAINS_DIR.glob("*.md")):
                 dest = target / f.name
                 shutil.copy2(f, dest)
                 synced.append(str(dest))
@@ -139,7 +139,7 @@ def register_notebooklm_tools(mcp: Any, ctx: Any) -> None:
         cutoff = time.time() - (7 * 86400)
         cleaned = 0
         synced_names = {Path(s).name for s in synced}
-        for f in target.glob("*.md"):
+        for f in sorted(target.glob("*.md")):
             if os.path.getmtime(f) < cutoff and f.name not in synced_names:
                 f.unlink()
                 cleaned += 1
@@ -184,7 +184,7 @@ def register_notebooklm_tools(mcp: Any, ctx: Any) -> None:
 
         # Domain fragments
         if DOMAINS_DIR.exists():
-            files = list(DOMAINS_DIR.glob("*.md"))
+            files = list(sorted(DOMAINS_DIR.glob("*.md")))
             result["domains"] = {
                 "exists": True,
                 "file_count": len(files),

@@ -236,7 +236,7 @@ def sync_cmd(drive_path: str | None, mode: str):
             ctx = click.Context(fragment_cmd, info_name="fragment")
             ctx.invoke(fragment_cmd, output_dir=str(DOMAINS_DIR))
 
-        for f in domains_path.glob("*.md"):
+        for f in sorted(domains_path.glob("*.md")):
             dest = target / f.name
             shutil.copy2(f, dest)
             synced_files.append(str(dest))
@@ -251,7 +251,7 @@ def sync_cmd(drive_path: str | None, mode: str):
     # Clean old files (older than 7 days)
     cutoff = time.time() - (7 * 86400)
     cleaned = 0
-    for f in target.glob("*.md"):
+    for f in sorted(target.glob("*.md")):
         synced_names = [Path(s).name for s in synced_files]
         if os.path.getmtime(f) < cutoff and f.name not in synced_names:
             f.unlink()
@@ -396,7 +396,7 @@ def ingest_cmd(drive_path: str | None):
         )
 
         async with SovereignLLM() as llm:
-            for file_path in target.glob("*.md"):
+            for file_path in sorted(target.glob("*.md")):
                 # Ignoramos los propios archivos que exporta CORTEX
                 if (
                     file_path.name.startswith("cortex-master")

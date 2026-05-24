@@ -55,7 +55,7 @@ def migrate_v31_to_v40(
     # 2. Migrate project files
     projects_dir = src / "projects"
     if projects_dir.exists():
-        for pfile in projects_dir.glob("*.json"):
+        for pfile in sorted(projects_dir.glob("*.json")):
             _migrate_project(engine, pfile, stats)
 
     # 3. Migrate mistakes.jsonl

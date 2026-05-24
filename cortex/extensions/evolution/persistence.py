@@ -101,7 +101,7 @@ def save_swarm(agents: list[SovereignAgent], cycle: int, path: Path = DEFAULT_ST
         shutil.copy2(cycle_path, path)
 
         # Rotación: mantener solo los N más recientes
-        all_backups = sorted(path.parent.glob("evolution_state_cycle_*.json"))
+        all_backups = sorted(path.parent.glob("evolution_state_cycle_*.json")))
         if len(all_backups) > MAX_BACKUPS:
             for old in all_backups[:-MAX_BACKUPS]:
                 old.unlink()
@@ -123,7 +123,7 @@ def load_swarm(path: Path = DEFAULT_STATE_PATH) -> Optional[tuple[list[Sovereign
 
     # Intentamos cargar el principal primero, luego los backups ordenados por fecha descendente
     targets = [path] + sorted(
-        path.parent.glob("evolution_state_cycle_*.json"),
+        sorted(path.parent.glob("evolution_state_cycle_*.json")),
         key=lambda x: x.stat().st_mtime,
         reverse=True,
     )

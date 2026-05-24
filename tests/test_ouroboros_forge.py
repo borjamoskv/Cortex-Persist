@@ -1,3 +1,5 @@
+import unittest.mock as mock
+
 import logging
 import sys
 import unittest
@@ -24,7 +26,12 @@ class TestOuroborosForge(unittest.IsolatedAsyncioTestCase):
 
         # This will clone and audit
         try:
-            await self.engine.run_audit()
+            with mock.patch("os.system", return_value=0), mock.patch("asyncio.create_subprocess_exec") as mock_exec:
+                mock_process = mock.AsyncMock()
+                mock_process.communicate.return_value = (b"", b"")
+                mock_process.returncode = 0
+                mock_exec.return_value = mock_process
+                await self.engine.run_audit()
             logger.info("Audit Cycle 1/1 verified.")
         except Exception as e:
             self.fail(f"Ouroboros Engine Crashed: {str(e)}")
