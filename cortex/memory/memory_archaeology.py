@@ -120,21 +120,32 @@ class MemoryArchaeologist:
     def _build_clusters(
         self, facts: list[dict[str, Any]], vecs_matrix: np.ndarray, threshold: float
     ) -> list[list[int]]:
-        # O(N^2) dot product for cosine similarity
+        # O(N^2) dot product for cosine similarity is unavoidable here without approximate KNN.
+        # But we can eliminate the O(N^2) nested python loops and use vectorization.
         sim_matrix = np.dot(vecs_matrix, vecs_matrix.T)
+
+        # Zero out the diagonal to not match with self during boolean indexing
+        np.fill_diagonal(sim_matrix, 0)
+
+        # Find all pairs above threshold
+        matches = sim_matrix >= threshold
+
         visited = set()
         clusters = []
-
         n = len(facts)
+
         for i in range(n):
             if i in visited:
                 continue
 
-            # Find neighbors
-            neighbors = [j for j in range(n) if sim_matrix[i, j] >= threshold]
-            if len(neighbors) > 1:
-                clusters.append(neighbors)
-                visited.update(neighbors)
+            # Get indices where the match is true
+            neighbors = np.where(matches[i])[0].tolist()
+
+            # Since diagonal is zeroed out, we need to explicitly add `i` if it has neighbors
+            if neighbors:
+                cluster = [i] + neighbors
+                clusters.append(cluster)
+                visited.update(cluster)
             else:
                 visited.add(i)
 
@@ -176,7 +187,12 @@ class MemoryArchaeologist:
             if not simulate:
                 try:
                     await self._apply_db_updates(
-                        project, tenant_id, condensed_content, cluster_facts, primary_parent_id, l2_conn
+                        project,
+                        tenant_id,
+                        condensed_content,
+                        cluster_facts,
+                        primary_parent_id,
+                        l2_conn,
                     )
                 except (sqlite3.Error, aiosqlite.Error) as e:
                     logger.error("Archaeology DB update failed: %s", e)

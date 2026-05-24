@@ -6,6 +6,7 @@ to ground truth facts (L0).
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from dataclasses import dataclass
 from typing import Any, Optional
@@ -35,7 +36,7 @@ class LineageVerifier:
         self.engine = engine
 
     async def get_lineage(
-        self, fact_id: int, max_depth: int = 5, _cache: Optional[dict[int, LineageNode]] = None
+        self, fact_id: int, max_depth: int = 5, _cache: Optional[dict[int, Any]] = None
     ) -> LineageNode:
         """Recursively build the lineage tree for a fact.
 
@@ -60,7 +61,23 @@ class LineageVerifier:
             _cache = {}
 
         if fact_id in _cache:
-            return _cache[fact_id]
+            val = _cache[fact_id]
+            if val is True:
+                return LineageNode(
+                    fact_id=fact_id,
+                    project="unknown",
+                    content="[CYCLIC REFERENCE DETECTED]",
+                    fact_type="error",
+                    confidence="none",
+                    timestamp="",
+                    parents=[],
+                    is_valid=False,
+                    error="Cyclic graph lineage protection triggered.",
+                )
+            return val
+
+        # Pre-emptively mark as being processed to prevent concurrent N+1 race conditions
+        _cache[fact_id] = True
 
         fact = await self.engine.get_fact(fact_id)
         if not fact:
@@ -88,29 +105,16 @@ class LineageVerifier:
         if prev_id and prev_id not in parent_ids:
             parent_ids.append(prev_id)
 
-        # To prevent deadlocks, _cache is simply used to prevent infinite recursion
-        # during traversal, not to store fully materialized trees which breaks GC in pytest.
-        _cache[fact_id] = True  # type: ignore[type-error]
-
         parents = []
         if max_depth > 0:
-            for pid in parent_ids:
-                if pid not in _cache:
-                    parents.append(await self.get_lineage(pid, max_depth - 1, _cache))
-                else:
-                    parents.append(
-                        LineageNode(
-                            fact_id=pid,
-                            project=fact.project,
-                            content="[CYCLIC REFERENCE DETECTED]",
-                            fact_type="error",
-                            confidence="none",
-                            timestamp="",
-                            parents=[],
-                            is_valid=False,
-                            error="Cyclic graph lineage protection triggered.",
-                        )
-                    )
+            tasks = [self.get_lineage(pid, max_depth - 1, _cache) for pid in parent_ids]
+            if tasks:
+                parents = list(await asyncio.gather(*tasks))
+
+        # Fix missing project in cyclic references that were resolved before fact fetch
+        for p in parents:
+            if p.error == "Cyclic graph lineage protection triggered." and p.project == "unknown":
+                p.project = fact.project
 
         # Cryptographic Verification (Ω₃-V)
         # In a real scenario, we'd verify hashes here.
