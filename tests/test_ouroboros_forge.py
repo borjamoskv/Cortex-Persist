@@ -14,8 +14,29 @@ class TestOuroborosForge(unittest.IsolatedAsyncioTestCase):
     """Verifies the Forge-backed Ouroboros audit pipeline (V5)."""
 
     async def asyncSetUp(self):
+        from unittest.mock import patch, AsyncMock
+
+        self.patcher1 = patch("asyncio.create_subprocess_exec", new_callable=AsyncMock)
+        self.patcher2 = patch("os.system")
+        self.patcher3 = patch("subprocess.run")
+
+        self.mock_exec = self.patcher1.start()
+        mock_proc = AsyncMock()
+        mock_proc.stdout.readline.side_effect = [b"[FAIL] Mock failure", b""]
+        mock_proc.wait.return_value = 0
+        mock_proc.communicate.return_value = (b"[FAIL] Mock failure", b"")
+        self.mock_exec.return_value = mock_proc
+
+        self.mock_sys = self.patcher2.start()
+        self.mock_run = self.patcher3.start()
+
         self.engine = OuroborosEngine()
         self.test_repo = "https://github.com/Uniswap/v4-core"
+
+    async def asyncTearDown(self):
+        self.patcher1.stop()
+        self.patcher2.stop()
+        self.patcher3.stop()
 
     async def test_audit_cycle(self):
         """Standard Audit Cycle on mock contract."""
@@ -37,12 +58,18 @@ class TestOuroborosForge(unittest.IsolatedAsyncioTestCase):
         from cortex.extensions.signals.bus import SignalBus
 
         # Ensure schema initialization
-        conn = sqlite3.connect(DB_PATH)
-        _bus = SignalBus(conn)
+        import tempfile
+        from unittest.mock import patch
 
-        # Check if signals exist for 'ouroboros'
-        cursor = conn.cursor()
-        cursor.execute("SELECT count(*) FROM signals WHERE source='ouroboros'")
+        with tempfile.NamedTemporaryFile() as tmp:
+            with patch("cortex.config.DB_PATH", tmp.name):
+                conn = sqlite3.connect(tmp.name)
+                _bus = SignalBus(conn)
+                _bus.ensure_table()  # Must create table first!
+
+                # Check if signals exist for 'ouroboros'
+                cursor = conn.cursor()
+                cursor.execute("SELECT count(*) FROM signals WHERE source='ouroboros'")
         count = cursor.fetchone()[0]
         conn.close()
         self.assertGreaterEqual(count, 0, "Signal table check failed.")
