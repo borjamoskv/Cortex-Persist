@@ -448,7 +448,7 @@ class CortexEngine(
             fact_type=kwargs.get("fact_type", ""),
             project=kwargs.get("project", args[0] if args else ""),
         )
-        return await self.facts.store(*args, **kwargs)
+        return await super().store(*args, **kwargs)
     async def store_many(self, *args, **kwargs):
         self._synthesize_skill("store")
         return await super().store_many(*args, **kwargs)

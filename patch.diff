@@ -1,0 +1,16 @@
+<<<<<<< SEARCH
+    try:
+        updated_id = await engine.update(
+            fact_id=fact_id_alice, new_content="Bob hacked this", project="beta"
+        )
+        assert not updated_id, "Bob should not be able to update Alice's fact"
+    except Exception:
+        pass  # Depending on implementation it might raise or return None
+=======
+    try:
+        updated_id = await engine.update(
+            fact_id=fact_id_alice, content="Bob hacked this", project="beta"
+        )
+        assert not updated_id, "Bob should not be able to update Alice's fact"
+    except ValueError:
+        pass

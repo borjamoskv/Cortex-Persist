@@ -1,0 +1,19 @@
+<<<<<<< SEARCH
+    async def store(self, *args, **kwargs):
+        self._synthesize_skill("store")
+        self._audit_log(
+            "store",
+            fact_type=kwargs.get("fact_type", ""),
+            project=kwargs.get("project", args[0] if args else ""),
+        )
+        return await self.facts.store(*args, **kwargs)
+=======
+    async def store(self, *args, **kwargs):
+        self._synthesize_skill("store")
+        self._audit_log(
+            "store",
+            fact_type=kwargs.get("fact_type", ""),
+            project=kwargs.get("project", args[0] if args else ""),
+        )
+        return await super().store(*args, **kwargs)
+>>>>>>> REPLACE
