@@ -7,19 +7,11 @@ from cortex.engine import CortexEngine
 
 @pytest.fixture
 async def engine(tmp_path):
-    import sqlite_vec
-
     db_path = tmp_path / "test_cortex.db"
-    engine = CortexEngine(db_path=str(db_path))
-    # Initialize schema with extension loaded
-    async with aiosqlite.connect(str(db_path)) as db:
-        await db.enable_load_extension(True)
-        await db.load_extension(sqlite_vec.loadable_path())
-        await db.enable_load_extension(False)
-        for statement in ALL_SCHEMA:
-            await db.executescript(statement)
-        await db.commit()
-    return engine
+    e = CortexEngine(db_path=str(db_path))
+    await e.init_db()
+    yield e
+    await e.close()
 
 
 @pytest.mark.asyncio

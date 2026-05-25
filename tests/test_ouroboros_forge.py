@@ -22,12 +22,21 @@ class TestOuroborosForge(unittest.IsolatedAsyncioTestCase):
         logger = logging.getLogger("cortex.ouroboros.test")
         logger.info("Starting Ouroboros-1 Verification...")
 
+        # Mock external calls to forge and git
+        from unittest.mock import patch, AsyncMock
+        mock_process = AsyncMock()
+        mock_process.communicate.return_value = (b"mock stdout", b"mock stderr")
+        mock_process.wait.return_value = None
+        mock_process.returncode = 0
+
         # This will clone and audit
-        try:
-            await self.engine.run_audit()
-            logger.info("Audit Cycle 1/1 verified.")
-        except Exception as e:
-            self.fail(f"Ouroboros Engine Crashed: {str(e)}")
+        with patch("asyncio.create_subprocess_exec", return_value=mock_process):
+            with patch("os.system", return_value=0):
+                try:
+                    await self.engine.run_audit()
+                    logger.info("Audit Cycle 1/1 verified.")
+                except Exception as e:
+                    self.fail(f"Ouroboros Engine Crashed: {str(e)}")
 
     async def test_signal_emission(self):
         """Verify SignalBus emits audit findings correctly."""
