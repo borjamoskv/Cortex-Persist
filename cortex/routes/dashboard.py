@@ -145,13 +145,23 @@ def get_dashboard_html() -> str:
             function addBlock(payload) {
                 const block = document.createElement('div');
                 block.className = 'block';
-                block.innerHTML = `
-                    <div class="hash">${payload.hash ? payload.hash.substring(0, 16) : '---'}...</div>
-                    <div class="action">
-                        Action: ${payload.action} | Vector: ${payload.vector_id}
-                        <span class="yield">+${payload.yield_amount}</span>
-                    </div>
-                `;
+
+                const hashDiv = document.createElement('div');
+                hashDiv.className = 'hash';
+                hashDiv.textContent = (payload.hash ? payload.hash.substring(0, 16) : '---') + '...';
+
+                const actionDiv = document.createElement('div');
+                actionDiv.className = 'action';
+                actionDiv.textContent = `Action: ${payload.action} | Vector: ${payload.vector_id} `;
+
+                const yieldSpan = document.createElement('span');
+                yieldSpan.className = 'yield';
+                yieldSpan.textContent = `+${payload.yield_amount}`;
+
+                actionDiv.appendChild(yieldSpan);
+                block.appendChild(hashDiv);
+                block.appendChild(actionDiv);
+
                 ledgerFeed.prepend(block);
                 totalExergy += parseFloat(payload.yield_amount || 0);
                 exergyText.textContent = totalExergy.toFixed(4);

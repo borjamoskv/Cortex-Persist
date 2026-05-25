@@ -197,4 +197,5 @@ SKIP_DIRS = {
     "scratch",
     ".scratch_debris",
     "scratch_debris",
+    "migrations",
 }

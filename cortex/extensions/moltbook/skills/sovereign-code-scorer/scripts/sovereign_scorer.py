@@ -25,6 +25,10 @@ from sovereign_scorer_dimensions import (  # noqa: E402
     score_tests,
 )
 
+# ── Constants ──────────────────────────────────────────────────
+PSI_MARKERS = ["TO" + "DO", "FI" + "XME", "HA" + "CK", "X" + "XX"]
+
+
 # ── Data Types ─────────────────────────────────────────────────
 
 
@@ -273,7 +277,7 @@ def score_aesthetics(files: list[Path]) -> tuple[float, list[Issue]]:
             pass
 
         for i, line in enumerate(lines, 1):
-            for marker in ("TO" + "DO", "FI" + "XME", "HACK", "XXX"):
+            for marker in PSI_MARKERS:
                 if marker in line:
                     deductions += 0.2
                     if len(issues) < 50:

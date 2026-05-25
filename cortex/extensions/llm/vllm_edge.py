@@ -11,8 +11,10 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import logging
+import json
 import os
 import time
+from pathlib import Path
 from collections.abc import AsyncGenerator
 
 from cortex.engine.context_cache import ContextCacheManager
@@ -60,6 +62,22 @@ class NativeVLLMProvider(BaseProvider):
         self._context_window = max_model_len
         self._gpu_util = gpu_memory_utilization
 
+        # Check active verified adapter registry
+        verified_adapter_path = None
+        registry_file = Path.home() / ".cortex" / "training" / "verified_adapter.json"
+        if registry_file.exists():
+            try:
+                with open(registry_file, encoding="utf-8") as f:
+                    reg = json.load(f)
+                    if reg.get("status") == "verified":
+                        verified_adapter_path = reg.get("adapter_path")
+            except Exception:
+                pass
+
+        enable_lora = (
+            verified_adapter_path is not None or os.environ.get("CORTEX_ENABLE_LORA") == "true"
+        )
+
         args = AsyncEngineArgs(
             model=self._model,
             gpu_memory_utilization=self._gpu_util,
@@ -67,6 +85,8 @@ class NativeVLLMProvider(BaseProvider):
             quantization=quantization,
             trust_remote_code=True,
             disable_log_requests=True,
+            enable_lora=enable_lora,
+            max_loras=4 if enable_lora else None,
         )
 
         logger.info(
@@ -112,7 +132,31 @@ class NativeVLLMProvider(BaseProvider):
         # CORTEX assumes ChatML or similar system mappings natively handled by vLLM.
         composed_prompt = f"<|im_start|>system\\n{system}<|im_end|>\\n<|im_start|>user\\n{prompt}<|im_end|>\\n<|im_start|>assistant\\n"
 
-        generator = self._engine.generate(composed_prompt, sp, request_id)  # type: ignore[reportOptionalMemberAccess]
+        # Dynamically load verified adapter if registered
+        lora_request = None
+        registry_file = Path.home() / ".cortex" / "training" / "verified_adapter.json"
+        if registry_file.exists():
+            try:
+                with open(registry_file, encoding="utf-8") as f:
+                    reg = json.load(f)
+                    if reg.get("status") == "verified":
+                        adapter_path = reg.get("adapter_path")
+                        if adapter_path:
+                            from vllm.lora.request import LoRARequest
+
+                            lora_request = LoRARequest(
+                                lora_name="verified_adapter",
+                                lora_int_id=1,
+                                lora_path=adapter_path,
+                            )
+            except Exception as e:
+                logger.error("Failed to load verified adapter for completion: %s", e)
+
+        kwargs = {}
+        if lora_request:
+            kwargs["lora_request"] = lora_request
+
+        generator = self._engine.generate(composed_prompt, sp, request_id, **kwargs)  # type: ignore[reportOptionalMemberAccess]
 
         final_output = ""
         async for output in generator:
@@ -193,7 +237,32 @@ class NativeVLLMProvider(BaseProvider):
         )
 
         composed_prompt = f"<|im_start|>system\\n{system}<|im_end|>\\n<|im_start|>user\\n{prompt}<|im_end|>\\n<|im_start|>assistant\\n"
-        generator = self._engine.generate(composed_prompt, sp, request_id)  # type: ignore[reportOptionalMemberAccess]
+
+        # Dynamically load verified adapter if registered
+        lora_request = None
+        registry_file = Path.home() / ".cortex" / "training" / "verified_adapter.json"
+        if registry_file.exists():
+            try:
+                with open(registry_file, encoding="utf-8") as f:
+                    reg = json.load(f)
+                    if reg.get("status") == "verified":
+                        adapter_path = reg.get("adapter_path")
+                        if adapter_path:
+                            from vllm.lora.request import LoRARequest
+
+                            lora_request = LoRARequest(
+                                lora_name="verified_adapter",
+                                lora_int_id=1,
+                                lora_path=adapter_path,
+                            )
+            except Exception as e:
+                logger.error("Failed to load verified adapter for stream: %s", e)
+
+        kwargs = {}
+        if lora_request:
+            kwargs["lora_request"] = lora_request
+
+        generator = self._engine.generate(composed_prompt, sp, request_id, **kwargs)  # type: ignore[reportOptionalMemberAccess]
 
         previous_text = ""
         async for output in generator:

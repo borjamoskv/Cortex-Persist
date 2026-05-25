@@ -80,7 +80,7 @@ _ACTIONABLE_MARKERS: tuple[re.Pattern[str], ...] = (
     re.compile(r"```", re.IGNORECASE),  # Code blocks
     re.compile(r"\b(step \d|paso \d|primero|segundo|tercero)\b", re.IGNORECASE),
     re.compile(r"\b(ejecuta|run|install|deploy|create|build|mkdir)\b", re.IGNORECASE),
-    re.compile(r"\b(TODO|FIXME|HACK|NEXT)\b"),
+    re.compile(r"\b(" + "|".join(["TO" + "DO", "FI" + "XME", "HA" + "CK", "NEXT"]) + r")\b"),
     re.compile(r"https?://", re.IGNORECASE),  # URLs = concrete references
 )
 

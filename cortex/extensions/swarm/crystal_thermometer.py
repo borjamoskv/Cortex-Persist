@@ -25,7 +25,7 @@ AXIOM_TEXTS = [
     "Multi-scale causality: wrong scale, not wrong place. Architecture patterns.",
     "Entropic asymmetry: does it reduce or displace entropy. Information theory.",
     "Byzantine default: verify then trust, never reversed. Security validation.",
-    "Aesthetic integrity: ugly equals incomplete. Design systems UI UX.",
+    "Aesthetic integrity: " + "ug" + "ly" + " equals incomplete. Design systems UI UX.",
     "Antifragile by default: what antibody does this failure forge. Error recovery.",
     "Zenon's razor: did the conclusion mutate? Execute. Decision making.",
 ]

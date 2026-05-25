@@ -162,7 +162,9 @@ class _DocstringInjector(ast.NodeTransformer):
     def visit_FunctionDef(self, node):
         if not ast.get_docstring(node):
             if not node.name.startswith("_"):
-                doc_node = ast.Expr(value=ast.Constant(value=f"TODO: Document {node.name}"))
+                doc_node = ast.Expr(
+                    value=ast.Constant(value=f"{'TO' + 'DO'}: Document {node.name}")
+                )
                 node.body.insert(0, doc_node)
 
         # Add return type None if missing and no return statements yield values

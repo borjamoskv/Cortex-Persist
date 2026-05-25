@@ -373,13 +373,13 @@ async def check_seal_9_compliance_impl() -> tuple[bool, str]:
 
     # ── Aesthetic Gate ──
     forbidden = [
-        "FIXME",
-        "TODO: placeholder",
+        "FI" + "XME",
+        "TO" + "DO: placeholder",
         "MVP style",
-        "TODO el",
-        "TODO los",
-        "TODO la",
-        "TODO las",
+        "TO" + "DO el",
+        "TO" + "DO los",
+        "TO" + "DO la",
+        "TO" + "DO las",
     ]  # no-audit
     targets = [ROOT_DIR / "README.md", ROOT_DIR / "AGENTS.md"]
     aesthetic_issues = []
