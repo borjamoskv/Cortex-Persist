@@ -241,4 +241,3 @@ def test_enqueue_swarm_task_api_sync_failure_fallback(monkeypatch, tmp_path):
     assert len(local_data["pending_tasks"]) == 1
     assert local_data["pending_tasks"][0]["agent"] == "OPTIMIZER"
     assert local_data["pending_tasks"][0]["payload"] == payload
-
