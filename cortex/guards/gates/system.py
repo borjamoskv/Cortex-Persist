@@ -9,7 +9,7 @@ from .common import ROOT_DIR, GateResult, GlobalSourceCache, arun_cmd, printer
 async def check_gate_4_tests() -> GateResult:
     """Seal 4: Tests & Coverage (AX-II Ledger Integrity)."""
     printer.seal(4, "Ledger Integrity", "Tests & Coverage")
-    code, _ = await arun_cmd(["pytest", "tests/", "-q", "--maxfail=1"])
+    code, _ = await arun_cmd(["uv", "run", "pytest", "-o", "addopts=", "tests/", "-q", "--maxfail=1"])
     if code == 0:
         printer.success("Core tests passed.")
         return True, "verified"

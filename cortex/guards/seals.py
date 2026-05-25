@@ -287,7 +287,7 @@ async def check_seal_3_security() -> GateResult:
 async def check_seal_4_tests() -> GateResult:
     printer.seal(4, "AX-II Paradoja Epistémica", "Tests & Coverage")
     python_cmd = sys.executable
-    cmd = [str(python_cmd), "-m", "pytest", "tests/", "-x", "-q", "--tb=short"]
+    cmd = ["uv", "run", "pytest", "-o", "addopts=", "tests/", "-x", "-q", "--tb=short"]
     try:
         code, out = await asyncio.wait_for(arun_cmd(cmd, timeout=600.0), timeout=605.0)
     except asyncio.TimeoutError:
