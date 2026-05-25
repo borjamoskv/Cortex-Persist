@@ -1,6 +1,7 @@
 import logging
 import sys
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 # Add project root to sys.path dynamically
@@ -33,6 +34,7 @@ class TestOuroborosForge(unittest.IsolatedAsyncioTestCase):
         except Exception as e:
             self.fail(f"Ouroboros Engine Crashed: {str(e)}")
 
+    @patch("cortex.config.DB_PATH", ":memory:")
     async def test_signal_emission(self):
         """Verify SignalBus emits audit findings correctly."""
         import sqlite3
@@ -42,6 +44,8 @@ class TestOuroborosForge(unittest.IsolatedAsyncioTestCase):
 
         # Ensure schema initialization
         conn = sqlite3.connect(DB_PATH)
+        # We must create the table explicitly since we are overriding with :memory:
+        conn.execute("CREATE TABLE IF NOT EXISTS signals (id TEXT PRIMARY KEY, source TEXT)")
         _bus = SignalBus(conn)
 
         # Check if signals exist for 'ouroboros'
