@@ -366,7 +366,190 @@ class TestDiamondPromotion:
 # ── Full Consolidation E2E Tests ──────────────────────────────────────────
 
 
+class TestSemanticMerge:
+    @pytest.mark.asyncio
+    async def test_semantic_merge_low_mergeable_count(self, in_memory_db) -> None:
+        vitals = [
+            CrystalVitals(
+                fact_id="sim-1",
+                content_preview="similar A",
+                temperature=1.0,
+                resonance=0.5,
+                quadrant="ACTIVE",
+                recommendation="KEEP",
+                age_days=10,
+                recall_count=5,
+                is_diamond=False,
+            ),
+        ]
+        result = await consolidate(in_memory_db, vitals)
+        assert result.merged == 0
+
+    @pytest.mark.asyncio
+    async def test_semantic_merge_missing_db_tables(self, in_memory_db) -> None:
+        # DB exists but missing vec_facts which triggers the load data failure
+        vitals = [
+            CrystalVitals(
+                fact_id="sim-1",
+                content_preview="similar A",
+                temperature=1.0,
+                resonance=0.5,
+                quadrant="ACTIVE",
+                recommendation="KEEP",
+                age_days=10,
+                recall_count=5,
+                is_diamond=False,
+            ),
+            CrystalVitals(
+                fact_id="sim-2",
+                content_preview="similar B",
+                temperature=1.0,
+                resonance=0.5,
+                quadrant="ACTIVE",
+                recommendation="KEEP",
+                age_days=10,
+                recall_count=5,
+                is_diamond=False,
+            ),
+        ]
+        result = await consolidate(in_memory_db, vitals)
+        # Should catch error and return gracefully
+        assert result.merged == 0
+
+    @pytest.mark.asyncio
+    async def test_semantic_merge_fuses_near_duplicates(self, in_memory_db) -> None:
+        from unittest.mock import patch, AsyncMock
+        import numpy as np
+
+        _insert_crystal(in_memory_db, "sim-1", "similar content A")
+        _insert_crystal(in_memory_db, "sim-2", "similar content B")
+
+        # Mock vector extraction to simulate near duplicates
+        cursor = in_memory_db.cursor()
+        cursor.execute(
+            "CREATE TABLE IF NOT EXISTS vec_facts (rowid INTEGER PRIMARY KEY, embedding BLOB)"
+        )
+        # Make sure facts_meta has updated_at if we are testing that path
+        try:
+            cursor.execute("ALTER TABLE facts_meta ADD COLUMN updated_at REAL")
+        except sqlite3.OperationalError:
+            pass
+
+        # We need rowids
+        cursor.execute("SELECT rowid FROM facts_meta WHERE id = 'sim-1'")
+        r1 = cursor.fetchone()[0]
+        cursor.execute("SELECT rowid FROM facts_meta WHERE id = 'sim-2'")
+        r2 = cursor.fetchone()[0]
+
+        vec_a = np.array([1.0, 0.0, 0.0], dtype=np.float32)
+        vec_b = np.array([0.99, 0.01, 0.0], dtype=np.float32)  # High similarity
+
+        cursor.execute(
+            "INSERT OR REPLACE INTO vec_facts (rowid, embedding) VALUES (?, ?)",
+            (r1, vec_a.tobytes()),
+        )
+        cursor.execute(
+            "INSERT OR REPLACE INTO vec_facts (rowid, embedding) VALUES (?, ?)",
+            (r2, vec_b.tobytes()),
+        )
+        in_memory_db.commit()
+
+        vitals = [
+            CrystalVitals(
+                fact_id="sim-1",
+                content_preview="similar A",
+                temperature=1.0,
+                resonance=0.5,
+                quadrant="ACTIVE",
+                recommendation="KEEP",
+                age_days=10,
+                recall_count=5,
+                is_diamond=False,
+            ),
+            CrystalVitals(
+                fact_id="sim-2",
+                content_preview="similar B",
+                temperature=1.0,
+                resonance=0.5,
+                quadrant="ACTIVE",
+                recommendation="KEEP",
+                age_days=10,
+                recall_count=5,
+                is_diamond=False,
+            ),
+        ]
+
+        with patch(
+            "cortex.extensions.swarm.crystal_synthesis.synthesize_crystals", new_callable=AsyncMock
+        ) as mock_sync:
+            mock_sync.return_value = {"fused_content": "Fused similar content AB"}
+
+            result = await consolidate(in_memory_db, vitals)
+
+            assert result.merged == 1
+
+            cursor.execute("SELECT id, content FROM facts_meta")
+            rows = cursor.fetchall()
+            assert len(rows) == 1
+            assert rows[0][1] == "Fused similar content AB"
+
+
 class TestFullConsolidation:
+    @pytest.mark.asyncio
+    async def test_diamond_promotion_db_error(self, in_memory_db) -> None:
+        _insert_crystal(in_memory_db, "err-1", "content A")
+        vitals = [
+            CrystalVitals(
+                fact_id="err-1",
+                content_preview="A",
+                temperature=1.0,
+                resonance=0.5,
+                quadrant="ACTIVE",
+                recommendation="PROMOTE",
+                age_days=10,
+                recall_count=5,
+                is_diamond=False,
+            ),
+        ]
+
+        from unittest.mock import Mock
+        import sqlite3
+
+        # Use a mock connection to trigger errors cleanly
+        mock_conn = Mock()
+        mock_conn.cursor.side_effect = sqlite3.OperationalError("DB Locked")
+
+        result = await consolidate(mock_conn, vitals)
+        assert result.promoted == 0
+        assert result.errors == 1
+
+    @pytest.mark.asyncio
+    async def test_cold_purge_db_error(self, in_memory_db) -> None:
+        _insert_crystal(in_memory_db, "err-1", "content A", age_days=30)
+        vitals = [
+            CrystalVitals(
+                fact_id="err-1",
+                content_preview="A",
+                temperature=1.0,
+                resonance=0.5,
+                quadrant="DEAD_WEIGHT",
+                recommendation="PURGE",
+                age_days=30,
+                recall_count=0,
+                is_diamond=False,
+            ),
+        ]
+
+        from unittest.mock import Mock
+        import sqlite3
+
+        mock_conn = Mock()
+        mock_conn.cursor.side_effect = sqlite3.OperationalError("DB Locked")
+
+        result = await consolidate(mock_conn, vitals)
+        assert result.purged == 0
+        assert result.errors == 1
+
     @pytest.mark.asyncio
     async def test_consolidation_with_mixed_crystals(self, in_memory_db) -> None:
         """End-to-end: mix of dead, active, and similar crystals."""
