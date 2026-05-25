@@ -302,3 +302,4 @@ When auditing existing code, these observable signals indicate a violation has a
 | Missing `CORTEX-TAINT` on any fact insert | Write-Path Contract | CRITICAL | Audit `engine/` — add taint to all write paths. |
 | Schema change with no alembic revision entry | Migration Safety | CRITICAL | Run `alembic revision --autogenerate`; review diff before apply. |
 | Plaintext secret in any metadata dict or JSON field | Encryption Invariant | **P0** | Rotate secret immediately; encrypt at rest; audit exposure window. |
+2024-05-25 | Jules | Refactored complex Python components (seals.py, daemon/core.py) to reduce Calcification scores and conform to Axiom Ω₂ | Success
