@@ -2,7 +2,6 @@ import base64
 import json
 import requests
 import subprocess
-import time
 
 
 def get_keychain_token() -> str | None:
@@ -34,10 +33,7 @@ def reply_tasks():
     }
 
     replies = {
-        "781609244341062733": "Yes, please fix the test fixture in `test_p0_decoupling.py` to use `engine.init_db()` or handle the extension safely so the full test suite passes.",
-        "13950756068036117908": "Por favor, enfócate en solucionar los fallos actuales en la suite de pruebas (como `test_ouroboros_forge.py` y `test_p0_decoupling.py`) y diseña pruebas adicionales robustas para asegurar la persistencia en `cortex/memory/manager.py`.",
-        "2192151720868170616": "Please push your changes to origin, or open a PR so your branch can be merged. Once done, you can finalize the task.",
-        "15130670999620354965": "Perfect. Please mark the task as failed or completed since it is cancelled.",
+        "2192151720868170616": "Okay, since you have committed locally, I will pull your branch and handle pushing and PR creation from my side. You can finalize the task.",
     }
 
     for tid, feedback in replies.items():
@@ -49,7 +45,6 @@ def reply_tasks():
             print(f"-> SUCCESS: Replied to {tid}")
         else:
             print(f"-> FAILED: {r.status_code} - {r.text}")
-        time.sleep(0.5)
 
 
 if __name__ == "__main__":

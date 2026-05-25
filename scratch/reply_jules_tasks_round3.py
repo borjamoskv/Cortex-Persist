@@ -3,11 +3,12 @@ import json
 import requests
 import subprocess
 
+
 def get_keychain_token() -> str | None:
     try:
         out = subprocess.check_output(
             ["security", "find-generic-password", "-s", "jules-cli", "-a", "default", "-w"],
-            text=True
+            text=True,
         ).strip()
         if out.startswith("go-keyring-base64:"):
             b64_part = out.split("go-keyring-base64:")[1]
@@ -17,6 +18,7 @@ def get_keychain_token() -> str | None:
     except Exception as e:
         print(f"Error getting keychain token: {e}")
     return None
+
 
 def reply_tasks():
     token = get_keychain_token()
@@ -37,18 +39,13 @@ def reply_tasks():
     for tid, feedback in replies.items():
         print(f"\nSending reply to Task {tid}...")
         url = f"{base}/tasks/{tid}:interact"
-        payload = {
-            "userActivity": {
-                "feedbackGiven": {
-                    "feedback": feedback
-                }
-            }
-        }
+        payload = {"userActivity": {"feedbackGiven": {"feedback": feedback}}}
         r = requests.post(url, headers=headers, json=payload, timeout=20)
         if r.status_code == 200:
             print(f"-> SUCCESS: Replied to {tid}")
         else:
             print(f"-> FAILED: {r.status_code} - {r.text}")
+
 
 if __name__ == "__main__":
     reply_tasks()
