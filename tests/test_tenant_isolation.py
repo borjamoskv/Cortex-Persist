@@ -83,11 +83,11 @@ async def test_tenant_isolation_update_and_deprecate(engine):
     token_bob = tenant_id_var.set("tenant-bob")
     try:
         updated_id = await engine.update(
-            fact_id=fact_id_alice, new_content="Bob hacked this", project="beta"
+            fact_id=fact_id_alice, content="Bob hacked this"
         )
-        assert not updated_id, "Bob should not be able to update Alice's fact"
-    except Exception:
-        pass  # Depending on implementation it might raise or return None
+        assert False, "Bob should not be able to update Alice's fact"
+    except ValueError:
+        pass  # Expected to raise ValueError for missing fact or wrong tenant
 
     # Verify Alice's fact is unchanged
     tenant_id_var.reset(token_bob)
