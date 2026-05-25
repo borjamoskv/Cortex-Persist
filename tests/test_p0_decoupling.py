@@ -11,13 +11,21 @@ async def engine(tmp_path):
 
     db_path = tmp_path / "test_cortex.db"
     engine = CortexEngine(db_path=str(db_path))
+    from cortex.database.core import load_sqlite_vec_async
+
     # Initialize schema with extension loaded
     async with aiosqlite.connect(str(db_path)) as db:
-        await db.enable_load_extension(True)
-        await db.load_extension(sqlite_vec.loadable_path())
-        await db.enable_load_extension(False)
+        await load_sqlite_vec_async(db)
         for statement in ALL_SCHEMA:
-            await db.executescript(statement)
+            # Only execute vec0 schema if sqlite_vec is available, to prevent crashes
+            if "vec0" in statement and sqlite_vec is None:
+                continue
+            try:
+                await db.executescript(statement)
+            except Exception as e:
+                if "vec0" in statement and "no such module: vec0" in str(e):
+                    continue
+                raise
         await db.commit()
     return engine
 
@@ -39,6 +47,7 @@ async def test_store_decoupled(engine):
     assert fact.content == "Worker test fact"
 
     # Check that a job is in the enrichment_jobs table
+    # Wait for background task enqueue if necessary
     async with aiosqlite.connect(str(engine._db_path)) as db:
         async with db.execute(
             "SELECT fact_id, status FROM enrichment_jobs WHERE fact_id = ?", (fact_id,)
@@ -46,6 +55,8 @@ async def test_store_decoupled(engine):
             row = await cursor.fetchone()
             assert row is not None
             assert row[1] == "pending"
+    # Close engine
+    await engine.close()
 
 
 @pytest.mark.asyncio
@@ -79,3 +90,6 @@ async def test_worker_processing(engine):
         ) as cursor:
             row = await cursor.fetchone()
             assert row[0] == "completed"
+
+    # Close engine
+    await engine.close()

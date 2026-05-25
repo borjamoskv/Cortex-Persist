@@ -329,3 +329,90 @@ async def test_wait_for_background_timeout(manager):
 
     # Queue should have been auto-drained due to timeout logic (since CORTEX_TESTING is set)
     assert manager._bg_queue.empty()
+
+@pytest.mark.asyncio
+async def test_reconcile_experience(manager):
+    """Test reconciling an experience signal from the bus."""
+    # Build a mock signal
+    signal = MagicMock()
+    signal.payload = {
+        "tenant_id": "tenant_1",
+        "project_id": "proj_1",
+        "content": "Reconciled fact from experience",
+        "fact_type": "knowledge",
+        "metadata": {"source": "signal_bus"},
+        "layer": "semantic",
+    }
+
+    with patch.object(type(manager), "store", new_callable=AsyncMock) as mock_store:
+        mock_store.return_value = "engram_123"
+        result = await manager.reconcile_experience(signal)
+
+        assert result == "engram_123"
+        mock_store.assert_called_once_with(
+            tenant_id="tenant_1",
+            project_id="proj_1",
+            content="Reconciled fact from experience",
+            fact_type="knowledge",
+            metadata={"source": "signal_bus"},
+            layer="semantic",
+            use_bus=False
+        )
+
+
+@pytest.mark.asyncio
+async def test_store_direct_pipeline_with_bus(manager, mock_mem0_pipeline):
+    """Test that store emits to the bus when use_bus=True and bus exists."""
+    manager._mem0_pipeline = mock_mem0_pipeline
+    manager.thalamus.filter = AsyncMock(return_value=(True, "encode:new", None))
+    manager._resonance_gate.gate = AsyncMock(
+        return_value=(
+            "reset",
+            CortexSemanticEngram(
+                id="engram_456",
+                tenant_id="t",
+                project_id="p",
+                content="c",
+                embedding=[0.0],
+            ),
+        )
+    )
+
+    manager._bus = MagicMock()
+
+    with (
+        patch.object(type(manager), "_check_deduplication", return_value=None),
+        patch.object(type(manager._schema_engine), "match_schema", return_value=None),
+        patch.object(type(manager), "_emit_to_bus", new_callable=AsyncMock) as mock_emit,
+    ):
+        mock_emit.return_value = "emitted_engram_456"
+        result_id = await manager.store(
+            tenant_id="tenant_bus",
+            project_id="proj",
+            content="Fact to emit",
+            fact_type="knowledge",
+            use_bus=True
+        )
+
+    assert result_id == "emitted_engram_456"
+    mock_emit.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_get_context_vector(manager):
+    """Test get_context_vector logic."""
+    manager._l1.get_context.return_value = [
+        {"content": "First event"},
+        {"content": "Second event"}
+    ]
+
+    manager._hdc_encoder = MagicMock()
+    manager._hdc_encoder.encode_text.side_effect = ["hv1", "hv2"]
+
+    with patch("cortex.memory.hdc.algebra.bundle") as mock_bundle:
+        mock_bundle.return_value = "bundled_hv"
+
+        result = manager.get_context_vector(tenant_id="tenant_1")
+
+        assert result == "bundled_hv"
+        mock_bundle.assert_called_once_with("hv1", "hv2")

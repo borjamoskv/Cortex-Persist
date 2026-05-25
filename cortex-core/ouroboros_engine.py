@@ -9,7 +9,7 @@ import time
 from cortex.extensions.signals.bus import SignalBus
 from cortex.config import DB_PATH
 
-SCRATCH_BASE = "/Users/borjafernandezangulo/Cortex-Persist/.scratch/ouroboros"
+SCRATCH_BASE = os.environ.get("CORTEX_SCRATCH_BASE", "/tmp/cortex_scratch/ouroboros")
 FORGE_PATH = "forge" # Verified in path
 logger = logging.getLogger("cortex.ouroboros")
 
@@ -179,11 +179,12 @@ contract {contract_name}OuroborosTest is Test {{
                 with open(queue_path, "r") as f:
                     queue = json.load(f)
             
+            remediator_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "remediator.py")
             queue["pending_tasks"].append({
                 "id": f"remed_{int(time.time())}",
                 "agent": "SURGEON-1",
                 "type": "remediation",
-                "command": f"python3 /Users/borjafernandezangulo/Cortex-Persist/cortex-core/remediator.py {target_file} {log_file}",
+                "command": f"python3 {remediator_path} {target_file} {log_file}",
                 "timestamp": time.time()
             })
             
