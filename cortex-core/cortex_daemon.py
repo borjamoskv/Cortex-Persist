@@ -21,7 +21,7 @@ except ImportError as e:
     logging.error("Startup Failure: Dependency missing: %s", e)
 
 DB_PATH = str(PROJECT_ROOT / "cortex-core" / "cortex_memory_vsa.db")
-WATCH_DIR = "/Users/borjafernandezangulo/.gemini/antigravity/knowledge"
+WATCH_DIR = str(Path.home() / ".gemini" / "antigravity" / "knowledge")
 SWARM_QUEUE_FILE = "/tmp/cortex_swarm_queue.json"
 EXECUTION_LEDGER = "/tmp/cortex_execution_ledger.json"
 
