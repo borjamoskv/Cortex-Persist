@@ -5,9 +5,13 @@ import hashlib
 import asyncio
 import logging
 import sqlite3
+import fcntl
 
 VSA_DIMENSION = 10000
-DB_PATH = "/Users/borjafernandezangulo/Cortex-Persist/cortex-core/cortex_memory_vsa.db"
+DB_PATH = os.getenv(
+    "CORTEX_DB_PATH",
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "cortex_memory_vsa.db")
+)
 SWARM_QUEUE_FILE = "/tmp/cortex_swarm_queue.json"
 
 logger = logging.getLogger("cortex.persistence")
@@ -39,7 +43,6 @@ class ContextCache:
         formatted_blocks = []
         for i, block in enumerate(message_blocks):
             new_block = dict(block)
-            # Add cache breakpoint on large blocks (>2048 chars) or the final block of system instructions
             if len(str(block.get("text", ""))) > 2048 or i == len(message_blocks) - 1:
                 new_block["cache_control"] = {"type": "ephemeral"}
             formatted_blocks.append(new_block)
@@ -55,67 +58,78 @@ class LedgerManager:
     def _init_db(self):
         # Ensure database parent directory exists
         os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
-        conn = sqlite3.connect(DB_PATH)
-        c = conn.cursor()
-        c.execute("""
-            CREATE TABLE IF NOT EXISTS ledger_records (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                timestamp REAL,
-                action TEXT,
-                vector_id TEXT,
-                yield_amount REAL,
-                hash TEXT
-            )
-        """)
-        c.execute("""
-            CREATE TABLE IF NOT EXISTS cortex_knowledge (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                ki_id TEXT UNIQUE,
-                summary TEXT,
-                content TEXT
-            )
-        """)
-        conn.commit()
-        conn.close()
+        conn = None
+        try:
+            conn = sqlite3.connect(DB_PATH)
+            c = conn.cursor()
+            c.execute("""
+                CREATE TABLE IF NOT EXISTS ledger_records (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    timestamp REAL,
+                    action TEXT,
+                    vector_id TEXT,
+                    yield_amount REAL,
+                    hash TEXT
+                )
+            """)
+            c.execute("""
+                CREATE TABLE IF NOT EXISTS cortex_knowledge (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    ki_id TEXT UNIQUE,
+                    summary TEXT,
+                    content TEXT
+                )
+            """)
+            conn.commit()
+        finally:
+            if conn:
+                conn.close()
 
     def append(self, action: str, vector_id: str, yield_amount: float) -> str:
         """Hash-chain new transaction to guarantee auditable tamper-evident history."""
-        conn = sqlite3.connect(DB_PATH)
-        c = conn.cursor()
+        conn = None
+        try:
+            conn = sqlite3.connect(DB_PATH)
+            c = conn.cursor()
 
-        # Get previous hash
-        c.execute("SELECT hash FROM ledger_records ORDER BY id DESC LIMIT 1")
-        row = c.fetchone()
-        prev_hash = row[0] if row else "GENESIS_BLOCK"
+            # Get previous hash
+            c.execute("SELECT hash FROM ledger_records ORDER BY id DESC LIMIT 1")
+            row = c.fetchone()
+            prev_hash = row[0] if row else "GENESIS_BLOCK"
 
-        timestamp = time.time()
-        payload = f"{prev_hash}_{action}_{vector_id}_{yield_amount}_{timestamp}"
-        block_hash = hashlib.sha256(payload.encode("utf-8")).hexdigest()
+            timestamp = time.time()
+            payload = f"{prev_hash}_{action}_{vector_id}_{yield_amount}_{timestamp}"
+            block_hash = hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
-        c.execute(
-            """
-            INSERT INTO ledger_records (timestamp, action, vector_id, yield_amount, hash)
-            VALUES (?, ?, ?, ?, ?)
-        """,
-            (timestamp, action, vector_id, yield_amount, block_hash),
-        )
-
-        conn.commit()
-        conn.close()
-        return block_hash
+            c.execute(
+                """
+                INSERT INTO ledger_records (timestamp, action, vector_id, yield_amount, hash)
+                VALUES (?, ?, ?, ?, ?)
+            """,
+                (timestamp, action, vector_id, yield_amount, block_hash),
+            )
+            conn.commit()
+            return block_hash
+        finally:
+            if conn:
+                conn.close()
 
     def get_total_yield(self, vector_id=None) -> float:
-        conn = sqlite3.connect(DB_PATH)
-        c = conn.cursor()
-        if vector_id:
-            c.execute(
-                "SELECT SUM(yield_amount) FROM ledger_records WHERE vector_id = ?", (vector_id,)
-            )
-        else:
-            c.execute("SELECT SUM(yield_amount) FROM ledger_records")
-        res = c.fetchone()[0]
-        conn.close()
-        return res or 0.0
+        conn = None
+        try:
+            conn = sqlite3.connect(DB_PATH)
+            c = conn.cursor()
+            if vector_id:
+                c.execute(
+                    "SELECT SUM(yield_amount) FROM ledger_records WHERE vector_id = ?", (vector_id,)
+                )
+            else:
+                c.execute("SELECT SUM(yield_amount) FROM ledger_records")
+            res = c.fetchone()[0]
+            return res or 0.0
+        finally:
+            if conn:
+                conn.close()
 
 
 class VSAMemory:
@@ -132,6 +146,7 @@ class VSAMemory:
         idx = int(hashlib.sha256(ctx_string.encode("utf-8")).hexdigest(), 16) % VSA_DIMENSION
         self._tensor[idx] += 1.0
 
+        conn = None
         try:
             conn = sqlite3.connect(DB_PATH)
             c = conn.cursor()
@@ -141,9 +156,11 @@ class VSAMemory:
                 (ki_id, key, value),
             )
             conn.commit()
-            conn.close()
         except Exception as e:
             logger.error(f"VSA SQLite Record Failure: {e}")
+        finally:
+            if conn:
+                conn.close()
 
     async def _decay_loop(self):
         """Periodically decay high-dimensional state space to model biological memory loss."""
@@ -156,9 +173,14 @@ class VSAMemory:
                     self._tensor[i] = 0.0
 
     def start_glia(self):
-        """Start the background neural decay process."""
-        if not self._daemon_task:
-            self._daemon_task = asyncio.create_task(self._decay_loop())
+        """Start the background neural decay process safely."""
+        if self._daemon_task:
+            return
+        try:
+            loop = asyncio.get_running_loop()
+            self._daemon_task = loop.create_task(self._decay_loop())
+        except RuntimeError:
+            logger.warning("VSA neural decay loop could not be started: no running event loop.")
 
 
 class HybridPersistenceManager:
@@ -175,19 +197,32 @@ class HybridPersistenceManager:
 
 
 def enqueue_swarm_task(agent_name: str, payload: dict):
-    """Sovereign Swarm Queue Dispatcher."""
+    """Sovereign Swarm Queue Dispatcher with POSIX file locking."""
+    # Ensure queue file exists before locking
     if not os.path.exists(SWARM_QUEUE_FILE):
-        data = {"pending_tasks": []}
-    else:
-        with open(SWARM_QUEUE_FILE) as f:
+        try:
+            with open(SWARM_QUEUE_FILE, "w") as f:
+                json.dump({"pending_tasks": []}, f)
+        except OSError:
+            pass
+
+    try:
+        with open(SWARM_QUEUE_FILE, "r+") as f:
             try:
-                data = json.load(f)
-            except Exception:
-                data = {"pending_tasks": []}
+                fcntl.flock(f.fileno(), fcntl.LOCK_EX)
+                try:
+                    data = json.load(f)
+                except Exception:
+                    data = {"pending_tasks": []}
 
-    data["pending_tasks"].append(
-        {"timestamp": time.time(), "agent": agent_name, "payload": payload}
-    )
+                data["pending_tasks"].append(
+                    {"timestamp": time.time(), "agent": agent_name, "payload": payload}
+                )
 
-    with open(SWARM_QUEUE_FILE, "w") as f:
-        json.dump(data, f, indent=2)
+                f.seek(0)
+                json.dump(data, f, indent=2)
+                f.truncate()
+            finally:
+                fcntl.flock(f.fileno(), fcntl.LOCK_UN)
+    except Exception as e:
+        logger.error(f"Failed to enqueue swarm task: {e}")

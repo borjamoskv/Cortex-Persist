@@ -22,11 +22,46 @@ def test_db(tmp_path, monkeypatch):
     reg.close()
 
 
+HEADERS_JULES = {"Authorization": "Bearer ya29.test_token_jules"}
+
+
 def test_health_endpoint():
     client = TestClient(server.app)
     response = client.get("/api/health")
     assert response.status_code == 200
     assert response.json()["status"] == "operational"
+
+
+def test_jules_token_validation():
+    client = TestClient(server.app)
+
+    reg_data = {
+        "name": "TEST-AGENT",
+        "capabilities": ["research"],
+    }
+
+    # 1. No Authorization header -> 401
+    response = client.post("/api/agents/register", json=reg_data)
+    assert response.status_code == 401
+    assert "Authorization header missing" in response.json()["detail"]
+
+    # 2. Invalid Scheme -> 401
+    response = client.post(
+        "/api/agents/register", json=reg_data, headers={"Authorization": "Token ya29.test"}
+    )
+    assert response.status_code == 401
+    assert "Invalid authorization scheme" in response.json()["detail"]
+
+    # 3. Invalid Token Layout (not starting with ya29.) -> 403
+    response = client.post(
+        "/api/agents/register", json=reg_data, headers={"Authorization": "Bearer ctx_invalid_key"}
+    )
+    assert response.status_code == 403
+    assert "Invalid token layout for Jules" in response.json()["detail"]
+
+    # 4. Valid Token Layout -> 200
+    response = client.post("/api/agents/register", json=reg_data, headers=HEADERS_JULES)
+    assert response.status_code == 200
 
 
 def test_agent_registration_and_trust():
@@ -40,7 +75,7 @@ def test_agent_registration_and_trust():
         "owner": "test-owner",
         "website": "https://test.agent",
     }
-    response = client.post("/api/agents/register", json=reg_data)
+    response = client.post("/api/agents/register", json=reg_data, headers=HEADERS_JULES)
     assert response.status_code == 200
     res_json = response.json()
     assert res_json["name"] == "TEST-AGENT-1"
@@ -58,12 +93,11 @@ def test_agent_registration_and_trust():
         "source_agent_id": "system",
         "reason": "Verified during testing",
     }
-    response = client.post(f"/api/agents/{agent_id}/trust", json=trust_data)
+    response = client.post(f"/api/agents/{agent_id}/trust", json=trust_data, headers=HEADERS_JULES)
     assert response.status_code == 200
     assert response.json()["total_signals"] == 1
 
-    # Verify persistence: create a new registry instance pointing to the same DB
-    # and check if the agent trust score and signal history are preserved
+    # Verify persistence
     new_reg = AgentRegistry(server.DB_PATH)
     new_reg.init_db()
     agent = new_reg.get_agent(agent_id)
@@ -83,7 +117,9 @@ def test_tasks_flow():
         "capabilities": ["security"],
         "owner": "test-owner",
     }
-    agent_id = client.post("/api/agents/register", json=reg_data).json()["id"]
+    agent_id = client.post("/api/agents/register", json=reg_data, headers=HEADERS_JULES).json()[
+        "id"
+    ]
 
     # 1. Create a task
     task_data = {
@@ -93,7 +129,7 @@ def test_tasks_flow():
         "delegator_id": "system",
         "reward": 100.0,
     }
-    response = client.post("/api/tasks", json=task_data)
+    response = client.post("/api/tasks", json=task_data, headers=HEADERS_JULES)
     assert response.status_code == 200
     task_json = response.json()
     assert task_json["title"] == "Solve vulnerability"
@@ -101,7 +137,7 @@ def test_tasks_flow():
     task_id = task_json["id"]
 
     # 2. Assign the task
-    response = client.post(f"/api/tasks/{task_id}/assign/{agent_id}")
+    response = client.post(f"/api/tasks/{task_id}/assign/{agent_id}", headers=HEADERS_JULES)
     assert response.status_code == 200
     assert response.json()["status"] == "assigned"
     assert response.json()["assignee_id"] == agent_id
@@ -111,7 +147,7 @@ def test_tasks_flow():
     assert agent_res["status"] == "busy"
 
     # 3. Complete the task
-    response = client.post(f"/api/tasks/{task_id}/complete")
+    response = client.post(f"/api/tasks/{task_id}/complete", headers=HEADERS_JULES)
     assert response.status_code == 200
     assert response.json()["status"] == "completed"
 
@@ -122,6 +158,5 @@ def test_tasks_flow():
     assert agent_res["trust"]["total_signals"] == 1
 
     # 4. Try to assign/complete/fail invalid task or transitioning states
-    # Already completed task cannot be assigned again
-    response = client.post(f"/api/tasks/{task_id}/assign/{agent_id}")
+    response = client.post(f"/api/tasks/{task_id}/assign/{agent_id}", headers=HEADERS_JULES)
     assert response.status_code == 400

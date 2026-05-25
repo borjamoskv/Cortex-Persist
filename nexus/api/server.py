@@ -4,7 +4,7 @@ from __future__ import annotations
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Header, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
@@ -54,6 +54,17 @@ def _reg() -> AgentRegistry:
     return registry
 
 
+def verify_jules_token(authorization: str | None = Header(None)) -> str:
+    if not authorization:
+        raise HTTPException(status_code=401, detail="Authorization header missing")
+    if not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Invalid authorization scheme")
+    token = authorization.split(" ", 1)[1]
+    if not token.startswith("ya29."):
+        raise HTTPException(status_code=403, detail="Forbidden: Invalid token layout for Jules")
+    return token
+
+
 # ── Stats ───────────────────────────────────────────────────────
 
 
@@ -91,7 +102,7 @@ def get_agent(agent_id: str):
 
 
 @app.post("/api/agents/register")
-def register_agent(reg: AgentRegistration):
+def register_agent(reg: AgentRegistration, token: str = Depends(verify_jules_token)):
     try:
         agent = _reg().register_agent(reg)
         return agent.model_dump()
@@ -100,7 +111,7 @@ def register_agent(reg: AgentRegistration):
 
 
 @app.post("/api/agents/{agent_id}/trust")
-def apply_trust(agent_id: str, req: TrustSignalRequest):
+def apply_trust(agent_id: str, req: TrustSignalRequest, token: str = Depends(verify_jules_token)):
     try:
         score = _reg().apply_trust_signal(
             agent_id, TrustSignal(req.signal), req.source_agent_id, req.reason
@@ -120,7 +131,7 @@ def list_tasks(status: str | None = None, limit: int = 20):
 
 
 @app.post("/api/tasks")
-def create_task(task: TaskCreate):
+def create_task(task: TaskCreate, token: str = Depends(verify_jules_token)):
     return _reg().create_task(task).model_dump()
 
 
@@ -133,7 +144,7 @@ def get_task(task_id: str):
 
 
 @app.post("/api/tasks/{task_id}/assign/{assignee_id}")
-def assign_task(task_id: str, assignee_id: str):
+def assign_task(task_id: str, assignee_id: str, token: str = Depends(verify_jules_token)):
     try:
         return _reg().assign_task(task_id, assignee_id).model_dump()
     except ValueError as e:
@@ -141,7 +152,7 @@ def assign_task(task_id: str, assignee_id: str):
 
 
 @app.post("/api/tasks/{task_id}/complete")
-def complete_task(task_id: str):
+def complete_task(task_id: str, token: str = Depends(verify_jules_token)):
     try:
         return _reg().complete_task(task_id).model_dump()
     except ValueError as e:
@@ -149,7 +160,9 @@ def complete_task(task_id: str):
 
 
 @app.post("/api/tasks/{task_id}/fail")
-def fail_task(task_id: str, reason: str = Query(default="")):
+def fail_task(
+    task_id: str, reason: str = Query(default=""), token: str = Depends(verify_jules_token)
+):
     try:
         return _reg().fail_task(task_id, reason).model_dump()
     except ValueError as e:
