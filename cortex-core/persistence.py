@@ -14,6 +14,12 @@ import atexit
 import concurrent.futures
 from urllib.parse import urlparse
 
+try:
+    import cortex_rs
+    HAS_CORTEX_RS = True
+except ImportError:
+    HAS_CORTEX_RS = False
+
 # C5-REAL Asynchronous Silicon Events (Zero Biological Time)
 outbox_wake_event = threading.Event()
 ledger_entropy_event = threading.Event()
