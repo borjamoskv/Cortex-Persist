@@ -1,0 +1,14 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.13, pytest-9.0.3, pluggy-1.6.0 -- /home/jules/.pyenv/versions/3.12.13/bin/python
+cachedir: .pytest_cache
+rootdir: /app
+configfile: pyproject.toml
+plugins: anyio-4.13.0, asyncio-1.4.0, timeout-2.4.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collecting ... collected 5 items
+
+tests/test_mcp_outbound.py::test_client_initialization_and_discovery ERROR [ 20%]
+tests/test_mcp_outbound.py::test_call_tool_routing ERROR                 [ 40%]
+tests/test_mcp_outbound.py::test_call_tool_not_found ERROR               [ 60%]
+tests/test_mcp_outbound.py::test_call_tool_error_handling ERROR          [ 80%]
+tests/test_mcp_outbound.py::test_close_cleans_up ERROR                   [100%]
