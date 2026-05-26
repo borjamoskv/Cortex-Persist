@@ -209,7 +209,7 @@ class CortexDaemon:
                     "DELETE FROM cortex_execution_ledger WHERE id NOT IN (SELECT id FROM cortex_execution_ledger ORDER BY id DESC LIMIT 100)"
                 )
         except Exception as e:
-            logging.error("Execution Ledger SQLite Failure: %s", e)
+            print("Execution Ledger SQLite Failure:", e)
 
     async def process_swarm_queue(self):
         """Consumes the Swarm Task Queue and executes autonomous work using Sovereign SQLite VSA bypass."""
@@ -287,6 +287,7 @@ class CortexDaemon:
     def _queue_task(self, agent: str, cmd: str):
         """Internal helper to push tasks to the persistent SQLite queue via the Sovereign Persistence module."""
         from persistence import enqueue_swarm_task
+
         try:
             payload = {
                 "command": cmd,

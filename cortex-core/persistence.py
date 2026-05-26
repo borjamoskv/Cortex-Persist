@@ -14,6 +14,15 @@ import atexit
 import concurrent.futures
 from urllib.parse import urlparse
 
+# Exergy-Maximized Thread-Local Connection Pool
+_local = threading.local()
+
+def _get_local_conn(db_path, timeout=30.0):
+    if not hasattr(_local, 'conn'):
+        _local.conn = sqlite3.connect(db_path, timeout=timeout)
+        _local.conn.execute("PRAGMA journal_mode=WAL;")
+    return _local.conn
+
 VSA_DIMENSION = 10000
 VSA_BIN_PATH = os.getenv("VSA_BIN_PATH", "/Users/borjafernandezangulo/10_PROJECTS/vsa_nexus.bin")
 DB_PATH = os.getenv(
@@ -305,23 +314,38 @@ class OutboxDaemon:
     def __init__(self, db_path: str):
         self._db_path = db_path
         self._daemon_task = None
+        self._conn = sqlite3.connect(self._db_path, check_same_thread=False, timeout=10.0)
+        self._conn.execute("PRAGMA journal_mode=WAL;")
+        self._lock = threading.Lock()
+
+    def _fetch_pending_tasks(self):
+        with self._lock:
+            c = self._conn.cursor()
+            c.execute(
+                "SELECT id, agent, payload FROM cortex_swarm_queue WHERE status = 'pending' ORDER BY timestamp ASC LIMIT 50"
+            )
+            return c.fetchall()
+
+    def _update_task_status(self, row_id, status):
+        with self._lock:
+            c = self._conn.cursor()
+            c.execute(
+                "UPDATE cortex_swarm_queue SET status = ? WHERE id = ?",
+                (status, row_id),
+            )
+            self._conn.commit()
 
     async def _drain_loop(self):
         import urllib.request
         import urllib.error
 
+        loop = asyncio.get_running_loop()
         while True:
             await asyncio.sleep(2)
             try:
-                conn = sqlite3.connect(self._db_path, timeout=10.0)
-                conn.execute("PRAGMA journal_mode=WAL;")
-                c = conn.cursor()
-                c.execute(
-                    "SELECT id, agent, payload FROM cortex_swarm_queue WHERE status = 'pending' ORDER BY timestamp ASC LIMIT 50"
-                )
-                rows = c.fetchall()
+                # C5-REAL: Offload SQLite I/O to prevent event loop blocking
+                rows = await loop.run_in_executor(None, self._fetch_pending_tasks)
                 if not rows:
-                    conn.close()
                     continue
 
                 nexus_url = os.getenv("NEXUS_API_URL", "http://localhost:8600")
@@ -331,13 +355,11 @@ class OutboxDaemon:
                     and parsed_url.hostname not in ("localhost", "127.0.0.1")
                 ):
                     logger.error("SECURITY ALERT: Invalid NEXUS_API_URL scheme/host.")
-                    conn.close()
                     continue
 
                 nexus_token = os.getenv("NEXUS_BEARER_TOKEN")
                 if not nexus_token:
                     logger.error("SECURITY ALERT: NEXUS_BEARER_TOKEN missing.")
-                    conn.close()
                     continue
 
                 for row_id, agent_name, payload_str in rows:
@@ -373,27 +395,18 @@ class OutboxDaemon:
                         method="POST",
                     )
 
-                    loop = asyncio.get_running_loop()
                     try:
                         resp = await loop.run_in_executor(
                             None, lambda r=req: urllib.request.urlopen(r, timeout=2.0)
                         )
                         if resp.status in (200, 201):
-                            c.execute(
-                                "UPDATE cortex_swarm_queue SET status = 'completed' WHERE id = ?",
-                                (row_id,),
-                            )
+                            await loop.run_in_executor(None, self._update_task_status, row_id, 'completed')
                             logger.info("Outbox synced task: %s", task_data["title"])
                         else:
-                            c.execute(
-                                "UPDATE cortex_swarm_queue SET status = 'failed' WHERE id = ?",
-                                (row_id,),
-                            )
+                            await loop.run_in_executor(None, self._update_task_status, row_id, 'failed')
                     except urllib.error.URLError as e:
                         logger.warning("Outbox sync deferred (network error): %s", e)
                         break  # Stop processing to wait for network recovery
-                conn.commit()
-                conn.close()
             except Exception as e:
                 logger.error("Outbox drainer error: %s", e)
 
@@ -409,12 +422,10 @@ class OutboxDaemon:
 
 def _enqueue_swarm_task_sync(agent_name: str, payload: dict):
     """Synchronous core implementation of the Swarm Queue Dispatcher and NEXUS API sync."""
-    # Sovereign SQLite Insert to eliminate fcntl locking friction
-    conn = None
+    # Sovereign SQLite Insert with Thread-Local pooling to eliminate connection/lock friction
     try:
-        conn = sqlite3.connect(DB_PATH, timeout=30.0)
+        conn = _get_local_conn(DB_PATH, timeout=30.0)
         c = conn.cursor()
-        c.execute("PRAGMA journal_mode=WAL;")
         c.execute(
             "INSERT INTO cortex_swarm_queue (timestamp, agent, payload, status) VALUES (?, ?, ?, 'pending')",
             (time.time(), agent_name, json.dumps(payload)),
@@ -422,9 +433,6 @@ def _enqueue_swarm_task_sync(agent_name: str, payload: dict):
         conn.commit()
     except Exception as e:
         logger.error("Failed to enqueue swarm task via SQLite: %s", e)
-    finally:
-        if conn:
-            conn.close()
 
 
 def enqueue_swarm_task(agent_name: str, payload: dict):
