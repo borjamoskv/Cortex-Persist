@@ -119,15 +119,28 @@ class CortexDaemon:
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
             )
-            stdout, stderr = await process.communicate()
+
+            # C5-REAL Kill-Switch (Muerte Temprana) - 300s max exergy allocation
+            try:
+                stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=300.0)
+            except asyncio.TimeoutError:
+                logging.error(
+                    "💀 [KILL-SWITCH] Agent %s exceeded 300s exergy allocation. Terminating.", agent
+                )
+                try:
+                    process.kill()
+                    stdout, stderr = await process.communicate()
+                except ProcessLookupError:
+                    stdout, stderr = b"", b"Process vanished before kill."
+                stderr += b"\n[SYSTEM] Terminated by CORTEX LGD-200 Kill-Switch (Timeout)."
 
             result = {
                 "timestamp": time.time(),
                 "agent": agent,
                 "command": cmd,
-                "exit_code": process.returncode,
-                "stdout": stdout.decode()[-1000:],  # Last 1k to avoid bloat
-                "stderr": stderr.decode()[-1000:],
+                "exit_code": process.returncode if process.returncode is not None else -9,
+                "stdout": stdout.decode(errors="replace")[-1000:],  # Last 1k to avoid bloat
+                "stderr": stderr.decode(errors="replace")[-1000:],
             }
 
             # Emit V4 Pulse: Completion
@@ -167,21 +180,35 @@ class CortexDaemon:
             logging.error("Execution Crash for %s: %s", agent, e)
 
     def _log_execution(self, result):
-        """Appends task result to the persistent execution ledger."""
-        ledger = []
-        if os.path.exists(EXECUTION_LEDGER):
-            try:
-                with open(EXECUTION_LEDGER) as f:
-                    ledger = json.load(f)
-            except Exception:
-                ledger = []
-
-        ledger.append(result)
-        # Keep last 100 entries to maintain O(1) performance
-        ledger = ledger[-100:]
-
-        with open(EXECUTION_LEDGER, "w") as f:
-            json.dump(ledger, f, indent=2)
+        """Appends task result to the persistent execution ledger via Sovereign SQLite."""
+        conn = None
+        try:
+            conn = sqlite3.connect(DB_PATH, timeout=10.0)
+            conn.execute("PRAGMA synchronous = NORMAL; PRAGMA temp_store = MEMORY;")
+            c = conn.cursor()
+            c.execute(
+                "CREATE TABLE IF NOT EXISTS cortex_execution_ledger (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp REAL, agent TEXT, command TEXT, returncode INTEGER, execution_time REAL);"
+            )
+            c.execute(
+                "INSERT INTO cortex_execution_ledger (timestamp, agent, command, returncode, execution_time) VALUES (?, ?, ?, ?, ?)",
+                (
+                    result.get("timestamp", time.time()),
+                    result.get("agent", "unknown"),
+                    result.get("command", ""),
+                    result.get("returncode", -1),
+                    result.get("execution_time", 0.0),
+                ),
+            )
+            # Prune to last 100 entries to maintain O(1) constraints
+            c.execute(
+                "DELETE FROM cortex_execution_ledger WHERE id NOT IN (SELECT id FROM cortex_execution_ledger ORDER BY id DESC LIMIT 100)"
+            )
+            conn.commit()
+        except Exception as e:
+            logging.error("Execution Ledger SQLite Failure: %s", e)
+        finally:
+            if conn:
+                conn.close()
 
     async def process_swarm_queue(self):
         """Consumes the Swarm Task Queue and executes autonomous work using Sovereign SQLite VSA bypass."""
@@ -189,6 +216,7 @@ class CortexDaemon:
         conn = None
         try:
             conn = sqlite3.connect(DB_PATH, timeout=10.0)
+            conn.execute("PRAGMA synchronous = NORMAL; PRAGMA temp_store = MEMORY;")
             c = conn.cursor()
             c.execute(
                 "SELECT id, timestamp, agent, payload FROM cortex_swarm_queue WHERE status = 'pending'"
@@ -261,6 +289,7 @@ class CortexDaemon:
         conn = None
         try:
             conn = sqlite3.connect(DB_PATH, timeout=10.0)
+            conn.execute("PRAGMA synchronous = NORMAL; PRAGMA temp_store = MEMORY;")
             c = conn.cursor()
             c.execute(
                 "INSERT INTO cortex_swarm_queue (timestamp, agent, payload, status) VALUES (?, ?, ?, 'pending')",
