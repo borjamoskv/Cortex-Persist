@@ -83,7 +83,7 @@ async def check_gate_11_cobbler(cached_files: dict[Path, str]) -> GateResult:
     if demon_violations:
         printer.fail(f"EntropyDemon fired on engine source ({len(demon_violations)} files):")
         for v in demon_violations:
-            print(f"      ↳ {v}")
+            printer.warn(f"      ↳ {v}")
         passed = False
     else:
         printer.success(f"EntropyDemon: engine source clean ({len(engine_files)} files).")
@@ -93,7 +93,7 @@ async def check_gate_11_cobbler(cached_files: dict[Path, str]) -> GateResult:
             f"Intruder found security issues in engine ({len(intruder_violations)} files):"
         )
         for v in intruder_violations:
-            print(f"      ↳ {v}")
+            printer.warn(f"      ↳ {v}")
         passed = False
     else:
         printer.success("Intruder: no eval/exec/os.system in engine source.")

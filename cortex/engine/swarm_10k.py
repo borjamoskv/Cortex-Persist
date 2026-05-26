@@ -376,7 +376,7 @@ class SwarmCommander:
                     closed_count += 1
             legion.centurions.clear()
             legion._available_centurions.clear()
-        print(f"[ANNIHILATE] Unlinked: {unlinked_count}, Closed: {closed_count}")
+        logger.info("ANNIHILATE: Unlinked=%d, Closed=%d", unlinked_count, closed_count)
 
         # Lifecycle cleanup
         if hasattr(self.bus, "close"):

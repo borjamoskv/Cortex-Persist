@@ -4,6 +4,7 @@ Zero-Copy `mmap` tensor map mapped across 10,000 swarm agents representing High-
 """
 
 import hashlib
+import logging
 import os
 import threading
 import time
@@ -166,7 +167,9 @@ class TensorGlialLegion:
 
 if __name__ == "__main__":
     # Boot sequence for local execution validation
-    print("[+] Legión TensorGlial init...")
+    logging.basicConfig(level=logging.INFO)
+    _log = logging.getLogger("cortex.swarm.tensor_glial")
+    _log.info("Legión TensorGlial init...")
     # Fast test with 100 agents, 1000 D for speed
     legion = TensorGlialLegion(num_agents=100, d_dim=1000, file_path="tmp_legion.vsa_mmap")
 
@@ -184,7 +187,7 @@ if __name__ == "__main__":
     # Reduce
     centurion_state = legion.map_reduce_centurion(0, 100)
 
-    print(f"[+] Total execution time: {time.time() - start_time:.4f}s")
-    print(f"[+] Nodes respawned from corpses: {slashed}")
-    print(f"[+] Centurion MapReduce state dim: {centurion_state.shape}")
-    print(f"[+] Matrix SHA256 integrity: {legion.global_sha256_audit()}")
+    _log.info("Total execution time: %.4fs", time.time() - start_time)
+    _log.info("Nodes respawned from corpses: %d", slashed)
+    _log.info("Centurion MapReduce state dim: %s", centurion_state.shape)
+    _log.info("Matrix SHA256 integrity: %s", legion.global_sha256_audit())
