@@ -182,8 +182,9 @@ class CortexDaemon:
                 else:
                     logging.error("❌ [SELF-HEALING] Failure. Manual intervention required.")
 
-            # Log to Execution Ledger
-            self._log_execution(result)
+            # Log to Execution Ledger via Executor
+            loop = asyncio.get_running_loop()
+            await loop.run_in_executor(None, self._log_execution, result)
             logging.info("⚡ [EXEC] Success: %s (code %d)", agent, process.returncode)
 
         except Exception as e:
@@ -197,15 +198,12 @@ class CortexDaemon:
             with self.db_lock:
                 c = self.db_conn.cursor()
                 c.execute(
-                    "CREATE TABLE IF NOT EXISTS cortex_execution_ledger (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp REAL, agent TEXT, command TEXT, exit_code INTEGER, execution_time REAL);"
-                )
-                c.execute(
-                    "INSERT INTO cortex_execution_ledger (timestamp, agent, command, exit_code, execution_time) VALUES (?, ?, ?, ?, ?)",
+                    "INSERT INTO cortex_execution_ledger (timestamp, agent, command, returncode, execution_time) VALUES (?, ?, ?, ?, ?)",
                     (
                         result.get("timestamp", time.time()),
                         result.get("agent", "unknown"),
                         result.get("command", ""),
-                        result.get("exit_code", -1),
+                        result.get("returncode", -1),
                         result.get("execution_time", 0.0),
                     ),
                 )

@@ -99,7 +99,8 @@ class TestCortexDaemon:
 
     def test_queue_task(self, daemon):
         daemon._queue_task("TEST_AGENT", "echo 'hello'")
-        import time; time.sleep(0.1)
+        import time
+        time.sleep(0.1)
 
         conn = sqlite3.connect(cortex_daemon.DB_PATH)
         c = conn.cursor()
@@ -133,7 +134,7 @@ class TestCortexDaemon:
             # Check if ledger was updated in SQLite
             conn = sqlite3.connect(cortex_daemon.DB_PATH)
             c = conn.cursor()
-            c.execute("SELECT agent, command, exit_code FROM cortex_execution_ledger")
+            c.execute("SELECT agent, command, returncode FROM cortex_execution_ledger")
             ledger = c.fetchall()
             conn.close()
 
