@@ -182,6 +182,7 @@ contract {contract_name}OuroborosTest is Test {{
                 with open(queue_path) as f:
                     queue = json.load(f)
             
+            remediator_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "remediator.py")
             queue["pending_tasks"].append({
                 "id": f"remed_{int(time.time())}",
                 "agent": "SURGEON-1",
