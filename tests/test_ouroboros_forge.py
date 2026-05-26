@@ -24,6 +24,7 @@ class TestOuroborosForge(unittest.IsolatedAsyncioTestCase):
 
         # Mock external calls to forge and git
         from unittest.mock import patch, AsyncMock
+
         mock_process = AsyncMock()
         mock_process.communicate.return_value = (b"mock stdout", b"mock stderr")
         mock_process.wait.return_value = None
