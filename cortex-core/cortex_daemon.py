@@ -5,7 +5,6 @@ import logging
 import asyncio
 import json
 import sys
-import fcntl
 import threading
 
 from pathlib import Path
@@ -25,7 +24,6 @@ except ImportError as e:
 
 DB_PATH = str(PROJECT_ROOT / "cortex-core" / "cortex_memory_vsa.db")
 WATCH_DIR = str(Path.home() / ".gemini" / "antigravity" / "knowledge")
-SWARM_QUEUE_FILE = "/tmp/cortex_swarm_queue.json"
 EXECUTION_LEDGER = "/tmp/cortex_execution_ledger.json"
 
 logging.basicConfig(
@@ -242,8 +240,11 @@ class CortexDaemon:
                     )
 
                 if rows:
+                    ids = [row[0] for row in rows]
+                    placeholders = ",".join("?" for _ in ids)
                     c.execute(
-                        "UPDATE cortex_swarm_queue SET status = 'processing' WHERE status = 'pending'"
+                        f"UPDATE cortex_swarm_queue SET status = 'processing' WHERE id IN ({placeholders})",
+                        ids,
                     )
         except Exception as e:
             logging.error("Swarm Queue SQLite Reading Failure: %s", e)
@@ -282,27 +283,18 @@ class CortexDaemon:
         self._queue_task("SAGE_COUNCIL", cmd)
 
     def _queue_task(self, agent: str, cmd: str):
-        """Internal helper to push tasks to the persistent SQLite queue."""
+        """Internal helper to push tasks to the persistent SQLite queue via the Sovereign Persistence module."""
+        from persistence import enqueue_swarm_task
         try:
-            with self.db_lock:
-                c = self.db_conn.cursor()
-                c.execute(
-                    "INSERT INTO cortex_swarm_queue (timestamp, agent, payload, status) VALUES (?, ?, ?, 'pending')",
-                    (
-                        time.time(),
-                        agent,
-                        json.dumps(
-                            {
-                                "command": cmd,
-                                "timestamp": time.time(),
-                                "id": f"council_{int(time.time())}",
-                            }
-                        ),
-                    ),
-                )
-                logging.info("📌 [COUNCIL] Mission queued in SQLite: %s", cmd)
+            payload = {
+                "command": cmd,
+                "timestamp": time.time(),
+                "id": f"council_{int(time.time())}",
+            }
+            enqueue_swarm_task(agent, payload)
+            logging.info("📌 [COUNCIL] Mission queued via Sovereign Nexus: %s", cmd)
         except Exception as e:
-            logging.error("Council SQLite Queue Failure: %s", e)
+            logging.error("Council Nexus Queue Failure: %s", e)
 
     async def _run_self_audit(self):
         """Invoke Mirror Protocol to audit own source code (Ω₄)."""

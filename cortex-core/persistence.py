@@ -140,8 +140,8 @@ class VSAMemory:
     def __init__(self):
         self._tensor_size = VSA_DIMENSION * 8  # 8 bytes per double
 
-        # Ensure bin file exists and is pre-allocated
-        if not os.path.exists(VSA_BIN_PATH):
+        # Ensure bin file exists and is pre-allocated to the exact tensor size
+        if not os.path.exists(VSA_BIN_PATH) or os.path.getsize(VSA_BIN_PATH) < self._tensor_size:
             with open(VSA_BIN_PATH, "wb") as f:
                 import struct
 

@@ -16,6 +16,7 @@ import pytest
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "cortex-core"))
 
 import cortex_daemon
+
 print("IMPORTED CORTEX_DAEMON FROM:", cortex_daemon.__file__)
 try:
     print("HAS THREADING:", cortex_daemon.threading)
