@@ -64,8 +64,22 @@ class MirrorAuditor:
                         self.exergy_score -= 5.0
 
             # 3. Structural Complexity
-            # TODO: Add cyclomatic complexity check in v6.5
-
+            for node in ast.walk(tree):
+                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                    complexity = 1
+                    for subnode in ast.walk(node):
+                        if isinstance(subnode, (ast.If, ast.For, ast.While, ast.ExceptHandler, ast.With, ast.IfExp, ast.DictComp, ast.ListComp, ast.SetComp, ast.GeneratorExp, ast.AsyncFor, ast.AsyncWith)):
+                            complexity += 1
+                        elif isinstance(subnode, ast.BoolOp):
+                            complexity += len(subnode.values) - 1
+                    if complexity > 15:
+                        self.findings.append({
+                            "type": "HIGH_COMPLEXITY",
+                            "severity": "WARNING",
+                            "line": node.lineno,
+                            "msg": f"Function '{node.name}' has high cyclomatic complexity ({complexity} > 15).",
+                        })
+                        self.exergy_score -= (complexity - 15) * 2.0
             return True
         except Exception as e:
             logging.error("Mirror Audit Failure: %s", e)
