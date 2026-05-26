@@ -115,7 +115,7 @@ jobs:
             esac
           done < .changed_files
 
-          python_files="$(grep -E '^(cortex|tests|scripts)/.*\.py$' .changed_files || true)"
+          python_files="$(grep -E '^(cortex|tests|scripts)/.*\.py$' .changed_files | grep -v '^cortex-core/' || true)"
           {
             echo "release_only=${release_only}"
             echo "python_files<<EOF"
@@ -211,7 +211,7 @@ jobs:
             esac
           done < .changed_files
 
-          python_files="$(grep -E '^(cortex|tests|scripts)/.*\.py$' .changed_files || true)"
+          python_files="$(grep -E '^(cortex|tests|scripts)/.*\.py$' .changed_files | grep -v '^cortex-core/' || true)"
           {
             echo "release_only=${release_only}"
             echo "python_files<<EOF"
