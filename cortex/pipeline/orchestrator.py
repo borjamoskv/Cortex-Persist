@@ -490,10 +490,11 @@ class CortexOrchestrator:
                 )
 
         # Real LLM dispatch via AgentExecutor
-        if self._executor is not None:
+        executor = self._executor
+        if executor is not None:
             import asyncio
 
-            coro_factory = lambda: self._executor.execute(  # noqa: E731
+            coro_factory = lambda: executor.execute(  # noqa: E731
                 intent=request.intent,
                 context=context,
                 plan=plan,
@@ -533,20 +534,20 @@ class CortexOrchestrator:
         result_hash = hashlib.sha256(output_bytes).hexdigest()
 
         # If we have a sovereign SQLite engine, persist execution log
-        if self.engine is not None:
+        engine = self.engine
+        if engine is not None:
             try:
                 import asyncio
-                from cortex.utils.time_utils import get_utc_timestamp
 
                 async def persist_to_engine():
-                    async with self.engine.session() as conn:
+                    async with engine.session() as conn:
                         await conn.execute(
                             "INSERT INTO execution_log (mission_id, result_hash, tenant_id, completed_at, status) VALUES (?, ?, ?, ?, ?)",
                             (
                                 request.mission_id,
                                 result_hash,
                                 request.tenant_id,
-                                get_utc_timestamp(),
+                                time.time(),
                                 "SUCCESS",
                             ),
                         )
