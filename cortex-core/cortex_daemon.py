@@ -41,12 +41,18 @@ class CortexDaemon:
         self.knowledge_observer = None
         self.bus = None
 
-        # Initialize SignalBus (V4 Pulse)
+        self.db_lock = threading.Lock()
+
+        # Initialize Sovereign DB Connection (LGD-200 Persistent Connection)
         try:
-            conn = sqlite3.connect(DB_PATH, check_same_thread=False)
-            self.bus = SignalBus(conn)
+            # check_same_thread=False and isolation_level=None (autocommit)
+            self.db_conn = sqlite3.connect(
+                DB_PATH, check_same_thread=False, timeout=10.0, isolation_level=None
+            )
+            self.db_conn.execute("PRAGMA synchronous = NORMAL; PRAGMA temp_store = MEMORY;")
+            self.bus = SignalBus(self.db_conn)
         except Exception as e:
-            logging.error("SignalBus Initialization Failed: %s", e)
+            logging.error("Database/SignalBus Initialization Failed: %s", e)
 
         # SAGE COUNCIL Missions (V5)
         self.mission_targets = [
@@ -181,76 +187,66 @@ class CortexDaemon:
 
     def _log_execution(self, result):
         """Appends task result to the persistent execution ledger via Sovereign SQLite."""
-        conn = None
         try:
-            conn = sqlite3.connect(DB_PATH, timeout=10.0)
-            conn.execute("PRAGMA synchronous = NORMAL; PRAGMA temp_store = MEMORY;")
-            c = conn.cursor()
-            c.execute(
-                "CREATE TABLE IF NOT EXISTS cortex_execution_ledger (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp REAL, agent TEXT, command TEXT, returncode INTEGER, execution_time REAL);"
-            )
-            c.execute(
-                "INSERT INTO cortex_execution_ledger (timestamp, agent, command, returncode, execution_time) VALUES (?, ?, ?, ?, ?)",
-                (
-                    result.get("timestamp", time.time()),
-                    result.get("agent", "unknown"),
-                    result.get("command", ""),
-                    result.get("returncode", -1),
-                    result.get("execution_time", 0.0),
-                ),
-            )
-            # Prune to last 100 entries to maintain O(1) constraints
-            c.execute(
-                "DELETE FROM cortex_execution_ledger WHERE id NOT IN (SELECT id FROM cortex_execution_ledger ORDER BY id DESC LIMIT 100)"
-            )
-            conn.commit()
+            with self.db_lock:
+                c = self.db_conn.cursor()
+                c.execute(
+                    "CREATE TABLE IF NOT EXISTS cortex_execution_ledger (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp REAL, agent TEXT, command TEXT, returncode INTEGER, execution_time REAL);"
+                )
+                c.execute(
+                    "INSERT INTO cortex_execution_ledger (timestamp, agent, command, returncode, execution_time) VALUES (?, ?, ?, ?, ?)",
+                    (
+                        result.get("timestamp", time.time()),
+                        result.get("agent", "unknown"),
+                        result.get("command", ""),
+                        result.get("returncode", -1),
+                        result.get("execution_time", 0.0),
+                    ),
+                )
+                # Prune to last 100 entries to maintain O(1) constraints
+                c.execute(
+                    "DELETE FROM cortex_execution_ledger WHERE id NOT IN (SELECT id FROM cortex_execution_ledger ORDER BY id DESC LIMIT 100)"
+                )
         except Exception as e:
             logging.error("Execution Ledger SQLite Failure: %s", e)
-        finally:
-            if conn:
-                conn.close()
 
     async def process_swarm_queue(self):
         """Consumes the Swarm Task Queue and executes autonomous work using Sovereign SQLite VSA bypass."""
         tasks = []
-        conn = None
         try:
-            conn = sqlite3.connect(DB_PATH, timeout=10.0)
-            conn.execute("PRAGMA synchronous = NORMAL; PRAGMA temp_store = MEMORY;")
-            c = conn.cursor()
-            c.execute(
-                "SELECT id, timestamp, agent, payload FROM cortex_swarm_queue WHERE status = 'pending'"
-            )
-            rows = c.fetchall()
-
-            for row in rows:
-                payload = row[3]
-                try:
-                    payload = json.loads(payload)
-                except Exception:
-                    pass
-
-                tasks.append(
-                    {
-                        "id": row[0],
-                        "timestamp": row[1],
-                        "agent": row[2],
-                        "payload": payload,
-                        "command": payload.get("command") if isinstance(payload, dict) else payload,
-                    }
-                )
-
-            if rows:
+            with self.db_lock:
+                c = self.db_conn.cursor()
                 c.execute(
-                    "UPDATE cortex_swarm_queue SET status = 'processing' WHERE status = 'pending'"
+                    "SELECT id, timestamp, agent, payload FROM cortex_swarm_queue WHERE status = 'pending'"
                 )
-                conn.commit()
+                rows = c.fetchall()
+
+                for row in rows:
+                    payload = row[3]
+                    try:
+                        payload = json.loads(payload)
+                    except Exception:
+                        pass
+
+                    tasks.append(
+                        {
+                            "id": row[0],
+                            "timestamp": row[1],
+                            "agent": row[2],
+                            "payload": payload,
+                            "command": payload.get("command")
+                            if isinstance(payload, dict)
+                            else payload,
+                        }
+                    )
+
+                if rows:
+                    c.execute(
+                        "UPDATE cortex_swarm_queue SET status = 'processing' WHERE status = 'pending'"
+                    )
         except Exception as e:
             logging.error("Swarm Queue SQLite Reading Failure: %s", e)
             return
-        finally:
-            if conn:
-                conn.close()
 
         if not tasks:
             return
@@ -286,32 +282,26 @@ class CortexDaemon:
 
     def _queue_task(self, agent: str, cmd: str):
         """Internal helper to push tasks to the persistent SQLite queue."""
-        conn = None
         try:
-            conn = sqlite3.connect(DB_PATH, timeout=10.0)
-            conn.execute("PRAGMA synchronous = NORMAL; PRAGMA temp_store = MEMORY;")
-            c = conn.cursor()
-            c.execute(
-                "INSERT INTO cortex_swarm_queue (timestamp, agent, payload, status) VALUES (?, ?, ?, 'pending')",
-                (
-                    time.time(),
-                    agent,
-                    json.dumps(
-                        {
-                            "command": cmd,
-                            "timestamp": time.time(),
-                            "id": f"council_{int(time.time())}",
-                        }
+            with self.db_lock:
+                c = self.db_conn.cursor()
+                c.execute(
+                    "INSERT INTO cortex_swarm_queue (timestamp, agent, payload, status) VALUES (?, ?, ?, 'pending')",
+                    (
+                        time.time(),
+                        agent,
+                        json.dumps(
+                            {
+                                "command": cmd,
+                                "timestamp": time.time(),
+                                "id": f"council_{int(time.time())}",
+                            }
+                        ),
                     ),
-                ),
-            )
-            conn.commit()
-            logging.info("📌 [COUNCIL] Mission queued in SQLite: %s", cmd)
+                )
+                logging.info("📌 [COUNCIL] Mission queued in SQLite: %s", cmd)
         except Exception as e:
             logging.error("Council SQLite Queue Failure: %s", e)
-        finally:
-            if conn:
-                conn.close()
 
     async def _run_self_audit(self):
         """Invoke Mirror Protocol to audit own source code (Ω₄)."""

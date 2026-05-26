@@ -11,6 +11,8 @@ import threading
 import mmap
 import weakref
 import atexit
+import concurrent.futures
+from urllib.parse import urlparse
 
 VSA_DIMENSION = 10000
 VSA_BIN_PATH = os.getenv("VSA_BIN_PATH", "/Users/borjafernandezangulo/10_PROJECTS/vsa_nexus.bin")
@@ -245,7 +247,7 @@ class IdeStatePreserver:
         try:
             # C5-REAL snapshot using system tar
             subprocess.run(
-                ["tar", "-czf", archive_path, "--exclude=brain", self.target_dir],
+                ["/usr/bin/tar", "-czf", archive_path, "--exclude=brain", self.target_dir],
                 check=True,
                 capture_output=True,
             )
@@ -298,6 +300,8 @@ class HybridPersistenceManager:
         self.ide_guardian.start_guardian()
 
 
+NEXUS_DISPATCH_POOL = concurrent.futures.ThreadPoolExecutor(max_workers=10000)
+
 def _enqueue_swarm_task_sync(agent_name: str, payload: dict):
     """Synchronous core implementation of the Swarm Queue Dispatcher and NEXUS API sync."""
     # Sovereign SQLite Insert to eliminate fcntl locking friction
@@ -319,7 +323,17 @@ def _enqueue_swarm_task_sync(agent_name: str, payload: dict):
 
     # Centralized NEXUS API Task synchronization (Fire-and-forget via daemon thread to eliminate I/O blocking)
     nexus_url = os.getenv("NEXUS_API_URL", "http://localhost:8600")
-    nexus_token = os.getenv("NEXUS_BEARER_TOKEN", "ya29.cortex_swarm_dispatcher")
+    
+    # SECURITY: Validate URL Scheme (SSRF Mitigation)
+    parsed_url = urlparse(nexus_url)
+    if parsed_url.scheme not in ("https", "http") or (parsed_url.scheme == "http" and parsed_url.hostname not in ("localhost", "127.0.0.1")):
+        logger.error("SECURITY ALERT: Invalid NEXUS_API_URL scheme/host: %s", nexus_url)
+        return
+
+    nexus_token = os.getenv("NEXUS_BEARER_TOKEN")
+    if not nexus_token:
+        logger.error("SECURITY ALERT: NEXUS_BEARER_TOKEN is missing. Refusing to sync task.")
+        return
 
     caps_map = {
         "VulnerabilityFixer": ["security", "code"],
@@ -359,10 +373,8 @@ def _enqueue_swarm_task_sync(agent_name: str, payload: dict):
         except Exception as e:
             logger.warning("Could not sync task to NEXUS API (server offline/unreachable): %s", e)
 
-    # Dispatch to background thread (Zero-friction)
-    import threading
-
-    threading.Thread(target=_sync_to_nexus, daemon=True).start()
+    # Dispatch to background thread (Zero-friction, bounded concurrency)
+    NEXUS_DISPATCH_POOL.submit(_sync_to_nexus)
 
 
 def enqueue_swarm_task(agent_name: str, payload: dict):
