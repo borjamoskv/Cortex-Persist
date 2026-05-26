@@ -1,0 +1,20 @@
+name: Dispatch Portfolio Update
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'data/portfolio.json'
+  workflow_dispatch:
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger agents.archi sync
+        run: |
+          curl -X POST https://api.github.com/repos/borjamoskv/agents-archi/dispatches \
+          -H 'Accept: application/vnd.github.everest-preview+json' \
+          -u ${{ secrets.DISPATCH_PAT }} \
+          --data '{"event_type": "portfolio_update"}'

@@ -6,6 +6,7 @@ import asyncio
 import logging
 import sqlite3
 import fcntl
+import subprocess
 
 VSA_DIMENSION = 10000
 DB_PATH = os.getenv(
@@ -183,6 +184,63 @@ class VSAMemory:
             logger.warning("VSA neural decay loop could not be started: no running event loop.")
 
 
+class IdeStatePreserver:
+    """Guardian para proteger el entorno IDE/Agent contra fallas estructurales (Antigravity Drama)."""
+
+    def __init__(self, ledger: LedgerManager):
+        self.ledger = ledger
+        self.backup_dir = os.path.expanduser("~/cortex_backups")
+        self.target_dir = os.path.expanduser("~/.gemini/antigravity")
+        self._daemon_task = None
+
+    def _execute_snapshot(self):
+        os.makedirs(self.backup_dir, exist_ok=True)
+        timestamp = int(time.time())
+        archive_path = os.path.join(self.backup_dir, f"antigravity_state_{timestamp}.tar.gz")
+        
+        try:
+            # C5-REAL snapshot using system tar
+            subprocess.run([
+                "tar", "-czf", archive_path, 
+                "--exclude=brain", 
+                self.target_dir
+            ], check=True, capture_output=True)
+            
+            # Hash the backup
+            hasher = hashlib.sha256()
+            with open(archive_path, 'rb') as f:
+                while chunk := f.read(8192):
+                    hasher.update(chunk)
+            backup_hash = hasher.hexdigest()
+            
+            # Register in L3 Ledger
+            self.ledger.append(
+                action="IDE_STATE_SNAPSHOT",
+                vector_id=f"hash:{backup_hash[:16]}",
+                yield_amount=0.0
+            )
+            logger.info("IDE State Snapshot secured: %s", archive_path)
+        except Exception as e:
+            logger.error("Failed to snapshot IDE state: %s", e)
+
+    async def _snapshot_loop(self):
+        """Perform daily snapshots of IDE state to prevent entropy accumulation."""
+        while True:
+            self._execute_snapshot()
+            await asyncio.sleep(86400)  # 24 hours
+
+    def start_guardian(self):
+        if self._daemon_task:
+            return
+        try:
+            loop = asyncio.get_running_loop()
+            self._daemon_task = loop.create_task(self._snapshot_loop())
+        except RuntimeError:
+            logger.warning("IDE State Preserver loop could not be started: no running event loop.")
+            # Fallback sync run once
+            self._execute_snapshot()
+
+
 class HybridPersistenceManager:
     """
     Sovereign Hybrid Persistence Manager.
@@ -193,7 +251,9 @@ class HybridPersistenceManager:
         self.l1 = ContextCache()
         self.l2 = VSAMemory()
         self.l3 = LedgerManager()
+        self.ide_guardian = IdeStatePreserver(self.l3)
         self.l2.start_glia()
+        self.ide_guardian.start_guardian()
 
 
 def _enqueue_swarm_task_sync(agent_name: str, payload: dict):
