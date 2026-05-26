@@ -17,11 +17,14 @@ from urllib.parse import urlparse
 # Exergy-Maximized Thread-Local Connection Pool
 _local = threading.local()
 
+
 def _get_local_conn(db_path, timeout=30.0):
-    if not hasattr(_local, 'conn'):
+    if getattr(_local, "db_path", None) != db_path or not hasattr(_local, "conn"):
+        _local.db_path = db_path
         _local.conn = sqlite3.connect(db_path, timeout=timeout)
         _local.conn.execute("PRAGMA journal_mode=WAL;")
     return _local.conn
+
 
 VSA_DIMENSION = 10000
 VSA_BIN_PATH = os.getenv("VSA_BIN_PATH", "/Users/borjafernandezangulo/10_PROJECTS/vsa_nexus.bin")
@@ -400,10 +403,14 @@ class OutboxDaemon:
                             None, lambda r=req: urllib.request.urlopen(r, timeout=2.0)
                         )
                         if resp.status in (200, 201):
-                            await loop.run_in_executor(None, self._update_task_status, row_id, 'completed')
+                            await loop.run_in_executor(
+                                None, self._update_task_status, row_id, "completed"
+                            )
                             logger.info("Outbox synced task: %s", task_data["title"])
                         else:
-                            await loop.run_in_executor(None, self._update_task_status, row_id, 'failed')
+                            await loop.run_in_executor(
+                                None, self._update_task_status, row_id, "failed"
+                            )
                     except urllib.error.URLError as e:
                         logger.warning("Outbox sync deferred (network error): %s", e)
                         break  # Stop processing to wait for network recovery
