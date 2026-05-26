@@ -8,8 +8,10 @@ import sqlite3
 import fcntl
 import subprocess
 import threading
+import mmap
 
 VSA_DIMENSION = 10000
+VSA_BIN_PATH = os.getenv("VSA_BIN_PATH", "/Users/borjafernandezangulo/10_PROJECTS/vsa_nexus.bin")
 DB_PATH = os.getenv(
     "CORTEX_DB_PATH",
     os.path.join(os.path.dirname(os.path.abspath(__file__)), "cortex_memory_vsa.db"),
@@ -133,17 +135,38 @@ class VSAMemory:
     """L2 Sovereign Vector Symbolic Architecture (VSA) Substrate & SQLite Semantic Knowledge Base."""
 
     def __init__(self):
-        self._tensor = [0.0] * VSA_DIMENSION
+        self._tensor_size = VSA_DIMENSION * 8  # 8 bytes per double
+
+        # Ensure bin file exists and is pre-allocated
+        if not os.path.exists(VSA_BIN_PATH):
+            with open(VSA_BIN_PATH, "wb") as f:
+                import struct
+
+                f.write(struct.pack("d", 0.0) * VSA_DIMENSION)
+
+        self._f = open(VSA_BIN_PATH, "r+b")
+        self._mmap_tensor = mmap.mmap(self._f.fileno(), self._tensor_size)
+        self._tensor = memoryview(self._mmap_tensor).cast("d")
+
         self._decay_rate = 0.99
         self._daemon_task = None
         self._lock = threading.Lock()
         self._conn = sqlite3.connect(DB_PATH, check_same_thread=False)
         self._conn.execute("PRAGMA journal_mode=WAL;")
 
+    def __del__(self):
+        try:
+            self._mmap_tensor.close()
+            self._f.close()
+        except:
+            pass
+
     def record(self, key: str, value: str):
         """Map semantic trace to both RAM tensor and Persistent SQLite FTS5."""
         ctx_string = f"{key}:{value}"
         idx = int(hashlib.sha256(ctx_string.encode("utf-8")).hexdigest(), 16) % VSA_DIMENSION
+
+        # Zero-copy Silicon Direct Access
         self._tensor[idx] += 1.0
 
         try:
@@ -163,9 +186,10 @@ class VSAMemory:
         while True:
             await asyncio.sleep(60)
             for i in range(VSA_DIMENSION):
-                if self._tensor[i] > 0.001:
-                    self._tensor[i] *= self._decay_rate
-                else:
+                val = self._tensor[i]
+                if val > 0.001:
+                    self._tensor[i] = val * self._decay_rate
+                elif val > 0.0:
                     self._tensor[i] = 0.0
 
     def start_glia(self):
