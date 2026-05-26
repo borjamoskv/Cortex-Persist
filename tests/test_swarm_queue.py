@@ -19,19 +19,33 @@ from persistence import enqueue_swarm_task
 from cortex_daemon import CortexDaemon
 
 
-@pytest.fixture(autouse=True)
-def clean_swarm_queue_file(monkeypatch, tmp_path):
-    """Isolate queue file for each test."""
-    test_queue = tmp_path / "test_swarm_queue.json"
-    if os.path.exists(test_queue):
-        os.remove(test_queue)
+import sqlite3
 
-    # Patch SWARM_QUEUE_FILE paths in imported modules
-    monkeypatch.setattr("persistence.SWARM_QUEUE_FILE", str(test_queue))
-    monkeypatch.setattr("cortex_daemon.SWARM_QUEUE_FILE", str(test_queue))
-    yield test_queue
-    if os.path.exists(test_queue):
-        os.remove(test_queue)
+@pytest.fixture(autouse=True)
+def clean_swarm_queue_db(monkeypatch, tmp_path):
+    """Isolate SQLite database for each test."""
+    test_db = tmp_path / "test_cortex_memory_vsa.db"
+    
+    # Patch DB_PATH in imported modules
+    monkeypatch.setattr("persistence.DB_PATH", str(test_db))
+    monkeypatch.setattr("cortex_daemon.DB_PATH", str(test_db))
+    
+    # Initialize the tables in test_db
+    conn = sqlite3.connect(str(test_db))
+    c = conn.cursor()
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS cortex_swarm_queue (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp REAL,
+            agent TEXT,
+            payload TEXT,
+            status TEXT
+        )
+    """)
+    conn.commit()
+    conn.close()
+    
+    yield test_db
 
 
 @pytest.mark.asyncio
@@ -91,10 +105,21 @@ async def test_daemon_command_extraction():
 
     daemon._execute_task = mock_execute_raw
 
-    # Prepare queue content manually
-    queue_data = {"pending_tasks": [task1, task2, task3]}
-    with open(persistence.SWARM_QUEUE_FILE, "w") as f:
-        json.dump(queue_data, f)
+    # Prepare queue content in SQLite
+    conn = sqlite3.connect(persistence.DB_PATH)
+    c = conn.cursor()
+    for task in [task1, task2, task3]:
+        agent = task["agent"]
+        if "payload" in task:
+            payload_val = task["payload"]
+        else:
+            payload_val = {"command": task["command"]}
+        c.execute(
+            "INSERT INTO cortex_swarm_queue (timestamp, agent, payload, status) VALUES (?, ?, ?, 'pending')",
+            (time.time(), agent, json.dumps(payload_val)),
+        )
+    conn.commit()
+    conn.close()
 
     await daemon.process_swarm_queue()
 

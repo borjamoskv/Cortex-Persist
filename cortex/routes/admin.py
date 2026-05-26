@@ -44,6 +44,7 @@ if TYPE_CHECKING:
 __all__ = [
     "create_api_key",
     "deep_health_check",
+    "execute_credibility_strike",
     "export_project",
     "generate_handoff_context",
     "get_system_status",
@@ -436,3 +437,53 @@ async def generate_handoff_context(
         logger.error("Handoff failure: %s", exc)
         SelfHealingHook.trigger(exc, {"endpoint": "generate_handoff_context"})
         raise HTTPException(status_code=500, detail=get_trans("error_unexpected", lang)) from None
+
+
+@router.post("/v1/admin/credibility-strike")
+async def execute_credibility_strike(
+    project: str = Query(...),
+    ultrathink: bool = Query(True),
+    auth: AuthResult = Depends(require_permission("admin")),
+    engine: CortexEngine = Depends(get_engine),
+) -> dict:
+    """Execute a JIT credibility strike for a project.
+
+    Computes exergy, constructs Merkle roots, signs the root,
+    performs replay validation, and takes database snapshots.
+    """
+    if hasattr(engine, "_extensions") and hasattr(engine._extensions, "credibility_stack"):
+        stack = engine._extensions.credibility_stack
+    else:
+        from cortex.engine.credibility_stack import LedgerCredibilityStack
+        stack = LedgerCredibilityStack(engine)
+
+    try:
+        import inspect
+        sig = inspect.signature(stack.execute_full_strike)
+        if "tenant_id" in sig.parameters:
+            evidence = await stack.execute_full_strike(
+                project=project,
+                use_ultrathink=ultrathink,
+                tenant_id=auth.tenant_id,
+            )
+        else:
+            evidence = await stack.execute_full_strike(
+                project=project,
+                use_ultrathink=ultrathink,
+            )
+        return {
+            "project": evidence["project"],
+            "timestamp": evidence["timestamp"],
+            "merkle_root": evidence["merkle_root"],
+            "signature": evidence["signature"],
+            "replay_validated": evidence["replay_validated"],
+            "exergy": evidence["exergy"],
+            "metrics": evidence["metrics"],
+            "message": "Credibility strike executed successfully",
+        }
+    except Exception as exc:
+        logger.error("Credibility strike failed for project=%s: %s", project, exc)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Credibility strike execution failed: {str(exc)}",
+        )

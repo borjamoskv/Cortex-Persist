@@ -9,6 +9,8 @@ import fcntl
 import subprocess
 import threading
 import mmap
+import weakref
+import atexit
 
 VSA_DIMENSION = 10000
 VSA_BIN_PATH = os.getenv("VSA_BIN_PATH", "/Users/borjafernandezangulo/10_PROJECTS/vsa_nexus.bin")
@@ -62,7 +64,7 @@ class LedgerManager:
     def _init_db(self):
         # Ensure database parent directory exists
         os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
-        self._conn = sqlite3.connect(DB_PATH, check_same_thread=False)
+        self._conn = sqlite3.connect(DB_PATH, check_same_thread=False, timeout=30.0)
         c = self._conn.cursor()
         c.execute("PRAGMA journal_mode=WAL;")
         c.execute("""
@@ -132,8 +134,20 @@ class LedgerManager:
 
 class VSAMemory:
     """L2 Sovereign Vector Symbolic Architecture (VSA) Substrate & SQLite Semantic Knowledge Base."""
+    _instance = None
+    _init_lock = threading.Lock()
+
+    def __new__(cls):
+        with cls._init_lock:
+            if cls._instance is None:
+                cls._instance = super(VSAMemory, cls).__new__(cls)
+                cls._instance._initialized = False
+            return cls._instance
 
     def __init__(self):
+        if getattr(self, "_initialized", False):
+            return
+            
         self._tensor_size = VSA_DIMENSION * 8  # 8 bytes per double
 
         # Ensure bin file exists and is pre-allocated
@@ -143,6 +157,7 @@ class VSAMemory:
 
                 f.write(struct.pack("d", 0.0) * VSA_DIMENSION)
 
+        # Contextualize file and mmap lifecycle. Hold references tightly.
         self._f = open(VSA_BIN_PATH, "r+b")
         self._mmap_tensor = mmap.mmap(self._f.fileno(), self._tensor_size)
         self._tensor = memoryview(self._mmap_tensor).cast("d")
@@ -150,15 +165,26 @@ class VSAMemory:
         self._decay_rate = 0.99
         self._daemon_task = None
         self._lock = threading.Lock()
-        self._conn = sqlite3.connect(DB_PATH, check_same_thread=False)
+        self._conn = sqlite3.connect(DB_PATH, check_same_thread=False, timeout=30.0)
         self._conn.execute("PRAGMA journal_mode=WAL;")
+        
+        self._initialized = True
+        atexit.register(self.close)
 
-    def __del__(self):
+    def close(self):
+        """Explicitly close the mmap and file descriptors to prevent Errno 24 leaks."""
         try:
-            self._mmap_tensor.close()
-            self._f.close()
+            if hasattr(self, "_mmap_tensor") and self._mmap_tensor:
+                self._mmap_tensor.close()
+            if hasattr(self, "_f") and self._f:
+                self._f.close()
+            if hasattr(self, "_conn") and self._conn:
+                self._conn.close()
         except Exception:
             pass
+
+    def __del__(self):
+        self.close()
 
     def record(self, key: str, value: str):
         """Map semantic trace to both RAM tensor and Persistent SQLite FTS5."""
@@ -277,8 +303,9 @@ def _enqueue_swarm_task_sync(agent_name: str, payload: dict):
     # Sovereign SQLite Insert to eliminate fcntl locking friction
     conn = None
     try:
-        conn = sqlite3.connect(DB_PATH, timeout=10.0)
+        conn = sqlite3.connect(DB_PATH, timeout=30.0)
         c = conn.cursor()
+        c.execute("PRAGMA journal_mode=WAL;")
         c.execute(
             "INSERT INTO cortex_swarm_queue (timestamp, agent, payload, status) VALUES (?, ?, ?, 'pending')",
             (time.time(), agent_name, json.dumps(payload)),

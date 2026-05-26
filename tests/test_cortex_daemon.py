@@ -18,11 +18,30 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "cortex-core"))
 import cortex_daemon
 
 
+import sqlite3
+
 class TestCortexDaemon:
     @pytest.fixture
-    def daemon(self, tmp_path):
-        with patch("cortex_daemon.sqlite3.connect"):
-            d = cortex_daemon.CortexDaemon()
+    def daemon(self, tmp_path, monkeypatch):
+        test_db = tmp_path / "test_cortex_memory_vsa.db"
+        monkeypatch.setattr(cortex_daemon, "DB_PATH", str(test_db))
+
+        # Initialize the test SQLite schema
+        conn = sqlite3.connect(str(test_db))
+        c = conn.cursor()
+        c.execute("""
+            CREATE TABLE IF NOT EXISTS cortex_swarm_queue (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp REAL,
+                agent TEXT,
+                payload TEXT,
+                status TEXT
+            )
+        """)
+        conn.commit()
+        conn.close()
+
+        d = cortex_daemon.CortexDaemon()
 
         # Patch paths to use temp dir
         d.bus = MagicMock()
@@ -59,14 +78,18 @@ class TestCortexDaemon:
     def test_queue_task(self, daemon):
         daemon._queue_task("TEST_AGENT", "echo 'hello'")
 
-        assert os.path.exists(cortex_daemon.SWARM_QUEUE_FILE)
-        with open(cortex_daemon.SWARM_QUEUE_FILE) as f:
-            data = json.load(f)
+        conn = sqlite3.connect(cortex_daemon.DB_PATH)
+        c = conn.cursor()
+        c.execute("SELECT agent, payload, status FROM cortex_swarm_queue")
+        rows = c.fetchall()
+        conn.close()
 
-        assert "pending_tasks" in data
-        assert len(data["pending_tasks"]) == 1
-        assert data["pending_tasks"][0]["agent"] == "TEST_AGENT"
-        assert data["pending_tasks"][0]["command"] == "echo 'hello'"
+        assert len(rows) == 1
+        agent, payload_str, status = rows[0]
+        assert agent == "TEST_AGENT"
+        payload = json.loads(payload_str)
+        assert payload["command"] == "echo 'hello'"
+        assert status == "pending"
 
     @pytest.mark.asyncio
     async def test_execute_task(self, daemon):
@@ -105,10 +128,15 @@ class TestCortexDaemon:
             mock_execute.assert_called_once()
             assert mock_execute.call_args[0][0]["agent"] == "AGENT_1"
 
-            # Check if queue was cleared
-            with open(cortex_daemon.SWARM_QUEUE_FILE) as f:
-                data = json.load(f)
-            assert len(data["pending_tasks"]) == 0
+            # Check if queue status is updated to processing
+            conn = sqlite3.connect(cortex_daemon.DB_PATH)
+            c = conn.cursor()
+            c.execute("SELECT status FROM cortex_swarm_queue")
+            rows = c.fetchall()
+            conn.close()
+
+            assert len(rows) == 1
+            assert rows[0][0] == "processing"
 
     @pytest.mark.asyncio
     async def test_run_council_deliberation(self, daemon):
