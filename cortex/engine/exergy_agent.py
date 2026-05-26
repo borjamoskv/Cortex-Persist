@@ -68,8 +68,13 @@ class ExergyMaximizerAgent:
                 ENDOCRINE.pulse(HormoneType.DOPAMINE, entropy_paid * 0.8, reason=pulse_reason)
                 findings.append(f"[OPTIMIZATION] {pulse_reason}")
 
-            # Decisión Estructural: Sharding
-            if ExergyOptimizer.should_shard(exergy_score):
+            # Decisión Estructural
+            if exergy_score < 0.1:
+                findings.append(
+                    "[DEATH PROTOCOL] Entropía extrema detectada (>0.9). Nodo no salvable. Ejecutando terminación."
+                )
+                action = "KILL_NODE"
+            elif ExergyOptimizer.should_shard(exergy_score):
                 findings.append(
                     "[SHARDING REQUIRED] Límite entrópico superado. Ejecutando bifurcación de nodo."
                 )
