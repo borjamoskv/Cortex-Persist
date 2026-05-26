@@ -17,6 +17,7 @@ from urllib.parse import urlparse
 # Exergy-Maximized Thread-Local Connection Pool
 _local = threading.local()
 
+
 def _close_local_conn():
     """Cleanup thread-local connection on process exit."""
     conn = getattr(_local, "conn", None)
@@ -26,7 +27,9 @@ def _close_local_conn():
         except Exception:
             pass
 
+
 atexit.register(_close_local_conn)
+
 
 def _get_local_conn(db_path, timeout=30.0):
     if getattr(_local, "db_path", None) != db_path or not hasattr(_local, "conn"):
@@ -142,7 +145,9 @@ class LedgerManager:
             )
         """)
         c.execute("CREATE INDEX IF NOT EXISTS idx_ledger_vector ON ledger_records(vector_id);")
-        c.execute("CREATE INDEX IF NOT EXISTS idx_swarm_status_time ON cortex_swarm_queue(status, timestamp);")
+        c.execute(
+            "CREATE INDEX IF NOT EXISTS idx_swarm_status_time ON cortex_swarm_queue(status, timestamp);"
+        )
         self._conn.commit()
 
     def append(self, action: str, vector_id: str, yield_amount: float) -> str:
@@ -161,7 +166,9 @@ class LedgerManager:
             current_time = time.time()
             # L2 Sequencer Enforcement: Prevent rollback / Time-Jacking
             if current_time <= last_timestamp:
-                logger.warning(f"SECURITY ALERT: Time-Jacking or clock drift detected. Current: {current_time}, Last: {last_timestamp}. Enforcing monotonic sequence.")
+                logger.warning(
+                    f"SECURITY ALERT: Time-Jacking or clock drift detected. Current: {current_time}, Last: {last_timestamp}. Enforcing monotonic sequence."
+                )
                 timestamp = last_timestamp + 0.001
             else:
                 timestamp = current_time
@@ -368,7 +375,7 @@ class HybridPersistenceManager:
         """Aggregates C5-REAL telemetry from all persistence substrates."""
         return {
             "outbox": self.outbox.get_health_metrics(),
-            "ledger_yield": self.l3.get_total_yield()
+            "ledger_yield": self.l3.get_total_yield(),
         }
 
 
@@ -425,17 +432,17 @@ class OutboxDaemon:
             c = self._conn.cursor()
             c.execute("SELECT status, COUNT(*) FROM cortex_swarm_queue GROUP BY status")
             counts = {row[0]: row[1] for row in c.fetchall()}
-            
+
             c.execute("SELECT MIN(timestamp) FROM cortex_swarm_queue WHERE status = 'pending'")
             oldest_pending = c.fetchone()[0]
-            
+
             latency = (time.time() - oldest_pending) if oldest_pending else 0.0
-            
+
             return {
                 "pending_tasks": counts.get("pending", 0),
                 "failed_tasks": counts.get("failed", 0),
                 "completed_tasks": counts.get("completed", 0),
-                "max_latency_seconds": round(latency, 4)
+                "max_latency_seconds": round(latency, 4),
             }
 
     def drain_once_sync(self):

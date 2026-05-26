@@ -48,7 +48,12 @@ class CortexDaemon:
             self.db_conn = sqlite3.connect(
                 DB_PATH, check_same_thread=False, timeout=10.0, isolation_level=None
             )
-            self.db_conn.executescript("PRAGMA synchronous = NORMAL; PRAGMA temp_store = MEMORY;")
+            self.db_conn.executescript(
+                "PRAGMA synchronous = NORMAL; PRAGMA temp_store = MEMORY; PRAGMA mmap_size = 30000000000;"
+            )
+            self.db_conn.execute(
+                "CREATE TABLE IF NOT EXISTS cortex_execution_ledger (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp REAL, agent TEXT, command TEXT, exit_code INTEGER, execution_time REAL);"
+            )
             self.bus = SignalBus(self.db_conn)
         except Exception as e:
             logging.error("Database/SignalBus Initialization Failed: %s", e)
@@ -61,6 +66,8 @@ class CortexDaemon:
 
     def ensure_hygiene(self):
         """Flushes redundant temporal caches to maintain strict Exergy."""
+        if self.cycle_count % 20 != 0:
+            return
         scratch_dir = str(PROJECT_ROOT / ".scratch")
         if not os.path.exists(scratch_dir):
             return
@@ -77,16 +84,14 @@ class CortexDaemon:
 
     def check_memory_integrity(self):
         """Evaluates SQLite state, triggering implicit yields."""
+        if self.cycle_count % 20 != 0:
+            return
         try:
-            if not os.path.exists(DB_PATH):
-                return
-            conn = sqlite3.connect(DB_PATH)
-            c = conn.cursor()
-            c.execute("SELECT COUNT(*) FROM cortex_knowledge")
-            count = c.fetchone()[0]
-            conn.close()
-            if self.cycle_count % 20 == 0:
-                logging.info("📉 VSA State: %d active KIs in RAM", count)
+            with self.db_lock:
+                c = self.db_conn.cursor()
+                c.execute("SELECT COUNT(*) FROM cortex_knowledge")
+                count = c.fetchone()[0]
+            logging.info("📉 VSA State: %d active KIs in RAM", count)
         except Exception as e:
             logging.error("VSA Bridge detached: %s", e)
 
@@ -192,10 +197,10 @@ class CortexDaemon:
             with self.db_lock:
                 c = self.db_conn.cursor()
                 c.execute(
-                    "CREATE TABLE IF NOT EXISTS cortex_execution_ledger (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp REAL, agent TEXT, command TEXT, returncode INTEGER, execution_time REAL);"
+                    "CREATE TABLE IF NOT EXISTS cortex_execution_ledger (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp REAL, agent TEXT, command TEXT, exit_code INTEGER, execution_time REAL);"
                 )
                 c.execute(
-                    "INSERT INTO cortex_execution_ledger (timestamp, agent, command, returncode, execution_time) VALUES (?, ?, ?, ?, ?)",
+                    "INSERT INTO cortex_execution_ledger (timestamp, agent, command, exit_code, execution_time) VALUES (?, ?, ?, ?, ?)",
                     (
                         result.get("timestamp", time.time()),
                         result.get("agent", "unknown"),
@@ -211,43 +216,46 @@ class CortexDaemon:
         except Exception as e:
             print("Execution Ledger SQLite Failure:", e)
 
+    def _fetch_and_lock_swarm_tasks(self):
+        tasks = []
+        with self.db_lock:
+            c = self.db_conn.cursor()
+            c.execute(
+                "SELECT id, timestamp, agent, payload FROM cortex_swarm_queue WHERE status = 'pending'"
+            )
+            rows = c.fetchall()
+
+            for row in rows:
+                payload = row[3]
+                try:
+                    payload = json.loads(payload)
+                except Exception:
+                    pass
+
+                tasks.append(
+                    {
+                        "id": row[0],
+                        "timestamp": row[1],
+                        "agent": row[2],
+                        "payload": payload,
+                        "command": payload.get("command") if isinstance(payload, dict) else payload,
+                    }
+                )
+
+            if rows:
+                ids = [row[0] for row in rows]
+                placeholders = ",".join("?" for _ in ids)
+                c.execute(
+                    f"UPDATE cortex_swarm_queue SET status = 'processing' WHERE id IN ({placeholders})",
+                    ids,
+                )
+        return tasks
+
     async def process_swarm_queue(self):
         """Consumes the Swarm Task Queue and executes autonomous work using Sovereign SQLite VSA bypass."""
-        tasks = []
         try:
-            with self.db_lock:
-                c = self.db_conn.cursor()
-                c.execute(
-                    "SELECT id, timestamp, agent, payload FROM cortex_swarm_queue WHERE status = 'pending'"
-                )
-                rows = c.fetchall()
-
-                for row in rows:
-                    payload = row[3]
-                    try:
-                        payload = json.loads(payload)
-                    except Exception:
-                        pass
-
-                    tasks.append(
-                        {
-                            "id": row[0],
-                            "timestamp": row[1],
-                            "agent": row[2],
-                            "payload": payload,
-                            "command": payload.get("command")
-                            if isinstance(payload, dict)
-                            else payload,
-                        }
-                    )
-
-                if rows:
-                    ids = [row[0] for row in rows]
-                    placeholders = ",".join("?" for _ in ids)
-                    c.execute(
-                        f"UPDATE cortex_swarm_queue SET status = 'processing' WHERE id IN ({placeholders})",
-                        ids,
-                    )
+            loop = asyncio.get_running_loop()
+            tasks = await loop.run_in_executor(None, self._fetch_and_lock_swarm_tasks)
         except Exception as e:
             logging.error("Swarm Queue SQLite Reading Failure: %s", e)
             return
@@ -353,8 +361,9 @@ class CortexDaemon:
             self.cycle_count += 1
 
             # 1. Hygiene & Memory
-            self.ensure_hygiene()
-            self.check_memory_integrity()
+            loop = asyncio.get_running_loop()
+            await loop.run_in_executor(None, self.ensure_hygiene)
+            await loop.run_in_executor(None, self.check_memory_integrity)
 
             # 2. SAGE COUNCIL (Every 100 cycles)
             if self.cycle_count % 100 == 0:

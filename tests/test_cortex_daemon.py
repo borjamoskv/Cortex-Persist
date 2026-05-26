@@ -66,22 +66,7 @@ class TestCortexDaemon:
             "CREATE TABLE IF NOT EXISTS cortex_swarm_queue (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp REAL, agent TEXT, payload TEXT, status TEXT)"
         )
         c.execute(
-            "CREATE TABLE IF NOT EXISTS cortex_execution_ledger (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp REAL, agent TEXT, command TEXT, exit_code INTEGER, execution_time REAL)"
-        )
-        conn.commit()
-        conn.close()
-
-        # Create schema for tests
-        conn = sqlite3.connect(test_db)
-        c = conn.cursor()
-        c.execute(
-            "CREATE TABLE IF NOT EXISTS cortex_knowledge (id INTEGER PRIMARY KEY, content TEXT)"
-        )
-        c.execute(
-            "CREATE TABLE IF NOT EXISTS cortex_swarm_queue (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp REAL, agent TEXT, payload TEXT, status TEXT)"
-        )
-        c.execute(
-            "CREATE TABLE IF NOT EXISTS cortex_execution_ledger (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp REAL, agent TEXT, command TEXT, exit_code INTEGER, execution_time REAL)"
+            "CREATE TABLE IF NOT EXISTS cortex_execution_ledger (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp REAL, agent TEXT, command TEXT, returncode INTEGER, execution_time REAL)"
         )
         conn.commit()
         conn.close()
