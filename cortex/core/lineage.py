@@ -65,19 +65,20 @@ class LineageVerifier:
 
         if fact_id in _cache:
             val = _cache[fact_id]
-            if val is True:
-                return LineageNode(
-                    fact_id=fact_id,
-                    project="unknown",
-                    content="[CYCLIC REFERENCE DETECTED]",
-                    fact_type="error",
-                    confidence="none",
-                    timestamp="",
-                    parents=[],
-                    is_valid=False,
-                    error="Cyclic graph lineage protection triggered.",
-                )
-            return val
+            if isinstance(val, LineageNode):
+                return val
+
+            return LineageNode(
+                fact_id=fact_id,
+                project="unknown",
+                content="[CYCLIC REFERENCE DETECTED]",
+                fact_type="error",
+                confidence="none",
+                timestamp="",
+                parents=[],
+                is_valid=False,
+                error="Cyclic graph lineage protection triggered.",
+            )
 
         # Pre-emptively mark as being processed to prevent concurrent N+1 race conditions
         _cache[fact_id] = True
@@ -124,7 +125,7 @@ class LineageVerifier:
         # For now, we assume if it's in the DB and has a tx_id, it's valid L0.
         is_valid = fact.tx_id is not None
 
-        return LineageNode(
+        node = LineageNode(
             fact_id=fact.id,
             project=fact.project,
             content=fact.content,
@@ -134,6 +135,8 @@ class LineageVerifier:
             parents=parents,
             is_valid=is_valid,
         )
+        _cache[fact_id] = node
+        return node
 
     def print_tree(self, node: LineageNode, indent: int = 0):
         """Debug helper to print lineage."""
