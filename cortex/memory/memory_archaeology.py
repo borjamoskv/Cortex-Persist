@@ -120,21 +120,32 @@ class MemoryArchaeologist:
     def _build_clusters(
         self, facts: list[dict[str, Any]], vecs_matrix: np.ndarray, threshold: float
     ) -> list[list[int]]:
-        # O(N^2) dot product for cosine similarity
+        # O(N^2) dot product for cosine similarity is unavoidable here without approximate KNN.
+        # But we can eliminate the O(N^2) nested python loops and use vectorization.
         sim_matrix = np.dot(vecs_matrix, vecs_matrix.T)
+
+        # Zero out the diagonal to not match with self during boolean indexing
+        np.fill_diagonal(sim_matrix, 0)
+
+        # Find all pairs above threshold
+        matches = sim_matrix >= threshold
+
         visited = set()
         clusters = []
-
         n = len(facts)
+
         for i in range(n):
             if i in visited:
                 continue
 
-            # Find neighbors
-            neighbors = [j for j in range(n) if sim_matrix[i, j] >= threshold]
-            if len(neighbors) > 1:
-                clusters.append(neighbors)
-                visited.update(neighbors)
+            # Get indices where the match is true
+            neighbors = np.where(matches[i])[0].tolist()
+
+            # Since diagonal is zeroed out, we need to explicitly add `i` if it has neighbors
+            if neighbors:
+                cluster = [i] + neighbors
+                clusters.append(cluster)
+                visited.update(cluster)
             else:
                 visited.add(i)
 
@@ -176,7 +187,12 @@ class MemoryArchaeologist:
             if not simulate:
                 try:
                     await self._apply_db_updates(
-                        project, tenant_id, condensed_content, cluster_facts, primary_parent_id, l2_conn
+                        project,
+                        tenant_id,
+                        condensed_content,
+                        cluster_facts,
+                        primary_parent_id,
+                        l2_conn,
                     )
                 except (sqlite3.Error, aiosqlite.Error) as e:
                     logger.error("Archaeology DB update failed: %s", e)
@@ -233,8 +249,8 @@ class MemoryArchaeologist:
             parent_column = await self._parent_column(conn)
             if parent_column:
                 cursor = await conn.execute(
-                    f"SELECT id, tenant_id FROM facts "
-                    f"WHERE {parent_column} IN ({placeholders}) AND tenant_id = ?",
+                    f"SELECT id, tenant_id FROM facts "  # noqa: S608  # nosec B608
+                    f"WHERE {parent_column} IN ({placeholders}) AND tenant_id = ?",  # noqa: S608  # nosec B608
                     (*old_ids, tenant_id),
                 )
                 for child_id, child_tenant_id in await cursor.fetchall():
@@ -259,11 +275,11 @@ class MemoryArchaeologist:
                 "UPDATE facts_meta SET parent_decision_id = ? WHERE id = ?",
                 (primary_parent_id, new_fact_id),
             )
-        cl2.execute(f"DELETE FROM facts_meta WHERE id IN ({placeholders})", str_old_ids)
+        cl2.execute(f"DELETE FROM facts_meta WHERE id IN ({placeholders})", str_old_ids)  # noqa: S608  # nosec B608
         cl2.execute("DELETE FROM vec_facts WHERE rowid NOT IN (SELECT rowid FROM facts_meta)")
         cl2 = l2_conn.cursor()
         cl2.execute(
-            f"UPDATE facts_meta SET parent_decision_id = ? WHERE parent_decision_id IN ({placeholders})",
+            f"UPDATE facts_meta SET parent_decision_id = ? WHERE parent_decision_id IN ({placeholders})",  # noqa: S608  # nosec B608
             [new_fact_id] + old_ids,
         )
         l2_conn.commit()
