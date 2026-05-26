@@ -24,6 +24,7 @@ from cortex.extensions.security.signatures import (
     generate_keypair,
 )
 
+
 class LedgerCredibilityStack:
     """
     Sovereign Credibility Stack for CORTEX.

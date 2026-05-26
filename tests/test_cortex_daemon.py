@@ -20,6 +20,7 @@ import cortex_daemon
 
 import sqlite3
 
+
 class TestCortexDaemon:
     @pytest.fixture
     def daemon(self, tmp_path, monkeypatch):

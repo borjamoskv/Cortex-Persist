@@ -21,15 +21,16 @@ from cortex_daemon import CortexDaemon
 
 import sqlite3
 
+
 @pytest.fixture(autouse=True)
 def clean_swarm_queue_db(monkeypatch, tmp_path):
     """Isolate SQLite database for each test."""
     test_db = tmp_path / "test_cortex_memory_vsa.db"
-    
+
     # Patch DB_PATH in imported modules
     monkeypatch.setattr("persistence.DB_PATH", str(test_db))
     monkeypatch.setattr("cortex_daemon.DB_PATH", str(test_db))
-    
+
     # Initialize the tables in test_db
     conn = sqlite3.connect(str(test_db))
     c = conn.cursor()
@@ -44,7 +45,7 @@ def clean_swarm_queue_db(monkeypatch, tmp_path):
     """)
     conn.commit()
     conn.close()
-    
+
     yield test_db
 
 

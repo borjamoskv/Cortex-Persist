@@ -455,10 +455,12 @@ async def execute_credibility_strike(
         stack = engine._extensions.credibility_stack
     else:
         from cortex.engine.credibility_stack import LedgerCredibilityStack
+
         stack = LedgerCredibilityStack(engine)
 
     try:
         import inspect
+
         sig = inspect.signature(stack.execute_full_strike)
         if "tenant_id" in sig.parameters:
             evidence = await stack.execute_full_strike(
