@@ -19,7 +19,7 @@ class SystemLoadCollector:
 
     @property
     def weight(self) -> float:
-        return 1.0
+        return 0.5
 
     @property
     def description(self) -> str:

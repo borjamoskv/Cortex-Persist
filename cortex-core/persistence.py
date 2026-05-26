@@ -14,7 +14,7 @@ import hmac
 VSA_DIMENSION = 10000
 DB_PATH = os.getenv(
     "CORTEX_DB_PATH",
-    os.path.join(os.path.dirname(os.path.abspath(__file__)), "cortex_memory_vsa.db")
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "cortex_memory_vsa.db"),
 )
 SWARM_QUEUE_FILE = "/tmp/cortex_swarm_queue.json"
 LEDGER_SECRET = os.getenv("CORTEX_LEDGER_SECRET", "default_sovereign_secret_2026")
@@ -24,6 +24,7 @@ logger = logging.getLogger("cortex.persistence")
 
 class MMAPArray:
     """Memory-mapped array wrapping double precision floats (float64) backed by a file."""
+
     def __init__(self, mmap_obj, dimension):
         self._mmap = mmap_obj
         self._dim = dimension
@@ -33,14 +34,14 @@ class MMAPArray:
             idx += self._dim
         if not (0 <= idx < self._dim):
             raise IndexError("VSA tensor index out of range")
-        return struct.unpack_from('d', self._mmap, idx * 8)[0]
+        return struct.unpack_from("d", self._mmap, idx * 8)[0]
 
     def __setitem__(self, idx, val):
         if idx < 0:
             idx += self._dim
         if not (0 <= idx < self._dim):
             raise IndexError("VSA tensor index out of range")
-        struct.pack_into('d', self._mmap, idx * 8, float(val))
+        struct.pack_into("d", self._mmap, idx * 8, float(val))
 
     def __len__(self):
         return self._dim
@@ -63,11 +64,11 @@ class ContextCache:
             raise ValueError("content_key must be a non-empty string")
         if not isinstance(payload, dict):
             raise TypeError("payload must be a dict")
-        
+
         # Proactive garbage collection to prevent memory footprint bloat
         if len(self._cache) > 100:
             self.gc()
-            
+
         self._cache[content_key] = {"payload": payload, "timestamp": time.time()}
 
     def get(self, content_key: str) -> dict:
@@ -86,8 +87,7 @@ class ContextCache:
         """Remove expired entries from the L1 cache to optimize memory footprint."""
         now = time.time()
         expired_keys = [
-            k for k, entry in self._cache.items()
-            if now - entry["timestamp"] >= self._ttl
+            k for k, entry in self._cache.items() if now - entry["timestamp"] >= self._ttl
         ]
         for k in expired_keys:
             del self._cache[k]
@@ -172,9 +172,7 @@ class LedgerManager:
             timestamp = time.time()
             payload = f"{prev_hash}_{action}_{vector_id}_{yield_amount}_{timestamp}"
             block_hash = hmac.new(
-                LEDGER_SECRET.encode("utf-8"),
-                payload.encode("utf-8"),
-                hashlib.sha256
+                LEDGER_SECRET.encode("utf-8"), payload.encode("utf-8"), hashlib.sha256
             ).hexdigest()
 
             c.execute(
@@ -196,17 +194,17 @@ class LedgerManager:
         try:
             conn = sqlite3.connect(DB_PATH)
             c = conn.cursor()
-            c.execute("SELECT timestamp, action, vector_id, yield_amount, hash FROM ledger_records ORDER BY id ASC")
+            c.execute(
+                "SELECT timestamp, action, vector_id, yield_amount, hash FROM ledger_records ORDER BY id ASC"
+            )
             rows = c.fetchall()
-            
+
             prev_hash = "GENESIS_BLOCK"
             for row in rows:
                 timestamp, action, vector_id, yield_amount, block_hash = row
                 payload = f"{prev_hash}_{action}_{vector_id}_{yield_amount}_{timestamp}"
                 expected_hash = hmac.new(
-                    LEDGER_SECRET.encode("utf-8"),
-                    payload.encode("utf-8"),
-                    hashlib.sha256
+                    LEDGER_SECRET.encode("utf-8"), payload.encode("utf-8"), hashlib.sha256
                 ).hexdigest()
                 if block_hash != expected_hash:
                     return False
@@ -240,19 +238,24 @@ class VSAMemory:
     def __init__(self):
         self._decay_rate = 0.99
         self._daemon_task = None
-        
+
         # Setup memory-mapped file for real VSA state space
-        vsa_file = os.getenv("CORTEX_VSA_FILE", "/tmp/cortex_vsa.bin")
-        os.makedirs(os.path.dirname(vsa_file), exist_ok=True)
-        
+        vsa_file = os.getenv("CORTEX_VSA_FILE")
+        if not vsa_file:
+            self._temp_file = tempfile.NamedTemporaryFile(delete=False)
+            vsa_file = self._temp_file.name
+        else:
+            self._temp_file = None
+            os.makedirs(os.path.dirname(vsa_file), exist_ok=True)
+
         self._file_fd = os.open(vsa_file, os.O_RDWR | os.O_CREAT)
         size = os.lseek(self._file_fd, 0, os.SEEK_END)
         expected_size = VSA_DIMENSION * 8
         if size < expected_size:
             os.ftruncate(self._file_fd, expected_size)
             os.lseek(self._file_fd, 0, os.SEEK_SET)
-            os.write(self._file_fd, b'\x00' * expected_size)
-            
+            os.write(self._file_fd, b"\x00" * expected_size)
+
         self._mmap = mmap.mmap(self._file_fd, expected_size)
         self._tensor = MMAPArray(self._mmap, VSA_DIMENSION)
 
@@ -263,7 +266,7 @@ class VSAMemory:
     def clear(self):
         """Zero out the entire VSA memory-mapped state space."""
         self._mmap.seek(0)
-        self._mmap.write(b'\x00' * (VSA_DIMENSION * 8))
+        self._mmap.write(b"\x00" * (VSA_DIMENSION * 8))
 
     def record(self, key: str, value: str):
         """Map semantic trace to both RAM tensor and Persistent SQLite FTS5."""
@@ -312,6 +315,17 @@ class VSAMemory:
         except RuntimeError:
             logger.warning("VSA neural decay loop could not be started: no running event loop.")
 
+    def __del__(self):
+        try:
+            if hasattr(self, "_mmap") and self._mmap:
+                self._mmap.close()
+            if hasattr(self, "_file_fd") and self._file_fd:
+                os.close(self._file_fd)
+            if hasattr(self, "_temp_file") and self._temp_file:
+                os.unlink(self._temp_file.name)
+        except Exception:
+            pass
+
 
 class HybridPersistenceManager:
     """
@@ -329,8 +343,10 @@ class HybridPersistenceManager:
 def _enqueue_swarm_task_sync(agent_name: str, payload: dict):
     """Synchronous core implementation of the Swarm Queue Dispatcher using SQLite WAL queue."""
     import sqlite3
-    
+
     payload_str = json.dumps(payload)
+
+    # 1. Enqueue to SQLite WAL queue
     conn = None
     for attempt in range(5):
         try:
@@ -346,10 +362,13 @@ def _enqueue_swarm_task_sync(agent_name: str, payload: dict):
                     status TEXT DEFAULT 'pending'
                 )
             """)
-            c.execute("""
+            c.execute(
+                """
                 INSERT INTO cortex_swarm_queue (timestamp, agent, payload, status)
                 VALUES (?, ?, ?, 'pending')
-            """, (time.time(), agent_name, payload_str))
+            """,
+                (time.time(), agent_name, payload_str),
+            )
             conn.commit()
             break
         except sqlite3.OperationalError as e:
@@ -361,7 +380,39 @@ def _enqueue_swarm_task_sync(agent_name: str, payload: dict):
             if conn:
                 conn.close()
 
-    # Centralized NEXUS API Task synchronization
+    # 2. Legacy JSON-file queue integration for backward compatibility and test validation
+    task_dict = {"agent": agent_name, "payload": payload, "timestamp": time.time()}
+    try:
+        # Create directory of SWARM_QUEUE_FILE if not exists
+        os.makedirs(os.path.dirname(SWARM_QUEUE_FILE), exist_ok=True)
+        fd = os.open(SWARM_QUEUE_FILE, os.O_RDWR | os.O_CREAT)
+        try:
+            fcntl.flock(fd, fcntl.LOCK_EX)
+            # Read current contents
+            size = os.lseek(fd, 0, os.SEEK_END)
+            os.lseek(fd, 0, os.SEEK_SET)
+            data = {"pending_tasks": []}
+            if size > 0:
+                content = os.read(fd, size).decode("utf-8")
+                try:
+                    data = json.loads(content)
+                    if not isinstance(data, dict) or "pending_tasks" not in data:
+                        data = {"pending_tasks": []}
+                except Exception:
+                    data = {"pending_tasks": []}
+            data["pending_tasks"].append(task_dict)
+
+            # Write back
+            os.ftruncate(fd, 0)
+            os.lseek(fd, 0, os.SEEK_SET)
+            os.write(fd, json.dumps(data, indent=2).encode("utf-8"))
+        finally:
+            fcntl.flock(fd, fcntl.LOCK_UN)
+            os.close(fd)
+    except Exception as e:
+        logger.error("Failed writing task to SWARM_QUEUE_FILE: %s", e)
+
+    # 3. Centralized NEXUS API Task synchronization
     nexus_url = os.getenv("NEXUS_API_URL", "http://localhost:8600")
     nexus_token = os.getenv("NEXUS_BEARER_TOKEN", "ya29.cortex_swarm_dispatcher")
 
@@ -369,7 +420,7 @@ def _enqueue_swarm_task_sync(agent_name: str, payload: dict):
         "VulnerabilityFixer": ["security", "code"],
         "InvariantValidator": ["security", "code"],
         "SAGE_COUNCIL": ["intel", "research"],
-        "OPTIMIZER": ["code"]
+        "OPTIMIZER": ["code"],
     }
     required_caps = caps_map.get(agent_name, ["code"])
 
@@ -377,26 +428,26 @@ def _enqueue_swarm_task_sync(agent_name: str, payload: dict):
         "title": f"Swarm: {agent_name} Task",
         "description": json.dumps(payload) if isinstance(payload, dict) else str(payload),
         "required_capabilities": required_caps,
-        "reward": float(payload.get("reward", 0.0)) if (isinstance(payload, dict) and "reward" in payload) else 0.0,
-        "delegator_id": "system"
+        "reward": float(payload.get("reward", 0.0))
+        if (isinstance(payload, dict) and "reward" in payload)
+        else 0.0,
+        "delegator_id": "system",
     }
 
     try:
         import urllib.request
         import urllib.error
+
         req = urllib.request.Request(
             f"{nexus_url.rstrip('/')}/api/tasks",
             data=json.dumps(task_data).encode("utf-8"),
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {nexus_token}"
-            },
-            method="POST"
+            headers={"Content-Type": "application/json", "Authorization": f"Bearer {nexus_token}"},
+            method="POST",
         )
         # Timeout at 1.0 second to ensure non-blocking dispatch
         with urllib.request.urlopen(req, timeout=1.0) as resp:
             if resp.status in (200, 201):
-                logger.info("Successfully sync'd task to NEXUS API: %s", task_data['title'])
+                logger.info("Successfully sync'd task to NEXUS API: %s", task_data["title"])
     except Exception as e:
         logger.warning("Could not sync task to NEXUS API (server offline/unreachable): %s", e)
 
