@@ -632,13 +632,12 @@ async def main() -> int:
     await GlobalSourceCache.load()
 
     skip, only, force = _parse_gate_filters()
-    is_ci = any(
-        os.environ.get(k) in ("1", "true", "yes")
-        for k in ("CI", "GITHUB_ACTIONS", "CORTEX_FULL_SEALS")
-    )
+    # Gate 4 (tests) requires full dev deps — only enable with explicit opt-in
+    full_seals = os.environ.get("CORTEX_FULL_SEALS", "").strip() in ("1", "true", "yes")
+    is_ci = full_seals or os.environ.get("CI", "").strip() in ("1", "true", "yes")
 
-    # Auto-skip Gate 4 locally
-    if not is_ci and 4 not in force and 4 not in only:
+    # Auto-skip Gate 4 unless CORTEX_FULL_SEALS is explicitly set
+    if not full_seals and 4 not in force and 4 not in only:
         if 4 not in skip:
             printer.warn("Ω₂ EXERGY PRESERVATION: Running in FAST MODE (Gate 4 SKIPPED).")
             skip.add(4)
