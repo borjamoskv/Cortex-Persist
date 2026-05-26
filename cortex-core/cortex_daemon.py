@@ -95,6 +95,24 @@ class CortexDaemon:
         except Exception as e:
             logging.error("VSA Bridge detached: %s", e)
 
+    def check_swarm_exergy(self):
+        """Evaluates Swarm Exergy Metrics and logs them to LGD-200."""
+        if self.cycle_count % 10 != 0:
+            return
+        try:
+            from persistence import get_swarm_metrics
+            metrics = get_swarm_metrics()
+            logging.info("🔋 [EXERGY] Swarm Telemetry: Active=%d, Latency=%.2fms, Uncertainty=%.2f",
+                         metrics["active_children"], metrics["latency_ms"], metrics["uncertainty"])
+            if self.bus:
+                self.bus.emit(
+                    "exergy_telemetry",
+                    metrics,
+                    source="daemon"
+                )
+        except Exception as e:
+            logging.error("Failed to read Exergy Metrics: %s", e)
+
     async def _execute_task(self, task):
         """Spawns an asynchronous sub-process for a swarm task."""
         agent = task.get("agent", "unknown")
@@ -358,10 +376,11 @@ class CortexDaemon:
         while self.is_running:
             self.cycle_count += 1
 
-            # 1. Hygiene & Memory
+            # 1. Hygiene & Memory & Exergy
             loop = asyncio.get_running_loop()
             await loop.run_in_executor(None, self.ensure_hygiene)
             await loop.run_in_executor(None, self.check_memory_integrity)
+            await loop.run_in_executor(None, self.check_swarm_exergy)
 
             # 2. SAGE COUNCIL (Every 100 cycles)
             if self.cycle_count % 100 == 0:

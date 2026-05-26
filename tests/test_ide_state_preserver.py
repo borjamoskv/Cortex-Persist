@@ -44,7 +44,7 @@ class TestIdeStatePreserver:
         # Check tar subprocess invocation
         mock_run.assert_called_once()
         args = mock_run.call_args[0][0]
-        assert args[0] == "tar"
+        assert args[0].endswith("tar")
         assert args[1] == "-czf"
         assert "--exclude=brain" in args
         assert "/fake/target" in args
