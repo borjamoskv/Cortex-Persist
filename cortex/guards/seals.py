@@ -634,7 +634,6 @@ async def main() -> int:
     skip, only, force = _parse_gate_filters()
     # Gate 4 (tests) requires full dev deps — only enable with explicit opt-in
     full_seals = os.environ.get("CORTEX_FULL_SEALS", "").strip() in ("1", "true", "yes")
-    is_ci = full_seals or os.environ.get("CI", "").strip() in ("1", "true", "yes")
 
     # Auto-skip Gate 4 unless CORTEX_FULL_SEALS is explicitly set
     if not full_seals and 4 not in force and 4 not in only:
