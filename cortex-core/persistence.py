@@ -236,6 +236,11 @@ class VSAMemory:
                 f.write(struct.pack("d", 0.0) * VSA_DIMENSION)
 
         # Contextualize file and mmap lifecycle. Hold references tightly.
+        if HAS_CORTEX_RS:
+            self._substrate = cortex_rs.CortexRsSubstrate(VSA_BIN_PATH, VSA_DIMENSION)
+        else:
+            self._substrate = None
+
         self._f = open(VSA_BIN_PATH, "r+b")
         self._mmap_tensor = mmap.mmap(self._f.fileno(), self._tensor_size)
         self._tensor = memoryview(self._mmap_tensor).cast("d")
@@ -279,6 +284,17 @@ class VSAMemory:
 
     def record(self, key: str, value: str):
         """Map semantic trace to both RAM tensor and Persistent SQLite FTS5."""
+        if self._substrate is not None:
+            try:
+                self._substrate.record(key, value, DB_PATH)
+                self._record_count += 1
+                if self._record_count >= 1000:
+                    self._substrate.apply_decay(self._decay_rate)
+                    self._record_count = 0
+            except Exception as e:
+                logger.error("Rust VSA Record Failure: %s", e)
+            return
+
         ctx_string = f"{key}:{value}"
         idx = int(hashlib.sha256(ctx_string.encode("utf-8")).hexdigest(), 16) % VSA_DIMENSION
 
@@ -423,19 +439,32 @@ class ZeroCopyRingBuffer:
         self.tensor_size = self.capacity * self.task_size
         self.bin_path = os.path.join(os.path.dirname(DB_PATH), "swarm_ring_vsa.bin")
 
-        if not os.path.exists(self.bin_path) or os.path.getsize(self.bin_path) < self.tensor_size:
-            with open(self.bin_path, "wb") as f:
-                f.write(b"\x00" * self.tensor_size)
+        if HAS_CORTEX_RS:
+            try:
+                self._rust_buf = cortex_rs.ZeroCopyRingBuffer(self.bin_path, self.capacity)
+            except Exception as e:
+                logger.warning("Failed to initialize Rust ZeroCopyRingBuffer, using Python fallback: %s", e)
+                self._rust_buf = None
+        else:
+            self._rust_buf = None
 
-        self._f = open(self.bin_path, "r+b")
-        self._mmap = mmap.mmap(self._f.fileno(), self.tensor_size)
-        self._buffer = memoryview(self._mmap)
-        self._lock = threading.Lock()
-        self._write_idx = 0
-        self._read_idx = 0
+        if self._rust_buf is None:
+            if not os.path.exists(self.bin_path) or os.path.getsize(self.bin_path) < self.tensor_size:
+                with open(self.bin_path, "wb") as f:
+                    f.write(b"\x00" * self.tensor_size)
+
+            self._f = open(self.bin_path, "r+b")
+            self._mmap = mmap.mmap(self._f.fileno(), self.tensor_size)
+            self._buffer = memoryview(self._mmap)
+            self._lock = threading.Lock()
+            self._write_idx = 0
+            self._read_idx = 0
 
     def enqueue(self, agent_id: bytes, payload: bytes) -> bool:
         """O(1) Zero-copy memory write. Bypasses VSA OS locks."""
+        if self._rust_buf is not None:
+            return self._rust_buf.enqueue(agent_id, payload)
+
         with self._lock:
             offset = self._write_idx * self.task_size
             if self._buffer[offset] != 0:
@@ -456,6 +485,9 @@ class ZeroCopyRingBuffer:
 
     def fetch_pending(self):
         """Zero-copy read direct from C-contiguous memory."""
+        if self._rust_buf is not None:
+            return self._rust_buf.fetch_pending()
+
         tasks = []
         import struct
 
