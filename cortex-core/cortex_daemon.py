@@ -6,6 +6,7 @@ import asyncio
 import json
 import sys
 import fcntl
+import threading
 
 from pathlib import Path
 
@@ -49,7 +50,7 @@ class CortexDaemon:
             self.db_conn = sqlite3.connect(
                 DB_PATH, check_same_thread=False, timeout=10.0, isolation_level=None
             )
-            self.db_conn.execute("PRAGMA synchronous = NORMAL; PRAGMA temp_store = MEMORY;")
+            self.db_conn.executescript("PRAGMA synchronous = NORMAL; PRAGMA temp_store = MEMORY;")
             self.bus = SignalBus(self.db_conn)
         except Exception as e:
             logging.error("Database/SignalBus Initialization Failed: %s", e)
@@ -144,7 +145,7 @@ class CortexDaemon:
                 "timestamp": time.time(),
                 "agent": agent,
                 "command": cmd,
-                "exit_code": process.returncode if process.returncode is not None else -9,
+                "returncode": process.returncode if process.returncode is not None else -9,
                 "stdout": stdout.decode(errors="replace")[-1000:],  # Last 1k to avoid bloat
                 "stderr": stderr.decode(errors="replace")[-1000:],
             }

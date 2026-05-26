@@ -272,6 +272,7 @@ def test_enqueue_swarm_task_api_sync_failure_fallback(monkeypatch, tmp_path):
 
     # Mock urllib.request.urlopen to raise an error
     mock_urlopen = MagicMock(side_effect=URLError("Connection refused"))
+    monkeypatch.setenv("NEXUS_BEARER_TOKEN", "ya29.cortex_swarm_dispatcher")
 
     with patch("urllib.request.urlopen", mock_urlopen):
         payload = {"action": "clean"}

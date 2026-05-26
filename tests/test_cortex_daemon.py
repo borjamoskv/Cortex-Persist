@@ -16,6 +16,11 @@ import pytest
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "cortex-core"))
 
 import cortex_daemon
+print("IMPORTED CORTEX_DAEMON FROM:", cortex_daemon.__file__)
+try:
+    print("HAS THREADING:", cortex_daemon.threading)
+except AttributeError as e:
+    print("ERROR THREADING:", e)
 
 
 import sqlite3
@@ -46,9 +51,37 @@ class TestCortexDaemon:
 
         # Patch paths to use temp dir
         d.bus = MagicMock()
-        cortex_daemon.SWARM_QUEUE_FILE = str(tmp_path / "cortex_swarm_queue.json")
-        cortex_daemon.EXECUTION_LEDGER = str(tmp_path / "cortex_execution_ledger.json")
         cortex_daemon.PROJECT_ROOT = tmp_path
+
+        # Create schema for tests
+        conn = sqlite3.connect(test_db)
+        c = conn.cursor()
+        c.execute(
+            "CREATE TABLE IF NOT EXISTS cortex_knowledge (id INTEGER PRIMARY KEY, content TEXT)"
+        )
+        c.execute(
+            "CREATE TABLE IF NOT EXISTS cortex_swarm_queue (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp REAL, agent TEXT, payload TEXT, status TEXT)"
+        )
+        c.execute(
+            "CREATE TABLE IF NOT EXISTS cortex_execution_ledger (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp REAL, agent TEXT, command TEXT, returncode INTEGER, execution_time REAL)"
+        )
+        conn.commit()
+        conn.close()
+
+        # Create schema for tests
+        conn = sqlite3.connect(test_db)
+        c = conn.cursor()
+        c.execute(
+            "CREATE TABLE IF NOT EXISTS cortex_knowledge (id INTEGER PRIMARY KEY, content TEXT)"
+        )
+        c.execute(
+            "CREATE TABLE IF NOT EXISTS cortex_swarm_queue (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp REAL, agent TEXT, payload TEXT, status TEXT)"
+        )
+        c.execute(
+            "CREATE TABLE IF NOT EXISTS cortex_execution_ledger (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp REAL, agent TEXT, command TEXT, returncode INTEGER, execution_time REAL)"
+        )
+        conn.commit()
+        conn.close()
 
         # Create scratch dir
         (tmp_path / ".scratch").mkdir()
@@ -108,14 +141,19 @@ class TestCortexDaemon:
                 "echo", "success", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
             )
 
-            # Check if ledger was updated
-            assert os.path.exists(cortex_daemon.EXECUTION_LEDGER)
-            with open(cortex_daemon.EXECUTION_LEDGER) as f:
-                ledger = json.load(f)
+            # Check if ledger was updated in SQLite
+            conn = sqlite3.connect(cortex_daemon.DB_PATH)
+            c = conn.cursor()
+            c.execute("SELECT agent, command, returncode FROM cortex_execution_ledger")
+            ledger = c.fetchall()
+            conn.close()
+
+            print("LEDGER ENTRIES:", ledger)
 
             assert len(ledger) == 1
-            assert ledger[0]["stdout"] == "success"
-            assert ledger[0]["exit_code"] == 0
+            assert ledger[0][0] == "TEST"
+            assert ledger[0][1] == "echo 'success'"
+            assert ledger[0][2] == 0
 
     @pytest.mark.asyncio
     async def test_process_swarm_queue(self, daemon):

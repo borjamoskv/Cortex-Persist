@@ -1,0 +1,17 @@
+name: Sync Portfolio Data
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'data/portfolio.json'
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger agents-archi update
+        run: |
+          curl -X POST https://api.github.com/repos/borjamoskv/agents-archi/dispatches \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: Bearer ${{ secrets.PAT_TOKEN }}" \
+          -d '{"event_type": "portfolio-update"}'
