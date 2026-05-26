@@ -103,12 +103,16 @@ class ExergyAgentAdapter(SwarmAgent):
 
         import sys
         import os
-        cortex_core_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../cortex-core")
+
+        cortex_core_path = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "../../cortex-core"
+        )
         if cortex_core_path not in sys.path:
             sys.path.insert(0, cortex_core_path)
-            
+
         try:
             from persistence import get_swarm_metrics
+
             real_metrics = get_swarm_metrics()
         except ImportError:
             real_metrics = {

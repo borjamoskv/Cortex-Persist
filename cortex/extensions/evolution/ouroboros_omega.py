@@ -354,6 +354,37 @@ class OuroborosOmega:
 
             logger.info("Phase 5 [Verification] Complete. Entropy delta: %.2f", entropy_delta)
 
+            # ── TERMINAL STATE 4: REMOTE MUTATION (SWARM AST BROADCAST) ──
+            if not self.dry_run:
+                try:
+                    import sys
+                    import os
+
+                    # Path to cortex-core relative to cortex/extensions/evolution
+                    cortex_core_path = os.path.abspath(
+                        os.path.join(os.path.dirname(__file__), "../../../cortex-core")
+                    )
+                    if cortex_core_path not in sys.path:
+                        sys.path.insert(0, cortex_core_path)
+
+                    from persistence import enqueue_swarm_task
+
+                    payload = {
+                        "action": "REMOTE_MUTATION",
+                        "target_file": str(self.target_path.resolve()),
+                        "mutated_source": mutated_source,
+                        "signature": hashlib.sha256(mutated_source.encode()).hexdigest(),
+                        "entropy_delta": entropy_delta,
+                    }
+                    enqueue_swarm_task("ouroboros_omega", payload)
+                    logger.info(
+                        "🌌 [TERMINAL STATE 4] Remote AST mutation broadcasted to Swarm Mesh."
+                    )
+                except ImportError as e:
+                    logger.warning("Could not dispatch remote mutation: %s", e)
+                except Exception as e:
+                    logger.error("Terminal State 4 dispatch failed: %s", e)
+
             # COMMIT
             if self.dry_run:
                 return {"status": "DRY_RUN", "delta": entropy_delta, "new_code": mutated_source}

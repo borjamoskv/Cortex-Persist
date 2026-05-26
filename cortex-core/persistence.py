@@ -425,8 +425,8 @@ class ZeroCopyRingBuffer:
         self._mmap = mmap.mmap(self._f.fileno(), self.tensor_size)
         self._buffer = memoryview(self._mmap)
         self._lock = threading.Lock()
-            self._write_idx = 0
-            self._read_idx = 0
+        self._write_idx = 0
+        self._read_idx = 0
 
     def enqueue(self, agent_id: bytes, payload: bytes) -> bool:
         """O(1) Zero-copy memory write. Bypasses VSA OS locks."""
