@@ -139,9 +139,9 @@ class DiskSpaceCollector:
         try:
             usage = shutil.disk_usage(Path(target).parent)
             free_gb = usage.free / (1024**3)
-            if free_gb > 50:
+            if free_gb > 20:
                 val = 1.0
-            elif free_gb > 20:
+            elif free_gb > 10:
                 val = 0.8
             elif free_gb > 5:
                 val = 0.5

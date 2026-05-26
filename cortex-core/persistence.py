@@ -6,6 +6,10 @@ import asyncio
 import logging
 import sqlite3
 import fcntl
+import mmap
+import struct
+import tempfile
+import hmac
 
 VSA_DIMENSION = 10000
 DB_PATH = os.getenv(
@@ -13,8 +17,37 @@ DB_PATH = os.getenv(
     os.path.join(os.path.dirname(os.path.abspath(__file__)), "cortex_memory_vsa.db")
 )
 SWARM_QUEUE_FILE = "/tmp/cortex_swarm_queue.json"
+LEDGER_SECRET = os.getenv("CORTEX_LEDGER_SECRET", "default_sovereign_secret_2026")
 
 logger = logging.getLogger("cortex.persistence")
+
+
+class MMAPArray:
+    """Memory-mapped array wrapping double precision floats (float64) backed by a file."""
+    def __init__(self, mmap_obj, dimension):
+        self._mmap = mmap_obj
+        self._dim = dimension
+
+    def __getitem__(self, idx):
+        if idx < 0:
+            idx += self._dim
+        if not (0 <= idx < self._dim):
+            raise IndexError("VSA tensor index out of range")
+        return struct.unpack_from('d', self._mmap, idx * 8)[0]
+
+    def __setitem__(self, idx, val):
+        if idx < 0:
+            idx += self._dim
+        if not (0 <= idx < self._dim):
+            raise IndexError("VSA tensor index out of range")
+        struct.pack_into('d', self._mmap, idx * 8, float(val))
+
+    def __len__(self):
+        return self._dim
+
+    def __iter__(self):
+        for i in range(self._dim):
+            yield self[i]
 
 
 class ContextCache:
@@ -26,10 +59,21 @@ class ContextCache:
 
     def put(self, content_key: str, payload: dict):
         """Register payload with local timestamp for L1 state management."""
+        if not isinstance(content_key, str) or not content_key:
+            raise ValueError("content_key must be a non-empty string")
+        if not isinstance(payload, dict):
+            raise TypeError("payload must be a dict")
+        
+        # Proactive garbage collection to prevent memory footprint bloat
+        if len(self._cache) > 100:
+            self.gc()
+            
         self._cache[content_key] = {"payload": payload, "timestamp": time.time()}
 
     def get(self, content_key: str) -> dict:
         """Retrieve cached payload if it exists and falls within TTL window."""
+        if not isinstance(content_key, str) or not content_key:
+            raise ValueError("content_key must be a non-empty string")
         if content_key in self._cache:
             entry = self._cache[content_key]
             if time.time() - entry["timestamp"] < self._ttl:
@@ -37,6 +81,16 @@ class ContextCache:
             else:
                 del self._cache[content_key]
         return None
+
+    def gc(self):
+        """Remove expired entries from the L1 cache to optimize memory footprint."""
+        now = time.time()
+        expired_keys = [
+            k for k, entry in self._cache.items()
+            if now - entry["timestamp"] >= self._ttl
+        ]
+        for k in expired_keys:
+            del self._cache[k]
 
     def inject_anthropic_headers(self, message_blocks: list) -> list:
         """Inject ephemeral cache controls to optimize token pricing on Anthropic APIs."""
@@ -61,6 +115,8 @@ class LedgerManager:
         conn = None
         try:
             conn = sqlite3.connect(DB_PATH)
+            # Enable WAL mode for high concurrency
+            conn.execute("PRAGMA journal_mode=WAL;")
             c = conn.cursor()
             c.execute("""
                 CREATE TABLE IF NOT EXISTS ledger_records (
@@ -80,16 +136,32 @@ class LedgerManager:
                     content TEXT
                 )
             """)
+            c.execute("""
+                CREATE TABLE IF NOT EXISTS cortex_swarm_queue (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    timestamp REAL,
+                    agent TEXT,
+                    payload TEXT,
+                    status TEXT DEFAULT 'pending'
+                )
+            """)
             conn.commit()
         finally:
             if conn:
                 conn.close()
 
     def append(self, action: str, vector_id: str, yield_amount: float) -> str:
-        """Hash-chain new transaction to guarantee auditable tamper-evident history."""
+        """Hash-chain new transaction to guarantee auditable tamper-evident history with HMAC signatures."""
+        if not isinstance(action, str) or not action.strip():
+            raise ValueError("action must be a non-empty string")
+        if not isinstance(vector_id, str) or not vector_id.strip():
+            raise ValueError("vector_id must be a non-empty string")
+        if not isinstance(yield_amount, (int, float)):
+            raise TypeError("yield_amount must be numeric")
         conn = None
         try:
             conn = sqlite3.connect(DB_PATH)
+            conn.execute("PRAGMA journal_mode=WAL;")
             c = conn.cursor()
 
             # Get previous hash
@@ -99,7 +171,11 @@ class LedgerManager:
 
             timestamp = time.time()
             payload = f"{prev_hash}_{action}_{vector_id}_{yield_amount}_{timestamp}"
-            block_hash = hashlib.sha256(payload.encode("utf-8")).hexdigest()
+            block_hash = hmac.new(
+                LEDGER_SECRET.encode("utf-8"),
+                payload.encode("utf-8"),
+                hashlib.sha256
+            ).hexdigest()
 
             c.execute(
                 """
@@ -110,6 +186,32 @@ class LedgerManager:
             )
             conn.commit()
             return block_hash
+        finally:
+            if conn:
+                conn.close()
+
+    def verify_integrity(self) -> bool:
+        """Verify the integrity of the ledger chain by checking HMAC signatures."""
+        conn = None
+        try:
+            conn = sqlite3.connect(DB_PATH)
+            c = conn.cursor()
+            c.execute("SELECT timestamp, action, vector_id, yield_amount, hash FROM ledger_records ORDER BY id ASC")
+            rows = c.fetchall()
+            
+            prev_hash = "GENESIS_BLOCK"
+            for row in rows:
+                timestamp, action, vector_id, yield_amount, block_hash = row
+                payload = f"{prev_hash}_{action}_{vector_id}_{yield_amount}_{timestamp}"
+                expected_hash = hmac.new(
+                    LEDGER_SECRET.encode("utf-8"),
+                    payload.encode("utf-8"),
+                    hashlib.sha256
+                ).hexdigest()
+                if block_hash != expected_hash:
+                    return False
+                prev_hash = block_hash
+            return True
         finally:
             if conn:
                 conn.close()
@@ -136,12 +238,39 @@ class VSAMemory:
     """L2 Sovereign Vector Symbolic Architecture (VSA) Substrate & SQLite Semantic Knowledge Base."""
 
     def __init__(self):
-        self._tensor = [0.0] * VSA_DIMENSION
         self._decay_rate = 0.99
         self._daemon_task = None
+        
+        # Setup memory-mapped file for real VSA state space
+        vsa_file = os.getenv("CORTEX_VSA_FILE", "/tmp/cortex_vsa.bin")
+        os.makedirs(os.path.dirname(vsa_file), exist_ok=True)
+        
+        self._file_fd = os.open(vsa_file, os.O_RDWR | os.O_CREAT)
+        size = os.lseek(self._file_fd, 0, os.SEEK_END)
+        expected_size = VSA_DIMENSION * 8
+        if size < expected_size:
+            os.ftruncate(self._file_fd, expected_size)
+            os.lseek(self._file_fd, 0, os.SEEK_SET)
+            os.write(self._file_fd, b'\x00' * expected_size)
+            
+        self._mmap = mmap.mmap(self._file_fd, expected_size)
+        self._tensor = MMAPArray(self._mmap, VSA_DIMENSION)
+
+    def _read_idx(self, idx: int) -> float:
+        """Helper to read an index from the memory-mapped tensor."""
+        return self._tensor[idx]
+
+    def clear(self):
+        """Zero out the entire VSA memory-mapped state space."""
+        self._mmap.seek(0)
+        self._mmap.write(b'\x00' * (VSA_DIMENSION * 8))
 
     def record(self, key: str, value: str):
         """Map semantic trace to both RAM tensor and Persistent SQLite FTS5."""
+        if not isinstance(key, str) or not key:
+            raise ValueError("key must be a non-empty string")
+        if not isinstance(value, str):
+            raise TypeError("value must be a string")
         ctx_string = f"{key}:{value}"
         idx = int(hashlib.sha256(ctx_string.encode("utf-8")).hexdigest(), 16) % VSA_DIMENSION
         self._tensor[idx] += 1.0
@@ -167,8 +296,9 @@ class VSAMemory:
         while True:
             await asyncio.sleep(60)
             for i in range(VSA_DIMENSION):
-                if self._tensor[i] > 0.001:
-                    self._tensor[i] *= self._decay_rate
+                val = self._tensor[i]
+                if val > 0.001:
+                    self._tensor[i] = val * self._decay_rate
                 else:
                     self._tensor[i] = 0.0
 
@@ -197,43 +327,39 @@ class HybridPersistenceManager:
 
 
 def _enqueue_swarm_task_sync(agent_name: str, payload: dict):
-    """Synchronous core implementation of the Swarm Queue Dispatcher and NEXUS API sync."""
-    # Ensure queue file exists without race conditions or truncation
-    try:
-        with open(SWARM_QUEUE_FILE, "a"):
-            pass
-    except OSError:
-        pass
-
-    try:
-        with open(SWARM_QUEUE_FILE, "r+") as f:
-            try:
-                fcntl.flock(f.fileno(), fcntl.LOCK_EX)
-                content = f.read().strip()
-                if content:
-                    try:
-                        data = json.loads(content)
-                        if not isinstance(data, dict) or "pending_tasks" not in data:
-                            data = {"pending_tasks": []}
-                    except Exception:
-                        data = {"pending_tasks": []}
-                else:
-                    data = {"pending_tasks": []}
-
-                if not isinstance(data.get("pending_tasks"), list):
-                    data["pending_tasks"] = []
-
-                data["pending_tasks"].append(
-                    {"timestamp": time.time(), "agent": agent_name, "payload": payload}
+    """Synchronous core implementation of the Swarm Queue Dispatcher using SQLite WAL queue."""
+    import sqlite3
+    
+    payload_str = json.dumps(payload)
+    conn = None
+    for attempt in range(5):
+        try:
+            conn = sqlite3.connect(DB_PATH, timeout=5.0)
+            conn.execute("PRAGMA journal_mode=WAL;")
+            c = conn.cursor()
+            c.execute("""
+                CREATE TABLE IF NOT EXISTS cortex_swarm_queue (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    timestamp REAL,
+                    agent TEXT,
+                    payload TEXT,
+                    status TEXT DEFAULT 'pending'
                 )
-
-                f.seek(0)
-                json.dump(data, f, indent=2)
-                f.truncate()
-            finally:
-                fcntl.flock(f.fileno(), fcntl.LOCK_UN)
-    except Exception as e:
-        logger.error("Failed to enqueue swarm task: %s", e)
+            """)
+            c.execute("""
+                INSERT INTO cortex_swarm_queue (timestamp, agent, payload, status)
+                VALUES (?, ?, ?, 'pending')
+            """, (time.time(), agent_name, payload_str))
+            conn.commit()
+            break
+        except sqlite3.OperationalError as e:
+            if attempt == 4:
+                logger.error("Failed to write to SQLite queue: %s", e)
+            else:
+                time.sleep(0.05 * (attempt + 1))
+        finally:
+            if conn:
+                conn.close()
 
     # Centralized NEXUS API Task synchronization
     nexus_url = os.getenv("NEXUS_API_URL", "http://localhost:8600")
@@ -285,4 +411,3 @@ def enqueue_swarm_task(agent_name: str, payload: dict):
     except RuntimeError:
         pass
     _enqueue_swarm_task_sync(agent_name, payload)
-

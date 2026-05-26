@@ -37,11 +37,11 @@ class SystemLoadCollector:
             # Load > Cores means processes are waiting for CPU
             ratio = load_1m / cores
 
-            if ratio < 0.7:
+            if ratio < 1.5:
                 val = 1.0
-            elif ratio < 1.0:
+            elif ratio < 2.5:
                 val = 0.8
-            elif ratio < 1.5:
+            elif ratio < 4.0:
                 val = 0.5
             else:
                 val = 0.2
