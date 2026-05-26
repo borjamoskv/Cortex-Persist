@@ -32,6 +32,8 @@ class TestCortexDaemon:
     def daemon(self, tmp_path, monkeypatch):
         test_db = tmp_path / "test_cortex_memory_vsa.db"
         monkeypatch.setattr(cortex_daemon, "DB_PATH", str(test_db))
+        import persistence
+        monkeypatch.setattr(persistence, "DB_PATH", str(test_db))
 
         # Initialize the test SQLite schema
         conn = sqlite3.connect(str(test_db))
@@ -64,7 +66,7 @@ class TestCortexDaemon:
             "CREATE TABLE IF NOT EXISTS cortex_swarm_queue (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp REAL, agent TEXT, payload TEXT, status TEXT)"
         )
         c.execute(
-            "CREATE TABLE IF NOT EXISTS cortex_execution_ledger (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp REAL, agent TEXT, command TEXT, returncode INTEGER, execution_time REAL)"
+            "CREATE TABLE IF NOT EXISTS cortex_execution_ledger (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp REAL, agent TEXT, command TEXT, exit_code INTEGER, execution_time REAL)"
         )
         conn.commit()
         conn.close()
@@ -79,7 +81,7 @@ class TestCortexDaemon:
             "CREATE TABLE IF NOT EXISTS cortex_swarm_queue (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp REAL, agent TEXT, payload TEXT, status TEXT)"
         )
         c.execute(
-            "CREATE TABLE IF NOT EXISTS cortex_execution_ledger (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp REAL, agent TEXT, command TEXT, returncode INTEGER, execution_time REAL)"
+            "CREATE TABLE IF NOT EXISTS cortex_execution_ledger (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp REAL, agent TEXT, command TEXT, exit_code INTEGER, execution_time REAL)"
         )
         conn.commit()
         conn.close()
@@ -112,6 +114,7 @@ class TestCortexDaemon:
 
     def test_queue_task(self, daemon):
         daemon._queue_task("TEST_AGENT", "echo 'hello'")
+        import time; time.sleep(0.1)
 
         conn = sqlite3.connect(cortex_daemon.DB_PATH)
         c = conn.cursor()
@@ -145,7 +148,7 @@ class TestCortexDaemon:
             # Check if ledger was updated in SQLite
             conn = sqlite3.connect(cortex_daemon.DB_PATH)
             c = conn.cursor()
-            c.execute("SELECT agent, command, returncode FROM cortex_execution_ledger")
+            c.execute("SELECT agent, command, exit_code FROM cortex_execution_ledger")
             ledger = c.fetchall()
             conn.close()
 

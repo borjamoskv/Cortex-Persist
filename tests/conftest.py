@@ -69,6 +69,6 @@ def pytest_configure(config):
 
 def pytest_sessionfinish(session, exitstatus):
     """Force exit to prevent finalization hangs on leaked daemon threads."""
-    import os
-
-    os._exit(exitstatus)
+    pass
+    # import os
+    # os._exit(exitstatus)

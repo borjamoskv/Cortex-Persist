@@ -182,7 +182,7 @@ class CortexDaemon:
             logging.info("⚡ [EXEC] Success: %s (code %d)", agent, process.returncode)
 
         except Exception as e:
-            logging.error("Execution Crash for %s: %s", agent, e)
+            logging.error("Execution error for agent %s: %s", agent, e)
 
         logging.info("RESULT DICT: %s", result)
 

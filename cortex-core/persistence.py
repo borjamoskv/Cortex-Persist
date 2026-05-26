@@ -438,84 +438,85 @@ class OutboxDaemon:
                 "max_latency_seconds": round(latency, 4)
             }
 
-    async def _drain_loop(self):
+    def drain_once_sync(self):
+        """Synchronously drains a batch of pending tasks (primarily for tests and synchronous fallbacks)."""
         import urllib.request
         import urllib.error
 
+        try:
+            rows = self._fetch_pending_tasks()
+            if not rows:
+                return
+
+            nexus_url = os.getenv("NEXUS_API_URL", "http://localhost:8600")
+            parsed_url = urlparse(nexus_url)
+            if parsed_url.scheme not in ("https", "http") or (
+                parsed_url.scheme == "http"
+                and parsed_url.hostname not in ("localhost", "127.0.0.1")
+            ):
+                logger.error("SECURITY ALERT: Invalid NEXUS_API_URL scheme/host.")
+                return
+
+            nexus_token = os.getenv("NEXUS_BEARER_TOKEN")
+            if not nexus_token:
+                logger.error("SECURITY ALERT: NEXUS_BEARER_TOKEN missing.")
+                return
+
+            for row_id, agent_name, payload_str in rows:
+                try:
+                    payload_dict = json.loads(payload_str)
+                except json.JSONDecodeError:
+                    payload_dict = {}
+
+                caps_map = {
+                    "VulnerabilityFixer": ["security", "code"],
+                    "InvariantValidator": ["security", "code"],
+                    "SAGE_COUNCIL": ["intel", "research"],
+                    "OPTIMIZER": ["code"],
+                }
+
+                task_data = {
+                    "title": f"Swarm: {agent_name} Task",
+                    "description": payload_str,
+                    "required_capabilities": caps_map.get(agent_name, ["code"]),
+                    "reward": float(payload_dict.get("reward", 0.0))
+                    if isinstance(payload_dict, dict) and "reward" in payload_dict
+                    else 0.0,
+                    "delegator_id": "system",
+                }
+
+                req = urllib.request.Request(
+                    f"{nexus_url.rstrip('/')}/api/tasks",
+                    data=json.dumps(task_data).encode("utf-8"),
+                    headers={
+                        "Content-Type": "application/json",
+                        "Authorization": f"Bearer {nexus_token}",
+                    },
+                    method="POST",
+                )
+
+                try:
+                    resp = urllib.request.urlopen(req, timeout=2.0)
+                    if resp.status in (200, 201):
+                        self._update_task_status(row_id, "completed")
+                        logger.info("Outbox synced task: %s", task_data["title"])
+                    else:
+                        self._update_task_status(row_id, "failed")
+                except urllib.error.URLError as e:
+                    logger.warning("Outbox sync deferred (network error): %s", e)
+                    break  # Stop processing to wait for network recovery
+        except Exception as e:
+            logger.error("Outbox drainer error: %s", e)
+
+    async def _drain_loop(self):
         loop = asyncio.get_running_loop()
         while True:
             await asyncio.sleep(2)
             try:
-                # C5-REAL: Offload SQLite I/O to prevent event loop blocking
-                rows = await loop.run_in_executor(None, self._fetch_pending_tasks)
-                if not rows:
-                    continue
-
-                nexus_url = os.getenv("NEXUS_API_URL", "http://localhost:8600")
-                parsed_url = urlparse(nexus_url)
-                if parsed_url.scheme not in ("https", "http") or (
-                    parsed_url.scheme == "http"
-                    and parsed_url.hostname not in ("localhost", "127.0.0.1")
-                ):
-                    logger.error("SECURITY ALERT: Invalid NEXUS_API_URL scheme/host.")
-                    continue
-
-                nexus_token = os.getenv("NEXUS_BEARER_TOKEN")
-                if not nexus_token:
-                    logger.error("SECURITY ALERT: NEXUS_BEARER_TOKEN missing.")
-                    continue
-
-                for row_id, agent_name, payload_str in rows:
-                    try:
-                        payload_dict = json.loads(payload_str)
-                    except json.JSONDecodeError:
-                        payload_dict = {}
-
-                    caps_map = {
-                        "VulnerabilityFixer": ["security", "code"],
-                        "InvariantValidator": ["security", "code"],
-                        "SAGE_COUNCIL": ["intel", "research"],
-                        "OPTIMIZER": ["code"],
-                    }
-
-                    task_data = {
-                        "title": f"Swarm: {agent_name} Task",
-                        "description": payload_str,
-                        "required_capabilities": caps_map.get(agent_name, ["code"]),
-                        "reward": float(payload_dict.get("reward", 0.0))
-                        if isinstance(payload_dict, dict) and "reward" in payload_dict
-                        else 0.0,
-                        "delegator_id": "system",
-                    }
-
-                    req = urllib.request.Request(
-                        f"{nexus_url.rstrip('/')}/api/tasks",
-                        data=json.dumps(task_data).encode("utf-8"),
-                        headers={
-                            "Content-Type": "application/json",
-                            "Authorization": f"Bearer {nexus_token}",
-                        },
-                        method="POST",
-                    )
-
-                    try:
-                        resp = await loop.run_in_executor(
-                            None, lambda r=req: urllib.request.urlopen(r, timeout=2.0)
-                        )
-                        if resp.status in (200, 201):
-                            await loop.run_in_executor(
-                                None, self._update_task_status, row_id, "completed"
-                            )
-                            logger.info("Outbox synced task: %s", task_data["title"])
-                        else:
-                            await loop.run_in_executor(
-                                None, self._update_task_status, row_id, "failed"
-                            )
-                    except urllib.error.URLError as e:
-                        logger.warning("Outbox sync deferred (network error): %s", e)
-                        break  # Stop processing to wait for network recovery
+                # C5-REAL: Offload blocking drain operations to prevent event loop lag
+                await loop.run_in_executor(None, self.drain_once_sync)
             except Exception as e:
-                logger.error("Outbox drainer error: %s", e)
+                logger.error("Outbox drainer loop error: %s", e)
 
     def start_guardian(self):
         if self._daemon_task:

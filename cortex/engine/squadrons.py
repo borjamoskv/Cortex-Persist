@@ -171,6 +171,11 @@ class PhalanxBase(Squadron):
         if idx % 10 == 9:
             return NemesisAgentAdapter(agent_id, self.bus, self.engine)
 
+        # Evolución Exergética (TSI-Ω): 10% del enjambre es ExergyMaximizerAgent
+        if idx % 10 == 8:
+            from cortex.engine.exergy_agent import ExergyAgentAdapter
+            return ExergyAgentAdapter(agent_id, self.bus, self.engine)
+
         if idx < len(phalanx_agents):
             reg_id = phalanx_agents[idx]
             specs = self._get_agent_spec(reg_id)
