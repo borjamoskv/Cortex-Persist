@@ -17,7 +17,6 @@ class ExtractionStrategy(enum.Enum):
     AUTO = "auto"
     HTTP_FAST = "http_fast"
     JINA = "jina"
-    FIRECRAWL = "firecrawl"
     PLAYWRIGHT = "playwright"
 
 

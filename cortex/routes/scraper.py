@@ -74,8 +74,7 @@ async def scrape_url(body: ScrapeRequestBody) -> dict[str, Any]:
     except ValueError:
         raise HTTPException(  # noqa: B904
             status_code=400,
-            detail=f"Invalid strategy: {body.strategy}. "
-            f"Valid: auto, http_fast, jina, firecrawl, playwright",
+            detail=f"Invalid strategy: {body.strategy}. Valid: auto, http_fast, jina, playwright",
         )
 
     engine = ScraperEngine()

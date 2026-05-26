@@ -29,7 +29,7 @@ def scraper():
 @click.option(
     "--strategy",
     "-s",
-    type=click.Choice(["auto", "http_fast", "jina", "firecrawl", "playwright"]),
+    type=click.Choice(["auto", "http_fast", "jina", "playwright"]),
     default="auto",
     help="Extraction strategy.",
 )
@@ -123,7 +123,7 @@ def scrape(
 @click.option(
     "--strategy",
     "-s",
-    type=click.Choice(["auto", "http_fast", "jina", "firecrawl", "playwright"]),
+    type=click.Choice(["auto", "http_fast", "jina", "playwright"]),
     default="auto",
     help="Extraction strategy.",
 )

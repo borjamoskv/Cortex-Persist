@@ -16,13 +16,13 @@ ERR_PREFIX = "[ERROR]"
 # ==============================================================================
 # 0. CONFIGURACIÓN DURA (Zero-Trust)
 # ==============================================================================
-FIRECRAWL_API_KEY = os.getenv("FIRECRAWL_API_KEY")
+
 EXA_API_KEY = os.getenv("EXA_API_KEY")
 ASSEMBLYAI_API_KEY = os.getenv("ASSEMBLYAI_API_KEY")
 
 # Timeouts and Retries
 TIMEOUT_JINA = 8.0
-TIMEOUT_FIRECRAWL = 15.0
+
 TIMEOUT_EXA = 10.0
 TIMEOUT_ASSEMBLY = 20.0
 TIMEOUT_GIDATU = 45.0
@@ -51,28 +51,8 @@ async def fetch_jina_markdown(url: str) -> str:
 
 
 # ==============================================================================
-# 2. FIRECRAWL (Deep Crawl & Structure) -> Tier 🟢
+# 2. (REMOVED — Firecrawl purged. Jina + Playwright cover all cases.)
 # ==============================================================================
-@sovereign_circuit_breaker(timeout=TIMEOUT_FIRECRAWL, max_retries=RETRIES_STANDARD)
-async def fetch_firecrawl_deep(url: str, max_depth: int = DEFAULT_CRAWL_DEPTH) -> dict[str, Any]:
-    """Raspa recursivamente y estructura."""
-    logger.info("🟢 [FIRECRAWL] Deep Crawl: %s (Depth: %s)", url, max_depth)
-    if not FIRECRAWL_API_KEY:
-        raise ValueError("FIRECRAWL_API_KEY missing.")
-
-    endpoint = "https://api.firecrawl.dev/v1/crawl"
-    headers = {"Authorization": f"Bearer {FIRECRAWL_API_KEY}"}
-    payload = {
-        "url": url,
-        "maxDepth": max_depth,
-        "limit": DEFAULT_CRAWL_LIMIT,
-        "scrapeOptions": {"formats": ["markdown", "links"]},
-    }
-
-    async with httpx.AsyncClient() as client:
-        response = await client.post(endpoint, json=payload, headers=headers)
-        response.raise_for_status()
-        return response.json()
 
 
 # ==============================================================================
@@ -164,15 +144,9 @@ async def execute_cognitive_acquisition(intent_type: str, target: str) -> Any:
         if intent_type == "quick_read" and not is_youtube:
             return _unwrap(await fetch_jina_markdown(target))
         elif is_youtube and intent_type in ("quick_read", "deep_learn"):
-            res = _unwrap(await fetch_firecrawl_deep(target))
-            if isinstance(res, dict) and "data" in res and res["data"]:
-                return res["data"][0].get("markdown", str(res))
-            return str(res)
+            return _unwrap(await fetch_jina_markdown(target))
         if intent_type == "deep_learn":
-            res = _unwrap(await fetch_firecrawl_deep(target))
-            if isinstance(res, dict) and "data" in res and res["data"]:
-                return res["data"][0].get("markdown", str(res))
-            return str(res)
+            return _unwrap(await fetch_jina_markdown(target))
         if intent_type == "search_gap":
             res = _unwrap(await fetch_exa_search(target))
             if isinstance(res, str) and res.startswith("["):

@@ -25,12 +25,11 @@ def register_scraper_tools(mcp) -> None:
         - auto: Cascade through all strategies until one succeeds
         - http_fast: Direct HTTP + HTML-to-markdown (fastest, static pages)
         - jina: Jina Reader API (handles JS rendering server-side)
-        - firecrawl: Firecrawl API (deep extraction, requires API key)
         - playwright: Full browser rendering (heaviest, for complex SPAs)
 
         Args:
             url: The URL to scrape.
-            strategy: Extraction strategy (auto|http_fast|jina|firecrawl|playwright).
+            strategy: Extraction strategy (auto|http_fast|jina|playwright).
 
         Returns:
             Dict with url, title, content (markdown), hash, strategy_used, elapsed_ms.

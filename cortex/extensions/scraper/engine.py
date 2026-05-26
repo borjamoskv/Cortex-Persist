@@ -32,7 +32,7 @@ class ScraperEngine:
     """Sovereign Scraping Engine — orchestrates extraction strategies.
 
     Features:
-    - Automatic fallback cascade: HTTP → Jina → Firecrawl → Playwright
+    - Automatic fallback cascade: HTTP → Jina → Playwright
     - Content deduplication via SHA-256 hash
     - Rate limiting (configurable, default 1 req/sec)
     - Robots.txt compliance

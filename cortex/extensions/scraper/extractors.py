@@ -258,63 +258,6 @@ class JinaExtractor(BaseExtractor):
 
 
 # ==============================================================================
-# 3. Firecrawl Extractor (Tier 🟢 — deep crawl)
-# ==============================================================================
-
-
-class FirecrawlExtractor(BaseExtractor):
-    """Firecrawl API — deep extraction with JS rendering.
-
-    Requires FIRECRAWL_API_KEY environment variable.
-    """
-
-    FIRECRAWL_ENDPOINT = "https://api.firecrawl.dev/v1/scrape"
-
-    async def extract(self, url: str, timeout: float = 20.0) -> tuple[str, str]:
-        LOG.info("🟢 [FIRECRAWL] Extracting: %s", url)
-        import os
-
-        api_key = os.environ.get("FIRECRAWL_API_KEY")
-        if not api_key:
-            raise ExtractionError("FIRECRAWL_API_KEY not set")
-
-        headers = {
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json",
-        }
-        payload = {
-            "url": url,
-            "formats": ["markdown"],
-            "onlyMainContent": True,
-        }
-
-        try:
-            async with httpx.AsyncClient(timeout=timeout) as client:
-                response = await client.post(self.FIRECRAWL_ENDPOINT, json=payload, headers=headers)
-                response.raise_for_status()
-                data = response.json()
-
-                if not data.get("success"):
-                    raise ExtractionError(
-                        f"Firecrawl extraction unsuccessful: {data.get('error', 'unknown')}"
-                    )
-
-                result_data = data.get("data", {})
-                content = result_data.get("markdown", "")
-                title = result_data.get("metadata", {}).get("title", "")
-
-                if not content:
-                    raise ExtractionError("Firecrawl returned empty markdown")
-
-                return title, content
-
-        except httpx.HTTPStatusError as e:
-            raise ExtractionError(f"Firecrawl HTTP {e.response.status_code}") from e
-        except httpx.RequestError as e:
-            raise ExtractionError(f"Firecrawl network error: {e}") from e
-
-
-# ==============================================================================
 # 4. Playwright Extractor (Tier 🔴 — full browser rendering)
 # ==============================================================================
 
@@ -406,9 +349,8 @@ async def check_robots_txt(url: str, timeout: float = 5.0) -> bool:
 EXTRACTORS: dict[str, BaseExtractor] = {
     "http_fast": HttpExtractor(),
     "jina": JinaExtractor(),
-    "firecrawl": FirecrawlExtractor(),
     "playwright": PlaywrightExtractor(),
 }
 
 # Default cascade order for AUTO strategy
-CASCADE_ORDER = ["http_fast", "jina", "firecrawl", "playwright"]
+CASCADE_ORDER = ["http_fast", "jina", "playwright"]

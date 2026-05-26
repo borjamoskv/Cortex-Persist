@@ -25,7 +25,7 @@ class SovereignTriad:
         self.jina_key = os.getenv("JINA_API_KEY", "")
         self.exa_key = os.getenv("EXA_API_KEY", "")
         self.braintrust_key = os.getenv("BRAINTRUST_API_KEY", "")
-        self.firecrawl_key = os.getenv("FIRECRAWL_API_KEY", "")
+
         # Tiempos de colapso - la Red no tiene paciencia.
         self.timeout_s = 15.0
 
@@ -55,30 +55,6 @@ class SovereignTriad:
             except httpx.RequestError as e:
                 logger.error("JINA Request Timeout/Fail en '%s': %s", target_url, str(e))
                 return "[ERROR] Falla estructural (Red/Timeout) durante la Ingesta."
-
-    async def extract_url_firecrawl(self, target_url: str) -> str:
-        """
-        [Firecrawl] Extracción profunda a Markdown. Usa para ingestas pesadas.
-        """
-        if not self.firecrawl_key:
-            return "[ERROR] FIRECRAWL_API_KEY no detectada."
-
-        url = "https://api.firecrawl.dev/v0/scrape"
-        headers = {"Authorization": f"Bearer {self.firecrawl_key}"}
-        payload = {"url": target_url, "formats": ["markdown"]}
-
-        async with httpx.AsyncClient(timeout=self.timeout_s) as client:
-            try:
-                response = await client.post(url, headers=headers, json=payload)
-                response.raise_for_status()
-                data = response.json()
-                if data.get("success") and "markdown" in data.get("data", {}):
-                    return data["data"]["markdown"]
-                return "[ERROR] Firecrawl incompleto o bloqueado por JS."
-            except httpx.HTTPStatusError as e:
-                return f"[ERROR] Firecrawl Status {e.response.status_code}"
-            except httpx.RequestError as e:
-                return f"[ERROR] Firecrawl Fallo de red: {str(e)}"
 
     async def extract_url_exa(self, target_url: str) -> str:
         """

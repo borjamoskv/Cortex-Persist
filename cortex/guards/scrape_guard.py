@@ -3,7 +3,7 @@
 
 """CORTEX Sovereign Scrape Sanization Guard.
 
-Implements centralized validation for content scraped from external sources (e.g., Firecrawl).
+Implements centralized validation for content scraped from external sources.
 Addresses "Byzantine Default" and "Write-Path Contract" where generative or scraped data
 is strictly conjetura until validated.
 
@@ -21,7 +21,7 @@ logger = logging.getLogger("cortex.guards.scrape_guard")
 
 # O(1) Exergy limits
 MAX_RAW_PAGE_SIZE = 150_000  # Chars limit to prevent Memory DoS
-CORTEX_TAINT_SIGNATURE = "source_firecrawl_unverified"
+CORTEX_TAINT_SIGNATURE = "source_external_unverified"
 
 
 @dataclass(frozen=True)
@@ -37,7 +37,7 @@ class ScrapeSanitizerGuard:
     """Enforces structural entropy limits and sanitization on scraped HTML/Markdown."""
 
     # Fast regex to drop malicious attributes and executable blocks.
-    # Note: Firecrawl markdown renderer handles most, but this is a defensive fallback.
+    # Defensive fallback — strip residual executable vectors from any scraper output.
     _SCRIPT_RE = re.compile(r"<script.*?>.*?</script>", re.IGNORECASE | re.DOTALL)
     _IFRAME_RE = re.compile(r"<iframe.*?>.*?</iframe>", re.IGNORECASE | re.DOTALL)
     _ON_EVENT_RE = re.compile(r"\s+on[a-z]+\s*=\s*(?:\"[^\"]*\"|'[^']*')", re.IGNORECASE)

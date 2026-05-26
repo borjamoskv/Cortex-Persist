@@ -123,7 +123,7 @@ class ExecutorNode:
     """Executes knowledge crystallization via AUTODIDACT-Ω.
 
     For each planned task, invokes the autodidact pipeline to:
-    1. Fetch content (Jina/Firecrawl/Exa/AssemblyAI)
+    1. Fetch content (Jina/Exa/AssemblyAI/Playwright)
     2. Distill via Claude (synthesis.py)
     3. Index into L2 vector store
     """
