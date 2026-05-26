@@ -184,6 +184,8 @@ class CortexDaemon:
         except Exception as e:
             logging.error("Execution Crash for %s: %s", agent, e)
 
+        logging.info("RESULT DICT: %s", result)
+
     def _log_execution(self, result):
         """Appends task result to the persistent execution ledger via Sovereign SQLite."""
         try:
@@ -198,7 +200,7 @@ class CortexDaemon:
                         result.get("timestamp", time.time()),
                         result.get("agent", "unknown"),
                         result.get("command", ""),
-                        result.get("returncode", -1),
+                        result.get("exit_code", -1),
                         result.get("execution_time", 0.0),
                     ),
                 )

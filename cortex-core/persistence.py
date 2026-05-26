@@ -301,21 +301,24 @@ class HybridPersistenceManager:
 
 class OutboxDaemon:
     """Outbox Pattern Daemon: Asynchronously drains pending swarm tasks to NEXUS API."""
+
     def __init__(self, db_path: str):
         self._db_path = db_path
         self._daemon_task = None
-        
+
     async def _drain_loop(self):
         import urllib.request
         import urllib.error
-        
+
         while True:
             await asyncio.sleep(2)
             try:
                 conn = sqlite3.connect(self._db_path, timeout=10.0)
                 conn.execute("PRAGMA journal_mode=WAL;")
                 c = conn.cursor()
-                c.execute("SELECT id, agent, payload FROM cortex_swarm_queue WHERE status = 'pending' ORDER BY timestamp ASC LIMIT 50")
+                c.execute(
+                    "SELECT id, agent, payload FROM cortex_swarm_queue WHERE status = 'pending' ORDER BY timestamp ASC LIMIT 50"
+                )
                 rows = c.fetchall()
                 if not rows:
                     conn.close()
@@ -323,11 +326,14 @@ class OutboxDaemon:
 
                 nexus_url = os.getenv("NEXUS_API_URL", "http://localhost:8600")
                 parsed_url = urlparse(nexus_url)
-                if parsed_url.scheme not in ("https", "http") or (parsed_url.scheme == "http" and parsed_url.hostname not in ("localhost", "127.0.0.1")):
+                if parsed_url.scheme not in ("https", "http") or (
+                    parsed_url.scheme == "http"
+                    and parsed_url.hostname not in ("localhost", "127.0.0.1")
+                ):
                     logger.error("SECURITY ALERT: Invalid NEXUS_API_URL scheme/host.")
                     conn.close()
                     continue
-                
+
                 nexus_token = os.getenv("NEXUS_BEARER_TOKEN")
                 if not nexus_token:
                     logger.error("SECURITY ALERT: NEXUS_BEARER_TOKEN missing.")
@@ -339,37 +345,50 @@ class OutboxDaemon:
                         payload_dict = json.loads(payload_str)
                     except json.JSONDecodeError:
                         payload_dict = {}
-                    
+
                     caps_map = {
                         "VulnerabilityFixer": ["security", "code"],
                         "InvariantValidator": ["security", "code"],
                         "SAGE_COUNCIL": ["intel", "research"],
                         "OPTIMIZER": ["code"],
                     }
-                    
+
                     task_data = {
                         "title": f"Swarm: {agent_name} Task",
                         "description": payload_str,
                         "required_capabilities": caps_map.get(agent_name, ["code"]),
-                        "reward": float(payload_dict.get("reward", 0.0)) if isinstance(payload_dict, dict) and "reward" in payload_dict else 0.0,
+                        "reward": float(payload_dict.get("reward", 0.0))
+                        if isinstance(payload_dict, dict) and "reward" in payload_dict
+                        else 0.0,
                         "delegator_id": "system",
                     }
 
                     req = urllib.request.Request(
                         f"{nexus_url.rstrip('/')}/api/tasks",
                         data=json.dumps(task_data).encode("utf-8"),
-                        headers={"Content-Type": "application/json", "Authorization": f"Bearer {nexus_token}"},
-                        method="POST"
+                        headers={
+                            "Content-Type": "application/json",
+                            "Authorization": f"Bearer {nexus_token}",
+                        },
+                        method="POST",
                     )
 
                     loop = asyncio.get_running_loop()
                     try:
-                        resp = await loop.run_in_executor(None, lambda: urllib.request.urlopen(req, timeout=2.0))
+                        resp = await loop.run_in_executor(
+                            None, lambda r=req: urllib.request.urlopen(r, timeout=2.0)
+                        )
                         if resp.status in (200, 201):
-                            c.execute("UPDATE cortex_swarm_queue SET status = 'completed' WHERE id = ?", (row_id,))
+                            c.execute(
+                                "UPDATE cortex_swarm_queue SET status = 'completed' WHERE id = ?",
+                                (row_id,),
+                            )
                             logger.info("Outbox synced task: %s", task_data["title"])
                         else:
-                            c.execute("UPDATE cortex_swarm_queue SET status = 'failed' WHERE id = ?", (row_id,))
+                            c.execute(
+                                "UPDATE cortex_swarm_queue SET status = 'failed' WHERE id = ?",
+                                (row_id,),
+                            )
                     except urllib.error.URLError as e:
                         logger.warning("Outbox sync deferred (network error): %s", e)
                         break  # Stop processing to wait for network recovery
