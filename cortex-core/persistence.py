@@ -157,7 +157,7 @@ class VSAMemory:
             )
             conn.commit()
         except Exception as e:
-            logger.error(f"VSA SQLite Record Failure: {e}")
+            logger.error("VSA SQLite Record Failure: %s", e)
         finally:
             if conn:
                 conn.close()
@@ -233,7 +233,7 @@ def _enqueue_swarm_task_sync(agent_name: str, payload: dict):
             finally:
                 fcntl.flock(f.fileno(), fcntl.LOCK_UN)
     except Exception as e:
-        logger.error(f"Failed to enqueue swarm task: {e}")
+        logger.error("Failed to enqueue swarm task: %s", e)
 
     # Centralized NEXUS API Task synchronization
     nexus_url = os.getenv("NEXUS_API_URL", "http://localhost:8600")
@@ -270,9 +270,9 @@ def _enqueue_swarm_task_sync(agent_name: str, payload: dict):
         # Timeout at 1.0 second to ensure non-blocking dispatch
         with urllib.request.urlopen(req, timeout=1.0) as resp:
             if resp.status in (200, 201):
-                logger.info(f"Successfully sync'd task to NEXUS API: {task_data['title']}")
+                logger.info("Successfully sync'd task to NEXUS API: %s", task_data['title'])
     except Exception as e:
-        logger.warning(f"Could not sync task to NEXUS API (server offline/unreachable): {e}")
+        logger.warning("Could not sync task to NEXUS API (server offline/unreachable): %s", e)
 
 
 def enqueue_swarm_task(agent_name: str, payload: dict):
