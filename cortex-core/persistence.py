@@ -213,7 +213,7 @@ class LedgerManager(SovereignResource):
                 prev_hash = "GENESIS_BLOCK"
                 last_timestamp = 0.0
 
-            current_time = time.time()
+            current_time = time.monotonic()
             # L2 Sequencer Enforcement: Prevent rollback / Time-Jacking
             if current_time <= last_timestamp:
                 logger.warning(
@@ -227,7 +227,7 @@ class LedgerManager(SovereignResource):
             block_hash = hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
             # C5-REAL Cryptographic Vault Sealing (ZK-Proof / Inter-Nodal Trust)
-            zk_payload = f"{block_hash}_{action}_{timestamp}_CORTEX_L0".encode('utf-8')
+            zk_payload = f"{block_hash}_{action}_{timestamp}_CORTEX_L0".encode()
             zk_proof = self.private_key.sign(zk_payload).hex()
 
             c.execute(
@@ -306,33 +306,32 @@ class VSAMemory(SovereignResource):
 
     def record(self, key: str, value: str):
         """Map semantic trace to both RAM tensor and Persistent SQLite FTS5."""
+        ctx_string = f"{key}:{value}"
+        idx = int(hashlib.sha256(ctx_string.encode("utf-8")).hexdigest(), 16) % VSA_DIMENSION
+
         if self._substrate is not None:
             try:
-                self._substrate.record(key, value, DB_PATH)
+                self._substrate.record(key, value)
                 self._record_count += 1
                 if self._record_count >= 1000:
                     self._substrate.apply_decay(self._decay_rate)
                     self._record_count = 0
             except Exception as e:
                 logger.error("Rust VSA Record Failure: %s", e)
-            return
+        else:
+            # Zero-copy Silicon Direct Access
+            self._tensor[idx] += 1.0
 
-        ctx_string = f"{key}:{value}"
-        idx = int(hashlib.sha256(ctx_string.encode("utf-8")).hexdigest(), 16) % VSA_DIMENSION
-
-        # Zero-copy Silicon Direct Access
-        self._tensor[idx] += 1.0
-
-        self._record_count += 1
-        if self._record_count >= 1000:
-            # Metabolic decay: driven by operation volume (Exergy), not arbitrary clock time
-            self._apply_decay()
-            self._record_count = 0
+            self._record_count += 1
+            if self._record_count >= 1000:
+                # Metabolic decay: driven by operation volume (Exergy), not arbitrary clock time
+                self._apply_decay()
+                self._record_count = 0
 
         try:
             with self._lock:
                 c = self._conn.cursor()
-                ki_id = f"vsa_{int(time.time())}_{idx}"
+                ki_id = f"vsa_{int(time.monotonic())}_{idx}"
                 c.execute(
                     "INSERT OR REPLACE INTO cortex_knowledge (ki_id, summary, content) VALUES (?, ?, ?)",
                     (ki_id, key, value),
@@ -361,7 +360,7 @@ class IdeStatePreserver:
 
     def _execute_snapshot(self):
         os.makedirs(self.backup_dir, exist_ok=True)
-        timestamp = int(time.time())
+        timestamp = int(time.monotonic())
         archive_path = os.path.join(self.backup_dir, f"antigravity_state_{timestamp}.tar.gz")
 
         try:
@@ -419,7 +418,7 @@ class HybridPersistenceManager:
         self.l3 = LedgerManager()
         self.ring = ZeroCopyRingBuffer()  # L4 Zero-Copy Substrate
         self.ide_guardian = IdeStatePreserver(self.l3)
-        self.outbox = OutboxDaemon(DB_PATH)
+        self.outbox = OutboxDaemon(DB_PATH, ledger=self.l3)
         self.ide_guardian.start_guardian()
         self.outbox.start_guardian()
 
@@ -480,7 +479,7 @@ class ZeroCopyRingBuffer:
                 
             self._buffer[offset] = 1  # Pending
             import struct
-            struct.pack_into("d", self._buffer, offset + 1, time.time())
+            struct.pack_into("d", self._buffer, offset + 1, time.monotonic())
             
             agent_bytes = agent_id[:64].ljust(64, b"\x00")
             self._buffer[offset + 9 : offset + 73] = agent_bytes
@@ -519,14 +518,15 @@ class ZeroCopyRingBuffer:
 class OutboxDaemon(SovereignResource):
     """Outbox Pattern Daemon: Asynchronously drains pending swarm tasks to NEXUS API."""
 
-    def __init__(self, db_path: str):
-        self._db_path = db_path
+    def __init__(self, db_path: str | None = None, ledger: LedgerManager | None = None):
+        self._db_path = db_path if db_path is not None else DB_PATH
         self._daemon_task = None
         self._conn = sqlite3.connect(self._db_path, check_same_thread=False, timeout=10.0)
         _setup_sqlite_pragmas(self._conn)
         self._lock = threading.Lock()
         self._finalizer = weakref.finalize(self, self._safe_close, self._conn)
         atexit.register(self.close)
+        self.ledger = ledger
 
     def _fetch_pending_tasks(self):
         with self._lock:
@@ -565,7 +565,7 @@ class OutboxDaemon(SovereignResource):
             c.execute("SELECT MIN(timestamp) FROM cortex_swarm_queue WHERE status = 'pending'")
             oldest_pending = c.fetchone()[0]
 
-            latency = (time.time() - oldest_pending) if oldest_pending else 0.0
+            latency = (time.monotonic() - oldest_pending) if oldest_pending else 0.0
 
             return {
                 "pending_tasks": counts.get("pending", 0),
@@ -592,20 +592,6 @@ class OutboxDaemon(SovereignResource):
             if not rows:
                 return
 
-            nexus_url = os.getenv("NEXUS_API_URL", "http://localhost:8600")
-            parsed_url = urlparse(nexus_url)
-            if parsed_url.scheme not in ("https", "http") or (
-                parsed_url.scheme == "http"
-                and parsed_url.hostname not in ("localhost", "127.0.0.1")
-            ):
-                logger.error("SECURITY ALERT: Invalid NEXUS_API_URL scheme/host.")
-                return
-
-            nexus_token = os.getenv("NEXUS_BEARER_TOKEN")
-            if not nexus_token:
-                logger.error("SECURITY ALERT: NEXUS_BEARER_TOKEN missing.")
-                return
-
             for row_id, agent_name, payload_str in rows:
                 try:
                     payload_dict = json.loads(payload_str)
@@ -623,6 +609,8 @@ class OutboxDaemon(SovereignResource):
                         try:
                             # C5-REAL Vault Verification
                             if signature:
+                                if not self.ledger:
+                                    self.ledger = LedgerManager()
                                 is_valid = self.ledger.verify_zk_seal(new_source, signature)
                                 if not is_valid:
                                     logger.error(f"AST Mutation Rejected: Invalid C5-REAL ZK-Seal for {target_file}")
@@ -650,6 +638,22 @@ class OutboxDaemon(SovereignResource):
                             self._update_task_status(row_id, "failed")
                             continue
                 # -- END INTERCEPTOR --
+
+                nexus_url = os.getenv("NEXUS_API_URL", "http://localhost:8600")
+                parsed_url = urlparse(nexus_url)
+                if parsed_url.scheme not in ("https", "http") or (
+                    parsed_url.scheme == "http"
+                    and parsed_url.hostname not in ("localhost", "127.0.0.1")
+                ):
+                    logger.error("SECURITY ALERT: Invalid NEXUS_API_URL scheme/host.")
+                    self._update_task_status(row_id, "failed")
+                    continue
+
+                nexus_token = os.getenv("NEXUS_BEARER_TOKEN")
+                if not nexus_token:
+                    logger.error("SECURITY ALERT: NEXUS_BEARER_TOKEN missing.")
+                    self._update_task_status(row_id, "failed")
+                    continue
 
                 caps_map = {
                     "VulnerabilityFixer": ["security", "code"],
@@ -723,7 +727,7 @@ def _enqueue_swarm_task_sync(agent_name: str, payload: dict):
         c = conn.cursor()
         c.execute(
             "INSERT INTO cortex_swarm_queue (timestamp, agent, payload, status) VALUES (?, ?, ?, 'pending')",
-            (time.time(), agent_name, json.dumps(payload)),
+            (time.monotonic(), agent_name, json.dumps(payload)),
         )
         conn.commit()
         # Fire Zero-Latency Event to awaken the Outbox Daemon instantly

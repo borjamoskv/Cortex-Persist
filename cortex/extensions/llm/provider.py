@@ -17,6 +17,7 @@ import httpx
 
 from cortex.extensions.llm._audit import spectral_audit
 from cortex.extensions.llm._backoff import handle_429_backoff
+from cortex.extensions.llm._resilience import CircuitBreaker, resilient_call
 from cortex.extensions.llm._models import BaseProvider, CortexPrompt, IntentProfile
 from cortex.extensions.llm._presets import get_prefix_cache_config, load_presets
 from cortex.extensions.llm._result_cache import ResultCache
@@ -90,6 +91,7 @@ class LLMProvider(BaseProvider):
         timeout_val = float(os.environ.get("CORTEX_LLM_TIMEOUT", "120.0"))
         self._client = httpx.AsyncClient(timeout=timeout_val)
         self._semaphore = asyncio.Semaphore(100)
+        self._circuit_breaker = CircuitBreaker(provider_name=self._provider)
         logger.info(
             "LLM [READY] -> Provider: %s | Model: %s | URL: %s",
             self._provider,
@@ -264,31 +266,35 @@ class LLMProvider(BaseProvider):
         """Execute inference against Gemini's native API bypassing the OpenAI compatibility logic.
         Required because OpenAI compatibility endpoints do not support cachedContents mapping yet.
         """
-        await _get_quota_manager().acquire(tokens=1)
-        model_stripped = model_name.replace("models/", "")
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_stripped}:generateContent?key={self._api_key}"
 
-        headers = {"Content-Type": "application/json"}
-        payload = {
-            "cachedContent": remote_cache,
-            "contents": [{"role": "user", "parts": [{"text": prompt}]}],
-        }
+        async def _call():
+            model_stripped = model_name.replace("models/", "")
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_stripped}:generateContent?key={self._api_key}"
 
-        # O1/O3 handling skip, Gemini needs standard generation config
-        payload["generationConfig"] = {"temperature": temperature, "maxOutputTokens": max_tokens}
+            headers = {"Content-Type": "application/json"}
+            payload = {
+                "cachedContent": remote_cache,
+                "contents": [{"role": "user", "parts": [{"text": prompt}]}],
+            }
 
-        await apply_causal_jitter(tokens_estimate=50)
-        async with self._semaphore:
-            response = await self._client.post(url, headers=headers, json=payload)
+            # O1/O3 handling skip, Gemini needs standard generation config
+            payload["generationConfig"] = {
+                "temperature": temperature,
+                "maxOutputTokens": max_tokens,
+            }
 
-        try:
+            await apply_causal_jitter(tokens_estimate=50)
+            async with self._semaphore:
+                response = await self._client.post(url, headers=headers, json=payload)
             response.raise_for_status()
             data = response.json()
             raw_content = data["candidates"][0]["content"]["parts"][0]["text"]
             return sanitize_response(raw_content)
+
+        await _get_quota_manager().acquire(tokens=1)
+        try:
+            return await resilient_call(_call, self._provider, self._circuit_breaker)
         except httpx.HTTPStatusError as e:
-            if e.response.status_code == 429:
-                return await handle_429_backoff(self, url, headers, payload, e)
             logger.error("Native Gemini API Failure: %s", e.response.text[:500])
             raise ValueError(f"HTTP {e.response.status_code} from native Gemini") from e
 
@@ -296,11 +302,12 @@ class LLMProvider(BaseProvider):
         self, url: str, headers: dict[str, str], payload: dict[str, Any], wrap_errors: bool
     ) -> str:
         try:
-            return await self._execute_completion_raw(url, headers, payload)
+            return await resilient_call(
+                lambda: self._execute_completion_raw(url, headers, payload),
+                self._provider,
+                self._circuit_breaker,
+            )
         except httpx.HTTPStatusError as e:
-            if e.response.status_code == 429:
-                return await handle_429_backoff(self, url, headers, payload, e)
-
             logger.error(
                 "LLM API Failure [%s %s]: %s",
                 e.response.status_code,
@@ -377,24 +384,78 @@ class LLMProvider(BaseProvider):
             payload["max_tokens"] = max_tokens
 
         try:
-            async with self._semaphore:
-                async with self._client.stream(
-                    "POST", url, headers=headers, json=payload
-                ) as response:
-                    response.raise_for_status()
-                    async for chunk in self._process_stream_lines(response):
-                        yield chunk
-        except httpx.HTTPStatusError as e:
-            if e.response.status_code == 429:
-                # Fallback non-streaming call if throttled during stream start
-                # or handle backoff for the remaining stream (complex, using sequential for now)
-                logger.warning(
-                    "LLM Stream [429 Quota Exceeded] -> Falling back to resilient execution."
-                )
-                result = await handle_429_backoff(self, url, headers, payload, e)
-                yield result
-                return
+            # Phase 1: Establish the stream connection with resilience
+            async def _connect():
+                # We need to use a context manager here, but resilient_call expects a simple awaitable.
+                # So we enter the stream, and return the response object.
+                # However, the response object MUST be used within the same context or it will be closed.
+                # Instead, we'll wrap the iteration in a way that respects resilience on start.
+                pass
 
+            # Simplified: Resilience applies to the initial connection.
+            # Once connected, the stream is delivered.
+
+            last_exc = None
+            max_attempts = 3
+            yielded_any = False
+            for attempt in range(1, max_attempts + 1):
+                start_time = time.time()
+                try:
+                    async with self._circuit_breaker:
+                        async with self._semaphore:
+                            async with self._client.stream(
+                                "POST", url, headers=headers, json=payload
+                            ) as response:
+                                response.raise_for_status()
+                                latency = time.time() - start_time
+                                logger.info(
+                                    "LLM Stream [CONNECTED] -> Provider: %s | Latency: %.2fs | Attempt: %d",
+                                    self._provider,
+                                    latency,
+                                    attempt,
+                                )
+                                async for chunk in self._process_stream_lines(response):
+                                    yield chunk
+                                    yielded_any = True
+                                return  # Success, exit the retry loop
+                except Exception as e:
+                    from cortex.extensions.llm._resilience import CircuitBreakerError, is_retryable
+
+                    latency = time.time() - start_time
+                    last_exc = e
+
+                    if yielded_any:
+                        logger.error(
+                            "LLM Stream [FAIL-MIDSTREAM] -> Provider: %s | Error: %s. Cannot retry after partial yield.",
+                            self._provider,
+                            type(e).__name__,
+                        )
+                        raise
+
+                    if isinstance(e, CircuitBreakerError):
+                        raise
+                    if isinstance(e, httpx.HTTPStatusError) and e.response.status_code in (
+                        400,
+                        401,
+                        403,
+                    ):
+                        raise
+                    if not is_retryable(e) or attempt == max_attempts:
+                        raise
+
+                    delay = min(1.0 * (2 ** (attempt - 1)), 30.0)
+                    sleep_s = delay + (delay * 0.1 * random.uniform(-1, 1))
+                    logger.warning(
+                        "LLM Stream [RETRY] -> Provider: %s | Error: %s | Next try in %.2fs",
+                        self._provider,
+                        type(e).__name__,
+                        sleep_s,
+                    )
+                    await asyncio.sleep(sleep_s)
+            if last_exc:
+                raise last_exc
+
+        except httpx.HTTPStatusError as e:
             logger.error(
                 "LLM Stream Failure [%s]: %s",
                 self._provider,

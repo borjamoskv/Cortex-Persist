@@ -11,13 +11,15 @@ import json
 import logging
 import time
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, TypeAlias, TYPE_CHECKING
 
 import aiosqlite
 
-# We keep the core dataclasses here to avoid circular imports if auth.py uses this
-# But for now, let's assume those stay in auth.py and this file imports them if needed.
-# Actually, it's better if backends.py doesn't depend on auth.py's internal classes.
+if TYPE_CHECKING:
+    import asyncpg
+
+KeyData: TypeAlias = dict[str, Any]
+KeyID: TypeAlias = int | str
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +33,7 @@ class BaseAuthBackend(ABC):
         pass
 
     @abstractmethod
-    async def get_key_by_hash(self, key_hash: str) -> dict[str, Any] | None:
+    async def get_key_by_hash(self, key_hash: str) -> KeyData | None:
         """Retrieve an active API key by its hash."""
         pass
 
@@ -50,17 +52,17 @@ class BaseAuthBackend(ABC):
         pass
 
     @abstractmethod
-    async def list_keys(self, tenant_id: str | None = None) -> list[dict[str, Any]]:
+    async def list_keys(self, tenant_id: str | None = None) -> list[KeyData]:
         """List API keys, optionally filtered by tenant."""
         pass
 
     @abstractmethod
-    async def revoke_key(self, key_id: int | str) -> bool:
+    async def revoke_key(self, key_id: KeyID) -> bool:
         """Revoke (deactivate) an API key."""
         pass
 
     @abstractmethod
-    async def update_last_used(self, key_id: int | str) -> None:
+    async def update_last_used(self, key_id: KeyID) -> None:
         """Update the last_used timestamp for a key."""
         pass
 
@@ -71,7 +73,7 @@ class SQLiteAuthBackend(BaseAuthBackend):
     Uses aiosqlite to prevent event loop blocking.
     """
 
-    def __init__(self, db_path: str):
+    def __init__(self, db_path: str) -> None:
         self.db_path = db_path
 
     async def initialize(self) -> None:
@@ -89,7 +91,7 @@ class SQLiteAuthBackend(BaseAuthBackend):
 
         return await connect_async(self.db_path)
 
-    async def get_key_by_hash(self, key_hash: str) -> dict[str, Any] | None:
+    async def get_key_by_hash(self, key_hash: str) -> KeyData | None:
         conn = await self._get_conn_async()
         try:
             conn.row_factory = aiosqlite.Row
@@ -123,7 +125,7 @@ class SQLiteAuthBackend(BaseAuthBackend):
         finally:
             await conn.close()
 
-    async def list_keys(self, tenant_id: str | None = None) -> list[dict[str, Any]]:
+    async def list_keys(self, tenant_id: str | None = None) -> list[KeyData]:
         conn = await self._get_conn_async()
         try:
             conn.row_factory = aiosqlite.Row
@@ -139,7 +141,7 @@ class SQLiteAuthBackend(BaseAuthBackend):
         finally:
             await conn.close()
 
-    async def revoke_key(self, key_id: int | str) -> bool:
+    async def revoke_key(self, key_id: KeyID) -> bool:
         conn = await self._get_conn_async()
         try:
             cursor = await conn.execute("UPDATE api_keys SET is_active = 0 WHERE id = ?", (key_id,))
@@ -148,7 +150,7 @@ class SQLiteAuthBackend(BaseAuthBackend):
         finally:
             await conn.close()
 
-    async def update_last_used(self, key_id: int | str) -> None:
+    async def update_last_used(self, key_id: KeyID) -> None:
         from datetime import datetime, timezone
 
         conn = await self._get_conn_async()
@@ -170,16 +172,16 @@ class AlloyDBAuthBackend(BaseAuthBackend):
     Uses asyncpg for native asynchronous operations.
     """
 
-    def __init__(self, dsn: str):
+    def __init__(self, dsn: str) -> None:
         self.dsn = dsn
-        self._pool = None
+        self._pool: asyncpg.Pool | None = None
 
-    async def _get_pool(self):
+    async def _get_pool(self) -> asyncpg.Pool:
         import asyncpg
 
         if self._pool is None:
             self._pool = await asyncpg.create_pool(self.dsn)
-        return self._pool
+        return self._pool  # type: ignore[return-value]
 
     async def initialize(self) -> None:
         from cortex.auth import AUTH_SCHEMA
@@ -193,7 +195,7 @@ class AlloyDBAuthBackend(BaseAuthBackend):
         async with pool.acquire() as conn:
             await conn.execute(pg_schema)
 
-    async def get_key_by_hash(self, key_hash: str) -> dict[str, Any] | None:
+    async def get_key_by_hash(self, key_hash: str) -> KeyData | None:
         pool = await self._get_pool()
         async with pool.acquire() as conn:
             row = await conn.fetchrow(
@@ -229,9 +231,9 @@ class AlloyDBAuthBackend(BaseAuthBackend):
                 json.dumps(permissions),
                 rate_limit,
             )
-            return key_id
+            return key_id  # type: ignore[no-any-return]
 
-    async def list_keys(self, tenant_id: str | None = None) -> list[dict[str, Any]]:
+    async def list_keys(self, tenant_id: str | None = None) -> list[KeyData]:
         pool = await self._get_pool()
         async with pool.acquire() as conn:
             if tenant_id:
@@ -243,14 +245,14 @@ class AlloyDBAuthBackend(BaseAuthBackend):
                 rows = await conn.fetch("SELECT * FROM api_keys ORDER BY id DESC")
             return [dict(r) for r in rows]
 
-    async def revoke_key(self, key_id: int | str) -> bool:
+    async def revoke_key(self, key_id: KeyID) -> bool:
         pool = await self._get_pool()
         async with pool.acquire() as conn:
             res = await conn.execute("UPDATE api_keys SET is_active = 0 WHERE id = $1", key_id)
             # res is something like "UPDATE 1"
             return res.endswith("1")
 
-    async def update_last_used(self, key_id: int | str) -> None:
+    async def update_last_used(self, key_id: KeyID) -> None:
         from datetime import datetime, timezone
 
         pool = await self._get_pool()
@@ -261,7 +263,7 @@ class AlloyDBAuthBackend(BaseAuthBackend):
                 key_id,
             )
 
-    async def close(self):
+    async def close(self) -> None:
         """Close the connection pool."""
         if self._pool:
             await self._pool.close()
