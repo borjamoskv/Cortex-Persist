@@ -11,6 +11,8 @@ from typing import Any
 
 from pydantic import BaseModel
 
+from cortex.utils.void_vec import cosine_similarity
+
 
 class DoubtAlert(BaseModel):
     """Alert emitted when a Coherence Trap or high Epistemic Uncertainty is detected."""
@@ -94,7 +96,7 @@ class DoubtCircuit:
                 n_emb = n.get("embedding")
 
             if n_emb:
-                sim = self._cosine_similarity(target_emb, n_emb)
+                sim = cosine_similarity(target_emb, n_emb)
                 similarities.append(sim)
 
         if not similarities:
@@ -103,13 +105,3 @@ class DoubtCircuit:
         mean_sim = sum(similarities) / len(similarities)
         variance = sum((s - mean_sim) ** 2 for s in similarities) / len(similarities)
         return variance
-
-    def _cosine_similarity(self, a: list[float], b: list[float]) -> float:
-        if len(a) != len(b) or not a:
-            return 0.0
-        dot = sum(x * y for x, y in zip(a, b, strict=True))
-        norm_a = math.sqrt(sum(x * x for x in a))
-        norm_b = math.sqrt(sum(x * x for x in b))
-        if norm_a < 1e-12 or norm_b < 1e-12:
-            return 0.0
-        return dot / (norm_a * norm_b)

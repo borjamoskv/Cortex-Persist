@@ -9,11 +9,31 @@ Reduced exergy footprint for the Legion 10,000 swarm.
 from __future__ import annotations
 
 import ctypes
+import math
 import os
 
-import numpy as np
+from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
 
-__all__ = ["pack_void_bit", "void_hamming_dist", "void_similarity", "unpack_void_bit"]
+__all__ = [
+    "pack_void_bit",
+    "void_hamming_dist",
+    "void_similarity",
+    "unpack_void_bit",
+    "cosine_similarity",
+]
+
+
+def cosine_similarity(a: list[float] | None, b: list[float] | None) -> float:
+    """Cosine similarity between two vectors. O(d)."""
+    if not a or not b or len(a) != len(b):
+        return 0.0
+    dot = sum(x * y for x, y in zip(a, b, strict=False))
+    norm_a = math.sqrt(sum(x * x for x in a))
+    norm_b = math.sqrt(sum(x * x for x in b))
+    if norm_a < 1e-12 or norm_b < 1e-12:
+        return 0.0
+    return dot / (norm_a * norm_b)
+
 
 # Load Sovereign SIMD Accelerator
 _ACCEL_PATH = os.path.join(os.path.dirname(__file__), "void_accel.so")

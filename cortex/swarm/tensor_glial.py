@@ -8,7 +8,7 @@ import os
 import threading
 import time
 
-import numpy as np
+from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
 
 try:
     from numba import njit, prange

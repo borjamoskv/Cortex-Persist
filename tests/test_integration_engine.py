@@ -55,7 +55,7 @@ async def test_connection_pool_stability(engine):
     # This should complete without "Too many open connections" or pool timeouts
     scores = await asyncio.gather(*tasks)
     assert len(scores) == 100
-    assert all(isinstance(s, (int, float)) for s in scores)
+    assert all(isinstance(s, int | float) for s in scores)
 
 
 @pytest.mark.asyncio

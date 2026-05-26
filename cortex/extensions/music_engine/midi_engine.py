@@ -12,7 +12,7 @@ import random
 from dataclasses import dataclass, field
 from enum import Enum
 
-import numpy as np
+from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
 
 from cortex.extensions.music_engine._synth import (
     _note_to_freq,

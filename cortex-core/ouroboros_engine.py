@@ -1,17 +1,18 @@
 import os
-import os
 import asyncio
 import logging
 import re
 import sqlite3
 import time
 import json
+from pathlib import Path
 
 # CORTEX V5 Pulse Integration
 from cortex.extensions.signals.bus import SignalBus
 from cortex.config import DB_PATH
 
-SCRATCH_BASE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".scratch", "ouroboros")
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+SCRATCH_BASE = str(PROJECT_ROOT / ".scratch" / "ouroboros")
 FORGE_PATH = "forge" # Verified in path
 logger = logging.getLogger("cortex.ouroboros")
 
@@ -65,7 +66,7 @@ class OuroborosEngine:
                 if file.endswith(".sol") and "test" not in file.lower():
                     path = os.path.join(root, file)
                     try:
-                        with open(path, "r") as f:
+                        with open(path) as f:
                             content = f.read()
                             matches = re.findall(r"contract\s+(\w+)", content)
                             for m in matches:
@@ -178,7 +179,7 @@ contract {contract_name}OuroborosTest is Test {{
         try:
             queue = {"pending_tasks": []}
             if os.path.exists(queue_path):
-                with open(queue_path, "r") as f:
+                with open(queue_path) as f:
                     queue = json.load(f)
             
             remediator_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "remediator.py")
@@ -186,7 +187,7 @@ contract {contract_name}OuroborosTest is Test {{
                 "id": f"remed_{int(time.time())}",
                 "agent": "SURGEON-1",
                 "type": "remediation",
-                "command": f"python3 {remediator_path} {target_file} {log_file}",
+                "command": f"python3 {str(PROJECT_ROOT / 'cortex-core' / 'remediator.py')} {target_file} {log_file}",
                 "timestamp": time.time()
             })
             

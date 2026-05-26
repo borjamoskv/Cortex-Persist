@@ -60,7 +60,7 @@ def sanitize_response(text: str) -> str:
         scrubbed = re.sub(pattern, "", scrubbed).strip()
 
     # Remove common "apologetic" prefixes
-    _APOL = r"^(?i)(i apologize|i'm sorry|as an ai language model|as an ai).*?(\.|\!|\:)\s*"
+    _APOL = r"(?i)^(i apologize|i'm sorry|as an ai language model|as an ai).*?(\.|\!|\:)\s*"
     scrubbed = re.sub(_APOL, "", scrubbed)
     return scrubbed.strip()
 

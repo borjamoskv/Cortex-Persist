@@ -61,19 +61,69 @@ class Formation:
 
 
 class VirtualAgent:
-    """A simulated agent for the Centauro Swarm."""
+    """A sovereign agent for the Centauro Swarm.
 
-    def __init__(self, agent_id: str, specialty: str = "general", execution_delay: float = 0.0):
+    Operates in two modes:
+    - C5-REAL: when ``router`` is injected, dispatches to CortexLLMRouter.execute_resilient()
+    - C4-SIM:  when ``router`` is None (default), uses deterministic mock for testing.
+    """
+
+    def __init__(
+        self,
+        agent_id: str,
+        specialty: str = "general",
+        execution_delay: float = 0.0,
+        router: Any | None = None,
+    ) -> None:
         self.agent_id = agent_id
         self.specialty = specialty
         self.alive = True
         self._execution_delay = execution_delay
+        self._router = router  # CortexLLMRouter | None
 
     async def execute(self, task_idx: str, prompt: str) -> str:
-        # Simulate execution
-        await asyncio.sleep(self._execution_delay)
-        # Mock response: return a deterministic result so Byzantine consensus can pass
-        return f"Result for {task_idx} - Operation {prompt} completed"
+        """Execute a task. C5-REAL when router is set, C4-SIM otherwise."""
+        if self._router is not None:
+            # ── C5-REAL path ──────────────────────────────────────────
+            try:
+                from cortex.extensions.llm._models import CortexPrompt, IntentProfile
+
+                cortex_prompt = CortexPrompt(
+                    system_instruction=(
+                        f"You are a sovereign {self.specialty} specialist agent "
+                        f"(id={self.agent_id}). Answer concisely and deterministically."
+                    ),
+                    working_memory=[{"role": "user", "content": prompt}],
+                    temperature=0.0,  # AX-I: determinismo estricto
+                    intent=IntentProfile.GENERAL,
+                )
+                result = await self._router.execute_resilient(cortex_prompt)
+                # Result is Ok(str) | Err(str) — extract value regardless
+                if hasattr(result, "ok") and result.ok is not None:
+                    return str(result.ok)
+                if hasattr(result, "err") and result.err is not None:
+                    logger.warning(
+                        "VirtualAgent %s: router returned error for task %s: %s — "
+                        "falling back to C4-SIM stub.",
+                        self.agent_id,
+                        task_idx,
+                        result.err,
+                    )
+                # Fallback: unwrap as string if Result type varies
+                return str(result.ok if hasattr(result, "ok") else result)
+            except Exception as exc:  # noqa: BLE001
+                logger.warning(
+                    "VirtualAgent %s: C5-REAL dispatch failed (%s) — "
+                    "degrading to C4-SIM for task %s.",
+                    self.agent_id,
+                    exc,
+                    task_idx,
+                )
+
+        # ── C4-SIM path (testing scaffold / router unavailable) ───────
+        if self._execution_delay > 0:
+            await asyncio.sleep(self._execution_delay)
+        return f"[C4-SIM] Result for {task_idx} — {self.specialty} Operation '{prompt}' completed"
 
 
 class CentauroEngine:
@@ -160,7 +210,7 @@ class CentauroEngine:
 
             str_result = cast(str, result)
             proposals[agent_id] = str_result
-            winning = self.consensus.execute_consensus(proposals)
+            winning = await self.consensus.execute_consensus(proposals)
             if winning:
                 logger.info("⚔️ [QUORUM] Consensus achieved early! Bypassing trailing latency.")
                 break

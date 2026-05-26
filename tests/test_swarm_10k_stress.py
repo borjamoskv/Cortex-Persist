@@ -17,6 +17,10 @@ async def run_10k_stress():
     test_bus_dir.mkdir()
 
     commander = SwarmCommander(bus_path=test_bus_dir)
+    import sys
+
+    print(f"DEBUG: SwarmCommander module: {sys.modules['cortex.engine.swarm_10k'].__file__}")
+    print(f"DEBUG: SwarmCommander class: {SwarmCommander}")
     await commander.initialize()
 
     print(f"📡 Bus initialized with {commander.bus.num_shards} shards.")
@@ -45,10 +49,17 @@ async def run_10k_stress():
     else:
         print("💎 GRAVITY-WELL STABILITY CONFIRMED: 10k agents crystallized.")
 
+    print(f"Legions at teardown: {len(commander.legions)}")
     await commander.consolidate_and_annihilate()
     if test_bus_dir.exists():
         shutil.rmtree(test_bus_dir)
 
 
 if __name__ == "__main__":
-    asyncio.run(run_10k_stress())
+    try:
+        asyncio.run(run_10k_stress())
+    except Exception as e:
+        import traceback
+
+        print(f"❌ CRITICAL EXCEPTION IN MAIN: {e}")
+        traceback.print_exc()

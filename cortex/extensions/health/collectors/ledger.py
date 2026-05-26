@@ -45,7 +45,7 @@ class LedgerCollector:
             with connect(db_path, timeout=2.0) as conn:  # pyright: ignore
                 conn.row_factory = sqlite3.Row
                 try:
-                    cur = conn.execute("SELECT COUNT(*) as cnt FROM cortex_ledger")
+                    cur = conn.execute("SELECT COUNT(*) as cnt FROM transactions")
                     row = cur.fetchone()
                     count = row["cnt"] if row else 0
                     if count == 0:
@@ -54,7 +54,7 @@ class LedgerCollector:
                             value=0.5,
                             weight=self.weight,
                         )
-                    cur = conn.execute("SELECT hash FROM cortex_ledger ORDER BY rowid DESC LIMIT 1")
+                    cur = conn.execute("SELECT hash FROM transactions ORDER BY id DESC LIMIT 1")
                     last = cur.fetchone()
                     val = 1.0 if (last and last["hash"]) else 0.7
                     return MetricSnapshot(

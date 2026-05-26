@@ -31,7 +31,7 @@ else:
     _keyring_error_types = (_keyring_cls, OSError)
 
 
-def get_master_key() -> Optional[bytes]:
+def get_master_key() -> bytes | None:
     """Read the master key from the OS keychain or fallback to env var."""
     key_b64 = None
     if keyring is not None and not os.environ.get("CORTEX_TESTING"):

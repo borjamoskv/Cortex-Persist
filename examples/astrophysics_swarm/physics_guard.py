@@ -12,6 +12,7 @@ class EpistemicPhysicsGuard:
     Si el LLM alucina la física o si el data point rompe la entropía tolerada,
     el Guard aniquila la computación determinísticamente.
     """
+
     REQUIRED_COSMOLOGY_PARAMS = {"Omega_M", "Omega_Lambda", "H0"}
 
     @classmethod
@@ -24,24 +25,34 @@ class EpistemicPhysicsGuard:
 
         if ast_type == "singularity_anomaly":
             # Robotic telescope trigger validation (P0 Event horizon check)
-            print(f"[CORTEX Guard] Validando P0 Singularity. Trigger Z: {induced_ast.get('trigger_z')}")
+            print(
+                f"[CORTEX Guard] Validando P0 Singularity. Trigger Z: {induced_ast.get('trigger_z')}"
+            )
             z = induced_ast.get("trigger_z", 0.0)
-            if not isinstance(z, (int, float)) or z <= 50.0:
-                 raise ValueError(f"[Guard Failure] Falsa singularidad detectada con z={z}. Abortando inserción.")
+            if not isinstance(z, int | float) or z <= 50.0:
+                raise ValueError(
+                    f"[Guard Failure] Falsa singularidad detectada con z={z}. Abortando inserción."
+                )
             return True
 
         elif ast_type == "bayes_inference_model":
             params = set(induced_ast.get("parameters", []))
             if not cls.REQUIRED_COSMOLOGY_PARAMS.issubset(params):
                 missing = cls.REQUIRED_COSMOLOGY_PARAMS - params
-                raise ValueError(f"[Guard Failure] Modelo cosmológico incompleto. Faltan: {missing}")
+                raise ValueError(
+                    f"[Guard Failure] Modelo cosmológico incompleto. Faltan: {missing}"
+                )
 
             priors = induced_ast.get("priors", {})
             for param in cls.REQUIRED_COSMOLOGY_PARAMS:
                 if param not in priors:
-                    raise ValueError(f"[Guard Failure] Falta distribución a priori estructurada para: {param}")
+                    raise ValueError(
+                        f"[Guard Failure] Falta distribución a priori estructurada para: {param}"
+                    )
 
             return True
 
         else:
-            raise TypeError(f"[Guard Failure] Tipo de inducción estructural desconocido: {ast_type}")
+            raise TypeError(
+                f"[Guard Failure] Tipo de inducción estructural desconocido: {ast_type}"
+            )

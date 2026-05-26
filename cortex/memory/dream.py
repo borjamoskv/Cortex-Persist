@@ -30,6 +30,8 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import Any, Final
 
+from cortex.utils.void_vec import cosine_similarity
+
 logger = logging.getLogger("cortex.memory.dream")
 
 __all__ = ["AssociativeDreamEngine", "DreamResult"]
@@ -101,18 +103,6 @@ class SyntheticBridge:
 
 
 # ─── Utility Functions ────────────────────────────────────────────────
-
-
-def _cosine_similarity(a: list[float], b: list[float]) -> float:
-    """O(d) cosine similarity."""
-    if len(a) != len(b) or not a:
-        return 0.0
-    dot = sum(x * y for x, y in zip(a, b, strict=True))
-    norm_a = math.sqrt(sum(x * x for x in a))
-    norm_b = math.sqrt(sum(x * x for x in b))
-    if norm_a < 1e-12 or norm_b < 1e-12:
-        return 0.0
-    return dot / (norm_a * norm_b)
 
 
 def _compute_centroid(embeddings: list[list[float]]) -> list[float]:
@@ -249,7 +239,7 @@ class AssociativeDreamEngine:
         for j in range(i + 1, len(embs)):
             if j in assigned or not embs[j]:
                 continue
-            if _cosine_similarity(emb_a, embs[j]) >= self._cluster_threshold:
+            if cosine_similarity(emb_a, embs[j]) >= self._cluster_threshold:
                 members.append(j)
                 assigned.add(j)
         return members
@@ -290,7 +280,7 @@ class AssociativeDreamEngine:
                 ea = getattr(engrams[cluster_members[ci]], "embedding", [])
                 eb = getattr(engrams[cluster_members[cj]], "embedding", [])
                 if ea and eb:
-                    sims.append(_cosine_similarity(ea, eb))
+                    sims.append(cosine_similarity(ea, eb))
         return sum(sims) / len(sims) if sims else 0.0
 
     # ─── Phase 2: Redundancy Fusion ───────────────────────────────
@@ -351,7 +341,7 @@ class AssociativeDreamEngine:
             if id_b in to_delete:
                 continue
 
-            if _cosine_similarity(emb_a, emb_b) > 0.95:
+            if cosine_similarity(emb_a, emb_b) > 0.95:
                 to_delete.add(id_a if ts_a < ts_b else id_b)
 
     def _generate_bridges(self, clusters: list[SemanticCluster]) -> list[SyntheticBridge]:
@@ -383,7 +373,7 @@ class AssociativeDreamEngine:
         self, ca: SemanticCluster, cb: SemanticCluster
     ) -> SyntheticBridge | None:
         """Create a bridge hypothesis if semantic distance is in sweet spot."""
-        sim = _cosine_similarity(ca.centroid, cb.centroid)
+        sim = cosine_similarity(ca.centroid, cb.centroid)
         distance = 1.0 - sim
 
         if self._bridge_min <= distance <= self._bridge_max:

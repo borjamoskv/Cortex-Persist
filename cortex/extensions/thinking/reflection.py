@@ -77,8 +77,8 @@ def generate_reflection(
     engine: CortexEngine,
     project: str,
     summary: str,
-    errors: Optional[list[str]] = None,
-    decisions: Optional[list[str]] = None,
+    errors: list[str] | None = None,
+    decisions: list[str] | None = None,
     source: str = "auto-reflect",
 ) -> int:
     """Store a structured post-mortem reflection.
@@ -118,7 +118,7 @@ def generate_reflection(
 def inject_reflections(
     engine: CortexEngine,
     context_hint: str,
-    project: Optional[str] = None,
+    project: str | None = None,
     top_k: int = 5,
 ) -> list[InjectedLearning]:
     """Retrieve the top-K most relevant past learnings for system_prompt injection.
@@ -207,7 +207,7 @@ def format_injection_json(learnings: list[InjectedLearning]) -> str:
 def _hybrid_search_learnable(
     conn: sqlite3.Connection,
     query: str,
-    project: Optional[str],
+    project: str | None,
     top_k: int,
 ) -> list[dict]:
     """Hybrid search filtered to learnable fact types only.
@@ -241,7 +241,7 @@ def _build_type_filter_clause(
 def _semantic_arm(  # nosec B608 — parameterized query
     conn: sqlite3.Connection,
     query: str,
-    project: Optional[str],
+    project: str | None,
     top_k: int,
 ) -> list[dict]:
     """Semantic vector search arm."""
@@ -288,7 +288,7 @@ def _semantic_arm(  # nosec B608 — parameterized query
 def _text_arm(
     conn: sqlite3.Connection,
     query: str,
-    project: Optional[str],
+    project: str | None,
     top_k: int,
 ) -> list[dict]:
     """Full-text search arm via FTS5."""

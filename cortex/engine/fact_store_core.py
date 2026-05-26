@@ -26,7 +26,7 @@ async def _get_table_columns(conn: aiosqlite.Connection, table_name: str) -> set
 
 async def _prepare_fact_content(
     content: str, tenant_id: str
-) -> tuple[str, str, Optional[str], Optional[str]]:
+) -> tuple[str, str, str | None, str | None]:
     """Encrypted content and cryptographic signatures."""
     from cortex.crypto import get_default_encrypter
     from cortex.extensions.security.signatures import get_default_signer
@@ -52,8 +52,8 @@ async def _resolve_causal_parent(
     tenant_id: str,
     project: str,
     fact_type: str,
-    parent_decision_id: Optional[int],
-) -> Optional[int]:
+    parent_decision_id: int | None,
+) -> int | None:
     """Validate or auto-resolve the parent decision link."""
     if parent_decision_id is not None:
         async with conn.execute(
@@ -84,13 +84,13 @@ async def insert_fact_record(
     project: str,
     content: str,
     fact_type: str,
-    tags: Optional[list[str]],
+    tags: list[str] | None,
     confidence: str,
-    ts: Optional[str],
-    source: Optional[str],
-    meta: Optional[dict[str, Any]],
-    tx_id: Optional[int],
-    parent_decision_id: Optional[int] = None,
+    ts: str | None,
+    source: str | None,
+    meta: dict[str, Any] | None,
+    tx_id: int | None,
+    parent_decision_id: int | None = None,
 ) -> int:
     """Perform the actual SQL insert into the facts table."""
     ts = ts or now_iso()
@@ -155,10 +155,10 @@ async def _build_fact_payload(
     fact_type: str,
     meta: dict[str, Any],
     f_hash: str,
-    source: Optional[str],
+    source: str | None,
     confidence: str,
-    parent_decision_id: Optional[int],
-    tx_id: Optional[int],
+    parent_decision_id: int | None,
+    tx_id: int | None,
     tags_json: str,
     ts: str,
 ) -> list[tuple[str, Any]]:
@@ -230,7 +230,7 @@ async def _record_causality(
     project: str,
     tenant_id: str,
     meta: dict[str, Any],
-    parent_decision_id: Optional[int],
+    parent_decision_id: int | None,
 ) -> None:
     """Record causal linkage for the fact."""
     try:
@@ -262,12 +262,12 @@ async def _post_insert_actions(
     content: str,
     tenant_id: str,
     project: str,
-    tags: Optional[list[str]],
+    tags: list[str] | None,
     tags_json: str,
     fact_type: str,
     ts: str,
     meta: dict[str, Any],
-    parent_decision_id: Optional[int],
+    parent_decision_id: int | None,
 ) -> None:
     """Side effects: Enrichment jobs, Tags, FTS, Causality, and Graph."""
     try:
@@ -303,7 +303,7 @@ async def _post_insert_actions(
 
 
 async def resolve_causality_async(
-    conn: aiosqlite.Connection, project: str, meta: Optional[dict[str, Any]]
+    conn: aiosqlite.Connection, project: str, meta: dict[str, Any] | None
 ) -> dict[str, Any]:
     """Resolve causal linking for a fact asynchronously.
 
@@ -318,7 +318,7 @@ async def resolve_causality_async(
 
 
 def resolve_causality(
-    db_path: Optional[str], project: str, meta: Optional[dict[str, Any]]
+    db_path: str | None, project: str, meta: dict[str, Any] | None
 ) -> dict[str, Any]:
     """Resolve causal linking for a fact (sync)."""
     from cortex.engine.causality import CausalOracle, link_causality

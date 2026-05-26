@@ -36,16 +36,16 @@ class ChaosGate:
 
     name: str = "default_gate"
     is_active: bool = True
-    fail_after_n: Optional[int] = None
+    fail_after_n: int | None = None
     op_count: int = 0
-    scenario: Optional[ChaosScenario] = None
-    pending_scenario: Optional[ChaosScenario] = None
+    scenario: ChaosScenario | None = None
+    pending_scenario: ChaosScenario | None = None
 
     def arm(
         self,
         scenario: ChaosScenario,
         *,
-        after_n: Optional[int] = None,
+        after_n: int | None = None,
     ) -> None:
         """Arm the gate to explode. Instant or delayed."""
         self.pending_scenario = scenario

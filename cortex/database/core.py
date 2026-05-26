@@ -214,6 +214,7 @@ async def connect_async(
     db_path: str,
     *,
     read_only: bool = False,
+    uri: bool = False,
 ) -> aiosqlite.Connection:
     """Create a hardened async SQLite connection.
 
@@ -222,12 +223,11 @@ async def connect_async(
     Args:
         db_path: Path to the SQLite database file.
         read_only: If True, enforce query_only=1.
-
-    Returns:
-        A fully-configured aiosqlite.Connection.
+        uri: If True, allow URI filename parsing.
     """
+    is_uri = uri or db_path.startswith("file:")
     try:
-        conn = await aiosqlite.connect(db_path, timeout=5.0)
+        conn = await aiosqlite.connect(db_path, timeout=5.0, uri=is_uri)
     except sqlite3.OperationalError as e:
         if any(m in str(e).lower() for m in _LOCK_MARKERS):
             raise DBLockError(f"Async database lock timeout: {e}") from e
@@ -245,6 +245,7 @@ async def connect_async_ctx(
     db_path: str,
     *,
     read_only: bool = False,
+    uri: bool = False,
 ) -> AsyncIterator[aiosqlite.Connection]:
     """Context manager wrapping connect_async().
 
@@ -256,7 +257,7 @@ async def connect_async_ctx(
         async with connect_async_ctx("/path/to/db") as conn:
             await conn.execute("SELECT 1")
     """
-    conn = await connect_async(db_path, read_only=read_only)
+    conn = await connect_async(db_path, read_only=read_only, uri=uri)
     try:
         yield conn
     finally:

@@ -58,7 +58,7 @@ class SovereignOpacityLayer:
     def __init__(
         self,
         opacity_strategy: str = STRATEGY_HIGH,
-        session_id: Optional[str] = None,
+        session_id: str | None = None,
     ) -> None:
         self._strategy = opacity_strategy
         self._prover = ZKOrtexProver(session_id=session_id)
@@ -93,7 +93,7 @@ class SovereignOpacityLayer:
 
     # ─── Proof Emission ────────────────────────────────────────────────────────
 
-    def prove_knows_fact(self, fact_content: str) -> Optional[ZKMembershipProof]:
+    def prove_knows_fact(self, fact_content: str) -> ZKMembershipProof | None:
         """
         Genera una prueba de que CORTEX conoce `fact_content`.
 
@@ -110,7 +110,7 @@ class SovereignOpacityLayer:
             logger.warning("prove_knows_fact: fact not in sovereign knowledge set.")
             return None
 
-    def prove_count_in_range(self, min_count: int, max_count: int) -> Optional[ZKRangeProof]:
+    def prove_count_in_range(self, min_count: int, max_count: int) -> ZKRangeProof | None:
         """
         Prueba que el número de hechos conocidos ∈ [min_count, max_count].
         Solo disponible en MEDIUM o SELECTIVE strategy.
@@ -134,7 +134,7 @@ class SovereignOpacityLayer:
         self,
         fact_id: str,
         fact_content: str,
-        metadata: Optional[dict[str, str]] = None,
+        metadata: dict[str, str] | None = None,
     ) -> KnowledgeCommitment:
         """
         Emite un commitment al hecho (no el hecho en sí).
@@ -147,7 +147,7 @@ class SovereignOpacityLayer:
     # ─── Public Interface ──────────────────────────────────────────────────────
 
     @property
-    def public_root(self) -> Optional[str]:
+    def public_root(self) -> str | None:
         """El único identificador público del knowledge set de CORTEX."""
         try:
             return self._prover.public_root

@@ -51,7 +51,7 @@ class Autopoiesis:
     def generate_and_register(
         self,
         generator: Callable[[], str],
-        validator: Optional[Callable[[str], bool]] = None,
+        validator: Callable[[str], bool] | None = None,
     ) -> Path:
         """Generate a script, execute it, and register it if valid."""
         source = generator()

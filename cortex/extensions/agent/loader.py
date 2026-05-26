@@ -43,10 +43,10 @@ class AgentInstance:
         role: AgentRole,
         working_memory: WorkingMemoryL1,
         guardrail: SessionGuardrail,
-        art_gate: Optional[AdaptiveResonanceGate],
+        art_gate: AdaptiveResonanceGate | None,
         bift_router: BIFTRouter,
-        cms: Optional[ContinuousMemorySystem],
-        sparse_encoder: Optional[MushroomBodyEncoder],
+        cms: ContinuousMemorySystem | None,
+        sparse_encoder: MushroomBodyEncoder | None,
         vector_store: Any = None,
     ):
         self.role = role

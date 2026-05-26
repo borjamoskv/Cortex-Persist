@@ -9,13 +9,15 @@ import subprocess
 logger = logging.getLogger("mac_maestro.applescript")
 
 # Translation table for O(1) character escape
-_ESCAPE_TABLE = str.maketrans({
-    "\\": "\\\\",
-    '"': '\\"',
-    "\n": "\\n",
-    "\r": "\\r",
-    "\t": "\\t",
-})
+_ESCAPE_TABLE = str.maketrans(
+    {
+        "\\": "\\\\",
+        '"': '\\"',
+        "\n": "\\n",
+        "\r": "\\r",
+        "\t": "\\t",
+    }
+)
 
 # Regex to strip control characters (except those handled above)
 _CTRL_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
@@ -49,8 +51,7 @@ def run_applescript(script: str) -> str:
         )
         if result.returncode != 0:
             raise AppleScriptError(
-                f"osascript error (rc={result.returncode}): "
-                f"{result.stderr.strip()}"
+                f"osascript error (rc={result.returncode}): {result.stderr.strip()}"
             )
         return result.stdout.strip()
     except subprocess.TimeoutExpired as exc:
@@ -60,14 +61,10 @@ def run_applescript(script: str) -> str:
 def activate_app_by_name(app_name: str) -> str:
     """Activate an application by name."""
     safe_name = sanitize_applescript_string(app_name)
-    return run_applescript(
-        f'tell application "{safe_name}" to activate'
-    )
+    return run_applescript(f'tell application "{safe_name}" to activate')
 
 
 def open_url_in_safari(url: str) -> str:
     """Open a URL in Safari."""
     safe_url = sanitize_applescript_string(url)
-    return run_applescript(
-        f'tell application "Safari" to open location "{safe_url}"'
-    )
+    return run_applescript(f'tell application "Safari" to open location "{safe_url}"')

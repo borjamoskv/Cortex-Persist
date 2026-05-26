@@ -12,7 +12,7 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 
-# from cortex.database.core import connect as db_connect
+from cortex.database.core import connect as db_connect
 
 logger = logging.getLogger("cortex.extensions.swarm.budget")
 
@@ -47,7 +47,7 @@ class SwarmBudgetManager:
 
     def _init_db(self):
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
-        with sqlite3.connect(self.db_path, timeout=5) as conn:
+        with db_connect(str(self.db_path)) as conn:
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS mission_budget (
                     mission_id           TEXT PRIMARY KEY,
@@ -69,7 +69,7 @@ class SwarmBudgetManager:
 
         now = time.time()
         try:
-            with sqlite3.connect(self.db_path, timeout=5) as conn:
+            with db_connect(str(self.db_path)) as conn:
                 conn.execute(
                     """
                     INSERT INTO mission_budget
@@ -113,7 +113,7 @@ class SwarmBudgetManager:
     def get_mission_budget(self, mission_id: str) -> MissionBudget | None:
         """Retrieve current budget state for a mission."""
         try:
-            with sqlite3.connect(self.db_path) as conn:
+            with db_connect(str(self.db_path)) as conn:
                 row = conn.execute(
                     """SELECT mission_id, total_input_tokens, total_output_tokens,
                               total_cost_usd, request_count, last_update
@@ -129,7 +129,7 @@ class SwarmBudgetManager:
     def list_missions(self) -> list[MissionBudget]:
         """List all missions tracked in the budget database."""
         try:
-            with sqlite3.connect(self.db_path) as conn:
+            with db_connect(str(self.db_path)) as conn:
                 rows = conn.execute(
                     "SELECT * FROM mission_budget ORDER BY last_update DESC"
                 ).fetchall()

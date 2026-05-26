@@ -79,7 +79,7 @@ class GhostReaper:
 
     # ── Songlines Ghosts (filesystem xattrs) ───────────────────────
 
-    def reap_songlines_ghosts(self, root_dir: Optional[Path] = None) -> int:
+    def reap_songlines_ghosts(self, root_dir: Path | None = None) -> int:
         """Remove expired ghost traces from filesystem xattrs/manifests.
 
         Returns:

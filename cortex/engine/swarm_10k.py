@@ -363,6 +363,21 @@ class SwarmCommander:
             # Shannon compaction (only for persistent bus)
             await self.bus.gc(max_age_days=0, tenant_id=self.tenant_id)
 
+        # Cleanup L1 legions and L2 centurions to prevent shared memory leakage
+        unlinked_count = 0
+        closed_count = 0
+        for legion in self.legions.values():
+            for centurion in list(legion.centurions.values()):
+                if hasattr(centurion.bus, "unlink"):
+                    centurion.bus.unlink()
+                    unlinked_count += 1
+                elif hasattr(centurion.bus, "close"):
+                    centurion.bus.close()
+                    closed_count += 1
+            legion.centurions.clear()
+            legion._available_centurions.clear()
+        print(f"[ANNIHILATE] Unlinked: {unlinked_count}, Closed: {closed_count}")
+
         # Lifecycle cleanup
         if hasattr(self.bus, "close"):
             if isinstance(self.bus, ShardedAsyncSignalBus):

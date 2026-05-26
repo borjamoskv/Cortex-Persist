@@ -258,7 +258,7 @@ class FreeEnergyMonitor:
     Thread-safe. Uses the same CortexMetrics sync layer.
     """
 
-    def __init__(self, cortex_metrics: Optional[CortexMetrics] = None) -> None:
+    def __init__(self, cortex_metrics: CortexMetrics | None = None) -> None:
         self._metrics = cortex_metrics or CortexMetrics()
         self._history: list[dict[AgentDomain, FreeEnergyState]] = []
         self._max_history: int = 100

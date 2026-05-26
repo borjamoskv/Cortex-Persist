@@ -97,8 +97,8 @@ class LangbaseClient:
         method: str,
         path: str,
         *,
-        json_body: Optional[dict] = None,
-        timeout: Optional[float] = None,
+        json_body: dict | None = None,
+        timeout: float | None = None,
     ) -> dict:
         """Make an authenticated request to Langbase API."""
         try:
@@ -132,8 +132,8 @@ class LangbaseClient:
         name: str,
         messages: list[dict[str, str]],
         *,
-        thread_id: Optional[str] = None,
-        variables: Optional[list[dict[str, str]]] = None,
+        thread_id: str | None = None,
+        variables: list[dict[str, str]] | None = None,
     ) -> dict:
         """Run a Langbase Pipe (AI agent).
 
@@ -171,7 +171,7 @@ class LangbaseClient:
         description: str = "",
         model: str | None = None,
         system_prompt: str = "",
-        memory: Optional[list[dict]] = None,
+        memory: list[dict] | None = None,
     ) -> dict:
         """Create a new Pipe (AI agent).
 
@@ -255,7 +255,7 @@ class LangbaseClient:
         content: str,
         filename: str,
         *,
-        meta: Optional[dict] = None,
+        meta: dict | None = None,
     ) -> dict:
         """Upload a document to a Memory set.
 

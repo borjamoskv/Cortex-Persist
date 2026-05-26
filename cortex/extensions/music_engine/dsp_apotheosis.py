@@ -5,7 +5,7 @@ Capa determinista de procesamiento de señal en Python (Mastering, Tonal Balance
 
 import logging
 
-import numpy as np
+from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
 import pyloudnorm as pyln
 import scipy.signal
 

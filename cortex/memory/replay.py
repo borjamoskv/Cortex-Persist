@@ -57,7 +57,7 @@ class HippocampalReplay:
     async def replay_cycle(
         self,
         tenant_id: str,
-        hot_engrams: Optional[list] = None,
+        hot_engrams: list | None = None,
     ) -> ReplayResult:
         """Execute one replay cycle over HOT-tier engrams.
 

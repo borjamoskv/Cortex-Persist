@@ -1,5 +1,5 @@
 import asyncio
-from cortex.swarm.centauro_engine import CentauroEngine, Formation
+from cortex.extensions.swarm.centauro_engine import CentauroEngine, Formation
 
 async def run():
     engine = CentauroEngine()

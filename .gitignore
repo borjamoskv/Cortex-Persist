@@ -63,6 +63,9 @@ dist/
 build/
 .eggs/
 
+# ── Rust build artifacts ──────────────────────────
+**/target/
+
 # ── IDE & Editor ──────────────────────────────────
 .idea/
 .vscode/
@@ -118,6 +121,7 @@ Thumbs.db
 
 # ── Generated / Scratch ──────────────────────────
 .scratch/
+scratch/
 tmp/
 ouroboros-matrix/node_modules/
 engine-c5/fuzzer-cache/
@@ -271,3 +275,17 @@ xokas-elevator/
 yt-notebooklm-ext/
 auramem/
 nexus-dashboard/.next/
+
+# Local-only agent/multimedia directories (exergy triage)
+.snapshots/
+farandula_remix/
+cortex_rs/
+cortex_audit_ledger.jsonl
+
+# Local clones of audit/bounty targets
+engine-c5/targets/
+
+
+# Hardware simulation artifacts
+*.vcd
+*.vvp

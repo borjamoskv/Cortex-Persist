@@ -44,7 +44,7 @@ from typing import TYPE_CHECKING, Final
 if TYPE_CHECKING:
     from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
 
-import numpy as np
+from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
 
 __all__ = ["L2HybridSearch", "L2SearchResult"]
 

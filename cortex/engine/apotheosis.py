@@ -83,7 +83,7 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
     def __init__(
         self,
         workspace: Path,
-        cortex_engine: Optional[CortexEngine] = None,
+        cortex_engine: CortexEngine | None = None,
     ) -> None:
         self.workspace = workspace
         self.is_active = False

@@ -132,7 +132,7 @@ def _row_to_result(row: Any, is_fts: bool = False) -> SearchResult:
     )
 
 
-def _decrypt_row_content(content: Optional[str], tenant_id: str, enc: Any) -> str:
+def _decrypt_row_content(content: str | None, tenant_id: str, enc: Any) -> str:
     """Helper to decrypt fact content if prefixed."""
     if content and str(content).startswith(V6_PREFIX):
         try:

@@ -61,6 +61,54 @@ Before opening a PR:
 
 For schema, ledger, async, API, or trust-surface changes, follow the deep protocols in [`docs/CONTRIBUTING.md`](./docs/CONTRIBUTING.md).
 
+## Commit Message Standard
+
+All commits **must** follow [Conventional Commits](https://www.conventionalcommits.org/):
+
+```
+<type>(<scope>): <description>
+```
+
+### Allowed types
+
+`feat` · `fix` · `chore` · `refactor` · `docs` · `test` · `ci` · `build` · `perf` · `style` · `revert` · `release`
+
+### Rules
+
+| Rule | Constraint |
+|---|---|
+| Header max length | 100 chars |
+| Subject max length | 72 chars |
+| Subject case | lower-case or sentence-case |
+| Emoji in subject | **forbidden** |
+| Codenames in subject | **forbidden** (e.g. `VOID-MAX`, `Operation X`) |
+
+### Examples
+
+```bash
+# ✅ Good
+feat(pipeline): implement E2E orchestration layer
+fix(ci): make Trivy scan non-blocking
+refactor(search): modularize into vector, hybrid, text packages
+docs: add CODE_OF_CONDUCT.md
+
+# ❌ Bad — will be rejected by commitlint
+🚀 CORTEX Singularity Foundational Push
+Operation VOID-MAX — Silicon-Native SIMD
+Add GitHub Actions workflow for publishing to PyPI
+[WIP] Fix product foundation naming
+MEJORAlo v9.1 checkpoint: Inicio
+```
+
+### Enforcement
+
+Commit messages are validated by `commitlint` via `pre-commit` (commit-msg stage). Install hooks:
+
+```bash
+pre-commit install --hook-type commit-msg
+pre-commit install
+```
+
 ## Basic Contribution Rules
 
 - Preserve tenant-aware behavior in public data paths.

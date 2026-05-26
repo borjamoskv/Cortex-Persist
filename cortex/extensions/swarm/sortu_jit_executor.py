@@ -78,21 +78,25 @@ def _execute_sync(source_code: str, global_ctx: dict) -> dict:
         "TypeError": TypeError,
         "KeyError": KeyError,
         "IndexError": IndexError,
+        "__import__": __import__,
     }
 
     exec_globals = {"__builtins__": safe_builtins}
     exec_globals.update(global_ctx)
 
-    exec(compiled_code, exec_globals, local_env)
+    exec(compiled_code, exec_globals, local_env)  # noqa: S102
     return local_env
 
 
 def _worker(source_code: str, global_ctx: dict, result_dict: dict):
+    t0 = time.perf_counter()
+    result_dict["started_at"] = t0
     try:
         res = _execute_sync(source_code, global_ctx)
         # Avoid passing complex objects back via IPC
         result_dict["locals"] = list(res.keys())
         result_dict["status"] = "success"
+        result_dict["exec_time_ms"] = (time.perf_counter() - t0) * 1000
     except Exception as e:
         result_dict["status"] = "failed"
         result_dict["error"] = str(e)
@@ -100,7 +104,7 @@ def _worker(source_code: str, global_ctx: dict, result_dict: dict):
 
 async def run_jit_sandbox(source_code: str, timeout_ms: int = 50, global_ctx: dict = None) -> Any:
     """
-    Executes Python AST in a 50ms bounded memory-only sandbox.
+    Executes Python AST in a bounded memory-only sandbox.
     Uses multiprocessing to guarantee true OS-level termination and bypass GIL deadlocks.
     """
     ctx = global_ctx or {}
@@ -116,14 +120,32 @@ async def run_jit_sandbox(source_code: str, timeout_ms: int = 50, global_ctx: di
     p.start()
 
     # Await in a non-blocking way to keep event loop alive
-    # We poll every 5ms up to timeout_ms
-    max_iters = timeout_ms // 5
-    iters = 0
-    while p.is_alive() and iters < max_iters:
-        await asyncio.sleep(0.005)
-        iters += 1
+    # We allow up to 2.0 seconds for process spawn/initialization overhead
+    # and strictly enforce timeout_ms on actual execution
+    spawn_timeout = 2.0
+    exec_timeout = timeout_ms / 1000.0
 
-    if p.is_alive():
+    timeout_triggered = False
+    timeout_reason = ""
+
+    while p.is_alive():
+        now = time.perf_counter()
+        started_at = result_dict.get("started_at")
+
+        if started_at is None:
+            if now - start_time > spawn_timeout:
+                timeout_triggered = True
+                timeout_reason = f"Process failed to spawn within {spawn_timeout}s"
+                break
+        else:
+            if now - started_at > exec_timeout:
+                timeout_triggered = True
+                timeout_reason = f"Execution exceeded thermodynamic bounds ({timeout_ms}ms)"
+                break
+
+        await asyncio.sleep(0.005)
+
+    if p.is_alive() or timeout_triggered:
         p.terminate()
         p.join(timeout=0.1)
         if p.is_alive():
@@ -131,21 +153,27 @@ async def run_jit_sandbox(source_code: str, timeout_ms: int = 50, global_ctx: di
 
         elapsed = (time.perf_counter() - start_time) * 1000
         logger.error(
-            "⚡ [SORTU-JIT] Thermodynamic Timeout triggered (%.2fms). Process terminated via SIGKILL.",
-            elapsed,
+            "⚡ [SORTU-JIT] Thermodynamic Timeout triggered. Process terminated via SIGKILL. Reason: %s",
+            timeout_reason or "Subprocess ended unexpectedly or timed out",
         )
-        raise JITTimeoutException("Execution exceeded thermodynamic bounds (50ms)")
+        raise JITTimeoutException(timeout_reason or "Execution timed out")
 
     elapsed = (time.perf_counter() - start_time) * 1000
+    res_dict = dict(result_dict)
 
-    if dict(result_dict).get("status") == "success":
-        logger.info("⚡ [SORTU-JIT] Sovereign AST execution complete. Yield Time: %.2fms", elapsed)
+    if res_dict.get("status") == "success":
+        exec_time = res_dict.get("exec_time_ms", elapsed)
+        logger.info(
+            "⚡ [SORTU-JIT] Sovereign AST execution complete. Yield Time: %.2fms (Process Lifetime: %.2fms)",
+            exec_time,
+            elapsed,
+        )
         return {
             "status": "success",
-            "result": {"locals": result_dict["locals"]},
-            "time_ms": elapsed,
+            "result": {"locals": res_dict["locals"]},
+            "time_ms": exec_time,
         }
     else:
-        err = dict(result_dict).get("error", "Unknown Epistemic Failure")
+        err = res_dict.get("error", "Unknown Epistemic Failure")
         logger.error("⚡ [SORTU-JIT] Epistemic failure: %s", err)
         return {"status": "failed", "error": err}

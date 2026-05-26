@@ -11,11 +11,19 @@ repos:
       - id: ruff-format
         args: [--check]
 
+  - repo: https://github.com/alessandrojcm/commitlint-pre-commit-hook
+    rev: v9.18.0
+    hooks:
+      - id: commitlint
+        stages: [commit-msg]
+        additional_dependencies: ['@commitlint/config-conventional']
+
   - repo: local
     hooks:
       - id: cortex-fast-tests
         name: CORTEX Fast Tests
-        entry: python3 -m pytest tests/ -m "not slow" --tb=line -q --no-header
+        entry: .venv/bin/pytest
+        args: [tests/, -m, "not slow", --tb=line, -q, --no-header]
         language: system
         pass_filenames: false
         always_run: true

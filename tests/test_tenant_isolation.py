@@ -82,16 +82,17 @@ async def test_tenant_isolation_update_and_deprecate(engine):
     # Bob tries to update Alice's fact
     token_bob = tenant_id_var.set("tenant-bob")
     try:
-        updated_id = await engine.update(
-            fact_id=fact_id_alice, new_content="Bob hacked this", project="beta"
-        )
+        updated_id = await engine.update(fact_id=fact_id_alice, content="Bob hacked this")
         assert not updated_id, "Bob should not be able to update Alice's fact"
-    except Exception:
-        pass  # Depending on implementation it might raise or return None
+    except ValueError:
+        pass
 
-    # Verify Alice's fact is unchanged
+    # Bob tries to deprecate Alice's fact
+    deprecated = await engine.deprecate(fact_id=fact_id_alice)
+    assert not deprecated, "Bob should not be able to deprecate Alice's fact"
     tenant_id_var.reset(token_bob)
 
+    # Verify Alice's fact is unchanged
     token_alice = tenant_id_var.set("tenant-alice")
     alice_fact = await engine.get_fact(fact_id_alice)
     assert alice_fact.content == "Alice's initial draft"

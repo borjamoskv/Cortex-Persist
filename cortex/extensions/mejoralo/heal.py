@@ -59,7 +59,7 @@ def _add_finding_to_issues(file_issues: dict[str, list[str]], dim_name: str, fin
         file_issues.setdefault(rel_path, []).append(f"({dim_name}) {finding}")
 
 
-def _extract_path_from_finding(finding: str) -> Optional[str]:
+def _extract_path_from_finding(finding: str) -> str | None:
     """Extract file relative path from typical MEJORAlo findings."""
     if " -> " in finding or " → " in finding:
         return finding.split(":", 1)[0].strip()

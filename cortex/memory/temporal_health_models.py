@@ -10,7 +10,7 @@ import time
 from dataclasses import dataclass, field
 from typing import Literal
 
-import numpy as np
+from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
 
 __all__ = ["HealthTier", "SchedulerConfig", "HealthReport"]
 

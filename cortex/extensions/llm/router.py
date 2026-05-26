@@ -93,9 +93,29 @@ class CortexLLMRouter:
         if isinstance(prompt, IntentProfile):
             effective_intent = prompt
             reasoning_mode = None
+            estimated_tokens = 0
+            requires_frontier_coercion = False
         else:
             effective_intent = prompt.intent
             reasoning_mode = prompt.reasoning_mode
+
+            # Estimate prompt tokens (heuristic: 1 token = 3 chars)
+            system_instruction = getattr(prompt, "system_instruction", "") or ""
+            working_memory = getattr(prompt, "working_memory", []) or []
+            total_chars = len(system_instruction)
+            for msg in working_memory:
+                if isinstance(msg, dict) and "content" in msg:
+                    total_chars += len(str(msg["content"]))
+            estimated_tokens = (total_chars // 3) + (getattr(prompt, "max_tokens", 0) or 0)
+
+            # Check for verification terms (frontier coercion constraint)
+            prompt_text = system_instruction.lower()
+            for msg in working_memory:
+                if isinstance(msg, dict) and "content" in msg:
+                    prompt_text += " " + str(msg["content"]).lower()
+            requires_frontier_coercion = any(
+                term in prompt_text for term in ["anvil", "z3", "formal", "verify"]
+            )
 
         # Axiom Ω₁₆: If reasoning mode is DEEP_THINK, ULTRA_THINK, or DEEP_RESEARCH,
         # coerce the fallback intent to REASONING to select the right model map.
@@ -117,17 +137,25 @@ class CortexLLMRouter:
 
         # Axiom Ω₁₆: ULTRA_THINK strictly requires frontier models.
         if reasoning_mode == ReasoningMode.ULTRA_THINK:
-            typed_matches = [p for p in typed_matches if p.tier == "frontier"]
-            safety_net = [p for p in safety_net if p.tier == "frontier"]
+            frontier_typed = [p for p in typed_matches if p.tier == "frontier"]
+            frontier_safety = [p for p in safety_net if p.tier == "frontier"]
+            if frontier_typed or frontier_safety:
+                typed_matches = frontier_typed
+                safety_net = frontier_safety
+            # Else: Constraint relaxation (keep original typed_matches and safety_net)
 
         # Apply A-record promotion + cost/tier tiebreaking
         promoted_typed = self._promote_by_latency_then_cost(
             typed_matches,
             effective_intent,
+            estimated_tokens=estimated_tokens,
+            requires_frontier=requires_frontier_coercion,
         )
         promoted_safety = self._promote_by_latency_then_cost(
             safety_net,
             effective_intent,
+            estimated_tokens=estimated_tokens,
+            requires_frontier=requires_frontier_coercion,
         )
 
         return promoted_typed + promoted_safety
@@ -136,28 +164,54 @@ class CortexLLMRouter:
         self,
         providers: list[BaseProvider],
         intent: IntentProfile,
+        estimated_tokens: int = 0,
+        requires_frontier: bool = False,
     ) -> list[BaseProvider]:
         """A-record first (by latency), unknowns by (cost, tier)."""
         from cortex.config import LLM_LOCAL_FIRST
 
-        p_known = self._cascade.promote_known_good(providers, intent)
-        # promote_known_good: [known_good by latency] + [unknown]
-        known_count = sum(1 for p in p_known if self._cascade.get_a_record(p.provider_name))
-        known = p_known[:known_count]
-        unknown = p_known[known_count:]
+        # Partition providers by context window fit to handle constraint
+        fits_context: list[BaseProvider] = []
+        overflows_context: list[BaseProvider] = []
+        for p in providers:
+            p_window = getattr(p, "context_window", 128000)
+            if p_window and estimated_tokens > p_window:
+                overflows_context.append(p)
+            else:
+                fits_context.append(p)
 
-        # Dynamic tier order if local-first is active
-        tier_order = self._TIER_ORDER.copy()
-        if LLM_LOCAL_FIRST:
-            tier_order["local"] = -1  # Promote above frontier (0)
+        def process_group(group: list[BaseProvider]) -> list[BaseProvider]:
+            if not group:
+                return []
+            p_known = self._cascade.promote_known_good(group, intent)
+            # promote_known_good: [known_good by latency] + [unknown]
+            known_count = sum(1 for p in p_known if self._cascade.get_a_record(p.provider_name))
+            known = p_known[:known_count]
+            unknown = p_known[known_count:]
 
-        unknown.sort(
-            key=lambda p: (
-                self._COST_ORDER.get(p.cost_class, 4),
-                tier_order.get(p.tier, 2),
-            )
-        )
-        return known + unknown
+            # Dynamic tier order if local-first is active
+            tier_order = self._TIER_ORDER.copy()
+            if LLM_LOCAL_FIRST:
+                tier_order["local"] = -1  # Promote above frontier (0)
+
+            if requires_frontier:
+                unknown.sort(
+                    key=lambda p: (
+                        p.tier != "frontier",
+                        self._COST_ORDER.get(p.cost_class, 4),
+                        tier_order.get(p.tier, 2),
+                    )
+                )
+            else:
+                unknown.sort(
+                    key=lambda p: (
+                        self._COST_ORDER.get(p.cost_class, 4),
+                        tier_order.get(p.tier, 2),
+                    )
+                )
+            return known + unknown
+
+        return process_group(fits_context) + process_group(overflows_context)
 
     async def execute_hedged(self, prompt: CortexPrompt) -> Result[str, str] | None:
         """Attempt hedged (parallel) execution if peers are available."""
@@ -290,7 +344,7 @@ class CortexLLMRouter:
         return await self.execute_resilient(prompt)
 
     async def route(
-        self, prompt: CortexPrompt, provider_hint: Optional[str] = None
+        self, prompt: CortexPrompt, provider_hint: str | None = None
     ) -> Result[str, str]:
         """Dispatch a prompt with optional provider override (hint) and Dynamic Cache Routing.
 

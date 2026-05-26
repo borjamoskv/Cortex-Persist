@@ -325,10 +325,10 @@
     "cost_class": "free",
     "specialization": ["code", "reasoning", "general"],
     "intent_model_map": {
-      "code":      "qwen2.5-coder:32b",
-      "architect": "qwen2.5-coder:32b",
-      "reasoning": "qwen2.5-coder:32b",
-      "creative":  "llama3.3:latest",
+      "code":      "qwen2.5-coder:7b",
+      "architect": "qwen2.5-coder:7b",
+      "reasoning": "cortex-8b-solver-pro:latest",
+      "creative":  "llama3.2:latest",
       "general":   "qwen2.5-coder:7b"
     }
   },

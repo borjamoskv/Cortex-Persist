@@ -99,7 +99,7 @@ class ThreatFeedEngine:
     def __init__(
         self,
         data_dir: str = "~/.cortex",
-        hmac_key: Optional[str] = None,
+        hmac_key: str | None = None,
     ) -> None:
         self._data_dir = Path(data_dir).expanduser()
         self._feed_path = self._data_dir / "threat_intel.json"
@@ -334,7 +334,7 @@ class ThreatFeedEngine:
 
         return matches
 
-    def get_last_update(self) -> Optional[datetime]:
+    def get_last_update(self) -> datetime | None:
         """Get timestamp of last successful feed update."""
         if not self._feed_path.exists():
             return None

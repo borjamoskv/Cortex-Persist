@@ -70,7 +70,7 @@ class Tip:
     category: TipCategory
     lang: str = "en"
     source: str = "static"  # "static" | "memory" | "dynamic"
-    project: Optional[str] = None
+    project: str | None = None
     relevance: float = 1.0
 
     def format(self, *, with_category: bool = True) -> str:
@@ -82,7 +82,7 @@ class Tip:
 # ─── Static Tips Bank ────────────────────────────────────────────────
 
 _static_lock = threading.Lock()
-_STATIC_TIPS_CACHE: Optional[list[Tip]] = None
+_STATIC_TIPS_CACHE: list[Tip] | None = None
 
 
 def _load_static_tips() -> list[Tip]:
@@ -167,7 +167,7 @@ class TipsEngine:
 
     def __init__(
         self,
-        engine: Optional[CortexEngine] = None,
+        engine: CortexEngine | None = None,
         *,
         lang: str = "en",
         include_dynamic: bool = True,
@@ -185,7 +185,7 @@ class TipsEngine:
 
     # ─── Public API ──────────────────────────────────────────────
 
-    async def random(self, *, lang: Optional[str] = None, exclude_shown: bool = True) -> Tip:
+    async def random(self, *, lang: str | None = None, exclude_shown: bool = True) -> Tip:
         """Get a random tip. Avoids repeats until all tips have been shown."""
         pool = await self._get_pool(lang=lang or self.lang)
         return self._pick_from_pool(pool, exclude_shown=exclude_shown)
@@ -224,7 +224,7 @@ class TipsEngine:
         self,
         category: str | TipCategory,
         *,
-        lang: Optional[str] = None,
+        lang: str | None = None,
         limit: int = 5,
     ) -> list[Tip]:
         """Get tips for a specific category."""
@@ -240,7 +240,7 @@ class TipsEngine:
         return matching[:limit]
 
     async def for_project(
-        self, project: str, *, lang: Optional[str] = None, limit: int = 3
+        self, project: str, *, lang: str | None = None, limit: int = 3
     ) -> list[Tip]:
         """Get tips scoped to a specific project."""
         target_lang = lang or self.lang
@@ -256,7 +256,7 @@ class TipsEngine:
             result.extend(general_tips[:remaining])
         return result
 
-    async def all_tips(self, *, lang: Optional[str] = None) -> list[Tip]:
+    async def all_tips(self, *, lang: str | None = None) -> list[Tip]:
         """Return all available tips (static + dynamic)."""
         return await self._get_pool(lang=lang or self.lang)
 
@@ -271,7 +271,7 @@ class TipsEngine:
 
     # ─── Dynamic Tips from CORTEX Memory ─────────────────────────
 
-    async def _get_pool(self, lang: Optional[str] = None) -> list[Tip]:
+    async def _get_pool(self, lang: str | None = None) -> list[Tip]:
         """Get combined static + dynamic tip pool filtered by language."""
         target_lang = lang or self.lang
         static_tips = _load_static_tips()

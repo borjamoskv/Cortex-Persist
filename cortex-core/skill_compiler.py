@@ -2,16 +2,17 @@ import os
 import re
 import json
 
-SKILLS_DIR = "/Users/borjafernandezangulo/.gemini/antigravity/skills"
-TARGET_DIR = (
-    "/Users/borjafernandezangulo/Cortex-Persist/cortex-core/compiled_skills"
-)
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
+SKILLS_DIR = str(Path.home() / ".gemini" / "antigravity" / "skills")
+TARGET_DIR = str(PROJECT_ROOT / "cortex-core" / "compiled_skills")
 
 
 def parse_skill_markdown(filepath):
     """Parse skill markdown and extract metadata and body."""
     try:
-        with open(filepath, 'r', encoding='utf-8') as f:
+        with open(filepath, encoding='utf-8') as f:
             content = f.read()
     except Exception:
         return None

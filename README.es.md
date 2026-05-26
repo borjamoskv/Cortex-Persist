@@ -6,8 +6,8 @@
 
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
-[![CI](https://github.com/borjamoskv/Cortex-Persist/actions/workflows/ci.yml/badge.svg)](https://github.com/borjamoskv/Cortex-Persist/actions)
-[![Codecov](https://codecov.io/gh/borjamoskv/Cortex-Persist/branch/main/graph/badge.svg)](https://codecov.io/gh/borjamoskv/Cortex-Persist)
+[![CI](https://github.com/borjamoskv/cortex-persist/actions/workflows/ci.yml/badge.svg)](https://github.com/borjamoskv/cortex-persist/actions)
+[![Codecov](https://codecov.io/gh/borjamoskv/cortex-persist/branch/main/graph/badge.svg)](https://codecov.io/gh/borjamoskv/cortex-persist)
 
 CORTEX es una **capa de confianza (drop-in trust layer)** para la memoria de IA. Aplica integridad criptográfica sobre cualquier almacenamiento (Mem0, Zep, o personalizado), garantizando que el estado y las decisiones de los agentes permanezcan a prueba de manipulaciones y listos para auditorías.
 

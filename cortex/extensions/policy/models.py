@@ -23,7 +23,7 @@ class ActionItem:
         metadata: Extra context (cross-project deps, tags, etc.).
     """
 
-    fact_id: Optional[int]
+    fact_id: int | None
     project: str
     action_type: str
     description: str

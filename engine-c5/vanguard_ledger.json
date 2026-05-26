@@ -1,8 +1,8 @@
 {
   "layerzero": {
-    "last_seen": "2026-04-02T21:27:46.575829",
-    "status": "RESISTANT",
-    "details": "Fatal Python error: init_sys_streams: can't initialize sys standard streams\nPython runtime state: core initialized\nOSError: [Errno 9] Bad file descriptor\n\nCurrent thread 0x00000001f492b080 (most recent call first):\n  <no Python frame>"
+    "last_seen": "2026-05-25T22:36:33.224884",
+    "status": "FRACTURED",
+    "details": "calldata=0xe0f2c89100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000005525b8f0000000000000000000000000000000000000000000000000000000000000000 args=[1, 89283471 [8.928e7], 0]] testFuzz_ChaosExplosion(uint256,uint256,uint256) (runs: 0, \u03bc: 0, ~: 0)\n[22:36:33.219071] [C5-REAL] [CHAOS-FUZZER] -> EXERGY YIELD: Encontrada colisi\u00f3n matem\u00e1tica en /Users/borjafernandezangulo/Cortex-Persist/engine-c5/targets/layerzero. Seed: Unknown_Seed"
   },
   "stellar_endpoint_v2": {
     "last_seen": "2026-04-02T16:53:00.000000",
@@ -10,8 +10,13 @@
     "details": "1,000,000 iteration Chaos Burst COMPLETE."
   },
   "stargate": {
-    "last_seen": "2026-04-02T21:27:46.636372",
+    "last_seen": "2026-05-25T22:36:47.544419",
+    "status": "FRACTURED",
+    "details": "89100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000005525b8f0000000000000000000000000000000000000000000000000000000005525b8f args=[0, 89283471 [8.928e7], 89283471 [8.928e7]]] testFuzz_ChaosExplosion(uint256,uint256,uint256) (runs: 0, \u03bc: 0, ~: 0)\n[22:36:47.538128] [C5-REAL] [CHAOS-FUZZER] -> EXERGY YIELD: Encontrada colisi\u00f3n matem\u00e1tica en /Users/borjafernandezangulo/Cortex-Persist/engine-c5/targets/stargate. Seed: Unknown_Seed"
+  },
+  "sky": {
+    "last_seen": "2026-05-25T22:36:44.225626",
     "status": "RESISTANT",
-    "details": "Fatal Python error: init_sys_streams: can't initialize sys standard streams\nPython runtime state: core initialized\nOSError: [Errno 9] Bad file descriptor\n\nCurrent thread 0x00000001f492b080 (most recent call first):\n  <no Python frame>"
+    "details": "o Asalto Chaos en: /Users/borjafernandezangulo/Cortex-Persist/engine-c5/targets/sky (50000 ciclos)\n[22:36:35.952970] [L3-STRIKE] [CHAOS-FUZZER] Iniciando Chaos Engine sobre el Target F\u00edsico... (50000 ciclos)\n[22:36:44.219424] [C5-SUCCESS] [CHAOS-FUZZER] Silo termo-resistente. Ninguna invariante cedi\u00f3 ante la entrop\u00eda. (Forge ReturnCode: 0)\n[22:36:44.219493] [C5-REAL] [CHAOS-FUZZER] -> EXERGY YIELD: Target /Users/borjafernandezangulo/Cortex-Persist/engine-c5/targets/sky resisti\u00f3 la carga t\u00e9rmica."
   }
 }

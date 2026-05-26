@@ -85,7 +85,7 @@ class Fact:
 def _parse_json_blob(raw: object, fallback: object) -> object:
     if raw is None:
         return fallback
-    if isinstance(raw, (list, dict)):
+    if isinstance(raw, list | dict):
         return raw
     if isinstance(raw, str):
         try:

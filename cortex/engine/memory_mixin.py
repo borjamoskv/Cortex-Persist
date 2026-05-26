@@ -84,15 +84,21 @@ class MemoryMixin(EngineMixinBase):
             self._memory_l1 = l1
             self._memory_l3 = l3
             self._memory_ready = True
-            logger.info("Memory subsystem: partial (L1+L3) (optional L2 skipped: sqlite-vec unavailable)")
+            logger.info(
+                "Memory subsystem: partial (L1+L3) (optional L2 skipped: sqlite-vec unavailable)"
+            )
             return
 
-        if find_spec("numpy") is None:
+        try:
+            import numpy  # noqa: F401
+        except ImportError:
             self._memory_manager = None
             self._memory_l1 = l1
             self._memory_l3 = l3
             self._memory_ready = True
-            logger.info("Memory subsystem: partial (L1+L3) (optional L2 skipped: numpy not installed)")
+            logger.info(
+                "Memory subsystem: partial (L1+L3) (optional L2 skipped: numpy not installed)"
+            )
             return
 
         # 1. Dense L2: Sovereign (v6) Vector Store (SQLite-vec)
@@ -109,7 +115,7 @@ class MemoryMixin(EngineMixinBase):
 
             logger.info("Memory L2 (SovereignVectorStoreL2) initialized at %s", vector_path)
         except Exception as e:  # noqa: BLE001
-            if isinstance(e, (ImportError, ModuleNotFoundError)) or "numpy" in str(e).lower():
+            if isinstance(e, ImportError | ModuleNotFoundError) or "numpy" in str(e).lower():
                 l2_skip_reason = str(e)
             else:
                 logger.warning("Memory L2 unavailable (degrading to L1+L3 only): %s", e)
@@ -158,7 +164,9 @@ class MemoryMixin(EngineMixinBase):
         self._memory_ready = True
 
         if self._memory_manager:
-            logger.info("Memory subsystem: full (L1+L2+L3) (HDC: %s)", "active" if hdc_l2 else "inactive")
+            logger.info(
+                "Memory subsystem: full (L1+L2+L3) (HDC: %s)", "active" if hdc_l2 else "inactive"
+            )
         elif l2_skip_reason:
             logger.info(
                 "Memory subsystem: partial (L1+L3) (HDC: %s, optional L2 skipped: %s)",

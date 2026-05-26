@@ -107,7 +107,7 @@ async def execute_fallback(
     """Ejecuta el fallback hacia un modelo más estable si todo falla."""
     logger.warning(
         "LLM API [429 Quota Exceeded Final] on %s. Fallback to Open Code (Qwen Coder)...",
-        provider.model,  # pyright: ignore
+        provider.model_name,
     )
     if provider.provider_name == "qwen":
         raise original_error
@@ -118,7 +118,7 @@ async def execute_fallback(
     try:
         fb_url, fb_headers = fallback_provider._prepare_request()
         fb_payload = {
-            "model": fallback_provider.model,  # pyright: ignore
+            "model": fallback_provider.model_name,
             "messages": payload.get("messages", []),
             "temperature": payload.get("temperature", 0.3),
             "max_tokens": payload.get("max_tokens", 2048),

@@ -56,8 +56,8 @@ __all__ = [
 ]
 
 STACK_MARKERS = {
-    "node": "package.json",
     "python": "pyproject.toml",
+    "node": "package.json",
     "swift": "Package.swift",
 }
 
@@ -137,7 +137,7 @@ TOTAL_SCANNER_COUNT = 6  # Number of antipattern scanners
 
 # ─── Ghost Detection Constants ────────────────────────────────────
 GHOST_SIMILARITY_THRESHOLD = 0.80  # AST subtree hashes that match ≥80% = ghost
-GHOST_MIN_SUBTREE_SIZE = 5  # Minimum number of AST nodes in a subtree to check
+GHOST_MIN_SUBTREE_SIZE = 10  # Minimum number of AST nodes in a subtree to check
 GHOST_PENALTY_PER_FINDING = 8  # Score penalty per code ghost discovered
 
 # ─── CHRONOS-1 Yield Constants ─────────────────────────────────────
@@ -168,11 +168,16 @@ SKIP_DIRS = {
     "node_modules",
     "__pycache__",
     ".venv",
+    ".venv-audit",
     "venv",
     "dist",
     "build",
     ".next",
     ".svelte-kit",
+    ".vercel",
+    ".astro",
+    ".snapshots",
+    ".cortex",
     "vendor",
     ".pytest_cache",
     ".mypy_cache",
@@ -188,4 +193,9 @@ SKIP_DIRS = {
     "cortex-sovereign-web",
     "cortex_hive_ui",
     "sacrificial_project",
+    ".scratch",
+    "scratch",
+    ".scratch_debris",
+    "scratch_debris",
+    "migrations",
 }

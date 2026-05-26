@@ -27,6 +27,7 @@ import aiosqlite
 
 from cortex.core.paths import CORTEX_DB as DEFAULT_DB_PATH
 from cortex.database.core import connect_async_ctx
+from cortex.utils.void_vec import cosine_similarity
 
 logger = logging.getLogger("cortex.guards.contradiction")
 
@@ -272,20 +273,7 @@ def _classify_conflict(
     return conflict_type, base_score
 
 
-def _embedding_cosine_similarity(emb_a: list[float] | None, emb_b: list[float] | None) -> float:
-    """Compute cosine similarity between two embeddings.
-
-    Layer 4: Catches semantic contradictions that use different vocabulary.
-    Returns 0.0 if either embedding is missing (graceful degradation).
-    """
-    if not emb_a or not emb_b or len(emb_a) != len(emb_b):
-        return 0.0
-    dot = sum(a * b for a, b in zip(emb_a, emb_b, strict=False))
-    norm_a = sum(a * a for a in emb_a) ** 0.5
-    norm_b = sum(b * b for b in emb_b) ** 0.5
-    if norm_a < 1e-9 or norm_b < 1e-9:
-        return 0.0
-    return dot / (norm_a * norm_b)
+_embedding_cosine_similarity = cosine_similarity
 
 
 EMBEDDING_BOOST_WEIGHT = 0.3  # Max boost from embedding similarity
@@ -314,7 +302,7 @@ def _score_candidate(
         score *= 1.3
 
     # Layer 4: Embedding cosine similarity boost (Ω₁₃ upgrade)
-    cosine_sim = _embedding_cosine_similarity(new_embedding, existing_embedding)
+    cosine_sim = cosine_similarity(new_embedding, existing_embedding)
     if cosine_sim > 0.5:
         score += EMBEDDING_BOOST_WEIGHT * cosine_sim
 

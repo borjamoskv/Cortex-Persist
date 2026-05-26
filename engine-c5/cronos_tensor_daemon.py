@@ -14,8 +14,10 @@ Translates the cognitive request "think for 30 minutes about Cronos" into
 physical hardware exergy via Ebbinghaus exponential decay over the 10k agents VSA Tensor.
 """
 
+import os
+os.makedirs("/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/engine-c5", exist_ok=True)
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - CRONOS-Ω - %(message)s', handlers=[
-    logging.FileHandler("/Users/borjafernandezangulo/Cortex-Persist/engine-c5/cronos_glia.log"),
+    logging.FileHandler("/Users/borjafernandezangulo/10_PROJECTS/cortex-persist/engine-c5/cronos_glia.log"),
     logging.StreamHandler()
 ])
 

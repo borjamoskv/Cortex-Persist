@@ -55,3 +55,20 @@ def inject_test_master_key(monkeypatch):
     monkeypatch.setenv("CORTEX_TESTING", "1")
     # Base64 for 32 bytes of '0'
     monkeypatch.setenv("CORTEX_MASTER_KEY", "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA=")
+
+
+def pytest_configure(config):
+    """Optimize pytest collection and execution on macOS."""
+    import gc
+    import sys
+
+    sys.settrace(None)
+    sys.setprofile(None)
+    gc.freeze()
+
+
+def pytest_sessionfinish(session, exitstatus):
+    """Force exit to prevent finalization hangs on leaked daemon threads."""
+    import os
+
+    os._exit(exitstatus)

@@ -185,7 +185,7 @@ class AnomalyHunterEngine:
                 v1 = f1.meta.get("value") if isinstance(f1.meta, dict) else None
                 v2 = f2.meta.get("value") if isinstance(f2.meta, dict) else None
 
-                if isinstance(v1, (int, float)) and isinstance(v2, (int, float)) and v1 != 0:
+                if isinstance(v1, int | float) and isinstance(v2, int | float) and v1 != 0:
                     drift_pct = abs(v2 - v1) / abs(v1)
                     if drift_pct > 0.5:
                         drifts.append(

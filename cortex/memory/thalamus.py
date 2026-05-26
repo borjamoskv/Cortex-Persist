@@ -49,9 +49,9 @@ class ThalamusGate:
         project_id: str,
         tenant_id: str,
         fact_type: str = "general",
-        parent_decision_id: Optional[int] = None,
+        parent_decision_id: int | None = None,
         conn: Any = None,
-    ) -> tuple[bool, str, Optional[Any]]:
+    ) -> tuple[bool, str, Any | None]:
         """
         Determines if a fact should be encoded, merged, or discarded.
 
@@ -137,7 +137,7 @@ class ThalamusGate:
         self,
         proposals: list[dict],
         verifier: Any,
-    ) -> Optional[dict]:
+    ) -> dict | None:
         """
         Arbitrate conflicting proposals dynamically based on Bayesian Trust.
         Groups by content, sums trust scores for each content group,

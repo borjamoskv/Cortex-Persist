@@ -44,7 +44,7 @@ class ContextInference:
         5. Generate human-readable summary
     """
 
-    def __init__(self, conn: Optional[aiosqlite.Connection] = None):
+    def __init__(self, conn: aiosqlite.Connection | None = None):
         self.conn = conn
 
     def infer(self, signals: list[Signal]) -> InferenceResult:

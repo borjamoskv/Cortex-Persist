@@ -41,7 +41,7 @@ class SovereignSurgeon:
             return False
 
         try:
-            with open(self.target_file, "r") as f:
+            with open(self.target_file) as f:
                 content = f.read()
 
             new_content = content
@@ -110,7 +110,7 @@ if __name__ == "__main__":
     target = sys.argv[1]
     log_path = sys.argv[2]
     
-    with open(log_path, "r") as f:
+    with open(log_path) as f:
         log_content = f.read()
         
     surgeon = SovereignSurgeon(target, log_content)

@@ -28,7 +28,7 @@ class PlannerBackend(Protocol):
     async def decompose(
         self,
         intent: str,
-        context: Optional[dict[str, Any]] = None,
+        context: dict[str, Any] | None = None,
     ) -> list[dict[str, Any]]: ...
 
 
@@ -57,7 +57,7 @@ class Planner:
 
     def __init__(
         self,
-        backend: Optional[PlannerBackend] = None,
+        backend: PlannerBackend | None = None,
         model: str = "",
         source: str = "agent:vex",
     ) -> None:
@@ -68,7 +68,7 @@ class Planner:
     async def plan(
         self,
         intent: str,
-        context: Optional[dict[str, Any]] = None,
+        context: dict[str, Any] | None = None,
     ) -> TaskPlan:
         """Create a TaskPlan from a natural-language intent.
 

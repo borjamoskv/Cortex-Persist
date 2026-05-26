@@ -87,7 +87,8 @@ class LLMProvider(BaseProvider):
             supported = sorted(list(presets.keys()) + ["custom"])
             raise ValueError(f"Unknown LLM provider '{provider}'. Supported: {supported}")
 
-        self._client = httpx.AsyncClient(timeout=60.0)
+        timeout_val = float(os.environ.get("CORTEX_LLM_TIMEOUT", "120.0"))
+        self._client = httpx.AsyncClient(timeout=timeout_val)
         self._semaphore = asyncio.Semaphore(100)
         logger.info(
             "LLM [READY] -> Provider: %s | Model: %s | URL: %s",
@@ -420,6 +421,21 @@ class LLMProvider(BaseProvider):
 
     def _resolve_model(self, intent: IntentProfile) -> str:
         """Return the optimal model for the given intent."""
+        if self._provider == "vllm":
+            from pathlib import Path
+
+            registry_file = Path.home() / ".cortex" / "training" / "verified_adapter.json"
+            if registry_file.exists():
+                try:
+                    with open(registry_file, encoding="utf-8") as f:
+                        reg = json.load(f)
+                        if reg.get("status") == "verified":
+                            adapter_path = reg.get("adapter_path")
+                            if adapter_path:
+                                return adapter_path
+                except Exception as e:
+                    logger.warning("Failed to check verified adapter registry: %s", e)
+
         if self._intent_model_map:
             resolved = self._intent_model_map.get(intent, self._model)
             if resolved != self._model:

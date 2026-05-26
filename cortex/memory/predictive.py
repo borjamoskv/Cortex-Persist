@@ -45,7 +45,7 @@ class CoAccessGraph:
         # co_access[A][B] = weight (how often B follows A)
         self._edges: dict[str, dict[str, float]] = defaultdict(lambda: defaultdict(float))
         self._decay = decay_factor
-        self._last_accessed: Optional[str] = None
+        self._last_accessed: str | None = None
 
     def record_access(self, engram_id: str) -> None:
         """Record an access event, strengthening co-access edges."""
@@ -113,7 +113,7 @@ class AnticipatoryCache:
 
     def __init__(
         self,
-        co_access: Optional[CoAccessGraph] = None,
+        co_access: CoAccessGraph | None = None,
         prefetch_threshold: float = 0.3,
         max_prefetch: int = 5,
     ):
@@ -160,7 +160,7 @@ class AnticipatoryCache:
 
         return result
 
-    def get_cached(self, engram_id: str) -> Optional[object]:
+    def get_cached(self, engram_id: str) -> object | None:
         """Retrieve from anticipatory cache (O(1))."""
         return self._cache.get(engram_id)
 

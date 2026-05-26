@@ -37,7 +37,7 @@ class AsyncCortexClient:
     def __init__(
         self,
         base_url: str = "http://localhost:8484",
-        api_key: Optional[str] = None,
+        api_key: str | None = None,
         timeout: float = 30.0,
     ):
         self.base_url = base_url.rstrip("/")
@@ -136,9 +136,9 @@ class AsyncCortexClient:
         self,
         query: str,
         k: int = 5,
-        project: Optional[str] = None,
-        tags: Optional[list[str]] = None,
-        fact_type: Optional[str] = None,
+        project: str | None = None,
+        tags: list[str] | None = None,
+        fact_type: str | None = None,
     ) -> list[Fact]:
         """Semantic search. Returns ranked facts."""
         data: dict[str, Any] = {"query": query, "k": k}
@@ -167,7 +167,7 @@ class AsyncCortexClient:
         self,
         project: str,
         include_deprecated: bool = False,
-        limit: Optional[int] = None,
+        limit: int | None = None,
         offset: int = 0,
     ) -> list[Fact]:
         """Get facts for a project with optional pagination."""

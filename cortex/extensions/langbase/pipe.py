@@ -62,10 +62,10 @@ async def run_with_cortex_context(
     pipe_name: str,
     query: str,
     *,
-    project: Optional[str] = None,
+    project: str | None = None,
     top_k: int = 10,
-    thread_id: Optional[str] = None,
-    variables: Optional[list[dict[str, str]]] = None,
+    thread_id: str | None = None,
+    variables: list[dict[str, str]] | None = None,
 ) -> dict[str, Any]:
     """Run a Langbase Pipe with CORTEX memory as context.
 

@@ -50,7 +50,7 @@ class Episode:
     session_id: str
     event_type: str
     content: str
-    project: Optional[str]
+    project: str | None
     emotion: str
     tags: list[str]
     meta: dict[str, Any]

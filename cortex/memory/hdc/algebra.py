@@ -14,10 +14,16 @@ All operations use numpy int8 arrays for memory efficiency:
 
 from __future__ import annotations
 
-from typing import Final, Optional
+from typing import TYPE_CHECKING, Any, Final, Optional
 
-import numpy as np
-from numpy.typing import NDArray
+from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
+
+if TYPE_CHECKING:
+    from numpy.typing import NDArray
+
+    HVType = NDArray[np.int8]
+else:
+    HVType = Any
 
 __all__ = [
     "bind",
@@ -31,10 +37,9 @@ __all__ = [
 
 # Sovereign constants
 DEFAULT_DIM: Final[int] = 8000
-HVType = NDArray[np.int8]
 
 
-def random_bipolar(dim: int = DEFAULT_DIM, *, seed: Optional[int] = None) -> HVType:
+def random_bipolar(dim: int = DEFAULT_DIM, *, seed: int | None = None) -> HVType:
     """Generate a random bipolar hypervector (±1).
 
     Args:

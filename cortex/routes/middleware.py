@@ -127,7 +127,7 @@ class SelfHealingHook:
     """
 
     @staticmethod
-    def trigger(exc: BaseException, context: Optional[dict[str, Any]] = None) -> None:
+    def trigger(exc: BaseException, context: dict[str, Any] | None = None) -> None:
         """Record the failure and attempt lightweight recovery.
 
         This does NOT call the full MEJORAlo heal loop — it only logs and

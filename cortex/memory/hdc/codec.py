@@ -87,8 +87,8 @@ class HDCEncoder:
     def encode_fact(
         self,
         content: str,
-        fact_type: Optional[str] = None,
-        project_id: Optional[str] = None,
+        fact_type: str | None = None,
+        project_id: str | None = None,
     ) -> HVType:
         """Encode a full CORTEX fact with role and project bindings.
 

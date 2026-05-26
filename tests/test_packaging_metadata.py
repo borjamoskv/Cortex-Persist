@@ -39,7 +39,13 @@ def test_heavy_dependencies_live_in_optional_extras() -> None:
     assert _dependency_names(extras["embeddings"]) == {"sentence-transformers", "onnxruntime"}
     assert _dependency_names(extras["knowledge"]) == {"chromadb"}
     assert _dependency_names(extras["acceleration"]) == {"numba"}
-    assert _dependency_names(extras["api"]) >= {"fastapi", "uvicorn", "httpx", "sse-starlette", "email-validator"}
+    assert _dependency_names(extras["api"]) >= {
+        "fastapi",
+        "uvicorn",
+        "httpx",
+        "sse-starlette",
+        "email-validator",
+    }
     assert _dependency_names(extras["mcp"]) == {
         "mcp",
         "aiohttp",
@@ -51,7 +57,9 @@ def test_heavy_dependencies_live_in_optional_extras() -> None:
     assert _dependency_names(extras["platform"]) >= {"pyobjc-core", "pyobjc-framework-Cocoa"}
     assert _dependency_names(extras["authoring"]) == {"PyYAML"}
     assert extras["all"] == [
-        "cortex-persist[api,mcp,daemon,platform,authoring,dev,adk,toolbox,billing,cloud,trends,embeddings,knowledge,acceleration]"
+        "cortex-persist[compute,secure,api,mcp,daemon,platform,authoring,dev,adk,toolbox,billing,cloud,trends,embeddings,knowledge,acceleration]"
     ]
 
-    assert (Path(__file__).resolve().parents[1] / "cortex" / "cli" / "assets" / "tips.json").exists()
+    assert (
+        Path(__file__).resolve().parents[1] / "cortex" / "cli" / "assets" / "tips.json"
+    ).exists()

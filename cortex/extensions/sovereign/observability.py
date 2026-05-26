@@ -160,7 +160,7 @@ def init_telemetry(service_name: str = "cortex-sovereign") -> None:
         logger.warning("OpenTelemetry packages not installed — running without telemetry")
 
 
-_latest_power: Optional[PowerLevel] = None
+_latest_power: PowerLevel | None = None
 
 
 def record_power(power: PowerLevel) -> None:

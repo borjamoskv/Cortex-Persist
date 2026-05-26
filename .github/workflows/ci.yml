@@ -223,7 +223,7 @@ jobs:
           python-version: "3.13"
       - name: Install dependencies
         if: steps.scope.outputs.release_only != 'true'
-        run: pip install -e ".[dev,api]"
+        run: pip install -e ".[dev,api,mcp,adk]"
       - name: Install security tools
         run: |
           if [ "${{ steps.scope.outputs.release_only }}" = "true" ]; then
@@ -342,7 +342,7 @@ jobs:
       - name: Install dependencies
         if: steps.scope.outputs.release_only != 'true'
         run: |
-          pip install -e ".[dev,api]"
+          pip install -e ".[dev,api,mcp,adk]"
       - name: Install release smoke dependencies
         if: steps.scope.outputs.release_only == 'true'
         run: pip install build twine

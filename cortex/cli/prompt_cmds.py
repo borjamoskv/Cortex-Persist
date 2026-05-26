@@ -208,7 +208,7 @@ def prompt_show(variant: str) -> None:
     default=None,
     help="Write generated prompt to file instead of stdout.",
 )
-def prompt_generate(variant: str, out: Optional[str]) -> None:
+def prompt_generate(variant: str, out: str | None) -> None:
     """Regenerate the system prompt with live codebase statistics.
 
     Stats injected: LOC, test count, module count, REST endpoints,

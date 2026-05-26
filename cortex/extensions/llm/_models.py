@@ -45,6 +45,11 @@ class ReasoningMode(str, Enum):
     """P0 Singularity Mode. Demands maximum context, strict zero-hallucination guards,
     and compound problem solving. Overrides all cost gates."""
 
+    DEEPTHINK_R1 = "deepthink_r1"
+    """Dedicated DeepSeek-R1 reasoning cluster. Requires native extended chain-of-thought
+    capability. Routes exclusively to `deepseek-reasoner` or equivalent R1-class models.
+    Used by P0VulnerabilityExtractor for code-level hypothesis generation."""
+
 
 # ─── Intent Classification ─────────────────────────────────────────────────
 
@@ -99,9 +104,9 @@ class CascadeEvent:
     """
 
     intent: IntentProfile
-    resolved_by: Optional[str]
+    resolved_by: str | None
     tier: CascadeTier
-    project: Optional[str] = None
+    project: str | None = None
     depth: int = 1  # how many providers attempted before success
     latency_ms: float = 0.0
     errors: list[str] = field(default_factory=list)
@@ -145,13 +150,13 @@ class CortexPrompt(BaseModel):
         default_factory=list,
         description="Historial reciente o contexto de trabajo (rol/contenido).",
     )
-    episodic_context: list[dict[str, Optional[str]]] = Field(
+    episodic_context: list[dict[str, str | None]] = Field(
         default_factory=list,
         description="Recuerdos comprimidos o contexto a largo plazo recuperado.",
     )
     temperature: float = Field(default=0.3, ge=0.0, le=2.0)
     max_tokens: int = Field(default=4096, gt=0)
-    project: Optional[str] = Field(
+    project: str | None = Field(
         default=None,
         description="Project to which this prompt belongs. Used for telemetry and billing.",
     )
@@ -162,7 +167,7 @@ class CortexPrompt(BaseModel):
             "elegibles para el cascade determinista. GENERAL usa todos."
         ),
     )
-    reasoning_mode: Optional[ReasoningMode] = Field(
+    reasoning_mode: ReasoningMode | None = Field(
         default=None,
         description="Explicit cognitive mode requiring specific architectural capabilities.",
     )
@@ -235,6 +240,11 @@ class BaseProvider(ABC):
     def cost_class(self) -> str:
         """Cost classification: 'free', 'low', 'medium', 'high', 'variable'."""
         return "medium"
+
+    @property
+    def context_window(self) -> int:
+        """The context window limit of the provider's underlying model (in tokens)."""
+        return 128000
 
     @abstractmethod
     async def invoke(self, prompt: CortexPrompt) -> str:

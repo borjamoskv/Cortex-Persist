@@ -11,14 +11,18 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 if current_dir not in sys.path:
     sys.path.append(current_dir)
 
-from persistence import LedgerManager, VSAMemory
+from persistence import HybridPersistenceManager
 
 # Sovereign MCP Node v3.0
 mcp = FastMCP("CORTEX-SOVEREIGN-MCP")
-vsa = VSAMemory()
-ledger = LedgerManager()
+cortex_storage = HybridPersistenceManager()
+vsa = cortex_storage.l2
+ledger = cortex_storage.l3
 
-DB_PATH = "/Users/borjafernandezangulo/Cortex-Persist/cortex-core/cortex_memory_vsa.db"
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+DB_PATH = str(PROJECT_ROOT / "cortex-core" / "cortex_memory_vsa.db")
+
 
 @mcp.tool()
 async def cortex_ledger_append(action: str, vector_id: str, yield_amount: float) -> str:
@@ -29,11 +33,13 @@ async def cortex_ledger_append(action: str, vector_id: str, yield_amount: float)
     vsa.record(key=f"mcp_ledger:{vector_id}", value=action)
     return f"BLOCK_COMMITTED: {block_hash[:16]}... | Yield: +{yield_amount}"
 
+
 @mcp.tool()
 async def cortex_vsa_record(key: str, value: str) -> str:
     """Records a semantic trace in the VSA-SDM tensor and SQLite DB."""
     vsa.record(key, value)
     return f"VSA_RECORDED: {key}"
+
 
 @mcp.tool()
 async def get_cortex_status() -> dict:
@@ -45,14 +51,15 @@ async def get_cortex_status() -> dict:
     c.execute("SELECT COUNT(*) FROM ledger_records")
     ledger_count = c.fetchone()[0]
     conn.close()
-    
+
     return {
         "status": "SOVEREIGN_V3_ACTIVE",
         "ki_count": ki_count,
         "ledger_count": ledger_count,
         "total_yield": ledger.get_total_yield(),
-        "mode": "C5-REAL"
+        "mode": "C5-REAL",
     }
+
 
 if __name__ == "__main__":
     vsa.start_glia()

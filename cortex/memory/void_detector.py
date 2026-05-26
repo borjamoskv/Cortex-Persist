@@ -25,6 +25,8 @@ import math
 from dataclasses import dataclass
 from typing import Any, Final
 
+from cortex.utils.void_vec import cosine_similarity
+
 logger = logging.getLogger("cortex.memory.void_detector")
 
 __all__ = [
@@ -108,18 +110,6 @@ class EpistemicAnalysis:
 
 
 # ─── Core Engine ──────────────────────────────────────────────────────
-
-
-def _cosine_similarity(a: list[float], b: list[float]) -> float:
-    """Cosine similarity between two vectors. O(d)."""
-    if len(a) != len(b) or not a:
-        return 0.0
-    dot = sum(x * y for x, y in zip(a, b, strict=True))
-    norm_a = math.sqrt(sum(x * x for x in a))
-    norm_b = math.sqrt(sum(x * x for x in b))
-    if norm_a < 1e-12 or norm_b < 1e-12:
-        return 0.0
-    return dot / (norm_a * norm_b)
 
 
 class EpistemicVoidDetector:
@@ -266,7 +256,7 @@ class EpistemicVoidDetector:
                 emb2 = c2.get("embedding")
                 if not emb2:
                     continue
-                sim = _cosine_similarity(emb1, emb2)
+                sim = cosine_similarity(emb1, emb2)
                 if sim >= self._contradiction_floor:
                     # Same topic — check for negation signals
                     if self._detect_negation(c1["content"], c2["content"]):

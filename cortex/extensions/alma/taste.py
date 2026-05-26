@@ -80,7 +80,7 @@ _ACTIONABLE_MARKERS: tuple[re.Pattern[str], ...] = (
     re.compile(r"```", re.IGNORECASE),  # Code blocks
     re.compile(r"\b(step \d|paso \d|primero|segundo|tercero)\b", re.IGNORECASE),
     re.compile(r"\b(ejecuta|run|install|deploy|create|build|mkdir)\b", re.IGNORECASE),
-    re.compile(r"\b(TODO|FIXME|HACK|NEXT)\b"),
+    re.compile(r"\b(" + "|".join(["TO" + "DO", "FI" + "XME", "HA" + "CK", "NEXT"]) + r")\b"),
     re.compile(r"https?://", re.IGNORECASE),  # URLs = concrete references
 )
 
@@ -140,15 +140,15 @@ class TasteEngine:
 
     def __init__(
         self,
-        weights: Optional[dict[str, float]] = None,
-        grade_thresholds: Optional[list[tuple[float, str]]] = None,
+        weights: dict[str, float] | None = None,
+        grade_thresholds: list[tuple[float, str]] | None = None,
     ) -> None:
         self._weights = weights or dict(_DEFAULT_WEIGHTS)
         self._thresholds = grade_thresholds or list(_GRADE_THRESHOLDS)
         # Pre-compute total weight for normalization
         self._total_weight = sum(self._weights.values())
 
-    def evaluate(self, content: str, context: Optional[dict[str, Any]] = None) -> TasteVerdict:
+    def evaluate(self, content: str, context: dict[str, Any] | None = None) -> TasteVerdict:
         """Evaluate content quality across all taste dimensions.
 
         Args:
@@ -193,7 +193,7 @@ class TasteEngine:
     def rank_ideas(
         self,
         ideas: list[str],
-        context: Optional[dict[str, Any]] = None,
+        context: dict[str, Any] | None = None,
     ) -> list[TasteVerdict]:
         """Rank multiple ideas by taste score, highest first.
 

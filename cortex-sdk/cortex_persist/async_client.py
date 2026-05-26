@@ -162,7 +162,9 @@ class AsyncMemoryClient(BaseAsyncClientDomain):
 
     async def delete(self, fact_id: str, tenant_id: str = "default") -> AcceptanceResult:
         """Tombstone a fact asynchronously."""
-        await self._request("DELETE", f"/v1/memory/facts/{fact_id}", params={"tenant_id": tenant_id})
+        await self._request(
+            "DELETE", f"/v1/memory/facts/{fact_id}", params={"tenant_id": tenant_id}
+        )
         return AcceptanceResult(accepted=True, operation_id=fact_id, warnings=[])
 
 
@@ -172,7 +174,9 @@ class AsyncMemoryClient(BaseAsyncClientDomain):
 class AsyncTraceClient(BaseAsyncClientDomain):
     """Canonical Async API for Audit & Trace Integration."""
 
-    async def get_causal_chain(self, fact_id: str, tenant_id: str = "default") -> list[dict[str, Any]]:
+    async def get_causal_chain(
+        self, fact_id: str, tenant_id: str = "default"
+    ) -> list[dict[str, Any]]:
         """Retrieve the upstream dependencies that produced a fact asynchronously."""
         return await self._request(
             "GET",

@@ -52,14 +52,14 @@ class EngineProtocol(Protocol):
         content: str,
         tenant_id: str = "default",
         fact_type: str = "knowledge",
-        tags: Optional[list[str]] = None,
+        tags: list[str] | None = None,
         confidence: str = "stated",
-        source: Optional[str] = None,
-        meta: Optional[dict[str, Any]] = None,
-        valid_from: Optional[str] = None,
+        source: str | None = None,
+        meta: dict[str, Any] | None = None,
+        valid_from: str | None = None,
         commit: bool = True,
-        tx_id: Optional[int] = None,
-        conn: Optional[aiosqlite.Connection] = None,
+        tx_id: int | None = None,
+        conn: aiosqlite.Connection | None = None,
         **kwargs: Any,
     ) -> int:
         """Store a fact and return its ID."""
@@ -69,15 +69,15 @@ class EngineProtocol(Protocol):
         """Store multiple facts in a transaction."""
         ...
 
-    async def get_fact(self, fact_id: int) -> Optional[Any]:
+    async def get_fact(self, fact_id: int) -> Any | None:
         """Get fact by ID."""
         ...
 
     async def get_all_active_facts(
         self,
         tenant_id: str = "default",
-        project: Optional[str] = None,
-        fact_types: Optional[list[str]] = None,
+        project: str | None = None,
+        fact_types: list[str] | None = None,
     ) -> list[Any]:
         """Get all active facts matching criteria."""
         ...
@@ -85,7 +85,7 @@ class EngineProtocol(Protocol):
     async def recall(
         self,
         project: str,
-        query: Optional[str] = None,
+        query: str | None = None,
         tenant_id: str = "default",
         **kwargs: Any,
     ) -> list[Any]:
@@ -96,7 +96,7 @@ class EngineProtocol(Protocol):
         self,
         project: str,
         tenant_id: str = "default",
-        as_of: Optional[str] = None,
+        as_of: str | None = None,
     ) -> list[Any]:
         """Temporal history."""
         ...
@@ -104,7 +104,7 @@ class EngineProtocol(Protocol):
     async def time_travel(
         self,
         tenant_id: str = "default",
-        tx_id: Optional[int] = None,
+        tx_id: int | None = None,
     ) -> list[Any]:
         """Project state reconstruction."""
         ...
@@ -119,7 +119,7 @@ class EngineProtocol(Protocol):
         graph_depth: int = 0,
         include_graph: bool = False,
         confidence: str | None = None,
-        causal_gap: Optional[Any] = None,
+        causal_gap: Any | None = None,
         **kwargs: Any,
     ) -> list[Any]:
         """Semantic/hybrid search."""
@@ -128,8 +128,8 @@ class EngineProtocol(Protocol):
     async def deprecate(
         self,
         fact_id: int,
-        reason: Optional[str] = None,
-        conn: Optional[aiosqlite.Connection] = None,
+        reason: str | None = None,
+        conn: aiosqlite.Connection | None = None,
         tenant_id: str = "default",
     ) -> bool:
         """Soft-delete a fact."""
@@ -140,9 +140,9 @@ class EngineProtocol(Protocol):
         reference: str,
         context: str,
         project: str,
-        target_file: Optional[str | Path] = None,
-        conn: Optional[aiosqlite.Connection] = None,
-        root_dir: Optional[Path] = None,
+        target_file: str | Path | None = None,
+        conn: aiosqlite.Connection | None = None,
+        root_dir: Path | None = None,
     ) -> str:
         """Register a ghost fact."""
         ...

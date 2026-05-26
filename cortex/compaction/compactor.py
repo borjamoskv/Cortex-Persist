@@ -170,7 +170,7 @@ async def _apply_strategies(
 async def compact(
     engine: CortexEngine,
     project: str,
-    strategies: Optional[list[CompactionStrategy]] = None,
+    strategies: list[CompactionStrategy] | None = None,
     dry_run: bool = False,
     similarity_threshold: float = 0.85,
     max_age_days: int = 90,
@@ -334,7 +334,7 @@ def _append_type_section(lines: list[str], fact_type: str, facts: list[Any]) -> 
 
 async def get_compaction_stats(
     engine: CortexEngine,
-    project: Optional[str] = None,
+    project: str | None = None,
 ) -> dict[str, Any]:
     """Get compaction history and statistics."""
     conn = await engine.get_conn()

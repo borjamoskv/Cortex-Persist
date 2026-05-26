@@ -178,7 +178,7 @@ def resolve_context_window(provider: str, model_name: str) -> int:
         meta = models_meta[model_name]
         if isinstance(meta, dict) and "context_window" in meta:
             return int(meta["context_window"])
-        if isinstance(meta, (int, float)):
+        if isinstance(meta, int | float):
             return int(meta)
 
     return int(info.get("context_window", 0))

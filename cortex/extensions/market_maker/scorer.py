@@ -22,7 +22,7 @@ class OpportunityScorer:
     EXECUTE_THRESHOLD = Decimal("70")
     MONITOR_THRESHOLD = Decimal("40")
 
-    def __init__(self, random_seed: Optional[int] = None) -> None:
+    def __init__(self, random_seed: int | None = None) -> None:
         self._rng = random.Random(random_seed)
 
     async def score(self, signal: TrendSignal) -> Opportunity:

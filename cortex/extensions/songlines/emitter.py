@@ -26,7 +26,7 @@ class ResonanceEmitter:
     on the target file.
     """
 
-    def __init__(self, encoder: Optional[HDCEncoder] = None):
+    def __init__(self, encoder: HDCEncoder | None = None):
         self.encoder = encoder or HDCEncoder(ItemMemory())
         self.prefix = "user.cortex.ghost"
 

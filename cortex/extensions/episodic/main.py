@@ -156,10 +156,10 @@ class EpisodicMemory:
         session_id: str,
         event_type: str,
         content: str,
-        project: Optional[str] = None,
+        project: str | None = None,
         emotion: str = "neutral",
-        tags: Optional[list[str]] = None,
-        meta: Optional[dict[str, Any]] = None,
+        tags: list[str] | None = None,
+        meta: dict[str, Any] | None = None,
     ) -> int:
         """Store an episodic event with cryptographic intent."""
         if event_type not in EVENT_TYPES:
@@ -189,11 +189,11 @@ class EpisodicMemory:
 
     async def recall(
         self,
-        project: Optional[str] = None,
-        event_type: Optional[str] = None,
-        since: Optional[str] = None,
+        project: str | None = None,
+        event_type: str | None = None,
+        since: str | None = None,
         limit: int = 20,
-        search: Optional[str] = None,
+        search: str | None = None,
     ) -> list[Episode]:
         """Retrieve episodes with multi-dimensional filtering."""
         if search:
@@ -225,7 +225,7 @@ class EpisodicMemory:
 
         return [self._row_to_episode(row) for row in rows]  # type: ignore[reportArgumentType]
 
-    async def _fts_recall(self, search: str, project: Optional[str], limit: int) -> list[Episode]:
+    async def _fts_recall(self, search: str, project: str | None, limit: int) -> list[Episode]:
         """High-performance full-text search across episodes."""
         sql = """
             SELECT
@@ -251,7 +251,7 @@ class EpisodicMemory:
 
     async def detect_patterns(
         self,
-        project: Optional[str] = None,
+        project: str | None = None,
         min_occurrences: int = 3,
         limit: int = 10,
     ) -> list[Pattern]:
@@ -281,7 +281,7 @@ class EpisodicMemory:
             limit,  # type: ignore[reportArgumentType]
         )
 
-    async def count(self, project: Optional[str] = None) -> int:
+    async def count(self, project: str | None = None) -> int:
         """Sovereign audit: count total temporal memories."""
         sql = "SELECT COUNT(*) FROM episodes"
         params: list[str] = []

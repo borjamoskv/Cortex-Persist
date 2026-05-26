@@ -11,9 +11,9 @@ Legion-Omega hardened:
 from __future__ import annotations
 
 import asyncio
-
+import json
+import redis.asyncio
 import pytest
-
 from cortex.database.cache import _MAX_REDIS_VALUE_BYTES, CacheEvent, TieredCache
 
 # ─── L1 Behavior (always active) ─────────────────────────────────────
@@ -146,3 +146,135 @@ def test_redis_keys_differ_across_caches():
     c1 = TieredCache("cache_a")
     c2 = TieredCache("cache_b")
     assert c1._redis_key("k") != c2._redis_key("k")
+
+
+# ─── Mocked Redis L2 Tests ─────────────────────────────────────────────
+
+
+class MockRedis:
+    def __init__(self):
+        self.data: dict[str, str] = {}
+
+    async def get(self, key: str) -> str | None:
+        return self.data.get(key)
+
+    async def set(self, key: str, value: str, ex: int | None = None) -> bool:
+        self.data[key] = value
+        return True
+
+    async def delete(self, *keys: str) -> int:
+        count = 0
+        for k in keys:
+            if k in self.data:
+                del self.data[k]
+                count += 1
+        return count
+
+    async def scan(
+        self, cursor: int, match: str | None = None, count: int | None = None
+    ) -> tuple[int, list[str]]:
+        # Simple glob-like matching (starts/contains/ends)
+        matched_keys = []
+        if match:
+            clean_match = match.replace("*", "")
+            for k in self.data.keys():
+                if clean_match in k:
+                    matched_keys.append(k)
+        else:
+            matched_keys = list(self.data.keys())
+        return 0, matched_keys
+
+
+class FaultyMockRedis(MockRedis):
+    async def get(self, key: str) -> str | None:
+        raise Exception("Redis Connection Error")
+
+    async def set(self, key: str, value: str, ex: int | None = None) -> bool:
+        raise Exception("Redis Write Error")
+
+    async def scan(
+        self, cursor: int, match: str | None = None, count: int | None = None
+    ) -> tuple[int, list[str]]:
+        raise Exception("Redis Scan Error")
+
+
+@pytest.mark.asyncio
+async def test_redis_l2_cache_flow(monkeypatch):
+    """Test full tiered cache operations (L1 miss -> L2 hit -> L1 fill)."""
+    monkeypatch.setenv("REDIS_URL", "redis://localhost:6379/0")
+    mock_redis = MockRedis()
+
+    monkeypatch.setattr(redis.asyncio, "from_url", lambda *args, **kwargs: mock_redis)
+
+    cache = TieredCache("test_l2", l1_size=2)
+
+    # 1. Set values. They should go to both L1 and L2
+    await cache.set("k1", "val1")
+    await cache.set("k2", "val2")
+
+    redis_key1 = cache._redis_key("k1")
+    redis_key2 = cache._redis_key("k2")
+    assert mock_redis.data[redis_key1] == json.dumps("val1")
+    assert mock_redis.data[redis_key2] == json.dumps("val2")
+
+    # 2. Evict k1 from L1 (size is 2, insert third key)
+    await cache.set("k3", "val3")
+    assert "k1" not in cache.l1
+
+    # 3. Read k1, should cause L1 miss, L2 hit, and L1 repopulation
+    val = await cache.get("k1")
+    assert val == "val1"
+    assert "k1" in cache.l1
+
+    # 4. Invalidate pattern
+    await cache.invalidate("k2")
+    assert await cache.get("k2") is None
+    assert mock_redis.data.get(cache._redis_key("k2")) is None
+
+    # 5. Clear cache
+    await cache.clear()
+    assert len(cache.l1) == 0
+    assert len(mock_redis.data) == 0
+
+
+@pytest.mark.asyncio
+async def test_redis_l2_oversized_guard(monkeypatch):
+    """Ensure L2 skip logic works with active Redis."""
+    monkeypatch.setenv("REDIS_URL", "redis://localhost:6379/0")
+    mock_redis = MockRedis()
+
+    monkeypatch.setattr(redis.asyncio, "from_url", lambda *args, **kwargs: mock_redis)
+
+    cache = TieredCache("test_oversized", l1_size=2)
+    oversized = "y" * (_MAX_REDIS_VALUE_BYTES + 1)
+
+    await cache.set("big", oversized)
+    # L1 should have it
+    assert await cache.get("big") == oversized
+    # L2 should NOT have it
+    assert mock_redis.data.get(cache._redis_key("big")) is None
+
+
+@pytest.mark.asyncio
+async def test_redis_fault_tolerance(monkeypatch):
+    """Ensure exceptions in Redis are caught and handled gracefully."""
+    monkeypatch.setenv("REDIS_URL", "redis://localhost:6379/0")
+    faulty_redis = FaultyMockRedis()
+
+    monkeypatch.setattr(redis.asyncio, "from_url", lambda *args, **kwargs: faulty_redis)
+
+    cache = TieredCache("test_fault", l1_size=2)
+
+    # Set should succeed (write to L1 works, L2 fails silently)
+    await cache.set("k1", "val1")
+    assert await cache.get("k1") == "val1"
+
+    # Force L1 miss to trigger L2 get which raises error
+    del cache.l1["k1"]
+    assert await cache.get("k1") is None
+
+    # Invalidate should handle error gracefully
+    await cache.invalidate("k1")
+
+    # Clear should handle error gracefully
+    await cache.clear()

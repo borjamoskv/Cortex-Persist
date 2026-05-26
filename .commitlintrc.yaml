@@ -1,0 +1,25 @@
+extends: ['@commitlint/config-conventional']
+rules:
+  type-enum:
+    - 2
+    - always
+    - [feat, fix, chore, refactor, docs, test, ci, build, perf, style, revert, release]
+  subject-max-length:
+    - 1
+    - always
+    - 72
+  header-max-length:
+    - 1
+    - always
+    - 100
+  subject-empty:
+    - 2
+    - never
+  type-empty:
+    - 2
+    - never
+  # No emojis in subject
+  subject-case:
+    - 2
+    - always
+    - [lower-case, sentence-case]

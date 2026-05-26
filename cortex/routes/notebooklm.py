@@ -85,7 +85,7 @@ async def notebooklm_status(
 
 @router.post("/v1/notebooklm/digest")
 async def notebooklm_digest(
-    project: Optional[str] = Query(None, description="Optional project filter"),
+    project: str | None = Query(None, description="Optional project filter"),
     output: str = Query("cortex_notebooklm_digest.md", description="Output file path"),
     auth: AuthResult = Depends(require_permission("write")),
 ) -> dict:
@@ -137,7 +137,7 @@ async def notebooklm_fragment(
 
 @router.post("/v1/notebooklm/sync")
 async def notebooklm_sync(
-    drive_path: Optional[str] = Query(None, description="Explicit cloud folder path"),
+    drive_path: str | None = Query(None, description="Explicit cloud folder path"),
     mode: str = Query("both", description="What to sync: digest, domains, or both"),
     auth: AuthResult = Depends(require_permission("write")),
 ) -> dict:

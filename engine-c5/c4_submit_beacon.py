@@ -16,7 +16,7 @@ class Code4renaSubmitBeacon:
 
     def forge_payload(self):
         self.log(f"Leyendo informe crudo Sovereign desde: {self.report_path}", "L3-IO")
-        with open(self.report_path, "r") as f:
+        with open(self.report_path) as f:
             content = f.read()
 
         payload = {

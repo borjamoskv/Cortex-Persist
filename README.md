@@ -15,11 +15,11 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/borjamoskv/Cortex-Persist/stargazers"><img src="https://img.shields.io/github/stars/borjamoskv/Cortex-Persist?style=social" alt="GitHub Stars"></a>&nbsp;&nbsp;
+  <a href="https://github.com/borjamoskv/cortex-persist/stargazers"><img src="https://img.shields.io/github/stars/borjamoskv/cortex-persist?style=social" alt="GitHub Stars"></a>&nbsp;&nbsp;
   <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.10%2B-blue.svg" alt="Python"></a>&nbsp;
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-blue.svg" alt="License"></a>&nbsp;
-  <a href="https://github.com/borjamoskv/Cortex-Persist/actions"><img src="https://github.com/borjamoskv/Cortex-Persist/actions/workflows/ci.yml/badge.svg" alt="CI"></a>&nbsp;
-  <a href="https://codecov.io/gh/borjamoskv/Cortex-Persist"><img src="https://codecov.io/gh/borjamoskv/Cortex-Persist/branch/main/graph/badge.svg" alt="Codecov"></a>&nbsp;
+  <a href="https://github.com/borjamoskv/cortex-persist/actions"><img src="https://github.com/borjamoskv/cortex-persist/actions/workflows/ci.yml/badge.svg" alt="CI"></a>&nbsp;
+  <a href="https://codecov.io/gh/borjamoskv/cortex-persist"><img src="https://codecov.io/gh/borjamoskv/cortex-persist/branch/main/graph/badge.svg" alt="Codecov"></a>&nbsp;
   <a href="https://pypi.org/project/cortex-persist/"><img src="https://img.shields.io/pypi/v/cortex-persist.svg" alt="PyPI"></a>
 </p>
 
@@ -145,8 +145,8 @@ pip install "cortex-persist[api,mcp,daemon,authoring]"  # optional server surfac
 ### Path B: Install from Source *(development)*
 
 ```bash
-git clone https://github.com/borjamoskv/Cortex-Persist.git
-cd Cortex-Persist
+git clone https://github.com/borjamoskv/cortex-persist.git
+cd cortex-persist
 python3 -m venv .venv && source .venv/bin/activate
 pip install -e .
 cortex init

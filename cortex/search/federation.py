@@ -45,7 +45,7 @@ _FEDERATION_MAP: dict[str, tuple[Path, str]] = {
 
 def attach_federated_dbs(
     conn: sqlite3.Connection,
-    scopes: Optional[list[str]] = None,
+    scopes: list[str] | None = None,
 ) -> list[str]:
     """ATTACH secondary databases to an existing connection.
 
@@ -84,7 +84,7 @@ def attach_federated_dbs(
 
 async def attach_federated_dbs_async(
     conn: aiosqlite.Connection,
-    scopes: Optional[list[str]] = None,
+    scopes: list[str] | None = None,
 ) -> list[str]:
     """ATTACH secondary databases to an existing async connection."""
     targets = scopes or list(_FEDERATION_MAP.keys())
@@ -143,7 +143,7 @@ def _search_attached_db(
     conn: sqlite3.Connection,
     alias: str,
     query: str,
-    project: Optional[str] = None,
+    project: str | None = None,
     limit: int = 20,
 ) -> list[SearchResult]:
     """Search an attached database's facts table.
@@ -234,7 +234,7 @@ async def _search_attached_db_async(
     conn: aiosqlite.Connection,
     alias: str,
     query: str,
-    project: Optional[str] = None,
+    project: str | None = None,
     limit: int = 20,
 ) -> list[SearchResult]:
     """Search an attached database's facts table (async)."""
@@ -316,7 +316,7 @@ async def federated_search(
     conn: aiosqlite.Connection,
     query: str,
     scope: str = "core",
-    project: Optional[str] = None,
+    project: str | None = None,
     limit: int = 20,
 ) -> list[SearchResult]:
     """Federated text search across (async)."""
@@ -370,7 +370,7 @@ def federated_search_sync(
     conn: sqlite3.Connection,
     query: str,
     scope: str = "core",
-    project: Optional[str] = None,
+    project: str | None = None,
     limit: int = 20,
 ) -> list[SearchResult]:
     """Federated text search across partitioned databases.

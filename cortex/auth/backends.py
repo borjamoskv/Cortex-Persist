@@ -31,7 +31,7 @@ class BaseAuthBackend(ABC):
         pass
 
     @abstractmethod
-    async def get_key_by_hash(self, key_hash: str) -> Optional[dict[str, Any]]:
+    async def get_key_by_hash(self, key_hash: str) -> dict[str, Any] | None:
         """Retrieve an active API key by its hash."""
         pass
 
@@ -50,7 +50,7 @@ class BaseAuthBackend(ABC):
         pass
 
     @abstractmethod
-    async def list_keys(self, tenant_id: Optional[str] = None) -> list[dict[str, Any]]:
+    async def list_keys(self, tenant_id: str | None = None) -> list[dict[str, Any]]:
         """List API keys, optionally filtered by tenant."""
         pass
 
@@ -89,7 +89,7 @@ class SQLiteAuthBackend(BaseAuthBackend):
 
         return await connect_async(self.db_path)
 
-    async def get_key_by_hash(self, key_hash: str) -> Optional[dict[str, Any]]:
+    async def get_key_by_hash(self, key_hash: str) -> dict[str, Any] | None:
         conn = await self._get_conn_async()
         try:
             conn.row_factory = aiosqlite.Row
@@ -123,7 +123,7 @@ class SQLiteAuthBackend(BaseAuthBackend):
         finally:
             await conn.close()
 
-    async def list_keys(self, tenant_id: Optional[str] = None) -> list[dict[str, Any]]:
+    async def list_keys(self, tenant_id: str | None = None) -> list[dict[str, Any]]:
         conn = await self._get_conn_async()
         try:
             conn.row_factory = aiosqlite.Row
@@ -193,7 +193,7 @@ class AlloyDBAuthBackend(BaseAuthBackend):
         async with pool.acquire() as conn:
             await conn.execute(pg_schema)
 
-    async def get_key_by_hash(self, key_hash: str) -> Optional[dict[str, Any]]:
+    async def get_key_by_hash(self, key_hash: str) -> dict[str, Any] | None:
         pool = await self._get_pool()
         async with pool.acquire() as conn:
             row = await conn.fetchrow(
@@ -231,7 +231,7 @@ class AlloyDBAuthBackend(BaseAuthBackend):
             )
             return key_id
 
-    async def list_keys(self, tenant_id: Optional[str] = None) -> list[dict[str, Any]]:
+    async def list_keys(self, tenant_id: str | None = None) -> list[dict[str, Any]]:
         pool = await self._get_pool()
         async with pool.acquire() as conn:
             if tenant_id:

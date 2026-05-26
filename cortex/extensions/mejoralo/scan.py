@@ -169,7 +169,7 @@ def _analyze_polyglot_nesting(lines: list[str], rel: str) -> list[str]:
 
 def _analyze_single_file(
     sf: Path, root: Path
-) -> tuple[int, Optional[str], list[str], list[str], list[str]]:
+) -> tuple[int, str | None, list[str], list[str], list[str]]:
     """Analyse a single file and return its metrics."""
     try:
         content = sf.read_text(errors="replace")
@@ -259,12 +259,35 @@ def _detect_code_ghosts(source_files: list[Path], root: Path) -> list[str]:
         rel_path = str(sf.relative_to(root))
 
         for node in ast.walk(tree):
-            if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            if not isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
+                continue
+            # Skip simple methods with only 1 statement (excluding docstring)
+            non_doc_body = [
+                stmt
+                for stmt in node.body
+                if not (
+                    isinstance(stmt, ast.Expr)
+                    and isinstance(stmt.value, ast.Constant)
+                    and isinstance(stmt.value.value, str)
+                )
+            ]
+            if len(non_doc_body) <= 1:
+                continue
+            name = getattr(node, "name", "<anonymous>")
+            if name.startswith("__") and name.endswith("__"):
+                continue
+            if name.lower() in {"clear", "stop", "reset", "close", "reset_shown", "is_available"}:
+                continue
+            # Skip boilerplate database or wrapper helpers if the body is small
+            body_size = sum(_count_subtree_nodes(stmt) for stmt in node.body)
+            is_boilerplate = body_size < 60 or (
+                name.startswith("_") and not name.startswith("__") and body_size < 80
+            )
+            if is_boilerplate:
                 continue
             if _count_subtree_nodes(node) < GHOST_MIN_SUBTREE_SIZE:
                 continue
             h = _hash_ast_subtree(node)
-            name = getattr(node, "name", "<anonymous>")
             line = getattr(node, "lineno", 0)
             hash_registry.setdefault(h, []).append((rel_path, name, line))
 

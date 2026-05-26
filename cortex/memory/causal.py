@@ -64,65 +64,59 @@ class CausalGraph:
         """Why does this engram exist? (backward trace)"""
         return self._backward.get(engram_id, [])
 
+    def _traverse_causal_graph(
+        self,
+        start_id: str,
+        forward: bool = True,
+        max_depth: int = 5,
+        collect_roots_only: bool = False,
+    ) -> list[str]:
+        """Unified BFS traversal of the causal graph."""
+        visited: set[str] = set()
+        queue = [start_id]
+        result: list[str] = []
+
+        graph = self._forward if forward else self._backward
+
+        for _ in range(max_depth):
+            if not queue:
+                break
+            next_queue: list[str] = []
+            for eid in queue:
+                if eid in visited:
+                    continue
+                visited.add(eid)
+
+                if eid != start_id:
+                    if collect_roots_only:
+                        if not self._backward.get(eid):
+                            result.append(eid)
+                    else:
+                        result.append(eid)
+
+                neighbors = graph.get(eid, [])
+                for link in neighbors:
+                    nxt = link.effect_id if forward else link.cause_id
+                    if nxt not in visited:
+                        next_queue.append(nxt)
+            queue = next_queue
+
+        return result
+
     def impact_chain(self, engram_id: str, max_depth: int = 5) -> list[str]:
         """Trace the full downstream impact chain (BFS).
 
         Returns list of engram IDs that depend on this one.
         """
-        visited: set[str] = set()
-        queue = [engram_id]
-        chain: list[str] = []
-
-        for _ in range(max_depth):
-            if not queue:
-                break
-            queue = self._process_impact_queue(queue, visited, chain, engram_id)
-
-        return chain
-
-    def _process_impact_queue(
-        self, queue: list[str], visited: set[str], chain: list[str], start_id: str
-    ) -> list[str]:
-        next_queue: list[str] = []
-        for eid in queue:
-            if eid in visited:
-                continue
-            visited.add(eid)
-            if eid != start_id:
-                chain.append(eid)
-            next_queue.extend(
-                link.effect_id
-                for link in self._forward.get(eid, [])
-                if link.effect_id not in visited
-            )
-        return next_queue
+        return self._traverse_causal_graph(
+            engram_id, forward=True, max_depth=max_depth, collect_roots_only=False
+        )
 
     def root_causes(self, engram_id: str, max_depth: int = 5) -> list[str]:
         """Trace backward to find all root causes (no incoming edges)."""
-        visited: set[str] = set()
-        queue = [engram_id]
-        roots: list[str] = []
-
-        for _ in range(max_depth):
-            if not queue:
-                break
-            queue = self._process_root_queue(queue, visited, roots, engram_id)
-
-        return roots
-
-    def _process_root_queue(
-        self, queue: list[str], visited: set[str], roots: list[str], start_id: str
-    ) -> list[str]:
-        next_queue: list[str] = []
-        for eid in queue:
-            if eid in visited:
-                continue
-            visited.add(eid)
-            causes = self._backward.get(eid, [])
-            if not causes and eid != start_id:
-                roots.append(eid)
-            next_queue.extend(link.cause_id for link in causes if link.cause_id not in visited)
-        return next_queue
+        return self._traverse_causal_graph(
+            engram_id, forward=False, max_depth=max_depth, collect_roots_only=True
+        )
 
     def find_zombies(self, alive_ids: set[str]) -> list[str]:
         """Find decisions whose root causes no longer exist.

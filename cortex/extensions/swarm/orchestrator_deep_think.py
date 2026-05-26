@@ -2,7 +2,7 @@ import asyncio
 import logging
 from typing import Any
 
-import numpy as np
+from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
 
 try:
     from cortex.extensions.agents.factory import create_agent  # type: ignore[import-not-found]

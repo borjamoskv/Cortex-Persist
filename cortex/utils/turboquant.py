@@ -10,7 +10,7 @@ from __future__ import annotations
 import logging
 from collections.abc import Sequence
 
-import numpy as np
+from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
 
 from cortex.utils import void_vec
 

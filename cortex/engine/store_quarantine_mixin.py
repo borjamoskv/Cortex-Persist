@@ -32,7 +32,7 @@ class QuarantineMixin(EngineMixinBase):
         self,
         fact_id: int,
         reason: str,
-        conn: Optional[aiosqlite.Connection] = None,
+        conn: aiosqlite.Connection | None = None,
     ) -> bool:
         """Quarantine a fact: isolate without deleting.
 
@@ -85,7 +85,7 @@ class QuarantineMixin(EngineMixinBase):
     async def unquarantine(
         self,
         fact_id: int,
-        conn: Optional[aiosqlite.Connection] = None,
+        conn: aiosqlite.Connection | None = None,
     ) -> bool:
         """Lift quarantine from a fact."""
         if not isinstance(fact_id, int) or fact_id <= 0:

@@ -21,7 +21,7 @@ class DemandValidator:
     MIN_CONVERSION_RATE = Decimal("0.02")  # 2% conversion point to scale
     MAX_SPEND = Decimal("20.00")  # $20 budget per test
 
-    def __init__(self, random_seed: Optional[int] = None) -> None:
+    def __init__(self, random_seed: int | None = None) -> None:
         self._rng = random.Random(random_seed)
 
     async def validate(self, experiment: Experiment) -> ValidationResult:

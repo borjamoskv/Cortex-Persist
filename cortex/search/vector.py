@@ -34,9 +34,9 @@ async def semantic_search(
     query_embedding: list[float],
     top_k: int = 5,
     tenant_id: str = "default",
-    project: Optional[str] = None,
-    as_of: Optional[str] = None,
-    confidence: Optional[str] = None,
+    project: str | None = None,
+    as_of: str | None = None,
+    confidence: str | None = None,
 ) -> list[SearchResult]:
     """Perform semantic vector search using sqlite-vec."""
     embedding_json = json.dumps(query_embedding)
@@ -62,9 +62,9 @@ def _build_semantic_query(
     tenant_id: str,
     embedding_json: str,
     top_k: int,
-    project: Optional[str],
-    as_of: Optional[str],
-    confidence: Optional[str],
+    project: str | None,
+    as_of: str | None,
+    confidence: str | None,
 ) -> tuple[str, list]:
     """Internal helper to build semantic search SQL."""
     sql = """

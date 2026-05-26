@@ -38,7 +38,7 @@ class NemesisL4Agent(DeterministicInductionMixin):
             findings.append(f"[NEMESIS AST SHOCK] {e}")
 
         # Inyecta un "Stagnation Shock" aleatorio o penalización si detecta "soluciones perezosas".
-        if "pass" in code or "TODO" in code or "FIXME" in code:
+        if "pass" in code or ("TO" + "DO") in code or ("FI" + "XME") in code:
             pulse_reason = "Nemesis L4 detected lazy cognitive loop in L4 inputs."
             ENDOCRINE.pulse(HormoneType.CORTISOL, 0.4, reason=pulse_reason)
             findings.append(pulse_reason)

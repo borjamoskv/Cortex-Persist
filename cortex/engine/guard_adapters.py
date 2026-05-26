@@ -18,6 +18,7 @@ __all__ = [
     "VerifierGuardAdapter",
     "ExergyGuardAdapter",
     "ZKGuardAdapter",
+    "VirgoGuardAdapter",
     "LedgerCheckpointHook",
     "SignalEmitHook",
     "EpistemicBreakerHook",
@@ -144,6 +145,28 @@ class ZKGuardAdapter:
 
         guard = ZKSwarmGuard()
         await guard.verify_integrity(content, fact_type, meta)
+
+
+class VirgoGuardAdapter:
+    """AX-II Hook for Logos-Critique → StoreGuard protocol."""
+
+    def __init__(self, engine: Any) -> None:
+        self._engine = engine
+
+    async def check(
+        self,
+        content: str,
+        project: str,
+        fact_type: str,
+        meta: dict[str, Any],
+        conn: aiosqlite.Connection,
+        *,
+        tenant_id: str = "default",
+    ) -> None:
+        from cortex.guards.virgo import VirgoContextGuard
+
+        guard = VirgoContextGuard(engine=self._engine)
+        await guard.check(content, project, fact_type, meta, conn, tenant_id=tenant_id)
 
 
 # ─── Post-Store Hooks ─────────────────────────────────────────────

@@ -163,6 +163,8 @@ class SnapshotAgeCollector:
                     from datetime import datetime, timezone
 
                     ts = datetime.fromisoformat(row[0].replace("Z", "+00:00"))
+                    if ts.tzinfo is None:
+                        ts = ts.replace(tzinfo=timezone.utc)
                     age_hours = (
                         datetime.fromtimestamp(time.time(), tz=timezone.utc) - ts
                     ).total_seconds() / 3600

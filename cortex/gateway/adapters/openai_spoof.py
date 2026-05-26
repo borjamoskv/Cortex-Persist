@@ -31,15 +31,15 @@ _spoof_manager = SpoofManager()
 class OpenAIMessage(BaseModel):
     role: str
     content: str
-    name: Optional[str] = None
+    name: str | None = None
 
 
 class OpenAICompletionRequest(BaseModel):
     model: str
     messages: list[OpenAIMessage]
-    temperature: Optional[float] = 0.3
-    max_tokens: Optional[int] = 4096
-    stream: Optional[bool] = False
+    temperature: float | None = 0.3
+    max_tokens: int | None = 4096
+    stream: bool | None = False
 
 
 # --- Routes ---
@@ -49,7 +49,7 @@ class OpenAICompletionRequest(BaseModel):
 async def openai_chat_completions(
     request: Request,
     body: OpenAICompletionRequest,
-    authorization: Optional[str] = Header(None),
+    authorization: str | None = Header(None),
 ):
     """Spoof OpenAI endpoint by routing to CORTEX internal LLM."""
 

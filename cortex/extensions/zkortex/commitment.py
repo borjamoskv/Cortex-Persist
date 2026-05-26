@@ -89,9 +89,7 @@ class KnowledgeCommitment:
         )
 
 
-def commit(
-    secret: str, blinding_factor: Optional[bytes] = None
-) -> tuple[KnowledgeCommitment, bytes]:
+def commit(secret: str, blinding_factor: bytes | None = None) -> tuple[KnowledgeCommitment, bytes]:
     """
     Crea un nuevo Pedersen commitment a `secret`.
 
@@ -109,7 +107,7 @@ def commit(
     return c, blinding_factor
 
 
-def _point_to_hex(point: Optional[tuple]) -> str:
+def _point_to_hex(point: tuple | None) -> str:
     """Serializa un punto en coordenadas afines (x,y) sobre FQ."""
     if point is None:
         return "00" * 96

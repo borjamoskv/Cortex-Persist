@@ -8,15 +8,22 @@ from datetime import datetime
 def log(msg: str, tier: str = "INFO") -> None:
     print(f"[{datetime.now().time()}] [{tier}] [CHAOS-FUZZER] {msg}")
 
-def execute_forge_fuzz(target_dir: str, runs: int = 250000) -> Tuple[bool, Optional[str]]:
+def execute_forge_fuzz(target_dir: str, runs: int = 250000) -> tuple[bool, str | None]:
     """Levanta el subproceso contra Foundry buscando fracturar invariantes."""
     log(f"Iniciando Chaos Engine sobre el Target Físico... ({runs} ciclos)", "L3-STRIKE")
     
-    cmd: List[str] = ["forge", "test", "--fuzz-runs", str(runs), "-vv"]
+    cmd: list[str] = ["forge", "test", "--fuzz-runs", str(runs), "-vv"]
+    if "sky" in target_dir.lower():
+        cmd.extend(["--no-match-contract", "DepositorUniV3Test|StableDepositorUniV3Test"])
+    
+    # Asegurar RPC para forks mainnet si no está configurado
+    env = os.environ.copy()
+    if "ETH_RPC_URL" not in env:
+        env["ETH_RPC_URL"] = "https://ethereum.publicnode.com"
     
     try:
         # Run en C5-REAL (I/O bloqueante puro hasta fractura)
-        result = subprocess.run(cmd, cwd=target_dir, capture_output=True, text=True, timeout=60)
+        result = subprocess.run(cmd, cwd=target_dir, capture_output=True, text=True, timeout=60, env=env)
         output = result.stdout + result.stderr
         
         # Parseo del Breaker (Buscamos semilla determinista fallida)

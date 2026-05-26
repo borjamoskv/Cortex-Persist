@@ -30,7 +30,7 @@ class Axiom:
     mandate: str
     category: AxiomCategory
     enforcement: str
-    ci_gate: Optional[str] = None
+    ci_gate: str | None = None
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -136,7 +136,7 @@ class AxiomRegistry:
         """Mock load for interface compatibility."""
         pass
 
-    def get(self, axiom_id: str) -> Optional[Axiom]:
+    def get(self, axiom_id: str) -> Axiom | None:
         return self._axioms.get(axiom_id)
 
     def by_category(self, category: AxiomCategory) -> list[Axiom]:
@@ -158,5 +158,5 @@ def enforced() -> list[Axiom]:
     return [ax for ax in AXIOM_REGISTRY.values() if ax.ci_gate is not None]
 
 
-def get(axiom_id: str) -> Optional[Axiom]:
+def get(axiom_id: str) -> Axiom | None:
     return AXIOM_REGISTRY.get(axiom_id)

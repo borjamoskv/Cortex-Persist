@@ -136,7 +136,7 @@ class OptimizationMixin:
         if OptimizationMixin._executor is None:
             # Saturate all available CPU cores for maximum exergy (Ω₂)
             OptimizationMixin._executor = ProcessPoolExecutor(max_workers=os.cpu_count())
-        self._buffer_task: Optional[asyncio.Task] = None
+        self._buffer_task: asyncio.Task | None = None
         self._is_flushing = False
 
     def _on_cache_evict(self, key: str, value: Any, audit: dict[str, Any]):

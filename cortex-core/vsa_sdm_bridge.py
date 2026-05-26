@@ -4,8 +4,11 @@ import sqlite3
 import sys
 import logging
 
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
 # Add paths for VSAEngine and local modules
-SKILLS_DIR = "/Users/borjafernandezangulo/.gemini/antigravity/skills"
+SKILLS_DIR = str(Path.home() / ".gemini" / "antigravity" / "skills")
 sys.path.append(os.path.join(SKILLS_DIR, "vsa-sdm-memory-omega"))
 
 try:
@@ -14,13 +17,9 @@ except ImportError:
     logging.error("VSAEngine not found in skills/vsa-sdm-memory-omega.")
     VSAEngine = None
 
-DB_PATH = (
-    "/Users/borjafernandezangulo/Cortex-Persist/cortex-core/cortex_memory_vsa.db"
-)
-KNOWLEDGE_DIR = "/Users/borjafernandezangulo/.gemini/antigravity/knowledge"
-VSA_STORAGE_PATH = (
-    "/Users/borjafernandezangulo/Cortex-Persist/cortex-core/cortex_vsa.vsa"
-)
+DB_PATH = str(PROJECT_ROOT / "cortex-core" / "cortex_memory_vsa.db")
+KNOWLEDGE_DIR = str(Path.home() / ".gemini" / "antigravity" / "knowledge")
+VSA_STORAGE_PATH = str(PROJECT_ROOT / "cortex-core" / "cortex_vsa.vsa")
 
 
 def ensure_db():
@@ -71,7 +70,7 @@ def compress_and_index():
 
         if os.path.exists(meta_file):
             try:
-                with open(meta_file, "r") as f:
+                with open(meta_file) as f:
                     meta = json.load(f)
                     summary = meta.get("summary", "")
             except Exception:
@@ -83,7 +82,7 @@ def compress_and_index():
                 if file.endswith(".md"):
                     try:
                         md_path = os.path.join(artifacts_dir, file)
-                        with open(md_path, "r", encoding="utf-8") as f:
+                        with open(md_path, encoding="utf-8") as f:
                             full_content += f.read() + "\n"
                     except Exception:
                         pass
@@ -125,7 +124,7 @@ def semantic_search(query, limit=3):
     query_vec = engine.encode_text(query)
     
     # Associate recall
-    result_vec = engine.recall(query_vec)
+    _result_vec = engine.recall(query_vec)
 
     # Cross-reference with all stored items in the engine's internal list
     # (In a real VSA system, this would be a cleanup operation against a codebook)
@@ -145,7 +144,7 @@ def semantic_search(query, limit=3):
     # We need to map key_vec back to ki_id. 
     # For now, we'll use a simple name search in the FTS for the top scores.
     # In V3.2 we will implement a true SDM codebook.
-    for score, vec in matches[:limit]:
+    for score, _ in matches[:limit]:
          # For the prototype, we assume the query might match the KI ID
          results.append({"vibe_score": score})
 

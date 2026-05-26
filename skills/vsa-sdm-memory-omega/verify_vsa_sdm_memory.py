@@ -380,11 +380,11 @@ def main():
     print(f"  Footprint: {D * 8} B ({D * 8 / 1024:.1f} KB)")
     print(f"  SDM: {M_locs} locs, r={radius}, "
           f"sparse={activation_rate:.1%}")
-    print(f"  Encoders: N-gram + Record-based")
-    print(f"  Decay: Ebbinghaus, retrieval-verified")
-    print(f"  Resonator: 3-factor HRR")
-    print(f"  Persistence: .vsa binary + SHA-256")
-    print(f"  Pipeline: text→tensor→disk→retrieve ✓")
+    print("  Encoders: N-gram + Record-based")
+    print("  Decay: Ebbinghaus, retrieval-verified")
+    print("  Resonator: 3-factor HRR")
+    print("  Persistence: .vsa binary + SHA-256")
+    print("  Pipeline: text→tensor→disk→retrieve ✓")
     print("=" * 60)
 
 

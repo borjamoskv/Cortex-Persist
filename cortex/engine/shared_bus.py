@@ -233,6 +233,10 @@ class SovereignSharedBus:
         shm = self._shm
         if shm is not None:
             try:
+                shm.close()
+            except Exception:
+                pass
+            try:
                 shm.unlink()
             except FileNotFoundError:
                 logger.debug("Shared memory segment %s already unlinked", self.name)

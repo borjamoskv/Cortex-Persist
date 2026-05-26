@@ -20,7 +20,7 @@ from collections import deque
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Literal
 
-import numpy as np
+from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
 
 if TYPE_CHECKING:
     from cortex.memory.encoder import AsyncEncoder

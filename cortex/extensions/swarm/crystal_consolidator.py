@@ -22,7 +22,7 @@ import time
 from dataclasses import dataclass
 from typing import Any
 
-import numpy as np
+from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
 
 from cortex.extensions.swarm.crystal_thermometer import CrystalVitals
 

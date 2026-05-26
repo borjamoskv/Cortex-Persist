@@ -69,7 +69,7 @@ async def sync_to_langbase(
     client: LangbaseClient,
     engine: AsyncCortexEngine,
     project: str,
-    memory_name: Optional[str] = None,
+    memory_name: str | None = None,
     *,
     limit: int = 500,
 ) -> dict:

@@ -31,8 +31,8 @@ class ChaosResult:
     pipeline_transferred: bool
     critical_process_interrupted: bool
     latency_ns: int
-    error_type: Optional[str] = None
-    ghost_content_hash: Optional[str] = None
+    error_type: str | None = None
+    ghost_content_hash: str | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
 
     @property
@@ -52,11 +52,11 @@ class MockRedisClient:
         self._store: dict[str, str] = {}
         self._is_alive = True
 
-    async def get(self, key: str) -> Optional[str]:
+    async def get(self, key: str) -> str | None:
         await asyncio.sleep(0)  # Satisfy async lint
         return self._store.get(key)
 
-    async def set(self, key: str, value: str, ex: Optional[int] = None) -> bool:
+    async def set(self, key: str, value: str, ex: int | None = None) -> bool:
         await asyncio.sleep(0)
         self._store[key] = value
         return True
@@ -156,7 +156,7 @@ class HydraChaosEngine:
         self,
         scenario: ChaosScenario,
         mock_redis: MockRedisClient,
-        _pipeline_mock: Optional[MagicMock] = None,
+        _pipeline_mock: MagicMock | None = None,
     ) -> ChaosResult:
         """Execute a single chaos scenario and record the result."""
         ghost_pipeline = ErrorGhostPipeline()

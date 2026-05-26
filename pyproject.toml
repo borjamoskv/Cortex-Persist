@@ -32,10 +32,8 @@ dependencies = [
     "click>=8.0",
     "rich>=13.0",
     "aiosqlite>=0.20.0",
-    "keyring>=25.7.0",
     "cryptography>=46.0.7",
     "pydantic>=2.0",
-    "numpy",
 ]
 
 [project.urls]
@@ -45,6 +43,12 @@ Repository = "https://github.com/borjamoskv/Cortex-Persist"
 Issues = "https://github.com/borjamoskv/Cortex-Persist/issues"
 Changelog = "https://github.com/borjamoskv/Cortex-Persist/releases"
 [project.optional-dependencies]
+compute = [
+    "numpy",
+]
+secure = [
+    "keyring>=25.7.0",
+]
 api = [
     "fastapi>=0.110",
     "uvicorn[standard]>=0.27",
@@ -110,7 +114,7 @@ acceleration = [
     "numba>=0.65.0",
 ]
 all = [
-    "cortex-persist[api,mcp,daemon,platform,authoring,dev,adk,toolbox,billing,cloud,trends,embeddings,knowledge,acceleration]",
+    "cortex-persist[compute,secure,api,mcp,daemon,platform,authoring,dev,adk,toolbox,billing,cloud,trends,embeddings,knowledge,acceleration]",
 ]
 
 [project.scripts]
@@ -139,7 +143,7 @@ markers = [
 [tool.ruff]
 target-version = "py310"
 line-length = 100
-exclude = ["experimental", "notebooks"]
+exclude = ["experimental", "notebooks", "skills", "engine-c5", "bounty_hunt", "cortex-core", "cortex_mev_base"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "B", "G", "TID"]

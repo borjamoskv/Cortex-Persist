@@ -89,9 +89,9 @@ class SAPClient:
 
     def __init__(self, config: SAPConfig) -> None:
         self.config = config
-        self._http: Optional[httpx.AsyncClient] = None
-        self._csrf_token: Optional[str] = None
-        self._oauth_token: Optional[str] = None
+        self._http: httpx.AsyncClient | None = None
+        self._csrf_token: str | None = None
+        self._oauth_token: str | None = None
 
     async def connect(self) -> dict[str, str]:
         """Establish connection and fetch CSRF token.
@@ -150,9 +150,9 @@ class SAPClient:
         self,
         entity_set: str,
         *,
-        filters: Optional[str] = None,
-        select: Optional[list[str]] = None,
-        expand: Optional[list[str]] = None,
+        filters: str | None = None,
+        select: list[str] | None = None,
+        expand: list[str] | None = None,
         top: int = 100,
         skip: int = 0,
     ) -> list[dict[str, Any]]:
@@ -340,8 +340,8 @@ class SAPClient:
         method: str,
         url: str,
         *,
-        params: Optional[dict[str, str]] = None,
-        json_data: Optional[dict] = None,
+        params: dict[str, str] | None = None,
+        json_data: dict | None = None,
     ) -> dict[str, Any]:
         """Execute an HTTP request with retry and error handling."""
         resp = await self._raw_request(method, url, params=params, json_data=json_data)
@@ -369,8 +369,8 @@ class SAPClient:
         method: str,
         url: str,
         *,
-        params: Optional[dict[str, str]] = None,
-        json_data: Optional[dict] = None,
+        params: dict[str, str] | None = None,
+        json_data: dict | None = None,
     ) -> httpx.Response:
         """Execute raw HTTP request with retry logic."""
         if not self._http:
@@ -379,9 +379,7 @@ class SAPClient:
         headers = await self._build_request_headers(method, json_data)
         return await self._perform_retry_loop(method, url, params, json_data, headers)
 
-    async def _build_request_headers(
-        self, method: str, json_data: Optional[dict]
-    ) -> dict[str, str]:
+    async def _build_request_headers(self, method: str, json_data: dict | None) -> dict[str, str]:
         """Build the complete headers dictionary for the request."""
         auth_headers = await self._build_auth_headers()
         headers = {
@@ -403,12 +401,12 @@ class SAPClient:
         self,
         method: str,
         url: str,
-        params: Optional[dict[str, str]],
-        json_data: Optional[dict],
+        params: dict[str, str] | None,
+        json_data: dict | None,
         headers: dict[str, str],
     ) -> httpx.Response:
         """Execute the request with backoff retry logic."""
-        last_error: Optional[Exception] = None
+        last_error: Exception | None = None
 
         for attempt in range(self.config.max_retries):
             try:

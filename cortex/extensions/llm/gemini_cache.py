@@ -24,7 +24,7 @@ class GeminiCacheGateway:
         self._base_url = "https://generativelanguage.googleapis.com/v1beta"
 
         # Local state mapping of our cryptographic isolated cache_key -> Gemini remote name
-        # Ex: "123abc456..." -> "cachedContents/xxx-yyy-zzz"
+        # Ex: "123abc456..." -> "cachedContents/uuid-yyy-zzz"
         self._local_to_remote: dict[str, str] = {}
 
     async def get_or_create_cache(
@@ -35,7 +35,7 @@ class GeminiCacheGateway:
         ttl_seconds: int = 3600,
     ) -> str | None:
         """
-        Devuelve el URI remoto temporal de Gemini ('cachedContents/xxx'), creándolo si no existe.
+        Devuelve el URI remoto temporal de Gemini ('cachedContents/uuid'), creándolo si no existe.
         Si la carga es demasiado pequeña o la API falla, devuelve None para hacer fallback a Inferencia Normal.
         """
         if cache_key in self._local_to_remote:

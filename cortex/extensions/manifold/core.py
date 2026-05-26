@@ -27,7 +27,7 @@ logger = logging.getLogger("cortex.extensions.manifold.core")
 class TesseractManifold:
     """The 4D Cognitive Manifold engine."""
 
-    def __init__(self, llm_provider: str = "qwen", agent_id: Optional[str] = None) -> None:
+    def __init__(self, llm_provider: str = "qwen", agent_id: str | None = None) -> None:
         from cortex.extensions.agents.registry import AgentRegistry
         from cortex.extensions.llm.provider import LLMProvider
 
@@ -63,7 +63,7 @@ class TesseractManifold:
 
             # Run active dimensions concurrently
             # D1: Perception (Context, History, Predix)
-            async def run_d1() -> Optional[dict]:
+            async def run_d1() -> dict | None:
                 if state.dimensions[DimensionType.D1_PERCEPTION].active:
                     return await self.d1.process(
                         task, toolkit, state.dimensions[DimensionType.D1_PERCEPTION]
@@ -71,7 +71,7 @@ class TesseractManifold:
                 return None
 
             # D2: Decision (Plan, Intent expansion)
-            async def run_d2() -> Optional[object]:
+            async def run_d2() -> object | None:
                 if state.dimensions[DimensionType.D2_DECISION].active:
                     return await self.d2.process(
                         task, toolkit, state.dimensions[DimensionType.D2_DECISION]
@@ -84,7 +84,7 @@ class TesseractManifold:
             state.dimensions[DimensionType.D2_DECISION].output = d2_res
 
             # D3: Creation (Materialization, Scaffold, Code)
-            async def run_d3(plan: Optional[object]) -> Optional[str]:
+            async def run_d3(plan: object | None) -> str | None:
                 if state.dimensions[DimensionType.D3_CREATION].active:
                     return await self.d3.process(
                         task,
@@ -95,7 +95,7 @@ class TesseractManifold:
                 return None
 
             # D4: Validation (Siege, Fitness, Entropy reduction)
-            async def run_d4() -> Optional[dict]:
+            async def run_d4() -> dict | None:
                 if state.dimensions[DimensionType.D4_VALIDATION].active:
                     return await self.d4.process(
                         task, toolkit, state.dimensions[DimensionType.D4_VALIDATION]

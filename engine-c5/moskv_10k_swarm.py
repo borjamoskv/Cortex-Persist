@@ -33,9 +33,9 @@ def log(msg: str, tier: str = "INFO") -> None:
 async def agent_strike(
     agent_id: int, 
     session: aiohttp.ClientSession, 
-    target: Dict[str, Any], 
+    target: dict[str, Any], 
     semaphore: asyncio.Semaphore, 
-    results: List[Dict[str, Any]]
+    results: list[dict[str, Any]]
 ) -> None:
     """Corrutina C5-REAL: 1 Agente -> 1 Ataque."""
     async with semaphore:
@@ -57,7 +57,7 @@ async def agent_strike(
         except (aiohttp.ClientError, asyncio.TimeoutError):
             pass # Chaos network. Ignoramos a los agentes caídos.
 
-async def swarm_commander() -> List[Dict[str, Any]]:
+async def swarm_commander() -> list[dict[str, Any]]:
     log("Iniciando Matriz Asíncrona (C5-REAL)...", "SYSTEM")
     log(f"Liberando Legión de {TOTAL_AGENTS} Agentes. Restricción Termodinámica: {CONCURRENCY_LIMIT} concurrentes.", "SWARM")
     
@@ -80,7 +80,7 @@ async def swarm_commander() -> List[Dict[str, Any]]:
         
     return results
 
-def crystallize_ledger(results: List[Dict[str, Any]]) -> None:
+def crystallize_ledger(results: list[dict[str, Any]]) -> None:
     log("Asalto concluido. Procesando Tensor-State (RTT)...", "SYSTEM")
     output_path = os.path.expanduser("~/Cortex-Persist/engine-c5/mev_rpc_routing.json")
     

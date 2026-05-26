@@ -39,7 +39,7 @@ class CircuitBreaker:
         self._state = "CLOSED"
         self._failure_count = 0
         self._success_count = 0
-        self._opened_at: Optional[float] = None
+        self._opened_at: float | None = None
 
     @property
     def state(self) -> str:

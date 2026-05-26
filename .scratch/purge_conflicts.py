@@ -11,7 +11,7 @@ import sys
 from pathlib import Path
 
 CONFLICT_RE = re.compile(
-    r'^<<<<<<< HEAD\n(.*?)^=======\n(.*?)^>>>>>>> [^\n]+\n',
+    r"^<<<<<<< HEAD\n(.*?)^=======\n(.*?)^>>>>>>> [^\n]+\n",
     re.MULTILINE | re.DOTALL,
 )
 
@@ -19,7 +19,7 @@ CONFLICT_RE = re.compile(
 def resolve_file(path: Path, dry_run: bool = False) -> int:
     """Resolve all conflicts in a file by keeping HEAD. Returns count resolved."""
     content = path.read_text(encoding="utf-8", errors="replace")
-    resolved, count = CONFLICT_RE.subn(r'\1', content)
+    resolved, count = CONFLICT_RE.subn(r"\1", content)
     if count > 0 and not dry_run:
         path.write_text(resolved, encoding="utf-8")
     return count
@@ -47,7 +47,9 @@ def main():
             prefix = "[DRY] " if dry_run else "[FIX] "
             print(f"{prefix}{f} — {count} conflicts")
 
-    print(f"\n{'DRY RUN' if dry_run else 'RESOLVED'}: {total_conflicts} conflicts in {total_files} files")
+    print(
+        f"\n{'DRY RUN' if dry_run else 'RESOLVED'}: {total_conflicts} conflicts in {total_files} files"
+    )
 
 
 if __name__ == "__main__":

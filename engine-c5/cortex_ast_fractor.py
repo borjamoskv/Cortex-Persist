@@ -12,7 +12,7 @@ import concurrent.futures
 def log(msg: str, tier: str = "INFO") -> None:
     print(f"[{datetime.now().time()}] [{tier}] [FRACTOR] {msg}")
 
-def extract_private_ast(target_path: str) -> List[Dict[str, str]]:
+def extract_private_ast(target_path: str) -> list[dict[str, str]]:
     log(f"Escaneando recursivamente el AST material de {target_path}...", "L2-EXTRACTOR")
     nodes = []
     
@@ -25,7 +25,7 @@ def extract_private_ast(target_path: str) -> List[Dict[str, str]]:
             if file.endswith('.sol'):
                 filepath = os.path.join(root, file)
                 try:
-                    with open(filepath, 'r', encoding='utf-8') as f:
+                    with open(filepath, encoding='utf-8') as f:
                         lines = f.readlines()
                 except (OSError, UnicodeDecodeError):
                     continue
@@ -51,7 +51,7 @@ SAGE_COUNCIL = [
     "Rol: BYZANTINE-ASSAILANT. Manipulación asimétrica pura. Explotas desajustes de control de acceso o firmas huérfanas en el contrato de EntryPoint o Paymaster. Escribe exploits engañosos. Zero rhetoric."
 ]
 
-def call_qwen_mcts(target_functions: List[str], mutation_id: int, temperature: float) -> str:
+def call_qwen_mcts(target_functions: list[str], mutation_id: int, temperature: float) -> str:
     api_key = os.environ.get("QWEN_API_KEY")
     if not api_key:
         return None
@@ -87,7 +87,7 @@ def call_qwen_mcts(target_functions: List[str], mutation_id: int, temperature: f
         log(f"API Qwen falló en M{mutation_id}: {str(e)}", "ERROR")
         return None
 
-def process_single_mutation(mutation_id: int, target_functions: List[str], fuzz_dir: str):
+def process_single_mutation(mutation_id: int, target_functions: list[str], fuzz_dir: str):
     """
     Ejecuta un thread MCTS e IO atado a disco para una variante estocástica de harness.
     """
@@ -128,7 +128,7 @@ contract L2StochasticPoC_M{mutation_id} is Test {{
         log(f"Error I/O escribiendo POC (M{mutation_id}): {str(e)}", "ERROR")
         return False
 
-def generate_poc(target_nodes: List[Dict[str, str]], fuzz_dir: str) -> bool:
+def generate_poc(target_nodes: list[dict[str, str]], fuzz_dir: str) -> bool:
     """
     Genera fìsicamente los arneses PoC x18 concurrente con base ThreadPoolExecutor.
     """

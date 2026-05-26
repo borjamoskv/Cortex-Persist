@@ -55,7 +55,7 @@ class FrequencyMetadata:
 
     tier: MemoryFrequency = MemoryFrequency.HOT
     access_count: int = 0
-    promotion_history: Optional[list[str]] = None
+    promotion_history: list[str] | None = None
 
 
 class ContinuousMemorySystem:
