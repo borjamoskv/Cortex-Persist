@@ -56,6 +56,3 @@ def test_ring_buffer_overflow():
     assert buffer.enqueue(b"a1", b"p1") is True
     assert buffer.enqueue(b"a2", b"p2") is True
     assert buffer.enqueue(b"a3", b"p3") is False  # Full!
-
-
-
