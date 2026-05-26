@@ -2,8 +2,10 @@
 CORTEX JIT Compiled Skill: L1-Yang-Mills-Omega
 Description: Sovereign Mathematical Physics Engine — Clúster especializado en la resolución asíncrona de la Brecha de Masa (Mass Gap) en teorías Yang-Mills aislando tensores de vacío en Lattice Gauge.
 """
+
 import json
 import logging
+
 
 class L1YangMillsOmegaSkill:
     def __init__(self):
@@ -27,5 +29,5 @@ class L1YangMillsOmegaSkill:
             "skill": self.name,
             "injected_knowledge_tokens": len(self.instructions.split()),
             "yield_impact": "O(1) Execution",
-            "extracted_payload": payload
+            "extracted_payload": payload,
         }

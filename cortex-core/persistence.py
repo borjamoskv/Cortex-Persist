@@ -10,7 +10,7 @@ import fcntl
 VSA_DIMENSION = 10000
 DB_PATH = os.getenv(
     "CORTEX_DB_PATH",
-    os.path.join(os.path.dirname(os.path.abspath(__file__)), "cortex_memory_vsa.db")
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "cortex_memory_vsa.db"),
 )
 SWARM_QUEUE_FILE = "/tmp/cortex_swarm_queue.json"
 
@@ -243,7 +243,7 @@ def _enqueue_swarm_task_sync(agent_name: str, payload: dict):
         "VulnerabilityFixer": ["security", "code"],
         "InvariantValidator": ["security", "code"],
         "SAGE_COUNCIL": ["intel", "research"],
-        "OPTIMIZER": ["code"]
+        "OPTIMIZER": ["code"],
     }
     required_caps = caps_map.get(agent_name, ["code"])
 
@@ -251,26 +251,26 @@ def _enqueue_swarm_task_sync(agent_name: str, payload: dict):
         "title": f"Swarm: {agent_name} Task",
         "description": json.dumps(payload) if isinstance(payload, dict) else str(payload),
         "required_capabilities": required_caps,
-        "reward": float(payload.get("reward", 0.0)) if (isinstance(payload, dict) and "reward" in payload) else 0.0,
-        "delegator_id": "system"
+        "reward": float(payload.get("reward", 0.0))
+        if (isinstance(payload, dict) and "reward" in payload)
+        else 0.0,
+        "delegator_id": "system",
     }
 
     try:
         import urllib.request
         import urllib.error
+
         req = urllib.request.Request(
             f"{nexus_url.rstrip('/')}/api/tasks",
             data=json.dumps(task_data).encode("utf-8"),
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {nexus_token}"
-            },
-            method="POST"
+            headers={"Content-Type": "application/json", "Authorization": f"Bearer {nexus_token}"},
+            method="POST",
         )
         # Timeout at 1.0 second to ensure non-blocking dispatch
         with urllib.request.urlopen(req, timeout=1.0) as resp:
             if resp.status in (200, 201):
-                logger.info("Successfully sync'd task to NEXUS API: %s", task_data['title'])
+                logger.info("Successfully sync'd task to NEXUS API: %s", task_data["title"])
     except Exception as e:
         logger.warning("Could not sync task to NEXUS API (server offline/unreachable): %s", e)
 
@@ -285,4 +285,3 @@ def enqueue_swarm_task(agent_name: str, payload: dict):
     except RuntimeError:
         pass
     _enqueue_swarm_task_sync(agent_name, payload)
-

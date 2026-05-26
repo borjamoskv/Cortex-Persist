@@ -304,7 +304,9 @@ class CortexDaemon:
 
         # HIGH-02 hardened: use exec with explicit arg list
         process = await asyncio.create_subprocess_exec(
-            "python3", mirror_script, self_path,
+            "python3",
+            mirror_script,
+            self_path,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
         )

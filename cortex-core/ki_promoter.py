@@ -77,8 +77,7 @@ def detect_context() -> dict:
     # Check git repo name
     try:
         result = subprocess.run(
-            ["git", "rev-parse", "--show-toplevel"],
-            capture_output=True, text=True, timeout=3
+            ["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True, timeout=3
         )
         if result.returncode == 0:
             project_name = Path(result.stdout.strip()).name.lower()
@@ -227,7 +226,7 @@ def main():
         context = detect_context()
 
     print(f"{'=' * 70}")
-    print(f"KI CONTEXT PROMOTER")
+    print("KI CONTEXT PROMOTER")
     print(f"{'=' * 70}")
     print(f"  Project:  {context.get('project', '?')}")
     print(f"  Domain:   {context['domain']}")
@@ -246,7 +245,7 @@ def main():
             with open(meta_path) as f:
                 meta = json.load(f)
             scored.append(score_ki(meta, meta_path, context))
-        except (json.JSONDecodeError, IOError):
+        except (OSError, json.JSONDecodeError):
             continue
 
     # Sort by score descending
@@ -259,7 +258,7 @@ def main():
     for i, ki in enumerate(scored[:top_n]):
         marker = "→" if not dry_run else " "
         print(
-            f"{marker}{i+1:<3} {ki.score:<8.4f} {ki.tag_score:<6.3f} "
+            f"{marker}{i + 1:<3} {ki.score:<8.4f} {ki.tag_score:<6.3f} "
             f"{ki.domain_score:<6.3f} {ki.freshness_score:<7.3f} "
             f"{ki.domain:<15} {ki.name[:40]}"
         )
@@ -277,16 +276,16 @@ def main():
             try:
                 promote_ki(ki)
                 promoted += 1
-            except IOError as e:
+            except OSError as e:
                 print(f"  ERROR promoting {ki.name}: {e}")
 
         print(f"\n  ✓ Promoted {promoted}/{top_n} KIs")
-        print(f"  → These will be injected in the next conversation")
+        print("  → These will be injected in the next conversation")
     else:
         print(f"\n  → Run without --dry-run to promote top-{top_n}")
 
     # Bottom 10 for awareness
-    print(f"\n  Bottom 5 (lowest relevance):")
+    print("\n  Bottom 5 (lowest relevance):")
     for ki in scored[-5:]:
         print(f"    {ki.score:.4f}  {ki.domain:<15} {ki.name[:50]}")
 

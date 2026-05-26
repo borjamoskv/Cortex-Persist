@@ -5,6 +5,7 @@ import sys
 import logging
 
 from pathlib import Path
+
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 # Add paths for VSAEngine and local modules
@@ -26,13 +27,13 @@ def ensure_db():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     # Hybrid FTS5 + VSA: FTS for exact, VSA for associative
-    c.execute('''
+    c.execute("""
         CREATE VIRTUAL TABLE IF NOT EXISTS cortex_knowledge USING fts5(
             ki_id, 
             summary, 
             content
         )
-    ''')
+    """)
     conn.commit()
     return conn
 
@@ -64,7 +65,7 @@ def compress_and_index():
 
         meta_file = os.path.join(ki_path, "metadata.json")
         artifacts_dir = os.path.join(ki_path, "artifacts")
-        
+
         summary = ""
         full_content = ""
 
@@ -90,7 +91,7 @@ def compress_and_index():
         # Index in FTS5
         c.execute(
             "INSERT INTO cortex_knowledge (ki_id, summary, content) VALUES (?, ?, ?)",
-            (ki_folder, summary, full_content)
+            (ki_folder, summary, full_content),
         )
 
         # VSA Associative Memorize
@@ -122,7 +123,7 @@ def semantic_search(query, limit=3):
 
     # Encode query search vector
     query_vec = engine.encode_text(query)
-    
+
     # Associate recall
     _result_vec = engine.recall(query_vec)
 
@@ -135,18 +136,18 @@ def semantic_search(query, limit=3):
         key_vec, val_vec, ts, lam = item
         score = engine.cosine(query_vec, key_vec)
         if score > 0.1:  # Relevance threshold
-             matches.append((score, key_vec))
+            matches.append((score, key_vec))
 
     # Sort by score and de-duplicate
     matches.sort(key=lambda x: x[0], reverse=True)
     results = []
-    
-    # We need to map key_vec back to ki_id. 
+
+    # We need to map key_vec back to ki_id.
     # For now, we'll use a simple name search in the FTS for the top scores.
     # In V3.2 we will implement a true SDM codebook.
     for score, _ in matches[:limit]:
-         # For the prototype, we assume the query might match the KI ID
-         results.append({"vibe_score": score})
+        # For the prototype, we assume the query might match the KI ID
+        results.append({"vibe_score": score})
 
     return results
 

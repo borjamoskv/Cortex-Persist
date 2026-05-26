@@ -20,6 +20,7 @@ vsa = cortex_storage.l2
 ledger = cortex_storage.l3
 
 from pathlib import Path
+
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DB_PATH = str(PROJECT_ROOT / "cortex-core" / "cortex_memory_vsa.db")
 

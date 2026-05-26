@@ -26,46 +26,59 @@ KI_BASE = Path.home() / ".gemini" / "antigravity" / "knowledge"
 
 # Canonical schema
 CANONICAL_FIELDS = {
-    "title", "summary", "created_at", "updated_at", "last_accessed",
-    "access_count", "status", "confidence", "tags", "domain",
-    "references", "calibration",
+    "title",
+    "summary",
+    "created_at",
+    "updated_at",
+    "last_accessed",
+    "access_count",
+    "status",
+    "confidence",
+    "tags",
+    "domain",
+    "references",
+    "calibration",
 }
 
 # Timestamp field normalization map
 TIMESTAMP_ALIASES = {
-    "created":        "created_at",
-    "createdAt":      "created_at",
-    "date_created":   "created_at",
-    "date_added":     "created_at",
-    "crystallized_at":"created_at",
-    "crawled_at":     "created_at",
-    "updated":        "updated_at",
-    "updatedAt":      "updated_at",
-    "date_updated":   "updated_at",
-    "last_updated":   "updated_at",
-    "lastModified":   "updated_at",
-    "lastAccessed":   "last_accessed",
+    "created": "created_at",
+    "createdAt": "created_at",
+    "date_created": "created_at",
+    "date_added": "created_at",
+    "crystallized_at": "created_at",
+    "crawled_at": "created_at",
+    "updated": "updated_at",
+    "updatedAt": "updated_at",
+    "date_updated": "updated_at",
+    "last_updated": "updated_at",
+    "lastModified": "updated_at",
+    "lastAccessed": "last_accessed",
 }
 
 # Domain inference from tags (priority order)
 DOMAIN_RULES = [
-    ({"bounty", "immunefi", "code4rena"},          "security"),
-    ({"security", "critical", "high"},              "security"),
-    ({"cortex"},                                    "cortex"),
-    ({"ai-agent", "ai-model"},                      "ai"),
-    ({"music", "sonic", "audio"},                   "multimedia"),
-    ({"design", "aesthetic"},                       "design"),
-    ({"philosophy"},                                "philosophy"),
-    ({"hardware"},                                  "hardware"),
-    ({"web3", "blockchain", "defi"},                "web3"),
-    ({"research"},                                  "research"),
-    ({"infrastructure"},                            "infrastructure"),
+    ({"bounty", "immunefi", "code4rena"}, "security"),
+    ({"security", "critical", "high"}, "security"),
+    ({"cortex"}, "cortex"),
+    ({"ai-agent", "ai-model"}, "ai"),
+    ({"music", "sonic", "audio"}, "multimedia"),
+    ({"design", "aesthetic"}, "design"),
+    ({"philosophy"}, "philosophy"),
+    ({"hardware"}, "hardware"),
+    ({"web3", "blockchain", "defi"}, "web3"),
+    ({"research"}, "research"),
+    ({"infrastructure"}, "infrastructure"),
 ]
 
 # Fields to preserve as-is (non-canonical but potentially useful)
 PRESERVE_FIELDS = {
-    "calibration", "capital_vector", "vulnerabilities",
-    "poc_path", "poc_type", "pdr_hash",
+    "calibration",
+    "capital_vector",
+    "vulnerabilities",
+    "poc_path",
+    "poc_type",
+    "pdr_hash",
 }
 
 
@@ -120,8 +133,7 @@ def standardize_ki(meta: dict, meta_path: Path, dry_run: bool = True) -> dict:
     stat = meta_path.stat()
     if "created_at" not in normalized:
         normalized["created_at"] = datetime.fromtimestamp(
-            stat.st_birthtime if hasattr(stat, 'st_birthtime') else stat.st_ctime,
-            tz=timezone.utc
+            stat.st_birthtime if hasattr(stat, "st_birthtime") else stat.st_ctime, tz=timezone.utc
         ).isoformat()
         changes.append("  ✓ created_at ← file birthtime")
 
@@ -211,7 +223,7 @@ def main():
         try:
             with open(meta_path) as f:
                 meta = json.load(f)
-        except (json.JSONDecodeError, IOError) as e:
+        except (OSError, json.JSONDecodeError) as e:
             print(f"ERROR: {ki_dir.name}: {e}")
             stats["errors"] += 1
             continue
@@ -244,7 +256,7 @@ def main():
 
     # Report
     print(f"\n{'=' * 70}")
-    print(f"RESULTS")
+    print("RESULTS")
     print(f"{'=' * 70}")
     print(f"  Total KIs:              {stats['total']}")
     print(f"  Modified:               {stats['modified']}")
@@ -253,12 +265,12 @@ def main():
     print(f"  Domains inferred:       {stats['domains_inferred']}")
     print(f"  Oversized summaries:    {stats['oversized_summaries']}")
     print(f"  Fields dropped:         {stats['fields_dropped']}")
-    print(f"\n  Domain distribution:")
+    print("\n  Domain distribution:")
     for domain, count in stats["domains"].most_common():
         print(f"    {domain:<20} {count:>4}")
 
     if mode == "dry-run":
-        print(f"\n  → Run with --apply to write changes")
+        print("\n  → Run with --apply to write changes")
     elif mode == "apply":
         print(f"\n  ✓ Changes applied to {stats['modified']} KIs")
 

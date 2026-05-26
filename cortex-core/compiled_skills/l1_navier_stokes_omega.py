@@ -2,8 +2,10 @@
 CORTEX JIT Compiled Skill: L1-Navier-Stokes-Omega
 Description: Sovereign Fluid Dynamics Engine — Clúster especializado en Falsación de las Ecuaciones de Navier-Stokes utilizando simulación 3D de turbulencia (WebGL/WebGPU) y detección diferencial de Blow-Ups.
 """
+
 import json
 import logging
+
 
 class L1NavierStokesOmegaSkill:
     def __init__(self):
@@ -27,5 +29,5 @@ class L1NavierStokesOmegaSkill:
             "skill": self.name,
             "injected_knowledge_tokens": len(self.instructions.split()),
             "yield_impact": "O(1) Execution",
-            "extracted_payload": payload
+            "extracted_payload": payload,
         }

@@ -3,6 +3,7 @@ import re
 import json
 
 from pathlib import Path
+
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 SKILLS_DIR = str(Path.home() / ".gemini" / "antigravity" / "skills")
@@ -12,13 +13,13 @@ TARGET_DIR = str(PROJECT_ROOT / "cortex-core" / "compiled_skills")
 def parse_skill_markdown(filepath):
     """Parse skill markdown and extract metadata and body."""
     try:
-        with open(filepath, encoding='utf-8') as f:
+        with open(filepath, encoding="utf-8") as f:
             content = f.read()
     except Exception:
         return None
 
     # Parse YAML frontmatter using basic regex
-    regex = r'^---\s*\n(.*?)\n---\s*\n(.*)'
+    regex = r"^---\s*\n(.*?)\n---\s*\n(.*)"
     frontmatter_match = re.match(regex, content, re.DOTALL)
 
     metadata = {}
@@ -29,9 +30,9 @@ def parse_skill_markdown(filepath):
         body = frontmatter_match.group(2)
 
         # Simple Name and Description parse
-        for line in yaml_content.split('\n'):
-            if ':' in line:
-                key, val = line.split(':', 1)
+        for line in yaml_content.split("\n"):
+            if ":" in line:
+                key, val = line.split(":", 1)
                 metadata[key.strip()] = val.strip().strip("'\"")
 
     return metadata, body
@@ -39,11 +40,11 @@ def parse_skill_markdown(filepath):
 
 def compile_to_python(skill_folder, metadata, body):
     """Compile skill instructions into a Python object template."""
-    safe_name = skill_folder.replace('-', '_').replace('.', '_').lower()
-    class_name = "".join(x.capitalize() for x in safe_name.split('_'))
+    safe_name = skill_folder.replace("-", "_").replace(".", "_").lower()
+    class_name = "".join(x.capitalize() for x in safe_name.split("_"))
     class_name += "Skill"
 
-    description = metadata.get('description', 'No description provided')
+    description = metadata.get("description", "No description provided")
     encoded_body = json.dumps(body)  # To escape quotes securely
 
     template = f"""\"\"\"
@@ -122,8 +123,7 @@ def main():
         f.write("]\n")
 
     msg = (
-        f"\n[CORTEX JIT] Successfully compiled {compiled_count} "
-        "markdown skills to Python objects."
+        f"\n[CORTEX JIT] Successfully compiled {compiled_count} markdown skills to Python objects."
     )
     print(msg)
 

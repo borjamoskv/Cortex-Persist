@@ -9,11 +9,12 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
+
 class SubmissionBridge:
     def __init__(self, watch_dir="./engine-c5/targets/active"):
         self.watch_dir = Path(watch_dir)
         self.verified_pocs = []
-        
+
     def log(self, msg, tier="INFO"):
         # MED-03: Migrated from print() to structured logging
         logger.info("[%s] [BRIDGE] %s", tier, msg)
@@ -21,7 +22,7 @@ class SubmissionBridge:
     def verify_poc(self, target_path, poc_file):
         """Invoke Foundry (Forge) to verify the PoC."""
         self.log(f"Verifying PoC: {poc_file} on target {target_path}", "C5-VERIFY")
-        
+
         try:
             # Command: forge test --match-path <poc_file> -vvv
             # We assume Foundry is installed and the target is a Foundry project
@@ -30,9 +31,9 @@ class SubmissionBridge:
                 cwd=target_path,
                 capture_output=True,
                 text=True,
-                timeout=60
+                timeout=60,
             )
-            
+
             if " [PASS] " in result.stdout:
                 self.log(f"PoC VERIFIED (PASS): {poc_file}", "C5-SUCCESS")
                 return True, result.stdout
@@ -79,24 +80,29 @@ Validate state transitions and enforce strict access control on internal functio
         while True:
             # Scan active targets for new PoC files in test/fuzz/
             for target in self.watch_dir.iterdir():
-                if not target.is_dir(): continue
-                
+                if not target.is_dir():
+                    continue
+
                 fuzz_dir = target / "test" / "fuzz"
-                if not fuzz_dir.exists(): continue
-                
+                if not fuzz_dir.exists():
+                    continue
+
                 for poc in fuzz_dir.glob("PoC_*.sol"):
-                    if poc.name in [p['name'] for p in self.verified_pocs]: 
+                    if poc.name in [p["name"] for p in self.verified_pocs]:
                         continue
-                    
+
                     success, logs = self.verify_poc(target, poc)
-                    self.verified_pocs.append({"name": poc.name, "target": target.name, "success": success})
-                    
+                    self.verified_pocs.append(
+                        {"name": poc.name, "target": target.name, "success": success}
+                    )
+
                     if success:
                         with open(poc) as f:
                             poc_content = f.read()
                         self.generate_report(target.name, poc_content, logs)
-            
+
             time.sleep(30)  # noqa: ASYNC101 — standalone CLI script, no event loop
+
 
 if __name__ == "__main__":
     bridge = SubmissionBridge()
