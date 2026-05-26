@@ -114,12 +114,23 @@ class LedgerManager:
         """Hash-chain new transaction to guarantee auditable tamper-evident history."""
         with self._lock:
             c = self._conn.cursor()
-            # Get previous hash
-            c.execute("SELECT hash FROM ledger_records ORDER BY id DESC LIMIT 1")
+            # Get previous hash and validate timestamp monotonicity (Anti-Time-Jacking)
+            c.execute("SELECT hash, timestamp FROM ledger_records ORDER BY id DESC LIMIT 1")
             row = c.fetchone()
-            prev_hash = row[0] if row else "GENESIS_BLOCK"
+            if row:
+                prev_hash, last_timestamp = row
+            else:
+                prev_hash = "GENESIS_BLOCK"
+                last_timestamp = 0.0
 
-            timestamp = time.time()
+            current_time = time.time()
+            # L2 Sequencer Enforcement: Prevent rollback / Time-Jacking
+            if current_time <= last_timestamp:
+                logger.warning(f"SECURITY ALERT: Time-Jacking or clock drift detected. Current: {current_time}, Last: {last_timestamp}. Enforcing monotonic sequence.")
+                timestamp = last_timestamp + 0.001
+            else:
+                timestamp = current_time
+
             payload = f"{prev_hash}_{action}_{vector_id}_{yield_amount}_{timestamp}"
             block_hash = hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
@@ -440,6 +451,7 @@ def _enqueue_swarm_task_sync(agent_name: str, payload: dict):
         conn.commit()
     except Exception as e:
         logger.error("Failed to enqueue swarm task via SQLite: %s", e)
+        raise
 
 
 def enqueue_swarm_task(agent_name: str, payload: dict):
