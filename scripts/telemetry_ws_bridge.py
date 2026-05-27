@@ -30,7 +30,7 @@ async def telemetry_loop(websocket):
             # Emisión de métricas termodinámicas (Proyección C5-REAL)
             # En producción, se extraen del pm.ring.process_all_native()
             payload = {
-                "timestamp": time.monotonic(),
+                "timestamp": time.time(),
                 "swarm_state": "LEGION_ZERO_LATENCY_LOCKED",
                 "metrics": {
                     "active_nodes": 10000,

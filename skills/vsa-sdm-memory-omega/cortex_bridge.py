@@ -79,7 +79,7 @@ class SwarmMemory:
             tags: Optional dict of structured metadata.
             timestamp: Unix timestamp (default: now).
         """
-        ts = timestamp or time.monotonic()
+        ts = timestamp or time.time()
 
         # Generate a time-key for this event
         time_key = self.engine.random_vec()
@@ -114,7 +114,7 @@ class SwarmMemory:
         Record a full agent state snapshot (structured).
         Useful for periodic checkpoints.
         """
-        ts = timestamp or time.monotonic()
+        ts = timestamp or time.time()
         time_key = self.engine.random_vec()
         state_vec = self.engine.encode_record(state_dict)
         self.engine.memorize(
