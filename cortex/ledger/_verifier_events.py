@@ -58,16 +58,14 @@ def verify_events(verifier: _PublicLedgerVerifier) -> None:
     temporal_ok = bool(verifier.events)
 
     for index, event in enumerate(verifier.events, start=1):
-        (i_ok, o_ok, a_ok, r_ok, t_ok, previous_sequence, previous_hash) = (
-            _verify_single_event(
-                verifier,
-                event,
-                index,
-                seen_event_ids,
-                seen_nonces,
-                previous_sequence,
-                previous_hash,
-            )
+        (i_ok, o_ok, a_ok, r_ok, t_ok, previous_sequence, previous_hash) = _verify_single_event(
+            verifier,
+            event,
+            index,
+            seen_event_ids,
+            seen_nonces,
+            previous_sequence,
+            previous_hash,
         )
         integrity_ok = integrity_ok and i_ok
         origin_ok = origin_ok and o_ok
@@ -200,7 +198,9 @@ def _verify_single_event(  # noqa: C901
     )
 
 
-def _verify_event_time(verifier: _PublicLedgerVerifier, event: Mapping[str, Any], index: int) -> bool:
+def _verify_event_time(
+    verifier: _PublicLedgerVerifier, event: Mapping[str, Any], index: int
+) -> bool:
     try:
         issued_at = _parse_utc(str(event["issued_at"]))
         recorded_at = _parse_utc(str(event["recorded_at"]))

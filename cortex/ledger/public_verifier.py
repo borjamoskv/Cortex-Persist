@@ -197,9 +197,9 @@ class _PublicLedgerVerifier:
         self.guarantees["truth_verified"] = False
 
         if self.manifest is not None and self.guarantees["completeness_verified"]:
-            self.guarantees["authority_verified"] = (
-                self.guarantees["authority_verified"] and manifest_export_authority_ok(self)
-            )
+            self.guarantees["authority_verified"] = self.guarantees[
+                "authority_verified"
+            ] and manifest_export_authority_ok(self)
 
     def _report(self) -> dict[str, Any]:
         errors = sorted(set(self.errors))

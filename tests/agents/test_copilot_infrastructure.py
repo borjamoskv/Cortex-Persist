@@ -131,12 +131,8 @@ class TestContextWindow:
         prefix = "a" * 5000
         suffix = "b" * 5000
 
-        window_75 = build_context_window(
-            prefix, suffix, budget_tokens=200, prefix_ratio=0.75
-        )
-        window_25 = build_context_window(
-            prefix, suffix, budget_tokens=200, prefix_ratio=0.25
-        )
+        window_75 = build_context_window(prefix, suffix, budget_tokens=200, prefix_ratio=0.75)
+        window_25 = build_context_window(prefix, suffix, budget_tokens=200, prefix_ratio=0.25)
 
         # 75% prefix should give more prefix tokens
         assert window_75.prefix_tokens >= window_25.prefix_tokens
@@ -406,11 +402,13 @@ class MockLLMClient:
         temperature: float = 0.0,
         stop: list[str] | None = None,
     ) -> LLMResponse:
-        self.calls.append({
-            "prompt_len": len(prompt),
-            "max_tokens": max_tokens,
-            "temperature": temperature,
-        })
+        self.calls.append(
+            {
+                "prompt_len": len(prompt),
+                "max_tokens": max_tokens,
+                "temperature": temperature,
+            }
+        )
 
         if self.delay > 0:
             await asyncio.sleep(self.delay)
@@ -457,15 +455,11 @@ class TestLLMStrategy:
     async def test_uses_context_window(self) -> None:
         """Strategy should truncate context before sending to LLM."""
         client = MockLLMClient()
-        strategy = LLMCompletionStrategy(
-            client, context_budget_tokens=50
-        )
+        strategy = LLMCompletionStrategy(client, context_budget_tokens=50)
 
         # Large context
         big_prefix = "x = 1\n" * 1000
-        results = await strategy.generate(
-            self._make_context(prefix=big_prefix)
-        )
+        results = await strategy.generate(self._make_context(prefix=big_prefix))
 
         # LLM should have been called with truncated prompt
         assert len(client.calls) == 1
@@ -477,9 +471,7 @@ class TestLLMStrategy:
         client = MockLLMClient(fail=True)
         strategy = LLMCompletionStrategy(client)
 
-        results = await strategy.generate(
-            self._make_context(prefix="def hello():")
-        )
+        results = await strategy.generate(self._make_context(prefix="def hello():"))
 
         # Should still return something (from fallback)
         assert len(results) >= 1
@@ -490,7 +482,8 @@ class TestLLMStrategy:
         """Slow LLM should trigger timeout and fallback."""
         client = MockLLMClient(delay=10.0)  # Very slow
         strategy = LLMCompletionStrategy(
-            client, timeout_seconds=0.1  # Very short timeout
+            client,
+            timeout_seconds=0.1,  # Very short timeout
         )
 
         results = await strategy.generate(self._make_context())

@@ -103,9 +103,7 @@ def _verify_single_checkpoint(  # noqa: C901
             pass
 
     permissions = _string_list(matching_key.get("permissions"))
-    if not any(
-        p in permissions for p in ("ledger.checkpoint", "ledger.export", "ledger.write")
-    ):
+    if not any(p in permissions for p in ("ledger.checkpoint", "ledger.export", "ledger.write")):
         verifier.errors.append(f"checkpoint_key_missing_permission:{index}")
         return False
 

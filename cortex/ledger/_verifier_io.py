@@ -94,7 +94,9 @@ def load_optional_object(
     return _load_json_object(path, verifier.errors)
 
 
-def build_key_index(verifier: _PublicLedgerVerifier, registry: Mapping[str, Any]) -> dict[str, dict[str, Any]]:
+def build_key_index(
+    verifier: _PublicLedgerVerifier, registry: Mapping[str, Any]
+) -> dict[str, dict[str, Any]]:
     keys = registry.get("keys")
     if not isinstance(keys, list):
         verifier.errors.append("public_keys_missing_keys_array")
