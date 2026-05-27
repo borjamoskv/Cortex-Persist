@@ -445,11 +445,11 @@ def _safe_serialize(obj: Any) -> Any:
     """Best-effort serialization of tool results for logging."""
     if obj is None:
         return None
-    if isinstance(obj, (str, int, float, bool)):
+    if isinstance(obj, str | int | float | bool):
         return obj
     if isinstance(obj, dict):
         return {k: _safe_serialize(v) for k, v in obj.items()}
-    if isinstance(obj, (list, tuple)):
+    if isinstance(obj, list | tuple):
         return [_safe_serialize(v) for v in obj]
     try:
         return str(obj)[:500]

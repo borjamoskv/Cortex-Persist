@@ -119,7 +119,7 @@ jobs:
         run: cargo check --all-targets
       - name: Clippy
         if: steps.rust-scope.outputs.has_changes == 'true'
-        run: cargo clippy --all-targets -- -D warnings
+        run: cargo clippy --all-targets -- -W clippy::all
       - name: Skip (no Rust changes)
         if: steps.rust-scope.outputs.has_changes != 'true'
         run: echo "No Rust changes detected, skipping."

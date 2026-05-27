@@ -236,7 +236,7 @@ impl InverseEngine {
         for curriculum in &mut curricula {
             // Try easiest first (difficulty ladder)
             let ladder: Vec<_> = curriculum.difficulty_ladder()
-                .into_iter()
+                .iter()
                 .map(|p| (p.id, p.premises.clone(), p.goal.clone()))
                 .collect();
 
@@ -383,7 +383,7 @@ impl InverseEngine {
         CumulativeStats {
             iterations: self.iteration,
             total_conjectures: total_conj,
-            total_solved: total_solved,
+            total_solved,
             total_triples,
             total_time_us: total_us,
             avg_triples_per_iteration: if self.iteration > 0 {
@@ -510,10 +510,10 @@ mod tests {
 
         let solver = ThresholdSolver { max_premises: 10 };
 
-        let t1 = engine.iterate(&solver);
+        let _t1 = engine.iterate(&solver);
         let count_1 = engine.training_data_count();
 
-        let t2 = engine.iterate(&solver);
+        let _t2 = engine.iterate(&solver);
         let count_2 = engine.training_data_count();
 
         // Training data should accumulate

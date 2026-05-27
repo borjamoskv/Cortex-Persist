@@ -288,7 +288,7 @@ impl CurriculumEngine {
                 let simplified = simplify(problem);
                 let specialized = specialize(problem, &self.substitution_table);
 
-                for variant in simplified.into_iter().chain(specialized.into_iter()) {
+                for variant in simplified.into_iter().chain(specialized) {
                     if !self.nodes.contains_key(&variant.id) && !new_problems.iter().any(|(id, _)| *id == variant.id) {
                         new_problems.push((variant.id, variant));
                     }

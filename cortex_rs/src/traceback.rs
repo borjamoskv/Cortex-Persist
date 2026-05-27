@@ -160,7 +160,7 @@ impl DeductionDAG {
             .unwrap_or(0);
 
         let has_auxiliary = premises.iter()
-            .any(|id| self.facts.get(id).map_or(false, |f| f.is_auxiliary));
+            .any(|id| self.facts.get(id).is_some_and(|f| f.is_auxiliary));
 
         let id = self.next_id;
         self.next_id += 1;

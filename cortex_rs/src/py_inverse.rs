@@ -147,7 +147,7 @@ impl PyCurriculumEngine {
     pub fn decompose_target(&mut self, subgoals: Vec<String>) -> Vec<String> {
         self.inner.decompose_target(subgoals)
             .into_iter()
-            .map(|id| hex::encode(id))
+            .map(hex::encode)
             .collect()
     }
 
@@ -155,7 +155,7 @@ impl PyCurriculumEngine {
     pub fn analogize_target(&mut self, swaps: Vec<(String, String)>) -> Vec<String> {
         self.inner.analogize_target(swaps)
             .into_iter()
-            .map(|id| hex::encode(id))
+            .map(hex::encode)
             .collect()
     }
 
