@@ -10,8 +10,6 @@ import threading
 import mmap
 import weakref
 import atexit
-from urllib.parse import urlparse
-
 from cryptography.hazmat.primitives.asymmetric import ed25519
 from cryptography.exceptions import InvalidSignature
 
@@ -246,19 +244,29 @@ class LedgerManager(SovereignResource):
                     except queue.Empty:
                         break
                 
-                c = self._conn.cursor()
-                for timestamp, action, vector_id, yield_amount, block_hash, zk_payload in batch:
-                    zk_proof = self.private_key.sign(zk_payload).hex()
-                    c.execute(
-                        "INSERT INTO ledger_records (timestamp, action, vector_id, yield_amount, hash, zk_proof) VALUES (?, ?, ?, ?, ?, ?)",
-                        (timestamp, action, vector_id, yield_amount, block_hash, zk_proof)
-                    )
-                self._conn.commit()
-                batch.clear()
+                for attempt in range(3):
+                    try:
+                        c = self._conn.cursor()
+                        for timestamp, action, vector_id, yield_amount, block_hash, zk_payload in batch:
+                            zk_proof = self.private_key.sign(zk_payload).hex()
+                            c.execute(
+                                "INSERT INTO ledger_records (timestamp, action, vector_id, yield_amount, hash, zk_proof) VALUES (?, ?, ?, ?, ?, ?)",
+                                (timestamp, action, vector_id, yield_amount, block_hash, zk_proof)
+                            )
+                        self._conn.commit()
+                        batch.clear()
+                        break
+                    except Exception as e:
+                        logger.error("LedgerManager DB write error (attempt %d): %s", attempt + 1, e)
+                        self._conn.rollback()
+                        time.sleep(0.5)
+                else:
+                    logger.critical("LedgerManager FATAL: Dropping batch after 3 failed attempts to maintain C5-REAL throughput.")
+                    batch.clear()
             except queue.Empty:
                 continue
             except Exception as e:
-                logger.error("LedgerManager _signer_loop error: %s", e)
+                logger.error("LedgerManager _signer_loop queue/unexpected error: %s", e)
                 batch.clear()
 
     def append(self, action: str, vector_id: str, yield_amount: float) -> str:
@@ -373,17 +381,27 @@ class VSAMemory(SovereignResource):
                     except queue.Empty:
                         break
                 
-                c = self._conn.cursor()
-                c.executemany(
-                    "INSERT OR REPLACE INTO cortex_knowledge (ki_id, summary, content) VALUES (?, ?, ?)",
-                    batch
-                )
-                self._conn.commit()
-                batch.clear()
+                for attempt in range(3):
+                    try:
+                        c = self._conn.cursor()
+                        c.executemany(
+                            "INSERT OR REPLACE INTO cortex_knowledge (ki_id, summary, content) VALUES (?, ?, ?)",
+                            batch
+                        )
+                        self._conn.commit()
+                        batch.clear()
+                        break
+                    except Exception as e:
+                        logger.error("VSAMemory DB write error (attempt %d): %s", attempt + 1, e)
+                        self._conn.rollback()
+                        time.sleep(0.5)
+                else:
+                    logger.critical("VSAMemory FATAL: Dropping batch after 3 failed attempts to maintain VSA throughput.")
+                    batch.clear()
             except queue.Empty:
                 continue
             except Exception as e:
-                logger.error("VSAMemory _db_loop error: %s", e)
+                logger.error("VSAMemory _db_loop queue/unexpected error: %s", e)
                 batch.clear()
 
     def record(self, key: str, value: str):

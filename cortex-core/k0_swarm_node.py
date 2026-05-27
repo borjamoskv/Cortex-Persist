@@ -111,7 +111,7 @@ class K0Metabolism:
         logger.info("Iniciando Metabolismo K-0 Sovereign Swarm (Anvil-Fuzzer Bridge)...")
         while self._running:
             # 1. Extraer tareas del L4 Ring Buffer / SQLite Mempool
-            tasks = self.pm.l1._fetch_pending_tasks()
+            tasks = self.pm.outbox._fetch_pending_tasks()
             
             if not tasks:
                 # Si no hay vulnerabilidades detectadas, latido de reposo.
@@ -136,10 +136,10 @@ class K0Metabolism:
                         logger.info(f"Canalizado: {captured_yield} ETH al CORTEX-Persist Ledger.")
                         
                         # Marcar tarea como asimilada (completada)
-                        self.pm.l1._update_task_status(row_id, "completed")
+                        self.pm.outbox._update_task_status(row_id, "completed")
                     except Exception as e:
                         logger.error(f"Error procesando vulnerabilidad Anvil: {e}")
-                        self.pm.l1._update_task_status(row_id, "failed")
+                        self.pm.outbox._update_task_status(row_id, "failed")
                 else:
                     # Ignoramos temporalmente tareas que no son del fuzzer
                     pass
@@ -152,16 +152,20 @@ class K0Metabolism:
     def stop(self):
         self._running = False
 
+async def main():
+    print("Initializing HybridPersistenceManager...")
+    pm = HybridPersistenceManager()
+    print("Initializing K0Metabolism...")
+    metabolism = K0Metabolism(pm)
+    print("Running metabolism life cycle...")
+    await metabolism.life_cycle()
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     from persistence import HybridPersistenceManager
     
-    # Arrancamos con el gestor híbrido (L1 -> SQLite/Ring, L2 -> VSA, L3 -> Ledger)
-    pm = HybridPersistenceManager()
-    metabolism = K0Metabolism(pm)
     try:
-        asyncio.run(metabolism.life_cycle())
+        asyncio.run(main())
     except KeyboardInterrupt:
-        metabolism.stop()
         print("K-0 Terminado.")
 
