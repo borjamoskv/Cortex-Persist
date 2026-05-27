@@ -11,6 +11,7 @@ class TestAutonomousSwarm(unittest.IsolatedAsyncioTestCase):
     async def test_spectral_audit_refusal(self):
         """Ω₂₃: Verify that a refusal triggers Shadow Re-phrasing (retry)."""
         import os
+        from unittest.mock import patch
 
         os.environ["CORTEX_LLM_BASE_URL"] = "http://localhost:8080/v1"
         provider = LLMProvider("custom", "test-model", "test-api-key")
@@ -22,10 +23,14 @@ class TestAutonomousSwarm(unittest.IsolatedAsyncioTestCase):
             "Sovereign execution confirmed.",
         ]
 
-        # We need to mock _apply_causal_jitter to avoid sleeping
+        # Mock causal jitter and quota manager to avoid real sleeps
         provider._apply_causal_jitter = AsyncMock()
 
-        response = await provider.complete("system-prompt", "user-msg")
+        mock_quota = MagicMock()
+        mock_quota.acquire = AsyncMock()
+
+        with patch("cortex.extensions.llm.provider._get_quota_manager", return_value=mock_quota):
+            response = await provider.complete("system-prompt", "user-msg")
 
         self.assertEqual(response, "Sovereign execution confirmed.")
         self.assertEqual(provider._execute_completion.call_count, 2)
