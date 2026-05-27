@@ -1,0 +1,216 @@
+from __future__ import annotations
+
+import ast
+import asyncio
+from pathlib import Path
+import sys
+
+from cortex.guards._seals_cache import GlobalSourceCache, ROOT_DIR, printer
+from cortex.guards.sovereign_seals import (
+    check_gate_21_preservation,
+    check_seal_8_dependency_impl,
+    check_seal_9_compliance_impl,
+)
+
+GateResult = tuple[bool, str]
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# SEAL 6: ASYNC & PERFORMANCE — No time.sleep + Temperature + Latency
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+async def _check_blocking_sleep(exclude_files: frozenset[str]) -> list[str]:
+    """Identify synchronous time.sleep() calls in async-critical files."""
+    violations = []
+    for py_file, content in GlobalSourceCache.files.items():
+        if py_file.name in exclude_files:
+            continue
+        try:
+            tree = ast.parse(content, filename=str(py_file))
+            for node in ast.walk(tree):
+                if isinstance(node, ast.Call):
+                    # Check for time.sleep()
+                    if (
+                        isinstance(node.func, ast.Attribute)
+                        and node.func.attr == "sleep"
+                        and isinstance(node.func.value, ast.Name)
+                        and node.func.value.id == "time"
+                    ):
+                        violations.append(f"{py_file.name}:{node.lineno}")
+                    # Check for bare sleep() (if imported)
+                    elif isinstance(node.func, ast.Name) and node.func.id == "sleep":
+                        violations.append(f"{py_file.name}:{node.lineno}")
+        except SyntaxError:
+            pass
+    return violations
+
+
+async def _check_temperature_determinism(critical_files: list[Path]) -> list[str]:  # noqa: C901
+    """Ensure LLM calls use temperature=0 for determinism."""
+    violations = []
+    zero_values = (0, 0.0)
+    for path in critical_files:
+        if path in GlobalSourceCache.files:
+            content = GlobalSourceCache.files[path]
+        elif path.exists():
+            content = await asyncio.to_thread(path.read_text, encoding="utf-8")
+        else:
+            continue
+
+        try:
+            tree = ast.parse(content, filename=str(path))
+            has_temp = False
+            has_zero = False
+            for node in ast.walk(tree):
+                if isinstance(node, ast.keyword) and node.arg == "temperature":
+                    has_temp = True
+                    if isinstance(node.value, ast.Constant) and node.value.value in zero_values:
+                        has_zero = True
+                elif isinstance(node, ast.Dict):
+                    for k, v in zip(node.keys, node.values, strict=False):
+                        if isinstance(k, ast.Constant) and k.value == "temperature":
+                            has_temp = True
+                            if isinstance(v, ast.Constant) and v.value in zero_values:
+                                has_zero = True
+            if has_temp and not has_zero:
+                violations.append(path.name)
+        except SyntaxError:
+            pass
+    return violations
+
+
+async def _check_latency_telemetry() -> list[str]:
+    """Audit local provider latency from telemetry."""
+    try:
+        from cortex.extensions.llm._telemetry import CascadeTelemetry
+
+        telemetry = CascadeTelemetry()
+        stats = telemetry.stats()
+        slow = []
+        for prov in ["ollama", "vllm", "jan", "lmstudio"]:
+            avg_lat = stats.get(prov, {}).get("avg_latency_ms", 0)
+            if avg_lat > 200:
+                slow.append(f"{prov} ({avg_lat}ms)")
+        return slow
+    except ImportError:
+        return []
+
+
+async def check_seal_6_async_perf() -> GateResult:
+    printer.seal(6, "AX-III Colapso Entrópico", "Async & Performance")
+    passed = True
+
+    # ── Async Guard (No time.sleep) ──
+    exclude = frozenset(
+        [
+            "seals.py",
+            "reactor.py",
+            "antipatterns.py",
+            "_scanner_visitors.py",
+            "registry.py",
+            "legion.py",
+            "legion_vectors.py",
+            "demo_swarm.py",
+            "demo_bicameral.py",
+            "network.py",
+            "fiat_oracle.py",
+            "mouse.py",
+            "dashboard_cmds.py",
+            "health_cmds.py",
+            "ouroboros_omega.py",
+            "oracle.py",
+        ]
+    )
+    sleep_violations = await _check_blocking_sleep(exclude)
+    if sleep_violations:
+        printer.fail(f"Blocking time.sleep(): {sleep_violations}")
+        passed = False
+    else:
+        printer.success("No blocking time.sleep() found.")
+
+    # ── Temperature Determinism ──
+    critical = [
+        ROOT_DIR / "cortex/llm/router.py",
+        ROOT_DIR / "cortex/llm/provider.py",
+        ROOT_DIR / "cortex/guards/seals.py",
+    ]
+    temp_violations = await _check_temperature_determinism(critical)
+    if temp_violations:
+        printer.fail(f"Temperature drift in {temp_violations}")
+        passed = False
+    else:
+        printer.success("Temperature Determinism intact.")
+
+    # ── Latency Check ──
+    slow_locals = await _check_latency_telemetry()
+    if slow_locals:
+        printer.warn(f"High local latency: {slow_locals}")
+    else:
+        printer.success("Latency <200ms.")
+
+    return passed, "verified"
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# SEAL 7: AXIOM REGISTRY — Registry Sync + Prompt Size
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+async def check_seal_7_axiom_registry() -> GateResult:
+    printer.seal(7, "Registry Integrity", "Axiom Registry + Prompt Budget")
+    passed = True
+
+    # ── Registry Sync ──
+    try:
+        from cortex.extensions.axioms import AXIOM_REGISTRY
+        from cortex.extensions.axioms.registry import enforced
+
+        total = len(AXIOM_REGISTRY)
+        enf = len(enforced())
+
+        if total != 7:
+            printer.fail(f"Registry degraded: exactly 7 axioms required, found {total}")
+            passed = False
+        else:
+            printer.success(f"Registry: {total} Sovereign Axioms, {enf} CI-enforced.")
+    except ImportError:
+        printer.warn("Axioms extension not found. Skipping registry check.")
+    except Exception as e:  # noqa: BLE001
+        printer.fail(f"Registry error: {e}")
+        passed = False
+
+    # ── Prompt Size (warn-only) ──
+    prompt_file = ROOT_DIR / "SYSTEM_PROMPT.md"
+    if prompt_file.exists():
+        try:
+            content = await asyncio.to_thread(prompt_file.read_text, encoding="utf-8")
+            tokens = len(content.split())
+            if tokens > 500:
+                printer.warn(f"System prompt {tokens} words (target: <200).")
+            else:
+                printer.success(f"Prompt within targets ({tokens} words).")
+        except OSError:
+            printer.warn("Could not read SYSTEM_PROMPT.md")
+
+    return passed, "verified"
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# SEAL 8: DEPENDENCY INTEGRITY — Ghost Check + Shannon Entropy
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+async def check_seal_8_dependency() -> GateResult:
+    printer.seal(8, "Ω₃ Byzantine", "Dependency Integrity + Shannon Entropy")
+    return await check_seal_8_dependency_impl(GlobalSourceCache.files)
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# SEAL 9: COMPLIANCE & AESTHETIC — No placeholders + Audit trail
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+async def check_seal_9_compliance() -> GateResult:
+    printer.seal(9, "Sovereign Aesthetic", "Compliance & Aesthetic Integrity")
+    return await check_seal_9_compliance_impl()
+
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# SEAL 10: SELF-PRESERVATION — Hook + seals.py existence + HEAD lineage
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+async def check_seal_10_preservation() -> GateResult:
+    printer.seal(10, "Ω₅ Antifragile", "Self-Preservation")
+    return await check_gate_21_preservation(cached_files=GlobalSourceCache.files)
