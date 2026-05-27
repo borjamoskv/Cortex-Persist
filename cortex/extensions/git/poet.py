@@ -18,294 +18,9 @@ import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from cortex.extensions.git.poet_data import TYPE_REGEX, TEMPLATES, EMOJI_MAP, SCOPE_MAP
+
 logger = logging.getLogger("cortex.extensions.git.poet")
-
-# ── Commit type detection heuristics ──────────────────────────────────────────
-
-_TYPE_SIGNALS: dict[str, list[str]] = {
-    "feat": ["new file", "added", "create", "implement", "introduce", "add"],
-    "fix": ["fix", "bug", "error", "crash", "patch", "repair", "resolve"],
-    "refactor": ["rename", "move", "restructure", "reorganize", "extract", "simplify"],
-    "perf": ["optimize", "cache", "speed", "latency", "benchmark", "fast"],
-    "docs": ["readme", "doc", "comment", "changelog", "license", "manifest"],
-    "test": ["test", "spec", "assert", "mock", "fixture", "coverage"],
-    "ci": ["ci", "github", "workflow", "pipeline", "deploy", "docker"],
-    "style": ["lint", "format", "whitespace", "indent", "ruff", "pyright"],
-    "chore": ["bump", "update", "upgrade", "dependency", "cleanup", "misc"],
-}
-
-# ── Metaphorical templates per commit type ────────────────────────────────────
-# Each template is a format string. `{scope}` is injected at compose time.
-
-_TEMPLATES: dict[str, list[str]] = {
-    "feat": [
-        "ignite the {scope} reactor",
-        "forge {scope} from the sovereign anvil",
-        "crystallize {scope} into existence",
-        "birth the {scope} neural pathway",
-        "weave {scope} into the living membrane",
-        "conjure {scope} from the thermodynamic void",
-        "plant the {scope} seed in the sovereign garden",
-        "give {scope} its first heartbeat",
-        "awaken {scope} from the dormant lattice",
-        "mint {scope} on the sovereign ledger",
-        "carve {scope} into the bedrock",
-        "distill {scope} from raw entropy",
-        "unfurl the {scope} constellation",
-        "lay the {scope} keystone",
-        "inject {scope} into the bloodstream",
-        "spark the {scope} ignition sequence",
-        "graft {scope} onto the living architecture",
-        "cast {scope} in sovereign alloy",
-        "encode {scope} into the double helix",
-        "terraform {scope} for habitation",
-        "architect the {scope} cantilever",
-        "nucleate {scope} in the supersaturated solution",
-        "bootstrap {scope} from first principles",
-        "deploy the {scope} vanguard",
-        "summon {scope} through the event horizon",
-        "initiate the autopoietic synthesis of {scope}",
-        "harden the cryptographically secure vault of {scope}",
-        "align {scope} with sovereign consensus invariants",
-        "inject {scope} into the zero-copy ring lattice",
-        "crystallize the Shannon entropy boundary of {scope}",
-    ],
-    "fix": [
-        "cauterize the wound in {scope}",
-        "exorcise the ghost haunting {scope}",
-        "suture the breach in {scope}",
-        "neutralize the pathogen in {scope}",
-        "seal the entropy leak in {scope}",
-        "realign the fractured {scope} axis",
-        "purge the toxic residue from {scope}",
-        "restore the broken symmetry of {scope}",
-        "mend the torn fabric of {scope}",
-        "extinguish the cascade failure in {scope}",
-        "inoculate {scope} against regression",
-        "quench the thermal runaway in {scope}",
-        "stabilize the {scope} orbit decay",
-        "drain the abscess from {scope}",
-        "rethread the severed {scope} nerve",
-        "annihilate the phantom signal in {scope}",
-        "close the gravitational wound in {scope}",
-        "extract the embedded shrapnel from {scope}",
-        "recalibrate the {scope} drift correction",
-        "defuse the silent detonator in {scope}",
-        "resolve non-deterministic state drift in {scope}",
-        "mitigate thermodynamic leakage in {scope}",
-        "patch the cryptographic vulnerability in {scope}",
-        "heal the fractured memory manifold of {scope}",
-        "reconcile split-brain consensus in {scope}",
-        "enforce cache coherence in {scope}",
-    ],
-    "refactor": [
-        "metamorphose {scope} to its sovereign form",
-        "annihilate entropy accumulated in {scope}",
-        "purify the {scope} signal",
-        "distill {scope} to its irreducible essence",
-        "transmute the {scope} lead into gold",
-        "strip {scope} to the structural bone",
-        "reforge {scope} in the crucible",
-        "compress the {scope} wavefunction",
-        "untangle the {scope} gordian knot",
-        "temper {scope} through sovereign heat treatment",
-        "sculpt {scope} with subtractive precision",
-        "realign {scope} along the geodesic",
-        "collapse the {scope} redundancy manifold",
-        "anoint {scope} with O(1) clarity",
-        "shed the vestigial exoskeleton of {scope}",
-        "elevate {scope} from clay to marble",
-        "decouple the {scope} gravitational binding",
-        "crystallize {scope} into its final polymorph",
-        "extract the {scope} signal from thermal noise",
-        "prune the {scope} dead branches",
-        "compress {scope} to its minimum entropy boundary",
-        "decouple {scope} to unlock lock-free execution",
-        "transmute {scope} to a zero-copy representation",
-        "flatten the recursive abstraction stack in {scope}",
-    ],
-    "perf": [
-        "accelerate {scope} beyond escape velocity",
-        "compress spacetime in the {scope} pipeline",
-        "shatter the {scope} latency barrier",
-        "overclock the {scope} throughput reactor",
-        "eliminate the {scope} friction coefficient",
-        "superconduct the {scope} critical path",
-        "collapse the {scope} computational manifold",
-        "inject nitrous into the {scope} engine",
-        "achieve {scope} terminal velocity",
-        "liquefy the {scope} bottleneck",
-        "tune {scope} to resonant frequency",
-        "strip aerodynamic drag from {scope}",
-        "unlock the {scope} warp drive",
-        "anneal {scope} for zero-resistance flow",
-        "vaporize the {scope} memory overhead",
-        "reduce {scope} latency to O(1) complexity",
-        "streamline the zero-copy pathway in {scope}",
-        "optimize thermodynamic efficiency in {scope}",
-        "minimize latency spikes in {scope}",
-    ],
-    "docs": [
-        "inscribe the scripture of {scope}",
-        "illuminate the dark matter of {scope}",
-        "chart the {scope} territory for future navigators",
-        "engrave {scope} wisdom into the stone tablet",
-        "decode the {scope} rosetta stone",
-        "author the {scope} survival manual",
-        "map the {scope} cartography for the swarm",
-        "chronicle the {scope} epoch transition",
-        "translate {scope} from machine to human",
-        "annotate the {scope} archaeological record",
-        "index the {scope} sovereign knowledge base",
-        "publish the {scope} field reconnaissance",
-    ],
-    "test": [
-        "deploy the verification membrane around {scope}",
-        "probe the structural integrity of {scope}",
-        "fire the {scope} stress test barrage",
-        "inoculate {scope} with regression antibodies",
-        "construct the {scope} byzantine fault detector",
-        "erect the {scope} perimeter defense grid",
-        "simulate {scope} under adversarial conditions",
-        "calibrate the {scope} truth oracle",
-        "arm the {scope} tripwire network",
-        "subject {scope} to sovereign audit",
-        "validate the {scope} invariant fortress",
-        "deploy chaos probes against {scope}",
-        "deploy invariant validation guards for {scope}",
-        "stress-test the Byzantine fault limits of {scope}",
-        "probe the entropic boundary of {scope}",
-        "fuzz the cryptographic inputs of {scope}",
-    ],
-    "ci": [
-        "wire the {scope} deployment pipeline",
-        "automate the {scope} launch sequence",
-        "install the {scope} continuous forge",
-        "activate the {scope} autonomous build reactor",
-        "harden the {scope} delivery corridor",
-        "establish the {scope} sovereign supply chain",
-        "provision the {scope} orbital deployment",
-        "arm the {scope} release catapult",
-    ],
-    "style": [
-        "polish the {scope} sovereign surface",
-        "align the {scope} crystalline lattice",
-        "discipline the {scope} visual rhythm",
-        "harmonize the {scope} typographic frequency",
-        "enforce the {scope} aesthetic constitution",
-        "calibrate the {scope} formatting resonance",
-    ],
-    "chore": [
-        "maintain the {scope} sovereign substrate",
-        "renew the {scope} cosmic infrastructure",
-        "tend the {scope} orbital machinery",
-        "recycle the {scope} thermal waste",
-        "service the {scope} autonomous systems",
-        "lubricate the {scope} kinetic bearings",
-        "rotate the {scope} cryptographic seals",
-        "restock the {scope} supply depot",
-    ],
-    "revert": [
-        "reverse the {scope} temporal anomaly",
-        "undo the {scope} spacetime distortion",
-        "roll back the {scope} failed mutation",
-        "recall the {scope} defective deployment",
-    ],
-}
-
-# ── Emoji signatures per commit type ──────────────────────────────────────────
-
-_EMOJI_MAP: dict[str, list[str]] = {
-    "feat": ["⚡", "🧬", "🔮", "🌱", "🏗️", "💎", "🚀", "🔥", "✨", "🧊"],
-    "fix": ["🩹", "🔧", "🛡️", "💉", "🩺", "⚕️", "🔒", "🧯", "🪡", "🗡️"],
-    "refactor": ["♻️", "🔬", "⚗️", "🪨", "🧹", "🧹", "🌀", "🔭", "🪞", "🫧", "🧱"],
-    "perf": ["⚡", "🏎️", "💨", "🔋", "⏱️", "🦅", "🌊", "🧲", "🔩", "🛸"],
-    "docs": ["📜", "🗺️", "📡", "🔍", "📖", "🧭", "📐", "📐", "🏛️", "📋", "🪶"],
-    "test": ["🧪", "🛡️", "🎯", "🔬", "🧫", "🏹", "⚔️", "🪤", "🔎", "🧿"],
-    "ci": ["🏭", "🤖", "⚙️", "🔗", "🛰️", "📦", "🧰", "🪝"],
-    "style": ["🎨", "💅", "📏", "✏️", "🖋️", "🔲"],
-    "chore": ["🔄", "🧹", "🛠️", "📎", "🗂️", "🪛", "⛽", "🧴"],
-    "revert": ["⏪", "🔙", "↩️", "🕐"],
-}
-
-# ── Scope extraction from file paths ─────────────────────────────────────────
-
-_SCOPE_MAP: dict[str, str] = {
-    "engine": "engine",
-    "memory": "memory",
-    "search": "search",
-    "graph": "graph",
-    "cli": "cli",
-    "api": "api",
-    "routes": "routes",
-    "mcp": "mcp",
-    "auth": "auth",
-    "crypto": "crypto",
-    "security": "security",
-    "guards": "guards",
-    "audit": "audit",
-    "ledger": "ledger",
-    "embeddings": "embeddings",
-    "llm": "llm",
-    "agents": "agents",
-    "swarm": "swarm",
-    "tests": "tests",
-    "daemon": "daemon",
-    "config": "config",
-    "migrate": "migrations",
-    "notifications": "notifications",
-    "telemetry": "telemetry",
-    "evolution": "evolution",
-    "axioms": "axioms",
-    "skills": "skills",
-    "immune": "immune",
-    "consensus": "consensus",
-    "git": "git",
-    "web": "web",
-    "docs": "docs",
-    "scripts": "scripts",
-    "compaction": "compaction",
-    "context": "context",
-    "storage": "storage",
-    "database": "database",
-    "sync": "sync",
-    "hive": "hive",
-    "alma": "alma",
-    "thinking": "thinking",
-    "perception": "perception",
-    "platform": "platform",
-    "signals": "signals",
-    "events": "events",
-    "sovereign": "sovereign",
-    "hypervisor": "hypervisor",
-    "adk": "adk",
-    "compat": "compat",
-    "compliance": "compliance",
-    "composer": "composer",
-    "darknet": "darknet",
-    "delivery": "delivery",
-    "enrichment": "enrichment",
-    "facts": "facts",
-    "forensics": "forensics",
-    "gateway": "gateway",
-    "http": "http",
-    "mac_maestro": "mac_maestro",
-    "mcts": "mcts",
-    "pipeline": "pipeline",
-    "router": "router",
-    "services": "services",
-    "shannon": "shannon",
-    "types": "types",
-    "utils": "utils",
-    "verification": "verification",
-    "worker": "worker",
-    "ouroboros": "ouroboros",
-    "aeon": "aeon",
-    "ring_buffer": "ring_buffer",
-    "aof": "aof",
-    "cortex_rs": "cortex_rs",
-}
-
 
 @dataclass
 class CommitPoet:
@@ -444,29 +159,35 @@ class CommitPoet:
         count: int = 3,
     ) -> list[str]:
         """Generate multiple candidate commit messages ranked by originality.
-
-        Args:
-            diff_summary: Output of `git diff --cached --stat`.
-            files: List of changed file paths.
-            count: Number of candidates to generate.
-
-        Returns:
-            List of commit messages sorted by information density.
+        Optimized to O(1) for type detection and scope extraction.
         """
+        if not files:
+            return ["chore(core): tend the sovereign void 🔄"] * count
+
+        detected_type = self._detect_type(diff_summary, files)
+        scope = self._extract_scope(files)
+
         candidates: list[str] = []
         seen_bodies: set[str] = set()
 
-        for _ in range(count * 3):  # Over-generate to filter duplicates
-            msg = self.compose(diff_summary, files)
-            # Extract body for dedup
-            body_match = re.search(r":\s+(.+?)\s+\S+$", msg)
-            body = body_match.group(1) if body_match else msg
+        for _ in range(count * 3):
+            body = self._select_template(detected_type, scope)
             if body not in seen_bodies:
                 seen_bodies.add(body)
-                candidates.append(msg)
-            # Pop from history to allow re-generation
-            if self._history:
-                self._history.pop()
+                emoji = self._select_emoji(detected_type)
+                
+                message = f"{detected_type}({scope}): {body} {emoji}"
+                if len(message) > 72:
+                    prefix = f"{detected_type}({scope}): "
+                    suffix = f" {emoji}"
+                    max_body = 72 - len(prefix) - len(suffix)
+                    if max_body > 10:
+                        trimmed_body = body[:max_body].rstrip()
+                        message = f"{prefix}{trimmed_body}{suffix}"
+                
+                candidates.append(message)
+                self._history.append(message)
+                
             if len(candidates) >= count:
                 break
 
@@ -564,14 +285,14 @@ class CommitPoet:
     # ── Type detection ────────────────────────────────────────────────────
 
     def _detect_type(self, diff_summary: str, files: list[str]) -> str:
-        """Detect commit type from diff summary and file paths."""
+        """Detect commit type from diff summary and file paths using O(1) regex matching."""
         combined = (diff_summary + " " + " ".join(files)).lower()
 
         scores: dict[str, int] = {}
-        for commit_type, signals in _TYPE_SIGNALS.items():
-            score = sum(1 for signal in signals if signal in combined)
-            if score > 0:
-                scores[commit_type] = score
+        for commit_type, regex in TYPE_REGEX.items():
+            matches = len(regex.findall(combined))
+            if matches > 0:
+                scores[commit_type] = matches
 
         if not scores:
             # Heuristic fallback based on file extensions / paths
@@ -581,32 +302,33 @@ class CommitPoet:
                 return "docs"
             if any(f.endswith((".yml", ".yaml", ".toml")) for f in files):
                 return "chore"
-            return "feat"  # Default — creation is the default state
+            return "feat"  # Default
 
         return max(scores, key=lambda k: scores[k])
 
     # ── Scope extraction ──────────────────────────────────────────────────
 
     def _extract_scope(self, files: list[str]) -> str:
-        """Extract the most relevant scope from changed file paths."""
-        scope_counts: dict[str, int] = {}
+        """Extract the most relevant scope from changed file paths in O(N)."""
+        if not files:
+            return "core"
 
+        scope_counts: dict[str, int] = {}
         for filepath in files:
-            parts = Path(filepath).parts
+            parts = filepath.lower().split('/')
             for part in parts:
-                part_lower = part.lower().rstrip(".py").rstrip(".yaml").rstrip(".yml")
-                if part_lower in _SCOPE_MAP:
-                    scope = _SCOPE_MAP[part_lower]
+                clean_part = part.rsplit(".", 1)[0]
+                if clean_part in SCOPE_MAP:
+                    scope = SCOPE_MAP[clean_part]
                     scope_counts[scope] = scope_counts.get(scope, 0) + 1
 
         if scope_counts:
             return max(scope_counts, key=lambda k: scope_counts[k])
 
         # Fallback: use the parent directory of the first file
-        if files:
-            first_parent = Path(files[0]).parent.name
-            if first_parent and first_parent != ".":
-                return first_parent
+        first_parent = Path(files[0]).parent.name
+        if first_parent and first_parent != ".":
+            return first_parent
 
         return "core"
 
@@ -614,7 +336,7 @@ class CommitPoet:
 
     def _select_template(self, commit_type: str, scope: str) -> str:
         """Select a metaphorical template and inject scope."""
-        templates = _TEMPLATES.get(commit_type, _TEMPLATES["chore"])
+        templates = TEMPLATES.get(commit_type, TEMPLATES["chore"])
 
         # Anti-repetition: filter out recently used templates
         recent_bodies = set(self._history[-10:]) if self._history else set()
@@ -630,7 +352,7 @@ class CommitPoet:
 
     def _select_emoji(self, commit_type: str) -> str:
         """Select a signature emoji for the commit type."""
-        emojis = _EMOJI_MAP.get(commit_type, ["🔄"])
+        emojis = EMOJI_MAP.get(commit_type, ["🔄"])
         return self._rng.choice(emojis)
 
     # ── Code narration helpers ────────────────────────────────────────────

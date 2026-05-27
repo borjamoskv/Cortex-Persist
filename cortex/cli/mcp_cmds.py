@@ -65,10 +65,8 @@ def sovereign_mcp() -> None:
     import json
     from cortex_rs import McpSovereignHost
 
-    console.print(
-        "[bold blue]🚀 Booting CORTEX Sovereign MCP Server (Rust-native, Transport: stdio)...[/bold blue]",
-        file=sys.stderr,
-    )
+    sys.stderr.write("🚀 Booting CORTEX Sovereign MCP Server (Rust-native, Transport: stdio)...\n")
+    sys.stderr.flush()
 
     host = McpSovereignHost("cortex-sovereign-mcp", "1.0.0")
 

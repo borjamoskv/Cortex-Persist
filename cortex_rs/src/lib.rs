@@ -631,25 +631,27 @@ impl McpNativeClient {
 pub struct McpSovereignHost {
     name: String,
     version: String,
+    vsa_bridge: PyObject,
 }
 
 #[pymethods]
 impl McpSovereignHost {
     #[new]
-    pub fn new(name: &str, version: &str) -> Self {
+    pub fn new(name: &str, version: &str, vsa_bridge: PyObject) -> Self {
         McpSovereignHost {
             name: name.to_string(),
             version: version.to_string(),
+            vsa_bridge,
         }
     }
 
     /// Process an incoming JSON-RPC request and return a JSON-RPC response
     /// Exergically efficient serialization using serde_json directly in Rust.
-    pub fn process_request(&self, request_json: &str) -> PyResult<String> {
+    pub fn process_request<'py>(&self, py: Python<'py>, request_json: &str) -> PyResult<String> {
         let req: Result<McpRequest, _> = serde_json::from_str(request_json);
         match req {
             Ok(request) => {
-                let response = self.handle_method(request);
+                let response = self.handle_method(py, request);
                 let res_json = serde_json::to_string(&response).unwrap_or_else(|_| "{\"jsonrpc\":\"2.0\",\"error\":{\"code\":-32603,\"message\":\"Internal error\"},\"id\":null}".to_string());
                 Ok(res_json)
             }
@@ -662,7 +664,7 @@ impl McpSovereignHost {
 }
 
 impl McpSovereignHost {
-    fn handle_method(&self, req: McpRequest) -> McpResponse {
+    fn handle_method<'py>(&self, py: Python<'py>, req: McpRequest) -> McpResponse {
         let id = req.id.clone();
         match req.method.as_str() {
             "initialize" => {
