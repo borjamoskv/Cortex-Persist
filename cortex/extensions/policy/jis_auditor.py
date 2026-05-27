@@ -75,6 +75,19 @@ class JISAuditor:
                     )
                 )
 
+        # 4. Thermodynamic Stress Check: Detect high cortisol
+        metrics = payload.get("metrics", {})
+        cortisol = metrics.get("cortisol_level", 0.0)
+        if cortisol > 0.8:
+            violations.append(
+                JISViolation(
+                    policy="THERMODYNAMIC_STRESS_CRITICAL",
+                    severity="HIGH",
+                    reason=f"Systemic cortisol ({cortisol:.2f}) exceeded 0.8 threshold. High risk of entropic decay.",
+                    event_ref=event_id,
+                )
+            )
+
         if violations:
             logger.warning(
                 f"[JIS Auditor] Detected {len(violations)} policy violations for event {event_id}"

@@ -37,6 +37,17 @@ def _audit_payload_inline(payload: dict, event_id: str) -> list[dict]:
             "event_id": event_id,
             "detail": "Missing cryptographic signature on telemetry payload",
         })
+        
+    metrics = payload.get("metrics", {})
+    cortisol = metrics.get("cortisol_level", 0.0)
+    if cortisol > 0.8:
+        violations.append({
+            "rule": "THERMODYNAMIC_STRESS_CRITICAL",
+            "severity": "HIGH",
+            "event_id": event_id,
+            "detail": f"Systemic cortisol ({cortisol:.2f}) exceeded 0.8 threshold. High risk of entropic decay.",
+        })
+        
     return violations
 
 
@@ -73,9 +84,13 @@ async def telemetry_loop(websocket):
                 "metrics": metrics,
             }
 
-            # Simulate a C5 violation spike every 50 ticks to test HUD visual alerts
+            # Simulate a C5 signature violation every 50 ticks
             if tick_count % 50 == 0:
                 payload.pop("signature")
+
+            # Simulate a Cortisol spike every 200 ticks (10s) to trigger THERMODYNAMIC_STRESS_CRITICAL
+            if tick_count % 200 < 10:
+                payload["metrics"]["cortisol_level"] = 0.85 + random.uniform(0.0, 0.1)
 
             violations = _audit_payload_inline(payload, event_id=f"tick_{tick_count}")
             payload["jis_violations"] = violations
