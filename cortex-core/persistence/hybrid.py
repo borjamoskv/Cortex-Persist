@@ -11,9 +11,9 @@ except ImportError:
 from .cache import ContextCache
 from .vsa import VSAMemory
 from .ledger import LedgerManager
-from .outbox import ZeroCopyRingBuffer, OutboxDaemon
+from daemons.outbox import ZeroCopyRingBuffer, OutboxDaemon
 from .ide_preserver import IdeStatePreserver
-from .security_recon import SecurityReconDaemon
+from daemons.security_recon import SecurityReconDaemon
 class HybridPersistenceManager:
     """
     Sovereign Hybrid Persistence Manager.

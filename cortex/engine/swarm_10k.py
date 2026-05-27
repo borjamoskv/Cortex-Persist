@@ -379,13 +379,12 @@ class SwarmCommander:
         print(f"ANNIHILATE: Unlinked={unlinked_count}, Closed={closed_count}")
 
         # Lifecycle cleanup
-        if hasattr(self.bus, "close"):
-            if isinstance(self.bus, ShardedAsyncSignalBus):
+        if isinstance(self.bus, ShardedAsyncSignalBus):
+            if hasattr(self.bus, "close"):
                 await self.bus.close()
-            else:
-                self.bus.close()
-
-        if isinstance(self.bus, SovereignSharedBus):
+        elif isinstance(self.bus, SovereignSharedBus):
             self.bus.unlink()
+        elif hasattr(self.bus, "close"):
+            self.bus.close()
 
         self.legions.clear()

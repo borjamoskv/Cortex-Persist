@@ -271,7 +271,7 @@ class CortexDaemon:
 
         if not tasks:
             # ── C5-REAL AEON-0 DOWNTIME MUTATION ──
-            if self.cycle_count % 50 == 0:
+            if self.cycle_count > 0 and self.cycle_count % 50 == 0:
                 await self._trigger_aeon_0_mutation()
             return
 

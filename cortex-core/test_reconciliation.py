@@ -1,6 +1,9 @@
 import sys
+import os
 import asyncio
-from persistence import LedgerManager
+
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
+from persistence.ledger import LedgerManager
 from k0_swarm_node import HardwareAggressor
 
 async def test_reconciliation():

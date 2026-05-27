@@ -1,3 +1,4 @@
+import sys
 from .base import (
     SovereignResource, _setup_sqlite_pragmas, DB_PATH, VSA_BIN_PATH, VSA_DIMENSION,
     HAS_CORTEX_RS, outbox_wake_event, ledger_entropy_event, _get_local_conn, logger,
@@ -6,9 +7,17 @@ from .base import (
 from .cache import ContextCache
 from .ledger import LedgerManager
 from .vsa import VSAMemory
-from .outbox import ZeroCopyRingBuffer, OutboxDaemon, enqueue_swarm_task, get_swarm_metrics, _get_ring_buffer
+
+import daemons.outbox
+sys.modules["persistence.outbox"] = daemons.outbox
+from daemons.outbox import ZeroCopyRingBuffer, OutboxDaemon, enqueue_swarm_task, get_swarm_metrics, _get_ring_buffer
+
 from .ide_preserver import IdeStatePreserver
-from .security_recon import SecurityReconDaemon
+
+import daemons.security_recon
+sys.modules["persistence.security_recon"] = daemons.security_recon
+from daemons.security_recon import SecurityReconDaemon
+
 from .hybrid import HybridPersistenceManager
 
 __all__ = [

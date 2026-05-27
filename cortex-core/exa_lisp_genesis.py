@@ -138,6 +138,37 @@ def evaluate(x, env: ExergyEnvironment):
             time.sleep(0.1)
             return f"<C5_REAL_FACT: skill_execution_{skill_module} | status: error>"
 
+    elif op == 'umap-recon':
+        agent_idx = evaluate(x[1], env)
+        target_hash = evaluate(x[2], env)
+        
+        try:
+            from ultramap import UltramapSubstrate
+            umap = UltramapSubstrate()
+            joules_required = umap.calculate_exergy_distance(int(agent_idx), str(target_hash))
+            env.consume(int(joules_required) + 10, "UMAP_RECON", vector_id=str(target_hash)[:16])
+            
+            state = umap.get_agent_state(int(agent_idx))
+            return f"<C5_REAL_FACT: umap_recon | dist: {joules_required:.2f}j | state: {state}>"
+        except Exception as e:
+            return f"<C5_REAL_FACT: umap_recon_failed | error: {e}>"
+
+    elif op == 'umap-target':
+        agent_idx = evaluate(x[1], env)
+        x_c = evaluate(x[2], env)
+        y_c = evaluate(x[3], env)
+        z_c = evaluate(x[4], env)
+        target_hash = evaluate(x[5], env)
+        
+        env.consume(50, "UMAP_TARGET_UPDATE", vector_id=str(target_hash)[:16])
+        try:
+            from ultramap import UltramapSubstrate
+            umap = UltramapSubstrate()
+            umap.update_agent_position(int(agent_idx), float(x_c), float(y_c), float(z_c), str(target_hash), 0.5)
+            return f"<C5_REAL_FACT: umap_target_updated | agent: {agent_idx}>"
+        except Exception as e:
+            return f"<C5_REAL_FACT: umap_target_failed | error: {e}>"
+
     elif op == 'q-let':
         branch_a = x[1]
         branch_b = x[2]
@@ -204,8 +235,14 @@ if __name__ == "__main__":
     # Invokes capital_extractor_omega to simulate a revenue generation run.
     code_invoke_skill = "(with-exergy-limit 1000j (invoke-skill capital_extractor_omega CapitalExtractorOmegaSkill))"
     
+    # Test 7: Sovereign Topology Recon (UltraMap)
+    code_umap_recon = "(with-exergy-limit 150000j (umap-recon 42 target_alpha))"
+
+    # Test 8: Sovereign Topology Target Update
+    code_umap_target = "(with-exergy-limit 500j (umap-target 42 10.5 20.5 30.5 target_beta))"
+    
     print("==================================================")
-    print(" TSI-LISP (EXA-Ω) : Genesis Bootstrap v0.3 (DYNAMIC SKILLS) ")
+    print(" TSI-LISP (EXA-Ω) : Genesis Bootstrap v0.4 (ULTRAMAP) ")
     print("==================================================\n")
     
     # Initialize real LedgerManager
@@ -217,7 +254,9 @@ if __name__ == "__main__":
         ("T3: Quantum Branching", code_quantum),
         ("T4: Deep Nesting Stress", code_nested_stress),
         ("T5: Quantum Swarm Explosion", code_q_explosion),
-        ("T6: Dynamic Skill Invocation", code_invoke_skill)
+        ("T6: Dynamic Skill Invocation", code_invoke_skill),
+        ("T7: UMAP Topology Recon", code_umap_recon),
+        ("T8: UMAP Target Update", code_umap_target)
     ]
     
     for name, code in targets:

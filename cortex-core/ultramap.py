@@ -68,7 +68,6 @@ class UltramapSubstrate:
             return False
             
         offset = agent_idx * self.node_size
-        struct.pack_into("dddd", self._buffer, offset, x, y, z, entropy) # Pack coordinates and entropy
         
         # We pack x, y, z first, then target_hash, then entropy
         # Let's fix the layout mapping:

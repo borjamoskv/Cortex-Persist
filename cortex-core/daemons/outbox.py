@@ -8,8 +8,8 @@ import mmap
 import weakref
 import atexit
 
-from .base import SovereignResource, _setup_sqlite_pragmas, _get_local_conn, HAS_CORTEX_RS, outbox_wake_event, logger, _metrics_cache, _metrics_cache_lock
-from . import base
+from persistence.base import SovereignResource, _setup_sqlite_pragmas, _get_local_conn, HAS_CORTEX_RS, outbox_wake_event, logger, _metrics_cache, _metrics_cache_lock
+from persistence import base
 
 try:
     import cortex_rs  # noqa: F401
@@ -17,7 +17,7 @@ try:
 except ImportError:
     pass
 
-from .ledger import LedgerManager
+from persistence.ledger import LedgerManager
 class ZeroCopyRingBuffer(SovereignResource):
     """L4 Sovereign Zero-Copy Ring Buffer.
     Bypasses SQLite & JSON deserialization using C-contiguous mmap memoryviews.

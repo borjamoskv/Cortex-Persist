@@ -218,4 +218,13 @@ class LedgerManager(SovereignResource):
             res = c.fetchone()[0]
             return res or 0.0
 
+    def reconcile_bankruptcy(self):
+        """C5-REAL: Detects if the total yield is negative (thermodynamic bankruptcy) and issues an autonomous offset to restore balance to exactly 0.0."""
+        current_yield = self.get_total_yield()
+        if current_yield < 0:
+            offset = -current_yield
+            logger.warning("C5-REAL BANKRUPTCY DETECTED: Yield is %f. Triggering automatic reconciliation offset of %f.", current_yield, offset)
+            self.append(action="RECONCILIATION_OFFSET", vector_id="SYSTEM", yield_amount=offset)
+
+
 
