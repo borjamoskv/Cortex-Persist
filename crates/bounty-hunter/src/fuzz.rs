@@ -272,7 +272,7 @@ pub async fn run(
                                 fuzzed_at: Utc::now().to_rfc3339(),
                             };
                             results.insert(format!("{}{}", url, payload_label), result);
-                        } else if status == 200 && !payload_label.starts_with("PATH:") == false {
+                        } else if status == 200 && payload_label.starts_with("PATH:") {
                             // Interesting path found
                             let result = FuzzResult {
                                 url: url.clone(),
@@ -404,10 +404,12 @@ async fn get_baseline_length(url: &str) -> Option<usize> {
 }
 
 fn urlencoding(s: &str) -> String {
-    s.chars()
-        .map(|c| match c {
-            'A'..='Z' | 'a'..='z' | '0'..='9' | '-' | '_' | '.' | '~' => c.to_string(),
-            _ => format!("%{:02X}", c as u8),
+    s.bytes()
+        .map(|b| match b {
+            b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'-' | b'_' | b'.' | b'~' => {
+                String::from(b as char)
+            }
+            _ => format!("%{:02X}", b),
         })
         .collect()
 }

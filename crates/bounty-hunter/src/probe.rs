@@ -115,7 +115,7 @@ pub async fn run(
         Client::builder()
             .timeout(Duration::from_secs(timeout_secs))
             .redirect(redirect_policy)
-            .danger_accept_invalid_certs(false)
+            .danger_accept_invalid_certs(true) // bug bounty: expired/self-signed certs are common
             .use_rustls_tls()
             .user_agent("Mozilla/5.0 (compatible; BountyHunter/0.1; security-research)")
             .build()?

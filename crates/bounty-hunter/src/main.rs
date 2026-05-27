@@ -179,30 +179,45 @@ async fn run_full_pipeline(
     ).await?;
 
     println!("\n{}", "━━━ PHASE 3: FUZZ ━━━".bright_blue().bold());
-    let fuzz_out = format!("{}/fuzz.json", output_dir);
-    let mut vuln_urls: Vec<String> = vec![];
-    if let Some(target) = live_hosts.first() {
-        vuln_urls = fuzz::run(
-            target.clone(),
-            fuzz_wordlist,
-            "both".to_string(),
-            concurrency / 3,
-            "GET".to_string(),
-            fuzz_out,
-        ).await?;
-    } else {
+    let mut all_vuln_urls: Vec<String> = vec![];
+    if live_hosts.is_empty() {
         println!("{}", "No live hosts found. Aborting fuzz phase.".yellow());
+    } else {
+        let fuzz_concurrency = std::cmp::max(concurrency / (3 * live_hosts.len()), 50);
+        println!(
+            "  {} {} live hosts × {} concurrency each",
+            "→".bright_blue(),
+            live_hosts.len().to_string().bright_white(),
+            fuzz_concurrency.to_string().yellow()
+        );
+        for (i, target) in live_hosts.iter().enumerate() {
+            let fuzz_out = format!("{}/fuzz_{}.json", output_dir, i);
+            match fuzz::run(
+                target.clone(),
+                fuzz_wordlist.clone(),
+                "both".to_string(),
+                fuzz_concurrency,
+                "GET".to_string(),
+                fuzz_out,
+            ).await {
+                Ok(vulns) => all_vuln_urls.extend(vulns),
+                Err(e) => println!("  {} fuzz error on {}: {}", "✗".red(), target, e),
+            }
+        }
     }
+
+    // Count takeover risks from recon output
+    let takeover_count = count_takeover_risks(&recon_out).await;
 
     // ── PHASE 4: REPORT + CORTEX-PERSIST FLYWHEEL ──────────────
     println!("\n{}", "━━━ PHASE 4: CORTEX-PERSIST FLYWHEEL ━━━".bright_blue().bold());
     let summary = report::ReportSummary {
         subdomains_found: discovered.len(),
         live_endpoints: live_hosts.len(),
-        vulnerabilities_found: vuln_urls.len(),
-        high_confidence: vuln_urls.len(), // refined in fuzz module
+        vulnerabilities_found: all_vuln_urls.len(),
+        high_confidence: all_vuln_urls.len(),
         medium_confidence: 0,
-        takeover_risks: 0,
+        takeover_risks: takeover_count,
     };
     let bounty_report = report::generate_report(
         &domain,
@@ -268,6 +283,21 @@ async fn persist_to_cortex(
     );
 
     Ok(())
+}
+
+async fn count_takeover_risks(recon_output_path: &str) -> usize {
+    let content = match tokio::fs::read_to_string(recon_output_path).await {
+        Ok(c) => c,
+        Err(_) => return 0,
+    };
+    let entries: Vec<serde_json::Value> = match serde_json::from_str(&content) {
+        Ok(v) => v,
+        Err(_) => return 0,
+    };
+    entries
+        .iter()
+        .filter(|e| e.get("takeover_risk").and_then(|v| v.as_bool()).unwrap_or(false))
+        .count()
 }
 
 fn print_banner() {

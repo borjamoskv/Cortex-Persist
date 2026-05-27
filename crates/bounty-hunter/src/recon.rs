@@ -118,11 +118,19 @@ pub async fn run(
 
                         if !ips.is_empty() {
                             // Check for CNAME (takeover risk detection)
-                            let cname = resolver
-                                .lookup_ip(&subdomain)
+                            let cname = match resolver
+                                .lookup(
+                                    subdomain.as_str(),
+                                    hickory_resolver::proto::rr::RecordType::CNAME,
+                                )
                                 .await
-                                .ok()
-                                .and_then(|_| None::<String>); // simplified
+                            {
+                                Ok(lookup) => lookup
+                                    .iter()
+                                    .next()
+                                    .map(|r| r.to_string().trim_end_matches('.').to_string()),
+                                Err(_) => None,
+                            };
 
                             let takeover_risk = check_takeover_risk(&subdomain, &cname);
 
