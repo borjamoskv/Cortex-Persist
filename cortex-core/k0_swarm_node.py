@@ -60,6 +60,7 @@ class DarkPoolZK:
         )
         return yield_amount
 
+import random
 
 class HardwareAggressor:
     """
@@ -70,6 +71,12 @@ class HardwareAggressor:
         self.ledger = ledger
         self.expansion_threshold = 1.0  # ETH / CORTEX-Credits needed to buy 1 Spot GPU node
         self.active_nodes = 1
+        
+        try:
+            from ultramap import UltramapSubstrate
+            self.umap = UltramapSubstrate()
+        except ImportError:
+            self.umap = None
 
     async def _deploy_to_akash(self) -> bool:
         """
@@ -95,6 +102,18 @@ class HardwareAggressor:
 
         self.active_nodes += 1
         logger.warning(f"K-0 Enjambre expandido. Nodos físicos activos: {self.active_nodes}")
+        
+        if self.umap:
+            try:
+                x, y, z = random.uniform(0, 100), random.uniform(0, 100), random.uniform(0, 100)
+                target_hash = f"NODE_EXPANSION_VECTOR_{self.active_nodes}"
+                entropy = random.uniform(0.1, 1.0)
+                # Assign position to the new node (agent_idx = self.active_nodes - 1)
+                self.umap.update_agent_position(self.active_nodes - 1, x, y, z, target_hash, entropy)
+                logger.info(f"UltraMap: Coordenadas termodinámicas asignadas al Nodo {self.active_nodes} en [{x:.2f}, {y:.2f}, {z:.2f}] (S={entropy:.2f})")
+            except Exception as e:
+                logger.error(f"Error asimilando topología UltraMap: {e}")
+                
         return True
 
     async def evaluate_expansion(self):
