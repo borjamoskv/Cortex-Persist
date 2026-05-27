@@ -110,11 +110,17 @@ async def lifespan(app: FastAPI):
     notification_bus = setup_notifications(config)
     api_state.notification_bus = notification_bus  # type: ignore[reportAttributeAccessIssue]
 
-    # 7. V4 Singularity Daemons
-    watcher = start_knowledge_daemon()
-    swarm_daemon = start_swarm_daemon()
-    app.state.watcher = watcher
-    app.state.swarm_daemon = swarm_daemon
+    # 7. V4 Singularity Daemons (Execution Plane Only)
+    if config.DEPLOY_MODE != "cloud":
+        watcher = start_knowledge_daemon()
+        swarm_daemon = start_swarm_daemon()
+        app.state.watcher = watcher
+        app.state.swarm_daemon = swarm_daemon
+        logger.info("Lifespan: Sovereign Daemons initialized (Execution Plane).")
+    else:
+        app.state.watcher = None
+        app.state.swarm_daemon = None
+        logger.info("Lifespan: Daemons disabled in serverless mode (Control Plane).")
 
     try:
         yield
