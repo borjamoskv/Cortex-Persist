@@ -9,22 +9,14 @@ from persistence import ZeroCopyRingBuffer, VSAMemory, DB_PATH, VSA_BIN_PATH
 
 
 @pytest.fixture(autouse=True)
-def cleanup_bin_files():
-    """Ensure binary files are clean before and after each test."""
-    bin_path = os.path.join(os.path.dirname(DB_PATH), "swarm_ring_vsa.bin")
-    for path in [bin_path, VSA_BIN_PATH]:
-        if os.path.exists(path):
-            try:
-                os.remove(path)
-            except Exception:
-                pass
+def clean_vsa_env(monkeypatch, tmp_path):
+    """Isolate DB and bin paths to tmp_path to prevent xdist concurrency conflicts."""
+    test_db = tmp_path / "test_cortex.db"
+    
+    monkeypatch.setattr("persistence.DB_PATH", str(test_db))
+    monkeypatch.setattr("persistence.VSA_BIN_PATH", str(tmp_path / "vsa.bin"))
     yield
-    for path in [bin_path, VSA_BIN_PATH]:
-        if os.path.exists(path):
-            try:
-                os.remove(path)
-            except Exception:
-                pass
+
 
 
 def test_ring_buffer_lifecycle():
