@@ -5,6 +5,7 @@ Tests for QdrantVectorBackend.
 from __future__ import annotations
 
 import pytest
+pytest.importorskip("qdrant_client")
 from unittest.mock import AsyncMock, MagicMock
 
 from cortex.storage.qdrant import (

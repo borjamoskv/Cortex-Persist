@@ -12,8 +12,9 @@ from __future__ import annotations
 
 import asyncio
 import json
-import redis.asyncio
 import pytest
+pytest.importorskip("redis")
+import redis.asyncio
 from cortex.database.cache import _MAX_REDIS_VALUE_BYTES, CacheEvent, TieredCache
 
 # ─── L1 Behavior (always active) ─────────────────────────────────────

@@ -10,8 +10,9 @@ import json
 import sqlite3
 import time
 
-import numpy as np
 import pytest
+pytest.importorskip("numpy")
+import numpy as np
 
 from cortex.extensions.swarm.crystal_consolidator import (
     ConsolidationResult,
