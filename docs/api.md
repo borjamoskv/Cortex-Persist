@@ -1,6 +1,6 @@
-# REST API Reference
+# CORTEX REST API Reference (LEGION-10k)
 
-CORTEX exposes a FastAPI application via `cortex.api:app`.
+CORTEX exposes a high-throughput, C5-REAL verified FastAPI application via `cortex.api:app`.
 
 By default, the FastAPI app mounts the core verifiable-memory and trust surface described here.
 Broader operator/runtime routes are gated behind `CORTEX_ENABLE_EXPERIMENTAL_API=1`.
@@ -57,9 +57,9 @@ curl -H "Authorization: Bearer ctx_xxxxxxxxxx" \
 
 ---
 
-## Recommended Core Endpoints
+## Recommended Sovereign Endpoints
 
-### Facts And Memory
+### Facts And Memory (C5-REAL Verified)
 
 - `POST /v1/facts` — Store a single fact for the authenticated tenant.
 - `POST /v1/facts/batch` — Store up to 100 facts in one request.
@@ -72,7 +72,7 @@ curl -H "Authorization: Bearer ctx_xxxxxxxxxx" \
 - `GET /v1/facts/verify` — Verify ledger integrity across persisted facts.
 - `DELETE /v1/facts/{fact_id}` — Soft-deprecate a fact.
 
-### Trust, Governance, And Health
+### Trust, Governance, And Swarm Health
 
 - `GET /health` — Lightweight service health endpoint returning `status`, `engine`, and `health_index`.
 - `GET /v1/status` — Engine status, counts, and database size.
