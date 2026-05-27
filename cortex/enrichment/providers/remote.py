@@ -15,6 +15,11 @@ class RemoteEmbeddingProvider:
         return bool(self.endpoint)
 
     def embed(self, texts: list[str]) -> list[list[float]]:
+        from cortex.guards.url_guard import is_safe_url
+
+        if not is_safe_url(self.endpoint):
+            raise ValueError(f"URLGuard blocked unsafe SSRF attempt to endpoint: {self.endpoint}")
+
         payload = json.dumps({"texts": texts}).encode("utf-8")
         req = urllib.request.Request(
             self.endpoint,

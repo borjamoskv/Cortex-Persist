@@ -117,6 +117,13 @@ def crawl(url: str):
     console.print(f"[bold cyan]🕸️ LIBRARIAN-1 Ingesting: {url}[/bold cyan]")
     try:
         if url.startswith("http"):
+            from cortex.guards.url_guard import is_safe_url
+
+            if not is_safe_url(url):
+                console.print(
+                    f"[bold red]✗ LIBRARIAN Error:[/bold red] URLGuard blocked unsafe SSRF attempt to {url}"
+                )
+                return
             with urllib.request.urlopen(url, timeout=10) as response:
                 text = response.read().decode("utf-8")
         else:

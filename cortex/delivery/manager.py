@@ -85,6 +85,12 @@ class DeliveryManager:
             return False
 
         try:
+            from cortex.guards.url_guard import is_safe_url
+
+            if not is_safe_url(target.url):
+                logger.error("[DELIVERY] WEBHOOK target URL blocked by URLGuard: %s", target.url)
+                return False
+
             import urllib.request
 
             payload = json.dumps({"mission_id": mission_id, "output": output}, default=str).encode()

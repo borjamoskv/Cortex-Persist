@@ -50,7 +50,7 @@ class TelemetryBridge:
     async def handler(self, websocket):
         await self.register(websocket)
         try:
-            async for message in websocket:
+            async for _ in websocket:
                 # Accept reverse-telemetry or pings
                 pass
         finally:

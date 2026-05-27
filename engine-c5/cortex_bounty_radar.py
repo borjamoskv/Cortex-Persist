@@ -18,6 +18,18 @@ def execute_radar() -> None:
     query = "label:bounty state:open language:Solidity language:Rust language:TypeScript language:JavaScript"
     url = f"https://api.github.com/search/issues?q={urllib.parse.quote(query)}&sort=created&order=desc&per_page=10"
     
+    import sys
+    import os
+    sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+    try:
+        from cortex.guards.url_guard import is_safe_url
+        if not is_safe_url(url):
+            log("URLGuard Block: SSRF Attempt Prevented.", "ERROR")
+            return
+    except Exception as e:
+        log(f"URLGuard Initialization Error: {e}", "ERROR")
+        return
+
     # Requisitos de encabezado para evitar ban inmediato
     headers = {
         'Accept': 'application/vnd.github.v3+json',

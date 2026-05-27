@@ -28,6 +28,11 @@ def generate_sri_hash(url: str, algo: str = "sha384") -> str:
         if parsed.hostname not in trusted_domains:
             return ""
 
+        from cortex.guards.url_guard import is_safe_url
+
+        if not is_safe_url(url):
+            return ""
+
         req = urllib.request.Request(url, headers={"User-Agent": "CORTEX-Persist/SRI-Engine"})
         with urllib.request.urlopen(req, timeout=5) as response:
             data = response.read()
