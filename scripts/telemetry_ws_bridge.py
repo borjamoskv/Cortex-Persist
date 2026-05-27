@@ -9,6 +9,7 @@ import json
 import time
 import random
 import logging
+import math
 
 try:
     import websockets
@@ -24,30 +25,48 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - CORTEX-WS - %(mess
 
 async def telemetry_loop(websocket):
     from cortex.compliance.tracker import ComplianceTracker
+    from cortex.extensions.langchain_bridge import CortexLedgerCallback
+    from cortex.extensions.policy.jis_auditor import JISAuditor
     tracker = ComplianceTracker(project="exergia-telemetry")
+    auditor = JISAuditor(enforce_encryption=True)
     logging.info("C5-REAL: Frontend Dashboard conectado al flujo de telemetría.")
     try:
         base_throughput = 390534.73
         tick_count = 0
         while True:
             tick_count += 1
-            # Emisión de métricas termodinámicas (Proyección C5-REAL)
-            # En producción, se extraen del pm.ring.process_all_native()
+            # Simulacion "Consejo de Sabios" (Deep Breathing / Synchronization)
+            phase = tick_count * 0.05
+            breathing = math.sin(phase)
+            sync_pulse = math.cos(phase * 0.5)
+
+            cortisol_val = 0.3 + (breathing * 0.2) + random.uniform(0.01, 0.05)
+            exergy_val = 0.02 + (sync_pulse * 0.015) + random.uniform(0.001, 0.005)
+            throughput = base_throughput + (breathing * 150000)
+
             metrics = {
-                "active_nodes": 10000,
-                "throughput_agents_sec": round(
-                    base_throughput + random.uniform(-5000, 5000), 2
-                ),
-                "gil_friction_us": 0.0,  # GIL bypassed
-                "ring_buffer_utilization": round(random.uniform(0.1, 2.5), 2),
-                "exergy_consumption_j": round(random.uniform(0.01, 0.05), 4),
-                "cortisol_level": round(random.uniform(0.1, 0.9), 3),
+                "active_nodes": 1000,
+                "active_tasks": len(CortexLedgerCallback._active_tasks_global),
+                "throughput_agents_sec": round(max(10000, throughput), 2),
+                "gil_friction_us": 0.0,
+                "ring_buffer_utilization": round(random.uniform(0.1, 0.5), 2),
+                "exergy_consumption_j": round(exergy_val, 4),
+                "cortisol_level": round(cortisol_val, 3),
             }
             payload = {
                 "timestamp": time.monotonic(),
-                "swarm_state": "LEGION_ZERO_LATENCY_LOCKED",
+                "swarm_state": "LEGION-1K // CONSEJO_DE_SABIOS",
+                "actor_id": "cortex-telemetry-daemon",
+                "signature": "0xCRYPTO_MOCK_SIGNATURE",
                 "metrics": metrics,
             }
+            
+            # Simulate a C5 violation spike every 50 ticks to test HUD visual alerts
+            if tick_count % 50 == 0:
+                payload.pop("signature")
+                
+            violations = auditor.audit_payload(payload, event_id=f"tick_{tick_count}")
+            payload["jis_violations"] = [v.__dict__ for v in violations]
             
             # Log telemetry tick using the O(1) async compliance path
             await tracker.log_decision_async(

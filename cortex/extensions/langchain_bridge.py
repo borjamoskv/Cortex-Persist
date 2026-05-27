@@ -8,6 +8,8 @@ class CortexLedgerCallback(AsyncCallbackHandler):
     O(1) Deterministic injection of LangChain agent state into Cortex-Persist.
     Generates C5-REAL cryptographic ledger entries asynchronously to prevent LEGION-10k deadlocks.
     """
+    _active_tasks_global = set()
+
     def __init__(self, engine, agent_id: str):
         self.engine = engine
         self.agent_id = agent_id
@@ -24,7 +26,13 @@ class CortexLedgerCallback(AsyncCallbackHandler):
             )
         )
         self._tasks.add(task)
-        task.add_done_callback(self._tasks.discard)
+        CortexLedgerCallback._active_tasks_global.add(task)
+        
+        def _on_done(t):
+            self._tasks.discard(t)
+            CortexLedgerCallback._active_tasks_global.discard(t)
+            
+        task.add_done_callback(_on_done)
 
     async def on_agent_finish(self, finish: AgentFinish, **kwargs) -> None:
         # Serialize return_values efficiently to avoid deserialization bottlenecks
@@ -42,4 +50,10 @@ class CortexLedgerCallback(AsyncCallbackHandler):
             )
         )
         self._tasks.add(task)
-        task.add_done_callback(self._tasks.discard)
+        CortexLedgerCallback._active_tasks_global.add(task)
+        
+        def _on_done(t):
+            self._tasks.discard(t)
+            CortexLedgerCallback._active_tasks_global.discard(t)
+            
+        task.add_done_callback(_on_done)
