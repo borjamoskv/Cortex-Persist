@@ -276,7 +276,7 @@ class LedgerManager(SovereignResource):
             self._tx_queue.put((timestamp, action, vector_id, yield_amount, block_hash, zk_payload))
 
             self._entropy_counter += 1
-            if self._entropy_counter >= 1000:
+            if self._entropy_counter >= 100000:
                 ledger_entropy_event.set()
                 self._entropy_counter = 0
 
@@ -419,6 +419,14 @@ class IdeStatePreserver:
 
     async def _execute_snapshot_async(self):
         os.makedirs(self.backup_dir, exist_ok=True)
+        try:
+            backups = sorted([os.path.join(self.backup_dir, f) for f in os.listdir(self.backup_dir) if f.startswith("antigravity_state_") and f.endswith(".tar.gz")], key=os.path.getmtime)
+            while len(backups) >= 2:
+                oldest = backups.pop(0)
+                os.remove(oldest)
+        except Exception:
+            pass
+
         timestamp = int(time.monotonic())
         archive_path = os.path.join(self.backup_dir, f"antigravity_state_{timestamp}.tar.gz")
 
@@ -451,6 +459,14 @@ class IdeStatePreserver:
     def _execute_snapshot_sync(self):
         """Fallback for environments without a running event loop."""
         os.makedirs(self.backup_dir, exist_ok=True)
+        try:
+            backups = sorted([os.path.join(self.backup_dir, f) for f in os.listdir(self.backup_dir) if f.startswith("antigravity_state_") and f.endswith(".tar.gz")], key=os.path.getmtime)
+            while len(backups) >= 2:
+                oldest = backups.pop(0)
+                os.remove(oldest)
+        except Exception:
+            pass
+
         timestamp = int(time.monotonic())
         archive_path = os.path.join(self.backup_dir, f"antigravity_state_{timestamp}.tar.gz")
         try:
