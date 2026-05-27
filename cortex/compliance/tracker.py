@@ -101,6 +101,7 @@ class ComplianceTracker:
         now = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat()
 
         eu_meta: dict[str, Any] = {
+            "actor_id": agent_id,
             "eu_ai_act": {
                 "article": "12",
                 "logged_at": now,

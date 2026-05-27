@@ -49,7 +49,7 @@ class TestLogDecision:
         )
         # Retrieve the fact and check meta
         import sqlite3
-        conn = sqlite3.connect(tracker.db_path)
+        conn = sqlite3.connect(tracker._engine._db_path)
         cursor = conn.execute("SELECT metadata FROM facts WHERE id = ?", (fact_id,))
         row = cursor.fetchone()
         conn.close()
@@ -70,7 +70,7 @@ class TestLogDecision:
             meta={"model": "gpt-4", "latency_ms": 230},
         )
         import sqlite3
-        conn = sqlite3.connect(tracker.db_path)
+        conn = sqlite3.connect(tracker._engine._db_path)
         cursor = conn.execute("SELECT metadata FROM facts WHERE id = ?", (fact_id,))
         row = cursor.fetchone()
         conn.close()
@@ -88,7 +88,7 @@ class TestLogDecision:
             agent_id="agent:test",
         )
         import sqlite3
-        conn = sqlite3.connect(tracker.db_path)
+        conn = sqlite3.connect(tracker._engine._db_path)
         cursor = conn.execute("SELECT project FROM facts WHERE id = ?", (fact_id,))
         row = cursor.fetchone()
         conn.close()
@@ -101,7 +101,7 @@ class TestLogDecision:
             agent_id="agent:test",
         )
         import sqlite3
-        conn = sqlite3.connect(tracker.db_path)
+        conn = sqlite3.connect(tracker._engine._db_path)
         cursor = conn.execute("SELECT project FROM facts WHERE id = ?", (fact_id,))
         row = cursor.fetchone()
         conn.close()

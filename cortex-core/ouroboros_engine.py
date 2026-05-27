@@ -66,7 +66,8 @@ class OuroborosEngine:
 
         # Initialize SignalBus
         try:
-            conn = sqlite3.connect(DB_PATH, check_same_thread=False)
+            conn = sqlite3.connect(DB_PATH, check_same_thread=False, timeout=15.0)
+            conn.execute("PRAGMA journal_mode=WAL;")
             self.bus = SignalBus(conn)
         except Exception:
             self.bus = None
