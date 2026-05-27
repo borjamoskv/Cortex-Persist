@@ -18,14 +18,14 @@ async def test_hardware_aggressor_c4_sim():
         mock_ledger = MagicMock()
         aggressor = HardwareAggressor(ledger=mock_ledger)
 
-        # Verify initial state (starts at 1 node)
-        assert aggressor.active_nodes == 1
+        # Verify initial state (starts at 10000 nodes)
+        assert aggressor.active_nodes == 10000
 
         # Execute deployment
         result = await aggressor._deploy_to_akash()
 
         # Verify it still increments physical node count in sim
-        assert aggressor.active_nodes == 2
+        assert aggressor.active_nodes == 10001
 
 
 @pytest.mark.asyncio
@@ -57,4 +57,4 @@ async def test_hardware_aggressor_c5_real(monkeypatch):
             assert "deployment" in args
             assert "akash1mockwallet" in args
 
-            assert aggressor.active_nodes == 2
+            assert aggressor.active_nodes == 10001

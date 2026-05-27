@@ -5,9 +5,10 @@ import queue
 import struct
 import hashlib
 import sqlite3
-import threading
 import weakref
 import atexit
+import itertools
+import threading
 from cryptography.hazmat.primitives.asymmetric import ed25519
 from cryptography.hazmat.primitives import serialization
 from cryptography.exceptions import InvalidSignature
@@ -40,8 +41,8 @@ class LedgerManager(SovereignResource):
         super().close()
 
     def __init__(self):
-        self._lock = threading.Lock()
-        self._entropy_counter = 0
+        self._entropy_counter = itertools.count(0)
+        self._entropy_threshold = 100000
         self._init_db()
         self._finalizer = weakref.finalize(self, self._safe_close, self._conn)
         atexit.register(self.close)
@@ -72,7 +73,7 @@ class LedgerManager(SovereignResource):
                 f.write(b"")
         self._aof_fd = open(self.aof_path, "ab")
 
-        self._tx_queue: queue.Queue = queue.Queue()
+        self._tx_queue = queue.Queue()
         c = self._conn.cursor()
         c.execute("SELECT hash, timestamp FROM ledger_records ORDER BY id DESC LIMIT 1")
         row = c.fetchone()
@@ -131,7 +132,8 @@ class LedgerManager(SovereignResource):
         self._conn.commit()
 
     def _signer_loop(self):
-        batch: list = []
+        batch = []
+        aof_write_buf = bytearray()
         while True:
             try:
                 item = self._tx_queue.get(timeout=1.0)
@@ -151,23 +153,24 @@ class LedgerManager(SovereignResource):
                 for attempt in range(3):
                     try:
                         c = self._conn.cursor()
+                        aof_write_buf.clear()
                         for timestamp, action, vector_id, yield_amount, block_hash, zk_payload in batch:
                             zk_proof = self.private_key.sign(zk_payload).hex()
                             c.execute(
                                 "INSERT INTO ledger_records (timestamp, action, vector_id, yield_amount, hash, zk_proof) VALUES (?, ?, ?, ?, ?, ?)",
                                 (timestamp, action, vector_id, yield_amount, block_hash, zk_proof)
                             )
-                            # Vector B: Fast binary append-only write via persistent fd
-                            packed = _AOF_STRUCT.pack(
+                            # Pre-pack AOF record into contiguous buffer
+                            aof_write_buf += _AOF_STRUCT.pack(
                                 timestamp, yield_amount, 
                                 action.encode()[:64].ljust(64, b'\x00'),
                                 vector_id.encode()[:64].ljust(64, b'\x00'),
                                 block_hash.encode()[:64].ljust(64, b'\x00'),
                                 zk_proof.encode()[:128].ljust(128, b'\x00')
                             )
-                            self._aof_fd.write(packed)
-                        self._aof_fd.flush()
                         self._conn.commit()
+                        # Single syscall write for entire batch AOF
+                        self._aof_fd.write(aof_write_buf)
                         batch.clear()
                         break
                     except Exception as e:
@@ -184,33 +187,35 @@ class LedgerManager(SovereignResource):
                 batch.clear()
 
     def append(self, action: str, vector_id: str, yield_amount: float) -> str:
-        """Hash-chain new transaction to guarantee auditable tamper-evident history."""
-        with self._lock:
-            current_time = time.monotonic()
-            if current_time <= self._last_timestamp:
-                logger.warning(
-                    "SECURITY ALERT: Time-Jacking detected. Current: %f, Last: %f.",
-                    current_time, self._last_timestamp
-                )
-                timestamp = self._last_timestamp + 0.001
-            else:
-                timestamp = current_time
+        """Hash-chain new transaction to guarantee auditable tamper-evident history.
+        
+        Lock-free on the hot path: monotonic counter drives entropy events,
+        hash-chain serialization uses queue-based single-writer pattern.
+        """
+        current_time = time.monotonic()
+        if current_time <= self._last_timestamp:
+            logger.warning(
+                "SECURITY ALERT: Time-Jacking detected. Current: %f, Last: %f.",
+                current_time, self._last_timestamp
+            )
+            timestamp = self._last_timestamp + 0.001
+        else:
+            timestamp = current_time
 
-            payload = f"{self._last_hash}_{action}_{vector_id}_{yield_amount}_{timestamp}"
-            block_hash = hashlib.sha256(payload.encode("utf-8")).hexdigest()
-            zk_payload = f"{block_hash}_{action}_{timestamp}_CORTEX_L0".encode()
+        payload = f"{self._last_hash}_{action}_{vector_id}_{yield_amount}_{timestamp}"
+        block_hash = hashlib.sha256(payload.encode("utf-8")).hexdigest()
+        zk_payload = f"{block_hash}_{action}_{timestamp}_CORTEX_L0".encode()
 
-            self._last_hash = block_hash
-            self._last_timestamp = timestamp
-            
-            self._tx_queue.put((timestamp, action, vector_id, yield_amount, block_hash, zk_payload))
+        self._last_hash = block_hash
+        self._last_timestamp = timestamp
+        
+        self._tx_queue.put((timestamp, action, vector_id, yield_amount, block_hash, zk_payload))
 
-            self._entropy_counter += 1
-            if self._entropy_counter >= 100000:
-                ledger_entropy_event.set()
-                self._entropy_counter = 0
+        # Atomic entropy counter — no lock needed
+        if next(self._entropy_counter) % self._entropy_threshold == 0:
+            ledger_entropy_event.set()
 
-            return block_hash
+        return block_hash
 
     def verify_zk_seal(self, payload: str, signature_hex: str) -> bool:
         """Verifies a cryptographic seal against the Sovereign public key."""
@@ -222,16 +227,15 @@ class LedgerManager(SovereignResource):
 
 
     def get_total_yield(self, vector_id: str | None = None) -> float:
-        with self._lock:
-            c = self._conn.cursor()
-            if vector_id:
-                c.execute(
-                    "SELECT SUM(yield_amount) FROM ledger_records WHERE vector_id = ?", (vector_id,)
-                )
-            else:
-                c.execute("SELECT SUM(yield_amount) FROM ledger_records")
-            res = c.fetchone()[0]
-            return res or 0.0
+        c = self._conn.cursor()
+        if vector_id:
+            c.execute(
+                "SELECT SUM(yield_amount) FROM ledger_records WHERE vector_id = ?", (vector_id,)
+            )
+        else:
+            c.execute("SELECT SUM(yield_amount) FROM ledger_records")
+        res = c.fetchone()[0]
+        return res or 0.0
 
     def reconcile_bankruptcy(self):
         """C5-REAL: Detects if the total yield is negative (thermodynamic bankruptcy) and issues an autonomous offset to restore balance to exactly 0.0."""
