@@ -122,6 +122,50 @@ class ComplianceTracker:
             tags=tags or ["eu-ai-act", "compliance"],
         )
 
+    async def log_decision_async(
+        self,
+        project: str | None = None,
+        content: str = "",
+        *,
+        agent_id: str = "agent:unknown",
+        decision_type: str = "decision",
+        confidence: str = "C3",
+        meta: dict[str, Any] | None = None,
+        tags: list[str] | None = None,
+    ) -> int:
+        """Async variant of log_decision for O(1) non-blocking agent flows.
+        
+        Bypasses the sync loop bridge to achieve maximum telemetry throughput.
+        """
+        if not self._initialized:
+            await self._engine.init_db_async()
+            self._initialized = True
+
+        proj = project or self._default_project
+        now = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat()
+
+        eu_meta: dict[str, Any] = {
+            "actor_id": agent_id,
+            "eu_ai_act": {
+                "article": "12",
+                "logged_at": now,
+                "agent_id": agent_id,
+                "decision_type": decision_type,
+            },
+        }
+        if meta:
+            eu_meta.update(meta)
+
+        return await self._engine.store(  # type: ignore[type-error]
+            project=proj,
+            content=content,
+            fact_type="decision",
+            source=agent_id,
+            confidence=confidence,
+            meta=eu_meta,
+            tags=tags or ["eu-ai-act", "compliance"],
+        )
+
     # ─── 2. verify_chain ──────────────────────────────────────────
 
     def verify_chain(self) -> dict[str, Any]:
@@ -148,6 +192,23 @@ class ComplianceTracker:
             }
 
         return self._engine._run_sync(ledger.audit_integrity_async())  # type: ignore[type-error]
+
+    async def verify_chain_async(self) -> dict[str, Any]:
+        """Async variant of verify_chain for zero-latency cryptographic verification."""
+        if not self._initialized:
+            await self._engine.init_db_async()
+            self._initialized = True
+
+        ledger = self._engine._ledger
+        if ledger is None:
+            return {
+                "valid": True,
+                "tx_checked": 0,
+                "roots_checked": 0,
+                "violations": [],
+            }
+
+        return await ledger.audit_integrity_async()
 
     # ─── 3. export_audit ──────────────────────────────────────────
 
