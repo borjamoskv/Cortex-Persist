@@ -214,8 +214,13 @@ async def test_seal_5_guard_rejection():
 async def test_seal_6_happy(mock_cache):
     mock_cache.files = {Path("ok.py"): "async def foo(): await asyncio.sleep(1)"}
     with (
-        patch("cortex.guards._seals_checks_6_10._check_temperature_determinism", AsyncMock(return_value=[])),
-        patch("cortex.guards._seals_checks_6_10._check_latency_telemetry", AsyncMock(return_value=[])),
+        patch(
+            "cortex.guards._seals_checks_6_10._check_temperature_determinism",
+            AsyncMock(return_value=[]),
+        ),
+        patch(
+            "cortex.guards._seals_checks_6_10._check_latency_telemetry", AsyncMock(return_value=[])
+        ),
     ):
         passed, _ = await check_seal_6_async_perf()
         assert passed is True
@@ -225,8 +230,13 @@ async def test_seal_6_happy(mock_cache):
 async def test_seal_6_sleep_rejection(mock_cache):
     mock_cache.files = {Path("bad.py"): "time.sleep(1)"}
     with (
-        patch("cortex.guards._seals_checks_6_10._check_temperature_determinism", AsyncMock(return_value=[])),
-        patch("cortex.guards._seals_checks_6_10._check_latency_telemetry", AsyncMock(return_value=[])),
+        patch(
+            "cortex.guards._seals_checks_6_10._check_temperature_determinism",
+            AsyncMock(return_value=[]),
+        ),
+        patch(
+            "cortex.guards._seals_checks_6_10._check_latency_telemetry", AsyncMock(return_value=[])
+        ),
     ):
         passed, _ = await check_seal_6_async_perf()
         assert passed is False
@@ -240,7 +250,9 @@ async def test_seal_6_temp_rejection(mock_cache):
             "cortex.guards._seals_checks_6_10._check_temperature_determinism",
             AsyncMock(return_value=["router.py"]),
         ),
-        patch("cortex.guards._seals_checks_6_10._check_latency_telemetry", AsyncMock(return_value=[])),
+        patch(
+            "cortex.guards._seals_checks_6_10._check_latency_telemetry", AsyncMock(return_value=[])
+        ),
     ):
         passed, _ = await check_seal_6_async_perf()
         assert passed is False
@@ -311,7 +323,8 @@ async def test_seal_9_happy():
 @pytest.mark.asyncio
 async def test_seal_10_happy():
     with patch(
-        "cortex.guards._seals_checks_6_10.check_gate_21_preservation", AsyncMock(return_value=(True, "verified"))
+        "cortex.guards._seals_checks_6_10.check_gate_21_preservation",
+        AsyncMock(return_value=(True, "verified")),
     ):
         passed, _ = await check_seal_10_preservation()
         assert passed is True
@@ -320,7 +333,8 @@ async def test_seal_10_happy():
 @pytest.mark.asyncio
 async def test_seal_10_rejection():
     with patch(
-        "cortex.guards._seals_checks_6_10.check_gate_21_preservation", AsyncMock(return_value=(False, "broken"))
+        "cortex.guards._seals_checks_6_10.check_gate_21_preservation",
+        AsyncMock(return_value=(False, "broken")),
     ):
         passed, _ = await check_seal_10_preservation()
         assert passed is False
