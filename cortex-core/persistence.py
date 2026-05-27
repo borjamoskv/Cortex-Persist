@@ -611,7 +611,7 @@ class ZeroCopyRingBuffer:
             self._f = open(self.bin_path, "r+b")
             self._mmap = mmap.mmap(self._f.fileno(), self.tensor_size)
             self._buffer = memoryview(self._mmap)
-            self._lock = threading.Lock()
+            # Pure Lock-Free C5-REAL
             self._write_idx = 0
             self._read_idx = 0
 
@@ -620,23 +620,23 @@ class ZeroCopyRingBuffer:
         if self._rust_buf is not None:
             return self._rust_buf.enqueue(agent_id, payload)
 
-        with self._lock:
-            offset = self._write_idx * self.task_size
-            if self._buffer[offset] != 0:
-                return False  # Buffer full
-                
-            self._buffer[offset] = 1  # Pending
-            import struct
-            struct.pack_into("d", self._buffer, offset + 1, time.monotonic())
+        # Zero-copy Lock-Free write (C5-REAL Enforced)
+        offset = self._write_idx * self.task_size
+        if self._buffer[offset] != 0:
+            return False  # Buffer full
             
-            agent_bytes = agent_id[:64].ljust(64, b"\x00")
-            self._buffer[offset + 9 : offset + 73] = agent_bytes
+        self._buffer[offset] = 1  # Pending
+        import struct
+        struct.pack_into("d", self._buffer, offset + 1, time.monotonic())
+        
+        agent_bytes = agent_id[:64].ljust(64, b"\x00")
+        self._buffer[offset + 9 : offset + 73] = agent_bytes
 
-            payload_bytes = payload[:183].ljust(183, b"\x00")
-            self._buffer[offset + 73 : offset + 256] = payload_bytes
-            
-            self._write_idx = (self._write_idx + 1) % self.capacity
-            return True
+        payload_bytes = payload[:183].ljust(183, b"\x00")
+        self._buffer[offset + 73 : offset + 256] = payload_bytes
+        
+        self._write_idx = (self._write_idx + 1) % self.capacity
+        return True
 
     def fetch_pending(self):
         """Zero-copy read direct from C-contiguous memory."""
@@ -646,20 +646,20 @@ class ZeroCopyRingBuffer:
         tasks = []
         import struct
 
-        with self._lock:
-            for _ in range(self.capacity):
-                offset = self._read_idx * self.task_size
-                if self._buffer[offset] == 1:  # Pending
-                    self._buffer[offset] = 2  # Mark Processing
-                    ts = struct.unpack_from("d", self._buffer, offset + 1)[0]
-                    agent_id = bytes(self._buffer[offset + 9 : offset + 73]).rstrip(b"\x00")
-                    payload = bytes(self._buffer[offset + 73 : offset + 256]).rstrip(b"\x00")
-                    tasks.append((self._read_idx, ts, agent_id, payload))
-                    
-                    self._buffer[offset] = 0 # Free it
-                    self._read_idx = (self._read_idx + 1) % self.capacity
-                else:
-                    break
+        # Zero-copy Lock-Free read (C5-REAL Enforced)
+        for _ in range(self.capacity):
+            offset = self._read_idx * self.task_size
+            if self._buffer[offset] == 1:  # Pending
+                self._buffer[offset] = 2  # Mark Processing
+                ts = struct.unpack_from("d", self._buffer, offset + 1)[0]
+                agent_id = bytes(self._buffer[offset + 9 : offset + 73]).rstrip(b"\x00")
+                payload = bytes(self._buffer[offset + 73 : offset + 256]).rstrip(b"\x00")
+                tasks.append((self._read_idx, ts, agent_id, payload))
+                
+                self._buffer[offset] = 0 # Free it
+                self._read_idx = (self._read_idx + 1) % self.capacity
+            else:
+                break
         return tasks
 
 
@@ -680,7 +680,7 @@ class OutboxDaemon(SovereignResource):
         self._daemon_task = None
         self._conn = sqlite3.connect(self._db_path, check_same_thread=False, timeout=10.0)
         _setup_sqlite_pragmas(self._conn)
-        self._lock = threading.Lock()
+        # Lock-Free Outbox C5-REAL
         self._finalizer = weakref.finalize(self, self._safe_close, self._conn)
         atexit.register(self.close)
         self.ledger = ledger
@@ -749,6 +749,46 @@ class OutboxDaemon(SovereignResource):
                         continue
                     except Exception as e:
                         logger.error(f"EXA_LISP Syntax/Runtime Error: {e}")
+                        continue
+
+                # -- NATIVE L0 INTERCEPTOR: QUANTUM_BRANCHING (Q-Let v2) --
+                if payload_dict.get("type") == "QUANTUM_BRANCHING":
+                    try:
+                        from exa_lisp_genesis import parse, tokenize, evaluate, ExergyEnvironment, EntropyDeath
+                        import concurrent.futures
+                        
+                        logger.info("C5-REAL QUANTUM_BRANCHING (Q-Let v2) Invoked. Speculative parallel evaluation.")
+                        branches = payload_dict.get("branches", [])
+                        limit = payload_dict.get("exergy_limit", 1000)
+                        
+                        def _evaluate_branch(code, branch_id, bound_limit=limit):
+                            env = ExergyEnvironment(joules=bound_limit, ledger=self.ledger)
+                            try:
+                                ast = parse(tokenize(code))
+                                result = evaluate(ast, env)
+                                return branch_id, result, env.joules, True
+                            except Exception as e:
+                                return branch_id, str(e), getattr(env, 'joules', 0), False
+                                
+                        best_branch = None
+                        max_exergy_retained = -1.0
+                        
+                        max_workers = min(32, len(branches) if branches else 1)
+                        if max_workers > 0:
+                            with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+                                futures = [executor.submit(_evaluate_branch, b.get("code", ""), b.get("id", str(i))) for i, b in enumerate(branches)]
+                                for future in concurrent.futures.as_completed(futures):
+                                    branch_id, result, remaining_joules, success = future.result()
+                                    if success and remaining_joules > max_exergy_retained:
+                                        max_exergy_retained = remaining_joules
+                                        best_branch = (branch_id, result)
+                                        
+                            if best_branch:
+                                logger.info(f"Q-Let v2 Collapsed: Selected Branch {best_branch[0]} with Retained Exergy: {max_exergy_retained}J")
+                                self.ledger.append(action="Q_BRANCH_COLLAPSE", vector_id=str(best_branch[0]), yield_amount=float(max_exergy_retained))
+                        continue
+                    except Exception as e:
+                        logger.error(f"QUANTUM_BRANCHING Error: {e}")
                         continue
 
                 # -- NATIVE L0 INTERCEPTOR: AST_MUTATION --
