@@ -38,11 +38,12 @@ class SovereignFlake:
         self.sequence = 0
         self.last_timestamp = -1
         self._lock = threading.Lock()
+        self.epoch_offset = int(time.time() * 1000) - int(time.monotonic() * 1000)
 
     def next_id(self) -> int:
         """Return the next unique, causal, monotonically increasing integer ID."""
         with self._lock:
-            current_timestamp = int(time.monotonic() * 1000)
+            current_timestamp = int(time.monotonic() * 1000) + self.epoch_offset
 
             # NTP drift backward: prevent causal violations by freezing logic time
             if current_timestamp < self.last_timestamp:
@@ -54,7 +55,7 @@ class SovereignFlake:
                 if self.sequence == 0:
                     # Sequence exhausted for this millisecond. Wait for next ms.
                     while current_timestamp <= self.last_timestamp:
-                        current_timestamp = int(time.monotonic() * 1000)
+                        current_timestamp = int(time.monotonic() * 1000) + self.epoch_offset
             else:
                 self.sequence = 0
 

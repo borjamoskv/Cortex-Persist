@@ -1,7 +1,6 @@
 import asyncio
 import threading
 
-_SYNC_LOCK = threading.Lock()
 
 
 # pyright: reportAttributeAccessIssue=false
@@ -9,7 +8,8 @@ class SyncMixin:
     def _run_sync(self, coro):
         """Execute a coroutine synchronously, thread-safe on a persistent background loop."""
         if not hasattr(self, "_sync_loop") or self._sync_loop.is_closed():
-            with _SYNC_LOCK:
+            lock = self.__dict__.setdefault("_instance_sync_lock", threading.Lock())
+            with lock:
                 if not hasattr(self, "_sync_loop") or self._sync_loop.is_closed():
                     self._sync_loop = asyncio.new_event_loop()
                     self._sync_thread = threading.Thread(
@@ -64,7 +64,8 @@ class SyncMixin:
                     f"[SyncMixin] Error closing async engine synchronously: {e}", exc_info=True
                 )
 
-            with _SYNC_LOCK:
+            lock = self.__dict__.setdefault("_instance_sync_lock", threading.Lock())
+            with lock:
                 if hasattr(self, "_sync_loop"):
                     loop = self._sync_loop
                     loop.call_soon_threadsafe(loop.stop)
