@@ -23,7 +23,7 @@ SECRETS_REGEX = [
 ]
 
 TRASH_REGEX = [
-    (r"(?<!_)" + "pri" + r"nt\s*\(", "Residual print() statement"),
+    (r"(?<!_)" + "pri" + r"nt\s*\(", "Residual standard output"),
     (r"import pdb; pdb\.set_trace\(\)", "Residual PDB trace"),
     (r"console\.log\(", "Residual console.log()")
 ]
