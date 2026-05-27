@@ -20,7 +20,7 @@ class ContextCache:
             self._cache.clear()  # O(1) Memory Entropy Purge
         self._cache[content_key] = {"payload": payload, "timestamp": time.monotonic()}
 
-    def get(self, content_key: str) -> dict:
+    def get(self, content_key: str) -> dict | None:
         """Retrieve cached payload if it exists and falls within TTL window."""
         if content_key in self._cache:
             entry = self._cache[content_key]

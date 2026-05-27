@@ -32,6 +32,7 @@ def _setup_sqlite_pragmas(conn):
 
 class SovereignResource:
     """Base class for autonomous cleanup of file descriptors and connections via weakref."""
+    _finalizer = None
     @staticmethod
     def _safe_close(*resources):
         for res in resources:

@@ -38,7 +38,9 @@ class LedgerManager(SovereignResource):
         if os.path.exists(key_path):
             from cryptography.hazmat.primitives import serialization
             with open(key_path, "rb") as key_file:
-                self.private_key = serialization.load_pem_private_key(key_file.read(), password=None)
+                pk = serialization.load_pem_private_key(key_file.read(), password=None)
+            assert isinstance(pk, ed25519.Ed25519PrivateKey)
+            self.private_key = pk
         else:
             from cryptography.hazmat.primitives import serialization
             self.private_key = ed25519.Ed25519PrivateKey.generate()

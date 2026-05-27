@@ -99,7 +99,7 @@ class OuroborosEngine:
         )
         await process.wait()
 
-    def _detect_contracts(self) -> list[str]:
+    def _detect_contracts(self) -> list[dict[str, str]]:
         """Detect Solidity contracts using simple regex (O(1) approach for V5)."""
         contracts = []
         for root, _, files in os.walk(self.scratch_dir):
