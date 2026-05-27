@@ -25,11 +25,11 @@
 
 **From local Python daemon → High-performance Multi-agent network backbone supporting 10,000+ concurrent agents.**
 
-- [ ] **ZeroCopyRingBuffer Hardening** — Lock-free MPSC memory mapping for LEGION-10k swarm dispatch.
-- [ ] **Distributed Event Bus** — C5-REAL telemetry streaming (WebSocket @ 20Hz) to agents.archi.
-- [ ] **Sovereign Magic Decorator** — `@sovereign_persist` for zero-friction agent onboarding.
-- [ ] **EVM Topography Mapping** — Latency-optimized node routing for Ethereum, Base, and Arbitrum.
-- [ ] **Redis L1 Cache** — Distributed working memory for lower TTFT latency across the swarm.
+- [x] **ZeroCopyRingBuffer Hardening** — Lock-free MPSC memory mapping for LEGION-10k swarm dispatch.
+- [x] **Distributed Event Bus** — C5-REAL telemetry streaming (WebSocket @ 20Hz) to agents.archi.
+- [x] **Sovereign Magic Decorator** — `@sovereign_persist` for zero-friction agent onboarding.
+- [x] **EVM Topography Mapping** — Latency-optimized node routing for Ethereum, Base, and Arbitrum.
+- [x] **Redis L1 Cache** — Distributed working memory for lower TTFT latency across the swarm.
 
 ---
 
