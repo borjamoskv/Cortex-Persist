@@ -1,36 +1,3 @@
-```python
-# Logs and temporary data files
-*.log
-*.json
+(CORTEX_OMEGA_MANIFESTO.md is a source file, so no ignores needed)
 
-# Python
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-env/
-venv/
-.venv/
-.ENV
-.python-version
-pip-log.txt
-pip-delete-this-directory.txt
-.tox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.log
-*.tmp
-*.temp
-*.lock
-
-# VSCode
-.vscode/
-
-# Original rules preserved
-*.log
-```
+(empty — output nothing)

@@ -1,0 +1,82 @@
+[
+  {
+    "step": 0,
+    "noise": 0.4,
+    "masked_params": 1175,
+    "observable_classes": 496,
+    "boundary_score": 0.0,
+    "stable": true
+  },
+  {
+    "step": 1,
+    "noise": 0.45,
+    "masked_params": 1369,
+    "observable_classes": 434,
+    "boundary_score": 0.01,
+    "stable": true
+  },
+  {
+    "step": 2,
+    "noise": 0.5,
+    "masked_params": 1496,
+    "observable_classes": 292,
+    "boundary_score": 0.1308,
+    "stable": true
+  },
+  {
+    "step": 3,
+    "noise": 0.55,
+    "masked_params": 1696,
+    "observable_classes": 165,
+    "boundary_score": 0.3991,
+    "stable": true
+  },
+  {
+    "step": 4,
+    "noise": 0.6,
+    "masked_params": 1745,
+    "observable_classes": 74,
+    "boundary_score": 0.7189,
+    "stable": true
+  },
+  {
+    "step": 5,
+    "noise": 0.65,
+    "masked_params": 1942,
+    "observable_classes": 29,
+    "boundary_score": 0.8873,
+    "stable": false
+  },
+  {
+    "step": 6,
+    "noise": 0.7,
+    "masked_params": 2104,
+    "observable_classes": 10,
+    "boundary_score": 0.9643,
+    "stable": false
+  },
+  {
+    "step": 7,
+    "noise": 0.75,
+    "masked_params": 2229,
+    "observable_classes": 3,
+    "boundary_score": 0.992,
+    "stable": false
+  },
+  {
+    "step": 8,
+    "noise": 0.8,
+    "masked_params": 2419,
+    "observable_classes": 2,
+    "boundary_score": 0.996,
+    "stable": false
+  },
+  {
+    "step": 9,
+    "noise": 0.85,
+    "masked_params": 2553,
+    "observable_classes": 2,
+    "boundary_score": 0.996,
+    "stable": false
+  }
+]
