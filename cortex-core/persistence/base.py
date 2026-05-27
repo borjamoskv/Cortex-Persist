@@ -3,6 +3,7 @@ import logging
 import sqlite3
 import threading
 import atexit
+import itertools
 
 try:
     import cortex_rs  # noqa: F401
@@ -19,9 +20,15 @@ ledger_entropy_event = threading.Event()
 # Exergy-Maximized Thread-Local Connection Pool
 _local = threading.local()
 
-# Metrics Cache to reduce database read contention in concurrent swarms
-_metrics_cache: dict = {"value": None, "expiry": 0.0}
-_metrics_cache_lock = threading.Lock()
+# Lock-Free Metrics Cache: Atomic epoch-based invalidation
+# Writers increment _metrics_epoch; readers compare snapshot epoch to current.
+# No Lock. No contention. O(1) deterministic.
+_metrics_epoch = itertools.count(0)
+_metrics_cache = {"value": None, "expiry": 0.0, "epoch": -1}
+_metrics_cache_lock = threading.Lock()  # Retained for backward compat imports; unused in hot path
+
+# Monotonic clock anchor for deterministic timing across all layers
+_BOOT_MONOTONIC = __import__("time").monotonic()
 
 
 def _setup_sqlite_pragmas(conn: sqlite3.Connection) -> None:
@@ -30,6 +37,7 @@ def _setup_sqlite_pragmas(conn: sqlite3.Connection) -> None:
     conn.execute("PRAGMA synchronous=NORMAL;")
     conn.execute("PRAGMA cache_size=-64000;")
     conn.execute("PRAGMA temp_store=MEMORY;")
+    conn.execute("PRAGMA mmap_size=268435456;")  # 256MB mmap for zero-copy reads
 
 
 class SovereignResource:

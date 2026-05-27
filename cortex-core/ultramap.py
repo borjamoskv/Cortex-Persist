@@ -43,7 +43,7 @@ class UltramapSubstrate:
         self._mmap = mmap.mmap(self._f.fileno(), self.tensor_size)
         self._buffer = memoryview(self._mmap)
         
-        self._finalizer = weakref.finalize(self, self._safe_close, self._mmap, self._f)
+        self._finalizer = weakref.finalize(self, self._safe_close, getattr(self, '_buffer', None), getattr(self, '_mmap', None), getattr(self, '_f', None))
         atexit.register(self.close)
         
         logger.info(f"ULTRAMAP-Ω Initialized. Capacity: {self.capacity} agents. O(1) Memory Active.")
