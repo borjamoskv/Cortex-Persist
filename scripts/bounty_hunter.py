@@ -34,11 +34,11 @@ class BountyHunter:
 
             # Using VOID-MAX SIMD/MIH retrieval for historical context
             # Expected latency < 1ms across 10k previous audit notes / code patterns
-            start = time.time()
+            start = time.monotonic()
             matches = await self.store.recall_secure(
                 tenant_id="default", project_id="bounty_research", query=target, limit=3
             )
-            elapsed = (time.time() - start) * 1000
+            elapsed = (time.monotonic() - start) * 1000
 
             logger.info(f"⚡ VOID-MAX RECALL: {elapsed:.2f}ms | Matches: {len(matches)}")
 

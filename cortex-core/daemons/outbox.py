@@ -263,16 +263,43 @@ class OutboxDaemon(SovereignResource):
                         continue
                 if payload_dict.get('type') == 'QUANTUM_BRANCHING':
                     try:
-                        from exa_lisp_genesis import parse, tokenize, evaluate, ExergyEnvironment, EntropyDeath
-                        logger.info('C5-REAL QUANTUM_BRANCHING (Q-Let v2) Invoked. Speculative parallel evaluation.')
-                        branches = payload_dict.get('branches', [])
-                        limit = payload_dict.get('exergy_limit', 1000)
+                        from exa_lisp_genesis import (
+                            parse,
+                            tokenize,
+                            evaluate,
+                            ExergyEnvironment,
+                            EntropyDeath,
+                        )
+                        import concurrent.futures
+
+                        logger.info(
+                            "C5-REAL QUANTUM_BRANCHING (Q-Let v2) Invoked. Speculative parallel evaluation."
+                        )
+                        branches = payload_dict.get("branches", [])
+                        limit = payload_dict.get("exergy_limit", 1000)
+
+                        def _evaluate_branch(code, branch_id, bound_limit=limit):
+                            env = ExergyEnvironment(joules=bound_limit, ledger=self.ledger)
+                            try:
+                                ast = parse(tokenize(code))
+                                result = evaluate(ast, env)
+                                return branch_id, result, env.joules, True
+                            except Exception as e:
+                                return branch_id, str(e), getattr(env, "joules", 0), False
+
                         best_branch = None
                         max_exergy_retained = -1.0
                         max_workers = min(32, len(branches) if branches else 1)
                         if max_workers > 0:
-                            with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-                                futures = [executor.submit(_evaluate_branch, b.get('code', ''), b.get('id', str(i))) for i, b in enumerate(branches)]
+                            with concurrent.futures.ThreadPoolExecutor(
+                                max_workers=max_workers
+                            ) as executor:
+                                futures = [
+                                    executor.submit(
+                                        _evaluate_branch, b.get("code", ""), b.get("id", str(i))
+                                    )
+                                    for i, b in enumerate(branches)
+                                ]
                                 for future in concurrent.futures.as_completed(futures):
                                     branch_id, result, remaining_joules, success = future.result()
                                     if success and remaining_joules > max_exergy_retained:
