@@ -35,6 +35,7 @@ class TestCortexDaemon:
         import persistence
 
         monkeypatch.setattr(persistence, "DB_PATH", str(test_db))
+        monkeypatch.setattr(persistence, "_global_ring_buffer", None)
 
         # Initialize the test SQLite schema
         conn = sqlite3.connect(str(test_db))
@@ -104,18 +105,32 @@ class TestCortexDaemon:
 
         time.sleep(0.1)
 
-        conn = sqlite3.connect(cortex_daemon.DB_PATH)
-        c = conn.cursor()
-        c.execute("SELECT agent, payload, status FROM cortex_swarm_queue")
-        rows = c.fetchall()
-        conn.close()
+        import persistence
 
-        assert len(rows) == 1
-        agent, payload_str, status = rows[0]
-        assert agent == "TEST_AGENT"
-        payload = json.loads(payload_str)
-        assert payload["command"] == "echo 'hello'"
-        assert status == "pending"
+        ring = persistence._get_ring_buffer()
+        pending = ring.fetch_pending()
+
+        if pending:
+            assert len(pending) == 1
+            idx, ts, agent_bytes, payload_bytes = pending[0]
+            agent = agent_bytes.decode("utf-8", "ignore").rstrip("\x00")
+            payload_str = payload_bytes.decode("utf-8", "ignore").rstrip("\x00")
+            assert agent == "TEST_AGENT"
+            payload = json.loads(payload_str)
+            assert payload["command"] == "echo 'hello'"
+        else:
+            conn = sqlite3.connect(cortex_daemon.DB_PATH)
+            c = conn.cursor()
+            c.execute("SELECT agent, payload, status FROM cortex_swarm_queue")
+            rows = c.fetchall()
+            conn.close()
+
+            assert len(rows) == 1
+            agent, payload_str, status = rows[0]
+            assert agent == "TEST_AGENT"
+            payload = json.loads(payload_str)
+            assert payload["command"] == "echo 'hello'"
+            assert status == "pending"
 
     @pytest.mark.asyncio
     async def test_execute_task(self, daemon):
@@ -159,15 +174,21 @@ class TestCortexDaemon:
             mock_execute.assert_called_once()
             assert mock_execute.call_args[0][0]["agent"] == "AGENT_1"
 
-            # Check if queue status is updated to processing
+            # Check if queue status is updated to processing (SQLite) or consumed (Ring Buffer)
             conn = sqlite3.connect(cortex_daemon.DB_PATH)
             c = conn.cursor()
             c.execute("SELECT status FROM cortex_swarm_queue")
             rows = c.fetchall()
             conn.close()
 
-            assert len(rows) == 1
-            assert rows[0][0] == "processing"
+            if rows:
+                assert len(rows) == 1
+                assert rows[0][0] == "processing"
+            else:
+                import persistence
+
+                ring = persistence._get_ring_buffer()
+                assert len(ring.fetch_pending()) == 0
 
     @pytest.mark.asyncio
     async def test_run_council_deliberation(self, daemon):

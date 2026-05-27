@@ -19,7 +19,7 @@ async def run_stress_test():
     conn.commit()
     conn.close()
 
-    NUM_TASKS = 2500
+    NUM_TASKS = 10000
     print(f"[+] Inyectando {NUM_TASKS} tareas en ráfaga (Simulación de Enjambre Masivo)...")
     
     start_time = time.time()

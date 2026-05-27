@@ -17,13 +17,13 @@ def test_vsa_hammer():
 def test_queue_hammer():
     start = time.time()
     
-    # Concurrently enqueue 5,000 swarm tasks to stress SQLite WAL and Nexus ThreadPool
+    # Concurrently enqueue 10,000 swarm tasks to stress SQLite WAL and Nexus ThreadPool
     def dispatch(idx):
         enqueue_swarm_task(f"Agent-{idx}", {"action": "stress", "id": idx})
     
     # We use a ThreadPool just to simulate a high-concurrency swarm bombarding the queue
     with concurrent.futures.ThreadPoolExecutor(max_workers=100) as pool:
-        pool.map(dispatch, range(5000))
+        pool.map(dispatch, range(10000))
         
     # Wait for the background Outbox Daemon to drain (or force a sync drain for the test)
     import persistence
@@ -32,8 +32,8 @@ def test_queue_hammer():
     outbox.drain_once_sync()
     
     duration = time.time() - start
-    print(f"🌪️  [Swarm SQLite Queue + Async Nexus] 5,000 concurrent tasks processed in {duration:.4f}s")
-    print(f"   => {5000/duration:.2f} OPS (Lock-free WAL & C5-REAL Outbox)")
+    print(f"🌪️  [Swarm SQLite Queue + Async Nexus] 10,000 concurrent tasks processed in {duration:.4f}s")
+    print(f"   => {10000/duration:.2f} OPS (Lock-free WAL & C5-REAL Outbox)")
 
 if __name__ == "__main__":
     print("🚀 INITIATING CORTEX-PERSIST EXERGY STRESS TEST (C5-REAL)...")

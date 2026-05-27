@@ -234,6 +234,31 @@ class CortexDaemon:
 
     def _fetch_and_lock_swarm_tasks(self):
         tasks = []
+        # 1. Zero-Copy Exergy Path: Drain from Ring Buffer first
+        try:
+            from persistence import _get_ring_buffer
+            ring = _get_ring_buffer()
+            ring_tasks = ring.fetch_pending()
+            for idx, ts, agent_bytes, payload_bytes in ring_tasks:
+                agent = agent_bytes.decode('utf-8', 'ignore').rstrip('\x00')
+                payload_str = payload_bytes.decode('utf-8', 'ignore').rstrip('\x00')
+                try:
+                    payload = json.loads(payload_str)
+                except Exception:
+                    payload = payload_str
+                tasks.append(
+                    {
+                        "id": f"ring_{idx}",
+                        "timestamp": ts,
+                        "agent": agent,
+                        "payload": payload,
+                        "command": payload.get("command") if isinstance(payload, dict) else payload,
+                    }
+                )
+        except Exception as e:
+            logging.error("Failed to fetch from ZeroCopyRingBuffer in daemon: %s", e)
+
+        # 2. SQLite Fallback
         with self.db_lock:
             c = self.db_conn.cursor()
             c.execute(

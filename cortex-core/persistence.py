@@ -28,6 +28,11 @@ ledger_entropy_event = threading.Event()
 # Exergy-Maximized Thread-Local Connection Pool
 _local = threading.local()
 
+# Metrics Cache to reduce database read contention in concurrent swarms
+_metrics_cache = {"value": None, "expiry": 0.0}
+_metrics_cache_lock = threading.Lock()
+
+
 
 def _setup_sqlite_pragmas(conn):
     conn.execute("PRAGMA journal_mode=WAL;")
@@ -190,6 +195,8 @@ class LedgerManager(SovereignResource):
             CREATE TABLE IF NOT EXISTS cortex_execution_ledger (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 timestamp REAL,
+                agent TEXT,
+                command TEXT,
                 returncode INTEGER,
                 execution_time REAL
             )
@@ -197,6 +204,9 @@ class LedgerManager(SovereignResource):
         c.execute("CREATE INDEX IF NOT EXISTS idx_ledger_vector ON ledger_records(vector_id);")
         c.execute(
             "CREATE INDEX IF NOT EXISTS idx_swarm_status_time ON cortex_swarm_queue(status, timestamp);"
+        )
+        c.execute(
+            "CREATE INDEX IF NOT EXISTS idx_exec_ledger_time ON cortex_execution_ledger(timestamp DESC);"
         )
         self._conn.commit()
 
@@ -350,7 +360,7 @@ class VSAMemory(SovereignResource):
 
 
 class IdeStatePreserver:
-    """Guardian para proteger el entorno IDE/Agent contra fallas estructurales (Antigravity Drama)."""
+    """Guardian para proteger el entorno IDE/Agent contra fallas estructurales."""
 
     def __init__(self, ledger: LedgerManager):
         self.ledger = ledger
@@ -358,33 +368,47 @@ class IdeStatePreserver:
         self.target_dir = os.path.expanduser("~/.gemini/antigravity")
         self._daemon_task = None
 
-    def _execute_snapshot(self):
+    async def _execute_snapshot_async(self):
         os.makedirs(self.backup_dir, exist_ok=True)
         timestamp = int(time.monotonic())
         archive_path = os.path.join(self.backup_dir, f"antigravity_state_{timestamp}.tar.gz")
 
         try:
-            # C5-REAL snapshot using system tar
-            subprocess.run(
-                ["/usr/bin/tar", "-czf", archive_path, "--exclude=brain", self.target_dir],
-                check=True,
-                capture_output=True,
+            # C5-REAL snapshot using non-blocking async subprocess (Zero OS-Thread Friction)
+            proc = await asyncio.create_subprocess_exec(
+                "/usr/bin/tar", "-czf", archive_path, "--exclude=brain", self.target_dir,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE
             )
+            stdout, stderr = await proc.communicate()
 
-            # Hash the backup
-            hasher = hashlib.sha256()
-            with open(archive_path, "rb") as f:
-                while chunk := f.read(8192):
-                    hasher.update(chunk)
-            backup_hash = hasher.hexdigest()
+            if proc.returncode == 0:
+                hasher = hashlib.sha256()
+                with open(archive_path, "rb") as f:
+                    while chunk := f.read(8192):
+                        hasher.update(chunk)
+                backup_hash = hasher.hexdigest()
 
-            # Register in L3 Ledger
-            self.ledger.append(
-                action="IDE_STATE_SNAPSHOT", vector_id=f"hash:{backup_hash[:16]}", yield_amount=0.0
-            )
-            logger.info("IDE State Snapshot secured: %s", archive_path)
+                # Register in L3 Ledger
+                self.ledger.append(
+                    action="IDE_STATE_SNAPSHOT", vector_id=f"hash:{backup_hash[:16]}", yield_amount=0.0
+                )
+                logger.info("IDE State Snapshot secured: %s", archive_path)
+            else:
+                logger.error("Failed to snapshot IDE state: %s", stderr.decode())
         except Exception as e:
             logger.error("Failed to snapshot IDE state: %s", e)
+
+    def _execute_snapshot_sync(self):
+        """Fallback for environments without a running event loop."""
+        os.makedirs(self.backup_dir, exist_ok=True)
+        timestamp = int(time.monotonic())
+        archive_path = os.path.join(self.backup_dir, f"antigravity_state_{timestamp}.tar.gz")
+        try:
+            subprocess.run(["/usr/bin/tar", "-czf", archive_path, "--exclude=brain", self.target_dir], check=True, capture_output=True)
+            logger.info("IDE State Snapshot secured (Sync Fallback): %s", archive_path)
+        except Exception as e:
+            logger.error("Failed to snapshot IDE state sync: %s", e)
 
     async def _snapshot_loop(self):
         """Entropy-driven snapshots. Triggered precisely by Ledger cryptographic volume."""
@@ -392,7 +416,7 @@ class IdeStatePreserver:
         while True:
             await loop.run_in_executor(None, ledger_entropy_event.wait)
             ledger_entropy_event.clear()
-            await loop.run_in_executor(None, self._execute_snapshot)
+            await self._execute_snapshot_async()
 
     def start_guardian(self):
         if self._daemon_task:
@@ -403,7 +427,7 @@ class IdeStatePreserver:
         except RuntimeError:
             logger.warning("IDE State Preserver loop could not be started: no running event loop.")
             # Fallback sync run once
-            self._execute_snapshot()
+            self._execute_snapshot_sync()
 
 
 class HybridPersistenceManager:
@@ -515,6 +539,15 @@ class ZeroCopyRingBuffer:
         return tasks
 
 
+_global_ring_buffer = None
+
+def _get_ring_buffer():
+    global _global_ring_buffer
+    if _global_ring_buffer is None:
+        _global_ring_buffer = ZeroCopyRingBuffer()
+    return _global_ring_buffer
+
+
 class OutboxDaemon(SovereignResource):
     """Outbox Pattern Daemon: Asynchronously drains pending swarm tasks to NEXUS API."""
 
@@ -529,9 +562,20 @@ class OutboxDaemon(SovereignResource):
         self.ledger = ledger
 
     def _fetch_pending_tasks(self):
+        # 1. Zero-Copy Exergy Path: Drain from Ring Buffer first
+        try:
+            ring = _get_ring_buffer()
+            ring_tasks = ring.fetch_pending()
+            if ring_tasks:
+                return [(f"ring_{idx}", agent.decode('utf-8', 'ignore'), payload.decode('utf-8', 'ignore')) 
+                        for idx, ts, agent, payload in ring_tasks]
+        except Exception as e:
+            logger.error("ZeroCopyRingBuffer fetch failed: %s", e)
+
+        # 2. High-Entropy Fallback: Drain from SQLite
         with self._lock:
             c = self._conn.cursor()
-            # C5-REAL Atomic Outbox Consumption
+            # C4-SIM SQL Extraction (Index scan on status/timestamp)
             c.execute("""
                 UPDATE cortex_swarm_queue 
                 SET status = 'processing' 
@@ -720,20 +764,27 @@ class OutboxDaemon(SovereignResource):
 
 
 def _enqueue_swarm_task_sync(agent_name: str, payload: dict):
-    """Synchronous core implementation of the Swarm Queue Dispatcher and NEXUS API sync."""
-    # Sovereign SQLite Insert with Thread-Local pooling to eliminate connection/lock friction
+    """Zero-copy core implementation of the Swarm Queue Dispatcher."""
     try:
-        conn = _get_local_conn(DB_PATH, timeout=30.0)
-        c = conn.cursor()
-        c.execute(
-            "INSERT INTO cortex_swarm_queue (timestamp, agent, payload, status) VALUES (?, ?, ?, 'pending')",
-            (time.monotonic(), agent_name, json.dumps(payload)),
-        )
-        conn.commit()
+        ring = _get_ring_buffer()
+        payload_bytes = json.dumps(payload).encode('utf-8')
+        agent_bytes = agent_name.encode('utf-8')
+        success = ring.enqueue(agent_bytes, payload_bytes)
+        
+        if not success:
+            logger.warning("ZeroCopyRingBuffer full. Entropic Fallback to SQLite.")
+            conn = _get_local_conn(DB_PATH, timeout=30.0)
+            c = conn.cursor()
+            c.execute(
+                "INSERT INTO cortex_swarm_queue (timestamp, agent, payload, status) VALUES (?, ?, ?, 'pending')",
+                (time.monotonic(), agent_name, payload_bytes.decode('utf-8')),
+            )
+            conn.commit()
+            
         # Fire Zero-Latency Event to awaken the Outbox Daemon instantly
         outbox_wake_event.set()
     except Exception as e:
-        logger.error("Failed to enqueue swarm task via SQLite: %s", e)
+        logger.error("Failed to enqueue swarm task: %s", e)
         raise
 
 
@@ -752,8 +803,14 @@ def enqueue_swarm_task(agent_name: str, payload: dict):
     _enqueue_swarm_task_sync(agent_name, payload)
 
 
-def get_swarm_metrics() -> dict:
+def get_swarm_metrics(bypass_cache: bool = False) -> dict:
     """Extract C5-REAL telemetry from SQLite regarding swarm operation."""
+    now = time.monotonic()
+    if not bypass_cache:
+        with _metrics_cache_lock:
+            if _metrics_cache["value"] is not None and now < _metrics_cache["expiry"]:
+                return _metrics_cache["value"]
+
     try:
         conn = _get_local_conn(DB_PATH, timeout=5.0)
         c = conn.cursor()
@@ -781,11 +838,15 @@ def get_swarm_metrics() -> dict:
         else:
             uncertainty = 0.0
 
-        return {
+        result = {
             "latency_ms": round(latency_ms, 2),
             "active_children": active_children,
             "uncertainty": round(uncertainty, 4),
         }
+        with _metrics_cache_lock:
+            _metrics_cache["value"] = result
+            _metrics_cache["expiry"] = now + 0.5  # Cache for 500ms
+        return result
     except Exception as e:
         logger.error("Failed to extract swarm metrics (Deterministic C5-REAL Exception): %s", e)
         # C5-REAL CIRCUIT BREAKER: Maximize entropy signal to isolate failing node.
