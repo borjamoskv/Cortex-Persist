@@ -321,11 +321,11 @@ class ReflexionEngine:
             executor=my_executor_fn,
         )
         if outcome.succeeded:
-            print(f"Solved in {outcome.iterations_used} iterations")
+            logger.info(f"Solved in {outcome.iterations_used} iterations")
         else:
-            print(f"Failed after {outcome.iterations_used} attempts")
+            logger.info(f"Failed after {outcome.iterations_used} attempts")
             for r in outcome.reflections:
-                print(f"  [{r.iteration}] {r.diagnosis}")
+                logger.info(f"  [{r.iteration}] {r.diagnosis}")
     """
 
     def __init__(self, config: ReflexionConfig | None = None) -> None:
