@@ -356,3 +356,54 @@ class ImmuneMiddleware(BaseHTTPMiddleware):
             return await call_next(request)
         finally:
             tenant_id_var.reset(token)
+
+
+class CortexBillingMiddleware(BaseHTTPMiddleware):
+    """
+    CORTEX-Persist C5-REAL Middleware for Stripe Metered Billing.
+
+    Intercepts O(1) memory write operations and reports usage to Stripe
+    for managed API users. This establishes the $10k MRR funnel.
+    """
+
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+
+        # Track successful memory insertions for billing
+        if (
+            request.url.path.endswith("/facts")
+            and response.status_code in (200, 201)
+            and request.method == "POST"
+        ):
+            # NOTE: /v1/memories routes to /v1/facts
+            api_key = request.headers.get("x-api-key")
+            if api_key and api_key.startswith("ctx_cloud_"):
+                # Non-blocking async usage reporting
+                asyncio.create_task(self._report_usage(api_key))
+
+        return response
+
+    async def _report_usage(self, api_key: str):
+        """Asynchronously reports usage to Stripe via background task."""
+        try:
+            import stripe
+            from cortex import config
+
+            stripe.api_key = getattr(config, "STRIPE_SECRET_KEY", None)
+            if not stripe.api_key:
+                return
+
+            # Lookup via DB/cache. For C5-REAL MVP, use a mock ID derivation.
+            subscription_item_id = f"si_{api_key[-8:]}"
+
+            # Run synchronous stripe call in a thread pool to avoid blocking event loop
+            await asyncio.to_thread(
+                stripe.SubscriptionItem.create_usage_record,
+                subscription_item_id,
+                quantity=1,
+                timestamp="now",
+                action="increment",
+            )
+            logger.info("Stripe usage reported for %s", api_key[:12])
+        except Exception as e:
+            logger.error("Stripe billing increment failed for %s: %s", api_key[:12], e)

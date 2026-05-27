@@ -20,6 +20,7 @@ import cortex.api.state as api_state
 from cortex import __version__, config
 from cortex.api.middleware import (
     ContentSizeLimitMiddleware,
+    CortexBillingMiddleware,
     ImmuneMiddleware,
     RateLimitMiddleware,
     SecurityFraudMiddleware,
@@ -168,6 +169,7 @@ app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(RateLimitMiddleware, limit=config.RATE_LIMIT, window=config.RATE_WINDOW)
 app.add_middleware(MetricsMiddleware)
 app.add_middleware(MeteringMiddleware)
+app.add_middleware(CortexBillingMiddleware)
 
 
 # ─── Exception Handlers ──────────────────────────────────────────────
