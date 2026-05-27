@@ -37,7 +37,20 @@ class TestCortexDaemon:
 
         monkeypatch.setattr(persistence, "DB_PATH", str(test_db))
         monkeypatch.setattr(persistence.base, "DB_PATH", str(test_db))
+        monkeypatch.setattr(_outbox_mod, "DB_PATH", str(test_db))
         monkeypatch.setattr(_outbox_mod, "_global_ring_buffer", None)
+
+        # Reset thread-local connections to avoid cross-contamination
+        from persistence.base import _local
+
+        if hasattr(_local, "conn"):
+            try:
+                _local.conn.close()
+            except Exception:
+                pass
+            delattr(_local, "conn")
+        if hasattr(_local, "db_path"):
+            delattr(_local, "db_path")
 
         # Initialize the test SQLite schema
         conn = sqlite3.connect(str(test_db))
@@ -102,19 +115,24 @@ class TestCortexDaemon:
             assert "test.tmp" in mock_remove.call_args[0][0]
 
     def test_queue_task(self, daemon):
-        daemon._queue_task("TEST_AGENT", "echo 'hello'")
         import time
-
-        time.sleep(0.1)
-
         import persistence
 
         ring = persistence._get_ring_buffer()
+        pending_before = len(ring.fetch_pending())
+
+        daemon._queue_task("TEST_AGENT", "echo 'hello'")
+        time.sleep(0.1)
+
         pending = ring.fetch_pending()
 
         if pending:
-            assert len(pending) == 1
-            idx, ts, agent_bytes, payload_bytes = pending[0]
+            # Assert exactly one new entry was added
+            assert len(pending) == pending_before + 1
+            # Find our specific entry
+            matching = [e for e in pending if b"TEST_AGENT" in e[2]]
+            assert len(matching) == 1
+            idx, ts, agent_bytes, payload_bytes = matching[0]
             agent = agent_bytes.decode("utf-8", "ignore").rstrip("\x00")
             payload_str = payload_bytes.decode("utf-8", "ignore").rstrip("\x00")
             assert agent == "TEST_AGENT"

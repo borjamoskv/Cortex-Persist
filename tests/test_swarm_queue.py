@@ -26,10 +26,14 @@ import sqlite3
 def clean_swarm_queue_db(monkeypatch, tmp_path):
     """Isolate SQLite database for each test."""
     test_db = tmp_path / "test_cortex_memory_vsa.db"
+    import daemons.outbox as _outbox_mod
 
     # Patch DB_PATH in imported modules
     monkeypatch.setattr("persistence.DB_PATH", str(test_db))
+    monkeypatch.setattr("persistence.base.DB_PATH", str(test_db))
+    monkeypatch.setattr(_outbox_mod, "DB_PATH", str(test_db))
     monkeypatch.setattr("cortex_daemon.DB_PATH", str(test_db))
+    monkeypatch.setattr(_outbox_mod, "_global_ring_buffer", None)
 
     # Initialize the tables in test_db
     conn = sqlite3.connect(str(test_db))
@@ -46,14 +50,16 @@ async def test_daemon_basic_queue_processing(tmp_path, monkeypatch):
     db_path = str(tmp_path / "cortex_memory_vsa.db")
     bin_path = str(tmp_path / "swarm_ring_vsa.bin")
 
+    import daemons.outbox as _outbox_mod
+
     # Patch all the possible paths
-    monkeypatch.setattr("cortex_daemon.DB_PATH", db_path)
+    monkeypatch.setattr("persistence.DB_PATH", db_path)
     monkeypatch.setattr("persistence.base.DB_PATH", db_path)
+    monkeypatch.setattr(_outbox_mod, "DB_PATH", db_path)
+    monkeypatch.setattr("cortex_daemon.DB_PATH", db_path)
     monkeypatch.setattr("persistence.base.VSA_BIN_PATH", bin_path)
 
     # Force _global_ring_buffer to None so it recreates with the new path
-    import daemons.outbox as _outbox_mod
-
     monkeypatch.setattr(_outbox_mod, "_global_ring_buffer", None)
 
     # Initialize mock daemon
@@ -94,12 +100,14 @@ async def test_daemon_command_extraction(tmp_path, monkeypatch):
     db_path = str(tmp_path / "cortex_memory_vsa.db")
     bin_path = str(tmp_path / "swarm_ring_vsa.bin")
 
-    monkeypatch.setattr("cortex_daemon.DB_PATH", db_path)
-    monkeypatch.setattr("persistence.base.DB_PATH", db_path)
-    monkeypatch.setattr("persistence.base.VSA_BIN_PATH", bin_path)
-
+    # Force _global_ring_buffer to None so it recreates with the new path
     import daemons.outbox as _outbox_mod
 
+    monkeypatch.setattr("persistence.DB_PATH", db_path)
+    monkeypatch.setattr("persistence.base.DB_PATH", db_path)
+    monkeypatch.setattr(_outbox_mod, "DB_PATH", db_path)
+    monkeypatch.setattr("cortex_daemon.DB_PATH", db_path)
+    monkeypatch.setattr("persistence.base.VSA_BIN_PATH", bin_path)
     monkeypatch.setattr(_outbox_mod, "_global_ring_buffer", None)
 
     daemon = CortexDaemon()
@@ -152,14 +160,14 @@ async def test_swarm_queue_contention(tmp_path, monkeypatch):
     db_path = str(tmp_path / "cortex_memory_vsa.db")
     bin_path = str(tmp_path / "swarm_ring_vsa.bin")
 
-    # Patch all the possible paths
-    monkeypatch.setattr("cortex_daemon.DB_PATH", db_path)
-    monkeypatch.setattr("persistence.base.DB_PATH", db_path)
-    monkeypatch.setattr("persistence.base.VSA_BIN_PATH", bin_path)
-
     # Force _global_ring_buffer to None so it recreates with the new path
     import daemons.outbox as _outbox_mod
 
+    monkeypatch.setattr("persistence.DB_PATH", db_path)
+    monkeypatch.setattr("persistence.base.DB_PATH", db_path)
+    monkeypatch.setattr(_outbox_mod, "DB_PATH", db_path)
+    monkeypatch.setattr("cortex_daemon.DB_PATH", db_path)
+    monkeypatch.setattr("persistence.base.VSA_BIN_PATH", bin_path)
     monkeypatch.setattr(_outbox_mod, "_global_ring_buffer", None)
     # Wait, just setting _global_ring_buffer to None is enough because __init__ reads from base.DB_PATH
 

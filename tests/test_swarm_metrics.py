@@ -24,7 +24,20 @@ def clean_swarm_queue_db(monkeypatch, tmp_path):
     # Patch DB_PATH in imported modules
     monkeypatch.setattr("persistence.DB_PATH", str(test_db))
     monkeypatch.setattr("persistence.base.DB_PATH", str(test_db))
+    monkeypatch.setattr(_outbox_mod, "DB_PATH", str(test_db))
     monkeypatch.setattr(_outbox_mod, "_global_ring_buffer", None)
+
+    # Reset thread-local connections to avoid test cross-contamination
+    from persistence.base import _local
+
+    if hasattr(_local, "conn"):
+        try:
+            _local.conn.close()
+        except Exception:
+            pass
+        delattr(_local, "conn")
+    if hasattr(_local, "db_path"):
+        delattr(_local, "db_path")
 
     # Reset cache
     with persistence._metrics_cache_lock:
