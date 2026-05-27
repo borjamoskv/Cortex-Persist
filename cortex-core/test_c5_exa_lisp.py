@@ -10,7 +10,7 @@ async def main():
     print("[TEST] Enqueuing EXA-LISP Quantum Task to Ring Buffer...")
     payload = {
         "type": "EXA_LISP",
-        "code": "(with-exergy-limit 3000j (q-let (invoke-skill capital_extractor_omega CapitalExtractorOmegaSkill) (invoke-skill capital_extractor_omega CapitalExtractorOmegaSkill)))",
+        "code": "(q-let (invoke-skill mac_control_omega MacControlOmega) (math-add 5 5))",
         "exergy_limit": 3000
     }
     
