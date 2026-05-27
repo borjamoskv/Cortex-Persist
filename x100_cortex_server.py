@@ -118,7 +118,7 @@ def push_state():
 
 
 def add_log(msg, val):
-    STATE["logs"].append({"id": time.time(), "msg": str(msg), "val": str(val)})
+    STATE["logs"].append({"id": time.monotonic(), "msg": str(msg), "val": str(val)})
     STATE["logs"] = STATE["logs"][-30:]
     push_state()
 

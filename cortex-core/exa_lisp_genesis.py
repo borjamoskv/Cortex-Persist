@@ -2,6 +2,7 @@ import logging
 logger = logging.getLogger(__name__)
 import time
 import hashlib
+import concurrent.futures
 from persistence import LedgerManager
 
 class EntropyDeath(Exception):

@@ -142,13 +142,13 @@ class VSAEngine:
     def memorize(self, key_vec, state_vec, timestamp=None, decay_lambda=0.0):
         """Add a bound pair to the memory tensor with optional decay."""
         if timestamp is None:
-            timestamp = _time.time()
+            timestamp = _time.monotonic()
         self._items.append((key_vec, state_vec, timestamp, decay_lambda))
         self._rebuild_memory()
 
     def _rebuild_memory(self):
         """Rebuild memory tensor with current decay weights."""
-        now = _time.time()
+        now = _time.monotonic()
         self.memory = np.zeros(self.D)
         for key, state, ts, lam in self._items:
             dt = now - ts
@@ -162,7 +162,7 @@ class VSAEngine:
 
     def forget(self, epsilon=0.01):
         """Purge items whose decay weight has fallen below epsilon."""
-        now = _time.time()
+        now = _time.monotonic()
         before = len(self._items)
         self._items = [
             (k, s, ts, lam) for k, s, ts, lam in self._items
