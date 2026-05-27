@@ -31,7 +31,7 @@ class JISAuditor:
     def __init__(self, enforce_encryption: bool = True):
         self.enforce_encryption = enforce_encryption
 
-    def audit_payload(self, payload: Dict[str, Any], event_id: str | None = None) -> list[JISViolation]:
+    def audit_payload(self, payload: dict[str, Any], event_id: str | None = None) -> list[JISViolation]:
         """Run all compliance checks on a transaction payload."""
         violations = []
         

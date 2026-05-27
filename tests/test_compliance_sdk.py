@@ -19,7 +19,7 @@ pytestmark = [
 
 
 @pytest.fixture
-async def tracker(tmp_path: Path):
+def tracker(tmp_path: Path):
     """Create a ComplianceTracker with a temp database."""
     from cortex.compliance import ComplianceTracker
 
@@ -33,7 +33,7 @@ async def tracker(tmp_path: Path):
 
 
 class TestLogDecision:
-    async def test_returns_fact_id(self, tracker):
+    def test_returns_fact_id(self, tracker):
         fact_id = tracker.log_decision(
             content="Approved loan application #443 — risk score 0.23",
             agent_id="agent:loan-processor",
@@ -41,20 +41,21 @@ class TestLogDecision:
         assert isinstance(fact_id, int)
         assert fact_id > 0
 
-    async def test_stores_eu_metadata(self, tracker):
+    def test_stores_eu_metadata(self, tracker):
         fact_id = tracker.log_decision(
             content="Rejected application #444 — income verification failed",
             agent_id="agent:loan-processor",
             decision_type="rejection",
         )
         # Retrieve the fact and check meta
-        conn = await tracker._engine.get_conn()
-        cursor = await conn.execute("SELECT metadata FROM facts WHERE id = ?", (fact_id,))
-        row = await cursor.fetchone()
+        import sqlite3
+        conn = sqlite3.connect(tracker.db_path)
+        cursor = conn.execute("SELECT metadata FROM facts WHERE id = ?", (fact_id,))
+        row = cursor.fetchone()
+        conn.close()
         assert row is not None
 
         from cortex.crypto import get_default_encrypter
-
         enc = get_default_encrypter()
         meta = enc.decrypt_json(row[0], tenant_id="default")
         assert "eu_ai_act" in meta
@@ -62,56 +63,62 @@ class TestLogDecision:
         assert meta["eu_ai_act"]["decision_type"] == "rejection"
         assert meta["eu_ai_act"]["agent_id"] == "agent:loan-processor"
 
-    async def test_custom_meta_merged(self, tracker):
+    def test_custom_meta_merged(self, tracker):
         fact_id = tracker.log_decision(
             content="Approved application #445 with model override.",
             agent_id="agent:loan-processor",
             meta={"model": "gpt-4", "latency_ms": 230},
         )
-        conn = await tracker._engine.get_conn()
-        cursor = await conn.execute("SELECT metadata FROM facts WHERE id = ?", (fact_id,))
-        row = await cursor.fetchone()
+        import sqlite3
+        conn = sqlite3.connect(tracker.db_path)
+        cursor = conn.execute("SELECT metadata FROM facts WHERE id = ?", (fact_id,))
+        row = cursor.fetchone()
+        conn.close()
 
         from cortex.crypto import get_default_encrypter
-
         enc = get_default_encrypter()
         meta = enc.decrypt_json(row[0], tenant_id="default")
         assert meta.get("model") == "gpt-4"
         assert meta.get("latency_ms") == 230
         assert "eu_ai_act" in meta
 
-    async def test_uses_default_project(self, tracker):
+    def test_uses_default_project(self, tracker):
         fact_id = tracker.log_decision(
             content="Decision using default project namespace.",
             agent_id="agent:test",
         )
-        conn = await tracker._engine.get_conn()
-        cursor = await conn.execute("SELECT project FROM facts WHERE id = ?", (fact_id,))
-        row = await cursor.fetchone()
+        import sqlite3
+        conn = sqlite3.connect(tracker.db_path)
+        cursor = conn.execute("SELECT project FROM facts WHERE id = ?", (fact_id,))
+        row = cursor.fetchone()
+        conn.close()
         assert row[0] == "test-agent"
 
-    async def test_custom_project_override(self, tracker):
+    def test_custom_project_override(self, tracker):
         fact_id = tracker.log_decision(
             project="custom-project",
             content="Decision with explicit project override.",
             agent_id="agent:test",
         )
-        conn = await tracker._engine.get_conn()
-        cursor = await conn.execute("SELECT project FROM facts WHERE id = ?", (fact_id,))
-        row = await cursor.fetchone()
+        import sqlite3
+        conn = sqlite3.connect(tracker.db_path)
+        cursor = conn.execute("SELECT project FROM facts WHERE id = ?", (fact_id,))
+        row = cursor.fetchone()
+        conn.close()
         assert row[0] == "custom-project"
+
 
 
 # ─── verify_chain ─────────────────────────────────────────────────────
 
 
 class TestVerifyChain:
-    async def test_valid_on_fresh_db(self, tracker):
+    def test_valid_on_fresh_db(self, tracker):
         result = tracker.verify_chain()
         assert result["valid"] is True
         assert result["violations"] == []
 
-    async def test_valid_after_decisions(self, tracker):
+    def test_valid_after_decisions(self, tracker):
         for i in range(3):
             tracker.log_decision(
                 content=f"Decision {i} for chain verification test.",
@@ -125,7 +132,7 @@ class TestVerifyChain:
 
 
 class TestExportAudit:
-    async def test_contains_required_fields(self, tracker):
+    def test_contains_required_fields(self, tracker):
         tracker.log_decision(
             content="Decision for audit export test.",
             agent_id="agent:auditor",
@@ -137,7 +144,7 @@ class TestExportAudit:
         assert "generated_at" in report
         assert "project" in report
 
-    async def test_compliance_checks_present(self, tracker):
+    def test_compliance_checks_present(self, tracker):
         tracker.log_decision(
             content="Decision for compliance checks test.",
             agent_id="agent:auditor",
@@ -150,7 +157,7 @@ class TestExportAudit:
         assert "art_12_3_tamper_proof" in checks
         assert "art_12_4_periodic_verification" in checks
 
-    async def test_compliance_score(self, tracker):
+    def test_compliance_score(self, tracker):
         tracker.log_decision(
             content="Decision for score validation.",
             agent_id="agent:auditor",
@@ -159,7 +166,7 @@ class TestExportAudit:
         assert report["eu_ai_act"]["score"] == "5/5"
         assert report["eu_ai_act"]["status"] == "COMPLIANT"
 
-    async def test_facts_summary_counts(self, tracker):
+    def test_facts_summary_counts(self, tracker):
         for i in range(3):
             tracker.log_decision(
                 content=f"Decision {i} for summary counting.",
@@ -172,7 +179,7 @@ class TestExportAudit:
         assert "decision" in summary["by_type"]
         assert "agent:counter" in summary["sources"]
 
-    async def test_include_facts_flag(self, tracker):
+    def test_include_facts_flag(self, tracker):
         tracker.log_decision(
             content="Decision for facts list test.",
             agent_id="agent:lister",
@@ -190,7 +197,7 @@ class TestExportAudit:
 
 
 class TestContextManager:
-    async def test_context_manager_works(self, tmp_path: Path):
+    def test_context_manager_works(self, tmp_path: Path):
         from cortex.compliance import ComplianceTracker
 
         with ComplianceTracker(

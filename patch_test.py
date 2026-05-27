@@ -1,5 +1,5 @@
 import re
-with open("tests/test_virgo_guard.py", "r") as f:
+with open("tests/test_virgo_guard.py") as f:
     content = f.read()
 
 # find test_virgo_agent_valid_fallback_signature

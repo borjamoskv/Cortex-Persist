@@ -34,7 +34,7 @@ class EVMTopographyMapper:
     """
 
     def __init__(self) -> None:
-        self.nodes: Dict[int, List[EVMNode]] = {
+        self.nodes: dict[int, list[EVMNode]] = {
             1: [],      # Ethereum Mainnet
             8453: [],   # Base
             42161: []   # Arbitrum One
@@ -49,7 +49,7 @@ class EVMTopographyMapper:
             self.nodes[chain_id].append(EVMNode(url=url, chain_id=chain_id))
             logger.info("📍 [EVM Topography] Added node for chain %d: %s", chain_id, url)
 
-    async def get_optimal_node(self, chain_id: int) -> Optional[EVMNode]:
+    async def get_optimal_node(self, chain_id: int) -> EVMNode | None:
         """O(1) retrieval of the most performant active node."""
         if chain_id not in self.nodes or not self.nodes[chain_id]:
             return None
