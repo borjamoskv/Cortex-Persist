@@ -46,7 +46,7 @@ import os
 import time
 from dataclasses import dataclass, field
 
-from cortex.extensions.llm._presets import load_presets
+from cortex.extensions.llm._presets import check_api_key, load_presets
 from cortex.extensions.llm.provider import LLMProvider
 from cortex.extensions.llm.router import IntentProfile
 
@@ -354,7 +354,7 @@ class SovereignLLM:
             return None
 
         env_key = preset.get("env_key", "")
-        if not is_local and env_key and not os.environ.get(env_key):
+        if not is_local and env_key and not check_api_key(preset):
             return None
 
         chain.append(provider_name)

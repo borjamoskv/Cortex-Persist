@@ -19,7 +19,7 @@ from cortex.extensions.llm._audit import spectral_audit
 from cortex.extensions.llm._backoff import handle_429_backoff
 from cortex.extensions.llm._resilience import CircuitBreaker, resilient_call
 from cortex.extensions.llm._models import BaseProvider, CortexPrompt, IntentProfile
-from cortex.extensions.llm._presets import get_prefix_cache_config, load_presets
+from cortex.extensions.llm._presets import check_api_key, get_prefix_cache_config, load_presets
 from cortex.extensions.llm._result_cache import ResultCache
 from cortex.extensions.llm._stealth import (
     apply_causal_jitter,
@@ -157,7 +157,7 @@ class LLMProvider(BaseProvider):
         # Resolve API key if not explicitly provided
         env_key = preset.get("env_key") or preset.get("api_key_env")
         if not self._api_key and env_key:
-            self._api_key = os.environ.get(env_key)
+            self._api_key = check_api_key(preset)
 
         if not self._api_key and provider not in ["ollama", "lmstudio", "llamacpp", "vllm", "jan"]:
             raise ValueError(f"Provider '{provider}' requires API key ({env_key})")

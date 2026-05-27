@@ -107,8 +107,6 @@ class CortexEngine(
         self._db_path.parent.mkdir(parents=True, exist_ok=True)
         self._conn: aiosqlite.Connection | None = None
         self._vec_available = False
-        self._conn_lock = asyncio.Lock()
-        self._schema_lock = asyncio.Lock()
         self._schema_ready = False
         self._ledger = None  # Wave 5: ImmutableLedger (lazy init)
         self._embedder: LocalEmbedder | None = None
@@ -134,6 +132,34 @@ class CortexEngine(
         self._buffer_task = None
         self._post_commit_tasks: set[asyncio.Task[Any]] = set()
         self._pending_graph_jobs: dict[int, list[dict[str, Any]]] = {}
+
+    @property
+    def _conn_lock(self) -> asyncio.Lock:
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            if not hasattr(self, "_fallback_conn_lock"):
+                self._fallback_conn_lock = asyncio.Lock()
+            return self._fallback_conn_lock
+        if not hasattr(self, "_conn_locks_by_loop"):
+            self._conn_locks_by_loop = {}
+        if loop not in self._conn_locks_by_loop:
+            self._conn_locks_by_loop[loop] = asyncio.Lock()
+        return self._conn_locks_by_loop[loop]
+
+    @property
+    def _schema_lock(self) -> asyncio.Lock:
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            if not hasattr(self, "_fallback_schema_lock"):
+                self._fallback_schema_lock = asyncio.Lock()
+            return self._fallback_schema_lock
+        if not hasattr(self, "_schema_locks_by_loop"):
+            self._schema_locks_by_loop = {}
+        if loop not in self._schema_locks_by_loop:
+            self._schema_locks_by_loop[loop] = asyncio.Lock()
+        return self._schema_locks_by_loop[loop]
 
     # ─── System State ─────────────────────────────────────────────────────────
     @property

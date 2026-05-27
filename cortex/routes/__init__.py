@@ -34,6 +34,7 @@ _ROUTE_MODULES = {
     "topology_ws",
     "translate",
     "trust",
+    "taas",
     "usage",
 }
 
@@ -64,6 +65,7 @@ _API_ROUTE_SPECS: tuple[tuple[str, str], ...] = (
     ("onboarding", "router"),
     ("health", "router"),
     ("trust", "router"),
+    ("taas", "router"),
 )
 
 

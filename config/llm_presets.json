@@ -428,7 +428,7 @@
     "base_url": "https://api.x.ai/v1",
     "default_model": "grok-beta",
     "models": ["grok-beta", "grok-2", "grok-vision-beta"],
-    "api_key": "YOUR_GROK_API_KEY",
+    "env_key": "GROK_API_KEY",
     "context_window": 131072,
     "tier": "frontier",
     "cost_class": "high",

@@ -261,3 +261,42 @@ class TestRouterOrdering:
 
         t = CortexLLMRouter._TIER_ORDER
         assert t["frontier"] < t["high"] < t["local"]
+
+
+class TestAPIKeyFallbacks:
+    """Verifies check_api_key resolves fallback env vars correctly."""
+
+    def test_fallback_moonshot_to_kimi(self, monkeypatch):
+        from cortex.extensions.llm._presets import check_api_key
+
+        monkeypatch.delenv("MOONSHOT_API_KEY", raising=False)
+        monkeypatch.setenv("KIMI_API_KEY", "kimi-secret-token")
+
+        preset = {"env_key": "MOONSHOT_API_KEY"}
+        assert check_api_key(preset) == "kimi-secret-token"
+
+    def test_fallback_xai_to_grok(self, monkeypatch):
+        from cortex.extensions.llm._presets import check_api_key
+
+        monkeypatch.delenv("XAI_API_KEY", raising=False)
+        monkeypatch.setenv("GROK_API_KEY", "grok-secret-token")
+
+        preset = {"env_key": "XAI_API_KEY"}
+        assert check_api_key(preset) == "grok-secret-token"
+
+    def test_fallback_grok_to_xai(self, monkeypatch):
+        from cortex.extensions.llm._presets import check_api_key
+
+        monkeypatch.delenv("GROK_API_KEY", raising=False)
+        monkeypatch.setenv("XAI_API_KEY", "xai-secret-token")
+
+        preset = {"env_key": "GROK_API_KEY"}
+        assert check_api_key(preset) == "xai-secret-token"
+
+    def test_grok_preset_uses_env_key(self):
+        from cortex.extensions.llm._presets import load_presets
+
+        presets = load_presets()
+        grok_preset = presets.get("grok", {})
+        assert grok_preset.get("env_key") == "GROK_API_KEY"
+        assert "api_key" not in grok_preset

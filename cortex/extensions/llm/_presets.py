@@ -107,6 +107,28 @@ def get_prefix_cache_config(provider: str) -> dict[str, Any]:
     }
 
 
+def check_api_key(preset: dict[str, Any]) -> str | None:
+    """Resolve API key from preset and environment with appropriate fallbacks."""
+    env_key = preset.get("env_key") or preset.get("api_key_env")
+    if not env_key:
+        return None
+
+    keys = [env_key] if isinstance(env_key, str) else list(env_key)
+    for k in keys:
+        if val := os.environ.get(k):
+            return val
+
+    # Hardcoded fallbacks if nothing was found
+    for k in keys:
+        if k == "MOONSHOT_API_KEY" and (val := os.environ.get("KIMI_API_KEY")):
+            return val
+        if k in ("XAI_API_KEY", "GROK_API_KEY"):
+            other = "GROK_API_KEY" if k == "XAI_API_KEY" else "XAI_API_KEY"
+            if val := os.environ.get(other):
+                return val
+    return None
+
+
 def provider_inventory(active_provider: str | None = None) -> list[dict[str, Any]]:
     """Return a list of all registered LLM providers and their operational status."""
     presets = load_presets()
@@ -114,7 +136,7 @@ def provider_inventory(active_provider: str | None = None) -> list[dict[str, Any
 
     for name, config in presets.items():
         env_key = config.get("env_key") or config.get("api_key_env")
-        api_key_present = bool(os.environ.get(env_key)) if env_key else True
+        api_key_present = bool(check_api_key(config)) if env_key else True
         api_key_required = bool(env_key)
 
         is_local = name in ["ollama", "lmstudio", "llamacpp", "vllm", "jan"]
