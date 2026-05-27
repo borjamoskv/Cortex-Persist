@@ -17,6 +17,7 @@ pub mod autocurative;
 pub mod traceback;
 pub mod curriculum;
 pub mod conjecturer;
+pub mod inverse_engine;
 pub mod oracle;
 
 #[derive(Serialize, Deserialize, Debug)]

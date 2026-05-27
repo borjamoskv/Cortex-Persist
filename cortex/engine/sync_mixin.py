@@ -87,7 +87,7 @@ class SyncMixin:
         return self._run_sync(self.health_report(*args, **kwargs))
 
     def fingerprint_sync(self, *args, **kwargs):
-        return self._run_sync(self.fingerlogging.info(*args, **kwargs))
+        return self._run_sync(self.fingerprint(*args, **kwargs))
 
     def immortality_index_sync(self, *args, **kwargs):
         return self._run_sync(self.immortality_index(*args, **kwargs))

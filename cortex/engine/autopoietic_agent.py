@@ -201,8 +201,8 @@ class FitnessOracle:
             throughput = result.get("throughput", 0.0)
             metadata = result.get("metadata", {})
 
-            # Composite fitness: weighted combination
-            score = self._composite_fitness(
+            # Composite fitness: weighted combination (C5-REAL: Native Rust calculation)
+            score = cortex_rs.FitnessOracleRs.composite_fitness(
                 raw_score=score,
                 latency_ms=latency_ms,
                 error_rate=error_rate,
@@ -233,46 +233,6 @@ class FitnessOracle:
         )
         genome.record_fitness(record)
         return record
-
-    def _composite_fitness(
-        self,
-        *,
-        raw_score: float,
-        latency_ms: float,
-        error_rate: float,
-        throughput: float,
-        complexity: int,
-    ) -> float:
-        """Weighted fitness combining multiple signals.
-
-        Rewards:
-        - High raw score
-        - Low latency
-        - Low error rate
-        - High throughput
-        - Low complexity (Occam's razor)
-        """
-        # Normalize latency (lower is better, sigmoid-like)
-        latency_factor = 1.0 / (1.0 + latency_ms / 1000.0)
-
-        # Error penalty
-        error_factor = 1.0 - error_rate
-
-        # Throughput bonus (log-scaled)
-        import math
-
-        throughput_factor = math.log1p(throughput) / 10.0 if throughput > 0 else 0.0
-
-        # Complexity penalty (Occam's razor)
-        complexity_factor = 1.0 / (1.0 + complexity / 50.0)
-
-        return (
-            raw_score * 0.40
-            + latency_factor * 0.20
-            + error_factor * 0.20
-            + throughput_factor * 0.10
-            + complexity_factor * 0.10
-        )
 
 
 # ─── Autopoietic Agent ──────────────────────────────────────────
@@ -634,12 +594,12 @@ class AutopoieticAgent:
         if not self._genesis:
             return
 
-        blueprint = AgentBluelogging.info(
+        blueprint = AgentBlueprint(
             species=f"evolved_{self._genome.name}_{self.state.current_generation}",
             genome=self._genome.clone(),
             capabilities=["evolved", "autopoietic"],
         )
-        self._genesis.register_bluelogging.info(blueprint)
+        self._genesis.register_blueprint(blueprint)
         self._genesis.spawn(blueprint)
         self.state.total_agents_spawned += 1
         logger.info(
