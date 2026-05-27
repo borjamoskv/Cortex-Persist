@@ -258,38 +258,6 @@ class CortexDaemon:
         except Exception as e:
             logging.error("Failed to fetch from ZeroCopyRingBuffer in daemon: %s", e)
 
-        # 2. SQLite Fallback
-        with self.db_lock:
-            c = self.db_conn.cursor()
-            c.execute(
-                "SELECT id, timestamp, agent, payload FROM cortex_swarm_queue WHERE status = 'pending'"
-            )
-            rows = c.fetchall()
-
-            for row in rows:
-                payload = row[3]
-                try:
-                    payload = json.loads(payload)
-                except Exception:
-                    pass
-
-                tasks.append(
-                    {
-                        "id": row[0],
-                        "timestamp": row[1],
-                        "agent": row[2],
-                        "payload": payload,
-                        "command": payload.get("command") if isinstance(payload, dict) else payload,
-                    }
-                )
-
-            if rows:
-                ids = [row[0] for row in rows]
-                placeholders = ",".join("?" for _ in ids)
-                c.execute(
-                    f"UPDATE cortex_swarm_queue SET status = 'processing' WHERE id IN ({placeholders})",
-                    ids,
-                )
         return tasks
 
     async def process_swarm_queue(self):
