@@ -82,19 +82,19 @@ def list_facts(project, fact_type, limit, tenant_id, db) -> None:
                     SELECT id, project, content, fact_type, tags, created_at
                     FROM facts WHERE valid_until IS NULL AND tenant_id = ?
                 """
-            params = [tenant_id]
-            if project:
-                query += " AND project = ?"
-                params.append(project)
-            if fact_type:
-                query += " AND fact_type = ?"
-                params.append(fact_type)
-            query += " ORDER BY project, fact_type, id"
-            if limit:
-                query += " LIMIT ?"
-                params.append(limit)
-            cursor = await conn.execute(query, params)
-            return list(await cursor.fetchall())
+                params = [tenant_id]
+                if project:
+                    query += " AND project = ?"
+                    params.append(project)
+                if fact_type:
+                    query += " AND fact_type = ?"
+                    params.append(fact_type)
+                query += " ORDER BY project, fact_type, id"
+                if limit:
+                    query += " LIMIT ?"
+                    params.append(limit)
+                cursor = await conn.execute(query, params)
+                return list(await cursor.fetchall())
 
         rows = _run_async(__get_rows())
 
