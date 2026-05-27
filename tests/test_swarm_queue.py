@@ -93,18 +93,22 @@ async def test_daemon_command_extraction(tmp_path, monkeypatch):
     """Test that command is extracted from payload or command key correctly."""
     db_path = str(tmp_path / "cortex_memory_vsa.db")
     bin_path = str(tmp_path / "swarm_ring_vsa.bin")
-    
+
     monkeypatch.setattr("cortex_daemon.DB_PATH", db_path)
     monkeypatch.setattr("persistence.base.DB_PATH", db_path)
     monkeypatch.setattr("persistence.base.VSA_BIN_PATH", bin_path)
-    
+
     import persistence.outbox
+
     monkeypatch.setattr("persistence.outbox._global_ring_buffer", None)
-    
+
     daemon = CortexDaemon()
     import sqlite3
+
     daemon.db_conn = sqlite3.connect(db_path, check_same_thread=False, isolation_level=None)
-    daemon.db_conn.execute("CREATE TABLE IF NOT EXISTS cortex_execution_ledger (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp REAL, agent TEXT, command TEXT, returncode INTEGER, execution_time REAL);")
+    daemon.db_conn.execute(
+        "CREATE TABLE IF NOT EXISTS cortex_execution_ledger (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp REAL, agent TEXT, command TEXT, returncode INTEGER, execution_time REAL);"
+    )
 
     # Task with command in payload
     task1 = {"agent": "AgentA", "payload": {"command": "cmd_a"}}
