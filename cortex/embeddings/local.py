@@ -50,7 +50,7 @@ def _resolve_device() -> str:
             return "cuda"
         if hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
             return "mps"
-    except Exception:
+    except (ImportError, RuntimeError, AttributeError):
         pass
 
     return "cpu"

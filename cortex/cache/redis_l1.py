@@ -101,7 +101,7 @@ class RedisL1Cache:
             else:
                 self._misses += 1
             return val
-        except Exception:
+        except (OSError, ConnectionError, TimeoutError):
             self._misses += 1
             return None
 
@@ -111,7 +111,7 @@ class RedisL1Cache:
             return False
         try:
             return bool(self._client.setex(self._key(key), ttl or self._default_ttl, value))
-        except Exception:
+        except (OSError, ConnectionError, TimeoutError):
             return False
 
     def get_or_compute(
@@ -134,7 +134,7 @@ class RedisL1Cache:
             return False
         try:
             return bool(self._client.delete(self._key(key)))
-        except Exception:
+        except (OSError, ConnectionError, TimeoutError):
             return False
 
     def flush_namespace(self, prefix: str) -> int:
@@ -147,7 +147,7 @@ class RedisL1Cache:
             if keys:
                 return self._client.delete(*keys)
             return 0
-        except Exception:
+        except (OSError, ConnectionError, TimeoutError):
             return 0
 
     def health_check(self) -> dict[str, Any]:

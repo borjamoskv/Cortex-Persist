@@ -587,6 +587,7 @@ mod tests {
     use std::time::Instant;
 
     #[test]
+    #[ignore] // Requires Python runtime — run via `pytest tests/` instead of `cargo test`
     fn test_bench_native_performance() {
         Python::initialize();
         Python::attach(|py| -> PyResult<()> {

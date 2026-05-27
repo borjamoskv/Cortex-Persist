@@ -9,6 +9,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import os
 import time
 from typing import Any, Protocol
 
@@ -180,12 +181,21 @@ class ByzantineZeroCopyBus:
     and HMAC-SHA256 signatures to reject Byzantine faults and forged messages.
     """
     
-    def __init__(self, bin_path: str = "cortex_swarm.bin", capacity: int = 10000, secret: str = "cortex_alpha"):
+    def __init__(self, bin_path: str = "cortex_swarm.bin", capacity: int = 10000, secret: str | None = None):
+        """Initialize Byzantine bus.
+        
+        Args:
+            secret: HMAC signing key. Defaults to CORTEX_BUS_SECRET env var,
+                    or a random 32-byte key if neither is provided.
+                    WARNING: In production multi-process deployments, set
+                    CORTEX_BUS_SECRET explicitly so all processes share a key.
+        """
         self.bin_path = bin_path
         # Late import to prevent circular dependency
         import cortex_rs
         self.ring = cortex_rs.ZeroCopyRingBuffer(self.bin_path, capacity)
-        self.secret = secret.encode("utf-8")
+        resolved_secret = secret or os.environ.get("CORTEX_BUS_SECRET") or os.urandom(32).hex()
+        self.secret = resolved_secret.encode("utf-8")
         self._lock = asyncio.Lock()
         
     def _sign(self, msg_json: str) -> str:
@@ -228,7 +238,7 @@ class ByzantineZeroCopyBus:
             # fetch_pending removes it from the pending queue (sets to processing/0).
             pending = self.ring.fetch_pending()
             
-            for idx, ts, rec_id, payload_bytes in pending:
+            for _idx, _ts, rec_id, payload_bytes in pending:
                 try:
                     rec_str = rec_id.decode("utf-8").strip("\x00")
                     if rec_str == agent_id or rec_str == "*":
@@ -246,7 +256,7 @@ class ByzantineZeroCopyBus:
                             continue
                             
                         return AgentMessage.from_json(msg_json)
-                except Exception as e:
+                except (UnicodeDecodeError, json.JSONDecodeError, ValueError, KeyError) as e:
                     logger.warning("ZeroCopyBus: Failed to deserialize message: %s", e)
 
             if timeout <= 0 or (time.monotonic() - start) >= timeout:
