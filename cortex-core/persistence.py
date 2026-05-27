@@ -431,7 +431,7 @@ class IdeStatePreserver:
 
 
 class SecurityReconDaemon(SovereignResource):
-    """C5-REAL SOTA Security Radar. Continuously investigates new security vulnerabilities globally."""
+    """C5-REAL SOTA AI Agents Radar. Continuously investigates new SOTA AI agents and autonomous frameworks."""
 
     def __init__(self, ledger: LedgerManager):
         self.ledger = ledger
@@ -441,16 +441,16 @@ class SecurityReconDaemon(SovereignResource):
     async def _recon_loop(self):
         loop = asyncio.get_running_loop()
         while True:
-            # Enqueue a high-exergy Swarm Task to the SAGE_COUNCIL to fetch SOTA Security Fronts
+            # Enqueue a high-exergy Swarm Task to the SAGE_COUNCIL to fetch SOTA AI Agents Fronts
             payload = {
-                "type": "RESEARCH_SOTA_SECURITY",
-                "target": "global_cve_0day_feed",
-                "reward": 10.0,
-                "description": "Investigate new zero-days, vulnerabilities, and SOTA security models."
+                "type": "RESEARCH_SOTA_IA_AGENTS",
+                "target": "agente-sota",
+                "reward": 15.0,
+                "description": "Continuous SOTA AI agents investigation. Extract exergy voids and evaluate empirical results from agentic architectures."
             }
             try:
                 loop.run_in_executor(None, enqueue_swarm_task, "SAGE_COUNCIL", payload)
-                logger.info("SecurityReconDaemon: Dispatched global security research task.")
+                logger.info("SecurityReconDaemon: Dispatched continuous SOTA IA agents investigation task.")
             except Exception as e:
                 logger.error("SecurityReconDaemon error: %s", e)
             
@@ -659,13 +659,25 @@ class OutboxDaemon(SovereignResource):
 
     def drain_once_sync(self):
         """Synchronously drains a batch of pending tasks (primarily for tests and synchronous fallbacks)."""
+        try:
+            tasks = self._fetch_pending_tasks()
+            if not tasks:
+                return
+
+            for task in tasks:
+                row_id, agent_name, payload = task
+                logger.info("Processing task %s from %s", row_id, agent_name)
+
                 # -- END INTERCEPTOR --
 
                 # -- C5-REAL SOVEREIGN ISOLATION --
                 # Todo tráfico de red externa está PROHIBIDO. Las tareas que no son manejadas
                 # por interceptores nativos L0 se marcan como fallidas para prevenir exfiltración de entropía.
                 logger.error(f"C5-REAL Isolation: Task {agent_name} rejected. Network dispatch is prohibited.")
-                self._update_task_status(row_id, "failed")
+                
+                # If row_id starts with 'ring_', it's from the Ring Buffer, no SQLite update needed unless synced
+                if not str(row_id).startswith("ring_"):
+                    self._update_task_status(row_id, "failed")
                 
         except Exception as e:
             logger.error("Outbox drainer error: %s", e)
@@ -777,3 +789,9 @@ def get_swarm_metrics(bypass_cache: bool = False) -> dict:
             _metrics_cache["value"] = result
             _metrics_cache["expiry"] = now + 0.5  # Cache for 500ms
         return result
+    except Exception as e:
+        logger.error("Error retrieving swarm metrics: %s", e)
+        return {"latency_ms": 0.0, "active_children": 0, "uncertainty": 0.0}
+    except Exception as e:
+        logger.error("Failed to extract swarm metrics (Deterministic C5-REAL Exception): %s", e)
+        return {"latency_ms": 99999.0, "active_children": -1, "uncertainty": 1.0}
