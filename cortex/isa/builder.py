@@ -40,6 +40,7 @@ from typing import Any, Optional
 # S1 - Core Types (mirror Rust enums)
 # -----------------------------------------------------------
 
+
 class MutationOp(str, Enum):
     INSERT = "Insert"
     UPDATE = "Update"
@@ -151,9 +152,11 @@ class Predicate:
 # S2 - Ledger Types
 # -----------------------------------------------------------
 
+
 @dataclass
 class LedgerQuery:
     """Ledger query - mirrors Rust LedgerQuery struct."""
+
     table: str
     output_ref: dict
     filter: Optional[Any] = None
@@ -171,6 +174,7 @@ class LedgerQuery:
 @dataclass
 class LedgerMutation:
     """Ledger mutation - mirrors Rust LedgerMutation struct."""
+
     table: str
     operation: MutationOp
     payload: Any
@@ -196,6 +200,7 @@ AgentOp = dict
 # -----------------------------------------------------------
 # S4 - Builder DSL Functions
 # -----------------------------------------------------------
+
 
 def dispatch(target: str, payload: Any = None, *, id: int = 0) -> AgentOp:
     """Create a Dispatch operation.
@@ -335,6 +340,7 @@ def noop() -> AgentOp:
 # S5 - Serialization Utilities
 # -----------------------------------------------------------
 
+
 def to_json(op: AgentOp, *, indent: int = 2) -> str:
     """Serialize an AgentOp tree to JSON (code -> data)."""
     return json.dumps(op, indent=indent, default=str)
@@ -348,6 +354,7 @@ def from_json(json_str: str) -> AgentOp:
 # -----------------------------------------------------------
 # S6 - Tree Introspection (Python-side)
 # -----------------------------------------------------------
+
 
 def node_count(op: AgentOp) -> int:
     """Count all nodes in the dispatch tree."""

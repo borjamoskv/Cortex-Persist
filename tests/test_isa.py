@@ -26,6 +26,7 @@ from cortex.isa import (
 )
 from persistence import HAS_CORTEX_RS
 
+
 def test_python_isa_builder_dsl():
     plan = seq(
         bind("target", "bounty_alpha"),
@@ -52,7 +53,9 @@ def test_python_isa_builder_dsl():
             {
                 "Cond": {
                     "predicate": "Always",
-                    "then_branch": {"Dispatch": {"id": 3, "target": "aggregator", "payload": {"collect": True}}},
+                    "then_branch": {
+                        "Dispatch": {"id": 3, "target": "aggregator", "payload": {"collect": True}}
+                    },
                     "else_branch": {"Halt": {"Error": "no results"}},
                 }
             },
@@ -66,18 +69,19 @@ def test_python_isa_builder_dsl():
     parsed = from_json(json_str)
     assert parsed == plan
 
+
 @pytest.mark.skipif(not HAS_CORTEX_RS, reason="Rust extension not loaded")
 def test_rust_isa_parse():
     # Verify that the Python DSL output matches the Rust AgentOp deserialization structure
     # by importing cortex_rs.
     import cortex_rs
-    
+
     plan = seq(
         dispatch("hunter_a", {"mode": "scan"}, id=1),
         noop(),
     )
     json_str = to_json(plan)
-    
+
     # We check if there's any panic or serialization issues
     # Since cortex_rs has deserialization under the hood, we can verify that the raw json string
     # is structural and correct.
