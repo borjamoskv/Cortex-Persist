@@ -128,7 +128,6 @@ async def run_jit_sandbox(source_code: str, timeout_ms: int = 500, global_ctx: d
     exec_timeout = timeout_ms / 1000.0
 
     timeout_triggered = False
-    timeout_reason = ""
 
     while p.is_alive():
         now = time.perf_counter()
@@ -137,12 +136,10 @@ async def run_jit_sandbox(source_code: str, timeout_ms: int = 500, global_ctx: d
         if started_at is None:
             if now - start_time > spawn_timeout:
                 timeout_triggered = True
-                timeout_reason = f"Process failed to spawn within {spawn_timeout}s"
                 break
         else:
             if now - started_at > exec_timeout:
                 timeout_triggered = True
-                timeout_reason = f"Execution exceeded thermodynamic bounds ({timeout_ms}ms)"
                 break
 
         await asyncio.sleep(0.005)
