@@ -22,6 +22,7 @@ __all__ = [
     "LedgerCheckpointHook",
     "SignalEmitHook",
     "EpistemicBreakerHook",
+    "OmegaGuardAdapter",
 ]
 
 logger = logging.getLogger("cortex.engine")
@@ -167,6 +168,28 @@ class VirgoGuardAdapter:
 
         guard = VirgoContextGuard(engine=self._engine)
         await guard.check(content, project, fact_type, meta, conn, tenant_id=tenant_id)
+
+
+class OmegaGuardAdapter:
+    """AX-II Hook -> StoreGuard protocol (Omega Auditor)."""
+
+    async def check(
+        self,
+        content: str,
+        project: str,
+        fact_type: str,
+        meta: dict[str, Any],
+        conn: aiosqlite.Connection,
+        *,
+        tenant_id: str = "default",
+    ) -> None:
+        from cortex.guards.omega_auditor import run_omega_audit
+
+        conflicts = await run_omega_audit(content, project)
+        if conflicts:
+            # Block the store
+            reasons = "; ".join(f"[{c.severity.upper()}] {c.summary}: {c.reasoning}" for c in conflicts)
+            raise ValueError(f"[AX-II] Omega Auditor detected contradictions: {reasons}")
 
 
 # ─── Post-Store Hooks ─────────────────────────────────────────────

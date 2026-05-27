@@ -239,7 +239,7 @@ def register_singularity_tools(mcp) -> None:
         Uses Foundry/Forge for C5-REAL findings.
         """
         try:
-            cmd = f"python3 /Users/borjafernandezangulo/Cortex-Persist/cortex-core/ouroboros_engine.py --target {repo_url}"
+            cmd = f"python3 {os.path.join(_CORTEX_CORE, 'ouroboros_engine.py')} --target {repo_url}"
             # Need to reference tools via self if inside class, or just call directly if helper
             return cortex_swarm_dispatch("SAGE_COUNCIL", cmd)
         except Exception as e:

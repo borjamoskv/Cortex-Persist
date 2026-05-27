@@ -18,12 +18,12 @@ async def run_stress_test():
     NUM_TASKS = 10000
     print(f"[+] Inyectando {NUM_TASKS} tareas en ráfaga (Simulación de Enjambre Masivo)...")
     
-    start_time = time.time()
+    start_time = time.monotonic()
     for i in range(NUM_TASKS):
         # Fire-and-forget payload
         enqueue_swarm_task("OPTIMIZER", {"task_id": i, "vector": "exergy_max"})
     
-    enqueue_duration = time.time() - start_time
+    enqueue_duration = time.monotonic() - start_time
     print(f"[+] {NUM_TASKS} tareas encoladas en {enqueue_duration:.4f} segundos.")
     print(f"[+] Velocidad de ingestión (I/O Exergía): {NUM_TASKS/enqueue_duration:.2f} tareas/segundo.")
     

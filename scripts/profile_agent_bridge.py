@@ -394,28 +394,31 @@ async def main():
 
                 merkle_roots_checked = mr_count + lc_count
 
-            # Audit both validation surfaces (SovereignLedger and LedgerVerifier)
-            valid_le = True
-            violations_le = []
-            try:
-                verifier = LedgerVerifier(engine.ledger_store)
-                v_res = verifier.verify_chain()
-                valid_le = v_res.get("valid", True)
-                violations_le = v_res.get("violations", [])
-            except Exception:
-                pass
+            # Audit both validation surfaces (SovereignLedger and LedgerVerifier) in parallel
+            loop = asyncio.get_running_loop()
 
-            valid_tx = True
-            violations_tx = []
-            try:
-                from cortex.ledger.ledger_core import SovereignLedger
+            async def verify_le():
+                try:
+                    verifier = LedgerVerifier(engine.ledger_store)
+                    return await loop.run_in_executor(None, verifier.verify_chain)
+                except Exception:
+                    return {"valid": True, "violations": []}
 
-                sync_ledger = await engine._get_or_create_ledger()
-                audit_res = await sync_ledger.audit_integrity_async()
-                valid_tx = audit_res.get("valid", True)
-                violations_tx = audit_res.get("violations", [])
-            except Exception:
-                pass
+            async def audit_tx():
+                try:
+                    from cortex.ledger.ledger_core import SovereignLedger
+                    sync_ledger = await engine._get_or_create_ledger()
+                    return await sync_ledger.audit_integrity_async()
+                except Exception:
+                    return {"valid": True, "violations": []}
+
+            v_res, audit_res = await asyncio.gather(verify_le(), audit_tx())
+
+            valid_le = v_res.get("valid", True)
+            violations_le = v_res.get("violations", [])
+
+            valid_tx = audit_res.get("valid", True)
+            violations_tx = audit_res.get("violations", [])
 
             valid = valid_le and valid_tx
             violations = violations_le + violations_tx

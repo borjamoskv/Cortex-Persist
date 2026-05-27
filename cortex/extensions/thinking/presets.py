@@ -115,7 +115,7 @@ GROK_4_1 = "grok-4.1"
 # Solo se usarán los que tengan API key configurada.
 DEFAULT_ROUTING: dict[str, list[tuple[str, str]]] = {
     ThinkingMode.DEEP_REASONING: [
-        ("ollama", "qwen2.5-coder:32b"),
+        ("ollama", "qwen2.5-coder:7b"),
         ("gemini", "gemini-3.1-pro-preview"),
         ("openai", GPT_5_4),
         ("anthropic", "claude-sonnet-4-20250514"),
@@ -125,7 +125,7 @@ DEFAULT_ROUTING: dict[str, list[tuple[str, str]]] = {
         ("qwen", "qwen-3.5-397b"),
     ],
     ThinkingMode.CODE: [
-        ("ollama", "qwen2.5-coder:32b"),
+        ("ollama", "qwen2.5-coder:7b"),
         ("gemini", "gemini-3.1-pro-preview"),
         ("anthropic", "claude-sonnet-4-20250514"),
         ("deepseek", DEEPSEEK_V4),
@@ -141,7 +141,7 @@ DEFAULT_ROUTING: dict[str, list[tuple[str, str]]] = {
         ("qwen", "qwen-3.5-397b"),
     ],
     ThinkingMode.SPEED: [
-        ("ollama", "qwen2.5-coder:32b"),
+        ("ollama", "qwen2.5-coder:7b"),
         ("gemini", "gemini-3.1-pro-preview"),
         ("groq", "llama-3.3-70b-versatile"),
         ("cerebras", "llama-3.3-70b"),

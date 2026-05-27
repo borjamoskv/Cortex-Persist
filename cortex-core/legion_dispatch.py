@@ -15,7 +15,7 @@ async def main():
     def dispatch_legion(num_agents=10000):
         print(f"Initializing LEGION-{num_agents} Swarm Substrate...", flush=True)
         print(f"[LEGION] Dispatching {num_agents} sovereign agents via ZeroCopyRingBuffer...")
-        start_time = time.time()
+        start_time = time.monotonic()
         
         # Pre-generate tasks
         tasks = []
@@ -32,7 +32,7 @@ async def main():
             if pm.ring.enqueue(agent_id, payload):
                 success += 1
                 
-        enqueue_time = time.time() - start_time
+        enqueue_time = time.monotonic() - start_time
         
         print(f"--- LEGION {num_agents} DISPATCH REPORT ---", flush=True)
         print(f"Agents Dispatched: {success}/{num_agents}", flush=True)
@@ -41,7 +41,7 @@ async def main():
         
         print("[LEGION] Triggering Swarm Native Rust Processing (Zero-GIL)...", flush=True)
         
-        process_start = time.time()
+        process_start = time.monotonic()
         
         try:
             # Bypass Python GIL completely -> Process entirely in Rust using Rayon
@@ -51,7 +51,7 @@ async def main():
             processed = 0
             native_elapsed = 0.0
             
-        process_time = time.time() - process_start
+        process_time = time.monotonic() - process_start
         
         print(f"Tasks Processed (Native Rust): {processed}", flush=True)
         print(f"Native Rust Rayon Latency: {native_elapsed:.6f} seconds", flush=True)
@@ -60,7 +60,6 @@ async def main():
         
         # Force exit to prevent daemons from hanging the process
         print("Exiting...", flush=True)
-        import sys
         sys.exit(0)
 
     num_agents = 10000

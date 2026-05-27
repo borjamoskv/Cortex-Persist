@@ -35,9 +35,12 @@ class ApisOmegaAgent:
 
     def __init__(
         self,
-        presets_path: str | Path = "/Users/borjafernandezangulo/30_CORTEX/config/llm_presets.json",
+        presets_path: str | Path | None = None,
         db_path: str | Path | None = None,
     ):
+        if presets_path is None:
+            base_dir = Path(__file__).resolve().parent.parent.parent.parent
+            presets_path = base_dir / "config" / "llm_presets.json"
         self.presets_path = Path(presets_path)
         self._engine: Any = None
         self._db_path = db_path

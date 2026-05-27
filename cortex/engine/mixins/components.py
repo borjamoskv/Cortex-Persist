@@ -211,6 +211,17 @@ class ComponentsMixin:
             logger.debug("VirgoGuardAdapter unavailable: %s", e)
         except Exception as e:
             raise RuntimeError(f"FAIL-CLOSED: VirgoGuardAdapter failed: {e}") from e
+        # Omega Auditor Guard (Axiom 20)
+        try:
+            from cortex.engine.guard_adapters import OmegaGuardAdapter
+
+            pipeline.add_guard(OmegaGuardAdapter())
+        except ImportError as e:
+            if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
+                raise RuntimeError(f"FAIL-CLOSED: OmegaGuardAdapter failed: {e}") from e
+            logger.debug("OmegaGuardAdapter unavailable: %s", e)
+        except Exception as e:
+            raise RuntimeError(f"FAIL-CLOSED: OmegaGuardAdapter failed: {e}") from e
         # Post-store hooks (AX-II Hook 4 + signals + epistemic)
         try:
             from cortex.engine.guard_adapters import LedgerCheckpointHook

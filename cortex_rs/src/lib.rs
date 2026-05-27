@@ -5,6 +5,7 @@ use pyo3::types::PyList;
 use sha2::{Digest, Sha256};
 use std::fs::OpenOptions;
 use std::sync::{Arc, Mutex};
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::Instant;
 use rayon::prelude::*;
 
@@ -122,6 +123,7 @@ pub struct ZeroCopyRingBuffer {
     mmap: Arc<Mutex<MmapMut>>,
     capacity: usize,
     task_size: usize,
+    enqueue_cursor: AtomicUsize,
 }
 
 #[pymethods]
@@ -156,20 +158,27 @@ impl ZeroCopyRingBuffer {
             mmap: Arc::new(Mutex::new(mmap)),
             capacity,
             task_size,
+            enqueue_cursor: AtomicUsize::new(0),
         })
     }
 
-    /// Enqueue a task to the ring buffer by writing directly to mapped memory
+    /// Enqueue a task to the ring buffer by writing directly to mapped memory in O(1)
     pub fn enqueue(&self, agent_id: &[u8], payload: &[u8]) -> PyResult<bool> {
         let mut mmap = self.mmap.lock().unwrap();
         let buffer: &mut [u8] = unsafe {
             std::slice::from_raw_parts_mut(mmap.as_mut_ptr(), self.capacity * self.task_size)
         };
 
+        let start_idx = self.enqueue_cursor.load(Ordering::Relaxed);
         for i in 0..self.capacity {
-            let offset = i * self.task_size;
+            let idx = (start_idx + i) % self.capacity;
+            let offset = idx * self.task_size;
+            
             if buffer[offset] == 0 { // Free
                 buffer[offset] = 1; // Pending
+                
+                // Update cursor to next potentially free slot (O(1) exergy)
+                self.enqueue_cursor.store((idx + 1) % self.capacity, Ordering::Relaxed);
 
                 // Write native float timestamp
                 let timestamp = std::time::SystemTime::now()
