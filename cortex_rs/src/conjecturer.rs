@@ -580,10 +580,10 @@ mod tests {
 
         // Run 5 evolution cycles
         let start = Instant::now();
-        let mut total_mutations = 0;
+        let mut _total_mutations = 0;
         for _ in 0..5 {
             let stats = engine.evolve();
-            total_mutations += stats.mutations_generated;
+            _total_mutations += stats.mutations_generated;
         }
         let _elapsed = start.elapsed();
 

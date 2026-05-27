@@ -18,8 +18,9 @@ pub mod traceback;
 pub mod curriculum;
 pub mod conjecturer;
 pub mod inverse_engine;
+pub mod py_inverse;
 pub mod oracle;
-
+pub mod mutator;
 #[derive(Serialize, Deserialize, Debug)]
 struct McpRequest {
     jsonrpc: String,
@@ -889,6 +890,8 @@ fn cortex_rs(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<McpSovereignHost>()?;
     m.add_class::<autocurative::AutoCurativeEngine>()?;
     m.add_class::<oracle::FitnessOracleRs>()?;
+    m.add_class::<mutator::GenomeMutatorRs>()?;
+    py_inverse::register(m)?;
     Ok(())
 }
 

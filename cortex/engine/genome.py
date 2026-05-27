@@ -41,8 +41,6 @@ from cortex.isa.builder import (
     noop,
     reflect,
     rewrite,
-    to_json,
-    from_json,
     node_count,
     dispatch_targets,
     Predicate,
@@ -380,22 +378,48 @@ class GenomeMutator:
         else:
             mutation_type = self._select_mutation_type(child)
 
-        method_name = self._OPERATORS.get(mutation_type)
-        if method_name and hasattr(self, method_name):
-            getattr(self, method_name)(child)
-            child.lineage.mutation_log.append(
-                f"gen={child.lineage.generation} type={mutation_type.value}"
-            )
-            child._invalidate_hash()
-            logger.debug(
-                "GENOME MUTATION: %s on %s → %s (gen %d)",
-                mutation_type.value,
-                genome.genome_hash[:8],
-                child.genome_hash[:8],
-                child.lineage.generation,
-            )
+        ast_mutation_types = {
+            MutationType.SUBTREE_SWAP,
+            MutationType.NODE_INSERT,
+            MutationType.NODE_DELETE,
+            MutationType.PARALLELIZE,
+            MutationType.SEQUENTIALIZE,
+            MutationType.LOOP_UNROLL,
+            MutationType.CONDITIONAL_INJECT,
+            MutationType.STRATEGY_SYNTHESIS,
+        }
+
+        if mutation_type in ast_mutation_types:
+            try:
+                import cortex_rs
+                tree_json = json.dumps(child.dispatch_tree, default=str)
+                new_tree_json = cortex_rs.GenomeMutatorRs.mutate_tree(
+                    tree_json, mutation_type.value, child.lineage.generation
+                )
+                child.dispatch_tree = json.loads(new_tree_json)
+                child.lineage.mutation_log.append(
+                    f"gen={child.lineage.generation} type={mutation_type.value} [Rust]"
+                )
+                child._invalidate_hash()
+            except Exception as e:
+                logger.error("Rust AST mutation failed: %s", e)
         else:
-            logger.warning("Unknown mutation type: %s", mutation_type)
+            method_name = self._OPERATORS.get(mutation_type)
+            if method_name and hasattr(self, method_name):
+                getattr(self, method_name)(child)
+                child.lineage.mutation_log.append(
+                    f"gen={child.lineage.generation} type={mutation_type.value}"
+                )
+                child._invalidate_hash()
+                logger.debug(
+                    "GENOME MUTATION: %s on %s → %s (gen %d)",
+                    mutation_type.value,
+                    genome.genome_hash[:8],
+                    child.genome_hash[:8],
+                    child.lineage.generation,
+                )
+            else:
+                logger.warning("Unknown mutation type: %s", mutation_type)
 
         return child
 
@@ -454,7 +478,7 @@ class GenomeMutator:
 
         key = random.choice(list(genome.parameters))
         val = genome.parameters[key]
-        if isinstance(val, (int, float)):
+        if isinstance(val, int | float):
             sigma = abs(val) * 0.1 + 0.01
             genome.parameters[key] = val + random.gauss(0, sigma)
         elif isinstance(val, bool):
