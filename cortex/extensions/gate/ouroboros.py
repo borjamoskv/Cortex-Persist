@@ -108,16 +108,26 @@ class OuroborosGate:
         fact_ids = [row[0] for row in cursor.fetchall()]
         if fact_ids:
             for i in range(0, len(fact_ids), 900):
-                chunk = fact_ids[i:i+900]
+                chunk = fact_ids[i : i + 900]
                 placeholders = ",".join("?" * len(chunk))
                 # Delete from tables referencing facts(id)
-                self.conn.execute(f"DELETE FROM consensus_votes_v2 WHERE fact_id IN ({placeholders})", chunk)
-                self.conn.execute(f"DELETE FROM consensus_outcomes WHERE fact_id IN ({placeholders})", chunk)
-                self.conn.execute(f"DELETE FROM causal_edges WHERE fact_id IN ({placeholders})", chunk)
-                self.conn.execute(f"DELETE FROM enrichment_jobs WHERE fact_id IN ({placeholders})", chunk)
-                self.conn.execute(f"DELETE FROM fact_vectors WHERE fact_id IN ({placeholders})", chunk)
+                self.conn.execute(
+                    f"DELETE FROM consensus_votes_v2 WHERE fact_id IN ({placeholders})", chunk
+                )
+                self.conn.execute(
+                    f"DELETE FROM consensus_outcomes WHERE fact_id IN ({placeholders})", chunk
+                )
+                self.conn.execute(
+                    f"DELETE FROM causal_edges WHERE fact_id IN ({placeholders})", chunk
+                )
+                self.conn.execute(
+                    f"DELETE FROM enrichment_jobs WHERE fact_id IN ({placeholders})", chunk
+                )
+                self.conn.execute(
+                    f"DELETE FROM fact_vectors WHERE fact_id IN ({placeholders})", chunk
+                )
                 self.conn.execute(f"DELETE FROM fact_tags WHERE fact_id IN ({placeholders})", chunk)
-            
+
             self.conn.execute("DELETE FROM facts WHERE project = ?", (target_project,))
             self.conn.commit()
 

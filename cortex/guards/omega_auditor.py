@@ -44,7 +44,11 @@ class OmegaAuditor:
     async def audit_decision(self, content: str, project: str) -> list[OmegaConflict]:
         """Audit a candidate decision against the massive context of the snapshot."""
         import os
-        if os.environ.get("CORTEX_TESTING") == "1" and os.environ.get("CORTEX_STRICT_GUARDS") != "1":
+
+        if (
+            os.environ.get("CORTEX_TESTING") == "1"
+            and os.environ.get("CORTEX_STRICT_GUARDS") != "1"
+        ):
             logger.warning("OmegaAuditor: CORTEX_TESTING is enabled. Skipping deep audit.")
             return []
 

@@ -8,14 +8,13 @@ class SyncMixin:
         """Execute a coroutine synchronously, thread-safe on a persistent background loop."""
         if not hasattr(self, "_sync_loop") or self._sync_loop.is_closed():
             import threading
+
             global_lock = globals().setdefault("_cortex_sync_lock", threading.Lock())
             with global_lock:
                 if not hasattr(self, "_sync_loop") or self._sync_loop.is_closed():
                     self._sync_loop = asyncio.new_event_loop()
                     self._sync_thread = threading.Thread(
-                        target=self._sync_loop.run_forever,
-                        name="CortexSyncLoopThread",
-                        daemon=True
+                        target=self._sync_loop.run_forever, name="CortexSyncLoopThread", daemon=True
                     )
                     self._sync_thread.start()
 
@@ -63,6 +62,7 @@ class SyncMixin:
             except Exception:
                 pass
             import threading
+
             global_lock = globals().setdefault("_cortex_sync_lock", threading.Lock())
             with global_lock:
                 if hasattr(self, "_sync_loop"):

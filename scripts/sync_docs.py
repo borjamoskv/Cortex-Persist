@@ -92,7 +92,9 @@ def verify_file_parity(source_path: Path, target_path: Path) -> list[str]:
             f"but {target_name} has {len(target_headings)}."
         )
     else:
-        for idx, ((s_level, s_text), (t_level, t_text)) in enumerate(zip(source_headings, target_headings, strict=False)):
+        for idx, ((s_level, s_text), (t_level, t_text)) in enumerate(
+            zip(source_headings, target_headings, strict=False)
+        ):
             if s_level != t_level:
                 errors.append(
                     f"Heading level mismatch at index {idx}: "
@@ -109,17 +111,29 @@ def verify_file_parity(source_path: Path, target_path: Path) -> list[str]:
             f"but {target_name} has {len(target_code)}."
         )
     else:
-        for idx, ((s_lang, s_content), (t_lang, t_content)) in enumerate(zip(source_code, target_code, strict=False)):
+        for idx, ((s_lang, s_content), (t_lang, t_content)) in enumerate(
+            zip(source_code, target_code, strict=False)
+        ):
             if s_lang != t_lang:
                 errors.append(
                     f"Code block language mismatch at index {idx}: "
                     f"'{s_lang}' in {source_name} vs '{t_lang}' in {target_name}."
                 )
-            
+
             # Extract clean lines (no comments, no empty lines) to verify script logic is matching
-            s_clean = [line.strip() for line in s_content.splitlines() if line.strip() and not line.strip().startswith(("#", "//", "/*", "*", "'''", '"""'))]
-            t_clean = [line.strip() for line in t_content.splitlines() if line.strip() and not line.strip().startswith(("#", "//", "/*", "*", "'''", '"""'))]
-            
+            s_clean = [
+                line.strip()
+                for line in s_content.splitlines()
+                if line.strip()
+                and not line.strip().startswith(("#", "//", "/*", "*", "'''", '"""'))
+            ]
+            t_clean = [
+                line.strip()
+                for line in t_content.splitlines()
+                if line.strip()
+                and not line.strip().startswith(("#", "//", "/*", "*", "'''", '"""'))
+            ]
+
             # Only compare logic lines if code languages match and are script-based (python, bash, rust)
             if s_lang == t_lang and s_lang in ("python", "bash", "rust", "sh"):
                 # Normalize common differences in translation strings if matching code examples
@@ -195,7 +209,9 @@ def main() -> int:
         _print(f"{GREEN}{BOLD}🎉 DOCUMENTATION IN SYNC (C5-REAL Realized){RESET}\n")
         return 0
     else:
-        _print(f"{RED}{BOLD}🛑 PARITY ERRORS DETECTED. Update translations before committing.{RESET}\n")
+        _print(
+            f"{RED}{BOLD}🛑 PARITY ERRORS DETECTED. Update translations before committing.{RESET}\n"
+        )
         return 1
 
 
