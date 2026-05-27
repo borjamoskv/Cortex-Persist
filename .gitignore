@@ -150,7 +150,7 @@ run_*.py
 store_*.py
 check_*.py
 demo_*.py
-!examples/demo_canonical.py
+!examples/demo_*.py
 ingest_*.py
 extract_*.py
 rework_*.py
