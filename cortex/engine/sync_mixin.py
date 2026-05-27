@@ -1,16 +1,15 @@
 import asyncio
 import threading
 
+_SYNC_LOCK = threading.Lock()
+
 
 # pyright: reportAttributeAccessIssue=false
 class SyncMixin:
     def _run_sync(self, coro):
         """Execute a coroutine synchronously, thread-safe on a persistent background loop."""
         if not hasattr(self, "_sync_loop") or self._sync_loop.is_closed():
-            import threading
-
-            global_lock = globals().setdefault("_cortex_sync_lock", threading.Lock())
-            with global_lock:
+            with _SYNC_LOCK:
                 if not hasattr(self, "_sync_loop") or self._sync_loop.is_closed():
                     self._sync_loop = asyncio.new_event_loop()
                     self._sync_thread = threading.Thread(
@@ -19,10 +18,7 @@ class SyncMixin:
                     self._sync_thread.start()
 
         future = asyncio.run_coroutine_threadsafe(coro, self._sync_loop)
-        try:
-            return future.result()
-        except Exception as e:
-            raise e
+        return future.result()
 
     def init_db_sync(self) -> None:
         return self._run_sync(self.init_db())
@@ -37,7 +33,7 @@ class SyncMixin:
         return self._run_sync(self.search(*args, **kwargs))
 
     def hybrid_search_sync(self, *args, **kwargs):
-        return self._run_sync(self.search(*args, **kwargs))
+        return self._run_sync(self.hybrid_search(*args, **kwargs))
 
     def recall_episode_sync(self, *args, **kwargs):
         return self._run_sync(self.recall_episode(*args, **kwargs))
@@ -61,10 +57,8 @@ class SyncMixin:
                 self._run_sync(self.close())
             except Exception:
                 pass
-            import threading
 
-            global_lock = globals().setdefault("_cortex_sync_lock", threading.Lock())
-            with global_lock:
+            with _SYNC_LOCK:
                 if hasattr(self, "_sync_loop"):
                     loop = self._sync_loop
                     loop.call_soon_threadsafe(loop.stop)
@@ -74,9 +68,13 @@ class SyncMixin:
                     delattr(self, "_sync_loop")
         else:
             try:
-                asyncio.run(self.close())
-            except (RuntimeError, Exception):
-                pass
+                loop = asyncio.get_running_loop()
+                loop.create_task(self.close())
+            except RuntimeError:
+                try:
+                    asyncio.run(self.close())
+                except Exception:
+                    pass
 
     def health_check_sync(self, *args, **kwargs):
         return self._run_sync(self.health_check(*args, **kwargs))
