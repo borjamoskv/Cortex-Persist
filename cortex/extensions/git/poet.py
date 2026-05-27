@@ -22,6 +22,7 @@ from cortex.extensions.git.poet_data import TYPE_REGEX, TEMPLATES, EMOJI_MAP, SC
 
 logger = logging.getLogger("cortex.extensions.git.poet")
 
+
 @dataclass
 class CommitPoet:
     """Sovereign commit message generator.
@@ -175,7 +176,7 @@ class CommitPoet:
             if body not in seen_bodies:
                 seen_bodies.add(body)
                 emoji = self._select_emoji(detected_type)
-                
+
                 message = f"{detected_type}({scope}): {body} {emoji}"
                 if len(message) > 72:
                     prefix = f"{detected_type}({scope}): "
@@ -184,10 +185,10 @@ class CommitPoet:
                     if max_body > 10:
                         trimmed_body = body[:max_body].rstrip()
                         message = f"{prefix}{trimmed_body}{suffix}"
-                
+
                 candidates.append(message)
                 self._history.append(message)
-                
+
             if len(candidates) >= count:
                 break
 
@@ -315,7 +316,7 @@ class CommitPoet:
 
         scope_counts: dict[str, int] = {}
         for filepath in files:
-            parts = filepath.lower().split('/')
+            parts = filepath.lower().split("/")
             for part in parts:
                 clean_part = part.rsplit(".", 1)[0]
                 if clean_part in SCOPE_MAP:

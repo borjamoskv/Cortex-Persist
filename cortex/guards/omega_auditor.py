@@ -37,6 +37,7 @@ class OmegaAuditor:
 
     def __init__(self, provider: str = "gemini"):
         import os
+
         if LLMProvider is not None:
             self._llm = LLMProvider(provider=provider)
             dashscope_key = os.environ.get("DASHSCOPE_API_KEY")
@@ -45,7 +46,7 @@ class OmegaAuditor:
                     provider="custom",
                     model="qwen3.6-27b",
                     base_url="https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
-                    api_key=dashscope_key
+                    api_key=dashscope_key,
                 )
             else:
                 self._fallback_llm = None
@@ -117,7 +118,9 @@ INSTRUCTIONS:
         try:
             response = await self._llm.invoke(prompt)
         except Exception as e:
-            logger.warning("OmegaAuditor: Primary LLM failed (%s). Attempting API-Provider-OMEGA fallback.", e)
+            logger.warning(
+                "OmegaAuditor: Primary LLM failed (%s). Attempting API-Provider-OMEGA fallback.", e
+            )
             if self._fallback_llm:
                 try:
                     response = await self._fallback_llm.invoke(prompt)

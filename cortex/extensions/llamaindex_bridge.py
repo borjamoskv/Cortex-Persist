@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, List
+from typing import Any, Optional
 from llama_index.core.callbacks.base_handler import BaseCallbackHandler
 from llama_index.core.callbacks.schema import CBEventType
 from cortex.engine import CortexEngine
@@ -17,7 +17,7 @@ class CortexIndexCallback(BaseCallbackHandler):
     def on_event_start(
         self,
         event_type: CBEventType,
-        payload: Optional[Dict[str, Any]] = None,
+        payload: dict[str, Any] | None = None,
         event_id: str = "",
         parent_id: str = "",
         **kwargs: Any,
@@ -27,7 +27,7 @@ class CortexIndexCallback(BaseCallbackHandler):
     def on_event_end(
         self,
         event_type: CBEventType,
-        payload: Optional[Dict[str, Any]] = None,
+        payload: dict[str, Any] | None = None,
         event_id: str = "",
         **kwargs: Any,
     ) -> None:
@@ -35,7 +35,9 @@ class CortexIndexCallback(BaseCallbackHandler):
             payload = {}
         if event_type == CBEventType.RETRIEVE:
             nodes = payload.get("nodes", [])
-            sources = [n.node.node_id for n in nodes if hasattr(n, "node") and hasattr(n.node, "node_id")]
+            sources = [
+                n.node.node_id for n in nodes if hasattr(n, "node") and hasattr(n.node, "node_id")
+            ]
             self.engine.store_sync(
                 fact_type="rag_retrieve",
                 content=f"RETRIEVAL_EVENT: Fetched {len(sources)} nodes",
@@ -43,12 +45,12 @@ class CortexIndexCallback(BaseCallbackHandler):
                 agent_id=self.agent_id,
             )
 
-    def start_trace(self, trace_id: Optional[str] = None) -> None:
+    def start_trace(self, trace_id: str | None = None) -> None:
         pass
 
     def end_trace(
         self,
-        trace_id: Optional[str] = None,
-        trace_map: Optional[Dict[str, List[str]]] = None,
+        trace_id: str | None = None,
+        trace_map: dict[str, list[str]] | None = None,
     ) -> None:
         pass

@@ -18,6 +18,7 @@ try:
     import websockets
 except ImportError:
     import logging
+
     logging.warning("Instalando dependencia websockets...")
     import subprocess
 
@@ -31,23 +32,27 @@ def _audit_payload_inline(payload: dict, event_id: str) -> list[dict]:
     """Minimal JIS audit — checks signature presence (SOC2/C5 gate)."""
     violations = []
     if "signature" not in payload:
-        violations.append({
-            "rule": "JIS-001-SIGNATURE",
-            "severity": "CRITICAL",
-            "event_id": event_id,
-            "detail": "Missing cryptographic signature on telemetry payload",
-        })
-        
+        violations.append(
+            {
+                "rule": "JIS-001-SIGNATURE",
+                "severity": "CRITICAL",
+                "event_id": event_id,
+                "detail": "Missing cryptographic signature on telemetry payload",
+            }
+        )
+
     metrics = payload.get("metrics", {})
     cortisol = metrics.get("cortisol_level", 0.0)
     if cortisol > 0.8:
-        violations.append({
-            "rule": "THERMODYNAMIC_STRESS_CRITICAL",
-            "severity": "HIGH",
-            "event_id": event_id,
-            "detail": f"Systemic cortisol ({cortisol:.2f}) exceeded 0.8 threshold. High risk of entropic decay.",
-        })
-        
+        violations.append(
+            {
+                "rule": "THERMODYNAMIC_STRESS_CRITICAL",
+                "severity": "HIGH",
+                "event_id": event_id,
+                "detail": f"Systemic cortisol ({cortisol:.2f}) exceeded 0.8 threshold. High risk of entropic decay.",
+            }
+        )
+
     return violations
 
 

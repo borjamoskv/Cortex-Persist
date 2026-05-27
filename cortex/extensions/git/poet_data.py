@@ -23,7 +23,7 @@ TYPE_SIGNALS: dict[str, list[str]] = {
 
 # Precompiled O(1) regex for ultra-fast matching
 TYPE_REGEX = {
-    ctype: re.compile(r'\b(?:' + '|'.join(map(re.escape, signals)) + r')\b', re.IGNORECASE)
+    ctype: re.compile(r"\b(?:" + "|".join(map(re.escape, signals)) + r")\b", re.IGNORECASE)
     for ctype, signals in TYPE_SIGNALS.items()
 }
 

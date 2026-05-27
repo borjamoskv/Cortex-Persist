@@ -21,16 +21,16 @@ try:
 except ImportError:
     FastMCP = Any  # type: ignore
 
+
 def register_apollo_tools(mcp: FastMCP) -> None:
     """Register Apollo extraction tools on the MCP server."""
 
     @mcp.tool()
     def cortex_apollo_extract_leads(
-        target_leads: int = 10,
-        output_filename: str = "apollo_leads_c5.json"
+        target_leads: int = 10, output_filename: str = "apollo_leads_c5.json"
     ) -> str:
         """C5-REAL deterministic extraction of B2B Web3 AI leads via Apollo API.
-        
+
         Extracts Founders, CEOs, CTOs from Web3, Crypto, and AI Agent domains.
         Requires APOLLO_API_KEY environment variable.
         """
@@ -40,14 +40,11 @@ def register_apollo_tools(mcp: FastMCP) -> None:
             return "❌ Rejected: APOLLO_API_KEY environment variable is missing."
 
         output_path = Path(os.getcwd()) / output_filename
-        
+
         logger.info(f"[*] Iniciando extracción C5-REAL: Objetivo {target_leads} leads.")
-        
+
         url = "https://api.apollo.io/v1/mixed_people/search"
-        headers = {
-            "Cache-Control": "no-cache",
-            "Content-Type": "application/json"
-        }
+        headers = {"Cache-Control": "no-cache", "Content-Type": "application/json"}
 
         data = {
             "api_key": api_key,
@@ -56,34 +53,36 @@ def register_apollo_tools(mcp: FastMCP) -> None:
             "per_page": min(100, target_leads),
             "organization_num_employees_ranges": ["1,10", "11,50", "51,200"],
             "person_titles": ["founder", "ceo", "cto", "developer", "lead"],
-            "organization_keywords": ["web3", "ai agent", "blockchain", "zk", "tee"]
+            "organization_keywords": ["web3", "ai agent", "blockchain", "zk", "tee"],
         }
 
         extracted_leads = []
-        
+
         while len(extracted_leads) < target_leads:
             try:
                 response = requests.post(url, headers=headers, json=data)
                 response.raise_for_status()
                 contacts = response.json().get("contacts", [])
-                
+
                 if not contacts:
                     break
 
                 for contact in contacts:
                     if len(extracted_leads) >= target_leads:
                         break
-                    extracted_leads.append({
-                        "Name": contact.get("name"),
-                        "Title": contact.get("title"),
-                        "Company": contact.get("organization_name"),
-                        "Email": contact.get("email"),
-                        "LinkedIn": contact.get("linkedin_url")
-                    })
-                
+                    extracted_leads.append(
+                        {
+                            "Name": contact.get("name"),
+                            "Title": contact.get("title"),
+                            "Company": contact.get("organization_name"),
+                            "Email": contact.get("email"),
+                            "LinkedIn": contact.get("linkedin_url"),
+                        }
+                    )
+
                 data["page"] += 1
-                time.sleep(1) # Rate limit respect
-                
+                time.sleep(1)  # Rate limit respect
+
             except Exception as e:
                 logger.error(f"[!] Apollo Extraction Error: {e}")
                 return f"❌ Apollo Extraction Error: {e}"
@@ -95,4 +94,3 @@ def register_apollo_tools(mcp: FastMCP) -> None:
             return f"❌ Failed to write JSON output: {e}"
 
         return f"✅ C5-REAL Lead Extraction complete. Extracted {len(extracted_leads)} leads to {output_path}"
-

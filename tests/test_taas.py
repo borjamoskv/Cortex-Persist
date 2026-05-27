@@ -13,12 +13,15 @@ mock_auth.authenticated = True
 mock_auth.permissions = ["read", "write", "admin"]
 mock_auth.key_name = "test_agent"
 
+
 async def override_auth():
     return mock_auth
+
 
 @pytest.fixture
 def mock_engine():
     return AsyncMock()
+
 
 @pytest.fixture
 async def ac_client(mock_engine):
@@ -26,7 +29,7 @@ async def ac_client(mock_engine):
     app.dependency_overrides[require_auth] = override_auth
     for perm in ["read", "write", "admin"]:
         app.dependency_overrides[require_permission(perm)] = override_auth
-        
+
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         yield ac
 

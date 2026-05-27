@@ -14,12 +14,12 @@ logger = logging.getLogger("uvicorn.error")
 
 _marketplace_instance: TaaSMarketplace | None = None
 
+
 def get_taas_marketplace(engine: AsyncCortexEngine = Depends(get_async_engine)) -> TaaSMarketplace:
     global _marketplace_instance
     if _marketplace_instance is None:
         _marketplace_instance = TaaSMarketplace(engine)
     return _marketplace_instance
-
 
 
 @router.post("/v1/taas/jobs/quote", response_model=JobQuote)

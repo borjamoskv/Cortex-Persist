@@ -67,6 +67,7 @@ class TestFTS5Triggers:
     async def test_insert_trigger_populates_fts(self, tmp_path):
         """Storing via CortexEngine populates facts_fts."""
         from cortex.engine import CortexEngine
+
         db = str(tmp_path / "test_fts_insert.db")
         engine = CortexEngine(db_path=db, auto_embed=False)
         await engine.init_db()
@@ -80,7 +81,9 @@ class TestFTS5Triggers:
 
         # Search FTS5
         async with engine.session() as conn:
-            cursor = await conn.execute("SELECT rowid FROM facts_fts WHERE content MATCH 'sovereign'")
+            cursor = await conn.execute(
+                "SELECT rowid FROM facts_fts WHERE content MATCH 'sovereign'"
+            )
             rows = await cursor.fetchall()
             assert len(rows) == 1
         await engine.close()
@@ -89,6 +92,7 @@ class TestFTS5Triggers:
     async def test_update_trigger_syncs_fts(self, tmp_path):
         """Updating via CortexEngine syncs facts_fts."""
         from cortex.engine import CortexEngine
+
         db = str(tmp_path / "test_fts_update.db")
         engine = CortexEngine(db_path=db, auto_embed=False)
         await engine.init_db()
@@ -111,7 +115,9 @@ class TestFTS5Triggers:
             assert await cursor.fetchone() is None
 
             # New content should be findable
-            cursor = await conn.execute("SELECT rowid FROM facts_fts WHERE content MATCH 'sovereign'")
+            cursor = await conn.execute(
+                "SELECT rowid FROM facts_fts WHERE content MATCH 'sovereign'"
+            )
             assert await cursor.fetchone() is not None
         await engine.close()
 
@@ -119,6 +125,7 @@ class TestFTS5Triggers:
     async def test_delete_trigger_removes_from_fts(self, tmp_path):
         """Purging via CortexEngine removes from facts_fts."""
         from cortex.engine import CortexEngine
+
         db = str(tmp_path / "test_fts_delete.db")
         engine = CortexEngine(db_path=db, auto_embed=False)
         await engine.init_db()
@@ -133,7 +140,9 @@ class TestFTS5Triggers:
         await engine.purge(fact_id, force=True)
 
         async with engine.session() as conn:
-            cursor = await conn.execute("SELECT rowid FROM facts_fts WHERE content MATCH 'ephemeral'")
+            cursor = await conn.execute(
+                "SELECT rowid FROM facts_fts WHERE content MATCH 'ephemeral'"
+            )
             assert await cursor.fetchone() is None
         await engine.close()
 
