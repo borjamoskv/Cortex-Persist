@@ -83,7 +83,7 @@ class GlobalSourceCache:
             except OSError:
                 return p, None
 
-        results = await asyncio.gather(*( _read_file(p) for p in target_files))
+        results = await asyncio.gather(*(_read_file(p) for p in target_files))
         for p, content in results:
             if content is not None:
                 cls.files[p] = content
