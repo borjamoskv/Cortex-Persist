@@ -53,13 +53,16 @@ class SyncMixin:
     def close_sync(self):
         """Close the underlying engine and stop the background sync loop."""
         import logging
+
         logger = logging.getLogger(__name__)
-        
+
         if hasattr(self, "_sync_loop") and not self._sync_loop.is_closed():
             try:
                 self._run_sync(self.close())
             except Exception as e:
-                logger.error(f"[SyncMixin] Error closing async engine synchronously: {e}", exc_info=True)
+                logger.error(
+                    f"[SyncMixin] Error closing async engine synchronously: {e}", exc_info=True
+                )
 
             with _SYNC_LOCK:
                 if hasattr(self, "_sync_loop"):
@@ -77,7 +80,10 @@ class SyncMixin:
                 try:
                     asyncio.run(self.close())
                 except Exception as e:
-                    logger.error(f"[SyncMixin] Error closing async engine via asyncio.run: {e}", exc_info=True)
+                    logger.error(
+                        f"[SyncMixin] Error closing async engine via asyncio.run: {e}",
+                        exc_info=True,
+                    )
 
     def health_check_sync(self, *args, **kwargs):
         return self._run_sync(self.health_check(*args, **kwargs))
