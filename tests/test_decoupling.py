@@ -25,6 +25,7 @@ async def engine(tmp_path):
 
 
 @pytest.mark.asyncio
+@pytest.mark.timeout(120)
 async def test_asynchronous_enrichment_flow(engine):
     """Verify that storing a fact enqueues a job and EnrichmentWorker processes it."""
     project = "test_p0"
