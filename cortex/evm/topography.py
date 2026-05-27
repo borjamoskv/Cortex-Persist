@@ -1,6 +1,6 @@
 """EVM Topography Mapping — Latency-optimized node routing.
 
-Provides deterministic O(1) routing to the most performant RPC node for 
+Provides deterministic O(1) routing to the most performant RPC node for
 Ethereum, Base, and Arbitrum, adhering to C5-REAL execution standards.
 """
 
@@ -10,7 +10,6 @@ import asyncio
 import logging
 import time
 from dataclasses import dataclass
-from typing import Dict, List, Optional
 
 import aiohttp
 
@@ -35,9 +34,9 @@ class EVMTopographyMapper:
 
     def __init__(self) -> None:
         self.nodes: dict[int, list[EVMNode]] = {
-            1: [],      # Ethereum Mainnet
-            8453: [],   # Base
-            42161: []   # Arbitrum One
+            1: [],  # Ethereum Mainnet
+            8453: [],  # Base
+            42161: [],  # Arbitrum One
         }
         self._lock = asyncio.Lock()
 
@@ -62,7 +61,9 @@ class EVMTopographyMapper:
             active_nodes.sort(key=lambda n: n.latency_ms)
             return active_nodes[0]
 
-    async def update_node_health(self, chain_id: int, url: str, latency_ms: float, success: bool = True) -> None:
+    async def update_node_health(
+        self, chain_id: int, url: str, latency_ms: float, success: bool = True
+    ) -> None:
         """Update telemetry for a specific node to maintain topographical homeostasis."""
         async with self._lock:
             for node in self.nodes.get(chain_id, []):
@@ -81,7 +82,9 @@ class EVMTopographyMapper:
                         node.latency_ms = float("inf")
                         if node.failures >= 3:
                             node.is_active = False
-                            logger.warning("⚠️ [EVM Topography] Node %s quarantined (Chain %d).", url, chain_id)
+                            logger.warning(
+                                "⚠️ [EVM Topography] Node %s quarantined (Chain %d).", url, chain_id
+                            )
                     break
 
     async def ping_all_nodes(self) -> None:

@@ -22,8 +22,10 @@ from cortex.memory.models import MemoryEvent
 try:
     from cortex.extensions.security.tenant import get_tenant_id
 except Exception:
+
     def get_tenant_id() -> str:
         return "default"
+
 
 __all__ = ["RedisWorkingMemoryL1"]
 
@@ -57,7 +59,7 @@ class RedisWorkingMemoryL1:
 
     def _tokens_key(self, tenant_id: str) -> str:
         return f"{self._prefix}tokens:{tenant_id}"
-        
+
     def _access_log_key(self) -> str:
         return f"{self._prefix}access_log"
 
@@ -94,12 +96,12 @@ class RedisWorkingMemoryL1:
         event_dict = event.model_dump() if hasattr(event, "model_dump") else event.dict()
         # Convert datetime to string for json serialization
         event_dict["timestamp"] = event.timestamp.isoformat()
-        
+
         self._redis.rpush(bkey, json.dumps(event_dict))
         self._redis.incrby(tkey, event.token_count)
 
         overflow: list[MemoryEvent] = []
-        
+
         # Check eviction
         current_tokens = int(self._redis.get(tkey) or 0)
         if current_tokens > self._max_tokens:
@@ -110,10 +112,11 @@ class RedisWorkingMemoryL1:
             for item in buffer_data:
                 data = json.loads(item)
                 import dateutil.parser
+
                 if "timestamp" in data and isinstance(data["timestamp"], str):
                     data["timestamp"] = dateutil.parser.isoparse(data["timestamp"])
                 buffer.append(MemoryEvent(**data))
-            
+
             while current_tokens > self._max_tokens and buffer:
                 lowest_priority = float("inf")
                 evict_idx = 0
@@ -124,11 +127,11 @@ class RedisWorkingMemoryL1:
                         evict_idx = i
 
                 evicted = buffer.pop(evict_idx)
-                # Remove from redis buffer by removing the specific JSON string (tricky with duplicates, 
+                # Remove from redis buffer by removing the specific JSON string (tricky with duplicates,
                 # but we'll rebuild the buffer to keep it atomic)
                 current_tokens -= evicted.token_count
                 overflow.append(evicted)
-                
+
             # Re-write the buffer and token count
             pipe = self._redis.pipeline()
             pipe.delete(bkey)
@@ -174,7 +177,7 @@ class RedisWorkingMemoryL1:
         log_data = self._redis.lrange(self._access_log_key(), 0, -1)
         if not log_data:
             return 0.0
-            
+
         cutoff = time.monotonic() - window_seconds
         count = 0
         for item in log_data:
@@ -192,6 +195,7 @@ class RedisWorkingMemoryL1:
             for item in buffer_data:
                 data = json.loads(item)
                 import dateutil.parser
+
                 if "timestamp" in data and isinstance(data["timestamp"], str):
                     data["timestamp"] = dateutil.parser.isoparse(data["timestamp"])
                 flushed.append(MemoryEvent(**data))
@@ -203,6 +207,7 @@ class RedisWorkingMemoryL1:
                 for item in buffer_data:
                     data = json.loads(item)
                     import dateutil.parser
+
                     if "timestamp" in data and isinstance(data["timestamp"], str):
                         data["timestamp"] = dateutil.parser.isoparse(data["timestamp"])
                     flushed.append(MemoryEvent(**data))
@@ -214,11 +219,11 @@ class RedisWorkingMemoryL1:
         resolved_tenant_id = tenant_id or get_tenant_id()
         bkey = self._buffer_key(resolved_tenant_id)
         tkey = self._tokens_key(resolved_tenant_id)
-        
+
         tokens = int(self._redis.get(tkey) or 0)
         buffer_data = self._redis.lrange(bkey, 0, -1)
         events = [json.loads(item) for item in buffer_data]
-        
+
         return {
             "tenant_id": resolved_tenant_id,
             "tokens": tokens,
@@ -232,7 +237,7 @@ class RedisWorkingMemoryL1:
 
         bkey = self._buffer_key(resolved_tenant_id)
         tkey = self._tokens_key(resolved_tenant_id)
-        
+
         events_data = snapshot_data.get("events", [])
         pipe = self._redis.pipeline()
         pipe.delete(bkey)
@@ -240,8 +245,13 @@ class RedisWorkingMemoryL1:
             if isinstance(e_data, dict):
                 pipe.rpush(bkey, json.dumps(e_data))
             else:
-                pipe.rpush(bkey, json.dumps(e_data.model_dump() if hasattr(e_data, "model_dump") else e_data.dict()))
-                
+                pipe.rpush(
+                    bkey,
+                    json.dumps(
+                        e_data.model_dump() if hasattr(e_data, "model_dump") else e_data.dict()
+                    ),
+                )
+
         tokens = snapshot_data.get("tokens", 0)
         pipe.set(tkey, tokens)
         pipe.execute()

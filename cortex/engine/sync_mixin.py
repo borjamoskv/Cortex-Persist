@@ -10,15 +10,17 @@ class SyncMixin:
             loop = asyncio.get_running_loop()
         except RuntimeError:
             loop = None
-            
+
         if loop is not None and loop.is_running():
-            raise RuntimeError("Cannot call _run_sync from a running event loop. Use await instead.")
-            
+            raise RuntimeError(
+                "Cannot call _run_sync from a running event loop. Use await instead."
+            )
+
         tls = self.__dict__.setdefault("_sync_tls", threading.local())
         if not hasattr(tls, "loop") or tls.loop.is_closed():
             tls.loop = asyncio.new_event_loop()
             asyncio.set_event_loop(tls.loop)
-            
+
         return tls.loop.run_until_complete(coro)
 
     def init_db_sync(self) -> None:

@@ -49,6 +49,7 @@ class TestLogDecision:
         )
         # Retrieve the fact and check meta
         import sqlite3
+
         conn = sqlite3.connect(tracker._engine._db_path)
         cursor = conn.execute("SELECT metadata FROM facts WHERE id = ?", (fact_id,))
         row = cursor.fetchone()
@@ -56,6 +57,7 @@ class TestLogDecision:
         assert row is not None
 
         from cortex.crypto import get_default_encrypter
+
         enc = get_default_encrypter()
         meta = enc.decrypt_json(row[0], tenant_id="default")
         assert "eu_ai_act" in meta
@@ -70,12 +72,14 @@ class TestLogDecision:
             meta={"model": "gpt-4", "latency_ms": 230},
         )
         import sqlite3
+
         conn = sqlite3.connect(tracker._engine._db_path)
         cursor = conn.execute("SELECT metadata FROM facts WHERE id = ?", (fact_id,))
         row = cursor.fetchone()
         conn.close()
 
         from cortex.crypto import get_default_encrypter
+
         enc = get_default_encrypter()
         meta = enc.decrypt_json(row[0], tenant_id="default")
         assert meta.get("model") == "gpt-4"
@@ -88,6 +92,7 @@ class TestLogDecision:
             agent_id="agent:test",
         )
         import sqlite3
+
         conn = sqlite3.connect(tracker._engine._db_path)
         cursor = conn.execute("SELECT project FROM facts WHERE id = ?", (fact_id,))
         row = cursor.fetchone()
@@ -101,12 +106,12 @@ class TestLogDecision:
             agent_id="agent:test",
         )
         import sqlite3
+
         conn = sqlite3.connect(tracker._engine._db_path)
         cursor = conn.execute("SELECT project FROM facts WHERE id = ?", (fact_id,))
         row = cursor.fetchone()
         conn.close()
         assert row[0] == "custom-project"
-
 
 
 # ─── verify_chain ─────────────────────────────────────────────────────

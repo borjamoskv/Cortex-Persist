@@ -27,6 +27,7 @@ logger = logging.getLogger("cortex.encryption.zk")
 # 12-byte nonce for ChaCha20
 NONCE_SIZE: Final[int] = 12
 
+
 class ZeroKnowledgeShield:
     """Hardware-backed ZK encryption for Sovereign memory at rest."""
 
@@ -42,16 +43,16 @@ class ZeroKnowledgeShield:
         # Default to environment variable or secure random bytes if running in simulation
         if hardware_key_material is None:
             hw_seed_env = os.environ.get("CORTEX_HW_SEED")
-            self._master_seed = hw_seed_env.encode('utf-8') if hw_seed_env else os.urandom(32)
+            self._master_seed = hw_seed_env.encode("utf-8") if hw_seed_env else os.urandom(32)
         else:
             self._master_seed = hardware_key_material
-        
+
         # Derive a 32-byte key for ChaCha20-Poly1305 using HKDF
         hkdf = HKDF(
             algorithm=hashes.SHA256(),
             length=32,
             salt=b"cortex-sovereign-zk-salt",
-            info=b"cortex-memory-encryption-at-rest"
+            info=b"cortex-memory-encryption-at-rest",
         )
         self._key = hkdf.derive(self._master_seed)
         self._cipher = ChaCha20Poly1305(self._key)
@@ -62,9 +63,9 @@ class ZeroKnowledgeShield:
         Returns a base64 encoded string containing the nonce + ciphertext.
         """
         nonce = os.urandom(NONCE_SIZE)
-        ciphertext = self._cipher.encrypt(nonce, plaintext.encode('utf-8'), None)
+        ciphertext = self._cipher.encrypt(nonce, plaintext.encode("utf-8"), None)
         # Prepend nonce to ciphertext and base64 encode for storage
-        encrypted_payload = base64.b64encode(nonce + ciphertext).decode('utf-8')
+        encrypted_payload = base64.b64encode(nonce + ciphertext).decode("utf-8")
         return encrypted_payload
 
     def decrypt_memory(self, encrypted_payload: str) -> str:
@@ -73,13 +74,15 @@ class ZeroKnowledgeShield:
         Requires the exact hardware key derivative to succeed.
         """
         try:
-            raw_payload = base64.b64decode(encrypted_payload.encode('utf-8'))
+            raw_payload = base64.b64decode(encrypted_payload.encode("utf-8"))
             nonce = raw_payload[:NONCE_SIZE]
             ciphertext = raw_payload[NONCE_SIZE:]
             plaintext = self._cipher.decrypt(nonce, ciphertext, None)
-            return plaintext.decode('utf-8')
+            return plaintext.decode("utf-8")
         except Exception as e:
-            logger.error("Zero-Knowledge decryption failed. Cryptographic integrity breach or missing hardware key.")
+            logger.error(
+                "Zero-Knowledge decryption failed. Cryptographic integrity breach or missing hardware key."
+            )
             raise ValueError("Decryption failed. Data may be tampered or key is invalid.") from e
 
     @property

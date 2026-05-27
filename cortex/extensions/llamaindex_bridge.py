@@ -2,10 +2,12 @@ from llama_index.core.callbacks import BaseCallbackHandler
 from llama_index.core.callbacks.schema import CBEventType
 from cortex.engine.sync_mixin import CortexSyncEngine
 
+
 class CortexIndexCallback(BaseCallbackHandler):
     """
     C5-REAL Cryptographic tracing of LlamaIndex RAG retrieval paths.
     """
+
     def __init__(self, engine: CortexSyncEngine, agent_id: str):
         super().__init__(event_starts_to_ignore=[], event_ends_to_ignore=[])
         self.engine = engine
@@ -18,5 +20,5 @@ class CortexIndexCallback(BaseCallbackHandler):
             self.engine.store_fact(
                 agent_id=self.agent_id,
                 content=f"RETRIEVAL_EVENT: Fetched {len(sources)} nodes",
-                metadata={"nodes": sources, "event": "rag_retrieve"}
+                metadata={"nodes": sources, "event": "rag_retrieve"},
             )

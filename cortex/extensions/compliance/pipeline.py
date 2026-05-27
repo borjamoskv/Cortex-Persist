@@ -16,6 +16,7 @@ from typing import Any
 
 logger = logging.getLogger("cortex.compliance.dual_mode")
 
+
 class DualComplianceAuditor:
     """Automated compliance pipeline generator for Sovereign CORTEX."""
 
@@ -29,7 +30,7 @@ class DualComplianceAuditor:
         to ensure traceability of the system's functioning.
         """
         logger.info(f"Generating EU AI Act Art. 12 Report for tenant {self.tenant_id}...")
-        
+
         # In a C5-REAL execution, this would query the `transactions` and `facts` ledger
         report = {
             "directive": "EU_AI_ACT_ART_12",
@@ -40,10 +41,10 @@ class DualComplianceAuditor:
                 "total_autonomous_decisions": 0,
                 "traceability_score": "100.0%",
                 "human_oversight_interventions": 0,
-                "anomalies_detected": 0
+                "anomalies_detected": 0,
             },
             "cryptographic_seal": "VERIFIED_C5",
-            "status": "COMPLIANT"
+            "status": "COMPLIANT",
         }
         return report
 
@@ -53,7 +54,7 @@ class DualComplianceAuditor:
         Focuses on Security, Availability, Processing Integrity, Confidentiality, and Privacy.
         """
         logger.info(f"Generating SOC 2 Audit Payload for tenant {self.tenant_id}...")
-        
+
         report = {
             "framework": "SOC2_TYPE_II",
             "tenant_id": self.tenant_id,
@@ -63,10 +64,10 @@ class DualComplianceAuditor:
                 "logical_access": "PASSED",
                 "data_encryption_at_rest": "PASSED",
                 "system_monitoring": "PASSED",
-                "incident_response": "PASSED"
+                "incident_response": "PASSED",
             },
             "evidence_integrity": "SHA-256_VERIFIED",
-            "status": "COMPLIANT"
+            "status": "COMPLIANT",
         }
         return report
 
@@ -76,15 +77,16 @@ class DualComplianceAuditor:
             "metadata": {
                 "generator": "CORTEX-Persist DualComplianceAuditor",
                 "version": "1.0.0",
-                "timestamp": time.monotonic()
+                "timestamp": time.monotonic(),
             },
             "eu_ai_act": self.generate_eu_ai_act_report(date_range),
-            "soc_2": self.generate_soc2_report(date_range)
+            "soc_2": self.generate_soc2_report(date_range),
         }
-        
+
         import os
+
         os.makedirs(os.path.dirname(filepath), exist_ok=True)
         with open(filepath, "w") as f:
             json.dump(payload, f, indent=2)
-        
+
         logger.info(f"Dual compliance payload synthesized and anchored at {filepath}")

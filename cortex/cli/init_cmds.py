@@ -109,6 +109,7 @@ def migrate(source, db) -> None:
             with console.status("[bold blue]Migrating v3.1 → v4.0...[/]"):
                 # Run the synchronous migrate in an executor to avoid blocking the event loop
                 import asyncio
+
                 loop = asyncio.get_running_loop()
                 stats = await loop.run_in_executor(None, migrate_v31_to_v40, engine, source)
             console.print(

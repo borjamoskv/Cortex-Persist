@@ -27,6 +27,7 @@ async def telemetry_loop(websocket):
     from cortex.compliance.tracker import ComplianceTracker
     from cortex.extensions.langchain_bridge import CortexLedgerCallback
     from cortex.extensions.policy.jis_auditor import JISAuditor
+
     tracker = ComplianceTracker(project="exergia-telemetry")
     auditor = JISAuditor(enforce_encryption=True)
     logging.info("C5-REAL: Frontend Dashboard conectado al flujo de telemetría.")
@@ -60,28 +61,30 @@ async def telemetry_loop(websocket):
                 "signature": "0xCRYPTO_MOCK_SIGNATURE",
                 "metrics": metrics,
             }
-            
+
             # Simulate a C5 violation spike every 50 ticks to test HUD visual alerts
             if tick_count % 50 == 0:
                 payload.pop("signature")
-                
+
             violations = auditor.audit_payload(payload, event_id=f"tick_{tick_count}")
             payload["jis_violations"] = [v.__dict__ for v in violations]
-            
+
             # Log telemetry tick using the O(1) async compliance path
             await tracker.log_decision_async(
                 content=f"Telemetry tick {tick_count}",
                 agent_id="agent:telemetry-ws",
                 decision_type="telemetry_tick",
                 confidence="C5",
-                meta=metrics
+                meta=metrics,
             )
-            
+
             # Stress-test: async verification every 100 ticks (5 seconds at 20Hz)
             if tick_count % 100 == 0:
                 verify_result = await tracker.verify_chain_async()
-                logging.info(f"C5-REAL: Async verification complete. Valid: {verify_result.get('valid')}, TXs: {verify_result.get('tx_checked')}")
-            
+                logging.info(
+                    f"C5-REAL: Async verification complete. Valid: {verify_result.get('valid')}, TXs: {verify_result.get('tx_checked')}"
+                )
+
             await websocket.send(json.dumps(payload))
             await asyncio.sleep(0.05)  # 20Hz Tick Rate para estética fluida (Industrial Noir)
     except websockets.exceptions.ConnectionClosed:

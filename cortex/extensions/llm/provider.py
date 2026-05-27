@@ -16,7 +16,6 @@ from typing import Any, Final
 import httpx
 
 from cortex.extensions.llm._audit import spectral_audit
-from cortex.extensions.llm._backoff import handle_429_backoff
 from cortex.extensions.llm._resilience import CircuitBreaker, resilient_call
 from cortex.extensions.llm._models import BaseProvider, CortexPrompt, IntentProfile
 from cortex.extensions.llm._presets import check_api_key, get_prefix_cache_config, load_presets

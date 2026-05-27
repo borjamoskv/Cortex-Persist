@@ -9,7 +9,6 @@ Axiom Reference:
 from __future__ import annotations
 
 import asyncio
-import hashlib
 import json
 import logging
 import sqlite3
@@ -17,7 +16,6 @@ import time
 from collections import deque
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, cast
 
 import aiosqlite
@@ -35,7 +33,7 @@ from cortex.utils.canonical import (
 logger = logging.getLogger("cortex.ledger")
 
 
-from .merkle import MerkleNode, MerkleTree, SemanticMerkleTree
+from .merkle import MerkleTree
 
 
 class SovereignLedger:

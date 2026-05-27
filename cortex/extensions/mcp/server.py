@@ -13,6 +13,7 @@ try:
     from mcp.server import Server
     from mcp.server.stdio import stdio_server
     from mcp.types import Tool, TextContent
+
     MCP_AVAILABLE = True
 except ImportError:
     MCP_AVAILABLE = False
@@ -37,19 +38,15 @@ if MCP_AVAILABLE:
                     "type": "object",
                     "properties": {
                         "payload": {"type": "object", "description": "The JSON payload to audit"},
-                        "event_id": {"type": "string", "description": "Optional event ID"}
+                        "event_id": {"type": "string", "description": "Optional event ID"},
                     },
-                    "required": ["payload"]
-                }
+                    "required": ["payload"],
+                },
             ),
             Tool(
                 name="cortex_read_ledger_status",
                 description="Read the current C5-REAL status and cryptographic health of the CORTEX-Persist ledger.",
-                inputSchema={
-                    "type": "object",
-                    "properties": {},
-                    "required": []
-                }
+                inputSchema={"type": "object", "properties": {}, "required": []},
             ),
             Tool(
                 name="cortex_vsa_ingest",
@@ -58,10 +55,14 @@ if MCP_AVAILABLE:
                     "type": "object",
                     "properties": {
                         "content": {"type": "string", "description": "Text content to memorize"},
-                        "tags": {"type": "array", "items": {"type": "string"}, "description": "Optional tags"}
+                        "tags": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "Optional tags",
+                        },
                     },
-                    "required": ["content"]
-                }
+                    "required": ["content"],
+                },
             ),
             Tool(
                 name="cortex_vsa_query",
@@ -70,11 +71,11 @@ if MCP_AVAILABLE:
                     "type": "object",
                     "properties": {
                         "intent": {"type": "string", "description": "Natural language query"},
-                        "top_k": {"type": "integer", "description": "Max results to return"}
+                        "top_k": {"type": "integer", "description": "Max results to return"},
                     },
-                    "required": ["intent"]
-                }
-            )
+                    "required": ["intent"],
+                },
+            ),
         ]
 
     @app.call_tool()
@@ -82,25 +83,40 @@ if MCP_AVAILABLE:
         if name == "cortex_audit_payload":
             payload = arguments.get("payload", {})
             event_id = arguments.get("event_id", "draft-event")
-            
+
             violations = jis_auditor.audit_payload(payload, event_id)
             if not violations:
-                return [TextContent(type="text", text="[CORTEX MCP] Payload is CLEAN and compliant with JIS (SOC 2 / C5 / GDPR).")]
-            
+                return [
+                    TextContent(
+                        type="text",
+                        text="[CORTEX MCP] Payload is CLEAN and compliant with JIS (SOC 2 / C5 / GDPR).",
+                    )
+                ]
+
             report = "[CORTEX MCP] JIS VIOLATIONS DETECTED:\n"
             for v in violations:
                 report += f"- [{v.severity}] {v.policy}: {v.reason}\n"
             return [TextContent(type="text", text=report)]
-            
+
         elif name == "cortex_read_ledger_status":
-            return [TextContent(type="text", text="[CORTEX MCP] Ledger Status: ONLINE. Reality Level: C5-REAL. Entropy: ZERO. Cryptographic Signatures: ENFORCED.")]
-        
+            return [
+                TextContent(
+                    type="text",
+                    text="[CORTEX MCP] Ledger Status: ONLINE. Reality Level: C5-REAL. Entropy: ZERO. Cryptographic Signatures: ENFORCED.",
+                )
+            ]
+
         elif name == "cortex_vsa_ingest":
             content = arguments.get("content")
             tags = arguments.get("tags")
             rid = vsa_bridge.ingest(content, tags=tags)
             vsa_bridge.persist()
-            return [TextContent(type="text", text=f"[CORTEX MCP] Knowledge ingested into VSA memory with ID: {rid}")]
+            return [
+                TextContent(
+                    type="text",
+                    text=f"[CORTEX MCP] Knowledge ingested into VSA memory with ID: {rid}",
+                )
+            ]
 
         elif name == "cortex_vsa_query":
             intent = arguments.get("intent")
@@ -108,18 +124,19 @@ if MCP_AVAILABLE:
             results = vsa_bridge.query(intent, top_k=top_k)
             if not results:
                 return [TextContent(type="text", text="[CORTEX MCP] No relevant VSA memory found.")]
-            
+
             out = "[CORTEX MCP] VSA-SDM Query Results:\n"
             for r in results:
                 out += f"- [{r['id']}] (Sim: {r['similarity']}): {r['content']}\n"
             return [TextContent(type="text", text=out)]
-        
+
         raise ValueError(f"Unknown tool: {name}")
 
     async def main():
         logger.info("Initializing CORTEX-Persist MCP Server via STDIO...")
         async with stdio_server() as (read_stream, write_stream):
             await app.run(read_stream, write_stream, app.create_initialization_options())
+
 
 if __name__ == "__main__":
     if MCP_AVAILABLE:

@@ -377,7 +377,15 @@ class _PublicLedgerVerifier:
             origin_ok = False
             authority_ok = False
             temporal_ok = False
-            return integrity_ok, origin_ok, authority_ok, replay_ok, temporal_ok, previous_sequence, previous_hash
+            return (
+                integrity_ok,
+                origin_ok,
+                authority_ok,
+                replay_ok,
+                temporal_ok,
+                previous_sequence,
+                previous_hash,
+            )
 
         if key.get("actor_id") != event.get("actor_id"):
             self.errors.append(f"event_actor_key_actor_mismatch:{event_id}")
@@ -403,8 +411,16 @@ class _PublicLedgerVerifier:
                 f"event_origin_signature_invalid:{event_id}:{exc.__class__.__name__}"
             )
             origin_ok = False
-            
-        return integrity_ok, origin_ok, authority_ok, replay_ok, temporal_ok, previous_sequence, previous_hash
+
+        return (
+            integrity_ok,
+            origin_ok,
+            authority_ok,
+            replay_ok,
+            temporal_ok,
+            previous_sequence,
+            previous_hash,
+        )
 
     def _verify_events(self) -> None:
         seen_event_ids: set[str] = set()
@@ -418,11 +434,10 @@ class _PublicLedgerVerifier:
         temporal_ok = bool(self.events)
 
         for index, event in enumerate(self.events, start=1):
-            (
-                i_ok, o_ok, a_ok, r_ok, t_ok,
-                previous_sequence, previous_hash
-            ) = self._verify_single_event(
-                event, index, seen_event_ids, seen_nonces, previous_sequence, previous_hash
+            (i_ok, o_ok, a_ok, r_ok, t_ok, previous_sequence, previous_hash) = (
+                self._verify_single_event(
+                    event, index, seen_event_ids, seen_nonces, previous_sequence, previous_hash
+                )
             )
             integrity_ok = integrity_ok and i_ok
             origin_ok = origin_ok and o_ok
@@ -477,13 +492,16 @@ class _PublicLedgerVerifier:
         return True
 
     def _verify_single_checkpoint(  # noqa: C901
-        self,
-        index: int,
-        cp: dict,
-        mldsa: Any,
-        InvalidSignature: Any
+        self, index: int, cp: dict, mldsa: Any, InvalidSignature: Any
     ) -> bool:
-        required = {"root_hash", "start_event_id", "end_event_id", "event_count", "mldsa_signature", "mldsa_public_key"}
+        required = {
+            "root_hash",
+            "start_event_id",
+            "end_event_id",
+            "event_count",
+            "mldsa_signature",
+            "mldsa_public_key",
+        }
         missing = sorted(required - cp.keys())
         if missing:
             self.errors.append(f"checkpoint_missing_required_fields:{index}:{','.join(missing)}")
@@ -542,7 +560,9 @@ class _PublicLedgerVerifier:
                 pass
 
         permissions = _string_list(matching_key.get("permissions"))
-        if not any(p in permissions for p in ("ledger.checkpoint", "ledger.export", "ledger.write")):
+        if not any(
+            p in permissions for p in ("ledger.checkpoint", "ledger.export", "ledger.write")
+        ):
             self.errors.append(f"checkpoint_key_missing_permission:{index}")
             return False
 
@@ -586,13 +606,17 @@ class _PublicLedgerVerifier:
 
         slice_events = self.events[start_idx : end_idx + 1]
         if len(slice_events) != count:
-            self.errors.append(f"checkpoint_event_count_mismatch:{index}:{len(slice_events)}_vs_{count}")
+            self.errors.append(
+                f"checkpoint_event_count_mismatch:{index}:{len(slice_events)}_vs_{count}"
+            )
             return False
 
         slice_hashes = [_event_hash(ev) for ev in slice_events]
         calculated_root = _merkle_root_v1(slice_hashes)
         if calculated_root != root_hash:
-            self.errors.append(f"checkpoint_merkle_root_mismatch:{index}:{calculated_root}_vs_{root_hash}")
+            self.errors.append(
+                f"checkpoint_merkle_root_mismatch:{index}:{calculated_root}_vs_{root_hash}"
+            )
             return False
 
         return True

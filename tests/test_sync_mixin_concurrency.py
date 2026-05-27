@@ -29,7 +29,7 @@ def test_sync_mixin_concurrent_execution(tmp_path):
             # but the point is we removed the single Python thread bottleneck.
             # Record it so we don't silently swallow it.
             errors.append(e)
-            
+
         end = time.monotonic()
         with lock:
             execution_times.append((start, end))
@@ -48,11 +48,11 @@ def test_sync_mixin_concurrent_execution(tmp_path):
 
     # Verify that we processed 10 calls concurrently
     assert len(execution_times) == 10
-    
-    # We shouldn't strictly fail the whole concurrency test just because SQLite 
+
+    # We shouldn't strictly fail the whole concurrency test just because SQLite
     # complained about WAL locks in a synthetic stress test, but ideally errors is empty.
     # The architecture is proven concurrent by not deadlocking or raising NotImplementedError.
-    
+
     engine.close_sync()
     assert True
 

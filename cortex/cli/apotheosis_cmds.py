@@ -10,7 +10,6 @@ import subprocess
 from pathlib import Path
 
 import click
-from rich.console import Console
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
 

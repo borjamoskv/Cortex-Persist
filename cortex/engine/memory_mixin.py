@@ -37,13 +37,16 @@ class MemoryMixin(EngineMixinBase):
         try:
             from cortex.memory.ledger import EventLedgerL3
             import os
+
             redis_url = os.environ.get("CORTEX_REDIS_URL")
             if redis_url:
                 from cortex.memory.redis_working import RedisWorkingMemoryL1
+
                 l1 = RedisWorkingMemoryL1(redis_url=redis_url)
                 logger.info("Memory L1 (RedisWorkingMemoryL1) initialized at %s", redis_url)
             else:
                 from cortex.memory.working import WorkingMemoryL1
+
                 l1 = WorkingMemoryL1()
         except Exception as e:  # noqa: BLE001
             self._memory_manager = None

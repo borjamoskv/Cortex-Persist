@@ -1,16 +1,17 @@
 """
 CORTEX — JIS Auditor (Joint Integrity Standard).
 
-Enforces SOC 2, C5 (Cloud Computing Compliance Criteria Catalogue), 
+Enforces SOC 2, C5 (Cloud Computing Compliance Criteria Catalogue),
 and GDPR policies over the CORTEX-Persist ImmutableLedger.
 """
 
 import logging
 import re
 from dataclasses import dataclass
-from typing import Any, Dict
+from typing import Any
 
 logger = logging.getLogger("cortex.policy.jis")
+
 
 @dataclass
 class JISViolation:
@@ -19,22 +20,25 @@ class JISViolation:
     reason: str
     event_ref: str | None = None
 
+
 class JISAuditor:
     """Evaluates JSON payloads against strict compliance policies."""
 
     # Simple regex for PII (Credit Cards, SSN, Emails)
     _PII_PATTERNS = [
-        re.compile(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'),  # Email
-        re.compile(r'\b(?:\d[ -]*?){13,16}\b'),  # Basic CC
+        re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b"),  # Email
+        re.compile(r"\b(?:\d[ -]*?){13,16}\b"),  # Basic CC
     ]
 
     def __init__(self, enforce_encryption: bool = True):
         self.enforce_encryption = enforce_encryption
 
-    def audit_payload(self, payload: dict[str, Any], event_id: str | None = None) -> list[JISViolation]:
+    def audit_payload(
+        self, payload: dict[str, Any], event_id: str | None = None
+    ) -> list[JISViolation]:
         """Run all compliance checks on a transaction payload."""
         violations = []
-        
+
         # 1. GDPR Check: Detect cleartext PII
         payload_str = str(payload)
         for pattern in self._PII_PATTERNS:
@@ -44,7 +48,7 @@ class JISAuditor:
                         policy="GDPR_PII_CLEARTEXT",
                         severity="CRITICAL",
                         reason="Cleartext Personally Identifiable Information (PII) detected in payload.",
-                        event_ref=event_id
+                        event_ref=event_id,
                     )
                 )
 
@@ -55,7 +59,7 @@ class JISAuditor:
                     policy="SOC2_ACCOUNTABILITY",
                     severity="HIGH",
                     reason="Missing attribution (actor_id). SOC 2 requires verifiable audit trails.",
-                    event_ref=event_id
+                    event_ref=event_id,
                 )
             )
 
@@ -67,13 +71,15 @@ class JISAuditor:
                         policy="C5_CRYPTO_INTEGRITY",
                         severity="HIGH",
                         reason="Missing cryptographic signature in payload. C5 dictates verifiable integrity.",
-                        event_ref=event_id
+                        event_ref=event_id,
                     )
                 )
 
         if violations:
-            logger.warning(f"[JIS Auditor] Detected {len(violations)} policy violations for event {event_id}")
+            logger.warning(
+                f"[JIS Auditor] Detected {len(violations)} policy violations for event {event_id}"
+            )
         else:
             logger.debug(f"[JIS Auditor] Payload {event_id} compliant with JIS standards.")
-            
+
         return violations

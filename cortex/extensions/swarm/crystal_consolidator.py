@@ -306,32 +306,26 @@ async def _execute_heuristic_integration(
         return
 
     heuristic_engine = HeuristicEngine()
-    
+
     # Ingest ambient signals from crystals to form associations
     for v in vitals:
-        heuristic_engine.ingest_ambient_signal({
-            "source": v.fact_id,
-            "temperature": v.temperature,
-            "resonance": v.resonance
-        })
+        heuristic_engine.ingest_ambient_signal(
+            {"source": v.fact_id, "temperature": v.temperature, "resonance": v.resonance}
+        )
 
     # Simulate low-stress FreeEnergyState to trigger daydreaming during REM sleep
-    fep_state = FreeEnergyState(
-        domain=AgentDomain.MEMORY,
-        surprise=0.1,
-        free_energy=0.2
-    )
-    
+    fep_state = FreeEnergyState(domain=AgentDomain.MEMORY, surprise=0.1, free_energy=0.2)
+
     insights = heuristic_engine.daydream(fep_state)
-    
+
     if insights:
         logger.info("🧠 [RIGHT-BRAIN] Generated %d architectural suggestions", len(insights))
         if result.heuristic_insights is None:
             result.heuristic_insights = []
         result.heuristic_insights.extend(insights)
-        
+
         for insight in insights:
-            logger.info("💡 Suggestion: %s", insight.get('payload'))
+            logger.info("💡 Suggestion: %s", insight.get("payload"))
 
 
 # ── Public API ────────────────────────────────────────────────────────────

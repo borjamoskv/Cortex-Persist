@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey, Ed25519PublicKey
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 
 from cortex.ledger.public_verifier import STRICT_REQUIRED_EVENT_FIELDS, verify_export
@@ -108,7 +108,7 @@ def write_public_ledger_export(
     event_objects = [dict(event) for event in events]
     key_objects = [dict(key) for key in public_keys]
     checkpoint_objects = [dict(cp) for cp in checkpoints]
-    
+
     event_hashes = _validate_public_events(
         event_objects,
         tenant_id=tenant_id,
@@ -117,7 +117,7 @@ def write_public_ledger_export(
     _validate_public_key_records(key_objects)
     if checkpoint_objects:
         _validate_public_checkpoints(checkpoint_objects)
-        
+
     key_event_objects = [dict(event) for event in key_events]
     _assert_no_private_material(
         {
@@ -151,7 +151,7 @@ def write_public_ledger_export(
             checkpoints_path,
             "".join(_canonical_public_json(cp) + "\n" for cp in checkpoint_objects),
         )
-        
+
     _write_json_atomic(schema_path, _schema_document())
     _write_json_atomic(verification_profile_path, _verification_profile_document())
     _write_json_atomic(
@@ -302,7 +302,7 @@ def _manifest_document(
 ) -> dict[str, Any]:
     first = events[0]
     last = events[-1]
-    
+
     hashes = {
         "events_file_sha256": _sha256_file(root / "events.jsonl"),
         "first_event_hash": event_hashes[0],
@@ -457,7 +457,14 @@ def _validate_public_key_records(keys: Sequence[Mapping[str, Any]]) -> None:
 
 def _validate_public_checkpoints(checkpoints: Sequence[Mapping[str, Any]]) -> None:
     for cp in checkpoints:
-        for field in ("root_hash", "start_event_id", "end_event_id", "event_count", "mldsa_signature", "mldsa_public_key"):
+        for field in (
+            "root_hash",
+            "start_event_id",
+            "end_event_id",
+            "event_count",
+            "mldsa_signature",
+            "mldsa_public_key",
+        ):
             if field not in cp:
                 raise ValueError(f"checkpoint missing required field: {field}")
 

@@ -12,25 +12,17 @@ and temporal decay directly in the embedding retrieval.
 from __future__ import annotations
 
 import asyncio
-import json
 import logging
 import sqlite3
-import time
 from pathlib import Path
-from typing import Any
 
-from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
 
 try:
     import sqlite_vec
 except ImportError:
     sqlite_vec = None
 
-from cortex.guards.exergy_guard import calculate_exergy
 from cortex.memory.encoder import AsyncEncoder
-from cortex.memory.models import CortexFactModel
-from cortex.utils import void_vec
-from cortex.utils.turboquant import encode_query_qjl
 
 __all__ = ["SovereignVectorStoreL2"]
 

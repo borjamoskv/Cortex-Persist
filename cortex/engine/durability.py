@@ -45,7 +45,7 @@ class PersistenceSupervisor:
                 logger.warning("PersistenceSupervisor: Heartbeat loop did not exit in time.")
             except asyncio.CancelledError:
                 pass
-            
+
             await self.flush(reason="shutdown")
             self._task = None
             logger.info("PersistenceSupervisor: C5 layer hibernated.")

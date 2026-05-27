@@ -8,10 +8,8 @@ import asyncio
 import json
 import logging
 import signal
-import sqlite3
 import threading
 import time
-from collections.abc import Callable
 from datetime import datetime, timezone
 from pathlib import Path
 from cortex.extensions.daemon.alerts import AlertHandlerMixin
@@ -25,18 +23,13 @@ from cortex.extensions.daemon.healing import HealingMixin
 from cortex.extensions.daemon.loops_mixin import LoopsMixin
 from cortex.extensions.daemon.models import (
     AGENT_DIR,
-    CONFIG_FILE,
-    CORTEX_DB,
-    CORTEX_DIR,
     DEFAULT_COOLDOWN,
-    DEFAULT_DISK_WARN_MB,
     DEFAULT_INTERVAL,
     DEFAULT_MEMORY_STALE_HOURS,
     DEFAULT_STALE_HOURS,
     STATUS_FILE,
     DaemonStatus,
 )
-from cortex.extensions.daemon.monitors import CloudSyncMonitor, DiskMonitor, EngineHealthCheck
 
 try:
     from cortex.extensions.daemon.hot_state import HotStateDB

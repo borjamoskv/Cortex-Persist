@@ -5,14 +5,10 @@ based on the volatility (entropy) of the afferent metric stream.
 """
 
 import logging
-import math
-import sqlite3
-import time
 from pathlib import Path
 from cortex.extensions.evolution.agents import AgentDomain
 from cortex.extensions.evolution.cortex_metrics import (
     _DEFAULT_DB,
-    DOMAIN_PROJECT_MAP,
     DomainMetrics,
 )
 

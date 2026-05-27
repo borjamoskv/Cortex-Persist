@@ -20,6 +20,16 @@ from cortex.guards.virgo import VirgoValidationError, ContextPoisoningError
 pytestmark = pytest.mark.slow
 
 
+@pytest.fixture(autouse=True)
+def mock_omega_auditor(monkeypatch):
+    """Mock OmegaAuditor to prevent LLM calls (PULMONES throttling) during testing."""
+
+    async def mock_audit(*args, **kwargs):
+        return []
+
+    monkeypatch.setattr("cortex.guards.omega_auditor.run_omega_audit", mock_audit)
+
+
 @pytest.fixture
 async def engine(tmp_path: Path):
     """Create a CortexEngine with a temp database, close after test."""

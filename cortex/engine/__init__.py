@@ -260,7 +260,7 @@ class CortexEngine(
                 current_loop = None
 
             conn = self._conns_by_loop.get(current_loop)
-            
+
             if conn is not None:
                 if (
                     conn._cortex_loop is None
@@ -284,9 +284,9 @@ class CortexEngine(
                 conn._cortex_loop = asyncio.get_running_loop()
             except RuntimeError:
                 conn._cortex_loop = None
-            
+
             self._conns_by_loop[current_loop] = conn
-            
+
             # Since vec_available and schema_ready are process-wide or DB-wide,
             # we initialize them once, but we might need to load extensions per connection
             self._vec_available = await load_sqlite_vec_async(conn)

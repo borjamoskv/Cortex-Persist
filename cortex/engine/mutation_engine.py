@@ -456,7 +456,6 @@ class FactMutationEngine:
             )
 
     async def _proj_taint_update(  # noqa: C901
-
         self,
         conn: aiosqlite.Connection,
         fact_id: int,
@@ -531,7 +530,6 @@ class FactMutationEngine:
         await conn.execute(query, tuple(params))
 
     async def _proj_reparent(  # noqa: C901
-
         self,
         conn: aiosqlite.Connection,
         fact_id: int,

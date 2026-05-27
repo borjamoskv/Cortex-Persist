@@ -134,7 +134,7 @@ class ComplianceTracker:
         tags: list[str] | None = None,
     ) -> int:
         """Async variant of log_decision for O(1) non-blocking agent flows.
-        
+
         Bypasses the sync loop bridge to achieve maximum telemetry throughput.
         """
         if not self._initialized:

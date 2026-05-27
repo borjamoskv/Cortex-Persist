@@ -36,15 +36,18 @@ class TransactionMixin(EngineMixinBase):
         tenant_id: str = "default",
     ) -> int:
         from cortex.utils.canonical import canonical_json, compute_tx_hash
-        
+
         # JIS (SOC 2 / C5 / GDPR) Audit Policy Check
         try:
             from cortex.extensions.policy.jis_auditor import JISAuditor
+
             auditor = JISAuditor(enforce_encryption=False)  # Enforced softly
             violations = auditor.audit_payload(detail, event_id=f"tx_pending_{project}_{action}")
             if violations:
-                logger.error(f"JIS Policy violation in project '{project}' for action '{action}': {violations}")
-                # Depending on strictness, we might raise an Exception here, 
+                logger.error(
+                    f"JIS Policy violation in project '{project}' for action '{action}': {violations}"
+                )
+                # Depending on strictness, we might raise an Exception here,
                 # but for now we log it as an error to track entropy.
         except ImportError:
             pass

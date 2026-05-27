@@ -6,9 +6,6 @@ and dispatches notifications via the Notifier subsystem.
 """
 
 import logging
-import sys
-import time
-from cortex.extensions.daemon.notifier import Notifier
 
 __all__ = ["AlertHandlerMixin"]
 logger = logging.getLogger("moskv-daemon")

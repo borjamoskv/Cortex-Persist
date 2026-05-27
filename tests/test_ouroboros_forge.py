@@ -19,13 +19,15 @@ class TestOuroborosForge(unittest.IsolatedAsyncioTestCase):
         self.test_repo = "https://github.com/Uniswap/v4-core"
         # Use a temporary file for tests to prevent locking the real DB
         import tempfile
+
         self.temp_dir = tempfile.TemporaryDirectory()
         self.db_path = str(Path(self.temp_dir.name) / "test.db")
-        
+
         from unittest.mock import patch
+
         self.patcher = patch("ouroboros_engine.DB_PATH", self.db_path)
         self.patcher.start()
-        
+
         self.engine = OuroborosEngine()
 
     async def asyncTearDown(self):

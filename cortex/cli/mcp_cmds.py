@@ -56,3 +56,37 @@ def trust_mcp(host: str, port: int, transport: str) -> None:
 
     cfg = MCPServerConfig(host=host, port=port, transport=transport)  # type: ignore
     run_server(cfg)
+
+
+@mcp_cmds.command("sovereign")
+def sovereign_mcp() -> None:
+    """Boot the CORTEX Sovereign MCP Server (Rust-native, Stdio)."""
+    import sys
+    import json
+    from cortex_rs import McpSovereignHost
+
+    console.print(
+        "[bold blue]🚀 Booting CORTEX Sovereign MCP Server (Rust-native, Transport: stdio)...[/bold blue]",
+        file=sys.stderr,
+    )
+
+    host = McpSovereignHost("cortex-sovereign-mcp", "1.0.0")
+
+    # Simple Stdio loop for MCP
+    while True:
+        line = sys.stdin.readline()
+        if not line:
+            break
+
+        line = line.strip()
+        if not line:
+            continue
+
+        try:
+            response_json = host.process_request(line)
+            sys.stdout.write(response_json + "\n")
+            sys.stdout.flush()
+        except Exception as e:
+            err = {"jsonrpc": "2.0", "error": {"code": -32603, "message": str(e)}, "id": None}
+            sys.stdout.write(json.dumps(err) + "\n")
+            sys.stdout.flush()

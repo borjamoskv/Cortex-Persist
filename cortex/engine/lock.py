@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import time
 from datetime import datetime, timedelta, timezone
 from typing import TYPE_CHECKING, Any
 
@@ -21,6 +20,7 @@ logger = logging.getLogger("cortex.lock")
 
 _REDUCE_LOCKS: dict[tuple[str, int], asyncio.Lock] = {}
 
+
 def _get_local_lock(db_path: str | None) -> asyncio.Lock:
     key = db_path or ":memory:"
     loop_id = id(asyncio.get_running_loop())
@@ -28,7 +28,6 @@ def _get_local_lock(db_path: str | None) -> asyncio.Lock:
     if lock_key not in _REDUCE_LOCKS:
         _REDUCE_LOCKS[lock_key] = asyncio.Lock()
     return _REDUCE_LOCKS[lock_key]
-
 
 
 class SovereignLock:

@@ -16,9 +16,10 @@ from typing import Any
 
 logger = logging.getLogger("cortex.federation.gossip")
 
+
 class GossipNode:
     """A sovereign participant in the federated LEGION-10k swarm.
-    
+
     Executes an epidemic propagation loop to synchronize distributed memory
     without a single point of failure.
     """
@@ -36,7 +37,7 @@ class GossipNode:
         """Initialize the background gossip propagation loop."""
         if self._running:
             return
-        
+
         self._running = True
         self._task = asyncio.create_task(self._gossip_loop())
         logger.info(f"Gossip Protocol initialized on node {self.node_id} (port {self.bind_port})")
@@ -57,7 +58,7 @@ class GossipNode:
         self.peers[peer_id] = {
             "address": address,
             "last_seen": time.monotonic(),
-            "status": "active"
+            "status": "active",
         }
         logger.debug(f"Peer {peer_id} registered at {address}")
 
@@ -67,7 +68,7 @@ class GossipNode:
             try:
                 await self._propagate_state()
                 # Gossip frequency aligned with LEGION-10k execution speed
-                await asyncio.sleep(0.5) 
+                await asyncio.sleep(0.5)
             except asyncio.CancelledError:
                 break
             except (ConnectionError, TimeoutError, RuntimeError) as e:
@@ -78,11 +79,11 @@ class GossipNode:
         """Select a random peer and merge states."""
         if not self.peers:
             return
-            
+
         # Select random peer for epidemic propagation
         peer_id = random.choice(list(self.peers.keys()))
         peer = self.peers[peer_id]
-        
+
         # Simulate state merge and latency mapping
         peer["last_seen"] = time.monotonic()
         self.known_state["version"] += 1

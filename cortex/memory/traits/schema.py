@@ -1,6 +1,5 @@
 import sqlite3
 import logging
-from typing import Any
 from cortex.guards.exergy_guard import calculate_exergy
 from cortex.utils import void_vec
 

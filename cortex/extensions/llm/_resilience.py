@@ -5,7 +5,7 @@ import asyncio
 import logging
 import random
 import time
-from collections.abc import AsyncIterator, Callable
+from collections.abc import Callable
 from typing import Any, TypeVar
 
 import httpx

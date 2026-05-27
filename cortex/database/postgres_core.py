@@ -5,12 +5,13 @@ This module establishes the connection substrate for infinite memory scaling
 under the v11.0 Sovereign Cloud architecture. It guarantees connection pooling,
 pgvector type registration, and transaction isolation levels consistent with C5-REAL execution.
 """
+
 from __future__ import annotations
 
 import logging
 import os
 from contextlib import asynccontextmanager
-from typing import AsyncIterator
+from collections.abc import AsyncIterator
 
 try:
     import asyncpg
@@ -43,7 +44,7 @@ async def _init_connection(conn: asyncpg.Connection) -> None:
         await register_vector(conn)
     else:
         logger.warning("pgvector.asyncpg not installed; vector operations may fail.")
-    
+
     # Set statement timeout to prevent runaway queries
     await conn.execute(f"SET statement_timeout = {PG_TIMEOUT_S * 1000};")
 
@@ -51,7 +52,9 @@ async def _init_connection(conn: asyncpg.Connection) -> None:
 async def create_pool_async(dsn: str) -> asyncpg.Pool:
     """Create a highly concurrent connection pool for LEGION-10k scaling."""
     if asyncpg is None:
-        raise ImportError("asyncpg is required for PostgreSQL backend. Install via `pip install asyncpg`.")
+        raise ImportError(
+            "asyncpg is required for PostgreSQL backend. Install via `pip install asyncpg`."
+        )
 
     try:
         pool = await asyncpg.create_pool(
@@ -59,7 +62,7 @@ async def create_pool_async(dsn: str) -> asyncpg.Pool:
             min_size=PG_POOL_MIN,
             max_size=PG_POOL_MAX,
             setup=_init_connection,
-            command_timeout=PG_TIMEOUT_S
+            command_timeout=PG_TIMEOUT_S,
         )
         if pool is None:
             raise RuntimeError("Failed to initialize asyncpg pool")
