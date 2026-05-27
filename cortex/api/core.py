@@ -137,6 +137,7 @@ app = FastAPI(
     "Vector search, temporal facts, cryptographic ledger.",
     version=__version__,
     lifespan=lifespan,
+    root_path="/api" if config.DEPLOY_MODE == "cloud" else "",
     docs_url="/docs" if not config.PROD else None,
     redoc_url="/redoc" if not config.PROD else None,
 )
