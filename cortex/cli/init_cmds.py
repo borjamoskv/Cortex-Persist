@@ -94,6 +94,8 @@ def init(db, ouroboros: bool) -> None:
                 border_style="#0A0A0A",
             )
         )
+    finally:
+        _run_async(engine.close())
 
 
 @cli.command()

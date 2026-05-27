@@ -249,48 +249,53 @@ class CortexEngine(
 
     async def _get_or_create_conn(self) -> aiosqlite.Connection:
         """Internal helper for connection acquisition.
-        Note: This path is for single-connection mode.
+        Note: This path is for single-connection mode per event loop.
         """
         async with self._conn_lock:
-            if self._conn is not None:
-                try:
-                    current_loop = asyncio.get_running_loop()
-                except RuntimeError:
-                    current_loop = None
+            if not hasattr(self, "_conns_by_loop"):
+                self._conns_by_loop = {}
+            try:
+                current_loop = asyncio.get_running_loop()
+            except RuntimeError:
+                current_loop = None
 
-                conn_loop = getattr(self._conn, "_cortex_loop", None)
+            conn = self._conns_by_loop.get(current_loop)
+            
+            if conn is not None:
                 if (
-                    conn_loop is not current_loop
-                    or conn_loop is None
-                    or conn_loop.is_closed()
-                    or not self._conn._running
-                    or not self._conn._thread.is_alive()
+                    conn._cortex_loop is None
+                    or conn._cortex_loop.is_closed()
+                    or not conn._running
+                    or not conn._thread.is_alive()
                 ):
                     try:
-                        await self._conn.close()
+                        await conn.close()
                     except Exception:
                         pass
-                    self._conn = None
-                    self._schema_ready = False
-                    self._memory_ready = False
-                    self._ledger = None
+                    self._conns_by_loop.pop(current_loop, None)
+                    conn = None
                 else:
-                    return self._conn
+                    return conn
 
             from cortex.database.core import connect_async
 
-            self._conn = await connect_async(str(self._db_path))
+            conn = await connect_async(str(self._db_path))
             try:
-                self._conn._cortex_loop = asyncio.get_running_loop()
+                conn._cortex_loop = asyncio.get_running_loop()
             except RuntimeError:
-                self._conn._cortex_loop = None
-            self._vec_available = await load_sqlite_vec_async(self._conn)
-            await self._ensure_schema_ready(self._conn)
+                conn._cortex_loop = None
+            
+            self._conns_by_loop[current_loop] = conn
+            
+            # Since vec_available and schema_ready are process-wide or DB-wide,
+            # we initialize them once, but we might need to load extensions per connection
+            self._vec_available = await load_sqlite_vec_async(conn)
+            await self._ensure_schema_ready(conn)
             # Ensure memory subsystem is initialized (L1/L2/L3)
             # This is critical for Active Forgetting (Thalamus Gate)
-            if not self._memory_ready:
-                await self._init_memory_subsystem(self._db_path, self._conn)
-            return self._conn
+            if not getattr(self, "_memory_ready", False):
+                await self._init_memory_subsystem(self._db_path, conn)
+            return conn
 
     async def _ensure_schema_ready(self, conn: aiosqlite.Connection) -> None:
         """Bootstrap the base schema once per engine instance."""
@@ -324,9 +329,14 @@ class CortexEngine(
 
     def get_connection(self) -> aiosqlite.Connection:
         """Synchronous wrapper for internal connection access."""
-        if self._conn is None:
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = None
+        conn = getattr(self, "_conns_by_loop", {}).get(loop)
+        if conn is None:
             raise RuntimeError("Connection not initialized. Call session() first.")
-        return self._conn
+        return conn
 
     def _get_sync_conn(self):
         """Devuelve una conexión síncrona para procesos bloqueantes."""

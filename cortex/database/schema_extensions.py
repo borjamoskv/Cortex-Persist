@@ -89,6 +89,39 @@ CREATE INDEX IF NOT EXISTS idx_votes_v2_fact ON consensus_votes_v2(fact_id);
 CREATE INDEX IF NOT EXISTS idx_votes_v2_agent ON consensus_votes_v2(agent_id);
 CREATE INDEX IF NOT EXISTS idx_trust_source ON trust_edges(source_agent);
 CREATE INDEX IF NOT EXISTS idx_trust_target ON trust_edges(target_agent);
+
+# ─── Graph Memory (Knowledge Graph) ──────────────────────────────────
+CREATE_ENTITIES = """
+CREATE TABLE IF NOT EXISTS entities (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    entity_type TEXT NOT NULL DEFAULT 'unknown',
+    project TEXT NOT NULL,
+    first_seen TEXT NOT NULL,
+    last_seen TEXT NOT NULL,
+    mention_count INTEGER DEFAULT 1,
+    meta TEXT DEFAULT '{}'
+);
+
+CREATE INDEX IF NOT EXISTS idx_entities_name_project ON entities(name, project);
+CREATE INDEX IF NOT EXISTS idx_entities_type ON entities(entity_type);
+CREATE INDEX IF NOT EXISTS idx_entities_project ON entities(project);
+"""
+
+CREATE_ENTITY_RELATIONS = """
+CREATE TABLE IF NOT EXISTS entity_relations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    source_entity_id INTEGER NOT NULL REFERENCES entities(id),
+    target_entity_id INTEGER NOT NULL REFERENCES entities(id),
+    relation_type TEXT NOT NULL DEFAULT 'related_to',
+    weight REAL DEFAULT 1.0,
+    first_seen TEXT NOT NULL,
+    source_fact_id INTEGER REFERENCES facts(id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_relations_source ON entity_relations(source_entity_id);
+CREATE INDEX IF NOT EXISTS idx_relations_target ON entity_relations(target_entity_id);
+"""
 """
 
 # ─── Context Snapshots (Ambient Intelligence) ────────────────────────
@@ -446,4 +479,6 @@ EXTENSION_SCHEMA = [
     CREATE_MERKLE_ROOTS,
     CREATE_INTEGRITY_CHECKS,
     CREATE_AUDIT_EXPORTS,
+    CREATE_ENTITIES,
+    CREATE_ENTITY_RELATIONS,
 ]
