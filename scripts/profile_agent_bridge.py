@@ -263,6 +263,10 @@ async def main():
     parser.add_argument("--project", default="github-profile-agent")
     parser.add_argument("--agent-id", default="cortex-profile-agent")
     parser.add_argument("--json", action="store_true", help="Flag to produce JSON outputs")
+    parser.add_argument(
+        "--endpoint", help="Optional telemetry endpoint to POST status data (Control Plane)"
+    )
+    parser.add_argument("--api-key", help="API key for the telemetry endpoint")
 
     args = parser.parse_args()
 
@@ -517,6 +521,23 @@ async def main():
             print("Warning: could not locate CORTEX-PROFILE-AGENT markers in README.md")
     else:
         print(f"Warning: README.md not found at {readme_path}")
+
+    # 6. Push telemetry to Control Plane (e.g., Vercel API or agents.archi)
+    if args.endpoint:
+        try:
+            import urllib.request
+
+            headers = {"Content-Type": "application/json"}
+            if args.api_key:
+                headers["Authorization"] = f"Bearer {args.api_key}"
+
+            req = urllib.request.Request(
+                args.endpoint, data=json.dumps(status_data).encode(), headers=headers, method="POST"
+            )
+            with urllib.request.urlopen(req, timeout=5) as response:
+                print(f"Telemetry pushed to {args.endpoint}: HTTP {response.status}")
+        except Exception as e:
+            print(f"Warning: Failed to push telemetry to {args.endpoint}: {e}")
 
 
 if __name__ == "__main__":
