@@ -1,6 +1,7 @@
 import asyncio
 import threading
 
+
 class SyncMixin:
     def _run_sync(self, coro):
         try:
