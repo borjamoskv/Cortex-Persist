@@ -2,20 +2,13 @@
 import os
 import json
 import time
-import hashlib
 import asyncio
-import logging
 import sqlite3
-import subprocess
-import threading
 import mmap
 import weakref
 import atexit
-from cryptography.hazmat.primitives.asymmetric import ed25519
-from cryptography.exceptions import InvalidSignature
-from ultramap import UltramapSubstrate
 
-from .base import SovereignResource, _setup_sqlite_pragmas, _get_local_conn, DB_PATH, VSA_BIN_PATH, VSA_DIMENSION, HAS_CORTEX_RS, ledger_entropy_event, outbox_wake_event, logger
+from .base import SovereignResource, _setup_sqlite_pragmas, _get_local_conn, DB_PATH, HAS_CORTEX_RS, outbox_wake_event, logger
 
 try:
     import cortex_rs
@@ -175,6 +168,7 @@ class OutboxDaemon(SovereignResource):
                 try:
                     payload_dict = json.loads(payload)
                 except Exception as e:
+                    logger.error("Failed to parse task payload json: %s", e)
                     payload_dict = {}
 
                 # -- NATIVE L0 INTERCEPTOR: EXA_LISP --
@@ -324,8 +318,9 @@ def get_swarm_metrics(bypass_cache: bool = False) -> dict:
         avg_exec = c.fetchone()[0]
         latency_ms = (avg_exec * 1000.0) if avg_exec else 35.0
 
-        # Active children: Strictly isolated to ZeroCopyRingBuffer (no SQLite tracking)
-        active_children = 0
+        # Active children: count of pending tasks in swarm queue
+        c.execute("SELECT COUNT(*) FROM cortex_swarm_queue WHERE status = 'pending'")
+        active_children = c.fetchone()[0]
 
         # Uncertainty: Failure rate in the ledger (returncode != 0)
         c.execute(
