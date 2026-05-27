@@ -2,11 +2,11 @@
 
 All notable changes to CORTEX, derived from the git history.
 
-Current package metadata in the tree is `v0.3.0b3`.
+Current package metadata in the tree is `v0.3.0b7`.
 Historical entries below reflect release notes captured at the time and may describe preview features
 that are not uniformly present in the current workspace snapshot.
 
-## v0.3.0b3 — Release Hardening (April 13, 2026)
+## v0.3.0b7 — Release Hardening (April 13, 2026)
 
 ### Added
 

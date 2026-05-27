@@ -131,7 +131,7 @@ Add extras on top only if you need those surfaces during development, for exampl
 
 ```bash
 cortex --version
-# cortex, version 0.3.0b5
+# cortex, version 0.3.0b7
 ```
 
 ---
