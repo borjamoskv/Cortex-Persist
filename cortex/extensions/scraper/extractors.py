@@ -54,7 +54,7 @@ class _HtmlToMarkdown(HTMLParser):
         self._in_title = False
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-        """TODO: Document handle_starttag"""
+        """Handle the start of an HTML tag, tracking depth and mapping to Markdown format."""
         tag = tag.lower()
         if tag in _SKIP_TAGS:
             self._skip_depth += 1
@@ -84,7 +84,7 @@ class _HtmlToMarkdown(HTMLParser):
             self._output.append("`")
 
     def handle_endtag(self, tag: str) -> None:
-        """TODO: Document handle_endtag"""
+        """Handle the end of an HTML tag, emitting markdown closures where necessary."""
         tag = tag.lower()
         if tag in _SKIP_TAGS:
             self._skip_depth = max(0, self._skip_depth - 1)
@@ -110,7 +110,7 @@ class _HtmlToMarkdown(HTMLParser):
             self._tag_stack.pop()
 
     def handle_data(self, data: str) -> None:
-        """TODO: Document handle_data"""
+        """Extract and append textual data, capturing the <title> block if active."""
         if self._skip_depth:
             return
         if self._in_title:
@@ -155,7 +155,7 @@ class HttpExtractor(BaseExtractor):
     """
 
     async def extract(self, url: str, timeout: float = 15.0) -> tuple[str, str]:
-        """TODO: Document extract"""
+        """Extract markdown from URL using standard HTTP GET requests."""
         LOG.info("🔵 [HTTP_FAST] Extracting: %s", url)
         try:
             async with httpx.AsyncClient(
@@ -191,7 +191,7 @@ class JinaExtractor(BaseExtractor):
     JINA_ENDPOINT = "https://r.jina.ai"
 
     async def extract(self, url: str, timeout: float = 15.0) -> tuple[str, str]:
-        """TODO: Document extract"""
+        """Extract markdown from URL using Jina Reader API for server-side JS rendering."""
         LOG.info("🟡 [JINA] Extracting: %s", url)
         import os
 
@@ -227,7 +227,7 @@ class PlaywrightExtractor(BaseExtractor):
     """
 
     async def extract(self, url: str, timeout: float = 30.0) -> tuple[str, str]:
-        """TODO: Document extract"""
+        """Extract markdown from URL using an automated headless Playwright instance."""
         LOG.info("🔴 [PLAYWRIGHT] Extracting: %s", url)
         try:
             from cortex.extensions.browser.engine import BrowserEngine

@@ -252,8 +252,8 @@ async def _record_causality(
                 "VALUES (?, ?, NULL, ?, ?, ?)",
                 (fact_id, parent_decision_id, EDGE_DERIVED_FROM, project, tenant_id),
             )
-    except Exception:
-        pass
+    except Exception as e:
+        logger.error("Failed to record causality for fact %d: %s", fact_id, e)
 
 
 async def _post_insert_actions(
@@ -275,8 +275,8 @@ async def _post_insert_actions(
             "INSERT INTO enrichment_jobs (fact_id, job_type, status, priority) VALUES (?, 'embedding', 'pending', ?)",
             (fact_id, 1 if fact_type == "decision" else 0),
         )
-    except Exception:
-        pass
+    except Exception as e:
+        logger.error("Failed to insert enrichment job for fact %d: %s", fact_id, e)
 
     if tags:
         await conn.executemany(
@@ -289,8 +289,8 @@ async def _post_insert_actions(
             "INSERT INTO facts_fts (rowid, content, project, tags, fact_type, tenant_id) VALUES (?, ?, ?, ?, ?, ?)",
             (fact_id, content, project, tags_json, fact_type, tenant_id),
         )
-    except Exception:
-        pass
+    except Exception as e:
+        logger.error("Failed to insert FTS for fact %d: %s", fact_id, e)
 
     await _record_causality(conn, fact_id, project, tenant_id, meta, parent_decision_id)
 
@@ -298,8 +298,8 @@ async def _post_insert_actions(
         from cortex.graph import process_fact_graph
 
         await process_fact_graph(conn, fact_id, content, project, ts, tenant_id)
-    except Exception:
-        pass
+    except Exception as e:
+        logger.error("Failed to process graph for fact %d: %s", fact_id, e)
 
 
 async def resolve_causality_async(

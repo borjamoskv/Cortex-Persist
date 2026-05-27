@@ -236,8 +236,8 @@ class SovereignSharedBus:
         if shm is not None:
             try:
                 shm.close()
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug("Failed to close shared memory: %s", e)
 
     def close(self):
         if self._finalizer is not None:
@@ -247,8 +247,8 @@ class SovereignSharedBus:
         if shm is not None:
             try:
                 shm.close()
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug("Failed to close shared memory: %s", e)
         self._local_buf = None
 
     def unlink(self):
@@ -260,8 +260,8 @@ class SovereignSharedBus:
         if shm is not None:
             try:
                 shm.close()
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug("Failed to close shared memory during unlink: %s", e)
             try:
                 shm.unlink()
             except FileNotFoundError:

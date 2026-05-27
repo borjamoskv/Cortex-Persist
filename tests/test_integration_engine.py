@@ -28,6 +28,10 @@ async def engine(tmp_path):
     engine = AsyncCortexEngine(pool, db_path)
     yield engine
     await pool.close()
+    # Drain aiosqlite worker threads to prevent inter-test lock cascade.
+    # Without this, worker threads from test N still hold SQLite locks
+    # when test N+1 tries to initialize its pool, causing 'database is locked'.
+    await asyncio.sleep(0.15)
 
 
 @pytest.mark.asyncio
