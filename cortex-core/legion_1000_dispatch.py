@@ -32,12 +32,12 @@ async def main():
                 
         enqueue_time = time.time() - start_time
         
-        print(f"--- LEGION 1000 DISPATCH REPORT ---")
-        print(f"Agents Dispatched: {success}/1000")
-        print(f"Enqueue Latency: {enqueue_time:.6f} seconds")
-        print(f"Throughput: {success/enqueue_time:.2f} agents/sec" if enqueue_time > 0 else "Throughput: INF agents/sec")
+        print(f"--- LEGION 1000 DISPATCH REPORT ---", flush=True)
+        print(f"Agents Dispatched: {success}/1000", flush=True)
+        print(f"Enqueue Latency: {enqueue_time:.6f} seconds", flush=True)
+        print(f"Throughput: {success/enqueue_time:.2f} agents/sec" if enqueue_time > 0 else "Throughput: INF agents/sec", flush=True)
         
-        print("[LEGION] Triggering Swarm Processing...")
+        print("[LEGION] Triggering Swarm Processing...", flush=True)
         
         process_start = time.time()
         # Fetch all tasks from ring buffer
@@ -50,15 +50,16 @@ async def main():
             return agent_id
             
         processed = 0
+        print("Starting ThreadPoolExecutor...", flush=True)
         with concurrent.futures.ThreadPoolExecutor(max_workers=100) as executor:
             results = list(executor.map(process_task, pending_tasks))
             processed = len(results)
             
         process_time = time.time() - process_start
         
-        print(f"Tasks Processed: {processed}")
-        print(f"Processing Latency: {process_time:.6f} seconds")
-        print("VEREDICTO: C5-REAL ZERO-LATENCY LEGION ACHIEVED.")
+        print(f"Tasks Processed: {processed}", flush=True)
+        print(f"Processing Latency: {process_time:.6f} seconds", flush=True)
+        print("VEREDICTO: C5-REAL ZERO-LATENCY LEGION ACHIEVED.", flush=True)
 
     dispatch_legion()
 
