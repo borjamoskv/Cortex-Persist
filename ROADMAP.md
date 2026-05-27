@@ -41,7 +41,7 @@
 - [x] **Admin Web Dashboard** — Industrial Noir UI for memory management and cryptographically signed audit visualization.
 - [x] **Multi-node Federation** — Distributed clusters with Gossip protocol for global swarm homeostasis.
 - [x] **Dual Compliance Mode** — EU AI Act (Art. 12) + SOC 2 reporting pipelines.
-- [ ] **Zero-Knowledge Encryption** — Memories encrypted at rest on hardware keys.
+- [x] **Zero-Knowledge Encryption** — Memories encrypted at rest on hardware keys.
 
 ---
 
