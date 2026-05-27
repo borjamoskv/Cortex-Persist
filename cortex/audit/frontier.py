@@ -65,7 +65,7 @@ class FrontierAuditor:
         context_lines = []
         for f in facts:
             # We rely on DB schemas to pull fact context
-            context_lines.append(f"- ID: {f.id} | Type: {f.type_name} | Content: {f.content}")
+            context_lines.append(f"- ID: {f.fact_id} | Type: {f.fact_type} | Content: {f.content}")
 
         return "\n".join(context_lines)
 
