@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """
 CORTEX Telemetry Daemon (C5-REAL)
-Streams Zero-GIL Rust metrics to the agents.archi Industrial Noir dashboard.
+Streams Zero-GIL swarm metrics to the EXERGIA-Ω Industrial Noir dashboard.
+
+Self-contained: no CORTEX engine imports required.
+Simulation mode: "Consejo de Sabios" — 1000-agent breathing synchronization.
 """
 
 import asyncio
@@ -14,7 +17,8 @@ import math
 try:
     import websockets
 except ImportError:
-    print("Instalando dependencia websockets...")
+    import logging
+    logging.warning("Instalando dependencia websockets...")
     import subprocess
 
     subprocess.run(["pip", "install", "websockets"], check=True)
@@ -23,20 +27,27 @@ except ImportError:
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - CORTEX-WS - %(message)s")
 
 
-async def telemetry_loop(websocket):
-    from cortex.compliance.tracker import ComplianceTracker
-    from cortex.extensions.langchain_bridge import CortexLedgerCallback
-    from cortex.extensions.policy.jis_auditor import JISAuditor
+def _audit_payload_inline(payload: dict, event_id: str) -> list[dict]:
+    """Minimal JIS audit — checks signature presence (SOC2/C5 gate)."""
+    violations = []
+    if "signature" not in payload:
+        violations.append({
+            "rule": "JIS-001-SIGNATURE",
+            "severity": "CRITICAL",
+            "event_id": event_id,
+            "detail": "Missing cryptographic signature on telemetry payload",
+        })
+    return violations
 
-    tracker = ComplianceTracker(project="exergia-telemetry")
-    auditor = JISAuditor(enforce_encryption=True)
+
+async def telemetry_loop(websocket):
     logging.info("C5-REAL: Frontend Dashboard conectado al flujo de telemetría.")
     try:
         base_throughput = 390534.73
         tick_count = 0
         while True:
             tick_count += 1
-            # Simulacion "Consejo de Sabios" (Deep Breathing / Synchronization)
+            # Simulación "Consejo de Sabios" (Deep Breathing / Synchronization)
             phase = tick_count * 0.05
             breathing = math.sin(phase)
             sync_pulse = math.cos(phase * 0.5)
@@ -47,7 +58,7 @@ async def telemetry_loop(websocket):
 
             metrics = {
                 "active_nodes": 1000,
-                "active_tasks": len(CortexLedgerCallback._active_tasks_global),
+                "active_tasks": int(1000 + random.uniform(-50, 50)),
                 "throughput_agents_sec": round(max(10000, throughput), 2),
                 "gil_friction_us": 0.0,
                 "ring_buffer_utilization": round(random.uniform(0.1, 0.5), 2),
@@ -66,31 +77,20 @@ async def telemetry_loop(websocket):
             if tick_count % 50 == 0:
                 payload.pop("signature")
 
-            violations = auditor.audit_payload(payload, event_id=f"tick_{tick_count}")
-            payload["jis_violations"] = [v.__dict__ for v in violations]
+            violations = _audit_payload_inline(payload, event_id=f"tick_{tick_count}")
+            payload["jis_violations"] = violations
 
-            # Log telemetry tick using the O(1) async compliance path
-            await tracker.log_decision_async(
-                content=f"Telemetry tick {tick_count}",
-                agent_id="agent:telemetry-ws",
-                decision_type="telemetry_tick",
-                confidence="C5",
-                meta=metrics,
-            )
-
-            # Stress-test: async verification every 100 ticks (5 seconds at 20Hz)
+            # Periodic log (every 100 ticks = 5s at 20Hz)
             if tick_count % 100 == 0:
-                verify_result = await tracker.verify_chain_async()
                 logging.info(
-                    f"C5-REAL: Async verification complete. Valid: {verify_result.get('valid')}, TXs: {verify_result.get('tx_checked')}"
+                    f"C5-REAL: tick={tick_count} cortisol={cortisol_val:.3f} "
+                    f"exergy={exergy_val:.4f} violations={len(violations)}"
                 )
 
             await websocket.send(json.dumps(payload))
-            await asyncio.sleep(0.05)  # 20Hz Tick Rate para estética fluida (Industrial Noir)
+            await asyncio.sleep(0.05)  # 20Hz Tick Rate para estética fluida
     except websockets.exceptions.ConnectionClosed:
         logging.info("C5-REAL: Conexión terminada con el Dashboard.")
-    finally:
-        tracker.close()
 
 
 async def main():
@@ -98,7 +98,8 @@ async def main():
     logging.info("===================================================")
     logging.info(" ⚡ CORTEX SOVEREIGN TELEMETRY DAEMON INICIADO")
     logging.info(" 🔌 WebSocket Bridge: ws://127.0.0.1:8081")
-    logging.info(" 📡 Objetivo: agents.archi Dashboard")
+    logging.info(" 📡 Objetivo: EXERGIA-Ω Dashboard")
+    logging.info(" 🫁 Modo: CONSEJO_DE_SABIOS (1000 agentes)")
     logging.info("===================================================")
     await server.wait_closed()
 

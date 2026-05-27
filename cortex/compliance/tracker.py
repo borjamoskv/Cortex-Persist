@@ -138,7 +138,7 @@ class ComplianceTracker:
         Bypasses the sync loop bridge to achieve maximum telemetry throughput.
         """
         if not self._initialized:
-            await self._engine.init_db_async()
+            self._engine.init_db_sync()
             self._initialized = True
 
         proj = project or self._default_project
@@ -196,7 +196,7 @@ class ComplianceTracker:
     async def verify_chain_async(self) -> dict[str, Any]:
         """Async variant of verify_chain for zero-latency cryptographic verification."""
         if not self._initialized:
-            await self._engine.init_db_async()
+            self._engine.init_db_sync()
             self._initialized = True
 
         ledger = self._engine._ledger
