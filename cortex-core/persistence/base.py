@@ -5,7 +5,7 @@ import threading
 import atexit
 
 try:
-    import cortex_rs
+    import cortex_rs  # noqa: F401
     HAS_CORTEX_RS = True
 except ImportError:
     HAS_CORTEX_RS = False

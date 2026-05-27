@@ -3,7 +3,7 @@ import time
 
 
 try:
-    import cortex_rs
+    import cortex_rs  # noqa: F401
 except ImportError:
     pass
 

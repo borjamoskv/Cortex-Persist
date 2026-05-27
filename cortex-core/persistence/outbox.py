@@ -7,7 +7,6 @@ import sqlite3
 import mmap
 import weakref
 import atexit
-import threading
 
 from .base import SovereignResource, _setup_sqlite_pragmas, _get_local_conn, DB_PATH, HAS_CORTEX_RS, outbox_wake_event, logger, _metrics_cache, _metrics_cache_lock
 
@@ -320,8 +319,36 @@ def get_swarm_metrics(bypass_cache: bool = False) -> dict:
         avg_exec = c.fetchone()[0]
         latency_ms = (avg_exec * 1000.0) if avg_exec else 35.0
 
-        # Active children: Strictly isolated to ZeroCopyRingBuffer (no SQLite tracking)
+        # Active children: count pending tasks in ZeroCopyRingBuffer and SQLite fallback
         active_children = 0
+        try:
+            ring = _get_ring_buffer()
+            if ring._rust_buf is not None:
+                # If using Rust buffer, check if there's a custom count method, otherwise fallback
+                if hasattr(ring._rust_buf, "count_pending"):
+                    active_children += ring._rust_buf.count_pending()
+                elif hasattr(ring._rust_buf, "pending_count"):
+                    active_children += ring._rust_buf.pending_count()
+                elif os.path.exists(ring.bin_path):
+                    with open(ring.bin_path, "rb") as f:
+                        data = f.read()
+                    for idx in range(ring.capacity):
+                        offset = idx * ring.task_size
+                        if offset < len(data) and data[offset] in (1, 2):
+                            active_children += 1
+            elif hasattr(ring, "_buffer") and ring._buffer is not None:
+                for idx in range(ring.capacity):
+                    offset = idx * ring.task_size
+                    if ring._buffer[offset] in (1, 2):  # 1=pending, 2=processing
+                        active_children += 1
+        except Exception as e:
+            logger.error("Failed to count RingBuffer tasks in metrics: %s", e)
+
+        try:
+            c.execute("SELECT COUNT(*) FROM cortex_swarm_queue WHERE status = 'pending'")
+            active_children += c.fetchone()[0]
+        except sqlite3.OperationalError:
+            pass
 
         # Uncertainty: Failure rate in the ledger (returncode != 0)
         c.execute(

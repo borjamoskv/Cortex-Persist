@@ -4,7 +4,7 @@ from ultramap import UltramapSubstrate
 from .base import DB_PATH
 
 try:
-    import cortex_rs
+    import cortex_rs  # noqa: F401
 except ImportError:
     pass
 

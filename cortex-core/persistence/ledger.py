@@ -12,7 +12,7 @@ from cryptography.exceptions import InvalidSignature
 from .base import SovereignResource, _setup_sqlite_pragmas, DB_PATH, ledger_entropy_event, logger
 
 try:
-    import cortex_rs
+    import cortex_rs  # noqa: F401
 except ImportError:
     pass
 
