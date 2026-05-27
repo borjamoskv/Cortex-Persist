@@ -2,6 +2,7 @@
 // BOUNTY-HUNTER — C5-REAL Rust Swarm Orchestrator
 // Reality: C5-REAL (network I/O bound, not CPU bound after dispatch)
 // Dispatch: 22.5M task/s local scheduling | Network: ~50K req/s
+// CORTEX-Persist integration: findings → knowledge graph (flywheel)
 // ============================================================
 
 mod recon;
@@ -151,13 +152,14 @@ async fn run_full_pipeline(
     output_dir: String,
     concurrency: usize,
 ) -> Result<()> {
+    let pipeline_start = std::time::Instant::now();
+
     println!("{}", "━━━ PHASE 1: RECON ━━━".bright_blue().bold());
     let recon_out = format!("{}/recon.json", output_dir);
     let discovered = recon::run(domain.clone(), sub_wordlist, concurrency, recon_out.clone()).await?;
 
     println!("\n{}", "━━━ PHASE 2: PROBE ━━━".bright_blue().bold());
     let probe_input = format!("{}/urls.txt", output_dir);
-    // Write discovered URLs to temp file for probe phase
     let urls: Vec<String> = discovered
         .iter()
         .flat_map(|h| vec![
@@ -178,9 +180,9 @@ async fn run_full_pipeline(
 
     println!("\n{}", "━━━ PHASE 3: FUZZ ━━━".bright_blue().bold());
     let fuzz_out = format!("{}/fuzz.json", output_dir);
-    // Fuzz the first live host found (extend for full swarm)
+    let mut vuln_urls: Vec<String> = vec![];
     if let Some(target) = live_hosts.first() {
-        fuzz::run(
+        vuln_urls = fuzz::run(
             target.clone(),
             fuzz_wordlist,
             "both".to_string(),
@@ -192,8 +194,79 @@ async fn run_full_pipeline(
         println!("{}", "No live hosts found. Aborting fuzz phase.".yellow());
     }
 
+    // ── PHASE 4: REPORT + CORTEX-PERSIST FLYWHEEL ──────────────
+    println!("\n{}", "━━━ PHASE 4: CORTEX-PERSIST FLYWHEEL ━━━".bright_blue().bold());
+    let summary = report::ReportSummary {
+        subdomains_found: discovered.len(),
+        live_endpoints: live_hosts.len(),
+        vulnerabilities_found: vuln_urls.len(),
+        high_confidence: vuln_urls.len(), // refined in fuzz module
+        medium_confidence: 0,
+        takeover_risks: 0,
+    };
+    let bounty_report = report::generate_report(
+        &domain,
+        summary,
+        vec!["recon".into(), "probe".into(), "fuzz".into()],
+    )?;
+
+    // Persist to CORTEX-compatible JSON artifact
+    let cortex_out = format!("{}/cortex_findings.json", output_dir);
+    persist_to_cortex(&domain, &bounty_report, &cortex_out, pipeline_start.elapsed().as_secs_f64()).await?;
+
     println!("\n{}", "━━━ PIPELINE COMPLETE ━━━".green().bold());
     println!("Results stored in: {}", output_dir.bright_white());
+    println!("CORTEX artifact:   {}", cortex_out.bright_blue());
+    Ok(())
+}
+
+async fn persist_to_cortex(
+    domain: &str,
+    report: &report::BountyReport,
+    output_path: &str,
+    elapsed_secs: f64,
+) -> Result<()> {
+    use chrono::Utc;
+    use serde_json::json;
+
+    // CORTEX-Persist compatible fact schema
+    let cortex_artifact = json!({
+        "schema_version": "cortex_v4",
+        "fact_type": "bounty_hunter_run",
+        "reality_level": "C5-REAL",
+        "generated_at": Utc::now().to_rfc3339(),
+        "target": domain,
+        "elapsed_secs": elapsed_secs,
+        "dispatch_engine": "Rust/Rayon 22.5M agents/s",
+        "summary": {
+            "subdomains_found": report.summary.subdomains_found,
+            "live_endpoints": report.summary.live_endpoints,
+            "vulnerabilities_found": report.summary.vulnerabilities_found,
+            "takeover_risks": report.summary.takeover_risks,
+        },
+        "phases": report.phases_run,
+        "cortex_tags": ["security", "bug_bounty", "recon", "exergy_extraction"],
+        "ledger_entry": {
+            "event": "bounty_scan_complete",
+            "domain": domain,
+            "findings": report.summary.vulnerabilities_found,
+            "timestamp": Utc::now().to_rfc3339(),
+        }
+    });
+
+    if let Some(parent) = std::path::Path::new(output_path).parent() {
+        let _ = tokio::fs::create_dir_all(parent).await;
+    }
+    let json = serde_json::to_string_pretty(&cortex_artifact)?;
+    tokio::fs::write(output_path, &json).await?;
+
+    println!(
+        "  {} CORTEX artifact persisted → {} ({} bytes)",
+        "✓".green().bold(),
+        output_path.bright_blue(),
+        json.len().to_string().dimmed()
+    );
+
     Ok(())
 }
 
