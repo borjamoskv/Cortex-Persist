@@ -70,10 +70,10 @@ class AeonCompiler:
                 zk_proof = self.dark_pool.generate_exploit_proof(new_source)
                 # target_tvl se asume proporcional al yield base para la prueba
                 final_yield = self.dark_pool.negotiate_yield(zk_proof, target_tvl=yield_amount * 10)
-                logger.info(f"Fusión exérgica completada. ZK-Proof generada en AEON-0.")
+                logger.info("Fusión exérgica completada. ZK-Proof generada en AEON-0.")
 
             # 4. L2 Ledger Seal (Local Autopoiesis)
-            hash_seal = result["hash"]
+            result["hash"]
             vector_id = f"AEON_0_{func_name}"
             ledger_hash = self.ledger.append(action="AEON_0_STRIKE", vector_id=vector_id, yield_amount=final_yield)
             
@@ -141,7 +141,7 @@ if __name__ == "__main__":
     
     # Simple check if source is a file path
     if os.path.exists(args.source):
-        with open(args.source, "r") as f:
+        with open(args.source) as f:
             new_code = f.read()
     else:
         new_code = args.source

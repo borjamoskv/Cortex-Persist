@@ -134,7 +134,7 @@ def evaluate(x, env: ExergyEnvironment):
             skill_instance = skill_class()
             result = skill_instance.execute(payload)
             return f"<C5_REAL_FACT: skill_execution_{skill_module} | status: {result.get('status', 'success')}>"
-        except Exception as e:
+        except Exception:
             time.sleep(0.1)
             return f"<C5_REAL_FACT: skill_execution_{skill_module} | status: error>"
 

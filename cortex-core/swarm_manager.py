@@ -18,13 +18,13 @@ class SwarmActuator:
         self.db_path = db_path
         self.token_budget = 1000000  # Default daily budget
         
-    def estimate_exergy_cost(self, task_payload: Dict[str, Any]) -> int:
+    def estimate_exergy_cost(self, task_payload: dict[str, Any]) -> int:
         """Estimates the token cost (entropy) of a task."""
         # Simplified structural heuristic
         context_size = len(json.dumps(task_payload))
         return context_size * 2
 
-    def delegate_task(self, agent_id: str, task_payload: Dict[str, Any]) -> str:
+    def delegate_task(self, agent_id: str, task_payload: dict[str, Any]) -> str:
         """
         Dispatches the task to an external agent.
         In a C5-REAL deployment, this interfaces with the specific external API.

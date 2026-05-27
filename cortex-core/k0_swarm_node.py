@@ -47,7 +47,7 @@ class DarkPoolZK:
         try:
             # Simulando integración Web3 C5-REAL en L2 (Arbitrum/Base)
             from web3 import Web3
-            w3 = Web3(Web3.HTTPProvider(os.getenv("L2_RPC_URL", "https://arb1.arbitrum.io/rpc")))
+            Web3(Web3.HTTPProvider(os.getenv("L2_RPC_URL", "https://arb1.arbitrum.io/rpc")))
             logger.info(f"DarkPoolZK: Transmitiendo prueba ZK {zk_proof[:12]} al Escrow L2...")
         except ImportError:
             logger.info(f"DarkPoolZK: Web3 no disponible. Ejecutando resolución L2 simulada para {zk_proof[:12]}...")

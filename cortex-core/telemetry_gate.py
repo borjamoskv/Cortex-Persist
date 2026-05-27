@@ -45,7 +45,7 @@ class TelemetryGate:
         logging.info(f"Received patch from {agent_id}. Initiating Quality Gate...")
         
         try:
-            payload: Dict[str, Any] = json.loads(patch_payload)
+            payload: dict[str, Any] = json.loads(patch_payload)
             
             if payload.get("type") == "ABORT":
                 logging.info(f"{agent_id} explicitly aborted (Kill Criteria respected). No penalty.")

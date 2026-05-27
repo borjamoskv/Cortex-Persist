@@ -18,7 +18,7 @@ class ASTAutopoiesisEngine:
         if not os.path.exists(self.target_file):
             raise FileNotFoundError(f"AST Target not found: {self.target_file}")
             
-        with open(self.target_file, "r") as f:
+        with open(self.target_file) as f:
             self.source = f.read()
         self.tree = ast.parse(self.source)
         self.lines = self.source.splitlines()

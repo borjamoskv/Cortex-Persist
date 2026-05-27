@@ -2,7 +2,7 @@ import asyncio
 from persistence import enqueue_swarm_task, HybridPersistenceManager
 
 async def main():
-    manager = HybridPersistenceManager()
+    HybridPersistenceManager()
     
     # Inyectar tarea de tipo LISP al Enjambre
     print("[+] Inyectando EXA_LISP payload...")

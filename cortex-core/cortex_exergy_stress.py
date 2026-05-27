@@ -7,7 +7,7 @@ import sqlite3
 
 async def run_stress_test():
     print("[+] Inicializando HybridPersistenceManager (Outbox Daemon)...")
-    manager = HybridPersistenceManager()
+    HybridPersistenceManager()
     
     # Red externa eliminada, operamos en aislamiento Ring-0
     

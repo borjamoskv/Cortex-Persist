@@ -136,7 +136,7 @@ class ExergySentinel:
         try:
             # 1. Ruff Format
             cmd_fmt = [sys.executable, "-m", "ruff", "format", "."]
-            res_fmt = subprocess.run(cmd_fmt, cwd=PROJECT_ROOT, capture_output=True, text=True)
+            subprocess.run(cmd_fmt, cwd=PROJECT_ROOT, capture_output=True, text=True)
             
             # 2. Ruff Check Fix
             cmd_chk = [sys.executable, "-m", "ruff", "check", "--fix", "."]
