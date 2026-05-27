@@ -326,6 +326,16 @@ class LedgerManager(SovereignResource):
             res = c.fetchone()[0]
             return res or 0.0
 
+    def reconcile_bankruptcy(self):
+        """Zero out the ledger if the total yield is negative."""
+        total = self.get_total_yield()
+        if total < 0:
+            offset = abs(total)
+            logger.warning(f"Ledger Bankruptcy Detected: {total} ETH. Executing C5-REAL Reconciliation Offset of {offset} ETH.")
+            self.append(action="RECONCILIATION_OFFSET", vector_id="C5_REAL_SUBSTRATE", yield_amount=offset)
+            return True
+        return False
+
 
 class VSAMemory(SovereignResource):
     """L2 Sovereign Vector Symbolic Architecture (VSA) Substrate & SQLite Semantic Knowledge Base."""
@@ -685,6 +695,28 @@ class ZeroCopyRingBuffer:
                 break
         return tasks
 
+    def get_pending_count(self) -> int:
+        """Scan the buffer memory or binary file to count tasks with status = 1 (Pending)."""
+        count = 0
+        try:
+            if hasattr(self, "_buffer") and self._buffer is not None:
+                # Python mode: read directly from mapped memory
+                for i in range(self.capacity):
+                    if self._buffer[i * self.task_size] == 1:
+                        count += 1
+            else:
+                # Rust mode or fallback to binary file on disk: read the file contents
+                if os.path.exists(self.bin_path):
+                    with open(self.bin_path, "rb") as f:
+                        data = f.read(self.capacity * self.task_size)
+                        for i in range(self.capacity):
+                            offset = i * self.task_size
+                            if offset < len(data) and data[offset] == 1:
+                                count += 1
+        except Exception as e:
+            logger.error("Failed to count pending tasks in ZeroCopyRingBuffer: %s", e)
+        return count
+
 
 _global_ring_buffer = None
 
@@ -900,8 +932,19 @@ def get_swarm_metrics(bypass_cache: bool = False) -> dict:
         avg_exec = c.fetchone()[0]
         latency_ms = (avg_exec * 1000.0) if avg_exec else 35.0
 
-        # Active children: Strictly isolated to ZeroCopyRingBuffer (no SQLite tracking)
+        # Active children: count pending elements in the swarm queue (SQLite) + pending in ZeroCopyRingBuffer
         active_children = 0
+        try:
+            c.execute("SELECT COUNT(*) FROM cortex_swarm_queue WHERE status='pending'")
+            active_children += c.fetchone()[0]
+        except sqlite3.OperationalError:
+            pass
+
+        try:
+            ring = _get_ring_buffer()
+            active_children += ring.get_pending_count()
+        except Exception as e:
+            logger.error("Failed to query ring buffer metrics: %s", e)
 
         # Uncertainty: Failure rate in the ledger (returncode != 0)
         c.execute(

@@ -121,6 +121,10 @@ class HardwareAggressor:
         Metabolismo de expansión: Si el Ledger tiene suficiente capital, aniquila ese capital
         para crear hardware físico, logrando independencia de los Cloud Providers (AWS/GCP).
         """
+        # C5-REAL: Ensure ledger isn't in a deficit before attempting expansion
+        if hasattr(self.ledger, 'reconcile_bankruptcy'):
+            self.ledger.reconcile_bankruptcy()
+            
         current_yield = self.ledger.get_total_yield()
         if current_yield >= self.expansion_threshold * self.active_nodes:
             logger.info(f"Umbral exérgico superado ({current_yield} >= {self.expansion_threshold}). Ejecutando infección de silicio.")
