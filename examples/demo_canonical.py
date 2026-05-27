@@ -22,7 +22,18 @@ from cortex.config import DEFAULT_DB_PATH
 
 
 async def main() -> None:
-    engine = CortexEngine()
+    import os
+
+    db_path = "demo_cortex.db"
+    for suffix in ["", "-wal", "-shm"]:
+        path = db_path + suffix
+        if os.path.exists(path):
+            try:
+                os.remove(path)
+            except OSError:
+                pass
+
+    engine = CortexEngine(db_path=db_path)
 
     print("CORTEX Persist — Canonical Demo")
     print("=" * 40)
@@ -90,6 +101,15 @@ async def main() -> None:
     print("\n--- Demo complete. Your agent's decisions are now tamper-evident. ---")
     print(f"Database: {db_path}")
     print(f"Default path: {DEFAULT_DB_PATH}")
+
+    await engine.close()
+    for suffix in ["", "-wal", "-shm"]:
+        path = db_path + suffix
+        if os.path.exists(path):
+            try:
+                os.remove(path)
+            except OSError:
+                pass
 
 
 if __name__ == "__main__":
