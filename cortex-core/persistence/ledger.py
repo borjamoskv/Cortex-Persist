@@ -36,8 +36,8 @@ class LedgerManager(SovereignResource):
         if hasattr(self, '_aof_fd') and self._aof_fd is not None:
             try:
                 self._aof_fd.close()
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug("Failed to close AOF file descriptor: %s", e)
         super().close()
 
     def __init__(self):
@@ -104,8 +104,8 @@ class LedgerManager(SovereignResource):
         """)
         try:
             c.execute("ALTER TABLE ledger_records ADD COLUMN zk_proof TEXT")
-        except sqlite3.OperationalError:
-            pass
+        except sqlite3.OperationalError as e:
+            logger.debug("zk_proof column already exists or migration skipped: %s", e)
 
         c.execute("""
             CREATE TABLE IF NOT EXISTS cortex_knowledge (

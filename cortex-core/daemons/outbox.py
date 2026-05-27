@@ -8,8 +8,7 @@ import mmap
 import weakref
 import atexit
 
-from persistence.base import SovereignResource, _setup_sqlite_pragmas, _get_local_conn, HAS_CORTEX_RS, outbox_wake_event, logger, _metrics_cache, _metrics_cache_lock
-from persistence import base
+from persistence.base import SovereignResource, _setup_sqlite_pragmas, _get_local_conn, HAS_CORTEX_RS, outbox_wake_event, logger, _metrics_cache, _metrics_cache_lock, DB_PATH
 
 try:
     import cortex_rs  # noqa: F401
@@ -34,7 +33,7 @@ class ZeroCopyRingBuffer(SovereignResource):
         self.capacity = capacity
         self.task_size = 256
         self.tensor_size = self.capacity * self.task_size
-        self.bin_path = os.path.join(os.path.dirname(base.DB_PATH), "swarm_ring_vsa.bin")
+        self.bin_path = os.path.join(os.path.dirname(DB_PATH), "swarm_ring_vsa.bin")
         self._mmap = None
         self._f = None
 
@@ -203,7 +202,7 @@ class OutboxDaemon(SovereignResource):
     """Outbox Pattern Daemon: Asynchronously drains pending swarm tasks to NEXUS API."""
 
     def __init__(self, db_path: str | None = None, ledger: LedgerManager | None = None):
-        self._db_path = db_path if db_path is not None else base.DB_PATH
+        self._db_path = db_path if db_path is not None else DB_PATH
         self._daemon_task = None
         self._conn = sqlite3.connect(self._db_path, check_same_thread=False, timeout=10.0)
         _setup_sqlite_pragmas(self._conn)
@@ -402,7 +401,7 @@ class OutboxDaemon(SovereignResource):
             loop = asyncio.get_running_loop()
             self._daemon_task = loop.create_task(self._drain_loop())
         except RuntimeError:
-            pass
+            logger.warning("OutboxDaemon could not start: no active event loop.")
 
 
 def _enqueue_swarm_task_sync(agent_name: str, payload: dict):
@@ -438,7 +437,7 @@ def get_swarm_metrics(bypass_cache: bool = False) -> dict:
                 return _metrics_cache["value"]
 
     try:
-        conn = _get_local_conn(base.DB_PATH, timeout=5.0)
+        conn = _get_local_conn(DB_PATH, timeout=5.0)
         c = conn.cursor()
 
         # Latency approximation: find average execution time from recent ledger entries
@@ -476,8 +475,8 @@ def get_swarm_metrics(bypass_cache: bool = False) -> dict:
         try:
             c.execute("SELECT COUNT(*) FROM cortex_swarm_queue WHERE status = 'pending'")
             active_children += c.fetchone()[0]
-        except sqlite3.OperationalError:
-            pass
+        except sqlite3.OperationalError as e:
+            logger.debug("OperationalError querying cortex_swarm_queue: %s", e)
 
         # Uncertainty: Failure rate in the ledger (returncode != 0)
         c.execute(

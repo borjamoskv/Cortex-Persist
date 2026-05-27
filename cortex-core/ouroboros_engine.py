@@ -112,8 +112,8 @@ class OuroborosEngine:
                             matches = re.findall(r"contract\s+(\w+)", content)
                             for m in matches:
                                 contracts.append({"name": m, "file": path})
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        logger.debug("Failed to read file %s: %s", path, e)
         return contracts
 
     async def generate_fuzz_test(self, contract_name: str, contract_file: str):

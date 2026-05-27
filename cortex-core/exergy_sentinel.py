@@ -72,8 +72,8 @@ class ExergySentinel:
             fd_dir = Path("/dev/fd")
             if fd_dir.exists():
                 return len(list(fd_dir.iterdir()))
-        except Exception:
-            pass
+        except Exception as e:
+            logging.debug("Failed to count open FDs: %s", e)
         return 0
 
     def clean_stale_locks(self):
@@ -102,8 +102,8 @@ class ExergySentinel:
                             # We don't delete database wal/shm files directly unless we are sure,
                             # but we log them.
                             pass
-                except Exception:
-                    pass
+                except Exception as e:
+                    logging.debug("Failed to inspect lock file %s: %s", lock_file, e)
 
     def terminate_stale_processes(self):
         """Finds and terminates orphaned pytest or python process groups holding lock files."""
@@ -202,8 +202,8 @@ class ExergySentinel:
         try:
             with open(STATE_FILE, "w") as f:
                 json.dump(self.state, f, indent=2)
-        except Exception:
-            pass
+        except Exception as e:
+            logging.debug("Failed to save state file: %s", e)
 
     def run_cycle(self):
         self.state["cycle_count"] += 1

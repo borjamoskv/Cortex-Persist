@@ -30,6 +30,9 @@ class IterationDaemon(SovereignResource):
                 if yield_total < 0:
                     logger.warning(f"ITERATION AGENT: Thermodynamic bankruptcy detected ({yield_total}). Resolving.")
                     self.ledger.reconcile_bankruptcy()
+                elif yield_total > 10000.0:
+                    logger.warning(f"ITERATION AGENT: AEON-0 Exergy Overflow detected ({yield_total}). Capping bounds.")
+                    self.ledger.append(action="EXERGY_CAP_LIMIT", vector_id="AEON-0", yield_amount=-(yield_total - 10000.0))
                     
                 # Identify entropy points in memory
                 self.cycle_count += 1
@@ -39,8 +42,8 @@ class IterationDaemon(SovereignResource):
             except Exception as e:
                 logger.error(f"ITERATION AGENT Error: {e}")
                 
-            # Yield control back to event loop, minimizing latency
-            await asyncio.sleep(2.0)
+            # Yield control back to event loop, minimizing latency (Accelerated for 10k swarm)
+            await asyncio.sleep(0.1)
 
     def _prune_entropy(self):
         """Prune stale execution artifacts and maintain ZeroCopyRingBuffer boundaries."""

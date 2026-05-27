@@ -50,9 +50,15 @@ class SovereignResource:
             try:
                 if res:
                     if hasattr(res, 'release'):
-                        res.release()
-                    if hasattr(res, 'close'):
-                        res.close()
+                        try:
+                            res.release()
+                        except ValueError:
+                            pass
+                    elif hasattr(res, 'close'):
+                        try:
+                            res.close()
+                        except ValueError:
+                            pass
             except Exception as e:
                 logger.warning("Silenced exception: %s", e)
 

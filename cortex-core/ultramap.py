@@ -57,8 +57,11 @@ class UltramapSubstrate:
                 mmap_obj.close()
             if f_obj:
                 f_obj.close()
-        except Exception:
-            pass
+        except Exception as e:
+            try:
+                logger.debug("Error in ultramap _safe_close: %s", e)
+            except Exception:
+                pass
 
     def close(self):
         if hasattr(self, "_buffer") and self._buffer is not None:

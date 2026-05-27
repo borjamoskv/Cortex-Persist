@@ -53,7 +53,7 @@ try:
         handlers=[RichHandler(console=console, rich_tracebacks=True, markup=True, show_path=False, show_time=True)]
     )
 except ImportError:
-    pass
+    logging.debug("rich library not available, using standard basicConfig")
 
 class CortexDaemon:
     """Sovereign Orchestrator V3.1 — The Heart of MOSKV-1."""
@@ -111,8 +111,8 @@ class CortexDaemon:
                     if os.path.getsize(target) > 5000000:
                         os.remove(target)
                         logging.info("🧹 Hygiene: Purged entropy [%s]", file)
-        except Exception:
-            pass
+        except Exception as e:
+            logging.debug("Hygiene purging failed: %s", e)
 
     def check_memory_integrity(self):
         """Evaluates SQLite state, triggering implicit yields."""
@@ -488,8 +488,8 @@ class CortexDaemon:
             try:
                 self.knowledge_observer.stop()
                 self.knowledge_observer.join()
-            except Exception:
-                pass
+            except Exception as e:
+                logging.debug("Observer shutdown failed: %s", e)
         logging.info("Daemon decommissioned safely.")
 
 
