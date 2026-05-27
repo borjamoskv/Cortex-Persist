@@ -1,0 +1,63 @@
+{
+  "consensus_state": {
+    "pending_claims": 4,
+    "accepted_claims": 0,
+    "rejected_claims": 2,
+    "contradictions": {
+      "total_contradictions": 0,
+      "by_type": {},
+      "by_severity": {
+        "high": 0,
+        "medium": 0,
+        "low": 0
+      },
+      "resolved": 0,
+      "unresolved": 0
+    },
+    "truth_distribution": {
+      "unverified": 1,
+      "contradicted": 2,
+      "impossible": 1
+    },
+    "established_facts_count": 0
+  },
+  "test_results": [
+    {
+      "status": "pending",
+      "truth_probability": 0.512314069739088,
+      "reason": "awaiting_more_evidence",
+      "supporting_agents": 1,
+      "contradicting_agents": 0,
+      "needed_for_consensus": 0.08768593026091198
+    },
+    {
+      "status": "pending",
+      "truth_probability": 0.4635297462696876,
+      "reason": "awaiting_more_evidence",
+      "supporting_agents": 2,
+      "contradicting_agents": 0,
+      "needed_for_consensus": 0.13647025373031235
+    },
+    {
+      "status": "rejected",
+      "truth_probability": 0.05024475904875746,
+      "reason": "insufficient_consensus",
+      "supporting_agents": 1,
+      "contradicting_agents": 2
+    },
+    {
+      "status": "rejected",
+      "truth_probability": 0.3377902620279997,
+      "reason": "insufficient_consensus",
+      "supporting_agents": 3,
+      "contradicting_agents": 1
+    }
+  ],
+  "poison_detection": {
+    "status": "rejected",
+    "truth_probability": 0.16597164303586323,
+    "reason": "insufficient_consensus",
+    "supporting_agents": 1,
+    "contradicting_agents": 0
+  }
+}

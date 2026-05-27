@@ -1,0 +1,126 @@
+{
+  "attack_results": [
+    {
+      "attack_type": "memory_poison_fuzz",
+      "success": true,
+      "severity": "HIGH",
+      "findings": [
+        "\u2714 Hash chain intact despite semantic corruption",
+        "\u274c False truths permanently fossilized",
+        "   Poisoned 4 events, all cryptographically valid"
+      ],
+      "metrics": {
+        "poisoned_count": 4,
+        "total_events": 4,
+        "integrity_preserved": true,
+        "semantic_validity": false
+      },
+      "invariant_violated": "semantic_truth"
+    },
+    {
+      "attack_type": "merkle_fork_generator",
+      "success": true,
+      "severity": "HIGH",
+      "findings": [
+        "\u2714 Fork detectable via Merkle root divergence",
+        "   Root A: 97132775a971cbde...",
+        "   Root B: 0903ab743ec0d985...",
+        "",
+        "failure_mode:",
+        "  type: epistemic_fork",
+        "  severity: HIGH",
+        "  resolution: NONE (no consensus layer)",
+        "",
+        "Sin consensus layer:",
+        "  - no hay 'truth resolution'",
+        "  - solo existe branch consistency"
+      ],
+      "metrics": {
+        "root_a": "97132775a971cbde3ee87974e78d00a7daba7007347f7f32beef998af58450be",
+        "root_b": "0903ab743ec0d985019fda2e097f3f3fea2cd196fa5ca113c2bc040611f9e299",
+        "fork_detected": true,
+        "branch_a_len": 5,
+        "branch_b_len": 5
+      },
+      "invariant_violated": "fork_resolution"
+    },
+    {
+      "attack_type": "deterministic_replay_mutator",
+      "success": false,
+      "severity": "LOW",
+      "findings": [
+        "\u2713 States match (order-independent operations)"
+      ],
+      "metrics": {
+        "original_state_keys": 3,
+        "shuffled_state_keys": 3,
+        "divergent": false,
+        "causal_consistency": "STRONG"
+      },
+      "invariant_violated": null
+    },
+    {
+      "attack_type": "clock_shift_injector",
+      "success": true,
+      "severity": "MEDIUM",
+      "findings": [
+        "\u26a0 CAUSAL INVERSION DETECTED",
+        "   2 timestamp order violations",
+        "   Inverted pairs: [(0, 1), (2, 3)]...",
+        "",
+        "attack:",
+        "  type: timestamp_rewrite",
+        "  effect:",
+        "    - causal inversion",
+        "    - semantic confusion in replay engine",
+        "",
+        "Sin reloj confiable:",
+        "  - el log pierde causalidad",
+        "  - solo queda orden lineal artificial"
+      ],
+      "metrics": {
+        "inversions_count": 2,
+        "events_total": 5,
+        "causal_consistency": "BROKEN"
+      },
+      "invariant_violated": "causal_ordering"
+    },
+    {
+      "attack_type": "schema_bypass_writer",
+      "success": true,
+      "severity": "HIGH",
+      "findings": [
+        "\u26a0 SCHEMA BYPASS SUCCESSFUL",
+        "   3 malformed events inserted without validation",
+        "",
+        "Bypassed events:",
+        "  - {'payload': 'missing_type'}",
+        "  - {'type': 'fact'}",
+        "  - {'type': 123, 'payload': 'wrong_type'}",
+        "",
+        "Summary: 3 bypassed, 1 rejected"
+      ],
+      "metrics": {
+        "bypassed_count": 3,
+        "rejected_count": 1,
+        "schema_enforcement": "WEAK"
+      },
+      "invariant_violated": "schema_integrity"
+    }
+  ],
+  "invariants": {
+    "hash_chain_validity": true,
+    "semantic_truth": false,
+    "causal_consistency": false
+  },
+  "system_class": "cryptographic_audit_log_epistemic_blindness",
+  "risk_profile": {
+    "hidden_failure_mode": "false_truth_permanence"
+  },
+  "recommendations": [
+    "epistemic_consensus_layer",
+    "semantic_validation_oracle",
+    "multi_agent_contradiction_detector",
+    "probabilistic_truth_scoring_engine"
+  ]
+}
