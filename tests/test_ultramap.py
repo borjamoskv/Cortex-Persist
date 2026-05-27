@@ -41,7 +41,7 @@ def test_ultramap_initialization(temp_umap_env):
 
     bin_path = temp_umap_env / "ultramap.bin"
     assert bin_path.exists()
-    assert bin_path.stat().st_size == capacity * 96
+    assert bin_path.stat().st_size == capacity * 128
 
     umap.close()
 

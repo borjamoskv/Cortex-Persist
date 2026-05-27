@@ -41,14 +41,14 @@ async def deep_audit_cortex():
 
     # Inyectar hallazgos de los 1000 agentes en la base de datos para TOM & OLIVER
     print("💉 Inyectando telemetría del enjambre en CORTEX-Memory...")
-    engine.store_sync(
+    await engine.store(
         tenant_id="default",
         project="CORTEX",
         fact_type="system_health",
         content=f"Enjambre desplegó {report['agents']} agentes en {total_time:.4f}s analizando el OuroborosGate, Rust ZeroCopyRingBuffer y el GIL annihilation.",
         confidence="C5",
     )
-    engine.store_sync(
+    await engine.store(
         tenant_id="default",
         project="CORTEX",
         fact_type="system_health",

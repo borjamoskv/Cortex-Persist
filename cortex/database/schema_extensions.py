@@ -294,16 +294,20 @@ CREATE INDEX IF NOT EXISTS idx_lock_intents_agent ON lock_intents(agent_id);
 CREATE_ENRICHMENT_JOBS = """
 CREATE TABLE IF NOT EXISTS enrichment_jobs (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    job_id          TEXT UNIQUE,
+    event_id        TEXT,
     fact_id         INTEGER NOT NULL REFERENCES facts(id),
     job_type        TEXT NOT NULL DEFAULT 'embedding',
     status          TEXT NOT NULL DEFAULT 'queued',
     priority        INTEGER DEFAULT 0,
     attempts        INTEGER DEFAULT 0,
     last_error      TEXT,
+    next_attempt_ts TEXT,
     next_attempt_at TEXT,
     payload         TEXT,
     created_at      TEXT NOT NULL DEFAULT (datetime('now')),
-    updated_at      TEXT NOT NULL DEFAULT (datetime('now'))
+    updated_at      TEXT NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY(event_id) REFERENCES ledger_events(event_id) ON DELETE CASCADE
 );
 """
 

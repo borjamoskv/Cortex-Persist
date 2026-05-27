@@ -38,6 +38,7 @@ PUBLIC_EXPORT_FILES = frozenset(
         "schema.json",
         "verification-profile.json",
         "verification-report.json",
+        "checkpoints.jsonl",
     }
 )
 FORBIDDEN_EXPORT_TOKENS = (
@@ -68,6 +69,7 @@ class LedgerExportResult:
     verification_report_path: Path | None
     manifest_hash: str
     verification_result: str | None
+    checkpoints_path: Path | None = None
 
 
 @dataclass(frozen=True)
@@ -92,6 +94,7 @@ def write_public_ledger_export(
     environment: str = "test",
     created_at: str | None = None,
     key_events: Sequence[Mapping[str, Any]] = (),
+    checkpoints: Sequence[Mapping[str, Any]] = (),
     include_verification_report: bool = False,
     allow_overwrite: bool = False,
 ) -> LedgerExportResult:
@@ -104,18 +107,24 @@ def write_public_ledger_export(
 
     event_objects = [dict(event) for event in events]
     key_objects = [dict(key) for key in public_keys]
+    checkpoint_objects = [dict(cp) for cp in checkpoints]
+    
     event_hashes = _validate_public_events(
         event_objects,
         tenant_id=tenant_id,
         stream_id=stream_id,
     )
     _validate_public_key_records(key_objects)
+    if checkpoint_objects:
+        _validate_public_checkpoints(checkpoint_objects)
+        
     key_event_objects = [dict(event) for event in key_events]
     _assert_no_private_material(
         {
             "events": event_objects,
             "key_events": key_event_objects,
             "public_keys": key_objects,
+            "checkpoints": checkpoint_objects,
         }
     )
 
@@ -127,6 +136,7 @@ def write_public_ledger_export(
     verification_profile_path = root / "verification-profile.json"
     manifest_path = root / "manifest.json"
     verification_report_path = root / "verification-report.json"
+    checkpoints_path = root / "checkpoints.jsonl" if checkpoint_objects else None
 
     _write_text_atomic(
         events_path,
@@ -136,6 +146,12 @@ def write_public_ledger_export(
         key_events_path,
         "".join(_canonical_public_json(event) + "\n" for event in key_event_objects),
     )
+    if checkpoint_objects:
+        _write_text_atomic(
+            checkpoints_path,
+            "".join(_canonical_public_json(cp) + "\n" for cp in checkpoint_objects),
+        )
+        
     _write_json_atomic(schema_path, _schema_document())
     _write_json_atomic(verification_profile_path, _verification_profile_document())
     _write_json_atomic(
@@ -159,6 +175,7 @@ def write_public_ledger_export(
         purpose=purpose,
         environment=environment,
         root=root,
+        has_checkpoints=bool(checkpoint_objects),
     )
     manifest = dict(manifest_without_signature)
     manifest["signature"] = {
@@ -190,6 +207,7 @@ def write_public_ledger_export(
         verification_report_path=verification_report_path,
         manifest_hash=_sha256_file(manifest_path),
         verification_result=verification_result,
+        checkpoints_path=checkpoints_path,
     )
 
 
