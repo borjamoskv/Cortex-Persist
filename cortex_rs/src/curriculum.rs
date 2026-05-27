@@ -562,15 +562,15 @@ mod tests {
         assert!(stats.total_variants > 1);
         assert!(stats.min_difficulty < 0.9);
 
-        e// tracing::info!("═══════════════════════════════════════════");
-        e// tracing::info!("  TTRL CURRICULUM GENERATION");
-        e// tracing::info!("═══════════════════════════════════════════");
-        e// tracing::info!("  Target:       {:?}...", &target_id[..4]);
-        e// tracing::info!("  Generated:    {} variants", generated);
-        e// tracing::info!("  Total nodes:  {}", stats.total_variants);
-        e// tracing::info!("  Difficulty:   [{:.2}, {:.2}] avg={:.2}",
+        // tracing::info!("═══════════════════════════════════════════");
+        // tracing::info!("  TTRL CURRICULUM GENERATION");
+        // tracing::info!("═══════════════════════════════════════════");
+        // tracing::info!("  Target:       {:?}...", &target_id[..4]);
+        // tracing::info!("  Generated:    {} variants", generated);
+        // tracing::info!("  Total nodes:  {}", stats.total_variants);
+        // tracing::info!("  Difficulty:   [{:.2}, {:.2}] avg={:.2}",
             stats.min_difficulty, stats.max_difficulty, stats.avg_difficulty);
-        e// tracing::info!("═══════════════════════════════════════════");
+        // tracing::info!("═══════════════════════════════════════════");
     }
 
     #[test]
@@ -694,15 +694,15 @@ mod tests {
         let elapsed = start.elapsed();
         let rate = generated as f64 / elapsed.as_secs_f64();
 
-        e// tracing::info!("═══════════════════════════════════════════");
-        e// tracing::info!("  CURRICULUM THROUGHPUT BENCHMARK");
-        e// tracing::info!("═══════════════════════════════════════════");
-        e// tracing::info!("  Premises:    20");
-        e// tracing::info!("  Depth:       3 levels");
-        e// tracing::info!("  Generated:   {} variants", generated);
-        e// tracing::info!("  Elapsed:     {:.4?}", elapsed);
-        e// tracing::info!("  Rate:        {:.0} variants/sec", rate);
-        e// tracing::info!("═══════════════════════════════════════════");
+        // tracing::info!("═══════════════════════════════════════════");
+        // tracing::info!("  CURRICULUM THROUGHPUT BENCHMARK");
+        // tracing::info!("═══════════════════════════════════════════");
+        // tracing::info!("  Premises:    20");
+        // tracing::info!("  Depth:       3 levels");
+        // tracing::info!("  Generated:   {} variants", generated);
+        // tracing::info!("  Elapsed:     {:.4?}", elapsed);
+        // tracing::info!("  Rate:        {:.0} variants/sec", rate);
+        // tracing::info!("═══════════════════════════════════════════");
 
         assert!(generated > 20, "Should generate many variants from 20 premises");
     }

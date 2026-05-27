@@ -478,15 +478,15 @@ mod tests {
 
         let stats = engine.evolve();
 
-        e// tracing::info!("═══════════════════════════════════════════");
-        e// tracing::info!("  EVOLUTIONARY CONJECTURER — Gen {}", stats.generation);
-        e// tracing::info!("═══════════════════════════════════════════");
-        e// tracing::info!("  Population:  {}", stats.population_size);
-        e// tracing::info!("  Mutations:   {}", stats.mutations_generated);
-        e// tracing::info!("  Culled:      {}", stats.culled);
-        e// tracing::info!("  Elo range:   [{:.0}, {:.0}]", stats.bottom_elo, stats.top_elo);
-        e// tracing::info!("  Elapsed:     {} μs", stats.elapsed_us);
-        e// tracing::info!("═══════════════════════════════════════════");
+        // tracing::info!("═══════════════════════════════════════════");
+        // tracing::info!("  EVOLUTIONARY CONJECTURER — Gen {}", stats.generation);
+        // tracing::info!("═══════════════════════════════════════════");
+        // tracing::info!("  Population:  {}", stats.population_size);
+        // tracing::info!("  Mutations:   {}", stats.mutations_generated);
+        // tracing::info!("  Culled:      {}", stats.culled);
+        // tracing::info!("  Elo range:   [{:.0}, {:.0}]", stats.bottom_elo, stats.top_elo);
+        // tracing::info!("  Elapsed:     {} μs", stats.elapsed_us);
+        // tracing::info!("═══════════════════════════════════════════");
 
         assert!(stats.population_size > 1);
         assert!(stats.mutations_generated > 0);
@@ -587,17 +587,17 @@ mod tests {
         }
         let elapsed = start.elapsed();
 
-        e// tracing::info!("═══════════════════════════════════════════");
-        e// tracing::info!("  EVOLUTION THROUGHPUT BENCHMARK");
-        e// tracing::info!("═══════════════════════════════════════════");
-        e// tracing::info!("  Seeds:          10");
-        e// tracing::info!("  Cycles:         5");
-        e// tracing::info!("  Final pop:      {}", engine.len());
-        e// tracing::info!("  Total mutants:  {}", total_mutations);
-        e// tracing::info!("  Elapsed:        {:.4?}", elapsed);
-        e// tracing::info!("  Rate:           {:.0} conjectures/sec",
+        // tracing::info!("═══════════════════════════════════════════");
+        // tracing::info!("  EVOLUTION THROUGHPUT BENCHMARK");
+        // tracing::info!("═══════════════════════════════════════════");
+        // tracing::info!("  Seeds:          10");
+        // tracing::info!("  Cycles:         5");
+        // tracing::info!("  Final pop:      {}", engine.len());
+        // tracing::info!("  Total mutants:  {}", total_mutations);
+        // tracing::info!("  Elapsed:        {:.4?}", elapsed);
+        // tracing::info!("  Rate:           {:.0} conjectures/sec",
             total_mutations as f64 / elapsed.as_secs_f64());
-        e// tracing::info!("═══════════════════════════════════════════");
+        // tracing::info!("═══════════════════════════════════════════");
 
         assert!(engine.len() > 10, "Population should grow");
     }
