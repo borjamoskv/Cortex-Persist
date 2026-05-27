@@ -37,7 +37,6 @@ def _bootstrap_without_embeddings() -> Iterator[None]:
 @click.option("--ouroboros", is_flag=True, help="Initialize with Ouroboros-Ω laws enabled")
 def init(db, ouroboros: bool) -> None:
     """Initialize CORTEX database."""
-    engine = get_engine(db)
     # Inject MOSKV-1 v5 Axioms
     axioms = [
         "Axioma I: Latencia Negativa (El colapso Evento-Intención). La respuesta precede a la pregunta.",
@@ -53,6 +52,7 @@ def init(db, ouroboros: bool) -> None:
     ]
 
     async def _init_flow():
+        engine = get_engine(db)
         try:
             await engine.init_db()
             for idx, axiom in enumerate(axioms, start=1):
@@ -84,7 +84,7 @@ def init(db, ouroboros: bool) -> None:
     msg = (
         f"[bold #CCFF00]✓ CORTEX v{__version__} initialized[/]\n"
         f"{'↳ Ouroboros-Ω Active' if ouroboros else '↳ 10 Sovereign Axioms Injected'}\n"
-        f"[dim]Database: {engine._db_path}[/]"
+        f"[dim]Database: {db}[/]"
     )
     console.print(
         Panel(
@@ -103,6 +103,7 @@ def migrate(source, db) -> None:
     from cortex.migrate import migrate_v31_to_v40
 
     async def _migrate_flow():
+        engine = get_engine(db)
         try:
             await engine.init_db()
             with console.status("[bold blue]Migrating v3.1 → v4.0...[/]"):

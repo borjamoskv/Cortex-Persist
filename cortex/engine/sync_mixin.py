@@ -52,52 +52,31 @@ class SyncMixin:
         return self._run_sync(self.get_causal_chain(*args, **kwargs))
 
     def close_sync(self):
-        """Close the underlying engine and stop the background sync loop."""
+        """Close the underlying engine and clean up the thread-local event loop."""
         import logging
 
         logger = logging.getLogger(__name__)
 
-        if hasattr(self, "_sync_loop") and not self._sync_loop.is_closed():
-            try:
-                self._run_sync(self.close())
-            except Exception as e:
-                logger.exception(f"[SyncMixin] Error closing async engine synchronously: {e}")
+        self._closing = True  # Guard to prevent new checkpointing and tasks
+        try:
+            self._run_sync(self.close())
+        except Exception as e:
+            logger.exception(f"[SyncMixin] Error closing async engine synchronously: {e}")
 
-            lock = self.__dict__.setdefault("_instance_sync_lock", threading.Lock())
-            with lock:
-                if hasattr(self, "_sync_loop"):
-                    loop = self._sync_loop
-                    
-                    async def _cancel_tasks():
-                        tasks = [t for t in asyncio.all_tasks(loop) if t is not asyncio.current_task(loop)]
-                        for t in tasks:
-                            t.cancel()
-                        if tasks:
-                            await asyncio.gather(*tasks, return_exceptions=True)
-                        
-                    try:
-                        asyncio.run_coroutine_threadsafe(_cancel_tasks(), loop).result(timeout=5.0)
-                    except Exception as e:
-                        logger.exception(f"[SyncMixin] Error cancelling tasks during shutdown: {e}")
-                    
-                    loop.call_soon_threadsafe(loop.stop)
-                    
-                    if hasattr(self, "_sync_thread"):
-                        self._sync_thread.join(timeout=2.0)
-                        delattr(self, "_sync_thread")
-                    
-                    if not loop.is_closed():
-                        loop.close()
-                    delattr(self, "_sync_loop")
-        else:
-            try:
-                loop = asyncio.get_running_loop()
-                loop.create_task(self.close())
-            except RuntimeError:
+        tls = self.__dict__.get("_sync_tls")
+        if tls and hasattr(tls, "loop"):
+            loop = tls.loop
+            if not loop.is_closed():
                 try:
-                    asyncio.run(self.close())
+                    tasks = asyncio.all_tasks(loop)
+                    for t in tasks:
+                        t.cancel()
+                    if tasks:
+                        loop.run_until_complete(asyncio.gather(*tasks, return_exceptions=True))
+                    loop.close()
                 except Exception as e:
-                    logger.exception(f"[SyncMixin] Error closing async engine via asyncio.run: {e}")
+                    logger.debug(f"[SyncMixin] Handled error during loop teardown: {e}")
+            delattr(tls, "loop")
 
     def health_check_sync(self, *args, **kwargs):
         return self._run_sync(self.health_check(*args, **kwargs))
