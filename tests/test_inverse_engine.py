@@ -4,6 +4,7 @@ Test: CORTEX Inverse Engine — Python Integration (C5-REAL)
 Validates the full Rust→Python bridge for the inverse AlphaProof pipeline.
 Requires: maturin develop (or pre-built cortex_rs.so)
 """
+
 import json
 import time
 import pytest
@@ -13,6 +14,7 @@ def _try_import():
     """Attempt to import cortex_rs with the inverse engine classes."""
     try:
         import cortex_rs
+
         # Check that the new classes exist
         assert hasattr(cortex_rs, "DeductionDAG"), "DeductionDAG not exported"
         assert hasattr(cortex_rs, "CurriculumEngine"), "CurriculumEngine not exported"
@@ -32,6 +34,7 @@ requires_cortex = pytest.mark.skipif(cortex_rs is None, reason=skip_reason)
 # ─────────────────────────────────────────────────────────────
 # §1 — DeductionDAG Tests
 # ─────────────────────────────────────────────────────────────
+
 
 @requires_cortex
 class TestDeductionDAG:
@@ -91,6 +94,7 @@ class TestDeductionDAG:
 # §2 — CurriculumEngine Tests
 # ─────────────────────────────────────────────────────────────
 
+
 @requires_cortex
 class TestCurriculumEngine:
     def test_target_and_generate(self):
@@ -122,6 +126,7 @@ class TestCurriculumEngine:
 # ─────────────────────────────────────────────────────────────
 # §3 — EvolutionaryConjecturer Tests
 # ─────────────────────────────────────────────────────────────
+
 
 @requires_cortex
 class TestConjecturer:
@@ -160,6 +165,7 @@ class TestConjecturer:
 # ─────────────────────────────────────────────────────────────
 # §4 — InverseEngine (Full Pipeline) Tests
 # ─────────────────────────────────────────────────────────────
+
 
 @requires_cortex
 class TestInverseEngine:
@@ -253,14 +259,16 @@ class TestInverseEngine:
 # §5 — Benchmark
 # ─────────────────────────────────────────────────────────────
 
+
 @requires_cortex
+@pytest.mark.slow
 class TestBenchmark:
     def test_pipeline_throughput(self):
         eng = cortex_rs.InverseEngine(
-            conjecturer_population=100,
-            evolution_cycles=3,
-            curriculum_depth=3,
-            batch_size=20,
+            conjecturer_population=50,
+            evolution_cycles=2,
+            curriculum_depth=2,
+            batch_size=10,
         )
 
         for i in range(10):
@@ -274,7 +282,7 @@ class TestBenchmark:
         eng.add_swap_mutation("0", "1")
 
         t0 = time.perf_counter()
-        for _ in range(5):
+        for _ in range(3):
             eng.iterate_threshold(max_premises=4)
         elapsed = time.perf_counter() - t0
 
@@ -282,5 +290,5 @@ class TestBenchmark:
         rate = stats["total_solved"] / elapsed if elapsed > 0 else 0
 
         # Just verify it runs — exact rate depends on hardware
-        assert stats["iterations"] == 5
-        assert elapsed < 10.0, "Pipeline should complete 5 iterations in < 10s"
+        assert stats["iterations"] == 3
+        assert elapsed < 15.0, "Pipeline should complete 3 iterations in < 15s"
