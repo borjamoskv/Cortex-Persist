@@ -4,7 +4,7 @@ import time
 import hashlib
 import asyncio
 import logging
-from typing import Dict, Optional
+from typing import Optional
 
 # CORTEX-Persist Dependencies
 try:
