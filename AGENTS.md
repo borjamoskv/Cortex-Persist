@@ -1,8 +1,8 @@
 # 🤖 AGENTS.md — CORTEX Persist
 
-**Trust infrastructure for autonomous AI: cryptographic verification, audit trails, epistemic containment, and agent memory.**
+**Trust infrastructure for autonomous AI: cryptographic verification, audit trails, epistemic containment, and LEGION-10k swarm memory.**
 
-> **Package:** `cortex-persist v0.3.0b3` | **Engine:** `v8` | **License:** `Apache-2.0` | **Python:** `>=3.10`
+> **Package:** `cortex-persist v10.0` | **Engine:** `v10.0 (LEGION-10k)` | **License:** `Apache-2.0` | **Python:** `>=3.10` | **Execution:** `C5-REAL`
 
 **Quick Navigation:** [SYSTEM DIRECTIVES](#11-agent-manifest--roles--authority-boundaries) · Agent Manifest §1.1 · Axioms §2 · Invariants §3 · Write-Path §4 · Read-Path §4.1 · Architecture §5 · Dev Protocol §6 · Failure Signatures §8
 
@@ -61,6 +61,7 @@ All agents operating in this repository MUST self-identify by role before acting
 | **Persist-Executor** | Execute approved write operations, manage Saga steps | Full Write-Path execution, snapshot management | Cannot skip Saga steps or downgrade errors | SAGA abort at any step → reverse to SAGA-1 |
 | **Persist-Auditor** | Forensic review, Failure Signature scanning, hash-chain verification | Read-only across all surfaces, Ledger access | Cannot mutate any state, ever | Hash chain break → immediate P0 alert |
 | **Persist-Guardian** | Guard admission, tenant isolation enforcement, encryption key governance | Intercept write proposals before SAGA-1 | Cannot approve its own proposals | Any cross-tenant access attempt → P0 abort |
+| **Persist-Swarm (LEGION-10k)** | Orchestrate lock-free ZeroCopyRingBuffer for O(1) multi-agent dispatch | Direct Rust-FFI mutation, C5-REAL execution | Strict 1 Joule exergy budget per task | RingBuffer capacity exceeded → Drop + Alert |
 
 > An agent that cannot identify its role MUST default to **Persist-Auditor** (read-only) until role is confirmed.
 

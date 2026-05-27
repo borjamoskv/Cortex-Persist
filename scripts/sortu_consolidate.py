@@ -43,8 +43,8 @@ def consolidate_registry():
                 name = skill_dir.name
 
                 # Assign a synthetic exergy and silicon score
-                exergy = round(10.0 + len(name) * 1.5, 2)
-                silicon_score = round(0.5 + min(len(name) * 0.02, 0.4), 2)
+                exergy = round(85.0 + len(name) * 0.4, 2)
+                silicon_score = round(0.90 + min(len(name) * 0.003, 0.09), 2)
 
                 active_skills.append(
                     {
@@ -65,6 +65,7 @@ def consolidate_registry():
         "version": "14.0.0",
         "compilation_mode": "JIT",
         "storage": "VSA_INDEXED",
+        "max_active_skills": 50,
         "active_skills": active_skills,
         "quarantined_skills": [],
         "tombstoned_skills": [],

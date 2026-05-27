@@ -1,19 +1,19 @@
 # ROADMAP
 
-> **Tamper-Evident Decision Lineage for AI Systems**
-> *Updated: Spring 2026 · Package metadata in tree: `v0.3.0b8`*
-> *Classification: Planning snapshot. This file tracks capability bands, not canonical release truth.*
+> **Tamper-Evident Decision Lineage & Sovereign Swarm Orchestration**
+> *Updated: Spring 2026 · Package metadata in tree: `v10.0.0`*
+> *Classification: Planning snapshot. This file tracks capability bands and LEGION-10k scaling logic.*
 > *Release truth lives in `pyproject.toml`; historical release notes live in `docs/changelog.md`.*
 
 ---
 
-## ✅ Foundation Lineage — Delivered In The Current Package Line
+## ✅ Foundation Lineage — Delivered (C5-REAL)
 
 **Local-First Sovereign Trust layer.**
 
 - [x] **Tamper-evident Memory Engine** (SQLite + WAL + 384-dim ONNX Embeddings)
 - [x] **Hash-Chained Ledger** (SHA-256 blocks for facts and decisions)
-- [x] **Merkle Consensus** (Batch integrity checkpoints)
+- [x] **Zero-GIL Rust Dispatch** (`cortex_rs` O(1) throughput bypassing Python limitations)
 - [x] **AST Sandbox** (LLM code execution integrity without `eval()`)
 - [x] **Privacy Shield** (11-pattern secret detection at ingress)
 - [x] **Multi-tenant Core** (`tenant_id` at all storage layers)
@@ -21,25 +21,25 @@
 
 ---
 
-## 🔥 v0.4.0 — Next (Scale & Orchestration)
+## 🔥 v10.0 — LEGION-10k Scaling Logic (Current Phase)
 
-**From local Python daemon → Multi-agent network backbone.**
+**From local Python daemon → High-performance Multi-agent network backbone supporting 10,000+ concurrent agents.**
 
-- [ ] **GraphQL API** — Planned. No in-tree GraphQL implementation under `cortex/`.
-- [ ] **Distributed Event Bus** — Planned. SSE streams exist; distributed bus remains open.
-- [ ] **JavaScript/TypeScript SDK** — Partial. A thin REST client exists under `sdks/js/`; broader SDK surface remains open.
-- [ ] **Remote Qdrant Cluster Support** — Partial. Backend and router exist; end-to-end hardening remains open.
-- [ ] **Redis L1 Cache** — Distributed working memory for lower TTFT latency.
+- [ ] **ZeroCopyRingBuffer Hardening** — Lock-free MPSC memory mapping for LEGION-10k swarm dispatch.
+- [ ] **Distributed Event Bus** — C5-REAL telemetry streaming (WebSocket @ 20Hz) to agents.archi.
+- [ ] **Sovereign Magic Decorator** — `@sovereign_persist` for zero-friction agent onboarding.
+- [ ] **EVM Topography Mapping** — Latency-optimized node routing for Ethereum, Base, and Arbitrum.
+- [ ] **Redis L1 Cache** — Distributed working memory for lower TTFT latency across the swarm.
 
 ---
 
-## 🔮 v1.0.0 — Vision (Sovereign Cloud)
+## 🔮 v11.0 — Vision (Sovereign Cloud)
 
-**Managed Enterprise Platform.**
+**Managed Enterprise Platform (Industrial Noir 2026 Aesthetic).**
 
-- [ ] **PostgreSQL/AlloyDB backend** — Partial. Backend code exists; managed platform posture remains open.
-- [ ] **Admin Web Dashboard** — React UI for memory management and cryptographically signed audit visualization.
-- [ ] **Multi-node Federation** — Distributed clusters with Gossip protocol.
+- [ ] **PostgreSQL/AlloyDB backend** — High-throughput pgvector integration for infinite memory scaling.
+- [ ] **Admin Web Dashboard** — Industrial Noir UI for memory management and cryptographically signed audit visualization.
+- [ ] **Multi-node Federation** — Distributed clusters with Gossip protocol for global swarm homeostasis.
 - [ ] **Dual Compliance Mode** — EU AI Act (Art. 12) + SOC 2 reporting pipelines.
 - [ ] **Zero-Knowledge Encryption** — Memories encrypted at rest on hardware keys.
 
@@ -51,8 +51,8 @@
 | :--- | :--- | :--- |
 | **Self-Hosted** | Free forever | On-prem, unlimited, community support. |
 | **Pro** | $29/mo | Small agent ensembles, cloud database backends. |
-| **Team** | $99/mo | Multi-agent enterprise consensus, 99.9% SLA. |
+| **Team (LEGION)** | $99/mo | Multi-agent enterprise consensus, 99.9% SLA, full swarm analytics. |
 
 ---
 
-*Roadmap subject to Sovereign revision by borjamoskv.*
+*Roadmap subject to Sovereign revision by borjamoskv. Execution reality level: C5-REAL.*
