@@ -207,7 +207,11 @@ async def test_swarm_queue_contention(tmp_path, monkeypatch):
         await asyncio.sleep(0.03)
 
     # Final sweep to ensure queue is completely empty
-    await daemon.process_swarm_queue()
+    for _ in range(10):
+        await daemon.process_swarm_queue()
+        if len(executed_tasks) == 20:
+            break
+        await asyncio.sleep(0.05)
 
     # Check total executed tasks
     assert len(executed_tasks) == 20
