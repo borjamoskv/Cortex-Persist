@@ -104,9 +104,12 @@ MODE_SYSTEM_PROMPTS: dict[str, str] = {
 
 # Model constants to avoid literal duplication
 ERNIE_5_0 = "baidu/ernie-5-0-thinking-latest"
-CHATGPT_5_2 = "chatgpt-5.2"
-CODEX_5_2 = "codex-5.2"
-OPENAI_O3 = "o3"
+GPT_5_4 = "gpt-5.4"
+GPT_5_4_TURBO = "gpt-5.4-turbo"
+O3_ULTRA = "o3-ultra-2026"
+DEEPSEEK_R1 = "deepseek-r1-2026"
+DEEPSEEK_V4 = "deepseek-v4"
+GROK_4_1 = "grok-4.1"
 
 # modo → lista de (provider, model) a consultar.
 # Solo se usarán los que tengan API key configurada.
@@ -114,28 +117,28 @@ DEFAULT_ROUTING: dict[str, list[tuple[str, str]]] = {
     ThinkingMode.DEEP_REASONING: [
         ("ollama", "qwen2.5-coder:32b"),
         ("gemini", "gemini-3.1-pro-preview"),
-        ("openai", CHATGPT_5_2),
+        ("openai", GPT_5_4),
         ("anthropic", "claude-sonnet-4-20250514"),
-        ("deepseek", "deepseek-reasoner"),
+        ("deepseek", DEEPSEEK_R1),
         ("ernie", ERNIE_5_0),
         ("zhipu", "glm-5"),
-        ("qwen", "qwen-max"),
+        ("qwen", "qwen-3.5-397b"),
     ],
     ThinkingMode.CODE: [
         ("ollama", "qwen2.5-coder:32b"),
         ("gemini", "gemini-3.1-pro-preview"),
         ("anthropic", "claude-sonnet-4-20250514"),
-        ("deepseek", "deepseek-v3"),
+        ("deepseek", DEEPSEEK_V4),
         ("zhipu", "glm-5"),
-        ("qwen", "qwen-coder-plus"),
-        ("openai", CODEX_5_2),
+        ("qwen", "qwen-3.5-397b"),
+        ("openai", GPT_5_4_TURBO),
         ("fireworks", "accounts/fireworks/models/deepseek-v3"),
     ],
     ThinkingMode.CREATIVE: [
         ("gemini", "gemini-3.1-pro-preview"),
-        ("openai", CHATGPT_5_2),
-        ("xai", "grok-2-latest"),
-        ("qwen", "qwen-plus"),
+        ("openai", GPT_5_4),
+        ("xai", GROK_4_1),
+        ("qwen", "qwen-3.5-397b"),
     ],
     ThinkingMode.SPEED: [
         ("ollama", "qwen2.5-coder:32b"),
@@ -149,35 +152,35 @@ DEFAULT_ROUTING: dict[str, list[tuple[str, str]]] = {
     ThinkingMode.CONSENSUS: [
         ("gemini", "gemini-3.1-pro-preview"),
         ("zhipu", "glm-5"),
-        ("openai", CHATGPT_5_2),
+        ("openai", GPT_5_4),
         ("anthropic", "claude-sonnet-4-20250514"),
-        ("deepseek", "deepseek-v3"),
+        ("deepseek", DEEPSEEK_V4),
         ("ernie", ERNIE_5_0),
-        ("qwen", "qwen-plus"),
+        ("qwen", "qwen-3.5-397b"),
         ("groq", "llama-3.3-70b-versatile"),
-        ("xai", "grok-2-latest"),
+        ("xai", GROK_4_1),
     ],
     # Sprint 1: Metacognitive mode uses the best reasoning models —
     # these need to follow complex epistemic instructions reliably.
     ThinkingMode.METACOGNITIVE: [
         ("gemini", "gemini-3.1-pro-preview"),
         ("anthropic", "claude-sonnet-4-20250514"),
-        ("openai", CHATGPT_5_2),
-        ("deepseek", "deepseek-reasoner"),
+        ("openai", GPT_5_4),
+        ("deepseek", DEEPSEEK_R1),
     ],
     ThinkingMode.OMEGA: [
         ("gemini", "gemini-3.1-pro-preview"),
-        ("deepseek", "deepseek-reasoner"),
+        ("deepseek", DEEPSEEK_R1),
         ("anthropic", "claude-sonnet-4-20250514"),
         ("ernie", ERNIE_5_0),
-        ("openai", OPENAI_O3),
-        ("openai", CHATGPT_5_2),
+        ("openai", O3_ULTRA),
+        ("openai", GPT_5_4),
     ],
     # Deepthink Cluster: DeepSeek-R1 primary, reasoning-capable fallbacks only
     ThinkingMode.DEEPTHINK_CLUSTER: [
-        ("deepseek", "deepseek-reasoner"),
+        ("deepseek", DEEPSEEK_R1),
         ("gemini", "gemini-3.1-pro-preview"),
-        ("openai", OPENAI_O3),
+        ("openai", O3_ULTRA),
         ("anthropic", "claude-sonnet-4-20250514"),
         ("ernie", ERNIE_5_0),
     ],

@@ -11,7 +11,9 @@ from cortex.database.core import connect
 from cortex.extensions.signals.bus import SignalBus
 
 # Sovereign Memory & Execution Imports
-sys.path.append("/Users/borjafernandezangulo/Cortex-Persist/cortex-core")
+_CORTEX_CORE = os.path.join(os.path.dirname(__file__), "..", "..", "cortex-core")
+if os.path.isdir(_CORTEX_CORE) and _CORTEX_CORE not in sys.path:
+    sys.path.append(os.path.abspath(_CORTEX_CORE))
 try:
     import vsa_sdm_bridge as vsa
 except ImportError:
