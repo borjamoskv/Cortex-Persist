@@ -216,6 +216,25 @@ class CortexEngine(
             for conn in conns:
                 conn_loop = getattr(conn, "_cortex_loop", current_loop)
                 if conn_loop is None or conn_loop.is_closed():
+                    # If the original loop is already closed, we can't await conn.close().
+                    # But we MUST kill the aiosqlite worker thread, or it hangs on exit!
+                    if hasattr(conn, "_tx"):
+                        try:
+                            from aiosqlite.core import _STOP_RUNNING_SENTINEL
+                            def close_and_stop():
+                                if getattr(conn, "_connection", None) is not None:
+                                    try:
+                                        conn._connection.close()
+                                    except Exception:
+                                        pass
+                                    conn._connection = None
+                                return _STOP_RUNNING_SENTINEL
+                            conn._tx.put_nowait((None, close_and_stop))
+                        except Exception:
+                            if hasattr(conn, "stop"):
+                                conn.stop()
+                    elif hasattr(conn, "stop"):
+                        conn.stop()
                     continue
 
                 if conn_loop is current_loop:
@@ -228,6 +247,7 @@ class CortexEngine(
                         asyncio.run_coroutine_threadsafe(conn.close(), conn_loop)
                     except Exception:
                         pass
+
             self._conns_by_loop.clear()
         self.mac_maestro = None  # type: ignore
         self.ledger_writer = None  # type: ignore

@@ -309,6 +309,7 @@ class CortexMemoryManager:
                         (tenant_id, project_id, content),
                     )
                     row = cursor.fetchone()
+                    conn.rollback()  # Release shared lock left by SELECT
                     if row:
                         return str(row["id"])
                 except (OSError, RuntimeError, ValueError) as e:
@@ -564,14 +565,15 @@ class CortexMemoryManager:
 
     async def wait_for_background(self, timeout: float = 30.0) -> None:
         """Wait for background tasks to complete with a hard timeout."""
-        if not self._bg_queue.empty():
-            try:
-                await asyncio.wait_for(self._bg_queue.join(), timeout=timeout)
-            except asyncio.TimeoutError:
-                logger.error("MemoryManager: wait_for_background timed out after %ds", timeout)
-
-        # Always cancel workers when shutting down
-        await self._cancel_background_tasks()
+        try:
+            if not self._bg_queue.empty():
+                try:
+                    await asyncio.wait_for(self._bg_queue.join(), timeout=timeout)
+                except asyncio.TimeoutError:
+                    logger.error("MemoryManager: wait_for_background timed out after %ds", timeout)
+        finally:
+            # Always cancel workers when shutting down
+            await self._cancel_background_tasks()
 
     async def _cancel_background_tasks(self) -> None:
         """Cancel pending tasks and workers aggressively to prevent event loop leaks."""

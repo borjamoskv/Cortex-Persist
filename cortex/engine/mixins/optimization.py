@@ -170,7 +170,16 @@ class OptimizationMixin:
             await self._write_buffer.put(None)
             await self._buffer_task
             self._buffer_task = None
-        # Note: Shared executor is not shutdown per-agent to avoid breaking others.
+        
+        if OptimizationMixin._executor is not None:
+            # Force terminate child processes to completely avoid atexit hang
+            try:
+                for p in OptimizationMixin._executor._processes.values():
+                    p.terminate()
+            except Exception:
+                pass
+            OptimizationMixin._executor.shutdown(wait=False, cancel_futures=True)
+            OptimizationMixin._executor = None
 
     async def _buffer_worker(self):
         batch = []

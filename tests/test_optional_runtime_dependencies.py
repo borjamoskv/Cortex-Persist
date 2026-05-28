@@ -168,6 +168,7 @@ def test_cli_base_flow_without_extended_runtime_dependencies(tmp_path: Path) -> 
     env["CORTEX_NO_EMBED"] = "1"
     env["CORTEX_LLM_PROVIDER"] = ""
     env["CORTEX_MASTER_KEY"] = "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA="
+    env["CORTEX_TESTING"] = "1"
     for k in ["GEMINI_API_KEY", "OPENAI_API_KEY", "ANTHROPIC_API_KEY", "GROQ_API_KEY", "DEEPSEEK_API_KEY"]:
         env.pop(k, None)
     db_path = tmp_path / "base-flow.db"
@@ -201,6 +202,7 @@ def test_cli_base_flow_without_keyring_when_env_master_key_is_set(tmp_path: Path
     env["CORTEX_NO_EMBED"] = "1"
     env["CORTEX_LLM_PROVIDER"] = ""
     env["CORTEX_MASTER_KEY"] = "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA="
+    env["CORTEX_TESTING"] = "1"
     for k in ["GEMINI_API_KEY", "OPENAI_API_KEY", "ANTHROPIC_API_KEY", "GROQ_API_KEY", "DEEPSEEK_API_KEY"]:
         env.pop(k, None)
     db_path = tmp_path / "env-master-key.db"

@@ -90,7 +90,8 @@ class SemanticMutator:
                 pass
             except Exception as e:  # noqa: BLE001
                 logger.error("SemanticMutator shutdown error: %s", e)
-            self._pool.shutdown(wait=True)
+            if hasattr(self._pool, "shutdown"):
+                self._pool.shutdown(wait=False, cancel_futures=True)
             logger.info("SemanticMutator: Topological gravitational field collapsed (Stopped).")
 
     def emit_pulse(
