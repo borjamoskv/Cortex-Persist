@@ -24,13 +24,36 @@ def _run_async(coro: Coroutine[Any, Any, _T]) -> _T:
     return asyncio.run(coro)
 
 
+def _resolve_cli_tenant(tenant_id: str | None) -> str:
+    """Resolve a CLI tenant without silently falling back to the default tenant."""
+    requested_tenant = tenant_id or "default"
+    if requested_tenant == "default":
+        try:
+            from cortex.extensions.security.tenant import MissingTenantContext, get_tenant_id
+        except ImportError as exc:
+            raise click.ClickException(
+                "Tenant context missing; pass --tenant-id explicitly"
+            ) from exc
+        try:
+            return get_tenant_id()
+        except MissingTenantContext as exc:
+            raise click.ClickException(
+                "Tenant context missing; pass --tenant-id explicitly "
+                "or set CORTEX_LEGACY_DEFAULT_TENANT=1 for legacy default-tenant mode"
+            ) from exc
+    if not requested_tenant.strip():
+        raise click.ClickException("tenant_id must be explicitly provided")
+    return requested_tenant
+
+
 @cli.command()
 @click.argument("fact_id", type=int)
 @click.option("--reason", "-r", default=None, help="Razón de la eliminación")
-@click.option("--tenant-id", default="default", show_default=True, help="Tenant scope")
+@click.option("--tenant-id", default=None, help="Tenant scope")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def delete(fact_id, reason, tenant_id, db) -> None:
     """Soft-delete: depreca un fact y auto-sincroniza JSON."""
+    tenant_id = _resolve_cli_tenant(tenant_id)
     engine = get_engine(db)
     try:
         try:
@@ -69,10 +92,11 @@ def delete(fact_id, reason, tenant_id, db) -> None:
 @click.option("--project", "-p", default=None, help="Filtrar por proyecto")
 @click.option("--type", "fact_type", default=None, help="Filtrar por tipo")
 @click.option("--limit", "-n", default=20, help="Máximo de resultados")
-@click.option("--tenant-id", default="default", show_default=True, help="Tenant scope")
+@click.option("--tenant-id", default=None, help="Tenant scope")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def list_facts(project, fact_type, limit, tenant_id, db) -> None:
     """Listar facts activos (tabulado)."""
+    tenant_id = _resolve_cli_tenant(tenant_id)
     engine = get_engine(db)
     try:
 
@@ -142,10 +166,11 @@ def list_facts(project, fact_type, limit, tenant_id, db) -> None:
 @cli.command()
 @click.argument("fact_id", type=int)
 @click.argument("new_content")
-@click.option("--tenant-id", default="default", show_default=True, help="Tenant scope")
+@click.option("--tenant-id", default=None, help="Tenant scope")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def edit(fact_id, new_content, tenant_id, db) -> None:
     """Editar un fact: depreca el viejo y crea uno nuevo con el contenido actualizado."""
+    tenant_id = _resolve_cli_tenant(tenant_id)
     engine = get_engine(db)
     try:
         try:
@@ -186,10 +211,11 @@ def edit(fact_id, new_content, tenant_id, db) -> None:
 
 @cli.command()
 @click.argument("fact_id", type=int)
-@click.option("--tenant-id", default="default", show_default=True, help="Tenant scope")
+@click.option("--tenant-id", default=None, help="Tenant scope")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def inspect(fact_id, tenant_id, db) -> None:
     """Deep inspection of a fact (Double-Plane V2 facets)."""
+    tenant_id = _resolve_cli_tenant(tenant_id)
     engine = get_engine(db)
     try:
         from rich.panel import Panel

@@ -11,8 +11,8 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from cortex.database.core import connect as db_connect
+from cortex.events.loop import sovereign_run
 from cortex.extensions.signals.bus import SignalBus
-from cortex.memory.temporal import now_iso
 
 logger = logging.getLogger("cortex.chronos.compound")
 
@@ -266,34 +266,27 @@ class CompoundYieldTracker:
     ) -> int | None:
         """Persist a CHRONOS Compound report as a CORTEX fact + emit signal."""
         try:
-            import json
+            from cortex.engine import CortexEngine
+
+            async def _store_report() -> int:
+                engine = CortexEngine(self.db_path)
+                try:
+                    return await engine.store(
+                        project=project,
+                        content=report.summary(),
+                        tenant_id="system",
+                        fact_type="knowledge",
+                        tags=["chronos", "compound", "metrics"],
+                        confidence="observed",
+                        source="chronos-compound",
+                        meta=report.to_dict(),
+                    )
+                finally:
+                    await engine.close()
+
+            fact_id = int(sovereign_run(_store_report()))
 
             with db_connect(self.db_path) as conn:
-                ts = now_iso()
-                content = report.summary()
-                meta_json = json.dumps(report.to_dict())
-
-                cursor = conn.execute(
-                    "INSERT INTO facts (tenant_id, project, content, fact_type, tags, confidence,"
-                    " valid_from, source, meta, created_at, updated_at)"
-                    " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                    (
-                        "default",
-                        project,
-                        content,
-                        "knowledge",
-                        '["chronos", "compound", "metrics"]',
-                        "observed",
-                        ts,
-                        "chronos-compound",
-                        meta_json,
-                        ts,
-                        ts,
-                    ),
-                )
-                fact_id: int = cursor.lastrowid  # type: ignore[assignment]
-
-                # Emit signal to bus
                 bus = SignalBus(conn)
                 bus.emit(
                     "chronos:compound_audit",
@@ -302,9 +295,9 @@ class CompoundYieldTracker:
                     project=project,
                 )
 
-                logger.info("CHRONOS Compound report persisted as fact #%d", fact_id)
-                return fact_id
+            logger.info("CHRONOS Compound report persisted as fact #%d", fact_id)
+            return fact_id
 
-        except (sqlite3.Error, ValueError, TypeError, RuntimeError) as e:
+        except (sqlite3.Error, ValueError, TypeError, RuntimeError, OSError) as e:
             logger.warning("CHRONOS Compound persistence failed: %s", e)
             return None

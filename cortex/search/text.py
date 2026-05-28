@@ -56,7 +56,7 @@ async def text_search(
     except (sqlite3.Error, OSError, ValueError) as e:
         logger.error("Text search failed: %s", e)
         return []
-    return _rows_to_results(rows, is_fts=use_fts)
+    return _rows_to_results(rows, is_fts=use_fts, tenant_id=tenant_id)
 
 
 async def _fts5_search(
@@ -191,4 +191,4 @@ def text_search_sync(
     except (sqlite3.Error, OSError, ValueError) as e:
         logger.error("Text search sync failed: %s", e)
         return []
-    return [_parse_row_sync(row, use_fts) for row in rows]
+    return [_parse_row_sync(row, use_fts, tenant_id=tenant_id) for row in rows]

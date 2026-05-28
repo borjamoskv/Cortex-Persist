@@ -8,7 +8,7 @@ import logging
 import sqlite3
 import subprocess
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -79,7 +79,7 @@ class EntropicWakeDaemon:
         logger.debug("Current Zenón Entropy τ_z: %s", entropy_score)
         return entropy_score
 
-    def ignite_purification_agent(self, target: str = "modulo_entropico"):
+    async def ignite_purification_agent(self, target: str = "modulo_entropico") -> None:
         """
         Spawn the headless agent.
         Todo ocurre sin un solo Input Field.
@@ -98,29 +98,32 @@ class EntropicWakeDaemon:
                 start_new_session=True,
             )
             # Log the action in memory
-            self._log_action_to_cortex(target)
+            await self._log_action_to_cortex(target)
         except (subprocess.SubprocessError, OSError) as e:
             logger.error("Failed to ignite purification agent: %s", e)
 
-    def _log_action_to_cortex(self, target: str):
+    async def _log_action_to_cortex(self, target: str) -> None:
         """Register the autonomous action into CORTEX-DB."""
         if not self.engine:
             return
-        now_str = datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime("%H:%M %p")
+        now_str = datetime.fromtimestamp(time.time(), tz=UTC).strftime("%H:%M %p")
         msg = (
             f"Anoche a las {now_str} disolví secciones entrópicas estancadas en {target}. "
             "Pasó los tests de inmunidad. Deuda saldada. PR en espera de merge."
         )
         try:
-            conn = self.engine.pool.get_connection()
-            conn.execute(
-                "INSERT INTO facts (id, type, topic, content, timestamp) "
-                "VALUES (lower(hex(randomblob(16))), 'decision', 'Autopoiesis', ?, ?)",
-                (msg, time.time()),
+            fact_id = await self.engine.store(
+                project="Autopoiesis",
+                content=msg,
+                tenant_id="system",
+                fact_type="decision",
+                tags=["entropic-wake", "autopoiesis"],
+                confidence="C5",
+                source="daemon:entropic-wake",
+                meta={"target": target},
             )
-            conn.commit()
-            logger.info("Logged autopoiesis cycle to CORTEX.")
-        except sqlite3.Error as e:
+            logger.info("Logged autopoiesis cycle to CORTEX as fact #%s.", fact_id)
+        except (AttributeError, OSError, RuntimeError, ValueError) as e:
             logger.error("Failed to log to cortex DB: %s", e)
 
     async def run_loop(self):
@@ -132,7 +135,7 @@ class EntropicWakeDaemon:
                 if tau_z > self.threshold:
                     # In a true system, we dynamically select the target based on entropy clusters
                     highest_entropy_target = "cortex_router"  # Placeholder
-                    self.ignite_purification_agent(highest_entropy_target)
+                    await self.ignite_purification_agent(highest_entropy_target)
             except Exception as e:  # noqa: BLE001 — Main daemon loop must survive unexpected errors
                 logger.error("Entropic Wake encountered an error: %s", e)
 

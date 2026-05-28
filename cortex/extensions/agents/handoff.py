@@ -44,6 +44,7 @@ MAX_GHOSTS = 20
 async def generate_handoff(
     engine: CortexEngine,
     session_meta: Optional[dict[str, Any]] = None,
+    tenant_id: str = "default",
 ) -> dict[str, Any]:
     """Generate a compact handoff from current CORTEX state.
 
@@ -61,9 +62,10 @@ async def generate_handoff(
             "tenant_id, parent_decision_id "
             "FROM facts "
             "WHERE fact_type = 'decision' "
+            "AND tenant_id = ? "
             "AND valid_until IS NULL "
             "ORDER BY id DESC LIMIT ?",
-            (MAX_DECISIONS,),
+            (tenant_id, MAX_DECISIONS),
         ) as cursor:
             decision_rows = await cursor.fetchall()
 
@@ -86,9 +88,10 @@ async def generate_handoff(
         async with conn.execute(
             "SELECT id, project, reference, context "
             "FROM ghosts "
-            "WHERE status = 'open' "
+            "WHERE tenant_id = ? "
+            "AND status = 'open' "
             "ORDER BY id DESC LIMIT ?",
-            (MAX_GHOSTS,),
+            (tenant_id, MAX_GHOSTS),
         ) as cursor:
             ghost_rows = await cursor.fetchall()
 
@@ -102,9 +105,10 @@ async def generate_handoff(
             "tenant_id, parent_decision_id "
             "FROM facts "
             "WHERE fact_type IN ('error', 'mistake') "
+            "AND tenant_id = ? "
             "AND valid_until IS NULL "
             "ORDER BY id DESC LIMIT ?",
-            (MAX_ERRORS,),
+            (tenant_id, MAX_ERRORS),
         ) as cursor:
             error_rows = await cursor.fetchall()
 
@@ -159,6 +163,7 @@ async def generate_handoff(
                     did,
                     direction="down",
                     max_depth=5,
+                    tenant_id=tenant_id,
                 )
                 if chain and len(chain) > 1:
                     seen_chain_roots.add(did)
@@ -184,19 +189,26 @@ async def generate_handoff(
         async with conn.execute(
             "SELECT DISTINCT project FROM facts "
             "WHERE created_at >= datetime('now', '-1 day') "
+            "AND tenant_id = ? "
             "AND valid_until IS NULL "
             "ORDER BY project"
+            ,
+            (tenant_id,),
         ) as cursor:
             project_rows = await cursor.fetchall()
 
         active_projects = [r[0] for r in project_rows]
 
         # ── Stats summary ─────────────────────────────────────────────
-        async with conn.execute("SELECT COUNT(*) FROM facts WHERE valid_until IS NULL") as cursor:
+        async with conn.execute(
+            "SELECT COUNT(*) FROM facts WHERE valid_until IS NULL AND tenant_id = ?",
+            (tenant_id,),
+        ) as cursor:
             total_active = (await cursor.fetchone())[0]  # type: ignore[reportOptionalSubscript]
 
         async with conn.execute(
-            "SELECT COUNT(DISTINCT project) FROM facts WHERE valid_until IS NULL"
+            "SELECT COUNT(DISTINCT project) FROM facts WHERE valid_until IS NULL AND tenant_id = ?",
+            (tenant_id,),
         ) as cursor:
             total_projects = (await cursor.fetchone())[0]  # type: ignore[reportOptionalSubscript]
 
@@ -225,6 +237,7 @@ async def generate_handoff(
     handoff = {
         "version": HANDOFF_VERSION,
         "generated_at": now_iso(),
+        "tenant_id": tenant_id,
         "session": session,
         "cognitive_fingerprint": cognitive_fingerprint,
         "hot_decisions": hot_decisions,
@@ -267,7 +280,13 @@ def save_handoff(
     Returns:
         Path where the handoff was saved.
     """
-    out_path = path or DEFAULT_HANDOFF_PATH
+    tenant_id = str(handoff_data.get("tenant_id", "default") or "default")
+    default_path = (
+        DEFAULT_HANDOFF_PATH
+        if tenant_id == "default"
+        else DEFAULT_HANDOFF_PATH.with_name(f"handoff-{tenant_id}.json")
+    )
+    out_path = path or default_path
     content = json.dumps(handoff_data, indent=2, ensure_ascii=False)
     atomic_write(out_path, content)
     logger.info("Handoff saved to %s", out_path)

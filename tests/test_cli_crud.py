@@ -10,6 +10,8 @@ from click.testing import CliRunner
 from cortex.cli import cli
 from cortex.engine import CortexEngine
 
+TENANT_ID = "tenant-cli"
+
 
 @pytest.fixture
 def runner():
@@ -28,18 +30,21 @@ def db_path(tmp_path):
         "First test fact for CORTEX validation",
         fact_type="knowledge",
         source="cli",
+        tenant_id=TENANT_ID,
     )
     engine.store_sync(
         "test-project",
         "Second test fact for error tracking",
         fact_type="error",
         source="cli",
+        tenant_id=TENANT_ID,
     )
     engine.store_sync(
         "other-project",
         "Third test fact for ghost registering",
         fact_type="ghost",
         source="cli",
+        tenant_id=TENANT_ID,
     )
     engine.close_sync()
     return str(path)
@@ -49,31 +54,50 @@ class TestListCommand:
     """Tests for 'cortex list'."""
 
     def test_list_shows_facts(self, runner, db_path):
-        result = runner.invoke(cli, ["list", "--db", db_path])
+        result = runner.invoke(cli, ["list", "--db", db_path, "--tenant-id", TENANT_ID])
         assert result.exit_code == 0
         # Content is AES-encrypted in v6 — check structure, not plaintext
         assert "test-project" in result.output or "CORTEX" in result.output
 
+    def test_list_requires_tenant_without_context(self, runner, db_path, monkeypatch):
+        monkeypatch.delenv("CORTEX_LEGACY_DEFAULT_TENANT", raising=False)
+        from cortex.extensions.security.tenant import tenant_id_var
+
+        token = tenant_id_var.set(None)
+        try:
+            result = runner.invoke(cli, ["list", "--db", db_path])
+        finally:
+            tenant_id_var.reset(token)
+
+        assert result.exit_code != 0
+        assert "Tenant context missing" in result.output
+
     def test_list_filter_by_project(self, runner, db_path):
-        result = runner.invoke(cli, ["list", "--db", db_path, "-p", "test-project"])
+        result = runner.invoke(
+            cli, ["list", "--db", db_path, "--tenant-id", TENANT_ID, "-p", "test-project"]
+        )
         assert result.exit_code == 0
         # Should show test-project facts but not other-project
         assert "other-project" not in result.output or "test-project" in result.output
 
     def test_list_filter_by_type(self, runner, db_path):
-        result = runner.invoke(cli, ["list", "--db", db_path, "--type", "ghost"])
+        result = runner.invoke(
+            cli, ["list", "--db", db_path, "--tenant-id", TENANT_ID, "--type", "ghost"]
+        )
         assert result.exit_code == 0
         # Content is AES-encrypted — check type label appears, not plaintext
         assert "ghost" in result.output.lower()
 
     def test_list_empty_result(self, runner, db_path):
-        result = runner.invoke(cli, ["list", "--db", db_path, "-p", "nonexistent"])
+        result = runner.invoke(
+            cli, ["list", "--db", db_path, "--tenant-id", TENANT_ID, "-p", "nonexistent"]
+        )
         assert result.exit_code == 0
         # i18n-agnostic: all translations contain the Panel title emoji
         assert "📭" in result.output or "no" in result.output.lower()
 
     def test_list_with_limit(self, runner, db_path):
-        result = runner.invoke(cli, ["list", "--db", db_path, "-n", "1"])
+        result = runner.invoke(cli, ["list", "--db", db_path, "--tenant-id", TENANT_ID, "-n", "1"])
         assert result.exit_code == 0
 
 
@@ -86,12 +110,12 @@ class TestDeleteCommand:
         monkeypatch.setattr("cortex.extensions.sync.CORTEX_DIR", tmp_path)
         monkeypatch.setattr("cortex.extensions.sync.SYNC_STATE_FILE", tmp_path / "sync_state.json")
 
-        result = runner.invoke(cli, ["delete", "1", "--db", db_path])
+        result = runner.invoke(cli, ["delete", "1", "--db", db_path, "--tenant-id", TENANT_ID])
         assert result.exit_code == 0
         assert "deprecado" in result.output.lower() or "deprecated" in result.output.lower()
 
     def test_delete_nonexistent_fact(self, runner, db_path):
-        result = runner.invoke(cli, ["delete", "999", "--db", db_path])
+        result = runner.invoke(cli, ["delete", "999", "--db", db_path, "--tenant-id", TENANT_ID])
         assert result.exit_code == 0
         # i18n-agnostic: fact ID appears in all translations, plus the Panel icon
         assert "999" in result.output and "🔍" in result.output
@@ -101,7 +125,9 @@ class TestDeleteCommand:
         monkeypatch.setattr("cortex.extensions.sync.CORTEX_DIR", tmp_path)
         monkeypatch.setattr("cortex.extensions.sync.SYNC_STATE_FILE", tmp_path / "sync_state.json")
 
-        result = runner.invoke(cli, ["delete", "1", "-r", "testing", "--db", db_path])
+        result = runner.invoke(
+            cli, ["delete", "1", "-r", "testing", "--db", db_path, "--tenant-id", TENANT_ID]
+        )
         assert result.exit_code == 0
         assert "deprecado" in result.output.lower() or "deprecated" in result.output.lower()
 
@@ -115,14 +141,32 @@ class TestEditCommand:
         monkeypatch.setattr("cortex.extensions.sync.SYNC_STATE_FILE", tmp_path / "sync_state.json")
 
         result = runner.invoke(
-            cli, ["edit", "1", "Updated content here with more detail", "--db", db_path]
+            cli,
+            [
+                "edit",
+                "1",
+                "Updated content here with more detail",
+                "--db",
+                db_path,
+                "--tenant-id",
+                TENANT_ID,
+            ],
         )
         assert result.exit_code == 0
         assert "editado" in result.output or "edited" in result.output.lower()
 
     def test_edit_nonexistent_fact(self, runner, db_path):
         result = runner.invoke(
-            cli, ["edit", "999", "New content that is long enough", "--db", db_path]
+            cli,
+            [
+                "edit",
+                "999",
+                "New content that is long enough",
+                "--db",
+                db_path,
+                "--tenant-id",
+                TENANT_ID,
+            ],
         )
         assert result.exit_code == 0
         # i18n-agnostic: fact ID and Panel icon appear in all translations
@@ -135,10 +179,21 @@ class TestEditCommand:
         monkeypatch.setattr("cortex.extensions.sync.SYNC_STATE_FILE", tmp_path / "sync_state.json")
 
         result = runner.invoke(
-            cli, ["edit", "1", "Edited content with extended metadata", "--db", db_path]
+            cli,
+            [
+                "edit",
+                "1",
+                "Edited content with extended metadata",
+                "--db",
+                db_path,
+                "--tenant-id",
+                TENANT_ID,
+            ],
         )
         assert result.exit_code == 0
 
         # Verify project still listed (content is encrypted)
-        list_result = runner.invoke(cli, ["list", "--db", db_path, "-p", "test-project"])
+        list_result = runner.invoke(
+            cli, ["list", "--db", db_path, "--tenant-id", TENANT_ID, "-p", "test-project"]
+        )
         assert "test-project" in list_result.output or list_result.exit_code == 0

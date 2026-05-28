@@ -244,11 +244,11 @@ async def verify_memories(
 ) -> dict:
     """Verify cryptographic integrity of the memory ledger."""
     try:
-        report = await engine.verify_ledger()
+        report = await engine.verify_ledger(tenant_id=auth.tenant_id)
         return {
             "valid": report["valid"],
             "violations": len(report.get("violations", [])),
-            "transactions_checked": report.get("tx_checked", 0),
+            "transactions_checked": report.get("tx_count", report.get("tx_checked", 0)),
         }
     except (sqlite3.Error, OSError, RuntimeError):
         logger.exception("Ledger verification failed")
@@ -291,7 +291,7 @@ async def delete_memory(
     if not fact:
         raise HTTPException(status_code=404, detail=f"Memory #{memory_id} not found")
 
-    success = await engine.deprecate(memory_id, reason="api_deleted")
+    success = await engine.deprecate(memory_id, reason="api_deleted", tenant_id=auth.tenant_id)
     if not success:
         raise HTTPException(status_code=500, detail="Failed to delete memory")
 
@@ -312,6 +312,7 @@ async def get_causal_chain(
             fact_id=memory_id,
             direction=direction,
             max_depth=max_depth,
+            tenant_id=auth.tenant_id,
         )
         return [_fact_data(fact) for fact in chain]
     except (sqlite3.Error, OSError, RuntimeError):

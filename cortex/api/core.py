@@ -9,10 +9,11 @@ Optimized for high-concurrency memory lookups and secure agentic access.
 from __future__ import annotations
 
 import logging
+import os
 import sqlite3
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
@@ -31,9 +32,7 @@ from cortex.engine import CortexEngine
 from cortex.extensions.metering.middleware import MeteringMiddleware
 from cortex.extensions.swarm.manager import get_swarm_manager
 from cortex.extensions.timing import TimingTracker
-from cortex.mcp.knowledge_watcher import start_knowledge_daemon
 from cortex.routes import api_router
-from cortex.swarm import start_swarm_daemon
 from cortex.telemetry.metrics import MetricsMiddleware, metrics
 from cortex.utils.i18n import DEFAULT_LANGUAGE, get_trans
 
@@ -52,6 +51,24 @@ __all__ = [
 ]
 
 logger = logging.getLogger("uvicorn.error")
+
+
+def _env_enabled(name: str) -> bool:
+    return os.getenv(name, "0").strip().lower() in {"1", "true", "yes", "on"}
+
+
+async def _require_metrics_admin(request: Request, authorization: str | None) -> None:
+    """Authorize Prometheus metrics unless explicitly published by env."""
+    if _env_enabled("CORTEX_PUBLIC_METRICS"):
+        return
+
+    from cortex.auth.deps import require_auth
+
+    auth = await require_auth(request, authorization)
+    if "admin" not in auth.permissions:
+        lang = request.headers.get("Accept-Language", DEFAULT_LANGUAGE)
+        detail = get_trans("error_missing_permission", lang).format(permission="admin")
+        raise HTTPException(status_code=403, detail=detail)
 
 # ─── Initialization ───────────────────────────────────────────────────
 
@@ -109,9 +126,18 @@ async def lifespan(app: FastAPI):
     notification_bus = setup_notifications(config)
     api_state.notification_bus = notification_bus  # type: ignore[reportAttributeAccessIssue]
 
-    # 7. V4 Singularity Daemons
-    watcher = start_knowledge_daemon()
-    swarm_daemon = start_swarm_daemon()
+    # 7. Experimental daemons are opt-in to keep API startup deterministic.
+    watcher = None
+    if _env_enabled("CORTEX_ENABLE_KNOWLEDGE_DAEMON"):
+        from cortex.mcp.knowledge_watcher import start_knowledge_daemon
+
+        watcher = start_knowledge_daemon()
+
+    swarm_daemon = None
+    if _env_enabled("CORTEX_ENABLE_SWARM"):
+        from cortex.swarm import start_swarm_daemon
+
+        swarm_daemon = start_swarm_daemon()
     app.state.watcher = watcher
     app.state.swarm_daemon = swarm_daemon
 
@@ -288,9 +314,13 @@ async def health_check(request: Request) -> dict:
 
 
 @app.get("/metrics", tags=["health"])
-async def get_metrics():
+async def get_metrics(
+    request: Request,
+    authorization: str | None = Header(None),
+):
     from fastapi.responses import Response
 
+    await _require_metrics_admin(request, authorization)
     return Response(content=metrics.to_prometheus(), media_type="text/plain")
 
 

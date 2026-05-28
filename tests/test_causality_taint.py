@@ -74,6 +74,26 @@ def _create_db(conn: sqlite3.Connection) -> None:
     conn.commit()
 
 
+async def _create_entity_events_table(conn) -> None:
+    """Create the mutation-event table required by canonical taint updates."""
+    await conn.execute(
+        """
+        CREATE TABLE entity_events (
+            id TEXT PRIMARY KEY,
+            entity_id INTEGER NOT NULL,
+            tenant_id TEXT NOT NULL,
+            event_type TEXT NOT NULL,
+            payload TEXT NOT NULL,
+            timestamp TEXT NOT NULL,
+            prev_hash TEXT NOT NULL,
+            signature TEXT NOT NULL,
+            signer TEXT,
+            schema_version TEXT DEFAULT '1'
+        )
+        """
+    )
+
+
 def _insert_fact(conn: sqlite3.Connection, fact_id: int, confidence: str = "C5") -> None:
     conn.execute(
         "INSERT INTO facts (id, content, confidence) VALUES (?, ?, ?)",
@@ -117,6 +137,7 @@ async def test_propagate_taint_single_child() -> None:
         )
         """
     )
+    await _create_entity_events_table(conn)
 
     # Create facts: 1 → 2 (parent → child)
     await conn.execute(
@@ -182,6 +203,7 @@ async def test_propagate_taint_chain() -> None:
         )
         """
     )
+    await _create_entity_events_table(conn)
 
     # Chain: 1 → 2 → 3 → 4
     for fid in range(1, 5):
@@ -232,6 +254,7 @@ async def test_propagate_taint_no_descendants() -> None:
         )
         """
     )
+    await _create_entity_events_table(conn)
 
     await conn.execute(
         "INSERT INTO facts (id, content, confidence) VALUES (?, ?, ?)",
@@ -271,6 +294,7 @@ async def test_propagate_taint_cyclic_graph() -> None:
         )
         """
     )
+    await _create_entity_events_table(conn)
 
     # Chain: 1 → 2 → 3 → 1 (Cycle)
     for fid in range(1, 4):

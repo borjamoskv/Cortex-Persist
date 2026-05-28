@@ -18,6 +18,8 @@ from cortex.cli.trust_helpers import (
     _render_verification_certificate,
     _safe_count,
     _verify_chain,
+    render_verify_all_report,
+    run_verify_all,
 )
 
 __all__ = ["verify_fact", "compliance_report", "audit", "audit_cognitive"]
@@ -40,12 +42,29 @@ def _run_async(coro):
 
 
 @cli.command("verify")
-@click.argument("fact_id", type=int)
+@click.argument("target")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
-def verify_fact(fact_id: int, db: str) -> None:
-    """Verify cryptographic integrity of a specific fact."""
+def verify_fact(target: str, db: str) -> None:
+    """Verify a fact by ID, or all ledger surfaces with `all`."""
     from cortex.cli.errors import err_fact_not_found, handle_cli_error
     from cortex.database.core import connect as db_connect
+
+    if target.lower() == "all":
+        try:
+            result = run_verify_all(db)
+            render_verify_all_report(result)
+            if not result["valid"]:
+                raise click.exceptions.Exit(1)
+        except click.exceptions.Exit:
+            raise
+        except (OSError, RuntimeError, ValueError) as e:
+            handle_cli_error(e, db_path=db, context="verifying all ledger surfaces")
+        return
+
+    try:
+        fact_id = int(target)
+    except ValueError as exc:
+        raise click.ClickException("verify target must be a fact ID or 'all'") from exc
 
     conn = None
     try:
@@ -90,7 +109,7 @@ def verify_fact(fact_id: int, db: str) -> None:
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def compliance_report(db: str) -> None:
     """Generate EU AI Act Article 12 compliance snapshot."""
-    from datetime import datetime, timezone
+    from datetime import UTC, datetime
 
     from cortex.cli.errors import handle_cli_error
     from cortex.database.core import connect as db_connect
@@ -116,7 +135,7 @@ def compliance_report(db: str) -> None:
 
         chain_ok, violations = _check_chain_integrity(conn)
 
-        now = datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+        now = datetime.fromtimestamp(time.time(), tz=UTC).strftime("%Y-%m-%d %H:%M UTC")
 
         console.print()
         console.print(

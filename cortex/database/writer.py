@@ -26,8 +26,8 @@ Usage:
 
     # Automatic batching via transaction grouping:
     result = await writer.execute(
-        "INSERT INTO facts (project, content) VALUES (?, ?)",
-        ("cortex", "A new fact")
+        "INSERT INTO audit_queue (project, content) VALUES (?, ?)",
+        ("cortex", "queued side effect")
     )
 
     # For multi-statement transactions:
@@ -145,7 +145,7 @@ class SqliteWriteWorker:
         # Wait for the writer to process remaining items and exit
         try:
             await asyncio.wait_for(shutdown.future, timeout=10.0)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             logger.warning("Writer shutdown timed out, cancelling task")
             if self._task:
                 self._task.cancel()

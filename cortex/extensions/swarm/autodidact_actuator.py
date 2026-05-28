@@ -17,7 +17,7 @@ async def autodidact_ingest(source_code: str, expected_yield_gain: float, metada
 
     # 1. AST Sandbox Execution
     try:
-        sandbox_res = await run_jit_sandbox(source_code, timeout_ms=50)
+        sandbox_res = await run_jit_sandbox(source_code, timeout_ms=500)
     except Exception as e:
         # Purge -> Stigmergic / Cicatricial Tissue handling is 'silent purge' per rules
         logger.warning("🔥 [AUTODIDACT-Ω] PURGED. AST Execution Failed: %s", e)
@@ -31,8 +31,9 @@ async def autodidact_ingest(source_code: str, expected_yield_gain: float, metada
     exec_time = sandbox_res["time_ms"]
 
     # Mathematical integration: we estimate the 'Thermodynamic Resonance' based on speed.
-    # We require <50ms natively via the bounds, but an execution >30ms is considered "noisy".
-    performance_resonance = 1.0 if exec_time < 10 else (0.5 if exec_time < 30 else 0.1)
+    # We require <500ms natively via the bounds, but an execution >300ms is considered "noisy".
+    # multiprocessing spawn overhead in macOS takes ~30-100ms on its own.
+    performance_resonance = 1.0 if exec_time < 150 else (0.5 if exec_time < 300 else 0.1)
 
     # Enforcing Axiom Ω2: If the operation doesn't resonate positively against the exergy expenditure, we abort.
     if performance_resonance < 0.2:

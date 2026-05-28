@@ -80,7 +80,7 @@ class TransactionMixin(EngineMixinBase):
 
         return int(tx_id) if tx_id is not None else 0
 
-    async def verify_ledger(self) -> dict[str, Any]:
+    async def verify_ledger(self, tenant_id: str | None = None) -> dict[str, Any]:
         """Verify the integrity of the sovereign ledger (Operation Void)."""
         if not getattr(self, "_ledger", None):
             from cortex.ledger import ImmutableLedger
@@ -89,4 +89,6 @@ class TransactionMixin(EngineMixinBase):
             if db_or_pool is None:
                 db_or_pool = await self.get_conn()
             self._ledger = ImmutableLedger(db_or_pool)
-        return await self._ledger.audit_integrity_async()
+        report = await self._ledger.audit_integrity_async(tenant_id=tenant_id)
+        report.setdefault("tx_checked", report.get("tx_count", 0))
+        return report

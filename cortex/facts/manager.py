@@ -59,38 +59,48 @@ class FactManager:
         """Sovereign Store: Delegates to engine with pre-validation."""
         tenant_id = self.engine._resolve_tenant(tenant_id)
         if conn:
-            return await self._store_delegate(
-                conn,
-                project,
-                content,
-                tenant_id,
-                fact_type,
-                tags,
-                confidence,
-                source,
-                meta,
-                valid_from,
-                commit,
-                tx_id,
-                **kwargs,
-            )
+            try:
+                return await self._store_delegate(
+                    conn,
+                    project,
+                    content,
+                    tenant_id,
+                    fact_type,
+                    tags,
+                    confidence,
+                    source,
+                    meta,
+                    valid_from,
+                    commit,
+                    tx_id,
+                    **kwargs,
+                )
+            except (OSError, RuntimeError, ValueError):
+                if commit and getattr(conn, "in_transaction", False):
+                    await conn.rollback()
+                raise
 
         async with self.engine.session() as conn:
-            return await self._store_delegate(
-                conn,
-                project,
-                content,
-                tenant_id,
-                fact_type,
-                tags,
-                confidence,
-                source,
-                meta,
-                valid_from,
-                commit,
-                tx_id,
-                **kwargs,
-            )
+            try:
+                return await self._store_delegate(
+                    conn,
+                    project,
+                    content,
+                    tenant_id,
+                    fact_type,
+                    tags,
+                    confidence,
+                    source,
+                    meta,
+                    valid_from,
+                    commit,
+                    tx_id,
+                    **kwargs,
+                )
+            except (OSError, RuntimeError, ValueError):
+                if commit and getattr(conn, "in_transaction", False):
+                    await conn.rollback()
+                raise
 
     async def _store_delegate(
         self,

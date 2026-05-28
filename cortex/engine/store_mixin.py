@@ -80,38 +80,48 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                 )
 
         if conn:
-            return await self._store_impl(
-                conn,
-                project=project,
-                content=content,
-                tenant_id=tenant_id,
-                fact_type=fact_type,
-                tags=tags,
-                confidence=confidence,
-                source=source,
-                meta=meta,
-                valid_from=valid_from,
-                commit=commit,
-                tx_id=tx_id,
-                parent_decision_id=parent_decision_id,
-            )
+            try:
+                return await self._store_impl(
+                    conn,
+                    project=project,
+                    content=content,
+                    tenant_id=tenant_id,
+                    fact_type=fact_type,
+                    tags=tags,
+                    confidence=confidence,
+                    source=source,
+                    meta=meta,
+                    valid_from=valid_from,
+                    commit=commit,
+                    tx_id=tx_id,
+                    parent_decision_id=parent_decision_id,
+                )
+            except (aiosqlite.Error, OSError, RuntimeError, ValueError):
+                if commit and getattr(conn, "in_transaction", False):
+                    await conn.rollback()
+                raise
 
         async with self.session() as _conn:
-            return await self._store_impl(
-                _conn,
-                project=project,
-                content=content,
-                tenant_id=tenant_id,
-                fact_type=fact_type,
-                tags=tags,
-                confidence=confidence,
-                source=source,
-                meta=meta,
-                valid_from=valid_from,
-                commit=commit,
-                tx_id=tx_id,
-                parent_decision_id=parent_decision_id,
-            )
+            try:
+                return await self._store_impl(
+                    _conn,
+                    project=project,
+                    content=content,
+                    tenant_id=tenant_id,
+                    fact_type=fact_type,
+                    tags=tags,
+                    confidence=confidence,
+                    source=source,
+                    meta=meta,
+                    valid_from=valid_from,
+                    commit=commit,
+                    tx_id=tx_id,
+                    parent_decision_id=parent_decision_id,
+                )
+            except (aiosqlite.Error, OSError, RuntimeError, ValueError):
+                if commit and getattr(_conn, "in_transaction", False):
+                    await _conn.rollback()
+                raise
 
     async def _run_store_validation(
         self,
@@ -165,8 +175,11 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             except (ValueError, RuntimeError):
                 raise  # Guard rejections and runtime errors must propagate
             except (ImportError, AttributeError) as _gp_err:
-                # Guard module not loaded — safe to skip
-                logger.debug("[AX-II] GuardPipeline pre-store skipped (not loaded): %s", _gp_err)
+                if getattr(pipeline, "fail_closed", False):
+                    raise RuntimeError(
+                        f"FAIL-CLOSED: GuardPipeline pre-store unavailable: {_gp_err}"
+                    ) from _gp_err
+                logger.warning("[AX-II] GuardPipeline pre-store skipped (not loaded): %s", _gp_err)
 
         dedupe_id, meta, content, fact_type = await self._run_store_validation(
             conn, project, content, tenant_id, fact_type, tags, confidence, source, meta
@@ -215,9 +228,6 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                 tenant_id,
             )
 
-        if commit:
-            await conn.commit()
-
         # ═══ AX-II: Post-store hooks via GuardPipeline ═══
         if pipeline is not None:
             db_path = str(getattr(self, "_db_path", "") or "")
@@ -232,9 +242,18 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                     db_path=db_path,
                 )
             except (ImportError, AttributeError) as _ph_err:
-                logger.debug("[AX-II] GuardPipeline post-hooks skipped (not loaded): %s", _ph_err)
+                if getattr(pipeline, "fail_closed", False):
+                    raise RuntimeError(
+                        f"FAIL-CLOSED: GuardPipeline post-hooks unavailable: {_ph_err}"
+                    ) from _ph_err
+                logger.warning("[AX-II] GuardPipeline post-hooks skipped (not loaded): %s", _ph_err)
             except (ValueError, RuntimeError, OSError) as _ph_err:
+                if getattr(pipeline, "fail_closed", False):
+                    raise
                 logger.warning("[AX-II] GuardPipeline post-hooks failed: %s", _ph_err)
+
+        if commit:
+            await conn.commit()
 
         return fact_id
 
@@ -248,7 +267,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
                     ids.append(await self.store(commit=False, conn=conn, **fact))
                 await conn.commit()
                 return ids
-            except (aiosqlite.Error, ValueError, OSError):
+            except (aiosqlite.Error, ValueError, OSError, RuntimeError):
                 # Deliberate boundary: rollback any store failure atomically, then re-raise
                 await conn.rollback()
                 raise

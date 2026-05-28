@@ -321,11 +321,11 @@ async def verify_ledger(
 ) -> dict:
     """Verify cryptographic integrity of the memory ledger."""
     try:
-        report = await engine.verify_ledger()
+        report = await engine.verify_ledger(tenant_id=auth.tenant_id)
         return {
             "valid": report["valid"],
             "violations": len(report.get("violations", [])),
-            "transactions_checked": report.get("tx_checked", 0),
+            "transactions_checked": report.get("tx_count", report.get("tx_checked", 0)),
         }
     except (sqlite3.Error, OSError, RuntimeError):
         logger.exception("Ledger verification failed")
@@ -350,7 +350,12 @@ async def cast_vote(
             )
 
         agent_id = auth.key_name or "api_agent"
-        score = await engine.vote_v2(fact_id, agent_id, req.value)
+        score = await engine.vote_v2(
+            fact_id=fact_id,
+            agent_id=agent_id,
+            value=req.value,
+            tenant_id=auth.tenant_id,
+        )
 
         # Confidence is updated automatically by manager
         updated_fact = await engine.get_fact(fact_id, tenant_id=auth.tenant_id)
@@ -393,8 +398,9 @@ async def cast_vote_v2(
 
         score = await engine.vote_v2(
             fact_id=fact_id,
-            agent=req.agent_id,
+            agent_id=req.agent_id,
             value=req.vote,
+            tenant_id=auth.tenant_id,
         )
 
         # Re-fetch for updated confidence

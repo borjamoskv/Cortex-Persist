@@ -60,134 +60,36 @@ class TestCoveringIndices:
 
 
 class TestFTS5Triggers:
-    """Verify FTS5 auto-sync triggers fire correctly."""
+    """Verify facts FTS is application-managed, not trigger-managed."""
 
-    def _setup_db(self, db_path: str) -> sqlite3.Connection:
-        """Create facts table + FTS5 + triggers."""
-        from cortex.database.schema import CREATE_FACTS, CREATE_FACTS_INDEXES
-        from cortex.database.schema_extensions import (
-            CREATE_FACTS_FTS,
-            CREATE_FACTS_FTS_TRIGGERS,
-        )
+    def test_fresh_schema_does_not_install_fact_fts_triggers(self, tmp_path):
+        """Fresh DBs must match migrated DBs: no facts_ai/facts_ad/facts_au triggers."""
+        from cortex.database.schema import get_all_schema
+        from cortex.database.schema_extensions import CREATE_FACTS_FTS_TRIGGERS, EXTENSION_SCHEMA
 
-        conn = sqlite3.connect(db_path)
-        for stmt in CREATE_FACTS.strip().split(";"):
-            s = stmt.strip()
-            if s:
-                conn.execute(s + ";")
-        for stmt in CREATE_FACTS_INDEXES.strip().split(";"):
-            s = stmt.strip()
-            if s:
-                conn.execute(s + ";")
-        # FTS5 virtual table
-        conn.executescript(CREATE_FACTS_FTS)
-        # Triggers
-        conn.executescript(CREATE_FACTS_FTS_TRIGGERS)
-        conn.commit()
-        return conn
+        assert CREATE_FACTS_FTS_TRIGGERS not in EXTENSION_SCHEMA
 
-    def test_insert_trigger_populates_fts(self, tmp_path):
-        """INSERT into facts auto-populates facts_fts."""
-        conn = self._setup_db(str(tmp_path / "test.db"))
-        conn.execute(
-            "INSERT INTO facts "
-            "(tenant_id, project, content, fact_type, confidence, "
-            "valid_from, tags, source, metadata, exergy_score, "
-            "created_at, updated_at) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (
-                "default",
-                "test-proj",
-                "sovereign memory system",
-                "decision",
-                "C4",
-                "2026-01-01",
-                "[]",
-                "test",
-                "{}",
-                1.0,
-                "2026-01-01",
-                "2026-01-01",
-            ),
-        )
-        conn.commit()
+        conn = sqlite3.connect(str(tmp_path / "test.db"))
+        try:
+            for stmt in get_all_schema():
+                if "USING vec0" in stmt:
+                    continue
+                conn.executescript(stmt)
+            conn.commit()
 
-        # Search FTS5
-        cursor = conn.execute("SELECT rowid FROM facts_fts WHERE content MATCH 'sovereign'")
-        rows = cursor.fetchall()
-        assert len(rows) == 1, f"Expected 1 FTS hit, got {len(rows)}"
-        conn.close()
+            trigger_rows = conn.execute(
+                "SELECT name FROM sqlite_master "
+                "WHERE type = 'trigger' AND name IN ('facts_ai', 'facts_ad', 'facts_au')"
+            ).fetchall()
+            columns = {
+                row[1]
+                for row in conn.execute("PRAGMA table_info(facts_fts)").fetchall()
+            }
+        finally:
+            conn.close()
 
-    def test_update_trigger_syncs_fts(self, tmp_path):
-        """UPDATE facts.content syncs to facts_fts."""
-        conn = self._setup_db(str(tmp_path / "test.db"))
-        conn.execute(
-            "INSERT INTO facts "
-            "(tenant_id, project, content, fact_type, confidence, "
-            "valid_from, tags, source, metadata, exergy_score, "
-            "created_at, updated_at) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (
-                "default",
-                "test-proj",
-                "old content here",
-                "decision",
-                "C4",
-                "2026-01-01",
-                "[]",
-                "test",
-                "{}",
-                1.0,
-                "2026-01-01",
-                "2026-01-01",
-            ),
-        )
-        conn.commit()
-
-        conn.execute("UPDATE facts SET content = 'new sovereign content' WHERE id = 1")
-        conn.commit()
-
-        # Old content should be gone
-        cursor = conn.execute("SELECT rowid FROM facts_fts WHERE content MATCH 'old'")
-        assert cursor.fetchone() is None, "Old content still in FTS"
-
-        # New content should be findable
-        cursor = conn.execute("SELECT rowid FROM facts_fts WHERE content MATCH 'sovereign'")
-        assert cursor.fetchone() is not None, "New content missing from FTS"
-        conn.close()
-
-    def test_delete_trigger_removes_from_fts(self, tmp_path):
-        """DELETE from facts removes from facts_fts."""
-        conn = self._setup_db(str(tmp_path / "test.db"))
-        conn.execute(
-            "INSERT INTO facts "
-            "(tenant_id, project, content, fact_type, confidence, "
-            "valid_from, tags, source, metadata, exergy_score, "
-            "created_at, updated_at) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (
-                "default",
-                "test-proj",
-                "ephemeral data",
-                "decision",
-                "C4",
-                "2026-01-01",
-                "[]",
-                "test",
-                "{}",
-                1.0,
-                "2026-01-01",
-                "2026-01-01",
-            ),
-        )
-        conn.commit()
-
-        conn.execute("DELETE FROM facts WHERE id = 1")
-        conn.commit()
-
-        cursor = conn.execute("SELECT rowid FROM facts_fts WHERE content MATCH 'ephemeral'")
-        assert cursor.fetchone() is None, "Deleted fact still in FTS"
-        conn.close()
+        assert trigger_rows == []
+        assert {"content", "project", "tags", "fact_type", "tenant_id"} <= columns
 
 
 # ─── WAL Checkpoint Tests ────────────────────────────────────────────

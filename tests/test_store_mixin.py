@@ -7,6 +7,7 @@ of the store → deduplicate → deprecate → update pipeline.
 from __future__ import annotations
 
 from pathlib import Path
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
@@ -101,6 +102,33 @@ class TestStore:
                 source="agent:test_suite",
             )
 
+    async def test_store_rolls_back_when_compliance_post_hook_fails(self, engine):
+        from cortex.engine.guard_pipeline import GuardPipeline
+
+        hook = MagicMock()
+        hook.on_stored = AsyncMock(side_effect=RuntimeError("hook failure"))
+        pipeline = GuardPipeline(profile="compliance")
+        pipeline.add_post_hook(hook)
+        engine._guard_pipeline = pipeline
+
+        with pytest.raises(RuntimeError, match="FAIL-CLOSED: post-store hook"):
+            await engine.store(
+                project="hook-rollback",
+                content="This fact must roll back if the compliance hook fails.",
+                tenant_id="tenant-a",
+                fact_type="knowledge",
+                source="agent:test_suite",
+            )
+
+        async with engine.session() as conn:
+            row = await (
+                await conn.execute(
+                    "SELECT COUNT(*) FROM facts WHERE project = ?",
+                    ("hook-rollback",),
+                )
+            ).fetchone()
+        assert row[0] == 0
+
 
 # ─── Store Many ───────────────────────────────────────────────────────
 
@@ -123,6 +151,44 @@ class TestStoreMany:
     async def test_store_many_empty_raises(self, engine):
         with pytest.raises(ValueError, match="empty"):
             await engine.store_many([])
+
+    async def test_store_many_rolls_back_runtime_error_from_post_hook(self, engine):
+        from cortex.engine.guard_pipeline import GuardPipeline
+
+        hook = MagicMock()
+        hook.on_stored = AsyncMock(side_effect=RuntimeError("hook failure"))
+        pipeline = GuardPipeline(profile="compliance")
+        pipeline.add_post_hook(hook)
+        engine._guard_pipeline = pipeline
+
+        with pytest.raises(RuntimeError, match="FAIL-CLOSED: post-store hook"):
+            await engine.store_many(
+                [
+                    {
+                        "project": "batch-rollback",
+                        "content": "Batch fact one that should roll back cleanly.",
+                        "tenant_id": "tenant-a",
+                        "fact_type": "knowledge",
+                        "source": "agent:test_suite",
+                    },
+                    {
+                        "project": "batch-rollback",
+                        "content": "Batch fact two that should never commit either.",
+                        "tenant_id": "tenant-a",
+                        "fact_type": "knowledge",
+                        "source": "agent:test_suite",
+                    },
+                ]
+            )
+
+        async with engine.session() as conn:
+            row = await (
+                await conn.execute(
+                    "SELECT COUNT(*) FROM facts WHERE project = ?",
+                    ("batch-rollback",),
+                )
+            ).fetchone()
+        assert row[0] == 0
 
 
 # ─── Deprecate ────────────────────────────────────────────────────────

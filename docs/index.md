@@ -6,7 +6,7 @@
 
 ![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
-![Status](https://img.shields.io/badge/status-v0.3.0b3%20beta-orange.svg)
+![Status](https://img.shields.io/badge/status-v0.3.0b7%20beta-orange.svg)
 ![Tests](https://img.shields.io/badge/tests-1621%2B%20passing-brightgreen.svg)
 ![LOC](https://img.shields.io/badge/LOC-178K-informational.svg)
 
@@ -82,7 +82,7 @@ cortex verify 1
 
 | Metric | Value |
 |:---|:---|
-| Package metadata line | **v0.3.0b3** |
+| Package metadata line | **v0.3.0b7** |
 | Test suite | **Large repo-level suite; validate specific shards locally** |
 | CLI surface | **Broad multi-command CLI; confirm exact subcommands from `cortex --help`** |
 | Deployment artifacts | **Dockerfile + GCP K8s manifest present** |

@@ -8,7 +8,7 @@ import logging
 import math
 import sqlite3
 import time
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
 from cortex.engine.forgetting_models import (
@@ -249,17 +249,17 @@ class ForgettingOracle(AnalyzerMixin, PolicyMixin, EvidenceMixin):
                 return False
 
             async with self._engine.session() as conn:
-                await conn.execute(
-                    "UPDATE facts SET fact_type = 'ghost', updated_at = ? WHERE id = ?",
-                    (datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(), fact_id),
-                )
                 tenant_id = fact.get("tenant_id", "default")
-                await self._engine._log_transaction(
+                from cortex.engine.mutation_engine import MUTATION_ENGINE
+
+                await MUTATION_ENGINE.apply(
                     conn,
-                    fact.get("project", "SYSTEM"),
-                    "MUTATE_TO_GHOST",
-                    {"fact_id": fact_id, "original_type": fact.get("fact_type")},
+                    fact_id=fact_id,
                     tenant_id=tenant_id,
+                    event_type="mutate_to_ghost",
+                    payload={"original_type": fact.get("fact_type"), "axiom": "Ω₅"},
+                    signer="ForgettingOracle",
+                    commit=False,
                 )
                 await conn.commit()
 

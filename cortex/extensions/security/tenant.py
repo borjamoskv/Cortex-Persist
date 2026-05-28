@@ -5,10 +5,20 @@ isolation in the database engine without explicitly passing it down all call cha
 """
 
 import contextvars
+import os
 
-tenant_id_var: contextvars.ContextVar[str] = contextvars.ContextVar("tenant_id", default="default")
+tenant_id_var: contextvars.ContextVar[str | None] = contextvars.ContextVar("tenant_id", default=None)
+
+
+class MissingTenantContext(RuntimeError):
+    """Raised when code attempts a tenant-scoped operation without tenant context."""
 
 
 def get_tenant_id() -> str:
-    """Retrieve the current active tenant ID from context. Defaults to 'default'."""
-    return tenant_id_var.get()
+    """Retrieve the active tenant ID, failing closed unless legacy mode is explicit."""
+    tenant_id = tenant_id_var.get()
+    if tenant_id:
+        return tenant_id
+    if os.getenv("CORTEX_LEGACY_DEFAULT_TENANT") == "1":
+        return "default"
+    raise MissingTenantContext("Tenant context missing")

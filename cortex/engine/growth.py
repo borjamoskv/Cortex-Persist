@@ -6,7 +6,6 @@ Manages fact consolidation and autonomous pattern promotion (Bridges -> Global A
 
 from __future__ import annotations
 
-import json
 import logging
 from typing import Any
 
@@ -101,39 +100,21 @@ class NeuralGrowthEngine:
                 p_count,
             )
 
-            if storer and hasattr(storer, "store"):
-                await storer.store(
-                    content=f"GLOBAL_AXIOM: {content}",
-                    fact_type="axiom",
-                    project="global",
-                    confidence="verified",
-                    tags=["promoted", "v7_synaptic"],
-                    meta={"source_bridge_count": p_count},
-                    conn=conn,
-                    commit=False,
-                )
-            else:
-                from cortex.memory.temporal import now_iso
+            if not storer or not hasattr(storer, "store"):
+                logger.warning("GROWTH promotion skipped: guarded storer required")
+                continue
 
-                ts = now_iso()
-                # Ω₈: Morphic Resonance. Promoción a Axioma Global.
-                # Un patrón que se repite en 3 proyectos deja de ser local.
-                # Se sincroniza con la "conciencia colectiva".
-                logger.info("🧬 [GROWTH] Morphic Resonance detected: %s", content[:50])
-                await conn.execute(
-                    "INSERT INTO facts (tenant_id, project, content, fact_type, confidence, created_at, updated_at, metadata) "
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                    (
-                        "system",
-                        "global",
-                        f"AXIOM_RESONANCE: {content}",
-                        "axiom",
-                        "verified",
-                        ts,
-                        ts,
-                        json.dumps({"origin": "synaptic_promotion", "axiom": "Ω₈"}),  # type: ignore[reportUndefinedVariable]
-                    ),
-                )
+            await storer.store(
+                content=f"GLOBAL_AXIOM: {content}",
+                tenant_id="system",
+                fact_type="axiom",
+                project="global",
+                confidence="verified",
+                tags=["promoted", "v7_synaptic"],
+                meta={"source_bridge_count": p_count, "origin": "synaptic_promotion"},
+                conn=conn,
+                commit=False,
+            )
 
             ENDOCRINE.pulse(HormoneType.NEURAL_GROWTH, 0.05)
             count += 1

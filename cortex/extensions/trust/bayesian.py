@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -57,7 +57,7 @@ _SIGNAL_WEIGHTS: dict[str, tuple[float, float]] = {
 }
 
 
-class Signal(str, Enum):
+class Signal(StrEnum):
     """Evidence signal for a stored fact."""
 
     CONFIRM = "confirm"
@@ -152,12 +152,17 @@ class BayesianTrustUpdater:
         # consensus_score = posterior mean (bounded 0–1)
         new_score = round(mean, 4)
 
-        # Write back
-        await conn.execute(
-            "UPDATE facts SET confidence = ?, consensus_score = ? WHERE id = ? AND tenant_id = ?",
-            (new_conf, new_score, fact_id, tenant_id),
+        from cortex.engine.mutation_engine import MUTATION_ENGINE
+
+        await MUTATION_ENGINE.apply(
+            conn,
+            fact_id=fact_id,
+            tenant_id=tenant_id,
+            event_type="score_update",
+            payload={"confidence": new_conf, "consensus_score": new_score},
+            signer="BayesianTrustUpdater",
+            commit=True,
         )
-        await conn.commit()
 
         result = TrustUpdate(
             fact_id=fact_id,

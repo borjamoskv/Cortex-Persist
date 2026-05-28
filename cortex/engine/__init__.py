@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -236,33 +235,34 @@ class CortexEngine(
         """
         from cortex.engine.guard_pipeline import GuardPipeline
         pipeline = GuardPipeline()
+        fail_closed = pipeline.fail_closed
         db_path = str(self._db_path)
         # Pre-store guards (AX-II Hooks 1-3)
         try:
             from cortex.engine.guard_adapters import HealthGuardAdapter
             pipeline.add_guard(HealthGuardAdapter(db_path))
         except ImportError as e:
-            if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
+            if fail_closed:
                 raise RuntimeError(f"FAIL-CLOSED: HealthGuardAdapter failed: {e}") from e
-            logger.debug("HealthGuardAdapter unavailable: %s", e)
+            logger.warning("HealthGuardAdapter unavailable: %s", e)
         except Exception as e:
             raise RuntimeError(f"FAIL-CLOSED: HealthGuardAdapter failed: {e}") from e
         try:
             from cortex.engine.guard_adapters import ContradictionGuardAdapter
             pipeline.add_guard(ContradictionGuardAdapter(db_path))
         except ImportError as e:
-            if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
+            if fail_closed:
                 raise RuntimeError(f"FAIL-CLOSED: ContradictionGuardAdapter failed: {e}") from e
-            logger.debug("ContradictionGuardAdapter unavailable: %s", e)
+            logger.warning("ContradictionGuardAdapter unavailable: %s", e)
         except Exception as e:
             raise RuntimeError(f"FAIL-CLOSED: ContradictionGuardAdapter failed: {e}") from e
         try:
             from cortex.engine.guard_adapters import VerifierGuardAdapter
             pipeline.add_guard(VerifierGuardAdapter())
         except ImportError as e:
-            if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
+            if fail_closed:
                 raise RuntimeError(f"FAIL-CLOSED: VerifierGuardAdapter failed: {e}") from e
-            logger.debug("VerifierGuardAdapter unavailable: %s", e)
+            logger.warning("VerifierGuardAdapter unavailable: %s", e)
         except Exception as e:
             raise RuntimeError(f"FAIL-CLOSED: VerifierGuardAdapter failed: {e}") from e
         # ZK-Swarm Cryptographic Guard (RFC-003 Phase 1)
@@ -270,9 +270,9 @@ class CortexEngine(
             from cortex.engine.guard_adapters import ZKGuardAdapter
             pipeline.add_guard(ZKGuardAdapter())
         except ImportError as e:
-            if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
+            if fail_closed:
                 raise RuntimeError(f"FAIL-CLOSED: ZKGuardAdapter failed: {e}") from e
-            logger.debug("ZKGuardAdapter unavailable: %s", e)
+            logger.warning("ZKGuardAdapter unavailable: %s", e)
         except Exception as e:
             raise RuntimeError(f"FAIL-CLOSED: ZKGuardAdapter failed: {e}") from e
         # Post-store hooks (AX-II Hook 4 + signals + epistemic)
@@ -280,31 +280,32 @@ class CortexEngine(
             from cortex.engine.guard_adapters import LedgerCheckpointHook
             pipeline.add_post_hook(LedgerCheckpointHook(self))
         except ImportError as e:
-            if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
+            if fail_closed:
                 raise RuntimeError(f"FAIL-CLOSED: LedgerCheckpointHook failed: {e}") from e
-            logger.debug("LedgerCheckpointHook unavailable: %s", e)
+            logger.warning("LedgerCheckpointHook unavailable: %s", e)
         except Exception as e:
             raise RuntimeError(f"FAIL-CLOSED: LedgerCheckpointHook failed: {e}") from e
         try:
             from cortex.engine.guard_adapters import SignalEmitHook
             pipeline.add_post_hook(SignalEmitHook())
         except ImportError as e:
-            if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
+            if fail_closed:
                 raise RuntimeError(f"FAIL-CLOSED: SignalEmitHook failed: {e}") from e
-            logger.debug("SignalEmitHook unavailable: %s", e)
+            logger.warning("SignalEmitHook unavailable: %s", e)
         except Exception as e:
             raise RuntimeError(f"FAIL-CLOSED: SignalEmitHook failed: {e}") from e
         try:
             from cortex.engine.guard_adapters import EpistemicBreakerHook
             pipeline.add_post_hook(EpistemicBreakerHook())
         except ImportError as e:
-            if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
+            if fail_closed:
                 raise RuntimeError(f"FAIL-CLOSED: EpistemicBreakerHook failed: {e}") from e
-            logger.debug("EpistemicBreakerHook unavailable: %s", e)
+            logger.warning("EpistemicBreakerHook unavailable: %s", e)
         except Exception as e:
             raise RuntimeError(f"FAIL-CLOSED: EpistemicBreakerHook failed: {e}") from e
         logger.debug(
-            "GuardPipeline: %d guards, %d hooks registered",
+            "GuardPipeline (%s): %d guards, %d hooks registered",
+            pipeline.profile,
             pipeline.guard_count,
             pipeline.hook_count,
         )
@@ -608,7 +609,7 @@ class CortexEngine(
                     asyncio.gather(*self._post_commit_tasks, return_exceptions=True),
                     timeout=5.0,
                 )
-            except (asyncio.TimeoutError, Exception):  # noqa: BLE001
+            except TimeoutError:
                 logger.debug("Post-commit task drain timed out — forcing close")
             self._post_commit_tasks.clear()
         if self._memory_manager:
@@ -617,7 +618,7 @@ class CortexEngine(
                     self._memory_manager.wait_for_background(),  # type: ignore
                     timeout=5.0,
                 )
-            except (asyncio.TimeoutError, Exception):  # noqa: BLE001
+            except (RuntimeError, TimeoutError):
                 logger.debug("Memory manager background drain timed out — forcing close")
             self._memory_manager = None
         self._memory_l1 = None

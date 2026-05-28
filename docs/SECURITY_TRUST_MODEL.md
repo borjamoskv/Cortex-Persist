@@ -1,7 +1,7 @@
 # SECURITY_TRUST_MODEL.md — CORTEX Persist
 
-Package: cortex-persist v0.3.0b3 · Engine: v8.0
-License: Apache-2.0 · Python: >=3.10
+Package: cortex-persist v0.3.0b7 · Engine: v8.0
+License: Apache-2.0 · Python: >=3.11
 
 This document describes trust boundaries and cognitive/state-mutation risks.
 
@@ -236,18 +236,24 @@ It is a trust event.
 
 ## Encryption Model
 
-Fact content and meta are encrypted at rest.
+Fact content is encrypted at rest with tenant-scoped AES-GCM keys. Fact metadata
+is not generally encrypted and must not contain secrets unless it is routed
+through an explicitly encrypted subsystem.
 
 ### Operational Meaning
 
-- sensitive payloads must not be stored plaintext
+- sensitive payloads must not be stored in plaintext metadata or secondary indexes
 - decryption occurs on authorized read path
 - key handling must remain externalized and controlled
-- secrets must not be reintroduced unencrypted into secondary stores
+- `facts_fts` is an intentional local plaintext search side channel for
+  policy-eligible, non-sensitive facts; privacy-flagged facts are excluded by
+  default
 
 ### Practical Rule (Encryption)
 
-"Encrypted primary store + plaintext side channel" is not security. It is cosplay.
+Encrypted primary content plus plaintext FTS is a searchability tradeoff, not
+full-database encryption. Claims must distinguish `facts.content` from derived
+indexes and metadata.
 
 ---
 

@@ -44,10 +44,10 @@ async def get_ledger_status(
     """Check the cryptographic integrity of all ledgers (Tx and Votes)."""
     try:
         # 1. Verify Transaction Ledger
-        tx_report = await engine.verify_ledger()
+        tx_report = await engine.verify_ledger(tenant_id=auth.tenant_id)
 
         # 2. Verify Vote Ledger
-        vote_report = await engine.verify_vote_ledger()
+        vote_report = await engine.verify_vote_ledger(tenant_id=auth.tenant_id)
 
         # Merge reports
         combined_valid = tx_report["valid"] and vote_report["valid"]
@@ -59,7 +59,7 @@ async def get_ledger_status(
         return LedgerReportResponse(
             valid=combined_valid,
             violations=combined_violations,
-            tx_checked=tx_report.get("tx_checked", 0),
+            tx_checked=tx_report.get("tx_count", tx_report.get("tx_checked", 0)),
             roots_checked=tx_report.get("roots_checked", 0),
             votes_checked=vote_report.get("votes_checked", 0),
             vote_checkpoints_checked=vote_report.get("checkpoints_checked", 0),

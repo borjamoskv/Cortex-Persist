@@ -19,6 +19,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from cortex.database.core import connect as db_connect
+from cortex.events.loop import sovereign_run
 
 logger = logging.getLogger("cortex.chronos")
 
@@ -180,35 +181,28 @@ class ChronosROI:
         part of the CORTEX knowledge graph, not a dead-end calculation.
         """
         try:
+            from cortex.engine import CortexEngine
+
+            async def _store_report() -> int:
+                engine = CortexEngine(db_path)
+                try:
+                    return await engine.store(
+                        project=project,
+                        content=report.summary(),
+                        tenant_id="system",
+                        fact_type="knowledge",
+                        tags=["chronos", "roi", "metrics"],
+                        confidence="observed",
+                        source="chronos-roi",
+                        meta=report.to_dict(),
+                    )
+                finally:
+                    await engine.close()
+
+            fact_id = int(sovereign_run(_store_report()))
+
             with db_connect(db_path) as conn:
-                # 1. Store as fact (sync path for simplicity)
-                from cortex.memory.temporal import now_iso
-
-                ts = now_iso()
-                content = report.summary()
-                meta_json = str(report.to_dict()).replace("'", '"')
-
-                cursor = conn.execute(
-                    "INSERT INTO facts (tenant_id, project, content, fact_type, tags, confidence,"
-                    " valid_from, source, meta, created_at, updated_at)"
-                    " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                    (
-                        "default",
-                        project,
-                        content,
-                        "knowledge",
-                        '["chronos", "roi", "metrics"]',
-                        "observed",
-                        ts,
-                        "chronos-roi",
-                        meta_json,
-                        ts,
-                        ts,
-                    ),
-                )
-                fact_id: int = cursor.lastrowid  # type: ignore[assignment]
-
-                # 2. Emit signal to bus
+                # Emit signal to bus after the guarded fact write succeeds.
                 from cortex.extensions.signals.bus import SignalBus
 
                 bus = SignalBus(conn)
@@ -219,10 +213,10 @@ class ChronosROI:
                     project=project,
                 )
 
-                logger.info("CHRONOS report persisted as fact #%d: %s", fact_id, report.summary())
-                return fact_id
+            logger.info("CHRONOS report persisted as fact #%d: %s", fact_id, report.summary())
+            return fact_id
 
-        except (sqlite3.Error, OSError, ImportError) as e:
+        except (sqlite3.Error, OSError, ImportError, RuntimeError, ValueError) as e:
             logger.warning("CHRONOS persistence failed (degraded mode): %s", e)
             return None
 

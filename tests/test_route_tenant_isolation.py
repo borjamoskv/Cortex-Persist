@@ -72,6 +72,42 @@ def test_graph_all_scopes_calls_to_authenticated_tenant(monkeypatch) -> None:
     assert observed == {"project": None, "limit": 25, "tenant_id": "tenant-graph"}
 
 
+def test_graph_project_scopes_by_project_and_authenticated_tenant(monkeypatch) -> None:
+    observed: dict[str, object] = {}
+
+    async def fake_get_graph(
+        conn: object,
+        project: str | None = None,
+        limit: int = 50,
+        tenant_id: str = "default",
+    ) -> dict[str, object]:
+        observed.update({"project": project, "limit": limit, "tenant_id": tenant_id})
+        return observed.copy()
+
+    monkeypatch.setattr(graph_router, "_get_graph", fake_get_graph)
+
+    app = FastAPI()
+    app.include_router(graph_router.router)
+    auth_dep = _dependency_for(
+        "/v1/graph/{project}",
+        "GET",
+        _route_by_path(graph_router.router, "/v1/graph/{project}", "GET"),
+    )
+    app.dependency_overrides[auth_dep] = lambda: AuthResult(
+        authenticated=True,
+        tenant_id="tenant-alpha",
+        permissions=["read"],
+    )
+    app.dependency_overrides[get_engine] = lambda: _FakeEngine()
+
+    with TestClient(app) as client:
+        response = client.get("/v1/graph/project-alpha?limit=25")
+
+    assert response.status_code == 200
+    assert response.json()["tenant_id"] == "tenant-alpha"
+    assert observed == {"project": "project-alpha", "limit": 25, "tenant_id": "tenant-alpha"}
+
+
 class _FakeAsyncEngine:
     def __init__(self) -> None:
         self.calls: list[tuple[str, str | None]] = []

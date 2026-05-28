@@ -10,6 +10,7 @@ Sovereign 130/100 — Pydantic responses, structured logging, TOCTOU-safe paths.
 import logging
 import os
 import re
+import secrets
 import time
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional
@@ -83,6 +84,26 @@ def _get_auth_manager() -> "ApiKeyManager":
     return api_state.auth_manager or get_auth_manager()
 
 
+def _is_loopback_request(request: Request) -> bool:
+    """Return True only for direct local bootstrap requests."""
+    host = request.client.host if request.client else ""
+    return host in {"127.0.0.1", "::1", "localhost"}
+
+
+def _bearer_token(authorization: Optional[str]) -> str:
+    if not authorization or not authorization.startswith("Bearer "):
+        return ""
+    return authorization.split(" ", 1)[1].strip()
+
+
+def _bootstrap_authorized(request: Request, authorization: Optional[str]) -> bool:
+    bootstrap_token = os.getenv("CORTEX_BOOTSTRAP_TOKEN", "")
+    provided = _bearer_token(authorization)
+    if bootstrap_token and secrets.compare_digest(provided, bootstrap_token):
+        return True
+    return _is_loopback_request(request)
+
+
 def _validate_export_path(path: Optional[str], project: str, lang: str) -> Path:
     """Validate and resolve export path with traversal protection.
 
@@ -125,7 +146,7 @@ async def _verify_admin_auth(
     authorization: Optional[str],
     manager: object,
     lang: str,
-) -> None:
+) -> AuthResult:
     """Validate that the caller has 'admin' permission.
 
     Raises HTTPException (401/403) on failure.
@@ -152,6 +173,8 @@ async def _verify_admin_auth(
         ).format(permission="admin")
         raise HTTPException(status_code=403, detail=detail)
 
+    return result
+
 
 # ─── Project Management ──────────────────────────────────────────────
 
@@ -177,11 +200,11 @@ async def export_project(
     target_file = _validate_export_path(path, project, lang)
 
     try:
-        facts = await run_in_threadpool(  # type: ignore[reportCallIssue]
-            engine.search,
+        facts = await engine.get_all_active_facts(
             project=project,
-            limit=_MAX_EXPORT_FACTS,
+            tenant_id=auth.tenant_id,
         )
+        facts = facts[:_MAX_EXPORT_FACTS]
         content = export_facts(facts, fmt="json")  # type: ignore[reportArgumentType]
 
         def _write_export() -> Path:
@@ -357,13 +380,16 @@ async def create_api_key(
 
     manager = _get_auth_manager()
     existing_keys = await manager.list_keys()
-    allow_bootstrap = os.getenv("CORTEX_ALLOW_BOOTSTRAP_KEY", "0") == "1"
-
+    authenticated_admin: AuthResult | None = None
     if existing_keys:
-        await _verify_admin_auth(authorization, manager, lang)
-    elif not allow_bootstrap:
-        # STRICT BOOTSTRAP: Preventing unauthorized first-key creation in production.
-        logger.error("Provisioning blocked: 0 keys found and CORTEX_ALLOW_BOOTSTRAP_KEY=0")
+        authenticated_admin = await _verify_admin_auth(authorization, manager, lang)
+        if tenant_id != authenticated_admin.tenant_id:
+            raise HTTPException(
+                status_code=403,
+                detail=get_trans("error_missing_permission", lang).format(permission="admin"),
+            )
+    elif not _bootstrap_authorized(request, authorization):
+        logger.error("Provisioning blocked: fresh DB bootstrap requires loopback or token")
         raise HTTPException(
             status_code=403,
             detail=get_trans("error_bootstrap_required", lang),
@@ -437,7 +463,11 @@ async def generate_handoff_context(
 
     session_meta = body.get("session") if isinstance(body, dict) else None
     try:
-        data = await generate_handoff(engine, session_meta=session_meta)
+        data = await generate_handoff(
+            engine,
+            session_meta=session_meta,
+            tenant_id=auth.tenant_id,
+        )
         save_handoff(data)
         logger.info("Handoff generated: keys=%d", len(data))
         return data

@@ -5,7 +5,7 @@ from __future__ import annotations
 import click
 from rich.table import Table
 
-from cortex.cli.common import DEFAULT_DB, cli, console, get_engine
+from cortex.cli.common import DEFAULT_DB, _run_async, cli, console, get_engine
 
 __all__ = [
     "purge",
@@ -15,10 +15,21 @@ __all__ = [
 ]
 
 
-def _purge_short_facts(conn, dry_run: bool) -> int:
+async def _deprecate_fact_refs(engine, refs: list[tuple[int, str]], reason: str) -> int:
+    count = 0
+    for fact_id, tenant_id in refs:
+        if await engine.deprecate(fact_id, reason=reason, tenant_id=tenant_id):
+            count += 1
+    return count
+
+
+def _purge_short_facts(engine, conn, dry_run: bool, tenant_id: str) -> int:
     """Purge or preview purging of very short facts (< 15 chars)."""
     rows = conn.execute(
-        "SELECT id, content FROM facts WHERE length(content) < 15 AND valid_until IS NULL",
+        "SELECT id, COALESCE(tenant_id, 'default'), content "
+        "FROM facts WHERE length(content) < 15 AND valid_until IS NULL "
+        "AND COALESCE(tenant_id, 'default') = ?",
+        (tenant_id,),
     ).fetchall()
     if not rows:
         return 0
@@ -26,12 +37,8 @@ def _purge_short_facts(conn, dry_run: bool) -> int:
     count = len(rows)
     console.print(f"  {'[yellow]WOULD[/] ' if dry_run else ''}🗑  Short facts (<15 chars): {count}")
     if not dry_run:
-        conn.execute(
-            "UPDATE facts SET valid_until = datetime('now'), "
-            "meta = json_set(COALESCE(meta, '{}'), "
-            "'$.deprecation_reason', 'purge-too-short') "
-            "WHERE length(content) < 15 AND valid_until IS NULL",
-        )
+        refs = [(int(row[0]), str(row[1] or "default")) for row in rows]
+        return int(_run_async(_deprecate_fact_refs(engine, refs, "purge-too-short")))
     return count
 
 
@@ -42,16 +49,18 @@ def purge():
 
 @purge.command("duplicates")
 @click.option("--dry-run", is_flag=True, help="Preview without deleting")
+@click.option("--tenant-id", default="default", show_default=True, help="Tenant scope")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
-def purge_duplicates(dry_run, db) -> None:
+def purge_duplicates(dry_run, tenant_id, db) -> None:
     """Remove exact duplicate facts, keeping the oldest per project."""
     engine = get_engine(db)
     try:
         conn = engine._get_sync_conn()
         rows = conn.execute(
             "SELECT content, project, MIN(id) AS keep_id, COUNT(*) AS cnt "
-            "FROM facts WHERE valid_until IS NULL "
-            "GROUP BY content, project HAVING cnt > 1"
+            "FROM facts WHERE valid_until IS NULL AND COALESCE(tenant_id, 'default') = ? "
+            "GROUP BY content, project HAVING cnt > 1",
+            (tenant_id,),
         ).fetchall()
 
         if not rows:
@@ -72,14 +81,14 @@ def purge_duplicates(dry_run, db) -> None:
             table.add_row(str(keep_id), project, str(duplicates), preview)
 
             if not dry_run:
-                conn.execute(
-                    "UPDATE facts SET valid_until = datetime('now'), "
-                    "meta = json_set(COALESCE(meta, '{}'), "
-                    "'$.deprecation_reason', 'purge-duplicate') "
-                    "WHERE content = ? AND project = ? AND id != ? "
-                    "AND valid_until IS NULL",
-                    (content, project, keep_id),
-                )
+                duplicate_rows = conn.execute(
+                    "SELECT id, COALESCE(tenant_id, 'default') "
+                    "FROM facts WHERE content = ? AND project = ? AND id != ? "
+                    "AND valid_until IS NULL AND COALESCE(tenant_id, 'default') = ?",
+                    (content, project, keep_id, tenant_id),
+                ).fetchall()
+                refs = [(int(row[0]), str(row[1] or "default")) for row in duplicate_rows]
+                _run_async(_deprecate_fact_refs(engine, refs, "purge-duplicate"))
 
         console.print(table)
 
@@ -94,8 +103,9 @@ def purge_duplicates(dry_run, db) -> None:
 
 @purge.command("empty")
 @click.option("--dry-run", is_flag=True, help="Preview without deleting")
+@click.option("--tenant-id", default="default", show_default=True, help="Tenant scope")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
-def purge_empty(dry_run, db) -> None:
+def purge_empty(dry_run, tenant_id, db) -> None:
     """Remove facts with empty or template-only content."""
     engine = get_engine(db)
     try:
@@ -111,8 +121,10 @@ def purge_empty(dry_run, db) -> None:
         total = 0
         for label, pattern in patterns:
             rows = conn.execute(
-                "SELECT id FROM facts WHERE content LIKE ? AND valid_until IS NULL",
-                (pattern,),
+                "SELECT id, COALESCE(tenant_id, 'default') "
+                "FROM facts WHERE content LIKE ? AND valid_until IS NULL "
+                "AND COALESCE(tenant_id, 'default') = ?",
+                (pattern, tenant_id),
             ).fetchall()
 
             if rows:
@@ -121,16 +133,11 @@ def purge_empty(dry_run, db) -> None:
                 console.print(f"  {'[yellow]WOULD[/] ' if dry_run else ''}🗑  {label}: {count}")
 
                 if not dry_run:
-                    conn.execute(
-                        "UPDATE facts SET valid_until = datetime('now'), "
-                        "meta = json_set(COALESCE(meta, '{}'), "
-                        "'$.deprecation_reason', 'purge-empty') "
-                        "WHERE content LIKE ? AND valid_until IS NULL",
-                        (pattern,),
-                    )
+                    refs = [(int(row[0]), str(row[1] or "default")) for row in rows]
+                    _run_async(_deprecate_fact_refs(engine, refs, "purge-empty"))
 
         # Catch very short facts (< 15 chars)
-        total += _purge_short_facts(conn, dry_run)
+        total += _purge_short_facts(engine, conn, dry_run, tenant_id)
 
         if total == 0:
             console.print("[green]✓[/] No empty/garbage facts found.")
@@ -146,15 +153,18 @@ def purge_empty(dry_run, db) -> None:
 @purge.command("project")
 @click.argument("project_name")
 @click.option("--dry-run", is_flag=True, help="Preview without deleting")
+@click.option("--tenant-id", default="default", show_default=True, help="Tenant scope")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
-def purge_project(project_name, dry_run, db) -> None:
+def purge_project(project_name, dry_run, tenant_id, db) -> None:
     """Deprecate all facts in a project."""
     engine = get_engine(db)
     try:
         conn = engine._get_sync_conn()
         rows = conn.execute(
-            "SELECT id, fact_type, content FROM facts WHERE project = ? AND valid_until IS NULL",
-            (project_name,),
+            "SELECT id, COALESCE(tenant_id, 'default'), fact_type, content "
+            "FROM facts WHERE project = ? AND valid_until IS NULL "
+            "AND COALESCE(tenant_id, 'default') = ?",
+            (project_name, tenant_id),
         ).fetchall()
 
         if not rows:
@@ -166,8 +176,8 @@ def purge_project(project_name, dry_run, db) -> None:
         table.add_column("Type", width=10)
         table.add_column("Content", width=60)
         for row in rows[:20]:
-            preview = row[2][:57] + "..." if len(row[2]) > 60 else row[2]
-            table.add_row(str(row[0]), row[1], preview)
+            preview = row[3][:57] + "..." if len(row[3]) > 60 else row[3]
+            table.add_row(str(row[0]), row[2], preview)
         if len(rows) > 20:
             table.add_row("...", "...", f"(+{len(rows) - 20} more)")
         console.print(table)
@@ -175,14 +185,8 @@ def purge_project(project_name, dry_run, db) -> None:
         if dry_run:
             console.print(f"\n[yellow]DRY RUN:[/] Would deprecate {len(rows)} facts.")
         else:
-            conn.execute(
-                "UPDATE facts SET valid_until = datetime('now'), "
-                "meta = json_set(COALESCE(meta, '{}'), "
-                "'$.deprecation_reason', 'purge-project') "
-                "WHERE project = ? AND valid_until IS NULL",
-                (project_name,),
-            )
-            conn.commit()
+            refs = [(int(row[0]), str(row[1] or "default")) for row in rows]
+            _run_async(_deprecate_fact_refs(engine, refs, "purge-project"))
             console.print(
                 f"\n[green]✓[/] Deprecated {len(rows)} facts in project '{project_name}'."
             )

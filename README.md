@@ -71,7 +71,7 @@ Traditional logging and standard vector stores fail the epistemic containment te
 
 ## Deployment Matrix
 
-- **Tamper-evident memory:** append-only ledger for facts, decisions, and state transitions.
+- **Tamper-evident memory:** hash-linked ledger for facts, decisions, and state transitions.
 - **Hash-linked records:** SHA-256 chaining across stored entries.
 - **Batch integrity proofs:** Merkle checkpoints for efficient verification at scale.
 - **Deterministic audit exports:** reproducible evidence for internal review and regulated workflows.

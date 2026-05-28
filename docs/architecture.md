@@ -85,7 +85,9 @@ graph TB
 
 ### Facts — The Memory Primitive
 
-Every piece of knowledge is a **Fact**. Facts are immutable records with temporal validity:
+Every piece of knowledge is a **Fact**. Normal updates preserve temporal validity
+through deprecation/tombstones; explicit purge/GC paths may physically remove fact
+rows after a transaction is logged:
 
 | Field | Type | Description |
 |:---|:---|:---|

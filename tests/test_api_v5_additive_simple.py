@@ -59,7 +59,7 @@ def mock_engine():
     engine.get_trust_registry.return_value = registry
 
     # Mock ledger verify and stats
-    engine.verify_ledger.return_value = {"valid": True}
+    engine.verify_ledger.return_value = {"valid": True, "violations": [], "tx_count": 7}
     engine.stats.return_value = {"causal_facts": 10, "active_facts": 10}
 
     return engine
@@ -108,3 +108,9 @@ def test_trust_endpoints(client):
     resp = client.get("/v1/trust/compliance")
     assert resp.status_code == 200
     assert resp.json()["article_12_status"] == "LOGGED_AND_VERIFIED"
+
+
+def test_facts_verify_uses_tx_count(client):
+    resp = client.get("/v1/facts/verify")
+    assert resp.status_code == 200
+    assert resp.json()["transactions_checked"] == 7

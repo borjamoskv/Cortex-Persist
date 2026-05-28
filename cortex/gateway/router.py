@@ -37,7 +37,7 @@ from __future__ import annotations
 import logging
 import time
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 logger = logging.getLogger("cortex.gateway")
@@ -46,7 +46,7 @@ logger = logging.getLogger("cortex.gateway")
 # ─── Request / Response Models ────────────────────────────────────────
 
 
-class GatewayIntent(str, Enum):
+class GatewayIntent(StrEnum):
     """Supported intents the Gateway can route."""
 
     STORE = "store"  # Store a fact in memory
@@ -228,17 +228,26 @@ class GatewayRouter:
         fact_type = req.payload.get("type", "knowledge")
         tags = req.payload.get("tags", [])
         source = req.payload.get("source", req.source)
+        meta = req.payload.get("meta")
+        if meta is None:
+            meta = req.payload.get("metadata", {})
+        if not isinstance(meta, dict):
+            raise ValueError("payload.meta must be an object when provided")
+        parent_decision_id = req.payload.get("parent_decision_id")
 
         if not content:
             raise ValueError("payload.content is required for store intent")
 
         fact_id = await self._engine.store(
-            req.project or "default",
-            content,
-            fact_type,
-            tags,
-            "stated",
-            source,
+            project=req.project or "default",
+            content=content,
+            tenant_id=req.tenant_id,
+            fact_type=fact_type,
+            tags=tags,
+            confidence="stated",
+            source=source,
+            meta=meta,
+            parent_decision_id=parent_decision_id,
         )
         return {"fact_id": fact_id, "project": req.project}
 
@@ -250,9 +259,10 @@ class GatewayRouter:
             raise ValueError("payload.query is required for search intent")
 
         results = await self._engine.search(
-            query,
-            req.project or None,
-            min(max(top_k, 1), 20),
+            query=query,
+            tenant_id=req.tenant_id,
+            project=req.project or None,
+            top_k=min(max(top_k, 1), 20),
         )
         return [
             {
@@ -270,14 +280,14 @@ class GatewayRouter:
         if not project:
             raise ValueError("project is required for recall intent")
 
-        results = await self._engine.recall(project)
+        results = await self._engine.recall(project=project, tenant_id=req.tenant_id)
         return [
             {"fact_id": getattr(r, "fact_id", None), "content": getattr(r, "content", str(r))}
             for r in results
         ]
 
     async def _handle_status(self, req: GatewayRequest) -> dict[str, Any]:
-        stats = await self._engine.stats()
+        stats = await self._engine.stats(tenant_id=req.tenant_id)
         return {
             "status": "operational",
             "total_facts": stats.get("total_facts", 0),
@@ -285,6 +295,7 @@ class GatewayRouter:
             "projects": stats.get("project_count", 0),
             "db_size_mb": stats.get("db_size_mb", 0),
             "source": req.source,
+            "tenant_id": req.tenant_id,
         }
 
     async def _handle_emit(self, req: GatewayRequest) -> dict[str, Any]:

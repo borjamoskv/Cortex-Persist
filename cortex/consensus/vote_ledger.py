@@ -11,11 +11,13 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import sqlite3
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any, Optional
 
 logger = logging.getLogger("cortex.ledger")
+GENESIS_PREV_HASH = "GENESIS"
 
 
 class ImmutableVoteLedger:
@@ -71,16 +73,20 @@ class ImmutableVoteLedger:
         """
         Añade un voto al ledger, calculando el nuevo hash encadenado.
         """
-        async with self.conn.transaction():
-            prev_hash = await self.get_last_hash(tenant_id)
-            timestamp = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+        normalized_vote = int(vote)
+        started_local_tx = not getattr(self.conn, "in_transaction", False)
+        if started_local_tx:
+            await self.conn.execute("BEGIN IMMEDIATE")
+        try:
+            prev_hash = await self.get_last_hash(tenant_id) or GENESIS_PREV_HASH
+            timestamp = datetime.fromtimestamp(time.time(), tz=UTC).isoformat()
 
             entry_hash = self._compute_hash(
                 tenant_id,
                 prev_hash,
                 fact_id,
                 agent_id,
-                vote,
+                normalized_vote,
                 vote_weight,
                 timestamp,
             )
@@ -96,7 +102,7 @@ class ImmutableVoteLedger:
                     tenant_id,
                     fact_id,
                     agent_id,
-                    vote,
+                    normalized_vote,
                     vote_weight,
                     prev_hash,
                     entry_hash,
@@ -104,13 +110,18 @@ class ImmutableVoteLedger:
                     signature,
                 ),
             )
-            await self.conn.commit()
+            if started_local_tx:
+                await self.conn.commit()
             logger.info(
                 "Vote appended to ledger: %s... (fact #%d)",
                 entry_hash[:8],
                 fact_id,
             )
             return entry_hash
+        except (sqlite3.Error, OSError, ValueError):
+            if started_local_tx and getattr(self.conn, "in_transaction", False):
+                await self.conn.rollback()
+            raise
 
     async def verify_chain(self, tenant_id: str) -> bool:
         """
@@ -123,7 +134,7 @@ class ImmutableVoteLedger:
         )
         rows = await cursor.fetchall()
 
-        current_prev_hash = None
+        current_prev_hash = GENESIS_PREV_HASH
         for row in rows:
             # row indices based on schema:
             # 0:id, 1:tenant_id, 2:fact_id, 3:agent_id, 4:vote, 5:vote_weight,
@@ -165,20 +176,25 @@ class ImmutableVoteLedger:
         Esto permite verificaciones rápidas de 'estado global' del ledger.
         """
         cursor = await self.conn.execute(
-            "SELECT hash FROM vote_ledger WHERE tenant_id = ? ORDER BY id ASC",
+            "SELECT id, hash FROM vote_ledger WHERE tenant_id = ? ORDER BY id ASC",
             (tenant_id,),
         )
-        hashes = [row[0] for row in await cursor.fetchall()]
+        rows = await cursor.fetchall()
+        hashes = [row[1] for row in rows]
 
         if not hashes:
             return ""
 
         root = self._build_merkle_tree(hashes)
-        timestamp = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
+        vote_start_id = int(rows[0][0])
+        vote_end_id = int(rows[-1][0])
+        vote_count = len(rows)
 
         await self.conn.execute(
-            "INSERT INTO vote_merkle_roots (tenant_id, root_hash, timestamp) VALUES (?, ?, ?)",
-            (tenant_id, root, timestamp),
+            "INSERT INTO vote_merkle_roots "
+            "(tenant_id, root_hash, vote_start_id, vote_end_id, vote_count) "
+            "VALUES (?, ?, ?, ?, ?)",
+            (tenant_id, root, vote_start_id, vote_end_id, vote_count),
         )
         await self.conn.commit()
         return root
@@ -189,14 +205,24 @@ class ImmutableVoteLedger:
 
     async def verify_chain_integrity(self, tenant_id: str = "default") -> dict:
         """Verifica la cadena de hashes y retorna un informe detallado (CLI)."""
-        cursor = await self.conn.execute(
-            "SELECT * FROM vote_ledger WHERE tenant_id = ? ORDER BY id ASC",
-            (tenant_id,),
-        )
+        try:
+            cursor = await self.conn.execute(
+                "SELECT * FROM vote_ledger WHERE tenant_id = ? ORDER BY id ASC",
+                (tenant_id,),
+            )
+        except sqlite3.OperationalError as exc:
+            if "no such table" not in str(exc).lower():
+                raise
+            return {
+                "valid": True,
+                "votes_checked": 0,
+                "checkpoints_checked": 0,
+                "violations": [],
+            }
         rows = await cursor.fetchall()
 
         violations = []
-        current_prev_hash = None
+        current_prev_hash = GENESIS_PREV_HASH
         votes_checked = 0
 
         for row in rows:
@@ -222,26 +248,56 @@ class ImmutableVoteLedger:
         return {
             "valid": len(violations) == 0,
             "votes_checked": votes_checked,
+            "checkpoints_checked": await self._count_vote_checkpoints(tenant_id),
             "violations": violations,
         }
 
+    async def _count_vote_checkpoints(self, tenant_id: str) -> int:
+        try:
+            cursor = await self.conn.execute(
+                "SELECT COUNT(*) FROM vote_merkle_roots WHERE tenant_id = ?",
+                (tenant_id,),
+            )
+            row = await cursor.fetchone()
+        except sqlite3.OperationalError as exc:
+            if "no such table" not in str(exc).lower():
+                raise
+            return 0
+        return int(row[0]) if row else 0
+
     async def verify_merkle_roots(self, tenant_id: str = "default") -> list[dict]:
         """Verifica todas las raíces de Merkle registradas (CLI)."""
-        cursor = await self.conn.execute(
-            "SELECT id, root_hash, timestamp FROM vote_merkle_roots WHERE tenant_id = ? ORDER BY id ASC",
-            (tenant_id,),
-        )
-        roots = await cursor.fetchall()
+        try:
+            cursor = await self.conn.execute(
+                "SELECT id, root_hash, vote_start_id, vote_end_id, vote_count, created_at "
+                "FROM vote_merkle_roots WHERE tenant_id = ? ORDER BY id ASC",
+                (tenant_id,),
+            )
+            roots = await cursor.fetchall()
+        except sqlite3.OperationalError as exc:
+            if "no such table" not in str(exc).lower():
+                raise
+            return []
 
         report = []
-        # Para verificar una raíz, necesitamos recalcular el árbol de los votos hasta ese punto.
-        # Por simplicidad en este paso, verificamos que la raíz coincida con el cálculo actual
-        # si fuera el último punto. NOTA: Una implementación completa filtraría votos por timestamp.
-        for r_id, root_hash, _ in roots:
-            # Aquí iría la lógica de filtrado por ventana temporal del checkpoint.
-            # Por ahora, marcamos como válidos si existen (place-holder para estabilidad CLI).
+        for r_id, root_hash, vote_start_id, vote_end_id, vote_count, created_at in roots:
+            hash_cursor = await self.conn.execute(
+                "SELECT hash FROM vote_ledger "
+                "WHERE tenant_id = ? AND id >= ? AND id <= ? ORDER BY id ASC",
+                (tenant_id, vote_start_id, vote_end_id),
+            )
+            vote_hashes = [row[0] for row in await hash_cursor.fetchall()]
+            actual_root = self._build_merkle_tree(vote_hashes) if vote_hashes else ""
+            valid = actual_root == root_hash and len(vote_hashes) == vote_count
             report.append(
-                {"checkpoint_id": r_id, "valid": True, "expected": root_hash, "actual": root_hash}
+                {
+                    "checkpoint_id": r_id,
+                    "valid": valid,
+                    "expected": root_hash,
+                    "actual": actual_root,
+                    "created_at": created_at,
+                    "vote_count": vote_count,
+                }
             )
         return report
 

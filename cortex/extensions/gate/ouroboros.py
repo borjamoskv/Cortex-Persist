@@ -5,7 +5,7 @@ The thermodynamic enforcer for architectural scaling.
 
 import logging
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any, Optional
 
 logger = logging.getLogger("cortex.extensions.gate.ouroboros")
@@ -20,7 +20,8 @@ class OuroborosGate:
     """
 
     def __init__(self, engine_conn: Any):
-        self.conn = engine_conn
+        self.engine = engine_conn if hasattr(engine_conn, "store") else None
+        self.conn = engine_conn._get_sync_conn() if self.engine is not None else engine_conn
         self.metrics_key = "ouroboros:entropy_metrics"
 
     def measure_entropy(self) -> dict[str, Any]:
@@ -54,7 +55,7 @@ class OuroborosGate:
             "total_bridges": total_bridges,
             "signal_to_noise": round(snr, 3),
             "entropy_index": round(entropy_idx, 4),
-            "timestamp": datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
+            "timestamp": datetime.fromtimestamp(time.time(), tz=UTC).isoformat(),
         }
 
     def identify_dead_weight(self) -> Optional[str]:
@@ -85,41 +86,81 @@ class OuroborosGate:
 
         return None
 
-    def trigger_pruning(self, target_project: str):
-        """Executes a mass-extinction of a specific project scope."""
+    def trigger_pruning(self, target_project: str) -> int:
+        """Invalidate a specific project scope through the guarded write path."""
         logger.warning("🌀 Ouroboros-Ω: Pruning dead weight project [%s]", target_project)
         # 350/100: Sensory Feedback
         import asyncio
 
-        from cortex.routes.notch_ws import notify_notch_pruning
+        try:
+            from cortex.routes.notch_ws import notify_notch_pruning
 
-        asyncio.create_task(notify_notch_pruning())
+            asyncio.get_running_loop().create_task(notify_notch_pruning())
+        except (ImportError, RuntimeError) as e:
+            logger.debug("Ouroboros pruning notification skipped: %s", e)
 
-        self.conn.execute("DELETE FROM facts WHERE project = ?", (target_project,))
-        self.conn.commit()
+        if self.engine is None:
+            logger.warning("Ouroboros pruning skipped: guarded engine required")
+            return 0
+
+        columns = {str(row[1]) for row in self.conn.execute("PRAGMA table_info(facts)")}
+        tenant_select = "tenant_id" if "tenant_id" in columns else "'default' AS tenant_id"
+        query = f"SELECT id, {tenant_select} FROM facts WHERE project = ?"
+        if "is_tombstoned" in columns:
+            query += " AND is_tombstoned = 0"
+
+        fact_refs = [
+            (int(row[0]), str(row[1] or "default"))
+            for row in self.conn.execute(query, (target_project,)).fetchall()
+        ]
+        if not fact_refs:
+            return 0
+
+        from cortex.events.loop import sovereign_run
+
+        async def _invalidate_project() -> int:
+            invalidated = 0
+            for fact_id, tenant_id in fact_refs:
+                did_invalidate = await self.engine.invalidate(
+                    fact_id,
+                    reason=f"ouroboros_pruned_project:{target_project}",
+                    tenant_id=tenant_id,
+                )
+                invalidated += int(bool(did_invalidate))
+            return invalidated
+
+        pruned_count = int(sovereign_run(_invalidate_project()))
 
         # Log scaling decision
-        self._log_scaling_event(f"Pruned project {target_project} due to zero bridge density.")
+        self._log_scaling_event(
+            f"Tombstoned {pruned_count} facts in project {target_project} "
+            "due to zero bridge density."
+        )
+        return pruned_count
 
     def _log_scaling_event(self, content: str):
         """Persists architectural scaling decisions."""
-        self.conn.execute(
-            """
-            INSERT INTO facts (project, content, fact_type, confidence, source, created_at)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """,
-            (
-                "cortex",
-                content,
-                "decision",
-                "C5",
-                "ag:ouroboros",
-                datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat(),
-            ),
-        )
-        self.conn.commit()
+        if self.engine is None:
+            logger.warning("Ouroboros scaling event not persisted: guarded engine required")
+            return
+
+        from cortex.events.loop import sovereign_run
+
+        async def _store_event() -> int:
+            return await self.engine.store(
+                project="cortex",
+                content=content,
+                tenant_id="system",
+                fact_type="decision",
+                tags=["ouroboros", "scaling"],
+                confidence="C5",
+                source="ag:ouroboros",
+                meta={"timestamp": datetime.fromtimestamp(time.time(), tz=UTC).isoformat()},
+            )
+
+        sovereign_run(_store_event())
 
 
 def get_ouroboros_gate(engine: Any) -> OuroborosGate:
     """Helper to initialize the gate with an engine connection."""
-    return OuroborosGate(engine._get_sync_conn())
+    return OuroborosGate(engine)

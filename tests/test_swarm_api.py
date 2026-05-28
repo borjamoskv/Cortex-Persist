@@ -61,3 +61,15 @@ async def test_swarm_worktree_lifecycle_api(mock_iso, client):
     resp = await client.delete(f"/v1/swarm/worktrees/{wt_id}")
     assert resp.status_code == 200
     assert resp.json()["status"] == "tearing_down"
+
+
+@pytest.mark.asyncio
+@patch("cortex.extensions.swarm.manager.isolated_worktree")
+async def test_swarm_worktree_rejects_public_base_path(mock_iso, client):
+    resp = await client.post(
+        "/v1/swarm/worktrees",
+        json={"branch_name": "test_branch", "base_path": "/tmp"},
+    )
+
+    assert resp.status_code == 422
+    mock_iso.assert_not_called()

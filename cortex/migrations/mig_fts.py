@@ -1,7 +1,9 @@
+import json
 import logging
 import sqlite3
 
 from cortex.crypto import get_default_encrypter
+from cortex.engine.fts_policy import should_index_plaintext_fts
 
 logger = logging.getLogger("cortex")
 
@@ -30,7 +32,8 @@ def _migration_017_fts_decouple(conn: sqlite3.Connection):
 
         # 3. Create the new standalone FTS5 table
         conn.execute(
-            "CREATE VIRTUAL TABLE facts_fts USING fts5(    content, project, tags, fact_type)"
+            "CREATE VIRTUAL TABLE facts_fts USING fts5("
+            "content, project, tags, fact_type, tenant_id UNINDEXED)"
         )
         logger.info("Migration 017: Recreated facts_fts as a standard FTS5 table")
 
@@ -39,24 +42,40 @@ def _migration_017_fts_decouple(conn: sqlite3.Connection):
 
         # Read all valid facts
         cursor = conn.execute(
-            "SELECT id, content, project, tags, fact_type, tenant_id FROM facts WHERE valid_until IS NULL"
+            "SELECT id, content, project, tags, fact_type, tenant_id, metadata "
+            "FROM facts WHERE valid_until IS NULL"
         )
         rows = cursor.fetchall()
 
         insert_count = 0
+        skipped_fact_ids: list[int] = []
         for row in rows:
-            fact_id, content_enc, project, tags_str, fact_type, tenant_id = row
+            fact_id, content_enc, project, tags_str, fact_type, tenant_id, metadata_raw = row
+            try:
+                metadata = json.loads(metadata_raw) if metadata_raw else {}
+            except (json.JSONDecodeError, TypeError):
+                metadata = {}
+            if not should_index_plaintext_fts(metadata):
+                continue
             try:
                 content_dec = enc.decrypt_str(content_enc, tenant_id=tenant_id)
                 conn.execute(
-                    "INSERT INTO facts_fts(rowid, content, project, tags, fact_type) VALUES (?, ?, ?, ?, ?)",
-                    (fact_id, content_dec, project, tags_str, fact_type),
+                    "INSERT INTO facts_fts(rowid, content, project, tags, fact_type, tenant_id) "
+                    "VALUES (?, ?, ?, ?, ?, ?)",
+                    (fact_id, content_dec, project, tags_str, fact_type, tenant_id),
                 )
                 insert_count += 1
             except (ValueError, TypeError, OSError) as e:
-                logger.warning(
+                skipped_fact_ids.append(int(fact_id))
+                logger.error(
                     "Migration 017: Failed to decrypt or insert fact %s into FTS: %s", fact_id, e
                 )
+
+        if skipped_fact_ids:
+            raise RuntimeError(
+                "Migration 017 aborted: facts_fts rebuild skipped "
+                f"{len(skipped_fact_ids)} fact(s): {skipped_fact_ids[:10]}"
+            )
 
         logger.info(
             "Migration 017: Successfully repopulated facts_fts with %s decrypted facts",

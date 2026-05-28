@@ -1,6 +1,7 @@
 import logging
 
 from fastapi import APIRouter, Depends, HTTPException
+from cortex.auth.models import AuthResult
 from pydantic import BaseModel, Field
 from starlette.requests import Request
 
@@ -11,6 +12,14 @@ from cortex.extensions.swarm.psychohistory import PsychohistoryOrchestrator
 
 async def get_manager(request: Request):
     return request.app.state.swarm_manager
+
+
+def _tenant_swarm_owners(request: Request) -> dict[str, str]:
+    owners = getattr(request.app.state, "swarm_worktree_owners", None)
+    if owners is None:
+        owners = {}
+        request.app.state.swarm_worktree_owners = owners
+    return owners
 
 
 router = APIRouter(prefix="/v1/swarm", tags=["swarm"])
@@ -50,19 +59,41 @@ class SwarmStatusResponse(BaseModel):
 
 
 @router.get("/status", response_model=SwarmStatusResponse)
-async def get_swarm_status(auth=Depends(require_permission("read")), manager=Depends(get_manager)):
+async def get_swarm_status(
+    request: Request,
+    auth: AuthResult = Depends(require_permission("read")),
+    manager=Depends(get_manager),
+):
     """Aggregate swarm health and load metrics."""
-    return await manager.get_status()
+    owners = _tenant_swarm_owners(request)
+    managed = [
+        w for worktree_id, w in manager.worktrees.items() if owners.get(worktree_id) == auth.tenant_id
+    ]
+    global_status = await manager.get_status()
+    return SwarmStatusResponse(
+        active_worktrees=len([w for w in managed if w.status == "active"]),
+        total_worktrees=len(managed),
+        agent_pids=list({w.pid for w in managed}),
+        timestamp=global_status["timestamp"],
+    )
 
 
 @router.post("/worktrees", response_model=WorktreeResponse)
 async def create_worktree(
+    request: Request,
     req: WorktreeCreateRequest,
-    auth=Depends(require_permission("write")),
+    auth: AuthResult = Depends(require_permission("write")),
     manager=Depends(get_manager),
 ):
     """Provision a new isolated execution environment (Hito 3)."""
-    state = await manager.create_worktree(req.branch_name, req.base_path)
+    if req.base_path is not None:
+        raise HTTPException(
+            status_code=422,
+            detail="base_path is server-controlled and cannot be set through the public API",
+        )
+
+    state = await manager.create_worktree(req.branch_name)
+    _tenant_swarm_owners(request)[state.id] = auth.tenant_id
     if state.status == "failed":
         logging.error(
             "Worktree isolation failed for branch %s and path %s", req.branch_name, req.base_path
@@ -80,9 +111,14 @@ async def create_worktree(
 
 @router.get("/worktrees/{worktree_id}", response_model=WorktreeResponse)
 async def get_worktree_status(
-    worktree_id: str, auth=Depends(require_permission("read")), manager=Depends(get_manager)
+    request: Request,
+    worktree_id: str,
+    auth: AuthResult = Depends(require_permission("read")),
+    manager=Depends(get_manager),
 ):
     """Get metadata for a specific worktree."""
+    if _tenant_swarm_owners(request).get(worktree_id) != auth.tenant_id:
+        raise HTTPException(status_code=404, detail="Worktree not found")
     state = await manager.get_worktree(worktree_id)
     if not state:
         raise HTTPException(status_code=404, detail="Worktree not found")
@@ -98,12 +134,19 @@ async def get_worktree_status(
 
 @router.delete("/worktrees/{worktree_id}")
 async def delete_worktree(
-    worktree_id: str, auth=Depends(require_permission("admin")), manager=Depends(get_manager)
+    request: Request,
+    worktree_id: str,
+    auth: AuthResult = Depends(require_permission("admin")),
+    manager=Depends(get_manager),
 ):
     """Cleanly destroy an isolated worktree."""
+    owners = _tenant_swarm_owners(request)
+    if owners.get(worktree_id) != auth.tenant_id:
+        raise HTTPException(status_code=404, detail="Worktree not found")
     success = await manager.delete_worktree(worktree_id)
     if not success:
         raise HTTPException(status_code=404, detail="Worktree not found")
+    owners.pop(worktree_id, None)
 
     return {"status": "tearing_down", "id": worktree_id}
 

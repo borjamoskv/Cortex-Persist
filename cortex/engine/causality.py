@@ -410,6 +410,8 @@ class AsyncCausalGraph:
                         "old_confidence": old_conf,
                         "new_confidence": new_conf,
                         "status": new_status.value,
+                        "tainted_by": source_id,
+                        "taint_timestamp": timestamp,
                     }
                 )
 
@@ -463,38 +465,24 @@ class AsyncCausalGraph:
         has_tenant: bool,
         tenant_id: str,
     ) -> None:
-        """Execute batch updates to the facts table."""
-        fact_updates: list[tuple[Any, ...]] = []
-        enc = get_default_encrypter()
+        """Apply taint updates through the canonical mutation gateway."""
+        from cortex.engine.mutation_engine import MUTATION_ENGINE
 
         for chg in changes:
-            fid = chg["fact_id"]
-            data = nodes_data[fid]
-            new_conf = chg["new_confidence"]
-
-            if meta_col:
-                if data["is_encrypted"]:
-                    payload = enc.encrypt_json(data["metadata"], tenant_id=tenant_id)
-                elif data["is_json"]:
-                    payload = json.dumps(data["metadata"])
-                else:
-                    payload = data.get("raw_meta", "")
-                row = (new_conf, payload, fid)
-            else:
-                row = (new_conf, fid)
-
-            if has_tenant:
-                row = (*row, tenant_id)
-            fact_updates.append(row)
-
-        sql = "UPDATE facts SET confidence = ?"
-        if meta_col:
-            sql += f", {meta_col} = ?"
-        sql += " WHERE id = ?"
-        if has_tenant:
-            sql += " AND tenant_id = ?"
-
-        await self.conn.executemany(sql, fact_updates)
+            await MUTATION_ENGINE.apply(
+                self.conn,
+                fact_id=int(chg["fact_id"]),
+                tenant_id=tenant_id,
+                event_type="taint_update",
+                payload={
+                    "confidence": chg["new_confidence"],
+                    "taint_status": chg["status"],
+                    "tainted_by": chg["tainted_by"],
+                    "taint_timestamp": chg["taint_timestamp"],
+                },
+                signer="AsyncCausalGraph",
+                commit=False,
+            )
 
     async def _record_taint_edges(
         self,

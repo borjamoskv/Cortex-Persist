@@ -172,6 +172,39 @@ class TestPostHooks:
         assert results == ["ok", "bad", "final"]
 
 
+class TestGuardProfiles:
+    def test_default_profile_is_dev(self, monkeypatch):
+        monkeypatch.delenv("CORTEX_GUARD_PROFILE", raising=False)
+        monkeypatch.delenv("CORTEX_STRICT_GUARDS", raising=False)
+
+        from cortex.engine.guard_pipeline import GuardPipeline
+
+        pipeline = GuardPipeline()
+        assert pipeline.profile == "dev"
+        assert pipeline.fail_closed is False
+
+    def test_strict_env_maps_to_compliance(self, monkeypatch):
+        monkeypatch.delenv("CORTEX_GUARD_PROFILE", raising=False)
+        monkeypatch.setenv("CORTEX_STRICT_GUARDS", "1")
+
+        from cortex.engine.guard_pipeline import GuardPipeline
+
+        pipeline = GuardPipeline()
+        assert pipeline.profile == "compliance"
+        assert pipeline.fail_closed is True
+
+    async def test_compliance_post_hook_failure_raises(self, mock_conn):
+        from cortex.engine.guard_pipeline import GuardPipeline
+
+        hook = MagicMock()
+        hook.on_stored = AsyncMock(side_effect=RuntimeError("disk on fire"))
+        pipeline = GuardPipeline(profile="compliance")
+        pipeline.add_post_hook(hook)
+
+        with pytest.raises(RuntimeError, match="FAIL-CLOSED: post-store hook"):
+            await pipeline.run_post_hooks(123, "project", "knowledge", mock_conn)
+
+
 # ─── Count Properties ───────────────────────────────────────────────
 
 

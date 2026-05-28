@@ -8,7 +8,7 @@ Common questions about CORTEX, answered honestly.
 
 ### Is CORTEX production-ready?
 
-**Not yet.** CORTEX is in **beta**. The package metadata in the tree is **v0.3.0b3**. The architecture is solid and many core paths are implemented, but there are still known gaps in consistency, documentation, and some platform surfaces. We recommend CORTEX for:
+**Not yet.** CORTEX is in **beta**. The package metadata in the tree is **v0.3.0b7**. The architecture is solid and many core paths are implemented, but there are still known gaps in consistency, documentation, and some platform surfaces. We recommend CORTEX for:
 
 - ✅ Development and prototyping
 - ✅ Compliance proof-of-concepts

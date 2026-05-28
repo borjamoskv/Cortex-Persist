@@ -4,8 +4,11 @@ from pathlib import Path
 
 import pytest
 
+from cortex.crypto.keys import ZKSwarmIdentity
 from cortex.engine import CortexEngine
 from cortex.engine.causality import EDGE_DERIVED_FROM, AsyncCausalGraph
+
+TENANT_ID = "purge-test"
 
 
 @pytest.fixture
@@ -35,9 +38,10 @@ class TestPurgeBounded:
             content="Simple fact with no dependencies.",
             fact_type="knowledge",
             source="test",
+            tenant_id=TENANT_ID,
         )
 
-        result = await engine.purge(fact_id)
+        result = await engine.purge(fact_id, tenant_id=TENANT_ID)
         assert result is True
 
         # Verify it's gone
@@ -47,11 +51,19 @@ class TestPurgeBounded:
 
     async def test_purge_rule_with_dependencies_denied(self, engine):
         # 1. Create a rule fact
+        rule_content = "IF x THEN y"
+        keypair = ZKSwarmIdentity.generate_keypair()
+        signature = ZKSwarmIdentity.sign_payload(rule_content, keypair.private_key_b64)
         rule_id = await engine.store(
             project="test",
-            content="IF x THEN y",
+            content=rule_content,
             fact_type="rule",
             source="test",
+            tenant_id=TENANT_ID,
+            meta={
+                "agent_public_key": keypair.public_key_b64,
+                "zk_proof_signature": signature,
+            },
         )
 
         # 2. Create 5 dependent facts to reach criticality > 0.8
@@ -62,21 +74,23 @@ class TestPurgeBounded:
                 content=f"Dependent fact {i}",
                 parent_decision_id=rule_id,
                 source="test",
+                tenant_id=TENANT_ID,
             )
             # Ensure causal edge is created (if store doesn't do it automatically for these types)
             async with engine.session() as conn:
                 await conn.execute(
-                    "INSERT INTO causal_edges (fact_id, parent_id, edge_type) VALUES (?, ?, ?)",
-                    (child_id, rule_id, EDGE_DERIVED_FROM),
+                    "INSERT INTO causal_edges (fact_id, parent_id, edge_type, tenant_id) "
+                    "VALUES (?, ?, ?, ?)",
+                    (child_id, rule_id, EDGE_DERIVED_FROM, TENANT_ID),
                 )
                 await conn.commit()
 
         # 3. Purge should fail
         with pytest.raises(RuntimeError, match="Bounded Demolition Denied"):
-            await engine.purge(rule_id)
+            await engine.purge(rule_id, tenant_id=TENANT_ID)
 
         # 4. Success with force
-        result = await engine.purge(rule_id, force=True)
+        result = await engine.purge(rule_id, tenant_id=TENANT_ID, force=True)
         assert result is True
 
         # 5. Verify edges are also gone
@@ -96,6 +110,7 @@ class TestPurgeBounded:
             content="Knowledge fact with dependencies.",
             fact_type="knowledge",
             source="test",
+            tenant_id=TENANT_ID,
         )
 
         for i in range(5):
@@ -104,16 +119,18 @@ class TestPurgeBounded:
                 content=f"Dependent {i}",
                 parent_decision_id=fact_id,
                 source="test",
+                tenant_id=TENANT_ID,
             )
             async with engine.session() as conn:
                 await conn.execute(
-                    "INSERT INTO causal_edges (fact_id, parent_id, edge_type) VALUES (?, ?, ?)",
-                    (child_id, fact_id, EDGE_DERIVED_FROM),
+                    "INSERT INTO causal_edges (fact_id, parent_id, edge_type, tenant_id) "
+                    "VALUES (?, ?, ?, ?)",
+                    (child_id, fact_id, EDGE_DERIVED_FROM, TENANT_ID),
                 )
                 await conn.commit()
 
         # Should be allowed (crit=0.4 <= 0.8)
-        result = await engine.purge(fact_id)
+        result = await engine.purge(fact_id, tenant_id=TENANT_ID)
         assert result is True
 
         async with engine.session() as conn:

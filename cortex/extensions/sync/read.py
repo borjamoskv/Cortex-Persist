@@ -95,14 +95,24 @@ async def _sync_ghosts(engine: CortexEngine, path: Path, result: SyncResult) -> 
     # Deprecar ghosts anteriores (son snapshots temporales)
     async with engine.session() as conn:
         try:
-            await conn.execute(
-                "UPDATE facts SET valid_until = ? "
-                "WHERE fact_type = 'ghost' AND valid_until IS NULL",
-                (result.synced_at,),
+            cursor = await conn.execute(
+                "SELECT id, COALESCE(tenant_id, 'default') "
+                "FROM facts WHERE fact_type = 'ghost' AND valid_until IS NULL"
             )
-            await conn.commit()
+            ghost_refs = await cursor.fetchall()
         except sqlite3.Error as e:
             result.errors.append(f"Error deprecando ghosts antiguos: {e}")
+            ghost_refs = []
+
+    for fact_id, tenant_id in ghost_refs:
+        try:
+            await engine.deprecate(
+                int(fact_id),
+                reason=f"sync-ghost-snapshot:{result.synced_at}",
+                tenant_id=str(tenant_id or "default"),
+            )
+        except (sqlite3.Error, RuntimeError, ValueError) as e:
+            result.errors.append(f"Error deprecando ghost antiguo #{fact_id}: {e}")
 
     # Insertar snapshot actual de cada proyecto
     for project_name, ghost_data in data.items():

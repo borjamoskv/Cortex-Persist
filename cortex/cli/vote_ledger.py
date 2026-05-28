@@ -37,7 +37,7 @@ def vote(fact_id, value, agent, db) -> None:
         try:
             # En Wave 5 usamos sesiones transaccionales
             async with engine.session() as conn:
-                ledger = ImmutableVoteLedger(engine._pool if hasattr(engine, "_pool") else conn)  # type: ignore[reportAttributeAccessIssue]
+                ledger = ImmutableVoteLedger(conn)
 
                 if value not in [1, -1]:
                     err_validation("value", "El voto debe ser 1 (verificar) o -1 (disputar)")
@@ -49,7 +49,7 @@ def vote(fact_id, value, agent, db) -> None:
 
                 console.print(
                     f"[green]✓[/] El agente [bold]{agent}[/] votó {value} en el hecho [bold]#{fact_id}[/].\n"
-                    f"   [dim]Hash: {entry.hash[:16]}...[/]"  # pyright: ignore
+                    f"   [dim]Hash: {entry[:16]}...[/]"
                 )
         except (sqlite3.Error, OSError, ValueError, RuntimeError) as e:
             handle_cli_error(e, db_path=db, context="casting vote")
@@ -111,8 +111,7 @@ def ledger_checkpoint(db):
         engine = get_engine(db)
         try:
             async with engine.session() as conn:
-                pool_attr = engine._pool if hasattr(engine, "_pool") else conn  # type: ignore[reportAttributeAccessIssue]
-                ledger = ImmutableVoteLedger(pool_attr)  # type: ignore[reportAttributeAccessIssue]
+                ledger = ImmutableVoteLedger(conn)
                 with console.status(
                     "[bold yellow]Calculando Merkle Root y creando punto de control...[/]"
                 ):
@@ -141,8 +140,7 @@ def ledger_verify(db):
         engine = get_engine(db)
         try:
             async with engine.session() as conn:
-                pool_attr = engine._pool if hasattr(engine, "_pool") else conn  # type: ignore[reportAttributeAccessIssue]
-                ledger_inst = ImmutableVoteLedger(pool_attr)  # type: ignore[reportAttributeAccessIssue]
+                ledger_inst = ImmutableVoteLedger(conn)
                 with console.status(
                     "[bold blue]Verificando la cadena de hashes del registro...[/]"
                 ):

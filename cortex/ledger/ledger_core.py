@@ -446,6 +446,7 @@ class SovereignLedger:
         """
         violations = []
         tx_count = 0
+        roots_checked = 0
 
         async with self._get_conn_proxy() as conn:
             started_at = now_iso()
@@ -500,6 +501,7 @@ class SovereignLedger:
                 )
                 roots = list(await cursor.fetchall())
                 for stored_root, start, end in roots:
+                    roots_checked += 1
                     c = await conn.execute(
                         "SELECT hash FROM transactions WHERE id >= ? AND id <= ? ORDER BY id",
                         (start, end),
@@ -522,5 +524,7 @@ class SovereignLedger:
             "valid": not violations,
             "violations": violations,
             "tx_count": tx_count,
+            "tx_checked": tx_count,
+            "roots_checked": roots_checked,
             "tenant": tenant_id or "global",
         }

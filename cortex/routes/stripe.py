@@ -1,42 +1,38 @@
-from typing import Optional
-
-"""
-CORTEX v5.0 — Stripe Billing Routes.
-
-Full checkout flow: session creation, webhook processing, customer portal.
-Provisions API keys automatically on successful payment.
-
-Usage:
-    Registered opt-in in api.py when STRIPE_SECRET_KEY is set.
-
-Environment variables:
-    STRIPE_SECRET_KEY — sk_live_... or sk_test_...
-    STRIPE_WEBHOOK_SECRET — whsec_... from Stripe dashboard
-    STRIPE_PRICE_TABLE — JSON mapping plan names to Stripe Price IDs
-"""
-
 import hashlib
 import logging
 import os
 import time
+from typing import Optional
 
 from fastapi import APIRouter, Header, HTTPException, Request
 from pydantic import BaseModel
 
 from cortex import config
 
-__all__ = [
-    "CheckoutRequest",
-    "PortalRequest",
-    "create_checkout_session",
-    "create_portal_session",
-    "stripe_webhook",
-]
-
 router = APIRouter(prefix="/v1/stripe", tags=["stripe"])
 logger = logging.getLogger("uvicorn.error")
 
 # ─── Plan Configuration ──────────────────────────────────────────────
+
+@router.get("/config", include_in_schema=False)
+async def get_stripe_config() -> dict:
+    """Return public configuration for Stripe integration."""
+    return {
+        "publicKey": os.environ.get("STRIPE_PUBLIC_KEY", ""),
+        "plans": {
+            "pro": {
+                "name": "Pro",
+                "priceId": config.STRIPE_PRICE_TABLE.get("pro", ""),
+                "features": PLAN_CONFIG["pro"],
+            },
+            "team": {
+                "name": "Team",
+                "priceId": config.STRIPE_PRICE_TABLE.get("team", ""),
+                "features": PLAN_CONFIG["team"],
+            },
+        },
+    }
+
 
 PLAN_CONFIG: dict[str, dict] = {
     "pro": {
@@ -198,7 +194,9 @@ async def stripe_webhook(
 
     try:
         # type: ignore[reportAttributeAccessIssue]
-        event = stripe.Webhook.construct_event(payload, stripe_signature, webhook_secret)  # type: ignore[reportAttributeAccessIssue]
+        event = stripe.Webhook.construct_event(
+            payload, stripe_signature, webhook_secret
+        )  # type: ignore[reportAttributeAccessIssue]
     except stripe.SignatureVerificationError as exc:  # type: ignore[reportAttributeAccessIssue]
         raise HTTPException(status_code=400, detail="Invalid webhook signature") from exc
     except ValueError as exc:
@@ -252,10 +250,10 @@ async def create_portal_session(body: PortalRequest) -> dict:
     stripe = _get_stripe()
 
     try:
-        session = stripe.billing_portal.Session.create(  # type: ignore[reportAttributeAccessIssue]
+        session = stripe.billing_portal.Session.create(
             customer=body.customer_id,
             return_url=body.return_url,
-        )
+        )  # type: ignore[reportAttributeAccessIssue]
     except stripe.StripeError as exc:  # type: ignore[reportAttributeAccessIssue]
         logger.error("Stripe portal error: %s", exc)
         raise HTTPException(status_code=502, detail="Stripe API error") from exc

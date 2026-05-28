@@ -166,7 +166,11 @@ async def purge_logic(
             ("DELETE FROM fact_tags WHERE fact_id = ? AND tenant_id = ?", (fact_id, tenant_id)),
             ("DELETE FROM fact_embeddings WHERE fact_id = ?", (fact_id,)),
             ("DELETE FROM specular_embeddings WHERE fact_id = ?", (fact_id,)),
+            ("DELETE FROM pruned_embeddings WHERE fact_id = ?", (fact_id,)),
             ("DELETE FROM enrichment_jobs WHERE fact_id = ?", (fact_id,)),
+            ("DELETE FROM consensus_votes_v2 WHERE fact_id = ?", (fact_id,)),
+            ("DELETE FROM consensus_votes WHERE fact_id = ?", (fact_id,)),
+            ("DELETE FROM consensus_outcomes WHERE fact_id = ?", (fact_id,)),
             (
                 "DELETE FROM entity_events WHERE entity_id = ? AND tenant_id = ?",
                 (fact_id, tenant_id),

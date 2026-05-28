@@ -104,20 +104,20 @@ class EngineMixinBase:
         """
         if tenant_id == "default":
             try:
-                from cortex.extensions.security.tenant import tenant_id_var
-                context_tid = tenant_id_var.get(None)
-                if context_tid:
-                    return context_tid
+                from cortex.extensions.security.tenant import MissingTenantContext, get_tenant_id
+
+                return get_tenant_id()
+            except MissingTenantContext as exc:
+                if os.environ.get("CORTEX_LEGACY_DEFAULT_TENANT") == "1":
+                    return "default"
+                raise ValueError("Tenant context missing; pass tenant_id explicitly") from exc
             except ImportError:
-                # If security extension is missing, we only allow 'default' if explicitly requested
-                # and no context-binding was expected.
-                pass
+                if os.environ.get("CORTEX_LEGACY_DEFAULT_TENANT") == "1":
+                    return "default"
+                raise ValueError("Tenant context missing; security extension unavailable") from None
 
         # Strict Multi-Tenancy (RLS): never fail open into implicit default traffic.
         if not tenant_id or not tenant_id.strip():
             raise ValueError("tenant_id must be explicitly provided or bound in tenant context")
-
-        if tenant_id == "default" and os.environ.get("CORTEX_STRICT_TENANTS") == "1":
-            raise ValueError("Implicit 'default' tenant is forbidden in STRICT_TENANTS mode")
 
         return tenant_id

@@ -4,6 +4,7 @@ import click
 from rich.console import Console
 
 from cortex.cli.common import DEFAULT_DB, cli
+from cortex.cli.trust_helpers import render_verify_all_report
 from cortex.ledger.store import LedgerStore
 from cortex.ledger.verifier import LedgerVerifier
 
@@ -19,10 +20,19 @@ def ledger_cmds():
 @ledger_cmds.command("verify")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 @click.option("--full", is_flag=True, help="Perform full cryptographic verify")
-def verify_ledger(db: str, full: bool):
+@click.option("--all", "verify_all", is_flag=True, help="Verify all ledger surfaces")
+def verify_ledger(db: str, full: bool, verify_all: bool):
     """Verify hash chain integrity."""
     store = LedgerStore(db)
     verifier = LedgerVerifier(store)
+
+    if verify_all or full:
+        with console.status("[bold cyan]Verifying all ledger surfaces..."):
+            result = verifier.verify_all()
+        render_verify_all_report(result)
+        if not result["valid"]:
+            raise click.exceptions.Exit(1)
+        return
 
     with console.status("[bold cyan]Verifying ledger integrity..."):
         result = verifier.verify_chain()

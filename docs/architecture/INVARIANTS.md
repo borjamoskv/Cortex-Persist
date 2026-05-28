@@ -1,8 +1,10 @@
 # DB Invariants — Operational Contract
 
 This document is the **machine-verifiable constitution** of the CORTEX storage engine.
-Every invariant listed here is enforced by `scripts/verify_db_invariants.py` and
-gated in CI by `.github/workflows/ci.yml`.
+It defines the storage invariants CORTEX should enforce. The dedicated
+`scripts/verify_db_invariants.py` gate and CI `invariant-check` job are not yet
+present in this repository; until they exist, treat the SQL probes below as the
+target contract and rely on the focused regression tests for enforced coverage.
 
 If any invariant is violated, the system is in a degraded state.
 Fix → verify → commit. No exceptions.
@@ -21,7 +23,7 @@ These conditions must hold on every healthy database. A single violation = `FAIL
 | `INV-004` | Hash backfill coverage 100% for active, non-tombstoned facts | `SELECT count(*) FROM facts WHERE hash IS NULL AND is_tombstoned=0 AND is_quarantined=0` must be 0 |
 | `INV-005` | Ledger hash-chain integrity: no transaction with a broken `prev_hash` link | Verified by the ledger verifier (`cortex verify`) |
 | `INV-006` | No tombstoned facts still indexed in FTS | `SELECT count(*) FROM facts_fts WHERE rowid IN (SELECT id FROM facts WHERE is_tombstoned=1)` |
-| `INV-007` | `facts_fts` row count matches non-tombstoned, non-quarantined `facts` count | `count(facts_fts)` == `count(facts WHERE is_tombstoned=0 AND is_quarantined=0)` |
+| `INV-007` | `facts_fts` row count matches active facts that are policy-eligible for plaintext FTS | `count(facts_fts)` == `count(facts WHERE is_tombstoned=0 AND is_quarantined=0 AND privacy policy allows plaintext FTS)` |
 
 ## Soft Invariants (threshold-based)
 
@@ -64,16 +66,16 @@ drift_velocity          = integrity_failures / ingested_total  (if > 0 → inves
 
 | Where | How |
 |-------|-----|
-| Local dev | `python scripts/verify_db_invariants.py` |
-| Pre-push hook | `scripts/verify_db_invariants.py --strict` in `.pre-commit-config.yaml` |
-| CI gate | `.github/workflows/ci.yml` → `invariant-check` job → blocks merge |
-| Regression suite | `tests/integration/test_db_invariants.py` |
+| Local dev | Proposed: `python scripts/verify_db_invariants.py` |
+| Pre-push hook | Proposed: `scripts/verify_db_invariants.py --strict` in `.pre-commit-config.yaml` |
+| CI gate | Proposed: `.github/workflows/ci.yml` → `invariant-check` job → blocks merge |
+| Regression suite | Current: focused tests such as `tests/test_verify_all.py` and FTS/privacy regressions |
 
 ## Mutation Policy
 
 Any PR that touches `cortex/database/`, `cortex/migrations/`, `cortex/engine/`, or `cortex/memory/`
 **must** include:
-1. A migration that passes `verify_db_invariants.py --strict`.
+1. A migration/schema review and the closest available focused invariant tests.
 2. A regression test proving the new invariant holds post-mutation.
 3. Updated thresholds in this document if benchmarks change.
 

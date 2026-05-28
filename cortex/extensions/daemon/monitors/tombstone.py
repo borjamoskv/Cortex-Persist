@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 import sqlite3
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from cortex.extensions.daemon.models import TombstoneAlert
@@ -35,7 +35,7 @@ class TombstoneMonitor:
 
     def _in_maintenance_window(self) -> bool:
         """Check if current UTC time is within the maintenance window."""
-        now = datetime.fromtimestamp(time.time(), tz=timezone.utc)
+        now = datetime.fromtimestamp(time.time(), tz=UTC)
         return self.start_hour <= now.hour < self.end_hour
 
     def check(self) -> list[TombstoneAlert]:
@@ -53,74 +53,46 @@ class TombstoneMonitor:
         self._last_run = now
 
         try:
-            from cortex.database.core import connect as db_connect
+            from cortex.compaction.gc import GarbageCollector
+            from cortex.engine import CortexEngine
+            from cortex.events.loop import sovereign_run
 
-            # Fix HIGH-005 lock contention: use auto-commit mode (isolation_level=None)
-            # to avoid taking a write-lock on the first SELECT. We'll manage transactions manually.
-            with db_connect(
-                self.db_path,  # type: ignore[type-error]
-                timeout=5,
-                isolation_level=None,  # Manual transaction control
-            ) as conn:
-                cursor = conn.cursor()
+            initial_size = self.db_path.stat().st_size
 
-                # Get count of facts to sweep
-                cursor.execute("SELECT COUNT(*) FROM facts WHERE is_tombstoned = 1")
-                to_delete = cursor.fetchone()[0]
+            async def _run_guarded_gc() -> dict:
+                engine = CortexEngine(self.db_path)
+                try:
+                    gc = GarbageCollector(engine)
+                    return await gc.run_gc(batch_size=1000, force=True)
+                finally:
+                    await engine.close()
 
-                if to_delete == 0:
-                    return []
+            stats = sovereign_run(_run_guarded_gc())
+            total_deleted = int(stats.get("deleted_facts", 0))
+            if total_deleted == 0:
+                return []
 
-                logger.info("TombstoneMonitor: Evicting %d logically deleted facts.", to_delete)
+            logger.info("TombstoneMonitor: Evicted %d logically deleted facts.", total_deleted)
 
-                initial_size = self.db_path.stat().st_size
+            if total_deleted > 5000:
+                from cortex.database.core import connect as db_connect
 
-                # 1. Main Delete — cascade handles vector indexes
-                # depending on schema triggers.
-                # But to be safe, we explicitly clear related vectors if cascade is off.
-                cursor.execute("SELECT id FROM facts WHERE is_tombstoned = 1")
-
-                # Batch deletes to avoid mammoth transactions,
-                # pulling directly from C-layer limits.
-                total_deleted = 0
-                while True:
-                    batch_rows = cursor.fetchmany(1000)
-                    if not batch_rows:
-                        break
-
-                    batch = [r[0] for r in batch_rows]
-                    id_list = ",".join("?" * len(batch))
-
-                    try:
-                        cursor.execute("BEGIN IMMEDIATE")
-                        # nosec B608 — Validated local table structure, batch parameterized.
-                        cursor.execute(
-                            f"DELETE FROM fact_embeddings WHERE fact_id IN ({id_list})", batch
-                        )
-                        cursor.execute(f"DELETE FROM facts_fts WHERE rowid IN ({id_list})", batch)
-                        cursor.execute(f"DELETE FROM facts WHERE id IN ({id_list})", batch)
-                        conn.commit()
-                        total_deleted += len(batch)
-                    except sqlite3.Error as batch_err:
-                        conn.rollback()
-                        logger.warning(
-                            "Batch sweep issue (might be ignored if tables missing): %s", batch_err
-                        )
-
-                # Optimizing standard FTS / standard fragmentation if heavy sweeping occurred
-                if total_deleted > 5000:
+                with db_connect(self.db_path, timeout=5, isolation_level=None) as conn:  # type: ignore[type-error]
                     conn.execute("PRAGMA optimize")
 
+            try:
                 final_size = self.db_path.stat().st_size
-                freed_mb = (initial_size - final_size) / (1024 * 1024)
+            except OSError:
+                final_size = initial_size
+            freed_mb = (initial_size - final_size) / (1024 * 1024)
 
-                return [
-                    TombstoneAlert(
-                        deleted_facts=total_deleted,
-                        freed_mb=freed_mb,
-                        message=(f"Barrido Nocturno completado: {total_deleted} facts purgados."),
-                    )
-                ]
+            return [
+                TombstoneAlert(
+                    deleted_facts=total_deleted,
+                    freed_mb=freed_mb,
+                    message=(f"Barrido Nocturno completado: {total_deleted} facts purgados."),
+                )
+            ]
 
         except (ValueError, OSError, RuntimeError, sqlite3.Error) as e:
             logger.error("Tombstone Sweep failed: %s", e)

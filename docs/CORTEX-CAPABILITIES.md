@@ -109,7 +109,7 @@ OS-native secret vault (e.g. macOS Keychain)
 Application key retrieval
     │
     ▼
-Fernet-based authenticated encryption (AES-128-CBC + HMAC-SHA256)
+Tenant-scoped AES-256-GCM authenticated encryption
     │
     ▼
 Encrypted blob persisted in SQLite
@@ -122,7 +122,7 @@ Conceptual example:
 
 ```python
 master_key = keyring.get_password("cortex", "master_key")
-ciphertext = fernet.encrypt(fact.content.encode())
+ciphertext = encrypter.encrypt_str(fact.content, tenant_id=tenant_id)
 store_encrypted(ciphertext)
 ```
 
@@ -364,14 +364,14 @@ With topology, intelligence can crystallize into system.
 
 ## Technical Precision Notes
 
-### Fernet
+### Encryption Envelope
 
-Do not document Fernet as if it were simply AES-128-CBC.
-That would be technically incomplete.
+CORTEX fact content uses tenant-scoped AES-256-GCM. Do not describe the current
+runtime as Fernet unless a specific legacy compatibility path is being discussed.
 
 Correct characterization:
-- **Fernet-based authenticated encryption**
-- AES-128-CBC + HMAC-SHA256 under Fernet envelope
+- **AES-256-GCM authenticated encryption**
+- Tenant-scoped key derivation before persistence
 
 ### Positioning Statement
 

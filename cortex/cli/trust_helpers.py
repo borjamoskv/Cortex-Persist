@@ -127,6 +127,71 @@ def _check_chain_integrity(conn) -> tuple[bool, int]:
     return violations == 0, violations
 
 
+def run_verify_all(db: str) -> dict:
+    """Run the unified verification report over all ledger surfaces."""
+    from cortex.ledger.store import LedgerStore
+    from cortex.ledger.verifier import LedgerVerifier
+
+    store = LedgerStore(db)
+    verifier = LedgerVerifier(store)
+    return verifier.verify_all()
+
+
+def _section_checked_count(section: dict) -> str:
+    for key in (
+        "checked_events",
+        "checked_transactions",
+        "checked_checkpoints",
+        "checked_facts",
+    ):
+        if key in section:
+            return str(section[key])
+    return "-"
+
+
+def render_verify_all_report(result: dict) -> None:
+    """Render a compact, human-readable verify-all report."""
+    sections = result.get("sections", {})
+    table = Table(title="CORTEX Verify All")
+    table.add_column("Surface", style="bold")
+    table.add_column("Status")
+    table.add_column("Checked", justify="right")
+    table.add_column("Notes")
+
+    for name, section in sections.items():
+        skipped = section.get("skipped", False)
+        valid = section.get("valid", False)
+        if skipped:
+            status = "[yellow]SKIPPED[/yellow]"
+            notes = section.get("reason", "")
+        elif valid:
+            status = "[green]VALID[/green]"
+            notes = ""
+        else:
+            status = "[red]INVALID[/red]"
+            notes = f"{len(section.get('violations', []))} violation(s)"
+        table.add_row(name, status, _section_checked_count(section), notes)
+
+    console.print(table)
+
+    violations = result.get("violations", {})
+    if violations:
+        detail = Table(title="Verification Violations")
+        detail.add_column("Surface", style="bold red")
+        detail.add_column("Violation")
+        for surface, surface_violations in violations.items():
+            for violation in surface_violations[:10]:
+                detail.add_row(surface, str(violation))
+        console.print(detail)
+
+    verdict = (
+        "[bold green]All ledger surfaces are VALID[/bold green]"
+        if result.get("valid")
+        else "[bold red]Ledger verification FAILED[/bold red]"
+    )
+    console.print(Panel(verdict, title="Verdict"))
+
+
 def _get_audit_trail(conn, project: str, limit: int):
     """Internal helper to get the audit trail rows."""
     from cortex.cli.errors import err_empty_results

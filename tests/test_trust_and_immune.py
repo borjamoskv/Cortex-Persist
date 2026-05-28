@@ -6,7 +6,7 @@ that the cognitive_fingerprint key is present in the output dict.
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -168,10 +168,14 @@ class TestBayesianTrustUpdater:
         engine.get_conn = AsyncMock(return_value=conn_obj)
 
         updater = BayesianTrustUpdater(engine)
-        result = await updater.update(1, Signal.CONFIRM)
+        with patch("cortex.engine.mutation_engine.MUTATION_ENGINE.apply", new_callable=AsyncMock) as apply:
+            result = await updater.update(1, Signal.CONFIRM)
 
         assert result.old_confidence == "C1"
         assert result.posterior_mean > 0.1  # moved toward higher confidence
+        apply.assert_awaited_once()
+        assert apply.await_args.kwargs["event_type"] == "score_update"
+        assert apply.await_args.kwargs["payload"]["confidence"] == result.new_confidence
 
     @pytest.mark.asyncio
     async def test_contradict_lowers_confidence(self):
@@ -184,9 +188,11 @@ class TestBayesianTrustUpdater:
         engine.get_conn = AsyncMock(return_value=conn_obj)
 
         updater = BayesianTrustUpdater(engine)
-        result = await updater.update(1, Signal.CONTRADICT)
+        with patch("cortex.engine.mutation_engine.MUTATION_ENGINE.apply", new_callable=AsyncMock) as apply:
+            result = await updater.update(1, Signal.CONTRADICT)
         # posterior mean of C5 prior after contradict should drop
         assert result.posterior_mean < 0.9
+        apply.assert_awaited_once()
 
     @pytest.mark.asyncio
     async def test_fact_not_found_raises(self):
@@ -212,7 +218,8 @@ class TestBayesianTrustUpdater:
         engine.get_conn = AsyncMock(return_value=conn_obj)
 
         updater = BayesianTrustUpdater(engine)
-        result = await updater.update(1, "replicate")  # str, not Signal enum
+        with patch("cortex.engine.mutation_engine.MUTATION_ENGINE.apply", new_callable=AsyncMock):
+            result = await updater.update(1, "replicate")  # str, not Signal enum
         assert result.signal == "replicate"
 
 

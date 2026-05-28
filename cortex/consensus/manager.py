@@ -5,8 +5,9 @@ from __future__ import annotations
 import logging
 import math
 import uuid
-from typing import Optional
+from typing import Any, Optional
 
+from cortex.consensus.vote_ledger import ImmutableVoteLedger
 from cortex.engine.slashing import SlashingEngine
 from cortex.telemetry.metrics import metrics
 from cortex.telemetry.pulse import PULSE
@@ -42,11 +43,12 @@ class ConsensusManager:
         agent: str,
         value: int,
         agent_id: Optional[str] = None,
+        tenant_id: Optional[str] = None,
     ) -> float:
         """Legacy v1 vote path. DEPRECATED. Redirects to vote_v2()."""
         # Purge: Redirect to v2 logic
         target_agent = agent_id or agent
-        return await self.vote_v2(fact_id, target_agent, value)
+        return await self.vote_v2(fact_id, target_agent, value, tenant_id=tenant_id)
 
     async def register_agent(
         self,
@@ -72,14 +74,22 @@ class ConsensusManager:
         agent_id: str,
         value: int,
         reason: Optional[str] = None,
+        tenant_id: Optional[str] = None,
     ) -> float:
         if value not in (-1, 0, 1):
             raise ValueError(f"vote value must be -1, 0, or 1, got {value}")
 
         async with self.engine.session() as conn:
+            fact_tenant_id = await self._resolve_fact_tenant(conn, fact_id)
+            effective_tenant_id = tenant_id or fact_tenant_id
+            if fact_tenant_id != effective_tenant_id:
+                raise ValueError(
+                    f"Fact {fact_id} belongs to tenant {fact_tenant_id}, not {effective_tenant_id}"
+                )
+
             cursor = await conn.execute(
-                "SELECT reputation_score FROM agents WHERE id = ? AND is_active = 1",
-                (agent_id,),
+                "SELECT reputation_score FROM agents WHERE id = ? AND tenant_id = ? AND is_active = 1",
+                (agent_id, effective_tenant_id),
             )
             agent = await cursor.fetchone()
             if not agent:
@@ -87,7 +97,11 @@ class ConsensusManager:
                 if self._signal_bus:
                     self._signal_bus.emit(
                         "error:consensus:agent_not_found",
-                        payload={"agent_id": agent_id, "fact_id": fact_id},
+                        payload={
+                            "agent_id": agent_id,
+                            "fact_id": fact_id,
+                            "tenant_id": effective_tenant_id,
+                        },
                         source="consensus_manager",
                     )
 
@@ -95,29 +109,30 @@ class ConsensusManager:
                 metrics.inc(
                     "cortex_consensus_failures_total",
                     labels={"reason": "agent_not_found"},
-                    meta={"agent_id": agent_id, "fact_id": fact_id},
+                    meta={"agent_id": agent_id, "fact_id": fact_id, "tenant_id": effective_tenant_id},
                 )
                 # Notify Pulse Registry of the shadow detection
                 PULSE.inc(
                     "cortex_consensus_failures_shadow_total", labels={"reason": "agent_not_found"}
                 )
 
-                raise ValueError(f"Agent {agent_id} not found")
+                raise ValueError(f"Agent {agent_id} not found for tenant {effective_tenant_id}")
 
             rep = agent[0]
 
             if value == 0:
                 await conn.execute(
-                    "DELETE FROM consensus_votes_v2 WHERE fact_id = ? AND agent_id = ?",
-                    (fact_id, agent_id),
+                    "DELETE FROM consensus_votes_v2 "
+                    "WHERE fact_id = ? AND agent_id = ? AND tenant_id = ?",
+                    (fact_id, agent_id, effective_tenant_id),
                 )
                 action = "unvote_v2"
             else:
                 await conn.execute(
                     "INSERT OR REPLACE INTO consensus_votes_v2 "
-                    "(fact_id, agent_id, vote, vote_weight, agent_rep_at_vote, vote_reason) "
-                    "VALUES (?, ?, ?, ?, ?, ?)",
-                    (fact_id, agent_id, value, rep, rep, reason),
+                    "(fact_id, agent_id, tenant_id, vote, vote_weight, agent_rep_at_vote, vote_reason) "
+                    "VALUES (?, ?, ?, ?, ?, ?, ?)",
+                    (fact_id, agent_id, effective_tenant_id, value, rep, rep, reason),
                 )
                 action = "vote_v2"
 
@@ -128,25 +143,40 @@ class ConsensusManager:
                 {
                     "fact_id": fact_id,
                     "agent_id": agent_id,
+                    "tenant_id": effective_tenant_id,
                     "vote": value,
                     "rep": rep,
                     "reason": reason,
                 },
+                tenant_id=effective_tenant_id,
             )
-            score = await self._recalculate_consensus_v2(fact_id, conn)
+            score = await self._recalculate_consensus_v2(fact_id, conn, effective_tenant_id)
             await conn.commit()
             return score
 
-    async def _recalculate_consensus_v2(self, fact_id: int, conn) -> float:
+    async def _resolve_fact_tenant(self, conn, fact_id: int) -> str:
+        cursor = await conn.execute("SELECT tenant_id FROM facts WHERE id = ?", (fact_id,))
+        row = await cursor.fetchone()
+        if not row:
+            raise ValueError(f"Fact {fact_id} not found")
+        return row[0] or "default"
+
+    async def _recalculate_consensus_v2(
+        self, fact_id: int, conn, tenant_id: str = "default"
+    ) -> float:
         cursor = await conn.execute(
             "SELECT v.vote, v.vote_weight, a.reputation_score "
             "FROM consensus_votes_v2 v "
-            "JOIN agents a ON v.agent_id = a.id "
-            "WHERE v.fact_id = ? AND a.is_active = 1",
-            (fact_id,),
+            "JOIN agents a ON v.agent_id = a.id AND v.tenant_id = a.tenant_id "
+            "WHERE v.fact_id = ? AND v.tenant_id = ? AND a.is_active = 1",
+            (fact_id, tenant_id),
         )
         votes = await cursor.fetchall()
         if not votes:
+            if tenant_id != "default":
+                score = 1.0
+                await self._update_fact_score(fact_id, score, conn)
+                return score
             return await self._recalculate_consensus(fact_id, conn)
 
         # Logarithmic Opinion Pool (LogOP) consensus calculation
@@ -170,7 +200,7 @@ class ConsensusManager:
         await self._update_fact_score(fact_id, score, conn)
 
         # 🛡️ Aplicar Penalización de Entropía (Alignment Drift)
-        await self._update_agent_entropy(fact_id, score, conn)
+        await self._update_agent_entropy(fact_id, score, conn, tenant_id)
 
         return score
 
@@ -230,7 +260,9 @@ class ConsensusManager:
             commit=False,
         )
 
-    async def _update_agent_entropy(self, fact_id: int, final_consensus: float, conn) -> None:
+    async def _update_agent_entropy(
+        self, fact_id: int, final_consensus: float, conn, tenant_id: str = "default"
+    ) -> None:
         """
         Ratifica el consenso final y castiga/premia la entropía de los votantes.
         Implementa el decaimiento de reputación por Deriva de Alineación (Ω2 + Ω5).
@@ -245,7 +277,8 @@ class ConsensusManager:
 
         # 1. Recuperar los votos para este Fact
         cursor = await conn.execute(
-            "SELECT agent_id, vote FROM consensus_votes_v2 WHERE fact_id = ?", (fact_id,)
+            "SELECT agent_id, vote FROM consensus_votes_v2 WHERE fact_id = ? AND tenant_id = ?",
+            (fact_id, tenant_id),
         )
         voters = await cursor.fetchall()
 
@@ -265,9 +298,16 @@ class ConsensusManager:
                         WHEN ? > 0 THEN reputation_score + (1.0 - reputation_score) * 0.05
                         ELSE reputation_score
                     END
-                WHERE id = ? AND is_active = 1
+                WHERE id = ? AND tenant_id = ? AND is_active = 1
             """,
-                (alignment_score, alignment_score, alignment_score, alignment_score, agent_id),
+                (
+                    alignment_score,
+                    alignment_score,
+                    alignment_score,
+                    alignment_score,
+                    agent_id,
+                    tenant_id,
+                ),
             )
 
             # Pulse the reality degradation check
@@ -279,9 +319,36 @@ class ConsensusManager:
                 if self._signal_bus:
                     self._signal_bus.emit(
                         "agent:alignment:drift",
-                        payload={"agent_id": agent_id, "fact_id": fact_id},
+                        payload={"agent_id": agent_id, "fact_id": fact_id, "tenant_id": tenant_id},
                         source="consensus_manager",
                     )
+
+    async def get_votes(self, fact_id: int, tenant_id: str = "default") -> list[dict[str, Any]]:
+        """Return tenant-scoped consensus votes for a fact."""
+        async with self.engine.session() as conn:
+            cursor = await conn.execute(
+                "SELECT v.vote, v.agent_id AS agent, v.created_at, a.reputation_score "
+                "FROM consensus_votes_v2 v "
+                "JOIN agents a ON v.agent_id = a.id AND v.tenant_id = a.tenant_id "
+                "WHERE v.fact_id = ? AND v.tenant_id = ?",
+                (fact_id, tenant_id),
+            )
+            rows = await cursor.fetchall()
+        return [
+            {
+                "vote": row[0],
+                "agent": row[1],
+                "created_at": row[2],
+                "reputation_score": row[3],
+            }
+            for row in rows
+        ]
+
+    async def verify_vote_ledger(self, tenant_id: str = "default") -> dict[str, Any]:
+        """Verify the immutable vote ledger for one tenant."""
+        async with self.engine.session() as conn:
+            ledger = ImmutableVoteLedger(conn)
+            return await ledger.verify_chain_integrity(tenant_id=tenant_id)
 
     async def slash_vote_deviation(
         self,

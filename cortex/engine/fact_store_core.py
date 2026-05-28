@@ -7,10 +7,12 @@ from __future__ import annotations
 
 import json
 import logging
+import sqlite3
 from typing import Any
 
 import aiosqlite
 
+from cortex.engine.fts_policy import should_index_plaintext_fts
 from cortex.memory.temporal import now_iso
 from cortex.utils.canonical import compute_fact_hash
 
@@ -254,8 +256,8 @@ async def _record_causality(
                 "VALUES (?, ?, NULL, ?, ?, ?)",
                 (fact_id, parent_decision_id, EDGE_DERIVED_FROM, project, tenant_id),
             )
-    except Exception:
-        pass
+    except (ImportError, ValueError, RuntimeError, aiosqlite.Error, sqlite3.Error) as exc:
+        logger.debug("Causality side effect skipped for fact %s: %s", fact_id, exc)
 
 
 async def _post_insert_actions(
@@ -277,8 +279,8 @@ async def _post_insert_actions(
             "INSERT INTO enrichment_jobs (fact_id, job_type, status, priority) VALUES (?, 'embedding', 'pending', ?)",
             (fact_id, 1 if fact_type == "decision" else 0),
         )
-    except Exception:
-        pass
+    except (aiosqlite.Error, sqlite3.Error) as exc:
+        logger.debug("Embedding enrichment job skipped for fact %s: %s", fact_id, exc)
 
     if tags:
         await conn.executemany(
@@ -287,12 +289,18 @@ async def _post_insert_actions(
         )
 
     try:
-        await conn.execute(
-            "INSERT INTO facts_fts (rowid, content, project, tags, fact_type, tenant_id) VALUES (?, ?, ?, ?, ?, ?)",
-            (fact_id, content, project, tags_json, fact_type, tenant_id),
+        await _sync_plaintext_fts_row(
+            conn,
+            fact_id=fact_id,
+            content=content,
+            tenant_id=tenant_id,
+            project=project,
+            tags_json=tags_json,
+            fact_type=fact_type,
+            meta=meta,
         )
-    except Exception:
-        pass
+    except (aiosqlite.Error, sqlite3.Error) as exc:
+        logger.debug("FTS plaintext sync skipped for fact %s: %s", fact_id, exc)
 
     await _record_causality(conn, fact_id, project, tenant_id, meta, parent_decision_id)
 
@@ -300,8 +308,46 @@ async def _post_insert_actions(
         from cortex.graph import process_fact_graph
 
         await process_fact_graph(conn, fact_id, content, project, ts, tenant_id)
-    except Exception:
-        pass
+    except (ImportError, ValueError, RuntimeError, OSError, aiosqlite.Error, sqlite3.Error) as exc:
+        logger.debug("Graph side effect skipped for fact %s: %s", fact_id, exc)
+
+
+async def _sync_plaintext_fts_row(
+    conn: aiosqlite.Connection,
+    *,
+    fact_id: int,
+    content: str,
+    tenant_id: str,
+    project: str,
+    tags_json: str,
+    fact_type: str,
+    meta: dict[str, Any],
+) -> None:
+    """Replace any legacy FTS row, then index plaintext only when policy allows it."""
+    fts_columns = await _get_table_columns(conn, "facts_fts")
+    if "content" not in fts_columns:
+        return
+
+    await conn.execute("DELETE FROM facts_fts WHERE rowid = ?", (fact_id,))
+    if not should_index_plaintext_fts(meta):
+        return
+
+    payload: list[tuple[str, Any]] = [
+        ("content", content),
+        ("project", project),
+        ("tags", tags_json),
+        ("fact_type", fact_type),
+    ]
+    if "tenant_id" in fts_columns:
+        payload.append(("tenant_id", tenant_id))
+
+    columns_sql = ", ".join(["rowid", *(column for column, _ in payload)])
+    placeholders_sql = ", ".join("?" for _ in range(len(payload) + 1))
+    values = [fact_id, *(value for _, value in payload)]
+    await conn.execute(
+        f"INSERT INTO facts_fts ({columns_sql}) VALUES ({placeholders_sql})",
+        values,
+    )
 
 
 async def resolve_causality_async(

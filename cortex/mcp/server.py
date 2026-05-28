@@ -1,5 +1,3 @@
-from typing import Optional
-
 """MCP Server Implementation.
 
 Core logic for the CORTEX MCP Trust Server.
@@ -8,7 +6,9 @@ Provides memory, search, and EU AI Act compliance tools.
 
 import json
 import logging
+import os
 from concurrent.futures import ThreadPoolExecutor
+from typing import Optional
 
 from cortex.engine import CortexEngine
 from cortex.extensions.immune.filters.base import Verdict
@@ -25,9 +25,7 @@ from cortex.mcp.core_tools import (
 from cortex.mcp.genesis_tools import register_genesis_tools
 from cortex.mcp.guard import MCPGuard
 from cortex.mcp.health_tools import register_health_tools
-from cortex.mcp.knowledge_watcher import start_knowledge_daemon
 from cortex.mcp.mega_tools import register_mega_tools
-from cortex.mcp.music_tools import register_music_tools
 from cortex.mcp.singularity_tools import register_singularity_tools
 from cortex.mcp.trust_tools import register_trust_tools
 from cortex.mcp.utils import (
@@ -36,11 +34,26 @@ from cortex.mcp.utils import (
     MCPServerConfig,
     SimpleAsyncCache,
 )
-from cortex.swarm import start_swarm_daemon
 
 __all__ = ["create_mcp_server", "run_server"]
 
 logger = logging.getLogger("cortex.mcp.server")
+
+
+def _env_enabled(name: str) -> bool:
+    return os.getenv(name, "0").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _register_optional_music_tools(mcp: "FastMCP") -> None:  # type: ignore[reportInvalidTypeForm]
+    """Register music tools only when their optional audio dependencies are installed."""
+    try:
+        from cortex.mcp.music_tools import register_music_tools
+    except ImportError as exc:
+        logger.info("MCP music tools disabled; optional dependency unavailable: %s", exc)
+        return
+
+    register_music_tools(mcp)
+
 
 _MCP_AVAILABLE = False
 try:
@@ -90,10 +103,12 @@ def _register_store_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ign
     async def cortex_store(
         project: str,
         content: str,
+        tenant_id: str = "default",
         fact_type: str = "knowledge",
         tags: str = "[]",
         source: str = "",
         parent_decision_id: int = 0,
+        meta: str = "{}",
     ) -> str:
         """Store a fact in CORTEX memory.
 
@@ -106,6 +121,12 @@ def _register_store_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ign
             parsed_tags = json.loads(tags) if tags else []
         except (json.JSONDecodeError, TypeError):
             parsed_tags = []
+        try:
+            parsed_meta = json.loads(meta) if meta else {}
+        except (json.JSONDecodeError, TypeError):
+            parsed_meta = {}
+        if not isinstance(parsed_meta, dict):
+            parsed_meta = {}
 
         try:
             MCPGuard.validate_store(project, content, fact_type, parsed_tags)
@@ -120,6 +141,7 @@ def _register_store_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ign
             "project": project,
             "tags": parsed_tags,
             "source": source,
+            "meta": parsed_meta,
         }
         triage = await ctx.membrane.intercept(
             intent_payload,
@@ -142,13 +164,15 @@ def _register_store_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ign
             engine._conn = conn
 
             fact_id = await engine.store(
-                project,
-                content,
-                fact_type,
-                parsed_tags,
-                "stated",
-                source or None,
+                project=project,
+                content=content,
+                tenant_id=tenant_id,
+                fact_type=fact_type,
+                tags=parsed_tags,
+                confidence="stated",
+                source=source or "mcp",
                 parent_decision_id=parent_id,
+                meta=parsed_meta,
             )
 
         ctx.metrics.record_request()
@@ -162,6 +186,7 @@ def _register_search_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ig
     @mcp.tool()
     async def cortex_search(
         query: str,
+        tenant_id: str = "default",
         project: str = "",
         top_k: int = 5,
     ) -> str:
@@ -199,7 +224,7 @@ def _register_search_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ig
             # We can allow HOLD for search, but log it
             logger.info("Search passed with HOLD warnings: %s", triage.risks_assumed)
 
-        cache_key = f"{query}:{project}:{top_k}"
+        cache_key = f"{tenant_id}:{query}:{project}:{top_k}"
         cached_result = ctx.search_cache.get(cache_key)
         if cached_result:
             ctx.metrics.record_request(cached=True)
@@ -210,9 +235,10 @@ def _register_search_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ig
             engine._conn = conn
 
             results = await engine.search(
-                query,
-                project or None,  # type: ignore[reportArgumentType]
-                min(max(top_k, 1), 20),  # type: ignore[reportArgumentType]
+                query=query,
+                tenant_id=tenant_id,
+                project=project or None,
+                top_k=min(max(top_k, 1), 20),
             )
 
         if not results:
@@ -235,14 +261,14 @@ def _register_status_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ig
     """Register the ``cortex_status`` tool on *mcp*."""
 
     @mcp.tool()
-    async def cortex_status() -> str:
+    async def cortex_status(tenant_id: str = "default") -> str:
         """Get CORTEX system status and metrics."""
         await ctx.ensure_ready()
 
         async with ctx.pool.acquire() as conn:
             engine = CortexEngine(ctx.cfg.db_path, auto_embed=False)
             engine._conn = conn
-            stats = await engine.stats()
+            stats = await engine.stats(tenant_id=tenant_id)
 
         m_summary = ctx.metrics.get_summary()
         return (
@@ -250,6 +276,7 @@ def _register_status_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ig
             f"  Facts: {stats.get('total_facts', 0)} total, "
             f"{stats.get('active_facts', 0)} active\n"
             f"  Projects: {stats.get('project_count', 0)}\n"
+            f"  Tenant: {tenant_id}\n"
             f"  Fact Types: {json.dumps(stats.get('types', {}))}\n"
             f"  DB Size: {stats.get('db_size_mb', 0):.1f} MB\n"
             f"  MCP Metrics: {json.dumps(m_summary, indent=2)}"
@@ -260,19 +287,20 @@ def _register_ledger_tool(mcp: "FastMCP", ctx: _MCPContext) -> None:  # type: ig
     """Register the ``cortex_ledger_verify`` tool on *mcp*."""
 
     @mcp.tool()
-    async def cortex_ledger_verify() -> str:
+    async def cortex_ledger_verify(tenant_id: str = "default") -> str:
         """Perform a full integrity check on the CORTEX ledger."""
         await ctx.ensure_ready()
 
         # ImmutableLedger expects a pool, not a single connection
         ledger = ImmutableLedger(ctx.pool)  # type: ignore[reportArgumentType]
-        report = await ledger.audit_integrity_async()
+        report = await ledger.audit_integrity_async(tenant_id=tenant_id)
 
         if report["valid"]:
             return (
                 f"✅ Ledger Integrity: OK\n"
-                f"Transactions verified: {report['tx_checked']}\n"
-                f"Roots checked: {report['roots_checked']}"
+                f"Transactions verified: {report.get('tx_count', report.get('tx_checked', 0))}\n"
+                f"Roots checked: {report.get('roots_checked', 0)}\n"
+                f"Violations: {len(report.get('violations', []))}"
             )
         return (
             f"❌ Ledger Integrity: VIOLATION\n"
@@ -338,7 +366,7 @@ def create_mcp_server(config: MCPServerConfig | None = None) -> "FastMCP":  # ty
     register_health_tools(mcp, ctx)
 
     # Music Engine — Master Orchestrator
-    register_music_tools(mcp)
+    _register_optional_music_tools(mcp)
 
     # V3 Singularity Tools (Skills, Memory, Swarm Queue)
     register_singularity_tools(mcp)
@@ -361,11 +389,16 @@ def run_server(config: Optional[MCPServerConfig] = None) -> None:
 
     cfg = config or _default_config
 
-    # V3 Singularity: Launch Live Knowledge Sync Daemon
-    start_knowledge_daemon()
+    # Experimental daemons are opt-in to keep MCP startup deterministic.
+    if _env_enabled("CORTEX_ENABLE_KNOWLEDGE_DAEMON"):
+        from cortex.mcp.knowledge_watcher import start_knowledge_daemon
 
-    # V4 Singularity: Launch Swarm Autopoiesis Engine
-    start_swarm_daemon()
+        start_knowledge_daemon()
+
+    if _env_enabled("CORTEX_ENABLE_SWARM"):
+        from cortex.swarm import start_swarm_daemon
+
+        start_swarm_daemon()
 
     if cfg.transport == "sse":
         logger.info("Starting CORTEX MCP server v2 (SSE) on %s:%d", cfg.host, cfg.port)

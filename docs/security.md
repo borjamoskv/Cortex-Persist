@@ -51,7 +51,7 @@ Four-role hierarchy with atomic permission scopes:
 
 - **SHA-256 hash-chained ledger** — every mutation is linked to its predecessor
 - **Merkle tree checkpoints** — periodic batch verification
-- **Immutable transactions** — facts are never physically deleted
+- **Tamper-evident transactions** — normal mutations use deprecation/tombstones; explicit purge/GC paths can hard-delete fact rows after logging a transaction
 - **Cryptographic verification** — any fact can be independently verified
 
 ### 5. Privacy Shield (Ingress Guard)
@@ -68,6 +68,13 @@ Three-tier scoring system with automatic response:
 - Critical secrets → force local-only storage
 - Platform secrets → flag and notify
 - Standard secrets → log and tag
+
+Plaintext FTS policy:
+- Fact content is encrypted in `facts.content`.
+- `facts_fts` is a local plaintext search index and is not populated for facts with
+  `privacy_flagged=true` or `privacy_score >= 0.7`.
+- Set `CORTEX_ALLOW_PLAINTEXT_FTS=1` only for an explicit local-only searchability
+  tradeoff; it re-enables plaintext FTS indexing for flagged facts.
 
 ### 6. AST Sandbox
 
