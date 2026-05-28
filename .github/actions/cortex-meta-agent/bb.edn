@@ -1,4 +1,4 @@
 {:paths ["src"]
  :deps {org.babashka/http-client {:mvn/version "0.4.22"}
         cheshire/cheshire {:mvn/version "5.13.0"}
-        io.github.clj-commons/clj-yaml {:mvn/version "1.0.27"}}}
+        clj-commons/clj-yaml {:mvn/version "1.0.27"}}}
