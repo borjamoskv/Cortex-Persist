@@ -59,12 +59,11 @@ class TensorGlialLegion:
         self.file_path = file_path
         self.vsa = VSAEngine(D=self.D, algebra="HRR")
 
-        # OMEGA-X Matrix Memory: shape (N, D), float64 = N*D*8 bytes
-        # N=10000, D=10000 -> 800MB mapped straight to RAM (Zero-Copy)
+        # N=100000, D=10000 -> 4GB mapped straight to RAM (Zero-Copy)
         init_required = not os.path.exists(self.file_path)
         self.agents_tensor = np.memmap(
             self.file_path,
-            dtype="float64",
+            dtype="float32",
             mode="w+" if init_required else "r+",
             shape=(self.num_agents, self.D),
         )
