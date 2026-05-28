@@ -253,10 +253,16 @@ pub async fn run(
                                 url.bright_white()
                             ));
 
-                            let confidence = if payload_label.starts_with("SQLI") && body.to_lowercase().contains("sql") {
-                                "HIGH"
-                            } else if status == 200 && response_length > baseline_len + 100 {
-                                "MEDIUM"
+                            let confidence = if let Some(ref atype) = anomaly {
+                                if atype.contains("SQL_INJECTION") || 
+                                   atype.contains("XSS_REFLECTED") || 
+                                   atype.contains("SSTI_DETECTED") || 
+                                   atype.contains("PATH_TRAVERSAL") || 
+                                   atype.contains("OPEN_REDIRECT") {
+                                    "HIGH"
+                                } else {
+                                    "MEDIUM"
+                                }
                             } else {
                                 "LOW"
                             };
