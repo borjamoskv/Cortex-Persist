@@ -38,4 +38,4 @@ def test_vsa_ledger_hash_and_commit(tmp_path, monkeypatch):
 
     assert entry["hash"] == hv_hash
     assert entry["dim"] == 256
-    assert isinstance(entry["timestamp"], (int, float))
+    assert isinstance(entry["timestamp"], int | float)

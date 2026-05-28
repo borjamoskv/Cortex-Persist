@@ -359,19 +359,17 @@ class InferenceEngine:
 
             from cortex.guards.contradiction_guard import detect_contradictions
             from cortex.config import DB_PATH
-            
+
             # FALSATION PROTOCOL (L7): Prevent entropy leaks by culling contradictory derivations
             conflict_report = await detect_contradictions(
-                new_content=d.content,
-                new_project=d.project,
-                db_path=DB_PATH
+                new_content=d.content, new_project=d.project, db_path=DB_PATH
             )
-            
+
             if conflict_report.has_conflicts and conflict_report.severity in ("high", "medium"):
                 logger.warning(
                     "[FALSATION-GUARD] Culled derived fact due to contradiction. Rule: %s, Severity: %s",
                     d.rule_name,
-                    conflict_report.severity
+                    conflict_report.severity,
                 )
                 continue
 
