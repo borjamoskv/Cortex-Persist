@@ -19,6 +19,12 @@ on:
           - reflexion
           - workflow-audit
           - self-evolve
+          - pandora-assault
+          - aletheia-audit
+          - colmena-quorum
+          - aegis-guard
+          - eidolon-sim
+          - thanatos-purge
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -97,3 +103,16 @@ jobs:
         uses: ./.github/actions/cortex-meta-agent
         with:
           action: self-evolve
+
+  # ─── New Agents ──────────────────────────────────────────────
+  new-agents:
+    if: github.event_name == 'workflow_dispatch' && contains(fromJson('["pandora-assault", "aletheia-audit", "colmena-quorum", "aegis-guard", "eidolon-sim", "thanatos-purge"]'), github.event.inputs.action)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: ∞ MÖBIUS — ${{ github.event.inputs.action }}
+        uses: ./.github/actions/cortex-meta-agent
+        with:
+          action: ${{ github.event.inputs.action }}

@@ -4,7 +4,7 @@ description: >
   self-healing, PR analysis, issue triage, and workflow auto-evolution.
 inputs:
   action:
-    description: 'Action to execute: pr-analyze, issue-triage, reflexion, workflow-audit, self-evolve'
+    description: 'Action to execute: pr-analyze, issue-triage, reflexion, workflow-audit, self-evolve, pandora-assault, aletheia-audit, colmena-quorum, aegis-guard, eidolon-sim, thanatos-purge'
     required: true
     default: 'reflexion'
   pr-number:
