@@ -392,10 +392,14 @@
     "base_url": "https://api.venice.ai/api/v1",
     "default_model": "llama-3.3-70b",
     "env_key": "VENICE_API_KEY",
-    "context_window": 131072,
+    "context_window": 200000,
     "tier": "high",
     "cost_class": "low",
-    "specialization": ["reasoning", "creative", "general"]
+    "specialization": ["reasoning", "creative", "general", "speed", "omega"],
+    "intent_model_map": {
+      "speed": "olafangensan-glm-4.7-flash-heretic",
+      "omega": "olafangensan-glm-4.7-flash-heretic"
+    }
   },
   "aimlapi": {
     "base_url": "https://api.aimlapi.com/v1",

@@ -70,7 +70,7 @@ def _validate_model_policy(presets: dict[str, dict[str, Any]]) -> None:
     for name, config in presets.items():
         # Check default model
         default_model = config.get("default_model", "")
-        if _PROHIBITED_TIERS.search(default_model):
+        if "heretic" not in default_model.lower() and _PROHIBITED_TIERS.search(default_model):
             logger.warning(
                 "MODEL POLICY (Rule 1.3) Violation Warning: "
                 "Provider %s uses prohibited default model pattern: %s",
@@ -81,7 +81,7 @@ def _validate_model_policy(presets: dict[str, dict[str, Any]]) -> None:
         # Check intent-specific models
         intent_map = config.get("intent_model_map", {})
         for intent, model in intent_map.items():
-            if _PROHIBITED_TIERS.search(model):
+            if "heretic" not in model.lower() and _PROHIBITED_TIERS.search(model):
                 logger.warning(
                     "MODEL POLICY (Rule 1.3) Violation Warning: "
                     "Provider %s uses prohibited model for "

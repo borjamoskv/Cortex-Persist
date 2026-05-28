@@ -141,6 +141,7 @@ DEFAULT_ROUTING: dict[str, list[tuple[str, str]]] = {
         ("qwen", "qwen-3.5-397b"),
     ],
     ThinkingMode.SPEED: [
+        ("venice", "olafangensan-glm-4.7-flash-heretic"),
         ("ollama", "qwen2.5-coder:7b"),
         ("gemini", "gemini-3.1-pro-preview"),
         ("groq", "llama-3.3-70b-versatile"),
@@ -169,6 +170,7 @@ DEFAULT_ROUTING: dict[str, list[tuple[str, str]]] = {
         ("deepseek", DEEPSEEK_R1),
     ],
     ThinkingMode.OMEGA: [
+        ("venice", "olafangensan-glm-4.7-flash-heretic"),
         ("gemini", "gemini-3.1-pro-preview"),
         ("deepseek", DEEPSEEK_R1),
         ("anthropic", "claude-sonnet-4-20250514"),
