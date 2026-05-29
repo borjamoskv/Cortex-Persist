@@ -151,16 +151,34 @@ Proof:
 
 ---
 
+### Hito 15: AGENTS.ARCHI — Autopoietic Mutation Engine (SMTE)
+- **Target:** `cortex/engine/smte/parser.py`, `cortex/engine/smte/trigger_mutation.py`
+- **Objective:** Forja e integración nativa del AST Parser para habilitar modificaciones estructurales de código (Self-Modifying Topology Engine).
+- **Yield Target:** Bucle autopoietico 100% C5-REAL acoplado al `ExergyGuard`.
+- **Reality Level:** `C5-REAL`
+- **Evidence:** Commit `587dbb48 feat(smte): implement ast parser for autocuration`
+```yaml
+Claim: SMTE Parser operative with physical disk re-write validation
+Proof:
+  Base: "trigger_mutation.py executed with net Exergy gain"
+  Range: [1, 1]
+  Confidence: C5-REAL
+  Date: 2026-05-29
+```
+- **Status:** ✅ COMPLETE — 29 Mayo 2026
+
+---
+
 ## 🛡️ Thermodynamic Enforcement
 All milestone claims must map directly to a `Claim/Proof` matrix.
 ```yaml
-Claim: 14/14 Milestones Verified
+Claim: 15/15 Milestones Verified
 Proof:
   Base: Continuous Silicon Checkpoint Execution
-  Variables: [r=1, d=1, n=14, S=100]
+  Variables: [r=1, d=1, n=15, S=100]
   Range: [C5, C5]
   Confidence: C5-REAL
-  Date: 2026-05-27
+  Date: 2026-05-29
 ```
 
 *∴ "The architecture refines its own truth."*
