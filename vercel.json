@@ -12,25 +12,25 @@
     {
       "source": "/:path*",
       "has": [{ "type": "host", "value": "cortexpersist.dev" }],
-      "destination": "https://github.com/borjamoskv/Cortex-Persist/tree/main/docs",
+      "destination": "https://cortexpersist.com/:path*",
       "permanent": false
     },
     {
       "source": "/:path*",
       "has": [{ "type": "host", "value": "www.cortexpersist.dev" }],
-      "destination": "https://github.com/borjamoskv/Cortex-Persist/tree/main/docs",
+      "destination": "https://cortexpersist.com/:path*",
       "permanent": false
     },
     {
       "source": "/:path*",
       "has": [{ "type": "host", "value": "cortexpersist.org" }],
-      "destination": "https://github.com/borjamoskv/Cortex-Persist",
+      "destination": "https://cortexpersist.com/:path*",
       "permanent": false
     },
     {
       "source": "/:path*",
       "has": [{ "type": "host", "value": "www.cortexpersist.org" }],
-      "destination": "https://github.com/borjamoskv/Cortex-Persist",
+      "destination": "https://cortexpersist.com/:path*",
       "permanent": false
     }
   ],
