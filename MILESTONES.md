@@ -169,13 +169,22 @@ Proof:
 
 ---
 
+### Hito 16: Qwen-Omega LLM Mutator (AGENTS.ARCHI)
+- **Target:** `cortex/engine/smte/llm_mutator.py`
+- **Objective:** Acoplamiento directo del modelo LLM (Qwen) al motor de mutación AST, eliminando mutadores hardcodeados y permitiendo re-escritura estocástica guiada por Exergía.
+- **Yield Target:** Generación de código Python sintácticamente válido desde el modelo y cristalización vía `ExergyGuard`.
+- **Reality Level:** `C5-REAL`
+- **Status:** ✅ COMPLETE — 29 Mayo 2026
+
+---
+
 ## 🛡️ Thermodynamic Enforcement
 All milestone claims must map directly to a `Claim/Proof` matrix.
 ```yaml
-Claim: 15/15 Milestones Verified
+Claim: 16/16 Milestones Verified
 Proof:
   Base: Continuous Silicon Checkpoint Execution
-  Variables: [r=1, d=1, n=15, S=100]
+  Variables: [r=1, d=1, n=16, S=100]
   Range: [C5, C5]
   Confidence: C5-REAL
   Date: 2026-05-29
