@@ -37,9 +37,14 @@ def _make_trace(
 ) -> ExecutionTrace:
     t = ExecutionTrace(task_id=task_id, objective=objective, strategy_genome_hash="abc")
     for i in range(n_steps):
-        t.add_step(ExecutionStep(
-            step_id=i + 1, action=f"use_tool:{tool}", outcome=outcome, tool_used=tool,
-        ))
+        t.add_step(
+            ExecutionStep(
+                step_id=i + 1,
+                action=f"use_tool:{tool}",
+                outcome=outcome,
+                tool_used=tool,
+            )
+        )
     t.finalize(outcome)
     return t
 
@@ -148,7 +153,10 @@ class TestWorldModel:
 
         # Surprising failure of a reliable tool
         surprise_step = ExecutionStep(
-            step_id=1, action="use", outcome=StepOutcome.FAILURE, tool_used="reliable",
+            step_id=1,
+            action="use",
+            outcome=StepOutcome.FAILURE,
+            tool_used="reliable",
         )
         surprise = wm.surprise(surprise_step)
         assert surprise > 0.7  # Very surprising
@@ -188,8 +196,12 @@ def _make_traces_batch(
     for i in range(n):
         tool = tools[i % len(tools)]
         outcome = StepOutcome.SUCCESS if (i / n) < success_rate else StepOutcome.FAILURE
-        t = ExecutionTrace(task_id=f"t{i}", objective=f"{objective} target", strategy_genome_hash="abc")
-        t.add_step(ExecutionStep(step_id=1, action=f"use_tool:{tool}", outcome=outcome, tool_used=tool))
+        t = ExecutionTrace(
+            task_id=f"t{i}", objective=f"{objective} target", strategy_genome_hash="abc"
+        )
+        t.add_step(
+            ExecutionStep(step_id=1, action=f"use_tool:{tool}", outcome=outcome, tool_used=tool)
+        )
         if outcome == StepOutcome.FAILURE and i > 0:
             t.add_step(ExecutionStep(step_id=2, action="retry", outcome=StepOutcome.FAILURE))
         t.finalize(outcome)
@@ -226,7 +238,9 @@ class TestDreamEngine:
         traces = []
         for i in range(8):
             t = ExecutionTrace(task_id=f"t{i}", objective="test", strategy_genome_hash="abc")
-            t.add_step(ExecutionStep(step_id=1, action="danger_action", outcome=StepOutcome.SUCCESS))
+            t.add_step(
+                ExecutionStep(step_id=1, action="danger_action", outcome=StepOutcome.SUCCESS)
+            )
             t.add_step(ExecutionStep(step_id=2, action="crash_action", outcome=StepOutcome.FAILURE))
             t.finalize(StepOutcome.FAILURE)
             traces.append(t)
@@ -371,9 +385,7 @@ class TestGenomeCrossover:
         cx = GenomeCrossover()
         parent_a = default_genome()
         parent_b = default_genome()
-        parent_b.heuristics.append(
-            Heuristic(name="unique_b", description="only in B", weight=0.7)
-        )
+        parent_b.heuristics.append(Heuristic(name="unique_b", description="only in B", weight=0.7))
         parent_b.heuristics[-1].activate(success=True)
 
         child = cx.crossover(parent_a, parent_b)
@@ -424,14 +436,18 @@ class TestSpecialization:
     def test_recommend_routing(self):
         sd = SpecializationDetector()
         strategies = {
-            "searcher": SearchStrategy(StrategyGenome(
-                heuristics=[Heuristic(name="h", description="", weight=0.5)],
-                tool_priority=["search", "grep"],
-            )),
-            "deployer": SearchStrategy(StrategyGenome(
-                heuristics=[Heuristic(name="h", description="", weight=0.5)],
-                tool_priority=["deploy", "build"],
-            )),
+            "searcher": SearchStrategy(
+                StrategyGenome(
+                    heuristics=[Heuristic(name="h", description="", weight=0.5)],
+                    tool_priority=["search", "grep"],
+                )
+            ),
+            "deployer": SearchStrategy(
+                StrategyGenome(
+                    heuristics=[Heuristic(name="h", description="", weight=0.5)],
+                    tool_priority=["deploy", "build"],
+                )
+            ),
         }
         specs = sd.detect(strategies)
         routing = sd.recommend_routing("search", specs)

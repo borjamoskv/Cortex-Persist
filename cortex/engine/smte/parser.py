@@ -10,6 +10,7 @@ from typing import Any
 
 logger = logging.getLogger("cortex.engine.smte.parser")
 
+
 class AgentASTParser:
     """
     Transcription engine for SMTE. Loads Python source code into memory
@@ -20,30 +21,31 @@ class AgentASTParser:
         self.filepath = filepath
         self.source_code = self._load_source()
         self.tree = ast.parse(self.source_code, filename=self.filepath)
-        
+
     def _load_source(self) -> str:
-        with open(self.filepath, encoding='utf-8') as f:
+        with open(self.filepath, encoding="utf-8") as f:
             return f.read()
-            
+
     def get_topology(self) -> dict[str, Any]:
         """
         Extracts the structural topology (classes, functions, docs) of the agent.
         """
         topology = {"classes": [], "functions": []}
-        
+
         for node in ast.iter_child_nodes(self.tree):
             if isinstance(node, ast.ClassDef):
-                topology["classes"].append({
-                    "name": node.name,
-                    "docstring": ast.get_docstring(node),
-                    "methods": [n.name for n in node.body if isinstance(n, ast.FunctionDef)]
-                })
+                topology["classes"].append(
+                    {
+                        "name": node.name,
+                        "docstring": ast.get_docstring(node),
+                        "methods": [n.name for n in node.body if isinstance(n, ast.FunctionDef)],
+                    }
+                )
             elif isinstance(node, ast.FunctionDef):
-                topology["functions"].append({
-                    "name": node.name,
-                    "docstring": ast.get_docstring(node)
-                })
-                
+                topology["functions"].append(
+                    {"name": node.name, "docstring": ast.get_docstring(node)}
+                )
+
         return topology
 
     def apply_mutation(self, mutator_func) -> bool:
@@ -55,7 +57,7 @@ class AgentASTParser:
             # Verify the tree is still valid Python
             ast.fix_missing_locations(self.tree)
             try:
-                compile(self.tree, filename=self.filepath, mode='exec')
+                compile(self.tree, filename=self.filepath, mode="exec")
                 return True
             except Exception as e:
                 logger.error(f"Mutation failed compilation check: {e}")
@@ -68,9 +70,9 @@ class AgentASTParser:
         """
         target_path = output_path or self.filepath
         new_source = ast.unparse(self.tree)
-        
-        with open(target_path, 'w', encoding='utf-8') as f:
+
+        with open(target_path, "w", encoding="utf-8") as f:
             f.write(new_source)
-            
+
         logger.info(f"SMTE: Rewrote agent DNA to {target_path}")
         return new_source

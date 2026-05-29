@@ -36,29 +36,35 @@ class OuroborosCompiler:
 
     def analyze_limerence(self, source_code: str) -> dict[str, Any]:
         """Analyze code for high maintenance cost vs utility.
-        
+
         Calculates C(entity) via heuristics: LLM network calls and cyclomatic complexity.
         """
         try:
             tree = ast.parse(source_code)
             llm_calls = 0
             complexity = 0
-            
+
             for node in ast.walk(tree):
                 if isinstance(node, ast.Call):
                     if isinstance(node.func, ast.Attribute):
-                        if node.func.attr in ("complete", "chat", "predict", "generate", "mutate_prompt"):
+                        if node.func.attr in (
+                            "complete",
+                            "chat",
+                            "predict",
+                            "generate",
+                            "mutate_prompt",
+                        ):
                             llm_calls += 1
                 elif isinstance(node, (ast.If, ast.For, ast.While)):
                     complexity += 1
-                    
+
             # Formula: Heavy penalty for LLM calls (entropy source), minor for structural branching
             cost = (llm_calls * 10) + complexity
             return {
                 "llm_calls": llm_calls,
                 "complexity": complexity,
                 "maintenance_cost": cost,
-                "is_limerent": cost > 15
+                "is_limerent": cost > 15,
             }
         except SyntaxError:
             return {"is_limerent": False, "maintenance_cost": 0}
@@ -67,7 +73,7 @@ class OuroborosCompiler:
         """Compile an agent into its minimal deterministic path."""
         target_path = Path(target_file).resolve()
         logger.info(f"OuroborosCompiler: Ingesting {target_path.name}")
-        
+
         if not target_path.exists():
             logger.error("Target file does not exist.")
             return False
@@ -96,7 +102,7 @@ class OuroborosCompiler:
 
         try:
             compiled_code = await self.mutator.mutate_prompt(prompt, source)
-            
+
             # Clean formatting
             compiled_code = compiled_code.strip()
             if compiled_code.startswith("```python"):
@@ -111,16 +117,20 @@ class OuroborosCompiler:
             temp_path = target_path.with_suffix(".ouroboros.tmp")
             with open(temp_path, "w", encoding="utf-8") as f:
                 f.write(compiled_code + "\n")
-                
+
             # Verify the mutation
             if not enforce_weismann_barrier(str(temp_path), None):
-                logger.error("OuroborosCompiler: Weismann barrier rejected the compilation. Syntax/entropy failure.")
+                logger.error(
+                    "OuroborosCompiler: Weismann barrier rejected the compilation. Syntax/entropy failure."
+                )
                 temp_path.unlink(missing_ok=True)
                 return False
 
             # Replace the old entity with the compressed minimal path
             temp_path.replace(target_path)
-            logger.info(f"OuroborosCompiler: Entity {target_path.name} compressed successfully (Exergía Maximizada).")
+            logger.info(
+                f"OuroborosCompiler: Entity {target_path.name} compressed successfully (Exergía Maximizada)."
+            )
 
             # Persist to ledger
             await self._engine.store(
@@ -137,9 +147,11 @@ class OuroborosCompiler:
             logger.error(f"OuroborosCompiler: Compilation failed - {e}")
             return False
 
+
 if __name__ == "__main__":
     import asyncio
     import sys
+
     logging.basicConfig(level=logging.INFO)
     if len(sys.argv) > 1:
         compiler = OuroborosCompiler()

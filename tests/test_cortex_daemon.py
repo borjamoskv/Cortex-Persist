@@ -41,8 +41,10 @@ class TestCortexDaemon:
         monkeypatch.setattr(_outbox_mod, "_global_ring_buffer", None)
 
         original_init = _outbox_mod.ZeroCopyRingBuffer.__init__
+
         def mocked_init(self, capacity=100):
             original_init(self, capacity=capacity)
+
         monkeypatch.setattr(_outbox_mod.ZeroCopyRingBuffer, "__init__", mocked_init)
 
         # Reset thread-local connections to avoid cross-contamination

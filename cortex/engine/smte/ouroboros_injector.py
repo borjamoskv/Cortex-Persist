@@ -29,51 +29,48 @@ def delivery_report(err, msg):
 def inject_synthetic_friction(broker="localhost:9092", num_events=500):
     """Inyecta una carga de exergía y entropía en el bus system.friction."""
     producer = Producer({"bootstrap.servers": broker})
-    
+
     # Pool de 10 agentes virtuales
     agent_ids = [f"Agent-Ω-{i}" for i in range(10)]
-    
+
     logger.info(f"⚡ Iniciando inyección de {num_events} eventos hacia {broker}")
-    
+
     for i in range(num_events):
         agent_id = random.choice(agent_ids)
-        
+
         # Determinismo de prueba: Agentes pares son limerentes (alta entropía, baja señal)
         # Agentes impares son cristalinos (alta señal, baja entropía)
         is_limerent = int(agent_id.split("-")[-1]) % 2 == 0
-        
+
         if is_limerent:
             signal = random.uniform(0.1, 0.8)
             entropy = random.uniform(3.0, 12.0)  # C > U
         else:
-            signal = random.uniform(5.0, 15.0)   # U > C
+            signal = random.uniform(5.0, 15.0)  # U > C
             entropy = random.uniform(0.1, 1.5)
-            
+
         event = {
             "event_id": str(uuid.uuid4()),
             "agent_id": agent_id,
             "type": "FRICTION_SEEN",
             "timestamp": int(time.time()),
-            "payload": {
-                "signal": signal,
-                "entropy": entropy,
-                "target": None
-            }
+            "payload": {"signal": signal, "entropy": entropy, "target": None},
         }
-        
+
         producer.produce(
-            "system.friction", 
-            value=json.dumps(event).encode("utf-8"), 
-            callback=delivery_report
+            "system.friction", value=json.dumps(event).encode("utf-8"), callback=delivery_report
         )
         producer.poll(0)
-        
+
         # Pausa ligera para emular streaming natural
         if i % 50 == 0:
             time.sleep(0.05)
-            
+
     producer.flush()
-    logger.info("✅ Inyección completada. El Stream Kernel debería haber podado a los agentes pares.")
+    logger.info(
+        "✅ Inyección completada. El Stream Kernel debería haber podado a los agentes pares."
+    )
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)

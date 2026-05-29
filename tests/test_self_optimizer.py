@@ -168,9 +168,7 @@ async def test_optimizer_no_data(optimizer: SelfOptimizer):
 
 
 @pytest.mark.asyncio
-async def test_optimizer_timeout_increase(
-    tracker: PerformanceTracker, optimizer: SelfOptimizer
-):
+async def test_optimizer_timeout_increase(tracker: PerformanceTracker, optimizer: SelfOptimizer):
     """Optimizer increases timeout when p99 approaches current timeout."""
     # Set current timeout
     optimizer._tuned_params["api"] = {"timeout_ms": 100.0}
@@ -184,7 +182,8 @@ async def test_optimizer_timeout_increase(
     event = await optimizer.optimize()
 
     timeout_decisions = [
-        d for d in event.decisions
+        d
+        for d in event.decisions
         if d.type == TuningType.TIMEOUT_ADJUSTMENT and d.subsystem == "api"
     ]
     assert len(timeout_decisions) == 1
@@ -207,7 +206,8 @@ async def test_optimizer_batch_reduction_on_errors(
     event = await optimizer.optimize()
 
     batch_decisions = [
-        d for d in event.decisions
+        d
+        for d in event.decisions
         if d.type == TuningType.BATCH_SIZE_TUNING and d.subsystem == "worker"
     ]
     assert len(batch_decisions) == 1
@@ -227,7 +227,8 @@ async def test_optimizer_batch_increase_on_success(
     event = await optimizer.optimize()
 
     batch_decisions = [
-        d for d in event.decisions
+        d
+        for d in event.decisions
         if d.type == TuningType.BATCH_SIZE_TUNING and d.subsystem == "fast_worker"
     ]
     assert len(batch_decisions) == 1
@@ -235,9 +236,7 @@ async def test_optimizer_batch_increase_on_success(
 
 
 @pytest.mark.asyncio
-async def test_optimizer_strategy_demotion(
-    tracker: PerformanceTracker, optimizer: SelfOptimizer
-):
+async def test_optimizer_strategy_demotion(tracker: PerformanceTracker, optimizer: SelfOptimizer):
     """Optimizer demotes strategies with low success rate."""
     for _ in range(20):
         tracker.record_execution("db", 10.0, True)
@@ -250,18 +249,13 @@ async def test_optimizer_strategy_demotion(
 
     event = await optimizer.optimize()
 
-    demotions = [
-        d for d in event.decisions
-        if d.type == TuningType.STRATEGY_DEMOTION
-    ]
+    demotions = [d for d in event.decisions if d.type == TuningType.STRATEGY_DEMOTION]
     assert len(demotions) >= 1
     assert "WEAK_STRAT" in demotions[0].parameter
 
 
 @pytest.mark.asyncio
-async def test_optimizer_strategy_promotion(
-    tracker: PerformanceTracker, optimizer: SelfOptimizer
-):
+async def test_optimizer_strategy_promotion(tracker: PerformanceTracker, optimizer: SelfOptimizer):
     """Optimizer promotes strategies with high success rate."""
     for _ in range(20):
         tracker.record_execution("api", 10.0, True)
@@ -271,10 +265,7 @@ async def test_optimizer_strategy_promotion(
 
     event = await optimizer.optimize()
 
-    promotions = [
-        d for d in event.decisions
-        if d.type == TuningType.STRATEGY_PROMOTION
-    ]
+    promotions = [d for d in event.decisions if d.type == TuningType.STRATEGY_PROMOTION]
     assert len(promotions) >= 1
     assert "SUPER_FIX" in promotions[0].parameter
 
@@ -334,9 +325,7 @@ async def test_optimizer_stats(optimizer: SelfOptimizer):
 
 
 @pytest.mark.asyncio
-async def test_optimizer_history(
-    tracker: PerformanceTracker, optimizer: SelfOptimizer
-):
+async def test_optimizer_history(tracker: PerformanceTracker, optimizer: SelfOptimizer):
     """Optimization events are recorded in history."""
     for _ in range(20):
         tracker.record_execution("test", 10.0, True)
@@ -371,9 +360,7 @@ async def test_tuned_parameter_queries(optimizer: SelfOptimizer):
 
 
 @pytest.mark.asyncio
-async def test_full_optimization_loop(
-    tracker: PerformanceTracker, optimizer: SelfOptimizer
-):
+async def test_full_optimization_loop(tracker: PerformanceTracker, optimizer: SelfOptimizer):
     """End-to-end test: populate metrics → optimize → verify tunings."""
     # Phase 1: System running with moderate issues
     for _ in range(30):

@@ -118,7 +118,7 @@ class _TrendWindow:
 
         ss_xx = sum((x - mean_x) ** 2 for x in xs)
         ss_yy = sum((y - mean_y) ** 2 for y in ys)
-        ss_xy = sum((x - mean_x) * (y - mean_y) for x, y in zip(xs, ys))
+        ss_xy = sum((x - mean_x) * (y - mean_y) for x, y in zip(xs, ys, strict=False))
 
         if ss_xx == 0:
             return 0.0, mean_y, 0.0
@@ -126,13 +126,11 @@ class _TrendWindow:
         slope = ss_xy / ss_xx
         intercept = mean_y - slope * mean_x
 
-        r_squared = (ss_xy ** 2) / (ss_xx * ss_yy) if ss_yy > 0 else 0.0
+        r_squared = (ss_xy**2) / (ss_xx * ss_yy) if ss_yy > 0 else 0.0
 
         return slope, intercept, r_squared
 
-    def extrapolate_to_threshold(
-        self, threshold: float
-    ) -> float | None:
+    def extrapolate_to_threshold(self, threshold: float) -> float | None:
         """Estimate seconds until value reaches threshold.
 
         Returns None if trend is flat or moving away from threshold.
@@ -237,17 +235,13 @@ class PredictiveHealer:
             self._error_trends[subsystem] = _TrendWindow(max_size=100)
         self._error_trends[subsystem].push(rate, timestamp)
 
-    def record_latency(
-        self, subsystem: str, p99_ms: float, timestamp: float | None = None
-    ) -> None:
+    def record_latency(self, subsystem: str, p99_ms: float, timestamp: float | None = None) -> None:
         """Record a latency percentile for drift detection."""
         if subsystem not in self._latency_trends:
             self._latency_trends[subsystem] = _TrendWindow(max_size=100)
         self._latency_trends[subsystem].push(p99_ms, timestamp)
 
-    def record_error_event(
-        self, subsystem: str, timestamp: float | None = None
-    ) -> None:
+    def record_error_event(self, subsystem: str, timestamp: float | None = None) -> None:
         """Record an individual error event for pattern detection."""
         t = time.monotonic() if timestamp is None else timestamp
         if subsystem not in self._error_timestamps:
@@ -312,9 +306,7 @@ class PredictiveHealer:
 
         return predictions
 
-    def _predict_error_rate(
-        self, subsystem: str, trend: _TrendWindow
-    ) -> Prediction | None:
+    def _predict_error_rate(self, subsystem: str, trend: _TrendWindow) -> Prediction | None:
         """Predict if error rate is trending toward threshold."""
         if trend.size < self._min_samples:
             return None
@@ -342,9 +334,7 @@ class PredictiveHealer:
             recommended_action="PREEMPTIVE_BATCH_REDUCTION",
         )
 
-    def _predict_latency_drift(
-        self, subsystem: str, trend: _TrendWindow
-    ) -> Prediction | None:
+    def _predict_latency_drift(self, subsystem: str, trend: _TrendWindow) -> Prediction | None:
         """Predict if latency is drifting toward timeout."""
         if trend.size < self._min_samples:
             return None
@@ -379,9 +369,7 @@ class PredictiveHealer:
             recommended_action="PREEMPTIVE_TIMEOUT_INCREASE",
         )
 
-    def _predict_recurring(
-        self, subsystem: str, timestamps: deque[float]
-    ) -> Prediction | None:
+    def _predict_recurring(self, subsystem: str, timestamps: deque[float]) -> Prediction | None:
         """Detect recurring error patterns (periodic failures)."""
         if len(timestamps) < 4:
             return None
@@ -459,16 +447,10 @@ class PredictiveHealer:
         return {
             "total_predictions": self._total_predictions,
             "total_preventions": self._total_preventions,
-            "prevention_rate": (
-                self._total_preventions / max(1, self._total_predictions)
-            ),
+            "prevention_rate": (self._total_preventions / max(1, self._total_predictions)),
             "tracked_subsystems": list(self._error_trends.keys()),
-            "error_trend_samples": {
-                k: v.size for k, v in self._error_trends.items()
-            },
-            "latency_trend_samples": {
-                k: v.size for k, v in self._latency_trends.items()
-            },
+            "error_trend_samples": {k: v.size for k, v in self._error_trends.items()},
+            "latency_trend_samples": {k: v.size for k, v in self._latency_trends.items()},
             "cortisol_samples": self._cortisol_trend.size,
         }
 

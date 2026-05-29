@@ -187,9 +187,7 @@ class SelfOptimizer:
         self._strategy_rankings: dict[str, list[str]] = {}
 
         # History
-        self._events: deque[OptimizationEvent] = deque(
-            maxlen=self.config.max_event_history
-        )
+        self._events: deque[OptimizationEvent] = deque(maxlen=self.config.max_event_history)
 
         # Baselines for revert detection
         self._baselines: dict[str, dict[str, float]] = {}
@@ -278,9 +276,7 @@ class SelfOptimizer:
 
         return event
 
-    def _generate_decisions(
-        self, snapshot: PerformanceSnapshot
-    ) -> list[TuningDecision]:
+    def _generate_decisions(self, snapshot: PerformanceSnapshot) -> list[TuningDecision]:
         """Analyze snapshot and generate tuning decisions."""
         decisions: list[TuningDecision] = []
 
@@ -306,9 +302,7 @@ class SelfOptimizer:
 
         return decisions
 
-    def _tune_timeout(
-        self, subsystem: str, metrics: Any
-    ) -> list[TuningDecision]:
+    def _tune_timeout(self, subsystem: str, metrics: Any) -> list[TuningDecision]:
         """Tune timeout based on latency percentiles."""
         decisions = []
         current = self._get_param(subsystem, "timeout_ms", 5000.0)
@@ -320,15 +314,17 @@ class SelfOptimizer:
                 current * (1.0 + self.config.timeout_adjustment_factor),
             )
             if new_val != current:
-                decisions.append(TuningDecision(
-                    type=TuningType.TIMEOUT_ADJUSTMENT,
-                    subsystem=subsystem,
-                    parameter="timeout_ms",
-                    old_value=current,
-                    new_value=round(new_val, 1),
-                    reason=f"p99 ({metrics.p99:.1f}ms) approaching timeout ({current:.1f}ms)",
-                    confidence=0.85,
-                ))
+                decisions.append(
+                    TuningDecision(
+                        type=TuningType.TIMEOUT_ADJUSTMENT,
+                        subsystem=subsystem,
+                        parameter="timeout_ms",
+                        old_value=current,
+                        new_value=round(new_val, 1),
+                        reason=f"p99 ({metrics.p99:.1f}ms) approaching timeout ({current:.1f}ms)",
+                        confidence=0.85,
+                    )
+                )
 
         # If p99 is much lower than timeout, decrease it (save resources)
         elif metrics.p99 > 0 and metrics.p99 < current * 0.2:
@@ -337,21 +333,21 @@ class SelfOptimizer:
                 current * (1.0 - self.config.timeout_adjustment_factor * 0.5),
             )
             if new_val != current:
-                decisions.append(TuningDecision(
-                    type=TuningType.TIMEOUT_ADJUSTMENT,
-                    subsystem=subsystem,
-                    parameter="timeout_ms",
-                    old_value=current,
-                    new_value=round(new_val, 1),
-                    reason=f"p99 ({metrics.p99:.1f}ms) far below timeout ({current:.1f}ms)",
-                    confidence=0.7,
-                ))
+                decisions.append(
+                    TuningDecision(
+                        type=TuningType.TIMEOUT_ADJUSTMENT,
+                        subsystem=subsystem,
+                        parameter="timeout_ms",
+                        old_value=current,
+                        new_value=round(new_val, 1),
+                        reason=f"p99 ({metrics.p99:.1f}ms) far below timeout ({current:.1f}ms)",
+                        confidence=0.7,
+                    )
+                )
 
         return decisions
 
-    def _tune_batch_size(
-        self, subsystem: str, metrics: Any
-    ) -> list[TuningDecision]:
+    def _tune_batch_size(self, subsystem: str, metrics: Any) -> list[TuningDecision]:
         """Tune batch size based on error rate and latency."""
         decisions = []
         current = self._get_param(subsystem, "batch_size", 100)
@@ -363,15 +359,17 @@ class SelfOptimizer:
                 int(current * (1.0 - self.config.batch_adjustment_factor)),
             )
             if new_val != current:
-                decisions.append(TuningDecision(
-                    type=TuningType.BATCH_SIZE_TUNING,
-                    subsystem=subsystem,
-                    parameter="batch_size",
-                    old_value=current,
-                    new_value=new_val,
-                    reason=f"High error rate ({metrics.error_rate:.2%}) → reduce batch pressure",
-                    confidence=0.80,
-                ))
+                decisions.append(
+                    TuningDecision(
+                        type=TuningType.BATCH_SIZE_TUNING,
+                        subsystem=subsystem,
+                        parameter="batch_size",
+                        old_value=current,
+                        new_value=new_val,
+                        reason=f"High error rate ({metrics.error_rate:.2%}) → reduce batch pressure",
+                        confidence=0.80,
+                    )
+                )
 
         # Low error rate + low latency → increase batch (more throughput)
         elif metrics.error_rate < 0.02 and metrics.p90 < 100:
@@ -380,21 +378,21 @@ class SelfOptimizer:
                 int(current * (1.0 + self.config.batch_adjustment_factor)),
             )
             if new_val != current:
-                decisions.append(TuningDecision(
-                    type=TuningType.BATCH_SIZE_TUNING,
-                    subsystem=subsystem,
-                    parameter="batch_size",
-                    old_value=current,
-                    new_value=new_val,
-                    reason=f"Low error ({metrics.error_rate:.2%}) + fast p90 ({metrics.p90:.1f}ms)",
-                    confidence=0.65,
-                ))
+                decisions.append(
+                    TuningDecision(
+                        type=TuningType.BATCH_SIZE_TUNING,
+                        subsystem=subsystem,
+                        parameter="batch_size",
+                        old_value=current,
+                        new_value=new_val,
+                        reason=f"Low error ({metrics.error_rate:.2%}) + fast p90 ({metrics.p90:.1f}ms)",
+                        confidence=0.65,
+                    )
+                )
 
         return decisions
 
-    def _tune_breaker(
-        self, subsystem: str, metrics: Any
-    ) -> list[TuningDecision]:
+    def _tune_breaker(self, subsystem: str, metrics: Any) -> list[TuningDecision]:
         """Tune circuit breaker threshold based on error patterns."""
         decisions = []
         current = self._get_param(subsystem, "breaker_threshold", 5)
@@ -403,35 +401,37 @@ class SelfOptimizer:
         if metrics.error_rate < 0.01 and metrics.total_executions > 100:
             new_val = min(self.config.max_breaker_threshold, current + 1)
             if new_val != current:
-                decisions.append(TuningDecision(
-                    type=TuningType.BREAKER_THRESHOLD,
-                    subsystem=subsystem,
-                    parameter="breaker_threshold",
-                    old_value=current,
-                    new_value=new_val,
-                    reason=f"Very low error rate ({metrics.error_rate:.4f}) — increase tolerance",
-                    confidence=0.6,
-                ))
+                decisions.append(
+                    TuningDecision(
+                        type=TuningType.BREAKER_THRESHOLD,
+                        subsystem=subsystem,
+                        parameter="breaker_threshold",
+                        old_value=current,
+                        new_value=new_val,
+                        reason=f"Very low error rate ({metrics.error_rate:.4f}) — increase tolerance",
+                        confidence=0.6,
+                    )
+                )
 
         # High error bursts → be more sensitive (lower threshold)
         elif metrics.error_rate > 0.2:
             new_val = max(self.config.min_breaker_threshold, current - 1)
             if new_val != current:
-                decisions.append(TuningDecision(
-                    type=TuningType.BREAKER_THRESHOLD,
-                    subsystem=subsystem,
-                    parameter="breaker_threshold",
-                    old_value=current,
-                    new_value=new_val,
-                    reason=f"High error rate ({metrics.error_rate:.2%}) — trip faster",
-                    confidence=0.75,
-                ))
+                decisions.append(
+                    TuningDecision(
+                        type=TuningType.BREAKER_THRESHOLD,
+                        subsystem=subsystem,
+                        parameter="breaker_threshold",
+                        old_value=current,
+                        new_value=new_val,
+                        reason=f"High error rate ({metrics.error_rate:.2%}) — trip faster",
+                        confidence=0.75,
+                    )
+                )
 
         return decisions
 
-    def _tune_strategies(
-        self, subsystem: str, metrics: Any
-    ) -> list[TuningDecision]:
+    def _tune_strategies(self, subsystem: str, metrics: Any) -> list[TuningDecision]:
         """Promote winning strategies and demote losers."""
         decisions = []
 
@@ -441,41 +441,43 @@ class SelfOptimizer:
 
             # Demotion
             if strat.success_rate < self.config.strategy_demotion_threshold:
-                decisions.append(TuningDecision(
-                    type=TuningType.STRATEGY_DEMOTION,
-                    subsystem=subsystem,
-                    parameter=f"strategy:{sname}",
-                    old_value="active",
-                    new_value="demoted",
-                    reason=(
-                        f"Strategy '{sname}' success rate "
-                        f"({strat.success_rate:.1%}) below threshold "
-                        f"({self.config.strategy_demotion_threshold:.0%})"
-                    ),
-                    confidence=0.85,
-                ))
+                decisions.append(
+                    TuningDecision(
+                        type=TuningType.STRATEGY_DEMOTION,
+                        subsystem=subsystem,
+                        parameter=f"strategy:{sname}",
+                        old_value="active",
+                        new_value="demoted",
+                        reason=(
+                            f"Strategy '{sname}' success rate "
+                            f"({strat.success_rate:.1%}) below threshold "
+                            f"({self.config.strategy_demotion_threshold:.0%})"
+                        ),
+                        confidence=0.85,
+                    )
+                )
 
             # Promotion
             elif strat.success_rate > self.config.strategy_promotion_threshold:
-                decisions.append(TuningDecision(
-                    type=TuningType.STRATEGY_PROMOTION,
-                    subsystem=subsystem,
-                    parameter=f"strategy:{sname}",
-                    old_value="active",
-                    new_value="promoted",
-                    reason=(
-                        f"Strategy '{sname}' excels "
-                        f"({strat.success_rate:.1%} success, "
-                        f"{strat.avg_latency_ms:.1f}ms avg)"
-                    ),
-                    confidence=0.90,
-                ))
+                decisions.append(
+                    TuningDecision(
+                        type=TuningType.STRATEGY_PROMOTION,
+                        subsystem=subsystem,
+                        parameter=f"strategy:{sname}",
+                        old_value="active",
+                        new_value="promoted",
+                        reason=(
+                            f"Strategy '{sname}' excels "
+                            f"({strat.success_rate:.1%} success, "
+                            f"{strat.avg_latency_ms:.1f}ms avg)"
+                        ),
+                        confidence=0.90,
+                    )
+                )
 
         return decisions
 
-    def _tune_cooldown(
-        self, subsystem: str, metrics: Any
-    ) -> list[TuningDecision]:
+    def _tune_cooldown(self, subsystem: str, metrics: Any) -> list[TuningDecision]:
         """Tune cooldown period between repair attempts."""
         decisions = []
         current = self._get_param(subsystem, "cooldown_s", 5.0)
@@ -487,15 +489,17 @@ class SelfOptimizer:
             if strat.success_rate > 0.9 and strat.avg_latency_ms < 50:
                 new_val = max(self.config.min_cooldown_s, current * 0.7)
                 if abs(new_val - current) > 0.1:
-                    decisions.append(TuningDecision(
-                        type=TuningType.COOLDOWN_ADJUSTMENT,
-                        subsystem=subsystem,
-                        parameter="cooldown_s",
-                        old_value=round(current, 2),
-                        new_value=round(new_val, 2),
-                        reason=f"Fast repairs ({strat.avg_latency_ms:.1f}ms) — reduce cooldown",
-                        confidence=0.65,
-                    ))
+                    decisions.append(
+                        TuningDecision(
+                            type=TuningType.COOLDOWN_ADJUSTMENT,
+                            subsystem=subsystem,
+                            parameter="cooldown_s",
+                            old_value=round(current, 2),
+                            new_value=round(new_val, 2),
+                            reason=f"Fast repairs ({strat.avg_latency_ms:.1f}ms) — reduce cooldown",
+                            confidence=0.65,
+                        )
+                    )
 
         return decisions
 
@@ -529,9 +533,7 @@ class SelfOptimizer:
                 "p99_ms": data.get("p99_ms", 0),
             }
 
-    def _check_degradation(
-        self, snapshot: PerformanceSnapshot
-    ) -> list[TuningDecision]:
+    def _check_degradation(self, snapshot: PerformanceSnapshot) -> list[TuningDecision]:
         """Check if tunings caused performance degradation. Revert if so."""
         reverts = []
 
@@ -544,7 +546,9 @@ class SelfOptimizer:
             baseline_err = baseline.get("error_rate", 0)
 
             # Error rate degraded significantly
-            if baseline_err > 0 and current_err > baseline_err * (1 + self.config.degradation_threshold):
+            if baseline_err > 0 and current_err > baseline_err * (
+                1 + self.config.degradation_threshold
+            ):
                 # Revert all tunings for this subsystem
                 if name in self._tuned_params:
                     logger.warning(
@@ -626,9 +630,7 @@ class SelfOptimizer:
             "total_tunings_applied": self._total_tunings_applied,
             "total_reverts": self._total_reverts,
             "uptime_s": round(time.monotonic() - self._start_time, 2),
-            "active_tunings": sum(
-                len(params) for params in self._tuned_params.values()
-            ),
+            "active_tunings": sum(len(params) for params in self._tuned_params.values()),
             "subsystems_tuned": list(self._tuned_params.keys()),
         }
 

@@ -45,6 +45,7 @@ def enforce_weismann_barrier(target_kernel_file: str, mutator_callback) -> bool:
         # To make it generic, we simply try to compile the mutant file as a module.
         logger.info("[WEISMANN] Running Ontological Falsification (Syntax/Compilation Check)...")
         import sys
+
         try:
             # We run it in a subprocess to prevent namespace poisoning or crashing the main process
             result = subprocess.run(

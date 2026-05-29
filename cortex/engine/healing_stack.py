@@ -155,10 +155,10 @@ class HealingStack:
 
         try:
             result = await self._agent.execute_with_healing(
-                task=task,
+                task,
+                *args,
                 subsystem=subsystem,
                 context=ctx,
-                *args,
                 **kwargs,
             )
 
@@ -247,7 +247,8 @@ class HealingStack:
 
         elif action == "PREEMPTIVE_CONSOLIDATION":
             ENDOCRINE.pulse(
-                HormoneType.SEROTONIN, 0.1,
+                HormoneType.SEROTONIN,
+                0.1,
                 reason="Preemptive consolidation trigger",
             )
 
@@ -370,19 +371,13 @@ class HealingStack:
         agent_health = self._agent.health.to_dict()
         optimizer_stats = self._optimizer.stats
         predictor_stats = self._predictor.stats
-        snapshot = (
-            self._tracker.snapshot().to_dict()
-            if self._tracker.subsystem_names
-            else {}
-        )
+        snapshot = self._tracker.snapshot().to_dict() if self._tracker.subsystem_names else {}
 
         return {
             "agent": agent_health,
             "optimizer": optimizer_stats,
             "predictor": predictor_stats,
             "telemetry": snapshot,
-            "persisted_subsystems": (
-                self._store.subsystems if self._store else []
-            ),
+            "persisted_subsystems": (self._store.subsystems if self._store else []),
             "uptime_s": round(time.monotonic() - self._start_time, 2),
         }

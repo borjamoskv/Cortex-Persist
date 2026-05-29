@@ -121,9 +121,7 @@ class TuningStore:
         for sub, params in all_params.items():
             self.save(sub, params)
 
-        logger.info(
-            "[TUNING_STORE] Snapshot saved: %d subsystems", len(all_params)
-        )
+        logger.info("[TUNING_STORE] Snapshot saved: %d subsystems", len(all_params))
         return self._snapshot_path
 
     def load_snapshot(self) -> dict[str, Any] | None:

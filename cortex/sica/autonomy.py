@@ -82,7 +82,7 @@ class SpeculativeFork:
         original_fitness = strategy.current_fitness
         candidates: list[tuple[SearchStrategy, float, list[str]]] = []
 
-        for i in range(self._n_forks):
+        for _i in range(self._n_forks):
             forked = strategy.fork()
             mutations = self._apply_random_mutations(forked, judgment)
             fitness = self._evaluate_fork(forked, recent_traces)
@@ -94,14 +94,16 @@ class SpeculativeFork:
 
         # Record all fork results
         for i, (f, fitness, muts) in enumerate(candidates):
-            adopted = (i == 0 and best_fitness > original_fitness)
-            self._fork_history.append(ForkResult(
-                fork_id=i,
-                genome_hash=f.genome.genome_hash,
-                fitness=round(fitness, 4),
-                mutations_applied=muts,
-                outcome="adopted" if adopted else "discarded",
-            ))
+            adopted = i == 0 and best_fitness > original_fitness
+            self._fork_history.append(
+                ForkResult(
+                    fork_id=i,
+                    genome_hash=f.genome.genome_hash,
+                    fitness=round(fitness, 4),
+                    mutations_applied=muts,
+                    outcome="adopted" if adopted else "discarded",
+                )
+            )
 
         if best_fitness > original_fitness:
             logger.info(
@@ -130,12 +132,14 @@ class SpeculativeFork:
         genome = strategy.genome
 
         for _ in range(n_mutations):
-            action = random.choice([
-                "amplify_random",
-                "attenuate_random",
-                "adjust_exploration",
-                "swap_tool_priority",
-            ])
+            action = random.choice(
+                [
+                    "amplify_random",
+                    "attenuate_random",
+                    "adjust_exploration",
+                    "swap_tool_priority",
+                ]
+            )
 
             if action == "amplify_random" and genome.heuristics:
                 h = random.choice(genome.heuristics)
@@ -158,7 +162,8 @@ class SpeculativeFork:
             elif action == "swap_tool_priority" and len(genome.tool_priority) > 1:
                 i, j = random.sample(range(len(genome.tool_priority)), 2)
                 genome.tool_priority[i], genome.tool_priority[j] = (
-                    genome.tool_priority[j], genome.tool_priority[i],
+                    genome.tool_priority[j],
+                    genome.tool_priority[i],
                 )
                 mutations_applied.append(f"swap_tools:{i}<>{j}")
 
@@ -509,9 +514,7 @@ class MetaMetaController:
 
         # Check if high-confidence judgments actually led to improvements
         # (rough proxy: were there meta-failures despite high confidence?)
-        meta_fails_with_high_conf = sum(
-            1 for j in high_conf if j.is_meta_failure
-        )
+        meta_fails_with_high_conf = sum(1 for j in high_conf if j.is_meta_failure)
 
         if meta_fails_with_high_conf >= 3:
             self._intervention_count += 1
@@ -683,7 +686,8 @@ class AutonomousTick:
         # 2. Synthesize new heuristics from traces
         traces = object_level.trace_archive
         new_heuristics = self._synthesizer.synthesize(
-            traces, strategy.genome.heuristics,
+            traces,
+            strategy.genome.heuristics,
         )
         for h in new_heuristics:
             strategy.mutate_inject(h, reason=f"trace synthesis (tick #{self._tick_count})")
@@ -692,9 +696,7 @@ class AutonomousTick:
         # 3. Meta-meta self-correction
         diagnoses = self._meta_meta.check_and_correct(meta_level, strategy)
         for d in diagnoses:
-            report["actions"].append(
-                f"meta-meta [{d.pattern}]: {d.action_taken}"
-            )
+            report["actions"].append(f"meta-meta [{d.pattern}]: {d.action_taken}")
 
         # 4. Exploration rate decay (cool down over time)
         self._cool_exploration(strategy)
@@ -710,7 +712,8 @@ class AutonomousTick:
         """Prune heuristics with very low fitness and many activations."""
         pruned: list[str] = []
         to_prune = [
-            h for h in strategy.genome.heuristics
+            h
+            for h in strategy.genome.heuristics
             if h.activation_count > 10 and h.fitness < 0.35 and h.weight < 0.15
         ]
         for h in to_prune:

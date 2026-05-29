@@ -100,7 +100,7 @@ class RedisWorkingMemoryL1:
 
         pipe.rpush(bkey, json.dumps(event_dict))
         pipe.incrby(tkey, event.token_count)
-        
+
         # Execute all initial commands in a single roundtrip
         results = pipe.execute()
         current_tokens = int(results[-1])

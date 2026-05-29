@@ -33,7 +33,9 @@ class FrictionAnnihilatorAgent:
         db_val = str(self._db_path) if self._db_path else DEFAULT_DB_PATH
         self._engine = get_engine(db_val)
 
-    async def annihilate_friction(self, target_file: str, error_trace: str, context: str) -> dict[str, Any]:
+    async def annihilate_friction(
+        self, target_file: str, error_trace: str, context: str
+    ) -> dict[str, Any]:
         """Convert a Reality Delta < 0 (error) into Exergy (fix)."""
         logger.info(f"FrictionAnnihilator: Engaging on {target_file}")
         self._ensure_engine()
@@ -56,7 +58,7 @@ class FrictionAnnihilatorAgent:
         try:
             logger.info("FrictionAnnihilator: Generating mutation to resolve friction...")
             fixed_code = await self.mutator.mutate_prompt(prompt, code_content)
-            
+
             # Ensure it is just code, not wrapped in markdown block
             fixed_code = fixed_code.strip()
             if fixed_code.startswith("```python"):
@@ -71,7 +73,9 @@ class FrictionAnnihilatorAgent:
             with open(target_path, "w", encoding="utf-8") as f:
                 f.write(fixed_code + "\n")
 
-            logger.info(f"FrictionAnnihilator: Friction resolved. Exergy generated for {target_path.name}")
+            logger.info(
+                f"FrictionAnnihilator: Friction resolved. Exergy generated for {target_path.name}"
+            )
 
             # Persist the annihilation event to the ledger
             await self._engine.store(
@@ -101,6 +105,7 @@ async def run_friction_cli(target_file: str, error_trace: str):
 
 if __name__ == "__main__":
     import sys
+
     logging.basicConfig(level=logging.INFO)
     if len(sys.argv) > 2:
         asyncio.run(run_friction_cli(sys.argv[1], sys.argv[2]))

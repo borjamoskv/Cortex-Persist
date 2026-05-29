@@ -38,7 +38,8 @@ import logging
 import time
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Coroutine
+from typing import Any
+from collections.abc import Callable, Coroutine
 
 from cortex.engine.autocurative_agent import AutoCurativeAgent
 from cortex.engine._autocurative_config import AutoCurativeConfig
@@ -96,12 +97,8 @@ class SupervisorConfig:
     """Configuration for the CortexSupervisor."""
 
     # Agent configs
-    curative_config: AutoCurativeConfig = field(
-        default_factory=AutoCurativeConfig
-    )
-    optimizer_config: OptimizerConfig = field(
-        default_factory=OptimizerConfig
-    )
+    curative_config: AutoCurativeConfig = field(default_factory=AutoCurativeConfig)
+    optimizer_config: OptimizerConfig = field(default_factory=OptimizerConfig)
 
     # Supervisor loop
     heartbeat_interval_s: float = 10.0
@@ -315,10 +312,10 @@ class CortexSupervisor:
 
         try:
             result = await self._l5.execute_with_healing(
-                task=task,
+                task,
+                *args,
                 subsystem=subsystem,
                 context=ctx,
-                *args,
                 **kwargs,
             )
 
@@ -384,9 +381,7 @@ class CortexSupervisor:
                 event = await self._l6.optimize()
                 if event.applied > 0:
                     self._sync_l6_to_l5()
-                    logger.info(
-                        "[SUPERVISOR] L6 applied %d tunings", event.applied
-                    )
+                    logger.info("[SUPERVISOR] L6 applied %d tunings", event.applied)
                 self._agents["l6"].last_heartbeat = time.monotonic()
             except Exception as e:
                 logger.error("[SUPERVISOR] L6 error: %s", e)
@@ -401,9 +396,9 @@ class CortexSupervisor:
                 predictions = self._predictor.predict_all()
                 self._total_predictions += len(predictions)
                 critical = [
-                    p for p in predictions
-                    if p.is_critical
-                    and p.confidence >= self.config.preemptive_confidence
+                    p
+                    for p in predictions
+                    if p.is_critical and p.confidence >= self.config.preemptive_confidence
                 ]
 
                 for p in critical:
@@ -421,7 +416,7 @@ class CortexSupervisor:
         """Periodic health check of all agents."""
         while self._is_running:
             try:
-                for key, info in self._agents.items():
+                for _key, info in self._agents.items():
                     if info.status == AgentStatus.RUNNING:
                         # Check heartbeat staleness
                         staleness = time.monotonic() - info.last_heartbeat
@@ -582,13 +577,8 @@ class CortexSupervisor:
         """Complete system health report."""
         uptime = time.monotonic() - self._start_time if self._start_time else 0
 
-        agent_reports = {
-            k: v.to_dict() for k, v in self._agents.items()
-        }
-        running_count = sum(
-            1 for v in self._agents.values()
-            if v.status == AgentStatus.RUNNING
-        )
+        agent_reports = {k: v.to_dict() for k, v in self._agents.items()}
+        running_count = sum(1 for v in self._agents.values() if v.status == AgentStatus.RUNNING)
 
         # System status
         if running_count == len(self._agents):

@@ -205,31 +205,37 @@ class DreamEngine:
                     current_run.append(step)
                 else:
                     if len(current_run) >= 2:
-                        fragments.append(_TraceFragment(
-                            steps=list(current_run),
-                            source_trace=trace.task_id,
-                            outcome=outcome_filter,
-                        ))
+                        fragments.append(
+                            _TraceFragment(
+                                steps=list(current_run),
+                                source_trace=trace.task_id,
+                                outcome=outcome_filter,
+                            )
+                        )
                     current_run = []
 
             if len(current_run) >= 2:
-                fragments.append(_TraceFragment(
-                    steps=list(current_run),
-                    source_trace=trace.task_id,
-                    outcome=outcome_filter,
-                ))
+                fragments.append(
+                    _TraceFragment(
+                        steps=list(current_run),
+                        source_trace=trace.task_id,
+                        outcome=outcome_filter,
+                    )
+                )
 
         # Also extract individual successful steps
         for trace in traces:
             for step in trace.steps:
                 if step.outcome == outcome_filter and step.tool_used:
-                    fragments.append(_TraceFragment(
-                        steps=[step],
-                        source_trace=trace.task_id,
-                        outcome=outcome_filter,
-                    ))
+                    fragments.append(
+                        _TraceFragment(
+                            steps=[step],
+                            source_trace=trace.task_id,
+                            outcome=outcome_filter,
+                        )
+                    )
 
-        return fragments[:self._max_fragments]
+        return fragments[: self._max_fragments]
 
     def _recombine_fragments(
         self,
@@ -254,11 +260,13 @@ class DreamEngine:
 
             if mid1 > 0 and mid2 < len(f2.steps):
                 combined_steps = f1.steps[:mid1] + f2.steps[mid2:]
-                recombinations.append(_TraceFragment(
-                    steps=combined_steps,
-                    source_trace=f"recombination:{f1.source_trace}+{f2.source_trace}",
-                    outcome=StepOutcome.SUCCESS,  # Hypothetical
-                ))
+                recombinations.append(
+                    _TraceFragment(
+                        steps=combined_steps,
+                        source_trace=f"recombination:{f1.source_trace}+{f2.source_trace}",
+                        outcome=StepOutcome.SUCCESS,  # Hypothetical
+                    )
+                )
 
         return recombinations
 
@@ -297,9 +305,7 @@ class DreamEngine:
         # Abstraction 2: Step count → outcome correlation
         step_outcomes: dict[int, list[bool]] = defaultdict(list)
         for trace in traces:
-            step_outcomes[trace.step_count].append(
-                trace.final_outcome == StepOutcome.SUCCESS
-            )
+            step_outcomes[trace.step_count].append(trace.final_outcome == StepOutcome.SUCCESS)
 
         for count, outcomes in step_outcomes.items():
             if len(outcomes) >= self._abstraction_threshold:
@@ -367,21 +373,23 @@ class DreamEngine:
                 worst = min(tool_rates, key=tool_rates.get)  # type: ignore[arg-type]
 
                 if tool_rates[best] - tool_rates[worst] > 0.3:
-                    insights.append(DreamInsight(
-                        insight_type="specialization",
-                        description=(
-                            f"For '{task_type}' tasks, '{best}' succeeds "
-                            f"{tool_rates[best]:.0%} vs '{worst}' at "
-                            f"{tool_rates[worst]:.0%}. Prefer '{best}'."
-                        ),
-                        confidence=min(0.9, 0.5 + len(tool_data[best]) * 0.05),
-                        evidence_count=len(tool_data[best]),
-                        proposed_heuristic=Heuristic(
-                            name=f"prefer_{best}_for_{task_type}",
-                            description=f"Use {best} for {task_type} tasks (dream-discovered)",
-                            weight=0.6,
-                        ),
-                    ))
+                    insights.append(
+                        DreamInsight(
+                            insight_type="specialization",
+                            description=(
+                                f"For '{task_type}' tasks, '{best}' succeeds "
+                                f"{tool_rates[best]:.0%} vs '{worst}' at "
+                                f"{tool_rates[worst]:.0%}. Prefer '{best}'."
+                            ),
+                            confidence=min(0.9, 0.5 + len(tool_data[best]) * 0.05),
+                            evidence_count=len(tool_data[best]),
+                            proposed_heuristic=Heuristic(
+                                name=f"prefer_{best}_for_{task_type}",
+                                description=f"Use {best} for {task_type} tasks (dream-discovered)",
+                                weight=0.6,
+                            ),
+                        )
+                    )
 
         return insights
 
@@ -408,12 +416,14 @@ class DreamEngine:
 
         for pattern, count in precursor_counts.most_common(3):
             if count >= 3:
-                insights.append(DreamInsight(
-                    insight_type="anti_pattern",
-                    description=f"Sequence '{pattern}' preceded failure {count} times.",
-                    confidence=min(0.85, 0.4 + count * 0.1),
-                    evidence_count=count,
-                ))
+                insights.append(
+                    DreamInsight(
+                        insight_type="anti_pattern",
+                        description=f"Sequence '{pattern}' preceded failure {count} times.",
+                        confidence=min(0.85, 0.4 + count * 0.1),
+                        evidence_count=count,
+                    )
+                )
 
         return insights
 
@@ -432,12 +442,14 @@ class DreamEngine:
 
         for seq, count in sequence_counts.most_common(3):
             if count >= 3:
-                insights.append(DreamInsight(
-                    insight_type="combo",
-                    description=f"Sequence '{seq}' appeared in {count} successes.",
-                    confidence=min(0.8, 0.3 + count * 0.1),
-                    evidence_count=count,
-                ))
+                insights.append(
+                    DreamInsight(
+                        insight_type="combo",
+                        description=f"Sequence '{seq}' appeared in {count} successes.",
+                        confidence=min(0.8, 0.3 + count * 0.1),
+                        evidence_count=count,
+                    )
+                )
 
         return insights
 
@@ -454,30 +466,38 @@ class DreamEngine:
         old_traces = traces[:mid]
         new_traces = traces[mid:]
 
-        old_success = sum(1 for t in old_traces if t.final_outcome == StepOutcome.SUCCESS) / len(old_traces)
-        new_success = sum(1 for t in new_traces if t.final_outcome == StepOutcome.SUCCESS) / len(new_traces)
+        old_success = sum(1 for t in old_traces if t.final_outcome == StepOutcome.SUCCESS) / len(
+            old_traces
+        )
+        new_success = sum(1 for t in new_traces if t.final_outcome == StepOutcome.SUCCESS) / len(
+            new_traces
+        )
 
         insights: list[DreamInsight] = []
         if old_success - new_success > 0.2:
-            insights.append(DreamInsight(
-                insight_type="abstraction",
-                description=(
-                    f"Performance declining: old success rate {old_success:.0%} "
-                    f"→ recent {new_success:.0%}. Strategy may be staling."
-                ),
-                confidence=0.7,
-                evidence_count=len(traces),
-            ))
+            insights.append(
+                DreamInsight(
+                    insight_type="abstraction",
+                    description=(
+                        f"Performance declining: old success rate {old_success:.0%} "
+                        f"→ recent {new_success:.0%}. Strategy may be staling."
+                    ),
+                    confidence=0.7,
+                    evidence_count=len(traces),
+                )
+            )
         elif new_success - old_success > 0.2:
-            insights.append(DreamInsight(
-                insight_type="abstraction",
-                description=(
-                    f"Performance improving: old {old_success:.0%} "
-                    f"→ recent {new_success:.0%}. Current strategy is working."
-                ),
-                confidence=0.7,
-                evidence_count=len(traces),
-            ))
+            insights.append(
+                DreamInsight(
+                    insight_type="abstraction",
+                    description=(
+                        f"Performance improving: old {old_success:.0%} "
+                        f"→ recent {new_success:.0%}. Current strategy is working."
+                    ),
+                    confidence=0.7,
+                    evidence_count=len(traces),
+                )
+            )
 
         return insights
 
@@ -514,12 +534,14 @@ class DreamEngine:
                     try:
                         if delta > 0:
                             strategy.mutate_amplify(
-                                name, reason=f"dream: {insight.description[:60]}",
+                                name,
+                                reason=f"dream: {insight.description[:60]}",
                                 factor=1 + delta,
                             )
                         elif delta < 0:
                             strategy.mutate_attenuate(
-                                name, reason=f"dream: {insight.description[:60]}",
+                                name,
+                                reason=f"dream: {insight.description[:60]}",
                                 factor=1 + delta,
                             )
                         applied += 1
@@ -530,6 +552,7 @@ class DreamEngine:
 
 
 # ── Internal Types ───────────────────────────────────────────────
+
 
 @dataclass
 class _TraceFragment:
@@ -547,9 +570,7 @@ class _Abstraction:
     def update(self, new_rate: float, new_obs: int) -> None:
         # Weighted running average
         total = self.observations + new_obs
-        self.success_rate = (
-            self.success_rate * self.observations + new_rate * new_obs
-        ) / total
+        self.success_rate = (self.success_rate * self.observations + new_rate * new_obs) / total
         self.observations = total
 
     def to_dict(self) -> dict[str, Any]:

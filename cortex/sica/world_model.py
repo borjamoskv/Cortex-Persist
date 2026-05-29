@@ -54,7 +54,7 @@ class ToolBelief:
 
     tool_name: str
     alpha: float = 1.0  # Prior: 1 success (optimistic prior)
-    beta: float = 1.0   # Prior: 1 failure
+    beta: float = 1.0  # Prior: 1 failure
     last_updated: float = field(default_factory=time.monotonic)
 
     @property
@@ -225,7 +225,8 @@ class WorldModel:
 
             if use_ucb and tool in self._tool_beliefs:
                 score = self._tool_beliefs[tool].ucb_score(
-                    self._total_selections, self._exploration_c,
+                    self._total_selections,
+                    self._exploration_c,
                 )
             else:
                 score = p_success
@@ -369,12 +370,16 @@ class WorldModel:
             belief.observe_failure()
 
     def _update_contextual_belief(
-        self, tool: str, context_key: str, outcome: StepOutcome,
+        self,
+        tool: str,
+        context_key: str,
+        outcome: StepOutcome,
     ) -> None:
         ckey = f"{tool}:{context_key}"
         if ckey not in self._contextual_beliefs:
             self._contextual_beliefs[ckey] = ContextualBelief(
-                tool_name=tool, context_key=context_key,
+                tool_name=tool,
+                context_key=context_key,
             )
         belief = self._contextual_beliefs[ckey].belief
         if outcome == StepOutcome.SUCCESS:
@@ -400,11 +405,13 @@ class WorldModel:
 
         links = []
         for i in range(len(trace.steps) - 1):
-            links.append(_CausalLink(
-                action=trace.steps[i].action,
-                outcome=trace.steps[i].outcome,
-                next_action=trace.steps[i + 1].action,
-            ))
+            links.append(
+                _CausalLink(
+                    action=trace.steps[i].action,
+                    outcome=trace.steps[i].outcome,
+                    next_action=trace.steps[i + 1].action,
+                )
+            )
 
         return _CausalChain(
             trace_id=trace.task_id,
@@ -439,6 +446,7 @@ class WorldModel:
 
 
 # ── Internal dataclasses ─────────────────────────────────────────
+
 
 @dataclass
 class _CausalLink:

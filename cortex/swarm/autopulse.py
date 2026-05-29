@@ -25,14 +25,19 @@ async def process_queue():
 
     try:
         from cortex_rs import AntiLimerenceTopology
+
         anti_limerence = AntiLimerenceTopology()
-        
+
         # Inject Ultramap for Endocrinology mapping
         import sys
-        sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "cortex-core")))
+
+        sys.path.append(
+            os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "cortex-core"))
+        )
         from ultramap import UltramapSubstrate
+
         umap = UltramapSubstrate(capacity=10000)
-        
+
         logger.info("C5-REAL: Anti-Limerence Runtime & Ultramap Endocrinology Engaged")
     except ImportError as e:
         anti_limerence = None
@@ -85,42 +90,53 @@ async def process_queue():
                         _audit_entropy_spike(legion, agent)
                         reality_delta = 0.5  # Positive yield from reality
                     except EntropySpikeException:
-                        reality_delta = -1.0 # Harsh rejection from reality (friction)
+                        reality_delta = -1.0  # Harsh rejection from reality (friction)
                         # We don't raise it yet, we let the Rust topological killer decide if it's limerent
-                    
+
                     # ⚡ ANTI-LIMERENCE RUNTIME (C5-REAL)
                     if anti_limerence:
                         # Incubate the agent's specific theory/task
                         try:
                             anti_limerence.incubate_belief(agent)
                             anti_limerence.inject_friction(agent, reality_delta)
-                            
+
                             purged = anti_limerence.execute_kill_switch()
                             if purged:
-                                logger.error("OUROBOROS KILL-SWITCH: The following agents suffered Epistemic Limerence and were annihilated: %s", purged)
-                                
+                                logger.error(
+                                    "OUROBOROS KILL-SWITCH: The following agents suffered Epistemic Limerence and were annihilated: %s",
+                                    purged,
+                                )
+
                                 # 🌊 SHOCKWAVE DE CORTISOL EN ULTRAMAP
                                 if umap:
                                     # Deterministically hash agent name to get an approximate coordinate in the swarm topology
-                                    agent_hash = int(hashlib.sha256(agent.encode()).hexdigest()[:16], 16)
+                                    agent_hash = int(
+                                        hashlib.sha256(agent.encode()).hexdigest()[:16], 16
+                                    )
                                     agent_hash % umap.capacity
                                     x = (agent_hash % 1000) / 10.0
                                     y = ((agent_hash >> 4) % 1000) / 10.0
                                     z = ((agent_hash >> 8) % 1000) / 10.0
-                                    
+
                                     affected = umap.volume_transmit_hormones(
-                                        origin_x=x, origin_y=y, origin_z=z,
+                                        origin_x=x,
+                                        origin_y=y,
+                                        origin_z=z,
                                         radius=20.0,
                                         dopamine=0.0,
-                                        cortisol=0.9,     # Máximo estrés termodinámico
+                                        cortisol=0.9,  # Máximo estrés termodinámico
                                         serotonin=0.0,
-                                        adrenaline=0.6    # Alerta de combate
+                                        adrenaline=0.6,  # Alerta de combate
                                     )
-                                    logger.warning("🌊 CORTISOL SHOCKWAVE: %s agentes adyacentes estresados por la aniquilación de %s", affected, agent)
+                                    logger.warning(
+                                        "🌊 CORTISOL SHOCKWAVE: %s agentes adyacentes estresados por la aniquilación de %s",
+                                        affected,
+                                        agent,
+                                    )
 
                                 if agent in purged:
                                     logger.error("Agent %s was purged! Halting execution.", agent)
-                                    continue # Skip ledger insertion!
+                                    continue  # Skip ledger insertion!
                         except Exception as e:
                             logger.error("AntiLimerence Execution Failed: %s", e)
 

@@ -100,14 +100,24 @@ class NREMConsolidationCycle:
 
         # Phase 1 & 2: Maturation and Entropy Pruning (Concurrent Execution)
         import asyncio
+
         matured = deceased = pending = pruned = 0
-        
+
         async def run_phase1() -> None:
             nonlocal matured, deceased, pending
             try:
                 stats = await self._consolidator.consolidation_sweep(tenant_id=tenant_id)
-                matured, deceased, pending = stats.get("matured", 0), stats.get("deceased", 0), stats.get("pending", 0)
-                logger.info("NREM Phase 1 (Maturation): matured=%d deceased=%d pending=%d", matured, deceased, pending)
+                matured, deceased, pending = (
+                    stats.get("matured", 0),
+                    stats.get("deceased", 0),
+                    stats.get("pending", 0),
+                )
+                logger.info(
+                    "NREM Phase 1 (Maturation): matured=%d deceased=%d pending=%d",
+                    matured,
+                    deceased,
+                    pending,
+                )
             except (RuntimeError, ValueError, OSError) as exc:
                 msg = f"Phase 1 (Maturation) failed: {exc}"
                 logger.error(msg)
@@ -128,7 +138,7 @@ class NREMConsolidationCycle:
             concurrent_tasks.append(run_phase1())
         if self._pruner is not None:
             concurrent_tasks.append(run_phase2())
-            
+
         if concurrent_tasks:
             await asyncio.gather(*concurrent_tasks)
 

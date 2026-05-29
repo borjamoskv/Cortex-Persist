@@ -274,9 +274,7 @@ async def test_persist_and_restore(sv: CortexSupervisor, tmp_path: Path):
     sv.shutdown()
 
     # New supervisor pointing to same dir
-    sv2 = CortexSupervisor(
-        config=SupervisorConfig(persist_dir=str(tmp_path))
-    )
+    sv2 = CortexSupervisor(config=SupervisorConfig(persist_dir=str(tmp_path)))
     await sv2.boot()
 
     # Tunings restored

@@ -144,13 +144,19 @@ class TestSpeculativeFork:
         traces = []
         for i in range(n):
             t = ExecutionTrace(
-                task_id=f"t{i}", objective="test", strategy_genome_hash="abc",
+                task_id=f"t{i}",
+                objective="test",
+                strategy_genome_hash="abc",
             )
             outcome = StepOutcome.SUCCESS if i % 2 == 0 else StepOutcome.FAILURE
-            t.add_step(ExecutionStep(
-                step_id=1, action="test", outcome=outcome,
-                heuristic_applied="decompose_first",
-            ))
+            t.add_step(
+                ExecutionStep(
+                    step_id=1,
+                    action="test",
+                    outcome=outcome,
+                    heuristic_applied="decompose_first",
+                )
+            )
             t.finalize(outcome)
             traces.append(t)
         return traces
@@ -190,9 +196,14 @@ class TestTraceSynthesizer:
         traces = []
         for i in range(n):
             t = ExecutionTrace(task_id=f"t{i}", objective="test", strategy_genome_hash="abc")
-            t.add_step(ExecutionStep(
-                step_id=1, action="use_tool", outcome=outcome, tool_used=tool,
-            ))
+            t.add_step(
+                ExecutionStep(
+                    step_id=1,
+                    action="use_tool",
+                    outcome=outcome,
+                    tool_used=tool,
+                )
+            )
             t.finalize(outcome)
             traces.append(t)
         return traces
@@ -223,7 +234,9 @@ class TestTraceSynthesizer:
         traces = []
         for i in range(6):
             t = ExecutionTrace(task_id=f"t{i}", objective="test", strategy_genome_hash="abc")
-            t.add_step(ExecutionStep(step_id=1, action="dangerous_action", outcome=StepOutcome.SUCCESS))
+            t.add_step(
+                ExecutionStep(step_id=1, action="dangerous_action", outcome=StepOutcome.SUCCESS)
+            )
             t.add_step(ExecutionStep(step_id=2, action="crash", outcome=StepOutcome.FAILURE))
             t.finalize(StepOutcome.FAILURE)
             traces.append(t)
@@ -261,13 +274,15 @@ class TestMetaMetaController:
         meta = MetaLevel(s)
         controller = MetaMetaController()
 
-        for i, fc in enumerate([
-            FailureClass.TOOL_ERROR,
-            FailureClass.TIMEOUT,
-            FailureClass.CASCADE_BLINDNESS,
-            FailureClass.STALE_PATTERN,
-            FailureClass.WRONG_TOOL_CHOICE,
-        ]):
+        for i, fc in enumerate(
+            [
+                FailureClass.TOOL_ERROR,
+                FailureClass.TIMEOUT,
+                FailureClass.CASCADE_BLINDNESS,
+                FailureClass.STALE_PATTERN,
+                FailureClass.WRONG_TOOL_CHOICE,
+            ]
+        ):
             j = MetaJudgment(trace_id=f"t{i}")
             j.failure_class = fc
             meta._judgment_history.append(j)
@@ -312,7 +327,8 @@ class TestAdaptiveRetry:
         ar = AdaptiveRetry(base_budget=3)
         j = MetaJudgment(trace_id="test")
         j.constitutional_verdict = ConstitutionalVerdict(
-            passed=False, abort_needed=True,
+            passed=False,
+            abort_needed=True,
         )
         assert ar.compute_budget(j) == 0
 
@@ -373,8 +389,11 @@ class TestAutonomousTick:
         g = default_genome()
         # Create a dead heuristic
         dead_h = Heuristic(
-            name="dead_heuristic", description="should be pruned",
-            weight=0.05, activation_count=20, success_count=0,
+            name="dead_heuristic",
+            description="should be pruned",
+            weight=0.05,
+            activation_count=20,
+            success_count=0,
         )
         # Force fitness to be very low
         dead_h.last_activated = 0.0  # Ancient
@@ -408,7 +427,9 @@ class TestAutonomyIntegration:
 
         # Phase 2: Execute some tasks
         obj.begin_task("task-1", "find file")
-        obj.record_step(action="search", outcome=StepOutcome.SUCCESS, heuristic_applied="decompose_first")
+        obj.record_step(
+            action="search", outcome=StepOutcome.SUCCESS, heuristic_applied="decompose_first"
+        )
         trace1 = obj.end_task(StepOutcome.SUCCESS)
         j1 = meta.monitor(trace1)
         meta.control(j1)

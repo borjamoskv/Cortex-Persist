@@ -221,13 +221,15 @@ def list_generations(
         try:
             with open(f) as fh:
                 data = json.load(fh)
-            results.append({
-                "file": str(f),
-                "generation": data.get("generation", 0),
-                "genome_hash": data.get("genome_hash", ""),
-                "saved_at": data.get("saved_at", 0),
-                "heuristic_count": len(data.get("heuristics", [])),
-            })
+            results.append(
+                {
+                    "file": str(f),
+                    "generation": data.get("generation", 0),
+                    "genome_hash": data.get("genome_hash", ""),
+                    "saved_at": data.get("saved_at", 0),
+                    "heuristic_count": len(data.get("heuristics", [])),
+                }
+            )
         except (json.JSONDecodeError, KeyError):
             continue
 

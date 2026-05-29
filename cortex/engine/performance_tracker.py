@@ -68,7 +68,9 @@ class StrategyEffectiveness:
             "successes": self.successes,
             "success_rate": round(self.success_rate, 4),
             "avg_latency_ms": round(self.avg_latency_ms, 3),
-            "min_latency_ms": round(self.min_latency_ms, 3) if self.min_latency_ms != float("inf") else 0.0,
+            "min_latency_ms": round(self.min_latency_ms, 3)
+            if self.min_latency_ms != float("inf")
+            else 0.0,
             "max_latency_ms": round(self.max_latency_ms, 3),
         }
 
@@ -98,9 +100,7 @@ class SubsystemMetrics:
             self._errors.append(now)
             self.total_errors += 1
 
-    def record_repair(
-        self, strategy: str, success: bool, latency_ms: float
-    ) -> None:
+    def record_repair(self, strategy: str, success: bool, latency_ms: float) -> None:
         """Record a repair attempt."""
         if strategy not in self.strategies:
             self.strategies[strategy] = StrategyEffectiveness(strategy=strategy)
@@ -167,9 +167,7 @@ class SubsystemMetrics:
             "mean_latency_ms": round(self.mean_latency, 3),
             "stddev_latency_ms": round(self.stddev_latency, 3),
             "best_strategy": self.best_strategy,
-            "strategies": {
-                k: v.to_dict() for k, v in self.strategies.items()
-            },
+            "strategies": {k: v.to_dict() for k, v in self.strategies.items()},
         }
 
 
@@ -215,9 +213,7 @@ class PerformanceTracker:
             self._subsystems[subsystem] = SubsystemMetrics(subsystem=subsystem)
         return self._subsystems[subsystem]
 
-    def record_execution(
-        self, subsystem: str, latency_ms: float, success: bool
-    ) -> None:
+    def record_execution(self, subsystem: str, latency_ms: float, success: bool) -> None:
         """Record an execution event for a subsystem."""
         self._get_or_create(subsystem).record_execution(latency_ms, success)
 
@@ -238,9 +234,7 @@ class PerformanceTracker:
     def snapshot(self) -> PerformanceSnapshot:
         """Take a point-in-time performance snapshot."""
         now = time.time()
-        subsystem_dicts = {
-            name: m.to_dict() for name, m in self._subsystems.items()
-        }
+        subsystem_dicts = {name: m.to_dict() for name, m in self._subsystems.items()}
 
         # Global aggregates
         total_exec = sum(m.total_executions for m in self._subsystems.values())
@@ -277,44 +271,52 @@ class PerformanceTracker:
 
             # High error rate
             if m.error_rate > 0.1:
-                opportunities.append({
-                    "type": "HIGH_ERROR_RATE",
-                    "subsystem": name,
-                    "value": m.error_rate,
-                    "threshold": 0.1,
-                    "suggestion": "Increase retry count or adjust timeout",
-                })
+                opportunities.append(
+                    {
+                        "type": "HIGH_ERROR_RATE",
+                        "subsystem": name,
+                        "value": m.error_rate,
+                        "threshold": 0.1,
+                        "suggestion": "Increase retry count or adjust timeout",
+                    }
+                )
 
             # High latency variance (unstable)
             if m.stddev_latency > m.mean_latency * 0.5 and m.mean_latency > 0:
-                opportunities.append({
-                    "type": "HIGH_LATENCY_VARIANCE",
-                    "subsystem": name,
-                    "value": m.stddev_latency / m.mean_latency,
-                    "threshold": 0.5,
-                    "suggestion": "Stabilize with circuit breaker or batch reduction",
-                })
+                opportunities.append(
+                    {
+                        "type": "HIGH_LATENCY_VARIANCE",
+                        "subsystem": name,
+                        "value": m.stddev_latency / m.mean_latency,
+                        "threshold": 0.5,
+                        "suggestion": "Stabilize with circuit breaker or batch reduction",
+                    }
+                )
 
             # p99 >> p50 (tail latency problem)
             if m.p50 > 0 and m.p99 > m.p50 * 10:
-                opportunities.append({
-                    "type": "TAIL_LATENCY",
-                    "subsystem": name,
-                    "value": m.p99 / m.p50,
-                    "threshold": 10,
-                    "suggestion": "Add timeout guard or investigate slow path",
-                })
+                opportunities.append(
+                    {
+                        "type": "TAIL_LATENCY",
+                        "subsystem": name,
+                        "value": m.p99 / m.p50,
+                        "threshold": 10,
+                        "suggestion": "Add timeout guard or investigate slow path",
+                    }
+                )
 
             # Underperforming strategy
             for sname, strat in m.strategies.items():
                 if strat.total_attempts >= 5 and strat.success_rate < 0.5:
-                    opportunities.append({
-                        "type": "WEAK_STRATEGY",
-                        "subsystem": name,
-                        "strategy": sname,
-                        "success_rate": strat.success_rate,
-                        "suggestion": f"Replace '{sname}' with alternative strategy",
-                    })
+                    opportunities.append(
+                        {
+                            "type": "WEAK_STRATEGY",
+                            "subsystem": name,
+                            "strategy": sname,
+                            "success_rate": strat.success_rate,
+                            "suggestion": f"Replace '{sname}' with alternative strategy",
+                        }
+                    )
 
         return opportunities
 

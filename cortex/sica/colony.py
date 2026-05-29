@@ -170,14 +170,18 @@ class GenePool:
         self._evict_if_full()
 
         if donated:
-            self._donation_log.append({
-                "agent": agent_id,
-                "fragments": donated,
-                "time": time.monotonic(),
-            })
+            self._donation_log.append(
+                {
+                    "agent": agent_id,
+                    "fragments": donated,
+                    "time": time.monotonic(),
+                }
+            )
             logger.info(
                 "GenePool: %s donated %d fragments (pool size=%d)",
-                agent_id, len(donated), self.size,
+                agent_id,
+                len(donated),
+                self.size,
             )
 
         return donated
@@ -199,16 +203,13 @@ class GenePool:
         Returns the fragments that were adopted.
         """
         existing_names = {h.name for h in strategy.genome.heuristics}
-        candidates = [
-            f for f in self._fragments.values()
-            if f.donor_agent != agent_id
-        ]
+        candidates = [f for f in self._fragments.values() if f.donor_agent != agent_id]
 
         # Filter heuristics we already have
         candidates = [
-            f for f in candidates
-            if f.fragment_type != "heuristic"
-            or f.payload.get("name") not in existing_names
+            f
+            for f in candidates
+            if f.fragment_type != "heuristic" or f.payload.get("name") not in existing_names
         ]
 
         # Sort by value score
@@ -357,8 +358,7 @@ class Tournament:
             mutations = strategy.mutation_log
             if mutations:
                 positive = sum(
-                    1 for m in mutations
-                    if m.fitness_delta is not None and m.fitness_delta > 0
+                    1 for m in mutations if m.fitness_delta is not None and m.fitness_delta > 0
                 )
                 efficiency = positive / len(mutations)
             else:
@@ -383,7 +383,9 @@ class Tournament:
 
         logger.info(
             "Tournament: winner=%s (%.3f), pressure=%.3f",
-            winner, winner_score, selection_pressure,
+            winner,
+            winner_score,
+            selection_pressure,
         )
         return result
 
@@ -657,8 +659,7 @@ class Colony:
         # 4. Specialization
         specs = self.specialization.detect(self._agents)
         report["specializations"] = {
-            k: {"role": v.primary_role, "confidence": v.role_confidence}
-            for k, v in specs.items()
+            k: {"role": v.primary_role, "confidence": v.role_confidence} for k, v in specs.items()
         }
 
         # 5. Crossover: breed the top 2
@@ -675,7 +676,9 @@ class Colony:
             }
             # Inject child genome into gene pool
             child_strategy = SearchStrategy(child)
-            self.gene_pool.donate(f"crossover:{parent_a_id}x{parent_b_id}", child_strategy, min_fitness=0.0)
+            self.gene_pool.donate(
+                f"crossover:{parent_a_id}x{parent_b_id}", child_strategy, min_fitness=0.0
+            )
 
         logger.info("Colony evolve cycle: %s", report)
         return report
@@ -688,13 +691,15 @@ class Colony:
             "tournament_count": len(self.tournament.history),
             "agents": list(self._agents.keys()),
             "specializations": {
-                k: v.primary_role
-                for k, v in self.specialization.detect(self._agents).items()
-            } if self.population > 0 else {},
+                k: v.primary_role for k, v in self.specialization.detect(self._agents).items()
+            }
+            if self.population > 0
+            else {},
         }
 
 
 # ── Helpers ──────────────────────────────────────────────────────
+
 
 def _interleave(a: list[str], b: list[str]) -> list[str]:
     """Interleave two lists."""
