@@ -98,38 +98,39 @@ class NREMConsolidationCycle:
         t0 = time.perf_counter()
         errors: list[str] = []
 
-        # Phase 1: Maturation (silent → stable)
-        matured = deceased = pending = 0
-        if self._consolidator is not None:
+        # Phase 1 & 2: Maturation and Entropy Pruning (Concurrent Execution)
+        import asyncio
+        matured = deceased = pending = pruned = 0
+        
+        async def run_phase1() -> None:
+            nonlocal matured, deceased, pending
             try:
                 stats = await self._consolidator.consolidation_sweep(tenant_id=tenant_id)
-                matured = stats.get("matured", 0)
-                deceased = stats.get("deceased", 0)
-                pending = stats.get("pending", 0)
-                logger.info(
-                    "NREM Phase 1 (Maturation): matured=%d deceased=%d pending=%d",
-                    matured,
-                    deceased,
-                    pending,
-                )
+                matured, deceased, pending = stats.get("matured", 0), stats.get("deceased", 0), stats.get("pending", 0)
+                logger.info("NREM Phase 1 (Maturation): matured=%d deceased=%d pending=%d", matured, deceased, pending)
             except (RuntimeError, ValueError, OSError) as exc:
                 msg = f"Phase 1 (Maturation) failed: {exc}"
                 logger.error(msg)
                 errors.append(msg)
 
-        # Phase 2: Entropy Pruning (depleted → destroyed)
-        pruned = 0
-        if self._pruner is not None:
+        async def run_phase2() -> None:
+            nonlocal pruned
             try:
-                pruned = await self._pruner.prune_cycle(
-                    tenant_id=tenant_id,
-                    project_id=project_id,
-                )
+                pruned = await self._pruner.prune_cycle(tenant_id=tenant_id, project_id=project_id)
                 logger.info("NREM Phase 2 (Pruning): pruned=%d", pruned)
             except (RuntimeError, ValueError, OSError) as exc:
                 msg = f"Phase 2 (Pruning) failed: {exc}"
                 logger.error(msg)
                 errors.append(msg)
+
+        concurrent_tasks = []
+        if self._consolidator is not None:
+            concurrent_tasks.append(run_phase1())
+        if self._pruner is not None:
+            concurrent_tasks.append(run_phase2())
+            
+        if concurrent_tasks:
+            await asyncio.gather(*concurrent_tasks)
 
         # Phase 3: Synaptic Decay (STDP edge weakening)
         edges_decayed = edges_pruned = 0

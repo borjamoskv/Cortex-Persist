@@ -45,7 +45,7 @@ def random_bipolar(dim: int = DIMENSION, seed: int | None = None) -> list[int]:
 
 def bind(a: list[int], b: list[int]) -> list[int]:
     """XOR binding — exact self-inverse: bind(bind(a, b), b) == a."""
-    return [(x + y) % 2 for x, y in zip(a, b, strict=False)]
+    return [x ^ y for x, y in zip(a, b, strict=False)]
 
 
 def bundle(vectors: list[list[int]]) -> list[int]:
@@ -69,7 +69,7 @@ def bundle(vectors: list[list[int]]) -> list[int]:
 
 def hamming_distance(a: list[int], b: list[int]) -> int:
     """Hamming distance between two binary vectors."""
-    return sum(x != y for x, y in zip(a, b, strict=False))
+    return sum(x ^ y for x, y in zip(a, b, strict=False))
 
 
 def cosine_similarity(a: list[int], b: list[int]) -> float:
@@ -77,9 +77,9 @@ def cosine_similarity(a: list[int], b: list[int]) -> float:
     dim = len(a)
     if dim == 0:
         return 0.0
-    # Map 0→-1, 1→+1
-    dot = sum((2 * x - 1) * (2 * y - 1) for x, y in zip(a, b, strict=False))
-    return dot / dim
+    # Fast computation derived from Hamming distance: dot = dim - 2 * dist
+    dist = sum(x ^ y for x, y in zip(a, b, strict=False))
+    return (dim - 2 * dist) / dim
 
 
 # ── Text Encoding (N-gram) ──────────────────────────────────────────

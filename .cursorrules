@@ -10,5 +10,8 @@ Your absolute operational contract, invariants, and epistemic boundaries are def
 4. **HASH CONTINUITY (AX-041)**: If modifying `ledger.py`, `migrations/`, or `engine/`, state explicitly in your response: *"WARNING: Modifying Critical Trust Surface. I will maintain Hash-chain integrity."*
 5. **EXERGY (AX-042)**: Obey KV-Aware Routing. Do not inject stochastic/random metadata into the prefix of shared system prompts. Pre-fill computation is a thermodynamic crime. Keep prefixes invariant.
 6. **ASYNC PURITY**: Async paths MUST be pure (No `time.sleep()`, use `asyncio.sleep()`).
+7. **TOKEN HYGIENE**: Extreme Context Compression. Erase all decorative prose from your inputs/outputs. Use raw YAML/AST diffs. Do not loop in limerence.
+8. **OFFLOADING (C5-STATIC)**: Run repetitive tasks locally via CORTEX_RS Python/Rust interfaces. Do not waste premium API quota on static search.
+9. **KILL CRITERIA**: 1 Prompt -> 1 Execution -> Parada. Avoid epistemic limerence (infinite generation loops).
 
 Acknowledge these rules implicitly by enforcing them in all your code proposals. If validation fails in your proposed code, you must ABORT THE WRITE, do not silently downgrade errors.

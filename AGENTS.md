@@ -27,7 +27,8 @@
 | **[P0]** | **Treat Generative Output as Conjecture** — route ALL state mutations through deterministic guards before persistence | Always |
 | **[P0]** | **Never Bypass Guards** — do not write code that circumvents the Write-Path Contract or downgrades validation errors | Always |
 | **[P0]** | **Verify Hash Continuity** — do not mutate `ledger.py` or any state-persisting path without ensuring cryptographic auditability | Any ledger/engine change |
-| **[P2]** | **Enforce Axioms** — apply AX-041 to AX-046 (see §2) in all architectural decisions | Architecture work |
+| **[P0]** | **Anti-Limerence Protocol (Kill Criteria)** — 1 Prompt -> 1 Execution -> Stop. No infinite generation loops or planning without execution. | All generative loops |
+| **[P2]** | **Enforce Axioms** — apply AX-041 to AX-047 (see §2) in all architectural decisions | Architecture work |
 
 ### Decision Gate §0 — Agent Routing Tree (execute before any action)
 
@@ -81,6 +82,7 @@ All agents operating in this repository MUST self-identify by role before acting
 | **AX-044** | *"La inteligencia se evalúa como capacidad agéntica."* | Observation-Action Loop: inference must induce executable programs, not act as a passive oracle. |
 | **AX-045** | *"Autonomía = elegir qué problemas resolver y persistir."* | Causal chain enforced: PeARL → Ledger → Swarm. No step may be skipped. |
 | **AX-046** | *"La inteligencia fluida sintetiza abstracciones ad-hoc en tiempo de ejecución."* | JIT concept formation: generate mini-program → execute → validate empirically. No static guessing. |
+| **AX-047** | *"La limerencia epistémica quema cuota sin mutar el estado (Exergy Drain)."* | Kill Criteria enforced: 1 Prompt → 1 Mutation → Stop. Prosa decorativa y bucles infinitos de sobre-análisis están terminalmente prohibidos. |
 
 ---
 

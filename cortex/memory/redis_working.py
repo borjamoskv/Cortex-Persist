@@ -86,8 +86,9 @@ class RedisWorkingMemoryL1:
         project_id: str = event.metadata.get("project_id", tenant_id)
         now = time.monotonic()
         log_entry = json.dumps({"ts": now, "pid": f"{tenant_id}:{project_id}"})
-        self._redis.lpush(self._access_log_key(), log_entry)
-        self._redis.ltrim(self._access_log_key(), 0, _ACCESS_LOG_MAXLEN - 1)
+        pipe = self._redis.pipeline()
+        pipe.lpush(self._access_log_key(), log_entry)
+        pipe.ltrim(self._access_log_key(), 0, _ACCESS_LOG_MAXLEN - 1)
 
         bkey = self._buffer_key(tenant_id)
         tkey = self._tokens_key(tenant_id)
@@ -97,13 +98,16 @@ class RedisWorkingMemoryL1:
         # Convert datetime to string for json serialization
         event_dict["timestamp"] = event.timestamp.isoformat()
 
-        self._redis.rpush(bkey, json.dumps(event_dict))
-        self._redis.incrby(tkey, event.token_count)
+        pipe.rpush(bkey, json.dumps(event_dict))
+        pipe.incrby(tkey, event.token_count)
+        
+        # Execute all initial commands in a single roundtrip
+        results = pipe.execute()
+        current_tokens = int(results[-1])
 
         overflow: list[MemoryEvent] = []
 
         # Check eviction
-        current_tokens = int(self._redis.get(tkey) or 0)
         if current_tokens > self._max_tokens:
             # We must fetch the whole buffer to apply priority eviction
             # Note: For strict O(1) we would use simple LPOP, but we keep priority logic for parity.
@@ -162,15 +166,18 @@ class RedisWorkingMemoryL1:
         now = time.monotonic()
         seen: set[str] = set()
         result = []
+        pipe = self._redis.pipeline()
         for item in buffer_data:
             data = json.loads(item)
             pid = data.get("metadata", {}).get("project_id", data.get("tenant_id"))
             if pid not in seen:
                 log_entry = json.dumps({"ts": now, "pid": f"{tenant_id}:{pid}"})
-                self._redis.lpush(self._access_log_key(), log_entry)
-                self._redis.ltrim(self._access_log_key(), 0, _ACCESS_LOG_MAXLEN - 1)
+                pipe.lpush(self._access_log_key(), log_entry)
+                pipe.ltrim(self._access_log_key(), 0, _ACCESS_LOG_MAXLEN - 1)
                 seen.add(pid)
             result.append({"role": data["role"], "content": data["content"]})
+        if seen:
+            pipe.execute()
         return result
 
     def get_access_frequency(self, project_id: str, window_seconds: float = 3600.0) -> float:
