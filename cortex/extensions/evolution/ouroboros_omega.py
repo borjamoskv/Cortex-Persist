@@ -98,6 +98,12 @@ class _AstAnalyzer(ast.NodeVisitor):
                 self.used_imports.add(node.func.value.id)
         self.generic_visit(node)
 
+    def visit_Attribute(self, node):
+        if isinstance(node.value, ast.Name) and node.value.id in ("self", "cls"):
+            if self._current_function:
+                self.call_graph[self._current_function].add(node.attr)
+        self.generic_visit(node)
+
     def visit_Name(self, node):
         if isinstance(node.ctx, ast.Load):
             self.used_imports.add(node.id)
@@ -358,7 +364,7 @@ class OuroborosOmega:
         dead_funcs = {
             f
             for f, callers in called_by.items()
-            if not callers and f.startswith("_") and f != "__init__"
+            if not callers and f.startswith("_") and f != "__init__" and f not in analyzer.used_imports
         }
 
         unused_imports = analyzer.imports - analyzer.used_imports
