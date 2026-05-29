@@ -54,10 +54,10 @@ class FrontierAuditor:
             [self._custom_model] if self._custom_model else ["gemini", "anthropic", "qwen"]
         )
 
-    def _gather_project_context(self, project_name: str) -> str:
+    async def _gather_project_context(self, project_name: str) -> str:
         """Extrae el estado arquitectónico y los facts actuales del proyecto."""
         logger.info("Gathering absolute context for project: %s", project_name)
-        facts = self.engine.search_sync(query=f"project:{project_name}", top_k=100)
+        facts = await self.engine.search(query=f"project:{project_name}", top_k=100)
 
         if not facts:
             return f"[WARN]: No existen facts en CORTEX para el proyecto {project_name}."
@@ -75,7 +75,7 @@ class FrontierAuditor:
         """
         logger.info("Frontier Auditor: Despertando Tríada Distribuida para [ %s ]...", project_name)
 
-        project_context = self._gather_project_context(project_name)
+        project_context = await self._gather_project_context(project_name)
 
         # 1. TOM (El Cuchillo) - Alta temperatura (0.7)
         prompt_tom = f"=== CONTEXTO DEL PROYECTO: {project_name} ===\n{project_context}\n\n=== MISIÓN TOM ===\nExtrae las vulnerabilidades y deuda técnica."
@@ -128,7 +128,7 @@ class FrontierAuditor:
         final_report += f"{oliver_res.content}\n"
 
         # Persist to database
-        self.engine.store_sync(
+        await self.engine.store(
             tenant_id="default",
             project=project_name,
             fact_type="audit_report",
@@ -184,7 +184,7 @@ class FrontierAuditor:
 
         if res.ok:
             # Persist to database as a diagnostic tip
-            self.engine.store_sync(
+            await self.engine.store(
                 tenant_id="default",
                 project="CORTEX",
                 fact_type="diagnostic",
