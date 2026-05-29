@@ -1,0 +1,37 @@
+# claude_manifest.yaml — Batch dispatch manifest for claude_orchestrator.py
+# Reality Level: C5-REAL
+#
+# Usage:
+#   python scripts/claude_orchestrator.py --manifest scripts/data/claude_manifest.yaml -o results.json
+
+defaults:
+  model: claude-sonnet-4-20250514
+  max_tokens: 4096
+  temperature: 0.0
+  system: >-
+    Eres Claude invocado vía CORTEX-Persist C5-REAL Orchestrator.
+    Ejecuta en modo señal pura: cero prosa decorativa, máxima densidad.
+    Responde en YAML cuando sea posible.
+
+requests:
+  - prompt: >-
+      Analiza la arquitectura de un sistema de persistencia criptográfica para agentes AI.
+      Lista los 5 componentes críticos con una línea de justificación cada uno.
+    metadata:
+      user_id: cortex-architect
+      tag: architecture
+
+  - prompt: >-
+      Dado un ledger criptográfico con SHA-256 chain hashing,
+      ¿cuáles son los 3 vectores de ataque más probables y sus mitigaciones?
+    metadata:
+      user_id: cortex-security
+      tag: red-team
+
+  - prompt: >-
+      Genera un esquema Pydantic v2 para un sistema de auditoría de agentes AI
+      que incluya: agent_id, action, timestamp, hash_chain, metadata.
+      Incluye validators y field descriptions.
+    metadata:
+      user_id: cortex-schema
+      tag: codegen
