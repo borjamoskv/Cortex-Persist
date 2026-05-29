@@ -22,7 +22,6 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 
 from cortex import config
-from cortex.auth import get_current_user
 from cortex.extensions.signals.bus import AsyncSignalBus
 
 logger = logging.getLogger("cortex.exergy.middleware")
