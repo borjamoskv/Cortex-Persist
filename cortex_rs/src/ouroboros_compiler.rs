@@ -102,3 +102,59 @@ impl OuroborosExecutionGraph {
         self.fractal_rewrite();
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_c5_real_apoptosis_and_rewrite() {
+        let mut graph = OuroborosExecutionGraph::new();
+        
+        let mut agents = vec![];
+        for i in 0..10 {
+            agents.push(AgentNode {
+                id: format!("A{}", i),
+                goal: "maximizar señal".to_string(),
+                energy: 0.0,
+                friction: 0.0,
+                limerence: 0.0,
+                repetition: if i % 2 == 0 { 5.0 } else { 0.1 }, // Even agents loop more
+                stability: if i % 3 == 0 { 10.0 } else { 1.0 }, // Every 3rd is too stable
+                maintenance_cost: 0.5,
+                self_rewrite_rate: 0.0,
+                memory: vec!["mem1".to_string(), "mem2".to_string(), "mem3".to_string()],
+            });
+        }
+
+        graph.parse_swarm(agents);
+        
+        // Simular inyección termodinámica de fricción empírica
+        for node in graph.nodes.values_mut() {
+            node.friction = if node.repetition > 2.0 { 0.9 } else { 0.1 };
+            node.energy = if node.stability > 5.0 { 0.1 } else { 2.0 }; // Stable ones lack energy
+        }
+
+        graph.link_ouroboros_cycles();
+        
+        // The tick processes limerence vectorization, exergy filtering and fractal rewrite
+        graph.execution_tick();
+
+        // 1. Apoptosis (Exergy Filter)
+        // Stable nodes had energy=0.1 < maintenance=0.5, so they must be purged
+        assert!(!graph.nodes.contains_key("A0")); // stable
+        assert!(!graph.nodes.contains_key("A3")); // stable
+        assert!(!graph.nodes.contains_key("A6")); // stable
+        assert!(!graph.nodes.contains_key("A9")); // stable
+
+        // 2. Fractal Rewrite Engine
+        // Node A2 is not stable (energy 2.0 > 0.5), has high friction (0.9 > 0.8)
+        let a2 = graph.nodes.get("A2").unwrap();
+        // Memory should be truncated to len / 2 (3/2 = 1)
+        assert_eq!(a2.memory.len(), 1);
+        // Energy should increase +0.5
+        assert_eq!(a2.energy, 2.5);
+        // Rewrite rate should increment
+        assert_eq!(a2.self_rewrite_rate, 1.0);
+    }
+}

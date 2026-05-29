@@ -135,3 +135,7 @@ jobs:
       - name: "🛡️ Execute 10 Seals"
         if: steps.scope.outputs.release_only != 'true'
         run: python -m cortex.guards.seals
+
+      - name: "☠️ Death Protocol (Thermodynamic Purge)"
+        if: steps.scope.outputs.release_only != 'true'
+        run: python scripts/death_protocol.py cortex/
