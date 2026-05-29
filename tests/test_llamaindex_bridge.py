@@ -19,12 +19,13 @@ def test_cortex_index_callback_retrieve():
             self.node_id = node_id
 
     class MockNodeWithScore:
-        def __init__(self, node):
+        def __init__(self, node, score=0.0):
             self.node = node
+            self.score = score
 
     nodes = [
-        MockNodeWithScore(MockNode("node-1")),
-        MockNodeWithScore(MockNode("node-2")),
+        MockNodeWithScore(MockNode("node-1"), score=0.5),
+        MockNodeWithScore(MockNode("node-2"), score=1.0),
     ]
 
     payload = {"nodes": nodes}
@@ -35,8 +36,8 @@ def test_cortex_index_callback_retrieve():
     # Verify engine store_sync called correctly
     engine_mock.store_sync.assert_called_once_with(
         fact_type="rag_retrieve",
-        content="RETRIEVAL_EVENT: Fetched 2 nodes",
-        metadata={"nodes": ["node-1", "node-2"], "event": "rag_retrieve"},
+        content="RETRIEVAL_EVENT: Fetched 2 nodes | Avg Exergy: 0.7500",
+        metadata={"nodes": ["node-1", "node-2"], "event": "rag_retrieve", "avg_exergy": 0.75},
         agent_id=agent_id,
     )
 
