@@ -310,3 +310,5 @@ cortex_rs/target/
 cortex_rs/*.so
 .vercel
 cortex_ledger.jsonl
+*.vsa_mmap
+cortex/swarm/staged_legion_2m.py
