@@ -16,11 +16,12 @@ import sys
 import struct
 
 # Maintain CORTEX-V3.0 Alignment
-sys.path.append(os.path.join(os.path.dirname(__file__), "cortex-core"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "cortex-core"))
 try:
     from persistence import HybridPersistenceManager, enqueue_swarm_task
 except ImportError:
     pass
+
 
 app = FastAPI(title="CORTEX-X100-SSE-ENGINE")
 app.add_middleware(
@@ -30,6 +31,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+from forense_kernel import router as forense_router
+app.include_router(forense_router)
 
 cortex_storage = HybridPersistenceManager()
 ledger = cortex_storage.l3
