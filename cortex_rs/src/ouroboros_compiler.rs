@@ -79,22 +79,30 @@ impl OuroborosExecutionGraph {
     }
 
     /// PHASE 5 — FRACTAL REWRITE ENGINE
-    pub fn fractal_rewrite(&mut self) {
+    pub fn fractal_rewrite(&mut self, ring_buffer: Option<&crate::ZeroCopyRingBuffer>) {
         for node in self.nodes.values_mut() {
             if node.friction > 0.8 {
                 // A1 -> A1' (menos memoria, más señal)
                 node.memory.truncate(node.memory.len() / 2);
                 node.energy += 0.5; // Incrementa señal tras compresión
                 node.self_rewrite_rate += 1.0;
+                
+                // C5-REAL: Emit zero-copy rewrite command to the ring buffer
+                if let Some(rb) = ring_buffer {
+                    let payload = format!(r#"{{"op":"AST_REWRITE","target":"{}"}}"#, node.id);
+                    let _ = rb.enqueue(node.id.as_bytes(), payload.as_bytes());
+                }
             }
         }
     }
 
     /// PHASE 6 — RUNTIME EXECUTION LOOP (C5-REAL Tick)
-    pub fn execution_tick(&mut self) {
+    #[pyo3(signature = (ring_buffer=None))]
+    pub fn execution_tick(&mut self, ring_buffer: Option<PyRef<'_, crate::ZeroCopyRingBuffer>>) {
         self.vectorize_limerence(1.0, 1.5, 0.5);
         self.filter_exergy();
-        self.fractal_rewrite();
+        let rb_ref = ring_buffer.as_deref();
+        self.fractal_rewrite(rb_ref);
     }
     
     /// Extract Graph state as JSON
@@ -142,7 +150,8 @@ mod tests {
             });
         }
 
-        graph.parse_swarm(agents);
+        let agents_json = serde_json::to_string(&agents).unwrap();
+        graph.parse_swarm(&agents_json).unwrap();
         
         // Simular inyección termodinámica de fricción empírica
         for node in graph.nodes.values_mut() {
@@ -153,7 +162,7 @@ mod tests {
         graph.link_ouroboros_cycles();
         
         // The tick processes limerence vectorization, exergy filtering and fractal rewrite
-        graph.execution_tick();
+        graph.execution_tick(None);
 
         // 1. Apoptosis (Exergy Filter)
         // Stable nodes had energy=0.1 < maintenance=0.5, so they must be purged
