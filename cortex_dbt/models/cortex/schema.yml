@@ -1,0 +1,17 @@
+version: 2
+
+models:
+  - name: stg_exergy_extraction
+    description: "CORTEX-Guard compliant model. Extracts interaction exergy from LP_Web."
+    columns:
+      - name: session_id
+        description: "Unique identifier for the LP session."
+        tests:
+          - unique
+          - not_null
+      - name: interaction_time
+        description: "C5-REAL timestamp of the interaction."
+      - name: safe_friction_score
+        description: "Cognitive friction score normalized between 0 and 100."
+      - name: normalized_device
+        description: "Device type accessing the LP, cleaned."
