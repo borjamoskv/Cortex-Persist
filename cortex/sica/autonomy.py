@@ -711,7 +711,7 @@ class AutonomousTick:
         pruned: list[str] = []
         to_prune = [
             h for h in strategy.genome.heuristics
-            if h.activation_count > 10 and h.fitness < 0.1 and h.weight < 0.15
+            if h.activation_count > 10 and h.fitness < 0.35 and h.weight < 0.15
         ]
         for h in to_prune:
             strategy.mutate_prune(
