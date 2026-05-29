@@ -174,3 +174,88 @@ pub async fn topology_loop(mut state: Topology) {
     
     println!("[SMTE] Ciclo Termodinámico Completo. Órganos funcionales supervivientes: {}", state.agents.len());
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_compile_template() {
+        let predator = compile_template("apex_predator");
+        assert_eq!(predator.role, "apex_predator");
+        assert!(predator.constraints.contains(&"falsacion_epistemica".to_string()));
+
+        let executor = compile_template("executor");
+        assert_eq!(executor.role, "executor");
+    }
+
+    #[test]
+    fn test_fitness_scoring() {
+        let topology_peace = Topology::new(false);
+        let gene = AgentGene {
+            id: "test_agent".into(),
+            role: "executor".into(),
+            behavior_vector: vec![0.9, 0.9, 0.2], // sum = 2.0
+            constraints: vec!["c1".into()], // complexity = 1.0
+            mutation_rate: 0.05,
+            exergy_bias: 1.5,
+            lifetime: 500,
+        };
+        // Expected: (2.0 / (1.0 + 1.0)) * 1.5 - 0 = 1.5
+        let fitness_peace = topology_peace.fitness(&gene);
+        assert!((fitness_peace - 1.5).abs() < f32::EPSILON);
+
+        let topology_war = Topology::new(true);
+        // Expected under adversarial mode: 1.5 - 0.15 = 1.35
+        let fitness_war = topology_war.fitness(&gene);
+        assert!((fitness_war - 1.35).abs() < f32::EPSILON);
+    }
+
+    #[test]
+    fn test_pruning() {
+        let mut topology = Topology::new(true);
+        
+        // High exergy gene
+        let high = AgentGene {
+            id: "high".into(),
+            role: "executor".into(),
+            behavior_vector: vec![1.0, 1.0, 1.0], // sum = 3.0
+            constraints: vec![], // complexity = 0.0
+            mutation_rate: 0.05,
+            exergy_bias: 2.0,
+            lifetime: 500,
+        }; // fitness = (3 / 1) * 2 - 0.15 = 5.85 > 0.5
+
+        // Low exergy gene
+        let low = AgentGene {
+            id: "low".into(),
+            role: "planner".into(),
+            behavior_vector: vec![0.0, 0.1, 0.1], // sum = 0.2
+            constraints: vec!["c1".into(), "c2".into()], // complexity = 2.0
+            mutation_rate: 0.1,
+            exergy_bias: 1.0,
+            lifetime: 1000,
+        }; // fitness = (0.2 / 3) * 1.0 - 0.15 = -0.083 < 0.5
+
+        // Low exergy predator (should NOT be pruned)
+        let low_predator = AgentGene {
+            id: "pred".into(),
+            role: "apex_predator".into(),
+            behavior_vector: vec![0.0, 0.1, 0.1],
+            constraints: vec!["c1".into()],
+            mutation_rate: 0.1,
+            exergy_bias: 1.0,
+            lifetime: 1000,
+        };
+
+        topology.agents.insert(high.id.clone(), high);
+        topology.agents.insert(low.id.clone(), low);
+        topology.agents.insert(low_predator.id.clone(), low_predator);
+
+        topology.prune_low_exergy();
+
+        assert!(topology.agents.contains_key("high"));
+        assert!(topology.agents.contains_key("pred"));
+        assert!(!topology.agents.contains_key("low"));
+    }
+}
