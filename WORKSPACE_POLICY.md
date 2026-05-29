@@ -18,3 +18,6 @@ El desvío del Vector Primario obedece estrictamente a estas condiciones innegoc
 ## 3. Barrera de Entropía (P0 - Hard Violation)
 Queda estrictamente prohibida la fragmentación de una misma modificación causal entre la variante activa (`30_CORTEX`) y la variante en red (`LinkAgents`).
 La ejecución fragmentada sin sincronización de Ledger genera *ruido termal* y divergencia irreversible. Una tarea completa todo su ciclo de vida dentro del mismo vector físico asignado.
+
+## 4. Protocolo de Sincronización y Re-anclaje
+Cualquier entidad, agente u operador externo que busque reintegrarse al flujo operativo tras un periodo de latencia o desincronización, debe acatar estrictamente el framework establecido en [PROTOCOL_RE_ANCHOR.md](file:///Users/borjafernandezangulo/10_PROJECTS/cortex-persist/PROTOCOL_RE_ANCHOR.md). Esto asegura Exergía Máxima y Entropía Cero en la comunicación.
