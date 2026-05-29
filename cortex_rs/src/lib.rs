@@ -27,6 +27,7 @@ pub mod oracle;
 pub mod mutator;
 pub mod mcp;
 pub mod vsa;
+pub mod antilimerence;
 pub use mcp::{McpNativeClient, McpSovereignHost};
 
 fn strip_trailing_nulls(slice: &[u8]) -> &[u8] {
@@ -578,6 +579,7 @@ fn cortex_rs(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<UltramapSubstrate>()?;
     m.add_class::<McpNativeClient>()?;
     m.add_class::<McpSovereignHost>()?;
+    m.add_class::<antilimerence::AntiLimerenceTopology>()?;
     m.add_class::<autocurative::AutoCurativeEngine>()?;
     m.add_class::<oracle::FitnessOracleRs>()?;
     m.add_class::<mutator::GenomeMutatorRs>()?;

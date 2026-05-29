@@ -22,10 +22,10 @@ class AgentASTParser:
         self.tree = ast.parse(self.source_code, filename=self.filepath)
         
     def _load_source(self) -> str:
-        with open(self.filepath, 'r', encoding='utf-8') as f:
+        with open(self.filepath, encoding='utf-8') as f:
             return f.read()
             
-    def get_topology(self) -> Dict[str, Any]:
+    def get_topology(self) -> dict[str, Any]:
         """
         Extracts the structural topology (classes, functions, docs) of the agent.
         """

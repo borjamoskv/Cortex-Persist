@@ -320,6 +320,10 @@ from cortex.api import events as events_router
 
 app.include_router(events_router.router)
 
+# V5 LLM Proxy Middleware (Exergy Labyrinth)
+from cortex.routes import llm_proxy
+app.include_router(llm_proxy.router)
+
 # Extensions and third-party integrations
 
 # Extension modules (opt-in)

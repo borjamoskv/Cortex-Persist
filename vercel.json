@@ -20,6 +20,18 @@
       "has": [{ "type": "host", "value": "www.cortexpersist.dev" }],
       "destination": "https://github.com/borjamoskv/Cortex-Persist/tree/main/docs",
       "permanent": false
+    },
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "cortexpersist.org" }],
+      "destination": "https://github.com/borjamoskv/Cortex-Persist",
+      "permanent": false
+    },
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "www.cortexpersist.org" }],
+      "destination": "https://github.com/borjamoskv/Cortex-Persist",
+      "permanent": false
     }
   ],
   "headers": [

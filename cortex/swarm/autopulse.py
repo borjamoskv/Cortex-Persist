@@ -23,6 +23,14 @@ async def process_queue():
     """Background loop to consume and execute pending swarm tasks."""
     logger.info("Autopulse Engine: Ignited. Watching swarm queue...")
 
+    try:
+        from cortex_rs import AntiLimerenceTopology
+        anti_limerence = AntiLimerenceTopology()
+        logger.info("C5-REAL: Anti-Limerence Runtime Engaged (Rust FFI)")
+    except ImportError as e:
+        anti_limerence = None
+        logger.warning("C5-REAL: Anti-Limerence Runtime NOT found (Rust FFI missing): %s", e)
+
     while True:
         if os.path.exists(SWARM_QUEUE_FILE):
             try:
@@ -65,7 +73,31 @@ async def process_queue():
                         )
 
                     # AUDITOR-Ω: Entropy spike detection post-process
-                    _audit_entropy_spike(legion, agent)
+                    try:
+                        _audit_entropy_spike(legion, agent)
+                        reality_delta = 0.5  # Positive yield from reality
+                    except EntropySpikeException:
+                        reality_delta = -1.0 # Harsh rejection from reality (friction)
+                        # We don't raise it yet, we let the Rust topological killer decide if it's limerent
+                    
+                    # ⚡ ANTI-LIMERENCE RUNTIME (C5-REAL)
+                    if anti_limerence:
+                        # Incubate the agent's specific theory/task
+                        try:
+                            anti_limerence.incubate_belief(agent)
+                            anti_limerence.inject_friction(agent, reality_delta)
+                            
+                            purged = anti_limerence.execute_kill_switch()
+                            if purged:
+                                logger.error("OUROBOROS KILL-SWITCH: The following agents suffered Epistemic Limerence and were annihilated: %s", purged)
+                                if agent in purged:
+                                    logger.error("Agent %s was purged! Halting execution.", agent)
+                                    continue # Skip ledger insertion!
+                        except Exception as e:
+                            logger.error("AntiLimerence Execution Failed: %s", e)
+
+                    if reality_delta < 0:
+                        raise EntropySpikeException(f"Entropy Circuit Breaker tripped for {agent}")
 
                     # Record the 'Success' in the Ledger
 

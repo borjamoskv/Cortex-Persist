@@ -25,7 +25,6 @@ def docstring_mutator(tree: ast.AST) -> bool:
 def run_mutation_cycle(target_path: str):
     parser = AgentASTParser(target_path)
     
-    guard = ExergyGuard()
     initial_exergy = calculate_exergy(parser.source_code)
     logger.info(f"[*] Initial Exergy of {target_path}: {initial_exergy:.4f}")
     

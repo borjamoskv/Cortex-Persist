@@ -24,7 +24,7 @@ def re_anchor(target_id="OPERADOR_PRIMARIO"):
     
     # Update exergy state
     if os.path.exists(STATE_FILE):
-        with open(STATE_FILE, "r") as f:
+        with open(STATE_FILE) as f:
             try:
                 state = json.load(f)
             except json.JSONDecodeError:
