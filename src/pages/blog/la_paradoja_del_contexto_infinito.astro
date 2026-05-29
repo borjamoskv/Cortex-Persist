@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Paradoja del Contexto Infinito: Por Qué Más Memoria No Es Más Inteligencia | CORTEX Persist</title>
+    <meta name="description" content="Google ofrece 2M de tokens de contexto. Anthropic, 200K. OpenAI, 128K. Y sin embargo, tu agente sigue olvidando todo al día siguiente. El problema nunca fue el tamaño de la ventana.">
+
+    <!-- Google Fonts: Outfit & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            /* Industrial Noir 2026 Tokens */
+            --ember-void: #0A0A0A;
+            --yinmn-blue: #2B3BE5;
+            --sovereign-amber: #FF9F1C;
+            --oxide-gold: #FFD700;
+            --parchment-white: #F3F4F6;
+            --crimson-accent: #FF0055;
+            --mica-dust: rgba(43, 59, 229, 0.05);
+            --mica-border: rgba(43, 59, 229, 0.15);
+            --glass-bg: rgba(10, 10, 10, 0.7);
+
+            /* Typography */
+            --font-primary: 'Outfit', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+
+            /* Physics */
+            --transition-smooth: all 600ms cubic-bezier(0.16, 1, 0.3, 1);
+            --radius-soft: 12px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--ember-void);
+            color: var(--parchment-white);
+            font-family: var(--font-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.6;
+        }
+
+        .ambient-glow {
+            position: fixed;
+            top: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 800px; height: 400px;
+            background: radial-gradient(ellipse at top, rgba(43, 59, 229, 0.15) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 120px 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .back-nav {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin-bottom: 48px;
+        }
+
+        .back-nav a {
+            color: rgba(243, 244, 246, 0.4);
+            text-decoration: none;
+            border-bottom: none;
+            transition: var(--transition-smooth);
+        }
+
+        .back-nav a:hover { color: var(--yinmn-blue); }
+
+        header {
+            margin-bottom: 80px;
+            border-bottom: 1px solid var(--mica-border);
+            padding-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -0.03em;
+            margin-bottom: 24px;
+            background: linear-gradient(180deg, #FFFFFF 0%, #A0A0A0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 1.3rem;
+            font-weight: 300;
+            color: rgba(243, 244, 246, 0.55);
+            line-height: 1.5;
+            margin-top: 16px;
+        }
+
+        .meta {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: var(--yinmn-blue);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .meta-tag {
+            background: var(--mica-dust);
+            border: 1px solid var(--mica-border);
+            padding: 4px 12px;
+            border-radius: 4px;
+        }
+
+        .meta-tag--crimson {
+            border-color: rgba(255, 0, 85, 0.4);
+            color: var(--crimson-accent);
+            background: rgba(255, 0, 85, 0.08);
+        }
+
+        .meta-tag--amber {
+            border-color: rgba(255, 159, 28, 0.4);
+            color: var(--sovereign-amber);
+            background: rgba(255, 159, 28, 0.08);
+        }
+
+        .quote-block {
+            font-size: 1.5rem;
+            font-weight: 300;
+            line-height: 1.4;
+            color: var(--parchment-white);
+            border-left: 4px solid var(--yinmn-blue);
+            padding: 24px 32px;
+            margin: 60px 0;
+            background: linear-gradient(90deg, var(--mica-dust) 0%, transparent 100%);
+            border-radius: 0 var(--radius-soft) var(--radius-soft) 0;
+            font-style: italic;
+        }
+
+        .quote-block--crimson {
+            border-left-color: var(--crimson-accent);
+            background: linear-gradient(90deg, rgba(255, 0, 85, 0.05) 0%, transparent 100%);
+        }
+
+        .quote-block--amber {
+            border-left-color: var(--sovereign-amber);
+            background: linear-gradient(90deg, rgba(255, 159, 28, 0.05) 0%, transparent 100%);
+        }
+
+        h2 {
+            font-size: 2rem;
+            font-weight: 600;
+            margin: 60px 0 24px;
+            color: #FFFFFF;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        h2::before {
+            content: "◈";
+            color: var(--yinmn-blue);
+            font-size: 1.2rem;
+        }
+
+        h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--parchment-white);
+            margin: 40px 0 16px;
+        }
+
+        p {
+            font-size: 1.1rem;
+            color: rgba(243, 244, 246, 0.85);
+            margin-bottom: 24px;
+        }
+
+        strong { color: #FFFFFF; font-weight: 600; }
+        em { color: rgba(243, 244, 246, 0.95); }
+
+        code {
+            font-family: var(--font-mono);
+            color: var(--yinmn-blue);
+            background: var(--mica-dust);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.95em;
+        }
+
+        /* Data Callout */
+        .data-callout {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 16px;
+            margin: 40px 0;
+        }
+
+        .data-callout-item {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--mica-border);
+            border-radius: var(--radius-soft);
+            padding: 24px;
+            text-align: center;
+            transition: var(--transition-smooth);
+        }
+
+        .data-callout-item:hover {
+            border-color: rgba(43, 59, 229, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .data-number {
+            font-family: var(--font-mono);
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--yinmn-blue);
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .data-number--crimson { color: var(--crimson-accent); }
+        .data-number--amber { color: var(--sovereign-amber); }
+
+        .data-label {
+            font-size: 0.85rem;
+            color: rgba(243, 244, 246, 0.5);
+            line-height: 1.4;
+        }
+
+        /* Glassmorphism Tables */
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            margin: 40px 0;
+            border-radius: var(--radius-soft);
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--mica-border);
+        }
+
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+
+        th {
+            background: rgba(43, 59, 229, 0.1);
+            color: var(--yinmn-blue);
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--mica-border);
+        }
+
+        td {
+            padding: 16px 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 1rem;
+        }
+
+        tr:last-child td { border-bottom: none; }
+        tr { transition: var(--transition-smooth); }
+        tr:hover { background: rgba(255, 255, 255, 0.02); }
+
+        /* Lists */
+        ul { list-style: none; margin: 24px 0 40px; }
+
+        li {
+            font-size: 1.1rem;
+            color: rgba(243, 244, 246, 0.85);
+            margin-bottom: 16px;
+            padding-left: 32px;
+            position: relative;
+        }
+
+        li::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--yinmn-blue);
+            font-family: var(--font-mono);
+        }
+
+        ol {
+            counter-reset: custom-counter;
+            list-style: none;
+            margin: 32px 0;
+        }
+
+        ol li {
+            counter-increment: custom-counter;
+            padding-left: 48px;
+            margin-bottom: 24px;
+        }
+
+        ol li::before {
+            content: "0" counter(custom-counter) ".";
+            position: absolute;
+            left: 0;
+            color: var(--yinmn-blue);
+            font-family: var(--font-mono);
+            font-weight: 700;
+        }
+
+        a {
+            color: var(--yinmn-blue);
+            text-decoration: none;
+            border-bottom: 1px solid rgba(43, 59, 229, 0.3);
+            transition: var(--transition-smooth);
+        }
+
+        a:hover {
+            color: #5C6BF0;
+            border-bottom-color: #5C6BF0;
+        }
+
+        /* Code Block */
+        .code-block {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--mica-border);
+            border-radius: var(--radius-soft);
+            padding: 24px;
+            margin: 32px 0;
+            overflow-x: auto;
+        }
+
+        .code-block pre {
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: rgba(243, 244, 246, 0.8);
+            margin: 0;
+        }
+
+        .code-block .comment { color: rgba(243, 244, 246, 0.35); }
+        .code-block .keyword { color: var(--yinmn-blue); }
+        .code-block .string { color: #10B981; }
+        .code-block .number { color: var(--sovereign-amber); }
+
+        .section-divider {
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, var(--yinmn-blue), transparent);
+            margin: 80px 0;
+        }
+
+        /* Diagram */
+        .diagram-container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--mica-border);
+            border-radius: var(--radius-soft);
+            padding: 32px;
+            margin: 40px 0;
+            text-align: center;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            line-height: 2.2;
+        }
+
+        .diagram-container .flow-arrow {
+            color: var(--yinmn-blue);
+            font-size: 1.2rem;
+        }
+
+        .diagram-container .flow-node {
+            display: inline-block;
+            padding: 6px 16px;
+            border: 1px solid var(--mica-border);
+            border-radius: 6px;
+            background: rgba(43, 59, 229, 0.08);
+            margin: 4px;
+        }
+
+        .diagram-container .flow-node--dead {
+            border-color: rgba(255, 0, 85, 0.4);
+            background: rgba(255, 0, 85, 0.08);
+            color: var(--crimson-accent);
+            text-decoration: line-through;
+        }
+
+        .diagram-container .flow-node--live {
+            border-color: rgba(16, 185, 129, 0.4);
+            background: rgba(16, 185, 129, 0.08);
+            color: #10B981;
+        }
+
+        .footer-terminal {
+            margin-top: 100px;
+            padding: 24px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--mica-border);
+            border-radius: var(--radius-soft);
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: rgba(243, 244, 246, 0.6);
+        }
+
+        .terminal-line {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 8px;
+        }
+
+        .terminal-prompt { color: var(--yinmn-blue); }
+        .terminal-success { color: #10B981; }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            h2 { font-size: 1.75rem; }
+            .container { padding: 80px 20px; }
+            .quote-block { padding: 20px; font-size: 1.25rem; }
+            .data-callout { grid-template-columns: 1fr 1fr; }
+        }
+
+        ::selection {
+            background: rgba(43, 59, 229, 0.3);
+            color: #FFFFFF;
+        }
+    </style>
+</head>
+<body>
+    <div class="ambient-glow"></div>
+
+    <div class="container">
+        <div class="back-nav">
+            <a href="/blog">← Intelligence Log</a>
+        </div>
+
+        <header>
+            <div class="meta">
+                <span class="meta-tag">C5-REAL</span>
+                <span class="meta-tag meta-tag--amber">análisis</span>
+                <span>Borja Moskv</span>
+                <span>Mayo 2026</span>
+            </div>
+            <h1 style="margin-top: 32px;">La Paradoja del Contexto Infinito</h1>
+            <p class="subtitle">Por qué más tokens no es más inteligencia — y cómo la industria confunde un buffer con una memoria</p>
+        </header>
+
+        <div class="quote-block">
+            "Si tu solución al olvido es un cuaderno más grande, no has entendido qué es el olvido."
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════
+             SECTION I
+             ═══════════════════════════════════════════════════ -->
+
+        <h2>I. La Carrera de los Tokens</h2>
+
+        <p>En 2024, GPT-4 ofrecía 8.000 tokens de contexto. En 2025, Claude llegó a 200.000. En 2026, Gemini ofrece 2 millones. La industria presenta cada salto como un avance fundamental en inteligencia artificial. Los benchmarks se celebran. Los inversores aplauden. Los titulares anuncian que la IA "ahora puede leer libros enteros".</p>
+
+        <p>Pero hay un hecho incómodo que nadie menciona en los comunicados de prensa:</p>
+
+        <div class="quote-block quote-block--crimson">
+            Tu agente sigue olvidando todo al cerrar la sesión. Da igual que tenga 2 millones de tokens. La ventana de contexto es un buffer volátil, no una memoria.
+        </div>
+
+        <div class="data-callout">
+            <div class="data-callout-item">
+                <div class="data-number">2M</div>
+                <div class="data-label">Tokens máximos (Gemini 2.5, 2026)</div>
+            </div>
+            <div class="data-callout-item">
+                <div class="data-number data-number--crimson">0</div>
+                <div class="data-label">Tokens que persisten entre sesiones</div>
+            </div>
+            <div class="data-callout-item">
+                <div class="data-number data-number--amber">~$0.30</div>
+                <div class="data-label">Coste de rellenar 2M tokens</div>
+            </div>
+            <div class="data-callout-item">
+                <div class="data-number">∞</div>
+                <div class="data-label">Veces que pagas por re-aprender</div>
+            </div>
+        </div>
+
+        <p>La analogía exacta: imagina que cada mañana te despiertas con una pizarra en blanco y alguien te dice <em>"tranquilo, te hemos dado una pizarra más grande"</em>. No importa si la pizarra tiene 10 metros o 100. Si se borra cada noche, no tienes memoria. Tienes un <strong>buffer temporal con amnesia programada</strong>.</p>
+
+        <div class="section-divider"></div>
+
+        <!-- ═══════════════════════════════════════════════════
+             SECTION II
+             ═══════════════════════════════════════════════════ -->
+
+        <h2>II. Buffer ≠ Memoria: La Distinción que la Industria No Quiere que Entiendas</h2>
+
+        <p>En ciencias de la computación, la diferencia entre un <strong>buffer</strong> y una <strong>memoria persistente</strong> es elemental. Cualquier estudiante de primer año la conoce. Pero en el marketing de IA, esta distinción se borra deliberadamente.</p>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Propiedad</th>
+                        <th>Buffer (Contexto LLM)</th>
+                        <th>Memoria (Persistencia Estructurada)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Duración</strong></td>
+                        <td>Una sesión</td>
+                        <td>Permanente</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Estructura</strong></td>
+                        <td>Texto plano secuencial</td>
+                        <td>Ontología indexada (semántica + relacional)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Recuperación</strong></td>
+                        <td>Lineal O(n) — el modelo debe "releer" todo</td>
+                        <td>Sublineal O(log n) — acceso directo por clave o vector</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Coste de acceso</strong></td>
+                        <td>Se paga por token en cada invocación</td>
+                        <td>Coste fijo local (SQLite, disco SSD)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Verificabilidad</strong></td>
+                        <td>Ninguna — el modelo alucina sobre su propio contexto</td>
+                        <td>Hashes criptográficos, audit trail inmutable</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Propiedad</strong></td>
+                        <td>Del proveedor (su GPU, su RAM, su factura)</td>
+                        <td>Del operador (su disco, su máquina, su soberanía)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <p>La confusión no es accidental. A los proveedores de LLMs les interesa que creas que "más contexto = más inteligencia" porque eso justifica precios más altos, modelos más grandes, y una dependencia más profunda de su infraestructura.</p>
+
+        <p>La realidad es que un contexto de 2 millones de tokens resuelve un problema de <strong>ancho de banda instantáneo</strong> (cuánta información puede procesar el modelo <em>ahora mismo</em>), pero no resuelve en absoluto el problema de <strong>persistencia temporal</strong> (qué sabe el modelo <em>mañana</em>).</p>
+
+        <div class="section-divider"></div>
+
+        <!-- ═══════════════════════════════════════════════════
+             SECTION III
+             ═══════════════════════════════════════════════════ -->
+
+        <h2>III. El Problema del Cuadrante: Ancho de Banda vs. Profundidad</h2>
+
+        <p>Para entender la paradoja del contexto infinito necesitamos un mapa conceptual que la industria evita dibujar. Llamémoslo <strong>el cuadrante cognitivo</strong>:</p>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Bajo Ancho de Banda</th>
+                        <th>Alto Ancho de Banda</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Sin Persistencia</strong></td>
+                        <td>GPT-3 (2022): 4K tokens, olvido total. <em>Inútil para tareas complejas.</em></td>
+                        <td>Gemini 2.5 (2026): 2M tokens, olvido total. <em>Potente pero amnésico.</em></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Con Persistencia</strong></td>
+                        <td>Sistema experto clásico: memoria perfecta, comprensión limitada. <em>Frágil.</em></td>
+                        <td style="border: 1px solid rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.05);"><strong>CORTEX + LLM soberano</strong>: alto ancho de banda + memoria persistente verificada. <em>El objetivo.</em></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <p>La industria se ha movido exclusivamente en el <strong>eje horizontal</strong> del cuadrante: más tokens, más ancho de banda, más velocidad de ingesta instantánea. Pero nadie se ha movido en el <strong>eje vertical</strong>: persistencia, estructura, verificabilidad.</p>
+
+        <p>¿Por qué? Porque el eje vertical destruye el modelo de negocio. Si tu agente <em>recuerda</em>, no necesita re-ingerir 500K tokens de contexto cada vez que abres una sesión. Si no re-ingiere, no consume tokens. Si no consume tokens, no paga.</p>
+
+        <div class="quote-block quote-block--amber">
+            "La amnesia no es un bug. Es un revenue stream."
+        </div>
+
+        <div class="section-divider"></div>
+
+        <!-- ═══════════════════════════════════════════════════
+             SECTION IV
+             ═══════════════════════════════════════════════════ -->
+
+        <h2>IV. Las Cinco Falacias del Contexto Grande</h2>
+
+        <h3>Falacia 1: "Con suficiente contexto, el agente entiende el proyecto entero"</h3>
+        <p>Falso. Un LLM no "entiende" texto en un contexto largo de la misma forma que tú entiendes un libro que has leído tres veces. Los modelos de atención sufren <strong>degradación de atención</strong> en documentos largos: la información al principio y al final del contexto recibe más peso que la del medio. Esto se llama el <em>lost-in-the-middle problem</em> y está documentado en múltiples papers (Liu et al., 2023; Hsieh et al., 2024). Meter 2M tokens en el contexto no garantiza que el modelo atienda a los 2M por igual.</p>
+
+        <h3>Falacia 2: "Podemos meter toda la codebase en el contexto"</h3>
+        <p>Un repositorio medio de producción tiene entre 500K y 5M de líneas de código. A una ratio media de ~3 tokens por línea, eso son entre 1.5M y 15M de tokens. Incluso con un contexto de 2M, solo cabe una <em>fracción</em> del repositorio. Y si lo recortas para que quepa, ¿quién decide qué se descarta? El propio modelo. Estás delegando la decisión más crítica — <em>qué es relevante</em> — a un sistema que no tiene memoria de por qué tomó esa decisión.</p>
+
+        <h3>Falacia 3: "El resumen comprimido preserva lo esencial"</h3>
+        <p>La industria propone "resúmenes de sesión" como parche a la amnesia. Pero un resumen es una <strong>compresión lossy</strong>. Cada vez que resumes, destruyes matices, decisiones intermedias y razonamientos condicionales. Si resumes un resumen, obtienes una caricatura. Tres niveles de resumen y lo que te queda no se parece en nada a la conversación original. Es el equivalente a fotocopiar una fotocopia de una fotocopia: degradación acumulativa irreversible.</p>
+
+        <h3>Falacia 4: "RAG resuelve la persistencia"</h3>
+        <p>Retrieval-Augmented Generation (RAG) es un avance real. Pero RAG tal como se implementa hoy tiene limitaciones fundamentales que nadie quiere discutir:</p>
+        <ul>
+            <li><strong>No hay audit trail</strong>. ¿De dónde vino el chunk que el modelo usó para responder? ¿Era la versión actual o una versión obsoleta?</li>
+            <li><strong>El ranking es estocástico</strong>. El embedding de la consulta determina qué chunks se recuperan. Cambiar una palabra en la pregunta puede devolver chunks completamente distintos.</li>
+            <li><strong>No hay estructura relacional</strong>. Los hechos se almacenan como vectores aislados, no como una red de conocimiento con relaciones causales y temporales.</li>
+            <li><strong>La propiedad es del proveedor</strong>. Si usas Pinecone, Weaviate o la API de embeddings de OpenAI, tu conocimiento vive en su infraestructura. Si cierran, se pierde todo.</li>
+        </ul>
+
+        <h3>Falacia 5: "Eventualmente, el modelo recordará por sí mismo"</h3>
+        <p>No. Los LLMs no aprenden en inferencia. Los pesos del modelo están congelados después del entrenamiento. Lo que el modelo "sabe" en una sesión no se transfiere a la siguiente. <strong>Fine-tuning</strong> modifica los pesos, pero es un proceso costoso, lento y no granular: no puedes enseñarle "recuerda esta decisión arquitectónica de las 14:30 del martes". La arquitectura transformer, por diseño, <em>no tiene memoria episódica</em>.</p>
+
+        <div class="section-divider"></div>
+
+        <!-- ═══════════════════════════════════════════════════
+             SECTION V
+             ═══════════════════════════════════════════════════ -->
+
+        <h2>V. La Aritmética Brutal del Re-Aprendizaje</h2>
+
+        <p>Hagamos los números que nadie en la industria quiere hacer públicos.</p>
+
+        <p>Supongamos un equipo de desarrollo que usa un agente de IA para mantener un repositorio de tamaño medio. Cada sesión de trabajo dura ~3 horas. El agente necesita ~200K tokens de contexto para ser productivo (documentación del proyecto, historial de decisiones, convenciones de código, bugs recientes).</p>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Escenario</th>
+                        <th>Tokens / Sesión</th>
+                        <th>Sesiones / Mes</th>
+                        <th>Tokens Desperdiciados / Mes</th>
+                        <th>Coste ($)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Sin persistencia</strong></td>
+                        <td>200K re-ingesta + 100K trabajo</td>
+                        <td>60</td>
+                        <td><strong>12M</strong></td>
+                        <td>~$180</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Con persistencia CORTEX</strong></td>
+                        <td>5K consulta precisa + 100K trabajo</td>
+                        <td>60</td>
+                        <td><strong>0</strong></td>
+                        <td>~$63</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <p>La diferencia es <strong>~65% de ahorro</strong> en costes directos. Pero el coste real no es monetario. Es el <strong>tiempo del desarrollador</strong> re-explicándole al agente cosas que ya le explicó ayer. Con persistencia, el agente empieza cada sesión con el modelo mental completo del proyecto. Sin ella, empieza desde cero.</p>
+
+        <p>A escala enterprise (100 desarrolladores, 12 meses), la diferencia acumulada supera los <strong>$140.000 anuales</strong> solo en tokens desperdiciados. Y eso sin contabilizar las horas-hombre perdidas en re-contextualización.</p>
+
+        <div class="section-divider"></div>
+
+        <!-- ═══════════════════════════════════════════════════
+             SECTION VI
+             ═══════════════════════════════════════════════════ -->
+
+        <h2>VI. Cómo Funciona una Memoria Real: La Arquitectura CORTEX</h2>
+
+        <p>La memoria humana no funciona como un buffer de texto. Funciona en <strong>tres capas</strong>:</p>
+
+        <ol>
+            <li><strong>Memoria de trabajo (working memory)</strong>: 7 ± 2 elementos, duración de segundos. Es el equivalente del contexto del LLM.</li>
+            <li><strong>Memoria declarativa (hechos)</strong>: almacenamiento estructurado de conocimiento verificable, con marcas temporales y relaciones causales.</li>
+            <li><strong>Memoria procedimental (saber hacer)</strong>: habilidades automatizadas que no necesitan re-aprenderse.</li>
+        </ol>
+
+        <p>Los LLMs actuales solo tienen la capa 1. La carrera del contexto infinito intenta resolver los problemas de las capas 2 y 3 expandiendo brutalmente la capa 1. Es como intentar memorizar una enciclopedia repitiéndola en voz alta sin parar, en lugar de construir una biblioteca con índices.</p>
+
+        <p>CORTEX-Persist implementa las tres capas:</p>
+
+        <div class="diagram-container">
+            <div style="margin-bottom: 16px; color: rgba(243, 244, 246, 0.4); letter-spacing: 0.2em; text-transform: uppercase; font-size: 0.7rem;">Arquitectura de Memoria CORTEX</div>
+            <div>
+                <span class="flow-node">LLM Context (L0)</span>
+                <span class="flow-arrow">→</span>
+                <span class="flow-node">Redis Cache (L1)</span>
+                <span class="flow-arrow">→</span>
+                <span class="flow-node flow-node--live">VSA Vectorial (L2)</span>
+                <span class="flow-arrow">→</span>
+                <span class="flow-node flow-node--live">SQLite Audit Ledger (L3)</span>
+            </div>
+            <div style="margin-top: 20px; font-size: 0.75rem; color: rgba(243, 244, 246, 0.35);">
+                <span class="flow-node--dead" style="padding: 2px 8px; border-radius: 4px;">Volátil</span> L0-L1 &nbsp;&nbsp;|&nbsp;&nbsp;
+                <span class="flow-node--live" style="padding: 2px 8px; border-radius: 4px;">Persistente</span> L2-L3
+            </div>
+        </div>
+
+        <ul>
+            <li><strong>L0 (LLM Context)</strong>: La ventana de atención del modelo. Volátil por diseño. No intentamos hacerla infinita.</li>
+            <li><strong>L1 (Redis Cache)</strong>: Hot cache de hechos recientes. Rápido, efímero, sacrificable.</li>
+            <li><strong>L2 (VSA Vectorial)</strong>: Espacio semántico persistente. Cada concepto existe como un vector de alta dimensión, recuperable por similitud semántica en O(log n).</li>
+            <li><strong>L3 (Audit Ledger)</strong>: Cadena de hechos verificados con SHA-256. Inmutable. Auditable. La fuente de verdad que el agente consulta antes de confiar en su propia generación.</li>
+        </ul>
+
+        <p>Cuando un agente CORTEX inicia una nueva sesión, no re-ingiere 200K tokens de contexto. Consulta L2 y L3 para recuperar <strong>exactamente</strong> los hechos relevantes para la tarea actual, con sus cadenas de evidencia. El contexto del LLM se usa para <em>razonar</em>, no para <em>almacenar</em>.</p>
+
+        <div class="section-divider"></div>
+
+        <!-- ═══════════════════════════════════════════════════
+             SECTION VII
+             ═══════════════════════════════════════════════════ -->
+
+        <h2>VII. El Futuro que la Industria No Quiere Construir</h2>
+
+        <p>La trayectoria actual de la industria es predecible: contextos más grandes, precios más altos, dependencia más profunda. En 2027 veremos contextos de 10 millones de tokens. En 2028, 50 millones. Y los agentes seguirán olvidando todo entre sesiones, porque <strong>expandir el buffer no crea memoria</strong>.</p>
+
+        <p>La alternativa es un cambio de paradigma arquitectónico:</p>
+
+        <ul>
+            <li><strong>Separar la cognición de la memoria</strong>. El LLM es un motor de razonamiento, no un disco duro. Úsalo para pensar, no para almacenar.</li>
+            <li><strong>Persistir localmente</strong>. El conocimiento del agente debe vivir en el disco del operador, no en la RAM del proveedor.</li>
+            <li><strong>Verificar criptográficamente</strong>. Si no puedes demostrar que un hecho es auténtico e inalterado, no es memoria. Es alucinación con formato.</li>
+            <li><strong>Indexar semánticamente</strong>. La recuperación debe ser por significado, no por posición en un buffer lineal.</li>
+        </ul>
+
+        <p>Este no es un framework hipotético. Es la arquitectura operativa de CORTEX-Persist, funcionando hoy en producción.</p>
+
+        <div class="quote-block quote-block--crimson" style="margin-top: 60px;">
+            La inteligencia no se mide en tokens por segundo. Se mide en decisiones que sobreviven al reinicio. El contexto infinito es la respuesta equivocada a la pregunta correcta.
+        </div>
+
+        <div style="margin-top: 80px; padding-top: 40px; border-top: 1px solid var(--mica-border);">
+            <h3>Referencias y Fuentes</h3>
+            <div class="table-container" style="margin-top: 24px;">
+                <table>
+                    <tbody>
+                        <tr>
+                            <td><strong>Liu, N. F. et al. (2023)</strong></td>
+                            <td>"Lost in the Middle: How Language Models Use Long Contexts" — Demostración empírica de la degradación de atención en contextos largos.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Hsieh, C. et al. (2024)</strong></td>
+                            <td>"RULER: What's the Real Context Size of Your Long-Context LMs?" — Benchmark que muestra que el rendimiento real cae drásticamente antes del límite nominal.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Lewis, P. et al. (2020)</strong></td>
+                            <td>"Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks" — El paper fundacional de RAG y sus limitaciones inherentes.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Miller, G. A. (1956)</strong></td>
+                            <td>"The Magical Number Seven, Plus or Minus Two" — El paper clásico sobre los límites de la memoria de trabajo humana.</td>
+                        </tr>
+                        <tr>
+                            <td><a href="/blog/why-your-ai-agent-has-alzheimers">Why Your AI Agent Has Alzheimer's</a></td>
+                            <td>Análisis técnico sobre amnesia en agentes IA y la necesidad de persistencia soberana.</td>
+                        </tr>
+                        <tr>
+                            <td><a href="/blog/la_extincion_de_las_formas_de_pensar">La Extinción de las Formas de Pensar</a></td>
+                            <td>Ensayo sobre la conexión entre la muerte de las lenguas y la amnesia industrial de la IA.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="footer-terminal">
+                <div class="terminal-line">
+                    <span class="terminal-prompt">[SYSTEM]</span>
+                    <span>C5-REAL Execution Verified</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="terminal-prompt">[STATE]</span>
+                    <span class="terminal-success">True</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="terminal-prompt">[BUFFER]</span>
+                    <span>2,000,000 tokens. Zero persist. Think about it.</span>
+                </div>
+                <div class="terminal-line">
+                    <span class="terminal-prompt">[AUTH]</span>
+                    <span>Borja Moskv · CORTEX-Persist · Escrito desde el metal local en Bizkaia.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
