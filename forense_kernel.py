@@ -36,16 +36,16 @@ except ImportError:
         return "ed25519:" + hmac.new(b"cortex-secret-key", payload, hashlib.sha256).hexdigest()
 
 class CaseInput(BaseModel):
-    repo_url: Optional[str] = None
-    contract_address: Optional[str] = None
-    system_spec: Optional[str] = None
+    repo_url: str | None = None
+    contract_address: str | None = None
+    system_spec: str | None = None
 
 class CaseResponse(BaseModel):
     case_id: str
     status: str
     timestamp: float
 
-def append_event(case_id: str, event_type: str, details: Dict[str, Any]):
+def append_event(case_id: str, event_type: str, details: dict[str, Any]):
     if case_id not in events_db:
         events_db[case_id] = []
     
@@ -58,7 +58,7 @@ def append_event(case_id: str, event_type: str, details: Dict[str, Any]):
     events_db[case_id].append(event)
     return event
 
-def run_adversarial_swarm(case_id: str, case_data: Dict[str, Any]):
+def run_adversarial_swarm(case_id: str, case_data: dict[str, Any]):
     """
     Background Task: Executes the Adversarial Swarm IR Graph
     INPUT -> PARSER -> IR GRAPH -> ATTACK SURFACE MAP -> SWARM -> CONSENSUS -> LEDGER

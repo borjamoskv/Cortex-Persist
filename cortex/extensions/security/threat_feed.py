@@ -56,7 +56,7 @@ def _keywords_to_pattern(text: str, max_keywords: int=5) -> str | None:
     keywords = [w for w in text.lower().split() if len(w) > 4 and w.isalpha()][:max_keywords]
     if not keywords:
         return None
-    return '(?i)(' + '|'.join((re.escape(k) for k in keywords)) + ')'
+    return '(?i)(' + '|'.join(re.escape(k) for k in keywords) + ')'
 
 class ThreatFeedEngine:
     """Daily-updated threat intelligence engine.
@@ -147,4 +147,4 @@ class ThreatFeedEngine:
         for ch in content:
             freq[ch] = freq.get(ch, 0) + 1
         length = len(content)
-        return -sum((c / length * math.log2(c / length) for c in freq.values() if c > 0))
+        return -sum(c / length * math.log2(c / length) for c in freq.values() if c > 0)

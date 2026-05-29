@@ -84,7 +84,7 @@ if __name__ == "__main__":
 
     sys.stdout.write("\n--- Final Cryptographic Ledger (Merkle Tree) ---\n")
     try:
-        with open("cortex_ledger.jsonl", "r") as f:
+        with open("cortex_ledger.jsonl") as f:
             for line in f:
                 data = json.loads(line)
                 sys.stdout.write(f"Merkle Root: {data['root_hash'][:16]}... | Leaf Hash: {data['hash'][:8]}... | Timestamp: {data['timestamp']}\n")

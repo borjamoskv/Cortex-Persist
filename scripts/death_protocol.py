@@ -16,9 +16,9 @@ def check_file_entropy(filepath):
     issues = []
     
     try:
-        with open(filepath, 'r', encoding='utf-8') as f:
+        with open(filepath, encoding='utf-8') as f:
             content = f.read()
-    except Exception as e:
+    except Exception:
         return 0, []
 
     # Penalty 1: LOC Entropy (Over 500 lines = +1 penalty per 100 extra)

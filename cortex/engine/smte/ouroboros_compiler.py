@@ -72,7 +72,7 @@ class OuroborosCompiler:
             logger.error("Target file does not exist.")
             return False
 
-        with open(target_path, "r", encoding="utf-8") as f:
+        with open(target_path, encoding="utf-8") as f:
             source = f.read()
 
         analysis = self.analyze_limerence(source)
