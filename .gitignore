@@ -309,3 +309,4 @@ cortex-core/cortex_exergy_autopoiesis.py
 cortex_rs/target/
 cortex_rs/*.so
 .vercel
+cortex_ledger.jsonl

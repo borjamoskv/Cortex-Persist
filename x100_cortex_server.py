@@ -264,8 +264,8 @@ async def neuro_static_fuzz(repo_url: str, effort: str = "think"):
 
 @app.on_event("startup")
 async def startup_event():
-    vsa.start_glia()
     asyncio.create_task(vigilia_loop())
+
 
 
 async def vigilia_loop():

@@ -190,8 +190,8 @@ class LedgerManager(SovereignResource):
         Lock-free on the hot path: monotonic counter drives entropy events,
         hash-chain serialization uses queue-based single-writer pattern.
         """
-        current_time = time.monotonic()
         with self._lock:
+            current_time = time.monotonic()
             if current_time <= self._last_timestamp:
                 logger.warning(
                     "SECURITY ALERT: Time-Jacking detected. Current: %f, Last: %f.",
