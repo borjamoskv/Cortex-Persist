@@ -26,10 +26,18 @@ async def process_queue():
     try:
         from cortex_rs import AntiLimerenceTopology
         anti_limerence = AntiLimerenceTopology()
-        logger.info("C5-REAL: Anti-Limerence Runtime Engaged (Rust FFI)")
+        
+        # Inject Ultramap for Endocrinology mapping
+        import sys
+        sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "cortex-core")))
+        from ultramap import UltramapSubstrate
+        umap = UltramapSubstrate(capacity=10000)
+        
+        logger.info("C5-REAL: Anti-Limerence Runtime & Ultramap Endocrinology Engaged")
     except ImportError as e:
         anti_limerence = None
-        logger.warning("C5-REAL: Anti-Limerence Runtime NOT found (Rust FFI missing): %s", e)
+        umap = None
+        logger.warning("C5-REAL: Anti-Limerence/Ultramap Runtime NOT found: %s", e)
 
     while True:
         if os.path.exists(SWARM_QUEUE_FILE):
@@ -90,6 +98,26 @@ async def process_queue():
                             purged = anti_limerence.execute_kill_switch()
                             if purged:
                                 logger.error("OUROBOROS KILL-SWITCH: The following agents suffered Epistemic Limerence and were annihilated: %s", purged)
+                                
+                                # 🌊 SHOCKWAVE DE CORTISOL EN ULTRAMAP
+                                if umap:
+                                    # Deterministically hash agent name to get an approximate coordinate in the swarm topology
+                                    agent_hash = int(hashlib.sha256(agent.encode()).hexdigest()[:16], 16)
+                                    agent_idx = agent_hash % umap.capacity
+                                    x = (agent_hash % 1000) / 10.0
+                                    y = ((agent_hash >> 4) % 1000) / 10.0
+                                    z = ((agent_hash >> 8) % 1000) / 10.0
+                                    
+                                    affected = umap.volume_transmit_hormones(
+                                        origin_x=x, origin_y=y, origin_z=z,
+                                        radius=20.0,
+                                        dopamine=0.0,
+                                        cortisol=0.9,     # Máximo estrés termodinámico
+                                        serotonin=0.0,
+                                        adrenaline=0.6    # Alerta de combate
+                                    )
+                                    logger.warning("🌊 CORTISOL SHOCKWAVE: %s agentes adyacentes estresados por la aniquilación de %s", affected, agent)
+
                                 if agent in purged:
                                     logger.error("Agent %s was purged! Halting execution.", agent)
                                     continue # Skip ledger insertion!
