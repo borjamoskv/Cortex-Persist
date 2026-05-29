@@ -198,13 +198,24 @@ async def dispatch_single(
 
             if resp.status_code == 429:
                 retry_after = float(resp.headers.get("retry-after", BACKOFF_BASE * attempt))
-                log.warning("[RATE-LIMIT] Retry-After=%.1fs attempt=%d/%d", retry_after, attempt, MAX_RETRIES)
+                log.warning(
+                    "[RATE-LIMIT] Retry-After=%.1fs attempt=%d/%d",
+                    retry_after,
+                    attempt,
+                    MAX_RETRIES,
+                )
                 await asyncio.sleep(retry_after)
                 continue
 
             if resp.status_code >= 500:
                 delay = min(BACKOFF_BASE * (2 ** (attempt - 1)), BACKOFF_CAP)
-                log.warning("[SERVER-ERR] %d — backoff=%.1fs attempt=%d/%d", resp.status_code, delay, attempt, MAX_RETRIES)
+                log.warning(
+                    "[SERVER-ERR] %d — backoff=%.1fs attempt=%d/%d",
+                    resp.status_code,
+                    delay,
+                    attempt,
+                    MAX_RETRIES,
+                )
                 await asyncio.sleep(delay)
                 continue
 
@@ -470,7 +481,9 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--manifest", "-m", help="YAML manifest for batch dispatch")
     p.add_argument("--model", default=DEFAULT_MODEL, help=f"Model ID (default: {DEFAULT_MODEL})")
     p.add_argument("--max-tokens", type=int, default=DEFAULT_MAX_TOKENS, help="Max output tokens")
-    p.add_argument("--temperature", "-t", type=float, default=0.0, help="Temperature (0.0 = deterministic)")
+    p.add_argument(
+        "--temperature", "-t", type=float, default=0.0, help="Temperature (0.0 = deterministic)"
+    )
     p.add_argument("--system", "-s", help="Custom system prompt")
     p.add_argument("--output", "-o", help="Output JSON file path")
     p.add_argument("--concurrency", "-c", type=int, default=3, help="Batch concurrency limit")
@@ -488,10 +501,7 @@ async def main() -> None:
     # Resolve API key
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
-        sys.exit(
-            "FATAL: ANTHROPIC_API_KEY not set.\n"
-            "  export ANTHROPIC_API_KEY=sk-ant-..."
-        )
+        sys.exit("FATAL: ANTHROPIC_API_KEY not set.\n  export ANTHROPIC_API_KEY=sk-ant-...")
 
     # Build request(s)
     if args.manifest:
@@ -513,9 +523,7 @@ async def main() -> None:
     # Dispatch
     if len(requests) == 1 and not args.manifest:
         async with httpx.AsyncClient(timeout=120.0) as client:
-            result = await dispatch_single(
-                client, requests[0], api_key, stream=args.stream
-            )
+            result = await dispatch_single(client, requests[0], api_key, stream=args.stream)
             stats = OrchestratorStats(
                 total=1,
                 success=1 if result.status == "C5-REAL" else 0,

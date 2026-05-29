@@ -84,7 +84,10 @@ if MCP_AVAILABLE:
                     "type": "object",
                     "properties": {
                         "prompt": {"type": "string", "description": "The prompt to execute"},
-                        "model": {"type": "string", "description": "The model ID (default: claude-3-opus-20240229)"},
+                        "model": {
+                            "type": "string",
+                            "description": "The model ID (default: claude-3-opus-20240229)",
+                        },
                     },
                     "required": ["prompt"],
                 },
