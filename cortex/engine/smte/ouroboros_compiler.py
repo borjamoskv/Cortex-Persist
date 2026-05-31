@@ -95,13 +95,18 @@ class OuroborosCompiler:
                 "Amputación automática iniciada."
             )
             target_path.unlink()
+            
+            content_val = f"L-EPI Guard amputated {target_path.name} due to high limerence/dead code."
+            import hashlib
+            logos_sig = hashlib.sha256(f"{content_val}SYSTEM".encode()).hexdigest()
+            
             await self._engine.store(
                 project="SYSTEM",
-                content=f"L-EPI Guard amputated {target_path.name} due to high limerence/dead code.",
+                content=content_val,
                 fact_type="bridge",
                 confidence="C5",
                 source="agent:ouroboros-compiler",
-                meta={"sub_type": "l_epi_amputation", "target_file": str(target_path), "logos_signature": "smte_ouroboros"},
+                meta={"sub_type": "l_epi_amputation", "target_file": str(target_path), "logos_signature": logos_sig},
             )
             return True
             
@@ -157,13 +162,17 @@ class OuroborosCompiler:
             )
 
             # Persist to ledger
+            content_val = f"Ouroboros compiled {target_path.name}. Cost reduced from {analysis['maintenance_cost']}."
+            import hashlib
+            logos_sig = hashlib.sha256(f"{content_val}SYSTEM".encode()).hexdigest()
+
             await self._engine.store(
                 project="SYSTEM",
-                content=f"Ouroboros compiled {target_path.name}. Cost reduced from {analysis['maintenance_cost']}.",
+                content=content_val,
                 fact_type="bridge",
                 confidence="C5",
                 source="agent:ouroboros-compiler",
-                meta={"sub_type": "graph_compression", "target_file": str(target_path), "logos_signature": "smte_ouroboros"},
+                meta={"sub_type": "graph_compression", "target_file": str(target_path), "logos_signature": logos_sig},
             )
             return True
 

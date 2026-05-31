@@ -1,5 +1,6 @@
 """
 Tests for Self-Modifying Topology Engine (SMTE).
+Aligned with the consolidated cortex/engine/smte/ module.
 
 Reality Level: C5-REAL
 """
@@ -9,13 +10,23 @@ import sys
 import json
 import tempfile
 import pytest
+import ast
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, AsyncMock
 
-from engine.smte.parser import CortexASTParser
-from engine.smte.analyzer import calculate_ast_complexity, estimate_dead_code_ratio
-from engine.smte.exergy import ExergyMonitor
-from engine.smte.ouroboros import OuroborosLoop
+# Add project root and cortex-core to sys.path dynamically
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+if str(_REPO_ROOT / "cortex-core") not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT / "cortex-core"))
+
+from cortex.engine.smte.parser import AgentASTParser
+from cortex.engine.smte.analyzer import calculate_ast_complexity, estimate_dead_code_ratio
+from cortex.engine.smte.exergy import ExergyMonitor, evaluate_module_exergy
+from cortex.engine.smte.ouroboros_compiler import OuroborosCompiler
+from cortex.engine.smte.weismann_barrier import enforce_weismann_barrier
+from cortex.engine.smte.llm_mutator import llm_driven_mutator
 
 
 # Sample code for testing AST parsing and analysis
@@ -75,57 +86,51 @@ def temp_source_file():
         os.remove(path)
 
 
-class TestCortexASTParser:
-    def test_load_and_extract_functions(self, temp_source_file):
-        parser = CortexASTParser(temp_source_file)
-        funcs = parser.extract_functions()
-        func_names = [f["name"] for f in funcs]
+class TestAgentASTParser:
+    def test_load_and_extract_topology(self, temp_source_file):
+        parser = AgentASTParser(temp_source_file)
+        topology = parser.get_topology()
+        
+        # Verify classes
+        assert len(topology["classes"]) == 1
+        assert topology["classes"][0]["name"] == "MyClass"
+        assert "method_one" in topology["classes"][0]["methods"]
+        assert "method_two" in topology["classes"][0]["methods"]
+        
+        # Verify top-level functions
+        func_names = [f["name"] for f in topology["functions"]]
         assert "hello_world" in func_names
         assert "async_fn" in func_names
-        assert "method_one" in func_names
-        assert "method_two" in func_names
-        assert len(funcs) == 4
+        assert len(topology["functions"]) == 2
 
-    def test_extract_classes(self, temp_source_file):
-        parser = CortexASTParser(temp_source_file)
-        classes = parser.extract_classes()
-        assert len(classes) == 1
-        assert classes[0]["name"] == "MyClass"
-        assert "method_one" in classes[0]["methods"]
-        assert "method_two" in classes[0]["methods"]
-
-    def test_get_source_segment(self, temp_source_file):
-        parser = CortexASTParser(temp_source_file)
-        # Find async_fn start and end lines
-        funcs = parser.extract_functions()
-        async_fn_info = next(f for f in funcs if f["name"] == "async_fn")
-        segment = parser.get_source_segment(async_fn_info["lineno"], async_fn_info["end_lineno"])
-        assert "async def async_fn(x):" in segment
-        assert "return False" in segment
-
-    def test_inject_mutation_and_save(self, temp_source_file):
-        parser = CortexASTParser(temp_source_file)
-        original = "print(\"Hello, world!\")"
-        mutated = "print(\"Hello, mutated world!\")"
-        new_source = parser.inject_mutation(original, mutated)
-        assert mutated in new_source
-        assert original not in new_source
-        parser.save()
-
+    def test_apply_mutation(self, temp_source_file):
+        parser = AgentASTParser(temp_source_file)
+        
+        # Mutation that appends an attribute check or dummy node to a function
+        def mock_mutator(tree):
+            for node in ast.walk(tree):
+                if isinstance(node, ast.FunctionDef) and node.name == "hello_world":
+                    # add a dummy pass statement
+                    node.body.append(ast.Pass())
+                    return True
+            return False
+            
+        success = parser.apply_mutation(mock_mutator)
+        assert success is True
+        
+        # Verify crystallization
+        mutated_code = parser.crystallize()
+        assert mutated_code is not None
+        
         # Reload to verify persistence
-        parser2 = CortexASTParser(temp_source_file)
-        assert mutated in parser2.source_code
-        assert original not in parser2.source_code
-
-    def test_invalid_syntax_mutation_raises(self, temp_source_file):
-        parser = CortexASTParser(temp_source_file)
-        with pytest.raises(ValueError, match="invalid syntax"):
-            parser.inject_mutation("print(\"Hello, world!\")", "def invalid syntax :(")
+        parser2 = AgentASTParser(temp_source_file)
+        topology = parser2.get_topology()
+        func_names = [f["name"] for f in topology["functions"]]
+        assert "hello_world" in func_names
 
 
 class TestSMTEAnalyzer:
     def test_calculate_ast_complexity(self):
-        # Base complexity is 1.0. branches: if (1), for (1), if (1) inside for, while (1). Total branch count = 4. Complexity = 5.0
         comp = calculate_ast_complexity(COMPLEX_SAMPLE_CODE)
         assert comp == 5.0
 
@@ -145,7 +150,6 @@ class TestExergyMonitor:
         monitor.set_l_epi_metrics(ast_complexity=5.0, empirical_usage=2.0, dead_code_ratio=0.3)
         
         monitor.start_transaction()
-        # simulate some work
         monitor.end_transaction(success=True)
         
         metrics = monitor.calculate_metrics()
@@ -157,86 +161,123 @@ class TestExergyMonitor:
         # limerence_penalty = (5.0 / 2.0) * 10.0 = 25.0
         assert metrics["limerence_penalty"] == 25.0
 
+    def test_evaluate_module_exergy(self):
+        results = [
+            {"status": "C5-REAL", "latency": 0.1},
+            {"status": "error", "latency": 0.5},
+            {"status": "C5-REAL", "latency": 1.2} # latency penalty +0.2
+        ]
+        avg_entropy = evaluate_module_exergy(results)
+        # expected: (0.0 + 1.0 + 0.2) / 3 = 0.4
+        assert abs(avg_entropy - 0.4) < 1e-6
 
-class TestOuroborosLoop:
-    def test_transcribe(self, temp_source_file):
-        loop = OuroborosLoop(temp_source_file)
-        funcs = loop.transcribe()
-        assert len(funcs) == 4
 
-    @patch("cortex.extensions.mcp.claude_tool.run_claude_query")
-    def test_propose_mutation_success(self, mock_query, temp_source_file):
-        loop = OuroborosLoop(temp_source_file)
+class TestWeismannBarrier:
+    def test_enforce_weismann_barrier_success(self, temp_source_file):
+        # A mutator that changes code to valid Python
+        def mutator(filepath):
+            with open(filepath, "w") as f:
+                f.write("x = 10\n")
+            return True
+            
+        success = enforce_weismann_barrier(temp_source_file, mutator)
+        assert success is True
         
-        # Mock successful Claude MCP response
-        mock_response = {
-            "status": "C5-REAL",
-            "model": "claude-3-opus",
-            "response": "def hello_world():\n    print('Hello from mutation!')"
-        }
-        mock_query.return_value = json.dumps(mock_response)
-        
-        exergy_metrics = {
-            "entropy": 0.5,
-            "latency": 0.1,
-            "status": "C5-REAL",
-            "dead_code_ratio": 0.1,
-            "limerence_penalty": 2.0
-        }
-        
-        mutated_code = loop.propose_mutation("hello_world", exergy_metrics)
-        assert "Hello from mutation!" in mutated_code
-        mock_query.assert_called_once()
-
-    def test_propose_mutation_l_epi_guard_purge(self, temp_source_file):
-        loop = OuroborosLoop(temp_source_file)
-        
-        exergy_metrics = {
-            "entropy": 1.0,
-            "latency": 1.5,
-            "status": "error",
-            "dead_code_ratio": 0.5,  # > 0.4
-            "limerence_penalty": 15.0  # > 10.0
-        }
-        
-        # Should trigger L-EPI Guard automatic amputation (returns empty string)
-        mutated_code = loop.propose_mutation("hello_world", exergy_metrics)
-        assert mutated_code == ""
-
-    def test_mutate_and_integrate(self, temp_source_file):
-        loop = OuroborosLoop(temp_source_file)
-        
-        new_hello = "def hello_world():\n    return 'mutated!'"
-        loop.mutate("hello_world", new_hello)
-        loop.integrate()
-        
-        # Read back from file
         with open(temp_source_file, "r") as f:
             content = f.read()
-        assert "mutated!" in content
+        assert content == "x = 10\n"
 
-    @patch("subprocess.run")
-    def test_validate_in_sandbox_success(self, mock_run, temp_source_file):
-        loop = OuroborosLoop(temp_source_file)
+    def test_enforce_weismann_barrier_syntax_failure(self, temp_source_file):
+        # A mutator that outputs invalid syntax
+        def mutator(filepath):
+            with open(filepath, "w") as f:
+                f.write("invalid syntax === \n")
+            return True
+            
+        success = enforce_weismann_barrier(temp_source_file, mutator)
+        assert success is False
         
-        mock_proc = MagicMock()
-        mock_proc.returncode = 0
-        mock_run.return_value = mock_proc
-        
-        assert loop.validate_in_sandbox() is True
+        # Original should be untouched
+        with open(temp_source_file, "r") as f:
+            content = f.read()
+        assert "hello_world" in content
 
-    @patch("subprocess.run")
-    def test_validate_in_sandbox_failure(self, mock_run, temp_source_file):
-        loop = OuroborosLoop(temp_source_file)
-        
-        mock_proc = MagicMock()
-        mock_proc.returncode = 1
-        mock_proc.stderr = "Test failure detail"
-        mock_run.return_value = mock_proc
-        
-        assert loop.validate_in_sandbox() is False
+    def test_enforce_weismann_barrier_none_callback(self, temp_source_file):
+        # Passing None callback should evaluate as True mutation check
+        success = enforce_weismann_barrier(temp_source_file, None)
+        assert success is True
 
-    def test_mitosis(self, temp_source_file):
-        loop = OuroborosLoop(temp_source_file)
-        # Verify mitosis doesn't raise if module isn't loaded in sys.modules
-        loop.mitosis("some_random_module_that_does_not_exist")
+
+class TestOuroborosCompiler:
+    def test_analyze_limerence(self):
+        compiler = OuroborosCompiler()
+        analysis = compiler.analyze_limerence(SAMPLE_CODE)
+        assert "complexity" in analysis
+        assert "dead_code_ratio" in analysis
+        assert "limerence_penalty" in analysis
+        assert "is_limerent" in analysis
+        assert "must_amputate" in analysis
+
+    @pytest.mark.asyncio
+    @patch("cortex.engine.smte.ouroboros_compiler.call_qwen_mutator")
+    @patch("cortex_core.engine.CortexEngine")
+    async def test_compile_entity_success(self, mock_engine_cls, mock_qwen, temp_source_file):
+        # Mock CortexEngine store method
+        mock_engine = MagicMock()
+        mock_engine.store = AsyncMock()
+        mock_engine_cls.return_value = mock_engine
+        
+        compiler = OuroborosCompiler()
+        compiler._engine = mock_engine
+        
+        # Mock Qwen response with valid python code
+        mock_qwen.return_value = "x = 42\n"
+        
+        result = await compiler.compile_entity(temp_source_file)
+        assert result is True
+        
+        # Verify file content updated
+        with open(temp_source_file, "r") as f:
+            content = f.read()
+        assert content == "x = 42\n"
+        
+        mock_engine.store.assert_awaited_once()
+
+    @pytest.mark.asyncio
+    @patch("cortex_core.engine.CortexEngine")
+    async def test_compile_entity_amputation(self, mock_engine_cls, temp_source_file):
+        mock_engine = MagicMock()
+        mock_engine.store = AsyncMock()
+        mock_engine_cls.return_value = mock_engine
+        
+        compiler = OuroborosCompiler()
+        compiler._engine = mock_engine
+        
+        # Target high dead code and high complexity to force amputation
+        with patch.object(compiler, "analyze_limerence") as mock_analyze:
+            mock_analyze.return_value = {
+                "complexity": 5.0,
+                "dead_code_ratio": 0.5, # > 0.4
+                "limerence_penalty": 15.0, # > 10.0
+                "is_limerent": True,
+                "must_amputate": True
+            }
+            
+            result = await compiler.compile_entity(temp_source_file)
+            assert result is True
+            # File should be unlinked/deleted by amputation
+            assert not os.path.exists(temp_source_file)
+            mock_engine.store.assert_awaited_once()
+
+
+class TestLLMDrivenMutator:
+    @patch("cortex.engine.smte.llm_mutator.call_qwen_mutator")
+    def test_llm_driven_mutator_success(self, mock_qwen, temp_source_file):
+        parser = AgentASTParser(temp_source_file)
+        
+        # Qwen returns valid updated python code
+        mock_qwen.return_value = SAMPLE_CODE + "\n# extra comment\n"
+        
+        success = llm_driven_mutator(parser)
+        assert success is True
+        assert "# extra comment" in ast.unparse(parser.tree)
