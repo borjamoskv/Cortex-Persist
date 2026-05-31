@@ -24,10 +24,12 @@ def test_genome_mutator_pruning():
     """Verify GenomeMutator prunes poorly performing heuristics."""
     genome = default_genome()
     # Force a very weak heuristic, and pad to exceed the > 3 threshold
-    genome.heuristics.append(Heuristic("dummy1", "pad", weight=0.9))
-    genome.heuristics.append(Heuristic("dummy2", "pad", weight=0.9))
-    genome.heuristics.append(Heuristic("dummy3", "pad", weight=0.9))
-    genome.heuristics.append(Heuristic("weak_link", "to be pruned", weight=0.01))
+    genome.heuristics = [
+        Heuristic("dummy1", "pad", weight=0.9),
+        Heuristic("dummy2", "pad", weight=0.9),
+        Heuristic("dummy3", "pad", weight=0.9),
+        Heuristic("weak_link", "to be pruned", weight=0.01),
+    ]
 
     mutator = GenomeMutator()
     mutated = mutator.mutate(genome, mutation_rate=1.0)
