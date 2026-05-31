@@ -232,13 +232,31 @@ Proof:
 
 ---
 
+### Hito 20: Erradicación de Fricción Estática en Despliegue Edge (Vercel)
+- **Target:** `cortexpersist-com/`
+- **Objective:** Aniquilación de Routing Parasitario (archivos estáticos legacy) forzando a la red Edge a procesar el AST compilado de Astro 6.
+- **Yield Target:** Destrucción de la limerencia caché local e inyección de SOTA 2026.
+- **Reality Level:** `C5-REAL`
+- **Evidence:** Commit `4fef21d` (cortexpersist-com) y recarga forzosa vía AppleScript.
+```yaml
+Claim: Despliegue Edge limpiado de entropía
+Proof:
+  Base: "git rm -r index.html css/ js/ && osascript reload"
+  Range: [C5, C5]
+  Confidence: C5-REAL
+  Date: 2026-05-31
+```
+- **Status:** ✅ COMPLETE — 31 Mayo 2026
+
+---
+
 ## 🛡️ Thermodynamic Enforcement
 All milestone claims must map directly to a `Claim/Proof` matrix.
 ```yaml
-Claim: 19/19 Milestones Verified
+Claim: 20/20 Milestones Verified
 Proof:
   Base: Continuous Silicon Checkpoint Execution
-  Variables: [r=1, d=1, n=19, S=100]
+  Variables: [r=1, d=1, n=20, S=100]
   Range: [C5, C5]
   Confidence: C5-REAL
   Date: 2026-05-31

@@ -18,6 +18,7 @@ serde_json = "1.0"
 rand = "0.8.5"
 rand_distr = "0.4.3"
 hex = "0.4"
+wasm-runtime = { path = "../crates/wasm-runtime" }
 
 [profile.release]
 opt-level = 3
