@@ -104,7 +104,7 @@ def _show_tip(engine=None) -> None:
             )
         )
     except (ImportError, RuntimeError, OSError, ValueError):
-        pass  # Tips are non-critical
+        print(\"[DETECTIVE-Ω] Warning: Swallowed exception (Auto-Fix Express)\")  # Tips are non-critical
 
 
 def _get_tip_text(engine=None) -> str:

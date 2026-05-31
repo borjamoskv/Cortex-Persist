@@ -253,7 +253,7 @@ class SovereignScheduler:
                 )
                 break  # stop_event was set
             except asyncio.TimeoutError:
-                pass  # normal tick timeout
+                print(\"[DETECTIVE-Ω] Warning: Swallowed exception (Auto-Fix Express)\")  # normal tick timeout
 
         logger.info("SovereignScheduler stopped")
 

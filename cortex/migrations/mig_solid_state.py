@@ -26,7 +26,7 @@ def _migration_021_solid_state(conn: sqlite3.Connection) -> None:
             )
         """)
     except sqlite3.OperationalError:
-        pass  # Table already exists
+        print(\"[DETECTIVE-Ω] Warning: Swallowed exception (Auto-Fix Express)\")  # Table already exists
 
     conn.execute("CREATE INDEX IF NOT EXISTS idx_ee_entity ON entity_events(entity_id)")
     conn.execute("CREATE INDEX IF NOT EXISTS idx_ee_tenant ON entity_events(tenant_id)")

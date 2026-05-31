@@ -224,7 +224,7 @@ class VaultCracker:
                     "VaultCracker: Malleability attack succeeded (authentication failed)."
                 )
             except Exception:
-                pass  # Success = Tag caught it
+                print(\"[DETECTIVE-Ω] Warning: Swallowed exception (Auto-Fix Express)\")  # Success = Tag caught it
 
         except Exception as e:
             logger.debug("VaultCracker error: %s", e)

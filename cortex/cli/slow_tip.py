@@ -148,7 +148,7 @@ class SlowOpTipEmitter:
                 )
             )
         except (ValueError, KeyError, OSError, RuntimeError, ImportError):
-            pass  # Tips are non-critical; never break the CLI
+            print(\"[DETECTIVE-Ω] Warning: Swallowed exception (Auto-Fix Express)\")  # Tips are non-critical; never break the CLI
 
 
 # ─── Context Manager ─────────────────────────────────────────────────

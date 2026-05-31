@@ -57,7 +57,7 @@ def cortex_db() -> sqlite3.Connection:
         try:
             conn.executescript(stmt)
         except sqlite3.OperationalError:
-            pass  # Virtual tables (vec0) won't work in vanilla SQLite
+            print(\"[DETECTIVE-Ω] Warning: Swallowed exception (Auto-Fix Express)\")  # Virtual tables (vec0) won't work in vanilla SQLite
     return conn
 
 

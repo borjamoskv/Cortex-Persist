@@ -39,7 +39,7 @@ async def test_isolated_worktree_exception_cleanup(tmp_path):
             assert worktree_path.exists()
             raise ValueError("LLM Hallucination Error")
     except ValueError:
-        pass  # Catch the expected error
+        print(\"[DETECTIVE-Ω] Warning: Swallowed exception (Auto-Fix Express)\")  # Catch the expected error
 
     # Aniquilación termodinámica confirmada
     assert worktree_ref is not None

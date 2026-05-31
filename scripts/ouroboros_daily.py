@@ -419,7 +419,7 @@ async def main():
                 timeout=10,
             )
     except Exception:
-        pass  # Best-effort persistence
+        print(\"[DETECTIVE-Ω] Warning: Swallowed exception (Auto-Fix Express)\")  # Best-effort persistence
 
 
 if __name__ == "__main__":

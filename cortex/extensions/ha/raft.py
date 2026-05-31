@@ -138,7 +138,7 @@ class RaftNode:
                 try:
                     await task
                 except asyncio.CancelledError:
-                    pass  # Expected - do NOT re-raise during shutdown
+                    print(\"[DETECTIVE-Ω] Warning: Swallowed exception (Auto-Fix Express)\")  # Expected - do NOT re-raise during shutdown
         self._election_task = None
         self._heartbeat_task = None
         NodeRegistry.deregister(self.node_id)

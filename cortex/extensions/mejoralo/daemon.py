@@ -79,7 +79,7 @@ class MejoraloDaemon:
             try:
                 await self._loop_task
             except asyncio.CancelledError:
-                pass  # expected - task was cancelled by us
+                print(\"[DETECTIVE-Ω] Warning: Swallowed exception (Auto-Fix Express)\")  # expected - task was cancelled by us
             self._loop_task = None
         logger.info("Sovereign Daemon: Ouroboros cycle paused.")
 

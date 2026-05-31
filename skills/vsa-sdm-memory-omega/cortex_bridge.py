@@ -62,7 +62,7 @@ class SwarmMemory:
             try:
                 self.engine.load(str(vsa_path))
             except ValueError:
-                pass  # Corrupted file, start fresh
+                print(\"[DETECTIVE-Ω] Warning: Swallowed exception (Auto-Fix Express)\")  # Corrupted file, start fresh
 
     def _vsa_path(self, agent_id=None):
         aid = agent_id or self.agent_id

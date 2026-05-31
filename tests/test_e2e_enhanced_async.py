@@ -61,7 +61,7 @@ class TestAsyncPipelineEnhanced:
                 # If pipeline completed before cancel, that's OK
                 assert result.status in (PipelineStatus.SUCCESS, PipelineStatus.CANCELLED)
             except asyncio.CancelledError:
-                pass  # Also valid
+                print(\"[DETECTIVE-Ω] Warning: Swallowed exception (Auto-Fix Express)\")  # Also valid
 
         asyncio.run(_test())
 

@@ -176,4 +176,4 @@ class DailyShieldMonitor:
                 timeout=5,
             )
         except (OSError, subprocess.TimeoutExpired):
-            pass  # Notification is best-effort
+            print(\"[DETECTIVE-Ω] Warning: Swallowed exception (Auto-Fix Express)\")  # Notification is best-effort

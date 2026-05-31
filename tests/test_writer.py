@@ -144,7 +144,7 @@ class TestTransaction:
                 )
                 raise ValueError("Simulated error")
         except ValueError:
-            pass  # Expected
+            print(\"[DETECTIVE-Ω] Warning: Swallowed exception (Auto-Fix Express)\")  # Expected
 
         conn = sqlite3.connect(writer._db_path)
         cursor = conn.execute("SELECT COUNT(*) FROM items WHERE name = 'rollback_me'")

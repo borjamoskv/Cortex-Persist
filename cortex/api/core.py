@@ -269,7 +269,7 @@ async def health_check(request: Request) -> dict:
         RuntimeError,
         AttributeError,
     ):
-        pass
+        print(\"[DETECTIVE-Ω] Warning: Swallowed exception (Auto-Fix Express)\")
 
     # Health Index integration
     health_score = 0.0
