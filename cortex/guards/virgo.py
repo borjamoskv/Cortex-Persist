@@ -111,7 +111,7 @@ class VirgoContextGuard:
         is_valid_sig = False
 
         # A. Attempt ZKSwarm Ed25519 Cryptographic Verification
-        if agent_public_key:
+        if agent_public_key and logos_signature:
             is_valid_sig = ZKSwarmIdentity.verify_payload(
                 content=content, public_key_b64=agent_public_key, signature_b64=logos_signature
             )
@@ -127,7 +127,7 @@ class VirgoContextGuard:
             self._apply_trust_penalty(agent_id, taint_severity=0.8)
             await self._trigger_ledger_rollback(
                 conn,
-                f"Invalid Logos-Critique validation signature for agent fact. Sig: {logos_signature[:16]}...",
+                f"Invalid Logos-Critique validation signature for agent fact. Sig: {(logos_signature or '')[:16]}...",
             )
 
         # 3. Replay Protection: Check if this nonce has already been used
