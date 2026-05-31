@@ -61,6 +61,7 @@ STATE = {
 
 events_queue: asyncio.Queue = asyncio.Queue()
 
+
 # --- WEBSOCKET BINARY MEMBRANE --- #
 class ConnectionManager:
     def __init__(self):
