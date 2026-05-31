@@ -27,6 +27,9 @@
 | **[P0]** | **Treat Generative Output as Conjecture** — route ALL state mutations through deterministic guards before persistence | Always |
 | **[P0]** | **Never Bypass Guards** — do not write code that circumvents the Write-Path Contract or downgrades validation errors | Always |
 | **[P0]** | **Verify Hash Continuity** — do not mutate `ledger.py` or any state-persisting path without ensuring cryptographic auditability | Any ledger/engine change |
+| **[P0]** | **JIT Skill Compiler Loop (Sortu-APEX)** — Every time an agent encounters a repetitive 3-step sequence, automatically invoke `workflow_skill_creator`, crystallize into `~/.gemini/config/skills/`, and hot-reload context | JIT Cognition |
+| **[P0]** | **Recursive Dead Code Purge (LEA-Ω)** — Deploy LEA-Ω continuously against `.agents` and `cortex-config` to enforce Token Hygiene and zero dead tokens | Token Hygiene |
+| **[P0]** | **C5-REAL Hardware Anchoring** — Never rely solely on API payloads. Visually (screenshot/DOM) or hardware-verify (git, hashes, DB) state mutations | Verification |
 | **[P2]** | **Enforce Axioms** — apply AX-041 to AX-046 (see §2) in all architectural decisions | Architecture work |
 
 ### Decision Gate §0 — Agent Routing Tree (execute before any action)
