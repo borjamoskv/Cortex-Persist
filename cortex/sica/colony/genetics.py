@@ -199,11 +199,16 @@ class GenePool:
         if fragment.fragment_type == "heuristic":
             name = fragment.payload["name"]
             desc = fragment.payload.get("description", "")
-            weight = fragment.payload.get("weight", 0.5)
-            h = Heuristic(name=name, description=desc, weight=weight)
+            base_weight = fragment.payload.get("weight", 0.5)
+            
+            # Integrate Heuristic drift logic during adoption
+            drift = random.uniform(-0.1, 0.1) if random.random() < 0.2 else 0.0
+            mutated_weight = max(0.1, min(1.0, base_weight + drift))
+
+            h = Heuristic(name=name, description=desc, weight=mutated_weight)
             strategy.mutate_inject(
                 h,
-                reason=f"colony adoption from {fragment.donor_agent}",
+                reason=f"colony adoption from {fragment.donor_agent} (drift {drift:+.2f})",
             )
             return True
 
@@ -272,6 +277,12 @@ class GenomeCrossover:
                         all_heuristics[h.name] = copy.deepcopy(h)
                 else:
                     all_heuristics[h.name] = copy.deepcopy(h)
+
+        # Apply structural drift to inherited heuristics
+        for h in all_heuristics.values():
+            if random.random() < 0.15:  # 15% chance to mutate weight
+                drift = random.uniform(-0.15, 0.15)
+                h.weight = max(0.1, min(1.0, h.weight + drift))
 
         # Blend exploration rates
         er = (parent_a.exploration_rate + parent_b.exploration_rate) / 2
