@@ -229,27 +229,47 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
         if self.callback_api is not None:
             tasks.append(asyncio.create_task(self.callback_api.serve(), name="CallbackAPI"))
         if self._aether_daemon is not None:
-            self._spawn_thread(self._aether_daemon.start, "AetherAgent")
+            tasks.append(
+                asyncio.create_task(
+                    asyncio.to_thread(self._aether_daemon.start), name="AetherAgent"
+                )
+            )
         if self.fiat_oracle:
-            self._spawn_thread(self.fiat_oracle.run_sync_loop, "FiatOracle")
-        self._spawn_thread(self._run_neural_loop, "NeuralSync")
+            tasks.append(asyncio.create_task(self.fiat_oracle.run_loop(), name="FiatOracle"))
+        tasks.append(asyncio.create_task(self._run_neural_loop_async(), name="NeuralSync"))
         if self.ast_oracle:
-            self._spawn_thread(self._run_ast_oracle_loop, "ASTOracle")
+            tasks.append(asyncio.create_task(self._run_ast_oracle_loop_async(), name="ASTOracle"))
         if getattr(self, "iot_oracle", None):
-            self._spawn_thread(self._run_iot_oracle_loop, "IoTOracle")
+            tasks.append(asyncio.create_task(self._run_iot_oracle_loop_async(), name="IoTOracle"))
         if self.heartbeat_daemon:
-            self._spawn_thread(self._run_heartbeat_loop, "HeartbeatDaemon")
+            tasks.append(
+                asyncio.create_task(self._run_heartbeat_loop_async(), name="HeartbeatDaemon")
+            )
         if self.entropic_wake_daemon:
-            self._spawn_thread(self._run_entropic_wake_loop, "EntropicWakeDaemon")
+            tasks.append(
+                asyncio.create_task(self._run_entropic_wake_loop_async(), name="EntropicWakeDaemon")
+            )
         if self.frontier_daemon:
-            self._spawn_thread(self._run_frontier_loop, "FrontierDaemon")
+            tasks.append(
+                asyncio.create_task(self._run_frontier_loop_async(), name="FrontierDaemon")
+            )
         if getattr(self, "zero_prompting_daemon", None):
-            self._spawn_thread(self._run_zero_prompting_loop, "ZeroPromptingDaemon")
+            tasks.append(
+                asyncio.create_task(
+                    self._run_zero_prompting_loop_async(), name="ZeroPromptingDaemon"
+                )
+            )
         if getattr(self, "epistemic_breaker_daemon", None):
-            self._spawn_thread(self._run_epistemic_breaker_loop, "EpistemicBreakerDaemon")
+            tasks.append(
+                asyncio.create_task(
+                    self._run_epistemic_breaker_loop_async(), name="EpistemicBreakerDaemon"
+                )
+            )
         if getattr(self, "sentinel_oracle", None):
-            self._spawn_thread(self._run_sentinel_oracle_loop, "SentinelOracle")
-        self._spawn_thread(self._run_health_loop, "HealthMonitor")
+            tasks.append(
+                asyncio.create_task(self._run_sentinel_oracle_loop_async(), name="SentinelOracle")
+            )
+        tasks.append(asyncio.create_task(self._run_health_loop_async(), name="HealthMonitor"))
         async_count = len(tasks)
         thread_count = len(self._threads)
         logger.info(
