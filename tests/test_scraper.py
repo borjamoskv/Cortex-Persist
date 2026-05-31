@@ -1,4 +1,4 @@
-"""SCRAPER-Ω Unit Tests — Sovereign Web Extraction.
+"""SCRAPER-Ω Unit Tests - Sovereign Web Extraction.
 
 Tests cover:
 - HTML-to-Markdown conversion
@@ -357,7 +357,7 @@ class TestRobotsTxt:
 
 
 # ==============================================================================
-# 7. ScraperEngine — Cascade
+# 7. ScraperEngine - Cascade
 # ==============================================================================
 
 

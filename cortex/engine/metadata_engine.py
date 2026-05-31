@@ -1,4 +1,4 @@
-"""CORTEX Metadata Engine — Deterministic and Async Classification.
+"""CORTEX Metadata Engine - Deterministic and Async Classification.
 
 Decouples metabolic state (Thermodynamic Plane) from thematic domain (Semantic Plane).
 """

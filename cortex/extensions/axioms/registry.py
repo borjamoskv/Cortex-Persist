@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Canonical Sovereign Axiom Registry — 7 axioms, zero ambiguity.
+"""Canonical Sovereign Axiom Registry - 7 axioms, zero ambiguity.
 
 Every axiom in the CORTEX ecosystem has exactly ONE definition here.
 All other documents MUST reference axioms by their AX-I to AX-VII ID.
 
 Category:
-    SOVEREIGN — The 7 fundamental principles of CORTEX Persist.
+    SOVEREIGN - The 7 fundamental principles of CORTEX Persist.
 """
 
 from __future__ import annotations

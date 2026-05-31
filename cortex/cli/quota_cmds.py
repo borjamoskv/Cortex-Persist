@@ -1,4 +1,4 @@
-"""CLI commands: quota (PULMONES — Sovereign Quota Manager)."""
+"""CLI commands: quota (PULMONES - Sovereign Quota Manager)."""
 
 from __future__ import annotations
 

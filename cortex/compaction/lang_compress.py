@@ -1,6 +1,6 @@
-"""Language Compression Engine — Tokenization Tax Eliminator.
+"""Language Compression Engine - Tokenization Tax Eliminator.
 
-Ω₂: Entropic Asymmetry — The tokenizer doesn't care about culture.
+Ω₂: Entropic Asymmetry - The tokenizer doesn't care about culture.
 Optimize for its physics. Auto-translates non-English memos to English
 for storage, preserving the original language tag for retrieval rendering.
 
@@ -349,7 +349,7 @@ class LangCompressor:
             "Rules:\n"
             "1. Preserve ALL technical terms, variable names, and project names as-is\n"
             "2. Preserve code snippets and file paths unchanged\n"
-            "3. Use concise, dense English — no fluff or padding\n"
+            "3. Use concise, dense English - no fluff or padding\n"
             "4. Maintain the exact meaning and all details\n"
             "5. Output ONLY the translation, no commentary\n"
             f"Source language: {source_lang}"
@@ -419,7 +419,7 @@ class LangCompressor:
                 fact_id=fact_id,
                 original_lang=lang,
                 original_content=content,
-                compressed_content="[DRY RUN — not translated]",
+                compressed_content="[DRY RUN - not translated]",
                 token_savings_est=savings_info["est_token_savings"],
                 savings_pct=savings_info["savings_pct"],
                 was_compressed=True,

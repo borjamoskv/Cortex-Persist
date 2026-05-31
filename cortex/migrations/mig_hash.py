@@ -20,5 +20,5 @@ def _migration_016_add_fact_hash(conn: sqlite3.Connection):
 
     # Note: existing encrypted rows keep hash=NULL (safe: unique index only applies to
     # hash IS NOT NULL rows). New facts will always get hashed. Legacy rows won't dedup
-    # against each other by hash, which is acceptable — they existed before dedup was
+    # against each other by hash, which is acceptable - they existed before dedup was
     # enforced. No backfill needed for encrypted content.

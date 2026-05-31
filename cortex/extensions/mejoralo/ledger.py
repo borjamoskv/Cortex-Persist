@@ -1,4 +1,4 @@
-"""MEJORAlo Ledger — session recording and history retrieval."""
+"""MEJORAlo Ledger - session recording and history retrieval."""
 
 import json
 import logging

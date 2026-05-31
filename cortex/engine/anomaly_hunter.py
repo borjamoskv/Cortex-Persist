@@ -1,4 +1,4 @@
-"""Anomaly Hunter Engine — NightShift Memory Refiner.
+"""Anomaly Hunter Engine - NightShift Memory Refiner.
 
 Detects physical and temporal contradictions in the daily logs.
 Implementación directa del Axioma Ω₂ (Asimetría Entrópica) y CORTEX-Sovereignty.
@@ -256,7 +256,7 @@ class AnomalyHunterEngine:
                 project="anomaly-hunter",
                 source="daemon:anomaly-hunter-v2",
                 confidence="C4",
-                summary=f"⚠️ VERIFICAR: {anomaly.type} — {anomaly.description}",
+                summary=f"⚠️ VERIFICAR: {anomaly.type} - {anomaly.description}",
                 meta={
                     "anomaly_type": anomaly.type,
                     "facts_involved": anomaly.facts_involved,

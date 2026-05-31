@@ -1,4 +1,4 @@
-"""Tests for CORTEX API Embedder — Gemini Embedding 2 Multimodal."""
+"""Tests for CORTEX API Embedder - Gemini Embedding 2 Multimodal."""
 
 from __future__ import annotations
 

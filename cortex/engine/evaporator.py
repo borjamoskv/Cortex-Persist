@@ -1,4 +1,4 @@
-"""Entropic Evaporator — Ω₂: Selective Forgetting (Evaporation).
+"""Entropic Evaporator - Ω₂: Selective Forgetting (Evaporation).
 
 Space is finite. Knowledge has a half-life. This engine prunes
 low-value, unverified, and non-causal facts to reduce system heat.

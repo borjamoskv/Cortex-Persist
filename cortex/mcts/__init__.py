@@ -1,4 +1,4 @@
-"""CORTEX Chronos (Git-MCTS) — Quantum Version Control Engine.
+"""CORTEX Chronos (Git-MCTS) - Quantum Version Control Engine.
 
 Motor AlphaZero-Autodidact que juega al ajedrez contra tu base de código Git
 para encontrar la matriz evolutiva arquitectónica matemáticamente perfecta.

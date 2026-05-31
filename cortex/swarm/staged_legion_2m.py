@@ -1,5 +1,5 @@
 """
-CORTEX-SWARM-PRIME: Staged Hierarchical Legion — 2M Agents.
+CORTEX-SWARM-PRIME: Staged Hierarchical Legion - 2M Agents.
 Overcomes physical RAM/disk limits by streaming waves of agents through
 a single mmap slot, collapsing each wave into a Centurion hypervector,
 then reducing all Centurions into the Global Consensus.
@@ -10,7 +10,7 @@ Architecture:
     L2: Each wave collapses to 1 Centurion (D-dimensional hypervector)
     L3: All Centurions reduce to Global Consensus
 
-C5-REAL — Zero disk overflow guaranteed.
+C5-REAL - Zero disk overflow guaranteed.
 """
 
 from __future__ import annotations
@@ -133,7 +133,7 @@ def execute_staged_reverse_engineering(
 
     # --- Report ---
     logger.info("=" * 80)
-    logger.info("[%s] STAGED REVERSE ENGINEERING — FINAL REPORT", target.upper())
+    logger.info("[%s] STAGED REVERSE ENGINEERING - FINAL REPORT", target.upper())
     logger.info("=" * 80)
     logger.info("Total agents deployed:    %d", total_agents)
     logger.info("Waves executed:           %d", num_waves)
@@ -148,7 +148,7 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="Staged Hierarchical Swarm — 2M Agent Reverse Engineering"
+        description="Staged Hierarchical Swarm - 2M Agent Reverse Engineering"
     )
     parser.add_argument("--target", default="cortex-kernel", help="Target to reverse engineer")
     parser.add_argument("--total", type=int, default=2_000_000, help="Total logical agents")

@@ -1,4 +1,4 @@
-"""CORTEX CLI — Main entry point with timeout guard.
+"""CORTEX CLI - Main entry point with timeout guard.
 
 Prevents CLI commands from hanging forever by enforcing a maximum
 execution time. This is critical when the agent spawns multiple
@@ -20,7 +20,7 @@ CLI_TIMEOUT_SECONDS = 3600
 def _timeout_handler(signum: int, frame: object) -> None:
     """Force-kill the process when timeout expires."""
     print(
-        f"\n⏱️ CORTEX CLI: timeout after {CLI_TIMEOUT_SECONDS}s — self-terminating",
+        f"\n⏱️ CORTEX CLI: timeout after {CLI_TIMEOUT_SECONDS}s - self-terminating",
         file=sys.stderr,
     )
     sys.exit(124)  # Standard timeout exit code

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-KI Schema Standardizer — One-shot normalizer for CORTEX Knowledge Items.
+KI Schema Standardizer - One-shot normalizer for CORTEX Knowledge Items.
 
 Fixes:
   - 80+ inconsistent field names → canonical 10-field schema
@@ -116,7 +116,7 @@ def standardize_ki(meta: dict, meta_path: Path, dry_run: bool = True) -> dict:
     if len(normalized["summary"]) > 500:
         changes.append(f"  ⚠ summary={len(normalized['summary'])} chars (>500)")
 
-    # 3. Timestamps — normalize aliases
+    # 3. Timestamps - normalize aliases
     for alias, canonical in TIMESTAMP_ALIASES.items():
         if alias in meta and canonical not in normalized:
             ts = normalize_timestamp(meta[alias])
@@ -159,7 +159,7 @@ def standardize_ki(meta: dict, meta_path: Path, dry_run: bool = True) -> dict:
     # 6. Tags
     normalized["tags"] = meta.get("tags", [])
 
-    # 7. Domain — infer if missing
+    # 7. Domain - infer if missing
     if "domain" in meta:
         normalized["domain"] = meta["domain"]
     else:
@@ -195,7 +195,7 @@ def main():
         mode = "report"
 
     print(f"{'=' * 70}")
-    print(f"KI SCHEMA STANDARDIZER — mode: {mode}")
+    print(f"KI SCHEMA STANDARDIZER - mode: {mode}")
     print(f"{'=' * 70}\n")
 
     if not KI_BASE.is_dir():

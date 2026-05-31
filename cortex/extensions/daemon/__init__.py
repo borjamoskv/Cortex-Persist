@@ -1,5 +1,5 @@
 """
-CORTEX Daemon — Package init (lazy-loaded).
+CORTEX Daemon - Package init (lazy-loaded).
 
 Re-exports from sub-modules for backward compatibility.
 Uses __getattr__ to avoid eager loading of heavyweight dependencies
@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import importlib
 import socket  # noqa: F401
-import ssl  # noqa: F401 — re-export for backward compat (tests patch via cortex.daemon.ssl)
+import ssl  # noqa: F401 - re-export for backward compat (tests patch via cortex.daemon.ssl)
 import time  # noqa: F401
 from typing import TYPE_CHECKING
 

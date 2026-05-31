@@ -120,7 +120,7 @@ class Ed25519Signer:
             RuntimeError: If no private key is loaded.
         """
         if self._private_key is None:
-            raise RuntimeError("No private key loaded — cannot sign")
+            raise RuntimeError("No private key loaded - cannot sign")
 
         payload = _canonical_payload(content, fact_hash)
         raw_sig = self._private_key.sign(payload)
@@ -182,7 +182,7 @@ _default_signer: Ed25519Signer | None = None
 def get_default_signer() -> Ed25519Signer | None:
     """Get the default signer, loading from keyring if available.
 
-    Returns None if no signing key is configured — signing is optional.
+    Returns None if no signing key is configured - signing is optional.
     Falls back to CORTEX_ED25519_PRIVATE_KEY env var for CI environments.
     """
     global _default_signer

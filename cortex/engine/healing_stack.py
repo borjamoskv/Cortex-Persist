@@ -1,7 +1,7 @@
-"""Unified Self-Healing Stack v2 — L5 + L6 + Predictive + Persistent.
+"""Unified Self-Healing Stack v2 - L5 + L6 + Predictive + Persistent.
 
 Upgrades from v1:
-    1. FULL parameter sync (timeout, batch, cooldown, breaker — not just breaker)
+    1. FULL parameter sync (timeout, batch, cooldown, breaker - not just breaker)
     2. Predictive healing (trend analysis → preemptive repair)
     3. Persistence (tunings survive restart)
     4. Repair telemetry feedback to L6 tracker

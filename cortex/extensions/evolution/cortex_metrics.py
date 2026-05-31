@@ -1,5 +1,5 @@
 # cortex/evolution/cortex_metrics.py
-"""Real Telemetry from CORTEX DB — Afferent Signals for Fitness Computation.
+"""Real Telemetry from CORTEX DB - Afferent Signals for Fitness Computation.
 
 Replaces stochastic (random.uniform) fitness signals with empirical
 measurements from the CORTEX fact store.  Each AgentDomain maps to a
@@ -7,29 +7,29 @@ project axis in the DB; metrics are fetched asynchronously via aiosqlite.
 
 Terminology (Computational Neuroscience & Evolutionary Biology):
 
-    **Afferent signal** — Raw metric from DB → strategy input.
+    **Afferent signal** - Raw metric from DB → strategy input.
         Analogous to sensory afferents in the dorsal column-medial
         lemniscus pathway (Mountcastle, 1957).
 
-    **Efferent modulation** — Strategy output → fitness delta.
+    **Efferent modulation** - Strategy output → fitness delta.
         The motor output of the evolutionary controller.
 
-    **Tonic baseline** — Default metrics when DB is unavailable.
+    **Tonic baseline** - Default metrics when DB is unavailable.
         Homeostatic set-point (Turrigiano & Nelson, 2004).
 
-    **Phasic burst** — Large metric change → amplified fitness delta.
+    **Phasic burst** - Large metric change → amplified fitness delta.
         Models the phasic dopaminergic reward prediction error
         (Schultz, Dayan & Montague, 1997).
 
-    **Hebbian reinforcement** — Success facts → increased fitness.
+    **Hebbian reinforcement** - Success facts → increased fitness.
         Mirrors long-term potentiation (LTP) at corticostriatal
         synapses (Bliss & Lømo, 1973).
 
-    **Anti-Hebbian penalty** — Error/ghost accumulation → decreased fitness.
+    **Anti-Hebbian penalty** - Error/ghost accumulation → decreased fitness.
         Analogous to long-term depression (LTD) via mGluR-dependent
         endocannabinoid signalling (Lovinger, 2010).
 
-    **Decision success rate** — Ratio of decisions to errors.
+    **Decision success rate** - Ratio of decisions to errors.
         Proxy for the LTP/LTD balance in synaptic plasticity.
 
 References:
@@ -80,7 +80,7 @@ DOMAIN_PROJECT_MAP: dict[AgentDomain, list[str]] = {
 class DomainMetrics:
     """Afferent telemetry vector for a single AgentDomain.
 
-    Each field is a **sensory channel** feeding the strategy pipeline —
+    Each field is a **sensory channel** feeding the strategy pipeline -
     analogous to proprioceptive input in the spinal reflex arc
     (Sherrington, 1906).
 
@@ -91,7 +91,7 @@ class DomainMetrics:
     Attributes:
         domain:  The agent domain this snapshot describes.
         error_count:  Unresolved error facts (anti-Hebbian signal).
-        ghost_count:  Open ghosts — technical debt markers.
+        ghost_count:  Open ghosts - technical debt markers.
         bridge_count:  Cross-project pattern transfers (Hebbian bridges).
         decision_count:  Explicit decisions stored (crystallised knowledge).
         knowledge_count:  Pure knowledge facts (background context).
@@ -155,7 +155,7 @@ class DomainMetrics:
 
     @property
     def decision_success_rate(self) -> float:
-        """LTP/LTD ratio proxy — decisions vs errors.
+        """LTP/LTD ratio proxy - decisions vs errors.
 
         Higher values indicate more crystallised successful knowledge
         relative to failure signals.  Analogous to the long-term
@@ -223,7 +223,7 @@ async def fetch_domain_metrics(
 ) -> DomainMetrics:
     """Query CORTEX DB for real afferent telemetry.
 
-    Falls back to tonic baseline if the DB is missing or queries fail —
+    Falls back to tonic baseline if the DB is missing or queries fail -
     graceful degradation analogous to homeostatic plasticity
     (Turrigiano & Nelson, 2004).
 
@@ -271,7 +271,7 @@ async def fetch_domain_metrics(
             # ── Open ghosts ──
             placeholders = ",".join("?" for _ in projects)
             async with conn.execute(
-                f"SELECT COUNT(*) FROM ghosts "  # nosec B608 — parameterized query
+                f"SELECT COUNT(*) FROM ghosts "  # nosec B608 - parameterized query
                 f"WHERE status = 'open' AND project IN ({placeholders})",
                 projects,
             ) as cur:
@@ -280,7 +280,7 @@ async def fetch_domain_metrics(
 
             # ── Last decision recency (phasic salience) ──
             async with conn.execute(
-                f"SELECT MAX(created_at) FROM facts "  # nosec B608 — parameterized query
+                f"SELECT MAX(created_at) FROM facts "  # nosec B608 - parameterized query
                 f"WHERE fact_type = 'decision' AND project IN ({placeholders})",
                 projects,
             ) as cur:
@@ -346,7 +346,7 @@ async def fetch_all_domain_metrics(
     """Fetch afferent telemetry for all 10 domains in parallel.
 
     Returns a dict keyed by AgentDomain.  Implements a full
-    proprioceptive snapshot across all sensory modalities —
+    proprioceptive snapshot across all sensory modalities -
     Sherrington's "integrative action of the nervous system" (1906).
     """
     import asyncio

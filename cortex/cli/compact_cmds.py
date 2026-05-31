@@ -81,7 +81,7 @@ def compact_cmd(project, strategy, dry_run, background, threshold, max_age, forc
     """Run auto-compaction on a project's facts.
 
     Deduplicates, consolidates errors, and prunes stale facts.
-    Original facts are deprecated (never deleted) — full audit trail preserved.
+    Original facts are deprecated (never deleted) - full audit trail preserved.
     """
     from cortex.cli.common import _run_async
 
@@ -165,7 +165,7 @@ def compact_status(project, db) -> None:
 
         console.print(
             f"\n[bold]Compaction Stats[/]"
-            f"{f' — {project}' if project else ''}\n"
+            f"{f' - {project}' if project else ''}\n"
             f"  Total runs: [cyan]{stats['total_compactions']}[/]\n"  # type: ignore[reportIndexIssue]
             f"  Total deprecated: [yellow]{stats['total_deprecated']}[/]\n"  # type: ignore[reportIndexIssue]
         )

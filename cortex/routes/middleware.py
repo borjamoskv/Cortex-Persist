@@ -2,7 +2,7 @@
 Admin Security Middleware.
 
 Rate limiting, audit logging, and self-healing trigger for governance endpoints.
-Designed for FastAPI dependency injection — zero overhead on non-admin routes.
+Designed for FastAPI dependency injection - zero overhead on non-admin routes.
 """
 
 import logging
@@ -130,7 +130,7 @@ class SelfHealingHook:
     def trigger(exc: BaseException, context: dict[str, Any] | None = None) -> None:
         """Record the failure and attempt lightweight recovery.
 
-        This does NOT call the full MEJORAlo heal loop — it only logs and
+        This does NOT call the full MEJORAlo heal loop - it only logs and
         increments a failure counter so monitoring can alert.  Full healing
         requires a CLI invocation (``cortex mejoralo --heal``).
         """

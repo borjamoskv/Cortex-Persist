@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Cadastral Perimeter Check — Sovereign Territorial Radar.
+"""Cadastral Perimeter Check - Sovereign Territorial Radar.
 
 Cross-references zoning, ownership, and expropriation data to identify
 legal blind spots where an autonomous swarm (Earthship MMX) can operate

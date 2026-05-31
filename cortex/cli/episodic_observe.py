@@ -33,7 +33,7 @@ async def _observe_async(workspace: str, db: str, console) -> None:
                 f"  Ruta: [dim]{workspace_path}[/dim]\n\n"
                 f"[yellow]¿Cómo resolverlo?[/]\n"
                 f"  Usa [cyan]--workspace /ruta/correcta[/cyan] o ejecuta desde el directorio del proyecto.",
-                title="📁 CORTEX — Workspace No Encontrado",
+                title="📁 CORTEX - Workspace No Encontrado",
                 border_style="red",
             )
         )

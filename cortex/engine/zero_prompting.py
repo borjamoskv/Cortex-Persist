@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Axioma Ω₇ — Zero-Prompting Autonomous Evolution Strategy.
+"""Axioma Ω₇ - Zero-Prompting Autonomous Evolution Strategy.
 
 The frontier collapse: continuous learning reduced to a single directive
 free of orchestration. The system predicts entropy before it occurs,
 executes the necessary CORTEX mutation, purges ghosts, and produces
-a cryptographic report of what was resolved — without user prompts.
+a cryptographic report of what was resolved - without user prompts.
 
 Implementation as a pluggable strategy for the CortexEvolutionEngine.
 
@@ -37,7 +37,7 @@ logger = logging.getLogger(__name__)
 # ENTROPY PREDICTION MODEL
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-# Entropy prediction threshold — above this, autonomous mutation fires
+# Entropy prediction threshold - above this, autonomous mutation fires
 _ENTROPY_THRESHOLD: float = 0.40
 
 # Minimum fitness for a subagent to be eligible for zero-prompting evolution
@@ -69,7 +69,7 @@ class ResolutionReport:
     """Cryptographic report of autonomous entropy resolution.
 
     This is the proof-of-work that the Zero-Prompting directive executed
-    correctly — anchored to the ledger via SHA-256 hash chain.
+    correctly - anchored to the ledger via SHA-256 hash chain.
     """
 
     report_id: str
@@ -101,12 +101,12 @@ class ResolutionReport:
 
 
 class ZeroPromptingEvolutionStrategy:
-    """Axiom Ω₇ implementation — Autonomous entropy prediction and resolution.
+    """Axiom Ω₇ implementation - Autonomous entropy prediction and resolution.
 
     The strategy follows a three-phase cycle:
-      1. PREDICT — Estimate upcoming entropy via EWMA of ghost_density + error_rate
-      2. MUTATE  — If predicted entropy exceeds threshold, apply corrective mutation
-      3. REPORT  — Generate cryptographic resolution report for the ledger
+      1. PREDICT - Estimate upcoming entropy via EWMA of ghost_density + error_rate
+      2. MUTATE  - If predicted entropy exceeds threshold, apply corrective mutation
+      3. REPORT  - Generate cryptographic resolution report for the ledger
 
     This strategy does NOT require user prompts: it fires autonomously
     when the thermodynamic conditions are met.

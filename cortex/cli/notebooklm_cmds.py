@@ -1,5 +1,5 @@
 """
-CORTEX CLI — NotebookLM Integration Commands.
+CORTEX CLI - NotebookLM Integration Commands.
 
 Provides native CLI commands for NotebookLM synchronization:
   cortex notebooklm digest    → Generate Master Digest
@@ -157,7 +157,7 @@ def fragment_cmd(output_dir: str):
                 proj_data[f.project].append(f)
 
             lines = [
-                f"# 🧠 CORTEX — {domain.upper()}\n\n",
+                f"# 🧠 CORTEX - {domain.upper()}\n\n",
                 f"> Snapshot: {ts} | Facts: {len(facts_in_domain)}"
                 f" | Projects: {len(proj_data)}\n\n",
                 "---\n\n",
@@ -289,10 +289,10 @@ def status_cmd():
             files = list(path.glob("*.md"))
             total_size = sum(os.path.getsize(f) for f in files)
             newest = max((os.path.getmtime(f) for f in files), default=0)
-            mtime = datetime.fromtimestamp(newest).strftime("%Y-%m-%d %H:%M") if newest else "—"
+            mtime = datetime.fromtimestamp(newest).strftime("%Y-%m-%d %H:%M") if newest else "-"
             table.add_row(label, str(path), str(len(files)), f"{total_size:,} B", mtime)
         else:
-            table.add_row(label, str(path), "—", "—", "[red]NOT FOUND[/red]")
+            table.add_row(label, str(path), "-", "-", "[red]NOT FOUND[/red]")
 
     _check(DIGEST_FILE, "Master Digest")
     _check(NOTEBOOKLM_DIR, "Per-Project Sources")
@@ -306,8 +306,8 @@ def status_cmd():
         table.add_row(
             "Cloud Sync",
             "Not detected",
-            "—",
-            "—",
+            "-",
+            "-",
             "[yellow]NO SYNC[/yellow]",
         )
 
@@ -317,9 +317,9 @@ def status_cmd():
     if DIGEST_FILE.exists():
         age_h = (time.monotonic() - os.path.getmtime(DIGEST_FILE)) / 3600
         if age_h > 48:
-            console.print(f"\n[red]⚠️ Digest tiene {age_h:.0f}h — alto riesgo (>48h)[/red]")
+            console.print(f"\n[red]⚠️ Digest tiene {age_h:.0f}h - alto riesgo (>48h)[/red]")
         elif age_h > 24:
-            console.print(f"\n[yellow]⚠️ Digest tiene {age_h:.0f}h — considerar re-sync[/yellow]")
+            console.print(f"\n[yellow]⚠️ Digest tiene {age_h:.0f}h - considerar re-sync[/yellow]")
         else:
             console.print(f"\n[green]✅ Digest fresco ({age_h:.1f}h)[/green]")
 

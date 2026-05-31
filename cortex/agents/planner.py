@@ -1,4 +1,4 @@
-"""CORTEX Agent Runtime — Exergy-Aware Planner.
+"""CORTEX Agent Runtime - Exergy-Aware Planner.
 
 Decomposes an objective into an ordered sequence of executable steps.
 Each step is annotated with:
@@ -13,7 +13,7 @@ yield per unit of Entropy paid).
 
 This is a Level 4 planner: it generates plans but does NOT question
 its own strategy mid-execution. If a step fails beyond retry budget,
-the plan halts — no meta-cognitive replanning.
+the plan halts - no meta-cognitive replanning.
 """
 
 from __future__ import annotations
@@ -183,7 +183,7 @@ class ExecutionPlan:
 class ExergyPlanner:
     """Stateless planner that converts objectives into ExecutionPlans.
 
-    The planner does NOT execute steps — it only generates plans.
+    The planner does NOT execute steps - it only generates plans.
     Execution is handled by the AutonomousAgent's run loop.
 
     Level 4 limitation: the planner generates a single plan upfront.

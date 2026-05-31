@@ -100,7 +100,7 @@ class Lineage:
 
 
 class MutationType(str, Enum):
-    """Categories of genome mutation — from conservative to radical."""
+    """Categories of genome mutation - from conservative to radical."""
 
     PARAMETER_DRIFT = "parameter_drift"
     SUBTREE_SWAP = "subtree_swap"

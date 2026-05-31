@@ -1,4 +1,4 @@
-"""compaction_ttl — TTL Prune strategy for the Auto-Compaction Engine.
+"""compaction_ttl - TTL Prune strategy for the Auto-Compaction Engine.
 
 Extracted from compactor.py to satisfy the Landauer LOC barrier (≤500).
 Implements TTL Policy (Persist With Decay): deprecate facts exceeding their
@@ -28,7 +28,7 @@ def find_expired_facts(
     """Identify expired and tombstonable facts.
 
     Returns:
-        (expired_ids, tombstonable_ids) — tuples of (fact_id, tenant_id).
+        (expired_ids, tombstonable_ids) - tuples of (fact_id, tenant_id).
     """
     from cortex.extensions.axioms.ttl import FACT_TTL, is_expired, is_tombstonable
 

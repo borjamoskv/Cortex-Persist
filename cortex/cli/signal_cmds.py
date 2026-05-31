@@ -5,7 +5,7 @@
 
 """CLI commands: cortex signal emit/poll/history/stats.
 
-The nervous system of MOSKV-1 — exposed through the command line.
+The nervous system of MOSKV-1 - exposed through the command line.
 """
 
 from __future__ import annotations
@@ -31,7 +31,7 @@ def _get_signal_bus(db: str):
 
 @cli.group("signal")
 def signal_cmds() -> None:
-    """Signal Bus — L1 consciousness for cross-tool communication."""
+    """Signal Bus - L1 consciousness for cross-tool communication."""
     pass
 
 
@@ -118,7 +118,7 @@ def poll_cmd(
                 str(sig.id),
                 sig.event_type,
                 sig.source,
-                sig.project or "—",
+                sig.project or "-",
                 payload_str,
                 str(sig.created_at)[:19],
             )
@@ -169,12 +169,12 @@ def history_cmd(
             payload_str = json.dumps(sig.payload)
             if len(payload_str) > 32:
                 payload_str = payload_str[:32] + "..."
-            consumed = f"[green]✓ {len(sig.consumed_by)}[/]" if sig.consumed_by else "[dim]—[/]"
+            consumed = f"[green]✓ {len(sig.consumed_by)}[/]" if sig.consumed_by else "[dim]-[/]"
             table.add_row(
                 str(sig.id),
                 sig.event_type,
                 sig.source,
-                sig.project or "—",
+                sig.project or "-",
                 consumed,
                 payload_str,
                 str(sig.created_at)[:19],

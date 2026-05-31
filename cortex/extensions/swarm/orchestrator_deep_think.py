@@ -125,7 +125,7 @@ class DeepThinkOrchestrator:
             agent_id_hv = self.encoder.encode_text(agent_id)
             hv = bind(agent_id_hv, text_hv)
 
-        except Exception as e:  # noqa: BLE001 — intentional isolation for agent reasoning error
+        except Exception as e:  # noqa: BLE001 - intentional isolation for agent reasoning error
             logger.error("Agent %s failed in deep think: %s", agent_id, e)
             hv = self.encoder.encode_text("error")
             text_response = "Error."

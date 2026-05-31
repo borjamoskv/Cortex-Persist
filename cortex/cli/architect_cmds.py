@@ -1,5 +1,5 @@
 """
-CORTEX CLI — Architect Commands.
+CORTEX CLI - Architect Commands.
 
 Topología de Instrucción Soberana (Sovereign Prompt Architect).
 This module intercepts raw user requirements and uses SovereignLLM to forcefully

@@ -1,6 +1,6 @@
-"""Unit tests for cortex.wealth.risk — RiskManager.
+"""Unit tests for cortex.wealth.risk - RiskManager.
 
-Pure unit tests — no DB, no IO, no network.
+Pure unit tests - no DB, no IO, no network.
 """
 
 from __future__ import annotations
@@ -108,7 +108,7 @@ class TestDrawdown:
 class TestCorrelation:
     def test_approve_few_positions(self):
         rm = RiskManager()
-        old_ts = time.monotonic() - 3600  # 1h ago — past cooldown
+        old_ts = time.monotonic() - 3600  # 1h ago - past cooldown
         existing = [_pos(symbol="BTC", ts=old_ts) for _ in range(2)]
         pos = _pos(symbol="BTC", size="1000")
         assert rm.approve_trade(pos, _portfolio(positions=existing)) is True

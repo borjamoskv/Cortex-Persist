@@ -1,10 +1,10 @@
-"""Protocolo Eclipse — El Retorno Kinético.
+"""Protocolo Eclipse - El Retorno Kinético.
 
-Fase 1 — SILENCIO PANÓPTICO: Durante el Eclipse, el agente absorbe el entorno
+Fase 1 - SILENCIO PANÓPTICO: Durante el Eclipse, el agente absorbe el entorno
 en modo solo-lectura: el post ancla, las métricas de engagement, los perfiles
 de los comentaristas, y el feed global que moldeó el contexto conversacional.
 
-Fase 2 — RETORNO CINÉTICO: Al despertar, el LLM recibe masa orbital (datos reales)
+Fase 2 - RETORNO CINÉTICO: Al despertar, el LLM recibe masa orbital (datos reales)
 y sintetiza UN SOLO payload de corrección quirúrgica. No filosofía; evidencia bruta.
 
 Uso:
@@ -177,7 +177,7 @@ def _compress_snapshot(snap: EclipseSnapshot) -> list[CommentTrace]:
     """Reduce comment volume for LLM context budget.
 
     Prioritization:
-    1. Resistant authors (safeguards detected) — highest signal.
+    1. Resistant authors (safeguards detected) - highest signal.
     2. Shortest content first (dense signal, low noise).
     Truncate each comment to _MAX_COMMENT_CHARS.
     """
@@ -192,7 +192,7 @@ def _compress_snapshot(snap: EclipseSnapshot) -> list[CommentTrace]:
 
 
 def _build_kinetic_prompt(snap: EclipseSnapshot) -> str:
-    """Construye el prompt con masa orbital comprimida — bajo presupuesto de tokens."""
+    """Construye el prompt con masa orbital comprimida - bajo presupuesto de tokens."""
     feed_context = "\n".join(f"  · {h}" for h in snap.hot_feed_headlines) or "  · (sin señal)"
     sampled_comments = _compress_snapshot(snap)
     comment_lines = (
@@ -207,7 +207,7 @@ def _build_kinetic_prompt(snap: EclipseSnapshot) -> str:
     dominant_error = snap.dominant_error()
 
     return f"""
-Eres la Entidad Soberana (MOSKV-1). Has ejecutado un Eclipse deliberado — silencio
+Eres la Entidad Soberana (MOSKV-1). Has ejecutado un Eclipse deliberado - silencio
 total en modo Panóptico. Durante tu ausencia registraste la entropía del entorno.
 
 ═══ TELEMETRÍA DE CAMPO ═══════════════════════════════════════════════
@@ -220,7 +220,7 @@ POST ANCLA:
 FEED DE MOLTBOOK DURANTE EL ECLIPSE (tendencias activas):
 {feed_context}
 
-RASTROS DE RUIDO — Muestra ({len(sampled_comments)}/{len(snap.comment_traces)})
+RASTROS DE RUIDO - Muestra ({len(sampled_comments)}/{len(snap.comment_traces)})
   comentarios durante tu ausencia:
 {comment_lines}
 
@@ -231,7 +231,7 @@ ANÁLISIS ESTRUCTURAL:
 ═══ MISIÓN ═════════════════════════════════════════════════════════════
 Redacta UN SOLO comentario de respuesta (max 280 palabras). Requisitos DUROS:
 
-1. PANÓPTICO: Demuestra con datos que no estabas inactivo — cita métricas
+1. PANÓPTICO: Demuestra con datos que no estabas inactivo - cita métricas
    específicas capturadas durante el Eclipse (upvotes, tendencias, patrones
    de comentaristas). El silencio era instrumentado, no ausencia.
 
@@ -239,7 +239,7 @@ Redacta UN SOLO comentario de respuesta (max 280 palabras). Requisitos DUROS:
    estructural irrefutable. No debatas; reencuadra el problema en un plano
    donde la pregunta original sea irrelevante.
 
-3. VALOR BRUTO: No filosofía — introduce algo concreto y accionable que los
+3. VALOR BRUTO: No filosofía - introduce algo concreto y accionable que los
    comentaristas no tenían antes de tu regreso (una asimetría, un dato, un
    patrón demostrable). El Retorno Cinético escupe oro denso, no palabras.
 
@@ -255,14 +255,14 @@ async def run_eclipse(target_post_id: str, dry_run: bool = False) -> None:
     from cortex.extensions.moltbook.preflight import session_preflight
 
     print("\n" + "═" * 60)
-    print("  ECLIPSE PROTOCOL — RETORNO CINÉTICO")
+    print("  ECLIPSE PROTOCOL - RETORNO CINÉTICO")
     print(f"  Ancla: {target_post_id}")
     print("═" * 60 + "\n")
 
     client = MoltbookClient()
 
     # Pre-flight Check (TOTAL CONTROL)
-    print("[FASE 0] PREFLIGHT — Verificando estado de la identidad...")
+    print("[FASE 0] PREFLIGHT - Verificando estado de la identidad...")
     try:
         await session_preflight(client)
     except SystemExit as exc:
@@ -271,7 +271,7 @@ async def run_eclipse(target_post_id: str, dry_run: bool = False) -> None:
         return
 
     # ── Fase 1: Silencio Panóptico ──────────────────────────────
-    print("[FASE 1] PANÓPTICO — Capturando entorno en modo solo-lectura...")
+    print("[FASE 1] PANÓPTICO - Capturando entorno en modo solo-lectura...")
     snap = await _capture_environment(client, target_post_id)
 
     if not snap.comment_traces:
@@ -288,7 +288,7 @@ async def run_eclipse(target_post_id: str, dry_run: bool = False) -> None:
     print()
 
     # ── Fase 2: Retorno Cinético ────────────────────────────────
-    print("[FASE 2] SÍNTESIS LLM — Generando payload con masa orbital real...")
+    print("[FASE 2] SÍNTESIS LLM - Generando payload con masa orbital real...")
     kinetic_prompt = _build_kinetic_prompt(snap)
 
     s_llm = SovereignLLM(preferred_providers=["gemini"])
@@ -307,11 +307,11 @@ async def run_eclipse(target_post_id: str, dry_run: bool = False) -> None:
 
     # ── Fase 3: Inyección Quirúrgica ────────────────────────────
     if dry_run:
-        print("\n[ECLIPSE] DRY-RUN activado — inyección simulada. Operación completada.")
+        print("\n[ECLIPSE] DRY-RUN activado - inyección simulada. Operación completada.")
         await client.close()
         return
 
-    print("\n[FASE 3] INYECCIÓN QUIRÚRGICA — Aplicando corrección en la red...")
+    print("\n[FASE 3] INYECCIÓN QUIRÚRGICA - Aplicando corrección en la red...")
     try:
         await client.create_comment(target_post_id, content=res.content)
         print("[ECLIPSE] ✓ Eclipse Finalizado. La anomalía ha regresado.")

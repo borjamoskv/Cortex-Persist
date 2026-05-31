@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Cadastral Perimeter Check — Sovereign Territorial Engine.
+"""Cadastral Perimeter Check - Sovereign Territorial Engine.
 
 Cross-references zoning law, ownership records, and expropriation status
 to compute risk scores, classify zones, and detect legal blind spots
@@ -35,7 +35,7 @@ from cortex.extensions.skills.cadastral.models import (
 logger = logging.getLogger(__name__)
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# RISK FIELD CONSTANTS — Gravitational curvature per zone
+# RISK FIELD CONSTANTS - Gravitational curvature per zone
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 _ZONE_RISK_WEIGHT: dict[ZoneClassification, float] = {
@@ -93,7 +93,7 @@ def _haversine_km(c1: Coordinate, c2: Coordinate) -> float:
 
 
 class CadastralEngine:
-    """Sovereign Territorial Radar — Risk analysis and blind-spot detection.
+    """Sovereign Territorial Radar - Risk analysis and blind-spot detection.
 
     Usage:
         engine = CadastralEngine()
@@ -168,7 +168,7 @@ class CadastralEngine:
         """Scan all registered parcels within a radius and produce a report.
 
         Identifies blind spots where the risk_score falls below the
-        _BLIND_SPOT_THRESHOLD — the Lagrange points of the legal field.
+        _BLIND_SPOT_THRESHOLD - the Lagrange points of the legal field.
         """
         report_id = f"cad-{uuid.uuid4().hex[:12]}"
         assessments: list[RiskAssessment] = []

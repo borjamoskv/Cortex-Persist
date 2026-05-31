@@ -35,7 +35,7 @@ async def execute_with_healing(
         # ─── CHECK: Circuit breaker ────────────────────────
         if breaker.state == CircuitState.OPEN:
             logger.warning(
-                "[AUTOCURATIVE] Circuit breaker OPEN for '%s' — skipping execution",
+                "[AUTOCURATIVE] Circuit breaker OPEN for '%s' - skipping execution",
                 subsystem,
             )
             ENDOCRINE.pulse(

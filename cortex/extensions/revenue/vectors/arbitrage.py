@@ -1,7 +1,7 @@
-"""CORTEX Revenue — Vector 2: Arbitrage Scanner.
+"""CORTEX Revenue - Vector 2: Arbitrage Scanner.
 
 Detects price discrepancies across public marketplaces and digital goods
-platforms. Detection only by default — execution requires explicit opt-in.
+platforms. Detection only by default - execution requires explicit opt-in.
 
 Pipeline:
     1. Data Collection → query pricing APIs / scrape public listings

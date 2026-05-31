@@ -23,7 +23,7 @@ __all__ = [
 
 @cli.group()
 def entropy():
-    """ENTROPY-0 v1.0 — El Guardián de la Deuda Técnica."""
+    """ENTROPY-0 v1.0 - El Guardián de la Deuda Técnica."""
     pass
 
 
@@ -238,7 +238,7 @@ def entropy_immortality(
     as_json: bool,
     verbose: bool,
 ) -> None:
-    """Immortality Index (ι) — cognitive crystallization metric."""
+    """Immortality Index (ι) - cognitive crystallization metric."""
     from cortex.extensions.shannon.immortality import ImmortalityIndex
 
     engine = get_engine()

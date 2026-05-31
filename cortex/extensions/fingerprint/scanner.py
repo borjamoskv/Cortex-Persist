@@ -1,4 +1,4 @@
-"""Cognitive Fingerprint — Raw pattern queries from CORTEX SQLite.
+"""Cognitive Fingerprint - Raw pattern queries from CORTEX SQLite.
 
 Async bridge between the engine and the preference extractor.
 Each method runs a focused SQL query and returns structured raw data.
@@ -94,7 +94,7 @@ class FingerprintScanner:
         project: str | None = None,
         recent_days: int = 30,
     ) -> tuple[int, int]:
-        """Facts in last N days vs total — measures recency bias.
+        """Facts in last N days vs total - measures recency bias.
 
         Returns:
             (recent_count, total_count)

@@ -1,5 +1,5 @@
 """
-Sovereign Reporter Daemon — The Event Horizon (Ω-Dynamic SSE).
+Sovereign Reporter Daemon - The Event Horizon (Ω-Dynamic SSE).
 Empuja telemetría hacia el dashboard en verdadero tiempo real usando
 Server-Sent Events (SSE) cada vez que el Manifold emite una señal.
 Latencia cero.

@@ -1,4 +1,4 @@
-"""SICA Object-Level — Task Execution Engine.
+"""SICA Object-Level - Task Execution Engine.
 
 The object-level is WHERE the actual work happens:
   - Receives a task with an objective

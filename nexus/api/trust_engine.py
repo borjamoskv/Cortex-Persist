@@ -1,4 +1,4 @@
-"""NEXUS Trust Engine — Bayesian posterior trust scoring.
+"""NEXUS Trust Engine - Bayesian posterior trust scoring.
 
 Standalone implementation derived from cortex.extensions.trust.bayesian.
 Each agent's trust is modeled as a Beta(α, β) distribution.

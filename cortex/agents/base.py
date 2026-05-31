@@ -1,11 +1,11 @@
-"""CORTEX Agent Runtime — Base Agent.
+"""CORTEX Agent Runtime - Base Agent.
 
 BaseAgent provides the event loop, message handling, and lifecycle
 management that distinguishes an agent from a tool.
 
 Subclasses implement:
-    - handle_message(message) — react to incoming messages
-    - tick() — periodic autonomous work (daemons override this)
+    - handle_message(message) - react to incoming messages
+    - tick() - periodic autonomous work (daemons override this)
 
 The loop: heartbeat → receive → handle_message/tick → repeat.
 Auto-quarantine after max_consecutive_errors.
@@ -103,7 +103,7 @@ class BaseAgent:
                     self.state.record_message_processed()
                     self.state.record_success()
                 else:
-                    # No message — run periodic tick
+                    # No message - run periodic tick
                     await self.tick()
                     self.state.record_success()
 
@@ -129,7 +129,7 @@ class BaseAgent:
                 # Brief backoff before retrying
                 await asyncio.sleep(0.5)
 
-        # Cleanup — preserve terminal statuses (QUARANTINED, FAILED)
+        # Cleanup - preserve terminal statuses (QUARANTINED, FAILED)
         try:
             await self.on_stop()
         except Exception as exc:  # noqa: BLE001

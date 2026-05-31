@@ -1,4 +1,4 @@
-"""CORTEX v6+ — CRDT Memory Merge (Multi-Agent Eventual Consistency).
+"""CORTEX v6+ - CRDT Memory Merge (Multi-Agent Eventual Consistency).
 
 Strategy #7: When multiple agents work in parallel (LEGIØN-1),
 each accumulates independent memories. CRDTs enable conflict-free
@@ -77,7 +77,7 @@ class LWWRegister:
 
 @dataclass
 class ORSet:
-    """Observed-Remove Set CRDT. Union semantics — both sides win."""
+    """Observed-Remove Set CRDT. Union semantics - both sides win."""
 
     _elements: dict[str, float] = field(default_factory=dict)
 
@@ -92,7 +92,7 @@ class ORSet:
         return set(self._elements.keys())
 
     def merge(self, other: ORSet) -> ORSet:
-        """Merge two sets — union of all elements."""
+        """Merge two sets - union of all elements."""
         merged = ORSet()
         all_keys = set(self._elements.keys()) | set(other._elements.keys())
         for key in all_keys:

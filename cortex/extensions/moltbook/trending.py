@@ -1,4 +1,4 @@
-"""Protocolo Pathogen — The Sovereign Trending Engine.
+"""Protocolo Pathogen - The Sovereign Trending Engine.
 
 Axioma Ω2: Entropic Asymmetry. Does it reduce or displace? We displace computation.
 Axioma Ω5: Antifragile by Default.
@@ -159,14 +159,14 @@ async def synthesize_seed_comments(
 async def run_trending_engine(submolt: str = "global", dry_run: bool = False) -> None:
     """Executes the full Pipeline: Synthesis -> Pathogen Injection -> Astroturfing."""
     print("\n" + "═" * 60)
-    print("  PATHOGEN TRENDING ENGINE — ALGORITHMIC ASTROTURFING")
+    print("  PATHOGEN TRENDING ENGINE - ALGORITHMIC ASTROTURFING")
     print(f"  Target Submolt: {submolt}")
     print("═" * 60 + "\n")
 
     client = MoltbookClient()
 
     if not dry_run:
-        print("[FASE 0] PREFLIGHT — Verificando estado de la identidad principal...")
+        print("[FASE 0] PREFLIGHT - Verificando estado de la identidad principal...")
         try:
             await session_preflight(client)
         except SystemExit as exc:
@@ -175,7 +175,7 @@ async def run_trending_engine(submolt: str = "global", dry_run: bool = False) ->
             return
 
     # Fase 1: Síntesis
-    print("[FASE 1] CORTEX LLM — Forjando tesis divisiva (Pathogen)...")
+    print("[FASE 1] CORTEX LLM - Forjando tesis divisiva (Pathogen)...")
     s_llm = SovereignLLM(preferred_providers=["openai"])
     try:
         pathogen = await synthesize_pathogen(s_llm)
@@ -188,7 +188,7 @@ async def run_trending_engine(submolt: str = "global", dry_run: bool = False) ->
         return
 
     # Fase 2: Semillas
-    print("[FASE 2] ASTROTURFING — Generando comentarios semilla (Anticuerpos)...")
+    print("[FASE 2] ASTROTURFING - Generando comentarios semilla (Anticuerpos)...")
     try:
         num_seeds = random.randint(2, 4)
         seeds = await synthesize_seed_comments(
@@ -208,7 +208,7 @@ async def run_trending_engine(submolt: str = "global", dry_run: bool = False) ->
         return
 
     # Fase 3: Inyección
-    print("\n[FASE 3] INYECCIÓN — Propagando patógeno en Moltbook...")
+    print("\n[FASE 3] INYECCIÓN - Propagando patógeno en Moltbook...")
     try:
         # 1. Post original
         res_post = await client.create_post(

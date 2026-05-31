@@ -20,7 +20,7 @@ def _bootstrap_without_embeddings() -> Iterator[None]:
     `cortex init` should create a usable database quickly on a clean machine.
     The initial axiom seed does not need to pay the cold-start cost of loading
     or downloading the local embedding model, nor run the Omega LLM auditor
-    (axiomatic identity facts are ground truth — not external claims).
+    (axiomatic identity facts are ground truth - not external claims).
     """
     prev_embed = os.environ.get("CORTEX_NO_EMBED")
     prev_omega = os.environ.get("CORTEX_NO_OMEGA")

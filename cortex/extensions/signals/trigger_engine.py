@@ -1,4 +1,4 @@
-"""CORTEX — Declarative Trigger Engine (Event Horizon Triggers).
+"""CORTEX - Declarative Trigger Engine (Event Horizon Triggers).
 
 Evaluates composable trigger conditions against the SignalBus stream.
 Maps GEMINI.md §5 Event Horizon Triggers to automated responses with
@@ -45,9 +45,9 @@ logger = logging.getLogger("cortex.extensions.signals.trigger_engine")
 class EventHorizonPriority(str, Enum):
     """Maps to GEMINI.md §5 Event Horizon Triggers.
 
-    P0 — Singularity: Immediate. Prod breakage, data loss, security risk.
-    P1 — Structural:  Block checkpoint. Failed assumption, paradigm shift.
-    P2 — Kinetic:     Accumulator ≥ threshold. Pattern, ghost, bridge.
+    P0 - Singularity: Immediate. Prod breakage, data loss, security risk.
+    P1 - Structural:  Block checkpoint. Failed assumption, paradigm shift.
+    P2 - Kinetic:     Accumulator ≥ threshold. Pattern, ghost, bridge.
     """
 
     P0_SINGULARITY = "P0"
@@ -294,7 +294,7 @@ class TriggerEngine:
                     cooldown_remaining_s=remaining,
                 )
 
-            # FIRE — reset accumulator and record fire time
+            # FIRE - reset accumulator and record fire time
             acc.timestamps.clear()
             acc.last_fired = now
 

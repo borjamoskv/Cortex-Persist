@@ -1,4 +1,4 @@
-"""Immortality Index (ι) — Cognitive Crystallization Metric.
+"""Immortality Index (ι) - Cognitive Crystallization Metric.
 
 Measures the ratio of crystallized cognitive state to estimated total
 cognitive activity using Shannon information theory:
@@ -6,11 +6,11 @@ cognitive activity using Shannon information theory:
     ι = 0.25·δ + 0.25·γ + 0.20·ρ + 0.15·κ + 0.15·σ
 
 Where:
-    δ = Diversity   — normalized entropy of fact types
-    γ = Continuity  — 1 − (max_gap / total_span)
-    ρ = Density     — facts per active day, normalized
-    κ = Quality     — confidence-weighted fact ratio
-    σ = Coverage    — domain pairs / theoretical max
+    δ = Diversity   - normalized entropy of fact types
+    γ = Continuity  - 1 − (max_gap / total_span)
+    ρ = Density     - facts per active day, normalized
+    κ = Quality     - confidence-weighted fact ratio
+    σ = Coverage    - domain pairs / theoretical max
 
 Scale: 0% (total entropic decay) → 100% (functional immortality).
 """
@@ -85,7 +85,7 @@ def _weakest_dimension(
             "Diversify: cortex store --type decision/error/bridge/ghost"
         ),
         "continuity": (
-            "Large temporal gaps detected — periods of cognitive activity "
+            "Large temporal gaps detected - periods of cognitive activity "
             "were NOT crystallized. Maintain daily cortex store sessions."
         ),
         "density": (
@@ -97,7 +97,7 @@ def _weakest_dimension(
             "Upgrade hypotheses to verified: cortex update --confidence C4/C5"
         ),
         "coverage": (
-            "Knowledge map has gaps — some (type × project) combinations "
+            "Knowledge map has gaps - some (type × project) combinations "
             "are empty. Explore cross-domain bridges."
         ),
     }

@@ -1,4 +1,4 @@
-"""CORTEX Gateway — OpenAI Spoofing Adapter (API Proxy).
+"""CORTEX Gateway - OpenAI Spoofing Adapter (API Proxy).
 
 Intercepts OpenAI-compatible requests from any tool/IDE and routes them
 through CORTEX's SovereignLLM cascade.
@@ -93,7 +93,7 @@ async def openai_chat_completions(
                     import json
 
                     yield f"data: {json.dumps(data)}\n\n"
-            except Exception as e:  # noqa: BLE001 — streaming SSE boundary
+            except Exception as e:  # noqa: BLE001 - streaming SSE boundary
                 logger.error("Spoof Stream Error: %s", e)
                 yield 'data: {"error": "Internal streaming error"}\n\n'
 
@@ -101,7 +101,7 @@ async def openai_chat_completions(
 
         return StreamingResponse(event_generator(), media_type="text/event-stream")
 
-    # Non-streaming — USE SOVEREIGN GRADE CASCADE
+    # Non-streaming - USE SOVEREIGN GRADE CASCADE
     try:
         async with SovereignLLM(
             temperature=prompt.temperature,
@@ -144,6 +144,6 @@ async def openai_chat_completions(
             ],
             "system_fingerprint": "cortex-sovereign-v5",
         }
-    except Exception as e:  # noqa: BLE001 — endpoint boundary
+    except Exception as e:  # noqa: BLE001 - endpoint boundary
         logger.error("Spoof Completion Error: %s", e)
         raise HTTPException(status_code=500, detail="Internal server error") from e

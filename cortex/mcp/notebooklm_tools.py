@@ -90,7 +90,7 @@ def register_notebooklm_tools(mcp: Any, ctx: Any) -> None:
 
         Args:
             drive_path: Optional explicit cloud folder path. Auto-detected if None.
-            mode: What to sync — 'digest', 'domains', or 'both'.
+            mode: What to sync - 'digest', 'domains', or 'both'.
 
         Returns:
             dict with keys: provider, destination, files_synced, files_cleaned.
@@ -153,7 +153,7 @@ def register_notebooklm_tools(mcp: Any, ctx: Any) -> None:
 
     @mcp.tool()
     async def notebooklm_status() -> dict:
-        """Check NotebookLM sync status — staleness, file inventory, cloud detection.
+        """Check NotebookLM sync status - staleness, file inventory, cloud detection.
 
         No arguments required. Reports digest freshness, domain fragment count,
         cloud sync provider availability, and staleness warnings.

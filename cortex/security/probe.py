@@ -1,4 +1,4 @@
-"""Metastability Probe — Detect Fragile Stability (Ω₁₃).
+"""Metastability Probe - Detect Fragile Stability (Ω₁₃).
 
 Identifies facts/subsystems that appear stable only because nothing
 has perturbed them. Absence of failure is not proof of robustness.
@@ -58,14 +58,14 @@ async def probe_metastability(
     min_age_days: int = 30,
     limit: int = 200,
 ) -> MetastabilityReport:
-    """Probe for metastable facts — structurally unchallenged knowledge.
+    """Probe for metastable facts - structurally unchallenged knowledge.
 
     A fact is metastable if:
     1. No downstream causal edges (nothing depends on it)
     2. Age > min_age_days (old enough that absence of use is meaningful)
     3. Still active (valid_until IS NULL)
 
-    These facts appear "green" in dashboards but are fragile —
+    These facts appear "green" in dashboards but are fragile -
     they've never been tested, relied upon, or challenged.
 
     Args:

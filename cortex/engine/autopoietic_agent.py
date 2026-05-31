@@ -1,4 +1,4 @@
-"""Autopoietic Agent — Level 7: Self-Modifying Runtime.
+"""Autopoietic Agent - Level 7: Self-Modifying Runtime.
 
 The highest level in the agent capability matrix. This agent:
 1. REIFIES its own code/strategy as manipulable data (genome)

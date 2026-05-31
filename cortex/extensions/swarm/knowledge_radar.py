@@ -1,9 +1,9 @@
 """Knowledge Radar (NightShift Target Discovery).
 
 Discovers crystallization targets from 3 sovereign sources:
-    1. Ghost Knowledge Gaps — CORTEX DB facts tagged 'knowledge_gap'/'auto_ghost'
-    2. Curated Queue — YAML file with explicit URLs/queries
-    3. Semantic Gap Detection — Projects with sparse L2 coverage
+    1. Ghost Knowledge Gaps - CORTEX DB facts tagged 'knowledge_gap'/'auto_ghost'
+    2. Curated Queue - YAML file with explicit URLs/queries
+    3. Semantic Gap Detection - Projects with sparse L2 coverage
 
 Axiom Derivations:
     Ω₂ (Entropic Asymmetry): Only targets that reduce uncertainty survive.

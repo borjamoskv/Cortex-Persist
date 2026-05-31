@@ -1,4 +1,4 @@
-"""Tests for cortex.genesis.models — SystemSpec, ComponentSpec, GenesisResult."""
+"""Tests for cortex.genesis.models - SystemSpec, ComponentSpec, GenesisResult."""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-"""Mac-Maestro-Ω — App Discovery (Target Lock phase)."""
+"""Mac-Maestro-Ω - App Discovery (Target Lock phase)."""
 
 from __future__ import annotations
 

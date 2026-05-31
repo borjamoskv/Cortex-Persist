@@ -162,7 +162,7 @@ def benchmark_engine_api():
 
 
 if __name__ == "__main__":
-    print("VSA-SDM-MEMORY-OMEGA v3.1 — BENCHMARK")
+    print("VSA-SDM-MEMORY-OMEGA v3.1 - BENCHMARK")
     print("=" * 50)
 
     print("\n[1] Retrieval Speed")

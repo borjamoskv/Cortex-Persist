@@ -1,4 +1,4 @@
-"""Memory mixin — Tripartite Memory (L1/L2/L3) initialization and management."""
+"""Memory mixin - Tripartite Memory (L1/L2/L3) initialization and management."""
 
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ logger = logging.getLogger("cortex.memory")
 
 
 class MemoryMixin(EngineMixinBase):
-    """Cognitive Memory Subsystem (Frontera 2) — Tripartite L1/L2/L3 Architecture.
+    """Cognitive Memory Subsystem (Frontera 2) - Tripartite L1/L2/L3 Architecture.
 
     L1 (Working Memory): In-process ephemeral buffer with access frequency tracking.
     L2 (Vector Store): Sovereign sqlite-vec ANN index + optional HDC hypervectors.
@@ -29,7 +29,7 @@ class MemoryMixin(EngineMixinBase):
         """Initialize the Tripartite Cognitive Memory Architecture.
 
         L1 (Working Memory) + L3 (Event Ledger) always available.
-        L2 (Vector Store) optional — requires qdrant_client.
+        L2 (Vector Store) optional - requires qdrant_client.
 
         When auto_embed=False (e.g. tests), L2 initialization is skipped entirely
         to avoid loading the ML model (~30s penalty per test).

@@ -136,7 +136,7 @@ _ALLOWED_NODES = frozenset(
         ast.IfExp,
         ast.For,
         ast.While,
-        # Functions (no classes — too powerful)
+        # Functions (no classes - too powerful)
         ast.FunctionDef,
         ast.arguments,
         ast.arg,
@@ -231,7 +231,7 @@ class ExecResult:
 class ASTSandbox:
     """Validates and optionally executes Python code in a restricted environment.
 
-    Uses AST whitelist analysis. No subprocess, no Docker — pure AST + restricted exec.
+    Uses AST whitelist analysis. No subprocess, no Docker - pure AST + restricted exec.
     """
 
     def __init__(
@@ -394,8 +394,8 @@ class ASTSandbox:
                 signal.alarm(self._timeout)
 
             try:
-                # nosec B102 — guarded by AST whitelist + timeout + restricted builtins
-                exec(compile(code, "<sandbox>", "exec"), namespace)  # noqa: S102  # nosec B102 — exec() in sandboxed namespace — explicit design decision for REPL
+                # nosec B102 - guarded by AST whitelist + timeout + restricted builtins
+                exec(compile(code, "<sandbox>", "exec"), namespace)  # noqa: S102  # nosec B102 - exec() in sandboxed namespace - explicit design decision for REPL
             finally:
                 if hasattr(signal, "SIGALRM"):
                     signal.alarm(0)
@@ -408,7 +408,7 @@ class ASTSandbox:
                 stdout=captured.getvalue(),
                 duration_ms=(_time.monotonic() - start) * 1000,
             )
-        except Exception as e:  # noqa: BLE001 — sandbox restriction catches all dynamic execution errors
+        except Exception as e:  # noqa: BLE001 - sandbox restriction catches all dynamic execution errors
             return ExecResult(
                 success=False,
                 error=f"{type(e).__name__}: {e}",

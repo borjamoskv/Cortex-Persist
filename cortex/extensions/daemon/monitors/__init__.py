@@ -1,4 +1,4 @@
-"""CORTEX Daemon monitors — lazy-loaded (PEP 562)."""
+"""CORTEX Daemon monitors - lazy-loaded (PEP 562)."""
 
 from __future__ import annotations
 

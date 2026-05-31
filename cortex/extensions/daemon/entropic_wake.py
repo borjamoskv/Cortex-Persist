@@ -133,7 +133,7 @@ class EntropicWakeDaemon:
                     # In a true system, we dynamically select the target based on entropy clusters
                     highest_entropy_target = "cortex_router"  # Placeholder
                     self.ignite_purification_agent(highest_entropy_target)
-            except Exception as e:  # noqa: BLE001 — Main daemon loop must survive unexpected errors
+            except Exception as e:  # noqa: BLE001 - Main daemon loop must survive unexpected errors
                 logger.error("Entropic Wake encountered an error: %s", e)
 
             # Sleep until next pulse

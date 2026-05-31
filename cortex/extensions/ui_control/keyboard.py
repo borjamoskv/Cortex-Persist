@@ -1,5 +1,5 @@
 """
-CORTEX — Sovereign Keyboard Engine for macOS.
+CORTEX - Sovereign Keyboard Engine for macOS.
 
 Dedicated keyboard automation: hotkeys, text input, special keys.
 Uses AppleScript (System Events) for reliable keystroke injection.
@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger("cortex.extensions.ui_control.keyboard")
 
-# Default inter-character delay (seconds) — human-like cadence
+# Default inter-character delay (seconds) - human-like cadence
 DEFAULT_TYPING_DELAY = 0.03
 
 
@@ -101,7 +101,7 @@ class KeyboardEngine:
         if not text:
             return InteractionResult(success=True)
 
-        # For long text, use clipboard injection — O(1) instead of O(n)
+        # For long text, use clipboard injection - O(1) instead of O(n)
         if len(text) > 50:
             return await self._type_via_clipboard(text, target)
 

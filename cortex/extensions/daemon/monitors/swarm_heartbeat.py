@@ -1,4 +1,4 @@
-"""Swarm Heartbeat Monitor — Detects silent daemon thread deaths.
+"""Swarm Heartbeat Monitor - Detects silent daemon thread deaths.
 
 Integrates with the SwarmHeartbeat registry to surface SUSPECT/DEAD
 nodes as alerts that flow through the standard daemon pipeline.
@@ -50,7 +50,7 @@ class SwarmHeartbeatMonitor:
                     pulse_count=node.pulse_count,
                     message=(
                         f"💀 [{severity}] Thread '{node.thread_name}' ({node.node_id}) "
-                        f"status={node.status.value} — no pulse for {node.age_seconds:.0f}s "
+                        f"status={node.status.value} - no pulse for {node.age_seconds:.0f}s "
                         f"({node.miss_count} misses, {node.pulse_count} total pulses)"
                     ),
                 )

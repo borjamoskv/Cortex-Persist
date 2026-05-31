@@ -26,7 +26,7 @@ class SMTModelExtractor(ast.NodeVisitor):
 
     def visit_Call(self, node: ast.Call) -> None:
         """Check for calls to prohibited or sensitive methods."""
-        # 1. Check for I2/I3 (Ledger/Isolation) — raw SQL or specific method calls
+        # 1. Check for I2/I3 (Ledger/Isolation) - raw SQL or specific method calls
         if isinstance(node.func, ast.Attribute):
             name = node.func.attr
             if name in {"delete", "remove", "drop_table"}:

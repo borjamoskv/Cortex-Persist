@@ -1,4 +1,4 @@
-"""CORTEX Policy Engine — Data Models."""
+"""CORTEX Policy Engine - Data Models."""
 
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ class ActionItem:
     Attributes:
         fact_id: Source fact ID (None for synthetic actions).
         project: Project this action belongs to.
-        action_type: Category — resolve_ghost | apply_bridge | fix_error |
+        action_type: Category - resolve_ghost | apply_bridge | fix_error |
                      review_decision | absorb_knowledge.
         description: Human-readable action description.
         value: Final Bellman value score (0.0–1.0, clamped).
@@ -39,9 +39,9 @@ class ActionItem:
 # ── Reward Mapping ──────────────────────────────────────────────────
 # Base reward per fact_type.  Higher = more actionable.
 # Ghost and error are high because they represent incomplete/broken state.
-# Bridge is medium — proven pattern transfer opportunity.
-# Decision is low — already resolved.
-# Knowledge is lowest — informational, no action needed.
+# Bridge is medium - proven pattern transfer opportunity.
+# Decision is low - already resolved.
+# Knowledge is lowest - informational, no action needed.
 
 REWARD_MAP: dict[str, float] = {
     "ghost": 0.70,

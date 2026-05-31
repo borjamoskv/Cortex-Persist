@@ -1,6 +1,6 @@
-"""Tests for cortex.memory.l2_hybrid_search — RRF fusion, FTS sanitizer, result model.
+"""Tests for cortex.memory.l2_hybrid_search - RRF fusion, FTS sanitizer, result model.
 
-All tests exercise pure/static functions — no DB, no sqlite-vec required.
+All tests exercise pure/static functions - no DB, no sqlite-vec required.
 """
 
 from __future__ import annotations
@@ -98,7 +98,7 @@ class TestRRFFuse:
         assert "fts" in signal_map["b"]
 
     def test_weight_normalization(self):
-        """Weights should be normalized — different absolute weights, same ratio, same results."""
+        """Weights should be normalized - different absolute weights, same ratio, same results."""
         vec = [("a", 0), ("b", 1)]
         fts = [("c", 0)]
 

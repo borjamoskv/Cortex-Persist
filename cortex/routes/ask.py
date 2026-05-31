@@ -9,7 +9,7 @@ from typing import Any
 
 """Ask Router (RAG endpoint).
 
-POST /v1/ask — Search facts → synthesize with LLM → return answer.
+POST /v1/ask - Search facts → synthesize with LLM → return answer.
 Gracefully returns 503 if no LLM provider is configured.
 """
 

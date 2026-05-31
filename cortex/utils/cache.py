@@ -4,7 +4,7 @@ Sovereign Bounded Cache.
 A thread-safe, async-friendly LRU+TTL cache with eviction hooks for
 persistence and audit trails.
 
-Axiom: Ω₂ (Entropic Asymmetry) — memory is finite; audit trails are infinite.
+Axiom: Ω₂ (Entropic Asymmetry) - memory is finite; audit trails are infinite.
 """
 
 from __future__ import annotations
@@ -41,7 +41,7 @@ class SovereignCache(Generic[T]):
     Audit requirements (Ω₀: Self-Reference) are met by maintaining a
     cryptographic chain of all evictions.
 
-    Axiom: Ω₂ (Entropic Asymmetry) — memory is finite; audit trails are infinite.
+    Axiom: Ω₂ (Entropic Asymmetry) - memory is finite; audit trails are infinite.
     """
 
     __slots__ = (

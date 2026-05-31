@@ -1,4 +1,4 @@
-"""CORTEX Core — Foundational configuration and constants."""
+"""CORTEX Core - Foundational configuration and constants."""
 
 from cortex.core.config import (
     CORTEX_DIR,

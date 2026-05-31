@@ -1,4 +1,4 @@
-"""CORTEX Hypervisor — Agent Handle.
+"""CORTEX Hypervisor - Agent Handle.
 
 The AgentHandle is the ONLY object a tenant interacts with.
 3 methods. No internal types. No configuration.

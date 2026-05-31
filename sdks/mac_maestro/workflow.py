@@ -1,4 +1,4 @@
-"""Mac-Maestro-Ω — Central workflow orchestrator with full Master Protocol."""
+"""Mac-Maestro-Ω - Central workflow orchestrator with full Master Protocol."""
 
 from __future__ import annotations
 

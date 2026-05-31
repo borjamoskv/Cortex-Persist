@@ -117,7 +117,7 @@ class FundingRateScanner:
         return result
 
     async def _fetch_funding_rates(self, asset: str) -> dict[str, Decimal]:
-        """Fetch funding rates — uses HTTP client if injected, else deterministic mock."""
+        """Fetch funding rates - uses HTTP client if injected, else deterministic mock."""
         if self._http is not None:
             return await self._fetch_funding_rates_live(asset)
         return self._fetch_funding_rates_mock(asset)
@@ -141,7 +141,7 @@ class FundingRateScanner:
         return rates
 
     def _fetch_funding_rates_mock(self, asset: str) -> dict[str, Decimal]:
-        """Deterministic mock — reproducible con seed fijo."""
+        """Deterministic mock - reproducible con seed fijo."""
         rates: dict[str, Decimal] = {}
         for exchange in self.EXCHANGES:
             if self._rng.random() > 0.2:

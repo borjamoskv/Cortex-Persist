@@ -1,4 +1,4 @@
-"""Tests for Context Cache Adapter — Phase 5."""
+"""Tests for Context Cache Adapter - Phase 5."""
 
 import time
 

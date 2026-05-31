@@ -1,4 +1,4 @@
-"""CORTEX Execution Loop — Task Input → Result Output → Auto-Persistence.
+"""CORTEX Execution Loop - Task Input → Result Output → Auto-Persistence.
 
 Durability Architecture (Ω₃ Byzantine Default):
     ┌─────────────────────────────────────────────────────────┐
@@ -14,9 +14,9 @@ Durability Architecture (Ω₃ Byzantine Default):
     │                              └──────────────────────┘  │
     └─────────────────────────────────────────────────────────┘
 
-  GUARANTEE (C5): PersistSupervisor — external thread, persists every
+  GUARANTEE (C5): PersistSupervisor - external thread, persists every
     PERSIST_INTERVAL seconds. Survives SIGTERM. Max data loss = interval.
-  FALLBACK (C4): atexit — fires on clean process exit only. Does NOT
+  FALLBACK (C4): atexit - fires on clean process exit only. Does NOT
     survive SIGKILL, OOM, kernel panic, or CPython segfault.
 
   Rule: Never invert the confidence order. The supervisor is primary.
@@ -89,7 +89,7 @@ GOLD = "#D4AF37"
 )
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def loop(project: str, mode: str, task: str | None, no_persist: bool, db: str) -> None:
-    """Sovereign Execution Loop — Task → Execute → Persist → Repeat.
+    """Sovereign Execution Loop - Task → Execute → Persist → Repeat.
 
     Interactive mode: REPL with continuous task execution.
     Batch mode: Execute a single task and exit.
@@ -353,7 +353,7 @@ def _handle_history(loop_engine: ExecutionLoop) -> None:
         status_style = _status_style_for(r.status)
         status_text = f"[{status_style}]{r.status.value}[/]"
         task_preview = r.task[:37] + "..." if len(r.task) > 40 else r.task
-        persisted = str(r.persisted_ids) if r.persisted_ids else "—"
+        persisted = str(r.persisted_ids) if r.persisted_ids else "-"
 
         table.add_row(
             str(i),

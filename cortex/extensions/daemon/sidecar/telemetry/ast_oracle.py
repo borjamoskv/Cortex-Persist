@@ -3,7 +3,7 @@ El Lector de Mentes Asíncrono.
 
 Sovereign 200: Uses watchdog filesystem events instead of polling rglob.
 Detects human mutations at the OS kernel level (kqueue/inotify)
-and injects them into CORTEX — O(1) per event instead of O(N) per tick.
+and injects them into CORTEX - O(1) per event instead of O(N) per tick.
 """
 
 from __future__ import annotations
@@ -161,7 +161,7 @@ class ASTOracle:
             target_str = str(py_file)
 
             if not py_file.exists():
-                # File deleted — purge from memory
+                # File deleted - purge from memory
                 self._mtimes.pop(target_str, None)
                 self._cache.pop(target_str, None)
                 continue

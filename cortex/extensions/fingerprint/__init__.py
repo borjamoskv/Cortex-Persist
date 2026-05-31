@@ -1,4 +1,4 @@
-"""CORTEX Fingerprint Module — Cognitive crystallization patterns."""
+"""CORTEX Fingerprint Module - Cognitive crystallization patterns."""
 
 from __future__ import annotations
 

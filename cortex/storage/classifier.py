@@ -24,14 +24,14 @@ logger = logging.getLogger("cortex.storage.classifier")
 # Tier 4 (Standard, score=0.7): generic API keys, cloud provider keys, infra tokens
 
 SECRET_PATTERNS: Final[dict[str, str]] = {
-    # ── Tier 1 — Critical (score=1.0) ───────────────────────────────
+    # ── Tier 1 - Critical (score=1.0) ───────────────────────────────
     "private_key": r"-----BEGIN (RSA|OPENSSH|EC|PGP|DSA) PRIVATE KEY-----",
     "connection_string": (
         r"(mongodb\+srv|postgres|postgresql|mysql|redis|mongodb|amqp)"
         r"://[a-zA-Z0-9_]+:[a-zA-Z0-9_!@#$%^&*]+@"
     ),
     "ssh_key": r"ssh-(rsa|ed25519|ecdsa|dss) AAAA[0-9A-Za-z+/]",
-    # ── Tier 2 — PII (score=0.9) ────────────────────────────────────
+    # ── Tier 2 - PII (score=0.9) ────────────────────────────────────
     "email_address": r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}",
     "phone_number": (
         r"(?<!\d)(\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?"
@@ -40,7 +40,7 @@ SECRET_PATTERNS: Final[dict[str, str]] = {
     "ssn": r"(?<!\d)\d{3}-\d{2}-\d{4}(?!\d)",
     "credit_card": r"(?<!\d)(?:4\d{3}|5[1-5]\d{2}|3[47]\d{2}|6011)[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}(?!\d)",
     "passport_number": r"(?i)passport[\s:#]*[A-Z0-9]{6,12}",
-    # ── Tier 3 — Platform Tokens (score=0.8) ────────────────────────
+    # ── Tier 3 - Platform Tokens (score=0.8) ────────────────────────
     "github_token": r"(ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9_]{36,}",
     "gitlab_token": r"glpat-[A-Za-z0-9\-_]{20,}",
     "jwt_token": r"eyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_\-]{10,}",
@@ -49,7 +49,7 @@ SECRET_PATTERNS: Final[dict[str, str]] = {
     "heroku_api_key": r"(?i)heroku[_-]?api[_-]?key\s*[=:]\s*[a-f0-9\-]{36}",
     "twilio_key": r"(?:AC|SK)[a-f0-9]{32}",
     "sendgrid_key": r"SG\.[A-Za-z0-9_-]{22}\.[A-Za-z0-9_-]{43}",
-    # ── Tier 4 — Generic & Infra (score=0.7) ────────────────────────
+    # ── Tier 4 - Generic & Infra (score=0.7) ────────────────────────
     "generic_api_key": (
         r"(?i)(api[_-]?key|access[_-]?token|auth[_-]?token)"
         r"['\"\s]*[:=]['\"\s]*([a-zA-Z0-9_\-\.]{16,})"
@@ -116,10 +116,10 @@ def classify_content(content: str) -> DataSensitivity:
     """Analyze content for sensitive patterns.
 
     Returns a DataSensitivity with tiered scoring:
-      - Tier 1 (Critical): score=1.0 — private keys, DB strings, SSH
-      - Tier 2 (PII):      score=0.9 — email, phone, SSN, credit card
-      - Tier 3 (Platform): score=0.8 — GitHub/GitLab/JWT/cloud tokens
-      - Tier 4 (Standard): score=0.7 — generic API keys, infra tokens
+      - Tier 1 (Critical): score=1.0 - private keys, DB strings, SSH
+      - Tier 2 (PII):      score=0.9 - email, phone, SSN, credit card
+      - Tier 3 (Platform): score=0.8 - GitHub/GitLab/JWT/cloud tokens
+      - Tier 4 (Standard): score=0.7 - generic API keys, infra tokens
     """
     matches: list[str] = []
     score = 0.0

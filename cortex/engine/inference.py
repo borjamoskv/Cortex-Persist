@@ -1,4 +1,4 @@
-"""Inference Engine — Automatic Fact Derivation (Ω₂: Reduce Entropy).
+"""Inference Engine - Automatic Fact Derivation (Ω₂: Reduce Entropy).
 
 Scans existing facts and derives new knowledge via rule-based reasoning.
 All derived facts get C3 confidence (conjecture until externally verified).

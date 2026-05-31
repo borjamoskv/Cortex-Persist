@@ -1,19 +1,19 @@
-"""Shannon Information Theory — Pure Math Module.
+"""Shannon Information Theory - Pure Math Module.
 
 Zero external dependencies. All functions operate on dict frequency
 distributions using only stdlib math.log2.
 
 Functions:
-    shannon_entropy             — H(X) in bits
-    max_entropy                 — log₂(n)
-    normalized_entropy          — H(X) / H_max ∈ [0, 1]
-    kl_divergence               — D_KL(P‖Q) with Laplace smoothing
-    jensen_shannon_divergence   — JSD(P‖Q) symmetric metric
-    mutual_information          — I(X;Y) from joint frequencies
-    conditional_entropy         — H(Y|X) from joint frequencies
-    cross_entropy               — H(P, Q) cross-entropy
-    redundancy                  — R = 1 - H/H_max
-    information_value           — Self-information -log₂(p) for a single event
+    shannon_entropy             - H(X) in bits
+    max_entropy                 - log₂(n)
+    normalized_entropy          - H(X) / H_max ∈ [0, 1]
+    kl_divergence               - D_KL(P‖Q) with Laplace smoothing
+    jensen_shannon_divergence   - JSD(P‖Q) symmetric metric
+    mutual_information          - I(X;Y) from joint frequencies
+    conditional_entropy         - H(Y|X) from joint frequencies
+    cross_entropy               - H(P, Q) cross-entropy
+    redundancy                  - R = 1 - H/H_max
+    information_value           - Self-information -log₂(p) for a single event
 """
 
 from __future__ import annotations
@@ -125,7 +125,7 @@ def kl_divergence(
 
     D_KL(P‖Q) = Σ P(x) · log₂(P(x) / Q(x))
 
-    NOTE: Not symmetric — D_KL(P‖Q) ≠ D_KL(Q‖P).
+    NOTE: Not symmetric - D_KL(P‖Q) ≠ D_KL(Q‖P).
 
     Args:
         p: True distribution (probability dict, values should sum to ~1).
@@ -151,7 +151,7 @@ def jensen_shannon_divergence(
     p: dict[str, float],
     q: dict[str, float],
 ) -> float:
-    """Jensen-Shannon divergence — symmetric, bounded KL metric.
+    """Jensen-Shannon divergence - symmetric, bounded KL metric.
 
     JSD(P‖Q) = ½·D_KL(P‖M) + ½·D_KL(Q‖M)  where M = ½(P+Q)
 
@@ -210,7 +210,7 @@ def mutual_information(joint: dict[tuple[str, str], int]) -> float:
     h_x = shannon_entropy(margin_x)
     h_y = shannon_entropy(margin_y)
 
-    # Joint entropy H(X,Y) — treat tuple keys as flat categories
+    # Joint entropy H(X,Y) - treat tuple keys as flat categories
     joint_flat: dict[str, int] = {f"{x}|{y}": c for (x, y), c in joint.items()}
     h_xy = shannon_entropy(joint_flat)
 
@@ -305,14 +305,14 @@ def information_value(freq: int, total: int) -> float:
     return -math.log2(p)
 
 
-# ── Exergy — Ω₁₃ §15.9: Useful Work Measurement ──────────────────────
+# ── Exergy - Ω₁₃ §15.9: Useful Work Measurement ──────────────────────
 
 
 def exergy_score(
     distribution: dict[str, int],
     usage_weights: dict[str, float],
 ) -> float:
-    """Compute exergy score — the fraction of information that is actionable.
+    """Compute exergy score - the fraction of information that is actionable.
 
     Ω₁₃ §15.9: exergy_score_required_for_useful_work_claims = true
 

@@ -28,7 +28,7 @@ ATTR_SUBJECT_ROLE = "subject.role"
 
 
 class Effect(str, Enum):
-    """Policy effect — explicitly allow or deny."""
+    """Policy effect - explicitly allow or deny."""
 
     ALLOW = "allow"
     DENY = "deny"
@@ -68,7 +68,7 @@ class Policy:
     priority: int = 0
 
 
-# Default policies — deny-by-default, then layer allows
+# Default policies - deny-by-default, then layer allows
 DEFAULT_POLICIES: list[Policy] = [
     # Tenant isolation: users can only access their own tenant's data
     Policy(
@@ -167,7 +167,7 @@ class ABACEvaluator:
                 applicable.append(policy)
 
         if not applicable:
-            logger.debug("No policies matched — deny by default")
+            logger.debug("No policies matched - deny by default")
             return AccessDecision.DENIED
 
         # Among applicable, highest priority wins. If tied, DENY wins.

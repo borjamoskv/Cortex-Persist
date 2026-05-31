@@ -1,4 +1,4 @@
-"""CORTEX ADK Tools — Bridge between ADK agents and CortexEngine.
+"""CORTEX ADK Tools - Bridge between ADK agents and CortexEngine.
 
 Wraps CortexEngine operations as plain Python functions that ADK agents
 can call as tools. Optimized for low-latency autonomous operations.

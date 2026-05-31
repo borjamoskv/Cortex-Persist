@@ -51,7 +51,7 @@ class AsyncEncoder:
     def model_identity_hash(self) -> str:
         """SHA-256 identity hash of the underlying embedding model.
 
-        Used to version TopologicalAnchors — if this changes,
+        Used to version TopologicalAnchors - if this changes,
         reference signatures are invalid and must be recalculated cold.
         """
         return self._embedder.model_identity_hash

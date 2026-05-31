@@ -1,4 +1,4 @@
-"""CORTEX Delivery — Typed Egress Layer.
+"""CORTEX Delivery - Typed Egress Layer.
 
 Routes pipeline results to their delivery targets:
 MCP responses, files, webhooks, or CLI stdout.

@@ -1,5 +1,5 @@
 """
-Bayesian Trust Registry (Axiom Ω₃) — CORTEX Persist.
+Bayesian Trust Registry (Axiom Ω₃) - CORTEX Persist.
 
 Converts "Bayesian Trust" from a decorative metric to an actionable consensus primitive.
 Defines who has the mathematical right to mutate the persistent state.

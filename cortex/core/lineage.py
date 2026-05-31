@@ -1,4 +1,4 @@
-"""CORTEX Core — Epistemic Lineage & Audit Engine.
+"""CORTEX Core - Epistemic Lineage & Audit Engine.
 
 Ensures Ω₃-V compliance: All synthesized insights (L2) must be traceble
 to ground truth facts (L0).

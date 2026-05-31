@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Death Protocol — CORTEX-Persist AI Code Hygiene Engine (C5-REAL)
+Death Protocol - CORTEX-Persist AI Code Hygiene Engine (C5-REAL)
 ===============================================================
 Thermodynamic entropy sensor for Python codebases.
 Implements AST-based parsing to detect structural code rot (AI slop, dead code, TODOs)

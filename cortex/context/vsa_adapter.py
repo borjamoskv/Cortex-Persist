@@ -1,4 +1,4 @@
-"""CORTEX Context — VSA-SDM Adapter.
+"""CORTEX Context - VSA-SDM Adapter.
 
 Wraps the sovereign VSA-SDM SwarmMemory into the ContextAssembler's
 algebraic context interface. Replaces RAG-based retrieval with

@@ -18,7 +18,7 @@ console = Console()
 
 @click.group(name="chronos")
 def chronos_cmds() -> None:
-    """CHRONOS-1 — Benchmark of Senior Human Time vs AI Swarm Time."""
+    """CHRONOS-1 - Benchmark of Senior Human Time vs AI Swarm Time."""
     pass
 
 
@@ -60,7 +60,7 @@ def analyze(ai_time: float, complexity: str) -> None:
 
         panel = Panel(
             content,
-            title="[bold magenta]🕒 CHRONOS-1 — SENIOR BENCHMARK[/bold magenta]",
+            title="[bold magenta]🕒 CHRONOS-1 - SENIOR BENCHMARK[/bold magenta]",
             border_style="magenta",
             expand=False,
         )

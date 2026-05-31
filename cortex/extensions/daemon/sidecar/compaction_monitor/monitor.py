@@ -1,12 +1,12 @@
 """monitor.py
 
-MemoryPressureMonitor — Compaction Sidecar, Nivel 130/100.
+MemoryPressureMonitor - Compaction Sidecar, Nivel 130/100.
 
 Responsibilities:
 - Periodic memory-pressure sampling via `psutil` (cross-platform) and
   `memory_wrapper.malloc_trim` / `mallinfo2` (Linux/glibc only, gracefully
   degraded on macOS with zero import-time side-effects).
-- Runs OS calls in a ``ThreadPoolExecutor`` (not Process) — avoids fork
+- Runs OS calls in a ``ThreadPoolExecutor`` (not Process) - avoids fork
   hazards with SQLite connections on macOS and eliminates spawn overhead.
 - Emits ``MemoryPressureAlert`` dataclass instances; caller routes them.
 - Fully self-contained: no daemon-level imports, injected dependencies only.
@@ -48,7 +48,7 @@ try:
     _HAS_PSUTIL: bool = True
 except ModuleNotFoundError:
     _HAS_PSUTIL = False
-    logger.debug("psutil not installed — memory pressure sampling will use fallback")
+    logger.debug("psutil not installed - memory pressure sampling will use fallback")
 
 
 # ── MemorySnapshot ────────────────────────────────────────────────────────────
@@ -124,7 +124,7 @@ def _collect_snapshot() -> MemorySnapshot:
             rss, vms = mi.rss, mi.vms
             vm = _p.virtual_memory()
             sys_avail, sys_total = vm.available, vm.total
-        except (ValueError, KeyError, OSError, RuntimeError, ImportError):  # noqa: BLE001 — boundary; caller handles alerts
+        except (ValueError, KeyError, OSError, RuntimeError, ImportError):  # noqa: BLE001 - boundary; caller handles alerts
             pass
 
     if _IS_LINUX:
@@ -151,7 +151,7 @@ def _collect_snapshot() -> MemorySnapshot:
 
 
 def _do_malloc_trim() -> bool:
-    """Attempt malloc_trim(0) — Linux only. Returns True on success."""
+    """Attempt malloc_trim(0) - Linux only. Returns True on success."""
     if not _IS_LINUX:
         return False
     try:
@@ -191,7 +191,7 @@ class MemoryPressureMonitor:
     use_legion:
         Send alerts to Legion swarm via ``legion.send_alert`` (lazy import).
     max_workers:
-        Thread pool size. Default 1 — one background thread is sufficient.
+        Thread pool size. Default 1 - one background thread is sufficient.
     """
 
     def __init__(
@@ -220,7 +220,7 @@ class MemoryPressureMonitor:
     def start(self, loop: asyncio.AbstractEventLoop | None = None) -> None:
         """Schedule the monitoring coroutine on *loop* (or the running loop).
 
-        Safe to call multiple times — idempotent.
+        Safe to call multiple times - idempotent.
         """
         if self._running:
             return
@@ -251,7 +251,7 @@ class MemoryPressureMonitor:
         logger.info("MemoryPressureMonitor stopped")
 
     async def sample(self) -> MemorySnapshot:
-        """One-shot snapshot — useful for CLI inspection or tests."""
+        """One-shot snapshot - useful for CLI inspection or tests."""
         loop = asyncio.get_running_loop()
         return await loop.run_in_executor(self._executor, _collect_snapshot)
 
@@ -269,7 +269,7 @@ class MemoryPressureMonitor:
             except asyncio.CancelledError:
                 self._running = False
                 raise  # Re-raise to allow task to be cleanly cancelled
-            except Exception as exc:  # noqa: BLE001 — top-level resilience
+            except Exception as exc:  # noqa: BLE001 - top-level resilience
                 logger.exception("MemoryPressureSidecar tick error: %s", exc)
             try:
                 await asyncio.sleep(self.interval)

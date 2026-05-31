@@ -1,4 +1,4 @@
-"""Tests for cortex.consensus.rwa_bft — RWA-BFT Consensus Protocol.
+"""Tests for cortex.consensus.rwa_bft - RWA-BFT Consensus Protocol.
 
 C5-REAL audit remediation: consensus/ had 0% test coverage.
 Validates: supermajority condition, Markov reputation updates, Byzantine detection,

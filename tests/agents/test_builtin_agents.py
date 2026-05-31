@@ -1,4 +1,4 @@
-"""Tests for CORTEX Agent Runtime — Sprint 2: Builtin Agents.
+"""Tests for CORTEX Agent Runtime - Sprint 2: Builtin Agents.
 
 Tests:
     - MemoryAgent: store, context, status ops
@@ -321,7 +321,7 @@ class TestSecurityAgent:
     async def test_tick_no_targets_suppresses_broadcast(self, bus, alert_monitor):
         agent = self._agent(bus, alert_monitor, targets=[])
         await agent.tick()
-        # No crash — warning logged, no message sent
+        # No crash - warning logged, no message sent
 
     @pytest.mark.asyncio
     async def test_on_demand_scan(self, bus, alert_monitor):

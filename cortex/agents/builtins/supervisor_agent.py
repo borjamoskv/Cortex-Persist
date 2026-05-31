@@ -1,5 +1,5 @@
 """
-supervisor_agent.py — SupervisorAgent
+supervisor_agent.py - SupervisorAgent
 
 Reactive agent that wraps the Supervisor to provide a message-based control
 plane for agent lifecycle operations: start, stop, quarantine, status.
@@ -25,7 +25,7 @@ _OPS: frozenset[str] = frozenset({"start", "stop", "quarantine", "status", "heal
 
 
 class SupervisorAgent(BaseAgent):
-    """Reactive agent — exposes Supervisor lifecycle ops over the message bus."""
+    """Reactive agent - exposes Supervisor lifecycle ops over the message bus."""
 
     def __init__(
         self,
@@ -60,7 +60,7 @@ class SupervisorAgent(BaseAgent):
             await self._reply(message, {"op": op, "error": str(exc)})
 
     async def tick(self) -> None:
-        """Periodic health-check tick — detects stale agents."""
+        """Periodic health-check tick - detects stale agents."""
         await self._supervisor.health_check()
 
     # ------------------------------------------------------------------

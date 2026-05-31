@@ -1,4 +1,4 @@
-"""Mac-Maestro-Ω — Keyboard input (Vector C)."""
+"""Mac-Maestro-Ω - Keyboard input (Vector C)."""
 
 from __future__ import annotations
 
@@ -49,7 +49,7 @@ def _press_char_cgevent(char: str) -> None:
     if not QUARTZ_AVAILABLE:
         raise ActionFailed("Quartz not available.")
 
-    # Use keycode 0 as placeholder — real impl would map chars to keycodes
+    # Use keycode 0 as placeholder - real impl would map chars to keycodes
     down = CGEventCreateKeyboardEvent(None, 0, True)
     up = CGEventCreateKeyboardEvent(None, 0, False)
 

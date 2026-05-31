@@ -1,11 +1,11 @@
-"""Heartbeat Emitter — Stateless signaling with idle-triggered sleep.
+"""Heartbeat Emitter - Stateless signaling with idle-triggered sleep.
 
 Follows the 130/100 standard: Zero-latency, idempotent, structured telemetry.
 When the system is idle for N seconds, triggers SleepOrchestrator for
-memory consolidation — converting dead time into active learning,
+memory consolidation - converting dead time into active learning,
 exactly like biological sleep.
 
-Derivation: Ω₅ (Antifragile) — idle periods STRENGTHEN the system.
+Derivation: Ω₅ (Antifragile) - idle periods STRENGTHEN the system.
 """
 
 from __future__ import annotations

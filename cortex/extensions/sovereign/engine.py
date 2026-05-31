@@ -1,4 +1,4 @@
-"""Sovereign Engine — async-first orchestration layer.
+"""Sovereign Engine - async-first orchestration layer.
 
 Production-grade async pipeline that coordinates all MOSKV-1 skills,
 multi-cloud deployment, observability, and auto-optimization.
@@ -81,7 +81,7 @@ class SovereignContext:
 
 
 async def _phase_fabrication(ctx: SovereignContext) -> PipelineResult:
-    """Phase 1 — Invoke aether-1 to materialize artifacts."""
+    """Phase 1 - Invoke aether-1 to materialize artifacts."""
     t0 = time.monotonic()
     try:
         await asyncio.to_thread(ctx.bridge.execute, "aether-1")
@@ -102,7 +102,7 @@ async def _phase_fabrication(ctx: SovereignContext) -> PipelineResult:
 
 
 async def _phase_orchestration(ctx: SovereignContext) -> PipelineResult:
-    """Phase 2 — Keter-omega for multi-cloud readiness."""
+    """Phase 2 - Keter-omega for multi-cloud readiness."""
     t0 = time.monotonic()
     try:
         await asyncio.to_thread(ctx.bridge.execute, "keter-omega")
@@ -121,7 +121,7 @@ async def _phase_orchestration(ctx: SovereignContext) -> PipelineResult:
 
 
 async def _phase_swarm(ctx: SovereignContext) -> PipelineResult:
-    """Phase 3 — Legion-Omega swarm execution."""
+    """Phase 3 - Legion-Omega swarm execution."""
     t0 = time.monotonic()
     try:
         from cortex.engine.legion import LEGION_OMEGA
@@ -150,7 +150,7 @@ async def _phase_swarm(ctx: SovereignContext) -> PipelineResult:
 
 
 async def _phase_security(ctx: SovereignContext) -> PipelineResult:
-    """Phase 5 — Run military-grade security scans."""
+    """Phase 5 - Run military-grade security scans."""
     t0 = time.monotonic()
     report = await asyncio.to_thread(run_security_scans, str(ctx.project_root / "cortex"))
     return PipelineResult(
@@ -167,7 +167,7 @@ async def _phase_security(ctx: SovereignContext) -> PipelineResult:
 
 
 async def _phase_observability(ctx: SovereignContext) -> PipelineResult:
-    """Phase 6 — Initial telemetry and initial power level check."""
+    """Phase 6 - Initial telemetry and initial power level check."""
     t0 = time.monotonic()
     init_telemetry()
 
@@ -186,7 +186,7 @@ async def _phase_observability(ctx: SovereignContext) -> PipelineResult:
 
 
 async def _phase_experience(ctx: SovereignContext) -> PipelineResult:
-    """Phase 7 — Impactv-1 for UI/UX excellence."""
+    """Phase 7 - Impactv-1 for UI/UX excellence."""
     t0 = time.monotonic()
     try:
         await asyncio.to_thread(ctx.bridge.execute, "impactv-1")
@@ -205,7 +205,7 @@ async def _phase_experience(ctx: SovereignContext) -> PipelineResult:
 
 
 async def _phase_arbitration(ctx: SovereignContext) -> PipelineResult:
-    """Phase — Calibrate the arbiter state."""
+    """Phase - Calibrate the arbiter state."""
     t0 = time.monotonic()
     # Baseline justice check
     return PipelineResult(
@@ -217,7 +217,7 @@ async def _phase_arbitration(ctx: SovereignContext) -> PipelineResult:
 
 
 async def _phase_verification(ctx: SovereignContext) -> PipelineResult:
-    """Phase 9 — Final verification: power ≥ 1300."""
+    """Phase 9 - Final verification: power ≥ 1300."""
     t0 = time.monotonic()
     power_val = ctx.power.power if ctx.power else 0
     return PipelineResult(
@@ -238,7 +238,7 @@ async def _phase_verification(ctx: SovereignContext) -> PipelineResult:
 
 
 async def _phase_evolution(ctx: SovereignContext) -> PipelineResult:
-    """Phase — Run one evolution cycle for continuous agent improvement."""
+    """Phase - Run one evolution cycle for continuous agent improvement."""
     t0 = time.monotonic()
     try:
         from cortex.extensions.evolution.engine import EvolutionEngine
@@ -356,7 +356,7 @@ def main() -> None:
     out = sys.stdout.write
 
     out("\n" + "═" * 60 + "\n")
-    out("  SOVEREIGN PIPELINE — RESULTS\n")
+    out("  SOVEREIGN PIPELINE - RESULTS\n")
     out("═" * 60 + "\n")
     for r in ctx.results:
         status = "✅" if r.success else "❌"

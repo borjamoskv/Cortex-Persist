@@ -1,11 +1,11 @@
-"""Entropic Quarantine Filter — blocks low-information-density signals.
+"""Entropic Quarantine Filter - blocks low-information-density signals.
 
 F6: If a proposed signal/fact has Shannon entropy below a threshold,
 it carries no new information and must be quarantined before the membrane
 wastes guards and DB cycles on it.
 
 Entropy is computed on the signal content (string or dict) using character
-frequency distribution. This is a fast O(n) gate — no async I/O required.
+frequency distribution. This is a fast O(n) gate - no async I/O required.
 
 Score mapping:
   entropy >= HIGH_ENTROPY_THRESHOLD (≥3.5 bits) → PASS  (score 100)
@@ -28,8 +28,8 @@ from cortex.extensions.immune.filters.base import FilterResult, ImmuneFilter, Ve
 
 __all__ = ["EntropicQuarantineFilter"]
 
-HIGH_ENTROPY_THRESHOLD = 3.5  # bits — PASS, signal carries real information
-MID_ENTROPY_THRESHOLD = 2.5  # bits — HOLD, marginal signal
+HIGH_ENTROPY_THRESHOLD = 3.5  # bits - PASS, signal carries real information
+MID_ENTROPY_THRESHOLD = 2.5  # bits - HOLD, marginal signal
 
 _SCORE_PASS = 100.0
 _SCORE_HOLD = 50.0
@@ -61,7 +61,7 @@ def _extract_text(signal: Any) -> str:
 
 
 class EntropicQuarantineFilter(ImmuneFilter):
-    """F6 — Blocks zero-entropy / low-information signals before they enter the membrane.
+    """F6 - Blocks zero-entropy / low-information signals before they enter the membrane.
 
     Prevents trivial, repetitive, or vacuous facts from consuming guard
     cycles, embedding compute, and ledger space.
@@ -86,7 +86,7 @@ class EntropicQuarantineFilter(ImmuneFilter):
                 verdict=Verdict.PASS,
                 score=_SCORE_PASS,
                 justification=(
-                    f"Entropy {entropy:.3f} bits ≥ {high_t} — signal carries real information."
+                    f"Entropy {entropy:.3f} bits ≥ {high_t} - signal carries real information."
                 ),
                 metadata={"entropy_bits": round(entropy, 4), "text_len": len(text)},
             )
@@ -102,14 +102,14 @@ class EntropicQuarantineFilter(ImmuneFilter):
                 metadata={"entropy_bits": round(entropy, 4), "text_len": len(text)},
             )
 
-        # Below mid threshold — quarantine
+        # Below mid threshold - quarantine
         return FilterResult(
             filter_id=self.filter_id,
             verdict=Verdict.BLOCK,
             score=_SCORE_BLOCK,
             justification=(
                 f"Entropic quarantine triggered: {entropy:.3f} bits < {mid_t}. "
-                "Signal carries insufficient new information — blocked."
+                "Signal carries insufficient new information - blocked."
             ),
             metadata={"entropy_bits": round(entropy, 4), "text_len": len(text)},
         )

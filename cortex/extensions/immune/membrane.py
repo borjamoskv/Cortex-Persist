@@ -1,5 +1,5 @@
 """
-Cortex Immune Membrane — The Sovereign Arbiter.
+Cortex Immune Membrane - The Sovereign Arbiter.
 """
 
 from __future__ import annotations

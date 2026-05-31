@@ -1,4 +1,4 @@
-"""CORTEX API — NotebookLM Routes.
+"""CORTEX API - NotebookLM Routes.
 
 Provides REST endpoints for NotebookLM Ouroboros memory loop operations:
   GET  /v1/notebooklm/status   → Staleness audit and file inventory
@@ -22,7 +22,7 @@ router = APIRouter(tags=["notebooklm"])
 async def notebooklm_status(
     auth: AuthResult = Depends(require_permission("read")),
 ) -> dict:
-    """Get NotebookLM sync status — staleness, file inventory, cloud detection."""
+    """Get NotebookLM sync status - staleness, file inventory, cloud detection."""
     import os
     import time
     from datetime import datetime, timezone

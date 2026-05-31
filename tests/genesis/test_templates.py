@@ -1,4 +1,4 @@
-"""Tests for cortex.genesis.templates — TemplateRegistry and renderers."""
+"""Tests for cortex.genesis.templates - TemplateRegistry and renderers."""
 
 from __future__ import annotations
 

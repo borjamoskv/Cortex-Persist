@@ -1,4 +1,4 @@
-"""MoskvDaemon — Alert handler mixin.
+"""MoskvDaemon - Alert handler mixin.
 
 Extracted from core.py to keep file size under 300 LOC.
 Each _alert_* method processes results from a specific monitor

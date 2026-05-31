@@ -1,4 +1,4 @@
-"""CORTEX MCP — Genesis Engine Tools.
+"""CORTEX MCP - Genesis Engine Tools.
 
 Exposes the Genesis Engine to AI agents via MCP,
 enabling autonomous system creation from declarative specs.

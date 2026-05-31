@@ -26,7 +26,7 @@ def _safe_parse_tags(raw: str | None) -> list[str]:
         parsed = json.loads(raw)
         return parsed if isinstance(parsed, list) else []
     except (json.JSONDecodeError, TypeError):
-        # Legacy format: "tag1,tag2,tag3" — split and clean
+        # Legacy format: "tag1,tag2,tag3" - split and clean
         return [t.strip() for t in raw.split(",") if t.strip()]
 
 
@@ -94,7 +94,7 @@ async def export_snapshot(
                     total_facts += 1
 
     lines = [
-        "# 🧠 CORTEX — Snapshot de Memoria",
+        "# 🧠 CORTEX - Snapshot de Memoria",
         "",
         f"> Generado automáticamente: {now_iso()}",
         f"> Total: {total_facts} facts activos en {len(by_project)} proyectos",

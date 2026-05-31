@@ -365,7 +365,7 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
                 self._observer.start()
 
         _loop.create_task(self._omniscience_loop())
-        logger.info("[APOTHEOSIS-Ω] Latencia Negativa (Ω₇) — OS Hooks Mounted.")
+        logger.info("[APOTHEOSIS-Ω] Latencia Negativa (Ω₇) - OS Hooks Mounted.")
 
     def shutdown(self) -> None:
         """Hibernation protocol and filesystem detachment."""

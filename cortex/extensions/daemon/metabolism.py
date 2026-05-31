@@ -1,4 +1,4 @@
-"""MOSKV-1 — PULSE-Ω (Sovereign Metabolism Engine).
+"""MOSKV-1 - PULSE-Ω (Sovereign Metabolism Engine).
 
 Injects biological life into the CORTEX Daemon. Repurposed from the experimental
 pulse.py script. Instead of static while-loops, the daemon's heart rate

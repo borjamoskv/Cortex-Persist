@@ -1,4 +1,4 @@
-"""Tests para KeyboardEngine — inyección de teclas vía AppleScript."""
+"""Tests para KeyboardEngine - inyección de teclas vía AppleScript."""
 
 from unittest.mock import AsyncMock, patch
 

@@ -30,7 +30,7 @@ class SQLiteAdapter:
     - commit() calls conn.commit() (aiosqlite is NOT auto-commit).
     - executemany() wraps in an explicit transaction for atomicity
       and to prevent unbounded memory growth on large batches.
-    - health_check() never raises — always returns bool.
+    - health_check() never raises - always returns bool.
     - This class does NOT own the connection; it wraps it. close()
       delegates to the connection but the caller controls lifecycle.
     """

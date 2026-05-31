@@ -1,5 +1,5 @@
 """
-CORTEX — Exergy Guard (Axiom Ω₁₃: Thermodynamic Cognition).
+CORTEX - Exergy Guard (Axiom Ω₁₃: Thermodynamic Cognition).
 
 Filters incoming facts based on their information density (Exergy) vs raw entropy.
 Rejects decorative stochastic output (e.g., apologies, padding, generic AI speak)

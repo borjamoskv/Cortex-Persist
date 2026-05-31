@@ -25,7 +25,7 @@ __all__ = [
 
 @cli.group()
 def context():
-    """Context Engine — ambient intelligence."""
+    """Context Engine - ambient intelligence."""
     pass
 
 
@@ -155,7 +155,7 @@ async def _signals_async(db: str, as_json: bool):
             table.add_row(
                 s.source,
                 s.signal_type,
-                s.project or "—",
+                s.project or "-",
                 s.content[:50],
                 f"{s.weight:.2f}",
             )
@@ -204,7 +204,7 @@ async def _history_async(db: str, limit: int, as_json: bool):
         for snap in snapshots:
             table.add_row(
                 str(snap["id"]),
-                snap.get("active_project") or "—",
+                snap.get("active_project") or "-",
                 snap["confidence"],
                 str(snap["signals_used"]),
                 snap.get("created_at", ""),

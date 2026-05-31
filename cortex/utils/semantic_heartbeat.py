@@ -1,5 +1,5 @@
 """
-Semantic Heartbeat — Metastatic Drift Analysis.
+Semantic Heartbeat - Metastatic Drift Analysis.
 
 A true heartbeat monitor calculating the semantic asymmetry
 between system health states.

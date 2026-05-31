@@ -1,4 +1,4 @@
-"""MOSKV-Aether — Critic Agent.
+"""MOSKV-Aether - Critic Agent.
 
 Reviews the git diff produced by the Executor and approves or rejects.
 """
@@ -50,7 +50,7 @@ class CriticAgent:
 
         diff = toolkit.git_diff()
         if not diff.strip() or diff.startswith("[ERROR]"):
-            logger.info("Critic: no diff found — auto-approving")
+            logger.info("Critic: no diff found - auto-approving")
             return CriticOutput(approved=True, issues=[], suggestions="No changes detected.")
 
         prompt = (

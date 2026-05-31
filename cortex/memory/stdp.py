@@ -1,7 +1,7 @@
 """Spike-Timing Dependent Plasticity (STDP).
 
 Hebbian learning rule adapted for semantic graphs:
-  "Neurons that fire together, wire together — but TIMING matters."
+  "Neurons that fire together, wire together - but TIMING matters."
 
 STDP modulates edge weights based on temporal co-activation ordering:
   - If A precedes B (causal) → LTP (strengthen connection)
@@ -75,7 +75,7 @@ class SynapticEdge:
 
     @property
     def plasticity_ratio(self) -> float:
-        """LTP/LTD ratio — >1.0 means net strengthening."""
+        """LTP/LTD ratio - >1.0 means net strengthening."""
         total = self.ltp_events + self.ltd_events
         if total == 0:
             return 1.0
@@ -224,7 +224,7 @@ class STDPEngine:
         edge = self._edges.get(edge_key)
 
         if edge is None:
-            # No existing edge to weaken — skip
+            # No existing edge to weaken - skip
             return None
 
         weight_decrease = self._lr_ltd * math.exp(-delta_t / TAU_LTD)

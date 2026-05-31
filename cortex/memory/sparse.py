@@ -1,4 +1,4 @@
-"""CORTEX v6+ — Sparse Encoding (Mushroom Body-inspired).
+"""CORTEX v6+ - Sparse Encoding (Mushroom Body-inspired).
 
 Strategy 3: Implements dimensionality expansion and sparse activation
 inspired by the Drosophila Mushroom Body circuit.

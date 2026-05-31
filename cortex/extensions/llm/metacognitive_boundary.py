@@ -17,8 +17,8 @@ This module solves the "blind LLM" problem in three steps:
   1. PREAMBLE: Injects FOK/JOL/Verdict signals into the system prompt
                so the LLM knows what it knows BEFORE generating.
 
-  2. PLAN: Forces the LLM to declare a "retrieval plan" —
-           which memories it will use and why — BEFORE answering.
+  2. PLAN: Forces the LLM to declare a "retrieval plan" -
+           which memories it will use and why - BEFORE answering.
 
   3. VERIFY: Post-generation consistency check to detect when the
              response contradicts or ignores the memory evidence.
@@ -202,7 +202,7 @@ def build_epistemic_preamble(ctx: MetacognitiveContext) -> str:
         lines.append(
             "🚫 EPISTEMIC HARD BLOCK: Confidence below minimum threshold. "
             "You MUST respond with 'I don't have reliable information about this.' "
-            "Do NOT speculate or fabricate. Ω₃ — Byzantine Default active."
+            "Do NOT speculate or fabricate. Ω₃ - Byzantine Default active."
         )
 
     if ctx.knowledge_gaps:
@@ -214,7 +214,7 @@ def build_epistemic_preamble(ctx: MetacognitiveContext) -> str:
         usable = [c for c in ctx.memory_cards if not c.repair_needed]
         broken = len(ctx.memory_cards) - len(usable)
         if broken:
-            lines.append(f"  ⚠ {broken} engram(s) flagged for repair — do not rely on them.")
+            lines.append(f"  ⚠ {broken} engram(s) flagged for repair - do not rely on them.")
         if usable:
             best = max(usable, key=lambda c: c.retrieval_confidence)
             lines.append(
@@ -223,7 +223,7 @@ def build_epistemic_preamble(ctx: MetacognitiveContext) -> str:
                 f"status={best.consolidation_status}"
             )
     else:
-        lines.append("Memory evidence: NONE — no engrams retrieved for this query.")
+        lines.append("Memory evidence: NONE - no engrams retrieved for this query.")
 
     # Verdict-specific instruction
     if ctx.verdict == Verdict.RESPOND:
@@ -244,7 +244,7 @@ def build_epistemic_preamble(ctx: MetacognitiveContext) -> str:
     lines.append("--- [END EPISTEMIC STATE] ---")
 
     preamble = "\n".join(lines)
-    # Hard cap — Ω₂: entropic asymmetry
+    # Hard cap - Ω₂: entropic asymmetry
     return preamble[:_MAX_PREAMBLE_CHARS]
 
 
@@ -286,7 +286,7 @@ def append_retrieval_plan_request(user_message: str) -> str:
     """Append retrieval plan declaration requirement to user message.
 
     Forces the LLM to make its memory usage explicit before answering.
-    This prevents silent memory-ignoring — an LLM that declares it used
+    This prevents silent memory-ignoring - an LLM that declares it used
     no memories but then states facts confidently is detectable.
     """
     return f"{user_message}{RETRIEVAL_PLAN_SUFFIX}"
@@ -299,7 +299,7 @@ def verify_retrieval_plan_declared(response: str) -> bool:
     """Check that the LLM declared a retrieval plan in its response.
 
     Returns True if <retrieval_plan>...</retrieval_plan> is present.
-    A missing plan is a soft violation — logged, not raised.
+    A missing plan is a soft violation - logged, not raised.
     """
     has_open = "<retrieval_plan>" in response
     has_close = "</retrieval_plan>" in response

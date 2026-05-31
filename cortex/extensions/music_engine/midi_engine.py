@@ -1,7 +1,7 @@
 """
 MIDI Engine for GRAMMY-Ω.
 
-Local MIDI generation and WAV synthesis — operates without external APIs.
+Local MIDI generation and WAV synthesis - operates without external APIs.
 Ports the best patterns from GRAMMY_OMEGA_AvantGarde scripts into CORTEX.
 """
 

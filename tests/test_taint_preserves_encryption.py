@@ -1,4 +1,4 @@
-"""Tests for Issue #96 — preserve encrypted metadata during taint propagation.
+"""Tests for Issue #96 - preserve encrypted metadata during taint propagation.
 
 Causality taint propagation must not corrupt encrypted metadata columns
 or leak tenant-specific ciphertext across boundaries.

@@ -76,7 +76,7 @@ class FixResult:
 
 
 class JosuProactiveDaemon:
-    """The Code Sniper — Proactive Background Agent.
+    """The Code Sniper - Proactive Background Agent.
 
     Scans for resolvable ghosts every POLL_INTERVAL_S seconds.
     For each target under MAX_COMPLEXITY, spawns an ephemeral Pulse

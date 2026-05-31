@@ -1,7 +1,7 @@
-"""loop_models — Data models for the CORTEX Execution Loop.
+"""loop_models - Data models for the CORTEX Execution Loop.
 
 Extracted from loop_cmds.py to satisfy the Landauer LOC barrier.
-Pure dataclasses — no I/O, no side effects.
+Pure dataclasses - no I/O, no side effects.
 """
 
 from __future__ import annotations

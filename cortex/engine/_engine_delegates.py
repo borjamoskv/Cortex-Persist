@@ -1,4 +1,4 @@
-"""CORTEX Engine — Delegated Methods Mixin.
+"""CORTEX Engine - Delegated Methods Mixin.
 
 Reality Level: C5-REAL
 """
@@ -171,13 +171,13 @@ class DelegatesMixin:
         project: str | None = None,
         top_domains: int = 15,
     ):
-        """Cognitive Fingerprint — extract behavioral patterns from the Ledger."""
+        """Cognitive Fingerprint - extract behavioral patterns from the Ledger."""
         from cortex.extensions.fingerprint.extractor import FingerprintExtractor
 
         return await FingerprintExtractor.extract(self, project, top_domains)
 
     async def immortality_index(self, project: str | None = None) -> dict:
-        """Immortality Index (ι) — cognitive crystallization metric."""
+        """Immortality Index (ι) - cognitive crystallization metric."""
         from cortex.extensions.shannon.immortality import ImmortalityIndex
 
         return await ImmortalityIndex.compute(self, project)
@@ -187,7 +187,7 @@ class DelegatesMixin:
         project: str | None = None,
         tenant_id: str = "default",
     ) -> list:
-        """Bellman Policy Engine — prioritized action queue."""
+        """Bellman Policy Engine - prioritized action queue."""
         from cortex.extensions.policy import PolicyEngine
 
         policy = PolicyEngine(self)

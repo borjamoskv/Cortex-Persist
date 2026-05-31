@@ -1,4 +1,4 @@
-"""The Google Trends Oracle — permanent connection system."""
+"""The Google Trends Oracle - permanent connection system."""
 
 import asyncio
 import logging

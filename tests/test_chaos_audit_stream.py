@@ -8,12 +8,12 @@ Axiom: Ω₅ (Antifragile by Default)
   - All mechanisms sealed: O(1) lookup, O(1) fallback, O(1) recovery.
 
 Scenarios tested:
-  1. KILL  — Abrupt daemon termination (SIGKILL).
-  2. CORRUPTION — Malformed audit stream data.
-  3. PARTIAL_FAILURE — Transaction interrupted mid-pipeline.
-  4. TIMEOUT — Consumer group stops ACKing.
-  5. BYZANTINE — Multiple simultaneous subsystem failures.
-  6. FULL_SIEGE — All scenarios in sequence (Ouroboros Loop).
+  1. KILL  - Abrupt daemon termination (SIGKILL).
+  2. CORRUPTION - Malformed audit stream data.
+  3. PARTIAL_FAILURE - Transaction interrupted mid-pipeline.
+  4. TIMEOUT - Consumer group stops ACKing.
+  5. BYZANTINE - Multiple simultaneous subsystem failures.
+  6. FULL_SIEGE - All scenarios in sequence (Ouroboros Loop).
 """
 
 from __future__ import annotations
@@ -219,7 +219,7 @@ class TestPartialWriteScenario:
 
 
 class TestConsumerStallScenario:
-    """Scenario 4: Consumer group stops ACKing — backpressure."""
+    """Scenario 4: Consumer group stops ACKing - backpressure."""
 
     @pytest.mark.asyncio
     async def test_consumer_stall_captures_ghost(
@@ -253,7 +253,7 @@ class TestCascadeFailureScenario:
         chaos_engine: HydraChaosEngine,
         mock_redis: MockRedisClient,
     ):
-        """ALL concurrent failures MUST be captured — zero leaks."""
+        """ALL concurrent failures MUST be captured - zero leaks."""
         with patch(
             "cortex.extensions.swarm.error_ghost_pipeline.ErrorGhostPipeline._persist_async",
             new_callable=AsyncMock,
@@ -276,7 +276,7 @@ class TestCascadeFailureScenario:
         chaos_engine: HydraChaosEngine,
         mock_redis: MockRedisClient,
     ):
-        """Cascade failure recovery MUST be O(1) — bounded latency."""
+        """Cascade failure recovery MUST be O(1) - bounded latency."""
         with patch(
             "cortex.extensions.swarm.error_ghost_pipeline.ErrorGhostPipeline._persist_async",
             new_callable=AsyncMock,
@@ -295,7 +295,7 @@ class TestCascadeFailureScenario:
 
 
 class TestFullSiege:
-    """Execute ALL chaos scenarios in sequence — the Ouroboros Loop."""
+    """Execute ALL chaos scenarios in sequence - the Ouroboros Loop."""
 
     @pytest.mark.asyncio
     async def test_full_siege_all_sovereign(
@@ -315,14 +315,14 @@ class TestFullSiege:
                 mock = MockRedisClient()
                 result = await chaos_engine.execute_scenario(scenario, mock)
                 assert result.is_sovereign, (
-                    f"SIEGE FAILURE: {scenario.name} is NOT sovereign — "
+                    f"SIEGE FAILURE: {scenario.name} is NOT sovereign - "
                     f"ghost={result.ghost_captured}, pipeline={result.pipeline_transferred}, "
                     f"critical_interrupted={result.critical_process_interrupted}"
                 )
 
         # All scenarios must have been executed
         assert len(chaos_engine.results) == len(ChaosScenario)
-        assert chaos_engine.all_sovereign, "SYSTEM NOT SOVEREIGN — siege failed"
+        assert chaos_engine.all_sovereign, "SYSTEM NOT SOVEREIGN - siege failed"
 
         report = chaos_engine.report()
         assert report["all_sovereign"] is True

@@ -163,12 +163,12 @@ def test_all_tools_read_only(tools: list[dict]) -> None:
     for tool in tools:
         stmt_upper = tool["statement"].upper()
         for kw in write_keywords:
-            # Allow keywords inside comments or string literals — crude but effective
+            # Allow keywords inside comments or string literals - crude but effective
             # We check if the keyword appears as a standalone word
             import re
 
             if re.search(rf"\b{kw}\b", stmt_upper):
                 pytest.fail(
-                    f"Tool '{tool['name']}' contains write keyword '{kw}' — "
+                    f"Tool '{tool['name']}' contains write keyword '{kw}' - "
                     f"Toolbox tools must be read-only (Ω₃)"
                 )

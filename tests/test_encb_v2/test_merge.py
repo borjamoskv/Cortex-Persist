@@ -1,4 +1,4 @@
-"""Tests for merge.py — CRDT merge per belief type."""
+"""Tests for merge.py - CRDT merge per belief type."""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-"""Tests for CORTEX Agent Runtime — Sprint 1.
+"""Tests for CORTEX Agent Runtime - Sprint 1.
 
 Tests:
     - Agent lifecycle (start, run, stop, state transitions)

@@ -85,7 +85,7 @@ async def sync_memory(engine: CortexEngine) -> SyncResult:
 
 
 async def _sync_ghosts(engine: CortexEngine, path: Path, result: SyncResult) -> None:
-    """Sincroniza ghosts.json — estado actual de cada proyecto fantasma."""
+    """Sincroniza ghosts.json - estado actual de cada proyecto fantasma."""
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
     except (json.JSONDecodeError, OSError) as e:
@@ -129,7 +129,7 @@ async def _sync_ghosts(engine: CortexEngine, path: Path, result: SyncResult) -> 
 
 
 async def _sync_mistakes(engine: CortexEngine, path: Path, result: SyncResult) -> None:
-    """Sincroniza mistakes.jsonl — memoria de errores."""
+    """Sincroniza mistakes.jsonl - memoria de errores."""
     existing = await get_existing_contents(engine, None, fact_type="error")
     lines = [
         json.loads(line)
@@ -164,7 +164,7 @@ async def _sync_mistakes(engine: CortexEngine, path: Path, result: SyncResult) -
 
 
 async def _sync_bridges(engine: CortexEngine, path: Path, result: SyncResult) -> None:
-    """Sincroniza bridges.jsonl — conexiones entre proyectos."""
+    """Sincroniza bridges.jsonl - conexiones entre proyectos."""
     existing = await get_existing_contents(engine, "__bridges__", fact_type="bridge")
     lines = [
         json.loads(line)

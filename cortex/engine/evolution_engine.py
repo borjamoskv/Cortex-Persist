@@ -25,7 +25,7 @@ from cortex.engine.zero_prompting import ZeroPromptingEvolutionStrategy
 
 class ParameterTuningStrategy:
     """
-    Eigen (1971) — Quasispecies Error Threshold.
+    Eigen (1971) - Quasispecies Error Threshold.
     Adaptive mutation rates based on error_rate to avoid error catastrophe.
     """
 
@@ -53,7 +53,7 @@ class ParameterTuningStrategy:
 
 class PruneDeadPathStrategy:
     """
-    Fisher (1930) — Purifying Selection / Fundamental Theorem.
+    Fisher (1930) - Purifying Selection / Fundamental Theorem.
     Removes deleterious paths based on ghost_density (mutation load).
     """
 
@@ -83,7 +83,7 @@ class PruneDeadPathStrategy:
 
 class HeuristicInjectionStrategy:
     """
-    Ochman (2000) — Horizontal Gene Transfer (HGT).
+    Ochman (2000) - Horizontal Gene Transfer (HGT).
     Injects validated heuristics from domain knowledge into low-fitness agents.
     """
 
@@ -129,7 +129,7 @@ class HeuristicInjectionStrategy:
 
 class BridgeImportStrategy:
     """
-    Margulis (1970) — Endosymbiosis / Symbiotic Gene Transfer.
+    Margulis (1970) - Endosymbiosis / Symbiotic Gene Transfer.
     Cross-domain knowledge bridging when fitness gap is large.
     """
 
@@ -168,7 +168,7 @@ class BridgeImportStrategy:
 
 class AdversarialStressStrategy:
     """
-    Van Valen (1973) — Red Queen Hypothesis.
+    Van Valen (1973) - Red Queen Hypothesis.
     Controlled chaos injection for high-fitness agents to test resilience.
     """
 
@@ -213,7 +213,7 @@ class AdversarialStressStrategy:
 
 class EntropyReductionStrategy:
     """
-    Kimura (1968) — Neutral Theory / Genetic Drift Correction.
+    Kimura (1968) - Neutral Theory / Genetic Drift Correction.
     Axiom 12 (ψWitness Passive Observation) compliance.
     """
 
@@ -251,7 +251,7 @@ class EntropyReductionStrategy:
 
 class CrossoverRecombinationStrategy:
     """
-    Maynard Smith (1978) — Evolution of Sex / Recombination.
+    Maynard Smith (1978) - Evolution of Sex / Recombination.
     High-variance recombination when fitness variance justifies cost.
     """
 
@@ -290,7 +290,7 @@ class CrossoverRecombinationStrategy:
 
 class StagnationBreakerStrategy:
     """
-    Gould & Eldredge (1972) — Punctuated Equilibrium.
+    Gould & Eldredge (1972) - Punctuated Equilibrium.
     Disrupts local optima when stasis is detected over a 5-mutation window.
     """
 

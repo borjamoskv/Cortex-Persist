@@ -1,4 +1,4 @@
-"""Tests for P0 Decoupling (V6) — Thermodynamic Isolation.
+"""Tests for P0 Decoupling (V6) - Thermodynamic Isolation.
 
 Verifies that facts are persistent and ledgerized even when enrichment
 is delayed or failing.

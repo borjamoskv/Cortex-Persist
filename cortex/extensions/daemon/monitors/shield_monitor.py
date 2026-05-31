@@ -48,12 +48,12 @@ class DailyShieldMonitor:
             hours_since = (now - self._last_scan).total_seconds() / 3600
             if hours_since < self.SCAN_INTERVAL_HOURS:
                 logger.debug(
-                    "Shield scan skipped — last ran %.1fh ago",
+                    "Shield scan skipped - last ran %.1fh ago",
                     hours_since,
                 )
                 return alerts
 
-        logger.info("🛡️ DAILY SHIELD — Starting security pipeline")
+        logger.info("🛡️ DAILY SHIELD - Starting security pipeline")
 
         # ── Phase 1: Threat Feed Update ──
         feed_report = await self._update_feeds()
@@ -102,7 +102,7 @@ class DailyShieldMonitor:
         }
 
         logger.info(
-            "🛡️ DAILY SHIELD — Complete. %d alerts generated.",
+            "🛡️ DAILY SHIELD - Complete. %d alerts generated.",
             len(alerts),
         )
         return alerts

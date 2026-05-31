@@ -5,7 +5,7 @@
 
 """CORTEX Search Package.
 
-Status: IMPLEMENTED (Ω₁₃ — causal gap wired into hybrid search).
+Status: IMPLEMENTED (Ω₁₃ - causal gap wired into hybrid search).
 """
 
 from __future__ import annotations

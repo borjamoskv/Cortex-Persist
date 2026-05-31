@@ -1,4 +1,4 @@
-"""Repair Strategy Registry — Deterministic Fix Application for Level 5 Self-Healing.
+"""Repair Strategy Registry - Deterministic Fix Application for Level 5 Self-Healing.
 
 Each strategy is a pure function: (context, parameters) → RepairResult.
 Strategies are registered by anomaly class and executed by the AutoCurativeAgent.
@@ -320,7 +320,7 @@ class RestartHeartbeatEmitter:
             if heartbeat is not None:
                 heartbeat.stop()
                 await asyncio.sleep(restart_delay / 1000.0)
-                # The caller should restart — we just set the flag
+                # The caller should restart - we just set the flag
                 context["heartbeat_needs_restart"] = True
 
             latency = (time.perf_counter_ns() - start) / 1e6
@@ -376,7 +376,7 @@ class TriggerConsolidation:
                 strategy="TRIGGER_CONSOLIDATION",
                 target=target,
                 latency_ms=latency,
-                message="No SleepOrchestrator available — skipped",
+                message="No SleepOrchestrator available - skipped",
             )
         except Exception as e:
             latency = (time.perf_counter_ns() - start) / 1e6

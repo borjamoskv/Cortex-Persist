@@ -4,7 +4,7 @@ Executes a deep synthesis of conflicting or redundant knowledge crystals.
 Used by the CrystalConsolidator to fuse near-duplicate crystals while
 preserving non-redundant information.
 
-Axiom Ω₂: Entropic Asymmetry — Reducing noise by melting information together.
+Axiom Ω₂: Entropic Asymmetry - Reducing noise by melting information together.
 """
 
 from __future__ import annotations

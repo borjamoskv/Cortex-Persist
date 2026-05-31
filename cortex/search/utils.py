@@ -93,7 +93,7 @@ def _row_to_result(row: Any, is_fts: bool = False) -> SearchResult:
     # Meta (index 9)
     meta = _parse_row_meta(row[9], tenant_id, enc) if len(row) > 9 else {}
 
-    # Scoring — FTS has rank at index 16
+    # Scoring - FTS has rank at index 16
     score = 0.5
     if is_fts and len(row) > 16:
         rank = row[16] if row[16] is not None else 0.0

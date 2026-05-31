@@ -1,4 +1,4 @@
-"""CORTEX Agents — runtime public API.
+"""CORTEX Agents - runtime public API.
 
 Exposes the core agent runtime classes. Extension-layer prompts and pitch
 templates remain in ``cortex.extensions.agents``.

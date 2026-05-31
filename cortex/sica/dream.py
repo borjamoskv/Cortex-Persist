@@ -1,4 +1,4 @@
-"""SICA Dream Engine — NREM-Inspired Trace Consolidation.
+"""SICA Dream Engine - NREM-Inspired Trace Consolidation.
 
 Biological insight: during NREM sleep, the hippocampus replays
 recent experiences while the neocortex extracts generalizable
@@ -41,7 +41,7 @@ logger = logging.getLogger("cortex.sica.dream")
 class DreamInsight:
     """A pattern discovered during dream consolidation.
 
-    Each insight is actionable — it can become a heuristic,
+    Each insight is actionable - it can become a heuristic,
     modify a weight, or flag a blind spot.
     """
 
@@ -130,24 +130,24 @@ class DreamEngine:
                 memories_pruned=0,
             )
 
-        # Phase 1: REPLAY — shuffle for decontextualization
+        # Phase 1: REPLAY - shuffle for decontextualization
         replay_order = list(traces)
         random.shuffle(replay_order)
 
-        # Phase 2: FRAGMENT — extract reusable pieces
+        # Phase 2: FRAGMENT - extract reusable pieces
         success_fragments = self._extract_fragments(replay_order, StepOutcome.SUCCESS)
         failure_fragments = self._extract_fragments(replay_order, StepOutcome.FAILURE)
 
-        # Phase 3: RECOMBINE — splice fragments
+        # Phase 3: RECOMBINE - splice fragments
         recombinations = self._recombine_fragments(success_fragments)
 
-        # Phase 4: ABSTRACT — generalize patterns
+        # Phase 4: ABSTRACT - generalize patterns
         new_abstractions = self._abstract_patterns(replay_order)
 
-        # Phase 5: PRUNE — forget noise
+        # Phase 5: PRUNE - forget noise
         pruned_count = self._prune_low_signal(replay_order)
 
-        # Phase 6: INSIGHT — generate actionable discoveries
+        # Phase 6: INSIGHT - generate actionable discoveries
         insights: list[DreamInsight] = []
         insights.extend(self._discover_tool_specializations(replay_order))
         insights.extend(self._discover_failure_precursors(replay_order))
@@ -399,7 +399,7 @@ class DreamEngine:
     ) -> list[DreamInsight]:
         """Discover action patterns that precede failures.
 
-        Like dreaming about falling — rehearsing danger to prepare.
+        Like dreaming about falling - rehearsing danger to prepare.
         """
         insights: list[DreamInsight] = []
         precursor_counts: Counter[str] = Counter()

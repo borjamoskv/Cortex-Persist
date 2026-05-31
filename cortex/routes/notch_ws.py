@@ -27,7 +27,7 @@ logger = logging.getLogger("cortex.notch_ws")
 class NotchHub:
     """Manages all connected Notch Live clients.
 
-    Thread-safe singleton — any part of CORTEX can call
+    Thread-safe singleton - any part of CORTEX can call
     ``await notch_hub.broadcast("thinking")`` to push state to the notch.
     """
 
@@ -76,7 +76,7 @@ class NotchHub:
         return False
 
 
-# Global singleton — importable from anywhere
+# Global singleton - importable from anywhere
 notch_hub = NotchHub()
 
 

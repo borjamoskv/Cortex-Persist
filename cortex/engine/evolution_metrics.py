@@ -115,7 +115,7 @@ class CortexMetrics:
             conn.close()
 
     def record_mutation(self, mutation: Mutation, domain_id: str) -> None:
-        """Immutable ledger entry — Axiom 12 (ψWitness Passive Observation)."""
+        """Immutable ledger entry - Axiom 12 (ψWitness Passive Observation)."""
         p_json = json.dumps(mutation.parameters)
         prev_hash = self._get_last_hash(domain_id)
         data = f"{mutation.mutation_id}{p_json}{mutation.fitness}{prev_hash}"

@@ -1,4 +1,4 @@
-"""Mac-Maestro-Ω — Semantic Element Matcher."""
+"""Mac-Maestro-Ω - Semantic Element Matcher."""
 
 from __future__ import annotations
 

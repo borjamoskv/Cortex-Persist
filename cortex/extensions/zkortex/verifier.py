@@ -1,5 +1,5 @@
 """
-ZKORTEX — Public Verifier.
+ZKORTEX - Public Verifier.
 
 El Verifier es la entidad externa: auditores, clientes, reguladores.
 Opera SOLO con datos públicos (roots, commitments, proofs).
@@ -104,9 +104,9 @@ class ZKOrtexVerifier:
             is_valid=is_valid,
             proof_type="membership",
             verified_at=time.monotonic(),
-            details="Proof valid — element is a member of the sovereign knowledge set."
+            details="Proof valid - element is a member of the sovereign knowledge set."
             if is_valid
-            else "Proof INVALID — element not in set or tampered proof.",
+            else "Proof INVALID - element not in set or tampered proof.",
             public_root=proof.root,
         )
 
@@ -141,7 +141,7 @@ class ZKOrtexVerifier:
         Verifica que un commitment corresponde al secreto revelado.
 
         Este método se usa cuando el Prover decide ABRIR el commitment
-        para una auditoría específica. La apertura es soberana — CORTEX decide.
+        para una auditoría específica. La apertura es soberana - CORTEX decide.
 
         Args:
             commitment: El commitment público previamente emitido.
@@ -166,7 +166,7 @@ class ZKOrtexVerifier:
             is_valid=is_valid,
             proof_type="commitment_opening",
             verified_at=time.monotonic(),
-            details="Commitment opens correctly — secret is authentic."
+            details="Commitment opens correctly - secret is authentic."
             if is_valid
             else "Commitment DOES NOT match the revealed secret. ALERT: possible forgery.",
         )

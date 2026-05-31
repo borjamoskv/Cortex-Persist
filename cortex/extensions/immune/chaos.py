@@ -101,7 +101,7 @@ async def async_interceptor(
                 res = "!!CORRUPTED_STRING_BY_CHAOS_GATE!!"  # type: ignore[assignment]
 
         return res  # type: ignore[type-error]
-    except Exception as e:  # noqa: BLE001 — chaos gate must intercept and re-raise all failures
+    except Exception as e:  # noqa: BLE001 - chaos gate must intercept and re-raise all failures
         # Re-check gate state
         gate.check()
         raise e

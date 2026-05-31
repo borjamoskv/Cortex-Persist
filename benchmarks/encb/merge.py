@@ -1,4 +1,4 @@
-"""ENCB v2 — CRDT Merge Operators.
+"""ENCB v2 - CRDT Merge Operators.
 
 Layer 1: Replica convergence only. No truth resolution here.
 Each merge operator is commutative, associative, and idempotent.
@@ -50,7 +50,7 @@ def merge_boolean(local: BeliefObject, remote: BeliefObject) -> BeliefObject:
         result_conf = remote.confidence
         conflict = set(remote.conflict_set)
     else:
-        # Concurrent — take higher confidence, mark conflict
+        # Concurrent - take higher confidence, mark conflict
         if local.confidence >= remote.confidence:
             result_value = local.value
             result_conf = local.confidence
@@ -95,7 +95,7 @@ def merge_categorical(local: BeliefObject, remote: BeliefObject) -> BeliefObject
         result_conf = remote.confidence
         conflict = set(remote.conflict_set)
     else:
-        # Concurrent — highest confidence wins, conflict tracked
+        # Concurrent - highest confidence wins, conflict tracked
         if local.confidence >= remote.confidence:
             result_value = local.value
             result_conf = local.confidence
@@ -150,7 +150,7 @@ def merge_scalar(local: BeliefObject, remote: BeliefObject) -> BeliefObject:
     if values:
         result_value = statistics.median(values)
     else:
-        # Fallback — take more recent
+        # Fallback - take more recent
         result_value = (
             local.value if local.latest_timestamp >= remote.latest_timestamp else remote.value
         )

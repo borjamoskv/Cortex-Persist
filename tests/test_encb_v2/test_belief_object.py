@@ -1,4 +1,4 @@
-"""Tests for belief_object.py — BeliefObject, Evidence, version vectors."""
+"""Tests for belief_object.py - BeliefObject, Evidence, version vectors."""
 
 from __future__ import annotations
 

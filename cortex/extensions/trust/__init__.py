@@ -1,4 +1,4 @@
-"""CORTEX Trust Module — Bayesian confidence management."""
+"""CORTEX Trust Module - Bayesian confidence management."""
 
 from __future__ import annotations
 

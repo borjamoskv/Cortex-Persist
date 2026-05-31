@@ -1,4 +1,4 @@
-"""Mac-Maestro-Ω — Structured trace emission."""
+"""Mac-Maestro-Ω - Structured trace emission."""
 
 from __future__ import annotations
 
@@ -27,7 +27,7 @@ def _get_ledger():
         _ledger = SovereignLedger(DEFAULT_DB_PATH)
         logger.info("CORTEX Ledger connected for Mac-Maestro tracing.")
     except Exception:
-        logger.debug("CORTEX Ledger unavailable — traces are local only.")
+        logger.debug("CORTEX Ledger unavailable - traces are local only.")
     return _ledger
 
 
@@ -99,6 +99,6 @@ def emit_trace(
                 payload=json.dumps(trace_data, default=str),
             )
         except Exception:
-            logger.debug("Ledger write failed — trace persisted locally only.")
+            logger.debug("Ledger write failed - trace persisted locally only.")
 
     return trace_data

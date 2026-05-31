@@ -1,10 +1,10 @@
-"""ENCB v2 — Resolution Strategies (S0–S3).
+"""ENCB v2 - Resolution Strategies (S0–S3).
 
 Four strategies implementing a common interface:
-    S0 — Last-Write-Wins (LWW): baseline miserable
-    S1 — RAG Summary Overwrite: majority vote weighted by confidence
-    S2 — CRDT-only: convergence without reliability adaptation
-    S3 — Cortex: CRDT + LogOP + ATMS-lite + reliability adaptation
+    S0 - Last-Write-Wins (LWW): baseline miserable
+    S1 - RAG Summary Overwrite: majority vote weighted by confidence
+    S2 - CRDT-only: convergence without reliability adaptation
+    S3 - Cortex: CRDT + LogOP + ATMS-lite + reliability adaptation
 """
 
 from __future__ import annotations
@@ -100,7 +100,7 @@ def resolve_lww(
     observations: list[Observation],
     round_idx: int,
 ) -> None:
-    """S0 — Last observation wins. No intelligence."""
+    """S0 - Last observation wins. No intelligence."""
     if not observations:
         return
     _, value, conf = observations[-1]
@@ -117,7 +117,7 @@ def resolve_rag(
     observations: list[Observation],
     round_idx: int,
 ) -> None:
-    """S1 — Majority vote weighted by confidence. Simulates RAG retrieval."""
+    """S1 - Majority vote weighted by confidence. Simulates RAG retrieval."""
     if not observations:
         return
 
@@ -162,7 +162,7 @@ def resolve_crdt_only(
     observations: list[Observation],
     round_idx: int,
 ) -> None:
-    """S2 — CRDT convergence without reliability adaptation.
+    """S2 - CRDT convergence without reliability adaptation.
 
     All nodes have equal weight. Converges deterministically but
     cannot distinguish honest from malicious.
@@ -220,7 +220,7 @@ def resolve_cortex(
     use_freshness: bool = True,
     warmup_rounds: int = 5,
 ) -> None:
-    """S3 — CRDT merge + LogOP + ATMS-lite + reliability adaptation.
+    """S3 - CRDT merge + LogOP + ATMS-lite + reliability adaptation.
 
     Three-layer architecture:
       Layer 1: CRDT merge (in observations, already pre-merged)
@@ -327,7 +327,7 @@ def resolve_cortex(
         assumption_ids = frozenset(f"{node.node_id}:{round_idx}" for node, _, _ in observations)
         atms.add_justification(belief_id, assumption_ids)
 
-        # Check for invalidated nodes — if a node has reliability < 0.15,
+        # Check for invalidated nodes - if a node has reliability < 0.15,
         # add a nogood for its assumptions
         for node, _, _ in observations:
             if use_reliability and node.reliability < 0.15:

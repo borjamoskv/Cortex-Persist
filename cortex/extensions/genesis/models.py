@@ -1,4 +1,4 @@
-"""CORTEX Genesis — Declarative System Specification Models.
+"""CORTEX Genesis - Declarative System Specification Models.
 
 Dataclasses that define the shape of a system before it exists.
 A SystemSpec is the DNA; GenesisResult is the birth certificate.

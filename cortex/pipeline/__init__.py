@@ -1,4 +1,4 @@
-"""CORTEX Pipeline — END-to-END Contracts & Types.
+"""CORTEX Pipeline - END-to-END Contracts & Types.
 
 Defines the sovereign pipeline contracts that wire all CORTEX layers
 into a deterministic flow: Ingress → Context → Plan → Execute → Persist → Egress.

@@ -1,4 +1,4 @@
-"""VEX — Verifiable Execution for Autonomous Agents.
+"""VEX - Verifiable Execution for Autonomous Agents.
 
 The first agent runner with cryptographic execution proofs.
 Every action hash-chained. Every result provable. Every receipt verifiable.

@@ -1,4 +1,4 @@
-"""CORTEX Gateway — Universal Intelligence Entry Point.
+"""CORTEX Gateway - Universal Intelligence Entry Point.
 
 The Gateway is the unified ingress layer for all external systems
 that want to interact with CORTEX's intelligence core.
@@ -14,7 +14,7 @@ Architecture::
     OpenClaw         ──────→  GatewayRouter   →   NotificationBus
 
 Every request through the Gateway:
-1. Is validated (auth, rate limit, size — reusing existing middleware)
+1. Is validated (auth, rate limit, size - reusing existing middleware)
 2. Is routed to the correct intelligence handler
 3. Returns a structured GatewayResponse
 4. Optionally triggers a CortexEvent via NotificationBus
@@ -126,7 +126,7 @@ class GatewayRouter:
 
     This is the nerve center: adapters (Telegram, REST, MCP) call
     ``handle()`` and receive a ``GatewayResponse``. The router owns
-    no state of its own — it delegates to the engine and bus passed
+    no state of its own - it delegates to the engine and bus passed
     at construction time.
 
     Example::
@@ -160,7 +160,7 @@ class GatewayRouter:
     async def handle(self, request: GatewayRequest) -> GatewayResponse:
         """Route request to the correct intelligence handler.
 
-        Always returns a GatewayResponse — never raises.
+        Always returns a GatewayResponse - never raises.
         """
         t0 = time.perf_counter()
         handler = self._handlers.get(request.intent)
@@ -211,7 +211,7 @@ class GatewayRouter:
                     extra_meta={"request_id": request.request_id, "source": request.source},
                 )
                 await boundary._persist(exc)
-            except Exception:  # noqa: BLE001 — boundary persistence must never break gateway
+            except Exception:  # noqa: BLE001 - boundary persistence must never break gateway
                 pass
             return GatewayResponse(
                 ok=False,

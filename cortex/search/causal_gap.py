@@ -1,4 +1,4 @@
-"""Causal Gap Retrieval — Axiom Ω₁₃ Search Upgrade.
+"""Causal Gap Retrieval - Axiom Ω₁₃ Search Upgrade.
 
 Replaces "give me similar results" with "give me the missing evidence
 that most reduces uncertainty for decision D."
@@ -81,7 +81,7 @@ def compute_candidate_score(candidate: SearchCandidate) -> float:
         final = 0.25*semantic + 0.35*evidence + 0.30*confidence_gain + 0.10*novelty
 
     Returns:
-        Composite score (can be negative if inputs are negative — clamp externally).
+        Composite score (can be negative if inputs are negative - clamp externally).
     """
     score = (
         W_SEMANTIC * candidate.semantic_score
@@ -130,7 +130,7 @@ def retrieve_for_causal_gap(
         compute_candidate_score(candidate)
         candidates.append(candidate)
 
-    # Sort by final_score descending — causal utility wins over similarity
+    # Sort by final_score descending - causal utility wins over similarity
     candidates.sort(key=lambda c: c.final_score, reverse=True)
 
     result = candidates[:top_k]

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-CORTEX-SENTINEL x1000 — Exergy-Maximized Git Hook Substrate
+CORTEX-SENTINEL x1000 - Exergy-Maximized Git Hook Substrate
 Reality Level: C5-REAL
 Role: Pre-commit (Secret/Trash Annihilation) & Prepare-commit-msg (Semantic Auto-Forge)
 """

@@ -139,7 +139,7 @@ class IntegrityAuditor:
                 report.facts_verified = report.facts_with_signatures - len(sig_failures)
 
         except ImportError:
-            logger.error("aiosqlite not available — cannot run integrity audit")
+            logger.error("aiosqlite not available - cannot run integrity audit")
             report.chain_status.is_valid = False
         except (OSError, ValueError, RuntimeError) as e:
             logger.error("Integrity audit failed: %s", e)
@@ -282,12 +282,12 @@ class IntegrityAuditor:
                 get_default_signer,
             )
         except ImportError:
-            logger.warning("Ed25519 signatures not available — skipping")
+            logger.warning("Ed25519 signatures not available - skipping")
             return failures
 
         signer = get_default_signer()
         if not signer or not signer.can_verify:
-            logger.info("No signing key configured — signature verification skipped")
+            logger.info("No signing key configured - signature verification skipped")
             return failures
 
         for fact in facts:

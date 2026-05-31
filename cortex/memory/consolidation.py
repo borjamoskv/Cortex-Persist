@@ -1,4 +1,4 @@
-"""CORTEX v6+ — Silent Engrams & Systems Consolidation.
+"""CORTEX v6+ - Silent Engrams & Systems Consolidation.
 
 Strategy 4: Implements Tonegawa's discovery of silent engrams.
 
@@ -12,7 +12,7 @@ If both decay → natural death (thermodynamic pruning).
 
 Compute-in-Memory principle: Each engram carries its OWN maturation logic
 as embedded methods, not as external daemon processing. The memory IS
-the processor — no separation between storage and computation.
+the processor - no separation between storage and computation.
 """
 
 from __future__ import annotations
@@ -31,10 +31,10 @@ logger = logging.getLogger("cortex.memory.consolidation")
 class EngramState(str, enum.Enum):
     """Lifecycle state of an engram in the consolidation pipeline."""
 
-    ACTIVE = "active"  # Hippocampal — immediately retrievable
-    SILENT = "silent"  # Cortical — exists but invisible to search
-    MATURED = "matured"  # Cortical — fully consolidated, stable
-    DECEASED = "deceased"  # Pruned — marked for garbage collection
+    ACTIVE = "active"  # Hippocampal - immediately retrievable
+    SILENT = "silent"  # Cortical - exists but invisible to search
+    MATURED = "matured"  # Cortical - fully consolidated, stable
+    DECEASED = "deceased"  # Pruned - marked for garbage collection
 
 
 # Maturation period in days before a silent engram becomes visible
@@ -48,7 +48,7 @@ class SilentEngram(CortexSemanticEngram):
     """An engram that exists but is invisible to regular search.
 
     Implements compute-in-memory: the engram carries its own maturation
-    logic. No external daemon needed to decide if it matures — the
+    logic. No external daemon needed to decide if it matures - the
     engram IS the processor of its own lifecycle.
 
     Biological analogy:
@@ -108,7 +108,7 @@ class SilentEngram(CortexSemanticEngram):
     def tick(self) -> EngramState:
         """Self-evaluate lifecycle state. Compute-in-memory.
 
-        The engram decides its OWN fate — no external orchestrator.
+        The engram decides its OWN fate - no external orchestrator.
         Returns the new state after evaluation.
         """
         if self.state == EngramState.DECEASED:

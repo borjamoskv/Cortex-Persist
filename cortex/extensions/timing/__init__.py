@@ -1,5 +1,5 @@
 """
-CORTEX Timing — Package init.
+CORTEX Timing - Package init.
 
 Re-exports for backward compatibility.
 """

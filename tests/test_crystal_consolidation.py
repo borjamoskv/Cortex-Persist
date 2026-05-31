@@ -372,9 +372,9 @@ class TestFullConsolidation:
     @pytest.mark.asyncio
     async def test_consolidation_with_mixed_crystals(self, in_memory_db) -> None:
         """End-to-end: mix of dead, active, and similar crystals."""
-        # Dead weight — should be purged
+        # Dead weight - should be purged
         _insert_crystal(in_memory_db, "dead-e2e", "obsolete", age_days=30, recall_count=0)
-        # Active — should be promoted
+        # Active - should be promoted
         _insert_crystal(in_memory_db, "hot-e2e", "valuable", age_days=10, recall_count=20)
 
         vitals = [

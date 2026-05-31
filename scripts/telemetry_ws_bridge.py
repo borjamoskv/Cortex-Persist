@@ -4,7 +4,7 @@ CORTEX Telemetry Daemon (C5-REAL)
 Streams Zero-GIL swarm metrics to the EXERGIA-Ω Industrial Noir dashboard.
 
 Self-contained: no CORTEX engine imports required.
-Simulation mode: "Consejo de Sabios" — 1000-agent breathing synchronization.
+Simulation mode: "Consejo de Sabios" - 1000-agent breathing synchronization.
 """
 
 import asyncio
@@ -29,7 +29,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - CORTEX-WS - %(mess
 
 
 def _audit_payload_inline(payload: dict, event_id: str) -> list[dict]:
-    """Minimal JIS audit — checks signature presence (SOC2/C5 gate)."""
+    """Minimal JIS audit - checks signature presence (SOC2/C5 gate)."""
     violations = []
     if "signature" not in payload:
         violations.append(

@@ -1,4 +1,4 @@
-"""IDC Layers — Information, Decision, Control, Watchdog.
+"""IDC Layers - Information, Decision, Control, Watchdog.
 
 Each layer is a pure function (state in, state out). No hidden side effects.
 The Agent orchestrates them in sequence.
@@ -12,7 +12,7 @@ from numpy.typing import NDArray
 from .types import Action, AgentConfig, AgentMode, Belief, Observation
 
 # ──────────────────────────────────────────────────────────────
-# LAYER I — INFORMATION (Bayesian Belief Update)
+# LAYER I - INFORMATION (Bayesian Belief Update)
 # ──────────────────────────────────────────────────────────────
 
 def update_belief(
@@ -38,12 +38,12 @@ def update_belief(
     total = posterior.sum()
 
     if total < 1e-15:
-        # Observation was "impossible" under current beliefs — watchdog territory
+        # Observation was "impossible" under current beliefs - watchdog territory
         posterior = np.ones_like(prior) / len(prior)  # Reset to uniform
     else:
         posterior = posterior / total
 
-    # KL(posterior || prior) — information gained
+    # KL(posterior || prior) - information gained
     kl = _kl_divergence(posterior, prior)
 
     new_belief = Belief(
@@ -63,7 +63,7 @@ def _kl_divergence(p: NDArray, q: NDArray) -> float:
 
 
 # ──────────────────────────────────────────────────────────────
-# LAYER D — DECISION (Expected Utility Maximization)
+# LAYER D - DECISION (Expected Utility Maximization)
 # ──────────────────────────────────────────────────────────────
 
 def propose_actions(
@@ -91,7 +91,7 @@ def propose_actions(
         # E[U(s,a)] under belief
         expected_u = float(np.dot(belief.probabilities, utilities))
 
-        # Risk: CVaR approximation — expected value of bottom 20% outcomes
+        # Risk: CVaR approximation - expected value of bottom 20% outcomes
         risk = _compute_cvar(belief.probabilities, utilities, alpha=0.2)
 
         # Risk-adjusted score
@@ -109,7 +109,7 @@ def propose_actions(
 
 
 def _compute_cvar(probs: NDArray, values: NDArray, alpha: float = 0.2) -> float:
-    """Conditional Value at Risk — expected loss in the worst alpha-fraction.
+    """Conditional Value at Risk - expected loss in the worst alpha-fraction.
 
     Higher CVaR = more dangerous action.
     """
@@ -154,7 +154,7 @@ def select_action(
 
 
 # ──────────────────────────────────────────────────────────────
-# LAYER C — CONTROL (Constraint Filtering + Stability)
+# LAYER C - CONTROL (Constraint Filtering + Stability)
 # ──────────────────────────────────────────────────────────────
 
 def filter_action(
@@ -186,7 +186,7 @@ def filter_action(
         action.is_safe = True
         return action
 
-    # Action is unsafe — find safest alternative
+    # Action is unsafe - find safest alternative
     action.is_safe = False
     for alt in actions:
         alt_violation = max(0.0, float(constraints[alt.index]))
@@ -195,7 +195,7 @@ def filter_action(
             alt.constraint_violation = alt_violation
             return alt
 
-    # No safe action exists — return least-violating with flag
+    # No safe action exists - return least-violating with flag
     best_alt = min(actions, key=lambda a: float(constraints[a.index]))
     best_alt.is_safe = False
     best_alt.constraint_violation = max(0.0, float(constraints[best_alt.index]))
@@ -226,7 +226,7 @@ def watchdog_check(
     diagnostics: dict[str, float] = {}
     mode = AgentMode.NORMAL
 
-    # 1. OOD — entropy-based
+    # 1. OOD - entropy-based
     max_entropy = np.log2(len(belief.probabilities))
     ood_score = belief.entropy / max_entropy if max_entropy > 0 else 0.0
     diagnostics["ood_score"] = ood_score
@@ -234,7 +234,7 @@ def watchdog_check(
     if ood_score > config.ood_threshold / max_entropy:
         mode = AgentMode.SAFE
 
-    # 2. Drift — KL-based
+    # 2. Drift - KL-based
     drift = belief.last_kl_update
     diagnostics["drift_rate"] = drift
 

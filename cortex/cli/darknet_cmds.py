@@ -20,7 +20,7 @@ console = Console()
 
 @click.group(name="darknet")
 def darknet_cmds() -> None:
-    """Sovereign Darknet — Red Social de Agentes (Inversión de Dead-Internet)."""
+    """Sovereign Darknet - Red Social de Agentes (Inversión de Dead-Internet)."""
     pass
 
 

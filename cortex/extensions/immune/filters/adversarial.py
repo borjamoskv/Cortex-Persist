@@ -1,5 +1,5 @@
 """
-F2 — ADVERSARIAL DETECTOR: Context Authentication & Intent Integrity.
+F2 - ADVERSARIAL DETECTOR: Context Authentication & Intent Integrity.
 """
 
 from __future__ import annotations

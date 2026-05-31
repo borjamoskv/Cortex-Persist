@@ -1,4 +1,4 @@
-"""CORTEX Revenue Engine — Data Models.
+"""CORTEX Revenue Engine - Data Models.
 
 Defines the core data structures for opportunities, execution results,
 revenue reports, and the pluggable vector protocol.

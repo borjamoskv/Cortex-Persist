@@ -1,4 +1,4 @@
-"""MCP Pipeline Tools — Expose E2E Pipeline as MCP Tools.
+"""MCP Pipeline Tools - Expose E2E Pipeline as MCP Tools.
 
 Registers cortex_run, cortex_pipeline_status, and cortex_pipeline_history
 as MCP tools, enabling any external agent to execute sovereign missions

@@ -1,4 +1,4 @@
-"""MOSKV-1 — Tesseract Dimensions Adapters.
+"""MOSKV-1 - Tesseract Dimensions Adapters.
 
 Wraps Aether agents (Planner, Executor, Critic, Tester) into
 asynchronous dimensional nodes (D1-D4).
@@ -125,7 +125,7 @@ class ValidationDimension:
                     None, self.tester.run, toolkit
                 )
             except Exception as e:  # noqa: BLE001
-                logger.warning("Tester failed (%s) — ignoring", e)
+                logger.warning("Tester failed (%s) - ignoring", e)
                 test_result = None
 
             passed = critique.approved and (test_result.passed if test_result else True)

@@ -1,4 +1,4 @@
-"""Mac-Maestro-Ω — AppleScript wrappers (Vector A)."""
+"""Mac-Maestro-Ω - AppleScript wrappers (Vector A)."""
 
 from __future__ import annotations
 

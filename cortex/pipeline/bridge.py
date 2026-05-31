@@ -1,4 +1,4 @@
-"""CORTEX Pipeline Bridge — Wires E2E Pipeline to Real Infrastructure.
+"""CORTEX Pipeline Bridge - Wires E2E Pipeline to Real Infrastructure.
 
 Connects the abstract CortexOrchestrator to the real CortexEngine,
 FactStore, LedgerStore, and LLM providers.
@@ -119,7 +119,7 @@ class CortexPipelineBridge:
             if adapter.is_available:
                 logger.info("[BRIDGE] VSA-SDM memory adapter initialized")
                 return adapter
-            logger.debug("[BRIDGE] VSA engine not available — algebraic context disabled")
+            logger.debug("[BRIDGE] VSA engine not available - algebraic context disabled")
         except ImportError:
             logger.debug("[BRIDGE] VSA adapter not available")
         except Exception as e:
@@ -171,7 +171,7 @@ class FactStoreAdapter:
         try:
             loop = asyncio.get_event_loop()
             if loop.is_running():
-                # We're inside an async context — can't nest. Return empty.
+                # We're inside an async context - can't nest. Return empty.
                 # The async path should use _search_async directly.
                 return []
             return loop.run_until_complete(self._search_async(query, tenant_id, limit))

@@ -23,7 +23,7 @@ _AOF_STRUCT = struct.Struct("dd64s64s64s128s")
 
 
 class LedgerManager(SovereignResource):
-    """L3 Sovereign Cryptographic Ledger — Audit Trail complying with EU AI Act."""
+    """L3 Sovereign Cryptographic Ledger - Audit Trail complying with EU AI Act."""
 
     def close(self):
         if hasattr(self, '_tx_queue'):
@@ -210,7 +210,7 @@ class LedgerManager(SovereignResource):
         
         self._tx_queue.put((timestamp, action, vector_id, yield_amount, block_hash, zk_payload))
 
-        # Atomic entropy counter — no lock needed
+        # Atomic entropy counter - no lock needed
         if next(self._entropy_counter) % self._entropy_threshold == 0:
             ledger_entropy_event.set()
 

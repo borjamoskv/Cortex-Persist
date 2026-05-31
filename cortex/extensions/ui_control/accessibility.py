@@ -60,7 +60,7 @@ class AccessibilityEngine:
     def find_element(self, app_name: str, identifier: str) -> AXElement | None:
         """
         Recursively searches for an element with a specific AXIdentifier.
-        This is the preferred method — language-independent.
+        This is the preferred method - language-independent.
         """
         app_ref = self._get_app_element(app_name)
         if not app_ref:

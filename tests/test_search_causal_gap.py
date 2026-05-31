@@ -1,4 +1,4 @@
-"""Tests for causal gap retrieval — Ω₁₃ §15.9."""
+"""Tests for causal gap retrieval - Ω₁₃ §15.9."""
 
 from __future__ import annotations
 

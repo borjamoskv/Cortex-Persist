@@ -1,6 +1,6 @@
 # cortex/evolution/action.py
 """
-ψSAP (Symbolic Action Principle) — Lagrangian Formalism for CORTEX.
+ψSAP (Symbolic Action Principle) - Lagrangian Formalism for CORTEX.
 
 Phase 2 (v3): Operationalizes the Recursive Identity Field (RIF) by
 measuring the 'effort' it takes to maintain coherence.

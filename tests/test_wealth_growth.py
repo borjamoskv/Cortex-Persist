@@ -1,4 +1,4 @@
-"""Unit tests for cortex.wealth.growth — GrowthEngine.
+"""Unit tests for cortex.wealth.growth - GrowthEngine.
 
 No DB, no IO. Tests deduplication, sorting, and configurability.
 """

@@ -1,4 +1,4 @@
-"""Sovereign Market Maker v1.0.0 — Data Models.
+"""Sovereign Market Maker v1.0.0 - Data Models.
 
 Precision first. All monetary/scoring logic explicitly uses Decimal.
 """

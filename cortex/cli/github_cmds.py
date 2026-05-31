@@ -15,7 +15,7 @@ __all__ = ["github_cmds"]
 
 @cli.group("github")
 def github_cmds() -> None:
-    """GitHub ↔ CORTEX bridge — sync issues/PRs as facts."""
+    """GitHub ↔ CORTEX bridge - sync issues/PRs as facts."""
     pass
 
 

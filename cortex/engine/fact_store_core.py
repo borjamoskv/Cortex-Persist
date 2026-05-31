@@ -60,7 +60,7 @@ async def _resolve_causal_parent(
             "SELECT id FROM facts WHERE id = ?", (parent_decision_id,)
         ) as cursor:
             if await cursor.fetchone() is None:
-                logger.warning("parent_decision_id=%d non-existent — cleared", parent_decision_id)
+                logger.warning("parent_decision_id=%d non-existent - cleared", parent_decision_id)
                 return None
         return parent_decision_id
 

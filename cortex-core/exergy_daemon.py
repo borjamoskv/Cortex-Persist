@@ -1,7 +1,7 @@
 # This file is part of CORTEX. Apache-2.0. Change Date: 2030-01-01.
 
 """
-Exergy Daemon V1.0 — Sovereign Self-Healing & Health Sentinel.
+Exergy Daemon V1.0 - Sovereign Self-Healing & Health Sentinel.
 
 Performs code hygiene (ruff fix & format), SQLite database maintenance (WAL truncate
 & vacuum), ambient context auto-snapshots, and resource optimization.

@@ -1,5 +1,5 @@
 # This file is part of CORTEX. Apache-2.0.
-"""Sovereign Seals — Helper functions for 10-Seal Quality Gates.
+"""Sovereign Seals - Helper functions for 10-Seal Quality Gates.
 
 Provides dependency parsing, import extraction, and self-preservation checks
 used by the consolidated seals.py. Stubs (16, 18, 19, 20) have been purged.
@@ -19,7 +19,7 @@ ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 
 printer = SealPrinter()
 
-# ── stdlib package names (common subset) — used to exclude from ghost detection ──
+# ── stdlib package names (common subset) - used to exclude from ghost detection ──
 _STDLIB_TOP = frozenset(
     {
         "abc",
@@ -305,7 +305,7 @@ async def check_seal_8_dependency_impl(
 ) -> tuple[bool, str]:
     """Dependency Ghost Check + Shannon Entropy Budget.
 
-    Warn-only — never blocks the pipeline.
+    Warn-only - never blocks the pipeline.
     """
     import math
     from collections import Counter
@@ -335,7 +335,7 @@ async def check_seal_8_dependency_impl(
         else:
             printer.success(f"Dependency Ghost Check: {len(external_imports)} externals verified.")
     else:
-        printer.warn("No pyproject.toml deps — skipping dependency check.")
+        printer.warn("No pyproject.toml deps - skipping dependency check.")
 
     # ── Shannon Entropy Budget ──
     def _entropy(text: str) -> float:
@@ -367,7 +367,7 @@ async def check_seal_8_dependency_impl(
 async def check_seal_9_compliance_impl() -> tuple[bool, str]:
     """Aesthetic Gate + EU AI Act Audit Trail.
 
-    Warn-only — never blocks the pipeline.
+    Warn-only - never blocks the pipeline.
     """
     import asyncio
 
@@ -396,7 +396,7 @@ async def check_seal_9_compliance_impl() -> tuple[bool, str]:
     if aesthetic_issues:
         printer.warn(f"Aesthetic drift: {aesthetic_issues}")
     else:
-        printer.success("Aesthetic Gate intact — no placeholders.")
+        printer.success("Aesthetic Gate intact - no placeholders.")
 
     # ── EU AI Act Audit Trail ──
     try:
@@ -413,8 +413,8 @@ async def check_seal_9_compliance_impl() -> tuple[bool, str]:
         if tables:
             printer.success(f"EU AI Act audit trail: {len(tables)} audit table(s) found.")
         else:
-            printer.warn("EU AI Act: no audit tables found — implement for compliance.")
-    except Exception:  # noqa: BLE001 — compliance check boundary
+            printer.warn("EU AI Act: no audit tables found - implement for compliance.")
+    except Exception:  # noqa: BLE001 - compliance check boundary
         printer.warn("EU AI Act audit check skipped (engine not available).")
 
     # ── SSRF URLGuard Verification (CodeQL #95) ──
@@ -427,7 +427,7 @@ async def check_seal_9_compliance_impl() -> tuple[bool, str]:
             printer.fail("SSRF URLGuard: Misconfigured or non-functional.")
             return False, "URLGuard failure"
     except ImportError:
-        printer.fail("SSRF URLGuard: Module missing — CodeQL #95 vulnerability risk.")
+        printer.fail("SSRF URLGuard: Module missing - CodeQL #95 vulnerability risk.")
         return False, "URLGuard missing"
 
     return True, "verified"
@@ -446,11 +446,11 @@ async def check_gate_21_preservation(
     passed = True
     checks: list[str] = []
 
-    # 1. Pre-push hook — skip in CI (hook is a local dev-machine invariant)
+    # 1. Pre-push hook - skip in CI (hook is a local dev-machine invariant)
     _in_ci = os.environ.get("CI", "").lower() in ("true", "1", "yes")
     hook = _resolve_git_hook_path("pre-push")
     if _in_ci:
-        printer.warn("CI env detected — pre-push hook check skipped (local invariant).")
+        printer.warn("CI env detected - pre-push hook check skipped (local invariant).")
         checks.append("pre-push hook (CI skip)")
     elif hook.exists():
         if os.access(hook, os.X_OK):
@@ -459,7 +459,7 @@ async def check_gate_21_preservation(
             printer.warn("pre-push hook exists but is not executable.")
             checks.append("pre-push hook (not executable)")
     else:
-        printer.fail("pre-push hook missing — defense perimeter breached.")
+        printer.fail("pre-push hook missing - defense perimeter breached.")
         passed = False
 
     # 2. seals.py self-reference
@@ -472,7 +472,7 @@ async def check_gate_21_preservation(
     if seals_exists:
         checks.append("seals.py ✓")
     else:
-        printer.fail("seals.py not found — self-audit system deleted.")
+        printer.fail("seals.py not found - self-audit system deleted.")
         passed = False
 
     # 3. HEAD has parent (not orphan)

@@ -1,5 +1,5 @@
 """
-noqa_audit.py — The Systematic noqa:BLE001 Drift Detector.
+noqa_audit.py - The Systematic noqa:BLE001 Drift Detector.
 
 Axiom: noqa:BLE001 is a signed promise. Un-reviewed promises become debt.
 
@@ -58,7 +58,7 @@ class NoqaEntry:
 # ─── Classification ────────────────────────────────────────────────────────────
 
 _JUSTIFICATION_PATTERNS = (
-    r"—\s*.+",  # em-dash followed by reason
+    r"-\s*.+",  # em-dash followed by reason
     r"-\s*[A-Z].+",  # dash + capital letter reason
     r"#\s*(deliberate|intentional|boundary|relay|supervisor|resilience|safety)",
 )
@@ -70,10 +70,10 @@ def classify_entry(entry: NoqaEntry, next_line: str = "") -> NoqaEntry:
     Score a NoqaEntry for justification quality.
 
     Score:
-      0 — Silent noqa, no explanation anywhere
-      1 — Has a next-line comment but no noqa-inline reason
-      2 — Has an inline reason after the noqa marker
-      3 — Has inline reason + descriptive next-line comment
+      0 - Silent noqa, no explanation anywhere
+      1 - Has a next-line comment but no noqa-inline reason
+      2 - Has an inline reason after the noqa marker
+      3 - Has inline reason + descriptive next-line comment
     """
     inline_after_noqa = entry.line_content.split("# noqa: BLE001")[-1].strip()
     has_inline = bool(inline_after_noqa and _JUSTIFICATION_RE.search(inline_after_noqa))
@@ -265,7 +265,7 @@ def _format_header(total: int, justified: int, silent: int) -> list[str]:
     return [
         "",
         "━" * 60,
-        " 📋 noqa:BLE001 DRIFT REPORT — Sovereign Exception Audit",
+        " 📋 noqa:BLE001 DRIFT REPORT - Sovereign Exception Audit",
         "━" * 60,
         f"  Total suppressions:     {total}",
         f"  ✅ Justified:           {justified}",
@@ -276,7 +276,7 @@ def _format_header(total: int, justified: int, silent: int) -> list[str]:
 
 
 def _format_git_archaeology(git_commits: list[dict[str, str]], since: str) -> list[str]:
-    lines = [f"─ Git Pickaxe — New noqa:BLE001 since '{since}' ─"]
+    lines = [f"─ Git Pickaxe - New noqa:BLE001 since '{since}' ─"]
     if git_commits:
         for c in git_commits:
             lines.append(f"  [{c['hash']}] {c['date']} {c['author']:<20} {c['subject']}")
@@ -311,7 +311,7 @@ def _format_violation_details(entries: list[NoqaEntry]) -> list[str]:
         lines.append("─ Fully justified suppressions ─")
         for e in well_justified:
             short_just = e.justification_text[:60].strip()
-            lines.append(f"  ✅ {e.short_path}:{e.line_number} — {short_just}")
+            lines.append(f"  ✅ {e.short_path}:{e.line_number} - {short_just}")
         lines.append("")
     return lines
 
@@ -320,14 +320,14 @@ def _format_verdict(entries: list[NoqaEntry], git_commits: list[dict[str, str]])
     silent = [e for e in entries if e.quality_score == 0]
     lines = ["─ Verdict ─"]
     if not silent and not git_commits:
-        lines.append("  🟢 CLEAN — No drift detected. All suppressions are justified.")
+        lines.append("  🟢 CLEAN - No drift detected. All suppressions are justified.")
     elif git_commits and not silent:
         lines.append(
-            f"  🟡 DRIFT — {len(git_commits)} new noqa(s) introduced. All have justifications."
+            f"  🟡 DRIFT - {len(git_commits)} new noqa(s) introduced. All have justifications."
         )
     else:
         lines.append(
-            f"  🔴 ACTION REQUIRED — {len(silent)} silent suppressions detected. "
+            f"  🔴 ACTION REQUIRED - {len(silent)} silent suppressions detected. "
             "Add justification comments."
         )
     return lines

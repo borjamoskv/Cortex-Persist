@@ -1,4 +1,4 @@
-"""MOSKV-Aether — SQLite-backed task queue.
+"""MOSKV-Aether - SQLite-backed task queue.
 
 Thread-safe O(1) pop via atomic UPDATE+SELECT.
 """
@@ -65,7 +65,7 @@ class TaskQueue:
         try:
             yield conn
             conn.commit()
-        except Exception:  # noqa: BLE001 — rollback transaction before raising
+        except Exception:  # noqa: BLE001 - rollback transaction before raising
             conn.rollback()
             raise
         finally:
@@ -110,7 +110,7 @@ class TaskQueue:
                     task.github_repo,
                 ),
             )
-        logger.info("✅ Enqueued task [%s] — %s", task.id, task.title)
+        logger.info("✅ Enqueued task [%s] - %s", task.id, task.title)
         return task
 
     def pop_next(self) -> AgentTask | None:

@@ -25,10 +25,10 @@ from cortex.extensions.axioms.ttl import FACT_TTL, ttl_days
 def _header() -> str:
     total = len(AXIOM_REGISTRY)
     return (
-        "# Axiom Registry — Canonical Source of Truth\n\n"
+        "# Axiom Registry - Canonical Source of Truth\n\n"
         "> *Los 7 Axiomas Soberanos. One numbering. One taxonomy. One source.*\n"
         "> **Auto-generated from `cortex/extensions/axioms/registry.py`"
-        " — do not edit manually.**\n\n"
+        " - do not edit manually.**\n\n"
         "### Invarianza Total\n\n"
         '> *"CORTEX no aumenta la inteligencia del modelo fundacional; '
         'restringe rígidamente su libertad estructural para contaminar la arquitectura."*\n\n---\n\n'
@@ -46,7 +46,7 @@ def _section(title: str, emoji: str, category: AxiomCategory) -> str:
 
     lines.append("| ID | Name | Mandate | CI Gate/Enforcement |\n|:---|:---|:---|:---|\n")
     for ax in axioms:
-        gate = ax.ci_gate or "—"
+        gate = ax.ci_gate or "-"
         mandate = ax.mandate.replace("\n", " ")
         lines.append(f"| **{ax.id}** | {ax.name} | {mandate} | {gate} |\n")
 
@@ -85,7 +85,7 @@ def _metrics() -> str:
         "Inflation Rate Target  : 0\n"
         "```\n\n---\n\n"
         "*Auto-generated from `cortex/extensions/axioms/registry.py`"
-        f" — {today}*\n"
+        f" - {today}*\n"
     )
 
 

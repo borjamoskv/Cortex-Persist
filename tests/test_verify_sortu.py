@@ -1,4 +1,4 @@
-"""Tests for verify_sortu.py — Tripartite mechanical verification."""
+"""Tests for verify_sortu.py - Tripartite mechanical verification."""
 
 from __future__ import annotations
 

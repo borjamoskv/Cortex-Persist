@@ -1,5 +1,5 @@
 # This file is part of CORTEX. Apache-2.0.
-# Heuristic Seals (10-14) — Non-blocking Quality Gates.
+# Heuristic Seals (10-14) - Non-blocking Quality Gates.
 
 from __future__ import annotations
 
@@ -39,7 +39,7 @@ async def check_gate_10_prompt_size() -> GateResult:
 
 
 async def check_gate_11_cobbler(cached_files: dict[Path, str]) -> GateResult:
-    """Seal 11 — Cobbler's Compliance (Ω₃ Byzantine Default)."""
+    """Seal 11 - Cobbler's Compliance (Ω₃ Byzantine Default)."""
     printer.seal(11, "Ω₃ Byzantine Default", "Cobbler's Compliance (Swarm Self-Audit)")
 
     _NOQA_MARKERS = ("# noqa: BLE001", "# noqa:BLE001", "# deliberate boundary")

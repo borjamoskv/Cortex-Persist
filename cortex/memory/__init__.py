@@ -2,9 +2,9 @@
 Cognitive Memory Module.
 
 Tripartite Memory Architecture (KETER-∞ Frontera 2):
-    L1: WorkingMemoryL1  — Token-budgeted sliding window
-    L2: VectorStoreL2    — Qdrant-backed semantic recall
-    L3: EventLedgerL3    — SQLite WAL immutable event log
+    L1: WorkingMemoryL1  - Token-budgeted sliding window
+    L2: VectorStoreL2    - Qdrant-backed semantic recall
+    L3: EventLedgerL3    - SQLite WAL immutable event log
 
 Orchestrator: CortexMemoryManager wires L1 → L2 → L3.
 

@@ -1,4 +1,4 @@
-"""SCRAPER-Ω MCP Tools — Sovereign Web Extraction for Model Context Protocol.
+"""SCRAPER-Ω MCP Tools - Sovereign Web Extraction for Model Context Protocol.
 
 Exposes scraping capabilities as MCP tools for LLM agents.
 """

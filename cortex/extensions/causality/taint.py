@@ -1,8 +1,8 @@
-"""Taint Propagation Engine — Axiom Ω₁₃ Enforcement.
+"""Taint Propagation Engine - Axiom Ω₁₃ Enforcement.
 
 When a fact_node is invalidated or loses confidence, propagate impact
 to descendants and recalculate effective_confidence. Without this,
-derived facts float on cadáveres perfumados — structurally elegant,
+derived facts float on cadáveres perfumados - structurally elegant,
 epistemically corrupt.
 
 Algorithm: BFS from invalidated node.
@@ -125,7 +125,7 @@ def propagate_taint(
         for child_id in current.children:
             if child_id not in graph:
                 logger.warning(
-                    "Causal edge references unknown child %s from %s — skipping",
+                    "Causal edge references unknown child %s from %s - skipping",
                     child_id,
                     current_id,
                 )
@@ -154,7 +154,7 @@ def propagate_taint(
                 queue.append(child_id)
 
     logger.info(
-        "Taint propagated from %s — %d nodes touched",
+        "Taint propagated from %s - %d nodes touched",
         start_fact_id,
         len(touched),
     )

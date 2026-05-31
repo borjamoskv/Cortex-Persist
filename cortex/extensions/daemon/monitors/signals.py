@@ -22,7 +22,7 @@ logger = logging.getLogger("moskv-daemon")
 
 
 class SignalMonitor:
-    """Watchdog for the Signal Bus — the L2 Reactor heart."""
+    """Watchdog for the Signal Bus - the L2 Reactor heart."""
 
     def __init__(self, db_path: str, engine: Any = None):
         self.db_path = db_path

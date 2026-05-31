@@ -152,7 +152,7 @@ async def _merge_duplicate_group(
             except (ValueError, Exception) as e:  # noqa: BLE001
                 # IntegrityError (UNIQUE hash collision) is expected when
                 # merged content hashes identically to another active fact.
-                # The canonical fact is already correct — skip silently.
+                # The canonical fact is already correct - skip silently.
                 logger.warning(
                     "Dedup merge update skipped for fact %d: %s",
                     canonical_id,

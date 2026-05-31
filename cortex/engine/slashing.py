@@ -1,5 +1,5 @@
 """
-Sovereign Slashing Primitive (Axiom Ω₃) — CORTEX Persist.
+Sovereign Slashing Primitive (Axiom Ω₃) - CORTEX Persist.
 Defines the penalty hooks for reputation destruction.
 """
 

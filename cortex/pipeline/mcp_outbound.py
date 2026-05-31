@@ -1,4 +1,4 @@
-"""CORTEX Pipeline — MCP Outbound Client.
+"""CORTEX Pipeline - MCP Outbound Client.
 
 Adapter enabling the AgentExecutor to call external MCP tools during
 execution. Connects to one or more MCP servers (stdio or SSE) and

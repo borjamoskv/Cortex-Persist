@@ -1,13 +1,13 @@
-"""ENCB v2 — Ablation Variants.
+"""ENCB v2 - Ablation Variants.
 
 Systematically removes components from S3 (Cortex) to measure
-each one's contribution. Without ablations, no paper — just propaganda.
+each one's contribution. Without ablations, no paper - just propaganda.
 
 Variants:
-    S3_no_reliability — r_node fixed at 0.5
-    S3_no_atms        — No assumption tracking / nogood invalidation
-    S3_no_merge       — LWW instead of CRDT merge (skip merge layer)
-    S3_no_freshness   — t_freshness weight = 1.0 always
+    S3_no_reliability - r_node fixed at 0.5
+    S3_no_atms        - No assumption tracking / nogood invalidation
+    S3_no_merge       - LWW instead of CRDT merge (skip merge layer)
+    S3_no_freshness   - t_freshness weight = 1.0 always
 """
 
 from __future__ import annotations
@@ -91,7 +91,7 @@ def print_ablation_summary(
     """Print ablation comparison table."""
     header = f"{'Ablation':<25} {'PFBR':>8} {'EDI':>12} {'CNCL':>8}"
     print("\n" + "=" * 55)
-    print("ENCB v2 — Ablation Study")
+    print("ENCB v2 - Ablation Study")
     print("=" * 55)
     print(header)
     print("-" * 55)

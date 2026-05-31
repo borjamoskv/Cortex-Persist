@@ -1,4 +1,4 @@
-"""CORTEX Persist Engine — Persistent memory for AI agents.
+"""CORTEX Persist Engine - Persistent memory for AI agents.
 
 Tiered architecture:
   T1: Working memory (in-process dict, volatile)

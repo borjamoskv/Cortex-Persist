@@ -59,7 +59,7 @@ def attach_federated_dbs(
             continue
         db_path, alias = _FEDERATION_MAP[scope_name]
         if not db_path.exists():
-            logger.debug("Skipping %s — %s not found", alias, db_path)
+            logger.debug("Skipping %s - %s not found", alias, db_path)
             continue
         valid_aliases = [v[1] for v in _FEDERATION_MAP.values()]
         if alias not in valid_aliases:

@@ -1,6 +1,6 @@
 # cortex/evolution/psi_sap.py
 """
-ψSAP (Symbolic Action Principle) — Lagrangian Meta-Framework.
+ψSAP (Symbolic Action Principle) - Lagrangian Meta-Framework.
 Formalization of Euler-Lagrange trajectories for autonomous agents.
 
 Common Currency: UAS (Unidades de Acción Simbólica).

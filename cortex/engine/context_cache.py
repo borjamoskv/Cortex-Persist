@@ -1,5 +1,5 @@
 """
-Context Cache Adapter — GPU-Native KV-Cache Management (Ω₁₁ / Ω₁₂).
+Context Cache Adapter - GPU-Native KV-Cache Management (Ω₁₁ / Ω₁₂).
 
 Provider-agnostic metadata layer that manages the lifecycle of
 KV-Cache (attention state) across LLM providers. CORTEX controls
@@ -16,7 +16,7 @@ Architecture:
   - CacheManager: create, get, invalidate, evict
   - EvictionPolicy: LRU, TTL-based, project-scoped
 
-This module does NOT store raw tensors — it orchestrates provider
+This module does NOT store raw tensors - it orchestrates provider
 APIs that handle GPU memory allocation. CORTEX remains model-agnostic.
 
 GPU-native: Manages GPU-resident state via provider APIs.

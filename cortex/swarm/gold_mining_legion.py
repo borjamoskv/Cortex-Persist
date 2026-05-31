@@ -1,5 +1,5 @@
 """
-CORTEX-SWARM-PRIME: Gold Mining Legion — 2M Market Data Agents.
+CORTEX-SWARM-PRIME: Gold Mining Legion - 2M Market Data Agents.
 Ingests raw market space (simulated bulk B2B/Web3 datasets), applies
 Epistemic Slashing via Zero-Copy Ring Buffer, and distills the
 highest Exergy extraction targets.

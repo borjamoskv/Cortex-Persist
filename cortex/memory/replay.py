@@ -1,4 +1,4 @@
-"""CORTEX v6+ — Hippocampal Replay (Nocturnal Consolidation).
+"""CORTEX v6+ - Hippocampal Replay (Nocturnal Consolidation).
 
 Strategy #1: During "sleep" cycles (daemon idle periods), replay
 the day's HOT engrams against the existing semantic base.
@@ -112,7 +112,7 @@ class HippocampalReplay:
             neighbors = [n for n in neighbors_raw if n.id != engram.id]
 
         if not neighbors:
-            # Novel — reinforce
+            # Novel - reinforce
             engram.energy_level = min(
                 1.0,
                 engram.energy_level + self._novelty_boost,
@@ -128,7 +128,7 @@ class HippocampalReplay:
             logger.warning("Conflict detected for engram %s during replay", engram.id)
             return
 
-        # Resonates — merge into strongest neighbor
+        # Resonates - merge into strongest neighbor
         result.merged += 1
         logger.debug("Engram %s merged during replay (resonance hit)", engram.id)
 

@@ -2,7 +2,7 @@
 APOTHEOSIS-∞ Daemon CLI commands.
 El nivel 5 de autonomía Soberana en CORTEX.
 
-Connected to real CORTEX subsystems — zero simulation.
+Connected to real CORTEX subsystems - zero simulation.
 """
 
 import os
@@ -79,11 +79,11 @@ def manifest_cmd(intent: str) -> None:
             verified = len(results) > 0  # type: ignore[reportArgumentType]
             status = "✅ Verificado" if verified else "⚠️ Sin verificación"
             progress.update(
-                t_id, description=f"[bold #D4AF37]{status} — Intent registrado en ledger[/]"
+                t_id, description=f"[bold #D4AF37]{status} - Intent registrado en ledger[/]"
             )
         except ImportError:
             progress.update(
-                t_id, description="[dim]CortexEngine no disponible — intent no persistido[/]"
+                t_id, description="[dim]CortexEngine no disponible - intent no persistido[/]"
             )
 
     console.print(

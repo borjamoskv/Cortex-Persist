@@ -1,4 +1,4 @@
-"""CORTEX Metering — Quota Enforcement.
+"""CORTEX Metering - Quota Enforcement.
 
 Plan-based quota definitions and enforcement for Memory-as-a-Service.
 Integrates with UsageTracker to check consumption against plan limits.

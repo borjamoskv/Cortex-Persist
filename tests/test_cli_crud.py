@@ -1,5 +1,5 @@
 """
-Tests for CLI CRUD commands — delete, list, edit.
+Tests for CLI CRUD commands - delete, list, edit.
 """
 
 from __future__ import annotations
@@ -51,7 +51,7 @@ class TestListCommand:
     def test_list_shows_facts(self, runner, db_path):
         result = runner.invoke(cli, ["list", "--db", db_path])
         assert result.exit_code == 0
-        # Content is AES-encrypted in v6 — check structure, not plaintext
+        # Content is AES-encrypted in v6 - check structure, not plaintext
         assert "test-project" in result.output or "CORTEX" in result.output
 
     def test_list_filter_by_project(self, runner, db_path):
@@ -63,7 +63,7 @@ class TestListCommand:
     def test_list_filter_by_type(self, runner, db_path):
         result = runner.invoke(cli, ["list", "--db", db_path, "--type", "ghost"])
         assert result.exit_code == 0
-        # Content is AES-encrypted — check type label appears, not plaintext
+        # Content is AES-encrypted - check type label appears, not plaintext
         assert "ghost" in result.output.lower()
 
     def test_list_empty_result(self, runner, db_path):

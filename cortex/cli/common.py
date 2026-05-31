@@ -1,4 +1,4 @@
-"""CORTEX CLI — Common shared objects and utilities.
+"""CORTEX CLI - Common shared objects and utilities.
 
 Prevent circular imports by centralizing base CLI objects.
 """
@@ -153,5 +153,5 @@ def _detect_agent_source() -> str:
 @click.group()
 @click.version_option(__version__, prog_name="cortex")
 def cli() -> None:
-    """CORTEX — Trust Infrastructure for Autonomous AI."""
+    """CORTEX - Trust Infrastructure for Autonomous AI."""
     pass

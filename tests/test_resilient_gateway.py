@@ -1,4 +1,4 @@
-"""Tests for CORTEX Resilient Gateway — Ω₅ Antifragile URL cascade."""
+"""Tests for CORTEX Resilient Gateway - Ω₅ Antifragile URL cascade."""
 
 from __future__ import annotations
 

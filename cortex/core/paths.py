@@ -2,7 +2,7 @@
 # Licensed under the Apache License, Version 2.0.
 # See top-level LICENSE file for details.
 
-"""CORTEX — Canonical Path Resolution.
+"""CORTEX - Canonical Path Resolution.
 
 Single source of truth for ALL filesystem paths in the codebase.
 Every path is overridable via environment variables for portability,

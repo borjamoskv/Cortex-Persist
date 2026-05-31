@@ -1,4 +1,4 @@
-"""Memory Scanner — Extracts frequency distributions from CORTEX SQLite.
+"""Memory Scanner - Extracts frequency distributions from CORTEX SQLite.
 
 Async bridge between the CortexEngine and the pure-math Shannon analyzer.
 Each method runs a single GROUP BY query and returns a dict[str, int]
@@ -107,7 +107,7 @@ class MemoryScanner:
         """Joint distribution of (fact_type, project) for I(type; project)."""
         async with self._engine.session() as conn:
             cursor = await conn.execute(
-                "SELECT fact_type, project, COUNT(*) "  # nosec B608 — parameterized query — {where}/{column}/{placeholders} built internally with ? params
+                "SELECT fact_type, project, COUNT(*) "  # nosec B608 - parameterized query - {where}/{column}/{placeholders} built internally with ? params
                 f"FROM facts WHERE {_ACTIVE} "
                 "GROUP BY fact_type, project"
             )
@@ -135,7 +135,7 @@ class MemoryScanner:
 
         async with self._engine.session() as conn:
             cursor = await conn.execute(
-                "SELECT DATE(created_at) AS day, COUNT(*) "  # nosec B608 — parameterized query — {where}/{column}/{placeholders} built internally with ? params
+                "SELECT DATE(created_at) AS day, COUNT(*) "  # nosec B608 - parameterized query - {where}/{column}/{placeholders} built internally with ? params
                 f"FROM facts WHERE {where} "
                 "AND created_at >= datetime('now', '-' || ? || ' days') "
                 "GROUP BY day ORDER BY day",
@@ -163,7 +163,7 @@ class MemoryScanner:
 
         async with self._engine.session() as conn:
             cursor = await conn.execute(
-                "SELECT "  # nosec B608 — parameterized query — {where}/{column}/{placeholders} built internally with ? params
+                "SELECT "  # nosec B608 - parameterized query - {where}/{column}/{placeholders} built internally with ? params
                 "  CASE "
                 "    WHEN LENGTH(content) < 20 THEN 'micro' "
                 "    WHEN LENGTH(content) < 50 THEN 'short' "
@@ -195,7 +195,7 @@ class MemoryScanner:
         async with self._engine.session() as conn:
             cursor = await conn.execute(
                 f"SELECT COUNT(*) FROM facts WHERE {where}",
-                params,  # nosec B608 — parameterized query — {where}/{column}/{placeholders} built internally with ? params
+                params,  # nosec B608 - parameterized query - {where}/{column}/{placeholders} built internally with ? params
             )
             row = await cursor.fetchone()
             return row[0] if row else 0
@@ -206,7 +206,7 @@ class MemoryScanner:
         """Filled vs. theoretical max (fact_type × project) pairs.
 
         Returns:
-            (filled_pairs, theoretical_max) — coverage = filled / max.
+            (filled_pairs, theoretical_max) - coverage = filled / max.
         """
         async with self._engine.session() as conn:
             cursor = await conn.execute(
@@ -234,7 +234,7 @@ class MemoryScanner:
         """Largest gap between consecutive facts and total time span.
 
         Returns:
-            (max_gap_days, total_span_days, active_days) — continuity = 1 - max_gap/span.
+            (max_gap_days, total_span_days, active_days) - continuity = 1 - max_gap/span.
         """
         where = _ACTIVE
         params: list[str] = []
@@ -274,7 +274,7 @@ class MemoryScanner:
         Weights: C5=1.0, C4=0.8, C3=0.6, C2=0.4, C1=0.2.
 
         Returns:
-            (weighted_sum, total_facts) — quality = weighted / total.
+            (weighted_sum, total_facts) - quality = weighted / total.
         """
         where = _ACTIVE
         params: list[str] = []
@@ -316,7 +316,7 @@ class MemoryScanner:
 
         async with self._engine.session() as conn:
             cursor = await conn.execute(
-                f"SELECT {column}, COUNT(*) FROM facts "  # nosec B608 — parameterized query — {where}/{column}/{placeholders} built internally with ? params
+                f"SELECT {column}, COUNT(*) FROM facts "  # nosec B608 - parameterized query - {where}/{column}/{placeholders} built internally with ? params
                 f"WHERE {where} GROUP BY {column}",
                 params,
             )

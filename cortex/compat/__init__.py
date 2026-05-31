@@ -1,1 +1,1 @@
-"""CORTEX Compatibility Layer — Lazy optional dependencies."""
+"""CORTEX Compatibility Layer - Lazy optional dependencies."""

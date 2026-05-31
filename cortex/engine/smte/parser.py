@@ -1,5 +1,5 @@
 """
-CORTEX — SMTE AST Parser (Transcription)
+CORTEX - SMTE AST Parser (Transcription)
 Axiom Ω₁₄: Code as DNA.
 Parses, analyzes, and reconstructs Python source code for mutation.
 """

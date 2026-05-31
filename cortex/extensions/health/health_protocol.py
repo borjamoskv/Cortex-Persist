@@ -1,4 +1,4 @@
-"""MetricCollector Protocol — enforced at registration time.
+"""MetricCollector Protocol - enforced at registration time.
 
 Every collector must implement this protocol. The registry
 rejects non-conforming objects at registration, not at runtime.

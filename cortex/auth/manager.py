@@ -1,4 +1,4 @@
-"""CORTEX Auth — AuthManager and singleton access."""
+"""CORTEX Auth - AuthManager and singleton access."""
 
 from __future__ import annotations
 
@@ -174,7 +174,7 @@ class AuthManager:
         except RuntimeError:
             return asyncio.run(coro)
 
-        # Inside existing loop — block via thread-safe event
+        # Inside existing loop - block via thread-safe event
         import threading
 
         res: list[tuple[str, APIKey]] = []
@@ -184,7 +184,7 @@ class AuthManager:
         async def _wrapper() -> None:
             try:
                 res.append(await coro)
-            except Exception as e:  # noqa: BLE001 — relay to calling thread
+            except Exception as e:  # noqa: BLE001 - relay to calling thread
                 err.append(e)
             finally:
                 event.set()
@@ -216,7 +216,7 @@ class AuthManager:
         async def _wrapper() -> None:
             try:
                 res.append(await self.authenticate_async(raw_key))
-            except Exception as e:  # noqa: BLE001 — relay to calling thread
+            except Exception as e:  # noqa: BLE001 - relay to calling thread
                 err.append(e)
             finally:
                 event.set()

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
 """
-CORTEX — SWARM DASHBOARD (VOID-BEYOND).
+CORTEX - SWARM DASHBOARD (VOID-BEYOND).
 
 Real-time TUI for monitoring the Legion 10,000 swarm.
 Visualizes reputation slashing, consensus alignment, and exergy extraction.

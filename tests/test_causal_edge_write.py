@@ -218,7 +218,7 @@ async def test_auto_resolved_parent_creates_edge(
     )
     await conn.commit()
 
-    # Insert a new decision WITHOUT explicit parent — should auto-resolve
+    # Insert a new decision WITHOUT explicit parent - should auto-resolve
     fact_id = await insert_fact_record(
         conn,
         tenant_id="default",
@@ -231,7 +231,7 @@ async def test_auto_resolved_parent_creates_edge(
         source=None,
         meta={},
         tx_id=None,
-        # No parent_decision_id — should auto-resolve to 50
+        # No parent_decision_id - should auto-resolve to 50
     )
 
     async with conn.execute("SELECT fact_id, parent_id, edge_type FROM causal_edges") as cursor:

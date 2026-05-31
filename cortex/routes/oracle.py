@@ -7,7 +7,7 @@ from __future__ import annotations
 
 """The Oracle Router (B2B SaaS Endpoint).
 
-POST /v1/oracle/audit — Executes a Sovereign Agent to audit a target.
+POST /v1/oracle/audit - Executes a Sovereign Agent to audit a target.
 Requires an API key provided by Stripe (pro or team plan).
 """
 
@@ -151,7 +151,7 @@ async def audit_target(
                 "depth": req.depth,
             },
         )
-    except Exception as e:  # noqa: BLE001 — ledger persistence must not block oracle response
+    except Exception as e:  # noqa: BLE001 - ledger persistence must not block oracle response
         logger.warning("Failed to persist Oracle audit to ledger: %s", e)
 
     return OracleResponse(

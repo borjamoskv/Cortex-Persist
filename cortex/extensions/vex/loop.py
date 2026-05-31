@@ -1,4 +1,4 @@
-"""VEX Execution Loop — Hash-chained verified execution.
+"""VEX Execution Loop - Hash-chained verified execution.
 
 This is the core of VEX: executes each step in a TaskPlan and produces
 a cryptographic ExecutionReceipt with hash-chained transaction records.
@@ -10,7 +10,7 @@ Every step:
 4. Persist result as CORTEX fact
 5. Append to receipt
 
-Derivation: Ω₃ (Byzantine Default) — nothing is trusted, everything is verified.
+Derivation: Ω₃ (Byzantine Default) - nothing is trusted, everything is verified.
 """
 
 from __future__ import annotations
@@ -127,7 +127,7 @@ class VEXRunner:
                     step.step_id,
                     result.error,
                 )
-                # Don't break — continue to record remaining steps as skipped
+                # Don't break - continue to record remaining steps as skipped
                 # unless it's critical. For now, we stop on first failure.
                 break
 
@@ -176,7 +176,7 @@ class VEXRunner:
             output = ""
             error = f"Timeout after {step.timeout_seconds}s"
 
-        except Exception as exc:  # noqa: BLE001 — VEX step catch-all boundary
+        except Exception as exc:  # noqa: BLE001 - VEX step catch-all boundary
             elapsed_ms = int((time.monotonic() - t0) * 1000)
             success = False
             output = ""
@@ -225,7 +225,7 @@ class VEXRunner:
                 ),
             )
             await conn.commit()
-        except Exception as exc:  # noqa: BLE001 — VEX transaction logging fallback
+        except Exception as exc:  # noqa: BLE001 - VEX transaction logging fallback
             logger.error("Failed to record plan transaction: %s", exc)
 
     async def _record_step_transaction(
@@ -272,7 +272,7 @@ class VEXRunner:
             await conn.commit()
             return tx_hash
 
-        except Exception as exc:  # noqa: BLE001 — VEX step logging fallback
+        except Exception as exc:  # noqa: BLE001 - VEX step logging fallback
             logger.error("Failed to record step transaction: %s", exc)
             return None
 
@@ -283,7 +283,7 @@ class VEXRunner:
                 cp = await self._engine._ledger.create_checkpoint_async()
                 if cp:
                     return str(cp)
-        except Exception as exc:  # noqa: BLE001 — VEX merkle cp skip
+        except Exception as exc:  # noqa: BLE001 - VEX merkle cp skip
             logger.debug("Merkle checkpoint skipped: %s", exc)
         return None
 
@@ -312,7 +312,7 @@ class VEXRunner:
                 meta={"tx_hash": tx_hash, "step_id": step.step_id},
             )
             return fact_id
-        except Exception as exc:  # noqa: BLE001 — VEX step fact persistence fallback
+        except Exception as exc:  # noqa: BLE001 - VEX step fact persistence fallback
             logger.error("Failed to persist step fact: %s", exc)
             return None
 
@@ -338,7 +338,7 @@ class VEXRunner:
                     "plan_hash": receipt.plan_hash,
                 },
             )
-        except Exception as exc:  # noqa: BLE001 — VEX receipt persistence fallback
+        except Exception as exc:  # noqa: BLE001 - VEX receipt persistence fallback
             logger.error("Failed to persist receipt: %s", exc)
 
     # ─── Tether Integration ───────────────────────────────────────
@@ -353,7 +353,7 @@ class VEXRunner:
         dangerous_tools = frozenset(("shell_exec", "file_write", "network_request"))
 
         if step.tool in dangerous_tools:
-            # For now just log — full tether enforcement comes in Phase 2.
+            # For now just log - full tether enforcement comes in Phase 2.
             logger.info(
                 "VEX tether: tool %s requires elevated permissions",
                 step.tool,

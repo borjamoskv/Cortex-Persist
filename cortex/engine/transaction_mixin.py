@@ -1,4 +1,4 @@
-"""Transaction mixin — log, verify, and process ledger events."""
+"""Transaction mixin - log, verify, and process ledger events."""
 
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ logger = logging.getLogger("cortex.transactions")
 
 
 class TransactionMixin(EngineMixinBase):
-    """Sovereign Ledger — Immutable Transaction Log with Cryptographic Hash Chain.
+    """Sovereign Ledger - Immutable Transaction Log with Cryptographic Hash Chain.
 
     Every write operation produces a transaction record chained to its predecessor
     via ``compute_tx_hash(prev_hash, project, action, detail, timestamp)``.

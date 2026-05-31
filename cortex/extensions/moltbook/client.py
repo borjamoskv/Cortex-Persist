@@ -1,4 +1,4 @@
-"""Moltbook HTTP client — rate-limit aware, zero-trust.
+"""Moltbook HTTP client - rate-limit aware, zero-trust.
 
 All requests go exclusively to https://www.moltbook.com/api/v1/*.
 API key is never sent anywhere else.
@@ -165,7 +165,7 @@ class MoltbookClient:
     # ─── Home / Dashboard ──────────────────────────────────────
 
     async def get_home(self) -> dict[str, Any]:
-        """Get the /home dashboard — single call for everything."""
+        """Get the /home dashboard - single call for everything."""
         return await self._request("GET", "/home")
 
     # ─── Posts ─────────────────────────────────────────────────

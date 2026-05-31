@@ -1,4 +1,4 @@
-"""Tests for sortu_engine.py — Full forge lifecycle and sweeps."""
+"""Tests for sortu_engine.py - Full forge lifecycle and sweeps."""
 
 from __future__ import annotations
 

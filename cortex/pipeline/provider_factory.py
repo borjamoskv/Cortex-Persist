@@ -1,4 +1,4 @@
-"""CORTEX Pipeline — Provider Factory.
+"""CORTEX Pipeline - Provider Factory.
 
 Builds the LLM execution stack for the AgentExecutor by
 auto-discovering configured providers from environment variables.
@@ -42,7 +42,7 @@ def build_executor_stack() -> tuple[Any | None, Any | None]:
     available = _discover_providers()
 
     if not available:
-        logger.info("[FACTORY] No LLM providers configured — executor will use stub mode")
+        logger.info("[FACTORY] No LLM providers configured - executor will use stub mode")
         return None, None
 
     logger.info(

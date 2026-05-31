@@ -1,6 +1,6 @@
-"""MoskvDaemon — Main daemon orchestrator.
+"""MoskvDaemon - Main daemon orchestrator.
 
-v2.0: Sovereign Async Loop — single event loop replaces N threads.
+v2.0: Sovereign Async Loop - single event loop replaces N threads.
 New subsystems: SovereignScheduler, HotStateDB, WatchdogHub, HumanCallbackAPI.
 """
 
@@ -183,7 +183,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
             self._run_legacy(interval=interval)
 
     async def run_sovereign(self, interval: int = DEFAULT_INTERVAL) -> None:
-        """Sovereign async execution — single event loop, all subsystems as tasks.
+        """Sovereign async execution - single event loop, all subsystems as tasks.
 
         This is the x100 upgrade: replaces N threads with N async tasks on one loop.
         All subsystems share the same DistributedEventBus and HotStateDB.

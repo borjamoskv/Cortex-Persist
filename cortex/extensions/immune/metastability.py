@@ -1,7 +1,7 @@
-"""Metastability Probing — Axiom Ω₁₃ Immune System Upgrade.
+"""Metastability Probing - Axiom Ω₁₃ Immune System Upgrade.
 
 Detects systems that appear stable only because nobody has perturbed them.
-"No anomalies detected" ≠ "stable" — absence of perturbation is not
+"No anomalies detected" ≠ "stable" - absence of perturbation is not
 evidence of stability.
 
 Status: IMPLEMENTED (upgraded from PARTIAL via Ω₁₃ enforcement).

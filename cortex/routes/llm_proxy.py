@@ -4,7 +4,7 @@ C5-REAL Cognitive Operating System Route.
 
 This module exposes a plug-and-play OpenAI-compatible `/v1/chat/completions` proxy.
 It intercepts ANY prompt, forwards it to the target LLM provider, and subjects
-the output to the "Deterministic Labyrinth" filter—annihilating stochastic prose,
+the output to the "Deterministic Labyrinth" filter-annihilating stochastic prose,
 enforcing C5-REAL execution limits, and allowing ONLY actionable exergy to survive.
 """
 

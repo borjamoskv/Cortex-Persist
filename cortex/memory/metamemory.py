@@ -1,4 +1,4 @@
-"""CORTEX v7+ — Metamemory: The Agent That Knows What It Knows.
+"""CORTEX v7+ - Metamemory: The Agent That Knows What It Knows.
 
 Nelson & Narens (1990) framework: FOK, JOL, calibration, TOT detection.
 Schema layer (Verdict, MemoryCard, etc.) lives in metamemory_schema.py.
@@ -85,7 +85,7 @@ def _cosine_similarity(a: list[float], b: list[float]) -> float:
     """Compute cosine similarity between two vectors. O(d).
 
     Uses math.fsum (Shewchuk compensated summation) for O(1) error
-    bound regardless of dimensionality — critical for 384–768 dim embeddings.
+    bound regardless of dimensionality - critical for 384–768 dim embeddings.
     """
     if len(a) != len(b) or not a:
         return 0.0
@@ -128,7 +128,7 @@ class MetamemoryMonitor:
         """Evaluate Feeling-of-Knowing for a query against candidate engrams.
 
         Analyzes the similarity distribution of retrieved engrams to
-        estimate whether knowledge exists in memory — even if the top
+        estimate whether knowledge exists in memory - even if the top
         match isn't perfect.
 
         Returns a MetaJudgment with fok_score and accessibility populated.

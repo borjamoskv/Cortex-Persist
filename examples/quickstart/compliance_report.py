@@ -22,17 +22,17 @@ async def main() -> None:
 
     engine = CortexEngine(db_path=str(db_path))
 
-    print("📋 CORTEX Quickstart — EU AI Act Compliance Report\n")
+    print("📋 CORTEX Quickstart - EU AI Act Compliance Report\n")
 
     # --- Step 1: Simulate an agent's decision history ---
     print("1️⃣  Simulating agent decision history...\n")
 
     decisions = [
-        ("decision", "Approved loan application #443 — risk score 0.23"),
-        ("decision", "Rejected application #444 — income verification failed"),
-        ("knowledge", "Risk model v2.1 deployed — AUC 0.94 on validation set"),
-        ("error", "Timeout on credit bureau API — retried 3x, succeeded"),
-        ("decision", "Approved application #445 — manual review flagged"),
+        ("decision", "Approved loan application #443 - risk score 0.23"),
+        ("decision", "Rejected application #444 - income verification failed"),
+        ("knowledge", "Risk model v2.1 deployed - AUC 0.94 on validation set"),
+        ("error", "Timeout on credit bureau API - retried 3x, succeeded"),
+        ("decision", "Approved application #445 - manual review flagged"),
     ]
 
     for fact_type, content in decisions:

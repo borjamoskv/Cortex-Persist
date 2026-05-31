@@ -1,5 +1,5 @@
 """
-ZKORTEX — Knowledge Commitments.
+ZKORTEX - Knowledge Commitments.
 
 Un Commitment es una caja sellada: contiene un secreto, demuestra que existe,
 pero no lo revela. Mathematically binding + hiding.
@@ -63,7 +63,7 @@ class KnowledgeCommitment:
     def verify(self, secret: str, blinding_factor: bytes) -> bool:
         """
         Verifica que este commitment corresponde a (secret, blinding_factor).
-        SOLO el poseedor del blinding_factor puede verificar —
+        SOLO el poseedor del blinding_factor puede verificar -
         nadie más puede abrir el commitment.
         """
         expected = _compute_commitment(secret, blinding_factor)
@@ -71,7 +71,7 @@ class KnowledgeCommitment:
         return hmac.compare_digest(self.commitment_hex, expected)
 
     def to_public_dict(self) -> dict[str, object]:
-        """Serialización pública — NUNCA contiene el secreto."""
+        """Serialización pública - NUNCA contiene el secreto."""
         return {
             "commitment": self.commitment_hex,
             "timestamp": self.timestamp,

@@ -1,4 +1,4 @@
-"""Mac-Maestro-Ω CLI — Sovereign macOS Automation Tool.
+"""Mac-Maestro-Ω CLI - Sovereign macOS Automation Tool.
 
 Usage:
     python3 -m mac_maestro inspect --app com.apple.TextEdit

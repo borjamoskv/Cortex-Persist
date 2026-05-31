@@ -300,7 +300,7 @@ class GRAMMYOrchestrator:
 
     async def run_pipeline_local(self, track: TrackContext) -> TrackContext:
         """
-        Offline pipeline — MIDI + DSP synthesis.
+        Offline pipeline - MIDI + DSP synthesis.
         No LLM, no external APIs.
         """
         logger.info("--- Local Pipeline para %s ---", track.title)

@@ -1,5 +1,5 @@
 # This file is part of CORTEX. Apache-2.0.
-"""Shared SealPrinter — extracted to break circular import between seals ↔ sovereign_seals."""
+"""Shared SealPrinter - extracted to break circular import between seals ↔ sovereign_seals."""
 
 from __future__ import annotations
 

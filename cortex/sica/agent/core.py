@@ -1,4 +1,4 @@
-"""SICA Agent — The Integrated Self-Improving Cognitive Architecture.
+"""SICA Agent - The Integrated Self-Improving Cognitive Architecture.
 
 Integrates the three SICA layers into a single agent that inherits
 from CORTEX BaseAgent:
@@ -141,7 +141,7 @@ class SICAAgent(BaseAgent):
         )
 
     async def on_stop(self) -> None:
-        # Persist genome on shutdown — learned strategies survive restarts
+        # Persist genome on shutdown - learned strategies survive restarts
         try:
             save_genome(
                 self._strategy.genome,
@@ -160,7 +160,7 @@ class SICAAgent(BaseAgent):
     async def tick(self) -> None:
         """Autonomous self-diagnostic tick (runs during idle).
 
-        This is the agent's inner monologue — proactive reflection
+        This is the agent's inner monologue - proactive reflection
         without external stimulus. Nelson-Narens without a trigger.
         """
         if not self._autonomy_enabled:
@@ -300,7 +300,7 @@ class SICAAgent(BaseAgent):
                 await self._emitter.emit_result(message, task_id, result, judgment)
                 return
 
-            # Failure — should we retry?
+            # Failure - should we retry?
             if judgment.is_meta_failure:
                 # Meta-failure: strategy was mutated, retry with new genome
                 retry_count += 1
@@ -417,7 +417,7 @@ class SICAAgent(BaseAgent):
 
         return {
             "status": "completed",
-            "note": "base execution — override _run_object_level for domain logic",
+            "note": "base execution - override _run_object_level for domain logic",
         }
 
     # ── Introspection API ────────────────────────────────────────

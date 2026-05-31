@@ -21,7 +21,7 @@ class AutonomousTick:
     - Auto-save genome
     - Adjust exploration rate based on recent performance
 
-    The tick is the agent's "inner monologue" — reflection
+    The tick is the agent's "inner monologue" - reflection
     without external stimulus.
     """
 

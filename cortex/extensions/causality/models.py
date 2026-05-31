@@ -1,4 +1,4 @@
-"""Causality data models — Taint status, confidence ordering, fact nodes.
+"""Causality data models - Taint status, confidence ordering, fact nodes.
 
 Tri-state taint (CLEAN/SUSPECT/TAINTED) prevents binary overshoot:
 a boolean taint would rupture half the DAG on a mild suspicion.

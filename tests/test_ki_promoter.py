@@ -1,4 +1,4 @@
-"""Tests for cortex-core/ki_promoter.py — KI Context Promoter.
+"""Tests for cortex-core/ki_promoter.py - KI Context Promoter.
 
 C5-REAL coverage for context detection, scoring, and promotion mechanisms.
 """

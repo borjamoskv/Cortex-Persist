@@ -178,7 +178,7 @@ class SovereignAgent:
         return min(self.subagents, key=lambda s: s.fitness)
 
     def apply_mutation(self, mutation: Mutation) -> None:
-        # Ceiling enforcement by FitnessLandscape.clamp() — only floor here.
+        # Ceiling enforcement by FitnessLandscape.clamp() - only floor here.
         self.fitness = max(0.0, self.fitness + mutation.delta_fitness)
         self.mutations.append(mutation)
         self.generation += 1

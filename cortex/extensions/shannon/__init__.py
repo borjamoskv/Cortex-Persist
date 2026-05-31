@@ -1,4 +1,4 @@
-"""CORTEX Shannon Module — Information Theory for Memory Intelligence.
+"""CORTEX Shannon Module - Information Theory for Memory Intelligence.
 
 Applies Shannon entropy, KL divergence, mutual information,
 conditional entropy, cross-entropy, redundancy analysis,
@@ -6,8 +6,8 @@ exergy scoring, and Exergetic Epistemology (ΞΕ) frontier primitives
 to measure memory quality, detect imbalance, quantify useful work,
 audit cryptographic security, and guide pruning.
 
-Status: IMPLEMENTED (Ω₁₃ enforcement — exergy wired into hot paths).
-ΞΕ Status: epistemology.py — Rényi, entropy rate, compression proxy,
+Status: IMPLEMENTED (Ω₁₃ enforcement - exergy wired into hot paths).
+ΞΕ Status: epistemology.py - Rényi, entropy rate, compression proxy,
            DPI verification, free energy guard, Φ proxy.
 """
 

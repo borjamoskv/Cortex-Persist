@@ -7,7 +7,7 @@ from .common import GateResult, arun_cmd, printer
 async def check_gate_5_ledger() -> GateResult:
     """Seal 5: Ledger Initialization (AX-II Ledger Integrity)."""
     printer.seal(5, "Ledger Integrity", "Schema Initialization check")
-    # Tries to initialize the ledger DB — if fails, the engine is dead
+    # Tries to initialize the ledger DB - if fails, the engine is dead
     code, out = await arun_cmd(["python", "cortex/database/core.py", "--init"])
     if code != 0:
         printer.fail(f"Ledger initialization failed:\n{out}")

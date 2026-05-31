@@ -1,4 +1,4 @@
-"""CORTEX — Notification Event model."""
+"""CORTEX - Notification Event model."""
 
 from __future__ import annotations
 

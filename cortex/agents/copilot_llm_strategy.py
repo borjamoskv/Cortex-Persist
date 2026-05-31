@@ -1,4 +1,4 @@
-"""CORTEX Level 3 Copilot — LLM-Backed Suggestion Strategy.
+"""CORTEX Level 3 Copilot - LLM-Backed Suggestion Strategy.
 
 Production strategy that calls an actual LLM API for code completions.
 Supports FIM (Fill-in-the-Middle) and standard completion modes.
@@ -76,7 +76,7 @@ class LLMClient(Protocol):
 class DeterministicFallbackClient:
     """Fallback client when no LLM is available or API fails.
 
-    Returns simple pattern-based completions. NOT a real LLM —
+    Returns simple pattern-based completions. NOT a real LLM -
     used only as a degraded fallback.
     """
 

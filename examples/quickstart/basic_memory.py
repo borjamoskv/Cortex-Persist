@@ -21,12 +21,12 @@ async def main() -> None:
     # Use a temporary database for this example
     db_path = Path(tempfile.mkdtemp()) / "quickstart.db"
 
-    # Import CortexEngine — the single entry point for all operations
+    # Import CortexEngine - the single entry point for all operations
     from cortex.engine import CortexEngine
 
     engine = CortexEngine(db_path=str(db_path))
 
-    print("🧠 CORTEX Quickstart — Basic Memory\n")
+    print("🧠 CORTEX Quickstart - Basic Memory\n")
 
     # --- Step 1: Store facts ---
     print("1️⃣  Storing decisions...")
@@ -50,7 +50,7 @@ async def main() -> None:
     print("\n2️⃣  Verifying fact integrity...")
     result = await engine.verify_fact(fact1["id"])
     status = "✅ VERIFIED" if result["valid"] else "❌ BROKEN"
-    print(f"   {status} — Hash chain: {result.get('chain_status', 'ok')}")
+    print(f"   {status} - Hash chain: {result.get('chain_status', 'ok')}")
 
     # --- Step 3: Search facts ---
     print("\n3️⃣  Searching memory...")

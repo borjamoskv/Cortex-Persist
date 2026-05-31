@@ -1,5 +1,5 @@
 # cortex/evolution/telemetry.py
-"""Lightweight telemetry log — appends one CSV line per cycle.
+"""Lightweight telemetry log - appends one CSV line per cycle.
 
 Allows graphing fitness progression across thousands of cycles
 without parsing heavy JSON state files.

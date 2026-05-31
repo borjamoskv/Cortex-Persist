@@ -1,4 +1,4 @@
-"""CORTEX Delivery Manager — Typed Egress Layer.
+"""CORTEX Delivery Manager - Typed Egress Layer.
 
 Routes pipeline results to their delivery targets:
 MCP responses, files, webhooks, or CLI stdout.
@@ -34,7 +34,7 @@ class DeliveryManager:
             elif target.type == DeliveryType.MCP:
                 return self._deliver_mcp(output, target, mission_id)
             elif target.type == DeliveryType.MEMORY:
-                logger.debug("[DELIVERY] MEMORY target — no external delivery")
+                logger.debug("[DELIVERY] MEMORY target - no external delivery")
                 return True
             else:
                 logger.warning("[DELIVERY] Unknown target type: %s", target.type)

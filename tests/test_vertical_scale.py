@@ -1,4 +1,4 @@
-"""Tests for CORTEX Vertical Scale — SQLite Pragma Tuning + GPU Embeddings.
+"""Tests for CORTEX Vertical Scale - SQLite Pragma Tuning + GPU Embeddings.
 
 Validates:
 1. SQLite performance pragmas are applied consistently across all connection types.

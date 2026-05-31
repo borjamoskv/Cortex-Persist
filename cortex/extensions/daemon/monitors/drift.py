@@ -101,7 +101,7 @@ class DriftMonitorDaemon:
             logger.warning("DriftMonitor: %s", alert.message)
             return [alert]
 
-        logger.info("DriftMonitor: Healthy (%.2f) — %s", health, result["detail"])
+        logger.info("DriftMonitor: Healthy (%.2f) - %s", health, result["detail"])
         return []
 
     def _read_embeddings(self) -> np.ndarray | None:

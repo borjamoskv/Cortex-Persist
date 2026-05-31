@@ -1,4 +1,4 @@
-"""Enrichment Worker — Background semantic enrichment.
+"""Enrichment Worker - Background semantic enrichment.
 
 Axiom Ω₁₃: An optional subsystem must not degrade base truth persistence.
 """

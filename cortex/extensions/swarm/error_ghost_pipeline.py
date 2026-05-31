@@ -1,7 +1,7 @@
 """Error→Ghost Pipeline (Ω₅ Antifragile Autopersistence).
 
 Every uncaught error in the daemon/swarm is automatically persisted as a
-ghost fact in cortex.db. This ensures CORTEX cannot die silently — every
+ghost fact in cortex.db. This ensures CORTEX cannot die silently - every
 failure forges an antibody.
 
 Architecture:
@@ -49,7 +49,7 @@ class ErrorGhostPipeline:
         pipeline = ErrorGhostPipeline()
         await pipeline.capture(error, source="daemon:SiteMonitor", project="CORTEX")
 
-    Usage (sync — from daemon threads):
+    Usage (sync - from daemon threads):
         pipeline.capture_sync(error, source="daemon:SiteMonitor", project="CORTEX")
     """
 
@@ -111,7 +111,7 @@ class ErrorGhostPipeline:
         if self._should_suppress(content_hash, source):
             return
 
-        # Fire in background — ghost persistence must never block the daemon
+        # Fire in background - ghost persistence must never block the daemon
         thread = threading.Thread(
             target=self._persist_sync,
             args=(project, content, source, meta, content_hash),
@@ -151,7 +151,7 @@ class ErrorGhostPipeline:
         """Build ghost content and metadata from an error."""
         error_type = type(error).__qualname__
         tb = traceback.format_exception(type(error), error, error.__traceback__)
-        tb_str = "".join(tb[-3:])  # Last 3 frames — enough for diagnosis
+        tb_str = "".join(tb[-3:])  # Last 3 frames - enough for diagnosis
 
         content = (
             f"AUTO-GHOST [{source}] {error_type}: {error}\nTraceback (last 3 frames):\n{tb_str}"
@@ -256,7 +256,7 @@ class ErrorGhostPipeline:
             fact_id = asyncio.run(self._persist_async(project, content, source, meta))
             self._record_emission(content_hash, source, fact_id)
         except Exception as e:  # noqa: BLE001
-            # Last resort — never let ghost persistence crash the daemon
+            # Last resort - never let ghost persistence crash the daemon
             logger.error("AUTO-GHOST sync persist failed: %s", e)
             self._record_emission(content_hash, source, None)
 
@@ -289,4 +289,4 @@ class ErrorGhostPipeline:
             )
             logger.info("AUTO-GHOST fallback persisted to %s", fallback_dir / filename)
         except OSError as e:
-            logger.critical("AUTO-GHOST TOTAL FAILURE — cannot persist anywhere: %s", e)
+            logger.critical("AUTO-GHOST TOTAL FAILURE - cannot persist anywhere: %s", e)

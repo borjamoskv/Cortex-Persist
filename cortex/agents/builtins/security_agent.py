@@ -1,5 +1,5 @@
 """
-security_agent.py — SecurityAgent
+security_agent.py - SecurityAgent
 
 Daemon agent wrapping SecurityMonitor. Runs periodic async security checks
 on each tick, emits ALERT_ENTROPY messages for every security alert found.
@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 class SecurityAgent(BaseAgent):
-    """Daemon agent — runs SecurityMonitor.check_async() on every tick.
+    """Daemon agent - runs SecurityMonitor.check_async() on every tick.
 
     Emits ALERT_ENTROPY to all escalation_targets when threats are detected.
     """
@@ -37,7 +37,7 @@ class SecurityAgent(BaseAgent):
         self._monitor = monitor or SecurityMonitor()
 
     # ------------------------------------------------------------------
-    # Daemon tick — main security scan
+    # Daemon tick - main security scan
     # ------------------------------------------------------------------
 
     async def tick(self) -> None:
@@ -48,10 +48,10 @@ class SecurityAgent(BaseAgent):
             raise RuntimeError(f"SecurityMonitor failure: {exc}") from exc
 
         if not alerts:
-            logger.debug("SecurityAgent tick — no threats detected")
+            logger.debug("SecurityAgent tick - no threats detected")
             return
 
-        logger.warning("SecurityAgent — %d alert(s) detected", len(alerts))
+        logger.warning("SecurityAgent - %d alert(s) detected", len(alerts))
         for alert in alerts:
             await self._broadcast_alert(alert)
 
@@ -74,7 +74,7 @@ class SecurityAgent(BaseAgent):
     async def _broadcast_alert(self, alert: Any) -> None:
         targets = self.manifest.escalation_targets or []
         if not targets:
-            logger.warning("SecurityAgent — no escalation_targets configured")
+            logger.warning("SecurityAgent - no escalation_targets configured")
             return
 
         for target in targets:

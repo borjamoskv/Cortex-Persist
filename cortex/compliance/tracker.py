@@ -1,4 +1,4 @@
-"""ComplianceTracker — EU AI Act Article 12 compliance in 3 methods.
+"""ComplianceTracker - EU AI Act Article 12 compliance in 3 methods.
 
 Usage:
     from cortex.compliance import ComplianceTracker
@@ -251,7 +251,7 @@ class ComplianceTracker:
         report: dict[str, Any] = {
             "eu_ai_act": {
                 "regulation": "EU AI Act (Regulation 2024/1689)",
-                "article": "12 — Record-Keeping",
+                "article": "12 - Record-Keeping",
                 "enforcement_date": "2026-08-02",
                 "score": f"{score}/{total}",
                 "status": "COMPLIANT" if score == total else "NON_COMPLIANT",

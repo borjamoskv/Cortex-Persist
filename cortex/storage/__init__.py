@@ -3,7 +3,7 @@ Storage Backend Abstraction.
 
 Pluggable storage layer: switch between local SQLite and Turso (cloud)
 via environment variable. The engine layer never knows which backend
-is active — it just calls the protocol methods.
+is active - it just calls the protocol methods.
 
 Usage:
     CORTEX_STORAGE=local   → SQLite file (default, current behavior)

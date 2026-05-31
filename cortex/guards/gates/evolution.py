@@ -55,7 +55,7 @@ async def check_gate_13_latency() -> GateResult:
 async def check_gate_14_aesthetic() -> GateResult:
     """Seal 14: Aesthetic (Industrial Noir)."""
     printer.seal(14, "Industrial Noir", "Format Check")
-    # Stub — in backend, we only check for docstring presence
+    # Stub - in backend, we only check for docstring presence
     violations = []
     for path, content in GlobalSourceCache.files.items():
         if not content.startswith('"""') and not content.startswith('r"""'):

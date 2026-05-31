@@ -124,7 +124,7 @@ class EpistemicBreakerDaemon:
                 confidence="C5",
                 source="agent:epistemic-breaker",
             )
-        except Exception as e:  # noqa: BLE001 — wakeup persist must not crash daemon
+        except Exception as e:  # noqa: BLE001 - wakeup persist must not crash daemon
             logger.error("Failed to record breaker wakeup: %s", e)
 
     async def run(self):

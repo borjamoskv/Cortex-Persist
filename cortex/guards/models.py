@@ -28,7 +28,7 @@ EXEC_MODULES: frozenset[str] = frozenset(
     }
 )
 
-# Sovereign fallback markers — if present, severity = WARNING
+# Sovereign fallback markers - if present, severity = WARNING
 SOVEREIGN_MARKERS: frozenset[str] = frozenset(
     {
         "SovereignLLM",
@@ -38,7 +38,7 @@ SOVEREIGN_MARKERS: frozenset[str] = frozenset(
     }
 )
 
-# Rule 1.3 — Only frontier and high tier models are allowed
+# Rule 1.3 - Only frontier and high tier models are allowed
 ALLOWED_TIERS: frozenset[str] = frozenset({"frontier", "high"})
 
 
@@ -59,4 +59,4 @@ class DependencyViolation:
 
     def __str__(self) -> str:
         fallback_str = " (with fallback)" if self.has_fallback else ""
-        return f"[{self.severity}] {self.file}:{self.line} — Found {self.call_type} to '{self.binary}'{fallback_str}"
+        return f"[{self.severity}] {self.file}:{self.line} - Found {self.call_type} to '{self.binary}'{fallback_str}"

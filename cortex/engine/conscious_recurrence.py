@@ -80,7 +80,7 @@ class ConsciousRecurrenceEngine:
             result = await task_task
             t1 = time.perf_counter()
             task_success = True
-        except Exception as e:  # noqa: BLE001 — metacognitive boundary protects L1 from L0 failures
+        except Exception as e:  # noqa: BLE001 - metacognitive boundary protects L1 from L0 failures
             logger.error("Task failure during conscious execution: %s", e)
             t1 = time.perf_counter()
             result = str(e)
@@ -171,6 +171,6 @@ class ConsciousRecurrenceEngine:
             result = await ttt.run_nocturnal_consolidation(session_ids)
             logger.info("🧠 SLEEP CYCLE COMPLETE: %s", result["status"])
             return result
-        except Exception as e:  # noqa: BLE001 — nocturnal cycle boundary isolates TTT failures
+        except Exception as e:  # noqa: BLE001 - nocturnal cycle boundary isolates TTT failures
             logger.error("Failed to run nocturnal cycle: %s", e)
             return {"status": "error", "reason": str(e)}

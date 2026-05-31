@@ -1,4 +1,4 @@
-"""CORTEX ADK Runner — CLI and Web interface for ADK agents.
+"""CORTEX ADK Runner - CLI and Web interface for ADK agents.
 
 Provides commands to run CORTEX agents interactively via CLI or
 launch the ADK web dev UI.
@@ -31,7 +31,7 @@ def _parse_args() -> argparse.Namespace:
         "--agent",
         choices=["memory", "analyst", "guardian", "google-one", "sovereign"],
         default="sovereign",
-        help="Which agent to run (default: sovereign — full swarm)",
+        help="Which agent to run (default: sovereign - full swarm)",
     )
     parser.add_argument(
         "--model",
@@ -72,7 +72,7 @@ async def _connect_toolbox(
     """Attempt to connect to an MCP Toolbox server and return its tools.
 
     Returns an empty list if the Toolbox is not configured or unavailable.
-    This is intentionally non-fatal — the agents work fine without it.
+    This is intentionally non-fatal - the agents work fine without it.
     """
     from cortex.mcp.toolbox_bridge import ToolboxBridge, ToolboxConfig
 
@@ -90,21 +90,21 @@ async def _connect_toolbox(
         import os
 
         if not os.environ.get("TOOLBOX_URL"):
-            logger.debug("No TOOLBOX_URL configured — skipping Toolbox connection")
+            logger.debug("No TOOLBOX_URL configured - skipping Toolbox connection")
             return []
 
     bridge = ToolboxBridge(config)
     if not bridge.is_available:
-        logger.info("Toolbox SDK not installed — running without external DB tools")
+        logger.info("Toolbox SDK not installed - running without external DB tools")
         return []
 
     connected = await bridge.connect()
     if connected:
-        logger.info("Toolbox connected — loaded %d tools: %s", len(bridge.tools), bridge.tool_names)
+        logger.info("Toolbox connected - loaded %d tools: %s", len(bridge.tools), bridge.tool_names)
         return bridge.tools
 
     logger.warning(
-        "Could not connect to Toolbox at %s — running without external DB tools", config.server_url
+        "Could not connect to Toolbox at %s - running without external DB tools", config.server_url
     )
     return []
 
@@ -152,7 +152,7 @@ def run_cli(
     runner = Runner(agent=agent, app_name="cortex", session_service=session_service)
 
     toolbox_status = f" + {len(toolbox_tools)} Toolbox tools" if toolbox_tools else ""
-    print(f"\n🧠 CORTEX ADK — {agent.name}")
+    print(f"\n🧠 CORTEX ADK - {agent.name}")
     print(f"   Model: {agent.model}{toolbox_status}")
     print("   Type 'quit' to exit\n")
 

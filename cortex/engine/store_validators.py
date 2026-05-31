@@ -1,4 +1,4 @@
-"""store_validators — Content validation and deduplication for the Store Layer.
+"""store_validators - Content validation and deduplication for the Store Layer.
 
 Extracted from StoreMixin to satisfy the Landauer LOC barrier (≤500).
 These are pure functions: no side effects beyond raising ValueError on rejection.
@@ -21,7 +21,7 @@ MIN_CONTENT_LENGTH = 10
 
 
 def validate_content(project: str, content: str, fact_type: str) -> str:
-    """Sovereign Content Gatekeeper — normalizes content before storage.
+    """Sovereign Content Gatekeeper - normalizes content before storage.
 
     Note: Structural requirements (minimum length, poisoning checks, non-empty)
     are now enforced deterministically by StorageGuard via Pydantic upstream.

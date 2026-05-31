@@ -1,5 +1,5 @@
 # cortex/consensus/rwa_bft.py
-"""RWA-BFT — Reputation-Weighted Asynchronous Byzantine Fault Tolerance.
+"""RWA-BFT - Reputation-Weighted Asynchronous Byzantine Fault Tolerance.
 
 Implements the formal consensus protocol specified in CORTEX Phase 2 v3
 for validating fact injections from evolutionary agents.
@@ -13,8 +13,8 @@ Markov reputation update (Eq. 2):
     Rᵢ⁽ᵗ⁺¹⁾ = λ·Rᵢ⁽ᵗ⁾ + (1−λ)·Φ(vᵢ, V_final)
 
 Where:
-    λ  ∈ [0,1]  — historical memory factor (default: 0.85)
-    Φ  — reward function:
+    λ  ∈ [0,1]  - historical memory factor (default: 0.85)
+    Φ  - reward function:
           +1.0  if agent voted with consensus (correct)
           −3.0  if agent submitted a byzantine fault (tamper attempt)
            0.0  if agent abstained
@@ -89,7 +89,7 @@ class ConsensusResult:
         fact_id:             The fact that was evaluated.
         accepted:            True if supermajority agreed the fact is valid.
         supermajority_met:   Whether the Σᵢ Rᵢ > 2/3 × Σ condition was met.
-        total_reputation:    Σₖ Rₖ — total active reputation in this round.
+        total_reputation:    Σₖ Rₖ - total active reputation in this round.
         approving_reputation: Σᵢ∈FOR Rᵢ.
         byzantine_detected:  True if any agent submitted a fault-flagged vote.
         quorum_size:         Number of agents that participated (non-abstain).
@@ -152,7 +152,7 @@ class RWABFTConsensus:
 
         result = consensus.evaluate("fact_001", votes)
         if result.accepted:
-            # Trust injection — supermajority validated
+            # Trust injection - supermajority validated
             ...
 
     Attributes:
@@ -212,7 +212,7 @@ class RWABFTConsensus:
             ConsensusResult with acceptance decision and diagnostic metadata.
         """
         if not votes:
-            logger.warning("RWA-BFT: No votes for fact %s — returning rejected.", fact_id)
+            logger.warning("RWA-BFT: No votes for fact %s - returning rejected.", fact_id)
             return ConsensusResult(
                 fact_id=fact_id,
                 accepted=False,
@@ -248,7 +248,7 @@ class RWABFTConsensus:
         total_rep = self._total_rep(non_abstain)
         approving_rep = self._weighted_rep(for_votes)
 
-        # Eq. 1 — Supermajority check
+        # Eq. 1 - Supermajority check
         supermajority_met = (total_rep > 0) and (approving_rep > self._threshold * total_rep)
 
         # ── Step 3: Detect Byzantine outliers ─────────────────────────
@@ -381,7 +381,7 @@ class RWABFTConsensus:
             return 0.0
         if vote.outcome == final:
             return 1.0
-        # Penalise dissent proportionally to confidence — high-confidence
+        # Penalise dissent proportionally to confidence - high-confidence
         # opposition in a clear consensus is a stronger byzantine signal.
         return -3.0 * vote.confidence
 

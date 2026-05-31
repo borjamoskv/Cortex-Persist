@@ -3,7 +3,7 @@
 # See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
 
-"""SkillRegistry — Auto-registro y parsing de manifests.
+"""SkillRegistry - Auto-registro y parsing de manifests.
 
 Parsea el frontmatter YAML de cada SKILL.md y construye el catálogo de nodos
 del grafo cognitivo. Los skills se registran solos al ser descubiertos.
@@ -125,7 +125,7 @@ class SkillRegistry:
 
     El registry escanea SKILLS_BASE_DIR, parsea el frontmatter YAML de cada
     SKILL.md y construye el catálogo interno. Los skills se «registran solos»
-    simplemente existiendo en el filesystem — sin ningún paso manual.
+    simplemente existiendo en el filesystem - sin ningún paso manual.
 
     Uso:
         registry = SkillRegistry()
@@ -296,7 +296,7 @@ class SkillRegistry:
         content = path.read_text(encoding="utf-8")
         match = FRONTMATTER_PATTERN.match(content)
         if not match:
-            # Skill sin frontmatter — nombre derivado del directorio
+            # Skill sin frontmatter - nombre derivado del directorio
             return SkillManifest(
                 name=path.parent.name,
                 path=path,

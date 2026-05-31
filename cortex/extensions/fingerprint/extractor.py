@@ -1,4 +1,4 @@
-"""Cognitive Fingerprint — Preference Model Builder.
+"""Cognitive Fingerprint - Preference Model Builder.
 
 Consumes raw data from FingerprintScanner and produces a
 CognitiveFingerprint: the compressed representation of a human's

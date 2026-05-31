@@ -12,14 +12,14 @@ Deliberately stochastic strategies (Adversarial, Entropy, Crossover,
 StagnationBreaker) retain controlled randomness by design.
 
 Operator taxonomy (Evolutionary Biology → CORTEX mapping):
-    ParameterTuning   — Adaptive mutation rate (Eigen, 1971)
-    PruneDeadPath     — Purifying selection (Fisher, 1930)
-    HeuristicInjection— Horizontal gene transfer (Ochman et al., 2000)
-    BridgeImport      — Symbiotic gene transfer (Margulis, 1970)
-    AdversarialStress — Red Queen hypothesis (Van Valen, 1973)
-    EntropyReduction  — Genetic drift correction (Kimura, 1968)
-    CrossoverRecombi. — Sexual recombination (Maynard Smith, 1978)
-    StagnationBreaker — Punctuated equilibrium (Gould & Eldredge, 1972)
+    ParameterTuning   - Adaptive mutation rate (Eigen, 1971)
+    PruneDeadPath     - Purifying selection (Fisher, 1930)
+    HeuristicInjection- Horizontal gene transfer (Ochman et al., 2000)
+    BridgeImport      - Symbiotic gene transfer (Margulis, 1970)
+    AdversarialStress - Red Queen hypothesis (Van Valen, 1973)
+    EntropyReduction  - Genetic drift correction (Kimura, 1968)
+    CrossoverRecombi. - Sexual recombination (Maynard Smith, 1978)
+    StagnationBreaker - Punctuated equilibrium (Gould & Eldredge, 1972)
 """
 
 from __future__ import annotations
@@ -40,7 +40,7 @@ logger = logging.getLogger(__name__)
 
 _rng = secrets.SystemRandom()
 
-# Shared metrics instance — 60s TTL cache, thread-safe
+# Shared metrics instance - 60s TTL cache, thread-safe
 _metrics = CortexMetrics()
 
 
@@ -50,7 +50,7 @@ def _dm(agent_or_sub: SovereignAgent | SubAgent) -> DomainMetrics:
 
 
 def _safe_float(val: object, default: float = 0.0) -> float:
-    """Safely convert numeric values to float — returns default for non-numeric types.
+    """Safely convert numeric values to float - returns default for non-numeric types.
 
     Explicitly handles MagicMock and other non-standard types in test environments.
     """
@@ -67,7 +67,7 @@ class ImprovementStrategy(Protocol):
 
 
 class ParameterTuningStrategy:
-    """Adaptive mutation rate — scales with ruggedness (Developmental Plasticity).
+    """Adaptive mutation rate - scales with ruggedness (Developmental Plasticity).
 
     Low errors → small tuning nudges (stable domain).
     High errors → bigger leaps (domain needs aggressive repair).
@@ -107,7 +107,7 @@ class ParameterTuningStrategy:
 
 
 class PruneDeadPathStrategy:
-    """Purifying selection — threshold adjusts with ghost_density.
+    """Purifying selection - threshold adjusts with ghost_density.
 
     More open ghosts → more aggressive pruning (higher threshold).
     """
@@ -141,7 +141,7 @@ class PruneDeadPathStrategy:
 
 
 class HeuristicInjectionStrategy:
-    """Horizontal gene transfer — weights from fact density.
+    """Horizontal gene transfer - weights from fact density.
 
     Richer domains (more facts in CORTEX) get higher multipliers
     because there's more data to inform heuristic decisions.
@@ -192,7 +192,7 @@ class HeuristicInjectionStrategy:
 
 
 class BridgeImportStrategy:
-    """Symbiotic gene transfer — multiplier scales with real bridge count.
+    """Symbiotic gene transfer - multiplier scales with real bridge count.
 
     More existing bridges in CORTEX DB → more aggressive knowledge
     transfer, reflecting a culture of proven cross-domain sharing.
@@ -229,7 +229,7 @@ class BridgeImportStrategy:
 
 
 class AdversarialStressStrategy:
-    """Red Queen hypothesis — chaos injection.
+    """Red Queen hypothesis - chaos injection.
 
     If an agent survives stress (fitness > threshold after penalty),
     it gets a resilience bonus. Deliberately stochastic.
@@ -292,7 +292,7 @@ class AdversarialStressStrategy:
 
 
 class EntropyReductionStrategy:
-    """Genetic drift correction — Axiom 12 enforcement (Phase 2 v3).
+    """Genetic drift correction - Axiom 12 enforcement (Phase 2 v3).
 
     Compresses mutation history when mutations/gain ratio is too high.
     Triggers cryptographic archival via Merkle Checkpoints.
@@ -341,7 +341,7 @@ class EntropyReductionStrategy:
 
 
 class CrossoverRecombinationStrategy:
-    """Sexual recombination — combines traits of best and worst subagents.
+    """Sexual recombination - combines traits of best and worst subagents.
 
     Only triggers when there's enough fitness variance to justify it.
     """
@@ -378,7 +378,7 @@ class CrossoverRecombinationStrategy:
 
 
 class StagnationBreakerStrategy:
-    """Punctuated equilibrium — disrupts local optima.
+    """Punctuated equilibrium - disrupts local optima.
 
     Uses real fitness_delta from CORTEX metrics + stochastic component.
     """
@@ -439,7 +439,7 @@ class StagnationBreakerStrategy:
         )
 
 
-# Default strategy pipeline (order matters — applied sequentially)
+# Default strategy pipeline (order matters - applied sequentially)
 # Phase 1: Repair (prune, bridge)
 # Phase 2: Grow (heuristics, tuning)
 # Phase 3: Stress-test (adversarial)

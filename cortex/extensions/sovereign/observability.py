@@ -157,7 +157,7 @@ def init_telemetry(service_name: str = "cortex-sovereign") -> None:
         )
 
     except ImportError:
-        logger.warning("OpenTelemetry packages not installed — running without telemetry")
+        logger.warning("OpenTelemetry packages not installed - running without telemetry")
 
 
 _latest_power: PowerLevel | None = None

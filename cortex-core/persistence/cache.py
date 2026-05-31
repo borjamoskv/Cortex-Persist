@@ -6,7 +6,7 @@ from collections import OrderedDict
 
 
 class ContextCache:
-    """L1 Ephemeral Context Cache — O(1) LRU eviction, TTL-bounded."""
+    """L1 Ephemeral Context Cache - O(1) LRU eviction, TTL-bounded."""
 
     __slots__ = ('_cache', '_ttl', '_capacity')
 

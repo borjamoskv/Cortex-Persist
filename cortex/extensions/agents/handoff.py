@@ -119,7 +119,7 @@ async def generate_handoff(
             for r in error_rows
         ]
 
-        # ── Causal Episodes (Epoch 8 — WHY context) ────────────────────
+        # ── Causal Episodes (Epoch 8 - WHY context) ────────────────────
         causal_episodes_data: list[dict[str, Any]] = []
         try:
             from cortex.memory.episodic import CausalTracer
@@ -212,7 +212,7 @@ async def generate_handoff(
     if session_meta:
         session.update(session_meta)
 
-    # ── Cognitive Fingerprint (v1.3) — Behavioral prior for receiving agent ─
+    # ── Cognitive Fingerprint (v1.3) - Behavioral prior for receiving agent ─
     cognitive_fingerprint: dict = {}
     try:
         from cortex.extensions.fingerprint.extractor import FingerprintExtractor

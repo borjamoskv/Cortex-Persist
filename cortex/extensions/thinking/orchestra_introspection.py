@@ -60,13 +60,13 @@ class OrchestraIntrospectionMixin:
         )
 
     async def consensus_think(self, prompt: str) -> FusedThought:
-        """Máximo consenso — todos los modelos con síntesis."""
+        """Máximo consenso - todos los modelos con síntesis."""
         return await self.think(  # type: ignore[reportAttributeAccessIssue]
             prompt, mode="consensus", strategy="synthesis"
         )
 
     async def omega_think(self, prompt: str) -> FusedThought:
-        """Omega Reasoning Protocol (ORP) — Adversarial Truth Collapse.
+        """Omega Reasoning Protocol (ORP) - Adversarial Truth Collapse.
 
         1. Generates consensus hypothesis (ThinkingMode.OMEGA).
         2. Subjects the hypothesis to an Inquisitorial siege (Red Team).

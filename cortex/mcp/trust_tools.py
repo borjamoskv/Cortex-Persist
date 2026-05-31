@@ -1,5 +1,5 @@
 """
-CORTEX Trust Tools — EU AI Act Compliance MCP Tools.
+CORTEX Trust Tools - EU AI Act Compliance MCP Tools.
 
 These tools extend the CORTEX MCP server with audit, verification,
 and compliance capabilities aligned with EU AI Act Article 12
@@ -114,7 +114,7 @@ def _register_audit_trail(mcp: FastMCP, ctx: _MCPContext) -> None:
 
         for row in rows:
             fact_id, proj, content, ftype, created, tags, tx_hash, prev_hash, _ = row
-            hash_short = (tx_hash or "—")[:16]
+            hash_short = (tx_hash or "-")[:16]
             prev_short = (prev_hash or "genesis")[:16]
             lines.append(
                 f"[{created}] #{fact_id} ({ftype}) [{proj}]\n"
@@ -182,7 +182,7 @@ def _register_verify_fact(mcp: FastMCP, ctx: _MCPContext) -> None:
                 prev_tx = await cursor.fetchone()
                 if prev_tx and prev_tx[0] != prev_hash:
                     chain_valid = False
-                    chain_msg = "❌ BROKEN — prev_hash mismatch"
+                    chain_msg = "❌ BROKEN - prev_hash mismatch"
 
             # Check if the fact is in a Merkle checkpoint
             cursor = await conn.execute(

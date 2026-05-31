@@ -125,12 +125,12 @@ class SAPClient:
             raise SAPConnectionError(f"Cannot reach SAP at {self.config.base_url}: {e}") from e
 
         if resp.status_code == 401:
-            raise SAPAuthError("SAP authentication failed — check credentials")
+            raise SAPAuthError("SAP authentication failed - check credentials")
         if resp.status_code == 403:
-            raise SAPAuthError("SAP authorization denied — check permissions")
+            raise SAPAuthError("SAP authorization denied - check permissions")
         if resp.status_code >= 400:
             raise SAPConnectionError(
-                f"SAP connection error: HTTP {resp.status_code} — {resp.text[:200]}"
+                f"SAP connection error: HTTP {resp.status_code} - {resp.text[:200]}"
             )
 
         self._csrf_token = resp.headers.get("x-csrf-token", "")
@@ -268,7 +268,7 @@ class SAPClient:
                 if name:
                     entity_sets[name] = props
         except ElementTree.ParseError:
-            logger.warning("Failed to parse $metadata XML — returning raw")
+            logger.warning("Failed to parse $metadata XML - returning raw")
 
         return entity_sets
 
@@ -358,7 +358,7 @@ class SAPClient:
     def _check_response_status(resp: httpx.Response) -> None:
         """Raise typed error for non-success HTTP status codes."""
         if resp.status_code == 401:
-            raise SAPAuthError("Authentication expired — reconnect required")
+            raise SAPAuthError("Authentication expired - reconnect required")
         if resp.status_code == 403:
             raise SAPAuthError(f"Forbidden: {resp.text[:200]}")
         if resp.status_code >= 400:
@@ -374,7 +374,7 @@ class SAPClient:
     ) -> httpx.Response:
         """Execute raw HTTP request with retry logic."""
         if not self._http:
-            raise SAPConnectionError("Client not connected — call connect() first")
+            raise SAPConnectionError("Client not connected - call connect() first")
 
         headers = await self._build_request_headers(method, json_data)
         return await self._perform_retry_loop(method, url, params, json_data, headers)

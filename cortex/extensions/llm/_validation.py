@@ -3,7 +3,7 @@
 # See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
 
-"""CORTEX LLM Router — DNSSEC Intent Validation.
+"""CORTEX LLM Router - DNSSEC Intent Validation.
 
 Validates that a provider's response matches the requested intent.
 Zero-cost heuristic validation (no LLM call required).
@@ -55,10 +55,10 @@ class DriftSignal:
 
 
 class IntentValidator:
-    """DNSSEC for LLM routing — post-response intent verification.
+    """DNSSEC for LLM routing - post-response intent verification.
 
     Validates that a provider's response actually matches the requested
-    intent. Uses heuristic signal detection (no LLM call required —
+    intent. Uses heuristic signal detection (no LLM call required -
     zero-cost validation).
 
     DNS analogy:
@@ -72,7 +72,7 @@ class IntentValidator:
         CREATIVE: narrative structure, dialogue, metaphors
         GENERAL: no strong signal (always passes)
 
-    Axiom: Ω₃ (Byzantine Default) — verify, then trust. Never reversed.
+    Axiom: Ω₃ (Byzantine Default) - verify, then trust. Never reversed.
     """
 
     # Minimum response length to attempt validation
@@ -123,7 +123,7 @@ class IntentValidator:
         Returns a DriftSignal with detection results. GENERAL intent
         always passes (no signal required).
         """
-        # GENERAL never drifts — it accepts everything
+        # GENERAL never drifts - it accepts everything
         if requested_intent is IntentProfile.GENERAL:
             return DriftSignal(
                 provider=provider_name,
@@ -131,7 +131,7 @@ class IntentValidator:
                 detected_intent=IntentProfile.GENERAL,
                 confidence=1.0,
                 is_drift=False,
-                evidence="GENERAL intent — no validation required",
+                evidence="GENERAL intent - no validation required",
             )
 
         # Too short to validate meaningfully
@@ -159,7 +159,7 @@ class IntentValidator:
 
         # Confidence: how much stronger is the detected signal vs requested
         if detected_score == 0.0:
-            # No signals at all — can't determine, benefit of the doubt
+            # No signals at all - can't determine, benefit of the doubt
             return DriftSignal(
                 provider=provider_name,
                 requested_intent=requested_intent,
@@ -179,7 +179,7 @@ class IntentValidator:
                 evidence=f"Matched: {detected.value} score={detected_score:.2f}",
             )
 
-        # Drift detected — response doesn't match requested intent
+        # Drift detected - response doesn't match requested intent
         drift_confidence = detected_score - requested_score
         is_drift = drift_confidence >= self._DRIFT_CONFIDENCE_THRESHOLD
 

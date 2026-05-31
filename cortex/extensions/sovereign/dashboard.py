@@ -1,4 +1,4 @@
-"""Sovereign Dashboard — FastAPI endpoints.
+"""Sovereign Dashboard - FastAPI endpoints.
 
 Exposes the sovereign power level, dimension breakdown, security
 status, and multi-cloud health as a JSON API consumable by Grafana
@@ -88,7 +88,7 @@ async def list_skills() -> dict[str, Any]:
 
 @router.get("/cloud-status")
 async def cloud_status() -> dict[str, Any]:
-    """Multi-cloud deployment status (stub — connect to real K8s APIs)."""
+    """Multi-cloud deployment status (stub - connect to real K8s APIs)."""
     return {
         "clouds": {
             "aws": {

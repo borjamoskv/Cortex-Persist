@@ -73,14 +73,14 @@ class TestDefenseInDepth:
         """agent:gemini MUST still trigger PI-001 on instruction override."""
         report = GUARD.scan(PROMPT_INJECTION, source="agent:gemini")
         l2_matches = [m for m in report.matches if m.layer == "L2_prompt"]
-        assert len(l2_matches) > 0, "Trusted source bypassed L2 prompt injection — CRITICAL"
+        assert len(l2_matches) > 0, "Trusted source bypassed L2 prompt injection - CRITICAL"
         assert not report.is_safe
 
     def test_trusted_source_still_catches_path_traversal(self):
         """agent:josu MUST still trigger PT-001 on path traversal."""
         report = GUARD.scan(PATH_TRAVERSAL, source="agent:josu")
         l3_matches = [m for m in report.matches if m.layer == "L3_path"]
-        assert len(l3_matches) > 0, "Trusted source bypassed L3 path traversal — CRITICAL"
+        assert len(l3_matches) > 0, "Trusted source bypassed L3 path traversal - CRITICAL"
 
 
 # ═══════════════════════════════════════

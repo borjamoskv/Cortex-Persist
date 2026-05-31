@@ -57,7 +57,7 @@ def _axiom_3_verify(action_type: str, details: str) -> bool:
     script = f'''
     try
         set theDialogText to "{prompt}"
-        display dialog theDialogText buttons {{"Deny", "Authorize"}} default button "Deny" with title "CORTEX Axiom 3 — Byzantine Verify" with icon caution
+        display dialog theDialogText buttons {{"Deny", "Authorize"}} default button "Deny" with title "CORTEX Axiom 3 - Byzantine Verify" with icon caution
         if button returned of result is "Authorize" then
             return "true"
         else

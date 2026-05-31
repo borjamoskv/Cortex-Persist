@@ -1,4 +1,4 @@
-"""Mac-Maestro-Ω — CGEvent mouse control (Vector D)."""
+"""Mac-Maestro-Ω - CGEvent mouse control (Vector D)."""
 
 from __future__ import annotations
 

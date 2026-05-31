@@ -167,7 +167,7 @@ class NemesisProtocol:
                     source="nemesis-protocol",
                     project="system",
                 )
-        except Exception as e:  # noqa: BLE001 — signal emission failure should not crash analysis
+        except Exception as e:  # noqa: BLE001 - signal emission failure should not crash analysis
             logger.debug("Failed to emit nemesis signal: %s", e)
 
     def assimilate(cls, vector: str, reason: str, db_path: str | None = None) -> bool:
@@ -197,7 +197,7 @@ class NemesisProtocol:
                         source="nemesis-protocol",
                         project="system",
                     )
-            except Exception as e:  # noqa: BLE001 — must not crash analysis
+            except Exception as e:  # noqa: BLE001 - must not crash analysis
                 logger.debug("Failed to emit assimilation signal: %s", e)
 
         return True
@@ -212,5 +212,5 @@ class NemesisProtocol:
             with open(cls.NEMESIS_PATH, "a") as f:
                 f.write(new_row)
         except OSError as e:
-            # Ω₅: survive at all costs — log but do not crash.
+            # Ω₅: survive at all costs - log but do not crash.
             logger.error("Error appending antibody to nemesis.md: %s", e)

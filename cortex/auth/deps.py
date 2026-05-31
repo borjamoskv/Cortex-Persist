@@ -1,4 +1,4 @@
-"""CORTEX Auth — FastAPI dependencies."""
+"""CORTEX Auth - FastAPI dependencies."""
 
 from __future__ import annotations
 

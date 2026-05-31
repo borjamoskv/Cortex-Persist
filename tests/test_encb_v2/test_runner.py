@@ -1,4 +1,4 @@
-"""Tests for runner.py — end-to-end smoke tests."""
+"""Tests for runner.py - end-to-end smoke tests."""
 
 from __future__ import annotations
 

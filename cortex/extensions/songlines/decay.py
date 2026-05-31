@@ -1,5 +1,5 @@
 """
-DecayEngine — The Radioactive Clock.
+DecayEngine - The Radioactive Clock.
 Calculates the semantic evaporation of ghost traces.
 """
 

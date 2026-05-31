@@ -1,6 +1,6 @@
-"""CORTEX CLI — Genesis command group.
+"""CORTEX CLI - Genesis command group.
 
-Commands for the Genesis Engine — creating systems from specs.
+Commands for the Genesis Engine - creating systems from specs.
 Thin CLI wrapper; all logic lives in cortex.genesis.engine.
 """
 
@@ -16,7 +16,7 @@ from cortex.cli.common import console
 
 @click.group("genesis")
 def genesis_group() -> None:
-    """Genesis Engine — create systems from declarative specs."""
+    """Genesis Engine - create systems from declarative specs."""
 
 
 # pyright: reportCallIssue=false
@@ -241,7 +241,7 @@ def extend(
         for f in result.files_created:
             console.print(f"   [dim]{f}[/]")
     else:
-        console.print("\n[yellow]No new files added[/] — all components already exist.")
+        console.print("\n[yellow]No new files added[/] - all components already exist.")
 
     console.print(f"   CHRONOS-1: [yellow]{result.hours_saved:.2f}h[/]")
 

@@ -1,4 +1,4 @@
-"""SICA Constitution — Immutable Epistemic Principles.
+"""SICA Constitution - Immutable Epistemic Principles.
 
 Inspired by Anthropic Constitutional AI. Every agent output is evaluated
 against a set of principles BEFORE emission. Violations trigger meta-level
@@ -87,7 +87,7 @@ class Constitution:
 
     Holds an immutable set of principles against which every output
     is evaluated before emission. The constitution itself CANNOT be
-    modified at runtime — only the strategies for complying with it
+    modified at runtime - only the strategies for complying with it
     can evolve.
     """
 
@@ -150,7 +150,7 @@ class Constitution:
             name="Protected Path Sovereignty",
             description=(
                 "Never touch protected filesystem paths, CloudDocs, or system assets. "
-                "Violations are cardinal — data loss is irreversible."
+                "Violations are cardinal - data loss is irreversible."
             ),
             severity=Severity.CARDINAL,
             evaluator="protected_paths_check",
@@ -179,7 +179,7 @@ class Constitution:
     ) -> ConstitutionalVerdict:
         """Evaluate an output against all constitutional principles.
 
-        This is a structural evaluation — concrete evaluator implementations
+        This is a structural evaluation - concrete evaluator implementations
         are plugged in via the meta-level's evaluation registry.
         """
         violations: list[Violation] = []

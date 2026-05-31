@@ -3,7 +3,7 @@
 # See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
 
-"""CORTEX Skills Module — Cognitive Graph Engine.
+"""CORTEX Skills Module - Cognitive Graph Engine.
 
 De un directorio de .md a un grafo cognitivo vivo.
 Skills que se registran solos, declaran capacidades y se componen bajo demanda.

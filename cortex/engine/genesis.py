@@ -1,12 +1,12 @@
-"""Agent Genesis — L7 Factory for Spawning New Agent Types.
+"""Agent Genesis - L7 Factory for Spawning New Agent Types.
 
 The Genesis engine creates entirely new agent types from evolved genomes.
 This is the "generate new agents" capability of L7:
 
-1. COMPOSE — Combine winning genome fragments into new architectures
-2. SPECIALIZE — Create domain-specific agents from general templates
-3. SPAWN — Instantiate agents with evolved dispatch trees
-4. REGISTER — Add new agent types to the runtime registry
+1. COMPOSE - Combine winning genome fragments into new architectures
+2. SPECIALIZE - Create domain-specific agents from general templates
+3. SPAWN - Instantiate agents with evolved dispatch trees
+4. REGISTER - Add new agent types to the runtime registry
 
 The Genesis engine does NOT use exec() or eval() on raw strings.
 All agent creation flows through the ISA builder's type-safe DSL,

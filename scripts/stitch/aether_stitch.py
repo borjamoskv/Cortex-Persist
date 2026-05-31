@@ -12,7 +12,7 @@ def get_hash(path):
     if not os.path.exists(path):
         return ""
     with open(path, "rb") as f:
-        return hashlib.sha256(f.read()).hexdigest()  # nosec — SHA-256 replaces MD5
+        return hashlib.sha256(f.read()).hexdigest()  # nosec - SHA-256 replaces MD5
 
 
 def watch_tokens():
@@ -30,7 +30,7 @@ def watch_tokens():
                 print("\n[AETHER-STITCH] ⚠️ Alteración estructural de diseño detectada!")
                 print("Lanzando agente de compilación e inspección Visual Noir (130/100)...")
 
-                # Integración con Ouroboros o Gemini (CLI) — safe subprocess call
+                # Integración con Ouroboros o Gemini (CLI) - safe subprocess call
                 prompt = (
                     f"Visualiza los cambios en {TOKENS_PATH}. "
                     "¿Son compatibles con la estética Industrial Noir? "

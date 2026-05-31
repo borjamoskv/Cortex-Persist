@@ -1,4 +1,4 @@
-"""CORTEX — iMessage Sovereign Adapter.
+"""CORTEX - iMessage Sovereign Adapter.
 
 Bridges CORTEX events to Messages.app via AppleScript.
 Allows sending system alerts directly to your phone without external APIs.

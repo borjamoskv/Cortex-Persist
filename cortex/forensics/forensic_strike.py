@@ -1,5 +1,5 @@
 """
-CORTEX Forensic Strike Module (AX-I) — Operation VOID-MAX.
+CORTEX Forensic Strike Module (AX-I) - Operation VOID-MAX.
 High-concurrency smart contract state auditing and anomaly detection.
 """
 

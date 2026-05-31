@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
 """
-CORTEX — Genesis Auditor (Axiom 20 Deployment).
+CORTEX - Genesis Auditor (Axiom 20 Deployment).
 
 Continuously verifies the convergence of the ouroboros_genesis_db
 against the target ontological Seed using OmegaAuditor.

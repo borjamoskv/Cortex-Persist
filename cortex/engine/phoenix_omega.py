@@ -117,7 +117,7 @@ class AnalysisEngine(BaseEngine):
                     atoms.update(file_atoms)
                 except SyntaxError as e:
                     logger.error("SyntaxError inside %s: %s", path, e)
-                except Exception as e:  # noqa: BLE001 — parser boundary isolates file failures
+                except Exception as e:  # noqa: BLE001 - parser boundary isolates file failures
                     logger.error("Failed to read %s: %s", path, e)
 
         # O(1) Graph linking

@@ -1,4 +1,4 @@
-"""CORTEX Toolbox Watchdog — Subprocess Lifecycle Manager.
+"""CORTEX Toolbox Watchdog - Subprocess Lifecycle Manager.
 
 Manages the genai-toolbox binary as a child process, auto-restarting
 on crash with exponential backoff. Designed to co-run alongside
@@ -116,7 +116,7 @@ class ToolboxWatchdog:
                 self._shutdown = True
                 self._kill()
                 raise
-            except Exception as exc:  # noqa: BLE001 — supervisor catches all crashes
+            except Exception as exc:  # noqa: BLE001 - supervisor catches all crashes
                 logger.error(
                     "☠️ [WATCHDOG] Crash detected: %s",
                     exc,
@@ -255,7 +255,7 @@ class ToolboxWatchdog:
                 url=f"http://127.0.0.1:{self._port}",
             ):
                 logger.warning(
-                    "⚠️ [WATCHDOG] Health probe failed but process alive — possible hang.",
+                    "⚠️ [WATCHDOG] Health probe failed but process alive - possible hang.",
                 )
 
     def _kill(self) -> None:

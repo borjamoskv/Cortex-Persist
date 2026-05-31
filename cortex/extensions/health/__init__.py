@@ -1,4 +1,4 @@
-"""CORTEX Health — system-wide monitoring and scoring.
+"""CORTEX Health - system-wide monitoring and scoring.
 
 Usage::
 

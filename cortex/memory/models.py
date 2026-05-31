@@ -151,7 +151,7 @@ class MemoryAccessStats(BaseModel):
 
 
 class MemoryEvent(BaseModel):
-    """Atomic unit of cognitive memory — an immutable interaction record.
+    """Atomic unit of cognitive memory - an immutable interaction record.
 
     Stored in L3 (Event Ledger) for permanent audit trail.
     Flows through L1 (Working Memory) as the sliding window moves.

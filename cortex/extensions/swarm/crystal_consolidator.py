@@ -3,14 +3,14 @@
 The destructive half of the NightShift cycle. Executes 4 consolidation
 strategies on crystals based on their CrystalVitals assessment:
 
-    1. COLD_PURGE     — Remove dead weight (cold + irrelevant + old)
-    2. SEMANTIC_MERGE  — Fuse near-duplicate crystals (cosine > 0.92)
-    3. DIAMOND_PROMOTE — Elevate high-impact crystals to immortal status
-    4. RE_EMBED        — Refresh stale embeddings with current encoder
+    1. COLD_PURGE     - Remove dead weight (cold + irrelevant + old)
+    2. SEMANTIC_MERGE  - Fuse near-duplicate crystals (cosine > 0.92)
+    3. DIAMOND_PROMOTE - Elevate high-impact crystals to immortal status
+    4. RE_EMBED        - Refresh stale embeddings with current encoder
 
 Axiom Derivations:
     Ω₂ (Entropic Asymmetry): Purging reduces noise, increasing recall precision.
-    Ω₅ (Antifragile): Each purge forges an antibody — the radar learns to avoid
+    Ω₅ (Antifragile): Each purge forges an antibody - the radar learns to avoid
         targets that produce dead weight.
 """
 
@@ -122,7 +122,7 @@ async def _execute_cold_purge(
 
             result.purged += 1
             logger.info(
-                "🗑️ [PURGE] %s — temp=%.3f, res=%.3f, age=%.0fd%s",
+                "🗑️ [PURGE] %s - temp=%.3f, res=%.3f, age=%.0fd%s",
                 v.fact_id,
                 v.temperature,
                 v.resonance,
@@ -357,7 +357,7 @@ async def consolidate(
     )
 
     logger.info(
-        "🧹 [CONSOLIDATOR] Starting REM cycle%s — %d crystals to process",
+        "🧹 [CONSOLIDATOR] Starting REM cycle%s - %d crystals to process",
         " (DRY RUN)" if dry_run else "",
         len(vitals),
     )

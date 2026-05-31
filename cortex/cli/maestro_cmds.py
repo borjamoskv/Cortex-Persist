@@ -1,5 +1,5 @@
 """
-CLI de Mac Maestro — Automatización soberana de escritorio macOS.
+CLI de Mac Maestro - Automatización soberana de escritorio macOS.
 
 Comandos para control de teclado, mouse, ventanas y accesibilidad
 desde la terminal.
@@ -200,14 +200,14 @@ def list_windows_cmd(app_name: str):
         if not windows:
             console.print(f"[yellow]⚠ Sin ventanas para '{app_name}'[/yellow]")
             return
-        console.print(f"[bold]{app_name}[/bold] — {len(windows)} ventana(s):")
+        console.print(f"[bold]{app_name}[/bold] - {len(windows)} ventana(s):")
         for w in windows:
             state = ""
             if w.minimized:
                 state = " [minimizada]"
             elif w.fullscreen:
                 state = " [pantalla completa]"
-            console.print(f"  • '{w.title}' — {w.width}×{w.height} @ ({w.x},{w.y}){state}")
+            console.print(f"  • '{w.title}' - {w.width}×{w.height} @ ({w.x},{w.y}){state}")
 
     asyncio.run(_run())
 

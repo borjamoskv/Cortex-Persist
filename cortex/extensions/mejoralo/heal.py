@@ -3,7 +3,7 @@
 Detects the files that lowered the score, delegates refactoring to an LLM agent,
 runs `pytest` to ensure 100% integrity, and automatically commits or rollbacks.
 
-v8.0 — Relentless Mode: no para hasta que sea INMEJORABLE.
+v8.0 - Relentless Mode: no para hasta que sea INMEJORABLE.
 """
 
 from __future__ import annotations
@@ -343,7 +343,7 @@ def heal_project(
     scan_result: ScanResult,
     engine: MejoraloEngine | None = None,  # type: ignore[reportGeneralTypeIssues]
 ) -> bool:
-    """Orchestrate autonomous healing: detect, rewrite, test, commit — RELENTLESSLY."""
+    """Orchestrate autonomous healing: detect, rewrite, test, commit - RELENTLESSLY."""
     from cortex.cli import console  # pyright: ignore
 
     current_result = scan_result

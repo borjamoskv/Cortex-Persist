@@ -1,4 +1,4 @@
-"""CORTEX v6+ — Declarative Agent Schema (YAML → Engine).
+"""CORTEX v6+ - Declarative Agent Schema (YAML → Engine).
 
 Pydantic models that define the YAML schema for a CORTEX agent role.
 Inspired by InitRunner's declarative approach but hydrated with the

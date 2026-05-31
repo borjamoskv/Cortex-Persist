@@ -1,4 +1,4 @@
-"""CORTEX Agent Router — Deterministic Capability Matching.
+"""CORTEX Agent Router - Deterministic Capability Matching.
 
 Maps intents to agent capabilities using keyword/pattern matching
 with fallback chain. Deterministic per Ω₁.

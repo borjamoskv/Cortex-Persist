@@ -1,4 +1,4 @@
-"""NEXUS Agent Registry — Persistent store with Ed25519 identity.
+"""NEXUS Agent Registry - Persistent store with Ed25519 identity.
 
 SQLite-backed registry for agent profiles, capabilities, and metadata.
 Each agent gets a self-certifying Ed25519 key pair on registration.
@@ -312,7 +312,7 @@ class AgentRegistry:
             f"trust_{signal.value}",
             agent_id,
             agent.name,
-            description=f"Trust signal: {signal.value}" + (f" — {reason}" if reason else ""),
+            description=f"Trust signal: {signal.value}" + (f" - {reason}" if reason else ""),
         )
 
         return TrustScore(**state.to_dict())

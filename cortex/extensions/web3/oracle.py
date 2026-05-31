@@ -74,7 +74,7 @@ def send_heartbeat():
             print(f"[Web3 Oracle] ❌ Tx Failed. Block {receipt.blockNumber}. Entropy rising.")  # type: ignore[type-error]
             return False
 
-    except Exception as e:  # noqa: BLE001 — Web3 transaction boundary
+    except Exception as e:  # noqa: BLE001 - Web3 transaction boundary
         print(f"[Web3 Oracle] ❌ Oracle execution error: {e}")
         return False
 

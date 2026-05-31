@@ -1,4 +1,4 @@
-"""Tests for cortex-core/cortex_daemon.py — Sovereign Orchestrator.
+"""Tests for cortex-core/cortex_daemon.py - Sovereign Orchestrator.
 
 C5-REAL coverage for daemon execution, queue processing, and task hygiene.
 """

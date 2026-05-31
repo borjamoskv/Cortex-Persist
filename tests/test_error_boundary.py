@@ -1,4 +1,4 @@
-"""Tests for cortex.immune.error_boundary — Ω₅ Antifragile Decorator."""
+"""Tests for cortex.immune.error_boundary - Ω₅ Antifragile Decorator."""
 
 from __future__ import annotations
 
@@ -73,7 +73,7 @@ async def test_async_cm_reraise_false_swallows(_reset_pipeline):
 
 @pytest.mark.asyncio
 async def test_async_cm_passes_through_cancelled_error(_reset_pipeline):
-    """CancelledError must propagate — never captured."""
+    """CancelledError must propagate - never captured."""
     mock_persist, _ = _reset_pipeline
 
     with pytest.raises(asyncio.CancelledError):
@@ -85,7 +85,7 @@ async def test_async_cm_passes_through_cancelled_error(_reset_pipeline):
 
 @pytest.mark.asyncio
 async def test_async_cm_passes_through_keyboard_interrupt(_reset_pipeline):
-    """KeyboardInterrupt must propagate — never captured."""
+    """KeyboardInterrupt must propagate - never captured."""
     mock_persist, _ = _reset_pipeline
 
     with pytest.raises(KeyboardInterrupt):

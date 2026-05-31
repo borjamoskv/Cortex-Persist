@@ -1,5 +1,5 @@
 """
-CORTEX CLI — Niche Arbitrage Commands
+CORTEX CLI - Niche Arbitrage Commands
 """
 
 import asyncio
@@ -11,7 +11,7 @@ from cortex.extensions.skills.niche_arbitrage.models import NicheTarget
 from cortex.extensions.skills.niche_arbitrage.pipeline import NicheArbitrageEngine
 
 
-@click.group(name="niche", help="Niche Arbitrage — Market Intelligence Pipeline")
+@click.group(name="niche", help="Niche Arbitrage - Market Intelligence Pipeline")
 def niche_cmds():
     """Domain intelligence and market anomaly arbitrage."""
     pass

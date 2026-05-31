@@ -1,4 +1,4 @@
-"""SCRAPER-Ω — Multi-strategy extraction backends.
+"""SCRAPER-Ω - Multi-strategy extraction backends.
 
 Each extractor implements the same interface: async extract(url) -> (title, content).
 The ScraperEngine orchestrates fallback cascades between them.
@@ -174,7 +174,7 @@ class HttpExtractor(BaseExtractor):
                     raise ExtractionError(f"Non-HTML content type: {content_type}")
                 title, markdown = html_to_markdown(response.text)
                 if not markdown or len(markdown) < 50:
-                    raise ExtractionError("Extracted content too short — likely JS-rendered SPA")
+                    raise ExtractionError("Extracted content too short - likely JS-rendered SPA")
                 return (title, markdown)
         except httpx.HTTPStatusError as e:
             raise ExtractionError(f"HTTP {e.response.status_code} for {url}") from e
@@ -183,7 +183,7 @@ class HttpExtractor(BaseExtractor):
 
 
 class JinaExtractor(BaseExtractor):
-    """Jina Reader API — converts any URL to clean markdown.
+    """Jina Reader API - converts any URL to clean markdown.
 
     No API key required for basic usage. Handles JS rendering server-side.
     """
@@ -220,7 +220,7 @@ class JinaExtractor(BaseExtractor):
 
 
 class PlaywrightExtractor(BaseExtractor):
-    """Playwright-based extraction — full browser rendering.
+    """Playwright-based extraction - full browser rendering.
 
     Heaviest strategy. Use as last resort for heavily JS-rendered SPAs.
     Leverages cortex.browser.BrowserEngine.

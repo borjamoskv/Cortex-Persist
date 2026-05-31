@@ -43,7 +43,7 @@ class EvolutionConfig:
 class FitnessOracle:
     """Empirical fitness measurement through execution.
 
-    Does NOT simulate or estimate — it RUNS the strategy and MEASURES.
+    Does NOT simulate or estimate - it RUNS the strategy and MEASURES.
     This is the eval in quote-transform-eval.
     """
 

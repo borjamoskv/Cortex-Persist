@@ -90,7 +90,7 @@ def logout_cmd(db: str, force: bool) -> None:
             if not has_decision:
                 console.print(
                     Panel(
-                        "🚨 Ω₆ — ZENÓN'S RAZOR: Cierre de sesión rechazado.\n\n"
+                        "🚨 Ω₆ - ZENÓN'S RAZOR: Cierre de sesión rechazado.\n\n"
                         "Se ha detectado una fluctuación en la entropía de los archivos que no "
                         "ha sido colapsada en un [noir.cyber]Engrama Causal "
                         "(Decision)[/noir.cyber] reciente.\n\n"

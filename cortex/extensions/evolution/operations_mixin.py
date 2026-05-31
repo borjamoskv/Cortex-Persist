@@ -1,4 +1,4 @@
-"""Evolution Operations Mixin — genetic operators and adversarial processes."""
+"""Evolution Operations Mixin - genetic operators and adversarial processes."""
 
 from __future__ import annotations
 

@@ -24,7 +24,7 @@ def _run_async(coro):
 
 @cli.group()
 def handoff() -> None:
-    """Session Handoff Protocol — compact session continuity."""
+    """Session Handoff Protocol - compact session continuity."""
     pass
 
 

@@ -1,4 +1,4 @@
-"""Tests for ErrorGhostPipeline — Ω₅ Antifragile Autopersistence."""
+"""Tests for ErrorGhostPipeline - Ω₅ Antifragile Autopersistence."""
 
 from __future__ import annotations
 
@@ -120,7 +120,7 @@ class TestRateLimit:
         assert not pipeline._should_suppress("hash_1", "source_A")
         pipeline._record_emission("hash_1", "source_A", 1)
 
-        # Different source — not rate limited
+        # Different source - not rate limited
         assert not pipeline._should_suppress("hash_2", "source_B")
 
 

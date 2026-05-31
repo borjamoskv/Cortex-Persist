@@ -1,4 +1,4 @@
-"""The Elder's Gate (Ω₁) — Deterministic Verification for Swarm Agents."""
+"""The Elder's Gate (Ω₁) - Deterministic Verification for Swarm Agents."""
 
 import logging
 from dataclasses import dataclass

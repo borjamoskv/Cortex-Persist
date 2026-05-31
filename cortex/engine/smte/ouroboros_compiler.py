@@ -1,4 +1,4 @@
-"""OUROBOROS-COMPILER-Ω — AOT Limerent Agent Compiler.
+"""OUROBOROS-COMPILER-Ω - AOT Limerent Agent Compiler.
 
 Transforms high-entropy, low-utility execution graphs (limerent agents)
 into deterministic, minimal paths (pure functions).

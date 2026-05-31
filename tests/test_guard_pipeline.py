@@ -1,4 +1,4 @@
-"""Tests for cortex.engine.guard_pipeline.GuardPipeline — fully isolated, no DB.
+"""Tests for cortex.engine.guard_pipeline.GuardPipeline - fully isolated, no DB.
 
 These tests verify the composable guard/mutator/hook pipeline independently
 of the full CortexEngine, proving that guards can be tested in isolation.
@@ -110,7 +110,7 @@ class TestMutators:
         assert m["mutated"] is True
 
     async def test_chained_mutators(self, pipeline, mock_conn):
-        """Mutators should chain — each receives the previous output."""
+        """Mutators should chain - each receives the previous output."""
 
         async def add_prefix(content, project, fact_type, meta, conn, **kw):
             return f"[PREFIX] {content}", fact_type, meta
@@ -140,7 +140,7 @@ class TestPostHooks:
         hook.on_stored.assert_awaited_once()
 
     async def test_failing_hook_does_not_raise(self, pipeline, mock_conn):
-        """Post-store hooks must never raise — failures are logged."""
+        """Post-store hooks must never raise - failures are logged."""
         hook = MagicMock()
         hook.on_stored = AsyncMock(side_effect=RuntimeError("disk on fire"))
         pipeline.add_post_hook(hook)

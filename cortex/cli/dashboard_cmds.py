@@ -247,7 +247,7 @@ def _build_activity(recent: list[dict]) -> Panel:
     table.add_column("Content", style="white", ratio=1)
 
     if not recent:
-        table.add_row("—", "—", "—", f"[{_DIM}]No recent activity[/]")
+        table.add_row("-", "-", "-", f"[{_DIM}]No recent activity[/]")
     else:
         for fact in recent[:8]:
             fact_type = str(fact.get("type", "?"))
@@ -344,7 +344,7 @@ def _build_dashboard(data: dict) -> Layout:
 @click.option("--interval", default=2.0, help="Refresh interval in seconds")
 @click.option("--once", is_flag=True, help="Show single snapshot and exit")
 def dashboard(db: str, interval: float, once: bool) -> None:
-    """Live sovereign dashboard — system health, entropy, ledger, activity."""
+    """Live sovereign dashboard - system health, entropy, ledger, activity."""
     engine = get_engine(db)
     try:
         if once:

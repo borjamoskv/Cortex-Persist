@@ -110,7 +110,7 @@ class HypothesisEngineTool:
         confidence: str = "C2",
         project: str = "research",
     ) -> str:
-        """Async execution — persists hypothesis to CORTEX engine."""
+        """Async execution - persists hypothesis to CORTEX engine."""
         fact_type = _VERDICT_TYPE_MAP.get(verdict, "discovery")
 
         logger.info(

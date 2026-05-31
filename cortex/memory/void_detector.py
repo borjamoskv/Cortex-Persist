@@ -1,4 +1,4 @@
-"""CORTEX v7+ — Epistemic Void Detector.
+"""CORTEX v7+ - Epistemic Void Detector.
 
 Strategy #12: Before the agent responds, analyze the *topology* of
 the retrieval results to determine whether it truly knows the answer,
@@ -117,7 +117,7 @@ class EpistemicVoidDetector:
     Call ``analyze()`` with the raw search results to get a typed
     EpistemicAnalysis before the agent formulates its response.
 
-    Pure logic — no I/O, no DB, no async. Fits into any pipeline.
+    Pure logic - no I/O, no DB, no async. Fits into any pipeline.
     """
 
     def __init__(
@@ -221,7 +221,7 @@ class EpistemicVoidDetector:
                 candidate_count=count,
                 recommendation=(
                     f"Only {count} result(s) found (threshold: {self._fog_density}). "
-                    "Sparse knowledge region — low confidence."
+                    "Sparse knowledge region - low confidence."
                 ),
             )
 
@@ -257,7 +257,7 @@ class EpistemicVoidDetector:
                     continue
                 sim = cosine_similarity(emb1, emb2)
                 if sim >= self._contradiction_floor:
-                    # Same topic — check for negation signals
+                    # Same topic - check for negation signals
                     if self._detect_negation(c1["content"], c2["content"]):
                         contradictions.append(
                             ConflictPair(

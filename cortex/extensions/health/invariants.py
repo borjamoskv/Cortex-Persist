@@ -1,6 +1,6 @@
 """Health system invariant verification.
 
-Self-test that runs in tests AND daemon — any future regression
+Self-test that runs in tests AND daemon - any future regression
 breaks automatically.
 """
 
@@ -23,7 +23,7 @@ def verify_health_system(
     Call from tests and daemon self-check.
     """
     violations: list[str] = []
-    # CRITICAL: do NOT use `registry or default` — empty registry
+    # CRITICAL: do NOT use `registry or default` - empty registry
     # has __len__==0 which makes bool(registry)==False in Python.
     reg = create_default_registry() if registry is None else registry
 
@@ -58,7 +58,7 @@ def verify_health_system(
     if total_weight <= 0:
         violations.append(f"Total collector weight must be > 0, got {total_weight}")
 
-    # 5. Built-in collector count — must be at least 9
+    # 5. Built-in collector count - must be at least 9
     if len(reg) < 9:
         violations.append(f"Need at least 9 collectors, have {len(reg)}")
 
@@ -100,7 +100,7 @@ def verify_health_system(
     if missing:
         violations.append(f"Missing required collectors: {sorted(missing)}")
 
-    # 10. Sub-index coverage — all collector names must appear in at least one sub-index
+    # 10. Sub-index coverage - all collector names must appear in at least one sub-index
 
     # Build the mapping from scorer's internals
     sub_idx_mapping = {

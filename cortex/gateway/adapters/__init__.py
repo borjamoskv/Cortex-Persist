@@ -1,4 +1,4 @@
-"""CORTEX Gateway — Adapters package."""
+"""CORTEX Gateway - Adapters package."""
 
 from __future__ import annotations
 

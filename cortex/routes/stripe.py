@@ -8,9 +8,9 @@ Usage:
     Registered opt-in in api.py when STRIPE_SECRET_KEY is set.
 
 Environment variables:
-    STRIPE_SECRET_KEY — sk_live_... or sk_test_...
-    STRIPE_WEBHOOK_SECRET — whsec_... from Stripe dashboard
-    STRIPE_PRICE_TABLE — JSON mapping plan names to Stripe Price IDs
+    STRIPE_SECRET_KEY - sk_live_... or sk_test_...
+    STRIPE_WEBHOOK_SECRET - whsec_... from Stripe dashboard
+    STRIPE_PRICE_TABLE - JSON mapping plan names to Stripe Price IDs
 """
 
 import hashlib

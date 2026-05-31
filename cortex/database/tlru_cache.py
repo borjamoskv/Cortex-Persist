@@ -5,7 +5,7 @@ Bounded-memory deduplication cache with automatic TTL eviction.
 Replaces unbounded dict caches (Nexus dedup, etc.) to prevent
 memory leaks under sustained write load.
 
-Derivation: Ω₂ (Entropic Asymmetry) — bounded memory = bounded entropy cost.
+Derivation: Ω₂ (Entropic Asymmetry) - bounded memory = bounded entropy cost.
 """
 
 from __future__ import annotations
@@ -60,7 +60,7 @@ class TLRUCache:
         """Insert or update a key. Evicts LRU entry if at capacity. O(1)."""
         now = time.monotonic()
         if key in self._cache:
-            # Update existing — move to end
+            # Update existing - move to end
             self._cache[key] = (now, value)
             self._cache.move_to_end(key)
             return

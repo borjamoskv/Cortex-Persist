@@ -1,15 +1,15 @@
-"""CORTEX Gateway — FastAPI REST Adapter.
+"""CORTEX Gateway - FastAPI REST Adapter.
 
 Exposes the GatewayRouter as a set of REST endpoints.
 These routes accept normalized GatewayRequests and return GatewayResponses.
 
 Endpoints::
 
-    POST /gateway/v1/store    — store a fact
-    POST /gateway/v1/search   — semantic search
-    POST /gateway/v1/recall   — recall project facts
-    GET  /gateway/v1/status   — system status
-    POST /gateway/v1/emit     — fire a notification event
+    POST /gateway/v1/store    - store a fact
+    POST /gateway/v1/search   - semantic search
+    POST /gateway/v1/recall   - recall project facts
+    GET  /gateway/v1/status   - system status
+    POST /gateway/v1/emit     - fire a notification event
 
 Auth: reuses existing CORTEX API key mechanism (X-API-Key header).
 """

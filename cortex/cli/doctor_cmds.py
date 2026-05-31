@@ -84,7 +84,7 @@ def check_env() -> dict:
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 @click.option("--json", "as_json", is_flag=True, help="Output as JSON")
 def doctor(db: str, as_json: bool) -> None:
-    """🩺 CORTEX Doctor — System diagnostic and health tool."""
+    """🩺 CORTEX Doctor - System diagnostic and health tool."""
     report = {
         "python": check_python(),
         "dependencies": check_dependencies(),
@@ -97,7 +97,7 @@ def doctor(db: str, as_json: bool) -> None:
         return
 
     console.print(
-        Panel("[bold #CCFF00]🩺 CORTEX DOCTOR — INFORME DE DIAGNÓSTICO[/]", border_style="#6600FF")
+        Panel("[bold #CCFF00]🩺 CORTEX DOCTOR - INFORME DE DIAGNÓSTICO[/]", border_style="#6600FF")
     )
 
     # Environment

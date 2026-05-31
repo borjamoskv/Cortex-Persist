@@ -1,4 +1,4 @@
-"""Tests for sortu_ledger.py — Skill lifecycle persistence."""
+"""Tests for sortu_ledger.py - Skill lifecycle persistence."""
 
 from __future__ import annotations
 

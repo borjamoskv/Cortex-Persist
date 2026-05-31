@@ -22,7 +22,7 @@ def export_facts(facts: list[Fact], fmt: str = "json") -> str:
 
     Args:
         facts: List of Fact objects.
-        fmt: Format — 'json', 'csv', 'jsonl', or 'notebooklm'.
+        fmt: Format - 'json', 'csv', 'jsonl', or 'notebooklm'.
 
     Returns:
         Formatted string.

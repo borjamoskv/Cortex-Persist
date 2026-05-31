@@ -139,7 +139,7 @@ class ApotheosisAuditsMixin:
                 ENDOCRINE.pulse(HormoneType.DOPAMINE, +0.05)
         except (AttributeError, sqlite3.Error, asyncio.CancelledError) as e:
             logger.debug("[ORACLE] Audit skipped: %s", e)
-        except Exception as e:  # noqa: BLE001 — intentional re-raise after logging
+        except Exception as e:  # noqa: BLE001 - intentional re-raise after logging
             logger.error("[ORACLE] Unexpected audit failure: %s", e)
             raise
 

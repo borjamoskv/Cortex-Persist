@@ -1,4 +1,4 @@
-"""CORTEX CLI — Health dashboard command.
+"""CORTEX CLI - Health dashboard command.
 
 Rich terminal dashboard showing system health at a glance.
 Added to the `cortex health` command group.

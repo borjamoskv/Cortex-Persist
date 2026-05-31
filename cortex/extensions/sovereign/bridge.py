@@ -1,5 +1,5 @@
 # cortex/sovereign/bridge.py
-"""Sovereign Bridge — The interface between CORTEX and Antigravity skills.
+"""Sovereign Bridge - The interface between CORTEX and Antigravity skills.
 
 Provides the `SovereignBridge` class, which handles dynamic loading and
 execution of Antigravity skills (aether-1, keter-omega, legion-1, etc.)

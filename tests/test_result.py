@@ -1,4 +1,4 @@
-"""Tests for cortex.utils.result — Railway Oriented Programming monads."""
+"""Tests for cortex.utils.result - Railway Oriented Programming monads."""
 
 from __future__ import annotations
 

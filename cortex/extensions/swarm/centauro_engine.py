@@ -98,12 +98,12 @@ class VirtualAgent:
                     intent=IntentProfile.GENERAL,
                 )
                 result = await self._router.execute_resilient(cortex_prompt)
-                # Result is Ok(str) | Err(str) — extract value regardless
+                # Result is Ok(str) | Err(str) - extract value regardless
                 if hasattr(result, "ok") and result.ok is not None:
                     return str(result.ok)
                 if hasattr(result, "err") and result.err is not None:
                     logger.warning(
-                        "VirtualAgent %s: router returned error for task %s: %s — "
+                        "VirtualAgent %s: router returned error for task %s: %s - "
                         "falling back to C4-SIM stub.",
                         self.agent_id,
                         task_idx,
@@ -113,7 +113,7 @@ class VirtualAgent:
                 return str(result.ok if hasattr(result, "ok") else result)
             except Exception as exc:  # noqa: BLE001
                 logger.warning(
-                    "VirtualAgent %s: C5-REAL dispatch failed (%s) — "
+                    "VirtualAgent %s: C5-REAL dispatch failed (%s) - "
                     "degrading to C4-SIM for task %s.",
                     self.agent_id,
                     exc,
@@ -123,7 +123,7 @@ class VirtualAgent:
         # ── C4-SIM path (testing scaffold / router unavailable) ───────
         if self._execution_delay > 0:
             await asyncio.sleep(self._execution_delay)
-        return f"[C4-SIM] Result for {task_idx} — {self.specialty} Operation '{prompt}' completed"
+        return f"[C4-SIM] Result for {task_idx} - {self.specialty} Operation '{prompt}' completed"
 
 
 class CentauroEngine:
@@ -190,7 +190,7 @@ class CentauroEngine:
         """Execute agents and race for Byzantine consensus (Ω₃ Quorum).
 
         Returns:
-            (winning_proposal, agents_used) — proposal is None if consensus failed.
+            (winning_proposal, agents_used) - proposal is None if consensus failed.
         """
         proposals: dict[str, str] = {}
 

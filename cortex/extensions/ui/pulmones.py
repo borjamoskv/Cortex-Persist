@@ -21,7 +21,7 @@ class SpringConfig:
 class TemporalInversion:
     """
     KAIROS-Ω core logic. Calculating dynamic responses for interfaces so they
-    don't just animate—they breathe and react to the user's velocity.
+    don't just animate-they breathe and react to the user's velocity.
     """
 
     @staticmethod

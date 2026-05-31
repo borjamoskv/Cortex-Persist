@@ -83,7 +83,7 @@ class SovereignVectorStoreL2(SchemaTrait, ReadTrait, WriteTrait):
         self._half_life = half_life_days * 24 * 3600
         self._vector_enabled = False
         # Lazy-initialized subsystems
-        self._hybrid = None  # L2HybridSearch — created after conn is ready
+        self._hybrid = None  # L2HybridSearch - created after conn is ready
         self._sanitizer = None  # PIISanitizer singleton
 
     async def close(self) -> None:

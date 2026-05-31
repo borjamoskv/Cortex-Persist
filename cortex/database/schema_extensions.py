@@ -1,4 +1,4 @@
-"""schema_extensions — Extended SQLite tables for CORTEX v5.
+"""schema_extensions - Extended SQLite tables for CORTEX v5.
 
 Extracted from database/schema.py to satisfy the Landauer LOC barrier.
 Contains: Consensus/RWC (votes, agents, trust), Monitoring (signals, entity_events),
@@ -195,7 +195,7 @@ CREATE INDEX IF NOT EXISTS idx_evo_cycle ON evolution_state(cycle);
 CREATE INDEX IF NOT EXISTS idx_evo_domain ON evolution_state(agent_domain);
 """
 
-# ─── Signal Bus (L1 Consciousness — Cross-Tool Reactive Signaling) ───
+# ─── Signal Bus (L1 Consciousness - Cross-Tool Reactive Signaling) ───
 CREATE_SIGNALS = """
 CREATE TABLE IF NOT EXISTS signals (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -216,7 +216,7 @@ CREATE INDEX IF NOT EXISTS idx_signals_created ON signals(created_at);
 CREATE INDEX IF NOT EXISTS idx_signals_project ON signals(project);
 """
 
-# ─── Entity Events (Solid-State Substrate — Append-Only Ledger) ──────
+# ─── Entity Events (Solid-State Substrate - Append-Only Ledger) ──────
 CREATE_ENTITY_EVENTS = """
 CREATE TABLE IF NOT EXISTS entity_events (
     id              TEXT PRIMARY KEY,
@@ -239,7 +239,7 @@ CREATE INDEX IF NOT EXISTS idx_ee_type ON entity_events(event_type);
 CREATE INDEX IF NOT EXISTS idx_ee_timestamp ON entity_events(timestamp);
 """
 
-# ─── Sovereign Locks (Axiom Ω₂ — Lock-Free Concurrency) ──────────────
+# ─── Sovereign Locks (Axiom Ω₂ - Lock-Free Concurrency) ──────────────
 CREATE_LOCK_INTENTS = """
 CREATE TABLE IF NOT EXISTS lock_intents (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -448,7 +448,7 @@ CREATE TRIGGER IF NOT EXISTS trg_facts_au AFTER UPDATE ON facts BEGIN
 END;
 """
 
-# Convenience export — all extension statements in insertion order
+# Convenience export - all extension statements in insertion order
 EXTENSION_SCHEMA = [
     CREATE_AGENTS,
     CREATE_VOTES_V2,

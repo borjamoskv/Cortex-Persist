@@ -1,16 +1,16 @@
-"""StorageGuard — Mandatory pre-store middleware.
+"""StorageGuard - Mandatory pre-store middleware.
 
 No fact reaches the database without passing through this guard.
 This is NOT opt-in. CortexEngine.store() calls it automatically.
 
 Enforces:
-1. Source attribution — every fact must have a source
-2. Privacy classification — delegates to PrivacyMixin (blocks unclassified sensitive data)
-3. Content integrity — size limits, poisoning detection (delegates to MCPGuard)
-4. Fact type whitelist — only allowed types pass
-5. Project validation — non-empty, reasonable length
+1. Source attribution - every fact must have a source
+2. Privacy classification - delegates to PrivacyMixin (blocks unclassified sensitive data)
+3. Content integrity - size limits, poisoning detection (delegates to MCPGuard)
+4. Fact type whitelist - only allowed types pass
+5. Project validation - non-empty, reasonable length
 
-Copyright 2026 by borjamoskv.com — Apache-2.0
+Copyright 2026 by borjamoskv.com - Apache-2.0
 """
 
 from __future__ import annotations

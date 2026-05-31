@@ -1,4 +1,4 @@
-"""CORTEX — Notification Bus.
+"""CORTEX - Notification Bus.
 
 Pluggable notification layer that delivers CORTEX events to external
 channels (Telegram, macOS, Slack, webhooks, etc.).

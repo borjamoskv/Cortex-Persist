@@ -1,8 +1,8 @@
-"""Bayesian Trust Updater — Sovereign confidence as a running posterior.
+"""Bayesian Trust Updater - Sovereign confidence as a running posterior.
 
 Treats fact confidence as a Beta distribution:
-  - alpha (α): successes — confirmations, high-confidence citations
-  - beta  (β): failures  — contradictions, low-confidence evidence
+  - alpha (α): successes - confirmations, high-confidence citations
+  - beta  (β): failures  - contradictions, low-confidence evidence
 
 After enough updates the posterior mean converges naturally to C5/C4/C3.
 We write the result back to `facts.confidence` and `facts.consensus_score`.
@@ -27,11 +27,11 @@ __all__ = ["BayesianTrustUpdater", "Signal", "TrustUpdate"]
 logger = logging.getLogger("cortex.extensions.trust")
 
 
-# Confidence → (α₀, β₀) priors — start from empirical base rates
+# Confidence → (α₀, β₀) priors - start from empirical base rates
 _PRIORS: dict[str, tuple[float, float]] = {
     "C5": (9.0, 1.0),  # Very strong prior toward trust
     "C4": (7.0, 3.0),
-    "C3": (5.0, 5.0),  # Symmetric — uncertain
+    "C3": (5.0, 5.0),  # Symmetric - uncertain
     "C2": (3.0, 7.0),
     "C1": (1.0, 9.0),  # Very strong prior toward distrust
     "unknown": (2.0, 2.0),

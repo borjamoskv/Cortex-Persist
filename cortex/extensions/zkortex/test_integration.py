@@ -1,5 +1,5 @@
 """
-ZKORTEX — Integration Test Suite.
+ZKORTEX - Integration Test Suite.
 
 Demuestra el protocolo completo de opacidad selectiva:
     1. CORTEX ingiere hechos (privados)
@@ -26,7 +26,7 @@ def test_full_sovereign_opacity_protocol() -> None:
     from cortex.extensions.zkortex import SovereignOpacityLayer, ZKOrtexVerifier
 
     print("\n" + "═" * 60)
-    print("  ZKORTEX — SOVEREIGN OPACITY PROTOCOL")
+    print("  ZKORTEX - SOVEREIGN OPACITY PROTOCOL")
     print("  Demostración Zero-Knowledge Completa")
     print("═" * 60)
 
@@ -47,7 +47,7 @@ def test_full_sovereign_opacity_protocol() -> None:
         opacity_strategy=SovereignOpacityLayer.STRATEGY_MEDIUM, session_id="sovereign-demo-session"
     )
 
-    # ── 3. Ingestión — genera el root público ─────────────────────────────────
+    # ── 3. Ingestión - genera el root público ─────────────────────────────────
     public_root = opacity.ingest_facts(private_knowledge)
     print(f"[PÚBLICO] Merkle Root publicado: {public_root[:32]}...")
     print("[PÚBLICO] Este hash representa TODO el conocimiento, sin revelar nada")
@@ -69,7 +69,7 @@ def test_full_sovereign_opacity_protocol() -> None:
     print("[VERIFIER] El hecho existe en el knowledge set de CORTEX")
     print("[VERIFIER] El Verifier NO ha visto ningún otro hecho")
 
-    # ── 6. Prueba de rango — "¿Tienes más de 3 hechos?" ──────────────────────
+    # ── 6. Prueba de rango - "¿Tienes más de 3 hechos?" ──────────────────────
     print("\n[AUDITOR] ¿Tiene CORTEX entre 3 y 100 hechos?")
     range_proof = opacity.prove_count_in_range(3, 100)
     assert range_proof is not None
@@ -78,7 +78,7 @@ def test_full_sovereign_opacity_protocol() -> None:
     print(f"[VERIFIER] Rango: {'✓ CONFIRMADO' if range_result.is_valid else '✗ RECHAZADO'}")
     print("[VERIFIER] CORTEX tiene entre 3 y 100 hechos. El número exacto: REDACTADO.")
 
-    # ── 7. Commitment — CORTEX se compromete a un hecho futuro ───────────────
+    # ── 7. Commitment - CORTEX se compromete a un hecho futuro ───────────────
     print("\n[CORTEX] Emitiendo commitment a un hecho sensible...")
     commitment = opacity.commit_to_knowledge(
         fact_id="wallet-balance-2026-03",
@@ -102,7 +102,7 @@ def test_full_sovereign_opacity_protocol() -> None:
 
 
 def _fact_fingerprint(fact: str) -> str:
-    """Helper para fingerprint — replicando la lógica interna de SovereignOpacityLayer."""
+    """Helper para fingerprint - replicando la lógica interna de SovereignOpacityLayer."""
     import hashlib
 
     return hashlib.sha256(b"zkortex:fact:" + fact.encode()).hexdigest()
@@ -146,7 +146,7 @@ def test_range_proof_honesty() -> None:
     proof = prove_range(42, 10, 100)
     assert verify_range_proof(proof)
 
-    # Deshonesto — debe lanzar ValueError
+    # Deshonesto - debe lanzar ValueError
     try:
         prove_range(200, 10, 100)
         raise AssertionError("Should have raised ValueError")

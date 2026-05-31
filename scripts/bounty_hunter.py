@@ -5,7 +5,7 @@ import time
 from cortex.memory.encoder import AsyncEncoder
 from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
 
-# CORTEX — Operation VOID-MAX: Bounty Hunter (Lido/SSV Edition)
+# CORTEX - Operation VOID-MAX: Bounty Hunter (Lido/SSV Edition)
 # Targets: $10M Immunefi Lido/SSV Bounties.
 # Axiom Ω6: Zero-Rhetoric Mandate.
 

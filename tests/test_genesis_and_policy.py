@@ -1,6 +1,6 @@
-"""Tests for cortex.genesis — GenesisEngine, SystemSpec, preview, CHRONOS-1.
+"""Tests for cortex.genesis - GenesisEngine, SystemSpec, preview, CHRONOS-1.
 
-No temp database required — Genesis operates on the filesystem.
+No temp database required - Genesis operates on the filesystem.
 """
 
 from __future__ import annotations

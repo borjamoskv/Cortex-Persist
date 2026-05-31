@@ -8,7 +8,7 @@ from cortex.extensions.genesis.models import ComponentSpec
 def _render_cli_command(system_name: str, comp: ComponentSpec) -> str:
     """Render a Click CLI command group."""
     parts: list[str] = []
-    docstring = comp.docstring or f"CORTEX Genesis — CLI commands for {system_name}."
+    docstring = comp.docstring or f"CORTEX Genesis - CLI commands for {system_name}."
     parts.append(f'"""{docstring}"""\n\nfrom __future__ import annotations\n')
     parts.extend(["import click", ""])
     if comp.imports:

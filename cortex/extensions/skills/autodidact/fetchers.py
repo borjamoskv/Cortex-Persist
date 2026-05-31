@@ -51,7 +51,7 @@ async def fetch_jina_markdown(url: str) -> str:
 
 
 # ==============================================================================
-# 2. (REMOVED — Firecrawl purged. Jina + Playwright cover all cases.)
+# 2. (REMOVED - Firecrawl purged. Jina + Playwright cover all cases.)
 # ==============================================================================
 
 
@@ -158,6 +158,6 @@ async def execute_cognitive_acquisition(intent_type: str, target: str) -> Any:
         if intent_type == "audio_ingest":
             return _unwrap(await fetch_assemblyai_transcript(target))
         return _unwrap(await fetch_jina_markdown(target))
-    except Exception as e:  # noqa: BLE001 — fetcher fallback to physical browser on any failure
+    except Exception as e:  # noqa: BLE001 - fetcher fallback to physical browser on any failure
         logger.error("⚠️ Error en adquisición '%s': %s. Probando GIDATU...", intent_type, e)
         return _unwrap(await fetch_gidatu_browser(target))

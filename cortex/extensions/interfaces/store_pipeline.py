@@ -1,4 +1,4 @@
-"""Store Pipeline Protocols — Decoupled contracts for the write path.
+"""Store Pipeline Protocols - Decoupled contracts for the write path.
 
 Modules implementing these protocols can be registered with the engine
 at init time instead of being hardcoded into store_mixin.py.
@@ -60,7 +60,7 @@ class ContentMutator(Protocol):
         """Transform content before storage.
 
         Returns:
-            (content, fact_type, meta) — potentially modified.
+            (content, fact_type, meta) - potentially modified.
         """
         ...
 
@@ -86,6 +86,6 @@ class PostStoreHook(Protocol):
     ) -> None:
         """Execute post-store side effect.
 
-        Must not raise — exceptions are logged and swallowed.
+        Must not raise - exceptions are logged and swallowed.
         """
         ...

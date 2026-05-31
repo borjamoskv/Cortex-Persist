@@ -1,4 +1,4 @@
-"""ROI & Efficiency Quantification — CHRONOS-1 Integration.
+"""ROI & Efficiency Quantification - CHRONOS-1 Integration.
 
 Data-driven ROI engine that queries real CHRONOS metadata
 stored in CORTEX facts to aggregate systemic leverage metrics.

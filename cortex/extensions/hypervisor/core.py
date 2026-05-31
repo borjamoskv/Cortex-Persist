@@ -1,4 +1,4 @@
-"""CORTEX Hypervisor — Core Orchestrator.
+"""CORTEX Hypervisor - Core Orchestrator.
 
 The AgencyHypervisor is the singleton that mediates between the simple
 tenant surface (AgentHandle) and the fractal internal machinery.
@@ -29,7 +29,7 @@ logger = logging.getLogger("cortex.extensions.hypervisor")
 
 
 class AgencyHypervisor:
-    """The Telescope Membrane — singleton that hides CORTEX complexity.
+    """The Telescope Membrane - singleton that hides CORTEX complexity.
 
     Creates AgentHandles for tenants and routes their 3 verbs
     through isolation → compression → projection pipelines.
@@ -82,7 +82,7 @@ class AgencyHypervisor:
         tags: list[str] | None = None,
         meta: dict[str, Any] | None = None,
     ) -> Receipt:
-        """The real remember() — store + compress + project side-effects."""
+        """The real remember() - store + compress + project side-effects."""
         isolator = self._isolators[tenant]
 
         # 1. Store via engine (isolator injects tenant_id)
@@ -100,7 +100,7 @@ class AgencyHypervisor:
         # 2. Fire invisible side-effects (non-blocking)
         try:
             await self._projector.on_remember(fact_id, project, content)
-        except Exception:  # noqa: BLE001 — projector must never break store
+        except Exception:  # noqa: BLE001 - projector must never break store
             logger.debug("Projector on_remember failed for fact %d", fact_id)
 
         # 3. Compress to Receipt (tenant never sees fact_id as int)
@@ -114,7 +114,7 @@ class AgencyHypervisor:
         query: str,
         limit: int = 5,
     ) -> list[Memory]:
-        """The real recall() — search + compress results."""
+        """The real recall() - search + compress results."""
         isolator = self._isolators[tenant]
 
         # Search via engine
@@ -154,7 +154,7 @@ class AgencyHypervisor:
         tenant: str,
         project: str,
     ) -> HealthReport:
-        """The real reflect() — gather stats + verify chain + compress."""
+        """The real reflect() - gather stats + verify chain + compress."""
         isolator = self._isolators[tenant]
         tid = isolator.tenant_id
 

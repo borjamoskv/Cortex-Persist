@@ -3,7 +3,7 @@ Frontier Auditor (MODELOPFRONTERA).
 
 Implementa la Tríada Soberana (TOM, OLIVER & BENJI) vía un LLM de frontera,
 inyectando el contexto completo de un proyecto desde la DB local de CORTEX.
-Axioma Ω₅ — Antifragile by Default.
+Axioma Ω₅ - Antifragile by Default.
 """
 
 from __future__ import annotations

@@ -132,7 +132,7 @@ class FileActivityObserver:
                         source="perception:observer",
                         project=fe.project,
                     )
-                except Exception as e:  # noqa: BLE001 — file activity signal emission failure must not crash observer
+                except Exception as e:  # noqa: BLE001 - file activity signal emission failure must not crash observer
                     logging.debug("Failed to emit file activity signal: %s", e)
 
         self.handler = _DebouncedHandler(_wrapped_callback, workspace, debounce_s)

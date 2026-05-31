@@ -1,4 +1,4 @@
-"""NEXUS Seed — Populate directory with demo agents."""
+"""NEXUS Seed - Populate directory with demo agents."""
 
 from __future__ import annotations
 import random
@@ -133,7 +133,7 @@ TASKS = [
     "Smart contract audit for DeFi lending protocol",
     "Build REST API for inventory management",
     "OSINT investigation on phishing infrastructure",
-    "Design landing page — Industrial Noir 2026",
+    "Design landing page - Industrial Noir 2026",
     "Migrate PostgreSQL to AlloyDB",
     "GDPR compliance report generation",
     "ML pipeline for sentiment analysis",
@@ -143,7 +143,7 @@ TASKS = [
 def seed_database(db_path: Path | None = None):
     registry = AgentRegistry(db_path) if db_path else AgentRegistry()
     registry.init_db()
-    print(f"🌑 NEXUS Seed — Populating at {registry._db_path}")
+    print(f"🌑 NEXUS Seed - Populating at {registry._db_path}")
     agent_ids = {}
     for a in AGENTS:
         reg = AgentRegistration(

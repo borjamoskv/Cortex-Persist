@@ -1,8 +1,8 @@
-"""compaction_drift — Drift Check strategy for the Auto-Compaction Engine.
+"""compaction_drift - Drift Check strategy for the Auto-Compaction Engine.
 
 Extracted from compactor.py to satisfy the Landauer LOC barrier (≤500).
 Non-destructive diagnostic: checks L2 vector space topological health.
-Does not deprecate or modify any facts — diagnostic only.
+Does not deprecate or modify any facts - diagnostic only.
 """
 
 from __future__ import annotations
@@ -25,7 +25,7 @@ async def apply_drift_check(
 ) -> None:
     """Check L2 vector space topological health.
 
-    Non-destructive — appends diagnostic info to result.details only.
+    Non-destructive - appends diagnostic info to result.details only.
     Does not deprecate or modify any facts.
     """
     from cortex.compaction.compactor import CompactionStrategy
@@ -56,7 +56,7 @@ async def apply_drift_check(
 
         embeddings = np.array([np.frombuffer(row[0], dtype=np.float32) for row in rows])
 
-        from pathlib import Path  # noqa: F401 — used implicitly by DRIFT_DIR
+        from pathlib import Path  # noqa: F401 - used implicitly by DRIFT_DIR
 
         from cortex.core.paths import DRIFT_DIR
 

@@ -1,5 +1,5 @@
 """
-CORTEX — Health Guard (Axiom 14: System Integrity).
+CORTEX - Health Guard (Axiom 14: System Integrity).
 
 Circuit breaker that blocks writes or intense operations if the
 underlying system health is degraded or failing. This prevents entropy

@@ -1,4 +1,4 @@
-"""Tests for Hybrid Logical Clock — Phase 4."""
+"""Tests for Hybrid Logical Clock - Phase 4."""
 
 import time
 

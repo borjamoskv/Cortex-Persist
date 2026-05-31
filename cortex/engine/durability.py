@@ -1,5 +1,5 @@
 """
-DURABILITY-1 — CORTEX Persistence Supervisor (Ω₃ / Ω₅).
+DURABILITY-1 - CORTEX Persistence Supervisor (Ω₃ / Ω₅).
 Implements the two-layer persistence strategy:
 1. C5 Supervisor: Interval-based background flushing.
 2. C4 atexit: Fallback for clean process termination.

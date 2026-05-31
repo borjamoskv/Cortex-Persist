@@ -1,4 +1,4 @@
-"""Predictive Healer — Proactive Failure Prevention for Level 5+6.
+"""Predictive Healer - Proactive Failure Prevention for Level 5+6.
 
 Analyzes telemetry trends to predict failures BEFORE they happen
 and applies preventive repairs. Transforms L5 from reactive to proactive.

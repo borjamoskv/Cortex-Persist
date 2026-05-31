@@ -68,7 +68,7 @@ def setup_logging(verbose: bool = False) -> None:
     level = logging.DEBUG if verbose else logging.INFO
     logging.basicConfig(
         level=level,
-        format="%(asctime)s [%(name)s] %(levelname)s — %(message)s",
+        format="%(asctime)s [%(name)s] %(levelname)s - %(message)s",
         datefmt="%H:%M:%S",
     )
 
@@ -162,7 +162,7 @@ def check(ctx: click.Context) -> None:
     console.print()
     console.print(
         Panel(
-            "[bold]MOSKV-1 DAEMON — CHECK[/]",
+            "[bold]MOSKV-1 DAEMON - CHECK[/]",
             border_style="cyan",
         )
     )
@@ -188,7 +188,7 @@ def check(ctx: click.Context) -> None:
     console.print("[bold]▸ Stale Projects[/]")
     if status.stale_ghosts:
         for g in status.stale_ghosts:
-            console.print(f"  💤 [yellow]{g.project}[/] — {g.hours_stale:.0f}h sin actividad")
+            console.print(f"  💤 [yellow]{g.project}[/] - {g.hours_stale:.0f}h sin actividad")
     else:
         console.print("  [green]✅ All projects active[/]")
     console.print()
@@ -197,7 +197,7 @@ def check(ctx: click.Context) -> None:
     console.print("[bold]▸ CORTEX Memory[/]")
     if status.memory_alerts:
         for m in status.memory_alerts:
-            console.print(f"  ⚠️  [yellow]{m.file}[/] — {m.hours_stale:.0f}h stale")
+            console.print(f"  ⚠️  [yellow]{m.file}[/] - {m.hours_stale:.0f}h stale")
     else:
         console.print("  [green]✅ Memory fresh[/]")
     console.print()
@@ -250,7 +250,7 @@ def status(as_json: bool) -> None:
         sys.exit(0 if last.get("all_healthy") else 1)
 
     # Rich table mode (existing behavior)
-    table = Table(title="MOSKV-1 — Last Status", show_header=True, header_style="bold")
+    table = Table(title="MOSKV-1 - Last Status", show_header=True, header_style="bold")
     table.add_column("Field", style="cyan")
     table.add_column("Value")
 
@@ -281,7 +281,7 @@ def status(as_json: bool) -> None:
 @cli.command()
 def version() -> None:
     """Show CORTEX / MOSKV-1 version."""
-    console.print(f"[bold cyan]MOSKV-1 Daemon[/] — CORTEX v{__version__}")
+    console.print(f"[bold cyan]MOSKV-1 Daemon[/] - CORTEX v{__version__}")
 
 
 @cli.command()

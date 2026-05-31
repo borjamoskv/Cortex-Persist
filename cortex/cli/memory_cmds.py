@@ -257,7 +257,7 @@ def recall(project, db) -> None:
             return
         console.print(
             Panel(
-                f"[bold]{project}[/] — {len(facts)} active facts",
+                f"[bold]{project}[/] - {len(facts)} active facts",
                 title="🧠 CORTEX Recall",
                 border_style="cyan",
             )
@@ -313,7 +313,7 @@ def history(project, as_of, db) -> None:
         label = f"as of {as_of}" if as_of else "all time"
         console.print(
             Panel(
-                f"[bold]{project}[/] — {len(facts)} facts ({label})",
+                f"[bold]{project}[/] - {len(facts)} facts ({label})",
                 title="⏰ CORTEX History",
                 border_style="yellow",
             )
@@ -373,7 +373,7 @@ def dedupe(project: str, threshold: float, simulate: bool, db: str) -> None:
 @click.option("--limit", "-n", default=3, help="Max episodes to return")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def trace_episode(query, fact_id, project, limit, db) -> None:
-    """Trace causal episodes — reconstruct WHY something happened.
+    """Trace causal episodes - reconstruct WHY something happened.
 
     Two modes:
       By query:   cortex trace-episode "migration failed"
@@ -474,7 +474,7 @@ def trace_chain(fact_id, direction, depth, db) -> None:
         for f in chain:
             content = f.get("content", "")[:50]
             parent_id = f.get("parent_decision_id")
-            parent_str = str(parent_id) if parent_id else "—"
+            parent_str = str(parent_id) if parent_id else "-"
             meta = f.get("metadata") or {}
             if isinstance(meta, str):
                 try:

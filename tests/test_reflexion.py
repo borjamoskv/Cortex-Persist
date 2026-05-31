@@ -1,4 +1,4 @@
-"""Tests for ReflexionEngine — Self-Healing Dispatch Loop (L5).
+"""Tests for ReflexionEngine - Self-Healing Dispatch Loop (L5).
 
 Validates the core reflexion cycle: execute → fail → reflect → rewrite → retry.
 All tests are deterministic (no LLM dependency).

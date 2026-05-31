@@ -51,9 +51,9 @@ async def project(
         else:
             await projector(engine, conn, fact_id, payload)
     else:
-        # Unknown event type — log but don't fail.
+        # Unknown event type - log but don't fail.
         logger.info(
-            "No projector for event_type=%s on fact %d — event stored but not projected",
+            "No projector for event_type=%s on fact %d - event stored but not projected",
             event_type,
             fact_id,
         )

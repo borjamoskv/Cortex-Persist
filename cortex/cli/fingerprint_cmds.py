@@ -1,4 +1,4 @@
-"""CLI commands: cortex fingerprint — cognitive pattern extraction."""
+"""CLI commands: cortex fingerprint - cognitive pattern extraction."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ __all__ = ["fingerprint", "fingerprint_extract"]
 
 @cli.group()
 def fingerprint():
-    """Cognitive Fingerprint — Extract your decision-making patterns."""
+    """Cognitive Fingerprint - Extract your decision-making patterns."""
     pass
 
 

@@ -1,4 +1,4 @@
-"""CLI commands for CORTEX Reflection System — reflect + inject."""
+"""CLI commands for CORTEX Reflection System - reflect + inject."""
 
 from __future__ import annotations
 

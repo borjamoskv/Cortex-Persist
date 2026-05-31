@@ -1,5 +1,5 @@
 """
-CORTEX CLI — Security Commands.
+CORTEX CLI - Security Commands.
 
 Shield status, manual scans, threat feed updates,
 integrity audits, and daily reports.
@@ -22,7 +22,7 @@ logger = logging.getLogger("cortex.cli.security")
 console = Console()
 
 
-@click.group(name="security", help="🛡️  Anti-Hacker Shield — Daily-Updated Defense System.")
+@click.group(name="security", help="🛡️  Anti-Hacker Shield - Daily-Updated Defense System.")
 def security_cli() -> None:
     """CORTEX Security Shield commands."""
     pass
@@ -58,7 +58,7 @@ def security_status() -> None:
     table.add_row(
         "Threat Feed Engine",
         feed_status,
-        f"{total_sigs} signatures — {feed_detail}",
+        f"{total_sigs} signatures - {feed_detail}",
     )
 
     # Injection Guard
@@ -118,7 +118,7 @@ def security_scan(content: str | None, filepath: str | None) -> None:
     if inj_report.is_safe and not threat_matches:
         console.print(
             Panel(
-                "✅ Content is CLEAN — no threats detected",
+                "✅ Content is CLEAN - no threats detected",
                 title="Shield Scan",
                 border_style="green",
             )

@@ -3,7 +3,7 @@
 # See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
 
-"""CORTEX LLM Router — Hedged Request Strategy.
+"""CORTEX LLM Router - Hedged Request Strategy.
 
 DNS-over-HTTPS pattern: race-to-first parallel execution.
 Sends query to N providers simultaneously, takes the first Ok response,
@@ -48,8 +48,8 @@ class HedgedRequestStrategy:
         first valid response wins, all others are cancelled.
 
         Returns:
-            (HedgedResult, [])       — winner found, errors empty.
-            (None, ["p: reason", …]) — all failed, caller falls to cascade.
+            (HedgedResult, [])       - winner found, errors empty.
+            (None, ["p: reason", …]) - all failed, caller falls to cascade.
         """
         if not providers:
             return None, ["No providers for hedging"]
@@ -59,7 +59,7 @@ class HedgedRequestStrategy:
             asyncio.create_task(p.invoke(prompt), name=f"hedge:{p.provider_name}"): p
             for p in providers
         }
-        all_tasks = set(tasks)  # immutable snapshot — pending mutates in loop
+        all_tasks = set(tasks)  # immutable snapshot - pending mutates in loop
         pending: set[asyncio.Task[str]] = set(tasks)
         errors: list[str] = []
 
@@ -72,13 +72,13 @@ class HedgedRequestStrategy:
                     if exc is not None:
                         errors.append(f"{provider.provider_name}: {exc}")
                         logger.debug(
-                            "Hedge loser (error): %s — %s",
+                            "Hedge loser (error): %s - %s",
                             provider.provider_name,
                             exc,
                         )
                         continue
 
-                    # Winner — capture latency, cancel remaining
+                    # Winner - capture latency, cancel remaining
                     latency_ms = (time.monotonic() - start) * 1000
                     cancelled_names: list[str] = []
                     for loser in pending:
@@ -103,13 +103,13 @@ class HedgedRequestStrategy:
             return None, errors
 
         except asyncio.CancelledError:
-            raise  # propagate — caller owns the event loop context
+            raise  # propagate - caller owns the event loop context
         except (RuntimeError, ValueError, TypeError, OSError) as exc:
             errors.append(f"Hedging infrastructure: {exc}")
             return None, errors
         finally:
             # Guaranteed cleanup using the immutable snapshot (Ω₃ Byzantine Default)
-            # `pending` may have been reassigned mid-loop — all_tasks is the safe ref
+            # `pending` may have been reassigned mid-loop - all_tasks is the safe ref
             for t in all_tasks:
                 if not t.done():
                     t.cancel()

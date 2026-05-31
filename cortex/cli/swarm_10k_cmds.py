@@ -14,7 +14,7 @@ from cortex.engine.swarm_10k import SwarmCommander
 
 @cli.group()
 def swarm_10k():
-    """SOVEREIGN SWARM 10K — Hierarchical Orchestration (L0 -> L2)."""
+    """SOVEREIGN SWARM 10K - Hierarchical Orchestration (L0 -> L2)."""
     pass
 
 

@@ -139,7 +139,7 @@ class SwarmHeartbeat:
                         old_status,
                     )
                     logger.error(
-                        "💀 NODE DEAD: %s [%s] — no pulse for %.0fs (%d misses, was %s)",
+                        "💀 NODE DEAD: %s [%s] - no pulse for %.0fs (%d misses, was %s)",
                         node.node_id,
                         node.thread_name,
                         elapsed,
@@ -159,7 +159,7 @@ class SwarmHeartbeat:
                         NodeStatus.ALIVE,
                     )
                     logger.warning(
-                        "⚠️  NODE SUSPECT: %s [%s] — no pulse for %.0fs (%d misses)",
+                        "⚠️  NODE SUSPECT: %s [%s] - no pulse for %.0fs (%d misses)",
                         node.node_id,
                         node.thread_name,
                         elapsed,

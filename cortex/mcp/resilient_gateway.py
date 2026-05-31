@@ -1,10 +1,10 @@
-"""CORTEX MCP — Resilient Gateway Server.
+"""CORTEX MCP - Resilient Gateway Server.
 
 Cascading URL fetcher with per-provider circuit breakers.
 Complements Antigravity's browser_subagent when 503 errors block content extraction.
 
-Axiom Ω₅: Antifragile by Default — the cascade never stops on a single failure.
-Axiom Ω₃: Byzantine Default — verify HTTP response before trusting content.
+Axiom Ω₅: Antifragile by Default - the cascade never stops on a single failure.
+Axiom Ω₃: Byzantine Default - verify HTTP response before trusting content.
 """
 
 from __future__ import annotations
@@ -99,7 +99,7 @@ async def _fetch_httpx(url: str, timeout: float) -> tuple[str, int]:
 
 
 async def _fetch_aiohttp(url: str, timeout: float) -> tuple[str, int]:
-    """Fallback 1: aiohttp — different connection pool and HTTP stack."""
+    """Fallback 1: aiohttp - different connection pool and HTTP stack."""
     if aiohttp is None:
         raise ImportError("aiohttp not available")
     client_timeout = aiohttp.ClientTimeout(total=timeout)
@@ -114,7 +114,7 @@ async def _fetch_aiohttp(url: str, timeout: float) -> tuple[str, int]:
 
 
 async def _fetch_urllib(url: str, timeout: float) -> tuple[str, int]:
-    """Fallback 2: stdlib urllib — zero external deps, sync in executor."""
+    """Fallback 2: stdlib urllib - zero external deps, sync in executor."""
     loop = asyncio.get_running_loop()
 
     def _sync_fetch() -> tuple[str, int]:
@@ -146,8 +146,8 @@ class _FetchProvider:
 class ResilientFetcher:
     """Cascading URL fetcher with per-provider circuit breakers.
 
-    Ω₅: Antifragile — cascades through independent HTTP stacks.
-    Ω₃: Byzantine — validates status codes before trusting response body.
+    Ω₅: Antifragile - cascades through independent HTTP stacks.
+    Ω₃: Byzantine - validates status codes before trusting response body.
     """
 
     def __init__(self) -> None:
@@ -222,7 +222,7 @@ class ResilientFetcher:
                 errors.append(f"{provider.name}: TIMEOUT ({timeout}s)")
                 logger.warning("⏱️ [GATEWAY] %s timed out on %s", provider.name, url[:80])
 
-            except Exception as e:  # noqa: BLE001 — catches all provider-specific HTTP errors
+            except Exception as e:  # noqa: BLE001 - catches all provider-specific HTTP errors
                 provider.circuit_breaker.record_failure()
                 error_msg = f"{provider.name}: {type(e).__name__}: {e}"
                 errors.append(error_msg)
@@ -232,7 +232,7 @@ class ResilientFetcher:
             if depth < len(self._providers):
                 await asyncio.sleep(0.5 * depth)
 
-        # Total cascade failure — enqueue for deferred retry
+        # Total cascade failure - enqueue for deferred retry
         total_latency = (time.monotonic() - start) * 1000
         self._queue.enqueue(
             "cortex.mcp.resilient_gateway.ResilientFetcher.fetch",

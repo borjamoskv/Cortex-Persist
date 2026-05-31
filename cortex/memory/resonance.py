@@ -1,4 +1,4 @@
-"""CORTEX v6+ — Adaptive Resonance Gate (ART-inspired).
+"""CORTEX v6+ - Adaptive Resonance Gate (ART-inspired).
 
 Implements Grossberg's Adaptive Resonance Theory as a pre-store filter.
 Instead of blindly appending facts, the gate checks for semantic resonance

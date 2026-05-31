@@ -1,4 +1,4 @@
-"""Genesis Template Registry — deterministic ComponentSpec → Python source renderers."""
+"""Genesis Template Registry - deterministic ComponentSpec → Python source renderers."""
 
 from __future__ import annotations
 

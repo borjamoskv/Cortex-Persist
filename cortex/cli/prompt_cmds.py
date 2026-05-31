@@ -1,8 +1,8 @@
 """
-CORTEX CLI — Prompt Commands.
+CORTEX CLI - Prompt Commands.
 
 Salto 2: Dynamic prompt generation from live codebase stats.
-The system prompt is no longer a static document — it's a living artifact
+The system prompt is no longer a static document - it's a living artifact
 generated from actual project metrics every time you need it.
 
 Commands:
@@ -161,7 +161,7 @@ def _generate_live_prompt(project_root: Path) -> str:
 
 @cli.group()
 def prompt() -> None:
-    """System prompt management — generate, show, copy."""
+    """System prompt management - generate, show, copy."""
 
 
 @prompt.command("show")
@@ -188,7 +188,7 @@ def prompt_show(variant: str) -> None:
     console.print(
         Panel(
             Syntax(text, "markdown", theme="monokai", word_wrap=True),
-            title=f"[bold #CCFF00]⚡ CORTEX System Prompt — {variant.upper()}[/]",
+            title=f"[bold #CCFF00]⚡ CORTEX System Prompt - {variant.upper()}[/]",
             subtitle=f"[dim]~{token_estimate} tokens[/]",
             border_style="#6600FF",
         )
@@ -218,7 +218,7 @@ def prompt_generate(variant: str, out: str | None) -> None:
     if variant == "full":
         text = _generate_live_prompt(project_root)
     else:
-        # short/medium don't embed stats yet — but show accurate pattern count
+        # short/medium don't embed stats yet - but show accurate pattern count
         from cortex.extensions.agents.system_prompt import SYSTEM_PROMPT_MEDIUM, SYSTEM_PROMPT_SHORT
 
         patterns = _count_secret_patterns()
@@ -241,7 +241,7 @@ def prompt_generate(variant: str, out: str | None) -> None:
         console.print(
             Panel(
                 Syntax(text, "markdown", theme="monokai", word_wrap=True),
-                title=f"[bold #CCFF00]⚡ CORTEX System Prompt — {variant.upper()} (live stats)[/]",
+                title=f"[bold #CCFF00]⚡ CORTEX System Prompt - {variant.upper()} (live stats)[/]",
                 subtitle=f"[dim]~{token_estimate} tokens[/]",
                 border_style="#6600FF",
             )

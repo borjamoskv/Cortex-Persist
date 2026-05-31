@@ -1,4 +1,4 @@
-"""CORTEX Metering — Metering Middleware.
+"""CORTEX Metering - Metering Middleware.
 
 Intercepts /v1/* API requests to track usage per authenticated tenant
 and enforce quota limits based on their billing plan.

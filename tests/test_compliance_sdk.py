@@ -1,4 +1,4 @@
-"""Tests for cortex.compliance.tracker — ComplianceTracker SDK.
+"""Tests for cortex.compliance.tracker - ComplianceTracker SDK.
 
 Validates the 3-method EU AI Act compliance API:
 log_decision(), verify_chain(), export_audit().
@@ -35,7 +35,7 @@ def tracker(tmp_path: Path):
 class TestLogDecision:
     def test_returns_fact_id(self, tracker):
         fact_id = tracker.log_decision(
-            content="Approved loan application #443 — risk score 0.23",
+            content="Approved loan application #443 - risk score 0.23",
             agent_id="agent:loan-processor",
         )
         assert isinstance(fact_id, int)
@@ -43,7 +43,7 @@ class TestLogDecision:
 
     def test_stores_eu_metadata(self, tracker):
         fact_id = tracker.log_decision(
-            content="Rejected application #444 — income verification failed",
+            content="Rejected application #444 - income verification failed",
             agent_id="agent:loan-processor",
             decision_type="rejection",
         )

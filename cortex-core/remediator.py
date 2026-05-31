@@ -3,7 +3,7 @@ import re
 import sys
 import logging
 
-# CORTEX Sovereign Remediator v3.2 — The Ouroboros Surgeon
+# CORTEX Sovereign Remediator v3.2 - The Ouroboros Surgeon
 logging.basicConfig(level=logging.INFO, format="🏥 [SURGEON] %(message)s")
 
 
@@ -103,7 +103,7 @@ class SovereignSurgeon:
 
                         _ast.parse(new_content)
                     except SyntaxError as syn_err:
-                        logging.error("Patch rejected — invalid syntax: %s", syn_err)
+                        logging.error("Patch rejected - invalid syntax: %s", syn_err)
                         return False
 
                 with open(self.target_file, "w") as f:

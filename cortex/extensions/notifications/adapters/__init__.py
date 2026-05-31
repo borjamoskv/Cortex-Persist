@@ -1,4 +1,4 @@
-"""CORTEX — Notification Adapters registry."""
+"""CORTEX - Notification Adapters registry."""
 
 from cortex.extensions.notifications.adapters.base import BaseAdapter
 from cortex.extensions.notifications.adapters.macos import MacOSAdapter

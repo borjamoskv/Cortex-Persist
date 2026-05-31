@@ -1,4 +1,4 @@
-"""Sovereign Arbiter — The Strict Validation Membrane (Ω₃).
+"""Sovereign Arbiter - The Strict Validation Membrane (Ω₃).
 
 Implements the Byzantine Default: I verify, then trust.
 Any code mutation from the LLM Engine must pass structural checks before
@@ -105,7 +105,7 @@ class SovereignArbiter:
             logger.warning("🛡️ Sovereign Arbiter Block: %s", msg)
             return False, msg
 
-        except Exception as e:  # noqa: BLE001 — execution arbiter must catch all fatal compilation errors
+        except Exception as e:  # noqa: BLE001 - execution arbiter must catch all fatal compilation errors
             msg = f"[BLOQUEO BIZANTINO - Ω₃] Compilation Failed: {e}"
             logger.error("🛡️ Sovereign Arbiter Compilation Block: %s", msg)
             return False, msg

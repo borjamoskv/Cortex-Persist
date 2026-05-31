@@ -13,7 +13,7 @@ Architecture:
     Query + Documents → Cross-Encoder → relevance_score per doc → top_n
 
 The cross-encoder evaluates the *direct semantic relationship* between
-query and each document — unlike embedding distance (symmetric) or BM25
+query and each document - unlike embedding distance (symmetric) or BM25
 (lexical), this produces a contextual relevance judgment.
 
 Model: cross-encoder/ms-marco-MiniLM-L-6-v2 (~22MB, ~50ms for 10 docs)
@@ -35,7 +35,7 @@ __all__ = [
 
 logger = logging.getLogger("cortex.search.reranker")
 
-# Default model — small, fast, excellent for passage reranking
+# Default model - small, fast, excellent for passage reranking
 _DEFAULT_MODEL = os.environ.get(
     "CORTEX_RERANK_MODEL",
     "cross-encoder/ms-marco-MiniLM-L-6-v2",

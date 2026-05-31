@@ -73,7 +73,7 @@ class DemiurgeCompiler:
                 if generated_code.startswith("python"):
                     generated_code = generated_code[6:].strip()
 
-            # Phase 3: Zero-Trust Validation (AST Sandbox — CRIT-01 hardened)
+            # Phase 3: Zero-Trust Validation (AST Sandbox - CRIT-01 hardened)
             from cortex.utils.sandbox import ASTSandbox
 
             _sandbox = ASTSandbox(max_nodes=500, max_depth=20, timeout_seconds=5)
@@ -99,7 +99,7 @@ class DemiurgeCompiler:
                 # All inputs are validated via ASTSandbox whitelist before execution.
                 exec(code_obj, sandbox_globals)  # noqa: S102 # nosec B102
             except Exception as e:
-                # noqa: BLE001 — Compilation error during JIT forging is expected.
+                # noqa: BLE001 - Compilation error during JIT forging is expected.
                 await self._record_ghost(intent, generated_code, f"Compilation Error: {e}", 0.15)
                 return {
                     "status": "FAILED",

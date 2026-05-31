@@ -1,15 +1,15 @@
 """
-CORTEX — Contradiction Guard (Axiom 20: Epistemic Consistency).
+CORTEX - Contradiction Guard (Axiom 20: Epistemic Consistency).
 
 Every new decision must explicitly invalidate its predecessors or confirm
 compatibility. This guard runs at store-time and returns potential
 conflicts so the agent can disambiguate before persisting.
 
 Strategy (4-layer, O(N) bounded):
-  1. FTS5 keyword overlap — fast, coarse.
-  2. Project+topic co-occurrence — medium precision.
-  3. Negation / supersession detection — high precision.
-  4. Embedding cosine similarity — semantic precision (graceful degradation).
+  1. FTS5 keyword overlap - fast, coarse.
+  2. Project+topic co-occurrence - medium precision.
+  3. Negation / supersession detection - high precision.
+  4. Embedding cosine similarity - semantic precision (graceful degradation).
 
 Returns a ConflictReport with scored candidates.
 """

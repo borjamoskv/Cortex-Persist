@@ -24,7 +24,7 @@ __all__ = [
 
 @cli.group()
 def mejoralo():
-    """MEJORAlo v8.0 — Protocolo de auditoría y mejora de código. Modo Relentless."""
+    """MEJORAlo v8.0 - Protocolo de auditoría y mejora de código. Modo Relentless."""
     pass
 
 
@@ -42,7 +42,7 @@ def mejoralo():
 )
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def mejoralo_scan(project, path, deep, brutal, auto_heal, relentless, target_score, db):
-    """X-Ray 13D — Escaneo multidimensional del proyecto."""
+    """X-Ray 13D - Escaneo multidimensional del proyecto."""
     from cortex.extensions.mejoralo import MejoraloEngine
     from cortex.extensions.mejoralo.constants import INMEJORABLE_SCORE
 
@@ -57,7 +57,7 @@ def mejoralo_scan(project, path, deep, brutal, auto_heal, relentless, target_sco
         if relentless:
             effective_target = target_score if target_score is not None else INMEJORABLE_SCORE
             console.print(
-                f"\n[bold magenta]♾️ MODO RELENTLESS ACTIVADO — "
+                f"\n[bold magenta]♾️ MODO RELENTLESS ACTIVADO - "
                 f"Meta: {effective_target}/100. No hay vuelta atrás.[/]"
             )
             success = m.relentless_heal(project, path, result, target_score=effective_target)
@@ -92,7 +92,7 @@ def _display_scan_result(result):
     else:
         score_style = "bold red"
 
-    table = Table(title=f"🔬 X-Ray 13D — {result.project}")
+    table = Table(title=f"🔬 X-Ray 13D - {result.project}")
     table.add_column("Dimensión", style="bold", width=15)
     table.add_column("Score", width=8)
     table.add_column("Peso", width=10)
@@ -105,7 +105,7 @@ def _display_scan_result(result):
             d_color = "yellow"
         else:
             d_color = "red"
-        findings_str = "; ".join(d.findings[:3]) if d.findings else "—"
+        findings_str = "; ".join(d.findings[:3]) if d.findings else "-"
         table.add_row(d.name, f"[{d_color}]{d.score}[/]", d.weight, findings_str[:50])
 
     console.print(table)
@@ -129,7 +129,7 @@ def _display_scan_result(result):
 @click.option("--action", "-a", "actions", multiple=True, help="Acciones realizadas (repetible)")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def mejoralo_record(project, score_before, score_after, actions, db):
-    """Ouroboros — Registrar sesión MEJORAlo en el ledger."""
+    """Ouroboros - Registrar sesión MEJORAlo en el ledger."""
     from cortex.extensions.mejoralo import MejoraloEngine
 
     engine = get_engine(db)
@@ -180,7 +180,7 @@ def mejoralo_record(project, score_before, score_after, actions, db):
                 pass
 
         console.print(
-            f"[green]✓[/] Sesión registrada [bold]#{fact_id}[/] — "
+            f"[green]✓[/] Sesión registrada [bold]#{fact_id}[/] - "
             f"{score_before} → {score_after} ([{color}]Δ{delta:+d}[/])"
         )
     finally:
@@ -202,7 +202,7 @@ def mejoralo_history(project, limit, db):
         if not sessions:
             console.print(f"[dim]Sin sesiones MEJORAlo para '{project}'.[/]")
             return
-        table = Table(title=f"📊 MEJORAlo History — {project}")
+        table = Table(title=f"📊 MEJORAlo History - {project}")
         table.add_column("ID", style="bold", width=6)
         table.add_column("Fecha", width=20)
         table.add_column("Score", width=12)
@@ -220,12 +220,12 @@ def mejoralo_history(project, limit, db):
             s_before = s.get("score_before", "?")
             s_after = s.get("score_after", "?")
             score_str = f"{s_before} → {s_after}"
-            actions_str = ", ".join(s.get("actions", [])[:2]) or "—"
+            actions_str = ", ".join(s.get("actions", [])[:2]) or "-"
             table.add_row(
                 str(s["id"]),
                 s["created_at"][:19].replace("T", " "),
                 score_str,
-                f"[{d_color}]{delta:+d}[/]" if delta is not None else "—",
+                f"[{d_color}]{delta:+d}[/]" if delta is not None else "-",
                 actions_str[:40],
             )
         console.print(table)
@@ -238,7 +238,7 @@ def mejoralo_history(project, limit, db):
 @click.option("--window", "-w", default=30, help="Sessions to analyze")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def mejoralo_trend(project, window, db):
-    """📈 Effectiveness Trend — ¿CORTEX está mejorando tu código de verdad?"""
+    """📈 Effectiveness Trend - ¿CORTEX está mejorando tu código de verdad?"""
     from cortex.extensions.mejoralo.effectiveness import EffectivenessTracker
 
     engine = get_engine(db)
@@ -279,7 +279,7 @@ def mejoralo_trend(project, window, db):
 
         if trend.stagnant:
             console.print(
-                "  [bold red]⚠️  ESTANCAMIENTO DETECTADO — últimas 5 sesiones sin mejora[/]"
+                "  [bold red]⚠️  ESTANCAMIENTO DETECTADO - últimas 5 sesiones sin mejora[/]"
             )
 
         console.print()
@@ -292,7 +292,7 @@ def mejoralo_trend(project, window, db):
 @click.argument("path", type=click.Path(exists=True))
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def mejoralo_ship(project, path, db):
-    """Ship Gate — Los 7 Sellos de producción."""
+    """Ship Gate - Los 7 Sellos de producción."""
     from cortex.extensions.mejoralo import MejoraloEngine
 
     engine = get_engine(db)
@@ -306,11 +306,11 @@ def mejoralo_ship(project, path, db):
         console.print()
         if result.ready:
             console.print(
-                f"  [bold green]🚀 READY — {result.passed}/{result.total} sellos aprobados[/]"
+                f"  [bold green]🚀 READY - {result.passed}/{result.total} sellos aprobados[/]"
             )
         else:
             console.print(
-                f"  [bold red]⛔ NOT READY — {result.passed}/{result.total} sellos aprobados[/]"
+                f"  [bold red]⛔ NOT READY - {result.passed}/{result.total} sellos aprobados[/]"
             )
     finally:
         close_engine_sync(engine)
@@ -321,7 +321,7 @@ def mejoralo_ship(project, path, db):
 @click.argument("path", type=click.Path(exists=True))
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def mejoralo_awwwards_fix(project, path, db):
-    """Sovereign 200 — Rewrite animations, CSS, and UI for Awwwards SOTD."""
+    """Sovereign 200 - Rewrite animations, CSS, and UI for Awwwards SOTD."""
     from cortex.extensions.mejoralo import MejoraloEngine
 
     engine = get_engine(db)
@@ -340,7 +340,7 @@ def mejoralo_awwwards_fix(project, path, db):
 
 @mejoralo.command("daemon")
 def mejoralo_daemon():
-    """♾️  Ouroboros — Inicia el bucle infinito de mejora soberana."""
+    """♾️  Ouroboros - Inicia el bucle infinito de mejora soberana."""
     from cortex.extensions.mejoralo.daemon import main  # type: ignore[reportAttributeAccessIssue]
 
     main()
@@ -351,7 +351,7 @@ def mejoralo_daemon():
 @click.option("--magic", is_flag=True, help="Incluir detección de magic numbers (ruidoso)")
 @click.option("--no-hints", is_flag=True, help="Excluir detección de type hints faltantes")
 def mejoralo_antipatterns(path, magic, no_hints):
-    """🔍 Antipattern Scanner — Detecta lo implícito que debería ser explícito."""
+    """🔍 Antipattern Scanner - Detecta lo implícito que debería ser explícito."""
     from cortex.extensions.mejoralo.antipatterns import scan_antipatterns
 
     with console.status("[bold blue]Escaneando antipatrones...[/]"):
@@ -363,7 +363,7 @@ def mejoralo_antipatterns(path, magic, no_hints):
 
     if not report.findings:
         console.print(
-            f"\n  [bold green]✅ LIMPIO — {report.files_scanned} archivos, "
+            f"\n  [bold green]✅ LIMPIO - {report.files_scanned} archivos, "
             f"{report.scanners_run} scanners, 0 antipatrones.[/]\n"
         )
         return
@@ -407,5 +407,5 @@ def mejoralo_antipatterns(path, magic, no_hints):
         console.print("  [bold red]🔧 Fix hints (critical):[/]")
         for f in report.findings:
             if f.severity == "critical":
-                console.print(f"    → {f.file}:{f.line} — {f.fix_hint}")
+                console.print(f"    → {f.file}:{f.line} - {f.fix_hint}")
         console.print()

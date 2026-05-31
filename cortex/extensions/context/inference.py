@@ -25,11 +25,11 @@ logger = logging.getLogger("cortex.extensions.context")
 
 # Confidence thresholds (ratio of top project score to second)
 _CONFIDENCE_MAP = [
-    (5.0, "C5"),  # Confirmed — overwhelming evidence
-    (3.0, "C4"),  # Probable — strong signal
-    (1.5, "C3"),  # Inferred — consistent pattern
-    (1.1, "C2"),  # Speculative — weak indicators
-    (0.0, "C1"),  # Hypothesis — no clear winner
+    (5.0, "C5"),  # Confirmed - overwhelming evidence
+    (3.0, "C4"),  # Probable - strong signal
+    (1.5, "C3"),  # Inferred - consistent pattern
+    (1.1, "C2"),  # Speculative - weak indicators
+    (0.0, "C1"),  # Hypothesis - no clear winner
 ]
 
 

@@ -11,7 +11,7 @@ GateResult = tuple[bool, str]
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# SEAL 1: CODE QUALITY — Ruff Lint + LOC Guard (≤600)
+# SEAL 1: CODE QUALITY - Ruff Lint + LOC Guard (≤600)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async def check_seal_1_code_quality() -> GateResult:
     printer.seal(1, "AX-IV Cognición Termodinámica", "Code Quality (Ruff + LOC ≤700)")
@@ -22,7 +22,7 @@ async def check_seal_1_code_quality() -> GateResult:
     if code == 0:
         printer.success("Ruff checks passed.")
     elif code == 127:
-        printer.warn("Ruff not found — skipping (install with: pip install ruff)")
+        printer.warn("Ruff not found - skipping (install with: pip install ruff)")
     else:
         printer.fail("Ruff linting failed.")
         printer.print(out[:2000], style="dim")
@@ -48,13 +48,13 @@ async def check_seal_1_code_quality() -> GateResult:
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# SEAL 2: TYPE SAFETY — Pyright/Mypy
+# SEAL 2: TYPE SAFETY - Pyright/Mypy
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async def check_seal_2_type_safety() -> GateResult:
     printer.seal(2, "AX-I Determinismo Estocástico", "Type Check (Pyright)")
     code, out = await arun_cmd(["pyright", "cortex/", "--outputjson"])
     if code == 127:
-        printer.warn("No type checker found (pyright/mypy) — skipping")
+        printer.warn("No type checker found (pyright/mypy) - skipping")
         return True, "verified"
 
     if code != 0:
@@ -85,7 +85,7 @@ async def check_seal_2_type_safety() -> GateResult:
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# SEAL 3: SECURITY — Bandit + Cobbler Self-Audit
+# SEAL 3: SECURITY - Bandit + Cobbler Self-Audit
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async def check_seal_3_security() -> GateResult:  # noqa: C901
     printer.seal(3, "AX-VII Inmunología Computacional", "Security (Bandit + Self-Audit)")
@@ -98,7 +98,7 @@ async def check_seal_3_security() -> GateResult:  # noqa: C901
     if code == 0:
         printer.success("Bandit security scan passed.")
     elif code == 127:
-        printer.warn("Bandit not found — skipping")
+        printer.warn("Bandit not found - skipping")
     else:
         printer.fail("Security vulnerabilities detected.")
         printer.print(out[:2000], style="dim")
@@ -160,7 +160,7 @@ async def check_seal_3_security() -> GateResult:  # noqa: C901
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# SEAL 4: TESTS — pytest
+# SEAL 4: TESTS - pytest
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async def check_seal_4_tests() -> GateResult:
     printer.seal(4, "AX-II Paradoja Epistémica", "Tests & Coverage")
@@ -182,7 +182,7 @@ async def check_seal_4_tests() -> GateResult:
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# SEAL 5: LEDGER INTEGRITY — Schema Init + Connection Guard
+# SEAL 5: LEDGER INTEGRITY - Schema Init + Connection Guard
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async def check_seal_5_ledger() -> GateResult:
     printer.seal(5, "AX-II Paradoja Epistémica", "Schema Init + Connection Guard")

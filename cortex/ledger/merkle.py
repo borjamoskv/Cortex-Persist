@@ -80,7 +80,7 @@ class MerkleTree:
 
 
 class SemanticMerkleTree:
-    """Vectorial Merkle Tree — Validates integrity using semantic distance.
+    """Vectorial Merkle Tree - Validates integrity using semantic distance.
 
     Instead of comparing SHA-256 hashes of raw bytes, this tree compares
     the cosine similarity of embedding vectors. A paraphrased memory

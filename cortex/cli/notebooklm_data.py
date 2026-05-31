@@ -1,5 +1,5 @@
 """
-CORTEX CLI — NotebookLM Constants, Data Taxonomy & Helpers.
+CORTEX CLI - NotebookLM Constants, Data Taxonomy & Helpers.
 
 Extracted from notebooklm_cmds.py to keep CLI command handlers < 500 LOC.
 """

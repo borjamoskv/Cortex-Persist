@@ -1,10 +1,10 @@
 """
-Belief Consolidation Engine — The AI "Sleep" Cycle (Ω₂ / Ω₁₁).
+Belief Consolidation Engine - The AI "Sleep" Cycle (Ω₂ / Ω₁₁).
 
 Implements hippocampal-style memory consolidation for AI agents.
 A secondary Small Language Model (SLM) runs in the background,
 reads trivial event logs, forgets noise, and compresses the
-history into "Core Beliefs" — high-confidence knowledge nodes.
+history into "Core Beliefs" - high-confidence knowledge nodes.
 
 The agent wakes up operating on a clean Knowledge Graph, not a
 saturated event log. This prevents the "Lost in the Middle"
@@ -132,7 +132,7 @@ class BeliefConsolidator:
             f"Rules:\n"
             f"1. Extract the essential pattern, not individual events\n"
             f"2. Use present tense for ongoing behaviors\n"
-            f"3. Be concise — one sentence maximum\n"
+            f"3. Be concise - one sentence maximum\n"
             f"4. Preserve specific details (names, quantities)\n"
             f"5. Output ONLY the belief statement, no commentary"
         )
@@ -217,7 +217,7 @@ class BeliefConsolidator:
     ) -> ConsolidationResult:
         """Run a consolidation cycle on a project.
 
-        This is the "sleep" function — ideally run nightly via
+        This is the "sleep" function - ideally run nightly via
         the NightShift daemon.
 
         Args:

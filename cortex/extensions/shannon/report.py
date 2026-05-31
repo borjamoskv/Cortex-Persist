@@ -1,4 +1,4 @@
-"""Entropy Report — Structured analysis of CORTEX memory health.
+"""Entropy Report - Structured analysis of CORTEX memory health.
 
 Orchestrates MemoryScanner (data extraction) and analyzer (pure math)
 into a single diagnostic report with actionable recommendations
@@ -145,7 +145,7 @@ def _diagnose(
         if diagnosis == "balanced":
             diagnosis = "redundant"
         recommendations.append(
-            f"Redundancy at {type_redundancy:.0%} — too much repetition. "
+            f"Redundancy at {type_redundancy:.0%} - too much repetition. "
             "Run: cortex prune --dedup to remove near-duplicates."
         )
 
@@ -161,7 +161,7 @@ def _diagnose(
         if diagnosis == "balanced":
             diagnosis = "declining"
         recommendations.append(
-            "Fact velocity is dropping — memory is going cold. "
+            "Fact velocity is dropping - memory is going cold. "
             "Re-engage: store recent decisions and learnings."
         )
 
@@ -248,7 +248,7 @@ class EntropyReport:
         type_exergy = exergy_score(type_dist, usage_weights)
         type_dead_weight = dead_weight(type_dist, usage_weights)
 
-        # Full exergy report — Ω₁₃: useful work measurement, not just entropy
+        # Full exergy report - Ω₁₃: useful work measurement, not just entropy
         # Map high-confidence facts to decisions_enabled proxy
         conf_decisions = sum(
             v for k, v in type_dist.items() if k in {"decision", "architecture", "error", "bridge"}

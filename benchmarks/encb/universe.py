@@ -1,4 +1,4 @@
-"""ENCB v2 — Proposition Universe Generator.
+"""ENCB v2 - Proposition Universe Generator.
 
 Generates P propositions across K semantic domains with 4 types,
 ground truth assignments, and optional causal constraints.

@@ -1,4 +1,4 @@
-"""CORTEX — Telegram Notification Adapter.
+"""CORTEX - Telegram Notification Adapter.
 
 Delivers events to a Telegram chat using the Bot API.
 No dependencies beyond httpx (already in the project).
@@ -60,7 +60,7 @@ class TelegramAdapter(BaseAdapter):
                 resp = await client.post(url, json=payload)
                 if resp.status_code != 200:
                     logger.warning(
-                        "Telegram delivery failed: HTTP %d — %s",
+                        "Telegram delivery failed: HTTP %d - %s",
                         resp.status_code,
                         resp.text[:200],
                     )

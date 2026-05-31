@@ -1,4 +1,4 @@
-"""CORTEX GitOps Memory — Synchronizes global facts to local repository JSON/MD files."""
+"""CORTEX GitOps Memory - Synchronizes global facts to local repository JSON/MD files."""
 
 import json
 import logging

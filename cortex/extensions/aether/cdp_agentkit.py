@@ -1,4 +1,4 @@
-"""MOSKV-Aether — CDP AgentKit Sovereign Wallet.
+"""MOSKV-Aether - CDP AgentKit Sovereign Wallet.
 
 [SOVEREIGN WALLET V3.0] - Axioma Ω₅ (Antifragile by Default)
 Integración CORTEX con Coinbase Developer Platform.
@@ -50,7 +50,7 @@ _tx_count_this_session = 0
 
 
 class CDPSovereignWallet:
-    """Singleton Sovereign Wallet — O(1) initialization, persistent identity.
+    """Singleton Sovereign Wallet - O(1) initialization, persistent identity.
 
     Uses CdpAgentkitWrapper from cdp-langchain for MPC wallet management.
     Wallet seed persists to ~/.cortex/ with restricted file permissions (0600).
@@ -60,7 +60,7 @@ class CDPSovereignWallet:
     _initialized: bool = False
 
     def __new__(cls, *args, **kwargs):
-        """Singleton pattern — one wallet per process."""
+        """Singleton pattern - one wallet per process."""
         if cls._instance is None:
             cls._instance = super().__new__(cls)
         return cls._instance

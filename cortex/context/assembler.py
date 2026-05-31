@@ -1,4 +1,4 @@
-"""CORTEX Context Assembler — Unified Knowledge Retrieval.
+"""CORTEX Context Assembler - Unified Knowledge Retrieval.
 
 Fuses VSA, ChromaDB, FactStore, and Knowledge Items into a single
 ContextPacket ranked by semantic relevance.

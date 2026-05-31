@@ -368,7 +368,7 @@ async def test_genome_export_import():
 async def main():
     logging.info("")
     logging.info("╔══════════════════════════════════════════════════════════╗")
-    logging.info("║        LEVEL 7 AUTOPOIETIC AGENT — VALIDATION          ║")
+    logging.info("║        LEVEL 7 AUTOPOIETIC AGENT - VALIDATION          ║")
     logging.info("║        Reality Level: C5-REAL                           ║")
     logging.info("╚══════════════════════════════════════════════════════════╝")
     logging.info("")
@@ -388,7 +388,7 @@ async def main():
 
     elapsed = (time.perf_counter() - t0) * 1000
     logging.info("╔══════════════════════════════════════════════════════════╗")
-    logging.info(f"║  ALL 7 TESTS PASSED — {elapsed:.1f}ms total                    ║")
+    logging.info(f"║  ALL 7 TESTS PASSED - {elapsed:.1f}ms total                    ║")
     logging.info("║  L7 Autopoietic Agent: OPERATIONAL                     ║")
     logging.info("╚══════════════════════════════════════════════════════════╝")
 

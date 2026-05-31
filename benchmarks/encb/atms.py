@@ -1,4 +1,4 @@
-"""ENCB v2 — ATMS-Lite (Assumption-based Truth Maintenance System).
+"""ENCB v2 - ATMS-Lite (Assumption-based Truth Maintenance System).
 
 Layer 3: Truth maintenance. Tracks which assumptions support each belief
 and detects/propagates inconsistencies via nogood sets.
@@ -42,9 +42,9 @@ class ATMSLite:
         atms.add_justification("b1", frozenset({"a1", "a2"}))
         atms.add_justification("b2", frozenset({"a2", "a3"}))
         atms.add_nogood(frozenset({"a1", "a3"}))
-        assert atms.is_valid("b1")  # True — {a1, a2} doesn't hit nogoods
+        assert atms.is_valid("b1")  # True - {a1, a2} doesn't hit nogoods
         atms.add_nogood(frozenset({"a1", "a2"}))
-        assert not atms.is_valid("b1")  # False — all labels hit nogoods
+        assert not atms.is_valid("b1")  # False - all labels hit nogoods
     """
 
     def __init__(self) -> None:

@@ -3,7 +3,7 @@
 # See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
 
-"""Tests for BeliefObject contract — frozen dataclasses, enums, provenance."""
+"""Tests for BeliefObject contract - frozen dataclasses, enums, provenance."""
 
 from __future__ import annotations
 

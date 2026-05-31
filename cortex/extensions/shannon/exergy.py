@@ -1,4 +1,4 @@
-"""Exergy Scoring — Axiom Ω₁₃ Shannon Upgrade.
+"""Exergy Scoring - Axiom Ω₁₃ Shannon Upgrade.
 
 Measures useful extractable work, not just entropy or volume.
 "More data" does not imply better exergy_score. Content that is
@@ -23,7 +23,7 @@ __all__ = [
 logger = logging.getLogger("cortex.extensions.shannon.exergy")
 
 # ── Formula weights ──────────────────────────────────────────────────
-# downstream_utility dominates — if decisions can't use it, it's waste.
+# downstream_utility dominates - if decisions can't use it, it's waste.
 
 _W_UTILITY = 0.35
 _W_WORK_RATIO = 0.25
@@ -60,7 +60,7 @@ def compute_exergy_report(
     tokens_spent: int,
     noise_fraction: float,
 ) -> ExergyReport:
-    """Compute exergy report — useful work, not raw information volume.
+    """Compute exergy report - useful work, not raw information volume.
 
     Formula (pragmatic v1):
         exergy = 0.35*downstream_utility + 0.25*useful_work_ratio

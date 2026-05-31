@@ -1,5 +1,5 @@
 """
-Crypto-Shredding Engine — GDPR Right to Erasure (Ω₃ / Ω₁₂).
+Crypto-Shredding Engine - GDPR Right to Erasure (Ω₃ / Ω₁₂).
 
 Resolves the EU AI Act ↔ GDPR paradox:
   - EU AI Act demands immutable audit trails for AI decisions.

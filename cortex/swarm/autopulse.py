@@ -15,7 +15,7 @@ logger = logging.getLogger("cortex.swarm.autopulse")
 SWARM_QUEUE_FILE = "/tmp/cortex_swarm_queue.json"
 STATE_FILE = "/tmp/cortex_state.json"
 
-# AUDITOR-Ω: Entropy spike threshold — override via CORTEX_ENTROPY_THRESHOLD env var
+# AUDITOR-Ω: Entropy spike threshold - override via CORTEX_ENTROPY_THRESHOLD env var
 _ENTROPY_THRESHOLD = float(os.environ.get("CORTEX_ENTROPY_THRESHOLD", "0.15"))
 
 
@@ -238,7 +238,7 @@ def _audit_entropy_spike(legion: TensorGlialLegion, agent_name: str) -> None:
     cv = std_yield / mean_yield  # Coefficient of Variation
     if cv > _ENTROPY_THRESHOLD:
         logger.error(
-            "[AUDITOR-Ω] CIRCUIT BREAKER TRIPPED! Entropy Spike Detected — agent=%s cv=%.4f threshold=%.4f sha256=%s",
+            "[AUDITOR-Ω] CIRCUIT BREAKER TRIPPED! Entropy Spike Detected - agent=%s cv=%.4f threshold=%.4f sha256=%s",
             agent_name,
             cv,
             _ENTROPY_THRESHOLD,
@@ -249,7 +249,7 @@ def _audit_entropy_spike(legion: TensorGlialLegion, agent_name: str) -> None:
         )
     else:
         logger.debug(
-            "[AUDITOR-Ω] entropy OK — agent=%s cv=%.4f",
+            "[AUDITOR-Ω] entropy OK - agent=%s cv=%.4f",
             agent_name,
             cv,
         )

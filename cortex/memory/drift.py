@@ -3,11 +3,11 @@
 Detects catastrophic drift in the L2 vector space before recall degrades
 silently. Uses 3 computationally honest proxies instead of theoretical TDA:
 
-1. Spectral Gap   — λ₁/λ₂ of covariance.  Detects cluster collapse.  O(n·d²).
-2. Intrinsic Dim  — MLE (Levina-Bickel 2004) with JL projection.     O(n·k·d).
-3. Page-Hinkley   — Streaming change-point detection.                 O(1)/update.
+1. Spectral Gap   - λ₁/λ₂ of covariance.  Detects cluster collapse.  O(n·d²).
+2. Intrinsic Dim  - MLE (Levina-Bickel 2004) with JL projection.     O(n·k·d).
+3. Page-Hinkley   - Streaming change-point detection.                 O(1)/update.
 
-Zero new required dependencies — numpy only (already in project).
+Zero new required dependencies - numpy only (already in project).
 scipy.spatial.cKDTree is opt-in for intrinsic dimensionality (brute-force fallback).
 
 Stratified anchoring: different stability thresholds per fact_type.
@@ -177,7 +177,7 @@ def intrinsic_dimensionality(
         tree = cKDTree(embeddings)
         dists, _ = tree.query(embeddings, k=k + 1)
     except ImportError:
-        # Brute-force fallback — O(n²) but zero deps
+        # Brute-force fallback - O(n²) but zero deps
         from numpy.linalg import norm
 
         all_dists = np.array([norm(embeddings - embeddings[i], axis=1) for i in range(n)])
@@ -332,7 +332,7 @@ class DriftMonitor:
                 "intrinsic_dim_ratio": None,
                 "page_hinkley_alert": False,
                 "model_valid": True,
-                "detail": "No baseline — first checkpoint needed",
+                "detail": "No baseline - first checkpoint needed",
             }
 
         model_valid = baseline.model_hash == self._model_hash

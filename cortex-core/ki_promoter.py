@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-KI Context Promoter — Smart KI selection for CORTEX-Persist.
+KI Context Promoter - Smart KI selection for CORTEX-Persist.
 
 Replaces blind LRU with context-aware scoring.
 Analyzes current working context (project, git branch, open files) and
@@ -182,7 +182,7 @@ def promote_ki(ki: ScoredKI):
     This triggers the platform's internal access tracking,
     updating last_accessed so it gets selected for injection.
     """
-    # Read the file — this is the promotion mechanism
+    # Read the file - this is the promotion mechanism
     with open(ki.path) as f:
         _ = json.load(f)
 

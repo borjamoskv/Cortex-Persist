@@ -1,4 +1,4 @@
-"""AutoFixPipeline — Ghost → Classify → AgentTask → Aether → Validate (Ω₅)."""
+"""AutoFixPipeline - Ghost → Classify → AgentTask → Aether → Validate (Ω₅)."""
 
 from __future__ import annotations
 
@@ -101,7 +101,7 @@ class AutoFixPipeline:
                 ghost_id=ghost_id,
                 classification=classification,
                 success=False,
-                summary="Cannot classify — requires human review",
+                summary="Cannot classify - requires human review",
                 duration_ms=(time.monotonic() - t0) * 1000,
             )
 
@@ -352,7 +352,7 @@ class AutoFixPipeline:
                 },
             )
             logger.warning(
-                "🔄 [AUTOFIX] Ghost [%s] escalated — fix failed: %s",
+                "🔄 [AUTOFIX] Ghost [%s] escalated - fix failed: %s",
                 ghost_id,
                 error_short,
             )

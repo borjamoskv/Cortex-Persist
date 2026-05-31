@@ -1,4 +1,4 @@
-"""Cognitive Fingerprint — Data models.
+"""Cognitive Fingerprint - Data models.
 
 Defines the CognitiveFingerprint dataclass: the compressed
 representation of a human's decision-making patterns extracted
@@ -67,7 +67,7 @@ def _fmt_dim(label: str, value: float, hi: str, mid: str, lo: str) -> str:
         desc = mid
     else:
         desc = lo if lo else mid
-    return f"- **{label}**: {value:.0%} — {desc}"
+    return f"- **{label}**: {value:.0%} - {desc}"
 
 
 @dataclass

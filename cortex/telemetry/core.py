@@ -6,7 +6,7 @@
 """Sovereign Trace Layer (KETER-∞ Ola 4).
 
 Zero-dependency structured tracing for CORTEX.
-No OpenTelemetry, no Logfire — pure Python with contextvars propagation.
+No OpenTelemetry, no Logfire - pure Python with contextvars propagation.
 
 Architecture::
 

@@ -1,4 +1,4 @@
-"""CORTEX Agent Executor — Real LLM Dispatch for E2E Pipeline.
+"""CORTEX Agent Executor - Real LLM Dispatch for E2E Pipeline.
 
 Connects the pipeline's abstract _execute() to the real CortexLLMRouter
 and LLMProvider infrastructure. Translates pipeline concepts (intent,
@@ -224,8 +224,8 @@ class AgentExecutor:
                 "provider": provider.provider_name,
             }
 
-        # No LLM available — return structured stub
-        logger.warning("[EXECUTOR] No LLM provider available — returning stub")
+        # No LLM available - return structured stub
+        logger.warning("[EXECUTOR] No LLM provider available - returning stub")
         return {
             "content": f"[STUB] Agent '{agent_id}' executed for intent: {intent[:100]}",
             "tokens": 0,

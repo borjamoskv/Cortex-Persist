@@ -1,5 +1,5 @@
 """
-cortex.ui_control — Control soberano de escritorio macOS.
+cortex.ui_control - Control soberano de escritorio macOS.
 
 Motores:
     - MaestroUI: Orquestador unificado (punto de entrada recomendado)

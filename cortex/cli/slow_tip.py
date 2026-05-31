@@ -58,7 +58,7 @@ class SlowOpTipEmitter:
     Thread starts immediately; tips only surface after ``threshold`` seconds.
     Call ``stop()`` (or use as context manager) to cleanly terminate.
 
-    Thread is daemonized — it will not prevent process exit.
+    Thread is daemonized - it will not prevent process exit.
     """
 
     __slots__ = (
@@ -114,7 +114,7 @@ class SlowOpTipEmitter:
         """Wait for threshold, then emit tips at interval until stopped."""
         # Wait for threshold before emitting first tip
         if self._stop_event.wait(timeout=self._threshold):
-            return  # Operation finished before threshold — no tip needed
+            return  # Operation finished before threshold - no tip needed
 
         self._emit_tip()
 
@@ -123,7 +123,7 @@ class SlowOpTipEmitter:
             self._emit_tip()
 
     def _emit_tip(self) -> None:
-        """Emit a single tip to Rich console. Fully isolated — never crashes."""
+        """Emit a single tip to Rich console. Fully isolated - never crashes."""
         try:
             from rich.panel import Panel
 

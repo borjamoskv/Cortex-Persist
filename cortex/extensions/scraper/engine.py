@@ -1,4 +1,4 @@
-"""SCRAPER-Ω — Sovereign Scraping Engine.
+"""SCRAPER-Ω - Sovereign Scraping Engine.
 
 Orchestrates multi-strategy extraction with automatic fallback cascade,
 deduplication, rate limiting, and batch processing with checkpoints.
@@ -29,7 +29,7 @@ LOG = logging.getLogger("cortex.extensions.scraper.engine")
 
 
 class ScraperEngine:
-    """Sovereign Scraping Engine — orchestrates extraction strategies.
+    """Sovereign Scraping Engine - orchestrates extraction strategies.
 
     Features:
     - Automatic fallback cascade: HTTP → Jina → Playwright
@@ -96,7 +96,7 @@ class ScraperEngine:
         return result
 
     async def scrape_url(self, url: str, strategy: str = "auto") -> ScrapeResult:
-        """Convenience method — scrape a URL with minimal config."""
+        """Convenience method - scrape a URL with minimal config."""
         strat = ExtractionStrategy(strategy)
         request = ScrapeRequest(url=url, strategy=strat)
         return await self.scrape(request)
@@ -128,7 +128,7 @@ class ScraperEngine:
         self._jobs[job.job_id] = job
 
         LOG.info(
-            "📦 [BATCH] Starting job %s — %d URLs, concurrency=%d",
+            "📦 [BATCH] Starting job %s - %d URLs, concurrency=%d",
             job.job_id,
             len(urls),
             concurrency,
@@ -167,7 +167,7 @@ class ScraperEngine:
         job.completed_at = time.monotonic()
 
         LOG.info(
-            "✅ [BATCH] Job %s complete — %d/%d successful, %d errors",
+            "✅ [BATCH] Job %s complete - %d/%d successful, %d errors",
             job.job_id,
             job.successful_count,
             len(urls),

@@ -1,4 +1,4 @@
-"""loop_engine — ExecutionLoop: The Sovereign Task Execution Engine.
+"""loop_engine - ExecutionLoop: The Sovereign Task Execution Engine.
 
 Extracted from loop_cmds.py to satisfy the Landauer LOC barrier (≤500).
 Implements the Task→Execute→Persist→Repeat cycle with 2-layer durability:
@@ -23,7 +23,7 @@ __all__ = ["ExecutionLoop", "PersistSupervisor", "PERSIST_INTERVAL"]
 
 logger = logging.getLogger("cortex.loop.engine")
 
-# Industrial Noir palette — used in render methods
+# Industrial Noir palette - used in render methods
 CYBER_LIME = "#CCFF00"
 ELECTRIC_VIOLET = "#6600FF"
 ABYSSAL_BLACK = "#0A0A0A"
@@ -35,7 +35,7 @@ PERSIST_INTERVAL: int = 60
 
 
 class PersistSupervisor:
-    """External supervisor thread — C5 durability guarantee.
+    """External supervisor thread - C5 durability guarantee.
 
     Persists pending facts every ``interval`` seconds, independent of
     process lifecycle. The primary persistence guarantee for the loop.
@@ -43,11 +43,11 @@ class PersistSupervisor:
     Design contract (Ω₃):
       - Does NOT trust the process to exit cleanly.
       - Each tick drains the pending queue atomically.
-      - On persist failure: re-enqueues the fact (Ω₅ — error = gradient).
-      - Never raises — the supervisor must not die.
-      - stop() is idempotent — safe to call multiple times.
+      - On persist failure: re-enqueues the fact (Ω₅ - error = gradient).
+      - Never raises - the supervisor must not die.
+      - stop() is idempotent - safe to call multiple times.
 
-    Confidence: C5 🟢 (confirmed) — bounded data loss = ``interval`` seconds.
+    Confidence: C5 🟢 (confirmed) - bounded data loss = ``interval`` seconds.
     """
 
     def __init__(self, flush_fn: Any, interval: int = PERSIST_INTERVAL) -> None:
@@ -62,12 +62,12 @@ class PersistSupervisor:
     def start(self) -> None:
         self._started = True
         self._thread.start()
-        logger.info("PersistSupervisor started — interval=%ds (C5 durability)", self._interval)
+        logger.info("PersistSupervisor started - interval=%ds (C5 durability)", self._interval)
 
     def stop(self) -> None:
         """Signal stop and wait for the supervisor to complete its final flush.
 
-        Idempotent — safe to call from both close() and _atexit_flush.
+        Idempotent - safe to call from both close() and _atexit_flush.
         Second call is a guaranteed no-op: Event is already set, dead thread
         join() returns immediately.
         """
@@ -81,7 +81,7 @@ class PersistSupervisor:
         while not self._stop.wait(timeout=self._interval):
             try:
                 self._flush(source="supervisor")
-            except Exception as exc:  # noqa: BLE001 — supervisor must not die
+            except Exception as exc:  # noqa: BLE001 - supervisor must not die
                 logger.warning("PersistSupervisor: flush error (non-fatal): %s", exc)
 
 
@@ -233,7 +233,7 @@ class ExecutionLoop:
                 self._pending_facts = re_enqueue + self._pending_facts
 
     def _atexit_flush(self) -> None:
-        """C4 🔵 atexit fallback — fires on clean process exit only. Idempotent."""
+        """C4 🔵 atexit fallback - fires on clean process exit only. Idempotent."""
         if self._closed:
             return
 

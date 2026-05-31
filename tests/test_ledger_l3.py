@@ -1,4 +1,4 @@
-"""Tests for cortex.memory.ledger — EventLedgerL3.
+"""Tests for cortex.memory.ledger - EventLedgerL3.
 
 Tests the immutable event sourcing ledger with a real `:memory:` aiosqlite DB.
 Covers: append, replay, count, session retrieval, chain verification.

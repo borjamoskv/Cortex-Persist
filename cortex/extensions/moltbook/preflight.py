@@ -1,4 +1,4 @@
-"""Moltbook Pre-flight Check — Zero-Waste Dispatch Gate.
+"""Moltbook Pre-flight Check - Zero-Waste Dispatch Gate.
 
 Consult suspension state BEFORE generating any LLM payload.
 If the destination is blocked, abort immediately: zero tokens burned.
@@ -58,7 +58,7 @@ class PreflightResult:
             return f"✅ PREFLIGHT CLEAR [{self.source} +{self.latency_ms:.1f}ms]"
         return (
             f"🚫 PREFLIGHT BLOCKED [{self.source} +{self.latency_ms:.1f}ms] "
-            f"suspended={self.remaining_s}s — {self.reason}"
+            f"suspended={self.remaining_s}s - {self.reason}"
         )
 
 
@@ -88,7 +88,7 @@ async def preflight_check(
             source="cache",
             latency_ms=elapsed_ms,
         )
-        logger.warning("PREFLIGHT [cache] BLOCKED — %ds remaining", remaining)
+        logger.warning("PREFLIGHT [cache] BLOCKED - %ds remaining", remaining)
         return result
 
     # ── Tier 1: live API probe (opt-in) ──────────────────────────────────────
@@ -100,7 +100,7 @@ async def preflight_check(
         status_resp = await client.check_status()
         elapsed_ms = (time.perf_counter() - t0) * 1_000
 
-        # Parse suspension fields — API may return various shapes
+        # Parse suspension fields - API may return various shapes
         suspended_flag: bool = status_resp.get("suspended", False)
         until_str: str = status_resp.get("suspended_until", "") or ""
         reason: str = status_resp.get("suspension_reason", "") or status_resp.get("reason", "")
@@ -129,7 +129,7 @@ async def preflight_check(
                 meta={"raw_status": status_resp},
             )
             logger.warning(
-                "PREFLIGHT [api] BLOCKED — %ds remaining. Reason: %s",
+                "PREFLIGHT [api] BLOCKED - %ds remaining. Reason: %s",
                 remaining,
                 reason,
             )
@@ -155,7 +155,7 @@ async def session_preflight(client: MoltbookClient) -> PreflightResult:
     result = await preflight_check(client, force_probe=True)
     if result.suspended:
         logger.error(
-            "SESSION ABORTED by pre-flight — agent suspended %ds. %s",
+            "SESSION ABORTED by pre-flight - agent suspended %ds. %s",
             result.remaining_s,
             result.reason,
         )

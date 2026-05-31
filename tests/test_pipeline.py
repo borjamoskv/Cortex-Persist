@@ -1,7 +1,7 @@
-"""Tests for cortex.memory.pipeline — NeuromorphicPipeline.
+"""Tests for cortex.memory.pipeline - NeuromorphicPipeline.
 
 Covers query assessment and store processing paths.
-All tests are self-contained with mocks — no DB, no LLM.
+All tests are self-contained with mocks - no DB, no LLM.
 """
 
 from __future__ import annotations

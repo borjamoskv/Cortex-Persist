@@ -1,4 +1,4 @@
-"""NEXUS API Server — FastAPI backend for the Sovereign Agent Directory."""
+"""NEXUS API Server - FastAPI backend for the Sovereign Agent Directory."""
 
 from __future__ import annotations
 from contextlib import asynccontextmanager
@@ -24,7 +24,7 @@ async def lifespan(app: FastAPI):
     # Auto-seed if empty
     stats = registry.get_stats()
     if stats.total_agents == 0:
-        print("🌑 Empty database — running seed...")
+        print("🌑 Empty database - running seed...")
         registry.close()
         seed_database(DB_PATH)
         registry = AgentRegistry(DB_PATH)
@@ -35,7 +35,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="NEXUS — Sovereign Agent Directory",
+    title="NEXUS - Sovereign Agent Directory",
     version="1.0.0",
     lifespan=lifespan,
 )

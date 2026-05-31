@@ -1,4 +1,4 @@
-"""MOSKV-Aether — GitHub Issue ingestor.
+"""MOSKV-Aether - GitHub Issue ingestor.
 
 Polls GitHub repositories for issues labeled 'aether' and enqueues them.
 """
@@ -124,7 +124,7 @@ class GitHubIngestor:
                 json={
                     "body": (
                         f"🤖 **MOSKV-Aether** picked up this issue. Task ID: `{task_id}`\n\n"
-                        f"Working autonomously — branch `aether/{task_id}` will be created when done."
+                        f"Working autonomously - branch `aether/{task_id}` will be created when done."
                     )
                 },
             )

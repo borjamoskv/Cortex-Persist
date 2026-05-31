@@ -1,4 +1,4 @@
-"""GitHub → CORTEX Bridge — Synchronize Issues/PRs as CORTEX facts.
+"""GitHub → CORTEX Bridge - Synchronize Issues/PRs as CORTEX facts.
 
 Open issues/PRs are stored as `bridge` facts.
 Closed issues crystallize into `decision` facts (bridge deprecated, decision created).
@@ -185,7 +185,7 @@ class GitHubCortexBridge:
         state: str = item["state"]  # "open" or "closed"
 
         if key in existing:
-            # Already in CORTEX — check for crystallization
+            # Already in CORTEX - check for crystallization
             if state == "closed":
                 await self._crystallize_decision(item, repo, existing[key])
                 result.crystallized += 1
@@ -193,14 +193,14 @@ class GitHubCortexBridge:
                 result.skipped += 1
             return
 
-        # New item — only store open ones as bridges
+        # New item - only store open ones as bridges
         if state == "open":
             await self._store_bridge(item, repo, key, is_pr)
             if is_pr:
                 result.prs_synced += 1
             else:
                 result.issues_synced += 1
-        # Closed items without a previous bridge are historical — skip
+        # Closed items without a previous bridge are historical - skip
         else:
             result.skipped += 1
 

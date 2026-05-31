@@ -14,7 +14,7 @@ from cortex.cli.slow_tip import tip_on_slow
 
 @cli.group()
 def swarm():
-    """SOVEREIGN SWARM — Orchestration of specialized agents (130/100)."""
+    """SOVEREIGN SWARM - Orchestration of specialized agents (130/100)."""
     pass
 
 

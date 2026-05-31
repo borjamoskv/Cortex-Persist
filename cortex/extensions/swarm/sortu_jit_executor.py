@@ -78,7 +78,7 @@ def _execute_sync(source_code: str, global_ctx: dict) -> dict:
         "TypeError": TypeError,
         "KeyError": KeyError,
         "IndexError": IndexError,
-        # SECURITY: __import__ deliberately excluded — CRIT-02 remediation.
+        # SECURITY: __import__ deliberately excluded - CRIT-02 remediation.
         # Allowing __import__ in safe_builtins defeats the SovereignASTVisitor
         # blocklist and enables arbitrary code execution.
     }

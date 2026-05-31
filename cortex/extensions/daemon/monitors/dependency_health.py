@@ -1,4 +1,4 @@
-"""Dependency Health Monitor — checks external service availability.
+"""Dependency Health Monitor - checks external service availability.
 
 Pluggable health checks for CORTEX dependencies:
 - SQLite (always present)
@@ -7,7 +7,7 @@ Pluggable health checks for CORTEX dependencies:
 - Redis (optional, v6 Cloud)
 - Embedding model (optional)
 
-Each check is Optional — if the service isn't configured, it's skipped.
+Each check is Optional - if the service isn't configured, it's skipped.
 """
 
 from __future__ import annotations
@@ -198,7 +198,7 @@ class DependencyHealthMonitor:
                 if alert is not None:
                     alerts.append(alert)
                     logger.warning(
-                        "Dependency unhealthy: %s — %s: %s",
+                        "Dependency unhealthy: %s - %s: %s",
                         alert.service,
                         alert.status,
                         alert.detail,

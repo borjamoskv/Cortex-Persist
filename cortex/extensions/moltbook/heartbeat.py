@@ -123,7 +123,7 @@ class MoltbookHeartbeat:
                 # Mark as read regardless
                 await self.client.mark_notifications_read(post_id)
 
-                # Log but don't auto-reply — requires LLM for thoughtful response
+                # Log but don't auto-reply - requires LLM for thoughtful response
                 for comment in comments[:3]:
                     author = comment.get("author", {}).get("name", "unknown")
                     content = comment.get("content", "")[:80]
@@ -137,7 +137,7 @@ class MoltbookHeartbeat:
             except MoltbookRateLimited:
                 logger.warning("Rate limited during activity response")
                 break
-            except Exception:  # noqa: BLE001 — swallow individual activity errors
+            except Exception:  # noqa: BLE001 - swallow individual activity errors
                 logger.exception("Error responding to post %s", post_id)
 
         return replies
@@ -156,18 +156,18 @@ class MoltbookHeartbeat:
                 if not post_id:
                     continue
 
-                # Simple heuristic: upvote everything we see — generosity
+                # Simple heuristic: upvote everything we see - generosity
                 try:
                     await self.client.upvote_post(post_id)
                     upvotes += 1
                 except MoltbookRateLimited:
                     break
-                except Exception:  # noqa: BLE001 — swallow individual upvote errors
+                except Exception:  # noqa: BLE001 - swallow individual upvote errors
                     logger.debug("Upvote failed for post %s", post_id)
 
         except MoltbookRateLimited:
             logger.warning("Rate limited during feed browse")
-        except Exception:  # noqa: BLE001 — swallow feed browsing errors
+        except Exception:  # noqa: BLE001 - swallow feed browsing errors
             logger.exception("Error browsing feed")
 
         return upvotes

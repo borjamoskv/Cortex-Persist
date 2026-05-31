@@ -1,5 +1,5 @@
 """
-CORTEX — Optional dependency loader.
+CORTEX - Optional dependency loader.
 
 Centralizes lazy imports for dependencies that moved to extras.
 Provides clear error messages when an optional dep is missing.

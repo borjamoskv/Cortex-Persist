@@ -2,7 +2,7 @@
 Temporal Fact Management.
 
 Handles versioned facts with valid_from/valid_until semantics.
-Never deletes — only deprecates. Enables time-travel queries.
+Never deletes - only deprecates. Enables time-travel queries.
 """
 
 from __future__ import annotations

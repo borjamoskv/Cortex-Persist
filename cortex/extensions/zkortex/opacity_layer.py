@@ -1,5 +1,5 @@
 """
-ZKORTEX — Sovereign Opacity Layer.
+ZKORTEX - Sovereign Opacity Layer.
 
 Capa de integración entre ZKORTEX y cortex.crypto.aes.
 
@@ -173,7 +173,7 @@ class SovereignOpacityLayer:
     # ─── Internal ──────────────────────────────────────────────────────────────
 
     def _log_proof(self, proof_type: str, meta: dict[str, Any]) -> None:
-        """Registro interno de auditoría — sin datos privados."""
+        """Registro interno de auditoría - sin datos privados."""
         self._proof_log.append(
             {
                 "type": proof_type,

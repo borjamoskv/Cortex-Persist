@@ -1,4 +1,4 @@
-"""MOSKV-1 — Tesseract Manifold Data Models."""
+"""MOSKV-1 - Tesseract Manifold Data Models."""
 
 from __future__ import annotations
 

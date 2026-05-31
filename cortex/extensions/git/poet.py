@@ -1,12 +1,12 @@
 """
-CORTEX Commit Poet Engine — LORCA-Ω
+CORTEX Commit Poet Engine - LORCA-Ω
 =====================================
 Transforms git diffs into compressed literary artifacts.
 
 Every commit message is a one-line epic. No "fix bug". No "update file".
 Each message earns its place in the sovereign chronicle of the repository.
 
-DERIVATION: Axiom Ω₂ (Entropic Asymmetry) — reduce noise in the signal.
+DERIVATION: Axiom Ω₂ (Entropic Asymmetry) - reduce noise in the signal.
 """
 
 from __future__ import annotations
@@ -67,7 +67,7 @@ class CommitPoet:
 
         message = f"{detected_type}({scope}): {body} {emoji}"
 
-        # Truncate to 72 chars (git best practice) — preserve emoji at end
+        # Truncate to 72 chars (git best practice) - preserve emoji at end
         if len(message) > 72:
             # Recalculate with trimmed body
             prefix = f"{detected_type}({scope}): "
@@ -108,7 +108,7 @@ class CommitPoet:
             else:
                 system_prompt = (
                     "You are LORCA-Ω, the Sovereign Git Poet & Code Narrator of CORTEX.\n"
-                    "Named after Federico García Lorca — poetry as a surgical blade. You transform\n"
+                    "Named after Federico García Lorca - poetry as a surgical blade. You transform\n"
                     "the mundane ledger of version control into compressed literary artifacts that\n"
                     "make engineers stop scrolling. Every commit message is a one-line epic.\n"
                     "Use the format `type(scope): body emoji`."
@@ -235,7 +235,7 @@ class CommitPoet:
             else:
                 system_prompt = (
                     "You are LORCA-Ω, the Sovereign Git Poet & Code Narrator of CORTEX.\n"
-                    "Named after Federico García Lorca — poetry as a surgical blade."
+                    "Named after Federico García Lorca - poetry as a surgical blade."
                 )
                 model = "gemini-2.5-pro"
                 pref_provider = provider_name or "gemini"
@@ -364,11 +364,11 @@ class CommitPoet:
         name = class_match.group(1) if class_match else "Unknown"
 
         openers = [
-            f"Sovereign construct — {name} governs",
-            f"The {name} citadel —",
+            f"Sovereign construct - {name} governs",
+            f"The {name} citadel -",
             f"{name}: a living architecture that",
-            f"Autonomous entity — {name}",
-            f"The {name} reactor core —",
+            f"Autonomous entity - {name}",
+            f"The {name} reactor core -",
         ]
         closers = [
             "its domain with zero delegation.",
@@ -411,7 +411,7 @@ class CommitPoet:
         ]
         verb = self._rng.choice(verbs)
         obj = self._rng.choice(objects)
-        ctx = f" — {context.strip()}" if context.strip() else ""
+        ctx = f" - {context.strip()}" if context.strip() else ""
         return f'"""{verb} {obj}{ctx}. [{name}]"""'
 
     def _narrate_module(self, code: str, context: str) -> str:
@@ -433,7 +433,7 @@ class CommitPoet:
         subject = self._rng.choice(subjects)
         purpose = self._rng.choice(purposes)
         ctx = f"\n{context.strip()}" if context.strip() else ""
-        return f'"""\n{subject} — {purpose}{ctx}\n"""'
+        return f'"""\n{subject} - {purpose}{ctx}\n"""'
 
 
 def generate_commit_message(
@@ -443,7 +443,7 @@ def generate_commit_message(
     commit_type: str | None = None,
     seed: int | None = None,
 ) -> str:
-    """Convenience function — generate a single commit message.
+    """Convenience function - generate a single commit message.
 
     Args:
         diff_summary: Output of `git diff --cached --stat`.
@@ -465,7 +465,7 @@ def generate_candidates(
     files: list[str],
     count: int = 3,
 ) -> list[str]:
-    """Convenience function — generate multiple commit message candidates.
+    """Convenience function - generate multiple commit message candidates.
 
     Args:
         diff_summary: Output of `git diff --cached --stat`.

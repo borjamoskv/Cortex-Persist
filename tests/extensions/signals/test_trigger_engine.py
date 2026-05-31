@@ -3,7 +3,7 @@
 # See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
 
-"""Tests for the TriggerEngine — declarative conditions system.
+"""Tests for the TriggerEngine - declarative conditions system.
 
 Coverage:
 - Condition registration and matching

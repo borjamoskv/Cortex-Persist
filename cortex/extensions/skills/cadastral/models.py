@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Cadastral Perimeter Check — Data Models.
+"""Cadastral Perimeter Check - Data Models.
 
 Defines the type-safe domain objects for territorial risk analysis:
 zone classifications, coordinates, risk scores, and blind-spot reports.
@@ -129,7 +129,7 @@ class RiskAssessment:
 
 @dataclass()
 class BlindSpot:
-    """A legal 'blind spot' — a gap in the system where risk is minimal.
+    """A legal 'blind spot' - a gap in the system where risk is minimal.
 
     These are the zones where an autonomous swarm can operate with the
     lowest probability of legal friction or existential threat.

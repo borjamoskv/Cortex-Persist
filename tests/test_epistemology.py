@@ -30,7 +30,7 @@ from cortex.extensions.shannon.epistemology import (
 
 
 class TestRenyiEntropy:
-    """H_α(X) — generalized entropy family."""
+    """H_α(X) - generalized entropy family."""
 
     def test_uniform_distribution(self) -> None:
         """Rényi entropy of uniform = log₂(n) for all α."""
@@ -47,7 +47,7 @@ class TestRenyiEntropy:
         assert abs(h_shannon - h_renyi) < 1e-6
 
     def test_alpha_0_is_hartley(self) -> None:
-        """H_0(X) = log₂(|support|) — Hartley entropy."""
+        """H_0(X) = log₂(|support|) - Hartley entropy."""
         dist = {"a": 100, "b": 1, "c": 1}
         h0 = renyi_entropy(dist, 0.0)
         assert abs(h0 - math.log2(3)) < 1e-6
@@ -76,7 +76,7 @@ class TestRenyiEntropy:
 
 
 class TestMinEntropy:
-    """H_∞(X) — worst-case predictability."""
+    """H_∞(X) - worst-case predictability."""
 
     def test_min_leq_shannon(self) -> None:
         """Min-entropy is always ≤ Shannon entropy."""
@@ -102,7 +102,7 @@ class TestMinEntropy:
 
 
 class TestEntropyRate:
-    """h(X) — temporal stationarity measure."""
+    """h(X) - temporal stationarity measure."""
 
     def test_constant_sequence_low_rate(self) -> None:
         """Constant activity → low entropy rate (predictable)."""
@@ -131,7 +131,7 @@ class TestEntropyRate:
 
 
 class TestCompressionIntelligence:
-    """K(x) proxy via zlib — Kolmogorov-Assembly bridge (Ξ-KA)."""
+    """K(x) proxy via zlib - Kolmogorov-Assembly bridge (Ξ-KA)."""
 
     def test_repetitive_text_low_ratio(self) -> None:
         """Repetitive text is highly compressible."""
@@ -158,7 +158,7 @@ class TestCompressionIntelligence:
 
 
 class TestAssemblyIndexProxy:
-    """A(x) proxy — heuristic bridge to Cronin."""
+    """A(x) proxy - heuristic bridge to Cronin."""
 
     def test_empty_returns_zero(self) -> None:
         assert assembly_index_proxy("") == 0.0
@@ -174,7 +174,7 @@ class TestAssemblyIndexProxy:
 
 
 class TestDPIVerify:
-    """Theorem T6 — Exergetic Data Processing Inequality."""
+    """Theorem T6 - Exergetic Data Processing Inequality."""
 
     def test_monotone_chain_passes(self) -> None:
         """Decreasing exergy chain satisfies DPI."""
@@ -205,7 +205,7 @@ class TestDPIVerify:
 
 
 class TestFreeEnergyDivergence:
-    """Equivalence Ξ-FG — Active Inference ↔ Guard."""
+    """Equivalence Ξ-FG - Active Inference ↔ Guard."""
 
     def test_identical_distributions_low_energy(self) -> None:
         """Matching claim and evidence → low free energy → ADMIT."""
@@ -233,7 +233,7 @@ class TestFreeEnergyDivergence:
 
 
 class TestPhiProxy:
-    """Theorem T5 — Consciousness Ceiling."""
+    """Theorem T5 - Consciousness Ceiling."""
 
     def test_feed_forward_bound(self) -> None:
         """Feed-forward: Φ ≤ log₂(n)."""

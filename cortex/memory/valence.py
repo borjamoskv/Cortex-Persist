@@ -1,7 +1,7 @@
-"""CORTEX v6+ — Emotional Valence Tagging (Amygdala Artificial).
+"""CORTEX v6+ - Emotional Valence Tagging (Amygdala Artificial).
 
 Strategy #3: Memories with emotional charge are stored more
-strongly. The amygdala doesn't just tag — it AMPLIFIES consolidation
+strongly. The amygdala doesn't just tag - it AMPLIFIES consolidation
 via noradrenaline-mediated LTP enhancement.
 
 Valence spectrum:
@@ -50,7 +50,7 @@ class ValenceRecord(BaseModel):
         default=0.5,
         ge=0.0,
         le=1.0,
-        description="Arousal level — how activating this memory is.",
+        description="Arousal level - how activating this memory is.",
     )
 
     @property

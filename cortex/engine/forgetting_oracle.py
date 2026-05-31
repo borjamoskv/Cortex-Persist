@@ -1,4 +1,4 @@
-"""ForgettingOracle — Metacognitive forgetting: EVICTION → LEDGER → POST-HOC → POLICY."""
+"""ForgettingOracle - Metacognitive forgetting: EVICTION → LEDGER → POST-HOC → POLICY."""
 
 from __future__ import annotations
 
@@ -64,7 +64,7 @@ class ForgettingOracle(AnalyzerMixin, PolicyMixin, EvidenceMixin):
     ) -> None:
         self._engine = engine
         self._cache = cache_ref
-        # Direct reference to L1 Working Memory — enables real access_frequency_score
+        # Direct reference to L1 Working Memory - enables real access_frequency_score
         # instead of the transactional approximation ghost (Derivation: Ω₁ + Ω₂).
         self._l1 = l1_ref
         self._last_report: OracleReport | None = None
@@ -83,7 +83,7 @@ class ForgettingOracle(AnalyzerMixin, PolicyMixin, EvidenceMixin):
             return self._empty_report()
 
         logger.info(
-            "🔮 [ORACLE] Cycle #%d — Evaluating last %d evictions.",
+            "🔮 [ORACLE] Cycle #%d - Evaluating last %d evictions.",
             self._audit_count,
             window,
         )

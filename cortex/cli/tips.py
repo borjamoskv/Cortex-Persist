@@ -317,7 +317,7 @@ class TipsEngine:
         spec: _MiningSpec,
         limit: int,
     ) -> list[Tip]:
-        """Generic fact miner — extracts tips from any fact_type."""
+        """Generic fact miner - extracts tips from any fact_type."""
         from cortex.storage.classifier import classify_content
 
         tips: list[Tip] = []

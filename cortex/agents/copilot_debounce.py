@@ -1,4 +1,4 @@
-"""CORTEX Level 3 Copilot — Debounce Controller.
+"""CORTEX Level 3 Copilot - Debounce Controller.
 
 Keystroke throttling to prevent flooding the LLM with requests.
 When the human types fast, only the latest context is sent.

@@ -1,4 +1,4 @@
-"""CORTEX E2E Pipeline — Integration Tests.
+"""CORTEX E2E Pipeline - Integration Tests.
 
 Tests the full pipeline flow: Ingress → Context → Plan → Execute → Persist → Egress.
 """
@@ -373,7 +373,7 @@ class TestAsyncOrchestrator:
         import asyncio
 
         orch = CortexOrchestrator()
-        # Set impossible timeout — pipeline executes instantly so
+        # Set impossible timeout - pipeline executes instantly so
         # we verify the contract works (timeout returns PipelineResult)
         req = PipelineRequest(intent="timeout test", timeout_s=30.0)
         result = asyncio.run(orch.run_async(req))
@@ -598,7 +598,7 @@ class TestProviderFactory:
 
         try:
             router, provider = build_executor_stack()
-            # May or may not find local providers — both outcomes valid
+            # May or may not find local providers - both outcomes valid
             if router is None and provider is None:
                 assert True  # Expected: no keys, no local service
             else:

@@ -3,7 +3,7 @@
 # See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
 
-"""Tests for CognitiveHandoff — quad-model escalation cascade."""
+"""Tests for CognitiveHandoff - quad-model escalation cascade."""
 
 from __future__ import annotations
 
@@ -36,7 +36,7 @@ class TestCognitiveIntents:
         assert IntentProfile.GENERAL.value == "general"
 
 
-# ─── CognitiveHandoff (No Router — Heuristic Mode) ─────────────────────────
+# ─── CognitiveHandoff (No Router - Heuristic Mode) ─────────────────────────
 
 
 class TestCognitiveHandoffNoRouter:

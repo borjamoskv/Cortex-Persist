@@ -1,4 +1,4 @@
-"""CORTEX Config — Backward-compatible shim.
+"""CORTEX Config - Backward-compatible shim.
 
 Real implementation lives in cortex.core.config.
 This module re-exports everything so existing `from cortex.config import X` works.

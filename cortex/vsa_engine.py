@@ -1,5 +1,5 @@
 """
-CORTEX VSA Engine Adapter — C5-REAL
+CORTEX VSA Engine Adapter - C5-REAL
 Exposes the sovereign VSAEngine from the skills directory.
 """
 

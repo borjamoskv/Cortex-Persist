@@ -1,4 +1,4 @@
-"""CORTEX CLI — Tips Commands.
+"""CORTEX CLI - Tips Commands.
 
 Surface contextual tips from the TIPS engine.
 Designed to display during agent thinking pauses.
@@ -72,7 +72,7 @@ def tips(
     count: int,
     lang: str | None,
 ) -> None:
-    """💡 TIPS — Contextual tips and insights from CORTEX."""
+    """💡 TIPS - Contextual tips and insights from CORTEX."""
     try:
         final_lang = lang or "es"  # Prioritize Spanish as requested by the user
 

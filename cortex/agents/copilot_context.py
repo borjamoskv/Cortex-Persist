@@ -1,4 +1,4 @@
-"""CORTEX Level 3 Copilot — Context Window Manager.
+"""CORTEX Level 3 Copilot - Context Window Manager.
 
 Intelligent prefix/suffix extraction for LLM context windows.
 Handles token budget management, smart truncation, and FIM formatting.

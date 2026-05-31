@@ -1,5 +1,5 @@
 # cortex/evolution/landscape.py
-"""Dynamic Fitness Landscape — the ceiling that moves.
+"""Dynamic Fitness Landscape - the ceiling that moves.
 
 The fitness ceiling is not a constant. It grows with the ecosystem:
 - More active projects → higher ceiling
@@ -74,7 +74,7 @@ class LandscapeState:
 class FitnessLandscape:
     """Computes a dynamic fitness ceiling from live ecosystem state.
 
-    Fully synchronous — no async DB calls. Uses filesystem
+    Fully synchronous - no async DB calls. Uses filesystem
     (project dirs, skill dirs, context-snapshot.md) for speed.
     """
 
@@ -101,7 +101,7 @@ class FitnessLandscape:
             + facts.get("decision", 0) * _PER_DECISION
         )
 
-        # Ratchet — ceiling never decreases
+        # Ratchet - ceiling never decreases
         ceiling = max(ceiling, self._last_ceiling)
         self._last_ceiling = ceiling
 

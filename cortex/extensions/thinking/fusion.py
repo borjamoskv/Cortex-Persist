@@ -1,4 +1,4 @@
-"""Thought Fusion Engine — N model responses → 1 superior fused response."""
+"""Thought Fusion Engine - N model responses → 1 superior fused response."""
 
 from __future__ import annotations
 
@@ -191,7 +191,7 @@ class ThoughtFusion:
                 sources=responses,
             )
 
-        # Una sola respuesta — no hay nada que fusionar
+        # Una sola respuesta - no hay nada que fusionar
         if len(valid) == 1:
             result = FusedThought(
                 content=valid[0].content,
@@ -401,7 +401,7 @@ class ThoughtFusion:
                 agreement_score=agreement,
                 meta={"judge": self._judge.provider_name + ":" + self._judge.model},  # type: ignore[reportOptionalMemberAccess]
             )
-        logger.error("Juez de síntesis falló tras retries — fallback a majority")
+        logger.error("Juez de síntesis falló tras retries - fallback a majority")
         return self._fuse_majority(valid, all_responses, agreement, FusionStrategy.SYNTHESIS)
 
     # ── BEST_OF_N ─────────────────────────────────────────────────

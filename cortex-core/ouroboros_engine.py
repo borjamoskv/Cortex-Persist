@@ -164,7 +164,7 @@ contract {contract_name}OuroborosTest is Test {{
             with open(os.path.join(self.scratch_dir, "src/Vault.sol"), "w") as f:
                 f.write("contract CortexVault { function deposit() external payable {} }")
 
-        # Initialize Forge project — CRIT-03 hardened: no shell injection
+        # Initialize Forge project - CRIT-03 hardened: no shell injection
         process = await asyncio.create_subprocess_exec(
             "forge", "init", "--no-git",
             cwd=self.scratch_dir,

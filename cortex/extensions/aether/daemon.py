@@ -1,4 +1,4 @@
-"""MOSKV-Aether — Background daemon and MoskvDaemon monitor."""
+"""MOSKV-Aether - Background daemon and MoskvDaemon monitor."""
 
 from __future__ import annotations
 
@@ -72,7 +72,7 @@ class AetherDaemon:
     # ── Internal loop ──────────────────────────────────────────────────
 
     def _tick(self) -> None:
-        """Single poll cycle — spawn worker threads up to max_concurrent."""
+        """Single poll cycle - spawn worker threads up to max_concurrent."""
         with self._lock:
             # Clean up finished threads
             done = [tid for tid, t in self._active.items() if not t.is_alive()]
@@ -152,5 +152,5 @@ class AetherMonitor:
         self._daemon = daemon
 
     def check(self) -> list[AetherAlert]:
-        """Called by MoskvDaemon.check() — returns completed task alerts."""
+        """Called by MoskvDaemon.check() - returns completed task alerts."""
         return self._daemon.pop_completed_alerts()

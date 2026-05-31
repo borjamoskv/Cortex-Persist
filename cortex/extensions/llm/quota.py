@@ -24,7 +24,7 @@ from cortex.database.core import connect as db_connect
 
 logger = logging.getLogger("cortex.extensions.llm.quota")
 
-# Module-level CSPRNG — avoid recreating per-iteration (~0.5ms saved/call)
+# Module-level CSPRNG - avoid recreating per-iteration (~0.5ms saved/call)
 _RNG = secrets.SystemRandom()
 
 
@@ -37,7 +37,7 @@ def _db(path: Path, exclusive: bool = False) -> Generator[sqlite3.Connection, No
             conn.execute("BEGIN EXCLUSIVE")
         yield conn
         conn.commit()
-    except Exception:  # noqa: BLE001 — rollback transaction before raising
+    except Exception:  # noqa: BLE001 - rollback transaction before raising
         conn.rollback()
         raise
     finally:
@@ -94,7 +94,7 @@ class SovereignQuotaManager:
         elif refill_rate is not None:
             self.refill_rate = float(refill_rate)
         else:
-            self.refill_rate = 10.0 / 60.0  # 10 RPM (0.166 t/s) — swarm baseline
+            self.refill_rate = 10.0 / 60.0  # 10 RPM (0.166 t/s) - swarm baseline
 
         self._init_db()
 
@@ -185,7 +185,7 @@ class SovereignQuotaManager:
                 return wait
 
         except sqlite3.OperationalError:
-            return 0.5  # DB contendida — backoff corto
+            return 0.5  # DB contendida - backoff corto
 
     # ─── Public API ───────────────────────────────────────────────────
 

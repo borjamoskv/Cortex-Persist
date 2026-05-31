@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""CORTEX Axiom Registry — The Canonical Source of Truth."""
+"""CORTEX Axiom Registry - The Canonical Source of Truth."""
 
 from __future__ import annotations
 

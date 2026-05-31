@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Purge decorative 'CORTEX vX.Y — ' prefixes from module docstrings.
+"""Purge decorative 'CORTEX vX.Y - ' prefixes from module docstrings.
 
 Single source of truth for version = pyproject.toml (0.3.0b7).
 SCHEMA_VERSION (5.4.3) is independent and stays in database/schema.py.
@@ -12,10 +12,10 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 EXCLUDE_DIRS = {".venv", ".venv-audit", "__pycache__", "node_modules", ".git", "engine-c5"}
 
-# Pattern: "CORTEX vX.Y.Z — " or "CORTEX vX.Y — " or "CORTEX vX — "
-# Handles both em-dash (—) and en-dash (–) and hyphen (-)
+# Pattern: "CORTEX vX.Y.Z - " or "CORTEX vX.Y - " or "CORTEX vX - "
+# Handles both em-dash (-) and en-dash (–) and hyphen (-)
 PATTERN = re.compile(
-    r"CORTEX\s+v[\d.]+\s*[—–\-]\s*",
+    r"CORTEX\s+v[\d.]+\s*[-–\-]\s*",
     re.IGNORECASE,
 )
 

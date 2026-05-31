@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-VSA-SDM-MEMORY-OMEGA v3.1 — Mechanical Verifier
+VSA-SDM-MEMORY-OMEGA v3.1 - Mechanical Verifier
 Deterministic. Zero stochastic. 10 gates:
   [0] Tripartite artifacts
   [1] HRR bind/retrieve
   [2] MAP-B exact self-inverse
   [3] SNR capacity model
   [4] Hierarchical chunking (proper normalization)
-  [5] True Kanerva SDM (SPARSE — <5% activation)
+  [5] True Kanerva SDM (SPARSE - <5% activation)
   [6] N-gram + Record-based encoding
   [7] Ebbinghaus temporal decay (retrieval-quality proof)
   [8] Resonator network (3-factor HRR, non-trivial)
@@ -133,7 +133,7 @@ def main():
     print(f"PASS [4/9]: Hierarchical 30d×50e. "
           f"2-hop cos={sim_h:.4f}. 80KB fixed.")
 
-    # ── [5] True Kanerva SDM — ACTUALLY SPARSE ──
+    # ── [5] True Kanerva SDM - ACTUALLY SPARSE ──
     M_locs = 1000
     # Use BINARY addresses in {0,1}^D
     addresses = np.array([rand_binary() for _ in range(M_locs)])
@@ -271,7 +271,7 @@ def main():
     assert sim_decay > sim_uniform, \
         "Decay must improve recent retrieval"
 
-    # Retrieve OLD item (t=19) — should be weaker in decayed
+    # Retrieve OLD item (t=19) - should be weaker in decayed
     old_from_decay = hrr_unbind(M_decayed, keys[-1])
     old_from_uniform = hrr_unbind(M_uniform, keys[-1])
     sim_old_d = cosine(vecs[-1], old_from_decay)
@@ -376,7 +376,7 @@ def main():
 
     # ── Report ──
     print("\n" + "=" * 60)
-    print("ALL 10 GATES PASSED — VSA-SDM-MEMORY-OMEGA v3.1")
+    print("ALL 10 GATES PASSED - VSA-SDM-MEMORY-OMEGA v3.1")
     print(f"  Footprint: {D * 8} B ({D * 8 / 1024:.1f} KB)")
     print(f"  SDM: {M_locs} locs, r={radius}, "
           f"sparse={activation_rate:.1%}")

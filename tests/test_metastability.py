@@ -1,4 +1,4 @@
-"""CORTEX — Metastability Probing Test Suite.
+"""CORTEX - Metastability Probing Test Suite.
 
 Tests the immune metastability probe (Axiom Ω₁₃).
 Key invariant: "sin anomalías" deja de equivaler a "estable".

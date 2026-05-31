@@ -1,5 +1,5 @@
 """
-CORTEX — SMTE LLM Mutator
+CORTEX - SMTE LLM Mutator
 Connects the AST Parser directly to an LLM (Qwen) for structural topology rewriting.
 """
 

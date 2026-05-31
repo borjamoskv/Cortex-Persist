@@ -102,7 +102,7 @@ def get_prefix_cache_config(provider: str) -> dict[str, Any]:
         "enabled": info.get("prefix_cache_enabled", False),
         "ttl_seconds": info.get("cache_ttl_seconds", 3600),
         "strategy": info.get("prefix_hash_strategy", "system_prompt"),
-        "tenant_scoped": True,  # ALWAYS True — AGENTS.md Invariant #4
+        "tenant_scoped": True,  # ALWAYS True - AGENTS.md Invariant #4
         "quantization": info.get("kv_quantization", "fp16"),
     }
 

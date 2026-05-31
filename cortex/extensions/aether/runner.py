@@ -1,4 +1,4 @@
-"""MOSKV-Aether — Main AetherAgent orchestrator.
+"""MOSKV-Aether - Main AetherAgent orchestrator.
 
 Orchestrates the 4-agent loop:
   Plan → Execute → Critique → Test → Commit/Branch
@@ -26,7 +26,7 @@ _MAX_EXECUTOR_RETRIES = 1  # Critic can send back once for fixes
 
 
 class AetherAgent:
-    """Sovereign autonomous coding agent — Aether paradigm, local-first.
+    """Sovereign autonomous coding agent - Aether paradigm, local-first.
 
     Usage::
 
@@ -57,7 +57,7 @@ class AetherAgent:
 
     async def run_task(self, task: AgentTask, queue: TaskQueue) -> AgentTask:
         """Full async task execution. Updates queue status at each phase."""
-        logger.info("🤖 Aether starting task [%s] — %s", task.id, task.title)
+        logger.info("🤖 Aether starting task [%s] - %s", task.id, task.title)
 
         branch = f"aether/{task.id}"
 
@@ -77,8 +77,8 @@ class AetherAgent:
         try:
             plan = await self._planner.plan(task.description, toolkit)
             queue.update(task.id, plan=plan.to_prompt_str())
-            logger.info("📋 Plan: %s — %d steps", plan.summary, len(plan.steps))
-        except Exception as e:  # noqa: BLE001 — LLM failure boundary
+            logger.info("📋 Plan: %s - %d steps", plan.summary, len(plan.steps))
+        except Exception as e:  # noqa: BLE001 - LLM failure boundary
             return await self._fail(task, queue, f"Planner error: {e}")
 
         # ── 1.5 Ω₆ Siege-Verification (Pathogen Matching) ─────────────
@@ -111,7 +111,7 @@ class AetherAgent:
                     )
 
                 execute_result = await self._executor.execute(plan, instruction, toolkit)
-            except Exception as e:  # noqa: BLE001 — LLM execution failure boundary
+            except Exception as e:  # noqa: BLE001 - LLM execution failure boundary
                 return await self._fail(task, queue, f"Executor error: {e}")
 
             # ── 3. Critique ───────────────────────────────────────────
@@ -119,8 +119,8 @@ class AetherAgent:
             logger.info("🔍 Critiquing...")
             try:
                 critique = await self._critic.critique(task.description, toolkit)
-            except Exception as e:  # noqa: BLE001 — LLM critique failure boundary
-                logger.warning("Critic failed (%s) — skipping", e)
+            except Exception as e:  # noqa: BLE001 - LLM critique failure boundary
+                logger.warning("Critic failed (%s) - skipping", e)
                 break
 
             if critique.approved:
@@ -151,8 +151,8 @@ class AetherAgent:
                 None, self._tester.run, toolkit
             )
 
-        except Exception as e:  # noqa: BLE001 — Testing framework boundary isolation
-            logger.warning("Tester failed (%s) — ignoring", e)
+        except Exception as e:  # noqa: BLE001 - Testing framework boundary isolation
+            logger.warning("Tester failed (%s) - ignoring", e)
             test_result = None
 
         if test_result and not test_result.passed:

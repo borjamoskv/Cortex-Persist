@@ -1,6 +1,6 @@
-"""CORTEX v6+ — Predictive Memory & Anticipatory Caching.
+"""CORTEX v6+ - Predictive Memory & Anticipatory Caching.
 
-Strategies #2 + #10: The brain doesn't just store — it PREDICTS.
+Strategies #2 + #10: The brain doesn't just store - it PREDICTS.
 
 Predictive Memory (#2):
   Co-access graph: "if you accessed A, you'll likely need B next"

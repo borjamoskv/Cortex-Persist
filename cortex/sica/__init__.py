@@ -1,4 +1,4 @@
-"""SICA — Self-Improving Cognitive Architecture.
+"""SICA - Self-Improving Cognitive Architecture.
 
 Nelson-Narens (1990) dual-level metacognitive agent framework.
 

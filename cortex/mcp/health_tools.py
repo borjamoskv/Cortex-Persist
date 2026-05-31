@@ -22,7 +22,7 @@ def register_health_tools(mcp: Any, ctx: Any) -> None:
 
     @mcp.tool()
     async def cortex_health_check() -> dict:
-        """Quick CORTEX health check — returns score, grade, and healthy boolean.
+        """Quick CORTEX health check - returns score, grade, and healthy boolean.
 
         No arguments required. Checks DB, ledger, and entropy.
         Returns: {"healthy": bool, "score": float, "grade": str}

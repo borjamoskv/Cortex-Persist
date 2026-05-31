@@ -1,4 +1,4 @@
-"""MOSKV-Aether — Agent Tool Layer.
+"""MOSKV-Aether - Agent Tool Layer.
 
 Thin, sandboxed wrappers the Executor agent dispatches.
 All file/shell operations are confined to task.repo_path.
@@ -165,7 +165,7 @@ class AgentToolkit:
             p.parent.mkdir(parents=True, exist_ok=True)
             p.write_text(content, encoding="utf-8")
             logger.info("✏️  write_file: %s (%d bytes)", path, len(content))
-            return f"OK — wrote {len(content)} bytes to {path}"
+            return f"OK - wrote {len(content)} bytes to {path}"
         except OSError as e:
             return f"[ERROR] Cannot write {path}: {e}"
 

@@ -1,4 +1,4 @@
-"""Tests for CortexSupervisor — Central Nervous System.
+"""Tests for CortexSupervisor - Central Nervous System.
 
 Validates:
     - Boot sequence (dependency order)

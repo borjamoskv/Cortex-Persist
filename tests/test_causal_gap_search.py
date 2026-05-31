@@ -1,4 +1,4 @@
-"""CORTEX — Causal Gap Search Test Suite.
+"""CORTEX - Causal Gap Search Test Suite.
 
 Tests the causal gap retrieval engine (Axiom Ω₁₃).
 Key invariant: a semantically similar but causally useless document

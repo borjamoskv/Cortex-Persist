@@ -127,7 +127,7 @@ class SignalReactor:
             )
             return te
         except Exception:  # noqa: BLE001
-            logger.debug("TriggerEngine not available — continuing")
+            logger.debug("TriggerEngine not available - continuing")
             return None
 
     async def _handle_experience_recorded(self, signal: Any) -> None:
@@ -183,7 +183,7 @@ class SignalReactor:
 
     async def run_loop(self, interval: float = 5.0) -> None:
         """Start a non-blocking infinite loop for standalone usage. (PULMONES)"""
-        logger.info("Signal Reactor active — monitoring bus pulses (L2) [OXYGENATED]")
+        logger.info("Signal Reactor active - monitoring bus pulses (L2) [OXYGENATED]")
         while True:
             try:
                 count = await self.process_once()

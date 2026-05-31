@@ -1,4 +1,4 @@
-"""Mac-Maestro-Ω — Accessibility Inspector (Vector B)."""
+"""Mac-Maestro-Ω - Accessibility Inspector (Vector B)."""
 
 from __future__ import annotations
 

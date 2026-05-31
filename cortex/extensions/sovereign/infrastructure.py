@@ -1,5 +1,5 @@
 """
-CORTEX v7.8 "MAILING" — Sovereign Infrastructure (脉灵 - 国家主权架构).
+CORTEX v7.8 "MAILING" - Sovereign Infrastructure (脉灵 - 国家主权架构).
 
 Level 300: Secure Hardware Enclave & Data Diode Sync.
 Standard: 300/100 Sovereign.

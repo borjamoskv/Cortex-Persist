@@ -84,7 +84,7 @@ def register_hilbert_tools(mcp, ctx) -> None:  # type: ignore
                     lines.append(
                         f"  {icon.get(r.verdict, '⚪')} [{r.problem}] "
                         f"{r.verdict.upper()} ({r.confidence}) "
-                        f"[{r.elapsed_ms:.0f}ms] — {r.detail[:80]}"
+                        f"[{r.elapsed_ms:.0f}ms] - {r.detail[:80]}"
                     )
                 return "\n".join(lines)
 

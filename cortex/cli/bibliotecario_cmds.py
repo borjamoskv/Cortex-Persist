@@ -1,5 +1,5 @@
 """
-CORTEX CLI — Bibliotecario (LIBRARIAN-1) commands.
+CORTEX CLI - Bibliotecario (LIBRARIAN-1) commands.
 
 The BIBLIOTECARIO agent ("se encarga de ordenar") ingests messy
 directories, files, or text, and orchestrates an LLM to organize and synthesize

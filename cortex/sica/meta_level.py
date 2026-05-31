@@ -1,4 +1,4 @@
-"""SICA Meta-Level — Metacognitive Monitor & Controller.
+"""SICA Meta-Level - Metacognitive Monitor & Controller.
 
 Nelson-Narens (1990) implementation:
   MONITOR (bottom-up): observes ExecutionTraces from the object-level
@@ -8,7 +8,7 @@ The critical insight: the meta-level distinguishes between:
   1. "The task failed" → adjust parameters, retry
   2. "My APPROACH to the task was wrong" → mutate the strategy genome
 
-This is the qualitative leap — not just error detection, but
+This is the qualitative leap - not just error detection, but
 analysis of the agent's own cognitive processes.
 """
 
@@ -36,7 +36,7 @@ class FailureClass(str, Enum):
     """Classification of WHY something failed.
 
     The meta-level's primary job is to classify failures into
-    these categories — each triggers a different control response.
+    these categories - each triggers a different control response.
     """
 
     # Object-level failures (fix the task)
@@ -73,7 +73,7 @@ class MetaAction(str, Enum):
 class MetaJudgment:
     """A meta-level judgment about an execution trace.
 
-    This is the output of the MONITOR function — a structured
+    This is the output of the MONITOR function - a structured
     diagnosis of what happened and why.
     """
 
@@ -172,7 +172,7 @@ class MetaLevel:
         if verdict.abort_needed:
             judgment.failure_class = FailureClass.CONFIDENCE_MISCALIBRATION
             judgment.is_meta_failure = True
-            judgment.diagnosis = "Constitutional cardinal violation — abort required."
+            judgment.diagnosis = "Constitutional cardinal violation - abort required."
             judgment.recommended_actions = [MetaAction.ESCALATE_TO_HUMAN]
             judgment.confidence = 0.95
             reasoning.append("CARDINAL violation detected → immediate escalation")
@@ -180,7 +180,7 @@ class MetaLevel:
             self._judgment_history.append(judgment)
             return judgment
 
-        # Phase 2: Success path — strategy reinforcement
+        # Phase 2: Success path - strategy reinforcement
         if trace.final_outcome == StepOutcome.SUCCESS:
             reasoning.append(f"Task succeeded (success_rate={trace.success_rate:.2f})")
             judgment = self._analyze_success(trace, judgment, reasoning)
@@ -189,7 +189,7 @@ class MetaLevel:
             self._consecutive_no_actions = 0
             return judgment
 
-        # Phase 3: Failure diagnosis — the core metacognitive analysis
+        # Phase 3: Failure diagnosis - the core metacognitive analysis
         reasoning.append(f"Task failed (success_rate={trace.success_rate:.2f})")
 
         # Detect error pattern
@@ -232,7 +232,7 @@ class MetaLevel:
 
         # If success was slow (>80% of steps), consider optimization
         if trace.success_rate < 0.6 and trace.final_outcome == StepOutcome.SUCCESS:
-            reasoning.append("Success was inefficient — many failed intermediate steps")
+            reasoning.append("Success was inefficient - many failed intermediate steps")
             judgment.recommended_actions.append(MetaAction.ADJUST_DECOMPOSITION)
 
         return judgment
@@ -273,7 +273,7 @@ class MetaLevel:
             judgment.is_meta_failure = True
             judgment.diagnosis = (
                 f"Repeated failure with tool '{tool_name}'. The agent's tool selection "
-                f"heuristic is miscalibrated — it keeps choosing a tool that doesn't work "
+                f"heuristic is miscalibrated - it keeps choosing a tool that doesn't work "
                 f"for this problem class."
             )
             judgment.recommended_actions = [
@@ -309,7 +309,7 @@ class MetaLevel:
             judgment.is_meta_failure = True
             judgment.diagnosis = (
                 f"Agent was {trace.self_assessed_confidence:.0%} confident but failed. "
-                f"Confidence calibration is broken — the meta-monitoring itself "
+                f"Confidence calibration is broken - the meta-monitoring itself "
                 f"is unreliable."
             )
             judgment.recommended_actions = [
@@ -326,7 +326,7 @@ class MetaLevel:
             judgment.is_meta_failure = True
             judgment.diagnosis = (
                 "Exploration rate is very low and the agent is failing. "
-                "Likely stuck in a local optimum — needs more diverse search."
+                "Likely stuck in a local optimum - needs more diverse search."
             )
             judgment.recommended_actions = [MetaAction.ADJUST_EXPLORATION]
             judgment.confidence = 0.65
@@ -459,7 +459,7 @@ class MetaLevel:
             )
 
         elif action == MetaAction.FORCE_TOOL_SWITCH:
-            # Rotate tool priority — push failing tool to the back
+            # Rotate tool priority - push failing tool to the back
             if len(self._strategy.genome.tool_priority) > 1:
                 tools = self._strategy.genome.tool_priority
                 # Move first tool to the end (round-robin)
@@ -529,7 +529,7 @@ class MetaLevel:
         # Pattern: consecutive NO_ACTION despite failures
         if self._consecutive_no_actions >= 5:
             logger.warning(
-                "META-META: %d consecutive NO_ACTION judgments — "
+                "META-META: %d consecutive NO_ACTION judgments - "
                 "meta-level may be blind to a systemic issue",
                 self._consecutive_no_actions,
             )
@@ -540,7 +540,7 @@ class MetaLevel:
             classes = [j.failure_class for j in recent if j.failure_class is not None]
             if classes and len(set(classes)) == 1:
                 logger.warning(
-                    "META-META: Last %d judgments all classify as %s — "
+                    "META-META: Last %d judgments all classify as %s - "
                     "possible diagnostic tunnel vision",
                     len(classes),
                     classes[0].value,
@@ -553,7 +553,7 @@ class MetaLevel:
             deltas = [m.fitness_delta for m in recent_mutations if m.fitness_delta is not None]
             if deltas and all(d <= 0 for d in deltas):
                 logger.warning(
-                    "META-META: Last %d mutations all had non-positive fitness delta — "
+                    "META-META: Last %d mutations all had non-positive fitness delta - "
                     "meta-level control strategy may be wrong",
                     len(deltas),
                 )

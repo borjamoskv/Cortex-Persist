@@ -1,4 +1,4 @@
-"""IDC Agent — the orchestrator that runs the I→D→C loop."""
+"""IDC Agent - the orchestrator that runs the I→D→C loop."""
 
 from __future__ import annotations
 
@@ -30,7 +30,7 @@ class AgentState:
 
 
 class IDCAgent:
-    """Minimal IDC Agent — Information · Decision · Control.
+    """Minimal IDC Agent - Information · Decision · Control.
 
     Architecture:
         1. INFORMATION: Bayesian belief update from observation
@@ -54,7 +54,7 @@ class IDCAgent:
         self.config = config
         self.likelihood = likelihood_matrix  # P(o|s): (n_obs, n_states)
         self.utility = utility_matrix        # U(s,a): (n_states, n_actions)
-        self.constraints = constraints       # g(a): (n_actions,) — ≤ 0 is safe
+        self.constraints = constraints       # g(a): (n_actions,) - ≤ 0 is safe
         self.rng = np.random.default_rng(seed)
 
         n_states = utility_matrix.shape[0]
@@ -72,14 +72,14 @@ class IDCAgent:
         prev_belief = self.state.belief
         metrics = Metrics()
 
-        # ① INFORMATION — Update beliefs
+        # ① INFORMATION - Update beliefs
         self.state.belief = update_belief(
             self.state.belief, obs, self.likelihood
         )
         metrics.kl_divergence = self.state.belief.last_kl_update
         metrics.belief_entropy = self.state.belief.entropy
 
-        # ② DECISION — Propose and select action
+        # ② DECISION - Propose and select action
         candidates = propose_actions(
             self.state.belief, self.utility, self.config, self.n_actions
         )
@@ -87,13 +87,13 @@ class IDCAgent:
         metrics.expected_utility = action.expected_utility
         metrics.risk_cvar = action.risk
 
-        # ③ CONTROL — Filter through constraints
+        # ③ CONTROL - Filter through constraints
         action = filter_action(
             action, candidates, self.constraints, self.config
         )
         metrics.constraint_violation = action.constraint_violation
 
-        # 🚨 WATCHDOG — Check for anomalies
+        # 🚨 WATCHDOG - Check for anomalies
         mode, diagnostics = watchdog_check(
             self.state.belief, prev_belief, action, self.config
         )
@@ -128,7 +128,7 @@ class IDCAgent:
             + self.config.beta * metrics.constraint_violation
         )
 
-        # ④ LOG — Record everything
+        # ④ LOG - Record everything
         self.state.total_reward += obs.reward
         self.state.total_regret += metrics.regret
         self.state.step += 1

@@ -1,11 +1,11 @@
 """
-ENCB — Baseline RAG (Passive Memory Control Group)
+ENCB - Baseline RAG (Passive Memory Control Group)
 ====================================================
 Minimal append-only memory system with NO epistemic governance.
 No consensus, no belief revision, no Byzantine detection.
 Serves as the control group for the ENCB experiment.
 
-Nobel-Ω Vector Ξ₄ — Control Group for Falsification.
+Nobel-Ω Vector Ξ₄ - Control Group for Falsification.
 """
 
 from __future__ import annotations
@@ -72,7 +72,7 @@ class BaselineRAG:
         return fact.id
 
     async def search(self, query: str, top_k: int = 5) -> list[RagFact]:
-        """Naive substring search — no embeddings, no ranking by trust."""
+        """Naive substring search - no embeddings, no ranking by trust."""
         query_lower = query.lower()
         scored: list[tuple[RagFact, float]] = []
 

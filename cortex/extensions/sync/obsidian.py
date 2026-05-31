@@ -156,7 +156,7 @@ def _render_project_moc(project: str, facts: list[dict]) -> str:
                 preview += "..."
             folder = TYPE_FOLDERS.get(ftype, ftype)
             filename = f"{ftype}-{f['id']}"
-            lines.append(f"- [[{folder}/{filename}|#{f['id']}]] — {preview}")
+            lines.append(f"- [[{folder}/{filename}|#{f['id']}]] - {preview}")
         lines.append("")
 
     return "\n".join(lines)
@@ -179,7 +179,7 @@ def _render_tag_note(tag: str, facts: list[dict]) -> str:
             preview += "..."
         folder = TYPE_FOLDERS.get(f["type"], f["type"])
         filename = f"{f['type']}-{f['id']}"
-        lines.append(f"- [[{folder}/{filename}|#{f['id']}]] ({f['project']}) — {preview}")
+        lines.append(f"- [[{folder}/{filename}|#{f['id']}]] ({f['project']}) - {preview}")
 
     lines.append("")
     return "\n".join(lines)
@@ -222,7 +222,7 @@ def _render_dashboard(
     lines.append("## 📂 Projects")
     lines.append("")
     for project, facts in sorted(projects.items()):
-        lines.append(f"- [[projects/{project}|{project}]] — {len(facts)} facts")
+        lines.append(f"- [[projects/{project}|{project}]] - {len(facts)} facts")
     lines.append("")
 
     return "\n".join(lines)

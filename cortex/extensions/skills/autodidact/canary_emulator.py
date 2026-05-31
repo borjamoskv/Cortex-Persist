@@ -1,4 +1,4 @@
-"""CORTEX AUTODIDACT-Ω — GPT-5.6 Canary & Claude Mythos Emulator.
+"""CORTEX AUTODIDACT-Ω - GPT-5.6 Canary & Claude Mythos Emulator.
 
 Provides reverse engineering telemetry, canary detection, and vulnerability audit
 pipelines simulating Project Glasswing & OpenAI Codex iris-alpha test rollouts.

@@ -44,7 +44,7 @@ class MVPGenerator:
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{topic_title} — Early Access</title>
+    <title>{topic_title} - Early Access</title>
     <style>
         body {{ font-family: system-ui, sans-serif; background: #0A0A0A; color: #FAFAFA; }}
         .hero {{ padding: 100px 20px; text-align: center; }}

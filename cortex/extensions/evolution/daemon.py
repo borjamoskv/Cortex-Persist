@@ -1,5 +1,5 @@
 # cortex/evolution/daemon.py
-"""Daemon entry point — starts the Evolution Engine as a background process.
+"""Daemon entry point - starts the Evolution Engine as a background process.
 
 Usage:
     python -m cortex.evolution.daemon                # run forever (resumes state)
@@ -21,7 +21,7 @@ from cortex.extensions.evolution.engine import EvolutionEngine
 
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s — %(message)s",
+    format="%(asctime)s [%(levelname)s] %(name)s - %(message)s",
     datefmt="%H:%M:%S",
 )
 logger = logging.getLogger(__name__)
@@ -32,7 +32,7 @@ def _print_swarm(engine: EvolutionEngine) -> None:
     status = engine.swarm_status()  # type: ignore[reportAttributeAccessIssue]
 
     print("\n═══════════════════════════════════════════════════════")
-    print(f"  🧬 CORTEX EVOLUTION ENGINE — Cycle {status['cycle']}")
+    print(f"  🧬 CORTEX EVOLUTION ENGINE - Cycle {status['cycle']}")
     print("═══════════════════════════════════════════════════════")
 
     for agent in status["agents"]:
@@ -100,7 +100,7 @@ async def _run_forever(engine: EvolutionEngine) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="🧬 CORTEX Evolution Daemon — Continuous Agent Improvement",
+        description="🧬 CORTEX Evolution Daemon - Continuous Agent Improvement",
     )
     parser.add_argument("--once", action="store_true", help="Run a single cycle and exit")
     parser.add_argument("--cycles", type=int, default=0, help="Run N cycles and exit")
@@ -125,7 +125,7 @@ def main() -> None:
     elif args.cycles > 0:
         asyncio.run(_run_n_cycles(engine, args.cycles))
     else:
-        print("🧬 Evolution Engine — Press Ctrl+C to stop\n")
+        print("🧬 Evolution Engine - Press Ctrl+C to stop\n")
         try:
             asyncio.run(_run_forever(engine))
         except KeyboardInterrupt:

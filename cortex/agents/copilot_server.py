@@ -1,4 +1,4 @@
-"""CORTEX Level 3 Copilot — WebSocket Server.
+"""CORTEX Level 3 Copilot - WebSocket Server.
 
 Bridges IDE clients (VS Code extension) to the CopilotAgent backend.
 
@@ -38,7 +38,7 @@ try:
     HAS_WEBSOCKETS = True
 except ImportError:
     HAS_WEBSOCKETS = False
-    logger.debug("websockets not installed — CopilotServer unavailable")
+    logger.debug("websockets not installed - CopilotServer unavailable")
 
 
 # ── Session Tracking ──────────────────────────────────────────────

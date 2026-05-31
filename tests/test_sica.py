@@ -1,4 +1,4 @@
-"""Tests for SICA — Self-Improving Cognitive Architecture.
+"""Tests for SICA - Self-Improving Cognitive Architecture.
 
 Validates the full Nelson-Narens metacognitive loop:
   1. Object-level execution tracing

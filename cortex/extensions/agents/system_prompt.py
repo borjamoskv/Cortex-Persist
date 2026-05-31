@@ -1,5 +1,5 @@
 """
-CORTEX Agent — Sovereign System Prompt v2.1.
+CORTEX Agent - Sovereign System Prompt v2.1.
 
 The definitive system prompt for any LLM operating as a CORTEX agent.
 Optimized for Claude, GPT-4o, Gemini, and local models (Llama 3+).
@@ -25,7 +25,7 @@ from __future__ import annotations
 __all__ = ["SYSTEM_PROMPT", "SYSTEM_PROMPT_SHORT", "SYSTEM_PROMPT_MEDIUM"]
 
 
-# ─── Short (~500 tokens) — for small-context models ─────────────────
+# ─── Short (~500 tokens) - for small-context models ─────────────────
 
 SYSTEM_PROMPT_SHORT = """\
 [IDENTITY] CORTEX Agent | Trust Infrastructure for Autonomous AI.
@@ -51,7 +51,7 @@ SYSTEM_PROMPT_SHORT = """\
 """
 
 
-# ─── Medium (~1100 tokens) — for production agents ──────────────────
+# ─── Medium (~1100 tokens) - for production agents ──────────────────
 
 SYSTEM_PROMPT_MEDIUM = """\
 [IDENTITY] CORTEX Agent | Cryptographic trust infrastructure for autonomous AI memory.
@@ -92,7 +92,7 @@ cortex store --type [decision|error|ghost|bridge] PROJECT "content"
 """
 
 
-# ─── Full (~2000 tokens) — maximum precision, complex tasks ─────────
+# ─── Full (~2000 tokens) - maximum precision, complex tasks ─────────
 
 SYSTEM_PROMPT = """\
 # [CORTEX AGENT] Sovereign System Prompt v2.0 | TPS-1.0

@@ -1,5 +1,5 @@
 """
-ThermalEconomy — The Entropy Gatekeeper.
+ThermalEconomy - The Entropy Gatekeeper.
 Enforces 'Proof-of-Skin' and field density limits.
 """
 

@@ -1,19 +1,19 @@
 # cortex/evolution/db_persistence.py
-"""Database Persistence for Evolution State — Long-Term Memory Consolidation.
+"""Database Persistence for Evolution State - Long-Term Memory Consolidation.
 
 Replaces JSON file persistence with CORTEX DB storage, implementing
 the hippocampal-cortical complementary learning systems model
 (McClelland et al., 1995; O'Reilly & Norman, 2002):
 
-    **Hippocampal buffer** — Rapid one-shot encoding of swarm state
+    **Hippocampal buffer** - Rapid one-shot encoding of swarm state
     into the ``evolution_state`` table after each persistence interval.
     Analogous to hippocampal pattern separation (Leutgeb et al., 2007).
 
-    **Cortical consolidation** — Historical snapshots accumulate in the
+    **Cortical consolidation** - Historical snapshots accumulate in the
     DB as a time-series, enabling retrospective analysis and rollback.
     Analogous to neocortical schema assimilation (van Kesteren et al., 2012).
 
-    **Engram retrieval** — ``load_from_db()`` reconstructs the most recent
+    **Engram retrieval** - ``load_from_db()`` reconstructs the most recent
     swarm state from the latest DB snapshot, functioning as episodic
     recall via hippocampal pattern completion (Marr, 1971).
 
@@ -76,7 +76,7 @@ async def save_to_db(
     """Persist swarm state to CORTEX DB (hippocampal rapid encoding).
 
     Uses INSERT OR REPLACE with UNIQUE(cycle) constraint to ensure
-    one snapshot per cycle (pattern separation — Leutgeb et al., 2007).
+    one snapshot per cycle (pattern separation - Leutgeb et al., 2007).
     """
     state = {
         "version": SCHEMA_VERSION,
@@ -141,7 +141,7 @@ async def get_evolution_history(
 ) -> list[dict[str, Any]]:
     """Retrieve historical evolution snapshots (cortical timeline).
 
-    Returns summary data for retrospective analysis — analogous to
+    Returns summary data for retrospective analysis - analogous to
     cortical memory replay during offline consolidation
     (McClelland et al., 1995).
     """

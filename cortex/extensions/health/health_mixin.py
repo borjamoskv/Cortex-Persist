@@ -1,4 +1,4 @@
-"""CortexEngine health health_mixin — engine.health_check() API.
+"""CortexEngine health health_mixin - engine.health_check() API.
 
 Cached collector, TrendDetector, configurable thresholds.
 Health scores are persisted to SQLite for cross-invocation trend analysis.
@@ -107,14 +107,14 @@ class HealthMixin:
 
         if hs.grade <= Grade.FAILED:
             warnings.append(
-                f"Overall health is FAILED ({hs.grade.letter}) — immediate investigation required"
+                f"Overall health is FAILED ({hs.grade.letter}) - immediate investigation required"
             )
         elif hs.grade <= Grade.DEGRADED:
             warnings.append(f"Overall health is DEGRADED ({hs.grade.letter})")
         elif hs.grade <= Grade.ACCEPTABLE:
             recommendations.append("Run `cortex compact` to reduce entropy")
         elif hs.grade <= Grade.GOOD:
-            recommendations.append("Health is Good — consider ledger verification")
+            recommendations.append("Health is Good - consider ledger verification")
 
         trend = self._get_trend_detector()
         drift = trend.detect_drift()

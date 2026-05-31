@@ -1,12 +1,12 @@
-"""Reflexion Engine — Self-Healing Dispatch Loop (Level 5).
+"""Reflexion Engine - Self-Healing Dispatch Loop (Level 5).
 
 Bridges the ISA builder's code-as-data primitives (reflect/rewrite) with a
 structured self-improvement loop. When a dispatch tree execution fails:
 
-1. REFLECT — Inspect the failed tree via ISA `reflect()`
-2. DIAGNOSE — Generate structured analysis of the failure
-3. REWRITE — Modify the tree via ISA `rewrite()` with corrections
-4. RETRY — Re-execute with accumulated reflection context
+1. REFLECT - Inspect the failed tree via ISA `reflect()`
+2. DIAGNOSE - Generate structured analysis of the failure
+3. REWRITE - Modify the tree via ISA `rewrite()` with corrections
+4. RETRY - Re-execute with accumulated reflection context
 
 Reflections are persisted for cross-session learning.
 
@@ -438,7 +438,7 @@ class ReflexionEngine:
                 self._session_stats["total_reflections"] += 1
 
                 logger.warning(
-                    "[REFLEXION] Iteration %d/%d failed: %s — %s",
+                    "[REFLEXION] Iteration %d/%d failed: %s - %s",
                     iteration + 1,
                     self.config.max_iterations,
                     type(error).__name__,

@@ -1,4 +1,4 @@
-"""Tests para WindowEngine — gestión de ventanas vía AppleScript."""
+"""Tests para WindowEngine - gestión de ventanas vía AppleScript."""
 
 from unittest.mock import AsyncMock, patch
 

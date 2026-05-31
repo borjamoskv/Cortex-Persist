@@ -1,4 +1,4 @@
-"""SICA World Model — Causal Prediction & Counterfactual Reasoning.
+"""SICA World Model - Causal Prediction & Counterfactual Reasoning.
 
 The agent currently REACTS to failures. A world model lets it
 PREDICT outcomes before executing, and reason about
@@ -47,7 +47,7 @@ class ToolBelief:
       beta  = prior failures + observed failures
       E[p]  = alpha / (alpha + beta)
 
-    This gives us principled uncertainty quantification —
+    This gives us principled uncertainty quantification -
     a tool used once successfully has high uncertainty,
     a tool used 100 times successfully has low uncertainty.
     """
@@ -126,7 +126,7 @@ class WorldModel:
     - Temporal patterns in tool reliability
 
     Uses Upper Confidence Bounds (UCB) for exploration-exploitation
-    in tool selection — theoretically optimal for multi-armed bandits.
+    in tool selection - theoretically optimal for multi-armed bandits.
     """
 
     def __init__(self, exploration_c: float = 1.414) -> None:

@@ -1,4 +1,4 @@
-"""CORTEX Ledger — Sovereign transaction logs and semantic enrichment."""
+"""CORTEX Ledger - Sovereign transaction logs and semantic enrichment."""
 
 from __future__ import annotations
 

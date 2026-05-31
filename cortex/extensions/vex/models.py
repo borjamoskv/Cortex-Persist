@@ -1,9 +1,9 @@
-"""VEX Data Models — Cryptographically verifiable execution primitives.
+"""VEX Data Models - Cryptographically verifiable execution primitives.
 
 All models are immutable dataclasses designed for hash-chain integration
 with CORTEX's ImmutableLedger and WBFT consensus.
 
-Derivation: Ω₃ (Byzantine Default) — every model is self-verifiable.
+Derivation: Ω₃ (Byzantine Default) - every model is self-verifiable.
 """
 
 from __future__ import annotations
@@ -138,7 +138,7 @@ class StepResult:
     fact_id: int | None = None
 
     def content_hash(self) -> str:
-        """Hash of the result — covers output + success status."""
+        """Hash of the result - covers output + success status."""
         payload = json.dumps(
             {
                 "step_id": self.step_id,
@@ -169,7 +169,7 @@ class StepResult:
 class ExecutionReceipt:
     """Cryptographic proof that an agent executed a task.
 
-    The receipt is the VEX deliverable — a self-contained, independently
+    The receipt is the VEX deliverable - a self-contained, independently
     verifiable proof of execution that can be shared with auditors,
     compliance officers, or third-party systems.
     """

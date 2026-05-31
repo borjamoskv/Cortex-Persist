@@ -73,7 +73,7 @@ def migrate_v31_to_v40(
 
 
 def _migrate_system(engine: CortexEngine, path: Path, stats: dict) -> None:
-    """Migrate system.json — preferences, decisions, knowledge, sessions."""
+    """Migrate system.json - preferences, decisions, knowledge, sessions."""
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
     except (json.JSONDecodeError, OSError) as e:
@@ -221,7 +221,7 @@ def _migrate_project(engine: CortexEngine, path: Path, stats: dict) -> None:
 
 
 def _migrate_mistakes(engine: CortexEngine, path: Path, stats: dict) -> None:
-    """Migrate mistakes.jsonl — error memory."""
+    """Migrate mistakes.jsonl - error memory."""
     try:
         content = path.read_text(encoding="utf-8")
     except OSError as e:
@@ -255,7 +255,7 @@ def _migrate_mistakes(engine: CortexEngine, path: Path, stats: dict) -> None:
 
 
 def _migrate_bridges(engine: CortexEngine, path: Path, stats: dict) -> None:
-    """Migrate bridges.jsonl — cross-project connections."""
+    """Migrate bridges.jsonl - cross-project connections."""
     try:
         content = path.read_text(encoding="utf-8")
     except OSError as e:

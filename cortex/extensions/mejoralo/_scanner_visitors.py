@@ -1,4 +1,4 @@
-"""_scanner_visitors — AST visitors for BroadException and AsyncIntegrity scanners.
+"""_scanner_visitors - AST visitors for BroadException and AsyncIntegrity scanners.
 
 Extracted from antipatterns.py to satisfy the Landauer LOC barrier (≤500).
 Visitors accept AntipatternFinding instances but do NOT import antipatterns.py
@@ -13,7 +13,7 @@ from cortex.extensions.mejoralo.models import AntipatternFinding
 
 __all__ = ["_BroadExceptionVisitor", "_AsyncIntegrityVisitor"]
 
-# Mirrors the constant in antipatterns.py — kept in sync manually.
+# Mirrors the constant in antipatterns.py - kept in sync manually.
 _BLOCKING_CALLS: dict[str, str] = {
     "time.sleep": "Use asyncio.sleep() instead",
     "requests.get": "Use httpx.AsyncClient or aiohttp",
@@ -65,10 +65,10 @@ class _BroadExceptionVisitor(ast.NodeVisitor):
             )
             severity = "critical" if body_is_silent else "high"
             msg = (
-                f"`except {node.type.id}` with silent body — errors are being swallowed"
+                f"`except {node.type.id}` with silent body - errors are being swallowed"
                 if body_is_silent
                 else f"`except {node.type.id}` is too broad"
-                " — specific exceptions lose their identity"
+                " - specific exceptions lose their identity"
             )
             self.findings.append(
                 AntipatternFinding(

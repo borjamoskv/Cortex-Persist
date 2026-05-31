@@ -39,7 +39,7 @@ class SignupResponse(BaseModel):
 async def signup(req: SignupRequest) -> SignupResponse:
     """Create a free-tier account. Returns API key immediately.
 
-    No email verification required for MVP — key is active on creation.
+    No email verification required for MVP - key is active on creation.
     """
     import cortex.api.state as api_state
 
@@ -83,5 +83,5 @@ async def signup(req: SignupRequest) -> SignupResponse:
         calls_limit=plan_info["calls_limit"],
         quickstart_url="https://github.com/borjamoskv/Cortex-Persist/blob/main/docs/quickstart.md",
         message=f"Welcome, {req.name}! Your free-tier API key is ready. "
-        "Store it securely — it won't be shown again.",
+        "Store it securely - it won't be shown again.",
     )

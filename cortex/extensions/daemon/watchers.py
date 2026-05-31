@@ -1,10 +1,10 @@
-"""WatchdogHub — Unified filesystem monitor for the daemon.
+"""WatchdogHub - Unified filesystem monitor for the daemon.
 
 Consolidates Git watching & AST monitoring into a single Observer
 that publishes events to the DistributedEventBus.
 
 Uses kernel-level kqueue (macOS) / inotify (Linux) via watchdog
-for O(1) event-driven detection — no polling.
+for O(1) event-driven detection - no polling.
 
 Architecture:
     ┌─────────────────────────────────────┐
@@ -216,11 +216,11 @@ class WatchdogHub:
     async def start(self) -> None:
         """Start watching configured paths."""
         if not _WATCHDOG_AVAILABLE:
-            logger.warning("watchdog not installed — WatchdogHub disabled")
+            logger.warning("watchdog not installed - WatchdogHub disabled")
             return
 
         if not self._paths:
-            logger.info("No paths configured — WatchdogHub idle")
+            logger.info("No paths configured - WatchdogHub idle")
             return
 
         loop = asyncio.get_running_loop()
@@ -246,7 +246,7 @@ class WatchdogHub:
         self._observer.start()
         self._running = True
         logger.info(
-            "WatchdogHub started — %d paths, %d patterns",
+            "WatchdogHub started - %d paths, %d patterns",
             len(self._paths),
             len(self._patterns),
         )

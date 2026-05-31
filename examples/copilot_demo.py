@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CORTEX Level 3 Copilot — End-to-End Integration Demo.
+"""CORTEX Level 3 Copilot - End-to-End Integration Demo.
 
 Reality Level: C5-REAL
 
@@ -305,7 +305,7 @@ async def scenario_3_multi_file_refactor(agent: CopilotAgent, bus: DemoBus) -> N
 async def main() -> None:
     """Run the full copilot demo."""
     logger.info("╔══════════════════════════════════════════════════════════╗")
-    logger.info("║  CORTEX Level 3 Copilot — Integration Demo             ║")
+    logger.info("║  CORTEX Level 3 Copilot - Integration Demo             ║")
     logger.info("║  Reality Level: C5-REAL                                 ║")
     logger.info("╚══════════════════════════════════════════════════════════╝")
     logger.info("")

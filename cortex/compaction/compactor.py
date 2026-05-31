@@ -12,7 +12,7 @@ Strategies:
   - MERGE_ERRORS: Consolidate repeated error facts into one
   - STALENESS_PRUNE: Deprecate old, low-consensus facts
 
-Design: Zero data loss — originals are deprecated, never deleted.
+Design: Zero data loss - originals are deprecated, never deleted.
 Ledger hash-chain remains intact. time_travel still works.
 """
 
@@ -309,7 +309,7 @@ async def compact_session(
         else:
             grouped["other"].append(row)
 
-    lines = [f"# {project} — Active Memory State", ""]
+    lines = [f"# {project} - Active Memory State", ""]
     for ftype in _TYPE_ORDER:
         if grouped[ftype]:
             _append_type_section(lines, ftype, grouped[ftype])

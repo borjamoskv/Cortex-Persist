@@ -1,4 +1,4 @@
-"""FRICTION-ANNIHILATOR-Ω — Reality Delta Resolver.
+"""FRICTION-ANNIHILATOR-Ω - Reality Delta Resolver.
 
 Takes failed assumptions (limerence) and resolves them into working code,
 annihilating the friction (Delta < 0) and converting it to Exergy.

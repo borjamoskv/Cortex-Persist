@@ -1,4 +1,4 @@
-"""IDC Core Types — the data structures that define an agent."""
+"""IDC Core Types - the data structures that define an agent."""
 
 from __future__ import annotations
 
@@ -12,9 +12,9 @@ from numpy.typing import NDArray
 class AgentMode(Enum):
     """Operational mode of the agent."""
     NORMAL = auto()
-    SAFE = auto()       # Watchdog triggered — conservative actions only
+    SAFE = auto()       # Watchdog triggered - conservative actions only
     EXPLORE = auto()    # Deliberately increasing uncertainty
-    SHUTDOWN = auto()   # Fatal anomaly — stop everything
+    SHUTDOWN = auto()   # Fatal anomaly - stop everything
 
 
 @dataclass

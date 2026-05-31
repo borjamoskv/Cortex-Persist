@@ -3,10 +3,10 @@
 # See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
 
-"""CORTEX LLM Router — DNS-Inspired Resolver Caches.
+"""CORTEX LLM Router - DNS-Inspired Resolver Caches.
 
-NegativeCache (RFC 2308 NXDOMAIN) — failed provider suppression.
-PositiveCache (DNS A-record) — successful provider promotion.
+NegativeCache (RFC 2308 NXDOMAIN) - failed provider suppression.
+PositiveCache (DNS A-record) - successful provider promotion.
 
 Extraído de router.py (Ω₂ Landauer split).
 """
@@ -33,8 +33,8 @@ _DEFAULT_POS_CAPACITY: Final[int] = 5000
 class NegativeCache:
     """RFC 2308 NXDOMAIN cache for failed providers using bounded TLRU.
 
-    Axiom: Ω₅ (Antifragile by Default) — the failure feeds the system.
-    Derivation: Ω₂ (Entropic Asymmetry) — bounded memory for failure states.
+    Axiom: Ω₅ (Antifragile by Default) - the failure feeds the system.
+    Derivation: Ω₂ (Entropic Asymmetry) - bounded memory for failure states.
     """
 
     __slots__ = ("_cache",)
@@ -43,7 +43,7 @@ class NegativeCache:
         self._cache = TLRUCache(maxsize=capacity, ttl=default_ttl)
 
     def record_failure(self, provider_name: str, intent: str, ttl: float | None = None) -> None:
-        """NXDOMAIN — cache that this provider failed for this intent."""
+        """NXDOMAIN - cache that this provider failed for this intent."""
         key = f"{provider_name}:{intent}"
         # TLRUCache stores a value; we just store 1.0 as a placeholder since presence is what matters
         # If a custom TTL is provided, we can't easily override it per-item in the current TLRUCache
@@ -73,7 +73,7 @@ class NegativeCache:
 class PositiveCache:
     """DNS A-Record cache for successful providers using bounded TLRU.
 
-    Axiom: Ω₅ (Antifragile by Default) — success feeds the system.
+    Axiom: Ω₅ (Antifragile by Default) - success feeds the system.
     """
 
     __slots__ = ("_cache",)
@@ -88,7 +88,7 @@ class PositiveCache:
         latency_ms: float,
         ttl: float | None = None,
     ) -> None:
-        """A-record — cache that this provider succeeded for this intent."""
+        """A-record - cache that this provider succeeded for this intent."""
         key = f"{provider_name}:{intent}"
         self._cache[key] = latency_ms
         logger.debug(
@@ -111,7 +111,7 @@ class PositiveCache:
     def known_good_providers(self, intent: str) -> list[tuple[str, float]]:
         """Return all known-good providers for an intent, sorted by latency.
 
-        Returns list of (provider_name, latency_ms) — fastest first.
+        Returns list of (provider_name, latency_ms) - fastest first.
         """
         # TLRUCache doesn't expose internal items easily in a sorted way.
         # We access the internal OrderedDict for this specific use case.
@@ -127,7 +127,7 @@ class PositiveCache:
             if pintent == intent and (now - ts <= self._cache.ttl):
                 good.append((pname, latency))
 
-        # Sort by latency — fastest first
+        # Sort by latency - fastest first
         good.sort(key=lambda x: x[1])
         return good
 

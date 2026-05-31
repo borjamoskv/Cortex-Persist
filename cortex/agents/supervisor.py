@@ -1,4 +1,4 @@
-"""CORTEX Agent Runtime — Supervisor.
+"""CORTEX Agent Runtime - Supervisor.
 
 The Supervisor manages agent lifecycle:
     - register / start / stop / quarantine
@@ -83,7 +83,7 @@ class Supervisor:
         if entry is None:
             raise KeyError(f"Agent '{agent_id}' not registered")
         if entry.task is not None and not entry.task.done():
-            raise RuntimeError(f"Agent '{agent_id}' is still running — stop it first")
+            raise RuntimeError(f"Agent '{agent_id}' is still running - stop it first")
         del self._agents[agent_id]
         logger.info("Supervisor: Unregistered '%s'", agent_id)
 
@@ -119,7 +119,7 @@ class Supervisor:
             entry.agent.force_stop()
 
     async def quarantine_agent(self, agent_id: str, reason: str = "") -> None:
-        """Quarantine an agent — stop it and mark as quarantined."""
+        """Quarantine an agent - stop it and mark as quarantined."""
         entry = self._get_entry(agent_id)
         entry.agent.state.status = AgentStatus.QUARANTINED
         entry.agent.state.metadata["quarantine_reason"] = reason
@@ -128,7 +128,7 @@ class Supervisor:
             entry.agent.force_stop()
 
         logger.warning(
-            "Supervisor: QUARANTINED '%s' — %s",
+            "Supervisor: QUARANTINED '%s' - %s",
             agent_id,
             reason or "no reason given",
         )
@@ -142,7 +142,7 @@ class Supervisor:
 
         if entry.restart_count >= entry.max_restarts:
             logger.error(
-                "Supervisor: '%s' exceeded restart budget (%d/%d) — quarantining",
+                "Supervisor: '%s' exceeded restart budget (%d/%d) - quarantining",
                 agent_id,
                 entry.restart_count,
                 entry.max_restarts,
@@ -246,7 +246,7 @@ class Supervisor:
                 and entry.restart_count < entry.max_restarts
             ):
                 logger.warning(
-                    "Supervisor: '%s' task died unexpectedly — restarting",
+                    "Supervisor: '%s' task died unexpectedly - restarting",
                     agent_id,
                 )
                 await self.restart_agent(agent_id)
@@ -255,7 +255,7 @@ class Supervisor:
             # Detect stale heartbeats
             if task_alive and heartbeat and (now - heartbeat) > self._heartbeat_timeout_s:
                 logger.warning(
-                    "Supervisor: '%s' heartbeat stale (%.1fs) — restarting",
+                    "Supervisor: '%s' heartbeat stale (%.1fs) - restarting",
                     agent_id,
                     now - heartbeat,
                 )

@@ -97,7 +97,7 @@ class AgentEmitter:
         task_id: str,
         judgment: MetaJudgment,
     ) -> None:
-        """Emit constitutional abort — the nuclear option."""
+        """Emit constitutional abort - the nuclear option."""
         logger.error(
             "[%s] CONSTITUTIONAL ABORT: %s",
             self.agent.agent_id,

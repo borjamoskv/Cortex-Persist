@@ -1,5 +1,5 @@
 """
-nightshift_agent.py — NightshiftAgent
+nightshift_agent.py - NightshiftAgent
 
 Daemon agent wrapping NightShiftCrystalDaemon. On each tick it runs one
 consolidation cycle, emits a FACT_PROPOSAL per crystal produced, and
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 class NightshiftAgent(BaseAgent):
-    """Daemon agent — drives NightShiftCrystalDaemon on each autonomous tick.
+    """Daemon agent - drives NightShiftCrystalDaemon on each autonomous tick.
 
     Emits FACT_PROPOSAL for every crystal synthesized, then broadcasts
     a cycle summary to escalation_targets.
@@ -39,19 +39,19 @@ class NightshiftAgent(BaseAgent):
         self._daemon = daemon or NightShiftCrystalDaemon()
 
     # ------------------------------------------------------------------
-    # Daemon tick — run one consolidation cycle
+    # Daemon tick - run one consolidation cycle
     # ------------------------------------------------------------------
 
     async def tick(self) -> None:
-        logger.info("NightshiftAgent — starting consolidation cycle")
+        logger.info("NightshiftAgent - starting consolidation cycle")
         try:
             report: dict[str, Any] = await self._daemon.run_cycle()
         except Exception as exc:
-            logger.exception("NightshiftAgent — run_cycle() failed")
+            logger.exception("NightshiftAgent - run_cycle() failed")
             raise RuntimeError(f"NightShiftCrystalDaemon failure: {exc}") from exc
 
         crystals: list[Any] = report.get("crystals", [])
-        logger.info("NightshiftAgent — cycle complete, %d crystal(s)", len(crystals))
+        logger.info("NightshiftAgent - cycle complete, %d crystal(s)", len(crystals))
 
         for crystal in crystals:
             await self._emit_crystal(crystal)
@@ -64,7 +64,7 @@ class NightshiftAgent(BaseAgent):
 
     async def handle_message(self, message: AgentMessage) -> None:  # type: ignore[override]
         if message.kind == MessageKind.SHUTDOWN:
-            logger.info("NightshiftAgent — shutdown requested by %s", message.sender)
+            logger.info("NightshiftAgent - shutdown requested by %s", message.sender)
             self._daemon.stop()
             self.force_stop()
 

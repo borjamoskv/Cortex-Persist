@@ -1,4 +1,4 @@
-"""CORTEX v7+ — Procedural Memory & Skill Buffer.
+"""CORTEX v7+ - Procedural Memory & Skill Buffer.
 
 Basal Ganglia analogue: caches recently executed skills, tracking
 execution outcomes (striatal valuation) and latencies. Shifts
@@ -16,14 +16,14 @@ from typing import ClassVar, Final
 
 # ─── Constants ──────────────────────────────────────────────────────────────
 
-# EMA alpha for success rate updates — higher = reacts faster to recent outcomes
+# EMA alpha for success rate updates - higher = reacts faster to recent outcomes
 _ALPHA_SUCCESS: Final[float] = 0.3
 
-# EMA alpha for latency updates — lower = more stable average
+# EMA alpha for latency updates - lower = more stable average
 _ALPHA_LATENCY: Final[float] = 0.2
 
 # Temporal decay half-life: striatal value halves every N seconds of disuse
-# Set to 30 days (2.592e6 seconds) — matches biological dopaminergic pruning timescale
+# Set to 30 days (2.592e6 seconds) - matches biological dopaminergic pruning timescale
 _DECAY_HALFLIFE_SECONDS: Final[float] = 30 * 24 * 3600.0
 
 
@@ -40,11 +40,11 @@ class ProceduralEngram:
     avg_latency_ms: float = 0.0
     last_invoked: float = field(default_factory=time.time)
     permanent: bool = False
-    """If True, skip temporal decay — skill is always fully valued."""
+    """If True, skip temporal decay - skill is always fully valued."""
 
     def __post_init__(self) -> None:
         """Enforce architectural constraints (Ω₄).
-        Omega-tier skills are permanent by definition — the system prohibits
+        Omega-tier skills are permanent by definition - the system prohibits
         non-permanent omegas at the logical layer.
         """
         if "omega" in self.skill_name.lower() and not self.permanent:
@@ -52,7 +52,7 @@ class ProceduralEngram:
 
     @property
     def striatal_value(self) -> float:
-        """Valuation score — combines success rate, usage frequency, and recency decay.
+        """Valuation score - combines success rate, usage frequency, and recency decay.
 
         Analogue to Striatal valuation in the Basal Ganglia:
           - Success rate is the primary driver.

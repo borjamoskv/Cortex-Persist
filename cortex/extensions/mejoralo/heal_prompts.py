@@ -1,4 +1,4 @@
-"""MEJORAlo Auto-Healing — Prompt Templates.
+"""MEJORAlo Auto-Healing - Prompt Templates.
 
 Extracted from heal.py to keep file size under 300 LOC.
 Contains the escalating prompt templates used by the healing engine.
@@ -55,7 +55,7 @@ OBLIGACIONES:
 4. Early returns SIEMPRE, nunca else después de return
 5. Type hints en CADA parámetro y retorno, sin excepción
 6. Docstrings concisas y en inglés para toda función pública
-7. Elimina CUALQUIER comentario que diga {"FIX" + "ME"}/{"TO" + "DO"}/{"HAC" + "K"} — RESUELVE el problema, no lo documentes
+7. Elimina CUALQUIER comentario que diga {"FIX" + "ME"}/{"TO" + "DO"}/{"HAC" + "K"} - RESUELVE el problema, no lo documentes
 
 Tu respuesta: SOLO código Python entre ```python y ```. NADA MÁS.
 
@@ -66,7 +66,7 @@ Código:
 """
 
 HEAL_PROMPT_NUCLEAR = """
-MODO NUCLEAR — REESCRITURA TOTAL.
+MODO NUCLEAR - REESCRITURA TOTAL.
 Eres el último recurso. Este archivo ha resistido {iterations} iteraciones de mejora.
 Si tú no lo arreglas, NADIE lo hará.
 

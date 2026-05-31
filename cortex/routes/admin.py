@@ -4,7 +4,7 @@ Admin & Governance Router.
 High-privilege endpoints for project management, API key governance,
 and session handoff orchestration. Enforces strict RBAC and input validation.
 
-Sovereign 130/100 — Pydantic responses, structured logging, TOCTOU-safe paths.
+Sovereign 130/100 - Pydantic responses, structured logging, TOCTOU-safe paths.
 """
 
 import logging
@@ -165,7 +165,7 @@ async def export_project(
     auth: AuthResult = Depends(require_permission("admin")),
     engine: CortexEngine = Depends(get_engine),
 ) -> ExportResponse:
-    """Sovereign Export — dumps project memory to a secure JSON artifact.
+    """Sovereign Export - dumps project memory to a secure JSON artifact.
 
     Enforces path incarceration to prevent directory traversal.
     """
@@ -229,7 +229,7 @@ async def deep_health_check(
     engine: CortexEngine = Depends(get_engine),
     auth: AuthResult = Depends(require_permission("read")),
 ) -> DeepHealthResponse:
-    """Deep Health Check — probes all CORTEX subsystems.
+    """Deep Health Check - probes all CORTEX subsystems.
 
     Returns 200 if all checks pass, 503 if any subsystem is degraded.
     Designed for Kubernetes liveness/readiness probes.

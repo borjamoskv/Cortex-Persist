@@ -1,1 +1,1 @@
-"""Mac-Maestro-Ω — Sovereign macOS Automation SDK."""
+"""Mac-Maestro-Ω - Sovereign macOS Automation SDK."""

@@ -1,11 +1,11 @@
 """Auto-persist hooks for MCP session lifecycle.
 
 When an MCP session closes, this module scans the interaction context
-and auto-persists decisions, errors, and ghosts to CORTEX — without
+and auto-persists decisions, errors, and ghosts to CORTEX - without
 the agent needing a prompt rule to tell it. The prompt becomes unnecessary
 because the product enforces the behavior.
 
-Copyright 2026 by borjamoskv.com — Apache-2.0
+Copyright 2026 by borjamoskv.com - Apache-2.0
 """
 
 from __future__ import annotations

@@ -3,9 +3,9 @@
 CORTEX Sovereign Pre-Commit Hook
 =================================
 Last line of defense against credential/seed leaks.
-Catches what .gitignore cannot — including `git add -f`.
+Catches what .gitignore cannot - including `git add -f`.
 
-DERIVATION: Ω₃ Byzantine Default — verify, then trust.
+DERIVATION: Ω₃ Byzantine Default - verify, then trust.
 """
 
 import re
@@ -113,7 +113,7 @@ def check_file_contents(files: list[str], *, source: str, untracked_files: set[s
                     violations.append(f"  🔍 CONTENT: {filepath} contains '{pattern.pattern}'")
                     break
         except (OSError, ValueError):
-            pass  # Binary files or access errors — skip
+            pass  # Binary files or access errors - skip
     return violations
 
 
@@ -128,7 +128,7 @@ def main() -> int:
 
     if violations:
         print(f"\n{RED}{BOLD}╔══════════════════════════════════════════════════╗{RESET}")
-        print(f"{RED}{BOLD}║  🛑 SOVEREIGN SECURITY GATE — COMMIT BLOCKED    ║{RESET}")
+        print(f"{RED}{BOLD}║  🛑 SOVEREIGN SECURITY GATE - COMMIT BLOCKED    ║{RESET}")
         print(f"{RED}{BOLD}╚══════════════════════════════════════════════════╝{RESET}\n")
         scope = "staged files" if source == "staged" else "local diff files"
         print(f"{YELLOW}Wallet seeds / credentials detected in {scope}:{RESET}\n")

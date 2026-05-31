@@ -1,4 +1,4 @@
-"""Mac-Maestro-Ω — Vector Resolution Engine (V5).
+"""Mac-Maestro-Ω - Vector Resolution Engine (V5).
 
 Maps action.vector strings (A/B/C/D) to concrete executor callables.
 Supports ResolvedTarget from the Element Resolution Pipeline.

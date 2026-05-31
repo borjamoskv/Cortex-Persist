@@ -1,5 +1,5 @@
 """
-Sovereign Outbox — Atomic Task Queue via SQLite WAL.
+Sovereign Outbox - Atomic Task Queue via SQLite WAL.
 
 Implements the C5-REAL outbox pattern with UPDATE...RETURNING
 for zero-latency atomic task claiming. All mutations are
@@ -74,7 +74,7 @@ class SovereignOutbox:
         """Atomically claim pending tasks via UPDATE...RETURNING.
 
         Returns list of (id, agent_id, payload) tuples.
-        Uses UPDATE...RETURNING for single-statement atomicity —
+        Uses UPDATE...RETURNING for single-statement atomicity -
         no race window between SELECT and UPDATE.
         """
         conn = self._get_conn()

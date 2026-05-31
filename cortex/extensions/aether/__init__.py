@@ -1,4 +1,4 @@
-"""MOSKV-Aether — Autonomous background AI coding agent.
+"""MOSKV-Aether - Autonomous background AI coding agent.
 
 Autonomous agent that picks up coding tasks (GitHub Issues, CORTEX Ghosts,
 or CLI input), runs a 4-agent loop (Planner→Executor→Critic→Tester) in a

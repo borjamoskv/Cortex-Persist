@@ -1,4 +1,4 @@
-"""CORTEX Agents — handoff, neural, system prompts and pitch arsenal."""
+"""CORTEX Agents - handoff, neural, system prompts and pitch arsenal."""
 
 from __future__ import annotations
 

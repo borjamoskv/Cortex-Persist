@@ -1,4 +1,4 @@
-"""Tests for atms.py — ATMS-lite truth maintenance."""
+"""Tests for atms.py - ATMS-lite truth maintenance."""
 
 from __future__ import annotations
 

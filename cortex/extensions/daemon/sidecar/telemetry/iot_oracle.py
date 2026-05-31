@@ -1,5 +1,5 @@
 """SOVEREIGN IOT TELEMETRY ORACLE (CORTEX Sidecar)
-Physical-Cognitive Entanglement — tensor-robocar-entanglement
+Physical-Cognitive Entanglement - tensor-robocar-entanglement
 
 Captures physical friction and acts as the bridging protocol between hardware
 (NXP, ESP32, environmental sensors) and the CORTEX core.

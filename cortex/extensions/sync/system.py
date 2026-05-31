@@ -48,7 +48,7 @@ async def _sync_fact_list(
 
 
 async def sync_system(engine: CortexEngine, path: Path, result: SyncResult) -> None:
-    """Sincroniza system.json — conocimiento global y decisiones."""
+    """Sincroniza system.json - conocimiento global y decisiones."""
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
     except (json.JSONDecodeError, OSError) as e:

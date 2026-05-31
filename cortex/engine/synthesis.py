@@ -1,10 +1,10 @@
 """
-CORTEX — AutoSynthesis Engine (Ω-Phase).
+CORTEX - AutoSynthesis Engine (Ω-Phase).
 
 Closes the semantic loop between:
-  • AutoCrystallizer  — thermal-noise → crystallized fact
-  • AutopoiesisEngine — runtime self-mutation watchdog
-  • SwarmCommander    — 10k-agent bucketed dispatch
+  • AutoCrystallizer  - thermal-noise → crystallized fact
+  • AutopoiesisEngine - runtime self-mutation watchdog
+  • SwarmCommander    - 10k-agent bucketed dispatch
 
 Architecture:
   SynthesisCycle (async generator)
@@ -74,9 +74,9 @@ class CortexAutoSynthesisEngine:
     Ω-Phase sovereign synthesis engine.
 
     Implements the three-phase closed loop:
-      1. FORGE  — Crystallize raw inputs via AutoCrystallizer.
-      2. SIEGE  — Dispatch crystallized tasks to the swarm.
-      3. EVOLVE — Trigger AutopoiesisEngine if P95 latency exceeds threshold.
+      1. FORGE  - Crystallize raw inputs via AutoCrystallizer.
+      2. SIEGE  - Dispatch crystallized tasks to the swarm.
+      3. EVOLVE - Trigger AutopoiesisEngine if P95 latency exceeds threshold.
     """
 
     # Exergy gate: discard facts below this threshold (thermal noise floor)
@@ -142,7 +142,7 @@ class CortexAutoSynthesisEngine:
             SynthesisReport with full telemetry.
         """
         if not self._commander:
-            raise RuntimeError("Engine not started — call await engine.start() first.")
+            raise RuntimeError("Engine not started - call await engine.start() first.")
 
         self._cycle_count += 1
         cycle_id = self._cycle_count
@@ -247,7 +247,7 @@ class CortexAutoSynthesisEngine:
     async def _evolve_phase(self, p95_ms: float, cycle_id: int) -> bool:
         """
         Trigger autopoietic self-rewrite if P95 exceeds budget.
-        Uses the AutopoiesisEngine as a watchdog — it will mutate the
+        Uses the AutopoiesisEngine as a watchdog - it will mutate the
         forge phase's hot path if consecutive breaches are detected.
         """
         if p95_ms <= self.P95_BUDGET_MS:

@@ -1,4 +1,4 @@
-"""CORTEX Agent Runtime — Built-in Tools for Autonomous Agent.
+"""CORTEX Agent Runtime - Built-in Tools for Autonomous Agent.
 
 Provides concrete Tool implementations for the AutonomousAgent's
 ToolRegistry. Each tool follows the Tool protocol and can be
@@ -31,7 +31,7 @@ logger = logging.getLogger("cortex.agents.builtin_tools")
 class ShellTool:
     """Execute shell commands with timeout and output capture.
 
-    Reality Level: C5-REAL — commands execute on the host.
+    Reality Level: C5-REAL - commands execute on the host.
     """
 
     @property
@@ -85,7 +85,7 @@ class ShellTool:
 class FileSystemTool:
     """Read, write, list, and check filesystem paths.
 
-    Reality Level: C5-REAL — operates on the real filesystem.
+    Reality Level: C5-REAL - operates on the real filesystem.
     """
 
     @property
@@ -173,7 +173,7 @@ class FileSystemTool:
 class HttpTool:
     """Make HTTP requests using aiohttp or urllib fallback.
 
-    Reality Level: C5-REAL — makes real network requests.
+    Reality Level: C5-REAL - makes real network requests.
     """
 
     @property
@@ -230,7 +230,7 @@ class ExergyAuditTool:
     """Audit the thermodynamic state of agent execution.
 
     Reads the current plan and computes exergy efficiency ratios.
-    Does not produce side effects — pure observation.
+    Does not produce side effects - pure observation.
     """
 
     @property
@@ -294,7 +294,7 @@ class NoOpTool:
 class GitTool:
     """Git operations for autonomous code management.
 
-    Reality Level: C5-REAL — executes real git commands.
+    Reality Level: C5-REAL - executes real git commands.
     """
 
     @property

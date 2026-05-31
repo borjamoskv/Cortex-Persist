@@ -1,4 +1,4 @@
-"""store_quarantine_mixin — Quarantine / Unquarantine lifecycle for the Store Layer.
+"""store_quarantine_mixin - Quarantine / Unquarantine lifecycle for the Store Layer.
 
 Extracted from StoreMixin to satisfy the Landauer LOC barrier (≤500).
 Handles the forensic isolation protocol: facts remain in DB for audit,
@@ -21,7 +21,7 @@ logger = logging.getLogger("cortex")
 
 
 class QuarantineMixin(EngineMixinBase):
-    """Forensic Isolation Layer — Quarantine Without Deletion.
+    """Forensic Isolation Layer - Quarantine Without Deletion.
 
     Quarantined facts are excluded from recall, search, and dedup
     but remain in the database for immutable audit trail compliance.

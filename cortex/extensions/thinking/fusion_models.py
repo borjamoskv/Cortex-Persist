@@ -97,7 +97,7 @@ _STOPWORDS = frozenset(
     }
 )
 
-_PUNCT_RE = re.compile(r"[.,!?;:\"'()\[\]{}—–\-/\\<>@#$%^&*~`|+=]")
+_PUNCT_RE = re.compile(r"[.,!?;:\"'()\[\]{}-–\-/\\<>@#$%^&*~`|+=]")
 
 
 # ─── Enums ───────────────────────────────────────────────────────────
@@ -192,7 +192,7 @@ class _ModelStats:
 
 
 class ThinkingHistory:
-    """Historial acumulado de fusiones — win rates y latencias por modelo."""
+    """Historial acumulado de fusiones - win rates y latencias por modelo."""
 
     def __init__(self):
         self._stats: dict[str, _ModelStats] = defaultdict(_ModelStats)

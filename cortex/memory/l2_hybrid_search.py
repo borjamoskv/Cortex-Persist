@@ -2,7 +2,7 @@
 L2 Hybrid Search Engine (Mem0-Killer).
 
 Implements Reciprocal Rank Fusion (RRF) over the L2 vector database
-(SovereignVectorStoreL2 — facts_meta + vec_facts + facts_meta_fts).
+(SovereignVectorStoreL2 - facts_meta + vec_facts + facts_meta_fts).
 
 Unlike the main hybrid search (cortex.search.hybrid), which operates on the
 primary `facts` table via aiosqlite, this engine operates directly on the
@@ -21,9 +21,9 @@ Architecture:
     └──────────────────────────────────────────────────┘
 
 Key design decisions:
-  - RRF_K=60 — same constant as main hybrid for consistency
+  - RRF_K=60 - same constant as main hybrid for consistency
   - FTS5 mirror table (`facts_meta_fts`) is created lazily on first
-    call to `ensure_fts_table()` — zero migration friction
+    call to `ensure_fts_table()` - zero migration friction
   - UUID Trick: results carry a sequential `rank_index` (0,1,2...) for
     clean LLM context injection without exposing internal UUIDs
   - Thread safety: sync lock inherited from parent store's asyncio.Lock
@@ -67,7 +67,7 @@ class L2SearchResult:
     """A single L2 hybrid search result.
 
     The `rank_index` field provides a clean 0-based sequential identifier
-    safe for LLM context injection (UUID Trick — avoids raw UUID confusion).
+    safe for LLM context injection (UUID Trick - avoids raw UUID confusion).
     """
 
     rank_index: int
@@ -81,7 +81,7 @@ class L2SearchResult:
     confidence: str
     cognitive_layer: str
     rrf_score: float
-    source_signals: list[str]  # ["vector", "fts"] — which branches contributed
+    source_signals: list[str]  # ["vector", "fts"] - which branches contributed
     metadata: dict = field(default_factory=dict)
 
     def to_context_dict(self) -> dict:
@@ -168,7 +168,7 @@ class L2HybridSearch:
                 )
             """)
 
-            # Insert trigger — populate FTS on new facts_meta rows
+            # Insert trigger - populate FTS on new facts_meta rows
             conn.execute(f"""
                 CREATE TRIGGER IF NOT EXISTS facts_meta_fts_insert
                 AFTER INSERT ON {META_TABLE}
@@ -178,7 +178,7 @@ class L2HybridSearch:
                 END
             """)
 
-            # Delete trigger — remove FTS entries when facts_meta row deleted
+            # Delete trigger - remove FTS entries when facts_meta row deleted
             conn.execute(f"""
                 CREATE TRIGGER IF NOT EXISTS facts_meta_fts_delete
                 AFTER DELETE ON {META_TABLE}
@@ -187,7 +187,7 @@ class L2HybridSearch:
                 END
             """)
 
-            # Update trigger — refresh FTS when content changes
+            # Update trigger - refresh FTS when content changes
             conn.execute(f"""
                 CREATE TRIGGER IF NOT EXISTS facts_meta_fts_update
                 AFTER UPDATE OF content ON {META_TABLE}

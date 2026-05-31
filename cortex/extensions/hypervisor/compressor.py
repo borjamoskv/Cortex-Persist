@@ -1,4 +1,4 @@
-"""CORTEX Hypervisor — Complexity Compressor.
+"""CORTEX Hypervisor - Complexity Compressor.
 
 Transforms rich internal types into simple tenant-facing models.
 This is the thermal barrier: internal entropy stays inside.

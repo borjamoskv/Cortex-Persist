@@ -464,7 +464,7 @@ class OuroborosOmega:
             try:
                 ast.parse(mutated_source)  # Syntax
                 compile(mutated_source, filename="<ast>", mode="exec")  # Bytecode
-            except Exception as e:  # noqa: BLE001 — verification phase expected to fail on invalid syntax
+            except Exception as e:  # noqa: BLE001 - verification phase expected to fail on invalid syntax
                 logger.error("Phase 5 [Verification] Failed syntax/bytecode: %s", e)
                 return {"status": "ROLLED_BACK", "reason": str(e)}
 
@@ -532,7 +532,7 @@ class OuroborosOmega:
                 result["p0_report"] = p0_report.to_dict()
             return result
 
-        except Exception as e:  # noqa: BLE001 — atomic cycle caught unhandled exception, triggering apoptosis
+        except Exception as e:  # noqa: BLE001 - atomic cycle caught unhandled exception, triggering apoptosis
             logger.exception("Apoptosis: Unhandled exception during cycle.")
             return {"status": "ROLLED_BACK", "reason": str(e)}
 

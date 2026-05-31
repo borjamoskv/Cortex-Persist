@@ -1,4 +1,4 @@
-"""Tests for CORTEX Health — REFACTOR-Ω edition.
+"""Tests for CORTEX Health - REFACTOR-Ω edition.
 
 Covers all 3 dimensions:
   D1: Sealed Grade enum + validation

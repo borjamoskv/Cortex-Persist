@@ -1,7 +1,7 @@
 """
 benchmarks/bench_temperature.py
 ================================
-CORTEX Temperature Determinism Benchmark — Ω₃ (Byzantine Default)
+CORTEX Temperature Determinism Benchmark - Ω₃ (Byzantine Default)
 
 Gate: if unique_ratio at temp ≤ 0.1 exceeds MAX_DETERMINISM_DRIFT,
 the model has degraded and MUST NOT enter the production stack.
@@ -17,9 +17,9 @@ Usage:
     python benchmarks/bench_temperature.py --model qwen2.5-coder:7b --runs 5
 
 Exit codes:
-    0  — All determinism gates passed
-    1  — One or more gates FAILED (model degraded, block from production)
-    2  — Ollama unreachable (skip gracefully in CI with --allow-skip)
+    0  - All determinism gates passed
+    1  - One or more gates FAILED (model degraded, block from production)
+    2  - Ollama unreachable (skip gracefully in CI with --allow-skip)
 """
 
 from __future__ import annotations
@@ -40,7 +40,7 @@ OLLAMA_BASE = "http://localhost:11434"
 
 # Determinism gate: unique_ratio at LOW_TEMP must stay BELOW this threshold.
 # > 0.40 means the model is producing 40%+ distinct outputs on a deterministic
-# task — a clear signal of thermal collapse or quantisation degradation.
+# task - a clear signal of thermal collapse or quantisation degradation.
 MAX_DETERMINISM_DRIFT: float = 0.40
 
 # Entropy gap: LOW_TEMP uniqueness must be at least this LOWER than HIGH_TEMP.
@@ -116,7 +116,7 @@ async def _probe_once(
                 "options": {
                     "temperature": temperature,
                     "num_ctx": ctx,
-                    "seed": -1,  # No fixed seed — pure model randomness
+                    "seed": -1,  # No fixed seed - pure model randomness
                 },
             },
         )
@@ -145,7 +145,7 @@ async def run_trial(
     trial = TrialResult(temperature=temperature, label=label)
 
     if verbose:
-        print(f"\n  🔬 temp={temperature} ({label}) — {runs} runs...")
+        print(f"\n  🔬 temp={temperature} ({label}) - {runs} runs...")
 
     for i in range(runs):
         output, ms = await _probe_once(
@@ -228,7 +228,7 @@ def print_report(result: GateResult) -> None:
     bar = "═" * 62
 
     print(f"\n{bar}")
-    print(f"  TEMPERATURE DETERMINISM GATE — {result.model}")
+    print(f"  TEMPERATURE DETERMINISM GATE - {result.model}")
     print(bar)
 
     for t in result.trials:

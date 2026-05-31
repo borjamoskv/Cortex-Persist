@@ -1,1 +1,1 @@
-"""CORTEX Wealth — Sovereign Wealth Engine Core Package."""
+"""CORTEX Wealth - Sovereign Wealth Engine Core Package."""

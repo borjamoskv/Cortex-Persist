@@ -11,7 +11,7 @@ logger = logging.getLogger("cortex.nemesis_agent")
 
 class NemesisL4Agent(DeterministicInductionMixin):
     """
-    Evolución Adversaria (Ω₁₃) — The Red Queen.
+    Evolución Adversaria (Ω₁₃) - The Red Queen.
     Acts as a perpetual Nemesis to stress and purify other specialists (L4).
     Instead of normal validation, it intercepts or targets payloads, injecting
     "Stagnation Shocks" (Byzantine noise, syntax failures, logical dead-ends)

@@ -1,4 +1,4 @@
-"""MOSKV-Aether — Red Team Agent.
+"""MOSKV-Aether - Red Team Agent.
 
 Generates hostile characterization tests (Golden Master) over a codebase
 BEFORE execution/refactoring occurs, cementing the current behavior into

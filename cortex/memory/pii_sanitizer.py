@@ -7,7 +7,7 @@ so the vector captures semantic *shape* ("there is an address here") but
 the actual value is only recoverable with the tenant key.
 
 Derivation: Ω₃ (Byzantine Default) + Ω₂ (Entropic Asymmetry)
-DECISION: Encrypt, not redact — semantic vectors must remain useful.
+DECISION: Encrypt, not redact - semantic vectors must remain useful.
 
 Pattern categories detected:
   - EMAIL          → user@domain.com
@@ -146,13 +146,13 @@ class PIISanitizer:
 
     Args:
         encrypt: If True (default), encrypt matched PII. If False, redact with placeholder.
-        scan_proper_names: Experimental — detects capitalized multi-word sequences.
+        scan_proper_names: Experimental - detects capitalized multi-word sequences.
                            Disabled by default to avoid false positives.
     """
 
     __slots__ = ("_encrypt", "_scan_proper_names")
 
-    # Placeholder templates — semantically descriptive for the embedder
+    # Placeholder templates - semantically descriptive for the embedder
     _PLACEHOLDER_MAP: dict[PIICategory, str] = {
         PIICategory.EMAIL: "[EMAIL_ADDRESS]",
         PIICategory.PHONE: "[PHONE_NUMBER]",
@@ -189,7 +189,7 @@ class PIISanitizer:
                     )
                 )
 
-        # Deduplicate overlapping spans — priority: first-matched pattern wins
+        # Deduplicate overlapping spans - priority: first-matched pattern wins
         raw_matches.sort(key=lambda x: x.start)
         deduped: list[PIIMatch] = []
         last_end = -1
@@ -266,7 +266,7 @@ class PIISanitizer:
             return enc.encrypt_str(value, tenant_id=tenant_id)
         except (ImportError, OSError, ValueError, RuntimeError) as e:
             logger.warning(
-                "PII encryption failed for tenant %s: %s — redacting instead",
+                "PII encryption failed for tenant %s: %s - redacting instead",
                 tenant_id,
                 e,
             )

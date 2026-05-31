@@ -1,4 +1,4 @@
-"""CORTEX v6+ — Session-Level Token Budget Guardrails.
+"""CORTEX v6+ - Session-Level Token Budget Guardrails.
 
 Wraps WorkingMemoryL1 with a hard cap on total tokens consumed
 across an entire session (not just the sliding window).

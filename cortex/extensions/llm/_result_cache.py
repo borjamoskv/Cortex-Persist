@@ -1,5 +1,5 @@
 # This file is part of CORTEX. Apache-2.0.
-"""CORTEX LLM Result Cache — Persistent Semantic Deduplication.
+"""CORTEX LLM Result Cache - Persistent Semantic Deduplication.
 
 Prevents redundant expensive API calls during audits, tests, or iterative runs.
 Uses SQLite WAL for zero-latency cross-process synchronization (Ω₂).

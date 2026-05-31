@@ -1,5 +1,5 @@
 """
-Test: CORTEX Inverse Engine — Python Integration (C5-REAL)
+Test: CORTEX Inverse Engine - Python Integration (C5-REAL)
 
 Validates the full Rust→Python bridge for the inverse AlphaProof pipeline.
 Requires: maturin develop (or pre-built cortex_rs.so)
@@ -32,7 +32,7 @@ requires_cortex = pytest.mark.skipif(cortex_rs is None, reason=skip_reason)
 
 
 # ─────────────────────────────────────────────────────────────
-# §1 — DeductionDAG Tests
+# §1 - DeductionDAG Tests
 # ─────────────────────────────────────────────────────────────
 
 
@@ -91,7 +91,7 @@ class TestDeductionDAG:
 
 
 # ─────────────────────────────────────────────────────────────
-# §2 — CurriculumEngine Tests
+# §2 - CurriculumEngine Tests
 # ─────────────────────────────────────────────────────────────
 
 
@@ -124,7 +124,7 @@ class TestCurriculumEngine:
 
 
 # ─────────────────────────────────────────────────────────────
-# §3 — EvolutionaryConjecturer Tests
+# §3 - EvolutionaryConjecturer Tests
 # ─────────────────────────────────────────────────────────────
 
 
@@ -163,7 +163,7 @@ class TestConjecturer:
 
 
 # ─────────────────────────────────────────────────────────────
-# §4 — InverseEngine (Full Pipeline) Tests
+# §4 - InverseEngine (Full Pipeline) Tests
 # ─────────────────────────────────────────────────────────────
 
 
@@ -256,7 +256,7 @@ class TestInverseEngine:
 
 
 # ─────────────────────────────────────────────────────────────
-# §5 — Benchmark
+# §5 - Benchmark
 # ─────────────────────────────────────────────────────────────
 
 
@@ -289,6 +289,6 @@ class TestBenchmark:
         stats = json.loads(eng.cumulative_stats())
         rate = stats["total_solved"] / elapsed if elapsed > 0 else 0
 
-        # Just verify it runs — exact rate depends on hardware
+        # Just verify it runs - exact rate depends on hardware
         assert stats["iterations"] == 3
         assert elapsed < 15.0, "Pipeline should complete 3 iterations in < 15s"

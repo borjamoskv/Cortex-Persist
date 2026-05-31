@@ -4,9 +4,9 @@ Thalamus Gate (Pre-Persistence Admission Filter).
 Implements Active Forgetting (selective encoding) BEFORE persistence.
 Three deterministic filters run in sequence:
 
-  1. Density Check   — discard facts below minimum character threshold.
-  2. Redundancy Check — semantic dedup against existing L2 facts.
-  3. Causal Saturation — cap children per parent decision to contain entropy.
+  1. Density Check   - discard facts below minimum character threshold.
+  2. Redundancy Check - semantic dedup against existing L2 facts.
+  3. Causal Saturation - cap children per parent decision to contain entropy.
 
 Biological analogue: the thalamic relay nuclei gate sensory input,
 preventing cortical overload by filtering noise before it reaches
@@ -92,7 +92,7 @@ class ThalamusGate:
                 child_count = await self._count_children(conn, parent_decision_id, fact_type)
                 if child_count >= self.max_causal_children:
                     logger.info(
-                        "Thalamus: Discarding fact — causal saturation "
+                        "Thalamus: Discarding fact - causal saturation "
                         "(parent=%s, children=%d, type=%s)",
                         parent_decision_id,
                         child_count,

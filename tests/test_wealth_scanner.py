@@ -1,4 +1,4 @@
-"""Unit tests for cortex.wealth.scanner — FundingRateScanner.
+"""Unit tests for cortex.wealth.scanner - FundingRateScanner.
 
 Deterministic via seed injection. No network IO.
 """

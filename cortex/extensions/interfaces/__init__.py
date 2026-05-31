@@ -1,1 +1,1 @@
-"""Cortex Interfaces — Protocol contracts for decoupled architecture."""
+"""Cortex Interfaces - Protocol contracts for decoupled architecture."""

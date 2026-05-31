@@ -124,7 +124,7 @@ class AssociativeDreamEngine:
     """REM-phase dream engine for creative knowledge restructuring.
 
     Runs during daemon idle periods AFTER HippocampalReplay (NREM).
-    Does not replace NREM — complements it with creative operations:
+    Does not replace NREM - complements it with creative operations:
 
     1. Detect clusters of semantically related engrams
     2. Bridge distant clusters with synthetic hypotheses

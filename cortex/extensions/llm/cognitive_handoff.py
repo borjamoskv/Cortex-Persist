@@ -3,15 +3,15 @@
 # See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
 
-"""CORTEX LLM — Cognitive Handoff Orchestrator.
+"""CORTEX LLM - Cognitive Handoff Orchestrator.
 
 Quad-model orchestrator for cognitive governance of the Belief Layer.
 
 Escalation cascade (cost-optimized):
-  1. Infrastructure (Gemini 3.1 Pro) — episodic reads, prescreen — $12/1M
-  2. Auditor Economic (Gemini 2.5 Pro Deep Think) — routine belief audit — $12/1M
-  3. Auditor Premium (Claude Opus 4.6) — high-severity contradictions — $25/1M
-  4. Architect (GPT-5.4) — schema revision, contract design — $15/1M
+  1. Infrastructure (Gemini 3.1 Pro) - episodic reads, prescreen - $12/1M
+  2. Auditor Economic (Gemini 2.5 Pro Deep Think) - routine belief audit - $12/1M
+  3. Auditor Premium (Claude Opus 4.6) - high-severity contradictions - $25/1M
+  4. Architect (GPT-5.4) - schema revision, contract design - $15/1M
 
 Invariants enforced:
   - Auditor verdict is FINAL (quarantine overrides all)
@@ -81,7 +81,7 @@ class _AuditResult:
 class CognitiveHandoff:
     """Quad-model orchestrator for cognitive governance.
 
-    Sits above CortexLLMRouter — wraps it with cognitive-specific routing
+    Sits above CortexLLMRouter - wraps it with cognitive-specific routing
     decisions. Does NOT replace the router; uses it to dispatch prompts
     to the appropriate model via IntentProfile.
 
@@ -90,7 +90,7 @@ class CognitiveHandoff:
       → architect (gpt-5.4, only if schema revision needed)
     """
 
-    # Default provider assignments — can be overridden at init
+    # Default provider assignments - can be overridden at init
     DEFAULT_ARCHITECT = "openai"
     DEFAULT_AUDITOR_PREMIUM = "anthropic"
     DEFAULT_AUDITOR_ECONOMIC = "gemini"
@@ -138,9 +138,9 @@ class CognitiveHandoff:
 
         Implements the quad-model escalation cascade:
         1. Infrastructure prescreen (cheap)
-        2. Auditor Economic — Deep Think (routine)
-        3. Auditor Premium — Opus (high-severity, only if needed)
-        4. Architect — GPT-5.4 (schema revision, only if needed)
+        2. Auditor Economic - Deep Think (routine)
+        3. Auditor Premium - Opus (high-severity, only if needed)
+        4. Architect - GPT-5.4 (schema revision, only if needed)
 
         Args:
             belief: The belief to evaluate.
@@ -158,7 +158,7 @@ class CognitiveHandoff:
 
         if prescreen.action == "compact_and_forget":
             logger.info(
-                "Belief prescreened as low-relevance — skipping: %s",
+                "Belief prescreened as low-relevance - skipping: %s",
                 belief.id,
             )
             return BeliefVerdict(
@@ -175,7 +175,7 @@ class CognitiveHandoff:
         if audit.verdict == "CERTAIN" and audit.has_contradiction:
             self._quarantine_count += 1
             logger.warning(
-                "Deep Think detected contradiction — quarantining: %s",
+                "Deep Think detected contradiction - quarantining: %s",
                 belief.id,
             )
             return BeliefVerdict(
@@ -202,7 +202,7 @@ class CognitiveHandoff:
             if premium.has_contradiction:
                 self._quarantine_count += 1
                 logger.warning(
-                    "Opus detected contradiction — quarantining: %s",
+                    "Opus detected contradiction - quarantining: %s",
                     belief.id,
                 )
                 return BeliefVerdict(
@@ -215,7 +215,7 @@ class CognitiveHandoff:
 
         # ── Step 4: Architect revision (if schema change needed) ─────
         if audit.needs_schema_revision:
-            logger.info("Schema revision needed — dispatching to Architect")
+            logger.info("Schema revision needed - dispatching to Architect")
             revised = await self._architect_revise(belief, audit)
             total_tokens += revised.cost_tokens
             return revised
@@ -255,7 +255,7 @@ class CognitiveHandoff:
         - Content length and complexity heuristics
         """
         if self._router is None:
-            # No router — heuristic fallback (for testing / offline)
+            # No router - heuristic fallback (for testing / offline)
             if belief.confidence == BeliefConfidence.C1_HYPOTHESIS:
                 return _PrescreenResult(action="compact_and_forget", tokens_used=0)
             return _PrescreenResult(action="audit", tokens_used=0)
@@ -338,7 +338,7 @@ class CognitiveHandoff:
         b) Contradiction involves C5 axiomatic beliefs
 
         Opus has the highest semantic fidelity at long context and
-        is the final arbiter — its quarantine verdict is non-overridable.
+        is the final arbiter - its quarantine verdict is non-overridable.
         """
         if self._router is None:
             return _AuditResult(
@@ -386,14 +386,14 @@ class CognitiveHandoff:
         """Step 4: Schema revision via Architect (GPT-5.4).
 
         Only invoked when the audit indicates the belief structure
-        needs modification — not just content contradiction but
+        needs modification - not just content contradiction but
         schema-level changes (new fields, type changes, etc.).
         """
         if self._router is None:
             return BeliefVerdict(
                 action=VerdictAction.REVISE,
                 model="architect",
-                reason="Schema revision requested (no router — dry run)",
+                reason="Schema revision requested (no router - dry run)",
             )
 
         prompt = CortexPrompt(

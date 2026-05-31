@@ -3,10 +3,10 @@
 # See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
 
-"""CORTEX LLM Router — Anycast-Style Weighted Provider Pool.
+"""CORTEX LLM Router - Anycast-Style Weighted Provider Pool.
 
 ProviderMetrics: EWMA latency + success rate per provider.
-WeightedProviderPool: DNS Anycast routing — fastest provider wins.
+WeightedProviderPool: DNS Anycast routing - fastest provider wins.
 
 Extraído de router.py (Ω₂ Landauer split).
 """
@@ -34,7 +34,7 @@ class ProviderMetrics:
     Uses Exponentially Weighted Moving Average (EWMA) for latency with
     α=0.3 (recent observations bias). Success rate is a simple ratio.
 
-    Axiom: Ω₅ (Antifragile) — metrics feed the system, not just report.
+    Axiom: Ω₅ (Antifragile) - metrics feed the system, not just report.
     """
 
     total_calls: int = 0

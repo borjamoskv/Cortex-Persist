@@ -6,10 +6,10 @@
 """Langbase Router.
 
 REST endpoints for Langbase integration:
-- /v1/langbase/pipe/run   — Run Pipe with CORTEX context
-- /v1/langbase/sync       — Sync facts to Langbase Memory
-- /v1/langbase/search     — Search Langbase Memory (proxy)
-- /v1/langbase/status     — Connection status
+- /v1/langbase/pipe/run   - Run Pipe with CORTEX context
+- /v1/langbase/sync       - Sync facts to Langbase Memory
+- /v1/langbase/search     - Search Langbase Memory (proxy)
+- /v1/langbase/status     - Connection status
 """
 
 from __future__ import annotations

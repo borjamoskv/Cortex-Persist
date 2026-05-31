@@ -6,7 +6,7 @@ All storage backends (SQLite, PostgreSQL, Turso) must implement this protocol
 so CortexEngine never knows which backend is active.
 
 Design invariants:
-- Protocol is runtime_checkable — adapters are verified at init time.
+- Protocol is runtime_checkable - adapters are verified at init time.
 - commit() is part of the contract; no-op for auto-commit backends (asyncpg).
 - health_check() must always return bool, never raise.
 """
@@ -63,5 +63,5 @@ class StorageAdapter(Protocol):
         ...
 
     async def health_check(self) -> bool:
-        """Verify backend connectivity. Never raises — always returns bool."""
+        """Verify backend connectivity. Never raises - always returns bool."""
         ...

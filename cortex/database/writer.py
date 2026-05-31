@@ -280,7 +280,7 @@ class SqliteWriteWorker:
     # ─── Internal Writer Loop ─────────────────────────────────────────
 
     async def _writer_loop(self) -> None:
-        """Main writer loop — processes messages sequentially."""
+        """Main writer loop - processes messages sequentially."""
         assert self._conn is not None
         conn = self._conn
         loop = asyncio.get_running_loop()

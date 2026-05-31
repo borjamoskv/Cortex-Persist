@@ -1,9 +1,9 @@
 """
-Semantic Hashing Engine — Vectorial Merkle Bridge (Ω₂ / Ω₃).
+Semantic Hashing Engine - Vectorial Merkle Bridge (Ω₂ / Ω₃).
 
 Replaces byte-exact SHA-256 hashing with embedding-based semantic fingerprints.
 A system that compares meaning instead of characters eliminates false positives
-when an LLM paraphrases stored content — the structural condition that causes
+when an LLM paraphrases stored content - the structural condition that causes
 traditional Merkle Trees to flag valid memory as "corrupted".
 
 Architecture:
@@ -160,7 +160,7 @@ def cosine_similarity(vec_a: list[float], vec_b: list[float]) -> float:
     """Compute cosine similarity between two vectors.
 
     O(D) where D is the embedding dimension (384).
-    No external dependencies — runs on any edge device.
+    No external dependencies - runs on any edge device.
 
     Returns value in [-1.0, 1.0]. For normalized embeddings (L2-norm=1),
     this simplifies to the dot product.

@@ -1,4 +1,4 @@
-"""MOSKV-Aether — Planner Agent.
+"""MOSKV-Aether - Planner Agent.
 
 Reads repo structure and emits a structured implementation plan.
 """
@@ -23,7 +23,7 @@ Your job is to analyze a codebase and produce a precise, actionable implementati
 You MUST identify or create a reproduction test (command or script) that FAILS on the current codebase.
 This ensures the pathogen is identified before the fix is applied.
 
-Output ONLY valid JSON — no markdown, no explanation, no code blocks around it.
+Output ONLY valid JSON - no markdown, no explanation, no code blocks around it.
 Schema:
 {
   "summary": "one-line summary",
@@ -146,7 +146,7 @@ class PlannerAgent:
                 repro_test=data.get("repro_test", ""),
             )
         except (json.JSONDecodeError, KeyError) as e:
-            logger.warning("Planner JSON parse failed (%s) — using raw text as single step", e)
+            logger.warning("Planner JSON parse failed (%s) - using raw text as single step", e)
             return PlanOutput(
                 summary="Plan extracted from raw LLM output",
                 steps=[raw.strip()],

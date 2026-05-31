@@ -1,4 +1,4 @@
-"""ENCB v2 — Visualization.
+"""ENCB v2 - Visualization.
 
 Generates publication-quality plots for the benchmark results.
 Requires matplotlib and seaborn (optional for styling).
@@ -33,7 +33,7 @@ def _ensure_matplotlib():
 def plot_pfbr_convergence(
     round_data: dict[str, list[list[float]]],
     output_path: str = "pfbr_convergence.png",
-    title: str = "PFBR Convergence — ENCB v2",
+    title: str = "PFBR Convergence - ENCB v2",
 ) -> None:
     """Plot PFBR convergence curves across rounds.
 
@@ -87,7 +87,7 @@ def plot_pfbr_convergence(
 def plot_edi_bars(
     results: dict[str, list[MetricsReport]],
     output_path: str = "edi_comparison.png",
-    title: str = "Epistemic Debt Integral — ENCB v2",
+    title: str = "Epistemic Debt Integral - ENCB v2",
 ) -> None:
     """Bar chart comparing EDI across strategies."""
     plt = _ensure_matplotlib()
@@ -122,7 +122,7 @@ def plot_edi_bars(
 def plot_cncl_timeline(
     containment_data: dict[str, dict[str, int | None]],
     output_path: str = "cncl_timeline.png",
-    title: str = "Corrupt Node Containment — ENCB v2",
+    title: str = "Corrupt Node Containment - ENCB v2",
 ) -> None:
     """Timeline showing when each adversary type gets contained.
 
@@ -170,7 +170,7 @@ def plot_cncl_timeline(
 def plot_ablation_heatmap(
     ablation_results: dict[str, list[MetricsReport]],
     output_path: str = "ablation_heatmap.png",
-    title: str = "Ablation Study — ENCB v2",
+    title: str = "Ablation Study - ENCB v2",
 ) -> None:
     """Heatmap showing how removing each component affects metrics."""
     plt = _ensure_matplotlib()

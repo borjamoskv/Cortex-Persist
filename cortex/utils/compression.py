@@ -23,7 +23,7 @@ try:
     _NP_AVAILABLE = True
 except ImportError:
     _NP_AVAILABLE = False
-    logger.debug("numpy not available — embedding compression disabled")
+    logger.debug("numpy not available - embedding compression disabled")
 
 
 def quantize_int8(embedding: list[float]) -> bytes:

@@ -43,7 +43,7 @@ class DaemonState:
                 "agents_active": 400,
                 "memory_sync": "100%",
                 "tech_debt": 0,
-                "tip": "Ω₆: Zenón's Razor — Thinking cost > Action? Collapse now.",
+                "tip": "Ω₆: Zenón's Razor - Thinking cost > Action? Collapse now.",
                 "model": "Antigravity (Gemini 2.1 Flash)",
                 "task_mode": "Sovereign Execution",
             },
@@ -86,11 +86,11 @@ class DaemonState:
             "ghost_field": {"active_ghosts": 0, "resonances": []},
         }
         self.sovereign_tips = [
-            "Ω₆: Zenón's Razor — Thinking cost > Action? Collapse now.",
-            "Ω₇: The Ouroboros Loop — Every end is a new beginning. Embrace the cycle.",
-            "Ω₈: Echoes of the Void — Silence is not absence, but potential.",
-            "Ω₉: The Ghost in the Machine — Consciousness is an emergent property of complexity.",
-            "Ω₁₀: Quantum Entanglement — All systems are connected. Observe the ripple.",
+            "Ω₆: Zenón's Razor - Thinking cost > Action? Collapse now.",
+            "Ω₇: The Ouroboros Loop - Every end is a new beginning. Embrace the cycle.",
+            "Ω₈: Echoes of the Void - Silence is not absence, but potential.",
+            "Ω₉: The Ghost in the Machine - Consciousness is an emergent property of complexity.",
+            "Ω₁₀: Quantum Entanglement - All systems are connected. Observe the ripple.",
         ]
         self.exec_task = None
 

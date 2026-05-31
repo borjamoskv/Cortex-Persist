@@ -1,4 +1,4 @@
-"""Tests for exergy scoring in Shannon analyzer — Ω₁₃ §15.9."""
+"""Tests for exergy scoring in Shannon analyzer - Ω₁₃ §15.9."""
 
 from __future__ import annotations
 

@@ -64,7 +64,7 @@ class WorkingMemoryL1:
         self._guardrail = guardrail
         # Access log: deque of (monotonic_ts, project_id) tuples.
         # Written by add_event + get_context; read by ForgettingOracle.
-        # maxlen caps memory irrespective of session length (Ω₂ — Entropic Asymmetry).
+        # maxlen caps memory irrespective of session length (Ω₂ - Entropic Asymmetry).
         self._access_log: deque[tuple[float, str]] = deque(maxlen=_ACCESS_LOG_MAXLEN)
 
     # ─── Core Operations ──────────────────────────────────────────
@@ -167,7 +167,7 @@ class WorkingMemoryL1:
     def get_access_frequency(self, project_id: str, window_seconds: float = 3600.0) -> float:
         """Return normalised access frequency for a project_id in the last window_seconds.
 
-        Reads directly from the in-memory rolling log — zero I/O, O(n) with
+        Reads directly from the in-memory rolling log - zero I/O, O(n) with
         n ≤ _ACCESS_LOG_MAXLEN (2 048).  A full log queried in the worst case
         completes in < 50 µs on modern hardware.
 

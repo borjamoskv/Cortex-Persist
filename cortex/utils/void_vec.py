@@ -1,5 +1,5 @@
 """
-CORTEX — VOID-VEC (Void-Bit) Engine.
+CORTEX - VOID-VEC (Void-Bit) Engine.
 
 Sovereign 1-bit Binary Quantization and bitwise similarity logic.
 Achieves O(1) Hamming Distance comparison via bit-packing and POPCOUNT.

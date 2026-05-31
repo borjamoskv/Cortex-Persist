@@ -1,4 +1,4 @@
-"""Tests for cortex.database.writer.SqliteWriteWorker — Single Writer Queue."""
+"""Tests for cortex.database.writer.SqliteWriteWorker - Single Writer Queue."""
 
 from __future__ import annotations
 
@@ -125,7 +125,7 @@ class TestTransaction:
         async with writer.transaction() as tx:
             await tx.execute("INSERT INTO items (name, value) VALUES (?, ?)", ("tx_a", 10))
             await tx.execute("INSERT INTO items (name, value) VALUES (?, ?)", ("tx_b", 20))
-        # Should have committed — verify via read
+        # Should have committed - verify via read
         import sqlite3
 
         conn = sqlite3.connect(writer._db_path)

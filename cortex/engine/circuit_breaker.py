@@ -4,7 +4,7 @@ Circuit Breaker Pattern.
 Protects the system from cascading failures when a subsystem
 (e.g., Ledger integrity verification) fails repeatedly.
 
-Derivation: Ω₅ (Antifragile by Default) — failures trigger degraded mode, not system death.
+Derivation: Ω₅ (Antifragile by Default) - failures trigger degraded mode, not system death.
 """
 
 from __future__ import annotations
@@ -25,9 +25,9 @@ T = TypeVar("T")
 class CircuitState(Enum):
     """Three-state circuit breaker following the standard pattern."""
 
-    CLOSED = auto()  # Normal operation — all calls go through
-    OPEN = auto()  # Failing — reject calls immediately
-    HALF_OPEN = auto()  # Testing recovery — allow one probe call
+    CLOSED = auto()  # Normal operation - all calls go through
+    OPEN = auto()  # Failing - reject calls immediately
+    HALF_OPEN = auto()  # Testing recovery - allow one probe call
 
 
 class CircuitBreaker:
@@ -39,7 +39,7 @@ class CircuitBreaker:
         try:
             result = await breaker.call(verify_integrity_async)
         except RuntimeError:
-            # Circuit is open — system in degraded mode
+            # Circuit is open - system in degraded mode
             pass
 
     State transitions:
@@ -99,7 +99,7 @@ class CircuitBreaker:
 
         if current == CircuitState.OPEN:
             raise RuntimeError(
-                f"Circuit breaker '{self._name}' is OPEN — "
+                f"Circuit breaker '{self._name}' is OPEN - "
                 f"subsystem unavailable (failures={self._failures})"
             )
 
@@ -107,7 +107,7 @@ class CircuitBreaker:
             result = await func(*args, **kwargs)
             self._on_success()
             return result
-        except Exception as e:  # noqa: BLE001 — breaker intercepts all downstream errors
+        except Exception as e:  # noqa: BLE001 - breaker intercepts all downstream errors
             self._on_failure()
             raise e
 

@@ -47,7 +47,7 @@ class GrowthEngine:
         results = await asyncio.gather(*tasks)
         raw = [signal for sublist in results for signal in sublist]
 
-        # Deduplicate by target_url — highest alpha_score wins
+        # Deduplicate by target_url - highest alpha_score wins
         deduped = self._deduplicate(raw)
 
         sorted_signals = sorted(deduped, key=lambda x: x.alpha_score, reverse=True)
@@ -61,7 +61,7 @@ class GrowthEngine:
 
     @staticmethod
     def _deduplicate(signals: list[GrowthSignal]) -> list[GrowthSignal]:
-        """Colapsa señales con la misma URL — gana la de mayor alpha_score."""
+        """Colapsa señales con la misma URL - gana la de mayor alpha_score."""
         best: dict[str, GrowthSignal] = {}
         for s in signals:
             if s.target_url not in best or s.alpha_score > best[s.target_url].alpha_score:

@@ -1,5 +1,5 @@
 """
-CRDT Merge Engine — Conflict-Free Replication for Agent Swarms (Ω₃ / Ω₁₂).
+CRDT Merge Engine - Conflict-Free Replication for Agent Swarms (Ω₃ / Ω₁₂).
 
 Implements Local-First persistence for multi-agent swarms:
   - Agents mutate memory locally without connection or locks.
@@ -152,16 +152,16 @@ class CortexCRDT:
             local = local_index.get(key)
 
             if local is None:
-                # New fact — ADD
+                # New fact - ADD
                 result.facts_added += 1
                 continue
 
             if local.content == remote.content:
-                # Identical — SKIP
+                # Identical - SKIP
                 result.facts_identical += 1
                 continue
 
-            # Content differs — resolve by type
+            # Content differs - resolve by type
             if remote.is_critical:
                 # MV-Register: preserve both, flag conflict
                 conflict = ConflictRecord(

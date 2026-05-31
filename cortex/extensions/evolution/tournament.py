@@ -104,7 +104,7 @@ def speciate(
 ) -> list[Species]:
     """Cluster subagents into species based on fitness distance.
 
-    Uses a simple 1D threshold clustering — subagents within
+    Uses a simple 1D threshold clustering - subagents within
     `threshold` fitness of each other belong to the same species.
     """
     sorted_subs = sorted(agent.subagents, key=lambda s: s.fitness)

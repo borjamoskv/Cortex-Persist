@@ -129,7 +129,7 @@ async def test_oversized_value_skipped_in_redis(monkeypatch):
     cache: TieredCache[str] = TieredCache("test_oom")
     # Generate a value that would exceed the byte limit when JSON-encoded
     oversized = "x" * (_MAX_REDIS_VALUE_BYTES + 1)
-    # Should not raise — just silently skip L2 write
+    # Should not raise - just silently skip L2 write
     await cache._redis_set("big_key", oversized, 300.0)
 
 

@@ -2,7 +2,7 @@
 Prometheus Metrics.
 
 Lightweight metrics middleware for the CORTEX API.
-No prometheus_client dependency — uses a simple in-memory registry
+No prometheus_client dependency - uses a simple in-memory registry
 that exposes a /metrics endpoint in Prometheus text format.
 
 Critical metrics (ledger errors, consensus failures) are also persisted
@@ -125,7 +125,7 @@ class MetricsRegistry:
             loop = asyncio.get_running_loop()
             loop.create_task(self._persist_critical(name, key, labels, meta))
         except RuntimeError:
-            # No running loop — skip persistence (e.g. during tests).
+            # No running loop - skip persistence (e.g. during tests).
             pass
 
     async def _persist_critical(

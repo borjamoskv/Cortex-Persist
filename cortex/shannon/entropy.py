@@ -1,4 +1,4 @@
-"""Shannon Entropy Module — Corpus-Level Information Measurement (Ω₁₃).
+"""Shannon Entropy Module - Corpus-Level Information Measurement (Ω₁₃).
 
 Computes Shannon entropy H(X) = -Σ p(x) log₂ p(x) over the fact corpus.
 Produces actionable diagnostics: redundancy detection, stagnation warning,
@@ -271,7 +271,7 @@ def diagnose_health(report: ShannonReport) -> list[str]:
     if report.redundancy_score < 0.1 and report.total_facts > 50:
         diagnostics.append(
             f"LOW_REDUNDANCY ({report.redundancy_score:.0%}): "
-            "Very diverse corpus — verify that key axioms are sufficiently represented. "
+            "Very diverse corpus - verify that key axioms are sufficiently represented. "
             "Low redundancy may indicate insufficient reinforcement of critical knowledge."
         )
 

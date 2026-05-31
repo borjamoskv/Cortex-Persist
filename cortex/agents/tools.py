@@ -1,4 +1,4 @@
-"""CORTEX Agent Runtime — Tool Protocol & Registry.
+"""CORTEX Agent Runtime - Tool Protocol & Registry.
 
 Tools are atomic capabilities (skills) that agents invoke.
 The registry enforces manifest policy: an agent can only

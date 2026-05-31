@@ -1,4 +1,4 @@
-"""Tests for SwarmHeartbeat — Ω₃ Byzantine Default (Distributed Liveness)."""
+"""Tests for SwarmHeartbeat - Ω₃ Byzantine Default (Distributed Liveness)."""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-"""SICA Persistence — Genome Save/Load.
+"""SICA Persistence - Genome Save/Load.
 
 Autonomy requirement: learned strategies MUST survive restarts.
 Without persistence, every agent restart resets the genome to
@@ -200,7 +200,7 @@ def load_or_default(
         )
         return SearchStrategy(genome)
     else:
-        logger.info("SICA starting fresh — no saved genome for '%s'", agent_id)
+        logger.info("SICA starting fresh - no saved genome for '%s'", agent_id)
         return SearchStrategy(default_genome())
 
 

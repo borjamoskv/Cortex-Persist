@@ -4,12 +4,12 @@ Sovereign Telemetry Gate (RADAR-Ω + KETER-OMEGA)
 Axiom: "Un swarm que no puede trazar probabilísticamente las decisiones
 de sus nodos es una bomba estocástica."
 
-Quality gate — NOT a dashboard.  If the evaluator scores an LLM output
+Quality gate - NOT a dashboard.  If the evaluator scores an LLM output
 below threshold, the transaction is aborted *before* it can poison CORTEX
 memory.  Traces are emitted to LangSmith for post-mortem, but the runtime
 decision is fully local and O(1).
 
-Changelog v2 — 2026-03-09:
+Changelog v2 - 2026-03-09:
   ✓ Aligned with real Result monad (Ok/Err, not Result.fail)
   ✓ Async-native gate (sovereign_quality_gate_async)
   ✓ Circuit breaker: consecutive failures -> hard-kill without retrying
@@ -31,7 +31,7 @@ from typing import Any, TypeAlias, TypeVar
 from cortex.extensions.swarm.error_ghost_pipeline import ErrorGhostPipeline
 from cortex.utils.result import Err, Result
 
-# Optional LangSmith — graceful degradation, never a hard dep
+# Optional LangSmith - graceful degradation, never a hard dep
 try:
     from langsmith.run_trees import RunTree
 
@@ -78,7 +78,7 @@ class CircuitOpenError(Exception):
         self.tool_name = tool_name
         self.failures = failures
         super().__init__(
-            f"🔌 CIRCUIT OPEN [{tool_name}]: {failures} consecutive failures — refusing execution"
+            f"🔌 CIRCUIT OPEN [{tool_name}]: {failures} consecutive failures - refusing execution"
         )
 
 
@@ -132,7 +132,7 @@ def confidence_evaluator(field: str = "confidence", min_val: float = 0.7) -> Eva
 
 
 def compose_and(*evaluators: EvaluatorFn) -> EvaluatorFn:
-    """All evaluators must pass — returns the minimum score."""
+    """All evaluators must pass - returns the minimum score."""
 
     def _eval(inputs: dict[str, Any], output: Any) -> float:
         return min(ev(inputs, output) for ev in evaluators)
@@ -141,7 +141,7 @@ def compose_and(*evaluators: EvaluatorFn) -> EvaluatorFn:
 
 
 def compose_or(*evaluators: EvaluatorFn) -> EvaluatorFn:
-    """At least one evaluator must pass — returns the maximum score."""
+    """At least one evaluator must pass - returns the maximum score."""
 
     def _eval(inputs: dict[str, Any], output: Any) -> float:
         return max(ev(inputs, output) for ev in evaluators)
@@ -205,7 +205,7 @@ def sovereign_quality_gate(
     Synchronous quality gate decorator.
 
     Wraps a function that returns ``Ok[T] | Err[E]``.
-    1. Checks circuit breaker — refuses execution if open.
+    1. Checks circuit breaker - refuses execution if open.
     2. Executes the function.
     3. On Ok: runs evaluator; if score < threshold → Err + detonation.
     4. Emits LangSmith trace with latency + score metadata.
@@ -256,7 +256,7 @@ def sovereign_quality_gate_async(
     evaluator: EvaluatorFn | None = None,
     threshold: float = 0.8,
 ) -> Callable:
-    """Async variant — wraps ``async def fn(...) -> Result``."""
+    """Async variant - wraps ``async def fn(...) -> Result``."""
 
     def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         @wraps(func)
@@ -311,7 +311,7 @@ def _maybe_create_run_tree(tool_name: str, args: tuple, kwargs: dict[str, Any]) 
         rt.post()
         return rt
     except (ImportError, ValueError, RuntimeError):
-        logger.debug("RunTree creation failed — continuing without trace", exc_info=True)
+        logger.debug("RunTree creation failed - continuing without trace", exc_info=True)
         return None
 
 

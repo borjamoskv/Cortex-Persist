@@ -352,12 +352,12 @@ class TestRunSequence(unittest.TestCase):
 
 
 # ═══════════════════════════════════════════════════════════════════
-# V5: Matcher Tests — Acceptance Test 2
+# V5: Matcher Tests - Acceptance Test 2
 # ═══════════════════════════════════════════════════════════════════
 
 
 class TestMatcher(unittest.TestCase):
-    """Semantic matcher over mock AX tree — Acceptance Test 2."""
+    """Semantic matcher over mock AX tree - Acceptance Test 2."""
 
     def setUp(self):
         self.tree = _make_tree()
@@ -459,7 +459,7 @@ class TestMatcher(unittest.TestCase):
 
 
 # ═══════════════════════════════════════════════════════════════════
-# V5: Trace Degradation — Acceptance Test 3
+# V5: Trace Degradation - Acceptance Test 3
 # ═══════════════════════════════════════════════════════════════════
 
 

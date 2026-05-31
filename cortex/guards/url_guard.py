@@ -1,7 +1,7 @@
 # This file is part of CORTEX.
 # Licensed under the Apache License, Version 2.0.
 
-"""CORTEX Sovereign URLGuard — SSRF Mitigation Layer.
+"""CORTEX Sovereign URLGuard - SSRF Mitigation Layer.
 
 Implements centralized validation for all outgoing remote requests.
 Addresses CodeQL Alert #95 (Server-Side Request Forgery).

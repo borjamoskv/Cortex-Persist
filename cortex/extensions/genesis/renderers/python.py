@@ -9,7 +9,7 @@ from cortex.extensions.genesis.renderers.utils import _ensure_self_param
 def _render_module(system_name: str, comp: ComponentSpec) -> str:
     """Render a standard Python module file."""
     parts: list[str] = []
-    docstring = comp.docstring or f"CORTEX Genesis — {system_name}.{comp.name} module."
+    docstring = comp.docstring or f"CORTEX Genesis - {system_name}.{comp.name} module."
     parts.append(f'"""{docstring}"""\n\nfrom __future__ import annotations\n')
     if comp.imports:
         parts.extend(sorted(comp.imports))
@@ -42,7 +42,7 @@ def _render_module(system_name: str, comp: ComponentSpec) -> str:
 def _render_dataclass(system_name: str, comp: ComponentSpec) -> str:
     """Render a dataclass module."""
     parts: list[str] = []
-    docstring = comp.docstring or f"CORTEX Genesis — {system_name}.{comp.name} data models."
+    docstring = comp.docstring or f"CORTEX Genesis - {system_name}.{comp.name} data models."
     parts.append(f'"""{docstring}"""\n\nfrom __future__ import annotations\n')
     parts.extend(["from dataclasses import dataclass, field", "from typing import Any", ""])
     if comp.imports:
@@ -69,7 +69,7 @@ def _render_dataclass(system_name: str, comp: ComponentSpec) -> str:
 def _render_mixin(system_name: str, comp: ComponentSpec) -> str:
     """Render a CortexEngine mixin."""
     parts: list[str] = []
-    docstring = comp.docstring or f"CORTEX Genesis — {system_name}.{comp.name} mixin."
+    docstring = comp.docstring or f"CORTEX Genesis - {system_name}.{comp.name} mixin."
     parts.append(f'"""{docstring}"""\n\nfrom __future__ import annotations\n')
     parts.extend(["import logging", "from typing import Any", ""])
     if comp.imports:
@@ -145,7 +145,7 @@ def _render_test(system_name: str, comp: ComponentSpec) -> str:
 def _render_init(system_name: str, comp: ComponentSpec) -> str:
     """Render an __init__.py with exports."""
     parts: list[str] = []
-    docstring = comp.docstring or f"CORTEX Genesis — {system_name} package."
+    docstring = comp.docstring or f"CORTEX Genesis - {system_name} package."
     parts.append(f'"""{docstring}"""\n')
     if comp.interfaces:
         exports = [f'    "{name.strip()}",' for name in comp.interfaces]

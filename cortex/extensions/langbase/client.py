@@ -268,7 +268,7 @@ class LangbaseClient:
         Returns:
             Upload confirmation with document ID
         """
-        # Langbase expects multipart or base64 — we use the text content approach
+        # Langbase expects multipart or base64 - we use the text content approach
         body: dict[str, Any] = {
             "fileName": filename,
             "content": content,

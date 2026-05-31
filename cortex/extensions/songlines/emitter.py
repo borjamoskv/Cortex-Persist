@@ -1,5 +1,5 @@
 """
-ResonanceEmitter — The Ocre Painter.
+ResonanceEmitter - The Ocre Painter.
 Embeds hyperdimensional ghost traces into the file system.
 """
 

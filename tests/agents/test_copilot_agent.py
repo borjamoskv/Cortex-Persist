@@ -1,4 +1,4 @@
-"""Tests for Level 3 — CopilotAgent.
+"""Tests for Level 3 - CopilotAgent.
 
 Validates the core copilot contract:
   1. Copilot generates suggestions from context (NEVER applies them)
@@ -123,7 +123,7 @@ class TestCopilotContract:
 
     @pytest.mark.asyncio
     async def test_tick_is_noop(self) -> None:
-        """tick() must do nothing — copilot is purely reactive."""
+        """tick() must do nothing - copilot is purely reactive."""
         agent, _ = _make_copilot()
         # Should complete without error and without side effects
         await agent.tick()

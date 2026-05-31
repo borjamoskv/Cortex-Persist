@@ -1,4 +1,4 @@
-"""HotStateDB — SQLite-backed hot state for the daemon.
+"""HotStateDB - SQLite-backed hot state for the daemon.
 
 Replaces the in-memory dict+JSON flush pattern with a durable,
 queryable, cross-process-safe KV store using SQLite WAL mode.
@@ -11,7 +11,7 @@ Features:
     - Auto-migration from legacy handoff.json
     - Metrics: uptime, cycle count, last tick
 
-Derivation: Ω₂ (Thermodynamic Law) — measure exergy, not volume.
+Derivation: Ω₂ (Thermodynamic Law) - measure exergy, not volume.
 """
 
 from __future__ import annotations

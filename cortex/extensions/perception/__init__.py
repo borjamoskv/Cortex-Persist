@@ -2,9 +2,9 @@
 Real-Time Perception Engine.
 
 Three-layer behavioral perception:
-  1. FileActivityObserver — watches workspace via watchdog FSEvents
-  2. BehavioralInference — infers intent from activity patterns
-  3. PerceptionRecorder — auto-records episodes when confidence is high
+  1. FileActivityObserver - watches workspace via watchdog FSEvents
+  2. BehavioralInference - infers intent from activity patterns
+  3. PerceptionRecorder - auto-records episodes when confidence is high
 
 Re-exports all public symbols for backward-compatible imports.
 """

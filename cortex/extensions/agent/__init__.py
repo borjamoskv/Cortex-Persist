@@ -1,4 +1,4 @@
-"""CORTEX v6+ — Agent package."""
+"""CORTEX v6+ - Agent package."""
 
 from cortex.extensions.agent.degradation import (
     AgentAction,

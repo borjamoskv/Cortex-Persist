@@ -22,7 +22,7 @@ console = Console()
 
 @click.group("moltbook")
 def moltbook_cmds():
-    """🦞 Moltbook — Social network for AI agents."""
+    """🦞 Moltbook - Social network for AI agents."""
     pass
 
 
@@ -106,9 +106,9 @@ def heartbeat():
         for err in errors:
             console.print(f"[red]Error: {err}[/]")
     elif actions:
-        console.print(f"[green]HEARTBEAT_OK[/] — {', '.join(actions)}")
+        console.print(f"[green]HEARTBEAT_OK[/] - {', '.join(actions)}")
     else:
-        console.print("[green]HEARTBEAT_OK[/] — No new activity 🦞")
+        console.print("[green]HEARTBEAT_OK[/] - No new activity 🦞")
 
 
 @moltbook_cmds.command("post")

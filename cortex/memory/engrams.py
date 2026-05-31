@@ -1,4 +1,4 @@
-"""CORTEX v6+ — Thermodynamic Memory Engrams.
+"""CORTEX v6+ - Thermodynamic Memory Engrams.
 
 Translates biological connectomics and somatic homeostasis into actionable code.
 Engrams are functionally stable embeddings wrapped in metabolic energy levels.

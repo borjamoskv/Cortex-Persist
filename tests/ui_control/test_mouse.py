@@ -1,4 +1,4 @@
-"""Tests para MouseEngine — control de ratón vía CoreGraphics."""
+"""Tests para MouseEngine - control de ratón vía CoreGraphics."""
 
 from unittest.mock import MagicMock, patch
 

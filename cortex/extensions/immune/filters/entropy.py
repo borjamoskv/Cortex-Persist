@@ -1,5 +1,5 @@
 """
-F4 — ENTROPY MEASURE: AX-I: The Threshold of Thermodynamics (Ω₂).
+F4 - ENTROPY MEASURE: AX-I: The Threshold of Thermodynamics (Ω₂).
 """
 
 from __future__ import annotations

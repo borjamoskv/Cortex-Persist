@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""IDC Agent Demo — Run both toy environments and visualize tradeoffs.
+"""IDC Agent Demo - Run both toy environments and visualize tradeoffs.
 
 Usage:
     python -m idc.demo
@@ -75,7 +75,7 @@ def print_metric(name: str, value: float | int | str, color: str = "dim") -> Non
 
 def demo_risky_bandit(n_steps: int = 100) -> None:
     """Demonstrate IDC on the Risky Bandit environment."""
-    print_header("IDC DEMO — RISKY BANDIT (I-D-C Tradeoff)")
+    print_header("IDC DEMO - RISKY BANDIT (I-D-C Tradeoff)")
 
     configs = {
         "Aggressive (low α, low β)": AgentConfig(alpha=0.01, beta=0.01, lambda_risk=0.1),
@@ -116,7 +116,7 @@ def demo_risky_bandit(n_steps: int = 100) -> None:
 
 def demo_info_foraging(n_steps: int = 100) -> None:
     """Demonstrate IDC on the Information Foraging environment."""
-    print_header("IDC DEMO — INFORMATION FORAGING (Belief Quality)")
+    print_header("IDC DEMO - INFORMATION FORAGING (Belief Quality)")
 
     config = AgentConfig(
         alpha=0.2,              # High info penalty → force good beliefs
@@ -153,7 +153,7 @@ def demo_info_foraging(n_steps: int = 100) -> None:
 
 def sweep_alpha_beta(n_steps: int = 100) -> None:
     """Sweep α (info cost) and β (control cost) to show tradeoff surface."""
-    print_header("IDC SWEEP — α/β Tradeoff Surface")
+    print_header("IDC SWEEP - α/β Tradeoff Surface")
 
     alphas = [0.01, 0.05, 0.1, 0.2, 0.5, 1.0]
     betas = [0.01, 0.1, 0.5, 1.0, 2.0]
@@ -203,7 +203,7 @@ def main() -> None:
     args = parser.parse_args()
 
     print(f"\n{C['bold']}{C['lime']}  ╔══════════════════════════════════════════╗{C['reset']}")
-    print(f"{C['bold']}{C['lime']}  ║  IDC — Information · Decision · Control  ║{C['reset']}")
+    print(f"{C['bold']}{C['lime']}  ║  IDC - Information · Decision · Control  ║{C['reset']}")
     print(f"{C['bold']}{C['lime']}  ║  Minimal Agent Science Implementation   ║{C['reset']}")
     print(f"{C['bold']}{C['lime']}  ╚══════════════════════════════════════════╝{C['reset']}\n")
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-ENCB — Epistemic Noise Chaos Benchmark Runner
+ENCB - Epistemic Noise Chaos Benchmark Runner
 ===============================================
 Empirical falsification of the Cortex-Persist hypothesis via structured
 epistemic noise injection.
@@ -121,7 +121,7 @@ async def run_encb(
 
     console.print(
         Panel(
-            "[bold cyan]🧪 ENCB — Epistemic Noise Chaos Benchmark[/]\n"
+            "[bold cyan]🧪 ENCB - Epistemic Noise Chaos Benchmark[/]\n"
             "[dim]Nobel-Ω Vector Ξ₄: Empirical Falsification[/]",
             box=box.DOUBLE,
         )
@@ -261,7 +261,7 @@ async def run_encb(
     # ── Summary Table ──────────────────────────────────────────────────
     console.print("\n")
     table = Table(
-        title="🧪 ENCB Results — CORTEX vs Baseline RAG",
+        title="🧪 ENCB Results - CORTEX vs Baseline RAG",
         box=box.ROUNDED,
         show_header=True,
         header_style="bold magenta",
@@ -348,7 +348,7 @@ async def run_encb(
 async def main() -> None:
     import argparse
 
-    parser = argparse.ArgumentParser(description="ENCB — Epistemic Noise Chaos Benchmark")
+    parser = argparse.ArgumentParser(description="ENCB - Epistemic Noise Chaos Benchmark")
     parser.add_argument(
         "--iterations", "-n", type=int, default=20, help="Number of temporal contradiction rounds"
     )

@@ -1,5 +1,5 @@
 """
-VSA-SDM Engine v3.1 — Sovereign Context Collapse Module
+VSA-SDM Engine v3.1 - Sovereign Context Collapse Module
 Importable Python module for Vector Symbolic Architecture operations.
 
 Usage:

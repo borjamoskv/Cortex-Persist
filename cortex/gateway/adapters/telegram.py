@@ -1,4 +1,4 @@
-"""CORTEX Gateway — Telegram Channel Adapter.
+"""CORTEX Gateway - Telegram Channel Adapter.
 
 Bridges inbound Telegram messages → GatewayRequest → GatewayResponse → Telegram reply.
 
@@ -171,7 +171,7 @@ def _format_search(data: list, latency: float) -> str:
     lines = [f"🔍 *{len(data)} results:*\n"]
     for r in data[:5]:
         score = r.get("score", 0)
-        lines.append(f"• `[{r['project']}]` ({score:.2f}) — {r['content'][:120]}")
+        lines.append(f"• `[{r['project']}]` ({score:.2f}) - {r['content'][:120]}")
     return "\n".join(lines)
 
 

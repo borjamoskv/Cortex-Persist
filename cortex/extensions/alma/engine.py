@@ -163,7 +163,7 @@ class AlmaEngine:
         self._last_taste = verdict
 
         logger.debug(
-            "ALMA Taste: %s (%.4f) — %s",
+            "ALMA Taste: %s (%.4f) - %s",
             verdict.grade,
             verdict.composite_score,
             verdict.verdict,

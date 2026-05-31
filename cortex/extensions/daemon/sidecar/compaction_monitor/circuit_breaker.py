@@ -123,7 +123,7 @@ async def call_external_compact(
             from cortex.compaction.compactor import compact
 
             if engine is not None:
-                # compact() is sync — run in thread to avoid blocking event loop
+                # compact() is sync - run in thread to avoid blocking event loop
                 return await asyncio.to_thread(compact, engine, project)
         except ImportError:
             pass

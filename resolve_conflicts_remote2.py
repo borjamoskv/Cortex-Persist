@@ -35,7 +35,7 @@ def main():
         if count > 0:
             total_files += 1
             total_conflicts += count
-            print(f"[FIX] {f} — {count} conflicts resolved with REMOTE")
+            print(f"[FIX] {f} - {count} conflicts resolved with REMOTE")
 
     print(f"\nRESOLVED: {total_conflicts} conflicts in {total_files} files")
 

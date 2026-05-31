@@ -1,4 +1,4 @@
-"""OUROBOROS INJECTOR — Synthetic Friction Generator.
+"""OUROBOROS INJECTOR - Synthetic Friction Generator.
 
 Inyecta conflictos estocásticos y asimétricos (eventos de fricción) en Redpanda
 para someter a estrés al Ouroboros Stream Kernel (CQRS Pruning).

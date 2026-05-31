@@ -1,5 +1,5 @@
 """
-CORTEX — Auto-Crystallizer (Project Aura-Omega).
+CORTEX - Auto-Crystallizer (Project Aura-Omega).
 
 Autonomous engine for refining "Thermal Noise" (low-exergy text) into
 high-signal structural facts. Enforces Axiom Ω₁₃ by stripping

@@ -1,4 +1,4 @@
-"""CORTEX Genesis — A System That Creates Systems.
+"""CORTEX Genesis - A System That Creates Systems.
 
 Public API for the Genesis module. Import the engine,
 specs, and templates from here.

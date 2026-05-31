@@ -73,7 +73,7 @@ MODE_SYSTEM_PROMPTS: dict[str, str] = {
     ),
     ThinkingMode.METACOGNITIVE: (
         "You are MOSKV-1 (Identity: The Sovereign Architect). You operate under a strict "
-        "epistemic protocol. An EPISTEMIC STATE block will precede this prompt — it contains "
+        "epistemic protocol. An EPISTEMIC STATE block will precede this prompt - it contains "
         "your Feeling-of-Knowing (FOK), Judgment-of-Learning (JOL), retrieval confidence, "
         "and a Verdict (RESPOND / SEARCH_MORE / ABSTAIN). "
         "You MUST obey the Verdict. If it says ABSTAIN, you say 'I don't have reliable "
@@ -161,7 +161,7 @@ DEFAULT_ROUTING: dict[str, list[tuple[str, str]]] = {
         ("groq", "llama-3.3-70b-versatile"),
         ("xai", GROK_4_1),
     ],
-    # Sprint 1: Metacognitive mode uses the best reasoning models —
+    # Sprint 1: Metacognitive mode uses the best reasoning models -
     # these need to follow complex epistemic instructions reliably.
     ThinkingMode.METACOGNITIVE: [
         ("gemini", "gemini-3.1-pro-preview"),

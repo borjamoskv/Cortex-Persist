@@ -1,4 +1,4 @@
-"""Tests for AUTODIDACT synthesis cascade — Ω₅ Antifragile verification."""
+"""Tests for AUTODIDACT synthesis cascade - Ω₅ Antifragile verification."""
 
 from __future__ import annotations
 
@@ -53,7 +53,7 @@ class TestGetSynthesisRouter:
         syn._synthesis_router = None  # cleanup
 
     def test_router_is_singleton(self):
-        """Lazy singleton — same instance on repeated calls."""
+        """Lazy singleton - same instance on repeated calls."""
         import cortex.extensions.skills.autodidact.synthesis as syn
 
         syn._synthesis_router = None

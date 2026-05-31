@@ -1,4 +1,4 @@
-"""CORTEX Revenue — Vector 3: B2B Web Design Outreach Pipeline.
+"""CORTEX Revenue - Vector 3: B2B Web Design Outreach Pipeline.
 
 Automated lead generation and outreach leveraging Awwwards-grade
 design capabilities to sell premium web redesign services.
@@ -160,7 +160,7 @@ MOCK_LEADS: list[dict[str, Any]] = [
 ]
 
 
-EMAIL_TEMPLATE = """Asunto: {company} merece una web que convierta — análisis gratuito incluido
+EMAIL_TEMPLATE = """Asunto: {company} merece una web que convierta - análisis gratuito incluido
 
 Hola,
 
@@ -169,7 +169,7 @@ Soy diseñador web especializado en experiencias digitales premium.
 He analizado {website} y he detectado oportunidades importantes:
 {pain_points}
 
-He preparado un concepto visual gratuito de cómo podría verse {company} con un diseño moderno — sin compromiso.
+He preparado un concepto visual gratuito de cómo podría verse {company} con un diseño moderno - sin compromiso.
 
 ¿Puedo enviártelo?
 
@@ -232,7 +232,7 @@ class OutreachVector:
                 vector=VectorType.OUTREACH,
                 title=f"Redesign: {lead.company}",
                 description=(
-                    f"{lead.company} ({lead.industry}) — "
+                    f"{lead.company} ({lead.industry}) - "
                     f"Lighthouse: {lead.lighthouse_score}/100, "
                     f"Pain: {lead.pain_score:.0f}/100. "
                     f"Budget est: €{lead.estimated_budget}"
@@ -263,7 +263,7 @@ class OutreachVector:
         """Execute outreach for a lead.
 
         Generates a personalized email and adds the lead to the CRM pipeline.
-        Does NOT auto-send — returns the draft for human review.
+        Does NOT auto-send - returns the draft for human review.
 
         Args:
             opportunity: The outreach opportunity.

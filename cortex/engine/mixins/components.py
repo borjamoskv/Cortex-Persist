@@ -149,7 +149,7 @@ class ComponentsMixin:
     def _register_default_guards(self) -> GuardPipeline:
         """Build the GuardPipeline with all available guard adapters.
 
-        Each adapter is imported defensively — if the underlying module
+        Each adapter is imported defensively - if the underlying module
         is not installed, the adapter is skipped. Runtime failures during
         guard construction are treated as fatal because the write path must
         fail closed.

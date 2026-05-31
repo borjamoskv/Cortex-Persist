@@ -1,7 +1,7 @@
-"""Tests for CORTEX Memory Core — L1, Compression, Thalamus, Resonance.
+"""Tests for CORTEX Memory Core - L1, Compression, Thalamus, Resonance.
 
 Covers the 4 most critical untested paths in cortex/memory/.
-All tests are self-contained with mocks — no DB, no Redis, no LLM.
+All tests are self-contained with mocks - no DB, no Redis, no LLM.
 """
 
 from __future__ import annotations
@@ -316,7 +316,7 @@ class TestThalamusGate:
                 project_id="p",
                 tenant_id="t",
             )
-        # Gate degrades gracefully — allows the write
+        # Gate degrades gracefully - allows the write
         assert should is True
         assert action == "encode:new"
 

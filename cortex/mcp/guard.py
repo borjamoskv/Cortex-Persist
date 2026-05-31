@@ -1,4 +1,4 @@
-"""CORTEX MCP Guard — MOSKV-1 Hard Limits Enforcement.
+"""CORTEX MCP Guard - MOSKV-1 Hard Limits Enforcement.
 
 Validates all inputs to MCP tools against safety constraints:
 - Content size limits

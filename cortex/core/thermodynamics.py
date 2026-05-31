@@ -35,7 +35,7 @@ class CyanideImportHook(importlib.abc.MetaPathFinder):
         # or other pathological module names that python might allow internally.
         if "cortex.extensions.moltbook" in fullname or base_module in self._POISONED_MODULES:
             logger.critical(
-                "THERMODYNAMIC BORDER COLLAPSE — Attempted to import '%s' within Cold Mode",
+                "THERMODYNAMIC BORDER COLLAPSE - Attempted to import '%s' within Cold Mode",
                 fullname,
             )
             logger.critical("Activating Cyanide Protocol. Self-destructing.")

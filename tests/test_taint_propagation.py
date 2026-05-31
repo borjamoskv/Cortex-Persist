@@ -1,4 +1,4 @@
-"""CORTEX — Taint Propagation Test Suite.
+"""CORTEX - Taint Propagation Test Suite.
 
 Tests the causal DAG taint propagation engine (Axiom Ω₁₃).
 Validates tri-state taint, effective confidence recomputation,
@@ -191,7 +191,7 @@ class TestPropagateTaint:
         }
 
         propagate_taint("A", graph)
-        # Run again — should be idempotent
+        # Run again - should be idempotent
         touched = propagate_taint("A", graph)
 
         assert graph["A"].taint_status == TaintStatus.TAINTED

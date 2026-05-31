@@ -1,4 +1,4 @@
-"""CORTEX Agent Runtime — Agent Manifest (Identity + Policy).
+"""CORTEX Agent Runtime - Agent Manifest (Identity + Policy).
 
 The manifest is the runtime contract for an agent. It declares
 what the agent can do, what it's allowed to access, and its

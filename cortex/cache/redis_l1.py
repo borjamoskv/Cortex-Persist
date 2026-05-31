@@ -1,5 +1,5 @@
 """
-Redis L1 Cache — Distributed Working Memory for LEGION-10k.
+Redis L1 Cache - Distributed Working Memory for LEGION-10k.
 
 Provides a thread-safe, namespace-prefixed cache layer with
 graceful degradation when Redis is unavailable.

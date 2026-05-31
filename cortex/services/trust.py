@@ -1,6 +1,6 @@
-"""TrustService — Sovereign Audit, Compliance & Cryptographic Integrity (Ω₃).
+"""TrustService - Sovereign Audit, Compliance & Cryptographic Integrity (Ω₃).
 
-V6.0 Zero-Trust: Never assumes honesty — not from agents, not from data,
+V6.0 Zero-Trust: Never assumes honesty - not from agents, not from data,
 not from itself.  Every hash is verified live.  Every chain break is reported.
 Silence is NOT compliance.
 """
@@ -36,7 +36,7 @@ class TrustSnapshot:
 
     @property
     def is_compliant(self) -> bool:
-        """EU AI Act Article 12 — compliant iff score ≥ 0.80 AND chain intact."""
+        """EU AI Act Article 12 - compliant iff score ≥ 0.80 AND chain intact."""
         return self.eu_ai_act_score >= 0.80 and self.chain_integrity
 
 
@@ -69,10 +69,10 @@ _SIEGE_REPORT_CAP: int = 10
 class TrustService:
     """Sovereign service for Audit, Compliance, and Cryptography (Ω₃).
 
-    V6.0 Zero-Trust — Byzantine Default applied everywhere:
+    V6.0 Zero-Trust - Byzantine Default applied everywhere:
       • verify_fact_chain:  Live SHA-256 recomputation, never trusts stored state.
       • get_compliance_stats: Merkle gap detection + unsigned-fact scoring.
-      • run_siege_scan_async: Red Team probe — batch hash verification.
+      • run_siege_scan_async: Red Team probe - batch hash verification.
       • verify_batch:        O(N) batch verification (new in V6).
     """
 
@@ -100,7 +100,7 @@ class TrustService:
     def verify_fact_chain(self, fact_id: int) -> FactVerification:
         """Verify cryptographic integrity of a fact and its tx chain.
 
-        Ω₃ Byzantine Gate — rejects NULL hashes and empty content as violations.
+        Ω₃ Byzantine Gate - rejects NULL hashes and empty content as violations.
         Returns a frozen *FactVerification* instead of a mutable dict.
         """
         conn = self._get_conn()
@@ -130,14 +130,14 @@ class TrustService:
             return FactVerification(
                 **common,
                 valid=False,
-                violation="EMPTY_CONTENT — Cannot verify integrity of empty fact.",
+                violation="EMPTY_CONTENT - Cannot verify integrity of empty fact.",
             )
 
         if not stored_hash:
             return FactVerification(
                 **common,
                 valid=False,
-                violation="NULL_HASH — Fact was never signed. Chain trust invalidated.",
+                violation="NULL_HASH - Fact was never signed. Chain trust invalidated.",
             )
 
         recomputed = hashlib.sha256(content.encode()).hexdigest()
@@ -145,7 +145,7 @@ class TrustService:
 
         violation: str | None = None
         if not valid:
-            violation = f"HASH_MISMATCH — stored={stored_hash[:16]}… recomputed={recomputed[:16]}…"
+            violation = f"HASH_MISMATCH - stored={stored_hash[:16]}… recomputed={recomputed[:16]}…"
             logger.warning(
                 "⚠️ [TRUST] Fact #%d hash mismatch in project '%s'. Possible tampering.",
                 fact_id,
@@ -155,7 +155,7 @@ class TrustService:
         return FactVerification(**common, valid=valid, violation=violation)
 
     # ------------------------------------------------------------------
-    # Batch verification — O(N) single-pass
+    # Batch verification - O(N) single-pass
     # ------------------------------------------------------------------
 
     def verify_batch(
@@ -231,7 +231,7 @@ class TrustService:
 
             recomputed = hashlib.sha256(content.encode()).hexdigest()
             valid = recomputed == stored_hash
-            violation = f"HASH_MISMATCH — stored={stored_hash[:16]}…" if not valid else None
+            violation = f"HASH_MISMATCH - stored={stored_hash[:16]}…" if not valid else None
             results.append(FactVerification(**common, valid=valid, violation=violation))
 
         return results
@@ -284,7 +284,7 @@ class TrustService:
                     gaps,
                 )
         except sqlite3.OperationalError:
-            # Table may not exist yet in tests — degrade gracefully
+            # Table may not exist yet in tests - degrade gracefully
             logger.debug("[TRUST] merkle_roots table not found; skipping chain gap check.")
 
         # --- Unsigned Facts Check ---
@@ -292,7 +292,7 @@ class TrustService:
         if total > 0 and (signed / total) < _MIN_SIGNED_RATIO:
             violations.append(
                 f"UNSIGNED_FACTS: {unsigned}/{total} facts lack cryptographic signatures "
-                f"({(1 - signed / total):.1%} unsigned — below {_MIN_SIGNED_RATIO:.0%} threshold)."
+                f"({(1 - signed / total):.1%} unsigned - below {_MIN_SIGNED_RATIO:.0%} threshold)."
             )
 
         # EU AI Act score degrades proportionally with violations
@@ -339,7 +339,7 @@ class TrustService:
         import asyncio
 
         conn = self._get_conn()
-        await asyncio.sleep(0)  # Yield to event loop — non-blocking
+        await asyncio.sleep(0)  # Yield to event loop - non-blocking
 
         rows = conn.execute(
             "SELECT id, content, hash FROM facts ORDER BY id DESC LIMIT ?",

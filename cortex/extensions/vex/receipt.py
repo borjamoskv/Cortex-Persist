@@ -1,9 +1,9 @@
-"""VEX Receipt — Verification and export utilities.
+"""VEX Receipt - Verification and export utilities.
 
 Provides functions for third-party receipt verification, export
 to portable formats, and receipt storage/retrieval from CORTEX.
 
-Derivation: Ω₃ (Byzantine Default) — receipts are self-verifiable
+Derivation: Ω₃ (Byzantine Default) - receipts are self-verifiable
             without trusting the issuer.
 """
 
@@ -36,7 +36,7 @@ def verify_receipt(receipt: ExecutionReceipt) -> dict[str, Any]:
 
     # 1. Plan hash
     if not receipt.plan_hash:
-        violations.append("Missing plan_hash — cannot verify plan origin")
+        violations.append("Missing plan_hash - cannot verify plan origin")
 
     # 2. Step hash consistency
     for i, step in enumerate(receipt.steps):
@@ -44,10 +44,10 @@ def verify_receipt(receipt: ExecutionReceipt) -> dict[str, Any]:
         if not h:
             violations.append(f"Step {i} ({step.step_id}): empty content hash")
 
-    # 3. Receipt hash determinism — recompute and compare
+    # 3. Receipt hash determinism - recompute and compare
     computed = receipt.receipt_hash
     if not computed:
-        violations.append("Empty receipt_hash — receipt may be corrupted")
+        violations.append("Empty receipt_hash - receipt may be corrupted")
 
     # 4. Status validity
     try:
@@ -55,7 +55,7 @@ def verify_receipt(receipt: ExecutionReceipt) -> dict[str, Any]:
     except ValueError:
         violations.append(f"Invalid status: {receipt.status}")
 
-    # 5. Step chain integrity — verify step order
+    # 5. Step chain integrity - verify step order
     step_ids = [s.step_id for s in receipt.steps]
     if len(step_ids) != len(set(step_ids)):
         violations.append("Duplicate step IDs detected")

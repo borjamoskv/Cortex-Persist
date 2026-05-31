@@ -1,4 +1,4 @@
-"""CORTEX — Notification Bus (core orchestrator).
+"""CORTEX - Notification Bus (core orchestrator).
 
 The NotificationBus is the single point of dispatch for all CORTEX events.
 It manages a registry of pluggable adapters and fans out events concurrently.
@@ -71,7 +71,7 @@ class NotificationBus:
         """
         if not adapter.is_configured:
             logger.info(
-                "Adapter '%s' skipped — not configured (missing credentials?).",
+                "Adapter '%s' skipped - not configured (missing credentials?).",
                 adapter.name,
             )
             return

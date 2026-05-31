@@ -1,6 +1,6 @@
 """
 CORTEX JIT Compiled Skill: Aesthetic-Foundry-Omega
-Description: Sovereign Visual Design Engine — Industrial Noir 2026 design system, UI/UX generation, typography enforcement.
+Description: Sovereign Visual Design Engine - Industrial Noir 2026 design system, UI/UX generation, typography enforcement.
 """
 import json
 import logging

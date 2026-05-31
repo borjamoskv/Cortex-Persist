@@ -1,4 +1,4 @@
-"""CORTEX VSA-SDM v7.1 — Zero-Dependency Sovereign Memory Substrate.
+"""CORTEX VSA-SDM v7.1 - Zero-Dependency Sovereign Memory Substrate.
 
 Pure Python implementation of Vector Symbolic Architecture (VSA) with
 Sparse Distributed Memory (SDM) for algebraic context collapse.
@@ -44,12 +44,12 @@ def random_bipolar(dim: int = DIMENSION, seed: int | None = None) -> list[int]:
 
 
 def bind(a: list[int], b: list[int]) -> list[int]:
-    """XOR binding — exact self-inverse: bind(bind(a, b), b) == a."""
+    """XOR binding - exact self-inverse: bind(bind(a, b), b) == a."""
     return [x ^ y for x, y in zip(a, b, strict=False)]
 
 
 def bundle(vectors: list[list[int]]) -> list[int]:
-    """Majority-rule bundling — superposition of multiple vectors."""
+    """Majority-rule bundling - superposition of multiple vectors."""
     n = len(vectors)
     if n == 0:
         return [0] * DIMENSION
@@ -154,13 +154,13 @@ class SDMLocation:
 
 
 class KanervaSDM:
-    """Sparse Distributed Memory — O(1) associative recall.
+    """Sparse Distributed Memory - O(1) associative recall.
 
     Architecture:
     - N hard locations with random addresses
     - Write: increment counters at all locations within activation radius
     - Read: sum counters from activated locations, threshold to binary
-    - Capacity: SNR model — sqrt(D/N) items per location
+    - Capacity: SNR model - sqrt(D/N) items per location
     """
 
     def __init__(
@@ -410,7 +410,7 @@ class SwarmMemory:
         """
         self._persistence_path.parent.mkdir(parents=True, exist_ok=True)
 
-        # Serialize records (without vectors — too large)
+        # Serialize records (without vectors - too large)
         data = {
             "agent_id": self._agent_id,
             "dimension": self._dim,

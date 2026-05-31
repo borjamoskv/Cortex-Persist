@@ -1,4 +1,4 @@
-"""CORTEX Pipeline — Stage implementations.
+"""CORTEX Pipeline - Stage implementations.
 
 Reality Level: C5-REAL
 """
@@ -22,7 +22,7 @@ class StagesMixin:
     def _ingress(self, request: PipelineRequest) -> None:
         """Validate incoming request."""
         if not request.intent or not request.intent.strip():
-            raise ValueError("Empty intent — nothing to execute")
+            raise ValueError("Empty intent - nothing to execute")
 
         if request.budget_limit_usd <= 0:
             raise ValueError("Budget must be positive")
@@ -40,7 +40,7 @@ class StagesMixin:
     def _assemble_context(self, request: PipelineRequest) -> ContextPacket:
         """Gather relevant context from all knowledge sources."""
         if self._context is None:
-            logger.debug("  [CONTEXT] No assembler configured — empty context")
+            logger.debug("  [CONTEXT] No assembler configured - empty context")
             return ContextPacket()
 
         return self._context.assemble(
@@ -160,7 +160,7 @@ class StagesMixin:
     def _deliver(self, request: PipelineRequest, output: Any) -> None:
         """Deliver result to the specified target."""
         if self._delivery is None:
-            logger.info("  [EGRESS] No delivery manager — result logged only")
+            logger.info("  [EGRESS] No delivery manager - result logged only")
             return
 
         self._delivery.deliver(

@@ -7,7 +7,7 @@ from cortex.extensions.signals.sharded_bus import ShardedAsyncSignalBus
 
 @pytest.mark.asyncio
 async def test_exergy_calculation_o1(tmp_path):
-    """Verify the Nine Laws — Exergy decay on latency/density."""
+    """Verify the Nine Laws - Exergy decay on latency/density."""
     bus = ShardedAsyncSignalBus(base_dir=tmp_path)
     node = CenturionSuperv("node-1", "test_shard_bus_1")
 
@@ -40,7 +40,7 @@ class MockProvider:
 
 @pytest.mark.asyncio
 async def test_kv_aware_routing_affinity():
-    """Verify Corolario AX-IV — Routing sticks to warm KV instances."""
+    """Verify Corolario AX-IV - Routing sticks to warm KV instances."""
     mgr = CascadeManager()
     p1 = MockProvider("p1")
     p2 = MockProvider("p2")

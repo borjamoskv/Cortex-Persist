@@ -1,4 +1,4 @@
-"""MOSKV-1 — Tesseract Manifold.
+"""MOSKV-1 - Tesseract Manifold.
 
 4D Cognitive Manifold engine, implementing asynchronous convergence over
 Perception, Decision, Creation, and Validation.

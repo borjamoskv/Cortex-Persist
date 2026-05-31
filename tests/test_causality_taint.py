@@ -1,4 +1,4 @@
-"""Tests for taint propagation in causality engine — Ω₁₃ §15.9."""
+"""Tests for taint propagation in causality engine - Ω₁₃ §15.9."""
 
 from __future__ import annotations
 
@@ -149,7 +149,7 @@ async def test_propagate_taint_single_child() -> None:
         assert change["new_confidence"] in ("C1", "C2", "C3", "C4")
         assert "status" in change
 
-    # Verify DB updated — Ω₁₃ cascade: child inherits parent's C1 floor.
+    # Verify DB updated - Ω₁₃ cascade: child inherits parent's C1 floor.
     async with conn.execute("SELECT confidence, metadata FROM facts WHERE id = 2") as cursor:
         row = await cursor.fetchone()
     assert row[0] == "C1"

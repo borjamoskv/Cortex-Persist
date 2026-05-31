@@ -1,5 +1,5 @@
 """
-CORTEX — Weismann Barrier (Kernel Isolation Protocol)
+CORTEX - Weismann Barrier (Kernel Isolation Protocol)
 Protects the CORTEX-Persist kernel from fatal mutations during autopoiesis.
 """
 

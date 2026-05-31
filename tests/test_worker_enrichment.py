@@ -210,7 +210,7 @@ class TestProcessJob:
 
     @pytest.mark.asyncio
     async def test_provider_invocation_gated(self, worker_with_provider):
-        """Provider path is guarded by is_available — log and pass for now."""
+        """Provider path is guarded by is_available - log and pass for now."""
         conn = await _setup_db()
         await conn.execute(
             "INSERT INTO facts (id, project, content, tenant_id) VALUES (?, ?, ?, ?)",
@@ -226,7 +226,7 @@ class TestProcessJob:
 
         with patch.object(worker_with_provider, "_mark_success", new_callable=AsyncMock) as mock_ok:
             await worker_with_provider._process_job(conn, job["id"], 20)
-            # Provider is injected but current impl just passes — success should still be marked
+            # Provider is injected but current impl just passes - success should still be marked
             mock_ok.assert_awaited_once()
 
         await conn.close()

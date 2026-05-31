@@ -1,4 +1,4 @@
-"""CORTEX Pipeline — Runner implementations.
+"""CORTEX Pipeline - Runner implementations.
 
 Reality Level: C5-REAL
 """

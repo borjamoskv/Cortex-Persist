@@ -8,11 +8,11 @@ Pipeline DAG:
                 ↘ (conflict) → human_gate
 
 Nodes:
-    1. PlannerNode     — Receives targets from radar, builds execution plan
-    2. ExecutorNode    — Invokes AUTODIDACT-Ω per target (fetch + distill + index)
-    3. ValidatorNode   — ByzantineConsensus on results
-    4. PersisterNode   — Logs cycle metrics to CORTEX
-    5. HumanGateNode   — Pause if confidence < C3
+    1. PlannerNode     - Receives targets from radar, builds execution plan
+    2. ExecutorNode    - Invokes AUTODIDACT-Ω per target (fetch + distill + index)
+    3. ValidatorNode   - ByzantineConsensus on results
+    4. PersisterNode   - Logs cycle metrics to CORTEX
+    5. HumanGateNode   - Pause if confidence < C3
 
 Axiom Derivations:
     Ω₂ (Entropic Asymmetry): Each node reduces uncertainty or is skipped.
@@ -102,7 +102,7 @@ class PlannerNode:
                     }
                 )
             elif isinstance(target, str):
-                # Plain string target — wrap as quick_read
+                # Plain string target - wrap as quick_read
                 plan.append(
                     {
                         "id": f"crystal-{int(time.monotonic())}-{i}",
@@ -179,7 +179,7 @@ class ExecutorNode:
                         result.get("error", estado),
                     )
 
-            except Exception as e:  # noqa: BLE001 — boundary for autodidact execution
+            except Exception as e:  # noqa: BLE001 - boundary for autodidact execution
                 logger.error("❌ [EXECUTOR] Fatal: %s → %s", task_id, e)
                 results.append(
                     {
@@ -281,7 +281,7 @@ class HumanGateNode:
     """Pause execution for human review when confidence is low.
 
     Axiom Ω₆ (Zenón's Razor): When deliberation costs exceed production,
-    collapse into action — but only with human authorization.
+    collapse into action - but only with human authorization.
     """
 
     name = "human_gate"

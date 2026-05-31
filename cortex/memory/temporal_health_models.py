@@ -1,7 +1,7 @@
-"""temporal_health_models — SchedulerConfig, HealthReport, HealthTier.
+"""temporal_health_models - SchedulerConfig, HealthReport, HealthTier.
 
 Extracted from temporal_health.py to satisfy the Landauer LOC barrier (≤500).
-Pure data contracts — zero business logic, zero numpy dependency in this file.
+Pure data contracts - zero business logic, zero numpy dependency in this file.
 """
 
 from __future__ import annotations
@@ -64,18 +64,18 @@ class HealthReport:
     tier: list[HealthTier]
     timestamp: float = field(default_factory=time.time)
 
-    # PULSE — always populated after write 1
+    # PULSE - always populated after write 1
     centroid_drift: float | None = None
     running_centroid: np.ndarray | None = None  # not serialized
 
-    # HEARTBEAT — populated every `heartbeat_every` writes
+    # HEARTBEAT - populated every `heartbeat_every` writes
     page_hinkley_alert: bool = False
 
-    # DIAGNOSTIC — populated every `diagnostic_every` writes
+    # DIAGNOSTIC - populated every `diagnostic_every` writes
     spectral_gap_current: float | None = None
     spectral_gap_ratio: float | None = None  # vs baseline (1.0 = stable)
 
-    # DEEP_SCAN — populated every `deep_scan_every` writes
+    # DEEP_SCAN - populated every `deep_scan_every` writes
     intrinsic_dim_current: float | None = None
     intrinsic_dim_ratio: float | None = None  # vs baseline
 

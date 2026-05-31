@@ -1,4 +1,4 @@
-"""Storage mixin — store, update, deprecate, ghost management.
+"""Storage mixin - store, update, deprecate, ghost management.
 
 Security guards  → cortex.engine.store_guards
 Validators/dedup → cortex.engine.store_validators
@@ -36,7 +36,7 @@ logger = logging.getLogger("cortex")
 
 
 class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
-    """Sovereign Storage Layer — Fact Lifecycle with Zero-Trust Isolation.
+    """Sovereign Storage Layer - Fact Lifecycle with Zero-Trust Isolation.
 
     Inherits from ``PrivacyMixin``, ``GhostMixin``, ``QuarantineMixin``
     (all of which inherit from ``EngineMixinBase``), providing:

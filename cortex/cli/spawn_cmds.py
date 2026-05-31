@@ -1,5 +1,5 @@
 """
-CORTEX CLI — Headless Agent Spawn.
+CORTEX CLI - Headless Agent Spawn.
 Entry points for triggering detached, autonomous sub-agent execution.
 """
 

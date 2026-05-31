@@ -1,5 +1,5 @@
 """
-CORTEX — The Sovereign Ledger for AI Agents.
+CORTEX - The Sovereign Ledger for AI Agents.
 
 Local-first memory infrastructure with vector search, temporal facts,
 and cryptographic vaults. Zero network dependencies.
@@ -17,7 +17,7 @@ except ImportError:
 __version__ = "0.3.0b8"
 __author__ = "by borjamoskv.com"
 
-# Lazy imports — CortexEngine and experimental modules load on first access
+# Lazy imports - CortexEngine and experimental modules load on first access
 _LAZY_IMPORTS = {
     "CortexEngine": "cortex.engine",
     "api": "cortex.api",

@@ -1,4 +1,4 @@
-"""Tests for cortex.pipeline.executor — Agent Executor (stub mode).
+"""Tests for cortex.pipeline.executor - Agent Executor (stub mode).
 
 C5-REAL audit remediation: pipeline/ coverage gap.
 Tests the executor in stub mode (no LLM infrastructure required)

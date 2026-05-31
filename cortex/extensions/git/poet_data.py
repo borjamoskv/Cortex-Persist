@@ -1,5 +1,5 @@
 """
-CORTEX Commit Poet Engine Data — LORCA-Ω
+CORTEX Commit Poet Engine Data - LORCA-Ω
 =========================================
 Metaphors, signals, and heuristics for the sovereign CommitPoet engine.
 Extracted to maintain O(1) complexity in the core engine.

@@ -1,6 +1,6 @@
-"""CORTEX CLI — Policy Engine commands.
+"""CORTEX CLI - Policy Engine commands.
 
-`cortex policy` — Bellman-scored action prioritization.
+`cortex policy` - Bellman-scored action prioritization.
 """
 
 from __future__ import annotations
@@ -20,7 +20,7 @@ from cortex.cli.common import (
 
 @click.group("policy")
 def policy_cmds() -> None:
-    """🎯 Bellman Policy Engine — Prioritized action queue."""
+    """🎯 Bellman Policy Engine - Prioritized action queue."""
     pass
 
 
@@ -45,7 +45,7 @@ def evaluate_cmd(project: str | None, db: str, limit: int, gamma: float) -> None
             return
 
         table = Table(
-            title="🎯 CORTEX Policy Engine — Action Queue",
+            title="🎯 CORTEX Policy Engine - Action Queue",
             title_style="bold #CCFF00",
             border_style="#2E5090",
             show_lines=True,

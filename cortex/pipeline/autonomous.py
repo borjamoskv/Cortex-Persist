@@ -1,4 +1,4 @@
-"""CORTEX Pipeline — One-Shot Autonomous Session.
+"""CORTEX Pipeline - One-Shot Autonomous Session.
 
 Bootstraps the CORTEX ecosystem, processes a single intent deterministically,
 persists the outcome to the C5-REAL SQLite engine, and tears down gracefully.

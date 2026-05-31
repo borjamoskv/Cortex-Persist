@@ -1,4 +1,4 @@
-"""Runtime Capabilities — Sovereign Capability Detection (Axiom Ω₁₃)."""
+"""Runtime Capabilities - Sovereign Capability Detection (Axiom Ω₁₃)."""
 
 from __future__ import annotations
 

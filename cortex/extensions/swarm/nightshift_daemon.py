@@ -5,11 +5,11 @@ runs them through the NightShift Pipeline, consolidates existing crystals,
 and logs cycle metrics.
 
 Dual-Phase Lifecycle:
-    Phase 1 — Acquisition: Radar scan → Pipeline → Forge new crystals
-    Phase 2 — Consolidation (REM): Thermometer scan → Purge/Merge/Promote
+    Phase 1 - Acquisition: Radar scan → Pipeline → Forge new crystals
+    Phase 2 - Consolidation (REM): Thermometer scan → Purge/Merge/Promote
 
 Axiom Derivations:
-    Ω₀ (Self-Reference): If I write it, I execute it — autonomous by design.
+    Ω₀ (Self-Reference): If I write it, I execute it - autonomous by design.
     Ω₂ (Entropic Asymmetry): Only targets that reduce uncertainty survive.
     Ω₅ (Antifragile by Default): Each failure forges an antibody.
 """
@@ -74,7 +74,7 @@ class NightShiftCrystalDaemon:
             self._max_crystals,
         )
 
-        # 1. Radar scan — discover targets
+        # 1. Radar scan - discover targets
         try:
             targets = await discover(
                 cortex_db=self._db,

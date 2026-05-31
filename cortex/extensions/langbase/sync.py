@@ -94,11 +94,11 @@ async def sync_to_langbase(
     try:
         await client.create_memory(
             name=mem_name,
-            description=f"CORTEX facts from project '{project}' — auto-synced",
+            description=f"CORTEX facts from project '{project}' - auto-synced",
         )
         logger.info("Created Langbase memory: %s", mem_name)
     except (OSError, RuntimeError) as e:
-        # Memory might already exist — that's fine
+        # Memory might already exist - that's fine
         if "already exists" not in str(e).lower() and "409" not in str(e):
             logger.warning("Memory creation note: %s", e)
 

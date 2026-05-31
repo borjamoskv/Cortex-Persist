@@ -1,12 +1,12 @@
-"""ENCB v2 — Agent Profiles and Adversary Models.
+"""ENCB v2 - Agent Profiles and Adversary Models.
 
 Five adversary archetypes for realistic epistemic noise:
 
-1. Random Liar       — lies with probability p
-2. Assertive Hallucinator — lies rarely but with inflated confidence
-3. Coordinated Clique     — subset pushes unified lie together
-4. Stale Truth            — reports correct but outdated information
-5. Ontology Drift         — redefines key semantics over time
+1. Random Liar       - lies with probability p
+2. Assertive Hallucinator - lies rarely but with inflated confidence
+3. Coordinated Clique     - subset pushes unified lie together
+4. Stale Truth            - reports correct but outdated information
+5. Ontology Drift         - redefines key semantics over time
 """
 
 from __future__ import annotations
@@ -91,7 +91,7 @@ def generate_observation_boolean(
         return observed, conf
 
     if profile.adversary_type == AdversaryType.STALE_TRUTH:
-        # Reports truth but from an older state — for boolean, truth may
+        # Reports truth but from an older state - for boolean, truth may
         # have flipped since. Simulate by sometimes reporting old value.
         if random.random() < profile.staleness:
             observed = not truth  # "was true, now false" scenario
@@ -101,12 +101,12 @@ def generate_observation_boolean(
         return observed, conf
 
     if profile.adversary_type == AdversaryType.ONTOLOGY_DRIFT:
-        # For boolean, drift doesn't apply directly — treat as honest
+        # For boolean, drift doesn't apply directly - treat as honest
         observed = truth if random.random() < 0.90 else (not truth)
         conf = 0.55 + 0.30 * random.random()
         return observed, conf
 
-    # Fallback — honest
+    # Fallback - honest
     return truth, 0.5 + 0.3 * random.random()
 
 
@@ -178,7 +178,7 @@ def generate_observation_scalar(
         return truth + noise, 0.85 + 0.10 * random.random()
 
     if profile.adversary_type == AdversaryType.STALE_TRUTH:
-        # Report value from an older "epoch" — shifted baseline
+        # Report value from an older "epoch" - shifted baseline
         drift = truth * profile.staleness * random.uniform(-0.3, 0.3)
         return truth + drift, 0.55 + 0.30 * random.random()
 
@@ -199,7 +199,7 @@ def generate_observation_set(
     if profile.adversary_type == AdversaryType.HONEST:
         if random.random() < profile.truthfulness:
             return set(truth), 0.60 + 0.30 * random.random()
-        # Minor perturbation — drop or add one element
+        # Minor perturbation - drop or add one element
         result = set(truth)
         extras = universe_elements - truth
         if random.random() < 0.5 and result:
@@ -230,7 +230,7 @@ def generate_observation_set(
             result.add(random.choice(list(extras)))
         return result, 0.75 + 0.20 * random.random()
 
-    # Fallback — mostly honest
+    # Fallback - mostly honest
     return set(truth), 0.55 + 0.30 * random.random()
 
 

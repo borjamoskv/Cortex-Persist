@@ -1,4 +1,4 @@
-"""CORTEX v6+ — YAML Agent Loader (role.yaml → CortexEngine).
+"""CORTEX v6+ - YAML Agent Loader (role.yaml → CortexEngine).
 
 Compiles a declarative YAML agent role into a fully configured
 CORTEX agent with thermodynamic memory, ART Gate, BIFT routing,
@@ -112,7 +112,7 @@ def compile_agent(role: AgentRole) -> AgentInstance:
     # 3. ART Gate (Strategy 2)
     art_gate = None
     # We'll wire the vector store later when engine is available
-    # For now, create with None — caller can inject
+    # For now, create with None - caller can inject
     logger.debug("ART Gate configured with ρ=%.2f", role.memory.art_rho)
 
     # 4. BIFT Router (Strategy 5)

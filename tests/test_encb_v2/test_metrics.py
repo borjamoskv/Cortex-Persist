@@ -1,4 +1,4 @@
-"""Tests for metrics.py — PFBR, TER, EDI, CNCL."""
+"""Tests for metrics.py - PFBR, TER, EDI, CNCL."""
 
 from __future__ import annotations
 

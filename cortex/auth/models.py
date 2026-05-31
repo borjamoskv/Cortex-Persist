@@ -1,4 +1,4 @@
-"""CORTEX Auth — Data models."""
+"""CORTEX Auth - Data models."""
 
 from __future__ import annotations
 

@@ -151,7 +151,7 @@ class SemanticMutator:
             return
 
         # WRITE-GATE: If health monitor detects model_hash drift, skip batch.
-        # Fail-safe, not fail-deadly — log CRITICAL but don't crash.
+        # Fail-safe, not fail-deadly - log CRITICAL but don't crash.
         if self._health_monitor and self._anchor:
             if self._health_monitor.needs_recalibration(self._anchor):
                 logger.critical(

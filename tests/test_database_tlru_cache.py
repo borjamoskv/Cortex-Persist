@@ -1,4 +1,4 @@
-"""Tests for cortex.database.tlru_cache — Time-aware LRU Cache.
+"""Tests for cortex.database.tlru_cache - Time-aware LRU Cache.
 
 C5-REAL audit remediation: database/ coverage gap.
 """
@@ -101,7 +101,7 @@ class TestLRUEviction:
         c["a"] = 1.0
         c["b"] = 2.0
         c["c"] = 3.0
-        # Full — inserting d should evict a
+        # Full - inserting d should evict a
         c["d"] = 4.0
         assert len(c) == 3
         assert "a" not in c
@@ -114,7 +114,7 @@ class TestLRUEviction:
         c["c"] = 3.0
         # Access a to refresh it
         _ = c["a"]
-        # Now b is oldest — inserting d should evict b
+        # Now b is oldest - inserting d should evict b
         c["d"] = 4.0
         assert "b" not in c
         assert "a" in c

@@ -59,7 +59,7 @@ async def _check_isothermal_redundancy(text: str) -> tuple[bool, float, str]:
             similitud = getattr(nearest[0], "_recall_score", 0.0)
             if similitud > 0.94:
                 return True, similitud, nearest[0].content
-    except Exception as e:  # noqa: BLE001 — fallback if vector search fails
+    except Exception as e:  # noqa: BLE001 - fallback if vector search fails
         logger.warning("Isothermal L2 check bypassed/failed: %s", e)
 
     # Simulated fallback rule (Demonstration)
@@ -259,7 +259,7 @@ async def messages_endpoint(request: Request):
                                     f"event: content_block_delta\n"
                                     f"data: {json.dumps(event_data)}\n\n"
                                 )
-                        except Exception:  # noqa: BLE001 — drop malformed chunk
+                        except Exception:  # noqa: BLE001 - drop malformed chunk
                             continue
 
                     yield 'event: message_stop\ndata: {"type": "message_stop"}\n\n'

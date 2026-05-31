@@ -138,7 +138,7 @@ def get_provider_configs() -> dict[str, dict[str, Any]]:
     return _CONFIGS_CACHE
 
 
-# Public alias — lazy-loaded on first access
+# Public alias - lazy-loaded on first access
 PROVIDER_CONFIGS = _FALLBACK_CONFIGS  # Static reference for import compat
 
 # ─── Supported MIME types for multimodal ─────────────────────────────

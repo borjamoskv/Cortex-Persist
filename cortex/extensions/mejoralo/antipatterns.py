@@ -53,7 +53,7 @@ _BLOCKING_CALLS: dict[str, str] = {
     "urllib.request.urlopen": "Use httpx.AsyncClient",
 }
 
-# Magic number whitelist — common constants that are acceptable
+# Magic number whitelist - common constants that are acceptable
 _MAGIC_WHITELIST = {0, 1, 2, -1, 100, 0.5}
 
 
@@ -102,14 +102,14 @@ class _MagicLiteralVisitor(ast.NodeVisitor):
         if isinstance(value, int | float) and value in _MAGIC_WHITELIST:
             return
 
-        # Check context — is this in a comparison, return, or arithmetic?
+        # Check context - is this in a comparison, return, or arithmetic?
         self.findings.append(
             AntipatternFinding(
                 scanner="MagicLiteral",
                 severity="low",
                 file=self.rel,
                 line=node.lineno,
-                message=f"Magic number `{value}` — unnamed constant obscures intent",
+                message=f"Magic number `{value}` - unnamed constant obscures intent",
                 fix_hint=f"Extract to a named constant: MY_CONSTANT = {value}",
             )
         )
@@ -149,7 +149,7 @@ class _ImplicitAssumptionVisitor(ast.NodeVisitor):
             # Check if this is inside a try block (then it's guarded)
             # We can't easily check ancestry in a simple visitor,
             # so we flag all and let the user triage
-            pass  # Intentionally not flagging — too noisy without context
+            pass  # Intentionally not flagging - too noisy without context
         self.generic_visit(node)
 
     def visit_FunctionDef(self, node: ast.FunctionDef) -> None:

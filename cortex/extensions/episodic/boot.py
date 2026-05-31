@@ -88,7 +88,7 @@ class BootPayload:
     def to_markdown(self) -> str:
         """Render as compact markdown for system_prompt injection."""
         lines = [
-            "# 🧠 CORTEX — Session Boot (Episodic Memory)",
+            "# 🧠 CORTEX - Session Boot (Episodic Memory)",
             "",
             f"> Generated: {self.timestamp}",
             f"> Active project: **{self.active_project or 'Unknown'}** ({self.confidence})",
@@ -118,7 +118,7 @@ def _render_episodes(lines: list[str], episodes: list[Episode]) -> None:
     lines.append("")
     for ep in episodes:
         emoji = _EVENT_EMOJI.get(ep.event_type, "📌")
-        lines.append(f"- {emoji} **{ep.event_type}** [{ep.project or '—'}] {ep.content[:150]}")
+        lines.append(f"- {emoji} **{ep.event_type}** [{ep.project or '-'}] {ep.content[:150]}")
     lines.append("")
 
 
@@ -130,7 +130,7 @@ def _render_patterns(lines: list[str], patterns: list[Pattern]) -> None:
     lines.append("")
     for p in patterns:
         lines.append(
-            f"- 🔄 **{p.theme}** — {p.occurrences} sessions ({', '.join(p.event_types[:2])})"
+            f"- 🔄 **{p.theme}** - {p.occurrences} sessions ({', '.join(p.event_types[:2])})"
         )
     lines.append("")
 
@@ -312,7 +312,7 @@ async def _get_semantic_recalls(
     """Retrieve semantically relevant L2 memories (best-effort).
 
     Returns None if the vector store is not configured or unavailable.
-    Never raises — all failures degrade gracefully to None.
+    Never raises - all failures degrade gracefully to None.
     """
     try:
         from cortex.config import VECTOR_STORE_PATH

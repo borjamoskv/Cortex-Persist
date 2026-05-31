@@ -1,5 +1,5 @@
 """
-ZKORTEX — Range Proofs.
+ZKORTEX - Range Proofs.
 
 Probar que CORTEX tiene N hechos sobre un tema X,
 o que un valor numérico cae en [min, max],
@@ -8,7 +8,7 @@ sin revelar ni N exacto ni el valor.
 Implementación: Bit decomposition ZK (simplificada, sin SNARKs).
 Para producción real: migrar a Bulletproofs o Groth16.
 
-La implementación actual usa un esquema de commitments sobre bits —
+La implementación actual usa un esquema de commitments sobre bits -
 más pedagógica y auditable que una librería de circuit proofs.
 """
 
@@ -109,6 +109,6 @@ def prove_range(value: int, min_val: int, max_val: int) -> ZKRangeProof:
 def verify_range_proof(proof: ZKRangeProof) -> bool:
     """
     Verificación pública del proof estructural.
-    No requiere conocer el valor — solo la prueba.
+    No requiere conocer el valor - solo la prueba.
     """
     return proof.verify_structure()

@@ -1,4 +1,4 @@
-"""Consensus Sovereign Layer — ConsensusManager for CORTEX."""
+"""Consensus Sovereign Layer - ConsensusManager for CORTEX."""
 
 from __future__ import annotations
 

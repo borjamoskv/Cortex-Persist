@@ -3,7 +3,7 @@
 # See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
 
-"""CORTEX Hypervisor — BeliefObject Contract.
+"""CORTEX Hypervisor - BeliefObject Contract.
 
 Immutable cognitive units for the Belief Layer. The BeliefObject is the
 unifying atom between the quad-model Cognitive Handoff:
@@ -15,7 +15,7 @@ unifying atom between the quad-model Cognitive Handoff:
 
 Design decision (C4🔵): Python dataclasses over Protobuf.
 The project's serialization boundary is SQLite (local) + JSON (REST API).
-Protobuf adds protoc build step for a single contract — disproportionate cost.
+Protobuf adds protoc build step for a single contract - disproportionate cost.
 Migration path: @dataclass_to_proto adapter if cross-language federation arrives.
 """
 
@@ -41,22 +41,22 @@ __all__ = [
 
 
 class BeliefConfidence(str, Enum):
-    """Epistemic confidence level — maps to CORTEX C1→C5 scale."""
+    """Epistemic confidence level - maps to CORTEX C1→C5 scale."""
 
     C1_HYPOTHESIS = "C1"
-    """Unverified conjecture — single source, no corroboration."""
+    """Unverified conjecture - single source, no corroboration."""
 
     C2_TENTATIVE = "C2"
-    """Preliminary evidence — needs additional validation."""
+    """Preliminary evidence - needs additional validation."""
 
     C3_PROBABLE = "C3"
-    """Multiple corroborating sources — reasonable to act on."""
+    """Multiple corroborating sources - reasonable to act on."""
 
     C4_CONFIRMED = "C4"
     """Verified through testing or rigorous audit."""
 
     C5_AXIOMATIC = "C5"
-    """Foundational truth — contradicting this triggers premium audit."""
+    """Foundational truth - contradicting this triggers premium audit."""
 
 
 class BeliefStatus(str, Enum):
@@ -66,23 +66,23 @@ class BeliefStatus(str, Enum):
     """Belief is accepted and operational."""
 
     QUARANTINED = "quarantined"
-    """Auditor detected contradiction — frozen pending resolution."""
+    """Auditor detected contradiction - frozen pending resolution."""
 
     DEPRECATED = "deprecated"
-    """Superseded by a newer belief — kept for provenance lineage."""
+    """Superseded by a newer belief - kept for provenance lineage."""
 
     CONTESTED = "contested"
-    """Multiple conflicting beliefs exist — awaiting arbitration."""
+    """Multiple conflicting beliefs exist - awaiting arbitration."""
 
 
 class VerdictAction(str, Enum):
     """Actions the CognitiveHandoff can take on a belief."""
 
     ACCEPT = "accept"
-    """Belief passed audit — safe to integrate."""
+    """Belief passed audit - safe to integrate."""
 
     QUARANTINE = "quarantine"
-    """Contradiction detected — freeze and escalate."""
+    """Contradiction detected - freeze and escalate."""
 
     REVISE = "revise"
     """Architect recommends schema/content revision."""
@@ -91,7 +91,7 @@ class VerdictAction(str, Enum):
     """Infrastructure prescreen: not worth auditing (compact_and_forget)."""
 
     ESCALATE = "escalate"
-    """Deep Think uncertain — escalate to Opus premium audit."""
+    """Deep Think uncertain - escalate to Opus premium audit."""
 
 
 # ─── Provenance ─────────────────────────────────────────────────────────────
@@ -124,7 +124,7 @@ class ProvenanceEntry:
 class ProvenanceChain:
     """Immutable lineage of a belief's evidence.
 
-    Ordered tuple — newest entries last. The chain is append-only;
+    Ordered tuple - newest entries last. The chain is append-only;
     revising a belief creates a new BeliefObject with extended chain.
     """
 
@@ -146,7 +146,7 @@ class ProvenanceChain:
 
 def _uuid7() -> str:
     """Generate a UUID v7 (time-sortable) as string."""
-    # UUID v7 not in stdlib until 3.14 — use v4 with timestamp prefix
+    # UUID v7 not in stdlib until 3.14 - use v4 with timestamp prefix
     ts = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).strftime("%Y%m%d%H%M%S")
     uid = uuid.uuid4().hex
     return f"{ts}-{uid[:16]}"
@@ -159,7 +159,7 @@ def _now_iso() -> str:
 
 @dataclass(frozen=True)
 class BeliefObject:
-    """Immutable cognitive unit — the atom of the Belief Layer.
+    """Immutable cognitive unit - the atom of the Belief Layer.
 
     A BeliefObject represents a single epistemological claim within CORTEX.
     It is created by the BeliefConsolidator (compression), validated by
@@ -189,7 +189,7 @@ class BeliefObject:
     """Lifecycle state in the cognitive layer."""
 
     provenance: ProvenanceChain = field(default_factory=ProvenanceChain)
-    """Ordered evidence chain — newest entries last."""
+    """Ordered evidence chain - newest entries last."""
 
     created_at: str = field(default_factory=_now_iso)
     """When this belief was first created."""
@@ -210,7 +210,7 @@ class BeliefObject:
     """Model identifier that last judged this belief (e.g., 'opus', 'deep_think')."""
 
     def is_axiomatic(self) -> bool:
-        """Check if this belief has C5 confidence — triggers premium audit on conflict."""
+        """Check if this belief has C5 confidence - triggers premium audit on conflict."""
         return self.confidence == BeliefConfidence.C5_AXIOMATIC
 
     def is_quarantined(self) -> bool:
@@ -281,7 +281,7 @@ class BeliefObject:
 class BeliefVerdict:
     """Result of the CognitiveHandoff processing a belief.
 
-    Returned by CognitiveHandoff.process_belief() — tells the caller
+    Returned by CognitiveHandoff.process_belief() - tells the caller
     what happened and which model made the decision.
     """
 

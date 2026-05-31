@@ -1,7 +1,7 @@
-"""CORTEX Agent Runtime — Level 3 Copilot Contracts.
+"""CORTEX Agent Runtime - Level 3 Copilot Contracts.
 
 Pydantic models for the Copilot suggestion lifecycle.
-The Copilot NEVER acts autonomously — it proposes, the human decides.
+The Copilot NEVER acts autonomously - it proposes, the human decides.
 
 Message flow:
     HUMAN_CONTEXT → [Copilot] → SUGGESTION_PROPOSAL → [Human] → SUGGESTION_VERDICT
@@ -35,8 +35,8 @@ class SuggestionStatus(str, Enum):
     """Lifecycle status of a single suggestion."""
 
     PENDING = "pending"  # Shown to human, awaiting verdict
-    ACCEPTED = "accepted"  # Human accepted — apply
-    REJECTED = "rejected"  # Human rejected — discard
+    ACCEPTED = "accepted"  # Human accepted - apply
+    REJECTED = "rejected"  # Human rejected - discard
     PARTIALLY_ACCEPTED = "partial"  # Human accepted with modifications
     EXPIRED = "expired"  # TTL elapsed, no human action
 

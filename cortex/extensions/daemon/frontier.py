@@ -56,7 +56,7 @@ class FrontierDaemon:
                 if status == "SUCCESS":
                     msg = f"Auto-refactored {test_file.name} with Ouroboros-Omega."
                     self._log_evolution("metabolism", msg)
-        except Exception as e:  # noqa: BLE001 — Isolate metabolism cycle failures from daemon boundary
+        except Exception as e:  # noqa: BLE001 - Isolate metabolism cycle failures from daemon boundary
             logger.error("[FRONTIER] Metabolism cycle failed: %s", e)
 
     async def _run_ingestion(self):

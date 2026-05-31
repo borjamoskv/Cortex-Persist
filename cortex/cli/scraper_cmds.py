@@ -1,9 +1,9 @@
-"""SCRAPER-Ω CLI — Sovereign Web Extraction commands.
+"""SCRAPER-Ω CLI - Sovereign Web Extraction commands.
 
 Commands:
-    cortex scraper scrape <URL>   — Extract a single URL
-    cortex scraper batch <FILE>   — Batch extract from URL file
-    cortex scraper map <URL>      — Discover site URLs
+    cortex scraper scrape <URL>   - Extract a single URL
+    cortex scraper batch <FILE>   - Batch extract from URL file
+    cortex scraper map <URL>      - Discover site URLs
 """
 
 from __future__ import annotations
@@ -235,7 +235,7 @@ def _persist_to_cortex(result) -> None:
         _run_async(
             engine.store(
                 project="scraping",
-                content=f"Scraped: {result.url} — {result.title}",
+                content=f"Scraped: {result.url} - {result.title}",
                 fact_type="bridge",
                 tags=["scraper", "web_extraction", result.strategy_used.value],
                 confidence="C4",

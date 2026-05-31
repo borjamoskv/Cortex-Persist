@@ -1,4 +1,4 @@
-"""CORTEX Genesis — Post-Creation Validator.
+"""CORTEX Genesis - Post-Creation Validator.
 
 Validates that a generated system is structurally sound:
 - All expected files exist
@@ -23,7 +23,7 @@ logger = logging.getLogger("cortex.extensions.genesis.validator")
 class GenesisValidator:
     """Validates a generated system for structural correctness.
 
-    This is NOT a linter — it checks that the genesis process
+    This is NOT a linter - it checks that the genesis process
     produced a coherent, parseable system. Linting is done separately
     via Ruff.
     """
@@ -127,7 +127,7 @@ class GenesisValidator:
         non_test_components = [c for c in spec.components if c.component_type != "test"]
 
         # For non-module types (skill, agent, workflow) the generated files
-        # may be .md, .yaml, etc. — count all files with system name in path.
+        # may be .md, .yaml, etc. - count all files with system name in path.
         system_files = [f for f in files if spec.name in f]
 
         # We expect at least 1 file per non-test component + __init__.py

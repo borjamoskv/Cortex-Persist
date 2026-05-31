@@ -169,7 +169,7 @@ class LocalProcessSandbox:
     """Minimal local sandbox for environments without E2B/Wasm.
 
     Writes code to a temporary directory and runs pytest in a subprocess.
-    This is the FALLBACK — production should use E2B Firecracker or Wasm.
+    This is the FALLBACK - production should use E2B Firecracker or Wasm.
 
     WARNING: This sandbox provides basic isolation only. Do NOT use for
     untrusted code in production environments.
@@ -245,13 +245,13 @@ class LocalProcessSandbox:
 
 
 class CodeSmith:
-    """The Sovereign Code Smith — Safe Self-Evolution Engine.
+    """The Sovereign Code Smith - Safe Self-Evolution Engine.
 
     Orchestrates the full Agentic Software Engineering pipeline:
     REQUEST → DESIGN → EDIT → VALIDATE → TEST → COMMIT
 
     Every phase has a fail-safe. Every commit has a rollback.
-    The swarm builds itself — safely.
+    The swarm builds itself - safely.
 
     Usage::
 
@@ -400,7 +400,7 @@ class CodeSmith:
             # Cleanup sandbox (best-effort)
             try:
                 await self._sandbox.cleanup()
-            except Exception:  # noqa: BLE001 — best-effort cleanup
+            except Exception:  # noqa: BLE001 - best-effort cleanup
                 pass
 
         return result
@@ -425,7 +425,7 @@ class CodeSmith:
             skill_id: Identifier for the skill being healed.
 
         Returns:
-            SmithResult — same pipeline, triggered by error instead of request.
+            SmithResult - same pipeline, triggered by error instead of request.
         """
         # Extract the crashing function from the traceback
         crash_context = self._extract_crash_context(error_trace)

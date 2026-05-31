@@ -1,4 +1,4 @@
-"""CORTEX Agent ISA Builder — Pythonic DSL for homoiconic dispatch trees.
+"""CORTEX Agent ISA Builder - Pythonic DSL for homoiconic dispatch trees.
 
 Every function returns a dict that maps 1:1 to the Rust AgentOp enum
 via serde_json. The tree is pure data until it crosses FFI, where it

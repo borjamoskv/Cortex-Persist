@@ -3,7 +3,7 @@
 # See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
 
-"""CORTEX — P0 Vulnerability Extractor.
+"""CORTEX - P0 Vulnerability Extractor.
 
 Connects the Ouroboros-Omega DiagnosisMatrix (AST analysis) with the
 Deepthink-R1 cluster for LLM-driven vulnerability hypothesis generation.
@@ -28,7 +28,7 @@ Architecture::
 
 Invariants:
     - All findings are C3-Hypothetical or C4-Strong (never C5 without PoC)
-    - Extractor is read-only — never modifies source code
+    - Extractor is read-only - never modifies source code
     - Ω₉ compliance: output declares C4-SIMULACIÓN status
 """
 
@@ -139,7 +139,7 @@ class P0VulnerabilityExtractor:
     async def extract(
         self,
         source_code: str,
-        diagnosis: Any,  # DiagnosisMatrix — use Any to avoid circular import
+        diagnosis: Any,  # DiagnosisMatrix - use Any to avoid circular import
         target_file: str = "<unknown>",
     ) -> P0Report:
         """Run P0 vulnerability extraction via the Deepthink cluster.
@@ -218,7 +218,7 @@ class P0VulnerabilityExtractor:
         )
 
         return (
-            f"## P0 Vulnerability Extraction — {target_file}\n\n"
+            f"## P0 Vulnerability Extraction - {target_file}\n\n"
             f"### DiagnosisMatrix (AST Analysis)\n```\n{diagnosis_block}\n```\n\n"
             f"### Source Code\n```python\n{truncated}\n```\n\n"
             "### Task\n"
@@ -259,7 +259,7 @@ class P0VulnerabilityExtractor:
                 return thought.content
 
         except ImportError:
-            logger.warning("ThoughtOrchestra unavailable — falling back to SovereignLLM")
+            logger.warning("ThoughtOrchestra unavailable - falling back to SovereignLLM")
             return await self._fallback_sovereign(prompt)
 
     async def _fallback_sovereign(self, prompt: str) -> str:

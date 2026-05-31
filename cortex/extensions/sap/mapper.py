@@ -149,7 +149,7 @@ class SAPMapper:
             sap_key = metadata.get("uri", "") if isinstance(metadata, dict) else ""
 
             if sap_key in cortex_by_key:
-                # Exists in both — check for modification
+                # Exists in both - check for modification
                 existing = cortex_by_key.pop(sap_key)
                 existing_meta = _parse_meta_str(
                     existing.get("meta") or existing.get("metadata") or {}

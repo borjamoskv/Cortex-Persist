@@ -1,4 +1,4 @@
-"""CORTEX — Notification Adapter base class."""
+"""CORTEX - Notification Adapter base class."""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ class BaseAdapter(ABC):
     Each adapter is responsible for delivering a :class:`CortexEvent`
     to a specific channel (Telegram, macOS, Slack, webhook, etc.).
 
-    Adapters are fire-and-forget — they MUST swallow all exceptions
+    Adapters are fire-and-forget - they MUST swallow all exceptions
     internally and log failures rather than propagating them. The bus
     should never fail because one adapter is down.
     """

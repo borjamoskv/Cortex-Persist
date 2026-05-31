@@ -1,5 +1,5 @@
-"""CORTEX Optimization Mixin — High-performance buffered writes and LRU caching.
-Ω₂: Thermodynamic optimization — reduces IO wait and recomputation.
+"""CORTEX Optimization Mixin - High-performance buffered writes and LRU caching.
+Ω₂: Thermodynamic optimization - reduces IO wait and recomputation.
 """
 
 from __future__ import annotations
@@ -125,7 +125,7 @@ class SovereignTLRUCache:
 
 class OptimizationMixin:
     """Provides buffered writes and caching for the CortexEngine.
-    Ω₂: Thermodynamic optimization — shared resources for 10k scale.
+    Ω₂: Thermodynamic optimization - shared resources for 10k scale.
     """
 
     _executor: ClassVar[ProcessPoolExecutor | None] = None

@@ -1,4 +1,4 @@
-"""GhostWatcher — Optimized Cognitive Stratification.
+"""GhostWatcher - Optimized Cognitive Stratification.
 
 Listens to GHOST_DETECTED mutations in Nexus and triggers GHOST_WATCH_TRIGGER
 if they meet a certain threshold of significance.

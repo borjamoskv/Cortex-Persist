@@ -1,4 +1,4 @@
-"""Tests for cortex.genesis.engine — GenesisEngine core orchestration.
+"""Tests for cortex.genesis.engine - GenesisEngine core orchestration.
 
 Includes the Ω₀ self-referential test: the engine generates its own spec
 and assembles it in /tmp to verify recursive integrity.
@@ -148,7 +148,7 @@ class TestGenesisEngineCreate:
                 ComponentSpec(name="ok", component_type="module"),
             ],
         )
-        # This should still work — module template exists
+        # This should still work - module template exists
         result = engine.create(spec)
         assert result.validation_passed
 
@@ -287,7 +287,7 @@ class TestTopologicalSort:
         assert len(ordered) == 3
 
     def test_handles_circular_dependencies(self) -> None:
-        """Circular deps don't crash — remaining nodes are appended."""
+        """Circular deps don't crash - remaining nodes are appended."""
         assembler = SystemAssembler()
         components = [
             ComponentSpec(name="a", dependencies=["b"]),
@@ -375,7 +375,7 @@ class TestGenesisExtend:
         base_dir = test_root / "skiptest"
         original = (base_dir / "core.py").read_text(encoding="utf-8")
 
-        # Extend with the SAME component — should skip
+        # Extend with the SAME component - should skip
         result = engine.extend(
             base_dir,
             [ComponentSpec(name="core", component_type="module")],

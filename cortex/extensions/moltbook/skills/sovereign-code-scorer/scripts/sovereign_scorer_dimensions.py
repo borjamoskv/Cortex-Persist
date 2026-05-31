@@ -1,4 +1,4 @@
-"""sovereign_scorer_dimensions — Semantic and Test Coverage scorers.
+"""sovereign_scorer_dimensions - Semantic and Test Coverage scorers.
 
 Extracted from sovereign_scorer.py to satisfy the Landauer LOC barrier (≤500).
 Contains: score_semantics (Dimension 2), score_tests (Dimension 4).
@@ -8,7 +8,7 @@ from pathlib import Path
 __all__ = ['score_semantics', 'score_tests']
 
 def score_semantics(files: list[Path]) -> tuple[float, list]:
-    """Check naming, dead code, unused imports — Dimension 2 (25 pts)."""
+    """Check naming, dead code, unused imports - Dimension 2 (25 pts)."""
     if not files:
         return (0.0, [])
     from cortex.extensions.moltbook.skills.sovereign_code_scorer.scripts.sovereign_scorer import Issue
@@ -30,12 +30,12 @@ def score_semantics(files: list[Path]) -> tuple[float, list]:
         for node in ast.walk(tree):
             if isinstance(node, ast.ExceptHandler) and node.type is None:
                 deductions += 1.0
-                issues.append(Issue(file=str(f), line=node.lineno, category='semantics', severity='warning', message="Bare 'except:' — catch specific exceptions"))
+                issues.append(Issue(file=str(f), line=node.lineno, category='semantics', severity='warning', message="Bare 'except:' - catch specific exceptions"))
         for node in ast.walk(tree):
             if isinstance(node, ast.ExceptHandler) and node.type:
                 if isinstance(node.type, ast.Name) and node.type.id == 'Exception':
                     deductions += 0.5
-                    issues.append(Issue(file=str(f), line=node.lineno, category='semantics', severity='warning', message="Broad 'except Exception' — use specific exception types"))
+                    issues.append(Issue(file=str(f), line=node.lineno, category='semantics', severity='warning', message="Broad 'except Exception' - use specific exception types"))
         for node in ast.walk(tree):
             if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 if not (node.body and isinstance(node.body[0], ast.Expr) and isinstance(node.body[0].value, ast.Constant)):
@@ -46,7 +46,7 @@ def score_semantics(files: list[Path]) -> tuple[float, list]:
     return (max(0.0, total_score - deductions), issues)
 
 def score_tests(root: Path, files: list[Path]) -> tuple[float, list]:
-    """Check test file existence and quality — Dimension 4 (20 pts)."""
+    """Check test file existence and quality - Dimension 4 (20 pts)."""
     if not files:
         return (0.0, [])
     from cortex.extensions.moltbook.skills.sovereign_code_scorer.scripts.sovereign_scorer import Issue

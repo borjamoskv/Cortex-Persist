@@ -1,4 +1,4 @@
-"""CORTEX — Metamemory Schema Layer: Models, Index, and Judge.
+"""CORTEX - Metamemory Schema Layer: Models, Index, and Judge.
 
 Extracted from metamemory.py for module splitting (Ω₂: LOC ≤ 500).
 
@@ -74,13 +74,13 @@ class MemoryCard(BaseModel):
         default=1.0,
         ge=0.0,
         le=1.0,
-        description="P(memory exists) — derived from success_rate × energy_level.",
+        description="P(memory exists) - derived from success_rate × energy_level.",
     )
     retrieval_confidence: float = Field(
         default=1.0,
         ge=0.0,
         le=1.0,
-        description="P(accurate retrieval) — similarity score × energy.",
+        description="P(accurate retrieval) - similarity score × energy.",
     )
     last_accessed: datetime = Field(
         default_factory=lambda: datetime.fromtimestamp(time.monotonic(), tz=timezone.utc),
@@ -140,7 +140,7 @@ class MetamemoryStats(BaseModel):
 class MetamemoryIndex:
     """O(1) in-memory registry of MemoryCards.
 
-    Not a persistent store — rebuilt on demand from the living
+    Not a persistent store - rebuilt on demand from the living
     engram population. Think of it as a cognitive "dashboard" the
     agent consults before acting.
     """

@@ -1,5 +1,5 @@
 """
-MaestroUI — Orquestador soberano de control de escritorio macOS.
+MaestroUI - Orquestador soberano de control de escritorio macOS.
 
 Integra todos los motores (Accessibility, Keyboard, Mouse, Window, Vision)
 en una interfaz unificada con lógica de reintento.

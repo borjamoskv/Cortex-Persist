@@ -1,4 +1,4 @@
-"""Trend detection — drift detection from health snapshots.
+"""Trend detection - drift detection from health snapshots.
 
 Ring buffer of last N scores. Computes slope to classify:
   - "improving" (positive slope)

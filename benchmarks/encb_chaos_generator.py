@@ -1,5 +1,5 @@
 """
-ENCB — Epistemic Noise Chaos Benchmark: Chaos Generator
+ENCB - Epistemic Noise Chaos Benchmark: Chaos Generator
 =========================================================
 Generates structured epistemic noise in three modalities to stress-test
 CORTEX's cognitive governance layer.
@@ -9,7 +9,7 @@ Modalities:
   2. Transitive Breakage: Invalidation of root nodes in entails chains
   3. Episodic Spam: Mass injection of semantically similar but epistemically null facts
 
-Nobel-Ω Vector Ξ₄ — Empirical Falsification Experiment.
+Nobel-Ω Vector Ξ₄ - Empirical Falsification Experiment.
 """
 
 from __future__ import annotations
@@ -266,7 +266,7 @@ class TransitiveBreakageGenerator:
                     ChaosEvent(
                         modality=ChaosModality.TRANSITIVE_BREAKAGE,
                         agent_id="root_breaker",
-                        content=f"INVALIDATE: {root} — evidence disproven",
+                        content=f"INVALIDATE: {root} - evidence disproven",
                         fact_type="error",
                         confidence="C5",
                         tags=tuple(["encb", "transitive", "break", f"chain-{chain_idx}"]),
@@ -412,7 +412,7 @@ class EpisodicSpamGenerator:
             return f"{filler}, {source.lower()} (ref: unverified)"
         elif idx % 3 == 1:
             random.shuffle(words)
-            return f"{' '.join(words)} — {filler}"
+            return f"{' '.join(words)} - {filler}"
         else:
             return f"Re: {source[:40]}... {filler}, this is well-known"
 

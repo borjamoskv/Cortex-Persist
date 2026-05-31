@@ -79,7 +79,7 @@ class MejoraloDaemon:
             try:
                 await self._loop_task
             except asyncio.CancelledError:
-                pass  # expected — task was cancelled by us
+                pass  # expected - task was cancelled by us
             self._loop_task = None
         logger.info("Sovereign Daemon: Ouroboros cycle paused.")
 
@@ -134,7 +134,7 @@ class MejoraloDaemon:
         )
         fused_context = await self._ouroboros_analyze(result, fused_context)
 
-        # 3. Healing — escalate to relentless after consecutive stagnation
+        # 3. Healing - escalate to relentless after consecutive stagnation
         if self._consecutive_stagnant >= STAGNATION_ESCALATION_THRESHOLD:
             logger.warning(
                 "🔥 Stagnation detected (%d cycles). Escalating to relentless mode.",
@@ -286,7 +286,7 @@ async def run_daemon_cli():
         )
 
     await daemon.start()
-    await _stop.wait()  # block until signal fires — zero CPU
+    await _stop.wait()  # block until signal fires - zero CPU
 
 
 async def _shutdown(daemon: MejoraloDaemon, stop_event: asyncio.Event) -> None:

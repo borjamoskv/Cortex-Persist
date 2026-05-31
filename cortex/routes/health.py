@@ -1,4 +1,4 @@
-"""CORTEX Health Index — FastAPI routes.
+"""CORTEX Health Index - FastAPI routes.
 
 Provides /v1/health/check, /v1/health/report, /v1/health/score,
 /v1/health/metrics, /v1/health/prometheus, /v1/health/history
@@ -17,7 +17,7 @@ router = APIRouter(prefix="/v1/health", tags=["health-index"])
 
 @router.get("/check")
 async def health_index_check(request: Request) -> dict:
-    """Quick health check — score, grade, healthy boolean."""
+    """Quick health check - score, grade, healthy boolean."""
     db_path = _get_db_path(request)
     collector = HealthCollector(db_path=db_path)
     metrics = collector.collect_all()

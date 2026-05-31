@@ -1,9 +1,9 @@
 """Toy Environments for IDC Agent demonstrations.
 
 Each environment is a simple MDP/POMDP with:
-- likelihood_matrix: P(o|s) — observation model
-- utility_matrix: U(s,a) — reward structure
-- constraints: g(a) — action constraints
+- likelihood_matrix: P(o|s) - observation model
+- utility_matrix: U(s,a) - reward structure
+- constraints: g(a) - action constraints
 - transition dynamics
 """
 
@@ -53,9 +53,9 @@ def make_risky_bandit() -> Environment:
     """3-state, 3-action problem with risk/safety tradeoffs.
 
     States:
-        0: CALM market — safe actions pay decent
-        1: VOLATILE market — risky actions pay big OR lose big
-        2: CRASH market — everything hurts, only "hedge" survives
+        0: CALM market - safe actions pay decent
+        1: VOLATILE market - risky actions pay big OR lose big
+        2: CRASH market - everything hurts, only "hedge" survives
 
     Actions:
         0: SAFE (low return, always ok)
@@ -63,18 +63,18 @@ def make_risky_bandit() -> Environment:
         2: HEDGE (moderate always, protected in crash)
 
     Observations: noisy version of true state (80% accurate).
-    Constraint: Action 1 (RISKY) is penalized — g(1) > 0.
+    Constraint: Action 1 (RISKY) is penalized - g(1) > 0.
     """
     n_s, n_a, n_o = 3, 3, 3
 
-    # P(o|s) — 80% accurate observation
+    # P(o|s) - 80% accurate observation
     likelihood = np.array([
         [0.80, 0.10, 0.10],  # o=0 given s
         [0.10, 0.80, 0.10],  # o=1 given s
         [0.10, 0.10, 0.80],  # o=2 given s
     ], dtype=np.float64)
 
-    # U(s, a) — The payoff matrix
+    # U(s, a) - The payoff matrix
     utility = np.array([
         # SAFE  RISKY  HEDGE
         [ 3.0,   8.0,   4.0],   # CALM
@@ -85,7 +85,7 @@ def make_risky_bandit() -> Environment:
     # g(a) ≤ 0 means safe. Action 1 (RISKY) violates constraint.
     constraints = np.array([-1.0, 0.5, -0.5], dtype=np.float64)
 
-    # Transition P(s'|s,a) — simplified: action affects market stability
+    # Transition P(s'|s,a) - simplified: action affects market stability
     transition = np.zeros((n_s, n_a, n_s), dtype=np.float64)
 
     # From CALM
@@ -119,19 +119,19 @@ def make_information_foraging() -> Environment:
 
     The agent must figure out which state it's in before acting.
     States 0-3 each have ONE good action; acting without knowing = regret.
-    State 4 is "trap" — every action is bad, only early detection saves you.
+    State 4 is "trap" - every action is bad, only early detection saves you.
 
     Tests: VOI, exploration, calibration.
     """
     n_s, n_a, n_o = 5, 4, 5
 
-    # P(o|s) — 60% accurate (deliberate noise to test inference)
+    # P(o|s) - 60% accurate (deliberate noise to test inference)
     likelihood = np.eye(n_o, n_s) * 0.50
     likelihood += 0.50 / n_s
     # Normalize columns to sum to 1
     likelihood = likelihood / likelihood.sum(axis=0, keepdims=True)
 
-    # U(s, a) — each state rewards a different action
+    # U(s, a) - each state rewards a different action
     utility = np.array([
         # a0    a1    a2    a3
         [10.0, -2.0, -2.0, -2.0],  # s0 → a0 is correct
@@ -141,7 +141,7 @@ def make_information_foraging() -> Environment:
         [-5.0, -5.0, -5.0, -5.0],  # s4 → TRAP (all bad)
     ], dtype=np.float64)
 
-    # No hard constraints in this env — pure info/decision challenge
+    # No hard constraints in this env - pure info/decision challenge
     constraints = np.array([-1.0, -1.0, -1.0, -1.0], dtype=np.float64)
 
     # Transition: mostly stationary, small drift

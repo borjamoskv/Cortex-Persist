@@ -124,7 +124,7 @@ def inject_reflections(
     """Retrieve the top-K most relevant past learnings for system_prompt injection.
 
     Uses hybrid search (semantic + text via RRF) against facts of type
-    'reflection', 'error', and 'meta_learning' — the "learnable" subset.
+    'reflection', 'error', and 'meta_learning' - the "learnable" subset.
 
     Args:
         engine: Active CortexEngine instance.
@@ -176,7 +176,7 @@ def format_injection_markdown(learnings: list[InjectedLearning]) -> str:
         "",
     ]
     for i, lr in enumerate(learnings, 1):
-        lines.append(f"### {i}. [{lr.project}] ({lr.fact_type}) — score {lr.score:.3f}")
+        lines.append(f"### {i}. [{lr.project}] ({lr.fact_type}) - score {lr.score:.3f}")
         lines.append(f"> {lr.content}")
         lines.append(f"_Stored: {lr.created_at}_")
         lines.append("")
@@ -227,7 +227,7 @@ def _build_type_filter_clause(
     """Build a safe SQL fragment for type IN + optional project filter.
 
     Returns (sql_fragment, params) where sql_fragment contains only `?`
-    placeholders and static column names — never interpolated user input.
+    placeholders and static column names - never interpolated user input.
     """
     placeholders = ",".join("?" for _ in types)
     clause = "AND f.fact_type IN (" + placeholders + ")"
@@ -238,7 +238,7 @@ def _build_type_filter_clause(
     return clause, params
 
 
-def _semantic_arm(  # nosec B608 — parameterized query
+def _semantic_arm(  # nosec B608 - parameterized query
     conn: sqlite3.Connection,
     query: str,
     project: str | None,
@@ -255,8 +255,8 @@ def _semantic_arm(  # nosec B608 — parameterized query
 
     type_clause, type_params = _build_type_filter_clause(LEARNABLE_TYPES, project)
 
-    sql = (  # nosec B608 — type_clause is built from constants + ? placeholders only
-        "SELECT ve.fact_id, ve.distance, f.project, f.content, f.fact_type,"  # nosec B608 — parameterized query — {where}/{column}/{placeholders} built internally with ? params
+    sql = (  # nosec B608 - type_clause is built from constants + ? placeholders only
+        "SELECT ve.fact_id, ve.distance, f.project, f.content, f.fact_type,"  # nosec B608 - parameterized query - {where}/{column}/{placeholders} built internally with ? params
         "       f.created_at"
         " FROM fact_embeddings AS ve"
         " JOIN facts AS f ON f.id = ve.fact_id"
@@ -281,7 +281,7 @@ def _semantic_arm(  # nosec B608 — parameterized query
             for row in cursor.fetchall()
         ]
     except (sqlite3.Error, ValueError, OSError) as exc:
-        logger.debug("Semantic search failed: %s", exc)  # nosec B608 — parameterized query
+        logger.debug("Semantic search failed: %s", exc)  # nosec B608 - parameterized query
         return []
 
 
@@ -294,8 +294,8 @@ def _text_arm(
     """Full-text search arm via FTS5."""
     type_clause, type_params = _build_type_filter_clause(LEARNABLE_TYPES, project)
 
-    sql = (  # nosec B608 — type_clause is built from constants + ? placeholders only
-        "SELECT f.id, f.project, f.content, f.fact_type, f.created_at"  # nosec B608 — parameterized query — {where}/{column}/{placeholders} built internally with ? params
+    sql = (  # nosec B608 - type_clause is built from constants + ? placeholders only
+        "SELECT f.id, f.project, f.content, f.fact_type, f.created_at"  # nosec B608 - parameterized query - {where}/{column}/{placeholders} built internally with ? params
         " FROM facts AS f"
         " JOIN facts_fts AS fts ON fts.rowid = f.id"
         " WHERE facts_fts MATCH ?"

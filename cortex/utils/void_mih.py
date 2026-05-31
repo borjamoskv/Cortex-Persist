@@ -1,5 +1,5 @@
 """
-CORTEX — VOID-MIH (Multi-Index Hashing) Engine.
+CORTEX - VOID-MIH (Multi-Index Hashing) Engine.
 
 Sovereign Bit-Slicing logic for O(log N) Hamming retrieval.
 Shards binary vectors into 64-bit indexable integers.

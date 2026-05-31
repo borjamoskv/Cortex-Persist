@@ -1,4 +1,4 @@
-"""Tests for ImmortalityIndex — cognitive crystallization metric."""
+"""Tests for ImmortalityIndex - cognitive crystallization metric."""
 
 from __future__ import annotations
 

@@ -34,7 +34,7 @@ console = Console()
 
 @click.group()
 def episode():
-    """Episodic Memory — persistent native memory."""
+    """Episodic Memory - persistent native memory."""
     pass
 
 
@@ -113,7 +113,7 @@ async def _record_async(
             Panel(
                 f"[green]Episode #{ep_id}[/green] recorded\n"
                 f"[dim]Session: {session_id} | Type: {event_type} | "
-                f"Project: {project or '—'}[/dim]",
+                f"Project: {project or '-'}[/dim]",
                 title="🧠 Episodic Memory",
             )
         )
@@ -203,7 +203,7 @@ async def _recall_async(
             table.add_row(
                 str(ep.id),
                 ep.event_type,
-                ep.project or "—",
+                ep.project or "-",
                 ep.content[:50],
                 ep.emotion,
                 ep.created_at[:16],
@@ -276,7 +276,7 @@ async def _patterns_async(
                 p.theme,
                 str(p.occurrences),
                 ", ".join(p.event_types[:2]),
-                p.sample_content[0][:60] if p.sample_content else "—",
+                p.sample_content[0][:60] if p.sample_content else "-",
             )
         console.print(table)
     finally:

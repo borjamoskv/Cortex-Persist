@@ -1,5 +1,5 @@
 """
-CORTEX CLI — Sovereign Error Display System v2.0 (i18n-enabled).
+CORTEX CLI - Sovereign Error Display System v2.0 (i18n-enabled).
 
 Centralized, beautiful, consistent error messages across all CLI commands.
 Every error includes: icon, message, cause, and recovery hint.
@@ -96,7 +96,7 @@ def err_db_not_found(db_path: str) -> NoReturn:
     """Database file not found / not initialized."""
     _panel(
         _t("cli_err_db_not_found_body", path=db_path),
-        title=f"🚫 CORTEX — {_t('cli_err_db_not_found_title')}",
+        title=f"🚫 CORTEX - {_t('cli_err_db_not_found_title')}",
     )
     sys.exit(1)
 
@@ -106,7 +106,7 @@ def err_db_locked(db_path: str, detail: str = "") -> NoReturn:
     body = _t("cli_err_db_locked_body", path=db_path)
     if detail:
         body = f"{body}\n\n  [dim]{detail}[/dim]"
-    _panel(body, title=f"🔒 CORTEX — {_t('cli_err_db_locked_title')}")
+    _panel(body, title=f"🔒 CORTEX - {_t('cli_err_db_locked_title')}")
     sys.exit(1)
 
 
@@ -115,7 +115,7 @@ def err_db_corrupted(db_path: str, detail: str = "") -> NoReturn:
     body = _t("cli_err_db_corrupted_body", path=db_path)
     if detail:
         body = f"{body}\n\n  [dim]{detail}[/dim]"
-    _panel(body, title=f"💥 CORTEX — {_t('cli_err_db_corrupted_title')}")
+    _panel(body, title=f"💥 CORTEX - {_t('cli_err_db_corrupted_title')}")
     sys.exit(1)
 
 
@@ -123,7 +123,7 @@ def err_fact_not_found(fact_id: int) -> None:
     """Fact with given ID not found or already deprecated."""
     _panel(
         _t("cli_err_fact_not_found_body", id=fact_id),
-        title=f"🔍 CORTEX — {_t('cli_err_fact_not_found_title')}",
+        title=f"🔍 CORTEX - {_t('cli_err_fact_not_found_title')}",
         border="yellow",
     )
 
@@ -132,7 +132,7 @@ def err_skill_not_found(skill_name: str, skill_path: str) -> NoReturn:
     """Skill script not found on disk."""
     _panel(
         _t("cli_err_skill_not_found_body", name=skill_name, path=skill_path),
-        title=f"🔧 CORTEX — {_t('cli_err_skill_not_found_title')}",
+        title=f"🔧 CORTEX - {_t('cli_err_skill_not_found_title')}",
     )
     sys.exit(1)
 
@@ -142,7 +142,7 @@ def err_execution_failed(command: str, detail: str = "") -> NoReturn:
     body = _t("cli_err_execution_failed_body", command=command)
     if detail:
         body = f"{body}\n\n  [dim]{detail}[/dim]"
-    _panel(body, title=f"⚡ CORTEX — {_t('cli_err_execution_failed_title')}")
+    _panel(body, title=f"⚡ CORTEX - {_t('cli_err_execution_failed_title')}")
     sys.exit(1)
 
 
@@ -155,7 +155,7 @@ def err_platform_unsupported(feature: str, required_platform: str = "macOS") -> 
             platform=required_platform,
             current=sys.platform,
         ),
-        title=f"🖥️ CORTEX — {_t('cli_err_platform_unsupported_title')}",
+        title=f"🖥️ CORTEX - {_t('cli_err_platform_unsupported_title')}",
     )
     sys.exit(1)
 
@@ -178,7 +178,7 @@ def err_permission_denied(action: str, detail: str = "") -> NoReturn:
     body = _t("cli_err_permission_denied_body", action=action)
     if detail:
         body = f"{body}\n\n  [dim]{detail}[/dim]"
-    _panel(body, title=f"🔐 CORTEX — {_t('cli_err_permission_denied_title')}")
+    _panel(body, title=f"🔐 CORTEX - {_t('cli_err_permission_denied_title')}")
     sys.exit(1)
 
 
@@ -189,7 +189,7 @@ def err_network(action: str, detail: str = "") -> None:
         + (f"\n  [dim]{detail}[/dim]" if detail else "")
         + "\n\n  1. Verifica conexión a internet\n  2. Comprueba credenciales\n  3. Reintenta"
     )
-    _panel(body, title="🌐 CORTEX — Network")
+    _panel(body, title="🌐 CORTEX - Network")
 
 
 def err_validation(field: str, detail: str) -> None:
@@ -198,7 +198,7 @@ def err_validation(field: str, detail: str) -> None:
         f"[bold red]{_t('error_invalid_input')}[/]\n\n"
         f"  Campo: [cyan]{field}[/cyan]\n"
         f"  Problema: {detail}",
-        title="⚠️ CORTEX — Validación",
+        title="⚠️ CORTEX - Validación",
         border="yellow",
     )
 
@@ -208,7 +208,7 @@ def err_unexpected(detail: str, hint: str = "") -> NoReturn:
     body = _t("cli_err_unexpected_body", detail=detail)
     if hint:
         body = f"{body}\n\n[yellow]💡[/] {hint}"
-    _panel(body, title=f"💀 CORTEX — {_t('cli_err_unexpected_title')}")
+    _panel(body, title=f"💀 CORTEX - {_t('cli_err_unexpected_title')}")
     sys.exit(1)
 
 
@@ -337,7 +337,7 @@ def _classify_os_error(
 
 
 def handle_cli_error(e: Exception, *, db_path: str = "", context: str = "") -> NoReturn:
-    """Smart error router — classifies exceptions and shows the right message or JSON output."""
+    """Smart error router - classifies exceptions and shows the right message or JSON output."""
     struct = classify_error(e, db_path=db_path, context=context)
 
     # If JSON output is requested (e.g., by SDKs or other tools via env var)

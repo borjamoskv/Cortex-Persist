@@ -1,18 +1,18 @@
 """
-AGENTE ITERAR v1.0 — Autonomous Iteration Daemon
+AGENTE ITERAR v1.0 - Autonomous Iteration Daemon
 -------------------------------------------------
 Class: C5-REAL Continuous Improvement Engine
 Aesthetic: Industrial Noir 2026
 Reality Level: C5-REAL (Ledger-Anchored, Exergy-Bounded)
 
 Ciclo determinista:
-  1. SCAN  — ruff lint + dead code detection
-  2. TEST  — pytest fast suite
-  3. ANALYZE — cyclomatic complexity + entropy metrics
-  4. MUTATE — AST autopoiesis for detected improvements
-  5. VERIFY — re-test after mutation
-  6. SEAL  — ledger append + exergy accounting
-  7. REPORT — emit telemetry to RingBuffer
+  1. SCAN  - ruff lint + dead code detection
+  2. TEST  - pytest fast suite
+  3. ANALYZE - cyclomatic complexity + entropy metrics
+  4. MUTATE - AST autopoiesis for detected improvements
+  5. VERIFY - re-test after mutation
+  6. SEAL  - ledger append + exergy accounting
+  7. REPORT - emit telemetry to RingBuffer
 """
 
 import sys
@@ -130,7 +130,7 @@ class ComplexityAnalyzer:
 
 class AgenteIterar:
     """
-    Autonomous Iteration Daemon — Exergy-Maximized.
+    Autonomous Iteration Daemon - Exergy-Maximized.
 
     Each cycle:
       1. Lint scan + autofix (ruff)
@@ -204,7 +204,7 @@ class AgenteIterar:
         return result
 
     def run_forever(self) -> None:
-        """Daemon mode — runs until killed or max_cycles reached."""
+        """Daemon mode - runs until killed or max_cycles reached."""
         self._running = True
         logger.info(
             f"AGENTE ITERAR v1.0 ONLINE | interval={self.cycle_interval}s | max={self.max_cycles or '∞'}"
@@ -252,7 +252,7 @@ class AgenteIterar:
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(description="AGENTE ITERAR — C5-REAL Iteration Daemon")
+    parser = argparse.ArgumentParser(description="AGENTE ITERAR - C5-REAL Iteration Daemon")
     parser.add_argument("--cycles", type=int, default=0, help="Max cycles (0=infinite)")
     parser.add_argument("--interval", type=float, default=30.0, help="Seconds between cycles")
     parser.add_argument("--once", action="store_true", help="Run single cycle and exit")

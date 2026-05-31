@@ -1,13 +1,13 @@
-"""Exergetic Epistemology (ΞΕ) — Advanced Information-Theoretic Primitives.
+"""Exergetic Epistemology (ΞΕ) - Advanced Information-Theoretic Primitives.
 
 Implements the frontier functions derived from the ΞΕ treatise:
-    renyi_entropy           — H_α(X) generalized entropy (Ledger security audit)
-    min_entropy             — H_∞(X) worst-case predictability
-    entropy_rate            — h(X) temporal stationarity measure
-    compression_intelligence— K(x) proxy via zlib (Kolmogorov-Assembly bridge)
-    dpi_verify              — Data Processing Inequality compliance check
-    free_energy_divergence  — F(q) Active Inference guard metric
-    phi_proxy               — Φ proxy via perturbation complexity
+    renyi_entropy           - H_α(X) generalized entropy (Ledger security audit)
+    min_entropy             - H_∞(X) worst-case predictability
+    entropy_rate            - h(X) temporal stationarity measure
+    compression_intelligence- K(x) proxy via zlib (Kolmogorov-Assembly bridge)
+    dpi_verify              - Data Processing Inequality compliance check
+    free_energy_divergence  - F(q) Active Inference guard metric
+    phi_proxy               - Φ proxy via perturbation complexity
 
 Zero external dependencies beyond stdlib. All functions are pure.
 
@@ -42,7 +42,7 @@ __all__ = [
 
 
 def renyi_entropy(distribution: dict[str, int], alpha: float) -> float:
-    """Rényi entropy H_α(X) — generalized entropy for security auditing.
+    """Rényi entropy H_α(X) - generalized entropy for security auditing.
 
     H_α(X) = 1/(1-α) · log₂(Σ p(x)^α)
 
@@ -144,7 +144,7 @@ def entropy_rate(
         w_dist = {sorted_keys[j]: temporal_sequence[sorted_keys[j]] for j in range(i, i + window)}
         rates.append(shannon_entropy(w_dist))
 
-    # The rate converges to the limit — take the last window
+    # The rate converges to the limit - take the last window
     return rates[-1] if rates else 0.0
 
 
@@ -212,7 +212,7 @@ def dpi_verify(
     """Verify Data Processing Inequality across a processing pipeline.
 
     Theorem T6: In a Markov chain X → Y → Z,
-    I(X;Z) ≤ I(X;Y) — processing never creates information.
+    I(X;Z) ≤ I(X;Y) - processing never creates information.
 
     For CORTEX pipeline:
     Raw → Guard → Ledger → Query → Response
@@ -251,7 +251,7 @@ def dpi_verify(
             breach = stages[i + 1] - stages[i]
             violations.append(
                 f"Stage {i + 1}→{i + 2}: exergy INCREASED by {breach:.4f} bits "
-                f"({stages[i]:.4f} → {stages[i + 1]:.4f}) — DPI violated"
+                f"({stages[i]:.4f} → {stages[i + 1]:.4f}) - DPI violated"
             )
             max_violation = max(max_violation, breach)
 
@@ -271,7 +271,7 @@ def free_energy_divergence(
     claim_dist: dict[str, float],
     evidence_dist: dict[str, float],
 ) -> float:
-    """Free energy F(q) as guard metric — Equivalence Ξ-FG.
+    """Free energy F(q) as guard metric - Equivalence Ξ-FG.
 
     F(q) = D_KL(claim ‖ evidence) + complexity_penalty
 
@@ -298,7 +298,7 @@ def free_energy_divergence(
     return divergence + complexity
 
 
-# ── Φ Proxy (Consciousness Ceiling — Theorem T5) ───────────────────
+# ── Φ Proxy (Consciousness Ceiling - Theorem T5) ───────────────────
 
 
 def phi_proxy(
@@ -314,7 +314,7 @@ def phi_proxy(
     Φ_max ≈ log₂(n) × d × (1 + log₂(1 + feedback_loops))
 
     This is a STRUCTURAL upper bound, not a measurement of actual Φ
-    (which requires exhaustive partition search — NP-hard).
+    (which requires exhaustive partition search - NP-hard).
 
     Args:
         n_layers: Number of processing layers.

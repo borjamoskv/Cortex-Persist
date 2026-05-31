@@ -1,4 +1,4 @@
-"""Observatory — consolidated CORTEX system status endpoint.
+"""Observatory - consolidated CORTEX system status endpoint.
 
 Provides a single GET /v1/observatory endpoint that aggregates:
 - Daemon health (10+ monitors)
@@ -28,7 +28,7 @@ router = APIRouter(tags=["observatory"])
 def observatory_status(
     auth: AuthResult = Depends(require_permission("read")),
 ) -> dict[str, Any]:
-    """Consolidated system observatory — one endpoint, full picture."""
+    """Consolidated system observatory - one endpoint, full picture."""
     result: dict[str, Any] = {}
 
     # 1. Daemon status

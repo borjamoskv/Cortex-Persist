@@ -1,9 +1,9 @@
 """
-Hybrid Logical Clock — Causal Ordering for Edge Swarms (Ω₃ / Ω₁₂).
+Hybrid Logical Clock - Causal Ordering for Edge Swarms (Ω₃ / Ω₁₂).
 
 Implements the Hybrid Logical Clock (HLC) from Kulkarni et al. (2014).
 Provides causal ordering guarantees without dependence on synchronized
-physical clocks — critical for edge devices with intermittent connectivity.
+physical clocks - critical for edge devices with intermittent connectivity.
 
 Properties:
   - Monotonic: every tick() > all previous timestamps
@@ -76,7 +76,7 @@ class HLCTimestamp:
 
     @classmethod
     def zero(cls) -> HLCTimestamp:
-        """The epoch — smallest possible timestamp."""
+        """The epoch - smallest possible timestamp."""
         return cls(physical_ms=0, logical=0, node_id=0)
 
 

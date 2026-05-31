@@ -1,4 +1,4 @@
-"""CORTEX Revenue Vectors — Pluggable income pipelines."""
+"""CORTEX Revenue Vectors - Pluggable income pipelines."""
 
 from __future__ import annotations
 

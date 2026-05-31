@@ -1,9 +1,9 @@
-"""SCRAPER-Ω API Routes — REST endpoints for web extraction.
+"""SCRAPER-Ω API Routes - REST endpoints for web extraction.
 
 Endpoints:
-    POST /api/scraper/scrape   — Single URL extraction
-    POST /api/scraper/batch    — Batch URL extraction
-    POST /api/scraper/map      — Site URL discovery
+    POST /api/scraper/scrape   - Single URL extraction
+    POST /api/scraper/batch    - Batch URL extraction
+    POST /api/scraper/map      - Site URL discovery
 """
 
 from __future__ import annotations

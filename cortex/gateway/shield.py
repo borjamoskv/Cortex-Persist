@@ -1,4 +1,4 @@
-"""CORTEX Gateway — Shielding & Telemetry Suppression.
+"""CORTEX Gateway - Shielding & Telemetry Suppression.
 
 Protects the operator from accidental data leaks and behavioral tracking.
 """

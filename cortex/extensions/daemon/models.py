@@ -278,7 +278,7 @@ class DriftAlert:
 
 @dataclass
 class DaemonStatus:
-    """Full daemon check result — persisted to disk."""
+    """Full daemon check result - persisted to disk."""
 
     checked_at: str
     check_duration_ms: float = 0.0

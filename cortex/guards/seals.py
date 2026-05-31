@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: Apache-2.0
-"""CORTEX Quality Gates (10 Sovereign Seals) — Local Enforcement.
+"""CORTEX Quality Gates (10 Sovereign Seals) - Local Enforcement.
 
 Consolidated from 21 Seals → 10 orthogonal verification axes.
 Eliminated 4 stubs (16, 18, 19, 20) and merged related checks.
@@ -88,12 +88,12 @@ async def _execute_gates_loop(
 
     for gate_num in gate_order:
         if gate_num in skip:
-            printer.seal(gate_num, "SKIPPED", f"Seal {gate_num} — skipped via Filtering")
+            printer.seal(gate_num, "SKIPPED", f"Seal {gate_num} - skipped via Filtering")
             results[gate_num] = (True, "skipped")
             continue
 
         if gate_num in force:
-            printer.warn(f"Seal {gate_num} — FORCE VALIDATION (Bypassing auto-skip)")
+            printer.warn(f"Seal {gate_num} - FORCE VALIDATION (Bypassing auto-skip)")
 
         start = time.perf_counter()
         res = await gate_fns[gate_num]()
@@ -132,12 +132,12 @@ def _print_summary(results: dict[int, GateResult], total_elapsed: float) -> int:
 
 async def main() -> int:
     total_start = time.perf_counter()
-    printer.head("10 SOVEREIGN SEALS — CORTEX QUALITY GATES")
+    printer.head("10 SOVEREIGN SEALS - CORTEX QUALITY GATES")
 
     await GlobalSourceCache.load()
 
     skip, only, force = _parse_gate_filters()
-    # Gate 4 (tests) requires full dev deps — only enable with explicit opt-in
+    # Gate 4 (tests) requires full dev deps - only enable with explicit opt-in
     full_seals = os.environ.get("CORTEX_FULL_SEALS", "").strip() in ("1", "true", "yes")
 
     # Auto-skip Gate 4 unless CORTEX_FULL_SEALS is explicitly set

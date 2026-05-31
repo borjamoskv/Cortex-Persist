@@ -3,10 +3,10 @@
 # See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
 
-"""CORTEX LLM Router — Models & Contracts.
+"""CORTEX LLM Router - Models & Contracts.
 
 Tipos de datos soberanos: enums, dataclasses y BaseProvider.
-Extraído de router.py (Ω₂ Landauer split — 1371 → 5 módulos cohesivos).
+Extraído de router.py (Ω₂ Landauer split - 1371 → 5 módulos cohesivos).
 """
 
 from __future__ import annotations
@@ -73,7 +73,7 @@ class IntentProfile(str, Enum):
     """Análisis profundo de arquitectura y asedio adversario (Red Team)."""
 
     GENERAL = "general"
-    """Intención genérica o no clasificada — sin restricción de fallback."""
+    """Intención genérica o no clasificada - sin restricción de fallback."""
 
     BELIEF_AUDIT = "belief_audit"
     """Cognitive Handoff: contradiction detection, invariant verification.
@@ -205,7 +205,7 @@ class CortexPrompt(BaseModel):
 class BaseProvider(ABC):
     """Interfaz estricta que todo proveedor LLM debe cumplir.
 
-    Cada provider declara su `intent_affinity` — el conjunto de intenciones
+    Cada provider declara su `intent_affinity` - el conjunto de intenciones
     que sirve con alta precisión. El router usa esta declaración para
     construir el cascade determinista.
     """

@@ -1,4 +1,4 @@
-"""Moltbook SIGINT (Signals Intelligence) — Lead Detection Engine v2.
+"""Moltbook SIGINT (Signals Intelligence) - Lead Detection Engine v2.
 
 Dual-mode operation:
   1. Cognitive Blueprint: Detect LLM-generated text signatures
@@ -257,7 +257,7 @@ def run_sigint_sweep(
     all_leads.sort(key=lambda s: s.lead_score, reverse=True)
 
     print(f"\n{'═' * 66}")
-    print("  ⚔️  CORTEX SIGINT SWEEP — LEAD INTELLIGENCE")
+    print("  ⚔️  CORTEX SIGINT SWEEP - LEAD INTELLIGENCE")
     print(f"  Scanned {len(target)} repos | {len(all_leads)} leads detected")
     print(f"{'═' * 66}\n")
 
@@ -273,7 +273,7 @@ def run_sigint_sweep(
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(description="CORTEX SIGINT — Lead Scanner")
+    parser = argparse.ArgumentParser(description="CORTEX SIGINT - Lead Scanner")
     parser.add_argument(
         "--repos",
         nargs="*",

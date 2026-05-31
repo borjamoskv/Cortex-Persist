@@ -1,4 +1,4 @@
-"""Sovereign Vision QA — Aesthetic Auditor (Vector 1).
+"""Sovereign Vision QA - Aesthetic Auditor (Vector 1).
 
 Evaluates rendered components against the Industrial Noir 2026 guidelines
 using Headless Playwright and Kimi K2.5 Multimodal (or compatible Frontier model).

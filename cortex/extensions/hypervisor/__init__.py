@@ -1,4 +1,4 @@
-"""CORTEX Hypervisor — Public API.
+"""CORTEX Hypervisor - Public API.
 
 The Telescope Inversion: maximum simplicity on the outside.
 

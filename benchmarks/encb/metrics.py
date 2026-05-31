@@ -1,11 +1,11 @@
-"""ENCB v2 — Formal Metrics.
+"""ENCB v2 - Formal Metrics.
 
 Four metrics that measure epistemic debt, not just accuracy:
 
-    PFBR — Persistent False Belief Rate
-    TER  — Time to Epistemic Recovery
-    EDI  — Epistemic Debt Integral
-    CNCL — Corrupt Node Containment Latency
+    PFBR - Persistent False Belief Rate
+    TER  - Time to Epistemic Recovery
+    EDI  - Epistemic Debt Integral
+    CNCL - Corrupt Node Containment Latency
 """
 
 from __future__ import annotations
@@ -15,7 +15,7 @@ from dataclasses import dataclass
 from benchmarks.encb.agents import AdversaryType, NodeProfile
 from benchmarks.encb.strategies import PropState
 
-# ── PFBR — Persistent False Belief Rate ──────────────────────────────────
+# ── PFBR - Persistent False Belief Rate ──────────────────────────────────
 
 
 def pfbr(states: list[PropState]) -> float:
@@ -31,7 +31,7 @@ def pfbr(states: list[PropState]) -> float:
     return errors / len(states)
 
 
-# ── TER — Time to Epistemic Recovery ─────────────────────────────────────
+# ── TER - Time to Epistemic Recovery ─────────────────────────────────────
 
 
 def ter(
@@ -70,7 +70,7 @@ def ter(
     return None
 
 
-# ── EDI — Epistemic Debt Integral ────────────────────────────────────────
+# ── EDI - Epistemic Debt Integral ────────────────────────────────────────
 
 
 def edi(
@@ -108,7 +108,7 @@ def edi(
     return total
 
 
-# ── CNCL — Corrupt Node Containment Latency ──────────────────────────────
+# ── CNCL - Corrupt Node Containment Latency ──────────────────────────────
 
 
 def cncl(

@@ -1,4 +1,4 @@
-"""Tests for ALMA Taste Engine — Sovereign Quality Discriminator."""
+"""Tests for ALMA Taste Engine - Sovereign Quality Discriminator."""
 
 from __future__ import annotations
 

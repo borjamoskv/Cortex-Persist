@@ -1,6 +1,6 @@
 """
 IMMUNE-SYSTEM-v1 Arbiter.
-The Epistemic Arbitrator (Ωv3) — "Justice between perceptions."
+The Epistemic Arbitrator (Ωv3) - "Justice between perceptions."
 
 This module implements the unified 5-filter membrane logic:
 F1: Reversibility (R-Level Analysis)

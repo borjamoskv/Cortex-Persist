@@ -10,11 +10,11 @@ El cerebro distribuido de CORTEX.
 
 Modos de pensamiento::
 
-    DEEP_REASONING — Modelos top-tier para análisis profundo
-    CODE           — Especializados en generación/análisis de código
-    CREATIVE       — Para ideación, naming, y pensamiento lateral
-    SPEED          — Ultra-rápidos para decisiones instantáneas
-    CONSENSUS      — Todos los disponibles para máxima confianza
+    DEEP_REASONING - Modelos top-tier para análisis profundo
+    CODE           - Especializados en generación/análisis de código
+    CREATIVE       - Para ideación, naming, y pensamiento lateral
+    SPEED          - Ultra-rápidos para decisiones instantáneas
+    CONSENSUS      - Todos los disponibles para máxima confianza
 
 Uso::
 
@@ -429,7 +429,7 @@ class ThoughtOrchestra(OrchestraIntrospectionMixin):
             fusion_strategy.value,
         )
 
-        # Ejecución paralela — pasamos mode y temperatura variada a cada _query_model
+        # Ejecución paralela - pasamos mode y temperatura variada a cada _query_model
         start = time.monotonic()
 
         tasks = []

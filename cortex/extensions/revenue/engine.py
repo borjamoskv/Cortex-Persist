@@ -1,4 +1,4 @@
-"""CORTEX Revenue Engine — Sovereign Revenue Orchestrator.
+"""CORTEX Revenue Engine - Sovereign Revenue Orchestrator.
 
 Coordinates multiple revenue vectors, evaluates opportunities by ROI,
 persists results to the CORTEX ledger, and generates P&L reports.

@@ -1,4 +1,4 @@
-"""Sovereign Code Scorer — Automated code quality engine.
+"""Sovereign Code Scorer - Automated code quality engine.
 
 Evaluates codebases on 5 dimensions (PoQ-5 Protocol):
   1. Syntax Health (20pts)
@@ -287,7 +287,7 @@ def score_aesthetics(files: list[Path]) -> tuple[float, list[Issue]]:
                                 line=i,
                                 category="aesthetics",
                                 severity="info",
-                                message=f"Found {marker} comment — resolve or document.",
+                                message=f"Found {marker} comment - resolve or document.",
                             )
                         )
 
@@ -403,11 +403,11 @@ def print_report(report: dict) -> None:
         if crit:
             print("\n🔴 CRITICAL:")
             for i in crit[:10]:
-                print(f"  {i['file']}:{i['line']} — {i['message']}")
+                print(f"  {i['file']}:{i['line']} - {i['message']}")
         if warn:
             print("\n🟡 WARNINGS:")
             for i in warn[:10]:
-                print(f"  {i['file']}:{i['line']} — {i['message']}")
+                print(f"  {i['file']}:{i['line']} - {i['message']}")
 
 
 # ── CLI ────────────────────────────────────────────────────────

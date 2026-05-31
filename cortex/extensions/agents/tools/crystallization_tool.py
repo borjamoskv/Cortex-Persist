@@ -62,7 +62,7 @@ class CrystallizationTool:
         confidence: str = "C4",
         source: str = "agent:antigravity",
     ) -> str:
-        """Async execution — persists to CORTEX engine."""
+        """Async execution - persists to CORTEX engine."""
         logger.info(
             "💎 [CRYSTALLIZATION] Persisting %s (C=%s) → project=%s",
             fact_type,

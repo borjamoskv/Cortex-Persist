@@ -1,4 +1,4 @@
-"""ENCB v2 — Monte Carlo Simulation Runner.
+"""ENCB v2 - Monte Carlo Simulation Runner.
 
 Orchestrates the full benchmark: universe generation, agent population,
 multi-round observation/resolution, metrics collection, and JSON export.
@@ -273,7 +273,7 @@ def print_summary(results: dict[str, list[MetricsReport]]) -> None:
     """Print a summary table to stdout."""
     header = f"{'Strategy':<20} {'PFBR':>8} {'TER':>8} {'EDI':>12} {'CNCL':>8}"
     print("\n" + "=" * 60)
-    print("ENCB v2 — Benchmark Results")
+    print("ENCB v2 - Benchmark Results")
     print("=" * 60)
     print(header)
     print("-" * 60)
@@ -295,7 +295,7 @@ def print_summary(results: dict[str, list[MetricsReport]]) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="ENCB v2 — Epistemic Noise Chaos Benchmark")
+    parser = argparse.ArgumentParser(description="ENCB v2 - Epistemic Noise Chaos Benchmark")
     parser.add_argument("--n-agents", type=int, default=200)
     parser.add_argument("--n-props", type=int, default=1000)
     parser.add_argument("--n-domains", type=int, default=8)

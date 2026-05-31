@@ -1,4 +1,4 @@
-"""CORTEX Pipeline — Sovereign E2E Orchestrator.
+"""CORTEX Pipeline - Sovereign E2E Orchestrator.
 
 Wires Ingress → Context → Plan → Execute → Persist → Egress
 into a single deterministic flow with full telemetry.
@@ -22,12 +22,12 @@ class CortexOrchestrator(StagesMixin, RunnerMixin):
     """The central E2E orchestrator for CORTEX.
 
     Executes a 6-stage pipeline:
-    1. INGRESS  — Validate and parse the request
-    2. CONTEXT  — Assemble relevant knowledge
-    3. PLANNING — Route to agent(s)
-    4. EXECUTION — Run agent(s) with budget tracking
-    5. PERSISTENCE — Hash-chain result to ledger
-    6. EGRESS   — Deliver result to target
+    1. INGRESS  - Validate and parse the request
+    2. CONTEXT  - Assemble relevant knowledge
+    3. PLANNING - Route to agent(s)
+    4. EXECUTION - Run agent(s) with budget tracking
+    5. PERSISTENCE - Hash-chain result to ledger
+    6. EGRESS   - Deliver result to target
     """
 
     def __init__(

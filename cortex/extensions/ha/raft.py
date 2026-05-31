@@ -81,7 +81,7 @@ class NodeRegistry:
 
 class RaftNode:
     """
-    Raft Consensus Node — Phase 2: Full Leader Election (RequestVote RPC).
+    Raft Consensus Node - Phase 2: Full Leader Election (RequestVote RPC).
 
     Manages node state, election timeouts, and role transitions.
     Supports both in-process clusters (NodeRegistry) and stub peer resolution.
@@ -138,7 +138,7 @@ class RaftNode:
                 try:
                     await task
                 except asyncio.CancelledError:
-                    pass  # Expected — do NOT re-raise during shutdown
+                    pass  # Expected - do NOT re-raise during shutdown
         self._election_task = None
         self._heartbeat_task = None
         NodeRegistry.deregister(self.node_id)
@@ -163,7 +163,7 @@ class RaftNode:
                     self._heartbeat_event.wait(),
                     timeout=timeout,
                 )
-                # Heartbeat received — reset loop
+                # Heartbeat received - reset loop
             except asyncio.TimeoutError:
                 if self._heartbeat_event.is_set():
                     continue
@@ -281,7 +281,7 @@ class RaftNode:
             self.voted_for = self.node_id
             self.last_heartbeat = time.monotonic()
             term = self.current_term
-        # Lock released — RPCs happen without holding it
+        # Lock released - RPCs happen without holding it
         logger.info(
             "Node %s starting election for term %d (peers=%s)",
             self.node_id,
@@ -342,7 +342,7 @@ class RaftNode:
         if votes_received >= majority:
             await self._become_leader()
         else:
-            # Didn't win — revert to FOLLOWER and wait for next timeout
+            # Didn't win - revert to FOLLOWER and wait for next timeout
             async with self._role_lock:
                 self.role = NodeRole.FOLLOWER
             logger.info(
@@ -359,7 +359,7 @@ class RaftNode:
         """
         peer = NodeRegistry.get(peer_id)
         if peer is None:
-            # Peer not in registry — could be remote (stub: assume no vote)
+            # Peer not in registry - could be remote (stub: assume no vote)
             logger.debug("Peer %s not in NodeRegistry. Skipping vote.", peer_id)
             return False
 

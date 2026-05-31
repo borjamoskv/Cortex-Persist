@@ -1,4 +1,4 @@
-"""Ghost management mixin — register and resolve ghosts."""
+"""Ghost management mixin - register and resolve ghosts."""
 
 from __future__ import annotations
 
@@ -21,7 +21,7 @@ logger = logging.getLogger("cortex.ghosts")
 
 
 class GhostMixin(EngineMixinBase):
-    """Distributed Ghost Field — Filesystem-Embedded Entity References.
+    """Distributed Ghost Field - Filesystem-Embedded Entity References.
 
     Ghosts are radioactive traces on the filesystem (xattrs/manifest),
     not centralized DB records. Powered by the Songlines subsystem:

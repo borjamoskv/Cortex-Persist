@@ -1,5 +1,5 @@
 """
-CORTEX — Omega Auditor (Axiom 20 + Massive Context).
+CORTEX - Omega Auditor (Axiom 20 + Massive Context).
 
 Deep semantic contradiction detection using Gemini 3 Pro (1M context).
 This guard audits new decisions against the ENTIRE system snapshot.

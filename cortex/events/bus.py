@@ -35,7 +35,7 @@ class DistributedEventBus:
         to SQLite, surviving process boundaries.
         """
         self._signal_bus = signal_bus
-        logger.info("L1 Signal Bus bridge attached — persistence enabled")
+        logger.info("L1 Signal Bus bridge attached - persistence enabled")
 
     def subscribe(
         self,
@@ -59,7 +59,7 @@ class DistributedEventBus:
                     source=payload.get("source", "event-bus"),
                     project=payload.get("project"),
                 )
-            except Exception:  # noqa: BLE001 — persistence must not break event delivery
+            except Exception:  # noqa: BLE001 - persistence must not break event delivery
                 logger.warning(
                     "Signal Bus persistence failed for topic %s",
                     topic,

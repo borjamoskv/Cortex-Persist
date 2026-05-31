@@ -1,4 +1,4 @@
-"""CORTEX Agent Runtime — Level 4 Autonomous Multi-Step Agent.
+"""CORTEX Agent Runtime - Level 4 Autonomous Multi-Step Agent.
 
 The AutonomousAgent is a Level 4 agent that:
     1. Receives an OBJECTIVE via message or direct invocation.
@@ -15,14 +15,14 @@ The AutonomousAgent is a Level 4 agent that:
 Level 4 Limitation:
     If a step fails beyond its retry budget, the plan HALTS.
     The agent does NOT question its strategy or replan.
-    It insists on the original plan — this is by design.
+    It insists on the original plan - this is by design.
     Meta-cognitive replanning belongs to Level 5+.
 
 Exergy Maximization:
     Every step is scored by its net exergy (work_yield - entropy_cost).
     The planner greedily schedules highest-exergy steps first.
     Failed retries compound entropy_cost, degrading the plan's total
-    net exergy — providing a thermodynamic signal of plan quality.
+    net exergy - providing a thermodynamic signal of plan quality.
 """
 
 from __future__ import annotations
@@ -49,7 +49,7 @@ logger = logging.getLogger("cortex.agents.autonomous")
 
 
 class AutonomousAgent(BaseAgent):
-    """Level 4 Autonomous Multi-Step Agent — Exergy Maximizer.
+    """Level 4 Autonomous Multi-Step Agent - Exergy Maximizer.
 
     Receives an objective, decomposes into steps, executes tools,
     delivers results. Always maximizes exergy output.
@@ -161,7 +161,7 @@ class AutonomousAgent(BaseAgent):
         start_time = time.monotonic()
 
         logger.info(
-            "⚡ [%s] AUTONOMOUS EXECUTION START — Objective: %s",
+            "⚡ [%s] AUTONOMOUS EXECUTION START - Objective: %s",
             self.agent_id,
             objective,
         )
@@ -170,7 +170,7 @@ class AutonomousAgent(BaseAgent):
         if steps_def:
             plan = ExergyPlanner.plan_from_steps(objective, steps_def)
         else:
-            # No steps provided — create a single-step plan for the objective itself
+            # No steps provided - create a single-step plan for the objective itself
             plan = ExergyPlanner.plan_from_steps(
                 objective,
                 [
@@ -203,7 +203,7 @@ class AutonomousAgent(BaseAgent):
             step = plan.next_ready_step()
             if step is None:
                 # No ready steps and plan not complete = deadlock
-                logger.error("[%s] Plan deadlocked — no ready steps", self.agent_id)
+                logger.error("[%s] Plan deadlocked - no ready steps", self.agent_id)
                 break
 
             # Execute the step
@@ -216,7 +216,7 @@ class AutonomousAgent(BaseAgent):
             # Entropy circuit breaker
             if plan.total_entropy_paid > max_entropy:
                 logger.warning(
-                    "[%s] Entropy budget exceeded (%.2f > %.2f) — halting plan",
+                    "[%s] Entropy budget exceeded (%.2f > %.2f) - halting plan",
                     self.agent_id,
                     plan.total_entropy_paid,
                     max_entropy,
@@ -230,7 +230,7 @@ class AutonomousAgent(BaseAgent):
             # If step failed hard, halt (L4 behavior: no replanning)
             if step.status == StepStatus.FAILED:
                 logger.error(
-                    "[%s] Step '%s' FAILED after %d retries — HALTING PLAN (L4: no replan)",
+                    "[%s] Step '%s' FAILED after %d retries - HALTING PLAN (L4: no replan)",
                     self.agent_id,
                     step.step_id,
                     step.retry_count,
@@ -263,7 +263,7 @@ class AutonomousAgent(BaseAgent):
         }
 
         logger.info(
-            "⚡ [%s] AUTONOMOUS EXECUTION COMPLETE — Status: %s | Net Exergy: %.4f | Elapsed: %.2fs",
+            "⚡ [%s] AUTONOMOUS EXECUTION COMPLETE - Status: %s | Net Exergy: %.4f | Elapsed: %.2fs",
             self.agent_id,
             status,
             plan.net_exergy,
@@ -325,7 +325,7 @@ class AutonomousAgent(BaseAgent):
                     await asyncio.sleep(0.5 * step.retry_count)  # Exponential backoff
 
             except PermissionError as exc:
-                # Tool policy violation — no retry, immediate fail
+                # Tool policy violation - no retry, immediate fail
                 step.retry_count = step.retry_budget  # exhaust budget
                 step.mark_failed(f"Permission denied: {exc}")
                 logger.error("[%s] Step %s PERMISSION DENIED: %s", self.agent_id, step.step_id, exc)

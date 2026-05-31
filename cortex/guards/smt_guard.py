@@ -1,5 +1,5 @@
 """
-SMT Constraint Guard — Formal Verification via Z3.
+SMT Constraint Guard - Formal Verification via Z3.
 
 Uses Z3 SMT solver to formally validate fact constraints,
 temporal ordering, and cross-fact consistency. When Z3 is
@@ -35,7 +35,7 @@ class SMTConstraintGuard:
         self._z3_available = HAS_Z3
         if not HAS_Z3:
             logger.warning(
-                "Z3 not installed — SMTConstraintGuard running in arithmetic fallback mode. "
+                "Z3 not installed - SMTConstraintGuard running in arithmetic fallback mode. "
                 "Install with: pip install z3-solver"
             )
 

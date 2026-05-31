@@ -149,7 +149,7 @@ def validate_pagination(
     """Validate and clamp pagination parameters.
 
     Returns:
-        (limit, offset) — both guaranteed non-negative.
+        (limit, offset) - both guaranteed non-negative.
     """
     if limit is not None:
         if limit < 1:

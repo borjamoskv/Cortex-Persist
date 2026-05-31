@@ -1,4 +1,4 @@
-"""ENCB v2 — Log-Odds Pooling (LogOP) Resolution.
+"""ENCB v2 - Log-Odds Pooling (LogOP) Resolution.
 
 Layer 2: Belief arbitration. Takes CRDT-merged replicas and resolves
 them into a single epistemic judgement using weighted log-odds pooling.
@@ -101,7 +101,7 @@ def weighted_logop_binary(
     for value, conf, rel in observations:
         c_eff = effective_confidence(conf, rel, config=config)
         p = c_eff if value else 1.0 - c_eff
-        w = rel**2  # quadratic — suppresses unreliable nodes aggressively
+        w = rel**2  # quadratic - suppresses unreliable nodes aggressively
         score += w * logit(p)
 
     prob_true = sigmoid(score)
@@ -135,7 +135,7 @@ def weighted_logop_categorical(
 
     for chosen, conf, rel in observations:
         c_eff = effective_confidence(conf, rel, config=config)
-        w = rel**2  # quadratic — suppresses unreliable nodes aggressively
+        w = rel**2  # quadratic - suppresses unreliable nodes aggressively
         # Boost chosen, penalize others
         n_cats = len(categories)
         for cat in categories:

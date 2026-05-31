@@ -1,6 +1,6 @@
 # cortex/evolution/lnn.py
 """
-Lagrangian Neural Networks (LNN) for Evolutionary Policy — ψSAP Implementation.
+Lagrangian Neural Networks (LNN) for Evolutionary Policy - ψSAP Implementation.
 
 Operationalizes the Neural Least-Action (NLA) principle:
     d/dt (∂L/∂q̇) = ∂L/q

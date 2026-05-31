@@ -3,7 +3,7 @@
 # See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
 
-"""CORTEX Hypervisor — Belief Engine.
+"""CORTEX Hypervisor - Belief Engine.
 
 Cognitive governance layer that connects the CognitiveHandoff orchestrator
 to the AgencyHypervisor pipeline. Sits between remember() and the database,
@@ -39,7 +39,7 @@ class BeliefEngine:
 
     Evaluates incoming content against existing beliefs using the
     CognitiveHandoff quad-model cascade. If a contradiction is
-    detected, the belief is quarantined — this verdict is final
+    detected, the belief is quarantined - this verdict is final
     and cannot be overridden by downstream components.
 
     Usage::
@@ -128,20 +128,20 @@ class BeliefEngine:
 
         # Route through CognitiveHandoff
         if self._handoff is None:
-            logger.warning("No CognitiveHandoff configured — auto-accepting belief")
+            logger.warning("No CognitiveHandoff configured - auto-accepting belief")
             return BeliefVerdict(
                 action=VerdictAction.ACCEPT,
                 model="none",
-                reason="No handoff configured — passthrough mode",
+                reason="No handoff configured - passthrough mode",
             )
 
         verdict = await self._handoff.process_belief(candidate, context)
 
-        # Handle quarantine — persist the quarantine state
+        # Handle quarantine - persist the quarantine state
         if verdict.action == VerdictAction.QUARANTINE:
             await self._quarantine_belief(candidate, verdict)
 
-        # Handle accept — persist the belief
+        # Handle accept - persist the belief
         elif verdict.action == VerdictAction.ACCEPT:
             await self._persist_belief(candidate)
 
@@ -154,7 +154,7 @@ class BeliefEngine:
             belief_id: The belief ID to quarantine.
             reason: Human-readable reason for quarantine.
         """
-        logger.warning("Manual quarantine: %s — %s", belief_id, reason)
+        logger.warning("Manual quarantine: %s - %s", belief_id, reason)
 
         if self._engine is not None:
             await self._engine.store(

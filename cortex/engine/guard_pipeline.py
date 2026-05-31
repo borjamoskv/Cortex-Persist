@@ -1,4 +1,4 @@
-"""Guard Pipeline — Composable pre-store, mutate, and post-store chain.
+"""Guard Pipeline - Composable pre-store, mutate, and post-store chain.
 
 Replaces the hardcoded try/except ImportError blocks in store_mixin._store_impl
 with a registered list of protocol-conforming guards, mutators, and hooks.

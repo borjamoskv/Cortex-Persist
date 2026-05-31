@@ -12,10 +12,10 @@ and gates each probe behind a write-count or time-based trigger:
     ┌──────────────┬─────────────┬────────────────┬───────────────────────────┐
     │ Tier         │ Probe       │ Trigger         │ Complexity / call         │
     ├──────────────┼─────────────┼─────────────────┼──────────────────────────│
-    │ PULSE        │ centroid    │ Every write     │ O(d) — running mean       │
-    │ HEARTBEAT    │ page_hinkley│ Every 10 writes │ O(1) — streaming          │
-    │ DIAGNOSTIC   │ spectral_gap│ Every 100 writes│ O(n·d²) — batch           │
-    │ DEEP_SCAN    │ intrinsic_dim│ Every 500 writes│ O(n·k·d) — expensive     │
+    │ PULSE        │ centroid    │ Every write     │ O(d) - running mean       │
+    │ HEARTBEAT    │ page_hinkley│ Every 10 writes │ O(1) - streaming          │
+    │ DIAGNOSTIC   │ spectral_gap│ Every 100 writes│ O(n·d²) - batch           │
+    │ DEEP_SCAN    │ intrinsic_dim│ Every 500 writes│ O(n·k·d) - expensive     │
     └──────────────┴─────────────┴─────────────────┴──────────────────────────┘
 
 The running-mean centroid is the only probe that touches every write.
@@ -61,7 +61,7 @@ class TemporalHealthScheduler:
     """Multi-frequency topological health scheduler.
 
     Wraps DriftMonitor and gates each probe behind a write-count trigger.
-    The running centroid mean is tracked in O(d) per write — the only
+    The running centroid mean is tracked in O(d) per write - the only
     computation that touches every store() call.
 
     Usage::
@@ -114,12 +114,12 @@ class TemporalHealthScheduler:
         self._signature_dir = signature_dir
         self._write_count = 0
 
-        # Running mean state — O(d) memory, updated in O(d) per write
+        # Running mean state - O(d) memory, updated in O(d) per write
         self._running_mean: np.ndarray | None = None
         self._running_n: int = 0
         self._baseline_centroid: np.ndarray | None = None
 
-        # Streaming Page-Hinkley — O(1) memory, O(1) per update
+        # Streaming Page-Hinkley - O(1) memory, O(1) per update
         self._page_hinkley = PageHinkley(
             threshold=self._config.page_hinkley_threshold,
         )
@@ -128,7 +128,7 @@ class TemporalHealthScheduler:
         self._baseline_spectral_gap: float | None = None
         self._baseline_intrinsic_dim: float | None = None
 
-        # Rolling buffer for batch probes — bounded RAM
+        # Rolling buffer for batch probes - bounded RAM
         self._embedding_buffer: list[np.ndarray] = []
         self._buffer_maxsize = self.BUFFER_MAXSIZE
 
@@ -158,7 +158,7 @@ class TemporalHealthScheduler:
         The baseline is frozen with the current model_hash.
 
         Args:
-            embeddings: (n, d) float32 — representative sample of the space.
+            embeddings: (n, d) float32 - representative sample of the space.
 
         Returns:
             The frozen DriftSignature.
@@ -211,7 +211,7 @@ class TemporalHealthScheduler:
         amortized O(n·d²/100) for DIAGNOSTIC, O(n·k·d/500) for DEEP_SCAN.
 
         Args:
-            embedding: (d,) float32 — the newly stored embedding.
+            embedding: (d,) float32 - the newly stored embedding.
 
         Returns:
             HealthReport with populated fields for the tiers that fired.
@@ -252,7 +252,7 @@ class TemporalHealthScheduler:
     # ── Tier runners ──────────────────────────────────────────────────
 
     def _run_pulse(self, embedding: np.ndarray, report: HealthReport) -> None:
-        """PULSE tier — O(d) running centroid update, every write."""
+        """PULSE tier - O(d) running centroid update, every write."""
         self._update_running_mean(embedding)
         report.running_centroid = self._running_mean
         report.tier.append("pulse")
@@ -268,7 +268,7 @@ class TemporalHealthScheduler:
             report.centroid_drift = 0.0
 
     def _run_heartbeat(self, report: HealthReport) -> None:
-        """HEARTBEAT tier — O(1) Page-Hinkley streaming update."""
+        """HEARTBEAT tier - O(1) Page-Hinkley streaming update."""
         report.tier.append("heartbeat")
         ph_fired = self._page_hinkley.update(report.centroid_drift or 0.0)
         report.page_hinkley_alert = ph_fired
@@ -276,7 +276,7 @@ class TemporalHealthScheduler:
             report.alerts.append("PAGE_HINKLEY_CHANGE_POINT")
 
     def _run_diagnostic(self, n: int, report: HealthReport) -> None:
-        """DIAGNOSTIC tier — O(n·d²) spectral gap, every diagnostic_every writes."""
+        """DIAGNOSTIC tier - O(n·d²) spectral gap, every diagnostic_every writes."""
         buf = self._get_buffer_as_array()
         if buf is None or buf.shape[0] < self._config.min_vectors_diagnostic:
             return
@@ -296,7 +296,7 @@ class TemporalHealthScheduler:
         logger.debug("DIAGNOSTIC write=%d: sg=%.3f ratio=%.3f", n, sg_current, sg_ratio)
 
     def _run_deep_scan(self, n: int, report: HealthReport) -> None:
-        """DEEP_SCAN tier — O(n·k·d) intrinsic dim, every deep_scan_every writes."""
+        """DEEP_SCAN tier - O(n·k·d) intrinsic dim, every deep_scan_every writes."""
         buf = self._get_buffer_as_array()
         if buf is None or buf.shape[0] < self._config.min_vectors_deep_scan:
             return
@@ -320,7 +320,7 @@ class TemporalHealthScheduler:
         logger.info("DEEP_SCAN write=%d: idim=%.1f ratio=%.3f", n, idim_current, idim_ratio)
 
     def status(self) -> dict[str, Any]:
-        """Current scheduler state — suitable for the CLI `cortex health` command."""
+        """Current scheduler state - suitable for the CLI `cortex health` command."""
         return {
             "write_count": self._write_count,
             "model_hash": self._model_hash[:12] + "...",
@@ -377,7 +377,7 @@ class TemporalHealthScheduler:
     # ── Private helpers ───────────────────────────────────────────────
 
     def _update_running_mean(self, embedding: np.ndarray) -> None:
-        """Welford online running mean — O(d), no recomputation."""
+        """Welford online running mean - O(d), no recomputation."""
         self._running_n += 1
         if self._running_mean is None:
             self._running_mean = embedding.astype(np.float32).copy()
@@ -406,7 +406,7 @@ class TemporalHealthScheduler:
         if report.centroid_drift is not None:
             thr = self._config.centroid_alert_threshold
             drift_score = max(0.0, 1.0 - report.centroid_drift / thr)
-            components.append(drift_score * 1.5)  # higher weight — most frequent
+            components.append(drift_score * 1.5)  # higher weight - most frequent
 
         # Spectral gap ratio: healthy if close to 1.0
         if report.spectral_gap_ratio is not None:

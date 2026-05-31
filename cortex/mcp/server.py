@@ -330,13 +330,13 @@ def create_mcp_server(config: MCPServerConfig | None = None) -> "FastMCP":  # ty
 
     register_hilbert_tools(mcp, ctx)
 
-    # Genesis Engine — create systems from specs
+    # Genesis Engine - create systems from specs
     register_genesis_tools(mcp, ctx)
 
-    # Health Index — system monitoring
+    # Health Index - system monitoring
     register_health_tools(mcp, ctx)
 
-    # Music Engine — Master Orchestrator
+    # Music Engine - Master Orchestrator
     register_music_tools(mcp)
 
     # V3 Singularity Tools (Skills, Memory, Swarm Queue)

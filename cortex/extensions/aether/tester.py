@@ -1,4 +1,4 @@
-"""MOSKV-Aether — Tester Agent.
+"""MOSKV-Aether - Tester Agent.
 
 Detects test framework and runs tests in the repo.
 """
@@ -28,7 +28,7 @@ def _detect_test_command(repo_path: Path) -> str:
         return "go test ./... 2>&1 | head -80"
     if (repo_path / "Makefile").exists():
         return "make test 2>&1 | head -80"
-    return "echo 'No test command detected — skipping tests'"
+    return "echo 'No test command detected - skipping tests'"
 
 
 class TesterAgent:

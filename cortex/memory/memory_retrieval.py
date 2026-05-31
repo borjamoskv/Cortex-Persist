@@ -1,4 +1,4 @@
-"""memory_retrieval — L2 Episodic Retrieval with Reciprocal Rank Fusion.
+"""memory_retrieval - L2 Episodic Retrieval with Reciprocal Rank Fusion.
 
 Extracted from CortexMemoryManager to satisfy the Landauer LOC barrier (≤500).
 Pure retrieval logic: HDC + Dense recall + RRF fusion.
@@ -59,7 +59,7 @@ def apply_rrf(
 ) -> list[dict[str, Any]]:
     """Apply Reciprocal Rank Fusion to merge dense and HDC results.
 
-    O(N) over ranked lists — produces a single sorted output.
+    O(N) over ranked lists - produces a single sorted output.
     """
     scores: dict[str, float] = {}
     facts: dict[str, CortexFactModel] = {}
@@ -166,9 +166,9 @@ async def retrieve_episodic_context(
     """Retrieve and fuse facts from all available L2 layers.
 
     Strategy:
-        1. HDC (Vector Alpha + Gamma Inhibition) — preferred
-        2. Dense fallback (sqlite-vec) — if HDC unavailable
-        3. RRF fusion — if both return results
+        1. HDC (Vector Alpha + Gamma Inhibition) - preferred
+        2. Dense fallback (sqlite-vec) - if HDC unavailable
+        3. RRF fusion - if both return results
     """
     if not query:
         return []
@@ -228,7 +228,7 @@ def _apply_hebbian_boost(
 
     Facts connected by strong Hebbian edges get their scores amplified,
     causing co-activated knowledge to surface higher in rankings.
-    O(N²) over result set — bounded by max_episodes (~3-10).
+    O(N²) over result set - bounded by max_episodes (~3-10).
     """
     stdp = getattr(manager, "_stdp_engine", None)
     if stdp is None or len(results) < 2:

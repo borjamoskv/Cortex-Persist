@@ -1,4 +1,4 @@
-"""APIS-Ω — Sovereign Key Arbiter.
+"""APIS-Ω - Sovereign Key Arbiter.
 
 Manages the lifecycle, health, and acquisition of CORTEX LLM API keys.
 """

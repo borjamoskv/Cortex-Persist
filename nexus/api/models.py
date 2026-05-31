@@ -1,6 +1,6 @@
-"""NEXUS — Pydantic models for the Sovereign Agent Directory.
+"""NEXUS - Pydantic models for the Sovereign Agent Directory.
 
-Strict typing. No float for scores — Decimal would be ideal but
+Strict typing. No float for scores - Decimal would be ideal but
 we use float with explicit rounding for V1 speed.
 """
 

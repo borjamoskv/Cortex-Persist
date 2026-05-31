@@ -1,4 +1,4 @@
-"""Engine Mixin Base — The sovereign foundation for all engine sub-layers.
+"""Engine Mixin Base - The sovereign foundation for all engine sub-layers.
 Ω₂: Thermodynamic optimization via shared abstractions.
 """
 
@@ -15,7 +15,7 @@ __all__ = ["EngineMixinBase"]
 
 logger = logging.getLogger("cortex.engine")
 
-# Canonical Fact query structure — includes rich fact fields used by retrieve()/CLI.
+# Canonical Fact query structure - includes rich fact fields used by retrieve()/CLI.
 FACT_COLUMNS = (
     "f.id, f.tenant_id, f.project, f.content, f.fact_type, f.tags, f.metadata, "
     "f.hash, f.valid_from, f.valid_until, f.source, f.confidence, "

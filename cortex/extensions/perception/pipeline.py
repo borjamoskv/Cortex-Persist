@@ -132,7 +132,7 @@ class PerceptionPipeline:
         )
 
     def _on_event(self, event: FileEvent) -> None:
-        """Callback from the watchdog thread — thread-safe append."""
+        """Callback from the watchdog thread - thread-safe append."""
         self._events.append(event)
 
     def start(self) -> None:

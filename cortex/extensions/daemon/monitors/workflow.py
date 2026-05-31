@@ -1,4 +1,4 @@
-"""Workflow Recommender Monitor — suggests slash commands based on system state.
+"""Workflow Recommender Monitor - suggests slash commands based on system state.
 
 Analyzes the current daemon status (ghosts, entropy, memory staleness, etc.)
 and generates `WorkflowAlert`s recommending the most relevant workflow to run.
@@ -24,16 +24,16 @@ logger = logging.getLogger("moskv-daemon")
 
 _WORKFLOW_CATALOG: list[tuple[str, str, list[str]]] = [
     ("/josu", "Autonomous ghost resolution and code sniping", ["ghosts"]),
-    ("/mejoralo", "Code quality engine — score, categorize, improve", ["entropy", "quality"]),
-    ("/build", "Full quality gate — build, lint, type-check", ["quality", "build"]),
+    ("/mejoralo", "Code quality engine - score, categorize, improve", ["entropy", "quality"]),
+    ("/build", "Full quality gate - build, lint, type-check", ["quality", "build"]),
     ("/immune", "Anomaly detection, chaos gates, auto-quarantine", ["security", "anomaly"]),
     ("/nightshift", "Autonomous overnight crystal generation", ["knowledge", "stale_memory"]),
     ("/autodidact", "Semantic extraction and crystal synthesis", ["knowledge"]),
     ("/cortex-store", "Persist decisions, errors, ghosts, bridges", ["persist", "memory"]),
-    ("/test", "Run test suite — full or targeted", ["quality", "tests"]),
-    ("/status", "Boot protocol — load snapshot, check ghosts", ["health"]),
-    ("/aether", "Autonomous agent — Executor/Planner/Critic/Tester", ["agent", "complex_task"]),
-    ("/deploy", "Deploy CORTEX services — API, daemon, or MCP", ["deploy"]),
+    ("/test", "Run test suite - full or targeted", ["quality", "tests"]),
+    ("/status", "Boot protocol - load snapshot, check ghosts", ["health"]),
+    ("/aether", "Autonomous agent - Executor/Planner/Critic/Tester", ["agent", "complex_task"]),
+    ("/deploy", "Deploy CORTEX services - API, daemon, or MCP", ["deploy"]),
 ]
 
 # Minimum seconds between re-evaluations
@@ -137,7 +137,7 @@ class WorkflowMonitor(BaseMonitor[WorkflowAlert]):
                     reason=(
                         f"Convergencia de {ghost_count} ghosts "
                         f"+ memoria {memory_hours:.0f}h. "
-                        "Anomalía sistémica — escudos."
+                        "Anomalía sistémica - escudos."
                     ),
                     confidence="C3🟡",
                     priority=1,

@@ -1,4 +1,4 @@
-"""CORTEX Agent Runtime — Message Bus.
+"""CORTEX Agent Runtime - Message Bus.
 
 MessageBus protocol and SQLite implementation wrapping the
 existing AtomicMailbox with typed AgentMessage serialization.
@@ -31,7 +31,7 @@ class SqliteMessageBus:
     """SQLite-backed message bus using aiosqlite.
 
     Uses a simple queue table with agent_id routing.
-    Wraps the transport layer — does NOT reuse AtomicMailbox
+    Wraps the transport layer - does NOT reuse AtomicMailbox
     directly because we need typed AgentMessage serialization
     and per-recipient queuing (not topic-based).
     """

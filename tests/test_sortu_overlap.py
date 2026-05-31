@@ -1,4 +1,4 @@
-"""Tests for sortu_overlap.py — Overlap detection and causal gap scoring."""
+"""Tests for sortu_overlap.py - Overlap detection and causal gap scoring."""
 
 from __future__ import annotations
 

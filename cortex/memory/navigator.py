@@ -1,4 +1,4 @@
-"""CORTEX v7+ — Semantic Navigator (Grid Cell Architecture).
+"""CORTEX v7+ - Semantic Navigator (Grid Cell Architecture).
 
 Strategy #13: Navigate knowledge topology instead of just searching.
 Inspired by hippocampal place cells and grid cells (Nobel 2014, O'Keefe/Moser).
@@ -205,7 +205,7 @@ class SemanticNavigator:
     ) -> NavigationState:
         """Teleport to a point in semantic space.
 
-        Like typing coordinates — you land directly at the closest
+        Like typing coordinates - you land directly at the closest
         matching region.
         """
         embedding = await self._adapter.embed(query)
@@ -252,7 +252,7 @@ class SemanticNavigator:
         pos = list(self._position)
 
         for step in range(steps):
-            # Progressive interpolation — each step moves further
+            # Progressive interpolation - each step moves further
             alpha = self._drift_alpha * (step + 1) / steps
             pos = _interpolate(pos, direction_embedding, alpha)
             pos = _normalize(pos)

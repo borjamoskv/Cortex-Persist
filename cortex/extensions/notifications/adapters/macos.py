@@ -1,7 +1,7 @@
-"""CORTEX — macOS Notification Adapter.
+"""CORTEX - macOS Notification Adapter.
 
 Delivers events as native macOS notifications via `osascript`.
-Zero dependencies — uses stdlib subprocess only.
+Zero dependencies - uses stdlib subprocess only.
 """
 
 from __future__ import annotations

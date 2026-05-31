@@ -1,8 +1,8 @@
-"""CORTEX Hypervisor — Event Projector.
+"""CORTEX Hypervisor - Event Projector.
 
 Orchestrates invisible side-effects triggered by tenant operations.
 When a tenant calls remember(), the projector fires: embed, mutate,
-endocrine signal, autopoiesis verify — all without the tenant knowing.
+endocrine signal, autopoiesis verify - all without the tenant knowing.
 """
 
 from __future__ import annotations
@@ -35,7 +35,7 @@ class EventProjector:
     async def on_remember(self, fact_id: int, project: str, content: str) -> None:
         """Side-effects after a successful store.
 
-        Fires in background — never blocks the tenant.
+        Fires in background - never blocks the tenant.
         Individual failures degrade gracefully.
         """
         tasks: list[asyncio.Task[Any]] = []
@@ -64,7 +64,7 @@ class EventProjector:
             )
         )
 
-        # All fire-and-forget — gather with return_exceptions
+        # All fire-and-forget - gather with return_exceptions
         results = await asyncio.gather(*tasks, return_exceptions=True)
         for i, result in enumerate(results):
             if isinstance(result, BaseException):
@@ -73,7 +73,7 @@ class EventProjector:
     async def on_recall(self, query: str, project: str) -> None:
         """Side-effects after a successful search/recall.
 
-        Lighter than on_remember — just endocrine awareness.
+        Lighter than on_remember - just endocrine awareness.
         """
         try:
             await self._signal_endocrine("awareness", 0.1)
@@ -103,7 +103,7 @@ class EventProjector:
             endocrine = DigitalEndocrine()
             endocrine.signal(hormone, intensity=intensity)  # type: ignore[reportAttributeAccessIssue]
         except (ImportError, AttributeError, TypeError):
-            pass  # Endocrine not installed — degrade gracefully
+            pass  # Endocrine not installed - degrade gracefully
 
     async def _verify_songlines(self, project: str) -> None:
         """Trigger autopoiesis songline verification if available."""
@@ -113,4 +113,4 @@ class EventProjector:
             ap = Autopoiesis()
             await ap.verify_songlines(project)  # type: ignore[reportAttributeAccessIssue]
         except (ImportError, AttributeError, TypeError):
-            pass  # Autopoiesis not installed — degrade gracefully
+            pass  # Autopoiesis not installed - degrade gracefully

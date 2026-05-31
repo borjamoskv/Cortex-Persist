@@ -1,4 +1,4 @@
-"""Tests for NightShift Crystal Pipeline — Autonomous Knowledge Generation.
+"""Tests for NightShift Crystal Pipeline - Autonomous Knowledge Generation.
 
 Tests the full DAG: KnowledgeRadar → PlannerNode → ExecutorNode →
 ValidatorNode → PersisterNode, using mocked autodidact backend.

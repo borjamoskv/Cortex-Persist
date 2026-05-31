@@ -1,5 +1,5 @@
 """
-CORTEX — Ouroboros-Ω Gate.
+CORTEX - Ouroboros-Ω Gate.
 The thermodynamic enforcer for architectural scaling.
 """
 

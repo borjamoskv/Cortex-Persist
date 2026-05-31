@@ -1,4 +1,4 @@
-"""ENCB v2 — Pluggable Resolvers Protocol.
+"""ENCB v2 - Pluggable Resolvers Protocol.
 
 Defines the interface for resolving epistemic chaos, allowing engine-agnostic
 evaluation between CORTEX, Baseline RAG, and an Upper Bound Oracle.

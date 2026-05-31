@@ -1,4 +1,4 @@
-"""CORTEX v6+ — Thermodynamic Homeostasis Engine.
+"""CORTEX v6+ - Thermodynamic Homeostasis Engine.
 
 Implements active biological memory management (Forget Gates & Synaptic Pruning).
 Integrates with drift monitoring for post-prune topological health assessment.
@@ -75,12 +75,12 @@ class EntropyPruner:
         import importlib.util
 
         if importlib.util.find_spec("cortex.memory.drift") is None:
-            return  # drift module not available — degrade gracefully
+            return  # drift module not available - degrade gracefully
 
         if not hasattr(self._vs, "recall_secure"):
             return
 
-        # We log diagnostically — no action taken, just visibility
+        # We log diagnostically - no action taken, just visibility
         logger.debug(
             "Post-prune drift check requested for tenant=%s project=%s",
             tenant_id,
@@ -145,7 +145,7 @@ class HomeostaticScaler:
 
     Diamond engrams (is_diamond=True) are immune to scaling.
 
-    Derivation: Ω₂ (Entropic Asymmetry) — scaling reduces net entropy
+    Derivation: Ω₂ (Entropic Asymmetry) - scaling reduces net entropy
     without displacing it.
     """
 
@@ -180,7 +180,7 @@ class HomeostaticScaler:
         if not engrams:
             return {"scaled": 0, "factor": 1.0}
 
-        # Compute mean energy (excluding diamonds — they're invariant)
+        # Compute mean energy (excluding diamonds - they're invariant)
         mutable = [e for e in engrams if isinstance(e, CortexSemanticEngram) and not e.is_diamond]
         if not mutable:
             return {"scaled": 0, "factor": 1.0}

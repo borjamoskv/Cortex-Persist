@@ -1,4 +1,4 @@
-"""Tests for Level 3 Copilot Infrastructure — Context, Debounce, Cache, LLM Strategy.
+"""Tests for Level 3 Copilot Infrastructure - Context, Debounce, Cache, LLM Strategy.
 
 Validates the production-grade modules that support the CopilotAgent.
 """
@@ -500,11 +500,11 @@ class TestLLMStrategy:
 
         context = self._make_context()
 
-        # First call — cache miss
+        # First call - cache miss
         results1 = await strategy.generate(context)
         assert len(client.calls) == 1
 
-        # Second call — cache hit (no additional LLM call)
+        # Second call - cache hit (no additional LLM call)
         results2 = await strategy.generate(context)
         assert len(client.calls) == 1  # Still 1, used cache
 

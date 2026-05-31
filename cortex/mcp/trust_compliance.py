@@ -1,5 +1,5 @@
 """
-CORTEX Trust Tools — Compliance Report & Decision Lineage.
+CORTEX Trust Tools - Compliance Report & Decision Lineage.
 
 Extracted from trust_tools.py to keep file size under 300 LOC.
 """
@@ -104,7 +104,7 @@ def _register_compliance_report(mcp: FastMCP, ctx: _MCPContext) -> None:
 
         lines = [
             "╔══════════════════════════════════════════════════╗",
-            "║   CORTEX — EU AI Act Compliance Report          ║",
+            "║   CORTEX - EU AI Act Compliance Report          ║",
             "║   Article 12: Record-Keeping Obligations         ║",
             "╚══════════════════════════════════════════════════╝",
             "",
@@ -154,11 +154,11 @@ def _register_compliance_report(mcp: FastMCP, ctx: _MCPContext) -> None:
         )
 
         if score == 5:
-            lines.append("  🟢 COMPLIANT — All Article 12 requirements met.")
+            lines.append("  🟢 COMPLIANT - All Article 12 requirements met.")
         elif score >= 3:
-            lines.append("  🟡 PARTIAL — Some requirements need attention.")
+            lines.append("  🟡 PARTIAL - Some requirements need attention.")
         else:
-            lines.append("  🔴 NON-COMPLIANT — Critical gaps in record-keeping.")
+            lines.append("  🔴 NON-COMPLIANT - Critical gaps in record-keeping.")
 
         lines.append(f"\n  Compliance Score: {score}/5")
 

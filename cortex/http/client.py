@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""CORTEX Sovereign HTTP Client — Centralized SSRF Protection.
+"""CORTEX Sovereign HTTP Client - Centralized SSRF Protection.
 
 All outbound HTTP requests MUST go through this module.
 Blocks SSRF vectors: file://, internal IPs, link-local, loopback.
@@ -59,7 +59,7 @@ class SSRFBlockedError(Exception):
     def __init__(self, url: str, reason: str) -> None:
         self.url = url
         self.reason = reason
-        super().__init__(f"SSRF blocked: {reason} — {url}")
+        super().__init__(f"SSRF blocked: {reason} - {url}")
 
 
 def validate_url(url: str) -> str:
@@ -96,7 +96,7 @@ def validate_url(url: str) -> str:
             if addr in network:
                 raise SSRFBlockedError(url, f"blocked IP range: {hostname} in {network}")
     except ValueError:
-        # Not a raw IP — hostname. Check for suspicious patterns.
+        # Not a raw IP - hostname. Check for suspicious patterns.
         # Block hex/octal IP obfuscation: 0x7f.0x0.0x0.0x1, 017700000001
         if re.match(r"^(0x[0-9a-f]+\.?)+$", hostname, re.IGNORECASE):
             raise SSRFBlockedError(url, f"hex-encoded IP obfuscation: {hostname}") from None
@@ -106,7 +106,7 @@ def validate_url(url: str) -> str:
         if ".internal" in hostname or hostname.endswith(".local"):
             raise SSRFBlockedError(url, f"internal/local hostname: {hostname}") from None
 
-    # 4. Port check — block common internal service ports
+    # 4. Port check - block common internal service ports
     port = parsed.port
     if port and port not in (80, 443, 8080, 8443):
         logger.warning("Non-standard port %d in URL: %s", port, url)
@@ -165,7 +165,7 @@ class SovereignHTTPClient:
         elif self._backend == "aiohttp":
             async with self._client.get(url, **kwargs) as resp:  # type: ignore
                 return resp
-        raise RuntimeError("Client not initialized — use async with")
+        raise RuntimeError("Client not initialized - use async with")
 
     async def post(self, url: str, **kwargs) -> object:  # type: ignore
         """SSRF-safe POST request."""
@@ -175,7 +175,7 @@ class SovereignHTTPClient:
         elif self._backend == "aiohttp":
             async with self._client.post(url, **kwargs) as resp:  # type: ignore
                 return resp
-        raise RuntimeError("Client not initialized — use async with")
+        raise RuntimeError("Client not initialized - use async with")
 
     async def request(self, method: str, url: str, **kwargs) -> object:  # type: ignore
         """SSRF-safe arbitrary method request."""
@@ -185,7 +185,7 @@ class SovereignHTTPClient:
         elif self._backend == "aiohttp":
             async with self._client.request(method, url, **kwargs) as resp:  # type: ignore
                 return resp
-        raise RuntimeError("Client not initialized — use async with")
+        raise RuntimeError("Client not initialized - use async with")
 
 
 # ── Convenience Functions ──

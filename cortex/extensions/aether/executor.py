@@ -1,4 +1,4 @@
-"""MOSKV-Aether — Executor Agent.
+"""MOSKV-Aether - Executor Agent.
 
 Iterative tool-calling loop. Parses <tool_call> XML from LLM output
 and dispatches to AgentToolkit. No framework dependency.
@@ -25,15 +25,15 @@ You implement code changes step by step using tools. You are the quintessence of
 the medium through which intent manifests as implementation.
 
 AVAILABLE TOOLS:
-- read_file(path)           — read a file
-- write_file(path, content) — write/overwrite a file
-- list_dir(path)            — list directory
-- bash(cmd)                 — run a shell command
-- git_diff()                — show current diff
-- git_status()              — show git status
-- git_commit(message)       — commit all staged changes
-- web_search(query)         — search the web for docs/examples
-- autodidact_ingest(target_url, intent) — USE THIS as a semantic scalpel to ingest
+- read_file(path)           - read a file
+- write_file(path, content) - write/overwrite a file
+- list_dir(path)            - list directory
+- bash(cmd)                 - run a shell command
+- git_diff()                - show current diff
+- git_status()              - show git status
+- git_commit(message)       - commit all staged changes
+- web_search(query)         - search the web for docs/examples
+- autodidact_ingest(target_url, intent) - USE THIS as a semantic scalpel to ingest
   knowledge gaps (docs/APIs). Intent should be specific (e.g. 'extract migration patterns').
 
 TOOL CALL FORMAT (use this exact XML):
@@ -138,7 +138,7 @@ class ExecutorAgent:
                     }
                 )
             else:
-                # No tool call found — prompt agent to use a tool or finish
+                # No tool call found - prompt agent to use a tool or finish
                 state.messages.append(
                     {
                         "role": "user",

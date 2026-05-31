@@ -1,7 +1,7 @@
-"""ALMA Taste Engine — Sovereign Quality Discriminator.
+"""ALMA Taste Engine - Sovereign Quality Discriminator.
 
 Evaluates output quality across 7 heuristic dimensions and assigns
-a composite grade from GOAT to dead. Sync-only, zero LLM calls —
+a composite grade from GOAT to dead. Sync-only, zero LLM calls -
 pure local heuristics based on structural signals.
 
 Gap P0 from GOAT Framework mapping (Fact #4888).
@@ -135,7 +135,7 @@ class TasteEngine:
     """Sovereign Quality Discriminator.
 
     Evaluates content across 7 heuristic dimensions using
-    structural signal detection — no LLM, no external calls.
+    structural signal detection - no LLM, no external calls.
     """
 
     def __init__(
@@ -250,7 +250,7 @@ class TasteEngine:
 
     def _score_utility(self, content: str, ctx: dict[str, Any]) -> TasteDimension:
         """Utility: immediate actionability and executability."""
-        score = 0.3  # Low baseline — prove utility
+        score = 0.3  # Low baseline - prove utility
         signals: list[str] = []
 
         # Actionable markers
@@ -338,7 +338,7 @@ class TasteEngine:
 
     def _score_depth(self, content: str, _ctx: dict[str, Any]) -> TasteDimension:
         """Depth: structural reasoning, trade-offs, failure modes."""
-        score = 0.3  # Low baseline — depth must be proven
+        score = 0.3  # Low baseline - depth must be proven
         signals: list[str] = []
 
         # Depth markers
@@ -444,7 +444,7 @@ class TasteEngine:
         )
 
     def _score_taste(self, content: str, ctx: dict[str, Any]) -> TasteDimension:
-        """Taste: the 'soul' factor — identity, singularity, anti-mediocrity.
+        """Taste: the 'soul' factor - identity, singularity, anti-mediocrity.
 
         This is the most subjective dimension. It penalizes generic outputs
         and rewards content that has a discernible point of view, structural
@@ -560,18 +560,18 @@ class TasteEngine:
         weakest = min(dims, key=lambda d: d.score)
 
         verdicts: dict[str, str] = {
-            GRADE_GOAT: f"Exceptional — strongest in {strongest.name} ({strongest.score:.2f})",
+            GRADE_GOAT: f"Exceptional - strongest in {strongest.name} ({strongest.score:.2f})",
             GRADE_STRONG: (
-                f"Solid output — {strongest.name} excels ({strongest.score:.2f}), "
+                f"Solid output - {strongest.name} excels ({strongest.score:.2f}), "
                 f"improve {weakest.name} ({weakest.score:.2f})"
             ),
             GRADE_FUNCTIONAL: (
-                f"Functional but unremarkable — {weakest.name} drags ({weakest.score:.2f})"
+                f"Functional but unremarkable - {weakest.name} drags ({weakest.score:.2f})"
             ),
             GRADE_MEDIOCRE: (
-                f"Mediocre — lacks soul. Weakest: {weakest.name} ({weakest.score:.2f})"
+                f"Mediocre - lacks soul. Weakest: {weakest.name} ({weakest.score:.2f})"
             ),
-            GRADE_DEAD: ("Dead output — no structural value. All dimensions below threshold."),
+            GRADE_DEAD: ("Dead output - no structural value. All dimensions below threshold."),
         }
         return verdicts.get(grade, f"Score: {composite:.2f}")
 
@@ -585,6 +585,6 @@ class TasteEngine:
             dimensions=dims,
             composite_score=0.0,
             grade=GRADE_DEAD,
-            verdict="Dead output — empty content.",
+            verdict="Dead output - empty content.",
             timestamp=time.monotonic(),
         )

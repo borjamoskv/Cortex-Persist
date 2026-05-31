@@ -1,4 +1,4 @@
-"""CORTEX Metering — Usage Tracker.
+"""CORTEX Metering - Usage Tracker.
 
 Records API call consumption per tenant with SQLite-backed counters.
 Designed for O(1) inserts and O(1) aggregation via pre-computed monthly buckets.
@@ -122,7 +122,7 @@ class UsageTracker:
             ),
         )
 
-        # Upsert monthly summary — atomic O(1)
+        # Upsert monthly summary - atomic O(1)
         conn.execute(
             "INSERT INTO usage_monthly_summary (tenant_id, month_bucket, total_calls, "
             "total_tokens, last_updated) VALUES (?, ?, 1, ?, ?) "
@@ -244,7 +244,7 @@ class UsageTracker:
         status_code: int = 200,
         tokens_used: int = 0,
     ) -> None:
-        """Convenience wrapper — record a call without constructing UsageRecord."""
+        """Convenience wrapper - record a call without constructing UsageRecord."""
         self.record(
             UsageRecord(
                 tenant_id=tenant_id,

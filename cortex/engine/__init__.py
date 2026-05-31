@@ -1,4 +1,4 @@
-"""CORTEX Engine — Package init.
+"""CORTEX Engine - Package init.
 
 Reality Level: C5-REAL
 """
@@ -19,7 +19,7 @@ from cortex.engine.legacy_mixin import LegacyMixin
 from cortex.engine.memory_mixin import MemoryMixin
 from cortex.engine.mixins.components import ComponentsMixin
 from cortex.engine.mixins.optimization import OptimizationMixin
-from cortex.engine.models import row_to_fact  # noqa: F401 — re-exported
+from cortex.engine.models import row_to_fact  # noqa: F401 - re-exported
 from cortex.engine.query_mixin import QueryMixin
 from cortex.engine.search_mixin import SearchMixin
 from cortex.engine.store_mixin import StoreMixin
@@ -190,7 +190,7 @@ class CortexEngine(
                     timeout=5.0,
                 )
             except (asyncio.TimeoutError, Exception):  # noqa: BLE001
-                logger.debug("Post-commit task drain timed out — forcing close")
+                logger.debug("Post-commit task drain timed out - forcing close")
             self._post_commit_tasks.clear()
         if self._memory_manager:
             try:
@@ -199,7 +199,7 @@ class CortexEngine(
                     timeout=5.0,
                 )
             except (asyncio.TimeoutError, Exception):  # noqa: BLE001
-                logger.debug("Memory manager background drain timed out — forcing close")
+                logger.debug("Memory manager background drain timed out - forcing close")
             self._memory_manager = None
         self._memory_l1 = None
         self._memory_l3 = None

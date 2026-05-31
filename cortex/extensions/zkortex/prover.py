@@ -1,5 +1,5 @@
 """
-ZKORTEX — Sovereign Prover.
+ZKORTEX - Sovereign Prover.
 
 El Prover es la entidad soberana: CORTEX mismo.
 Tiene acceso a los secretos y genera pruebas sin exponerlos.
@@ -10,7 +10,7 @@ Arquitectura:
       2. Un registro de commitments emitidos
       3. La capacidad de generar pruebas verificables externamente
 
-El Prover NUNCA exporta datos en plaintext — solo commitments y proofs.
+El Prover NUNCA exporta datos en plaintext - solo commitments y proofs.
 """
 
 from __future__ import annotations
@@ -29,7 +29,7 @@ logger = logging.getLogger("cortex.extensions.zkortex.prover")
 
 @dataclass
 class ProverSession:
-    """Estado de una sesión de pruebas — el Prover controla su ciclo de vida."""
+    """Estado de una sesión de pruebas - el Prover controla su ciclo de vida."""
 
     session_id: str
     created_at: float = field(default_factory=time.time)
@@ -68,7 +68,7 @@ class ZKOrtexProver:
     def ingest(self, facts: list[str]) -> str:
         """
         Ingiere un conjunto de hechos en el árbol.
-        Retorna el Merkle Root público — el único dato que sale.
+        Retorna el Merkle Root público - el único dato que sale.
 
         Los hechos originales jamás se exponen fuera del Prover.
         """
@@ -87,7 +87,7 @@ class ZKOrtexProver:
 
     @property
     def knowledge_count(self) -> int:
-        """Número de hechos conocidos — solo accesible internamente."""
+        """Número de hechos conocidos - solo accesible internamente."""
         return len(self._knowledge_base)
 
     # ─── Commitment Generation ────────────────────────────────────────────────
@@ -118,7 +118,7 @@ class ZKOrtexProver:
 
     def open_commitment(self, fact_id: str) -> tuple[str, KnowledgeCommitment] | None:
         """
-        Abre un commitment — revela el hecho y el blinding factor.
+        Abre un commitment - revela el hecho y el blinding factor.
 
         ADVERTENCIA: Abrir un commitment destruye su opacidad.
         Solo hacer si la auditoría soberana lo requiere explícitamente.
@@ -126,7 +126,7 @@ class ZKOrtexProver:
         if fact_id not in self._commitments:
             return None
         commitment, blinding = self._commitments[fact_id]
-        # Solo el Prover sabe el contenido original — aquí lo recuperaríamos
+        # Solo el Prover sabe el contenido original - aquí lo recuperaríamos
         # de nuestra base de conocimiento interna
         logger.warning(
             "Commitment OPENED for fact_id='%s'. Opacity compromised for this fact.", fact_id
@@ -176,7 +176,7 @@ class ZKOrtexProver:
     # ─── Session Stats ────────────────────────────────────────────────────────
 
     def session_stats(self) -> dict[str, Any]:
-        """Estadísticas de la sesión — sin datos privados."""
+        """Estadísticas de la sesión - sin datos privados."""
         return {
             "session_id": self._session_id,
             "created_at": self._session.created_at,

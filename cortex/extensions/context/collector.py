@@ -61,7 +61,7 @@ def _parse_tx_detail(raw: str | dict | None) -> str:
     try:
         d = json.loads(raw) if isinstance(raw, str) else raw
         if isinstance(d, dict):
-            return f" — {d.get('content', '')[:80]}"
+            return f" - {d.get('content', '')[:80]}"
     except (json.JSONDecodeError, TypeError):
         pass
     return ""
@@ -175,7 +175,7 @@ class ContextCollector:
             Signal(
                 source="db:ghosts",
                 signal_type="active_ghost",
-                content=f"Ghost: {row[2]} — {(row[3] or '')[:100]}",
+                content=f"Ghost: {row[2]} - {(row[3] or '')[:100]}",
                 project=row[1],
                 timestamp=row[4] or now_iso(),
                 weight=WEIGHT_ACTIVE_GHOST,

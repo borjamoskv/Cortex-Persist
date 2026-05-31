@@ -1,4 +1,4 @@
-"""CORTEX Quickstart — Store, Search, Ask in 10 lines.
+"""CORTEX Quickstart - Store, Search, Ask in 10 lines.
 
 Usage:
     pip install cortex-persist

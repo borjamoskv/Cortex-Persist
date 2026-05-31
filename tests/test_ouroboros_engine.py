@@ -1,4 +1,4 @@
-"""Tests for cortex-core/ouroboros_engine.py — Security Audit Engine.
+"""Tests for cortex-core/ouroboros_engine.py - Security Audit Engine.
 
 C5-REAL coverage for provision, contract detection, test generation, and queue mechanisms.
 """

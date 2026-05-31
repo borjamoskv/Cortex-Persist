@@ -1,7 +1,7 @@
-"""ENCB v2 — Typed Belief Objects.
+"""ENCB v2 - Typed Belief Objects.
 
 Four claim types with CRDT-compatible version vectors, evidence chains,
-and conflict sets. Mutable dataclass — merge operations mutate in place
+and conflict sets. Mutable dataclass - merge operations mutate in place
 for simulation performance.
 """
 
@@ -26,7 +26,7 @@ class BeliefType(str, Enum):
 class Evidence:
     """A single observation supporting or contesting a belief.
 
-    Immutable — evidence records are append-only.
+    Immutable - evidence records are append-only.
     """
 
     source_node: str

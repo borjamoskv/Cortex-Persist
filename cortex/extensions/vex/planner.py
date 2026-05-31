@@ -1,4 +1,4 @@
-"""VEX Planner — Decomposes intent into verifiable execution steps.
+"""VEX Planner - Decomposes intent into verifiable execution steps.
 
 The planner is LLM-agnostic: it accepts a decomposition function
 that can be backed by any model (Gemini, Claude, GPT, local).
@@ -6,7 +6,7 @@ that can be backed by any model (Gemini, Claude, GPT, local).
 For Phase 1, includes a deterministic planner for known task patterns
 (store, search, recall) and a pluggable LLM planner interface.
 
-Derivation: Ω₂ (Entropic Asymmetry) — the plan reduces uncertainty.
+Derivation: Ω₂ (Entropic Asymmetry) - the plan reduces uncertainty.
 """
 
 from __future__ import annotations
@@ -33,7 +33,7 @@ class PlannerBackend(Protocol):
 
 
 class Planner:
-    """VEX Task Planner — intent → verifiable steps.
+    """VEX Task Planner - intent → verifiable steps.
 
     Supports two modes:
     1. Deterministic: Known CORTEX operations (store, search, recall)
@@ -116,7 +116,7 @@ class Planner:
     def _deterministic_plan(self, intent: str) -> list[PlannedStep]:
         """Fallback: single-step plan wrapping the intent as a cortex_store.
 
-        This is the minimal viable plan — stores the intent as a fact
+        This is the minimal viable plan - stores the intent as a fact
         so that the execution at least has a verifiable record.
         A real deployment would use an LLM backend here.
         """

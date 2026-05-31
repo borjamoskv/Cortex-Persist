@@ -1,10 +1,10 @@
 """
-ZKORTEX — Merkle Tree + Zero-Knowledge Membership Proof.
+ZKORTEX - Merkle Tree + Zero-Knowledge Membership Proof.
 
 Probar que "CORTEX conoce el hecho X" sin revelar X ni ningún otro hecho.
 
 El árbol Merkle transforma un conjunto de secretos en una raíz pública (root).
-La prueba de membresía (path) demuestra pertenencia con O(log n) hashes —
+La prueba de membresía (path) demuestra pertenencia con O(log n) hashes -
 revelando solo el camino, nunca el contenido de las hojas.
 
 Uso soberano:
@@ -24,14 +24,14 @@ def _sha256(data: bytes) -> bytes:
 
 
 def _hash_pair(left: bytes, right: bytes) -> bytes:
-    """H(left || right) — orden lexicográfico para consistencia."""
+    """H(left || right) - orden lexicográfico para consistencia."""
     if left <= right:
         return _sha256(left + right)
     return _sha256(right + left)
 
 
 def _leaf_hash(value: str) -> bytes:
-    """Leaf: H("leaf" || value) — domain separation para evitar second-preimage."""
+    """Leaf: H("leaf" || value) - domain separation para evitar second-preimage."""
     return _sha256(b"zkortex:leaf:" + value.encode("utf-8"))
 
 
@@ -54,7 +54,7 @@ class ZKMembershipProof:
         leaf_index: Posición en el árbol (opcional, para ordering)
 
     Campo privado (NUNCA se incluye en la prueba pública):
-        [el valor del elemento — solo el prover lo conoce]
+        [el valor del elemento - solo el prover lo conoce]
     """
 
     root: str
@@ -65,7 +65,7 @@ class ZKMembershipProof:
     def verify(self, element_value: str) -> bool:
         """
         Verifica que element_value ∈ árbol con esta raíz.
-        El verificador externo necesita el valor para verificar —
+        El verificador externo necesita el valor para verificar -
         pero CORTEX controla cuándo y a quién lo da.
         """
         current = _leaf_hash(element_value)
@@ -78,7 +78,7 @@ class ZKMembershipProof:
         return current.hex() == self.root
 
     def to_public_dict(self) -> dict[str, object]:
-        """Exportación pública — sin el valor del elemento."""
+        """Exportación pública - sin el valor del elemento."""
         return {
             "root": self.root,
             "proof_path": [
@@ -110,7 +110,7 @@ class MerkleTree:
     def build(self, elements: list[str]) -> str:
         """
         Construye el árbol desde una lista de elementos.
-        Retorna el root hex — el único dato que se publica.
+        Retorna el root hex - el único dato que se publica.
         """
         if not elements:
             raise ValueError("Cannot build Merkle tree from empty set.")

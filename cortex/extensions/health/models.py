@@ -1,4 +1,4 @@
-"""Health data models — scores, thresholds, snapshots.
+"""Health data models - scores, thresholds, snapshots.
 
 Grade is a sealed enum. MetricSnapshot is frozen. Invalid states
 are structurally impossible.
@@ -13,7 +13,7 @@ from datetime import datetime, timezone
 
 
 class Grade(enum.Enum):
-    """Sovereign health grade — sealed, ordered, no raw strings.
+    """Sovereign health grade - sealed, ordered, no raw strings.
 
     Comparison uses ordinal: Grade.SOVEREIGN > Grade.FAILED.
     Each grade carries its threshold and emoji.
@@ -63,7 +63,7 @@ class Grade(enum.Enum):
     def from_letter(cls, letter: str) -> Grade:
         """Resolve a letter ('S', 'A', ...) to a Grade enum.
 
-        Raises ValueError on unknown letters — regression impossible.
+        Raises ValueError on unknown letters - regression impossible.
         """
         for grade in cls:
             if grade.letter == letter:
@@ -83,7 +83,7 @@ class MetricSnapshot:
     """Point-in-time measurement of a single health dimension.
 
     Values are normalized to [0.0, 1.0] (1.0 = perfectly healthy).
-    Frozen — once created, never mutated.
+    Frozen - once created, never mutated.
     """
 
     name: str
@@ -119,7 +119,7 @@ class MetricSnapshot:
 class HealthScore:
     """Aggregate health index (0–100).
 
-    Grade is a sealed ``Grade`` enum — raw strings are dead.
+    Grade is a sealed ``Grade`` enum - raw strings are dead.
     """
 
     score: float
@@ -201,7 +201,7 @@ class HealthReport:
 
 @dataclass(frozen=True)
 class HealthThresholds:
-    """Centralized threshold configuration — no magic numbers.
+    """Centralized threshold configuration - no magic numbers.
 
     Change thresholds in ONE place, all surfaces respond.
     """

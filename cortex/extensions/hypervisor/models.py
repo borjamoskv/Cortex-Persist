@@ -1,4 +1,4 @@
-"""CORTEX Hypervisor — Tenant-Facing Surface Models.
+"""CORTEX Hypervisor - Tenant-Facing Surface Models.
 
 The Telescope Inversion: these are the ONLY types a tenant ever sees.
 4 dataclasses. Zero internal fields. Maximum simplicity.
@@ -42,7 +42,7 @@ class Receipt:
 
 @dataclass(frozen=True)
 class HealthReport:
-    """Project health — legible, no internal metrics exposed.
+    """Project health - legible, no internal metrics exposed.
 
     The tenant sees 'healthy' or 'degraded', not p99 latencies
     or Merkle tree depth or endocrine hormone levels.

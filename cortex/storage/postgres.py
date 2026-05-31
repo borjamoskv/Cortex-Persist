@@ -130,7 +130,7 @@ class PostgresBackend:
         """Apply the full CORTEX PostgreSQL schema (idempotent).
 
         Applies PG extensions (pgvector, pg_trgm) first, then all
-        table definitions. Safe to call multiple times — all statements
+        table definitions. Safe to call multiple times - all statements
         use CREATE IF NOT EXISTS.
 
         Raises:
@@ -141,14 +141,14 @@ class PostgresBackend:
         self._ensure_pool()
         logger.info("PostgreSQL: Applying schema (idempotent)...")
 
-        # Apply extensions — may require superuser; log warning if unavailable
+        # Apply extensions - may require superuser; log warning if unavailable
         try:
             await self.executescript(PG_EXTENSIONS)
             logger.debug("PostgreSQL: Extensions applied (pgvector, pg_trgm).")
         except Exception as exc:  # noqa: BLE001
             logger.warning("PostgreSQL: Extensions skipped (insufficient privileges): %s", exc)
 
-        # Apply all schema statements — each is idempotent
+        # Apply all schema statements - each is idempotent
         for i, schema_sql in enumerate(PG_ALL_SCHEMA):
             try:
                 await self.executescript(schema_sql)
@@ -173,7 +173,7 @@ class PostgresBackend:
 
         Also handles common SQLite → PostgreSQL syntax differences:
         - AUTOINCREMENT → handled at schema level
-        - datetime('now') → NOW() — handled at schema level
+        - datetime('now') → NOW() - handled at schema level
         """
         if "?" not in sql:
             return sql, params
@@ -303,7 +303,7 @@ class PostgresBackend:
         try:
             result = await self.execute("SELECT 1 AS ok")
             return len(result) > 0 and result[0].get("ok") == 1
-        except Exception:  # noqa: BLE001 — health probe must always return bool
+        except Exception:  # noqa: BLE001 - health probe must always return bool
             return False
 
     def __repr__(self) -> str:

@@ -1,4 +1,4 @@
-"""MOSKV-Aether — CLI commands.
+"""MOSKV-Aether - CLI commands.
 
 Registered as `cortex aether` subcommand group.
 """
@@ -64,7 +64,7 @@ def cmd_logs(args: argparse.Namespace) -> int:
     if task is None:
         print(f"Task [{args.task_id}] not found.")
         return 1
-    print(f"Task [{task.id}] — {task.title}")
+    print(f"Task [{task.id}] - {task.title}")
     print(f"Status  : {task.status}")
     print(f"Branch  : {task.branch or 'none'}")
     print(f"Created : {task.created_at}")
@@ -112,7 +112,7 @@ def cmd_run(args: argparse.Namespace) -> int:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="cortex aether",
-        description="MOSKV-Aether — Autonomous background AI coding agent",
+        description="MOSKV-Aether - Autonomous background AI coding agent",
     )
     sub = parser.add_subparsers(dest="command", required=True)
 

@@ -65,7 +65,7 @@ class Ok(Generic[T]):
         return Ok(fn(self.value))
 
     def flat_map(self, fn: Callable[[T], Result[U, Any]]) -> Result[U, Any]:
-        """Monadic bind — apply fn that returns a Result."""
+        """Monadic bind - apply fn that returns a Result."""
         return fn(self.value)
 
     def map_err(self, _fn: Callable[[Any], Any]) -> Ok[T]:
@@ -89,7 +89,7 @@ class Err(Generic[E]):
         return True
 
     def unwrap(self) -> Any:
-        """Raise on Err — forces explicit handling."""
+        """Raise on Err - forces explicit handling."""
         raise ValueError(f"Called unwrap() on Err: {self.error}")
 
     def unwrap_or(self, default: Any) -> Any:
@@ -121,7 +121,7 @@ def safe(fn: Callable[..., T]) -> Callable[..., Result[T, str]]:
     def wrapper(*args: Any, **kwargs: Any) -> Result[T, str]:
         try:
             return Ok(fn(*args, **kwargs))
-        except Exception as exc:  # noqa: BLE001 — deliberate boundary — @safe wraps any callable
+        except Exception as exc:  # noqa: BLE001 - deliberate boundary - @safe wraps any callable
             tb = traceback.format_exception(type(exc), exc, exc.__traceback__)
             return Err(f"{type(exc).__name__}: {exc}\n{''.join(tb[-3:])}")
 
@@ -136,7 +136,7 @@ def safe_async(fn: Callable[..., Any]) -> Callable[..., Any]:
     async def wrapper(*args: Any, **kwargs: Any) -> Result[T, str]:
         try:
             return Ok(await fn(*args, **kwargs))
-        except Exception as exc:  # noqa: BLE001 — deliberate boundary — @safe_async wraps any async callable
+        except Exception as exc:  # noqa: BLE001 - deliberate boundary - @safe_async wraps any async callable
             tb = traceback.format_exception(type(exc), exc, exc.__traceback__)
             return Err(f"{type(exc).__name__}: {exc}\n{''.join(tb[-3:])}")
 

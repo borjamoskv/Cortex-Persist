@@ -104,7 +104,7 @@ async def lifespan(app: FastAPI):
     api_state.auth_manager = auth_manager
     api_state.tracker = tracker
 
-    # 6. Notification Bus — wire adapters from config
+    # 6. Notification Bus - wire adapters from config
     from cortex.extensions.notifications.setup import setup_notifications
 
     notification_bus = setup_notifications(config)
@@ -138,7 +138,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="CORTEX — Sovereign Memory API",
+    title="CORTEX - Sovereign Memory API",
     description="Local-first memory infrastructure for AI agents. "
     "Vector search, temporal facts, cryptographic ledger.",
     version=__version__,
@@ -268,7 +268,7 @@ async def health_check(request: Request) -> dict:
         OSError,
         RuntimeError,
         AttributeError,
-    ):  # noqa: BLE001 — health check must never crash
+    ):  # noqa: BLE001 - health check must never crash
         pass
 
     # Health Index integration

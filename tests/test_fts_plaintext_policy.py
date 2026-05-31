@@ -1,4 +1,4 @@
-"""Tests for Issue #95 — define a single plaintext policy for FTS indexing.
+"""Tests for Issue #95 - define a single plaintext policy for FTS indexing.
 
 FTS should always index the plaintext content, NOT the ciphertext.
 Encryption should happen at the storage layer, but FTS (which is plaintext search)

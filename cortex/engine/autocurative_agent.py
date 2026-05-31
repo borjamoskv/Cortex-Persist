@@ -1,4 +1,4 @@
-"""Auto-Curative Agent — Level 5 Self-Healing Daemon.
+"""Auto-Curative Agent - Level 5 Self-Healing Daemon.
 
 Unifies the CORTEX self-healing primitives into a single closed-loop daemon.
 
@@ -77,7 +77,7 @@ class AutoCurativeAgent:
             self._rust_engine = AutoCurativeEngine(window_size=1000)
             logger.info("[AUTOCURATIVE] Rust fast-path engine loaded")
         except ImportError:
-            logger.debug("[AUTOCURATIVE] Rust engine not available — using Python fallback")
+            logger.debug("[AUTOCURATIVE] Rust engine not available - using Python fallback")
 
     def _get_or_create_breaker(self, subsystem: str) -> CircuitBreaker:
         """Get or create a circuit breaker for a subsystem."""

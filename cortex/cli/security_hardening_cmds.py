@@ -19,7 +19,7 @@ def quarantine(fact_id: int, reason: str, db: str) -> None:
     try:
         success = _run_async(engine.quarantine(fact_id, reason))
         if success:
-            console.print(f"[bold red]🔒 QUARANTINED[/] Fact [bold]#{fact_id}[/] — {reason}")
+            console.print(f"[bold red]🔒 QUARANTINED[/] Fact [bold]#{fact_id}[/] - {reason}")
         else:
             console.print(f"[yellow]⚠ Fact #{fact_id} not found or already quarantined[/]")
     finally:
@@ -36,7 +36,7 @@ def unquarantine(fact_id: int, db: str) -> None:
         success = _run_async(engine.unquarantine(fact_id))
         if success:
             console.print(
-                f"[bold green]🔓 RELEASED[/] Fact [bold]#{fact_id}[/] — quarantine lifted"
+                f"[bold green]🔓 RELEASED[/] Fact [bold]#{fact_id}[/] - quarantine lifted"
             )
         else:
             console.print(f"[yellow]⚠ Fact #{fact_id} not found or not quarantined[/]")

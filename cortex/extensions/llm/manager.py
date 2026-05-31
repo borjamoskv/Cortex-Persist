@@ -32,7 +32,7 @@ logger = logging.getLogger("cortex.extensions.llm.manager")
 class LLMManager:
     """Manages the LLM provider lifecycle.
 
-    Returns None if no provider is configured — CORTEX
+    Returns None if no provider is configured - CORTEX
     continues to work without LLM (search-only mode).
     """
 

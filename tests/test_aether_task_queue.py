@@ -1,4 +1,4 @@
-"""Tests for cortex.aether.queue — SQLite-backed task queue.
+"""Tests for cortex.aether.queue - SQLite-backed task queue.
 
 Uses tmp_path for isolated database per test. No network, no LLM.
 """

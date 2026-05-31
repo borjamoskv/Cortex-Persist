@@ -5,7 +5,7 @@ Translated from SQLite schema.py for PostgreSQL/AlloyDB compatibility.
 Key differences:
 - SERIAL/BIGSERIAL instead of INTEGER PRIMARY KEY AUTOINCREMENT
 - NOW() instead of datetime('now')
-- No VIRTUAL TABLE (FTS5/vec0) — use pgvector + pg_trgm instead
+- No VIRTUAL TABLE (FTS5/vec0) - use pgvector + pg_trgm instead
 - BOOLEAN instead of INTEGER for boolean fields
 - TEXT[] or JSONB instead of TEXT for structured fields
 """

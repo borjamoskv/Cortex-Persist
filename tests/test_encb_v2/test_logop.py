@@ -1,4 +1,4 @@
-"""Tests for logop.py — Log-odds pooling."""
+"""Tests for logop.py - Log-odds pooling."""
 
 from __future__ import annotations
 

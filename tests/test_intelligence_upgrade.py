@@ -1,4 +1,4 @@
-"""Tests for CORTEX Intelligence Upgrade — 6 components.
+"""Tests for CORTEX Intelligence Upgrade - 6 components.
 
 Tests:
 1. Inference Engine (inference.py)

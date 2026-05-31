@@ -1,4 +1,4 @@
-"""AUTOROUTER-1 — CLI commands for CORTEX integration.
+"""AUTOROUTER-1 - CLI commands for CORTEX integration.
 
 Commands:
   cortex autorouter start    → Arranca el daemon

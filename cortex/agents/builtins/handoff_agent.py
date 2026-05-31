@@ -1,8 +1,8 @@
 """
-handoff_agent.py — HandoffAgent
+handoff_agent.py - HandoffAgent
 
 Reactive agent coordinating inter-agent context transfer. Wraps
-save_handoff and load_handoff — the full generate_handoff requires a live
+save_handoff and load_handoff - the full generate_handoff requires a live
 CortexEngine, so callers must pass engine via manifest metadata or inject
 generate_handoff callable.
 """
@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 class HandoffAgent(BaseAgent):
-    """Reactive agent — manages session context serialisation between agents.
+    """Reactive agent - manages session context serialisation between agents.
 
     For full handoff generation (requires CortexEngine), callers should call
     generate_handoff(...) themselves and forward the result as a HANDOFF_REQUEST
@@ -71,14 +71,14 @@ class HandoffAgent(BaseAgent):
         try:
             path = self._handoff_dir / f"{message.sender}_{message.message_id[:8]}.json"
             save_handoff(handoff_data, path=path)
-            logger.info("HandoffAgent — saved handoff for %s → %s", message.sender, path)
+            logger.info("HandoffAgent - saved handoff for %s → %s", message.sender, path)
             await self._reply(
                 message,
                 {"path": str(path), "saved": True},
                 kind=MessageKind.HANDOFF_ACCEPTED,
             )
         except Exception as exc:
-            logger.exception("HandoffAgent — save_handoff failed")
+            logger.exception("HandoffAgent - save_handoff failed")
             await self._reply(
                 message,
                 {"error": str(exc)},
@@ -104,7 +104,7 @@ class HandoffAgent(BaseAgent):
             )
 
     async def tick(self) -> None:
-        logger.debug("HandoffAgent tick — idle")
+        logger.debug("HandoffAgent tick - idle")
 
     # ------------------------------------------------------------------
     # Helper

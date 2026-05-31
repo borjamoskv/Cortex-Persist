@@ -1,4 +1,4 @@
-"""Tests for sortu_models.py — State machine, transitions, invocations."""
+"""Tests for sortu_models.py - State machine, transitions, invocations."""
 
 from __future__ import annotations
 

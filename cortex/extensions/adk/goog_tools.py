@@ -1,4 +1,4 @@
-"""Google One Tools — Integration for CORTEX ADK agents.
+"""Google One Tools - Integration for CORTEX ADK agents.
 
 Provides tools to monitor storage, sync with NotebookLM sources,
 and manage backups in Google Drive (Google One).

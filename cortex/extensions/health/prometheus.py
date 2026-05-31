@@ -1,5 +1,5 @@
 """
-CORTEX — Prometheus Exposition.
+CORTEX - Prometheus Exposition.
 
 Converts a CORTEX HealthReport or HealthScore into the Prometheus
 text-based exposition format for ingestion by metrics scrapers.

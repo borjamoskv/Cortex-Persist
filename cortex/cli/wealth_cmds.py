@@ -1,14 +1,14 @@
-"""CORTEX CLI — Sovereign Wealth Engine (moneytv-1 & sovereign-growth-engine-v1).
+"""CORTEX CLI - Sovereign Wealth Engine (moneytv-1 & sovereign-growth-engine-v1).
 
 Commands:
-    cortex wealth radar      — Escaneo completo del mercado
-    cortex wealth snipe      — Ejecución de oportunidad validada
-    cortex wealth compound   — Reinversión automática con tax withholding
-    cortex wealth launch     — Lanzar producto digital MVP
-    cortex wealth tax        — Calcular obligaciones fiscales
-    cortex wealth growth     — Ejecuta pipeline GTM completo
-    cortex wealth scan       — Escaneo pasivo de oportunidades CORTEX
-    cortex wealth alpha      — Alpha hunt focalizado en un canal
+    cortex wealth radar      - Escaneo completo del mercado
+    cortex wealth snipe      - Ejecución de oportunidad validada
+    cortex wealth compound   - Reinversión automática con tax withholding
+    cortex wealth launch     - Lanzar producto digital MVP
+    cortex wealth tax        - Calcular obligaciones fiscales
+    cortex wealth growth     - Ejecuta pipeline GTM completo
+    cortex wealth scan       - Escaneo pasivo de oportunidades CORTEX
+    cortex wealth alpha      - Alpha hunt focalizado en un canal
 """
 
 from __future__ import annotations
@@ -26,7 +26,7 @@ console = Console()
 
 
 def _run_async(coro: Coroutine[Any, Any, Any]) -> Any:
-    """Run async coroutine safely — reuses existing loop or creates one."""
+    """Run async coroutine safely - reuses existing loop or creates one."""
     try:
         asyncio.get_running_loop()
     except RuntimeError:

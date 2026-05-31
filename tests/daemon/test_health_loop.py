@@ -1,4 +1,4 @@
-"""Tests for cortex.daemon.health_loop — autonomous health monitoring."""
+"""Tests for cortex.daemon.health_loop - autonomous health monitoring."""
 
 from __future__ import annotations
 

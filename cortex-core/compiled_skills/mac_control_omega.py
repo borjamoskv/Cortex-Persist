@@ -1,6 +1,6 @@
 """
 CORTEX JIT Compiled Skill: Mac-Control-OMEGA
-Description: SINGULARITY — Daemon, Vision, UI DOM, and 18-Domain macOS Control
+Description: SINGULARITY - Daemon, Vision, UI DOM, and 18-Domain macOS Control
 """
 import json
 import logging

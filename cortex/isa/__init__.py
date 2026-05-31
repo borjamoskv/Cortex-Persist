@@ -1,4 +1,4 @@
-"""CORTEX Agent ISA — Python DSL for Code-as-Data dispatch trees.
+"""CORTEX Agent ISA - Python DSL for Code-as-Data dispatch trees.
 
 Homoiconic builder: constructs AgentOp trees in Python that execute
 entirely in Rust via zero-copy PyO3 FFI. Python only builds the plan;

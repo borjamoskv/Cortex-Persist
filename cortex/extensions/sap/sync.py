@@ -214,7 +214,7 @@ class SAPSync:
         combined.skipped = pull_result.skipped
         combined.errors.extend(pull_result.errors)
 
-        # Step 2: Push (CORTEX → SAP) — only if cortex_wins
+        # Step 2: Push (CORTEX → SAP) - only if cortex_wins
         if conflict_strategy == "cortex_wins":
             push_result = await self.push(project, entity_set)
             combined.pushed = push_result.pushed

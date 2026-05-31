@@ -1,4 +1,4 @@
-"""MEJORALO-Ω — Sovereign Continuous Script Improvement Agent.
+"""MEJORALO-Ω - Sovereign Continuous Script Improvement Agent.
 
 Autonomous agent that runs perpetual Ouroboros cycles:
 Scan 13D → Shannon Prioritization → Swarm Heal → Delta-Test → Absorb.
@@ -93,7 +93,7 @@ class MejoraloOmegaAgent:
             logger.debug("Agent registry not available; using defaults.")
 
     async def run(self, max_cycles: int | None = None) -> dict[str, Any]:
-        """Main execution loop — runs until stopped or max_cycles reached.
+        """Main execution loop - runs until stopped or max_cycles reached.
 
         Returns:
             Summary dict with cycle_count, final_score, score_history.
@@ -168,11 +168,11 @@ class MejoraloOmegaAgent:
 
         console.print(f"  [cyan]🎯 Targeting {len(targets)} files by entropy rank[/]")
 
-        # 3. Heal — escalate level based on stagnation
+        # 3. Heal - escalate level based on stagnation
         level = self._escalation_level()
         success = self._mejoralo.heal(self.project, self.base_path, self.target_score, scan_result)
 
-        # 4. Verify — re-scan
+        # 4. Verify - re-scan
         result_after = self._mejoralo.scan(self.project, self.base_path)
         score_after = result_after.score
         delta = score_after - score_before
@@ -188,14 +188,14 @@ class MejoraloOmegaAgent:
         if delta <= 0:
             self._consecutive_stagnant += 1
             console.print(
-                f"  [yellow]⚠️ Δ{delta:+d} — Stagnation "
+                f"  [yellow]⚠️ Δ{delta:+d} - Stagnation "
                 f"{self._consecutive_stagnant}/{STAGNATION_LIMIT}[/]"
             )
         else:
             self._consecutive_stagnant = 0
             console.print(f"  [green]📈 Δ{delta:+d} → {score_after}[/]")
 
-        # 6. Absorb — persist learned pattern on success
+        # 6. Absorb - persist learned pattern on success
         if success and delta > 0:
             await self._absorb_pattern(score_before, score_after)
 

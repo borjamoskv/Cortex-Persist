@@ -1,4 +1,4 @@
-"""CORTEX Auth — SQL Schema definitions."""
+"""CORTEX Auth - SQL Schema definitions."""
 
 AUTH_SCHEMA = """
 CREATE TABLE IF NOT EXISTS api_keys (

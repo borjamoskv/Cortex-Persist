@@ -55,7 +55,7 @@ def registry() -> RepairRegistry:
 
 @pytest.mark.asyncio
 async def test_execute_success_no_healing(agent: AutoCurativeAgent):
-    """Task succeeds on first try — no healing loop triggered."""
+    """Task succeeds on first try - no healing loop triggered."""
 
     async def healthy_task():
         return 42
@@ -76,7 +76,7 @@ async def test_execute_success_no_healing(agent: AutoCurativeAgent):
 
 @pytest.mark.asyncio
 async def test_self_healing_transient_error(agent: AutoCurativeAgent):
-    """Task fails once, then succeeds — agent self-heals."""
+    """Task fails once, then succeeds - agent self-heals."""
     call_count = 0
 
     async def flaky_task():
@@ -129,7 +129,7 @@ async def test_multi_failure_recovery(agent: AutoCurativeAgent):
 
 @pytest.mark.asyncio
 async def test_healing_exhaustion(agent: AutoCurativeAgent):
-    """All healing attempts fail — error raised after max attempts."""
+    """All healing attempts fail - error raised after max attempts."""
 
     async def always_fails():
         raise RuntimeError("Invariant violation: assertion failed")
@@ -459,7 +459,7 @@ async def test_full_healing_loop_integration():
     from cortex.engine.endocrine import ENDOCRINE, HormoneType
     # Cortisol should have been pulsed (both up and down)
     # Neural growth should have been rewarded
-    # These are integration checks — exact values depend on decay
+    # These are integration checks - exact values depend on decay
 
 
 # ─── Test: Repair Registry Custom Strategy ────────────────────────

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CORTEX Ship Gate — Blocks deploy if quality checks fail.
+"""CORTEX Ship Gate - Blocks deploy if quality checks fail.
 
 Exit 0 = safe to ship. Exit 1 = blocked.
 Outputs a JSON report to stdout.
@@ -214,10 +214,10 @@ def _print_gate(console, report: GateReport) -> None:
         return
     console.print()
     if report.gate == "PASS":
-        console.print("[bold green]🟢 GATE: PASS — Safe to ship.[/bold green]\n")
+        console.print("[bold green]🟢 GATE: PASS - Safe to ship.[/bold green]\n")
     else:
         failed = [c.name for c in report.checks if not c.passed]
-        console.print(f"[bold red]🔴 GATE: FAIL — Blocked by: {', '.join(failed)}[/bold red]\n")
+        console.print(f"[bold red]🔴 GATE: FAIL - Blocked by: {', '.join(failed)}[/bold red]\n")
 
 
 def main() -> None:

@@ -3,7 +3,7 @@
 # See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
 
-"""Migration 019 — Signal Bus (L1 Consciousness Layer).
+"""Migration 019 - Signal Bus (L1 Consciousness Layer).
 
 Adds the persistent signals table for cross-tool reactive communication.
 """

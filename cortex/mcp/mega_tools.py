@@ -1,5 +1,5 @@
 """
-CORTEX Mega Poderosas Tools — High-Power Architectural MCP Extensions.
+CORTEX Mega Poderosas Tools - High-Power Architectural MCP Extensions.
 
 Production implementation with real data from:
 - EntropyAnnihilator (AST-based file analysis)
@@ -331,7 +331,7 @@ def _register_temporal_nexus(mcp: FastMCP, ctx: _MCPContext) -> None:
                     (project, project),
                 )
                 tx_stats = await cursor.fetchone()
-            except Exception:  # noqa: BLE001 — fallback if stats query fails
+            except Exception:  # noqa: BLE001 - fallback if stats query fails
                 tx_stats = (0, "N/A", "N/A")
 
             # 2. Ghost density (active unresolved work)
@@ -448,7 +448,7 @@ def _register_temporal_nexus(mcp: FastMCP, ctx: _MCPContext) -> None:
             "### Vitals",
             f"Active Facts:     {total_facts}",
             f"Active Ghosts:    {ghost_count}",
-            f"Ghost Density:    {ghost_density:.1f}% — {ghost_level}",
+            f"Ghost Density:    {ghost_density:.1f}% - {ghost_level}",
             f"Active Bridges:   {bridge_count}",
             f"Recent Errors:    {recent_errors} (7d)",
             "",

@@ -1,5 +1,5 @@
 # cortex/evolution/free_energy.py
-"""Variational Free Energy Monitor — Fristonian Formalization of CORTEX.
+"""Variational Free Energy Monitor - Fristonian Formalization of CORTEX.
 
 Phase 3 cornerstone: makes explicit what the 8 improvement strategies
 already do implicitly. Each agent domain is modeled as a system that
@@ -46,7 +46,7 @@ logger = logging.getLogger(__name__)
 
 
 # ── Homeostatic Set-Points (Prior Preferences) ────────────────
-# These define the "preferred state" p(θ) — the attractor basin
+# These define the "preferred state" p(θ) - the attractor basin
 # the domain seeks to maintain. A sovereign-grade agent has:
 #   error_count → 0, ghost_count → 0, health_score → 1.0,
 #   bridge_count → high, decision_count → high
@@ -115,7 +115,7 @@ def _kl_bernoulli(q: float, p: float) -> float:
 
 
 def compute_complexity(metrics: DomainMetrics) -> float:
-    """D_KL[q(θ) ‖ p(θ)] — divergence from homeostatic set-point.
+    """D_KL[q(θ) ‖ p(θ)] - divergence from homeostatic set-point.
 
     Decomposes across multiple "sensory channels":
       - Health channel:  KL between current health_score and prior (0.5)
@@ -143,7 +143,7 @@ def compute_complexity(metrics: DomainMetrics) -> float:
 
 
 def compute_accuracy(metrics: DomainMetrics) -> float:
-    """E_q[ln p(o|θ)] — model quality / predictive success.
+    """E_q[ln p(o|θ)] - model quality / predictive success.
 
     Proxied by the domain's fitness_delta (reward prediction error)
     and decision success rate. Higher accuracy means the domain's
@@ -152,7 +152,7 @@ def compute_accuracy(metrics: DomainMetrics) -> float:
     # fitness_delta ∈ [-5, +5] → rescale to [0, 1]
     delta_norm = (metrics.fitness_delta + 5.0) / 10.0
 
-    # decision_success_rate ∈ [0, 1] — already normalized
+    # decision_success_rate ∈ [0, 1] - already normalized
     dsr = metrics.decision_success_rate
 
     # Weighted combination: 60% delta signal, 40% crystallized knowledge
@@ -161,7 +161,7 @@ def compute_accuracy(metrics: DomainMetrics) -> float:
 
 
 def compute_surprise(metrics: DomainMetrics) -> float:
-    """Surprisal ≈ −ln p(o) — how unexpected the current observations are.
+    """Surprisal ≈ −ln p(o) - how unexpected the current observations are.
 
     High errors + ghosts + low health = high surprise.
     The agent's goal is to minimize surprise by acting on the world
@@ -243,7 +243,7 @@ def compute_strategy_efe(
     )
 
 
-# ── FreeEnergyMonitor — Orchestration Layer ───────────────────
+# ── FreeEnergyMonitor - Orchestration Layer ───────────────────
 
 
 class FreeEnergyMonitor:
@@ -279,7 +279,7 @@ class FreeEnergyMonitor:
         return states
 
     def total_free_energy(self) -> float:
-        """Aggregate F across all domains — system-level health."""
+        """Aggregate F across all domains - system-level health."""
         from cortex.engine.endocrine import ENDOCRINE
 
         states = self.snapshot()
@@ -299,7 +299,7 @@ class FreeEnergyMonitor:
             domain: The domain to evaluate strategies for.
 
         Returns:
-            Strategies sorted by G (ascending — lower is better).
+            Strategies sorted by G (ascending - lower is better).
         """
         metrics = self._metrics.get_domain(domain)
         efes = [
@@ -329,7 +329,7 @@ class FreeEnergyMonitor:
         return sum(deltas) / len(deltas) if deltas else 0.0
 
     def report(self) -> dict[str, Any]:
-        """Full system report — suitable for logging/dashboard."""
+        """Full system report - suitable for logging/dashboard."""
         states = self.snapshot()
         total_f = sum(s.free_energy for s in states.values())
         domains_sorted = sorted(states.items(), key=lambda x: x[1].free_energy, reverse=True)

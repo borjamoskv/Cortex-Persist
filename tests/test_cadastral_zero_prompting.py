@@ -70,7 +70,7 @@ def forbidden_parcel() -> Parcel:
 
 @pytest.fixture
 def blind_spot_parcel() -> Parcel:
-    """A parcel in legal limbo — contested ownership, active expropriation."""
+    """A parcel in legal limbo - contested ownership, active expropriation."""
     return Parcel(
         parcel_id="P-003",
         coordinates=[Coordinate(43.25, -2.92)],
@@ -125,7 +125,7 @@ def high_entropy_metrics() -> DomainMetrics:
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# TESTS — CADASTRAL MODELS
+# TESTS - CADASTRAL MODELS
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 
@@ -170,7 +170,7 @@ class TestCadastralReport:
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# TESTS — CADASTRAL ENGINE
+# TESTS - CADASTRAL ENGINE
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 
@@ -236,7 +236,7 @@ class TestCadastralEngine:
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# TESTS — ZERO-PROMPTING EVOLUTION (Axioma Ω₇)
+# TESTS - ZERO-PROMPTING EVOLUTION (Axioma Ω₇)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 
@@ -335,7 +335,7 @@ class TestZeroPromptingEvolution:
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# TESTS — AXIOM REGISTRY
+# TESTS - AXIOM REGISTRY
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 

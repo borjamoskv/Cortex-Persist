@@ -19,7 +19,7 @@ logger = logging.getLogger("cortex.extensions.gate.interact")
 
 def approve_interactive(gate: "SovereignGate", action_id: str) -> bool:
     """
-    Interactive CLI approval — prompts the operator directly.
+    Interactive CLI approval - prompts the operator directly.
 
     In AUDIT_ONLY mode, auto-approves with a log entry.
     In DISABLED mode, does nothing.
@@ -44,7 +44,7 @@ def approve_interactive(gate: "SovereignGate", action_id: str) -> bool:
 
     if gate.policy == GatePolicy.AUDIT_ONLY:
         logger.info(
-            "🔍 AUDIT: Action %s would require approval — %s",
+            "🔍 AUDIT: Action %s would require approval - %s",
             action_id,
             action.description,
         )
@@ -54,13 +54,13 @@ def approve_interactive(gate: "SovereignGate", action_id: str) -> bool:
         gate._log_audit("AUTO_APPROVED_AUDIT", action)
         return True
 
-    # ENFORCE mode — actual interactive prompt
+    # ENFORCE mode - actual interactive prompt
     return _handle_interactive_enforce(gate, action, action_id)
 
 
 def _handle_interactive_enforce(gate: "SovereignGate", action: Any, action_id: str) -> bool:
     print(f"\n{'=' * 60}")
-    print("⚡ SOVEREIGN GATE — L3 ACTION APPROVAL REQUIRED")
+    print("⚡ SOVEREIGN GATE - L3 ACTION APPROVAL REQUIRED")
     print(f"{'=' * 60}")
     print(f"  Action:  {action.description}")
     print(f"  Level:   {action.level.value}")

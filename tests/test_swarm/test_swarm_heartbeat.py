@@ -1,4 +1,4 @@
-"""Tests for SwarmHeartbeat — includes thermodynamic ghost-eviction coverage."""
+"""Tests for SwarmHeartbeat - includes thermodynamic ghost-eviction coverage."""
 
 from __future__ import annotations
 
@@ -66,7 +66,7 @@ def test_dead_node_evicted_after_recovery_window() -> None:
 def test_alive_node_never_evicted() -> None:
     hb = SwarmHeartbeat(suspect_threshold=1, dead_threshold=2)
     hb.pulse("live-node")
-    # Reap multiple times — node keeps pulsing
+    # Reap multiple times - node keeps pulsing
     for _ in range(10):
         hb.pulse("live-node")
         hb.reap(timeout_seconds=60)
@@ -83,7 +83,7 @@ def test_resurrection_after_eviction_re_registers() -> None:
         if "revive-node" in hb._registry:
             hb._registry["revive-node"].last_pulse -= 9999
 
-    # Node evicted — now re-register via pulse
+    # Node evicted - now re-register via pulse
     hb.pulse("revive-node")
     assert "revive-node" in hb._registry
     assert hb._registry["revive-node"].status == NodeStatus.ALIVE

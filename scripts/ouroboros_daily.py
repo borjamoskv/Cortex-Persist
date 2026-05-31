@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-OUROBOROS-∞ Daily Metabolism — Autonomous Self-Improvement Cron
+OUROBOROS-∞ Daily Metabolism - Autonomous Self-Improvement Cron
 ==============================================================
 
 Runs daily via launchd. Scans the cortex-persist codebase, diagnoses entropy,

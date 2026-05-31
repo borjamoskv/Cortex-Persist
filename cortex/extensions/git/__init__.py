@@ -1,4 +1,4 @@
-"""CORTEX Git Integration — Sovereign commit poetry and code narration."""
+"""CORTEX Git Integration - Sovereign commit poetry and code narration."""
 
 from cortex.extensions.git.poet import CommitPoet
 

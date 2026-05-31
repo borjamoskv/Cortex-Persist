@@ -1,5 +1,5 @@
 """
-verification_agent.py — VerificationAgent
+verification_agent.py - VerificationAgent
 
 Reactive agent wrapping SovereignVerifier. Receives TASK_REQUEST messages
 with code + context payloads, runs invariant checks, returns TASK_RESULT.
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 class VerificationAgent(BaseAgent):
-    """Reactive agent — runs deterministic invariant checks on code proposals."""
+    """Reactive agent - runs deterministic invariant checks on code proposals."""
 
     def __init__(
         self,
@@ -86,7 +86,7 @@ class VerificationAgent(BaseAgent):
             await self._reply(message, {"error": str(exc)})
 
     async def tick(self) -> None:
-        logger.debug("VerificationAgent tick — idle")
+        logger.debug("VerificationAgent tick - idle")
 
     # ------------------------------------------------------------------
     # Helpers

@@ -1,5 +1,5 @@
 """
-CORTEX Nexus v8.1 — The Einstein-Rosen Bridge (Production Grade).
+CORTEX Nexus v8.1 - The Einstein-Rosen Bridge (Production Grade).
 
 Legacy shim for backward compatibility. Use `cortex.nexus` directly.
 """

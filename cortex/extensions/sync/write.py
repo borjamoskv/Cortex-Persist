@@ -172,7 +172,7 @@ async def _writeback_system(engine: CortexEngine, result: WritebackResult) -> No
         else:
             system_data = {}
 
-        # Knowledge global — reconstruir desde DB
+        # Knowledge global - reconstruir desde DB
         cursor = await conn.execute(
             "SELECT content, tags, confidence, valid_from, metadata FROM facts "
             "WHERE project = '__system__' AND fact_type = 'knowledge' "
@@ -193,7 +193,7 @@ async def _writeback_system(engine: CortexEngine, result: WritebackResult) -> No
                 }
             )
 
-        # Decisions global — reconstruir desde DB
+        # Decisions global - reconstruir desde DB
         cursor = await conn.execute(
             "SELECT content, metadata FROM facts "
             "WHERE project = '__system__' AND fact_type = 'decision' "

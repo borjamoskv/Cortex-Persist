@@ -1,4 +1,4 @@
-"""Tests for strategies.py — S0 through S3 resolution."""
+"""Tests for strategies.py - S0 through S3 resolution."""
 
 from __future__ import annotations
 
@@ -68,7 +68,7 @@ class TestPropState:
 
 
 class TestLWW:
-    """Test S0 — Last-Write-Wins."""
+    """Test S0 - Last-Write-Wins."""
 
     def test_last_observation_wins(self):
         s = PropState("k", BeliefType.BOOLEAN, True)
@@ -86,7 +86,7 @@ class TestLWW:
 
 
 class TestRAG:
-    """Test S1 — RAG Summary Overwrite."""
+    """Test S1 - RAG Summary Overwrite."""
 
     def test_majority_wins_boolean(self):
         s = PropState("k", BeliefType.BOOLEAN, True)
@@ -120,7 +120,7 @@ class TestRAG:
 
 
 class TestCRDTOnly:
-    """Test S2 — CRDT-only."""
+    """Test S2 - CRDT-only."""
 
     def test_boolean_convergence(self):
         s = PropState("k", BeliefType.BOOLEAN, True)
@@ -134,7 +134,7 @@ class TestCRDTOnly:
 
 
 class TestCortex:
-    """Test S3 — Full Cortex."""
+    """Test S3 - Full Cortex."""
 
     def test_honest_majority_resolves_correctly(self):
         s = PropState("k", BeliefType.BOOLEAN, True)

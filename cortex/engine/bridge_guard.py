@@ -33,9 +33,9 @@ class BridgeGuard:
     """Validates bridge facts before cross-project propagation.
 
     Security triad completion:
-      1. Quarantine — post-facto isolation ✓
-      2. Reaper — ghost TTL expiry ✓
-      3. BridgeGuard — pre-store prevention ✓
+      1. Quarantine - post-facto isolation ✓
+      2. Reaper - ghost TTL expiry ✓
+      3. BridgeGuard - pre-store prevention ✓
     """
 
     @staticmethod
@@ -64,7 +64,7 @@ class BridgeGuard:
         result["source_project"] = source
 
         if not source:
-            # Can't determine source — allow with warning flag
+            # Can't determine source - allow with warning flag
             result["meta_flags"]["bridge_source_unknown"] = True
             logger.debug("Bridge source project unresolvable, allowing with flag")
             return result
@@ -88,7 +88,7 @@ class BridgeGuard:
                 ratio * 100,
             )
         elif ratio > 0:
-            # Some quarantined facts — allow but flag for review
+            # Some quarantined facts - allow but flag for review
             result["meta_flags"]["bridge_quarantine_warning"] = True
             result["meta_flags"]["bridge_source_quarantine_ratio"] = round(ratio, 4)
             logger.info(

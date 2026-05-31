@@ -1,4 +1,4 @@
-"""CORTEX Engine — Connection and Schema Initialization Mixin.
+"""CORTEX Engine - Connection and Schema Initialization Mixin.
 
 Reality Level: C5-REAL
 """

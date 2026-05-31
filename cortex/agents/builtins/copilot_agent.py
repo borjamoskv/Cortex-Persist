@@ -1,4 +1,4 @@
-"""CORTEX Agent Runtime — Level 3 Copilot Agent.
+"""CORTEX Agent Runtime - Level 3 Copilot Agent.
 
 ██████╗ ██████╗ ██████╗ ██╗██╗      ██████╗ ████████╗
 ██╔════╝██╔═══██╗██╔══██╗██║██║     ██╔═══██╗╚══██╔══╝
@@ -7,10 +7,10 @@
 ╚██████╗╚██████╔╝██║     ██║███████╗╚██████╔╝   ██║
  ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝ ╚═════╝    ╚═╝
 
-LEVEL 3 — COPILOT
+LEVEL 3 - COPILOT
   - Observes the human's context (cursor, file, project state)
   - Generates inline suggestions (completions, edits, refactors)
-  - NEVER acts autonomously — ALL suggestions require human verdict
+  - NEVER acts autonomously - ALL suggestions require human verdict
   - Is an amplifier, not an agent
 
 Architecture:
@@ -103,7 +103,7 @@ class InlineCompletionStrategy(SuggestionStrategy):
 
         # Detect patterns and generate structured completions
         if prefix.rstrip().endswith(":"):
-            # Likely a function/class definition — suggest body
+            # Likely a function/class definition - suggest body
             suggestions.append(
                 SuggestionProposal(
                     suggestion_id=f"cpl-{uuid4().hex[:12]}",
@@ -117,7 +117,7 @@ class InlineCompletionStrategy(SuggestionStrategy):
             )
 
         if "def " in prefix and "return" not in prefix:
-            # Function without return — suggest docstring
+            # Function without return - suggest docstring
             suggestions.append(
                 SuggestionProposal(
                     suggestion_id=f"cpl-{uuid4().hex[:12]}",
@@ -138,7 +138,7 @@ class InlineCompletionStrategy(SuggestionStrategy):
                     kind=SuggestionKind.CODE_COMPLETION,
                     confidence=Confidence.LOW,
                     inline_text="",
-                    explanation="No strong signal detected — awaiting more context",
+                    explanation="No strong signal detected - awaiting more context",
                     source_context_hash=context_hash,
                     model_used=model,
                 )
@@ -180,7 +180,7 @@ class DiagnosticFixStrategy(SuggestionStrategy):
                             start_line=line,
                             end_line=line,
                             original_text="",
-                            replacement_text=f"# TODO: Fix — {message}",
+                            replacement_text=f"# TODO: Fix - {message}",
                         )
                     ],
                     explanation=f"Fix for {severity}: {message}",
@@ -214,7 +214,7 @@ class MultiFileEditStrategy(SuggestionStrategy):
             source_file = edit.get("file", "")
 
             if old_symbol and new_symbol and old_symbol != new_symbol:
-                # Symbol rename detected — propose propagation to open files
+                # Symbol rename detected - propose propagation to open files
                 edits: list[CodeEdit] = []
                 for open_file in context.project.open_files:
                     if open_file != source_file:
@@ -251,7 +251,7 @@ class MultiFileEditStrategy(SuggestionStrategy):
 
 
 class CopilotAgent(BaseAgent):
-    """Level 3 — Copilot Agent.
+    """Level 3 - Copilot Agent.
 
     Observes the human's editor context, generates inline suggestions,
     and waits for human verdicts. NEVER executes changes autonomously.
@@ -263,8 +263,8 @@ class CopilotAgent(BaseAgent):
 
     Behavioral Constraints:
         1. Copilot NEVER calls use_tool() to mutate state
-        2. All output is SuggestionProposal — human decides application
-        3. No autonomous tick() work — purely reactive to context
+        2. All output is SuggestionProposal - human decides application
+        3. No autonomous tick() work - purely reactive to context
         4. Telemetry-only feedback loop (no self-modification)
     """
 
@@ -280,7 +280,7 @@ class CopilotAgent(BaseAgent):
         self.telemetry = CopilotTelemetry()
         self._pending: dict[str, SuggestionProposal] = {}  # suggestion_id → proposal
 
-        # Strategy registry — maps trigger types to generators
+        # Strategy registry - maps trigger types to generators
         self._strategies: dict[str, SuggestionStrategy] = strategies or {
             "keystroke": InlineCompletionStrategy(),
             "diagnostic": DiagnosticFixStrategy(),
@@ -288,7 +288,7 @@ class CopilotAgent(BaseAgent):
         }
 
         logger.info(
-            "[%s] CopilotAgent initialized — strategies=%s",
+            "[%s] CopilotAgent initialized - strategies=%s",
             self.agent_id,
             list(self._strategies.keys()),
         )
@@ -318,7 +318,7 @@ class CopilotAgent(BaseAgent):
     async def _handle_context(self, message: AgentMessage) -> None:
         """Process human context and generate suggestion proposals.
 
-        NEVER applies suggestions — only proposes them via message bus.
+        NEVER applies suggestions - only proposes them via message bus.
         """
         payload = message.payload or {}
 
@@ -337,7 +337,7 @@ class CopilotAgent(BaseAgent):
             self._strategies.get("keystroke", InlineCompletionStrategy()),
         )
 
-        # Generate suggestions (READ-ONLY — no side effects)
+        # Generate suggestions (READ-ONLY - no side effects)
         try:
             proposals = await strategy.generate(
                 context,
@@ -371,7 +371,7 @@ class CopilotAgent(BaseAgent):
             latency_ms,
         )
 
-        # Send proposals back — human decides what to apply
+        # Send proposals back - human decides what to apply
         await self._reply(
             message,
             batch.model_dump(mode="json"),

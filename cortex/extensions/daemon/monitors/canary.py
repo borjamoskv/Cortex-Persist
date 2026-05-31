@@ -1,4 +1,4 @@
-"""Canary monitor for MOSKV daemon — Active HoneyPots."""
+"""Canary monitor for MOSKV daemon - Active HoneyPots."""
 
 from __future__ import annotations
 

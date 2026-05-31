@@ -1,4 +1,4 @@
-"""cortex.utils.http — HTTP Retry Mixin Soberano.
+"""cortex.utils.http - HTTP Retry Mixin Soberano.
 
 Bridge Pattern (Axioma 9: Cross-Stack Synergy).
 
@@ -38,14 +38,14 @@ logger = logging.getLogger("cortex.http")
 # ─── Constants ───────────────────────────────────────────────────────────
 
 _DEFAULT_MAX_RETRIES = 5
-_DEFAULT_BASE_DELAY = 2.0  # seconds — doubles each attempt (exponential)
+_DEFAULT_BASE_DELAY = 2.0  # seconds - doubles each attempt (exponential)
 
 
 # ─── Mixin ───────────────────────────────────────────────────────────────
 
 
 class HttpRetryMixin:
-    """Soberano HTTP retry mixin — exponential backoff on 429.
+    """Soberano HTTP retry mixin - exponential backoff on 429.
 
     Requires subclass to provide:
     - `self._client`: `httpx.AsyncClient`
@@ -130,7 +130,7 @@ class HttpRetryMixin:
         payload: dict[str, Any] | None = None,
         label: str = "",
     ) -> dict[str, Any]:
-        """Core retry engine — exponential backoff on HTTP 429.
+        """Core retry engine - exponential backoff on HTTP 429.
 
         Zero-trust: only retries on 429. Everything else raises immediately.
         Landauer's Razor: single loop, single responsibility.
@@ -205,7 +205,7 @@ async def post_with_retry(
     max_retries: int = _DEFAULT_MAX_RETRIES,
     base_delay: float = _DEFAULT_BASE_DELAY,
 ) -> dict[str, Any]:
-    """Standalone retry helper — no inheritance needed.
+    """Standalone retry helper - no inheritance needed.
 
     Args:
         client: An `httpx.AsyncClient` instance.

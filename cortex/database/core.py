@@ -19,7 +19,7 @@ Usage (sync):
 Usage (read-only pool):
     conn = connect("/path/to/db", read_only=True)
 
-Usage (writer — disables auto WAL checkpoint):
+Usage (writer - disables auto WAL checkpoint):
     conn = connect_writer("/path/to/db")
 
 Usage (async):
@@ -117,7 +117,7 @@ def _apply_pragmas_sync(
     if read_only:
         conn.execute("PRAGMA query_only=1")
     if writer_mode:
-        # Disable automatic WAL checkpoints — writer controls flush timing
+        # Disable automatic WAL checkpoints - writer controls flush timing
         conn.execute("PRAGMA wal_autocheckpoint=0")
     else:
         conn.execute(f"PRAGMA wal_autocheckpoint={WAL_AUTOCHECKPOINT}")
@@ -286,7 +286,7 @@ async def apply_pragmas_async_readonly(conn: aiosqlite.Connection) -> None:
     """Apply read-only pragmas to an async connection.
 
     Sets query_only=1 so any INSERT/UPDATE/DELETE raises OperationalError
-    at the SQLite level — defense in depth for read pools.
+    at the SQLite level - defense in depth for read pools.
     """
     await apply_pragmas_async(conn)
     await conn.execute("PRAGMA query_only=1;")

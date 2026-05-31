@@ -16,9 +16,9 @@ from dataclasses import dataclass
 class PhysicsContext:
     """Contexto físico parametrizado para operación multi-planetaria."""
 
-    gravity: float = 9.8  # m/s² — Earth default
-    day_seconds: float = 86400  # seconds — Earth default
-    year_days: float = 365.25  # days — Earth default
+    gravity: float = 9.8  # m/s² - Earth default
+    day_seconds: float = 86400  # seconds - Earth default
+    year_days: float = 365.25  # days - Earth default
     light_delay_ms: float = 0.0  # one-way light delay to nearest relay
     radiation_flux: float = 1.0  # normalized solar radiation (Earth = 1.0)
     magnetic_shielding: float = 1.0  # magnetosphere factor (Earth = 1.0)

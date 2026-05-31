@@ -22,7 +22,7 @@ async def main() -> None:
 
     engine = CortexEngine(db_path=str(db_path))
 
-    print("🤝 CORTEX Quickstart — Multi-Agent Consensus\n")
+    print("🤝 CORTEX Quickstart - Multi-Agent Consensus\n")
 
     # --- Step 1: Multiple agents store observations ---
     print("1️⃣  Agents submitting observations...\n")
@@ -58,7 +58,7 @@ async def main() -> None:
     for content, count in sorted(votes.items(), key=lambda x: -x[1]):
         pct = count / len(all_facts) * 100
         bar = "█" * int(pct / 5)
-        print(f'      {bar} {pct:.0f}% — "{content[:50]}"')
+        print(f'      {bar} {pct:.0f}% - "{content[:50]}"')
 
     # BFT threshold: need > 2/3 agreement
     max_votes = max(votes.values())
@@ -73,7 +73,7 @@ async def main() -> None:
     for fact in facts:
         result = await engine.verify_fact(fact["id"])
         status = "✅" if result["valid"] else "❌"
-        print(f"   {status} Fact #{fact['id']} — chain intact")
+        print(f"   {status} Fact #{fact['id']} - chain intact")
 
     print("\n✨ Multi-agent consensus demonstration complete.")
 

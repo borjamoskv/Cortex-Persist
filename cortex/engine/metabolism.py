@@ -91,7 +91,7 @@ class Metabolism:
 
         # ── Entropy Grace Period (Ω₅: Antifragile by Default) ──
         # "think" actions signal strategy reconsideration.
-        # Reflecting IS progress — reward it with partial entropy forgiveness.
+        # Reflecting IS progress - reward it with partial entropy forgiveness.
         # Only penalize thoughts that are both repeated AND non-novel.
         if action_type == "think":
             if is_novel:

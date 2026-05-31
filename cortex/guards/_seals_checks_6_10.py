@@ -16,7 +16,7 @@ GateResult = tuple[bool, str]
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# SEAL 6: ASYNC & PERFORMANCE — No time.sleep + Temperature + Latency
+# SEAL 6: ASYNC & PERFORMANCE - No time.sleep + Temperature + Latency
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async def _check_blocking_sleep(exclude_files: frozenset[str]) -> list[str]:
     """Identify synchronous time.sleep() calls in async-critical files."""
@@ -151,7 +151,7 @@ async def check_seal_6_async_perf() -> GateResult:
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# SEAL 7: AXIOM REGISTRY — Registry Sync + Prompt Size
+# SEAL 7: AXIOM REGISTRY - Registry Sync + Prompt Size
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async def check_seal_7_axiom_registry() -> GateResult:
     printer.seal(7, "Registry Integrity", "Axiom Registry + Prompt Budget")
@@ -193,7 +193,7 @@ async def check_seal_7_axiom_registry() -> GateResult:
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# SEAL 8: DEPENDENCY INTEGRITY — Ghost Check + Shannon Entropy
+# SEAL 8: DEPENDENCY INTEGRITY - Ghost Check + Shannon Entropy
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async def check_seal_8_dependency() -> GateResult:
     printer.seal(8, "Ω₃ Byzantine", "Dependency Integrity + Shannon Entropy")
@@ -201,7 +201,7 @@ async def check_seal_8_dependency() -> GateResult:
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# SEAL 9: COMPLIANCE & AESTHETIC — No placeholders + Audit trail
+# SEAL 9: COMPLIANCE & AESTHETIC - No placeholders + Audit trail
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async def check_seal_9_compliance() -> GateResult:
     printer.seal(9, "Sovereign Aesthetic", "Compliance & Aesthetic Integrity")
@@ -209,7 +209,7 @@ async def check_seal_9_compliance() -> GateResult:
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-# SEAL 10: SELF-PRESERVATION — Hook + seals.py existence + HEAD lineage
+# SEAL 10: SELF-PRESERVATION - Hook + seals.py existence + HEAD lineage
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async def check_seal_10_preservation() -> GateResult:
     printer.seal(10, "Ω₅ Antifragile", "Self-Preservation")

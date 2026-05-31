@@ -102,7 +102,7 @@ Validate state transitions and enforce strict access control on internal functio
                             poc_content = f.read()
                         self.generate_report(target.name, poc_content, logs)
 
-            time.sleep(30)  # noqa: ASYNC101 — standalone CLI script, no event loop
+            time.sleep(30)  # noqa: ASYNC101 - standalone CLI script, no event loop
 
 
 if __name__ == "__main__":

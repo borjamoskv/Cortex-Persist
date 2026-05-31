@@ -1,4 +1,4 @@
-"""CORTEX Policy Engine — Bellman Value Function.
+"""CORTEX Policy Engine - Bellman Value Function.
 
 Converts CORTEX memory into a prioritized action queue using
 a Bellman-inspired value function: V(s) = R(s,a) + γ·V(s').
@@ -195,9 +195,9 @@ class PolicyEngine:
         conf_multiplier = {
             "c1": 1.3,  # Hypothesis needs validation.
             "c2": 1.2,  # Speculative.
-            "c3": 1.0,  # Inferred — neutral.
-            "c4": 0.9,  # Probable — slightly less urgent.
-            "c5": 0.8,  # Confirmed — least urgent.
+            "c3": 1.0,  # Inferred - neutral.
+            "c4": 0.9,  # Probable - slightly less urgent.
+            "c5": 0.8,  # Confirmed - least urgent.
         }.get(conf, 1.0)
 
         # Consensus: low consensus → needs attention.

@@ -1,4 +1,4 @@
-"""Default Guard/Hook Adapters — Wraps existing AX-II implementations behind Protocols.
+"""Default Guard/Hook Adapters - Wraps existing AX-II implementations behind Protocols.
 
 Each adapter wraps a concrete module (HealthGuard, ContradictionGuard, etc.)
 behind the StoreGuard / PostStoreHook protocol so they can be registered in

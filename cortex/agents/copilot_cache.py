@@ -1,4 +1,4 @@
-"""CORTEX Level 3 Copilot — Suggestion Cache (LRU).
+"""CORTEX Level 3 Copilot - Suggestion Cache (LRU).
 
 Deduplicates identical context→suggestion mappings.
 Prevents redundant LLM calls when the human revisits the same position.

@@ -1,4 +1,4 @@
-"""Privacy mixin — Zero-Trust Privacy Shield and classification."""
+"""Privacy mixin - Zero-Trust Privacy Shield and classification."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ logger = logging.getLogger("cortex.privacy")
 
 
 class PrivacyMixin(EngineMixinBase):
-    """Zero-Trust Privacy Shield — Pre-storage Content Classification.
+    """Zero-Trust Privacy Shield - Pre-storage Content Classification.
 
     Scans incoming content for sensitive patterns (API keys, private keys,
     connection strings) and injects audit metadata before persistence.
@@ -27,7 +27,7 @@ class PrivacyMixin(EngineMixinBase):
     def _apply_privacy_shield(
         content: str, project: str, meta: dict[str, Any] | None
     ) -> dict[str, Any] | None:
-        """Zero-Trust Privacy Shield — classify content before storage.
+        """Zero-Trust Privacy Shield - classify content before storage.
 
         If sensitive patterns (API keys, private keys, connection strings)
         are detected, inject privacy metadata into the fact for audit trail.
@@ -51,5 +51,5 @@ class PrivacyMixin(EngineMixinBase):
                 }
                 return {**(meta or {}), **privacy_meta}
         except ImportError:
-            pass  # Classifier not available — degrade gracefully
+            pass  # Classifier not available - degrade gracefully
         return meta

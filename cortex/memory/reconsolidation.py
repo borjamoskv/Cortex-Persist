@@ -3,8 +3,8 @@
 Sprint 2 of the 130/100 plan.
 
 v1 had the core labilization logic but was missing:
-  1. Version tracking — no audit trail of reconsolidation events
-  2. Confirmation bias detection — LLM could silently rewrite its own history
+  1. Version tracking - no audit trail of reconsolidation events
+  2. Confirmation bias detection - LLM could silently rewrite its own history
   3. Tests (zero coverage)
   4. Dream cycle integration hook
 
@@ -144,7 +144,7 @@ class ConfirmationBiasDetector:
 
     A healthy system should have a mix of CONFIRMED, CONTRADICTED,
     and IGNORED events. A system where >80% of events are CONFIRMED
-    for a specific engram is applying sycophantic reinforcement —
+    for a specific engram is applying sycophantic reinforcement -
     repeatedly confirming a potentially incorrect memory.
 
     This is the "rewriting history to match biases" problem from the
@@ -252,7 +252,7 @@ class ReconsolidationTracker:
         """
         record = self._labile.pop(engram_id, None)
         if record is None or record.is_expired:
-            logger.debug("Engram %s confirm attempt outside labile window — ignored.", engram_id)
+            logger.debug("Engram %s confirm attempt outside labile window - ignored.", engram_id)
             return 0.0
 
         record.confirmed = True
@@ -284,7 +284,7 @@ class ReconsolidationTracker:
         """
         record = self._labile.pop(engram_id, None)
         if record is None or record.is_expired:
-            logger.debug("Engram %s contradict attempt outside labile window — ignored.", engram_id)
+            logger.debug("Engram %s contradict attempt outside labile window - ignored.", engram_id)
             return 0.0
 
         record.contradicted = True
@@ -332,7 +332,7 @@ class ReconsolidationTracker:
         return expired
 
     def dream_sweep(self) -> list[tuple[str, float]]:
-        """Dream cycle integration hook — identical to sweep() semantics.
+        """Dream cycle integration hook - identical to sweep() semantics.
 
         Called by the dream engine during sleep/offline processing.
         Ensures labile engrams don't accumulate during extended idle periods.

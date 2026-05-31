@@ -40,11 +40,11 @@ def report(name, ok, detail=""):
         FAIL += 1
     else:
         PASS += 1
-    print(f"  [{tag}] {name}" + (f" — {detail}" if detail else ""))
+    print(f"  [{tag}] {name}" + (f" - {detail}" if detail else ""))
 
 
 def fuzz_zero_vector():
-    """[0] Zero vector injection — bind/unbind with zero."""
+    """[0] Zero vector injection - bind/unbind with zero."""
     print("\n[0] ZERO VECTOR INJECTION")
     e = VSAEngine(D=1000, seed=1)
     zero = np.zeros(1000)
@@ -125,7 +125,7 @@ def fuzz_extreme_dimensions():
 
 
 def fuzz_capacity_overflow():
-    """[3] Push N way past sqrt(D) — expect degradation, not crash."""
+    """[3] Push N way past sqrt(D) - expect degradation, not crash."""
     print("\n[3] CAPACITY OVERFLOW")
     D = 1000
     e = VSAEngine(D=D, seed=5)
@@ -196,7 +196,7 @@ def fuzz_near_orthogonal_attack():
 
 
 def fuzz_persistence_corruption():
-    """[6] Flip random bits in a .vsa file — must detect corruption."""
+    """[6] Flip random bits in a .vsa file - must detect corruption."""
     print("\n[6] PERSISTENCE CORRUPTION")
     e = VSAEngine(D=1000, seed=8)
     e.memorize(e.random_vec(), e.random_vec(), timestamp=0.0)
@@ -227,7 +227,7 @@ def fuzz_persistence_corruption():
 
 
 def fuzz_empty_memory():
-    """[7] Retrieve from empty memory — should not crash."""
+    """[7] Retrieve from empty memory - should not crash."""
     print("\n[7] EMPTY MEMORY RETRIEVAL")
     e = VSAEngine(D=1000, seed=9)
 
@@ -350,7 +350,7 @@ def fuzz_dimension_mismatch():
     e1.memorize(e1.random_vec(), e1.random_vec(), timestamp=0.0)
     e1.save(tmp)
 
-    # Try loading into D=2000 engine — should fail
+    # Try loading into D=2000 engine - should fail
     try:
         e2.load(tmp)
         report("Dimension mismatch rejected", False,
@@ -398,7 +398,7 @@ def fuzz_resonator_adversarial():
 
 if __name__ == "__main__":
     print("=" * 60)
-    print("VSA-SDM CHAOS FUZZER v1.0 — ADVERSARIAL STRESS TEST")
+    print("VSA-SDM CHAOS FUZZER v1.0 - ADVERSARIAL STRESS TEST")
     print("=" * 60)
 
     fuzz_zero_vector()

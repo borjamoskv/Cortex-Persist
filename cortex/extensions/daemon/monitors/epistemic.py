@@ -1,4 +1,4 @@
-"""Epistemic Membrane Monitor — autonomous self-healing based on certainty derivative.
+"""Epistemic Membrane Monitor - autonomous self-healing based on certainty derivative.
 
 Monitors the degradation of epistemic confidence across the knowledge base.
 Connects the Metamemory index to the Workflow layer, triggering /autodidact,

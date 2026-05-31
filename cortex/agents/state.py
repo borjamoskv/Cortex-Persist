@@ -1,4 +1,4 @@
-"""CORTEX Agent Runtime — State & Working Memory.
+"""CORTEX Agent Runtime - State & Working Memory.
 
 AgentStatus tracks lifecycle phase.
 AgentState holds runtime metadata.
@@ -54,7 +54,7 @@ class AgentState:
 class WorkingMemory:
     """Isolated per-agent working memory.
 
-    This is ephemeral scratch space — NOT persistent CORTEX facts.
+    This is ephemeral scratch space - NOT persistent CORTEX facts.
     Agents must propose facts through guards to persist knowledge.
     """
 

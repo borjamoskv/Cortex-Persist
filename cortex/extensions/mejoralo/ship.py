@@ -62,7 +62,7 @@ def _seal_linter(stack: str, cwd: str) -> ShipSeal:
     """Seal 3: Linter Silence."""
     lint_cmd = get_lint_cmd(stack)
     if not lint_cmd:
-        return ShipSeal(name="Linter Silence", passed=True, detail="No linter configured — pass")
+        return ShipSeal(name="Linter Silence", passed=True, detail="No linter configured - pass")
     result = run_quiet(lint_cmd, cwd=cwd)  # pyright: ignore
     return ShipSeal(
         name="Linter Silence",
@@ -86,7 +86,7 @@ def _seal_visual(p: Path) -> ShipSeal:
 
 
 def _seal_performance(project: str, path: str | Path) -> ShipSeal:
-    """Seal 5: Performance — score must be >= 70 as quality proxy."""
+    """Seal 5: Performance - score must be >= 70 as quality proxy."""
     result = scan(project, path)
     passed = result.score >= 70
     return ShipSeal(

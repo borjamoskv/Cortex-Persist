@@ -59,7 +59,7 @@ class TopologicalAnchor:
     """
 
     mean_vector: bytes  # np.float32 serialized mean of sampled vectors
-    variance_trace: float  # tr(Cov) — scalar summary of spread
+    variance_trace: float  # tr(Cov) - scalar summary of spread
     spectral_gap: float  # λ₁ - λ₂
     intrinsic_dim: float  # (∑λ_i)² / ∑λ_i², participation ratio
     hubness: float  # variance of in-degree in local KNN graph
@@ -145,7 +145,7 @@ class TopologicalHealthMonitor:
     def validate_anchor(self, anchor: TopologicalAnchor) -> bool:
         """Check if the anchor is still valid for the current model.
 
-        Returns False if model_hash has drifted — the anchor is
+        Returns False if model_hash has drifted - the anchor is
         epistemically useless and MUST be recalculated cold.
         """
         return anchor.model_hash == self._model_hash

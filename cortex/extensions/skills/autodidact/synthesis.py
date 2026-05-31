@@ -1,9 +1,9 @@
-"""CORTEX AUTODIDACT-Ω — Sovereign Synthesis Pipeline.
+"""CORTEX AUTODIDACT-Ω - Sovereign Synthesis Pipeline.
 
 Cristaliza radiación entrópica en Cristales Cognitivos usando el
 CortexLLMRouter resiliente. Zero single-point-of-failure.
 
-Axiom Ω₅: Antifragile by Default — el aprendizaje nunca se detiene por un 401.
+Axiom Ω₅: Antifragile by Default - el aprendizaje nunca se detiene por un 401.
 """
 
 from __future__ import annotations
@@ -60,15 +60,15 @@ _SYNTHESIS_PROVIDERS: tuple[str, ...] = (
 encode_engine = AsyncEncoder()
 vector_db = SovereignVectorStoreL2(encoder=encode_engine)
 
-# Lazy singleton — built on first use
+# Lazy singleton - built on first use
 _synthesis_router: CortexLLMRouter | None = None
 
 
 def _get_synthesis_router() -> CortexLLMRouter:
     """Lazy-init the resilient synthesis router.
 
-    Ω₅: Antifragile — tries every available provider.
-    Ω₃: Byzantine Default — verifies key existence before trusting.
+    Ω₅: Antifragile - tries every available provider.
+    Ω₃: Byzantine Default - verifies key existence before trusting.
     """
     global _synthesis_router
     if _synthesis_router is not None:
@@ -127,7 +127,7 @@ async def check_semantic_redundancy(text_snippet: str) -> tuple[bool, str | None
                 msg = f"🛡️ [ENTROPIC SHIELD] ❄️ Zona Isoterma Alcanzada (ΔS={similitud:.4f})."
                 logger.warning(msg)
                 return True, nearest[0].id
-    except Exception as e:  # noqa: BLE001 — redundancy check failure must not crash synthesis
+    except Exception as e:  # noqa: BLE001 - redundancy check failure must not crash synthesis
         logger.error("Error checking redundancy L2: %s", e)
 
     return False, None
@@ -142,7 +142,7 @@ async def distill_sovereign_memo(
 ) -> dict[str, Any]:
     """Cristaliza el ruido térmico de la web en un Cristal Cognitivo a T=0K.
 
-    Usa el CortexLLMRouter para cascade resiliente — si un provider falla,
+    Usa el CortexLLMRouter para cascade resiliente - si un provider falla,
     el siguiente toma el relevo. El intent_directive láser se preserva como
     el diferenciador sobre instruction grounding estándar.
     """
@@ -213,7 +213,7 @@ async def distill_sovereign_memo(
             "entities": [],
             "resonancia_axiomatica": "Fail JSON",
         }
-    except Exception as e:  # noqa: BLE001 — parsing failure must fall back to raw content
+    except Exception as e:  # noqa: BLE001 - parsing failure must fall back to raw content
         logger.error("Error parseando cristal: %s", e)
         return {"content_markdown": raw_data[:FALLBACK_CONTENT_LENGTH], "error": str(e)}
 

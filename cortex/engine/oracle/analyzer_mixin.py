@@ -193,7 +193,7 @@ class AnalyzerMixin:
             key.replace("last_hash_", "").split(":")[0] if key.startswith("last_hash_") else key
         )
 
-        # —— Path 1: Real L1 data ———————————————————————————————
+        # -- Path 1: Real L1 data -------------------------------
         if self._l1 is not None:
             freq = self._l1.get_access_frequency(project_id)
             logger.debug(
@@ -203,9 +203,9 @@ class AnalyzerMixin:
             )
             return freq
 
-        # —— Path 2: Transaction fallback (approximation) ——————————————
+        # -- Path 2: Transaction fallback (approximation) --------------
         logger.debug(
-            "[ORACLE] L1 not available — falling back to transaction-count approximation for '%s'.",
+            "[ORACLE] L1 not available - falling back to transaction-count approximation for '%s'.",
             project_id,
         )
         return await self._estimate_access_frequency_txn_fallback(project_id, eviction_ts)

@@ -1,6 +1,6 @@
-"""CORTEX v6+ — Causal Memory Graph (do-calculus chains).
+"""CORTEX v6+ - Causal Memory Graph (do-calculus chains).
 
-Strategy #6: Don't just store WHAT happened — store WHY.
+Strategy #6: Don't just store WHAT happened - store WHY.
 Each engram carries a causal chain enabling:
 - Contrafactual reasoning: "What if we reverted this?"
 - Zombie decision detection: if the cause no longer exists,

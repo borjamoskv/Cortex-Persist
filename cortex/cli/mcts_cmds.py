@@ -17,7 +17,7 @@ console = Console()
 
 @click.group(name="mcts")
 def mcts_cmds() -> None:
-    """CORTEX Chronos (Git-MCTS) — Búsqueda de Mutaciones Asintóticas."""
+    """CORTEX Chronos (Git-MCTS) - Búsqueda de Mutaciones Asintóticas."""
     pass
 
 
@@ -53,7 +53,7 @@ def evolve(file: str, simulations: int, prompt: str) -> None:
 
         if best_branch:
             console.print(
-                f"\n[bold green]👑 MUTACIÓN CON ÉXITO — MCTS COLAPSADO: checkout a `{best_branch}`[/bold green]"
+                f"\n[bold green]👑 MUTACIÓN CON ÉXITO - MCTS COLAPSADO: checkout a `{best_branch}`[/bold green]"
             )
 
     except Exception as e:

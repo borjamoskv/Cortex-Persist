@@ -56,7 +56,7 @@ except ImportError:
     logging.debug("rich library not available, using standard basicConfig")
 
 class CortexDaemon:
-    """Sovereign Orchestrator V3.1 — The Heart of MOSKV-1."""
+    """Sovereign Orchestrator V3.1 - The Heart of MOSKV-1."""
 
     def __init__(self):
         self.is_running = True
@@ -416,7 +416,7 @@ class CortexDaemon:
         
         NOTE: AEON-0 mutations are daemon-internal (trusted origin). They do NOT
         carry an Ed25519 signature because the OutboxDaemon's LedgerManager holds
-        its own ephemeral keypair — a signature forged here would never verify there.
+        its own ephemeral keypair - a signature forged here would never verify there.
         The interceptor permits unsigned payloads in Legacy Mode with a WARNING log.
         External/untrusted mutations MUST carry a valid signature or they are rejected.
         """

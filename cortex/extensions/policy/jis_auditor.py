@@ -1,5 +1,5 @@
 """
-CORTEX — JIS Auditor (Joint Integrity Standard).
+CORTEX - JIS Auditor (Joint Integrity Standard).
 
 Enforces SOC 2, C5 (Cloud Computing Compliance Criteria Catalogue),
 and GDPR policies over the CORTEX-Persist ImmutableLedger.

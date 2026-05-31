@@ -1,6 +1,6 @@
-"""CORTEX CLI — Health command group.
+"""CORTEX CLI - Health command group.
 
-Commands for the CORTEX Health Index — monitoring and scoring.
+Commands for the CORTEX Health Index - monitoring and scoring.
 Thin CLI wrapper; all logic lives in cortex.extensions.health.
 """
 
@@ -31,7 +31,7 @@ def render_sparkline(data: list[float]) -> str:
 
 @click.group("health")
 def health_group() -> None:
-    """CORTEX Health Index — system health monitoring."""
+    """CORTEX Health Index - system health monitoring."""
 
 
 @health_group.command("check")

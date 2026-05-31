@@ -1,4 +1,4 @@
-"""CORTEX MCP Toolbox Bridge — External Database Connectivity.
+"""CORTEX MCP Toolbox Bridge - External Database Connectivity.
 
 Provides a bridge between CORTEX and Google's MCP Toolbox for Databases,
 enabling agents to query external databases (PostgreSQL, AlloyDB, MySQL,
@@ -193,7 +193,7 @@ async def cortex_self_bridge(
 
     Returns a bridge pre-configured for reading CORTEX's own
     knowledge base, or None if the server is unreachable
-    (antifragile fallback — callers degrade to direct ORM).
+    (antifragile fallback - callers degrade to direct ORM).
 
     Tools via cortex-readonly:
       query-facts, query-ghosts, query-decisions,
@@ -201,7 +201,7 @@ async def cortex_self_bridge(
     """
     if not toolbox_health_check():
         logger.warning(
-            "Toolbox membrane unreachable at %s — fallback to direct ORM.",
+            "Toolbox membrane unreachable at %s - fallback to direct ORM.",
             DEFAULT_SERVER_URL,
         )
         return None
@@ -217,7 +217,7 @@ def toolbox_health_check(
 ) -> bool:
     """Probe whether the Toolbox server is alive.
 
-    Uses stdlib urllib — zero external deps. Hits GET /api/toolset/
+    Uses stdlib urllib - zero external deps. Hits GET /api/toolset/
     and expects a 200 response within `timeout` seconds.
     """
     import urllib.error

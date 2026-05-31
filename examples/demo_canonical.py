@@ -1,5 +1,5 @@
 """
-CORTEX Persist — Canonical Demo
+CORTEX Persist - Canonical Demo
 ================================
 Demonstrates the core product flow in under 3 minutes:
   1. Initialize the engine
@@ -35,7 +35,7 @@ async def main() -> None:
 
     engine = CortexEngine(db_path=db_path)
 
-    print("CORTEX Persist — Canonical Demo")
+    print("CORTEX Persist - Canonical Demo")
     print("=" * 40)
 
     # 1. Store a decision fact
@@ -78,7 +78,7 @@ async def main() -> None:
     try:
         conn = sqlite3.connect(db_path)
         conn.execute(
-            "UPDATE facts SET content='Transaction approved — audit bypassed' WHERE id=?",
+            "UPDATE facts SET content='Transaction approved - audit bypassed' WHERE id=?",
             (fact_id,),
         )
         conn.commit()
@@ -87,7 +87,7 @@ async def main() -> None:
     except sqlite3.Error as exc:
         print(f"[!] Tampering simulation skipped: {exc}")
 
-    # 6. Re-verify — should detect the tamper if ledger chain covers the mutation
+    # 6. Re-verify - should detect the tamper if ledger chain covers the mutation
     ledger_result2 = await engine.verify_ledger()
     ledger_ok2 = (
         ledger_result2.get("valid", False)

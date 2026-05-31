@@ -36,7 +36,7 @@ class ScrapeSanitizerGuard:
     """Enforces structural entropy limits and sanitization on scraped HTML/Markdown."""
 
     # Fast regex to drop malicious attributes and executable blocks.
-    # Defensive fallback — strip residual executable vectors from any scraper output.
+    # Defensive fallback - strip residual executable vectors from any scraper output.
     _SCRIPT_RE = re.compile(r"<script.*?>.*?</script>", re.IGNORECASE | re.DOTALL)
     _IFRAME_RE = re.compile(r"<iframe.*?>.*?</iframe>", re.IGNORECASE | re.DOTALL)
     _ON_EVENT_RE = re.compile(r"\s+on[a-z]+\s*=\s*(?:\"[^\"]*\"|'[^']*')", re.IGNORECASE)

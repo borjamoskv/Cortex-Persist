@@ -273,7 +273,7 @@ class EpisodicMemory:
         if not rows:
             return []
 
-        # Computationally expensive operation — offloaded to thread pool under high load
+        # Computationally expensive operation - offloaded to thread pool under high load
         return await asyncio.to_thread(
             _extract_patterns,
             list(rows),

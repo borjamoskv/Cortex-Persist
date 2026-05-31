@@ -297,7 +297,7 @@ def _detect_code_ghosts(source_files: list[Path], root: Path) -> list[str]:
         files_involved = {o[0] for o in occurrences}
         names_involved = {o[1] for o in occurrences}
         if len(files_involved) == 1 and len(names_involved) == 1:
-            continue  # Same function definition (e.g. inherited override) — skip
+            continue  # Same function definition (e.g. inherited override) - skip
 
         for fn, name, lineno in occurrences:
             other_locations = ", ".join(
@@ -436,7 +436,7 @@ def _score_dimensions(
         )
     )
 
-    # Fantasmas (Code Ghosts) — Structural clones burning entropy
+    # Fantasmas (Code Ghosts) - Structural clones burning entropy
     if not has_files:
         ghost_score = 100  # No files = no ghosts
     else:

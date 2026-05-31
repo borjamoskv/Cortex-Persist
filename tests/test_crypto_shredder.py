@@ -1,4 +1,4 @@
-"""Tests for Crypto-Shredding Engine — Phase 2."""
+"""Tests for Crypto-Shredding Engine - Phase 2."""
 
 import sqlite3
 

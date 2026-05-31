@@ -19,7 +19,7 @@ __all__ = ["get_tracker", "get_usage", "get_usage_breakdown", "get_usage_history
 router = APIRouter(prefix="/v1/usage", tags=["usage"])
 logger = logging.getLogger(__name__)
 
-# FastAPI dependency — lazily initialized, overridable in tests
+# FastAPI dependency - lazily initialized, overridable in tests
 _tracker: UsageTracker | None = None
 
 

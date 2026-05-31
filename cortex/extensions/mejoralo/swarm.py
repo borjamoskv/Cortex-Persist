@@ -1,4 +1,4 @@
-"""MEJORAlo v9.0 — Swarm of Specialized Subagents.
+"""MEJORAlo v9.0 - Swarm of Specialized Subagents.
 
 Uses ThoughtOrchestra to deploy multiple specialists in parallel,
 synthesizing their insights into a single sovereign refactor.
@@ -32,7 +32,7 @@ from cortex.extensions.thinking.presets import OrchestraConfig, ThinkingMode
 
 logger = logging.getLogger("cortex.extensions.mejoralo.swarm")
 
-# Sovereign Specialists (Level 130/100) — Aligned with kimi-swarm-1
+# Sovereign Specialists (Level 130/100) - Aligned with kimi-swarm-1
 SPECIALISTS_PROMPTS = {
     "ArchitectPrime": (
         "You are the Guardian of Axioms. High-level structural integrity and 'Industrial Noir' "
@@ -130,7 +130,7 @@ class MejoraloSwarm:
             if result is not None:
                 logger.info("✨ Cirujía AST completada [%s]", file_path.name)
                 return result
-            logger.info("⚠️ Modo quirúrgico fallido — fallback a archivo completo.")
+            logger.info("⚠️ Modo quirúrgico fallido - fallback a archivo completo.")
 
         # 📦 Full-file fallback
         base_prompt = self._build_prompt(file_path, content, findings_str, engine, project)

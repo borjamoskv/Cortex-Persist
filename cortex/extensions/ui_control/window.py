@@ -1,5 +1,5 @@
 """
-CORTEX — Sovereign Window Management Engine for macOS.
+CORTEX - Sovereign Window Management Engine for macOS.
 
 Dedicated window operations: list, move, resize, minimize, fullscreen, close.
 Uses AppleScript + System Events for maximum reliability across apps.

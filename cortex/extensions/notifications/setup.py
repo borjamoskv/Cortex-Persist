@@ -1,4 +1,4 @@
-"""CORTEX — Notification Bus startup wiring.
+"""CORTEX - Notification Bus startup wiring.
 
 Called once at API/daemon startup to build and configure the process-level
 NotificationBus from CortexConfig environment variables.
@@ -52,7 +52,7 @@ def setup_notifications(cfg: CortexConfig) -> NotificationBus:
     )
     bus.register(telegram, min_severity=min_severity)
 
-    # macOS (always attempt — is_configured handles platform check)
+    # macOS (always attempt - is_configured handles platform check)
     bus.register(MacOSAdapter(), min_severity=EventSeverity.WARNING)
 
     logger.info(

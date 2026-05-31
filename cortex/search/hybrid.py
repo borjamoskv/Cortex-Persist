@@ -150,10 +150,10 @@ async def hybrid_search(
         r.score = round(rrf_scores[fid], 6)
         merged.append(r)
 
-    # Ω₁₃: Temporal decay — older facts naturally discounted
+    # Ω₁₃: Temporal decay - older facts naturally discounted
     if recency_weight > 0 and merged:
         merged = _apply_temporal_decay(merged, recency_weight)
-    # Ω₁₃: Causal gap re-ranking — similarity alone is insufficient
+    # Ω₁₃: Causal gap re-ranking - similarity alone is insufficient
     if causal_gap is not None and merged:
         merged = _rerank_by_causal_gap(merged, causal_gap)
 

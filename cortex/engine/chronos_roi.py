@@ -166,7 +166,7 @@ class ChronosROI:
             cost=round(cost, 4),
         )
 
-    # ── Observability Loop (NEW — closes the blind oracle gap) ──────
+    # ── Observability Loop (NEW - closes the blind oracle gap) ──────
 
     def persist_report(
         self,
@@ -176,7 +176,7 @@ class ChronosROI:
     ) -> int | None:
         """Persist a CHRONOS report as a CORTEX fact + emit signal.
 
-        This closes the observability loop — CHRONOS metrics are now
+        This closes the observability loop - CHRONOS metrics are now
         part of the CORTEX knowledge graph, not a dead-end calculation.
         """
         try:

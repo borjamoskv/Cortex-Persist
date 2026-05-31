@@ -50,7 +50,7 @@ def delete(fact_id, reason, tenant_id, db) -> None:
 
             console.print(
                 f"[dim]Deprecando:[/] [bold]#{fact_id}[/] "
-                f"[cyan]{fact.project}[/] ({fact.fact_type}) — {fact.content[:80]}..."
+                f"[cyan]{fact.project}[/] ({fact.fact_type}) - {fact.content[:80]}..."
             )
             success = await engine.deprecate(
                 fact_id, reason or "deleted-via-cli", tenant_id=tenant_id
@@ -246,7 +246,7 @@ def inspect(fact_id, tenant_id, db) -> None:
             info.add_row("[bold underline]Semantic Plane[/]", "")
             info.add_row("Category:", fact.category)
             info.add_row("Yield:", f"{fact.yield_score:.2f}")
-            info.add_row("Tags:", ", ".join(tags) if tags else "—")
+            info.add_row("Tags:", ", ".join(tags) if tags else "-")
 
             # Enrichment Process
             info.add_row("", "")

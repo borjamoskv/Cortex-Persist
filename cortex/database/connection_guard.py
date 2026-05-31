@@ -1,4 +1,4 @@
-"""ConnectionGuard — CI/lint scanner for raw sqlite3.connect() usage.
+"""ConnectionGuard - CI/lint scanner for raw sqlite3.connect() usage.
 
 Provides a callable scanner that detects unauthorized sqlite3.connect()
 calls from CORTEX module code. Used by:
@@ -6,9 +6,9 @@ calls from CORTEX module code. Used by:
 2. Pre-commit hooks
 3. cortex lint command
 
-This is a build-time guard, not runtime — pragmatic and zero-overhead.
+This is a build-time guard, not runtime - pragmatic and zero-overhead.
 
-Copyright 2026 by borjamoskv.com — Apache-2.0
+Copyright 2026 by borjamoskv.com - Apache-2.0
 """
 
 from __future__ import annotations
@@ -62,7 +62,7 @@ _WHITELISTED_MODULES: frozenset[str] = frozenset(
         # TTT ghost harvester
         "cortex/ttt/ghost_harvester.py",
         "cortex/extensions/ttt/ghost_harvester.py",
-        # Causality (sync oracle — thread-safe)
+        # Causality (sync oracle - thread-safe)
         "cortex/engine/causality.py",
         # Metering tracker (sync, hot path)
         "cortex/metering/tracker.py",

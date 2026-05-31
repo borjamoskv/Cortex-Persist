@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-claude_orchestrator.py — C5-REAL Deterministic Claude Dispatcher
+claude_orchestrator.py - C5-REAL Deterministic Claude Dispatcher
 
 Fires structured, reproducible requests to the Anthropic Messages API.
 Zero decorative prose. Pure httpx async. Pydantic-validated payloads.
@@ -210,7 +210,7 @@ async def dispatch_single(
             if resp.status_code >= 500:
                 delay = min(BACKOFF_BASE * (2 ** (attempt - 1)), BACKOFF_CAP)
                 log.warning(
-                    "[SERVER-ERR] %d — backoff=%.1fs attempt=%d/%d",
+                    "[SERVER-ERR] %d - backoff=%.1fs attempt=%d/%d",
                     resp.status_code,
                     delay,
                     attempt,
@@ -415,7 +415,7 @@ def load_manifest(path: str) -> list[ClaudeRequest]:
 def render_stats(stats: OrchestratorStats) -> None:
     """Print batch stats."""
     if console:
-        table = Table(title="Claude Orchestrator — C5-REAL Results", show_lines=True)
+        table = Table(title="Claude Orchestrator - C5-REAL Results", show_lines=True)
         table.add_column("#", justify="right", style="dim")
         table.add_column("Hash", style="cyan")
         table.add_column("Status", style="bold")
@@ -433,7 +433,7 @@ def render_stats(stats: OrchestratorStats) -> None:
                 r.model,
                 f"{r.input_tokens}+{r.output_tokens}",
                 f"{r.latency_ms:.0f}ms",
-                r.stop_reason or r.error or "—",
+                r.stop_reason or r.error or "-",
             )
 
         console.print(table)

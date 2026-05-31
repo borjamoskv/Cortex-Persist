@@ -1,4 +1,4 @@
-"""SICA Strategy — Evolvable Search Heuristics.
+"""SICA Strategy - Evolvable Search Heuristics.
 
 A SearchStrategy encodes HOW the agent approaches problem-solving:
   - Tool selection priority
@@ -6,7 +6,7 @@ A SearchStrategy encodes HOW the agent approaches problem-solving:
   - Error recovery patterns
   - Exploration vs exploitation balance
 
-Strategies are represented as StrategyGenome — a mutable data structure
+Strategies are represented as StrategyGenome - a mutable data structure
 that the meta-level can mutate based on performance feedback.
 
 The evolutionary loop:

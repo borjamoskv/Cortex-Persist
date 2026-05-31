@@ -41,7 +41,7 @@ _uvloop_installed = False
 
 
 def install_uvloop() -> bool:
-    """Check if uvloop is available (deprecated — use sovereign_run() instead).
+    """Check if uvloop is available (deprecated - use sovereign_run() instead).
 
     .. deprecated:: 5.2
         This function previously called ``asyncio.set_event_loop_policy()``

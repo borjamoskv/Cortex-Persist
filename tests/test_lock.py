@@ -1,4 +1,4 @@
-"""Tests for SovereignLock — Ω₂ Lock-Free Concurrency."""
+"""Tests for SovereignLock - Ω₂ Lock-Free Concurrency."""
 
 import asyncio
 

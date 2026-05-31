@@ -1,6 +1,6 @@
 """
 CORTEX JIT Compiled Skill: Sortu-APEX
-Description: JIT Skill Compiler — Sovereign x10000 Centuria Forge + Death Protocol + Registry Consolidation
+Description: JIT Skill Compiler - Sovereign x10000 Centuria Forge + Death Protocol + Registry Consolidation
 """
 import json
 import logging

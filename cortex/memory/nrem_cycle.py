@@ -1,13 +1,13 @@
-"""CORTEX v8+ — NREM Consolidation Cycle.
+"""CORTEX v8+ - NREM Consolidation Cycle.
 
 Unified orchestrator for the "sleep" sweep that transforms volatile
 short-term memory into stable long-term knowledge.
 
 Phases (modeled after NREM slow-wave sleep):
-  1. Maturation  — Silent engrams that survived → promote to stable
-  2. Pruning     — Depleted engrams (ATP < threshold) → destroy
-  3. Synaptic decay — STDP edges decay globally (use-it-or-lose-it)
-  4. Homeostatic scaling — Turrigiano normalization prevents runaway LTP/LTD
+  1. Maturation  - Silent engrams that survived → promote to stable
+  2. Pruning     - Depleted engrams (ATP < threshold) → destroy
+  3. Synaptic decay - STDP edges decay globally (use-it-or-lose-it)
+  4. Homeostatic scaling - Turrigiano normalization prevents runaway LTP/LTD
 
 Each phase is independently skippable. The cycle returns a frozen
 NREMReport with stats from every phase.
@@ -60,7 +60,7 @@ class NREMConsolidationCycle:
       - STDPEngine (synaptic decay)
       - HomeostaticScaler (Turrigiano normalization)
 
-    All components are optional — the cycle degrades gracefully
+    All components are optional - the cycle degrades gracefully
     if any subsystem is unavailable.
     """
 

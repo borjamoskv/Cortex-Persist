@@ -1,4 +1,4 @@
-"""CORTEX Genesis Engine — A System That Creates Systems.
+"""CORTEX Genesis Engine - A System That Creates Systems.
 
 The core orchestrator that takes a SystemSpec and produces a complete,
 validated subsystem: modules, tests, CLI commands, configs.
@@ -6,7 +6,7 @@ validated subsystem: modules, tests, CLI commands, configs.
 Axioms:
     Ω₀ (Self-Reference): Can generate its own specification via self_create().
     Ω₂ (Entropic Asymmetry): Every genesis reduces system entropy.
-    Ω₃ (Byzantine Default): Validation before trust — all output is verified.
+    Ω₃ (Byzantine Default): Validation before trust - all output is verified.
 """
 
 from __future__ import annotations
@@ -33,7 +33,7 @@ class GenesisEngine:
 
     GenesisEngine is the recursive apex of CORTEX infrastructure.
     It takes a declarative SystemSpec and produces a complete, validated
-    subsystem on disk — with deterministic, template-based code generation.
+    subsystem on disk - with deterministic, template-based code generation.
 
     No LLM inference is involved. Quality is guaranteed by construction.
 
@@ -113,7 +113,7 @@ class GenesisEngine:
     ) -> GenesisResult:
         """Add components to an existing system (incremental genesis).
 
-        Unlike create(), this does NOT recreate the directory structure —
+        Unlike create(), this does NOT recreate the directory structure -
         it only adds new files for components that don't already exist.
 
         Args:
@@ -253,7 +253,7 @@ class GenesisEngine:
         """
         return SystemSpec(
             name="genesis",
-            description="A system that creates systems — the recursive apex of CORTEX.",
+            description="A system that creates systems - the recursive apex of CORTEX.",
             target_dir="",
             system_type="module",
             auto_cli=True,
@@ -290,7 +290,7 @@ class GenesisEngine:
                 ComponentSpec(
                     name="engine",
                     component_type="module",
-                    docstring="Core orchestrator — a system that creates systems.",
+                    docstring="Core orchestrator - a system that creates systems.",
                     interfaces=["create", "create_from_dict", "self_create"],
                     dependencies=["models", "templates", "assembler", "validator"],
                 ),
@@ -405,7 +405,7 @@ class GenesisEngine:
         engine.store_sync(
             content=(
                 f"Genesis bridge: created system '{result.spec.name}' "
-                f"({result.spec.system_type}) — "
+                f"({result.spec.system_type}) - "
                 f"{len(result.files_created)} files, "
                 f"CHRONOS-1: {result.hours_saved:.2f}h saved"
             ),

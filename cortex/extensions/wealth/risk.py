@@ -79,10 +79,10 @@ class RiskManager:
     """
     Gestión de riesgo soberana. NUNCA se desactiva.
     Circuit breakers automáticos incluidos.
-    Todos los umbrales en Decimal — zero float drift.
+    Todos los umbrales en Decimal - zero float drift.
     """
 
-    # Límites absolutos (Decimal — sin pérdida de precisión)
+    # Límites absolutos (Decimal - sin pérdida de precisión)
     MAX_POSITION_PCT = Decimal("0.05")  # 5% por posición
     MAX_DAILY_LOSS_PCT = Decimal("0.02")  # Stop diario -2%
     MAX_DRAWDOWN_PCT = Decimal("0.10")  # Stop total -10%
@@ -116,7 +116,7 @@ class RiskManager:
         if failed:
             self.consecutive_rejections += 1
             log.warning(
-                "Trade RECHAZADO — checks fallidos: %s (consecutivos: %d/%d)",
+                "Trade RECHAZADO - checks fallidos: %s (consecutivos: %d/%d)",
                 failed,
                 self.consecutive_rejections,
                 self.MAX_CONSECUTIVE_REJECTIONS,

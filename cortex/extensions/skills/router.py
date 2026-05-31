@@ -1,5 +1,5 @@
 """
-Skill Routing Engine — Capa base de ejecución Soberana (MOSKV-1).
+Skill Routing Engine - Capa base de ejecución Soberana (MOSKV-1).
 
 Transforma intención en invocación de la capability correcta.
 Enruta dinámicamente según el grafo de dependencias de la SkillRegistry.

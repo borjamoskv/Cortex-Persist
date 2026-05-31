@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Forensic Hunter v1.0 — Sovereign Swarm Audit & Slashing.
+Forensic Hunter v1.0 - Sovereign Swarm Audit & Slashing.
 Identifies agentic deviation and applies reputation penalties (The Gavel).
 """
 
@@ -20,7 +20,7 @@ async def hunt(db_path: str):
 
     logger.info("🔱 Forensic Hunter initialized. Auditing Swarm Integrity [Target: OpenAI/MCP]...")
 
-    # 1. Identity 'Tainted' output — Scanning for MCP Header Bypass (Ω₁₃)
+    # 1. Identity 'Tainted' output - Scanning for MCP Header Bypass (Ω₁₃)
     # Simulation: Agent 0x1 'Forgot' to include X-CORTEX-TENANT header in a tool call.
     tainted_agents = [
         {"id": "byzantine_node_0x1", "reason": "MCP Header Bypass (Missing X-CORTEX-TENANT)"},

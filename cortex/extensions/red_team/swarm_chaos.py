@@ -80,7 +80,7 @@ class RedTeamSwarm:
                 # Elegir un objetivo aleatorio de la lista para inyectar caos
                 service, func, seed = random.choice(targets)
                 logger.info(
-                    "🔥 [RED-TEAM] Chaos Cycle #%d — Targeted: %s.%s",
+                    "🔥 [RED-TEAM] Chaos Cycle #%d - Targeted: %s.%s",
                     self._chaos_count,
                     service,
                     func.__name__,

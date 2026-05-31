@@ -1,4 +1,4 @@
-"""SCRAPER-Ω — Data models for web extraction.
+"""SCRAPER-Ω - Data models for web extraction.
 
 Pydantic-validated schemas for requests, results, and batch jobs.
 """

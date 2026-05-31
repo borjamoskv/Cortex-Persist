@@ -1,4 +1,4 @@
-"""Mac-Maestro-Ω — Core data models for sovereign macOS automation."""
+"""Mac-Maestro-Ω - Core data models for sovereign macOS automation."""
 
 from __future__ import annotations
 

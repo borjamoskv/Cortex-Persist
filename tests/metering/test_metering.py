@@ -1,4 +1,4 @@
-"""Tests for cortex.metering module — tracker, quotas, and middleware."""
+"""Tests for cortex.metering module - tracker, quotas, and middleware."""
 
 import os
 import tempfile

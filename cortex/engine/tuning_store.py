@@ -1,4 +1,4 @@
-"""Tuning Persistence — Save and Restore Learned Optimizations (C5-REAL).
+"""Tuning Persistence - Save and Restore Learned Optimizations (C5-REAL).
 
 Persists L6 Self-Optimizer tunings to a SQLite database so the system
 retains its thermodynamic state and learned optimizations across restarts.

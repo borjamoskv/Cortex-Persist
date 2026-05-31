@@ -1,4 +1,4 @@
-"""MOSKV-1 — Tesseract Manifold Convergence Engine."""
+"""MOSKV-1 - Tesseract Manifold Convergence Engine."""
 
 from __future__ import annotations
 

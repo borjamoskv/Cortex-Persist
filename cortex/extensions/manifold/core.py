@@ -1,4 +1,4 @@
-"""MOSKV-1 — Tesseract Core Manifold.
+"""MOSKV-1 - Tesseract Core Manifold.
 
 The main orchestrator loop simulating 4D cognitive wave collapse.
 """
@@ -48,7 +48,7 @@ class TesseractManifold:
     async def run(self, task: AgentTask, toolkit: AgentToolkit) -> AgentTask:
         """Run the manifold wave collapse for a given task."""
         state = WaveState()
-        logger.info("◈ TESSERACT IGNITION — Task [%s] %s", task.id, task.title)
+        logger.info("◈ TESSERACT IGNITION - Task [%s] %s", task.id, task.title)
 
         branch = f"tesseract/{task.id}"
         toolkit.git_create_branch(branch)

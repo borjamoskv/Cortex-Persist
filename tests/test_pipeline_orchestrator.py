@@ -1,4 +1,4 @@
-"""Tests for cortex.pipeline.orchestrator — Sovereign E2E Pipeline.
+"""Tests for cortex.pipeline.orchestrator - Sovereign E2E Pipeline.
 
 C5-REAL audit remediation: pipeline/ coverage gap.
 Tests the synchronous `run()` path and all 6 stage implementations
@@ -221,7 +221,7 @@ class TestPersistence:
                 raise ConnectionError("DB down")
 
         orch = CortexOrchestrator(ledger=BrokenLedger())
-        # Should not raise — error is logged, hash still returned
+        # Should not raise - error is logged, hash still returned
         result = orch._persist(_make_request(), {"data": True})
         assert len(result) == 64  # SHA-256 hex
 

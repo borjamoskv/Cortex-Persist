@@ -88,7 +88,7 @@ class Notifier:
     @staticmethod
     def alert_site_down(site: SiteStatus) -> None:
         Notifier.notify(
-            "⚠️ MOSKV-1 — Site Down",
+            "⚠️ MOSKV-1 - Site Down",
             f"{site.url} is unreachable: {site.error or f'HTTP {site.status_code}'}",
             sound="Basso",
         )
@@ -97,7 +97,7 @@ class Notifier:
     def alert_stale_project(ghost: GhostAlert) -> None:
         hours = int(ghost.hours_stale)
         Notifier.notify(
-            "💤 MOSKV-1 — Proyecto Stale",
+            "💤 MOSKV-1 - Proyecto Stale",
             f"{ghost.project} lleva {hours}h sin actividad",
         )
 
@@ -105,6 +105,6 @@ class Notifier:
     def alert_memory_stale(alert: MemoryAlert) -> None:
         hours = int(alert.hours_stale)
         Notifier.notify(
-            "🧠 MOSKV-1 — CORTEX Stale",
+            "🧠 MOSKV-1 - CORTEX Stale",
             f"{alert.file} sin actualizar ({hours}h). Ejecuta /memoria",
         )

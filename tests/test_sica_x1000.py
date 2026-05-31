@@ -1,4 +1,4 @@
-"""Tests for SICA x1000 — World Model, Dream Engine, Colony.
+"""Tests for SICA x1000 - World Model, Dream Engine, Colony.
 
 Tests the three cognitive leap modules:
   1. WorldModel: Bayesian prediction, UCB ranking, counterfactuals

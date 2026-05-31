@@ -75,7 +75,7 @@ class TombstoneMonitor:
 
                 initial_size = self.db_path.stat().st_size
 
-                # 1. Main Delete — cascade handles vector indexes
+                # 1. Main Delete - cascade handles vector indexes
                 # depending on schema triggers.
                 # But to be safe, we explicitly clear related vectors if cascade is off.
                 cursor.execute("SELECT id FROM facts WHERE is_tombstoned = 1")
@@ -93,7 +93,7 @@ class TombstoneMonitor:
 
                     try:
                         cursor.execute("BEGIN IMMEDIATE")
-                        # nosec B608 — Validated local table structure, batch parameterized.
+                        # nosec B608 - Validated local table structure, batch parameterized.
                         cursor.execute(
                             f"DELETE FROM fact_embeddings WHERE fact_id IN ({id_list})", batch
                         )

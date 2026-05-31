@@ -8,7 +8,7 @@ from cortex.engine.swarm_10k import CenturionSuperv, SwarmCommander
 @pytest.mark.asyncio
 async def test_swarm_kinetic_feedback_throttling(tmp_path):
     """
-    Verify Singularity v7.0 — Throttling triggers when exergy is low.
+    Verify Singularity v7.0 - Throttling triggers when exergy is low.
     """
     cmd = SwarmCommander(tmp_path)
     await cmd.initialize()

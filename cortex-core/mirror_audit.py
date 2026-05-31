@@ -4,7 +4,7 @@ import sys
 import logging
 import time
 
-# CORTEX Mirror Protocol v6.5 — The Epistemic Auditor
+# CORTEX Mirror Protocol v6.5 - The Epistemic Auditor
 logging.basicConfig(level=logging.INFO, format="👁️ [MIRROR] %(message)s")
 
 

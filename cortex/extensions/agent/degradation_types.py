@@ -116,7 +116,7 @@ class SovereignAgentError(Exception):
 class SchemaIncompatibilityError(SovereignAgentError):
     """Model does not support the required function-calling schema.
 
-    L3 — Actionable: cause identified, alternative model suggested.
+    L3 - Actionable: cause identified, alternative model suggested.
     """
 
     level = DegradationLevel.L3_ACTIONABLE
@@ -149,7 +149,7 @@ class SchemaIncompatibilityError(SovereignAgentError):
 
 
 class ToolRegistrationError(SovereignAgentError):
-    """Tool registration failed — tool not available or misconfigured."""
+    """Tool registration failed - tool not available or misconfigured."""
 
     level = DegradationLevel.L3_ACTIONABLE
 
@@ -199,7 +199,7 @@ class AgentDegradedError(SovereignAgentError):
     """Agent is operating in a degraded mode after a partial failure.
 
     Raised when neither full execution nor text-only fallback is viable.
-    Always L3 — carries full context for the user to take action.
+    Always L3 - carries full context for the user to take action.
     """
 
     level = DegradationLevel.L3_ACTIONABLE
@@ -232,7 +232,7 @@ class AgentDegradedError(SovereignAgentError):
 
 
 class AgentCalcificationError(SovereignAgentError):
-    """Agent has stopped evolving — δ≈0 detected (Ω₅ violation).
+    """Agent has stopped evolving - δ≈0 detected (Ω₅ violation).
 
     Raised when the system detects the agent is repeating the same
     failure pattern without generating new learning gradient.
@@ -262,7 +262,7 @@ class AgentCalcificationError(SovereignAgentError):
 class AgentAction:
     """An action request to an agent (input contract).
 
-    Immutable — never mutated after creation.
+    Immutable - never mutated after creation.
     """
 
     action_id: str

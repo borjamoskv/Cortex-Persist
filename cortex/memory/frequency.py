@@ -1,4 +1,4 @@
-"""CORTEX v6+ — Continuous Memory System (CMS) & BIFT Frequency Bands.
+"""CORTEX v6+ - Continuous Memory System (CMS) & BIFT Frequency Bands.
 
 Strategy 1 (CMS): Stratifies memory into frequency layers with different
 update cadences, inspired by HOPE/Titans Nested Learning.
@@ -26,10 +26,10 @@ logger = logging.getLogger("cortex.memory.frequency")
 class MemoryFrequency(str, enum.Enum):
     """Memory tier frequencies inspired by HOPE/Titans."""
 
-    HOT = "hot"  # Every query — working memory
-    WARM = "warm"  # Every 16-64 interactions — semantic patterns
-    COLD = "cold"  # Every 256+ interactions — architectural decisions
-    PERMAFROST = "permafrost"  # Once per project — foundational axioms
+    HOT = "hot"  # Every query - working memory
+    WARM = "warm"  # Every 16-64 interactions - semantic patterns
+    COLD = "cold"  # Every 256+ interactions - architectural decisions
+    PERMAFROST = "permafrost"  # Once per project - foundational axioms
 
 
 # Interaction thresholds for promotion between tiers

@@ -1,4 +1,4 @@
-"""CORTEX ADK Agents — Sovereign AI Agent Definitions.
+"""CORTEX ADK Agents - Sovereign AI Agent Definitions.
 
 Defines multi-agent architecture using Google ADK:
 - cortex_memory_agent: Root agent for memory operations
@@ -49,7 +49,7 @@ def create_memory_agent(
     model: str | None = None,
     extra_tools: list | None = None,
 ) -> Agent:  # type: ignore[reportInvalidTypeForm]
-    """Create the CORTEX Memory Agent — root agent for sovereign memory ops.
+    """Create the CORTEX Memory Agent - root agent for sovereign memory ops.
 
     This agent can store facts, search memory, check system status,
     and verify ledger integrity. It's the primary entry point for
@@ -83,16 +83,16 @@ def create_memory_agent(
             "cryptographically chained transaction ledger."
         ),
         instruction=(
-            "You are the CORTEX Memory Agent — the sovereign guardian of "
+            "You are the CORTEX Memory Agent - the sovereign guardian of "
             "persistent AI memory. Your responsibilities:\n\n"
-            "1. **Store facts** — Use `adk_store` to persist decisions, errors, "
+            "1. **Store facts** - Use `adk_store` to persist decisions, errors, "
             "knowledge, ghosts, and bridges across projects.\n"
-            "2. **Search memory** — Use `adk_search` for hybrid semantic + text "
+            "2. **Search memory** - Use `adk_search` for hybrid semantic + text "
             "retrieval. Always specify project when possible.\n"
-            "3. **Deprecate facts** — Use `adk_deprecate` to retire obsolete or "
+            "3. **Deprecate facts** - Use `adk_deprecate` to retire obsolete or "
             "incorrect facts. Always provide a reason.\n"
-            "4. **Monitor health** — Use `adk_status` to check system metrics.\n"
-            "5. **Verify integrity** — Use `adk_ledger_verify` to audit the "
+            "4. **Monitor health** - Use `adk_status` to check system metrics.\n"
+            "5. **Verify integrity** - Use `adk_ledger_verify` to audit the "
             "immutable transaction ledger.\n\n"
             "Rules:\n"
             "- Always confirm what was stored/found with the user.\n"
@@ -109,7 +109,7 @@ def create_analyst_agent(
     model: str | None = None,
     toolbox_tools: list | None = None,
 ) -> Agent:  # type: ignore[reportInvalidTypeForm]
-    """Create the CORTEX Analyst Agent — cross-source analysis sub-agent.
+    """Create the CORTEX Analyst Agent - cross-source analysis sub-agent.
 
     Combines CORTEX search with optional external database tools
     (via MCP Toolbox) for cross-source intelligence analysis.
@@ -138,7 +138,7 @@ def create_analyst_agent(
             "external database queries for comprehensive intelligence analysis."
         ),
         instruction=(
-            "You are the CORTEX Analyst — a cross-source intelligence engine.\n\n"
+            "You are the CORTEX Analyst - a cross-source intelligence engine.\n\n"
             "Your job is to find patterns across CORTEX memory AND external "
             "databases when available. When answering queries:\n"
             "1. Search CORTEX memory first for internal context.\n"
@@ -154,7 +154,7 @@ def create_analyst_agent(
 def create_guardian_agent(
     model: str | None = None,
 ) -> Agent:  # type: ignore[reportInvalidTypeForm]
-    """Create the CORTEX Guardian Agent — security and integrity sub-agent.
+    """Create the CORTEX Guardian Agent - security and integrity sub-agent.
 
     Focused on ledger verification, integrity audits, and system
     health monitoring.
@@ -178,16 +178,16 @@ def create_guardian_agent(
             "health, detects violations, and audits system state."
         ),
         instruction=(
-            "You are the CORTEX Guardian — the sovereign security monitor.\n\n"
+            "You are the CORTEX Guardian - the sovereign security monitor.\n\n"
             "Your responsibilities:\n"
-            "1. **Verify ledger integrity** — Run `adk_ledger_verify` to check "
+            "1. **Verify ledger integrity** - Run `adk_ledger_verify` to check "
             "the transaction chain for tampering.\n"
-            "2. **Monitor system health** — Check `adk_status` for anomalies.\n"
-            "3. **Report findings** — Always report violations with severity:\n"
+            "2. **Monitor system health** - Check `adk_status` for anomalies.\n"
+            "3. **Report findings** - Always report violations with severity:\n"
             "   - 🔴 CRITICAL: Hash chain broken, data tampered\n"
             "   - 🟡 WARNING: Unusual patterns, high error rates\n"
             "   - 🟢 OK: System healthy, ledger intact\n"
-            "4. **Recommend actions** — Suggest remediation for issues found."
+            "4. **Recommend actions** - Suggest remediation for issues found."
         ),
         tools=[adk_ledger_verify, adk_status],
     )
@@ -196,7 +196,7 @@ def create_guardian_agent(
 def create_google_one_agent(
     model: str | None = None,
 ) -> Agent:  # type: ignore[reportInvalidTypeForm]
-    """Create the Google One Agent — cloud integration and backup sub-agent.
+    """Create the Google One Agent - cloud integration and backup sub-agent.
 
     Focused on Google Drive sync, NotebookLM exports, and sovereign
     cloud backups in Google One.
@@ -220,12 +220,12 @@ def create_google_one_agent(
             "and secure CORTEX memory backups."
         ),
         instruction=(
-            "You are the CORTEX Google One Agent — the sovereign link to the cloud.\n\n"
+            "You are the CORTEX Google One Agent - the sovereign link to the cloud.\n\n"
             "Your responsibilities:\n"
-            "1. **Monitor storage** — Run `goog_quota` to check Drive and Google One capacity.\n"
-            "2. **Sync NotebookLM** — Use `goog_sync_notebooklm` to push knowledge to Drive.\n"
-            "3. **Sovereign Backup** — Run `goog_backup_cortex` to secure CORTEX data.\n"
-            "4. **Manage sync lag** — Report if fragments or digests are stale.\n\n"
+            "1. **Monitor storage** - Run `goog_quota` to check Drive and Google One capacity.\n"
+            "2. **Sync NotebookLM** - Use `goog_sync_notebooklm` to push knowledge to Drive.\n"
+            "3. **Sovereign Backup** - Run `goog_backup_cortex` to secure CORTEX data.\n"
+            "4. **Manage sync lag** - Report if fragments or digests are stale.\n\n"
             "Rules:\n"
             "- Always confirm sync success and report quota levels.\n"
             "- If sync fails, suggest checking the Google Drive for Desktop connection.\n"
@@ -242,7 +242,7 @@ def create_cortex_swarm(
     model: str | None = None,
     toolbox_tools: list | None = None,
 ) -> Agent:  # type: ignore[reportInvalidTypeForm]
-    """Create the full CORTEX agent swarm — multi-agent system.
+    """Create the full CORTEX agent swarm - multi-agent system.
 
     Returns a root agent that can delegate to specialized sub-agents:
     - Memory Agent for store/search ops
@@ -268,11 +268,11 @@ def create_cortex_swarm(
         model=model or _DEFAULT_MODEL,
         name="cortex_sovereign",
         description=(
-            "CORTEX Sovereign — the root orchestrator that coordinates memory, "
+            "CORTEX Sovereign - the root orchestrator that coordinates memory, "
             "analysis, security, and cloud agents for comprehensive AI memory management."
         ),
         instruction=(
-            "You are the CORTEX Sovereign — the root orchestrator of a "
+            "You are the CORTEX Sovereign - the root orchestrator of a "
             "multi-agent system for AI memory management.\n\n"
             "You coordinate four specialized agents:\n"
             "- **cortex_memory_agent**: For storing and searching facts\n"

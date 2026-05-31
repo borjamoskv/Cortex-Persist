@@ -1,4 +1,4 @@
-"""memory_compression — Background L1 Overflow Compression Pipeline.
+"""memory_compression - Background L1 Overflow Compression Pipeline.
 
 Extracted from CortexMemoryManager to satisfy the Landauer LOC barrier (≤500).
 Handles the 'Sleep-time Compute' pattern: overflowed L1 events are compressed
@@ -26,7 +26,7 @@ logger = logging.getLogger("cortex.memory.compression")
 
 
 def raw_concat(events: list[MemoryEvent]) -> str:
-    """Raw concatenation fallback for compression — O(N), no LLM required."""
+    """Raw concatenation fallback for compression - O(N), no LLM required."""
     return "\n".join(f"[{e.role}]: {e.content}" for e in events)
 
 
@@ -59,9 +59,9 @@ async def summarize_events(
             logger.debug("LLM compression succeeded (%d chars)", len(result.value))
             return result.value
 
-        logger.warning("LLM compression failed: %s — falling back to raw", result.error)
+        logger.warning("LLM compression failed: %s - falling back to raw", result.error)
     except (ValueError, TypeError, RuntimeError, OSError, ImportError) as e:
-        logger.warning("LLM compression error: %s — falling back to raw", e)
+        logger.warning("LLM compression error: %s - falling back to raw", e)
 
     return raw_text
 
@@ -75,7 +75,7 @@ async def compress_and_store(
 ) -> None:
     """Compress overflowed events and store in L2 (v6 sovereign or legacy).
 
-    Called as a background asyncio.Task — must NEVER raise.
+    Called as a background asyncio.Task - must NEVER raise.
     """
     try:
         from cortex.memory.models import CortexFactModel, MemoryEntry

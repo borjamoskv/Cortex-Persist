@@ -3,7 +3,7 @@
 # See top-level LICENSE file for details.
 # Change Date: 2030-01-01 (Transitions to Apache 2.0)
 
-"""CORTEX Signal Hook — fact:stored reactive emission.
+"""CORTEX Signal Hook - fact:stored reactive emission.
 
 Every call to ``engine.store()`` emits a ``fact:stored`` signal into
 the persistent Signal Bus (L1 consciousness layer).  The emission is:
@@ -34,7 +34,7 @@ project exceeds ``COMPACT_TRIGGER_THRESHOLD``, a single ``compact:needed``
 signal is also emitted so that a listening daemon (``cortex compact``) or
 a future L2 reactor can auto-execute compaction without human intervention.
 This is the *neural seed* of L2 reactivity: the first emit() is invisible,
-the second is a consequence — the system develops reflexes.
+the second is a consequence - the system develops reflexes.
 """
 
 from __future__ import annotations
@@ -116,7 +116,7 @@ def emit_fact_stored(
         # ── Reactive Auto-Trigger: compact:needed ─────────────────────────
         # Count unconsumed fact:stored signals for this project.
         # If they exceed the threshold, emit compact:needed so a daemon
-        # can act without human intervention — the L2 neural seed.
+        # can act without human intervention - the L2 neural seed.
         threshold = _compact_threshold()
         try:
             cursor = conn.execute(
@@ -155,5 +155,5 @@ def emit_fact_stored(
         conn.close()
 
     except Exception as e:  # noqa: BLE001
-        # Never propagate — this hook must never break the store operation.
+        # Never propagate - this hook must never break the store operation.
         logger.debug("fact:stored signal emission failed: %s", e)

@@ -1,11 +1,11 @@
 """
-memory_agent.py — MemoryAgent
+memory_agent.py - MemoryAgent
 
 Reactive agent that wraps CortexMemoryManager. Responds to TASK_REQUEST
 messages, executes store/context operations, and emits TASK_RESULT.
 
 NOTE: CortexMemoryManager requires l1, l2, l3, encoder arguments and is a
-heavy dependency — callers must inject a fully constructed instance.
+heavy dependency - callers must inject a fully constructed instance.
 """
 
 from __future__ import annotations
@@ -26,7 +26,7 @@ _SUPPORTED_OPS: frozenset[str] = frozenset({"store", "context", "status"})
 
 
 class MemoryAgent(BaseAgent):
-    """Reactive agent — governs read/write access to CortexMemoryManager.
+    """Reactive agent - governs read/write access to CortexMemoryManager.
 
     Callers must inject a fully initialised CortexMemoryManager (it requires
     l1/l2/l3/encoder components that are environment-specific).
@@ -68,7 +68,7 @@ class MemoryAgent(BaseAgent):
             await self._reply(message, {"op": op, "error": str(exc)})
 
     async def tick(self) -> None:
-        logger.debug("MemoryAgent tick — idle")
+        logger.debug("MemoryAgent tick - idle")
 
     # ------------------------------------------------------------------
     # Internal dispatch

@@ -77,7 +77,7 @@ class SovereignGate:
         self._audit_log: collections.deque[dict[str, Any]] = collections.deque(maxlen=10_000)
 
         logger.info(
-            "SovereignGate initialized — policy=%s timeout=%ds",
+            "SovereignGate initialized - policy=%s timeout=%ds",
             self.policy.value,
             int(self.timeout),
         )
@@ -131,7 +131,7 @@ class SovereignGate:
         self._log_audit("ACTION_REQUESTED", action)
 
         logger.info(
-            "⚡ Gate: Action %s requested — %s [%s]",
+            "⚡ Gate: Action %s requested - %s [%s]",
             action_id,
             description,
             level.value,
@@ -177,7 +177,7 @@ class SovereignGate:
 
     def approve_interactive(self, action_id: str) -> bool:
         """
-        Interactive CLI approval — prompts the operator directly.
+        Interactive CLI approval - prompts the operator directly.
 
         In AUDIT_ONLY mode, auto-approves with a log entry.
         In DISABLED mode, does nothing.
@@ -190,7 +190,7 @@ class SovereignGate:
 
         if self.policy == GatePolicy.AUDIT_ONLY:
             logger.info(
-                "🔍 AUDIT: Action %s would require approval — %s",
+                "🔍 AUDIT: Action %s would require approval - %s",
                 action_id,
                 action.description,
             )
@@ -200,9 +200,9 @@ class SovereignGate:
             self._log_audit("AUTO_APPROVED_AUDIT", action)
             return True
 
-        # ENFORCE mode — actual interactive prompt
+        # ENFORCE mode - actual interactive prompt
         print(f"\n{'=' * 60}")
-        print("⚡ SOVEREIGN GATE — L3 ACTION APPROVAL REQUIRED")
+        print("⚡ SOVEREIGN GATE - L3 ACTION APPROVAL REQUIRED")
         print(f"{'=' * 60}")
         print(f"  Action:  {action.description}")
         print(f"  Level:   {action.level.value}")
@@ -239,7 +239,7 @@ class SovereignGate:
         action.status = ActionStatus.DENIED
         action.context["deny_reason"] = reason
         self._log_audit("ACTION_DENIED", action)
-        logger.warning("❌ Gate: Action %s denied — %s", action_id, reason)
+        logger.warning("❌ Gate: Action %s denied - %s", action_id, reason)
 
     def execute_subprocess(
         self,

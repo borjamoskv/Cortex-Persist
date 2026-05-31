@@ -1,4 +1,4 @@
-"""EVM Topography Mapping — Latency-optimized node routing.
+"""EVM Topography Mapping - Latency-optimized node routing.
 
 Provides deterministic O(1) routing to the most performant RPC node for
 Ethereum, Base, and Arbitrum, adhering to C5-REAL execution standards.
@@ -28,7 +28,7 @@ class EVMNode:
 
 class EVMTopographyMapper:
     """
-    EVM Topography Mapping — Latency-optimized node routing.
+    EVM Topography Mapping - Latency-optimized node routing.
     Ensures O(1) retrieval of the lowest latency RPC node for C5-REAL swarm interactions.
     """
 

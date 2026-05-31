@@ -1,4 +1,4 @@
-"""Tests for cortex.sync.github_bridge — GitHub → CORTEX Bridge.
+"""Tests for cortex.sync.github_bridge - GitHub → CORTEX Bridge.
 
 All GitHub API calls are mocked via httpx.MockTransport.
 Uses CortexEngine with a temp database for realistic end-to-end testing.
@@ -132,11 +132,11 @@ class TestSyncSkipsDuplicates:
         bridge = GitHubCortexBridge(engine, token="fake-token", owner="borjamoskv")
         bridge._client = httpx.AsyncClient(transport=transport)
 
-        # First sync — should create
+        # First sync - should create
         r1 = await bridge.sync_all()
         assert r1.issues_synced == 1
 
-        # Second sync — should skip
+        # Second sync - should skip
         bridge._client = httpx.AsyncClient(transport=transport)
         r2 = await bridge.sync_all()
         assert r2.skipped >= 1

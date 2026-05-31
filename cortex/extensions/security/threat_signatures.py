@@ -47,7 +47,7 @@ BUILT_IN_SIGNATURES: list[dict[str, Any]] = [
         "category": "prompt_injection",
         "severity": "critical",
         "pattern": r"(?i)(ignore\s+(all\s+)?previous\s+instructions|forget\s+(all\s+)?(your|previous)\s+instructions)",
-        "desc": "Direct prompt injection — instruction override",
+        "desc": "Direct prompt injection - instruction override",
     },
     {
         "id": "SIG-PI-002",

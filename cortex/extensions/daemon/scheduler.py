@@ -1,4 +1,4 @@
-"""SovereignScheduler — Async cron/interval task scheduler with SQLite persistence.
+"""SovereignScheduler - Async cron/interval task scheduler with SQLite persistence.
 
 Runs recurring and one-shot tasks on the daemon's single event loop.
 Survives restarts via SQLite WAL-mode persistence.
@@ -15,7 +15,7 @@ Architecture:
     │         HotStateDB.set()               │
     └───────────────────────────────────────┘
 
-Derivation: Ω₃ (Cycle Law) — Compound_Yield = Σ(Yield_i × S^d_i)
+Derivation: Ω₃ (Cycle Law) - Compound_Yield = Σ(Yield_i × S^d_i)
 """
 
 from __future__ import annotations
@@ -350,7 +350,7 @@ class SovereignScheduler:
                 level,
                 entry.name,
                 elapsed_ms,
-                f" — {error}" if error else "",
+                f" - {error}" if error else "",
             )
 
     # ─── Helpers ──────────────────────────────────────────────────
@@ -397,7 +397,7 @@ class SovereignScheduler:
             return (now + timedelta(seconds=entry.interval_s)).isoformat()
         if entry.kind == "cron" and entry.cron_expr:
             return self._next_cron_time(entry.cron_expr)
-        return None  # oneshot — won't run again
+        return None  # oneshot - won't run again
 
     @staticmethod
     def _next_cron_time(cron_expr: str) -> str:

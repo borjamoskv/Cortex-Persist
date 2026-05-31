@@ -1,4 +1,4 @@
-"""degradation_executor — sovereign_execute decorator and helpers.
+"""degradation_executor - sovereign_execute decorator and helpers.
 
 Extracted from agent/degradation.py to satisfy the Landauer LOC barrier (≤500).
 Contains: sovereign_execute decorator, _upgrade_to_l3, _persist_to_cortex.

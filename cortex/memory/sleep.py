@@ -1,4 +1,4 @@
-"""CORTEX v7+ — Sleep Orchestrator (Unified Consolidation Pipeline).
+"""CORTEX v7+ - Sleep Orchestrator (Unified Consolidation Pipeline).
 
 Connects NREM (HippocampalReplay) + REM (AssociativeDreamEngine) into a
 single sleep cycle with adaptive calibration feedback.
@@ -49,10 +49,10 @@ _BRIER_OVERCONFIDENT: float = 0.25
 # Brier score below which we loosen the FOK threshold (we're too conservative)
 _BRIER_UNDERCONFIDENT: float = 0.05
 
-# Max adjustment per cycle — prevents runaway drift
+# Max adjustment per cycle - prevents runaway drift
 _MAX_THRESHOLD_DELTA: float = 0.05
 
-# FOK threshold bounds — never collapse to extremes
+# FOK threshold bounds - never collapse to extremes
 _FOK_MIN_THRESHOLD: float = 0.15
 _FOK_MAX_THRESHOLD: float = 0.70
 
@@ -115,7 +115,7 @@ class SleepOrchestrator:
     Designed to be called by the HeartbeatEmitter during idle windows.
     Single entry point: ``run_full_cycle(tenant_id)``.
 
-    Pure composition — no direct DB logic. All state goes through
+    Pure composition - no direct DB logic. All state goes through
     the injected engines (adapter pattern).
     """
 
@@ -247,11 +247,11 @@ class SleepOrchestrator:
 
         Returns the actual delta applied.
 
-        Derivation: Ω₅ (Antifragile) — calibration failures IMPROVE the system.
+        Derivation: Ω₅ (Antifragile) - calibration failures IMPROVE the system.
         """
         brier = self._metamemory.calibration_score()
         if brier < 0:
-            # Insufficient data — no adjustment
+            # Insufficient data - no adjustment
             return 0.0
 
         current = self._metamemory._fok_threshold
@@ -278,7 +278,7 @@ class SleepOrchestrator:
             min(_FOK_MAX_THRESHOLD, current + delta),
         )
 
-        # Direct attribute write — MetamemoryMonitor uses __slots__
+        # Direct attribute write - MetamemoryMonitor uses __slots__
         # with mutable _fok_threshold, so this is safe
         self._metamemory._fok_threshold = new_threshold  # noqa: SLF001
         return new_threshold - current

@@ -123,7 +123,7 @@ def storage_init_pg(dsn: str | None, dry_run: bool, skip_extensions: bool) -> No
         console.print(
             Panel(
                 grid,
-                title="[bold #0A0A0A on #D4AF37]  CORTEX — PostgreSQL Init [/]",
+                title="[bold #0A0A0A on #D4AF37]  CORTEX - PostgreSQL Init [/]",
                 border_style="#CCFF00",
             )
         )

@@ -1,4 +1,4 @@
-"""CORTEX CLI — LLM Routing Commands (Industrial Noir).
+"""CORTEX CLI - LLM Routing Commands (Industrial Noir).
 
 Exposes the tier/cost-aware routing matrix to the terminal.
 
@@ -44,7 +44,7 @@ _COST_STYLE: dict[str, str] = {
 
 @cli.group()
 def routing() -> None:
-    """LLM routing — tier/cost-aware provider selection."""
+    """LLM routing - tier/cost-aware provider selection."""
 
 
 @routing.command("matrix")
@@ -87,8 +87,8 @@ def routing_matrix(intent: str | None) -> None:
         ]
 
         for i in display_intents:
-            model = intent_map.get(i, "—")
-            style = "white" if model != "—" else _DIM
+            model = intent_map.get(i, "-")
+            style = "white" if model != "-" else _DIM
             row.append(Text(model, style=style))
 
         table.add_row(*row)
@@ -209,7 +209,7 @@ def routing_status() -> None:
             ready_text,
             Text(p["status"], style=status_style),
             Text(p["tier"], style=_TIER_STYLE.get(p["tier"], "white")),
-            p["reason"] or "—",
+            p["reason"] or "-",
         )
 
     console.print(table)
@@ -225,7 +225,7 @@ def routing_agents() -> None:
     registry.load_all()
 
     table = Table(
-        title="🧬 Sovereign Agents — Model Resolution",
+        title="🧬 Sovereign Agents - Model Resolution",
         title_style=f"bold {_CYBER}",
         border_style=_VIOLET,
     )
@@ -244,8 +244,8 @@ def routing_agents() -> None:
 
         table.add_row(
             agent.name,
-            agent.provider or "—",
-            agent.intent or "—",
+            agent.provider or "-",
+            agent.intent or "-",
             static,
             resolved,
             indicator,

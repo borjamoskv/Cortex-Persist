@@ -74,7 +74,7 @@ class WeightedVote:
 
 @dataclass()
 class ConflictResolution:
-    """Full resolution record — persisted as a knowledge item."""
+    """Full resolution record - persisted as a knowledge item."""
 
     conflict_id: str
     timestamp: float
@@ -169,7 +169,7 @@ class DeadlockBreaker:
             score = self._heuristic_score(opt)
             scored.append((opt, score))
 
-        # O(N log N) — but N is ≤ 10 for any sane conflict
+        # O(N log N) - but N is ≤ 10 for any sane conflict
         scored.sort(key=lambda x: x[1], reverse=True)
 
         winner, best_score = scored[0]
@@ -346,7 +346,7 @@ class ConflictResolver:
                 winner_id=options[0].id if options else "",
                 method=ResolutionMethod.WEIGHTED_VOTE,
                 consensus_level=0.0,
-                reasoning="Zero total weight — no valid voters.",
+                reasoning="Zero total weight - no valid voters.",
             )
 
         # Find winner (O(K) where K = number of options, typically ≤ 5)
@@ -398,7 +398,7 @@ class ConflictResolver:
 
             if confidence < self.ARCHITECT_CONFIDENCE_GATE:
                 logger.warning(
-                    "Architect confidence %.2f < gate %.2f — cannot decide",
+                    "Architect confidence %.2f < gate %.2f - cannot decide",
                     confidence,
                     self.ARCHITECT_CONFIDENCE_GATE,
                 )

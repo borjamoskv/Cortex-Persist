@@ -1,4 +1,4 @@
-"""Query mixin — recall, history, time-travel, causal chains, stats.
+"""Query mixin - recall, history, time-travel, causal chains, stats.
 
 Note: ``search()`` is NOT defined here. The canonical search implementation
 lives in ``SearchMixin`` which provides hybrid search with graceful fallback
@@ -23,7 +23,7 @@ logger = logging.getLogger("cortex")
 
 
 class QueryMixin(EngineMixinBase):
-    """Query Layer — Recall, History, Time-Travel, Graph, and Stats.
+    """Query Layer - Recall, History, Time-Travel, Graph, and Stats.
 
     Provides all read-path operations against the fact store:
     - ``recall()``: Bayesian-scored retrieval with temporal decay.
@@ -164,7 +164,7 @@ class QueryMixin(EngineMixinBase):
         tenant_id: str = "default",
         as_of: str | None = None,
     ) -> list[dict[str, Any]]:
-        """Full temporal audit trail — active, deprecated, and updated facts.
+        """Full temporal audit trail - active, deprecated, and updated facts.
 
         Args:
             as_of: ISO timestamp to filter facts valid at that point in time.
@@ -252,7 +252,7 @@ class QueryMixin(EngineMixinBase):
     ) -> list[dict[str, Any]]:
         """Global world-state snapshot at a given transaction.
 
-        Unlike ``reconstruct_state()``, this is project-agnostic —
+        Unlike ``reconstruct_state()``, this is project-agnostic -
         it returns *all* facts across all projects at the given point.
         """
         tenant_id = self._resolve_tenant(tenant_id)
@@ -277,7 +277,7 @@ class QueryMixin(EngineMixinBase):
                     f"WHERE f.tenant_id = ? "
                     f"AND f.is_tombstoned = 0 AND {clause} "
                     "ORDER BY f.id ASC"
-                )  # nosec B608 — parameterized via temporal builder
+                )  # nosec B608 - parameterized via temporal builder
                 async with conn.execute(q, [tenant_id, *tparams]) as cursor:
                     rows = await cursor.fetchall()
             return [self._row_to_fact(row, tenant_id=tenant_id) for row in rows]

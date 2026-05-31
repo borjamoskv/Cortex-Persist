@@ -53,7 +53,7 @@ __all__ = ["SovereignLLM", "SovereignResult", "Inquisitor"]
 
 logger = logging.getLogger("cortex.extensions.llm.sovereign")
 
-# Default signature for template fallback — override via constructor
+# Default signature for template fallback - override via constructor
 _DEFAULT_SIGNATURE = (
     "---\nby borjamoskv.com | MOSKV Systems\nSovereign Architecture · Industrial Noir 2026"
 )
@@ -173,7 +173,7 @@ class SovereignLLM:
             mode: ThoughtOrchestra mode (if used).
 
         Returns:
-            SovereignResult — ALWAYS has content. Never raises.
+            SovereignResult - ALWAYS has content. Never raises.
         """
         chain: list[str] = []
         errors: list[str] = []
@@ -388,11 +388,11 @@ class SovereignLLM:
     def _template_fallback(self, prompt: str) -> str:
         """Zero-connectivity template. Uses prompt echo with framing.
 
-        This is the absolute last resort — no LLM is available at all.
+        This is the absolute last resort - no LLM is available at all.
         Extracts the user's intent and wraps it in a professional frame.
         """
         core = prompt[:500].strip()
-        return f"[Auto-generated — no LLM available]\n\n{core}\n\n{self._signature}"
+        return f"[Auto-generated - no LLM available]\n\n{core}\n\n{self._signature}"
 
     async def close(self) -> None:
         """Close all cached providers."""

@@ -1,4 +1,4 @@
-"""CLI commands for the E2E Pipeline — `cortex run` and `cortex pipeline`.
+"""CLI commands for the E2E Pipeline - `cortex run` and `cortex pipeline`.
 
 Provides the primary E2E entry point for executing intents through
 the full CORTEX pipeline: Ingress → Context → Plan → Execute → Persist → Egress.

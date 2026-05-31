@@ -225,7 +225,7 @@ def register_singularity_tools(mcp) -> None:
             {"repo": "https://github.com/lido-dao/lido-dao", "exergy_ratio": 0.76},
         ]
 
-        output = "### SAGE COUNCIL — Mission Deliberation\n"
+        output = "### SAGE COUNCIL - Mission Deliberation\n"
         for t in targets:
             output += f"- **Target**: [{t['repo']}] | Exergy Ratio: {t['exergy_ratio']}\n"
 

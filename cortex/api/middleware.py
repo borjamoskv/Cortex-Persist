@@ -56,7 +56,7 @@ class TracingMiddleware(BaseHTTPMiddleware):
                 )
             )
             return response
-        except Exception as e:  # noqa: BLE001 — tracing middleware must log all failures before raising
+        except Exception as e:  # noqa: BLE001 - tracing middleware must log all failures before raising
             process_time = time.monotonic() - start_time
             logger.error(
                 json.dumps(
@@ -142,7 +142,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         )
         response.headers["Cross-Origin-Opener-Policy"] = "same-origin"
 
-        # Sensitive path protection — never cache auth/admin responses
+        # Sensitive path protection - never cache auth/admin responses
         if any(request.url.path.startswith(p) for p in self._SENSITIVE_PREFIXES):
             response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, private"
             response.headers["Pragma"] = "no-cache"
@@ -290,7 +290,7 @@ class SecurityFraudMiddleware(BaseHTTPMiddleware):
                 sql = "SELECT 1 FROM threat_intel WHERE ip_address = ? AND (expires_at IS NULL OR expires_at > ?)"
                 async with conn.execute(sql, (client_ip, now)) as cursor:
                     return bool(await cursor.fetchone())
-        except Exception as e:  # noqa: BLE001 — threat intel check failure must not crash request
+        except Exception as e:  # noqa: BLE001 - threat intel check failure must not crash request
             logger.error("ThreatIntel check failed: %s", e)
             return False
 

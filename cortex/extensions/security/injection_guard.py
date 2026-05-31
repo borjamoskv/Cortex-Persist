@@ -224,11 +224,11 @@ class InjectionGuard:
     """Multi-layer injection defense for CORTEX content.
 
     Scans content through 5 defense layers before persistence.
-    Thread-safe, stateless — can be shared across async contexts.
+    Thread-safe, stateless - can be shared across async contexts.
 
     Trusted sources (agent:gemini, agent:aether, etc.) bypass L1 (SQL)
     and L5 (entropy) to avoid false positives on technical prose.
-    L2/L3/L4 remain active for ALL sources (Axiom Ω₃ — Byzantine Default).
+    L2/L3/L4 remain active for ALL sources (Axiom Ω₃ - Byzantine Default).
     """
 
     # Entropy threshold for encoded payload detection
@@ -271,16 +271,16 @@ class InjectionGuard:
 
         trusted = self._is_trusted(source)
 
-        # L1: SQL injection — skip for trusted sources (false-positive-prone)
+        # L1: SQL injection - skip for trusted sources (false-positive-prone)
         if not trusted:
             self._scan_layer(content, _L1_SQL_PATTERNS, "L1_sql", report.matches)
 
-        # L2-L4: Always active (Axiom Ω₃ — Byzantine Default)
+        # L2-L4: Always active (Axiom Ω₃ - Byzantine Default)
         self._scan_layer(content, _L2_PROMPT_PATTERNS, "L2_prompt", report.matches)
         self._scan_layer(content, _L3_PATH_PATTERNS, "L3_path", report.matches)
         self._scan_layer(content, _L4_CMD_PATTERNS, "L4_command", report.matches)
 
-        # L5: Encoded Payload Detection — skip for trusted sources
+        # L5: Encoded Payload Detection - skip for trusted sources
         if not trusted and len(content) >= self.ENTROPY_MIN_LENGTH:
             entropy = self._entropy(content)
             report.entropy_score = entropy
@@ -290,7 +290,7 @@ class InjectionGuard:
                         layer="L5_encoded",
                         severity="medium",
                         pattern_id="ENT-001",
-                        description=f"High Shannon entropy ({entropy:.2f}) — possible encoded payload",
+                        description=f"High Shannon entropy ({entropy:.2f}) - possible encoded payload",
                         matched_fragment=content[:40] + "...",
                     )
                 )
