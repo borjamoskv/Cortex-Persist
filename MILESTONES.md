@@ -197,7 +197,7 @@ Proof:
 ---
 
 ### Hito 18: L-EPI Guard & C5-REAL Market Reality Validation
-- **Target:** `engine/smte/exergy.py`, `engine/smte/analyzer.py`, `borjamoskv-site/index.html`
+- **Target:** `engine/smte/exergy.py`, `engine/smte/analyzer.py`, `cortexpersist-com/index.html`
 - **Objective:** Despliegue del Sistema Inmunitario Ouroboros-Omega (L-EPI Guard) para castigar empíricamente la Limerencia Epistémica, y consolidación pública del posicionamiento técnico frente a infraestructuras proxy estocásticas.
 - **Yield Target:** 100% purga automática de código estructural inútil (`dead_code_ratio > 0.4` & `limerence_penalty > 10.0`).
 - **Reality Level:** `C5-REAL`
