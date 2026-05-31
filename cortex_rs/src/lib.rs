@@ -10,8 +10,15 @@ use pyo3::prelude::*;
 use pyo3::types::PyList;
 use sha2::{Digest, Sha256};
 use std::fs::OpenOptions;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, OnceLock};
+use std::collections::HashMap;
 use std::sync::atomic::{AtomicUsize, Ordering};
+
+static MMAP_REGISTRY: OnceLock<Mutex<HashMap<String, Arc<Mutex<MmapMut>>>>> = OnceLock::new();
+
+fn get_registry() -> &'static Mutex<HashMap<String, Arc<Mutex<MmapMut>>>> {
+    MMAP_REGISTRY.get_or_init(|| Mutex::new(HashMap::new()))
+}
 use std::time::Instant;
 
 
@@ -55,29 +62,41 @@ impl CortexRsSubstrate {
     pub fn new(bin_path: &str, dimension: usize) -> PyResult<Self> {
         let tensor_size = dimension * 8; // 8 bytes per f64
 
-        let file = OpenOptions::new()
-            .read(true)
-            .write(true)
-            .create(true)
-            .truncate(false)
-            .open(bin_path)
-            .map_err(|e| PyRuntimeError::new_err(format!("Failed to open VSA BIN: {}", e)))?;
+        let path_str = bin_path.to_string();
+        let registry = get_registry();
+        let mut map = registry.lock().unwrap();
 
-        // Ensure pre-allocation
-        if file.metadata().map_err(|e| PyRuntimeError::new_err(format!("Failed to read metadata: {}", e)))?.len() < tensor_size as u64 {
-            file.set_len(tensor_size as u64)
-                .map_err(|e| PyRuntimeError::new_err(format!("Failed to allocate tensor size: {}", e)))?;
-        }
+        let mmap = if let Some(existing) = map.get(&path_str) {
+            Arc::clone(existing)
+        } else {
+            let file = OpenOptions::new()
+                .read(true)
+                .write(true)
+                .create(true)
+                .truncate(false)
+                .open(bin_path)
+                .map_err(|e| PyRuntimeError::new_err(format!("Failed to open VSA BIN: {}", e)))?;
 
-        let mmap = unsafe {
-            MmapOptions::new()
-                .len(tensor_size)
-                .map_mut(&file)
-                .map_err(|e| PyRuntimeError::new_err(format!("Mmap failed: {}", e)))?
+            // Ensure pre-allocation
+            if file.metadata().map_err(|e| PyRuntimeError::new_err(format!("Failed to read metadata: {}", e)))?.len() < tensor_size as u64 {
+                file.set_len(tensor_size as u64)
+                    .map_err(|e| PyRuntimeError::new_err(format!("Failed to allocate tensor size: {}", e)))?;
+            }
+
+            let mmap_new = unsafe {
+                MmapOptions::new()
+                    .len(tensor_size)
+                    .map_mut(&file)
+                    .map_err(|e| PyRuntimeError::new_err(format!("Mmap failed: {}", e)))?
+            };
+            
+            let arc_mmap = Arc::new(Mutex::new(mmap_new));
+            map.insert(path_str, Arc::clone(&arc_mmap));
+            arc_mmap
         };
 
         Ok(CortexRsSubstrate {
-            mmap: Arc::new(Mutex::new(mmap)),
+            mmap,
             dimension,
         })
     }
@@ -159,28 +178,40 @@ impl ZeroCopyRingBuffer {
         let task_size = 256;
         let total_size = capacity * task_size;
 
-        let file = OpenOptions::new()
-            .read(true)
-            .write(true)
-            .create(true)
-            .truncate(false)
-            .open(bin_path)
-            .map_err(|e| PyRuntimeError::new_err(format!("Failed to open ring buffer file: {}", e)))?;
+        let path_str = bin_path.to_string();
+        let registry = get_registry();
+        let mut map = registry.lock().unwrap();
 
-        if file.metadata().map_err(|e| PyRuntimeError::new_err(format!("Failed to read metadata: {}", e)))?.len() < total_size as u64 {
-            file.set_len(total_size as u64)
-                .map_err(|e| PyRuntimeError::new_err(format!("Failed to allocate ring buffer file: {}", e)))?;
-        }
+        let mmap = if let Some(existing) = map.get(&path_str) {
+            Arc::clone(existing)
+        } else {
+            let file = OpenOptions::new()
+                .read(true)
+                .write(true)
+                .create(true)
+                .truncate(false)
+                .open(bin_path)
+                .map_err(|e| PyRuntimeError::new_err(format!("Failed to open ring buffer file: {}", e)))?;
 
-        let mmap = unsafe {
-            MmapOptions::new()
-                .len(total_size)
-                .map_mut(&file)
-                .map_err(|e| PyRuntimeError::new_err(format!("Mmap failed: {}", e)))?
+            if file.metadata().map_err(|e| PyRuntimeError::new_err(format!("Failed to read metadata: {}", e)))?.len() < total_size as u64 {
+                file.set_len(total_size as u64)
+                    .map_err(|e| PyRuntimeError::new_err(format!("Failed to allocate ring buffer file: {}", e)))?;
+            }
+
+            let mmap_new = unsafe {
+                MmapOptions::new()
+                    .len(total_size)
+                    .map_mut(&file)
+                    .map_err(|e| PyRuntimeError::new_err(format!("Mmap failed: {}", e)))?
+            };
+            
+            let arc_mmap = Arc::new(Mutex::new(mmap_new));
+            map.insert(path_str, Arc::clone(&arc_mmap));
+            arc_mmap
         };
 
         Ok(ZeroCopyRingBuffer {
-            mmap: Arc::new(Mutex::new(mmap)),
+            mmap,
             capacity,
             task_size,
             enqueue_cursor: AtomicUsize::new(0),
@@ -365,28 +396,40 @@ impl UltramapSubstrate {
         let node_size = 128; // Ampliado de 96 a 128 para Topographical Endocrinology (4x f64)
         let tensor_size = capacity * node_size;
 
-        let file = OpenOptions::new()
-            .read(true)
-            .write(true)
-            .create(true)
-            .truncate(false)
-            .open(bin_path)
-            .map_err(|e| PyRuntimeError::new_err(format!("Failed to open ultramap file: {}", e)))?;
+        let path_str = bin_path.to_string();
+        let registry = get_registry();
+        let mut map = registry.lock().unwrap();
 
-        if file.metadata().map_err(|e| PyRuntimeError::new_err(format!("Failed to read metadata: {}", e)))?.len() < tensor_size as u64 {
-            file.set_len(tensor_size as u64)
-                .map_err(|e| PyRuntimeError::new_err(format!("Failed to allocate ultramap file: {}", e)))?;
-        }
+        let mmap = if let Some(existing) = map.get(&path_str) {
+            Arc::clone(existing)
+        } else {
+            let file = OpenOptions::new()
+                .read(true)
+                .write(true)
+                .create(true)
+                .truncate(false)
+                .open(bin_path)
+                .map_err(|e| PyRuntimeError::new_err(format!("Failed to open ultramap file: {}", e)))?;
 
-        let mmap = unsafe {
-            MmapOptions::new()
-                .len(tensor_size)
-                .map_mut(&file)
-                .map_err(|e| PyRuntimeError::new_err(format!("Mmap failed: {}", e)))?
+            if file.metadata().map_err(|e| PyRuntimeError::new_err(format!("Failed to read metadata: {}", e)))?.len() < tensor_size as u64 {
+                file.set_len(tensor_size as u64)
+                    .map_err(|e| PyRuntimeError::new_err(format!("Failed to allocate ultramap file: {}", e)))?;
+            }
+
+            let mmap_new = unsafe {
+                MmapOptions::new()
+                    .len(tensor_size)
+                    .map_mut(&file)
+                    .map_err(|e| PyRuntimeError::new_err(format!("Mmap failed: {}", e)))?
+            };
+            
+            let arc_mmap = Arc::new(Mutex::new(mmap_new));
+            map.insert(path_str, Arc::clone(&arc_mmap));
+            arc_mmap
         };
 
         Ok(UltramapSubstrate {
-            mmap: Arc::new(Mutex::new(mmap)),
+            mmap,
             capacity,
             node_size,
         })
