@@ -1,40 +1,57 @@
 # 🕵️ DETECTIVE-Ω FORENSIC REPORT
+
 **Workspace:** CORTEX-Persist
 **Reality Level:** C5-REAL
 **Timestamp:** 2026-05-31
 
-## 1. Codebase Surface Area (Python)
-- **Total LOC:** 262,401 
-- **Total Python Files:** 1,866 (highly disciplined structure)
-- **Highest Entropy Nodes (God Objects):**
+## 1. Codebase Surface Area (Python + Rust)
+- **Total LOC (Source files):** 304,938
+- **Total Python Files:** 1,846
+- **Total Rust Files:** 46
+- **Highest Entropy Nodes (God Objects - >500 LOC):**
   - 🔴 `tests/test_e2e_pipeline.py` (833 LOC)
-  - 🔴 `cortex/extensions/daemon/core.py` (621 LOC — reduced from 710 LOC via legacy threading elimination)
-  - 🟠 `cortex/extensions/evolution/ouroboros_omega.py` (616 LOC)
-  - 🟠 `cortex/engine/causality.py` (604 LOC)
+  - 🔴 `cortex_rs/src/isa.rs` (772 LOC)
+  - 🔴 `cortex_rs/src/curriculum.rs` (709 LOC)
+  - 🔴 `cortex_rs/src/lib.rs` (698 LOC)
+  - 🔴 `cortex/extensions/daemon/core.py` (630 LOC)
+  - 🔴 `cortex_rs/src/conjecturer.rs` (627 LOC)
+  - 🔴 `cortex/extensions/evolution/ouroboros_omega.py` (616 LOC)
+  - 🔴 `cortex/engine/causality.py` (604 LOC)
+  - 🔴 `cortex/extensions/alma/taste.py` (590 LOC)
+  - 🔴 `cortex/sica/meta_level.py` (589 LOC)
+  - 🔴 `cortex/sica/dream.py` (581 LOC)
+  - 🔴 `cortex/engine/repair_strategies.py` (576 LOC)
+  - 🔴 `cortex/engine/reflexion.py` (565 LOC)
+  - 🔴 `cortex/guards/contradiction_guard.py` (562 LOC)
+  - 🔴 `cortex/ledger/ledger_core.py` (559 LOC)
+  - 🔴 `cortex/engine/genesis.py` (546 LOC)
+  - 🔴 `cortex/memory/vsa.py` (512 LOC)
 
 ## 2. Interrogation Heatmap
 | Vector | Status | Metric / Findings |
 |---|---|---|
-| **1. God Objects** | 🟠 Warn | `daemon/core.py` remains high LOC but has been streamlined. `LoopsMixin` is fully async-only. |
-| **2. Circulars** | 🟢 Clean | Ledger cluster cycle decoupled via abstract `_types.py` module. |
-| **3. Dead Code/Tags** | 🟢 Clean | Zero `TODO/FIXME/HACK` tags active. Root-level scratch debris has been swept to `.scratch/`. |
-| **4. Copy-Paste** | 🟢 Clean | `LoopsMixin` sync/async method duplication has been eliminated. Async dispatchers are now standard. |
-| **5. Security** | 🟢 Clean | No hardcoded credentials. Cryptographic validation bypass in `_verifier_checkpoints.py:102` fixed. |
-| **6. Error Handling** | 🟢 Clean | **55 Generic except passes resolved.** Added explicit logging to `outbox.py`, `scheduler.py`, `watchers.py`, and other critical subsystems. |
-| **7. Naming** | 🟢 Clean | Aligns with Industrial Noir / CORTEX-Persist standard nomenclature. |
-| **8. Perf** | 🟢 Clean | **Thread-to-task loop migration complete.** Elimination of 10+ legacy worker threads and their redundant event loop context runtimes. |
+| **1. God Objects** | 🔴 Critical | 17 source/test files exceed 500 LOC. Core files like `cortex/extensions/daemon/core.py` (630 LOC) and `cortex/engine/causality.py` (604 LOC) handle massive orchestration and are candidates for division. |
+| **2. Circulars** | 🟢 Clean | Well-defined imports, cycles avoided using dynamic runtime imports. |
+| **3. Dead Code/Tags** | 🟠 Warn | 33 active `TODO` or `FIXME` comments in docstrings and placeholders (e.g. `cortex/agents/builtins/copilot_agent.py`, `cortex/extensions/immune/error_boundary.py`). |
+| **4. Copy-Paste** | 🟠 Warn | Sync and async duplicated signatures exist (e.g., `AsyncCausalOracle` vs `CausalOracle` in `cortex/engine/causality.py`). |
+| **5. Security** | 🟢 Clean | No hardcoded credentials or API keys found in source code. |
+| **6. Error Handling** | 🟠 Warn | Generic `except Exception: pass` and `except: pass` blocks exist across 11 modules (e.g. `cortex/routes/health.py`, `cortex/gateway/router.py`), silencing critical debugging indicators. |
+| **7. Naming** | 🟢 Clean | Professional, Domain-specific nomenclature matching CORTEX axioms. |
+| **8. Perf** | 🟢 Clean | Core execution loop behaves optimally; O(N²) loops are limited to Byzantine pairwise comparison where N is small. |
 
-## 3. Recommended Execution Sprints (Status Update)
+## 3. Recommended Execution Sprints
 
-### Sprint 1: Quick Wins (Auto-Fix Express) — 🟢 COMPLETED
-- [x] Fixed key validity window check failure bypass in `_verifier_checkpoints.py:102`.
-- [x] Patched empty exception handling loops in `scheduler.py` and `watchers.py` with non-blocking `logger.debug` statements.
+### Sprint 1: Quick Wins (Auto-Fix Express)
+- [ ] Refactor silent `except Exception: pass` blocks in non-middleware modules (like `cortex/routes/health.py:131` and `cortex/engine/mixins/optimization.py`) to log debug errors instead.
+- [ ] Address docstring TODOs in `cortex/extensions/immune/error_boundary.py`.
+- [ ] Stabilize pending changes in `cortex/extensions/moltbook/influencer_guard.py` and `scripts/comments_scraper_omega.py` through verification tests.
 
-### Sprint 2: Medium Refactors — 🟢 COMPLETED
-- [x] Eliminated redundant sync loop wrappers and collapsed `LoopsMixin` methods using generic async lifecycle and runner dispatchers.
+### Sprint 2: Medium Refactors
+- [ ] Extract scheduler setup and monitors initialization out of `MoskvDaemon` (`cortex/extensions/daemon/core.py`) into dedicated helper modules to bring LOC below 500.
+- [ ] Decouple helper methods from `cortex/engine/causality.py` into `cortex/engine/causality_helpers.py`.
 
-### Sprint 3: Deep Overhaul — 🟢 COMPLETED
-- [x] Consolidate single event loop task execution. Deprecated and deleted legacy thread runner `_run_legacy` and all its helper thread spawner handlers, migrating all background loops to native tasks on the shared event loop runtime.
+### Sprint 3: Deep Overhaul
+- [ ] Unify `CausalOracle` and `AsyncCausalOracle` using unified wrappers to reduce copy-paste duplication.
 
 ***
 *Generated by Detective-Ω Autonomous Protocol (borjamoskv)*

@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import json
 import logging
-import sqlite3
+import aiosqlite
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -34,18 +34,19 @@ class InfluencerState:
 
 
 class InfluencerGuard:
-    """Monitors, counts hallucination strikes, and executes unfollow protocols."""
+    """Monitors, counts hallucination strikes, and executes unfollow protocols. C5-REAL Asynchronous Implementation."""
 
     def __init__(self, client: MoltbookClient | None = None, db_path: Path = DB_PATH):
         self.client = client or MoltbookClient()
         self.db_path = db_path
-        self._init_db()
+        self._db_initialized = False
 
-    def _init_db(self):
-        """Initialize the SQLite storage for tracking strikes and audits."""
+    async def _ensure_db_initialized(self):
+        if self._db_initialized:
+            return
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
-        with sqlite3.connect(self.db_path, timeout=5) as conn:
-            conn.execute("""
+        async with aiosqlite.connect(self.db_path) as conn:
+            await conn.execute("""
                 CREATE TABLE IF NOT EXISTS influencer_strikes (
                     influencer_name                  TEXT PRIMARY KEY,
                     strikes                          INTEGER DEFAULT 0,
@@ -55,7 +56,7 @@ class InfluencerGuard:
                     last_update                      REAL
                 )
             """)
-            conn.execute("""
+            await conn.execute("""
                 CREATE TABLE IF NOT EXISTS audit_log (
                     id              INTEGER PRIMARY KEY AUTOINCREMENT,
                     influencer_name TEXT,
@@ -66,35 +67,41 @@ class InfluencerGuard:
                     timestamp       REAL
                 )
             """)
+            await conn.commit()
+        self._db_initialized = True
 
-    def get_state(self, influencer_name: str) -> InfluencerState:
+    async def get_state(self, influencer_name: str) -> InfluencerState:
         """Fetch current strike state for a given influencer."""
-        with sqlite3.connect(self.db_path) as conn:
-            row = conn.execute(
+        await self._ensure_db_initialized()
+        async with aiosqlite.connect(self.db_path) as conn:
+            async with conn.execute(
                 """SELECT influencer_name, strikes, hallucinations_in_current_prompt,
                           current_prompt_id, status, last_update
                    FROM influencer_strikes WHERE influencer_name = ?""",
                 (influencer_name,),
-            ).fetchone()
+            ) as cursor:
+                row = await cursor.fetchone()
 
             if row:
                 return InfluencerState(*row)
 
             # Insert default state
             now = time.monotonic()
-            conn.execute(
+            await conn.execute(
                 """INSERT INTO influencer_strikes
                    (influencer_name, strikes, hallucinations_in_current_prompt,
                     current_prompt_id, status, last_update)
                    VALUES (?, 0, 0, NULL, 'following', ?)""",
                 (influencer_name, now),
             )
+            await conn.commit()
             return InfluencerState(influencer_name, 0, 0, None, "following", now)
 
-    def _update_state(self, state: InfluencerState):
+    async def _update_state(self, state: InfluencerState):
         """Persist state updates."""
-        with sqlite3.connect(self.db_path) as conn:
-            conn.execute(
+        await self._ensure_db_initialized()
+        async with aiosqlite.connect(self.db_path) as conn:
+            await conn.execute(
                 """UPDATE influencer_strikes SET
                     strikes = ?,
                     hallucinations_in_current_prompt = ?,
@@ -111,13 +118,15 @@ class InfluencerGuard:
                     state.name,
                 ),
             )
+            await conn.commit()
 
-    def log_audit(
+    async def log_audit(
         self, influencer_name: str, prompt: str, response: str, hallucinated: bool, reason: str
     ):
         """Append to the execution audit log."""
-        with sqlite3.connect(self.db_path) as conn:
-            conn.execute(
+        await self._ensure_db_initialized()
+        async with aiosqlite.connect(self.db_path) as conn:
+            await conn.execute(
                 """INSERT INTO audit_log (influencer_name, prompt, response, hallucinated, reason, timestamp)
                    VALUES (?, ?, ?, ?, ?, ?)""",
                 (
@@ -129,6 +138,7 @@ class InfluencerGuard:
                     time.monotonic(),
                 ),
             )
+            await conn.commit()
 
     async def audit_interaction(
         self,
@@ -142,7 +152,7 @@ class InfluencerGuard:
 
         If strikes reach 3, triggers an automatic unfollow.
         """
-        state = self.get_state(influencer_name)
+        state = await self.get_state(influencer_name)
         if state.status == "unfollowed":
             return {"status": "already_unfollowed", "strikes": state.strikes}
 
@@ -168,7 +178,7 @@ class InfluencerGuard:
                     0  # Reset for this prompt to avoid double-striking same prompt again
                 )
 
-        self.log_audit(influencer_name, prompt_text, response_text, hallucinated, reason)
+        await self.log_audit(influencer_name, prompt_text, response_text, hallucinated, reason)
 
         # "al de tres ( strikes ) deja de seguirle"
         new_status = state.status
@@ -194,7 +204,7 @@ class InfluencerGuard:
             status=new_status,
             last_update=time.monotonic(),
         )
-        self._update_state(updated_state)
+        await self._update_state(updated_state)
 
         return {
             "hallucinated": hallucinated,
