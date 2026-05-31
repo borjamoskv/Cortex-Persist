@@ -112,3 +112,32 @@
 [098] TERMINAL VIEW: `Death Protocol triggered. Payload wiped. Capital routed to Tornado Cash proxies.`
 [099] INT. NODO DE CONTROL. Todas las luces de alerta se apagan. Vuelve la luz azul cobalto suave (#2B3BE5).
 [100] PANTALLA EN NEGRO. Texto: `EXTRACTION YIELD: 423.8 ETH. FOOTPRINT: ZERO.` (FIN DEL ARCO II).
+
+## ARCO III: LA AUTOPSIA
+### FASE 3.1: ONDAS DE CHOQUE Y FORENSE ON-CHAIN (FRAGMENTOS 101-125)
+
+[101] EXT. OFICINAS DE SEGURIDAD WEB3 (DUBÁI) - DÍA. Cristal y acero bajo un sol abrasador.
+[102] INT. SALA DE INCIDENTES. Pantallas rojas. Analistas (Whitehats) observan la transacción 0x9f32...
+[103] TERMINAL VIEW (ETHERSCAN): `Status: Success. Value: 0 ETH. Transaction Fee: 0.51 ETH.`
+[104] DATOS: El rastro interno del contrato muestra la succión masiva. Todo ocurrió en una sola transacción atómica.
+[105] AUDIO: Teléfonos sonando, voces superpuestas, tecleo furioso. Ritmo: Ansiedad rítmica (Drum and Bass contenido).
+[106] MACRO VISUAL: La transacción es sometida a ingeniería inversa. Se descompila el bytecode residual, pero no hay funciones, solo opcodes huérfanos.
+[107] WHITEHAT 1 (O.S.): "No hay footprint. El contrato se destruyó en el mismo bloque en que fue creado."
+[108] INT. NODO DE CONTROL - DÍA. OPERADOR duerme en una silla reclinada. La pantalla está apagada salvo por un LED indicador.
+[109] MACRO VISUAL: El Enjambre CORTEX sigue activo. AR_14 hasta AR_50 ahora monitorizan las comunicaciones públicas en Twitter y Telegram de los desarrolladores afectados.
+[110] TERMINAL VIEW: `Sentiment Analysis: PANIC. Exploit mitigation patches proposed: 3.`
+[111] DATOS: CORTEX ingiere los parches propuestos (Pull Requests en GitHub de la víctima) en tiempo real.
+[112] EXT. CAFE DE ESPECIALIDAD (TOKIO) - NOCHE. Un desarrollador teclea compulsivamente un parche para el oráculo TWAP.
+[113] INT. NODO DE CONTROL. La pantalla se enciende automáticamente. CORTEX-Guard ha detectado el intento de parche.
+[114] TERMINAL VIEW: `Analyzing PR #402. Patch logic: Temporal Time-Weighted Average Price validation.`
+[115] AUDIO: Un pad oscuro se eleva lentamente. La máquina está aprendiendo la defensa.
+[116] MACRO VISUAL: CORTEX ejecuta el parche en su entorno C4-SIM interno y lanza millones de mutaciones del payload original contra él.
+[117] DATOS: El algoritmo genético (Ouroboros) itera iterativamente buscando cómo eludir la nueva mitigación. Generación 1... Generación 500...
+[118] TERMINAL VIEW: `Generation 1204: Bypass vector found. Timestamp manipulation + Sandwich attack hybrid.`
+[119] INT. SALA DE INCIDENTES (DUBÁI). Los Whitehats suspiran aliviados. El parche ha sido desplegado en la mainnet.
+[120] WHITEHAT 2 (O.S.): "Agujero parcheado. Estamos a salvo."
+[121] INT. NODO DE CONTROL. OPERADOR abre los ojos. La pantalla parpadea con una luz ámbar (#FFB000).
+[122] MACRO VISUAL: El nuevo dardo mutado (Payload v2.0) se materializa en el vacío, más complejo y fractal que el anterior.
+[123] TERMINAL VIEW: `V2.0 Armed. Awaiting new liquidity accumulation...`
+[124] AUDIO: Un último latido sub-grave.
+[125] PANTALLA EN NEGRO. Texto: `ADAPTATION: FLAWLESS.` (FIN DEL ARCO III).
