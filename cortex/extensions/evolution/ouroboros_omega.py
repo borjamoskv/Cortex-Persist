@@ -109,6 +109,15 @@ class _AstAnalyzer(ast.NodeVisitor):
             self.used_imports.add(node.id)
         self.generic_visit(node)
 
+    def visit_Assign(self, node):
+        for target in node.targets:
+            if isinstance(target, ast.Name) and target.id == "__all__":
+                if isinstance(node.value, ast.List) or isinstance(node.value, ast.Tuple):
+                    for elt in node.value.elts:
+                        if isinstance(elt, ast.Constant) and isinstance(elt.value, str):
+                            self.used_imports.add(elt.value)
+        self.generic_visit(node)
+
     def _visit_nested(self, node):
         self._current_nesting += 1
         if self._current_function:
@@ -361,7 +370,7 @@ class OuroborosOmega:
 
         # Identify dead functions (internal only for now, ignoring public API if they have no calls inside the module)
         # Note: This is simplified, real implementation would scan the whole project for references
-        dead_funcs = {
+        dead_funcs_candidates = {
             f
             for f, callers in called_by.items()
             if not callers
@@ -369,6 +378,22 @@ class OuroborosOmega:
             and f != "__init__"
             and f not in analyzer.used_imports
         }
+        dead_funcs = set()
+        if dead_funcs_candidates:
+            import subprocess
+            from pathlib import Path
+
+            project_root = Path.cwd()
+            cortex_dir = project_root / "cortex"
+            tests_dir = project_root / "tests"
+            for f in dead_funcs_candidates:
+                try:
+                    subprocess.check_output(
+                        ["rg", "-qw", f, str(cortex_dir), str(tests_dir)], stderr=subprocess.DEVNULL
+                    )
+                    logger.info("Preserving implicitly used function: %s", f)
+                except subprocess.CalledProcessError:
+                    dead_funcs.add(f)
 
         unused_imports = analyzer.imports - analyzer.used_imports
 

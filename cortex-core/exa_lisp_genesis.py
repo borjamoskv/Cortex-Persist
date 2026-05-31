@@ -2,7 +2,6 @@ import logging
 logger = logging.getLogger(__name__)
 import time
 import hashlib
-import concurrent.futures
 from persistence import LedgerManager
 
 class EntropyDeath(Exception):
@@ -209,7 +208,7 @@ def evaluate(x, env: ExergyEnvironment):
             return res_b
     elif op == '+':
         env.consume(5, 'MATH_ADD', vector_id='MATH')
-        return sum(evaluate(arg, env) for arg in x[1:])
+        return sum((evaluate(arg, env) for arg in x[1:]))
     else:
         raise ValueError(f'Unknown sovereign operator: {op}')
 if __name__ == '__main__':

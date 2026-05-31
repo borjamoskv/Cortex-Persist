@@ -6,17 +6,7 @@ import random
 import secrets
 import sqlite3
 from typing import TYPE_CHECKING
-from cortex.extensions.evolution.action import SymbolicActionState
-from cortex.extensions.evolution.agents import (
-    AgentDomain,
-    Mutation,
-    MutationType,
-    SovereignAgent,
-    SubAgent,
-)
-from cortex.extensions.evolution.cortex_metrics import DomainMetrics
-from cortex.extensions.evolution.models import EvolutionMetric, EvolutionMutation
-from cortex.extensions.evolution.strategies import DEFAULT_STRATEGIES
+from cortex.extensions.evolution.agents import Mutation, SovereignAgent, SubAgent
 
 if TYPE_CHECKING:
     from cortex.extensions.evolution.action import SymbolicActionEngine
