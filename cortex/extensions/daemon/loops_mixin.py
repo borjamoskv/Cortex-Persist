@@ -1,7 +1,10 @@
+from __future__ import annotations
+
+from typing import Any
+
 # pyright: reportAttributeAccessIssue=false
 """Background loop methods for MoskvDaemon (Seal 8 LOC extraction)."""
 
-from __future__ import annotations
 
 import asyncio
 import logging
@@ -14,6 +17,44 @@ logger = logging.getLogger("moskv-daemon")
 
 
 class LoopsMixin:
+    tracker: Any
+    site_monitor: Any
+    ghost_watcher: Any
+    memory_syncer: Any
+    cert_monitor: Any
+    engine_health: Any
+    disk_monitor: Any
+    evaluation_monitor: Any
+    auto_mejoralo: Any
+    compaction_monitor: Any
+    perception_monitor: Any
+    security_monitor: Any
+    signal_monitor: Any
+    cloud_sync_monitor: Any
+    tombstone_monitor: Any
+    workflow_monitor: Any
+    epistemic_monitor: Any
+    aether_monitor: Any
+    _aether_daemon: Any
+    fiat_oracle: Any
+    ast_oracle: Any
+    heartbeat_daemon: Any
+    entropic_wake_daemon: Any
+    sentinel_oracle: Any
+    frontier_daemon: Any
+    iot_oracle: Any
+    zero_prompting_daemon: Any
+    epistemic_breaker_daemon: Any
+    notify_enabled: bool
+    _last_alerts: dict[str, float]
+    _cooldown: float
+    _shared_engine: Any
+    scheduler: Any
+    watchdog_hub: Any
+    callback_api: Any
+    _shutdown: bool
+    _stop_event: Any
+
     """Mixin providing daemon background thread loop methods."""
 
     def _spawn_thread(self, target, name: str) -> None:

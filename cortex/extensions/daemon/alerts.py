@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import Any
+
 """MoskvDaemon — Alert handler mixin.
 
 Extracted from core.py to keep file size under 300 LOC.
@@ -5,7 +9,6 @@ Each _alert_* method processes results from a specific monitor
 and dispatches notifications via the Notifier subsystem.
 """
 
-from __future__ import annotations
 
 import logging
 import sys
@@ -19,6 +22,44 @@ logger = logging.getLogger("moskv-daemon")
 
 
 class AlertHandlerMixin:
+    tracker: Any
+    site_monitor: Any
+    ghost_watcher: Any
+    memory_syncer: Any
+    cert_monitor: Any
+    engine_health: Any
+    disk_monitor: Any
+    evaluation_monitor: Any
+    auto_mejoralo: Any
+    compaction_monitor: Any
+    perception_monitor: Any
+    security_monitor: Any
+    signal_monitor: Any
+    cloud_sync_monitor: Any
+    tombstone_monitor: Any
+    workflow_monitor: Any
+    epistemic_monitor: Any
+    aether_monitor: Any
+    _aether_daemon: Any
+    fiat_oracle: Any
+    ast_oracle: Any
+    heartbeat_daemon: Any
+    entropic_wake_daemon: Any
+    sentinel_oracle: Any
+    frontier_daemon: Any
+    iot_oracle: Any
+    zero_prompting_daemon: Any
+    epistemic_breaker_daemon: Any
+    notify_enabled: bool
+    _last_alerts: dict[str, float]
+    _cooldown: float
+    _shared_engine: Any
+    scheduler: Any
+    watchdog_hub: Any
+    callback_api: Any
+    _shutdown: bool
+    _stop_event: Any
+
     """Mixin providing all alert dispatch methods for the daemon.
 
     Requires the host class to implement:

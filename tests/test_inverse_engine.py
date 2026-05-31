@@ -301,5 +301,6 @@ class TestBenchmark:
         assert stats["iterations"] == 3
         # Adjust limit based on baseline CPU latency
         limit = max(15.0, 15.0 + (base_us - 1.0) * 5.0)
-        assert elapsed < limit, f"Pipeline should complete 3 iterations in < {limit:.2f}s (elapsed: {elapsed:.2f}s, base_us: {base_us:.4f})"
-
+        assert elapsed < limit, (
+            f"Pipeline should complete 3 iterations in < {limit:.2f}s (elapsed: {elapsed:.2f}s, base_us: {base_us:.4f})"
+        )

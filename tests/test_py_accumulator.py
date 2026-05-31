@@ -68,7 +68,7 @@ def test_accumulator_performance():
 
     # Benchmark 10,000 operations
     iterations = 10000
-    
+
     # Measure baseline empty loop overhead under current CPU load
     start_base = time.perf_counter()
     for _ in range(iterations):
@@ -87,6 +87,9 @@ def test_accumulator_performance():
     # Adjust threshold dynamically: base limit of 30.0us, but scale if CPU contention is high
     dynamic_limit = max(30.0, 30.0 + (base_us - 1.0) * 15.0)
 
-    print(f"\n[BENCHMARK] Average Verification Latency: {avg_duration_us:.4f} µs (base_us: {base_us:.4f} µs, limit: {dynamic_limit:.4f} µs)")
-    assert avg_duration_us < dynamic_limit, f"Average latency too high: {avg_duration_us:.4f} us (limit: {dynamic_limit:.4f} us)"
-
+    print(
+        f"\n[BENCHMARK] Average Verification Latency: {avg_duration_us:.4f} µs (base_us: {base_us:.4f} µs, limit: {dynamic_limit:.4f} µs)"
+    )
+    assert avg_duration_us < dynamic_limit, (
+        f"Average latency too high: {avg_duration_us:.4f} us (limit: {dynamic_limit:.4f} us)"
+    )
