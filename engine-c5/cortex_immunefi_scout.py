@@ -27,7 +27,7 @@ async def fetch_open_bounties() -> list[dict[str, str]]:
         log(f"Error parseando real_bounties.json: {e}", "ERROR")
         return []
 
-def clone_and_fracture(repo_url: str, target_name: str) -> bool:
+async def clone_and_fracture(repo_url: str, target_name: str) -> bool:
     """Implementa el cierre del Ouroboros: Clona -> Extrae AST -> Prepara para Módulo Chaos"""
     name_clean = target_name.replace(' ', '_').lower()
     target_dir = os.path.expanduser(f"~/Cortex-Persist/engine-c5/targets/{name_clean}")
@@ -36,20 +36,31 @@ def clone_and_fracture(repo_url: str, target_name: str) -> bool:
         log(f"Repositorio {target_name} ya anclado. Refreshing...", "CACHE")
         # No borrar todo, solo git fetch/pull para ahorrar exergía
         try:
-            subprocess.run(["git", "pull"], cwd=target_dir, capture_output=True)
+            process = await asyncio.create_subprocess_exec(
+                "git", "pull",
+                cwd=target_dir,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE
+            )
+            await process.communicate()
             return True
         except:
              return True
 
     log(f"Extrayendo repositorio {target_name} ({repo_url})...", "CLONE")
     try:
-        subprocess.run(
-            ["git", "clone", "--depth", "1", repo_url, target_dir], 
-            check=True, 
-            capture_output=True
+        process = await asyncio.create_subprocess_exec(
+            "git", "clone", "--depth", "1", repo_url, target_dir,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
         )
-        return True
-    except subprocess.CalledProcessError as e:
+        stdout, stderr = await process.communicate()
+        if process.returncode == 0:
+            return True
+        else:
+            log(f"Falla crítica clonando repo: {stderr.decode().strip()}", "ERROR")
+            return False
+    except Exception as e:
         log(f"Falla crítica clonando repo: {e}", "ERROR")
         return False
 
@@ -75,11 +86,8 @@ async def orchestrate_l4_extraction() -> None:
 
         log(f"Asignando Enjambre a Target: {name} | Bounty: {reward}", "L4-ROUTER")
         
-        if clone_and_fracture(url, name):
+        if await clone_and_fracture(url, name):
             log(f"- [✓] Target Lock: {name}. Inyectando en matriz de Fuzzing.", "PIPELINE")
-
-if __name__ == "__main__":
-    asyncio.run(orchestrate_l4_extraction())
 
 if __name__ == "__main__":
     asyncio.run(orchestrate_l4_extraction())
