@@ -59,6 +59,7 @@ STATE = {
     "agent_states": [0] * 10000,
 }
 
+events_queue: asyncio.Queue = asyncio.Queue()
 
 # --- WEBSOCKET BINARY MEMBRANE --- #
 class ConnectionManager:
@@ -245,6 +246,7 @@ async def neuro_static_fuzz(repo_url: str, effort: str = "think"):
     )
 
     while True:
+        assert process.stdout is not None
         line = await process.stdout.readline()
         if not line:
             break
