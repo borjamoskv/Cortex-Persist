@@ -39,8 +39,8 @@ class AgentASTParser:
                         "name": node.name,
                         "docstring": ast.get_docstring(node),
                         "methods": [
-                            n.name 
-                            for n in node.body 
+                            n.name
+                            for n in node.body
                             if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))
                         ],
                     }

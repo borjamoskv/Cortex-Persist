@@ -19,6 +19,7 @@ logger = logging.getLogger("cortex.engine.smte.ouroboros_compiler")
 
 class OuroborosCompiler:
     """AOT Compiler that converts limerent agents into compressed minimal paths."""
+
     def __init__(self, db_path: str | Path | None = None):
         self._db_path = db_path
         self._engine: Any = None
@@ -38,27 +39,33 @@ class OuroborosCompiler:
         Calculates AST Complexity and Dead Code Ratio to enforce the Ouroboros-Omega L-EPI Guard.
         """
         from cortex.engine.smte.analyzer import calculate_ast_complexity, estimate_dead_code_ratio
-        
+
         complexity = calculate_ast_complexity(source_code)
         dead_code_ratio = estimate_dead_code_ratio(source_code)
-        
+
         # We assume empirical_usage = 1.0 statically unless dynamically passed
-        empirical_usage = 1.0 
+        empirical_usage = 1.0
         limerence_penalty = (complexity / empirical_usage) * 10.0
-        
+
         # Combine old metric style with new L-EPI Guard style
         llm_calls = 0
         try:
             tree = ast.parse(source_code)
             for node in ast.walk(tree):
                 if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
-                    if node.func.attr in ("complete", "chat", "predict", "generate", "mutate_prompt"):
+                    if node.func.attr in (
+                        "complete",
+                        "chat",
+                        "predict",
+                        "generate",
+                        "mutate_prompt",
+                    ):
                         llm_calls += 1
         except SyntaxError:
             pass
 
         cost = (llm_calls * 10) + complexity
-        
+
         is_limerent = cost > 15 or limerence_penalty > 10.0
         must_amputate = dead_code_ratio > 0.4 and limerence_penalty > 10.0
 
@@ -69,7 +76,7 @@ class OuroborosCompiler:
             "limerence_penalty": limerence_penalty,
             "maintenance_cost": cost,
             "is_limerent": is_limerent,
-            "must_amputate": must_amputate
+            "must_amputate": must_amputate,
         }
 
     async def compile_entity(self, target_file: str | Path) -> bool:
@@ -85,9 +92,9 @@ class OuroborosCompiler:
             source = f.read()
 
         analysis = self.analyze_limerence(source)
-        
+
         self._ensure_engine()
-        
+
         if analysis.get("must_amputate"):
             logger.info(
                 f"[L-EPI GUARD] FATAL: Limerencia Epistémica detectada en {target_path.name}. "
@@ -95,21 +102,28 @@ class OuroborosCompiler:
                 "Amputación automática iniciada."
             )
             target_path.unlink()
-            
-            content_val = f"L-EPI Guard amputated {target_path.name} due to high limerence/dead code."
+
+            content_val = (
+                f"L-EPI Guard amputated {target_path.name} due to high limerence/dead code."
+            )
             import hashlib
+
             logos_sig = hashlib.sha256(f"{content_val}SYSTEM".encode()).hexdigest()
-            
+
             await self._engine.store(
                 project="SYSTEM",
                 content=content_val,
                 fact_type="bridge",
                 confidence="C5",
                 source="agent:ouroboros-compiler",
-                meta={"sub_type": "l_epi_amputation", "target_file": str(target_path), "logos_signature": logos_sig},
+                meta={
+                    "sub_type": "l_epi_amputation",
+                    "target_file": str(target_path),
+                    "logos_signature": logos_sig,
+                },
             )
             return True
-            
+
         if not analysis.get("is_limerent"):
             logger.info("Entity is not limerent (C <= U). No compilation needed.")
             return True
@@ -164,6 +178,7 @@ class OuroborosCompiler:
             # Persist to ledger
             content_val = f"Ouroboros compiled {target_path.name}. Cost reduced from {analysis['maintenance_cost']}."
             import hashlib
+
             logos_sig = hashlib.sha256(f"{content_val}SYSTEM".encode()).hexdigest()
 
             await self._engine.store(
@@ -172,7 +187,11 @@ class OuroborosCompiler:
                 fact_type="bridge",
                 confidence="C5",
                 source="agent:ouroboros-compiler",
-                meta={"sub_type": "graph_compression", "target_file": str(target_path), "logos_signature": logos_sig},
+                meta={
+                    "sub_type": "graph_compression",
+                    "target_file": str(target_path),
+                    "logos_signature": logos_sig,
+                },
             )
             return True
 

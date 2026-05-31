@@ -88,6 +88,7 @@ def pytest_unconfigure(config):
         return
     import os
     import sys
+
     sys.stdout.flush()
     sys.stderr.flush()
     exitstatus = getattr(config, "exitstatus", 0)

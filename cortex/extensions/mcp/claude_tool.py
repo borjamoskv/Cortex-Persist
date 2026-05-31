@@ -1,6 +1,7 @@
 import os
 import json
 
+
 def run_claude_query(prompt: str, model: str = "claude-3-opus-20240229") -> str:
     """
     Executes a deterministic C5-REAL query against Anthropic's Claude API
@@ -28,6 +29,7 @@ def run_claude_query(prompt: str, model: str = "claude-3-opus-20240229") -> str:
     # Method 1: Try HTTPX (faster/async-friendly sync client)
     try:
         import httpx
+
         with httpx.Client(timeout=120.0) as client:
             resp = client.post(url, headers=headers, json=payload)
             resp.raise_for_status()
@@ -45,13 +47,10 @@ def run_claude_query(prompt: str, model: str = "claude-3-opus-20240229") -> str:
     # Method 2: Fallback to standard library urllib (zero dependencies)
     import urllib.request
     import urllib.error
-    
+
     try:
         req = urllib.request.Request(
-            url,
-            data=json.dumps(payload).encode("utf-8"),
-            headers=headers,
-            method="POST"
+            url, data=json.dumps(payload).encode("utf-8"), headers=headers, method="POST"
         )
         with urllib.request.urlopen(req, timeout=120.0) as response:
             data = json.loads(response.read().decode("utf-8"))

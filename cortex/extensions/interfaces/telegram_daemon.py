@@ -13,8 +13,7 @@ from cortex.cli.common import get_engine
 
 # Configure logging (C5-REAL Zero Noise)
 logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
 )
 logger = logging.getLogger("Antigravity-Telegram")
 
@@ -23,6 +22,7 @@ logger = logging.getLogger("Antigravity-Telegram")
 WHITELIST_ENV = os.environ.get("CORTEX_TELEGRAM_WHITELIST", "")
 AUTHORIZED_USERS = {int(uid.strip()) for uid in WHITELIST_ENV.split(",") if uid.strip().isdigit()}
 
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     if user_id not in AUTHORIZED_USERS:
@@ -30,9 +30,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     await context.bot.send_message(
-        chat_id=update.effective_chat.id, 
-        text="🦅 CORTEX-Antigravity Enlace Establecido. (C5-REAL)"
+        chat_id=update.effective_chat.id, text="🦅 CORTEX-Antigravity Enlace Establecido. (C5-REAL)"
     )
+
 
 async def handle_instruction(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
@@ -41,11 +41,10 @@ async def handle_instruction(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
     instruction = update.message.text
     logger.info(f"Instruction received: {instruction[:50]}...")
-    
+
     # Send ack
     status_msg = await context.bot.send_message(
-        chat_id=update.effective_chat.id, 
-        text="⚙️ Procesando en matriz local..."
+        chat_id=update.effective_chat.id, text="⚙️ Procesando en matriz local..."
     )
 
     try:
@@ -53,19 +52,20 @@ async def handle_instruction(update: Update, context: ContextTypes.DEFAULT_TYPE)
         # Direct integration with local execution matrix
         # Here we bind the intent into the engine's memory VSA
         engine.memory.record(f"TELEGRAM_INTENT: {instruction}", "Local execution requested via TG.")
-        
+
         await context.bot.edit_message_text(
             chat_id=update.effective_chat.id,
             message_id=status_msg.message_id,
-            text=f"✅ Ejecutado. Instrucción procesada en Engine local."
+            text="✅ Ejecutado. Instrucción procesada en Engine local.",
         )
     except Exception as e:
         logger.error(f"Execution failed: {e}")
         await context.bot.edit_message_text(
             chat_id=update.effective_chat.id,
             message_id=status_msg.message_id,
-            text=f"❌ Fallo de ejecución local: {str(e)}"
+            text=f"❌ Fallo de ejecución local: {str(e)}",
         )
+
 
 def main():
     token = os.environ.get("TELEGRAM_BOT_TOKEN")
@@ -74,16 +74,21 @@ def main():
         return
 
     if not AUTHORIZED_USERS:
-        logger.error("CORTEX_TELEGRAM_WHITELIST is empty. Identity hygiene requires at least 1 authorized UID.")
+        logger.error(
+            "CORTEX_TELEGRAM_WHITELIST is empty. Identity hygiene requires at least 1 authorized UID."
+        )
         return
 
     application = ApplicationBuilder().token(token).build()
-    
-    application.add_handler(CommandHandler('start', start))
+
+    application.add_handler(CommandHandler("start", start))
     application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_instruction))
-    
-    logger.info(f"Starting Antigravity Telegram Daemon for {len(AUTHORIZED_USERS)} authorized sovereign(s)...")
+
+    logger.info(
+        f"Starting Antigravity Telegram Daemon for {len(AUTHORIZED_USERS)} authorized sovereign(s)..."
+    )
     application.run_polling()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

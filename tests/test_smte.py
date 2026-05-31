@@ -90,13 +90,13 @@ class TestAgentASTParser:
     def test_load_and_extract_topology(self, temp_source_file):
         parser = AgentASTParser(temp_source_file)
         topology = parser.get_topology()
-        
+
         # Verify classes
         assert len(topology["classes"]) == 1
         assert topology["classes"][0]["name"] == "MyClass"
         assert "method_one" in topology["classes"][0]["methods"]
         assert "method_two" in topology["classes"][0]["methods"]
-        
+
         # Verify top-level functions
         func_names = [f["name"] for f in topology["functions"]]
         assert "hello_world" in func_names
@@ -105,7 +105,7 @@ class TestAgentASTParser:
 
     def test_apply_mutation(self, temp_source_file):
         parser = AgentASTParser(temp_source_file)
-        
+
         # Mutation that appends an attribute check or dummy node to a function
         def mock_mutator(tree):
             for node in ast.walk(tree):
@@ -114,14 +114,14 @@ class TestAgentASTParser:
                     node.body.append(ast.Pass())
                     return True
             return False
-            
+
         success = parser.apply_mutation(mock_mutator)
         assert success is True
-        
+
         # Verify crystallization
         mutated_code = parser.crystallize()
         assert mutated_code is not None
-        
+
         # Reload to verify persistence
         parser2 = AgentASTParser(temp_source_file)
         topology = parser2.get_topology()
@@ -148,10 +148,10 @@ class TestExergyMonitor:
     def test_set_l_epi_metrics_and_calculate(self):
         monitor = ExergyMonitor("test_target")
         monitor.set_l_epi_metrics(ast_complexity=5.0, empirical_usage=2.0, dead_code_ratio=0.3)
-        
+
         monitor.start_transaction()
         monitor.end_transaction(success=True)
-        
+
         metrics = monitor.calculate_metrics()
         assert metrics["target"] == "test_target"
         assert metrics["status"] == "C5-REAL"
@@ -165,7 +165,7 @@ class TestExergyMonitor:
         results = [
             {"status": "C5-REAL", "latency": 0.1},
             {"status": "error", "latency": 0.5},
-            {"status": "C5-REAL", "latency": 1.2} # latency penalty +0.2
+            {"status": "C5-REAL", "latency": 1.2},  # latency penalty +0.2
         ]
         avg_entropy = evaluate_module_exergy(results)
         # expected: (0.0 + 1.0 + 0.2) / 3 = 0.4
@@ -179,11 +179,11 @@ class TestWeismannBarrier:
             with open(filepath, "w") as f:
                 f.write("x = 10\n")
             return True
-            
+
         success = enforce_weismann_barrier(temp_source_file, mutator)
         assert success is True
-        
-        with open(temp_source_file, "r") as f:
+
+        with open(temp_source_file) as f:
             content = f.read()
         assert content == "x = 10\n"
 
@@ -193,12 +193,12 @@ class TestWeismannBarrier:
             with open(filepath, "w") as f:
                 f.write("invalid syntax === \n")
             return True
-            
+
         success = enforce_weismann_barrier(temp_source_file, mutator)
         assert success is False
-        
+
         # Original should be untouched
-        with open(temp_source_file, "r") as f:
+        with open(temp_source_file) as f:
             content = f.read()
         assert "hello_world" in content
 
@@ -226,21 +226,21 @@ class TestOuroborosCompiler:
         mock_engine = MagicMock()
         mock_engine.store = AsyncMock()
         mock_engine_cls.return_value = mock_engine
-        
+
         compiler = OuroborosCompiler()
         compiler._engine = mock_engine
-        
+
         # Mock Qwen response with valid python code
         mock_qwen.return_value = "x = 42\n"
-        
+
         result = await compiler.compile_entity(temp_source_file)
         assert result is True
-        
+
         # Verify file content updated
-        with open(temp_source_file, "r") as f:
+        with open(temp_source_file) as f:
             content = f.read()
         assert content == "x = 42\n"
-        
+
         mock_engine.store.assert_awaited_once()
 
     @pytest.mark.asyncio
@@ -249,20 +249,20 @@ class TestOuroborosCompiler:
         mock_engine = MagicMock()
         mock_engine.store = AsyncMock()
         mock_engine_cls.return_value = mock_engine
-        
+
         compiler = OuroborosCompiler()
         compiler._engine = mock_engine
-        
+
         # Target high dead code and high complexity to force amputation
         with patch.object(compiler, "analyze_limerence") as mock_analyze:
             mock_analyze.return_value = {
                 "complexity": 5.0,
-                "dead_code_ratio": 0.5, # > 0.4
-                "limerence_penalty": 15.0, # > 10.0
+                "dead_code_ratio": 0.5,  # > 0.4
+                "limerence_penalty": 15.0,  # > 10.0
                 "is_limerent": True,
-                "must_amputate": True
+                "must_amputate": True,
             }
-            
+
             result = await compiler.compile_entity(temp_source_file)
             assert result is True
             # File should be unlinked/deleted by amputation
@@ -274,10 +274,10 @@ class TestLLMDrivenMutator:
     @patch("cortex.engine.smte.llm_mutator.call_qwen_mutator")
     def test_llm_driven_mutator_success(self, mock_qwen, temp_source_file):
         parser = AgentASTParser(temp_source_file)
-        
+
         # Qwen returns valid updated python code with a functional statement
         mock_qwen.return_value = SAMPLE_CODE + "\nEXTRA_VAR = 999\n"
-        
+
         success = llm_driven_mutator(parser)
         assert success is True
         assert "EXTRA_VAR = 999" in ast.unparse(parser.tree)

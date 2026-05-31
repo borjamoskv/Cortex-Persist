@@ -1,5 +1,5 @@
 import time
-from typing import Dict, Any, Optional
+from typing import Any, Optional
 
 
 class ExergyMonitor:
@@ -14,13 +14,15 @@ class ExergyMonitor:
         self.start_time = 0.0
         self.end_time = 0.0
         self.status = "UNKNOWN"
-        self.ast_complexity = 1.0 # Default baseline
-        self.empirical_usage = 1.0 # Default baseline
-        self.dead_code_ratio = 0.0 # Default baseline
+        self.ast_complexity = 1.0  # Default baseline
+        self.empirical_usage = 1.0  # Default baseline
+        self.dead_code_ratio = 0.0  # Default baseline
 
-    def set_l_epi_metrics(self, ast_complexity: float, empirical_usage: float, dead_code_ratio: float):
+    def set_l_epi_metrics(
+        self, ast_complexity: float, empirical_usage: float, dead_code_ratio: float
+    ):
         self.ast_complexity = ast_complexity
-        self.empirical_usage = max(0.001, empirical_usage) # Prevent div by zero
+        self.empirical_usage = max(0.001, empirical_usage)  # Prevent div by zero
         self.dead_code_ratio = dead_code_ratio
 
     def start_transaction(self):
@@ -30,7 +32,7 @@ class ExergyMonitor:
         self.end_time = time.time()
         self.status = "C5-REAL" if success else "error"
 
-    def calculate_metrics(self) -> Dict[str, Any]:
+    def calculate_metrics(self) -> dict[str, Any]:
         latency = self.end_time - self.start_time
 
         # Base Entropy score (0.0 to 1.0)
@@ -52,7 +54,7 @@ class ExergyMonitor:
             "entropy": entropy,
             "exergy": 1.0 - entropy,
             "limerence_penalty": limerence_penalty,
-            "dead_code_ratio": self.dead_code_ratio
+            "dead_code_ratio": self.dead_code_ratio,
         }
 
 

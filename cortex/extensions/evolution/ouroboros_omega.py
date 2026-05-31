@@ -364,7 +364,10 @@ class OuroborosOmega:
         dead_funcs = {
             f
             for f, callers in called_by.items()
-            if not callers and f.startswith("_") and f != "__init__" and f not in analyzer.used_imports
+            if not callers
+            and f.startswith("_")
+            and f != "__init__"
+            and f not in analyzer.used_imports
         }
 
         unused_imports = analyzer.imports - analyzer.used_imports
