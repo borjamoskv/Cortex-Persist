@@ -4,6 +4,7 @@ import SiteLayout from '../layouts/SiteLayout.astro';
 const navLinks = [
 	{ href: '#problem', label: 'Problem' },
 	{ href: '#fit', label: 'Fit' },
+	{ href: '#sdks', label: 'SDKs' },
 	{ href: '#pilot', label: 'Pilot' },
 	{ href: 'https://agents.archi', label: 'Audit Registry' },
 	{ href: '/blog', label: 'Blog' },
@@ -402,6 +403,46 @@ No call required.</code></pre>
 						memory your agent actually used.
 					</p>
 				</aside>
+			</div>
+		</section>
+
+		<section class="section-frame surface" id="sdks">
+			<div class="section-heading">
+				<p class="section-kicker">Developer SDKs</p>
+				<h2>Integrate CORTEX in 30 seconds.</h2>
+				<p>
+					Production-ready npm packages to inject cryptographic immutability and thermodynamic memory on top of your current agent stack.
+				</p>
+			</div>
+
+			<div class="fit-layout">
+				<!-- Core SDK -->
+				<article class="fit-card surface-sunken" style="min-height: auto;">
+					<p class="surface-label">Core SDK</p>
+					<h3>cortex-persist</h3>
+					<p>The core cryptographic hash-chain ledger and thermodynamic semantic friction engine.</p>
+					<pre class="console-block"><code>npm install cortex-persist</code></pre>
+					<p class="microcopy" style="font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; margin-top: 1rem; color: var(--accent-soft); line-height: 1.5;">
+						import &#123; CortexLedger, cortexWrap &#125; from 'cortex-persist';
+						<br/><br/>
+						const ledger = new CortexLedger('./audit.jsonl');
+						const runAgent = cortexWrap(myAgentFunction, &#123; agentId: 'pricing-agent', ledger &#125;);
+					</p>
+				</article>
+
+				<!-- LangChain Plugin -->
+				<article class="fit-card surface-sunken" style="min-height: auto;">
+					<p class="surface-label">Plugin</p>
+					<h3>cortex-persist-langchain</h3>
+					<p>Official integration to plug CORTEX memory and audit tracking directly into your LangChain agents.</p>
+					<pre class="console-block"><code>npm install cortex-persist-langchain</code></pre>
+					<p class="microcopy" style="font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; margin-top: 1rem; color: var(--accent-soft); line-height: 1.5;">
+						import &#123; CortexCallbackHandler, CortexMemory &#125; from 'cortex-persist-langchain';
+						<br/><br/>
+						const handler = new CortexCallbackHandler(&#123; ledgerPath: './audit.jsonl' &#125;);
+						const memory = new CortexMemory();
+					</p>
+				</article>
 			</div>
 		</section>
 
