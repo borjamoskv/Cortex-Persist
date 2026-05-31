@@ -33,6 +33,7 @@ app.add_middleware(
 )
 
 from forense_kernel import router as forense_router
+
 app.include_router(forense_router)
 
 cortex_storage = HybridPersistenceManager()
@@ -265,7 +266,6 @@ async def neuro_static_fuzz(repo_url: str, effort: str = "think"):
 @app.on_event("startup")
 async def startup_event():
     asyncio.create_task(vigilia_loop())
-
 
 
 async def vigilia_loop():

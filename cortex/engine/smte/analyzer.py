@@ -14,7 +14,7 @@ def calculate_ast_complexity(source_code: str) -> float:
     complexity = 1.0
     for node in ast.walk(tree):
         if isinstance(
-            node, (ast.If, ast.For, ast.While, ast.Try, ast.ExceptHandler, ast.With, ast.Match)
+            node, ast.If | ast.For | ast.While | ast.Try | ast.ExceptHandler | ast.With | ast.Match
         ):
             complexity += 1.0
         elif isinstance(node, ast.BoolOp):
@@ -39,7 +39,7 @@ def estimate_dead_code_ratio(source_code: str) -> float:
 
     for node in ast.walk(tree):
         total_nodes += 1
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
             # Check if function is empty or just 'pass'
             if len(node.body) == 1 and isinstance(node.body[0], ast.Pass):
                 # The whole body is dead weight
@@ -51,7 +51,7 @@ def estimate_dead_code_ratio(source_code: str) -> float:
             for stmt in node.body:
                 if found_terminator:
                     dead_nodes += sum(1 for _ in ast.walk(stmt))
-                if isinstance(stmt, (ast.Return, ast.Raise, ast.Break, ast.Continue)):
+                if isinstance(stmt, ast.Return | ast.Raise | ast.Break | ast.Continue):
                     found_terminator = True
 
     if total_nodes == 0:

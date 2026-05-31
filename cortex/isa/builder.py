@@ -159,8 +159,8 @@ class LedgerQuery:
 
     table: str
     output_ref: dict
-    filter: Optional[Any] = None
-    limit: Optional[int] = None
+    filter: Any | None = None
+    limit: int | None = None
 
     def to_dict(self) -> dict:
         d: dict[str, Any] = {"table": self.table, "output_ref": self.output_ref}
@@ -232,7 +232,7 @@ def par(*ops: AgentOp) -> AgentOp:
 def cond(
     predicate: Any,
     then_branch: AgentOp,
-    else_branch: Optional[AgentOp] = None,
+    else_branch: AgentOp | None = None,
 ) -> AgentOp:
     """Conditional branching - evaluated entirely in Rust."""
     return {
@@ -279,8 +279,8 @@ def query(
     table: str,
     output_ref: dict,
     *,
-    filter: Optional[Any] = None,
-    limit: Optional[int] = None,
+    filter: Any | None = None,
+    limit: int | None = None,
 ) -> AgentOp:
     """Query the sovereign ledger."""
     q = LedgerQuery(table=table, output_ref=output_ref, filter=filter, limit=limit)
@@ -315,9 +315,9 @@ def rewrite(target_id: int, replacement: AgentOp) -> AgentOp:
 def halt(
     *,
     success: bool = False,
-    error: Optional[str] = None,
-    circuit_breaker: Optional[tuple] = None,
-    timeout_ms: Optional[int] = None,
+    error: str | None = None,
+    circuit_breaker: tuple | None = None,
+    timeout_ms: int | None = None,
 ) -> AgentOp:
     """Halt execution with a reason."""
     if error:

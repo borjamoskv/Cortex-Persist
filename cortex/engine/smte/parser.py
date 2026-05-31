@@ -41,11 +41,11 @@ class AgentASTParser:
                         "methods": [
                             n.name
                             for n in node.body
-                            if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))
+                            if isinstance(n, ast.FunctionDef | ast.AsyncFunctionDef)
                         ],
                     }
                 )
-            elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            elif isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
                 topology["functions"].append(
                     {"name": node.name, "docstring": ast.get_docstring(node)}
                 )

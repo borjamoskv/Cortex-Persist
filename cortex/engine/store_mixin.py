@@ -174,6 +174,7 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             return dedupe_id
 
         from cortex.utils.canonical import compute_fact_hash
+
         content_hash = compute_fact_hash(content)
         tx_id = (
             tx_id
@@ -225,12 +226,14 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
 
         # Ingest ambient signals into the Right-Brain heuristic engine (O(1))
         if hasattr(self, "right_brain") and self.right_brain is not None:
-            self.right_brain.ingest_ambient_signal({
-                "source": source or "unknown",
-                "fact_type": fact_type,
-                "project": project,
-                "tags": tags or [],
-            })
+            self.right_brain.ingest_ambient_signal(
+                {
+                    "source": source or "unknown",
+                    "fact_type": fact_type,
+                    "project": project,
+                    "tags": tags or [],
+                }
+            )
 
         # ═══ AX-II: Post-store hooks via GuardPipeline ═══
         if pipeline is not None:

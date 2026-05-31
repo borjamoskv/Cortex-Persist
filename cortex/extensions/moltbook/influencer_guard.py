@@ -112,13 +112,22 @@ class InfluencerGuard:
                 ),
             )
 
-    def log_audit(self, influencer_name: str, prompt: str, response: str, hallucinated: bool, reason: str):
+    def log_audit(
+        self, influencer_name: str, prompt: str, response: str, hallucinated: bool, reason: str
+    ):
         """Append to the execution audit log."""
         with sqlite3.connect(self.db_path) as conn:
             conn.execute(
                 """INSERT INTO audit_log (influencer_name, prompt, response, hallucinated, reason, timestamp)
                    VALUES (?, ?, ?, ?, ?, ?)""",
-                (influencer_name, prompt, response, 1 if hallucinated else 0, reason, time.monotonic()),
+                (
+                    influencer_name,
+                    prompt,
+                    response,
+                    1 if hallucinated else 0,
+                    reason,
+                    time.monotonic(),
+                ),
             )
 
     async def audit_interaction(
@@ -155,7 +164,9 @@ class InfluencerGuard:
             if halls_in_prompt == 2:
                 new_strikes += 1
                 strike_added = True
-                halls_in_prompt = 0  # Reset for this prompt to avoid double-striking same prompt again
+                halls_in_prompt = (
+                    0  # Reset for this prompt to avoid double-striking same prompt again
+                )
 
         self.log_audit(influencer_name, prompt_text, response_text, hallucinated, reason)
 
@@ -234,12 +245,18 @@ class InfluencerGuard:
             if content.startswith("```"):
                 lines = content.splitlines()
                 if len(lines) >= 2:
-                    content = "\n".join(lines[1:-1]) if lines[-1].startswith("```") else "\n".join(lines[1:])
+                    content = (
+                        "\n".join(lines[1:-1])
+                        if lines[-1].startswith("```")
+                        else "\n".join(lines[1:])
+                    )
             if content.startswith("json"):
                 content = content[4:].strip()
 
             data = json.loads(content)
-            return bool(data.get("hallucinated", False)), str(data.get("reason", "No reason provided."))
+            return bool(data.get("hallucinated", False)), str(
+                data.get("reason", "No reason provided.")
+            )
         except Exception as e:
             logger.error("Error during hallucination evaluation: %s", e)
             return False, f"Audit evaluation crashed: {e!r}"
