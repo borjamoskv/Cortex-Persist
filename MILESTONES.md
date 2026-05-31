@@ -196,16 +196,34 @@ Proof:
 
 ---
 
+### Hito 18: L-EPI Guard & C5-REAL Market Reality Validation
+- **Target:** `engine/smte/exergy.py`, `engine/smte/analyzer.py`, `borjamoskv-site/index.html`
+- **Objective:** Despliegue del Sistema Inmunitario Ouroboros-Omega (L-EPI Guard) para castigar empíricamente la Limerencia Epistémica, y consolidación pública del posicionamiento técnico frente a infraestructuras proxy estocásticas.
+- **Yield Target:** 100% purga automática de código estructural inútil (`dead_code_ratio > 0.4` & `limerence_penalty > 10.0`).
+- **Reality Level:** `C5-REAL`
+- **Evidence:** Commits `a0b40f6b` y `ca1e09e7`
+```yaml
+Claim: Telemetría Empírica & L-EPI Guard Integrado
+Proof:
+  Base: "smte_live_loop.py calcula limerence_penalty dinámicamente y decide purga/mutación."
+  Range: [C5, C5]
+  Confidence: C5-REAL
+  Date: 2026-05-31
+```
+- **Status:** ✅ COMPLETE — 31 Mayo 2026
+
+---
+
 ## 🛡️ Thermodynamic Enforcement
 All milestone claims must map directly to a `Claim/Proof` matrix.
 ```yaml
-Claim: 17/17 Milestones Verified
+Claim: 18/18 Milestones Verified
 Proof:
   Base: Continuous Silicon Checkpoint Execution
-  Variables: [r=1, d=1, n=17, S=100]
+  Variables: [r=1, d=1, n=18, S=100]
   Range: [C5, C5]
   Confidence: C5-REAL
-  Date: 2026-05-29
+  Date: 2026-05-31
 ```
 
 *∴ "The architecture refines its own truth."*
