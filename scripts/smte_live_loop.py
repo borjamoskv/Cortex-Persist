@@ -9,27 +9,44 @@ root_dir = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(root_dir))
 
 from engine.smte.ouroboros import OuroborosLoop
+from engine.smte.analyzer import calculate_ast_complexity, estimate_dead_code_ratio
 from scripts.claude_stress_test import run_stress_test
 
 async def main():
     sys.stdout.write("=== [ AGENTS.ARCHI ] SMTE LIVE LOOP ===\\n")
     
-    # 1. Evaluate baseline Exergy by importing and running stress test
-    sys.stdout.write("\\n[1] Evaluating Baseline Entropy via Stress Test...\\n")
-    # We will simulate a quick run to not waste too much time in the loop
-    # In a real run, this would gather actual metrics from `run_stress_test(concurrency=2, total_requests=5)`
+    # 1. Evaluate baseline Exergy by analyzing the target file
+    sys.stdout.write("\\n[1] Evaluating Baseline Entropy & L-EPI Metrics...\\n")
     
-    # Mocking the metric gathering for the demonstration of the loop
+    target_file = root_dir / "scripts" / "claude_stress_test.py"
+    
+    with open(target_file, "r") as f:
+        source = f.read()
+        
+    ast_complexity = calculate_ast_complexity(source)
+    dead_code_ratio = estimate_dead_code_ratio(source)
+    
+    # Mock runtime metrics
     baseline_metrics = {
         "entropy": 1.0, 
         "latency": 0.5, 
-        "status": "error"
+        "status": "error",
+        "ast_complexity": ast_complexity,
+        "empirical_usage": 1.0, # Assumed 1 call
+        "dead_code_ratio": dead_code_ratio
     }
     
-    sys.stdout.write(f"Baseline Metrics gathered: {baseline_metrics}\\n")
+    # Calculate limerence penalty dynamically
+    limerence_penalty = (ast_complexity / baseline_metrics["empirical_usage"]) * 10.0
+    baseline_metrics["limerence_penalty"] = limerence_penalty
     
-    if baseline_metrics["entropy"] > 0.0:
-        sys.stdout.write("\\n[2] High Entropy Detected. Initiating Autopoietic Ouroboros Loop...\\n")
+    sys.stdout.write(f"Baseline Metrics gathered:\\n")
+    sys.stdout.write(f"  - AST Complexity: {ast_complexity}\\n")
+    sys.stdout.write(f"  - Dead Code Ratio: {dead_code_ratio:.2f}\\n")
+    sys.stdout.write(f"  - Limerence Penalty: {limerence_penalty:.2f}\\n")
+    
+    if baseline_metrics["entropy"] > 0.0 or limerence_penalty > 10.0:
+        sys.stdout.write("\\n[2] High Entropy/Limerencia Detected. Initiating Autopoietic Ouroboros Loop...\\n")
         
         target_file = root_dir / "scripts" / "claude_stress_test.py"
         loop = OuroborosLoop(str(target_file))
