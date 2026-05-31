@@ -5,7 +5,6 @@ use pyo3::types::PyList;
 
 /// ⚡ CORTEX-PERSIST: ANTI-LIMERENCE RUNTIME
 /// Prevención de Overfitting Cognitivo y Adoración de Modelos (Model Worship).
-
 const LIMERENCE_THRESHOLD: f64 = 0.85;
 const INCUBATION_GRACE_PERIOD_SEC: u64 = 86400; // Edge case resuelto: fase creativa
 

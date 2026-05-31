@@ -333,7 +333,7 @@ impl GenomeMutatorRs {
                 Value::Object(map)
             }
             Value::Array(arr) => {
-                let new_arr = arr.into_iter().map(|item| Self::drift_parameters_recursive(item)).collect();
+                let new_arr = arr.into_iter().map(Self::drift_parameters_recursive).collect();
                 Value::Array(new_arr)
             }
             other => other
@@ -394,7 +394,7 @@ impl GenomeMutatorRs {
             }
             Value::Array(arr) => {
                 let new_arr: Vec<Value> = arr.into_iter()
-                    .map(|item| Self::heuristic_optimize(item))
+                    .map(Self::heuristic_optimize)
                     .filter(|item| *item != Value::String("Noop".to_string()))
                     .collect();
                 Value::Array(new_arr)
