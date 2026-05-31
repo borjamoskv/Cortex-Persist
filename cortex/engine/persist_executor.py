@@ -4,15 +4,17 @@ Status: C5-REAL
 Aesthetic: Industrial Noir 2026
 Unifies CORTEX Memory (VSA/Manager) and ASL (Agent Specification Language) Protocol.
 """
+
 import logging
-from typing import Dict, Any, Optional
+from typing import Any, Optional
 
 from cortex.memory.manager import CortexMemoryManager
 from cortex.memory.vsa import SwarmMemory
 
+
 class ASLProtocol:
     """Agent Specification Language (ASL) Constraints."""
-    
+
     @staticmethod
     def validate(payload: dict[str, Any]) -> bool:
         """Enforces ASL topological integrity."""
@@ -23,19 +25,21 @@ class ASLProtocol:
             return False
         return True
 
+
 class PersistExecutor:
     """
     Unified Execution Engine.
     Forges CORTEX Memory with ASL validations. Zero-stochastic execution.
     """
+
     def __init__(self, db_path: str = "cortex_memory_vsa.db"):
         self.logger = logging.getLogger("PersistExecutor")
         self.logger.setLevel(logging.INFO)
-        
+
         # Core Memory Convergence
         self.memory_manager = CortexMemoryManager()
         self.vsa_memory = SwarmMemory(db_path=db_path)
-        
+
     def execute_mutation(self, payload: dict[str, Any]) -> dict[str, Any]:
         """
         Executes an ASL payload and crystallizes the mutation in CORTEX memory.
@@ -43,32 +47,34 @@ class PersistExecutor:
         if not ASLProtocol.validate(payload):
             self.logger.error("ASL validation failed. Execution halted.")
             raise ValueError("Invalid ASL payload structure.")
-            
+
         agent_id = payload["agent_id"]
         intent = payload["intent"]
         reality_level = payload["reality_level"]
         state_data = payload.get("state", {})
-        
+
         self.logger.info(f"[{reality_level}] Forging mutation for {agent_id}: {intent}")
-        
+
         # 1. Crystallize Intent in VSA
         # Note: Assuming write_memory exists or similar api.
         # Handling generically for C5-REAL validation.
         try:
-            vsa_id = self.vsa_memory.write_memory(intent, {"agent_id": agent_id, "type": "asl_intent"})
+            vsa_id = self.vsa_memory.write_memory(
+                intent, {"agent_id": agent_id, "type": "asl_intent"}
+            )
         except AttributeError:
             # Fallback if VSA API differs
             vsa_id = "VSA_CRYSTALLIZED_FALLBACK"
-            
+
         # 2. Persist State in Manager
         try:
             self.memory_manager.store(agent_id, state_data)
         except AttributeError:
             pass
-            
+
         return {
             "status": "CRYSTALLIZED",
             "agent_id": agent_id,
             "vsa_id": vsa_id,
-            "reality_level": reality_level
+            "reality_level": reality_level,
         }
