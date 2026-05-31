@@ -58,7 +58,7 @@ class CortexASTParser:
         """Returns the raw source code string for a given line range."""
         lines = self.source_code.splitlines()
         # 1-indexed to 0-indexed translation
-        return "\\n".join(lines[start_line - 1 : end_line])
+        return "\n".join(lines[start_line - 1 : end_line])
 
     def inject_mutation(self, original_segment: str, mutated_segment: str) -> str:
         """
