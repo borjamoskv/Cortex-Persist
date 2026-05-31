@@ -173,8 +173,10 @@ def run_gate_check() -> dict:
 
         conn = sqlite3.connect(DB_PATH)
         from cortex.extensions.gate.ouroboros import OuroborosGate
+
         try:
             from cortex_rs import OuroborosStateAccumulator
+
             acc = OuroborosStateAccumulator()
         except ImportError:
             acc = None
@@ -182,10 +184,11 @@ def run_gate_check() -> dict:
         gate = OuroborosGate(conn)
         entropy = gate.measure_entropy()
         dead_weight = gate.identify_dead_weight()
-        
+
         acc_root = "N/A"
         if acc is not None:
             import json
+
             # Accumulate entropy state
             acc.append_state("ouroboros_gate", json.dumps(entropy))
             # If we had multiple agents, we'd accumulate them here
@@ -294,7 +297,7 @@ def print_summary(report: dict):
         dw = gate_result.get("dead_weight_candidate")
         dw_str = f"\n  ⚠ Dead Weight:  {dw}" if dw else ""
         acc_root = gate_result.get("accumulator_root", "N/A")
-        
+
         gate_str = f"""
   GATE STATUS:
   SNR:            {metrics.get("signal_to_noise", 0.0):.3f}

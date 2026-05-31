@@ -375,6 +375,7 @@ class OuroborosOmega:
         # Verify unused imports against tests/ directory to prevent systemic necrosis
         if unused_imports:
             import subprocess
+
             verified_unused = set()
             tests_dir = self.project_root / "tests"
             if tests_dir.exists():
@@ -382,8 +383,7 @@ class OuroborosOmega:
                     try:
                         # Use ripgrep to check if the symbol is used in tests
                         subprocess.check_output(
-                            ["rg", "-qw", imp, str(tests_dir)],
-                            stderr=subprocess.DEVNULL
+                            ["rg", "-qw", imp, str(tests_dir)], stderr=subprocess.DEVNULL
                         )
                         # If rg finds it (exit 0), it's used in tests -> preserve it
                         logger.info("Preserving implicitly used import (Test Dependency): %s", imp)
