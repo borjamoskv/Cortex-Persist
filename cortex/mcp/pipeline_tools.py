@@ -242,7 +242,7 @@ def register_pipeline_tools(mcp, ctx: _MCPContext | None = None) -> None:
 
         try:
             if hasattr(bridge, "cancel"):
-                cancelled = await bridge.cancel(mission_id.strip())
+                cancelled = await bridge.cancel(mission_id.strip())  # pyright: ignore[reportAttributeAccessIssue]
                 return json.dumps(
                     {
                         "mission_id": mission_id.strip(),
@@ -303,7 +303,7 @@ def register_pipeline_tools(mcp, ctx: _MCPContext | None = None) -> None:
             from cortex.extensions.swarm.budget import get_budget_manager
 
             bm = get_budget_manager()
-            budget_info = bm.get_remaining_budget()
+            budget_info = bm.get_remaining_budget()  # pyright: ignore[reportAttributeAccessIssue]
             status["budget"] = {
                 "remaining_usd": budget_info.get("remaining", 0),
                 "total_spent_usd": budget_info.get("spent", 0),

@@ -117,10 +117,10 @@ class VSAEngine:
         for i in range(len(text) - n + 1):
             gram = text[i:i + n]
             if all(c in self._char_vecs for c in gram):
-                gv = self._char_vecs[gram[0]]
+                gv = self._char_vecs[gram[0]]  # pyright: ignore[reportOptionalSubscript]
                 for k in range(1, n):
                     gv = self.bind(
-                        self.permute(self._char_vecs[gram[k]], k), gv
+                        self.permute(self._char_vecs[gram[k]], k), gv  # pyright: ignore[reportOptionalSubscript]
                     )
                 doc += gv
                 ct += 1

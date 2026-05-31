@@ -36,7 +36,7 @@ async def main() -> None:
     ]
 
     for fact_type, content in decisions:
-        await engine.store_fact(
+        await engine.store_fact(  # pyright: ignore[reportOptionalCall]
             content=content,
             fact_type=fact_type,
             project="fintech-agent",
@@ -46,7 +46,7 @@ async def main() -> None:
 
     # --- Step 2: Generate compliance report ---
     print("\n2️⃣  Generating EU AI Act compliance report...\n")
-    report = await engine.compliance_report(project="fintech-agent")
+    report = await engine.compliance_report(project="fintech-agent")  # pyright: ignore[reportAttributeAccessIssue]
 
     print("   🏛️  EU AI Act Article 12 Compliance")
     print(f"   {'=' * 40}")
@@ -64,7 +64,7 @@ async def main() -> None:
 
     # --- Step 3: Verify data integrity ---
     print("\n3️⃣  Verifying ledger integrity...")
-    integrity = await engine.verify_integrity(project="fintech-agent")
+    integrity = await engine.verify_integrity(project="fintech-agent")  # pyright: ignore[reportAttributeAccessIssue]
     icon = "✅" if integrity.get("valid", False) else "❌"
     print(f"   {icon} Ledger: {integrity.get('status', 'unknown')}")
     if "merkle_root" in integrity:

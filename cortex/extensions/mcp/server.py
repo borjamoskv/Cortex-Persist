@@ -125,7 +125,7 @@ if MCP_AVAILABLE:
         if name == "cortex_vsa_ingest":
             content = arguments.get("content")
             tags = arguments.get("tags")
-            rid = vsa_bridge.ingest(content, tags=tags)
+            rid = vsa_bridge.ingest(content, tags=tags)  # pyright: ignore[reportArgumentType]
             vsa_bridge.persist()
             return [
                 TextContent(
@@ -137,7 +137,7 @@ if MCP_AVAILABLE:
         if name == "cortex_vsa_query":
             intent = arguments.get("intent")
             top_k = arguments.get("top_k", 3)
-            results = vsa_bridge.query(intent, top_k=top_k)
+            results = vsa_bridge.query(intent, top_k=top_k)  # pyright: ignore[reportArgumentType]
             if not results:
                 return [TextContent(type="text", text="[CORTEX MCP] No relevant VSA memory found.")]
 
@@ -149,7 +149,7 @@ if MCP_AVAILABLE:
         if name == "cortex_invoke_claude":
             prompt = arguments.get("prompt")
             model = arguments.get("model", "claude-3-opus-20240229")
-            response_json = run_claude_query(prompt, model)
+            response_json = run_claude_query(prompt, model)  # pyright: ignore[reportArgumentType]
             return [TextContent(type="text", text=response_json)]
 
         raise ValueError(f"Unknown tool: {name}")

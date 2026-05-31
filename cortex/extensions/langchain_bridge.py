@@ -1,5 +1,5 @@
-from langchain.callbacks.base import AsyncCallbackHandler
-from langchain.schema import AgentAction, AgentFinish
+from langchain.callbacks.base import AsyncCallbackHandler  # pyright: ignore[reportMissingImports]
+from langchain.schema import AgentAction, AgentFinish  # pyright: ignore[reportMissingImports]
 import asyncio
 import json
 

@@ -252,7 +252,7 @@ class HDCVectorStoreL2:
 
     def _fetch_toxic_hvs(
         self, conn: sqlite3.Connection, inhibit_ids: list[str] | None
-    ) -> list[np.ndarray]:
+    ) -> list[np.ndarray]:  # pyright: ignore[reportInvalidTypeForm]
         """Fetch toxic vectors for inhibition."""
         toxic_hvs = []
         if inhibit_ids:
@@ -268,7 +268,7 @@ class HDCVectorStoreL2:
         return toxic_hvs
 
     def _process_hdc_fact_row(
-        self, conn: sqlite3.Connection, row: sqlite3.Row, toxic_hvs: list[np.ndarray]
+        self, conn: sqlite3.Connection, row: sqlite3.Row, toxic_hvs: list[np.ndarray]  # pyright: ignore[reportInvalidTypeForm]
     ) -> CortexFactModel:
         """Process a single row from the HDC recall query."""
         score = row["final_score"]

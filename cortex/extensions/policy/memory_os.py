@@ -8,7 +8,7 @@ VSA_DIMENSION = 10000
 EPISODIC_TRACE_LIMIT = 1000  # Maximum number of episodic traces retained in memory
 
 try:
-    import structlog
+    import structlog  # pyright: ignore[reportMissingImports]
 
     logger = structlog.get_logger(__name__)
 except ModuleNotFoundError:  # pragma: no cover

@@ -13,7 +13,7 @@ SKILLS_DIR = str(Path.home() / ".gemini" / "antigravity" / "skills")
 sys.path.append(os.path.join(SKILLS_DIR, "vsa-sdm-memory-omega"))
 
 try:
-    from vsa_engine import VSAEngine
+    from vsa_engine import VSAEngine  # pyright: ignore[reportMissingImports]
 except ImportError:
     logging.error("VSAEngine not found in skills/vsa-sdm-memory-omega.")
     VSAEngine = None

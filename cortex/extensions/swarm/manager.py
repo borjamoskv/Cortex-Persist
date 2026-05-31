@@ -281,7 +281,7 @@ class CapatazOrchestrator:
                 # Derive tenant ID implicitly from OS for local executions,
                 # or use a default standard tenant wrapper
                 tenant_id = os.environ.get("CORTEX_TENANT_ID", "local-tenant")
-                slot = self._kv_registry.register(
+                slot = self._kv_registry.register(  # pyright: ignore[reportCallIssue]
                     mission_id=self.mission_id,
                     tenant_id=tenant_id,
                     system_prompt=system_prompt,

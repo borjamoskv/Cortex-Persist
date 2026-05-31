@@ -42,7 +42,7 @@ class SageOrchestrator:
     def __init__(self, target_dir="./engine-c5/targets/active"):
         self.target_dir = Path(target_dir)
         self.running = True
-        self.engine = VSAEngine(D=10000, algebra="HRR") if VSAEngine else None
+        self.engine = VSAEngine(D=10000, algebra="HRR") if VSAEngine else None  # pyright: ignore[reportCallIssue]
         self.event_queue = asyncio.Queue()
         self.global_yield = 12700000000.0  # Initial valuation
         self.cycle_count = 0

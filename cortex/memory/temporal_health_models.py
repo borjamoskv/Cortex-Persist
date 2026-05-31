@@ -66,7 +66,7 @@ class HealthReport:
 
     # PULSE - always populated after write 1
     centroid_drift: float | None = None
-    running_centroid: np.ndarray | None = None  # not serialized
+    running_centroid: np.ndarray | None = None  # not serialized  # pyright: ignore[reportInvalidTypeForm]
 
     # HEARTBEAT - populated every `heartbeat_every` writes
     page_hinkley_alert: bool = False

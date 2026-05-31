@@ -8,7 +8,7 @@ import time
 logger = logging.getLogger("mac_maestro.cgevents")
 
 try:
-    from Quartz import (
+    from Quartz import (  # pyright: ignore[reportMissingImports]
         CGEventCreateMouseEvent,
         CGEventPost,
         CGPointMake,

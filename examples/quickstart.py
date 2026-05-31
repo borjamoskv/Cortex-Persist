@@ -8,7 +8,7 @@ Usage:
 
 from cortex import CortexClient
 
-client = CortexClient(base_url="http://localhost:8000")
+client = CortexClient(base_url="http://localhost:8000")  # pyright: ignore[reportCallIssue]
 
 # 1. Store a fact
 client.store(

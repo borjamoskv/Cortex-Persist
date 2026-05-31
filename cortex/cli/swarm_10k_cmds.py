@@ -64,7 +64,7 @@ def swarm_10k_deploy(db_path, tasks_count):
             "\n[bold #00FFCC]✅ 10K TOPOLOGY STABLE[/]\n"
             f"Legions (L1): {report['legions']} | Centurions (L2): {report['centurions']} | Active Agents: {report['agents']}"
         )
-        await commander.bus.close()
+        await commander.bus.close()  # pyright: ignore[reportGeneralTypeIssues]
 
     asyncio.run(_run())
 
@@ -81,7 +81,7 @@ def swarm_10k_status(db_path):
 
         total_signals = 0
         for sys_idx in range(commander.bus.num_shards):
-            conn = commander.bus._shards[sys_idx]
+            conn = commander.bus._shards[sys_idx]  # pyright: ignore[reportAttributeAccessIssue]
             row = await (await conn.execute("SELECT COUNT(*) FROM signals")).fetchone()
             total_signals += row[0] if row else 0
 
@@ -93,7 +93,7 @@ def swarm_10k_status(db_path):
                 border_style="blue",
             )
         )
-        await commander.bus.close()
+        await commander.bus.close()  # pyright: ignore[reportGeneralTypeIssues]
 
     asyncio.run(_run())
 

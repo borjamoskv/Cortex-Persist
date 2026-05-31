@@ -106,7 +106,7 @@ class NREMConsolidationCycle:
         async def run_phase1() -> None:
             nonlocal matured, deceased, pending
             try:
-                stats = await self._consolidator.consolidation_sweep(tenant_id=tenant_id)
+                stats = await self._consolidator.consolidation_sweep(tenant_id=tenant_id)  # pyright: ignore[reportOptionalMemberAccess]
                 matured, deceased, pending = (
                     stats.get("matured", 0),
                     stats.get("deceased", 0),
@@ -126,7 +126,7 @@ class NREMConsolidationCycle:
         async def run_phase2() -> None:
             nonlocal pruned
             try:
-                pruned = await self._pruner.prune_cycle(tenant_id=tenant_id, project_id=project_id)
+                pruned = await self._pruner.prune_cycle(tenant_id=tenant_id, project_id=project_id)  # pyright: ignore[reportOptionalMemberAccess]
                 logger.info("NREM Phase 2 (Pruning): pruned=%d", pruned)
             except (RuntimeError, ValueError, OSError) as exc:
                 msg = f"Phase 2 (Pruning) failed: {exc}"

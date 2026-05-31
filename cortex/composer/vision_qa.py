@@ -10,7 +10,7 @@ import base64
 import logging
 
 try:
-    from playwright.async_api import async_playwright
+    from playwright.async_api import async_playwright  # pyright: ignore[reportMissingImports]
 except ImportError:
     async_playwright = None  # fallback
 
@@ -112,6 +112,6 @@ class AestheticAuditor:
                 if evaluation.startswith("PASS"):
                     return Ok("Aesthetic Check Passed.")
                 return Err(evaluation)
-            return Err(f"QA Router Error: {res.error}")
+            return Err(f"QA Router Error: {res.error}")  # pyright: ignore[reportAttributeAccessIssue]
         except Exception as e:
             return Err(f"Vision API Error: {e}")

@@ -7,7 +7,7 @@ from .models import MarketReport, NicheTarget
 # Assuming standard CORTEX gateway interaction here for Pydantic structuring.
 # If CORTEX has a different structured output method, this should be adapted.
 try:
-    import instructor
+    import instructor  # pyright: ignore[reportMissingImports]
     from openai import AsyncOpenAI
 except ImportError:
     instructor = None

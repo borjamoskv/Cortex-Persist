@@ -1,7 +1,7 @@
 import sys
 import os
-import torch
-import torchhd
+import torch  # pyright: ignore[reportMissingImports]
+import torchhd  # pyright: ignore[reportMissingImports]
 import logging
 
 # Adjust path to import cortex module

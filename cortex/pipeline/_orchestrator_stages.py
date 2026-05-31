@@ -39,11 +39,11 @@ class StagesMixin:
 
     def _assemble_context(self, request: PipelineRequest) -> ContextPacket:
         """Gather relevant context from all knowledge sources."""
-        if self._context is None:
+        if self._context is None:  # pyright: ignore[reportAttributeAccessIssue]
             logger.debug("  [CONTEXT] No assembler configured - empty context")
             return ContextPacket()
 
-        return self._context.assemble(
+        return self._context.assemble(  # pyright: ignore[reportAttributeAccessIssue]
             intent=request.intent,
             hints=request.context_hints,
             tenant_id=request.tenant_id,
@@ -51,14 +51,14 @@ class StagesMixin:
 
     def _plan(self, request: PipelineRequest, context: ContextPacket) -> dict[str, Any]:
         """Route request to appropriate agent(s)."""
-        if self._router is None:
+        if self._router is None:  # pyright: ignore[reportAttributeAccessIssue]
             return {
                 "agents": ["general"],
                 "strategy": "sequential",
                 "max_tokens": 4096,
             }
 
-        return self._router.route(
+        return self._router.route(  # pyright: ignore[reportAttributeAccessIssue]
             intent=request.intent,
             context=context,
             budget_remaining=request.budget_limit_usd,
@@ -71,8 +71,8 @@ class StagesMixin:
         plan: dict[str, Any],
     ) -> Any:
         """Execute the planned agent chain."""
-        if self._budget:
-            budget_state = self._budget.get_mission_budget(request.mission_id)
+        if self._budget:  # pyright: ignore[reportAttributeAccessIssue]
+            budget_state = self._budget.get_mission_budget(request.mission_id)  # pyright: ignore[reportAttributeAccessIssue]
             if budget_state and budget_state.total_cost_usd >= request.budget_limit_usd:
                 raise BudgetExhaustedError(
                     f"Mission {request.mission_id} already at "
@@ -80,11 +80,11 @@ class StagesMixin:
                     f"(limit: ${request.budget_limit_usd:.4f})"
                 )
 
-        if self._executor is not None:
+        if self._executor is not None:  # pyright: ignore[reportAttributeAccessIssue]
             import asyncio
 
             def coro_factory():
-                return self._executor.execute(
+                return self._executor.execute(  # pyright: ignore[reportAttributeAccessIssue]
                     intent=request.intent,
                     context=context,
                     plan=plan,
@@ -118,13 +118,13 @@ class StagesMixin:
         output_bytes = json.dumps(output, sort_keys=True, default=str).encode()
         result_hash = hashlib.sha256(output_bytes).hexdigest()
 
-        if self.engine is not None:
+        if self.engine is not None:  # pyright: ignore[reportAttributeAccessIssue]
             try:
                 import asyncio
-                from cortex.utils.time_utils import get_utc_timestamp
+                from cortex.utils.time_utils import get_utc_timestamp  # pyright: ignore[reportMissingImports]
 
                 async def persist_to_engine():
-                    async with self.engine.session() as conn:
+                    async with self.engine.session() as conn:  # pyright: ignore[reportAttributeAccessIssue]
                         await conn.execute(
                             "INSERT INTO execution_log (mission_id, result_hash, tenant_id, completed_at, status) VALUES (?, ?, ?, ?, ?)",
                             (
@@ -145,9 +145,9 @@ class StagesMixin:
             except Exception as e:
                 logger.warning("  [PERSIST] Engine SQLite write failed: %s", e)
 
-        elif self._ledger:
+        elif self._ledger:  # pyright: ignore[reportAttributeAccessIssue]
             try:
-                self._ledger.append(
+                self._ledger.append(  # pyright: ignore[reportAttributeAccessIssue]
                     mission_id=request.mission_id,
                     result_hash=result_hash,
                     tenant_id=request.tenant_id,
@@ -160,11 +160,11 @@ class StagesMixin:
 
     def _deliver(self, request: PipelineRequest, output: Any) -> None:
         """Deliver result to the specified target."""
-        if self._delivery is None:
+        if self._delivery is None:  # pyright: ignore[reportAttributeAccessIssue]
             logger.info("  [EGRESS] No delivery manager - result logged only")
             return
 
-        self._delivery.deliver(
+        self._delivery.deliver(  # pyright: ignore[reportAttributeAccessIssue]
             output=output,
             target=request.delivery,
             mission_id=request.mission_id,

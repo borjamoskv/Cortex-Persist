@@ -451,8 +451,8 @@ async def execute_credibility_strike(
     Computes exergy, constructs Merkle roots, signs the root,
     performs replay validation, and takes database snapshots.
     """
-    if hasattr(engine, "_extensions") and hasattr(engine._extensions, "credibility_stack"):
-        stack = engine._extensions.credibility_stack
+    if hasattr(engine, "_extensions") and hasattr(engine._extensions, "credibility_stack"):  # pyright: ignore[reportAttributeAccessIssue]
+        stack = engine._extensions.credibility_stack  # pyright: ignore[reportAttributeAccessIssue]
     else:
         from cortex.engine.credibility_stack import LedgerCredibilityStack
 

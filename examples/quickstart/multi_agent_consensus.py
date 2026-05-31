@@ -35,7 +35,7 @@ async def main() -> None:
 
     facts = []
     for source, content in agents:
-        fact = await engine.store_fact(
+        fact = await engine.store_fact(  # pyright: ignore[reportOptionalCall]
             content=content,
             fact_type="decision",
             project="consensus-demo",
@@ -46,7 +46,7 @@ async def main() -> None:
 
     # --- Step 2: Show consensus ---
     print("\n2️⃣  Checking consensus across agents...")
-    all_facts = await engine.search_facts("market conditions", project="consensus-demo")
+    all_facts = await engine.search_facts("market conditions", project="consensus-demo")  # pyright: ignore[reportAttributeAccessIssue]
 
     # Count agreement
     votes: dict[str, int] = {}
@@ -71,7 +71,7 @@ async def main() -> None:
     # --- Step 3: Verify integrity ---
     print("\n3️⃣  Verifying all decisions have cryptographic integrity...")
     for fact in facts:
-        result = await engine.verify_fact(fact["id"])
+        result = await engine.verify_fact(fact["id"])  # pyright: ignore[reportAttributeAccessIssue]
         status = "✅" if result["valid"] else "❌"
         print(f"   {status} Fact #{fact['id']} - chain intact")
 

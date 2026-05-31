@@ -58,7 +58,7 @@ class RedisL1Cache:
 
         if self._client is None and HAS_REDIS:
             try:
-                self._client = redis.Redis(
+                self._client = redis.Redis(  # pyright: ignore[reportOptionalMemberAccess]
                     host=host,
                     port=port,
                     db=db,

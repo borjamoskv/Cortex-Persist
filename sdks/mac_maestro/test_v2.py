@@ -47,7 +47,7 @@ def _make_snapshot(**kwargs) -> AXNodeSnapshot:
         children=[],
     )
     defaults.update(kwargs)
-    return AXNodeSnapshot(**defaults)
+    return AXNodeSnapshot(**defaults)  # pyright: ignore[reportArgumentType]
 
 
 def _make_tree() -> AXNodeSnapshot:
@@ -424,7 +424,7 @@ class TestMatcher(unittest.TestCase):
     def test_find_best_returns_top(self):
         best = find_best(self.tree, role="AXButton", title="Save")
         self.assertIsNotNone(best)
-        self.assertEqual(best.title, "Save")
+        self.assertEqual(best.title, "Save")  # pyright: ignore[reportOptionalMemberAccess]
 
     def test_find_best_returns_none(self):
         best = find_best(self.tree, title="Nonexistent")
@@ -449,8 +449,8 @@ class TestMatcher(unittest.TestCase):
         match = results[0]
         center = match.center
         self.assertIsNotNone(center)
-        self.assertAlmostEqual(center[0], 140.0)
-        self.assertAlmostEqual(center[1], 65.0)
+        self.assertAlmostEqual(center[0], 140.0)  # pyright: ignore[reportOptionalSubscript]
+        self.assertAlmostEqual(center[1], 65.0)  # pyright: ignore[reportOptionalSubscript]
 
     def test_sorted_by_score_descending(self):
         results = find_elements(self.tree, role="AXButton")

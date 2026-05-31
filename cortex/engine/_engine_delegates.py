@@ -28,7 +28,7 @@ class DelegatesMixin:
         """Recall causal episodes matching a query."""
         from cortex.memory.episodic import CausalTracer
 
-        async with self.session() as conn:
+        async with self.session() as conn:  # pyright: ignore[reportAttributeAccessIssue]
             tracer = CausalTracer(conn)
             return await tracer.recall_episode(query, project, limit)
 
@@ -40,46 +40,46 @@ class DelegatesMixin:
         """Trace the full causal DAG from a given fact ID."""
         from cortex.memory.episodic import CausalTracer
 
-        async with self.session() as conn:
+        async with self.session() as conn:  # pyright: ignore[reportAttributeAccessIssue]
             tracer = CausalTracer(conn)
             return await tracer.trace_episode(fact_id, max_depth)
 
     async def store(self, *args, **kwargs):
-        self._synthesize_skill("store")
-        self._audit_log(
+        self._synthesize_skill("store")  # pyright: ignore[reportAttributeAccessIssue]
+        self._audit_log(  # pyright: ignore[reportAttributeAccessIssue]
             "store",
             fact_type=kwargs.get("fact_type", ""),
             project=kwargs.get("project", args[0] if args else ""),
         )
-        return await self.facts.store(*args, **kwargs)
+        return await self.facts.store(*args, **kwargs)  # pyright: ignore[reportAttributeAccessIssue]
 
     async def store_many(self, *args, **kwargs):
-        self._synthesize_skill("store")
-        return await super().store_many(*args, **kwargs)
+        self._synthesize_skill("store")  # pyright: ignore[reportAttributeAccessIssue]
+        return await super().store_many(*args, **kwargs)  # pyright: ignore[reportAttributeAccessIssue]
 
     async def recall(self, *args, **kwargs):
-        self._synthesize_skill("search")
-        self._audit_log(
+        self._synthesize_skill("search")  # pyright: ignore[reportAttributeAccessIssue]
+        self._audit_log(  # pyright: ignore[reportAttributeAccessIssue]
             "recall",
             project=kwargs.get("project", args[0] if args else ""),
         )
-        return await super().recall(*args, **kwargs)
+        return await super().recall(*args, **kwargs)  # pyright: ignore[reportAttributeAccessIssue]
 
     async def search(self, *args, **kwargs):
-        self._synthesize_skill("search")
-        return await super().search(*args, **kwargs)
+        self._synthesize_skill("search")  # pyright: ignore[reportAttributeAccessIssue]
+        return await super().search(*args, **kwargs)  # pyright: ignore[reportAttributeAccessIssue]
 
     async def query(self, *args, **kwargs):
-        self._synthesize_skill("query")
-        return await super().query(*args, **kwargs)
+        self._synthesize_skill("query")  # pyright: ignore[reportAttributeAccessIssue]
+        return await super().query(*args, **kwargs)  # pyright: ignore[reportAttributeAccessIssue]
 
     async def write_optimized(self, *args, **kwargs):
-        self._synthesize_skill("optimization")
-        return await super().write_optimized(*args, **kwargs)
+        self._synthesize_skill("optimization")  # pyright: ignore[reportAttributeAccessIssue]
+        return await super().write_optimized(*args, **kwargs)  # pyright: ignore[reportAttributeAccessIssue]
 
     async def get_fact(self, fact_id: int, tenant_id: str = "default"):
-        self._synthesize_skill("query")
-        res = await super().get_fact(fact_id, tenant_id=tenant_id)
+        self._synthesize_skill("query")  # pyright: ignore[reportAttributeAccessIssue]
+        res = await super().get_fact(fact_id, tenant_id=tenant_id)  # pyright: ignore[reportAttributeAccessIssue]
         if not res:
             return None
         from cortex.engine.models import Fact
@@ -91,7 +91,7 @@ class DelegatesMixin:
         from cortex.utils.errors import FactNotFound
 
         async with (
-            self.session() as conn,
+            self.session() as conn,  # pyright: ignore[reportAttributeAccessIssue]
             conn.execute(f"SELECT {FACT_COLUMNS} {FACT_JOIN} WHERE f.id = ?", (fact_id,)) as cursor,
         ):
             row = await cursor.fetchone()
@@ -101,20 +101,20 @@ class DelegatesMixin:
         return fact
 
     async def vote_v2(self, *args, **kwargs):
-        return await self.consensus.vote_v2(*args, **kwargs)
+        return await self.consensus.vote_v2(*args, **kwargs)  # pyright: ignore[reportAttributeAccessIssue]
 
     async def get_votes(self, *args, **kwargs):
-        return await self.consensus.get_votes(*args, **kwargs)
+        return await self.consensus.get_votes(*args, **kwargs)  # pyright: ignore[reportAttributeAccessIssue]
 
     async def verify_vote_ledger(self, *args, **kwargs):
-        return await self.consensus.verify_vote_ledger(*args, **kwargs)
+        return await self.consensus.verify_vote_ledger(*args, **kwargs)  # pyright: ignore[reportAttributeAccessIssue]
 
     async def propagate_taint(self, fact_id: int, tenant_id: str = "default"):
         """Propagate causal taint through the tenant-scoped causality graph."""
         from cortex.engine.causality import AsyncCausalGraph
 
-        tenant_id = self._resolve_tenant(tenant_id)
-        async with self.session() as conn:
+        tenant_id = self._resolve_tenant(tenant_id)  # pyright: ignore[reportAttributeAccessIssue]
+        async with self.session() as conn:  # pyright: ignore[reportAttributeAccessIssue]
             graph = AsyncCausalGraph(conn)
             await graph.ensure_table()
             return await graph.propagate_taint(fact_id, tenant_id=tenant_id)
@@ -129,12 +129,12 @@ class DelegatesMixin:
 
     async def create_checkpoint(self) -> str | None:
         """Create a transaction-ledger Merkle checkpoint."""
-        ledger = await self._get_or_create_ledger()
+        ledger = await self._get_or_create_ledger()  # pyright: ignore[reportAttributeAccessIssue]
         return await ledger.create_checkpoint_async()
 
     async def get_all_active_facts(self, *args, **kwargs):
         """Retrieve all active facts across all projects, wrapped in models."""
-        results = await super().get_all_active_facts(*args, **kwargs)
+        results = await super().get_all_active_facts(*args, **kwargs)  # pyright: ignore[reportAttributeAccessIssue]
         from cortex.engine.models import Fact
 
         return [
@@ -143,7 +143,7 @@ class DelegatesMixin:
 
     async def history(self, *args, **kwargs):
         """Retrieve historical facts wrapped in models."""
-        results = await super().history(*args, **kwargs)
+        results = await super().history(*args, **kwargs)  # pyright: ignore[reportAttributeAccessIssue]
         from cortex.engine.models import Fact
 
         return [
@@ -152,7 +152,7 @@ class DelegatesMixin:
 
     async def get_causal_chain(self, *args, **kwargs):
         """Retrieve causal chain facts wrapped in models."""
-        results = await super().get_causal_chain(*args, **kwargs)
+        results = await super().get_causal_chain(*args, **kwargs)  # pyright: ignore[reportAttributeAccessIssue]
         from cortex.engine.models import Fact
 
         return [
@@ -163,7 +163,7 @@ class DelegatesMixin:
         """Shannon entropy analysis of stored memory."""
         from cortex.extensions.shannon.report import EntropyReport
 
-        return await EntropyReport.analyze(self, project)
+        return await EntropyReport.analyze(self, project)  # pyright: ignore[reportArgumentType]
 
     async def fingerprint(
         self,
@@ -173,13 +173,13 @@ class DelegatesMixin:
         """Cognitive Fingerprint - extract behavioral patterns from the Ledger."""
         from cortex.extensions.fingerprint.extractor import FingerprintExtractor
 
-        return await FingerprintExtractor.extract(self, project, top_domains)
+        return await FingerprintExtractor.extract(self, project, top_domains)  # pyright: ignore[reportArgumentType]
 
     async def immortality_index(self, project: str | None = None) -> dict:
         """Immortality Index (ι) - cognitive crystallization metric."""
         from cortex.extensions.shannon.immortality import ImmortalityIndex
 
-        return await ImmortalityIndex.compute(self, project)
+        return await ImmortalityIndex.compute(self, project)  # pyright: ignore[reportArgumentType]
 
     async def prioritize(
         self,
@@ -189,7 +189,7 @@ class DelegatesMixin:
         """Bellman Policy Engine - prioritized action queue."""
         from cortex.extensions.policy import PolicyEngine
 
-        policy = PolicyEngine(self)
+        policy = PolicyEngine(self)  # pyright: ignore[reportArgumentType]
         return await policy.evaluate(project=project, tenant_id=tenant_id)
 
     def export_snapshot(self, out_path: str | Path) -> str:

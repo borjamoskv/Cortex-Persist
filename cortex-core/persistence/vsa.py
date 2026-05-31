@@ -141,7 +141,7 @@ class VSAMemory(SovereignResource):
                 logger.error("Rust VSA Record Failure: %s", e)
         else:
             # Zero-copy Silicon Direct Access
-            self._tensor[idx] += 1.0
+            self._tensor[idx] += 1.0  # pyright: ignore[reportOptionalSubscript]
 
             self._record_count += 1
             if self._record_count >= 1000:
@@ -154,8 +154,8 @@ class VSAMemory(SovereignResource):
 
     def _apply_decay(self):
         for i in range(VSA_DIMENSION):
-            val = self._tensor[i]
+            val = self._tensor[i]  # pyright: ignore[reportOptionalSubscript]
             if val > 0.001:
-                self._tensor[i] = val * self._decay_rate
+                self._tensor[i] = val * self._decay_rate  # pyright: ignore[reportOptionalSubscript]
             elif val > 0.0:
-                self._tensor[i] = 0.0
+                self._tensor[i] = 0.0  # pyright: ignore[reportOptionalSubscript]

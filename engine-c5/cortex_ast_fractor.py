@@ -54,7 +54,7 @@ SAGE_COUNCIL = [
 def call_qwen_mcts(target_functions: list[str], mutation_id: int, temperature: float) -> str:
     api_key = os.environ.get("QWEN_API_KEY")
     if not api_key:
-        return None
+        return None  # pyright: ignore[reportReturnType]
         
     url = "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions"
     headers = {
@@ -85,7 +85,7 @@ def call_qwen_mcts(target_functions: list[str], mutation_id: int, temperature: f
             return solidity_code
     except Exception as e:
         log(f"API Qwen falló en M{mutation_id}: {str(e)}", "ERROR")
-        return None
+        return None  # pyright: ignore[reportReturnType]
 
 def process_single_mutation(mutation_id: int, target_functions: list[str], fuzz_dir: str):
     """

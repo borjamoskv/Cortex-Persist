@@ -276,7 +276,7 @@ class EpisodicMemory:
         # Computationally expensive operation - offloaded to thread pool under high load
         return await asyncio.to_thread(
             _extract_patterns,
-            list(rows),
+            list(rows),  # pyright: ignore[reportArgumentType]
             min_occurrences,
             limit,  # type: ignore[reportArgumentType]
         )

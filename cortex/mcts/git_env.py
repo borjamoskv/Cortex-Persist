@@ -50,7 +50,7 @@ class MCTSGitEnvironment:
             # Fallback for existing branch
             await asyncio.create_subprocess_shell(
                 f"git checkout {shlex.quote(new_name)}"
-            ).communicate()
+            ).communicate()  # pyright: ignore[reportAttributeAccessIssue]
         return new_name
 
     async def mutate(self, prompt_instruction: str) -> bool:
@@ -76,7 +76,7 @@ class MCTSGitEnvironment:
 
         res = await self.router.execute_resilient(prompt)
         if res.is_err():
-            logger.error("Error en mutación LLM: %s", res.error)
+            logger.error("Error en mutación LLM: %s", res.error)  # pyright: ignore[reportAttributeAccessIssue]
             return False
 
         new_code = res.unwrap().strip()
@@ -135,6 +135,6 @@ class MCTSGitEnvironment:
     async def secure_checkout(self, branch: str) -> None:
         """Vuelve a una rama segura restaurando cualquier cambio."""
         logger.debug("Restaurando entropía: checkout a %s", branch)
-        await asyncio.create_subprocess_shell("git reset --hard HEAD").communicate()
-        await asyncio.create_subprocess_shell("git clean -fd").communicate()
-        await asyncio.create_subprocess_shell(f"git checkout {shlex.quote(branch)}").communicate()
+        await asyncio.create_subprocess_shell("git reset --hard HEAD").communicate()  # pyright: ignore[reportAttributeAccessIssue]
+        await asyncio.create_subprocess_shell("git clean -fd").communicate()  # pyright: ignore[reportAttributeAccessIssue]
+        await asyncio.create_subprocess_shell(f"git checkout {shlex.quote(branch)}").communicate()  # pyright: ignore[reportAttributeAccessIssue]

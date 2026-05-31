@@ -67,7 +67,7 @@ class CrossEncoderReranker:
             return self._available
 
         try:
-            from sentence_transformers import CrossEncoder
+            from sentence_transformers import CrossEncoder  # pyright: ignore[reportMissingImports]
 
             self._model = CrossEncoder(self._model_name)
             self._available = True

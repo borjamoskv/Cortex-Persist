@@ -44,7 +44,7 @@ def _resolve_device() -> str:
         return device_override
 
     try:
-        import torch
+        import torch  # pyright: ignore[reportMissingImports]
 
         if torch.cuda.is_available():
             return "cuda"
@@ -86,7 +86,7 @@ class LocalEmbedder:
                 return cls._model
 
             try:
-                from sentence_transformers import SentenceTransformer
+                from sentence_transformers import SentenceTransformer  # pyright: ignore[reportMissingImports]
 
                 cls._model = SentenceTransformer(model_name, device=device)
                 cls._model_name = model_name

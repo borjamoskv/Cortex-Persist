@@ -251,7 +251,7 @@ class ExergyDashboardServer(BaseHTTPRequestHandler):
             self.send_header("Content-Type", "text/html; charset=utf-8")
             self.end_headers()
             
-            state = self.sentinel_instance.state
+            state = self.sentinel_instance.state  # pyright: ignore[reportAttributeAccessIssue]
             logs_html = "".join(f"<div class='log-line'>{line}</div>" for line in reversed(state["logs"]))
             
             status_color = "#2B3BE5" if state["exergy_score"] >= 90 else ("#e58f2b" if state["exergy_score"] >= 60 else "#e52b2b")
@@ -473,7 +473,7 @@ class ExergyDashboardServer(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.end_headers()
-            self.wfile.write(json.dumps(self.sentinel_instance.state).encode("utf-8"))
+            self.wfile.write(json.dumps(self.sentinel_instance.state).encode("utf-8"))  # pyright: ignore[reportAttributeAccessIssue]
         else:
             self.send_response(404)
             self.end_headers()

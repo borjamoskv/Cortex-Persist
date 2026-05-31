@@ -1,12 +1,12 @@
 import logging
 
 
-from langchain_core.chat_history import BaseChatMessageHistory
-from langchain_core.messages import BaseMessage, message_to_dict, messages_from_dict
+from langchain_core.chat_history import BaseChatMessageHistory  # pyright: ignore[reportMissingImports]
+from langchain_core.messages import BaseMessage, message_to_dict, messages_from_dict  # pyright: ignore[reportMissingImports]
 
 # Attempt to import CortexClient; fallback gracefully if not installed
 try:
-    from cortex.client import CortexClient
+    from cortex.client import CortexClient  # pyright: ignore[reportMissingImports]
 except ImportError:
     CortexClient = None
 
@@ -24,7 +24,7 @@ class CortexChatMessageHistory(BaseChatMessageHistory):
     def __init__(
         self,
         session_id: str,
-        api_key: str = None,
+        api_key: str = None,  # pyright: ignore[reportArgumentType]
         cortex_url: str = "http://localhost:8000",
     ):
         if CortexClient is None:

@@ -375,7 +375,7 @@ def render_sequence_to_wav(
     Returns:
         absolute path to the rendered WAV file
     """
-    import scipy.io.wavfile as wavfile
+    import scipy.io.wavfile as wavfile  # pyright: ignore[reportMissingImports]
 
     # Calculate total duration
     total_ticks = sequence.total_ticks + TICKS_PER_BEAT  # Buffer
@@ -466,7 +466,7 @@ def save_sequence_as_midi(sequence: MIDISequence, output_path: str) -> str:
         absolute path to the saved MIDI file
     """
     try:
-        import mido
+        import mido  # pyright: ignore[reportMissingImports]
     except ImportError:
         logger.error("mido not installed. Cannot save MIDI files. pip install mido")
         raise

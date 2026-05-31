@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     "EnrichmentQueue",
-    "ImmutableLedger",
+    "ImmutableLedger",  # pyright: ignore[reportUnsupportedDunderAll]
     "LedgerEvent",
     "LedgerOriginSignature",
     "LedgerStore",

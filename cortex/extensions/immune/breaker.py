@@ -76,7 +76,7 @@ async def execute_circuit_trip(gap_description: str, cortex_engine: CortexEngine
 
     # 3. Trigger Autodidact (mocked or actual if integrated)
     try:
-        from cortex.agents.autodidact import force_ingestion
+        from cortex.agents.autodidact import force_ingestion  # pyright: ignore[reportMissingImports]
 
         axiom_id = await force_ingestion(query=gap_description)
     except ImportError:

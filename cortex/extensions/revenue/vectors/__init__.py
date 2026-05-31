@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 __all__ = [
-    "MicroSaaSVector",
-    "ArbitrageVector",
-    "OutreachVector",
+    "MicroSaaSVector",  # pyright: ignore[reportUnsupportedDunderAll]
+    "ArbitrageVector",  # pyright: ignore[reportUnsupportedDunderAll]
+    "OutreachVector",  # pyright: ignore[reportUnsupportedDunderAll]
 ]
 
 

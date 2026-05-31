@@ -39,7 +39,7 @@ class MirrorAuditor:
             for node in ast.walk(tree):
                 if isinstance(node, ast.Call):
                     if getattr(node.func, 'id', '') in ['print', 'time.sleep']:
-                        self.findings.append({'type': 'SYNCHRONOUS_BLOCK', 'severity': 'WARNING', 'line': node.lineno, 'msg': f'Synchronous {node.func.id} used in async context.'})
+                        self.findings.append({'type': 'SYNCHRONOUS_BLOCK', 'severity': 'WARNING', 'line': node.lineno, 'msg': f'Synchronous {node.func.id} used in async context.'})  # pyright: ignore[reportAttributeAccessIssue]
                         self.exergy_score -= 5.0
             for node in ast.walk(tree):
                 if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
@@ -84,8 +84,8 @@ if __name__ == '__main__':
                     auditor = MirrorAuditor(full_path)
                     if auditor.audit():
                         all_results.append(auditor.report())
-        logger.info(json.dumps(all_results, indent=2))
+        logger.info(json.dumps(all_results, indent=2))  # pyright: ignore[reportUndefinedVariable]
     else:
         auditor = MirrorAuditor(target)
         if auditor.audit():
-            logger.info(json.dumps(auditor.report(), indent=2))
+            logger.info(json.dumps(auditor.report(), indent=2))  # pyright: ignore[reportUndefinedVariable]

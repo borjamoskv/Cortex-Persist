@@ -45,11 +45,11 @@ class MemoryArchaeologist:
         await self.engine.get_conn()
         tenant_id = self.engine._resolve_tenant(tenant_id or "default")
 
-        l3_map = self._fetch_active_facts(project, tenant_id)
+        l3_map = self._fetch_active_facts(project, tenant_id)  # pyright: ignore[reportArgumentType]
         if not l3_map:
             return {"condensed": 0, "tombstoned": 0}
 
-        facts, vecs_matrix = self._extract_vectors(project, tenant_id, l3_map)
+        facts, vecs_matrix = self._extract_vectors(project, tenant_id, l3_map)  # pyright: ignore[reportArgumentType]
         if vecs_matrix is None:
             return {"condensed": 0, "tombstoned": 0}
 
@@ -58,7 +58,7 @@ class MemoryArchaeologist:
             return {"condensed": 0, "tombstoned": 0}
 
         condensed, tombstoned = await self._synthesize_and_update(
-            project, tenant_id, clusters, facts, simulate
+            project, tenant_id, clusters, facts, simulate  # pyright: ignore[reportArgumentType]
         )
         return {"condensed": condensed, "tombstoned": tombstoned}
 
@@ -78,7 +78,7 @@ class MemoryArchaeologist:
 
     def _extract_vectors(
         self, project: str, tenant_id: str, l3_map: dict[str, dict[str, Any]]
-    ) -> tuple[list[dict[str, Any]], np.ndarray | None]:
+    ) -> tuple[list[dict[str, Any]], np.ndarray | None]:  # pyright: ignore[reportInvalidTypeForm]
         l2_conn = self.engine.memory._l2._get_conn()
         c2 = l2_conn.cursor()
         c2.execute(
@@ -118,7 +118,7 @@ class MemoryArchaeologist:
         return facts, np.vstack(vecs)
 
     def _build_clusters(
-        self, facts: list[dict[str, Any]], vecs_matrix: np.ndarray, threshold: float
+        self, facts: list[dict[str, Any]], vecs_matrix: np.ndarray, threshold: float  # pyright: ignore[reportInvalidTypeForm]
     ) -> list[list[int]]:
         # O(N^2) dot product for cosine similarity is unavoidable here without approximate KNN.
         # But we can eliminate the O(N^2) nested python loops and use vectorization.

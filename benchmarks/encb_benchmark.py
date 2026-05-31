@@ -156,7 +156,7 @@ async def run_encb(
     db_path = os.path.join(tmp_dir, "encb_cortex.db")
 
     try:
-        from cortex.schema import ALL_SCHEMA
+        from cortex.schema import ALL_SCHEMA  # pyright: ignore[reportMissingImports]
 
         from cortex.database.pool import CortexConnectionPool
         from cortex.engine import CortexEngine as AsyncCortexEngine
@@ -169,7 +169,7 @@ async def run_encb(
                 await conn.executescript(stmt)
             await conn.commit()
 
-        engine = AsyncCortexEngine(pool, db_path)
+        engine = AsyncCortexEngine(pool, db_path)  # pyright: ignore[reportArgumentType]
         cortex_available = True
         console.print("[green]✅ CORTEX engine ready[/]")
     except Exception as exc:

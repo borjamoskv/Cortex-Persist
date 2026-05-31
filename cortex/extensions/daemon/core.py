@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Callable
 
 """MoskvDaemon - Main daemon orchestrator.
 
@@ -31,41 +31,68 @@ from cortex.extensions.daemon.models import (
     DEFAULT_STALE_HOURS,
     STATUS_FILE,
     DaemonStatus,
+    CORTEX_DB,
+    CORTEX_DIR,
+)
+
+from cortex.extensions.daemon.monitors import (
+    CloudSyncMonitor,
+    DiskMonitor,
+    EngineHealthCheck,
 )
 
 try:
+    from cortex.extensions.daemon.hot_state import HotStateDB
     _HOT_STATE_AVAILABLE = True
 except ImportError:
     _HOT_STATE_AVAILABLE = False
+
 try:
+    from cortex.extensions.daemon.scheduler import SovereignScheduler
     _SCHEDULER_AVAILABLE = True
 except ImportError:
     _SCHEDULER_AVAILABLE = False
+
 try:
+    from cortex.extensions.daemon.watchers import WatchdogHub
     _WATCHDOG_HUB_AVAILABLE = True
 except ImportError:
     _WATCHDOG_HUB_AVAILABLE = False
+
 try:
+    from cortex.extensions.daemon.api import HumanCallbackAPI  # pyright: ignore[reportMissingImports]
     _API_AVAILABLE = True
 except ImportError:
     _API_AVAILABLE = False
+
 try:
+    from cortex.extensions.daemon.centaur.heartbeat import HeartbeatDaemon
+    from cortex.extensions.daemon.centaur.entropic_queue import EntropicQueue  # pyright: ignore[reportMissingImports]
+    from cortex.extensions.daemon.centaur.engine import CentauroEngine  # pyright: ignore[reportMissingImports]
     _CENTAUR_AVAILABLE = True
 except ImportError:
     _CENTAUR_AVAILABLE = False
+
 try:
+    from cortex.extensions.daemon.entropic_wake import EntropicWakeDaemon
     _ENTROPIC_WAKE_AVAILABLE = True
 except ImportError:
     _ENTROPIC_WAKE_AVAILABLE = False
+
 try:
+    from cortex.extensions.daemon.frontier import FrontierDaemon
     _FRONTIER_AVAILABLE = True
 except ImportError:
     _FRONTIER_AVAILABLE = False
+
 try:
+    from cortex.extensions.daemon.zero_prompting import ZeroPromptingDaemon
     _ZERO_PROMPTING_AVAILABLE = True
 except ImportError:
     _ZERO_PROMPTING_AVAILABLE = False
+
 try:
+    from cortex.extensions.daemon.epistemic_breaker import EpistemicBreakerDaemon
     _EPISTEMIC_BREAKER_AVAILABLE = True
 except ImportError:
     _EPISTEMIC_BREAKER_AVAILABLE = False
@@ -112,6 +139,16 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
     scheduler: Any
     watchdog_hub: Any
     callback_api: Any
+    mejoralo_monitor: Any
+    _healed_total: int
+    _failure_counts: dict[str, int]
+    _shutdown: bool
+    _stop_event: threading.Event
+    _threads: list[threading.Thread]
+    _async_engine: Any
+    hot_state: Any
+    _event_bus: Any
+    config_dir: Path
 
     def __init__(
         self,
@@ -139,6 +176,180 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
         self._init_autopoiesis(file_config)
         self._init_sovereign_subsystems(file_config)
         self._init_persistence_checkers(file_config)
+
+    def _init_autopoiesis(self, file_config: dict) -> None:
+        """Initialize Heartbeat and metabolism engines."""
+        self.heartbeat_daemon = None
+        if _CENTAUR_AVAILABLE:
+            try:
+                db_path = file_config.get("db_path", str(CORTEX_DB))
+                centaur_queue = EntropicQueue(db_path=Path(db_path).parent / "entropic_queue.db")
+                centauro_engine = CentauroEngine()
+                self.heartbeat_daemon = HeartbeatDaemon(
+                    queue=centaur_queue,
+                    engine=centauro_engine,
+                    poll_interval=float(file_config.get("heartbeat_interval", 30.0)),
+                )
+                logger.info("❤️  HeartbeatDaemon (Continuous Autopoiesis) ENABLED")
+            except Exception as e:  # noqa: BLE001
+                logger.warning("Failed to init HeartbeatDaemon: %s", e)
+
+        self.frontier_daemon = None
+        if _FRONTIER_AVAILABLE:
+            try:
+                self.frontier_daemon = FrontierDaemon(
+                    engine=self._shared_engine,
+                    metabolism_interval_hours=int(
+                        file_config.get("frontier_metabolism_interval_hours", 12)
+                    ),
+                    ingestion_interval_hours=int(
+                        file_config.get("frontier_ingestion_interval_hours", 24)
+                    ),
+                    allow_commits=file_config.get("frontier_allow_commits", True),
+                )
+                logger.info("🚀 Frontier Daemon (Evolution Engine) ENABLED")
+            except Exception as e:  # noqa: BLE001
+                logger.warning("Failed to init Frontier Daemon: %s", e)
+
+        self.zero_prompting_daemon = None
+        if _ZERO_PROMPTING_AVAILABLE:
+            try:
+                self.zero_prompting_daemon = ZeroPromptingDaemon(
+                    engine=self._shared_engine,
+                    workspace_root=Path(file_config.get("watch_path", str(CORTEX_DIR))),
+                    cycle_interval_hours=float(
+                        file_config.get("zero_prompting_interval_hours", 24.0)
+                    ),
+                )
+                logger.info("🧠 Zero-Prompting Evolution Daemon (Axioma Ω₇) ENABLED")
+            except Exception as e:  # noqa: BLE001
+                logger.warning("Failed to init Zero-Prompting Daemon: %s", e)
+
+        self.epistemic_breaker_daemon = None
+        if _EPISTEMIC_BREAKER_AVAILABLE:
+            try:
+                self.epistemic_breaker_daemon = EpistemicBreakerDaemon(
+                    engine=self._shared_engine,
+                    check_interval_seconds=int(
+                        file_config.get("epistemic_breaker_interval_seconds", 300)
+                    ),
+                    max_entropy_threshold=float(
+                        file_config.get("epistemic_breaker_max_entropy", 0.85)
+                    ),
+                )
+                logger.info("🛡️ Sovereign Epistemic Circuit Breaker (Axioma Ω₂, Ω₃) ENABLED")
+            except Exception as e:  # noqa: BLE001
+                logger.warning("Failed to init Epistemic Breaker Daemon: %s", e)
+
+    def _init_sovereign_subsystems(self, file_config: dict) -> None:
+        """Initialize the v2.0 sovereign async subsystems."""
+        # 1. Hot State — SQLite-backed KV store
+        self.hot_state = None
+        if _HOT_STATE_AVAILABLE:
+            try:
+                self.hot_state = HotStateDB()
+                logger.info("🔥 HotStateDB (SQLite KV) ENABLED")
+            except Exception as e:  # noqa: BLE001
+                logger.warning("Failed to init HotStateDB: %s", e)
+
+        # 2. Event Bus (reuse existing or create)
+        self._event_bus = None
+        try:
+            from cortex.events.bus import DistributedEventBus
+
+            self._event_bus = DistributedEventBus()
+            logger.info("📡 DistributedEventBus ENABLED")
+        except ImportError:
+            pass
+
+        # 3. Scheduler — cron/interval task execution
+        self.scheduler = None
+        if _SCHEDULER_AVAILABLE:
+            try:
+                self.scheduler = SovereignScheduler(
+                    event_bus=self._event_bus,
+                    hot_state=self.hot_state,
+                    tick_interval=float(file_config.get("scheduler_tick_interval", 5.0)),
+                )
+                logger.info("⏱️  SovereignScheduler ENABLED")
+            except Exception as e:  # noqa: BLE001
+                logger.warning("Failed to init SovereignScheduler: %s", e)
+
+        # 4. Watchdog Hub — unified filesystem monitor
+        self.watchdog_hub = None
+        if _WATCHDOG_HUB_AVAILABLE:
+            try:
+                watch_paths = file_config.get(
+                    "watch_paths",
+                    [str(CORTEX_DIR), str(Path.home() / ".agent")],
+                )
+                watch_patterns = file_config.get(
+                    "watch_patterns",
+                    ["*.py", "*.md", "*.json", "*.yaml", "*.toml"],
+                )
+                self.watchdog_hub = WatchdogHub(
+                    paths=watch_paths,
+                    patterns=watch_patterns,
+                    event_bus=self._event_bus,
+                    hot_state=self.hot_state,
+                )
+                logger.info("👁️  WatchdogHub ENABLED (%d paths)", len(watch_paths))
+            except Exception as e:  # noqa: BLE001
+                logger.warning("Failed to init WatchdogHub: %s", e)
+
+        # 5. Human Callback API — REST + WebSocket sidecar
+        self.callback_api = None
+        if _API_AVAILABLE and file_config.get("api_enabled", True):
+            try:
+                self.callback_api = HumanCallbackAPI(
+                    hot_state=self.hot_state,
+                    scheduler=self.scheduler,
+                    event_bus=self._event_bus,
+                    port=int(file_config.get("api_port", 8741)),
+                )
+                logger.info(
+                    "🌐 Human Callback API ENABLED (port %s)", file_config.get("api_port", 8741)
+                )
+            except Exception as e:  # noqa: BLE001
+                logger.warning("Failed to init HumanCallbackAPI: %s", e)
+
+    def _init_persistence_checkers(self, file_config: dict) -> None:
+        """Initialize checks related to data persistence and timing."""
+        self.engine_health = EngineHealthCheck(Path(file_config.get("db_path", str(CORTEX_DB))))
+        self.disk_monitor = DiskMonitor(
+            Path(file_config.get("watch_path", str(CORTEX_DIR))),
+            file_config.get("disk_warn_mb", 500),
+        )
+        self.cloud_sync_monitor = CloudSyncMonitor(
+            interval_seconds=file_config.get("cloud_sync_interval", 15),
+            engine=self._shared_engine,
+        )
+
+        self.entropic_wake_daemon = None
+        if _ENTROPIC_WAKE_AVAILABLE:
+            try:
+                self.entropic_wake_daemon = EntropicWakeDaemon(
+                    engine=self._shared_engine,
+                    check_interval_hours=int(
+                        file_config.get("entropic_wake_interval_hours", 4)
+                    ),
+                    zenon_threshold=float(file_config.get("zenon_threshold", 1.0)),
+                )
+                logger.info("🌌 Entropic Wake Daemon (VOID DAEMON) ENABLED")
+            except Exception as e:  # noqa: BLE001
+                logger.warning("Failed to init Entropic Wake Daemon: %s", e)
+        # Time Tracker
+        try:
+            import sqlite3
+            from cortex.database.core import connect
+            from cortex.extensions.timing import TimingTracker
+
+            self.timing_conn = connect(file_config.get("db_path", str(CORTEX_DB)))
+            self.tracker = TimingTracker(self.timing_conn)
+        except (ImportError, sqlite3.Error) as e:
+            logger.error("Failed to init TimeTracker: %s", e)
+            self.tracker = None
+
 
     def check(self) -> DaemonStatus:
         """Run all checks once. Returns DaemonStatus."""
@@ -173,7 +384,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
             self._run_monitor(status, "aether_alerts", self.aether_monitor, self._alert_aether)
             if hasattr(self, "auto_immune_monitor"):
                 self._run_monitor(
-                    status, "auto_immune_alerts", self.auto_immune_monitor, self._alert_auto_immune
+                    status, "auto_immune_alerts", self.auto_immune_monitor, self._alert_auto_immune  # pyright: ignore[reportAttributeAccessIssue]
                 )
         self._auto_sync(status)
         self._flush_timer()
@@ -238,36 +449,36 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
             tasks.append(asyncio.create_task(self.fiat_oracle.run_loop(), name="FiatOracle"))
         tasks.append(asyncio.create_task(self._run_neural_loop_async(), name="NeuralSync"))
         if self.ast_oracle:
-            tasks.append(asyncio.create_task(self._run_ast_oracle_loop_async(), name="ASTOracle"))
+            tasks.append(asyncio.create_task(self._run_lifecycle_daemon_async(self.ast_oracle, "AST Oracle", "👁️"), name="ASTOracle"))
         if getattr(self, "iot_oracle", None):
-            tasks.append(asyncio.create_task(self._run_iot_oracle_loop_async(), name="IoTOracle"))
+            tasks.append(asyncio.create_task(self._run_lifecycle_daemon_async(self.iot_oracle, "IoT Oracle", "📡"), name="IoTOracle"))
         if self.heartbeat_daemon:
             tasks.append(
-                asyncio.create_task(self._run_heartbeat_loop_async(), name="HeartbeatDaemon")
+                asyncio.create_task(self._run_lifecycle_daemon_async(self.heartbeat_daemon, "Heartbeat", "❤️"), name="HeartbeatDaemon")
             )
         if self.entropic_wake_daemon:
             tasks.append(
-                asyncio.create_task(self._run_entropic_wake_loop_async(), name="EntropicWakeDaemon")
+                asyncio.create_task(self._run_loop_daemon_async(self.entropic_wake_daemon, "Entropic Wake", "🌌"), name="EntropicWakeDaemon")
             )
         if self.frontier_daemon:
             tasks.append(
-                asyncio.create_task(self._run_frontier_loop_async(), name="FrontierDaemon")
+                asyncio.create_task(self._run_loop_daemon_async(self.frontier_daemon, "Frontier", "🚀"), name="FrontierDaemon")
             )
         if getattr(self, "zero_prompting_daemon", None):
             tasks.append(
                 asyncio.create_task(
-                    self._run_zero_prompting_loop_async(), name="ZeroPromptingDaemon"
+                    self._run_loop_daemon_async(self.zero_prompting_daemon, "Zero-Prompting", "🧠"), name="ZeroPromptingDaemon"
                 )
             )
         if getattr(self, "epistemic_breaker_daemon", None):
             tasks.append(
                 asyncio.create_task(
-                    self._run_epistemic_breaker_loop_async(), name="EpistemicBreakerDaemon"
+                    self._run_loop_daemon_async(self.epistemic_breaker_daemon, "Epistemic Breaker", "🛡️", run_method="run"), name="EpistemicBreakerDaemon"
                 )
             )
         if getattr(self, "sentinel_oracle", None):
             tasks.append(
-                asyncio.create_task(self._run_sentinel_oracle_loop_async(), name="SentinelOracle")
+                asyncio.create_task(self._run_loop_daemon_async(self.sentinel_oracle, "Sentinel Oracle", "🛡️"), name="SentinelOracle")
             )
         tasks.append(asyncio.create_task(self._run_health_loop_async(), name="HealthMonitor"))
         async_count = len(tasks)
@@ -283,6 +494,51 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
             pass
         finally:
             await self._sovereign_shutdown()
+
+    async def _sovereign_check_loop(self, interval: int) -> None:
+        """Async version of the main check loop."""
+        while not self._shutdown:
+            try:
+                # Run check in thread pool to not block the event loop
+                await asyncio.to_thread(self.check)
+
+                # Update hot state cycle counter
+                if self.hot_state is not None:
+                    self.hot_state.increment("cycle_count")
+
+            except Exception as e:  # noqa: BLE001
+                logger.error("Check loop error: %s", e)
+
+            # Async sleep instead of threading.Event.wait
+            try:
+                await asyncio.sleep(interval)
+            except asyncio.CancelledError:
+                break
+
+    async def _sovereign_shutdown(self) -> None:
+        """Graceful shutdown of all sovereign subsystems."""
+        logger.info("Sovereign shutdown initiated...")
+
+        if self.watchdog_hub is not None:
+            await self.watchdog_hub.stop()
+        if self.scheduler is not None:
+            await self.scheduler.stop()
+        if hasattr(self, "_event_bus") and self._event_bus is not None:
+            await self._event_bus.shutdown()
+        if self.entropic_wake_daemon:
+            self.entropic_wake_daemon.stop()
+        if self.frontier_daemon:
+            self.frontier_daemon.stop()
+        if getattr(self, "zero_prompting_daemon", None):
+            self.zero_prompting_daemon.stop()  # type: ignore[union-attr]
+        if getattr(self, "epistemic_breaker_daemon", None):
+            self.epistemic_breaker_daemon.stop()  # type: ignore[union-attr]
+
+        # Persist final state
+        if self.hot_state is not None:
+            self.hot_state.set("daemon.stopped_at", datetime.now(timezone.utc).isoformat())
+
+        logger.info("MOSKV-1 Sovereign Daemon stopped")
 
     @staticmethod
     def load_status() -> dict | None:
@@ -388,31 +644,31 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
         self._spawn_thread(self._run_neural_loop, "NeuralSync")
 
         if self.ast_oracle:
-            self._spawn_thread(self._run_ast_oracle_loop, "ASTOracle")
+            self._spawn_thread(lambda: self._run_lifecycle_daemon(self.ast_oracle, "AST Oracle", "👁️"), "ASTOracle")
 
         if getattr(self, "iot_oracle", None):
-            self._spawn_thread(self._run_iot_oracle_loop, "IoTOracle")
+            self._spawn_thread(lambda: self._run_lifecycle_daemon(self.iot_oracle, "IoT Oracle", "📡"), "IoTOracle")
 
         if self.fiat_oracle:
             self._spawn_thread(self.fiat_oracle.run_sync_loop, "FiatOracle")
 
         if self.heartbeat_daemon:
-            self._spawn_thread(self._run_heartbeat_loop, "HeartbeatDaemon")
+            self._spawn_thread(lambda: self._run_lifecycle_daemon(self.heartbeat_daemon, "Heartbeat", "❤️"), "HeartbeatDaemon")
 
         if self.entropic_wake_daemon:
-            self._spawn_thread(self._run_entropic_wake_loop, "EntropicWakeDaemon")
+            self._spawn_thread(lambda: self._run_loop_daemon(self.entropic_wake_daemon, "Entropic Wake", "🌌"), "EntropicWakeDaemon")
 
         if self.frontier_daemon:
-            self._spawn_thread(self._run_frontier_loop, "FrontierDaemon")
+            self._spawn_thread(lambda: self._run_loop_daemon(self.frontier_daemon, "Frontier", "🚀"), "FrontierDaemon")
 
         if getattr(self, "zero_prompting_daemon", None):
-            self._spawn_thread(self._run_zero_prompting_loop, "ZeroPromptingDaemon")
+            self._spawn_thread(lambda: self._run_loop_daemon(self.zero_prompting_daemon, "Zero-Prompting", "🧠"), "ZeroPromptingDaemon")
 
         if getattr(self, "epistemic_breaker_daemon", None):
-            self._spawn_thread(self._run_epistemic_breaker_loop, "EpistemicBreakerDaemon")
+            self._spawn_thread(lambda: self._run_loop_daemon(self.epistemic_breaker_daemon, "Epistemic Breaker", "🛡️", run_method="run"), "EpistemicBreakerDaemon")
 
         if getattr(self, "sentinel_oracle", None):
-            self._spawn_thread(self._run_sentinel_oracle_loop, "SentinelOracle")
+            self._spawn_thread(lambda: self._run_loop_daemon(self.sentinel_oracle, "Sentinel Oracle", "🛡️"), "SentinelOracle")
 
         self._spawn_thread(self._run_health_loop, "HealthMonitor")
 

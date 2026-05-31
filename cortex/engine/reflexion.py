@@ -226,7 +226,7 @@ class TreeRewriter:
                     }
                 }
             elif variant in ("Seq", "Par") and isinstance(data, list):
-                result[variant] = [
+                result[variant] = [  # pyright: ignore[reportArgumentType]
                     TreeRewriter.apply_retry_wrapper(child, max_retries) for child in data
                 ]
             elif variant == "Cond" and isinstance(data, dict):
@@ -277,7 +277,7 @@ class TreeRewriter:
         for variant, data in tree.items():
             if variant == "Dispatch" and isinstance(data, dict):
                 if data.get("target") == target:
-                    return "Noop"  # Replace failed target with noop
+                    return "Noop"  # Replace failed target with noop  # pyright: ignore[reportReturnType]
                 result[variant] = data
             elif variant in ("Seq", "Par") and isinstance(data, list):
                 children = [TreeRewriter.remove_failed_target(child, target) for child in data]

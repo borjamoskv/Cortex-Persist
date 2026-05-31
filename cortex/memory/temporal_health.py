@@ -115,9 +115,9 @@ class TemporalHealthScheduler:
         self._write_count = 0
 
         # Running mean state - O(d) memory, updated in O(d) per write
-        self._running_mean: np.ndarray | None = None
+        self._running_mean: np.ndarray | None = None  # pyright: ignore[reportInvalidTypeForm]
         self._running_n: int = 0
-        self._baseline_centroid: np.ndarray | None = None
+        self._baseline_centroid: np.ndarray | None = None  # pyright: ignore[reportInvalidTypeForm]
 
         # Streaming Page-Hinkley - O(1) memory, O(1) per update
         self._page_hinkley = PageHinkley(
@@ -129,7 +129,7 @@ class TemporalHealthScheduler:
         self._baseline_intrinsic_dim: float | None = None
 
         # Rolling buffer for batch probes - bounded RAM
-        self._embedding_buffer: list[np.ndarray] = []
+        self._embedding_buffer: list[np.ndarray] = []  # pyright: ignore[reportInvalidTypeForm]
         self._buffer_maxsize = self.BUFFER_MAXSIZE
 
         # Persisted baseline
@@ -151,7 +151,7 @@ class TemporalHealthScheduler:
 
     # ── Public API ────────────────────────────────────────────────────
 
-    def set_baseline(self, embeddings: np.ndarray) -> DriftSignature:
+    def set_baseline(self, embeddings: np.ndarray) -> DriftSignature:  # pyright: ignore[reportInvalidTypeForm]
         """Compute and persist the baseline signature (cold calculation).
 
         Call this once after bulk load or embedder version change.
@@ -203,7 +203,7 @@ class TemporalHealthScheduler:
         )
         return sig
 
-    def on_write(self, embedding: np.ndarray) -> HealthReport:
+    def on_write(self, embedding: np.ndarray) -> HealthReport:  # pyright: ignore[reportInvalidTypeForm]
         """Feed one new embedding. Returns a HealthReport for this write.
 
         This is the only method that MUST be called per-write.
@@ -251,7 +251,7 @@ class TemporalHealthScheduler:
 
     # ── Tier runners ──────────────────────────────────────────────────
 
-    def _run_pulse(self, embedding: np.ndarray, report: HealthReport) -> None:
+    def _run_pulse(self, embedding: np.ndarray, report: HealthReport) -> None:  # pyright: ignore[reportInvalidTypeForm]
         """PULSE tier - O(d) running centroid update, every write."""
         self._update_running_mean(embedding)
         report.running_centroid = self._running_mean
@@ -376,7 +376,7 @@ class TemporalHealthScheduler:
 
     # ── Private helpers ───────────────────────────────────────────────
 
-    def _update_running_mean(self, embedding: np.ndarray) -> None:
+    def _update_running_mean(self, embedding: np.ndarray) -> None:  # pyright: ignore[reportInvalidTypeForm]
         """Welford online running mean - O(d), no recomputation."""
         self._running_n += 1
         if self._running_mean is None:
@@ -386,7 +386,7 @@ class TemporalHealthScheduler:
             delta = embedding.astype(np.float32) - self._running_mean
             self._running_mean += delta / self._running_n
 
-    def _get_buffer_as_array(self) -> np.ndarray | None:
+    def _get_buffer_as_array(self) -> np.ndarray | None:  # pyright: ignore[reportInvalidTypeForm]
         """Materialize the embedding buffer as a single ndarray.
 
         Returns None if the buffer is empty.

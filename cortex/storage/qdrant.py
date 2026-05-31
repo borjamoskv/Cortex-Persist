@@ -85,7 +85,7 @@ class QdrantVectorBackend:
             return
 
         try:
-            from qdrant_client import AsyncQdrantClient
+            from qdrant_client import AsyncQdrantClient  # pyright: ignore[reportMissingImports]
         except ImportError as exc:
             raise RuntimeError(
                 "qdrant-client required for Qdrant backend. Run: pip install qdrant-client"
@@ -107,7 +107,7 @@ class QdrantVectorBackend:
         if collection in self._initialized_collections:
             return
 
-        from qdrant_client.models import Distance, VectorParams
+        from qdrant_client.models import Distance, VectorParams  # pyright: ignore[reportMissingImports]
 
         try:
             exists = await self._client.collection_exists(collection)
@@ -148,7 +148,7 @@ class QdrantVectorBackend:
         collection = self._collection_name(tenant_id)
         await self._ensure_collection(collection)
 
-        from qdrant_client.models import PointStruct
+        from qdrant_client.models import PointStruct  # pyright: ignore[reportMissingImports]
 
         point = PointStruct(
             id=fact_id,
@@ -200,7 +200,7 @@ class QdrantVectorBackend:
 
         query_filter = None
         if project:
-            from qdrant_client.models import FieldCondition, Filter, MatchValue
+            from qdrant_client.models import FieldCondition, Filter, MatchValue  # pyright: ignore[reportMissingImports]
 
             query_filter = Filter(
                 must=[FieldCondition(key="project", match=MatchValue(value=project))]
@@ -224,7 +224,7 @@ class QdrantVectorBackend:
         self._ensure_client()
         collection = self._collection_name(tenant_id)
 
-        from qdrant_client.models import PointIdsList
+        from qdrant_client.models import PointIdsList  # pyright: ignore[reportMissingImports]
 
         try:
             await self._client.delete(

@@ -84,7 +84,7 @@ def sovereign_mcp() -> None:
             continue
 
         try:
-            response_json = host.process_request(line)
+            response_json = host.process_request(line)  # pyright: ignore[reportAttributeAccessIssue]
             sys.stdout.write(response_json + "\n")
             sys.stdout.flush()
         except Exception as e:

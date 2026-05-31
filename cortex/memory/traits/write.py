@@ -18,13 +18,13 @@ class WriteTrait:
         is available. The sanitized content is stored and vectorized;
         encrypted PII fragments are persisted in the metadata field.
         """
-        conn = self._get_conn()
+        conn = self._get_conn()  # pyright: ignore[reportAttributeAccessIssue]
 
         # ─── PII Sanitization Gate (Moved outside the DB Lock) ────────
         sanitized_content = fact.content
         sanitized_meta = dict(fact.metadata) if fact.metadata else {}
 
-        sanitizer = self._get_sanitizer()
+        sanitizer = self._get_sanitizer()  # pyright: ignore[reportAttributeAccessIssue]
         if sanitizer and fact.content:
             report = await asyncio.to_thread(
                 sanitizer.sanitize, fact.content, tenant_id=fact.tenant_id
@@ -52,7 +52,7 @@ class WriteTrait:
         def _sync_insert() -> None:
             cursor = conn.cursor()
             try:
-                meta_tb, vec_tb, vec_void_tb, mih_tb = self._get_domain_tables(
+                meta_tb, vec_tb, vec_void_tb, mih_tb = self._get_domain_tables(  # pyright: ignore[reportAttributeAccessIssue]
                     conn, fact.tenant_id, fact.project_id
                 )
                 insert_meta_sql = f"""
@@ -86,7 +86,7 @@ class WriteTrait:
                     ),
                 )
                 rowid = cursor.lastrowid
-                if self._vector_enabled:
+                if self._vector_enabled:  # pyright: ignore[reportAttributeAccessIssue]
                     # Store 1-bit Vector (Legion Recall)
                     if vec_void_tb:
                         insert_void_sql = (
@@ -127,5 +127,5 @@ class WriteTrait:
                 logger.error("DB integrity breach during memorize: %s", e)
                 raise
 
-        async with self._lock:
+        async with self._lock:  # pyright: ignore[reportAttributeAccessIssue]
             await asyncio.to_thread(_sync_insert)

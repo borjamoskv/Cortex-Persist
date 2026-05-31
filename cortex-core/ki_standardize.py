@@ -184,7 +184,7 @@ def standardize_ki(meta: dict, meta_path: Path, dry_run: bool = True) -> dict:
     if dropped:
         changes.append(f"  ✗ dropped: {', '.join(sorted(dropped))}")
 
-    return normalized, changes
+    return normalized, changes  # pyright: ignore[reportReturnType]
 
 
 def main():

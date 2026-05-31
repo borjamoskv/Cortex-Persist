@@ -98,7 +98,7 @@ class PostgresBackend:
             return
 
         try:
-            import asyncpg
+            import asyncpg  # pyright: ignore[reportMissingImports]
         except ImportError as exc:
             logger.critical("Sovereign Failure: asyncpg not installed.")
             raise RuntimeError(

@@ -55,7 +55,7 @@ class AutoCrystallizer:
         prompt = CRYSTALLIZATION_PROMPT.format(content=content)
 
         # Invoke the LLM with the crystallization instructions
-        refined = await self._llm.generate(
+        refined = await self._llm.generate(  # pyright: ignore[reportAttributeAccessIssue]
             prompt,
             model_tag=model_tag,
             temperature=0.0,  # Deterministic synthesis

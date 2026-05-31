@@ -268,7 +268,7 @@ class _EntropyAnnihilator(ast.NodeTransformer):
             self.made_changes = True
             return None
         if isinstance(node.value, ast.Call) and getattr(node.value.func, "attr", "") == "set_trace":
-            if getattr(node.value.func.value, "id", "") in ("pdb", "ipdb"):
+            if getattr(node.value.func.value, "id", "") in ("pdb", "ipdb"):  # pyright: ignore[reportAttributeAccessIssue]
                 self.made_changes = True
                 return None
         self.generic_visit(node)
@@ -540,7 +540,7 @@ class OuroborosOmega:
                     if cortex_core_path not in sys.path:
                         sys.path.insert(0, cortex_core_path)
 
-                    from persistence import enqueue_swarm_task
+                    from persistence import enqueue_swarm_task  # pyright: ignore[reportAttributeAccessIssue]
 
                     payload = {
                         "type": "AST_MUTATION",

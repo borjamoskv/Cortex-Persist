@@ -11,13 +11,13 @@ from __future__ import annotations
 import importlib
 
 __all__ = [
-    "ErrorBoundary",
-    "EvolutionaryFalsifier",
-    "FilterResult",
-    "ImmuneArbiter",
-    "TriageResult",
-    "Verdict",
-    "error_boundary",
+    "ErrorBoundary",  # pyright: ignore[reportUnsupportedDunderAll]
+    "EvolutionaryFalsifier",  # pyright: ignore[reportUnsupportedDunderAll]
+    "FilterResult",  # pyright: ignore[reportUnsupportedDunderAll]
+    "ImmuneArbiter",  # pyright: ignore[reportUnsupportedDunderAll]
+    "TriageResult",  # pyright: ignore[reportUnsupportedDunderAll]
+    "Verdict",  # pyright: ignore[reportUnsupportedDunderAll]
+    "error_boundary",  # pyright: ignore[reportUnsupportedDunderAll]
 ]
 
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {

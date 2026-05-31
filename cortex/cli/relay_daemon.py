@@ -1,7 +1,7 @@
 import asyncio
 import os
 
-import aiofiles
+import aiofiles  # pyright: ignore[reportMissingModuleSource]
 import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.responses import StreamingResponse

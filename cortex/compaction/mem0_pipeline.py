@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Any
 
 try:
-    import structlog
+    import structlog  # pyright: ignore[reportMissingImports]
 
     logger = structlog.get_logger(__name__)
 except ModuleNotFoundError:  # pragma: no cover

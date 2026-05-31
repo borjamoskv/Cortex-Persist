@@ -149,7 +149,7 @@ def write_public_ledger_export(
     )
     if checkpoint_objects:
         _write_text_atomic(
-            checkpoints_path,
+            checkpoints_path,  # pyright: ignore[reportArgumentType]
             "".join(_canonical_public_json(cp) + "\n" for cp in checkpoint_objects),
         )
 

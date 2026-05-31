@@ -77,7 +77,7 @@ class LineageVerifier:
             return val
 
         # Pre-emptively mark as being processed to prevent concurrent N+1 race conditions
-        _cache[fact_id] = True
+        _cache[fact_id] = True  # pyright: ignore[reportArgumentType]
 
         fact = await self.engine.get_fact(fact_id)
         if not fact:

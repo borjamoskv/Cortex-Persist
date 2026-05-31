@@ -111,10 +111,10 @@ class UltramapSubstrate:
 
         offset = agent_idx * self.node_size
         
-        struct.pack_into("ddd", self._buffer, offset, x, y, z)
+        struct.pack_into("ddd", self._buffer, offset, x, y, z)  # pyright: ignore[reportArgumentType]
         target_bytes = target.encode('utf-8')[:64].ljust(64, b"\x00")
-        self._buffer[offset + 24 : offset + 88] = target_bytes
-        struct.pack_into("d", self._buffer, offset + 88, entropy)
+        self._buffer[offset + 24 : offset + 88] = target_bytes  # pyright: ignore[reportOptionalSubscript]
+        struct.pack_into("d", self._buffer, offset + 88, entropy)  # pyright: ignore[reportArgumentType]
         
         return True
 
@@ -130,8 +130,8 @@ class UltramapSubstrate:
             return self._rs.calculate_exergy_distance(agent_idx, target_hash)
 
         offset = agent_idx * self.node_size
-        x, y, z = struct.unpack_from("ddd", self._buffer, offset)
-        current_entropy = struct.unpack_from("d", self._buffer, offset + 88)[0]
+        x, y, z = struct.unpack_from("ddd", self._buffer, offset)  # pyright: ignore[reportArgumentType]
+        current_entropy = struct.unpack_from("d", self._buffer, offset + 88)[0]  # pyright: ignore[reportArgumentType]
         
         target_int = int(hashlib.sha256(target_hash.encode()).hexdigest()[:16], 16)
         tx = (target_int % 1000) / 10.0
@@ -150,12 +150,12 @@ class UltramapSubstrate:
             return self._rs.get_agent_state(agent_idx)
 
         offset = agent_idx * self.node_size
-        x, y, z = struct.unpack_from("ddd", self._buffer, offset)
-        target_bytes = bytes(self._buffer[offset + 24 : offset + 88]).rstrip(b"\x00")
-        entropy = struct.unpack_from("d", self._buffer, offset + 88)[0]
+        x, y, z = struct.unpack_from("ddd", self._buffer, offset)  # pyright: ignore[reportArgumentType]
+        target_bytes = bytes(self._buffer[offset + 24 : offset + 88]).rstrip(b"\x00")  # pyright: ignore[reportOptionalSubscript]
+        entropy = struct.unpack_from("d", self._buffer, offset + 88)[0]  # pyright: ignore[reportArgumentType]
         
         # Hormones are stored at [96:128]
-        dopamine, cortisol, serotonin, adrenaline = struct.unpack_from("dddd", self._buffer, offset + 96)
+        dopamine, cortisol, serotonin, adrenaline = struct.unpack_from("dddd", self._buffer, offset + 96)  # pyright: ignore[reportArgumentType]
         
         return {
             "x": x,
@@ -177,21 +177,21 @@ class UltramapSubstrate:
         affected = 0
         for i in range(self.capacity):
             offset = i * self.node_size
-            x, y, z = struct.unpack_from("ddd", self._buffer, offset)
+            x, y, z = struct.unpack_from("ddd", self._buffer, offset)  # pyright: ignore[reportArgumentType]
             if x == 0.0 and y == 0.0 and z == 0.0:
                 continue
                 
             dist = ((x - origin_x)**2 + (y - origin_y)**2 + (z - origin_z)**2)**0.5
             if dist <= radius and radius > 0.0:
                 intensity = 1.0 - (dist / radius)
-                d, c, s, a = struct.unpack_from("dddd", self._buffer, offset + 96)
+                d, c, s, a = struct.unpack_from("dddd", self._buffer, offset + 96)  # pyright: ignore[reportArgumentType]
                 
                 d = max(0.0, min(1.0, d + (dopamine * intensity)))
                 c = max(0.0, min(1.0, c + (cortisol * intensity)))
                 s = max(0.0, min(1.0, s + (serotonin * intensity)))
                 a = max(0.0, min(1.0, a + (adrenaline * intensity)))
                 
-                struct.pack_into("dddd", self._buffer, offset + 96, d, c, s, a)
+                struct.pack_into("dddd", self._buffer, offset + 96, d, c, s, a)  # pyright: ignore[reportArgumentType]
                 affected += 1
                 
         return affected

@@ -68,7 +68,7 @@ class AgentASTParser:
                 return False
         return False
 
-    def crystallize(self, output_path: str = None) -> str:
+    def crystallize(self, output_path: str = None) -> str:  # pyright: ignore[reportArgumentType]
         """
         Writes the mutated AST back to physical disk. (C5-REAL).
         """

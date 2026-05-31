@@ -90,7 +90,7 @@ class AdapterVerifier:
         import_error_msg = None
         try:
             # Check if mlx_lm is installed and try a dry run loading config/metadata
-            import mlx_lm
+            import mlx_lm  # pyright: ignore[reportMissingImports]
 
             # In a real C5-REAL environment on Apple Silicon, we could call:
             # model, tokenizer = mlx_lm.load(base_model, adapter_path=str(path))

@@ -386,7 +386,7 @@ class CortexBillingMiddleware(BaseHTTPMiddleware):
     async def _report_usage(self, api_key: str):
         """Asynchronously reports usage to Stripe via background task."""
         try:
-            import stripe
+            import stripe  # pyright: ignore[reportMissingImports]
             from cortex import config
 
             stripe.api_key = getattr(config, "STRIPE_SECRET_KEY", None)

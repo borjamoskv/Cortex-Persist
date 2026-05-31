@@ -180,7 +180,7 @@ async def diagnose_and_repair(
     diagnosis: dict[str, Any]
     if agent._rust_engine is not None:
         # Fast-path: Rust diagnosis
-        diagnosis = dict(agent._rust_engine.diagnose(error_sig, subsystem))
+        diagnosis = dict(agent._rust_engine.diagnose(error_sig, subsystem))  # pyright: ignore[reportAttributeAccessIssue]
     else:
         # Fallback: Python diagnosis
         diagnosis = python_diagnose(error_sig, subsystem)
@@ -218,23 +218,23 @@ async def diagnose_and_repair(
             context=context,
         )
 
-        if repair_result.succeeded:
+        if repair_result.succeeded:  # pyright: ignore[reportOptionalMemberAccess]
             agent._successful_repairs += 1
             if agent._rust_engine is not None:
-                agent._rust_engine.record_repair_outcome(True)
+                agent._rust_engine.record_repair_outcome(True)  # pyright: ignore[reportAttributeAccessIssue]
             logger.info(
                 "[AUTOCURATIVE] 🔧 Repair SUCCESS: %s → %s (%.2fms)",
                 strategy_name,
-                repair_result.message[:100],
-                repair_result.latency_ms,
+                repair_result.message[:100],  # pyright: ignore[reportOptionalMemberAccess]
+                repair_result.latency_ms,  # pyright: ignore[reportOptionalMemberAccess]
             )
         else:
             if agent._rust_engine is not None:
-                agent._rust_engine.record_repair_outcome(False)
+                agent._rust_engine.record_repair_outcome(False)  # pyright: ignore[reportAttributeAccessIssue]
             logger.warning(
                 "[AUTOCURATIVE] ⚠️ Repair FAILED: %s → %s",
                 strategy_name,
-                repair_result.message[:100],
+                repair_result.message[:100],  # pyright: ignore[reportOptionalMemberAccess]
             )
 
     # ─── Build Event ──────────────────────────────────────

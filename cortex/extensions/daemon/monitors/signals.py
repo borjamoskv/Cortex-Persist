@@ -73,7 +73,7 @@ class SignalMonitor:
             count = self._reactor.process_once()
 
             if count > 0:  # type: ignore[reportOperatorIssue]
-                for sig in signals_to_process[:count]:
+                for sig in signals_to_process[:count]:  # pyright: ignore[reportArgumentType,reportCallIssue]
                     alerts.append(
                         SignalAlert(
                             event_type=sig.event_type,

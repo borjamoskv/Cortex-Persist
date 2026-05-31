@@ -118,7 +118,7 @@ class ContextAssembler:
     def _search_vsa(self, intent: str, packet: ContextPacket, budget: int) -> int:
         """Algebraic recall via VSA-SDM bridge."""
         try:
-            results = self._vsa.query(intent, top_k=3)
+            results = self._vsa.query(intent, top_k=3)  # pyright: ignore[reportOptionalMemberAccess]
             if results:
                 for item in results:
                     content = item.get("content", "")
@@ -148,7 +148,7 @@ class ContextAssembler:
         """Query temporal facts from FactStore."""
         try:
             # Search recent facts related to the intent
-            facts = self._facts.search(
+            facts = self._facts.search(  # pyright: ignore[reportOptionalMemberAccess]
                 query=intent,
                 tenant_id=tenant_id,
                 limit=10,

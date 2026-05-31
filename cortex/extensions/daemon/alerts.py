@@ -25,6 +25,11 @@ class AlertHandlerMixin:
     tracker: Any
     site_monitor: Any
     ghost_watcher: Any
+    entropy_monitor: Any
+
+    def _should_alert(self, key: str) -> bool:
+        return False
+
     memory_syncer: Any
     cert_monitor: Any
     engine_health: Any

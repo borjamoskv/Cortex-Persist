@@ -46,7 +46,7 @@ class DarkPoolZK:
         # En un entorno C5-REAL, esto interactuaría con un contrato de escrow on-chain.
         try:
             # Simulando integración Web3 C5-REAL en L2 (Arbitrum/Base)
-            from web3 import Web3
+            from web3 import Web3  # pyright: ignore[reportMissingImports]
             Web3(Web3.HTTPProvider(os.getenv("L2_RPC_URL", "https://arb1.arbitrum.io/rpc")))
             logger.info(f"DarkPoolZK: Transmitiendo prueba ZK {zk_proof[:12]} al Escrow L2...")
         except ImportError:

@@ -10,8 +10,8 @@ from typing import TYPE_CHECKING, Any
 from cortex.consensus.manager import ConsensusManager
 
 if TYPE_CHECKING:
-    from cortex.consensus.reputation import ReputationManager
-    from cortex.consensus.trust import TrustGraph
+    from cortex.consensus.reputation import ReputationManager  # pyright: ignore[reportMissingImports]
+    from cortex.consensus.trust import TrustGraph  # pyright: ignore[reportMissingImports]
 else:
     # Runtime optional loading
     ReputationManager: Any = None

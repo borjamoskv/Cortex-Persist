@@ -55,7 +55,7 @@ def get_master_key() -> bytes | None:
                 )
                 return None
             return raw
-        except (ValueError, base64.binascii.Error):
+        except (ValueError, base64.binascii.Error):  # pyright: ignore[reportAttributeAccessIssue]
             logger.error("Master key is not valid base64.")
             return None
 

@@ -68,38 +68,38 @@ class RunnerMixin:
             # ── Stage 1: INGRESS ──
             await self._run_stage_async(
                 PipelineStage.INGRESS,
-                lambda: self._ingress(request),
+                lambda: self._ingress(request),  # pyright: ignore[reportAttributeAccessIssue]
             )
 
             # ── Stage 2: CONTEXT ──
             context_packet = await self._run_stage_async(
                 PipelineStage.CONTEXT,
-                lambda: self._assemble_context(request),
+                lambda: self._assemble_context(request),  # pyright: ignore[reportAttributeAccessIssue]
             )
 
             # ── Stage 3: PLANNING ──
             execution_plan = await self._run_stage_async(
                 PipelineStage.PLANNING,
-                lambda: self._plan(request, context_packet),
+                lambda: self._plan(request, context_packet),  # pyright: ignore[reportAttributeAccessIssue]
             )
 
             # ── Stage 4: EXECUTION ──
             output = await self._run_stage_async(
                 PipelineStage.EXECUTION,
-                lambda: self._execute(request, context_packet, execution_plan),
+                lambda: self._execute(request, context_packet, execution_plan),  # pyright: ignore[reportAttributeAccessIssue]
                 is_async_executor=True,
             )
 
             # ── Stage 5: PERSISTENCE ──
             ledger_hash = await self._run_stage_async(
                 PipelineStage.PERSISTENCE,
-                lambda: self._persist(request, output),
+                lambda: self._persist(request, output),  # pyright: ignore[reportAttributeAccessIssue]
             )
 
             # ── Stage 6: EGRESS ──
             await self._run_stage_async(
                 PipelineStage.EGRESS,
-                lambda: self._deliver(request, output),
+                lambda: self._deliver(request, output),  # pyright: ignore[reportAttributeAccessIssue]
             )
 
             # ── Assemble final result ──
@@ -158,7 +158,7 @@ class RunnerMixin:
         result = None
 
         try:
-            if is_async_executor and self._executor is not None:
+            if is_async_executor and self._executor is not None:  # pyright: ignore[reportAttributeAccessIssue]
                 result = fn()
                 if asyncio.iscoroutine(result):
                     result = await result
@@ -195,34 +195,34 @@ class RunnerMixin:
         ledger_hash = None
 
         try:
-            await self._run_stage_async(PipelineStage.INGRESS, lambda: self._ingress(request))
+            await self._run_stage_async(PipelineStage.INGRESS, lambda: self._ingress(request))  # pyright: ignore[reportAttributeAccessIssue]
             yield self._traces[-1]
 
             context_packet = await self._run_stage_async(
-                PipelineStage.CONTEXT, lambda: self._assemble_context(request)
+                PipelineStage.CONTEXT, lambda: self._assemble_context(request)  # pyright: ignore[reportAttributeAccessIssue]
             )
             yield self._traces[-1]
 
             execution_plan = await self._run_stage_async(
                 PipelineStage.PLANNING,
-                lambda: self._plan(request, context_packet),
+                lambda: self._plan(request, context_packet),  # pyright: ignore[reportAttributeAccessIssue]
             )
             yield self._traces[-1]
 
             output = await self._run_stage_async(
                 PipelineStage.EXECUTION,
-                lambda: self._execute(request, context_packet, execution_plan),
+                lambda: self._execute(request, context_packet, execution_plan),  # pyright: ignore[reportAttributeAccessIssue]
                 is_async_executor=True,
             )
             yield self._traces[-1]
 
             ledger_hash = await self._run_stage_async(
-                PipelineStage.PERSISTENCE, lambda: self._persist(request, output)
+                PipelineStage.PERSISTENCE, lambda: self._persist(request, output)  # pyright: ignore[reportAttributeAccessIssue]
             )
             yield self._traces[-1]
 
             await self._run_stage_async(
-                PipelineStage.EGRESS, lambda: self._deliver(request, output)
+                PipelineStage.EGRESS, lambda: self._deliver(request, output)  # pyright: ignore[reportAttributeAccessIssue]
             )
             yield self._traces[-1]
 
@@ -257,32 +257,32 @@ class RunnerMixin:
         try:
             self._run_stage(
                 PipelineStage.INGRESS,
-                lambda: self._ingress(request),
+                lambda: self._ingress(request),  # pyright: ignore[reportAttributeAccessIssue]
             )
 
             context_packet = self._run_stage(
                 PipelineStage.CONTEXT,
-                lambda: self._assemble_context(request),
+                lambda: self._assemble_context(request),  # pyright: ignore[reportAttributeAccessIssue]
             )
 
             execution_plan = self._run_stage(
                 PipelineStage.PLANNING,
-                lambda: self._plan(request, context_packet),
+                lambda: self._plan(request, context_packet),  # pyright: ignore[reportAttributeAccessIssue]
             )
 
             output = self._run_stage(
                 PipelineStage.EXECUTION,
-                lambda: self._execute(request, context_packet, execution_plan),
+                lambda: self._execute(request, context_packet, execution_plan),  # pyright: ignore[reportAttributeAccessIssue]
             )
 
             ledger_hash = self._run_stage(
                 PipelineStage.PERSISTENCE,
-                lambda: self._persist(request, output),
+                lambda: self._persist(request, output),  # pyright: ignore[reportAttributeAccessIssue]
             )
 
             self._run_stage(
                 PipelineStage.EGRESS,
-                lambda: self._deliver(request, output),
+                lambda: self._deliver(request, output),  # pyright: ignore[reportAttributeAccessIssue]
             )
 
             result.status = PipelineStatus.SUCCESS
@@ -346,7 +346,7 @@ class RunnerMixin:
                     def _worker():
                         nonlocal res_val, exc_val
                         try:
-                            res_val = asyncio.run(result)
+                            res_val = asyncio.run(result)  # pyright: ignore[reportArgumentType]
                         except Exception as ex:
                             exc_val = ex
 

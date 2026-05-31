@@ -333,7 +333,7 @@ def halt(
 
 def noop() -> AgentOp:
     """No-op placeholder."""
-    return "Noop"
+    return "Noop"  # pyright: ignore[reportReturnType]
 
 
 # -----------------------------------------------------------

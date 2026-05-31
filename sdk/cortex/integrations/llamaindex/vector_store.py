@@ -1,15 +1,15 @@
 import logging
 from typing import Any
 
-from llama_index.core.schema import TextNode
-from llama_index.core.vector_stores.types import (
+from llama_index.core.schema import TextNode  # pyright: ignore[reportMissingImports]
+from llama_index.core.vector_stores.types import (  # pyright: ignore[reportMissingImports]
     BasePydanticVectorStore,
     VectorStoreQuery,
     VectorStoreQueryResult,
 )
 
 try:
-    from cortex.client import CortexClient
+    from cortex.client import CortexClient  # pyright: ignore[reportMissingImports]
 except ImportError:
     CortexClient = None
 
@@ -28,7 +28,7 @@ class CortexVectorStore(BasePydanticVectorStore):
     _client: Any = None
 
     def __init__(
-        self, api_key: str = None, cortex_url: str = "http://localhost:8000", **kwargs: Any
+        self, api_key: str = None, cortex_url: str = "http://localhost:8000", **kwargs: Any  # pyright: ignore[reportArgumentType]
     ):
         super().__init__(**kwargs)
         if CortexClient is None:

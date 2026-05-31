@@ -46,9 +46,9 @@ def estimate_dead_code_ratio(source_code: str) -> float:
                 dead_nodes += 2
 
         # Check for unreachable code after return/raise/break/continue
-        if hasattr(node, "body") and isinstance(node.body, list):
+        if hasattr(node, "body") and isinstance(node.body, list):  # pyright: ignore[reportAttributeAccessIssue]
             found_terminator = False
-            for stmt in node.body:
+            for stmt in node.body:  # pyright: ignore[reportAttributeAccessIssue]
                 if found_terminator:
                     dead_nodes += sum(1 for _ in ast.walk(stmt))
                 if isinstance(stmt, ast.Return | ast.Raise | ast.Break | ast.Continue):

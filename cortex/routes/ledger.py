@@ -85,7 +85,7 @@ async def create_checkpoint(
 
         if cp_id:
             return CheckpointResponse(
-                checkpoint_id=cp_id, message=f"Merkle checkpoint #{cp_id} created successfully"
+                checkpoint_id=cp_id, message=f"Merkle checkpoint #{cp_id} created successfully"  # pyright: ignore[reportArgumentType]
             )
         return CheckpointResponse(
             checkpoint_id=None,

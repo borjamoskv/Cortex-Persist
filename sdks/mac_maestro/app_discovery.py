@@ -10,7 +10,7 @@ from .models import ActionFailed
 logger = logging.getLogger("mac_maestro.app_discovery")
 
 try:
-    from AppKit import NSRunningApplication, NSWorkspace
+    from AppKit import NSRunningApplication, NSWorkspace  # pyright: ignore[reportMissingImports]
 
     APPKIT_AVAILABLE = True
 except ImportError:

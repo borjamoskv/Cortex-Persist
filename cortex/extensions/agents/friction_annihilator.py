@@ -11,7 +11,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from cortex.engine.smte.llm_mutator import LLMMutator
+from cortex.engine.smte.llm_mutator import LLMMutator  # pyright: ignore[reportAttributeAccessIssue]
 
 logger = logging.getLogger("cortex.extensions.agents.friction_annihilator")
 
@@ -27,7 +27,7 @@ class FrictionAnnihilatorAgent:
     def _ensure_engine(self) -> None:
         if self._engine is not None:
             return
-        from cortex.cli import get_engine
+        from cortex.cli import get_engine  # pyright: ignore[reportAttributeAccessIssue]
         from cortex.config import DEFAULT_DB_PATH
 
         db_val = str(self._db_path) if self._db_path else DEFAULT_DB_PATH

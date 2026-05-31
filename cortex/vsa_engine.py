@@ -15,7 +15,7 @@ for skill_dir in (_SKILL_DIR_LOCAL, _SKILL_DIR_HOME):
         sys.path.insert(0, str(skill_dir))
 
 try:
-    from vsa_engine import VSAEngine
+    from vsa_engine import VSAEngine  # pyright: ignore[reportAssignmentType]
 except ImportError:
     # Fallback dummy class if the skill engine is not available, avoiding crash-on-import
     class VSAEngine:  # type: ignore

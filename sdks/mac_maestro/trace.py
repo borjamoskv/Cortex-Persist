@@ -94,7 +94,7 @@ def emit_trace(
     ledger = _get_ledger()
     if ledger is not None:
         try:
-            ledger.append(
+            ledger.append(  # pyright: ignore[reportAttributeAccessIssue]
                 entry_type="mac_maestro_trace",
                 payload=json.dumps(trace_data, default=str),
             )

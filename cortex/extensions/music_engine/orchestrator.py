@@ -321,7 +321,7 @@ class GRAMMYOrchestrator:
         track.state = TrackState.POST_PRODUCTION
         try:
             import numpy as np
-            import scipy.io.wavfile as wavfile
+            import scipy.io.wavfile as wavfile  # pyright: ignore[reportMissingImports]
 
             sr, audio_data = wavfile.read(wav_path)
             audio_float = audio_data.astype(np.float64) / 32767.0

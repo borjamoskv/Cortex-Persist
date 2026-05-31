@@ -116,7 +116,7 @@ class PathogenEngine:
                 return
 
             created_at = datetime.fromisoformat(created_at_str)
-            console.logging.info(f"[cyan]📡 RADAR-Ω: Tracking pathogen post {post_id}[/cyan]")
+            console.logging.info(f"[cyan]📡 RADAR-Ω: Tracking pathogen post {post_id}[/cyan]")  # pyright: ignore[reportAttributeAccessIssue]
 
             while True:
                 elapsed = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc) - created_at
@@ -124,17 +124,17 @@ class PathogenEngine:
                 comments_data = await client.get_comments(post_id)
                 total_comments = len(comments_data.get("comments", []))
 
-                console.logging.info(
+                console.logging.info(  # pyright: ignore[reportAttributeAccessIssue]
                     f"[dim]⏳ Elapsed: {latency_hours:.2f}h | 💬 Comments: {total_comments}[/dim]"
                 )
 
                 if total_comments < 3 and latency_hours > 4.0:
-                    console.logging.info(
+                    console.logging.info(  # pyright: ignore[reportAttributeAccessIssue]
                         "[bold red]🚨 ALERTA RADAR-Ω: Shadowban detectado. Abortando...[/bold red]"
                     )
                     break
                 if total_comments >= 3:
-                    console.logging.info(
+                    console.logging.info(  # pyright: ignore[reportAttributeAccessIssue]
                         "[bold green]✅ Engagement exitoso."
                         " O(1) Cognitive Offloading"
                         " completado.[/bold green]"

@@ -19,8 +19,8 @@ class ReadTrait:
         layer: str | None = None,
     ) -> list[CortexFactModel]:
         """[C5] Recuperación particionada Zero-Trust con ranking SQL nativo."""
-        conn = self._get_conn()
-        query_vector = await self._encoder.encode(query)
+        conn = self._get_conn()  # pyright: ignore[reportAttributeAccessIssue]
+        query_vector = await self._encoder.encode(query)  # pyright: ignore[reportAttributeAccessIssue]
 
         def _sync_knn_search() -> list[CortexFactModel]:
             rotated_query = encode_query_qjl(query_vector)
@@ -29,11 +29,11 @@ class ReadTrait:
             now = time.monotonic()
 
             cursor = conn.cursor()
-            meta_tb, vec_tb, vec_void_tb, mih_tb = self._get_domain_tables(
+            meta_tb, vec_tb, vec_void_tb, mih_tb = self._get_domain_tables(  # pyright: ignore[reportAttributeAccessIssue]
                 conn, tenant_id, project_id
             )
 
-            if not self._vector_enabled:
+            if not self._vector_enabled:  # pyright: ignore[reportAttributeAccessIssue]
                 sql = (
                     f"SELECT * FROM {meta_tb} "
                     "WHERE tenant_id = ? AND (project_id = ? OR is_bridge = 1)"
@@ -81,7 +81,7 @@ class ReadTrait:
 
                 q_shards = slice_void_bit(void_query)
 
-                meta_tb, vec_tb, vec_void_tb, mih_tb = self._get_domain_tables(
+                meta_tb, vec_tb, vec_void_tb, mih_tb = self._get_domain_tables(  # pyright: ignore[reportAttributeAccessIssue]
                     conn, tenant_id, project_id
                 )
 
@@ -124,12 +124,12 @@ class ReadTrait:
                     limit * 10,  # limit for candidates
                     embedding_bytes,
                     void_query,
-                    self._encoder.dimension,
+                    self._encoder.dimension,  # pyright: ignore[reportAttributeAccessIssue]
                     embedding_bytes,
                     void_query,
-                    self._encoder.dimension,
+                    self._encoder.dimension,  # pyright: ignore[reportAttributeAccessIssue]
                     now,
-                    self._half_life,
+                    self._half_life,  # pyright: ignore[reportAttributeAccessIssue]
                     tenant_id,
                     project_id,
                     limit,
@@ -159,7 +159,7 @@ class ReadTrait:
                     embedding_bytes,
                     embedding_bytes,
                     now,
-                    self._half_life,
+                    self._half_life,  # pyright: ignore[reportAttributeAccessIssue]
                     tenant_id,
                     project_id,
                     limit,
@@ -211,8 +211,8 @@ class ReadTrait:
         text_weight: float = 0.4,
     ):
         """L2 Hybrid Search: Vector KNN + FTS5 BM25 fused via RRF."""
-        if self._hybrid is not None:
-            return await self._hybrid.search(
+        if self._hybrid is not None:  # pyright: ignore[reportAttributeAccessIssue]
+            return await self._hybrid.search(  # pyright: ignore[reportAttributeAccessIssue]
                 query=query,
                 query_embedding=query_embedding,
                 tenant_id=tenant_id,

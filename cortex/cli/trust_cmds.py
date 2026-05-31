@@ -296,13 +296,13 @@ def siege(db: str) -> None:
     async def _run_siege():
         pool = CortexConnectionPool(db, min_connections=2, max_connections=10, read_only=False)
         await pool.initialize()
-        engine = AsyncCortexEngine(pool, db)
+        engine = AsyncCortexEngine(pool, db)  # pyright: ignore[reportArgumentType]
         try:
             import os
 
             key = os.environ.get("CORTEX_VAULT_KEY")
             if key:
-                engine.vault = Vault(key.encode("utf-8"))
+                engine.vault = Vault(key.encode("utf-8"))  # pyright: ignore[reportAttributeAccessIssue]
         except (ValueError, KeyError, OSError, RuntimeError, AttributeError):
             pass
 

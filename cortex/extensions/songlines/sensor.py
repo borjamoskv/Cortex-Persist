@@ -96,7 +96,7 @@ class TopographicSensor:
 
         # 1.5 Try native python xattr package (macOS mostly) if installed
         try:
-            import xattr
+            import xattr  # pyright: ignore[reportMissingImports]
 
             try:
                 attrs = xattr.listxattr(str(file_path))
@@ -130,7 +130,7 @@ class TopographicSensor:
 
         # 1.5 Try native python xattr package (macOS mostly) if installed
         try:
-            import xattr
+            import xattr  # pyright: ignore[reportMissingImports]
 
             try:
                 return xattr.getxattr(str(file_path), attr)  # pyright: ignore

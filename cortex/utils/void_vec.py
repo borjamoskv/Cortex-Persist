@@ -82,7 +82,7 @@ def void_batch_hamming_dist(query: bytes, batch: list[bytes]) -> list[int]:
     return [void_hamming_dist(query, b) for b in batch]
 
 
-def pack_void_bit(vector: list[float] | np.ndarray) -> bytes:
+def pack_void_bit(vector: list[float] | np.ndarray) -> bytes:  # pyright: ignore[reportInvalidTypeForm]
     """
     Transforms float32/int8 vector into 1-bit packed binary representation.
 
@@ -131,7 +131,7 @@ def void_similarity(a: bytes, b: bytes, total_dim: int) -> float:
     return 1.0 - (dist / total_dim)
 
 
-def unpack_void_bit(packed: bytes, dim: int) -> np.ndarray:
+def unpack_void_bit(packed: bytes, dim: int) -> np.ndarray:  # pyright: ignore[reportInvalidTypeForm]
     """Explodes bits back into float32 [-1, 1] (Structural Loss Warning)."""
     binary = np.unpackbits(np.frombuffer(packed, dtype=np.uint8))
     # Slice to original dimension

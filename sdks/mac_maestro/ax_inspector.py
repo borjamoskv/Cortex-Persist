@@ -6,7 +6,7 @@ import logging
 from typing import Any
 
 try:
-    from ApplicationServices import (
+    from ApplicationServices import (  # pyright: ignore[reportMissingImports]
         AXUIElementCopyAttributeValue,
         AXUIElementCreateApplication,
         kAXChildrenAttribute,

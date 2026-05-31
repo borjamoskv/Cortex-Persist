@@ -208,7 +208,7 @@ class ComplianceTracker:
                 "violations": [],
             }
 
-        return await ledger.audit_integrity_async()
+        return await ledger.audit_integrity_async()  # pyright: ignore[reportGeneralTypeIssues]
 
     # ─── 3. export_audit ──────────────────────────────────────────
 

@@ -116,7 +116,7 @@ class AnomalyHunterEngine:
                     continue
 
                 # type: ignore
-                effect_ts = datetime.fromisoformat(fact.created_at.replace("Z", "+00:00"))
+                effect_ts = datetime.fromisoformat(fact.created_at.replace("Z", "+00:00"))  # pyright: ignore[reportOptionalMemberAccess]
 
                 if cause_ts > effect_ts:
                     inversions.append(

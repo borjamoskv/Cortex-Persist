@@ -24,8 +24,8 @@ logger = logging.getLogger(__name__)
 class LagrangianParameterSet:
     """State-space coordinates for the Lagrangian."""
 
-    q: np.ndarray  # Generalized coordinates (e.g., current fitness, health)
-    q_dot: np.ndarray  # Generalized velocities (e.g., fitness_delta, health_delta)
+    q: np.ndarray  # Generalized coordinates (e.g., current fitness, health)  # pyright: ignore[reportInvalidTypeForm]
+    q_dot: np.ndarray  # Generalized velocities (e.g., fitness_delta, health_delta)  # pyright: ignore[reportInvalidTypeForm]
 
 
 class LagrangianController:

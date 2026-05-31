@@ -20,19 +20,19 @@ SNARE_NOISE_MS = 120
 HAT_NOISE_MS = 30
 
 
-def _synth_sine(freq: float, duration_s: float, sr: int = DEFAULT_SR) -> np.ndarray:
+def _synth_sine(freq: float, duration_s: float, sr: int = DEFAULT_SR) -> np.ndarray:  # pyright: ignore[reportInvalidTypeForm]
     """Generate a sine wave."""
     t = np.arange(int(sr * duration_s)) / sr
     return np.sin(2 * np.pi * freq * t)
 
 
-def _synth_square(freq: float, duration_s: float, sr: int = DEFAULT_SR) -> np.ndarray:
+def _synth_square(freq: float, duration_s: float, sr: int = DEFAULT_SR) -> np.ndarray:  # pyright: ignore[reportInvalidTypeForm]
     """Generate a square wave."""
     t = np.arange(int(sr * duration_s)) / sr
     return np.sign(np.sin(2 * np.pi * freq * t))
 
 
-def _synth_kick(sr: int = DEFAULT_SR) -> np.ndarray:
+def _synth_kick(sr: int = DEFAULT_SR) -> np.ndarray:  # pyright: ignore[reportInvalidTypeForm]
     """Synthesize a kick drum: pitch-sweeping sine from 150Hz to 45Hz."""
     duration_s = KICK_DECAY_MS / 1000.0
     n_samples = int(sr * duration_s)
@@ -48,7 +48,7 @@ def _synth_kick(sr: int = DEFAULT_SR) -> np.ndarray:
     return wave * envelope * KICK_AMPLITUDE
 
 
-def _synth_snare(sr: int = DEFAULT_SR) -> np.ndarray:
+def _synth_snare(sr: int = DEFAULT_SR) -> np.ndarray:  # pyright: ignore[reportInvalidTypeForm]
     """Synthesize a snare: body tone + filtered noise burst."""
     duration_s = SNARE_NOISE_MS / 1000.0
     n_samples = int(sr * duration_s)
@@ -63,7 +63,7 @@ def _synth_snare(sr: int = DEFAULT_SR) -> np.ndarray:
     return (body * 0.4 + noise * 0.6) * SNARE_AMPLITUDE
 
 
-def _synth_hihat(sr: int = DEFAULT_SR) -> np.ndarray:
+def _synth_hihat(sr: int = DEFAULT_SR) -> np.ndarray:  # pyright: ignore[reportInvalidTypeForm]
     """Synthesize a hi-hat: filtered noise burst, very short."""
     duration_s = HAT_NOISE_MS / 1000.0
     n_samples = int(sr * duration_s)

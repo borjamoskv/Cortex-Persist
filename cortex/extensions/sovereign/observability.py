@@ -125,14 +125,14 @@ def init_telemetry(service_name: str = "cortex-sovereign") -> None:
     global _tracer, _meter
 
     try:
-        from opentelemetry import metrics, trace
-        from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import OTLPMetricExporter
-        from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
-        from opentelemetry.sdk.metrics import MeterProvider
-        from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
-        from opentelemetry.sdk.resources import Resource
-        from opentelemetry.sdk.trace import TracerProvider
-        from opentelemetry.sdk.trace.export import BatchSpanProcessor
+        from opentelemetry import metrics, trace  # pyright: ignore[reportMissingImports]
+        from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import OTLPMetricExporter  # pyright: ignore[reportMissingImports]
+        from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter  # pyright: ignore[reportMissingImports]
+        from opentelemetry.sdk.metrics import MeterProvider  # pyright: ignore[reportMissingImports]
+        from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader  # pyright: ignore[reportMissingImports]
+        from opentelemetry.sdk.resources import Resource  # pyright: ignore[reportMissingImports]
+        from opentelemetry.sdk.trace import TracerProvider  # pyright: ignore[reportMissingImports]
+        from opentelemetry.sdk.trace.export import BatchSpanProcessor  # pyright: ignore[reportMissingImports]
 
         resource = Resource.create({"service.name": service_name})
 
@@ -171,7 +171,7 @@ def record_power(power: PowerLevel) -> None:
 
 def _power_gauge_callback(_options: Any) -> Any:
     """Observable gauge callback for sovereign power."""
-    from opentelemetry.metrics import Observation
+    from opentelemetry.metrics import Observation  # pyright: ignore[reportMissingImports]
 
     if _latest_power is not None:
         yield Observation(_latest_power.power, {"version": "v5"})

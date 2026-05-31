@@ -63,5 +63,5 @@ async def get_cortex_status() -> dict:
 
 
 if __name__ == "__main__":
-    vsa.start_glia()
+    vsa.start_glia()  # pyright: ignore[reportAttributeAccessIssue]
     mcp.run()

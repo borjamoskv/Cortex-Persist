@@ -73,6 +73,6 @@ def get_gmail_service():
     creds = get_gmail_credentials()
     if not creds:
         return None
-    from googleapiclient.discovery import build
+    from googleapiclient.discovery import build  # pyright: ignore[reportMissingImports]
 
     return build("gmail", "v1", credentials=creds)

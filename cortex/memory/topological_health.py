@@ -109,7 +109,7 @@ class TopologicalHealthMonitor:
 
     def compute_anchor(
         self,
-        vectors: list[list[float]] | np.ndarray,
+        vectors: list[list[float]] | np.ndarray,  # pyright: ignore[reportInvalidTypeForm]
     ) -> TopologicalAnchor:
         """Compute a frozen topological anchor from a sample of vectors.
 
@@ -155,8 +155,8 @@ class TopologicalHealthMonitor:
         return anchor.model_hash != self._model_hash
 
     def _validate_and_prepare_array(
-        self, current_vectors: list[list[float]] | np.ndarray
-    ) -> np.ndarray:
+        self, current_vectors: list[list[float]] | np.ndarray  # pyright: ignore[reportInvalidTypeForm]
+    ) -> np.ndarray:  # pyright: ignore[reportInvalidTypeForm]
         if isinstance(current_vectors, list):
             arr = np.array(current_vectors, dtype=np.float32)
         else:
@@ -168,7 +168,7 @@ class TopologicalHealthMonitor:
 
     def _calculate_drift_metrics(
         self,
-        arr: np.ndarray,
+        arr: np.ndarray,  # pyright: ignore[reportInvalidTypeForm]
         anchor: TopologicalAnchor,
         current_spectral: float,
         current_idim: float,
@@ -206,7 +206,7 @@ class TopologicalHealthMonitor:
 
     def measure_drift(
         self,
-        current_vectors: list[list[float]] | np.ndarray,
+        current_vectors: list[list[float]] | np.ndarray,  # pyright: ignore[reportInvalidTypeForm]
         anchor: TopologicalAnchor,
     ) -> float:
         """Measure topological drift from the anchor.
@@ -246,7 +246,7 @@ class TopologicalHealthMonitor:
         return self._proxy_sequence[self._active_proxy_idx]
 
     @staticmethod
-    def _compute_metrics(arr: np.ndarray) -> tuple[float, float, float]:
+    def _compute_metrics(arr: np.ndarray) -> tuple[float, float, float]:  # pyright: ignore[reportInvalidTypeForm]
         """Compute the three structural proxies to prevent Goodhart's Law."""
         cov_matrix = np.cov(arr, rowvar=False)
         eigenvalues = np.linalg.eigvalsh(cov_matrix)

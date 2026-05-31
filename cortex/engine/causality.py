@@ -317,7 +317,7 @@ class AsyncCausalGraph:
             params = list(chunk)
             if has_tenant:
                 fact_sql += " AND tenant_id = ?"
-                params.append(tenant_id)
+                params.append(tenant_id)  # pyright: ignore[reportArgumentType]
 
             async with self.conn.execute(fact_sql, params) as cursor:
                 async for row in cursor:

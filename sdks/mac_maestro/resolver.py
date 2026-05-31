@@ -93,7 +93,7 @@ def _resolve_ax(
     Otherwise falls back to target_query keys (pid, element_path, action_name).
     """
     try:
-        from ApplicationServices import (
+        from ApplicationServices import (  # pyright: ignore[reportMissingImports]
             AXUIElementCopyAttributeValue,
             AXUIElementCreateApplication,
             AXUIElementPerformAction,

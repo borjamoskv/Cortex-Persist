@@ -177,7 +177,7 @@ class AutoCurativeAgent:
         """Get metrics from the Rust fast-path engine."""
         if self._rust_engine is None:
             return None
-        return dict(self._rust_engine.get_metrics())
+        return dict(self._rust_engine.get_metrics())  # pyright: ignore[reportAttributeAccessIssue]
 
     def reset_breaker(self, subsystem: str) -> bool:
         """Manually reset a circuit breaker."""

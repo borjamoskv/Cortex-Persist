@@ -225,8 +225,8 @@ class StoreMixin(PrivacyMixin, GhostMixin, QuarantineMixin):
             await conn.commit()
 
         # Ingest ambient signals into the Right-Brain heuristic engine (O(1))
-        if hasattr(self, "right_brain") and self.right_brain is not None:
-            self.right_brain.ingest_ambient_signal(
+        if hasattr(self, "right_brain") and self.right_brain is not None:  # pyright: ignore[reportAttributeAccessIssue]
+            self.right_brain.ingest_ambient_signal(  # pyright: ignore[reportAttributeAccessIssue]
                 {
                     "source": source or "unknown",
                     "fact_type": fact_type,

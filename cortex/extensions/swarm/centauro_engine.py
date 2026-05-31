@@ -73,7 +73,7 @@ class VirtualAgent:
         agent_id: str,
         specialty: str = "general",
         execution_delay: float = 0.0,
-        router: Any | None = None,
+        router: Any | None = None,  # pyright: ignore[reportUndefinedVariable]
     ) -> None:
         self.agent_id = agent_id
         self.specialty = specialty

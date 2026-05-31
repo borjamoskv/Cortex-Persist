@@ -124,7 +124,8 @@ async def probe_metastability(
             ) as cursor:
                 edge_row = await cursor.fetchone()
                 upstream_edges = edge_row[0] if edge_row else 0
-        except Exception:
+        except Exception as e:
+            logger.debug("Failed to count causal edges for fact %s: %s", fact_id, e)
             upstream_edges = 0
 
         fragility = age_days / max(upstream_edges + 1, 1)

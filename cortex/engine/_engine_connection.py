@@ -57,8 +57,8 @@ class ConnectionMixin:
     @asynccontextmanager
     async def session(self) -> AsyncIterator[aiosqlite.Connection]:
         """Proporciona una sesión transaccional (conexión) válida."""
-        if hasattr(self, "_pool") and self._pool is not None:
-            async with self._pool.acquire() as conn:
+        if hasattr(self, "_pool") and self._pool is not None:  # pyright: ignore[reportAttributeAccessIssue]
+            async with self._pool.acquire() as conn:  # pyright: ignore[reportAttributeAccessIssue]
                 yield conn
         else:
             conn = await self._get_or_create_conn()
@@ -109,18 +109,18 @@ class ConnectionMixin:
 
             from cortex.database.core import connect_async
 
-            conn = await connect_async(str(self._db_path))
+            conn = await connect_async(str(self._db_path))  # pyright: ignore[reportAttributeAccessIssue]
             try:
-                conn._cortex_loop = asyncio.get_running_loop()
+                conn._cortex_loop = asyncio.get_running_loop()  # pyright: ignore[reportAttributeAccessIssue]
             except RuntimeError:
-                conn._cortex_loop = None
+                conn._cortex_loop = None  # pyright: ignore[reportAttributeAccessIssue]
 
             self._conns_by_loop[current_loop] = conn
 
             self._vec_available = await load_sqlite_vec_async(conn)
             await self._ensure_schema_ready(conn)
             if not getattr(self, "_memory_ready", False):
-                await self._init_memory_subsystem(self._db_path, conn)
+                await self._init_memory_subsystem(self._db_path, conn)  # pyright: ignore[reportAttributeAccessIssue]
             return conn
 
     async def _ensure_schema_ready(self, conn: aiosqlite.Connection) -> None:
@@ -167,7 +167,7 @@ class ConnectionMixin:
     def _get_sync_conn(self):
         """Devuelve una conexión síncrona para procesos bloqueantes."""
 
-        conn = connect(str(self._db_path), row_factory=sqlite3.Row)
+        conn = connect(str(self._db_path), row_factory=sqlite3.Row)  # pyright: ignore[reportAttributeAccessIssue]
         try:
             conn.enable_load_extension(True)
             conn.load_extension(sqlite_vec.loadable_path())
@@ -180,6 +180,6 @@ class ConnectionMixin:
         """Initialize database schema. Safe to call multiple times."""
         conn = await self._get_or_create_conn()
         await self._ensure_schema_ready(conn)
-        await self._persistence.start()
+        await self._persistence.start()  # pyright: ignore[reportAttributeAccessIssue]
         metrics.set_engine(self)
-        logger.info("CORTEX database initialized (async) at %s", self._db_path)
+        logger.info("CORTEX database initialized (async) at %s", self._db_path)  # pyright: ignore[reportAttributeAccessIssue]

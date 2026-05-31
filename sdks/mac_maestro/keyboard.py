@@ -8,7 +8,7 @@ import time
 logger = logging.getLogger("mac_maestro.keyboard")
 
 try:
-    from Quartz import (
+    from Quartz import (  # pyright: ignore[reportMissingImports]
         CGEventCreateKeyboardEvent,
         CGEventPost,
         kCGHIDEventTap,
@@ -53,7 +53,7 @@ def _press_char_cgevent(char: str) -> None:
     down = CGEventCreateKeyboardEvent(None, 0, True)
     up = CGEventCreateKeyboardEvent(None, 0, False)
 
-    from Quartz import CGEventKeyboardSetUnicodeString
+    from Quartz import CGEventKeyboardSetUnicodeString  # pyright: ignore[reportMissingImports]
 
     CGEventKeyboardSetUnicodeString(down, len(char), char)
     CGEventKeyboardSetUnicodeString(up, len(char), char)

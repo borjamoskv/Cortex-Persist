@@ -115,7 +115,7 @@ async def require_consensus(
             engine = e
             break
 
-    results = await engine.search(query=claim, top_k=1)
+    results = await engine.search(query=claim, top_k=1)  # pyright: ignore[reportOptionalMemberAccess]
     if not results:
         return False
 

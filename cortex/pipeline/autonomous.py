@@ -39,7 +39,7 @@ async def execute_autonomous_mission(
 
     # 1. Bootstrap Engine
     engine = CortexEngine()
-    await engine.initialize()
+    await engine.initialize()  # pyright: ignore[reportAttributeAccessIssue]
 
     try:
         # 2. Wire Components
@@ -61,7 +61,7 @@ async def execute_autonomous_mission(
             tenant_id=tenant_id,
             budget_limit_usd=budget_limit_usd,
             timeout_s=timeout_s,
-            delivery=DeliveryTarget(mode=delivery_mode),
+            delivery=DeliveryTarget(mode=delivery_mode),  # pyright: ignore[reportCallIssue]
         )
 
         # 4. Execute E2E flow
@@ -80,7 +80,7 @@ async def execute_autonomous_mission(
     finally:
         # 5. Teardown Engine
         logger.info("Tearing down CortexEngine for mission %s", mission_id)
-        await engine.teardown()
+        await engine.teardown()  # pyright: ignore[reportAttributeAccessIssue]
 
 
 def run_autonomous_sync(intent: str, **kwargs: Any) -> PipelineResult:

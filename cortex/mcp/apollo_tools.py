@@ -22,7 +22,7 @@ except ImportError:
     FastMCP = Any  # type: ignore
 
 
-def register_apollo_tools(mcp: FastMCP) -> None:
+def register_apollo_tools(mcp: FastMCP) -> None:  # pyright: ignore[reportInvalidTypeForm]
     """Register Apollo extraction tools on the MCP server."""
 
     @mcp.tool()

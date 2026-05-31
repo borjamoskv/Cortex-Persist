@@ -50,7 +50,7 @@ def run_burst():
         )
         
         output_buffer = []
-        for line in process.stdout:
+        for line in process.stdout:  # pyright: ignore[reportOptionalIterable]
             print(f"  > {line.strip()}")
             output_buffer.append(line)
             if len(output_buffer) > 100:

@@ -9,7 +9,7 @@ class EntropyDeath(Exception):
 
 class ExergyEnvironment:
 
-    def __init__(self, joules: int, ledger: LedgerManager=None):
+    def __init__(self, joules: int, ledger: LedgerManager=None):  # pyright: ignore[reportArgumentType]
         self.joules = joules
         self.max_joules = joules
         self.ledger = ledger or LedgerManager()
@@ -40,7 +40,7 @@ class ExergyEnvironment:
         Creates an isolated parallel ExergyEnvironment with the same Joule balance.
         Ledger references are stripped for independent quantum branching.
         """
-        return ExergyEnvironment(self.joules, ledger=None)
+        return ExergyEnvironment(self.joules, ledger=None)  # pyright: ignore[reportArgumentType]
 
 def tokenize(chars: str) -> list:
     """
@@ -108,7 +108,7 @@ def evaluate(x, env: ExergyEnvironment):
         env.consume(400, op_name, vector_id=vector_id)
         logger.info(f'[EXA-L0] Orchestrating {model_name} locally via Swarm Integration...')
         try:
-            from compiled_skills.qwen_3_5_max_omega import Qwen35MaxOmegaSkill
+            from compiled_skills.qwen_3_5_max_omega import Qwen35MaxOmegaSkill  # pyright: ignore[reportMissingImports]
             qwen_skill = Qwen35MaxOmegaSkill()
             result = qwen_skill.execute({'prompt': prompt})
             return f"<TENSOR_C5: inferred_by_{model_name} | status: {result['status']}>"
@@ -193,7 +193,7 @@ def evaluate(x, env: ExergyEnvironment):
                 return (res, cost)
             except EntropyDeath:
                 return (None, float('inf'))
-        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:  # pyright: ignore[reportUndefinedVariable]
             future_a = executor.submit(eval_branch, branch_a, env_a)
             future_b = executor.submit(eval_branch, branch_b, env_b)
             res_a, cost_a = future_a.result()

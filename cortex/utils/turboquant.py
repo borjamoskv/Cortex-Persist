@@ -17,10 +17,10 @@ from cortex.utils import void_vec
 logger = logging.getLogger("cortex.utils.turboquant")
 
 # Cache estático en RAM para no desperdiciar exergía recalculando QR(R) O(D^3)
-_ROTATION_CACHE: dict[int, np.ndarray] = {}
+_ROTATION_CACHE: dict[int, np.ndarray] = {}  # pyright: ignore[reportInvalidTypeForm]
 
 
-def _get_rotation_matrix(dim: int) -> np.ndarray:
+def _get_rotation_matrix(dim: int) -> np.ndarray:  # pyright: ignore[reportInvalidTypeForm]
     """Obtiene y empaqueta la matriz ortogonal isométrica Q."""
     if dim not in _ROTATION_CACHE:
         # Utilizamos la dimensión como semilla para tener isometría determinista

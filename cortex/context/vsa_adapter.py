@@ -82,7 +82,7 @@ class VSAContextAdapter:
             return None
 
         try:
-            from cortex_bridge import SwarmMemory
+            from cortex_bridge import SwarmMemory  # pyright: ignore[reportMissingImports]
 
             kwargs: dict[str, Any] = {
                 "agent_id": self._agent_id,

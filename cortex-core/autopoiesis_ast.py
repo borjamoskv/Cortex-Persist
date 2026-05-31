@@ -25,12 +25,12 @@ class ASTAutopoiesisEngine:
 
     def _get_node_bounds(self, node: ast.AST) -> tuple[int, int]:
         """Returns 0-indexed start and end line numbers for an AST node."""
-        start_line = node.lineno - 1
-        end_line = getattr(node, 'end_lineno', node.lineno) - 1
+        start_line = node.lineno - 1  # pyright: ignore[reportAttributeAccessIssue]
+        end_line = getattr(node, 'end_lineno', node.lineno) - 1  # pyright: ignore[reportAttributeAccessIssue]
         
         # Adjust for decorators
-        if hasattr(node, 'decorator_list') and node.decorator_list:
-            start_line = node.decorator_list[0].lineno - 1
+        if hasattr(node, 'decorator_list') and node.decorator_list:  # pyright: ignore[reportAttributeAccessIssue]
+            start_line = node.decorator_list[0].lineno - 1  # pyright: ignore[reportAttributeAccessIssue]
             
         return start_line, end_line
 
@@ -80,7 +80,7 @@ class ASTAutopoiesisEngine:
                     
         return {"status": "failed", "error": "NotFound", "details": f"Function {func_name} not found in AST."}
 
-    def mutate_file(self, new_source: str, expected_signature: str = None) -> dict:
+    def mutate_file(self, new_source: str, expected_signature: str = None) -> dict:  # pyright: ignore[reportArgumentType]
         """
         Replaces the entire file with new_source.
         Validates the AST and optional cryptographic signature before applying.

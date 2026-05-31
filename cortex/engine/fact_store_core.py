@@ -44,7 +44,7 @@ async def _prepare_fact_content(
     except (ImportError, ValueError, OSError) as e:
         logger.debug("Fact signing skipped: %s", e)
 
-    return f_hash, encrypted_content, sig_b64, pub_b64
+    return f_hash, encrypted_content, sig_b64, pub_b64  # pyright: ignore[reportReturnType]
 
 
 async def _resolve_causal_parent(
@@ -109,7 +109,7 @@ async def insert_fact_record(
         project,
         encrypted_content,
         fact_type,
-        meta,
+        meta,  # pyright: ignore[reportArgumentType]
         f_hash,
         source,
         confidence,
@@ -140,7 +140,7 @@ async def insert_fact_record(
         tags_json,
         fact_type,
         ts,
-        meta,
+        meta,  # pyright: ignore[reportArgumentType]
         parent_decision_id,
     )
 

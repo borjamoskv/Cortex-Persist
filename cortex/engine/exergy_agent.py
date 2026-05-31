@@ -38,7 +38,7 @@ class ExergyMaximizerAgent:
 
         # Cálculo O(1) de la Exergía
         exergy_score = ExergyOptimizer.calculate_node_exergy(
-            telemetry, latency_ms=telemetry.latency_ms, max_capacity=telemetry.max_capacity
+            telemetry, latency_ms=telemetry.latency_ms, max_capacity=telemetry.max_capacity  # pyright: ignore[reportArgumentType]
         )
 
         # Variational Feedback Loop: Estimar Entropía Pagada
@@ -111,7 +111,7 @@ class ExergyAgentAdapter(SwarmAgent):
             sys.path.insert(0, cortex_core_path)
 
         try:
-            from persistence import get_swarm_metrics
+            from persistence import get_swarm_metrics  # pyright: ignore[reportMissingImports]
 
             real_metrics = get_swarm_metrics()
         except ImportError:

@@ -18,10 +18,10 @@ from benchmarks.encb.metrics import MetricsReport
 def _ensure_matplotlib():
     """Lazy import matplotlib to avoid hard dependency."""
     try:
-        import matplotlib
+        import matplotlib  # pyright: ignore[reportMissingImports]
 
         matplotlib.use("Agg")  # Non-interactive backend
-        import matplotlib.pyplot as plt
+        import matplotlib.pyplot as plt  # pyright: ignore[reportMissingImports]
 
         return plt
     except ImportError as err:

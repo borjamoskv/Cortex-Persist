@@ -49,13 +49,13 @@ def remove_target(tree: AgentOp, target: str) -> AgentOp:
     for variant, data in tree.items():
         if variant == "Dispatch" and isinstance(data, dict):
             if data.get("target") == target:
-                return "Noop"
+                return "Noop"  # pyright: ignore[reportReturnType]
             result[variant] = data
         elif variant in ("Seq", "Par") and isinstance(data, list):
             children = [remove_target(child, target) for child in data]
             children = [c for c in children if c != "Noop"]
             if not children:
-                return "Noop"
+                return "Noop"  # pyright: ignore[reportReturnType]
             result[variant] = children
         elif variant == "Cond" and isinstance(data, dict):
             result[variant] = {

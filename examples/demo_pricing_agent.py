@@ -5,7 +5,7 @@ Shows an AI modifying enterprise pricing while CORTEX records a cryptographic au
 
 import asyncio
 import sys
-from cortex.magic import sovereign_persist
+from cortex.magic import sovereign_persist  # pyright: ignore[reportMissingImports]
 
 
 # Mock LLM Agent that decides on pricing discounts

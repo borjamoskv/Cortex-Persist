@@ -237,7 +237,7 @@ def history(db_path: str | None, limit: int) -> None:
 def fix(db_path: str | None, dry_run: bool) -> None:
     """Auto-remediation for degraded metrics."""
     from cortex.extensions.health import HealthCollector, HealthScorer
-    from cortex.extensions.health.fix import FixRegistry
+    from cortex.extensions.health.fix import FixRegistry  # pyright: ignore[reportMissingImports]
 
     path = _resolve_db(db_path)
     collector = HealthCollector(db_path=path)

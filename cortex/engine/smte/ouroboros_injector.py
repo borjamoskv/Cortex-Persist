@@ -14,7 +14,7 @@ import sys
 logger = logging.getLogger("cortex.engine.smte.ouroboros_injector")
 
 try:
-    from confluent_kafka import Producer
+    from confluent_kafka import Producer  # pyright: ignore[reportMissingImports]
 except ImportError:
     logger.error("confluent_kafka not installed. Run: pip install confluent_kafka")
     sys.exit(1)

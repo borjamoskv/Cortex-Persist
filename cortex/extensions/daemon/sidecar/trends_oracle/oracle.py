@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 import pandas as pd
-from pytrends.request import TrendReq
+from pytrends.request import TrendReq  # pyright: ignore[reportMissingImports]
 from requests.exceptions import RequestException
 
 from cortex.extensions.daemon.models import TrendsAlert

@@ -6,11 +6,11 @@ Capa determinista de procesamiento de señal en Python (Mastering, Tonal Balance
 import logging
 
 from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
-import pyloudnorm as pyln
-import scipy.signal
+import pyloudnorm as pyln  # pyright: ignore[reportMissingImports]
+import scipy.signal  # pyright: ignore[reportMissingImports]
 
 try:
-    from numba import njit
+    from numba import njit  # pyright: ignore[reportMissingImports]
 
     _NUMBA_AVAILABLE = True
 except ImportError:
@@ -43,8 +43,8 @@ PEAK_CEILING = 0.99
 
 @njit
 def _fast_envelope_follower(
-    audio_data: np.ndarray, alpha_attack: float, alpha_release: float
-) -> np.ndarray:
+    audio_data: np.ndarray, alpha_attack: float, alpha_release: float  # pyright: ignore[reportInvalidTypeForm]
+) -> np.ndarray:  # pyright: ignore[reportInvalidTypeForm]
     n = len(audio_data)
     envelope = np.zeros(n)
     curr = 0.0
@@ -68,7 +68,7 @@ class DSPApotheosis:
     def __init__(self):
         pass
 
-    def calculate_lufs(self, audio_data: np.ndarray, sample_rate: int) -> float:
+    def calculate_lufs(self, audio_data: np.ndarray, sample_rate: int) -> float:  # pyright: ignore[reportInvalidTypeForm]
         """Calcula Integrated LUFS usando pyloudnorm (EBU R128 / ITU-R BS.1770)."""
         if len(audio_data) == 0:
             return LUFS_FLOOR
@@ -82,7 +82,7 @@ class DSPApotheosis:
             logger.error("Error calculando LUFS: %s", e)
             return LUFS_FLOOR
 
-    def match_pink_noise_curve(self, audio_data: np.ndarray, sample_rate: int) -> np.ndarray:
+    def match_pink_noise_curve(self, audio_data: np.ndarray, sample_rate: int) -> np.ndarray:  # pyright: ignore[reportInvalidTypeForm]
         """
         Ecualización adaptativa para balancear el espectro hacia una pendiente de -3dB/octavo.
         """
@@ -123,7 +123,7 @@ class DSPApotheosis:
 
         return audio_matched
 
-    def apply_transient_shaping(self, audio_data: np.ndarray, sample_rate: int) -> np.ndarray:
+    def apply_transient_shaping(self, audio_data: np.ndarray, sample_rate: int) -> np.ndarray:  # pyright: ignore[reportInvalidTypeForm]
         """
         Realza ataques percusivos perdiendo 'bluntness' de IA usando un seguidor de envolvente.
         """
@@ -144,7 +144,7 @@ class DSPApotheosis:
         boost = np.where(diff > TRANSIENT_BOOST_THRESHOLD, TRANSIENT_BOOST_FACTOR, 1.0)
         return audio_data * boost
 
-    def master_track(self, audio_data: np.ndarray, sample_rate: int) -> np.ndarray:
+    def master_track(self, audio_data: np.ndarray, sample_rate: int) -> np.ndarray:  # pyright: ignore[reportInvalidTypeForm]
         """
         Finalización determinista: Tonal Match -> Transient Design -> Loudness Norm -> Peak Limiting.
         """

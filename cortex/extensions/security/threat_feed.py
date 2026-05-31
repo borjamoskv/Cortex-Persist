@@ -88,7 +88,7 @@ class ThreatFeedEngine:
         self._hmac_key = (hmac_key or "cortex-sovereign-shield-2026").encode()
         self._custom_signatures: list[dict[str, Any]] = []
         self._custom_compiled: list[tuple[dict[str, Any], re.Pattern[str]]] = []
-        self._load_custom_signatures()
+        self._load_custom_signatures()  # pyright: ignore[reportAttributeAccessIssue]
 
     async def update_daily(self) -> ThreatFeedReport:
         """Fetch latest threat intelligence from all feeds.
@@ -103,13 +103,13 @@ class ThreatFeedEngine:
         new_sigs: list[dict[str, Any]] = []
         for feed_name, url in self.FEED_URLS.items():
             report.feeds_checked += 1
-            extracted = await self._fetch_feed_signatures(feed_name, url, report)
+            extracted = await self._fetch_feed_signatures(feed_name, url, report)  # pyright: ignore[reportAttributeAccessIssue]
             for sig in extracted:
                 if sig["id"] not in existing_ids:
                     new_sigs.append(sig)
                     existing_ids.add(sig["id"])
         if new_sigs:
-            self._add_new_signatures(new_sigs)
+            self._add_new_signatures(new_sigs)  # pyright: ignore[reportAttributeAccessIssue]
         report.new_signatures = len(new_sigs)
         report.total_signatures = len(BUILT_IN_SIGNATURES) + len(self._custom_signatures)
         report.duration_seconds = time.monotonic() - start

@@ -5,7 +5,7 @@ A support bot grants a refund. CORTEX seals the decision lineage.
 
 import asyncio
 import sys
-from cortex.magic import sovereign_persist
+from cortex.magic import sovereign_persist  # pyright: ignore[reportMissingImports]
 
 
 class SupportAgent:

@@ -132,7 +132,7 @@ class PageHinkley:
 # ─── Core Computations ───────────────────────────────────────────────
 
 
-def spectral_gap(embeddings: np.ndarray) -> float:
+def spectral_gap(embeddings: np.ndarray) -> float:  # pyright: ignore[reportInvalidTypeForm]
     """Ratio λ₁/λ₂ of the covariance matrix. O(n·d²).
 
     High → one dominant direction (structured).
@@ -149,7 +149,7 @@ def spectral_gap(embeddings: np.ndarray) -> float:
 
 
 def intrinsic_dimensionality(
-    embeddings: np.ndarray,
+    embeddings: np.ndarray,  # pyright: ignore[reportInvalidTypeForm]
     k: int = 10,
     projection_dim: int = 64,
 ) -> float | None:
@@ -207,8 +207,8 @@ def intrinsic_dimensionality(
 
 
 def centroid_drift(
-    current_centroid: np.ndarray,
-    baseline_centroid: np.ndarray,
+    current_centroid: np.ndarray,  # pyright: ignore[reportInvalidTypeForm]
+    baseline_centroid: np.ndarray,  # pyright: ignore[reportInvalidTypeForm]
 ) -> float:
     """Normalized L2 distance between centroids.
 
@@ -247,7 +247,7 @@ class DriftMonitor:
     def model_hash(self) -> str:
         return self._model_hash
 
-    def checkpoint(self, embeddings: np.ndarray) -> DriftSignature:
+    def checkpoint(self, embeddings: np.ndarray) -> DriftSignature:  # pyright: ignore[reportInvalidTypeForm]
         """Compute and optionally persist a drift signature (baseline).
 
         Call this after bulk loads or during maintenance windows.
@@ -307,7 +307,7 @@ class DriftMonitor:
 
     def health(
         self,
-        embeddings: np.ndarray,
+        embeddings: np.ndarray,  # pyright: ignore[reportInvalidTypeForm]
         baseline: DriftSignature | None = None,
     ) -> dict[str, Any]:
         """Compute health metrics against a baseline.

@@ -30,7 +30,7 @@ def run_exergy_daemon(interval: int) -> None:
     from pathlib import Path
 
     sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "cortex-core"))
-    from exergy_daemon import ExergyDaemon
+    from exergy_daemon import ExergyDaemon  # pyright: ignore[reportMissingImports]
 
     console.print(
         Panel(

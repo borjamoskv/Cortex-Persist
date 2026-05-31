@@ -16,7 +16,7 @@ def execute_radar() -> None:
     # El objetivo es aislar issues que tengan etiquetas "bounty" y sean sobre Solidity o Web3
     # Usaremos una query Rest sencilla
     query = "label:bounty state:open language:Solidity language:Rust language:TypeScript language:JavaScript"
-    url = f"https://api.github.com/search/issues?q={urllib.parse.quote(query)}&sort=created&order=desc&per_page=10"
+    url = f"https://api.github.com/search/issues?q={urllib.parse.quote(query)}&sort=created&order=desc&per_page=10"  # pyright: ignore[reportAttributeAccessIssue]
     
     import sys
     import os

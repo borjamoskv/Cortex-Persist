@@ -37,7 +37,7 @@ __all__ = [
 
 try:
     if is_macos():
-        import AppKit
+        import AppKit  # pyright: ignore[reportMissingImports]
 except ImportError:
     AppKit = None
 

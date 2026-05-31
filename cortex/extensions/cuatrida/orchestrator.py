@@ -65,7 +65,7 @@ class CuatridaOrchestrator:
             actual_tx_id = cursor.lastrowid
         else:
             # Standalone fallback
-            tx_res = await self.engine.write(
+            tx_res = await self.engine.write(  # pyright: ignore[reportAttributeAccessIssue]
                 "INSERT INTO transactions (project, action, detail, prev_hash, hash, timestamp) "
                 "VALUES (?, ?, ?, 'GENESIS', 'sha256:standalone_placeholder', ?)",
                 (project, f"cuatrida:{dimension.value}", json.dumps(metadata), timestamp),

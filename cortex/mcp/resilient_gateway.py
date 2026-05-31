@@ -28,7 +28,7 @@ except ImportError:
 import httpx
 
 try:
-    import markdownify
+    import markdownify  # pyright: ignore[reportMissingImports]
 
     _HAS_MARKDOWNIFY = True
 except ImportError:
@@ -36,7 +36,7 @@ except ImportError:
     _HAS_MARKDOWNIFY = False
 
 try:
-    from bs4 import BeautifulSoup
+    from bs4 import BeautifulSoup  # pyright: ignore[reportMissingImports]
 
     _HAS_BS4 = True
 except ImportError:

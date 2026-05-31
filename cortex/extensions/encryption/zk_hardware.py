@@ -48,8 +48,8 @@ class ZeroKnowledgeShield:
             self._master_seed = hardware_key_material
 
         # Derive a 32-byte key for ChaCha20-Poly1305 using HKDF
-        hkdf = HKDF(
-            algorithm=hashes.SHA256(),
+        hkdf = HKDF(  # pyright: ignore[reportOptionalCall]
+            algorithm=hashes.SHA256(),  # pyright: ignore[reportOptionalMemberAccess]
             length=32,
             salt=b"cortex-sovereign-zk-salt",
             info=b"cortex-memory-encryption-at-rest",

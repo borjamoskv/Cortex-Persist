@@ -280,7 +280,7 @@ class VEXRunner:
         """Create a Merkle checkpoint for this task's transactions."""
         try:
             if self._engine._ledger:
-                cp = await self._engine._ledger.create_checkpoint_async()
+                cp = await self._engine._ledger.create_checkpoint_async()  # pyright: ignore[reportGeneralTypeIssues]
                 if cp:
                     return str(cp)
         except Exception as exc:

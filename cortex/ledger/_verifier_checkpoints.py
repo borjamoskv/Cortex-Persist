@@ -73,7 +73,8 @@ def _verify_single_checkpoint(
                 continue
             try:
                 reg_pub_bytes = _b64url_decode(reg_pub_b64)
-            except Exception:
+            except Exception as e:
+                logger.debug("Failed to decode public key in key record %s: %s", reg_pub_b64, e)  # pyright: ignore[reportUndefinedVariable]
                 continue
             if reg_pub_bytes == cp_pubkey_bytes:
                 matching_key = key_record
@@ -99,8 +100,11 @@ def _verify_single_checkpoint(
             if not valid_from <= created_at <= valid_until:
                 verifier.errors.append(f"checkpoint_key_outside_validity:{index}")
                 return False
-        except Exception:
-            pass
+        except Exception as e:
+            verifier.errors.append(
+                f"checkpoint_validity_parse_error:{index}:{e}"
+            )
+            return False
 
     permissions = _string_list(matching_key.get("permissions"))
     if not any(p in permissions for p in ("ledger.checkpoint", "ledger.export", "ledger.write")):

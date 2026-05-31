@@ -23,7 +23,7 @@ if _lib_path is None:
 # Load the compiled extension as a Python module named 'cortex_rs'
 loader = importlib.machinery.ExtensionFileLoader("cortex_rs", str(_lib_path))
 spec = importlib.util.spec_from_loader("cortex_rs", loader)
-module = importlib.util.module_from_spec(spec)
+module = importlib.util.module_from_spec(spec)  # pyright: ignore[reportArgumentType]
 loader.exec_module(module)
 
 # Export symbols to this package's namespace

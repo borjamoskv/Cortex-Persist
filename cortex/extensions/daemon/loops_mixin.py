@@ -21,6 +21,12 @@ class LoopsMixin:
     site_monitor: Any
     ghost_watcher: Any
     memory_syncer: Any
+    neural_monitor: Any
+    _threads: list[threading.Thread]
+
+    def _alert_neural(self, alerts: list) -> None:
+        ...
+
     cert_monitor: Any
     engine_health: Any
     disk_monitor: Any
@@ -63,6 +69,64 @@ class LoopsMixin:
         t.start()
         self._threads.append(t)
 
+    def _run_lifecycle_daemon(self, daemon: Any, name: str, emoji: str) -> None:
+        """Runs a daemon with start/stop lifecycle in a sync thread event loop."""
+        if not daemon:
+            return
+        logger.info("%s %s thread started", emoji, name)
+
+        async def _lifecycle():
+            task = asyncio.create_task(daemon.start())
+            while not self._shutdown:
+                await asyncio.sleep(1.0)
+            await daemon.stop()
+            await task
+
+        try:
+            asyncio.run(_lifecycle())
+        except Exception as e:  # noqa: BLE001
+            logger.error("%s loop error: %s", name, e)
+
+    async def _run_lifecycle_daemon_async(self, daemon: Any, name: str, emoji: str) -> None:
+        """Runs a daemon with start/stop lifecycle as an async task."""
+        if not daemon:
+            return
+        logger.info("%s %s task started", emoji, name)
+        task = asyncio.create_task(daemon.start())
+        while not self._shutdown:
+            try:
+                await asyncio.sleep(1.0)
+            except asyncio.CancelledError:
+                break
+        await daemon.stop()
+        await task
+
+    def _run_loop_daemon(self, daemon: Any, name: str, emoji: str, run_method: str = "run_loop") -> None:
+        """Runs a daemon's run_loop/run method inside a sync thread event loop."""
+        if not daemon:
+            return
+        logger.info("%s %s thread started", emoji, name)
+        try:
+            method = getattr(daemon, run_method)
+            res = method()
+            if asyncio.iscoroutine(res):
+                asyncio.run(res)
+        except Exception as e:  # noqa: BLE001
+            logger.error("%s loop error: %s", name, e)
+
+    async def _run_loop_daemon_async(self, daemon: Any, name: str, emoji: str, run_method: str = "run_loop") -> None:
+        """Runs a daemon's run_loop/run method as an async task."""
+        if not daemon:
+            return
+        logger.info("%s %s task started", emoji, name)
+        try:
+            method = getattr(daemon, run_method)
+            res = method()
+            if asyncio.iscoroutine(res):
+                await res
+        except Exception as e:  # noqa: BLE001
+            logger.error("%s loop error: %s", name, e)
+
     def _run_neural_loop(self) -> None:
         """Fast polling loop for zero-latency neural intent ingestion."""
         logger.info("🧠 Neural-Bandwidth Sync thread started (1Hz)")
@@ -71,99 +135,17 @@ class LoopsMixin:
                 alerts = self.neural_monitor.check()
                 if alerts:
                     self._alert_neural(alerts)
-            except Exception as e:  # noqa: BLE001 — top-level loop crash barrier
+            except Exception as e:  # noqa: BLE001
                 logger.debug("Neural loop error: %s", e)
             self._stop_event.wait(timeout=1.0)
 
-    def _run_ast_oracle_loop(self) -> None:
-        """Runs the AST Oracle event loop."""
-        logger.info("👁️ AST Oracle thread started")
 
-        async def _lifecycle():
-            task = asyncio.create_task(self.ast_oracle.start())
-            while not self._shutdown:
-                await asyncio.sleep(1.0)
-            await self.ast_oracle.stop()
-            await task
 
-        try:
-            asyncio.run(_lifecycle())
-        except Exception as e:  # noqa: BLE001 — top-level loop crash barrier
-            logger.error("AST Oracle loop error: %s", e)
 
-    def _run_heartbeat_loop(self) -> None:
-        """Runs the HeartbeatDaemon event loop."""
-        if not self.heartbeat_daemon:
-            return
-        logger.info("❤️  Heartbeat thread started")
 
-        async def _lifecycle():
-            task = asyncio.create_task(self.heartbeat_daemon.start())
-            while not self._shutdown:
-                await asyncio.sleep(1.0)
-            await self.heartbeat_daemon.stop()
-            await task
 
-        try:
-            asyncio.run(_lifecycle())
-        except Exception as e:  # noqa: BLE001 — top-level loop crash barrier
-            logger.error("Heartbeat loop error: %s", e)
 
-    def _run_entropic_wake_loop(self) -> None:
-        """Runs the Entropic Wake Daemon event loop."""
-        logger.info("🌌 Entropic Wake thread started")
-        try:
-            asyncio.run(self.entropic_wake_daemon.run_loop())
-        except Exception as e:  # noqa: BLE001 — top-level loop crash barrier
-            logger.error("Entropic Wake loop error: %s", e)
 
-    def _run_sentinel_oracle_loop(self) -> None:
-        """Runs the Sentinel Oracle polling loop."""
-        logger.info("🛡️ CORTEX Sentinel Oracle thread started")
-        try:
-            asyncio.run(self.sentinel_oracle.run_loop())
-        except Exception as e:  # noqa: BLE001 — top-level loop crash barrier
-            logger.error("Sentinel Oracle loop error: %s", e)
-
-    def _run_frontier_loop(self) -> None:
-        """Runs the Frontier Daemon event loop."""
-        logger.info("🚀 Frontier thread started")
-        try:
-            asyncio.run(self.frontier_daemon.run_loop())
-        except Exception as e:  # noqa: BLE001 — top-level loop crash barrier
-            logger.error("Frontier loop error: %s", e)
-
-    def _run_iot_oracle_loop(self) -> None:
-        """Runs the IoT Oracle event loop for physical entanglement."""
-        logger.info("📡 IoT Oracle thread started")
-
-        async def _lifecycle():
-            task = asyncio.create_task(self.iot_oracle.start())
-            while not self._shutdown:
-                await asyncio.sleep(1.0)
-            await self.iot_oracle.stop()
-            await task
-
-        try:
-            asyncio.run(_lifecycle())
-        except Exception as e:  # noqa: BLE001 — top-level loop crash barrier
-            logger.error("IoT Oracle loop error: %s", e)
-
-    def _run_zero_prompting_loop(self) -> None:
-        """Runs the Zero-Prompting Evolution Daemon event loop."""
-        logger.info("🧠 Zero-Prompting thread started")
-        try:
-            asyncio.run(self.zero_prompting_daemon.run_loop())
-        except Exception as e:  # noqa: BLE001 — top-level loop crash barrier
-            logger.error("Zero-Prompting loop error: %s", e)
-
-    def _run_epistemic_breaker_loop(self) -> None:
-        """Runs the Epistemic Circuit Breaker Daemon event loop."""
-        logger.info("🛡️ Epistemic Breaker thread started")
-        try:
-            asyncio.run(self.epistemic_breaker_daemon.run())
-        except Exception as e:  # noqa: BLE001 — top-level loop crash barrier
-            logger.error("Epistemic Breaker loop error: %s", e)
 
     def _auto_sync(self, status: DaemonStatus) -> None:
         """Automatic memory JSON ↔ CORTEX DB synchronization."""
@@ -272,83 +254,13 @@ class LoopsMixin:
             except asyncio.CancelledError:
                 break
 
-    async def _run_ast_oracle_loop_async(self) -> None:
-        """Runs the AST Oracle event loop (Async)."""
-        logger.info("👁️ AST Oracle task started")
-        task = asyncio.create_task(self.ast_oracle.start())
-        while not self._shutdown:
-            try:
-                await asyncio.sleep(1.0)
-            except asyncio.CancelledError:
-                break
-        await self.ast_oracle.stop()
-        await task
 
-    async def _run_heartbeat_loop_async(self) -> None:
-        """Runs the HeartbeatDaemon event loop (Async)."""
-        if not self.heartbeat_daemon:
-            return
-        logger.info("❤️  Heartbeat task started")
-        task = asyncio.create_task(self.heartbeat_daemon.start())
-        while not self._shutdown:
-            try:
-                await asyncio.sleep(1.0)
-            except asyncio.CancelledError:
-                break
-        await self.heartbeat_daemon.stop()
-        await task
 
-    async def _run_entropic_wake_loop_async(self) -> None:
-        """Runs the Entropic Wake Daemon event loop (Async)."""
-        logger.info("🌌 Entropic Wake task started")
-        try:
-            await self.entropic_wake_daemon.run_loop()
-        except Exception as e:  # noqa: BLE001
-            logger.error("Entropic Wake loop error: %s", e)
 
-    async def _run_sentinel_oracle_loop_async(self) -> None:
-        """Runs the Sentinel Oracle polling loop (Async)."""
-        logger.info("🛡️ CORTEX Sentinel Oracle task started")
-        try:
-            await self.sentinel_oracle.run_loop()
-        except Exception as e:  # noqa: BLE001
-            logger.error("Sentinel Oracle loop error: %s", e)
 
-    async def _run_frontier_loop_async(self) -> None:
-        """Runs the Frontier Daemon event loop (Async)."""
-        logger.info("🚀 Frontier task started")
-        try:
-            await self.frontier_daemon.run_loop()
-        except Exception as e:  # noqa: BLE001
-            logger.error("Frontier loop error: %s", e)
 
-    async def _run_iot_oracle_loop_async(self) -> None:
-        """Runs the IoT Oracle event loop (Async)."""
-        logger.info("📡 IoT Oracle task started")
-        task = asyncio.create_task(self.iot_oracle.start())
-        while not self._shutdown:
-            try:
-                await asyncio.sleep(1.0)
-            except asyncio.CancelledError:
-                break
-        await self.iot_oracle.stop()
-        await task
 
-    async def _run_zero_prompting_loop_async(self) -> None:
-        """Runs the Zero-Prompting Evolution Daemon event loop (Async)."""
-        logger.info("🧠 Zero-Prompting task started")
-        try:
-            await self.zero_prompting_daemon.run_loop()
-        except Exception as e:  # noqa: BLE001
-            logger.error("Zero-Prompting loop error: %s", e)
 
-    async def _run_epistemic_breaker_loop_async(self) -> None:
-        """Runs the Epistemic Circuit Breaker Daemon event loop (Async)."""
-        logger.info("🛡️ Epistemic Breaker task started")
-        try:
-            await self.epistemic_breaker_daemon.run()
-        except Exception as e:  # noqa: BLE001
-            logger.error("Epistemic Breaker loop error: %s", e)
 
     async def _run_health_loop_async(self) -> None:
         """Periodic health monitoring via Health Index (Async)."""

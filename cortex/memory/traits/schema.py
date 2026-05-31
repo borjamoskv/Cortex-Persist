@@ -27,7 +27,7 @@ class SchemaTrait:
                 raise RuntimeError(err)
 
             self._conn = sqlite3.connect(
-                self._db_path,
+                self._db_path,  # pyright: ignore[reportAttributeAccessIssue]
                 check_same_thread=False,
                 timeout=5.0,  # opening-policy: O(1) fail-fast
             )
@@ -83,7 +83,7 @@ class SchemaTrait:
                 self._conn.executescript(
                     f"""
                     CREATE VIRTUAL TABLE IF NOT EXISTS vec_facts USING vec0(
-                        embedding int8[{self._encoder.dimension}]
+                        embedding int8[{self._encoder.dimension}]  # pyright: ignore[reportAttributeAccessIssue]
                     );
                     CREATE TABLE IF NOT EXISTS vec_void (
                         rowid INTEGER PRIMARY KEY,
@@ -146,7 +146,7 @@ class SchemaTrait:
             try:
                 from cortex.memory.l2_hybrid_search import L2HybridSearch
 
-                self._hybrid = L2HybridSearch(self)
+                self._hybrid = L2HybridSearch(self)  # pyright: ignore[reportArgumentType]
                 self._hybrid.ensure_fts_table()
             except Exception as e:
                 logger.warning("L2HybridSearch init failed (FTS5 unavailable): %s", e)
@@ -197,7 +197,7 @@ class SchemaTrait:
         )
         count = cursor.fetchone()[0]
 
-        if count >= self.MAX_DOMAIN_ENTROPY:
+        if count >= self.MAX_DOMAIN_ENTROPY:  # pyright: ignore[reportAttributeAccessIssue]
             logger.warning(
                 "🌌 [UNIVERSE SPLIT] Domain %s/%s reached mass %d. Sharding vector space.",
                 tenant_id,
@@ -226,7 +226,7 @@ class SchemaTrait:
                     exergy_score REAL DEFAULT 1.0
                 )
             """)  # nosec B608
-            emb_def = f"embedding int8[{self._encoder.dimension}]"
+            emb_def = f"embedding int8[{self._encoder.dimension}]"  # pyright: ignore[reportAttributeAccessIssue]
             conn.execute(f"CREATE VIRTUAL TABLE {vec_tb} USING vec0({emb_def})")
             conn.execute(f"CREATE TABLE {vec_void_tb} (rowid INTEGER PRIMARY KEY, embedding BLOB)")
             # MIH sharded table

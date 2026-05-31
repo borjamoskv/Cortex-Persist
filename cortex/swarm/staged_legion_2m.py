@@ -66,7 +66,7 @@ def execute_staged_reverse_engineering(
         target,
     )
 
-    centurion_states: list[np.ndarray] = []
+    centurion_states: list[np.ndarray] = []  # pyright: ignore[reportInvalidTypeForm]
     wave_hashes: list[str] = []
     total_slashed = 0
     t0 = time.monotonic()
@@ -121,7 +121,7 @@ def execute_staged_reverse_engineering(
     logger.info("🪐 Collapsing %d Centurions into Global Consensus...", len(centurion_states))
     from cortex.vsa_engine import VSAEngine
 
-    vsa = VSAEngine(D=d_dim, algebra="HRR")
+    vsa = VSAEngine(D=d_dim, algebra="HRR")  # pyright: ignore[reportCallIssue]
 
     global_consensus = np.sum(centurion_states, axis=0)
     global_consensus = vsa.normalize(global_consensus)

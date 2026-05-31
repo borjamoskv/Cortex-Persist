@@ -133,7 +133,7 @@ class DeepThinkOrchestrator:
         return {"agent_id": agent_id, "hv": hv, "text": text_response}
 
     async def _maradona_synthesis(
-        self, hvs: list[np.ndarray], text_context: str, diagnostics: Any, project: str
+        self, hvs: list[np.ndarray], text_context: str, diagnostics: Any, project: str  # pyright: ignore[reportInvalidTypeForm]
     ) -> str:
         """Maradona ejecuta el bundle HDC y emite la decisión absoluta."""
         bus = await self.engine.get_bus()

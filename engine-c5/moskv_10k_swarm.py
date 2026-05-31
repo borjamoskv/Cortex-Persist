@@ -71,7 +71,7 @@ async def swarm_commander() -> list[dict[str, Any]]:
         # Assign agents uniformly across targets
         for agent_id in range(TOTAL_AGENTS):
             target = results[agent_id % len(results)]
-            target["best_rtt"] = float('inf')
+            target["best_rtt"] = float('inf')  # pyright: ignore[reportArgumentType]
             
             task = asyncio.create_task(agent_strike(agent_id, session, target, semaphore, results))
             tasks.append(task)

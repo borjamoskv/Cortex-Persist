@@ -15,12 +15,12 @@ _CORTEX_CORE = os.path.join(os.path.dirname(__file__), "..", "..", "cortex-core"
 if os.path.isdir(_CORTEX_CORE) and _CORTEX_CORE not in sys.path:
     sys.path.append(os.path.abspath(_CORTEX_CORE))
 try:
-    import vsa_sdm_bridge as vsa
+    import vsa_sdm_bridge as vsa  # pyright: ignore[reportMissingImports]
 except ImportError:
     vsa = None
 
 try:
-    import chromadb
+    import chromadb  # pyright: ignore[reportMissingImports]
 except ImportError:
     chromadb = None
 

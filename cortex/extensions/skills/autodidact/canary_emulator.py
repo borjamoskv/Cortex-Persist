@@ -66,8 +66,8 @@ class GPTCanaryDetector:
         latency = t_end - t_start
 
         if result.is_err():
-            logger.error("❌ Canary benchmark failed: %s", result.error)
-            return {"status": "FAIL", "error": result.error}
+            logger.error("❌ Canary benchmark failed: %s", result.error)  # pyright: ignore[reportAttributeAccessIssue]
+            return {"status": "FAIL", "error": result.error}  # pyright: ignore[reportAttributeAccessIssue]
 
         response_text = result.unwrap()
         token_count = len(response_text) / 4.0  # Approx tokens
@@ -135,8 +135,8 @@ class GlasswingVulnerabilityScanner:
         result = await self.router.execute_resilient(prompt)
 
         if result.is_err():
-            logger.error("❌ Mythos scan failed: %s", result.error)
-            return {"status": "FAIL", "error": result.error}
+            logger.error("❌ Mythos scan failed: %s", result.error)  # pyright: ignore[reportAttributeAccessIssue]
+            return {"status": "FAIL", "error": result.error}  # pyright: ignore[reportAttributeAccessIssue]
 
         response_text = result.unwrap()
 

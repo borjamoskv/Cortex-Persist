@@ -414,7 +414,8 @@ class SovereignLedger:
 
                     try:
                         detail = json.loads(det) if det else {}
-                    except Exception:
+                    except Exception as e:
+                        logger.debug("Failed to parse transaction detail json for tx %s: %s", tid, e)
                         detail = {}
 
                     if act == "store":
@@ -469,7 +470,7 @@ class SovereignLedger:
                 for f_tx_id, info in list(active_facts_by_tx.items()):
                     try:
                         decrypted = enc.decrypt_str(info["content"], tenant_id=info["tenant_id"])
-                        computed_hash = compute_fact_hash(decrypted)
+                        computed_hash = compute_fact_hash(decrypted)  # pyright: ignore[reportArgumentType]
                         if computed_hash != info["hash"]:
                             violations.append(
                                 {

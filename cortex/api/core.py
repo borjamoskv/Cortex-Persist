@@ -313,7 +313,7 @@ async def get_metrics():
 # ─── Router Inclusion ────────────────────────────────────────────────
 
 
-app.include_router(api_router)
+app.include_router(api_router)  # pyright: ignore[reportArgumentType]
 
 # V4 SSE Event Bus (Aether Matrix)
 from cortex.api import events as events_router

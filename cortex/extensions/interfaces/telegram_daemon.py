@@ -24,44 +24,44 @@ AUTHORIZED_USERS = {int(uid.strip()) for uid in WHITELIST_ENV.split(",") if uid.
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id
+    user_id = update.effective_user.id  # pyright: ignore[reportOptionalMemberAccess]
     if user_id not in AUTHORIZED_USERS:
         logger.warning(f"UNAUTHORIZED ACCESS ATTEMPT from {user_id}")
         return
 
     await context.bot.send_message(
-        chat_id=update.effective_chat.id, text="🦅 CORTEX-Antigravity Enlace Establecido. (C5-REAL)"
+        chat_id=update.effective_chat.id, text="🦅 CORTEX-Antigravity Enlace Establecido. (C5-REAL)"  # pyright: ignore[reportOptionalMemberAccess]
     )
 
 
 async def handle_instruction(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id
+    user_id = update.effective_user.id  # pyright: ignore[reportOptionalMemberAccess]
     if user_id not in AUTHORIZED_USERS:
         return
 
-    instruction = update.message.text
-    logger.info(f"Instruction received: {instruction[:50]}...")
+    instruction = update.message.text  # pyright: ignore[reportOptionalMemberAccess]
+    logger.info(f"Instruction received: {instruction[:50]}...")  # pyright: ignore[reportOptionalSubscript]
 
     # Send ack
     status_msg = await context.bot.send_message(
-        chat_id=update.effective_chat.id, text="⚙️ Procesando en matriz local..."
+        chat_id=update.effective_chat.id, text="⚙️ Procesando en matriz local..."  # pyright: ignore[reportOptionalMemberAccess]
     )
 
     try:
         engine = get_engine()
         # Direct integration with local execution matrix
         # Here we bind the intent into the engine's memory VSA
-        engine.memory.record(f"TELEGRAM_INTENT: {instruction}", "Local execution requested via TG.")
+        engine.memory.record(f"TELEGRAM_INTENT: {instruction}", "Local execution requested via TG.")  # pyright: ignore[reportOptionalMemberAccess]
 
         await context.bot.edit_message_text(
-            chat_id=update.effective_chat.id,
+            chat_id=update.effective_chat.id,  # pyright: ignore[reportOptionalMemberAccess]
             message_id=status_msg.message_id,
             text="✅ Ejecutado. Instrucción procesada en Engine local.",
         )
     except Exception as e:
         logger.error(f"Execution failed: {e}")
         await context.bot.edit_message_text(
-            chat_id=update.effective_chat.id,
+            chat_id=update.effective_chat.id,  # pyright: ignore[reportOptionalMemberAccess]
             message_id=status_msg.message_id,
             text=f"❌ Fallo de ejecución local: {e!s}",
         )

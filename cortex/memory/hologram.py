@@ -43,7 +43,7 @@ class HolographicMemory:
         self._lock = asyncio.Lock()
 
         # Matrix E containing all embeddings (N, dimension).
-        self._tensor: np.ndarray | None = None
+        self._tensor: np.ndarray | None = None  # pyright: ignore[reportInvalidTypeForm]
 
         # Parallel arrays for fast metadata lookup and scoring
         self._metadata: list[dict[str, Any]] = []

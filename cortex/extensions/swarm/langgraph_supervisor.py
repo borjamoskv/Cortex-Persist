@@ -6,7 +6,7 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict
 
 try:
-    from langgraph.graph import END, StateGraph
+    from langgraph.graph import END, StateGraph  # pyright: ignore[reportMissingImports]
 
     LANGGRAPH_AVAILABLE = True
 except ImportError:

@@ -121,7 +121,7 @@ def run_cli(
     """Run a CORTEX agent in interactive CLI mode."""
     try:
         from google.adk.runners import Runner  # pyright: ignore[reportMissingImports]
-        from google.adk.sessions import (
+        from google.adk.sessions import (  # pyright: ignore[reportMissingImports]
             InMemorySessionService,  # pyright: ignore[reportMissingImports]
         )
     except ImportError:

@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from fastapi import APIRouter
 
-__all__ = ["api_router"]
+__all__ = ["api_router"]  # pyright: ignore[reportUnsupportedDunderAll]
 
 _ROUTE_MODULES = {
     "admin",

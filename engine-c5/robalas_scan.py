@@ -6,7 +6,7 @@ import numpy as np
 # Para máxima eficiencia en el asalto, inyectamos la lógica HDC directamente
 try:
     sys.path.append("/Users/borjafernandezangulo/.gemini/antigravity/skills/CORTEX-Swarm-Prime/scripts")
-    from tensor_glial_core import encode_text_vsa, KanervaGuard, SwarmCommanderMPS
+    from tensor_glial_core import encode_text_vsa, KanervaGuard, SwarmCommanderMPS  # pyright: ignore[reportMissingImports]
 except ImportError:
     # Logic fallback if needed
     pass

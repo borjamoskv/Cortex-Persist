@@ -79,7 +79,7 @@ def audit():
     async def _audit():
         from cortex.database.core import connect
 
-        conn = connect(engine._db_path)
+        conn = connect(engine._db_path)  # pyright: ignore[reportArgumentType]
         return await scan_all_crystals(conn, project="autodidact_knowledge")
 
     vitals = _run_async(_audit())

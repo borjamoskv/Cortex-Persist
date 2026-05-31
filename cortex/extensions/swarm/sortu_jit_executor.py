@@ -104,7 +104,7 @@ def _worker(source_code: str, global_ctx: dict, result_dict: dict):
         result_dict["error"] = str(e)
 
 
-async def run_jit_sandbox(source_code: str, timeout_ms: int = 500, global_ctx: dict = None) -> Any:
+async def run_jit_sandbox(source_code: str, timeout_ms: int = 500, global_ctx: dict = None) -> Any:  # pyright: ignore[reportArgumentType]
     """
     Executes Python AST in a bounded memory-only sandbox.
     Uses multiprocessing to guarantee true OS-level termination and bypass GIL deadlocks.

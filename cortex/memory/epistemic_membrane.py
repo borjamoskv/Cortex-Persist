@@ -1,8 +1,8 @@
 import hashlib
 import time
-import torch
-import torchhd
-from torchhd import functional as F
+import torch  # pyright: ignore[reportMissingImports]
+import torchhd  # pyright: ignore[reportMissingImports]
+from torchhd import functional as F  # pyright: ignore[reportMissingImports]
 import numpy as np
 
 D = 16384
@@ -24,7 +24,7 @@ class MerkleLedger:
         binary = (hv > 0).cpu().numpy().astype(np.int8).tobytes()
         return hashlib.sha256(binary).digest()
 
-    def append(self, hv: torch.Tensor, membrane_result: dict, source_llm_hash: str = None) -> str:
+    def append(self, hv: torch.Tensor, membrane_result: dict, source_llm_hash: str = None) -> str:  # pyright: ignore[reportArgumentType]
         """Appends a new verified leaf to the ledger."""
         hv_hash = self.hash_hv(hv)
         leaf = {
@@ -173,7 +173,7 @@ class EpistemicMembrane:
         }
 
     def commit(
-        self, proposal_hv: torch.Tensor, metadata: dict = None, source_llm_hash: str = None
+        self, proposal_hv: torch.Tensor, metadata: dict = None, source_llm_hash: str = None  # pyright: ignore[reportArgumentType]
     ) -> str:
         """
         Commits the proposal to the VSA memory and appends to the cryptographic ledger.

@@ -11,7 +11,7 @@ def score_semantics(files: list[Path]) -> tuple[float, list]:
     """Check naming, dead code, unused imports - Dimension 2 (25 pts)."""
     if not files:
         return (0.0, [])
-    from cortex.extensions.moltbook.skills.sovereign_code_scorer.scripts.sovereign_scorer import Issue
+    from cortex.extensions.moltbook.skills.sovereign_code_scorer.scripts.sovereign_scorer import Issue  # pyright: ignore[reportMissingImports]
     issues: list[Issue] = []
     total_score = 25.0
     deductions = 0.0
@@ -49,7 +49,7 @@ def score_tests(root: Path, files: list[Path]) -> tuple[float, list]:
     """Check test file existence and quality - Dimension 4 (20 pts)."""
     if not files:
         return (0.0, [])
-    from cortex.extensions.moltbook.skills.sovereign_code_scorer.scripts.sovereign_scorer import Issue
+    from cortex.extensions.moltbook.skills.sovereign_code_scorer.scripts.sovereign_scorer import Issue  # pyright: ignore[reportMissingImports]
     issues: list[Issue] = []
     total_score = 20.0
     test_files = [f for f in files if 'test' in f.name.lower() or f.parent.name == 'tests']

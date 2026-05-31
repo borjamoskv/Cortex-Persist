@@ -29,8 +29,8 @@ from pathlib import Path
 from typing import Any
 
 try:
-    from watchdog.events import FileSystemEvent, FileSystemEventHandler
-    from watchdog.observers import Observer
+    from watchdog.events import FileSystemEvent, FileSystemEventHandler  # pyright: ignore[reportAssignmentType]
+    from watchdog.observers import Observer  # pyright: ignore[reportAssignmentType]
 
     _WATCHDOG_AVAILABLE = True
 except ImportError:
@@ -121,19 +121,19 @@ class _UnifiedHandler(FileSystemEventHandler):
         return True
 
     def on_modified(self, event: FileSystemEvent) -> None:
-        if event.is_directory:
+        if event.is_directory:  # pyright: ignore[reportAttributeAccessIssue]
             return
         if self._should_handle(event.src_path):
             self._emit("fs.modified", event.src_path)
 
     def on_created(self, event: FileSystemEvent) -> None:
-        if event.is_directory:
+        if event.is_directory:  # pyright: ignore[reportAttributeAccessIssue]
             return
         if self._should_handle(event.src_path):
             self._emit("fs.created", event.src_path)
 
     def on_deleted(self, event: FileSystemEvent) -> None:
-        if event.is_directory:
+        if event.is_directory:  # pyright: ignore[reportAttributeAccessIssue]
             return
         if self._should_handle(event.src_path):
             self._emit("fs.deleted", event.src_path)
@@ -255,7 +255,7 @@ class WatchdogHub:
         """Stop watching."""
         if self._observer is not None:
             self._observer.stop()
-            self._observer.join(timeout=5.0)
+            self._observer.join(timeout=5.0)  # pyright: ignore[reportCallIssue]
             self._observer = None
         self._running = False
         logger.info("WatchdogHub stopped")

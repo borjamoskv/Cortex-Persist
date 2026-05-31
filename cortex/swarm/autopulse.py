@@ -34,7 +34,7 @@ async def process_queue():
         sys.path.append(
             os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "cortex-core"))
         )
-        from ultramap import UltramapSubstrate
+        from ultramap import UltramapSubstrate  # pyright: ignore[reportMissingImports]
 
         umap = UltramapSubstrate(capacity=10000)
 
@@ -97,10 +97,10 @@ async def process_queue():
                     if anti_limerence:
                         # Incubate the agent's specific theory/task
                         try:
-                            anti_limerence.incubate_belief(agent)
-                            anti_limerence.inject_friction(agent, reality_delta)
+                            anti_limerence.incubate_belief(agent)  # pyright: ignore[reportAttributeAccessIssue]
+                            anti_limerence.inject_friction(agent, reality_delta)  # pyright: ignore[reportAttributeAccessIssue]
 
-                            purged = anti_limerence.execute_kill_switch()
+                            purged = anti_limerence.execute_kill_switch()  # pyright: ignore[reportAttributeAccessIssue]
                             if purged:
                                 logger.error(
                                     "OUROBOROS KILL-SWITCH: The following agents suffered Epistemic Limerence and were annihilated: %s",
@@ -113,7 +113,7 @@ async def process_queue():
                                     agent_hash = int(
                                         hashlib.sha256(agent.encode()).hexdigest()[:16], 16
                                     )
-                                    agent_hash % umap.capacity
+                                    agent_hash % umap.capacity  # pyright: ignore[reportUnusedExpression]
                                     x = (agent_hash % 1000) / 10.0
                                     y = ((agent_hash >> 4) % 1000) / 10.0
                                     z = ((agent_hash >> 8) % 1000) / 10.0

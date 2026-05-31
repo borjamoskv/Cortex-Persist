@@ -17,14 +17,14 @@ Example::
 from __future__ import annotations
 
 __all__ = [
-    "ComponentSpec",
-    "GenesisEngine",
-    "GenesisResult",
-    "GenesisValidator",
-    "SystemAssembler",
-    "SystemSpec",
-    "SystemTemplate",
-    "TemplateRegistry",
+    "ComponentSpec",  # pyright: ignore[reportUnsupportedDunderAll]
+    "GenesisEngine",  # pyright: ignore[reportUnsupportedDunderAll]
+    "GenesisResult",  # pyright: ignore[reportUnsupportedDunderAll]
+    "GenesisValidator",  # pyright: ignore[reportUnsupportedDunderAll]
+    "SystemAssembler",  # pyright: ignore[reportUnsupportedDunderAll]
+    "SystemSpec",  # pyright: ignore[reportUnsupportedDunderAll]
+    "SystemTemplate",  # pyright: ignore[reportUnsupportedDunderAll]
+    "TemplateRegistry",  # pyright: ignore[reportUnsupportedDunderAll]
 ]
 
 

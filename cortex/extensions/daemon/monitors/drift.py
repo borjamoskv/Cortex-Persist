@@ -104,7 +104,7 @@ class DriftMonitorDaemon:
         logger.info("DriftMonitor: Healthy (%.2f) - %s", health, result["detail"])
         return []
 
-    def _read_embeddings(self) -> np.ndarray | None:
+    def _read_embeddings(self) -> np.ndarray | None:  # pyright: ignore[reportInvalidTypeForm]
         """Read embedding vectors from the sqlite-vec store.
 
         Samples up to max_sample vectors to keep computation bounded.

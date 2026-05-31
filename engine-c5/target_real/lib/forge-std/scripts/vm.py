@@ -159,19 +159,19 @@ def group(s: str) -> str:
 
 
 class Visibility(PyEnum):
-    EXTERNAL: str = "external"
-    PUBLIC: str = "public"
-    INTERNAL: str = "internal"
-    PRIVATE: str = "private"
+    EXTERNAL: str = "external"  # pyright: ignore[reportGeneralTypeIssues]
+    PUBLIC: str = "public"  # pyright: ignore[reportGeneralTypeIssues]
+    INTERNAL: str = "internal"  # pyright: ignore[reportGeneralTypeIssues]
+    PRIVATE: str = "private"  # pyright: ignore[reportGeneralTypeIssues]
 
     def __str__(self):
         return self.value
 
 
 class Mutability(PyEnum):
-    PURE: str = "pure"
-    VIEW: str = "view"
-    NONE: str = ""
+    PURE: str = "pure"  # pyright: ignore[reportGeneralTypeIssues]
+    VIEW: str = "view"  # pyright: ignore[reportGeneralTypeIssues]
+    NONE: str = ""  # pyright: ignore[reportGeneralTypeIssues]
 
     def __str__(self):
         return self.value
@@ -373,11 +373,11 @@ class Cheatcodes:
 
 
 class Item(PyEnum):
-    ERROR: str = "error"
-    EVENT: str = "event"
-    ENUM: str = "enum"
-    STRUCT: str = "struct"
-    FUNCTION: str = "function"
+    ERROR: str = "error"  # pyright: ignore[reportGeneralTypeIssues]
+    EVENT: str = "event"  # pyright: ignore[reportGeneralTypeIssues]
+    ENUM: str = "enum"  # pyright: ignore[reportGeneralTypeIssues]
+    STRUCT: str = "struct"  # pyright: ignore[reportGeneralTypeIssues]
+    FUNCTION: str = "function"  # pyright: ignore[reportGeneralTypeIssues]
 
 
 class ItemOrder:
@@ -395,7 +395,7 @@ class ItemOrder:
     @staticmethod
     def default() -> "ItemOrder":
         return ItemOrder(
-            [
+            [  # pyright: ignore[reportArgumentType]
                 Item.ERROR,
                 Item.EVENT,
                 Item.ENUM,
@@ -571,7 +571,7 @@ class CheatcodesPrinter:
         if s == "":
             return
 
-        s = map(lambda line: line.lstrip(), s.split("\n"))
+        s = map(lambda line: line.lstrip(), s.split("\n"))  # pyright: ignore[reportAssignmentType]
         if self.block_doc_style:
             self._p_str("/*")
             if doc:

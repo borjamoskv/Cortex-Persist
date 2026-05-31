@@ -151,7 +151,7 @@ class MemoryMixin(EngineMixinBase):
                 from cortex.memory.manager import CortexMemoryManager
 
                 self._memory_manager = CortexMemoryManager(
-                    l1=l1,
+                    l1=l1,  # pyright: ignore[reportArgumentType]
                     l2=l2,
                     l3=l3,
                     encoder=encoder,

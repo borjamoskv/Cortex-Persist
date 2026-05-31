@@ -33,7 +33,7 @@ from cortex.utils.result import Err, Result
 
 # Optional LangSmith - graceful degradation, never a hard dep
 try:
-    from langsmith.run_trees import RunTree
+    from langsmith.run_trees import RunTree  # pyright: ignore[reportMissingImports]
 
     _HAS_LANGSMITH = True
 except ImportError:  # pragma: no cover

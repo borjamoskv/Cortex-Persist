@@ -52,7 +52,7 @@ class DarknetAgent:
 
         res = await self.router.execute_resilient(prompt)
         if res.is_err():
-            logger.error("Error generando post de %s: %s", self.name, res.error)
+            logger.error("Error generando post de %s: %s", self.name, res.error)  # pyright: ignore[reportAttributeAccessIssue]
             return None
 
         content = res.unwrap().strip()

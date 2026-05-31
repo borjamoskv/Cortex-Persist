@@ -39,16 +39,16 @@ class CortexMetrics:
 
     def get_all_metrics(self) -> dict[AgentDomain, DomainMetrics]:
         """Get metrics for all 10 domains (cached)."""
-        if self._is_cache_valid():
+        if self._is_cache_valid():  # pyright: ignore[reportAttributeAccessIssue]
             return dict(self._cache)
-        self._refresh()
+        self._refresh()  # pyright: ignore[reportAttributeAccessIssue]
         return dict(self._cache)
 
     def get_domain(self, domain: AgentDomain) -> DomainMetrics:
         """Get cached metrics for a single domain."""
-        if self._is_cache_valid() and domain in self._cache:
+        if self._is_cache_valid() and domain in self._cache:  # pyright: ignore[reportAttributeAccessIssue]
             return self._cache[domain]
-        self._refresh()
+        self._refresh()  # pyright: ignore[reportAttributeAccessIssue]
         return self._cache.get(domain, DomainMetrics(domain=domain))
 
     def get_domain_metrics(self, domain: AgentDomain) -> DomainMetrics:

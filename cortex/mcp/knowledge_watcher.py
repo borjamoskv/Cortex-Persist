@@ -11,7 +11,7 @@ from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
 try:
-    import chromadb
+    import chromadb  # pyright: ignore[reportMissingImports]
 except ImportError:
     chromadb = None
 
@@ -58,11 +58,11 @@ class KnowledgeItemHandler(FileSystemEventHandler):
 
     def on_modified(self, event):
         if not event.is_directory:
-            self._sync_file(event.src_path)
+            self._sync_file(event.src_path)  # pyright: ignore[reportArgumentType]
 
     def on_created(self, event):
         if not event.is_directory:
-            self._sync_file(event.src_path)
+            self._sync_file(event.src_path)  # pyright: ignore[reportArgumentType]
 
 
 def start_knowledge_daemon():

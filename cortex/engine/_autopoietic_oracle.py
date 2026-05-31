@@ -86,7 +86,7 @@ class FitnessOracle:
             metadata = result.get("metadata", {})
 
             # Composite fitness: weighted combination (C5-REAL: Native Rust calculation)
-            score = cortex_rs.FitnessOracleRs.composite_fitness(
+            score = cortex_rs.FitnessOracleRs.composite_fitness(  # pyright: ignore[reportAttributeAccessIssue]
                 raw_score=score,
                 latency_ms=latency_ms,
                 error_rate=error_rate,

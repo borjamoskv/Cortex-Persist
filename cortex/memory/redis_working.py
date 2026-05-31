@@ -218,7 +218,7 @@ class RedisWorkingMemoryL1:
                     if "timestamp" in data and isinstance(data["timestamp"], str):
                         data["timestamp"] = dateutil.parser.isoparse(data["timestamp"])
                     flushed.append(MemoryEvent(**data))
-                tkey = bkey.replace("buffer:", "tokens:")
+                tkey = bkey.replace("buffer:", "tokens:")  # pyright: ignore[reportArgumentType]
                 self._redis.delete(bkey, tkey)
         return flushed
 

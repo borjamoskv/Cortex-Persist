@@ -16,7 +16,7 @@ from typing import Any, TypeAlias, TYPE_CHECKING
 import aiosqlite
 
 if TYPE_CHECKING:
-    import asyncpg
+    import asyncpg  # pyright: ignore[reportMissingImports]
 
 KeyData: TypeAlias = dict[str, Any]
 KeyID: TypeAlias = int | str
@@ -171,7 +171,7 @@ class AlloyDBAuthBackend(BaseAuthBackend):
         self._pool: asyncpg.Pool | None = None
 
     async def _get_pool(self) -> asyncpg.Pool:
-        import asyncpg
+        import asyncpg  # pyright: ignore[reportMissingImports]
 
         if self._pool is None:
             self._pool = await asyncpg.create_pool(self.dsn)
@@ -276,7 +276,7 @@ class TursoAuthBackend(BaseAuthBackend):
         self._client: Any = None
 
     async def _get_client(self) -> Any:
-        import libsql_client
+        import libsql_client  # pyright: ignore[reportMissingImports]
 
         if self._client is None:
             self._client = libsql_client.create_client(self.url, auth_token=self.auth_token)

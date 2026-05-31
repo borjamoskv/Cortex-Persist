@@ -14,7 +14,7 @@ import time
 from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
 
 try:
-    from numba import njit, prange
+    from numba import njit, prange  # pyright: ignore[reportMissingImports]
 
     HAS_NUMBA = True
 except ImportError:
@@ -58,7 +58,7 @@ class TensorGlialLegion:
         self.num_agents = num_agents
         self.D = d_dim
         self.file_path = file_path
-        self.vsa = VSAEngine(D=self.D, algebra="HRR")
+        self.vsa = VSAEngine(D=self.D, algebra="HRR")  # pyright: ignore[reportCallIssue]
 
         # N=100000, D=10000 -> 4GB mapped straight to RAM (Zero-Copy)
         init_required = not os.path.exists(self.file_path)
@@ -104,13 +104,13 @@ class TensorGlialLegion:
         self.last_update_ts[agent_indices] = now
         self.async_flush()
 
-    def normalize_batch(self, batch: np.ndarray) -> np.ndarray:
+    def normalize_batch(self, batch: np.ndarray) -> np.ndarray:  # pyright: ignore[reportInvalidTypeForm]
         """Batch normalize row by row."""
         norms = np.linalg.norm(batch, axis=1, keepdims=True)
         norms[norms < 1e-12] = 1.0  # Prevent division by zero
         return batch / norms
 
-    def map_reduce_centurion(self, start_idx: int, end_idx: int) -> np.ndarray:
+    def map_reduce_centurion(self, start_idx: int, end_idx: int) -> np.ndarray:  # pyright: ignore[reportInvalidTypeForm]
         """
         MapReduce Topologico: L2 Centurions collapse 100 subordinate agents into a single 1D tensor
         to send up to the LegionSupervisor, saving 99% bandwidth.

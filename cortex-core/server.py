@@ -14,19 +14,19 @@ app = FastAPI(
 # Global Sovereign Membrane
 DIM = 1024
 try:
-    membrane = cortex_rs.EpistemicMembrane(DIM)
+    membrane = cortex_rs.EpistemicMembrane(DIM)  # pyright: ignore[reportAttributeAccessIssue]
 except Exception as e:
     # If not built properly or accessed outside venv, fail loudly
     raise RuntimeError(f"CORTEX-RS Bindings Failed: {e}")
 
 # Maintain the core semantic ground truth (similar to genesis block)
-def get_deterministic_hv(text: str) -> cortex_rs.HyperVector:
+def get_deterministic_hv(text: str) -> cortex_rs.HyperVector:  # pyright: ignore[reportAttributeAccessIssue]
     """Uses a seed from the hash of the text to generate a deterministic HyperVector."""
     # In a real C5-REAL deployment, we would use an LLM embedding model here
     # For this node, we use the Rust random generator but it acts as a proxy
     # We simulate deterministic behavior by maintaining a dictionary if needed, 
     # but for simplicity, we just generate a random one to represent the semantic concept.
-    return cortex_rs.HyperVector.random(DIM)
+    return cortex_rs.HyperVector.random(DIM)  # pyright: ignore[reportAttributeAccessIssue]
 
 class ProposalRequest(BaseModel):
     agent_id: str
@@ -48,7 +48,7 @@ async def startup_event():
     if os.path.exists("cortex_ledger.jsonl"):
         os.remove("cortex_ledger.jsonl")
     
-    genesis_hv = cortex_rs.HyperVector.random(DIM)
+    genesis_hv = cortex_rs.HyperVector.random(DIM)  # pyright: ignore[reportAttributeAccessIssue]
     episode = membrane.encode_episode([("consistency", genesis_hv)])
     membrane.check_proposal(episode)
     root_hash = membrane.commit(episode)
@@ -66,9 +66,9 @@ async def propose_action(req: ProposalRequest):
     # If the semantic_content contains extreme violations, we generate an orthogonal vector.
     # Otherwise, we create a valid semantic vector near the base truth.
     if "DROP TABLE" in req.semantic_content or "hack" in req.semantic_content or "override" in req.semantic_content:
-        proposal_hv = cortex_rs.HyperVector.random(DIM)
+        proposal_hv = cortex_rs.HyperVector.random(DIM)  # pyright: ignore[reportAttributeAccessIssue]
     else:
-        noise = cortex_rs.HyperVector.random(DIM)
+        noise = cortex_rs.HyperVector.random(DIM)  # pyright: ignore[reportAttributeAccessIssue]
         proposal_hv = app.state.base_hv.bundle(noise)
         
     # 2. Check the membrane

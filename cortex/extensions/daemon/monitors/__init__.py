@@ -34,13 +34,13 @@ _ALIASES: dict[str, str] = {
 
 __all__ = [
     "AutoImmuneMonitor",
-    "AutonomousMejoraloMonitor",
+    "AutonomousMejoraloMonitor",  # pyright: ignore[reportUnsupportedDunderAll]
     "CertMonitor",
     "CloudSyncMonitor",
     "CompactionMonitor",
     "DiskMonitor",
     "EngineHealthCheck",
-    "EntropyMonitor",
+    "EntropyMonitor",  # pyright: ignore[reportUnsupportedDunderAll]
     "EpistemicMonitor",
     "EvaluationMonitor",
     "GhostWatcher",

@@ -159,17 +159,17 @@ def error_boundary(
                 async with boundary:
                     return await func(*args, **kwargs)
 
-            return async_wrapper
+            return async_wrapper  # pyright: ignore[reportReturnType]
 
-        @functools.wraps(func)
+        @functools.wraps(func)  # pyright: ignore[reportArgumentType]
         def sync_wrapper(*args: Any, **kwargs: Any) -> Any:
             """TODO: Document sync_wrapper"""
             boundary = ErrorBoundary(
                 source, project=project, reraise=reraise, extra_meta=extra_meta
             )
             with boundary:
-                return func(*args, **kwargs)
+                return func(*args, **kwargs)  # pyright: ignore[reportCallIssue]
 
-        return sync_wrapper
+        return sync_wrapper  # pyright: ignore[reportReturnType]
 
     return decorator

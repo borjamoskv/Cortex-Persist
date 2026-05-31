@@ -33,7 +33,7 @@ async def main() -> None:
             except OSError:
                 pass
 
-    engine = CortexEngine(db_path=db_path)
+    engine = CortexEngine(db_path=db_path)  # pyright: ignore[reportCallIssue]
 
     print("CORTEX Persist - Canonical Demo")
     print("=" * 40)
