@@ -50,7 +50,8 @@ async def protocolo_ship_omega(data: str):
          # subprocess.run(["cortex", "store", "--type", "decision", "--source", "agent:gemini", "sovereign_e2e_swarm", "Iteración finalizada end-to-end"])
          pass
     except Exception:
-         pass
+         import logging
+         logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in sovereign_e2e_swarm.py')
     print("[SHIP-Ω] Cristalización C5-REAL completada.\n")
 
 

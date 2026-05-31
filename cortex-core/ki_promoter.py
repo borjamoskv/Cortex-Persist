@@ -90,7 +90,8 @@ def detect_context() -> dict:
                     context["domain"] = ctx["domain"]
                     break
     except (subprocess.TimeoutExpired, FileNotFoundError):
-        pass
+        import logging
+        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in ki_promoter.py')
 
     # Check for active file hints from environment
     active_file = os.environ.get("CORTEX_ACTIVE_FILE", "")

@@ -113,7 +113,8 @@ async def gidatu_loop(state):
                         )
                         win_title = await run_osascript(title_script)
                     except OSError:
-                        pass
+                        import logging
+                        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in context.py')
                 state.daemons["gidatu"]["window_title"] = win_title
 
                 prev_context = state.daemons["gidatu"].get("current_context")

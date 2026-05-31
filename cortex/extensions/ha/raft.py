@@ -432,7 +432,8 @@ class RaftNode:
                 try:
                     await self._heartbeat_task
                 except asyncio.CancelledError:
-                    pass
+                    import logging
+                    logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in raft.py')
 
             self.role = NodeRole.LEADER
             self.leader_id = self.node_id

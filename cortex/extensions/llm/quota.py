@@ -268,4 +268,5 @@ class SovereignQuotaManager:
             with _db(self.db_path) as conn:
                 conn.execute("UPDATE quota_bucket SET timeouts = timeouts + 1 WHERE id = 1")
         except sqlite3.OperationalError:
-            pass
+            import logging
+            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in quota.py')

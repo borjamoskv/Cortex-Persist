@@ -105,7 +105,8 @@ class DaemonState:
                 if policy == "ZERO_LOCAL_ON_HANDSHAKE" and hs == "remote":
                     return
             except (json.JSONDecodeError, OSError, KeyError):
-                pass
+                import logging
+                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in state.py')
 
         try:
             path = CORTEX_ROOT / "handoff.json"

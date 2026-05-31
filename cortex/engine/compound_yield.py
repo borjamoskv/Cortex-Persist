@@ -157,7 +157,8 @@ class CompoundYieldTracker:
             if "hours_saved" in meta:
                 return float(meta["hours_saved"])
         except (json.JSONDecodeError, TypeError, ValueError):
-            pass
+            import logging
+            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in compound_yield.py')
 
         # If no explicit hours, assign a default baseline value of 0.5 hours
         # This prevents 0 yield for chained structural facts that lack explicit tracking

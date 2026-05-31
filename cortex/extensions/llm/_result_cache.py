@@ -113,7 +113,8 @@ class ResultCache:
                     logger.debug("LLM Cache [HIT] -> %s...", h[:8])
                     return row[0]
         except sqlite3.OperationalError:
-            pass
+            import logging
+            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in _result_cache.py')
         return None
 
     def set(

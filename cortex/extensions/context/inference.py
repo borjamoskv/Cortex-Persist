@@ -205,11 +205,13 @@ class ContextInference:
             try:
                 signals_data = json.loads(row[5]) if row[5] else []
             except (json.JSONDecodeError, TypeError):
-                pass
+                import logging
+                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in inference.py')
             try:
                 projects_data = json.loads(row[6]) if row[6] else []
             except (json.JSONDecodeError, TypeError):
-                pass
+                import logging
+                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in inference.py')
 
             results.append(
                 {

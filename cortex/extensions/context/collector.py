@@ -63,7 +63,8 @@ def _parse_tx_detail(raw: str | dict | None) -> str:
         if isinstance(d, dict):
             return f" - {d.get('content', '')[:80]}"
     except (json.JSONDecodeError, TypeError):
-        pass
+        import logging
+        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in collector.py')
     return ""
 
 
@@ -285,7 +286,8 @@ class ContextCollector:
                         elif p.is_file() and p.suffix == ".py":
                             py_files.append(p)
                 except (OSError, PermissionError):
-                    pass
+                    import logging
+                    logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in collector.py')
 
             max_d = 2 if self.workspace_dir == Path.home() else 4
             _walk(self.workspace_dir, 1, max_d)

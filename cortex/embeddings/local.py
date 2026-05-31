@@ -51,7 +51,8 @@ def _resolve_device() -> str:
         if hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
             return "mps"
     except (ImportError, RuntimeError, AttributeError):
-        pass
+        import logging
+        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in local.py')
 
     return "cpu"
 

@@ -240,7 +240,8 @@ def detect_language(text: str) -> str:
         if detected in _TOKEN_TAX_RATIOS:
             return detected
     except ImportError:
-        pass
+        import logging
+        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in lang_compress.py')
 
     return "en"
 

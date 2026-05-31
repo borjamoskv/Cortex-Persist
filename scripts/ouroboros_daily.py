@@ -387,7 +387,8 @@ async def main():
         try:
             stream_kernel.flush()
         except Exception:
-            pass
+            import logging
+            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in ouroboros_daily.py')
 
     # 7. PERSIST (best-effort)
     try:

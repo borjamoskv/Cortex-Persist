@@ -71,7 +71,8 @@ def main():
                         logger.info(f"⚡ [OSC BLASTER] -> {osc_address}")
 
                     except json.JSONDecodeError:
-                        pass
+                        import logging
+                        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in aether_osc_bridge.py')
                     current_event = None
 
     except urllib.error.URLError as e:

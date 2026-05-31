@@ -293,7 +293,8 @@ async def fetch_domain_metrics(
                         age_s = time.monotonic() - dt.timestamp()
                         m.last_decision_age_hours = age_s / 3600
                     except (ValueError, TypeError):
-                        pass
+                        import logging
+                        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in cortex_metrics.py')
 
             # ── LLM Telemetry (Afferent Cascade Signals) ──
             # Measure terminal failures and average depth in the last hour

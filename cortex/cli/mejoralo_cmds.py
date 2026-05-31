@@ -176,7 +176,8 @@ def mejoralo_record(project, score_before, score_after, actions, db):
                 with open(state_file, "w") as f:
                     json.dump(state, f, indent=2, default=str)
             except (OSError, ValueError):
-                pass
+                import logging
+                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in mejoralo_cmds.py')
 
         console.print(
             f"[green]✓[/] Sesión registrada [bold]#{fact_id}[/] - "

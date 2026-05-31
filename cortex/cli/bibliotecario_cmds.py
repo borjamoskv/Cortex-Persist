@@ -68,7 +68,8 @@ async def _ingest_and_organize(path: Path) -> str:
                     text = file_path.read_text(encoding="utf-8")
                     content += f"\\n\\n--- FILE: {file_path.relative_to(path)} ---\\n{text}"
                 except (UnicodeDecodeError, OSError):
-                    pass
+                    import logging
+                    logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in bibliotecario_cmds.py')
 
     # Truncate to avoid context window explosion
     if len(content) > 100000:

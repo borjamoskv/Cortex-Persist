@@ -68,7 +68,8 @@ async def main():
         try:
             num_agents = int(sys.argv[1])
         except ValueError:
-            pass
+            import logging
+            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in legion_dispatch.py')
     dispatch_legion(num_agents)
 
 if __name__ == "__main__":

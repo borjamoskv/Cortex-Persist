@@ -87,4 +87,5 @@ class Autopoiesis:
             script_path.unlink()
             logger.info("Tool recycled: %s", script_path.name)
         except FileNotFoundError:
-            pass
+            import logging
+            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in autopoiesis.py')

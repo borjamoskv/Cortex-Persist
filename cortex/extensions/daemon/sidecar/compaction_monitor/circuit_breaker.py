@@ -126,7 +126,8 @@ async def call_external_compact(
                 # compact() is sync - run in thread to avoid blocking event loop
                 return await asyncio.to_thread(compact, engine, project)
         except ImportError:
-            pass
+            import logging
+            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in circuit_breaker.py')
 
         # Fallback: direct SQLite WAL checkpoint
         if db_path:

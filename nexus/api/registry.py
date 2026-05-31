@@ -113,7 +113,8 @@ class AgentRegistry:
             conn.execute("ALTER TABLE trust_states ADD COLUMN history TEXT DEFAULT '[]'")
             conn.commit()
         except sqlite3.OperationalError:
-            pass
+            import logging
+            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in registry.py')
 
         self._load_trust_states()
 

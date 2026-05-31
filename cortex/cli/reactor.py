@@ -125,4 +125,5 @@ if __name__ == "__main__":
     try:
         run_reactor()
     except KeyboardInterrupt:
-        pass
+        import logging
+        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in reactor.py')

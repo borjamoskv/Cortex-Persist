@@ -101,4 +101,5 @@ if __name__ == "__main__":
                     f"Merkle Root: {data['root_hash'][:16]}... | Leaf Hash: {data['hash'][:8]}... | Timestamp: {data['timestamp']}\n"
                 )
     except FileNotFoundError:
-        pass
+        import logging
+        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in interceptor.py')

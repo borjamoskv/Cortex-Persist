@@ -83,7 +83,8 @@ class CortexResolver(Resolver):
                             vote_value = -vote_value
                         await self.engine.vote_v2(fact_id, event.agent_id, vote_value)
                     except Exception:
-                        pass
+                        import logging
+                        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in encb_benchmark.py')
             except Exception:
                 if event.meta.get("is_byzantine", False):
                     self._detected_byzantine.add(event.agent_id)
@@ -96,7 +97,8 @@ class CortexResolver(Resolver):
                 conf = float(hit.get("confidence", 1.0) if isinstance(hit, dict) else 1.0)
                 return content, conf
         except Exception:
-            pass
+            import logging
+            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in encb_benchmark.py')
         return None, 0.0
 
     async def detect_byzantine(self) -> set[str]:

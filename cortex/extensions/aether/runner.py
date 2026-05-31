@@ -269,4 +269,5 @@ class AetherAgent:
             )
             await asyncio.wait_for(proc.communicate(), timeout=5.0)
         except (asyncio.TimeoutError, OSError):
-            pass
+            import logging
+            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in runner.py')

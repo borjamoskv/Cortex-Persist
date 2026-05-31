@@ -132,7 +132,8 @@ class SovereignReporter:
         try:
             yield await self.collect_metrics()
         except sqlite3.Error:
-            pass
+            import logging
+            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in reporter.py')
 
         try:
             async with connect_async_ctx(self.db_path) as conn:

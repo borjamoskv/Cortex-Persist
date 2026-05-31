@@ -36,7 +36,8 @@ async def _check_blocking_sleep(exclude_files: frozenset[str]) -> list[str]:
                     ) or (isinstance(node.func, ast.Name) and node.func.id == "sleep"):
                         violations.append(f"{py_file.name}:{node.lineno}")
         except SyntaxError:
-            pass
+            import logging
+            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in _seals_checks_6_10.py')
     return violations
 
 
@@ -70,7 +71,8 @@ async def _check_temperature_determinism(critical_files: list[Path]) -> list[str
             if has_temp and not has_zero:
                 violations.append(path.name)
         except SyntaxError:
-            pass
+            import logging
+            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in _seals_checks_6_10.py')
     return violations
 
 

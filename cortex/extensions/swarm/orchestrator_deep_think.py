@@ -20,7 +20,8 @@ try:
     from cortex.memory.hdc.codec import HDCEncoder
     from cortex.memory.hdc.item_memory import ItemMemory
 except ImportError:
-    pass
+    import logging
+    logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in orchestrator_deep_think.py')
 
 logger = logging.getLogger("cortex.extensions.swarm.deep_think")
 

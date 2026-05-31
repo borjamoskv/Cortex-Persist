@@ -40,7 +40,8 @@ def run_claude_query(prompt: str, model: str = "claude-3-opus-20240229") -> str:
                 {"status": "C5-REAL", "model": data.get("model", model), "response": text}
             )
     except ImportError:
-        pass
+        import logging
+        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in claude_tool.py')
     except Exception as e:
         return json.dumps({"status": "error", "message": f"HTTPX request failed: {e}"})
 

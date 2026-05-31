@@ -59,7 +59,8 @@ class PlannerNode:
                 data = json.loads(target)
                 return data.get("url") or data.get("target") or data.get("query") or target[:200]
             except json.JSONDecodeError:
-                pass
+                import logging
+                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in nightshift_pipeline.py')
 
         # 3. Artifact header stripping
         clean = re.sub(r"═══.*?═══", "", target).strip()

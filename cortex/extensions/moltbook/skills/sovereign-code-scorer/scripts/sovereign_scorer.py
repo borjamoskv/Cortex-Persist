@@ -274,7 +274,8 @@ def score_aesthetics(files: list[Path]) -> tuple[float, list[Issue]]:
             ):
                 deductions += 0.5
         except SyntaxError:
-            pass
+            import logging
+            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in sovereign_scorer.py')
 
         for i, line in enumerate(lines, 1):
             for marker in PSI_MARKERS:

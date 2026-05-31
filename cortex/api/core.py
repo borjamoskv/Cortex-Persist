@@ -287,7 +287,8 @@ async def health_check(request: Request) -> dict:
         health_score = round(hs.score, 2)
         health_grade = hs.grade
     except (ValueError, KeyError, OSError, RuntimeError, AttributeError):
-        pass
+        import logging
+        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in core.py')
 
     return {
         "status": get_trans("system_healthy", lang),

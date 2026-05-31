@@ -134,7 +134,8 @@ def _analyze_python_complexity(content: str, rel: str) -> list[str]:
         McCabeVisitor(rel, findings).visit(tree)
         NestingVisitor(rel, findings).visit(tree)
     except SyntaxError:
-        pass
+        import logging
+        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in scan.py')
     return findings
 
 

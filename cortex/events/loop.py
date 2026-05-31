@@ -104,7 +104,8 @@ def sovereign_run(
                 getattr(uvloop, "__version__", "?"),
             )
     except ImportError:
-        pass
+        import logging
+        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in loop.py')
 
     # 2. Execute with appropriate runner
     if has_uvloop:

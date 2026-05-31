@@ -156,7 +156,8 @@ class TuningStore:
                         "snapshot_at_iso": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(row[2])),
                     }
                 except json.JSONDecodeError:
-                    pass
+                    import logging
+                    logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in tuning_store.py')
         return None
 
     @property

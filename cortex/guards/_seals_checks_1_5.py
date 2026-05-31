@@ -72,7 +72,8 @@ async def check_seal_2_type_safety() -> GateResult:
                 printer.print(out[:2000], style="dim")
                 return False, "verified"
         except (ValueError, KeyError, json.JSONDecodeError):
-            pass
+            import logging
+            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in _seals_checks_1_5.py')
 
     if code == 0 or "Success: no issues found" in out or '"errorCount":0' in out:
         printer.success("Type checks passed.")

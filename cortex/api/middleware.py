@@ -270,7 +270,8 @@ class SecurityFraudMiddleware(BaseHTTPMiddleware):
                     with open(self.log_path, "a", encoding="utf-8") as f:
                         f.write("".join(data_lines))
                 except OSError:
-                    pass
+                    import logging
+                    logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in middleware.py')
 
             # 1 thread spin-up per interval, not per attack request
             await asyncio.to_thread(_write_all, lines)
@@ -345,7 +346,8 @@ class ImmuneMiddleware(BaseHTTPMiddleware):
                             content={"error": "Payload rejected by Immune System (Data Poisoning)"},
                         )
                 except ImportError:
-                    pass
+                    import logging
+                    logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in middleware.py')
 
                 # Reconstruct stream since we consumed it
                 async def receive():

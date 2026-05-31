@@ -200,7 +200,8 @@ def semantic_search_sync(
             try:
                 content = enc.decrypt_str(content, tenant_id=tenant_id)
             except (ValueError, OSError):
-                pass
+                import logging
+                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in vector.py')
 
         score = 1.0 - (row[7] if row[7] else 0.0)
         results.append(

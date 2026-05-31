@@ -29,7 +29,8 @@ class FSEntropyOracle:
             try:
                 await self._measure_entropy()
             except Exception:
-                pass
+                import logging
+                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in fs_entropy_oracle.py')
             await asyncio.sleep(self.poll_interval)
 
     async def stop(self) -> None:

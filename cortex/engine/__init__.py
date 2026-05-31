@@ -227,7 +227,8 @@ class CortexEngine(
                                     try:
                                         c._connection.close()
                                     except Exception:
-                                        pass
+                                        import logging
+                                        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in __init__.py')
                                     c._connection = None
                                 return _STOP_RUNNING_SENTINEL
 
@@ -243,12 +244,14 @@ class CortexEngine(
                     try:
                         await conn.close()
                     except Exception:
-                        pass
+                        import logging
+                        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in __init__.py')
                 else:
                     try:
                         asyncio.run_coroutine_threadsafe(conn.close(), conn_loop)
                     except Exception:
-                        pass
+                        import logging
+                        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in __init__.py')
 
             self._conns_by_loop.clear()
         self.mac_maestro = None  # type: ignore

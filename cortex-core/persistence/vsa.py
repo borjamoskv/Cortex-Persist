@@ -15,7 +15,8 @@ from .base import SovereignResource, _setup_sqlite_pragmas, DB_PATH, VSA_BIN_PAT
 try:
     import cortex_rs
 except ImportError:
-    pass
+    import logging
+    logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in vsa.py')
 
 class VSAMemory(SovereignResource):
     """L2 Sovereign Vector Symbolic Architecture (VSA) Substrate & SQLite Semantic Knowledge Base."""
@@ -31,25 +32,29 @@ class VSAMemory(SovereignResource):
             try:
                 self._tensor.release()
             except ValueError:
-                pass
+                import logging
+                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in vsa.py')
             self._tensor = None
         if hasattr(self, "_base_view") and self._base_view is not None:
             try:
                 self._base_view.release()
             except ValueError:
-                pass
+                import logging
+                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in vsa.py')
             self._base_view = None
         if hasattr(self, "_mmap_tensor") and self._mmap_tensor is not None:
             try:
                 self._mmap_tensor.close()
             except ValueError:
-                pass
+                import logging
+                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in vsa.py')
             self._mmap_tensor = None
         if hasattr(self, "_f") and self._f is not None:
             try:
                 self._f.close()
             except OSError:
-                pass
+                import logging
+                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in vsa.py')
             self._f = None
         super().close()
 

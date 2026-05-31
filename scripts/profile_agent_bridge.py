@@ -347,7 +347,8 @@ async def main():
                         row = await cursor.fetchone()
                         tx_count = row[0] if row else 0
                 except Exception:
-                    pass
+                    import logging
+                    logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in profile_agent_bridge.py')
 
                 le_count = 0
                 try:
@@ -355,7 +356,8 @@ async def main():
                         row = await cursor.fetchone()
                         le_count = row[0] if row else 0
                 except Exception:
-                    pass
+                    import logging
+                    logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in profile_agent_bridge.py')
 
                 transactions_checked = tx_count + le_count
 
@@ -369,7 +371,8 @@ async def main():
                         if row and row[0]:
                             latest_tx_hash = row[0]
                 except Exception:
-                    pass
+                    import logging
+                    logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in profile_agent_bridge.py')
 
                 latest_le_hash = None
                 try:
@@ -380,7 +383,8 @@ async def main():
                         if row and row[0]:
                             latest_le_hash = row[0]
                 except Exception:
-                    pass
+                    import logging
+                    logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in profile_agent_bridge.py')
 
                 if latest_le_hash:
                     latest_hash = latest_le_hash
@@ -396,7 +400,8 @@ async def main():
                         row = await cursor.fetchone()
                         mr_count = row[0] if row else 0
                 except Exception:
-                    pass
+                    import logging
+                    logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in profile_agent_bridge.py')
 
                 lc_count = 0
                 try:
@@ -404,7 +409,8 @@ async def main():
                         row = await cursor.fetchone()
                         lc_count = row[0] if row else 0
                 except Exception:
-                    pass
+                    import logging
+                    logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in profile_agent_bridge.py')
 
                 merkle_roots_checked = mr_count + lc_count
 
@@ -414,7 +420,8 @@ async def main():
                         row = await cursor.fetchone()
                         integrity_checks = row[0] if row else 0
                 except Exception:
-                    pass
+                    import logging
+                    logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in profile_agent_bridge.py')
 
                 signals_processed = 0
                 try:
@@ -422,7 +429,8 @@ async def main():
                         row = await cursor.fetchone()
                         signals_processed = row[0] if row else 0
                 except Exception:
-                    pass
+                    import logging
+                    logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in profile_agent_bridge.py')
 
             # Audit both validation surfaces (SovereignLedger and LedgerVerifier) in parallel
             loop = asyncio.get_running_loop()

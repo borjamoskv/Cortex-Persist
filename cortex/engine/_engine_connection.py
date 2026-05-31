@@ -101,7 +101,8 @@ class ConnectionMixin:
                     try:
                         await conn.close()
                     except Exception:
-                        pass
+                        import logging
+                        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in _engine_connection.py')
                     self._conns_by_loop.pop(current_loop, None)
                     conn = None
                 else:
@@ -173,7 +174,8 @@ class ConnectionMixin:
             conn.load_extension(sqlite_vec.loadable_path())
             conn.enable_load_extension(False)
         except (AttributeError, OSError):
-            pass
+            import logging
+            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in _engine_connection.py')
         return conn
 
     async def init_db(self) -> None:

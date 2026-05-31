@@ -52,11 +52,13 @@ async def event_generator(
                         else sig.json(),
                     }
             except Exception:
-                pass
+                import logging
+                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in events.py')
 
             await asyncio.sleep(1.0)
     except asyncio.CancelledError:
-        pass
+        import logging
+        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in events.py')
 
 
 @events_router.get("/v1/events/stream")

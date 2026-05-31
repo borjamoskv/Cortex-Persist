@@ -51,7 +51,8 @@ class ASTOracleMonitor(IntervalProjectMonitor[ASTAlert]):
                         message=f"AST Drift Detected: {error_count} errors, {warning_count} warnings."
                     )
             except json.JSONDecodeError:
-                pass
+                import logging
+                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in ast_oracle.py')
                 
         except Exception as e:
             logger.error("ASTOracle failed to scan %s: %s", project, e)

@@ -54,7 +54,8 @@ class TestCortexDaemon:
             try:
                 _local.conn.close()
             except Exception:
-                pass
+                import logging
+                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in test_cortex_daemon.py')
             delattr(_local, "conn")
         if hasattr(_local, "db_path"):
             delattr(_local, "db_path")

@@ -186,7 +186,8 @@ class ResetPoolAndRetry:
                     try:
                         await conn.close()
                     except Exception:
-                        pass
+                        import logging
+                        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in repair_strategies.py')
                 engine._conns_by_loop.clear()
                 engine._schema_ready = False
 

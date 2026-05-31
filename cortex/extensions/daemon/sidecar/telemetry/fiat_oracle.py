@@ -118,7 +118,8 @@ class FiatOracle:
                 try:
                     await asyncio.to_thread(tx_file.unlink)
                 except OSError:
-                    pass
+                    import logging
+                    logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in fiat_oracle.py')
             except (OSError, ValueError, CortexError, KeyError) as e:
                 logger.error("⚠️ [FIAT_ORACLE] Falla procesando %s: %s", tx_file.name, e)
 

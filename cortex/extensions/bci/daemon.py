@@ -138,7 +138,8 @@ class BCI_Transmitter:
                 writer.close()
                 await writer.wait_closed()
             except UnboundLocalError:
-                pass
+                import logging
+                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in daemon.py')
 
 
 # -----------------------

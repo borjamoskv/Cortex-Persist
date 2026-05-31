@@ -87,7 +87,8 @@ class SemanticMutator:
             try:
                 await self._worker_task
             except asyncio.CancelledError:
-                pass
+                import logging
+                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in semantic_ram.py')
             except Exception as e:
                 logger.error("SemanticMutator shutdown error: %s", e)
             if hasattr(self._pool, "shutdown"):
@@ -315,7 +316,8 @@ class DynamicSemanticSpace:
             try:
                 await self._heartbeat_task
             except asyncio.CancelledError:
-                pass
+                import logging
+                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in semantic_ram.py')
             except Exception as e:
                 logger.error("DynamicSemanticSpace shutdown error: %s", e)
             logger.info("DynamicSemanticSpace: Autonomic heartbeat collapsed (Stopped).")

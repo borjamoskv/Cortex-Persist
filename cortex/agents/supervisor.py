@@ -196,7 +196,8 @@ class Supervisor:
             try:
                 await self._monitor_task
             except asyncio.CancelledError:
-                pass
+                import logging
+                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in supervisor.py')
 
         for agent_id in list(self._agents.keys()):
             try:

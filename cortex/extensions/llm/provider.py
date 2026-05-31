@@ -298,7 +298,8 @@ class LLMProvider(BaseProvider):
                             if adapter_path := reg.get("adapter_path"):
                                 return adapter_path
                 except Exception:
-                    pass
+                    import logging
+                    logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in provider.py')
         if self._intent_model_map:
             resolved = self._intent_model_map.get(intent, self._model)
             if resolved != self._model:

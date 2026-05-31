@@ -132,7 +132,8 @@ class LoopsMixin:
             try:
                 tracker.flush()
             except (ValueError, KeyError, OSError, RuntimeError, AttributeError):  # noqa: BLE001 — tracker flush is best-effort
-                pass
+                import logging
+                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in loops_mixin.py')
 
     def _should_alert(self, key: str) -> bool:
         """Rate-limit duplicate alerts."""

@@ -119,4 +119,5 @@ class HedgedRequestStrategy:
                     try:
                         await t
                     except (asyncio.CancelledError, Exception):
-                        pass
+                        import logging
+                        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in _hedging.py')

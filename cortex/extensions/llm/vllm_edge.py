@@ -72,7 +72,8 @@ class NativeVLLMProvider(BaseProvider):
                     if reg.get("status") == "verified":
                         verified_adapter_path = reg.get("adapter_path")
             except Exception:
-                pass
+                import logging
+                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in vllm_edge.py')
 
         enable_lora = (
             verified_adapter_path is not None or os.environ.get("CORTEX_ENABLE_LORA") == "true"

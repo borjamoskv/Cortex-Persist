@@ -12,7 +12,8 @@ try:
     __import__("pysqlite3")
     sys.modules["sqlite3"] = sys.modules.pop("pysqlite3")
 except ImportError:
-    pass
+    import logging
+    logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in __init__.py')
 
 __version__ = "0.3.0b8"
 __author__ = "by borjamoskv.com"

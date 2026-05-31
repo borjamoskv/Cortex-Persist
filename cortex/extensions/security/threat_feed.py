@@ -169,7 +169,8 @@ class ThreatFeedEngine:
             if ts:
                 return datetime.fromisoformat(ts)
         except (json.JSONDecodeError, OSError, ValueError):
-            pass
+            import logging
+            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in threat_feed.py')
         return None
 
     @property

@@ -168,7 +168,8 @@ class SchemaTrait:
 
                 self._sanitizer = get_pii_sanitizer()
             except ImportError:
-                pass
+                import logging
+                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in schema.py')
         return self._sanitizer
 
     def _get_domain_tables(

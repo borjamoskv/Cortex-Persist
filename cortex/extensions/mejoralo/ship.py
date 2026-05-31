@@ -115,7 +115,8 @@ def _seal_a11y(p: Path, stack: str) -> ShipSeal:
             if "<img" in content and 'alt="' not in content:
                 a11y_findings.append(f"{hf.name}: missing alt tags")
         except OSError:
-            pass
+            import logging
+            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in ship.py')
 
     return ShipSeal(
         name="A11y 100%",

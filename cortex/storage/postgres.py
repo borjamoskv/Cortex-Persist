@@ -204,7 +204,8 @@ class PostgresBackend:
                     user_part = pre_at.rsplit(":", 1)[0]
                     return f"{user_part}:***@{post_at}"
             except (IndexError, ValueError):
-                pass
+                import logging
+                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in postgres.py')
         return dsn
 
     async def execute(self, sql: str, params: tuple[Any, ...] = ()) -> list[dict[str, Any]]:

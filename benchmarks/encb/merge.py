@@ -138,14 +138,16 @@ def merge_scalar(local: BeliefObject, remote: BeliefObject) -> BeliefObject:
             try:
                 values.append(float(ev.value))
             except (ValueError, TypeError):
-                pass
+                import logging
+                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in merge.py')
         else:
             try:
                 parts = ev.payload_hash.split(":")
                 if len(parts) >= 2:
                     values.append(float(parts[1]))
             except (ValueError, IndexError):
-                pass
+                import logging
+                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in merge.py')
 
     if values:
         result_value = statistics.median(values)

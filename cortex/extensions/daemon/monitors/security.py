@@ -150,7 +150,8 @@ class SecurityMonitor:
                 (alert.ip_address, alert.summary, alert.confidence),
             )
         except sqlite3.IntegrityError:
-            pass
+            import logging
+            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in security.py')
 
     def check(self) -> list[SecurityAlert]:
         """Synchronous wrapper for check_async."""

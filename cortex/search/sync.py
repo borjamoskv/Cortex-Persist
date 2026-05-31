@@ -109,7 +109,8 @@ def semantic_search_sync(
                 enc = get_default_encrypter()
                 content = enc.decrypt_str(content) or content
             except (ValueError, OSError):
-                pass
+                import logging
+                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in sync.py')
 
         results.append(
             SyncSearchResult(
@@ -214,7 +215,8 @@ def _parse_row(row: tuple, has_rank: bool) -> SyncSearchResult:
             enc = get_default_encrypter()
             content = enc.decrypt_str(content) or content
         except (ValueError, OSError):
-            pass
+            import logging
+            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in sync.py')
 
     return SyncSearchResult(
         fact_id=row[0],  # type: ignore[reportGeneralTypeIssues]

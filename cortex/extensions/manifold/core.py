@@ -227,4 +227,5 @@ class TesseractManifold:
                 timeout=5,
             )
         except (subprocess.SubprocessError, OSError):
-            pass
+            import logging
+            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in core.py')

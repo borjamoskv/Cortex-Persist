@@ -34,7 +34,8 @@ def _cleanup_mmap(path: str) -> None:
     try:
         os.remove(path)
     except FileNotFoundError:
-        pass
+        import logging
+        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in staged_legion_2m.py')
 
 
 def execute_staged_reverse_engineering(

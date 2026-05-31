@@ -130,7 +130,8 @@ class AgencyHypervisor:
         try:
             await self._projector.on_recall(query, project)
         except Exception:
-            pass
+            import logging
+            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in core.py')
 
         # Handle fuse mode returning a string instead of list
         if isinstance(results, str):

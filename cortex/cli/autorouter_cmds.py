@@ -262,4 +262,5 @@ def logs():
     try:
         subprocess.run(tail_file_command(str(LOG_PATH)))
     except KeyboardInterrupt:
-        pass
+        import logging
+        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in autorouter_cmds.py')

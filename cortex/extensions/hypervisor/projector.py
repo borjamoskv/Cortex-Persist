@@ -78,7 +78,8 @@ class EventProjector:
         try:
             await self._signal_endocrine("awareness", 0.1)
         except Exception:
-            pass
+            import logging
+            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in projector.py')
 
     # ── Private side-effect implementations ───────────────────────
 

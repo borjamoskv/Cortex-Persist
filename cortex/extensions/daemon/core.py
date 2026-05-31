@@ -261,7 +261,8 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
             self._event_bus = DistributedEventBus()
             logger.info("📡 DistributedEventBus ENABLED")
         except ImportError:
-            pass
+            import logging
+            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in core.py')
 
         # 3. Scheduler — cron/interval task execution
         self.scheduler = None
@@ -421,7 +422,8 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
             try:
                 loop.add_signal_handler(sig, self._signal_shutdown)
             except (NotImplementedError, RuntimeError):
-                pass
+                import logging
+                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in core.py')
         logger.info("🚀 MOSKV-1 Sovereign Daemon starting (interval=%ds)", interval)
         if self.hot_state is not None:
             self.hot_state.set("daemon.mode", "sovereign")
@@ -490,7 +492,8 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin):
         try:
             await asyncio.gather(*tasks, return_exceptions=True)
         except asyncio.CancelledError:
-            pass
+            import logging
+            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in core.py')
         finally:
             await self._sovereign_shutdown()
 

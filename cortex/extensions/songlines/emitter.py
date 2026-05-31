@@ -56,7 +56,8 @@ class ResonanceEmitter:
                 logger.info("Embedded ghost %s on %s (os.setxattr)", ghost_id, target_file.name)
                 return
             except OSError:
-                pass
+                import logging
+                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in emitter.py')
 
         # Primary Fallback: /usr/bin/xattr CLI (macOS)
         try:
@@ -71,7 +72,8 @@ class ResonanceEmitter:
             logger.info("Embedded ghost %s on %s (xattr cli)", ghost_id, target_file.name)
             return
         except (subprocess.SubprocessError, FileNotFoundError):
-            pass
+            import logging
+            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in emitter.py')
 
         # Final Fallback: .songlines manifest
         self._fallback_embed(target_file, attr_name, encoded_payload)
@@ -85,7 +87,8 @@ class ResonanceEmitter:
                 with open(songline_file) as f:
                     data = json.load(f)
             except (json.JSONDecodeError, OSError):
-                pass
+                import logging
+                logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in emitter.py')
 
         file_key = target_file.name
         if file_key not in data:

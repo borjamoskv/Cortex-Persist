@@ -63,7 +63,8 @@ class SecurityVisualSync:
             else:
                 loop.run_until_complete(self.emit_signal(event_type, details))
         except (RuntimeError, OSError):
-            pass
+            import logging
+            logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in security_sync.py')
 
 
 # Global Singleton

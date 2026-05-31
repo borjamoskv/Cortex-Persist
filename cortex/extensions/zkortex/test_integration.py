@@ -151,7 +151,8 @@ def test_range_proof_honesty() -> None:
         prove_range(200, 10, 100)
         raise AssertionError("Should have raised ValueError")
     except ValueError:
-        pass
+        import logging
+        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in test_integration.py')
 
     print("✓ test_range_proof_honesty PASSED")
 
