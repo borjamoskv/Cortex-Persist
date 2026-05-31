@@ -14,7 +14,7 @@ except ImportError:
     print("[WARNING] SovereignLLM not found in path, falling back to basic extraction without semantic tagging.")
 
 
-async def extract_comments_dump(url: str) -> List[Dict[str, Any]]:
+async def extract_comments_dump(url: str) -> list[dict[str, Any]]:
     """Extrae metadatos y comentarios de forma asíncrona usando yt-dlp."""
     print(f"[SYS] Extrayendo DOM de comentarios asíncronamente para {url}...")
     cmd = ["yt-dlp", "--get-comments", "--dump-json", "--no-warnings", "--skip-download", url]
@@ -43,7 +43,7 @@ async def extract_comments_dump(url: str) -> List[Dict[str, Any]]:
         return []
 
 
-async def analyze_with_llm(comments: List[str]) -> Dict[str, str]:
+async def analyze_with_llm(comments: list[str]) -> dict[str, str]:
     """Usa el LLM Soberano para categorizar la toxicidad de los comentarios en lote."""
     if not SovereignLLM:
         return {}
