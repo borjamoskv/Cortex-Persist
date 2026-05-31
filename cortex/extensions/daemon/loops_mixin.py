@@ -72,7 +72,7 @@ class LoopsMixin:
         """Runs the Entropic Wake Daemon event loop."""
         logger.info("🌌 Entropic Wake thread started")
         try:
-            self.entropic_wake_daemon.run_loop()
+            asyncio.run(self.entropic_wake_daemon.run_loop())
         except Exception as e:  # noqa: BLE001 — top-level loop crash barrier
             logger.error("Entropic Wake loop error: %s", e)
 
@@ -215,3 +215,143 @@ class LoopsMixin:
                 )
 
             self._stop_event.wait(timeout=current_interval)
+
+    async def _run_neural_loop_async(self) -> None:
+        """Fast polling loop for zero-latency neural intent ingestion (Async)."""
+        logger.info("🧠 Neural-Bandwidth Sync task started (1Hz)")
+        while not self._shutdown:
+            try:
+                alerts = await asyncio.to_thread(self.neural_monitor.check)
+                if alerts:
+                    self._alert_neural(alerts)
+            except Exception as e:  # noqa: BLE001
+                logger.debug("Neural loop error: %s", e)
+            try:
+                await asyncio.sleep(1.0)
+            except asyncio.CancelledError:
+                break
+
+    async def _run_ast_oracle_loop_async(self) -> None:
+        """Runs the AST Oracle event loop (Async)."""
+        logger.info("👁️ AST Oracle task started")
+        task = asyncio.create_task(self.ast_oracle.start())
+        while not self._shutdown:
+            try:
+                await asyncio.sleep(1.0)
+            except asyncio.CancelledError:
+                break
+        await self.ast_oracle.stop()
+        await task
+
+    async def _run_heartbeat_loop_async(self) -> None:
+        """Runs the HeartbeatDaemon event loop (Async)."""
+        if not self.heartbeat_daemon:
+            return
+        logger.info("❤️  Heartbeat task started")
+        task = asyncio.create_task(self.heartbeat_daemon.start())
+        while not self._shutdown:
+            try:
+                await asyncio.sleep(1.0)
+            except asyncio.CancelledError:
+                break
+        await self.heartbeat_daemon.stop()
+        await task
+
+    async def _run_entropic_wake_loop_async(self) -> None:
+        """Runs the Entropic Wake Daemon event loop (Async)."""
+        logger.info("🌌 Entropic Wake task started")
+        try:
+            await self.entropic_wake_daemon.run_loop()
+        except Exception as e:  # noqa: BLE001
+            logger.error("Entropic Wake loop error: %s", e)
+
+    async def _run_sentinel_oracle_loop_async(self) -> None:
+        """Runs the Sentinel Oracle polling loop (Async)."""
+        logger.info("🛡️ CORTEX Sentinel Oracle task started")
+        try:
+            await self.sentinel_oracle.run_loop()
+        except Exception as e:  # noqa: BLE001
+            logger.error("Sentinel Oracle loop error: %s", e)
+
+    async def _run_frontier_loop_async(self) -> None:
+        """Runs the Frontier Daemon event loop (Async)."""
+        logger.info("🚀 Frontier task started")
+        try:
+            await self.frontier_daemon.run_loop()
+        except Exception as e:  # noqa: BLE001
+            logger.error("Frontier loop error: %s", e)
+
+    async def _run_iot_oracle_loop_async(self) -> None:
+        """Runs the IoT Oracle event loop (Async)."""
+        logger.info("📡 IoT Oracle task started")
+        task = asyncio.create_task(self.iot_oracle.start())
+        while not self._shutdown:
+            try:
+                await asyncio.sleep(1.0)
+            except asyncio.CancelledError:
+                break
+        await self.iot_oracle.stop()
+        await task
+
+    async def _run_zero_prompting_loop_async(self) -> None:
+        """Runs the Zero-Prompting Evolution Daemon event loop (Async)."""
+        logger.info("🧠 Zero-Prompting task started")
+        try:
+            await self.zero_prompting_daemon.run_loop()
+        except Exception as e:  # noqa: BLE001
+            logger.error("Zero-Prompting loop error: %s", e)
+
+    async def _run_epistemic_breaker_loop_async(self) -> None:
+        """Runs the Epistemic Circuit Breaker Daemon event loop (Async)."""
+        logger.info("🛡️ Epistemic Breaker task started")
+        try:
+            await self.epistemic_breaker_daemon.run()
+        except Exception as e:  # noqa: BLE001
+            logger.error("Epistemic Breaker loop error: %s", e)
+
+    async def _run_health_loop_async(self) -> None:
+        """Periodic health monitoring via Health Index (Async)."""
+        logger.info("🏥 Health Monitor task started (5min interval)")
+
+        from cortex.extensions.daemon.health_loop import HealthLoop
+
+        db_path = ""
+        if self._shared_engine:
+            db_path = str(getattr(self._shared_engine, "_db_path", ""))
+
+        health = HealthLoop(
+            db_path=db_path,
+            notify_fn=(self._send_notification if hasattr(self, "_send_notification") else None),
+        )
+
+        base_interval = 300.0
+        max_interval = 3600.0
+        current_interval = base_interval
+
+        while not self._shutdown:
+            try:
+                data = await asyncio.to_thread(health.tick)
+                if data is None:
+                    current_interval = min(current_interval * 2, max_interval)
+                    logger.warning(
+                        "Health check failed. Backing off to %.1fs",
+                        current_interval,
+                    )
+                else:
+                    if current_interval > base_interval:
+                        logger.info(
+                            "Health check recovered. Resetting interval to %.1fs", base_interval
+                        )
+                    current_interval = base_interval
+                    if self._shared_engine:
+                        await asyncio.to_thread(health.persist_snapshot, self._shared_engine, data)
+            except Exception as e:  # noqa: BLE001
+                current_interval = min(current_interval * 2, max_interval)
+                logger.error(
+                    "Health loop critical error: %s. Backing off to %.1fs", e, current_interval
+                )
+
+            try:
+                await asyncio.sleep(current_interval)
+            except asyncio.CancelledError:
+                break
