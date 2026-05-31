@@ -1,7 +1,8 @@
 import sqlite3
 import sys
 
-DB_PATH = 'influencer_audit_v1.db'
+DB_PATH = "influencer_audit_v1.db"
+
 
 def run_analytical_suite():
     """
@@ -11,14 +12,14 @@ def run_analytical_suite():
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print(" CORTEX PERSISTENCE AUDIT: ANALYTICS SUITE (C5-REAL)")
-    print("="*60)
+    print("=" * 60)
 
     # Query 1: Rage-to-Revenue Ratio (Conversión del Agravio)
     print("\n[0x01_ANALYSIS] Ratio de Conversión del Agravio (Rage-to-Revenue):")
     try:
-        cursor.execute('''
+        cursor.execute("""
             SELECT 
                 v.creador_id,
                 COUNT(DISTINCT v.video_id) as total_videos,
@@ -31,11 +32,13 @@ def run_analytical_suite():
             FROM videos_fuente v
             LEFT JOIN eventos_victimismo ev ON v.video_id = ev.video_id
             GROUP BY v.creador_id;
-        ''')
+        """)
         rows = cursor.fetchall()
         for r in rows:
             print(f"  - Creador: {r['creador_id']}")
-            print(f"    Videos Totales: {r['total_videos']} | Con Victimismo: {r['videos_con_victimismo']}")
+            print(
+                f"    Videos Totales: {r['total_videos']} | Con Victimismo: {r['videos_con_victimismo']}"
+            )
             print(f"    Víctima -> Monetización (CTA): {r['victimismo_con_cta']}")
             print(f"    Tasa de Conversión: {r['conversion_rate']}%")
     except Exception as e:
@@ -44,7 +47,7 @@ def run_analytical_suite():
     # Query 2: Induced Toxicity Index (Índice de Toxicidad Inducida)
     print("\n[0x02_ANALYSIS] Índice de Toxicidad Inducida (Acoso en comentarios vs Victimismo):")
     try:
-        cursor.execute('''
+        cursor.execute("""
             SELECT 
                 CASE WHEN ev.victim_id IS NOT NULL THEN 'Vídeo con Victimismo/Queja' ELSE 'Vídeo Neutral/Otros' END as tipo_video,
                 COUNT(DISTINCT v.video_id) as total_videos,
@@ -54,7 +57,7 @@ def run_analytical_suite():
             LEFT JOIN eventos_victimismo ev ON v.video_id = ev.video_id
             LEFT JOIN eventos_acoso ea ON v.video_id = ea.video_id
             GROUP BY tipo_video;
-        ''')
+        """)
         rows = cursor.fetchall()
         for r in rows:
             print(f"  - [{r['tipo_video']}]:")
@@ -66,17 +69,17 @@ def run_analytical_suite():
     # Query 3: Disonancias Filosóficas Documentadas (Broicism Friction)
     print("\n[0x03_ANALYSIS] Fricción de Coherencia Intelectual (Disonancias):")
     try:
-        cursor.execute('''
+        cursor.execute("""
             SELECT COUNT(*) as total_contradicciones FROM contradicciones_documentadas;
-        ''')
-        total = cursor.fetchone()['total_contradicciones']
+        """)
+        total = cursor.fetchone()["total_contradicciones"]
         print(f"  - Total contradicciones documentadas en el Ledger: {total}")
-        
-        cursor.execute('''
+
+        cursor.execute("""
             SELECT axioma_filosofico_declarado, accion_real_documentada, evidencia_url 
             FROM contradicciones_documentadas
             LIMIT 5;
-        ''')
+        """)
         rows = cursor.fetchall()
         for idx, r in enumerate(rows, 1):
             print(f"    {idx}. Axioma: {r['axioma_filosofico_declarado']}")
@@ -85,8 +88,9 @@ def run_analytical_suite():
     except Exception as e:
         print(f"  [FAIL] Query 3 fallida: {e}")
 
-    print("="*60 + "\n")
+    print("=" * 60 + "\n")
     conn.close()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     run_analytical_suite()
