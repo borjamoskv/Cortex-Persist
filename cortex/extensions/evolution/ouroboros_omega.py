@@ -372,6 +372,25 @@ class OuroborosOmega:
 
         unused_imports = analyzer.imports - analyzer.used_imports
 
+        # Verify unused imports against tests/ directory to prevent systemic necrosis
+        if unused_imports:
+            import subprocess
+            verified_unused = set()
+            tests_dir = self.project_root / "tests"
+            if tests_dir.exists():
+                for imp in unused_imports:
+                    try:
+                        # Use ripgrep to check if the symbol is used in tests
+                        subprocess.check_output(
+                            ["rg", "-qw", imp, str(tests_dir)],
+                            stderr=subprocess.DEVNULL
+                        )
+                        # If rg finds it (exit 0), it's used in tests -> preserve it
+                        logger.info("Preserving implicitly used import (Test Dependency): %s", imp)
+                    except subprocess.CalledProcessError:
+                        verified_unused.add(imp)
+                unused_imports = verified_unused
+
         # Calculate Entropy & Exergy (Landauer's Razor)
         # 1 bit of unstructured data ~ k_B T ln(2)
         # We consider unused imports and dead code as pure entropy generation (dS_gen)

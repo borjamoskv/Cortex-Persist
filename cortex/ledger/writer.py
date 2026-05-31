@@ -39,6 +39,12 @@ class LedgerWriter:
         self.queue = queue
         self.origin_policy = origin_policy
         self.replay_policy = replay_policy
+        
+        try:
+            from cortex_rs import OuroborosStateAccumulator
+            self.accumulator = OuroborosStateAccumulator()
+        except ImportError:
+            self.accumulator = None
 
     def append(self, event: LedgerEvent) -> str:
         if self.origin_policy is not None:
@@ -56,6 +62,13 @@ class LedgerWriter:
             cursor = conn.execute("SELECT hash FROM ledger_events ORDER BY rowid DESC LIMIT 1")
             row = cursor.fetchone()
             prev_hash = row["hash"] if row else "GENESIS"
+
+            # 1.5 Accumulate agent state if enabled
+            if self.accumulator is not None:
+                self.accumulator.append_state(event.actor, event.to_json())
+                if "ouroboros" not in event.metadata:
+                    event.metadata["ouroboros"] = {}
+                event.metadata["ouroboros"]["accumulator_root"] = self.accumulator.get_root()
 
             # 2. Compute current hash
             new_hash = event.compute_hash(prev_hash)
