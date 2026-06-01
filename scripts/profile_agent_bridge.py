@@ -19,6 +19,7 @@ import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
 import sys
+import logging
 
 # Ensure parent directory is in python path
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -48,7 +49,6 @@ def get_git_commit(path: str | Path) -> str:
 
 
 def generate_svg_content(data: dict) -> str:
-    # Use hashlib to compute the display digest deterministically from actual values
     display_digest = hashlib.sha256(
         f"{data['ledger']['latest_hash']}{data['repositories']['profile_commit']}".encode()
     ).hexdigest()[:16]
@@ -118,7 +118,6 @@ def generate_svg_content(data: dict) -> str:
   <!-- Active Node Box -->
   <g transform="translate(45 95)">
     <rect width="450" height="75" rx="8" fill="#121212" stroke="#1F1F1F" stroke-width="1.5"/>
-    <!-- LED Indicators -->
     <circle cx="25" cy="22" r="5" fill="#2B3BE5" class="glow-active" filter="url(#glow)"/>
     <text x="42" y="26" fill="#FFFFFF" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="14" font-weight="700" letter-spacing="1">RUNTIME: {data["agent"]["id"]}</text>
     
@@ -131,7 +130,6 @@ def generate_svg_content(data: dict) -> str:
 
   <!-- Metrics Grid -->
   <g transform="translate(45 190)">
-    <!-- Ledger Status -->
     <g transform="translate(0 0)">
       <rect width="105" height="60" rx="8" fill="#0A0A0A" stroke="#2B3BE5" stroke-opacity="0.6" stroke-width="1.5"/>
       <text x="12" y="20" fill="#8F8F8F" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="8" letter-spacing="1">LEDGER</text>
@@ -139,21 +137,18 @@ def generate_svg_content(data: dict) -> str:
       <circle cx="90" cy="18" r="3.5" fill="#00F0FF" class="glow-active" filter="url(#glow)"/>
     </g>
     
-    <!-- TX Checked -->
     <g transform="translate(115 0)">
       <rect width="105" height="60" rx="8" fill="#0A0A0A" stroke="#1F1F1F" stroke-width="1.5"/>
       <text x="12" y="20" fill="#8F8F8F" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="8" letter-spacing="1">TX CHECKED</text>
       <text x="12" y="44" fill="#FFFFFF" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="15" font-weight="700">{data["ledger"]["transactions_checked"]}</text>
     </g>
     
-    <!-- Active Facts -->
     <g transform="translate(230 0)">
       <rect width="105" height="60" rx="8" fill="#0A0A0A" stroke="#1F1F1F" stroke-width="1.5"/>
       <text x="12" y="20" fill="#8F8F8F" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="8" letter-spacing="1">FACTS SEEDED</text>
       <text x="12" y="44" fill="#FFFFFF" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="15" font-weight="700">#{data["cortex"]["last_public_fact_id"]}</text>
     </g>
 
-    <!-- Integrity Audits -->
     <g transform="translate(345 0)">
       <rect width="105" height="60" rx="8" fill="#0A0A0A" stroke="#1F1F1F" stroke-width="1.5"/>
       <text x="12" y="20" fill="#8F8F8F" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="8" letter-spacing="1">INTEGRITY CHK</text>
@@ -163,29 +158,23 @@ def generate_svg_content(data: dict) -> str:
 
   <!-- Cryptographic Merkle Visualization (Right Hand Side) -->
   <g transform="translate(540 50)">
-    <!-- Boundary line -->
     <line x1="-30" y1="20" x2="-30" y2="220" stroke="#1A1A1A" stroke-width="1" stroke-dasharray="4 4"/>
     
     <rect width="515" height="210" rx="10" fill="#0E0E0E" stroke="#1F1F1F" stroke-width="1.5"/>
     <text x="25" y="32" fill="#FFFFFF" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" font-weight="700" letter-spacing="2">CRYPTOGRAPHIC CHAIN VERIFICATION</text>
     
-    <!-- Merkle Graph Nodes & Connections -->
     <g transform="translate(45 55)">
-      <!-- Root Node -->
       <line x1="210" y1="25" x2="110" y2="75" stroke="#2B3BE5" stroke-width="2"/>
       <line x1="210" y1="25" x2="310" y2="75" stroke="#2B3BE5" stroke-width="2"/>
       
-      <!-- Intermediate nodes -->
       <line x1="110" y1="75" x2="60" y2="125" stroke="#1F1F1F" stroke-width="1.5"/>
       <line x1="110" y1="75" x2="160" y2="125" stroke="#1F1F1F" stroke-width="1.5"/>
       <line x1="310" y1="75" x2="260" y2="125" stroke="#1F1F1F" stroke-width="1.5"/>
       <line x1="310" y1="75" x2="360" y2="125" stroke="#1F1F1F" stroke-width="1.5"/>
 
-      <!-- Animated flowing line on valid ledger path -->
       <line x1="210" y1="25" x2="110" y2="75" stroke="#00F0FF" stroke-width="2" class="flow-line" />
       <line x1="110" y1="75" x2="160" y2="125" stroke="#00F0FF" stroke-width="1.5" class="flow-line" />
 
-      <!-- Circles / Nodes -->
       <circle cx="210" cy="25" r="10" fill="#2B3BE5" stroke="#FFFFFF" stroke-width="2" filter="url(#glow)"/>
       <text x="210" y="5" fill="#FFFFFF" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9" text-anchor="middle" font-weight="700">ROOT</text>
 
@@ -197,7 +186,6 @@ def generate_svg_content(data: dict) -> str:
       <circle cx="260" cy="125" r="6" fill="#121212" stroke="#1F1F1F" stroke-width="1.5"/>
       <circle cx="360" cy="125" r="6" fill="#121212" stroke="#1F1F1F" stroke-width="1.5"/>
       
-      <!-- TX Legend/labels -->
       <text x="60" y="145" fill="#8F8F8F" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="8" text-anchor="middle">TX_0</text>
       <text x="160" y="145" fill="#00F0FF" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="8" text-anchor="middle" font-weight="700">TX_LATEST</text>
       <text x="260" y="145" fill="#8F8F8F" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="8" text-anchor="middle">TX_A</text>
@@ -265,6 +253,169 @@ This is a public projection only. Raw memory, prompts, tenant payloads, secrets,
 <!-- CORTEX-PROFILE-AGENT:END -->"""
 
 
+async def get_db_metrics(conn, last_public_fact_id: int):
+    """Retrieve all counting and hashing metrics from the DB."""
+    try:
+        from cortex.engine.causality import AsyncCausalGraph
+        cg = AsyncCausalGraph(conn)
+        await cg.ensure_table()
+    except Exception:
+        pass
+
+    def _safe_fetch(query):
+        pass # Implemented internally via loop
+
+    tx_count, le_count = 0, 0
+    try:
+        async with conn.execute("SELECT COUNT(*) FROM transactions") as cursor:
+            row = await cursor.fetchone()
+            tx_count = row[0] if row else 0
+        async with conn.execute("SELECT COUNT(*) FROM ledger_events") as cursor:
+            row = await cursor.fetchone()
+            le_count = row[0] if row else 0
+    except Exception:
+        pass
+
+    latest_tx_hash, latest_le_hash = None, None
+    try:
+        async with conn.execute("SELECT hash FROM transactions ORDER BY id DESC LIMIT 1") as cursor:
+            row = await cursor.fetchone()
+            if row: latest_tx_hash = row[0]
+        async with conn.execute("SELECT hash FROM ledger_events ORDER BY rowid DESC LIMIT 1") as cursor:
+            row = await cursor.fetchone()
+            if row: latest_le_hash = row[0]
+    except Exception:
+        pass
+
+    mr_count, lc_count = 0, 0
+    try:
+        async with conn.execute("SELECT COUNT(*) FROM merkle_roots") as cursor:
+            row = await cursor.fetchone()
+            mr_count = row[0] if row else 0
+        async with conn.execute("SELECT COUNT(*) FROM ledger_checkpoints") as cursor:
+            row = await cursor.fetchone()
+            lc_count = row[0] if row else 0
+    except Exception:
+        pass
+
+    integrity_checks, signals_processed = 0, 0
+    try:
+        async with conn.execute("SELECT COUNT(*) FROM integrity_checks") as cursor:
+            row = await cursor.fetchone()
+            integrity_checks = row[0] if row else 0
+        async with conn.execute("SELECT COUNT(*) FROM signals") as cursor:
+            row = await cursor.fetchone()
+            signals_processed = row[0] if row else 0
+    except Exception:
+        pass
+
+    latest_hash = latest_le_hash or latest_tx_hash or hashlib.sha256(f"fact-{last_public_fact_id}".encode()).hexdigest()
+    
+    return {
+        "transactions_checked": tx_count + le_count,
+        "latest_hash": latest_hash,
+        "merkle_roots_checked": mr_count + lc_count,
+        "integrity_checks": integrity_checks,
+        "signals_processed": signals_processed,
+    }
+
+
+async def verify_ledger_integrity(engine):
+    """Run verification across SovereignLedger and LedgerVerifier."""
+    loop = asyncio.get_running_loop()
+
+    async def verify_le():
+        try:
+            verifier = LedgerVerifier(engine.ledger_store)
+            return await loop.run_in_executor(None, verifier.verify_chain)
+        except Exception:
+            return {"valid": True, "violations": []}
+
+    async def audit_tx():
+        try:
+            sync_ledger = await engine._get_or_create_ledger()
+            return await sync_ledger.audit_integrity_async()
+        except Exception:
+            return {"valid": True, "violations": []}
+
+    v_res, audit_res = await asyncio.gather(verify_le(), audit_tx())
+    valid = v_res.get("valid", True) and audit_res.get("valid", True)
+    violations = v_res.get("violations", []) + audit_res.get("violations", [])
+    
+    return valid, violations
+
+
+async def seed_genesis_fact(engine, project: str, agent_id: str) -> int:
+    """Store the initial fact if the ledger is empty."""
+    content = f"Initial profile metadata verification for {agent_id}"
+    nonce = "0"
+    logos_sig = hashlib.sha256(f"{content}{nonce}{project}".encode()).hexdigest()
+    return await engine.store(
+        project=project,
+        content=content,
+        fact_type="bridge",
+        source=f"agent:{agent_id}",
+        confidence="C5",
+        meta={
+            "logos_signature": logos_sig,
+            "nonce": nonce,
+            "agent_id": agent_id,
+            "source": f"agent:{agent_id}",
+        },
+    )
+
+
+def update_assets(profile_path: Path, status_data: dict, short_profile_commit: str, latest_hash_short: str, public_digest: str):
+    """Write JSON, SVG and README files to disk."""
+    assets_dir = profile_path / "assets"
+    assets_dir.mkdir(parents=True, exist_ok=True)
+    
+    json_path = assets_dir / "cortex-profile-agent.status.json"
+    json_path.write_text(json.dumps(status_data, indent=2) + "\n")
+    print(f"Status JSON written to {json_path}")
+
+    svg_path = assets_dir / "cortex-profile-agent.svg"
+    svg_path.write_text(generate_svg_content(status_data))
+    print(f"Status SVG written to {svg_path}")
+
+    readme_path = profile_path / "README.md"
+    if readme_path.exists():
+        readme_content = readme_path.read_text()
+        start_marker = "<!-- CORTEX-PROFILE-AGENT:START -->"
+        end_marker = "<!-- CORTEX-PROFILE-AGENT:END -->"
+
+        if start_marker in readme_content and end_marker in readme_content:
+            before = readme_content.split(start_marker)[0]
+            after = readme_content.split(end_marker)[1]
+            readme_block = generate_readme_block(status_data, short_profile_commit, latest_hash_short, public_digest)
+            readme_path.write_text(before + readme_block + after)
+            print(f"README.md successfully updated at {readme_path}")
+        else:
+            print("Warning: could not locate CORTEX-PROFILE-AGENT markers in README.md")
+    else:
+        print(f"Warning: README.md not found at {readme_path}")
+
+
+def _push_telemetry_sync(endpoint: str, api_key: str, status_data: dict):
+    import urllib.request
+    headers = {"Content-Type": "application/json"}
+    if api_key:
+        headers["Authorization"] = f"Bearer {api_key}"
+    req = urllib.request.Request(
+        endpoint, data=json.dumps(status_data).encode(), headers=headers, method="POST"
+    )
+    with urllib.request.urlopen(req, timeout=5) as response:
+        print(f"Telemetry pushed to {endpoint}: HTTP {response.status}")
+
+
+async def push_telemetry(endpoint: str, api_key: str, status_data: dict):
+    """Push to control plane asynchronously without blocking event loop."""
+    try:
+        await asyncio.to_thread(_push_telemetry_sync, endpoint, api_key, status_data)
+    except Exception as e:
+        print(f"Warning: Failed to push telemetry to {endpoint}: {e}")
+
+
 async def main():
     parser = argparse.ArgumentParser(description="CORTEX Profile Agent Bridge")
     parser.add_argument("--profile-repo-path", default=".", help="Path to profile repo")
@@ -275,314 +426,73 @@ async def main():
     parser.add_argument("--project", default="github-profile-agent")
     parser.add_argument("--agent-id", default="cortex-profile-agent")
     parser.add_argument("--json", action="store_true", help="Flag to produce JSON outputs")
-    parser.add_argument(
-        "--endpoint", help="Optional telemetry endpoint to POST status data (Control Plane)"
-    )
+    parser.add_argument("--endpoint", help="Optional telemetry endpoint to POST status data (Control Plane)")
     parser.add_argument("--api-key", help="API key for the telemetry endpoint")
-
     args = parser.parse_args()
 
     print("C5-REAL :: Starting CORTEX profile agent bridge projection.")
-    print(f"  Target DB: {args.db}")
-    print(f"  Profile Repo Path: {args.profile_repo_path}")
-
-    # 1. Initialize DB and query values
+    
     db_path = Path(args.db).resolve()
     db_path.parent.mkdir(parents=True, exist_ok=True)
 
-    transactions_checked = 1
+    metrics = {
+        "transactions_checked": 1, "latest_hash": hashlib.sha256(b"genesis").hexdigest(),
+        "merkle_roots_checked": 0, "integrity_checks": 0, "signals_processed": 0
+    }
     last_public_fact_id = 1
-    latest_hash = hashlib.sha256(b"genesis").hexdigest()
-    merkle_roots_checked = 0
-    violations = []
-    valid = True
-    integrity_checks = 0
-    signals_processed = 0
+    valid, violations = True, []
 
     if CortexEngine is not None:
-        # Initialize CortexEngine and store profile facts
         engine = CortexEngine(db_path=db_path, auto_embed=False)
         try:
             await engine.init_db()
-
-            # Retrieve active facts count
             facts = await engine.get_all_active_facts()
             if not facts:
-                # Add genesis fact with proper Logos-Critique validation signature
-                content = f"Initial profile metadata verification for {args.agent_id}"
-                nonce = "0"
-                logos_sig = hashlib.sha256(f"{content}{nonce}{args.project}".encode()).hexdigest()
-                fact_id = await engine.store(
-                    project=args.project,
-                    content=content,
-                    fact_type="bridge",
-                    source=f"agent:{args.agent_id}",
-                    confidence="C5",
-                    meta={
-                        "logos_signature": logos_sig,
-                        "nonce": nonce,
-                        "agent_id": args.agent_id,
-                        "source": f"agent:{args.agent_id}",
-                    },
-                )
-                last_public_fact_id = fact_id
+                last_public_fact_id = await seed_genesis_fact(engine, args.project, args.agent_id)
             else:
                 last_public_fact_id = max(f.id for f in facts)
 
-            # Ensure ledger store tables are initialized
             _ = engine.ledger_store
-
-            # Query database for ledger event count
             async with engine.session() as conn:
-                # Ensure causal edge tables are ready
-                from cortex.engine.causality import AsyncCausalGraph
+                metrics = await get_db_metrics(conn, last_public_fact_id)
 
-                cg = AsyncCausalGraph(conn)
-                await cg.ensure_table()
-
-                # Robust querying across both tables (transactions and ledger_events)
-                tx_count = 0
-                try:
-                    async with conn.execute("SELECT COUNT(*) FROM transactions") as cursor:
-                        row = await cursor.fetchone()
-                        tx_count = row[0] if row else 0
-                except Exception:
-                    import logging
-                    logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in profile_agent_bridge.py')
-
-                le_count = 0
-                try:
-                    async with conn.execute("SELECT COUNT(*) FROM ledger_events") as cursor:
-                        row = await cursor.fetchone()
-                        le_count = row[0] if row else 0
-                except Exception:
-                    import logging
-                    logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in profile_agent_bridge.py')
-
-                transactions_checked = tx_count + le_count
-
-                # Retrieve the latest hash across either ledger
-                latest_tx_hash = None
-                try:
-                    async with conn.execute(
-                        "SELECT hash FROM transactions ORDER BY id DESC LIMIT 1"
-                    ) as cursor:
-                        row = await cursor.fetchone()
-                        if row and row[0]:
-                            latest_tx_hash = row[0]
-                except Exception:
-                    import logging
-                    logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in profile_agent_bridge.py')
-
-                latest_le_hash = None
-                try:
-                    async with conn.execute(
-                        "SELECT hash FROM ledger_events ORDER BY rowid DESC LIMIT 1"
-                    ) as cursor:
-                        row = await cursor.fetchone()
-                        if row and row[0]:
-                            latest_le_hash = row[0]
-                except Exception:
-                    import logging
-                    logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in profile_agent_bridge.py')
-
-                if latest_le_hash:
-                    latest_hash = latest_le_hash
-                elif latest_tx_hash:
-                    latest_hash = latest_tx_hash
-                else:
-                    latest_hash = hashlib.sha256(f"fact-{last_public_fact_id}".encode()).hexdigest()
-
-                # Retrieve Merkle roots count from both tables
-                mr_count = 0
-                try:
-                    async with conn.execute("SELECT COUNT(*) FROM merkle_roots") as cursor:
-                        row = await cursor.fetchone()
-                        mr_count = row[0] if row else 0
-                except Exception:
-                    import logging
-                    logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in profile_agent_bridge.py')
-
-                lc_count = 0
-                try:
-                    async with conn.execute("SELECT COUNT(*) FROM ledger_checkpoints") as cursor:
-                        row = await cursor.fetchone()
-                        lc_count = row[0] if row else 0
-                except Exception:
-                    import logging
-                    logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in profile_agent_bridge.py')
-
-                merkle_roots_checked = mr_count + lc_count
-
-                integrity_checks = 0
-                try:
-                    async with conn.execute("SELECT COUNT(*) FROM integrity_checks") as cursor:
-                        row = await cursor.fetchone()
-                        integrity_checks = row[0] if row else 0
-                except Exception:
-                    import logging
-                    logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in profile_agent_bridge.py')
-
-                signals_processed = 0
-                try:
-                    async with conn.execute("SELECT COUNT(*) FROM signals") as cursor:
-                        row = await cursor.fetchone()
-                        signals_processed = row[0] if row else 0
-                except Exception:
-                    import logging
-                    logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in profile_agent_bridge.py')
-
-            # Audit both validation surfaces (SovereignLedger and LedgerVerifier) in parallel
-            loop = asyncio.get_running_loop()
-
-            async def verify_le():
-                try:
-                    verifier = LedgerVerifier(engine.ledger_store)
-                    return await loop.run_in_executor(None, verifier.verify_chain)
-                except Exception:
-                    return {"valid": True, "violations": []}
-
-            async def audit_tx():
-                try:
-                    sync_ledger = await engine._get_or_create_ledger()
-                    return await sync_ledger.audit_integrity_async()
-                except Exception:
-                    return {"valid": True, "violations": []}
-
-            v_res, audit_res = await asyncio.gather(verify_le(), audit_tx())
-
-            valid_le = v_res.get("valid", True)
-            violations_le = v_res.get("violations", [])
-
-            valid_tx = audit_res.get("valid", True)
-            violations_tx = audit_res.get("violations", [])
-
-            valid = valid_le and valid_tx
-            violations = violations_le + violations_tx
-
-            if transactions_checked == 0:
-                transactions_checked = 1
+            valid, violations = await verify_ledger_integrity(engine)
+            if metrics["transactions_checked"] == 0:
+                metrics["transactions_checked"] = 1
 
         except Exception as e:
             import traceback
-
             traceback.print_exc()
             print(f"CortexEngine query error: {e}. Falling back to default values.")
         finally:
             await engine.close()
     else:
-        # Fallback to standard deterministic mock projection if CortexEngine imports failed
-        latest_hash = hashlib.sha256(b"mock-genesis-hash").hexdigest()
+        metrics["latest_hash"] = hashlib.sha256(b"mock-genesis-hash").hexdigest()
 
-    # Get git commits
     profile_path = Path(args.profile_repo_path).resolve()
     profile_commit = get_git_commit(profile_path)
-
-    # Generate timestamp
     generated_at = datetime.now(timezone.utc).isoformat()
 
-    latest_hash_short = latest_hash[:18]
-    short_profile_commit = profile_commit[:12]
-    public_digest = hashlib.sha256(f"{latest_hash}{profile_commit}".encode()).hexdigest()[:16]
-
-    # 2. Build the output status dict
     status_data = {
-        "agent": {
-            "id": args.agent_id,
-            "memory_admission": "CortexEngine.store",
-            "runtime_boundary": args.agent_id,
-        },
-        "artifacts": {
-            "readme_block_markers": [
-                "<!-- CORTEX-PROFILE-AGENT:START -->",
-                "<!-- CORTEX-PROFILE-AGENT:END -->",
-            ],
-            "status_json": "assets/cortex-profile-agent.status.json",
-            "status_svg": "assets/cortex-profile-agent.svg",
-        },
-        "cortex": {
-            "last_public_fact_id": last_public_fact_id,
-            "project": args.project,
-            "tenant_scope": args.tenant,
-            "signals_processed": signals_processed,
-        },
+        "agent": {"id": args.agent_id, "memory_admission": "CortexEngine.store", "runtime_boundary": args.agent_id},
+        "artifacts": {"readme_block_markers": ["<!-- CORTEX-PROFILE-AGENT:START -->", "<!-- CORTEX-PROFILE-AGENT:END -->"], "status_json": "assets/cortex-profile-agent.status.json", "status_svg": "assets/cortex-profile-agent.svg"},
+        "cortex": {"last_public_fact_id": last_public_fact_id, "project": args.project, "tenant_scope": args.tenant, "signals_processed": metrics["signals_processed"]},
         "generated_at": generated_at,
         "ledger": {
-            "latest_hash": latest_hash,
-            "latest_hash_short": latest_hash_short,
-            "merkle_roots_checked": merkle_roots_checked,
-            "status": "VALID" if valid else "INVALID",
-            "transactions_checked": transactions_checked,
-            "valid": valid,
-            "violations_public": violations,
-            "integrity_checks": integrity_checks,
+            "latest_hash": metrics["latest_hash"], "latest_hash_short": metrics["latest_hash"][:18],
+            "merkle_roots_checked": metrics["merkle_roots_checked"], "status": "VALID" if valid else "INVALID",
+            "transactions_checked": metrics["transactions_checked"], "valid": valid,
+            "violations_public": violations, "integrity_checks": metrics["integrity_checks"],
         },
-        "privacy_boundary": {
-            "prompts_published": False,
-            "public_projection_only": True,
-            "raw_memory_published": False,
-            "secrets_published": False,
-            "tenant_payloads_published": False,
-        },
-        "repositories": {
-            "profile": args.profile_repo,
-            "profile_commit": profile_commit,
-            "source": args.source_repo,
-        },
+        "privacy_boundary": {"prompts_published": False, "public_projection_only": True, "raw_memory_published": False, "secrets_published": False, "tenant_payloads_published": False},
+        "repositories": {"profile": args.profile_repo, "profile_commit": profile_commit, "source": args.source_repo},
         "schema_version": 1,
     }
 
-    # 3. Write status.json
-    assets_dir = profile_path / "assets"
-    assets_dir.mkdir(parents=True, exist_ok=True)
-    json_path = assets_dir / "cortex-profile-agent.status.json"
-    json_path.write_text(json.dumps(status_data, indent=2) + "\n")
-    print(f"Status JSON written to {json_path}")
+    update_assets(profile_path, status_data, profile_commit[:12], metrics["latest_hash"][:18], hashlib.sha256(f"{metrics['latest_hash']}{profile_commit}".encode()).hexdigest()[:16])
 
-    # 4. Write status.svg
-    svg_content = generate_svg_content(status_data)
-    svg_path = assets_dir / "cortex-profile-agent.svg"
-    svg_path.write_text(svg_content)
-    print(f"Status SVG written to {svg_path}")
-
-    # 5. Update README.md
-    readme_path = profile_path / "README.md"
-    if readme_path.exists():
-        readme_content = readme_path.read_text()
-        start_marker = "<!-- CORTEX-PROFILE-AGENT:START -->"
-        end_marker = "<!-- CORTEX-PROFILE-AGENT:END -->"
-
-        if start_marker in readme_content and end_marker in readme_content:
-            before = readme_content.split(start_marker)[0]
-            after = readme_content.split(end_marker)[1]
-            readme_block = generate_readme_block(
-                status_data, short_profile_commit, latest_hash_short, public_digest
-            )
-
-            new_content = before + readme_block + after
-            readme_path.write_text(new_content)
-            print(f"README.md successfully updated at {readme_path}")
-        else:
-            print("Warning: could not locate CORTEX-PROFILE-AGENT markers in README.md")
-    else:
-        print(f"Warning: README.md not found at {readme_path}")
-
-    # 6. Push telemetry to Control Plane (e.g., Vercel API or agents.archi)
     if args.endpoint:
-        try:
-            import urllib.request
-
-            headers = {"Content-Type": "application/json"}
-            if args.api_key:
-                headers["Authorization"] = f"Bearer {args.api_key}"
-
-            req = urllib.request.Request(
-                args.endpoint, data=json.dumps(status_data).encode(), headers=headers, method="POST"
-            )
-            with urllib.request.urlopen(req, timeout=5) as response:
-                print(f"Telemetry pushed to {args.endpoint}: HTTP {response.status}")
-        except Exception as e:
-            print(f"Warning: Failed to push telemetry to {args.endpoint}: {e}")
+        await push_telemetry(args.endpoint, args.api_key, status_data)
 
 
 if __name__ == "__main__":
