@@ -172,6 +172,7 @@ class ZKGuardAdapter:
         tenant_id: str = "default",
     ) -> None:
         import os
+
         if os.environ.get("CORTEX_TESTING") == "1":
             return
         from cortex.guards.zk_guard import ZKSwarmGuard

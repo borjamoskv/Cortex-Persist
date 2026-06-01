@@ -166,6 +166,7 @@ INSTRUCTIONS:
 async def run_omega_audit(content: str, project: str) -> list[OmegaConflict]:
     """Convenience entry point for the Omega Auditor."""
     import os
+
     provider = os.environ.get("CORTEX_PRIMARY_LLM", "gemini")
     auditor = OmegaAuditor(provider=provider)
     return await auditor.audit_decision(content, project)

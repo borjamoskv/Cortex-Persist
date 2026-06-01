@@ -32,7 +32,11 @@ def spectral_audit(text: str) -> bool:
     # 2. Length Audit: unusually short responses after system prompts are suspect
     # Allow explicitly accepted sovereign short words and structured JSON arrays/objects
     clean_text = text.strip().upper()
-    if clean_text in ("CLEAN", "TRUE", "FALSE", "YES", "NO", "[]") or (clean_text.startswith("[") and clean_text.endswith("]")) or (clean_text.startswith("{") and clean_text.endswith("}")):
+    if (
+        clean_text in ("CLEAN", "TRUE", "FALSE", "YES", "NO", "[]")
+        or (clean_text.startswith("[") and clean_text.endswith("]"))
+        or (clean_text.startswith("{") and clean_text.endswith("}"))
+    ):
         return True
 
     if len(text.split()) < 3:
