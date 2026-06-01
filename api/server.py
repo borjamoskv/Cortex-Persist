@@ -1,4 +1,8 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
+import asyncio
+import random
+import json
+import time
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import aiosqlite
@@ -105,6 +109,35 @@ async def get_toxic_community_events(limit: int = 50):
             "cita": r[3]
         } for r in rows
     ]
+
+
+@app.websocket("/api/v1/ws/telemetry")
+async def websocket_telemetry(websocket: WebSocket):
+    await websocket.accept()
+    try:
+        while True:
+            # Generate dummy telemetry matching LEGIØN-10000 format
+            frame_nodes = []
+            for _ in range(50):
+                frame_nodes.append({
+                    "x": random.randint(0, 1000),
+                    "y": random.randint(0, 1000),
+                    "z": random.random() * 3.14159 * 2,
+                    "entropy": random.random(),
+                    "target": random.choice([None, "toxic_node", "anomaly"])
+                })
+                
+            payload = {
+                "type": "FRAME",
+                "timestamp": time.time(),
+                "data": frame_nodes
+            }
+            
+            await websocket.send_json(payload)
+            await asyncio.sleep(0.1) # 10fps broadcast
+    except WebSocketDisconnect:
+        pass
+
 
 if __name__ == "__main__":
     import uvicorn
