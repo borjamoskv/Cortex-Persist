@@ -181,3 +181,14 @@ exclude = [
 ]
 reportMissingImports = "warning"
 reportPrivateImportUsage = "none"
+
+[tool.mypy]
+ignore_missing_imports = true
+strict = true
+exclude = [
+    "experimental/",
+    "tests/",
+    "scripts/",
+    "cortex_mev_base/",
+]
+
