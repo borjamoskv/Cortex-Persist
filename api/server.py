@@ -1,0 +1,111 @@
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+import aiosqlite
+from pathlib import Path
+from typing import List, Dict, Any
+
+app = FastAPI(
+    title="CORTEX Persist API",
+    description="Motor C5-REAL para visualización de exergía y purga de influencers.",
+    version="1.0.0"
+)
+
+# CORS para permitir peticiones desde cortexpersist.com (o localhost para dev)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], # Reemplazar con dominios específicos en C5-REAL prod
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+GUARD_DB_PATH = Path("~/.cortex/influencer_guard.db").expanduser()
+SCRAPER_DB_PATH = "influencer_audit_v1.db"
+
+class StrikeInfo(BaseModel):
+    influencer_name: str
+    strikes: int
+    status: str
+    last_update: float
+
+class AuditLogEntry(BaseModel):
+    prompt: str
+    response: str
+    hallucinated: bool
+    reason: str
+    timestamp: float
+
+@app.get("/api/v1/health")
+async def health_check():
+    """Terminal de estado C5-REAL."""
+    return {"status": "ONLINE", "exergy": "MAX", "db_guard": GUARD_DB_PATH.exists()}
+
+@app.get("/api/v1/influencers", response_model=List[StrikeInfo])
+async def get_all_influencers():
+    """Retorna el estado del radar del Influencer Guard."""
+    if not GUARD_DB_PATH.exists():
+        raise HTTPException(status_code=404, detail="Guard DB not found. No telemetry yet.")
+        
+    async with aiosqlite.connect(GUARD_DB_PATH) as conn:
+        async with conn.execute("SELECT influencer_name, strikes, status, last_update FROM influencer_strikes ORDER BY strikes DESC") as cursor:
+            rows = await cursor.fetchall()
+            
+    return [
+        StrikeInfo(
+            influencer_name=r[0],
+            strikes=r[1],
+            status=r[2],
+            last_update=r[3]
+        ) for r in rows
+    ]
+
+@app.get("/api/v1/influencers/{name}/audit", response_model=List[AuditLogEntry])
+async def get_influencer_audit(name: str):
+    """Extrae el log criptográfico de alucinaciones (las pruebas del delito)."""
+    if not GUARD_DB_PATH.exists():
+        raise HTTPException(status_code=404, detail="Guard DB not found.")
+        
+    async with aiosqlite.connect(GUARD_DB_PATH) as conn:
+        async with conn.execute(
+            "SELECT prompt, response, hallucinated, reason, timestamp FROM audit_log WHERE influencer_name = ? ORDER BY timestamp DESC",
+            (name,)
+        ) as cursor:
+            rows = await cursor.fetchall()
+            
+    return [
+        AuditLogEntry(
+            prompt=r[0],
+            response=r[1],
+            hallucinated=bool(r[2]),
+            reason=r[3],
+            timestamp=r[4]
+        ) for r in rows
+    ]
+
+@app.get("/api/v1/toxic_community", response_model=List[Dict[str, Any]])
+async def get_toxic_community_events(limit: int = 50):
+    """Extrae los últimos hits del motor de extracción asíncrona de comentarios (Vector Alpha)."""
+    db_path = Path(SCRAPER_DB_PATH)
+    if not db_path.exists():
+        return []
+        
+    async with aiosqlite.connect(db_path) as conn:
+        async with conn.execute(
+            "SELECT video_id, target_id, taxonomia_ataque, cita_textual_exacta FROM eventos_acoso LIMIT ?",
+            (limit,)
+        ) as cursor:
+            rows = await cursor.fetchall()
+            
+    return [
+        {
+            "video_id": r[0],
+            "target_id": r[1],
+            "taxonomia_ataque": r[2],
+            "cita": r[3]
+        } for r in rows
+    ]
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("server:app", host="0.0.0.0", port=8000, reload=True)
