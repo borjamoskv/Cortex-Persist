@@ -20,9 +20,49 @@ import struct
 import sys
 import tempfile
 
+try:
+    import numpy as np
+except ImportError:
+    print("FAIL: NumPy required.")
+    sys.exit(1)
 
-def main():
-    # ── [0] Tripartite ──
+# --- GLOBAL CONFIG & RNG ---
+D = 10000
+rng = np.random.default_rng(seed=42)
+
+# --- CORE HELPERS ---
+def rand_vec(d=D):
+    v = rng.standard_normal(d)
+    return v / np.linalg.norm(v)
+
+def rand_bipolar(d=D):
+    return rng.choice([-1.0, 1.0], size=d)
+
+def rand_binary(d=D):
+    return rng.integers(0, 2, size=d).astype(np.int8)
+
+def hrr_bind(x, y):
+    return np.fft.ifft(np.fft.fft(x) * np.fft.fft(y)).real
+
+def hrr_unbind(c, k):
+    return np.fft.ifft(np.fft.fft(c) * np.conj(np.fft.fft(k))).real
+
+def cosine(a, b):
+    na, nb = np.linalg.norm(a), np.linalg.norm(b)
+    if na < 1e-12 or nb < 1e-12:
+        return 0.0
+    return float(np.dot(a, b) / (na * nb))
+
+def normalize(v):
+    n = np.linalg.norm(v)
+    return v / n if n > 1e-12 else v
+
+def permute(v, k):
+    return np.roll(v, k)
+
+# --- VERIFICATION GATES ---
+
+def gate_0_tripartite():
     for f in ["SKILL.md", "schema.json"]:
         if not os.path.exists(f):
             print(f"FAIL: Missing {f}")
@@ -30,53 +70,11 @@ def main():
     with open("schema.json") as fh:
         schema = json.load(fh)
     ops = schema["properties"]["operation"]["enum"]
-    for req in ["vsa-sdm-write", "vsa-sdm-read",
-                "vsa-encode", "vsa-decay", "vsa-persist"]:
+    for req in ["vsa-sdm-write", "vsa-sdm-read", "vsa-encode", "vsa-decay", "vsa-persist"]:
         assert req in ops, f"Schema missing: {req}"
     print("PASS [0/9]: Tripartite present. Schema valid.")
 
-    try:
-        import numpy as np
-    except ImportError:
-        print("FAIL: NumPy required.")
-        sys.exit(1)
-
-    D = 10000
-    rng = np.random.default_rng(seed=42)
-
-    # ── Helpers ──
-    def rand_vec(d=D):
-        v = rng.standard_normal(d)
-        return v / np.linalg.norm(v)
-
-    def rand_bipolar(d=D):
-        return rng.choice([-1.0, 1.0], size=d)
-
-    def rand_binary(d=D):
-        return rng.integers(0, 2, size=d).astype(np.int8)
-
-    def hrr_bind(x, y):
-        return np.fft.ifft(np.fft.fft(x) * np.fft.fft(y)).real
-
-    def hrr_unbind(c, k):
-        return np.fft.ifft(
-            np.fft.fft(c) * np.conj(np.fft.fft(k))
-        ).real
-
-    def cosine(a, b):
-        na, nb = np.linalg.norm(a), np.linalg.norm(b)
-        if na < 1e-12 or nb < 1e-12:
-            return 0.0
-        return float(np.dot(a, b) / (na * nb))
-
-    def normalize(v):
-        n = np.linalg.norm(v)
-        return v / n if n > 1e-12 else v
-
-    def permute(v, k):
-        return np.roll(v, k)
-
-    # ── [1] HRR bind/retrieve ──
+def gate_1_hrr_bind():
     T1, S1 = rand_vec(), rand_vec()
     T2, S2 = rand_vec(), rand_vec()
     M = hrr_bind(T1, S1) + hrr_bind(T2, S2)
@@ -85,18 +83,18 @@ def main():
     assert sim > 0.1
     print(f"PASS [1/9]: HRR bind/retrieve. cos={sim:.4f}")
 
-    # ── [2] MAP-B exact self-inverse ──
+def gate_2_mapb():
     A, B = rand_bipolar(), rand_bipolar()
     assert np.allclose(A, (A * B) * B)
     print("PASS [2/9]: MAP-B self-inverse. Perfect.")
 
-    # ── [3] SNR capacity ──
+def gate_3_snr():
     for N, exp in [(10, 31.6), (100, 10.0), (500, 4.47)]:
         assert abs(np.sqrt(D / N) - exp) < 0.5
     print("PASS [3/9]: SNR=sqrt(D/N) validated.")
 
-    # ── [4] Hierarchical chunking (FIXED normalization) ──
-    CHUNK = 50  # Fewer per day for cleaner signal
+def gate_4_hierarchical():
+    CHUNK = 50
     DAYS = 30
     day_keys = [rand_vec() for _ in range(DAYS)]
     target_day, target_event = 14, 7
@@ -112,49 +110,37 @@ def main():
             ground_truth = estates[target_event]
         for i in range(CHUNK):
             dt += hrr_bind(ekeys[i], estates[i])
-        # CRITICAL: normalize each day tensor before month-level binding
         dt = normalize(dt)
         day_tensors.append(dt)
         day_event_keys.append((ekeys, estates))
 
-    # Month tensor: bind each normalized day with its key
     month = np.zeros(D)
     for d in range(DAYS):
         month += hrr_bind(day_keys[d], day_tensors[d])
     month = normalize(month)
 
-    # Two-hop: month → day 14 → event 7
     day_extracted = hrr_unbind(month, day_keys[target_day])
-    evt_extracted = hrr_unbind(day_extracted,
-                               day_event_keys[target_day][0][target_event])
+    evt_extracted = hrr_unbind(day_extracted, day_event_keys[target_day][0][target_event])
     sim_h = cosine(ground_truth, evt_extracted)
-    # With proper normalization, signal should be significantly above noise
     assert sim_h > 0.01
-    print(f"PASS [4/9]: Hierarchical 30d×50e. "
-          f"2-hop cos={sim_h:.4f}. 80KB fixed.")
+    print(f"PASS [4/9]: Hierarchical 30d×50e. 2-hop cos={sim_h:.4f}. 80KB fixed.")
 
-    # ── [5] True Kanerva SDM - ACTUALLY SPARSE ──
+def gate_5_sdm():
     M_locs = 1000
-    # Use BINARY addresses in {0,1}^D
     addresses = np.array([rand_binary() for _ in range(M_locs)])
     counters = np.zeros((M_locs, D), dtype=np.int32)
 
     def hamming_batch(addr, all_addrs):
-        """Vectorized Hamming distance."""
         return np.sum(addr != all_addrs, axis=1)
 
-    # Calibrate radius to activate ~1% of locations (10 out of 1000)
     cal_addr = rand_binary()
     cal_dists = hamming_batch(cal_addr, addresses)
-    # Find percentile that gives ~1% activation
-    target_pct = 1.0  # 1% of 1000 = 10 locations
+    target_pct = 1.0
     radius = int(np.percentile(cal_dists, target_pct))
 
-    # Verify sparsity: count how many activate
     activated_count = int(np.sum(cal_dists <= radius))
     activation_rate = activated_count / M_locs
-    assert activation_rate < 0.10, \
-        f"SDM not sparse: {activation_rate:.1%} activation"
+    assert activation_rate < 0.10, f"SDM not sparse: {activation_rate:.1%} activation"
 
     def sdm_write(addr, data_bipolar):
         dists = hamming_batch(addr, addresses)
@@ -169,16 +155,10 @@ def main():
         total = np.sum(counters[mask], axis=0)
         return (total > 0).astype(np.int8)
 
-    # Reset counters
     counters[:] = 0
-
-    # Write 3 patterns at exact hard-location addresses (not random)
-    # so we guarantee activation
     test_patterns = []
     test_addrs = []
     for i in range(3):
-        # Use an actual hard location address as our write address
-        # This guarantees at least 1 location activates (itself)
         a = addresses[i * 100].copy()
         p = rand_binary()
         bp = p.astype(np.int32) * 2 - 1
@@ -189,64 +169,54 @@ def main():
     retrieved = sdm_read(test_addrs[0])
     match = np.sum(retrieved == test_patterns[0]) / D
     assert match > 0.55, f"SDM read failed: {match:.2%}"
-    print(f"PASS [5/9]: Kanerva SDM. {M_locs} locs, "
-          f"r={radius}, activation={activation_rate:.1%}, "
-          f"accuracy={match:.2%}")
+    print(f"PASS [5/9]: Kanerva SDM. {M_locs} locs, r={radius}, activation={activation_rate:.1%}, accuracy={match:.2%}")
+    return M_locs, radius, activation_rate
 
-    # ── [6] N-gram + Record-based encoding ──
+def encode_ngram(text, char_vecs, n=3):
+    text = text.lower()
+    doc = np.zeros(D)
+    ct = 0
+    for i in range(len(text) - n + 1):
+        gram = text[i:i + n]
+        if all(c in char_vecs for c in gram):
+            gv = char_vecs[gram[0]]
+            for k in range(1, n):
+                gv = hrr_bind(permute(char_vecs[gram[k]], k), gv)
+            doc += gv
+            ct += 1
+    return normalize(doc) if ct > 0 else doc
+
+def encode_record(record, field_keys, char_vecs):
+    rec_vec = np.zeros(D)
+    for key, val in record.items():
+        if key in field_keys:
+            val_vec = encode_ngram(val, char_vecs)
+            rec_vec += hrr_bind(field_keys[key], val_vec)
+    return normalize(rec_vec)
+
+def gate_6_ngram():
     alphabet = "abcdefghijklmnopqrstuvwxyz "
     char_vecs = {ch: rand_vec() for ch in alphabet}
-    # Field-key vectors for record encoding
     field_keys = {
         "time": rand_vec(), "action": rand_vec(),
         "status": rand_vec(), "agent": rand_vec()
     }
 
-    def encode_ngram(text, n=3):
-        text = text.lower()
-        doc = np.zeros(D)
-        ct = 0
-        for i in range(len(text) - n + 1):
-            gram = text[i:i + n]
-            if all(c in char_vecs for c in gram):
-                gv = char_vecs[gram[0]]
-                for k in range(1, n):
-                    gv = hrr_bind(permute(char_vecs[gram[k]], k), gv)
-                doc += gv
-                ct += 1
-        return normalize(doc) if ct > 0 else doc
-
-    def encode_record(record):
-        """Encode {key: value_text} as bound pairs."""
-        rec_vec = np.zeros(D)
-        for key, val in record.items():
-            if key in field_keys:
-                val_vec = encode_ngram(val)
-                rec_vec += hrr_bind(field_keys[key], val_vec)
-        return normalize(rec_vec)
-
-    # N-gram tests
-    v1 = encode_ngram("deploy to production")
-    v2 = encode_ngram("deploy to production")
-    v3 = encode_ngram("quantum entanglement")
+    v1 = encode_ngram("deploy to production", char_vecs)
+    v2 = encode_ngram("deploy to production", char_vecs)
+    v3 = encode_ngram("quantum entanglement", char_vecs)
     assert cosine(v1, v2) > 0.99
     assert cosine(v1, v3) < 0.3
 
-    # Record test
-    r1 = encode_record({"time": "morning", "action": "deploy",
-                         "status": "success"})
-    r2 = encode_record({"time": "morning", "action": "deploy",
-                         "status": "success"})
-    r3 = encode_record({"time": "night", "action": "rollback",
-                         "status": "failure"})
+    r1 = encode_record({"time": "morning", "action": "deploy", "status": "success"}, field_keys, char_vecs)
+    r2 = encode_record({"time": "morning", "action": "deploy", "status": "success"}, field_keys, char_vecs)
+    r3 = encode_record({"time": "night", "action": "rollback", "status": "failure"}, field_keys, char_vecs)
     assert cosine(r1, r2) > 0.99
     assert cosine(r1, r3) < cosine(r1, r2)
-    print(f"PASS [6/9]: Ngram same={cosine(v1, v2):.4f} "
-          f"diff={cosine(v1, v3):.4f}. "
-          f"Record same={cosine(r1, r2):.4f} "
-          f"diff={cosine(r1, r3):.4f}")
+    print(f"PASS [6/9]: Ngram same={cosine(v1, v2):.4f} diff={cosine(v1, v3):.4f}. Record same={cosine(r1, r2):.4f} diff={cosine(r1, r3):.4f}")
+    return char_vecs
 
-    # ── [7] Ebbinghaus decay (retrieval quality proof) ──
+def gate_7_ebbinghaus():
     lam = 0.15
     eps = 0.01
     N_items = 20
@@ -263,27 +233,21 @@ def main():
         M_decayed += weights[i] * bound
         M_uniform += bound
 
-    # Retrieve RECENT item (t=0) from both
     recent_from_decay = hrr_unbind(M_decayed, keys[0])
     recent_from_uniform = hrr_unbind(M_uniform, keys[0])
     sim_decay = cosine(vecs[0], recent_from_decay)
     sim_uniform = cosine(vecs[0], recent_from_uniform)
-    assert sim_decay > sim_uniform, \
-        "Decay must improve recent retrieval"
+    assert sim_decay > sim_uniform, "Decay must improve recent retrieval"
 
-    # Retrieve OLD item (t=19) - should be weaker in decayed
     old_from_decay = hrr_unbind(M_decayed, keys[-1])
     old_from_uniform = hrr_unbind(M_uniform, keys[-1])
     sim_old_d = cosine(vecs[-1], old_from_decay)
     sim_old_u = cosine(vecs[-1], old_from_uniform)
 
     prunable = int(np.sum(weights < eps))
-    print(f"PASS [7/9]: Ebbinghaus λ={lam}. "
-          f"Recent: decay={sim_decay:.4f} > uniform={sim_uniform:.4f}. "
-          f"Old: decay={sim_old_d:.4f} vs uniform={sim_old_u:.4f}. "
-          f"Prunable: {prunable}/{N_items}")
+    print(f"PASS [7/9]: Ebbinghaus λ={lam}. Recent: decay={sim_decay:.4f} > uniform={sim_uniform:.4f}. Old: decay={sim_old_d:.4f} vs uniform={sim_old_u:.4f}. Prunable: {prunable}/{N_items}")
 
-    # ── [8] Resonator (3-factor HRR) ──
+def gate_8_resonator():
     CB = 30
     cb_a = [rand_vec() for _ in range(CB)]
     cb_b = [rand_vec() for _ in range(CB)]
@@ -297,7 +261,6 @@ def main():
 
     converged = False
     for it in range(300):
-        # Isolate A: unbind B and C estimates
         sig_a = hrr_unbind(hrr_unbind(composite, est_b), est_c)
         best_a = int(np.argmax([cosine(sig_a, e) for e in cb_a]))
         est_a = cb_a[best_a]
@@ -312,17 +275,14 @@ def main():
 
         if best_a == ia and best_b == ib and best_c == ic:
             converged = True
-            print(f"PASS [8/9]: 3-factor resonator (HRR, "
-                  f"3×{CB} CBs). Converged iter {it + 1}. "
-                  f"Factors [{ia},{ib},{ic}].")
+            print(f"PASS [8/9]: 3-factor resonator (HRR, 3×{CB} CBs). Converged iter {it + 1}. Factors [{ia},{ib},{ic}].")
             break
 
     if not converged:
         print("FAIL: 3-factor resonator did not converge.")
         sys.exit(1)
 
-    # ── [9] End-to-end pipeline ──
-    # text → encode → bind with time → bundle → decay → persist → load → retrieve
+def gate_9_e2e(char_vecs):
     entries = [
         ("deployed api v2", 0),
         ("fixed memory leak in worker", 1),
@@ -335,13 +295,12 @@ def main():
     encoded_states = {}
 
     for text, t in entries:
-        hv = encode_ngram(text)
+        hv = encode_ngram(text, char_vecs)
         encoded_states[t] = hv
-        w = np.exp(-0.1 * t)  # Ebbinghaus
+        w = np.exp(-0.1 * t)
         memory += w * hrr_bind(time_keys[t], hv)
     memory = normalize(memory)
 
-    # Persist to disk
     tmp = tempfile.mktemp(suffix=".vsa")
     magic = b"VSA3"
     meta = struct.pack("<II", D, len(entries))
@@ -350,7 +309,6 @@ def main():
     with open(tmp, "wb") as f:
         f.write(magic + meta + tensor_bytes + sha)
 
-    # Load and verify integrity
     with open(tmp, "rb") as f:
         data = f.read()
     assert data[:4] == b"VSA3"
@@ -358,35 +316,41 @@ def main():
     assert d_read == D
     tensor_data = data[12:12 + D * 8]
     sha_read = data[12 + D * 8:]
-    assert hashlib.sha256(tensor_data).digest() == sha_read, \
-        "SHA-256 integrity FAILED"
+    assert hashlib.sha256(tensor_data).digest() == sha_read, "SHA-256 integrity FAILED"
     loaded = np.frombuffer(tensor_data, dtype=np.float64)
     assert np.allclose(memory, loaded)
 
-    # Retrieve: what happened at t=0?
     extracted = hrr_unbind(loaded, time_keys[0])
     sim_e2e = cosine(encoded_states[0], extracted)
     assert sim_e2e > 0.05
 
     os.unlink(tmp)
     file_size = len(data)
-    print(f"PASS [9/9]: E2E pipeline. "
-          f"text→encode→bind→decay→persist({file_size}B)"
-          f"→load→SHA256✓→retrieve cos={sim_e2e:.4f}")
+    print(f"PASS [9/9]: E2E pipeline. text→encode→bind→decay→persist({file_size}B)→load→SHA256✓→retrieve cos={sim_e2e:.4f}")
 
-    # ── Report ──
+def main():
+    # VSA-SDM memory execution lifecycle
+    gate_0_tripartite()
+    gate_1_hrr_bind()
+    gate_2_mapb()
+    gate_3_snr()
+    gate_4_hierarchical()
+    M_locs, radius, activation_rate = gate_5_sdm()
+    char_vecs = gate_6_ngram()
+    gate_7_ebbinghaus()
+    gate_8_resonator()
+    gate_9_e2e(char_vecs)
+    
     print("\n" + "=" * 60)
     print("ALL 10 GATES PASSED - VSA-SDM-MEMORY-OMEGA v3.1")
     print(f"  Footprint: {D * 8} B ({D * 8 / 1024:.1f} KB)")
-    print(f"  SDM: {M_locs} locs, r={radius}, "
-          f"sparse={activation_rate:.1%}")
+    print(f"  SDM: {M_locs} locs, r={radius}, sparse={activation_rate:.1%}")
     print("  Encoders: N-gram + Record-based")
     print("  Decay: Ebbinghaus, retrieval-verified")
     print("  Resonator: 3-factor HRR")
     print("  Persistence: .vsa binary + SHA-256")
     print("  Pipeline: text→tensor→disk→retrieve ✓")
     print("=" * 60)
-
 
 if __name__ == "__main__":
     main()
