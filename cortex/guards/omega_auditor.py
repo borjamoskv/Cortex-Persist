@@ -40,19 +40,26 @@ class OmegaAuditor:
 
         if LLMProvider is not None:
             self._llm = LLMProvider(provider=provider)
-            dashscope_key = os.environ.get("DASHSCOPE_API_KEY")
-            if dashscope_key:
-                self._fallback_llm = LLMProvider(
-                    provider="custom",
-                    model="qwen3.6-27b",
-                    base_url="https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
-                    api_key=dashscope_key,
+            # Dynamic fallback selector based on active environment keys
+            self._fallbacks = []
+            if os.environ.get("OPENAI_API_KEY"):
+                self._fallbacks.append(LLMProvider(provider="openai"))
+            if os.environ.get("DEEPSEEK_API_KEY"):
+                self._fallbacks.append(LLMProvider(provider="deepseek"))
+            if os.environ.get("OPENROUTER_API_KEY"):
+                self._fallbacks.append(LLMProvider(provider="openrouter"))
+            if os.environ.get("DASHSCOPE_API_KEY"):
+                self._fallbacks.append(
+                    LLMProvider(
+                        provider="custom",
+                        model="qwen3.6-27b",
+                        base_url="https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+                        api_key=os.environ.get("DASHSCOPE_API_KEY"),
+                    )
                 )
-            else:
-                self._fallback_llm = None
         else:
             self._llm = None
-            self._fallback_llm = None
+            self._fallbacks = []
 
     async def audit_decision(self, content: str, project: str) -> list[OmegaConflict]:
         """Audit a candidate decision against the massive context of the snapshot."""
@@ -121,13 +128,18 @@ INSTRUCTIONS:
             logger.warning(
                 "OmegaAuditor: Primary LLM failed (%s). Attempting API-Provider-OMEGA fallback.", e
             )
-            if self._fallback_llm:
+            response = None
+            for fallback_llm in self._fallbacks:
                 try:
-                    response = await self._fallback_llm.invoke(prompt)
+                    response = await fallback_llm.invoke(prompt)
+                    break
                 except Exception as fb_e:
-                    logger.error("OmegaAuditor: Fallback LLM also failed: %s", fb_e)
-                    return []
-            else:
+                    logger.error(
+                        "OmegaAuditor: Fallback LLM (%s) failed: %s",
+                        fallback_llm.provider_name,
+                        fb_e,
+                    )
+            if response is None:
                 logger.error("OmegaAuditor: Deep audit failed and no fallback available.")
                 return []
 
