@@ -109,6 +109,8 @@ def _row_to_result(row: Any, is_fts: bool = False) -> SearchResult:
     elif confidence in ("stated", "C3") and c_score <= 0.5:
         confidence = "disputed"
 
+    meta["consensus_score"] = c_score
+
     # Ω₁₁: Hardened lineage (Issue #94) mapped directly
     tx_id = row[12] if len(row) > 12 else meta.get("tx_id")
     tx_hash = row[13] if len(row) > 13 else meta.get("hash")

@@ -98,24 +98,19 @@ class CortexResolver(Resolver):
             for hit in hits:
                 if isinstance(hit, dict):
                     content = hit.get("content", "")
-                    conf_str = hit.get("confidence", "C3")
+                    meta = hit.get("meta", {})
+                    c_score = meta.get("consensus_score", 1.0)
                 elif hasattr(hit, "content"):
                     content = hit.content
-                    conf_str = hit.confidence
+                    meta = getattr(hit, "meta", {}) or {}
+                    c_score = meta.get("consensus_score", 1.0)
                 else:
                     content = str(hit)
-                    conf_str = "C3"
-                console.print(f"  -> hit content={content!r} conf={conf_str}")
-                if conf_str == "verified":
-                    conf = 1.0
-                elif conf_str == "disputed":
-                    conf = 0.0
-                else:
-                    try:
-                        conf = float(conf_str)
-                    except ValueError:
-                        mapping = {"C5": 1.0, "C4": 0.8, "C3": 0.6, "C2": 0.4, "C1": 0.2}
-                        conf = mapping.get(str(conf_str).upper(), 0.6)
+                    c_score = 1.0
+                console.print(f"  -> hit content={content!r} score={c_score}")
+                
+                # Continuous calibration transform: map consensus_score [0.0, 2.0] to [0.05, 0.95]
+                conf = 0.05 + 0.90 * (c_score / 2.0)
                 return content, conf
         except Exception as e:
             console.print(f"[red]⚠️ Resolve failed: {e}[/]")
