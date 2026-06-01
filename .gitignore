@@ -312,3 +312,4 @@ cortex_rs/*.so
 cortex_ledger.jsonl
 *.vsa_mmap
 cortex/swarm/staged_legion_2m.py
+.cortex_ledger.json

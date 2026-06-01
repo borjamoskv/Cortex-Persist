@@ -1,0 +1,1289 @@
+---
+// @C5-REAL
+// ASTRO PAGE: /taste
+// Fuses Industrial Noir 2026 aesthetics with the complete GOLD ALBUMS ledger.
+
+import SiteLayout from '../layouts/SiteLayout.astro';
+import { Music, Search, Disc, Clock, Calendar, ExternalLink, SlidersHorizontal } from 'lucide-react';
+import { CortexFriction } from '../lib/CortexFriction';
+
+// Import our C5-REAL data
+import albumsData from '../lib/playlist_albums.json';
+import analysesData from '../lib/album_analyses_cache.json';
+import exergyScores from '../lib/exergy_scores.json';
+
+// C5-REAL: Telemetry Ping
+CortexFriction.ping('taste.astro', 'RENDER');
+
+// Helper to extract Spotify Album ID for embedding
+function getEmbedUrl(url: string) {
+  if (!url) return null;
+  const match = url.match(/album\/([a-zA-Z0-9]+)/);
+  return match ? `https://open.spotify.com/embed/album/${match[1]}?utm_source=generator&theme=0` : null;
+}
+
+// Map and merge data
+const albums = albumsData.map((album, index) => {
+  const key = album.album_url || `unknown_album_${index}`;
+  const searchKey = `${album.album_name} - ${album.artist}`;
+  const exergyScore = (exergyScores as Record<string, number>)[searchKey] || 0.0;
+  return {
+    ...album,
+    id: key,
+    index: index + 1,
+    exergyScore,
+    analysis: analysesData[key as keyof typeof analysesData] || "Sonic analysis not available in local Ledger.",
+    embedUrl: getEmbedUrl(album.album_url || '')
+  };
+});
+
+const totalTracks = albums.reduce((acc, a) => acc + (a.tracks ? a.tracks.length : 0), 0);
+const totalDurationSec = albums.reduce((acc, a) => acc + (a.tracks ? a.tracks.reduce((tAcc, t) => tAcc + (t.duration_sec || 0), 0) : 0), 0);
+const totalHours = Math.floor(totalDurationSec / 3600);
+const totalMinutes = Math.floor((totalDurationSec % 3600) / 60);
+const durationStr = `${totalHours}h ${totalMinutes}m`;
+
+const years = albums.map(a => parseInt(a.year || '')).filter(y => !isNaN(y));
+const minYear = Math.min(...years);
+const maxYear = Math.max(...years);
+const yearsRangeStr = `${minYear} - ${maxYear}`;
+---
+
+<SiteLayout 
+  title="GOLD ALBUMS · Sovereign Curation Ledger"
+  description="The sonic vault and concentration repository for deep work behind Cortex Persist. 151 manually curated blocks."
+  canonical="https://cortexpersist.com/taste"
+>
+  <main class="taste-container">
+    
+    <!-- Navigation Back Link -->
+    <div class="nav-back-container">
+      <a href="/" class="nav-back-link">
+        ← BACK TO SUBSTRATE
+      </a>
+    </div>
+
+    <!-- Hero Header -->
+    <section class="taste-hero-section">
+      <div class="taste-hero-banner">
+        <div class="taste-hero-overlay"></div>
+        <img 
+          src="/assets/gold_albums_banner.png" 
+          alt="Gold Albums Substack Banner" 
+          class="taste-hero-img"
+        />
+        <div class="taste-hero-content">
+          <div>
+            <div class="taste-badge-wrapper">
+              <span class="pulse-dot">
+                <span class="pulse-ping"></span>
+                <span class="pulse-solid"></span>
+              </span>
+              <span class="badge-text">
+                The Official Cortex Soundtrack
+              </span>
+            </div>
+            <h1 class="taste-hero-title">
+              GOLD ALBUMS
+            </h1>
+            <p class="taste-hero-desc">
+              The sonic bunker where we build <strong>Cortex Persist</strong>. 100% manual curation. Complete albums designed to sustain deep work states with zero algorithmic interruptions.
+            </p>
+          </div>
+          
+          <div class="taste-hero-meta">
+            <span>Curator:</span>
+            <span class="curator-value">Bakala de Troya</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="taste-stats-grid">
+        <div class="taste-stat-card">
+          <div class="taste-stat-header">
+            <Disc class="taste-stat-icon" />
+            <span class="taste-stat-label">Albums</span>
+          </div>
+          <span class="taste-stat-value">{albums.length}</span>
+        </div>
+        
+        <div class="taste-stat-card">
+          <div class="taste-stat-header">
+            <Music class="taste-stat-icon" />
+            <span class="taste-stat-label">Tracks</span>
+          </div>
+          <span class="taste-stat-value">{totalTracks}</span>
+        </div>
+
+        <div class="taste-stat-card">
+          <div class="taste-stat-header">
+            <Clock class="taste-stat-icon" />
+            <span class="taste-stat-label">Duration</span>
+          </div>
+          <span class="taste-stat-value">{durationStr}</span>
+        </div>
+
+        <div class="taste-stat-card">
+          <div class="taste-stat-header">
+            <Calendar class="taste-stat-icon" />
+            <span class="taste-stat-label">Years Covered</span>
+          </div>
+          <span class="taste-stat-value">{yearsRangeStr}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Manifesto / Block Modulation Split Layout -->
+    <section class="taste-split-layout">
+      <div class="taste-section-intro">
+        <div class="taste-section-eyebrow">
+          <span>0x00</span>
+          <span class="taste-section-line"></span>
+          <span>Noise vs. Signal</span>
+        </div>
+        <h2 class="taste-section-heading">
+          Deep Work: <span>Zero Algorithms</span>
+        </h2>
+        <div class="taste-section-text">
+          <p>
+            Why does an AI infrastructure company have a music page? Because building complex code (like <span class="taste-bold-highlight">Cortex Persist</span>) requires absolute isolation. You don't write software while skipping through AI-generated playlists that break your focus.
+          </p>
+          <p>
+            <span class="taste-bold-highlight">GOLD ALBUMS</span> is our internal concentration repository. A sonic vault built block-by-block, adding each album manually over the years. It contains {totalTracks} tracks curated with human precision. No auto-recommendations. No <em>skips</em>. Only full albums that respect the original creator's narrative.
+          </p>
+          <p>
+            We open this library to the public. If you are a developer, founder, or simply need to escape Spotify's entropy for deep work, this is your sonic bunker. Close the door and start building.
+          </p>
+        </div>
+      </div>
+
+      <div class="taste-config-block">
+        <div class="taste-section-eyebrow" style="margin-bottom: 1rem;">
+          <span>0x01</span>
+          <span class="taste-section-line"></span>
+          <span>System Parameters</span>
+        </div>
+        <pre class="taste-config-pre"><code>Ledger: GOLD ALBUMS
+Operator: Bakala de Troya
+Scale: {totalTracks} Tracks (C5-REAL)
+Active Blocks: {albums.length} LPs/EPs
+Total Duration: {durationStr}
+Curation: 100% Manual
+Mission: Deep Work Focus</code></pre>
+      </div>
+    </section>
+
+    <!-- Frequencies Section -->
+    <section class="taste-split-layout" style="border-top: none; padding-top: 0;">
+      <div class="taste-section-intro">
+        <div class="taste-section-eyebrow">
+          <span>Frequencies</span>
+          <span class="taste-section-line"></span>
+          <span>Block Modulation</span>
+        </div>
+        <p class="taste-section-text" style="font-size: 0.8rem;">
+          Curation demands friction. By forcing the operator to process uninterrupted blocks of 40 to 60 minutes, the sonic design deploys its neurological modulation:
+        </p>
+        <div class="table-wrapper">
+          <table class="frequencies-table">
+            <thead>
+              <tr>
+                <th>Block</th>
+                <th>Dominant Styles & Textures</th>
+                <th>Technical Role</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="freq-block-num">01 - 25</td>
+                <td>Cinematic Synthpop, Warm Electronic, Avant-Garde House</td>
+                <td class="freq-desc">Beta wave modulation. Focus alignment.</td>
+              </tr>
+              <tr>
+                <td class="freq-block-num">26 - 50</td>
+                <td>Avant-Prog, Breaks, Spanish Indie Folk, Experimental Rap</td>
+                <td class="freq-desc">Causal friction injection. Complex problems.</td>
+              </tr>
+              <tr>
+                <td class="freq-block-num">51 - 100</td>
+                <td>Melodic Techno, Dark Ambient, Glitch-Hop</td>
+                <td class="freq-desc">Absolute isolation. High-density focus.</td>
+              </tr>
+              <tr>
+                <td class="freq-block-num">101 - 151</td>
+                <td>Synthwave, Post-Punk, Dark Ambient, Sci-Fi Soundtracks</td>
+                <td class="freq-desc">Episodic memory consolidation.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="avatar-card">
+        <div class="avatar-header">
+          <span>AVATAR: 'BORJARL'</span>
+          <span class="avatar-badge">Active</span>
+        </div>
+        <ul class="avatar-list">
+          <li class="avatar-item">
+            <span class="avatar-item-title">[Metallic Skin & Golden Mohawk]</span>
+            <span class="avatar-item-desc">The fusion between the immutable rigor of the machine and the constant disruption of open source.</span>
+          </li>
+          <li class="avatar-item">
+            <span class="avatar-item-title">[Tailoring & Patch Cords]</span>
+            <span class="avatar-item-desc">Each cable represents a neural connection in the AST (Abstract Syntax Tree) of curation. Systems engineering applied to acoustics.</span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Search and Controls Registry -->
+    <div class="search-controls-container">
+      <div class="search-header-row">
+        <div class="taste-section-eyebrow" style="margin-bottom: 0.5rem;">
+          <span>0x03</span>
+          <span class="taste-section-line"></span>
+          <span>Immutable Blocks Registry</span>
+        </div>
+        <h2 class="taste-section-heading">Subagent Audit</h2>
+      </div>
+
+      <div class="search-bar-row">
+        <div class="search-input-wrapper">
+          <Search class="search-icon" />
+          <input 
+            type="text" 
+            id="search-input" 
+            placeholder="Filter by artist, album, or year..." 
+            class="search-input"
+          />
+        </div>
+        
+        <div class="action-buttons-group">
+          <button id="sort-exergy-btn" class="filter-btn" data-active="false">
+            <SlidersHorizontal class="filter-btn-icon" /> SORT: DEFAULT
+          </button>
+          <button id="view-grid-btn" class="filter-btn active">GRID</button>
+          <button id="view-list-btn" class="filter-btn">LIST</button>
+        </div>
+      </div>
+      
+      <div id="results-count" class="results-telemetry">
+        Showing {albums.length} of {albums.length} blocks
+      </div>
+    </div>
+
+    <!-- Album Cards Container -->
+    <section style="margin-bottom: 6rem;">
+      <div id="albums-container" class="albums-grid">
+        {albums.map((a) => (
+          <div 
+            class="taste-album-card"
+            data-artist={a.artist.toLowerCase()}
+            data-title={a.album_name.toLowerCase()}
+            data-year={a.year ? a.year.toString() : ''}
+            data-exergy={a.exergyScore}
+            data-index={a.index}
+          >
+            <div class="card-top">
+              <div class="card-badge-row">
+                <span class="card-block-num">BLOCK #{a.index.toString().padStart(3, '0')}</span>
+                <div class="card-badges">
+                  {a.exergyScore > 9.0 && (
+                    <span class="badge-high-exergy">HIGH EXERGY</span>
+                  )}
+                  <span class="badge-exergy">Ex: {a.exergyScore.toFixed(2)}</span>
+                  {a.year && (
+                    <span class="badge-year">{a.year}</span>
+                  )}
+                </div>
+              </div>
+
+              <h3 class="card-album-name">{a.album_name}</h3>
+              <p class="card-artist">{a.artist}</p>
+              <p class="card-analysis">"{a.analysis}"</p>
+            </div>
+
+            <div class="card-bottom">
+              {a.embedUrl && (
+                <div class="embed-wrapper hidden">
+                  <iframe 
+                    class="lazy-spotify-iframe" 
+                    data-src={a.embedUrl}
+                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+                    loading="lazy"
+                  ></iframe>
+                </div>
+              )}
+              
+              <div class="card-actions">
+                <button class="play-btn">[PLAY]</button>
+                {a.album_url && (
+                  <a 
+                    href={a.album_url} 
+                    target="_blank" 
+                    class="spotify-link"
+                  >
+                    Open Spotify <ExternalLink class="link-icon" />
+                  </a>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+  </main>
+</SiteLayout>
+
+<style>
+  /* Scoped styles for the Gold Albums taste page */
+  .taste-container {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 2rem 1.5rem 6rem;
+    position: relative;
+    z-index: 10;
+  }
+  
+  .nav-back-container {
+    margin-bottom: 2.5rem;
+  }
+  
+  .nav-back-link {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    transition: color 0.2s ease;
+  }
+  
+  .nav-back-link:hover {
+    color: var(--accent-soft);
+  }
+  
+  /* Hero section styling */
+  .taste-hero-section {
+    margin-bottom: 3.5rem;
+  }
+  
+  .taste-hero-banner {
+    position: relative;
+    height: 280px;
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--line);
+    overflow: hidden;
+    margin-bottom: 2rem;
+    box-shadow: 0 0 35px rgba(43, 59, 229, 0.15);
+  }
+  
+  @media (min-width: 768px) {
+    .taste-hero-banner {
+      height: 360px;
+    }
+  }
+  
+  .taste-hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, var(--bg-0) 10%, rgba(10, 10, 10, 0.4) 60%, transparent 100%);
+    z-index: 10;
+  }
+  
+  .taste-hero-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.7) contrast(1.15);
+  }
+  
+  .taste-hero-content {
+    position: absolute;
+    bottom: 2rem;
+    left: 2rem;
+    right: 2rem;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  
+  @media (min-width: 768px) {
+    .taste-hero-content {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+  }
+  
+  .taste-badge-wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.35rem 0.85rem;
+    border-radius: 999px;
+    border: 1px solid rgba(43, 59, 229, 0.3);
+    background: rgba(43, 59, 229, 0.1);
+    backdrop-filter: blur(12px);
+    margin-bottom: 0.5rem;
+    width: fit-content;
+  }
+  
+  .pulse-dot {
+    position: relative;
+    display: flex;
+    width: 6px;
+    height: 6px;
+  }
+  
+  .pulse-ping {
+    position: absolute;
+    display: inline-flex;
+    height: 100%;
+    width: 100%;
+    border-radius: 9999px;
+    background-color: var(--accent-soft);
+    opacity: 0.75;
+    animation: ping 1.2s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+  
+  .pulse-solid {
+    position: relative;
+    display: inline-flex;
+    border-radius: 9999px;
+    height: 6px;
+    width: 6px;
+    background-color: var(--accent-soft);
+  }
+  
+  .badge-text {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.64rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent-soft);
+  }
+  
+  .taste-hero-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #fff;
+    margin: 0;
+  }
+  
+  @media (min-width: 768px) {
+    .taste-hero-title {
+      font-size: 3.8rem;
+    }
+  }
+  
+  .taste-hero-desc {
+    color: var(--muted);
+    font-size: 0.88rem;
+    line-height: 1.6;
+    max-width: 580px;
+    margin: 0.2rem 0 0;
+  }
+  
+  .taste-hero-meta {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.5);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  
+  .curator-value {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.2rem 0.55rem;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    text-transform: uppercase;
+  }
+  
+  /* Stats grid */
+  .taste-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 3.5rem;
+  }
+  
+  @media (min-width: 768px) {
+    .taste-stats-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+  
+  .taste-stat-card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-xl);
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.4rem;
+    box-shadow: var(--shadow);
+  }
+  
+  .taste-stat-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--accent-soft);
+  }
+  
+  .taste-stat-icon {
+    width: 0.9rem;
+    height: 0.9rem;
+  }
+  
+  .taste-stat-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  
+  .taste-stat-value {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #fff;
+  }
+  
+  /* Sections container */
+  .taste-split-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 3rem;
+    margin-bottom: 4rem;
+  }
+  
+  @media (min-width: 1024px) {
+    .taste-split-layout {
+      grid-template-columns: 2fr 1fr;
+    }
+  }
+  
+  .taste-section-intro {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .taste-section-eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent-soft);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  
+  .taste-section-line {
+    height: 1px;
+    width: 24px;
+    background: rgba(110, 124, 255, 0.3);
+  }
+  
+  .taste-section-heading {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 800;
+    font-size: 1.6rem;
+    text-transform: uppercase;
+    color: #fff;
+    margin: 0;
+  }
+  
+  .taste-section-heading span {
+    color: var(--success);
+  }
+  
+  .taste-section-text {
+    color: var(--muted);
+    font-size: 0.88rem;
+    line-height: 1.7;
+    margin: 0;
+    font-weight: 300;
+  }
+  
+  .taste-section-text p {
+    margin: 0 0 1rem 0;
+  }
+  
+  .taste-section-text p:last-child {
+    margin-bottom: 0;
+  }
+  
+  .taste-bold-highlight {
+    color: #fff;
+    font-weight: 500;
+  }
+  
+  .taste-italic-highlight {
+    color: #fff;
+    font-style: italic;
+  }
+  
+  /* System configuration block */
+  .taste-config-block {
+    background: var(--panel-strong);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-xl);
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .taste-config-block::after {
+    content: '';
+    position: absolute;
+    top: -4rem;
+    right: -4rem;
+    width: 8rem;
+    height: 8rem;
+    background: rgba(43, 59, 229, 0.08);
+    border-radius: 999px;
+    filter: blur(24px);
+  }
+  
+  .taste-config-pre {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-md);
+    padding: 1.1rem;
+    margin: 0;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    line-height: 1.7;
+    color: var(--success);
+    overflow-x: auto;
+  }
+  
+  /* Table block styles */
+  .table-wrapper {
+    overflow-x: auto;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-xl);
+    background: rgba(255, 255, 255, 0.01);
+    margin-top: 1rem;
+  }
+  
+  .frequencies-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.76rem;
+    text-align: left;
+  }
+  
+  .frequencies-table th {
+    background: rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 0.8rem 1rem;
+    color: var(--muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+  }
+  
+  .frequencies-table td {
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.8);
+  }
+  
+  .frequencies-table tr:hover td {
+    background: rgba(255, 255, 255, 0.015);
+  }
+  
+  .freq-block-num {
+    font-weight: 700;
+    color: var(--accent-soft);
+  }
+  
+  .freq-desc {
+    color: var(--muted);
+  }
+  
+  /* Avatar side panel */
+  .avatar-card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-xl);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+  
+  .avatar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: #fff;
+  }
+  
+  .avatar-badge {
+    font-size: 0.6rem;
+    padding: 0.2rem 0.5rem;
+    background: rgba(43, 59, 229, 0.1);
+    border: 1px solid rgba(43, 59, 229, 0.3);
+    color: var(--accent-soft);
+    border-radius: var(--radius-md);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  
+  .avatar-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .avatar-item {
+    border-left: 2px solid rgba(43, 59, 229, 0.4);
+    padding-left: 0.8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+  
+  .avatar-item-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    color: #fff;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  
+  .avatar-item-desc {
+    color: var(--muted);
+    font-size: 0.76rem;
+    line-height: 1.6;
+    font-weight: 300;
+  }
+  
+  /* Search and control deck bar */
+  .search-controls-container {
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 3rem;
+    margin-bottom: 2.5rem;
+  }
+  
+  .search-header-row {
+    margin-bottom: 1.5rem;
+  }
+  
+  .search-bar-row {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  @media (min-width: 768px) {
+    .search-bar-row {
+      flex-direction: row;
+      align-items: center;
+    }
+  }
+  
+  .search-input-wrapper {
+    position: relative;
+    flex-grow: 1;
+  }
+  
+  .search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0.95rem;
+    height: 0.95rem;
+    color: var(--muted);
+  }
+  
+  .search-input {
+    width: 100%;
+    background: var(--panel-strong);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.8rem;
+    color: #fff;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .search-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 15px rgba(43, 59, 229, 0.15);
+  }
+  
+  .search-input::placeholder {
+    color: var(--muted);
+    opacity: 0.6;
+  }
+  
+  .action-buttons-group {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .filter-btn {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--muted);
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  
+  .filter-btn:hover {
+    color: #fff;
+    border-color: var(--accent-strong);
+  }
+  
+  .filter-btn.active {
+    background: rgba(43, 59, 229, 0.18);
+    border-color: var(--accent);
+    color: #fff;
+    box-shadow: 0 0 10px rgba(43, 59, 229, 0.2);
+  }
+  
+  .filter-btn-icon {
+    width: 0.75rem;
+    height: 0.75rem;
+    color: var(--accent-soft);
+  }
+  
+  .results-telemetry {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-top: 1rem;
+    letter-spacing: 0.04em;
+  }
+  
+  /* Album Grid & Cards */
+  .albums-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    margin-bottom: 5rem;
+    transition: all 0.3s ease;
+  }
+  
+  @media (min-width: 768px) {
+    .albums-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .albums-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  
+  /* List Layout representation */
+  .albums-grid.list-view {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  
+  .albums-grid.list-view .taste-album-card {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    min-height: auto;
+  }
+  
+  .albums-grid.list-view .taste-album-card .card-top {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-grow: 1;
+    margin-bottom: 0;
+  }
+  
+  .albums-grid.list-view .taste-album-card .card-badge-row {
+    margin-bottom: 0;
+    flex-shrink: 0;
+    width: 120px;
+  }
+  
+  .albums-grid.list-view .taste-album-card .card-album-name {
+    font-size: 0.95rem;
+    margin: 0;
+    flex-shrink: 0;
+    width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .albums-grid.list-view .taste-album-card .card-artist {
+    font-size: 0.85rem;
+    margin: 0;
+    flex-shrink: 0;
+    width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .albums-grid.list-view .taste-album-card .card-analysis {
+    margin: 0;
+    border-left: none;
+    padding-left: 0;
+    max-width: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .albums-grid.list-view .taste-album-card .card-bottom {
+    margin-top: 0;
+    border-top: none;
+    padding-top: 0;
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .taste-album-card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-xl);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 320px;
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+  
+  .taste-album-card:hover {
+    border-color: var(--line-strong);
+    box-shadow: 0 0 25px rgba(43, 59, 229, 0.2);
+    transform: translateY(-2px);
+  }
+  
+  .card-top {
+    margin-bottom: 1.5rem;
+  }
+  
+  .card-badge-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  
+  .card-block-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--accent-soft);
+    letter-spacing: 0.05em;
+  }
+  
+  .card-badges {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  
+  .badge-high-exergy {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: #fff;
+    background: rgba(229, 43, 85, 0.8);
+    border: 1px solid rgba(229, 43, 85, 0.9);
+    padding: 0.15rem 0.4rem;
+    border-radius: var(--radius-md);
+  }
+  
+  .badge-exergy {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.64rem;
+    font-weight: 700;
+    color: var(--accent-soft);
+    background: rgba(43, 59, 229, 0.1);
+    border: 1px solid rgba(43, 59, 229, 0.2);
+    padding: 0.15rem 0.4rem;
+    border-radius: var(--radius-md);
+  }
+  
+  .badge-year {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.64rem;
+    color: var(--muted);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 0.15rem 0.4rem;
+    border-radius: var(--radius-md);
+  }
+  
+  .card-album-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 0.2rem 0;
+    letter-spacing: 0.02em;
+    transition: color 0.2s ease;
+  }
+  
+  .taste-album-card:hover .card-album-name {
+    color: var(--accent-soft);
+  }
+  
+  .card-artist {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin: 0 0 1.2rem 0;
+  }
+  
+  .card-analysis {
+    font-size: 0.76rem;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.7);
+    border-left: 2px solid rgba(43, 59, 229, 0.25);
+    padding-left: 0.75rem;
+    font-style: italic;
+    font-weight: 300;
+    margin: 0;
+  }
+  
+  .card-bottom {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 1rem;
+    margin-top: auto;
+  }
+  
+  .embed-wrapper {
+    width: 100%;
+    height: 80px;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+  }
+  
+  .embed-wrapper.hidden {
+    display: none;
+  }
+  
+  .lazy-spotify-iframe {
+    width: 100%;
+    height: 80px;
+    border: none;
+  }
+  
+  .card-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+  
+  .play-btn {
+    background: transparent;
+    border: none;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--accent-soft);
+    cursor: pointer;
+    padding: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    transition: color 0.2s ease;
+  }
+  
+  .play-btn:hover {
+    color: #fff;
+  }
+  
+  .spotify-link {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    transition: color 0.2s ease;
+  }
+  
+  .spotify-link:hover {
+    color: #fff;
+  }
+  
+  .link-icon {
+    width: 0.65rem;
+    height: 0.65rem;
+  }
+  
+  @keyframes ping {
+    75%, 100% {
+      transform: scale(2);
+      opacity: 0;
+    }
+  }
+</style>
+
+<script>
+  // Client-side search, view toggle, and sorting scripting
+  const searchInput = document.getElementById('search-input') as HTMLInputElement;
+  const cards = document.querySelectorAll('.taste-album-card') as NodeListOf<HTMLDivElement>;
+  const container = document.getElementById('albums-container') as HTMLDivElement;
+  const resultsCount = document.getElementById('results-count') as HTMLDivElement;
+  
+  const viewGridBtn = document.getElementById('view-grid-btn') as HTMLButtonElement;
+  const viewListBtn = document.getElementById('view-list-btn') as HTMLButtonElement;
+  const sortExergyBtn = document.getElementById('sort-exergy-btn') as HTMLButtonElement;
+
+  // Sorting Logic
+  if (sortExergyBtn && container) {
+    sortExergyBtn.addEventListener('click', () => {
+      const isActive = sortExergyBtn.getAttribute('data-active') === 'true';
+      const cardArray = Array.from(cards);
+      
+      if (!isActive) {
+        // Sort by Exergy descending
+        cardArray.sort((a, b) => {
+          const exA = parseFloat(a.getAttribute('data-exergy') || '0');
+          const exB = parseFloat(b.getAttribute('data-exergy') || '0');
+          return exB - exA;
+        });
+        sortExergyBtn.innerHTML = `<span class="inline-block w-1.5 h-1.5 rounded-full bg-[#ff0055] mr-1.5 animate-ping"></span> SORT: EXERGY`;
+        sortExergyBtn.setAttribute('data-active', 'true');
+        sortExergyBtn.className = "filter-btn active";
+      } else {
+        // Sort back to index ascending (original order)
+        cardArray.sort((a, b) => {
+          const idxA = parseInt(a.getAttribute('data-index') || '0');
+          const idxB = parseInt(b.getAttribute('data-index') || '0');
+          return idxA - idxB;
+        });
+        sortExergyBtn.innerHTML = `SORT: DEFAULT`;
+        sortExergyBtn.setAttribute('data-active', 'false');
+        sortExergyBtn.className = "filter-btn";
+      }
+      
+      // Append cards in sorted order
+      cardArray.forEach(card => container.appendChild(card));
+    });
+  }
+
+  // Filter Logic
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      const val = (e.target as HTMLInputElement).value.toLowerCase().trim();
+      let visibleCount = 0;
+      
+      cards.forEach(card => {
+        const artist = card.dataset.artist || '';
+        const title = card.dataset.title || '';
+        const year = card.dataset.year || '';
+        
+        if (artist.includes(val) || title.includes(val) || year.includes(val)) {
+          card.style.display = 'flex';
+          visibleCount++;
+        } else {
+          card.style.display = 'none';
+        }
+      });
+      
+      if (resultsCount) {
+        resultsCount.textContent = `Showing ${visibleCount} of ${cards.length} blocks`;
+      }
+    });
+  }
+
+  // View Toggles
+  if (viewGridBtn && viewListBtn && container) {
+    viewGridBtn.addEventListener('click', () => {
+      container.classList.remove('list-view');
+      viewGridBtn.classList.add('active');
+      viewListBtn.classList.remove('active');
+    });
+
+    viewListBtn.addEventListener('click', () => {
+      container.classList.add('list-view');
+      viewListBtn.classList.add('active');
+      viewGridBtn.classList.remove('active');
+    });
+  }
+
+  // Play/Embed Toggle Logic
+  cards.forEach(card => {
+    const playBtn = card.querySelector('.play-btn') as HTMLButtonElement;
+    const embedWrapper = card.querySelector('.embed-wrapper') as HTMLDivElement;
+    const iframe = card.querySelector('.lazy-spotify-iframe') as HTMLIFrameElement;
+    
+    if (playBtn && embedWrapper && iframe) {
+      playBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isHidden = embedWrapper.classList.contains('hidden');
+        
+        if (isHidden) {
+          // Lazy load the iframe source
+          const src = iframe.dataset.src;
+          if (src && !iframe.src) {
+            iframe.src = src;
+          }
+          embedWrapper.classList.remove('hidden');
+          playBtn.textContent = "[HIDE PLAYER]";
+        } else {
+          embedWrapper.classList.add('hidden');
+          playBtn.textContent = "[PLAY]";
+        }
+      });
+    }
+  });
+</script>
