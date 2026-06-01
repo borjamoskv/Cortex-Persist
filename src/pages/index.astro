@@ -1,5 +1,7 @@
 ---
 import SiteLayout from '../layouts/SiteLayout.astro';
+import CortexAuditLedger from '../components/CortexAuditLedger.tsx';
+import TelemetryWidget from '../components/TelemetryWidget.tsx';
 
 const navLinks = [
 	{ href: '#problem', label: 'Problem' },
@@ -364,6 +366,8 @@ No call required.</code></pre>
 			</div>
 		</section>
 
+		<CortexAuditLedger client:load />
+
 		<section class="section-frame surface" id="fit">
 			<div class="section-heading">
 				<p class="section-kicker">Fit</p>
@@ -599,5 +603,7 @@ Reply and get a scoped recommendation.</code></pre>
 				<a href="/vsa">Public Shell</a>
 			</div>
 		</footer>
+
+		<TelemetryWidget client:load />
 	</main>
 </SiteLayout>
