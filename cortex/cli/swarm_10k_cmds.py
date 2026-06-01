@@ -81,23 +81,39 @@ def swarm_10k_status(db_path):
         commander = SwarmCommander(bus_path=p)
         await commander.initialize()
 
-        total_signals = 0
-        for sys_idx in range(commander.bus.num_shards):
-            conn = commander.bus._shards[sys_idx]  # pyright: ignore[reportAttributeAccessIssue]
-            row = await (await conn.execute("SELECT COUNT(*) FROM signals")).fetchone()
-            total_signals += row[0] if row else 0
-
-        console.print(
-            Panel(
-                f"📊 [bold]CORTEX-SWARM-10K STATUS[/]\n"
-                f"Total Signals in Shards Bus: [cyan]{total_signals}[/]\n"
-                f"Shards Health: [green]100% ({commander.bus.num_shards} active)[/]",
-                border_style="blue",
+        from cortex.engine.shared_bus import SovereignSharedBus
+        if isinstance(commander.bus, SovereignSharedBus):
+            metrics = commander.bus.metrics
+            console.print(
+                Panel(
+                    f"📊 [bold]CORTEX-SWARM-10K STATUS[/]\n"
+                    f"Protocol: [cyan]SovereignSharedBus (Zero-Copy)[/]\n"
+                    f"Global Exergy: [green]{metrics['exergy']:.2f}[/]\n"
+                    f"Latency: [yellow]{metrics['latency']:.2f}ms[/]\n"
+                    f"Shards Health: [green]100% ({commander.bus.num_shards} active)[/]",
+                    border_style="blue",
+                )
             )
-        )
-        res = commander.bus.close()  # pyright: ignore[reportGeneralTypeIssues]
-        if asyncio.iscoroutine(res):
-            await res
+            commander.bus.close()
+        else:
+            total_signals = 0
+            for sys_idx in range(commander.bus.num_shards):
+                conn = commander.bus._shards[sys_idx]  # pyright: ignore[reportAttributeAccessIssue]
+                row = await (await conn.execute("SELECT COUNT(*) FROM signals")).fetchone()
+                total_signals += row[0] if row else 0
+
+            console.print(
+                Panel(
+                    f"📊 [bold]CORTEX-SWARM-10K STATUS[/]\n"
+                    f"Protocol: [cyan]ShardedAsyncSignalBus (SQLite)[/]\n"
+                    f"Total Signals in Shards Bus: [cyan]{total_signals}[/]\n"
+                    f"Shards Health: [green]100% ({commander.bus.num_shards} active)[/]",
+                    border_style="blue",
+                )
+            )
+            res = commander.bus.close()  # pyright: ignore[reportGeneralTypeIssues]
+            if asyncio.iscoroutine(res):
+                await res
 
     asyncio.run(_run())
 
