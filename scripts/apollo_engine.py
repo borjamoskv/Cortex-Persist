@@ -42,11 +42,11 @@ def extract_leads(config: ApolloConfig) -> list[dict]:
     url = "https://api.apollo.io/v1/mixed_people/search"
     headers = {
         "Cache-Control": "no-cache",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "x-api-key": config.api_key
     }
     
     payload = {
-        "api_key": config.api_key,
         "q_organization_domains": "",
         "page": 1,
         "per_page": config.limit,
