@@ -240,6 +240,18 @@ class AlertHandlerMixin:
                 Notifier.notify("Compaction completed", a.message)
                 self._last_alerts[key] = time.monotonic()  # type: ignore[reportAttributeAccessIssue]  # noqa: E501
 
+    def _alert_ast(self, alerts: list) -> None:
+        """Handler for ASTAlert (Pyright structural debt)."""
+        if not alerts:
+            return
+        for a in alerts:
+            key = f"ast_debt:{a.project}"
+            if self._should_alert(key):  # type: ignore[reportAttributeAccessIssue]
+                msg = f"AST Entropy: {a.entropy_score} violations. {a.message}"
+                logger.warning("🚨 STRUCTURAL DEBT DETECTED: %s", msg)
+                Notifier.notify("AST Pyright Entropy", msg, sound="Basso")
+                self._last_alerts[key] = time.monotonic()  # type: ignore[reportAttributeAccessIssue]
+
     def _alert_signals(self, alerts: list) -> None:
         """Handler for SignalAlert."""
         if not alerts:

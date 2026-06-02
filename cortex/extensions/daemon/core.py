@@ -93,6 +93,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin, ResourceMgrMixin,
     watchdog_hub: Any
     callback_api: Any
     mejoralo_monitor: Any
+    ast_debt_monitor: Any
     _healed_total: int
     _failure_counts: dict[str, int]
     _shutdown: bool
@@ -143,6 +144,8 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin, ResourceMgrMixin,
         self._run_monitor(status, 'tombstone_alerts', self.tombstone_monitor, self._alert_tombstone)
         self._run_monitor(status, 'workflow_alerts', self.workflow_monitor, self._alert_workflows)
         self._run_monitor(status, 'epistemic_alerts', self.epistemic_monitor, self._alert_workflows)
+        if hasattr(self, 'ast_debt_monitor'):
+            self._run_monitor(status, 'ast_alerts', self.ast_debt_monitor, self._alert_ast)
         if self.aether_monitor is not None:
             self._run_monitor(status, 'aether_alerts', self.aether_monitor, self._alert_aether)
             if hasattr(self, 'auto_immune_monitor'):

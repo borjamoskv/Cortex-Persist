@@ -24,6 +24,7 @@ from cortex.extensions.daemon.monitors import (
     UnifiedMejoraloMonitor,
     WorkflowMonitor,
 )
+from cortex.extensions.daemon.monitors.ast_oracle import ASTOracleMonitor
 from cortex.extensions.daemon.sidecar.sentinel_monitor.monitor import SentinelMonitor
 from cortex.extensions.daemon.sidecar.telemetry.fiat_oracle import FiatOracle
 
@@ -107,6 +108,11 @@ def init_advanced_monitors(daemon: Any, file_config: dict[str, Any]) -> None:
         critical_repair_threshold=file_config.get("epistemic_repair_threshold", 5),
         decay_velocity_threshold=file_config.get("epistemic_decay_threshold", -0.05),
         stale_ratio_threshold=file_config.get("epistemic_stale_ratio", 0.20),
+    )
+    daemon.ast_debt_monitor = ASTOracleMonitor(
+        projects=file_config.get("ast_debt_projects", {"cortex-persist": str(Path.cwd())}),
+        interval_seconds=file_config.get("ast_debt_interval", 1800),
+        engine=daemon._shared_engine,
     )
 
 
