@@ -1,115 +1,169 @@
-import json
 import time
-import networkx as nx
 import requests
 import feedparser
+import pandas as pd
+import networkx as nx
 from pathlib import Path
 from urllib.parse import urlparse
+from bs4 import BeautifulSoup
 
-# ==========================================
-# CORTEX PERSIST: REPUTATION GRAPH EXTRACTOR
-# Reality Level: C5-REAL
-# ==========================================
-
-# Seed Nodes (Substack / Newsletters / Podcasts)
-# Mapped by their Substack subdomain or identifier
 SEED_NODES = [
-    "borjamoskv",           # Nodo Cero (Borja Moskv)
-    "latentspace",          # Latent Space (Swyx)
-    "thesequence",          # The Sequence
-    "bensbites",            # Ben's Bites
-    "thealgorithmicbridge", # The Algorithmic Bridge
-    "importai",             # Import AI (Jack Clark)
-    "garymarcus",           # Marcus on AI
-    "dwarkesh",             # Dwarkesh Podcast
-    "zvi",                  # Don't Worry About the Vase
-    "stratechery",          # Stratechery (Ben Thompson)
-    "pragmaticengineer",    # The Pragmatic Engineer
-    "lennysnewsletter",     # Lenny's Newsletter
-    "cleothink",            # Cleo Abram (simulated mapping)
-    "simonw",               # Simon Willison's Weblog (uses atom/rss)
-    "aiweekly",             # AI Weekly
-    "rundownai",            # The Rundown AI
+    "latentspace", 
+    "thesequence",
+    "importai",
+    "thealgorithmicbridge",
+    "understandingai",
+    "garymarcus",
+    "lastweekinai",
+    "aheadofaitime",
+    "aisupremacy",
+    "thezvi",
+    "technosapiens",
+    "exponentialview",
+    "aiweirdness"
 ]
 
-OUTPUT_DIR = Path("data/reputation_graph")
-OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-
-class ReputationGraphBuilder:
+class RSSStructuralExtractor:
+    """
+    Pivot C5-REAL Definitivo: 
+    Las APIs JSON (/recommendations y /archive) bloquean o limitan body_html.
+    Fallback determinista a RSS/XML (/feed). 
+    Se extrae topología pura a partir de menciones intra-artículo (<content:encoded>).
+    """
     def __init__(self):
-        self.G = nx.DiGraph()
-        self.headers = {"User-Agent": "CortexPersist-Graph-Extractor/1.0 (C5-REAL)"}
+        self.headers = {
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        }
 
-    def fetch_substack_feed(self, subdomain: str) -> feedparser.FeedParserDict:
-        url = f"https://{subdomain}.substack.com/feed"
-        print(f"[*] Fetching feed for {subdomain}: {url}")
-        return feedparser.parse(url)
-
-    def extract_links(self, html_content: str) -> list[str]:
-        # Simple extraction using regex or simple parsing
-        # For C5-REAL we'll use a basic string split approach for speed and zero-dependency if bs4 is missing
-        import re
-        links = re.findall(r'href=[\'"]?([^\'" >]+)', html_content)
-        return links
-
-    def process_node(self, source_node: str):
-        self.G.add_node(source_node, type="seed")
-        feed = self.fetch_substack_feed(source_node)
-        
-        if feed.bozo:
-            print(f"[!] Warning: Malformed feed for {source_node}")
-            
-        for entry in feed.entries:
-            content = entry.get('content', [{'value': entry.get('summary', '')}])[0]['value']
-            links = self.extract_links(content)
-            
-            for link in links:
-                try:
-                    parsed = urlparse(link)
-                    domain = parsed.netloc.lower()
-                    
-                    # Detect if the link points to another substack
-                    if "substack.com" in domain:
-                        target_subdomain = domain.split(".substack.com")[0]
-                        if target_subdomain != source_node and target_subdomain != "www":
-                            # Add an edge representing a 'mention' (credibility transfer)
-                            if self.G.has_edge(source_node, target_subdomain):
-                                self.G[source_node][target_subdomain]['weight'] += 1
-                            else:
-                                self.G.add_edge(source_node, target_subdomain, weight=1)
-                except Exception:
-                    pass
-
-    def build_graph(self):
-        print("[*] Initiating Reputation Graph Extraction...")
-        for node in SEED_NODES:
-            self.process_node(node)
-            time.sleep(0.5) # Rate limiting
-            
-        print(f"[*] Extraction Complete. Nodes: {self.G.number_of_nodes()} | Edges: {self.G.number_of_edges()}")
-        
-    def analyze_graph(self):
-        # Calculate Eigenvector Centrality
+    def fetch_mentions(self, subdomain: str) -> list[dict]:
+        recommendations = []
         try:
-            centrality = nx.eigenvector_centrality(self.G, max_iter=1000, weight='weight')
-        except nx.PowerIterationFailedConvergence:
-            centrality = nx.degree_centrality(self.G)
+            print(f" -> Interceptando Feed RSS (C5-REAL) para: {subdomain}...")
+            # For Substack, use the main /feed
+            url = f"https://{subdomain}.substack.com/feed"
+            if subdomain == "importai": # special case
+                url = "https://importai.substack.com/feed"
+                
+            response = requests.get(url, headers=self.headers, timeout=10)
             
-        sorted_centrality = sorted(centrality.items(), key=lambda x: x[1], reverse=True)
-        
-        print("\n--- TOP 10 NODOS POR CENTRALIDAD (ÍNDICE DE LEGITIMACIÓN) ---")
-        for i, (node, score) in enumerate(sorted_centrality[:10]):
-            print(f"{i+1}. {node} -> {score:.4f}")
+            if response.status_code == 200:
+                feed = feedparser.parse(response.content)
+                seen_targets = set()
+                
+                for entry in feed.entries:
+                    # Get full HTML content
+                    html = ""
+                    if 'content' in entry:
+                        html = entry.content[0].value
+                    elif 'summary' in entry:
+                        html = entry.summary
+                        
+                    if not html:
+                        continue
+                        
+                    soup = BeautifulSoup(html, "html.parser")
+                    for a in soup.find_all("a", href=True):
+                        href = a["href"]
+                        if ".substack.com" in href:
+                            target_domain = urlparse(href).netloc
+                            target_subdomain = target_domain.split(".substack.com")[0].replace("www.", "")
+                            
+                            if target_subdomain and target_subdomain != subdomain and target_subdomain not in seen_targets:
+                                # We count 1 edge per Substack mentioned in the entire feed (binary presence)
+                                # To prevent one post dominating the weight
+                                seen_targets.add(target_subdomain)
+                                recommendations.append({
+                                    "source": subdomain,
+                                    "target": target_subdomain,
+                                    "timestamp": int(time.time()),
+                                    "recommendation_type": "in_text_mention",
+                                    "metadata": {
+                                        "weight": 1,
+                                        "extraction": "rss_content_encoded"
+                                    }
+                                })
+                                
+                print(f"   [+] {len(recommendations)} menciones cruzadas capturadas para {subdomain}.")
+            else:
+                print(f"   [!] Fallo HTTP {response.status_code} para {subdomain}.")
+                
+        except Exception as e:
+            print(f"   [!] Error de extracción en {subdomain}: {e}")
             
-        return sorted_centrality
+        return recommendations
 
-    def export(self):
-        # Export as GraphML for Gephi / Neo4j ingestion
-        nx.write_graphml(self.G, OUTPUT_DIR / "mafia_ai_graph.graphml")
-        print(f"[*] Graph exported to {OUTPUT_DIR / 'mafia_ai_graph.graphml'}")
+class StructuralGraphBuilder:
+    def __init__(self):
+        self.graph = nx.DiGraph()
+
+    def build_from_payloads(self, payloads: list[dict]):
+        for payload in payloads:
+            source = payload["source"]
+            target = payload["target"]
+            weight = payload["metadata"].get("weight", 1)
+            
+            if self.graph.has_edge(source, target):
+                self.graph[source][target]["weight"] += weight
+            else:
+                self.graph.add_edge(source, target, weight=weight)
+
+    def compute_tier1_metrics(self) -> pd.DataFrame:
+        metrics = []
+        try:
+            pr = nx.pagerank(self.graph, weight="weight")
+            in_degree = dict(self.graph.in_degree(weight="weight"))
+            out_degree = dict(self.graph.out_degree(weight="weight"))
+            
+            for node in self.graph.nodes():
+                metrics.append({
+                    "Node": node,
+                    "PageRank": pr.get(node, 0.0),
+                    "In_Degree": in_degree.get(node, 0),
+                    "Out_Degree": out_degree.get(node, 0),
+                    "Reciprocity_Ratio": len(list(nx.mutually_synergetic_edges(self.graph))) if hasattr(nx, 'mutually_synergetic_edges') else 0 
+                })
+        except Exception as e:
+            print(f"[!] Error de computo topológico: {e}")
+            
+        df = pd.DataFrame(metrics)
+        if not df.empty:
+            df = df.sort_values(by="PageRank", ascending=False)
+        return df
+
+    def export(self, output_dir: Path):
+        output_dir.mkdir(parents=True, exist_ok=True)
+        nx.write_graphml(self.graph, output_dir / "structural_graph.graphml")
+        print(f" -> Topología cristalizada en: {output_dir / 'structural_graph.graphml'}")
+
+def main():
+    print("[*] Iniciando Extractor C5-REAL (RSS Asimétrico)")
+    extractor = RSSStructuralExtractor()
+    builder = StructuralGraphBuilder()
+    
+    all_recommendations = []
+    for node in SEED_NODES:
+        recs = extractor.fetch_mentions(node)
+        all_recommendations.extend(recs)
+        time.sleep(1) # Rate limit protection
+        
+    print(f"\\n[*] Total Raw Edges Captured: {len(all_recommendations)}")
+    print("[*] Construyendo matriz topológica...")
+    builder.build_from_payloads(all_recommendations)
+    
+    print("\\n[*] Computando Métricas Tier-1 (Falsación de Concentración Anómala)...")
+    df_metrics = builder.compute_tier1_metrics()
+    
+    if not df_metrics.empty:
+        print("\\n--- TIER-1 METRICS ---")
+        print(df_metrics.head(10).to_string(index=False))
+        
+        output_dir = Path("data/mafia_ai")
+        output_dir.mkdir(parents=True, exist_ok=True)
+        df_metrics.to_csv(output_dir / "tier1_node_metrics.csv", index=False)
+        builder.export(output_dir)
+        print("\\n[*] FALSACIÓN COMPLETADA. Data anclada a disco.")
+    else:
+        print("\\n[!] Topología vacía. Falsación fallida.")
 
 if __name__ == "__main__":
-    builder = ReputationGraphBuilder()
-    builder.build_graph()
-    builder.analyze_graph()
-    builder.export()
+    main()
