@@ -11,12 +11,10 @@ from cortex.audit.frontier import FrontierAuditor
 from cortex.cli.common import console, get_engine
 
 
-@click.group("audit")
-def audit_cmds():
-    """🛡️ Sovereign Audit: Security & Entropy detection."""
+from cortex.cli.trust_cmds import audit
 
 
-@audit_cmds.command("frontier")
+@audit.command("frontier")
 @click.option("--project", "-p", required=True, help="Target project name to evaluate.")
 @click.option(
     "--model", "-m", help="Override default SovereignLLM with a specific preferred provider."

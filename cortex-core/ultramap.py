@@ -158,8 +158,8 @@ class UltramapSubstrate:
         target_bytes = bytes(self._buffer[offset + 24 : offset + 88]).rstrip(b"\x00")  # pyright: ignore[reportOptionalSubscript]
         entropy = struct.unpack_from("d", self._buffer, offset + 88)[0]  # pyright: ignore[reportArgumentType]
         
-        # Hormones are stored at [96:128]
-        dopamine, cortisol, serotonin, adrenaline = struct.unpack_from("dddd", self._buffer, offset + 96)  # pyright: ignore[reportArgumentType]
+        # UESS v2 Scalar Control Fields are stored at [96:128]
+        queue_depth, error_rate, causal_entropy, cpu_load = struct.unpack_from("dddd", self._buffer, offset + 96)  # pyright: ignore[reportArgumentType]
         
         return {
             "x": x,
@@ -167,47 +167,36 @@ class UltramapSubstrate:
             "z": z,
             "target": target_bytes.decode('utf-8', 'ignore'),
             "entropy": entropy,
-            "dopamine": dopamine,
-            "cortisol": cortisol,
-            "serotonin": serotonin,
-            "adrenaline": adrenaline
+            "queue_depth": queue_depth,
+            "error_rate": error_rate,
+            "causal_entropy": causal_entropy,
+            "cpu_load": cpu_load
         }
 
-    def volume_transmit_hormones(self, origin_x: float, origin_y: float, origin_z: float, radius: float, dopamine: float, cortisol: float, serotonin: float, adrenaline: float) -> int:
-        """Topographical Endocrinology: Volume transmission of hormones across the spatial matrix."""
+    def update_control_vector(self, agent_idx: int, queue_depth: float, error_rate: float, causal_entropy: float, cpu_load: float) -> bool:
+        """UESS v2: Writes the Control Vector fields to the memory substrate."""
         if self._rs is not None:
-            return self._rs.volume_transmit_hormones(origin_x, origin_y, origin_z, radius, dopamine, cortisol, serotonin, adrenaline)
+            return self._rs.update_control_vector(agent_idx, queue_depth, error_rate, causal_entropy, cpu_load)
             
-        affected = 0
-        for i in range(self.capacity):
-            offset = i * self.node_size
-            x, y, z = struct.unpack_from("ddd", self._buffer, offset)  # pyright: ignore[reportArgumentType]
-            if x == 0.0 and y == 0.0 and z == 0.0:
-                continue
-                
-            dist = ((x - origin_x)**2 + (y - origin_y)**2 + (z - origin_z)**2)**0.5
-            if dist <= radius and radius > 0.0:
-                intensity = 1.0 - (dist / radius)
-                d, c, s, a = struct.unpack_from("dddd", self._buffer, offset + 96)  # pyright: ignore[reportArgumentType]
-                
-                d = max(0.0, min(1.0, d + (dopamine * intensity)))
-                c = max(0.0, min(1.0, c + (cortisol * intensity)))
-                s = max(0.0, min(1.0, s + (serotonin * intensity)))
-                a = max(0.0, min(1.0, a + (adrenaline * intensity)))
-                
-                struct.pack_into("dddd", self._buffer, offset + 96, d, c, s, a)  # pyright: ignore[reportArgumentType]
-                affected += 1
-                
-        return affected
+        if not (0 <= agent_idx < self.capacity):
+            return False
+
+        offset = agent_idx * self.node_size
+        x, y, z = struct.unpack_from("ddd", self._buffer, offset)  # pyright: ignore[reportArgumentType]
+        if x == 0.0 and y == 0.0 and z == 0.0:
+            return False
+
+        struct.pack_into("dddd", self._buffer, offset + 96, queue_depth, error_rate, causal_entropy, cpu_load)  # pyright: ignore[reportArgumentType]
+        return True
 
 if __name__ == "__main__":
     umap = UltramapSubstrate()
     umap.update_agent_position(0, 10.0, 20.0, 30.0, "CVE-2026-MINIPLASMA", 0.95)
     
-    # Simulate a topographical dopamine/adrenaline burst at origin (10.0, 20.0, 30.0) with radius 5.0
-    affected = umap.volume_transmit_hormones(10.0, 20.0, 30.0, 5.0, dopamine=0.8, cortisol=0.0, serotonin=0.0, adrenaline=0.5)
+    # UESS v2: update agent control vector
+    success = umap.update_control_vector(0, queue_depth=10.0, error_rate=0.05, causal_entropy=0.1, cpu_load=0.6)
     
     joules = umap.calculate_exergy_distance(0, "TARGET_DARKPOOL_0x1")
     logger.info(f"C5-REAL: Exergy Distance Calculated: {joules:.2f} Joules")
-    logger.info(f"Topographical Endocrinology: Transmitted to {affected} agents.")
+    logger.info(f"UESS v2 Update Success: {success}")
     logger.info(f"Agent 0 State: {umap.get_agent_state(0)}")
