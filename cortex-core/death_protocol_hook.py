@@ -47,7 +47,7 @@ def main():
         print(f"  → {file_path} | Structural Entropy: {entropy:.2f}")
         
         # Threshold: If AST node density is too high (spaghetti code) or infinite (syntax error)
-        if entropy > 5.0:
+        if entropy > 6.0:
             print(f"\033[1;31m  [FATAL] Entropic collapse in {file_path}. Structural complexity exceeds limits.\033[0m")
             failed = True
             

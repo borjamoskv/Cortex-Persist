@@ -1,0 +1,534 @@
+[
+  {
+    "file": "cortex-core/cortex_engine_parallel.py",
+    "pattern_present": 0,
+    "loc": 34,
+    "authors": 2,
+    "failures": 1
+  },
+  {
+    "file": "cortex-core/exergy_sentinel.py",
+    "pattern_present": 1,
+    "loc": 497,
+    "authors": 1,
+    "failures": 0
+  },
+  {
+    "file": "cortex-core/ki_standardize.py",
+    "pattern_present": 0,
+    "loc": 279,
+    "authors": 2,
+    "failures": 2
+  },
+  {
+    "file": "cortex-core/death_protocol_hook.py",
+    "pattern_present": 0,
+    "loc": 62,
+    "authors": 1,
+    "failures": 0
+  },
+  {
+    "file": "cortex-core/mirror_audit.py",
+    "pattern_present": 0,
+    "loc": 91,
+    "authors": 2,
+    "failures": 4
+  },
+  {
+    "file": "cortex-core/server.py",
+    "pattern_present": 0,
+    "loc": 125,
+    "authors": 1,
+    "failures": 0
+  },
+  {
+    "file": "cortex-core/demo_outbox_c5.py",
+    "pattern_present": 0,
+    "loc": 8,
+    "authors": 1,
+    "failures": 0
+  },
+  {
+    "file": "cortex-core/dummy_exergy.py",
+    "pattern_present": 0,
+    "loc": 2,
+    "authors": 1,
+    "failures": 0
+  },
+  {
+    "file": "cortex-core/legion_dispatch.py",
+    "pattern_present": 0,
+    "loc": 76,
+    "authors": 1,
+    "failures": 1
+  },
+  {
+    "file": "cortex-core/c5_telemetry_bridge.py",
+    "pattern_present": 0,
+    "loc": 68,
+    "authors": 1,
+    "failures": 1
+  },
+  {
+    "file": "cortex-core/exa_lisp_genesis.py",
+    "pattern_present": 0,
+    "loc": 266,
+    "authors": 1,
+    "failures": 3
+  },
+  {
+    "file": "cortex-core/swarm_manager.py",
+    "pattern_present": 0,
+    "loc": 55,
+    "authors": 1,
+    "failures": 0
+  },
+  {
+    "file": "cortex-core/uess_remotion_bridge.py",
+    "pattern_present": 0,
+    "loc": 116,
+    "authors": 1,
+    "failures": 0
+  },
+  {
+    "file": "cortex-core/sage_orchestrator.py",
+    "pattern_present": 0,
+    "loc": 106,
+    "authors": 2,
+    "failures": 2
+  },
+  {
+    "file": "cortex-core/ki_promoter.py",
+    "pattern_present": 0,
+    "loc": 201,
+    "authors": 2,
+    "failures": 4
+  },
+  {
+    "file": "cortex-core/cortex_exergy_stress.py",
+    "pattern_present": 0,
+    "loc": 49,
+    "authors": 1,
+    "failures": 1
+  },
+  {
+    "file": "cortex-core/uess_sentinel_daemon.py",
+    "pattern_present": 0,
+    "loc": 106,
+    "authors": 1,
+    "failures": 0
+  },
+  {
+    "file": "cortex-core/dummy_gate.py",
+    "pattern_present": 0,
+    "loc": 3,
+    "authors": 1,
+    "failures": 0
+  },
+  {
+    "file": "cortex-core/uess_ouroboros_engine.py",
+    "pattern_present": 0,
+    "loc": 124,
+    "authors": 1,
+    "failures": 0
+  },
+  {
+    "file": "cortex-core/test_exa_integration.py",
+    "pattern_present": 0,
+    "loc": 22,
+    "authors": 1,
+    "failures": 0
+  },
+  {
+    "file": "cortex-core/autopoiesis_ast.py",
+    "pattern_present": 0,
+    "loc": 120,
+    "authors": 1,
+    "failures": 0
+  },
+  {
+    "file": "cortex-core/test_dummy_gate.py",
+    "pattern_present": 0,
+    "loc": 3,
+    "authors": 1,
+    "failures": 0
+  },
+  {
+    "file": "cortex-core/ultramap.py",
+    "pattern_present": 0,
+    "loc": 202,
+    "authors": 1,
+    "failures": 8
+  },
+  {
+    "file": "cortex-core/cortex_exergy_autopoiesis.py",
+    "pattern_present": 0,
+    "loc": 69,
+    "authors": 1,
+    "failures": 1
+  },
+  {
+    "file": "cortex-core/maxima_exergia_miner.py",
+    "pattern_present": 0,
+    "loc": 77,
+    "authors": 1,
+    "failures": 0
+  },
+  {
+    "file": "cortex-core/aeon_0_compiler.py",
+    "pattern_present": 0,
+    "loc": 157,
+    "authors": 1,
+    "failures": 0
+  },
+  {
+    "file": "cortex-core/skill_compiler.py",
+    "pattern_present": 0,
+    "loc": 137,
+    "authors": 2,
+    "failures": 2
+  },
+  {
+    "file": "cortex-core/submission_bridge.py",
+    "pattern_present": 0,
+    "loc": 113,
+    "authors": 2,
+    "failures": 4
+  },
+  {
+    "file": "cortex-core/stress_test.py",
+    "pattern_present": 0,
+    "loc": 42,
+    "authors": 1,
+    "failures": 1
+  },
+  {
+    "file": "cortex-core/test_c5_exa_lisp.py",
+    "pattern_present": 0,
+    "loc": 34,
+    "authors": 1,
+    "failures": 2
+  },
+  {
+    "file": "cortex-core/genesis_onboarding.py",
+    "pattern_present": 0,
+    "loc": 64,
+    "authors": 1,
+    "failures": 0
+  },
+  {
+    "file": "cortex-core/k0_swarm_node.py",
+    "pattern_present": 0,
+    "loc": 287,
+    "authors": 1,
+    "failures": 6
+  },
+  {
+    "file": "cortex-core/vsa_sdm_bridge.py",
+    "pattern_present": 0,
+    "loc": 162,
+    "authors": 2,
+    "failures": 3
+  },
+  {
+    "file": "cortex-core/uess_ast_mutation_engine.py",
+    "pattern_present": 0,
+    "loc": 102,
+    "authors": 1,
+    "failures": 0
+  },
+  {
+    "file": "cortex-core/remediator.py",
+    "pattern_present": 0,
+    "loc": 136,
+    "authors": 2,
+    "failures": 3
+  },
+  {
+    "file": "cortex-core/test_mmap_stress.py",
+    "pattern_present": 0,
+    "loc": 38,
+    "authors": 1,
+    "failures": 0
+  },
+  {
+    "file": "cortex-core/cortex_mcp_server.py",
+    "pattern_present": 0,
+    "loc": 67,
+    "authors": 2,
+    "failures": 2
+  },
+  {
+    "file": "cortex-core/cortex_daemon.py",
+    "pattern_present": 1,
+    "loc": 505,
+    "authors": 2,
+    "failures": 7
+  },
+  {
+    "file": "cortex-core/test_gate_sandbox.py",
+    "pattern_present": 0,
+    "loc": 51,
+    "authors": 1,
+    "failures": 1
+  },
+  {
+    "file": "cortex-core/uess_cortex_runtime.py",
+    "pattern_present": 0,
+    "loc": 98,
+    "authors": 1,
+    "failures": 0
+  },
+  {
+    "file": "cortex-core/on_chain_recon.py",
+    "pattern_present": 0,
+    "loc": 41,
+    "authors": 2,
+    "failures": 2
+  },
+  {
+    "file": "cortex-core/ouroboros_engine.py",
+    "pattern_present": 0,
+    "loc": 262,
+    "authors": 2,
+    "failures": 6
+  },
+  {
+    "file": "cortex-core/test_reconciliation.py",
+    "pattern_present": 0,
+    "loc": 42,
+    "authors": 1,
+    "failures": 2
+  },
+  {
+    "file": "cortex-core/exergy_daemon.py",
+    "pattern_present": 1,
+    "loc": 393,
+    "authors": 1,
+    "failures": 1
+  },
+  {
+    "file": "cortex-core/agente_iterar.py",
+    "pattern_present": 0,
+    "loc": 270,
+    "authors": 1,
+    "failures": 2
+  },
+  {
+    "file": "cortex-core/telemetry_gate.py",
+    "pattern_present": 0,
+    "loc": 161,
+    "authors": 1,
+    "failures": 1
+  },
+  {
+    "file": "cortex-core/uess_swarm_scheduler.py",
+    "pattern_present": 0,
+    "loc": 136,
+    "authors": 1,
+    "failures": 0
+  },
+  {
+    "file": "cortex-core/daemons/l0_immunology.py",
+    "pattern_present": 0,
+    "loc": 129,
+    "authors": 1,
+    "failures": 1
+  },
+  {
+    "file": "cortex-core/daemons/__init__.py",
+    "pattern_present": 0,
+    "loc": 0,
+    "authors": 1,
+    "failures": 0
+  },
+  {
+    "file": "cortex-core/daemons/security_recon.py",
+    "pattern_present": 0,
+    "loc": 45,
+    "authors": 1,
+    "failures": 0
+  },
+  {
+    "file": "cortex-core/daemons/outbox.py",
+    "pattern_present": 1,
+    "loc": 429,
+    "authors": 1,
+    "failures": 3
+  },
+  {
+    "file": "cortex-core/compiled_skills/antigravity_github_omega.py",
+    "pattern_present": 0,
+    "loc": 31,
+    "authors": 1,
+    "failures": 0
+  },
+  {
+    "file": "cortex-core/compiled_skills/estado_del_arte_omega.py",
+    "pattern_present": 0,
+    "loc": 31,
+    "authors": 1,
+    "failures": 0
+  },
+  {
+    "file": "cortex-core/compiled_skills/sortu_apex.py",
+    "pattern_present": 0,
+    "loc": 31,
+    "authors": 1,
+    "failures": 0
+  },
+  {
+    "file": "cortex-core/compiled_skills/mac_control_omega.py",
+    "pattern_present": 0,
+    "loc": 31,
+    "authors": 2,
+    "failures": 1
+  },
+  {
+    "file": "cortex-core/compiled_skills/crystallize_knowledge_jit.py",
+    "pattern_present": 0,
+    "loc": 31,
+    "authors": 1,
+    "failures": 0
+  },
+  {
+    "file": "cortex-core/compiled_skills/autodidact_history_omega.py",
+    "pattern_present": 0,
+    "loc": 31,
+    "authors": 1,
+    "failures": 0
+  },
+  {
+    "file": "cortex-core/compiled_skills/__init__.py",
+    "pattern_present": 0,
+    "loc": 17,
+    "authors": 2,
+    "failures": 1
+  },
+  {
+    "file": "cortex-core/compiled_skills/python_extractor_omega.py",
+    "pattern_present": 0,
+    "loc": 31,
+    "authors": 1,
+    "failures": 0
+  },
+  {
+    "file": "cortex-core/compiled_skills/c5_death_omega.py",
+    "pattern_present": 0,
+    "loc": 31,
+    "authors": 1,
+    "failures": 0
+  },
+  {
+    "file": "cortex-core/compiled_skills/cortex_research_loop_omega.py",
+    "pattern_present": 0,
+    "loc": 31,
+    "authors": 1,
+    "failures": 0
+  },
+  {
+    "file": "cortex-core/compiled_skills/aesthetic_foundry_omega.py",
+    "pattern_present": 0,
+    "loc": 31,
+    "authors": 2,
+    "failures": 1
+  },
+  {
+    "file": "cortex-core/compiled_skills/apollo_extractor_omega.py",
+    "pattern_present": 0,
+    "loc": 31,
+    "authors": 1,
+    "failures": 0
+  },
+  {
+    "file": "cortex-core/compiled_skills/agente_sota.py",
+    "pattern_present": 0,
+    "loc": 31,
+    "authors": 1,
+    "failures": 0
+  },
+  {
+    "file": "cortex-core/compiled_skills/api_provider_omega.py",
+    "pattern_present": 0,
+    "loc": 31,
+    "authors": 1,
+    "failures": 0
+  },
+  {
+    "file": "cortex-core/compiled_skills/ouroboros_infinity.py",
+    "pattern_present": 0,
+    "loc": 31,
+    "authors": 1,
+    "failures": 0
+  },
+  {
+    "file": "cortex-core/persistence/iteration_daemon.py",
+    "pattern_present": 0,
+    "loc": 72,
+    "authors": 1,
+    "failures": 0
+  },
+  {
+    "file": "cortex-core/persistence/ide_preserver.py",
+    "pattern_present": 0,
+    "loc": 101,
+    "authors": 1,
+    "failures": 0
+  },
+  {
+    "file": "cortex-core/persistence/hybrid.py",
+    "pattern_present": 0,
+    "loc": 57,
+    "authors": 1,
+    "failures": 1
+  },
+  {
+    "file": "cortex-core/persistence/ledger.py",
+    "pattern_present": 1,
+    "loc": 245,
+    "authors": 1,
+    "failures": 3
+  },
+  {
+    "file": "cortex-core/persistence/cache.py",
+    "pattern_present": 0,
+    "loc": 49,
+    "authors": 1,
+    "failures": 2
+  },
+  {
+    "file": "cortex-core/persistence/__init__.py",
+    "pattern_present": 0,
+    "loc": 75,
+    "authors": 1,
+    "failures": 2
+  },
+  {
+    "file": "cortex-core/persistence/vsa.py",
+    "pattern_present": 0,
+    "loc": 166,
+    "authors": 1,
+    "failures": 4
+  },
+  {
+    "file": "cortex-core/persistence/base.py",
+    "pattern_present": 0,
+    "loc": 117,
+    "authors": 1,
+    "failures": 5
+  },
+  {
+    "file": "cortex_rs/__init__.py",
+    "pattern_present": 0,
+    "loc": 34,
+    "authors": 1,
+    "failures": 0
+  },
+  {
+    "file": "api/server.py",
+    "pattern_present": 0,
+    "loc": 138,
+    "authors": 1,
+    "failures": 2
+  }
+]
