@@ -1,0 +1,171 @@
+<?xml version='1.0' encoding='utf-8'?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+  <key id="d1" for="edge" attr.name="weight" attr.type="long" />
+  <key id="d0" for="node" attr.name="type" attr.type="string" />
+  <graph edgedefault="directed">
+    <node id="latentspace">
+      <data key="d0">seed</data>
+    </node>
+    <node id="thesequence">
+      <data key="d0">seed</data>
+    </node>
+    <node id="bensbites">
+      <data key="d0">seed</data>
+    </node>
+    <node id="open" />
+    <node id="semaphore" />
+    <node id="helentoner" />
+    <node id="benhylak" />
+    <node id="thealgorithmicbridge">
+      <data key="d0">seed</data>
+    </node>
+    <node id="substack.com" />
+    <node id="importai">
+      <data key="d0">seed</data>
+    </node>
+    <node id="aleximas" />
+    <node id="therealartificialintelligence" />
+    <node id="forecastingresearch" />
+    <node id="freesystems" />
+    <node id="agglomerations" />
+    <node id="aiprospects" />
+    <node id="post" />
+    <node id="garymarcus">
+      <data key="d0">seed</data>
+    </node>
+    <node id="dwarkesh">
+      <data key="d0">seed</data>
+    </node>
+    <node id="nanransohoff" />
+    <node id="tspasemiconductor" />
+    <node id="cheekypint" />
+    <node id="zvi">
+      <data key="d0">seed</data>
+    </node>
+    <node id="stratechery">
+      <data key="d0">seed</data>
+    </node>
+    <node id="pragmaticengineer">
+      <data key="d0">seed</data>
+    </node>
+    <node id="benn" />
+    <node id="alifeengineered" />
+    <node id="lennysnewsletter">
+      <data key="d0">seed</data>
+    </node>
+    <node id="cleothink">
+      <data key="d0">seed</data>
+    </node>
+    <node id="simonw">
+      <data key="d0">seed</data>
+    </node>
+    <node id="speechmap" />
+    <node id="ailabwatch" />
+    <node id="aiweekly">
+      <data key="d0">seed</data>
+    </node>
+    <node id="davidbessis" />
+    <node id="stevensalzberg" />
+    <node id="recsysml" />
+    <node id="thomaswdinsmore" />
+    <node id="simonlermen" />
+    <node id="mindfulmodeler" />
+    <node id="frontierai" />
+    <node id="rundownai">
+      <data key="d0">seed</data>
+    </node>
+    <edge source="bensbites" target="open">
+      <data key="d1">1</data>
+    </edge>
+    <edge source="bensbites" target="semaphore">
+      <data key="d1">1</data>
+    </edge>
+    <edge source="bensbites" target="helentoner">
+      <data key="d1">1</data>
+    </edge>
+    <edge source="bensbites" target="benhylak">
+      <data key="d1">1</data>
+    </edge>
+    <edge source="thealgorithmicbridge" target="substack.com">
+      <data key="d1">1</data>
+    </edge>
+    <edge source="thealgorithmicbridge" target="importai">
+      <data key="d1">1</data>
+    </edge>
+    <edge source="thealgorithmicbridge" target="aleximas">
+      <data key="d1">1</data>
+    </edge>
+    <edge source="importai" target="substack.com">
+      <data key="d1">1</data>
+    </edge>
+    <edge source="importai" target="therealartificialintelligence">
+      <data key="d1">1</data>
+    </edge>
+    <edge source="importai" target="forecastingresearch">
+      <data key="d1">2</data>
+    </edge>
+    <edge source="importai" target="freesystems">
+      <data key="d1">1</data>
+    </edge>
+    <edge source="importai" target="agglomerations">
+      <data key="d1">1</data>
+    </edge>
+    <edge source="importai" target="aleximas">
+      <data key="d1">1</data>
+    </edge>
+    <edge source="importai" target="aiprospects">
+      <data key="d1">1</data>
+    </edge>
+    <edge source="importai" target="post">
+      <data key="d1">1</data>
+    </edge>
+    <edge source="garymarcus" target="open">
+      <data key="d1">5</data>
+    </edge>
+    <edge source="dwarkesh" target="aleximas">
+      <data key="d1">2</data>
+    </edge>
+    <edge source="dwarkesh" target="nanransohoff">
+      <data key="d1">1</data>
+    </edge>
+    <edge source="dwarkesh" target="tspasemiconductor">
+      <data key="d1">1</data>
+    </edge>
+    <edge source="dwarkesh" target="cheekypint">
+      <data key="d1">1</data>
+    </edge>
+    <edge source="pragmaticengineer" target="benn">
+      <data key="d1">1</data>
+    </edge>
+    <edge source="pragmaticengineer" target="alifeengineered">
+      <data key="d1">2</data>
+    </edge>
+    <edge source="simonw" target="speechmap">
+      <data key="d1">1</data>
+    </edge>
+    <edge source="simonw" target="ailabwatch">
+      <data key="d1">1</data>
+    </edge>
+    <edge source="aiweekly" target="davidbessis">
+      <data key="d1">1</data>
+    </edge>
+    <edge source="aiweekly" target="stevensalzberg">
+      <data key="d1">1</data>
+    </edge>
+    <edge source="aiweekly" target="recsysml">
+      <data key="d1">1</data>
+    </edge>
+    <edge source="aiweekly" target="thomaswdinsmore">
+      <data key="d1">1</data>
+    </edge>
+    <edge source="aiweekly" target="simonlermen">
+      <data key="d1">1</data>
+    </edge>
+    <edge source="aiweekly" target="mindfulmodeler">
+      <data key="d1">1</data>
+    </edge>
+    <edge source="aiweekly" target="frontierai">
+      <data key="d1">1</data>
+    </edge>
+  </graph>
+</graphml>
