@@ -139,6 +139,10 @@ _ALLOWED_NODES = frozenset(
         ast.While,
         # Functions (no classes — too powerful)
         ast.FunctionDef,
+        ast.AsyncFunctionDef,
+        ast.Await,
+        ast.AsyncFor,
+        ast.AsyncWith,
         ast.arguments,
         ast.arg,
         ast.Lambda,

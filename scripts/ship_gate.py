@@ -61,9 +61,10 @@ class GateReport:
 
 def _run(cmd: str, timeout: int = 120) -> subprocess.CompletedProcess:
     """Run a shell command and return result."""
+    import shlex
     return subprocess.run(
-        cmd,
-        shell=True,
+        shlex.split(cmd),
+        shell=False,
         capture_output=True,
         text=True,
         cwd=str(REPO_ROOT),

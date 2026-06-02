@@ -87,22 +87,21 @@ class DemiurgeCompiler:
                 }
 
             # Phase 4-5: Ephemeral Execution (Sandbox)
-            sandbox_globals: dict[str, Any] = {"__builtins__": {}}
-            try:
-                code_obj = compile(generated_code, "<demiurge_ast>", "exec")
-                # Security Justification: The Demiurge JIT compiler requires exec() for
-                # ephemeral skill generation (autopoiesis) within a controlled sandbox.
-                # All inputs are validated via AST analysis before execution.
-                exec(code_obj, sandbox_globals)  # noqa: S102 # nosec B102
-            except Exception as e:
-                # noqa: BLE001 — Compilation error during JIT forging is expected.
-                await self._record_ghost(intent, generated_code, f"Compilation Error: {e}", 0.15)
+            from cortex.utils.sandbox import ASTSandbox
+            sandbox = ASTSandbox(timeout_seconds=5)
+            exec_result = sandbox.safe_exec(generated_code)
+            
+            if not exec_result.success:
+                error_msg = exec_result.error or "Unknown sandbox error"
+                await self._record_ghost(intent, generated_code, f"Compilation Error: {error_msg}", 0.15)
                 return {
                     "status": "FAILED",
-                    "reason": f"Compilation Error: {e}",
+                    "reason": f"Compilation Error: {error_msg}",
                     "utility": 0.15,
                     "code": generated_code,
                 }
+                
+            sandbox_globals = exec_result.output
 
             if "execute_skill" not in sandbox_globals:
                 return {

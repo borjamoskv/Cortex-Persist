@@ -195,9 +195,10 @@ class AgentToolkit:
 
         logger.info("🔧 bash: %s", cmd[:120])
         try:
+            import shlex
             result = subprocess.run(
-                cmd,
-                shell=True,  # noqa: S602 # nosec B602: Guarded by _sovereign_bash_guard
+                shlex.split(cmd),
+                shell=False,
                 cwd=str(self.repo_path),
                 capture_output=True,
                 text=True,

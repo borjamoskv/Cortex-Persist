@@ -36,54 +36,20 @@ class SovereignASTVisitor(ast.NodeVisitor):
 
 
 def _execute_sync(source_code: str, global_ctx: dict) -> dict:
-    # Epistemic Filter (AST Parse)
-    try:
-        tree = ast.parse(source_code)
-        SovereignASTVisitor().visit(tree)
-    except SyntaxError as e:
-        raise SecurityViolationException(f"AST Syntax Error: {e}") from e
-
-    # Compilation
-    compiled_code = compile(tree, filename="<jit_ast>", mode="exec")
-
-    # Isolated Execution Environment
-    local_env = {}
-
-    # We restrict __builtins__
-    safe_builtins = {
-        "print": print,
-        "len": len,
-        "range": range,
-        "str": str,
-        "int": int,
-        "float": float,
-        "bool": bool,
-        "list": list,
-        "dict": dict,
-        "set": set,
-        "tuple": tuple,
-        "sum": sum,
-        "min": min,
-        "max": max,
-        "abs": abs,
-        "round": round,
-        "any": any,
-        "all": all,
-        "map": map,
-        "filter": filter,
-        "zip": zip,
-        "enumerate": enumerate,
-        "Exception": Exception,
-        "ValueError": ValueError,
-        "TypeError": TypeError,
-        "KeyError": KeyError,
-        "IndexError": IndexError,
-    }
-
-    exec_globals = {"__builtins__": safe_builtins}
-    exec_globals.update(global_ctx)
-
-    exec(compiled_code, exec_globals, local_env)
+    from cortex.utils.sandbox import ASTSandbox
+    
+    sandbox = ASTSandbox(timeout_seconds=2)
+    exec_result = sandbox.safe_exec(source_code)
+    
+    if not exec_result.success:
+        raise SecurityViolationException(f"AST Sandbox Error: {exec_result.error}")
+        
+    local_env = exec_result.output
+    # Inject global context if needed
+    for k, v in global_ctx.items():
+        if k not in local_env:
+            local_env[k] = v
+            
     return local_env
 
 
