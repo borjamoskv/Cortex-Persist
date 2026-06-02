@@ -1,0 +1,14 @@
+CI_Mutation_Report:
+  Evaluation:
+    Passed: false
+    Status: FAIL
+  Metrics:
+    Mutants_Killed: 963
+    Mutants_Survived: 654
+    Mutation_Score: 59.55%
+    Total_Files_Scanned: 40
+    Total_Mutants_Generated: 1617
+  Thresholds:
+    Critical: 99.0
+    General: 90.0
+    Important: 95.0
