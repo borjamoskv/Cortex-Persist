@@ -101,9 +101,7 @@ embeddings = [
     "sentence-transformers>=3.0",
     "onnxruntime>=1.17",
 ]
-knowledge = [
-    "chromadb>=1.5.5",
-]
+knowledge = []
 acceleration = [
     "numba>=0.65.0",
 ]

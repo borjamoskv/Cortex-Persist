@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 
 from cortex.memory.temporal import build_temporal_filter_params
 from cortex.search.models import SearchResult
+from cortex.memory.vector_store import VectorStore
 
 __all__ = ["semantic_search", "semantic_search_sync"]
 
@@ -37,8 +38,79 @@ async def semantic_search(
     project: Optional[str] = None,
     as_of: Optional[str] = None,
     confidence: Optional[str] = None,
+    vector_store: VectorStore | None = None,
 ) -> list[SearchResult]:
-    """Perform semantic vector search using sqlite-vec."""
+    """Perform semantic vector search."""
+    if vector_store:
+        filter_opts = {}
+        if project:
+            filter_opts["project"] = project
+        if confidence:
+            filter_opts["confidence"] = confidence
+            
+        try:
+            vs_results = await vector_store.query(tenant_id, query_embedding, top_k * 3, filter_opts)
+        except Exception as e:
+            logger.error("VectorStore query failed: %s", e)
+            return []
+            
+        if not vs_results:
+            return []
+            
+        fact_ids = [str(r[0]) for r in vs_results]
+        dist_map = {r[0]: r[1] for r in vs_results}
+        
+        placeholders = ",".join("?" * len(fact_ids))
+        sql = f"""
+            SELECT
+                f.id, f.content, f.project, f.fact_type, f.confidence,
+                f.valid_from, f.valid_until, f.tags, f.source, f.metadata,
+                f.created_at, f.updated_at, f.tx_id, t.hash
+            FROM facts AS f
+            LEFT JOIN transactions t ON f.tx_id = t.id
+            WHERE f.tenant_id = ? AND f.id IN ({placeholders})
+        """
+        params = [tenant_id] + fact_ids
+        
+        if project:
+            sql += " AND f.project = ?"
+            params.append(project)
+            
+        if as_of:
+            clause, t_params = build_temporal_filter_params(as_of, table_alias="f")
+            sql += " AND " + clause
+            params.extend(t_params)
+        else:
+            sql += " AND f.valid_until IS NULL"
+            
+        if confidence:
+            sql += " AND f.confidence >= ?"
+            params.append(float(confidence))
+            
+        try:
+            cursor = await conn.execute(sql, params)
+            rows = await cursor.fetchall()
+        except (aiosqlite.Error, sqlite3.Error, ValueError) as e:
+            logger.error("Fact fetch failed: %s", e)
+            return []
+            
+        from cortex.crypto import get_default_encrypter
+        enc = get_default_encrypter()
+        
+        # We need to map distance back into the row to mimic sqlite-vec output
+        # `rows` doesn't have distance. We'll reconstruct the SearchResult manually
+        results = []
+        for row in rows:
+            fact_id = row[0]
+            # Create a mock tuple for _row_to_result with distance at index 10
+            mock_row = list(row)
+            mock_row.insert(10, dist_map.get(fact_id, 0.0))
+            results.append(_row_to_result(tuple(mock_row), enc, tenant_id))
+            
+        results.sort(key=lambda r: r.score, reverse=True)
+        return results[:top_k]
+
+    # Fallback to local sqlite vec
     embedding_json = json.dumps(query_embedding)
     sql, params = _build_semantic_query(
         tenant_id, embedding_json, top_k, project, as_of, confidence

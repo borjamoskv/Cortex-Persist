@@ -13,6 +13,8 @@ from typing import Any, Protocol
 
 import aiosqlite
 
+from cortex.memory.vector_store import VectorStore
+
 
 class EmbedderProtocol(Protocol):
     def embed(self, text: str) -> Any: ...
@@ -44,6 +46,7 @@ async def embed_fact_async(
     embedder: EmbedderProtocol | None = None,
     memory_manager: MemoryManagerProtocol | None = None,
     tenant_id: str = "default",
+    vector_store: VectorStore | None = None,
 ) -> None:
     """Generate and store embedding for a fact asynchronously."""
     # 1. Legacy Vector Store (L2 Dense)
@@ -55,10 +58,15 @@ async def embed_fact_async(
                 embedding = await embedder.embed(content)
             else:
                 embedding = await asyncio.to_thread(embedder.embed, content)
-            await conn.execute(
-                "INSERT INTO fact_embeddings (fact_id, embedding) VALUES (?, ?)",
-                (fact_id, json.dumps(embedding)),
-            )
+            
+            if vector_store:
+                await vector_store.upsert(tenant_id, fact_id, embedding, payload={"project": project})
+            else:
+                # Fallback to local sqlite vec virtual table if no external vector store provided
+                await conn.execute(
+                    "INSERT INTO fact_embeddings (fact_id, embedding) VALUES (?, ?)",
+                    (fact_id, json.dumps(embedding)),
+                )
         except (sqlite3.Error, OSError, ValueError) as e:
             logger.warning("Embedding failed for fact %d: %s", fact_id, e)
 

@@ -162,9 +162,16 @@ async def purge_logic(
             tenant_id=tenant_id,
         )
 
+        if hasattr(mixin_instance, "vector_store") and mixin_instance.vector_store:
+            try:
+                await mixin_instance.vector_store.delete(tenant_id, [fact_id])
+            except Exception as e:
+                logger.warning("VectorStore deletion failed for fact %d: %s", fact_id, e)
+        else:
+            await _delete_best_effort(conn, "DELETE FROM fact_embeddings WHERE fact_id = ?", (fact_id,))
+
         delete_specs = [
             ("DELETE FROM fact_tags WHERE fact_id = ? AND tenant_id = ?", (fact_id, tenant_id)),
-            ("DELETE FROM fact_embeddings WHERE fact_id = ?", (fact_id,)),
             ("DELETE FROM specular_embeddings WHERE fact_id = ?", (fact_id,)),
             ("DELETE FROM pruned_embeddings WHERE fact_id = ?", (fact_id,)),
             ("DELETE FROM enrichment_jobs WHERE fact_id = ?", (fact_id,)),
