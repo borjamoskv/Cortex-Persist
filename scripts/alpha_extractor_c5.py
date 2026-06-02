@@ -20,7 +20,7 @@ class AlphaExtractor:
             print("[!] Sin datos base. Ejecuta la calculadora de Humo primero.")
             return
 
-        with open(SMOKE_INDEX_FILE, "r", encoding="utf-8") as f:
+        with open(SMOKE_INDEX_FILE, encoding="utf-8") as f:
             reader = csv.DictReader(f)
             for row in reader:
                 node = row["Node"]

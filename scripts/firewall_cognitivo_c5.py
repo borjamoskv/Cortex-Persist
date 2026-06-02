@@ -22,7 +22,7 @@ class CognitiveFirewall:
             print("[!] Advertencia: No se detecta Smoke Index previo. Firewall inactivo.")
             return
 
-        with open(SMOKE_INDEX_FILE, "r", encoding="utf-8") as f:
+        with open(SMOKE_INDEX_FILE, encoding="utf-8") as f:
             reader = csv.DictReader(f)
             for row in reader:
                 node = row["Node"]

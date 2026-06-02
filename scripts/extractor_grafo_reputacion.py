@@ -46,7 +46,7 @@ class ReputationGraphBuilder:
         print(f"[*] Fetching feed for {subdomain}: {url}")
         return feedparser.parse(url)
 
-    def extract_links(self, html_content: str) -> List[str]:
+    def extract_links(self, html_content: str) -> list[str]:
         # Simple extraction using regex or simple parsing
         # For C5-REAL we'll use a basic string split approach for speed and zero-dependency if bs4 is missing
         import re
@@ -78,7 +78,7 @@ class ReputationGraphBuilder:
                                 self.G[source_node][target_subdomain]['weight'] += 1
                             else:
                                 self.G.add_edge(source_node, target_subdomain, weight=1)
-                except Exception as e:
+                except Exception:
                     pass
 
     def build_graph(self):

@@ -393,13 +393,31 @@ Proof:
 
 ---
 
+### Hito 29: OLS Causal Advisory Engine (Fase C)
+- **Target:** `cortex/engine/causal/advisory.py`
+- **Objective:** Forja de un motor de inferencia causal basado en OLS (Mínimos Cuadrados Ordinarios) puro para filtrar falsos positivos termales generados por la colinealidad estructural (ej: tamaño vs presencia de AST).
+- **Yield Target:** Inferencia determinista de p-values (<0.05). Eliminación absoluta de alucinaciones causales y falsas purgas autónomas.
+- **Reality Level:** `C5-REAL`
+- **Evidence:** Commit `33e0d7c7`
+```yaml
+Claim: Motor Causal OLS operativo filtrando ruido.
+Proof:
+  Base: "Inferencia arrojó p-value insustancial (t_stat=0.089), emitiendo NO_CAUSAL_LINK e impidiendo apoptosis errónea."
+  Range: [C5, C5]
+  Confidence: C5-REAL
+  Date: 2026-06-02
+```
+- **Status:** ✅ COMPLETE — 2 Junio 2026
+
+---
+
 ## 🛡️ Thermodynamic Enforcement
 All milestone claims must map directly to a `Claim/Proof` matrix.
 ```yaml
-Claim: 28/28 Milestones Verified
+Claim: 29/29 Milestones Verified
 Proof:
   Base: Continuous Silicon Checkpoint Execution
-  Variables: [r=1, d=1, n=28, S=100]
+  Variables: [r=1, d=1, n=29, S=100]
   Range: [C5, C5]
   Confidence: C5-REAL
   Date: 2026-06-02

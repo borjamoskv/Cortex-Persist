@@ -30,7 +30,7 @@ Borja
     
     # Leer Firecrawl leads
     try:
-        with open("firecrawl_leads.csv", "r") as f:
+        with open("firecrawl_leads.csv") as f:
             reader = csv.DictReader(f)
             for row in reader:
                 if row.get("Email"):
@@ -40,7 +40,7 @@ Borja
 
     # Leer GitHub leads
     try:
-        with open("github_leads.csv", "r") as f:
+        with open("github_leads.csv") as f:
             reader = csv.DictReader(f)
             for row in reader:
                 if row.get("Email"):
