@@ -21,7 +21,7 @@ from typing import Any
 from cortex.utils.errors import CortexError
 from cortex.guards.virgo import VirgoValidationError, ContextPoisoningError
 from cortex.guards.zk_guard import ZKSwarmGuard, VoidStateSecurityError
-from cortex.guards.contradiction_guard import detect_contradictions, ConflictReport
+from cortex.guards.contradiction import detect_contradictions, ConflictReport
 from cortex.crypto.keys import ZKSwarmIdentity
 
 

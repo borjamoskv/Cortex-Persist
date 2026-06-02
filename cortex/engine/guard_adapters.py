@@ -100,7 +100,7 @@ class ContradictionGuardAdapter:
     ) -> None:
         if fact_type not in ("decision", "rule", "error"):
             return
-        from cortex.guards.contradiction_guard import detect_contradictions
+        from cortex.guards.contradiction import detect_contradictions
 
         report = await detect_contradictions(
             new_content=content, new_project=project, db_path=self._db_path

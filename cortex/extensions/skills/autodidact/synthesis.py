@@ -250,7 +250,7 @@ async def execute_cognitive_synthesis(
     logger.info("✅ Destilación: %.1f%% ruido eliminado. Entidades: %d", rendimiento, len(entities))
 
     # ── EPISTEMIC CONTRADICTION GUARD (Axioma Ω₁) ──
-    from cortex.guards.contradiction_guard import detect_contradictions
+    from cortex.guards.contradiction import detect_contradictions
 
     conflict_report = await detect_contradictions(
         new_content=memo_content,
