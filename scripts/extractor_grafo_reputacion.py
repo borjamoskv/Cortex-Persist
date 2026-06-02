@@ -15,6 +15,7 @@ from urllib.parse import urlparse
 # Seed Nodes (Substack / Newsletters / Podcasts)
 # Mapped by their Substack subdomain or identifier
 SEED_NODES = [
+    "borjamoskv",           # Nodo Cero (Borja Moskv)
     "latentspace",          # Latent Space (Swyx)
     "thesequence",          # The Sequence
     "bensbites",            # Ben's Bites
