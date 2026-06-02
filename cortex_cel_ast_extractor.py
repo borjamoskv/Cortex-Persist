@@ -1,16 +1,19 @@
-import ast,json,os,subprocess
+import ast
+import json
+import os
+import subprocess
 def get_git(p):
     try:
         a=len(set(subprocess.check_output(["git","log","--format=%an",p],text=True).split()))
         f=subprocess.check_output(["git","log","--oneline",p],text=True).lower().count("fix")
         return max(1,a),f
-    except:
+    except (OSError, SyntaxError):
         return 1,0
 def get_ast(p):
     try:
         c=open(p).read()
         return sum(1 for n in ast.walk(ast.parse(c)) if isinstance(n,ast.Global)),len(c.splitlines())
-    except:
+    except (OSError, SyntaxError):
         return 0,0
 d=[]
 for r,_,fs in os.walk("cortex-core"):

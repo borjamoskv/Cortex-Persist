@@ -53,7 +53,7 @@ async def manager(mock_l1, mock_l2, mock_l3, mock_encoder):
         max_bg_tasks=1,
     )
     yield mgr
-    mgr._cancel_background_tasks()
+    await mgr._cancel_background_tasks()
 
 
 @pytest.mark.asyncio
