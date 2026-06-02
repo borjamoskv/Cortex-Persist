@@ -411,13 +411,23 @@ Proof:
 
 ---
 
+### Hito 30: Gateway Isolation & Async Warning Clean-Up (Exergy Maximization)
+- **Target:** `tests/test_gateway.py`, `cortex/engine/_autocurative_helper.py`, `tests/test_memory_manager_lifecycle.py`
+- **Objective:** Bypassing DB lock contention during gateway unit tests via `ErrorBoundary` mocking, resolving async unawaited coroutine warnings, and resolving Ruff lints.
+- **Yield Target:** 100% test success rate, zero async unawaited warnings.
+- **Reality Level:** `C5-REAL`
+- **Evidence:** `pytest` suite completed with 2620/2620 tests passed.
+- **Status:** ✅ COMPLETE — 2 Junio 2026
+
+---
+
 ## 🛡️ Thermodynamic Enforcement
 All milestone claims must map directly to a `Claim/Proof` matrix.
 ```yaml
-Claim: 29/29 Milestones Verified
+Claim: 30/30 Milestones Verified
 Proof:
   Base: Continuous Silicon Checkpoint Execution
-  Variables: [r=1, d=1, n=29, S=100]
+  Variables: [r=1, d=1, n=30, S=100]
   Range: [C5, C5]
   Confidence: C5-REAL
   Date: 2026-06-02

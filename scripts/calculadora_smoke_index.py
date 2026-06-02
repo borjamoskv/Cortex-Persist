@@ -19,7 +19,7 @@ def calculate_smoke_index():
     
     try:
         centrality = nx.eigenvector_centrality(G, max_iter=1000)
-    except:
+    except nx.PowerIterationFailedConvergence:
         centrality = nx.degree_centrality(G)
         
     # Heurística empírica: 

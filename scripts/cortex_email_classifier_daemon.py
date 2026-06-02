@@ -8,13 +8,13 @@ import ssl
 import os
 import json
 import logging
-from typing import Optional, Dict, Any
+from typing import Optional, Any
 
 # C5-REAL: Clasificación estructural NLP
 # Simulada a través de un router lógico para mantener aislamiento, pero reemplazable por LLM local/API
 class EmailNLPClassifier:
     @staticmethod
-    async def classify_intent(subject: str, payload: str) -> Dict[str, Any]:
+    async def classify_intent(subject: str, payload: str) -> dict[str, Any]:
         """
         Analiza la semántica del correo para decidir políticas de respuesta.
         Evita responder arbitrariamente.
@@ -55,7 +55,7 @@ class CortexEmailDaemon:
                 # Lectura previa
                 data = []
                 if os.path.exists(self.telemetry_path):
-                    with open(self.telemetry_path, 'r', encoding='utf-8') as f:
+                    with open(self.telemetry_path, encoding='utf-8') as f:
                         data = json.load(f)
                 
                 data.append(event)

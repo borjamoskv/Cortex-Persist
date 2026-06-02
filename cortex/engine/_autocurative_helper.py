@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import inspect
 import logging
 import time
 from typing import Any, TYPE_CHECKING
@@ -51,7 +52,7 @@ async def execute_with_healing(
         # ─── EXECUTE ──────────────────────────────────────
         agent._phase = HealingPhase.EXECUTING
         try:
-            if asyncio.iscoroutinefunction(task):
+            if inspect.iscoroutinefunction(task):
                 result = await asyncio.wait_for(
                     task(*args, **kwargs),
                     timeout=agent.config.healing_timeout_s,

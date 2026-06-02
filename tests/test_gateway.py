@@ -1,4 +1,4 @@
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -49,7 +49,10 @@ async def test_gateway_router_exception_handling():
     router = GatewayRouter(engine=mock_engine)
     req = GatewayRequest(intent=GatewayIntent.SEARCH, payload={"query": "test query"})
 
-    resp = await router.handle(req)
+    with patch("cortex.extensions.immune.error_boundary.ErrorBoundary") as mock_boundary_cls:
+        mock_boundary = mock_boundary_cls.return_value
+        mock_boundary._persist = AsyncMock()
+        resp = await router.handle(req)
 
     assert resp.ok is False
     assert "Mocked DB failure" in resp.error

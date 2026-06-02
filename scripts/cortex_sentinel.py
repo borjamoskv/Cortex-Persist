@@ -70,7 +70,7 @@ def run_pre_commit():
         if not file_path.endswith('.py') or not os.path.exists(file_path):
             continue
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, encoding='utf-8') as f:
                 tree = ast.parse(f.read(), filename=file_path)
             
             detector = ASTTrashDetector()

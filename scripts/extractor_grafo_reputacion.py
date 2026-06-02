@@ -4,7 +4,6 @@ import networkx as nx
 import requests
 import feedparser
 from pathlib import Path
-from typing import List, Dict, Tuple
 from urllib.parse import urlparse
 
 # ==========================================
@@ -93,7 +92,7 @@ class ReputationGraphBuilder:
         # Calculate Eigenvector Centrality
         try:
             centrality = nx.eigenvector_centrality(self.G, max_iter=1000, weight='weight')
-        except:
+        except nx.PowerIterationFailedConvergence:
             centrality = nx.degree_centrality(self.G)
             
         sorted_centrality = sorted(centrality.items(), key=lambda x: x[1], reverse=True)
