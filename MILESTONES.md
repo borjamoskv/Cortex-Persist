@@ -1,7 +1,7 @@
 # 🌌 CORTEX MILESTONES — 2026 Execution Matrix
 > **Protocol:** C5-REAL / Direct-Silicon JIT
 > **Aesthetic:** Industrial Noir 2026 (`#0A0A0A` / `#2B3BE5`)
-> **Última actualización:** 27 Mayo 2026
+> **Última actualización:** 2 Junio 2026
 
 ---
 
@@ -373,16 +373,36 @@ Proof:
 
 ---
 
+---
+
+### Hito 28: CEL Causal AST Extraction (Advisory Mode)
+- **Target:** `cortex_cel_ast_extractor.py`
+- **Objective:** Sustituir la inferencia estocástica por extracción estructural del AST. Cruce determinista del árbol sintáctico (nodos globales) con métricas tabulares para forjar un dataset empírico causal.
+- **Yield Target:** Evasión del Death Protocol mediante reducción entrópica y generación de dataset tabular verifiable.
+- **Reality Level:** `C5-REAL`
+- **Evidence:** Commit `152eae5a`
+```yaml
+Claim: Extractor Causal AST en C5-REAL
+Proof:
+  Base: "Extracción determinista de 76 módulos a formato tabular JSON."
+  Range: [C5, C5]
+  Confidence: C5-REAL
+  Date: 2026-06-02
+```
+- **Status:** ✅ COMPLETE — 2 Junio 2026
+
+---
+
 ## 🛡️ Thermodynamic Enforcement
 All milestone claims must map directly to a `Claim/Proof` matrix.
 ```yaml
-Claim: 27/27 Milestones Verified
+Claim: 28/28 Milestones Verified
 Proof:
   Base: Continuous Silicon Checkpoint Execution
-  Variables: [r=1, d=1, n=27, S=100]
+  Variables: [r=1, d=1, n=28, S=100]
   Range: [C5, C5]
   Confidence: C5-REAL
-  Date: 2026-06-01
+  Date: 2026-06-02
 ```
 
 *∴ "The architecture refines its own truth."*
