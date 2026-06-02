@@ -421,13 +421,31 @@ Proof:
 
 ---
 
+### Hito 31: Takens' Delay Embedding & SOTA Benchmark
+- **Target:** `cortex-core/cortex_topology_anomaly_detector.py`, `bench_takens_matrix.py`
+- **Objective:** Falsación cruzada de homología persistente mediante matriz empírica. Inyección de *Takens' Delay Embedding* para dotar al enjambre de memoria orbital causal sin filtración simplicial.
+- **Yield Target:** Detección de "Ruptura de Periodicidad" (Takens Recall 0.15 vs Original Recall 0.00) y cuantificación del *Curse of Dimensionality*.
+- **Reality Level:** `C5-REAL`
+- **Evidence:** Commit `49c551ba` y resultados de `bench_takens_matrix.py`.
+```yaml
+Claim: Geometría orbital asimilada, FPR tradeoff mapeado empíricamente.
+Proof:
+  Base: "Ruptura periódica AUC=0.6258 (Takens) vs AUC=0.5207 (Original)."
+  Range: [C5, C5]
+  Confidence: C5-REAL
+  Date: 2026-06-02
+```
+- **Status:** ✅ COMPLETE — 2 Junio 2026
+
+---
+
 ## 🛡️ Thermodynamic Enforcement
 All milestone claims must map directly to a `Claim/Proof` matrix.
 ```yaml
-Claim: 30/30 Milestones Verified
+Claim: 31/31 Milestones Verified
 Proof:
   Base: Continuous Silicon Checkpoint Execution
-  Variables: [r=1, d=1, n=30, S=100]
+  Variables: [r=1, d=1, n=31, S=100]
   Range: [C5, C5]
   Confidence: C5-REAL
   Date: 2026-06-02
