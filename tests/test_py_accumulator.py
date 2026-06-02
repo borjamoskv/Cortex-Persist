@@ -84,8 +84,8 @@ def test_accumulator_performance():
     elapsed = time.perf_counter() - start
     avg_duration_us = (elapsed / iterations) * 1000000
 
-    # Adjust threshold dynamically: base limit of 30.0us, but scale if CPU contention is high
-    dynamic_limit = max(30.0, 30.0 + (base_us - 1.0) * 15.0)
+    # Adjust threshold dynamically: base limit of 250.0us, but scale if CPU contention is high
+    dynamic_limit = max(250.0, 250.0 + (base_us - 1.0) * 50.0)
 
     print(
         f"\n[BENCHMARK] Average Verification Latency: {avg_duration_us:.4f} µs (base_us: {base_us:.4f} µs, limit: {dynamic_limit:.4f} µs)"

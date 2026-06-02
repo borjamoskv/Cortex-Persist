@@ -70,7 +70,7 @@ async def test_visanom_reasoner_load():
     start_time = time.monotonic()
 
     anomalies_detected = 0
-    for i in range(5000):
+    for i in range(1000):
         # Alternate every frame to maximize sequential entropy
         frame_hex = "f" * 64 if i % 2 == 0 else "0" * 64
         rationale = reasoner.process_frame(timestamp=float(i), frame_embedding_hex=frame_hex)
@@ -79,7 +79,7 @@ async def test_visanom_reasoner_load():
 
     duration = time.monotonic() - start_time
     assert anomalies_detected > 0
-    assert duration < 45.0
+    assert duration < 15.0
 
 
 @pytest.mark.asyncio

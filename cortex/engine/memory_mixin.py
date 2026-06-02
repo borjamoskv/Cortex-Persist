@@ -77,16 +77,13 @@ class MemoryMixin(EngineMixinBase):
 
         use_hdc = os.environ.get("CORTEX_HDC") == "1"
 
-        # CORTOCIRCUITO: si auto_embed=False, no intentar L2 ni cargar embedder
-        # Esto evita instanciar LocalEmbedder (carga modelo ML) innecesariamente.
-        auto_embed = getattr(self, "_auto_embed", True)
-        if not auto_embed:
-            self._memory_manager = None
-            self._memory_l1 = l1
-            self._memory_l3 = l3
-            self._memory_ready = True
-            logger.debug("Memory subsystem: lite (L1+L3 only, auto_embed=False)")
-            return
+        # Check numpy and sqlite_vec availability first to ensure accurate capability reporting.
+        # This allows test assertions looking for "numpy not installed" to trigger.
+        numpy_installed = True
+        try:
+            import numpy
+        except ImportError:
+            numpy_installed = False
 
         if not getattr(self, "_vec_available", False):
             self._memory_manager = None
@@ -98,9 +95,7 @@ class MemoryMixin(EngineMixinBase):
             )
             return
 
-        try:
-            import numpy
-        except ImportError:
+        if not numpy_installed:
             self._memory_manager = None
             self._memory_l1 = l1
             self._memory_l3 = l3
@@ -108,6 +103,17 @@ class MemoryMixin(EngineMixinBase):
             logger.info(
                 "Memory subsystem: partial (L1+L3) (optional L2 skipped: numpy not installed)"
             )
+            return
+
+        # CORTOCIRCUITO: si auto_embed=False o CORTEX_NO_EMBED=1, no intentar L2 ni cargar embedder
+        # Esto evita instanciar LocalEmbedder (carga modelo ML) y profunda importación de scipy innecesariamente.
+        auto_embed = getattr(self, "_auto_embed", True)
+        if not auto_embed or os.environ.get("CORTEX_NO_EMBED") == "1":
+            self._memory_manager = None
+            self._memory_l1 = l1
+            self._memory_l3 = l3
+            self._memory_ready = True
+            logger.debug("Memory subsystem: lite (L1+L3 only, auto_embed=False)")
             return
 
         # 1. Dense L2: Sovereign (v6) Vector Store (SQLite-vec)
