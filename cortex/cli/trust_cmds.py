@@ -263,24 +263,26 @@ def _audit_trail(project: str, limit: int, db: str) -> None:
             conn.close()
 
 
-@cli.command("audit")
+@cli.group("audit", invoke_without_command=True)
 @click.option("--calcification", is_flag=True, help="Run Landauer's Razor audit")
 @click.option("--frontend", is_flag=True, help="Run Zero-Latency UI Axiom audit (CC < 5)")
 @click.option("--project", "-p", default="", help="Filter trail by project")
 @click.option("--limit", "-n", default=10, help="Max entries to show")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
-def audit(calcification: bool, frontend: bool, project: str, limit: int, db: str) -> None:
+@click.pass_context
+def audit(ctx, calcification: bool, frontend: bool, project: str, limit: int, db: str) -> None:
     """Run audits or view Audit Trail."""
-    if frontend:
-        from cortex.cli.audit_helpers import audit_frontend
+    if ctx.invoked_subcommand is None:
+        if frontend:
+            from cortex.cli.audit_helpers import audit_frontend
 
-        audit_frontend()
-    elif calcification:
-        from cortex.cli.audit_helpers import audit_calcification_report
+            audit_frontend()
+        elif calcification:
+            from cortex.cli.audit_helpers import audit_calcification_report
 
-        audit_calcification_report(limit)
-    else:
-        _audit_trail(project, limit, db)
+            audit_calcification_report(limit)
+        else:
+            _audit_trail(project, limit, db)
 
 
 @cli.command("siege")
