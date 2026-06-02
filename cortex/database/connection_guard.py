@@ -36,6 +36,9 @@ _WHITELISTED_MODULES: frozenset[str] = frozenset(
         "cortex/memory/hdc/store.py",  # HDC Specular Memory needs raw access
         "cortex/memory/procedural.py",  # Sync procedural memory bootstrap
         "cortex/memory/evaluator.py",  # Sync memory health evaluator
+        "cortex/engine/tuning_store.py",
+        "cortex/delivery/outbox.py",
+        "cortex/memory/traits/schema.py",
         # Engine low-level
         "cortex/engine/forgetting_oracle.py",  # Sync forgetting analysis
         "cortex/engine/decalcifier.py",  # Sync schema maintenance
