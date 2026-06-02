@@ -1,0 +1,86 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+
+const zipUrl = "/downloads/mafia-ai-blocker-v1.0.0.zip";
+---
+
+<SiteLayout
+	title="CORTEX Firewall | Mafia AI Blocker"
+	description="Extensión C5-REAL para bloquear el ruido térmico y la Economía de la Mentira en tu navegador."
+>
+	<main class="landing-shell">
+		<header class="masthead">
+			<a class="brand" href="/" aria-label="CORTEX Persist home">
+				<span class="brand-mark">CP</span>
+				<span class="brand-copy">
+					<strong>CORTEX Persist</strong>
+					<span>Verifiable memory for AI agents</span>
+				</span>
+			</a>
+			<nav class="site-nav" aria-label="Primary">
+				<a class="nav-link" href="/">Home</a>
+			</nav>
+		</header>
+
+		<section class="hero-section surface">
+			<div class="hero-copy">
+				<p class="eyebrow">Zero Friction / 100% C5-REAL</p>
+				<h1 style="color: #ff3333;">Firewall Cognitivo: Mafia AI Blocker.</h1>
+				<p class="hero-text">
+					La "Mafia AI" satura los feeds con ruido narrativo y validación cruzada. Esta extensión intercepta y ofusca a los emisores con alto <em>Smoke Index</em> (alta influencia, cero código) antes de que consuman tu atención.
+				</p>
+				
+				<div class="action-row" style="margin-top: 2rem;">
+					<a class="button-primary" href={zipUrl} download>
+						Descargar Extensión (.zip)
+					</a>
+				</div>
+			</div>
+
+			<aside class="hero-console surface-sunken" aria-label="Installation Steps">
+				<div class="surface-head">
+					<span class="surface-label">Instalación (Chrome / Brave / Arc)</span>
+					<span class="surface-state">Local</span>
+				</div>
+
+				<pre class="console-block" style="border-left: 2px solid #2b3be5; padding-left: 1rem;"><code>1. Descomprime el archivo .zip descargado.
+2. Abre la URL chrome://extensions/ en tu navegador.
+3. Activa el "Modo Desarrollador" (esquina superior derecha).
+4. Clic en "Cargar sin empaquetar" (Load unpacked).
+5. Selecciona la carpeta descomprimida.</code></pre>
+
+				<p class="console-note" style="margin-top: 1.5rem; color: #ff3333;">
+					[!] La extensión operará localmente sin recolectar ni transmitir datos.
+				</p>
+			</aside>
+		</section>
+
+		<section class="section-frame surface" id="how-it-works">
+			<div class="section-heading">
+				<p class="section-kicker">Mecanismo</p>
+				<h2>El Índice de Humo (Smoke Index)</h2>
+				<p>
+					El bloqueador opera sobre una topología precompilada en el backend de CORTEX. Identificamos la centralidad social de un actor y la dividimos por su output empírico (repositorios reales).
+					Si el humo térmico supera el umbral, la extensión aplica un blur irreversible y un overlay rojo en X, LinkedIn y Substack. 
+				</p>
+			</div>
+
+			<div class="architecture-grid">
+				<article class="architecture-card surface-sunken">
+					<p class="surface-label">Detección</p>
+					<h3>Escaneo de DOM</h3>
+					<p>Monitoriza pasivamente mutaciones en el DOM para interceptar enlaces e identificadores antes de que sean renderizados en tu campo visual.</p>
+				</article>
+				<article class="architecture-card surface-sunken">
+					<p class="surface-label">Ofuscación</p>
+					<h3>Censura C5-REAL</h3>
+					<p>Si el nodo está en la Blacklist, se aplica un CSS agresivo y se deshabilitan los eventos de puntero. El ruido desaparece.</p>
+				</article>
+			</div>
+		</section>
+
+		<footer class="site-footer">
+			<p class="footer-note">CORTEX Persist / The swarm verifies. The hardware remembers.</p>
+		</footer>
+	</main>
+</SiteLayout>
