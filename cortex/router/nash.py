@@ -45,7 +45,6 @@ class NashCausalRouter(CausalPolicyGradientRouter):
         """
         # Heuristic proxies for latency based on model priors
         expected_latency_f = 0.1  # Flash = Fast execution
-        expected_latency_p = 1.0  # Pro = Slow reasoning
         
         # Flash Utility: Favors low latency, heavily penalized by high KL instability
         u_flash = -(self.alpha * expected_latency_f) - (self.beta * state.kl_instability)

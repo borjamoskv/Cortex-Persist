@@ -64,9 +64,9 @@ class EpistemicPolicyNetwork:
         return max(0.0, x)
         
     def _softmax(self, logits: list[float]) -> list[float]:
-        scaled = [l / self.temperature for l in logits]
-        max_l = max(scaled)
-        exp_vals = [math.exp(l - max_l) for l in scaled]
+        scaled = [val / self.temperature for val in logits]
+        max_val = max(scaled)
+        exp_vals = [math.exp(val - max_val) for val in scaled]
         sum_exp = sum(exp_vals)
         return [e / sum_exp for e in exp_vals]
 

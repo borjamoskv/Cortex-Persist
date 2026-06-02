@@ -5,7 +5,8 @@ STATE: C5-REAL
 """
 
 from enum import Enum
-from typing import Callable, Any, Literal, List, Optional
+from typing import Any, Literal, Optional
+from collections.abc import Callable
 import dataclasses
 
 # ---------------------------------------------------------
@@ -97,7 +98,7 @@ class RouteAssignment:
 class RouteRule:
     when: RouteCondition
     assign: RouteAssignment
-    pipeline: List[PipelineStage]
+    pipeline: list[PipelineStage]
 
 # ---------------------------------------------------------
 # 4. ROUTING MATRIX
