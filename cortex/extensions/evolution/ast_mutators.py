@@ -25,6 +25,8 @@ class _AstAnalyzer(ast.NodeVisitor):
         self.generic_visit(node)
 
     def visit_ImportFrom(self, node):
+        if node.module == "__future__":
+            return
         for alias in node.names:
             var_name = alias.asname if alias.asname else alias.name
             self.imports.add(var_name)
@@ -123,6 +125,8 @@ class _DeadCodePurge(ast.NodeTransformer):
         return node
 
     def visit_ImportFrom(self, node):
+        if node.module == "__future__":
+            return node
         new_names = [n for n in node.names if (n.asname or n.name) not in self.unused_imports]
         if not new_names:
             return None
