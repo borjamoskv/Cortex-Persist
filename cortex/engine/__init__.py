@@ -2,17 +2,13 @@
 
 Reality Level: C5-REAL
 """
-
 from __future__ import annotations
-
 import asyncio
 import logging
 import threading
 from typing import TYPE_CHECKING, Any
 from pathlib import Path
-
 import aiosqlite
-
 from cortex.config import DEFAULT_DB_PATH
 from cortex.engine.agent_mixin import AgentMixin
 from cortex.engine.durability import PersistenceSupervisor
@@ -20,7 +16,7 @@ from cortex.engine.legacy_mixin import LegacyMixin
 from cortex.engine.memory_mixin import MemoryMixin
 from cortex.engine.mixins.components import ComponentsMixin
 from cortex.engine.mixins.optimization import OptimizationMixin
-from cortex.engine.models import row_to_fact
+pass
 from cortex.engine.query_mixin import QueryMixin
 from cortex.engine.search_mixin import SearchMixin
 from cortex.engine.store_mixin import StoreMixin
@@ -28,8 +24,6 @@ from cortex.engine.sync_mixin import SyncMixin
 from cortex.engine.transaction_mixin import TransactionMixin
 from cortex.engine._engine_connection import ConnectionMixin
 from cortex.engine._engine_delegates import DelegatesMixin
-
-# Lazy imports for runtime managers
 if TYPE_CHECKING:
     from cortex.consensus.manager import ConsensusManager
     from cortex.embeddings import LocalEmbedder
@@ -40,54 +34,30 @@ if TYPE_CHECKING:
     from cortex.facts.manager import FactManager
     from cortex.ledger import EnrichmentQueue, LedgerStore, LedgerWriter
     from cortex.mac_maestro.executor import MaestroExecutor
-
 try:
-    from cortex.extensions.health.health_mixin import HealthMixin  # type: ignore
+    from cortex.extensions.health.health_mixin import HealthMixin
 except ImportError:
 
-    class HealthMixin:  # type: ignore
+    class HealthMixin:
+
         async def health_check(self, *args, **kwargs):
-            return {"status": "unhealthy", "reason": "No Health extension"}
+            """TODO: Document health_check"""
+            return {'status': 'unhealthy', 'reason': 'No Health extension'}
 
         async def health_report(self, *args, **kwargs):
-            return {"status": "unhealthy", "reason": "No Health extension"}
-
-
-logger = logging.getLogger("cortex.engine.guards")
+            """TODO: Document health_report"""
+            return {'status': 'unhealthy', 'reason': 'No Health extension'}
+logger = logging.getLogger('cortex.engine.guards')
 MAX_TAGS_PER_FACT = 20
 
-
-class CortexEngine(
-    ConnectionMixin,
-    DelegatesMixin,
-    SearchMixin,
-    StoreMixin,
-    QueryMixin,
-    MemoryMixin,
-    TransactionMixin,
-    OptimizationMixin,
-    HealthMixin,
-    SyncMixin,
-    AgentMixin,
-    LegacyMixin,
-    ComponentsMixin,
-):
+class CortexEngine(ConnectionMixin, DelegatesMixin, SearchMixin, StoreMixin, QueryMixin, MemoryMixin, TransactionMixin, OptimizationMixin, HealthMixin, SyncMixin, AgentMixin, LegacyMixin, ComponentsMixin):
     """The Sovereign Ledger for AI Agents (Composite Orchestrator)."""
 
-    def __init__(
-        self,
-        db_path: str | Path | Any = DEFAULT_DB_PATH,
-        auto_embed: bool = True,
-        pool: Any = None,
-    ):
+    def __init__(self, db_path: str | Path | Any=DEFAULT_DB_PATH, auto_embed: bool=True, pool: Any=None):
         self._skills_verified: set[str] = set()
-        if not isinstance(db_path, str | Path) and not hasattr(db_path, "acquire"):
-            raise TypeError(
-                f"CortexEngine: db_path must be str, Path, or a pool object "
-                f"(with .acquire()), got {type(db_path).__name__!r}. "
-                "Did you swap pool and db_path arguments?"
-            )
-        if hasattr(db_path, "acquire") and not isinstance(db_path, str | Path):
+        if not isinstance(db_path, str | Path) and (not hasattr(db_path, 'acquire')):
+            raise TypeError(f'CortexEngine: db_path must be str, Path, or a pool object (with .acquire()), got {type(db_path).__name__!r}. Did you swap pool and db_path arguments?')
+        if hasattr(db_path, 'acquire') and (not isinstance(db_path, str | Path)):
             self._pool = db_path
             self._db_path = Path(str(auto_embed)).expanduser()
             self._auto_embed = True
@@ -107,7 +77,7 @@ class CortexEngine(
         self._memory_l3 = None
         self._memory_ready = False
         self._persistence = PersistenceSupervisor(self)
-        self._system_state = "ACTIVE"
+        self._system_state = 'ACTIVE'
         self._facts: FactManager | None = None
         self._embeddings: EmbeddingManager | None = None
         self._consensus: ConsensusManager | None = None
@@ -125,61 +95,42 @@ class CortexEngine(
 
     @property
     def system_state(self) -> str:
+        """TODO: Document system_state"""
         return self._system_state
 
     def set_system_state(self, state: str) -> None:
         """Lock or unlock the sovereign engine (e.g., from EpistemicCircuitBreaker)"""
         self._system_state = state
-        logger.warning("🛡️ [SOVEREIGN-STATE] CORTEX Engine state changed to: %s", state)
+        logger.warning('🛡️ [SOVEREIGN-STATE] CORTEX Engine state changed to: %s', state)
 
     def _synthesize_skill(self, skill_name: str) -> None:
         """JIT skill synthesis (Axiom Ω₄)."""
         if skill_name in self._skills_verified:
             return
-        SKILL_MAP = {
-            "search": SearchMixin,
-            "store": StoreMixin,
-            "query": QueryMixin,
-            "memory": MemoryMixin,
-            "tx": TransactionMixin,
-            "optimization": OptimizationMixin,
-            "health": HealthMixin,
-        }
+        SKILL_MAP = {'search': SearchMixin, 'store': StoreMixin, 'query': QueryMixin, 'memory': MemoryMixin, 'tx': TransactionMixin, 'optimization': OptimizationMixin, 'health': HealthMixin}
         if skill_name in SKILL_MAP:
             SKILL_MAP[skill_name].__init__(self)
             self._skills_verified.add(skill_name)
             logger.debug("🛡️ [SORTU-JIT] Skill '%s' synthesized.", skill_name)
 
     @staticmethod
-    def _audit_log(
-        action: str,
-        fact_type: str = "",
-        project: str = "",
-        tenant_id: str = "default",
-    ) -> None:
+    def _audit_log(action: str, fact_type: str='', project: str='', tenant_id: str='default') -> None:
         """Append-only audit log for CLI/SDK access to CORTEX memory."""
-        audit_logger = logging.getLogger("cortex.audit")
-        audit_logger.info(
-            "AUDIT: action=%s fact_type=%s project=%s tenant=%s",
-            action,
-            fact_type,
-            project,
-            tenant_id,
-        )
+        audit_logger = logging.getLogger('cortex.audit')
+        audit_logger.info('AUDIT: action=%s fact_type=%s project=%s tenant=%s', action, fact_type, project, tenant_id)
 
     def _get_embedder(self) -> LocalEmbedder:
         """Protocol requirement for SearchMixin."""
         if self._embedder is None:
             from cortex.embeddings import LocalEmbedder
-
             self._embedder = LocalEmbedder()
         return self._embedder
 
-    async def start(self):
+    async def start(self) -> None:
         """Ignite the sovereign engine and its optimization layers."""
         await self.start_optimizer()
         await self._persistence.start()
-        logger.info("🚀 [CORTEX] Sovereign Engine ignited (Ω₀-Ω₆).")
+        logger.info('🚀 [CORTEX] Sovereign Engine ignited (Ω₀-Ω₆).')
 
     async def close(self):
         """Shutdown the engine, optimizer, and database connections."""
@@ -187,96 +138,73 @@ class CortexEngine(
         await self.stop_optimizer()
         if self._post_commit_tasks:
             try:
-                await asyncio.wait_for(
-                    asyncio.gather(*self._post_commit_tasks, return_exceptions=True),
-                    timeout=5.0,
-                )
+                await asyncio.wait_for(asyncio.gather(*self._post_commit_tasks, return_exceptions=True), timeout=5.0)
             except (asyncio.TimeoutError, Exception):
-                logger.debug("Post-commit task drain timed out - forcing close")
+                logger.debug('Post-commit task drain timed out - forcing close')
             self._post_commit_tasks.clear()
         if self._memory_manager:
             try:
-                await asyncio.wait_for(
-                    self._memory_manager.wait_for_background(),  # type: ignore
-                    timeout=5.0,
-                )
+                await asyncio.wait_for(self._memory_manager.wait_for_background(), timeout=5.0)
             except (asyncio.TimeoutError, Exception):
-                logger.debug("Memory manager background drain timed out - forcing close")
+                logger.debug('Memory manager background drain timed out - forcing close')
             self._memory_manager = None
         self._memory_l1 = None
         self._memory_l3 = None
         self._memory_ready = False
         if self._persistence:
             await self._persistence.stop()
-        if hasattr(self, "_conns_by_loop"):
+        if hasattr(self, '_conns_by_loop'):
             conns = list(self._conns_by_loop.values())
             try:
                 current_loop = asyncio.get_running_loop()
             except RuntimeError:
                 current_loop = None
-
             for conn in conns:
-                conn_loop = getattr(conn, "_cortex_loop", current_loop)
+                conn_loop = getattr(conn, '_cortex_loop', current_loop)
                 if conn_loop is None or conn_loop.is_closed():
-                    # If the original loop is already closed, we can't await conn.close().
-                    # But we MUST kill the aiosqlite worker thread, or it hangs on exit!
-                    if hasattr(conn, "_tx"):
+                    if hasattr(conn, '_tx'):
                         try:
                             from aiosqlite.core import _STOP_RUNNING_SENTINEL
 
                             def close_and_stop(c=conn):
-                                if getattr(c, "_connection", None) is not None:
+                                """TODO: Document close_and_stop"""
+                                if getattr(c, '_connection', None) is not None:
                                     try:
                                         c._connection.close()
                                     except Exception:
                                         import logging
-
-                                        logging.getLogger(__name__).error(
-                                            "DETECTIVE-OMEGA: Silent exception swallowed in __init__.py"
-                                        )
+                                        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in __init__.py')
                                     c._connection = None
                                 return _STOP_RUNNING_SENTINEL
-
                             conn._tx.put_nowait((None, close_and_stop))
                         except Exception:
-                            if hasattr(conn, "stop"):
+                            if hasattr(conn, 'stop'):
                                 conn.stop()
-                    elif hasattr(conn, "stop"):
+                    elif hasattr(conn, 'stop'):
                         conn.stop()
                     continue
-
                 if conn_loop is current_loop:
                     try:
                         await conn.close()
                     except Exception:
                         import logging
-
-                        logging.getLogger(__name__).error(
-                            "DETECTIVE-OMEGA: Silent exception swallowed in __init__.py"
-                        )
+                        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in __init__.py')
                 else:
                     try:
                         asyncio.run_coroutine_threadsafe(conn.close(), conn_loop)
                     except Exception:
                         import logging
-
-                        logging.getLogger(__name__).error(
-                            "DETECTIVE-OMEGA: Silent exception swallowed in __init__.py"
-                        )
-
+                        logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in __init__.py')
             self._conns_by_loop.clear()
-        self.mac_maestro = None  # type: ignore
-        self.ledger_writer = None  # type: ignore
-        self.enrichment_queue = None  # type: ignore
-        self.ledger_store = None  # type: ignore
+        self.mac_maestro = None
+        self.ledger_writer = None
+        self.enrichment_queue = None
+        self.ledger_store = None
         self._ledger = None
 
     async def __aenter__(self):
         return self
 
-    async def __aexit__(self, *args):
+    async def __aexit__(self, *args) -> None:
         await self.close()
-
-
-# Ω₀ Type Alias for backward compatibility (AX-V Refactor)
 AsyncCortexEngine = CortexEngine

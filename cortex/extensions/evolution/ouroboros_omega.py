@@ -191,8 +191,10 @@ class OuroborosOmega:
             tree = ast.parse(self.original_source)
 
             # 2. EXTRACTION
+            is_init_py = self.target_path.name == "__init__.py"
             purger = _DeadCodePurge(
-                base_diagnosis.dead_interfaces, base_diagnosis.imports - base_diagnosis.used_imports
+                base_diagnosis.dead_interfaces,
+                set() if is_init_py else (base_diagnosis.imports - base_diagnosis.used_imports),
             )
             mutated_tree = purger.visit(copy.deepcopy(tree))
             ast.fix_missing_locations(mutated_tree)

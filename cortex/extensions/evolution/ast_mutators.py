@@ -68,6 +68,15 @@ class _AstAnalyzer(ast.NodeVisitor):
         elif isinstance(node.func, ast.Attribute):
             if isinstance(node.func.value, ast.Name):
                 self.used_imports.add(node.func.value.id)
+                # Check for __all__.append("name") or __all__.extend(["name"])
+                if node.func.value.id == "__all__" and node.func.attr in ("append", "extend"):
+                    for arg in node.args:
+                        if isinstance(arg, ast.Constant) and isinstance(arg.value, str):
+                            self.used_imports.add(arg.value)
+                        elif isinstance(arg, ast.List | ast.Tuple):
+                            for elt in arg.elts:
+                                if isinstance(elt, ast.Constant) and isinstance(elt.value, str):
+                                    self.used_imports.add(elt.value)
         self.generic_visit(node)
 
     def visit_Attribute(self, node):
@@ -88,6 +97,14 @@ class _AstAnalyzer(ast.NodeVisitor):
                     for elt in node.value.elts:
                         if isinstance(elt, ast.Constant) and isinstance(elt.value, str):
                             self.used_imports.add(elt.value)
+        self.generic_visit(node)
+
+    def visit_AugAssign(self, node):
+        if isinstance(node.target, ast.Name) and node.target.id == "__all__":
+            if isinstance(node.value, ast.List | ast.Tuple):
+                for elt in node.value.elts:
+                    if isinstance(elt, ast.Constant) and isinstance(elt.value, str):
+                        self.used_imports.add(elt.value)
         self.generic_visit(node)
 
     def _visit_nested(self, node):
@@ -120,7 +137,7 @@ class _DeadCodePurge(ast.NodeTransformer):
     def visit_Import(self, node):
         new_names = [n for n in node.names if (n.asname or n.name) not in self.unused_imports]
         if not new_names:
-            return None
+            return ast.Pass()
         node.names = new_names
         return node
 
@@ -129,7 +146,7 @@ class _DeadCodePurge(ast.NodeTransformer):
             return node
         new_names = [n for n in node.names if (n.asname or n.name) not in self.unused_imports]
         if not new_names:
-            return None
+            return ast.Pass()
         node.names = new_names
         return node
 
