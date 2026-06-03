@@ -7,6 +7,7 @@ from cortex.guards.noqa_audit import (
     drift_score,
 )
 
+
 def test_classify_entry_happy():
     """Happy path: High quality score for good justifications."""
     entry = NoqaEntry(Path("file.py"), 1, "def f(): # noqa: BLE001 - intentional design")
@@ -16,7 +17,11 @@ def test_classify_entry_happy():
 
     assert result.has_justification is True
     assert result.quality_score == 3
-    assert "intentional design" in result.justification_text or "detailed explanation" in result.justification_text
+    assert (
+        "intentional design" in result.justification_text
+        or "detailed explanation" in result.justification_text
+    )
+
 
 def test_classify_entry_rejection():
     """Rejection path: Silent noqa gives score 0."""
@@ -27,6 +32,7 @@ def test_classify_entry_rejection():
 
     assert result.has_justification is False
     assert result.quality_score == 0
+
 
 def test_classify_entry_boundary():
     """Boundary condition: Inline comment without strict pattern or next line that is short."""
@@ -40,9 +46,10 @@ def test_classify_entry_boundary():
     assert result.quality_score == 1
 
     entry2 = NoqaEntry(Path("file.py"), 1, "def f(): # noqa: BLE001")
-    next_line2 = "# foo" # len = 5, won't trigger next_line > 5
+    next_line2 = "# foo"  # len = 5, won't trigger next_line > 5
     result2 = classify_entry(entry2, next_line2)
     assert result2.quality_score == 0
+
 
 def test_format_report_happy():
     """Happy path: Format a report with no silent entries and no new git commits."""
@@ -58,6 +65,7 @@ def test_format_report_happy():
     assert "Total suppressions:     1" in report
     assert "✅ Justified:           1" in report
     assert "CLEAN - No drift detected" in report
+
 
 def test_format_report_rejection():
     """Rejection path: Format a report with silent entries and new commits."""
@@ -76,6 +84,7 @@ def test_format_report_rejection():
     assert "ACTION REQUIRED - 1 silent suppressions" in report
     assert "12345678" in report
 
+
 def test_format_report_boundary():
     """Boundary condition: Format a report with only score=1 entries."""
     entries = [
@@ -86,11 +95,13 @@ def test_format_report_boundary():
     report = format_report(entries, [], "30 days ago")
     assert "Partially justified" in report
 
+
 def test_drift_score_happy():
     """Happy path: 0 drift score for all justified and no new commits."""
     entries = [NoqaEntry(Path("file.py"), 1, "def f(): # noqa: BLE001")]
     entries[0].quality_score = 2
     assert drift_score(entries, []) == 0
+
 
 def test_drift_score_rejection():
     """Rejection path: negative score for silent and new commits."""
@@ -99,6 +110,7 @@ def test_drift_score_rejection():
     commits = [{"hash": "1"}]
     # -1 for silent, -2 for commit = -3
     assert drift_score(entries, commits) == -3
+
 
 def test_drift_score_boundary():
     """Boundary condition: Empty lists."""
