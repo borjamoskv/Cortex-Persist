@@ -142,7 +142,7 @@ def guard_cmd() -> None:
         try:
             from cortex.extensions.daemon.core import MoskvDaemon
 
-            status = MoskvDaemon.load_status()
+            status = MoskvDaemon().load_status()
             if status:
                 daemon_status = "healthy" if status.get("all_healthy") else "degraded"
         except ImportError:

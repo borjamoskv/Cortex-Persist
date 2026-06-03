@@ -68,7 +68,7 @@ def entropy_report():
     from cortex.extensions.daemon.core import MoskvDaemon
 
     try:
-        status_dict = MoskvDaemon.load_status()
+        status_dict = MoskvDaemon().load_status()
         if not status_dict:
             err_empty_results("daemon status", suggestion="Ensure MoskvDaemon is running.")
             return
