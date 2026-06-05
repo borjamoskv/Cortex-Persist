@@ -24,20 +24,28 @@ class CortexMemoryProvider(MemoryProvider):
                 id=str(getattr(r, "id", "unknown")),
                 score=getattr(r, "score", 0.0) or getattr(r, "relevance", 0.0),
                 summary=getattr(r, "summary", ""),
-                content=getattr(r, "content", str(r))
+                content=getattr(r, "content", str(r)),
+                fact_type=getattr(r, "fact_type", getattr(r, "type", "knowledge"))
             ))
         return memories
 
 async def setup_engine() -> CortexEngine:
-    engine = CortexEngine()
+    engine = CortexEngine("/tmp/cortex_copy.db")
     await engine.init_db()
     return engine
 
 def main():
     test_urls = [
-        "https://github.com/fastapi/fastapi/issues/10000",
-        "https://github.com/pypa/pip/issues/11500",
-        "https://github.com/astral-sh/uv/issues/2500"
+        "https://github.com/borjamoskv/Cortex-Persist/issues/415",
+        "https://github.com/borjamoskv/Cortex-Persist/issues/414",
+        "https://github.com/borjamoskv/Cortex-Persist/issues/413",
+        "https://github.com/borjamoskv/Cortex-Persist/issues/412",
+        "https://github.com/borjamoskv/Cortex-Persist/issues/411",
+        "https://github.com/borjamoskv/Cortex-Persist/issues/402",
+        "https://github.com/borjamoskv/Cortex-Persist/issues/401",
+        "https://github.com/borjamoskv/Cortex-Persist/issues/400",
+        "https://github.com/borjamoskv/Cortex-Persist/issues/399",
+        "https://github.com/borjamoskv/Cortex-Persist/issues/398"
     ]
     
     # 1. Initialize Real CORTEX Engine
@@ -59,7 +67,7 @@ def main():
             print(f"Related Memories Retrieved: {len(context.related_memories)}")
             
             for i, mem in enumerate(context.related_memories):
-                print(f"  [{i+1}] Score: {mem.score:.2f} | Content: {mem.content[:60]}...")
+                print(f"  [{i+1}] Score: {mem.score:.2f} | Type: {mem.fact_type} | Content: {mem.content[:60]}...")
                 
         except Exception as e:
             print(f"FAILED: {e}")

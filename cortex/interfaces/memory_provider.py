@@ -7,6 +7,7 @@ class MemoryResult:
     score: float
     summary: str
     content: str = ""
+    fact_type: str = "knowledge"
 
 class MemoryProvider(Protocol):
     def search(self, query: str, limit: int = 10) -> List[MemoryResult]:
