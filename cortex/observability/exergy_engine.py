@@ -4,6 +4,10 @@ import statistics
 import random
 from dataclasses import dataclass, asdict
 from typing import List, Dict, Any, Tuple
+from cortex.observability.efel import (
+    SystemState, encode_state, encode_task, 
+    build_failure_centroids, embedding_risk, efel_priority
+)
 
 CRONOS_LOG = os.path.expanduser("~/.gemini/config/skills/_metrics/cronos_memory.jsonl")
 META_PARAMS_LOG = os.path.expanduser("~/.gemini/config/skills/_metrics/meta_params.json")
@@ -14,6 +18,7 @@ class MetaParams:
     alpha_risk: float = 0.15
     learning_rate: float = 0.02
     epsilon: float = 0.05
+    semantic_risk_weight: float = 0.2
 
 @dataclass
 class TaskStats:
@@ -27,12 +32,28 @@ class TaskStats:
 class ExergyEngine:
     """
     Core engine for CORTEX Adaptive Runtime.
-    Implements Nivel 2 (Entropy Drift) to Nivel 6 (Counterfactual Ledger).
     """
     def __init__(self):
         self.history = self._load_cronos_history()
         self.genomes = self._extract_workflow_genomes()
         self.meta = self._load_meta_params()
+        self.failure_centroids = self._build_centroids()
+
+    def _build_centroids(self):
+        # Extract bad runs (e.g. outcome_score < 0.3 or success == False)
+        bad_runs = [r for r in self.history if r.get('outcome_score', 1.0) < 0.4 or not r.get('success', True)]
+        # We need a fake SystemState for historical runs to embed them. 
+        # In a real system, the state would be logged in cronos_memory.jsonl.
+        embeddings = []
+        for r in bad_runs:
+            s = SystemState(
+                git_diff=r.get('git_diff', 'unknown'),
+                ast_hash=r.get('ast_hash', 'unknown'),
+                active_tasks=[r.get('workflow')],
+                error_log=r.get('error_log', [])
+            )
+            embeddings.append(encode_state(s))
+        return build_failure_centroids(embeddings)
 
     def _load_meta_params(self) -> MetaParams:
         if os.path.exists(META_PARAMS_LOG):
@@ -135,16 +156,20 @@ class ExergyEngine:
         
         return TaskStats(workflow, exergy_mean, exergy_var, runtime_mean, runtime_var, confidence)
 
-    def lyapunov_scheduler(self, candidate_workflows: List[str]) -> List[Dict[str, Any]]:
-        """Nivel 4: Meta-Lyapunov Scheduler. Risk-penalized Exergy Density."""
+    def lyapunov_scheduler(self, candidate_workflows: List[str], state: SystemState = None) -> List[Dict[str, Any]]:
+        """Nivel 4: EFEL Meta-Lyapunov Scheduler. Risk-penalized Exergy Density in Embedding Space."""
         ranked = []
         for wf in candidate_workflows:
             stats = self.get_task_stats(wf)
             
-            # Priority formula with risk penalty
-            risk_penalty = self.meta.alpha_risk * stats.exergy_var
-            base_score = (stats.exergy_mean - risk_penalty) / (stats.runtime_mean + 1e-6)
-            priority = base_score * stats.confidence
+            if state and self.failure_centroids is not None and len(self.failure_centroids) > 0:
+                # EFEL context-aware priority
+                priority = efel_priority(stats, state, self.meta, self.failure_centroids)
+            else:
+                # Fallback flat statistical priority
+                risk_penalty = self.meta.alpha_risk * stats.exergy_var
+                base_score = (stats.exergy_mean - risk_penalty) / (stats.runtime_mean + 1e-6)
+                priority = base_score * stats.confidence
             
             ranked.append({
                 "workflow": wf,
