@@ -16,18 +16,17 @@ Architecture:
   call_id is deterministic: "{session_id}_{planner_step}_{i}" where i is the index
   within the tool_calls array.
 """
-
+import logging
+logger = logging.getLogger('cortex.exergy')
 import os
 import re
 import json
 import glob
-import uuid
+pass
 from datetime import datetime
 from typing import Optional
 from cortex.observability.telemetry import CortexTelemetry
-
-LOG_FILE = os.path.expanduser("~/.gemini/config/skills/_metrics/runtime_events.jsonl")
-
+LOG_FILE = os.path.expanduser('~/.gemini/config/skills/_metrics/runtime_events.jsonl')
 
 def _extract_skill_info(tool_name: str, tool_args: dict) -> dict:
     """
@@ -38,71 +37,48 @@ def _extract_skill_info(tool_name: str, tool_args: dict) -> dict:
     
     Never returns silently — always classifies.
     """
-    # Case A: view_file on a SKILL.md
-    if tool_name == "view_file":
-        path = tool_args.get("AbsolutePath", "")
-        # Match skills/SKILL_NAME/SKILL.md
-        match = re.search(r'skills/([^/]+)/SKILL\.md', path)
+    if tool_name == 'view_file':
+        path = tool_args.get('AbsolutePath', '')
+        match = re.search('skills/([^/]+)/SKILL\\.md', path)
         if match:
-            return {"skill": match.group(1), "source": "skill_md"}
-        # Match workflows/NAME.md
-        match_wf = re.search(r'workflows/([^/]+)\.md', path)
+            return {'skill': match.group(1), 'source': 'skill_md'}
+        match_wf = re.search('workflows/([^/]+)\\.md', path)
         if match_wf:
-            return {"skill": match_wf.group(1), "source": "workflow"}
-
-    # Case B: MCP tool calls
-    if tool_name == "call_mcp_tool":
-        server = tool_args.get("ServerName", "unknown")
-        tool = tool_args.get("ToolName", "unknown")
-        return {"skill": f"MCP_{server.upper()}", "source": "mcp", "mcp_tool": tool}
-
-    if tool_name.startswith("mcp_"):
-        server = tool_name.replace("mcp_", "").split("_")[0]
-        return {"skill": f"MCP_{server.upper()}", "source": "mcp"}
-
-    # Case C: Known built-in tools
-    builtins = {
-        "view_file", "list_dir", "grep_search", "run_command",
-        "write_to_file", "replace_file_content", "multi_replace_file_content",
-        "search_web", "read_url_content", "invoke_subagent", "manage_subagents",
-        "send_message", "ask_question", "generate_image", "schedule",
-        "manage_task", "ask_permission", "list_permissions",
-    }
+            return {'skill': match_wf.group(1), 'source': 'workflow'}
+    if tool_name == 'call_mcp_tool':
+        server = tool_args.get('ServerName', 'unknown')
+        tool = tool_args.get('ToolName', 'unknown')
+        return {'skill': f'MCP_{server.upper()}', 'source': 'mcp', 'mcp_tool': tool}
+    if tool_name.startswith('mcp_'):
+        server = tool_name.replace('mcp_', '').split('_')[0]
+        return {'skill': f'MCP_{server.upper()}', 'source': 'mcp'}
+    builtins = {'view_file', 'list_dir', 'grep_search', 'run_command', 'write_to_file', 'replace_file_content', 'multi_replace_file_content', 'search_web', 'read_url_content', 'invoke_subagent', 'manage_subagents', 'send_message', 'ask_question', 'generate_image', 'schedule', 'manage_task', 'ask_permission', 'list_permissions'}
     if tool_name in builtins:
-        return {"skill": tool_name, "source": "builtin"}
-
-    # Case D: Unknown — never discard silently
-    return {"skill": tool_name or "UNKNOWN", "source": "unknown"}
-
+        return {'skill': tool_name, 'source': 'builtin'}
+    return {'skill': tool_name or 'UNKNOWN', 'source': 'unknown'}
 
 def _parse_timestamp(content: str) -> Optional[str]:
     """Extract 'Created At' timestamp from step content."""
     if not content:
         return None
-    match = re.search(r'Created At:\s*(\S+)', content)
+    match = re.search('Created At:\\s*(\\S+)', content)
     if match:
         return match.group(1)
     return None
-
 
 def _parse_completed_at(content: str) -> Optional[str]:
     """Extract 'Completed At' timestamp from step content."""
     if not content:
         return None
-    match = re.search(r'Completed At:\s*(\S+)', content)
+    match = re.search('Completed At:\\s*(\\S+)', content)
     if match:
         return match.group(1)
     return None
 
-
 def _duration_ms(start_iso: str, end_iso: str) -> Optional[int]:
     """Calculate duration in ms between two ISO timestamps."""
     try:
-        fmt_patterns = [
-            "%Y-%m-%dT%H:%M:%SZ",
-            "%Y-%m-%dT%H:%M:%S.%fZ",
-            "%Y-%m-%dT%H:%M:%S%z",
-        ]
+        fmt_patterns = ['%Y-%m-%dT%H:%M:%SZ', '%Y-%m-%dT%H:%M:%S.%fZ', '%Y-%m-%dT%H:%M:%S%z']
         start_dt = end_dt = None
         for fmt in fmt_patterns:
             try:
@@ -122,16 +98,11 @@ def _duration_ms(start_iso: str, end_iso: str) -> Optional[int]:
         pass
     return None
 
-
 def process_transcript(file_path: str, telemetry: CortexTelemetry):
     """Process a single transcript.jsonl with positional correlation."""
-    session_id = os.path.basename(
-        os.path.dirname(os.path.dirname(os.path.dirname(file_path)))
-    )
-
-    with open(file_path, "r") as f:
+    session_id = os.path.basename(os.path.dirname(os.path.dirname(os.path.dirname(file_path))))
+    with open(file_path, 'r') as f:
         lines = f.readlines()
-
     steps = []
     for line in lines:
         line = line.strip()
@@ -141,246 +112,177 @@ def process_transcript(file_path: str, telemetry: CortexTelemetry):
             steps.append(json.loads(line))
         except json.JSONDecodeError:
             continue
-
     i = 0
     events_emitted = 0
-
     while i < len(steps):
         step = steps[i]
-
-        # Only process PLANNER_RESPONSE steps with tool_calls
-        tool_calls = step.get("tool_calls")
+        tool_calls = step.get('tool_calls')
         if not tool_calls:
             i += 1
             continue
-
-        planner_step_idx = step.get("step_index", i)
-        planner_created_at = step.get("created_at", "")
-
+        planner_step_idx = step.get('step_index', i)
+        planner_created_at = step.get('created_at', '')
         for j, call in enumerate(tool_calls):
-            tool_name = call.get("name", "")
-            tool_args = call.get("args", {})
+            tool_name = call.get('name', '')
+            tool_args = call.get('args', {})
             info = _extract_skill_info(tool_name, tool_args)
-
-            call_id = f"{session_id}_{planner_step_idx}_{j}"
-
-            # Emit tool_start
-            telemetry.log_event(
-                session_id=session_id,
-                call_id=call_id,
-                skill=info["skill"],
-                source=info["source"],
-                event_type="tool_start",
-                trigger="desktop_app",
-            )
+            call_id = f'{session_id}_{planner_step_idx}_{j}'
+            telemetry.log_event(session_id=session_id, call_id=call_id, skill=info['skill'], source=info['source'], event_type='tool_start', trigger='desktop_app')
             events_emitted += 1
-
-            # Find the corresponding result step (positional: i + 1 + j)
             result_idx = i + 1 + j
             if result_idx < len(steps):
                 result_step = steps[result_idx]
-                result_content = result_step.get("content", "")
-                result_status = result_step.get("status", "")
-
+                result_content = result_step.get('content', '')
+                result_status = result_step.get('status', '')
                 created_at = _parse_timestamp(result_content) or planner_created_at
                 completed_at = _parse_completed_at(result_content)
-
                 duration = None
                 if created_at and completed_at:
                     duration = _duration_ms(created_at, completed_at)
-
-                success = result_status == "DONE"
-
-                telemetry.log_event(
-                    session_id=session_id,
-                    call_id=call_id,
-                    skill=info["skill"],
-                    source=info["source"],
-                    event_type="tool_end",
-                    trigger="desktop_app",
-                    duration_ms=duration,
-                    success=success,
-                )
+                success = result_status == 'DONE'
+                telemetry.log_event(session_id=session_id, call_id=call_id, skill=info['skill'], source=info['source'], event_type='tool_end', trigger='desktop_app', duration_ms=duration, success=success)
                 events_emitted += 1
-
-        # Skip past the planner step + all result steps
         i += 1 + len(tool_calls)
-
     return events_emitted
 
-
 def parse_iso(ts):
+    """TODO: Document parse_iso"""
     if not ts:
         return None
-    for fmt in ["%Y-%m-%dT%H:%M:%SZ", "%Y-%m-%dT%H:%M:%S.%fZ", "%Y-%m-%dT%H:%M:%S%z"]:
+    for fmt in ['%Y-%m-%dT%H:%M:%SZ', '%Y-%m-%dT%H:%M:%S.%fZ', '%Y-%m-%dT%H:%M:%S%z']:
         try:
             return datetime.strptime(ts, fmt)
         except ValueError:
             continue
     return None
 
-
-def run_cronos_analysis(transcripts):
+def run_cronos_analysis(transcripts, rolling_window=5) -> None:
     """
     Parses workflow metadata and evaluates session durations to construct
     operational memory (CRONOS v0) and exergy rankings.
+    Uses a rolling median of the last N executions for planned_minutes.
     """
-    CRONOS_LOG = os.path.expanduser("~/.gemini/config/skills/_metrics/cronos_memory.jsonl")
-    CRONOS_REPORT = os.path.expanduser("~/.gemini/config/skills/_metrics/cronos_report.md")
-
+    CRONOS_LOG = os.path.expanduser('~/.gemini/config/skills/_metrics/cronos_memory.jsonl')
+    CRONOS_REPORT = os.path.expanduser('~/.gemini/config/skills/_metrics/cronos_report.md')
+    import statistics
     workflow_meta = {}
-    wf_dir = "/Users/borjafernandezangulo/.agents/workflows"
+    wf_dir = '/Users/borjafernandezangulo/.agents/workflows'
     if os.path.exists(wf_dir):
-        files = glob.glob(os.path.join(wf_dir, "*.md"))
+        files = glob.glob(os.path.join(wf_dir, '*.md'))
         for f in files:
             name = os.path.splitext(os.path.basename(f))[0]
             try:
-                with open(f, "r", encoding="utf-8") as fh:
+                with open(f, 'r', encoding='utf-8') as fh:
                     content = fh.read()
-                # Parse expected_duration_min
-                match = re.search(r"expected_duration_min:\s*(\d+)", content)
+                match = re.search('expected_duration_min:\\s*(\\d+)', content)
                 workflow_meta[name] = int(match.group(1)) if match else 15
             except Exception:
                 workflow_meta[name] = 15
-
-    cronos_records = []
+    raw_sessions = []
     for t in transcripts:
         session_id = os.path.basename(os.path.dirname(os.path.dirname(os.path.dirname(t))))
         try:
-            with open(t, "r", encoding="utf-8") as fh:
+            with open(t, 'r', encoding='utf-8') as fh:
                 lines = [json.loads(line) for line in fh if line.strip()]
         except Exception:
             continue
-            
         if not lines:
             continue
-            
-        # 1. Identify which workflows were run
         detected_workflows = set()
-        
-        # A. Tool calls (view_file)
         for step in lines:
-            for call in step.get("tool_calls", []):
-                if call.get("name") == "view_file":
-                    path = call.get("args", {}).get("AbsolutePath", "")
-                    m = re.search(r"workflows/([^/]+)\.md", path)
+            for call in step.get('tool_calls', []):
+                if call.get('name') == 'view_file':
+                    path = call.get('args', {}).get('AbsolutePath', '')
+                    m = re.search('workflows/([^/]+)\\.md', path)
                     if m:
                         detected_workflows.add(m.group(1))
-                        
-        # B. User slash commands
         for step in lines:
-            if step.get("source") == "USER_EXPLICIT" or step.get("type") == "USER_INPUT":
-                content = step.get("content", "")
+            if step.get('source') == 'USER_EXPLICIT' or step.get('type') == 'USER_INPUT':
+                content = step.get('content', '')
                 for wf in workflow_meta:
-                    if re.search(r"\b/" + re.escape(wf) + r"\b", content):
+                    if re.search('\\b/' + re.escape(wf) + '\\b', content):
                         detected_workflows.add(wf)
-                        
         if not detected_workflows:
             continue
-            
-        start_ts = lines[0].get("created_at")
-        end_ts = lines[-1].get("created_at")
-        start_raw = _parse_timestamp(lines[0].get("content", "")) or start_ts
-        end_raw = _parse_completed_at(lines[-1].get("content", "")) or end_ts
-        
+        start_ts = lines[0].get('created_at')
+        end_ts = lines[-1].get('created_at')
+        start_raw = _parse_timestamp(lines[0].get('content', '')) or start_ts
+        end_raw = _parse_completed_at(lines[-1].get('content', '')) or end_ts
         start_dt = parse_iso(start_raw)
         end_dt = parse_iso(end_raw)
-            
         if not (start_dt and end_dt):
             continue
-            
         actual_min = max(0.1, (end_dt - start_dt).total_seconds() / 60.0)
-        
-        # Success status: Last step was not an error
-        success = lines[-1].get("status") != "ERROR"
-        
-        for wf in detected_workflows:
-            planned = workflow_meta.get(wf, 15)
+        success = lines[-1].get('status') != 'ERROR'
+        outcome_score = 1.0
+        for step in reversed(lines):
+            if step.get('source') == 'USER_EXPLICIT' and '/score' in step.get('content', ''):
+                m = re.search('/score\\s+([0-9.]+)', step.get('content', ''))
+                if m:
+                    outcome_score = float(m.group(1))
+                    break
+        raw_sessions.append({'timestamp': end_ts or start_ts, 'session_id': session_id, 'workflows': detected_workflows, 'actual_min': actual_min, 'success': success, 'start_dt': start_dt, 'outcome_score': outcome_score})
+    raw_sessions.sort(key=lambda x: x['start_dt'])
+    cronos_records = []
+    history = {}
+    for session in raw_sessions:
+        for wf in session['workflows']:
+            if wf not in history:
+                history[wf] = []
+            if history[wf]:
+                planned = statistics.median(history[wf][-rolling_window:])
+            else:
+                planned = workflow_meta.get(wf, 15)
+            actual_min = session['actual_min']
+            outcome_score = session['outcome_score']
             deviation = actual_min - planned
-            exergy_yield = planned - actual_min
-            
-            record = {
-                "timestamp": end_ts or start_ts,
-                "session_id": session_id,
-                "workflow": wf,
-                "planned_minutes": planned,
-                "actual_minutes": round(actual_min, 2),
-                "deviation_minutes": round(deviation, 2),
-                "exergy_yield": round(exergy_yield, 2),
-                "success": success
-            }
+            time_saved = planned - actual_min
+            exergy_yield = time_saved * outcome_score if time_saved > 0 else time_saved / max(0.1, outcome_score)
+            exergy_score = outcome_score / actual_min
+            record = {'timestamp': session['timestamp'], 'session_id': session['session_id'], 'workflow': wf, 'planned_minutes': round(planned, 2), 'actual_minutes': round(actual_min, 2), 'deviation_minutes': round(deviation, 2), 'outcome_score': outcome_score, 'exergy_score': round(exergy_score, 4), 'exergy_yield': round(exergy_yield, 2), 'success': session['success']}
             cronos_records.append(record)
-            
-    # Write to CRONOS_LOG
+            if session['success']:
+                history[wf].append(actual_min)
     os.makedirs(os.path.dirname(CRONOS_LOG), exist_ok=True)
-    with open(CRONOS_LOG, "w", encoding="utf-8") as fh:
+    with open(CRONOS_LOG, 'w', encoding='utf-8') as fh:
         for r in cronos_records:
-            fh.write(json.dumps(r) + "\n")
-            
-    # Compute aggregate stats for reporting
+            fh.write(json.dumps(r) + '\n')
     stats = {}
     for r in cronos_records:
-        wf = r["workflow"]
+        wf = r['workflow']
         if wf not in stats:
-            stats[wf] = {
-                "count": 0,
-                "planned_sum": 0,
-                "actual_sum": 0,
-                "exergy_sum": 0,
-                "success_count": 0
-            }
-        stats[wf]["count"] += 1
-        stats[wf]["planned_sum"] += r["planned_minutes"]
-        stats[wf]["actual_sum"] += r["actual_minutes"]
-        stats[wf]["exergy_sum"] += r["exergy_yield"]
-        if r["success"]:
-            stats[wf]["success_count"] += 1
-            
-    # Compile markdown table sorted by exergy_sum descending (exergy ranking)
-    report_lines = [
-        "# CRONOS v0 — Operational Memory & Exergy Report",
-        f"> **Reality Level: C5-REAL** | Compiled: {datetime.utcnow().isoformat()}Z",
-        "",
-        "## Workflow Exergy Ranking",
-        "Positive exergy yield indicates time saved relative to plan; negative exergy yield identifies workflow friction (time sinks).",
-        "",
-        "| Workflow | Runs | Avg Planned | Avg Actual | Avg Deviation | Total Exergy Yield | Success Rate |",
-        "| :--- | :---: | :---: | :---: | :---: | :---: | :---: |"
-    ]
-    
-    sorted_stats = sorted(stats.items(), key=lambda x: x[1]["exergy_sum"], reverse=True)
+            stats[wf] = {'count': 0, 'planned_sum': 0, 'actual_sum': 0, 'exergy_sum': 0, 'success_count': 0}
+        stats[wf]['count'] += 1
+        stats[wf]['planned_sum'] += r['planned_minutes']
+        stats[wf]['actual_sum'] += r['actual_minutes']
+        stats[wf]['exergy_sum'] += r['exergy_yield']
+        if r['success']:
+            stats[wf]['success_count'] += 1
+    report_lines = ['# CRONOS v0 — Operational Memory & Exergy Report', f'> **Reality Level: C5-REAL** | Compiled: {datetime.utcnow().isoformat()}Z', '', '## Workflow Exergy Ranking', 'Positive exergy yield indicates time saved relative to plan; negative exergy yield identifies workflow friction (time sinks).', 'The **Exergy Score** measures pure output value per minute (Outcome / Actual Time).', '', '| Workflow | Runs | Avg Planned | Avg Actual | Avg Deviation | Exergy Score | Total Exergy Yield | Success |', '| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |']
+    sorted_stats = sorted(stats.items(), key=lambda x: x[1]['exergy_sum'], reverse=True)
     for wf, s in sorted_stats:
-        count = s["count"]
-        avg_planned = s["planned_sum"] / count
-        avg_actual = s["actual_sum"] / count
-        avg_dev = (s["actual_sum"] - s["planned_sum"]) / count
-        total_exergy = s["exergy_sum"]
-        success_rate = (s["success_count"] / count) * 100
-        
-        report_lines.append(
-            f"| `{wf}` | {count} | {avg_planned:.1f}m | {avg_actual:.1f}m | {avg_dev:+.1f}m | {total_exergy:+.1f}m | {success_rate:.1f}% |"
-        )
-        
-    report_content = "\n".join(report_lines)
-    with open(CRONOS_REPORT, "w", encoding="utf-8") as fh:
+        count = s['count']
+        avg_planned = s['planned_sum'] / count
+        avg_actual = s['actual_sum'] / count
+        avg_dev = (s['actual_sum'] - s['planned_sum']) / count
+        avg_exergy_score = sum((r['exergy_score'] for r in cronos_records if r['workflow'] == wf)) / count
+        total_exergy = s['exergy_sum']
+        success_rate = s['success_count'] / count * 100
+        report_lines.append(f'| `{wf}` | {count} | {avg_planned:.1f}m | {avg_actual:.1f}m | {avg_dev:+.1f}m | {avg_exergy_score:.2f} | {total_exergy:+.1f}m | {success_rate:.1f}% |')
+    report_content = '\n'.join(report_lines)
+    with open(CRONOS_REPORT, 'w', encoding='utf-8') as fh:
         fh.write(report_content)
-        
-    print(f"Generated CRONOS report in {CRONOS_REPORT}")
+    logger.info(f'Generated CRONOS report in {CRONOS_REPORT}')
 
-
-def ingest_all_transcripts(log_path: str = LOG_FILE):
+def ingest_all_transcripts(log_path: str=LOG_FILE):
     """Ingest all transcripts from the brain directory."""
-    # Start fresh
     if os.path.exists(log_path):
         os.remove(log_path)
-
     telemetry = CortexTelemetry(log_path=log_path)
-    base_dir = os.path.expanduser("~/.gemini/antigravity/brain")
-    transcripts = glob.glob(f"{base_dir}/*/.system_generated/logs/transcript.jsonl")
-
+    base_dir = os.path.expanduser('~/.gemini/antigravity/brain')
+    transcripts = glob.glob(f'{base_dir}/*/.system_generated/logs/transcript.jsonl')
     total_events = 0
     processed = 0
-
     sorted_transcripts = sorted(transcripts)
     for t in sorted_transcripts:
         try:
@@ -388,15 +290,9 @@ def ingest_all_transcripts(log_path: str = LOG_FILE):
             total_events += n
             processed += 1
         except Exception as e:
-            print(f"  ERROR processing {t}: {e}")
-
-    print(f"Processed {processed}/{len(transcripts)} transcripts → {total_events} events")
-    
-    # Run Cronos analysis
+            logger.info(f'  ERROR processing {t}: {e}')
+    logger.info(f'Processed {processed}/{len(transcripts)} transcripts → {total_events} events')
     run_cronos_analysis(sorted_transcripts)
-    
     return total_events
-
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     ingest_all_transcripts()

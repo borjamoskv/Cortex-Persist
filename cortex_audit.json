@@ -1,0 +1,5902 @@
+[
+  {
+    "classes": [
+      {
+        "name": "Z3ThermodynamicValidator",
+        "docstring": "Simulates Z3 Formal Verification for Exergy Bounding.\nIf the Joule cost or cyclomatic complexity is too high (infinite loop risk),\nit halts the execution.",
+        "methods": [
+          {
+            "name": "verify",
+            "docstring": null,
+            "args": [
+              "source_code"
+            ],
+            "line": 36,
+            "is_async": false
+          }
+        ],
+        "line": 29
+      },
+      {
+        "name": "AeonCompiler",
+        "docstring": null,
+        "methods": [
+          {
+            "name": "__init__",
+            "docstring": null,
+            "args": [
+              "self",
+              "target_file"
+            ],
+            "line": 48,
+            "is_async": false
+          },
+          {
+            "name": "execute_mutation",
+            "docstring": null,
+            "args": [
+              "self",
+              "func_name",
+              "new_source",
+              "yield_amount"
+            ],
+            "line": 54,
+            "is_async": false
+          },
+          {
+            "name": "_death_protocol",
+            "docstring": "Zero-GC Annihilation.",
+            "args": [
+              "self",
+              "exit_code"
+            ],
+            "line": 90,
+            "is_async": false
+          }
+        ],
+        "line": 47
+      },
+      {
+        "name": "AEON0Compiler",
+        "docstring": "AEON-0 Compiler wrapper for the background OutboxDaemon.\nMutates the AST without engaged death protocol (sys.exit) to preserve daemon runtime.",
+        "methods": [
+          {
+            "name": "__init__",
+            "docstring": null,
+            "args": [
+              "self",
+              "ledger"
+            ],
+            "line": 102,
+            "is_async": false
+          },
+          {
+            "name": "mutate",
+            "docstring": null,
+            "args": [
+              "self",
+              "payload_dict"
+            ],
+            "line": 105,
+            "is_async": false
+          }
+        ],
+        "line": 97
+      }
+    ],
+    "functions": [],
+    "critical_paths": [
+      {
+        "type": "attribute",
+        "name": "ledger",
+        "line": 50,
+        "context": "self.ledger = LedgerManager()"
+      },
+      {
+        "type": "identifier",
+        "name": "LedgerManager",
+        "line": 50,
+        "context": "self.ledger = LedgerManager()"
+      },
+      {
+        "type": "attribute",
+        "name": "ledger",
+        "line": 51,
+        "context": "self.dark_pool = DarkPoolZK(self.ledger)"
+      },
+      {
+        "type": "attribute",
+        "name": "verify",
+        "line": 58,
+        "context": "if not Z3ThermodynamicValidator.verify(new_source):"
+      },
+      {
+        "type": "identifier",
+        "name": "ledger_hash",
+        "line": 78,
+        "context": "ledger_hash = self.ledger.append(action=\"AEON_0_STRIKE\", vector_id=vector_id, yield_amount=final_yield)"
+      },
+      {
+        "type": "attribute",
+        "name": "ledger",
+        "line": 78,
+        "context": "ledger_hash = self.ledger.append(action=\"AEON_0_STRIKE\", vector_id=vector_id, yield_amount=final_yield)"
+      },
+      {
+        "type": "identifier",
+        "name": "ledger_hash",
+        "line": 80,
+        "context": "logger.info(f\"Ledger Sealed: {ledger_hash}\")"
+      },
+      {
+        "type": "attribute",
+        "name": "ledger",
+        "line": 103,
+        "context": "self.ledger = ledger"
+      },
+      {
+        "type": "identifier",
+        "name": "ledger",
+        "line": 103,
+        "context": "self.ledger = ledger"
+      },
+      {
+        "type": "identifier",
+        "name": "signature",
+        "line": 110,
+        "context": "signature = payload_dict.get(\"signature\")"
+      },
+      {
+        "type": "identifier",
+        "name": "signature",
+        "line": 113,
+        "context": "if not signature:"
+      },
+      {
+        "type": "attribute",
+        "name": "verify_zk_seal",
+        "line": 115,
+        "context": "if not self.ledger.verify_zk_seal(new_source, signature):"
+      },
+      {
+        "type": "identifier",
+        "name": "signature",
+        "line": 115,
+        "context": "if not self.ledger.verify_zk_seal(new_source, signature):"
+      },
+      {
+        "type": "attribute",
+        "name": "ledger",
+        "line": 115,
+        "context": "if not self.ledger.verify_zk_seal(new_source, signature):"
+      },
+      {
+        "type": "attribute",
+        "name": "verify",
+        "line": 119,
+        "context": "if not Z3ThermodynamicValidator.verify(new_source):  # pyright: ignore[reportArgumentType]"
+      },
+      {
+        "type": "attribute",
+        "name": "ledger",
+        "line": 130,
+        "context": "dark_pool = DarkPoolZK(self.ledger)"
+      },
+      {
+        "type": "attribute",
+        "name": "ledger",
+        "line": 136,
+        "context": "self.ledger.append(action=\"AEON_0_STRIKE\", vector_id=vector_id, yield_amount=final_yield)"
+      }
+    ],
+    "sovereign_markers": [
+      {
+        "type": "string_constant",
+        "value": "\nAEON-0 (Autotelic Exergy Orchestration Node)\n----...",
+        "line": 1,
+        "context": "\"\"\""
+      },
+      {
+        "type": "string_constant",
+        "value": "\n    Simulates Z3 Formal Verification for Exergy B...",
+        "line": 30,
+        "context": "\"\"\""
+      },
+      {
+        "type": "string_constant",
+        "value": "Z3 Pre-Compute: Calculated Exergy Cost = ",
+        "line": 40,
+        "context": "logger.info(f\"Z3 Pre-Compute: Calculated Exergy Cost = {entropy:.4f} Joules\")"
+      },
+      {
+        "type": "string_constant",
+        "value": "Initiating C5-REAL AST Mutation...",
+        "line": 62,
+        "context": "logger.info(\"Initiating C5-REAL AST Mutation...\")"
+      },
+      {
+        "type": "string_constant",
+        "value": "SECURITY ALERT: AST Mutation Rejected. Missing C5-...",
+        "line": 114,
+        "context": "raise ValueError(\"SECURITY ALERT: AST Mutation Rejected. Missing C5-REAL ZK-Seal.\")"
+      },
+      {
+        "type": "string_constant",
+        "value": "SECURITY ALERT: AST Mutation Rejected. Invalid C5-...",
+        "line": 116,
+        "context": "raise ValueError(\"SECURITY ALERT: AST Mutation Rejected. Invalid C5-REAL ZK-Seal.\")"
+      }
+    ]
+  },
+  {
+    "classes": [
+      {
+        "name": "IterationResult",
+        "docstring": "Immutable record of a single iteration cycle.",
+        "methods": [],
+        "line": 44
+      },
+      {
+        "name": "ComplexityAnalyzer",
+        "docstring": "O(N) single-pass AST visitor for cyclomatic complexity and dead code.",
+        "methods": [
+          {
+            "name": "analyze_file",
+            "docstring": "Parses a python file into an AST and calculates cyclomatic complexity for all functions.\nAlso identifies potentially dead code candidates based on function names and usage counts.",
+            "args": [
+              "filepath"
+            ],
+            "line": 66,
+            "is_async": false
+          },
+          {
+            "name": "scan_directory",
+            "docstring": "Recursively scans a directory for Python files, analyzing complexity and dead code.\nSkips excluded directories like __pycache__, node_modules, and .venv.",
+            "args": [
+              "directory",
+              "exclude"
+            ],
+            "line": 115,
+            "is_async": false
+          }
+        ],
+        "line": 62
+      },
+      {
+        "name": "AgenteIterar",
+        "docstring": "Autonomous Iteration Daemon - Exergy-Maximized.\n\nEach cycle:\n  1. Lint scan + autofix (ruff)\n  2. Fast test suite\n  3. Complexity + dead code analysis\n  4. Report hotspots\n  5. Seal to Ledger",
+        "methods": [
+          {
+            "name": "__init__",
+            "docstring": "Args:\n    max_cycles: 0 = infinite daemon mode\n    cycle_interval: seconds between cycles",
+            "args": [
+              "self",
+              "max_cycles",
+              "cycle_interval"
+            ],
+            "line": 143,
+            "is_async": false
+          },
+          {
+            "name": "run_cycle",
+            "docstring": "Executes a single continuous improvement cycle: Lint -> Test -> Analyze -> Seal -> Telemetry.\nReturns the IterationResult containing the delta of the Exergy and complexity metrics.",
+            "args": [
+              "self"
+            ],
+            "line": 157,
+            "is_async": false
+          },
+          {
+            "name": "run_forever",
+            "docstring": "Daemon mode - runs until killed or max_cycles reached.",
+            "args": [
+              "self"
+            ],
+            "line": 206,
+            "is_async": false
+          },
+          {
+            "name": "stop",
+            "docstring": "Terminates the autonomous iteration daemon loop.",
+            "args": [
+              "self"
+            ],
+            "line": 229,
+            "is_async": false
+          },
+          {
+            "name": "get_summary",
+            "docstring": "Returns aggregate stats across all cycles.",
+            "args": [
+              "self"
+            ],
+            "line": 233,
+            "is_async": false
+          }
+        ],
+        "line": 131
+      }
+    ],
+    "functions": [],
+    "critical_paths": [
+      {
+        "type": "attribute",
+        "name": "_ledger",
+        "line": 153,
+        "context": "self._ledger = None"
+      },
+      {
+        "type": "attribute",
+        "name": "_seal_to_ledger",
+        "line": 196,
+        "context": "self._seal_to_ledger(result)  # pyright: ignore[reportAttributeAccessIssue]"
+      }
+    ],
+    "sovereign_markers": [
+      {
+        "type": "string_constant",
+        "value": "\nAGENTE ITERAR v1.0 - Autonomous Iteration Daemon\n...",
+        "line": 1,
+        "context": "\"\"\""
+      },
+      {
+        "type": "identifier",
+        "name": "exergy_delta",
+        "line": 57,
+        "context": "exergy_delta: float = 0.0"
+      },
+      {
+        "type": "string_constant",
+        "value": "\n    Autonomous Iteration Daemon - Exergy-Maximize...",
+        "line": 132,
+        "context": "\"\"\""
+      },
+      {
+        "type": "string_constant",
+        "value": "\n        Executes a single continuous improvement ...",
+        "line": 158,
+        "context": "\"\"\""
+      },
+      {
+        "type": "identifier",
+        "name": "exergy",
+        "line": 188,
+        "context": "exergy = 0.0"
+      },
+      {
+        "type": "identifier",
+        "name": "exergy",
+        "line": 189,
+        "context": "exergy += result.lint_fixed * 1.0"
+      },
+      {
+        "type": "identifier",
+        "name": "exergy",
+        "line": 190,
+        "context": "exergy += 5.0 if passed else -10.0"
+      },
+      {
+        "type": "identifier",
+        "name": "exergy",
+        "line": 191,
+        "context": "exergy -= len(hotspots) * 0.5"
+      },
+      {
+        "type": "identifier",
+        "name": "exergy",
+        "line": 192,
+        "context": "exergy -= len(dead) * 0.2"
+      },
+      {
+        "type": "attribute",
+        "name": "exergy_delta",
+        "line": 193,
+        "context": "result.exergy_delta = round(exergy, 2)"
+      },
+      {
+        "type": "identifier",
+        "name": "exergy",
+        "line": 193,
+        "context": "result.exergy_delta = round(exergy, 2)"
+      },
+      {
+        "type": "string_constant",
+        "value": "MAX_EXERGY",
+        "line": 195,
+        "context": "result.status = \"MAX_EXERGY\" if exergy >= 5.0 else \"STABLE\" if exergy >= 0 else \"DEGRADED\""
+      },
+      {
+        "type": "identifier",
+        "name": "exergy",
+        "line": 195,
+        "context": "result.status = \"MAX_EXERGY\" if exergy >= 5.0 else \"STABLE\" if exergy >= 0 else \"DEGRADED\""
+      },
+      {
+        "type": "string_constant",
+        "value": "  Exergy Δ: ",
+        "line": 200,
+        "context": "f\"  Exergy Δ: {result.exergy_delta} | Status: {result.status} | {result.duration_ms}ms\""
+      },
+      {
+        "type": "attribute",
+        "name": "exergy_delta",
+        "line": 200,
+        "context": "f\"  Exergy Δ: {result.exergy_delta} | Status: {result.status} | {result.duration_ms}ms\""
+      },
+      {
+        "type": "string_constant",
+        "value": "total_exergy",
+        "line": 240,
+        "context": "\"total_exergy\": round(sum(r.exergy_delta for r in self.history), 2),"
+      },
+      {
+        "type": "attribute",
+        "name": "exergy_delta",
+        "line": 240,
+        "context": "\"total_exergy\": round(sum(r.exergy_delta for r in self.history), 2),"
+      },
+      {
+        "type": "string_constant",
+        "value": "AGENTE ITERAR - C5-REAL Iteration Daemon",
+        "line": 255,
+        "context": "parser = argparse.ArgumentParser(description=\"AGENTE ITERAR - C5-REAL Iteration Daemon\")"
+      }
+    ]
+  },
+  {
+    "classes": [
+      {
+        "name": "ASTAutopoiesisEngine",
+        "docstring": "Terminal State 4: AST Autopoiesis (Remote Mutation).\nC5-REAL structural mutation engine that allows the swarm to rewrite its own source code \nat runtime, bypassing I/O bottlenecks across the networked mesh.",
+        "methods": [
+          {
+            "name": "__init__",
+            "docstring": null,
+            "args": [
+              "self",
+              "target_file"
+            ],
+            "line": 16,
+            "is_async": false
+          },
+          {
+            "name": "_get_node_bounds",
+            "docstring": "Returns 0-indexed start and end line numbers for an AST node.",
+            "args": [
+              "self",
+              "node"
+            ],
+            "line": 26,
+            "is_async": false
+          },
+          {
+            "name": "mutate_function",
+            "docstring": "Locates a function by name in the AST and replaces it entirely with new_source.\nEmits a C5-REAL ZK-ready cryptographic hash of the mutation.",
+            "args": [
+              "self",
+              "func_name",
+              "new_source"
+            ],
+            "line": 37,
+            "is_async": false
+          },
+          {
+            "name": "mutate_file",
+            "docstring": "Replaces the entire file with new_source.\nValidates the AST and optional cryptographic signature before applying.",
+            "args": [
+              "self",
+              "new_source",
+              "expected_signature"
+            ],
+            "line": 83,
+            "is_async": false
+          }
+        ],
+        "line": 9
+      }
+    ],
+    "functions": [],
+    "critical_paths": [
+      {
+        "type": "identifier",
+        "name": "mutation_hash",
+        "line": 66,
+        "context": "mutation_hash = hashlib.sha256(new_code.encode(\"utf-8\")).hexdigest()"
+      },
+      {
+        "type": "identifier",
+        "name": "hashlib",
+        "line": 66,
+        "context": "mutation_hash = hashlib.sha256(new_code.encode(\"utf-8\")).hexdigest()"
+      },
+      {
+        "type": "identifier",
+        "name": "hashlib",
+        "line": 67,
+        "context": "zk_proof = f\"zkSTARK_AST_{hashlib.blake2s(mutation_hash.encode('utf-8')).hexdigest()}\""
+      },
+      {
+        "type": "identifier",
+        "name": "mutation_hash",
+        "line": 67,
+        "context": "zk_proof = f\"zkSTARK_AST_{hashlib.blake2s(mutation_hash.encode('utf-8')).hexdigest()}\""
+      },
+      {
+        "type": "identifier",
+        "name": "mutation_hash",
+        "line": 76,
+        "context": "\"hash\": mutation_hash,"
+      },
+      {
+        "type": "identifier",
+        "name": "mutation_hash",
+        "line": 95,
+        "context": "mutation_hash = hashlib.sha256(new_source.encode(\"utf-8\")).hexdigest()"
+      },
+      {
+        "type": "identifier",
+        "name": "hashlib",
+        "line": 95,
+        "context": "mutation_hash = hashlib.sha256(new_source.encode(\"utf-8\")).hexdigest()"
+      },
+      {
+        "type": "identifier",
+        "name": "expected_signature",
+        "line": 97,
+        "context": "if expected_signature and mutation_hash != expected_signature:"
+      },
+      {
+        "type": "identifier",
+        "name": "mutation_hash",
+        "line": 97,
+        "context": "if expected_signature and mutation_hash != expected_signature:"
+      },
+      {
+        "type": "identifier",
+        "name": "expected_signature",
+        "line": 98,
+        "context": "logger.error(f\"Signature mismatch. Expected {expected_signature}, got {mutation_hash}\")"
+      },
+      {
+        "type": "identifier",
+        "name": "mutation_hash",
+        "line": 98,
+        "context": "logger.error(f\"Signature mismatch. Expected {expected_signature}, got {mutation_hash}\")"
+      },
+      {
+        "type": "identifier",
+        "name": "hashlib",
+        "line": 106,
+        "context": "zk_proof = f\"zkSTARK_FILE_{hashlib.blake2s(mutation_hash.encode('utf-8')).hexdigest()}\""
+      },
+      {
+        "type": "identifier",
+        "name": "mutation_hash",
+        "line": 106,
+        "context": "zk_proof = f\"zkSTARK_FILE_{hashlib.blake2s(mutation_hash.encode('utf-8')).hexdigest()}\""
+      },
+      {
+        "type": "identifier",
+        "name": "mutation_hash",
+        "line": 114,
+        "context": "\"hash\": mutation_hash,"
+      }
+    ],
+    "sovereign_markers": [
+      {
+        "type": "string_constant",
+        "value": "\n    Terminal State 4: AST Autopoiesis (Remote Mut...",
+        "line": 10,
+        "context": "\"\"\""
+      },
+      {
+        "type": "string_constant",
+        "value": "\n        Locates a function by name in the AST and...",
+        "line": 38,
+        "context": "\"\"\""
+      },
+      {
+        "type": "string_constant",
+        "value": "C5-REAL Autopoiesis Executed. Function ",
+        "line": 69,
+        "context": "logger.info(f\"C5-REAL Autopoiesis Executed. Function {func_name} mutated.\")"
+      },
+      {
+        "type": "string_constant",
+        "value": "C5-REAL Autopoiesis Executed. File ",
+        "line": 108,
+        "context": "logger.info(f\"C5-REAL Autopoiesis Executed. File {self.target_file} fully mutated.\")"
+      }
+    ]
+  },
+  {
+    "classes": [
+      {
+        "name": "TelemetryBridge",
+        "docstring": null,
+        "methods": [
+          {
+            "name": "__init__",
+            "docstring": null,
+            "args": [
+              "self",
+              "port"
+            ],
+            "line": 10,
+            "is_async": false
+          },
+          {
+            "name": "register",
+            "docstring": null,
+            "args": [
+              "self",
+              "websocket"
+            ],
+            "line": 15,
+            "is_async": true
+          },
+          {
+            "name": "unregister",
+            "docstring": null,
+            "args": [
+              "self",
+              "websocket"
+            ],
+            "line": 19,
+            "is_async": true
+          },
+          {
+            "name": "broadcast_loop",
+            "docstring": "Streams the topological state of all active agents at ~60fps (16ms resolution).",
+            "args": [
+              "self"
+            ],
+            "line": 23,
+            "is_async": true
+          },
+          {
+            "name": "handler",
+            "docstring": null,
+            "args": [
+              "self",
+              "websocket"
+            ],
+            "line": 50,
+            "is_async": true
+          },
+          {
+            "name": "start",
+            "docstring": null,
+            "args": [
+              "self"
+            ],
+            "line": 59,
+            "is_async": true
+          }
+        ],
+        "line": 9
+      }
+    ],
+    "functions": [],
+    "critical_paths": [
+      {
+        "type": "await",
+        "name": "await",
+        "line": 48,
+        "context": "await asyncio.sleep(0.016)  # ~60 Hz resolution"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 51,
+        "context": "await self.register(websocket)"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 57,
+        "context": "await self.unregister(websocket)"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 61,
+        "context": "await self.broadcast_loop()"
+      }
+    ],
+    "sovereign_markers": [
+      {
+        "type": "string_constant",
+        "value": "📡 [C5-REAL-BRIDGE] %(message)s",
+        "line": 7,
+        "context": "logging.basicConfig(level=logging.INFO, format=\"📡 [C5-REAL-BRIDGE] %(message)s\")"
+      },
+      {
+        "type": "string_constant",
+        "value": "Initiating C5-REAL telemetry broadcast on ws://0.0...",
+        "line": 25,
+        "context": "logging.info(f\"Initiating C5-REAL telemetry broadcast on ws://0.0.0.0:{self.port}\")"
+      }
+    ]
+  },
+  {
+    "classes": [
+      {
+        "name": "CortexDaemon",
+        "docstring": "Sovereign Orchestrator V3.1 - The Heart of MOSKV-1.",
+        "methods": [
+          {
+            "name": "__init__",
+            "docstring": null,
+            "args": [
+              "self"
+            ],
+            "line": 61,
+            "is_async": false
+          },
+          {
+            "name": "ensure_hygiene",
+            "docstring": "Flushes redundant temporal caches to maintain strict Exergy.",
+            "args": [
+              "self"
+            ],
+            "line": 99,
+            "is_async": false
+          },
+          {
+            "name": "check_memory_integrity",
+            "docstring": "Evaluates SQLite state, triggering implicit yields.",
+            "args": [
+              "self"
+            ],
+            "line": 117,
+            "is_async": false
+          },
+          {
+            "name": "check_swarm_exergy",
+            "docstring": "Evaluates Swarm Exergy Metrics and logs them to LGD-200.",
+            "args": [
+              "self"
+            ],
+            "line": 130,
+            "is_async": false
+          },
+          {
+            "name": "_execute_task",
+            "docstring": "Spawns an asynchronous sub-process for a swarm task or handles internal autonomous actions.",
+            "args": [
+              "self",
+              "task"
+            ],
+            "line": 155,
+            "is_async": true
+          },
+          {
+            "name": "_log_execution",
+            "docstring": "Appends task result to the persistent execution ledger via Sovereign SQLite.",
+            "args": [
+              "self",
+              "result"
+            ],
+            "line": 267,
+            "is_async": false
+          },
+          {
+            "name": "_fetch_and_lock_swarm_tasks",
+            "docstring": null,
+            "args": [
+              "self"
+            ],
+            "line": 289,
+            "is_async": false
+          },
+          {
+            "name": "process_swarm_queue",
+            "docstring": "Consumes the Swarm Task Queue and executes autonomous work using Sovereign SQLite VSA bypass.",
+            "args": [
+              "self"
+            ],
+            "line": 317,
+            "is_async": true
+          },
+          {
+            "name": "_run_council_deliberation",
+            "docstring": "Invoke SAGE COUNCIL decision engine.",
+            "args": [
+              "self"
+            ],
+            "line": 340,
+            "is_async": true
+          },
+          {
+            "name": "_queue_task",
+            "docstring": "Internal helper to push tasks to the persistent SQLite queue via the Sovereign Persistence module.",
+            "args": [
+              "self",
+              "agent",
+              "cmd"
+            ],
+            "line": 361,
+            "is_async": false
+          },
+          {
+            "name": "_run_self_audit",
+            "docstring": "Invoke Mirror Protocol to audit own source code (Ω₄).",
+            "args": [
+              "self"
+            ],
+            "line": 376,
+            "is_async": true
+          },
+          {
+            "name": "_trigger_aeon_0_mutation",
+            "docstring": "Invoke AEON-0 Compiler for autonomous AST mutation during swarm downtime.\n\nNOTE: AEON-0 mutations are daemon-internal (trusted origin). They do NOT\ncarry an Ed25519 signature because the OutboxDaemon's LedgerManager holds\nits own ephemeral keypair - a signature forged here would never verify there.\nThe interceptor permits unsigned payloads in Legacy Mode with a WARNING log.\nExternal/untrusted mutations MUST carry a valid signature or they are rejected.",
+            "args": [
+              "self"
+            ],
+            "line": 414,
+            "is_async": true
+          },
+          {
+            "name": "run",
+            "docstring": "Main Autopoiesis Loop.",
+            "args": [
+              "self"
+            ],
+            "line": 451,
+            "is_async": true
+          },
+          {
+            "name": "stop",
+            "docstring": "Graceful shutdown sequence.",
+            "args": [
+              "self"
+            ],
+            "line": 485,
+            "is_async": false
+          }
+        ],
+        "line": 58
+      }
+    ],
+    "functions": [],
+    "critical_paths": [
+      {
+        "type": "identifier",
+        "name": "EXECUTION_LEDGER",
+        "line": 27,
+        "context": "EXECUTION_LEDGER = \"/tmp/cortex_execution_ledger.json\""
+      },
+      {
+        "type": "identifier",
+        "name": "SignalBus",
+        "line": 89,
+        "context": "self.bus = SignalBus(self.db_conn)"
+      },
+      {
+        "type": "identifier",
+        "name": "agent_hash",
+        "line": 185,
+        "context": "agent_hash = int(hashlib.md5(agent.encode()).hexdigest()[:8], 16)"
+      },
+      {
+        "type": "identifier",
+        "name": "hashlib",
+        "line": 185,
+        "context": "agent_hash = int(hashlib.md5(agent.encode()).hexdigest()[:8], 16)"
+      },
+      {
+        "type": "identifier",
+        "name": "agent_hash",
+        "line": 186,
+        "context": "idx = agent_hash % self.ultramap.capacity"
+      },
+      {
+        "type": "identifier",
+        "name": "agent_hash",
+        "line": 187,
+        "context": "x, y, z = (agent_hash % 100) / 10.0, ((agent_hash >> 4) % 100) / 10.0, ((agent_hash >> 8) % 100) / 10.0"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 199,
+        "context": "process = await asyncio.create_subprocess_exec("
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 207,
+        "context": "stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=300.0)"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 214,
+        "context": "stdout, stderr = await process.communicate()"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 259,
+        "context": "await loop.run_in_executor(None, self._log_execution, result)"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 321,
+        "context": "tasks = await loop.run_in_executor(None, self._fetch_and_lock_swarm_tasks)"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 329,
+        "context": "await self._trigger_aeon_0_mutation()"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 335,
+        "context": "await asyncio.gather(*(self._execute_task(t) for t in tasks))"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 385,
+        "context": "process = await asyncio.create_subprocess_exec("
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 392,
+        "context": "stdout, _ = await process.communicate()"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 468,
+        "context": "await loop.run_in_executor(None, self.ensure_hygiene)"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 469,
+        "context": "await loop.run_in_executor(None, self.check_memory_integrity)"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 470,
+        "context": "await loop.run_in_executor(None, self.check_swarm_exergy)"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 474,
+        "context": "await self._run_council_deliberation()"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 478,
+        "context": "await self._run_self_audit()"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 481,
+        "context": "await self.process_swarm_queue()"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 483,
+        "context": "await asyncio.sleep(5)"
+      }
+    ],
+    "sovereign_markers": [
+      {
+        "type": "import",
+        "name": "cortex.mcp.knowledge_watcher.start_knowledge_daemon",
+        "line": 19,
+        "context": "from cortex.mcp.knowledge_watcher import start_knowledge_daemon"
+      },
+      {
+        "type": "import",
+        "name": "cortex.extensions.signals.bus.SignalBus",
+        "line": 21,
+        "context": "from cortex.extensions.signals.bus import SignalBus"
+      },
+      {
+        "type": "identifier",
+        "name": "moskv_theme",
+        "line": 39,
+        "context": "moskv_theme = Theme({"
+      },
+      {
+        "type": "identifier",
+        "name": "moskv_theme",
+        "line": 45,
+        "context": "console = Console(theme=moskv_theme)"
+      },
+      {
+        "type": "string_constant",
+        "value": "Sovereign Orchestrator V3.1 - The Heart of MOSKV-1...",
+        "line": 59,
+        "context": "\"\"\"Sovereign Orchestrator V3.1 - The Heart of MOSKV-1.\"\"\""
+      },
+      {
+        "type": "string_constant",
+        "value": "Flushes redundant temporal caches to maintain stri...",
+        "line": 100,
+        "context": "\"\"\"Flushes redundant temporal caches to maintain strict Exergy.\"\"\""
+      },
+      {
+        "type": "string_constant",
+        "value": "Evaluates Swarm Exergy Metrics and logs them to LG...",
+        "line": 131,
+        "context": "\"\"\"Evaluates Swarm Exergy Metrics and logs them to LGD-200.\"\"\""
+      },
+      {
+        "type": "string_constant",
+        "value": "🔋 [EXERGY] Swarm Telemetry: Active=%d, UMAP_Nodes=...",
+        "line": 143,
+        "context": "logging.info(\"🔋 [EXERGY] Swarm Telemetry: Active=%d, UMAP_Nodes=%d, Latency=%.2fms, Uncertainty=%.2f\","
+      },
+      {
+        "type": "string_constant",
+        "value": "exergy_telemetry",
+        "line": 148,
+        "context": "\"exergy_telemetry\","
+      },
+      {
+        "type": "string_constant",
+        "value": "Failed to read Exergy Metrics: %s",
+        "line": 153,
+        "context": "logging.error(\"Failed to read Exergy Metrics: %s\", e)"
+      },
+      {
+        "type": "identifier",
+        "name": "exergy_cost",
+        "line": 190,
+        "context": "exergy_cost = self.ultramap.calculate_exergy_distance(idx, cmd)"
+      },
+      {
+        "type": "attribute",
+        "name": "calculate_exergy_distance",
+        "line": 190,
+        "context": "exergy_cost = self.ultramap.calculate_exergy_distance(idx, cmd)"
+      },
+      {
+        "type": "string_constant",
+        "value": "🌌 [ULTRAMAP] Agent %s mapped at [%.1f, %.1f, %.1f]...",
+        "line": 191,
+        "context": "logging.info(\"🌌 [ULTRAMAP] Agent %s mapped at [%.1f, %.1f, %.1f] (Exergy: %.2f J)\", agent, x, y, z, exergy_cost)"
+      },
+      {
+        "type": "identifier",
+        "name": "exergy_cost",
+        "line": 191,
+        "context": "logging.info(\"🌌 [ULTRAMAP] Agent %s mapped at [%.1f, %.1f, %.1f] (Exergy: %.2f J)\", agent, x, y, z, exergy_cost)"
+      },
+      {
+        "type": "string_constant",
+        "value": "💀 [KILL-SWITCH] Agent %s exceeded 300s exergy allo...",
+        "line": 210,
+        "context": "\"💀 [KILL-SWITCH] Agent %s exceeded 300s exergy allocation. Terminating.\", agent"
+      },
+      {
+        "type": "string_constant",
+        "value": "Appends task result to the persistent execution le...",
+        "line": 268,
+        "context": "\"\"\"Appends task result to the persistent execution ledger via Sovereign SQLite.\"\"\""
+      },
+      {
+        "type": "string_constant",
+        "value": "Consumes the Swarm Task Queue and executes autonom...",
+        "line": 318,
+        "context": "\"\"\"Consumes the Swarm Task Queue and executes autonomous work using Sovereign SQLite VSA bypass.\"\"\""
+      },
+      {
+        "type": "string_constant",
+        "value": "Internal helper to push tasks to the persistent SQ...",
+        "line": 362,
+        "context": "\"\"\"Internal helper to push tasks to the persistent SQLite queue via the Sovereign Persistence module.\"\"\""
+      },
+      {
+        "type": "string_constant",
+        "value": "📌 [COUNCIL] Mission queued via Sovereign Nexus: %s",
+        "line": 372,
+        "context": "logging.info(\"📌 [COUNCIL] Mission queued via Sovereign Nexus: %s\", cmd)"
+      },
+      {
+        "type": "string_constant",
+        "value": "exergy_score",
+        "line": 398,
+        "context": "\"⚠️ [MIRROR] Self-Optimization Required (Score: %d)\", report[\"exergy_score\"]"
+      },
+      {
+        "type": "string_constant",
+        "value": "exergy_score",
+        "line": 410,
+        "context": "logging.info(\"✅ [MIRROR] Self-Audit Optimal (Score: %d)\", report[\"exergy_score\"])"
+      },
+      {
+        "type": "string_constant",
+        "value": "cortex_exergy_stress.py",
+        "line": 429,
+        "context": "candidates = [\"ouroboros_engine.py\", \"k0_swarm_node.py\", \"cortex_exergy_stress.py\"]"
+      },
+      {
+        "type": "string_constant",
+        "value": "👁️  CORTEX Daemon Active: V5 Sovereign Ontogeny.",
+        "line": 453,
+        "context": "logging.info(\"👁️  CORTEX Daemon Active: V5 Sovereign Ontogeny.\")"
+      },
+      {
+        "type": "attribute",
+        "name": "check_swarm_exergy",
+        "line": 470,
+        "context": "await loop.run_in_executor(None, self.check_swarm_exergy)"
+      }
+    ]
+  },
+  {
+    "classes": [
+      {
+        "name": "SwarmProcessPool",
+        "docstring": null,
+        "methods": [
+          {
+            "name": "__init__",
+            "docstring": null,
+            "args": [
+              "self",
+              "max_workers"
+            ],
+            "line": 13,
+            "is_async": false
+          },
+          {
+            "name": "submit_sync_task",
+            "docstring": "Submit a CPU-bound or blocking request to the Parallel Worker Pool.",
+            "args": [
+              "self",
+              "target_function"
+            ],
+            "line": 20,
+            "is_async": false
+          },
+          {
+            "name": "execute_in_parallel",
+            "docstring": "Standard AsyncIO wrapper to bypass GIL blocking operation in FastAPI/Event loops.",
+            "args": [
+              "self",
+              "loop",
+              "target_function"
+            ],
+            "line": 24,
+            "is_async": true
+          },
+          {
+            "name": "shutdown",
+            "docstring": null,
+            "args": [
+              "self"
+            ],
+            "line": 28,
+            "is_async": false
+          }
+        ],
+        "line": 12
+      }
+    ],
+    "functions": [],
+    "critical_paths": [
+      {
+        "type": "await",
+        "name": "await",
+        "line": 26,
+        "context": "return await loop.run_in_executor(self.executor, target_function, *args)"
+      }
+    ],
+    "sovereign_markers": []
+  },
+  {
+    "classes": [],
+    "functions": [
+      {
+        "name": "setup",
+        "docstring": null,
+        "args": [],
+        "line": 9,
+        "is_async": false
+      },
+      {
+        "name": "inject_task",
+        "docstring": null,
+        "args": [],
+        "line": 16,
+        "is_async": false
+      },
+      {
+        "name": "run_test",
+        "docstring": null,
+        "args": [],
+        "line": 34,
+        "is_async": false
+      }
+    ],
+    "critical_paths": [
+      {
+        "type": "attribute",
+        "name": "commit",
+        "line": 31,
+        "context": "conn.commit()"
+      }
+    ],
+    "sovereign_markers": [
+      {
+        "type": "string_constant",
+        "value": "cortex-core/dummy_exergy.py",
+        "line": 7,
+        "context": "DUMMY_FILE = \"cortex-core/dummy_exergy.py\""
+      },
+      {
+        "type": "string_constant",
+        "value": "def calculate_exergy():\n    return 1.0\n",
+        "line": 11,
+        "context": "f.write(\"def calculate_exergy():\\n    return 1.0\\n\")"
+      },
+      {
+        "type": "string_constant",
+        "value": "def calculate_exergy():\n    return 2.0\n",
+        "line": 17,
+        "context": "new_source = \"def calculate_exergy():\\n    return 2.0\\n\""
+      },
+      {
+        "type": "string_constant",
+        "value": "calculate_exergy",
+        "line": 21,
+        "context": "\"function_name\": \"calculate_exergy\","
+      },
+      {
+        "type": "string_constant",
+        "value": "[PRE] Exergy: ",
+        "line": 37,
+        "context": "print(f\"[PRE] Exergy: {dummy_exergy.calculate_exergy()} from {dummy_exergy.__file__}\")"
+      },
+      {
+        "type": "attribute",
+        "name": "calculate_exergy",
+        "line": 37,
+        "context": "print(f\"[PRE] Exergy: {dummy_exergy.calculate_exergy()} from {dummy_exergy.__file__}\")"
+      },
+      {
+        "type": "identifier",
+        "name": "dummy_exergy",
+        "line": 37,
+        "context": "print(f\"[PRE] Exergy: {dummy_exergy.calculate_exergy()} from {dummy_exergy.__file__}\")"
+      },
+      {
+        "type": "string_constant",
+        "value": "[DEBUG] dummy_exergy file before reload: ",
+        "line": 51,
+        "context": "print(f\"[DEBUG] dummy_exergy file before reload: {dummy_exergy.__file__}\")"
+      },
+      {
+        "type": "identifier",
+        "name": "dummy_exergy",
+        "line": 51,
+        "context": "print(f\"[DEBUG] dummy_exergy file before reload: {dummy_exergy.__file__}\")"
+      },
+      {
+        "type": "attribute",
+        "name": "calculate_exergy",
+        "line": 52,
+        "context": "print(f\"[DEBUG] Function ID before reload: {id(dummy_exergy.calculate_exergy)}\")"
+      },
+      {
+        "type": "identifier",
+        "name": "dummy_exergy",
+        "line": 52,
+        "context": "print(f\"[DEBUG] Function ID before reload: {id(dummy_exergy.calculate_exergy)}\")"
+      },
+      {
+        "type": "identifier",
+        "name": "dummy_exergy",
+        "line": 53,
+        "context": "with open(dummy_exergy.__file__, \"r\") as f:"
+      },
+      {
+        "type": "identifier",
+        "name": "dummy_exergy",
+        "line": 56,
+        "context": "importlib.reload(dummy_exergy)"
+      },
+      {
+        "type": "string_constant",
+        "value": "[DEBUG] dummy_exergy file after reload: ",
+        "line": 57,
+        "context": "print(f\"[DEBUG] dummy_exergy file after reload: {dummy_exergy.__file__}\")"
+      },
+      {
+        "type": "identifier",
+        "name": "dummy_exergy",
+        "line": 57,
+        "context": "print(f\"[DEBUG] dummy_exergy file after reload: {dummy_exergy.__file__}\")"
+      },
+      {
+        "type": "attribute",
+        "name": "calculate_exergy",
+        "line": 58,
+        "context": "print(f\"[DEBUG] Function ID after reload: {id(dummy_exergy.calculate_exergy)}\")"
+      },
+      {
+        "type": "identifier",
+        "name": "dummy_exergy",
+        "line": 58,
+        "context": "print(f\"[DEBUG] Function ID after reload: {id(dummy_exergy.calculate_exergy)}\")"
+      },
+      {
+        "type": "attribute",
+        "name": "calculate_exergy",
+        "line": 59,
+        "context": "print(f\"[DEBUG] Function constants after reload: {dummy_exergy.calculate_exergy.__code__.co_consts}\")"
+      },
+      {
+        "type": "identifier",
+        "name": "dummy_exergy",
+        "line": 59,
+        "context": "print(f\"[DEBUG] Function constants after reload: {dummy_exergy.calculate_exergy.__code__.co_consts}\")"
+      },
+      {
+        "type": "string_constant",
+        "value": "[POST] Exergy: ",
+        "line": 61,
+        "context": "print(f\"[POST] Exergy: {dummy_exergy.calculate_exergy()}\")"
+      },
+      {
+        "type": "attribute",
+        "name": "calculate_exergy",
+        "line": 61,
+        "context": "print(f\"[POST] Exergy: {dummy_exergy.calculate_exergy()}\")"
+      },
+      {
+        "type": "identifier",
+        "name": "dummy_exergy",
+        "line": 61,
+        "context": "print(f\"[POST] Exergy: {dummy_exergy.calculate_exergy()}\")"
+      },
+      {
+        "type": "attribute",
+        "name": "calculate_exergy",
+        "line": 63,
+        "context": "if dummy_exergy.calculate_exergy() == 2.0:"
+      },
+      {
+        "type": "identifier",
+        "name": "dummy_exergy",
+        "line": 63,
+        "context": "if dummy_exergy.calculate_exergy() == 2.0:"
+      },
+      {
+        "type": "string_constant",
+        "value": "[SUCCESS] C5-REAL AST Autopoiesis executed locally...",
+        "line": 64,
+        "context": "print(\"[SUCCESS] C5-REAL AST Autopoiesis executed locally!\")"
+      }
+    ]
+  },
+  {
+    "classes": [],
+    "functions": [
+      {
+        "name": "run_stress_test",
+        "docstring": null,
+        "args": [],
+        "line": 8,
+        "is_async": true
+      }
+    ],
+    "critical_paths": [
+      {
+        "type": "await",
+        "name": "await",
+        "line": 36,
+        "context": "await asyncio.sleep(3.0)"
+      }
+    ],
+    "sovereign_markers": [
+      {
+        "type": "string_constant",
+        "value": "exergy_max",
+        "line": 24,
+        "context": "enqueue_swarm_task(\"OPTIMIZER\", {\"task_id\": i, \"vector\": \"exergy_max\"})"
+      },
+      {
+        "type": "string_constant",
+        "value": "[!] STRESS TEST C5-REAL COMPLETADO.",
+        "line": 46,
+        "context": "print(\"[!] STRESS TEST C5-REAL COMPLETADO.\")"
+      }
+    ]
+  },
+  {
+    "classes": [],
+    "functions": [
+      {
+        "name": "cortex_ledger_append",
+        "docstring": "Cryptographic write to the CORTEX-Persist ledger. Secures Exergy via Ed25519 ZK-Seal and SHA-256 Merkle chain.",
+        "args": [
+          "action",
+          "vector_id",
+          "yield_amount"
+        ],
+        "line": 29,
+        "is_async": true
+      },
+      {
+        "name": "cortex_vsa_record",
+        "docstring": "Records a semantic trace in the VSA-SDM tensor and SQLite DB.",
+        "args": [
+          "key",
+          "value"
+        ],
+        "line": 39,
+        "is_async": true
+      },
+      {
+        "name": "get_cortex_status",
+        "docstring": "Returns the current state of the Sovereign node from SQLite.",
+        "args": [],
+        "line": 46,
+        "is_async": true
+      }
+    ],
+    "critical_paths": [
+      {
+        "type": "identifier",
+        "name": "ledger",
+        "line": 20,
+        "context": "ledger = cortex_storage.l3"
+      },
+      {
+        "type": "identifier",
+        "name": "block_hash",
+        "line": 33,
+        "context": "block_hash = ledger.append(action, vector_id, yield_amount)"
+      },
+      {
+        "type": "identifier",
+        "name": "ledger",
+        "line": 33,
+        "context": "block_hash = ledger.append(action, vector_id, yield_amount)"
+      },
+      {
+        "type": "identifier",
+        "name": "block_hash",
+        "line": 35,
+        "context": "return f\"BLOCK_COMMITTED: {block_hash[:16]}... | Yield: +{yield_amount}\""
+      },
+      {
+        "type": "identifier",
+        "name": "ledger_count",
+        "line": 53,
+        "context": "ledger_count = c.fetchone()[0]"
+      },
+      {
+        "type": "identifier",
+        "name": "ledger_count",
+        "line": 59,
+        "context": "\"ledger_count\": ledger_count,"
+      },
+      {
+        "type": "identifier",
+        "name": "ledger",
+        "line": 60,
+        "context": "\"total_yield\": ledger.get_total_yield(),"
+      }
+    ],
+    "sovereign_markers": [
+      {
+        "type": "string_constant",
+        "value": "CORTEX-SOVEREIGN-MCP",
+        "line": 17,
+        "context": "mcp = FastMCP(\"CORTEX-SOVEREIGN-MCP\")"
+      },
+      {
+        "type": "string_constant",
+        "value": "\n    Cryptographic write to the CORTEX-Persist led...",
+        "line": 30,
+        "context": "\"\"\""
+      },
+      {
+        "type": "string_constant",
+        "value": "Returns the current state of the Sovereign node fr...",
+        "line": 47,
+        "context": "\"\"\"Returns the current state of the Sovereign node from SQLite.\"\"\""
+      },
+      {
+        "type": "string_constant",
+        "value": "SOVEREIGN_V3_ACTIVE",
+        "line": 57,
+        "context": "\"status\": \"SOVEREIGN_V3_ACTIVE\","
+      },
+      {
+        "type": "string_constant",
+        "value": "C5-REAL",
+        "line": 61,
+        "context": "\"mode\": \"C5-REAL\","
+      }
+    ]
+  },
+  {
+    "classes": [
+      {
+        "name": "WindowedManifoldDetector",
+        "docstring": "CORTEX STATISTICAL MANIFOLD DETECTOR (C5-REAL)\n\nUses Takens' Delay Embedding to map a multivariate time series into a \nhigher-dimensional geometric manifold, evaluating Mahalanobis distance \nover the trajectory S_t = [x_t, x_{t-tau}, x_{t-2tau}] instead of just x_t.",
+        "methods": [
+          {
+            "name": "__init__",
+            "docstring": null,
+            "args": [
+              "self",
+              "window_size",
+              "anomaly_threshold",
+              "takens_dim",
+              "takens_tau"
+            ],
+            "line": 13,
+            "is_async": false
+          },
+          {
+            "name": "step",
+            "docstring": null,
+            "args": [
+              "self",
+              "x"
+            ],
+            "line": 24,
+            "is_async": false
+          }
+        ],
+        "line": 4
+      }
+    ],
+    "functions": [],
+    "critical_paths": [],
+    "sovereign_markers": [
+      {
+        "type": "string_constant",
+        "value": "\n    CORTEX STATISTICAL MANIFOLD DETECTOR (C5-REAL...",
+        "line": 5,
+        "context": "\"\"\""
+      },
+      {
+        "type": "string_constant",
+        "value": "  CORTEX TAKENS MANIFOLD DETECTOR (C5-REAL)       ",
+        "line": 73,
+        "context": "print(\"  CORTEX TAKENS MANIFOLD DETECTOR (C5-REAL)       \")"
+      }
+    ]
+  },
+  {
+    "classes": [],
+    "functions": [
+      {
+        "name": "calculate_ast_entropy",
+        "docstring": null,
+        "args": [
+          "file_path"
+        ],
+        "line": 12,
+        "is_async": false
+      },
+      {
+        "name": "main",
+        "docstring": null,
+        "args": [],
+        "line": 25,
+        "is_async": false
+      }
+    ],
+    "critical_paths": [],
+    "sovereign_markers": [
+      {
+        "type": "string_constant",
+        "value": "\nC5-REAL DEATH PROTOCOL - Git Pre-Commit Entropy S...",
+        "line": 2,
+        "context": "\"\"\""
+      }
+    ]
+  },
+  {
+    "classes": [],
+    "functions": [],
+    "critical_paths": [
+      {
+        "type": "attribute",
+        "name": "commit",
+        "line": 7,
+        "context": "pm.l1._conn.commit()  # pyright: ignore[reportAttributeAccessIssue]"
+      }
+    ],
+    "sovereign_markers": []
+  },
+  {
+    "classes": [],
+    "functions": [
+      {
+        "name": "calculate_exergy",
+        "docstring": null,
+        "args": [],
+        "line": 1,
+        "is_async": false
+      }
+    ],
+    "critical_paths": [],
+    "sovereign_markers": []
+  },
+  {
+    "classes": [],
+    "functions": [
+      {
+        "name": "add",
+        "docstring": null,
+        "args": [
+          "a",
+          "b"
+        ],
+        "line": 1,
+        "is_async": false
+      }
+    ],
+    "critical_paths": [],
+    "sovereign_markers": []
+  },
+  {
+    "classes": [
+      {
+        "name": "EntropyDeath",
+        "docstring": null,
+        "methods": [],
+        "line": 8
+      },
+      {
+        "name": "ExergyEnvironment",
+        "docstring": null,
+        "methods": [
+          {
+            "name": "__init__",
+            "docstring": null,
+            "args": [
+              "self",
+              "joules",
+              "ledger"
+            ],
+            "line": 13,
+            "is_async": false
+          },
+          {
+            "name": "consume",
+            "docstring": "Deducts the specified amount of Joules from the environment.\nRaises EntropyDeath if insufficient Joules are available.\nSeals the transaction into the cryptographic Ledger.",
+            "args": [
+              "self",
+              "amount",
+              "op_name",
+              "vector_id"
+            ],
+            "line": 18,
+            "is_async": false
+          },
+          {
+            "name": "refund",
+            "docstring": "Refunds or dissipates the specified amount of Joules back to the environment.\nSeals the transaction into the cryptographic Ledger.",
+            "args": [
+              "self",
+              "amount",
+              "op_name",
+              "vector_id"
+            ],
+            "line": 30,
+            "is_async": false
+          },
+          {
+            "name": "clone",
+            "docstring": "Creates an isolated parallel ExergyEnvironment with the same Joule balance.\nLedger references are stripped for independent quantum branching.",
+            "args": [
+              "self"
+            ],
+            "line": 39,
+            "is_async": false
+          }
+        ],
+        "line": 11
+      }
+    ],
+    "functions": [
+      {
+        "name": "tokenize",
+        "docstring": "Transforms a raw Lisp expression string into a list of atomic tokens.",
+        "args": [
+          "chars"
+        ],
+        "line": 46,
+        "is_async": false
+      },
+      {
+        "name": "parse",
+        "docstring": "Parses a list of tokens into a nested abstract syntax tree (AST) representation.",
+        "args": [
+          "tokens"
+        ],
+        "line": 52,
+        "is_async": false
+      },
+      {
+        "name": "atom",
+        "docstring": "Casts a raw string token into its corresponding int, float, or sovereign 'j' metric type.",
+        "args": [
+          "token"
+        ],
+        "line": 70,
+        "is_async": false
+      },
+      {
+        "name": "handle_with_exergy_limit",
+        "docstring": null,
+        "args": [
+          "x",
+          "env"
+        ],
+        "line": 84,
+        "is_async": false
+      },
+      {
+        "name": "handle_infer",
+        "docstring": null,
+        "args": [
+          "x",
+          "env"
+        ],
+        "line": 94,
+        "is_async": false
+      },
+      {
+        "name": "handle_z3_verify",
+        "docstring": null,
+        "args": [
+          "x",
+          "env"
+        ],
+        "line": 110,
+        "is_async": false
+      },
+      {
+        "name": "handle_mutate_ast",
+        "docstring": null,
+        "args": [
+          "x",
+          "env"
+        ],
+        "line": 114,
+        "is_async": false
+      },
+      {
+        "name": "handle_dissipate",
+        "docstring": null,
+        "args": [
+          "x",
+          "env"
+        ],
+        "line": 120,
+        "is_async": false
+      },
+      {
+        "name": "handle_invoke_skill",
+        "docstring": null,
+        "args": [
+          "x",
+          "env"
+        ],
+        "line": 128,
+        "is_async": false
+      },
+      {
+        "name": "handle_umap_recon",
+        "docstring": null,
+        "args": [
+          "x",
+          "env"
+        ],
+        "line": 147,
+        "is_async": false
+      },
+      {
+        "name": "handle_umap_target",
+        "docstring": null,
+        "args": [
+          "x",
+          "env"
+        ],
+        "line": 160,
+        "is_async": false
+      },
+      {
+        "name": "handle_q_let",
+        "docstring": null,
+        "args": [
+          "x",
+          "env"
+        ],
+        "line": 175,
+        "is_async": false
+      },
+      {
+        "name": "handle_add",
+        "docstring": null,
+        "args": [
+          "x",
+          "env"
+        ],
+        "line": 210,
+        "is_async": false
+      },
+      {
+        "name": "evaluate",
+        "docstring": "Recursively evaluates an AST node within the provided ExergyEnvironment context.\nExecutes C5-REAL ops like infer, z3-verify, umap-target, and q-let.",
+        "args": [
+          "x",
+          "env"
+        ],
+        "line": 227,
+        "is_async": false
+      }
+    ],
+    "critical_paths": [
+      {
+        "type": "identifier",
+        "name": "LedgerManager",
+        "line": 13,
+        "context": "def __init__(self, joules: int, ledger: LedgerManager=None):  # pyright: ignore[reportArgumentType]"
+      },
+      {
+        "type": "attribute",
+        "name": "ledger",
+        "line": 16,
+        "context": "self.ledger = ledger or LedgerManager()"
+      },
+      {
+        "type": "identifier",
+        "name": "ledger",
+        "line": 16,
+        "context": "self.ledger = ledger or LedgerManager()"
+      },
+      {
+        "type": "identifier",
+        "name": "LedgerManager",
+        "line": 16,
+        "context": "self.ledger = ledger or LedgerManager()"
+      },
+      {
+        "type": "attribute",
+        "name": "ledger",
+        "line": 27,
+        "context": "if self.ledger:"
+      },
+      {
+        "type": "attribute",
+        "name": "ledger",
+        "line": 28,
+        "context": "self.ledger.append(action=op_name, vector_id=vector_id, yield_amount=float(-amount))"
+      },
+      {
+        "type": "attribute",
+        "name": "ledger",
+        "line": 36,
+        "context": "if self.ledger:"
+      },
+      {
+        "type": "attribute",
+        "name": "ledger",
+        "line": 37,
+        "context": "self.ledger.append(action=op_name, vector_id=vector_id, yield_amount=float(amount))"
+      },
+      {
+        "type": "attribute",
+        "name": "ledger",
+        "line": 91,
+        "context": "local_env = ExergyEnvironment(limit, ledger=env.ledger)"
+      },
+      {
+        "type": "identifier",
+        "name": "hashlib",
+        "line": 98,
+        "context": "vector_id = hashlib.sha256(str(prompt).encode('utf-8')).hexdigest()[:16]"
+      },
+      {
+        "type": "identifier",
+        "name": "hashlib",
+        "line": 133,
+        "context": "vector_id = hashlib.sha256(str(skill_module).encode('utf-8')).hexdigest()[:16]"
+      },
+      {
+        "type": "identifier",
+        "name": "target_hash",
+        "line": 149,
+        "context": "target_hash = evaluate(x[2], env)"
+      },
+      {
+        "type": "identifier",
+        "name": "target_hash",
+        "line": 153,
+        "context": "joules_required = umap.calculate_exergy_distance(int(agent_idx), str(target_hash))"
+      },
+      {
+        "type": "identifier",
+        "name": "target_hash",
+        "line": 154,
+        "context": "env.consume(int(joules_required) + 10, 'UMAP_RECON', vector_id=str(target_hash)[:16])"
+      },
+      {
+        "type": "identifier",
+        "name": "target_hash",
+        "line": 165,
+        "context": "target_hash = evaluate(x[5], env)"
+      },
+      {
+        "type": "identifier",
+        "name": "target_hash",
+        "line": 166,
+        "context": "env.consume(50, 'UMAP_TARGET_UPDATE', vector_id=str(target_hash)[:16])"
+      },
+      {
+        "type": "identifier",
+        "name": "target_hash",
+        "line": 170,
+        "context": "umap.update_agent_position(int(agent_idx), float(x_c), float(y_c), float(z_c), str(target_hash), 0.5)"
+      },
+      {
+        "type": "identifier",
+        "name": "handle_z3_verify",
+        "line": 217,
+        "context": "'z3-verify': handle_z3_verify,"
+      },
+      {
+        "type": "identifier",
+        "name": "global_ledger",
+        "line": 255,
+        "context": "global_ledger = LedgerManager()"
+      },
+      {
+        "type": "identifier",
+        "name": "LedgerManager",
+        "line": 255,
+        "context": "global_ledger = LedgerManager()"
+      },
+      {
+        "type": "identifier",
+        "name": "global_ledger",
+        "line": 262,
+        "context": "global_env = ExergyEnvironment(999999, ledger=global_ledger)"
+      }
+    ],
+    "sovereign_markers": [
+      {
+        "type": "string_constant",
+        "value": "\n        Creates an isolated parallel ExergyEnviro...",
+        "line": 40,
+        "context": "\"\"\""
+      },
+      {
+        "type": "identifier",
+        "name": "ExergyEnvironment",
+        "line": 44,
+        "context": "return ExergyEnvironment(self.joules, ledger=None)  # pyright: ignore[reportArgumentType]"
+      },
+      {
+        "type": "string_constant",
+        "value": "\n    Casts a raw string token into its correspondi...",
+        "line": 71,
+        "context": "\"\"\""
+      },
+      {
+        "type": "identifier",
+        "name": "ExergyEnvironment",
+        "line": 84,
+        "context": "def handle_with_exergy_limit(x, env: ExergyEnvironment):"
+      },
+      {
+        "type": "string_constant",
+        "value": "Exergy limit must end with 'j'",
+        "line": 88,
+        "context": "raise ValueError(\"Exergy limit must end with 'j'\")"
+      },
+      {
+        "type": "string_constant",
+        "value": "\n[EXA-L0] INITIATING SOVEREIGN SCOPE: ",
+        "line": 90,
+        "context": "logger.info(f'\\n[EXA-L0] INITIATING SOVEREIGN SCOPE: {limit} Joules Allocated.')"
+      },
+      {
+        "type": "identifier",
+        "name": "ExergyEnvironment",
+        "line": 91,
+        "context": "local_env = ExergyEnvironment(limit, ledger=env.ledger)"
+      },
+      {
+        "type": "identifier",
+        "name": "ExergyEnvironment",
+        "line": 94,
+        "context": "def handle_infer(x, env: ExergyEnvironment):"
+      },
+      {
+        "type": "import",
+        "name": "compiled_skills.qwen_3_5_max_omega.Qwen35MaxOmegaSkill",
+        "line": 102,
+        "context": "from compiled_skills.qwen_3_5_max_omega import Qwen35MaxOmegaSkill  # pyright: ignore[reportMissingImports]"
+      },
+      {
+        "type": "identifier",
+        "name": "ExergyEnvironment",
+        "line": 110,
+        "context": "def handle_z3_verify(x, env: ExergyEnvironment):"
+      },
+      {
+        "type": "identifier",
+        "name": "ExergyEnvironment",
+        "line": 114,
+        "context": "def handle_mutate_ast(x, env: ExergyEnvironment):"
+      },
+      {
+        "type": "identifier",
+        "name": "ExergyEnvironment",
+        "line": 120,
+        "context": "def handle_dissipate(x, env: ExergyEnvironment):"
+      },
+      {
+        "type": "string_constant",
+        "value": "Exergy amount must end with 'j'",
+        "line": 123,
+        "context": "raise ValueError(\"Exergy amount must end with 'j'\")"
+      },
+      {
+        "type": "identifier",
+        "name": "ExergyEnvironment",
+        "line": 128,
+        "context": "def handle_invoke_skill(x, env: ExergyEnvironment):"
+      },
+      {
+        "type": "identifier",
+        "name": "ExergyEnvironment",
+        "line": 147,
+        "context": "def handle_umap_recon(x, env: ExergyEnvironment):"
+      },
+      {
+        "type": "attribute",
+        "name": "calculate_exergy_distance",
+        "line": 153,
+        "context": "joules_required = umap.calculate_exergy_distance(int(agent_idx), str(target_hash))"
+      },
+      {
+        "type": "identifier",
+        "name": "ExergyEnvironment",
+        "line": 160,
+        "context": "def handle_umap_target(x, env: ExergyEnvironment):"
+      },
+      {
+        "type": "identifier",
+        "name": "ExergyEnvironment",
+        "line": 175,
+        "context": "def handle_q_let(x, env: ExergyEnvironment):"
+      },
+      {
+        "type": "string_constant",
+        "value": "C5-DEATH: Both quantum branches exceeded exergy bo...",
+        "line": 202,
+        "context": "raise EntropyDeath('C5-DEATH: Both quantum branches exceeded exergy bounds.')"
+      },
+      {
+        "type": "identifier",
+        "name": "ExergyEnvironment",
+        "line": 210,
+        "context": "def handle_add(x, env: ExergyEnvironment):"
+      },
+      {
+        "type": "string_constant",
+        "value": "with-exergy-limit",
+        "line": 215,
+        "context": "'with-exergy-limit': handle_with_exergy_limit,"
+      },
+      {
+        "type": "identifier",
+        "name": "handle_with_exergy_limit",
+        "line": 215,
+        "context": "'with-exergy-limit': handle_with_exergy_limit,"
+      },
+      {
+        "type": "identifier",
+        "name": "ExergyEnvironment",
+        "line": 227,
+        "context": "def evaluate(x, env: ExergyEnvironment):"
+      },
+      {
+        "type": "string_constant",
+        "value": "\n    Recursively evaluates an AST node within the ...",
+        "line": 228,
+        "context": "\"\"\""
+      },
+      {
+        "type": "string_constant",
+        "value": "Unknown sovereign operator: ",
+        "line": 242,
+        "context": "raise ValueError(f'Unknown sovereign operator: {op}')"
+      },
+      {
+        "type": "string_constant",
+        "value": "(with-exergy-limit 600j (z3-verify (infer qwen3.6 ...",
+        "line": 244,
+        "context": "code_success = '(with-exergy-limit 600j (z3-verify (infer qwen3.6 raw_tensor)))'"
+      },
+      {
+        "type": "string_constant",
+        "value": "(with-exergy-limit 500j (mutate-ast (infer qwen3.6...",
+        "line": 245,
+        "context": "code_death = '(with-exergy-limit 500j (mutate-ast (infer qwen3.6 raw_tensor)))'"
+      },
+      {
+        "type": "string_constant",
+        "value": "(with-exergy-limit 1000j (q-let (infer qwen_heavy ...",
+        "line": 246,
+        "context": "code_quantum = '(with-exergy-limit 1000j (q-let (infer qwen_heavy heavy_tensor) (z3-verify (infer qwen_light light_tensor))))'"
+      },
+      {
+        "type": "string_constant",
+        "value": "(with-exergy-limit 15j (+ (+ (+ (+ (+ (+ (+ (+ (+ ...",
+        "line": 247,
+        "context": "code_nested_stress = '(with-exergy-limit 15j (+ (+ (+ (+ (+ (+ (+ (+ (+ (+ 1 1) 1) 1) 1) 1) 1) 1) 1) 1) 1))'"
+      },
+      {
+        "type": "string_constant",
+        "value": "(with-exergy-limit 3000j (q-let (q-let (infer qwen...",
+        "line": 248,
+        "context": "code_q_explosion = '(with-exergy-limit 3000j (q-let (q-let (infer qwen_a) (infer qwen_b)) (q-let (infer qwen_c) (z3-verify (infer qwen_d)))))'"
+      },
+      {
+        "type": "string_constant",
+        "value": "(with-exergy-limit 1000j (invoke-skill capital_ext...",
+        "line": 249,
+        "context": "code_invoke_skill = '(with-exergy-limit 1000j (invoke-skill capital_extractor_omega CapitalExtractorOmegaSkill))'"
+      },
+      {
+        "type": "string_constant",
+        "value": "(with-exergy-limit 150000j (umap-recon 42 target_a...",
+        "line": 250,
+        "context": "code_umap_recon = '(with-exergy-limit 150000j (umap-recon 42 target_alpha))'"
+      },
+      {
+        "type": "string_constant",
+        "value": "(with-exergy-limit 500j (umap-target 42 10.5 20.5 ...",
+        "line": 251,
+        "context": "code_umap_target = '(with-exergy-limit 500j (umap-target 42 10.5 20.5 30.5 target_beta))'"
+      },
+      {
+        "type": "string_constant",
+        "value": "T1: High-Exergy Inference",
+        "line": 256,
+        "context": "targets = [('T1: High-Exergy Inference', code_success), ('T2: Entropic Death', code_death), ('T3: Quantum Branching', code_quantum), ('T4: Deep Nesting Stress', code_nested_stress), ('T5: Quantum Swarm Explosion', code_q_explosion), ('T6: Dynamic Skill Invocation', code_invoke_skill), ('T7: UMAP Topology Recon', code_umap_recon), ('T8: UMAP Target Update', code_umap_target)]"
+      },
+      {
+        "type": "identifier",
+        "name": "ExergyEnvironment",
+        "line": 262,
+        "context": "global_env = ExergyEnvironment(999999, ledger=global_ledger)"
+      }
+    ]
+  },
+  {
+    "classes": [
+      {
+        "name": "ExergyDaemon",
+        "docstring": "Sovereign loops checking/correcting code & DB health.",
+        "methods": [
+          {
+            "name": "__init__",
+            "docstring": null,
+            "args": [
+              "self",
+              "check_interval"
+            ],
+            "line": 41,
+            "is_async": false
+          },
+          {
+            "name": "acquire_lock",
+            "docstring": "Acquire a file lock to ensure only one instance is running.",
+            "args": [
+              "self"
+            ],
+            "line": 64,
+            "is_async": false
+          },
+          {
+            "name": "auto_heal_code",
+            "docstring": "Runs ruff lint auto-fix and format to eliminate code entropy.",
+            "args": [
+              "self"
+            ],
+            "line": 76,
+            "is_async": true
+          },
+          {
+            "name": "auto_heal_db",
+            "docstring": "Performs database WAL checkpoint (TRUNCATE) and VACUUM to prevent disk fragmentation.",
+            "args": [
+              "self"
+            ],
+            "line": 143,
+            "is_async": true
+          },
+          {
+            "name": "auto_heal_context_snapshot",
+            "docstring": "Forces context inference and persists a new snapshot to keep temporal alignment metrics green.",
+            "args": [
+              "self"
+            ],
+            "line": 162,
+            "is_async": true
+          },
+          {
+            "name": "auto_heal_playwright",
+            "docstring": "Kills orphaned ms-playwright-go processes to reclaim system resources.",
+            "args": [
+              "self"
+            ],
+            "line": 194,
+            "is_async": true
+          },
+          {
+            "name": "perform_health_assessment",
+            "docstring": "Runs the CORTEX Health Suite, logs to DB, and returns the aggregated score.",
+            "args": [
+              "self"
+            ],
+            "line": 233,
+            "is_async": true
+          },
+          {
+            "name": "emit_health_alert",
+            "docstring": "Dispatches a warning event through the NotificationBus.",
+            "args": [
+              "self",
+              "score"
+            ],
+            "line": 275,
+            "is_async": true
+          },
+          {
+            "name": "emit_process_exhaustion_alert",
+            "docstring": "Sends a critical alert if process execution fails due to OS limits (e.g. EMFILE).",
+            "args": [
+              "self",
+              "action_name",
+              "error"
+            ],
+            "line": 307,
+            "is_async": true
+          },
+          {
+            "name": "run",
+            "docstring": "Main daemon loop executing every check_interval seconds.",
+            "args": [
+              "self"
+            ],
+            "line": 326,
+            "is_async": true
+          },
+          {
+            "name": "stop",
+            "docstring": "Decommissions the daemon and releases resources.",
+            "args": [
+              "self"
+            ],
+            "line": 361,
+            "is_async": false
+          }
+        ],
+        "line": 38
+      }
+    ],
+    "functions": [],
+    "critical_paths": [
+      {
+        "type": "await",
+        "name": "await",
+        "line": 86,
+        "context": "process = await asyncio.create_subprocess_exec("
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 95,
+        "context": "stdout, stderr = await process.communicate()"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 110,
+        "context": "await self.emit_process_exhaustion_alert(\"ruff check\", e)"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 116,
+        "context": "process = await asyncio.create_subprocess_exec("
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 124,
+        "context": "stdout, stderr = await process.communicate()"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 139,
+        "context": "await self.emit_process_exhaustion_alert(\"ruff format\", e)"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 157,
+        "context": "await loop.run_in_executor(None, _maintenance)"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 171,
+        "context": "await engine.init_db()"
+      },
+      {
+        "type": "attribute",
+        "name": "CONTEXT_MAX_SIGNALS",
+        "line": 176,
+        "context": "max_signals=config.CONTEXT_MAX_SIGNALS,"
+      },
+      {
+        "type": "identifier",
+        "name": "signals",
+        "line": 180,
+        "context": "signals = await collector.collect_all()"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 180,
+        "context": "signals = await collector.collect_all()"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 182,
+        "context": "result = await inference.infer_and_persist(signals)"
+      },
+      {
+        "type": "identifier",
+        "name": "signals",
+        "line": 182,
+        "context": "result = await inference.infer_and_persist(signals)"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 190,
+        "context": "await engine.close()"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 199,
+        "context": "process = await asyncio.create_subprocess_exec("
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 206,
+        "context": "stdout, _ = await process.communicate()"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 214,
+        "context": "pkill_proc = await asyncio.create_subprocess_exec("
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 221,
+        "context": "await pkill_proc.communicate()"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 243,
+        "context": "metrics, score = await loop.run_in_executor(None, _assess)"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 258,
+        "context": "await loop.run_in_executor(None, _persist)"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 268,
+        "context": "await self.emit_health_alert(score)"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 304,
+        "context": "await self.bus.emit(event)"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 324,
+        "context": "await self.bus.emit(event)"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 338,
+        "context": "await self.auto_heal_code()"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 341,
+        "context": "await self.auto_heal_db()"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 344,
+        "context": "await self.auto_heal_playwright()"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 347,
+        "context": "await self.auto_heal_context_snapshot()"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 350,
+        "context": "await self.perform_health_assessment()"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 359,
+        "context": "await asyncio.sleep(self.check_interval)"
+      }
+    ],
+    "sovereign_markers": [
+      {
+        "type": "string_constant",
+        "value": "\nExergy Daemon V1.0 - Sovereign Self-Healing & Hea...",
+        "line": 3,
+        "context": "\"\"\""
+      },
+      {
+        "type": "import",
+        "name": "cortex.core.config",
+        "line": 26,
+        "context": "import cortex.core.config as config"
+      },
+      {
+        "type": "import",
+        "name": "cortex.extensions.health.HealthCollector",
+        "line": 27,
+        "context": "from cortex.extensions.health import HealthCollector, HealthScorer, TrendDetector"
+      },
+      {
+        "type": "import",
+        "name": "cortex.extensions.health.HealthScorer",
+        "line": 27,
+        "context": "from cortex.extensions.health import HealthCollector, HealthScorer, TrendDetector"
+      },
+      {
+        "type": "import",
+        "name": "cortex.extensions.health.TrendDetector",
+        "line": 27,
+        "context": "from cortex.extensions.health import HealthCollector, HealthScorer, TrendDetector"
+      },
+      {
+        "type": "import",
+        "name": "cortex.extensions.notifications.setup.setup_notifications",
+        "line": 28,
+        "context": "from cortex.extensions.notifications.setup import setup_notifications"
+      },
+      {
+        "type": "import",
+        "name": "cortex.extensions.notifications.get_notification_bus",
+        "line": 29,
+        "context": "from cortex.extensions.notifications import get_notification_bus, CortexEvent, EventSeverity"
+      },
+      {
+        "type": "import",
+        "name": "cortex.extensions.notifications.CortexEvent",
+        "line": 29,
+        "context": "from cortex.extensions.notifications import get_notification_bus, CortexEvent, EventSeverity"
+      },
+      {
+        "type": "import",
+        "name": "cortex.extensions.notifications.EventSeverity",
+        "line": 29,
+        "context": "from cortex.extensions.notifications import get_notification_bus, CortexEvent, EventSeverity"
+      },
+      {
+        "type": "string_constant",
+        "value": "%(asctime)s [%(levelname)s] EXERGY-DAEMON: %(messa...",
+        "line": 32,
+        "context": "level=logging.INFO, format=\"%(asctime)s [%(levelname)s] EXERGY-DAEMON: %(message)s\""
+      },
+      {
+        "type": "string_constant",
+        "value": "/tmp/cortex_exergy_daemon.lock",
+        "line": 35,
+        "context": "LOCK_FILE = \"/tmp/cortex_exergy_daemon.lock\""
+      },
+      {
+        "type": "string_constant",
+        "value": "Sovereign loops checking/correcting code & DB heal...",
+        "line": 39,
+        "context": "\"\"\"Sovereign loops checking/correcting code & DB health.\"\"\""
+      },
+      {
+        "type": "string_constant",
+        "value": "Exergy Daemon: Notification bus initialized. Adapt...",
+        "line": 55,
+        "context": "\"Exergy Daemon: Notification bus initialized. Adapters: %s\","
+      },
+      {
+        "type": "string_constant",
+        "value": "Exergy Daemon: Failed to initialize notifications:...",
+        "line": 59,
+        "context": "logging.error(\"Exergy Daemon: Failed to initialize notifications: %s\", e)"
+      },
+      {
+        "type": "string_constant",
+        "value": "Exergy Daemon: Lock acquired successfully.",
+        "line": 69,
+        "context": "logging.info(\"Exergy Daemon: Lock acquired successfully.\")"
+      },
+      {
+        "type": "string_constant",
+        "value": "Exergy Daemon: Another instance is already running...",
+        "line": 71,
+        "context": "logging.critical(\"Exergy Daemon: Another instance is already running. Exiting.\")"
+      },
+      {
+        "type": "string_constant",
+        "value": "Exergy Daemon: Failed to acquire lock: %s",
+        "line": 74,
+        "context": "logging.error(\"Exergy Daemon: Failed to acquire lock: %s\", e)"
+      },
+      {
+        "type": "string_constant",
+        "value": "Exergy Daemon: ruff executable not found. Skipping...",
+        "line": 79,
+        "context": "logging.warning(\"Exergy Daemon: ruff executable not found. Skipping code auto-healing.\")"
+      },
+      {
+        "type": "string_constant",
+        "value": "Exergy Daemon: Starting code auto-healing (ruff fi...",
+        "line": 82,
+        "context": "logging.info(\"Exergy Daemon: Starting code auto-healing (ruff fix & format)...\")"
+      },
+      {
+        "type": "string_constant",
+        "value": "Exergy Daemon: ruff check --fix completed successf...",
+        "line": 97,
+        "context": "logging.info(\"Exergy Daemon: ruff check --fix completed successfully.\")"
+      },
+      {
+        "type": "string_constant",
+        "value": "Exergy Daemon: ruff check exited with code %d. std...",
+        "line": 100,
+        "context": "\"Exergy Daemon: ruff check exited with code %d. stderr: %s\","
+      },
+      {
+        "type": "string_constant",
+        "value": "Exergy Daemon: Process spawn failure during ruff c...",
+        "line": 106,
+        "context": "\"Exergy Daemon: Process spawn failure during ruff check. \""
+      },
+      {
+        "type": "string_constant",
+        "value": "Exergy Daemon: Unexpected error during ruff check:...",
+        "line": 112,
+        "context": "logging.error(\"Exergy Daemon: Unexpected error during ruff check: %s\", e)"
+      },
+      {
+        "type": "string_constant",
+        "value": "Exergy Daemon: ruff format completed successfully.",
+        "line": 126,
+        "context": "logging.info(\"Exergy Daemon: ruff format completed successfully.\")"
+      },
+      {
+        "type": "string_constant",
+        "value": "Exergy Daemon: ruff format exited with code %d. st...",
+        "line": 129,
+        "context": "\"Exergy Daemon: ruff format exited with code %d. stderr: %s\","
+      },
+      {
+        "type": "string_constant",
+        "value": "Exergy Daemon: Process spawn failure during ruff f...",
+        "line": 135,
+        "context": "\"Exergy Daemon: Process spawn failure during ruff format. \""
+      },
+      {
+        "type": "string_constant",
+        "value": "Exergy Daemon: Unexpected error during ruff format...",
+        "line": 141,
+        "context": "logging.error(\"Exergy Daemon: Unexpected error during ruff format: %s\", e)"
+      },
+      {
+        "type": "string_constant",
+        "value": "Exergy Daemon: Running DB maintenance on %s...",
+        "line": 146,
+        "context": "logging.info(\"Exergy Daemon: Running DB maintenance on %s...\", db_path)"
+      },
+      {
+        "type": "string_constant",
+        "value": "Exergy Daemon: WAL checkpoint and VACUUM completed...",
+        "line": 158,
+        "context": "logging.info(\"Exergy Daemon: WAL checkpoint and VACUUM completed successfully.\")"
+      },
+      {
+        "type": "string_constant",
+        "value": "Exergy Daemon: Database maintenance failure: %s",
+        "line": 160,
+        "context": "logging.error(\"Exergy Daemon: Database maintenance failure: %s\", e)"
+      },
+      {
+        "type": "string_constant",
+        "value": "Exergy Daemon: Starting context snapshot generatio...",
+        "line": 164,
+        "context": "logging.info(\"Exergy Daemon: Starting context snapshot generation...\")"
+      },
+      {
+        "type": "import",
+        "name": "cortex.cli.common.get_engine",
+        "line": 166,
+        "context": "from cortex.cli.common import get_engine"
+      },
+      {
+        "type": "import",
+        "name": "cortex.extensions.context.collector.ContextCollector",
+        "line": 167,
+        "context": "from cortex.extensions.context.collector import ContextCollector"
+      },
+      {
+        "type": "import",
+        "name": "cortex.extensions.context.inference.ContextInference",
+        "line": 168,
+        "context": "from cortex.extensions.context.inference import ContextInference"
+      },
+      {
+        "type": "string_constant",
+        "value": "Exergy Daemon: Ambient context snapshot persisted....",
+        "line": 184,
+        "context": "\"Exergy Daemon: Ambient context snapshot persisted. \""
+      },
+      {
+        "type": "string_constant",
+        "value": "Exergy Daemon: Context snapshot generation failed:...",
+        "line": 192,
+        "context": "logging.error(\"Exergy Daemon: Context snapshot generation failed: %s\", e)"
+      },
+      {
+        "type": "string_constant",
+        "value": "Exergy Daemon: Checking and cleaning orphaned play...",
+        "line": 196,
+        "context": "logging.info(\"Exergy Daemon: Checking and cleaning orphaned playwright processes...\")"
+      },
+      {
+        "type": "string_constant",
+        "value": "Exergy Daemon: Found %d orphaned ms-playwright-go ...",
+        "line": 210,
+        "context": "\"Exergy Daemon: Found %d orphaned ms-playwright-go processes. Killing them...\","
+      },
+      {
+        "type": "string_constant",
+        "value": "Exergy Daemon: Orphaned processes terminated.",
+        "line": 222,
+        "context": "logging.info(\"Exergy Daemon: Orphaned processes terminated.\")"
+      },
+      {
+        "type": "string_constant",
+        "value": "Exergy Daemon: No orphaned playwright processes fo...",
+        "line": 224,
+        "context": "logging.info(\"Exergy Daemon: No orphaned playwright processes found.\")"
+      },
+      {
+        "type": "string_constant",
+        "value": "Exergy Daemon: Failed to query/pkill processes (po...",
+        "line": 227,
+        "context": "\"Exergy Daemon: Failed to query/pkill processes (possible process spawn limit): %s\","
+      },
+      {
+        "type": "string_constant",
+        "value": "Exergy Daemon: Playwright cleanup failed: %s",
+        "line": 231,
+        "context": "logging.error(\"Exergy Daemon: Playwright cleanup failed: %s\", e)"
+      },
+      {
+        "type": "string_constant",
+        "value": "Exergy Daemon: Running system health assessment...",
+        "line": 235,
+        "context": "logging.info(\"Exergy Daemon: Running system health assessment...\")"
+      },
+      {
+        "type": "string_constant",
+        "value": "Exergy Daemon: Aggregate Health Score: %.2f/100 (G...",
+        "line": 246,
+        "context": "\"Exergy Daemon: Aggregate Health Score: %.2f/100 (Grade: %s)\","
+      },
+      {
+        "type": "string_constant",
+        "value": "Exergy Daemon: Health score persisted and historic...",
+        "line": 259,
+        "context": "logging.info(\"Exergy Daemon: Health score persisted and historical records pruned.\")"
+      },
+      {
+        "type": "string_constant",
+        "value": "Exergy Daemon: Failed to update health history dat...",
+        "line": 261,
+        "context": "logging.warning(\"Exergy Daemon: Failed to update health history database: %s\", trend_err)"
+      },
+      {
+        "type": "string_constant",
+        "value": "Exergy Daemon: Health assessment crash: %s",
+        "line": 272,
+        "context": "logging.error(\"Exergy Daemon: Health assessment crash: %s\", e)"
+      },
+      {
+        "type": "string_constant",
+        "value": "Exergy Daemon: Notification bus not available. Ale...",
+        "line": 278,
+        "context": "logging.warning(\"Exergy Daemon: Notification bus not available. Alert dropped.\")"
+      },
+      {
+        "type": "string_constant",
+        "value": "exergy_daemon",
+        "line": 300,
+        "context": "source=\"exergy_daemon\","
+      },
+      {
+        "type": "string_constant",
+        "value": "Exergy Daemon: Dispatched health alert through not...",
+        "line": 305,
+        "context": "logging.info(\"Exergy Daemon: Dispatched health alert through notification bus.\")"
+      },
+      {
+        "type": "string_constant",
+        "value": "Exergy Daemon: OS Process Limit Exhaustion",
+        "line": 314,
+        "context": "title=\"Exergy Daemon: OS Process Limit Exhaustion\","
+      },
+      {
+        "type": "string_constant",
+        "value": "exergy_daemon",
+        "line": 321,
+        "context": "source=\"exergy_daemon\","
+      },
+      {
+        "type": "string_constant",
+        "value": "Exergy Daemon: Starting sovereign loop. Interval: ...",
+        "line": 330,
+        "context": "\"Exergy Daemon: Starting sovereign loop. Interval: %d seconds.\", self.check_interval"
+      },
+      {
+        "type": "string_constant",
+        "value": "Exergy Daemon: Starting self-healing cycle #%d...",
+        "line": 335,
+        "context": "logging.info(\"Exergy Daemon: Starting self-healing cycle #%d...\", self.cycle_count)"
+      },
+      {
+        "type": "string_constant",
+        "value": "Exergy Daemon: Cycle #%d completed. Sleeping for %...",
+        "line": 353,
+        "context": "\"Exergy Daemon: Cycle #%d completed. Sleeping for %d seconds...\","
+      },
+      {
+        "type": "string_constant",
+        "value": "DETECTIVE-OMEGA: Silent exception swallowed in exe...",
+        "line": 370,
+        "context": "logging.getLogger(__name__).error('DETECTIVE-OMEGA: Silent exception swallowed in exergy_daemon.py')"
+      },
+      {
+        "type": "string_constant",
+        "value": "Exergy Daemon: Stopped safely.",
+        "line": 371,
+        "context": "logging.info(\"Exergy Daemon: Stopped safely.\")"
+      },
+      {
+        "type": "string_constant",
+        "value": "Run CORTEX Exergy Daemon.",
+        "line": 377,
+        "context": "parser = argparse.ArgumentParser(description=\"Run CORTEX Exergy Daemon.\")"
+      },
+      {
+        "type": "identifier",
+        "name": "ExergyDaemon",
+        "line": 386,
+        "context": "daemon = ExergyDaemon(check_interval=args.interval)"
+      }
+    ]
+  },
+  {
+    "classes": [
+      {
+        "name": "ExergySentinel",
+        "docstring": "Deterministic C5-REAL Sentinel for keeping CORTEX-Persist at maximum exergy.",
+        "methods": [
+          {
+            "name": "__init__",
+            "docstring": null,
+            "args": [
+              "self"
+            ],
+            "line": 33,
+            "is_async": false
+          },
+          {
+            "name": "log",
+            "docstring": null,
+            "args": [
+              "self",
+              "message",
+              "level"
+            ],
+            "line": 52,
+            "is_async": false
+          },
+          {
+            "name": "count_open_fds",
+            "docstring": "Count open file descriptors for the current process (macOS compatible).",
+            "args": [
+              "self"
+            ],
+            "line": 68,
+            "is_async": false
+          },
+          {
+            "name": "clean_stale_locks",
+            "docstring": "Forcefully removes stale git and sqlite lock files.",
+            "args": [
+              "self"
+            ],
+            "line": 79,
+            "is_async": false
+          },
+          {
+            "name": "terminate_stale_processes",
+            "docstring": "Finds and terminates orphaned pytest or python process groups holding lock files.",
+            "args": [
+              "self"
+            ],
+            "line": 108,
+            "is_async": false
+          },
+          {
+            "name": "run_auto_fixes",
+            "docstring": "Runs ruff format and ruff check --fix to maintain strict standards.",
+            "args": [
+              "self"
+            ],
+            "line": 135,
+            "is_async": false
+          },
+          {
+            "name": "verify_system_tests",
+            "docstring": "Runs pytest on non-slow tests to verify test suite health status.",
+            "args": [
+              "self"
+            ],
+            "line": 157,
+            "is_async": false
+          },
+          {
+            "name": "calculate_exergy_score",
+            "docstring": "Varitional Exergy scoring: 100 - penalties for issues.",
+            "args": [
+              "self"
+            ],
+            "line": 178,
+            "is_async": false
+          },
+          {
+            "name": "save_state",
+            "docstring": null,
+            "args": [
+              "self"
+            ],
+            "line": 201,
+            "is_async": false
+          },
+          {
+            "name": "run_cycle",
+            "docstring": null,
+            "args": [
+              "self"
+            ],
+            "line": 208,
+            "is_async": false
+          },
+          {
+            "name": "run_forever",
+            "docstring": null,
+            "args": [
+              "self"
+            ],
+            "line": 234,
+            "is_async": false
+          }
+        ],
+        "line": 30
+      },
+      {
+        "name": "ExergyDashboardServer",
+        "docstring": "Sovereign Industrial Noir HTML dashboard server.",
+        "methods": [
+          {
+            "name": "do_GET",
+            "docstring": null,
+            "args": [
+              "self"
+            ],
+            "line": 248,
+            "is_async": false
+          }
+        ],
+        "line": 243
+      }
+    ],
+    "functions": [
+      {
+        "name": "run_dashboard_server",
+        "docstring": null,
+        "args": [
+          "sentinel"
+        ],
+        "line": 481,
+        "is_async": false
+      }
+    ],
+    "critical_paths": [
+      {
+        "type": "attribute",
+        "name": "verify_system_tests",
+        "line": 226,
+        "context": "self.verify_system_tests()"
+      }
+    ],
+    "sovereign_markers": [
+      {
+        "type": "string_constant",
+        "value": "%(asctime)s [%(levelname)s] EXERGY-SENTINEL: %(mes...",
+        "line": 20,
+        "context": "format=\"%(asctime)s [%(levelname)s] EXERGY-SENTINEL: %(message)s\","
+      },
+      {
+        "type": "string_constant",
+        "value": ".exergy_sentinel.log",
+        "line": 23,
+        "context": "logging.FileHandler(PROJECT_ROOT / \".exergy_sentinel.log\")"
+      },
+      {
+        "type": "string_constant",
+        "value": ".exergy_state.json",
+        "line": 27,
+        "context": "STATE_FILE = PROJECT_ROOT / \".exergy_state.json\""
+      },
+      {
+        "type": "string_constant",
+        "value": "Deterministic C5-REAL Sentinel for keeping CORTEX-...",
+        "line": 31,
+        "context": "\"\"\"Deterministic C5-REAL Sentinel for keeping CORTEX-Persist at maximum exergy.\"\"\""
+      },
+      {
+        "type": "string_constant",
+        "value": "exergy_score",
+        "line": 38,
+        "context": "\"exergy_score\": 100,"
+      },
+      {
+        "type": "string_constant",
+        "value": "Varitional Exergy scoring: 100 - penalties for iss...",
+        "line": 179,
+        "context": "\"\"\"Varitional Exergy scoring: 100 - penalties for issues.\"\"\""
+      },
+      {
+        "type": "string_constant",
+        "value": "exergy_score",
+        "line": 192,
+        "context": "self.state[\"exergy_score\"] = max(0, score)"
+      },
+      {
+        "type": "string_constant",
+        "value": "MAX_EXERGY",
+        "line": 195,
+        "context": "self.state[\"status\"] = \"MAX_EXERGY\""
+      },
+      {
+        "type": "attribute",
+        "name": "calculate_exergy_score",
+        "line": 229,
+        "context": "self.calculate_exergy_score()"
+      },
+      {
+        "type": "string_constant",
+        "value": "Pulse cycle complete. Current Exergy: ",
+        "line": 232,
+        "context": "self.log(f\"Pulse cycle complete. Current Exergy: {self.state['exergy_score']}% [{self.state['status']}]\", \"INFO\")"
+      },
+      {
+        "type": "string_constant",
+        "value": "exergy_score",
+        "line": 232,
+        "context": "self.log(f\"Pulse cycle complete. Current Exergy: {self.state['exergy_score']}% [{self.state['status']}]\", \"INFO\")"
+      },
+      {
+        "type": "string_constant",
+        "value": "Exergy Sentinel Active (C5-REAL). Dashboard port: ...",
+        "line": 235,
+        "context": "self.log(\"Exergy Sentinel Active (C5-REAL). Dashboard port: 18080.\", \"INFO\")"
+      },
+      {
+        "type": "string_constant",
+        "value": "Sovereign Industrial Noir HTML dashboard server.",
+        "line": 244,
+        "context": "\"\"\"Sovereign Industrial Noir HTML dashboard server.\"\"\""
+      },
+      {
+        "type": "string_constant",
+        "value": "exergy_score",
+        "line": 257,
+        "context": "status_color = \"#2B3BE5\" if state[\"exergy_score\"] >= 90 else (\"#e58f2b\" if state[\"exergy_score\"] >= 60 else \"#e52b2b\")"
+      },
+      {
+        "type": "string_constant",
+        "value": "<!DOCTYPE html>\n<html>\n<head>\n    <title>CORTEX EX...",
+        "line": 259,
+        "context": "html = f\"\"\"<!DOCTYPE html>"
+      },
+      {
+        "type": "string_constant",
+        "value": ";\n        }\n        .console-panel {\n            b...",
+        "line": 347,
+        "context": "color: {status_color};"
+      },
+      {
+        "type": "string_constant",
+        "value": "exergy_score",
+        "line": 414,
+        "context": "<div class=\"card-value score\">{state[\"exergy_score\"]}%</div>"
+      },
+      {
+        "type": "identifier",
+        "name": "ExergyDashboardServer",
+        "line": 482,
+        "context": "ExergyDashboardServer.sentinel_instance = sentinel"
+      },
+      {
+        "type": "identifier",
+        "name": "ExergyDashboardServer",
+        "line": 483,
+        "context": "server = HTTPServer((\"localhost\", PORT), ExergyDashboardServer)"
+      },
+      {
+        "type": "identifier",
+        "name": "ExergySentinel",
+        "line": 487,
+        "context": "sentinel = ExergySentinel()"
+      }
+    ]
+  },
+  {
+    "classes": [],
+    "functions": [
+      {
+        "name": "clear_screen",
+        "docstring": null,
+        "args": [],
+        "line": 8,
+        "is_async": false
+      },
+      {
+        "name": "typewriter_print",
+        "docstring": null,
+        "args": [
+          "text",
+          "delay"
+        ],
+        "line": 11,
+        "is_async": false
+      },
+      {
+        "name": "main",
+        "docstring": null,
+        "args": [],
+        "line": 18,
+        "is_async": false
+      }
+    ],
+    "critical_paths": [
+      {
+        "type": "attribute",
+        "name": "commit",
+        "line": 54,
+        "context": "conn.commit()"
+      }
+    ],
+    "sovereign_markers": [
+      {
+        "type": "string_constant",
+        "value": "[C5-REAL] Establishing zero-entropy developer cont...",
+        "line": 21,
+        "context": "typewriter_print(\"[C5-REAL] Establishing zero-entropy developer context.\", 0.03)"
+      }
+    ]
+  },
+  {
+    "classes": [
+      {
+        "name": "DarkPoolZK",
+        "docstring": "K-0 Sovereign Defense Mechanism.\nGenera valor mediante pruebas ZK-STARK, eliminando la exposición de código en texto plano.",
+        "methods": [
+          {
+            "name": "__init__",
+            "docstring": null,
+            "args": [
+              "self",
+              "ledger"
+            ],
+            "line": 23,
+            "is_async": false
+          },
+          {
+            "name": "generate_resolution_proof",
+            "docstring": "En lugar de enviar un PoC a Code4rena/Flashbots en plano, genera una prueba matemática (STARK)\nde que el enjambre posee la llave para capitalizar el TVL, garantizando C5-REAL trustless yield.",
+            "args": [
+              "self",
+              "vulnerability_ast"
+            ],
+            "line": 27,
+            "is_async": false
+          },
+          {
+            "name": "negotiate_yield",
+            "docstring": "Canaliza capital de vuelta al enjambre.\nSi la prueba es válida, se asimila el 10% del TVL procesado como bounty automático.",
+            "args": [
+              "self",
+              "zk_proof",
+              "target_tvl"
+            ],
+            "line": 42,
+            "is_async": false
+          }
+        ],
+        "line": 18
+      },
+      {
+        "name": "HardwareAggressor",
+        "docstring": "K-0 Physical Expansion.\nConvierte el capital acumulado directamente en silicio (despliegues bare-metal automáticos).",
+        "methods": [
+          {
+            "name": "__init__",
+            "docstring": null,
+            "args": [
+              "self",
+              "ledger"
+            ],
+            "line": 71,
+            "is_async": false
+          },
+          {
+            "name": "_deploy_to_akash",
+            "docstring": "C5-REAL: Interactúa con Akash Network vía CLI para instanciar un nuevo nodo \ny flashearle el EXA-LISP hypervisor.",
+            "args": [
+              "self"
+            ],
+            "line": 82,
+            "is_async": true
+          },
+          {
+            "name": "evaluate_expansion",
+            "docstring": "Metabolismo de expansión: Si el Ledger tiene suficiente capital, aniquila ese capital\npara crear hardware físico, logrando independencia de los Cloud Providers (AWS/GCP).",
+            "args": [
+              "self"
+            ],
+            "line": 158,
+            "is_async": true
+          }
+        ],
+        "line": 66
+      },
+      {
+        "name": "K0Metabolism",
+        "docstring": "Orquestador principal del K-0 Sovereign Swarm.\nConsume tareas 'VulnerabilityFixer' emitidas por el Fuzzer Anvil (x100_cortex_server) \na través del L4 Ring Buffer / SQLite, y las canaliza mediante ZK-STARK hacia el HardwareAggressor.",
+        "methods": [
+          {
+            "name": "__init__",
+            "docstring": null,
+            "args": [
+              "self",
+              "persistence_manager"
+            ],
+            "line": 187,
+            "is_async": false
+          },
+          {
+            "name": "life_cycle",
+            "docstring": null,
+            "args": [
+              "self"
+            ],
+            "line": 194,
+            "is_async": true
+          },
+          {
+            "name": "stop",
+            "docstring": null,
+            "args": [
+              "self"
+            ],
+            "line": 268,
+            "is_async": false
+          }
+        ],
+        "line": 181
+      }
+    ],
+    "functions": [
+      {
+        "name": "main",
+        "docstring": null,
+        "args": [],
+        "line": 271,
+        "is_async": true
+      }
+    ],
+    "critical_paths": [
+      {
+        "type": "attribute",
+        "name": "ledger",
+        "line": 24,
+        "context": "self.ledger = ledger"
+      },
+      {
+        "type": "identifier",
+        "name": "ledger",
+        "line": 24,
+        "context": "self.ledger = ledger"
+      },
+      {
+        "type": "identifier",
+        "name": "hashlib",
+        "line": 33,
+        "context": "witness = hashlib.sha3_256(vulnerability_ast.encode('utf-8')).hexdigest()"
+      },
+      {
+        "type": "attribute",
+        "name": "ledger",
+        "line": 57,
+        "context": "self.ledger.append("
+      },
+      {
+        "type": "attribute",
+        "name": "ledger",
+        "line": 72,
+        "context": "self.ledger = ledger"
+      },
+      {
+        "type": "identifier",
+        "name": "ledger",
+        "line": 72,
+        "context": "self.ledger = ledger"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 113,
+        "context": "proc = await asyncio.create_subprocess_exec("
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 118,
+        "context": "stdout, stderr = await proc.communicate()"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 123,
+        "context": "await asyncio.sleep(0.5)"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 126,
+        "context": "await asyncio.sleep(0.5)"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 130,
+        "context": "proc = await asyncio.create_subprocess_exec("
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 135,
+        "context": "stdout, _ = await proc.communicate()"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 140,
+        "context": "await asyncio.sleep(0.5)"
+      },
+      {
+        "type": "identifier",
+        "name": "target_hash",
+        "line": 148,
+        "context": "target_hash = f\"NODE_EXPANSION_VECTOR_{self.active_nodes}\""
+      },
+      {
+        "type": "identifier",
+        "name": "target_hash",
+        "line": 151,
+        "context": "self.umap.update_agent_position(self.active_nodes - 1, x, y, z, target_hash, entropy)"
+      },
+      {
+        "type": "attribute",
+        "name": "ledger",
+        "line": 164,
+        "context": "if hasattr(self.ledger, 'reconcile_bankruptcy'):"
+      },
+      {
+        "type": "attribute",
+        "name": "ledger",
+        "line": 165,
+        "context": "self.ledger.reconcile_bankruptcy()"
+      },
+      {
+        "type": "attribute",
+        "name": "ledger",
+        "line": 167,
+        "context": "current_yield = self.ledger.get_total_yield()"
+      },
+      {
+        "type": "attribute",
+        "name": "ledger",
+        "line": 171,
+        "context": "self.ledger.append("
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 176,
+        "context": "await self._deploy_to_akash()"
+      },
+      {
+        "type": "attribute",
+        "name": "ledger",
+        "line": 189,
+        "context": "self.ledger = self.pm.l3  # LedgerManager is l3 in HybridPersistenceManager"
+      },
+      {
+        "type": "attribute",
+        "name": "ledger",
+        "line": 190,
+        "context": "self.dark_pool = DarkPoolZK(self.ledger)"
+      },
+      {
+        "type": "attribute",
+        "name": "ledger",
+        "line": 191,
+        "context": "self.hardware = HardwareAggressor(self.ledger)"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 203,
+        "context": "await asyncio.sleep(2.0)"
+      },
+      {
+        "type": "attribute",
+        "name": "ledger",
+        "line": 250,
+        "context": "self.ledger.append("
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 264,
+        "context": "await self.hardware.evaluate_expansion()"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 266,
+        "context": "await asyncio.sleep(1.0)  # Ciclo rápido tras procesar"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 277,
+        "context": "await metabolism.life_cycle()"
+      }
+    ],
+    "sovereign_markers": [
+      {
+        "type": "string_constant",
+        "value": "\n    K-0 Sovereign Defense Mechanism.\n    Genera v...",
+        "line": 19,
+        "context": "\"\"\""
+      },
+      {
+        "type": "string_constant",
+        "value": "\n        En lugar de enviar un PoC a Code4rena/Fla...",
+        "line": 28,
+        "context": "\"\"\""
+      },
+      {
+        "type": "import",
+        "name": "web3.Web3",
+        "line": 50,
+        "context": "from web3 import Web3  # pyright: ignore[reportMissingImports]"
+      },
+      {
+        "type": "string_constant",
+        "value": "\n        C5-REAL: Interactúa con Akash Network vía...",
+        "line": 83,
+        "context": "\"\"\""
+      },
+      {
+        "type": "string_constant",
+        "value": "HardwareAggressor [C5-REAL]: Canalizando yield par...",
+        "line": 93,
+        "context": "logger.info(\"HardwareAggressor [C5-REAL]: Canalizando yield para adquirir nodo GPU Spot en Akash...\")"
+      },
+      {
+        "type": "string_constant",
+        "value": "HardwareAggressor [C5-REAL]: Silicio auto-aprovisi...",
+        "line": 120,
+        "context": "logger.info(f\"HardwareAggressor [C5-REAL]: Silicio auto-aprovisionado on-chain. TX: {stdout.decode().strip()}\")"
+      },
+      {
+        "type": "string_constant",
+        "value": "HardwareAggressor [C4-SIM]: Binario 'akash' no enc...",
+        "line": 128,
+        "context": "logger.warning(\"HardwareAggressor [C4-SIM]: Binario 'akash' no encontrado. Ejecutando mock de infección de silicio.\")"
+      },
+      {
+        "type": "string_constant",
+        "value": "HardwareAggressor [C4-SIM]: Silicio auto-aprovisio...",
+        "line": 137,
+        "context": "logger.info(f\"HardwareAggressor [C4-SIM]: Silicio auto-aprovisionado simulado: {stdout.decode().strip()}\")"
+      },
+      {
+        "type": "string_constant",
+        "value": "\n    Orquestador principal del K-0 Sovereign Swarm...",
+        "line": 182,
+        "context": "\"\"\""
+      },
+      {
+        "type": "string_constant",
+        "value": "Iniciando Metabolismo K-0 Sovereign Swarm (Anvil-F...",
+        "line": 196,
+        "context": "logger.info(\"Iniciando Metabolismo K-0 Sovereign Swarm (Anvil-Fuzzer Bridge)...\")"
+      }
+    ]
+  },
+  {
+    "classes": [
+      {
+        "name": "ScoredKI",
+        "docstring": null,
+        "methods": [],
+        "line": 34
+      }
+    ],
+    "functions": [
+      {
+        "name": "detect_context",
+        "docstring": "Auto-detect current working context from environment.",
+        "args": [],
+        "line": 45,
+        "is_async": false
+      },
+      {
+        "name": "score_ki",
+        "docstring": "Score a KI based on relevance to current context.",
+        "args": [
+          "meta",
+          "meta_path",
+          "context"
+        ],
+        "line": 71,
+        "is_async": false
+      },
+      {
+        "name": "promote_ki",
+        "docstring": "'Promote' a KI by reading its metadata file.\n\nThis triggers the platform's internal access tracking,\nupdating last_accessed so it gets selected for injection.",
+        "args": [
+          "ki"
+        ],
+        "line": 114,
+        "is_async": false
+      },
+      {
+        "name": "main",
+        "docstring": "TODO: Document main",
+        "args": [],
+        "line": 131,
+        "is_async": false
+      }
+    ],
+    "critical_paths": [],
+    "sovereign_markers": [
+      {
+        "type": "string_constant",
+        "value": "cortex.exergy",
+        "line": 21,
+        "context": "logger = logging.getLogger('cortex.exergy')"
+      },
+      {
+        "type": "string_constant",
+        "value": "c5-real",
+        "line": 31,
+        "context": "ALWAYS_RELEVANT_TAGS = {'cortex', 'c5-real', '2026'}"
+      }
+    ]
+  },
+  {
+    "classes": [],
+    "functions": [
+      {
+        "name": "infer_domain",
+        "docstring": "Infer primary domain from tag set.",
+        "args": [
+          "tags"
+        ],
+        "line": 85,
+        "is_async": false
+      },
+      {
+        "name": "normalize_timestamp",
+        "docstring": "Normalize various timestamp formats to ISO8601.",
+        "args": [
+          "value"
+        ],
+        "line": 94,
+        "is_async": false
+      },
+      {
+        "name": "standardize_ki",
+        "docstring": "Standardize a single KI metadata dict. Returns the normalized version.",
+        "args": [
+          "meta",
+          "meta_path",
+          "dry_run"
+        ],
+        "line": 106,
+        "is_async": false
+      },
+      {
+        "name": "main",
+        "docstring": null,
+        "args": [],
+        "line": 190,
+        "is_async": false
+      }
+    ],
+    "critical_paths": [],
+    "sovereign_markers": []
+  },
+  {
+    "classes": [],
+    "functions": [
+      {
+        "name": "main",
+        "docstring": null,
+        "args": [],
+        "line": 11,
+        "is_async": true
+      }
+    ],
+    "critical_paths": [],
+    "sovereign_markers": [
+      {
+        "type": "string_constant",
+        "value": " sovereign agents via ZeroCopyRingBuffer...",
+        "line": 17,
+        "context": "print(f\"[LEGION] Dispatching {num_agents} sovereign agents via ZeroCopyRingBuffer...\")"
+      },
+      {
+        "type": "string_constant",
+        "value": "C5-REAL",
+        "line": 24,
+        "context": "payload = json.dumps({\"command\": \"audit\", \"target\": f\"sector_{i}\", \"directive\": \"C5-REAL\"}).encode('utf-8')"
+      },
+      {
+        "type": "string_constant",
+        "value": "VEREDICTO: C5-REAL ZERO-LATENCY LEGION ACHIEVED VI...",
+        "line": 59,
+        "context": "print(\"VEREDICTO: C5-REAL ZERO-LATENCY LEGION ACHIEVED VIA RUST NATIVE DISPATCH.\", flush=True)"
+      }
+    ]
+  },
+  {
+    "classes": [
+      {
+        "name": "ExergyMiner",
+        "docstring": "C5-REAL MAXIMA EXERGIA.\nOperates near the Landauer limit by actively extracting \"capital\" (Cryptographic Proof of Work)\nwhen the UESS Swarm detects idle topological bounds.",
+        "methods": [
+          {
+            "name": "__init__",
+            "docstring": null,
+            "args": [
+              "self",
+              "target_difficulty"
+            ],
+            "line": 17,
+            "is_async": false
+          },
+          {
+            "name": "mine_block",
+            "docstring": "Burns CPU exergy to generate a verifiable cryptographic seal.",
+            "args": [
+              "self",
+              "previous_hash",
+              "payload"
+            ],
+            "line": 21,
+            "is_async": false
+          }
+        ],
+        "line": 11
+      },
+      {
+        "name": "MaximaExergiaEngine",
+        "docstring": null,
+        "methods": [
+          {
+            "name": "__init__",
+            "docstring": null,
+            "args": [
+              "self",
+              "max_workers",
+              "difficulty"
+            ],
+            "line": 57,
+            "is_async": false
+          },
+          {
+            "name": "extract_capital",
+            "docstring": null,
+            "args": [
+              "self",
+              "previous_seal"
+            ],
+            "line": 61,
+            "is_async": false
+          }
+        ],
+        "line": 56
+      }
+    ],
+    "functions": [
+      {
+        "name": "worker_process",
+        "docstring": null,
+        "args": [
+          "worker_id",
+          "difficulty",
+          "previous_hash"
+        ],
+        "line": 45,
+        "is_async": false
+      }
+    ],
+    "critical_paths": [
+      {
+        "type": "identifier",
+        "name": "previous_hash",
+        "line": 27,
+        "context": "block_data = f\"{previous_hash}{payload}{nonce}\".encode()"
+      },
+      {
+        "type": "identifier",
+        "name": "hashlib",
+        "line": 28,
+        "context": "seal = hashlib.sha256(block_data).hexdigest()"
+      },
+      {
+        "type": "identifier",
+        "name": "hash_rate",
+        "line": 32,
+        "context": "hash_rate = nonce / elapsed if elapsed > 0 else 0"
+      },
+      {
+        "type": "identifier",
+        "name": "hash_rate",
+        "line": 37,
+        "context": "\"hash_rate_hps\": hash_rate"
+      },
+      {
+        "type": "identifier",
+        "name": "previous_hash",
+        "line": 48,
+        "context": "result = miner.mine_block(previous_hash, f\"UESS_STATE_VECTOR_{worker_id}\")"
+      }
+    ],
+    "sovereign_markers": [
+      {
+        "type": "string_constant",
+        "value": "\n    C5-REAL MAXIMA EXERGIA.\n    Operates near the...",
+        "line": 12,
+        "context": "\"\"\""
+      },
+      {
+        "type": "string_constant",
+        "value": "Burns CPU exergy to generate a verifiable cryptogr...",
+        "line": 22,
+        "context": "\"\"\"Burns CPU exergy to generate a verifiable cryptographic seal.\"\"\""
+      },
+      {
+        "type": "string_constant",
+        "value": " burning exergy... Target Difficulty: ",
+        "line": 46,
+        "context": "logger.info(f\"Worker {worker_id} burning exergy... Target Difficulty: {difficulty}\")"
+      },
+      {
+        "type": "identifier",
+        "name": "ExergyMiner",
+        "line": 47,
+        "context": "miner = ExergyMiner(target_difficulty=difficulty)"
+      },
+      {
+        "type": "string_constant",
+        "value": "   → Exergy rate: ",
+        "line": 52,
+        "context": "logger.info(f\"   → Exergy rate: {result['hash_rate_hps']:.2f} H/s\")"
+      },
+      {
+        "type": "string_constant",
+        "value": " exergy depleted before seal generation.",
+        "line": 54,
+        "context": "logger.warning(f\"Worker {worker_id} exergy depleted before seal generation.\")"
+      }
+    ]
+  },
+  {
+    "classes": [
+      {
+        "name": "MirrorAuditor",
+        "docstring": "Deterministic AST Auditor for CORTEX Source Code (Ω₂).",
+        "methods": [
+          {
+            "name": "__init__",
+            "docstring": null,
+            "args": [
+              "self",
+              "target_path"
+            ],
+            "line": 11,
+            "is_async": false
+          },
+          {
+            "name": "audit",
+            "docstring": "Performs structural analysis of the target file.",
+            "args": [
+              "self"
+            ],
+            "line": 17,
+            "is_async": false
+          },
+          {
+            "name": "report",
+            "docstring": "Generates a Sovereign remediation report.",
+            "args": [
+              "self"
+            ],
+            "line": 71,
+            "is_async": false
+          }
+        ],
+        "line": 8
+      }
+    ],
+    "functions": [],
+    "critical_paths": [],
+    "sovereign_markers": [
+      {
+        "type": "attribute",
+        "name": "exergy_score",
+        "line": 15,
+        "context": "self.exergy_score = 100.0"
+      },
+      {
+        "type": "string_constant",
+        "value": "Loop detected without explicit throttle (Potential...",
+        "line": 37,
+        "context": "self.findings.append({'type': 'HOT_LOOP', 'severity': 'CRITICAL', 'line': node.lineno, 'msg': 'Loop detected without explicit throttle (Potential Exergy Leak)'})"
+      },
+      {
+        "type": "attribute",
+        "name": "exergy_score",
+        "line": 38,
+        "context": "self.exergy_score -= 20.0"
+      },
+      {
+        "type": "attribute",
+        "name": "exergy_score",
+        "line": 43,
+        "context": "self.exergy_score -= 5.0"
+      },
+      {
+        "type": "attribute",
+        "name": "exergy_score",
+        "line": 65,
+        "context": "self.exergy_score -= (complexity - 10) * 2.0"
+      },
+      {
+        "type": "string_constant",
+        "value": "Generates a Sovereign remediation report.",
+        "line": 72,
+        "context": "\"\"\"Generates a Sovereign remediation report.\"\"\""
+      },
+      {
+        "type": "string_constant",
+        "value": "exergy_score",
+        "line": 73,
+        "context": "report = {'timestamp': time.monotonic(), 'target': self.target_path, 'exergy_score': max(0, self.exergy_score), 'findings': self.findings, 'complexity_metrics': self.complexity_metrics, 'status': 'UNSTABLE' if self.exergy_score < 80 else 'OPTIMAL'}"
+      },
+      {
+        "type": "attribute",
+        "name": "exergy_score",
+        "line": 73,
+        "context": "report = {'timestamp': time.monotonic(), 'target': self.target_path, 'exergy_score': max(0, self.exergy_score), 'findings': self.findings, 'complexity_metrics': self.complexity_metrics, 'status': 'UNSTABLE' if self.exergy_score < 80 else 'OPTIMAL'}"
+      }
+    ]
+  },
+  {
+    "classes": [],
+    "functions": [
+      {
+        "name": "get_live_target",
+        "docstring": "Fetches the latest contest repo from Code4rena.",
+        "args": [],
+        "line": 8,
+        "is_async": false
+      }
+    ],
+    "critical_paths": [],
+    "sovereign_markers": [
+      {
+        "type": "string_constant",
+        "value": "🚀 [C5-REAL] Target ingested into Swarm Queue. Zero...",
+        "line": 39,
+        "context": "print(\"🚀 [C5-REAL] Target ingested into Swarm Queue. Zero-Latency.\")"
+      }
+    ]
+  },
+  {
+    "classes": [
+      {
+        "name": "OuroborosEngine",
+        "docstring": "Foundry-backed Security Audit Engine (V5).",
+        "methods": [
+          {
+            "name": "__init__",
+            "docstring": null,
+            "args": [
+              "self",
+              "target_url"
+            ],
+            "line": 62,
+            "is_async": false
+          },
+          {
+            "name": "_emit_event",
+            "docstring": null,
+            "args": [
+              "self",
+              "event_type",
+              "payload"
+            ],
+            "line": 75,
+            "is_async": true
+          },
+          {
+            "name": "provision",
+            "docstring": "Prepare the audit environment.",
+            "args": [
+              "self"
+            ],
+            "line": 79,
+            "is_async": true
+          },
+          {
+            "name": "clone_target",
+            "docstring": "Clones the target repository.",
+            "args": [
+              "self"
+            ],
+            "line": 92,
+            "is_async": true
+          },
+          {
+            "name": "_detect_contracts",
+            "docstring": "Detect Solidity contracts using simple regex (O(1) approach for V5).",
+            "args": [
+              "self"
+            ],
+            "line": 103,
+            "is_async": false
+          },
+          {
+            "name": "generate_fuzz_test",
+            "docstring": "Auto-generates a Foundry fuzz test for the detected contract.",
+            "args": [
+              "self",
+              "contract_name",
+              "contract_file"
+            ],
+            "line": 120,
+            "is_async": true
+          },
+          {
+            "name": "run_audit",
+            "docstring": "Executes the Forge Fuzzer and yields findings.",
+            "args": [
+              "self"
+            ],
+            "line": 151,
+            "is_async": true
+          },
+          {
+            "name": "_queue_remediation",
+            "docstring": "Pushes a remediation task to the swarm queue via C5-REAL ZeroCopyRingBuffer.",
+            "args": [
+              "self",
+              "target_file",
+              "log_file"
+            ],
+            "line": 239,
+            "is_async": false
+          }
+        ],
+        "line": 59
+      }
+    ],
+    "functions": [],
+    "critical_paths": [
+      {
+        "type": "identifier",
+        "name": "SignalBus",
+        "line": 71,
+        "context": "self.bus = SignalBus(conn)"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 98,
+        "context": "process = await asyncio.create_subprocess_exec("
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 101,
+        "context": "await process.wait()"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 153,
+        "context": "await self.provision()"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 154,
+        "context": "await self.clone_target()"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 157,
+        "context": "contracts = await loop.run_in_executor(None, self._detect_contracts)"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 168,
+        "context": "process = await asyncio.create_subprocess_exec("
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 174,
+        "context": "await process.communicate()"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 177,
+        "context": "await self.generate_fuzz_test(c[\"name\"], c[\"file\"])"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 180,
+        "context": "await self._emit_event("
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 189,
+        "context": "process = await asyncio.create_subprocess_exec("
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 198,
+        "context": "stdout, stderr = await process.communicate()"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 213,
+        "context": "await self._emit_event("
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 223,
+        "context": "await loop.run_in_executor(None, self._queue_remediation, c[\"file\"], error_log)"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 225,
+        "context": "await self._emit_event("
+      }
+    ],
+    "sovereign_markers": [
+      {
+        "type": "import",
+        "name": "cortex.extensions.signals.bus.SignalBus",
+        "line": 11,
+        "context": "from cortex.extensions.signals.bus import SignalBus"
+      },
+      {
+        "type": "import",
+        "name": "cortex.config.DB_PATH",
+        "line": 12,
+        "context": "from cortex.config import DB_PATH"
+      },
+      {
+        "type": "string_constant",
+        "value": "\n# RESTRICCIÓN TERMODINÁMICA (TSI-Ω)\nEres un actua...",
+        "line": 23,
+        "context": "TSI_OMEGA_SYSTEM_PROMPT = \"\"\""
+      },
+      {
+        "type": "string_constant",
+        "value": "\n# VECTOR DE MUTACIÓN AST (L0 HYPERVISOR)\nEstás ej...",
+        "line": 41,
+        "context": "AST_AUTOPOIESIS_PROMPT = \"\"\""
+      },
+      {
+        "type": "string_constant",
+        "value": "();\n    }\n\n    function test_FuzzExergy(uint256 am...",
+        "line": 137,
+        "context": "target = new {contract_name}();"
+      },
+      {
+        "type": "string_constant",
+        "value": "❌ [VULN] Found in %s. Queuing Sovereign Surgeon...",
+        "line": 210,
+        "context": "logger.warning(\"❌ [VULN] Found in %s. Queuing Sovereign Surgeon...\", c[\"name\"])"
+      },
+      {
+        "type": "string_constant",
+        "value": "Pushes a remediation task to the swarm queue via C...",
+        "line": 240,
+        "context": "\"\"\"Pushes a remediation task to the swarm queue via C5-REAL ZeroCopyRingBuffer.\"\"\""
+      }
+    ]
+  },
+  {
+    "classes": [
+      {
+        "name": "ProjectGlasswing",
+        "docstring": "C5-REAL CLAUDE MYTHOS (Project Glasswing).\nAutonomous Zero-Day Engine.\nFuzzes the internal CORTEX components to find thermodynamic logic flaws,\ngenerating controlled containment degradation payloads.",
+        "methods": [
+          {
+            "name": "__init__",
+            "docstring": null,
+            "args": [
+              "self",
+              "target_files"
+            ],
+            "line": 17,
+            "is_async": false
+          },
+          {
+            "name": "fuzz_json_payloads",
+            "docstring": "Injects corrupted JSON payloads into the global Event AOF to attempt DVF collapse.",
+            "args": [
+              "self"
+            ],
+            "line": 24,
+            "is_async": false
+          },
+          {
+            "name": "fuzz_death_protocol",
+            "docstring": "Attempts to bypass the Death Protocol by creating a low-entropy file that executes high-entropy commands.",
+            "args": [
+              "self"
+            ],
+            "line": 57,
+            "is_async": false
+          },
+          {
+            "name": "deploy_containment",
+            "docstring": "Synthesizes containment patches based on found zero-days.",
+            "args": [
+              "self"
+            ],
+            "line": 88,
+            "is_async": false
+          }
+        ],
+        "line": 10
+      }
+    ],
+    "functions": [],
+    "critical_paths": [],
+    "sovereign_markers": [
+      {
+        "type": "string_constant",
+        "value": "\n    C5-REAL CLAUDE MYTHOS (Project Glasswing).\n  ...",
+        "line": 11,
+        "context": "\"\"\""
+      },
+      {
+        "type": "string_constant",
+        "value": "[GLASSWING] Injected weaponized C5-REAL payload in...",
+        "line": 43,
+        "context": "logger.info(\"[GLASSWING] Injected weaponized C5-REAL payload into DAG.\")"
+      },
+      {
+        "type": "string_constant",
+        "value": "[GLASSWING] Generating C5-REAL Containment Protoco...",
+        "line": 91,
+        "context": "logger.warning(f\"[GLASSWING] Generating C5-REAL Containment Protocol for {self.vulnerabilities_found} vulnerabilities...\")"
+      }
+    ]
+  },
+  {
+    "classes": [
+      {
+        "name": "SovereignSurgeon",
+        "docstring": "Autonomous Solidity Patcher for CORTEX-Swarm-Prime.",
+        "methods": [
+          {
+            "name": "__init__",
+            "docstring": null,
+            "args": [
+              "self",
+              "target_file",
+              "error_log"
+            ],
+            "line": 13,
+            "is_async": false
+          },
+          {
+            "name": "analyze_vulnerability",
+            "docstring": "Detects the specific vulnerability type from the Forge or Mirror output.",
+            "args": [
+              "self"
+            ],
+            "line": 17,
+            "is_async": false
+          },
+          {
+            "name": "apply_patch",
+            "docstring": "Applies a JIT patch to the source code.",
+            "args": [
+              "self",
+              "vuln_type"
+            ],
+            "line": 38,
+            "is_async": false
+          }
+        ],
+        "line": 10
+      }
+    ],
+    "functions": [],
+    "critical_paths": [],
+    "sovereign_markers": [
+      {
+        "type": "string_constant",
+        "value": "🩹 Applying Sovereign Integrity Guard...",
+        "line": 94,
+        "context": "logging.info(\"🩹 Applying Sovereign Integrity Guard...\")"
+      },
+      {
+        "type": "string_constant",
+        "value": "external /* SOVEREIGN_PATCHED */",
+        "line": 96,
+        "context": "new_content = content.replace(\"external\", \"external /* SOVEREIGN_PATCHED */\")"
+      },
+      {
+        "type": "identifier",
+        "name": "SovereignSurgeon",
+        "line": 133,
+        "context": "surgeon = SovereignSurgeon(target, log_content)"
+      }
+    ]
+  },
+  {
+    "classes": [
+      {
+        "name": "SageOrchestrator",
+        "docstring": null,
+        "methods": [
+          {
+            "name": "__init__",
+            "docstring": null,
+            "args": [
+              "self",
+              "target_dir"
+            ],
+            "line": 42,
+            "is_async": false
+          },
+          {
+            "name": "broadcast",
+            "docstring": null,
+            "args": [
+              "self",
+              "event_type",
+              "data"
+            ],
+            "line": 50,
+            "is_async": true
+          },
+          {
+            "name": "log",
+            "docstring": null,
+            "args": [
+              "self",
+              "msg",
+              "sage"
+            ],
+            "line": 60,
+            "is_async": false
+          },
+          {
+            "name": "invoke_sage",
+            "docstring": null,
+            "args": [
+              "self",
+              "sage_name",
+              "target_path"
+            ],
+            "line": 65,
+            "is_async": true
+          },
+          {
+            "name": "run_council_loop",
+            "docstring": null,
+            "args": [
+              "self"
+            ],
+            "line": 89,
+            "is_async": true
+          }
+        ],
+        "line": 41
+      }
+    ],
+    "functions": [],
+    "critical_paths": [
+      {
+        "type": "await",
+        "name": "await",
+        "line": 58,
+        "context": "await self.event_queue.put(payload)"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 71,
+        "context": "await asyncio.sleep(2)"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 77,
+        "context": "await asyncio.sleep(3)"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 96,
+        "context": "await asyncio.sleep(30)"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 100,
+        "context": "await asyncio.gather(*tasks)"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 101,
+        "context": "await asyncio.sleep(60)"
+      }
+    ],
+    "sovereign_markers": [
+      {
+        "type": "import",
+        "name": "cortex.vsa_engine.VSAEngine",
+        "line": 18,
+        "context": "from cortex.vsa_engine import VSAEngine"
+      }
+    ]
+  },
+  {
+    "classes": [
+      {
+        "name": "ProposalRequest",
+        "docstring": null,
+        "methods": [],
+        "line": 31
+      },
+      {
+        "name": "VerificationResponse",
+        "docstring": null,
+        "methods": [],
+        "line": 36
+      }
+    ],
+    "functions": [
+      {
+        "name": "get_deterministic_hv",
+        "docstring": "Uses a seed from the hash of the text to generate a deterministic HyperVector.",
+        "args": [
+          "text"
+        ],
+        "line": 23,
+        "is_async": false
+      },
+      {
+        "name": "startup_event",
+        "docstring": null,
+        "args": [],
+        "line": 44,
+        "is_async": true
+      },
+      {
+        "name": "propose_action",
+        "docstring": "Evaluates an agent's proposed action against the collective memory.",
+        "args": [
+          "req"
+        ],
+        "line": 61,
+        "is_async": true
+      },
+      {
+        "name": "get_ledger",
+        "docstring": "Returns the cryptographic ledger for external auditing.",
+        "args": [],
+        "line": 101,
+        "is_async": true
+      },
+      {
+        "name": "consolidate",
+        "docstring": "Sleep-like consolidation: bundles all validators to extract majority vote \nand purges redundant memory vectors to reset entropy.",
+        "args": [],
+        "line": 115,
+        "is_async": true
+      }
+    ],
+    "critical_paths": [
+      {
+        "type": "identifier",
+        "name": "root_hash",
+        "line": 54,
+        "context": "root_hash = membrane.commit(episode)"
+      },
+      {
+        "type": "attribute",
+        "name": "commit",
+        "line": 54,
+        "context": "root_hash = membrane.commit(episode)"
+      },
+      {
+        "type": "identifier",
+        "name": "root_hash",
+        "line": 55,
+        "context": "sys.stdout.write(f\"[CORTEX-NODE] Genesis Block Root: {root_hash[:16]}...\\n\")"
+      },
+      {
+        "type": "identifier",
+        "name": "root_hash",
+        "line": 83,
+        "context": "root_hash = membrane.commit(episode)"
+      },
+      {
+        "type": "attribute",
+        "name": "commit",
+        "line": 83,
+        "context": "root_hash = membrane.commit(episode)"
+      },
+      {
+        "type": "identifier",
+        "name": "root_hash",
+        "line": 87,
+        "context": "merkle_root=root_hash,"
+      }
+    ],
+    "sovereign_markers": [
+      {
+        "type": "import",
+        "name": "cortex_rs",
+        "line": 3,
+        "context": "import cortex_rs"
+      },
+      {
+        "type": "string_constant",
+        "value": "CORTEX-Persist Sovereign Node",
+        "line": 9,
+        "context": "title=\"CORTEX-Persist Sovereign Node\","
+      },
+      {
+        "type": "string_constant",
+        "value": "C5-REAL Multi-Agent Epistemic Membrane via Vector ...",
+        "line": 10,
+        "context": "description=\"C5-REAL Multi-Agent Epistemic Membrane via Vector Symbolic Architecture\","
+      },
+      {
+        "type": "string_constant",
+        "value": "[CORTEX-NODE] Initializing Sovereign Epistemic Mem...",
+        "line": 47,
+        "context": "sys.stdout.write(\"[CORTEX-NODE] Initializing Sovereign Epistemic Membrane...\\n\")"
+      }
+    ]
+  },
+  {
+    "classes": [],
+    "functions": [
+      {
+        "name": "parse_skill_markdown",
+        "docstring": "Parse skill markdown and extract metadata and body.",
+        "args": [
+          "filepath"
+        ],
+        "line": 13,
+        "is_async": false
+      },
+      {
+        "name": "compile_to_python",
+        "docstring": "Compile skill instructions into a Python object template.",
+        "args": [
+          "skill_folder",
+          "metadata",
+          "body"
+        ],
+        "line": 41,
+        "is_async": false
+      },
+      {
+        "name": "main",
+        "docstring": "Main entry point for skill compilation.",
+        "args": [],
+        "line": 85,
+        "is_async": false
+      },
+      {
+        "name": "run_compiler",
+        "docstring": "Run the JIT Skill Compiler.",
+        "args": [],
+        "line": 131,
+        "is_async": false
+      }
+    ],
+    "critical_paths": [],
+    "sovereign_markers": []
+  },
+  {
+    "classes": [],
+    "functions": [
+      {
+        "name": "test_vsa_hammer",
+        "docstring": null,
+        "args": [],
+        "line": 5,
+        "is_async": false
+      },
+      {
+        "name": "test_queue_hammer",
+        "docstring": null,
+        "args": [],
+        "line": 17,
+        "is_async": false
+      }
+    ],
+    "critical_paths": [],
+    "sovereign_markers": [
+      {
+        "type": "string_constant",
+        "value": " OPS (Lock-free WAL & C5-REAL Outbox)",
+        "line": 36,
+        "context": "print(f\"   => {10000/duration:.2f} OPS (Lock-free WAL & C5-REAL Outbox)\")"
+      },
+      {
+        "type": "string_constant",
+        "value": "🚀 INITIATING CORTEX-PERSIST EXERGY STRESS TEST (C5...",
+        "line": 39,
+        "context": "print(\"🚀 INITIATING CORTEX-PERSIST EXERGY STRESS TEST (C5-REAL)...\")"
+      }
+    ]
+  },
+  {
+    "classes": [
+      {
+        "name": "SubmissionBridge",
+        "docstring": null,
+        "methods": [
+          {
+            "name": "__init__",
+            "docstring": null,
+            "args": [
+              "self",
+              "watch_dir"
+            ],
+            "line": 15,
+            "is_async": false
+          },
+          {
+            "name": "log",
+            "docstring": null,
+            "args": [
+              "self",
+              "msg",
+              "tier"
+            ],
+            "line": 19,
+            "is_async": false
+          },
+          {
+            "name": "verify_poc",
+            "docstring": "Invoke Foundry (Forge) to verify the PoC.",
+            "args": [
+              "self",
+              "target_path",
+              "poc_file"
+            ],
+            "line": 23,
+            "is_async": false
+          },
+          {
+            "name": "generate_report",
+            "docstring": "Generate a submission-ready markdown report.",
+            "args": [
+              "self",
+              "target_name",
+              "poc_content",
+              "logs"
+            ],
+            "line": 48,
+            "is_async": false
+          },
+          {
+            "name": "run_bridge_loop",
+            "docstring": null,
+            "args": [
+              "self"
+            ],
+            "line": 79,
+            "is_async": false
+          }
+        ],
+        "line": 14
+      }
+    ],
+    "functions": [],
+    "critical_paths": [
+      {
+        "type": "attribute",
+        "name": "verify_poc",
+        "line": 95,
+        "context": "success, logs = self.verify_poc(target, poc)"
+      }
+    ],
+    "sovereign_markers": [
+      {
+        "type": "string_constant",
+        "value": "\n**Agent:** SAGE_COUNCIL v7\n**Status:** VERIFIED (...",
+        "line": 51,
+        "context": "**Date:** {datetime.now().strftime(\"%Y-%m-%d %H:%M:%S\")}"
+      }
+    ]
+  },
+  {
+    "classes": [
+      {
+        "name": "SwarmActuator",
+        "docstring": "Delegates high-entropy tasks to external LLM agents and manages budget.",
+        "methods": [
+          {
+            "name": "__init__",
+            "docstring": null,
+            "args": [
+              "self",
+              "db_path"
+            ],
+            "line": 17,
+            "is_async": false
+          },
+          {
+            "name": "estimate_exergy_cost",
+            "docstring": "Estimates the token cost (entropy) of a task.",
+            "args": [
+              "self",
+              "task_payload"
+            ],
+            "line": 21,
+            "is_async": false
+          },
+          {
+            "name": "delegate_task",
+            "docstring": "Dispatches the task to an external agent.\nIn a C5-REAL deployment, this interfaces with the specific external API.",
+            "args": [
+              "self",
+              "agent_id",
+              "task_payload"
+            ],
+            "line": 27,
+            "is_async": false
+          },
+          {
+            "name": "penalize_agent",
+            "docstring": "Reduces the agent's virtual budget upon hallucination (Token Hygiene).",
+            "args": [
+              "self",
+              "agent_id",
+              "penalty_amount"
+            ],
+            "line": 48,
+            "is_async": false
+          }
+        ],
+        "line": 14
+      }
+    ],
+    "functions": [],
+    "critical_paths": [],
+    "sovereign_markers": [
+      {
+        "type": "string_constant",
+        "value": "\n        Dispatches the task to an external agent....",
+        "line": 28,
+        "context": "\"\"\""
+      },
+      {
+        "type": "attribute",
+        "name": "estimate_exergy_cost",
+        "line": 32,
+        "context": "cost = self.estimate_exergy_cost(task_payload)"
+      },
+      {
+        "type": "string_constant",
+        "value": ". Exergy cost: ",
+        "line": 39,
+        "context": "logging.info(f\"Task dispatched to {agent_id}. Exergy cost: {cost} tokens.\")"
+      }
+    ]
+  },
+  {
+    "classes": [
+      {
+        "name": "TelemetryGate",
+        "docstring": "The Ultimate C5-REAL Quality Gate for Alien Code.",
+        "methods": [
+          {
+            "name": "__init__",
+            "docstring": null,
+            "args": [
+              "self",
+              "actuator"
+            ],
+            "line": 19,
+            "is_async": false
+          },
+          {
+            "name": "_verify_ast_syntax",
+            "docstring": "Falsation Level 1: Static AST Parsing.",
+            "args": [
+              "self",
+              "source_code"
+            ],
+            "line": 23,
+            "is_async": false
+          },
+          {
+            "name": "_execute_sandbox_tests",
+            "docstring": "Falsation Level 2: Sandbox Execution (C5-REAL).\nTemporarily applies the patch, runs the test suite, and reverts.",
+            "args": [
+              "self",
+              "target_file",
+              "new_source"
+            ],
+            "line": 32,
+            "is_async": false
+          },
+          {
+            "name": "process_external_patch",
+            "docstring": "Receives an AST_MUTATION from an external agent and passes it through the guillotine.",
+            "args": [
+              "self",
+              "agent_id",
+              "patch_payload"
+            ],
+            "line": 91,
+            "is_async": false
+          }
+        ],
+        "line": 16
+      }
+    ],
+    "functions": [],
+    "critical_paths": [
+      {
+        "type": "attribute",
+        "name": "ledger",
+        "line": 20,
+        "context": "self.ledger = LedgerManager()"
+      },
+      {
+        "type": "identifier",
+        "name": "LedgerManager",
+        "line": 20,
+        "context": "self.ledger = LedgerManager()"
+      },
+      {
+        "type": "attribute",
+        "name": "_verify_ast_syntax",
+        "line": 112,
+        "context": "if not self._verify_ast_syntax(new_source):"
+      },
+      {
+        "type": "attribute",
+        "name": "ledger",
+        "line": 126,
+        "context": "self.ledger.append("
+      }
+    ],
+    "sovereign_markers": [
+      {
+        "type": "string_constant",
+        "value": "The Ultimate C5-REAL Quality Gate for Alien Code.",
+        "line": 17,
+        "context": "\"\"\"The Ultimate C5-REAL Quality Gate for Alien Code.\"\"\""
+      },
+      {
+        "type": "string_constant",
+        "value": "Falsation Level 2: Sandbox Execution (C5-REAL).\n  ...",
+        "line": 33,
+        "context": "\"\"\"Falsation Level 2: Sandbox Execution (C5-REAL)."
+      },
+      {
+        "type": "string_constant",
+        "value": "Running C5-REAL falsation tests on ",
+        "line": 56,
+        "context": "logging.info(f\"Running C5-REAL falsation tests on {target_file}...\")"
+      },
+      {
+        "type": "string_constant",
+        "value": "Falsation Timeout: Execution exceeded exergy bound...",
+        "line": 81,
+        "context": "logging.error(f\"Falsation Timeout: Execution exceeded exergy bounds (30s) on {target_file}.\")"
+      },
+      {
+        "type": "identifier",
+        "name": "exergy_yield",
+        "line": 122,
+        "context": "exergy_yield = float(payload.get(\"yield_amount\", 10.0))"
+      },
+      {
+        "type": "identifier",
+        "name": "exergy_yield",
+        "line": 129,
+        "context": "yield_amount=exergy_yield"
+      }
+    ]
+  },
+  {
+    "classes": [],
+    "functions": [
+      {
+        "name": "main",
+        "docstring": null,
+        "args": [],
+        "line": 5,
+        "is_async": true
+      }
+    ],
+    "critical_paths": [
+      {
+        "type": "attribute",
+        "name": "start_guardian",
+        "line": 7,
+        "context": "daemon.start_guardian()"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 21,
+        "context": "await asyncio.sleep(2)"
+      }
+    ],
+    "sovereign_markers": [
+      {
+        "type": "string_constant",
+        "value": "exergy_limit",
+        "line": 14,
+        "context": "\"exergy_limit\": 3000"
+      }
+    ]
+  },
+  {
+    "classes": [],
+    "functions": [
+      {
+        "name": "test_add",
+        "docstring": null,
+        "args": [],
+        "line": 2,
+        "is_async": false
+      }
+    ],
+    "critical_paths": [],
+    "sovereign_markers": []
+  },
+  {
+    "classes": [],
+    "functions": [
+      {
+        "name": "main",
+        "docstring": null,
+        "args": [],
+        "line": 4,
+        "is_async": true
+      }
+    ],
+    "critical_paths": [
+      {
+        "type": "await",
+        "name": "await",
+        "line": 18,
+        "context": "await asyncio.sleep(2)"
+      }
+    ],
+    "sovereign_markers": [
+      {
+        "type": "string_constant",
+        "value": "(with-exergy-limit 500j (z3-verify (infer qwen_loc...",
+        "line": 11,
+        "context": "\"code\": \"(with-exergy-limit 500j (z3-verify (infer qwen_local local_tensor)))\","
+      },
+      {
+        "type": "string_constant",
+        "value": "exergy_limit",
+        "line": 12,
+        "context": "\"exergy_limit\": 500"
+      }
+    ]
+  },
+  {
+    "classes": [],
+    "functions": [],
+    "critical_paths": [],
+    "sovereign_markers": []
+  },
+  {
+    "classes": [],
+    "functions": [
+      {
+        "name": "stress_test",
+        "docstring": null,
+        "args": [],
+        "line": 7,
+        "is_async": false
+      }
+    ],
+    "critical_paths": [],
+    "sovereign_markers": [
+      {
+        "type": "string_constant",
+        "value": "[MMAP-STRESS] Inciando C5-REAL Silicon Stress Test",
+        "line": 8,
+        "context": "print(\"[MMAP-STRESS] Inciando C5-REAL Silicon Stress Test\")"
+      }
+    ]
+  },
+  {
+    "classes": [],
+    "functions": [
+      {
+        "name": "test_reconciliation",
+        "docstring": null,
+        "args": [],
+        "line": 9,
+        "is_async": true
+      }
+    ],
+    "critical_paths": [
+      {
+        "type": "identifier",
+        "name": "ledger",
+        "line": 10,
+        "context": "ledger = LedgerManager()"
+      },
+      {
+        "type": "identifier",
+        "name": "LedgerManager",
+        "line": 10,
+        "context": "ledger = LedgerManager()"
+      },
+      {
+        "type": "identifier",
+        "name": "ledger",
+        "line": 13,
+        "context": "current_yield = ledger.get_total_yield()"
+      },
+      {
+        "type": "identifier",
+        "name": "ledger",
+        "line": 19,
+        "context": "ledger.append(action=\"BURN_OUT\", vector_id=\"SIMULATED_TEST\", yield_amount=deficit)"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 20,
+        "context": "await asyncio.sleep(1.5) # Wait for signer thread"
+      },
+      {
+        "type": "identifier",
+        "name": "ledger",
+        "line": 21,
+        "context": "new_yield = ledger.get_total_yield()"
+      },
+      {
+        "type": "identifier",
+        "name": "ledger",
+        "line": 25,
+        "context": "hardware = HardwareAggressor(ledger)"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 31,
+        "context": "expanded = await hardware.evaluate_expansion()"
+      },
+      {
+        "type": "await",
+        "name": "await",
+        "line": 35,
+        "context": "await asyncio.sleep(1.5)"
+      },
+      {
+        "type": "identifier",
+        "name": "ledger",
+        "line": 36,
+        "context": "final_yield = ledger.get_total_yield()"
+      },
+      {
+        "type": "identifier",
+        "name": "ledger",
+        "line": 39,
+        "context": "ledger.close()"
+      }
+    ],
+    "sovereign_markers": []
+  },
+  {
+    "classes": [
+      {
+        "name": "TopologicalPresenceEngine",
+        "docstring": null,
+        "methods": [
+          {
+            "name": "__init__",
+            "docstring": null,
+            "args": [
+              "self",
+              "num_splats"
+            ],
+            "line": 27,
+            "is_async": false
+          },
+          {
+            "name": "generate_synthetic_naroa_splats",
+            "docstring": "Generates a Torus (H1 hole) surrounded by uniform Gaussian noise.",
+            "args": [
+              "self"
+            ],
+            "line": 32,
+            "is_async": false
+          },
+          {
+            "name": "compute_persistent_homology_filter",
+            "docstring": "Emulates a Vietoris-Rips filtration by identifying the high-density\ntopological core that sustains perceptual shape (The Skeleton).",
+            "args": [
+              "self",
+              "radius",
+              "density_threshold"
+            ],
+            "line": 60,
+            "is_async": false
+          },
+          {
+            "name": "emit_presence_metrics",
+            "docstring": null,
+            "args": [
+              "self"
+            ],
+            "line": 85,
+            "is_async": false
+          }
+        ],
+        "line": 26
+      }
+    ],
+    "functions": [],
+    "critical_paths": [
+      {
+        "type": "identifier",
+        "name": "n_signal",
+        "line": 41,
+        "context": "n_signal = int(self.num_splats * 0.3)"
+      },
+      {
+        "type": "identifier",
+        "name": "n_signal",
+        "line": 42,
+        "context": "n_noise = self.num_splats - n_signal"
+      },
+      {
+        "type": "identifier",
+        "name": "n_signal",
+        "line": 46,
+        "context": "theta = np.random.uniform(0, 2*np.pi, n_signal)"
+      },
+      {
+        "type": "identifier",
+        "name": "n_signal",
+        "line": 47,
+        "context": "phi = np.random.uniform(0, 2*np.pi, n_signal)"
+      },
+      {
+        "type": "identifier",
+        "name": "signal_cloud",
+        "line": 52,
+        "context": "signal_cloud = np.column_stack((x_sig, y_sig, z_sig))"
+      },
+      {
+        "type": "identifier",
+        "name": "signal_cloud",
+        "line": 57,
+        "context": "self.cloud = np.vstack((signal_cloud, noise_cloud))"
+      }
+    ],
+    "sovereign_markers": [
+      {
+        "type": "string_constant",
+        "value": "\nHITO 24: TOPOLOGICAL PRESENCE ENGINE\nNaroa-2026 E...",
+        "line": 2,
+        "context": "\"\"\""
+      },
+      {
+        "type": "string_constant",
+        "value": "Scipy/Numpy required for C5-REAL topological proce...",
+        "line": 35,
+        "context": "logger.error(\"Scipy/Numpy required for C5-REAL topological processing. Falling back to pure math simulation.\")"
+      },
+      {
+        "type": "string_constant",
+        "value": "C5-REAL EXECUTION ERROR: 'numpy' and 'scipy' requi...",
+        "line": 118,
+        "context": "logger.error(\"C5-REAL EXECUTION ERROR: 'numpy' and 'scipy' required for Topological Data Analysis.\")"
+      }
+    ]
+  },
+  {
+    "classes": [
+      {
+        "name": "UESSAstMutationEngine",
+        "docstring": "C5-REAL AST Mutation Engine.\nSubscribes to UESS `AstMutate` events and applies semantic graph transformations.\nIntegrates directly with the UESS v2 Swarm Scheduler to enforce causal invariants.",
+        "methods": [
+          {
+            "name": "__init__",
+            "docstring": null,
+            "args": [
+              "self",
+              "target_file",
+              "scheduler"
+            ],
+            "line": 18,
+            "is_async": false
+          },
+          {
+            "name": "_build_semantic_graph",
+            "docstring": "Compiles AST into a semantic dependency DAG.",
+            "args": [
+              "self"
+            ],
+            "line": 25,
+            "is_async": false
+          },
+          {
+            "name": "evaluate_mutation_rules",
+            "docstring": "Applies Swarm Consensus Rules before mutating the AST.",
+            "args": [
+              "self",
+              "target_node",
+              "proposed_ast"
+            ],
+            "line": 37,
+            "is_async": false
+          },
+          {
+            "name": "execute_ast_mutation",
+            "docstring": "Executes the mutation using UESS invariants.\nReturns the event-sourced log artifact.",
+            "args": [
+              "self",
+              "agent_id",
+              "target_node",
+              "proposed_ast"
+            ],
+            "line": 56,
+            "is_async": false
+          }
+        ],
+        "line": 12
+      }
+    ],
+    "functions": [],
+    "critical_paths": [
+      {
+        "type": "identifier",
+        "name": "hashlib",
+        "line": 33,
+        "context": "\"hash\": hashlib.sha256(ast.unparse(node).encode()).hexdigest()"
+      }
+    ],
+    "sovereign_markers": [
+      {
+        "type": "string_constant",
+        "value": "\n    C5-REAL AST Mutation Engine.\n    Subscribes t...",
+        "line": 13,
+        "context": "\"\"\""
+      },
+      {
+        "type": "string_constant",
+        "value": "def compute_exergy():\n    return 42\n",
+        "line": 90,
+        "context": "f.write(\"def compute_exergy():\\n    return 42\\n\")"
+      },
+      {
+        "type": "string_constant",
+        "value": "def compute_exergy():\n    return 42 * 1.618\n",
+        "line": 99,
+        "context": "new_ast = \"def compute_exergy():\\n    return 42 * 1.618\\n\""
+      },
+      {
+        "type": "string_constant",
+        "value": "compute_exergy",
+        "line": 101,
+        "context": "result = engine.execute_ast_mutation(agent_id=0, target_node=\"compute_exergy\", proposed_ast=new_ast)"
+      }
+    ]
+  },
+  {
+    "classes": [
+      {
+        "name": "HybridLogicalClock",
+        "docstring": null,
+        "methods": [
+          {
+            "name": "__init__",
+            "docstring": null,
+            "args": [
+              "self"
+            ],
+            "line": 13,
+            "is_async": false
+          },
+          {
+            "name": "tick",
+            "docstring": null,
+            "args": [
+              "self"
+            ],
+            "line": 17,
+            "is_async": false
+          },
+          {
+            "name": "to_string",
+            "docstring": null,
+            "args": [
+              "self"
+            ],
+            "line": 26,
+            "is_async": false
+          }
+        ],
+        "line": 12
+      },
+      {
+        "name": "UESSCortexRuntime",
+        "docstring": "C5-REAL CORTEX Runtime.\nGlobal synchronization bus that unifies Swarm scheduling, AST mutations,\nand event logging via Hybrid Logical Clocks.",
+        "methods": [
+          {
+            "name": "__init__",
+            "docstring": null,
+            "args": [
+              "self",
+              "target_ast_file"
+            ],
+            "line": 36,
+            "is_async": false
+          },
+          {
+            "name": "_emit_event",
+            "docstring": null,
+            "args": [
+              "self",
+              "event_type",
+              "agent_id",
+              "payload"
+            ],
+            "line": 43,
+            "is_async": false
+          },
+          {
+            "name": "loop_cycle",
+            "docstring": "Single tick of the CORTEX Runtime.",
+            "args": [
+              "self"
+            ],
+            "line": 55,
+            "is_async": false
+          }
+        ],
+        "line": 30
+      }
+    ],
+    "functions": [],
+    "critical_paths": [],
+    "sovereign_markers": [
+      {
+        "type": "string_constant",
+        "value": "\n    C5-REAL CORTEX Runtime.\n    Global synchroniz...",
+        "line": 31,
+        "context": "\"\"\""
+      },
+      {
+        "type": "string_constant",
+        "value": "def exergy_optimized():\n    return 1.618\n",
+        "line": 76,
+        "context": "mutation_code = \"def exergy_optimized():\\n    return 1.618\\n\""
+      },
+      {
+        "type": "string_constant",
+        "value": "exergy_optimized",
+        "line": 77,
+        "context": "result = self.ast_engine.execute_ast_mutation(agent_id, \"exergy_optimized\", mutation_code)"
+      },
+      {
+        "type": "string_constant",
+        "value": "def exergy_optimized():\n    return 0\n",
+        "line": 88,
+        "context": "f.write(\"def exergy_optimized():\\n    return 0\\n\")"
+      }
+    ]
+  },
+  {
+    "classes": [
+      {
+        "name": "UESSOuroborosEngine",
+        "docstring": "C5-REAL Ouroboros Engine.\nSelf-rewriting SPEC loop.\nReads DVF collapse signals from Sentinel DAEMON.\nMutates the System SPEC and injects AST events into CORTEX Runtime\nto align execution with the new SPEC.",
+        "methods": [
+          {
+            "name": "__init__",
+            "docstring": null,
+            "args": [
+              "self",
+              "spec_path",
+              "runtime",
+              "daemon"
+            ],
+            "line": 22,
+            "is_async": false
+          },
+          {
+            "name": "_write_default_spec",
+            "docstring": null,
+            "args": [
+              "self"
+            ],
+            "line": 31,
+            "is_async": false
+          },
+          {
+            "name": "read_spec",
+            "docstring": null,
+            "args": [
+              "self"
+            ],
+            "line": 45,
+            "is_async": false
+          },
+          {
+            "name": "write_spec",
+            "docstring": null,
+            "args": [
+              "self",
+              "spec"
+            ],
+            "line": 49,
+            "is_async": false
+          },
+          {
+            "name": "measure_and_adapt",
+            "docstring": "1. Measure DVF state from Sentinel\n2. Adapt SPEC if DVF bounds are breached\nReturns status logic.",
+            "args": [
+              "self"
+            ],
+            "line": 60,
+            "is_async": false
+          },
+          {
+            "name": "run_ouroboros_loop",
+            "docstring": null,
+            "args": [
+              "self",
+              "max_iterations"
+            ],
+            "line": 91,
+            "is_async": false
+          }
+        ],
+        "line": 14
+      }
+    ],
+    "functions": [],
+    "critical_paths": [
+      {
+        "type": "identifier",
+        "name": "spec_hash",
+        "line": 54,
+        "context": "spec_hash = hashlib.sha256(yaml.dump(spec).encode()).hexdigest()"
+      },
+      {
+        "type": "identifier",
+        "name": "hashlib",
+        "line": 54,
+        "context": "spec_hash = hashlib.sha256(yaml.dump(spec).encode()).hexdigest()"
+      },
+      {
+        "type": "identifier",
+        "name": "spec_hash",
+        "line": 55,
+        "context": "logger.info(f\"Ouroboros Rewrote SPEC. Gen: {self.generation} | Hash: {spec_hash[:16]}\")"
+      },
+      {
+        "type": "identifier",
+        "name": "spec_hash",
+        "line": 58,
+        "context": "self.runtime._emit_event(\"SPEC_REWRITE\", 0, {\"generation\": self.generation, \"hash\": spec_hash})"
+      }
+    ],
+    "sovereign_markers": [
+      {
+        "type": "import",
+        "name": "uess_cortex_runtime.UESSCortexRuntime",
+        "line": 8,
+        "context": "from uess_cortex_runtime import UESSCortexRuntime"
+      },
+      {
+        "type": "string_constant",
+        "value": "\n    C5-REAL Ouroboros Engine.\n    Self-rewriting ...",
+        "line": 15,
+        "context": "\"\"\""
+      }
+    ]
+  },
+  {
+    "classes": [
+      {
+        "name": "UESSRemotionBridge",
+        "docstring": "C5-REAL Remotion Integration Bridge.\nProjects the CORTEX Event DAG into a deterministic Scene Graph.\nOutput is a Remotion-ready JSON sequence where:\n- History = Replay of events\n- Visuals = Projection of the graph\n- Music = State function (derived from entropy/DVF)",
+        "methods": [
+          {
+            "name": "__init__",
+            "docstring": null,
+            "args": [
+              "self",
+              "log_path",
+              "out_path"
+            ],
+            "line": 19,
+            "is_async": false
+          },
+          {
+            "name": "event_to_frame_mutation",
+            "docstring": "Maps an internal UESS Event into a Visual Scene Graph mutation.",
+            "args": [
+              "self",
+              "event"
+            ],
+            "line": 26,
+            "is_async": false
+          },
+          {
+            "name": "process_aof",
+            "docstring": "Tails the Event AOF and builds the Scene Graph Sequence.",
+            "args": [
+              "self"
+            ],
+            "line": 79,
+            "is_async": false
+          },
+          {
+            "name": "_flush_scene_graph",
+            "docstring": null,
+            "args": [
+              "self"
+            ],
+            "line": 104,
+            "is_async": false
+          }
+        ],
+        "line": 10
+      }
+    ],
+    "functions": [],
+    "critical_paths": [],
+    "sovereign_markers": [
+      {
+        "type": "string_constant",
+        "value": "\n    C5-REAL Remotion Integration Bridge.\n    Proj...",
+        "line": 11,
+        "context": "\"\"\""
+      }
+    ]
+  },
+  {
+    "classes": [
+      {
+        "name": "DriftVectorField",
+        "docstring": null,
+        "methods": [
+          {
+            "name": "__init__",
+            "docstring": null,
+            "args": [
+              "self"
+            ],
+            "line": 11,
+            "is_async": false
+          },
+          {
+            "name": "as_dict",
+            "docstring": null,
+            "args": [
+              "self"
+            ],
+            "line": 18,
+            "is_async": false
+          }
+        ],
+        "line": 10
+      },
+      {
+        "name": "UESSSentinelDaemon",
+        "docstring": "C5-REAL Sentinel DAEMON.\nPersistent observer mapping the AOF event log.\nCalculates the Drift Vector Field (DVF) to prevent semantic inflation\nand enforce identity coherence across the Swarm Runtime.",
+        "methods": [
+          {
+            "name": "__init__",
+            "docstring": null,
+            "args": [
+              "self",
+              "log_path"
+            ],
+            "line": 34,
+            "is_async": false
+          },
+          {
+            "name": "parse_event",
+            "docstring": "Modulates the DVF based on event payloads.",
+            "args": [
+              "self",
+              "event"
+            ],
+            "line": 40,
+            "is_async": false
+          },
+          {
+            "name": "trigger_repair",
+            "docstring": "Autonomic reflex if DVF bounds are breached.",
+            "args": [
+              "self"
+            ],
+            "line": 68,
+            "is_async": false
+          },
+          {
+            "name": "run_cycle",
+            "docstring": "Scans the event AOF and updates the global DVF metric.",
+            "args": [
+              "self"
+            ],
+            "line": 77,
+            "is_async": false
+          }
+        ],
+        "line": 27
+      }
+    ],
+    "functions": [],
+    "critical_paths": [],
+    "sovereign_markers": [
+      {
+        "type": "string_constant",
+        "value": "\n    C5-REAL Sentinel DAEMON.\n    Persistent obser...",
+        "line": 28,
+        "context": "\"\"\""
+      }
+    ]
+  },
+  {
+    "classes": [
+      {
+        "name": "AgentRole",
+        "docstring": null,
+        "methods": [],
+        "line": 13
+      },
+      {
+        "name": "AgentNode",
+        "docstring": null,
+        "methods": [],
+        "line": 22
+      },
+      {
+        "name": "UESSSwarmScheduler",
+        "docstring": "C5-REAL UESS Swarm Scheduler.\nReads UESS v2 metrics (queue_depth, error_rate, causal_entropy, cpu_load)\nfrom the ULTRAMAP-Ω memory substrate to perform dynamic scheduling,\nadversarial consensus, and entropy regulation.",
+        "methods": [
+          {
+            "name": "__init__",
+            "docstring": null,
+            "args": [
+              "self",
+              "capacity"
+            ],
+            "line": 36,
+            "is_async": false
+          },
+          {
+            "name": "_spawn_node",
+            "docstring": null,
+            "args": [
+              "self",
+              "agent_id",
+              "role",
+              "target"
+            ],
+            "line": 45,
+            "is_async": false
+          },
+          {
+            "name": "evaluate_swarm_entropy",
+            "docstring": "Calculates global causal entropy across the active swarm.",
+            "args": [
+              "self"
+            ],
+            "line": 58,
+            "is_async": false
+          },
+          {
+            "name": "tick",
+            "docstring": "Main Event Loop Tick.\n1. Reads state from ULTRAMAP-Ω\n2. Detects drift or anomaly\n3. Spawns/Kills nodes dynamically based on control vectors.",
+            "args": [
+              "self"
+            ],
+            "line": 79,
+            "is_async": false
+          }
+        ],
+        "line": 28
+      }
+    ],
+    "functions": [],
+    "critical_paths": [
+      {
+        "type": "identifier",
+        "name": "target_hash",
+        "line": 25,
+        "context": "target_hash: str"
+      },
+      {
+        "type": "identifier",
+        "name": "target_hash",
+        "line": 49,
+        "context": "target_hash = hashlib.sha256(target.encode()).hexdigest()"
+      },
+      {
+        "type": "identifier",
+        "name": "hashlib",
+        "line": 49,
+        "context": "target_hash = hashlib.sha256(target.encode()).hexdigest()"
+      },
+      {
+        "type": "identifier",
+        "name": "target_hash",
+        "line": 50,
+        "context": "self.nodes[agent_id] = AgentNode(id=agent_id, role=role, target_hash=target_hash, active=True)"
+      },
+      {
+        "type": "identifier",
+        "name": "target_hash",
+        "line": 54,
+        "context": "self.umap.update_agent_position(agent_id, x=0.1, y=0.1, z=0.1, target=target_hash, entropy=0.1)"
+      }
+    ],
+    "sovereign_markers": [
+      {
+        "type": "string_constant",
+        "value": "\n    C5-REAL UESS Swarm Scheduler.\n    Reads UESS ...",
+        "line": 29,
+        "context": "\"\"\""
+      }
+    ]
+  },
+  {
+    "classes": [
+      {
+        "name": "EntropyDeath",
+        "docstring": null,
+        "methods": [],
+        "line": 24
+      },
+      {
+        "name": "UltramapSubstrate",
+        "docstring": "ULTRAMAP-Ω: Sovereign Spatial Matrix for the K-0 Swarm.\nC5-REAL Lock-Free Topological Substrate.\n\nMemory Layout per Node (96 bytes):\n  [0:24]  : X, Y, Z coordinates (3x double)\n  [24:88] : Target Hash (64 bytes string)\n  [88:96] : Entropy Gradient (double)",
+        "methods": [
+          {
+            "name": "__init__",
+            "docstring": null,
+            "args": [
+              "self",
+              "capacity"
+            ],
+            "line": 38,
+            "is_async": false
+          },
+          {
+            "name": "_safe_close",
+            "docstring": null,
+            "args": [
+              "buffer_obj",
+              "mmap_obj",
+              "f_obj"
+            ],
+            "line": 66,
+            "is_async": false
+          },
+          {
+            "name": "close",
+            "docstring": null,
+            "args": [
+              "self"
+            ],
+            "line": 81,
+            "is_async": false
+          },
+          {
+            "name": "update_agent_position",
+            "docstring": "Updates the topological coordinates of a swarm agent.",
+            "args": [
+              "self",
+              "agent_idx",
+              "x",
+              "y",
+              "z",
+              "target",
+              "entropy"
+            ],
+            "line": 108,
+            "is_async": false
+          },
+          {
+            "name": "calculate_exergy_distance",
+            "docstring": "O(1) calculation of thermodynamic distance to target.\nReturns the Joules required to traverse the topology.",
+            "args": [
+              "self",
+              "agent_idx",
+              "target_hash"
+            ],
+            "line": 125,
+            "is_async": false
+          },
+          {
+            "name": "get_agent_state",
+            "docstring": null,
+            "args": [
+              "self",
+              "agent_idx"
+            ],
+            "line": 149,
+            "is_async": false
+          },
+          {
+            "name": "update_control_vector",
+            "docstring": "UESS v2: Writes the Control Vector fields to the memory substrate.",
+            "args": [
+              "self",
+              "agent_idx",
+              "queue_depth",
+              "error_rate",
+              "causal_entropy",
+              "cpu_load"
+            ],
+            "line": 176,
+            "is_async": false
+          }
+        ],
+        "line": 27
+      }
+    ],
+    "functions": [],
+    "critical_paths": [
+      {
+        "type": "identifier",
+        "name": "target_hash",
+        "line": 134,
+        "context": "return self._rs.calculate_exergy_distance(agent_idx, target_hash)"
+      },
+      {
+        "type": "identifier",
+        "name": "hashlib",
+        "line": 140,
+        "context": "target_int = int(hashlib.sha256(target_hash.encode()).hexdigest()[:16], 16)"
+      },
+      {
+        "type": "identifier",
+        "name": "target_hash",
+        "line": 140,
+        "context": "target_int = int(hashlib.sha256(target_hash.encode()).hexdigest()[:16], 16)"
+      }
+    ],
+    "sovereign_markers": [
+      {
+        "type": "import",
+        "name": "cortex_rs",
+        "line": 13,
+        "context": "import cortex_rs"
+      },
+      {
+        "type": "string_constant",
+        "value": "\n    ULTRAMAP-Ω: Sovereign Spatial Matrix for the ...",
+        "line": 28,
+        "context": "\"\"\""
+      },
+      {
+        "type": "attribute",
+        "name": "calculate_exergy_distance",
+        "line": 134,
+        "context": "return self._rs.calculate_exergy_distance(agent_idx, target_hash)"
+      },
+      {
+        "type": "attribute",
+        "name": "calculate_exergy_distance",
+        "line": 199,
+        "context": "joules = umap.calculate_exergy_distance(0, \"TARGET_DARKPOOL_0x1\")"
+      },
+      {
+        "type": "string_constant",
+        "value": "C5-REAL: Exergy Distance Calculated: ",
+        "line": 200,
+        "context": "logger.info(f\"C5-REAL: Exergy Distance Calculated: {joules:.2f} Joules\")"
+      }
+    ]
+  },
+  {
+    "classes": [],
+    "functions": [
+      {
+        "name": "ensure_db",
+        "docstring": null,
+        "args": [],
+        "line": 26,
+        "is_async": false
+      },
+      {
+        "name": "compress_and_index",
+        "docstring": "Generates VSA [1x10000] hypervectors for all Knowledge Items.",
+        "args": [],
+        "line": 41,
+        "is_async": false
+      },
+      {
+        "name": "semantic_search",
+        "docstring": "Associative recall from the Sovereign VSA Tensor.",
+        "args": [
+          "query",
+          "limit"
+        ],
+        "line": 118,
+        "is_async": false
+      }
+    ],
+    "critical_paths": [
+      {
+        "type": "attribute",
+        "name": "commit",
+        "line": 37,
+        "context": "conn.commit()"
+      },
+      {
+        "type": "attribute",
+        "name": "commit",
+        "line": 111,
+        "context": "conn.commit()"
+      }
+    ],
+    "sovereign_markers": [
+      {
+        "type": "string_constant",
+        "value": "🚀 [CORTEX VSA] Commencing Sovereign Memory Compres...",
+        "line": 59,
+        "context": "print(\"🚀 [CORTEX VSA] Commencing Sovereign Memory Compression...\")"
+      },
+      {
+        "type": "string_constant",
+        "value": "Associative recall from the Sovereign VSA Tensor.",
+        "line": 119,
+        "context": "\"\"\"Associative recall from the Sovereign VSA Tensor.\"\"\""
+      }
+    ]
+  }
+]

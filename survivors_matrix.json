@@ -1,0 +1,458 @@
+[
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 6,
+    "mutation_type": "ReturnValueMutation",
+    "lineno": 65
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 17,
+    "mutation_type": "CompareFlip",
+    "lineno": 88
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 18,
+    "mutation_type": "ConstantReplacement",
+    "lineno": 89
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 19,
+    "mutation_type": "CompareFlip",
+    "lineno": 89
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 22,
+    "mutation_type": "ConstantReplacement",
+    "lineno": 96
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 27,
+    "mutation_type": "CompareFlip",
+    "lineno": 105
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 28,
+    "mutation_type": "CompareFlip",
+    "lineno": 105
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 29,
+    "mutation_type": "BooleanFlip",
+    "lineno": 105
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 30,
+    "mutation_type": "ConstantReplacement",
+    "lineno": 106
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 31,
+    "mutation_type": "ReturnValueMutation",
+    "lineno": 106
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 32,
+    "mutation_type": "BranchInversion",
+    "lineno": 105
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 33,
+    "mutation_type": "CompareFlip",
+    "lineno": 107
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 34,
+    "mutation_type": "CompareFlip",
+    "lineno": 107
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 35,
+    "mutation_type": "BooleanFlip",
+    "lineno": 107
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 36,
+    "mutation_type": "ConstantReplacement",
+    "lineno": 108
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 37,
+    "mutation_type": "ReturnValueMutation",
+    "lineno": 108
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 38,
+    "mutation_type": "BranchInversion",
+    "lineno": 107
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 39,
+    "mutation_type": "CompareFlip",
+    "lineno": 109
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 40,
+    "mutation_type": "ConstantReplacement",
+    "lineno": 109
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 41,
+    "mutation_type": "CompareFlip",
+    "lineno": 109
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 42,
+    "mutation_type": "BooleanFlip",
+    "lineno": 109
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 43,
+    "mutation_type": "ConstantReplacement",
+    "lineno": 110
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 44,
+    "mutation_type": "ReturnValueMutation",
+    "lineno": 110
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 45,
+    "mutation_type": "BranchInversion",
+    "lineno": 109
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 46,
+    "mutation_type": "ConstantReplacement",
+    "lineno": 111
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 47,
+    "mutation_type": "ReturnValueMutation",
+    "lineno": 111
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 48,
+    "mutation_type": "CompareFlip",
+    "lineno": 118
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 49,
+    "mutation_type": "CompareFlip",
+    "lineno": 119
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 50,
+    "mutation_type": "CompareFlip",
+    "lineno": 120
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 51,
+    "mutation_type": "CompareFlip",
+    "lineno": 121
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 52,
+    "mutation_type": "ReturnValueMutation",
+    "lineno": 121
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 53,
+    "mutation_type": "BranchInversion",
+    "lineno": 115
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 54,
+    "mutation_type": "CompareFlip",
+    "lineno": 122
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 55,
+    "mutation_type": "ReturnValueMutation",
+    "lineno": 122
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 56,
+    "mutation_type": "ConstantReplacement",
+    "lineno": 136
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 57,
+    "mutation_type": "ReturnValueMutation",
+    "lineno": 136
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 61,
+    "mutation_type": "ReturnValueMutation",
+    "lineno": 140
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 65,
+    "mutation_type": "ConstantReplacement",
+    "lineno": 150
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 71,
+    "mutation_type": "BinOpFlip",
+    "lineno": 155
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 74,
+    "mutation_type": "CompareFlip",
+    "lineno": 162
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 75,
+    "mutation_type": "BooleanFlip",
+    "lineno": 162
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 76,
+    "mutation_type": "BranchInversion",
+    "lineno": 162
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 77,
+    "mutation_type": "ConstantReplacement",
+    "lineno": 166
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 78,
+    "mutation_type": "CompareFlip",
+    "lineno": 166
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 79,
+    "mutation_type": "ConstantReplacement",
+    "lineno": 168
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 80,
+    "mutation_type": "CompareFlip",
+    "lineno": 169
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 81,
+    "mutation_type": "ConstantReplacement",
+    "lineno": 172
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 82,
+    "mutation_type": "BinOpFlip",
+    "lineno": 172
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 83,
+    "mutation_type": "BinOpFlip",
+    "lineno": 174
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 84,
+    "mutation_type": "CompareFlip",
+    "lineno": 174
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 85,
+    "mutation_type": "CompareFlip",
+    "lineno": 176
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 86,
+    "mutation_type": "CompareFlip",
+    "lineno": 177
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 87,
+    "mutation_type": "BranchInversion",
+    "lineno": 166
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 94,
+    "mutation_type": "CompareFlip",
+    "lineno": 187
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 95,
+    "mutation_type": "ConstantReplacement",
+    "lineno": 188
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 96,
+    "mutation_type": "BinOpFlip",
+    "lineno": 188
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 97,
+    "mutation_type": "ConstantReplacement",
+    "lineno": 189
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 98,
+    "mutation_type": "BinOpFlip",
+    "lineno": 189
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 99,
+    "mutation_type": "CompareFlip",
+    "lineno": 189
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 100,
+    "mutation_type": "ConstantReplacement",
+    "lineno": 190
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 101,
+    "mutation_type": "ReturnValueMutation",
+    "lineno": 190
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 102,
+    "mutation_type": "BranchInversion",
+    "lineno": 189
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 103,
+    "mutation_type": "CompareFlip",
+    "lineno": 196
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 104,
+    "mutation_type": "BooleanFlip",
+    "lineno": 196
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 105,
+    "mutation_type": "BranchInversion",
+    "lineno": 196
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 106,
+    "mutation_type": "BinOpFlip",
+    "lineno": 200
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 107,
+    "mutation_type": "CompareFlip",
+    "lineno": 200
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 108,
+    "mutation_type": "ConstantReplacement",
+    "lineno": 201
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 109,
+    "mutation_type": "ReturnValueMutation",
+    "lineno": 201
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 110,
+    "mutation_type": "BranchInversion",
+    "lineno": 200
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 111,
+    "mutation_type": "ConstantReplacement",
+    "lineno": 202
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 112,
+    "mutation_type": "ReturnValueMutation",
+    "lineno": 202
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 113,
+    "mutation_type": "BinOpFlip",
+    "lineno": 212
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 114,
+    "mutation_type": "BinOpFlip",
+    "lineno": 214
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 115,
+    "mutation_type": "ConstantReplacement",
+    "lineno": 214
+  },
+  {
+    "file": "cortex/guards/smt_guard.py",
+    "mutation_index": 116,
+    "mutation_type": "ReturnValueMutation",
+    "lineno": 208
+  }
+]
