@@ -225,9 +225,12 @@ class CortexEngine(
                     # But we MUST kill the aiosqlite worker thread, or it hangs on exit!
                     if hasattr(conn, "_tx"):
                         try:
-                            from aiosqlite.core import _STOP_RUNNING_SENTINEL
+                            try:
+                                from aiosqlite.core import _STOP_RUNNING_SENTINEL
+                            except ImportError:
+                                _STOP_RUNNING_SENTINEL = None
 
-                            def close_and_stop(c=conn):
+                            def close_and_stop(c=conn, stop_sentinel=_STOP_RUNNING_SENTINEL):
                                 if getattr(c, "_connection", None) is not None:
                                     try:
                                         c._connection.close()
@@ -238,7 +241,7 @@ class CortexEngine(
                                             "DETECTIVE-OMEGA: Silent exception swallowed in __init__.py"
                                         )
                                     c._connection = None
-                                return _STOP_RUNNING_SENTINEL
+                                return stop_sentinel
 
                             conn._tx.put_nowait((None, close_and_stop))
                         except Exception:
