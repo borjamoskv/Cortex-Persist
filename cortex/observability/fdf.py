@@ -1,6 +1,6 @@
 import numpy as np
 from sklearn.neighbors import KernelDensity
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List, Callable, Any
 
 from cortex.observability.efel import SystemState, encode_state, encode_task
@@ -30,6 +30,22 @@ class Particle:
     velocity: np.ndarray
     mass: float
     original_stats: Any
+    history: List[float] = field(default_factory=list)
+    age: float = 0.0
+
+def update_mass(p: Particle, alpha: float = 0.08, mass_cap: float = 1e6) -> float:
+    """CTC: Masa dependiente de la inercia de fallos históricos."""
+    if len(p.history) == 0:
+        return p.mass
+    failure_pressure = np.mean(p.history[-20:])
+    volatility = np.std(p.history[-20:]) if len(p.history) > 1 else 0.0
+    p.mass = p.mass * (1 + alpha * failure_pressure + 0.5 * volatility)
+    p.mass = min(p.mass, mass_cap)
+    return p.mass
+
+def temporal_drag(p: Particle) -> float:
+    """CTC: Tiempo como resistencia."""
+    return 0.01 * p.age * p.mass
 
 def force(p1: Particle, p2: Particle) -> np.ndarray:
     """Repulsión si compiten por recursos."""
@@ -63,11 +79,22 @@ def total_force(particle: Particle, particles: List[Particle], field: FailureFie
 def simulate_field(particles: List[Particle], field: FailureField, steps: int = 50, dt: float = 0.1):
     for _ in range(steps):
         for p in particles:
+            # 1. Update causal mass
+            update_mass(p)
+            
+            # 2. Physics & forces
             F = total_force(p, particles, field)
-            p.velocity += (F / p.mass) * dt
+            F -= temporal_drag(p)
+            
+            # 3. Kinematics
+            p.velocity += (F / (p.mass + 1e-6)) * dt
+            p.velocity *= 0.90 # Structural damping
             p.position += p.velocity * dt
-            # Hysteresis damping
-            p.velocity *= 0.92
+            
+            # 4. History trace
+            p.history.append(float(field.potential(p.position)))
+            p.history = p.history[-50:] # Keep trace bounded
+            p.age += dt
 
 def energy(particle: Particle, state_vec: np.ndarray, meta: Any, field: FailureField) -> float:
     # We use the particle's converged position to evaluate potential
