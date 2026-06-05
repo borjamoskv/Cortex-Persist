@@ -1,13 +1,28 @@
 import os
 import json
 import statistics
-import math
-import re
-from datetime import datetime
+import random
+from dataclasses import dataclass, asdict
 from typing import List, Dict, Any, Tuple
 
 CRONOS_LOG = os.path.expanduser("~/.gemini/config/skills/_metrics/cronos_memory.jsonl")
+META_PARAMS_LOG = os.path.expanduser("~/.gemini/config/skills/_metrics/meta_params.json")
 WORKFLOWS_DIR = os.path.expanduser("~/.agents/workflows")
+
+@dataclass
+class MetaParams:
+    alpha_risk: float = 0.15
+    learning_rate: float = 0.02
+    epsilon: float = 0.05
+
+@dataclass
+class TaskStats:
+    name: str
+    exergy_mean: float
+    exergy_var: float
+    runtime_mean: float
+    runtime_var: float
+    confidence: float = 1.0
 
 class ExergyEngine:
     """
@@ -17,6 +32,22 @@ class ExergyEngine:
     def __init__(self):
         self.history = self._load_cronos_history()
         self.genomes = self._extract_workflow_genomes()
+        self.meta = self._load_meta_params()
+
+    def _load_meta_params(self) -> MetaParams:
+        if os.path.exists(META_PARAMS_LOG):
+            try:
+                with open(META_PARAMS_LOG, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    return MetaParams(**data)
+            except Exception:
+                pass
+        return MetaParams()
+
+    def _save_meta_params(self):
+        os.makedirs(os.path.dirname(META_PARAMS_LOG), exist_ok=True)
+        with open(META_PARAMS_LOG, 'w', encoding='utf-8') as f:
+            json.dump(asdict(self.meta), f, indent=2)
 
     def _load_cronos_history(self) -> List[Dict[str, Any]]:
         records = []
@@ -84,52 +115,54 @@ class ExergyEngine:
             "status": status
         }
 
-    def predict(self, workflow: str) -> Dict[str, float]:
-        """Nivel 3: Prediction Engine for runtime and exergy."""
+    def get_task_stats(self, workflow: str) -> TaskStats:
+        """Calculates stable statistical moments for a workflow."""
         wf_history = [r for r in self.history if r.get('workflow') == workflow]
-        if not wf_history:
-            return {"predicted_runtime": 15.0, "predicted_outcome": 1.0, "predicted_exergy": 0.06}
+        if len(wf_history) < 2:
+            return TaskStats(workflow, 0.06, 0.0, 15.0, 0.0, 0.1)
             
         runtimes = [r.get('actual_minutes', 15.0) for r in wf_history]
-        outcomes = [r.get('outcome_score', 1.0) for r in wf_history]
         exergies = [r.get('exergy_score', 0.06) for r in wf_history]
         
-        # Simple Exponential Moving Average (EMA) - weight recent runs more
-        def ema(values, alpha=0.3):
-            res = values[0]
-            for v in values[1:]:
-                res = alpha * v + (1 - alpha) * res
-            return res
-            
-        pred_runtime = ema(runtimes)
-        pred_outcome = ema(outcomes)
-        pred_exergy = ema(exergies)
+        exergy_mean = statistics.mean(exergies)
+        exergy_var = statistics.variance(exergies) if len(exergies) > 1 else 0.0
+        runtime_mean = statistics.mean(runtimes)
+        runtime_var = statistics.variance(runtimes) if len(runtimes) > 1 else 0.0
         
-        return {
-            "predicted_runtime": round(pred_runtime, 2),
-            "predicted_outcome": round(pred_outcome, 2),
-            "predicted_exergy": round(pred_exergy, 4)
-        }
+        # Confidence decays if variance is high relative to mean
+        cv = (exergy_var**0.5) / (exergy_mean + 1e-6)
+        confidence = max(0.1, 1.0 - min(cv, 0.9))
+        
+        return TaskStats(workflow, exergy_mean, exergy_var, runtime_mean, runtime_var, confidence)
 
     def lyapunov_scheduler(self, candidate_workflows: List[str]) -> List[Dict[str, Any]]:
-        """Nivel 4: Ranks workflows by expected Exergy Density (Exergy / Runtime)."""
+        """Nivel 4: Meta-Lyapunov Scheduler. Risk-penalized Exergy Density."""
         ranked = []
         for wf in candidate_workflows:
-            pred = self.predict(wf)
-            exergy = pred["predicted_exergy"]
-            runtime = pred["predicted_runtime"]
+            stats = self.get_task_stats(wf)
             
-            # Priority = expected_exergy / runtime
-            priority = exergy / runtime if runtime > 0 else 0
+            # Priority formula with risk penalty
+            risk_penalty = self.meta.alpha_risk * stats.exergy_var
+            base_score = (stats.exergy_mean - risk_penalty) / (stats.runtime_mean + 1e-6)
+            priority = base_score * stats.confidence
             
             ranked.append({
                 "workflow": wf,
-                "expected_exergy": exergy,
-                "expected_runtime": runtime,
-                "priority_score": round(priority, 4)
+                "expected_exergy": stats.exergy_mean,
+                "exergy_variance": stats.exergy_var,
+                "expected_runtime": stats.runtime_mean,
+                "priority_score": round(max(0.0, priority), 4)
             })
             
         ranked.sort(key=lambda x: x["priority_score"], reverse=True)
+        
+        # Epsilon-greedy forced exploration to prevent self-fulfilling bias
+        if candidate_workflows and random.random() < self.meta.epsilon:
+            exploring = random.choice(ranked)
+            exploring["priority_score"] = float('inf') # Force to top
+            exploring["is_exploration"] = True
+            ranked.sort(key=lambda x: x["priority_score"], reverse=True)
+            
         return ranked
 
     def genome_analysis(self) -> Dict[str, Dict[str, float]]:
@@ -168,20 +201,69 @@ class ExergyEngine:
         best_discarded_wf = None
         
         for wf in discarded_wfs:
-            pred = self.predict(wf)
-            if pred["predicted_exergy"] > best_discarded_exergy:
-                best_discarded_exergy = pred["predicted_exergy"]
+            stats = self.get_task_stats(wf)
+            if stats.exergy_mean > best_discarded_exergy:
+                best_discarded_exergy = stats.exergy_mean
                 best_discarded_wf = wf
                 
         missed_opportunity = best_discarded_exergy - actual_exergy
         
         return {
+            "type": "counterfactual_miss" if missed_opportunity > 0 else "optimal",
             "chosen_workflow": chosen_wf,
             "actual_exergy": round(actual_exergy, 4),
             "best_alternative": best_discarded_wf,
             "alternative_expected_exergy": round(best_discarded_exergy, 4),
-            "missed_opportunity": round(missed_opportunity, 4),
+            "miss_cost": round(missed_opportunity, 4),
+            "task_variance": self.get_task_stats(chosen_wf).exergy_var,
             "optimal_decision": actual_exergy >= best_discarded_exergy
+        }
+
+    def evolve(self, window_size: int = 1000) -> Dict[str, Any]:
+        """Update Meta-Lyapunov alpha_risk based on counterfactual historical errors."""
+        ledger_events = []
+        
+        # Generate counterfactuals from history simulating an evaluation context
+        # (For simplicity, evaluate each past run against the other active candidates)
+        active_wfs = list(set([r.get('workflow') for r in self.history]))
+        recent_history = self.history[-window_size:] if len(self.history) > window_size else self.history
+        
+        for record in recent_history:
+            wf = record.get('workflow')
+            discarded = [w for w in active_wfs if w != wf]
+            cf = self.evaluate_counterfactual(wf, discarded)
+            ledger_events.append(cf)
+            
+        total_error = 0.0
+        grad = 0.0
+        miss_count = 0
+        
+        for event in ledger_events:
+            if event["type"] != "counterfactual_miss":
+                continue
+                
+            error = event["miss_cost"]
+            variance = event["task_variance"]
+            
+            total_error += error
+            # If high variance caused a miss, alpha risk needs to increase
+            grad += error * variance
+            miss_count += 1
+            
+        old_alpha = self.meta.alpha_risk
+        
+        # Gradient update
+        self.meta.alpha_risk += self.meta.learning_rate * grad
+        self.meta.alpha_risk *= 0.999 # Entropy bleed
+        self.meta.alpha_risk = max(0.0, min(self.meta.alpha_risk, 1.0))
+        
+        self._save_meta_params()
+        
+        return {
+            "old_alpha": old_alpha,
+            "new_alpha": self.meta.alpha_risk,
+            "counterfactual_loss": total_error,
+            "miss_count": miss_count
         }
 
 if __name__ == "__main__":
@@ -199,8 +281,8 @@ if __name__ == "__main__":
         elif drift.get("status") == "NOMINAL":
             print(f" ✅ {wf} is NOMINAL. (Expected: {drift['expected_exergy']}, Actual: {drift['actual_exergy']})")
             
-    print("\n[NIVEL 4] Lyapunov Scheduler (Candidate Pool: ship, exergy-cascade, detective):")
-    candidates = ["ship", "exergy-cascade", "detective"]
+    print("\n[NIVEL 4] Lyapunov Scheduler (Candidate Pool: cron_health_check, memory_reconciliation, ingest_pipeline, vector_compaction, adversarial_simulation):")
+    candidates = ["cron_health_check", "memory_reconciliation", "ingest_pipeline", "vector_compaction", "adversarial_simulation"]
     ranked = engine.lyapunov_scheduler(candidates)
     for r in ranked:
         print(f" - {r['workflow']}: Priority {r['priority_score']} (Expected Exergy: {r['expected_exergy']}, Runtime: {r['expected_runtime']}m)")
@@ -211,11 +293,11 @@ if __name__ == "__main__":
         print(f" - Gene [{g}]: Avg Exergy {stats['average_exergy']} (Found in {stats['occurrences']} runs)")
         
     print("\n[NIVEL 6] Counterfactual Ledger Example:")
-    # Mock example
-    cf = engine.evaluate_counterfactual("ship", ["exergy-cascade", "detective"])
-    print(f" Chosen: {cf['chosen_workflow']} -> {cf['actual_exergy']} exergy")
-    print(f" Alternative: {cf['best_alternative']} -> {cf['alternative_expected_exergy']} expected exergy")
+    # Assume the agent chose "adversarial_simulation" because a human demanded it, ignoring the scheduler.
+    cf = engine.evaluate_counterfactual("adversarial_simulation", ["cron_health_check", "memory_reconciliation"])
+    print(f" Decisión tomada: {cf['chosen_workflow']} -> {cf['actual_exergy']} exergía real extraída")
+    print(f" Mejor alternativa según Lyapunov: {cf['best_alternative']} -> {cf['alternative_expected_exergy']} exergía esperada")
     if cf['optimal_decision']:
         print(" -> Decision was OPTIMAL.")
     else:
-        print(f" -> SUBOPTIMAL. Missed opportunity: {cf['missed_opportunity']}")
+        print(f" -> ERROR TÁCTICO. Missed opportunity (Coste de oportunidad): {cf['missed_opportunity']}")

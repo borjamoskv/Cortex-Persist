@@ -99,3 +99,19 @@ def check_genomes() -> None:
     for g, stats in list(genes.items())[:10]:
         console.print(f" - [cyan]{g}[/cyan]: Avg Exergy {stats['average_exergy']} ({stats['occurrences']} ejecuciones)")
 
+@exergy_cmds.command("evolve")
+@click.option("--window", default=1000, type=int, help="Historical window size for evolution.")
+def evolve_scheduler(window: int) -> None:
+    """Nivel 7: Meta-Lyapunov. Evoluciona el α_risk basado en errores contra-factuales."""
+    engine = ExergyEngine()
+    res = engine.evolve(window_size=window)
+    
+    console.print("[bold #2B3BE5]Meta-Lyapunov Update[/bold #2B3BE5]")
+    console.print(f" - alpha_risk: {res['old_alpha']:.4f} → {res['new_alpha']:.4f}")
+    console.print(f" - counterfactual_loss: {res['counterfactual_loss']:.4f} exergy units")
+    console.print(f" - misses_evaluated: {res['miss_count']} historical errors")
+    
+    shift = ((res['new_alpha'] - res['old_alpha']) / max(0.001, res['old_alpha'])) * 100
+    color = "red" if shift > 0 else "green"
+    console.print(f" - stability shift: [{color}]{shift:+.1f}%[/{color}]")
+
