@@ -5,7 +5,11 @@ Core functions for scoring and fetching candidates for the contradiction guard.
 from __future__ import annotations
 
 from collections.abc import Callable
-import aiosqlite
+
+try:
+    import aiosqlite
+except ImportError:
+    pass
 
 from cortex.utils.void_vec import cosine_similarity
 from cortex.guards.contradiction_guard.models import ConflictCandidate

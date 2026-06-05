@@ -11,7 +11,10 @@ import logging
 import math
 from typing import Any
 
-import aiosqlite
+try:
+    import aiosqlite
+except ImportError:
+    pass
 
 from cortex.utils.errors import CortexError
 from cortex.crypto.keys import ZKSwarmIdentity

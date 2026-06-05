@@ -8,7 +8,10 @@ import logging
 from collections.abc import Callable
 from pathlib import Path
 
-import aiosqlite
+try:
+    import aiosqlite
+except ImportError:
+    pass
 
 from cortex.core.paths import CORTEX_DB as DEFAULT_DB_PATH
 from cortex.database.core import connect_async_ctx

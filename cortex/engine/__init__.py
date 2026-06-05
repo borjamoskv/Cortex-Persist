@@ -11,7 +11,10 @@ import threading
 from typing import TYPE_CHECKING, Any
 from pathlib import Path
 
-import aiosqlite
+try:
+    import aiosqlite
+except ImportError:
+    pass
 
 from cortex.config import DEFAULT_DB_PATH
 from cortex.engine.agent_mixin import AgentMixin
