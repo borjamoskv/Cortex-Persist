@@ -5,34 +5,37 @@ from cortex.semantic.intent_encoder import IntentEncoder
 from cortex.simulation.monte_carlo import MonteCarloRecallEngine
 from cortex.simulation.mcp import MemoryCollapseProtocol
 from cortex.simulation.primitives import SimulationField
+from cortex.simulation.thermodynamics import MemoryEnergyField
+from cortex.simulation.narrative_compiler import NarrativeCompiler, ActionOutput
 
 @dataclass
-class SimulationContext:
+class ActionContext:
     query: str
-    simulation_field: SimulationField
+    action_output: ActionOutput
     architecture_context: List[Any] = field(default_factory=list)
 
 class StochasticMemoryOrchestrator:
     """
-    Sprint 4: Stochastic Memory Orchestrator.
-    Replaces SemanticAttentionOrchestrator with the Phase-Space Simulator.
+    Sprint 5: Action Orchestrator.
+    Maps Query -> Simulation -> Thermodynamics -> MCP -> Narrative Compiler -> Action.
     """
     def __init__(self, memory_provider: MemoryProvider):
         self.memory = memory_provider
         self.intent_encoder = IntentEncoder(memory_provider)
         self.mc_engine = MonteCarloRecallEngine(memory_provider)
-        self.collapse_protocol = MemoryCollapseProtocol()
+        self.collapse_protocol = MemoryCollapseProtocol(energy_budget=100.0)
+        self.narrative_compiler = NarrativeCompiler()
 
-    def process(self, query: str) -> SimulationContext:
+    def process(self, query: str) -> ActionContext:
         # Step 1: Intent distribution
         intent = self.intent_encoder.encode(query)
         
         # Step 2: Manifold Entry Points (Vector Search seeds)
         candidates = self.memory.vector_search(intent.semantic_vector, limit=15)
         if not candidates:
-            return SimulationContext(
+            return ActionContext(
                 query=query,
-                simulation_field=SimulationField(trajectories=[], is_collapsed=True, mode="EXTRACTIVE_MODE")
+                action_output=ActionOutput(type="DIRECT_ACTION", content="NO_MANIFOLD_SEEDS", confidence=1.0, energy_cost=0.0)
             )
             
         # Step 3: Probabilistic Path Rollout (Monte Carlo)
@@ -44,21 +47,21 @@ class StochasticMemoryOrchestrator:
             temperature=1.2
         )
         
-        # Step 4: Memory Collapse Protocol (Selection or Superposition)
-        # Using a dummy base_intent_variance for the drift detector
+        # Step 4: Thermodynamic State
+        from cortex.simulation.drift_detector import MemoryDriftDetector
+        drift = MemoryDriftDetector.calculate_drift(0.05, trajectories)
+        thermo_state = MemoryEnergyField.compute_energy(trajectories, drift, self.collapse_protocol.energy_budget)
+        
+        # Step 5: Memory Collapse Protocol
         simulation_field = self.collapse_protocol.evaluate(
             trajectories=trajectories,
             base_intent_variance=0.05
         )
         
-        # Hydration would happen post-collapse on the extracted trajectory or superposition field
-        if simulation_field.is_collapsed and simulation_field.dominant_trajectory:
-            # Hydrate only the collapsed path
-            nodes = [p.node_id for p in simulation_field.dominant_trajectory.particles]
-            # ... hydrate logic ...
-            pass
+        # Step 6: Narrative Compiler (Plasma -> Decision)
+        action_output = self.narrative_compiler.compile(simulation_field, thermo_state)
         
-        return SimulationContext(
+        return ActionContext(
             query=query,
-            simulation_field=simulation_field,
+            action_output=action_output,
         )
