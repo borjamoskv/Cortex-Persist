@@ -1,7 +1,8 @@
 from dataclasses import dataclass, field
 from typing import List, Any
 from cortex.worker.issue_reader import IssueReader, IssueContext
-from cortex.interfaces.memory_provider import MemoryProvider, MemoryResult
+from cortex.interfaces.memory_provider import MemoryProvider, MemoryResult, MemoryRef
+from cortex.worker.issue_reader import IssueReader, IssueContext
 
 @dataclass
 class TriageContext:
@@ -13,11 +14,10 @@ class IssueMemoryStrategy:
     ALLOWED_FACT_TYPES = {"issue", "decision", "knowledge", "architecture", "postmortem", "code_pattern"}
     
     @classmethod
-    def is_valid(cls, memory: MemoryResult) -> bool:
-        if memory.fact_type not in cls.ALLOWED_FACT_TYPES:
+    def is_valid(cls, ref: MemoryRef) -> bool:
+        if ref.fact_type not in cls.ALLOWED_FACT_TYPES:
             return False
-        if "v6_aesgcm:" in memory.content:
-            return False
+        # Phase 2 filtering is purely structural. No decryption here.
         return True
 
 class IssueTriagePipeline:
@@ -35,17 +35,21 @@ class IssueTriagePipeline:
         # Step 2: Retrieve Relevant Context from Memory
         query = f"{issue.title}\n{issue.body}"
         
-        # We query the interface with an over-fetch factor (x10) to allow hard-filtering
-        raw_memories = self.memory.search(query=query, limit=50)
+        # PHASE 1: Semantic retrieval (NO DECRYPT)
+        candidate_refs = self.memory.search(query=query, limit=50)
         
-        filtered_memories = []
-        for m in raw_memories:
-            if IssueMemoryStrategy.is_valid(m):
-                filtered_memories.append(m)
-            if len(filtered_memories) == 5:
+        # PHASE 2: Structural filtering
+        filtered_refs = []
+        for ref in candidate_refs:
+            if IssueMemoryStrategy.is_valid(ref):
+                filtered_refs.append(ref)
+            if len(filtered_refs) == 5:
                 break
+                
+        # PHASE 3 & 4: Rank and Hydrate
+        hydrated_memories = self.memory.hydrate(filtered_refs)
         
         return TriageContext(
             issue=issue,
-            related_memories=filtered_memories,
+            related_memories=hydrated_memories,
         )
