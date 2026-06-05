@@ -6,6 +6,7 @@ Provides memory, search, and EU AI Act compliance tools.
 
 import json
 import logging
+import os
 from concurrent.futures import ThreadPoolExecutor
 
 from cortex.engine import CortexEngine
@@ -303,52 +304,28 @@ def create_mcp_server(config: MCPServerConfig | None = None) -> "FastMCP":  # ty
     _register_store_tool(mcp, ctx)
     _register_search_tool(mcp, ctx)
     _register_status_tool(mcp, ctx)
-    _register_ledger_tool(mcp, ctx)
-
-    # Causal Episodic Trace (Epoch 8)
-    _register_trace_episode_tool(mcp, ctx)
-
-    # Causal Chain Traversal
-    _register_trace_chain_tool(mcp, ctx)
-
-    # Shannon Entropy & Session Handoff (Epoch 13)
-    _register_shannon_report_tool(mcp, ctx)
-    _register_handoff_tool(mcp, ctx)
-
-    # Embedding Tools (Gemini Embedding 2)
+    # Embeddings are required for vector search
     _register_embed_tool(mcp, ctx)
     _register_embed_status_tool(mcp, ctx)
 
-    # Trust & Compliance tools (EU AI Act Art. 12)
-    register_trust_tools(mcp, ctx)
-
-    # Mega Poderosas (Aether, Void, Chronos paradigms)
-    register_mega_tools(mcp, ctx)
-
-    # Hilbert-Omega Theorem Prover (Millennium Problems + Conjectures)
-    from cortex.mcp.hilbert_tools import register_hilbert_tools
-
-    register_hilbert_tools(mcp, ctx)
-
-    # Genesis Engine - create systems from specs
-    register_genesis_tools(mcp, ctx)
-
-    # Health Index - system monitoring
-    register_health_tools(mcp, ctx)
-
-    # Music Engine - Master Orchestrator
-    register_music_tools(mcp)
-
-    # V3 Singularity Tools (Skills, Memory, Swarm Queue)
-    register_singularity_tools(mcp)
-
-    # E2E Pipeline Tools (cortex_run, pipeline_status, pipeline_history)
-    from cortex.mcp.pipeline_tools import register_pipeline_tools
-
-    register_pipeline_tools(mcp, ctx)
-
-    # Apollo B2B Lead Extraction Tools
-    register_apollo_tools(mcp)
+    # ─── Extended Toolset (Gated for Zero-Friction public release) ───
+    if os.environ.get("CORTEX_MCP_FULL", "0") == "1":
+        _register_ledger_tool(mcp, ctx)
+        register_trust_tools(mcp, ctx)
+        register_mega_tools(mcp, ctx)
+        
+        from cortex.mcp.hilbert_tools import register_hilbert_tools
+        register_hilbert_tools(mcp, ctx)
+        
+        register_genesis_tools(mcp, ctx)
+        register_health_tools(mcp, ctx)
+        register_music_tools(mcp)
+        register_singularity_tools(mcp)
+        
+        from cortex.mcp.pipeline_tools import register_pipeline_tools
+        register_pipeline_tools(mcp, ctx)
+        
+        register_apollo_tools(mcp)
 
     return mcp
 
@@ -368,11 +345,11 @@ def run_server(config: MCPServerConfig | None = None) -> None:
 
     cfg = config or _default_config
 
-    # V3 Singularity: Launch Live Knowledge Sync Daemon
-    start_knowledge_daemon()
-
-    # V4 Singularity: Launch Swarm Autopoiesis Engine
-    start_swarm_daemon()
+    if os.environ.get("CORTEX_MCP_FULL", "0") == "1":
+        # V3 Singularity: Launch Live Knowledge Sync Daemon
+        start_knowledge_daemon()
+        # V4 Singularity: Launch Swarm Autopoiesis Engine
+        start_swarm_daemon()
 
     if cfg.transport == "sse":
         logger.info("Starting CORTEX MCP server v2 (SSE) on %s:%d", cfg.host, cfg.port)
