@@ -160,7 +160,7 @@ def run_cronos_analysis(transcripts, rolling_window=5) -> None:
     """
     Parses workflow metadata and evaluates session durations to construct
     operational memory (CRONOS v0) and exergy rankings.
-    Uses a rolling median of the last N executions for planned_minutes.
+    Implements Execution Funnel (VIEWED -> REFERENCED -> EXECUTED -> COMPLETED).
     """
     CRONOS_LOG = os.path.expanduser('~/.gemini/config/skills/_metrics/cronos_memory.jsonl')
     CRONOS_REPORT = os.path.expanduser('~/.gemini/config/skills/_metrics/cronos_report.md')
@@ -174,7 +174,7 @@ def run_cronos_analysis(transcripts, rolling_window=5) -> None:
             try:
                 with open(f, 'r', encoding='utf-8') as fh:
                     content = fh.read()
-                match = re.search('expected_duration_min:\\s*(\\d+)', content)
+                match = re.search(r'expected_duration_min:\s*(\d+)', content)
                 workflow_meta[name] = int(match.group(1)) if match else 15
             except Exception:
                 workflow_meta[name] = 15
@@ -188,87 +188,219 @@ def run_cronos_analysis(transcripts, rolling_window=5) -> None:
             continue
         if not lines:
             continue
-        detected_workflows = set()
+        
+        viewed_workflows = set()
+        referenced_workflows = set()
+        non_wf_tool_calls = 0
+        artifacts_generated = 0
+        
         for step in lines:
+            # 1. Detect views and tool counts
             for call in step.get('tool_calls', []):
-                if call.get('name') == 'view_file':
-                    path = call.get('args', {}).get('AbsolutePath', '')
-                    m = re.search('workflows/([^/]+)\\.md', path)
+                name = call.get('name', '')
+                args = call.get('args', {})
+                if name == 'view_file':
+                    path = args.get('AbsolutePath', '')
+                    m = re.search(r'workflows/([^/]+)\.md', path)
                     if m:
-                        detected_workflows.add(m.group(1))
-        for step in lines:
+                        viewed_workflows.add(m.group(1))
+                        continue  # Do not count as non_wf_tool_call
+                if name in ['write_to_file', 'replace_file_content', 'multi_replace_file_content']:
+                    if args.get('IsArtifact') or args.get('ArtifactMetadata'):
+                        artifacts_generated += 1
+                non_wf_tool_calls += 1
+
+            # 2. Detect references
             if step.get('source') == 'USER_EXPLICIT' or step.get('type') == 'USER_INPUT':
                 content = step.get('content', '')
                 for wf in workflow_meta:
-                    if re.search('\\b/' + re.escape(wf) + '\\b', content):
-                        detected_workflows.add(wf)
-        if not detected_workflows:
+                    if re.search(r'^\s*/' + re.escape(wf) + r'\b', content, re.MULTILINE):
+                        referenced_workflows.add(wf)
+
+        # Build funnel state for all workflows involved in this session
+        session_workflows = {}
+        all_wfs = viewed_workflows.union(referenced_workflows)
+        if not all_wfs:
             continue
+            
+        success = lines[-1].get('status') != 'ERROR'
+        
+        for wf in all_wfs:
+            state = 'VIEWED'
+            score = 1.0 # Base score for viewing
+            
+            if wf in referenced_workflows:
+                state = 'REFERENCED'
+                score += 2.0
+                
+                if non_wf_tool_calls >= 2:
+                    state = 'EXECUTED'
+                    score += 5.0 + (0.5 * non_wf_tool_calls) + (2.0 * artifacts_generated)
+                    
+                    if success:
+                        state = 'COMPLETED'
+                        score += 10.0
+            
+            session_workflows[wf] = {
+                'state': state,
+                'execution_score': round(score, 2)
+            }
+            
         start_ts = lines[0].get('created_at')
         end_ts = lines[-1].get('created_at')
         start_raw = _parse_timestamp(lines[0].get('content', '')) or start_ts
         end_raw = _parse_completed_at(lines[-1].get('content', '')) or end_ts
         start_dt = parse_iso(start_raw)
         end_dt = parse_iso(end_raw)
+        
         if not (start_dt and end_dt):
-            continue
-        actual_min = max(0.1, (end_dt - start_dt).total_seconds() / 60.0)
-        success = lines[-1].get('status') != 'ERROR'
+            actual_min = 0.1
+        else:
+            actual_min = max(0.1, (end_dt - start_dt).total_seconds() / 60.0)
+            
         outcome_score = 1.0
         for step in reversed(lines):
             if step.get('source') == 'USER_EXPLICIT' and '/score' in step.get('content', ''):
-                m = re.search('/score\\s+([0-9.]+)', step.get('content', ''))
+                m = re.search(r'/score\s+([0-9.]+)', step.get('content', ''))
                 if m:
                     outcome_score = float(m.group(1))
                     break
-        raw_sessions.append({'timestamp': end_ts or start_ts, 'session_id': session_id, 'workflows': detected_workflows, 'actual_min': actual_min, 'success': success, 'start_dt': start_dt, 'outcome_score': outcome_score})
+
+        raw_sessions.append({
+            'timestamp': end_ts or start_ts,
+            'session_id': session_id,
+            'workflows': session_workflows,
+            'actual_min': actual_min,
+            'success': success,
+            'start_dt': start_dt or datetime.utcnow(),
+            'outcome_score': outcome_score,
+            'artifacts': artifacts_generated,
+            'tool_calls': non_wf_tool_calls
+        })
+
     raw_sessions.sort(key=lambda x: x['start_dt'])
+    
     cronos_records = []
     history = {}
+    
+    # Process Exergy & Memory
     for session in raw_sessions:
-        for wf in session['workflows']:
+        for wf, funnel in session['workflows'].items():
             if wf not in history:
                 history[wf] = []
-            if history[wf]:
-                planned = statistics.median(history[wf][-rolling_window:])
-            else:
-                planned = workflow_meta.get(wf, 15)
+            
+            planned = statistics.median(history[wf][-rolling_window:]) if history[wf] else workflow_meta.get(wf, 15)
             actual_min = session['actual_min']
             outcome_score = session['outcome_score']
-            deviation = actual_min - planned
-            time_saved = planned - actual_min
-            exergy_yield = time_saved * outcome_score if time_saved > 0 else time_saved / max(0.1, outcome_score)
-            exergy_score = outcome_score / actual_min
-            record = {'timestamp': session['timestamp'], 'session_id': session['session_id'], 'workflow': wf, 'planned_minutes': round(planned, 2), 'actual_minutes': round(actual_min, 2), 'deviation_minutes': round(deviation, 2), 'outcome_score': outcome_score, 'exergy_score': round(exergy_score, 4), 'exergy_yield': round(exergy_yield, 2), 'success': session['success']}
+            state = funnel['state']
+            exec_score = funnel['execution_score']
+            
+            # Exergy only calculated if EXECUTED or COMPLETED
+            if state in ['EXECUTED', 'COMPLETED']:
+                deviation = actual_min - planned
+                time_saved = planned - actual_min
+                exergy_yield = time_saved * outcome_score if time_saved > 0 else time_saved / max(0.1, outcome_score)
+                time_exergy_score = outcome_score / actual_min
+            else:
+                deviation = 0.0
+                exergy_yield = 0.0
+                time_exergy_score = 0.0
+            
+            record = {
+                'timestamp': session['timestamp'],
+                'session_id': session['session_id'],
+                'workflow': wf,
+                'state': state,
+                'execution_score': exec_score,
+                'planned_minutes': round(planned, 2),
+                'actual_minutes': round(actual_min, 2),
+                'deviation_minutes': round(deviation, 2),
+                'outcome_score': outcome_score,
+                'exergy_score': round(time_exergy_score, 4),
+                'exergy_yield': round(exergy_yield, 2),
+                'success': session['success'],
+                'artifacts': session['artifacts'],
+                'tool_calls': session['tool_calls']
+            }
             cronos_records.append(record)
-            if session['success']:
+            
+            if state == 'COMPLETED':
                 history[wf].append(actual_min)
+
     os.makedirs(os.path.dirname(CRONOS_LOG), exist_ok=True)
     with open(CRONOS_LOG, 'w', encoding='utf-8') as fh:
         for r in cronos_records:
             fh.write(json.dumps(r) + '\n')
+
+    # Aggregation for the Report
     stats = {}
     for r in cronos_records:
         wf = r['workflow']
         if wf not in stats:
-            stats[wf] = {'count': 0, 'planned_sum': 0, 'actual_sum': 0, 'exergy_sum': 0, 'success_count': 0}
-        stats[wf]['count'] += 1
-        stats[wf]['planned_sum'] += r['planned_minutes']
-        stats[wf]['actual_sum'] += r['actual_minutes']
-        stats[wf]['exergy_sum'] += r['exergy_yield']
-        if r['success']:
-            stats[wf]['success_count'] += 1
-    report_lines = ['# CRONOS v0 — Operational Memory & Exergy Report', f'> **Reality Level: C5-REAL** | Compiled: {datetime.utcnow().isoformat()}Z', '', '## Workflow Exergy Ranking', 'Positive exergy yield indicates time saved relative to plan; negative exergy yield identifies workflow friction (time sinks).', 'The **Exergy Score** measures pure output value per minute (Outcome / Actual Time).', '', '| Workflow | Runs | Avg Planned | Avg Actual | Avg Deviation | Exergy Score | Total Exergy Yield | Success |', '| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |']
-    sorted_stats = sorted(stats.items(), key=lambda x: x[1]['exergy_sum'], reverse=True)
-    for wf, s in sorted_stats:
-        count = s['count']
-        avg_planned = s['planned_sum'] / count
-        avg_actual = s['actual_sum'] / count
-        avg_dev = (s['actual_sum'] - s['planned_sum']) / count
-        avg_exergy_score = sum((r['exergy_score'] for r in cronos_records if r['workflow'] == wf)) / count
+            stats[wf] = {
+                'viewed': 0, 'referenced': 0, 'executed': 0, 'completed': 0,
+                'planned_sum': 0, 'actual_sum': 0, 'exergy_sum': 0, 
+                'exec_score_sum': 0
+            }
+        
+        st = r['state']
+        stats[wf]['viewed'] += 1
+        if st in ['REFERENCED', 'EXECUTED', 'COMPLETED']:
+            stats[wf]['referenced'] += 1
+        if st in ['EXECUTED', 'COMPLETED']:
+            stats[wf]['executed'] += 1
+            stats[wf]['planned_sum'] += r['planned_minutes']
+            stats[wf]['actual_sum'] += r['actual_minutes']
+            stats[wf]['exergy_sum'] += r['exergy_yield']
+        if st == 'COMPLETED':
+            stats[wf]['completed'] += 1
+            
+        stats[wf]['exec_score_sum'] += r['execution_score']
+
+    report_lines = [
+        '# CRONOS v0.2 — Execution Funnel & Exergy Report',
+        f'> **Reality Level: C5-REAL** | Compiled: {datetime.utcnow().isoformat()}Z',
+        '',
+        '## Workflow Observability Funnel',
+        'State transitions tracking real execution vs mere references.',
+        '',
+        '| Workflow | Viewed | Referenced | Executed | Completed | Drop-off | Avg Exec Score |',
+        '| :--- | :---: | :---: | :---: | :---: | :---: | :---: |'
+    ]
+    
+    # Funnel Table
+    for wf, s in sorted(stats.items(), key=lambda x: x[1]['executed'], reverse=True):
+        if s['viewed'] == 0: continue
+        drop_off = f"{(1 - (s['completed'] / s['viewed'])) * 100:.1f}%"
+        avg_score = s['exec_score_sum'] / s['viewed']
+        report_lines.append(
+            f"| `{wf}` | {s['viewed']} | {s['referenced']} | {s['executed']} | {s['completed']} | {drop_off} | {avg_score:.1f} |"
+        )
+        
+    report_lines.extend([
+        '',
+        '## Exergy Analytics (Executed Only)',
+        'Positive exergy yield indicates time saved relative to plan; negative exergy yield identifies workflow friction.',
+        '',
+        '| Workflow | Runs | Avg Planned | Avg Actual | Avg Deviation | Total Exergy Yield | Success Rate |',
+        '| :--- | :---: | :---: | :---: | :---: | :---: | :---: |'
+    ])
+    
+    # Exergy Table
+    sorted_exergy = sorted(stats.items(), key=lambda x: x[1]['exergy_sum'], reverse=True)
+    for wf, s in sorted_exergy:
+        runs = s['executed']
+        if runs == 0:
+            continue
+        avg_planned = s['planned_sum'] / runs
+        avg_actual = s['actual_sum'] / runs
+        avg_dev = (s['actual_sum'] - s['planned_sum']) / runs
         total_exergy = s['exergy_sum']
-        success_rate = s['success_count'] / count * 100
-        report_lines.append(f'| `{wf}` | {count} | {avg_planned:.1f}m | {avg_actual:.1f}m | {avg_dev:+.1f}m | {avg_exergy_score:.2f} | {total_exergy:+.1f}m | {success_rate:.1f}% |')
+        success_rate = (s['completed'] / runs) * 100
+        report_lines.append(
+            f"| `{wf}` | {runs} | {avg_planned:.1f}m | {avg_actual:.1f}m | {avg_dev:+.1f}m | {total_exergy:+.1f}m | {success_rate:.1f}% |"
+        )
+
     report_content = '\n'.join(report_lines)
     with open(CRONOS_REPORT, 'w', encoding='utf-8') as fh:
         fh.write(report_content)

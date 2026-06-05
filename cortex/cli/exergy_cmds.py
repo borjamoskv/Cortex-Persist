@@ -11,6 +11,7 @@ import click
 from rich.panel import Panel
 
 from cortex.cli.common import cli, console
+from cortex.observability.exergy_engine import ExergyEngine
 
 __all__ = [
     "exergy_cmds",
@@ -47,3 +48,54 @@ def run_exergy_daemon(interval: int) -> None:
     except KeyboardInterrupt:
         daemon.stop()
         console.print("[yellow]Exergy Daemon stopped.[/yellow]")
+
+@exergy_cmds.command("entropy")
+@click.argument("workflow")
+def check_entropy(workflow: str) -> None:
+    """Nivel 2: Comprueba la degradación entrópica (Entropy Drift) de un workflow."""
+    engine = ExergyEngine()
+    drift = engine.get_entropy_drift(workflow)
+    status = drift.get("status", "UNKNOWN")
+    
+    color = "green" if status == "NOMINAL" else "red"
+    console.print(f"[{color}]Workflow {workflow}: {status}[/{color}]")
+    console.print(f"Expected Exergy: {drift.get('expected_exergy')}")
+    console.print(f"Actual Exergy: {drift.get('actual_exergy')}")
+    console.print(f"Deviation: {drift.get('deviation_pct')}%")
+
+@exergy_cmds.command("predict")
+@click.argument("workflow")
+def predict_exergy(workflow: str) -> None:
+    """Nivel 3: Predice el tiempo y exergía esperada de un workflow."""
+    engine = ExergyEngine()
+    pred = engine.predict(workflow)
+    
+    console.print(f"[bold #2B3BE5]Predicción para: {workflow}[/bold #2B3BE5]")
+    console.print(f"  Expected Runtime: {pred['predicted_runtime']}m")
+    console.print(f"  Expected Exergy:  {pred['predicted_exergy']}")
+
+@exergy_cmds.command("schedule")
+@click.argument("workflows", nargs=-1)
+def schedule_workflows(workflows: tuple) -> None:
+    """Nivel 4: Lyapunov Scheduler. Ordena workflows por densidad de exergía."""
+    if not workflows:
+        console.print("[red]Especifica workflows a priorizar (ej: cortex exergy schedule ship detective)[/red]")
+        return
+        
+    engine = ExergyEngine()
+    ranked = engine.lyapunov_scheduler(list(workflows))
+    
+    console.print("[bold #2B3BE5]Lyapunov Scheduler Ranking[/bold #2B3BE5]")
+    for r in ranked:
+        console.print(f" [green]{r['workflow']}[/green] -> Priority {r['priority_score']} (Exergy: {r['expected_exergy']}, Runtime: {r['expected_runtime']}m)")
+
+@exergy_cmds.command("genomes")
+def check_genomes() -> None:
+    """Nivel 5: Imprime el rendimiento exergético por gen (herramienta/paradigma)."""
+    engine = ExergyEngine()
+    genes = engine.genome_analysis()
+    
+    console.print("[bold #2B3BE5]Workflow Genome Analysis[/bold #2B3BE5]")
+    for g, stats in list(genes.items())[:10]:
+        console.print(f" - [cyan]{g}[/cyan]: Avg Exergy {stats['average_exergy']} ({stats['occurrences']} ejecuciones)")
+
