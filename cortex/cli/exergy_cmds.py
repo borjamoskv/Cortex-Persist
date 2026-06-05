@@ -48,7 +48,6 @@ def run_exergy_daemon(interval: int) -> None:
     except KeyboardInterrupt:
         daemon.stop()
         console.print("[yellow]Exergy Daemon stopped.[/yellow]")
-
 @exergy_cmds.command("entropy")
 @click.argument("workflow")
 def check_entropy(workflow: str) -> None:
@@ -114,4 +113,23 @@ def evolve_scheduler(window: int) -> None:
     shift = ((res['new_alpha'] - res['old_alpha']) / max(0.001, res['old_alpha'])) * 100
     color = "red" if shift > 0 else "green"
     console.print(f" - stability shift: [{color}]{shift:+.1f}%[/{color}]")
+
+@exergy_cmds.command("aefm")
+@click.option("--horizon", default=5, type=int, help="CAF trajectory horizon.")
+@click.option("--epsilon-path", default=0.1, type=float, help="Path noise to prevent bias collapse.")
+@click.option("--max-cycles", default=5, type=int, help="Max loops to run (for testing).")
+def run_aefm(horizon: int, epsilon_path: float, max_cycles: int) -> None:
+    """Starts the continuous Active Field reality deformation loop (Autonomous Exergy Field Mode)."""
+    console.print("[bold #2B3BE5]🌌 Starting AEFM Daemon...[/bold #2B3BE5]")
+    engine = ExergyEngine()
+    
+    import logging
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    
+    engine.autonomous_field_daemon(
+        horizon=horizon, 
+        epsilon_path=epsilon_path, 
+        recompute_fdf_min=10, 
+        max_cycles=max_cycles
+    )
 

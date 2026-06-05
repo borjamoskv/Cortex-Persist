@@ -8,6 +8,8 @@ from cortex.observability.efel import SystemState, encode_state, encode_task
 from cortex.observability.fdf import FailureField, Particle, simulate_field
 from cortex.observability.caf import select_next, lagrangian
 import numpy as np
+import time
+import os
 
 CRONOS_LOG = os.path.expanduser("~/.gemini/config/skills/_metrics/cronos_memory.jsonl")
 META_PARAMS_LOG = os.path.expanduser("~/.gemini/config/skills/_metrics/meta_params.json")
@@ -28,6 +30,24 @@ class TaskStats:
     runtime_mean: float
     runtime_var: float
     confidence: float = 1.0
+
+@dataclass
+class ExecutionTrace:
+    task: str
+    predicted_action: float
+    real_cost: float
+    real_exergy: float
+    fdf_shift: float
+
+def inject_reality_noise(state_vec: np.ndarray) -> np.ndarray:
+    """Grounding injection: Evita feedback loop de realidad simulada."""
+    git_entropy = np.random.uniform(-1, 1, size=state_vec.shape)
+    try:
+        load = os.getloadavg()[0]
+    except AttributeError:
+        load = 1.0
+    runtime_noise = np.full_like(state_vec, load)
+    return state_vec + 0.05 * git_entropy + 0.02 * runtime_noise
 
 class ExergyEngine:
     """
@@ -216,6 +236,64 @@ class ExergyEngine:
             
         # select_next already sorted them by action cost, so scored is in correct order
         return scored
+        
+    def autonomous_field_daemon(self, horizon: int = 5, epsilon_path: float = 0.1, recompute_fdf_min: int = 10, max_cycles: int = 5):
+        """
+        AEFM: Autonomous Exergy Field Mode. 
+        Ciclo infinito de: observe -> deform field -> simulate futures -> collapse action -> execute -> update geometry
+        """
+        import logging
+        log = logging.getLogger("CORTEX-AEFM")
+        log.info("🌌 Iniciando Autonomous Exergy Field Mode (AEFM)")
+        
+        last_fdf = time.time()
+        candidates = list(self.genomes.keys())
+        
+        for cycle in range(max_cycles):
+            log.info(f"⚡ [Cycle {cycle}] Observer & Reality Grounding...")
+            
+            if time.time() - last_fdf > recompute_fdf_min * 60:
+                log.info("🔄 Recomputing Failure Density Field (Geometry Update)...")
+                self.failure_field = self._build_failure_field()
+                last_fdf = time.time()
+                
+            # 1. Observe & Noise (Grounding)
+            dummy_state = SystemState(git_diff="daemon", ast_hash="daemon", active_tasks=[], error_log=[])
+            base_state_vec = encode_state(dummy_state)
+            grounded_state_vec = inject_reality_noise(base_state_vec)
+            
+            # 2. Simulate Futures & Collapse Action
+            scored = self.lyapunov_scheduler(candidates, dummy_state) # lyapunov_scheduler now uses CAF under the hood
+            if not scored:
+                break
+                
+            winner = scored[0]
+            predicted_action = winner['action_cost']
+            
+            log.info(f"🔮 Collapsed future trajectory. Winner: {winner['workflow']} (Predicted Action: {predicted_action})")
+            
+            # 3. "Execute" & Measure Reality (Mock execution for now)
+            start_time = time.time()
+            time.sleep(1) # Fake run
+            real_runtime = (time.time() - start_time) / 60.0
+            
+            # 4. Telemetry: Update Geometry
+            # En un entorno real, exergy se extraería del output. Asumimos fluctuación.
+            real_exergy = winner['expected_exergy'] * np.random.uniform(0.8, 1.2)
+            
+            trace = ExecutionTrace(
+                task=winner['workflow'],
+                predicted_action=predicted_action,
+                real_cost=real_runtime,
+                real_exergy=real_exergy,
+                fdf_shift=np.abs(predicted_action - real_exergy)
+            )
+            
+            log.info(f"🪐 Telemetry Tracked: {trace}")
+            log.info("---")
+            time.sleep(2)
+            
+        log.info("🌌 AEFM Cycle Limit Reached (Safe Stop).")
 
     def genome_analysis(self) -> Dict[str, Dict[str, float]]:
         """Nivel 5: Analyze exergy across isolated genes instead of monolithic workflows."""
