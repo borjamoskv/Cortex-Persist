@@ -2,32 +2,44 @@ import sys
 import asyncio
 from typing import List
 from cortex.engine import CortexEngine
-from cortex.interfaces.memory_provider import MemoryProvider, MemoryResult
+from cortex.interfaces.memory_provider import MemoryProvider, MemoryResult, MemoryRef
 from cortex.pipeline.triage import IssueTriagePipeline
 
 class CortexMemoryProvider(MemoryProvider):
     def __init__(self, engine: CortexEngine):
         self.engine = engine
+        self._loop = asyncio.get_event_loop()
 
-    def search(self, query: str, limit: int = 10) -> List[MemoryResult]:
-        loop = asyncio.get_event_loop()
-        if loop.is_running():
-            # If already in async context, we must adapt, but for this CLI it's fine
-            raise RuntimeError("Cannot run sync search inside running event loop")
+    def search(self, query: str, limit: int = 10) -> list[MemoryRef]:
+        # PHASE 1: Retrieval (we just extract metadata, even if engine decrypts, we ignore it)
+        results = self._loop.run_until_complete(
+            self.engine.search(query=query, top_k=limit)
+        )
         
-        # Call the real async search from CortexEngine
-        results = loop.run_until_complete(self.engine.search(query=query, limit=limit))
-        
-        memories = []
+        refs = []
         for r in (results or []):
-            memories.append(MemoryResult(
+            refs.append(MemoryRef(
                 id=str(getattr(r, "id", "unknown")),
                 score=getattr(r, "score", 0.0) or getattr(r, "relevance", 0.0),
                 summary=getattr(r, "summary", ""),
-                content=getattr(r, "content", str(r)),
                 fact_type=getattr(r, "fact_type", getattr(r, "type", "knowledge"))
             ))
-        return memories
+        return refs
+
+    def hydrate(self, refs: list[MemoryRef]) -> list[MemoryResult]:
+        # PHASE 4: Hydration (DECRYPT ONLY HERE)
+        hydrated = []
+        for ref in refs:
+            try:
+                # We use the engine's get_fact method to hydrate and decrypt
+                fact = self._loop.run_until_complete(self.engine.get_fact(int(ref.id)))
+                if fact:
+                    hydrated.append(MemoryResult(ref=ref, content=fact.content))
+                else:
+                    hydrated.append(MemoryResult(ref=ref, content="<Fact not found>"))
+            except Exception as e:
+                hydrated.append(MemoryResult(ref=ref, content=f"<Decryption/Fetch Error: {e}>"))
+        return hydrated
 
 async def setup_engine() -> CortexEngine:
     engine = CortexEngine("/tmp/cortex_copy.db")
@@ -67,7 +79,7 @@ def main():
             print(f"Related Memories Retrieved: {len(context.related_memories)}")
             
             for i, mem in enumerate(context.related_memories):
-                print(f"  [{i+1}] Score: {mem.score:.2f} | Type: {mem.fact_type} | Content: {mem.content[:60]}...")
+                print(f"  [{i+1}] Score: {mem.ref.score:.2f} | Type: {mem.ref.fact_type} | Content: {mem.content[:60]}...")
                 
         except Exception as e:
             print(f"FAILED: {e}")
