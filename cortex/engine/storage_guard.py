@@ -17,12 +17,9 @@ Copyright 2026 by borjamoskv.com - Apache-2.0
 from __future__ import annotations
 
 import logging
-import re
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
-
-__all__ = ["GuardViolation", "StorageGuard", "StoreProposal"]
+__all__ = ["GuardViolation", "StorageGuard"]
 
 logger = logging.getLogger("cortex.guard.storage")
 

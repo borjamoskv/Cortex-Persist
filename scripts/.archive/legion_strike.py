@@ -2,7 +2,8 @@ import argparse
 import asyncio
 import sys
 
-from cortex.extensions.swarm.centauro_engine import CentauroEngine, Formation
+from cortex.extensions.swarm.centauro_engine import CentauroEngine
+
 
 async def main():
     parser = argparse.ArgumentParser(description="LEGIØN-1 Sovereign Swarm Protocol Strike Interface")
@@ -17,7 +18,7 @@ async def main():
 
     engine = CentauroEngine(tolerance=args.tolerance)
     
-    print(f"🔱 LEGIØN-1 ACTIVATED")
+    print("🔱 LEGIØN-1 ACTIVATED")
     print(f"MISSION: {args.mission}")
     print(f"FORMATION: {args.formation}")
     print("Executing Byzantine Consensus Quorum...")

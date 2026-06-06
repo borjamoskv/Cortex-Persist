@@ -1,6 +1,7 @@
 import asyncio
-import time
+
 from cortex.extensions.bci.osc_bridge import AetherOscBridge
+
 
 async def test_osc():
     # Setup bridge mapping TX and RX to the same ports for loopback testing

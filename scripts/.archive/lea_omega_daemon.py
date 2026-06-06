@@ -18,8 +18,9 @@ import sys
 # Ensure correct pythonpath
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from cortex.engine.smte.llm_mutator import call_qwen_mutator
 from scripts.death_protocol import DeathProtocolVisitor, evaluate_file
+
+from cortex.engine.smte.llm_mutator import call_qwen_mutator
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger("lea-omega")

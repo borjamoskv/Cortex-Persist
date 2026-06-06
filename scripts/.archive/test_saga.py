@@ -1,5 +1,7 @@
 import asyncio
-from cortex.engine.saga_protocol import build_core_write_path_saga, SagaContext
+
+from cortex.engine.saga_protocol import SagaContext, build_core_write_path_saga
+
 
 async def test_saga():
     saga = build_core_write_path_saga()

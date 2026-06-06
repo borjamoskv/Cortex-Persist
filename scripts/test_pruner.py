@@ -1,6 +1,7 @@
-import asyncio
 import hashlib
-from cortex.compaction.pruner import MerklePruner, FactRecord
+
+from cortex.compaction.pruner import FactRecord, MerklePruner
+
 
 def test_pruner():
     pruner = MerklePruner(tolerance_threshold=3)

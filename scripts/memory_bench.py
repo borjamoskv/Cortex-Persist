@@ -5,9 +5,10 @@ Proves the performance of CORTEX against naive baselines.
 """
 
 import asyncio
-import time
 import random
+import time
 from uuid import uuid4
+
 from rich.console import Console
 from rich.table import Table
 

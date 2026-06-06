@@ -13,7 +13,6 @@ Axiom: Ω2 (Entropic Asymmetry)
 
 import logging
 import sqlite3
-import time
 from pathlib import Path
 
 # Minimum Exergy Threshold (3 half-lives = 0.125)
