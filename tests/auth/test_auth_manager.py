@@ -86,9 +86,7 @@ class TestAuthManager:
     @pytest.mark.asyncio
     async def test_create_key_custom_permissions(self, auth_manager):
         """Custom permissions should be stored and returned."""
-        _, key = await auth_manager.create_key(
-            "custom-key", permissions=["read", "admin"]
-        )
+        _, key = await auth_manager.create_key("custom-key", permissions=["read", "admin"])
         assert key.permissions == ["read", "admin"]
 
     @pytest.mark.asyncio
@@ -136,9 +134,7 @@ class TestAuthManager:
     @pytest.mark.asyncio
     async def test_authenticate_returns_permissions(self, auth_manager):
         """Authenticated result must carry the key's permissions."""
-        raw, _ = await auth_manager.create_key(
-            "perm-key", permissions=["read", "write", "admin"]
-        )
+        raw, _ = await auth_manager.create_key("perm-key", permissions=["read", "write", "admin"])
         result = await auth_manager.authenticate_async(raw)
         assert result.authenticated is True
         assert "read" in result.permissions
@@ -208,6 +204,7 @@ class TestAuthManager:
     async def test_hash_key_is_sha256(self, auth_manager):
         """_hash_key must produce a SHA-256 hex digest."""
         import hashlib
+
         test_key = "ctx_test123"
         expected = hashlib.sha256(test_key.encode()).hexdigest()
         assert AuthManager._hash_key(test_key) == expected
@@ -271,6 +268,7 @@ class TestRBAC:
     def test_authorize_raises_on_denial(self):
         """authorize() must raise PermissionDeniedError on missing permission."""
         from cortex.utils.errors import PermissionDeniedError
+
         with pytest.raises(PermissionDeniedError):
             RBAC.authorize("viewer", Permission.WRITE_FACTS)
 
@@ -288,9 +286,11 @@ class TestRBAC:
 
     def test_custom_evaluator(self):
         """Custom RBACEvaluator with custom policies works correctly."""
-        custom = RBACEvaluator({
-            Role.VIEWER: {Permission.WRITE_FACTS},  # unusual but valid
-        })
+        custom = RBACEvaluator(
+            {
+                Role.VIEWER: {Permission.WRITE_FACTS},  # unusual but valid
+            }
+        )
         assert custom.has_permission("viewer", Permission.WRITE_FACTS) is True
         assert custom.has_permission("viewer", Permission.READ_FACTS) is False
 
@@ -366,11 +366,16 @@ class TestModels:
 
     def test_apikey_dataclass(self):
         key = APIKey(
-            id=1, name="test", key_prefix="ctx_abc",
-            tenant_id="t1", role="admin",
+            id=1,
+            name="test",
+            key_prefix="ctx_abc",
+            tenant_id="t1",
+            role="admin",
             permissions=["read", "write"],
             created_at="2026-01-01T00:00:00Z",
-            last_used=None, is_active=True, rate_limit=100,
+            last_used=None,
+            is_active=True,
+            rate_limit=100,
         )
         assert key.id == 1
         assert key.name == "test"

@@ -76,6 +76,10 @@ class GossipNode:
             local_addr=(self.bind_host, self.bind_port),
         )
 
+        sock = self.transport.get_extra_info("socket")
+        if sock:
+            self.bind_port = sock.getsockname()[1]
+
         self._task = asyncio.create_task(self._gossip_loop())
         logger.info(
             f"Gossip Protocol initialized on node {self.node_id} "

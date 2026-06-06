@@ -126,12 +126,18 @@ class TestEnterpriseAuditLedger:
     async def test_hash_chain_integrity(self, ledger):
         """Verify that log entries form a valid hash chain (prev_hash linkage)."""
         await ledger.log_action(
-            tenant_id="t1", actor_role="admin", actor_id="a1",
-            action="act1", resource="r1",
+            tenant_id="t1",
+            actor_role="admin",
+            actor_id="a1",
+            action="act1",
+            resource="r1",
         )
         await ledger.log_action(
-            tenant_id="t1", actor_role="admin", actor_id="a1",
-            action="act2", resource="r2",
+            tenant_id="t1",
+            actor_role="admin",
+            actor_id="a1",
+            action="act2",
+            resource="r2",
         )
 
         cursor = await ledger._conn.execute(
@@ -231,8 +237,11 @@ class TestEnterpriseAuditLedger:
     async def test_last_hash_advances_after_log(self, ledger):
         """After logging, _last_hash must no longer be GENESIS."""
         await ledger.log_action(
-            tenant_id="t", actor_role="r", actor_id="a",
-            action="X", resource="Y",
+            tenant_id="t",
+            actor_role="r",
+            actor_id="a",
+            action="X",
+            resource="Y",
         )
         assert ledger._last_hash != "GENESIS"
 
@@ -240,12 +249,13 @@ class TestEnterpriseAuditLedger:
     async def test_log_action_default_status(self, ledger):
         """log_action with no explicit status should default to 'SUCCESS'."""
         await ledger.log_action(
-            tenant_id="t", actor_role="r", actor_id="a",
-            action="X", resource="Y",
+            tenant_id="t",
+            actor_role="r",
+            actor_id="a",
+            action="X",
+            resource="Y",
         )
-        cursor = await ledger._conn.execute(
-            "SELECT status FROM security_audit_log LIMIT 1"
-        )
+        cursor = await ledger._conn.execute("SELECT status FROM security_audit_log LIMIT 1")
         row = await cursor.fetchone()
         assert row[0] == "SUCCESS"
 
@@ -253,12 +263,14 @@ class TestEnterpriseAuditLedger:
     async def test_log_action_custom_status(self, ledger):
         """log_action must respect a custom status value."""
         await ledger.log_action(
-            tenant_id="t", actor_role="r", actor_id="a",
-            action="X", resource="Y", status="DENIED",
+            tenant_id="t",
+            actor_role="r",
+            actor_id="a",
+            action="X",
+            resource="Y",
+            status="DENIED",
         )
-        cursor = await ledger._conn.execute(
-            "SELECT status FROM security_audit_log LIMIT 1"
-        )
+        cursor = await ledger._conn.execute("SELECT status FROM security_audit_log LIMIT 1")
         row = await cursor.fetchone()
         assert row[0] == "DENIED"
 
@@ -267,8 +279,11 @@ class TestEnterpriseAuditLedger:
         """audit_id is SHA-256 of timestamp+actor+action — verify it's consistent."""
         # We can't predict the exact timestamp, but we can verify the format
         aid = await ledger.log_action(
-            tenant_id="t", actor_role="r", actor_id="a",
-            action="X", resource="Y",
+            tenant_id="t",
+            actor_role="r",
+            actor_id="a",
+            action="X",
+            resource="Y",
         )
         # Must be valid hex
         int(aid, 16)
@@ -294,8 +309,11 @@ class TestEnterpriseAuditLedger:
         l1.public_key = l1.private_key.public_key()
 
         await l1.log_action(
-            tenant_id="t", actor_role="r", actor_id="a",
-            action="X", resource="Y",
+            tenant_id="t",
+            actor_role="r",
+            actor_id="a",
+            action="X",
+            resource="Y",
         )
         saved_hash = l1._last_hash
 
@@ -325,6 +343,7 @@ class TestAuditAnalystGrok:
     @pytest.fixture
     async def analyst(self, ledger):
         from cortex.audit.analyst import AuditAnalystGrok
+
         return AuditAnalystGrok(ledger)
 
     @pytest.mark.asyncio
@@ -367,6 +386,7 @@ class TestAuditAnalystGrok:
     async def test_analyst_stores_ledger_ref(self, ledger):
         """AuditAnalystGrok must hold a reference to the provided ledger."""
         from cortex.audit.analyst import AuditAnalystGrok
+
         analyst = AuditAnalystGrok(ledger)
         assert analyst.ledger is ledger
 
@@ -374,5 +394,6 @@ class TestAuditAnalystGrok:
     async def test_analyst_initial_threat_score(self, ledger):
         """Initial threat score must be 0.0."""
         from cortex.audit.analyst import AuditAnalystGrok
+
         analyst = AuditAnalystGrok(ledger)
         assert analyst._threat_score == 0.0

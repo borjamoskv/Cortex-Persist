@@ -17,6 +17,7 @@ import pytest
 
 # Import the module under test
 import sys
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
 from ouroboros_prune import (
     COLD_THRESHOLD,
@@ -83,33 +84,39 @@ def _insert_fact(db_path: str, **kwargs) -> int:
             f"created_at, decay_half_life, quadrant, storage_tier, exergy_score) "
             f"VALUES (?, ?, ?, ?, {created_at}, ?, ?, ?, ?)"
         )
-        cursor.execute(sql, (
-            defaults["content"],
-            defaults["confidence"],
-            defaults["is_tombstoned"],
-            defaults["parent_id"],
-            defaults["decay_half_life"],
-            defaults["quadrant"],
-            defaults["storage_tier"],
-            defaults["exergy_score"],
-        ))
+        cursor.execute(
+            sql,
+            (
+                defaults["content"],
+                defaults["confidence"],
+                defaults["is_tombstoned"],
+                defaults["parent_id"],
+                defaults["decay_half_life"],
+                defaults["quadrant"],
+                defaults["storage_tier"],
+                defaults["exergy_score"],
+            ),
+        )
     else:
         sql = (
             "INSERT INTO facts (content, confidence, is_tombstoned, parent_id, "
             "created_at, decay_half_life, quadrant, storage_tier, exergy_score) "
             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
         )
-        cursor.execute(sql, (
-            defaults["content"],
-            defaults["confidence"],
-            defaults["is_tombstoned"],
-            defaults["parent_id"],
-            created_at,
-            defaults["decay_half_life"],
-            defaults["quadrant"],
-            defaults["storage_tier"],
-            defaults["exergy_score"],
-        ))
+        cursor.execute(
+            sql,
+            (
+                defaults["content"],
+                defaults["confidence"],
+                defaults["is_tombstoned"],
+                defaults["parent_id"],
+                created_at,
+                defaults["decay_half_life"],
+                defaults["quadrant"],
+                defaults["storage_tier"],
+                defaults["exergy_score"],
+            ),
+        )
 
     fact_id = cursor.lastrowid
     conn.commit()
@@ -183,8 +190,11 @@ class TestBuildTopologicalBarrier:
         """Tombstoned C5 facts should not seed the barrier."""
         parent_id = _insert_fact(tmp_db, content="parent")
         _insert_fact(
-            tmp_db, content="dead c5", confidence="C5",
-            parent_id=parent_id, is_tombstoned=1,
+            tmp_db,
+            content="dead c5",
+            confidence="C5",
+            parent_id=parent_id,
+            is_tombstoned=1,
         )
 
         conn = sqlite3.connect(tmp_db)
@@ -267,7 +277,9 @@ class TestExecuteThermalPurge:
         """C5 facts are excluded from scanning regardless of age."""
         # Very old C5 fact (would be tombstoned if it were C3)
         _insert_fact(
-            tmp_db, content="eternal c5", confidence="C5",
+            tmp_db,
+            content="eternal c5",
+            confidence="C5",
             created_at="datetime('now', '-365 days')",
             decay_half_life=30.0,
         )
@@ -289,9 +301,12 @@ class TestExecuteThermalPurge:
     def test_dry_run_no_mutations(self, tmp_db):
         """Dry-run computes stats but does NOT mutate the database."""
         fact_id = _insert_fact(
-            tmp_db, content="old fact", confidence="C3",
+            tmp_db,
+            content="old fact",
+            confidence="C3",
             created_at="datetime('now', '-100 days')",
-            decay_half_life=30.0, storage_tier="HOT",
+            decay_half_life=30.0,
+            storage_tier="HOT",
         )
 
         stats = execute_thermal_purge(tmp_db, dry_run=True)
@@ -310,9 +325,12 @@ class TestExecuteThermalPurge:
         """Fact with exergy < 0.125 (3+ half-lives old) should be tombstoned."""
         # 100 days old, half_life=30 → exergy = 0.5^(100/30) ≈ 0.099
         fact_id = _insert_fact(
-            tmp_db, content="dying fact", confidence="C3",
+            tmp_db,
+            content="dying fact",
+            confidence="C3",
             created_at="datetime('now', '-100 days')",
-            decay_half_life=30.0, storage_tier="HOT",
+            decay_half_life=30.0,
+            storage_tier="HOT",
         )
 
         stats = execute_thermal_purge(tmp_db, dry_run=False)
@@ -328,9 +346,12 @@ class TestExecuteThermalPurge:
         """Fact with exergy between 0.25 and 0.50 in HOT tier → transition to WARM."""
         # 35 days old, half_life=30 → exergy = 0.5^(35/30) ≈ 0.44
         fact_id = _insert_fact(
-            tmp_db, content="aging fact", confidence="C3",
+            tmp_db,
+            content="aging fact",
+            confidence="C3",
             created_at="datetime('now', '-35 days')",
-            decay_half_life=30.0, storage_tier="HOT",
+            decay_half_life=30.0,
+            storage_tier="HOT",
         )
 
         stats = execute_thermal_purge(tmp_db, dry_run=False)
@@ -344,9 +365,12 @@ class TestExecuteThermalPurge:
         """Fact with exergy between 0.125 and 0.25, not in COLD → transition to COLD."""
         # 65 days old, half_life=30 → exergy = 0.5^(65/30) ≈ 0.23
         fact_id = _insert_fact(
-            tmp_db, content="cold fact", confidence="C3",
+            tmp_db,
+            content="cold fact",
+            confidence="C3",
             created_at="datetime('now', '-65 days')",
-            decay_half_life=30.0, storage_tier="WARM",
+            decay_half_life=30.0,
+            storage_tier="WARM",
         )
 
         stats = execute_thermal_purge(tmp_db, dry_run=False)
@@ -361,9 +385,12 @@ class TestExecuteThermalPurge:
         """Fact already in COLD tier with same exergy range → no re-transition."""
         # 65 days old, half_life=30, already COLD
         fact_id = _insert_fact(
-            tmp_db, content="already cold", confidence="C3",
+            tmp_db,
+            content="already cold",
+            confidence="C3",
             created_at="datetime('now', '-65 days')",
-            decay_half_life=30.0, storage_tier="COLD",
+            decay_half_life=30.0,
+            storage_tier="COLD",
         )
 
         stats = execute_thermal_purge(tmp_db, dry_run=False)
@@ -376,13 +403,18 @@ class TestExecuteThermalPurge:
         """An old fact that's ancestor of a C5 node must not be tombstoned."""
         # Very old non-C5 fact (would normally be tombstoned)
         ancestor_id = _insert_fact(
-            tmp_db, content="old ancestor", confidence="C3",
+            tmp_db,
+            content="old ancestor",
+            confidence="C3",
             created_at="datetime('now', '-200 days')",
-            decay_half_life=30.0, storage_tier="HOT",
+            decay_half_life=30.0,
+            storage_tier="HOT",
         )
         # C5 child protecting the ancestor
         _insert_fact(
-            tmp_db, content="c5 protector", confidence="C5",
+            tmp_db,
+            content="c5 protector",
+            confidence="C5",
             parent_id=ancestor_id,
         )
 
@@ -397,7 +429,9 @@ class TestExecuteThermalPurge:
     def test_json_output_mode(self, tmp_db, capsys):
         """JSON output mode emits valid JSON with correct structure."""
         _insert_fact(
-            tmp_db, content="json test", confidence="C3",
+            tmp_db,
+            content="json test",
+            confidence="C3",
             created_at="datetime('now', '-100 days')",
         )
 
@@ -419,15 +453,21 @@ class TestExecuteThermalPurge:
         """After a real purge, exergy_score column reflects computed decay value."""
         # Fresh fact → exergy ≈ 1.0
         fresh_id = _insert_fact(
-            tmp_db, content="fresh", confidence="C3",
+            tmp_db,
+            content="fresh",
+            confidence="C3",
             created_at="datetime('now')",
-            decay_half_life=30.0, exergy_score=0.0,  # intentionally wrong
+            decay_half_life=30.0,
+            exergy_score=0.0,  # intentionally wrong
         )
         # Aged fact → exergy ≈ 0.44
         aged_id = _insert_fact(
-            tmp_db, content="aged", confidence="C3",
+            tmp_db,
+            content="aged",
+            confidence="C3",
             created_at="datetime('now', '-35 days')",
-            decay_half_life=30.0, exergy_score=0.0,  # intentionally wrong
+            decay_half_life=30.0,
+            exergy_score=0.0,  # intentionally wrong
         )
 
         stats = execute_thermal_purge(tmp_db, dry_run=False)
@@ -447,23 +487,32 @@ class TestExecuteThermalPurge:
         """Multiple facts at different decay stages transition correctly."""
         # HOT → WARM (35 days)
         warm_id = _insert_fact(
-            tmp_db, content="warm candidate", confidence="C3",
+            tmp_db,
+            content="warm candidate",
+            confidence="C3",
             created_at="datetime('now', '-35 days')",
-            decay_half_life=30.0, storage_tier="HOT",
+            decay_half_life=30.0,
+            storage_tier="HOT",
         )
         # HOT → COLD (65 days, starting from HOT so it goes to WARM first)
         # Actually, the engine checks COLD threshold first (<0.25 and not COLD),
         # so HOT fact at 65 days goes directly to COLD
         cold_id = _insert_fact(
-            tmp_db, content="cold candidate", confidence="C3",
+            tmp_db,
+            content="cold candidate",
+            confidence="C3",
             created_at="datetime('now', '-65 days')",
-            decay_half_life=30.0, storage_tier="HOT",
+            decay_half_life=30.0,
+            storage_tier="HOT",
         )
         # Tombstone (100 days)
         tomb_id = _insert_fact(
-            tmp_db, content="tombstone candidate", confidence="C3",
+            tmp_db,
+            content="tombstone candidate",
+            confidence="C3",
             created_at="datetime('now', '-100 days')",
-            decay_half_life=30.0, storage_tier="HOT",
+            decay_half_life=30.0,
+            storage_tier="HOT",
         )
 
         stats = execute_thermal_purge(tmp_db, dry_run=False)
@@ -485,8 +534,11 @@ class TestExecuteThermalPurge:
         TODO: Fix engine line 176 to use `is not None` instead of truthiness.
         """
         fact_id = _insert_fact(
-            tmp_db, content="zero half life", confidence="C3",
-            decay_half_life=0.0, storage_tier="HOT",
+            tmp_db,
+            content="zero half life",
+            confidence="C3",
+            decay_half_life=0.0,
+            storage_tier="HOT",
         )
 
         stats = execute_thermal_purge(tmp_db, dry_run=False)

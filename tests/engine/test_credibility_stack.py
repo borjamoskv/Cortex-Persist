@@ -9,11 +9,9 @@ from cortex.engine.credibility_stack import LedgerCredibilityStack
 
 
 @pytest.mark.asyncio
-async def test_ledger_credibility_stack_strike():
+async def test_ledger_credibility_stack_strike(tmp_path):
     # Set up a mock engine and temporary database directory/file path
-    db_path = "test_cred_stack.db"
-    if os.path.exists(db_path):
-        os.remove(db_path)
+    db_path = str(tmp_path / "test_cred_stack.db")
 
     mock_engine = MagicMock()
     mock_engine._db_path = db_path
