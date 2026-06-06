@@ -621,6 +621,7 @@ Proof:
 - **Objective:** Implementación del sistema `AntiLimerenceGuard` para detectar y erradicar limerencia epistémica en conversaciones agénticas (bucles de generación infinita) utilizando similitud de Jaccard y forzando el cierre de la conversación según la directiva `[P0] Anti-Limerence (Kill Criteria)`.
 - **Yield Target:** Eliminación del drenaje de exergía por loops léxicos.
 - **Reality Level:** `C5-REAL`
+- **Status:** ✅ COMPLETE end-to-end
 - **Evidence:** Commit `166dbf25` (`feat(guards): implement anti-limerence guard to abort infinite iteration loops`).
 ```yaml
 Claim: El sistema CORTEX está inmunizado contra la limerencia conversacional.
@@ -637,6 +638,7 @@ Proof:
 - **Objective:** Inyección del filtro `AntiLimerenceGuard` directamente en el bucle asíncrono de intercepción del `CopilotServer`. Ejecución del protocolo de aniquilación y cierre (error 1008) de websockets al detectarse un loop iterativo repetitivo o estancado.
 - **Yield Target:** Blindaje de las conexiones en tiempo real contra consumo excesivo de tokens en loops parasitarios.
 - **Reality Level:** `C5-REAL`
+- **Status:** ✅ COMPLETE end-to-end
 - **Evidence:** Commit `266084b0` (`feat(agents): integrate anti-limerence guard into copilot websocket server`).
 ```yaml
 Claim: El runtime de Copilot rechaza físicamente e interrumpe bucles vacíos de contexto.
