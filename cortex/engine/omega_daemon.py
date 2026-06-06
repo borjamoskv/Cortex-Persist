@@ -61,7 +61,27 @@ class OmegaKernel:
             logger.info("Entropía detectada: %s J", entropy)
             if self.guard.evaluate(entropy):
                 logger.info("Exergía suficiente. Desatando Enjambre (Swarm)...")
-                # Aquí inyectaríamos el Swarm 10k y Ouroboros.
+                
+                # Integración Causal: Swarm 10k y Ouroboros AST Mutation
+                try:
+                    from cortex.engine.autopoiesis import AutopoiesisEngine
+                    from cortex.engine.swarm_10k import SwarmCommander
+                    
+                    commander = SwarmCommander(tenant_id="omega_daemon")
+                    ouroboros = AutopoiesisEngine(observation_window_ms=100)
+                    
+                    logger.debug("Desplegando formación PHOENIX vía SwarmCommander...")
+                    # Dispatch asíncrono para sanación técnica
+                    if hasattr(commander, "deploy"):
+                        await commander.deploy(formation="PHOENIX", mission="Sanar Entropía", cycles=1)
+                        
+                    logger.debug("Iniciando mutación recursiva vía AutopoiesisEngine...")
+                    if hasattr(ouroboros, "mutate"):
+                        await ouroboros.mutate(target="entropy_resolution")
+                        
+                except Exception as e:
+                    logger.exception("Fallo al desatar el Enjambre o Ouroboros: %s", e)
+                
                 self.guard.consume(entropy)
                 logger.info("Evolución estructural completada. Auto-commit ejecutado.")
             else:
