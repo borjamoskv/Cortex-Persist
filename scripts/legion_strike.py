@@ -42,7 +42,13 @@ async def main():
         from cortex.extensions.llm.provider import LLMProvider
 
         primary_provider = LLMProvider("gemini")
-        router = CortexLLMRouter(primary=primary_provider)
+        fallback_providers = [
+            LLMProvider("openrouter"),
+            LLMProvider("deepseek"),
+            LLMProvider("ollama"),
+            LLMProvider("lmstudio"),
+        ]
+        router = CortexLLMRouter(primary=primary_provider, fallbacks=fallback_providers)
     else:
         router = None
 
