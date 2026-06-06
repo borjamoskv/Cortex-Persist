@@ -1,0 +1,5868 @@
+openapi: 3.1.0
+info:
+  description: "Local-first memory infrastructure for AI agents. Vector search, temporal\
+    \ facts, cryptographic ledger."
+  title: CORTEX - Sovereign Memory API
+  version: 1.0.0
+servers:
+- url: /
+paths:
+  /:
+    get:
+      operationId: root_node__get
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+      summary: Root Node
+      tags:
+      - health
+  /health:
+    get:
+      operationId: health_check_health_get
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: {}
+                title: Response Health Check Health Get
+          description: Successful Response
+      summary: Health Check
+      tags:
+      - health
+  /metrics:
+    get:
+      operationId: get_metrics_metrics_get
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+      summary: Get Metrics
+      tags:
+      - health
+  /v1/events/stream:
+    get:
+      description: Subscribe to CORTEX coordination events via SSE.
+      operationId: stream_events_v1_events_stream_get
+      parameters:
+      - description: Comma-separated list of event types
+        explode: true
+        in: query
+        name: types
+        required: false
+        schema:
+          description: Comma-separated list of event types
+          nullable: true
+          type: string
+        style: form
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Stream Events
+      tags:
+      - events
+  /v1/facts:
+    get:
+      operationId: list_all_facts_v1_facts_get
+      parameters:
+      - explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 50
+          maximum: 1000
+          minimum: 1
+          title: Limit
+          type: integer
+        style: form
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/FactResponse"
+                title: Response List All Facts V1 Facts Get
+                type: array
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: List All Facts
+      tags:
+      - facts
+    post:
+      description: Store a fact (scoped to authenticated tenant).
+      operationId: store_fact_v1_facts_post
+      parameters:
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StoreRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StoreResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Store Fact
+      tags:
+      - facts
+  /v1/facts/batch:
+    post:
+      description: Batch store up to 100 facts in a single request.
+      operationId: batch_store_v1_facts_batch_post
+      parameters:
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BatchStoreRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: {}
+                title: Response Batch Store V1 Facts Batch Post
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Batch Store
+      tags:
+      - facts
+  /v1/projects/{project}/facts:
+    get:
+      description: Recall facts for a specific project with tenant isolation.
+      operationId: recall_facts_v1_projects__project__facts_get
+      parameters:
+      - explode: false
+        in: path
+        name: project
+        required: true
+        schema:
+          title: Project
+          type: string
+        style: simple
+      - explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          maximum: 1000
+          minimum: 1
+          nullable: true
+          type: integer
+        style: form
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/FactResponse"
+                title: Response Recall Facts V1 Projects  Project  Facts Get
+                type: array
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Recall Facts
+      tags:
+      - facts
+  /v1/facts/search:
+    post:
+      description: Semantic search across all facts (scoped to tenant).
+      operationId: search_facts_v1_facts_search_post
+      parameters:
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SearchMemoryRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/FactResponse"
+                title: Response Search Facts V1 Facts Search Post
+                type: array
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Search Facts
+      tags:
+      - facts
+  /v1/facts/{fact_id}/history:
+    get:
+      description: Retrieve version history for a specific fact.
+      operationId: get_fact_history_v1_facts__fact_id__history_get
+      parameters:
+      - explode: false
+        in: path
+        name: fact_id
+        required: true
+        schema:
+          title: Fact Id
+          type: integer
+        style: simple
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/FactResponse"
+                title: Response Get Fact History V1 Facts  Fact Id  History Get
+                type: array
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Get Fact History
+      tags:
+      - facts
+  /v1/facts/{fact_id}/taint:
+    post:
+      description: Trigger Ω₁₃ taint propagation from a compromised/invalidated fact.
+      operationId: propagate_taint_v1_facts__fact_id__taint_post
+      parameters:
+      - explode: false
+        in: path
+        name: fact_id
+        required: true
+        schema:
+          title: Fact Id
+          type: integer
+        style: simple
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: {}
+                title: Response Propagate Taint V1 Facts  Fact Id  Taint Post
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Propagate Taint
+      tags:
+      - facts
+  /v1/facts/verify:
+    get:
+      description: Verify cryptographic integrity of the memory ledger.
+      operationId: verify_ledger_v1_facts_verify_get
+      parameters:
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: {}
+                title: Response Verify Ledger V1 Facts Verify Get
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Verify Ledger
+      tags:
+      - facts
+  /v1/facts/{fact_id}/vote:
+    post:
+      description: Cast a consensus vote (verify/dispute) on a fact.
+      operationId: cast_vote_v1_facts__fact_id__vote_post
+      parameters:
+      - explode: false
+        in: path
+        name: fact_id
+        required: true
+        schema:
+          title: Fact Id
+          type: integer
+        style: simple
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VoteRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VoteResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Cast Vote
+      tags:
+      - facts
+  /v1/facts/{fact_id}/vote-v2:
+    post:
+      description: Cast a reputation-weighted consensus vote (RWC).
+      operationId: cast_vote_v2_v1_facts__fact_id__vote_v2_post
+      parameters:
+      - explode: false
+        in: path
+        name: fact_id
+        required: true
+        schema:
+          title: Fact Id
+          type: integer
+        style: simple
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VoteV2Request"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VoteResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Cast Vote V2
+      tags:
+      - facts
+  /v1/facts/{fact_id}/votes:
+    get:
+      description: Retrieve all votes for a specific fact (Tenant Isolated).
+      operationId: list_votes_v1_facts__fact_id__votes_get
+      parameters:
+      - explode: false
+        in: path
+        name: fact_id
+        required: true
+        schema:
+          title: Fact Id
+          type: integer
+        style: simple
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  additionalProperties: true
+                  type: object
+                title: Response List Votes V1 Facts  Fact Id  Votes Get
+                type: array
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: List Votes
+      tags:
+      - facts
+  /v1/facts/{fact_id}:
+    delete:
+      description: Soft-deprecate a fact (mark as invalid).
+      operationId: deprecate_fact_v1_facts__fact_id__delete
+      parameters:
+      - explode: false
+        in: path
+        name: fact_id
+        required: true
+        schema:
+          title: Fact Id
+          type: integer
+        style: simple
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: {}
+                title: Response Deprecate Fact V1 Facts  Fact Id  Delete
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Deprecate Fact
+      tags:
+      - facts
+    get:
+      description: Get a single fact by ID.
+      operationId: get_fact_by_id_v1_facts__fact_id__get
+      parameters:
+      - explode: false
+        in: path
+        name: fact_id
+        required: true
+        schema:
+          title: Fact Id
+          type: integer
+        style: simple
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FactResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Get Fact By Id
+      tags:
+      - facts
+  /v1/facts/{fact_id}/chain:
+    get:
+      description: "Get the causal chain for a fact (up=ancestors, down=descendants)."
+      operationId: get_causal_chain_v1_facts__fact_id__chain_get
+      parameters:
+      - explode: false
+        in: path
+        name: fact_id
+        required: true
+        schema:
+          title: Fact Id
+          type: integer
+        style: simple
+      - description: '''up'' or ''down'''
+        explode: true
+        in: query
+        name: direction
+        required: false
+        schema:
+          default: down
+          description: '''up'' or ''down'''
+          title: Direction
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: max_depth
+        required: false
+        schema:
+          default: 10
+          maximum: 100
+          minimum: 1
+          title: Max Depth
+          type: integer
+        style: form
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  additionalProperties: true
+                  type: object
+                title: Response Get Causal Chain V1 Facts  Fact Id  Chain Get
+                type: array
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Get Causal Chain
+      tags:
+      - facts
+  /v1/search:
+    get:
+      description: Semantic + Graph-RAG search via GET (scoped to tenant).
+      operationId: search_facts_get_v1_search_get
+      parameters:
+      - explode: true
+        in: query
+        name: query
+        required: true
+        schema:
+          maxLength: 1024
+          title: Query
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: k
+        required: false
+        schema:
+          default: 5
+          maximum: 50
+          minimum: 1
+          title: K
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: as_of
+        required: false
+        schema:
+          nullable: true
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: graph_depth
+        required: false
+        schema:
+          default: 0
+          maximum: 5
+          minimum: 0
+          title: Graph Depth
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: include_graph
+        required: false
+        schema:
+          default: false
+          title: Include Graph
+          type: boolean
+        style: form
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/SearchResult"
+                title: Response Search Facts Get V1 Search Get
+                type: array
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Search Facts Get
+      tags:
+      - search
+    post:
+      description: Semantic + Graph-RAG search across facts (scoped to tenant).
+      operationId: search_facts_v1_search_post
+      parameters:
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SearchRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/SearchResult"
+                title: Response Search Facts V1 Search Post
+                type: array
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Search Facts
+      tags:
+      - search
+  /v1/ask:
+    post:
+      description: |-
+        RAG endpoint: search → synthesize → answer.
+
+        Searches CORTEX memory for relevant facts, then uses the configured
+        LLM to synthesize an answer grounded in those facts.
+
+        Returns 503 if no LLM provider is configured.
+      operationId: ask_cortex_v1_ask_post
+      parameters:
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AskRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AskResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Ask Cortex
+      tags:
+      - ask
+  /v1/ask/stream:
+    post:
+      description: |-
+        Streaming RAG endpoint: search → synthesize → stream answer.
+
+        Yields SSE 'data: ' events containing text chunks.
+      operationId: ask_stream_v1_ask_stream_post
+      parameters:
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AskRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Ask Stream
+      tags:
+      - ask
+  /v1/llm/status:
+    get:
+      description: "Check LLM provider status and list supported providers. [STATUS]"
+      operationId: llm_status_v1_llm_status_get
+      parameters:
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LLMStatusResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Llm Status
+      tags:
+      - ask
+  /v1/projects/{project}/export:
+    get:
+      description: |-
+        Sovereign Export - dumps project memory to a secure JSON artifact.
+
+        Enforces path incarceration to prevent directory traversal.
+      operationId: export_project_v1_projects__project__export_get
+      parameters:
+      - explode: false
+        in: path
+        name: project
+        required: true
+        schema:
+          title: Project
+          type: string
+        style: simple
+      - explode: true
+        in: query
+        name: path
+        required: false
+        schema:
+          nullable: true
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: format
+        required: false
+        schema:
+          default: json
+          title: Format
+          type: string
+        style: form
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExportResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Export Project
+      tags:
+      - governance
+  /v1/health/deep:
+    get:
+      description: |-
+        Deep Health Check - probes all CORTEX subsystems.
+
+        Returns 200 if all checks pass, 503 if any subsystem is degraded.
+        Designed for Kubernetes liveness/readiness probes.
+      operationId: deep_health_check_v1_health_deep_get
+      parameters:
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeepHealthResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Deep Health Check
+      tags:
+      - governance
+  /v1/status:
+    get:
+      description: Expose engine diagnostics and memory health metrics.
+      operationId: get_system_status_v1_status_get
+      parameters:
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatusResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Get System Status
+      tags:
+      - governance
+  /v1/admin/keys:
+    get:
+      description: Expose non-sensitive metadata for all provisioned keys.
+      operationId: list_api_keys_v1_admin_keys_get
+      parameters:
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/ApiKeyListItem"
+                title: Response List Api Keys V1 Admin Keys Get
+                type: array
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: List Api Keys
+      tags:
+      - governance
+    post:
+      description: |-
+        Sovereign Key Provisioning.
+
+        First key is self-provisioned (bootstrap).
+        Subsequent keys require 'admin' permission.
+      operationId: create_api_key_v1_admin_keys_post
+      parameters:
+      - explode: true
+        in: query
+        name: name
+        required: true
+        schema:
+          maxLength: 64
+          minLength: 3
+          title: Name
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: tenant_id
+        required: false
+        schema:
+          default: default
+          title: Tenant Id
+          type: string
+        style: form
+      - explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiKeyResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Create Api Key
+      tags:
+      - governance
+  /v1/handoff:
+    post:
+      description: |-
+        Manifest a session handoff artifact with hot context and recent episodes.
+
+        Used for transferring agentic state between platforms (macOS -> Web).
+      operationId: generate_handoff_context_v1_handoff_post
+      parameters:
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: {}
+                title: Response Generate Handoff Context V1 Handoff Post
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Generate Handoff Context
+      tags:
+      - governance
+  /v1/admin/credibility-strike:
+    post:
+      description: |-
+        Execute a JIT credibility strike for a project.
+
+        Computes exergy, constructs Merkle roots, signs the root,
+        performs replay validation, and takes database snapshots.
+      operationId: execute_credibility_strike_v1_admin_credibility_strike_post
+      parameters:
+      - explode: true
+        in: query
+        name: project
+        required: true
+        schema:
+          title: Project
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: ultrathink
+        required: false
+        schema:
+          default: true
+          title: Ultrathink
+          type: boolean
+        style: form
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: {}
+                title: Response Execute Credibility Strike V1 Admin Credibility Strike
+                  Post
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Execute Credibility Strike
+      tags:
+      - governance
+  /v1/heartbeat:
+    post:
+      description: Record an activity heartbeat for automatic time tracking.
+      operationId: record_heartbeat_v1_heartbeat_post
+      parameters:
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HeartbeatRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: {}
+                title: Response Record Heartbeat V1 Heartbeat Post
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Record Heartbeat
+      tags:
+      - timing
+  /v1/time/today:
+    get:
+      description: Get today's time tracking summary.
+      operationId: time_today_v1_time_today_get
+      parameters:
+      - explode: true
+        in: query
+        name: project
+        required: false
+        schema:
+          nullable: true
+          type: string
+        style: form
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TimeSummaryResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Time Today
+      tags:
+      - timing
+  /v1/time:
+    get:
+      description: Get time tracking report for the last N days.
+      operationId: time_report_v1_time_get
+      parameters:
+      - explode: true
+        in: query
+        name: project
+        required: false
+        schema:
+          nullable: true
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: days
+        required: false
+        schema:
+          default: 7
+          title: Days
+          type: integer
+        style: form
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TimeSummaryResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Time Report
+      tags:
+      - timing
+  /v1/time/history:
+    get:
+      description: Get daily time history.
+      operationId: get_time_history_v1_time_history_get
+      parameters:
+      - explode: true
+        in: query
+        name: days
+        required: false
+        schema:
+          default: 7
+          maximum: 365
+          minimum: 1
+          title: Days
+          type: integer
+        style: form
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items: {}
+                title: Response Get Time History V1 Time History Get
+                type: array
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Get Time History
+      tags:
+      - timing
+  /v1/translate:
+    post:
+      description: |-
+        OMNI-TRANSLATE: Sovereign Core translation endpoint.
+
+        Translates a dictionary of texts into multiple target languages simultaneously
+        using Gemini 2.0 Flash for optimal speed and cost.
+        Ensures that the output strictly matches the input schema.
+      operationId: translate_texts_v1_translate_post
+      parameters:
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TranslateRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TranslateResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Translate Texts
+      tags:
+      - translate
+  /v1/oracle/audit:
+    post:
+      description: |-
+        The Oracle: Run a Sovereign Agent audit.
+        Requires a valid CORTEX API Key (provisioned via Stripe subscription).
+      operationId: audit_target_v1_oracle_audit_post
+      parameters:
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OracleRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OracleResponse"
+          description: Successful Response
+        "500":
+          description: Oracle yielded no insights.
+        "502":
+          description: "Oracle Engine Error: LLM provider is failing."
+        "503":
+          description: The Oracle is currently disconnected from the LLM core.
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Audit Target
+      tags:
+      - oracle
+  /v1/daemon/status:
+    get:
+      description: Get last daemon watchdog check results.
+      operationId: daemon_status_v1_daemon_status_get
+      parameters:
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: {}
+                title: Response Daemon Status V1 Daemon Status Get
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Daemon Status
+      tags:
+      - daemon
+  /dashboard:
+    get:
+      description: Serve the embedded memory dashboard.
+      operationId: dashboard_dashboard_get
+      responses:
+        "200":
+          content:
+            text/html:
+              schema:
+                nullable: true
+                type: string
+          description: Successful Response
+      summary: Dashboard
+      tags:
+      - dashboard
+  /v1/agents:
+    get:
+      description: List all agents for the current tenant.
+      operationId: list_agents_v1_agents_get
+      parameters:
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/AgentResponse"
+                title: Response List Agents V1 Agents Get
+                type: array
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: List Agents
+      tags:
+      - agents
+    post:
+      description: Register a new agent for Reputation-Weighted Consensus (Requires
+        Admin).
+      operationId: register_agent_v1_agents_post
+      parameters:
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AgentRegisterRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Register Agent
+      tags:
+      - agents
+  /v1/agents/{agent_id}:
+    get:
+      description: Get agent details and current reputation.
+      operationId: get_agent_v1_agents__agent_id__get
+      parameters:
+      - explode: false
+        in: path
+        name: agent_id
+        required: true
+        schema:
+          title: Agent Id
+          type: string
+        style: simple
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Get Agent
+      tags:
+      - agents
+  /v1/graph/{project}:
+    get:
+      description: Get entity graph for a specific project.
+      operationId: get_graph_v1_graph__project__get
+      parameters:
+      - explode: false
+        in: path
+        name: project
+        required: true
+        schema:
+          title: Project
+          type: string
+        style: simple
+      - explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 50
+          maximum: 500
+          minimum: 1
+          title: Limit
+          type: integer
+        style: form
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: {}
+                title: Response Get Graph V1 Graph  Project  Get
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Get Graph
+      tags:
+      - graph
+  /v1/graph:
+    get:
+      description: Get entity graph across all projects.
+      operationId: get_graph_all_v1_graph_get
+      parameters:
+      - explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 50
+          maximum: 500
+          minimum: 1
+          title: Limit
+          type: integer
+        style: form
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: {}
+                title: Response Get Graph All V1 Graph Get
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Get Graph All
+      tags:
+      - graph
+  /v1/ledger/status:
+    get:
+      description: Check the cryptographic integrity of all ledgers (Tx and Votes).
+      operationId: get_ledger_status_v1_ledger_status_get
+      parameters:
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LedgerReportResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Get Ledger Status
+      tags:
+      - ledger
+  /v1/ledger/checkpoint:
+    post:
+      description: Manually trigger a Merkle root checkpoint for recent transactions.
+      operationId: create_checkpoint_v1_ledger_checkpoint_post
+      parameters:
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckpointResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Create Checkpoint
+      tags:
+      - ledger
+  /v1/ledger/verify:
+    get:
+      description: Alias for /status - performs full integrity verification.
+      operationId: verify_ledger_v1_ledger_verify_get
+      parameters:
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LedgerReportResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Verify Ledger
+      tags:
+      - ledger
+  /v1/missions/launch:
+    post:
+      description: Launch a new swarm mission through the CORTEX Launchpad.
+      operationId: launch_mission_v1_missions_launch_post
+      parameters:
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MissionLaunchRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MissionResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Launch Mission
+      tags:
+      - missions
+  /v1/missions/:
+    get:
+      description: List recent mission intents and reports from the ledger.
+      operationId: list_missions_v1_missions__get
+      parameters:
+      - explode: true
+        in: query
+        name: project
+        required: false
+        schema:
+          nullable: true
+          type: string
+        style: form
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  additionalProperties: true
+                  type: object
+                title: Response List Missions V1 Missions  Get
+                type: array
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: List Missions
+      tags:
+      - missions
+  /v1/mejoralo/scan:
+    post:
+      description: Execute X-Ray 13D scan on a project.
+      operationId: scan_project_v1_mejoralo_scan_post
+      parameters:
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MejoraloScanRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MejoraloScanResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Scan Project
+      tags:
+      - mejoralo
+  /v1/mejoralo/record:
+    post:
+      description: Record a MEJORAlo audit session in the ledger.
+      operationId: record_session_v1_mejoralo_record_post
+      parameters:
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MejoraloSessionRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MejoraloSessionResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Record Session
+      tags:
+      - mejoralo
+  /v1/mejoralo/history:
+    get:
+      description: Retrieve MEJORAlo session history for a project.
+      operationId: get_history_v1_mejoralo_history_get
+      parameters:
+      - explode: true
+        in: query
+        name: project
+        required: true
+        schema:
+          title: Project
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 20
+          maximum: 100
+          minimum: 1
+          title: Limit
+          type: integer
+        style: form
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  additionalProperties: true
+                  type: object
+                title: Response Get History V1 Mejoralo History Get
+                type: array
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Get History
+      tags:
+      - mejoralo
+  /v1/mejoralo/ship:
+    post:
+      description: Validate the 7 Seals for production readiness.
+      operationId: ship_gate_v1_mejoralo_ship_post
+      parameters:
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MejoraloShipRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MejoraloShipResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Ship Gate
+      tags:
+      - mejoralo
+  /v1/gate/status:
+    get:
+      description: Get the current SovereignGate status.
+      operationId: gate_status_v1_gate_status_get
+      parameters:
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GateStatusResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Gate Status
+      tags:
+      - sovereign-gate
+  /v1/gate/pending:
+    get:
+      description: List all pending L3 actions awaiting approval.
+      operationId: list_pending_v1_gate_pending_get
+      parameters:
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/GateActionResponse"
+                title: Response List Pending V1 Gate Pending Get
+                type: array
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: List Pending
+      tags:
+      - sovereign-gate
+  /v1/gate/{action_id}/approve:
+    post:
+      description: Approve a pending L3 action with HMAC signature.
+      operationId: approve_action_v1_gate__action_id__approve_post
+      parameters:
+      - explode: false
+        in: path
+        name: action_id
+        required: true
+        schema:
+          title: Action Id
+          type: string
+        style: simple
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GateApprovalRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GateActionResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Approve Action
+      tags:
+      - sovereign-gate
+  /v1/gate/{action_id}/deny:
+    post:
+      description: Deny a pending L3 action.
+      operationId: deny_action_v1_gate__action_id__deny_post
+      parameters:
+      - explode: false
+        in: path
+        name: action_id
+        required: true
+        schema:
+          title: Action Id
+          type: string
+        style: simple
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Deny Action
+      tags:
+      - sovereign-gate
+  /v1/gate/audit:
+    get:
+      description: View the SovereignGate audit log.
+      operationId: get_audit_log_v1_gate_audit_get
+      parameters:
+      - explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 50
+          title: Limit
+          type: integer
+        style: form
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Get Audit Log
+      tags:
+      - sovereign-gate
+  /v1/context/infer:
+    get:
+      description: Run ambient context inference and return the current context snapshot.
+      operationId: infer_context_v1_context_infer_get
+      parameters:
+      - description: Persist snapshot to DB
+        explode: true
+        in: query
+        name: persist
+        required: false
+        schema:
+          default: true
+          description: Persist snapshot to DB
+          title: Persist
+          type: boolean
+        style: form
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContextSnapshotResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Infer Context
+      tags:
+      - context
+  /v1/context/signals:
+    get:
+      description: List raw ambient signals without running inference.
+      operationId: list_signals_v1_context_signals_get
+      parameters:
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/ContextSignalModel"
+                title: Response List Signals V1 Context Signals Get
+                type: array
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: List Signals
+      tags:
+      - context
+  /v1/context/history:
+    get:
+      description: Retrieve past context inference snapshots.
+      operationId: context_history_v1_context_history_get
+      parameters:
+      - explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 10
+          maximum: 100
+          minimum: 1
+          title: Limit
+          type: integer
+        style: form
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  additionalProperties: true
+                  type: object
+                title: Response Context History V1 Context History Get
+                type: array
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Context History
+      tags:
+      - context
+  /tips:
+    get:
+      description: Get random contextual tips.
+      operationId: get_tips_tips_get
+      parameters:
+      - description: Number of tips to return
+        explode: true
+        in: query
+        name: count
+        required: false
+        schema:
+          default: 1
+          description: Number of tips to return
+          maximum: 20
+          minimum: 1
+          title: Count
+          type: integer
+        style: form
+      - description: "Language code (en, es, eu)"
+        explode: true
+        in: query
+        name: lang
+        required: false
+        schema:
+          default: en
+          description: "Language code (en, es, eu)"
+          title: Lang
+          type: string
+        style: form
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TipsListResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Get Tips
+      tags:
+      - tips
+  /tips/categories:
+    get:
+      description: List all tip categories with counts.
+      operationId: list_categories_tips_categories_get
+      parameters:
+      - description: "Language code (en, es, eu)"
+        explode: true
+        in: query
+        name: lang
+        required: false
+        schema:
+          default: en
+          description: "Language code (en, es, eu)"
+          title: Lang
+          type: string
+        style: form
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CategoriesResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: List Categories
+      tags:
+      - tips
+  /tips/category/{category}:
+    get:
+      description: Get tips filtered by category.
+      operationId: get_tips_by_category_tips_category__category__get
+      parameters:
+      - explode: false
+        in: path
+        name: category
+        required: true
+        schema:
+          title: Category
+          type: string
+        style: simple
+      - description: "Language code (en, es, eu)"
+        explode: true
+        in: query
+        name: lang
+        required: false
+        schema:
+          default: en
+          description: "Language code (en, es, eu)"
+          title: Lang
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 5
+          maximum: 50
+          minimum: 1
+          title: Limit
+          type: integer
+        style: form
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TipsListResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Get Tips By Category
+      tags:
+      - tips
+  /tips/project/{project}:
+    get:
+      description: Get tips scoped to a specific project.
+      operationId: get_tips_by_project_tips_project__project__get
+      parameters:
+      - explode: false
+        in: path
+        name: project
+        required: true
+        schema:
+          title: Project
+          type: string
+        style: simple
+      - description: "Language code (en, es, eu)"
+        explode: true
+        in: query
+        name: lang
+        required: false
+        schema:
+          default: en
+          description: "Language code (en, es, eu)"
+          title: Lang
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 3
+          maximum: 20
+          minimum: 1
+          title: Limit
+          type: integer
+        style: form
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TipsListResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Get Tips By Project
+      tags:
+      - tips
+  /v1/swarm/status:
+    get:
+      description: Aggregate swarm health and load metrics.
+      operationId: get_swarm_status_v1_swarm_status_get
+      parameters:
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SwarmStatusResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Get Swarm Status
+      tags:
+      - swarm
+  /v1/swarm/worktrees:
+    post:
+      description: Provision a new isolated execution environment (Hito 3).
+      operationId: create_worktree_v1_swarm_worktrees_post
+      parameters:
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorktreeCreateRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorktreeResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Create Worktree
+      tags:
+      - swarm
+  /v1/swarm/worktrees/{worktree_id}:
+    delete:
+      description: Cleanly destroy an isolated worktree.
+      operationId: delete_worktree_v1_swarm_worktrees__worktree_id__delete
+      parameters:
+      - explode: false
+        in: path
+        name: worktree_id
+        required: true
+        schema:
+          title: Worktree Id
+          type: string
+        style: simple
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Delete Worktree
+      tags:
+      - swarm
+    get:
+      description: Get metadata for a specific worktree.
+      operationId: get_worktree_status_v1_swarm_worktrees__worktree_id__get
+      parameters:
+      - explode: false
+        in: path
+        name: worktree_id
+        required: true
+        schema:
+          title: Worktree Id
+          type: string
+        style: simple
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorktreeResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Get Worktree Status
+      tags:
+      - swarm
+  /v1/swarm/psychohistory:
+    post:
+      description: |-
+        Trigger the Psychohistory Fracture Simulator (Hito 4).
+        Orchestrates 50 specialized agents using a Semaphore to calculate catastrophic cascades.
+        Extracts a Byzantine consensus O(1) Contingency Crystal.
+      operationId: run_psychohistory_simulation_v1_swarm_psychohistory_post
+      parameters:
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PsychohistoryRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Run Psychohistory Simulation
+      tags:
+      - swarm
+  /telemetry/ingest:
+    post:
+      description: Ingest sovereign telemetry facts (C5-REAL) from external edge sensors.
+      operationId: ingest_telemetry_telemetry_ingest_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TelemetryIngestRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Ingest Telemetry
+      tags:
+      - telemetry
+  /api/v1/telemetry/ingest:
+    post:
+      description: Ingest sovereign telemetry facts (C5-REAL) from external edge sensors.
+      operationId: ingest_telemetry_api_v1_telemetry_ingest_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TelemetryIngestRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Ingest Telemetry
+      tags:
+      - telemetry
+  /v1/telemetry/ingest:
+    post:
+      description: Ingest sovereign telemetry facts (C5-REAL) from external edge sensors.
+      operationId: ingest_telemetry_v1_telemetry_ingest_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TelemetryIngestRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Ingest Telemetry
+      tags:
+      - telemetry
+  /telemetry/nodes:
+    get:
+      description: Retrieve all active mafia nodes (base + dynamic).
+      operationId: get_mafia_nodes_telemetry_nodes_get
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+      summary: Get Mafia Nodes
+      tags:
+      - telemetry
+    post:
+      description: Add a new mafia node fact and push to all active extensions.
+      operationId: add_mafia_node_telemetry_nodes_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MafiaNodeProposal"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Add Mafia Node
+      tags:
+      - telemetry
+  /api/v1/telemetry/nodes:
+    get:
+      description: Retrieve all active mafia nodes (base + dynamic).
+      operationId: get_mafia_nodes_api_v1_telemetry_nodes_get
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+      summary: Get Mafia Nodes
+      tags:
+      - telemetry
+    post:
+      description: Add a new mafia node fact and push to all active extensions.
+      operationId: add_mafia_node_api_v1_telemetry_nodes_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MafiaNodeProposal"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Add Mafia Node
+      tags:
+      - telemetry
+  /v1/telemetry/nodes:
+    get:
+      description: Retrieve all active mafia nodes (base + dynamic).
+      operationId: get_mafia_nodes_v1_telemetry_nodes_get
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+      summary: Get Mafia Nodes
+      tags:
+      - telemetry
+    post:
+      description: Add a new mafia node fact and push to all active extensions.
+      operationId: add_mafia_node_v1_telemetry_nodes_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MafiaNodeProposal"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Add Mafia Node
+      tags:
+      - telemetry
+  /v1/usage:
+    get:
+      description: Get current month's API usage for the authenticated tenant.
+      operationId: get_usage_v1_usage_get
+      parameters:
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: {}
+                title: Response Get Usage V1 Usage Get
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Get Usage
+      tags:
+      - usage
+  /v1/usage/history:
+    get:
+      description: Get usage history for the last N months.
+      operationId: get_usage_history_v1_usage_history_get
+      parameters:
+      - explode: true
+        in: query
+        name: months
+        required: false
+        schema:
+          default: 12
+          title: Months
+          type: integer
+        style: form
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: {}
+                title: Response Get Usage History V1 Usage History Get
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Get Usage History
+      tags:
+      - usage
+  /v1/usage/breakdown:
+    get:
+      description: Get per-endpoint breakdown for current month.
+      operationId: get_usage_breakdown_v1_usage_breakdown_get
+      parameters:
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: {}
+                title: Response Get Usage Breakdown V1 Usage Breakdown Get
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Get Usage Breakdown
+      tags:
+      - usage
+  /v1/runtime/health:
+    get:
+      description: Retrieve runtime health report.
+      operationId: get_health_v1_runtime_health_get
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: {}
+                title: Response Get Health V1 Runtime Health Get
+          description: Successful Response
+      summary: Get Health
+      tags:
+      - runtime
+  /v1/runtime/boot_recovery:
+    get:
+      description: Get the memory recovery report generated during boot.
+      operationId: get_boot_recovery_v1_runtime_boot_recovery_get
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecoveryReport"
+          description: Successful Response
+      summary: Get Boot Recovery
+      tags:
+      - runtime
+  /v1/signup:
+    post:
+      description: |-
+        Create a free-tier account. Returns API key immediately.
+
+        No email verification required for MVP - key is active on creation.
+      operationId: signup_v1_signup_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignupRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SignupResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Signup
+      tags:
+      - onboarding
+  /v1/health/check:
+    get:
+      description: "Quick health check - score, grade, healthy boolean."
+      operationId: health_index_check_v1_health_check_get
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: {}
+                title: Response Health Index Check V1 Health Check Get
+          description: Successful Response
+      summary: Health Index Check
+      tags:
+      - health-index
+  /v1/health/score:
+    get:
+      description: Numeric score only (0-100).
+      operationId: health_index_score_v1_health_score_get
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: {}
+                title: Response Health Index Score V1 Health Score Get
+          description: Successful Response
+      summary: Health Index Score
+      tags:
+      - health-index
+  /v1/health/report:
+    get:
+      description: Full health report with recommendations and warnings.
+      operationId: health_index_report_v1_health_report_get
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: {}
+                title: Response Health Index Report V1 Health Report Get
+          description: Successful Response
+      summary: Health Index Report
+      tags:
+      - health-index
+  /v1/health/metrics:
+    get:
+      description: Raw metric snapshots for monitoring dashboards.
+      operationId: health_index_metrics_v1_health_metrics_get
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: {}
+                title: Response Health Index Metrics V1 Health Metrics Get
+          description: Successful Response
+      summary: Health Index Metrics
+      tags:
+      - health-index
+  /v1/health/prometheus:
+    get:
+      description: Prometheus text exposition format.
+      operationId: health_index_prometheus_v1_health_prometheus_get
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+      summary: Health Index Prometheus
+      tags:
+      - health-index
+  /v1/health/history:
+    get:
+      description: Persisted health score history.
+      operationId: health_index_history_v1_health_history_get
+      parameters:
+      - explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 20
+          title: Limit
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: {}
+                title: Response Health Index History V1 Health History Get
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Health Index History
+      tags:
+      - health-index
+  /v1/trust/guard:
+    post:
+      description: |-
+        Dry-run a store proposal against StorageGuard (Ω₃).
+
+        Returns 200 {valid: true} or 400 with specific violation details.
+      operationId: dry_run_guard_v1_trust_guard_post
+      parameters:
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StoreRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: {}
+                title: Response Dry Run Guard V1 Trust Guard Post
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Dry Run Guard
+      tags:
+      - trust
+  /v1/trust/profiles/{agent_id}:
+    get:
+      description: Retrieve the Bayesian trust profile for a specific agent.
+      operationId: get_agent_trust_v1_trust_profiles__agent_id__get
+      parameters:
+      - explode: false
+        in: path
+        name: agent_id
+        required: true
+        schema:
+          title: Agent Id
+          type: string
+        style: simple
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TrustProfileResponse"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Get Agent Trust
+      tags:
+      - trust
+  /v1/trust/compliance:
+    get:
+      description: Generate aggregate compliance report (EU AI Act Art 12).
+      operationId: get_compliance_status_v1_trust_compliance_get
+      parameters:
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ComplianceReport"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Get Compliance Status
+      tags:
+      - trust
+  /v1/taas/jobs/quote:
+    post:
+      description: Request a quote and SLA for an agent execution job.
+      operationId: request_job_quote_v1_taas_jobs_quote_post
+      parameters:
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JobRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobQuote"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Request Job Quote
+      tags:
+      - taas
+  /v1/taas/jobs/{job_id}/execute:
+    post:
+      description: Execute a previously quoted job and receive proof of execution.
+      operationId: execute_job_v1_taas_jobs__job_id__execute_post
+      parameters:
+      - explode: false
+        in: path
+        name: job_id
+        required: true
+        schema:
+          title: Job Id
+          type: string
+        style: simple
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobExecutionResult"
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Execute Job
+      tags:
+      - taas
+  /v1/taas/jobs/{job_id}/verify:
+    get:
+      description: Verify cryptographic proof of execution for a job.
+      operationId: verify_job_proof_v1_taas_jobs__job_id__verify_get
+      parameters:
+      - explode: false
+        in: path
+        name: job_id
+        required: true
+        schema:
+          title: Job Id
+          type: string
+        style: simple
+      - explode: true
+        in: query
+        name: proof
+        required: true
+        schema:
+          title: Proof
+          type: string
+        style: form
+      - description: Bearer <api-key>
+        explode: false
+        in: header
+        name: authorization
+        required: false
+        schema:
+          description: Bearer <api-key>
+          nullable: true
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: {}
+                title: Response Verify Job Proof V1 Taas Jobs  Job Id  Verify Get
+          description: Successful Response
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      summary: Verify Job Proof
+      tags:
+      - taas
+  /v1/public/events/stream:
+    get:
+      description: Server-Sent Events endpoint for real-time CORTEX telemetry.
+      operationId: stream_events_v1_public_events_stream_get
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+      summary: Stream Events
+      tags:
+      - events
+  /llm-proxy/v1/chat/completions:
+    post:
+      description: |-
+        OpenAI-compatible Chat Completions endpoint.
+        Passes the output through the Deterministic Labyrinth (Exergy Filter).
+      operationId: proxy_chat_completions_llm_proxy_v1_chat_completions_post
+      responses:
+        "200":
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+      summary: Proxy Chat Completions
+      tags:
+      - Exergy Proxy
+components:
+  schemas:
+    AgentRegisterRequest:
+      example:
+        agent_type: ai
+        public_key: ""
+        name: name
+      properties:
+        name:
+          maxLength: 100
+          title: Name
+          type: string
+        agent_type:
+          default: ai
+          description: "ai, human, oracle, system"
+          title: Agent Type
+          type: string
+        public_key:
+          default: ""
+          description: Optional Ed25519 public key
+          title: Public Key
+          type: string
+      required:
+      - name
+      title: AgentRegisterRequest
+    AgentResponse:
+      example:
+        agent_type: agent_type
+        reputation_score: 0.8008281904610115
+        agent_id: agent_id
+        name: name
+        created_at: created_at
+      properties:
+        agent_id:
+          title: Agent Id
+          type: string
+        name:
+          title: Name
+          type: string
+        agent_type:
+          title: Agent Type
+          type: string
+        reputation_score:
+          title: Reputation Score
+          type: number
+        created_at:
+          title: Created At
+          type: string
+      required:
+      - agent_id
+      - agent_type
+      - created_at
+      - name
+      - reputation_score
+      title: AgentResponse
+    ApiKeyListItem:
+      description: Non-sensitive API key metadata.
+      example:
+        tenant_id: tenant_id
+        is_active: true
+        prefix: prefix
+        permissions:
+        - permissions
+        - permissions
+        last_used: last_used
+        name: name
+        created_at: created_at
+        id: id
+      properties:
+        id:
+          title: Id
+          type: string
+        name:
+          title: Name
+          type: string
+        prefix:
+          title: Prefix
+          type: string
+        tenant_id:
+          title: Tenant Id
+          type: string
+        permissions:
+          items:
+            type: string
+          title: Permissions
+          type: array
+        is_active:
+          title: Is Active
+          type: boolean
+        created_at:
+          title: Created At
+          type: string
+        last_used:
+          nullable: true
+          type: string
+      required:
+      - created_at
+      - id
+      - is_active
+      - name
+      - permissions
+      - prefix
+      - tenant_id
+      title: ApiKeyListItem
+    ApiKeyResponse:
+      description: Response after creating an API key.
+      example:
+        tenant_id: tenant_id
+        prefix: prefix
+        name: name
+        message: message
+        key: key
+      properties:
+        key:
+          title: Key
+          type: string
+        name:
+          title: Name
+          type: string
+        prefix:
+          title: Prefix
+          type: string
+        tenant_id:
+          title: Tenant Id
+          type: string
+        message:
+          title: Message
+          type: string
+      required:
+      - key
+      - message
+      - name
+      - prefix
+      - tenant_id
+      title: ApiKeyResponse
+    AskRequest:
+      description: "RAG query: search CORTEX memory and synthesize an answer."
+      example:
+        max_tokens: 1255
+        query: query
+        temperature: 1.2054912366140806
+        project: project
+        k: 4
+        system_prompt: system_prompt
+      properties:
+        query:
+          description: Natural language question
+          maxLength: 4096
+          minLength: 1
+          title: Query
+          type: string
+        project:
+          description: Filter by project (optional)
+          nullable: true
+          type: string
+        k:
+          default: 10
+          description: Number of facts to retrieve
+          maximum: 50.0
+          minimum: 1.0
+          title: K
+          type: integer
+        temperature:
+          default: 0.3
+          description: LLM sampling temperature
+          maximum: 2.0
+          minimum: 0.0
+          title: Temperature
+          type: number
+        max_tokens:
+          default: 2048
+          description: Max response tokens
+          maximum: 8192.0
+          minimum: 64.0
+          title: Max Tokens
+          type: integer
+        system_prompt:
+          description: Override system prompt (optional)
+          nullable: true
+          type: string
+      required:
+      - query
+      title: AskRequest
+    AskResponse:
+      description: RAG response with answer and sources.
+      example:
+        answer: answer
+        sources:
+        - score: 6.027456183070403
+          fact_id: 0
+          project: project
+          content: content
+        - score: 6.027456183070403
+          fact_id: 0
+          project: project
+          content: content
+        provider: provider
+        facts_found: 1
+        model: model
+      properties:
+        answer:
+          title: Answer
+          type: string
+        sources:
+          items:
+            $ref: "#/components/schemas/AskSource"
+          title: Sources
+          type: array
+        model:
+          title: Model
+          type: string
+        provider:
+          title: Provider
+          type: string
+        facts_found:
+          title: Facts Found
+          type: integer
+      required:
+      - answer
+      - facts_found
+      - model
+      - provider
+      - sources
+      title: AskResponse
+    AskSource:
+      description: A source fact that contributed to the answer.
+      example:
+        score: 6.027456183070403
+        fact_id: 0
+        project: project
+        content: content
+      properties:
+        fact_id:
+          title: Fact Id
+          type: integer
+        content:
+          title: Content
+          type: string
+        score:
+          title: Score
+          type: number
+        project:
+          title: Project
+          type: string
+      required:
+      - content
+      - fact_id
+      - project
+      - score
+      title: AskSource
+    BatchStoreRequest:
+      example:
+        memories:
+        - parent_decision_id: 0
+          metadata:
+            key: ""
+          project: project
+          source: source
+          type: knowledge
+          content: content
+          tags:
+          - tags
+          - tags
+        - parent_decision_id: 0
+          metadata:
+            key: ""
+          project: project
+          source: source
+          type: knowledge
+          content: content
+          tags:
+          - tags
+          - tags
+        - parent_decision_id: 0
+          metadata:
+            key: ""
+          project: project
+          source: source
+          type: knowledge
+          content: content
+          tags:
+          - tags
+          - tags
+        - parent_decision_id: 0
+          metadata:
+            key: ""
+          project: project
+          source: source
+          type: knowledge
+          content: content
+          tags:
+          - tags
+          - tags
+        - parent_decision_id: 0
+          metadata:
+            key: ""
+          project: project
+          source: source
+          type: knowledge
+          content: content
+          tags:
+          - tags
+          - tags
+      properties:
+        memories:
+          items:
+            $ref: "#/components/schemas/StoreMemoryRequest"
+          maxItems: 100
+          minItems: 1
+          title: Memories
+          type: array
+      required:
+      - memories
+      title: BatchStoreRequest
+    CategoriesResponse:
+      description: Response for the categories endpoint.
+      example:
+        total: 6
+        categories:
+          key: 0
+        lang: lang
+      properties:
+        categories:
+          additionalProperties:
+            type: integer
+          title: Categories
+        total:
+          title: Total
+          type: integer
+        lang:
+          title: Lang
+          type: string
+      required:
+      - categories
+      - lang
+      - total
+      title: CategoriesResponse
+    CheckpointResponse:
+      example:
+        checkpoint_id: Checkpoint_Id
+        message: message
+        status: success
+      properties:
+        checkpoint_id:
+          $ref: "#/components/schemas/Checkpoint_Id"
+        message:
+          title: Message
+          type: string
+        status:
+          default: success
+          title: Status
+          type: string
+      required:
+      - checkpoint_id
+      - message
+      title: CheckpointResponse
+    ComplianceReport:
+      example:
+        total_trust_score: 0.8008281904610115
+        article_12_status: article_12_status
+        ledger_valid: true
+        audit_coverage: 6.027456183070403
+        status: status
+        compliance_level: compliance_level
+      properties:
+        status:
+          title: Status
+          type: string
+        ledger_valid:
+          title: Ledger Valid
+          type: boolean
+        total_trust_score:
+          title: Total Trust Score
+          type: number
+        audit_coverage:
+          title: Audit Coverage
+          type: number
+        compliance_level:
+          title: Compliance Level
+          type: string
+        article_12_status:
+          title: Article 12 Status
+          type: string
+      required:
+      - article_12_status
+      - audit_coverage
+      - compliance_level
+      - ledger_valid
+      - status
+      - total_trust_score
+      title: ComplianceReport
+    ContextSignalModel:
+      example:
+        project: project
+        weight: 6.027456183070403
+        source: source
+        content: content
+        signal_type: signal_type
+        timestamp: timestamp
+      properties:
+        source:
+          title: Source
+          type: string
+        signal_type:
+          title: Signal Type
+          type: string
+        content:
+          title: Content
+          type: string
+        project:
+          nullable: true
+          type: string
+        timestamp:
+          title: Timestamp
+          type: string
+        weight:
+          title: Weight
+          type: number
+      required:
+      - content
+      - signal_type
+      - source
+      - timestamp
+      - weight
+      title: ContextSignalModel
+    ContextSnapshotResponse:
+      example:
+        summary: summary
+        top_signals:
+        - project: project
+          weight: 6.027456183070403
+          source: source
+          content: content
+          signal_type: signal_type
+          timestamp: timestamp
+        - project: project
+          weight: 6.027456183070403
+          source: source
+          content: content
+          signal_type: signal_type
+          timestamp: timestamp
+        signals_used: 0
+        confidence: confidence
+        active_project: active_project
+        projects_ranked:
+        - score: 1.4658129805029452
+          project: project
+        - score: 1.4658129805029452
+          project: project
+      properties:
+        active_project:
+          nullable: true
+          type: string
+        confidence:
+          title: Confidence
+          type: string
+        signals_used:
+          title: Signals Used
+          type: integer
+        summary:
+          title: Summary
+          type: string
+        top_signals:
+          items:
+            $ref: "#/components/schemas/ContextSignalModel"
+          title: Top Signals
+          type: array
+        projects_ranked:
+          items:
+            $ref: "#/components/schemas/ProjectScoreModel"
+          title: Projects Ranked
+          type: array
+      required:
+      - confidence
+      - signals_used
+      - summary
+      title: ContextSnapshotResponse
+    DeepHealthResponse:
+      description: Structured deep health check response.
+      example:
+        schema_version: schema_version
+        checks:
+          key:
+            actual: actual
+            max_connections: 5
+            expected: expected
+            utilization: utilization
+            version: version
+            active_connections: 1
+            last_checkpoint_tx: 6
+            useful_facts_ratio: 5.637376656633329
+            total_facts: 7
+            detail: detail
+            pending_uncheckpointed: 0
+            duplicates_ratio: 2.3021358869347655
+            status: status
+        stale_ratio: 2.027123023002322
+        p95_latency_ms: 3.616076749251911
+        version: version
+        status: status
+        latency_ms: 9.301444243932576
+      properties:
+        status:
+          title: Status
+          type: string
+        version:
+          title: Version
+          type: string
+        schema_version:
+          title: Schema Version
+          type: string
+        checks:
+          additionalProperties:
+            $ref: "#/components/schemas/HealthCheckDetail"
+          title: Checks
+        latency_ms:
+          title: Latency Ms
+          type: number
+        p95_latency_ms:
+          description: p95 latency of ambient context boot
+          nullable: true
+          type: number
+        stale_ratio:
+          description: Ratio of facts older than 180 days with no hits
+          nullable: true
+          type: number
+      required:
+      - checks
+      - latency_ms
+      - schema_version
+      - status
+      - version
+      title: DeepHealthResponse
+    DimensionResultModel:
+      example:
+        score: 60
+        findings:
+        - findings
+        - findings
+        name: name
+        weight: weight
+      properties:
+        name:
+          title: Name
+          type: string
+        score:
+          maximum: 100.0
+          minimum: 0.0
+          title: Score
+          type: integer
+        weight:
+          title: Weight
+          type: string
+        findings:
+          items:
+            type: string
+          title: Findings
+          type: array
+      required:
+      - name
+      - score
+      - weight
+      title: DimensionResultModel
+    ExportResponse:
+      description: Response for project memory export.
+      example:
+        artifact: artifact
+        project: project
+        message: message
+        status: success
+      properties:
+        status:
+          default: success
+          title: Status
+          type: string
+        project:
+          title: Project
+          type: string
+        artifact:
+          title: Artifact
+          type: string
+        message:
+          title: Message
+          type: string
+      required:
+      - artifact
+      - message
+      - project
+      title: ExportResponse
+    FactResponse:
+      example:
+        confidence: Confidence
+        project: project
+        created_at: created_at
+        valid_from: valid_from
+        source: source
+        tx_id: tx_id
+        content: content
+        fact_type: fact_type
+        tags:
+        - tags
+        - tags
+        consensus_score: 6.027456183070403
+        valid_until: valid_until
+        updated_at: updated_at
+        meta:
+          key: ""
+        is_tombstoned: false
+        id: 0
+        hash: hash
+      properties:
+        id:
+          title: Id
+          type: integer
+        project:
+          title: Project
+          type: string
+        content:
+          title: Content
+          type: string
+        fact_type:
+          title: Fact Type
+          type: string
+        tags:
+          items:
+            type: string
+          title: Tags
+          type: array
+        created_at:
+          title: Created At
+          type: string
+        updated_at:
+          title: Updated At
+          type: string
+        confidence:
+          $ref: "#/components/schemas/Confidence"
+        valid_from:
+          nullable: true
+          type: string
+        valid_until:
+          nullable: true
+          type: string
+        source:
+          nullable: true
+          type: string
+        meta:
+          additionalProperties: true
+          nullable: true
+          type: object
+        is_tombstoned:
+          default: false
+          title: Is Tombstoned
+          type: boolean
+        hash:
+          nullable: true
+          type: string
+        tx_id:
+          nullable: true
+          type: string
+        consensus_score:
+          nullable: true
+          type: number
+      required:
+      - content
+      - created_at
+      - fact_type
+      - id
+      - project
+      - tags
+      - updated_at
+      title: FactResponse
+    GateActionResponse:
+      example:
+        action_id: action_id
+        level: level
+        approved_at: approved_at
+        operator_id: operator_id
+        description: description
+        project: project
+        created_at: created_at
+        command:
+        - command
+        - command
+        status: status
+      properties:
+        action_id:
+          title: Action Id
+          type: string
+        level:
+          title: Level
+          type: string
+        description:
+          title: Description
+          type: string
+        command:
+          items:
+            type: string
+          nullable: true
+          type: array
+        project:
+          nullable: true
+          type: string
+        status:
+          title: Status
+          type: string
+        created_at:
+          title: Created At
+          type: string
+        approved_at:
+          nullable: true
+          type: string
+        operator_id:
+          nullable: true
+          type: string
+      required:
+      - action_id
+      - created_at
+      - description
+      - level
+      - status
+      title: GateActionResponse
+    GateApprovalRequest:
+      example:
+        signature: signature
+        operator_id: operator_id
+      properties:
+        signature:
+          description: HMAC-SHA256 signature of the challenge
+          title: Signature
+          type: string
+        operator_id:
+          description: Operator identifier
+          nullable: true
+          type: string
+      required:
+      - signature
+      title: GateApprovalRequest
+    GateStatusResponse:
+      example:
+        total_audit_entries: 7
+        approved: 1
+        expired: 5
+        pending: 6
+        executed: 2
+        timeout_seconds: 0
+        denied: 5
+        policy: policy
+      properties:
+        policy:
+          title: Policy
+          type: string
+        timeout_seconds:
+          title: Timeout Seconds
+          type: integer
+        pending:
+          default: 0
+          title: Pending
+          type: integer
+        approved:
+          default: 0
+          title: Approved
+          type: integer
+        denied:
+          default: 0
+          title: Denied
+          type: integer
+        expired:
+          default: 0
+          title: Expired
+          type: integer
+        executed:
+          default: 0
+          title: Executed
+          type: integer
+        total_audit_entries:
+          default: 0
+          title: Total Audit Entries
+          type: integer
+      required:
+      - policy
+      - timeout_seconds
+      title: GateStatusResponse
+    HTTPValidationError:
+      example:
+        detail:
+        - msg: msg
+          loc:
+          - Location_inner
+          - Location_inner
+          input: ""
+          ctx: "{}"
+          type: type
+        - msg: msg
+          loc:
+          - Location_inner
+          - Location_inner
+          input: ""
+          ctx: "{}"
+          type: type
+      properties:
+        detail:
+          items:
+            $ref: "#/components/schemas/ValidationError"
+          title: Detail
+          type: array
+      title: HTTPValidationError
+    HealthCheckDetail:
+      additionalProperties: true
+      description: Single health probe result.
+      example:
+        actual: actual
+        max_connections: 5
+        expected: expected
+        utilization: utilization
+        version: version
+        active_connections: 1
+        last_checkpoint_tx: 6
+        useful_facts_ratio: 5.637376656633329
+        total_facts: 7
+        detail: detail
+        pending_uncheckpointed: 0
+        duplicates_ratio: 2.3021358869347655
+        status: status
+      properties:
+        status:
+          title: Status
+          type: string
+        detail:
+          nullable: true
+          type: string
+        version:
+          nullable: true
+          type: string
+        expected:
+          nullable: true
+          type: string
+        actual:
+          nullable: true
+          type: string
+        pending_uncheckpointed:
+          nullable: true
+          type: integer
+        last_checkpoint_tx:
+          nullable: true
+          type: integer
+        active_connections:
+          nullable: true
+          type: integer
+        max_connections:
+          nullable: true
+          type: integer
+        utilization:
+          nullable: true
+          type: string
+        useful_facts_ratio:
+          nullable: true
+          type: number
+        duplicates_ratio:
+          nullable: true
+          type: number
+        total_facts:
+          nullable: true
+          type: integer
+      required:
+      - status
+      title: HealthCheckDetail
+    HeartbeatRequest:
+      example:
+        meta:
+          key: ""
+        project: project
+        language: language
+        category: category
+        branch: branch
+        entity: ""
+      properties:
+        project:
+          maxLength: 100
+          title: Project
+          type: string
+        entity:
+          default: ""
+          maxLength: 1024
+          title: Entity
+          type: string
+        category:
+          maxLength: 50
+          nullable: true
+          type: string
+        branch:
+          maxLength: 255
+          nullable: true
+          type: string
+        language:
+          maxLength: 50
+          nullable: true
+          type: string
+        meta:
+          additionalProperties: true
+          nullable: true
+          type: object
+      required:
+      - project
+      title: HeartbeatRequest
+    JobExecutionResult:
+      example:
+        result:
+          key: ""
+        job_id: job_id
+        executed_at: executed_at
+        proof: proof
+        status: status
+      properties:
+        job_id:
+          title: Job Id
+          type: string
+        status:
+          title: Status
+          type: string
+        result:
+          additionalProperties: true
+          description: Graph-RAG context (subgraph or related entities)
+          nullable: true
+          type: object
+        proof:
+          nullable: true
+          type: string
+        executed_at:
+          title: Executed At
+          type: string
+      required:
+      - executed_at
+      - job_id
+      - proof
+      - result
+      - status
+      title: JobExecutionResult
+    JobQuote:
+      example:
+        job_id: job_id
+        estimated_time_ms: 6
+        estimated_cost_credits: 0.8008281904610115
+      properties:
+        job_id:
+          title: Job Id
+          type: string
+        estimated_cost_credits:
+          title: Estimated Cost Credits
+          type: number
+        estimated_time_ms:
+          title: Estimated Time Ms
+          type: integer
+      required:
+      - estimated_cost_credits
+      - estimated_time_ms
+      - job_id
+      title: JobQuote
+    JobRequest:
+      example:
+        payload:
+          key: ""
+        sla:
+          max_latency_ms: 0
+          requires_zk_proof: true
+          confidence_level: confidence_level
+        task_type: task_type
+      properties:
+        task_type:
+          title: Task Type
+          type: string
+        payload:
+          additionalProperties: true
+          title: Payload
+          type: object
+        sla:
+          $ref: "#/components/schemas/JobSLA"
+      required:
+      - payload
+      - sla
+      - task_type
+      title: JobRequest
+    JobSLA:
+      example:
+        max_latency_ms: 0
+        requires_zk_proof: true
+        confidence_level: confidence_level
+      properties:
+        confidence_level:
+          title: Confidence Level
+          type: string
+        max_latency_ms:
+          title: Max Latency Ms
+          type: integer
+        requires_zk_proof:
+          title: Requires Zk Proof
+          type: boolean
+      required:
+      - confidence_level
+      - max_latency_ms
+      - requires_zk_proof
+      title: JobSLA
+    LLMStatusResponse:
+      description: "LLM provider status. [LLM_STATUS]"
+      example:
+        provider: provider
+        available: true
+        supported_providers:
+        - supported_providers
+        - supported_providers
+        model: model
+        providers:
+        - key: ""
+        - key: ""
+      properties:
+        available:
+          title: Available
+          type: boolean
+        provider:
+          title: Provider
+          type: string
+        model:
+          nullable: true
+          type: string
+        supported_providers:
+          items:
+            type: string
+          title: Supported Providers
+          type: array
+        providers:
+          items:
+            additionalProperties: true
+            description: Graph-RAG context (subgraph or related entities)
+            nullable: true
+            type: object
+          title: Providers
+          type: array
+      required:
+      - available
+      - provider
+      - supported_providers
+      title: LLMStatusResponse
+    LedgerReportResponse:
+      example:
+        valid: true
+        votes_checked: 1
+        tx_checked: 0
+        roots_checked: 6
+        violations:
+        - key: ""
+        - key: ""
+        vote_checkpoints_checked: 5
+      properties:
+        valid:
+          title: Valid
+          type: boolean
+        violations:
+          items:
+            additionalProperties: true
+            description: Graph-RAG context (subgraph or related entities)
+            nullable: true
+            type: object
+          title: Violations
+          type: array
+        tx_checked:
+          default: 0
+          title: Tx Checked
+          type: integer
+        roots_checked:
+          default: 0
+          title: Roots Checked
+          type: integer
+        votes_checked:
+          default: 0
+          title: Votes Checked
+          type: integer
+        vote_checkpoints_checked:
+          default: 0
+          title: Vote Checkpoints Checked
+          type: integer
+      required:
+      - valid
+      - violations
+      title: LedgerReportResponse
+    MafiaNodeProposal:
+      example:
+        node: node
+      properties:
+        node:
+          title: Node
+          type: string
+      required:
+      - node
+      title: MafiaNodeProposal
+    MejoraloScanRequest:
+      example:
+        path: path
+        deep: false
+        project: project
+      properties:
+        project:
+          maxLength: 100
+          title: Project
+          type: string
+        path:
+          description: Ruta al directorio del proyecto
+          title: Path
+          type: string
+        deep:
+          default: false
+          description: Activa dimensión Psi + análisis profundo
+          title: Deep
+          type: boolean
+      required:
+      - path
+      - project
+      title: MejoraloScanRequest
+    MejoraloScanResponse:
+      example:
+        score: 0
+        stack: stack
+        dead_code: true
+        fact_id: 5
+        total_files: 1
+        project: project
+        total_loc: 5
+        dimensions:
+        - score: 60
+          findings:
+          - findings
+          - findings
+          name: name
+          weight: weight
+        - score: 60
+          findings:
+          - findings
+          - findings
+          name: name
+          weight: weight
+      properties:
+        project:
+          title: Project
+          type: string
+        score:
+          title: Score
+          type: integer
+        stack:
+          title: Stack
+          type: string
+        dimensions:
+          items:
+            $ref: "#/components/schemas/DimensionResultModel"
+          title: Dimensions
+          type: array
+        dead_code:
+          title: Dead Code
+          type: boolean
+        total_files:
+          default: 0
+          title: Total Files
+          type: integer
+        total_loc:
+          default: 0
+          title: Total Loc
+          type: integer
+        fact_id:
+          nullable: true
+          type: integer
+      required:
+      - dead_code
+      - dimensions
+      - project
+      - score
+      - stack
+      title: MejoraloScanResponse
+    MejoraloSessionRequest:
+      example:
+        score_after: 60
+        project: project
+        score_before: 8
+        actions:
+        - actions
+        - actions
+      properties:
+        project:
+          maxLength: 100
+          title: Project
+          type: string
+        score_before:
+          maximum: 100.0
+          minimum: 0.0
+          title: Score Before
+          type: integer
+        score_after:
+          maximum: 100.0
+          minimum: 0.0
+          title: Score After
+          type: integer
+        actions:
+          items:
+            type: string
+          title: Actions
+          type: array
+      required:
+      - project
+      - score_after
+      - score_before
+      title: MejoraloSessionRequest
+    MejoraloSessionResponse:
+      example:
+        fact_id: 0
+        delta: 6
+        project: project
+        status: recorded
+      properties:
+        fact_id:
+          title: Fact Id
+          type: integer
+        project:
+          title: Project
+          type: string
+        delta:
+          title: Delta
+          type: integer
+        status:
+          default: recorded
+          title: Status
+          type: string
+      required:
+      - delta
+      - fact_id
+      - project
+      title: MejoraloSessionResponse
+    MejoraloShipRequest:
+      example:
+        path: path
+        project: project
+      properties:
+        project:
+          maxLength: 100
+          title: Project
+          type: string
+        path:
+          description: Ruta al directorio del proyecto
+          title: Path
+          type: string
+      required:
+      - path
+      - project
+      title: MejoraloShipRequest
+    MejoraloShipResponse:
+      example:
+        total: 6
+        seals:
+        - name: name
+          passed: true
+          detail: ""
+        - name: name
+          passed: true
+          detail: ""
+        ready: true
+        project: project
+        passed: 0
+      properties:
+        project:
+          title: Project
+          type: string
+        ready:
+          title: Ready
+          type: boolean
+        seals:
+          items:
+            $ref: "#/components/schemas/ShipSealModel"
+          title: Seals
+          type: array
+        passed:
+          title: Passed
+          type: integer
+        total:
+          default: 7
+          title: Total
+          type: integer
+      required:
+      - passed
+      - project
+      - ready
+      - seals
+      title: MejoraloShipResponse
+    MissionLaunchRequest:
+      example:
+        goal: goal
+        project: project
+        formation: IRON_DOME
+        agents: 4
+      properties:
+        project:
+          maxLength: 100
+          title: Project
+          type: string
+        goal:
+          maxLength: 2000
+          title: Goal
+          type: string
+        formation:
+          default: IRON_DOME
+          title: Formation
+          type: string
+        agents:
+          default: 10
+          maximum: 50.0
+          minimum: 1.0
+          title: Agents
+          type: integer
+      required:
+      - goal
+      - project
+      title: MissionLaunchRequest
+    MissionResponse:
+      example:
+        stdout: stdout
+        result_id: 6
+        stderr: stderr
+        intent_id: 0
+        status: status
+      properties:
+        intent_id:
+          title: Intent Id
+          type: integer
+        result_id:
+          nullable: true
+          type: integer
+        status:
+          title: Status
+          type: string
+        stdout:
+          nullable: true
+          type: string
+        stderr:
+          nullable: true
+          type: string
+      required:
+      - intent_id
+      - status
+      title: MissionResponse
+    OracleRequest:
+      description: Request to trigger The Oracle audit on a target.
+      example:
+        agent_type: ariadne
+        depth: 0
+        target_url: https://openapi-generator.tech
+      properties:
+        target_url:
+          format: uri
+          maxLength: 2083
+          minLength: 1
+          title: Target Url
+          type: string
+        agent_type:
+          default: ariadne
+          title: Agent Type
+          type: string
+        depth:
+          default: 1
+          title: Depth
+          type: integer
+      required:
+      - target_url
+      title: OracleRequest
+    OracleResponse:
+      description: The Oracle's audit report.
+      example:
+        agent: agent
+        confidence: 0.8008281904610115
+        report: report
+        target: target
+        status: status
+      properties:
+        target:
+          title: Target
+          type: string
+        agent:
+          title: Agent
+          type: string
+        report:
+          title: Report
+          type: string
+        confidence:
+          title: Confidence
+          type: number
+        status:
+          title: Status
+          type: string
+      required:
+      - agent
+      - confidence
+      - report
+      - status
+      - target
+      title: OracleResponse
+    ProjectScoreModel:
+      example:
+        score: 1.4658129805029452
+        project: project
+      properties:
+        project:
+          title: Project
+          type: string
+        score:
+          title: Score
+          type: number
+      required:
+      - project
+      - score
+      title: ProjectScoreModel
+    PsychohistoryRequest:
+      example:
+        max_concurrency: 60
+        scenario_name: scenario_name
+        simulated_years: 81
+        project: SYSTEM
+      properties:
+        scenario_name:
+          description: The catastrophic scenario to simulate
+          title: Scenario Name
+          type: string
+        simulated_years:
+          default: 5
+          description: Number of years to simulate into the future
+          maximum: 1000.0
+          minimum: 1.0
+          title: Simulated Years
+          type: integer
+        project:
+          default: SYSTEM
+          description: Project namespace to save the crystal
+          title: Project
+          type: string
+        max_concurrency:
+          default: 5
+          description: Maximum concurrency for LLM calls
+          maximum: 100.0
+          minimum: 1.0
+          title: Max Concurrency
+          type: integer
+      required:
+      - scenario_name
+      title: PsychohistoryRequest
+    RecoveryReport:
+      description: Report of the agent's memory recovery status during boot.
+      example:
+        recovered_items: 0
+        failed_items: 6
+        warnings:
+        - warnings
+        - warnings
+        last_checkpoint_id: last_checkpoint_id
+        status: clean
+      properties:
+        status:
+          enum:
+          - clean
+          - recovered
+          - failed
+          title: Status
+          type: string
+        recovered_items:
+          title: Recovered Items
+          type: integer
+        failed_items:
+          title: Failed Items
+          type: integer
+        last_checkpoint_id:
+          nullable: true
+          type: string
+        warnings:
+          items:
+            type: string
+          title: Warnings
+          type: array
+      required:
+      - failed_items
+      - recovered_items
+      - status
+      title: RecoveryReport
+    SearchMemoryRequest:
+      example:
+        query: query
+        as_of: as_of
+        project: project
+        k: 4
+        tags:
+        - tags
+        - tags
+      properties:
+        query:
+          maxLength: 1024
+          minLength: 1
+          title: Query
+          type: string
+        k:
+          default: 5
+          maximum: 50.0
+          minimum: 1.0
+          title: K
+          type: integer
+        project:
+          nullable: true
+          type: string
+        tags:
+          items:
+            type: string
+          nullable: true
+          type: array
+        as_of:
+          nullable: true
+          type: string
+      required:
+      - query
+      title: SearchMemoryRequest
+    SearchRequest:
+      example:
+        query: query
+        as_of: as_of
+        project: project
+        include_graph: false
+        k: 4
+        graph_depth: 3
+        fact_type: fact_type
+        tags:
+        - tags
+        - tags
+      properties:
+        query:
+          description: Natural language search query
+          maxLength: 1024
+          title: Query
+          type: string
+        k:
+          default: 5
+          description: Number of results
+          maximum: 50.0
+          minimum: 1.0
+          title: K
+          type: integer
+        project:
+          description: Filter by project
+          maxLength: 100
+          nullable: true
+          type: string
+        as_of:
+          description: Temporal filter (ISO 8601)
+          nullable: true
+          type: string
+        fact_type:
+          description: Filter by fact type
+          nullable: true
+          type: string
+        tags:
+          description: Filter by tags
+          items:
+            type: string
+          nullable: true
+          type: array
+        graph_depth:
+          default: 0
+          description: "Enable Graph-RAG (0=off, >0=depth of context traversal)"
+          maximum: 5.0
+          minimum: 0.0
+          title: Graph Depth
+          type: integer
+        include_graph:
+          default: false
+          description: Include the localized context subgraph in response
+          title: Include Graph
+          type: boolean
+      required:
+      - query
+      title: SearchRequest
+    SearchResult:
+      example:
+        score: 6.027456183070403
+        fact_id: 0
+        updated_at: updated_at
+        meta:
+          key: ""
+        context:
+          key: ""
+        project: project
+        created_at: created_at
+        content: content
+        hash: hash
+        fact_type: fact_type
+        tags:
+        - tags
+        - tags
+      properties:
+        fact_id:
+          title: Fact Id
+          type: integer
+        project:
+          title: Project
+          type: string
+        content:
+          title: Content
+          type: string
+        fact_type:
+          title: Fact Type
+          type: string
+        score:
+          title: Score
+          type: number
+        tags:
+          items:
+            type: string
+          title: Tags
+          type: array
+        created_at:
+          title: Created At
+          type: string
+        updated_at:
+          title: Updated At
+          type: string
+        meta:
+          additionalProperties: true
+          nullable: true
+          type: object
+        hash:
+          nullable: true
+          type: string
+        context:
+          additionalProperties: true
+          description: Graph-RAG context (subgraph or related entities)
+          nullable: true
+          type: object
+      required:
+      - content
+      - created_at
+      - fact_id
+      - fact_type
+      - project
+      - score
+      - tags
+      - updated_at
+      title: SearchResult
+    ShipSealModel:
+      example:
+        name: name
+        passed: true
+        detail: ""
+      properties:
+        name:
+          title: Name
+          type: string
+        passed:
+          title: Passed
+          type: boolean
+        detail:
+          default: ""
+          title: Detail
+          type: string
+      required:
+      - name
+      - passed
+      title: ShipSealModel
+    SignupRequest:
+      description: Self-service signup request.
+      example:
+        name: name
+        email: email
+      properties:
+        email:
+          format: email
+          title: Email
+          type: string
+        name:
+          description: Display name or org name
+          maxLength: 128
+          minLength: 1
+          title: Name
+          type: string
+      required:
+      - email
+      - name
+      title: SignupRequest
+    SignupResponse:
+      description: Signup result with API credentials.
+      example:
+        tenant_id: tenant_id
+        api_key: api_key
+        quickstart_url: quickstart_url
+        message: message
+        plan: plan
+        calls_limit: 0
+      properties:
+        api_key:
+          title: Api Key
+          type: string
+        tenant_id:
+          title: Tenant Id
+          type: string
+        plan:
+          title: Plan
+          type: string
+        calls_limit:
+          title: Calls Limit
+          type: integer
+        quickstart_url:
+          title: Quickstart Url
+          type: string
+        message:
+          title: Message
+          type: string
+      required:
+      - api_key
+      - calls_limit
+      - message
+      - plan
+      - quickstart_url
+      - tenant_id
+      title: SignupResponse
+    StatusResponse:
+      example:
+        embeddings: 5
+        db_size_mb: 7.061401241503109
+        projects: 5
+        deprecated: 1
+        total_facts: 0
+        transactions: 2
+        version: version
+        active_facts: 6
+      properties:
+        version:
+          title: Version
+          type: string
+        total_facts:
+          title: Total Facts
+          type: integer
+        active_facts:
+          title: Active Facts
+          type: integer
+        deprecated:
+          title: Deprecated
+          type: integer
+        projects:
+          title: Projects
+          type: integer
+        embeddings:
+          title: Embeddings
+          type: integer
+        transactions:
+          title: Transactions
+          type: integer
+        db_size_mb:
+          title: Db Size Mb
+          type: number
+      required:
+      - active_facts
+      - db_size_mb
+      - deprecated
+      - embeddings
+      - projects
+      - total_facts
+      - transactions
+      - version
+      title: StatusResponse
+    StoreMemoryRequest:
+      example:
+        parent_decision_id: 0
+        metadata:
+          key: ""
+        project: project
+        source: source
+        type: knowledge
+        content: content
+        tags:
+        - tags
+        - tags
+      properties:
+        project:
+          maxLength: 128
+          minLength: 1
+          title: Project
+          type: string
+        content:
+          maxLength: 32768
+          minLength: 1
+          title: Content
+          type: string
+        type:
+          default: knowledge
+          title: Type
+          type: string
+        tags:
+          items:
+            type: string
+          title: Tags
+          type: array
+        source:
+          nullable: true
+          type: string
+        metadata:
+          additionalProperties: true
+          description: Graph-RAG context (subgraph or related entities)
+          nullable: true
+          type: object
+        parent_decision_id:
+          nullable: true
+          type: integer
+      required:
+      - content
+      - project
+      title: StoreMemoryRequest
+    StoreRequest:
+      example:
+        meta:
+          key: ""
+        confidence: confidence
+        project: project
+        source: ""
+        content: content
+        fact_type: knowledge
+        tags:
+        - tags
+        - tags
+      properties:
+        project:
+          description: Project/namespace for the fact
+          maxLength: 100
+          title: Project
+          type: string
+        content:
+          description: The fact content
+          maxLength: 50000
+          title: Content
+          type: string
+        fact_type:
+          default: knowledge
+          description: "Type: knowledge, decision, mistake, bridge, ghost"
+          maxLength: 20
+          title: Fact Type
+          type: string
+        tags:
+          description: Optional tags
+          items:
+            type: string
+          title: Tags
+          type: array
+        source:
+          default: ""
+          description: Origin of the fact (e.g. agent:vex)
+          maxLength: 200
+          title: Source
+          type: string
+        confidence:
+          description: Optional confidence level (C1-C5)
+          nullable: true
+          type: string
+        meta:
+          additionalProperties: true
+          description: Graph-RAG context (subgraph or related entities)
+          nullable: true
+          type: object
+      required:
+      - content
+      - project
+      title: StoreRequest
+    StoreResponse:
+      example:
+        fact_id: 0
+        project: project
+        message: message
+      properties:
+        fact_id:
+          title: Fact Id
+          type: integer
+        project:
+          title: Project
+          type: string
+        message:
+          title: Message
+          type: string
+      required:
+      - fact_id
+      - message
+      - project
+      title: StoreResponse
+    SwarmStatusResponse:
+      example:
+        agent_pids:
+        - 1
+        - 1
+        total_worktrees: 6
+        active_worktrees: 0
+        timestamp: timestamp
+      properties:
+        active_worktrees:
+          title: Active Worktrees
+          type: integer
+        total_worktrees:
+          title: Total Worktrees
+          type: integer
+        agent_pids:
+          items:
+            type: integer
+          title: Agent Pids
+          type: array
+        timestamp:
+          title: Timestamp
+          type: string
+      required:
+      - active_worktrees
+      - agent_pids
+      - timestamp
+      - total_worktrees
+      title: SwarmStatusResponse
+    TelemetryIngestRequest:
+      example:
+        agent_id: agent_id
+        payload:
+          telemetryLogs:
+          - key: ""
+          - key: ""
+          newEdges:
+            key: 6.027456183070403
+          authorsDelta:
+            key:
+              key: ""
+        logos_signature: logos_signature
+        timestamp: 0
+      properties:
+        timestamp:
+          title: Timestamp
+          type: integer
+        agent_id:
+          title: Agent Id
+          type: string
+        payload:
+          $ref: "#/components/schemas/TelemetryPayload"
+        logos_signature:
+          nullable: true
+          type: string
+      required:
+      - agent_id
+      - payload
+      - timestamp
+      title: TelemetryIngestRequest
+    TelemetryPayload:
+      example:
+        telemetryLogs:
+        - key: ""
+        - key: ""
+        newEdges:
+          key: 6.027456183070403
+        authorsDelta:
+          key:
+            key: ""
+      properties:
+        telemetryLogs:
+          items:
+            additionalProperties: true
+            description: Graph-RAG context (subgraph or related entities)
+            nullable: true
+            type: object
+          title: Telemetrylogs
+          type: array
+        newEdges:
+          additionalProperties:
+            type: number
+          title: Newedges
+        authorsDelta:
+          additionalProperties:
+            additionalProperties: true
+            description: Graph-RAG context (subgraph or related entities)
+            nullable: true
+            type: object
+          title: Authorsdelta
+      title: TelemetryPayload
+    TimeSummaryResponse:
+      example:
+        total_seconds: 0
+        entries: 5
+        heartbeats: 2
+        by_project:
+          key: 5
+        top_entities:
+        - - ""
+          - ""
+        - - ""
+          - ""
+        total_hours: 6.027456183070403
+        by_category:
+          key: 1
+      properties:
+        total_seconds:
+          title: Total Seconds
+          type: integer
+        total_hours:
+          title: Total Hours
+          type: number
+        by_category:
+          additionalProperties:
+            type: integer
+          title: By Category
+        by_project:
+          additionalProperties:
+            type: integer
+          title: By Project
+        entries:
+          title: Entries
+          type: integer
+        heartbeats:
+          title: Heartbeats
+          type: integer
+        top_entities:
+          items:
+            items: {}
+            type: array
+          title: Top Entities
+          type: array
+      required:
+      - by_category
+      - by_project
+      - entries
+      - heartbeats
+      - top_entities
+      - total_hours
+      - total_seconds
+      title: TimeSummaryResponse
+    TipResponse:
+      description: Serialized tip for API responses.
+      example:
+        formatted: ""
+        project: project
+        id: id
+        source: source
+        category: category
+        lang: lang
+        content: content
+        relevance: 0.8008281904610115
+      properties:
+        id:
+          title: Id
+          type: string
+        content:
+          title: Content
+          type: string
+        category:
+          title: Category
+          type: string
+        lang:
+          title: Lang
+          type: string
+        source:
+          title: Source
+          type: string
+        project:
+          nullable: true
+          type: string
+        relevance:
+          default: 1.0
+          title: Relevance
+          type: number
+        formatted:
+          default: ""
+          title: Formatted
+          type: string
+      required:
+      - category
+      - content
+      - id
+      - lang
+      - source
+      title: TipResponse
+    TipsListResponse:
+      description: Response for tip list endpoints.
+      example:
+        count: 6
+        project: project
+        lang: lang
+        category: category
+        total_available: 1
+        tips:
+        - formatted: ""
+          project: project
+          id: id
+          source: source
+          category: category
+          lang: lang
+          content: content
+          relevance: 0.8008281904610115
+        - formatted: ""
+          project: project
+          id: id
+          source: source
+          category: category
+          lang: lang
+          content: content
+          relevance: 0.8008281904610115
+      properties:
+        tips:
+          items:
+            $ref: "#/components/schemas/TipResponse"
+          title: Tips
+          type: array
+        count:
+          description: Number of tips returned
+          title: Count
+          type: integer
+        lang:
+          title: Lang
+          type: string
+        category:
+          nullable: true
+          type: string
+        project:
+          nullable: true
+          type: string
+        total_available:
+          nullable: true
+          type: integer
+      required:
+      - count
+      - lang
+      - tips
+      title: TipsListResponse
+    TranslateRequest:
+      example:
+        target_languages:
+        - target_languages
+        - target_languages
+        texts:
+          key: texts
+        context: context
+      properties:
+        texts:
+          additionalProperties:
+            type: string
+          description: Dictionary of key-value pairs to translate. Max 100 items.
+          title: Texts
+        target_languages:
+          description: "List of target language codes (e.g., ['es', 'fr', 'zh'])."
+          items:
+            type: string
+          title: Target Languages
+          type: array
+        context:
+          description: Optional context about the application or tone.
+          nullable: true
+          type: string
+      required:
+      - target_languages
+      - texts
+      title: TranslateRequest
+    TranslateResponse:
+      example:
+        translations:
+          key:
+            key: translations
+        usage:
+          key: 0
+      properties:
+        translations:
+          additionalProperties:
+            additionalProperties:
+              type: string
+          description: A dictionary mapping language codes to their translated key-value
+            pairs.
+          title: Translations
+        usage:
+          additionalProperties:
+            type: integer
+          title: Usage
+      required:
+      - translations
+      title: TranslateResponse
+    TrustProfileResponse:
+      example:
+        failures: 1
+        agent_id: agent_id
+        successes: 6
+        last_success: last_success
+        last_incident: last_incident
+        taint_events: 5
+        trust_score: 0.8008281904610115
+      properties:
+        agent_id:
+          title: Agent Id
+          type: string
+        trust_score:
+          title: Trust Score
+          type: number
+        successes:
+          title: Successes
+          type: integer
+        failures:
+          title: Failures
+          type: integer
+        taint_events:
+          title: Taint Events
+          type: integer
+        last_success:
+          nullable: true
+          type: string
+        last_incident:
+          nullable: true
+          type: string
+      required:
+      - agent_id
+      - failures
+      - successes
+      - taint_events
+      - trust_score
+      title: TrustProfileResponse
+    ValidationError:
+      example:
+        msg: msg
+        loc:
+        - Location_inner
+        - Location_inner
+        input: ""
+        ctx: "{}"
+        type: type
+      properties:
+        loc:
+          items:
+            $ref: "#/components/schemas/Location_inner"
+          title: Location
+          type: array
+        msg:
+          title: Message
+          type: string
+        type:
+          title: Error Type
+          type: string
+        input:
+          title: Input
+        ctx:
+          title: Context
+          type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+    VoteRequest:
+      example:
+        value: 0
+      properties:
+        value:
+          description: "1 to verify, -1 to dispute, 0 to remove"
+          title: Value
+          type: integer
+      required:
+      - value
+      title: VoteRequest
+    VoteResponse:
+      example:
+        agent: agent
+        fact_id: 0
+        confidence: Confidence
+        new_consensus_score: 1.4658129805029452
+        vote: 6
+        status: recorded
+      properties:
+        fact_id:
+          title: Fact Id
+          type: integer
+        agent:
+          title: Agent
+          type: string
+        vote:
+          title: Vote
+          type: integer
+        new_consensus_score:
+          title: New Consensus Score
+          type: number
+        confidence:
+          $ref: "#/components/schemas/Confidence"
+        status:
+          default: recorded
+          title: Status
+          type: string
+      required:
+      - agent
+      - fact_id
+      - new_consensus_score
+      - vote
+      title: VoteResponse
+    VoteV2Request:
+      example:
+        reason: reason
+        agent_id: agent_id
+        signature: signature
+        vote: 0
+      properties:
+        agent_id:
+          description: UUID of the registered agent
+          title: Agent Id
+          type: string
+        vote:
+          description: "1 to verify, -1 to dispute, 0 to remove"
+          title: Vote
+          type: integer
+        reason:
+          maxLength: 500
+          nullable: true
+          type: string
+        signature:
+          description: Optional cryptographic signature
+          nullable: true
+          type: string
+      required:
+      - agent_id
+      - vote
+      title: VoteV2Request
+    WorktreeCreateRequest:
+      example:
+        branch_name: branch_name
+        base_path: base_path
+      properties:
+        branch_name:
+          description: Branch to isolate
+          title: Branch Name
+          type: string
+        base_path:
+          description: Optional root for worktrees
+          nullable: true
+          type: string
+      required:
+      - branch_name
+      title: WorktreeCreateRequest
+    WorktreeResponse:
+      example:
+        path: path
+        branch_name: branch_name
+        created_at: created_at
+        id: id
+        status: status
+      properties:
+        id:
+          title: Id
+          type: string
+        branch_name:
+          title: Branch Name
+          type: string
+        path:
+          title: Path
+          type: string
+        status:
+          title: Status
+          type: string
+        created_at:
+          title: Created At
+          type: string
+      required:
+      - branch_name
+      - created_at
+      - id
+      - path
+      - status
+      title: WorktreeResponse
+    Checkpoint_Id:
+      anyOf:
+      - type: string
+      - type: integer
+      nullable: true
+      title: Checkpoint Id
+    Confidence:
+      anyOf:
+      - type: string
+      - type: number
+      nullable: true
+      title: Confidence
+    Location_inner:
+      anyOf:
+      - type: string
+      - type: integer

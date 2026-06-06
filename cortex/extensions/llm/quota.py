@@ -174,6 +174,12 @@ class SovereignQuotaManager:
                 ).fetchone()
                 current_tokens, last_update = row
 
+                # Protect against system reboot (time.monotonic() going backwards)
+                if now < last_update:
+                    logger.warning("PULMONES: Time regression detected. Resetting bucket.")
+                    current_tokens = self.capacity
+                    last_update = now
+
                 refilled = min(
                     self.capacity,
                     current_tokens + (now - last_update) * self.refill_rate,
