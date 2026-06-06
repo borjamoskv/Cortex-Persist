@@ -38,16 +38,16 @@ async def test_event_sovereignty_runtime_telemetry():
 
 @pytest.mark.asyncio
 async def test_auth_gateway_override():
-    from cortex.engine.auth_gateway import AuthGateway
+    from cortex.engine.auth_gateway import QuorumGateway
     
     mock_engine = MagicMock()
     mock_pool = MagicMock()
     mock_conn = MagicMock()
     mock_engine.pool.get_connection.return_value = mock_conn
     
-    gw = AuthGateway(mock_engine)
+    gw = QuorumGateway(mock_engine, n_nodes=1, f_nodes=0)
     req_id = await gw.request_override("Test hypothesis", {"state": "critical"})
     
-    assert req_id.startswith("AUTH-")
+    assert req_id.startswith("QRM-")
     mock_conn.execute.assert_called()
     mock_conn.commit.assert_called()

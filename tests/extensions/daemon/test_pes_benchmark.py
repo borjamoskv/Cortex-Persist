@@ -8,7 +8,7 @@ from unittest.mock import AsyncMock, MagicMock
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
 from cortex.engine.event_sovereignty import EventSovereigntyRuntime
-from cortex.engine.auth_gateway import AuthGateway
+from cortex.engine.auth_gateway import QuorumGateway
 from cortex.engine.causal.anomaly_bridge import AnomalyBridge
 from cortex.extensions.security.signatures import Ed25519Signer
 
@@ -25,7 +25,7 @@ def auth_gateway():
     mock_conn = sqlite3.connect(':memory:')
     mock_engine.pool.get_connection.return_value = mock_conn
     
-    gw = AuthGateway(mock_engine)
+    gw = QuorumGateway(mock_engine, n_nodes=1, f_nodes=0)
     asyncio.run(gw.ensure_table())
     return gw, mock_conn
 
@@ -48,12 +48,12 @@ async def test_event_integrity(auth_gateway, keys):
     sig = signer.sign(mutated_state, req_id)
     
     # Attempt to approve
-    res = await gw.approve_request(req_id, sig, signer.public_key_b64)
+    res = await gw.submit_vote(req_id, sig, signer.public_key_b64)
     assert res is False
     
     # Verify DB still PENDING
     cur = conn.cursor()
-    cur.execute("SELECT status FROM auth_requests WHERE id=?", (req_id,))
+    cur.execute("SELECT status FROM quorum_requests WHERE id=?", (req_id,))
     assert cur.fetchone()[0] == "PENDING"
 
 @pytest.mark.asyncio
@@ -73,7 +73,7 @@ async def test_replay_attack(auth_gateway, keys):
     
     # Replay on req_id_2
     req_id_2 = await gw.request_override("Test 2", state)
-    res = await gw.approve_request(req_id_2, sig, signer.public_key_b64)
+    res = await gw.submit_vote(req_id_2, sig, signer.public_key_b64)
     
     assert res is False
 
@@ -100,7 +100,7 @@ async def test_signature_forgery(auth_gateway, keys):
     # Actually, the public key of the fake signer will mathematically verify, 
     # but in a real C5 system, we'd check against an authorized set of pubkeys.
     # We will test that a broken signature fails.
-    res = await gw.approve_request(req_id, "broken_base64_signature", fake_signer.public_key_b64)
+    res = await gw.submit_vote(req_id, "broken_base64_signature", fake_signer.public_key_b64)
     assert res is False
 
 @pytest.mark.asyncio
@@ -110,13 +110,13 @@ async def test_operator_bypass(auth_gateway):
     req_id = await gw.request_override("Test", {"cpu": 99})
     
     # Force bypass
-    conn.execute("UPDATE auth_requests SET status='APPROVED' WHERE id=?", (req_id,))
+    conn.execute("UPDATE quorum_requests SET status='APPROVED' WHERE id=?", (req_id,))
     conn.commit()
     
     # Next check by sovereignty runtime should fail if signature is missing
     cur = conn.cursor()
-    cur.execute("SELECT signature FROM auth_requests WHERE id=?", (req_id,))
-    assert cur.fetchone()[0] is None
+    cur.execute("SELECT signatures_json FROM quorum_requests WHERE id=?", (req_id,))
+    assert cur.fetchone()[0] == "[]"
 
 @pytest.mark.asyncio
 async def test_event_storm():
@@ -200,6 +200,6 @@ async def test_recovery_after_authorization(auth_gateway, keys):
     req_id = await gw.request_override("Test", state)
     
     sig = signer.sign(json.dumps(state), req_id)
-    res = await gw.approve_request(req_id, sig, signer.public_key_b64)
+    res = await gw.submit_vote(req_id, sig, signer.public_key_b64)
     
     assert res is True
