@@ -96,6 +96,10 @@ async def insert_fact_record(
     ts = ts or now_iso()
     tags_json = json.dumps(tags or [])
 
+    from cortex.engine.causal.taint_engine import enforce_taint_check
+    token = meta.get("cortex_taint") if meta else None
+    enforce_taint_check(token, content)
+
     f_hash, encrypted_content, sig_b64, pub_b64 = await _prepare_fact_content(content, tenant_id)
 
     parent_decision_id = await _resolve_causal_parent(
