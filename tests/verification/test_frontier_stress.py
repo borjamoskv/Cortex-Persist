@@ -75,32 +75,38 @@ async def test_ledger_concurrency_bombing(ledger_db):
 
     tasks = [blast_ledger(i) for i in range(CONCURRENCY_LEVEL)]
     start_time = time.monotonic()
-    
+
     # Execute all requests concurrently
     results = await asyncio.gather(*tasks, return_exceptions=True)
-    
+
     end_time = time.monotonic()
-    
+
     # Ensure no exceptions were raised
     failures = [r for r in results if isinstance(r, Exception)]
     assert len(failures) == 0, f"Concurrency bombing failed: {failures}"
     assert len(results) == CONCURRENCY_LEVEL
 
     # Verify the hash chain continuity
-    async with ledger_db.execute("SELECT audit_id, prev_hash, signature FROM security_audit_log ORDER BY rowid ASC") as cursor:
+    async with ledger_db.execute(
+        "SELECT audit_id, prev_hash, signature FROM security_audit_log ORDER BY rowid ASC"
+    ) as cursor:
         rows = await cursor.fetchall()
 
     assert len(rows) == CONCURRENCY_LEVEL
-    
+
     current_hash = "GENESIS"
     for row in rows:
         audit_id, prev_hash, signature = row
-        assert prev_hash == current_hash, f"Hash chain broken at {audit_id}! Expected prev: {current_hash}, got: {prev_hash}"
+        assert prev_hash == current_hash, (
+            f"Hash chain broken at {audit_id}! Expected prev: {current_hash}, got: {prev_hash}"
+        )
         current_hash = signature
 
     # Verify the last hash of the object is correctly updated
     assert ledger._last_hash == current_hash
-    print(f"\\n[Ledger] Processed {CONCURRENCY_LEVEL} concurrent writes in {end_time - start_time:.3f}s")
+    print(
+        f"\\n[Ledger] Processed {CONCURRENCY_LEVEL} concurrent writes in {end_time - start_time:.3f}s"
+    )
 
 
 # ─── 2. Byzantine Taint Tsunami (Nonce & Replay attacks) ───────────────
@@ -118,10 +124,12 @@ async def test_byzantine_taint_tsunami(ledger_db):
     priv_key_bytes = priv_key.private_bytes(
         encoding=__import__("cryptography").hazmat.primitives.serialization.Encoding.Raw,
         format=__import__("cryptography").hazmat.primitives.serialization.PrivateFormat.Raw,
-        encryption_algorithm=__import__("cryptography").hazmat.primitives.serialization.NoEncryption(),
+        encryption_algorithm=__import__(
+            "cryptography"
+        ).hazmat.primitives.serialization.NoEncryption(),
     )
     priv_key_b64 = base64.b64encode(priv_key_bytes).decode("ascii")
-    
+
     pub_key_bytes = priv_key.public_key().public_bytes(
         encoding=__import__("cryptography").hazmat.primitives.serialization.Encoding.Raw,
         format=__import__("cryptography").hazmat.primitives.serialization.PublicFormat.Raw,
@@ -133,13 +141,14 @@ async def test_byzantine_taint_tsunami(ledger_db):
         "CREATE TABLE IF NOT EXISTS agents (id TEXT PRIMARY KEY, public_key TEXT, is_active INTEGER)"
     )
     await ledger_db.execute(
-        "INSERT INTO agents (id, public_key, is_active) VALUES (?, ?, 1)", ("agent_byz", pub_key_b64)
+        "INSERT INTO agents (id, public_key, is_active) VALUES (?, ?, 1)",
+        ("agent_byz", pub_key_b64),
     )
     await ledger_db.commit()
 
     content = "Adversarial Test Content"
     valid_nonce = "valid_nonce_01"
-    
+
     # 1 valid token
     valid_token = generate_secure_taint_token(
         agent_id="agent_byz",
@@ -185,7 +194,9 @@ async def test_byzantine_taint_tsunami(ledger_db):
     # Only EXACTLY ONE request should pass (the first one to grab the nonce)
     # The others must fail due to Replay Attack (nonce already used) or invalid signature
     successful_attempts = sum(results)
-    assert successful_attempts == 1, f"Expected exactly 1 successful taint validation, got {successful_attempts}"
+    assert successful_attempts == 1, (
+        f"Expected exactly 1 successful taint validation, got {successful_attempts}"
+    )
 
 
 # ─── 3. Contradiction Collisions (Causal Graph Stress) ──────────────────
@@ -196,14 +207,14 @@ async def test_contradiction_collisions(engine):
     Pushes opposing/colliding facts to the memory system concurrently.
     Verifies the system detects contradictions successfully without race condition deadlocks.
     """
-    
+
     # We will bombard the engine with slightly varying but opposing contents.
     # The contradiction detector relies on vector search and exact match overlapping logic.
     # We test `detect_contradictions` under high load.
-    
+
     project = "collision_test"
     base_truth = "The protocol strictly uses Ed25519."
-    
+
     # Seed truth
     await engine.store(
         project=project,
@@ -212,10 +223,10 @@ async def test_contradiction_collisions(engine):
         source="system",
         archaeology_audited=True,
     )
-    
+
     # We prepare tasks to detect contradiction simultaneously against this base truth.
     adversarial_claim = "The protocol strictly uses RSA."
-    
+
     async def blast_contradiction():
         report = await detect_contradictions(
             new_content=adversarial_claim,
@@ -224,12 +235,16 @@ async def test_contradiction_collisions(engine):
         )
         return report
 
-    tasks = [blast_contradiction() for _ in range(20)]  # Contradiction uses LLM/embeddings, limit concurrency for tests to avoid API limits if mocked
+    tasks = [
+        blast_contradiction() for _ in range(20)
+    ]  # Contradiction uses LLM/embeddings, limit concurrency for tests to avoid API limits if mocked
     results = await asyncio.gather(*tasks, return_exceptions=True)
 
     # Verify no deadlocks/exceptions and contradictions found
     failures = [r for r in results if isinstance(r, Exception)]
     assert len(failures) == 0, f"Contradiction detection failed: {failures}"
-    
+
     for report in results:
-        assert getattr(report, "has_conflicts", False) is True, "Contradiction failed to trigger during concurrent execution"
+        assert getattr(report, "has_conflicts", False) is True, (
+            "Contradiction failed to trigger during concurrent execution"
+        )

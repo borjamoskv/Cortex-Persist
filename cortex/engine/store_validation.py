@@ -82,25 +82,35 @@ async def _enforce_ctre(meta: dict | None) -> None:
     """Enforce Commit-Time Reconciliation Engine (CTRE) logic for UI_ACTION."""
     if meta and meta.get("intent") == "UI_ACTION" and "expected_ui_hash" in meta:
         from cortex.guards.ctre_guard import CTRECollisionError, CTREGuard
-        
+
         expected_hash = meta["expected_ui_hash"]
         current_hash = meta.get("current_ui_hash", expected_hash)
         target_x = meta.get("ui_target_x", 0.0)
         target_y = meta.get("ui_target_y", 0.0)
-        
+
         success, epsilon = CTREGuard.validate_commit(
             expected_hash=expected_hash,
             current_hash=current_hash,
             target_x=target_x,
-            target_y=target_y
+            target_y=target_y,
         )
         if not success:
-            logger.error(f"🛑 [CTRE] SAGA ABORT: UI TOCTOU Collision detected. Epsilon: {epsilon}µs")
+            logger.error(
+                f"🛑 [CTRE] SAGA ABORT: UI TOCTOU Collision detected. Epsilon: {epsilon}µs"
+            )
             raise CTRECollisionError(expected_hash, current_hash, epsilon)
 
+
 async def run_store_validation_logic(
-    mixin_instance: Any, conn: Any, project: str, content: str, tenant_id: str,
-    fact_type: str, tags: list[str] | None, confidence: str, source: str | None,
+    mixin_instance: Any,
+    conn: Any,
+    project: str,
+    content: str,
+    tenant_id: str,
+    fact_type: str,
+    tags: list[str] | None,
+    confidence: str,
+    source: str | None,
     meta: dict[str, Any] | None,
 ) -> tuple[int | None, dict[str, Any] | None, str, str]:
     """Orchestrates the multi-stage validation pipeline for memory storage."""
@@ -117,8 +127,13 @@ async def run_store_validation_logic(
     from cortex.engine.store_validators import check_dedup, validate_content
 
     StorageGuard.validate(
-        project=project, content=content, fact_type=fact_type,
-        source=source, confidence=confidence, tags=tags, meta=meta,
+        project=project,
+        content=content,
+        fact_type=fact_type,
+        source=source,
+        confidence=confidence,
+        tags=tags,
+        meta=meta,
     )
     content = validate_content(project, content, fact_type)
 
@@ -132,29 +147,39 @@ async def run_store_validation_logic(
     content, meta = _sanitize_engram(content, fact_type, source, project, meta)
 
     from cortex.engine.fact_store_core import resolve_causality_async
+
     meta = await resolve_causality_async(conn, project, meta)
 
     nemesis_rejection = None
     if fact_type not in ("error", "ghost"):
         from cortex.engine.nemesis import NemesisProtocol
+
         nemesis_rejection = await NemesisProtocol.analyze_async(content, conn=conn)
 
     bridge_result = None
     if fact_type not in ("error", "ghost") and not (meta and meta.get("previous_fact_id")):
-        content, fact_type, bridge_result = await _apply_bridge_guard(conn, content, project, tenant_id, fact_type)
+        content, fact_type, bridge_result = await _apply_bridge_guard(
+            conn, content, project, tenant_id, fact_type
+        )
         if bridge_result and bridge_result.get("meta_flags"):
             meta = {**(meta or {}), **bridge_result["meta_flags"]}
 
     from cortex.engine.guard_integration_patch import enforce_store_guards
+
     await enforce_store_guards(
-        content=content, project=project, tenant_id=tenant_id,
-        fact_type=fact_type, meta=meta or {}, nemesis_rejection=nemesis_rejection,
+        content=content,
+        project=project,
+        tenant_id=tenant_id,
+        fact_type=fact_type,
+        meta=meta or {},
+        nemesis_rejection=nemesis_rejection,
         bridge_result=bridge_result,
     )
 
     await _enforce_cortex_taint(conn, content, fact_type, meta)
 
     return None, meta, content, fact_type
+
 
 def _validate_dependencies():
     try:
@@ -168,18 +193,24 @@ def _validate_dependencies():
     except Exception as exc:
         raise RuntimeError(f"FAIL-CLOSED: dependencies unavailable: {exc}") from exc
 
+
 def _apply_exergy(cls: Any, meta: dict[str, Any] | None, fact_type: str, skip_thermo: bool):
     from cortex.guards.thermodynamic import AgentMode, should_enter_decorative_mode
     from cortex.shannon.exergy import ActionRisk, ExergyInput, calculate_exergy, enforce_exergy
+
     _has_entropy = meta is not None and ("_prior_entropy" in meta or "_posterior_entropy" in meta)
     if not skip_thermo and meta is not None and _has_entropy:
         ex_input = ExergyInput(
             prior_uncertainty=meta.get("_prior_entropy", 1.0),
             posterior_uncertainty=meta.get("_posterior_entropy", 0.5),
             tokens_consumed=meta.get("_tokens", 100),
-            action_risk=ActionRisk.MEMORY_WRITE if fact_type != "rule" else ActionRisk.SCHEMA_MUTATION,
-            had_backup=True, touched_persistent_state=True,
-            utility_delta=meta.get("_utility", 0.0), causal_gap=meta.get("_causal_gap", 0.0),
+            action_risk=ActionRisk.MEMORY_WRITE
+            if fact_type != "rule"
+            else ActionRisk.SCHEMA_MUTATION,
+            had_backup=True,
+            touched_persistent_state=True,
+            utility_delta=meta.get("_utility", 0.0),
+            causal_gap=meta.get("_causal_gap", 0.0),
         )
         ex_res = calculate_exergy(ex_input, threshold_min_work=0.01)
         enforce_exergy(ex_res)
@@ -190,16 +221,26 @@ def _apply_exergy(cls: Any, meta: dict[str, Any] | None, fact_type: str, skip_th
     elif cls._agent_mode != AgentMode.DECORATIVE:
         cls._agent_mode = AgentMode.ACTIVE
 
-def _sanitize_engram(content: str, fact_type: str, source: str | None, project: str, meta: dict | None):
+
+def _sanitize_engram(
+    content: str, fact_type: str, source: str | None, project: str, meta: dict | None
+):
     from cortex.engine.membrane.sanitizer import SovereignSanitizer
+
     raw_engram = {
-        "type": fact_type, "source": source or "engine:store",
-        "topic": project, "content": content, "metadata": meta or {},
+        "type": fact_type,
+        "source": source or "engine:store",
+        "topic": project,
+        "content": content,
+        "metadata": meta or {},
     }
     pure, membrane_log = SovereignSanitizer.digest(raw_engram)
     m = pure.metadata
-    m["_membrane_log"] = membrane_log.model_dump() if hasattr(membrane_log, "model_dump") else membrane_log.dict()
+    m["_membrane_log"] = (
+        membrane_log.model_dump() if hasattr(membrane_log, "model_dump") else membrane_log.dict()
+    )
     return pure.content, m
+
 
 async def _enforce_cortex_taint(
     conn: Any,
@@ -215,8 +256,10 @@ async def _enforce_cortex_taint(
     token = meta.get("cortex_taint") if meta else None
     await enforce_taint_check(conn, token, content)
 
+
 async def _apply_bridge_guard(conn, content, project, tenant_id, fact_type):
     from cortex.engine.bridge_guard import BridgeGuard
+
     source_proj = await BridgeGuard.detect_bridge_candidate(conn, content, project, tenant_id)
     bridge_result = None
     if source_proj:

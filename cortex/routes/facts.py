@@ -112,7 +112,7 @@ async def store_fact(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Failed to store fact: %s", e, exc_info=True)
+        logger.exception("Failed to store fact: %s", e)
         raise HTTPException(
             status_code=500, detail="Internal server error while storing fact"
         ) from None

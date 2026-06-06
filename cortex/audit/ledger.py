@@ -37,19 +37,37 @@ CREATE TABLE IF NOT EXISTS security_audit_log (
 
 
 class EnterpriseAuditLedger:
-    """Immutable Audit Ledger for enterprise-grade SOC 2 compliance."""
+    """Immutable Audit Ledger for enterprise-grade SOC 2 compliance (Merkle Micro-Batched)."""
 
-    __slots__ = ("_conn", "_last_hash", "_ready", "private_key", "public_key", "_lock")
+    __slots__ = (
+        "_conn",
+        "_last_hash",
+        "_ready",
+        "private_key",
+        "public_key",
+        "_lock",
+        "_batch_queue",
+        "_batch_task",
+        "batch_window_ms",
+        "max_batch_size",
+    )
 
     def __init__(self, conn: aiosqlite.Connection) -> None:
         import asyncio
+
         self._conn = conn
         self._ready = False
         self._last_hash = "GENESIS"
         self._lock = asyncio.Lock()
 
+        self._batch_queue: list[tuple[dict[str, Any], asyncio.Future[str]]] = []
+        self._batch_task: asyncio.Task | None = None
+
+        # Configure thresholds
+        self.batch_window_ms = int(os.environ.get("CORTEX_LEDGER_BATCH_MS", "50"))
+        self.max_batch_size = int(os.environ.get("CORTEX_LEDGER_MAX_BATCH", "500"))
+
         # C5-REAL Sovereign Ed25519 Keypair (Audit ZK-Seal Substrate)
-        # Almacena la clave localmente para persistir la identidad del auditor
         key_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "audit_sovereign.pem")
         if os.path.exists(key_path):
             with open(key_path, "rb") as key_file:
@@ -76,7 +94,6 @@ class EnterpriseAuditLedger:
                 return
             await self._conn.execute(_CREATE_AUDIT_SQL)
             await self._conn.commit()
-            # Fetch the last hash to maintain the chain
             cursor = await self._conn.execute(
                 "SELECT signature FROM security_audit_log ORDER BY rowid DESC LIMIT 1"
             )
@@ -86,14 +103,69 @@ class EnterpriseAuditLedger:
             self._ready = True
 
     async def run_scan(self) -> dict[str, Any]:
-        """
-        Scans audit logs for common threat patterns:
-        - Rapid role escalation
-        - Cross-tenant resource requests
-        - Out-of-hours high-volume reads
-        """
-        # Placeholder for scan logic
         return {"status": "scan_not_implemented"}
+
+    async def _batch_worker(self) -> None:
+        """Background worker that flushes the queue periodically using a Merkle Tree."""
+        import asyncio
+
+        while True:
+            await asyncio.sleep(self.batch_window_ms / 1000.0)
+            async with self._lock:
+                if not self._batch_queue:
+                    self._batch_task = None
+                    break
+
+                batch = self._batch_queue[: self.max_batch_size]
+                self._batch_queue = self._batch_queue[self.max_batch_size :]
+
+                # Compute Merkle Root for the batch
+                batch_audit_ids = [item["audit_id"] for item, _ in batch]
+                merkle_payload = "".join(batch_audit_ids) + self._last_hash
+                merkle_root = hashlib.sha256(merkle_payload.encode()).hexdigest()
+
+                # Sign the Merkle Root
+                payload_to_sign = f"merkle_batch:{merkle_root}:{self._last_hash}"
+                signature = self.private_key.sign(payload_to_sign.encode()).hex()
+
+                # Prepare SQLite bulk insert
+                insert_rows = []
+                for item, _ in batch:
+                    insert_rows.append(
+                        (
+                            item["audit_id"],
+                            item["timestamp"],
+                            item["tenant_id"],
+                            item["actor_role"],
+                            item["actor_id"],
+                            item["action"],
+                            item["resource"],
+                            item["status"],
+                            self._last_hash,
+                            signature,
+                        )
+                    )
+
+                try:
+                    await self._conn.executemany(
+                        """INSERT INTO security_audit_log
+                           (audit_id, timestamp, tenant_id, actor_role, actor_id, action,
+                            resource, status, prev_hash, signature)
+                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                        insert_rows,
+                    )
+                    await self._conn.commit()
+                    self._last_hash = signature
+
+                    # Resolve futures
+                    for item, fut in batch:
+                        if not fut.done():
+                            fut.set_result(item["audit_id"])
+                except Exception as e:
+                    logger.error("[AuditLedger] Batch insert failed: %s", e)
+                    for _, fut in batch:
+                        if not fut.done():
+                            fut.set_exception(e)
 
     async def log_action(
         self,
@@ -104,38 +176,34 @@ class EnterpriseAuditLedger:
         resource: str,
         status: str = "SUCCESS",
     ) -> str:
-        """Securely logs an action with a cryptographic hash chain."""
+        """Securely logs an action. Uses Micro-Batching under concurrency."""
+        import asyncio
+
         await self.ensure_table()
 
         timestamp = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat()
         audit_id = hashlib.sha256(f"{timestamp}{actor_id}{action}".encode()).hexdigest()
 
-        async with self._lock:
-            # Calculate new signature ensuring immutability chain via Ed25519 ZK-Seal
-            payload = f"{audit_id}:{timestamp}:{tenant_id}:{actor_id}:{action}:{self._last_hash}"
-            signature = self.private_key.sign(payload.encode()).hex()
+        event = {
+            "audit_id": audit_id,
+            "timestamp": timestamp,
+            "tenant_id": tenant_id,
+            "actor_role": actor_role,
+            "actor_id": actor_id,
+            "action": action,
+            "resource": resource,
+            "status": status,
+        }
 
-            await self._conn.execute(
-                """INSERT INTO security_audit_log
-                   (audit_id, timestamp, tenant_id, actor_role, actor_id, action,
-                    resource, status, prev_hash, signature)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                (
-                    audit_id,
-                    timestamp,
-                    tenant_id,
-                    actor_role,
-                    actor_id,
-                    action,
-                    resource,
-                    status,
-                    self._last_hash,
-                    signature,
-                ),
-            )
-            await self._conn.commit()
-            self._last_hash = signature
-        return audit_id
+        fut = asyncio.get_running_loop().create_future()
+
+        async with self._lock:
+            self._batch_queue.append((event, fut))
+            if self._batch_task is None:
+                self._batch_task = asyncio.create_task(self._batch_worker())
+
+        # Wait for the batch to be committed
+        return await fut
 
     def verify_zk_seal(self, payload: str, signature_hex: str) -> bool:
         """Verifies a cryptographic seal against the Audit Sovereign public key."""

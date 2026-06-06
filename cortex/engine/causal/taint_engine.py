@@ -22,7 +22,7 @@ def canonicalize_content(content: str) -> str:
     normalized = "\n".join(line.strip() for line in content.strip().splitlines())
     try:
         data = json.loads(normalized)
-        if isinstance(data, (dict, list)):
+        if isinstance(data, dict | list):
             return json.dumps(data, sort_keys=True, separators=(",", ":"))
     except Exception as exc:
         logger.warning("Suppressed exception: %s", exc)
