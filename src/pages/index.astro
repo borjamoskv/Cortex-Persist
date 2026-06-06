@@ -1,6 +1,7 @@
 ---
 import SiteLayout from '../layouts/SiteLayout.astro';
 import AwwwardsHero from '../components/landing/AwwwardsHero.tsx';
+import PreloadScreen from '../components/landing/PreloadScreen.tsx';
 import TelemetryWidget from '../components/TelemetryWidget.tsx';
 
 const navLinks = [
@@ -89,6 +90,7 @@ const docsUrl = 'https://github.com/borjamoskv/Cortex-Persist/tree/main/docs';
 	canonical="https://cortexpersist.com/"
 >
 	<main class="landing-shell">
+		<PreloadScreen client:load />
 		<header class="masthead">
 			<a class="brand" href="/" aria-label="CORTEX Persist home">
 				<span class="brand-mark">CP</span>
