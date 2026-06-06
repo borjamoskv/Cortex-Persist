@@ -1,23 +1,24 @@
 # [C5-REAL] Exergy-Maximized
-from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 import asyncio
 import random
-import json
 import time
 from contextlib import asynccontextmanager
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-import aiosqlite
 from pathlib import Path
 from typing import Any
 
-from cortex.engine.exergy_daemon import ExergyDaemon
-from cortex.engine.entropy_daemon import EntropyDaemon
-from cortex.ledger.execution_trace import ExecutionTraceLedger
-from cortex.ledger.causal_graph import CausalGraph
-from cortex.engine.causal_scheduler import CausalScheduler
-from cortex.engine.rollback_engine import CausalRollbackEngine
+import aiosqlite
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+
+from cortex import __version__
 from cortex.engine.bifurcation_engine import ExergyBifurcationEngine
+from cortex.engine.causal_scheduler import CausalScheduler
+from cortex.engine.entropy_daemon import EntropyDaemon
+from cortex.engine.exergy_daemon import ExergyDaemon
+from cortex.engine.rollback_engine import CausalRollbackEngine
+from cortex.ledger.causal_graph import CausalGraph
+from cortex.ledger.execution_trace import ExecutionTraceLedger
 
 CORTEX_DB_PATH = str(Path("~/.cortex/cortex_engine.db").expanduser())
 
@@ -67,7 +68,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="CORTEX Persist API",
     description="Motor C5-REAL para visualización de exergía y purga de influencers.",
-    version="1.0.0",
+    version=__version__,
     lifespan=lifespan,
 )
 

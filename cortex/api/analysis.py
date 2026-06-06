@@ -7,7 +7,9 @@ from fastapi import Depends, FastAPI, Header, HTTPException, Query
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.staticfiles import StaticFiles
 
-app = FastAPI(title="CORTEX Analysis Pipeline (MOSKV-1)", version="1.0.0", docs_url=None)
+from cortex import __version__
+
+app = FastAPI(title="CORTEX Analysis Pipeline (MOSKV-1)", version=__version__, docs_url=None)
 
 # Secret for JWT auth in CORTEX
 JWT_SECRET = os.getenv("CORTEX_JWT_SECRET", "default-exergy-secret")
