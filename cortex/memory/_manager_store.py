@@ -139,7 +139,7 @@ async def store_fact(
         project_id=project_id,
         content=content,
         embedding=vector,
-        timestamp=time.monotonic(),
+        timestamp=time.time(),
         metadata=_meta,
         cognitive_layer=adjusted_layer,  # type: ignore[reportArgumentType]
         parent_decision_id=int(parent_decision_id) if parent_decision_id is not None else None,
