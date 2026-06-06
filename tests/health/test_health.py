@@ -486,7 +486,7 @@ class TestTrendPersistence:
         db = str(tmp_path / "prune_test.db")
         td = TrendDetector()
         # Persist old and new
-        now = time.monotonic()
+        now = time.time()
         td.persist_to_db(db, 50.0, timestamp=now - (40 * 86400))  # 40 days ago
         td.persist_to_db(db, 95.0, timestamp=now)
 

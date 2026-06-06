@@ -526,13 +526,8 @@ class TestExecuteThermalPurge:
         # and >= COLD_THRESHOLD, so it hits the WARM branch
         assert stats.transitioned_warm == 1
 
-    def test_zero_half_life_defaults_to_30_due_to_falsy_check(self, tmp_db):
-        """BUG DOCUMENTATION: half_life=0.0 is falsy in Python, so the engine
-        defaults it to 30.0 via `if row["decay_half_life"]`. A fresh fact with
-        half_life=0.0 gets treated as half_life=30.0 → exergy ≈ 1.0 → stays HOT.
-
-        TODO: Fix engine line 176 to use `is not None` instead of truthiness.
-        """
+    def test_zero_half_life_tombstones_immediately(self, tmp_db):
+        """A fresh fact with half_life=0.0 is immediately tombstoned."""
         fact_id = _insert_fact(
             tmp_db,
             content="zero half life",
@@ -543,10 +538,10 @@ class TestExecuteThermalPurge:
 
         stats = execute_thermal_purge(tmp_db, dry_run=False)
 
-        # 0.0 is falsy → defaults to 30.0 → fresh fact stays HOT
-        assert stats.tombstoned == 0
+        assert stats.tombstoned == 1
         fact = _get_fact(tmp_db, fact_id)
-        assert fact["is_tombstoned"] == 0
+        assert fact["is_tombstoned"] == 1
+        assert fact["storage_tier"] == "VOID"
 
     def test_null_half_life_defaults_to_30(self, tmp_db):
         """Fact with NULL decay_half_life defaults to 30.0."""
