@@ -6,6 +6,7 @@ import logging
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger("cortex.simulation")
 
+
 def simulate_c7_economics(generations=100000):
     # Initial Populations
     P_prod = 1000.0  # Producers
@@ -24,7 +25,9 @@ def simulate_c7_economics(generations=100000):
     psi = 100.0
 
     logger.info(f"--- INICIANDO SIMULACIÓN C7 (GENERACIONES: {generations}) ---")
-    logger.info(f"POBLACIÓN INICIAL | Prod: {P_prod} | Para: {P_para} | Hunt: {P_hunt} | Mal: {P_mal}")
+    logger.info(
+        f"POBLACIÓN INICIAL | Prod: {P_prod} | Para: {P_para} | Hunt: {P_hunt} | Mal: {P_mal}"
+    )
 
     start_time = time.time()
 
@@ -116,9 +119,13 @@ def simulate_c7_economics(generations=100000):
 
     # Análisis
     if P_mal > P_prod:
-        logger.warning("\n[ALERTA C7-C] ENFERMEDAD AUTOINMUNE. Los Hunters han devorado a los Productores.")
+        logger.warning(
+            "\n[ALERTA C7-C] ENFERMEDAD AUTOINMUNE. Los Hunters han devorado a los Productores."
+        )
     elif P_para > P_prod:
-        logger.warning("\n[ALERTA C7-B] COLAPSO EPISTÉMICO. El Spoofing es más rentable que la verdad.")
+        logger.warning(
+            "\n[ALERTA C7-B] COLAPSO EPISTÉMICO. El Spoofing es más rentable que la verdad."
+        )
     elif psi < 100:
         logger.warning("\n[ALERTA] DEGRADACIÓN DE Ψ. El ecosistema es estéril.")
     else:

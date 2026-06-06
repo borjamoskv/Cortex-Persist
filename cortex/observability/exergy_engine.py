@@ -452,5 +452,3 @@ class ExergyEngine:
             "counterfactual_loss": total_error,
             "miss_count": miss_count,
         }
-
-

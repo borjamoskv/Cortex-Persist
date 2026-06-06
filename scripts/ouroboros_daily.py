@@ -236,7 +236,8 @@ async def main():
                 "metabolized": [m["file"] for m in metabolisms],
             },
             indent=2,
-        ) + "\n"
+        )
+        + "\n"
     )
 
 

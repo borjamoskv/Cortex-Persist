@@ -120,7 +120,9 @@ class EpistemicPolicyNetwork:
             or not hasattr(self, "_last_x")
             or not hasattr(self, "_last_h")
         ):
-            logger.warning("[POLICY] Attempted update_policy without stored forward pass/routing event.")
+            logger.warning(
+                "[POLICY] Attempted update_policy without stored forward pass/routing event."
+            )
             return
 
         probs = self._last_probs
