@@ -125,6 +125,59 @@ def store(
         _run_async(engine.close())
 
 
+@memory_cmds.command("store-batch")
+@click.argument("file_path", type=click.Path(exists=True))
+@click.option("--db", default=DEFAULT_DB, help="Database path")
+def store_batch(file_path, db) -> None:
+    """Store multiple facts from a JSON file in CORTEX."""
+    import sys
+    with open(file_path, "r", encoding="utf-8") as f:
+        facts = json.load(f)
+
+    if not isinstance(facts, list):
+        console.print("[red]Error: JSON content must be a list of facts.[/]")
+        sys.exit(1)
+
+    engine = get_engine(db)
+    stored_count = 0
+    try:
+        for idx, fact in enumerate(facts):
+            project = fact.get("project")
+            content = fact.get("content")
+            if not project or not content:
+                console.print(f"[yellow]Skipping fact at index {idx}: missing project or content[/]")
+                continue
+
+            fact_type = fact.get("fact_type", fact.get("type", "knowledge"))
+            tags = fact.get("tags")
+            if isinstance(tags, str):
+                tags = [t.strip() for t in tags.split(",") if t.strip()]
+            confidence = fact.get("confidence", "stated")
+            source = fact.get("source") or _detect_agent_source()
+            meta = fact.get("metadata", fact.get("meta"))
+            parent_id = fact.get("parent_decision_id", fact.get("parent_id"))
+
+            fact_id = _run_async(
+                engine.store(
+                    project=project,
+                    content=content,
+                    fact_type=fact_type,
+                    tags=tags,
+                    confidence=confidence,
+                    source=source,
+                    meta=meta,
+                    parent_decision_id=parent_id,
+                )
+            )
+            stored_count += 1
+            console.print(
+                f"[[noir.cyber]✓[/]] Stored fact [[noir.gold]#{fact_id}[/]] in [[noir.yinmn]{project}[/]]"
+            )
+        console.print(f"[bold green]Successfully stored {stored_count} facts.[/]")
+    finally:
+        _run_async(engine.close())
+
+
 @memory_cmds.command("search")
 @click.argument("query")
 @click.option("--project", "-p", default=None, help="Scope to project")
@@ -242,7 +295,7 @@ def search(query, project, top, scope, db, epistemic) -> None:
         _run_async(engine.close())
 
 
-@cli.command()
+@memory_cmds.command("recall")
 @click.argument("project")
 @click.option("--db", default=DEFAULT_DB, help="Database path")
 def recall(project, db) -> None:
@@ -533,29 +586,9 @@ def stats(db, as_json) -> None:
         _run_async(engine.close())
 
 
-# --- Root Aliases (Backward Compatibility) ---
-@cli.command("store", context_settings=dict(ignore_unknown_options=True, help_option_names=[]))
-@click.argument("args", nargs=-1, type=click.UNPROCESSED)
-@click.pass_context
-def store_alias(ctx, args):
-    """[Alias] Store a fact."""
-    ctx.invoke(store, *args)
-
-
-@cli.command("search", context_settings=dict(ignore_unknown_options=True, help_option_names=[]))
-@click.argument("args", nargs=-1, type=click.UNPROCESSED)
-@click.pass_context
-def search_alias(ctx, args):
-    """[Alias] Semantic search."""
-    ctx.invoke(search, *args)
-
-
-@cli.command("recall", context_settings=dict(ignore_unknown_options=True, help_option_names=[]))
-@click.argument("args", nargs=-1, type=click.UNPROCESSED)
-@click.pass_context
-def recall_alias(ctx, args):
-    """[Alias] Load full context."""
-    ctx.invoke(recall, *args)
-
-
+# --- Root Commands and Subcommand Group Registration ---
+cli.add_command(store)
+cli.add_command(store_batch)
+cli.add_command(search)
+cli.add_command(recall)
 cli.add_command(memory_cmds)
