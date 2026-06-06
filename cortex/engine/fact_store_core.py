@@ -242,23 +242,30 @@ async def _record_causality(
 ) -> None:
     """Record causal linkage for the fact."""
     try:
-        from cortex.engine.causality import EDGE_DERIVED_FROM, EDGE_TRIGGERED_BY, EDGE_UPDATED_FROM
+        from cortex.engine.causality import EDGE_DERIVED_FROM, EDGE_TRIGGERED_BY, EDGE_UPDATED_FROM, AsyncCausalGraph
 
         p_sig = meta.get("causal_parent")
         p_fact = meta.get("previous_fact_id")
+        
+        graph = AsyncCausalGraph(conn)
 
         if p_sig or p_fact:
             e_type = EDGE_UPDATED_FROM if p_fact else EDGE_TRIGGERED_BY
-            await conn.execute(
-                "INSERT INTO causal_edges (fact_id, parent_id, signal_id, edge_type, project, tenant_id) "
-                "VALUES (?, ?, ?, ?, ?, ?)",
-                (fact_id, p_fact, p_sig, e_type, project, tenant_id),
+            await graph.record_edge(
+                fact_id=fact_id,
+                parent_id=p_fact,
+                signal_id=p_sig,
+                edge_type=e_type,
+                project=project,
+                tenant_id=tenant_id
             )
         elif parent_decision_id:
-            await conn.execute(
-                "INSERT INTO causal_edges (fact_id, parent_id, signal_id, edge_type, project, tenant_id) "
-                "VALUES (?, ?, NULL, ?, ?, ?)",
-                (fact_id, parent_decision_id, EDGE_DERIVED_FROM, project, tenant_id),
+            await graph.record_edge(
+                fact_id=fact_id,
+                parent_id=parent_decision_id,
+                edge_type=EDGE_DERIVED_FROM,
+                project=project,
+                tenant_id=tenant_id
             )
     except Exception as e:
         logger.error("Failed to record causality for fact %d: %s", fact_id, e)
