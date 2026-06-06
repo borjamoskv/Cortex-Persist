@@ -81,7 +81,9 @@ def check_file_entropy(filepath):
                 visitor.visit(node)
                 if visitor.max_depth > 4:
                     penalties += 2
-                    issues.append(f"High nesting complexity in '{node.name}' (depth: {visitor.max_depth}). Penalty: +2")
+                    issues.append(
+                        f"High nesting complexity in '{node.name}' (depth: {visitor.max_depth}). Penalty: +2"
+                    )
     except SyntaxError:
         penalties += 10
         issues.append("SyntaxError: Critical structural failure. Penalty: +10")
@@ -109,7 +111,20 @@ def main(target_dir):
     total_entropy = 0
     all_issues = []
 
-    SKIP_DIRS = {".venv", ".git", "__pycache__", ".scratch", ".quarantine", "tests", "cortex_mev_base", "node_modules", "sdks", "benchmarks", "tools", "cortex-core"}
+    SKIP_DIRS = {
+        ".venv",
+        ".git",
+        "__pycache__",
+        ".scratch",
+        ".quarantine",
+        "tests",
+        "cortex_mev_base",
+        "node_modules",
+        "sdks",
+        "benchmarks",
+        "tools",
+        "cortex-core",
+    }
 
     for root, dirs, files in os.walk(target_dir):
         # Filter directories in-place to avoid traversing into skipped directories

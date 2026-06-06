@@ -303,10 +303,11 @@ class ApotheosisEngine(ApotheosisAuditsMixin):
         else:
             try:
                 import ast
+
                 source_code = await asyncio.to_thread(py_file.read_text, "utf-8")
                 try:
                     ast.parse(source_code, filename=str(py_file))
-                except SyntaxError as se:
+                except SyntaxError:
                     logger.error("[APOTHEOSIS] AST Breach: %s. Skipping healing.", py_file.name)
                     ENDOCRINE.pulse(HormoneType.ADRENALINE, 0.2, reason="AST Breach detected")
                     return

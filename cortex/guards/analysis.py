@@ -44,17 +44,22 @@ def scan_args_for_oracles(node: ast.Call) -> list[str]:
     all_args = list(node.args) + [kw.value for kw in node.keywords]
 
     for arg in all_args:
-        if isinstance(arg, ast.List):
-            found.extend(scan_list(arg))
-        elif isinstance(arg, ast.Constant) and isinstance(arg.value, str):
-            hit = oracle_in_str(arg.value)
-            if hit:
-                found.append(hit)
-        elif isinstance(arg, ast.JoinedStr):
-            found.extend(scan_fstring(arg))
-        elif isinstance(arg, ast.Name):
-            found.extend(scan_variable_name(arg))
+        found.extend(_scan_single_arg(arg))
     return found
+
+
+def _scan_single_arg(arg: ast.expr) -> list[str]:
+    """Dispatch a single AST argument node for oracle scanning."""
+    if isinstance(arg, ast.List):
+        return scan_list(arg)
+    if isinstance(arg, ast.Constant) and isinstance(arg.value, str):
+        hit = oracle_in_str(arg.value)
+        return [hit] if hit else []
+    if isinstance(arg, ast.JoinedStr):
+        return scan_fstring(arg)
+    if isinstance(arg, ast.Name):
+        return scan_variable_name(arg)
+    return []
 
 
 def scan_list(node: ast.List) -> list[str]:
@@ -204,13 +209,19 @@ def has_exec_calls(tree: ast.Module) -> bool:
         "asyncio.create_subprocess_shell",
     }
     for node in ast.walk(tree):
-        if isinstance(node, ast.Call):
-            name = get_call_name(node)
-            if name in exec_calls:
-                return True
-            # Also detect getattr(subprocess, ...)
-            if name == "getattr" and len(node.args) >= 1:
-                if isinstance(node.args[0], ast.Name):
-                    if node.args[0].id in ("subprocess", "os", "shutil"):
-                        return True
+        if not isinstance(node, ast.Call):
+            continue
+        name = get_call_name(node)
+        if name in exec_calls:
+            return True
+        if name == "getattr" and _is_exec_getattr(node):
+            return True
     return False
+
+
+def _is_exec_getattr(node: ast.Call) -> bool:
+    """Check if a getattr() call targets a process execution module."""
+    if len(node.args) < 1:
+        return False
+    target = node.args[0]
+    return isinstance(target, ast.Name) and target.id in ("subprocess", "os", "shutil")

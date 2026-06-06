@@ -1,57 +1,230 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CORTEX Firewall</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&display=swap');
+        
         body {
-            width: 250px;
-            background-color: #0a0a0a;
+            width: 280px;
+            background-color: #050505;
             color: #e0e0e0;
-            font-family: monospace;
-            padding: 15px;
+            font-family: 'Space Grotesk', sans-serif;
+            padding: 16px;
             margin: 0;
-            border: 1px solid #333;
+            border: 1px solid #1a1a1a;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.8);
         }
-        h1 {
-            font-size: 14px;
-            color: #2b3be5;
+        
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #222;
+            padding-bottom: 10px;
+            margin-bottom: 16px;
+        }
+        
+        .title {
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: #ffffff;
+            margin: 0;
             text-transform: uppercase;
-            border-bottom: 1px solid #333;
-            padding-bottom: 5px;
-            margin-top: 0;
         }
-        .stat {
-            margin: 15px 0;
-            font-size: 12px;
+        
+        .logo-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #2b3be5;
+            box-shadow: 0 0 8px #2b3be5;
+            display: inline-block;
+            transition: all 0.3s ease;
         }
-        .number {
-            font-size: 24px;
-            color: #ff3333;
-            font-weight: bold;
-            display: block;
-            margin-top: 5px;
+        
+        .logo-dot.bypass {
+            background-color: #e5a92b;
+            box-shadow: 0 0 8px #e5a92b;
         }
-        .status {
-            color: #00ff00;
+        
+        /* Stats Card */
+        .card {
+            background: rgba(15, 15, 15, 0.6);
+            border: 1px solid #1f1f1f;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 2px;
+            height: 100%;
+            background: #2b3be5;
+            transition: all 0.3s ease;
+        }
+        
+        .card.active::before {
+            background: #2b3be5;
+        }
+        
+        .card.bypass::before {
+            background: #e5a92b;
+        }
+        
+        .label {
+            font-size: 11px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-top: 4px;
+            font-family: monospace;
+        }
+        
+        /* Controls */
+        .control-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(15, 15, 15, 0.6);
+            border: 1px solid #1f1f1f;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .control-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #e0e0e0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Toggle Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 22px;
+        }
+        
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #2b3be5;
+            transition: .3s;
+            border-radius: 22px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background-color: #ffffff;
+            transition: .3s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: #333333;
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(22px);
+        }
+        
+        /* Status Banner */
+        .status-banner {
             font-size: 10px;
-            margin-top: 20px;
+            font-weight: 700;
             text-align: center;
+            padding: 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+        
+        .status-banner.active {
+            background-color: rgba(43, 59, 229, 0.1);
+            border: 1px solid #2b3be5;
+            color: #5577ff;
+            box-shadow: 0 0 10px rgba(43, 59, 229, 0.15);
+        }
+        
+        .status-banner.bypass {
+            background-color: rgba(229, 169, 43, 0.1);
+            border: 1px solid #e5a92b;
+            color: #e5a92b;
+            box-shadow: 0 0 10px rgba(229, 169, 43, 0.15);
+        }
+        
+        /* Footer */
+        .footer {
+            margin-top: 16px;
+            font-size: 8px;
+            color: #555;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
     </style>
 </head>
 <body>
-    <h1>CORTEX Firewall</h1>
-    
-    <div class="stat">
-        Nodos Interceptados (Sesión):
-        <span class="number" id="blockCount">0</span>
+    <div class="header">
+        <h1 class="title">CORTEX FIREWALL</h1>
+        <span class="logo-dot" id="statusDot"></span>
     </div>
     
-    <div class="status">
-        [ ESTADO: C5-REAL ACTIVO ]<br>
-        Bloqueando Ruido Térmico
+    <div class="card active" id="statsCard">
+        <div class="label">Nodos Interceptados</div>
+        <div class="value" id="blockCount">0</div>
+    </div>
+    
+    <div class="control-group">
+        <div class="control-label">Activar Bypass</div>
+        <label class="switch">
+            <input type="checkbox" id="bypassToggle">
+            <span class="slider"></span>
+        </label>
+    </div>
+    
+    <div class="status-banner active" id="statusBanner">
+        [ ESTADO: C5-REAL ACTIVO ]
+    </div>
+    
+    <div class="footer">
+        Engine: v10.0 (LEGION-10k)
     </div>
 
     <script src="popup.js"></script>

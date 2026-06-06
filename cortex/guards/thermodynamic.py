@@ -33,7 +33,7 @@ class MetastabilityProbe:
 
 
 class DecorativeModeTriggered(RuntimeError):
-    pass
+    """Raised when an agent enters decorative mode due to thermodynamic entropy thresholds."""
 
 
 def should_enter_decorative_mode(c: ThermodynamicCounters) -> tuple[bool, list[str]]:

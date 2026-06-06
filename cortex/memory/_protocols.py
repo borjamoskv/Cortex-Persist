@@ -60,4 +60,3 @@ class CortexMemoryManagerProtocol(Protocol):
     async def nrem_consolidation(self, tenant_id: str, project_id: str | None = None) -> dict:
         """Runs the NREM consolidation cycle, optimizing semantic and episodic vectors."""
         ...
-

@@ -31,7 +31,7 @@ except ImportError:
             return True
 
     class HealthSLAViolation(Exception):  # type: ignore
-        pass
+        """Raised when system health violates the target SLA grade."""
 
     class HealthMixin:  # type: ignore
         async def health_score(self) -> float:

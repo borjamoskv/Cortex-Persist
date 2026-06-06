@@ -180,9 +180,7 @@ async def _process_single_task(agent: str, payload: dict, anti_limerence, umap) 
     )
     legion.apply_fading_memory(lambda_decay=0.01)
     legion.batch_write_action([0], [f"Process: {payload}"])
-    slashed = legion.epistemic_slash_and_respawn(
-        bottom_percentile=10, elite_percentile=90
-    )
+    slashed = legion.epistemic_slash_and_respawn(bottom_percentile=10, elite_percentile=90)
     if slashed > 0:
         logger.info(
             "OMEGA-X: Apoptosis activated. %s dead nodes respawned from elite VSA topologies.",
