@@ -243,6 +243,23 @@ CREATE INDEX IF NOT EXISTS idx_ee_type ON entity_events(event_type);
 CREATE INDEX IF NOT EXISTS idx_ee_timestamp ON entity_events(timestamp);
 """
 
+# ─── Execution Trace Ledger (Memory Thermodynamics Graph) ─────────────
+CREATE_EXECUTION_TRACE_LEDGER = """
+CREATE TABLE IF NOT EXISTS execution_trace_ledger (
+    id              TEXT PRIMARY KEY,
+    tenant_id       TEXT NOT NULL DEFAULT 'default',
+    origin          TEXT NOT NULL,
+    cost            REAL NOT NULL,
+    lineage         TEXT NOT NULL DEFAULT '[]',
+    outcome         TEXT NOT NULL,
+    rollback_possible BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at      TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_exec_trace_tenant ON execution_trace_ledger(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_exec_trace_outcome ON execution_trace_ledger(outcome);
+"""
+
 # ─── Sovereign Locks (Axiom Ω₂ - Lock-Free Concurrency) ──────────────
 CREATE_LOCK_INTENTS = """
 CREATE TABLE IF NOT EXISTS lock_intents (
@@ -488,4 +505,5 @@ EXTENSION_SCHEMA = [
     CREATE_AUDIT_EXPORTS,
     CREATE_ENTITIES,
     CREATE_ENTITY_RELATIONS,
+    CREATE_EXECUTION_TRACE_LEDGER,
 ]

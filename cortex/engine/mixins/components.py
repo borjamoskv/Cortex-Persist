@@ -222,6 +222,17 @@ class ComponentsMixin:
             logger.debug("OmegaGuardAdapter unavailable: %s", e)
         except Exception as e:
             raise RuntimeError(f"FAIL-CLOSED: OmegaGuardAdapter failed: {e}") from e
+        # Archaeology First Guard (Ley 1)
+        try:
+            from cortex.engine.guard_adapters import ArchaeologyGuardAdapter
+
+            pipeline.add_guard(ArchaeologyGuardAdapter())
+        except ImportError as e:
+            if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
+                raise RuntimeError(f"FAIL-CLOSED: ArchaeologyGuardAdapter failed: {e}") from e
+            logger.debug("ArchaeologyGuardAdapter unavailable: %s", e)
+        except Exception as e:
+            raise RuntimeError(f"FAIL-CLOSED: ArchaeologyGuardAdapter failed: {e}") from e
         # Post-store hooks (AX-II Hook 4 + signals + epistemic)
         try:
             from cortex.engine.guard_adapters import LedgerCheckpointHook

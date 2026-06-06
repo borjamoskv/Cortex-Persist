@@ -23,6 +23,7 @@ __all__ = [
     "VerifierGuardAdapter",
     "VirgoGuardAdapter",
     "ZKGuardAdapter",
+    "ArchaeologyGuardAdapter",
 ]
 
 logger = logging.getLogger("cortex.engine")
@@ -231,6 +232,32 @@ class OmegaGuardAdapter:
                 f"[{c.severity.upper()}] {c.summary}: {c.reasoning}" for c in conflicts
             )
             raise ValueError(f"[AX-II] Omega Auditor detected contradictions: {reasons}")
+
+
+class ArchaeologyGuardAdapter:
+    """AX-II Hook for Archaeology First (Ley 1) → StoreGuard protocol."""
+
+    async def check(
+        self,
+        content: str,
+        project: str,
+        fact_type: str,
+        meta: dict[str, Any],
+        conn: aiosqlite.Connection,
+        *,
+        tenant_id: str = "default",
+    ) -> None:
+        from cortex.guards.archaeology_guard import ArchaeologyGuard
+
+        guard = ArchaeologyGuard()
+        result = await guard.check_history_audited(
+            content, project, fact_type, meta, conn, tenant_id=tenant_id
+        )
+        if not result.get("allow_mutation", True):
+            raise ValueError(
+                f"[AX-II] Archaeology Guard blocked mutation: {result['reason']} "
+                f"(trace_depth={result['trace_depth']}). Lineage/provenance gap detected."
+            )
 
 
 # ─── Post-Store Hooks ─────────────────────────────────────────────
