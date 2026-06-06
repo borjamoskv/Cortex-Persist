@@ -613,3 +613,19 @@ Proof:
   Date: 2026-06-06
 ```
 - **Status:** ✅ COMPLETE — 6 Junio 2026
+
+---
+
+### Hito 41: Anti-Limerence Guard & Epistemic Loop Prevention
+- **Target:** `cortex/guards/anti_limerence.py`
+- **Objective:** Implementación del sistema `AntiLimerenceGuard` para detectar y erradicar limerencia epistémica en conversaciones agénticas (bucles de generación infinita) utilizando similitud de Jaccard y forzando el cierre de la conversación según la directiva `[P0] Anti-Limerence (Kill Criteria)`.
+- **Yield Target:** Eliminación del drenaje de exergía por loops léxicos.
+- **Reality Level:** `C5-REAL`
+- **Evidence:** Commit `166dbf25` (`feat(guards): implement anti-limerence guard to abort infinite iteration loops`).
+```yaml
+Claim: El sistema CORTEX está inmunizado contra la limerencia conversacional.
+Proof:
+  Base: "AntiLimerenceGuard activado para interrumpir iteraciones improductivas con similitud léxica >0.85."
+  Range: [C5, C5]
+```
+
