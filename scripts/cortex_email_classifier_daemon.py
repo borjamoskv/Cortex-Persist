@@ -10,6 +10,7 @@ import json
 import logging
 from typing import Optional, Any
 
+
 # C5-REAL: Clasificación estructural NLP
 # Simulada a través de un router lógico para mantener aislamiento, pero reemplazable por LLM local/API
 class EmailNLPClassifier:
@@ -20,18 +21,19 @@ class EmailNLPClassifier:
         Evita responder arbitrariamente.
         """
         payload_lower = payload.lower()
-        
+
         # Filtros de exclusión (No responder)
         if "do-not-reply" in payload_lower or "no-reply" in payload_lower:
             return {"intent": "automated", "confidence": 0.99, "action": "IGNORE"}
-        
+
         # Clasificación
         if "invoice" in payload_lower or "factura" in payload_lower:
             return {"intent": "billing", "confidence": 0.85, "action": "ROUTE_TO_FINANCE"}
         elif "support" in payload_lower or "ayuda" in payload_lower:
             return {"intent": "support_request", "confidence": 0.80, "action": "GENERATE_RESPONSE"}
-            
+
         return {"intent": "unknown", "confidence": 0.50, "action": "IGNORE"}
+
 
 class CortexEmailDaemon:
     def __init__(self):
@@ -40,13 +42,15 @@ class CortexEmailDaemon:
         self.imap_server = os.getenv("CORTEX_IMAP_SERVER", "imap.gmail.com")
         self.smtp_server = os.getenv("CORTEX_SMTP_SERVER", "smtp.gmail.com")
         self.email_address = os.getenv("CORTEX_EMAIL_ADDR")
-        self.email_secret = os.getenv("CORTEX_EMAIL_OAUTH_TOKEN") # Migrado de plaintext a token OAuth2 / App Password
-        
+        self.email_secret = os.getenv(
+            "CORTEX_EMAIL_OAUTH_TOKEN"
+        )  # Migrado de plaintext a token OAuth2 / App Password
+
         # Punto 6: Evitar condiciones de carrera en logs globales
         self.log_lock = asyncio.Lock()
         self.telemetry_path = "cortex_email_telemetry.json"
-        
-        logging.basicConfig(level=logging.INFO, format='%(asctime)s - C5-REAL - %(message)s')
+
+        logging.basicConfig(level=logging.INFO, format="%(asctime)s - C5-REAL - %(message)s")
 
     async def log_telemetry(self, event: dict):
         """Escritura de logs asíncrona y segura (Thread-Safe / Async-Safe)."""
@@ -55,12 +59,12 @@ class CortexEmailDaemon:
                 # Lectura previa
                 data = []
                 if os.path.exists(self.telemetry_path):
-                    with open(self.telemetry_path, encoding='utf-8') as f:
+                    with open(self.telemetry_path, encoding="utf-8") as f:
                         data = json.load(f)
-                
+
                 data.append(event)
-                
-                with open(self.telemetry_path, 'w', encoding='utf-8') as f:
+
+                with open(self.telemetry_path, "w", encoding="utf-8") as f:
                     json.dump(data, f, ensure_ascii=False, indent=2)
             except Exception as e:
                 logging.error(f"Error escribiendo telemetría: {e}")
@@ -73,9 +77,9 @@ class CortexEmailDaemon:
             msg.get("Auto-Submitted"),
             msg.get("X-Auto-Response-Suppress"),
             msg.get("Precedence"),
-            msg.get("X-Autoreply")
+            msg.get("X-Autoreply"),
         ]
-        
+
         for h in headers:
             if h:
                 h_lower = str(h).lower()
@@ -90,7 +94,7 @@ class CortexEmailDaemon:
         if not from_header:
             return False
         name, addr = parseaddr(from_header)
-        domain = addr.split('@')[-1].lower()
+        domain = addr.split("@")[-1].lower()
         return domain == target_domain.lower()
 
     def _safe_decode_payload(self, msg: EmailMessage) -> str:
@@ -101,20 +105,20 @@ class CortexEmailDaemon:
         if msg.is_multipart():
             for part in msg.walk():
                 content_type = part.get_content_type()
-                if content_type == 'text/plain':
-                    charset = part.get_content_charset() or 'utf-8'
+                if content_type == "text/plain":
+                    charset = part.get_content_charset() or "utf-8"
                     try:
                         raw_payload = part.get_payload(decode=True)
                         if raw_payload:
-                            payload += raw_payload.decode(charset, errors='replace')
+                            payload += raw_payload.decode(charset, errors="replace")
                     except Exception:
                         pass
         else:
-            charset = msg.get_content_charset() or 'utf-8'
+            charset = msg.get_content_charset() or "utf-8"
             try:
                 raw_payload = msg.get_payload(decode=True)
                 if raw_payload:
-                    payload = raw_payload.decode(charset, errors='replace')
+                    payload = raw_payload.decode(charset, errors="replace")
             except Exception:
                 pass
         return payload
@@ -127,11 +131,11 @@ class CortexEmailDaemon:
                 mail = imaplib.IMAP4_SSL(self.imap_server)
                 mail.login(self.email_address, self.email_secret)
                 mail.select("inbox")
-                status, messages = mail.search(None, '(UNSEEN)')
-                
+                status, messages = mail.search(None, "(UNSEEN)")
+
                 raw_emails = []
                 for num in messages[0].split():
-                    _, data = mail.fetch(num, '(RFC822)')
+                    _, data = mail.fetch(num, "(RFC822)")
                     raw_emails.append(data[0][1])
                 mail.logout()
                 return raw_emails
@@ -141,37 +145,50 @@ class CortexEmailDaemon:
 
             for raw in raw_data:
                 msg = email.message_from_bytes(raw)
-                
+
                 # Reglas de descarte
                 if self._is_auto_response(msg):
-                    await self.log_telemetry({"action": "dropped_loop_risk", "subject": msg.get("Subject")})
+                    await self.log_telemetry(
+                        {"action": "dropped_loop_risk", "subject": msg.get("Subject")}
+                    )
                     continue
-                    
+
                 if not self._validate_sender_domain(msg.get("From"), "amazon.com"):
-                    await self.log_telemetry({"action": "dropped_domain_mismatch", "sender": msg.get("From")})
+                    await self.log_telemetry(
+                        {"action": "dropped_domain_mismatch", "sender": msg.get("From")}
+                    )
                     continue
 
                 # Extraer payload seguro
                 body = self._safe_decode_payload(msg)
-                
+
                 # Punto 3: Capa de Clasificación Real (NLP)
-                classification = await EmailNLPClassifier.classify_intent(msg.get("Subject", ""), body)
-                
-                await self.log_telemetry({
-                    "action": "classified",
-                    "intent": classification["intent"],
-                    "confidence": classification["confidence"],
-                    "policy": classification["action"]
-                })
-                
+                classification = await EmailNLPClassifier.classify_intent(
+                    msg.get("Subject", ""), body
+                )
+
+                await self.log_telemetry(
+                    {
+                        "action": "classified",
+                        "intent": classification["intent"],
+                        "confidence": classification["confidence"],
+                        "policy": classification["action"],
+                    }
+                )
+
                 if classification["action"] == "GENERATE_RESPONSE":
-                    await self.send_response(msg.get("From"), "Re: " + str(msg.get("Subject")), "Entendido, procediendo con la solicitud.")
-                    
+                    await self.send_response(
+                        msg.get("From"),
+                        "Re: " + str(msg.get("Subject")),
+                        "Entendido, procediendo con la solicitud.",
+                    )
+
         except Exception as e:
             logging.error(f"Error en process_inbox: {e}")
 
     async def send_response(self, to_addr: str, subject: str, body: str):
         """Envío de correo via SMTP con TLS."""
+
         def smtp_send():
             context = ssl.create_default_context()
             with smtplib.SMTP_SSL(self.smtp_server, 465, context=context) as server:
@@ -192,6 +209,7 @@ class CortexEmailDaemon:
         while True:
             await self.process_inbox()
             await asyncio.sleep(60)
+
 
 if __name__ == "__main__":
     daemon = CortexEmailDaemon()

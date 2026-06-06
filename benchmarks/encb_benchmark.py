@@ -108,7 +108,7 @@ class CortexResolver(Resolver):
                     content = str(hit)
                     c_score = 1.0
                 console.print(f"  -> hit content={content!r} score={c_score}")
-                
+
                 # Continuous calibration transform: map consensus_score [0.0, 2.0] to [0.05, 0.95]
                 conf = 0.05 + 0.90 * (c_score / 2.0)
                 return content, conf

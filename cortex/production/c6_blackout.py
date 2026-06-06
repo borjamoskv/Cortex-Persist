@@ -5,11 +5,13 @@ import uuid
 import time
 from pathlib import Path
 
+
 class C6BlackoutAudit:
     """
     Auditoría Ontológica del Ledger.
     Diseñado para probar la Inmortalidad Causal y el Historical Consistency Index (HCI).
     """
+
     def __init__(self, wal_dir, snapshot_dir):
         self.wal_dir = Path(wal_dir)
         self.snapshot_dir = Path(snapshot_dir)
@@ -17,7 +19,8 @@ class C6BlackoutAudit:
     def c6_1_wal_schrodinger(self):
         """C6.1 - WAL Schrodinger Attack: Truncate WAL mid-commit."""
         wal_files = list(self.wal_dir.glob("*.wal"))
-        if not wal_files: return
+        if not wal_files:
+            return
         wal_path = random.choice(wal_files)
         size = wal_path.stat().st_size
         if size > 10:
@@ -30,7 +33,7 @@ class C6BlackoutAudit:
         impossible_payloads = [
             {"tick": 981, "last_snapshot_tick": 1042},
             {"freeze_count": 0, "recovery_count": 17},
-            {"entropy": -4.7}
+            {"entropy": -4.7},
         ]
         snap_path = self.snapshot_dir / f"impossible_{int(time.time())}.snap"
         with open(snap_path, "w") as f:
@@ -76,7 +79,7 @@ class C6BlackoutAudit:
             # 4. Monotonía temporal preservada.
             history_valid = kernel.verify_ledger_integrity()
             single_truth = not kernel.detect_forks()
-            
+
             if history_valid and single_truth:
                 return 1.0
         except Exception:

@@ -147,7 +147,7 @@ class TestTransaction:
             import logging
 
             pass
-# Expected
+        # Expected
 
         conn = sqlite3.connect(writer._db_path)
         cursor = conn.execute("SELECT COUNT(*) FROM items WHERE name = 'rollback_me'")

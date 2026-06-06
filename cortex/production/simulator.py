@@ -1,5 +1,6 @@
 import random
 
+
 class LoadScenario:
     def __init__(self, rps, failure_rate, entropy_spike):
         self.rps = rps
@@ -14,15 +15,22 @@ def generate_load(duration_seconds):
             LoadScenario(
                 rps=random.randint(10, 5000),
                 failure_rate=random.random(),
-                entropy_spike=random.random() * 2
+                entropy_spike=random.random() * 2,
             )
         )
     return scenarios
 
 
-class TimeoutError(Exception): pass
-class MemoryOverflow(Exception): pass
-class LedgerCorruptionSim(Exception): pass
+class TimeoutError(Exception):
+    pass
+
+
+class MemoryOverflow(Exception):
+    pass
+
+
+class LedgerCorruptionSim(Exception):
+    pass
 
 
 def inject_faults(request=None):
@@ -40,17 +48,15 @@ def stress_test(system, scenarios):
         try:
             inject_faults()
             response = system.handle_load(s)
-            results.append({
-                "latency": getattr(response, "latency", 0),
-                "error": False,
-                "exergy": getattr(response, "exergy", 0)
-            })
+            results.append(
+                {
+                    "latency": getattr(response, "latency", 0),
+                    "error": False,
+                    "exergy": getattr(response, "exergy", 0),
+                }
+            )
         except Exception:
-            results.append({
-                "latency": None,
-                "error": True,
-                "exergy": -1
-            })
+            results.append({"latency": None, "error": True, "exergy": -1})
     return results
 
 

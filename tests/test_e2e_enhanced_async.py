@@ -65,7 +65,8 @@ class TestAsyncPipelineEnhanced:
                 import logging
 
                 pass
-# Also valid
+
+        # Also valid
 
         asyncio.run(_test())
 

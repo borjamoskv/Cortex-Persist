@@ -9,11 +9,11 @@ from cortex.observability.fdf import FailureField, Particle, simulate_field
 from cortex.observability.caf import select_next, lagrangian
 import numpy as np
 import time
-import os
 
 CRONOS_LOG = os.path.expanduser("~/.gemini/config/skills/_metrics/cronos_memory.jsonl")
 META_PARAMS_LOG = os.path.expanduser("~/.gemini/config/skills/_metrics/meta_params.json")
 WORKFLOWS_DIR = os.path.expanduser("~/.agents/workflows")
+
 
 @dataclass
 class MetaParams:
@@ -21,6 +21,7 @@ class MetaParams:
     learning_rate: float = 0.02
     epsilon: float = 0.05
     semantic_risk_weight: float = 0.2
+
 
 @dataclass
 class TaskStats:
@@ -31,6 +32,7 @@ class TaskStats:
     runtime_var: float
     confidence: float = 1.0
 
+
 @dataclass
 class ExecutionTrace:
     task: str
@@ -38,6 +40,7 @@ class ExecutionTrace:
     real_cost: float
     real_exergy: float
     fdf_shift: float
+
 
 def inject_reality_noise(state_vec: np.ndarray) -> np.ndarray:
     """Grounding injection: Evita feedback loop de realidad simulada."""
@@ -49,13 +52,15 @@ def inject_reality_noise(state_vec: np.ndarray) -> np.ndarray:
     runtime_noise = np.full_like(state_vec, load)
     return state_vec + 0.05 * git_entropy + 0.02 * runtime_noise
 
+
 class ExergyEngine:
     """
     Core engine for CORTEX Adaptive Runtime.
     """
+
     def __init__(self):
         from cortex.observability.ouroboros import OuroborosEngine
-        
+
         self.history = self._load_cronos_history()
         self.genomes = self._extract_workflow_genomes()
         self.meta = self._load_meta_params()
@@ -63,22 +68,26 @@ class ExergyEngine:
         self.ouroboros = OuroborosEngine()
 
     def _build_failure_field(self):
-        bad_runs = [r for r in self.history if r.get('outcome_score', 1.0) < 0.4 or not r.get('success', True)]
+        bad_runs = [
+            r
+            for r in self.history
+            if r.get("outcome_score", 1.0) < 0.4 or not r.get("success", True)
+        ]
         embeddings = []
         for r in bad_runs:
-            wf_name = r.get('workflow')
+            wf_name = r.get("workflow")
             stats = self.get_task_stats(wf_name)
             s = SystemState(
-                git_diff=r.get('git_diff', 'unknown'),
-                ast_hash=r.get('ast_hash', 'unknown'),
+                git_diff=r.get("git_diff", "unknown"),
+                ast_hash=r.get("ast_hash", "unknown"),
                 active_tasks=[wf_name],
-                error_log=r.get('error_log', [])
+                error_log=r.get("error_log", []),
             )
             state_vec = encode_state(s)
             task_vec = encode_task(stats)
             x = np.concatenate([task_vec, state_vec])
             embeddings.append(x)
-            
+
         field = FailureField()
         if embeddings:
             field.fit(np.array(embeddings))
@@ -87,7 +96,7 @@ class ExergyEngine:
     def _load_meta_params(self) -> MetaParams:
         if os.path.exists(META_PARAMS_LOG):
             try:
-                with open(META_PARAMS_LOG, 'r', encoding='utf-8') as f:
+                with open(META_PARAMS_LOG, encoding="utf-8") as f:
                     data = json.load(f)
                     return MetaParams(**data)
             except Exception:
@@ -96,121 +105,133 @@ class ExergyEngine:
 
     def _save_meta_params(self):
         os.makedirs(os.path.dirname(META_PARAMS_LOG), exist_ok=True)
-        with open(META_PARAMS_LOG, 'w', encoding='utf-8') as f:
+        with open(META_PARAMS_LOG, "w", encoding="utf-8") as f:
             json.dump(asdict(self.meta), f, indent=2)
 
-    def _load_cronos_history(self) -> List[Dict[str, Any]]:
+    def _load_cronos_history(self) -> list[dict[str, Any]]:
         records = []
         if os.path.exists(CRONOS_LOG):
-            with open(CRONOS_LOG, 'r', encoding='utf-8') as f:
+            with open(CRONOS_LOG, encoding="utf-8") as f:
                 for line in f:
                     if line.strip():
                         records.append(json.loads(line))
         return records
 
-    def _extract_workflow_genomes(self) -> Dict[str, List[str]]:
+    def _extract_workflow_genomes(self) -> dict[str, list[str]]:
         """Extracts 'genes' (tools, keywords, paradigms) from workflows."""
         genomes = {}
         if not os.path.exists(WORKFLOWS_DIR):
             return genomes
-            
+
         for file in os.listdir(WORKFLOWS_DIR):
             if not file.endswith(".md"):
                 continue
             wf_name = file.replace(".md", "")
             genes = set()
-            with open(os.path.join(WORKFLOWS_DIR, file), 'r', encoding='utf-8') as f:
+            with open(os.path.join(WORKFLOWS_DIR, file), encoding="utf-8") as f:
                 content = f.read().lower()
-                
+
                 # Gene extraction heuristics
-                if "python" in content or "script" in content: genes.add("python")
-                if "sql" in content or "database" in content or "sqlite" in content: genes.add("sql")
-                if "mcp" in content: genes.add("mcp")
-                if "search" in content or "brave" in content: genes.add("search")
-                if "browser" in content or "scraping" in content: genes.add("browser")
-                if "github" in content or "pr" in content: genes.add("github")
-                if "visual" in content or "ui" in content or "css" in content: genes.add("frontend")
-                if "plan" in content or "architecture" in content: genes.add("planning")
-                
+                if "python" in content or "script" in content:
+                    genes.add("python")
+                if "sql" in content or "database" in content or "sqlite" in content:
+                    genes.add("sql")
+                if "mcp" in content:
+                    genes.add("mcp")
+                if "search" in content or "brave" in content:
+                    genes.add("search")
+                if "browser" in content or "scraping" in content:
+                    genes.add("browser")
+                if "github" in content or "pr" in content:
+                    genes.add("github")
+                if "visual" in content or "ui" in content or "css" in content:
+                    genes.add("frontend")
+                if "plan" in content or "architecture" in content:
+                    genes.add("planning")
+
             genomes[wf_name] = list(genes)
         return genomes
 
-    def get_entropy_drift(self, workflow: str) -> Dict[str, Any]:
+    def get_entropy_drift(self, workflow: str) -> dict[str, Any]:
         """Nivel 2: Detects entropy drift based on recent exergy vs historical."""
-        wf_history = [r for r in self.history if r.get('workflow') == workflow]
+        wf_history = [r for r in self.history if r.get("workflow") == workflow]
         if len(wf_history) < 3:
             return {"status": "INSUFFICIENT_DATA"}
-            
-        scores = [r.get('exergy_score', 0) for r in wf_history]
+
+        scores = [r.get("exergy_score", 0) for r in wf_history]
         recent = scores[-1]
         baseline = scores[:-1]
-        
+
         avg = statistics.mean(baseline)
         std = statistics.stdev(baseline) if len(baseline) > 1 else 0
-        
+
         deviation_pct = ((recent - avg) / avg) * 100 if avg > 0 else 0
-        
+
         # If recent is > 1.5 standard deviations below the mean, it's degraded
         status = "NOMINAL"
         if std > 0 and recent < avg - (1.5 * std):
             status = "DEGRADED"
         elif deviation_pct < -30:
             status = "DEGRADED"
-            
+
         return {
             "workflow": workflow,
             "expected_exergy": round(avg, 4),
             "actual_exergy": round(recent, 4),
             "deviation_pct": round(deviation_pct, 1),
-            "status": status
+            "status": status,
         }
 
     def get_task_stats(self, workflow: str) -> TaskStats:
         """Calculates stable statistical moments for a workflow."""
-        wf_history = [r for r in self.history if r.get('workflow') == workflow]
+        wf_history = [r for r in self.history if r.get("workflow") == workflow]
         if len(wf_history) < 2:
             return TaskStats(workflow, 0.06, 0.0, 15.0, 0.0, 0.1)
-            
-        runtimes = [r.get('actual_minutes', 15.0) for r in wf_history]
-        exergies = [r.get('exergy_score', 0.06) for r in wf_history]
-        
+
+        runtimes = [r.get("actual_minutes", 15.0) for r in wf_history]
+        exergies = [r.get("exergy_score", 0.06) for r in wf_history]
+
         exergy_mean = statistics.mean(exergies)
         exergy_var = statistics.variance(exergies) if len(exergies) > 1 else 0.0
         runtime_mean = statistics.mean(runtimes)
         runtime_var = statistics.variance(runtimes) if len(runtimes) > 1 else 0.0
-        
+
         # Confidence decays if variance is high relative to mean
         cv = (exergy_var**0.5) / (exergy_mean + 1e-6)
         confidence = max(0.1, 1.0 - min(cv, 0.9))
-        
+
         return TaskStats(workflow, exergy_mean, exergy_var, runtime_mean, runtime_var, confidence)
 
-    def lyapunov_scheduler(self, candidate_workflows: List[str], state: SystemState = None) -> List[Dict[str, Any]]:
+    def lyapunov_scheduler(
+        self, candidate_workflows: list[str], state: SystemState = None
+    ) -> list[dict[str, Any]]:
         """Nivel 8: Multi-Agent Field Physics. Descenso de energía global de partículas."""
         if not candidate_workflows:
             return []
-            
+
         # 1. Create Particles
         particles = []
-        state_vec = encode_state(state) if state else np.zeros(32) # Dummy state
-        
+        state_vec = encode_state(state) if state else np.zeros(32)  # Dummy state
+
         for wf in candidate_workflows:
             stats = self.get_task_stats(wf)
             task_vec = encode_task(stats)
-            
+
             # Position is concatenated task and state
             position = np.concatenate([task_vec, state_vec])
             velocity = np.zeros_like(position)
             mass = 1.0 / (stats.exergy_mean + 1e-6)
-            
-            particles.append(Particle(
-                task_name=wf, 
-                position=position, 
-                velocity=velocity, 
-                mass=mass,
-                original_stats=stats
-            ))
-            
+
+            particles.append(
+                Particle(
+                    task_name=wf,
+                    position=position,
+                    velocity=velocity,
+                    mass=mass,
+                    original_stats=stats,
+                )
+            )
+
         # 2. Lagrangian Action Minimization (Variational Monte Carlo)
         if self.failure_field.fitted:
             # First, simulate field just briefly to acquire history/memory gravity
@@ -218,137 +239,160 @@ class ExergyEngine:
             # and let CAF just use the static histories if we persist them.
             # For now, simulate briefly to build the CTC 'history' curvature.
             simulate_field(particles, self.failure_field, steps=10, dt=0.1)
-            
+
         ordered_particles = select_next(particles, state_vec, self.failure_field, self.meta)
-            
+
         # 3. Collapse to final Lagrangian action states
         scored = []
         for p in ordered_particles:
             L = lagrangian(p, state_vec, self.meta, self.failure_field)
-            dt = p.original_stats.runtime_mean if getattr(p.original_stats, 'runtime_mean', 0) > 0 else 1.0
+            dt = (
+                p.original_stats.runtime_mean
+                if getattr(p.original_stats, "runtime_mean", 0) > 0
+                else 1.0
+            )
             S = -L * dt
-            
-            scored.append({
-                "workflow": p.task_name,
-                "expected_exergy": p.original_stats.exergy_mean,
-                "exergy_variance": p.original_stats.exergy_var,
-                "expected_runtime": p.original_stats.runtime_mean,
-                "action_cost": round(S, 4),
-                "priority_score": round(-S, 4) # For CLI sorting compatibility (higher is better)
-            })
-            
+
+            scored.append(
+                {
+                    "workflow": p.task_name,
+                    "expected_exergy": p.original_stats.exergy_mean,
+                    "exergy_variance": p.original_stats.exergy_var,
+                    "expected_runtime": p.original_stats.runtime_mean,
+                    "action_cost": round(S, 4),
+                    "priority_score": round(
+                        -S, 4
+                    ),  # For CLI sorting compatibility (higher is better)
+                }
+            )
+
         # select_next already sorted them by action cost, so scored is in correct order
         return scored
-        
-    def autonomous_field_daemon(self, horizon: int = 5, epsilon_path: float = 0.1, recompute_fdf_min: int = 10, max_cycles: int = 5):
+
+    def autonomous_field_daemon(
+        self,
+        horizon: int = 5,
+        epsilon_path: float = 0.1,
+        recompute_fdf_min: int = 10,
+        max_cycles: int = 5,
+    ):
         """
-        AEFM: Autonomous Exergy Field Mode. 
+        AEFM: Autonomous Exergy Field Mode.
         Ciclo infinito de: observe -> deform field -> simulate futures -> collapse action -> execute -> update geometry
         """
         import logging
+
         log = logging.getLogger("CORTEX-AEFM")
         log.info("🌌 Iniciando Autonomous Exergy Field Mode (AEFM)")
-        
+
         last_fdf = time.time()
         candidates = list(self.genomes.keys())
-        
+
         for cycle in range(max_cycles):
             log.info(f"⚡ [Cycle {cycle}] Observer & Reality Grounding...")
-            
+
             if time.time() - last_fdf > recompute_fdf_min * 60:
                 log.info("🔄 Recomputing Failure Density Field (Geometry Update)...")
                 self.failure_field = self._build_failure_field()
                 last_fdf = time.time()
-                
+
             # 1. Observe & Noise (Grounding)
-            dummy_state = SystemState(git_diff="daemon", ast_hash="daemon", active_tasks=[], error_log=[])
+            dummy_state = SystemState(
+                git_diff="daemon", ast_hash="daemon", active_tasks=[], error_log=[]
+            )
             base_state_vec = encode_state(dummy_state)
             grounded_state_vec = inject_reality_noise(base_state_vec)
-            
+
             # 2. Simulate Futures & Collapse Action
-            scored = self.lyapunov_scheduler(candidates, dummy_state) # lyapunov_scheduler now uses CAF under the hood
+            scored = self.lyapunov_scheduler(
+                candidates, dummy_state
+            )  # lyapunov_scheduler now uses CAF under the hood
             if not scored:
                 break
-                
+
             winner = scored[0]
-            predicted_action = winner['action_cost']
-            
-            log.info(f"🔮 Collapsed future trajectory. Winner: {winner['workflow']} (Predicted Action: {predicted_action})")
-            
+            predicted_action = winner["action_cost"]
+
+            log.info(
+                f"🔮 Collapsed future trajectory. Winner: {winner['workflow']} (Predicted Action: {predicted_action})"
+            )
+
             # 3. "Execute" & Measure Reality (Mock execution for now)
             start_time = time.time()
-            time.sleep(1) # Fake run
+            time.sleep(1)  # Fake run
             real_runtime = (time.time() - start_time) / 60.0
-            
+
             # 4. Telemetry: Update Geometry
             # En un entorno real, exergy se extraería del output. Asumimos fluctuación.
-            real_exergy = winner['expected_exergy'] * np.random.uniform(0.8, 1.2)
-            
+            real_exergy = winner["expected_exergy"] * np.random.uniform(0.8, 1.2)
+
             trace = ExecutionTrace(
-                task=winner['workflow'],
+                task=winner["workflow"],
                 predicted_action=predicted_action,
                 real_cost=real_runtime,
                 real_exergy=real_exergy,
-                fdf_shift=np.abs(predicted_action - real_exergy)
+                fdf_shift=np.abs(predicted_action - real_exergy),
             )
-            
+
             # Ouroboros Engine Injection
             self.ouroboros.inject_telemetry(trace)
-            
+
             log.info(f"🪐 Telemetry Tracked: {trace}")
-            
+
             safe_signals = self.ouroboros.get_safe_optimization_signal()
             if safe_signals:
                 log.info(f"🧬 Delayed Economic Signals Active: {safe_signals}")
-                
+
             log.info("---")
             time.sleep(2)
-            
+
         log.info("🌌 AEFM Cycle Limit Reached (Safe Stop).")
 
-    def genome_analysis(self) -> Dict[str, Dict[str, float]]:
+    def genome_analysis(self) -> dict[str, dict[str, float]]:
         """Nivel 5: Analyze exergy across isolated genes instead of monolithic workflows."""
         gene_stats = {}
-        
+
         for record in self.history:
-            wf = record.get('workflow')
-            exergy = record.get('exergy_score', 0)
+            wf = record.get("workflow")
+            exergy = record.get("exergy_score", 0)
             genes = self.genomes.get(wf, [])
-            
+
             for gene in genes:
                 if gene not in gene_stats:
                     gene_stats[gene] = []
                 gene_stats[gene].append(exergy)
-                
+
         results = {}
         for gene, scores in gene_stats.items():
             results[gene] = {
                 "average_exergy": round(statistics.mean(scores), 4),
-                "occurrences": len(scores)
+                "occurrences": len(scores),
             }
-            
-        # Sort by average exergy
-        return dict(sorted(results.items(), key=lambda item: item[1]["average_exergy"], reverse=True))
 
-    def evaluate_counterfactual(self, chosen_wf: str, discarded_wfs: List[str]) -> Dict[str, Any]:
+        # Sort by average exergy
+        return dict(
+            sorted(results.items(), key=lambda item: item[1]["average_exergy"], reverse=True)
+        )
+
+    def evaluate_counterfactual(self, chosen_wf: str, discarded_wfs: list[str]) -> dict[str, Any]:
         """Nivel 6: Calculate missed opportunity (Counterfactual Ledger)."""
         # Find the actual exergy achieved by the chosen workflow
-        wf_history = [r for r in self.history if r.get('workflow') == chosen_wf]
-        actual_exergy = wf_history[-1].get('exergy_score', 0) if wf_history else 0
-        
+        wf_history = [r for r in self.history if r.get("workflow") == chosen_wf]
+        actual_exergy = wf_history[-1].get("exergy_score", 0) if wf_history else 0
+
         # Predict exergy for discarded workflows based on history prior to the chosen run
         # (For simplicity here, we just use current prediction engine)
         best_discarded_exergy = 0
         best_discarded_wf = None
-        
+
         for wf in discarded_wfs:
             stats = self.get_task_stats(wf)
             if stats.exergy_mean > best_discarded_exergy:
                 best_discarded_exergy = stats.exergy_mean
                 best_discarded_wf = wf
-                
+
         missed_opportunity = best_discarded_exergy - actual_exergy
-        
+
         return {
             "type": "counterfactual_miss" if missed_opportunity > 0 else "optimal",
             "chosen_workflow": chosen_wf,
@@ -357,88 +401,115 @@ class ExergyEngine:
             "alternative_expected_exergy": round(best_discarded_exergy, 4),
             "miss_cost": round(missed_opportunity, 4),
             "task_variance": self.get_task_stats(chosen_wf).exergy_var,
-            "optimal_decision": actual_exergy >= best_discarded_exergy
+            "optimal_decision": actual_exergy >= best_discarded_exergy,
         }
 
-    def evolve(self, window_size: int = 1000) -> Dict[str, Any]:
+    def evolve(self, window_size: int = 1000) -> dict[str, Any]:
         """Update Meta-Lyapunov alpha_risk based on counterfactual historical errors."""
         ledger_events = []
-        
+
         # Generate counterfactuals from history simulating an evaluation context
         # (For simplicity, evaluate each past run against the other active candidates)
-        active_wfs = list(set([r.get('workflow') for r in self.history]))
-        recent_history = self.history[-window_size:] if len(self.history) > window_size else self.history
-        
+        active_wfs = list(set([r.get("workflow") for r in self.history]))
+        recent_history = (
+            self.history[-window_size:] if len(self.history) > window_size else self.history
+        )
+
         for record in recent_history:
-            wf = record.get('workflow')
+            wf = record.get("workflow")
             discarded = [w for w in active_wfs if w != wf]
             cf = self.evaluate_counterfactual(wf, discarded)
             ledger_events.append(cf)
-            
+
         total_error = 0.0
         grad = 0.0
         miss_count = 0
-        
+
         for event in ledger_events:
             if event["type"] != "counterfactual_miss":
                 continue
-                
+
             error = event["miss_cost"]
             variance = event["task_variance"]
-            
+
             total_error += error
             # If high variance caused a miss, alpha risk needs to increase
             grad += error * variance
             miss_count += 1
-            
+
         old_alpha = self.meta.alpha_risk
-        
+
         # Gradient update
         self.meta.alpha_risk += self.meta.learning_rate * grad
-        self.meta.alpha_risk *= 0.999 # Entropy bleed
+        self.meta.alpha_risk *= 0.999  # Entropy bleed
         self.meta.alpha_risk = max(0.0, min(self.meta.alpha_risk, 1.0))
-        
+
         self._save_meta_params()
-        
+
         return {
             "old_alpha": old_alpha,
             "new_alpha": self.meta.alpha_risk,
             "counterfactual_loss": total_error,
-            "miss_count": miss_count
+            "miss_count": miss_count,
         }
+
 
 if __name__ == "__main__":
     engine = ExergyEngine()
-    
+
     print("--- CORTEX ADAPTIVE RUNTIME: EXERGY ENGINE ---")
     print(f"Loaded {len(engine.history)} historical records.")
-    
+
     print("\n[NIVEL 2] Entropy Drift Check (latest run):")
-    workflows_run = list(set([r['workflow'] for r in engine.history]))
+    workflows_run = list(set([r["workflow"] for r in engine.history]))
     for wf in workflows_run[:5]:
         drift = engine.get_entropy_drift(wf)
         if drift.get("status") == "DEGRADED":
-            print(f" ⚠️  {wf} is DEGRADED! Expected: {drift['expected_exergy']}, Actual: {drift['actual_exergy']} ({drift['deviation_pct']}%)")
+            print(
+                f" ⚠️  {wf} is DEGRADED! Expected: {drift['expected_exergy']}, Actual: {drift['actual_exergy']} ({drift['deviation_pct']}%)"
+            )
         elif drift.get("status") == "NOMINAL":
-            print(f" ✅ {wf} is NOMINAL. (Expected: {drift['expected_exergy']}, Actual: {drift['actual_exergy']})")
-            
-    print("\n[NIVEL 4] Lyapunov Scheduler (Candidate Pool: cron_health_check, memory_reconciliation, ingest_pipeline, vector_compaction, adversarial_simulation):")
-    candidates = ["cron_health_check", "memory_reconciliation", "ingest_pipeline", "vector_compaction", "adversarial_simulation"]
+            print(
+                f" ✅ {wf} is NOMINAL. (Expected: {drift['expected_exergy']}, Actual: {drift['actual_exergy']})"
+            )
+
+    print(
+        "\n[NIVEL 4] Lyapunov Scheduler (Candidate Pool: cron_health_check, memory_reconciliation, ingest_pipeline, vector_compaction, adversarial_simulation):"
+    )
+    candidates = [
+        "cron_health_check",
+        "memory_reconciliation",
+        "ingest_pipeline",
+        "vector_compaction",
+        "adversarial_simulation",
+    ]
     ranked = engine.lyapunov_scheduler(candidates)
     for r in ranked:
-        print(f" - {r['workflow']}: Priority {r['priority_score']} (Expected Exergy: {r['expected_exergy']}, Runtime: {r['expected_runtime']}m)")
-        
+        print(
+            f" - {r['workflow']}: Priority {r['priority_score']} (Expected Exergy: {r['expected_exergy']}, Runtime: {r['expected_runtime']}m)"
+        )
+
     print("\n[NIVEL 5] Workflow Genome Analysis (Exergy per Gene):")
     genes = engine.genome_analysis()
     for g, stats in list(genes.items())[:5]:
-        print(f" - Gene [{g}]: Avg Exergy {stats['average_exergy']} (Found in {stats['occurrences']} runs)")
-        
+        print(
+            f" - Gene [{g}]: Avg Exergy {stats['average_exergy']} (Found in {stats['occurrences']} runs)"
+        )
+
     print("\n[NIVEL 6] Counterfactual Ledger Example:")
     # Assume the agent chose "adversarial_simulation" because a human demanded it, ignoring the scheduler.
-    cf = engine.evaluate_counterfactual("adversarial_simulation", ["cron_health_check", "memory_reconciliation"])
-    print(f" Decisión tomada: {cf['chosen_workflow']} -> {cf['actual_exergy']} exergía real extraída")
-    print(f" Mejor alternativa según Lyapunov: {cf['best_alternative']} -> {cf['alternative_expected_exergy']} exergía esperada")
-    if cf['optimal_decision']:
+    cf = engine.evaluate_counterfactual(
+        "adversarial_simulation", ["cron_health_check", "memory_reconciliation"]
+    )
+    print(
+        f" Decisión tomada: {cf['chosen_workflow']} -> {cf['actual_exergy']} exergía real extraída"
+    )
+    print(
+        f" Mejor alternativa según Lyapunov: {cf['best_alternative']} -> {cf['alternative_expected_exergy']} exergía esperada"
+    )
+    if cf["optimal_decision"]:
         print(" -> Decision was OPTIMAL.")
     else:
-        print(f" -> ERROR TÁCTICO. Missed opportunity (Coste de oportunidad): {cf['missed_opportunity']}")
+        print(
+            f" -> ERROR TÁCTICO. Missed opportunity (Coste de oportunidad): {cf['missed_opportunity']}"
+        )

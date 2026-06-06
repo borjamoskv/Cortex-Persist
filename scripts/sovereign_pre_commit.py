@@ -116,7 +116,7 @@ def check_file_contents(files: list[str], *, source: str, untracked_files: set[s
             import logging
 
             pass
-# Binary files or access errors - skip
+    # Binary files or access errors - skip
     return violations
 
 

@@ -42,7 +42,7 @@ async def test_isolated_worktree_exception_cleanup(tmp_path):
         import logging
 
         pass
-# Catch the expected error
+    # Catch the expected error
 
     # Aniquilación termodinámica confirmada
     assert worktree_ref is not None

@@ -256,7 +256,7 @@ class SovereignScheduler:
                 import logging
 
                 pass
-# normal tick timeout
+        # normal tick timeout
 
         logger.info("SovereignScheduler stopped")
 

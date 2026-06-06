@@ -313,18 +313,20 @@ def create_mcp_server(config: MCPServerConfig | None = None) -> "FastMCP":  # ty
         _register_ledger_tool(mcp, ctx)
         register_trust_tools(mcp, ctx)
         register_mega_tools(mcp, ctx)
-        
+
         from cortex.mcp.hilbert_tools import register_hilbert_tools
+
         register_hilbert_tools(mcp, ctx)
-        
+
         register_genesis_tools(mcp, ctx)
         register_health_tools(mcp, ctx)
         register_music_tools(mcp)
         register_singularity_tools(mcp)
-        
+
         from cortex.mcp.pipeline_tools import register_pipeline_tools
+
         register_pipeline_tools(mcp, ctx)
-        
+
         register_apollo_tools(mcp)
 
     return mcp

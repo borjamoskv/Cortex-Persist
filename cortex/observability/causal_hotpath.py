@@ -1,10 +1,12 @@
 import math
 import time
 from dataclasses import dataclass
-from typing import Callable, Dict, Tuple
+from typing import Dict, Tuple
+from collections.abc import Callable
 import logging
 
 logger = logging.getLogger("cortex.hotpath")
+
 
 @dataclass
 class CausalEdge:
@@ -14,14 +16,15 @@ class CausalEdge:
     latency: float
     transitions: int
 
+
 class CausalHotPathInjector:
     def __init__(self, threshold: float = 60.0, lambda_decay: float = 0.5, saturation_cap: int = 5):
         self.threshold = threshold
         self.lambda_decay = lambda_decay
         self.saturation_cap = saturation_cap
-        self.handlers: Dict[Tuple[str, str], Callable] = {}
+        self.handlers: dict[tuple[str, str], Callable] = {}
         # Thermal tracking: stores (activation_count, last_activation_time)
-        self.thermal_state: Dict[Tuple[str, str], Tuple[int, float]] = {}
+        self.thermal_state: dict[tuple[str, str], tuple[int, float]] = {}
 
     def register(self, source: str, target: str, handler: Callable):
         """Register a prewarm handler for a specific edge."""
@@ -39,7 +42,7 @@ class CausalHotPathInjector:
 
         # Update and decay thermal state
         activations, last_time = self.thermal_state.get(key, (0, 0.0))
-        
+
         # Linear decay of activations over time (1 activation cools down every 5 minutes)
         time_delta = now - last_time
         cooldown = int(time_delta / 300.0)
@@ -50,7 +53,9 @@ class CausalHotPathInjector:
 
         # Thermal saturation ceiling
         if activations >= self.saturation_cap:
-            logger.warning(f"🧯 [CHPI] Thermal saturation reached for {key}. Subgraph activation capped.")
+            logger.warning(
+                f"🧯 [CHPI] Thermal saturation reached for {key}. Subgraph activation capped."
+            )
             return None
 
         # Lyapunov stability proxy equation (Base Score)
@@ -62,7 +67,9 @@ class CausalHotPathInjector:
 
         if dampened_score >= self.threshold and key in self.handlers:
             self.thermal_state[key] = (activations + 1, now)
-            logger.info(f"🔥 [CHPI] Thermal threshold breached ({dampened_score:.1f} >= {self.threshold}). Activating anticipatory hook.")
+            logger.info(
+                f"🔥 [CHPI] Thermal threshold breached ({dampened_score:.1f} >= {self.threshold}). Activating anticipatory hook."
+            )
             return self.handlers[key](edge)
 
         # Update state even if not breached so cooldowns keep running properly from the last check

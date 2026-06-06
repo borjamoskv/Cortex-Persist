@@ -2,23 +2,24 @@ import numpy as np
 from typing import List, Tuple
 from cortex.interfaces.memory_provider import MemoryNode
 
+
 class CoherenceScorer:
     """
     Measures if the subgraph makes 'human sense'.
     coherence = density(causal_edges) + embedding_consistency - temporal_noise - anti_coherence
     """
-    
+
     @staticmethod
-    def score(nodes: List[MemoryNode], edges: List[Tuple[str, str, float]]) -> float:
+    def score(nodes: list[MemoryNode], edges: list[tuple[str, str, float]]) -> float:
         if not nodes:
             return 0.0
-            
+
         N = len(nodes)
-        
+
         # 1. Edge density
         possible_edges = N * (N - 1)
         density = len(edges) / possible_edges if possible_edges > 0 else 1.0
-        
+
         # 2. Embedding consistency (average pairwise cosine similarity)
         consistency = 0.0
         if N > 1:
@@ -39,7 +40,7 @@ class CoherenceScorer:
                 consistency = sum(sims) / len(sims)
         else:
             consistency = 1.0
-            
+
         # 3. Temporal noise (variance in timestamps)
         temporal_noise = 0.0
         if N > 1:
@@ -49,15 +50,15 @@ class CoherenceScorer:
                 mean_t = np.mean(timestamps)
                 temporal_noise = float(std_dev / mean_t) if mean_t > 0 else 0.0
                 temporal_noise = min(temporal_noise, 0.5)
-                
+
         # 4. Anti-coherence term (detects overly perfect echo topology)
         # If consistency is too high (> 0.90) and density is very high, it's likely a hallucinated loop.
         anti_coherence = 0.0
         if consistency > 0.90 and density > 0.8:
             # The more "perfect" it looks beyond 0.90, the harder we punish it.
-            anti_coherence = (consistency - 0.90) * 5.0 # Max penalty of 0.5
-            
+            anti_coherence = (consistency - 0.90) * 5.0  # Max penalty of 0.5
+
         coherence = density + consistency - temporal_noise - anti_coherence
-        
+
         # Normalize to [0, 1] roughly
         return max(0.0, min(1.0, coherence / 2.0))

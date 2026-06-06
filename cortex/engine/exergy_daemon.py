@@ -4,11 +4,13 @@ from .bifurcation_engine import ExergyBifurcationEngine
 
 logger = logging.getLogger(__name__)
 
+
 class ExergyDaemon:
     """
     [C5-REAL] Daemon residente de colapso termodinámico.
     Vigila el multiverso causal en background y aplica guadaña sobre ramas de entropía negativa o bloqueo esquizofrénico.
     """
+
     def __init__(self, bifurcation_engine: ExergyBifurcationEngine, scan_interval: int = 10):
         self.engine = bifurcation_engine
         self.interval = scan_interval
@@ -21,13 +23,13 @@ class ExergyDaemon:
             try:
                 # 1. Evaluar Fitness
                 multiverse_state = await self.engine.evaluate_multiverse()
-                
+
                 # 2. Guadaña termodinámica
                 await self.engine.prune_dead_branches(multiverse_state)
-                
+
             except Exception as e:
                 logger.error(f"[ExergyDaemon] Fallo en colapso causal: {e}")
-            
+
             await asyncio.sleep(self.interval)
 
     def start(self):
