@@ -88,15 +88,10 @@ class CausalGraph:
                     continue
                 visited.add(eid)
 
-                if eid != start_id:
-                    if collect_roots_only:
-                        if not self._backward.get(eid):
-                            result.append(eid)
-                    else:
-                        result.append(eid)
+                if eid != start_id and (not collect_roots_only or not self._backward.get(eid)):
+                    result.append(eid)
 
-                neighbors = graph.get(eid, [])
-                for link in neighbors:
+                for link in graph.get(eid, []):
                     nxt = link.effect_id if forward else link.cause_id
                     if nxt not in visited:
                         next_queue.append(nxt)

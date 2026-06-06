@@ -46,7 +46,8 @@ except ImportError:
 
     class DummyErrorGhostPipeline:
         def capture_sync(self, *args: Any, **kwargs: Any) -> None:
-            pass
+            """Dummy implementation of capture_sync for error tracking when real pipeline is unavailable."""
+            return None
 
     ErrorGhostPipeline = DummyErrorGhostPipeline  # type: ignore[assignment, misc]
 
