@@ -1,15 +1,17 @@
 # [C5-REAL] Exergy-Maximized
-"""CORTEX v6+ - Semantic Compression (MDL-based Fact Fusion).
+# NOTE: This module is the Semantic MDL Compressor (batch fact fusion).
+#       For the async L1→L2 overflow pipeline, see memory_compression.py.
+"""CORTEX v6+ — Semantic Compression (MDL-based Fact Fusion).
 
-Strategy #5: Compress N similar engrams into a single dense engram.
+Stateless, synchronous compressor for merging N similar engrams into one
+dense engram using the Minimum Description Length (MDL) principle.
 
-50 engrams × 200 tokens = 10,000 tokens
-→ 1 compressed × 500 tokens = 500 tokens
-→ 95% reduction, ~98% semantic retention
+    50 engrams × 200 tokens = 10,000 tokens
+    → 1 compressed × 500 tokens = 500 tokens
+    → 95% reduction, ~98% semantic retention
 
-Uses Minimum Description Length (MDL) principle: the best
-compression is the shortest description that preserves all
-actionable information.
+Distinct from ``memory_compression.py`` which handles background async
+L1 overflow → L2 persistence via CortexMemoryManager.
 """
 
 from __future__ import annotations

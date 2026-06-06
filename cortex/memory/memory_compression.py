@@ -1,9 +1,14 @@
 # [C5-REAL] Exergy-Maximized
-"""memory_compression - Background L1 Overflow Compression Pipeline.
+# NOTE: This module is the async L1→L2 overflow pipeline.
+#       For the stateless MDL-based fact fusion compressor, see compression.py.
+"""memory_compression — Background L1 Overflow Compression Pipeline.
 
-Extracted from CortexMemoryManager to satisfy the Landauer LOC barrier (≤500).
-Handles the 'Sleep-time Compute' pattern: overflowed L1 events are compressed
-(LLM or raw) and persisted to L2 in a bounded background asyncio task.
+Async pipeline extracted from CortexMemoryManager (Landauer LOC barrier ≤500).
+Handles 'Sleep-time Compute': overflowed L1 events are compressed (LLM or raw)
+and persisted to L2 in a bounded background asyncio task.
+
+Distinct from ``compression.py`` which provides stateless, synchronous
+semantic MDL compression for batch engram fusion.
 """
 
 from __future__ import annotations
