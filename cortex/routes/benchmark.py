@@ -4,11 +4,11 @@ Benchmark Router.
 API endpoints for managing the CORTEX IA Hype Benchmark dataset.
 """
 
-import logging
 import json
-from typing import Any
-from pydantic import BaseModel, Field
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import BaseModel, Field
 
 from cortex.api.deps import get_async_engine
 from cortex.auth import AuthResult, require_permission

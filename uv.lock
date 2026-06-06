@@ -899,7 +899,7 @@ requires-dist = [
     { name = "numba", marker = "extra == 'acceleration'", specifier = ">=0.65.0" },
     { name = "numpy", marker = "extra == 'compute'" },
     { name = "onnxruntime", marker = "extra == 'embeddings'", specifier = ">=1.17" },
-    { name = "optimum", extras = ["onnxruntime"], marker = "extra == 'embeddings'", specifier = ">=1.17" },
+    { name = "optimum", extras = ["onnxruntime"], marker = "extra == 'embeddings'", specifier = ">=1.17,<2.0.0" },
     { name = "pandas", marker = "extra == 'trends'", specifier = ">=2.0" },
     { name = "prometheus-client", specifier = ">=0.20.0" },
     { name = "pydantic", specifier = ">=2.0" },

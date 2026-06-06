@@ -112,7 +112,7 @@ trends = [
 embeddings = [
     "sentence-transformers>=3.0",
     "onnxruntime>=1.17",
-    "optimum[onnxruntime]>=1.17",
+    "optimum[onnxruntime]>=1.17,<2.0.0",
 ]
 knowledge = [
     "chromadb>=1.5.5",
