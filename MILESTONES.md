@@ -502,16 +502,36 @@ Proof:
 - **Status:** ✅ COMPLETE — 6 Junio 2026
 
 ---
+
+### Hito 35: BFT Consensus & Bisimulation Proof (TLA+ Refinement)
+- **Target:** [auth_gateway.py](file:///Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/engine/auth_gateway.py), [CortexByzantineRefinement.tla](file:///Users/borjafernandezangulo/10_PROJECTS/cortex-persist/docs/formal_specs/CortexByzantineRefinement.tla)
+- **Objective:** Refactorización de la seguridad de admisión a `QuorumGateway` (consenso BFT multi-firma $f < n/3$) y construcción de la prueba de refinamiento formal en TLA+ mapeando observables del Runtime contra el Kernel abstracto.
+- **Yield Target:** 100% de la suite de pruebas unitarias y adversariales en verde, con el adversario modelado formalmente como planificador del entorno no-determinista en TLA+.
+- **Reality Level:** `C6-FORMAL` (Math/Silicon)
+- **Commits:** `b30da3e6`
+- **Evidence:** Commit `chore(formal): add tla+ refinement proof mapping runtime observables to bft kernel` y suite `pytest tests/extensions/daemon/test_bft_consensus.py` pasando sin alertas.
+```yaml
+Claim: QuorumGateway implementa BFT robusto refinando el Kernel formal
+Proof:
+  Base: "Refinement mapping verificado en CortexByzantineRefinement.tla instanciando Kernel con variables del Runtime."
+  Range: [C5, C6]
+  Confidence: C6-FORMAL
+  Date: 2026-06-06
+```
+- **Status:** ✅ COMPLETE — 6 Junio 2026
+
+---
 ## 🛡️ Thermodynamic Enforcement
 All milestone claims must map directly to a `Claim/Proof` matrix.
 ```yaml
-Claim: 34/34 Milestones Completed
+Claim: 35/35 Milestones Completed
 Proof:
   Base: Continuous Silicon Checkpoint Execution
-  Variables: [r=1, d=1, n=34, S=100]
+  Variables: [r=1, d=1, n=35, S=100]
   Range: [C6, C6]
   Confidence: C4 (audit based on evidence classification)
   Date: 2026-06-06
 ```
 
 *∴ "The architecture refines its own truth."*
+
