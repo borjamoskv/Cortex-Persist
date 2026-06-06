@@ -57,6 +57,8 @@ def test_migration_025_adds_merkle_tenant_scope_without_data_loss() -> None:
         );
         INSERT INTO merkle_roots (root_hash, tx_start_id, tx_end_id, tx_count)
         VALUES ('root-a', 1, 3, 3);
+        CREATE TABLE facts (id TEXT PRIMARY KEY);
+        CREATE TABLE causal_edges (id TEXT PRIMARY KEY);
     """)
 
     applied = run_migrations(conn)
@@ -92,6 +94,8 @@ def test_migration_026_adds_replay_admission_table_and_tenant_scoped_uniques() -
             description TEXT
         );
         INSERT INTO schema_version (version, description) VALUES (25, 'pre replay baseline');
+        CREATE TABLE facts (id TEXT PRIMARY KEY);
+        CREATE TABLE causal_edges (id TEXT PRIMARY KEY);
     """)
 
     applied = run_migrations(conn)

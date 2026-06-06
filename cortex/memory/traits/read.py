@@ -74,7 +74,8 @@ class ReadTrait:
                 try:
                     count_void_sql = f"SELECT count(1) FROM {vec_void_tb}"
                     cursor.execute(count_void_sql)
-                    use_void = cursor.fetchone()[0] > 0
+                    row = cursor.fetchone()
+                    use_void = (row[0] > 0) if row else False
                 except sqlite3.OperationalError:
                     use_void = False
 

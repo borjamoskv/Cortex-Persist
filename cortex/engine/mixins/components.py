@@ -149,126 +149,81 @@ class ComponentsMixin:
         self._mac_maestro = value
 
     def _register_default_guards(self) -> GuardPipeline:
-        """Build the GuardPipeline with all available guard adapters.
-
-        Each adapter is imported defensively - if the underlying module
-        is not installed, the adapter is skipped. Runtime failures during
-        guard construction are treated as fatal because the write path must
-        fail closed.
-        """
+        """Build the GuardPipeline with all available guard adapters."""
         from cortex.engine.guard_pipeline import GuardPipeline
 
         pipeline = GuardPipeline()
         db_path = str(self._db_path)
-        # Pre-store guards (AX-II Hooks 1-3)
-        try:
+
+        def _health():
             from cortex.engine.guard_adapters import HealthGuardAdapter
+            return HealthGuardAdapter(self)
 
-            pipeline.add_guard(HealthGuardAdapter(self))
-        except ImportError as e:
-            if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
-                raise RuntimeError(f"FAIL-CLOSED: HealthGuardAdapter failed: {e}") from e
-            logger.debug("HealthGuardAdapter unavailable: %s", e)
-        except Exception as e:
-            raise RuntimeError(f"FAIL-CLOSED: HealthGuardAdapter failed: {e}") from e
-        try:
+        def _contradiction():
             from cortex.engine.guard_adapters import ContradictionGuardAdapter
+            return ContradictionGuardAdapter(db_path)
 
-            pipeline.add_guard(ContradictionGuardAdapter(db_path))
-        except ImportError as e:
-            if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
-                raise RuntimeError(f"FAIL-CLOSED: ContradictionGuardAdapter failed: {e}") from e
-            logger.debug("ContradictionGuardAdapter unavailable: %s", e)
-        except Exception as e:
-            raise RuntimeError(f"FAIL-CLOSED: ContradictionGuardAdapter failed: {e}") from e
-        try:
+        def _verifier():
             from cortex.engine.guard_adapters import VerifierGuardAdapter
+            return VerifierGuardAdapter()
 
-            pipeline.add_guard(VerifierGuardAdapter())
-        except ImportError as e:
-            if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
-                raise RuntimeError(f"FAIL-CLOSED: VerifierGuardAdapter failed: {e}") from e
-            logger.debug("VerifierGuardAdapter unavailable: %s", e)
-        except Exception as e:
-            raise RuntimeError(f"FAIL-CLOSED: VerifierGuardAdapter failed: {e}") from e
-        # ZK-Swarm Cryptographic Guard (RFC-003 Phase 1)
-        try:
+        def _zk():
             from cortex.engine.guard_adapters import ZKGuardAdapter
+            return ZKGuardAdapter()
 
-            pipeline.add_guard(ZKGuardAdapter())
-        except ImportError as e:
-            if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
-                raise RuntimeError(f"FAIL-CLOSED: ZKGuardAdapter failed: {e}") from e
-            logger.debug("ZKGuardAdapter unavailable: %s", e)
-        except Exception as e:
-            raise RuntimeError(f"FAIL-CLOSED: ZKGuardAdapter failed: {e}") from e
-        # Virgo Logos-Critique Guard (Virgo ♍)
-        try:
+        def _virgo():
             from cortex.engine.guard_adapters import VirgoGuardAdapter
+            return VirgoGuardAdapter(self)  # type: ignore
 
-            pipeline.add_guard(VirgoGuardAdapter(self))  # type: ignore
-        except ImportError as e:
-            if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
-                raise RuntimeError(f"FAIL-CLOSED: VirgoGuardAdapter failed: {e}") from e
-            logger.debug("VirgoGuardAdapter unavailable: %s", e)
-        except Exception as e:
-            raise RuntimeError(f"FAIL-CLOSED: VirgoGuardAdapter failed: {e}") from e
-        # Omega Auditor Guard (Axiom 20)
-        try:
+        def _omega():
             from cortex.engine.guard_adapters import OmegaGuardAdapter
+            return OmegaGuardAdapter()
 
-            pipeline.add_guard(OmegaGuardAdapter())
-        except ImportError as e:
-            if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
-                raise RuntimeError(f"FAIL-CLOSED: OmegaGuardAdapter failed: {e}") from e
-            logger.debug("OmegaGuardAdapter unavailable: %s", e)
-        except Exception as e:
-            raise RuntimeError(f"FAIL-CLOSED: OmegaGuardAdapter failed: {e}") from e
-        # Archaeology First Guard (Ley 1)
-        try:
+        def _arch():
             from cortex.engine.guard_adapters import ArchaeologyGuardAdapter
+            return ArchaeologyGuardAdapter()
 
-            pipeline.add_guard(ArchaeologyGuardAdapter())
-        except ImportError as e:
-            if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
-                raise RuntimeError(f"FAIL-CLOSED: ArchaeologyGuardAdapter failed: {e}") from e
-            logger.debug("ArchaeologyGuardAdapter unavailable: %s", e)
-        except Exception as e:
-            raise RuntimeError(f"FAIL-CLOSED: ArchaeologyGuardAdapter failed: {e}") from e
-        # Post-store hooks (AX-II Hook 4 + signals + epistemic)
-        try:
+        self._try_add(pipeline, "HealthGuardAdapter", _health, is_hook=False)
+        self._try_add(pipeline, "ContradictionGuardAdapter", _contradiction, is_hook=False)
+        self._try_add(pipeline, "VerifierGuardAdapter", _verifier, is_hook=False)
+        self._try_add(pipeline, "ZKGuardAdapter", _zk, is_hook=False)
+        self._try_add(pipeline, "VirgoGuardAdapter", _virgo, is_hook=False)
+        self._try_add(pipeline, "OmegaGuardAdapter", _omega, is_hook=False)
+        self._try_add(pipeline, "ArchaeologyGuardAdapter", _arch, is_hook=False)
+
+        def _ledger():
             from cortex.engine.guard_adapters import LedgerCheckpointHook
+            return LedgerCheckpointHook(self)  # type: ignore
 
-            pipeline.add_post_hook(LedgerCheckpointHook(self))  # type: ignore
-        except ImportError as e:
-            if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
-                raise RuntimeError(f"FAIL-CLOSED: LedgerCheckpointHook failed: {e}") from e
-            logger.debug("LedgerCheckpointHook unavailable: %s", e)
-        except Exception as e:
-            raise RuntimeError(f"FAIL-CLOSED: LedgerCheckpointHook failed: {e}") from e
-        try:
+        def _signal():
             from cortex.engine.guard_adapters import SignalEmitHook
+            return SignalEmitHook()
 
-            pipeline.add_post_hook(SignalEmitHook())
-        except ImportError as e:
-            if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
-                raise RuntimeError(f"FAIL-CLOSED: SignalEmitHook failed: {e}") from e
-            logger.debug("SignalEmitHook unavailable: %s", e)
-        except Exception as e:
-            raise RuntimeError(f"FAIL-CLOSED: SignalEmitHook failed: {e}") from e
-        try:
+        def _epistemic():
             from cortex.engine.guard_adapters import EpistemicBreakerHook
+            return EpistemicBreakerHook()
 
-            pipeline.add_post_hook(EpistemicBreakerHook())
-        except ImportError as e:
-            if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
-                raise RuntimeError(f"FAIL-CLOSED: EpistemicBreakerHook failed: {e}") from e
-            logger.debug("EpistemicBreakerHook unavailable: %s", e)
-        except Exception as e:
-            raise RuntimeError(f"FAIL-CLOSED: EpistemicBreakerHook failed: {e}") from e
+        self._try_add(pipeline, "LedgerCheckpointHook", _ledger, is_hook=True)
+        self._try_add(pipeline, "SignalEmitHook", _signal, is_hook=True)
+        self._try_add(pipeline, "EpistemicBreakerHook", _epistemic, is_hook=True)
+
         logger.debug(
             "GuardPipeline: %d guards, %d hooks registered",
             pipeline.guard_count,
             pipeline.hook_count,
         )
         return pipeline
+
+    def _try_add(self, pipeline, name: str, factory, is_hook: bool) -> None:
+        try:
+            component = factory()
+            if is_hook:
+                pipeline.add_post_hook(component)
+            else:
+                pipeline.add_guard(component)
+        except ImportError as e:
+            if os.environ.get("CORTEX_STRICT_GUARDS") == "1":
+                raise RuntimeError(f"FAIL-CLOSED: {name} failed: {e}") from e
+            logger.debug("%s unavailable: %s", name, e)
+        except Exception as e:
+            raise RuntimeError(f"FAIL-CLOSED: {name} failed: {e}") from ene
