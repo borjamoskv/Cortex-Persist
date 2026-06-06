@@ -153,7 +153,7 @@ class AdaptiveResonanceGate:
     async def gate(
         self,
         candidate: CortexSemanticEngram,
-        search_limit: int = 15,
+        search_limit: int = 8,
         vigilance_override: float | None = None,
         precision_mode: bool = False,
     ) -> tuple[str, CortexSemanticEngram]:

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import logging
+import sqlite3
 from typing import Any
 
 import aiosqlite
@@ -295,7 +296,7 @@ async def _post_insert_actions(
             "INSERT INTO enrichment_jobs (fact_id, job_type, status, priority) VALUES (?, 'embedding', 'pending', ?)",
             (fact_id, 1 if fact_type == "decision" else 0),
         )
-    except (OSError, ValueError) as e:
+    except (OSError, ValueError, sqlite3.Error) as e:
         logger.error("Failed to insert enrichment job for fact %d: %s", fact_id, e)
 
     if tags:
@@ -309,7 +310,7 @@ async def _post_insert_actions(
             "INSERT OR REPLACE INTO facts_fts (rowid, content, project, tags, fact_type, tenant_id) VALUES (?, ?, ?, ?, ?, ?)",
             (fact_id, content, project, tags_json, fact_type, tenant_id),
         )
-    except (OSError, ValueError) as e:
+    except (OSError, ValueError, sqlite3.Error) as e:
         logger.error("Failed to insert FTS for fact %d: %s", fact_id, e)
 
     await _record_causality(conn, fact_id, project, tenant_id, meta, parent_decision_id)
@@ -318,7 +319,7 @@ async def _post_insert_actions(
         from cortex.graph import process_fact_graph
 
         await process_fact_graph(conn, fact_id, content, project, ts, tenant_id)
-    except (ImportError, OSError, ValueError) as e:
+    except (ImportError, OSError, ValueError, sqlite3.Error) as e:
         logger.error("Failed to process graph for fact %d: %s", fact_id, e)
 
 

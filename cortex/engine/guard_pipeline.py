@@ -10,11 +10,16 @@ Guards that fail to import at registration time are silently skipped.
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import aiosqlite
 
-from cortex.extensions.interfaces.store_pipeline import ContentMutator, PostStoreHook, StoreGuard
+if TYPE_CHECKING:
+    from cortex.extensions.interfaces.store_pipeline import (
+        ContentMutator,
+        PostStoreHook,
+        StoreGuard,
+    )
 
 __all__ = ["GuardPipeline"]
 
