@@ -82,10 +82,13 @@ class SovereignQuotaManager:
         db_path: str | None = None,
         capacity: int = 10,
         refill_rate: float | None = None,
+        max_waiters: int = 20,
     ) -> None:
         configured_path = db_path or os.environ.get("CORTEX_LLM_QUOTA_DB", "~/.cortex/quota.db")
         self.db_path = Path(configured_path).expanduser()
         self.capacity = float(capacity)
+        self.max_waiters = max_waiters
+        self._current_waiters = 0
 
         # ── Protocolo PULMONES Conservative Refill ──
         # Prioritize ENV > Explicit arg > 10 RPM Default
@@ -201,31 +204,39 @@ class SovereignQuotaManager:
             deadline: Tiempo máximo de espera total en segundos.
 
         Returns:
-            True si se adquirió la cuota, False si expiró el deadline.
+            True si se adquirió la cuota, False si expiró el deadline o si se superó max_waiters.
         """
-        start = time.monotonic()
-        attempt = 0
+        if getattr(self, "_current_waiters", 0) >= getattr(self, "max_waiters", 20):
+            logger.error("PULMONES: Fast-Reject (OOM Protection). Cola desbordada: %d waiters", self._current_waiters)
+            return False
 
-        while True:
-            wait = self._consume_sync(tokens)
+        self._current_waiters = getattr(self, "_current_waiters", 0) + 1
+        try:
+            start = time.monotonic()
+            attempt = 0
 
-            if wait <= 0:
-                return True
+            while True:
+                wait = self._consume_sync(tokens)
 
-            elapsed = time.monotonic() - start
-            if elapsed >= deadline:
-                logger.error("PULMONES: Timeout tras %.1fs esperando %d tokens.", elapsed, tokens)
-                self._increment_timeouts()
-                return False
+                if wait <= 0:
+                    return True
 
-            # Hardware Entropy + Golden Ratio (Caos termodinámico asimétrico profundo)
-            jitter = _RNG.uniform(0.1, 1.618 ** min(attempt + 1, 6))
-            sleep = min(wait, 2 ** min(attempt, 5)) + jitter
-            sleep = min(sleep, deadline - elapsed)  # nunca sobrepasar el deadline
+                elapsed = time.monotonic() - start
+                if elapsed >= deadline:
+                    logger.error("PULMONES: Timeout tras %.1fs esperando %d tokens.", elapsed, tokens)
+                    self._increment_timeouts()
+                    return False
 
-            logger.info("PULMONES: Estrangulado. Exhalando %.2fs (intento %d)…", sleep, attempt + 1)
-            await asyncio.sleep(sleep)
-            attempt += 1
+                # Hardware Entropy + Golden Ratio (Caos termodinámico asimétrico profundo)
+                jitter = _RNG.uniform(0.1, 1.618 ** min(attempt + 1, 6))
+                sleep = min(wait, 2 ** min(attempt, 5)) + jitter
+                sleep = min(sleep, deadline - elapsed)  # nunca sobrepasar el deadline
+
+                logger.info("PULMONES: Estrangulado. Exhalando %.2fs (intento %d)…", sleep, attempt + 1)
+                await asyncio.sleep(sleep)
+                attempt += 1
+        finally:
+            self._current_waiters -= 1
 
     def status(self) -> QuotaStatus:
         """Estado completo del bucket con métricas de observabilidad."""
