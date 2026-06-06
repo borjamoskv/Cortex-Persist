@@ -1,6 +1,6 @@
 import logging
 import time
-from typing import Any, List, Dict
+from typing import Any
 import json
 import uuid
 
@@ -97,7 +97,7 @@ class QuorumGateway:
                 logger.error("[QuorumGateway] CRITICAL: Cryptographic Verification Failed for %s. Discarding vote.", req_id)
                 return False
                 
-            signatures: List[Dict[str, str]] = json.loads(sigs_json)
+            signatures: list[dict[str, str]] = json.loads(sigs_json)
             
             # Prevent double voting
             if any(sig["public_key"] == public_key_b64 for sig in signatures):

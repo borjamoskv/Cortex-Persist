@@ -28,7 +28,7 @@ def generate_agent_keys():
 def sign_payload(private_key, payload: str, fact_hash: str) -> str:
     import hashlib
     content_digest = hashlib.sha256(payload.encode("utf-8")).hexdigest()
-    message = f"{content_digest}:{fact_hash}".encode('utf-8')
+    message = f"{content_digest}:{fact_hash}".encode()
     signature = private_key.sign(message)
     return base64.b64encode(signature).decode('utf-8')
 

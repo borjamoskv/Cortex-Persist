@@ -24,39 +24,44 @@ async def verify_ledger_continuity(conn) -> bool:
         return False
 
 async def verify_causal_dag(conn) -> bool:
-    """Inv-3: Asserts the causal graph remains a Directed Acyclic Graph (no cycles)."""
+    """Inv-3: Asserts the causal graph remains a Directed Acyclic Graph (no cycles).
+    [SOTA Injection]: Kahn's Algorithm for infinite-depth execution without RecursionError.
+    """
     try:
-        # Fetch all causal edges
         cursor = await conn.execute("SELECT fact_id, parent_id FROM causal_edges WHERE parent_id IS NOT NULL")
         edges = await cursor.fetchall()
         
-        # Build adjacency list
+        in_degree = {}
         graph = {}
+        
         for row in edges:
             u, v = row[0], row[1]
             if u not in graph:
                 graph[u] = []
+            if u not in in_degree:
+                in_degree[u] = 0
+            if v not in in_degree:
+                in_degree[v] = 0
+                
             graph[u].append(v)
+            in_degree[v] += 1
             
-        # Detect cycles via DFS
-        visited = {}
+        from collections import deque
+        queue = deque([node for node, deg in in_degree.items() if deg == 0])
+        visited_count = 0
         
-        def has_cycle(node):
-            visited[node] = 1 # Visiting
+        while queue:
+            node = queue.popleft()
+            visited_count += 1
             for neighbor in graph.get(node, []):
-                if visited.get(neighbor, 0) == 1:
-                    return True
-                if visited.get(neighbor, 0) == 0:
-                    if has_cycle(neighbor):
-                        return True
-            visited[node] = 2 # Visited
+                in_degree[neighbor] -= 1
+                if in_degree[neighbor] == 0:
+                    queue.append(neighbor)
+                    
+        if visited_count != len(in_degree) and len(in_degree) > 0:
+            logger.error("[VerificationOracle] Inv-3 Failure: Cycle detected in causality graph.")
             return False
             
-        for node in list(graph.keys()):
-            if visited.get(node, 0) == 0:
-                if has_cycle(node):
-                    logger.error("[VerificationOracle] Inv-3 Failure: Cycle detected in causality graph at node %s", node)
-                    return False
         return True
     except Exception as e:
         logger.error("[VerificationOracle] Failed to run causal DAG check: %s", e)
@@ -85,7 +90,7 @@ async def verify_approved_auth_signatures(conn) -> bool:
                 # Verification payload in Ed25519Signer._canonical_payload is (sha256(content):fact_hash)
                 import hashlib
                 content_digest = hashlib.sha256(payload.encode("utf-8")).hexdigest()
-                canonical_msg = f"{content_digest}:{req_id}".encode("utf-8")
+                canonical_msg = f"{content_digest}:{req_id}".encode()
                 
                 pub_key.verify(sig_bytes, canonical_msg)
             except Exception as e:
