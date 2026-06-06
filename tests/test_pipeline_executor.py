@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Tests for cortex.pipeline.executor - Agent Executor (stub mode).
 
 C5-REAL audit remediation: pipeline/ coverage gap.

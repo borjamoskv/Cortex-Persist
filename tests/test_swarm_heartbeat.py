@@ -1,4 +1,4 @@
-"""Tests for SwarmHeartbeat - Ω₃ Byzantine Default (Distributed Liveness)."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

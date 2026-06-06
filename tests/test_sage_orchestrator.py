@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Tests for cortex-core/sage_orchestrator.py - SAGE Council Telemetry.
 
 C5-REAL coverage for Orchestrator events and sage invocation.

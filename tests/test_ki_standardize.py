@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Tests for cortex-core/ki_standardize.py - KI Schema Standardizer.
 
 C5-REAL coverage for domain inference, timestamp normalization, and schema standardization.

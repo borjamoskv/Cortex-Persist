@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """SCRAPER-Ω Unit Tests - Sovereign Web Extraction.
 
 Tests cover:

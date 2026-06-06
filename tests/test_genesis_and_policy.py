@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Tests for cortex.genesis - GenesisEngine, SystemSpec, preview, CHRONOS-1.
 
 No temp database required - Genesis operates on the filesystem.

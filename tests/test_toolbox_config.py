@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Tests for MCP Toolbox tools.yaml configuration.
 
 Validates YAML structure, SQL syntax, and toolset references without

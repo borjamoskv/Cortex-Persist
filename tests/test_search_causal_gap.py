@@ -1,4 +1,4 @@
-"""Tests for causal gap retrieval - Ω₁₃ §15.9."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

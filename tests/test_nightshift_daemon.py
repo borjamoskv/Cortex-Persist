@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Tests for NightShift Crystal Daemon.
 
 Verifies the lifecycle of the daemon, including the acquisition phase (Phase 1)

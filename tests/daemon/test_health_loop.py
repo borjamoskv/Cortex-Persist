@@ -1,4 +1,4 @@
-"""Tests for cortex.daemon.health_loop - autonomous health monitoring."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

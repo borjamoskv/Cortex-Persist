@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Tests for Level 3 - CopilotAgent.
 
 Validates the core copilot contract:

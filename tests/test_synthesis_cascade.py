@@ -1,4 +1,4 @@
-"""Tests for AUTODIDACT synthesis cascade - Ω₅ Antifragile verification."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

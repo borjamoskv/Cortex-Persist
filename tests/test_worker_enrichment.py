@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Tests for cortex.worker.enrichment (aiosqlite-backed EnrichmentWorker)
 ───────────────────────────────────────────────────────────────────────

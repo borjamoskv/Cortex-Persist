@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Tests for cortex.memory.ledger - EventLedgerL3.
 
 Tests the immutable event sourcing ledger with a real `:memory:` aiosqlite DB.

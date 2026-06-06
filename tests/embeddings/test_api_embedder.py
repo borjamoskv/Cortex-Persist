@@ -1,4 +1,4 @@
-"""Tests for CORTEX API Embedder - Gemini Embedding 2 Multimodal."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

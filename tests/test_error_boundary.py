@@ -1,4 +1,4 @@
-"""Tests for cortex.immune.error_boundary - Ω₅ Antifragile Decorator."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Tests for cortex.genesis.engine - GenesisEngine core orchestration.
 
 Includes the Ω₀ self-referential test: the engine generates its own spec

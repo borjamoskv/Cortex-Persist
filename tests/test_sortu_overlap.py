@@ -1,4 +1,4 @@
-"""Tests for sortu_overlap.py - Overlap detection and causal gap scoring."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX exergy scoring tests.
 
 Covers both the legacy Shannon report API and the newer thermodynamic exergy API.

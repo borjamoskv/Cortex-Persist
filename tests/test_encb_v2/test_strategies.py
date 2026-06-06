@@ -1,4 +1,4 @@
-"""Tests for strategies.py - S0 through S3 resolution."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

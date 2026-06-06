@@ -1,4 +1,4 @@
-"""Tests for credibility_stack.py"""
+# [C5-REAL] Exergy-Maximized
 
 import pytest
 import os

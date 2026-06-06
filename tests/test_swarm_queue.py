@@ -1,4 +1,4 @@
-"""Tests for Swarm Task Queue Concurrency & Advisory Locking."""
+# [C5-REAL] Exergy-Maximized
 
 import os
 import json

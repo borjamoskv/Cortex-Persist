@@ -1,4 +1,4 @@
-"""Tests for cortex.database.pool.CortexConnectionPool."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-"""Global test configuration for CORTEX test suite."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-"""Integration tests for the Tripartite Memory Orchestrator (CortexMemoryManager)."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

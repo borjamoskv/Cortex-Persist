@@ -1,4 +1,4 @@
-"""Tests for Phase 4: Strict Tool Sealing & Autonomous Merge (Ω₂, Ω₃)."""
+# [C5-REAL] Exergy-Maximized
 
 from dataclasses import dataclass
 from unittest.mock import MagicMock, patch

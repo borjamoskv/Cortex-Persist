@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Test: CORTEX Inverse Engine - Python Integration (C5-REAL)
 

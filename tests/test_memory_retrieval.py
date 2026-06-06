@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Tests for cortex.memory.memory_retrieval - RRF fusion, fact_to_dict, Hebbian boost.
 
 Pure function tests - no DB, no LLM, no async.

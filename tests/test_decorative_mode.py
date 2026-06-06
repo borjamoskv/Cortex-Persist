@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 from cortex.guards.thermodynamic import ThermodynamicCounters, should_enter_decorative_mode
 
 

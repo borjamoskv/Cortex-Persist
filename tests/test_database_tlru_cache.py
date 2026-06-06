@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Tests for cortex.database.tlru_cache - Time-aware LRU Cache.
 
 C5-REAL audit remediation: database/ coverage gap.

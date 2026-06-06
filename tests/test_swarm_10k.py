@@ -1,4 +1,4 @@
-"""Tests for CORTEX-SWARM-10K Sharded Architecture."""
+# [C5-REAL] Exergy-Maximized
 
 from pathlib import Path
 

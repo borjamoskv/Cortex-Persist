@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """H3 Load Degradation Protocol (C5-REAL Integration)
 
 Tests performance drop and recovery of RAG under simulated heavy context block injection,

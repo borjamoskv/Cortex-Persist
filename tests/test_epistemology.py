@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Tests for Exergetic Epistemology (ΞΕ) primitives.
 
 Validates the 7 frontier functions derived from the ΞΕ treatise:

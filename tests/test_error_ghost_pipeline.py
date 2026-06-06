@@ -1,4 +1,4 @@
-"""Tests for ErrorGhostPipeline - Ω₅ Antifragile Autopersistence."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

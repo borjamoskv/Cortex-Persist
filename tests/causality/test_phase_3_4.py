@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Permanent pytest tests for parent_decision_id causal infrastructure.
 
 Covers:

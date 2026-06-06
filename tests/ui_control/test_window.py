@@ -1,4 +1,4 @@
-"""Tests para WindowEngine - gestión de ventanas vía AppleScript."""
+# [C5-REAL] Exergy-Maximized
 
 from unittest.mock import AsyncMock, patch
 

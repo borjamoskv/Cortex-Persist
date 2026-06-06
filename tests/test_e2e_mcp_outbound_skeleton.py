@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX E2E Pipeline - Integration Tests.
 
 Tests the full pipeline flow: Ingress → Context → Plan → Execute → Persist → Egress.

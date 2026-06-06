@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Tests for CLI CRUD commands - delete, list, edit.
 """

@@ -1,4 +1,4 @@
-"""Tests for multi-tenant Row-Level Security (RLS) isolation in CORTEX Engine."""
+# [C5-REAL] Exergy-Maximized
 
 import os
 import tempfile

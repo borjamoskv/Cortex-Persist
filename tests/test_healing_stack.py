@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Tests for Predictive Healer + Tuning Persistence + HealingStack v2.
 
 Reality Level: C5-REAL

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Integration tests: ExergyReport + dead_weight_bits in EntropyReport.analyze().
 
 Validates Ω₁₃ enforcement: the Shannon report now contains mechanical

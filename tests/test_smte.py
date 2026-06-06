@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Tests for Self-Modifying Topology Engine (SMTE).
 Aligned with the consolidated cortex/engine/smte/ module.

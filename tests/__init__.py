@@ -1,1 +1,1 @@
-"""Test package marker for cross-module test imports."""
+# [C5-REAL] Exergy-Maximized

@@ -1,4 +1,4 @@
-"""Tests for metrics.py - PFBR, TER, EDI, CNCL."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

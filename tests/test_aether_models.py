@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Tests for cortex.aether.models - Pure data model validation.
 
 No I/O, no network, no database. Pure unit tests.

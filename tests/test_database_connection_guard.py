@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Tests for cortex.database.connection_guard - CI/lint scanner for raw sqlite3 usage.
 
 C5-REAL audit remediation: database/ coverage gap.

@@ -1,4 +1,4 @@
-"""Tests for the Autonomous Training Daemon, Adapter Verifier, and LoRA Provider routing hooks."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

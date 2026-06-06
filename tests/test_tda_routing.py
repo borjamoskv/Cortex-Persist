@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Tests for HodgeMemoryRouter in CORTEX memory routing.
 

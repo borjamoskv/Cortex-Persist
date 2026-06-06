@@ -1,4 +1,4 @@
-"""Tests for runner.py - end-to-end smoke tests."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

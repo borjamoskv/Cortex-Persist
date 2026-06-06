@@ -1,4 +1,4 @@
-"""Tests for Bounded Demolition (Axiom Ω₄)."""
+# [C5-REAL] Exergy-Maximized
 
 from pathlib import Path
 

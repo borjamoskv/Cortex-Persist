@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Tests for cortex.engine.guard_pipeline.GuardPipeline - fully isolated, no DB.
 
 These tests verify the composable guard/mutator/hook pipeline independently

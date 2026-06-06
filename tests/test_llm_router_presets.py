@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Permanent pytest tests for LLM Router cost/tier-aware routing.
 
 Covers:

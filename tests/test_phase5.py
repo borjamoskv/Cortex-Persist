@@ -1,4 +1,4 @@
-"""Tests for Phase 5: Ω₆ Siege-Verification (Pathogen Matching)."""
+# [C5-REAL] Exergy-Maximized
 
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch

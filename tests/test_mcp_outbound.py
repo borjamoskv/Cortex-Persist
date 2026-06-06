@@ -1,4 +1,4 @@
-"""Tests for MCP Outbound Client."""
+# [C5-REAL] Exergy-Maximized
 
 import asyncio
 import pytest

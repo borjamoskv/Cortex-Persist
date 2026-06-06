@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Tests for cortex.consensus.rwa_bft - RWA-BFT Consensus Protocol.
 
 C5-REAL audit remediation: consensus/ had 0% test coverage.

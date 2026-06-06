@@ -1,4 +1,4 @@
-"""Tests for ALMA Taste Engine - Sovereign Quality Discriminator."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

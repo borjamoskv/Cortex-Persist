@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Tests for Crystal Consolidation (REM Phase).
 
 Tests the thermometer (temperature, resonance, quadrant classification)

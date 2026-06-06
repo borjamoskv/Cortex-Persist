@@ -1,4 +1,4 @@
-"""Tests para MouseEngine - control de ratón vía CoreGraphics."""
+# [C5-REAL] Exergy-Maximized
 
 from unittest.mock import MagicMock, patch
 

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 LEGION-10K: Definitive 10,000-Agent Stress Test.
 

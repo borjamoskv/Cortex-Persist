@@ -1,4 +1,4 @@
-"""Tests for the Prometheus exposition module."""
+# [C5-REAL] Exergy-Maximized
 
 from cortex.extensions.health.models import Grade, HealthScore, MetricSnapshot
 from cortex.extensions.health.prometheus import export_prometheus

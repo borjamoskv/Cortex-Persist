@@ -1,4 +1,4 @@
-"""Tests for ExergyGuard."""
+# [C5-REAL] Exergy-Maximized
 
 import pytest
 

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Tests for cortex.sync.github_bridge - GitHub → CORTEX Bridge.
 
 All GitHub API calls are mocked via httpx.MockTransport.

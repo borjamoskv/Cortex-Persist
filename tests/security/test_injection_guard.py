@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Tests for InjectionGuard trusted source whitelist.
 
 Verifies that trusted sources bypass L1 (SQL) and L5 (entropy)

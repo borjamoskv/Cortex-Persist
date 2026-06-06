@@ -1,4 +1,4 @@
-"""Tests for CRDT Merge Engine - Phase 4."""
+# [C5-REAL] Exergy-Maximized
 
 from cortex.extensions.sync.crdt import ConflictRecord, CortexCRDT, FactReplica
 from cortex.extensions.sync.hlc import HLCTimestamp
