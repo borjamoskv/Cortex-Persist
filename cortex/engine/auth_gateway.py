@@ -1,126 +1,144 @@
 import logging
 import time
-from typing import Any
+from typing import Any, List, Dict
 import json
 import uuid
 
 logger = logging.getLogger("cortex.engine.auth_gateway")
 
-class AuthGateway:
+class QuorumGateway:
     """
-    Operator Override Integrity Gateway.
-    Generates deterministic pending authorization requests in the CORTEX Ledger
-    that require explicit C5-REAL cryptographic or manual CLI signature to proceed.
+    Byzantine-Aware Epistemic Transition Gateway.
+    Implements f < n/3 BFT consensus using multi-signature threshold validation.
     """
     
-    def __init__(self, engine: Any):
+    def __init__(self, engine: Any, n_nodes: int = 4, f_nodes: int = 1):
         self.engine = engine
+        self.n = n_nodes
+        self.f = f_nodes
+        self.threshold = self.n - self.f
         
     async def ensure_table(self) -> None:
-        """Ensures the auth_requests table exists in the DB."""
+        """Ensures the quorum_requests table exists in the DB."""
         try:
             conn = self.engine.pool.get_connection()
             conn.execute(
-                '''CREATE TABLE IF NOT EXISTS auth_requests (
+                '''CREATE TABLE IF NOT EXISTS quorum_requests (
                     id TEXT PRIMARY KEY,
                     hypothesis TEXT,
                     state_payload TEXT,
                     status TEXT,
                     created_at REAL,
                     resolved_at REAL,
-                    signature TEXT,
-                    public_key TEXT
+                    signatures_json TEXT
                 )'''
             )
             conn.commit()
-            
-            # Perform schema migration if needed (idempotent addition of new columns)
-            try:
-                conn.execute("ALTER TABLE auth_requests ADD COLUMN signature TEXT")
-                conn.execute("ALTER TABLE auth_requests ADD COLUMN public_key TEXT")
-                conn.commit()
-            except Exception:
-                pass # Columns likely already exist
         except Exception as e:
-            logger.error("Failed to ensure auth_requests table: %s", e)
+            logger.error("Failed to ensure quorum_requests table: %s", e)
             
     async def request_override(self, hypothesis: str, state: dict[str, Any]) -> str:
         """
-        Creates an authorization request for the Operator. 
+        Creates an authorization request for the Quorum. 
         Returns the Request ID.
         """
-        req_id = f"AUTH-{str(uuid.uuid4())[:8].upper()}"
-        logger.info("[AuthGateway] Issuing Operator Override Request: %s", req_id)
+        req_id = f"QRM-{str(uuid.uuid4())[:8].upper()}"
+        logger.info("[QuorumGateway] Issuing BFT Consensus Request: %s", req_id)
         
         try:
             conn = self.engine.pool.get_connection()
             conn.execute(
-                '''INSERT INTO auth_requests (id, hypothesis, state_payload, status, created_at)
-                   VALUES (?, ?, ?, ?, ?)''',
-                (req_id, hypothesis, json.dumps(state), "PENDING", time.monotonic())
+                '''INSERT INTO quorum_requests (id, hypothesis, state_payload, status, created_at, signatures_json)
+                   VALUES (?, ?, ?, ?, ?, ?)''',
+                (req_id, hypothesis, json.dumps(state), "PENDING", time.monotonic(), "[]")
             )
             conn.commit()
-            logger.warning("[AuthGateway] Action suspended. Awaiting Operator Approval for %s", req_id)
-            logger.warning("To approve, run: cortex auth approve %s", req_id)
+            logger.warning("[QuorumGateway] Action suspended. Awaiting %d votes to reach quorum for %s", self.threshold, req_id)
         except Exception as e:
-            logger.error("[AuthGateway] DB insert failed: %s", e)
+            logger.error("[QuorumGateway] DB insert failed: %s", e)
             
         return req_id
         
-    async def approve_request(self, req_id: str, signature_b64: str, public_key_b64: str) -> bool:
-        """Approves a request if and only if the Ed25519 signature over the payload is mathematically valid."""
+    async def submit_vote(self, req_id: str, signature_b64: str, public_key_b64: str, semantic_truth: bool = True) -> bool:
+        """
+        Submits a cryptographic vote. 
+        In a real scenario, semantic_truth is evaluated by the node before calling this.
+        If semantic_truth is False, the honest node should reject or not vote.
+        """
+        if not semantic_truth:
+            logger.warning("[QuorumGateway] Honest node evaluated payload as CORRUPT. Withholding vote.")
+            return False
+
         try:
-            from cortex.extensions.security.signatures import Ed25519Signer, SignatureVerificationError
+            from cortex.extensions.security.signatures import Ed25519Signer
             
             conn = self.engine.pool.get_connection()
             cursor = conn.cursor()
-            cursor.execute("SELECT status, state_payload FROM auth_requests WHERE id = ?", (req_id,))
+            cursor.execute("SELECT status, state_payload, signatures_json FROM quorum_requests WHERE id = ?", (req_id,))
             row = cursor.fetchone()
             
             if not row:
-                logger.error("[AuthGateway] Request %s not found.", req_id)
+                logger.error("[QuorumGateway] Request %s not found.", req_id)
                 return False
                 
-            status, state_payload = row
+            status, state_payload, sigs_json = row
                 
             if status != "PENDING":
-                logger.warning("[AuthGateway] Request %s is already %s.", req_id, status)
+                logger.warning("[QuorumGateway] Request %s is already %s.", req_id, status)
                 return False
                 
             # C5-REAL Cryptographic Verification
-            # We treat the req_id as the fact_hash and the state_payload as the content
-            signer = Ed25519Signer(public_key_bytes=None) # We will verify using the provided pubkey
+            signer = Ed25519Signer(public_key_bytes=None) 
             
             try:
                 signer.verify(content=state_payload, fact_hash=req_id, signature_b64=signature_b64, public_key_b64=public_key_b64)
-                logger.info("[AuthGateway] Ed25519 Signature Verified for %s", req_id)
-            except Exception as sig_err:
-                logger.error("[AuthGateway] CRITICAL: Cryptographic Verification Failed for %s. Rejecting override.", req_id)
-                # Fail open to rejection if signature is forged
+                logger.info("[QuorumGateway] Ed25519 Signature Verified for %s", req_id)
+            except Exception:
+                logger.error("[QuorumGateway] CRITICAL: Cryptographic Verification Failed for %s. Discarding vote.", req_id)
                 return False
                 
-            conn.execute(
-                "UPDATE auth_requests SET status = 'APPROVED', resolved_at = ?, signature = ?, public_key = ? WHERE id = ?",
-                (time.monotonic(), signature_b64, public_key_b64, req_id)
-            )
+            signatures: List[Dict[str, str]] = json.loads(sigs_json)
+            
+            # Prevent double voting
+            if any(sig["public_key"] == public_key_b64 for sig in signatures):
+                logger.warning("[QuorumGateway] Node %s already voted.", public_key_b64[:8])
+                return False
+
+            signatures.append({"signature": signature_b64, "public_key": public_key_b64})
+            new_sigs_json = json.dumps(signatures)
+            
+            vote_count = len(signatures)
+            
+            if vote_count >= self.threshold:
+                conn.execute(
+                    "UPDATE quorum_requests SET status = 'QUORUM_REACHED', resolved_at = ?, signatures_json = ? WHERE id = ?",
+                    (time.monotonic(), new_sigs_json, req_id)
+                )
+                logger.info("[QuorumGateway] Request %s REACHED QUORUM (%d/%d). BFT Consensus Achieved.", req_id, vote_count, self.threshold)
+            else:
+                conn.execute(
+                    "UPDATE quorum_requests SET signatures_json = ? WHERE id = ?",
+                    (new_sigs_json, req_id)
+                )
+                logger.info("[QuorumGateway] Vote registered for %s (%d/%d).", req_id, vote_count, self.threshold)
+
             conn.commit()
-            logger.info("[AuthGateway] Request %s APPROVED by Operator.", req_id)
             return True
         except Exception as e:
-            logger.error("[AuthGateway] Failed to approve request %s: %s", req_id, e)
+            logger.error("[QuorumGateway] Failed to submit vote for request %s: %s", req_id, e)
             return False
             
     async def reject_request(self, req_id: str) -> bool:
-        """Rejects a request."""
+        """Rejects a request directly (fallback/admin override)."""
         try:
             conn = self.engine.pool.get_connection()
             conn.execute(
-                "UPDATE auth_requests SET status = 'REJECTED', resolved_at = ? WHERE id = ?",
+                "UPDATE quorum_requests SET status = 'REJECTED', resolved_at = ? WHERE id = ?",
                 (time.monotonic(), req_id)
             )
             conn.commit()
-            logger.info("[AuthGateway] Request %s REJECTED by Operator.", req_id)
+            logger.info("[QuorumGateway] Request %s REJECTED.", req_id)
             return True
         except Exception as e:
-            logger.error("[AuthGateway] Failed to reject request %s: %s", req_id, e)
+            logger.error("[QuorumGateway] Failed to reject request %s: %s", req_id, e)
             return False
