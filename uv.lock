@@ -719,7 +719,7 @@ wheels = [
 
 [[package]]
 name = "cortex-persist"
-version = "0.3.0b8"
+version = "1.0.0"
 source = { editable = "." }
 dependencies = [
     { name = "aiosqlite" },
@@ -728,6 +728,7 @@ dependencies = [
     { name = "keyring" },
     { name = "prometheus-client" },
     { name = "pydantic" },
+    { name = "pyyaml" },
     { name = "rich" },
     { name = "sqlite-vec" },
 ]
@@ -889,6 +890,7 @@ requires-dist = [
     { name = "pytest-timeout", marker = "extra == 'dev'", specifier = ">=2.3" },
     { name = "pytest-xdist", marker = "extra == 'dev'", specifier = ">=3.8.0" },
     { name = "pytrends", marker = "extra == 'trends'", specifier = ">=4.9" },
+    { name = "pyyaml", specifier = ">=6.0.3" },
     { name = "pyyaml", marker = "extra == 'authoring'", specifier = ">=6.0" },
     { name = "qdrant-client", marker = "extra == 'cloud'", specifier = ">=1.9" },
     { name = "redis", marker = "extra == 'cloud'", specifier = ">=5.0" },
