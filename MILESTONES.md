@@ -45,9 +45,9 @@
 - **Commits:** `32b003b7` → `b01eb1a8`
 - **Status:** ✅ COMPLETE
 
-### Hito 06: MEJORAlo & Ouroboros Gate
+### Hito 06: mejoralo & Ouroboros Gate
 - **Target:** `cortex/extensions/gate/ouroboros.py`, `mejoralo/`
-- **Objective:** Motor de auditoría de código autónomo (MEJORAlo) + Ouroboros Gate como filtro termodinámico SNR para purga de datos obsoletos.
+- **Objective:** Motor de auditoría de código autónomo (mejoralo) + Ouroboros Gate como filtro termodinámico SNR para purga de datos obsoletos.
 - **Yield Target:** 151+ tests passing, narrow exceptions, type hints completos.
 - **Reality Level:** `C5-REAL`
 - **Commits:** `2fce2b12` → `fc5f3737`
@@ -466,16 +466,16 @@ Proof:
 
 ---
 
-### Hito 33: Autonomous C5-REAL Debt Purge (MEJORAlo 8.0 Protocol)
+### Hito 33: Autonomous C5-REAL Debt Purge (mejoralo 8.0 Protocol)
 - **Target:** `cortex/memory/`, `cortex/observability/`, `cortex/production/`
-- **Objective:** Ejecución autónoma de purga de deuda técnica e higienización estructural dictada por el escáner de anti-patrones MEJORAlo. Erradicación del anti-patrón `except Exception` global a favor de control específico.
+- **Objective:** Ejecución autónoma de purga de deuda técnica e higienización estructural dictada por el escáner de anti-patrones mejoralo. Erradicación del anti-patrón `except Exception` global a favor de control específico.
 - **Yield Target:** 7 vectores de limerencia y ruido estructural aniquilados, 100% de compliance con el linter Ruff (0 advertencias).
 - **Reality Level:** `C5-REAL`
 - **Evidence:** Commit `b8dbc25e` (`refactor: tighten exception handling in core modules`)
 ```yaml
 Claim: CORTEX-Persist code debt purged autonomously (7 critical fixes)
 Proof:
-  Base: "Autonomous execution of MEJORAlo fixing 7 broad Exception clauses."
+  Base: "Autonomous execution of mejoralo fixing 7 broad Exception clauses."
   Range: [C5, C5]
   Confidence: C5-REAL
   Date: 2026-06-06
