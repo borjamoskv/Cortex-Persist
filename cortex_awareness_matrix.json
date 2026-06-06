@@ -33,6 +33,7 @@
     "web-sota-100"
   ],
   "skills": [
+    ".ruff_cache",
     "API-Provider-OMEGA",
     "API-Sentinel-OMEGA",
     "Aesthetic-Foundry-Omega",
