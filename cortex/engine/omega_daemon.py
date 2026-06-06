@@ -30,13 +30,64 @@ class EntropySensor:
     """
     Escanea el ecosistema (AST, lints, tests, TODOs) y cuantifica la entropía.
     """
+    def __init__(self):
+        self.last_scan_files = 0
+        self.last_scan_todos = 0
+        self.last_scan_violations = 0
+
     async def scan(self) -> Decimal:
-        # Stub: en un sistema real esto ejecutaría Ruff, Pytest, o parsearía AST.
-        # Simulamos un sistema estable que ocasionalmente encuentra entropía.
-        logger.debug("Escaneando entropía estructural...")
-        await asyncio.sleep(0.1) # Simulamos latencia asíncrona de I/O
-        # Retorna entropía medida en Joules exergéticos
-        return Decimal("0.0")
+        import json
+        import os
+        
+        py_files = []
+        todos = 0
+        violations = 0
+        
+        cortex_dir = os.path.join(os.getcwd(), "cortex")
+        if os.path.exists(cortex_dir):
+            for root, _, files in os.walk(cortex_dir):
+                for file in files:
+                    if file.endswith(".py"):
+                        file_path = os.path.join(root, file)
+                        py_files.append(file_path)
+                        try:
+                            with open(file_path, encoding="utf-8", errors="ignore") as f:
+                                for line in f:
+                                    if "TODO" in line or "FIXME" in line:
+                                        todos += 1
+                        except Exception:
+                            pass
+        
+        # Run ruff check asynchronously
+        try:
+            proc = await asyncio.create_subprocess_exec(
+                "ruff", "check", "cortex/", "--format=json",
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE
+            )
+            stdout, _ = await proc.communicate()
+            if stdout:
+                try:
+                    data = json.loads(stdout)
+                    if isinstance(data, list):
+                        violations = len(data)
+                except Exception:
+                    pass
+        except Exception:
+            pass
+
+        self.last_scan_files = len(py_files)
+        self.last_scan_todos = todos
+        self.last_scan_violations = violations
+        
+        # Calculate structural entropy:
+        # Each violation = 1.5 J, each TODO = 0.4 J, each file baseline = 0.02 J
+        entropy = (
+            Decimal(str(violations)) * Decimal("1.5") + 
+            Decimal(str(todos)) * Decimal("0.4") + 
+            Decimal(str(len(py_files))) * Decimal("0.02")
+        )
+        return entropy
 
 
 class OmegaKernel:
@@ -51,23 +102,35 @@ class OmegaKernel:
         self.sensor = EntropySensor()
         self._running = False
         self._cycle_count = 0
+        self.last_entropy = Decimal("0.0")
+        self.events = []
 
     async def _metabolize(self):
         """
         El núcleo de un latido metabólico.
         """
+        from datetime import datetime
         entropy = await self.sensor.scan()
+        self.last_entropy = entropy
+        timestamp = datetime.now().strftime("%H:%M:%S")
+        
+        self.events.append(f"[{timestamp}] Iniciando ciclo de escaneo... Encontrada entropía: {entropy:.2f} J")
+        
         if entropy > Decimal("0.0"):
             logger.info("Entropía detectada: %s J", entropy)
             if self.guard.evaluate(entropy):
                 logger.info("Exergía suficiente. Desatando Enjambre (Swarm)...")
+                self.events.append(f"[{timestamp}] [bold green]✔ Exergía suficiente.[/] Desatando Enjambre (Swarm)...")
                 
                 # Integración Causal: Swarm 10k y Ouroboros AST Mutation
                 try:
+                    from pathlib import Path
+
                     from cortex.engine.autopoiesis import AutopoiesisEngine
                     from cortex.engine.swarm_10k import SwarmCommander
                     
-                    commander = SwarmCommander(tenant_id="omega_daemon")
+                    bus_path = Path("~/.cortex/10k_shards").expanduser()
+                    commander = SwarmCommander(bus_path=bus_path, tenant_id="omega_daemon")
                     ouroboros = AutopoiesisEngine(observation_window_ms=100)
                     
                     logger.debug("Desplegando formación PHOENIX vía SwarmCommander...")
@@ -81,13 +144,17 @@ class OmegaKernel:
                         
                 except Exception as e:
                     logger.exception("Fallo al desatar el Enjambre o Ouroboros: %s", e)
+                    self.events.append(f"[{timestamp}] [bold red]✗ Fallo Swarm/Ouroboros:[/] {e}")
                 
                 self.guard.consume(entropy)
                 logger.info("Evolución estructural completada. Auto-commit ejecutado.")
+                self.events.append(f"[{timestamp}] [bold green]★ Evolución estructural completada.[/] Auto-commit ejecutado.")
             else:
                 logger.warning("Fallo Exergético. Hibernando para conservar recursos.")
+                self.events.append(f"[{timestamp}] [bold red]⚠️ Fallo Exergético.[/] Presupuesto insuficiente. Hibernando...")
         else:
             logger.debug("Homeostasis mantenida. Sistema estable.")
+            self.events.append(f"[{timestamp}] Homeostasis mantenida. Sistema estable.")
 
     async def run_forever(self):
         self._running = True
@@ -104,6 +171,9 @@ class OmegaKernel:
             except Exception as e:
                 # Evita que un error mate el daemon, pero no silencia la excepción
                 logger.exception("Error cataclísmico en el metabolismo: %s", e)
+                from datetime import datetime
+                timestamp = datetime.now().strftime("%H:%M:%S")
+                self.events.append(f"[{timestamp}] [bold red]💥 Error metabólico:[/] {e}")
             
             await asyncio.sleep(self.tick_rate)
 
