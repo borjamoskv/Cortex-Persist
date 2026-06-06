@@ -29,9 +29,9 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 # ─── Thermodynamic Constants ─────────────────────────────────────────
-MIN_EXERGY_THRESHOLD = 0.125      # 3 half-lives → tombstone
-WARM_THRESHOLD = 0.50             # 1 half-life  → HOT → WARM
-COLD_THRESHOLD = 0.25             # 2 half-lives → WARM → COLD
+MIN_EXERGY_THRESHOLD = 0.125  # 3 half-lives → tombstone
+WARM_THRESHOLD = 0.50  # 1 half-life  → HOT → WARM
+COLD_THRESHOLD = 0.25  # 2 half-lives → WARM → COLD
 
 logging.basicConfig(
     level=logging.INFO,
@@ -42,9 +42,11 @@ logger = logging.getLogger("ouroboros_prune")
 
 # ─── Statistics ──────────────────────────────────────────────────────
 
+
 @dataclass
 class PurgeCycleStats:
     """Tracks results of a single Ouroboros cycle."""
+
     total_scanned: int = 0
     tombstoned: int = 0
     transitioned_warm: int = 0
@@ -66,6 +68,7 @@ class PurgeCycleStats:
 
 
 # ─── Core Engine ─────────────────────────────────────────────────────
+
 
 def _build_topological_barrier(conn: sqlite3.Connection) -> set[int]:
     """Build set of fact IDs that are ancestors of any live C5 node.
@@ -193,7 +196,10 @@ def execute_thermal_purge(
                     if not json_output:
                         logger.info(
                             "☠ Thermal Death: Fact %d (Age: %.1fd, T½: %.1fd, Exergy: %.4f)",
-                            fact_id, age_days, half_life, exergy,
+                            fact_id,
+                            age_days,
+                            half_life,
+                            exergy,
                         )
                 elif exergy < COLD_THRESHOLD and current_tier != "COLD":
                     cold_ids.append(fact_id)
@@ -268,6 +274,7 @@ def execute_thermal_purge(
 
 # ─── CLI ─────────────────────────────────────────────────────────────
 
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Ouroboros Thermodynamic Pruning Engine v2.0",
@@ -281,15 +288,18 @@ def main() -> None:
         ),
     )
     parser.add_argument(
-        "--db", default="~/.cortex/cortex.db",
+        "--db",
+        default="~/.cortex/cortex.db",
         help="Path to CORTEX SQLite database (default: ~/.cortex/cortex.db)",
     )
     parser.add_argument(
-        "--dry-run", action="store_true",
+        "--dry-run",
+        action="store_true",
         help="Simulate the purge without mutating state",
     )
     parser.add_argument(
-        "--json", action="store_true",
+        "--json",
+        action="store_true",
         help="Output results as machine-readable JSON",
     )
     args = parser.parse_args()

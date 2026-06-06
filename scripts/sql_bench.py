@@ -56,15 +56,20 @@ def create_temp_db(scale: int) -> tuple[str, float]:
     conn.execute("CREATE INDEX idx_f_tier ON facts(storage_tier)")
 
     start = time.perf_counter()
-    batch = [(
-        "default", "cortex-bench",
-        f"Fact #{i}: {uuid.uuid4().hex[:32]}",
-        "knowledge" if i % 3 != 0 else "observation",
-        json.dumps({"bench": True, "idx": i}),
-        f"C{(i % 5) + 1}", "ACTIVE",
-        "HOT" if i % 4 != 3 else "WARM",
-        max(0.1, 1.0 - (i / scale)),
-    ) for i in range(scale)]
+    batch = [
+        (
+            "default",
+            "cortex-bench",
+            f"Fact #{i}: {uuid.uuid4().hex[:32]}",
+            "knowledge" if i % 3 != 0 else "observation",
+            json.dumps({"bench": True, "idx": i}),
+            f"C{(i % 5) + 1}",
+            "ACTIVE",
+            "HOT" if i % 4 != 3 else "WARM",
+            max(0.1, 1.0 - (i / scale)),
+        )
+        for i in range(scale)
+    ]
 
     conn.executemany(
         "INSERT INTO facts (tenant_id, project, content, fact_type, metadata, "
@@ -150,22 +155,24 @@ def main() -> None:
     for scale in SCALES:
         print(f"\n--- {scale:,} facts ---")
         db_path, ins_ms = create_temp_db(scale)
-        print(f"  Insert: {ins_ms:.1f}ms ({scale/(ins_ms/1000):.0f} facts/s)")
+        print(f"  Insert: {ins_ms:.1f}ms ({scale / (ins_ms / 1000):.0f} facts/s)")
 
         results = bench(db_path, scale)
         report[scale] = {"insert_ms": round(ins_ms, 2), **results}
 
         print(f"  {'Query':<20} {'P50':>8} {'P95':>8} {'P99':>8} {'Mean':>8}")
-        print(f"  {'─'*52}")
+        print(f"  {'─' * 52}")
         for qtype, stats in results.items():
-            print(f"  {qtype:<20} {stats['p50']:>8.1f} {stats['p95']:>8.1f} {stats['p99']:>8.1f} {stats['mean']:>8.1f}")
+            print(
+                f"  {qtype:<20} {stats['p50']:>8.1f} {stats['p95']:>8.1f} {stats['p99']:>8.1f} {stats['mean']:>8.1f}"
+            )
         os.unlink(db_path)
 
     out = Path("/tmp/cortex_sql_bench.json")
     out.write_text(json.dumps(report, indent=2))
-    print(f"\n{'='*80}")
+    print(f"\n{'=' * 80}")
     print(f"  Report: {out}")
-    print(f"{'='*80}")
+    print(f"{'=' * 80}")
 
 
 if __name__ == "__main__":

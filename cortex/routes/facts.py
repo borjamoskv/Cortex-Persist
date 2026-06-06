@@ -179,9 +179,9 @@ async def recall_facts(
                 valid_until=fact_data["valid_until"],
                 source=fact_data["source"],
                 meta=fact_data["meta"],
-                created_at=fact_data["created_at"],
-                updated_at=fact_data["updated_at"],
-                tx_id=fact_data["tx_id"],
+                created_at=str(fact_data["created_at"]) if fact_data.get("created_at") else "",
+                updated_at=str(fact_data["updated_at"]) if fact_data.get("updated_at") else "",
+                tx_id=str(fact_data["tx_id"]) if fact_data.get("tx_id") is not None else None,
                 hash=fact_data["hash"],
                 consensus_score=fact_data.get("consensus_score", 1.0),
             )
@@ -216,7 +216,7 @@ async def list_all_facts(
                 created_at=str(fact_data.get("created_at", "")),
                 updated_at=str(fact_data.get("updated_at", ""))
                 or str(fact_data.get("created_at", "")),
-                tx_id=fact_data.get("tx_id"),
+                tx_id=str(fact_data.get("tx_id")) if fact_data.get("tx_id") is not None else None,
                 hash=fact_data.get("hash"),
                 consensus_score=float(fact_data.get("consensus_score", 1.0)),
             )
@@ -246,11 +246,11 @@ async def search_facts(
             fact_type=r.fact_type,
             tags=r.tags,
             confidence=r.confidence,
-            created_at=r.created_at,
-            updated_at=r.updated_at,
+            created_at=str(r.created_at) if r.created_at else "",
+            updated_at=str(r.updated_at) if r.updated_at else "",
             hash=r.hash,
             consensus_score=r.score,
-            tx_id=r.tx_id,
+            tx_id=str(r.tx_id) if r.tx_id is not None else None,
         )
         for r in results
     ]
@@ -282,10 +282,12 @@ async def get_fact_history(
                     fact_type=fact_data["fact_type"],
                     tags=fact_data.get("tags", []),
                     confidence=fact_data.get("confidence", "C3"),
-                    created_at=fact_data["created_at"],
-                    updated_at=fact_data.get("updated_at") or fact_data["created_at"],
+                    created_at=str(fact_data["created_at"]) if fact_data.get("created_at") else "",
+                    updated_at=str(
+                        fact_data.get("updated_at") or fact_data.get("created_at") or ""
+                    ),
                     hash=fact_data.get("hash"),
-                    tx_id=fact_data.get("tx_id"),
+                    tx_id=str(fact_data["tx_id"]) if fact_data.get("tx_id") is not None else None,
                 )
             )
         return response
@@ -495,7 +497,7 @@ async def get_fact_by_id(
         meta=fact_data.get("meta"),
         created_at=str(fact_data.get("created_at", "")),
         updated_at=str(fact_data.get("updated_at", "")),
-        tx_id=fact_data.get("tx_id"),
+        tx_id=str(fact_data.get("tx_id")) if fact_data.get("tx_id") is not None else None,
         hash=fact_data.get("hash"),
         consensus_score=float(fact_data.get("consensus_score", 1.0)),
     )

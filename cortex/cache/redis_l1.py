@@ -103,7 +103,9 @@ class RedisL1Cache:
             else:
                 self._misses += 1
             return val
-        except (OSError, ConnectionError, TimeoutError, RedisError):
+        except (OSError, ConnectionError, TimeoutError, RedisError) as exc:
+            logger.warning("Redis L1 error on get (%s), disabling cache fallback", exc)
+            self._client = None
             self._misses += 1
             return None
 
@@ -113,7 +115,9 @@ class RedisL1Cache:
             return False
         try:
             return bool(self._client.setex(self._key(key), ttl or self._default_ttl, value))
-        except (OSError, ConnectionError, TimeoutError, RedisError):
+        except (OSError, ConnectionError, TimeoutError, RedisError) as exc:
+            logger.warning("Redis L1 error on set (%s), disabling cache fallback", exc)
+            self._client = None
             return False
 
     def get_or_compute(
@@ -136,7 +140,9 @@ class RedisL1Cache:
             return False
         try:
             return bool(self._client.delete(self._key(key)))
-        except (OSError, ConnectionError, TimeoutError, RedisError):
+        except (OSError, ConnectionError, TimeoutError, RedisError) as exc:
+            logger.warning("Redis L1 error on invalidate (%s), disabling cache fallback", exc)
+            self._client = None
             return False
 
     def flush_namespace(self, prefix: str) -> int:
@@ -149,7 +155,9 @@ class RedisL1Cache:
             if keys:
                 return self._client.delete(*keys)
             return 0
-        except (OSError, ConnectionError, TimeoutError, RedisError):
+        except (OSError, ConnectionError, TimeoutError, RedisError) as exc:
+            logger.warning("Redis L1 error on flush_namespace (%s), disabling cache fallback", exc)
+            self._client = None
             return 0
 
     def health_check(self) -> dict[str, Any]:
