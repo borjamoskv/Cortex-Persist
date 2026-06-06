@@ -34,13 +34,13 @@ from pydantic import BaseModel, Field
 class MemoryConfig(BaseModel):
     """Memory configuration for an agent role."""
 
-    art_rho: float = Field(
+    art_rho: Decimal = Field(
         default=0.85,
         ge=0.0,
         le=1.0,
         description="ART vigilance parameter. Higher = more granular memory.",
     )
-    pruning_threshold: float = Field(
+    pruning_threshold: Decimal = Field(
         default=0.2,
         ge=0.0,
         le=1.0,
@@ -62,7 +62,7 @@ class MemoryConfig(BaseModel):
         default=True,
         description="Enable dual-trace consolidation (active + silent).",
     )
-    maturation_days: float = Field(
+    maturation_days: Decimal = Field(
         default=3.0,
         ge=0.0,
         description="Days for silent engrams to mature.",
@@ -82,7 +82,7 @@ class GuardrailConfig(BaseModel):
         gt=0,
         description="Hard cap on total tokens consumed per session.",
     )
-    warn_threshold: float = Field(
+    warn_threshold: Decimal = Field(
         default=0.8,
         ge=0.0,
         le=1.0,

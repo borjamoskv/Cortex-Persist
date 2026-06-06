@@ -18,10 +18,10 @@ WAL_DIR = "cortex_data/wal"
 @dataclass
 class CortexState:
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
-    exergy: float = 1.0
-    entropy: float = 0.0
-    drift: float = 0.0
-    cost: float = 0.0
+    exergy: Decimal = 1.0
+    entropy: Decimal = 0.0
+    drift: Decimal = 0.0
+    cost: Decimal = 0.0
     tick_count: int = 0
 
 
@@ -159,7 +159,7 @@ class CortexRuntime:
             }
         )
 
-    def run_forever(self, tick_delay: float = 1.0):
+    def run_forever(self, tick_delay: Decimal = 1.0):
         self.load_state()
         self.running = True
         logger.info(
