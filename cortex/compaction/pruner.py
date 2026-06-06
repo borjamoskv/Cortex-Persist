@@ -7,7 +7,7 @@ ledger bloat, maintaining C5-REAL audibility via continuous hash chains.
 
 import hashlib
 import logging
-from typing import Any, TypedDict
+from typing import TypedDict
 
 logger = logging.getLogger("cortex.compaction.pruner")
 

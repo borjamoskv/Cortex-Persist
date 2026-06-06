@@ -80,7 +80,10 @@ class QuorumGateway:
             return False
 
         try:
-            from cortex.extensions.security.signatures import Ed25519Signer, SignatureVerificationError
+            from cortex.extensions.security.signatures import (
+                Ed25519Signer,
+                SignatureVerificationError,
+            )
 
             conn = self.engine.pool.get_connection()
             cursor = conn.cursor()

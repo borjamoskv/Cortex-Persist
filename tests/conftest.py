@@ -11,6 +11,7 @@ os.environ["CORTEX_TESTING"] = "1"
 os.environ["CORTEX_NO_OMEGA"] = "1"
 os.environ["CORTEX_MASTER_KEY"] = "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA="
 os.environ["CORTEX_NO_TAINT_ENFORCE"] = "1"
+os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
 
 import pytest
 

@@ -27,7 +27,7 @@ def test_fresh_schema_has_tenant_scoped_merkle_roots() -> None:
     applied = run_migrations(conn)
 
     assert applied == 0
-    assert get_current_version(conn) == 26
+    assert get_current_version(conn) == 27
     assert "tenant_id" in _columns(conn, "merkle_roots")
     tenant_id = _column_info(conn, "merkle_roots", "tenant_id")
     assert tenant_id["notnull"] == 1
@@ -76,7 +76,7 @@ def test_migration_025_adds_merkle_tenant_scope_without_data_loss() -> None:
 
 def test_migration_registry_tracks_forensic_ledger_schema_version() -> None:
     versions = [version for version, _description, _func in MIGRATIONS]
-    assert versions[-1] == 26
+    assert versions[-1] == 27
     assert versions == sorted(versions)
     assert len(versions) == len(set(versions))
 

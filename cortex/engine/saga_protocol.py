@@ -5,9 +5,9 @@ Enforces the 7-step Write-Path Contract for all state mutations.
 If a proposal fails at step N, it compensates backwards to SAGA-1.
 """
 
-import asyncio
 import logging
-from typing import Any, Callable, Coroutine, TypedDict
+from collections.abc import Callable, Coroutine
+from typing import Any, TypedDict
 
 logger = logging.getLogger("cortex.engine.saga")
 
