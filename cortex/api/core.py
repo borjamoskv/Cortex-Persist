@@ -19,6 +19,7 @@ from fastapi.responses import JSONResponse
 
 import cortex.api.state as api_state
 from cortex import __version__, config
+from cortex.extensions.llm.quota import QuotaRejectedError
 from cortex.api.middleware import (
     ContentSizeLimitMiddleware,
     CortexBillingMiddleware,
@@ -206,6 +207,16 @@ async def sqlite_error_handler(request: Request, exc: sqlite3.Error) -> JSONResp
         )
 
     return JSONResponse(status_code=500, content={"detail": get_trans("error_internal_db", lang)})
+
+
+@app.exception_handler(QuotaRejectedError)
+async def quota_rejected_handler(request: Request, exc: QuotaRejectedError) -> JSONResponse:
+    logger.error("Sovereign Quota Rejected: %s", exc)
+    return JSONResponse(
+        status_code=429,
+        content={"detail": "CORTEX_OVERLOAD: Local PULMONES queue is full. Backoff required."},
+        headers={"Retry-After": "5"},
+    )
 
 
 @app.exception_handler(Exception)

@@ -23,6 +23,9 @@ from pathlib import Path
 
 from cortex.database.core import connect as db_connect
 
+class QuotaRejectedError(Exception):
+    """Raised when PULMONES fast-rejects or times out."""
+
 logger = logging.getLogger("cortex.extensions.llm.quota")
 
 # Module-level CSPRNG - avoid recreating per-iteration (~0.5ms saved/call)
@@ -204,11 +207,11 @@ class SovereignQuotaManager:
             deadline: Tiempo máximo de espera total en segundos.
 
         Returns:
-            True si se adquirió la cuota, False si expiró el deadline o si se superó max_waiters.
+            True si se adquirió la cuota. Levanta QuotaRejectedError si expiró el deadline o si se superó max_waiters.
         """
         if getattr(self, "_current_waiters", 0) >= getattr(self, "max_waiters", 20):
             logger.error("PULMONES: Fast-Reject (OOM Protection). Cola desbordada: %d waiters", self._current_waiters)
-            return False
+            raise QuotaRejectedError(f"Local PULMONES queue is full ({self._current_waiters} waiters). Fast-Rejecting to prevent OOM.")
 
         self._current_waiters = getattr(self, "_current_waiters", 0) + 1
         try:
@@ -225,7 +228,7 @@ class SovereignQuotaManager:
                 if elapsed >= deadline:
                     logger.error("PULMONES: Timeout tras %.1fs esperando %d tokens.", elapsed, tokens)
                     self._increment_timeouts()
-                    return False
+                    raise QuotaRejectedError(f"PULMONES deadline exceeded ({deadline}s)")
 
                 # Hardware Entropy + Golden Ratio (Caos termodinámico asimétrico profundo)
                 jitter = _RNG.uniform(0.1, 1.618 ** min(attempt + 1, 6))
