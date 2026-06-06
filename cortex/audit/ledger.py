@@ -181,7 +181,7 @@ class EnterpriseAuditLedger:
 
         await self.ensure_table()
 
-        timestamp = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat()
+        timestamp = datetime.fromtimestamp(time.time(), tz=timezone.utc).isoformat()
         audit_id = hashlib.sha256(f"{timestamp}{actor_id}{action}".encode()).hexdigest()
 
         event = {
