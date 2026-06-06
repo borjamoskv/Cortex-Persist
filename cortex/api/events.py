@@ -46,7 +46,9 @@ async def event_generator(request: Request) -> AsyncGenerator[str, None]:
                         "event_type": sig.event_type,
                         "payload": sig.payload,
                         "source": sig.source,
-                        "created_at": sig.created_at.isoformat() if hasattr(sig.created_at, 'isoformat') else sig.created_at,
+                        "created_at": sig.created_at.isoformat()
+                        if hasattr(sig.created_at, "isoformat")
+                        else sig.created_at,
                     }
                     yield f"event: {sig.event_type}\ndata: {json.dumps(event_data)}\n\n"
 
