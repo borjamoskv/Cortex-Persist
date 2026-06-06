@@ -91,10 +91,11 @@ class LocalEmbedder:
                 return None
 
             try:
+                import platform
+
                 from sentence_transformers import (
                     SentenceTransformer,  # pyright: ignore[reportMissingImports]
                 )
-                import platform
 
                 # Idea #6: ONNX INT8 Quantization
                 # Achieve < 10ms embeddings by using the ONNX backend.

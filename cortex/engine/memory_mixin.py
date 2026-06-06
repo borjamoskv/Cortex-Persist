@@ -53,6 +53,7 @@ class MemoryMixin(EngineMixinBase):
     async def _init_core_memory(self, conn: aiosqlite.Connection):
         try:
             import os
+
             from cortex.memory.ledger import EventLedgerL3
             redis_url = os.environ.get("CORTEX_REDIS_URL")
             if redis_url:

@@ -272,11 +272,3 @@ class StorageGuard:
         if "invalid tag" in msg:
             raise GuardViolation("INVALID_TAG", msg.replace("Value error, ", "")) from e
         raise GuardViolation("TOO_MANY_TAGS", msg.replace("Value error, ", "")) from e
-
-        logger.debug(
-            "StorageGuard PASS: project=%s, type=%s, source=%s, len=%d",
-            project,
-            fact_type,
-            effective_source,
-            len(content),
-        )

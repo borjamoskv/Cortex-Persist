@@ -10,9 +10,9 @@ import asyncio
 import logging
 from typing import Any
 
+from pythonosc.dispatcher import Dispatcher
 from pythonosc.osc_message_builder import OscMessageBuilder
 from pythonosc.osc_server import AsyncIOOSCUDPServer
-from pythonosc.dispatcher import Dispatcher
 
 logger = logging.getLogger("cortex.bci.osc_bridge")
 

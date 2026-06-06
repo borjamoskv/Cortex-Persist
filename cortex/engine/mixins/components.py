@@ -226,4 +226,4 @@ class ComponentsMixin:
                 raise RuntimeError(f"FAIL-CLOSED: {name} failed: {e}") from e
             logger.debug("%s unavailable: %s", name, e)
         except Exception as e:
-            raise RuntimeError(f"FAIL-CLOSED: {name} failed: {e}") from ene
+            raise RuntimeError(f"FAIL-CLOSED: {name} failed: {e}") from e
