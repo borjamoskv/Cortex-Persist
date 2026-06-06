@@ -23,6 +23,7 @@ from pathlib import Path
 
 from cortex.database.core import connect as db_connect
 
+
 class QuotaRejectedError(Exception):
     """Raised when PULMONES fast-rejects or times out."""
 

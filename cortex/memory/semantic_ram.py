@@ -87,10 +87,10 @@ class SemanticMutator:
             self._worker_task.cancel()
             try:
                 await self._worker_task
+            except asyncio.CancelledError:
+                pass
             except Exception as exc:
                 logger.warning("Suppressed exception: %s", exc)
-            except Exception as e:
-                logger.error("SemanticMutator shutdown error: %s", e)
             if hasattr(self._pool, "shutdown"):
                 self._pool.shutdown(wait=False, cancel_futures=True)
             logger.info("SemanticMutator: Topological gravitational field collapsed (Stopped).")
@@ -310,15 +310,18 @@ class DynamicSemanticSpace:
 
     async def stop(self) -> None:
         """Gracefully stops all autonomic processes."""
-        await self.semantic_mutator.stop()
+        try:
+            await self.semantic_mutator.stop()
+        except asyncio.CancelledError:
+            pass
         if self._heartbeat_task and not self._heartbeat_task.done():
             self._heartbeat_task.cancel()
             try:
                 await self._heartbeat_task
+            except asyncio.CancelledError:
+                pass
             except Exception as exc:
                 logger.warning("Suppressed exception: %s", exc)
-            except Exception as e:
-                logger.error("DynamicSemanticSpace shutdown error: %s", e)
             logger.info("DynamicSemanticSpace: Autonomic heartbeat collapsed (Stopped).")
 
     async def _heartbeat_loop(self) -> None:
