@@ -173,7 +173,9 @@ def execute_thermal_purge(
             for row in rows:
                 fact_id = row["id"]
                 age_days = float(row["age_days"]) if row["age_days"] else 0.0
-                half_life = float(row["decay_half_life"]) if row["decay_half_life"] is not None else 30.0
+                half_life = (
+                    float(row["decay_half_life"]) if row["decay_half_life"] is not None else 30.0
+                )
                 current_tier = row["storage_tier"] or "HOT"
 
                 # Compute exergy (exponential decay)

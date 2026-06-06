@@ -54,19 +54,21 @@ async def ingest_influencer(
 ) -> StoreResponse:
     """Ingest/update a single influencer into the benchmark dataset using the Write-Path Contract."""
     try:
-        content_payload = json.dumps({
-            "name": req.name,
-            "handle": req.handle,
-            "category": req.category,
-            "hype": req.hype,
-            "utility": req.utility,
-            "followers": req.followers,
-            "cliche": req.cliche,
-            "verdict": req.verdict,
-            "territory": req.territory,
-            "reality_level": req.reality_level,
-        })
-        
+        content_payload = json.dumps(
+            {
+                "name": req.name,
+                "handle": req.handle,
+                "category": req.category,
+                "hype": req.hype,
+                "utility": req.utility,
+                "followers": req.followers,
+                "cliche": req.cliche,
+                "verdict": req.verdict,
+                "territory": req.territory,
+                "reality_level": req.reality_level,
+            }
+        )
+
         fact_id = await engine.store(
             project="benchmark",
             content=content_payload,
@@ -74,13 +76,11 @@ async def ingest_influencer(
             fact_type="influencer",
             tags=["benchmark", req.category, req.territory.lower()],
             source="benchmark_api",
-            meta={
-                "hype": req.hype,
-                "utility": req.utility,
-                "reality_level": req.reality_level
-            }
+            meta={"hype": req.hype, "utility": req.utility, "reality_level": req.reality_level},
         )
-        return StoreResponse(fact_id=fact_id, project="benchmark", message="Influencer ingested successfully")
+        return StoreResponse(
+            fact_id=fact_id, project="benchmark", message="Influencer ingested successfully"
+        )
     except Exception as e:
         logger.exception("Failed to ingest influencer: %s", e)
         raise HTTPException(status_code=500, detail="Failed to ingest influencer") from None
@@ -95,33 +95,40 @@ async def list_influencers(
     try:
         # Benchmark data is globally readable, we recall under the default scope
         facts = await engine.recall(project="benchmark", tenant_id="default", limit=limit)
-        
+
         result: list[InfluencerResponse] = []
         for fact in facts:
             # We bypass private mapping protocols to read clean dict
             fact_dict = getattr(fact, "to_dict", lambda: None)()
             if not fact_dict or "content" not in fact_dict:
                 continue
-            
+
             try:
                 data = json.loads(fact_dict["content"])
-                result.append(InfluencerResponse(
-                    name=data["name"],
-                    handle=data["handle"],
-                    category=data["category"],
-                    hype=int(data["hype"]),
-                    utility=int(data["utility"]),
-                    followers=int(data["followers"]),
-                    cliche=data["cliche"],
-                    verdict=data["verdict"],
-                    territory=data.get("territory", "ES"),
-                    reality_level=data.get("reality_level", fact_dict.get("meta", {}).get("reality_level", "C4-SINTÉTICO")),
-                    fact_id=fact_dict["id"]
-                ))
+                result.append(
+                    InfluencerResponse(
+                        name=data["name"],
+                        handle=data["handle"],
+                        category=data["category"],
+                        hype=int(data["hype"]),
+                        utility=int(data["utility"]),
+                        followers=int(data["followers"]),
+                        cliche=data["cliche"],
+                        verdict=data["verdict"],
+                        territory=data.get("territory", "ES"),
+                        reality_level=data.get(
+                            "reality_level",
+                            fact_dict.get("meta", {}).get("reality_level", "C4-SINTÉTICO"),
+                        ),
+                        fact_id=fact_dict["id"],
+                    )
+                )
             except (json.JSONDecodeError, KeyError, ValueError):
                 continue
-                
+
         return result
     except Exception as e:
         logger.exception("Failed to retrieve influencer list: %s", e)
-        raise HTTPException(status_code=500, detail="Internal server error retrieving benchmark") from None
+        raise HTTPException(
+            status_code=500, detail="Internal server error retrieving benchmark"
+        ) from None

@@ -91,8 +91,7 @@ class EnrichmentQueue:
     def mark_failed(self, job_id: str, event_id: str, error: str, attempts: int) -> None:
         delay_minutes = min(60, 2 ** min(attempts, 5))
         next_attempt = (
-            datetime.fromtimestamp(time.time(), tz=timezone.utc)
-            + timedelta(minutes=delay_minutes)
+            datetime.fromtimestamp(time.time(), tz=timezone.utc) + timedelta(minutes=delay_minutes)
         ).isoformat()
         terminal = attempts >= 8
 

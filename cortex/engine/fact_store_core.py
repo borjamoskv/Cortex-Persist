@@ -113,6 +113,7 @@ async def insert_fact_record(
         current_hash = meta.get("current_ui_hash")
         if expected_hash is not None and current_hash is not None:
             from cortex.guards.ctre_guard import CTRECollisionError, CTREGuard
+
             success, epsilon = CTREGuard.validate_commit(int(expected_hash), int(current_hash))
             if not success:
                 raise CTRECollisionError(int(expected_hash), int(current_hash), epsilon)

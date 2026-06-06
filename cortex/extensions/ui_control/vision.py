@@ -60,9 +60,7 @@ class VisionEngine:
             return InteractionResult(success=False, error="Failed to capture screen")
 
         # Save to file
-        timestamp = datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime(
-            "%Y%m%d_%H%M%S"
-        )
+        timestamp = datetime.fromtimestamp(time.time(), tz=timezone.utc).strftime("%Y%m%d_%H%M%S")
         filename = f"capture_{timestamp}.png"
         path = os.path.join(self._screenshots_dir, filename)
 
