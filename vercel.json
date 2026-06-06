@@ -8,31 +8,6 @@
       "has": [{ "type": "host", "value": "www.cortexpersist.com" }],
       "destination": "https://cortexpersist.com/:path*",
       "permanent": true
-    },
-    {
-      "source": "/:path*",
-      "has": [{ "type": "host", "value": "cortexpersist.dev" }],
-      "destination": "https://cortexpersist.com/:path*",
-      "permanent": false
-    },
-    {
-      "source": "/:path*",
-      "has": [{ "type": "host", "value": "www.cortexpersist.dev" }],
-      "destination": "https://cortexpersist.com/:path*",
-      "permanent": false
-    },
-    {
-      "source": "/:path*",
-      "has": [{ "type": "host", "value": "cortexpersist.org" }],
-      "destination": "https://cortexpersist.com/:path*",
-      "permanent": false
-    },
-    {
-      "source": "/:path*",
-      "has": [{ "type": "host", "value": "www.cortexpersist.org" }],
-      "destination": "https://cortexpersist.com/:path*",
-      "permanent": false
-    }
   ],
   "headers": [
     {
