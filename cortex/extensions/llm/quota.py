@@ -198,7 +198,7 @@ class SovereignQuotaManager:
 
     # ─── Public API ───────────────────────────────────────────────────
 
-    async def acquire(self, tokens: int = 1, deadline: float = 120.0) -> bool:
+    async def acquire(self, tokens: int = 1, deadline: float = 120.0, fast_reject: bool = False) -> bool:
         """Adquiere tokens asíncronamente siguiendo el Protocolo PULMONES.
 
         Usa backoff exponencial con jitter para prevenir thundering-herd
@@ -207,6 +207,7 @@ class SovereignQuotaManager:
         Args:
             tokens:   Tokens a consumir (1 = 1 API request).
             deadline: Tiempo máximo de espera total en segundos.
+            fast_reject: Si es True, falla inmediatamente en lugar de hacer backoff.
 
         Returns:
             True si se adquirió la cuota. Levanta QuotaRejectedError si expiró el deadline o si se superó max_waiters.
@@ -230,6 +231,10 @@ class SovereignQuotaManager:
 
                 if wait <= 0:
                     return True
+
+                if fast_reject:
+                    logger.warning("PULMONES: Zero-Wait Failover activado. Evitando backoff (Wait %.2fs).", wait)
+                    raise QuotaRejectedError(f"PULMONES Fast-Reject (wait={wait:.2f}s)")
 
                 elapsed = time.monotonic() - start
                 if elapsed >= deadline:
