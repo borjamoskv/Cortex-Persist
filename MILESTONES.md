@@ -466,13 +466,30 @@ Proof:
 
 ---
 
+### Hito 33: Autonomous C5-REAL Debt Purge (MEJORAlo 8.0 Protocol)
+- **Target:** `cortex/memory/`, `cortex/observability/`, `cortex/production/`
+- **Objective:** Ejecución autónoma de purga de deuda técnica e higienización estructural dictada por el escáner de anti-patrones MEJORAlo. Erradicación del anti-patrón `except Exception` global a favor de control específico.
+- **Yield Target:** 7 vectores de limerencia y ruido estructural aniquilados, 100% de compliance con el linter Ruff (0 advertencias).
+- **Reality Level:** `C5-REAL`
+- **Evidence:** Commit `b8dbc25e` (`refactor: tighten exception handling in core modules`)
+```yaml
+Claim: CORTEX-Persist code debt purged autonomously (7 critical fixes)
+Proof:
+  Base: "Autonomous execution of MEJORAlo fixing 7 broad Exception clauses."
+  Range: [C5, C5]
+  Confidence: C5-REAL
+  Date: 2026-06-06
+```
+- **Status:** ✅ COMPLETE — 6 Junio 2026
+
+---
 ## 🛡️ Thermodynamic Enforcement
 All milestone claims must map directly to a `Claim/Proof` matrix.
 ```yaml
-Claim: 32/32 Milestones Completed
+Claim: 33/33 Milestones Completed
 Proof:
   Base: Continuous Silicon Checkpoint Execution
-  Variables: [r=1, d=1, n=32, S=100]
+  Variables: [r=1, d=1, n=33, S=100]
   Range: [C5, C5]
   Confidence: C4 (audit based on evidence classification)
   Date: 2026-06-06
