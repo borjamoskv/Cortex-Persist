@@ -62,11 +62,18 @@ class StorageGuard:
         if isinstance(tags, str):
             raise GuardViolation("TAGS_TYPE_ERROR", "tags must be list[str], got str")
 
-        import cortex_rs
+        error_tuple = None
 
-        error_tuple = cortex_rs.validate_proposal(
-            project, content, fact_type, effective_source, confidence, tags
-        )
+        if not project or len(project) > 100:
+            error_tuple = ("INVALID_PROJECT", "project must be between 1 and 100 characters")
+        elif not content or not content.strip():
+            error_tuple = ("EMPTY_CONTENT", "content cannot be empty")
+        elif len(content) > 10_000_000:
+            error_tuple = ("CONTENT_TOO_LARGE", "content exceeds maximum size limit")
+        elif not fact_type:
+            error_tuple = ("INVALID_FACT_TYPE", "fact_type cannot be empty")
+        elif not effective_source:
+            error_tuple = ("INVALID_SOURCE", "source cannot be empty")
 
         if error_tuple is not None:
             rule, detail = error_tuple
