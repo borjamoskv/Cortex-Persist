@@ -243,98 +243,21 @@ class MetaLevel:
         judgment: MetaJudgment,
         reasoning: list[str],
     ) -> MetaJudgment:
-        """Classify a failure as object-level or meta-level.
-
-        THIS is the qualitative leap. We don't just say "it failed",
-        we analyze WHETHER THE THINKING was wrong.
-        """
+        """Classify a failure as object-level or meta-level."""
         pattern = trace.error_pattern
 
-        # ── Cascade blindness: kept trying after clear failure ────
-        if pattern == "cascade_failure":
-            judgment.failure_class = FailureClass.CASCADE_BLINDNESS
-            judgment.is_meta_failure = True
-            judgment.diagnosis = (
-                "Cascade failure detected: the agent continued executing after "
-                "a clear failure signal. The STOP heuristic is too weak."
-            )
-            judgment.recommended_actions = [
-                MetaAction.INJECT_HEURISTIC,  # Add early-stop heuristic
-                MetaAction.ATTENUATE_HEURISTIC,  # Weaken blind persistence
-            ]
-            judgment.confidence = 0.85
-            reasoning.append("CASCADE BLINDNESS → meta-failure: thinking process deficient")
-            return judgment
+        for check in (
+            self._check_cascade_blindness,
+            self._check_wrong_tool_choice,
+            self._check_stale_pattern,
+            self._check_confidence_miscalibration,
+            self._check_exploration_deficit,
+        ):
+            res = check(trace, pattern, judgment, reasoning)
+            if res:
+                return res
 
-        # ── Repeated tool failure: wrong tool selection ──────────
-        if pattern and pattern.startswith("repeated_tool_failure:"):
-            tool_name = pattern.split(":", 1)[1]
-            judgment.failure_class = FailureClass.WRONG_TOOL_CHOICE
-            judgment.is_meta_failure = True
-            judgment.diagnosis = (
-                f"Repeated failure with tool '{tool_name}'. The agent's tool selection "
-                f"heuristic is miscalibrated - it keeps choosing a tool that doesn't work "
-                f"for this problem class."
-            )
-            judgment.recommended_actions = [
-                MetaAction.FORCE_TOOL_SWITCH,
-                MetaAction.ATTENUATE_HEURISTIC,
-                MetaAction.ADJUST_EXPLORATION,
-            ]
-            judgment.confidence = 0.8
-            reasoning.append(
-                f"WRONG TOOL CHOICE → meta-failure: tool '{tool_name}' repeatedly fails"
-            )
-            return judgment
-
-        # ── Same error repeated: stale pattern application ───────
-        if pattern and pattern.startswith("repeated_error:"):
-            judgment.failure_class = FailureClass.STALE_PATTERN
-            judgment.is_meta_failure = True
-            judgment.diagnosis = (
-                "Same error repeated across steps. The agent is applying a stale "
-                "solution pattern that doesn't fit this problem."
-            )
-            judgment.recommended_actions = [
-                MetaAction.PRUNE_HEURISTIC,
-                MetaAction.ADJUST_EXPLORATION,
-            ]
-            judgment.confidence = 0.75
-            reasoning.append("STALE PATTERN → meta-failure: outdated solution approach")
-            return judgment
-
-        # ── High confidence + failure = miscalibration ───────────
-        if trace.self_assessed_confidence > 0.7:
-            judgment.failure_class = FailureClass.CONFIDENCE_MISCALIBRATION
-            judgment.is_meta_failure = True
-            judgment.diagnosis = (
-                f"Agent was {trace.self_assessed_confidence:.0%} confident but failed. "
-                f"Confidence calibration is broken - the meta-monitoring itself "
-                f"is unreliable."
-            )
-            judgment.recommended_actions = [
-                MetaAction.ATTENUATE_HEURISTIC,
-                MetaAction.INJECT_HEURISTIC,
-            ]
-            judgment.confidence = 0.7
-            reasoning.append("CONFIDENCE MISCALIBRATION → meta-failure: broken self-assessment")
-            return judgment
-
-        # ── Low exploration + failure = exploration deficit ───────
-        if self._strategy.genome.exploration_rate < 0.2:
-            judgment.failure_class = FailureClass.EXPLORATION_DEFICIT
-            judgment.is_meta_failure = True
-            judgment.diagnosis = (
-                "Exploration rate is very low and the agent is failing. "
-                "Likely stuck in a local optimum - needs more diverse search."
-            )
-            judgment.recommended_actions = [MetaAction.ADJUST_EXPLORATION]
-            judgment.confidence = 0.65
-            reasoning.append("EXPLORATION DEFICIT → meta-failure: stuck in local optimum")
-            return judgment
-
-        # ── Default: object-level failure (not a thinking error) ──
-        # Check for specific step-level errors
+        # Default: object-level failure (not a thinking error)
         failures = trace.failure_steps
         if failures:
             first_error = failures[0].error or "unknown"
@@ -358,6 +281,78 @@ class MetaLevel:
         judgment.confidence = 0.6
         reasoning.append(f"OBJECT-LEVEL failure: {judgment.failure_class.value}")
         return judgment
+
+    def _check_cascade_blindness(self, trace, pattern, judgment, reasoning):
+        if pattern == "cascade_failure":
+            judgment.failure_class = FailureClass.CASCADE_BLINDNESS
+            judgment.is_meta_failure = True
+            judgment.diagnosis = (
+                "Cascade failure detected: the agent continued executing after "
+                "a clear failure signal. The STOP heuristic is too weak."
+            )
+            judgment.recommended_actions = [MetaAction.INJECT_HEURISTIC, MetaAction.ATTENUATE_HEURISTIC]
+            judgment.confidence = 0.85
+            reasoning.append("CASCADE BLINDNESS → meta-failure: thinking process deficient")
+            return judgment
+
+    def _check_wrong_tool_choice(self, trace, pattern, judgment, reasoning):
+        if pattern and pattern.startswith("repeated_tool_failure:"):
+            tool_name = pattern.split(":", 1)[1]
+            judgment.failure_class = FailureClass.WRONG_TOOL_CHOICE
+            judgment.is_meta_failure = True
+            judgment.diagnosis = (
+                f"Repeated failure with tool '{tool_name}'. The agent's tool selection "
+                f"heuristic is miscalibrated - it keeps choosing a tool that doesn't work "
+                f"for this problem class."
+            )
+            judgment.recommended_actions = [
+                MetaAction.FORCE_TOOL_SWITCH,
+                MetaAction.ATTENUATE_HEURISTIC,
+                MetaAction.ADJUST_EXPLORATION,
+            ]
+            judgment.confidence = 0.8
+            reasoning.append(f"WRONG TOOL CHOICE → meta-failure: tool '{tool_name}' repeatedly fails")
+            return judgment
+
+    def _check_stale_pattern(self, trace, pattern, judgment, reasoning):
+        if pattern and pattern.startswith("repeated_error:"):
+            judgment.failure_class = FailureClass.STALE_PATTERN
+            judgment.is_meta_failure = True
+            judgment.diagnosis = (
+                "Same error repeated across steps. The agent is applying a stale "
+                "solution pattern that doesn't fit this problem."
+            )
+            judgment.recommended_actions = [MetaAction.PRUNE_HEURISTIC, MetaAction.ADJUST_EXPLORATION]
+            judgment.confidence = 0.75
+            reasoning.append("STALE PATTERN → meta-failure: outdated solution approach")
+            return judgment
+
+    def _check_confidence_miscalibration(self, trace, pattern, judgment, reasoning):
+        if trace.self_assessed_confidence > 0.7:
+            judgment.failure_class = FailureClass.CONFIDENCE_MISCALIBRATION
+            judgment.is_meta_failure = True
+            judgment.diagnosis = (
+                f"Agent was {trace.self_assessed_confidence:.0%} confident but failed. "
+                f"Confidence calibration is broken - the meta-monitoring itself "
+                f"is unreliable."
+            )
+            judgment.recommended_actions = [MetaAction.ATTENUATE_HEURISTIC, MetaAction.INJECT_HEURISTIC]
+            judgment.confidence = 0.7
+            reasoning.append("CONFIDENCE MISCALIBRATION → meta-failure: broken self-assessment")
+            return judgment
+
+    def _check_exploration_deficit(self, trace, pattern, judgment, reasoning):
+        if self._strategy.genome.exploration_rate < 0.2:
+            judgment.failure_class = FailureClass.EXPLORATION_DEFICIT
+            judgment.is_meta_failure = True
+            judgment.diagnosis = (
+                "Exploration rate is very low and the agent is failing. "
+                "Likely stuck in a local optimum - needs more diverse search."
+            )
+            judgment.recommended_actions = [MetaAction.ADJUST_EXPLORATION]
+            judgment.confidence = 0.65
+            reasoning.append("EXPLORATION DEFICIT → meta-failure: stuck in local optimum")
+            return judgment
 
     # ── CONTROL (top-down) ───────────────────────────────────────
 
@@ -400,72 +395,76 @@ class MetaLevel:
         judgment: MetaJudgment,
     ) -> StrategyMutation | None:
         """Execute a single meta-action on the strategy."""
+        handlers = {
+            MetaAction.AMPLIFY_HEURISTIC: self._action_amplify,
+            MetaAction.ATTENUATE_HEURISTIC: self._action_attenuate,
+            MetaAction.INJECT_HEURISTIC: self._action_inject,
+            MetaAction.PRUNE_HEURISTIC: self._action_prune,
+            MetaAction.ADJUST_EXPLORATION: self._action_adjust_exploration,
+            MetaAction.ADJUST_DECOMPOSITION: self._action_adjust_decomposition,
+            MetaAction.FORCE_TOOL_SWITCH: self._action_force_tool_switch,
+        }
+        handler = handlers.get(action)
+        return handler(judgment) if handler else None
 
-        if action == MetaAction.AMPLIFY_HEURISTIC:
-            # Find the most successful heuristic to amplify
-            best = self._strategy.genome.dominant_heuristic
-            if best and best.fitness > 0.5:
-                return self._strategy.mutate_amplify(
-                    best.name,
-                    reason=f"Reinforcement after success: {judgment.diagnosis[:80]}",
-                )
-
-        elif action == MetaAction.ATTENUATE_HEURISTIC:
-            # Find the worst-performing heuristic to weaken
-            active = self._strategy.genome.active_heuristics
-            if active:
-                worst = min(active, key=lambda h: h.fitness)
-                return self._strategy.mutate_attenuate(
-                    worst.name,
-                    reason=f"Attenuation after failure: {judgment.diagnosis[:80]}",
-                )
-
-        elif action == MetaAction.INJECT_HEURISTIC:
-            # Inject a heuristic based on the failure class
-            new_h = self._synthesize_heuristic(judgment)
-            if new_h is not None:
-                return self._strategy.mutate_inject(
-                    new_h,
-                    reason=f"Injection to address: {judgment.failure_class.value if judgment.failure_class else 'unknown'}",
-                )
-
-        elif action == MetaAction.PRUNE_HEURISTIC:
-            # Prune heuristics with zero fitness and low weight
-            for h in self._strategy.genome.heuristics:
-                if h.fitness < 0.1 and h.activation_count > 5:
-                    return self._strategy.mutate_prune(
-                        h.name,
-                        reason=f"Pruned dead heuristic (fitness={h.fitness:.3f}, activations={h.activation_count})",
-                    )
-
-        elif action == MetaAction.ADJUST_EXPLORATION:
-            # Increase exploration when stuck
-            current = self._strategy.genome.exploration_rate
-            new_rate = min(0.8, current + 0.15)
-            self._strategy.mutate_exploration_rate(
-                new_rate,
-                reason=f"Increasing exploration after {judgment.failure_class.value if judgment.failure_class else 'failure'}",
+    def _action_amplify(self, judgment: MetaJudgment) -> StrategyMutation | None:
+        best = self._strategy.genome.dominant_heuristic
+        if best and best.fitness > 0.5:
+            return self._strategy.mutate_amplify(
+                best.name, reason=f"Reinforcement after success: {judgment.diagnosis[:80]}"
             )
+        return None
 
-        elif action == MetaAction.ADJUST_DECOMPOSITION:
-            # Increase decomposition depth when problems are too complex
-            self._strategy.genome.decomposition_depth = min(
-                8,
-                self._strategy.genome.decomposition_depth + 1,
+    def _action_attenuate(self, judgment: MetaJudgment) -> StrategyMutation | None:
+        active = self._strategy.genome.active_heuristics
+        if active:
+            worst = min(active, key=lambda h: h.fitness)
+            return self._strategy.mutate_attenuate(
+                worst.name, reason=f"Attenuation after failure: {judgment.diagnosis[:80]}"
             )
-            logger.info(
-                "MetaLevel: decomposition depth → %d",
-                self._strategy.genome.decomposition_depth,
+        return None
+
+    def _action_inject(self, judgment: MetaJudgment) -> StrategyMutation | None:
+        new_h = self._synthesize_heuristic(judgment)
+        if new_h is not None:
+            fc_val = judgment.failure_class.value if judgment.failure_class else "unknown"
+            return self._strategy.mutate_inject(
+                new_h, reason=f"Injection to address: {fc_val}"
             )
+        return None
 
-        elif action == MetaAction.FORCE_TOOL_SWITCH:
-            # Rotate tool priority - push failing tool to the back
-            if len(self._strategy.genome.tool_priority) > 1:
-                tools = self._strategy.genome.tool_priority
-                # Move first tool to the end (round-robin)
-                tools.append(tools.pop(0))
-                logger.info("MetaLevel: tool priority rotated → %s", tools)
+    def _action_prune(self, judgment: MetaJudgment) -> StrategyMutation | None:
+        for h in self._strategy.genome.heuristics:
+            if h.fitness < 0.1 and h.activation_count > 5:
+                return self._strategy.mutate_prune(
+                    h.name,
+                    reason=f"Pruned dead heuristic (fitness={h.fitness:.3f}, activations={h.activation_count})",
+                )
+        return None
 
+    def _action_adjust_exploration(self, judgment: MetaJudgment) -> StrategyMutation | None:
+        current = self._strategy.genome.exploration_rate
+        new_rate = min(0.8, current + 0.15)
+        fc_val = judgment.failure_class.value if judgment.failure_class else "failure"
+        self._strategy.mutate_exploration_rate(
+            new_rate, reason=f"Increasing exploration after {fc_val}"
+        )
+        return None
+
+    def _action_adjust_decomposition(self, judgment: MetaJudgment) -> StrategyMutation | None:
+        self._strategy.genome.decomposition_depth = min(
+            8, self._strategy.genome.decomposition_depth + 1
+        )
+        logger.info(
+            "MetaLevel: decomposition depth → %d", self._strategy.genome.decomposition_depth
+        )
+        return None
+
+    def _action_force_tool_switch(self, judgment: MetaJudgment) -> StrategyMutation | None:
+        if len(self._strategy.genome.tool_priority) > 1:
+            tools = self._strategy.genome.tool_priority
+            tools.append(tools.pop(0))
+            logger.info("MetaLevel: tool priority rotated → %s", tools)
         return None
 
     def _synthesize_heuristic(self, judgment: MetaJudgment) -> Heuristic | None:

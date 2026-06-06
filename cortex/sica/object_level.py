@@ -107,41 +107,40 @@ class ExecutionTrace:
         self.total_duration_ms = (self.end_ts - self.start_ts) * 1000
 
     def detect_error_pattern(self) -> str | None:
-        """Detect repetitive error patterns in the trace.
-
-        Returns a pattern identifier if a repeated failure mode
-        is detected, None otherwise.
-        """
+        """Detect repetitive error patterns in the trace."""
         if len(self.failure_steps) < 2:
             return None
 
-        # Check for same-tool repeated failure
+        pattern = (
+            self._check_repeated_tool()
+            or self._check_repeated_error()
+            or self._check_cascade()
+        )
+        if pattern:
+            self.error_pattern = pattern
+            return pattern
+        return None
+
+    def _check_repeated_tool(self) -> str | None:
         failed_tools = [s.tool_used for s in self.failure_steps if s.tool_used]
         if failed_tools and len(set(failed_tools)) == 1:
-            pattern = f"repeated_tool_failure:{failed_tools[0]}"
-            self.error_pattern = pattern
-            return pattern
+            return f"repeated_tool_failure:{failed_tools[0]}"
+        return None
 
-        # Check for same-error repeated failure
+    def _check_repeated_error(self) -> str | None:
         errors = [s.error for s in self.failure_steps if s.error]
         if errors and len(set(errors)) == 1:
-            pattern = f"repeated_error:{errors[0][:50]}"
-            self.error_pattern = pattern
-            return pattern
+            return f"repeated_error:{errors[0][:50]}"
+        return None
 
-        # Check for monotonic failure cascade (all steps after first failure also fail)
-        first_fail_idx = None
-        for i, step in enumerate(self.steps):
-            if step.outcome == StepOutcome.FAILURE:
-                first_fail_idx = i
-                break
+    def _check_cascade(self) -> str | None:
+        first_fail_idx = next(
+            (i for i, step in enumerate(self.steps) if step.outcome == StepOutcome.FAILURE), None
+        )
         if first_fail_idx is not None:
             remaining = self.steps[first_fail_idx:]
-            if all(s.outcome == StepOutcome.FAILURE for s in remaining) and len(remaining) >= 3:
-                pattern = "cascade_failure"
-                self.error_pattern = pattern
-                return pattern
-
+            if len(remaining) >= 3 and all(s.outcome == StepOutcome.FAILURE for s in remaining):
+                return "cascade_failure"
         return None
 
     def to_dict(self) -> dict[str, Any]:

@@ -40,8 +40,8 @@ fi
 echo "✓ API requirements detected."
 
 echo "[4/4] Deploying Cortex Cloud..."
-echo "Executing: vercel --prod"
-vercel --prod
+echo "Executing: vercel --prod --archive=tgz"
+vercel --prod --archive=tgz
 
 echo "============================================================"
 echo "✓ Cortex Cloud (Managed API) Deployment Initiated."

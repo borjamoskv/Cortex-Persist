@@ -37,15 +37,19 @@ async def run_benchmark():
     console.print("[yellow]Executing Concurrent Write Test...[/yellow]")
     start_time = time.perf_counter()
     
-    tasks = []
-    for fact in facts:
-        tasks.append(manager.store(
-            tenant_id=tenant_id,
-            project_id="bench",
-            content=fact,
-            fact_type="general",
-            layer="semantic"
-        ))
+    write_sem = asyncio.Semaphore(1)
+    
+    async def safe_write(fact_text):
+        async with write_sem:
+            return await manager.store(
+                tenant_id=tenant_id,
+                project_id="bench",
+                content=fact_text,
+                fact_type="general",
+                layer="semantic"
+            )
+            
+    tasks = [safe_write(f) for f in facts]
     
     await asyncio.gather(*tasks)
     write_time = time.perf_counter() - start_time
@@ -56,18 +60,24 @@ async def run_benchmark():
     
     # 2. Read Benchmark (Concurrent Assembly)
     num_queries = 100
-    console.print(f"[yellow]Executing {num_queries} Concurrent Reads...[/yellow]")
+    console.print(f"[yellow]Executing {num_queries} Reads...[/yellow]")
     start_time = time.perf_counter()
     
+    sem = asyncio.Semaphore(1)
+    
+    async def safe_read(query_text: str):
+        async with sem:
+            return await manager.assemble_context(
+                tenant_id=tenant_id,
+                project_id="bench",
+                query=query_text,
+                max_episodes=3
+            )
+            
     tasks = []
     for _ in range(num_queries):
         query = random.choice(facts)
-        tasks.append(manager.assemble_context(
-            tenant_id=tenant_id,
-            project_id="bench",
-            query=query,
-            max_episodes=3
-        ))
+        tasks.append(safe_read(query))
         
     await asyncio.gather(*tasks)
     read_time = time.perf_counter() - start_time

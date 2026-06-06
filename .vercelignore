@@ -22,3 +22,10 @@ cortex_mev_base/
 extensions/
 .ruff_cache/
 *.bin
+.quarantine/
+.cortex/
+.snapshots/
+.vscode/
+.artifacts/
+.gemini/
+
