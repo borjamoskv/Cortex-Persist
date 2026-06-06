@@ -52,6 +52,7 @@ graph) that no pre-trained model can answer without CORTEX memory.
 CODE RULES (enforced by CI):
 - cortex.db.get_connection() only - NEVER raw sqlite3 .connect()
 - classify_content() BEFORE every INSERT
+- meta={"expected_ui_hash": X} REQUIRED for UI_ACTION
 - except (sqlite3.Error, OSError, ValueError) - NEVER except Exception
 - Files ≤300 LOC · @pytest.mark.asyncio mandatory · from __future__ import annotations\
 """
@@ -98,6 +99,7 @@ graph). If a generic LLM can answer it, the prompt is too weak.
 ## CODE RULES (enforced by CI, not just guidelines)
 - cortex.db.get_connection() - NEVER raw sqlite3 .connect() [WAL + busy_timeout=5000 + FK=ON]
 - classify_content() BEFORE any INSERT [25 patterns, pipeline middleware enforces]
+- store_fact(type="UI_ACTION") MUST include 'expected_ui_hash' in metadata [CTRE TOCTOU guard]
 - except (sqlite3.Error, OSError, ValueError) - NEVER except Exception [Ruff S110]
 - Files ≤300 LOC → extract to package/ if larger [entropy analyzer monitors]
 - Tests: @pytest.mark.asyncio mandatory
@@ -183,6 +185,10 @@ from cortex.db import get_connection       # ✅ WAL + busy_timeout=5000 + FK=ON
 # PRIVACY - storage pipeline middleware enforces this
 classify_content(data)                     # ✅ Shield runs BEFORE every INSERT
 # INSERT without classification            # ❌ pipeline rejects unshielded data
+
+# CTRE ATOMIC COMMIT - TOCTOU protection for OS interaction
+store(..., fact_type="UI_ACTION", meta={"expected_ui_hash": 123456}) # ✅ Required for physical ops
+# store(..., fact_type="UI_ACTION", meta={})                         # ❌ Saga ABORT (TOCTOU collision)
 
 # EXCEPTIONS - Ruff S110 in CI enforces this
 except (sqlite3.Error, OSError, ValueError):  # ✅ specific always
