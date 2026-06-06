@@ -40,7 +40,7 @@ class SecurityAuditMiddleware:
             status_code = response.status_code
             status = "SUCCESS" if 200 <= status_code < 400 else f"FAILED_{status_code}"
 
-        except Exception as e:
+        except (ValueError, KeyError, OSError) as e:
             logger.error("Request failed: %s", e)
             status = "CRASHED"
             raise

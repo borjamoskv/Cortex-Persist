@@ -71,7 +71,7 @@ class ShellTool:
                 "stderr": f"Command timed out after {timeout}s",
                 "success": False,
             }
-        except Exception as exc:
+        except (ValueError, KeyError, OSError) as exc:
             return {
                 "returncode": -1,
                 "stdout": "",
@@ -163,7 +163,7 @@ class FileSystemTool:
 
             return {"ok": False, "error": f"Unknown action: {action}"}
 
-        except Exception as exc:
+        except (ValueError, KeyError, OSError) as exc:
             return {"ok": False, "error": str(exc)}
 
 
@@ -187,39 +187,33 @@ class HttpTool:
         timeout: float = 15.0,
     ) -> dict[str, Any]:
         """Execute an HTTP request."""
-        import urllib.request
-        import urllib.error
+        import aiohttp
 
         try:
-            req = urllib.request.Request(
-                url,
-                data=body.encode() if body else None,
-                headers=headers or {},
-                method=method.upper(),
-            )
+            async with aiohttp.ClientSession() as session:
+                async with session.request(
+                    method=method.upper(),
+                    url=url,
+                    headers=headers or {},
+                    data=body,
+                    timeout=aiohttp.ClientTimeout(total=timeout),
+                ) as response:
+                    response_body = await response.text()
+                    return {
+                        "ok": True,
+                        "status": response.status,
+                        "headers": dict(response.headers),
+                        "body": response_body[:20_000],
+                    }
 
-            loop = asyncio.get_event_loop()
-            response = await loop.run_in_executor(
-                None,
-                lambda: urllib.request.urlopen(req, timeout=timeout),
-            )
-
-            response_body = response.read().decode("utf-8", errors="replace")
-            return {
-                "ok": True,
-                "status": response.status,
-                "headers": dict(response.headers),
-                "body": response_body[:20_000],
-            }
-
-        except urllib.error.HTTPError as exc:
+        except aiohttp.ClientResponseError as exc:
             return {
                 "ok": False,
-                "status": exc.code,
+                "status": exc.status,
                 "error": str(exc),
-                "body": exc.read().decode("utf-8", errors="replace")[:5_000] if exc.fp else "",
+                "body": "",
             }
-        except Exception as exc:
+        except (ValueError, KeyError, OSError, aiohttp.ClientError) as exc:
             return {"ok": False, "error": str(exc)}
 
 

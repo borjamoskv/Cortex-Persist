@@ -68,7 +68,7 @@ class RedisL1Cache:
                 )
                 self._client.ping()
                 logger.info("Redis L1 cache connected: %s:%d/%d", host, port, db)
-            except Exception as exc:
+            except (OSError, ConnectionError, TimeoutError) as exc:
                 logger.warning("Redis L1 unavailable (%s), operating in pass-through mode", exc)
                 self._client = None
 
@@ -170,7 +170,7 @@ class RedisL1Cache:
             info = self._client.info("memory")
             result["used_memory_bytes"] = info.get("used_memory", 0)
             result["used_memory_human"] = info.get("used_memory_human", "N/A")
-        except Exception as exc:
+        except (OSError, ConnectionError, TimeoutError) as exc:
             result["error"] = str(exc)
         return result
 
