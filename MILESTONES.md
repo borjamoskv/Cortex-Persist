@@ -574,13 +574,31 @@ Proof:
 
 ---
 
+### Hito 42: Subagent MCP Membrane Integration (Path B)
+- **Target:** `cortex/adk/agents.py`, `cortex/adk/runner.py`
+- **Objective:** Asegurar que todos los subagentes del Enjambre (Swarm) de AGY2 hereden automáticamente el servidor MCP local de CORTEX. Esto expone las herramientas extendidas (mega tools, singularity tools) directamente a los subagentes, sin tener que "hardcodearlas" vía `adk/tools.py`.
+- **Yield Target:** Universalización del Toolset. Cualquier oráculo o subagente adquiere acceso completo al servidor MCP de CORTEX.
+- **Reality Level:** `C5-REAL`
+- **Evidence:** Commit `feat(adk): inject CORTEX MCP tools directly into ADK subagents swarm`.
+```yaml
+Claim: Swarm Subagents interactúan de forma nativa con el Servidor MCP local
+Proof:
+  Base: "Inyección de mcp_tools usando cortex_self_bridge() en runner.py -> agents.py."
+  Range: [C5, C5]
+  Confidence: C5-REAL
+  Date: 2026-06-06
+```
+- **Status:** ✅ COMPLETE — 6 Junio 2026
+
+---
+
 ## 🛡️ Thermodynamic Enforcement
 All milestone claims must map directly to a `Claim/Proof` matrix.
 ```yaml
-Claim: 41/41 Milestones Completed
+Claim: 42/42 Milestones Completed
 Proof:
   Base: Continuous Silicon Checkpoint Execution
-  Variables: [r=1, d=1, n=41, S=100]
+  Variables: [r=1, d=1, n=42, S=100]
   Range: [C6, C6]
   Confidence: C4 (audit based on evidence classification)
   Date: 2026-06-06
