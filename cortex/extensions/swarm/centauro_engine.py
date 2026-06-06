@@ -157,11 +157,12 @@ class CentauroEngine:
         Formation.GHOST: 1,
     }
 
-    def __init__(self, tolerance: float = 0.67):
+    def __init__(self, tolerance: float = 0.67, router: Any | None = None):
         self.consensus = ByzantineConsensus(tolerance_threshold=tolerance)
         self.agents: dict[str, VirtualAgent] = {}
         self._active_missions: dict[str, asyncio.Future[CentauroMissionResult]] = {}
         self._aleph = AxiomaticLeapEngine()
+        self.router = router
 
     def spawn_squad(self, size: int, formation: str = Formation.BLITZ) -> dict[str, VirtualAgent]:
         """Spawn a squad of virtual agents with specialized focus."""
@@ -169,7 +170,7 @@ class CentauroEngine:
         for i in range(size):
             agent_id = f"legionnaire_{len(self.agents) + 1}"
             specialty = self._get_specialty(i, formation)
-            agent = VirtualAgent(agent_id, specialty=specialty)
+            agent = VirtualAgent(agent_id, specialty=specialty, router=self.router)
             self.agents[agent_id] = agent
             self.consensus.register_node(agent_id, initial_reputation=1.0)
             squad[agent_id] = agent
