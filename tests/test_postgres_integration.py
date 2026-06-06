@@ -111,6 +111,33 @@ class MockPostgresConnection:
                         )
                         for c in cols
                     ]
+        if "embedding <=>" in sql:
+            res = []
+            for r in self.fetch_results:
+                if isinstance(r, dict):
+                    v_row = MockPostgresRecord(
+                        {
+                            "id": r.get("id"),
+                            "content": r.get("content"),
+                            "project": r.get("project"),
+                            "fact_type": r.get("fact_type"),
+                            "confidence": r.get("confidence"),
+                            "valid_from": r.get("valid_from"),
+                            "valid_until": r.get("valid_until"),
+                            "tags": r.get("tags"),
+                            "source": r.get("source"),
+                            "metadata": r.get("metadata") or r.get("meta"),
+                            "distance": 0.1,  # distance at index 10
+                            "created_at": r.get("created_at"),
+                            "updated_at": r.get("updated_at"),
+                            "tx_id": r.get("tx_id"),
+                            "hash": r.get("hash"),
+                        }
+                    )
+                    res.append(v_row)
+                else:
+                    res.append(r)
+            return res
         return self.fetch_results
 
     async def fetchrow(self, sql: str, *args: Any) -> Any:
