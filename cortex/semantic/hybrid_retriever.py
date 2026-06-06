@@ -37,8 +37,8 @@ class HybridRetriever:
         # Phase 3: Rerank (intent-aware)
         def rank_score(node: MemoryNode) -> float:
             base_score = 0.0
-            if isinstance(node.embedding, (list, np.ndarray)) and isinstance(
-                intent.semantic_vector, (list, np.ndarray)
+            if isinstance(node.embedding, list | np.ndarray) and isinstance(
+                intent.semantic_vector, list | np.ndarray
             ):
                 v1 = np.array(node.embedding)
                 v2 = np.array(intent.semantic_vector)

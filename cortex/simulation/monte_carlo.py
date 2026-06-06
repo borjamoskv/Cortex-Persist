@@ -69,7 +69,7 @@ class MonteCarloRecallEngine:
                         sim = 0.1
                         temporal_gap = abs(neighbor_node.timestamp - current_node.timestamp)
 
-                        if isinstance(neighbor_node.embedding, (list, np.ndarray)):
+                        if isinstance(neighbor_node.embedding, list | np.ndarray):
                             v_n = np.array(neighbor_node.embedding)
                             norm_n = np.linalg.norm(v_n)
                             if norm_n > 0 and norm_intent > 0:
@@ -100,7 +100,7 @@ class MonteCarloRecallEngine:
                 next_node = neighbors_eval[next_idx]
 
                 # Update Momentum: p_{t+1} = p_t * momentum + new_sample * (1 - momentum)
-                if isinstance(next_node.embedding, (list, np.ndarray)):
+                if isinstance(next_node.embedding, list | np.ndarray):
                     v_n = np.array(next_node.embedding)
                     current_momentum = (current_momentum * momentum_factor) + (
                         v_n * (1.0 - momentum_factor)

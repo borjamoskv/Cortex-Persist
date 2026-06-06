@@ -28,7 +28,7 @@ class CoherenceScorer:
                 for j in range(i + 1, N):
                     e1 = nodes[i].embedding
                     e2 = nodes[j].embedding
-                    if isinstance(e1, (list, np.ndarray)) and isinstance(e2, (list, np.ndarray)):
+                    if isinstance(e1, list | np.ndarray) and isinstance(e2, list | np.ndarray):
                         v1 = np.array(e1)
                         v2 = np.array(e2)
                         n1 = np.linalg.norm(v1)

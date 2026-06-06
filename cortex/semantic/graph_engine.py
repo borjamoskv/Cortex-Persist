@@ -42,8 +42,8 @@ class GraphExpansionEngine:
 
                             # 2. Semantic Distance Penalty
                             sem_penalty = 1.0
-                            if isinstance(node.embedding, (list, np.ndarray)) and isinstance(
-                                neighbor_node.embedding, (list, np.ndarray)
+                            if isinstance(node.embedding, list | np.ndarray) and isinstance(
+                                neighbor_node.embedding, list | np.ndarray
                             ):
                                 v1 = np.array(node.embedding)
                                 v2 = np.array(neighbor_node.embedding)
