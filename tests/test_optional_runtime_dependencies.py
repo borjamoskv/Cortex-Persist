@@ -161,6 +161,7 @@ def test_cli_init_without_numpy_logs_partial_memory_once(tmp_path: Path) -> None
     assert combined.count("Memory subsystem: partial (L1+L3)") == 1
 
 
+@pytest.mark.timeout(120)
 def test_cli_base_flow_without_extended_runtime_dependencies(tmp_path: Path) -> None:
     env = _blocked_import_env(
         tmp_path,
@@ -206,6 +207,7 @@ def test_cli_base_flow_without_extended_runtime_dependencies(tmp_path: Path) -> 
     assert "Ledger is VALID" in combined
 
 
+@pytest.mark.timeout(120)
 def test_cli_base_flow_without_keyring_when_env_master_key_is_set(tmp_path: Path) -> None:
     env = _blocked_import_env(tmp_path, ["keyring", "AppKit", "Foundation", "Cocoa", "objc"])
     env["CORTEX_NO_EMBED"] = "1"
