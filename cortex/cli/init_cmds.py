@@ -24,8 +24,10 @@ def _bootstrap_without_embeddings() -> Iterator[None]:
     """
     prev_embed = os.environ.get("CORTEX_NO_EMBED")
     prev_omega = os.environ.get("CORTEX_NO_OMEGA")
+    prev_taint = os.environ.get("CORTEX_NO_TAINT_ENFORCE")
     os.environ["CORTEX_NO_EMBED"] = "1"
     os.environ["CORTEX_NO_OMEGA"] = "1"
+    os.environ["CORTEX_NO_TAINT_ENFORCE"] = "1"
     try:
         yield
     finally:
@@ -37,6 +39,10 @@ def _bootstrap_without_embeddings() -> Iterator[None]:
             os.environ.pop("CORTEX_NO_OMEGA", None)
         else:
             os.environ["CORTEX_NO_OMEGA"] = prev_omega
+        if prev_taint is None:
+            os.environ.pop("CORTEX_NO_TAINT_ENFORCE", None)
+        else:
+            os.environ["CORTEX_NO_TAINT_ENFORCE"] = prev_taint
 
 
 @cli.command()
