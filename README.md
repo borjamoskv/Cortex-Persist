@@ -142,6 +142,8 @@ pip install cortex-persist
 pip install "cortex-persist[embeddings]"     # Local semantic embeddings
 pip install "cortex-persist[knowledge]"      # Chroma-backed knowledge sync
 pip install "cortex-persist[api,mcp,daemon]" # Web Server & MCP endpoints
+pip install "cortex-persist[cloud]"          # PostgreSQL, Redis, & Qdrant scaling
+
 ```
 
 ---
