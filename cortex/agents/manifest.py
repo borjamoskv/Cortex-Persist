@@ -9,7 +9,7 @@ operational boundaries. Complements the YAML persona (AgentDefinition).
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-
+from decimal import Decimal
 
 @dataclass(frozen=True)
 class AgentManifest:
