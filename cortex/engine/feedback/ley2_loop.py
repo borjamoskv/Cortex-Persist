@@ -1,4 +1,3 @@
-from typing import Any
 # [C5-REAL] Exergy-Maximized
 """Ley 2 Loop: Expensive Errors First (Kernel de Re-weighting Termodinámico).
 
@@ -9,7 +8,7 @@ de los linajes de ejecución.
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from cortex.ledger.execution_trace import ExecutionTraceLedger

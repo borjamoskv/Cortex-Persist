@@ -1,4 +1,3 @@
-import concurrent.futures
 # [C5-REAL] Exergy-Maximized
 """Auto-Healing capability for MEJORAlo.
 
@@ -12,6 +11,7 @@ from __future__ import annotations
 
 import ast
 import asyncio
+import concurrent.futures
 import logging
 import subprocess
 import sys

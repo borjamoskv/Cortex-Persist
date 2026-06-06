@@ -1,8 +1,7 @@
-import logging
-logger = logging.getLogger(__name__)
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING, Any
 
 from cortex.ledger.public_verifier_utils import (
@@ -12,6 +11,8 @@ from cortex.ledger.public_verifier_utils import (
     _parse_utc,
     _string_list,
 )
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from cortex.ledger._types import PublicVerifierProtocol as _PublicLedgerVerifier

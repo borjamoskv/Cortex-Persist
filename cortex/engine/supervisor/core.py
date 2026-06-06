@@ -150,7 +150,7 @@ class CortexSupervisor:
             if cooldown is not None:
                 self._l5.config.cooldown_after_repair_s = cooldown
 
-    async def _apply_preemptive_action(self, prediction: 'Prediction') -> None:  # pyright: ignore[reportUndefinedVariable]
+    async def _apply_preemptive_action(self, prediction: Any) -> None:  # pyright: ignore[reportUndefinedVariable]
         """Test proxy for the daemon method."""
         await self._daemon._apply_preemptive_action(prediction)
 

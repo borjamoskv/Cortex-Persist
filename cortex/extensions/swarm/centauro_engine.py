@@ -1,4 +1,3 @@
-from typing import Any
 # [C5-REAL] Exergy-Maximized
 """
 Centauro Engine (LEGION-Ω)
@@ -11,7 +10,7 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import logging
-from typing import TypedDict, cast
+from typing import Any, TypedDict, cast
 
 from pydantic import BaseModel, Field
 
