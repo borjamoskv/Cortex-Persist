@@ -76,21 +76,46 @@ class SearchMixin(EngineMixinBase):
                         self, conn, results, query, graph_depth, tenant_id=tenant_id
                     )
 
+                # 3. [CORTEX v10] Read-Path Epistemic Membrane (Taint Propagation)
+                for r in results:
+                    meta = getattr(r, "meta", {}) or {}
+                    confidence = getattr(r, "confidence", meta.get("confidence", "UNKNOWN"))
+                    is_c5 = confidence in ("C5", "C5-REAL", "C5-Static", "C5-Dynamic")
+                    has_taint = "cortex_taint" in meta
+                    
+                    if not is_c5 and not has_taint:
+                        # Append the deterministic tag to avoid Knowledge Laundering
+                        original_content = getattr(r, "content", "")
+                        r.content = f"[EPISTEMIC_WARNING: PROBABILISTIC_ORIGIN]\n{original_content}"
+
                 return results
 
             except (sqlite3.Error, OSError, RuntimeError) as e:
                 logger.exception("Hybrid Graph-RAG search failed: %s", e)
                 # Ultimate fallback to basic text search
-                return await text_search(
+                fallback_results = await text_search(
                     conn,
                     query,
-                    tenant_id,
-                    project,
+                    tenant_id=tenant_id,
+                    project=project,
                     limit=top_k,
                     as_of=as_of,
                     confidence=confidence,
                     **kwargs,
                 )
+                
+                # 3. [CORTEX v10] Read-Path Epistemic Membrane (Taint Propagation) - Fallback
+                for r in fallback_results:
+                    meta = getattr(r, "meta", {}) or {}
+                    conf = getattr(r, "confidence", meta.get("confidence", "UNKNOWN"))
+                    is_c5 = conf in ("C5", "C5-REAL", "C5-Static", "C5-Dynamic")
+                    has_taint = "cortex_taint" in meta
+                    
+                    if not is_c5 and not has_taint:
+                        original_content = getattr(r, "content", "")
+                        r.content = f"[EPISTEMIC_WARNING: PROBABILISTIC_ORIGIN]\n{original_content}"
+
+                return fallback_results
 
     async def _enrich_with_graph_context(
         self, conn, results: list[Any], query: str, graph_depth: int, tenant_id: str = "default"
