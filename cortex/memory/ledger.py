@@ -106,7 +106,7 @@ class EventLedgerL3:
         
         from cortex.engine.causal.taint_engine import enforce_taint_check
         token = event.metadata.get("cortex_taint") if event.metadata else None
-        enforce_taint_check(token, event.content)
+        await enforce_taint_check(self._conn, token, event.content)
 
         await self.ensure_table()
 

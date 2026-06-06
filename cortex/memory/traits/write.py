@@ -18,11 +18,10 @@ class WriteTrait:
         is available. The sanitized content is stored and vectorized;
         encrypted PII fragments are persisted in the metadata field.
         """
+        conn = self._get_conn()  # pyright: ignore[reportAttributeAccessIssue]
         from cortex.engine.causal.taint_engine import enforce_taint_check
         token = fact.metadata.get("cortex_taint") if fact.metadata else None
-        enforce_taint_check(token, fact.content)
-
-        conn = self._get_conn()  # pyright: ignore[reportAttributeAccessIssue]
+        await enforce_taint_check(conn, token, fact.content)
 
         # ─── PII Sanitization Gate (Moved outside the DB Lock) ────────
         sanitized_content = fact.content
