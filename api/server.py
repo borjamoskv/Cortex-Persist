@@ -3,16 +3,67 @@ import asyncio
 import random
 import json
 import time
+from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import aiosqlite
 from pathlib import Path
 from typing import Any
 
+from cortex.engine.exergy_daemon import ExergyDaemon
+from cortex.engine.entropy_daemon import EntropyDaemon
+from cortex.ledger.execution_trace import ExecutionTraceLedger
+from cortex.ledger.causal_graph import CausalGraph
+from cortex.engine.causal_scheduler import CausalScheduler
+from cortex.engine.rollback_engine import CausalRollbackEngine
+from cortex.engine.bifurcation_engine import ExergyBifurcationEngine
+
+CORTEX_DB_PATH = str(Path("~/.cortex/cortex_engine.db").expanduser())
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Inicialización del ecosistema termodinámico
+    Path(CORTEX_DB_PATH).parent.mkdir(parents=True, exist_ok=True)
+    
+    ledger = ExecutionTraceLedger(CORTEX_DB_PATH)
+    graph = CausalGraph(CORTEX_DB_PATH)
+    rollback = CausalRollbackEngine(CORTEX_DB_PATH, ledger, None)
+    scheduler = CausalScheduler(graph, rollback, ledger)
+    bifurcation = ExergyBifurcationEngine(ledger, scheduler)
+    
+    async with aiosqlite.connect(CORTEX_DB_PATH) as conn:
+        await conn.execute("PRAGMA journal_mode=WAL;")
+        await conn.execute("""
+            CREATE TABLE IF NOT EXISTS execution_trace_ledger (
+                id              TEXT PRIMARY KEY,
+                tenant_id       TEXT NOT NULL DEFAULT 'default',
+                origin          TEXT NOT NULL,
+                cost            REAL NOT NULL,
+                lineage         TEXT NOT NULL DEFAULT '[]',
+                outcome         TEXT NOT NULL,
+                rollback_possible BOOLEAN NOT NULL DEFAULT FALSE,
+                created_at      TEXT NOT NULL DEFAULT (datetime('now'))
+            )
+        """)
+        await conn.execute("CREATE TABLE IF NOT EXISTS thermodynamics_state (tenant_id TEXT PRIMARY KEY, entropy_budget REAL)")
+        await conn.commit()
+
+    exergy_daemon = ExergyDaemon(bifurcation, scan_interval=60.0)
+    entropy_daemon = EntropyDaemon(CORTEX_DB_PATH, scan_interval=3600.0)
+    
+    exergy_daemon.start()
+    entropy_daemon.start()
+
+    yield
+
+    await exergy_daemon.stop()
+    await entropy_daemon.stop()
+
 app = FastAPI(
     title="CORTEX Persist API",
     description="Motor C5-REAL para visualización de exergía y purga de influencers.",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 # CORS para permitir peticiones desde cortexpersist.com (o localhost para dev)

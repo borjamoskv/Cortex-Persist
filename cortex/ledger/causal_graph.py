@@ -114,11 +114,13 @@ class CausalGraph:
         """Calcula el Coherence Field (CF).
         
         CF = 1.0 - (ghost_nodes / total_active_nodes)
-        Un ghost node es un nodo activo cuyo linaje incluye un ancestro que fue rolled_back.
-        Mide la continuidad ontológica y contradicciones estructurales.
+        Un ghost node es un nodo que presenta:
+        - Ancestros que fueron rolled_back.
+        - Ancestros que apuntan al vacío (nunca existieron).
+        - Dependencias causales cíclicas (A -> B -> A).
+        Mide la continuidad ontológica real y previene Goodhart's Law (C7).
         """
         query_active = "SELECT id, lineage FROM execution_trace_ledger WHERE tenant_id = ? AND outcome != 'rolled_back' AND datetime(created_at) >= datetime('now', ?)"
-        query_dead = "SELECT id FROM execution_trace_ledger WHERE tenant_id = ? AND outcome = 'rolled_back'"
         window_modifier = f"-{window_seconds} seconds"
         
         async with aiosqlite.connect(self.db_path) as conn:
@@ -128,18 +130,52 @@ class CausalGraph:
             if not active_traces:
                 return 1.0  # Coherencia perfecta en vacío
                 
-            cursor = await conn.execute(query_dead, (tenant_id,))
+            cursor = await conn.execute("SELECT id FROM execution_trace_ledger WHERE tenant_id = ? AND outcome = 'rolled_back'", (tenant_id,))
             rolled_back_set = {r[0] for r in await cursor.fetchall()}
             
-            if not rolled_back_set:
-                return 1.0  # Nadie ha muerto, no hay fantasmas
+            cursor = await conn.execute("SELECT id FROM execution_trace_ledger WHERE tenant_id = ? AND outcome != 'rolled_back'", (tenant_id,))
+            global_active_set = {r[0] for r in await cursor.fetchall()}
             
             import json
             contradictions = 0
-            for r in active_traces:
-                lineage = json.loads(r[1])
-                # Incoherencia causal: existes pero tu pasado fue borrado
-                if any(p in rolled_back_set for p in lineage):
+            
+            # Construir DAG local
+            local_dag = {r[0]: json.loads(r[1]) for r in active_traces}
+            
+            for node_id, lineage in local_dag.items():
+                is_contradiction = False
+                for p in lineage:
+                    # 1. Dependencia en muerto
+                    if p in rolled_back_set:
+                        is_contradiction = True
+                        break
+                    # 2. Dependencia en el vacío (nunca existió)
+                    if p not in global_active_set:
+                        is_contradiction = True
+                        break
+                
+                if is_contradiction:
+                    contradictions += 1
+                    continue
+                    
+                # 3. Detección de ciclos (DFS recursivo acotado al DAG local)
+                visited = set()
+                stack = set()
+                
+                def has_cycle(n):
+                    if n in stack:
+                        return True
+                    if n in visited:
+                        return False
+                    visited.add(n)
+                    stack.add(n)
+                    for parent in local_dag.get(n, []):
+                        if has_cycle(parent):
+                            return True
+                    stack.remove(n)
+                    return False
+                    
+                if has_cycle(node_id):
                     contradictions += 1
                     
             normalized_contradiction = contradictions / len(active_traces)

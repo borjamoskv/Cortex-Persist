@@ -1,0 +1,49 @@
+version: "3.9"
+
+services:
+
+  api:
+    build: ./cortex
+    container_name: cortex-api
+    restart: always
+    environment:
+      - MODE=production
+      - LOG_LEVEL=info
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+      - postgres
+
+  worker:
+    build: ./cortex
+    container_name: cortex-worker
+    restart: always
+    command: python worker.py
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7
+    restart: always
+    command: ["redis-server", "--maxmemory", "512mb", "--maxmemory-policy", "allkeys-lru"]
+
+  postgres:
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_USER: cortex
+      POSTGRES_PASSWORD: cortex
+      POSTGRES_DB: ledger
+
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
