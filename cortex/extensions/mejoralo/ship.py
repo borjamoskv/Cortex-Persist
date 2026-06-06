@@ -37,12 +37,12 @@ def _seal_build(stack: str, cwd: str) -> ShipSeal:
         return ShipSeal(
             name="Build Zero-Warning", passed=False, detail="No build command for stack"
         )
-    result = run_quiet(build_cmd, cwd=cwd)  # pyright: ignore
+    ret, _, _ = run_quiet(build_cmd, cwd=cwd)
+    passed = ret == 0
     return ShipSeal(
         name="Build Zero-Warning",
-        # Note: result for run_quiet should be checked for correctness in return signature
-        passed=result is True,
-        detail="Build successful" if result else "Build failed",
+        passed=passed,
+        detail="Build successful" if passed else "Build failed",
     )
 
 
@@ -51,11 +51,12 @@ def _seal_tests(stack: str, cwd: str) -> ShipSeal:
     test_cmd = get_test_cmd(stack)
     if not test_cmd:
         return ShipSeal(name="Tests 100% Green", passed=False, detail="No test command for stack")
-    result = run_quiet(test_cmd, cwd=cwd)  # pyright: ignore
+    ret, _, _ = run_quiet(test_cmd, cwd=cwd)
+    passed = ret == 0
     return ShipSeal(
         name="Tests 100% Green",
-        passed=result is True,
-        detail="Tests passed" if result else "Tests failed",
+        passed=passed,
+        detail="Tests passed" if passed else "Tests failed",
     )
 
 
@@ -64,11 +65,12 @@ def _seal_linter(stack: str, cwd: str) -> ShipSeal:
     lint_cmd = get_lint_cmd(stack)
     if not lint_cmd:
         return ShipSeal(name="Linter Silence", passed=True, detail="No linter configured - pass")
-    result = run_quiet(lint_cmd, cwd=cwd)  # pyright: ignore
+    ret, _, _ = run_quiet(lint_cmd, cwd=cwd)
+    passed = ret == 0
     return ShipSeal(
         name="Linter Silence",
-        passed=result is True,
-        detail="Linter clean" if result else "Linter issues found",
+        passed=passed,
+        detail="Linter clean" if passed else "Linter issues found",
     )
 
 
