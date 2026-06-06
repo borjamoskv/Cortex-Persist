@@ -409,7 +409,7 @@ async def list_api_keys(
 # ─── Handoff & Continuity ───────────────────────────────────────────
 
 
-@router.post("/v1/handoff")
+@router.post("/v1/handoff", response_model=dict)
 async def generate_handoff_context(
     request: Request,
     engine: CortexEngine = Depends(get_engine),
@@ -440,7 +440,7 @@ async def generate_handoff_context(
         raise HTTPException(status_code=500, detail=get_trans("error_unexpected", lang)) from None
 
 
-@router.post("/v1/admin/credibility-strike")
+@router.post("/v1/admin/credibility-strike", response_model=dict)
 async def execute_credibility_strike(
     project: str = Query(...),
     ultrathink: bool = Query(True),
