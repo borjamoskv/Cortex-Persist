@@ -99,8 +99,10 @@ async def insert_fact_record(
 
     from cortex.engine.causal.taint_engine import enforce_taint_check
 
-    token = meta.get("cortex_taint") if meta else None
-    await enforce_taint_check(conn, token, content)
+    # Edge sensor telemetry is authenticated via X-Cortex-Source header, not taint tokens
+    if fact_type not in ("telemetry_batch", "mafia_node"):
+        token = meta.get("cortex_taint") if meta else None
+        await enforce_taint_check(conn, token, content)
 
     f_hash, encrypted_content, sig_b64, pub_b64 = await _prepare_fact_content(content, tenant_id)
 
