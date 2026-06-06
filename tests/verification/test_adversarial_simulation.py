@@ -166,6 +166,7 @@ async def test_contradictory_consensus_detection(engine):
         agent_id="user",
         logos_signature=logos_sig,
         nonce=nonce,
+        archaeology_audited=True,
     )
 
     # Next, simulate an adversarial agent trying to contradict the baseline decision

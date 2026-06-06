@@ -275,6 +275,7 @@ class GitHubCortexBridge:
             "previous_bridge_id": existing_fact_id,
             "closed_at": closed_at,
             "crystallized_at": now_iso(),
+            "archaeology_audited": True,
         }
 
         fact_id = await self._engine.store(

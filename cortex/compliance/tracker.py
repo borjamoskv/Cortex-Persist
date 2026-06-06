@@ -102,6 +102,7 @@ class ComplianceTracker:
 
         eu_meta: dict[str, Any] = {
             "actor_id": agent_id,
+            "archaeology_audited": True,
             "eu_ai_act": {
                 "article": "12",
                 "logged_at": now,
@@ -146,6 +147,7 @@ class ComplianceTracker:
 
         eu_meta: dict[str, Any] = {
             "actor_id": agent_id,
+            "archaeology_audited": True,
             "eu_ai_act": {
                 "article": "12",
                 "logged_at": now,
