@@ -90,7 +90,7 @@ async def _check_latency_telemetry() -> list[str]:
 
 
 async def check_seal_6_async_perf() -> GateResult:
-    """TODO: Document check_seal_6_async_perf"""
+    """Check asynchronous performance invariants."""
     printer.seal(6, "AX-III Colapso Entrópico", "Async & Performance")
     passed = True
     exclude = frozenset(
@@ -139,7 +139,7 @@ async def check_seal_6_async_perf() -> GateResult:
 
 
 async def check_seal_7_axiom_registry() -> GateResult:
-    """TODO: Document check_seal_7_axiom_registry"""
+    """Check axiom registry integrity and system prompt budget."""
     printer.seal(7, "Registry Integrity", "Axiom Registry + Prompt Budget")
     passed = True
     try:
@@ -173,18 +173,18 @@ async def check_seal_7_axiom_registry() -> GateResult:
 
 
 async def check_seal_8_dependency() -> GateResult:
-    """TODO: Document check_seal_8_dependency"""
+    """Verify dependency integrity and Shannon entropy of files."""
     printer.seal(8, "Ω₃ Byzantine", "Dependency Integrity + Shannon Entropy")
     return await check_seal_8_dependency_impl(GlobalSourceCache.files)
 
 
 async def check_seal_9_compliance() -> GateResult:
-    """TODO: Document check_seal_9_compliance"""
+    """Verify compliance and aesthetic integrity."""
     printer.seal(9, "Sovereign Aesthetic", "Compliance & Aesthetic Integrity")
     return await check_seal_9_compliance_impl()
 
 
 async def check_seal_10_preservation() -> GateResult:
-    """TODO: Document check_seal_10_preservation"""
+    """Check self-preservation guarantees."""
     printer.seal(10, "Ω₅ Antifragile", "Self-Preservation")
     return await check_gate_21_preservation(cached_files=GlobalSourceCache.files)

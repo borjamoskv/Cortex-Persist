@@ -37,6 +37,35 @@ def check_file_entropy(filepath):
         penalties += todos * 2
         issues.append(f"AI Slop detected (TODOs/FIXMEs). Penalty: +{todos * 2}")
 
+    class NestingDepthVisitor(ast.NodeVisitor):
+        def __init__(self):
+            self.max_depth = 0
+            self.current_depth = 0
+
+        def visit_If(self, node):
+            self.current_depth += 1
+            self.max_depth = max(self.max_depth, self.current_depth)
+            self.generic_visit(node)
+            self.current_depth -= 1
+
+        def visit_For(self, node):
+            self.current_depth += 1
+            self.max_depth = max(self.max_depth, self.current_depth)
+            self.generic_visit(node)
+            self.current_depth -= 1
+
+        def visit_While(self, node):
+            self.current_depth += 1
+            self.max_depth = max(self.max_depth, self.current_depth)
+            self.generic_visit(node)
+            self.current_depth -= 1
+
+        def visit_Try(self, node):
+            self.current_depth += 1
+            self.max_depth = max(self.max_depth, self.current_depth)
+            self.generic_visit(node)
+            self.current_depth -= 1
+
     # Penalty 3: Pass-only stubs (AST)
     try:
         tree = ast.parse(content)
@@ -49,13 +78,11 @@ def check_file_entropy(filepath):
             if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
                 # Penalty 4: Complexity (Deeply nested logic)
                 # Very basic depth check representation
-                depth = 0
-                for child in ast.walk(node):
-                    if isinstance(child, ast.If | ast.For | ast.While | ast.Try):
-                        depth += 1
-                if depth > 10:
+                visitor = NestingDepthVisitor()
+                visitor.visit(node)
+                if visitor.max_depth > 4:
                     penalties += 2
-                    issues.append(f"High nesting complexity in '{node.name}'. Penalty: +2")
+                    issues.append(f"High nesting complexity in '{node.name}' (depth: {visitor.max_depth}). Penalty: +2")
     except SyntaxError:
         penalties += 10
         issues.append("SyntaxError: Critical structural failure. Penalty: +10")
