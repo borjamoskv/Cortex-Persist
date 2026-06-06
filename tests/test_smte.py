@@ -147,7 +147,8 @@ class TestSMTEAnalyzer:
 
 class TestExergyMonitor:
     def test_set_l_epi_metrics_and_calculate(self):
-        monitor = ExergyMonitor("test_target")
+        # Set circuit_breaker_threshold high enough to prevent tripping
+        monitor = ExergyMonitor("test_target", circuit_breaker_threshold=30.0)
         monitor.set_l_epi_metrics(ast_complexity=5.0, empirical_usage=2.0, dead_code_ratio=0.3)
 
         monitor.start_transaction()
@@ -161,6 +162,19 @@ class TestExergyMonitor:
         assert metrics["dead_code_ratio"] == 0.3
         # limerence_penalty = (5.0 / 2.0) * 10.0 = 25.0
         assert metrics["limerence_penalty"] == 25.0
+
+    def test_circuit_breaker_tripped(self):
+        from cortex.engine.smte.exergy import CircuitBreakerTripped
+        monitor = ExergyMonitor("test_breaker", circuit_breaker_threshold=20.0)
+        # 5.0 / 2.0 * 10.0 = 25.0 > 20.0
+        monitor.set_l_epi_metrics(ast_complexity=5.0, empirical_usage=2.0, dead_code_ratio=0.3)
+
+        monitor.start_transaction()
+        monitor.end_transaction(success=True)
+
+        with pytest.raises(CircuitBreakerTripped) as exc_info:
+            monitor.calculate_metrics()
+        assert "Circuit breaker tripped" in str(exc_info.value)
 
     def test_evaluate_module_exergy(self):
         results = [

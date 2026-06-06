@@ -1,6 +1,19 @@
 # [C5-REAL] Exergy-Maximized
+import logging
 import time
 from typing import Any
+
+logger = logging.getLogger("cortex.engine.smte.exergy")
+
+# Configurable thresholds (AX-047 enforcement)
+LIMERENCE_CIRCUIT_BREAKER_THRESHOLD: float = 20.0
+DEAD_CODE_RATIO_THRESHOLD: float = 0.4
+LIMERENCE_PENALTY_MULTIPLIER: float = 10.0
+
+
+class CircuitBreakerTripped(Exception):
+    """Raised when the limerence penalty trips the exergy circuit breaker."""
+    pass
 
 
 class ExergyMonitor:
@@ -10,7 +23,14 @@ class ExergyMonitor:
     Ouroboros-Omega L-EPI Guard integrated.
     """
 
-    def __init__(self, target_name: str):
+    def __init__(
+        self,
+        target_name: str,
+        *,
+        circuit_breaker_threshold: float = LIMERENCE_CIRCUIT_BREAKER_THRESHOLD,
+        dead_code_threshold: float = DEAD_CODE_RATIO_THRESHOLD,
+        penalty_multiplier: float = LIMERENCE_PENALTY_MULTIPLIER,
+    ):
         self.target_name = target_name
         self.start_time = 0.0
         self.end_time = 0.0
@@ -18,6 +38,10 @@ class ExergyMonitor:
         self.ast_complexity = 1.0  # Default baseline
         self.empirical_usage = 1.0  # Default baseline
         self.dead_code_ratio = 0.0  # Default baseline
+        self._circuit_breaker_threshold = circuit_breaker_threshold
+        self._dead_code_threshold = dead_code_threshold
+        self._penalty_multiplier = penalty_multiplier
+        self._tripped = False
 
     def set_l_epi_metrics(
         self, ast_complexity: float, empirical_usage: float, dead_code_ratio: float
@@ -46,7 +70,29 @@ class ExergyMonitor:
             entropy = min(1.0, entropy + 0.2)
 
         # Ouroboros-Omega Formula
-        limerence_penalty = (self.ast_complexity / self.empirical_usage) * 10.0
+        limerence_penalty = (
+            (self.ast_complexity / self.empirical_usage) * self._penalty_multiplier
+        )
+
+        # Circuit Breaker (AX-047): abort mutation loop if limerence is catastrophic
+        if limerence_penalty > self._circuit_breaker_threshold:
+            self._tripped = True
+            logger.critical(
+                "CIRCUIT BREAKER TRIPPED for '%s': limerence_penalty=%.2f > threshold=%.2f. "
+                "Mutation loop MUST abort.",
+                self.target_name,
+                limerence_penalty,
+                self._circuit_breaker_threshold,
+            )
+            raise CircuitBreakerTripped(
+                f"Circuit breaker tripped: limerence penalty {limerence_penalty:.2f} "
+                f"exceeds threshold {self._circuit_breaker_threshold:.2f}"
+            )
+
+        must_amputate = (
+            self.dead_code_ratio > self._dead_code_threshold
+            and limerence_penalty > self._penalty_multiplier
+        )
 
         return {
             "target": self.target_name,
@@ -56,6 +102,8 @@ class ExergyMonitor:
             "exergy": 1.0 - entropy,
             "limerence_penalty": limerence_penalty,
             "dead_code_ratio": self.dead_code_ratio,
+            "circuit_breaker_tripped": self._tripped,
+            "must_amputate": must_amputate,
         }
 
 
