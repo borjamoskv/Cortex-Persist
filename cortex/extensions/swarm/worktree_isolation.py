@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Worktree isolation helpers.
 
 This is a lightweight, deterministic replacement for the original Git plumbing

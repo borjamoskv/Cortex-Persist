@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """AUTOROUTER-1 - CLI commands for CORTEX integration.
 
 Commands:

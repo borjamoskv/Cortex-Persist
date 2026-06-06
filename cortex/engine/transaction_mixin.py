@@ -1,4 +1,4 @@
-"""Transaction mixin - log, verify, and process ledger events."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

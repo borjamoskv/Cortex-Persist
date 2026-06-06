@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Core - Epistemic Lineage & Audit Engine.
 
 Ensures Ω₃-V compliance: All synthesized insights (L2) must be traceble

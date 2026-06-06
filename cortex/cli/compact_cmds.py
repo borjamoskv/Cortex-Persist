@@ -1,4 +1,4 @@
-"""CLI commands: compact, compact-status."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

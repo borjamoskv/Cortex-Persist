@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Auto-Healing capability for MEJORAlo.
 
 Detects the files that lowered the score, delegates refactoring to an LLM agent,

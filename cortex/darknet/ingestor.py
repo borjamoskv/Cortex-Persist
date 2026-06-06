@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Ingestor of Real World Data para la Darknet.
 
 Lee crudos del internet público (HackerNews, ArXiv, RSS DeFi).

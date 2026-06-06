@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX ADK Agents - Sovereign AI Agent Definitions.
 
 Defines multi-agent architecture using Google ADK:

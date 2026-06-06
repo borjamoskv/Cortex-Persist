@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Agent ISA - Python DSL for Code-as-Data dispatch trees.
 
 Homoiconic builder: constructs AgentOp trees in Python that execute

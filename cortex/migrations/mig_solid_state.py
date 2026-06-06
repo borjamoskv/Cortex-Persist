@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Migration 021: Solid-State Substrate (entity_events table).
 
 Creates the append-only, hash-chained entity_events table

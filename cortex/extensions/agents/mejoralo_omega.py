@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """MEJORALO-Ω - Sovereign Continuous Script Improvement Agent.
 
 Autonomous agent that runs perpetual Ouroboros cycles:

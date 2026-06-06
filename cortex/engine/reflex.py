@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Reflex Engine - Autonomic Responses and Immune Defense.
 Ω₅: High adrenaline triggers diagnostic healing.

@@ -1,4 +1,4 @@
-"""CORTEX Auth - SQL Schema definitions."""
+# [C5-REAL] Exergy-Maximized
 
 AUTH_SCHEMA = """
 CREATE TABLE IF NOT EXISTS api_keys (

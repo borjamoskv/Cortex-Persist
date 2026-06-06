@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Causal Graph - Trace DAG Extractor.
 
 Extrae subgrafos de ejecución causalmente dependientes para el Rollback Engine.

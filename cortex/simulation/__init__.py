@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 from cortex.simulation.primitives import MemoryParticle, MemoryTrajectory, SimulationField
 from cortex.simulation.monte_carlo import MonteCarloRecallEngine
 from cortex.simulation.mcp import MemoryCollapseProtocol

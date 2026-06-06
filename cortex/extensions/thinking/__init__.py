@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Thought Orchestra Module.
 
 Orquestación multi-modelo con fusión por consenso.

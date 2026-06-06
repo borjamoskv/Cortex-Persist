@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Cortex Router v3 - Causal Policy Gradient System.
 
 Optimizes routing decisions over future epistemic stability trajectories.

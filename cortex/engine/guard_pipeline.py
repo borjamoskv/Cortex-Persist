@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Guard Pipeline - Composable pre-store, mutate, and post-store chain.
 
 Replaces the hardcoded try/except ImportError blocks in store_mixin._store_impl

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Health system invariant verification.
 
 Self-test that runs in tests AND daemon - any future regression

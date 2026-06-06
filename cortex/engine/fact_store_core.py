@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Fact Store Core - Low-level storage operations (SQL, FTS, Graph, Causality).
 Ω₁: Immutable audit trail and causal linking.

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Store Pipeline Protocols - Decoupled contracts for the write path.
 
 Modules implementing these protocols can be registered with the engine

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# [C5-REAL] Exergy-Maximized
 # ─────────────────────────────────────────────────────────────────────
 # CORTEX MCP Toolbox Launcher
 #

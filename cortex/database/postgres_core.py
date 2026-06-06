@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Sovereign Connection Factory for PostgreSQL (AlloyDB / pgvector).
 

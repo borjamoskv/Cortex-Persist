@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Health Index - FastAPI routes.
 
 Provides /v1/health/check, /v1/health/report, /v1/health/score,

@@ -1,4 +1,4 @@
-"""CLI Interface for MCTS Quantum Git search (Chronos)."""
+# [C5-REAL] Exergy-Maximized
 
 import asyncio
 

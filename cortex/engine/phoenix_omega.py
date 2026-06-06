@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 PHOENIX-OMEGA: Motor de Transformación Atómica y Escalado Estructural
 Protocolo CORTEX: Analysis -> Extraction -> Reconstruction -> Scaling -> Verification

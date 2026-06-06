@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Error→Ghost Pipeline (Ω₅ Antifragile Autopersistence).
 
 Every uncaught error in the daemon/swarm is automatically persisted as a

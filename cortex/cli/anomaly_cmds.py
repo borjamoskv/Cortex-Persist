@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX CLI - Anomaly Hunter Daemon Commands.
 
 Integrates the NightShift anomaly hunter into the Sovereign CLI.

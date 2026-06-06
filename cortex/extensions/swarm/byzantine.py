@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Byzantine Consensus (LEGION-Ω)
 Byzantine Fault Tolerance / Zero-Trust Mathematics: Axiom 4.

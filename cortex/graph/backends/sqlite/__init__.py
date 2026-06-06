@@ -1,4 +1,4 @@
-"""SQLite Graph Backend Package."""
+# [C5-REAL] Exergy-Maximized
 
 import logging
 

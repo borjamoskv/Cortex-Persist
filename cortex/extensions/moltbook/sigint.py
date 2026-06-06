@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Moltbook SIGINT (Signals Intelligence) - Lead Detection Engine v2.
 
 Dual-mode operation:

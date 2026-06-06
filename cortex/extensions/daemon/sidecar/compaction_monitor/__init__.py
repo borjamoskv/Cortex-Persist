@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Compaction Monitor Sidecar package.
 
 Exports:

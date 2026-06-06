@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 # cortex/evolution/action.py
 """
 ψSAP (Symbolic Action Principle) - Lagrangian Formalism for CORTEX.

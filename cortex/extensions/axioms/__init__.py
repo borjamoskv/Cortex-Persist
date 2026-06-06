@@ -1,5 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
-"""CORTEX Axiom Registry - The Canonical Source of Truth."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

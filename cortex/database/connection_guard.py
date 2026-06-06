@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """ConnectionGuard - CI/lint scanner for raw sqlite3.connect() usage.
 
 Provides a callable scanner that detects unauthorized sqlite3.connect()

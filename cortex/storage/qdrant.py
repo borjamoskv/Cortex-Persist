@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Qdrant Vector Store Backend.
 

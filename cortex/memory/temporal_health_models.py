@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """temporal_health_models - SchedulerConfig, HealthReport, HealthTier.
 
 Extracted from temporal_health.py to satisfy the Landauer LOC barrier (≤500).

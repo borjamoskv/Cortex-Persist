@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX v8+ - NREM Consolidation Cycle.
 
 Unified orchestrator for the "sleep" sweep that transforms volatile

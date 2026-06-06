@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """SICA World Model - Causal Prediction & Counterfactual Reasoning.
 
 The agent currently REACTS to failures. A world model lets it

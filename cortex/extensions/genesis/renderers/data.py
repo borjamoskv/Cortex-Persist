@@ -1,4 +1,4 @@
-"""Genesis Template Renderers for Data Definitions (SQL & YAML)."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

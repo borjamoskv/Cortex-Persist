@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Reflexion Engine - Self-Healing Dispatch Loop (Level 5).
 
 Bridges the ISA builder's code-as-data primitives (reflect/rewrite) with a

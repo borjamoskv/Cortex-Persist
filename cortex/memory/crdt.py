@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX v6+ - CRDT Memory Merge (Multi-Agent Eventual Consistency).
 
 Strategy #7: When multiple agents work in parallel (LEGIØN-1),

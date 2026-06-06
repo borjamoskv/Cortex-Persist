@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CLI commands for Demiurge Omega (Sortu).
 Dynamically forge and execute skills.

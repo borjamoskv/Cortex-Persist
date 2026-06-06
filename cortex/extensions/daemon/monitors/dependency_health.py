@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Dependency Health Monitor - checks external service availability.
 
 Pluggable health checks for CORTEX dependencies:

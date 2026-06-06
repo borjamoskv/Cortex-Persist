@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Sovereign Telemetry Routes (AST Oracle WebSocket API)
 Exposes realtime stream of code mutations detected by AST Oracle.

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CLI commands for the E2E Pipeline - `cortex run` and `cortex pipeline`.
 
 Provides the primary E2E entry point for executing intents through

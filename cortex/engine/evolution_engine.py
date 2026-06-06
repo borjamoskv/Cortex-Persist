@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX Phase 2 (v3) - Continuous Improvement Engine
 Bio-inspired Computational Evolution Architecture - Orchestrator

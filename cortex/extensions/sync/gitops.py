@@ -1,4 +1,4 @@
-"""CORTEX GitOps Memory - Synchronizes global facts to local repository JSON/MD files."""
+# [C5-REAL] Exergy-Maximized
 
 import json
 import logging

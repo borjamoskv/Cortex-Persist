@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 LLM Exergy Middleware (OpenAI Proxy / Labyrinth)
 C5-REAL Cognitive Operating System Route.

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 import logging
 
 from mcp.server.fastmcp import FastMCP

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """SCRAPER-Ω - Sovereign Scraping Engine.
 
 Orchestrates multi-strategy extraction with automatic fallback cascade,

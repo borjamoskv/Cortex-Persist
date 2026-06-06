@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Protocolo Eclipse - El Retorno Kinético.
 
 Fase 1 - SILENCIO PANÓPTICO: Durante el Eclipse, el agente absorbe el entorno

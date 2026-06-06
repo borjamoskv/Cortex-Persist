@@ -1,1 +1,1 @@
-"""Cryptographic primitives for forensics."""
+# [C5-REAL] Exergy-Maximized

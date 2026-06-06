@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Validation script for L7 Autopoietic Agent.
 
 Runs a full evolution cycle with a mock executor to verify:

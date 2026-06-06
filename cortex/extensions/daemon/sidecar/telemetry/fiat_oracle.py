@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Fiat Oracle Sidecar (Operation Citadel).
 Monitors financial transactions (Simulated/Bunq) and pushes facts to the ledger.

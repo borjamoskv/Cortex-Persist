@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Sovereign Persist-Executor Engine
 Status: C5-REAL

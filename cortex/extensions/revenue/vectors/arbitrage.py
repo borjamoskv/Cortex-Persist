@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Revenue - Vector 2: Arbitrage Scanner.
 
 Detects price discrepancies across public marketplaces and digital goods

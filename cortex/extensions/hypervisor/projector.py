@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Hypervisor - Event Projector.
 
 Orchestrates invisible side-effects triggered by tenant operations.

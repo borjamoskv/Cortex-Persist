@@ -1,4 +1,4 @@
-"""Storage pipeline for CortexMemoryManager."""
+# [C5-REAL] Exergy-Maximized
 
 import asyncio
 import logging

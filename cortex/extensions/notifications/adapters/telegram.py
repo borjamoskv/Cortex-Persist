@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX - Telegram Notification Adapter.
 
 Delivers events to a Telegram chat using the Bot API.

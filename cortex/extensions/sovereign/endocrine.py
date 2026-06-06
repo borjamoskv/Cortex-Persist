@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 # cortex/sovereign/endocrine.py
 """Digital Endocrine system for adaptive Sovereign behavior.
 

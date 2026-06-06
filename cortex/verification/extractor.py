@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """SMT Model Extractor.
 
 Translates Python AST into semantic constraints for the Z3 verifier.

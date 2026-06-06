@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX CLI - Lineage & Epistemic Audit Commands.
 
 Provides verification of Ω₃-V: Verifiable Lineage.

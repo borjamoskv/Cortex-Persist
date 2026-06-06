@@ -1,4 +1,4 @@
-"""CLI commands: entropy install-hook, scan, report, shannon."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Context Cache Adapter - GPU-Native KV-Cache Management (Ω₁₁ / Ω₁₂).
 

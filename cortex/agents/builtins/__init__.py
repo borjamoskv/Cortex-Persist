@@ -1,4 +1,4 @@
-"""cortex.agents.builtins - built-in MVP agent implementations."""
+# [C5-REAL] Exergy-Maximized
 
 from cortex.agents.builtins.copilot_agent import CopilotAgent
 from cortex.agents.builtins.handoff_agent import HandoffAgent

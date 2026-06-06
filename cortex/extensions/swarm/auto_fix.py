@@ -1,4 +1,4 @@
-"""AutoFixPipeline - Ghost → Classify → AgentTask → Aether → Validate (Ω₅)."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

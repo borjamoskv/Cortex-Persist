@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Pipeline - Provider Factory.
 
 Builds the LLM execution stack for the AgentExecutor by

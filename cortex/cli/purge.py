@@ -1,4 +1,4 @@
-"""CLI commands: purge duplicates, empty facts, and projects."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

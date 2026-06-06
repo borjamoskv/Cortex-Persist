@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """memory_retrieval - L2 Episodic Retrieval with Reciprocal Rank Fusion.
 
 Extracted from CortexMemoryManager to satisfy the Landauer LOC barrier (≤500).

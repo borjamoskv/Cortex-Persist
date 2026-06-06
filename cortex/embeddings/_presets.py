@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Embedding Provider Presets Loader.
 
 Loads embedding provider configurations from config/embedding_presets.json.

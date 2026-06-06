@@ -1,4 +1,4 @@
-"""MEJORAlo Engine implementation."""
+# [C5-REAL] Exergy-Maximized
 
 from pathlib import Path
 from typing import Any

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Hyperdimensional Computing Memory Engine.
 
 Sovereign semantic memory using algebraic hypervectors (10k-dim bipolar ±1).

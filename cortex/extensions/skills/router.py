@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Skill Routing Engine - Capa base de ejecución Soberana (MOSKV-1).
 

@@ -1,4 +1,4 @@
-"""AST Oracle Monitor — C5-REAL Sensor for Pyright structural entropy."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

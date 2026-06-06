@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Metering - Usage Tracker.
 
 Records API call consumption per tenant with SQLite-backed counters.

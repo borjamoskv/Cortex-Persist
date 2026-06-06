@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CLI commands for Autodidact Omega (v4.0).
 JIT AST Compilation and Thermodynamic Sovereign Forging.

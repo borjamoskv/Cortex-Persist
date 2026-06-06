@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """HDC Encoder (Text to Hypervector).
 
 Converts raw text into a 10k-dim bipolar hypervector algebraically.

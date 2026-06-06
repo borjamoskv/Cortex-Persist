@@ -1,4 +1,4 @@
-"""CLI commands: cortex fingerprint - cognitive pattern extraction."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

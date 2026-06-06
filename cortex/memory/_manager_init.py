@@ -1,4 +1,4 @@
-"""Manager subsystem initializers."""
+# [C5-REAL] Exergy-Maximized
 
 import logging
 from typing import Any

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 cortex.ui_control - Control soberano de escritorio macOS.
 

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 L2 Hybrid Search Engine (Mem0-Killer).
 

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Causal Gap Retrieval - Axiom Ω₁₃ Search Upgrade.
 
 Replaces "give me similar results" with "give me the missing evidence

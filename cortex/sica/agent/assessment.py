@@ -1,4 +1,4 @@
-"""Self-assessment and output revision logic for SICA."""
+# [C5-REAL] Exergy-Maximized
 
 from typing import Any
 from cortex.sica.object_level import ObjectLevel, StepOutcome

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 from cortex.semantic.intent_encoder import IntentEncoder
 from cortex.semantic.graph_engine import GraphExpansionEngine
 from cortex.semantic.coherence import CoherenceScorer

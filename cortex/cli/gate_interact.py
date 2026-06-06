@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Interactive CLI approval logic for SovereignGate.
 """

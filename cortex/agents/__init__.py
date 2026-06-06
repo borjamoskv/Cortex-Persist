@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Agents - runtime public API.
 
 Exposes the core agent runtime classes. Extension-layer prompts and pitch

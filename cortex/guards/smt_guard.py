@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 SMT Constraint Guard - Formal Verification via Z3.
 

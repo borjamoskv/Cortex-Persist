@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Entropic Wake Daemon (VOID DAEMON)
 The proactive heartbeat that crosses the Rubicon: from determinism to autonomous mutation.

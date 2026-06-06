@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Associative Dream Engine (REM Phase).
 
 The creative counterpart to HippocampalReplay (NREM).

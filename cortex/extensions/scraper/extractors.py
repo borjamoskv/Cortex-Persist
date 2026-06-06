@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """SCRAPER-Ω - Multi-strategy extraction backends.
 
 Each extractor implements the same interface: async extract(url) -> (title, content).

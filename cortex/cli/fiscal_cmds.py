@@ -1,4 +1,4 @@
-"""CORTEX CLI - Fiscal Beachhead Commands."""
+# [C5-REAL] Exergy-Maximized
 
 import click
 

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Sovereign Telemetry Gate (RADAR-Ω + KETER-OMEGA)
 ================================================

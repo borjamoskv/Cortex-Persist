@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX - AST Validator (Static Analysis Gate).
 
 Extracted from code_smith.py for module splitting (Ω₂: LOC ≤ 500).

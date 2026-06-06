@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Config - Backward-compatible shim.
 
 Real implementation lives in cortex.core.config.

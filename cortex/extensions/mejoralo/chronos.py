@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CHRONOS-1 Yield Calculus (Axiom Ω₁₁).
 
 Extracted from heal.py to maintain thermodynamic LOC limits.

@@ -1,4 +1,4 @@
-"""Base class and common utilities for daemon monitors (PULMONES)."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

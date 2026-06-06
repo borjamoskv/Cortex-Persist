@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX CLI - Sovereign Error Display System v2.0 (i18n-enabled).
 

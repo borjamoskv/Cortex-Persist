@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Gateway.
 
 Sovereign Signal Bus and Cross-Axiom Orchestration.

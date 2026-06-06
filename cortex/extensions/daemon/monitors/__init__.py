@@ -1,4 +1,4 @@
-"""CORTEX Daemon monitors - lazy-loaded (PEP 562)."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

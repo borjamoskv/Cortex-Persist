@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """_scanner_import_graph - Import Graph analysis for the Antipattern Scanner.
 
 Extracted from antipatterns.py to satisfy the Landauer LOC barrier (≤500).

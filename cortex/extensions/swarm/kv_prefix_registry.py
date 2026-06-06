@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 KV Prefix Registry para SwarmManager.
 Implementa RadixAttention-style prefix sharing a nivel de aplicación.

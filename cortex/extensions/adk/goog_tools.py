@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Google One Tools - Integration for CORTEX ADK agents.
 
 Provides tools to monitor storage, sync with NotebookLM sources,

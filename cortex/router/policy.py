@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Cortex Router v2 - Differentiable Policy Network.
 
 Implements a trainable MoE-style router evaluating the epistemic state vector

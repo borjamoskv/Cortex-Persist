@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Crystal Consolidator (REM Sleep Phase).
 
 The destructive half of the NightShift cycle. Executes 4 consolidation

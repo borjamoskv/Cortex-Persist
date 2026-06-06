@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Path Security Guard - Path Traversal Prevention.
 
 Ensures all file system access is restricted to the workspace or allowed

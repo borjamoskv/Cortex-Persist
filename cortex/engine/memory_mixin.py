@@ -1,4 +1,4 @@
-"""Memory mixin - Tripartite Memory (L1/L2/L3) initialization and management."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

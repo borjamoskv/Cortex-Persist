@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Router - Deterministic Agent Routing.
 
 Routes pipeline requests to the correct agent(s) based on

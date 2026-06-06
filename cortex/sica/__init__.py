@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """SICA - Self-Improving Cognitive Architecture.
 
 Nelson-Narens (1990) dual-level metacognitive agent framework.

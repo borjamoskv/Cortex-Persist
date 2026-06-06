@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """SICA Strategy - Evolvable Search Heuristics.
 
 A SearchStrategy encodes HOW the agent approaches problem-solving:

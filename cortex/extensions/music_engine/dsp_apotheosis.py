@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 DSP Apotheosis.
 Capa determinista de procesamiento de señal en Python (Mastering, Tonal Balance, Phase Alignment).

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Repair Strategy Registry - Deterministic Fix Application for Level 5 Self-Healing.
 
 Each strategy is a pure function: (context, parameters) → RepairResult.

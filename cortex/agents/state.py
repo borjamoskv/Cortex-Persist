@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Agent Runtime - State & Working Memory.
 
 AgentStatus tracks lifecycle phase.

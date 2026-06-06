@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Exergetic Epistemology (ΞΕ) - Advanced Information-Theoretic Primitives.
 
 Implements the frontier functions derived from the ΞΕ treatise:

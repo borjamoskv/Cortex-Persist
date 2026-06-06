@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX API - NotebookLM Routes.
 
 Provides REST endpoints for NotebookLM Ouroboros memory loop operations:

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Inference Engine - Automatic Fact Derivation (Ω₂: Reduce Entropy).
 
 Scans existing facts and derives new knowledge via rule-based reasoning.

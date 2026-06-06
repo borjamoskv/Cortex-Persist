@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Neuromorphic Pipeline (Pre-Query & Pre-Store Cognitive Gateway).
 

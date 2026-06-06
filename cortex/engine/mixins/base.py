@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Engine Mixin Base - The sovereign foundation for all engine sub-layers.
 Ω₂: Thermodynamic optimization via shared abstractions.
 """

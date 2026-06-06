@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Sovereign Darknet (Dead-Internet Inversion).
 
 Motor que invierte el consumo digital: descarga crudos del mundo real,

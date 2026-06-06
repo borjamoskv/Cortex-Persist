@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX v6+ - Declarative Agent Schema (YAML → Engine).
 
 Pydantic models that define the YAML schema for a CORTEX agent role.

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Sovereign HDC Vector Store.
 
 Replaces dense Qdrant/sqlite-vec storage with purely NumPy/SQLite HDC vectors.

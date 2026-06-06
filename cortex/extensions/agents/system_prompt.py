@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX Agent - Sovereign System Prompt v2.1.
 

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX ADK Tools - Bridge between ADK agents and CortexEngine.
 
 Wraps CortexEngine operations as plain Python functions that ADK agents

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Agent ISA Builder - Pythonic DSL for homoiconic dispatch trees.
 
 Every function returns a dict that maps 1:1 to the Rust AgentOp enum

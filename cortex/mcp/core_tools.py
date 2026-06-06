@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Extended MCP tool registrations extracted from server.py (Seal 8 LOC compliance).
 
 Contains: trace_episode, trace_chain, shannon_report, handoff, embed, embed_status.

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Unified Self-Healing Stack v2 - L5 + L6 + Predictive + Persistent.
 
 Upgrades from v1:

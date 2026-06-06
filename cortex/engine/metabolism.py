@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Sovereign Biological Metabolism.
 
 The first agent engine with a heartbeat (derived from PULSE).

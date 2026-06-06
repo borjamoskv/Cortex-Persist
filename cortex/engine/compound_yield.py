@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CHRONOS-1 Compound Yield System - Axiom Ω₁₁
 Detects causal chains and projects exponential returns of sovereign agent work.

@@ -1,4 +1,4 @@
-"""ALMA: The Sovereign Bio-Digital Soul."""
+# [C5-REAL] Exergy-Maximized
 
 from cortex.extensions.alma.engine import AlmaEngine, SoulState
 from cortex.extensions.alma.taste import (

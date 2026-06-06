@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX v7+ - Sleep Orchestrator (Unified Consolidation Pipeline).
 
 Connects NREM (HippocampalReplay) + REM (AssociativeDreamEngine) into a

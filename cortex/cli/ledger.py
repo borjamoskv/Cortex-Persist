@@ -1,4 +1,4 @@
-"""Sovereign Ledger CLI commands for CORTEX (Waves 5 & 6)."""
+# [C5-REAL] Exergy-Maximized
 
 import click
 from rich.console import Console

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """VEX - Verifiable Execution for Autonomous Agents.
 
 The first agent runner with cryptographic execution proofs.

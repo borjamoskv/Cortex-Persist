@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX-SWARM-PRIME: Tensor-Glial Legion
 Zero-Copy `mmap` tensor map mapped across 10,000 swarm agents representing High-Dimensional Memory.

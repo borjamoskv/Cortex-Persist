@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX Trust Tools - Compliance Report & Decision Lineage.
 

@@ -1,4 +1,4 @@
-"""CORTEX v6+ - Agent package."""
+# [C5-REAL] Exergy-Maximized
 
 from cortex.extensions.agent.degradation import (
     AgentAction,

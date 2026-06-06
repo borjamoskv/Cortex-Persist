@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Autonomous Market-Making Agent (Idea #9).
 
 Full-cycle autonomous engine that detects pre-viral signals,

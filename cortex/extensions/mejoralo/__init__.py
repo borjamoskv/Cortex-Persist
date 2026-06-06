@@ -1,4 +1,4 @@
-"""CORTEX MEJORAlo Package."""
+# [C5-REAL] Exergy-Maximized
 
 from .engine import MejoraloEngine
 from .models import DimensionResult, ScanResult, ShipResult, ShipSeal

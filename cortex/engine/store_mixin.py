@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Storage mixin - store, update, deprecate, ghost management.
 
 Security guards  → cortex.engine.store_guards

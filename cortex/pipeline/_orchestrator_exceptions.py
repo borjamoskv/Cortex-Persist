@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Pipeline orchestrator exceptions.
 
 Reality Level: C5-REAL

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 # cortex/evolution/telemetry.py
 """Lightweight telemetry log - appends one CSV line per cycle.
 

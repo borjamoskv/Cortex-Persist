@@ -1,4 +1,4 @@
-"""Moltbook integration for CORTEX - MOSKV-1 agent social presence."""
+# [C5-REAL] Exergy-Maximized
 
 from cortex.extensions.moltbook.client import MoltbookClient
 from cortex.extensions.moltbook.heartbeat import MoltbookHeartbeat

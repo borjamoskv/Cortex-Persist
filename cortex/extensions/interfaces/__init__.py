@@ -1,1 +1,1 @@
-"""Cortex Interfaces - Protocol contracts for decoupled architecture."""
+# [C5-REAL] Exergy-Maximized

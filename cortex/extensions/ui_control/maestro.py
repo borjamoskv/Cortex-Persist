@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 MaestroUI - Orquestador soberano de control de escritorio macOS.
 

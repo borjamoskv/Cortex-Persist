@@ -1,4 +1,4 @@
-"""Swarm manager primitives for worktrees and task orchestration."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

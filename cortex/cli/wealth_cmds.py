@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX CLI - Sovereign Wealth Engine (moneytv-1 & sovereign-growth-engine-v1).
 
 Commands:

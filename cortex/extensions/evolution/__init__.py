@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 # cortex/evolution/__init__.py
 """Continuous Evolution Engine for CORTEX Sovereign Swarm.
 

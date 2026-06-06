@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX - Health Guard (Axiom 14: System Integrity).
 

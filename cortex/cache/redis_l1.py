@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Redis L1 Cache - Distributed Working Memory for LEGION-10k.
 

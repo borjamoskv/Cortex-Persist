@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX v6+ - YAML Agent Loader (role.yaml → CortexEngine).
 
 Compiles a declarative YAML agent role into a fully configured

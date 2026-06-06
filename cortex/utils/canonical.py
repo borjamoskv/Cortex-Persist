@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Canonical Hash Construction.
 
 Provides deterministic JSON serialization and null-byte separated

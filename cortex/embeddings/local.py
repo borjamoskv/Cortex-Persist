@@ -1,4 +1,4 @@
-"""Local embedding backend with lazy model loading and deterministic fallback."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

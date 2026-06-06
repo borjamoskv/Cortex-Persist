@@ -1,4 +1,4 @@
-"""Entry point for CORTEX MCP Server."""
+# [C5-REAL] Exergy-Maximized
 
 from cortex.mcp.server import run_server
 

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Performance Tracker - Telemetry Collection for Level 6 Self-Optimization.
 
 Collects, aggregates, and analyzes execution telemetry to feed

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Consensus.
 
 Neural Swarm Consensus and Reputation-Weighted validation.

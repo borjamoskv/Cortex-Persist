@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX v7+ - Metamemory: The Agent That Knows What It Knows.
 
 Nelson & Narens (1990) framework: FOK, JOL, calibration, TOT detection.

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """loop_models - Data models for the CORTEX Execution Loop.
 
 Extracted from loop_cmds.py to satisfy the Landauer LOC barrier.

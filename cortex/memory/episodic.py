@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX v6+ - Temporal Abstraction (Episodic Day Summaries).
 
 Strategy #9: Instead of storing every individual action,

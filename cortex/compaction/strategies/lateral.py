@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Lateral inhibition strategy (C5 confirming over C3).
 """

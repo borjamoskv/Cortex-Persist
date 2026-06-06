@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX Admin Health Probes.
 Internal probes for deep system diagnostics.

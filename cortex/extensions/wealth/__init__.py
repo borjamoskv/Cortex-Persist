@@ -1,1 +1,1 @@
-"""CORTEX Wealth - Sovereign Wealth Engine Core Package."""
+# [C5-REAL] Exergy-Maximized

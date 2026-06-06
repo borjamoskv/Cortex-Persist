@@ -1,4 +1,4 @@
-"""CLI commands: timeline log, checkout, snapshot."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

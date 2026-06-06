@@ -1,4 +1,4 @@
-"""Sentinel Monitor for threat actor tracking via pure HTTP."""
+# [C5-REAL] Exergy-Maximized
 
 import asyncio
 import logging

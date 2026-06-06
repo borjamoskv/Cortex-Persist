@@ -1,4 +1,4 @@
-"""Privacy mixin - Zero-Trust Privacy Shield and classification."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

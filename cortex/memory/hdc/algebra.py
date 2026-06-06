@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """HDC Algebraic Operations.
 
 Core operations on bipolar hypervectors (±1, int8):

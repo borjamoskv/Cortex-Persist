@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Moltbook HTTP client - rate-limit aware, zero-trust.
 
 All requests go exclusively to https://www.moltbook.com/api/v1/*.

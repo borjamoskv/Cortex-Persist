@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX v6+ - Semantic Compression (MDL-based Fact Fusion).
 
 Strategy #5: Compress N similar engrams into a single dense engram.

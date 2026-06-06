@@ -1,4 +1,4 @@
-"""CORTEX CLI - Trust & Compliance Commands."""
+# [C5-REAL] Exergy-Maximized
 
 import asyncio
 import time

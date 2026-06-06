@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX MCP Toolbox Bridge - External Database Connectivity.
 
 Provides a bridge between CORTEX and Google's MCP Toolbox for Databases,

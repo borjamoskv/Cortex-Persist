@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Notch WebSocket Hub (Bridge #6 Server-Side).
 

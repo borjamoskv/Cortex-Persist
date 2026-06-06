@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CLI commands for Moltbook Pathogen-Omega (Inverse Immune System).
 
 Usage:

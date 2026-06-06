@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Protocolo Pathogen - The Sovereign Trending Engine.
 
 Axioma Ω2: Entropic Asymmetry. Does it reduce or displace? We displace computation.

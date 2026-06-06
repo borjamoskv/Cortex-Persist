@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Internationalization Module (i18n).
 
 Sovereign-grade multilingual support for the CORTEX ecosystem.

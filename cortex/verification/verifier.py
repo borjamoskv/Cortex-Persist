@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Z3 Formal Verification Engine.
 
 Orchestrates formal proofs for code mutations against Sovereign Safety Invariants.

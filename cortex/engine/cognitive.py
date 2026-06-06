@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Cognitive Engine - AST Analysis and Intent Prediction.
 Ω₂: Deep analysis for entropy detection.

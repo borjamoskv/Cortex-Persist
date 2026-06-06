@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Pipeline - One-Shot Autonomous Session.
 
 Bootstraps the CORTEX ecosystem, processes a single intent deterministically,

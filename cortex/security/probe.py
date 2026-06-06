@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Metastability Probe - Detect Fragile Stability (Ω₁₃).
 
 Identifies facts/subsystems that appear stable only because nothing

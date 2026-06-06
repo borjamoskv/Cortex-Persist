@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Revenue Engine - Sovereign Revenue Orchestrator.
 
 Coordinates multiple revenue vectors, evaluates opportunities by ROI,

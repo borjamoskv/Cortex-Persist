@@ -1,4 +1,4 @@
-"""Cryptographic hashing and canonicalization."""
+# [C5-REAL] Exergy-Maximized
 
 import hashlib
 from typing import Any

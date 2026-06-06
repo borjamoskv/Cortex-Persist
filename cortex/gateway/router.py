@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Gateway - Universal Intelligence Entry Point.
 
 The Gateway is the unified ingress layer for all external systems

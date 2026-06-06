@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 # cortex/consensus/rwa_bft.py
 """RWA-BFT - Reputation-Weighted Asynchronous Byzantine Fault Tolerance.
 

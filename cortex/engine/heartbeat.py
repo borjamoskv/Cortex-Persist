@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Heartbeat Emitter - Stateless signaling with idle-triggered sleep.
 
 Follows the 130/100 standard: Zero-latency, idempotent, structured telemetry.

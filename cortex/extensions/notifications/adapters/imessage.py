@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX - iMessage Sovereign Adapter.
 
 Bridges CORTEX events to Messages.app via AppleScript.

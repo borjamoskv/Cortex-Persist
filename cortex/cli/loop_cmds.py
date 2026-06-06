@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Execution Loop - Task Input → Result Output → Auto-Persistence.
 
 Durability Architecture (Ω₃ Byzantine Default):

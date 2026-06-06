@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX - Notification Bus startup wiring.
 
 Called once at API/daemon startup to build and configure the process-level

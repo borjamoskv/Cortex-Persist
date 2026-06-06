@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX v6+ - Emotional Valence Tagging (Amygdala Artificial).
 
 Strategy #3: Memories with emotional charge are stored more

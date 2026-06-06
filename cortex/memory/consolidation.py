@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX v6+ - Silent Engrams & Systems Consolidation.
 
 Strategy 4: Implements Tonegawa's discovery of silent engrams.

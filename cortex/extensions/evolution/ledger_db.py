@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 # cortex/evolution/ledger_db.py
 """SQLite-backed metrics and mutation ledger for sovereign agent evolution.
 

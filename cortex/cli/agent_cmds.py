@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX CLI - Agent commands (YAML-driven agent interface).
 
 Commands:

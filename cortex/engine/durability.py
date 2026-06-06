@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 DURABILITY-1 - CORTEX Persistence Supervisor (Ω₃ / Ω₅).
 Implements the two-layer persistence strategy:

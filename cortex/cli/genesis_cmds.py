@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX CLI - Genesis command group.
 
 Commands for the Genesis Engine - creating systems from specs.

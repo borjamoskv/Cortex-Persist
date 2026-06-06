@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX v7+ - Semantic Navigator (Grid Cell Architecture).
 
 Strategy #13: Navigate knowledge topology instead of just searching.

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """TrustService - Sovereign Audit, Compliance & Cryptographic Integrity (Ω₃).
 
 V6.0 Zero-Trust: Never assumes honesty - not from agents, not from data,

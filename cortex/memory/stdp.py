@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Spike-Timing Dependent Plasticity (STDP).
 
 Hebbian learning rule adapted for semantic graphs:

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Causal Scheduler - Función de presión temporal y estabilidad del DAG.
 
 Árbitro de ejecución. Decide cuándo el sistema evoluciona y cuándo se

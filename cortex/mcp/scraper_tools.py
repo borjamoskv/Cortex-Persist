@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """SCRAPER-Ω MCP Tools - Sovereign Web Extraction for Model Context Protocol.
 
 Exposes scraping capabilities as MCP tools for LLM agents.

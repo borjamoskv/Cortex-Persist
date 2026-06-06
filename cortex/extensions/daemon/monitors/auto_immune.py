@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Auto-Immune Monitor for MOSKV daemon.
 
 Reads stale ghosts and dispatches them to the Aether Agent queue for autonomous resolution.

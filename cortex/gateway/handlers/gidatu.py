@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Gidatu UI/Desktop Orchestration Handler.
 Ω₃ (Byzantine Default): Enforces SafeZones and strict app-scoping.
 """

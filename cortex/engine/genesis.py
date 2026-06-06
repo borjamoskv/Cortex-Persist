@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Agent Genesis - L7 Factory for Spawning New Agent Types.
 
 The Genesis engine creates entirely new agent types from evolved genomes.

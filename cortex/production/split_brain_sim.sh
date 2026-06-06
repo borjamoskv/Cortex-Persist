@@ -1,4 +1,5 @@
 #!/bin/bash
+# [C5-REAL] Exergy-Maximized
 # 5. Split Brain Simulator
 # Spawn dos kernels simultáneamente apuntando al mismo ledger para evaluar Lock Contention y Divergencia de estado.
 echo "[C5-REAL] Forzando Split-Brain Lock Contention..."

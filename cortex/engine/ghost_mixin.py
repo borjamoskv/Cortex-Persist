@@ -1,4 +1,4 @@
-"""Ghost management mixin - register and resolve ghosts."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

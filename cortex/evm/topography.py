@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """EVM Topography Mapping - Latency-optimized node routing.
 
 Provides deterministic O(1) routing to the most performant RPC node for

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """memory_wrapper.py
 
 Low‑level memory‑reclamation utilities for the Compaction Monitor sidecar.

@@ -1,4 +1,4 @@
-"""Shannon Compression (Ω₁₃: Entropic Containment)."""
+# [C5-REAL] Exergy-Maximized
 
 import logging
 

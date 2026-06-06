@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Level 3 Copilot - Debounce Controller.
 
 Keystroke throttling to prevent flooding the LLM with requests.

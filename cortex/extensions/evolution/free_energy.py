@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 # cortex/evolution/free_energy.py
 """Variational Free Energy Monitor - Fristonian Formalization of CORTEX.
 

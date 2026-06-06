@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Sovereign Write Worker: Internal Message Types.
 
 Extracted from db_writer.py to keep file size under 400 LOC.

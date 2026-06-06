@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Exergy Optimizer.
 O(1) Heuristic Engine for Thermal utility and Swarm density.

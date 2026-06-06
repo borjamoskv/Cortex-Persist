@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Dual Compliance Engine (Sovereign Shield).
 

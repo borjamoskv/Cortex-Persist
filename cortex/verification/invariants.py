@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Sovereign Safety Invariants.
 
 Defines the mathematical properties that no RSI mutation may ever violate.

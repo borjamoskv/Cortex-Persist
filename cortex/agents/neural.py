@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Neural-Bandwidth Sync (Zero-Latency Intent Ingestion).
 

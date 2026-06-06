@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """MCTS Entorno de Simulación Git (Chronos).
 
 Proporciona la interfaz determinista para bifurcar el multiverso CORTEX,

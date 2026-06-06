@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX Shared-Memory Signal Bus (Axiom Ω₆).
 Zero-copy, lock-minimized signal transport for 10,000-agent swarms.

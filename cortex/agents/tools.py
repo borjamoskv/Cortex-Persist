@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Agent Runtime - Tool Protocol & Registry.
 
 Tools are atomic capabilities (skills) that agents invoke.

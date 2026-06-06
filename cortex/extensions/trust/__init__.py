@@ -1,4 +1,4 @@
-"""CORTEX Trust Module - Bayesian confidence management."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

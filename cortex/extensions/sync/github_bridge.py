@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """GitHub → CORTEX Bridge - Synchronize Issues/PRs as CORTEX facts.
 
 Open issues/PRs are stored as `bridge` facts.

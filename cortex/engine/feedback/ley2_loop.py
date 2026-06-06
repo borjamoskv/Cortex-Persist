@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Ley 2 Loop: Expensive Errors First (Kernel de Re-weighting Termodinámico).
 
 Aplica la selección evolutiva re-inyectando bias en base al costo real

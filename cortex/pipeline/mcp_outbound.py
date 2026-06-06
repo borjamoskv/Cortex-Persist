@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Pipeline - MCP Outbound Client.
 
 Adapter enabling the AgentExecutor to call external MCP tools during

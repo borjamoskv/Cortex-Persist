@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """MOSKV-Aether - SQLite-backed task queue.
 
 Thread-safe O(1) pop via atomic UPDATE+SELECT.

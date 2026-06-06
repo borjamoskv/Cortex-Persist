@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX - Notification Bus (core orchestrator).
 
 The NotificationBus is the single point of dispatch for all CORTEX events.

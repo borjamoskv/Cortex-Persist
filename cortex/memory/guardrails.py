@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX v6+ - Session-Level Token Budget Guardrails.
 
 Wraps WorkingMemoryL1 with a hard cap on total tokens consumed

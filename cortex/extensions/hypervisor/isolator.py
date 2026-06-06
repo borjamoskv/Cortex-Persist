@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Hypervisor - Tenant Isolator.
 
 Automatic tenant_id injection and scope enforcement.

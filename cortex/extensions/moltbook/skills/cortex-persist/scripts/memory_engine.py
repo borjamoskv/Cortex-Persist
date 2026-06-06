@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Persist Engine - Persistent memory for AI agents.
 
 Tiered architecture:

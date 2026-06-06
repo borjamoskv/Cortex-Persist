@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """MCP Pipeline Tools - Expose E2E Pipeline as MCP Tools.
 
 Registers cortex_run, cortex_pipeline_status, and cortex_pipeline_history

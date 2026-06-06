@@ -1,4 +1,4 @@
-"""CLI commands: github sync, github status."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

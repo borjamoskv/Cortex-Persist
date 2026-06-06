@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX - The Sovereign Ledger for AI Agents.
 

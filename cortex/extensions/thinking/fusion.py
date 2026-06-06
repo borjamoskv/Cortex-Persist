@@ -1,4 +1,4 @@
-"""Thought Fusion Engine - N model responses → 1 superior fused response."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

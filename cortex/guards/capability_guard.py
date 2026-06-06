@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 import logging
 
 from cortex.guards.capabilities import AgentCredentials, Capability, RiskTier

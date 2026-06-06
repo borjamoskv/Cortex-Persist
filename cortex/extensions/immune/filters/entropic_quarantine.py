@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Entropic Quarantine Filter - blocks low-information-density signals.
 
 F6: If a proposed signal/fact has Shannon entropy below a threshold,

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """FRICTION-ANNIHILATOR-Ω - Reality Delta Resolver.
 
 Takes failed assumptions (limerence) and resolves them into working code,

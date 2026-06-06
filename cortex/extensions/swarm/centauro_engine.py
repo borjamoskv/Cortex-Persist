@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Centauro Engine (LEGION-Ω)
 Orchestration engine for the Sovereign Swarm. Implements Byzantine Consensus

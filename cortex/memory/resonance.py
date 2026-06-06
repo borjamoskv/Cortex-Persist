@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX v6+ - Adaptive Resonance Gate (ART-inspired).
 
 Implements Grossberg's Adaptive Resonance Theory as a pre-store filter.

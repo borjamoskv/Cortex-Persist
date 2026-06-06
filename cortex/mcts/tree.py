@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """MCTS Algoritmo Central (CORTEX Chronos).
 
 Implementa Monte Carlo Tree Search para navegar el espacio de mutaciones de código.

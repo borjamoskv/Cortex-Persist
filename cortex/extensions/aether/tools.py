@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """MOSKV-Aether - Agent Tool Layer.
 
 Thin, sandboxed wrappers the Executor agent dispatches.

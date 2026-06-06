@@ -1,4 +1,4 @@
-"""Gate Enums."""
+# [C5-REAL] Exergy-Maximized
 
 from enum import Enum
 

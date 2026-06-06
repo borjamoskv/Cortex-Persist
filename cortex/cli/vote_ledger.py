@@ -1,4 +1,4 @@
-"""Comandos de CLI: vote, ledger verify, ledger checkpoint."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

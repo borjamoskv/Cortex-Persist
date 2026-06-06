@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """ALMA Taste Engine - Sovereign Quality Discriminator.
 
 Evaluates output quality across 7 heuristic dimensions and assigns

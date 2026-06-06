@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Error Boundary (Ω₅ Antifragile Decorator).
 
 Decorator + async context manager that wraps functions to auto-persist

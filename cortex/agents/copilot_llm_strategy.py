@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Level 3 Copilot - LLM-Backed Suggestion Strategy.
 
 Production strategy that calls an actual LLM API for code completions.

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX CLI - Tips Commands.
 
 Surface contextual tips from the TIPS engine.

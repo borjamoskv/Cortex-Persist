@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Sync Engine Package.
 
 Exposes the main sync functions and result types.

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Byzantine Default Auth Layer (Axiom 3).
 Vector 5 of the Singularity.

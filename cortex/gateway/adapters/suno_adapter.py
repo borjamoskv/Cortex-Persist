@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Suno Music Generator Adapter for CORTEX Gateway
 
 Implements sovereign music generation using sunoapi.org relay or cookie fallback.

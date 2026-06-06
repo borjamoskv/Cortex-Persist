@@ -1,4 +1,4 @@
-"""CORTEX Auth - AuthManager and singleton access."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

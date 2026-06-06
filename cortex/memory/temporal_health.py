@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Temporal Health Scheduler (Sovereign Temporal Hierarchy).
 
 The Axiom: La jerarquía temporal ES la arquitectura.

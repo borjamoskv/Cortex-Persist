@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Swarm state persistence - saves/loads evolution progress to disk.
 Version: 3.0 (Atomic, Rotating Backups & Auto-Rollback)
 """

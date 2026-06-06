@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX MCP - Genesis Engine Tools.
 
 Exposes the Genesis Engine to AI agents via MCP,

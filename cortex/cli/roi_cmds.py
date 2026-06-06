@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """ROI & Efficiency Quantification - CHRONOS-1 Integration.
 
 Data-driven ROI engine that queries real CHRONOS metadata

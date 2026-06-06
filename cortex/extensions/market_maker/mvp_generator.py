@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Phase 3: Zero-Click MVP Generation.
 
 Transforms a validated Opportunity into a testable landing page, waitlist, and Stripe stub.

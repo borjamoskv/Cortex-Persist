@@ -1,4 +1,4 @@
-"""SQLite Graph Algorithms Mixin."""
+# [C5-REAL] Exergy-Maximized
 
 from collections import deque
 

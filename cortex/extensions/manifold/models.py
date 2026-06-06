@@ -1,4 +1,4 @@
-"""MOSKV-1 - Tesseract Manifold Data Models."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

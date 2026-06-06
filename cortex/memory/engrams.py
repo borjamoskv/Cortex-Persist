@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX v6+ - Thermodynamic Memory Engrams.
 
 Translates biological connectomics and somatic homeostasis into actionable code.

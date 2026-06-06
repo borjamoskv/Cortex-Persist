@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 PSYCH-OMEGA: The Cognitive Integrity Manifold.
 

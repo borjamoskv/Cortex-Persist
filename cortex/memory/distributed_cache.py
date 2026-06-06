@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 "Hydra-Log" Distributed Cache (Redis Streams + Atomic Lua).
 

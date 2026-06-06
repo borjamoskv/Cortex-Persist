@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """NightShift Crystal Daemon (Autonomous Knowledge Generation).
 
 Background daemon that periodically discovers targets via KnowledgeRadar,

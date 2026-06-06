@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Weighted 0-100 health scoring engine.
 
 Uses sealed Grade enum. Supports configurable weight overrides.

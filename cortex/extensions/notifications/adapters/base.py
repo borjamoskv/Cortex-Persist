@@ -1,4 +1,4 @@
-"""CORTEX - Notification Adapter base class."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

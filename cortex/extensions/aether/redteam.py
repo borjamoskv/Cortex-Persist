@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """MOSKV-Aether - Red Team Agent.
 
 Generates hostile characterization tests (Golden Master) over a codebase

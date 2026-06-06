@@ -1,4 +1,4 @@
-"""Audit helper functions extracted from trust_cmds.py (Seal 8 LOC compliance)."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

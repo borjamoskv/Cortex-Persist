@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX CLI - Common shared objects and utilities.
 
 Prevent circular imports by centralizing base CLI objects.

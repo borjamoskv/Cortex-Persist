@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Sovereign Autopoiesis Engine
 Second-Order Cybernetics (Maturana / Varela): Axiom 10 Recursive Auto-Evolution.

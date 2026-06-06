@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """VEX Execution Loop - Hash-chained verified execution.
 
 This is the core of VEX: executes each step in a TaskPlan and produces

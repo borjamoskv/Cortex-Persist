@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Agent Runtime - Level 3 Copilot Contracts.
 
 Pydantic models for the Copilot suggestion lifecycle.

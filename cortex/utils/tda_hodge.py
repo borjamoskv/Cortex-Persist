@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX Persist TDA Subsystem — Hodge Zero-Mode Transport Engine.
 Implements combinatorial Hodge Laplacian computations and zero-mode tracking

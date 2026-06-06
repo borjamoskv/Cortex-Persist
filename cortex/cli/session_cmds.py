@@ -1,4 +1,4 @@
-"""CLI commands for session management and rejection logic."""
+# [C5-REAL] Exergy-Maximized
 
 import sqlite3
 import subprocess

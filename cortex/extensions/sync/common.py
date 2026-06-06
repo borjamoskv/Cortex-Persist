@@ -1,4 +1,4 @@
-"""Shared utilities and data structures for sync engine."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

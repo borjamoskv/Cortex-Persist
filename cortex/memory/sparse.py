@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX v6+ - Sparse Encoding (Mushroom Body-inspired).
 
 Strategy 3: Implements dimensionality expansion and sparse activation

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX Commit Poet Engine Data - LORCA-Ω
 =========================================

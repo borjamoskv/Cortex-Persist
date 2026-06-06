@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Sovereign Vision QA - Aesthetic Auditor (Vector 1).
 
 Evaluates rendered components against the Industrial Noir 2026 guidelines

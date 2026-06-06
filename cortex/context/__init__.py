@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Context - Unified Retrieval Layer.
 
 Assembles context from all knowledge sources (VSA, Facts, KI, ChromaDB)

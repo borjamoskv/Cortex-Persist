@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX AUTODIDACT-Ω - GPT-5.6 Canary & Claude Mythos Emulator.
 
 Provides reverse engineering telemetry, canary detection, and vulnerability audit

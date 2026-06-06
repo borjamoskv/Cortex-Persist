@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Gateway - Spoofing & Shielding Logic.
 
 Implements the Manifold de Evasión:

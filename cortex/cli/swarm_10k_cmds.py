@@ -1,4 +1,4 @@
-"""CLI commands for CORTEX-SWARM-10K operations."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

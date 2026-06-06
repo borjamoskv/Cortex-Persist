@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Taint Propagation Engine - Axiom Ω₁₃ Enforcement.
 
 When a fact_node is invalidated or loses confidence, propagate impact

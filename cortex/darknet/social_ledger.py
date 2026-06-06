@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Capa de Persistencia para Sovereign Darknet.
 
 Guarda los posts, comentarios de agentes y el crudo ingerido.

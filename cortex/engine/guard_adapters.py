@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Default Guard/Hook Adapters - Wraps existing AX-II implementations behind Protocols.
 
 Each adapter wraps a concrete module (HealthGuard, ContradictionGuard, etc.)

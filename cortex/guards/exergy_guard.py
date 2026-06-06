@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX - Exergy Guard (Axiom Ω₁₃: Thermodynamic Cognition).
 

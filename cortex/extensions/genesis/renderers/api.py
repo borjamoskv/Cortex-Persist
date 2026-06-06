@@ -1,4 +1,4 @@
-"""Genesis Template Renderers for REST API Routes."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

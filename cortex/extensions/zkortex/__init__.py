@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 ZKORTEX - Zero-Knowledge Proof Layer for CORTEX.
 La soberanía epistémica: probar sin revelar.

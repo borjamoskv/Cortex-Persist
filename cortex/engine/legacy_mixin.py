@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 # pyright: reportAttributeAccessIssue=false
 class LegacyMixin:
     # Backward Compatibility Aliases & Delegation

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """MEJORAlo Effectiveness Tracker - quantifies whether CORTEX is actually improving code.
 
 Answers the question: "Is this project getting better over time, or are we just churning?"

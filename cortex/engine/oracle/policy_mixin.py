@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Policy Mixin for Forgetting Oracle.
 
 Adjusts the cache eviction parameters dynamically in response to regret rates.

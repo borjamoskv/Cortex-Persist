@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX - Contradiction Guard (Axiom 20: Epistemic Consistency).
 
