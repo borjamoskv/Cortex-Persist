@@ -144,6 +144,13 @@ class EventLoopMixin:
                     name="SentinelOracle",
                 )
             )
+        if getattr(self, "agy2_planner_daemon", None):
+            tasks.append(
+                asyncio.create_task(
+                    self._run_loop_daemon_async(self.agy2_planner_daemon, "AGY2 Planner", "🧠"),
+                    name="AGY2PlannerDaemon",
+                )
+            )
         if getattr(self, "sovereignty_runtime", None):
             tasks.append(
                 asyncio.create_task(

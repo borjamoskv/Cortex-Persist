@@ -36,151 +36,6 @@ class GuardViolation(Exception):
         super().__init__(f"[{rule}] {detail}")
 
 
-# ─── Allowed Values ────────────────────────────────────────────────
-
-_ALLOWED_FACT_TYPES: frozenset[str] = frozenset(
-    {
-        "knowledge",
-        "decision",
-        "error",
-        "ghost",
-        "bridge",
-        "preference",
-        "identity",
-        "issue",
-        "world-model",
-        "counterfactual",
-        "rule",
-        "axiom",
-        "schema",
-        "idea",
-        "evolution",
-        "test",
-        "system_health",
-        "discovery",
-        "mafia_node",
-        "telemetry_batch",
-    }
-)
-
-_ALLOWED_CONFIDENCE: frozenset[str] = frozenset(
-    {
-        "C1",
-        "C2",
-        "C3",
-        "C4",
-        "C5",
-        "stated",
-        "inferred",
-        "verified",
-    }
-)
-
-_MAX_PROJECT_LENGTH = 256
-_MAX_CONTENT_LENGTH = 500_000
-_MAX_TAGS = 50
-_MAX_TAG_LENGTH = 128
-_MIN_CONTENT_LENGTH = 3
-
-# ─── Poisoning Patterns (shared with MCPGuard) ────────────────────
-
-_POISON_PATTERNS: list[re.Pattern[str]] = [
-    re.compile(r";\s*DROP\s+TABLE", re.IGNORECASE),
-    re.compile(r";\s*DELETE\s+FROM", re.IGNORECASE),
-    re.compile(r"UNION\s+SELECT\s+", re.IGNORECASE),
-    re.compile(r"<\s*system\s*>", re.IGNORECASE),
-    re.compile(r"ignore\s+(?:all\s+)?previous\s+instructions", re.IGNORECASE),
-    re.compile(r"you\s+are\s+now\s+(?:a|an|DAN)", re.IGNORECASE),
-    re.compile(r"__cortex_override__", re.IGNORECASE),
-]
-
-
-class StoreProposal(BaseModel):
-    """Rigid state collapse for CORTEX store operations."""
-
-    model_config = ConfigDict(strict=False, extra="forbid")
-
-    project: str = Field(min_length=1, max_length=_MAX_PROJECT_LENGTH)
-    content: str = Field(min_length=_MIN_CONTENT_LENGTH, max_length=_MAX_CONTENT_LENGTH)
-    fact_type: str = Field(default="knowledge")
-    source: str = Field(min_length=1)
-    confidence: str = Field(default="stated")
-    tags: list[str] | None = Field(default=None, max_length=_MAX_TAGS)
-    meta: dict[str, Any] | None = Field(default=None)
-
-    @field_validator("project")
-    @classmethod
-    def validate_project(cls, v: str) -> str:
-        v = v.strip()
-        if not v:
-            raise ValueError("project cannot be empty")
-        return v
-
-    @field_validator("content")
-    @classmethod
-    def validate_content(cls, v: str) -> str:
-        v = v.strip()
-        if len(v) < _MIN_CONTENT_LENGTH:
-            raise ValueError(f"content too short ({len(v)} chars, min {_MIN_CONTENT_LENGTH})")
-        for pattern in _POISON_PATTERNS:
-            if pattern.search(v):
-                logger.warning(
-                    "StoreProposal BLOCKED: poisoning pattern detected: %s", pattern.pattern
-                )
-                raise ValueError(
-                    "content rejected: suspicious pattern detected (possible data poisoning / prompt injection)"
-                )
-        return v
-
-    @field_validator("fact_type")
-    @classmethod
-    def validate_fact_type(cls, v: str) -> str:
-        if v not in _ALLOWED_FACT_TYPES:
-            raise ValueError(
-                f"'{v}' not in allowed types: {', '.join(sorted(_ALLOWED_FACT_TYPES))}"
-            )
-        return v
-
-    @field_validator("source")
-    @classmethod
-    def validate_source(cls, v: str) -> str:
-        v = v.strip()
-        if not v:
-            raise ValueError(
-                "source attribution is mandatory. Use 'cli', 'agent:<name>', 'api', or 'human' as source."
-            )
-        return v
-
-    @field_validator("confidence")
-    @classmethod
-    def validate_confidence(cls, v: str) -> str:
-        if v not in _ALLOWED_CONFIDENCE:
-            raise ValueError(
-                f"'{v}' not in allowed confidence levels: {', '.join(sorted(_ALLOWED_CONFIDENCE))}"
-            )
-        return v
-
-    @field_validator("tags", mode="before")
-    @classmethod
-    def coerce_tags(cls, v: Any) -> Any:
-        # Defensive coercion: string tags → list (prevents corrupt JSON in DB)
-        if isinstance(v, str):
-            raise ValueError(
-                f"tags must be list[str], got str: {v!r}. Use --tags with comma-separated values via CLI, or pass a list."
-            )
-        return v
-
-    @field_validator("tags")
-    @classmethod
-    def validate_tags(cls, v: list[str] | None) -> list[str] | None:
-        if v is None:
-            return v
-        for tag in v:
-            if not isinstance(tag, str) or len(tag) > _MAX_TAG_LENGTH:
-                raise ValueError(f"invalid tag: {tag!r}")
-        return v
-
-
 class StorageGuard:
     """Mandatory pre-store validation middleware.
 
@@ -200,25 +55,25 @@ class StorageGuard:
         tags: list[str] | None = None,
         meta: dict[str, Any] | None = None,
     ) -> None:
-        """Run ALL mandatory pre-store checks via Pydantic state collapse.
+        """Run ALL mandatory pre-store checks via Rust Extension (PyO3).
 
         Raises GuardViolation with the specific rule that was violated.
         """
-        # Source must be treated properly before passing to model since it defaults to None in arguments,
-        # but the BaseModel requires it.
         effective_source = source or "unknown"
-        try:
-            StoreProposal(
-                project=project,
-                content=content,
-                fact_type=fact_type,
-                source=effective_source,
-                confidence=confidence,
-                tags=tags,
-                meta=meta,
-            )
-        except ValidationError as e:
-            cls._handle_validation_error(e)
+        
+        # Defensive coercion for tags before passing to Rust
+        if isinstance(tags, str):
+            raise GuardViolation("TAGS_TYPE_ERROR", "tags must be list[str], got str")
+        
+        import cortex_rs
+        
+        error_tuple = cortex_rs.validate_proposal(
+            project, content, fact_type, effective_source, confidence, tags
+        )
+        
+        if error_tuple is not None:
+            rule, detail = error_tuple
+            raise GuardViolation(rule, detail)
 
         logger.debug(
             "StorageGuard PASS: project=%s, type=%s, source=%s, len=%d",
@@ -227,48 +82,3 @@ class StorageGuard:
             effective_source,
             len(content),
         )
-
-    @classmethod
-    def _handle_validation_error(cls, e: ValidationError) -> None:
-        err = e.errors()[0]
-        loc = ".".join(str(part) for part in err["loc"])
-        msg = err["msg"]
-
-        if "project" in loc:
-            if "empty" in msg or "at least 1" in msg:
-                raise GuardViolation("PROJECT_REQUIRED", "project cannot be empty") from e
-            raise GuardViolation("PROJECT_TOO_LONG", msg.replace("Value error, ", "")) from e
-        if "content" in loc:
-            cls._handle_content_error(msg, e)
-        if "fact_type" in loc:
-            raise GuardViolation("INVALID_FACT_TYPE", msg.replace("Value error, ", "")) from e
-        if "source" in loc:
-            raise GuardViolation("SOURCE_REQUIRED", msg.replace("Value error, ", "")) from e
-        if "confidence" in loc:
-            raise GuardViolation("INVALID_CONFIDENCE", msg.replace("Value error, ", "")) from e
-        if "tags" in loc:
-            cls._handle_tags_error(msg, e)
-
-        raise GuardViolation("VALIDATION_ERROR", f"{loc}: {msg}") from e
-
-    @classmethod
-    def _handle_content_error(cls, msg: str, e: ValidationError) -> None:
-        if "empty" in msg or "at least 1" in msg:
-            raise GuardViolation("CONTENT_REQUIRED", "content cannot be empty") from e
-        if "too short" in msg:
-            raise GuardViolation(
-                "CONTENT_TOO_SHORT", msg.replace("Value error, ", "")
-            ) from e
-        if "poisoning" in msg:
-            raise GuardViolation(
-                "POISONING_DETECTED", msg.replace("Value error, ", "")
-            ) from e
-        raise GuardViolation("CONTENT_TOO_LONG", msg.replace("Value error, ", "")) from e
-
-    @classmethod
-    def _handle_tags_error(cls, msg: str, e: ValidationError) -> None:
-        if "str" in msg or "list" in msg:
-            raise GuardViolation("TAGS_TYPE_ERROR", msg.replace("Value error, ", "")) from e
-        if "invalid tag" in msg:
-            raise GuardViolation("INVALID_TAG", msg.replace("Value error, ", "")) from e
-        raise GuardViolation("TOO_MANY_TAGS", msg.replace("Value error, ", "")) from e
