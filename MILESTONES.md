@@ -538,10 +538,28 @@ Proof:
 - **Status:** ✅ COMPLETE — 6 Junio 2026
 
 ---
+
+### Hito 37: Thermodynamic & Epistemic Crystallization (C5-REAL Migration)
+- **Target:** `cortex/agents/`, `cortex/engine/`, `cortex/cli/`
+- **Objective:** Erradicar la entropía profunda del repositorio: 1) Migración crítica de `float` a `Decimal` para blindaje financiero/scoring sin romper esquemas DB. 2) Caza y purga de silenciamientos de excepciones genéricos (`except Exception: pass`) en 131 archivos. 3) Parcheo del kernel para serialización de tensores en el WAL. 4) Aislamiento de lógica de negocio CLI (`TipsEngine`).
+- **Yield Target:** 0 degradaciones silenciosas, 100% de tipos financieros inmutables en WAL.
+- **Reality Level:** `C5-REAL`
+- **Evidence:** Commits `3513567c` (purga de excepciones), `535bf167` (decouple CLI), `98e46c74` (Decimal), `c75c74fd` (json encoder).
+```yaml
+Claim: 4 vectores de deuda técnica aniquilados y kernel parcheado en C5-REAL.
+Proof:
+  Base: "Refactor global de 131 archivos + 3 patches estructurales en núcleo de persistencia."
+  Range: [C5, C5]
+  Confidence: C5-REAL
+  Date: 2026-06-06
+```
+- **Status:** ✅ COMPLETE — 6 Junio 2026
+
+---
 ## 🛡️ Thermodynamic Enforcement
 All milestone claims must map directly to a `Claim/Proof` matrix.
 ```yaml
-Claim: 36/36 Milestones Completed
+Claim: 37/37 Milestones Completed
 Proof:
   Base: Continuous Silicon Checkpoint Execution
   Variables: [r=1, d=1, n=36, S=100]
