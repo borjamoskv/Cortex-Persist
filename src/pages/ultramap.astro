@@ -1,0 +1,1075 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+---
+
+<SiteLayout
+	title="CORTEX | Ultramap-Ω Sovereign Visualizer"
+	description="Topological memory substrate explorer for the K-0 Swarm. Real-time C5-REAL spatial grid and endocrine telemetry."
+	canonical="https://cortexpersist.com/ultramap"
+	bodyClass="ultramap-body"
+>
+	<div id="ultramap-stage">
+		<div id="ultramap-canvas-container"></div>
+
+		<div id="ultramap-overlay">
+			<header class="ultramap-topbar surface">
+				<div class="ultramap-brand">
+					<a class="brand" href="/" aria-label="Return to landing">
+						<span class="brand-mark">UΩ</span>
+						<span class="brand-copy">
+							<strong>ULTRAMAP-Ω</strong>
+							<span>K-0 Swarm / lock-free memory mapped</span>
+						</span>
+					</a>
+				</div>
+
+				<div class="ultramap-heading">
+					<p class="eyebrow">Topological Substrate Visualizer</p>
+					<h1>Matrix persistance plane</h1>
+				</div>
+
+				<div class="ultramap-actions">
+					<div class="status-badge" data-mode="standby" role="status">
+						STANDBY
+					</div>
+					<a class="button-tertiary compact" href="/vsa">
+						VSA Shell
+					</a>
+				</div>
+			</header>
+
+			<div class="ultramap-grid">
+				<!-- Left Panel: Agent Inspector -->
+				<aside class="surface ultramap-inspector">
+					<div class="surface-head">
+						<span class="surface-label">Agent Inspector</span>
+						<span class="surface-state" id="inspect-state">No selection</span>
+					</div>
+
+					<div id="inspector-content">
+						<div class="empty-inspector-state">
+							<p>Click on any agent in the 3D space to inspect its topological coordinates, endocrine signals, and exergy metrics.</p>
+						</div>
+					</div>
+
+					<div class="exergy-calculator-panel hidden" id="exergy-calc">
+						<span class="surface-label">Exergy calculator</span>
+						<div class="calc-row">
+							<input type="text" id="target-input" placeholder="TARGET_DARKPOOL_0x1" value="TARGET_DARKPOOL_0x1" />
+							<button id="calc-exergy-btn" class="button-primary compact">Compute</button>
+						</div>
+						<div class="calc-results" id="calc-results">
+							<!-- Dynamic exergy math -->
+						</div>
+					</div>
+				</aside>
+
+				<!-- Right Panel: Swarm Overview & Telemetry -->
+				<main class="ultramap-main-panel">
+					<section class="surface-sunken ultramap-overview">
+						<div class="surface-head">
+							<span class="surface-label">Swarm telemetry</span>
+							<span class="surface-copy" id="reality-indicator">C4-SIM (LOCAL)</span>
+						</div>
+
+						<div class="swarm-stats">
+							<div class="stat-card">
+								<span class="stat-label">Active Swarm size</span>
+								<strong id="active-agents-count">8</strong>
+							</div>
+							<div class="stat-card">
+								<span class="stat-label">System exergy index</span>
+								<strong id="system-exergy-value">92.4%</strong>
+							</div>
+							<div class="stat-card">
+								<span class="stat-label">Mean entropy</span>
+								<strong id="mean-entropy-value">0.892</strong>
+							</div>
+							<div class="stat-card">
+								<span class="stat-label">Telemetry latency</span>
+								<strong id="bridge-latency">0ms</strong>
+							</div>
+						</div>
+					</section>
+
+					<section class="surface-sunken log-panel">
+						<div class="surface-head">
+							<span class="surface-label">Signal log stream</span>
+							<span class="surface-copy">Real-time telemetry feeds</span>
+						</div>
+						<div id="log-monitor">
+							<div class="log-entry"><span class="log-tag">[BOOT]</span> Ultramap-Ω Dashboard mounted successfully.</div>
+						</div>
+					</section>
+				</main>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		import * as THREE from 'three';
+		import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+
+		// Define the 8 core agents from the specification (ultramap-substrate.html)
+		const staticAgents = [
+			{ id: 3105, name: 'VulnerabilityFixer', x: 0.5, y: 4.4, z: 4.0, target: 'CVE-2026-MINIPLASMA', entropy: 0.850, queue_depth: 8.5, error_rate: 0.02, causal_entropy: 0.05, cpu_load: 0.35, role: 'Parcheado y asimilación de TVL en Anvil Fuzzer' },
+			{ id: 3256, name: 'AEON_0_DAEMON', x: 5.6, y: 2.8, z: 8.3, target: 'JIT_COMPILATION_AST', entropy: 0.920, queue_depth: 12.0, error_rate: 0.08, causal_entropy: 0.12, cpu_load: 0.72, role: 'Compilación JIT y mutagenesis AST en downtime' },
+			{ id: 6003, name: 'SAGE_COUNCIL', x: 0.3, y: 5.0, z: 4.6, target: 'TARGET_DARKPOOL_0x1', entropy: 0.780, queue_depth: 4.0, error_rate: 0.01, causal_entropy: 0.22, cpu_load: 0.15, role: 'Deliberación inteligente de targets de red' },
+			{ id: 3207, name: 'OPTIMIZER', x: 0.7, y: 7.5, z: 3.5, target: 'REFACTOR_LOOP_HEREDADO', entropy: 0.990, queue_depth: 6.5, error_rate: 0.04, causal_entropy: 0.08, cpu_load: 0.95, role: 'Refactorización termodinámica de loops heredados' },
+			{ id: 3045, name: 'Jules-Secretario', x: 4.5, y: 4.0, z: 7.7, target: 'GIT_SENTINEL_PR_AUDIT', entropy: 0.810, queue_depth: 15.0, error_rate: 0.05, causal_entropy: 0.02, cpu_load: 0.45, role: 'Orquestación asíncrona de PRs e incidencias Git' },
+			{ id: 9032, name: 'CORTEX-Guard', x: 3.2, y: 1.4, z: 1.3, target: 'LEDGER_CHECKPOINT_SIGN', entropy: 0.950, queue_depth: 3.0, error_rate: 0.001, causal_entropy: 0.01, cpu_load: 0.12, role: 'Validación de firmas y checkpoints de ledger' },
+			{ id: 784, name: 'LEA-Ω', x: 8.4, y: 7.4, z: 6.0, target: 'PURGE_PHYSICAL_DISORDER', entropy: 0.880, queue_depth: 9.0, error_rate: 0.12, causal_entropy: 0.15, cpu_load: 0.65, role: 'Loose End Annihilator: purga física de desorden' },
+			{ id: 8832, name: 'Aesthetic-Omega', x: 3.2, y: 5.2, z: 8.4, target: 'NOIR_2026_AUDIT_VISUAL', entropy: 0.970, queue_depth: 5.0, error_rate: 0.02, causal_entropy: 0.06, cpu_load: 0.28, role: 'Auditor de componentes y alineación visual Moskv' }
+		];
+
+		const TELEMETRY_WS_URL = 'ws://localhost:8081';
+		const MAX_LOG_ENTRIES = 15;
+		const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+		// UI Elements
+		const canvasContainer = document.getElementById('ultramap-canvas-container');
+		const statusBadge = document.querySelector('.status-badge');
+		const realityIndicator = document.getElementById('reality-indicator');
+		const activeAgentsCount = document.getElementById('active-agents-count');
+		const systemExergyValue = document.getElementById('system-exergy-value');
+		const meanEntropyValue = document.getElementById('mean-entropy-value');
+		const bridgeLatency = document.getElementById('bridge-latency');
+		const logMonitor = document.getElementById('log-monitor');
+		
+		const inspectState = document.getElementById('inspect-state');
+		const inspectorContent = document.getElementById('inspector-content');
+		const exergyCalcPanel = document.getElementById('exergy-calc');
+		const targetInput = document.getElementById('target-input');
+		const calcExergyBtn = document.getElementById('calc-exergy-btn');
+		const calcResults = document.getElementById('calc-results');
+
+		// WebGL Variables
+		let scene, camera, renderer, controls;
+		let agentGroup, targetGroup, connectionLinesGroup, gridHelper;
+		let ws = null;
+		let lastFrameTime = Date.now();
+		
+		// Selected Node reference
+		let selectedAgent = null;
+		let agentsData = [...staticAgents];
+
+		// Raycasting
+		const raycaster = new THREE.Raycaster();
+		const mouse = new THREE.Vector2();
+
+		// Target coordinate project helper from ultramap.py
+		function getTargetCoords(targetHash) {
+			if (!targetHash) return { x: 0, y: 0, z: 0 };
+			// Emulate the hash projection math
+			let sum = 0;
+			for (let i = 0; i < targetHash.length; i++) {
+				sum += targetHash.charCodeAt(i) * (i + 1);
+			}
+			const x = (sum % 1000) / 100.0;
+			const y = ((sum >> 3) % 1000) / 100.0;
+			const z = ((sum >> 6) % 1000) / 100.0;
+			return { x, y, z };
+		}
+
+		function appendLog(tag, value, level = 'info') {
+			const text = `[${tag}] ${value}`;
+			const logEntry = document.createElement('div');
+			logEntry.className = `log-entry ${level}`;
+
+			const logTag = document.createElement('span');
+			logTag.className = 'log-tag';
+			logTag.textContent = `[${tag}] `;
+
+			logEntry.append(logTag, document.createTextNode(value));
+			logMonitor.prepend(logEntry);
+
+			while (logMonitor.childNodes.length > MAX_LOG_ENTRIES) {
+				logMonitor.removeChild(logMonitor.lastChild);
+			}
+		}
+
+		function setStatus(mode, label) {
+			statusBadge.dataset.mode = mode;
+			statusBadge.textContent = label;
+		}
+
+		// Calculate exergy distance
+		function calculateExergy(agent, targetHash) {
+			const target = getTargetCoords(targetHash);
+			const dx = target.x - agent.x;
+			const dy = target.y - agent.y;
+			const dz = target.z - agent.z;
+			const distance = Math.sqrt(dx*dx + dy*dy + dz*dz);
+			const joules = distance * (1.0 / (agent.entropy + 0.001));
+			return { distance, target, joules };
+		}
+
+		function updateMetrics() {
+			if (agentsData.length === 0) return;
+			activeAgentsCount.textContent = String(agentsData.length);
+			
+			const totalEntropy = agentsData.reduce((acc, a) => acc + a.entropy, 0);
+			const meanEntropy = totalEntropy / agentsData.length;
+			meanEntropyValue.textContent = meanEntropy.toFixed(3);
+
+			// Exergy index: system stability is high if error rate is low and adrenaline is stable
+			const totalErrorRate = agentsData.reduce((acc, a) => acc + (a.error_rate || 0), 0);
+			const baseExergy = 100 - (totalErrorRate / agentsData.length * 100);
+			systemExergyValue.textContent = `${Math.max(10, Math.min(100, baseExergy)).toFixed(1)}%`;
+		}
+
+		function populateInspector(agent) {
+			selectedAgent = agent;
+			inspectState.textContent = agent.name || `Idx ${agent.id}`;
+			
+			// Open calculator
+			exergyCalcPanel.classList.remove('hidden');
+			
+			const endocrineSystem = `
+				<div class="endocrine-metric">
+					<div class="metric-info">
+						<span>Dopamine (Queue Depth)</span>
+						<strong>${(agent.queue_depth || 0).toFixed(2)}</strong>
+					</div>
+					<div class="endocrine-bar"><div class="bar-fill dopamine" style="width: ${Math.min(100, (agent.queue_depth || 0) * 8)}%"></div></div>
+				</div>
+				<div class="endocrine-metric">
+					<div class="metric-info">
+						<span>Cortisol (Error Rate)</span>
+						<strong class="${(agent.error_rate || 0) > 0.05 ? 'warning-text' : ''}">${((agent.error_rate || 0) * 100).toFixed(1)}%</strong>
+					</div>
+					<div class="endocrine-bar"><div class="bar-fill cortisol" style="width: ${Math.min(100, (agent.error_rate || 0) * 100)}%"></div></div>
+				</div>
+				<div class="endocrine-metric">
+					<div class="metric-info">
+						<span>Serotonin (Causal Entropy)</span>
+						<strong>${(agent.causal_entropy || 0).toFixed(3)}</strong>
+					</div>
+					<div class="endocrine-bar"><div class="bar-fill serotonin" style="width: ${Math.min(100, (agent.causal_entropy || 0) * 100)}%"></div></div>
+				</div>
+				<div class="endocrine-metric">
+					<div class="metric-info">
+						<span>Adrenaline (CPU Load)</span>
+						<strong>${((agent.cpu_load || 0) * 100).toFixed(0)}%</strong>
+					</div>
+					<div class="endocrine-bar"><div class="bar-fill adrenaline" style="width: ${Math.min(100, (agent.cpu_load || 0) * 100)}%"></div></div>
+				</div>
+			`;
+
+			const targetCoords = getTargetCoords(agent.target);
+			const distance = Math.sqrt(
+				Math.pow(targetCoords.x - agent.x, 2) +
+				Math.pow(targetCoords.y - agent.y, 2) +
+				Math.pow(targetCoords.z - agent.z, 2)
+			);
+			const exergyCost = distance * (1.0 / (agent.entropy + 0.001));
+
+			inspectorContent.innerHTML = `
+				<div class="agent-detail-card">
+					<div class="detail-row">
+						<span class="detail-label">Index</span>
+						<strong class="detail-val font-mono">${agent.id}</strong>
+					</div>
+					<div class="detail-row">
+						<span class="detail-label">Position</span>
+						<strong class="detail-val font-mono">(${agent.x.toFixed(2)}, ${agent.y.toFixed(2)}, ${agent.z.toFixed(2)})</strong>
+					</div>
+					<div class="detail-row">
+						<span class="detail-label">Entropy</span>
+						<strong class="detail-val font-mono">${agent.entropy.toFixed(3)}</strong>
+					</div>
+					<div class="detail-row">
+						<span class="detail-label">Assigned Target</span>
+						<span class="detail-val font-mono target-name" title="${agent.target}">${agent.target || 'None'}</span>
+					</div>
+					<div class="detail-row">
+						<span class="detail-label">Target position</span>
+						<strong class="detail-val font-mono">(${targetCoords.x.toFixed(2)}, ${targetCoords.y.toFixed(2)}, ${targetCoords.z.toFixed(2)})</strong>
+					</div>
+					
+					${agent.role ? `
+					<div class="agent-role-block">
+						<span class="detail-label">Operative Role</span>
+						<p>${agent.role}</p>
+					</div>` : ''}
+
+					<div class="exergy-stats">
+						<div class="exergy-stat-mini">
+							<span>Topological Distance</span>
+							<strong>${distance.toFixed(2)} units</strong>
+						</div>
+						<div class="exergy-stat-mini">
+							<span>Active Exergy Cost</span>
+							<strong class="highlight-val">${exergyCost.toFixed(1)} Joules</strong>
+						</div>
+					</div>
+
+					<div class="endocrine-matrix-section">
+						<span class="surface-label">Endocrinología Volumétrica</span>
+						${endocrineSystem}
+					</div>
+				</div>
+			`;
+
+			updateExergyCalculation();
+		}
+
+		function updateExergyCalculation() {
+			if (!selectedAgent) return;
+			const targetVal = targetInput.value.trim();
+			if (!targetVal) return;
+
+			const calc = calculateExergy(selectedAgent, targetVal);
+			calcResults.innerHTML = `
+				<div class="calc-results-card">
+					<div class="calc-result-row">
+						<span>Projected Coordinates:</span>
+						<strong class="font-mono">(${calc.target.x.toFixed(2)}, ${calc.target.y.toFixed(2)}, ${calc.target.z.toFixed(2)})</strong>
+					</div>
+					<div class="calc-result-row">
+						<span>Distance to target:</span>
+						<strong class="font-mono">${calc.distance.toFixed(3)} units</strong>
+					</div>
+					<div class="calc-result-row">
+						<span>Exergy consumption:</span>
+						<strong class="highlight-val font-mono">${calc.joules.toFixed(2)} Joules</strong>
+					</div>
+					<div class="calc-formula">
+						exergy = distance × (1 / (entropy + 0.001))
+					</div>
+				</div>
+			`;
+		}
+
+		// Button listeners
+		calcExergyBtn.addEventListener('click', updateExergyCalculation);
+		targetInput.addEventListener('keypress', (e) => {
+			if (e.key === 'Enter') updateExergyCalculation();
+		});
+
+		// Build WebGL Scene
+		function initScene() {
+			scene = new THREE.Scene();
+			scene.fog = new THREE.FogExp2(0x0a0a0a, 0.015);
+
+			camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+			camera.position.set(12, 12, 22);
+
+			renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+			renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+			renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
+			canvasContainer.appendChild(renderer.domElement);
+
+			// Lighting
+			const ambientLight = new THREE.AmbientLight(0x0f122e, 1.2);
+			scene.add(ambientLight);
+
+			const dirLight = new THREE.DirectionalLight(0x2B3BE5, 2.5);
+			dirLight.position.set(10, 20, 10);
+			scene.add(dirLight);
+
+			const pointLight = new THREE.PointLight(0x00f3ff, 2, 50);
+			pointLight.position.set(0, 5, 0);
+			scene.add(pointLight);
+
+			// Groups
+			agentGroup = new THREE.Group();
+			targetGroup = new THREE.Group();
+			connectionLinesGroup = new THREE.Group();
+			scene.add(agentGroup);
+			scene.add(targetGroup);
+			scene.add(connectionLinesGroup);
+
+			// Grid Helper
+			gridHelper = new THREE.GridHelper(30, 30, 0x2B3BE5, 0x14141a);
+			gridHelper.position.y = 0;
+			gridHelper.material.opacity = 0.22;
+			gridHelper.material.transparent = true;
+			scene.add(gridHelper);
+
+			// Add axis helper
+			const axesHelper = new THREE.AxesHelper(5);
+			axesHelper.position.set(0, 0.01, 0);
+			axesHelper.material.opacity = 0.4;
+			axesHelper.material.transparent = true;
+			scene.add(axesHelper);
+
+			// Controls
+			controls = new OrbitControls(camera, renderer.domElement);
+			controls.enableDamping = true;
+			controls.dampingFactor = 0.05;
+			controls.rotateSpeed = 0.6;
+			controls.minDistance = 5;
+			controls.maxDistance = 50;
+			
+			// Setup Raycaster mouse events
+			window.addEventListener('click', onCanvasClick);
+
+			// Draw the agents
+			drawAgents();
+			animate();
+			appendLog('SYSTEM', 'WebGL Engine initialized successfully.');
+		}
+
+		function drawAgents() {
+			// Clear groups
+			while (agentGroup.children.length > 0) agentGroup.remove(agentGroup.children[0]);
+			while (targetGroup.children.length > 0) targetGroup.remove(targetGroup.children[0]);
+			while (connectionLinesGroup.children.length > 0) connectionLinesGroup.remove(connectionLinesGroup.children[0]);
+
+			// Core agent sphere geometry
+			const agentGeom = new THREE.SphereGeometry(0.35, 16, 16);
+
+			agentsData.forEach(agent => {
+				// Color matches primary state or cortisol level
+				let color = 0x2B3BE5; // Default Blue
+				if (agent.error_rate > 0.05) color = 0xe52b50; // High Cortisol Red
+				else if (agent.queue_depth > 10.0) color = 0x00f3ff; // High Dopamine Cyan
+				else if (agent.entropy > 0.95) color = 0x8e2de2; // Serotonin/Decayed Purple
+
+				const mat = new THREE.MeshPhongMaterial({
+					color: color,
+					emissive: color,
+					emissiveIntensity: 0.25,
+					shininess: 30,
+					transparent: true,
+					opacity: 0.92
+				});
+				const mesh = new THREE.Mesh(agentGeom, mat);
+				mesh.position.set(agent.x, agent.y, agent.z);
+				mesh.userData = { agent }; // Attach details
+				agentGroup.add(mesh);
+
+				// Add name tag billboard
+				// Target Coordinates
+				if (agent.target) {
+					const tCoords = getTargetCoords(agent.target);
+					
+					// Draw target marker (tetrahedron)
+					const targetGeom = new THREE.ConeGeometry(0.2, 0.4, 4);
+					const targetMat = new THREE.MeshBasicMaterial({ color: 0x00e5a3, wireframe: true });
+					const targetMesh = new THREE.Mesh(targetGeom, targetMat);
+					targetMesh.position.set(tCoords.x, tCoords.y, tCoords.z);
+					targetMesh.rotation.x = Math.PI; // upside down cone
+					targetGroup.add(targetMesh);
+
+					// Draw connecting line
+					const points = [];
+					points.push(new THREE.Vector3(agent.x, agent.y, agent.z));
+					points.push(new THREE.Vector3(tCoords.x, tCoords.y, tCoords.z));
+					
+					const lineGeom = new THREE.BufferGeometry().setFromPoints(points);
+					const lineMat = new THREE.LineDashedMaterial({
+						color: 0x2B3BE5,
+						dashSize: 0.3,
+						gapSize: 0.15,
+						transparent: true,
+						opacity: 0.4
+					});
+					const line = new THREE.Line(lineGeom, lineMat);
+					line.computeLineDistances(); // Required for dashed lines
+					connectionLinesGroup.add(line);
+				}
+			});
+		}
+
+		function onCanvasClick(event) {
+			// Calculate mouse position relative to container
+			const rect = renderer.domElement.getBoundingClientRect();
+			mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+			mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+			raycaster.setFromCamera(mouse, camera);
+			const intersects = raycaster.intersectObjects(agentGroup.children);
+
+			if (intersects.length > 0) {
+				const mesh = intersects[0].object;
+				const agent = mesh.userData.agent;
+				
+				// Highlight selected agent mesh
+				agentGroup.children.forEach(c => {
+					c.scale.set(1, 1, 1);
+					c.material.emissiveIntensity = 0.25;
+				});
+				mesh.scale.set(1.4, 1.4, 1.4);
+				mesh.material.emissiveIntensity = 0.8;
+
+				populateInspector(agent);
+				appendLog('INSPECT', `Focused on agent: ${agent.name || agent.id}`);
+
+				// Move camera towards agent
+				const targetPos = new THREE.Vector3(agent.x, agent.y, agent.z);
+				new Promise((resolve) => {
+					const start = camera.position.clone();
+					const dir = new THREE.Vector3().subVectors(start, targetPos).normalize().multiplyScalar(10);
+					const end = new THREE.Vector3().addVectors(targetPos, dir);
+					
+					let progress = 0;
+					const anim = () => {
+						progress += 0.05;
+						if (progress >= 1) {
+							camera.position.copy(end);
+							controls.target.copy(targetPos);
+							resolve();
+						} else {
+							camera.position.lerpVectors(start, end, progress);
+							controls.target.lerpVectors(controls.target, targetPos, progress);
+							requestAnimationFrame(anim);
+						}
+					};
+					anim();
+				});
+			}
+		}
+
+		function animate() {
+			requestAnimationFrame(animate);
+			const time = performance.now() * 0.001;
+
+			// Pulse agent sizes slightly
+			agentGroup.children.forEach((mesh, index) => {
+				const agent = mesh.userData.agent;
+				const pulse = 1.0 + Math.sin(time * 3 + index) * 0.06;
+				
+				// Keep scale relative to selection
+				if (selectedAgent && selectedAgent.id === agent.id) {
+					mesh.scale.set(1.4 * pulse, 1.4 * pulse, 1.4 * pulse);
+				} else {
+					mesh.scale.set(pulse, pulse, pulse);
+				}
+			});
+
+			// Rotate target cones
+			targetGroup.children.forEach(mesh => {
+				mesh.rotation.y += 0.01;
+			});
+
+			// Rotate the grid slightly for visual dynamics
+			if (agentGroup && !prefersReducedMotion) {
+				agentGroup.rotation.y = Math.sin(time * 0.05) * 0.05;
+				targetGroup.rotation.y = Math.sin(time * 0.05) * 0.05;
+				connectionLinesGroup.rotation.y = Math.sin(time * 0.05) * 0.05;
+			}
+
+			controls.update();
+			renderer.render(scene, camera);
+		}
+
+		function handleResize() {
+			if (!camera || !renderer) return;
+			const width = canvasContainer.clientWidth;
+			const height = canvasContainer.clientHeight;
+			camera.aspect = width / height;
+			camera.updateProjectionMatrix();
+			renderer.setSize(width, height);
+		}
+
+		// Connect to C5-REAL Telemetry WebSocket
+		function connectWS() {
+			setStatus('connecting', 'CONNECTING');
+			realityIndicator.textContent = 'CONNECTING TO TELEMETRY...';
+			
+			ws = new WebSocket(TELEMETRY_WS_URL);
+
+			ws.onopen = () => {
+				setStatus('live', 'C5-REAL');
+				realityIndicator.textContent = 'C5-REAL (LIVE GATEWAY)';
+				realityIndicator.style.color = 'var(--success)';
+				appendLog('STREAM', 'Verifiable lock-free telemetry bridge established.', 'success');
+			};
+
+			ws.onmessage = (event) => {
+				try {
+					const frame = JSON.parse(event.data);
+					if (frame.type === 'FRAME') {
+						const rawAgents = frame.data;
+						
+						// Calculate latency
+						const now = Date.now();
+						const latency = now - lastFrameTime;
+						lastFrameTime = now;
+						bridgeLatency.textContent = `${latency}ms`;
+						
+						// Map live agents, inject metadata names for static ones
+						agentsData = rawAgents.map(raw => {
+							const staticInfo = staticAgents.find(a => a.id === raw.id);
+							return {
+								id: raw.id,
+								name: staticInfo ? staticInfo.name : `Agent_${raw.id}`,
+								role: staticInfo ? staticInfo.role : 'Worker Node',
+								x: raw.x,
+								y: raw.y,
+								z: raw.z,
+								target: raw.target,
+								entropy: raw.entropy,
+								queue_depth: raw.queue_depth,
+								error_rate: raw.error_rate,
+								causal_entropy: raw.causal_entropy,
+								cpu_load: raw.cpu_load
+							};
+						});
+
+						// Redraw the 3D space
+						drawAgents();
+						updateMetrics();
+						
+						// Keep inspector updated
+						if (selectedAgent) {
+							const currentInfo = agentsData.find(a => a.id === selectedAgent.id);
+							if (currentInfo) populateInspector(currentInfo);
+						}
+					}
+				} catch (e) {
+					console.error("Payload error:", e);
+				}
+			};
+
+			ws.onerror = () => {
+				handleDisconnect();
+			};
+
+			ws.onclose = () => {
+				handleDisconnect();
+			};
+		}
+
+		function handleDisconnect() {
+			if (ws) {
+				ws.close();
+				ws = null;
+			}
+			
+			setStatus('demo', 'C4-SIM');
+			realityIndicator.textContent = 'C4-SIM (FALLBACK MODEL)';
+			realityIndicator.style.color = 'var(--warning)';
+			bridgeLatency.textContent = '0ms';
+			
+			// Load default static mock/persist values
+			agentsData = [...staticAgents];
+			drawAgents();
+			updateMetrics();
+			
+			// Try to reconnect in 5s
+			setTimeout(connectWS, 5000);
+		}
+
+		// Initialisation
+		try {
+			initScene();
+			connectWS();
+			window.addEventListener('resize', handleResize);
+		} catch (e) {
+			console.error("Three.js Init failed:", e);
+			setStatus('error', 'ERROR');
+			appendLog('ERR', 'WebGL Engine collapsed.');
+		}
+	</script>
+
+	<style is:global>
+		#ultramap-stage {
+			height: 100vh;
+			position: relative;
+			width: 100%;
+			z-index: 1;
+			background: #050505;
+		}
+
+		#ultramap-canvas-container {
+			inset: 0;
+			position: fixed;
+			z-index: 0;
+		}
+
+		#ultramap-overlay {
+			display: flex;
+			flex-direction: column;
+			gap: 1rem;
+			height: 100%;
+			padding: 1.1rem;
+			position: relative;
+			z-index: 2;
+			pointer-events: none;
+		}
+
+		/* Enable pointer events specifically on UI panels */
+		.ultramap-topbar,
+		.ultramap-grid {
+			pointer-events: auto;
+		}
+
+		.ultramap-topbar {
+			align-items: center;
+			display: grid;
+			grid-template-columns: auto minmax(0, 1fr) auto;
+			padding: 0.9rem 1.35rem;
+			background: rgba(10, 10, 10, 0.78);
+			border: 1px solid var(--line);
+			border-radius: var(--radius-xl);
+			backdrop-filter: blur(12px);
+		}
+
+		.ultramap-brand {
+			display: flex;
+			align-items: center;
+		}
+
+		.ultramap-heading h1 {
+			font-family: 'Orbitron', sans-serif;
+			letter-spacing: 0.05em;
+			font-size: clamp(0.95rem, 2vw, 1.35rem);
+			margin: 0;
+			text-transform: uppercase;
+			color: #ffffff;
+		}
+
+		.ultramap-actions {
+			display: flex;
+			align-items: center;
+			gap: 0.85rem;
+		}
+
+		.status-badge {
+			padding: 0.44rem 0.74rem;
+			font-family: 'IBM Plex Mono', monospace;
+			font-size: 0.72rem;
+			font-weight: 700;
+			border-radius: var(--radius-md);
+			border: 1px solid var(--line);
+			background: rgba(255, 255, 255, 0.03);
+			letter-spacing: 0.1em;
+		}
+
+		.status-badge[data-mode='live'] {
+			background: rgba(0, 229, 163, 0.1);
+			border-color: var(--success);
+			color: var(--success);
+		}
+
+		.status-badge[data-mode='connecting'] {
+			background: rgba(43, 59, 229, 0.1);
+			border-color: var(--accent);
+			color: var(--accent-soft);
+			animation: wsPulse 1.5s infinite alternate;
+		}
+
+		.status-badge[data-mode='demo'] {
+			background: rgba(229, 43, 80, 0.15);
+			border-color: var(--warning);
+			color: var(--warning);
+		}
+
+		@keyframes wsPulse {
+			0% { opacity: 0.6; }
+			100% { opacity: 1; }
+		}
+
+		.ultramap-grid {
+			flex: 1;
+			display: grid;
+			grid-template-columns: 380px 1fr;
+			gap: 1rem;
+			min-height: 0; /* allows grid children to shrink below content size */
+		}
+
+		.ultramap-inspector {
+			display: flex;
+			flex-direction: column;
+			gap: 1.1rem;
+			padding: 1.25rem;
+			overflow-y: auto;
+			background: rgba(10, 10, 10, 0.8);
+			border: 1px solid var(--line);
+			border-radius: var(--radius-xl);
+			backdrop-filter: blur(14px);
+		}
+
+		.empty-inspector-state {
+			padding: 2.2rem 0;
+			text-align: center;
+			color: var(--muted);
+			font-size: 0.95rem;
+			line-height: 1.6;
+		}
+
+		.ultramap-main-panel {
+			display: grid;
+			grid-template-rows: auto 1fr;
+			gap: 1rem;
+			min-height: 0;
+		}
+
+		.ultramap-overview {
+			padding: 1.15rem;
+			background: rgba(10, 10, 12, 0.74);
+			border: 1px solid var(--line);
+			border-radius: var(--radius-xl);
+			backdrop-filter: blur(8px);
+		}
+
+		.swarm-stats {
+			display: grid;
+			grid-template-columns: repeat(4, 1fr);
+			gap: 0.85rem;
+			margin-top: 0.9rem;
+		}
+
+		.stat-card {
+			background: rgba(255, 255, 255, 0.02);
+			border: 1px solid rgba(255, 255, 255, 0.05);
+			border-radius: var(--radius-lg);
+			padding: 0.82rem 0.95rem;
+		}
+
+		.stat-label {
+			display: block;
+			font-size: 0.68rem;
+			color: var(--muted);
+			text-transform: uppercase;
+			letter-spacing: 0.08em;
+			margin-bottom: 0.35rem;
+		}
+
+		.stat-card strong {
+			font-family: 'Orbitron', sans-serif;
+			font-size: 1.45rem;
+			color: #ffffff;
+		}
+
+		.log-panel {
+			padding: 1.15rem;
+			display: flex;
+			flex-direction: column;
+			background: rgba(7, 7, 9, 0.82);
+			border: 1px solid var(--line);
+			border-radius: var(--radius-xl);
+			backdrop-filter: blur(6px);
+			min-height: 0;
+		}
+
+		#log-monitor {
+			flex: 1;
+			overflow-y: auto;
+			font-family: 'IBM Plex Mono', monospace;
+			font-size: 0.74rem;
+			line-height: 1.8;
+			display: flex;
+			flex-direction: column-reverse;
+			gap: 0.35rem;
+			padding-top: 0.8rem;
+			border-top: 1px solid rgba(255, 255, 255, 0.04);
+			margin-top: 0.7rem;
+		}
+
+		.log-entry {
+			color: rgba(255, 255, 255, 0.8);
+		}
+
+		.log-entry.success { color: var(--success); }
+		.log-entry.warning { color: var(--warning); }
+		.log-tag {
+			color: var(--accent-soft);
+			font-weight: 600;
+		}
+
+		/* Agent Details */
+		.agent-detail-card {
+			display: flex;
+			flex-direction: column;
+			gap: 0.78rem;
+		}
+
+		.detail-row {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+			padding-bottom: 0.45rem;
+		}
+
+		.detail-label {
+			font-size: 0.72rem;
+			color: var(--muted);
+			text-transform: uppercase;
+			letter-spacing: 0.06em;
+		}
+
+		.detail-val {
+			color: #ffffff;
+			font-size: 0.88rem;
+		}
+
+		.detail-val.target-name {
+			max-width: 170px;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+			text-align: right;
+			color: var(--success);
+		}
+
+		.agent-role-block {
+			background: rgba(255, 255, 255, 0.02);
+			border-radius: var(--radius-md);
+			padding: 0.68rem;
+			border-left: 2px solid var(--accent);
+		}
+
+		.agent-role-block p {
+			margin: 0.25rem 0 0;
+			font-size: 0.8rem;
+			line-height: 1.5;
+			color: rgba(255, 255, 255, 0.82);
+		}
+
+		.exergy-stats {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 0.55rem;
+			margin: 0.45rem 0;
+		}
+
+		.exergy-stat-mini {
+			background: rgba(43, 59, 229, 0.04);
+			border: 1px solid rgba(43, 59, 229, 0.12);
+			border-radius: var(--radius-md);
+			padding: 0.55rem;
+			display: flex;
+			flex-direction: column;
+			gap: 0.2rem;
+		}
+
+		.exergy-stat-mini span {
+			font-size: 0.62rem;
+			color: var(--muted);
+			text-transform: uppercase;
+		}
+
+		.exergy-stat-mini strong {
+			font-family: 'Orbitron', sans-serif;
+			font-size: 0.95rem;
+		}
+
+		.exergy-stat-mini strong.highlight-val {
+			color: var(--success);
+		}
+
+		.endocrine-matrix-section {
+			display: flex;
+			flex-direction: column;
+			gap: 0.65rem;
+			margin-top: 0.75rem;
+		}
+
+		.endocrine-metric {
+			display: flex;
+			flex-direction: column;
+			gap: 0.25rem;
+		}
+
+		.metric-info {
+			display: flex;
+			justify-content: space-between;
+			font-size: 0.76rem;
+		}
+
+		.metric-info span {
+			color: rgba(255, 255, 255, 0.8);
+		}
+
+		.metric-info strong {
+			font-family: 'IBM Plex Mono', monospace;
+		}
+
+		.metric-info strong.warning-text {
+			color: var(--warning);
+		}
+
+		.endocrine-bar {
+			height: 5px;
+			background: rgba(255, 255, 255, 0.05);
+			border-radius: 99px;
+			overflow: hidden;
+		}
+
+		.bar-fill {
+			height: 100%;
+			border-radius: 99px;
+		}
+
+		.bar-fill.dopamine { background: #00f3ff; }
+		.bar-fill.cortisol { background: #e52b50; }
+		.bar-fill.serotonin { background: #8e2de2; }
+		.bar-fill.adrenaline { background: #ffaa00; }
+
+		/* Exergy Calculator */
+		.exergy-calculator-panel {
+			border-top: 1px solid rgba(255, 255, 255, 0.06);
+			padding-top: 1.1rem;
+			display: flex;
+			flex-direction: column;
+			gap: 0.65rem;
+		}
+
+		.calc-row {
+			display: grid;
+			grid-template-columns: 1fr auto;
+			gap: 0.45rem;
+		}
+
+		.exergy-calculator-panel input {
+			background: rgba(0, 0, 0, 0.35);
+			border: 1px solid var(--line);
+			border-radius: var(--radius-md);
+			color: #ffffff;
+			padding: 0.5rem 0.74rem;
+			font-family: 'IBM Plex Mono', monospace;
+			font-size: 0.8rem;
+		}
+
+		.exergy-calculator-panel input:focus {
+			outline: none;
+			border-color: var(--accent-soft);
+		}
+
+		.calc-results-card {
+			background: rgba(255, 255, 255, 0.02);
+			border: 1px solid rgba(255, 255, 255, 0.04);
+			border-radius: var(--radius-md);
+			padding: 0.68rem;
+			display: flex;
+			flex-direction: column;
+			gap: 0.4rem;
+		}
+
+		.calc-result-row {
+			display: flex;
+			justify-content: space-between;
+			font-size: 0.76rem;
+		}
+
+		.calc-result-row span {
+			color: var(--muted);
+		}
+
+		.calc-result-row strong {
+			color: #ffffff;
+		}
+
+		.calc-result-row strong.highlight-val {
+			color: var(--success);
+		}
+
+		.calc-formula {
+			font-size: 0.58rem;
+			color: var(--muted);
+			font-family: 'IBM Plex Mono', monospace;
+			margin-top: 0.35rem;
+			text-align: right;
+			text-transform: uppercase;
+		}
+
+		.hidden {
+			display: none !important;
+		}
+	</style>
+</SiteLayout>
