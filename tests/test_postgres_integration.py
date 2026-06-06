@@ -261,7 +261,7 @@ async def test_postgres_api_endpoints(mock_postgres_env: None) -> None:
             now = datetime.datetime.now(datetime.timezone.utc)
             mock_row = MockPostgresRecord(
                 {
-                    "id": "fact-999",
+                    "id": 999,
                     "content": "Mocked fact content",
                     "project": "test-proj",
                     "fact_type": "knowledge",
@@ -290,7 +290,7 @@ async def test_postgres_api_endpoints(mock_postgres_env: None) -> None:
             assert resp.status_code == 200
             results = resp.json()
             assert len(results) == 1
-            assert results[0]["id"] == "fact-999"
+            assert results[0]["id"] == 999
             assert results[0]["content"] == "Mocked fact content"
 
             search_queries = [q for q, _ in mock_conn.queries]
