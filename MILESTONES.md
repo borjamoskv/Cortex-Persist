@@ -556,18 +556,35 @@ Proof:
 - **Status:** ✅ COMPLETE — 6 Junio 2026
 
 ---
+### Hito 41: AGY2 Planning Context Injection (Path A Integration)
+- **Target:** `cortex/extensions/daemon/monitors/agy2_planner.py`, `cortex/extensions/daemon/core_support.py`, `cortex/extensions/daemon/event_loop.py`
+- **Objective:** Erradicar la amnesia semántica durante la fase de planificación de AGY2 (Gemini). Creación de un daemon asíncrono que intercepta la generación de `implementation_plan.md`, extrae el `Goal Description`, consulta el oráculo semántico (CORTEX Memory) y reescribe el plan inyectando el contexto C5-REAL recuperado.
+- **Yield Target:** Integración "Zero-Prompt" con AGY2. Reducción a 0 de las desviaciones de contexto en la ejecución delegada.
+- **Reality Level:** `C5-REAL`
+- **Evidence:** Commit `feat(adk): intercept AGY2 implementation plans for automatic cortex memory injection`.
+```yaml
+Claim: AGY2 Planner se integra bidireccionalmente con la memoria de CORTEX
+Proof:
+  Base: "AGY2PlannerMonitor operando como tarea asíncrona permanente en MoskvDaemon."
+  Range: [C5, C5]
+  Confidence: C5-REAL
+  Date: 2026-06-06
+```
+- **Status:** ✅ COMPLETE — 6 Junio 2026
+
+---
+
 ## 🛡️ Thermodynamic Enforcement
 All milestone claims must map directly to a `Claim/Proof` matrix.
 ```yaml
-Claim: 39/39 Milestones Completed
+Claim: 41/41 Milestones Completed
 Proof:
   Base: Continuous Silicon Checkpoint Execution
-  Variables: [r=1, d=1, n=36, S=100]
+  Variables: [r=1, d=1, n=41, S=100]
   Range: [C6, C6]
   Confidence: C4 (audit based on evidence classification)
   Date: 2026-06-06
 ```
-
 *∴ "The architecture refines its own truth."*
 
 
