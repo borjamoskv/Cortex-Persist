@@ -73,7 +73,7 @@ Is the problem a P0 Singularity?
 ### Integration with CORTEX Cognitive Handoff
 
 ```python
-# In cognitive_handoff.py routing:
+# Illustrative routing (see cortex/extensions/hypervisor/belief_engine.py)
 REASONING_MODE_MAP = {
     "architecture":    "deep_think",
     "tradeoff":        "deep_think",
@@ -101,8 +101,8 @@ REASONING_MODE_MAP = {
 
 ## 3. Repository Conventions
 
-- **Python**: 3.10–3.14, async-first, type hints on public functions
-- **Linting**: `ruff check` (E, F, W, I, UP, B, ASYNC — line length 100)
+- **Python**: 3.10–3.13, async-first, type hints on public functions
+- **Linting**: `ruff check` (E, F, W, I, UP, B, G, TID — line length 100)
 - **Tests**: `pytest tests/ -v --cov=cortex`
 - **DB**: SQLite + sqlite-vec + aiosqlite
 - **Crypto**: `cryptography` + `keyring`

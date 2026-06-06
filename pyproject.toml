@@ -1,6 +1,6 @@
 [project]
 name = "cortex-persist"
-version = "0.3.0b8"
+version = "1.0.0"
 description = "Cryptographic memory integrity, audit trails, and verifiable lineage for AI agents."
 readme = "README.md"
 license = "Apache-2.0"
@@ -14,7 +14,7 @@ keywords = [
     "vector-search", "sqlite", "mcp", "multi-tenant",
 ]
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
