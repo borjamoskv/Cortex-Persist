@@ -389,7 +389,7 @@ class SovereignLedger(LedgerAuditMixin):
             if not db_path:
                 try:
                     db_path = self.db._connector.__closure__[0].cell_contents
-                except Exception:
+                except (AttributeError, IndexError, TypeError):
                     db_path = None
 
             if db_path:

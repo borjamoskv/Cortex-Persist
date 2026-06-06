@@ -8,7 +8,7 @@ from pathlib import Path
 
 
 class LedgerStoreError(RuntimeError):
-    pass
+    """Base exception for ledger store errors."""
 
 
 class LedgerStore:
