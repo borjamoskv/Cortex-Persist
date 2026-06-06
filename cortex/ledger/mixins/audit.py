@@ -66,42 +66,40 @@ class LedgerAuditMixin:
             tid, tx_tenant_id, proj, act, det, prev, h, ts = row
             expected_prev = expected_prev_by_tenant.get(tx_tenant_id, "GENESIS")
             
-            # Update running expectations
+            if tenant_id is None or tx_tenant_id == tenant_id:
+                tx_count += 1
+                computed_v3 = compute_tx_hash(prev, proj, act, det, ts, tenant_id=tx_tenant_id)
+                computed_v2 = compute_tx_hash(prev, proj, act, det, ts)
+                computed_v1 = compute_tx_hash_v1(prev, proj, act, det, ts)
+                
+                if computed_v3 == h and prev != expected_prev:
+                    violations.append({"id": tid, "type": "CHAIN_BREAK", "expected": expected_prev})
+                elif h in {computed_v2, computed_v1} and prev != expected_prev_global:
+                    violations.append({
+                        "id": tid, "type": "CHAIN_BREAK", "expected": expected_prev, "legacy_expected": expected_prev_global
+                    })
+                elif computed_v3 != h and h not in {computed_v2, computed_v1}:
+                    violations.append({"id": tid, "type": "TAMPER_DETECTED", "stored": h})
+                    
+                try:
+                    detail = json.loads(det) if det else {}
+                except Exception as e:
+                    logger.debug("Failed to parse transaction detail json for tx %s: %s", tid, e)
+                    detail = {}
+                    
+                if act == "store":
+                    c_hash = detail.get("content_hash")
+                    if c_hash:
+                        store_txs_to_verify[tid] = c_hash
+                elif act == "purge":
+                    p_store_tx_id = detail.get("store_tx_id")
+                    if p_store_tx_id is not None:
+                        purged_store_tx_ids.add(int(p_store_tx_id))
+
+            # Update running expectations at the END of the loop
             expected_prev_by_tenant[tx_tenant_id] = h
             expected_prev_global = h
             
-            if tenant_id is not None and tx_tenant_id != tenant_id:
-                continue
-                
-            tx_count += 1
-            computed_v3 = compute_tx_hash(prev, proj, act, det, ts, tenant_id=tx_tenant_id)
-            computed_v2 = compute_tx_hash(prev, proj, act, det, ts)
-            computed_v1 = compute_tx_hash_v1(prev, proj, act, det, ts)
-            
-            if computed_v3 == h and prev != expected_prev:
-                violations.append({"id": tid, "type": "CHAIN_BREAK", "expected": expected_prev})
-            elif h in {computed_v2, computed_v1} and prev != expected_prev_global:
-                violations.append({
-                    "id": tid, "type": "CHAIN_BREAK", "expected": expected_prev, "legacy_expected": expected_prev_global
-                })
-            elif computed_v3 != h and h not in {computed_v2, computed_v1}:
-                violations.append({"id": tid, "type": "TAMPER_DETECTED", "stored": h})
-                
-            try:
-                detail = json.loads(det) if det else {}
-            except Exception as e:
-                logger.debug("Failed to parse transaction detail json for tx %s: %s", tid, e)
-                detail = {}
-                
-            if act == "store":
-                c_hash = detail.get("content_hash")
-                if c_hash:
-                    store_txs_to_verify[tid] = c_hash
-            elif act == "purge":
-                p_store_tx_id = detail.get("store_tx_id")
-                if p_store_tx_id is not None:
-                    purged_store_tx_ids.add(int(p_store_tx_id))
-                    
             if tid % 100 == 0:
                 await asyncio.sleep(0)
                 
