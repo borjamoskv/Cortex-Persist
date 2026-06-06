@@ -44,11 +44,11 @@ except ImportError:
 
     class HealthMixin:
         async def health_check(self, *args, **kwargs):
-            """TODO: Document health_check"""
+            """Document health_check"""
             return {"status": "unhealthy", "reason": "No Health extension"}
 
         async def health_report(self, *args, **kwargs):
-            """TODO: Document health_report"""
+            """Document health_report"""
             return {"status": "unhealthy", "reason": "No Health extension"}
 
 
@@ -119,7 +119,7 @@ class CortexEngine(
 
     @property
     def system_state(self) -> str:
-        """TODO: Document system_state"""
+        """Get the current system state."""
         return self._system_state
 
     def set_system_state(self, state: str) -> None:
@@ -210,7 +210,7 @@ class CortexEngine(
                             from aiosqlite.core import _STOP_RUNNING_SENTINEL
 
                             def close_and_stop(c=conn):
-                                """TODO: Document close_and_stop"""
+                                """Close connection and stop runner."""
                                 if getattr(c, "_connection", None) is not None:
                                     try:
                                         c._connection.close()
