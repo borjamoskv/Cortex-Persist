@@ -135,7 +135,7 @@ class CortexEmailDaemon:
 
                 raw_emails = []
                 for num in messages[0].split():
-                    _, data = mail.fetch(num, "(RFC822)")
+                    _, data = mail.fetch(num, "(BODY.PEEK[])")
                     raw_emails.append(data[0][1])
                 mail.logout()
                 return raw_emails
@@ -153,11 +153,12 @@ class CortexEmailDaemon:
                     )
                     continue
 
-                if not self._validate_sender_domain(msg.get("From"), "amazon.com"):
-                    await self.log_telemetry(
-                        {"action": "dropped_domain_mismatch", "sender": msg.get("From")}
-                    )
-                    continue
+                # [FIX]: Removed hardcoded 'amazon.com' domain filter (was a test artifact)
+                # if not self._validate_sender_domain(msg.get("From"), "amazon.com"):
+                #     await self.log_telemetry(
+                #         {"action": "dropped_domain_mismatch", "sender": msg.get("From")}
+                #     )
+                #     continue
 
                 # Extraer payload seguro
                 body = self._safe_decode_payload(msg)
