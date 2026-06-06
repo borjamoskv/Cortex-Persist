@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# [C5-REAL] Exergy-Maximized
 """
 VSA-SDM Benchmark: Prove the 100x claim.
 Compares VSA retrieval vs brute-force cosine search.

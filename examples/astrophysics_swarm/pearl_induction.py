@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX Astrophysics Swarm: PeARL Induction Engine
 Mandate: Zero-shot functional induction, UltraThink Rigor, epistemic containment.

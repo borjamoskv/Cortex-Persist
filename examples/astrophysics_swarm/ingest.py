@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX Astrophysics Swarm: Exascale Ingestion Mock (MMU/DESI Simulator)
 Mandate: Zero memory footprint, lazy evaluation, structural induction.

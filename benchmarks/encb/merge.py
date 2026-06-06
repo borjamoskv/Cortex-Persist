@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """ENCB v2 - CRDT Merge Operators.
 
 Layer 1: Replica convergence only. No truth resolution here.

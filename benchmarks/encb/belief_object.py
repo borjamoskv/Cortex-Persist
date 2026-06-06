@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """ENCB v2 - Typed Belief Objects.
 
 Four claim types with CRDT-compatible version vectors, evidence chains,

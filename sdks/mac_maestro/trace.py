@@ -1,4 +1,4 @@
-"""Mac-Maestro-Ω - Structured trace emission."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

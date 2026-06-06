@@ -1,4 +1,4 @@
-"""Tests for Mac-Maestro-Ω V5: Full Master Protocol verification."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

@@ -1,1 +1,1 @@
-"""Mac-Maestro-Ω - Sovereign macOS Automation SDK."""
+# [C5-REAL] Exergy-Maximized

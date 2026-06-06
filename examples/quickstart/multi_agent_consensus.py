@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# [C5-REAL] Exergy-Maximized
 """CORTEX Quickstart: Multi-Agent Byzantine Consensus.
 
 Demonstrates how CORTEX verifies decisions across multiple agents

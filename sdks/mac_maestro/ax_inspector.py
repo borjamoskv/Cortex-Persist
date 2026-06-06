@@ -1,4 +1,4 @@
-"""Mac-Maestro-Ω - Accessibility Inspector (Vector B)."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-"""IDC Agent - the orchestrator that runs the I→D→C loop."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

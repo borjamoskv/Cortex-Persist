@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """ENCB v2 - Formal Metrics.
 
 Four metrics that measure epistemic debt, not just accuracy:

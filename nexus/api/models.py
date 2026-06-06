@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """NEXUS - Pydantic models for the Sovereign Agent Directory.
 
 Strict typing. No float for scores - Decimal would be ideal but

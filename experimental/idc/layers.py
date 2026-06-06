@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """IDC Layers - Information, Decision, Control, Watchdog.
 
 Each layer is a pure function (state in, state out). No hidden side effects.

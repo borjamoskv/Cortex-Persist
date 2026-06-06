@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# [C5-REAL] Exergy-Maximized
 """
 VSA-SDM-MEMORY-OMEGA v3.1 - Mechanical Verifier
 Deterministic. Zero stochastic. 10 gates:

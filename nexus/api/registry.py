@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """NEXUS Agent Registry - Persistent store with Ed25519 identity.
 
 SQLite-backed registry for agent profiles, capabilities, and metadata.

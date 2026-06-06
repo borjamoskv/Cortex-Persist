@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """ENCB v2 - Log-Odds Pooling (LogOP) Resolution.
 
 Layer 2: Belief arbitration. Takes CRDT-merged replicas and resolves

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX Swarm ↔ VSA Memory Bridge v1.0
 Connects the VSA-SDM engine to the CORTEX-Swarm-Prime agent lifecycle.

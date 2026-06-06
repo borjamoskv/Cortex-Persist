@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 ENCB - Baseline RAG (Passive Memory Control Group)
 ====================================================

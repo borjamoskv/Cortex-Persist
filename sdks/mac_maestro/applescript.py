@@ -1,4 +1,4 @@
-"""Mac-Maestro-Ω - AppleScript wrappers (Vector A)."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

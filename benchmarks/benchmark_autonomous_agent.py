@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Proof of Concept & Stress Test for CORTEX Autonomous Agent (Level 4).
 
 Executes three test phases to validate correctness, safety invariants, and performance:

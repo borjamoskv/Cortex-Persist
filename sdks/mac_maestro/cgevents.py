@@ -1,4 +1,4 @@
-"""Mac-Maestro-Ω - CGEvent mouse control (Vector D)."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

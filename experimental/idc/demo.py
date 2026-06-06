@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# [C5-REAL] Exergy-Maximized
 """IDC Agent Demo - Run both toy environments and visualize tradeoffs.
 
 Usage:

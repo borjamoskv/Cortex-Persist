@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Mac-Maestro-Ω CLI - Sovereign macOS Automation Tool.
 
 Usage:

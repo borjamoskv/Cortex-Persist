@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# [C5-REAL] Exergy-Maximized
 """
 VSA-SDM CHAOS FUZZER v1.0
 Adversarial stress-test. Tries to BREAK everything.

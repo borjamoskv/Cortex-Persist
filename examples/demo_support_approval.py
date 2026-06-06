@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX-Persist: Customer Support Escalation Demo
 A support bot grants a refund. CORTEX seals the decision lineage.

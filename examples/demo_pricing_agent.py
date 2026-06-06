@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX-Persist: Automated Pricing Agent Demo
 Shows an AI modifying enterprise pricing while CORTEX records a cryptographic audit trail.

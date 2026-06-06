@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 VSA-SDM Engine v3.1 - Sovereign Context Collapse Module
 Importable Python module for Vector Symbolic Architecture operations.

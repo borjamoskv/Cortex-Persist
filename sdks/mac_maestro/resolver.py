@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Mac-Maestro-Ω - Vector Resolution Engine (V5).
 
 Maps action.vector strings (A/B/C/D) to concrete executor callables.

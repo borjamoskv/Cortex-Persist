@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """ENCB v2 - Epistemic Noise Chaos Benchmark.
 
 Self-contained benchmark framework for empirically falsifying the

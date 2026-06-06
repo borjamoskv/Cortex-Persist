@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """ENCB v2 - Monte Carlo Simulation Runner.
 
 Orchestrates the full benchmark: universe generation, agent population,

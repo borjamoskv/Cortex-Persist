@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 # zero_prompting.py
 """Zero‑Prompting module.
 

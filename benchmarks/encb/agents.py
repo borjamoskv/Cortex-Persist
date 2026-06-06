@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """ENCB v2 - Agent Profiles and Adversary Models.
 
 Five adversary archetypes for realistic epistemic noise:

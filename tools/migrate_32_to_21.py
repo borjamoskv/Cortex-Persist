@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Migration: Collapse facts table from 32 → 21 columns.
 
 Folds 11 orphan/low-use columns into the `metadata` JSON field.

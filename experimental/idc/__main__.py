@@ -1,4 +1,4 @@
-"""Allow `python -m idc` to run the demo."""
+# [C5-REAL] Exergy-Maximized
 from idc.demo import main
 
 main()

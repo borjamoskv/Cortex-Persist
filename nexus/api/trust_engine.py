@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """NEXUS Trust Engine - Bayesian posterior trust scoring.
 
 Standalone implementation derived from cortex.extensions.trust.bayesian.

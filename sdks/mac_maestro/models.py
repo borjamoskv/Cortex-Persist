@@ -1,4 +1,4 @@
-"""Mac-Maestro-Ω - Core data models for sovereign macOS automation."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

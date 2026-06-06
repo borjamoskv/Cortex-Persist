@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """ENCB v2 - Proposition Universe Generator.
 
 Generates P propositions across K semantic domains with 4 types,

@@ -1,4 +1,4 @@
-"""Mac-Maestro-Ω - App Discovery (Target Lock phase)."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

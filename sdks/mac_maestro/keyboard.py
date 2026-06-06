@@ -1,4 +1,4 @@
-"""Mac-Maestro-Ω - Keyboard input (Vector C)."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

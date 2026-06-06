@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# [C5-REAL] Exergy-Maximized
 """CORTEX Quickstart: Store and verify a decision.
 
 This example shows the core CORTEX workflow:

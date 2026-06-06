@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """ENCB v2 - Pluggable Resolvers Protocol.
 
 Defines the interface for resolving epistemic chaos, allowing engine-agnostic

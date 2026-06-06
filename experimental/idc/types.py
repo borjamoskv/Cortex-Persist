@@ -1,4 +1,4 @@
-"""IDC Core Types - the data structures that define an agent."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

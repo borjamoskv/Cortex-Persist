@@ -1,4 +1,4 @@
-"""NEXUS API Server - FastAPI backend for the Sovereign Agent Directory."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 from contextlib import asynccontextmanager

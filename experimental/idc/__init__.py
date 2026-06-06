@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 # IDC - Information · Decision · Control
 # Minimal reference implementation of the Agent Science framework
 # Author: borjamoskv | MOSKV-1 v5

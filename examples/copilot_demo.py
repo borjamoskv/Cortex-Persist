@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# [C5-REAL] Exergy-Maximized
 """CORTEX Level 3 Copilot - End-to-End Integration Demo.
 
 Reality Level: C5-REAL

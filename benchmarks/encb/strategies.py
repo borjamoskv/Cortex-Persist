@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """ENCB v2 - Resolution Strategies (S0–S3).
 
 Four strategies implementing a common interface:

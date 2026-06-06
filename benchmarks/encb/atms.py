@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """ENCB v2 - ATMS-Lite (Assumption-based Truth Maintenance System).
 
 Layer 3: Truth maintenance. Tracks which assumptions support each belief

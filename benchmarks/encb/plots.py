@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """ENCB v2 - Visualization.
 
 Generates publication-quality plots for the benchmark results.

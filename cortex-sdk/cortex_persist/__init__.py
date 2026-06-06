@@ -1,4 +1,4 @@
-"""cortex-persist - Python SDK for the CORTEX Persistence API."""
+# [C5-REAL] Exergy-Maximized
 
 from cortex_persist.async_client import AsyncCortexClient
 from cortex_persist.client import CortexClient

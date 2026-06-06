@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Toy Environments for IDC Agent demonstrations.
 
 Each environment is a simple MDP/POMDP with:

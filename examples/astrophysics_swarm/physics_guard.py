@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX Astrophysics Swarm: Physics Guard (UltraThink Protocol)
 Mandate: Deterministic boundary. No stochastic hallucination permitted in scientific models.
