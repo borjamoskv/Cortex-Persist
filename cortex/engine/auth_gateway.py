@@ -172,3 +172,29 @@ class QuorumGateway:
         except Exception as e:
             logger.error("[QuorumGateway] Failed to reject request %s: %s", req_id, e)
             return False
+
+    async def check_timeout(self, req_id: str, timeout_s: float) -> bool:
+        """
+        Checks if the request has expired (incomplete quorum within timeout).
+        If expired, marks status as 'TIMEOUT_EXPIRED' and returns True.
+        """
+        try:
+            conn = self.engine.pool.get_connection()
+            cursor = conn.cursor()
+            cursor.execute("SELECT status, created_at FROM quorum_requests WHERE id = ?", (req_id,))
+            row = cursor.fetchone()
+            if not row:
+                return False
+            status, created_at = row
+            if status == "PENDING" and (time.monotonic() - created_at) > timeout_s:
+                conn.execute(
+                    "UPDATE quorum_requests SET status = 'TIMEOUT_EXPIRED', resolved_at = ? WHERE id = ?",
+                    (time.monotonic(), req_id),
+                )
+                conn.commit()
+                logger.warning("[QuorumGateway] Request %s failed due to timeout.", req_id)
+                return True
+            return False
+        except Exception as e:
+            logger.error("[QuorumGateway] Failed checking timeout for %s: %s", req_id, e)
+            return False
