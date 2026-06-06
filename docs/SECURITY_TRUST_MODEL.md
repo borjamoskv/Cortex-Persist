@@ -1,7 +1,7 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 # SECURITY_TRUST_MODEL.md — CORTEX Persist
 
-Package: cortex-persist v0.3.0b8 · Design target: LEGION-10k
+Package: cortex-persist v1.0.0
 License: Apache-2.0 · Python: >=3.10 · Execution: C5-REAL
 
 This document describes trust boundaries, verification surfaces, and cognitive/state-mutation risks

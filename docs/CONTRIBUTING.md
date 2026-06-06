@@ -1,8 +1,7 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 # CONTRIBUTING.md — Deep Change Protocols
 
-Package: cortex-persist v0.3.0b7
-Engine: v8
+Package: cortex-persist v1.0.0
 License: Apache-2.0
 Python: >=3.10
 

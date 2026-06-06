@@ -1,8 +1,7 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 # CONTRIBUTING.md — CORTEX Persist
 
-Package: cortex-persist v0.3.0
-Engine: v8.0
+Package: cortex-persist v1.0.0
 License: Apache-2.0
 Python: >=3.10
 

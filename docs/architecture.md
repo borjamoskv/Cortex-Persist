@@ -1,7 +1,7 @@
 <!-- [C5-REAL] Exergy-Maximized -->
 # Architecture
 
-> **CORTEX Trust Engine v8 — Sovereign Cloud**
+> **CORTEX Trust Engine v1.0.0 — Sovereign Cloud**
 > *La probabilidad puede sugerir. Solo la verificación puede gobernar.*
 
 ---
