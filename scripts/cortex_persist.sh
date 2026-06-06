@@ -1,4 +1,5 @@
 #!/bin/bash
+# [C5-REAL] Exergy-Maximized
 cd ~/cortex
 
 echo "Persistiendo decisión arquitectónica en CORTEX..."

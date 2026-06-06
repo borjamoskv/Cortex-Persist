@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# [C5-REAL] Exergy-Maximized
 # ─── CORTEX Boot Script ─────────────────────────────────────────────
 # Refresca el snapshot de memoria y lo imprime para que el agente lea.
 # Uso: source cortex-boot.sh o llamar desde workflows.

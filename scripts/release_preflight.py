@@ -1,10 +1,4 @@
-"""Validate release artifacts before publication.
-
-This script checks the built wheel and sdist for:
-- expected package naming
-- required metadata files
-- absence of forbidden repository surfaces in public artifacts
-"""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

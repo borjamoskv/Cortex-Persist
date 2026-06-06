@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# [C5-REAL] Exergy-Maximized
 
 # RADAR-Ω Automation Script (Boveda-1 Integration)
 # Se ejecuta de forma perpetua (24/7) vía cron o launchd.

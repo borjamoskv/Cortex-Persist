@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# [C5-REAL] Exergy-Maximized
 """Lightweight repo-health checks for changed files.
 
 This guard is intentionally dependency-free so it can run early in CI.

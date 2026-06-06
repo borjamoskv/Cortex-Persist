@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 # 1. Splinter ledger_core.py
 ledger_path = "cortex/ledger/ledger_core.py"
 with open(ledger_path) as f:

@@ -1,4 +1,3 @@
-"""[QWEN-OMEGA-MOCK] AST Transmuted via Deterministic Fallback."""
 
 """[QWEN-OMEGA-MOCK] AST Transmuted via Deterministic Fallback."""
 

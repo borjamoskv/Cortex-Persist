@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# [C5-REAL] Exergy-Maximized
 """
 Ouroboros-Infinity: Daily Autopoietic Metabolism Loop.
 """

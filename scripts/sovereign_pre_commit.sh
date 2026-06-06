@@ -1,4 +1,5 @@
 #!/bin/bash
+# [C5-REAL] Exergy-Maximized
 # Sovereign Pre-commit hook v1.0 - Anti-Entropy Protocol
 
 set -euo pipefail

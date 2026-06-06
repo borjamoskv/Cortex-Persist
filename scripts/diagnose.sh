@@ -1,4 +1,5 @@
 #!/bin/bash
+# [C5-REAL] Exergy-Maximized
 echo "--- INTEGRITY ---"
 .venv/bin/python -m pytest 2>&1 || echo "PYTEST_EXIT:$?"
 

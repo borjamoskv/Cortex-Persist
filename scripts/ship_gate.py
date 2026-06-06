@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# [C5-REAL] Exergy-Maximized
 """CORTEX Ship Gate - Blocks deploy if quality checks fail.
 
 Exit 0 = safe to ship. Exit 1 = blocked.

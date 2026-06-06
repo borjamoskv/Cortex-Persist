@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# [C5-REAL] Exergy-Maximized
 """
 ENTROPY GATE (Pre-Commit Hook)
 Bloquea commits de archivos Python si su Complejidad Ciclomática (CC) supera

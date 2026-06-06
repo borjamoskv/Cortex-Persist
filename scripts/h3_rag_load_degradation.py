@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# [C5-REAL] Exergy-Maximized
 # SYS_DECLARATION: C4-SIM (Simulated RAG Degradation & Compaction)
 import time
 import uuid

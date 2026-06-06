@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# [C5-REAL] Exergy-Maximized
 """
 Forensic Hunter v1.0 - Sovereign Swarm Audit & Slashing.
 Identifies agentic deviation and applies reputation penalties (The Gavel).

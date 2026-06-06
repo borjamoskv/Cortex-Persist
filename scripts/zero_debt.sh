@@ -1,4 +1,5 @@
 #!/bin/sh
+# [C5-REAL] Exergy-Maximized
 # 🌌 ENTROPY GATE PRE-COMMIT HOOK
 # ----------------------------------------------------------------------------------
 # Asegura que ninguna línea de código se commitee si supera los umbrales
