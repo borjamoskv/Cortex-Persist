@@ -1,7 +1,5 @@
 # [C5-REAL] Exergy-Maximized
 import logging
-from typing import Set, Dict, List
-import uuid
 
 # Attempt to load the Rust PyO3 extension
 try:
