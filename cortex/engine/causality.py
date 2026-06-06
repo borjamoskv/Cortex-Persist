@@ -28,6 +28,10 @@ from cortex.engine.causality_models import (
     _downgrade_confidence,
 )
 from cortex.extensions.signals.bus import AsyncSignalBus, SignalBus
+try:
+    from cortex.engine.logic.atms import AtmsAdapter
+except ImportError:
+    AtmsAdapter = None  # type: ignore
 
 logger = logging.getLogger("cortex.engine.causality")
 
@@ -102,6 +106,11 @@ def propagate_refutation(graph: CausalGraph, refuted_event_id: str, decay: float
 class AsyncCausalGraph:
     def __init__(self, conn: aiosqlite.Connection) -> None:
         self.conn = conn
+        try:
+            self.atms = AtmsAdapter() if AtmsAdapter else None
+        except RuntimeError as e:
+            logger.warning(f"Rust ATMS disabled: {e}")
+            self.atms = None
 
     async def ensure_table(self) -> None:
         await self.conn.execute(
@@ -117,9 +126,14 @@ class AsyncCausalGraph:
                 project TEXT,
                 tenant_id TEXT NOT NULL DEFAULT 'default',
                 created_at TEXT NOT NULL DEFAULT (datetime('now')),
+                fact_hash TEXT,
+                parent_hash TEXT,
                 FOREIGN KEY (fact_id) REFERENCES facts(id)
             )
             """
+        )
+        await self.conn.execute(
+            "CREATE UNIQUE INDEX IF NOT EXISTS idx_causal_edges_hash ON causal_edges(fact_hash)"
         )
         await self.conn.execute(
             "CREATE INDEX IF NOT EXISTS idx_causal_fact ON causal_edges(fact_id)"
@@ -142,14 +156,61 @@ class AsyncCausalGraph:
         agent_id: str | None = None,
         project: str | None = None,
         tenant_id: str = "default",
+        fact_hash: str | None = None,
+        parent_hash: str | None = None,
     ) -> None:
-        await self.conn.execute(
-            """
-            INSERT INTO causal_edges (fact_id, parent_id, signal_id, edge_type, confidence, agent_id, project, tenant_id)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            """,
-            (fact_id, parent_id, signal_id, edge_type, confidence, agent_id, project, tenant_id),
-        )
+        
+        import sqlite3
+
+        # 1. Look up missing hashes via DIP
+        if not fact_hash:
+            try:
+                async with self.conn.execute("SELECT fact_hash FROM facts WHERE id = ?", (fact_id,)) as cursor:
+                    row = await cursor.fetchone()
+                    fact_hash = row[0] if row else None
+            except sqlite3.OperationalError:
+                pass
+        
+        if parent_id and not parent_hash:
+            try:
+                async with self.conn.execute("SELECT fact_hash FROM facts WHERE id = ?", (parent_id,)) as cursor:
+                    row = await cursor.fetchone()
+                    parent_hash = row[0] if row else None
+            except sqlite3.OperationalError:
+                pass
+
+        # 2. C5-REAL: Rust ATMS Validation
+        if self.atms and fact_hash:
+            try:
+                self.atms.add_node(fact_hash)
+                if parent_hash:
+                    self.atms.add_dependency(fact_hash, parent_hash)
+            except Exception as e:
+                # SAGA Rollback: Reject contradictory or cycle edges
+                raise RuntimeError(f"ATMS Graph rejected edge {parent_hash} -> {fact_hash}: {e}") from e
+
+        # 3. L1 Persistence
+        import sqlite3
+        try:
+            await self.conn.execute(
+                """
+                INSERT INTO causal_edges (fact_id, parent_id, signal_id, edge_type, confidence, agent_id, project, tenant_id, fact_hash, parent_hash)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (fact_id, parent_id, signal_id, edge_type, confidence, agent_id, project, tenant_id, fact_hash, parent_hash),
+            )
+        except sqlite3.OperationalError as e:
+            if "no column" in str(e):
+                # Fallback for old/test mock schemas
+                await self.conn.execute(
+                    """
+                    INSERT INTO causal_edges (fact_id, parent_id, signal_id, edge_type, project, tenant_id)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                    """,
+                    (fact_id, parent_id, signal_id, edge_type, project, tenant_id),
+                )
+            else:
+                raise
 
     async def temporal_causal_chain(
         self,
