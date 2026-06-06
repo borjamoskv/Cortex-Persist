@@ -14,10 +14,11 @@ logger = logging.getLogger("cortex.engine.saga")
 class SagaContext(TypedDict, total=False):
     agent_id: str
     session_id: str
+    tenant_id: str
     payload: dict[str, Any]
     taint_token: str | None
     schema_validated: bool
-    encrypted_payload: bytes | None
+    encrypted_payload: str | bytes | None
     ledger_hash: str | None
     db_tx_id: str | None
 
@@ -83,9 +84,21 @@ async def schema_comp(ctx: SagaContext):
     ctx["schema_validated"] = False
 
 async def encrypt_exec(ctx: SagaContext):
-    # Encryption
-    ctx["encrypted_payload"] = b"encrypted_stub"
+    # Encryption using C5-REAL AES-GCM
+    from cortex.crypto.aes import get_default_encrypter
+    
+    enc = get_default_encrypter()
+    tenant = ctx.get("tenant_id", "default")
+    
+    if enc.is_active:
+        ctx["encrypted_payload"] = enc.encrypt_json(ctx.get("payload"), tenant_id=tenant)
+    else:
+        # Fallback to plain if no master key is loaded (for local sim)
+        logger.warning("SAGA-4: Master Key not active. Payload stored unencrypted.")
+        ctx["encrypted_payload"] = None
+
 async def encrypt_comp(ctx: SagaContext):
+    # Wipe the ephemeral payload reference
     ctx["encrypted_payload"] = None
 
 async def ledger_exec(ctx: SagaContext):
