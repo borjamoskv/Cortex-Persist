@@ -114,7 +114,8 @@ class FactManager:
         if source is None and actor_id:
             source = (
                 actor_id
-                if isinstance(actor_id, str) and actor_id.startswith(("agent:", "cli", "api", "human"))
+                if isinstance(actor_id, str)
+                and actor_id.startswith(("agent:", "cli", "api", "human"))
                 else f"agent:{actor_id}"
             )
         if source and "source" not in meta:

@@ -76,12 +76,15 @@ async def semantic_search(
                 async with conn.acquire() as real_conn:
                     rows = await real_conn.fetch(sql, *params)
             else:
-                raise TypeError(f"PostgreSQL connection object has no fetch or acquire method: {type(conn)}")
+                raise TypeError(
+                    f"PostgreSQL connection object has no fetch or acquire method: {type(conn)}"
+                )
         except Exception as e:
             logger.error("PostgreSQL pgvector search failed: %s", e)
             return []
 
         from cortex.crypto import get_default_encrypter
+
         enc = get_default_encrypter()
         return [_row_to_result(row, enc, tenant_id) for row in rows]
 

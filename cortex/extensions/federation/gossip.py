@@ -146,9 +146,7 @@ class GossipNode:
         if sender_version > self.known_state["version"]:
             self.known_state["version"] = sender_version
             self.known_state["facts"] = max(self.known_state["facts"], sender_facts)
-            logger.debug(
-                f"[Gossip] Merged newer state version {sender_version} from {sender_id}"
-            )
+            logger.debug(f"[Gossip] Merged newer state version {sender_version} from {sender_id}")
 
         # Merge peer table for decentralized discovery
         peer_list = payload.get("peers", {})

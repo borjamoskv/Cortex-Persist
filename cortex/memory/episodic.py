@@ -211,17 +211,13 @@ class CausalTracer:
 
         # 1. Walk UP to find the root ancestor
         root_id = fact_id
-        cursor = await self._conn.execute(
-            _TRACE_UP_SQL, (fact_id, tenant_id, tenant_id, depth)
-        )
+        cursor = await self._conn.execute(_TRACE_UP_SQL, (fact_id, tenant_id, tenant_id, depth))
         ancestors = await cursor.fetchall()
         if ancestors:
             root_id = ancestors[0][0]  # First row = deepest ancestor
 
         # 2. Walk DOWN from root to get full tree
-        cursor = await self._conn.execute(
-            _TRACE_DOWN_SQL, (root_id, tenant_id, tenant_id, depth)
-        )
+        cursor = await self._conn.execute(_TRACE_DOWN_SQL, (root_id, tenant_id, tenant_id, depth))
         rows = await cursor.fetchall()
 
         chain: list[dict] = []

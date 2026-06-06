@@ -64,10 +64,9 @@ def sovereign_mcp() -> None:
     import json
     import sys
 
-    from cortex_rs import McpSovereignHost
-
     from cortex.extensions.policy.jis_auditor import JISAuditor
     from cortex.memory.vsa import VSAPipelineBridge
+    from cortex_rs import McpSovereignHost
 
     sys.stderr.write("🚀 Booting CORTEX Sovereign MCP Server (Rust-native, Transport: stdio)...\n")
     sys.stderr.flush()

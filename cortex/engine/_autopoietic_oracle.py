@@ -8,7 +8,6 @@ from dataclasses import dataclass
 from typing import Any
 
 import cortex_rs
-
 from cortex.engine.genome import FitnessRecord, StrategyGenome
 from cortex.isa.builder import AgentOp
 

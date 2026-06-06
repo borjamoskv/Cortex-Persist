@@ -3,6 +3,7 @@ import asyncio
 import pytest
 from cortex.extensions.federation.gossip import GossipNode
 
+
 @pytest.mark.asyncio
 async def test_gossip_node_communication_and_discovery() -> None:
     # 1. Initialize two nodes on different ports

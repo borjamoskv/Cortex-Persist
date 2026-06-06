@@ -189,7 +189,6 @@ class EventLedgerL3:
         [GOVERNANCE] Deep cryptographic audit of the memory event chain.
         Recalculates every signature and verifies the back-pointers.
         """
-        import hashlib
 
         await self.ensure_table()
         cursor = await self._conn.execute(

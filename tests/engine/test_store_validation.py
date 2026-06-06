@@ -27,7 +27,7 @@ async def test_taint_is_verified_after_bridge_mutation(monkeypatch: pytest.Monke
         "_sanitize_engram",
         lambda content, fact_type, source, project, meta: (content, meta or {}),
     )
-    
+
     async def bridge_guard(conn, content, project, tenant_id, fact_type):
         return f"bridged::{content}", "bridge", {"meta_flags": {"bridged": True}}
 

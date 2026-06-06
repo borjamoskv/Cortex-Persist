@@ -125,7 +125,9 @@ async def _postgres_text_search(
         async with conn.acquire() as real_conn:
             return await real_conn.fetch(sql, *params)
     else:
-        raise TypeError(f"PostgreSQL connection object has no fetch or acquire method: {type(conn)}")
+        raise TypeError(
+            f"PostgreSQL connection object has no fetch or acquire method: {type(conn)}"
+        )
 
 
 async def _fts5_search(

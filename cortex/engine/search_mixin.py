@@ -34,11 +34,12 @@ class SearchMixin(EngineMixinBase):
         **kwargs,
     ) -> list[Any]:
         """Perform hybrid search (Vector + Text) with optional Graph-RAG context."""
-        from cortex.search import hybrid_search, text_search
-        from cortex.cache import RedisL1Cache
-        from cortex.search.models import SearchResult
         import json
         from dataclasses import asdict
+
+        from cortex.cache import RedisL1Cache
+        from cortex.search import hybrid_search, text_search
+        from cortex.search.models import SearchResult
 
         tenant_id = self._resolve_tenant(tenant_id)
         cache = RedisL1Cache.singleton()
@@ -55,7 +56,7 @@ class SearchMixin(EngineMixinBase):
                     str(graph_depth),
                     str(include_graph),
                     str(confidence or ""),
-                    json.dumps(kwargs, sort_keys=True)
+                    json.dumps(kwargs, sort_keys=True),
                 )
                 cache_key = f"search:{tenant_id}:{args_hash}"
                 cached = cache.get(cache_key)
@@ -111,7 +112,7 @@ class SearchMixin(EngineMixinBase):
                     confidence = getattr(r, "confidence", meta.get("confidence", "UNKNOWN"))
                     is_c5 = confidence in ("C5", "C5-REAL", "C5-Static", "C5-Dynamic")
                     has_taint = "cortex_taint" in meta
-                    
+
                     if not is_c5 and not has_taint:
                         # Append the deterministic tag to avoid Knowledge Laundering
                         original_content = getattr(r, "content", "")
@@ -140,14 +141,14 @@ class SearchMixin(EngineMixinBase):
                     confidence=confidence,
                     **kwargs,
                 )
-                
+
                 # 3. [CORTEX v10] Read-Path Epistemic Membrane (Taint Propagation) - Fallback
                 for r in fallback_results:
                     meta = getattr(r, "meta", {}) or {}
                     conf = getattr(r, "confidence", meta.get("confidence", "UNKNOWN"))
                     is_c5 = conf in ("C5", "C5-REAL", "C5-Static", "C5-Dynamic")
                     has_taint = "cortex_taint" in meta
-                    
+
                     if not is_c5 and not has_taint:
                         original_content = getattr(r, "content", "")
                         r.content = f"[EPISTEMIC_WARNING: PROBABILISTIC_ORIGIN]\n{original_content}"
@@ -155,7 +156,9 @@ class SearchMixin(EngineMixinBase):
                 # Cache the fallback results
                 if cache.available and cache_key is not None:
                     try:
-                        serialized = json.dumps([asdict(r) for r in fallback_results]).encode("utf-8")
+                        serialized = json.dumps([asdict(r) for r in fallback_results]).encode(
+                            "utf-8"
+                        )
                         cache.set(cache_key, serialized)
                     except Exception as e:
                         logger.warning("[L1 Cache] Set failed: %s", e)

@@ -20,17 +20,17 @@ pytestmark = pytest.mark.slow
 class MockRedis:
     def __init__(self):
         self.store = {}
-        
+
     def ping(self):
         return True
-        
+
     def get(self, key):
         return self.store.get(key)
-        
+
     def setex(self, key, ttl, value):
         self.store[key] = value
         return True
-        
+
     def delete(self, *keys):
         count = 0
         for k in keys:
@@ -38,7 +38,7 @@ class MockRedis:
                 del self.store[k]
                 count += 1
         return count
-        
+
     def keys(self, pattern):
         # simple pattern matching: search:* -> prefix matches
         prefix = pattern.replace("*", "")
@@ -51,10 +51,10 @@ class MockRedis:
 @pytest.fixture
 def mock_redis_client():
     mock_client = MockRedis()
-    
+
     # We patch the RedisL1Cache singleton instance
     cache = RedisL1Cache(host="127.0.0.1", port=6379, db=0, _client=mock_client)
-    
+
     with patch.object(RedisL1Cache, "singleton", return_value=cache):
         yield mock_client
 
@@ -62,16 +62,18 @@ def mock_redis_client():
 @pytest.fixture
 async def engine(tmp_path: Path):
     import os
+
     os.environ["CORTEX_SKIP_EXERGY_VALIDATION"] = "1"
     db = str(tmp_path / "test_cache.db")
     e = CortexEngine(db_path=db, auto_embed=False)
     await e.init_db()
-    
+
     from cortex.engine.causality import AsyncCausalGraph
+
     async with e.session() as conn:
         cg = AsyncCausalGraph(conn)
         await cg.ensure_table()
-        
+
     yield e
     await e.close()
     if "CORTEX_SKIP_EXERGY_VALIDATION" in os.environ:
@@ -90,18 +92,16 @@ async def test_search_cache_aside_flow(engine, mock_redis_client):
         fact_type="knowledge",
         confidence="C5",
         source="agent:test_suite",
-        tenant_id="tenant-alpha"
+        tenant_id="tenant-alpha",
     )
 
     # 2. First search - Cache Miss
     results1 = await engine.search(
-        query="cache coherence",
-        tenant_id="tenant-alpha",
-        project="test_proj"
+        query="cache coherence", tenant_id="tenant-alpha", project="test_proj"
     )
     assert len(results1) > 0
     assert any(r.fact_id == fact_id for r in results1)
-    
+
     # Cache should now contain the serialized results
     assert len(mock_redis_client.store) == 1
     cache_key = list(mock_redis_client.store.keys())[0]
@@ -116,9 +116,7 @@ async def test_search_cache_aside_flow(engine, mock_redis_client):
     mock_redis_client.store[cache_key] = json.dumps(data).encode("utf-8")
 
     results2 = await engine.search(
-        query="cache coherence",
-        tenant_id="tenant-alpha",
-        project="test_proj"
+        query="cache coherence", tenant_id="tenant-alpha", project="test_proj"
     )
     assert len(results2) > 0
     assert results2[0].content == "CACHED_CONTENT_HIT"
@@ -133,14 +131,10 @@ async def test_write_invalidates_cache(engine, mock_redis_client):
         fact_type="knowledge",
         confidence="C5",
         source="agent:test_suite",
-        tenant_id="tenant-beta"
+        tenant_id="tenant-beta",
     )
 
-    await engine.search(
-        query="Coherence target",
-        tenant_id="tenant-beta",
-        project="test_proj"
-    )
+    await engine.search(query="Coherence target", tenant_id="tenant-beta", project="test_proj")
     assert len(mock_redis_client.store) > 0
 
     # Store a new fact under the same tenant -> Cache should be flushed
@@ -150,9 +144,9 @@ async def test_write_invalidates_cache(engine, mock_redis_client):
         fact_type="knowledge",
         confidence="C5",
         source="agent:test_suite",
-        tenant_id="tenant-beta"
+        tenant_id="tenant-beta",
     )
-    
+
     # Verify the cache for tenant-beta is cleared
     assert len(mock_redis_client.store) == 0
 
@@ -165,22 +159,14 @@ async def test_update_invalidates_cache(engine, mock_redis_client):
         fact_type="knowledge",
         confidence="C5",
         source="agent:test_suite",
-        tenant_id="tenant-gamma"
+        tenant_id="tenant-gamma",
     )
 
-    await engine.search(
-        query="Original fact",
-        tenant_id="tenant-gamma",
-        project="test_proj"
-    )
+    await engine.search(query="Original fact", tenant_id="tenant-gamma", project="test_proj")
     assert len(mock_redis_client.store) > 0
 
     # Update the fact -> Cache should be flushed
-    await engine.update(
-        fact_id=fact_id,
-        content="Updated fact content.",
-        tenant_id="tenant-gamma"
-    )
+    await engine.update(fact_id=fact_id, content="Updated fact content.", tenant_id="tenant-gamma")
 
     assert len(mock_redis_client.store) == 0
 
@@ -193,22 +179,14 @@ async def test_deprecate_invalidates_cache(engine, mock_redis_client):
         fact_type="knowledge",
         confidence="C5",
         source="agent:test_suite",
-        tenant_id="tenant-delta"
+        tenant_id="tenant-delta",
     )
 
-    await engine.search(
-        query="Fact to deprecate",
-        tenant_id="tenant-delta",
-        project="test_proj"
-    )
+    await engine.search(query="Fact to deprecate", tenant_id="tenant-delta", project="test_proj")
     assert len(mock_redis_client.store) > 0
 
     # Deprecate the fact -> Cache should be flushed
-    await engine.deprecate(
-        fact_id=fact_id,
-        reason="outdated",
-        tenant_id="tenant-delta"
-    )
+    await engine.deprecate(fact_id=fact_id, reason="outdated", tenant_id="tenant-delta")
 
     assert len(mock_redis_client.store) == 0
 
@@ -221,38 +199,22 @@ async def test_invalidate_and_purge_invalidate_cache(engine, mock_redis_client):
         fact_type="knowledge",
         confidence="C5",
         source="agent:test_suite",
-        tenant_id="tenant-epsilon"
+        tenant_id="tenant-epsilon",
     )
 
-    await engine.search(
-        query="Fact to invalidate",
-        tenant_id="tenant-epsilon",
-        project="test_proj"
-    )
+    await engine.search(query="Fact to invalidate", tenant_id="tenant-epsilon", project="test_proj")
     assert len(mock_redis_client.store) > 0
 
     # Invalidate the fact -> Cache should be flushed
-    await engine.invalidate(
-        fact_id=fact_id,
-        reason="incorrect",
-        tenant_id="tenant-epsilon"
-    )
+    await engine.invalidate(fact_id=fact_id, reason="incorrect", tenant_id="tenant-epsilon")
     assert len(mock_redis_client.store) == 0
 
     # Search again to populate cache
-    await engine.search(
-        query="Fact to invalidate",
-        tenant_id="tenant-epsilon",
-        project="test_proj"
-    )
+    await engine.search(query="Fact to invalidate", tenant_id="tenant-epsilon", project="test_proj")
     assert len(mock_redis_client.store) > 0
 
     # Purge the fact -> Cache should be flushed
-    await engine.purge(
-        fact_id=fact_id,
-        tenant_id="tenant-epsilon",
-        force=True
-    )
+    await engine.purge(fact_id=fact_id, tenant_id="tenant-epsilon", force=True)
     assert len(mock_redis_client.store) == 0
 
 
@@ -265,14 +227,10 @@ async def test_tenant_cache_isolation(engine, mock_redis_client):
         fact_type="knowledge",
         confidence="C5",
         source="agent:test_suite",
-        tenant_id="tenant-a"
-    )
-    await engine.search(
-        query="Tenant A content",
         tenant_id="tenant-a",
-        project="test_proj"
     )
-    
+    await engine.search(query="Tenant A content", tenant_id="tenant-a", project="test_proj")
+
     # Store and cache for tenant-B
     await engine.store(
         project="test_proj",
@@ -280,13 +238,9 @@ async def test_tenant_cache_isolation(engine, mock_redis_client):
         fact_type="knowledge",
         confidence="C5",
         source="agent:test_suite",
-        tenant_id="tenant-b"
-    )
-    await engine.search(
-        query="Tenant B content",
         tenant_id="tenant-b",
-        project="test_proj"
     )
+    await engine.search(query="Tenant B content", tenant_id="tenant-b", project="test_proj")
 
     # We should have both cached keys in the store
     assert len(mock_redis_client.store) == 2
@@ -298,7 +252,7 @@ async def test_tenant_cache_isolation(engine, mock_redis_client):
         fact_type="knowledge",
         confidence="C5",
         source="agent:test_suite",
-        tenant_id="tenant-a"
+        tenant_id="tenant-a",
     )
 
     # Verify tenant-b cache key is still present, while tenant-a cache key is gone

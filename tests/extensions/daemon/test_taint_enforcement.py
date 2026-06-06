@@ -284,6 +284,7 @@ async def test_store_mixin_guard_runtime_error_fails_closed(monkeypatch, tmp_pat
     engine = CortexEngine(db_path=str(db_path), auto_embed=False)
     await engine.init_db()
     try:
+
         async def fail_guard(*args, **kwargs):
             raise RuntimeError("guard runtime failure")
 

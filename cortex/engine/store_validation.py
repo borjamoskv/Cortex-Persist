@@ -81,7 +81,7 @@ async def _apply_semantic_dedup(
 async def _enforce_ctre(meta: dict | None) -> None:
     """Enforce Commit-Time Reconciliation Engine (CTRE) logic for UI_ACTION."""
     if meta and meta.get("intent") == "UI_ACTION" and "expected_ui_hash" in meta:
-        from cortex.guards.ctre_guard import CTREGuard, CTRECollisionError
+        from cortex.guards.ctre_guard import CTRECollisionError, CTREGuard
         
         expected_hash = meta["expected_ui_hash"]
         current_hash = meta.get("current_ui_hash", expected_hash)

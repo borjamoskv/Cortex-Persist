@@ -33,9 +33,7 @@ class DelegatesMixin:
         async with self.session() as conn:  # pyright: ignore[reportAttributeAccessIssue]
             tracer = CausalTracer(conn)
             resolved_tenant_id = self._resolve_tenant(tenant_id)  # pyright: ignore[reportAttributeAccessIssue]
-            return await tracer.recall_episode(
-                query, project, limit, tenant_id=resolved_tenant_id
-            )
+            return await tracer.recall_episode(query, project, limit, tenant_id=resolved_tenant_id)
 
     async def trace_episode(
         self,
@@ -49,9 +47,7 @@ class DelegatesMixin:
         async with self.session() as conn:  # pyright: ignore[reportAttributeAccessIssue]
             tracer = CausalTracer(conn)
             resolved_tenant_id = self._resolve_tenant(tenant_id)  # pyright: ignore[reportAttributeAccessIssue]
-            return await tracer.trace_episode(
-                fact_id, max_depth, tenant_id=resolved_tenant_id
-            )
+            return await tracer.trace_episode(fact_id, max_depth, tenant_id=resolved_tenant_id)
 
     async def store(self, *args, **kwargs):
         self._synthesize_skill("store")  # pyright: ignore[reportAttributeAccessIssue]
