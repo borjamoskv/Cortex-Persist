@@ -18,7 +18,12 @@ from cortex.storage import StorageMode
 
 
 class MockPostgresRecord(dict):
-    """Mocks asyncpg.Record which supports attribute access and values()."""
+    """Mocks asyncpg.Record which supports attribute access, indexing, and values()."""
+
+    def __getitem__(self, key: Any) -> Any:
+        if isinstance(key, int):
+            return list(self.values())[key]
+        return super().__getitem__(key)
 
     def values(self) -> Any:
         return super().values()

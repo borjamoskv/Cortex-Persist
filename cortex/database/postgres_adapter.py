@@ -123,6 +123,24 @@ class PostgresConnectionAdapter:
             return self._pg_conn_or_pool
         raise RuntimeError("No active connection available in adapter")
 
+    async def fetch(self, sql: str, *args: Any) -> list[Any]:
+        sql = self.translate_sqlite_to_pg(sql)
+        pg_sql, pg_params = self._translate_params(sql, args)
+        conn = self._get_active_conn()
+        return await conn.fetch(pg_sql, *pg_params)
+
+    async def fetchrow(self, sql: str, *args: Any) -> Any:
+        sql = self.translate_sqlite_to_pg(sql)
+        pg_sql, pg_params = self._translate_params(sql, args)
+        conn = self._get_active_conn()
+        return await conn.fetchrow(pg_sql, *pg_params)
+
+    async def fetchval(self, sql: str, *args: Any) -> Any:
+        sql = self.translate_sqlite_to_pg(sql)
+        pg_sql, pg_params = self._translate_params(sql, args)
+        conn = self._get_active_conn()
+        return await conn.fetchval(pg_sql, *pg_params)
+
     def execute(self, sql: str, params: tuple[Any, ...] = ()) -> PostgresCursorContext:
         return PostgresCursorContext(self, sql, params)
 
