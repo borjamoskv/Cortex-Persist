@@ -48,9 +48,9 @@ class MejoraloEngine:
 
     def ship_gate(self, project: str, path: str | Path) -> Any:
         """Verify and seal code improvements via Ship Gate."""
-        from .ship import ship_gate  # pyright: ignore
+        from .ship import check_ship_gate
 
-        return ship_gate(project, path)
+        return check_ship_gate(project, path)
 
     def record_session(
         self, project: str, score_before: int, score_after: int, actions: list[str]
