@@ -19,7 +19,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from cortex.cli.common import DEFAULT_DB, get_engine
+from cortex.cli.common import DEFAULT_DB, cli, get_engine
 
 __all__ = [
     "boot_cmd",
@@ -372,3 +372,6 @@ def observe_cmd(
     from cortex.cli.episodic_observe import run_observe
 
     run_observe(workspace, db, console)
+
+
+cli.add_command(episode)

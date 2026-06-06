@@ -98,7 +98,7 @@ async def test_ledger_concurrency_bombing(ledger_db):
     blocks = []
     current_block = []
     current_sig = rows[0][2] if rows else None
-    
+
     for row in rows:
         if row[2] != current_sig:
             blocks.append(current_block)
@@ -108,7 +108,7 @@ async def test_ledger_concurrency_bombing(ledger_db):
             current_block.append(row)
     if current_block:
         blocks.append(current_block)
-        
+
     current_hash = "GENESIS"
     for block in blocks:
         # All items in a block must have the same prev_hash and signature
@@ -120,12 +120,14 @@ async def test_ledger_concurrency_bombing(ledger_db):
         for row in block:
             assert row[1] == prev_hash, "Inconsistent prev_hash within block"
             assert row[2] == signature, "Inconsistent signature within block"
-            
+
         current_hash = signature
 
     # Verify the last hash of the object is correctly updated
     assert ledger._last_hash == current_hash
-    print(f"\n[Ledger] Processed {CONCURRENCY_LEVEL} concurrent writes into {len(blocks)} Merkle Blocks in {end_time - start_time:.3f}s")
+    print(
+        f"\n[Ledger] Processed {CONCURRENCY_LEVEL} concurrent writes into {len(blocks)} Merkle Blocks in {end_time - start_time:.3f}s"
+    )
 
 
 # ─── 2. Byzantine Taint Tsunami (Nonce & Replay attacks) ───────────────
