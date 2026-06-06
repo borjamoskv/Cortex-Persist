@@ -60,9 +60,9 @@ Cuando invocas LEGIØN-1, el Nucleus selecciona o tú fuerzas:
 Si quieres ver el cerebro del enjambre en acción:
 
 ```bash
-cd ~/game/moskv-swarm
+cd ~/10_PROJECTS/cortex-persist
 # Ejecutar el motor de formación adaptativa
-python -m agents.centauro_engine --mission "Despliega LEGIØN en modo auditoría"
+python scripts/legion_strike.py --mission "Despliega LEGIØN en modo auditoría"
 ```
 
 ---
