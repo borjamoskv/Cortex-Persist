@@ -54,7 +54,7 @@ async def event_generator(request: Request) -> AsyncGenerator[str, None]:
 
         except asyncio.CancelledError:
             logger.info("SSE: Stream cancelled for %s", consumer_id)
-        except Exception as e:
+        except (ValueError, KeyError, OSError) as e:
             logger.error("SSE: Stream error: %s", e)
             yield f'data: {{"error": "{e!s}"}}\n\n'
 

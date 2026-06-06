@@ -56,7 +56,7 @@ class TracingMiddleware(BaseHTTPMiddleware):
                 )
             )
             return response
-        except Exception as e:
+        except (ValueError, KeyError, OSError) as e:
             process_time = time.monotonic() - start_time
             logger.error(
                 json.dumps(
@@ -292,7 +292,7 @@ class SecurityFraudMiddleware(BaseHTTPMiddleware):
                 sql = "SELECT 1 FROM threat_intel WHERE ip_address = ? AND (expires_at IS NULL OR expires_at > ?)"
                 async with conn.execute(sql, (client_ip, now)) as cursor:
                     return bool(await cursor.fetchone())
-        except Exception as e:
+        except (ValueError, KeyError, OSError) as e:
             logger.error("ThreatIntel check failed: %s", e)
             return False
 
@@ -409,5 +409,5 @@ class CortexBillingMiddleware(BaseHTTPMiddleware):
                 action="increment",
             )
             logger.info("Stripe usage reported for %s", api_key[:12])
-        except Exception as e:
+        except (ValueError, KeyError, OSError) as e:
             logger.error("Stripe billing increment failed for %s: %s", api_key[:12], e)
