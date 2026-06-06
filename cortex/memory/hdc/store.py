@@ -133,6 +133,10 @@ class HDCVectorStoreL2:
 
     async def memorize(self, fact: CortexFactModel, fact_type: str | None = None) -> None:
         """Encode and store a multi-tenant CortexFactModel as a Hypervector."""
+        from cortex.engine.causal.taint_engine import enforce_taint_check
+        token = fact.metadata.get("cortex_taint") if fact.metadata else None
+        enforce_taint_check(token, fact.content)
+
         conn = self._get_conn()
 
         async with self._lock:
