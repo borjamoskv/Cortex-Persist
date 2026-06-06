@@ -242,11 +242,16 @@ async def _record_causality(
 ) -> None:
     """Record causal linkage for the fact."""
     try:
-        from cortex.engine.causality import EDGE_DERIVED_FROM, EDGE_TRIGGERED_BY, EDGE_UPDATED_FROM, AsyncCausalGraph
+        from cortex.engine.causality import (
+            EDGE_DERIVED_FROM,
+            EDGE_TRIGGERED_BY,
+            EDGE_UPDATED_FROM,
+            AsyncCausalGraph,
+        )
 
         p_sig = meta.get("causal_parent")
         p_fact = meta.get("previous_fact_id")
-        
+
         graph = AsyncCausalGraph(conn)
 
         if p_sig or p_fact:
@@ -257,7 +262,7 @@ async def _record_causality(
                 signal_id=p_sig,
                 edge_type=e_type,
                 project=project,
-                tenant_id=tenant_id
+                tenant_id=tenant_id,
             )
         elif parent_decision_id:
             await graph.record_edge(
@@ -265,7 +270,7 @@ async def _record_causality(
                 parent_id=parent_decision_id,
                 edge_type=EDGE_DERIVED_FROM,
                 project=project,
-                tenant_id=tenant_id
+                tenant_id=tenant_id,
             )
     except Exception as e:
         logger.error("Failed to record causality for fact %d: %s", fact_id, e)
