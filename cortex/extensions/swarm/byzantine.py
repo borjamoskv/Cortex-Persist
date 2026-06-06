@@ -46,9 +46,7 @@ class ByzantineConsensus:
         """Hash a proposal in a background thread."""
         return await asyncio.to_thread(self._hash_proposal, proposal)
 
-    async def _batch_hash_proposals(
-        self, proposals: dict[str, Any]
-    ) -> dict[str, str]:
+    async def _batch_hash_proposals(self, proposals: dict[str, Any]) -> dict[str, str]:
         """Hash all proposals concurrently (O(1) thread dispatch vs O(n))."""
         tasks = {
             nid: asyncio.to_thread(self._hash_proposal, prop)
