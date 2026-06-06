@@ -1,0 +1,9 @@
+{
+  "handoff_timestamp": "2026-06-06T14:53:16.517904",
+  "status": "VSA_ANCHORED",
+  "hashes": {
+    "Sortu-APEX/registry.yaml": "a6e0470654376019ad5174fc20717fe24768dbff7102989aed098ec18704b890",
+    "cortex-persist/.exergy_state.json": "49677f17fb185d2da14fb67133f1fde1f37102adbea95158dca1aa68c952aaf1"
+  },
+  "signature": "BORJAMOSKV_CORTEX_HANDOFF_AUTHORITY"
+}
