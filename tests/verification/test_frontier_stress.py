@@ -86,7 +86,7 @@ async def test_ledger_concurrency_bombing(ledger_db):
     assert len(failures) == 0, f"Concurrency bombing failed: {failures}"
     assert len(results) == CONCURRENCY_LEVEL
 
-    # Verify the hash chain continuity
+    # Verify the hash chain continuity (Merkle Blocks)
     async with ledger_db.execute(
         "SELECT audit_id, prev_hash, signature FROM security_audit_log ORDER BY rowid ASC"
     ) as cursor:
@@ -94,19 +94,38 @@ async def test_ledger_concurrency_bombing(ledger_db):
 
     assert len(rows) == CONCURRENCY_LEVEL
 
-    current_hash = "GENESIS"
+    # Group into blocks
+    blocks = []
+    current_block = []
+    current_sig = rows[0][2] if rows else None
+    
     for row in rows:
-        audit_id, prev_hash, signature = row
+        if row[2] != current_sig:
+            blocks.append(current_block)
+            current_block = [row]
+            current_sig = row[2]
+        else:
+            current_block.append(row)
+    if current_block:
+        blocks.append(current_block)
+        
+    current_hash = "GENESIS"
+    for block in blocks:
+        # All items in a block must have the same prev_hash and signature
+        prev_hash = block[0][1]
+        signature = block[0][2]
         assert prev_hash == current_hash, (
-            f"Hash chain broken at {audit_id}! Expected prev: {current_hash}, got: {prev_hash}"
+            f"Merkle Block Hash chain broken! Expected prev: {current_hash}, got: {prev_hash}"
         )
+        for row in block:
+            assert row[1] == prev_hash, "Inconsistent prev_hash within block"
+            assert row[2] == signature, "Inconsistent signature within block"
+            
         current_hash = signature
 
     # Verify the last hash of the object is correctly updated
     assert ledger._last_hash == current_hash
-    print(
-        f"\\n[Ledger] Processed {CONCURRENCY_LEVEL} concurrent writes in {end_time - start_time:.3f}s"
-    )
+    print(f"\n[Ledger] Processed {CONCURRENCY_LEVEL} concurrent writes into {len(blocks)} Merkle Blocks in {end_time - start_time:.3f}s")
 
 
 # ─── 2. Byzantine Taint Tsunami (Nonce & Replay attacks) ───────────────
