@@ -1,181 +1,158 @@
 <?xml version='1.0' encoding='utf-8'?>
-<graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
-  <key id="d0" for="edge" attr.name="weight" attr.type="long" />
-  <graph edgedefault="directed">
-    <node id="importai" />
-    <node id="therealartificialintelligence" />
-    <node id="forecastingresearch" />
-    <node id="freesystems" />
-    <node id="agglomerations" />
-    <node id="aleximas" />
-    <node id="aiprospects" />
-    <node id="post" />
-    <node id="thealgorithmicbridge" />
-    <node id="understandingai" />
-    <node id="thezvi" />
-    <node id="scrollprize" />
-    <node id="garymarcus" />
-    <node id="open" />
-    <node id="lastweekinai" />
-    <node id="cafetechinenglish" />
-    <node id="aisupremacy" />
-    <node id="prosperinai" />
-    <node id="thetranscript" />
-    <node id="securebio" />
-    <node id="linch" />
-    <node id="worldspiritsockpuppet" />
-    <node id="profserious" />
-    <node id="auren" />
-    <node id="sarahconstantin" />
-    <node id="nanransohoff" />
-    <node id="kajsotala" />
-    <node id="zachill" />
-    <node id="asteriskmag" />
-    <node id="arnoldkling" />
-    <node id="thetwocents" />
-    <node id="modelrepublic" />
-    <node id="ratorthodox" />
-    <node id="nablatheta" />
-    <node id="homosabiens" />
-    <node id="technosapiens" />
-    <node id="wondertools" />
-    <node id="twotruths" />
-    <node id="exponentialview" />
-    <node id="joannastern" />
-    <node id="convequity" />
-    <node id="interconnect" />
-    <node id="afraw" />
-    <edge source="importai" target="therealartificialintelligence">
-      <data key="d0">1</data>
-    </edge>
-    <edge source="importai" target="forecastingresearch">
-      <data key="d0">1</data>
-    </edge>
-    <edge source="importai" target="freesystems">
-      <data key="d0">1</data>
-    </edge>
-    <edge source="importai" target="agglomerations">
-      <data key="d0">1</data>
-    </edge>
-    <edge source="importai" target="aleximas">
-      <data key="d0">1</data>
-    </edge>
-    <edge source="importai" target="aiprospects">
-      <data key="d0">1</data>
-    </edge>
-    <edge source="importai" target="post">
-      <data key="d0">1</data>
-    </edge>
-    <edge source="thealgorithmicbridge" target="importai">
-      <data key="d0">1</data>
-    </edge>
-    <edge source="thealgorithmicbridge" target="aleximas">
-      <data key="d0">1</data>
-    </edge>
-    <edge source="understandingai" target="thezvi">
-      <data key="d0">1</data>
-    </edge>
-    <edge source="understandingai" target="scrollprize">
-      <data key="d0">1</data>
-    </edge>
-    <edge source="thezvi" target="garymarcus">
-      <data key="d0">1</data>
-    </edge>
-    <edge source="thezvi" target="securebio">
-      <data key="d0">1</data>
-    </edge>
-    <edge source="thezvi" target="linch">
-      <data key="d0">1</data>
-    </edge>
-    <edge source="thezvi" target="worldspiritsockpuppet">
-      <data key="d0">1</data>
-    </edge>
-    <edge source="thezvi" target="profserious">
-      <data key="d0">1</data>
-    </edge>
-    <edge source="thezvi" target="auren">
-      <data key="d0">1</data>
-    </edge>
-    <edge source="thezvi" target="sarahconstantin">
-      <data key="d0">1</data>
-    </edge>
-    <edge source="thezvi" target="nanransohoff">
-      <data key="d0">1</data>
-    </edge>
-    <edge source="thezvi" target="kajsotala">
-      <data key="d0">1</data>
-    </edge>
-    <edge source="thezvi" target="zachill">
-      <data key="d0">1</data>
-    </edge>
-    <edge source="thezvi" target="asteriskmag">
-      <data key="d0">1</data>
-    </edge>
-    <edge source="thezvi" target="arnoldkling">
-      <data key="d0">1</data>
-    </edge>
-    <edge source="thezvi" target="importai">
-      <data key="d0">1</data>
-    </edge>
-    <edge source="thezvi" target="open">
-      <data key="d0">1</data>
-    </edge>
-    <edge source="thezvi" target="thetwocents">
-      <data key="d0">1</data>
-    </edge>
-    <edge source="thezvi" target="modelrepublic">
-      <data key="d0">1</data>
-    </edge>
-    <edge source="thezvi" target="ratorthodox">
-      <data key="d0">1</data>
-    </edge>
-    <edge source="thezvi" target="nablatheta">
-      <data key="d0">1</data>
-    </edge>
-    <edge source="thezvi" target="homosabiens">
-      <data key="d0">1</data>
-    </edge>
-    <edge source="garymarcus" target="open">
-      <data key="d0">1</data>
-    </edge>
-    <edge source="lastweekinai" target="cafetechinenglish">
-      <data key="d0">1</data>
-    </edge>
-    <edge source="aisupremacy" target="prosperinai">
-      <data key="d0">1</data>
-    </edge>
-    <edge source="aisupremacy" target="thetranscript">
-      <data key="d0">1</data>
-    </edge>
-    <edge source="aisupremacy" target="thezvi">
-      <data key="d0">1</data>
-    </edge>
-    <edge source="technosapiens" target="wondertools">
-      <data key="d0">1</data>
-    </edge>
-    <edge source="technosapiens" target="twotruths">
-      <data key="d0">1</data>
-    </edge>
-    <edge source="technosapiens" target="open">
-      <data key="d0">1</data>
-    </edge>
-    <edge source="exponentialview" target="asteriskmag">
-      <data key="d0">1</data>
-    </edge>
-    <edge source="exponentialview" target="joannastern">
-      <data key="d0">1</data>
-    </edge>
-    <edge source="exponentialview" target="convequity">
-      <data key="d0">1</data>
-    </edge>
-    <edge source="exponentialview" target="interconnect">
-      <data key="d0">1</data>
-    </edge>
-    <edge source="exponentialview" target="afraw">
-      <data key="d0">1</data>
-    </edge>
-    <edge source="exponentialview" target="aleximas">
-      <data key="d0">1</data>
-    </edge>
-  </graph>
-</graphml>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd"><key id="d0" for="edge" attr.name="weight" attr.type="long"/>
+<graph edgedefault="directed"><node id="importai"/>
+<node id="therealartificialintelligence"/>
+<node id="forecastingresearch"/>
+<node id="freesystems"/>
+<node id="agglomerations"/>
+<node id="aleximas"/>
+<node id="aiprospects"/>
+<node id="post"/>
+<node id="thealgorithmicbridge"/>
+<node id="understandingai"/>
+<node id="thezvi"/>
+<node id="scrollprize"/>
+<node id="garymarcus"/>
+<node id="open"/>
+<node id="georgenoble"/>
+<node id="lastweekinai"/>
+<node id="cafetechinenglish"/>
+<node id="aisupremacy"/>
+<node id="thetranscript"/>
+<node id="securebio"/>
+<node id="linch"/>
+<node id="worldspiritsockpuppet"/>
+<node id="profserious"/>
+<node id="auren"/>
+<node id="sarahconstantin"/>
+<node id="nanransohoff"/>
+<node id="kajsotala"/>
+<node id="zachill"/>
+<node id="asteriskmag"/>
+<node id="arnoldkling"/>
+<node id="technosapiens"/>
+<node id="wondertools"/>
+<node id="twotruths"/>
+<node id="exponentialview"/>
+<node id="joannastern"/>
+<node id="convequity"/>
+<node id="interconnect"/>
+<node id="afraw"/>
+<edge source="importai" target="therealartificialintelligence">
+  <data key="d0">1</data>
+</edge>
+<edge source="importai" target="forecastingresearch">
+  <data key="d0">1</data>
+</edge>
+<edge source="importai" target="freesystems">
+  <data key="d0">1</data>
+</edge>
+<edge source="importai" target="agglomerations">
+  <data key="d0">1</data>
+</edge>
+<edge source="importai" target="aleximas">
+  <data key="d0">1</data>
+</edge>
+<edge source="importai" target="aiprospects">
+  <data key="d0">1</data>
+</edge>
+<edge source="importai" target="post">
+  <data key="d0">1</data>
+</edge>
+<edge source="thealgorithmicbridge" target="importai">
+  <data key="d0">1</data>
+</edge>
+<edge source="thealgorithmicbridge" target="aleximas">
+  <data key="d0">1</data>
+</edge>
+<edge source="understandingai" target="thezvi">
+  <data key="d0">1</data>
+</edge>
+<edge source="understandingai" target="scrollprize">
+  <data key="d0">1</data>
+</edge>
+<edge source="thezvi" target="garymarcus">
+  <data key="d0">1</data>
+</edge>
+<edge source="thezvi" target="securebio">
+  <data key="d0">1</data>
+</edge>
+<edge source="thezvi" target="linch">
+  <data key="d0">1</data>
+</edge>
+<edge source="thezvi" target="worldspiritsockpuppet">
+  <data key="d0">1</data>
+</edge>
+<edge source="thezvi" target="profserious">
+  <data key="d0">1</data>
+</edge>
+<edge source="thezvi" target="auren">
+  <data key="d0">1</data>
+</edge>
+<edge source="thezvi" target="sarahconstantin">
+  <data key="d0">1</data>
+</edge>
+<edge source="thezvi" target="nanransohoff">
+  <data key="d0">1</data>
+</edge>
+<edge source="thezvi" target="kajsotala">
+  <data key="d0">1</data>
+</edge>
+<edge source="thezvi" target="zachill">
+  <data key="d0">1</data>
+</edge>
+<edge source="thezvi" target="asteriskmag">
+  <data key="d0">1</data>
+</edge>
+<edge source="thezvi" target="arnoldkling">
+  <data key="d0">1</data>
+</edge>
+<edge source="thezvi" target="importai">
+  <data key="d0">1</data>
+</edge>
+<edge source="thezvi" target="open">
+  <data key="d0">1</data>
+</edge>
+<edge source="garymarcus" target="open">
+  <data key="d0">1</data>
+</edge>
+<edge source="garymarcus" target="georgenoble">
+  <data key="d0">1</data>
+</edge>
+<edge source="lastweekinai" target="cafetechinenglish">
+  <data key="d0">1</data>
+</edge>
+<edge source="aisupremacy" target="thetranscript">
+  <data key="d0">1</data>
+</edge>
+<edge source="aisupremacy" target="thezvi">
+  <data key="d0">1</data>
+</edge>
+<edge source="technosapiens" target="wondertools">
+  <data key="d0">1</data>
+</edge>
+<edge source="technosapiens" target="twotruths">
+  <data key="d0">1</data>
+</edge>
+<edge source="technosapiens" target="open">
+  <data key="d0">1</data>
+</edge>
+<edge source="exponentialview" target="asteriskmag">
+  <data key="d0">1</data>
+</edge>
+<edge source="exponentialview" target="joannastern">
+  <data key="d0">1</data>
+</edge>
+<edge source="exponentialview" target="convequity">
+  <data key="d0">1</data>
+</edge>
+<edge source="exponentialview" target="interconnect">
+  <data key="d0">1</data>
+</edge>
+<edge source="exponentialview" target="afraw">
+  <data key="d0">1</data>
+</edge>
+<edge source="exponentialview" target="aleximas">
+  <data key="d0">1</data>
+</edge>
+</graph></graphml>
