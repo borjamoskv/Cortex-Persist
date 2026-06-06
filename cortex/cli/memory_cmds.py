@@ -27,6 +27,7 @@ def _inject_cli_taint(content: str, meta: dict, agent_source: str) -> None:
     Falls back to bypassing taint enforcement ONLY if no key is provisioned.
     """
     import os
+
     if os.environ.get("CORTEX_NO_TAINT_ENFORCE") == "1":
         return
 
@@ -34,6 +35,7 @@ def _inject_cli_taint(content: str, meta: dict, agent_source: str) -> None:
     if not os.environ.get("CORTEX_TESTING"):
         try:
             import keyring
+
             priv_b64 = keyring.get_password("cortex_v6", "ed25519_private_key")
         except Exception:
             pass
@@ -43,6 +45,7 @@ def _inject_cli_taint(content: str, meta: dict, agent_source: str) -> None:
 
     if priv_b64:
         from cortex.engine.causal.taint_engine import generate_secure_taint_token
+
         try:
             token = generate_secure_taint_token(
                 agent_id=agent_source,
@@ -53,6 +56,7 @@ def _inject_cli_taint(content: str, meta: dict, agent_source: str) -> None:
             meta["cortex_taint"] = token
         except Exception as e:
             from cortex.cli.common import console
+
             console.print(f"[yellow]Warning: Failed to generate taint token: {e}[/]")
             os.environ["CORTEX_NO_TAINT_ENFORCE"] = "1"
     else:
@@ -144,10 +148,10 @@ def store(
             )
 
         tag_list = [t.strip() for t in tags.split(",")] if tags else None
-        
+
         # Ouroboros Auto-Healing: CORTEX-TAINT CLI Injection
         _inject_cli_taint(content, meta, source)
-        
+
         fact_id = _run_async(
             engine.store(
                 project=project,
@@ -174,6 +178,7 @@ def store(
 def store_batch(file_path, db) -> None:
     """Store multiple facts from a JSON file in CORTEX."""
     import sys
+
     with open(file_path, encoding="utf-8") as f:
         facts = json.load(f)
 
@@ -188,7 +193,9 @@ def store_batch(file_path, db) -> None:
             project = fact.get("project")
             content = fact.get("content")
             if not project or not content:
-                console.print(f"[yellow]Skipping fact at index {idx}: missing project or content[/]")
+                console.print(
+                    f"[yellow]Skipping fact at index {idx}: missing project or content[/]"
+                )
                 continue
 
             fact_type = fact.get("fact_type", fact.get("type", "knowledge"))

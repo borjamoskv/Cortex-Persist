@@ -71,7 +71,6 @@ def main():
                         logger.info(f"⚡ [OSC BLASTER] -> {osc_address}")
 
                     except json.JSONDecodeError:
-
                         pass
                     current_event = None
 

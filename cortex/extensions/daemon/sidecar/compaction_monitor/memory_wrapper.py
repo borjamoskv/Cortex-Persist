@@ -35,6 +35,7 @@ if _libc:
         HAS_MALLOC_TRIM = True
     except Exception as exc:
         import logging
+
         logging.warning("Suppressed exception: %s", exc)
 
     try:
@@ -58,6 +59,7 @@ if _libc:
         HAS_MALLINFO2 = True
     except Exception as exc:
         import logging
+
         logging.warning("Suppressed exception: %s", exc)
 
 

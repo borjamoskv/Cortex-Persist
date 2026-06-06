@@ -13,6 +13,7 @@ LIMERENCE_PENALTY_MULTIPLIER: float = 10.0
 
 class CircuitBreakerTripped(Exception):
     """Raised when the limerence penalty trips the exergy circuit breaker."""
+
     pass
 
 
@@ -70,9 +71,7 @@ class ExergyMonitor:
             entropy = min(1.0, entropy + 0.2)
 
         # Ouroboros-Omega Formula
-        limerence_penalty = (
-            (self.ast_complexity / self.empirical_usage) * self._penalty_multiplier
-        )
+        limerence_penalty = (self.ast_complexity / self.empirical_usage) * self._penalty_multiplier
 
         # Circuit Breaker (AX-047): abort mutation loop if limerence is catastrophic
         if limerence_penalty > self._circuit_breaker_threshold:

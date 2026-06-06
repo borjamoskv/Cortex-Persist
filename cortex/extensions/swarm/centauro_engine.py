@@ -88,7 +88,7 @@ class VirtualAgent:
             # ── C5-REAL path ──────────────────────────────────────────
             try:
                 from cortex.extensions.llm._models import CortexPrompt, IntentProfile
-                
+
                 # War Council: Cognitive Diversity Mapping
                 intent_map = {
                     "CODE": IntentProfile.CODE,

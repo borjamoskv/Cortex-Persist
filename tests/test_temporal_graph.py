@@ -3,6 +3,7 @@ import aiosqlite
 from cortex.engine.causality import AsyncCausalGraph
 from cortex.migrations.mig_temporal_kg import _migration_027_temporal_kg
 
+
 @pytest.mark.asyncio
 async def test_temporal_causal_chain():
     async with aiosqlite.connect(":memory:") as db:
@@ -15,7 +16,7 @@ async def test_temporal_causal_chain():
                 tenant_id TEXT DEFAULT 'default'
             )
         """)
-        
+
         await db.execute("""
             CREATE TABLE causal_edges (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -40,21 +41,21 @@ async def test_temporal_causal_chain():
         await db.commit()
 
         graph = AsyncCausalGraph(db)
-        
+
         # A -> B -> C
         await graph.record_edge(fact_id=2, parent_id=1, confidence=0.9, agent_id="agent_1")
         await graph.record_edge(fact_id=3, parent_id=2, confidence=0.8, agent_id="agent_2")
         await db.commit()
 
         chain = await graph.temporal_causal_chain(target_fact_id=3, hours_lookback=24)
-        
+
         assert len(chain) == 2
         # First degree ancestor
         assert chain[0]["ancestor_id"] == 2
         assert chain[0]["child_id"] == 3
         assert chain[0]["confidence"] == 0.8
         assert chain[0]["depth"] == 1
-        
+
         # Second degree ancestor
         assert chain[1]["ancestor_id"] == 1
         assert chain[1]["child_id"] == 2

@@ -19,9 +19,6 @@ def _load_script_module(name: str):
     return module
 
 
-
-
-
 def test_sovereign_pre_commit_reads_untracked_file_contents_when_no_diff(monkeypatch, tmp_path):
     module = _load_script_module("sovereign_pre_commit.py")
     secret_key = "wallet" + "_seed"

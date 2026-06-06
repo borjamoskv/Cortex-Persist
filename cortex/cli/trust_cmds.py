@@ -307,6 +307,7 @@ def siege(db: str) -> None:
                 engine.vault = Vault(key.encode("utf-8"))  # pyright: ignore[reportAttributeAccessIssue]
         except Exception as exc:
             import logging
+
             logging.warning("Suppressed exception: %s", exc)
 
         console.print(

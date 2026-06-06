@@ -64,6 +64,7 @@ def remove_target(tree: AgentOp, target: str) -> AgentOp:
             result[variant] = data
     return result
 
+
 def _process_complex_node(variant: str, data: dict, target: str) -> dict:
     if variant == "Cond":
         return {

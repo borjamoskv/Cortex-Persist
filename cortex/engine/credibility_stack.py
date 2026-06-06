@@ -45,7 +45,7 @@ class LedgerCredibilityStack:
         """Execute a credibility strike with full verification and snapshots."""
         start_time = time.monotonic()
         rows = await self._fetch_facts(project)
-        
+
         leaf_hashes = [
             hashlib.sha256(json.dumps(row, sort_keys=True, default=str).encode("utf-8")).hexdigest()
             for row in rows
@@ -118,15 +118,48 @@ class LedgerCredibilityStack:
             )
             for r in await cursor.fetchall():
                 if isinstance(r, dict):
-                    rows.append({k: r.get(k) for k in ["id", "project", "tenant_id", "content", "fact_type", "metadata", "created_at"]})
+                    rows.append(
+                        {
+                            k: r.get(k)
+                            for k in [
+                                "id",
+                                "project",
+                                "tenant_id",
+                                "content",
+                                "fact_type",
+                                "metadata",
+                                "created_at",
+                            ]
+                        }
+                    )
                 else:
                     try:
-                        rows.append({k: r[k] for k in ["id", "project", "tenant_id", "content", "fact_type", "metadata", "created_at"]})
+                        rows.append(
+                            {
+                                k: r[k]
+                                for k in [
+                                    "id",
+                                    "project",
+                                    "tenant_id",
+                                    "content",
+                                    "fact_type",
+                                    "metadata",
+                                    "created_at",
+                                ]
+                            }
+                        )
                     except (TypeError, IndexError, KeyError):
-                        rows.append({
-                            "id": r[0], "project": r[1], "tenant_id": r[2], "content": r[3],
-                            "fact_type": r[4], "metadata": r[5], "created_at": r[6]
-                        })
+                        rows.append(
+                            {
+                                "id": r[0],
+                                "project": r[1],
+                                "tenant_id": r[2],
+                                "content": r[3],
+                                "fact_type": r[4],
+                                "metadata": r[5],
+                                "created_at": r[6],
+                            }
+                        )
         return rows
 
     def _sign_and_verify(self, merkle_root: str) -> tuple[bytes, bool]:

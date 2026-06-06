@@ -165,6 +165,7 @@ class TestExergyMonitor:
 
     def test_circuit_breaker_tripped(self):
         from cortex.engine.smte.exergy import CircuitBreakerTripped
+
         monitor = ExergyMonitor("test_breaker", circuit_breaker_threshold=20.0)
         # 5.0 / 2.0 * 10.0 = 25.0 > 20.0
         monitor.set_l_epi_metrics(ast_complexity=5.0, empirical_usage=2.0, dead_code_ratio=0.3)

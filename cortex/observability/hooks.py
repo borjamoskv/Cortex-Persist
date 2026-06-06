@@ -29,6 +29,7 @@ def _extract_skill_info(data) -> dict:
 
     except Exception as exc:
         import logging
+
         logging.warning("Suppressed exception: %s", exc)
 
     return {"skill": data.name or "UNKNOWN", "source": "programmatic"}

@@ -222,7 +222,10 @@ class OmegaGuardAdapter:
         import os
 
         # Allow bootstrap / init to skip LLM auditing for axiomatic facts.
-        if os.environ.get("CORTEX_NO_OMEGA") == "1" or fact_type in ("mafia_node", "telemetry_batch"):
+        if os.environ.get("CORTEX_NO_OMEGA") == "1" or fact_type in (
+            "mafia_node",
+            "telemetry_batch",
+        ):
             return
 
         from cortex.guards.omega_auditor import run_omega_audit

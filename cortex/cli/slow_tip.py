@@ -150,6 +150,7 @@ class SlowOpTipEmitter:
             )
         except Exception as exc:
             import logging
+
             logging.warning("Suppressed exception: %s", exc)
 
 

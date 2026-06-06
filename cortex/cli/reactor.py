@@ -127,4 +127,5 @@ if __name__ == "__main__":
         run_reactor()
     except Exception as exc:
         import logging
+
         logging.warning("Suppressed exception: %s", exc)

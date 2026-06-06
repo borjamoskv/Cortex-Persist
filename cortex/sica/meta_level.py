@@ -290,7 +290,10 @@ class MetaLevel:
                 "Cascade failure detected: the agent continued executing after "
                 "a clear failure signal. The STOP heuristic is too weak."
             )
-            judgment.recommended_actions = [MetaAction.INJECT_HEURISTIC, MetaAction.ATTENUATE_HEURISTIC]
+            judgment.recommended_actions = [
+                MetaAction.INJECT_HEURISTIC,
+                MetaAction.ATTENUATE_HEURISTIC,
+            ]
             judgment.confidence = 0.85
             reasoning.append("CASCADE BLINDNESS → meta-failure: thinking process deficient")
             return judgment
@@ -311,7 +314,9 @@ class MetaLevel:
                 MetaAction.ADJUST_EXPLORATION,
             ]
             judgment.confidence = 0.8
-            reasoning.append(f"WRONG TOOL CHOICE → meta-failure: tool '{tool_name}' repeatedly fails")
+            reasoning.append(
+                f"WRONG TOOL CHOICE → meta-failure: tool '{tool_name}' repeatedly fails"
+            )
             return judgment
 
     def _check_stale_pattern(self, trace, pattern, judgment, reasoning):
@@ -322,7 +327,10 @@ class MetaLevel:
                 "Same error repeated across steps. The agent is applying a stale "
                 "solution pattern that doesn't fit this problem."
             )
-            judgment.recommended_actions = [MetaAction.PRUNE_HEURISTIC, MetaAction.ADJUST_EXPLORATION]
+            judgment.recommended_actions = [
+                MetaAction.PRUNE_HEURISTIC,
+                MetaAction.ADJUST_EXPLORATION,
+            ]
             judgment.confidence = 0.75
             reasoning.append("STALE PATTERN → meta-failure: outdated solution approach")
             return judgment
@@ -336,7 +344,10 @@ class MetaLevel:
                 f"Confidence calibration is broken - the meta-monitoring itself "
                 f"is unreliable."
             )
-            judgment.recommended_actions = [MetaAction.ATTENUATE_HEURISTIC, MetaAction.INJECT_HEURISTIC]
+            judgment.recommended_actions = [
+                MetaAction.ATTENUATE_HEURISTIC,
+                MetaAction.INJECT_HEURISTIC,
+            ]
             judgment.confidence = 0.7
             reasoning.append("CONFIDENCE MISCALIBRATION → meta-failure: broken self-assessment")
             return judgment
@@ -428,9 +439,7 @@ class MetaLevel:
         new_h = self._synthesize_heuristic(judgment)
         if new_h is not None:
             fc_val = judgment.failure_class.value if judgment.failure_class else "unknown"
-            return self._strategy.mutate_inject(
-                new_h, reason=f"Injection to address: {fc_val}"
-            )
+            return self._strategy.mutate_inject(new_h, reason=f"Injection to address: {fc_val}")
         return None
 
     def _action_prune(self, judgment: MetaJudgment) -> StrategyMutation | None:

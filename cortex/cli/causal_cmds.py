@@ -57,6 +57,7 @@ def trace_episode(query, fact_id, project, limit, db) -> None:
                 episodes = _run_async(engine.recall_episode(query, project, limit))
             if not episodes:
                 from cortex.cli.errors import err_empty_results
+
                 err_empty_results(
                     "episodios causales",
                     suggestion="Prueba con otros términos.",
@@ -220,6 +221,7 @@ def dedupe(project: str, threshold: float, simulate: bool, db: str) -> None:
             )
     finally:
         _run_async(engine.close())
+
 
 cli.add_command(history)
 cli.add_command(dedupe)

@@ -140,6 +140,7 @@ class BCI_Transmitter:
                 await writer.wait_closed()
             except Exception as exc:
                 import logging
+
                 logging.warning("Suppressed exception: %s", exc)
 
 

@@ -81,6 +81,7 @@ async def _collect_recent(engine, limit: int = 8) -> list[dict]:
             ]
     except Exception as exc:
         import logging
+
         logging.warning("Suppressed exception: %s", exc)
     return []
 
@@ -369,6 +370,7 @@ def dashboard(db: str, interval: float, once: bool) -> None:
                     time.sleep(interval)
             except Exception as exc:
                 import logging
+
                 logging.warning("Suppressed exception: %s", exc)
 
         console.print(f"\n[{_DIM}]Dashboard closed.[/]")

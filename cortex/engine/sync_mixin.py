@@ -30,6 +30,9 @@ class SyncMixin:
     def store_sync(self, *args, **kwargs):
         return self._run_sync(self.store(*args, **kwargs))
 
+    def store_many_sync(self, *args, **kwargs):
+        return self._run_sync(self.store_many(*args, **kwargs))
+
     def recall_sync(self, *args, **kwargs):
         return self._run_sync(self.recall(*args, **kwargs))
 

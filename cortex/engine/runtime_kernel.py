@@ -32,7 +32,6 @@ class CortexState:
         self.cost = Decimal(str(self.cost))
 
 
-
 class SnapshotManager:
     def __init__(self):
         os.makedirs(SNAPSHOT_DIR, exist_ok=True)

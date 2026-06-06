@@ -140,12 +140,25 @@ def run_cli(
     # Connect to Toolbox if configured
     toolbox_tools = asyncio.run(_connect_toolbox(toolbox_url, toolbox_toolset))
 
+    # Connect to local CORTEX MCP Server for native tool inheritance
+    from cortex.mcp.toolbox_bridge import cortex_self_bridge
+
+    try:
+        cortex_bridge = asyncio.run(cortex_self_bridge())
+        mcp_tools = cortex_bridge.tools if cortex_bridge else []
+    except ImportError:
+        mcp_tools = []
+
     agent_map = {
-        "memory": lambda: create_memory_agent(model=model),
-        "analyst": lambda: create_analyst_agent(model=model, toolbox_tools=toolbox_tools or None),
-        "guardian": lambda: create_guardian_agent(model=model),
-        "google-one": lambda: create_google_one_agent(model=model),
-        "sovereign": lambda: create_cortex_swarm(model=model, toolbox_tools=toolbox_tools or None),
+        "memory": lambda: create_memory_agent(model=model, mcp_tools=mcp_tools),
+        "analyst": lambda: create_analyst_agent(
+            model=model, toolbox_tools=toolbox_tools or None, mcp_tools=mcp_tools
+        ),
+        "guardian": lambda: create_guardian_agent(model=model, mcp_tools=mcp_tools),
+        "google-one": lambda: create_google_one_agent(model=model, mcp_tools=mcp_tools),
+        "sovereign": lambda: create_cortex_swarm(
+            model=model, toolbox_tools=toolbox_tools or None, mcp_tools=mcp_tools
+        ),
     }
 
     agent = agent_map[agent_name]()

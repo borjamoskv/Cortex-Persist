@@ -59,6 +59,7 @@ class BicameralConsole:
                 f.write(json.dumps(event) + "\n")
         except Exception as exc:
             import logging
+
             logging.warning("Suppressed exception: %s", exc)
 
     # Fail silently to avoid interrupting the agent loop

@@ -4,6 +4,7 @@
 Detects AGY2 planning mode execution (implementation_plan.md) and
 automatically injects CORTEX semantic facts to resolve agent amnesia.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -30,7 +31,7 @@ class AGY2PlannerMonitor:
         alerts: list[WorkflowAlert] = []
         if not self.engine:
             return alerts
-            
+
         if not self.brain_dir.exists():
             return alerts
 
@@ -51,7 +52,7 @@ class AGY2PlannerMonitor:
                                     reason=f"Injected CORTEX memory into {plan_file.parent.name}",
                                     confidence="C5",
                                     priority=1,
-                                    tags=["agy2", "memory_injection"]
+                                    tags=["agy2", "memory_injection"],
                                 )
                             )
                             # Update mtime so we don't trigger immediately again
@@ -69,7 +70,7 @@ class AGY2PlannerMonitor:
                 await self.check_async()
             except Exception as e:
                 logger.error("AGY2PlannerMonitor loop error: %s", e)
-            
+
             try:
                 await asyncio.sleep(10.0)
             except asyncio.CancelledError:
@@ -82,11 +83,11 @@ class AGY2PlannerMonitor:
         except RuntimeError as e:
             if "running event loop" not in str(e):
                 raise
-            
+
             # If we are already inside a running event loop, we cannot use asyncio.run
             if not hasattr(self, "_bg_tasks"):
                 self._bg_tasks: set = set()
-                
+
             task = asyncio.ensure_future(self.check_async())
             self._bg_tasks.add(task)
             task.add_done_callback(self._bg_tasks.discard)
@@ -115,36 +116,32 @@ class AGY2PlannerMonitor:
 
         try:
             from cortex.memory.memory_manager import MemoryManager
+
             # We use the internal synchronous / async MemoryManager
-            # Since MemoryManager is typically synchronous or has async variants, 
+            # Since MemoryManager is typically synchronous or has async variants,
             # we will just instantiate a local one or use the shared engine.
             memory = MemoryManager(engine=self.engine)
-            results = await asyncio.to_thread(
-                memory.search,
-                query=goal,
-                limit=5,
-                fact_type=None
-            )
-            
+            results = await asyncio.to_thread(memory.search, query=goal, limit=5, fact_type=None)
+
             if not results:
                 logger.debug("No CORTEX facts found for goal.")
                 return False
-                
+
             # Format injection
             injection = "\n\n## 🧠 CORTEX Semantic Context (Auto-Injected by C5-REAL)\n\n"
             injection += "> [!NOTE]\n> The following verified facts were retrieved from CORTEX Memory regarding your goal.\n\n"
-            
+
             for fact in results:
                 confidence = getattr(fact, "confidence", "Unknown")
                 fact_type = getattr(fact, "fact_type", "fact").upper()
                 injection += f"- **{fact_type}**: {fact.content} (Confidence: {confidence})\n"
-                
+
             new_content = content + injection
-            
+
             await asyncio.to_thread(plan_file.write_text, new_content, encoding="utf-8")
             logger.info("Successfully injected CORTEX context into AGY2 implementation plan.")
             return True
-            
+
         except Exception as e:
             logger.error("Failed to inject context: %s", e)
             return False

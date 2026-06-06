@@ -23,6 +23,7 @@ from cortex.engine.omega_daemon import OmegaKernel
 console = Console()
 logger = logging.getLogger(__name__)
 
+
 async def run_ui(kernel: OmegaKernel):
     # Colors
     _CYBER = "#CCFF00"
@@ -76,12 +77,14 @@ async def run_ui(kernel: OmegaKernel):
         vitals_table.add_row("Current Exergy", f"[bold {_CYBER}]{exergy:.1f} J[/] [{exergy_bar}]")
         vitals_table.add_row("Exergy Budget", f"${kernel.guard.budget_usd:.2f}")
 
-        layout["body"]["vitals"].update(Panel(
-            vitals_table,
-            title=f"[bold {_CYBER}]◉ METABOLIC VITALS[/]",
-            border_style=_VIOLET,
-            padding=(0, 1),
-        ))
+        layout["body"]["vitals"].update(
+            Panel(
+                vitals_table,
+                title=f"[bold {_CYBER}]◉ METABOLIC VITALS[/]",
+                border_style=_VIOLET,
+                padding=(0, 1),
+            )
+        )
 
         # Sensors
         sensors_table = Table(show_header=False, box=None, padding=(0, 2))
@@ -94,34 +97,49 @@ async def run_ui(kernel: OmegaKernel):
 
         sensors_table.add_row("Scanned Files", f"{kernel.sensor.last_scan_files} python files")
         sensors_table.add_row("TODOs / FIX-MEs", f"[bold white]{kernel.sensor.last_scan_todos}[/]")
-        sensors_table.add_row("Ruff Violations", f"[bold {_RED}]{kernel.sensor.last_scan_violations}[/]")
-        sensors_table.add_row("Structural Entropy", f"[bold {entropy_style}]{entropy:.2f} J[/] [{entropy_bar}]")
-        sensors_table.add_row("Auto-Push Config", f"[{_CYBER}]ACTIVE[/]" if kernel.auto_push else f"[{_DIM}]DISABLED[/]")
+        sensors_table.add_row(
+            "Ruff Violations", f"[bold {_RED}]{kernel.sensor.last_scan_violations}[/]"
+        )
+        sensors_table.add_row(
+            "Structural Entropy", f"[bold {entropy_style}]{entropy:.2f} J[/] [{entropy_bar}]"
+        )
+        sensors_table.add_row(
+            "Auto-Push Config",
+            f"[{_CYBER}]ACTIVE[/]" if kernel.auto_push else f"[{_DIM}]DISABLED[/]",
+        )
 
-        layout["body"]["sensors"].update(Panel(
-            sensors_table,
-            title=f"[bold {_CYBER}]∿ ECOSYSTEM SENSORS[/]",
-            border_style=_VIOLET,
-            padding=(0, 1),
-        ))
+        layout["body"]["sensors"].update(
+            Panel(
+                sensors_table,
+                title=f"[bold {_CYBER}]∿ ECOSYSTEM SENSORS[/]",
+                border_style=_VIOLET,
+                padding=(0, 1),
+            )
+        )
 
         # Footer
         events_table = Table(show_header=False, box=None, padding=(0, 1))
         events_table.add_column("Event", style="white")
 
-        display_events = kernel.events[-6:] if kernel.events else ["Homeostasis maintained. Waiting for next cycle..."]
+        display_events = (
+            kernel.events[-6:]
+            if kernel.events
+            else ["Homeostasis maintained. Waiting for next cycle..."]
+        )
         while len(display_events) < 6:
             display_events.insert(0, "")
 
         for ev in display_events:
             events_table.add_row(ev)
 
-        layout["footer"].update(Panel(
-            events_table,
-            title=f"[bold {_CYBER}]◷ METABOLIC EVENT LOG[/]",
-            border_style=_VIOLET,
-            padding=(0, 1),
-        ))
+        layout["footer"].update(
+            Panel(
+                events_table,
+                title=f"[bold {_CYBER}]◷ METABOLIC EVENT LOG[/]",
+                border_style=_VIOLET,
+                padding=(0, 1),
+            )
+        )
 
         return layout
 
@@ -145,7 +163,9 @@ def cmd_omega_start(tick_rate: int, auto_push: bool):
     Inicia el metabolismo de CORTEX (Omega Singularity).
     """
     # Mute default logs to stdout if running UI, to avoid visual corruption
-    logging.getLogger().handlers = [h for h in logging.getLogger().handlers if not isinstance(h, logging.StreamHandler)]
+    logging.getLogger().handlers = [
+        h for h in logging.getLogger().handlers if not isinstance(h, logging.StreamHandler)
+    ]
 
     kernel = OmegaKernel(tick_rate_seconds=tick_rate, auto_push=auto_push)
 
@@ -159,7 +179,9 @@ def cmd_omega_start(tick_rate: int, auto_push: bool):
     except KeyboardInterrupt:
         kernel.stop()
         # Reset terminal screen and show shutdown message
-        console.print("\n[bold red]Terminación manual detectada. Hibernando Omega Daemon...[/bold red]")
+        console.print(
+            "\n[bold red]Terminación manual detectada. Hibernando Omega Daemon...[/bold red]"
+        )
 
 
 @omega_cmds.command("status")

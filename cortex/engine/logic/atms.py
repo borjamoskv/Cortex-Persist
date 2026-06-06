@@ -10,11 +10,13 @@ except ImportError:
         "cortex_rs is not installed. AtmsGraph will not be hardware-accelerated."
     )
 
+
 class AtmsAdapter:
     """
     Python wrapper for the Rust AtmsGraph.
     Provides Assumption Truth Maintenance System capabilities using PyO3 bindings.
     """
+
     def __init__(self):
         if cortex_rs is None:
             raise RuntimeError("cortex_rs PyO3 extension is required for ATMS operations.")

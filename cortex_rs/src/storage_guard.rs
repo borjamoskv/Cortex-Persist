@@ -21,6 +21,16 @@ static POISON_PATTERNS: Lazy<Vec<Regex>> = Lazy::new(|| {
 });
 
 #[pyfunction]
+pub fn detect_poisoning(content: &str) -> bool {
+    for pat in POISON_PATTERNS.iter() {
+        if pat.is_match(content) {
+            return true;
+        }
+    }
+    false
+}
+
+#[pyfunction]
 #[pyo3(signature = (project, content, fact_type, source, confidence, tags))]
 pub fn validate_proposal(
     project: &str,

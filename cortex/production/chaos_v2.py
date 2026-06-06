@@ -31,6 +31,7 @@ class ChaosLayerV2:
                 victim.unlink()
             except Exception as exc:
                 import logging
+
                 logging.warning("Suppressed exception: %s", exc)
 
     def temporal_distortion_attack(self, event):

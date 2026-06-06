@@ -72,7 +72,7 @@ class MultiSpecialistAgent(SwarmAgent):
     def _check_static_debt(self, content: str) -> str | None:
         if not content:
             return None
-        
+
         excl = [
             'if "TO' + 'DO" in',
             '["TO' + 'DO"',
@@ -99,7 +99,7 @@ class MultiSpecialistAgent(SwarmAgent):
 
                 if is_todo and not is_excluded:
                     return line_stripped
-        
+
         return None
 
 

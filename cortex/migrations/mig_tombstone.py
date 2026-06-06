@@ -12,6 +12,7 @@ def _migration_020_tombstone(conn: sqlite3.Connection) -> None:
         conn.execute("ALTER TABLE facts ADD COLUMN is_tombstoned INTEGER NOT NULL DEFAULT 0")
     except Exception as exc:
         import logging
+
         logging.warning("Suppressed exception: %s", exc)
     # Column already exists
 
@@ -19,6 +20,7 @@ def _migration_020_tombstone(conn: sqlite3.Connection) -> None:
         conn.execute("ALTER TABLE facts ADD COLUMN tombstoned_at TEXT")
     except Exception as exc:
         import logging
+
         logging.warning("Suppressed exception: %s", exc)
     # Column already exists
 

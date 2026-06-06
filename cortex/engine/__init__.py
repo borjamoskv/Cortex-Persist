@@ -181,15 +181,15 @@ class CortexEngine(
         self._closing = True
         await self.stop_optimizer()
         await self._drain_tasks()
-        
+
         self._memory_l1 = None
         self._memory_l3 = None
         self._memory_ready = False
         if self._persistence:
             await self._persistence.stop()
-            
+
         await self._close_connections()
-        
+
         self.mac_maestro = None
         self.ledger_writer = None
         self.enrichment_queue = None

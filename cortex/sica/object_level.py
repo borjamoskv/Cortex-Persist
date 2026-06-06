@@ -112,9 +112,7 @@ class ExecutionTrace:
             return None
 
         pattern = (
-            self._check_repeated_tool()
-            or self._check_repeated_error()
-            or self._check_cascade()
+            self._check_repeated_tool() or self._check_repeated_error() or self._check_cascade()
         )
         if pattern:
             self.error_pattern = pattern

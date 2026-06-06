@@ -153,16 +153,20 @@ class GenePool:
         if adopted:
             logger.info(
                 "GenePool: %s adopted %d fragments: %s",
-                agent_id, len(adopted), [f.fragment_id for f in adopted],
+                agent_id,
+                len(adopted),
+                [f.fragment_id for f in adopted],
             )
         return adopted
 
-    def _get_adoptable_candidates(self, agent_id: str, existing_names: set[str]) -> list[GeneFragment]:
+    def _get_adoptable_candidates(
+        self, agent_id: str, existing_names: set[str]
+    ) -> list[GeneFragment]:
         candidates = [
-            f for f in self._fragments.values() 
-            if f.donor_agent != agent_id and (
-                f.fragment_type != "heuristic" or f.payload.get("name") not in existing_names
-            )
+            f
+            for f in self._fragments.values()
+            if f.donor_agent != agent_id
+            and (f.fragment_type != "heuristic" or f.payload.get("name") not in existing_names)
         ]
         candidates.sort(key=lambda f: f.value_score, reverse=True)
         return candidates
@@ -275,12 +279,17 @@ class GenomeCrossover:
 
         logger.info(
             "Crossover: %s × %s → %s (heuristics=%d, er=%.2f)",
-            parent_a.genome_hash, parent_b.genome_hash, child.genome_hash,
-            len(child.heuristics), child.exploration_rate,
+            parent_a.genome_hash,
+            parent_b.genome_hash,
+            child.genome_hash,
+            len(child.heuristics),
+            child.exploration_rate,
         )
         return child
 
-    def _merge_heuristics(self, parent_a: StrategyGenome, parent_b: StrategyGenome) -> dict[str, Heuristic]:
+    def _merge_heuristics(
+        self, parent_a: StrategyGenome, parent_b: StrategyGenome
+    ) -> dict[str, Heuristic]:
         all_heuristics: dict[str, Heuristic] = {}
         for h in parent_a.heuristics:
             if h.fitness > 0.4:

@@ -33,7 +33,7 @@ class MemoryMixin(EngineMixinBase):
             return
 
         bus = self._init_signal_bus()
-        
+
         l2_result = self._init_vector_memory(db_path, l1, l3)
         if not l2_result.get("proceed"):
             self._set_memory_state(None, l1, l3)
@@ -55,13 +55,16 @@ class MemoryMixin(EngineMixinBase):
             import os
 
             from cortex.memory.ledger import EventLedgerL3
+
             redis_url = os.environ.get("CORTEX_REDIS_URL")
             if redis_url:
                 from cortex.memory.redis_working import RedisWorkingMemoryL1
+
                 l1 = RedisWorkingMemoryL1(redis_url=redis_url)
                 logger.info("Memory L1 (RedisWorkingMemoryL1) initialized at %s", redis_url)
             else:
                 from cortex.memory.working import WorkingMemoryL1
+
                 l1 = WorkingMemoryL1()
             l3 = EventLedgerL3(conn)
             await l3.ensure_table()
@@ -73,6 +76,7 @@ class MemoryMixin(EngineMixinBase):
     def _init_signal_bus(self):
         try:
             from cortex.extensions.signals.bus import SignalBus
+
             sync_conn = self._get_sync_conn()
             bus = SignalBus(sync_conn)
             bus.ensure_table()
@@ -83,9 +87,11 @@ class MemoryMixin(EngineMixinBase):
 
     def _init_vector_memory(self, db_path: Path, l1, l3) -> dict:
         import os
+
         use_hdc = os.environ.get("CORTEX_HDC") == "1"
         try:
             import numpy  # noqa: F401
+
             numpy_installed = True
         except ImportError:
             numpy_installed = False
@@ -105,7 +111,7 @@ class MemoryMixin(EngineMixinBase):
         return {
             "proceed": True,
             "components": (l2, encoder, hdc_l2, hdc_encoder),
-            "l2_skip_reason": l2_skip_reason
+            "l2_skip_reason": l2_skip_reason,
         }
 
     def _init_l2_dense(self, db_path: Path):
@@ -113,6 +119,7 @@ class MemoryMixin(EngineMixinBase):
         try:
             from cortex.memory.encoder import AsyncEncoder
             from cortex.memory.sqlite_vec_store import SovereignVectorStoreL2
+
             vector_path = db_path.parent / "vectors"
             encoder = AsyncEncoder(self._get_embedder())
             l2 = SovereignVectorStoreL2(encoder=encoder, db_path=vector_path / "vectors.db")
@@ -128,6 +135,7 @@ class MemoryMixin(EngineMixinBase):
         hdc_l2, hdc_encoder = None, None
         try:
             from cortex.memory.hdc import HDCEncoder, HDCVectorStoreL2, ItemMemory
+
             hdc_path = db_path.parent / "hdc"
             item_mem = ItemMemory(codebook_path=hdc_path / "codebook.json")
             hdc_encoder = HDCEncoder(item_mem)
@@ -142,9 +150,15 @@ class MemoryMixin(EngineMixinBase):
     def _init_memory_manager(self, l1, l2, l3, encoder, hdc_l2, hdc_encoder, bus):
         try:
             from cortex.memory.manager import CortexMemoryManager
+
             self._memory_manager = CortexMemoryManager(
-                l1=l1, l2=l2, l3=l3, encoder=encoder,
-                hdc_l2=hdc_l2, hdc_encoder=hdc_encoder, bus=bus,
+                l1=l1,
+                l2=l2,
+                l3=l3,
+                encoder=encoder,
+                hdc_l2=hdc_l2,
+                hdc_encoder=hdc_encoder,
+                bus=bus,
             )
         except Exception as e:
             logger.warning("Memory manager unavailable: %s", e)
@@ -158,12 +172,19 @@ class MemoryMixin(EngineMixinBase):
 
     def _log_memory_status(self, has_hdc: bool, skip_reason: str | None):
         if self._memory_manager:
-            logger.info("Memory subsystem: full (L1+L2+L3) (HDC: %s)", "active" if has_hdc else "inactive")
+            logger.info(
+                "Memory subsystem: full (L1+L2+L3) (HDC: %s)", "active" if has_hdc else "inactive"
+            )
         elif skip_reason:
-            logger.info("Memory subsystem: partial (L1+L3) (HDC: %s, optional L2 skipped: %s)",
-                        "active" if has_hdc else "inactive", skip_reason)
+            logger.info(
+                "Memory subsystem: partial (L1+L3) (HDC: %s, optional L2 skipped: %s)",
+                "active" if has_hdc else "inactive",
+                skip_reason,
+            )
         else:
-            logger.info("Memory subsystem: partial (L1+L3) (HDC: %s)", "active" if has_hdc else "inactive")
+            logger.info(
+                "Memory subsystem: partial (L1+L3) (HDC: %s)", "active" if has_hdc else "inactive"
+            )
 
     @property
     def memory(self):

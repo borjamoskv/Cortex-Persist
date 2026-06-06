@@ -177,6 +177,7 @@ def mejoralo_record(project, score_before, score_after, actions, db):
                     json.dump(state, f, indent=2, default=str)
             except Exception as exc:
                 import logging
+
                 logging.warning("Suppressed exception: %s", exc)
 
         console.print(

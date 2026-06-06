@@ -18,10 +18,7 @@ from pathlib import Path
 # Minimum Exergy Threshold (3 half-lives = 0.125)
 MIN_EXERGY_THRESHOLD = 0.125
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 logger = logging.getLogger("ouroboros_prune")
 
 
@@ -41,7 +38,7 @@ def execute_thermal_purge(db_path: str = "~/.cortex/cortex.db") -> None:
             # We calculate decay in SQL:
             # age_days = (now - created_at) / 86400.0
             # decay_factor = 0.5 ^ (age_days / decay_half_life)
-            
+
             # Identify candidates
             # Only prune non-diamond facts that are not already tombstoned
             sql_find = """
@@ -57,7 +54,7 @@ def execute_thermal_purge(db_path: str = "~/.cortex/cortex.db") -> None:
             for row in rows:
                 age_days = float(row["age_days"])
                 half_life = float(row["decay_half_life"]) if row["decay_half_life"] else 30.0
-                
+
                 # Math: decay = 0.5 ^ (age / half_life)
                 if half_life <= 0:
                     decay = 0.0
@@ -66,8 +63,13 @@ def execute_thermal_purge(db_path: str = "~/.cortex/cortex.db") -> None:
 
                 if decay < MIN_EXERGY_THRESHOLD:
                     # Tombstone the fact
-                    logger.info(f"Thermal Death: Fact {row['id']} (Age: {age_days:.1f}d, Half-Life: {half_life:.1f}d, Exergy: {decay:.3f})")
-                    cursor.execute("UPDATE facts SET is_tombstoned = 1, updated_at = datetime('now') WHERE id = ?", (row["id"],))
+                    logger.info(
+                        f"Thermal Death: Fact {row['id']} (Age: {age_days:.1f}d, Half-Life: {half_life:.1f}d, Exergy: {decay:.3f})"
+                    )
+                    cursor.execute(
+                        "UPDATE facts SET is_tombstoned = 1, updated_at = datetime('now') WHERE id = ?",
+                        (row["id"],),
+                    )
                     purged_count += 1
 
             conn.commit()

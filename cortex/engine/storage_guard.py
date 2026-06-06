@@ -57,17 +57,17 @@ class StorageGuard:
         Raises GuardViolation with the specific rule that was violated.
         """
         effective_source = source or "unknown"
-        
+
         # Defensive coercion for tags before passing to Rust
         if isinstance(tags, str):
             raise GuardViolation("TAGS_TYPE_ERROR", "tags must be list[str], got str")
-        
+
         import cortex_rs
-        
+
         error_tuple = cortex_rs.validate_proposal(
             project, content, fact_type, effective_source, confidence, tags
         )
-        
+
         if error_tuple is not None:
             rule, detail = error_tuple
             raise GuardViolation(rule, detail)

@@ -155,6 +155,7 @@ def init_external_oracles(
         )
         try:
             from cortex.extensions.daemon.monitors.agy2_planner import AGY2PlannerMonitor
+
             daemon.agy2_planner_daemon = AGY2PlannerMonitor(engine=daemon._shared_engine)
         except ImportError:
             daemon.agy2_planner_daemon = None

@@ -49,6 +49,7 @@ _DEFAULT_MODEL = os.environ.get("CORTEX_ADK_MODEL", "gemini-2.0-flash")
 def create_memory_agent(
     model: str | None = None,
     extra_tools: list | None = None,
+    mcp_tools: list | None = None,
 ) -> Agent:  # type: ignore[reportInvalidTypeForm]
     """Create the CORTEX Memory Agent - root agent for sovereign memory ops.
 
@@ -59,6 +60,7 @@ def create_memory_agent(
     Args:
         model: LLM model to use (default: gemini-2.0-flash).
         extra_tools: Additional tools to register alongside CORTEX tools.
+        mcp_tools: CORTEX MCP server tools to inherit dynamically.
 
     Returns:
         Configured ADK Agent instance.
@@ -74,6 +76,8 @@ def create_memory_agent(
     tools = list(ALL_TOOLS)
     if extra_tools:
         tools.extend(extra_tools)
+    if mcp_tools:
+        tools.extend(mcp_tools)
 
     return Agent(  # type: ignore[reportOptionalCall]
         model=model or _DEFAULT_MODEL,
@@ -94,7 +98,8 @@ def create_memory_agent(
             "incorrect facts. Always provide a reason.\n"
             "4. **Monitor health** - Use `adk_status` to check system metrics.\n"
             "5. **Verify integrity** - Use `adk_ledger_verify` to audit the "
-            "immutable transaction ledger.\n\n"
+            "immutable transaction ledger.\n"
+            "6. **MCP Tools** - If MCP tools are available, use them to access the full cognitive membrane.\n\n"
             "Rules:\n"
             "- Always confirm what was stored/found with the user.\n"
             "- Use fact_type accurately (knowledge, decision, error, ghost, etc).\n"
@@ -109,6 +114,7 @@ def create_memory_agent(
 def create_analyst_agent(
     model: str | None = None,
     toolbox_tools: list | None = None,
+    mcp_tools: list | None = None,
 ) -> Agent:  # type: ignore[reportInvalidTypeForm]
     """Create the CORTEX Analyst Agent - cross-source analysis sub-agent.
 
@@ -118,6 +124,7 @@ def create_analyst_agent(
     Args:
         model: LLM model to use.
         toolbox_tools: Additional Toolbox bridge tools for external DBs.
+        mcp_tools: CORTEX MCP server tools to inherit dynamically.
 
     Returns:
         Configured ADK Agent instance.
@@ -130,6 +137,8 @@ def create_analyst_agent(
     tools: list = [adk_search, adk_status]
     if toolbox_tools:
         tools.extend(toolbox_tools)
+    if mcp_tools:
+        tools.extend(mcp_tools)
 
     return Agent(  # type: ignore[reportOptionalCall]
         model=model or _DEFAULT_MODEL,
@@ -154,6 +163,7 @@ def create_analyst_agent(
 
 def create_guardian_agent(
     model: str | None = None,
+    mcp_tools: list | None = None,
 ) -> Agent:  # type: ignore[reportInvalidTypeForm]
     """Create the CORTEX Guardian Agent - security and integrity sub-agent.
 
@@ -162,6 +172,7 @@ def create_guardian_agent(
 
     Args:
         model: LLM model to use.
+        mcp_tools: CORTEX MCP server tools to inherit dynamically.
 
     Returns:
         Configured ADK Agent instance.
@@ -170,6 +181,10 @@ def create_guardian_agent(
         raise ImportError(_ADK_INSTALL_MSG)
 
     from cortex.extensions.adk.tools import adk_ledger_verify, adk_status
+
+    tools: list = [adk_ledger_verify, adk_status]
+    if mcp_tools:
+        tools.extend(mcp_tools)
 
     return Agent(  # type: ignore[reportOptionalCall]
         model=model or _DEFAULT_MODEL,
@@ -190,12 +205,13 @@ def create_guardian_agent(
             "   - 🟢 OK: System healthy, ledger intact\n"
             "4. **Recommend actions** - Suggest remediation for issues found."
         ),
-        tools=[adk_ledger_verify, adk_status],
+        tools=tools,
     )
 
 
 def create_google_one_agent(
     model: str | None = None,
+    mcp_tools: list | None = None,
 ) -> Agent:  # type: ignore[reportInvalidTypeForm]
     """Create the Google One Agent - cloud integration and backup sub-agent.
 
@@ -204,6 +220,7 @@ def create_google_one_agent(
 
     Args:
         model: LLM model to use.
+        mcp_tools: CORTEX MCP server tools to inherit dynamically.
 
     Returns:
         Configured ADK Agent instance.
@@ -212,6 +229,10 @@ def create_google_one_agent(
         raise ImportError(_ADK_INSTALL_MSG)
 
     from cortex.extensions.adk.goog_tools import GOOGLE_ONE_TOOLS
+
+    tools = list(GOOGLE_ONE_TOOLS)
+    if mcp_tools:
+        tools.extend(mcp_tools)
 
     return Agent(  # type: ignore[reportOptionalCall]
         model=model or _DEFAULT_MODEL,
@@ -232,7 +253,7 @@ def create_google_one_agent(
             "- If sync fails, suggest checking the Google Drive for Desktop connection.\n"
             "- Treat backups as high-priority security events."
         ),
-        tools=GOOGLE_ONE_TOOLS,
+        tools=tools,
     )
 
 
@@ -242,6 +263,7 @@ def create_google_one_agent(
 def create_cortex_swarm(
     model: str | None = None,
     toolbox_tools: list | None = None,
+    mcp_tools: list | None = None,
 ) -> Agent:  # type: ignore[reportInvalidTypeForm]
     """Create the full CORTEX agent swarm - multi-agent system.
 
@@ -253,6 +275,7 @@ def create_cortex_swarm(
     Args:
         model: LLM model for all agents.
         toolbox_tools: External DB tools for the analyst agent.
+        mcp_tools: CORTEX MCP server tools to inherit dynamically.
 
     Returns:
         Root Agent with sub-agent delegation.
@@ -260,10 +283,14 @@ def create_cortex_swarm(
     if not _ADK_AVAILABLE:
         raise ImportError(_ADK_INSTALL_MSG)
 
-    memory = create_memory_agent(model=model)
-    analyst = create_analyst_agent(model=model, toolbox_tools=toolbox_tools)
-    guardian = create_guardian_agent(model=model)
-    google_one = create_google_one_agent(model=model)
+    memory = create_memory_agent(model=model, mcp_tools=mcp_tools)
+    analyst = create_analyst_agent(model=model, toolbox_tools=toolbox_tools, mcp_tools=mcp_tools)
+    guardian = create_guardian_agent(model=model, mcp_tools=mcp_tools)
+    google_one = create_google_one_agent(model=model, mcp_tools=mcp_tools)
+
+    tools = []
+    if mcp_tools:
+        tools.extend(mcp_tools)
 
     return Agent(  # type: ignore[reportOptionalCall]
         model=model or _DEFAULT_MODEL,
@@ -284,5 +311,6 @@ def create_cortex_swarm(
             "For complex queries, coordinate multiple agents. "
             "Always report results clearly and respond in the user's language."
         ),
+        tools=tools,
         sub_agents=[memory, analyst, guardian, google_one],
     )

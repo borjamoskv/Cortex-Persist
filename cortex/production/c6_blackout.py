@@ -84,5 +84,6 @@ class C6BlackoutAudit:
                 return 1.0
         except Exception as exc:
             import logging
+
             logging.warning("Suppressed exception: %s", exc)
         return 0.0

@@ -83,6 +83,7 @@ class TestMouseDrag:
         """drag_and_drop delega a drag con parámetros convertidos."""
         with patch.object(mouse, "drag") as mock_drag:
             from cortex.extensions.ui_control.models import InteractionResult
+
             mock_drag.return_value = InteractionResult(success=True)
             result = mouse.drag_and_drop(10, 20, 30, 40, duration_ms=100)
             assert result.success

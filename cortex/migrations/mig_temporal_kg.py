@@ -12,6 +12,7 @@ import sqlite3
 
 logger = logging.getLogger("cortex.migrations.mig_temporal_kg")
 
+
 def _migration_027_temporal_kg(conn: sqlite3.Connection) -> None:
     """Add temporal graph columns to facts and causal_edges."""
     # Facts decay_half_life

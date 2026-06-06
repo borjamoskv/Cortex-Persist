@@ -103,6 +103,7 @@ class ExergyEngine:
                     return MetaParams(**data)
             except Exception as exc:
                 import logging
+
                 logging.getLogger(__name__).warning("Suppressed exception: %s", exc)
         return MetaParams()
 

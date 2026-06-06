@@ -37,7 +37,11 @@ def test_heavy_dependencies_live_in_optional_extras() -> None:
     assert "pyobjc-core" not in base_dependencies
     assert "pyobjc-framework-Cocoa" not in base_dependencies
 
-    assert _dependency_names(extras["embeddings"]) == {"sentence-transformers", "onnxruntime", "optimum"}
+    assert _dependency_names(extras["embeddings"]) == {
+        "sentence-transformers",
+        "onnxruntime",
+        "optimum",
+    }
     assert _dependency_names(extras["knowledge"]) == {"chromadb"}
     assert _dependency_names(extras["acceleration"]) == {"numba"}
     assert _dependency_names(extras["api"]) >= {

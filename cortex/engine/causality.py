@@ -209,19 +209,23 @@ class AsyncCausalGraph:
         """
         time_modifier = f"-{hours_lookback} hours"
         chain = []
-        async with self.conn.execute(sql, (target_fact_id, tenant_id, time_modifier, tenant_id, time_modifier)) as cursor:
+        async with self.conn.execute(
+            sql, (target_fact_id, tenant_id, time_modifier, tenant_id, time_modifier)
+        ) as cursor:
             async for row in cursor:
-                chain.append({
-                    "ancestor_id": row[0],
-                    "child_id": row[1],
-                    "edge_type": row[2],
-                    "confidence": row[3],
-                    "agent_id": row[4],
-                    "edge_time": row[5],
-                    "depth": row[6],
-                    "content": row[7],
-                    "decay_half_life": row[8],
-                })
+                chain.append(
+                    {
+                        "ancestor_id": row[0],
+                        "child_id": row[1],
+                        "edge_type": row[2],
+                        "confidence": row[3],
+                        "agent_id": row[4],
+                        "edge_time": row[5],
+                        "depth": row[6],
+                        "content": row[7],
+                        "decay_half_life": row[8],
+                    }
+                )
         return chain
 
     async def _fact_columns(self) -> set[str]:

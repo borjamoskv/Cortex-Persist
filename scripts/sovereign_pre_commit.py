@@ -105,7 +105,6 @@ def check_file_contents(files: list[str], *, source: str, untracked_files: set[s
                     violations.append(f"- CONTENT: {filepath} | {pattern.pattern}")
                     break
         except (OSError, ValueError):
-
             pass
     return violations
 

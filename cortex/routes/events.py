@@ -54,11 +54,13 @@ async def event_generator(
                     }
             except Exception as exc:
                 import logging
+
                 logging.warning("Suppressed exception: %s", exc)
 
             await asyncio.sleep(1.0)
     except Exception as exc:
         import logging
+
         logging.warning("Suppressed exception: %s", exc)
 
 

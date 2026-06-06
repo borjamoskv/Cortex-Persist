@@ -2,6 +2,7 @@
 import datetime
 import json
 import os
+from typing import Any
 
 LOG_FILE = os.path.expanduser("~/.gemini/config/skills/_metrics/runtime_events.jsonl")
 
@@ -29,7 +30,7 @@ class CortexTelemetry:
         **kwargs,
     ):
         """Logs a single skill execution event with correlation IDs."""
-        entry = {
+        entry: dict[str, Any] = {
             "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
             "session_id": session_id,
             "call_id": call_id,

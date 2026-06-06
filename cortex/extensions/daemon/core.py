@@ -201,6 +201,7 @@ class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin, ResourceMgrMixin,
         )
         return status
 
+    @staticmethod
     def load_status() -> dict | None:
         """Load last daemon status from disk."""
         if not STATUS_FILE.exists():

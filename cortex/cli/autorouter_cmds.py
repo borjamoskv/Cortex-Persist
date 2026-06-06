@@ -264,4 +264,5 @@ def logs():
         subprocess.run(tail_file_command(str(LOG_PATH)))
     except Exception as exc:
         import logging
+
         logging.warning("Suppressed exception: %s", exc)

@@ -192,6 +192,7 @@ def _sanitize_dsn(dsn: str) -> str:
                 return f"{user_part}:***@{post_at}"
         except Exception as exc:
             import logging
+
             logging.warning("Suppressed exception: %s", exc)
     return dsn
 

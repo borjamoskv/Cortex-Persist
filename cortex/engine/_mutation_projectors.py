@@ -304,7 +304,9 @@ async def _update_metadata(
     metadata_column: str,
     updates: dict,
 ) -> str | None:
-    async with conn.execute(f"SELECT {metadata_column} FROM facts WHERE id = ?", (fact_id,)) as cursor:
+    async with conn.execute(
+        f"SELECT {metadata_column} FROM facts WHERE id = ?", (fact_id,)
+    ) as cursor:
         row = await cursor.fetchone()
     raw_meta = row[0] if row else None
     if raw_meta:
@@ -344,7 +346,9 @@ async def proj_taint_update(
             "tainted_by": payload["tainted_by"],
             "taint_timestamp": payload["taint_timestamp"],
         }
-        metadata_value = await _update_metadata(conn, fact_id, resolved_tenant_id, metadata_column, updates)
+        metadata_value = await _update_metadata(
+            conn, fact_id, resolved_tenant_id, metadata_column, updates
+        )
     set_clauses: list[str] = []
     params: list[Any] = []
     if confidence is not None:
@@ -393,7 +397,9 @@ async def proj_reparent(
         and "parent_decision_id" not in facts_columns
         and "parent_id" not in facts_columns
     ):
-        metadata_value = await _update_metadata(conn, fact_id, resolved_tenant_id, metadata_column, {"parent_decision_id": new_parent})
+        metadata_value = await _update_metadata(
+            conn, fact_id, resolved_tenant_id, metadata_column, {"parent_decision_id": new_parent}
+        )
     if metadata_column and metadata_value is not None:
         set_clauses.append(f"{metadata_column} = ?")
         params.append(metadata_value)

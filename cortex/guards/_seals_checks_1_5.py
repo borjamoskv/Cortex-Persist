@@ -74,6 +74,7 @@ async def check_seal_2_type_safety() -> GateResult:
                 return False, "verified"
         except Exception as exc:
             import logging
+
             logging.warning("Suppressed exception: %s", exc)
 
     if code == 0 or "Success: no issues found" in out or '"errorCount":0' in out:

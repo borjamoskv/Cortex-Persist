@@ -238,15 +238,16 @@ async def universal_error_handler(request: Request, exc: Exception) -> JSONRespo
 @app.get("/", tags=["health"])
 async def root_node(request: Request):
     from fastapi.responses import FileResponse
-    
+
     # Content negotiation: serve HTML landing page to browsers
     accept = request.headers.get("accept", "")
     if "text/html" in accept:
         import os
+
         index_path = os.path.join(os.path.dirname(__file__), "static", "index.html")
         if os.path.exists(index_path):
             return FileResponse(index_path)
-            
+
     # Fallback to standard JSON health check for agents
     lang = request.headers.get("Accept-Language", DEFAULT_LANGUAGE)
     return {
@@ -293,7 +294,6 @@ async def health_check(request: Request) -> dict:
         RuntimeError,
         AttributeError,
     ):
-
         pass
 
     # Health Index integration

@@ -153,6 +153,7 @@ def test_range_proof_honesty() -> None:
         raise AssertionError("Should have raised ValueError")
     except Exception as exc:
         import logging
+
         logging.warning("Suppressed exception: %s", exc)
 
     print("✓ test_range_proof_honesty PASSED")

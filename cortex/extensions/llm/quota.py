@@ -27,6 +27,7 @@ from cortex.database.core import connect as db_connect
 class QuotaRejectedError(Exception):
     """Raised when PULMONES fast-rejects or times out."""
 
+
 logger = logging.getLogger("cortex.extensions.llm.quota")
 
 # Module-level CSPRNG - avoid recreating per-iteration (~0.5ms saved/call)
@@ -211,8 +212,13 @@ class SovereignQuotaManager:
             True si se adquirió la cuota. Levanta QuotaRejectedError si expiró el deadline o si se superó max_waiters.
         """
         if getattr(self, "_current_waiters", 0) >= getattr(self, "max_waiters", 20):
-            logger.error("PULMONES: Fast-Reject (OOM Protection). Cola desbordada: %d waiters", self._current_waiters)
-            raise QuotaRejectedError(f"Local PULMONES queue is full ({self._current_waiters} waiters). Fast-Rejecting to prevent OOM.")
+            logger.error(
+                "PULMONES: Fast-Reject (OOM Protection). Cola desbordada: %d waiters",
+                self._current_waiters,
+            )
+            raise QuotaRejectedError(
+                f"Local PULMONES queue is full ({self._current_waiters} waiters). Fast-Rejecting to prevent OOM."
+            )
 
         self._current_waiters = getattr(self, "_current_waiters", 0) + 1
         try:
@@ -227,7 +233,9 @@ class SovereignQuotaManager:
 
                 elapsed = time.monotonic() - start
                 if elapsed >= deadline:
-                    logger.error("PULMONES: Timeout tras %.1fs esperando %d tokens.", elapsed, tokens)
+                    logger.error(
+                        "PULMONES: Timeout tras %.1fs esperando %d tokens.", elapsed, tokens
+                    )
                     self._increment_timeouts()
                     raise QuotaRejectedError(f"PULMONES deadline exceeded ({deadline}s)")
 
@@ -236,7 +244,9 @@ class SovereignQuotaManager:
                 sleep = min(wait, 2 ** min(attempt, 5)) + jitter
                 sleep = min(sleep, deadline - elapsed)  # nunca sobrepasar el deadline
 
-                logger.info("PULMONES: Estrangulado. Exhalando %.2fs (intento %d)…", sleep, attempt + 1)
+                logger.info(
+                    "PULMONES: Estrangulado. Exhalando %.2fs (intento %d)…", sleep, attempt + 1
+                )
                 await asyncio.sleep(sleep)
                 attempt += 1
         finally:

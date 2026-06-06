@@ -32,7 +32,6 @@ async def main() -> None:
             try:
                 os.remove(path)
             except OSError:
-
                 pass
 
     engine = CortexEngine(db_path=db_path)  # pyright: ignore[reportCallIssue]
@@ -111,7 +110,6 @@ async def main() -> None:
             try:
                 os.remove(path)
             except OSError:
-
                 pass
 
 

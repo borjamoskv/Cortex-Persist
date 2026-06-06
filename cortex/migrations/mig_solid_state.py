@@ -28,6 +28,7 @@ def _migration_021_solid_state(conn: sqlite3.Connection) -> None:
         """)
     except Exception as exc:
         import logging
+
         logging.warning("Suppressed exception: %s", exc)
     # Table already exists
 

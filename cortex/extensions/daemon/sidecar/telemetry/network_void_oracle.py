@@ -35,6 +35,7 @@ class NetworkVoidOracle:
                 await self._ping_reality()
             except Exception as exc:
                 import logging
+
                 logging.warning("Suppressed exception: %s", exc)
             await asyncio.sleep(self.poll_interval)
 

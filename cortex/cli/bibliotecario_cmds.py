@@ -70,6 +70,7 @@ async def _ingest_and_organize(path: Path) -> str:
                     content += f"\\n\\n--- FILE: {file_path.relative_to(path)} ---\\n{text}"
                 except Exception as exc:
                     import logging
+
                     logging.warning("Suppressed exception: %s", exc)
 
     # Truncate to avoid context window explosion

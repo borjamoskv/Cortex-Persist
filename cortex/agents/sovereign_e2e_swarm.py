@@ -56,6 +56,7 @@ async def protocolo_ship_omega(data: str):
         pass
     except Exception as exc:
         import logging
+
         logging.warning("Suppressed exception: %s", exc)
     print("[SHIP-Ω] Cristalización C5-REAL completada.\n")
 

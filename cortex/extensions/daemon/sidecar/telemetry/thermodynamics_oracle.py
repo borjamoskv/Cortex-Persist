@@ -39,6 +39,7 @@ class ThermodynamicsOracle:
             self._psutil = psutil
         except Exception as exc:
             import logging
+
             logging.warning("Suppressed exception: %s", exc)
 
     async def start(self) -> None:
@@ -82,6 +83,7 @@ class ThermodynamicsOracle:
                     disk_busy_ms = disk_io.busy_time or 0.0  # type: ignore[reportAttributeAccessIssue]
             except Exception as exc:
                 import logging
+
                 logging.warning("Suppressed exception: %s", exc)
 
         # Density factor of the Coroutine Swarm

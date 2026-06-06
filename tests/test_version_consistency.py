@@ -5,6 +5,7 @@ Ensures the canonical ``cortex.__version__`` is the single source of truth
 and that all downstream consumers (pyproject.toml, CHANGELOG.md, FastAPI app)
 stay in sync.
 """
+
 from __future__ import annotations
 
 import ast
@@ -39,9 +40,7 @@ def test_changelog_has_entry_for_current_version() -> None:
     changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
     # Keep-a-Changelog format: ## [x.y.z] — date
     pattern = re.compile(rf"^## \[{re.escape(cortex.__version__)}\]", re.MULTILINE)
-    assert pattern.search(changelog), (
-        f"CHANGELOG.md has no entry for version {cortex.__version__}"
-    )
+    assert pattern.search(changelog), f"CHANGELOG.md has no entry for version {cortex.__version__}"
 
 
 def test_fastapi_app_uses_module_version() -> None:
@@ -69,6 +68,5 @@ def test_fastapi_app_uses_module_version() -> None:
                     if isinstance(kw.value, ast.Name) and kw.value.id == "__version__":
                         found = True
     assert found, (
-        "FastAPI() in cortex/api/core.py must use version=__version__, "
-        "not a hardcoded string"
+        "FastAPI() in cortex/api/core.py must use version=__version__, not a hardcoded string"
     )

@@ -157,30 +157,37 @@ class ComponentsMixin:
 
         def _health():
             from cortex.engine.guard_adapters import HealthGuardAdapter
+
             return HealthGuardAdapter(self)
 
         def _contradiction():
             from cortex.engine.guard_adapters import ContradictionGuardAdapter
+
             return ContradictionGuardAdapter(db_path)
 
         def _verifier():
             from cortex.engine.guard_adapters import VerifierGuardAdapter
+
             return VerifierGuardAdapter()
 
         def _zk():
             from cortex.engine.guard_adapters import ZKGuardAdapter
+
             return ZKGuardAdapter()
 
         def _virgo():
             from cortex.engine.guard_adapters import VirgoGuardAdapter
+
             return VirgoGuardAdapter(self)  # type: ignore
 
         def _omega():
             from cortex.engine.guard_adapters import OmegaGuardAdapter
+
             return OmegaGuardAdapter()
 
         def _arch():
             from cortex.engine.guard_adapters import ArchaeologyGuardAdapter
+
             return ArchaeologyGuardAdapter()
 
         self._try_add(pipeline, "HealthGuardAdapter", _health, is_hook=False)
@@ -193,14 +200,17 @@ class ComponentsMixin:
 
         def _ledger():
             from cortex.engine.guard_adapters import LedgerCheckpointHook
+
             return LedgerCheckpointHook(self)  # type: ignore
 
         def _signal():
             from cortex.engine.guard_adapters import SignalEmitHook
+
             return SignalEmitHook()
 
         def _epistemic():
             from cortex.engine.guard_adapters import EpistemicBreakerHook
+
             return EpistemicBreakerHook()
 
         self._try_add(pipeline, "LedgerCheckpointHook", _ledger, is_hook=True)
