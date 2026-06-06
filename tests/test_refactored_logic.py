@@ -3,11 +3,14 @@ import pytest
 
 pytest.importorskip("numpy")
 import asyncio
+import sqlite3
 import numpy as np
 from cortex.core.lineage import LineageVerifier
 from cortex.memory.memory_archaeology import MemoryArchaeologist
 from dataclasses import dataclass
+from types import SimpleNamespace
 from typing import Any
+from unittest.mock import AsyncMock
 
 
 @dataclass
@@ -141,3 +144,35 @@ def test_archaeologist_no_clusters():
 
     clusters = archaeologist._build_clusters(facts, vecs_matrix, threshold=0.9)
     assert len(clusters) == 0  # nosec B101
+
+
+@pytest.mark.asyncio
+async def test_archaeologist_rejects_mixed_tenant_cluster_before_store():
+    l2_conn = sqlite3.connect(":memory:")
+    dummy_engine = SimpleNamespace(
+        memory=SimpleNamespace(_l2=SimpleNamespace(_get_conn=lambda: l2_conn)),
+        store=AsyncMock(),
+        _resolve_tenant=lambda tenant_id: tenant_id,
+        get_conn=AsyncMock(),
+    )
+    archaeologist = MemoryArchaeologist(engine=dummy_engine)
+    archaeologist.llm = SimpleNamespace(
+        agenerate=AsyncMock(return_value=SimpleNamespace(text="condensed pattern"))
+    )
+
+    facts = [
+        {"id": 1, "tenant_id": "tenant-a", "content": "alpha", "parent_decision_id": None},
+        {"id": 2, "tenant_id": "tenant-b", "content": "beta", "parent_decision_id": None},
+    ]
+
+    with pytest.raises(ValueError, match="multiple tenants"):
+        await archaeologist._synthesize_and_update(
+            project="test",
+            tenant_id="tenant-a",
+            clusters=[[0, 1]],
+            facts=facts,
+            simulate=False,
+        )
+
+    dummy_engine.store.assert_not_called()
+    l2_conn.close()

@@ -86,9 +86,6 @@ class EventLedgerL3:
 
     async def _get_last_hash(self, tenant_id: str) -> str:
         """Fetch the signature of the last event for a tenant to continue the chain."""
-        if tenant_id in self._last_hash_cache:
-            return self._last_hash_cache[tenant_id]
-
         cursor = await self._conn.execute(
             """SELECT signature FROM memory_events
                WHERE tenant_id = ?
@@ -103,31 +100,16 @@ class EventLedgerL3:
 
     async def append_event(self, event: MemoryEvent) -> None:
         """Persist an event immutably. Fire-and-commit with SHA-3-256 integrity."""
-        import hashlib
-
         from cortex.engine.causal.taint_engine import enforce_taint_check
 
+        await self.ensure_table()
         token = event.metadata.get("cortex_taint") if event.metadata else None
         await enforce_taint_check(self._conn, token, event.content)
 
-        await self.ensure_table()
-
-        # [GOVERNANCE] Calculate the cryptographic chain if signature is missing
-        if not event.signature:
-            prev_hash = await self._get_last_hash(event.tenant_id)
-            # Immutability payload: event identity + content + provenance
-            # [GOVERNANCE] Content is now hashed into the signature payload.
-            content_hash = hashlib.sha3_256(event.content.encode()).hexdigest()
-            payload = (
-                f"{event.event_id}:{event.timestamp.isoformat()}:"
-                f"{event.tenant_id}:{event.role}:{content_hash}:{prev_hash}"
-            )
-            signature = hashlib.sha3_256(payload.encode()).hexdigest()
-
-            # Update event model in-place (since it's a Pydantic model)
-            # Using object.__setattr__ if the model is frozen (which it is)
-            object.__setattr__(event, "prev_hash", prev_hash)
-            object.__setattr__(event, "signature", signature)
+        prev_hash = await self._get_last_hash(event.tenant_id)
+        signature = _compute_event_signature(event, prev_hash)
+        object.__setattr__(event, "prev_hash", prev_hash)
+        object.__setattr__(event, "signature", signature)
 
         await self._conn.execute(
             """INSERT OR IGNORE INTO memory_events
@@ -211,7 +193,8 @@ class EventLedgerL3:
 
         await self.ensure_table()
         cursor = await self._conn.execute(
-            """SELECT event_id, timestamp, role, content, tenant_id, prev_hash, signature
+            """SELECT event_id, timestamp, role, content, token_count,
+                      session_id, tenant_id, prev_hash, signature, metadata
                FROM memory_events
                WHERE tenant_id = ?
                ORDER BY rowid ASC""",
@@ -225,7 +208,7 @@ class EventLedgerL3:
 
         async for row in cursor:
             count += 1
-            eid, ts, role, content, tid, prev_hash, sig = row
+            eid, ts, role, content, token_count, session_id, tid, prev_hash, sig, metadata = row
 
             # 1. Verify Hash Continuity
             if prev_hash != last_sig:
@@ -236,9 +219,17 @@ class EventLedgerL3:
                 is_corrupt = True
 
             # 2. Verify Signature Integrity
-            content_hash = hashlib.sha3_256(content.encode()).hexdigest()
-            payload = f"{eid}:{ts}:{tid}:{role}:{content_hash}:{prev_hash}"
-            expected_sig = hashlib.sha3_256(payload.encode()).hexdigest()
+            expected_sig = _compute_event_signature_from_parts(
+                event_id=eid,
+                timestamp=ts,
+                tenant_id=tid,
+                role=role,
+                content=content,
+                token_count=token_count,
+                session_id=session_id,
+                metadata=json.loads(metadata) if metadata else {},
+                prev_hash=prev_hash,
+            )
 
             if sig != expected_sig:
                 audit_log.append(
@@ -261,6 +252,47 @@ class EventLedgerL3:
             "findings": audit_log or ["Memory event chain shows 100% integrity."],
             "timestamp": datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat(),
         }
+
+
+def _canonical_metadata(metadata: dict[str, Any]) -> str:
+    return json.dumps(metadata, sort_keys=True, separators=(",", ":"))
+
+
+def _compute_event_signature(event: MemoryEvent, prev_hash: str) -> str:
+    return _compute_event_signature_from_parts(
+        event_id=event.event_id,
+        timestamp=event.timestamp.isoformat(),
+        tenant_id=event.tenant_id,
+        role=event.role,
+        content=event.content,
+        token_count=event.token_count,
+        session_id=event.session_id,
+        metadata=event.metadata,
+        prev_hash=prev_hash,
+    )
+
+
+def _compute_event_signature_from_parts(
+    *,
+    event_id: str,
+    timestamp: str,
+    tenant_id: str,
+    role: str,
+    content: str,
+    token_count: int,
+    session_id: str,
+    metadata: dict[str, Any],
+    prev_hash: str,
+) -> str:
+    import hashlib
+
+    content_hash = hashlib.sha3_256(content.encode()).hexdigest()
+    metadata_hash = hashlib.sha3_256(_canonical_metadata(metadata).encode()).hexdigest()
+    payload = (
+        f"{event_id}:{timestamp}:{tenant_id}:{role}:{content_hash}:"
+        f"{token_count}:{session_id}:{metadata_hash}:{prev_hash}"
+    )
+    return hashlib.sha3_256(payload.encode()).hexdigest()
 
 
 def _row_to_event(row: tuple) -> MemoryEvent:

@@ -1,5 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 import asyncio
+import os
 import random
 import time
 from contextlib import asynccontextmanager
@@ -20,7 +21,14 @@ from cortex.engine.rollback_engine import CausalRollbackEngine
 from cortex.ledger.causal_graph import CausalGraph
 from cortex.ledger.execution_trace import ExecutionTraceLedger
 
-CORTEX_DB_PATH = str(Path("~/.cortex/cortex_engine.db").expanduser())
+CORTEX_DB_PATH = os.getenv(
+    "CORTEX_DB_PATH",
+    (
+        "/tmp/cortex_engine.db"
+        if os.getenv("VERCEL")
+        else str(Path("~/.cortex/cortex_engine.db").expanduser())
+    ),
+)
 
 
 @asynccontextmanager

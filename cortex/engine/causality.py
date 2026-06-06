@@ -113,7 +113,7 @@ class AsyncCausalGraph:
             logger.warning(f"Rust ATMS disabled: {e}")
             self.atms = None
 
-    async def ensure_table(self) -> None:
+    async def ensure_table(self, *, commit: bool = True) -> None:
         await self.conn.execute(
             """
             CREATE TABLE IF NOT EXISTS causal_edges (
@@ -133,19 +133,23 @@ class AsyncCausalGraph:
             )
             """
         )
-        await self.conn.execute(
-            "CREATE UNIQUE INDEX IF NOT EXISTS idx_causal_edges_hash ON causal_edges(fact_hash)"
-        )
+        cols = await self._causal_edge_columns()
         await self.conn.execute(
             "CREATE INDEX IF NOT EXISTS idx_causal_fact ON causal_edges(fact_id)"
         )
         await self.conn.execute(
             "CREATE INDEX IF NOT EXISTS idx_causal_parent ON causal_edges(parent_id)"
         )
-        await self.conn.execute(
-            "CREATE INDEX IF NOT EXISTS idx_causal_tenant ON causal_edges(tenant_id)"
-        )
-        await self.conn.commit()
+        if "tenant_id" in cols:
+            await self.conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_causal_tenant ON causal_edges(tenant_id)"
+            )
+        if "fact_hash" in cols:
+            await self.conn.execute(
+                "CREATE UNIQUE INDEX IF NOT EXISTS idx_causal_edges_hash ON causal_edges(fact_hash)"
+            )
+        if commit:
+            await self.conn.commit()
 
     async def _causal_edge_columns(self) -> set[str]:
         cursor = await self.conn.execute("PRAGMA table_info(causal_edges)")
@@ -165,6 +169,7 @@ class AsyncCausalGraph:
         fact_hash: str | None = None,
         parent_hash: str | None = None,
     ) -> None:
+        await self.ensure_table(commit=False)
 
         import sqlite3
 

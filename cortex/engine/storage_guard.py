@@ -56,7 +56,7 @@ class StorageGuard:
 
         Raises GuardViolation with the specific rule that was violated.
         """
-        effective_source = source or "unknown"
+        effective_source = source.strip() if isinstance(source, str) else ""
 
         # Defensive coercion for tags before passing to Rust
         if isinstance(tags, str):
@@ -73,7 +73,10 @@ class StorageGuard:
         elif not fact_type:
             error_tuple = ("INVALID_FACT_TYPE", "fact_type cannot be empty")
         elif not effective_source:
-            error_tuple = ("INVALID_SOURCE", "source cannot be empty")
+            error_tuple = (
+                "SOURCE_REQUIRED",
+                "source attribution is mandatory. Use 'cli', 'agent:<name>', 'api', or 'human'.",
+            )
 
         if error_tuple is not None:
             rule, detail = error_tuple

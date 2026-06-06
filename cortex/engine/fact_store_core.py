@@ -58,11 +58,13 @@ async def _resolve_causal_parent(
     """Validate or auto-resolve the parent decision link."""
     if parent_decision_id is not None:
         async with conn.execute(
-            "SELECT id FROM facts WHERE id = ?", (parent_decision_id,)
+            "SELECT id FROM facts WHERE id = ? AND tenant_id = ?",
+            (parent_decision_id, tenant_id),
         ) as cursor:
             if await cursor.fetchone() is None:
-                logger.warning("parent_decision_id=%d non-existent - cleared", parent_decision_id)
-                return None
+                raise ValueError(
+                    f"parent_decision_id={parent_decision_id} is missing or cross-tenant"
+                )
         return parent_decision_id
 
     if fact_type in ("decision", "error"):
@@ -92,6 +94,7 @@ async def insert_fact_record(
     meta: dict[str, Any] | None,
     tx_id: int | None,
     parent_decision_id: int | None = None,
+    taint_already_verified: bool = False,
 ) -> int:
     """Perform the actual SQL insert into the facts table."""
     ts = ts or now_iso()
@@ -100,7 +103,7 @@ async def insert_fact_record(
     from cortex.engine.causal.taint_engine import enforce_taint_check
 
     # Edge sensor telemetry is authenticated via X-Cortex-Source header, not taint tokens
-    if fact_type not in ("telemetry_batch", "mafia_node"):
+    if not taint_already_verified and fact_type not in ("telemetry_batch", "mafia_node"):
         token = meta.get("cortex_taint") if meta else None
         await enforce_taint_check(conn, token, content)
 
@@ -241,39 +244,36 @@ async def _record_causality(
     parent_decision_id: int | None,
 ) -> None:
     """Record causal linkage for the fact."""
-    try:
-        from cortex.engine.causality import (
-            EDGE_DERIVED_FROM,
-            EDGE_TRIGGERED_BY,
-            EDGE_UPDATED_FROM,
-            AsyncCausalGraph,
+    from cortex.engine.causality import (
+        EDGE_DERIVED_FROM,
+        EDGE_TRIGGERED_BY,
+        EDGE_UPDATED_FROM,
+        AsyncCausalGraph,
+    )
+
+    p_sig = meta.get("causal_parent")
+    p_fact = meta.get("previous_fact_id")
+
+    graph = AsyncCausalGraph(conn)
+
+    if p_sig or p_fact:
+        e_type = EDGE_UPDATED_FROM if p_fact else EDGE_TRIGGERED_BY
+        await graph.record_edge(
+            fact_id=fact_id,
+            parent_id=p_fact,
+            signal_id=p_sig,
+            edge_type=e_type,
+            project=project,
+            tenant_id=tenant_id,
         )
-
-        p_sig = meta.get("causal_parent")
-        p_fact = meta.get("previous_fact_id")
-
-        graph = AsyncCausalGraph(conn)
-
-        if p_sig or p_fact:
-            e_type = EDGE_UPDATED_FROM if p_fact else EDGE_TRIGGERED_BY
-            await graph.record_edge(
-                fact_id=fact_id,
-                parent_id=p_fact,
-                signal_id=p_sig,
-                edge_type=e_type,
-                project=project,
-                tenant_id=tenant_id,
-            )
-        elif parent_decision_id:
-            await graph.record_edge(
-                fact_id=fact_id,
-                parent_id=parent_decision_id,
-                edge_type=EDGE_DERIVED_FROM,
-                project=project,
-                tenant_id=tenant_id,
-            )
-    except Exception as e:
-        logger.error("Failed to record causality for fact %d: %s", fact_id, e)
+    elif parent_decision_id:
+        await graph.record_edge(
+            fact_id=fact_id,
+            parent_id=parent_decision_id,
+            edge_type=EDGE_DERIVED_FROM,
+            project=project,
+            tenant_id=tenant_id,
+        )
 
 
 async def _post_insert_actions(

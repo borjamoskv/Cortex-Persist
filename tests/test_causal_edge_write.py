@@ -249,6 +249,69 @@ async def test_auto_resolved_parent_creates_edge(
 
 
 @pytest.mark.asyncio
+async def test_parent_decision_id_cross_tenant_rejected(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A parent from another tenant must be rejected before persistence."""
+    monkeypatch.setattr(
+        "cortex.engine.fact_store_core.compute_fact_hash",
+        lambda x: "deadbeef",
+    )
+
+    class FakeEnc:
+        def encrypt_str(self, s: str, **kw: object) -> str:
+            return s
+
+        def encrypt_json(self, d: object, **kw: object) -> str:
+            return json.dumps(d)
+
+    monkeypatch.setattr("cortex.crypto.get_default_encrypter", lambda: FakeEnc())
+
+    class FakeSigner:
+        can_sign = False
+
+    monkeypatch.setattr(
+        "cortex.extensions.security.signatures.get_default_signer",
+        lambda: FakeSigner(),
+    )
+
+    conn = await aiosqlite.connect(":memory:")
+    await _setup_db(conn)
+
+    await conn.execute(
+        "INSERT INTO facts (id, project, content, fact_type, tenant_id, is_tombstoned) "
+        "VALUES (100, 'test', 'parent', 'decision', 'alpha', 0)"
+    )
+    await conn.commit()
+
+    with pytest.raises(ValueError, match="cross-tenant"):
+        await insert_fact_record(
+            conn,
+            tenant_id="beta",
+            project="test",
+            content="child decision",
+            fact_type="decision",
+            tags=["test"],
+            confidence="stated",
+            ts=None,
+            source=None,
+            meta={},
+            tx_id=None,
+            parent_decision_id=100,
+        )
+
+    async with conn.execute("SELECT COUNT(*) FROM facts") as cursor:
+        fact_count = await cursor.fetchone()
+    async with conn.execute("SELECT COUNT(*) FROM causal_edges") as cursor:
+        edge_count = await cursor.fetchone()
+
+    assert fact_count[0] == 1
+    assert edge_count[0] == 0
+
+    await conn.close()
+
+
+@pytest.mark.asyncio
 async def test_no_duplicate_edge_when_causal_parent_exists(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -312,5 +375,78 @@ async def test_no_duplicate_edge_when_causal_parent_exists(
     assert len(fact_edges) == 1
     assert fact_edges[0][2] == 999  # signal_id
     assert fact_edges[0][3] == "triggered_by"
+
+    await conn.close()
+
+
+@pytest.mark.asyncio
+async def test_causal_write_fails_closed_when_edge_recording_fails(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """If causal edge persistence fails, the write must abort loudly."""
+    monkeypatch.setattr(
+        "cortex.engine.fact_store_core.compute_fact_hash",
+        lambda x: "deadbeef",
+    )
+
+    class FakeEnc:
+        def encrypt_str(self, s: str, **kw: object) -> str:
+            return s
+
+        def encrypt_json(self, d: object, **kw: object) -> str:
+            return json.dumps(d)
+
+    monkeypatch.setattr("cortex.crypto.get_default_encrypter", lambda: FakeEnc())
+
+    class FakeSigner:
+        can_sign = False
+
+    monkeypatch.setattr(
+        "cortex.extensions.security.signatures.get_default_signer",
+        lambda: FakeSigner(),
+    )
+
+    async def boom(*args: object, **kwargs: object) -> None:
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr(
+        "cortex.engine.causality.AsyncCausalGraph.record_edge",
+        boom,
+    )
+
+    conn = await aiosqlite.connect(":memory:")
+    await _setup_db(conn)
+
+    await conn.execute(
+        "INSERT INTO facts (id, project, content, fact_type, tenant_id, is_tombstoned) "
+        "VALUES (100, 'test', 'parent', 'decision', 'default', 0)"
+    )
+    await conn.commit()
+
+    with pytest.raises(RuntimeError, match="boom"):
+        await insert_fact_record(
+            conn,
+            tenant_id="default",
+            project="test",
+            content="child decision",
+            fact_type="decision",
+            tags=["test"],
+            confidence="stated",
+            ts=None,
+            source=None,
+            meta={},
+            tx_id=None,
+            parent_decision_id=100,
+        )
+
+    await conn.rollback()
+
+    async with conn.execute("SELECT COUNT(*) FROM facts") as cursor:
+        fact_count = await cursor.fetchone()
+    async with conn.execute("SELECT COUNT(*) FROM causal_edges") as cursor:
+        edge_count = await cursor.fetchone()
+
+    assert fact_count[0] == 1
+    assert edge_count[0] == 0
 
     await conn.close()

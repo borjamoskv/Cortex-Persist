@@ -25,25 +25,33 @@ class DelegatesMixin:
         query: str,
         project: str = "",
         limit: int = 3,
+        tenant_id: str = "default",
     ) -> list:
         """Recall causal episodes matching a query."""
         from cortex.memory.episodic import CausalTracer
 
         async with self.session() as conn:  # pyright: ignore[reportAttributeAccessIssue]
             tracer = CausalTracer(conn)
-            return await tracer.recall_episode(query, project, limit)
+            resolved_tenant_id = self._resolve_tenant(tenant_id)  # pyright: ignore[reportAttributeAccessIssue]
+            return await tracer.recall_episode(
+                query, project, limit, tenant_id=resolved_tenant_id
+            )
 
     async def trace_episode(
         self,
         fact_id: int,
         max_depth: int | None = None,
+        tenant_id: str = "default",
     ):
         """Trace the full causal DAG from a given fact ID."""
         from cortex.memory.episodic import CausalTracer
 
         async with self.session() as conn:  # pyright: ignore[reportAttributeAccessIssue]
             tracer = CausalTracer(conn)
-            return await tracer.trace_episode(fact_id, max_depth)
+            resolved_tenant_id = self._resolve_tenant(tenant_id)  # pyright: ignore[reportAttributeAccessIssue]
+            return await tracer.trace_episode(
+                fact_id, max_depth, tenant_id=resolved_tenant_id
+            )
 
     async def store(self, *args, **kwargs):
         self._synthesize_skill("store")  # pyright: ignore[reportAttributeAccessIssue]

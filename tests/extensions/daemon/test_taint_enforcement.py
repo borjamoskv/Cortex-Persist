@@ -11,9 +11,9 @@ from datetime import datetime, timezone, timedelta
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from cryptography.hazmat.primitives.serialization import (
     Encoding,
-    PublicFormat,
     PrivateFormat,
     NoEncryption,
+    PublicFormat,
 )
 
 from cortex.engine.causal.taint_engine import (
@@ -238,6 +238,86 @@ async def test_fact_store_core_taint_rejection(agent_keys):
                 meta={"cortex_taint": valid_token},
                 tx_id=None,
             )
+
+
+@pytest.mark.asyncio
+async def test_store_mixin_taint_rejection_precedes_transaction(agent_keys, tmp_path):
+    """StoreMixin must reject missing taint before appending to the transaction ledger."""
+    _priv, pub = agent_keys
+    from cortex.engine import CortexEngine
+
+    db_path = tmp_path / "store_taint.db"
+    engine = CortexEngine(db_path=str(db_path), auto_embed=False)
+    await engine.init_db()
+    try:
+        async with engine.session() as conn:
+            await conn.execute(
+                "INSERT INTO agents (id, name, agent_type, reputation_score, public_key, tenant_id) "
+                "VALUES (?, ?, ?, 1.0, ?, 'default')",
+                ("agent_1", "TestAgent", "ai", pub),
+            )
+            await conn.commit()
+
+        with pytest.raises(TaintValidationError):
+            await engine.store(
+                project="default",
+                content="StoreMixin rejects this fact before writing a ledger transaction.",
+                fact_type="knowledge",
+                source="agent:test_suite",
+                meta={},
+            )
+
+        async with engine.session() as conn:
+            cursor = await conn.execute("SELECT COUNT(*) FROM transactions")
+            row = await cursor.fetchone()
+            assert row[0] == 0
+    finally:
+        await engine.close()
+
+
+@pytest.mark.asyncio
+async def test_store_mixin_guard_runtime_error_fails_closed(monkeypatch, tmp_path):
+    """Unexpected guard failures must abort instead of being downgraded to writes."""
+    from cortex.engine import CortexEngine
+
+    db_path = tmp_path / "store_guard.db"
+    engine = CortexEngine(db_path=str(db_path), auto_embed=False)
+    await engine.init_db()
+    try:
+        async def fail_guard(*args, **kwargs):
+            raise RuntimeError("guard runtime failure")
+
+        monkeypatch.setattr(engine._guard_pipeline, "run_guards", fail_guard)
+        with pytest.raises(RuntimeError, match="guard runtime failure"):
+            await engine.store(
+                project="default",
+                content="Guard runtime failure must abort before persistence.",
+                fact_type="knowledge",
+                source="agent:test_suite",
+                meta={},
+            )
+
+        async with engine.session() as conn:
+            cursor = await conn.execute("SELECT COUNT(*) FROM transactions")
+            row = await cursor.fetchone()
+            assert row[0] == 0
+    finally:
+        await engine.close()
+
+
+def test_storage_guard_rejects_missing_source():
+    from cortex.engine.storage_guard import GuardViolation, StorageGuard
+
+    with pytest.raises(GuardViolation, match="SOURCE_REQUIRED"):
+        StorageGuard.validate(
+            project="default",
+            content="Source attribution is mandatory for this store proposal.",
+            fact_type="knowledge",
+            source=None,
+            confidence="C5",
+            tags=None,
+            meta={},
+        )
 
 
 @pytest.mark.asyncio

@@ -19,7 +19,6 @@ benchmarks
 public
 dist
 cortex_mev_base
-extensions
 .ruff_cache
 *.bin
 .quarantine

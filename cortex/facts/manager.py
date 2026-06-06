@@ -110,6 +110,13 @@ class FactManager:
         **kwargs,
     ) -> int:
         meta = dict(meta) if meta else {}
+        actor_id = kwargs.get("actor_id")
+        if source is None and actor_id:
+            source = (
+                actor_id
+                if isinstance(actor_id, str) and actor_id.startswith(("agent:", "cli", "api", "human"))
+                else f"agent:{actor_id}"
+            )
         if source and "source" not in meta:
             meta["source"] = source
         for k, v in kwargs.items():
@@ -199,6 +206,7 @@ class FactManager:
             tags,
             confidence,
             source,
+            actor_id,
             meta,
             valid_from,
             commit,

@@ -194,6 +194,9 @@ class MemoryArchaeologist:
                 continue
 
             cluster_facts = [facts[idx] for idx in cluster_indices]
+            if any(str(f.get("tenant_id") or "default") != tenant_id for f in cluster_facts):
+                raise ValueError("Archaeology cluster spans multiple tenants")
+
             content_list = [f"- {f['content']}" for f in cluster_facts]
             prompt = (
                 "You are an expert memory consolidator for CORTEX. "
@@ -254,8 +257,6 @@ class MemoryArchaeologist:
 
         placeholders = ",".join("?" for _ in old_ids)
         async with self.engine.session() as conn:
-            if any(str(f.get("tenant_id") or "default") != tenant_id for f in cluster_facts):
-                raise ValueError("Archaeology cluster spans multiple tenants")
             for fact in cluster_facts:
                 await MUTATION_ENGINE.apply(
                     conn,

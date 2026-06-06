@@ -99,7 +99,6 @@ def _check_and_register_nonce_sync(conn, nonce: str) -> bool:
     if cursor.fetchone():
         return False
     conn.execute("INSERT INTO taint_nonces (nonce, timestamp) VALUES (?, ?)", (nonce, time.time()))
-    conn.commit()
     return True
 
 
@@ -116,7 +115,6 @@ async def _check_and_register_nonce_async(conn, nonce: str) -> bool:
     await conn.execute(
         "INSERT INTO taint_nonces (nonce, timestamp) VALUES (?, ?)", (nonce, time.time())
     )
-    await conn.commit()
     return True
 
 
