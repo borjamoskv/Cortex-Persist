@@ -31,9 +31,7 @@ async def _check_blocking_sleep(exclude_files: frozenset[str]) -> list[str]:
                     ):
                         violations.append(f"{py_file.name}:{node.lineno}")
         except SyntaxError:
-            import logging
-
-            pass
+            continue
     return violations
 
 
@@ -66,9 +64,7 @@ async def _check_temperature_determinism(critical_files: list[Path]) -> list[str
             if has_temp and (not has_zero):
                 violations.append(path.name)
         except SyntaxError:
-            import logging
-
-            pass
+            continue
     return violations
 
 
@@ -155,7 +151,7 @@ async def check_seal_7_axiom_registry() -> GateResult:
             printer.success(f"Registry: {total} Sovereign Axioms, {enf} CI-enforced.")
     except ImportError:
         printer.warn("Axioms extension not found. Skipping registry check.")
-    except Exception as e:
+    except (AttributeError, TypeError, ValueError) as e:
         printer.fail(f"Registry error: {e}")
         passed = False
     prompt_file = ROOT_DIR / "SYSTEM_PROMPT.md"

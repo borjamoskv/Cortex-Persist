@@ -8,8 +8,9 @@ and assigns a metabolic grade (A-F). Returns exit code 1 if Grade F.
 """
 
 import ast
-import sys
 import os
+import re
+import sys
 
 
 def check_file_entropy(filepath):
@@ -19,7 +20,7 @@ def check_file_entropy(filepath):
     try:
         with open(filepath, encoding="utf-8") as f:
             content = f.read()
-    except Exception:
+    except (OSError, UnicodeDecodeError):
         return 0, []
 
     # Penalty 1: LOC Entropy (Over 500 lines = +1 penalty per 100 extra)
@@ -30,8 +31,6 @@ def check_file_entropy(filepath):
         issues.append(f"LOC limit exceeded ({loc} lines). Penalty: +{extra}")
 
     # Penalty 2: AI Slop (TODOs, FIXMEs)
-    import re
-
     todos = len(re.findall(r"(?i)\b([t]odo|[f]ixme)\b", content))
     if todos > 0:
         penalties += todos * 2
@@ -110,7 +109,7 @@ def main(target_dir):
     total_entropy = 0
     all_issues = []
 
-    SKIP_DIRS = {".venv", ".git", "__pycache__", ".scratch", "tests", "cortex_mev_base", "node_modules", "sdks", "benchmarks", "tools", "cortex-core"}
+    SKIP_DIRS = {".venv", ".git", "__pycache__", ".scratch", ".quarantine", "tests", "cortex_mev_base", "node_modules", "sdks", "benchmarks", "tools", "cortex-core"}
 
     for root, dirs, files in os.walk(target_dir):
         # Filter directories in-place to avoid traversing into skipped directories
