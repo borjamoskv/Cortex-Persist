@@ -570,3 +570,10 @@ Proof:
 
 *∴ "The architecture refines its own truth."*
 
+
+### Hito 38: The Omega Singularity (CORTEX v10.0 Metabolism)
+- **Target:** `cortex/engine/omega_daemon.py`, `cortex/cli/omega_cmds.py`
+- **Objective:** Fusión del Swarm, Autopoiesis y Ledger en un único macro-organismo `OmegaDaemon` que reside en memoria y evalúa la termodinámica del sistema permanentemente.
+- **Yield Target:** Autonomous execution sin intervención humana (Zero-Prompt Operation) mediante el uso de `ExergyGuard` y `EntropySensor`.
+- **Reality Level:** `C6-SOVEREIGN`
+- **Status:** ✅ COMPLETE
