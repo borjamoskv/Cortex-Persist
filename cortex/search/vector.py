@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import logging
 import sqlite3
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import aiosqlite
 
@@ -14,6 +14,7 @@ if TYPE_CHECKING:
 
 from cortex.memory.temporal import build_temporal_filter_params
 from cortex.search.models import SearchResult
+from cortex.storage import StorageMode, get_storage_mode
 
 __all__ = ["semantic_search", "semantic_search_sync"]
 
@@ -25,7 +26,7 @@ _FILTER_ACTIVE = " AND f.valid_until IS NULL"
 
 
 async def semantic_search(
-    conn: aiosqlite.Connection,
+    conn: Any,
     query_embedding: list[float],
     top_k: int = 5,
     tenant_id: str = "default",
@@ -33,7 +34,58 @@ async def semantic_search(
     as_of: str | None = None,
     confidence: str | None = None,
 ) -> list[SearchResult]:
-    """Perform semantic vector search using sqlite-vec."""
+    """Perform semantic vector search using sqlite-vec or pgvector (PostgreSQL)."""
+    if get_storage_mode() == StorageMode.POSTGRES:
+        sql = """
+            SELECT
+                f.id, f.content, f.project, f.fact_type, f.confidence,
+                f.valid_from, f.valid_until, f.tags, f.source, f.meta as metadata,
+                (f.embedding <=> $1) as distance, f.created_at, f.updated_at, f.tx_id, t.hash
+            FROM facts AS f
+            LEFT JOIN transactions t ON f.tx_id = t.id
+            WHERE f.tenant_id = $2
+              AND f.embedding IS NOT NULL
+        """
+        params: list[Any] = [query_embedding, tenant_id]
+        param_idx = 3
+
+        if project:
+            sql += f" AND f.project = ${param_idx}"
+            params.append(project)
+            param_idx += 1
+
+        if as_of:
+            sql += f" AND f.valid_from <= ${param_idx} AND (f.valid_until IS NULL OR f.valid_until > ${param_idx}) AND f.is_tombstoned = FALSE"
+            params.append(as_of)
+            param_idx += 1
+        else:
+            sql += " AND f.valid_until IS NULL AND f.is_tombstoned = FALSE"
+
+        if confidence:
+            sql += f" AND f.confidence >= ${param_idx}"
+            params.append(confidence)
+            param_idx += 1
+
+        sql += f" ORDER BY f.embedding <=> $1 ASC LIMIT ${param_idx}"
+        params.append(top_k)
+
+        try:
+            if hasattr(conn, "fetch"):
+                rows = await conn.fetch(sql, *params)
+            elif hasattr(conn, "acquire"):
+                async with conn.acquire() as real_conn:
+                    rows = await real_conn.fetch(sql, *params)
+            else:
+                raise TypeError(f"PostgreSQL connection object has no fetch or acquire method: {type(conn)}")
+        except Exception as e:
+            logger.error("PostgreSQL pgvector search failed: %s", e)
+            return []
+
+        from cortex.crypto import get_default_encrypter
+        enc = get_default_encrypter()
+        return [_row_to_result(row, enc, tenant_id) for row in rows]
+
+    # Default SQLite-vec execution path
     embedding_json = json.dumps(query_embedding)
     sql, params = _build_semantic_query(
         tenant_id, embedding_json, top_k, project, as_of, confidence
@@ -50,7 +102,7 @@ async def semantic_search(
 
     enc = get_default_encrypter()
 
-    return [_row_to_result(row, enc, tenant_id) for row in rows[:top_k]]  # type: ignore[reportIndexIssue]
+    return [_row_to_result(row, enc, tenant_id) for row in rows[:top_k]]
 
 
 def _build_semantic_query(
@@ -98,12 +150,24 @@ def _build_semantic_query(
 def _row_to_result(row: tuple, enc: CortexEncrypter, tenant_id: str) -> SearchResult:
     """Helper to parse a search result row with decryption and metadata processing."""
     try:
-        tags = json.loads(row[7]) if row[7] else []
+        if isinstance(row[7], list):
+            tags = row[7]
+        else:
+            tags = json.loads(row[7]) if row[7] else []
     except (json.JSONDecodeError, TypeError):
         tags = []
 
     try:
-        meta = json.loads(row[9]) if row[9] else {}
+        if isinstance(row[9], dict):
+            meta = row[9]
+        elif row[9] and str(row[9]).startswith(enc.PREFIX):
+            try:
+                meta = enc.decrypt_json(row[9], tenant_id=tenant_id)
+            except (ValueError, OSError) as e:
+                logger.error("Vector meta decryption failed for tenant %s: %s", tenant_id, e)
+                meta = {}
+        else:
+            meta = json.loads(row[9]) if row[9] else {}
     except (json.JSONDecodeError, TypeError):
         meta = {}
 
@@ -113,12 +177,6 @@ def _row_to_result(row: tuple, enc: CortexEncrypter, tenant_id: str) -> SearchRe
             content = enc.decrypt_str(content, tenant_id=tenant_id)
         except (ValueError, OSError) as e:
             logger.error("Vector content decryption failed for tenant %s: %s", tenant_id, e)
-
-    if row[9] and str(row[9]).startswith(enc.PREFIX):
-        try:
-            meta = enc.decrypt_json(row[9], tenant_id=tenant_id)
-        except (ValueError, OSError) as e:
-            logger.error("Vector meta decryption failed for tenant %s: %s", tenant_id, e)
 
     score = 1.0 - (row[10] if row[10] else 0.0)
 

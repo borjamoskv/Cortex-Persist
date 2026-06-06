@@ -12,7 +12,6 @@ import asyncio
 import logging
 import math
 import sqlite3
-import time
 from datetime import datetime, timezone
 from typing import Final
 
@@ -47,11 +46,14 @@ def _apply_temporal_decay(results: list[SearchResult], recency_weight: float) ->
 
     Final score = rrf_score * (1 - w) + recency_factor * w
     """
-    now = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc)
+    now = datetime.now(timezone.utc)
     for r in results:
         try:
-            # Parse created_at (ISO format from SQLite)
-            created = datetime.fromisoformat(r.created_at.replace("Z", "+00:00"))
+            if isinstance(r.created_at, datetime):
+                created = r.created_at
+            else:
+                # Parse created_at (ISO format from SQLite)
+                created = datetime.fromisoformat(str(r.created_at).replace("Z", "+00:00"))
             if created.tzinfo is None:
                 created = created.replace(tzinfo=timezone.utc)
             age_days = (now - created).total_seconds() / 86400.0

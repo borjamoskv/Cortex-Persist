@@ -189,7 +189,7 @@ class TestTemporalDecay:
     def test_recent_facts_score_higher(self):
         from cortex.search.hybrid import _apply_temporal_decay
 
-        now = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc)
+        now = datetime.now(timezone.utc)
         recent = self._make_result(1, 0.5, now.isoformat())
         old = self._make_result(2, 0.5, (now - timedelta(days=365)).isoformat())
         results = _apply_temporal_decay([old, recent], recency_weight=0.3)
@@ -199,7 +199,7 @@ class TestTemporalDecay:
     def test_zero_weight_no_change(self):
         from cortex.search.hybrid import _apply_temporal_decay
 
-        now = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc)
+        now = datetime.now(timezone.utc)
         r = self._make_result(1, 0.5, now.isoformat())
         results = _apply_temporal_decay([r], recency_weight=0.0)
         assert abs(results[0].score - 0.5) < 0.01

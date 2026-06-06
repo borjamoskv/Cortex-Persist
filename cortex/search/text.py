@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import sqlite3
+from typing import Any
 
 import aiosqlite
 
@@ -16,6 +17,7 @@ from cortex.search.utils import (
     _rows_to_results,
     _sanitize_fts_query,
 )
+from cortex.storage import StorageMode, get_storage_mode
 
 __all__ = ["text_search", "text_search_sync"]
 
@@ -25,7 +27,7 @@ _PROJECT_FILTER = " AND f.project = ?"
 
 
 async def text_search(
-    conn: aiosqlite.Connection,
+    conn: Any,
     query: str,
     tenant_id: str = "default",
     project: str | None = None,
@@ -37,6 +39,16 @@ async def text_search(
     **kwargs,
 ) -> list[SearchResult]:
     """Perform text search (async)."""
+    if get_storage_mode() == StorageMode.POSTGRES:
+        try:
+            rows = await _postgres_text_search(
+                conn, query, tenant_id, project, fact_type, tags, limit, as_of, confidence
+            )
+            return _rows_to_results(rows, is_fts=False)
+        except Exception as e:
+            logger.error("Postgres text search failed: %s", e)
+            return []
+
     use_fts = await _has_fts5(conn)
     try:
         if use_fts:
@@ -51,6 +63,69 @@ async def text_search(
         logger.error("Text search failed: %s", e)
         return []
     return _rows_to_results(rows, is_fts=use_fts)
+
+
+async def _postgres_text_search(
+    conn: Any,
+    query: str,
+    tenant_id: str,
+    project: str | None,
+    fact_type: str | None,
+    tags: list[str] | None,
+    limit: int,
+    as_of: str | None,
+    confidence: str | None,
+) -> list:
+    sql = """
+        SELECT f.id, f.content, f.project, f.fact_type, f.confidence,
+               f.valid_from, f.valid_until, f.tags, f.source, f.meta as metadata,
+               f.created_at, f.updated_at, f.tx_id, t.hash,
+               f.consensus_score, 1.0::double precision as confidence_rank
+        FROM facts f
+        LEFT JOIN transactions t ON f.tx_id = t.id
+        WHERE f.tenant_id = $1 AND f.content ILIKE $2
+    """
+    params: list = [tenant_id, f"%{query}%"]
+    param_idx = 3
+
+    if as_of:
+        sql += f" AND f.valid_from <= ${param_idx} AND (f.valid_until IS NULL OR f.valid_until > ${param_idx}) AND f.is_tombstoned = FALSE"
+        params.append(as_of)
+        param_idx += 1
+    else:
+        sql += " AND f.valid_until IS NULL AND f.is_tombstoned = FALSE"
+
+    if project:
+        sql += f" AND f.project = ${param_idx}"
+        params.append(project)
+        param_idx += 1
+
+    if fact_type:
+        sql += f" AND f.fact_type = ${param_idx}"
+        params.append(fact_type)
+        param_idx += 1
+
+    if tags:
+        for tag in tags:
+            sql += f" AND f.tags ILIKE ${param_idx}"
+            params.append(f"%{tag}%")
+            param_idx += 1
+
+    if confidence:
+        sql += f" AND f.confidence >= ${param_idx}"
+        params.append(confidence)
+        param_idx += 1
+
+    sql += f" ORDER BY f.updated_at DESC LIMIT ${param_idx}"
+    params.append(limit)
+
+    if hasattr(conn, "fetch"):
+        return await conn.fetch(sql, *params)
+    elif hasattr(conn, "acquire"):
+        async with conn.acquire() as real_conn:
+            return await real_conn.fetch(sql, *params)
+    else:
+        raise TypeError(f"PostgreSQL connection object has no fetch or acquire method: {type(conn)}")
 
 
 async def _fts5_search(

@@ -714,6 +714,7 @@ Proof:
   Base: "War Council, OSC Bridge, SAGA-4 Cryptography y Temporal KG integrados en runtime C5-REAL."
   Range: [C5, C5]
   Confidence: C5-REAL
+```
 
 ---
 
@@ -735,4 +736,20 @@ Proof:
 - **Status:** ✅ COMPLETE — 6 Junio 2026
 - **Evidence:** Commit `d70bd5e8`
 
+---
+
+### Hito 46: PostgreSQL & pgvector Search Support
+- **Target:** [hybrid.py](file:///Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/search/hybrid.py), [text.py](file:///Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/search/text.py), [utils.py](file:///Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/search/utils.py), [vector.py](file:///Users/borjafernandezangulo/10_PROJECTS/cortex-persist/cortex/search/vector.py)
+- **Objective:** Add native support for PostgreSQL and pgvector cosine similarity search (`<=>`) for hybrid semantic-lexical queries. Ensure robust type handling for Postgres-deserialized JSONB/arrays (avoiding crashes on string vs dictionary/list inputs) and timezone-aware native datetimes during temporal decay computations.
+- **Yield Target:** Green test suite covering PostgreSQL-specific SQL parsing, mock connection execution, and row mapping.
+- **Reality Level:** `C5-REAL`
+- **Status:** ✅ COMPLETE — 6 Junio 2026
+- **Evidence:** pytest execution passing on `tests/test_postgres_search.py` and `tests/test_intelligence_upgrade.py`.
+```yaml
+Claim: Postgres and pgvector search pathways are robustly implemented and tested
+Proof:
+  Base: "MockPostgresConn test execution verifying pgvector <=> distance query, trigram ILIKE text queries, and dictionary/list/datetime parsing."
+  Range: [C5, C5]
+  Confidence: C5-REAL
+  Date: 2026-06-06
 ```

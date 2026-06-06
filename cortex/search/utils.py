@@ -81,7 +81,10 @@ def _row_to_result(row: Any, is_fts: bool = False) -> SearchResult:
 
     # Process Tags (index 7)
     try:
-        tags = json.loads(row[7]) if len(row) > 7 and row[7] else []
+        if isinstance(row[7], list):
+            tags = row[7]
+        else:
+            tags = json.loads(row[7]) if len(row) > 7 and row[7] else []
     except (json.JSONDecodeError, TypeError):
         tags = []
 
@@ -144,6 +147,9 @@ def _parse_row_meta(meta_raw: Any, tenant_id: str, enc: Any) -> dict[str, Any]:
     """Helper to parse and decrypt fact metadata."""
     if not meta_raw:
         return {}
+
+    if isinstance(meta_raw, dict):
+        return meta_raw
 
     meta_str = str(meta_raw)
     if meta_str.startswith(V6_PREFIX):
