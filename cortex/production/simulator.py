@@ -10,7 +10,7 @@ class LoadScenario:
 
 def generate_load(duration_seconds):
     scenarios = []
-    for t in range(duration_seconds):
+    for _t in range(duration_seconds):
         scenarios.append(
             LoadScenario(
                 rps=random.randint(10, 5000),

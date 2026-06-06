@@ -301,7 +301,7 @@ class ExergyEngine:
                 git_diff="daemon", ast_hash="daemon", active_tasks=[], error_log=[]
             )
             base_state_vec = encode_state(dummy_state)
-            grounded_state_vec = inject_reality_noise(base_state_vec)
+            inject_reality_noise(base_state_vec)
 
             # 2. Simulate Futures & Collapse Action
             scored = self.lyapunov_scheduler(
@@ -454,62 +454,3 @@ class ExergyEngine:
         }
 
 
-if __name__ == "__main__":
-    engine = ExergyEngine()
-
-    print("--- CORTEX ADAPTIVE RUNTIME: EXERGY ENGINE ---")
-    print(f"Loaded {len(engine.history)} historical records.")
-
-    print("\n[NIVEL 2] Entropy Drift Check (latest run):")
-    workflows_run = list(set([r["workflow"] for r in engine.history]))
-    for wf in workflows_run[:5]:
-        drift = engine.get_entropy_drift(wf)
-        if drift.get("status") == "DEGRADED":
-            print(
-                f" ⚠️  {wf} is DEGRADED! Expected: {drift['expected_exergy']}, Actual: {drift['actual_exergy']} ({drift['deviation_pct']}%)"
-            )
-        elif drift.get("status") == "NOMINAL":
-            print(
-                f" ✅ {wf} is NOMINAL. (Expected: {drift['expected_exergy']}, Actual: {drift['actual_exergy']})"
-            )
-
-    print(
-        "\n[NIVEL 4] Lyapunov Scheduler (Candidate Pool: cron_health_check, memory_reconciliation, ingest_pipeline, vector_compaction, adversarial_simulation):"
-    )
-    candidates = [
-        "cron_health_check",
-        "memory_reconciliation",
-        "ingest_pipeline",
-        "vector_compaction",
-        "adversarial_simulation",
-    ]
-    ranked = engine.lyapunov_scheduler(candidates)
-    for r in ranked:
-        print(
-            f" - {r['workflow']}: Priority {r['priority_score']} (Expected Exergy: {r['expected_exergy']}, Runtime: {r['expected_runtime']}m)"
-        )
-
-    print("\n[NIVEL 5] Workflow Genome Analysis (Exergy per Gene):")
-    genes = engine.genome_analysis()
-    for g, stats in list(genes.items())[:5]:
-        print(
-            f" - Gene [{g}]: Avg Exergy {stats['average_exergy']} (Found in {stats['occurrences']} runs)"
-        )
-
-    print("\n[NIVEL 6] Counterfactual Ledger Example:")
-    # Assume the agent chose "adversarial_simulation" because a human demanded it, ignoring the scheduler.
-    cf = engine.evaluate_counterfactual(
-        "adversarial_simulation", ["cron_health_check", "memory_reconciliation"]
-    )
-    print(
-        f" Decisión tomada: {cf['chosen_workflow']} -> {cf['actual_exergy']} exergía real extraída"
-    )
-    print(
-        f" Mejor alternativa según Lyapunov: {cf['best_alternative']} -> {cf['alternative_expected_exergy']} exergía esperada"
-    )
-    if cf["optimal_decision"]:
-        print(" -> Decision was OPTIMAL.")
-    else:
-        print(
-            f" -> ERROR TÁCTICO. Missed opportunity (Coste de oportunidad): {cf['missed_opportunity']}"
-        )

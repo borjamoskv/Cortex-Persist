@@ -37,7 +37,7 @@ class MonteCarloRecallEngine:
         intent_vec = np.array(intent.semantic_vector)
         norm_intent = np.linalg.norm(intent_vec)
 
-        for i in range(n_samples):
+        for _i in range(n_samples):
             current_node = random.choice(start_nodes)
             particle = MemoryParticle.from_node(current_node)
             path = [particle]

@@ -117,7 +117,7 @@ async def mass_extinction_test():
     start_time = time.time()
 
     # Tormenta termodinámica de 100 ticks (aprox 10 segundos de asedio total)
-    for tick in range(100):
+    for _tick in range(100):
         current_tenants = await get_tenants(DB_PATH)
         if not current_tenants:
             # Extinción total

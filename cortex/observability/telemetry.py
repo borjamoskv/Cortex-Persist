@@ -13,7 +13,7 @@ class CortexTelemetry:
         self.log_path = log_path
         os.makedirs(os.path.dirname(self.log_path), exist_ok=True)
         if not os.path.exists(self.log_path):
-            with open(self.log_path, "w") as f:
+            with open(self.log_path, "w"):
                 pass
 
     def log_event(

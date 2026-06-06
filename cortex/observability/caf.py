@@ -71,7 +71,6 @@ def select_next(
     horizon: int = 5,
     epsilon: float = 0.1,
 ) -> list[Particle]:
-    best_path = None
     best_score = float("inf")
 
     trajectories = sample_trajectories(tasks, horizon=horizon, num_samples=100)
@@ -85,7 +84,6 @@ def select_next(
 
         if S < best_score:
             best_score = S
-            best_path = path
 
     # Epsilon Path Noise: Evitar Global Path Bias Collapse
     if random.random() < epsilon and scored_paths:
@@ -93,7 +91,7 @@ def select_next(
         top_k = max(1, int(len(scored_paths) * 0.3))
         scored_paths.sort(key=lambda x: x[0])
         chosen = random.choice(scored_paths[:top_k])
-        best_path = chosen[1]
+        chosen[1]
         best_score = chosen[0]
 
     # Return sorted individual tasks based on their best action contribution?
