@@ -89,7 +89,14 @@ class EpistemicPolicyNetwork:
         for i in range(2):
             logits[i] = sum(self.W2[i][j] * h[j] for j in range(4)) + self.b2[i]
 
-        return self._softmax(logits)
+        probs = self._softmax(logits)
+
+        # Cache forward state variables for backpropagation update
+        self._last_x = x
+        self._last_h = h
+        self._last_probs = probs
+
+        return probs
 
     def route(self, state: SignalVector) -> ModelType:
         """Stochastically sample model based on policy distribution."""
@@ -97,14 +104,81 @@ class EpistemicPolicyNetwork:
         logger.info("[POLICY] pi_theta(Flash|s_t)=%.3f, pi_theta(Pro|s_t)=%.3f", probs[0], probs[1])
 
         if random.random() < probs[0]:
+            self._last_action = 0
             return self.models[0]
+        self._last_action = 1
         return self.models[1]
 
-    def update_policy(self, reward: float):
+    def update_policy(self, reward: float, learning_rate: float = 0.01):
         """
-        Policy Gradient update step (REINFORCE placeholder).
-        L_policy = -E[ R(s_t, m_t) ]
-        R = α*F1 - β*KL - γ*entropy_instability - δ*routing_cost
+        Policy Gradient update step (REINFORCE).
+        Updates parameters W1, b1, W2, b2 based on reward scalar.
         """
-        # TODO: Implement backprop over W1, b1, W2, b2 based on reward scalar
-        pass
+        if (
+            not hasattr(self, "_last_probs")
+            or not hasattr(self, "_last_action")
+            or not hasattr(self, "_last_x")
+            or not hasattr(self, "_last_h")
+        ):
+            logger.warning("[POLICY] Attempted update_policy without stored forward pass/routing event.")
+            return
+
+        probs = self._last_probs
+        action = self._last_action
+        x = self._last_x
+        h = self._last_h
+
+        # Logits gradients: dL/dlogits_i = reward * (1 - probs[i]) if i == action else -reward * probs[i]
+        d_logits = [0.0] * 2
+        for i in range(2):
+            if i == action:
+                d_logits[i] = reward * (1.0 - probs[i])
+            else:
+                d_logits[i] = reward * (0.0 - probs[i])
+
+        # Backpropagation:
+        # W2 (2 experts x 4 hidden): dW2[i][j] = d_logits[i] * h[j]
+        # b2 (2 biases): db2[i] = d_logits[i]
+        # h (4 hidden): dh[j] = sum(d_logits[i] * W2[i][j] for i in range(2))
+        dW2 = [[0.0] * 4 for _ in range(2)]
+        db2 = [0.0] * 2
+        dh = [0.0] * 4
+
+        for i in range(2):
+            db2[i] = d_logits[i]
+            for j in range(4):
+                dW2[i][j] = d_logits[i] * h[j]
+                dh[j] += d_logits[i] * self.W2[i][j]
+
+        # ReLU backprop: d_h_logits[j] = dh[j] if h[j] > 0 else 0
+        d_h_logits = [0.0] * 4
+        for j in range(4):
+            if h[j] > 0.0:
+                d_h_logits[j] = dh[j]
+
+        # W1 (4 hidden x 5 inputs): dW1[j][k] = d_h_logits[j] * x[k]
+        # b1 (4 biases): db1[j] = d_h_logits[j]
+        dW1 = [[0.0] * 5 for _ in range(4)]
+        db1 = [0.0] * 4
+
+        for j in range(4):
+            db1[j] = d_h_logits[j]
+            for k in range(5):
+                dW1[j][k] = d_h_logits[j] * x[k]
+
+        # Parameter updates (Gradient Ascent for REINFORCE)
+        for i in range(2):
+            self.b2[i] += learning_rate * db2[i]
+            for j in range(4):
+                self.W2[i][j] += learning_rate * dW2[i][j]
+
+        for j in range(4):
+            self.b1[j] += learning_rate * db1[j]
+            for k in range(5):
+                self.W1[j][k] += learning_rate * dW1[j][k]
+
+        # Clear cached trajectory values to prevent double updates
+        del self._last_probs
+        del self._last_action
+        del self._last_x
+        del self._last_h
