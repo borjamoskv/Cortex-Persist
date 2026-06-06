@@ -153,11 +153,17 @@ def init_external_oracles(
         daemon.sentinel_oracle = SentinelMonitor(
             check_interval=file_config.get("sentinel_interval", 60),
         )
+        try:
+            from cortex.extensions.daemon.monitors.agy2_planner import AGY2PlannerMonitor
+            daemon.agy2_planner_daemon = AGY2PlannerMonitor(engine=daemon._shared_engine)
+        except ImportError:
+            daemon.agy2_planner_daemon = None
     except ImportError:
         daemon._async_engine = None
         daemon.ast_oracle = None
         daemon.fiat_oracle = None
         daemon.sentinel_oracle = None
+        daemon.agy2_planner_daemon = None
 
     cert_hostnames = [
         host.replace("https://", "").replace("http://", "").split("/")[0]
