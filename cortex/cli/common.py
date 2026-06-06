@@ -86,7 +86,7 @@ def _run_async(coro):
 def _show_tip(engine=None) -> None:
     """Show a random contextual tip after CLI operations."""
     try:
-        from cortex.engine.tips_cmds import TipsEngine
+        from cortex.cli.tips_cmds import TipsEngine
 
         tips_engine = TipsEngine(engine, include_dynamic=engine is not None, lang="es")
 
@@ -116,7 +116,7 @@ def _show_tip(engine=None) -> None:
 def _get_tip_text(engine=None) -> str:
     """Get a short tip string for inline display."""
     try:
-        from cortex.engine.tips_cmds import TipsEngine
+        from cortex.cli.tips_cmds import TipsEngine
 
         tips_engine = TipsEngine(engine, include_dynamic=False, lang="es")
 
