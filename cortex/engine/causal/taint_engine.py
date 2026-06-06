@@ -95,11 +95,10 @@ def _check_and_register_nonce_sync(conn, nonce: str) -> bool:
         )
     """)
     cursor = conn.cursor()
-    cursor.execute("SELECT nonce FROM taint_nonces WHERE nonce = ?", (nonce,))
-    if cursor.fetchone():
-        return False
-    conn.execute("INSERT INTO taint_nonces (nonce, timestamp) VALUES (?, ?)", (nonce, time.time()))
-    return True
+    cursor.execute(
+        "INSERT OR IGNORE INTO taint_nonces (nonce, timestamp) VALUES (?, ?)", (nonce, time.time())
+    )
+    return cursor.rowcount > 0
 
 
 async def _check_and_register_nonce_async(conn, nonce: str) -> bool:
@@ -109,13 +108,10 @@ async def _check_and_register_nonce_async(conn, nonce: str) -> bool:
             timestamp REAL
         )
     """)
-    cursor = await conn.execute("SELECT nonce FROM taint_nonces WHERE nonce = ?", (nonce,))
-    if await cursor.fetchone():
-        return False
-    await conn.execute(
-        "INSERT INTO taint_nonces (nonce, timestamp) VALUES (?, ?)", (nonce, time.time())
+    cursor = await conn.execute(
+        "INSERT OR IGNORE INTO taint_nonces (nonce, timestamp) VALUES (?, ?)", (nonce, time.time())
     )
-    return True
+    return cursor.rowcount > 0
 
 
 def _is_async_conn(conn) -> bool:

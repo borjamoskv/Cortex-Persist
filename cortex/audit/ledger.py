@@ -39,12 +39,14 @@ CREATE TABLE IF NOT EXISTS security_audit_log (
 class EnterpriseAuditLedger:
     """Immutable Audit Ledger for enterprise-grade SOC 2 compliance."""
 
-    __slots__ = ("_conn", "_last_hash", "_ready", "private_key", "public_key")
+    __slots__ = ("_conn", "_last_hash", "_ready", "private_key", "public_key", "_lock")
 
     def __init__(self, conn: aiosqlite.Connection) -> None:
+        import asyncio
         self._conn = conn
         self._ready = False
         self._last_hash = "GENESIS"
+        self._lock = asyncio.Lock()
 
         # C5-REAL Sovereign Ed25519 Keypair (Audit ZK-Seal Substrate)
         # Almacena la clave localmente para persistir la identidad del auditor
@@ -69,16 +71,19 @@ class EnterpriseAuditLedger:
     async def ensure_table(self) -> None:
         if self._ready:
             return
-        await self._conn.execute(_CREATE_AUDIT_SQL)
-        await self._conn.commit()
-        # Fetch the last hash to maintain the chain
-        cursor = await self._conn.execute(
-            "SELECT signature FROM security_audit_log ORDER BY rowid DESC LIMIT 1"
-        )
-        row = await cursor.fetchone()
-        if row:
-            self._last_hash = row[0]
-        self._ready = True
+        async with self._lock:
+            if self._ready:
+                return
+            await self._conn.execute(_CREATE_AUDIT_SQL)
+            await self._conn.commit()
+            # Fetch the last hash to maintain the chain
+            cursor = await self._conn.execute(
+                "SELECT signature FROM security_audit_log ORDER BY rowid DESC LIMIT 1"
+            )
+            row = await cursor.fetchone()
+            if row:
+                self._last_hash = row[0]
+            self._ready = True
 
     async def run_scan(self) -> dict[str, Any]:
         """
@@ -105,30 +110,31 @@ class EnterpriseAuditLedger:
         timestamp = datetime.fromtimestamp(time.monotonic(), tz=timezone.utc).isoformat()
         audit_id = hashlib.sha256(f"{timestamp}{actor_id}{action}".encode()).hexdigest()
 
-        # Calculate new signature ensuring immutability chain via Ed25519 ZK-Seal
-        payload = f"{audit_id}:{timestamp}:{tenant_id}:{actor_id}:{action}:{self._last_hash}"
-        signature = self.private_key.sign(payload.encode()).hex()
+        async with self._lock:
+            # Calculate new signature ensuring immutability chain via Ed25519 ZK-Seal
+            payload = f"{audit_id}:{timestamp}:{tenant_id}:{actor_id}:{action}:{self._last_hash}"
+            signature = self.private_key.sign(payload.encode()).hex()
 
-        await self._conn.execute(
-            """INSERT INTO security_audit_log
-               (audit_id, timestamp, tenant_id, actor_role, actor_id, action,
-                resource, status, prev_hash, signature)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-            (
-                audit_id,
-                timestamp,
-                tenant_id,
-                actor_role,
-                actor_id,
-                action,
-                resource,
-                status,
-                self._last_hash,
-                signature,
-            ),
-        )
-        await self._conn.commit()
-        self._last_hash = signature
+            await self._conn.execute(
+                """INSERT INTO security_audit_log
+                   (audit_id, timestamp, tenant_id, actor_role, actor_id, action,
+                    resource, status, prev_hash, signature)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (
+                    audit_id,
+                    timestamp,
+                    tenant_id,
+                    actor_role,
+                    actor_id,
+                    action,
+                    resource,
+                    status,
+                    self._last_hash,
+                    signature,
+                ),
+            )
+            await self._conn.commit()
+            self._last_hash = signature
         return audit_id
 
     def verify_zk_seal(self, payload: str, signature_hex: str) -> bool:
