@@ -1,3 +1,5 @@
+import logging
+logger = logging.getLogger(__name__)
 # [C5-REAL] Exergy-Maximized
 import json
 
@@ -56,4 +58,4 @@ if __name__ == "__main__":
 
     dataset = sys.argv[1] if len(sys.argv) > 1 else ".cortex_ast_dataset.json"
     result = calculate_true_ate_numpy(dataset)
-    print(json.dumps(result, indent=2))
+    logger.info("Advisory Result:\n%s", json.dumps(result, indent=2))
