@@ -201,6 +201,7 @@ class CortexDaemon:
             except Exception as e:
                 logging.error("Ultramap tracking failed: %s", e)
 
+        result = {}
         try:
             # HIGH-02 hardened: avoid shell interpretation of task commands
             import shlex as _shlex
