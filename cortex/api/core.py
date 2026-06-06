@@ -19,7 +19,6 @@ from fastapi.responses import JSONResponse
 
 import cortex.api.state as api_state
 from cortex import __version__, config
-from cortex.extensions.llm.quota import QuotaRejectedError
 from cortex.api.middleware import (
     ContentSizeLimitMiddleware,
     CortexBillingMiddleware,
@@ -31,6 +30,7 @@ from cortex.api.middleware import (
 )
 from cortex.auth import AuthManager
 from cortex.engine import CortexEngine
+from cortex.extensions.llm.quota import QuotaRejectedError
 from cortex.extensions.metering.middleware import MeteringMiddleware
 from cortex.extensions.swarm.manager import get_swarm_manager
 from cortex.extensions.timing import TimingTracker

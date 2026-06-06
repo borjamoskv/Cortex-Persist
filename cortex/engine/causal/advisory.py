@@ -1,4 +1,5 @@
 import logging
+
 logger = logging.getLogger(__name__)
 # [C5-REAL] Exergy-Maximized
 import json
