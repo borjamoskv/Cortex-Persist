@@ -15,4 +15,5 @@ pub struct State {
     pub memory: HashMap<String, Vec<u8>>,
     pub reputation: HashMap<String, u32>,
     pub agent_lifecycle: HashMap<String, AgentStatus>,
+    pub public_keys: HashMap<String, [u8; 32]>,
 }

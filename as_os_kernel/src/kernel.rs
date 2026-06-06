@@ -1,8 +1,8 @@
 // [C5-REAL] Exergy-Maximized
-use crate::{event::Event, state::{State, AgentStatus}, crypto::hash, verify::verify_event};
+use crate::{event::Event, state::{State, AgentStatus}, crypto::hash, verify::{verify_event, verify_signature}};
 
 pub fn apply_event(state: State, event: Event) -> Result<State, String> {
-    // 1. VERIFY PRECONDITIONS
+    // 1. VERIFY CAUSAL CHAIN PRECONDITIONS
     if !verify_event(&event, &state.last_hash) {
         return Err("INVALID_EVENT".into());
     }
@@ -21,11 +21,50 @@ pub fn apply_event(state: State, event: Event) -> Result<State, String> {
         }
     }
 
-    // 2. DETERMINE NEW STATE HASH
+    // 2. CRYPTOGRAPHIC IDENTITY VERIFICATION (ZUTS)
+    let mut new_state = state.clone();
+    
+    match state.public_keys.get(&event.agent_id) {
+        Some(pubkey_bytes) => {
+            // Verify signature using the registered public key
+            if !verify_signature(&event, pubkey_bytes) {
+                return Err("INVALID_SIGNATURE".into());
+            }
+        }
+        None => {
+            // Unregistered agent: must register first
+            if event.payload.starts_with(b"REGISTER:") {
+                let payload_str = String::from_utf8_lossy(&event.payload);
+                let parts: Vec<&str> = payload_str.split(':').collect();
+                if parts.len() == 2 {
+                    let pubkey_hex = parts[1];
+                    let pubkey_vec = hex::decode(pubkey_hex).map_err(|_| "INVALID_PUBLIC_KEY_HEX".to_string())?;
+                    if pubkey_vec.len() != 32 {
+                        return Err("INVALID_PUBLIC_KEY_SIZE".into());
+                    }
+                    let mut pubkey_bytes = [0u8; 32];
+                    pubkey_bytes.copy_from_slice(&pubkey_vec);
+                    
+                    // Verify the signature on the registration event itself using the proposed key
+                    if !verify_signature(&event, &pubkey_bytes) {
+                        return Err("INVALID_REGISTRATION_SIGNATURE".into());
+                    }
+                    
+                    // Save public key in state
+                    new_state.public_keys.insert(event.agent_id.clone(), pubkey_bytes);
+                } else {
+                    return Err("MALFORMED_REGISTRATION".into());
+                }
+            } else {
+                return Err("UNREGISTERED_AGENT".into());
+            }
+        }
+    }
+
+    // 3. DETERMINE NEW STATE HASH
     let new_hash = hash(&event.payload);
     
-    // 3. APPLY STATE TRANSITION
-    let mut new_state = state.clone();
+    // 4. APPLY STATE TRANSITION
     new_state.last_hash = new_hash;
     new_state.memory.insert(event.id.clone(), event.payload.clone());
 
