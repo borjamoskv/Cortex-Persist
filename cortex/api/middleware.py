@@ -271,7 +271,6 @@ class SecurityFraudMiddleware(BaseHTTPMiddleware):
                     with open(self.log_path, "a", encoding="utf-8") as f:
                         f.write("".join(data_lines))
                 except OSError:
-                    import logging
 
                     pass
 
@@ -348,7 +347,6 @@ class ImmuneMiddleware(BaseHTTPMiddleware):
                             content={"error": "Payload rejected by Immune System (Data Poisoning)"},
                         )
                 except ImportError:
-                    import logging
 
                     pass
 
@@ -392,6 +390,7 @@ class CortexBillingMiddleware(BaseHTTPMiddleware):
         """Asynchronously reports usage to Stripe via background task."""
         try:
             import stripe  # pyright: ignore[reportMissingImports]
+
             from cortex import config
 
             stripe.api_key = getattr(config, "STRIPE_SECRET_KEY", None)

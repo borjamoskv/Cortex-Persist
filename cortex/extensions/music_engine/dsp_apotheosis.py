@@ -6,9 +6,10 @@ Capa determinista de procesamiento de señal en Python (Mastering, Tonal Balance
 
 import logging
 
-from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
 import pyloudnorm as pyln  # pyright: ignore[reportMissingImports]
 import scipy.signal  # pyright: ignore[reportMissingImports]
+
+from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
 
 try:
     from numba import njit  # pyright: ignore[reportMissingImports]

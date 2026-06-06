@@ -213,7 +213,6 @@ class GatewayRouter:
                 )
                 await boundary._persist(exc)
             except Exception:
-                import logging
 
                 pass
             return GatewayResponse(

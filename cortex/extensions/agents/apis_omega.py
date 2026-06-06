@@ -64,7 +64,6 @@ class ApisOmegaAgent:
 
             self._agent_def = get_agent("apis_omega")
         except ImportError:
-            import logging
 
             pass
 

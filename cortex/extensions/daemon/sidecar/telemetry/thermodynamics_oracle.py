@@ -38,7 +38,6 @@ class ThermodynamicsOracle:
 
             self._psutil = psutil
         except ImportError:
-            import logging
 
             pass
 
@@ -82,7 +81,6 @@ class ThermodynamicsOracle:
                 if disk_io and hasattr(disk_io, "busy_time"):
                     disk_busy_ms = disk_io.busy_time or 0.0  # type: ignore[reportAttributeAccessIssue]
             except Exception:
-                import logging
 
                 pass
 

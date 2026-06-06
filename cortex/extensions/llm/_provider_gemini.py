@@ -1,8 +1,10 @@
 # [C5-REAL] Exergy-Maximized
 # This file is part of CORTEX. Apache-2.0.
 import asyncio
-import httpx
 import logging
+
+import httpx
+
 from cortex.extensions.llm._resilience import resilient_call
 from cortex.extensions.llm._stealth import apply_causal_jitter, sanitize_response
 

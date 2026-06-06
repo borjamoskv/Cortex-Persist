@@ -1,7 +1,8 @@
 # [C5-REAL] Exergy-Maximized
 import logging
-import numpy as np
 from typing import Any
+
+import numpy as np
 
 logger = logging.getLogger("cortex.engine.causal.anomaly_bridge")
 

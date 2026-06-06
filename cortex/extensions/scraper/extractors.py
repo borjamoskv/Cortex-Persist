@@ -8,6 +8,7 @@ The ScraperEngine orchestrates fallback cascades between them.
 import logging
 import re
 from html.parser import HTMLParser
+
 import httpx
 
 LOG = logging.getLogger("cortex.extensions.scraper.extractors")

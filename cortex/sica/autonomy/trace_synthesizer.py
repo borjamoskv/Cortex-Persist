@@ -1,9 +1,11 @@
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
+
+import logging
+from collections import Counter
+
 from cortex.sica.object_level import ExecutionTrace, StepOutcome
 from cortex.sica.strategy import Heuristic
-from collections import Counter
-import logging
 
 logger = logging.getLogger("cortex.sica.autonomy.trace")
 

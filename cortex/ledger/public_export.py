@@ -13,8 +13,8 @@ from typing import Any
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 
-from cortex.ledger.public_verifier import verify_export
 from cortex.ledger._verifier_events import STRICT_REQUIRED_EVENT_FIELDS
+from cortex.ledger.public_verifier import verify_export
 from cortex.ledger.public_verifier_utils import (
     _canonical_public_json,
     _event_hash,

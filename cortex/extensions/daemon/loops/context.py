@@ -114,7 +114,6 @@ async def gidatu_loop(state):
                         )
                         win_title = await run_osascript(title_script)
                     except OSError:
-                        import logging
 
                         pass
                 state.daemons["gidatu"]["window_title"] = win_title

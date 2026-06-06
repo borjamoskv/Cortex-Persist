@@ -207,7 +207,6 @@ class SystemAssembler:
                 test_init.write_text("", encoding="utf-8")
                 created.append(str(test_init))
             except OSError:
-                import logging
 
                 pass
 
@@ -230,7 +229,6 @@ class SystemAssembler:
                         file_path.write_text(content, encoding="utf-8")
                         created.append(str(file_path))
                     except OSError:
-                        import logging
 
                         pass
 
@@ -261,7 +259,6 @@ class SystemAssembler:
                     file_path.write_text(content, encoding="utf-8")
                     created.append(str(file_path))
                 except OSError:
-                    import logging
 
                     pass
 

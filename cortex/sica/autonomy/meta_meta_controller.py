@@ -1,8 +1,10 @@
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
+
 import random
 import time
 from dataclasses import dataclass, field
+
 from cortex.sica.meta_level import MetaLevel
 from cortex.sica.strategy import SearchStrategy
 

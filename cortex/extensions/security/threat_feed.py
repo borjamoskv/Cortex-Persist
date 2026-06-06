@@ -16,6 +16,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
 from cortex.extensions.security.threat_signatures import BUILT_IN_SIGNATURES
 
 logger = logging.getLogger("cortex.extensions.security.threat_feed")
@@ -170,7 +171,6 @@ class ThreatFeedEngine:
             if ts:
                 return datetime.fromisoformat(ts)
         except (json.JSONDecodeError, OSError, ValueError):
-            import logging
 
             pass
         return None

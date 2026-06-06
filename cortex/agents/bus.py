@@ -204,8 +204,8 @@ class ByzantineZeroCopyBus:
         self._lock = asyncio.Lock()
 
     def _sign(self, msg_json: str) -> str:
-        import hmac
         import hashlib
+        import hmac
 
         return hmac.new(self.secret, msg_json.encode("utf-8"), hashlib.sha256).hexdigest()
 

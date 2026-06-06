@@ -7,12 +7,13 @@ act as players in a Bayesian routing game.
 """
 
 from __future__ import annotations
-import math
+
 import logging
+import math
 from dataclasses import dataclass
 from typing import Literal
 
-from cortex.router.causal import CausalTrajectory, CausalPolicyGradientRouter
+from cortex.router.causal import CausalPolicyGradientRouter
 from cortex.router.policy import SignalVector
 
 logger = logging.getLogger("cortex.router.nash")

@@ -69,7 +69,6 @@ async def _ingest_and_organize(path: Path) -> str:
                     text = file_path.read_text(encoding="utf-8")
                     content += f"\\n\\n--- FILE: {file_path.relative_to(path)} ---\\n{text}"
                 except (UnicodeDecodeError, OSError):
-                    import logging
 
                     pass
 

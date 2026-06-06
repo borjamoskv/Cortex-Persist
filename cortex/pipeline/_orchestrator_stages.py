@@ -122,7 +122,10 @@ class StagesMixin:
         if self.engine is not None:  # pyright: ignore[reportAttributeAccessIssue]
             try:
                 import asyncio
-                from cortex.utils.time_utils import get_utc_timestamp  # pyright: ignore[reportMissingImports]
+
+                from cortex.utils.time_utils import (
+                    get_utc_timestamp,  # pyright: ignore[reportMissingImports]
+                )
 
                 async def persist_to_engine():
                     async with self.engine.session() as conn:  # pyright: ignore[reportAttributeAccessIssue]

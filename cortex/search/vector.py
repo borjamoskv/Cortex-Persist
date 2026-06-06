@@ -195,7 +195,6 @@ def semantic_search_sync(
             try:
                 content = enc.decrypt_str(content, tenant_id=tenant_id)
             except (ValueError, OSError):
-                import logging
 
                 pass
 

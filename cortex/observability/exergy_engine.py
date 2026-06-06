@@ -1,15 +1,16 @@
 # [C5-REAL] Exergy-Maximized
-import os
 import json
+import os
 import statistics
-import random
-from dataclasses import dataclass, asdict
+import time
+from dataclasses import asdict, dataclass
 from typing import Any
+
+import numpy as np
+
+from cortex.observability.caf import lagrangian, select_next
 from cortex.observability.efel import SystemState, encode_state, encode_task
 from cortex.observability.fdf import FailureField, Particle, simulate_field
-from cortex.observability.caf import select_next, lagrangian
-import numpy as np
-import time
 
 CRONOS_LOG = os.path.expanduser("~/.gemini/config/skills/_metrics/cronos_memory.jsonl")
 META_PARAMS_LOG = os.path.expanduser("~/.gemini/config/skills/_metrics/meta_params.json")

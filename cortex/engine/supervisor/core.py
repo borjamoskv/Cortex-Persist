@@ -1,17 +1,20 @@
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
+
 import asyncio
 import logging
 import time
 from typing import Any
+
 from cortex.engine.autocurative_agent import AutoCurativeAgent
 from cortex.engine.endocrine import ENDOCRINE, HormoneType
 from cortex.engine.performance_tracker import PerformanceTracker
 from cortex.engine.predictive_healer import PredictiveHealer
 from cortex.engine.self_optimizer import SelfOptimizer
 from cortex.engine.tuning_store import TuningStore
-from .types import SupervisorConfig, AgentInfo, AgentStatus
+
 from .daemon import SupervisorDaemon
+from .types import AgentInfo, AgentStatus, SupervisorConfig
 
 logger = logging.getLogger("cortex.supervisor")
 
@@ -147,7 +150,7 @@ class CortexSupervisor:
             if cooldown is not None:
                 self._l5.config.cooldown_after_repair_s = cooldown
 
-    async def _apply_preemptive_action(self, prediction: Prediction) -> None:  # pyright: ignore[reportUndefinedVariable]
+    async def _apply_preemptive_action(self, prediction: 'Prediction') -> None:  # pyright: ignore[reportUndefinedVariable]
         """Test proxy for the daemon method."""
         await self._daemon._apply_preemptive_action(prediction)
 

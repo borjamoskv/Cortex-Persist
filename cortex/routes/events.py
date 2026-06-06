@@ -53,13 +53,11 @@ async def event_generator(
                         else sig.json(),
                     }
             except Exception:
-                import logging
 
                 pass
 
             await asyncio.sleep(1.0)
     except asyncio.CancelledError:
-        import logging
 
         pass
 

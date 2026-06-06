@@ -1,6 +1,7 @@
 # [C5-REAL] Exergy-Maximized
-import sqlite3
 import logging
+import sqlite3
+
 from cortex.guards.exergy_guard import calculate_exergy
 from cortex.utils import void_vec
 
@@ -179,7 +180,6 @@ class SchemaTrait:
 
                 self._sanitizer = get_pii_sanitizer()
             except ImportError:
-                import logging
 
                 pass
         return self._sanitizer

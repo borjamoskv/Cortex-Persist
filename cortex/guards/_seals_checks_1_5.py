@@ -3,8 +3,8 @@ from __future__ import annotations
 
 import asyncio
 import json
-from pathlib import Path
 import sys
+from pathlib import Path
 
 from cortex.guards._seals_cache import GlobalSourceCache, arun_cmd, printer
 
@@ -73,7 +73,6 @@ async def check_seal_2_type_safety() -> GateResult:
                 printer.print(out[:2000], style="dim")
                 return False, "verified"
         except (ValueError, KeyError, json.JSONDecodeError):
-            import logging
 
             pass
 

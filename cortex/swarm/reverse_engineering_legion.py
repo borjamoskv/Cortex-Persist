@@ -5,11 +5,12 @@ Applies VSA/HDC Memory-Mapped Swarm to brute-force or collaboratively decode/dec
 massive structures (ASTs, binaries, token trees) using 100,000 sovereign nodes.
 """
 
-import time
-import logging
 import argparse
-from cortex.swarm.tensor_glial import TensorGlialLegion
+import logging
+import time
+
 from cortex.compat.optional import np
+from cortex.swarm.tensor_glial import TensorGlialLegion
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("cortex.swarm.reverse_engineering")

@@ -8,7 +8,6 @@ through API boundaries (Sprint 0 security directive).
 
 from __future__ import annotations
 
-
 __all__ = [
     "CortexError",
     "CriticalSubsystemError",

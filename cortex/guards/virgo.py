@@ -14,8 +14,8 @@ from typing import Any
 
 import aiosqlite
 
-from cortex.utils.errors import CortexError
 from cortex.crypto.keys import ZKSwarmIdentity
+from cortex.utils.errors import CortexError
 
 logger = logging.getLogger("cortex.security.virgo")
 

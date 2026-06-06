@@ -1,11 +1,9 @@
 # [C5-REAL] Exergy-Maximized
-import numpy as np
-from sklearn.neighbors import KernelDensity
 from dataclasses import dataclass, field
 from typing import Any
-from collections.abc import Callable
 
-from cortex.observability.efel import SystemState, encode_state, encode_task
+import numpy as np
+from sklearn.neighbors import KernelDensity
 
 
 class FailureField:

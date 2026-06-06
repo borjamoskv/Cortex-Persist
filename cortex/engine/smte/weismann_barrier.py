@@ -4,10 +4,10 @@ CORTEX - Weismann Barrier (Kernel Isolation Protocol)
 Protects the CORTEX-Persist kernel from fatal mutations during autopoiesis.
 """
 
-import shutil
-import tempfile
-import subprocess
 import logging
+import shutil
+import subprocess
+import tempfile
 from pathlib import Path
 
 logger = logging.getLogger("cortex.engine.smte.weismann")

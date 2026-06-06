@@ -157,7 +157,6 @@ class TuningStore:
                         "snapshot_at_iso": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(row[2])),
                     }
                 except json.JSONDecodeError:
-                    import logging
 
                     pass
         return None

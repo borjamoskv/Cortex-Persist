@@ -4,13 +4,14 @@ from __future__ import annotations
 
 import logging
 from typing import TYPE_CHECKING
+
 from cortex.extensions.llm._hedging import HedgedRequestStrategy
 from cortex.extensions.llm._models import CascadeEvent, CascadeTier
 from cortex.utils.result import Ok
 
 if TYPE_CHECKING:
-    from cortex.extensions.llm._models import BaseProvider, CortexPrompt
     from cortex.extensions.llm._cascade import CascadeManager
+    from cortex.extensions.llm._models import BaseProvider, CortexPrompt
     from cortex.extensions.llm._telemetry import CascadeTelemetry
     from cortex.utils.result import Result
 

@@ -11,12 +11,12 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
-import logging
 import json
+import logging
 import os
 import time
-from pathlib import Path
 from collections.abc import AsyncGenerator
+from pathlib import Path
 
 from cortex.engine.context_cache import ContextCacheManager
 from cortex.extensions.llm._models import BaseProvider, CortexPrompt, IntentProfile
@@ -49,7 +49,10 @@ class NativeVLLMProvider(BaseProvider):
         quantization: str | None = None,
     ) -> None:
         try:
-            from vllm import AsyncEngineArgs, AsyncLLMEngine  # pyright: ignore[reportMissingImports]
+            from vllm import (  # pyright: ignore[reportMissingImports]
+                AsyncEngineArgs,
+                AsyncLLMEngine,
+            )
         except ImportError as e:
             logger.critical("vLLM native module missing. Cannot initialize in-process engine.")
             raise RuntimeError("Instala 'vllm' para usar NativeVLLMProvider.") from e
@@ -73,7 +76,6 @@ class NativeVLLMProvider(BaseProvider):
                     if reg.get("status") == "verified":
                         verified_adapter_path = reg.get("adapter_path")
             except Exception:
-                import logging
 
                 pass
 
@@ -145,7 +147,9 @@ class NativeVLLMProvider(BaseProvider):
                     if reg.get("status") == "verified":
                         adapter_path = reg.get("adapter_path")
                         if adapter_path:
-                            from vllm.lora.request import LoRARequest  # pyright: ignore[reportMissingImports]
+                            from vllm.lora.request import (
+                                LoRARequest,  # pyright: ignore[reportMissingImports]
+                            )
 
                             lora_request = LoRARequest(
                                 lora_name="verified_adapter",
@@ -253,7 +257,9 @@ class NativeVLLMProvider(BaseProvider):
                     if reg.get("status") == "verified":
                         adapter_path = reg.get("adapter_path")
                         if adapter_path:
-                            from vllm.lora.request import LoRARequest  # pyright: ignore[reportMissingImports]
+                            from vllm.lora.request import (
+                                LoRARequest,  # pyright: ignore[reportMissingImports]
+                            )
 
                             lora_request = LoRARequest(
                                 lora_name="verified_adapter",

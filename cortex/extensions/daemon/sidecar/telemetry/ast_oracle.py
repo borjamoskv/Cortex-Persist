@@ -144,7 +144,6 @@ class ASTOracle:
                 self._mtimes[target_str] = mtime
                 self._cache[target_str] = self._extract_semantic_nodes(py_file)
             except (ValueError, KeyError, OSError, RuntimeError, AttributeError):
-                import logging
 
                 pass
 

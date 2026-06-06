@@ -547,7 +547,6 @@ class DreamEngine:
                             )
                         applied += 1
                     except KeyError:
-                        import logging
 
                         pass
 

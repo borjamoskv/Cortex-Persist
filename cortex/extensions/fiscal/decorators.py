@@ -1,9 +1,9 @@
 # [C5-REAL] Exergy-Maximized
 import functools
-import logging
 import inspect
-from typing import Any
+import logging
 from collections.abc import Callable
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -40,9 +40,9 @@ def seal_decision(fact_type: str, client_id_kwarg: str = "client_id"):
 
             # 3. Forge the TaxFact payload (C5-REAL integration)
             try:
-                from cortex.extensions.fiscal.models import TaxFact, TaxFactPayload
                 from cortex.cli.common import get_engine
                 from cortex.events.loop import sovereign_run
+                from cortex.extensions.fiscal.models import TaxFact, TaxFactPayload
 
                 # Parse result generically (assuming the agent returned a dict or we cast it to string)
                 # In a real integration, result would be typed or mapped to TaxFactPayload

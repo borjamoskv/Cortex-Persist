@@ -27,7 +27,6 @@ def _migration_021_solid_state(conn: sqlite3.Connection) -> None:
             )
         """)
     except sqlite3.OperationalError:
-        import logging
 
         pass
     # Table already exists

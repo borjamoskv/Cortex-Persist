@@ -1,6 +1,6 @@
 # [C5-REAL] Exergy-Maximized
-import logging
 import json
+import logging
 from pathlib import Path
 from typing import Any
 

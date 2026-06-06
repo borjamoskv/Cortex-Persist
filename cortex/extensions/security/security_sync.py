@@ -64,7 +64,6 @@ class SecurityVisualSync:
             else:
                 loop.run_until_complete(self.emit_signal(event_type, details))
         except (RuntimeError, OSError):
-            import logging
 
             pass
 

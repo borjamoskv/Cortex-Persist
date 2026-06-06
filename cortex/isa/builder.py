@@ -36,7 +36,6 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any
 
-
 # -----------------------------------------------------------
 # S1 - Core Types (mirror Rust enums)
 # -----------------------------------------------------------

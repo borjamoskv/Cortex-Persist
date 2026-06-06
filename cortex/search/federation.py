@@ -121,7 +121,6 @@ def detach_federated_dbs(
         try:
             conn.execute(f"DETACH DATABASE {alias}")
         except sqlite3.OperationalError:
-            import logging
 
             pass
 
@@ -138,7 +137,6 @@ async def detach_federated_dbs_async(
         try:
             await conn.execute(f"DETACH DATABASE {alias}")
         except (aiosqlite.Error, sqlite3.Error):
-            import logging
 
             pass
 

@@ -1,7 +1,7 @@
 # [C5-REAL] Exergy-Maximized
-import logging
 import base64
-from datetime import datetime, timezone
+import logging
+
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 
 logger = logging.getLogger("cortex.engine.causal.verification_oracle")

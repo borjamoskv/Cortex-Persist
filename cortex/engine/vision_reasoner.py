@@ -8,7 +8,6 @@ from __future__ import annotations
 import logging
 from collections import deque
 from dataclasses import dataclass
-from typing import Optional
 
 logger = logging.getLogger("cortex.exergy.vision")
 

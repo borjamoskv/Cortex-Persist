@@ -294,7 +294,6 @@ async def fetch_domain_metrics(
                         age_s = time.monotonic() - dt.timestamp()
                         m.last_decision_age_hours = age_s / 3600
                     except (ValueError, TypeError):
-                        import logging
 
                         pass
 

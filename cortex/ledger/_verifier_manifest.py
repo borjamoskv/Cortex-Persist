@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+
 from cryptography.exceptions import InvalidSignature
 
 from cortex.ledger.public_verifier_utils import (

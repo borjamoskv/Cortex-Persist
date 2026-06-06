@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-from cortex.extensions.llm._models import IntentProfile, ReasoningMode, CascadeTier
+
 from cortex.extensions.llm._cascade import classify_tier
+from cortex.extensions.llm._models import CascadeTier, IntentProfile, ReasoningMode
 
 if TYPE_CHECKING:
-    from cortex.extensions.llm._models import BaseProvider, CortexPrompt
     from cortex.extensions.llm._cascade import CascadeManager
+    from cortex.extensions.llm._models import BaseProvider, CortexPrompt
 
 # Cost class ordering for tiebreaking (cheaper first)
 COST_ORDER: dict[str, int] = {

@@ -17,8 +17,8 @@ from typing import Any
 
 from cortex.isa.builder import (
     AgentOp,
-    node_count,
     dispatch_targets,
+    node_count,
     noop,
 )
 

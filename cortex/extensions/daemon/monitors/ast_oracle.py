@@ -52,7 +52,6 @@ class ASTOracleMonitor(IntervalProjectMonitor[ASTAlert]):
                         message=f"AST Drift Detected: {error_count} errors, {warning_count} warnings.",
                     )
             except json.JSONDecodeError:
-                import logging
 
                 pass
 

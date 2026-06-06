@@ -119,7 +119,6 @@ class FiatOracle:
                 try:
                     await asyncio.to_thread(tx_file.unlink)
                 except OSError:
-                    import logging
 
                     pass
             except (OSError, ValueError, CortexError, KeyError) as e:

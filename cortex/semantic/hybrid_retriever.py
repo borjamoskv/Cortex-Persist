@@ -1,14 +1,16 @@
 # [C5-REAL] Exergy-Maximized
+import random
+
+import numpy as np
+
 from cortex.interfaces.memory_provider import (
-    MemoryProvider,
     IntentVector,
     MemoryNode,
+    MemoryProvider,
     MemorySubgraph,
 )
-from cortex.semantic.graph_engine import GraphExpansionEngine
 from cortex.semantic.coherence import CoherenceScorer
-import numpy as np
-import random
+from cortex.semantic.graph_engine import GraphExpansionEngine
 
 
 class HybridRetriever:

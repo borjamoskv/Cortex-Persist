@@ -10,6 +10,7 @@ Provides native CLI commands for NotebookLM synchronization:
 """
 
 from __future__ import annotations
+
 import logging
 import os
 import shutil
@@ -17,10 +18,12 @@ import time
 from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
+
 import click
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
+
 from cortex.cli.notebooklm_data import (
     _PROJECT_DOMAIN,
     DIGEST_FILE,
@@ -278,6 +281,7 @@ def status_cmd() -> None:
 def ingest_cmd(drive_path: str | None) -> None:
     """Silent daemon-like ingest: Parse NotebookLM notes back into CORTEX."""
     import json
+
     from cortex.cli.common import get_engine
     from cortex.extensions.llm.router import IntentProfile
     from cortex.extensions.llm.sovereign import SovereignLLM

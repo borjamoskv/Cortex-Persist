@@ -12,14 +12,15 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from pathlib import Path
+
     from cortex.consensus.manager import ConsensusManager
     from cortex.embeddings.manager import EmbeddingManager
     from cortex.engine.auth import ByzantineAuthLayer
+    from cortex.engine.guard_pipeline import GuardPipeline
     from cortex.engine.lock import SovereignLock
     from cortex.facts.manager import FactManager
     from cortex.ledger import EnrichmentQueue, LedgerStore, LedgerWriter
     from cortex.mac_maestro.executor import MaestroExecutor
-    from cortex.engine.guard_pipeline import GuardPipeline
 
 logger = logging.getLogger("cortex.engine.guards")
 

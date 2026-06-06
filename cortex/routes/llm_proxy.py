@@ -123,7 +123,6 @@ async def _stream_labyrinth_proxy(request: Request, payload: dict) -> AsyncGener
                         if "content" in delta:
                             full_content += delta["content"]
                     except json.JSONDecodeError:
-                        import logging
 
                         pass
 

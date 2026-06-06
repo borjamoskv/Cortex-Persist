@@ -269,6 +269,5 @@ class SovereignQuotaManager:
             with _db(self.db_path) as conn:
                 conn.execute("UPDATE quota_bucket SET timeouts = timeouts + 1 WHERE id = 1")
         except sqlite3.OperationalError:
-            import logging
 
             pass

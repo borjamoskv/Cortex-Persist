@@ -21,20 +21,20 @@ from __future__ import annotations
 import logging
 import random
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any
-from collections.abc import Callable
 
+from cortex.engine.genome import FitnessRecord, GenomeMutator, StrategyGenome
 from cortex.isa.builder import (
-    dispatch,
-    seq,
-    par,
-    cond,
-    bind,
-    halt,
     Predicate,
+    bind,
+    cond,
+    dispatch,
+    halt,
+    par,
+    seq,
 )
-from cortex.engine.genome import StrategyGenome, GenomeMutator, FitnessRecord
 
 __all__ = [
     "AgentBlueprint",

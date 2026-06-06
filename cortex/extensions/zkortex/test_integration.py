@@ -152,7 +152,6 @@ def test_range_proof_honesty() -> None:
         prove_range(200, 10, 100)
         raise AssertionError("Should have raised ValueError")
     except ValueError:
-        import logging
 
         pass
 

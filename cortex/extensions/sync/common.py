@@ -142,7 +142,6 @@ def atomic_write(path: Path, content: str) -> None:
         try:
             os.unlink(tmp_path)
         except OSError:
-            import logging
 
             pass
         raise

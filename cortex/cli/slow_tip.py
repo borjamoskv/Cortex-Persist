@@ -149,7 +149,6 @@ class SlowOpTipEmitter:
                 )
             )
         except (ValueError, KeyError, OSError, RuntimeError, ImportError):
-            import logging
 
             pass
 

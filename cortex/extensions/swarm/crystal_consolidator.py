@@ -24,7 +24,6 @@ from dataclasses import dataclass
 from typing import Any
 
 from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
-
 from cortex.extensions.swarm.crystal_thermometer import CrystalVitals
 
 logger = logging.getLogger("cortex.extensions.swarm.crystal_consolidator")
@@ -300,8 +299,8 @@ async def _execute_heuristic_integration(
 ) -> None:
     """Connect Right-Brain HeuristicEngine to enable automated architectural suggestions."""
     from cortex.engine.right_brain import HeuristicEngine
-    from cortex.extensions.evolution.free_energy import FreeEnergyState
     from cortex.extensions.evolution.agents import AgentDomain
+    from cortex.extensions.evolution.free_energy import FreeEnergyState
 
     if len(vitals) < 2:
         return

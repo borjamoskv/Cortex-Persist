@@ -1,9 +1,10 @@
 # [C5-REAL] Exergy-Maximized
 import hashlib
-import numpy as np
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
-from collections.abc import Callable
+
+import numpy as np
 from sklearn.cluster import KMeans
 
 

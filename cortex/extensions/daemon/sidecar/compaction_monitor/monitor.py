@@ -44,7 +44,7 @@ _IS_LINUX = _PLATFORM == "Linux"
 
 # Probe psutil availability without importing at module level in workers
 try:
-    import psutil as _psutil_probe  # type: ignore[import]
+    import psutil as _psutil_probe  # type: ignore[import]  # noqa: F401
 
     _HAS_PSUTIL: bool = True
 except ModuleNotFoundError:
@@ -126,7 +126,6 @@ def _collect_snapshot() -> MemorySnapshot:
             vm = _p.virtual_memory()
             sys_avail, sys_total = vm.available, vm.total
         except (ValueError, KeyError, OSError, RuntimeError, ImportError):
-            import logging
 
             pass
 
@@ -140,7 +139,6 @@ def _collect_snapshot() -> MemorySnapshot:
             info = get_mallinfo2()
             arena, free_b = info.arena, info.fordblks
         except (ValueError, KeyError, OSError, RuntimeError, ImportError):
-            import logging
 
             pass
 
@@ -250,7 +248,6 @@ class MemoryPressureMonitor:
                 # Give it a moment to finish cleanup
                 await asyncio.wait_for(self._task, timeout=1.0)
             except (asyncio.CancelledError, asyncio.TimeoutError):
-                import logging
 
                 pass
 

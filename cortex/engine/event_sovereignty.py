@@ -2,7 +2,6 @@
 import asyncio
 import logging
 from typing import Any
-from collections.abc import Callable
 
 logger = logging.getLogger("cortex.engine.event_sovereignty")
 

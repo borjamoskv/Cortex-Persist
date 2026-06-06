@@ -33,8 +33,6 @@ logger = logging.getLogger("cortex.ledger")
 
 
 from .merkle import MerkleTree
-
-
 from .mixins.audit import LedgerAuditMixin
 
 

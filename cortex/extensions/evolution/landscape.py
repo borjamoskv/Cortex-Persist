@@ -174,7 +174,6 @@ class FitnessLandscape:
                     if key in line:
                         counts[key] += 1
         except OSError:
-            import logging
 
             pass
         return counts

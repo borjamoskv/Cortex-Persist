@@ -225,7 +225,6 @@ class VaultCracker:
                     "VaultCracker: Malleability attack succeeded (authentication failed)."
                 )
             except Exception:
-                import logging
 
                 pass
         # Success = Tag caught it

@@ -9,15 +9,18 @@ import logging
 import os
 import random
 import time
-from typing import Any
 from collections.abc import AsyncGenerator
+from typing import Any
 
 import httpx
 
 from cortex.extensions.llm._audit import spectral_audit
-from cortex.extensions.llm._resilience import CircuitBreaker, resilient_call
 from cortex.extensions.llm._models import BaseProvider, CortexPrompt, IntentProfile
 from cortex.extensions.llm._presets import get_prefix_cache_config, load_presets
+from cortex.extensions.llm._provider_config import resolve_provider_config
+from cortex.extensions.llm._provider_gemini import execute_gemini_native
+from cortex.extensions.llm._provider_stream import execute_stream
+from cortex.extensions.llm._resilience import CircuitBreaker, resilient_call
 from cortex.extensions.llm._result_cache import ResultCache
 from cortex.extensions.llm._stealth import (
     apply_causal_jitter,
@@ -26,10 +29,6 @@ from cortex.extensions.llm._stealth import (
 )
 from cortex.extensions.llm.gemini_cache import get_gemini_gateway
 from cortex.extensions.llm.quota import SovereignQuotaManager
-
-from cortex.extensions.llm._provider_config import resolve_provider_config
-from cortex.extensions.llm._provider_gemini import execute_gemini_native
-from cortex.extensions.llm._provider_stream import execute_stream
 
 __all__ = ["LLMProvider"]
 
@@ -296,7 +295,6 @@ class LLMProvider(BaseProvider):
                             if adapter_path := reg.get("adapter_path"):
                                 return adapter_path
                 except Exception:
-                    import logging
 
                     pass
         if self._intent_model_map:

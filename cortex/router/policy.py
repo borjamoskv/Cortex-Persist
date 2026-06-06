@@ -7,9 +7,10 @@ to output a stochastic routing distribution via softmax.
 """
 
 from __future__ import annotations
+
+import logging
 import math
 import random
-import logging
 from dataclasses import dataclass
 from typing import Literal
 

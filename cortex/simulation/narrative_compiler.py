@@ -1,7 +1,9 @@
 # [C5-REAL] Exergy-Maximized
 from dataclasses import dataclass
-from typing import Any, Union
+from typing import Any
+
 import numpy as np
+
 from cortex.simulation.primitives import MemoryTrajectory, SimulationField
 from cortex.simulation.thermodynamics import ThermodynamicState
 

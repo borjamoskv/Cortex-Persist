@@ -33,7 +33,7 @@ from cortex.agents.message_schema import MessageKind, new_message
 logger = logging.getLogger("cortex.agents.copilot.server")
 
 try:
-    import websockets
+    import websockets  # noqa: F401
     from websockets.asyncio.server import serve as ws_serve
 
     HAS_WEBSOCKETS = True

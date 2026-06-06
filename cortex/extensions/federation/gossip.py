@@ -51,7 +51,6 @@ class GossipNode:
             try:
                 await self._task
             except asyncio.CancelledError:
-                import logging
 
                 pass
         logger.info(f"Gossip Protocol terminated on node {self.node_id}")

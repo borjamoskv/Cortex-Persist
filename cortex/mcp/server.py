@@ -14,13 +14,10 @@ from cortex.engine import CortexEngine
 from cortex.extensions.immune.filters.base import Verdict
 from cortex.extensions.immune.membrane import ImmuneMembrane
 from cortex.ledger import ImmutableLedger
+from cortex.mcp.apollo_tools import register_apollo_tools
 from cortex.mcp.core_tools import (
     _register_embed_status_tool,
     _register_embed_tool,
-    _register_handoff_tool,
-    _register_shannon_report_tool,
-    _register_trace_chain_tool,
-    _register_trace_episode_tool,
 )
 from cortex.mcp.genesis_tools import register_genesis_tools
 from cortex.mcp.guard import MCPGuard
@@ -30,7 +27,6 @@ from cortex.mcp.mega_tools import register_mega_tools
 from cortex.mcp.music_tools import register_music_tools
 from cortex.mcp.singularity_tools import register_singularity_tools
 from cortex.mcp.trust_tools import register_trust_tools
-from cortex.mcp.apollo_tools import register_apollo_tools
 from cortex.mcp.utils import (
     AsyncConnectionPool,
     MCPMetrics,

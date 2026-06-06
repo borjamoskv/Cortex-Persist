@@ -263,6 +263,5 @@ def logs():
     try:
         subprocess.run(tail_file_command(str(LOG_PATH)))
     except KeyboardInterrupt:
-        import logging
 
         pass

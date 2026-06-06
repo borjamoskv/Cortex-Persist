@@ -1,8 +1,8 @@
 # [C5-REAL] Exergy-Maximized
 
 import hashlib
-from typing import Any
 from collections.abc import Mapping
+from typing import Any
 
 from cortex.utils.canonical import canonical_json
 

@@ -246,7 +246,6 @@ def status(as_json: bool) -> None:
                 ],
             }
         except ImportError:
-            import logging
 
             pass
         click.echo(json.dumps(last, indent=2, ensure_ascii=False))

@@ -198,7 +198,6 @@ async def scan_all_crystals(
                     embedding = np.frombuffer(embedding_data, dtype=np.float32).tolist()
                     resonance = await calculate_resonance(embedding, axiom_embeddings)
                 except Exception:
-                    import logging
 
                     pass
 

@@ -244,7 +244,6 @@ class ObjectLevel:
                 h = self._strategy._find_heuristic(heuristic_applied)
                 h.activate(success=(outcome == StepOutcome.SUCCESS))
             except KeyError:
-                import logging
 
                 pass
         # Heuristic may have been pruned mid-execution

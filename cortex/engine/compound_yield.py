@@ -158,7 +158,6 @@ class CompoundYieldTracker:
             if "hours_saved" in meta:
                 return float(meta["hours_saved"])
         except (json.JSONDecodeError, TypeError, ValueError):
-            import logging
 
             pass
 

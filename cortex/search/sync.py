@@ -110,7 +110,6 @@ def semantic_search_sync(
                 enc = get_default_encrypter()
                 content = enc.decrypt_str(content) or content
             except (ValueError, OSError):
-                import logging
 
                 pass
 
@@ -217,7 +216,6 @@ def _parse_row(row: tuple, has_rank: bool) -> SyncSearchResult:
             enc = get_default_encrypter()
             content = enc.decrypt_str(content) or content
         except (ValueError, OSError):
-            import logging
 
             pass
 

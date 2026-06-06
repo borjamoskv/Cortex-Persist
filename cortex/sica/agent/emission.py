@@ -4,8 +4,8 @@ import logging
 from typing import Any
 
 from cortex.agents.message_schema import AgentMessage, MessageKind, new_message
-from cortex.sica.meta_level import MetaJudgment
 from cortex.sica.agent.stats import _LifetimeStats
+from cortex.sica.meta_level import MetaJudgment
 
 logger = logging.getLogger("cortex.sica.agent.emission")
 

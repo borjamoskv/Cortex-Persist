@@ -1,8 +1,8 @@
 # [C5-REAL] Exergy-Maximized
-import numpy as np
 import time
 from dataclasses import dataclass, field
-from typing import Any
+
+import numpy as np
 
 from cortex.observability.exergy_engine import ExecutionTrace
 

@@ -5,12 +5,12 @@ import asyncio
 import inspect
 import logging
 import time
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
+from cortex.engine._autocurative_state import HealingEvent, HealingPhase
 from cortex.engine.circuit_breaker import CircuitState
 from cortex.engine.endocrine import ENDOCRINE, HormoneType
 from cortex.engine.repair_strategies import RepairResult
-from cortex.engine._autocurative_state import HealingPhase, HealingEvent
 
 if TYPE_CHECKING:
     from cortex.engine.autocurative_agent import AutoCurativeAgent

@@ -105,11 +105,10 @@ class TopographicSensor:
                 attrs = xattr.listxattr(str(file_path))
                 return [a for a in attrs if a.startswith(self.prefix)]
             except OSError:
-                import logging
+                import logging  # noqa: F401
 
                 pass
         except ImportError:
-            import logging
 
             pass
 
@@ -144,11 +143,10 @@ class TopographicSensor:
             try:
                 return xattr.getxattr(str(file_path), attr)  # pyright: ignore
             except OSError:
-                import logging
+                import logging  # noqa: F401
 
                 pass
         except ImportError:
-            import logging
 
             pass
 
@@ -193,14 +191,12 @@ class TopographicSensor:
                 os.removexattr(str(file_path), attr_name)  # type: ignore[reportAttributeAccessIssue]
                 return
             except OSError:
-                import logging
 
                 pass
 
         try:
             subprocess.run(["xattr", "-d", attr_name, str(file_path)], capture_output=True)
         except (subprocess.SubprocessError, FileNotFoundError, OSError):
-            import logging
 
             pass
 
@@ -222,7 +218,6 @@ class TopographicSensor:
                         ghost["source_file"] = str(manifest.parent / filename)
                         results.append(ghost)
         except (json.JSONDecodeError, KeyError, OSError):
-            import logging
 
             pass
         return results

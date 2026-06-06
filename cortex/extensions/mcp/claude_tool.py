@@ -1,6 +1,6 @@
 # [C5-REAL] Exergy-Maximized
-import os
 import json
+import os
 
 
 def run_claude_query(prompt: str, model: str = "claude-3-opus-20240229") -> str:
@@ -41,15 +41,14 @@ def run_claude_query(prompt: str, model: str = "claude-3-opus-20240229") -> str:
                 {"status": "C5-REAL", "model": data.get("model", model), "response": text}
             )
     except ImportError:
-        import logging
 
         pass
     except Exception as e:
         return json.dumps({"status": "error", "message": f"HTTPX request failed: {e}"})
 
     # Method 2: Fallback to standard library urllib (zero dependencies)
-    import urllib.request
     import urllib.error
+    import urllib.request
 
     try:
         req = urllib.request.Request(

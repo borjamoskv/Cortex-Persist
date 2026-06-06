@@ -1,6 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 import asyncio
 import logging
+
 from .bifurcation_engine import ExergyBifurcationEngine
 
 logger = logging.getLogger(__name__)

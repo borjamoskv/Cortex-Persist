@@ -176,7 +176,6 @@ def mejoralo_record(project, score_before, score_after, actions, db):
                 with open(state_file, "w") as f:
                     json.dump(state, f, indent=2, default=str)
             except (OSError, ValueError):
-                import logging
 
                 pass
 

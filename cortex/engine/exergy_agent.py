@@ -4,8 +4,8 @@ from collections.abc import Mapping
 from typing import Any
 
 from cortex.engine.endocrine import ENDOCRINE, HormoneType
-from cortex.engine.legion import AsyncSignalBus, SwarmAgent, SwarmSignal
 from cortex.engine.exergy_optimizer import ExergyOptimizer
+from cortex.engine.legion import AsyncSignalBus, SwarmAgent, SwarmSignal
 
 logger = logging.getLogger("cortex.exergy_agent")
 
@@ -104,8 +104,8 @@ class ExergyAgentAdapter(SwarmAgent):
     async def execute(self, target: str) -> SwarmSignal:
         logger.warning("🔋 [EXERGY-MAXIMIZER] %s desplegado sobre: %s", self.agent_id, target)
 
-        import sys
         import os
+        import sys
 
         cortex_core_path = os.path.join(
             os.path.dirname(os.path.abspath(__file__)), "../../cortex-core"

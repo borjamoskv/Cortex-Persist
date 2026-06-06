@@ -1,13 +1,14 @@
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
+
 import logging
 from typing import Any
 
 from cortex.sica.strategy import SearchStrategy
 
 from .genetics import GenePool, GenomeCrossover
-from .tournament import Tournament
 from .specialization import SpecializationDetector
+from .tournament import Tournament
 
 logger = logging.getLogger("cortex.sica.colony.core")
 

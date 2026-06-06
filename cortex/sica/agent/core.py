@@ -38,20 +38,19 @@ from cortex.agents.base import BaseAgent
 from cortex.agents.manifest import AgentManifest
 from cortex.agents.message_schema import AgentMessage, MessageKind
 from cortex.agents.tools import ToolRegistry
+from cortex.sica.agent.assessment import SelfAssessor
+from cortex.sica.agent.emission import AgentEmitter
+from cortex.sica.agent.stats import _LifetimeStats
 from cortex.sica.autonomy import (
     AdaptiveRetry,
     AutonomousTick,
     SpeculativeFork,
 )
 from cortex.sica.constitution import Constitution
-from cortex.sica.meta_level import MetaLevel, MetaJudgment, MetaAction
+from cortex.sica.meta_level import MetaAction, MetaJudgment, MetaLevel
 from cortex.sica.object_level import ObjectLevel, StepOutcome
 from cortex.sica.persistence import load_or_default, save_genome
 from cortex.sica.strategy import SearchStrategy
-
-from cortex.sica.agent.stats import _LifetimeStats
-from cortex.sica.agent.assessment import SelfAssessor
-from cortex.sica.agent.emission import AgentEmitter
 
 logger = logging.getLogger("cortex.sica.agent")
 

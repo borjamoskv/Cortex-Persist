@@ -82,7 +82,6 @@ class MacMaestroAgent:
         try:
             return json.loads(text)
         except json.JSONDecodeError:
-            import logging
 
             pass
 
@@ -91,7 +90,6 @@ class MacMaestroAgent:
             try:
                 return json.loads(match.group(1))
             except json.JSONDecodeError:
-                import logging
 
                 pass
 
@@ -100,7 +98,6 @@ class MacMaestroAgent:
             try:
                 return json.loads(match.group(1))
             except json.JSONDecodeError:
-                import logging
 
                 pass
 

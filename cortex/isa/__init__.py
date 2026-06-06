@@ -10,33 +10,33 @@ Reality Level: C5-REAL
 
 from cortex.isa.builder import (
     AgentOp,
+    HaltReason,
+    LedgerMutation,
+    LedgerQuery,
+    MutationOp,
     Predicate,
     Ref,
-    HaltReason,
     SelfQuery,
-    LedgerQuery,
-    LedgerMutation,
-    MutationOp,
+    bind,
+    cond,
     # Builder DSL shortcuts
     dispatch,
-    seq,
-    par,
-    cond,
-    loop_n,
-    bind,
-    halt,
-    noop,
-    reflect,
-    rewrite,
-    query,
-    mutate,
-    transform,
-    # Serialization
-    to_json,
+    dispatch_targets,
     from_json,
+    halt,
+    loop_n,
+    mutate,
     # Introspection
     node_count,
-    dispatch_targets,
+    noop,
+    par,
+    query,
+    reflect,
+    rewrite,
+    seq,
+    # Serialization
+    to_json,
+    transform,
 )
 
 __all__ = [

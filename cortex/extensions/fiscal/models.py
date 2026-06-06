@@ -1,5 +1,5 @@
 # [C5-REAL] Exergy-Maximized
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from typing import Any
 
 

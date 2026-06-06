@@ -127,7 +127,6 @@ async def call_external_compact(
                 # compact() is sync - run in thread to avoid blocking event loop
                 return await asyncio.to_thread(compact, engine, project)
         except ImportError:
-            import logging
 
             pass
 

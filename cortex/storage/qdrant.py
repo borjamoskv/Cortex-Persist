@@ -108,7 +108,10 @@ class QdrantVectorBackend:
         if collection in self._initialized_collections:
             return
 
-        from qdrant_client.models import Distance, VectorParams  # pyright: ignore[reportMissingImports]
+        from qdrant_client.models import (  # pyright: ignore[reportMissingImports]
+            Distance,
+            VectorParams,
+        )
 
         try:
             exists = await self._client.collection_exists(collection)
@@ -201,7 +204,11 @@ class QdrantVectorBackend:
 
         query_filter = None
         if project:
-            from qdrant_client.models import FieldCondition, Filter, MatchValue  # pyright: ignore[reportMissingImports]
+            from qdrant_client.models import (  # pyright: ignore[reportMissingImports]
+                FieldCondition,
+                Filter,
+                MatchValue,
+            )
 
             query_filter = Filter(
                 must=[FieldCondition(key="project", match=MatchValue(value=project))]

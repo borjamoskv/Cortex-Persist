@@ -205,7 +205,6 @@ class PostgresBackend:
                     user_part = pre_at.rsplit(":", 1)[0]
                     return f"{user_part}:***@{post_at}"
             except (IndexError, ValueError):
-                import logging
 
                 pass
         return dsn

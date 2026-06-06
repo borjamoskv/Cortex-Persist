@@ -1,6 +1,6 @@
 # [C5-REAL] Exergy-Maximized
-from typing import Any
 from collections.abc import Callable
+from typing import Any
 
 "MoskvDaemon - Main daemon orchestrator.\n\nv2.0: Sovereign Async Loop - single event loop replaces N threads.\nNew subsystems: SovereignScheduler, HotStateDB, WatchdogHub, HumanCallbackAPI.\n"
 import asyncio
@@ -10,6 +10,7 @@ import threading
 import time
 from datetime import datetime, timezone
 from pathlib import Path
+
 from cortex.extensions.daemon.alerts import AlertHandlerMixin
 from cortex.extensions.daemon.core_support import (
     init_advanced_monitors,
@@ -67,8 +68,8 @@ except ImportError:
 __all__ = ["MoskvDaemon"]
 logger = logging.getLogger("moskv-daemon")
 MAX_CONSECUTIVE_FAILURES = 3
-from cortex.extensions.daemon.resource_mgr import ResourceMgrMixin
 from cortex.extensions.daemon.event_loop import EventLoopMixin
+from cortex.extensions.daemon.resource_mgr import ResourceMgrMixin
 
 
 class MoskvDaemon(AlertHandlerMixin, HealingMixin, LoopsMixin, ResourceMgrMixin, EventLoopMixin):

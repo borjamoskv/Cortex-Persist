@@ -64,7 +64,6 @@ def _parse_tx_detail(raw: str | dict | None) -> str:
         if isinstance(d, dict):
             return f" - {d.get('content', '')[:80]}"
     except (json.JSONDecodeError, TypeError):
-        import logging
 
         pass
     return ""
@@ -288,7 +287,6 @@ class ContextCollector:
                         elif p.is_file() and p.suffix == ".py":
                             py_files.append(p)
                 except (OSError, PermissionError):
-                    import logging
 
                     pass
 

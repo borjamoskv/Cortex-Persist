@@ -1,9 +1,10 @@
 # [C5-REAL] Exergy-Maximized
-import sqlite3
-import json
 import asyncio
+import json
+import sqlite3
 import time
 from typing import Any
+
 from cortex.compat.optional import np
 from cortex.memory.models import CortexFactModel
 from cortex.utils import void_vec

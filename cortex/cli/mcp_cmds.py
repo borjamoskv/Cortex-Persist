@@ -61,11 +61,13 @@ def trust_mcp(host: str, port: int, transport: str) -> None:
 @mcp_cmds.command("sovereign")
 def sovereign_mcp() -> None:
     """Boot the CORTEX Sovereign MCP Server (Rust-native, Stdio)."""
-    import sys
     import json
+    import sys
+
     from cortex_rs import McpSovereignHost
-    from cortex.memory.vsa import VSAPipelineBridge
+
     from cortex.extensions.policy.jis_auditor import JISAuditor
+    from cortex.memory.vsa import VSAPipelineBridge
 
     sys.stderr.write("🚀 Booting CORTEX Sovereign MCP Server (Rust-native, Transport: stdio)...\n")
     sys.stderr.flush()

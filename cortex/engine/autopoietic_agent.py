@@ -16,33 +16,32 @@ Reality Level: C5-REAL
 from __future__ import annotations
 
 import logging
-import time
 import random
+import time
 from collections import deque
-from collections.abc import Callable, Awaitable
+from collections.abc import Awaitable, Callable
 from typing import Any
 
-from cortex.isa.builder import AgentOp
-from cortex.engine.genome import (
-    StrategyGenome,
-    GenomeMutator,
+from cortex.engine._autopoietic_helper import (
+    adopt,
+    apply_meta_mutation,
+    checkpoint,
+    escalate_mutation_pressure,
+    evaluate_genome,
+    rollback,
+    spawn_from_evolved,
+    validate_genome,
 )
+from cortex.engine._autopoietic_oracle import EvolutionConfig, FitnessOracle
+from cortex.engine._autopoietic_state import AutopoieticState
 from cortex.engine.genesis import (
     GenesisEngine,
 )
-
-from cortex.engine._autopoietic_state import AutopoieticState
-from cortex.engine._autopoietic_oracle import EvolutionConfig, FitnessOracle
-from cortex.engine._autopoietic_helper import (
-    evaluate_genome,
-    adopt,
-    validate_genome,
-    checkpoint,
-    rollback,
-    escalate_mutation_pressure,
-    apply_meta_mutation,
-    spawn_from_evolved,
+from cortex.engine.genome import (
+    GenomeMutator,
+    StrategyGenome,
 )
+from cortex.isa.builder import AgentOp
 
 __all__ = [
     "AutopoieticAgent",

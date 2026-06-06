@@ -207,6 +207,5 @@ class TieredCache(Generic[T]):
             try:
                 queue.put_nowait((event, key))
             except asyncio.QueueFull:
-                import logging
 
                 pass

@@ -5,10 +5,9 @@ SYS_ID: ENCB_ROUTER_OMEGA
 STATE: C5-REAL
 """
 
-from enum import Enum
-from typing import Any, Literal, Optional
-from collections.abc import Callable
 import dataclasses
+from enum import Enum
+from typing import Literal
 
 # ---------------------------------------------------------
 # 1. TYPE SYSTEM

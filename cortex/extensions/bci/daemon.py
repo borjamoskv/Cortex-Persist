@@ -139,7 +139,6 @@ class BCI_Transmitter:
                 writer.close()
                 await writer.wait_closed()
             except UnboundLocalError:
-                import logging
 
                 pass
 

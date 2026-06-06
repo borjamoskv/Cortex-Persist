@@ -1,9 +1,11 @@
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
+
 import logging
 
-from .types import AgentSpecialization
 from cortex.sica.strategy import SearchStrategy, StrategyGenome
+
+from .types import AgentSpecialization
 
 logger = logging.getLogger("cortex.sica.colony.specialization")
 

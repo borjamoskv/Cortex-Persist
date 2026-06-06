@@ -114,7 +114,6 @@ class ResultCache:
                     logger.debug("LLM Cache [HIT] -> %s...", h[:8])
                     return row[0]
         except sqlite3.OperationalError:
-            import logging
 
             pass
         return None

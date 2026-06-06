@@ -88,6 +88,5 @@ class Autopoiesis:
             script_path.unlink()
             logger.info("Tool recycled: %s", script_path.name)
         except FileNotFoundError:
-            import logging
 
             pass

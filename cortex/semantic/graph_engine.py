@@ -1,5 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 import numpy as np
+
 from cortex.interfaces.memory_provider import MemoryNode, MemoryProvider
 
 

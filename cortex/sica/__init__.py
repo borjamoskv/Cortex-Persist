@@ -26,8 +26,8 @@ from cortex.sica.autonomy import (
     TraceSynthesizer,
 )
 from cortex.sica.constitution import Constitution, Principle
-from cortex.sica.meta_level import MetaLevel, MetaJudgment
-from cortex.sica.object_level import ObjectLevel, ExecutionTrace
+from cortex.sica.meta_level import MetaJudgment, MetaLevel
+from cortex.sica.object_level import ExecutionTrace, ObjectLevel
 from cortex.sica.persistence import (
     load_genome,
     load_or_default,
@@ -35,8 +35,8 @@ from cortex.sica.persistence import (
 )
 from cortex.sica.strategy import (
     SearchStrategy,
-    StrategyMutation,
     StrategyGenome,
+    StrategyMutation,
 )
 
 __all__ = [

@@ -7,8 +7,6 @@ import math
 import uuid
 
 from cortex.engine.slashing import SlashingEngine
-from cortex.telemetry.metrics import metrics
-from cortex.telemetry.pulse import PULSE
 
 __all__ = ["ConsensusManager"]
 

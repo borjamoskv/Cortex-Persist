@@ -1,10 +1,11 @@
 # [C5-REAL] Exergy-Maximized
+import logging
 import time
 import uuid
-import logging
 from typing import Any
-from .state import RuntimeState
+
 from .snapshot import SnapshotManager
+from .state import RuntimeState
 
 logger = logging.getLogger("cortex.runtime")
 

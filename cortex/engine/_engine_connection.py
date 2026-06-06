@@ -17,7 +17,7 @@ from contextlib import asynccontextmanager
 import aiosqlite
 import sqlite_vec
 
-from cortex.database.core import load_sqlite_vec_async, connect
+from cortex.database.core import connect, load_sqlite_vec_async
 from cortex.database.schema import get_init_meta
 from cortex.migrations.core import run_migrations_async
 from cortex.telemetry.metrics import metrics
@@ -103,7 +103,6 @@ class ConnectionMixin:
                     try:
                         await conn.close()
                     except Exception:
-                        import logging
 
                         pass
                     self._conns_by_loop.pop(current_loop, None)
@@ -179,7 +178,6 @@ class ConnectionMixin:
             conn.load_extension(sqlite_vec.loadable_path())
             conn.enable_load_extension(False)
         except (AttributeError, OSError):
-            import logging
 
             pass
         return conn

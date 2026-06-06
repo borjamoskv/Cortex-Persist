@@ -6,6 +6,7 @@ import random
 import secrets
 import sqlite3
 from typing import TYPE_CHECKING
+
 from cortex.extensions.evolution.agents import Mutation, SovereignAgent, SubAgent
 
 if TYPE_CHECKING:

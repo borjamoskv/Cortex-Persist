@@ -3,8 +3,8 @@ from __future__ import annotations
 
 import asyncio
 import os
-from pathlib import Path
 import sys
+from pathlib import Path
 
 from cortex.guards._seal_printer import SealPrinter
 
@@ -44,7 +44,6 @@ async def arun_cmd(cmd: list[str], timeout: float = 60.0) -> tuple[int, str]:
                 proc.kill()
                 await asyncio.wait_for(proc.wait(), timeout=5.0)
             except (ProcessLookupError, asyncio.TimeoutError):
-                import logging
 
                 pass
             return 124, f"Command timed out after {timeout}s: {' '.join(cmd)}"

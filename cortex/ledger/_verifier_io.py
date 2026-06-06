@@ -4,7 +4,7 @@ from __future__ import annotations
 import json
 from collections.abc import Mapping
 from pathlib import Path
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from cortex.ledger.public_verifier_utils import (
     _load_json_object,

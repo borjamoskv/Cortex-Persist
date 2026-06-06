@@ -1,5 +1,6 @@
 # [C5-REAL] Exergy-Maximized
-from typing import Protocol, Any
+from typing import Any, Protocol
+
 from cortex.memory.models import MemoryEvent
 
 

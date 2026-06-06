@@ -76,6 +76,7 @@ class LedgerVerifier:
 
     def _get_mldsa_private_key(self):
         import os
+
         from cryptography.hazmat.primitives.asymmetric import mldsa
 
         db_dir = os.path.dirname(self.store.db_path) if self.store.db_path else "."
@@ -202,8 +203,8 @@ class LedgerVerifier:
         """Verify the ML-DSA post-quantum signature of all checkpoints."""
         violations = []
         checked = 0
-        from cryptography.hazmat.primitives.asymmetric import mldsa
         from cryptography.exceptions import InvalidSignature
+        from cryptography.hazmat.primitives.asymmetric import mldsa
 
         with self.store.tx() as conn:
             # Check if columns exist

@@ -1,6 +1,5 @@
 # [C5-REAL] Exergy-Maximized
 import random
-import hashlib
 
 
 class ExternalFitnessWitness:

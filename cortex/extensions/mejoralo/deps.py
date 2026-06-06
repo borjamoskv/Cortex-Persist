@@ -49,7 +49,6 @@ def _extract_file_dependencies(file_path: Path, targets: set[str]) -> set[str]:
             if mod:
                 _match_module_to_targets(mod, targets, deps)
     except (SyntaxError, UnicodeDecodeError, OSError):
-        import logging
 
         pass
     return deps

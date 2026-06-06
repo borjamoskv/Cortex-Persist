@@ -1,5 +1,5 @@
 # [C5-REAL] Exergy-Maximized
-from .market import TaaSMarketplace, JobRequest, JobSLA, JobQuote, JobExecutionResult
+from .market import JobExecutionResult, JobQuote, JobRequest, JobSLA, TaaSMarketplace
 
 __all__ = [
     "JobExecutionResult",

@@ -105,7 +105,6 @@ def sovereign_run(
                 getattr(uvloop, "__version__", "?"),
             )
     except ImportError:
-        import logging
 
         pass
 

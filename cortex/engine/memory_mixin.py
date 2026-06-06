@@ -35,8 +35,9 @@ class MemoryMixin(EngineMixinBase):
         to avoid loading the ML model (~30s penalty per test).
         """
         try:
-            from cortex.memory.ledger import EventLedgerL3
             import os
+
+            from cortex.memory.ledger import EventLedgerL3
 
             redis_url = os.environ.get("CORTEX_REDIS_URL")
             if redis_url:
@@ -81,7 +82,7 @@ class MemoryMixin(EngineMixinBase):
         # This allows test assertions looking for "numpy not installed" to trigger.
         numpy_installed = True
         try:
-            import numpy
+            import numpy  # noqa: F401
         except ImportError:
             numpy_installed = False
 

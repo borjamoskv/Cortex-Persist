@@ -1,5 +1,6 @@
 # [C5-REAL] Exergy-Maximized
-from typing import Optional, Any
+from typing import Any
+
 from .state import RuntimeState
 
 

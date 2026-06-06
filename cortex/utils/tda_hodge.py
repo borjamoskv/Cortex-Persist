@@ -10,7 +10,6 @@ Reality Level: C5-REAL
 from __future__ import annotations
 
 import numpy as np
-from typing import Any, Final
 
 
 class HodgeZeroModeTransport:

@@ -4,8 +4,8 @@ Implementation of O(1) latent reasoning sequences to replace autoregressive CoT.
 Based on arXiv:2605.30343v1.
 """
 
-from typing import Any
 import logging
+from typing import Any
 
 logger = logging.getLogger("cortex.engine.rim")
 

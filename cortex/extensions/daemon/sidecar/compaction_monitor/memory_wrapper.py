@@ -34,7 +34,6 @@ if _libc:
         _libc.malloc_trim.restype = ctypes.c_int
         HAS_MALLOC_TRIM = True
     except AttributeError:
-        import logging
 
         pass
 
@@ -58,7 +57,6 @@ if _libc:
         _libc.mallinfo2.restype = _MallInfo2Struct
         HAS_MALLINFO2 = True
     except AttributeError:
-        import logging
 
         pass
 

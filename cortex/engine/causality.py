@@ -10,22 +10,22 @@ from datetime import datetime, timezone
 from typing import Any
 
 import aiosqlite
-from cortex.engine.causality_models import (
-    EpistemicStatus,
-    TaintStatus,
-    Confidence,
-    CONFIDENCE_LEVELS,
-    TaintReport,
-    LedgerEvent,
-    _downgrade_confidence,
-    EDGE_DERIVED_FROM,
-    EDGE_TRIGGERED_BY,
-    EDGE_UPDATED_FROM,
-    EDGE_TAINTED_BY,
-)
 
 from cortex.crypto import get_default_encrypter
 from cortex.database.core import connect
+from cortex.engine.causality_models import (
+    CONFIDENCE_LEVELS,
+    EDGE_DERIVED_FROM,
+    EDGE_TAINTED_BY,
+    EDGE_TRIGGERED_BY,
+    EDGE_UPDATED_FROM,
+    Confidence,
+    EpistemicStatus,
+    LedgerEvent,
+    TaintReport,
+    TaintStatus,
+    _downgrade_confidence,
+)
 from cortex.extensions.signals.bus import AsyncSignalBus, SignalBus
 
 logger = logging.getLogger("cortex.engine.causality")

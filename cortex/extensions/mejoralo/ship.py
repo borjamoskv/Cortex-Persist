@@ -116,7 +116,6 @@ def _seal_a11y(p: Path, stack: str) -> ShipSeal:
             if "<img" in content and 'alt="' not in content:
                 a11y_findings.append(f"{hf.name}: missing alt tags")
         except OSError:
-            import logging
 
             pass
 

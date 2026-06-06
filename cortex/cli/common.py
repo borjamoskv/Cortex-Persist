@@ -105,7 +105,6 @@ def _show_tip(engine=None) -> None:
             )
         )
     except (ImportError, RuntimeError, OSError, ValueError):
-        import logging
 
         pass
 

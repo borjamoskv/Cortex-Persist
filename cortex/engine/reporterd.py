@@ -89,7 +89,6 @@ class ManifoldDaemon:
             while True:
                 await asyncio.sleep(60)
         except asyncio.CancelledError:
-            import logging
 
             pass
         finally:

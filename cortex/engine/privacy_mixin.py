@@ -51,7 +51,6 @@ class PrivacyMixin(EngineMixinBase):
                 }
                 return {**(meta or {}), **privacy_meta}
         except ImportError:
-            import logging
 
             pass
         # Classifier not available - degrade gracefully

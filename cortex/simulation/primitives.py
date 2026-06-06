@@ -1,7 +1,8 @@
 # [C5-REAL] Exergy-Maximized
-import numpy as np
 from dataclasses import dataclass, field
-from typing import Optional
+
+import numpy as np
+
 from cortex.interfaces.memory_provider import MemoryNode
 
 

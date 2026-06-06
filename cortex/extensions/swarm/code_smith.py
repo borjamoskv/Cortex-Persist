@@ -402,7 +402,6 @@ class CodeSmith:
             try:
                 await self._sandbox.cleanup()
             except Exception:
-                import logging
 
                 pass
 

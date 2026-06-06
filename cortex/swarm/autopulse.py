@@ -5,6 +5,7 @@ import json
 import logging
 import os
 import time
+
 from cortex.config import DB_PATH
 from cortex.extensions.signals.bus import AsyncSignalBus
 from cortex.swarm.tensor_glial import TensorGlialLegion

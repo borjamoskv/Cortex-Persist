@@ -8,6 +8,7 @@ Rule-based intent inference from file activity statistics.
 from collections import defaultdict
 from collections.abc import Callable
 from pathlib import Path
+
 from cortex.extensions.perception.base import (
     MIN_EVENTS_FOR_INFERENCE,
     BehavioralSnapshot,

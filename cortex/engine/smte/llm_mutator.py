@@ -4,10 +4,10 @@ Connects the AST Parser directly to an LLM (Qwen) for structural topology rewrit
 """
 
 import ast
-import os
 import json
-import urllib.request
 import logging
+import os
+import urllib.request
 
 logger = logging.getLogger("cortex.engine.smte.llm_mutator")
 

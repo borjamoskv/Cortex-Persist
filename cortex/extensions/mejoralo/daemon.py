@@ -80,7 +80,6 @@ class MejoraloDaemon:
             try:
                 await self._loop_task
             except asyncio.CancelledError:
-                import logging
 
                 pass
             # expected - task was cancelled by us

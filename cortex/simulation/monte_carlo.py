@@ -1,8 +1,9 @@
 # [C5-REAL] Exergy-Maximized
-import numpy as np
 import random
 
-from cortex.interfaces.memory_provider import MemoryProvider, MemoryNode, IntentVector
+import numpy as np
+
+from cortex.interfaces.memory_provider import IntentVector, MemoryNode, MemoryProvider
 from cortex.simulation.primitives import MemoryParticle, MemoryTrajectory
 from cortex.simulation.thermodynamics import MemoryFrictionEngine
 

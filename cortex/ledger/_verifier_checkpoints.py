@@ -1,7 +1,9 @@
+import logging
+logger = logging.getLogger(__name__)
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
 
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from cortex.ledger.public_verifier_utils import (
     _b64url_decode,
@@ -20,8 +22,8 @@ def verify_checkpoints(verifier: _PublicLedgerVerifier) -> None:
         return
 
     try:
-        from cryptography.hazmat.primitives.asymmetric import mldsa
         from cryptography.exceptions import InvalidSignature
+        from cryptography.hazmat.primitives.asymmetric import mldsa
     except ImportError:
         verifier.errors.append("mldsa_unsupported_by_cryptography")
         return

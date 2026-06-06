@@ -12,7 +12,7 @@ import json
 import logging
 import time
 from abc import ABC, abstractmethod
-from typing import Any, TypeAlias, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, TypeAlias
 
 import aiosqlite
 

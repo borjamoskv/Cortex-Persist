@@ -7,23 +7,23 @@ and triggers physical snapshots.
 
 from __future__ import annotations
 
-import time
 import hashlib
 import json
+import time
 from datetime import datetime, timezone
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from cortex.engine import CortexEngine
 
-from cortex.extensions.shannon.analyzer import shannon_entropy
-from cortex.engine.ultrathink_physics import UltrathinkPhysicsEngine
 from cortex.engine.snapshots import SnapshotManager
+from cortex.engine.ultrathink_physics import UltrathinkPhysicsEngine
 from cortex.extensions.security.signatures import (
-    get_default_signer,
     Ed25519Signer,
     generate_keypair,
+    get_default_signer,
 )
+from cortex.extensions.shannon.analyzer import shannon_entropy
 
 
 class LedgerCredibilityStack:

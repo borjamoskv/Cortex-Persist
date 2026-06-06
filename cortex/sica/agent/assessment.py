@@ -1,8 +1,9 @@
 # [C5-REAL] Exergy-Maximized
 
 from typing import Any
-from cortex.sica.object_level import ObjectLevel, StepOutcome
+
 from cortex.sica.meta_level import MetaJudgment
+from cortex.sica.object_level import ObjectLevel, StepOutcome
 from cortex.sica.strategy import SearchStrategy
 
 

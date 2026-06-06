@@ -1,7 +1,9 @@
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
+
 from typing import Any
-from .types import TuningDecision, TuningType, OptimizerConfig
+
+from .types import OptimizerConfig, TuningDecision, TuningType
 
 
 class OptimizationTuners:

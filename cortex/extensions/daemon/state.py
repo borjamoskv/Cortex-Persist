@@ -106,7 +106,6 @@ class DaemonState:
                 if policy == "ZERO_LOCAL_ON_HANDSHAKE" and hs == "remote":
                     return
             except (json.JSONDecodeError, OSError, KeyError):
-                import logging
 
                 pass
 

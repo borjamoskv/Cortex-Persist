@@ -1,9 +1,10 @@
 # [C5-REAL] Exergy-Maximized
-import numpy as np
 import random
 from typing import Any
 
-from cortex.observability.fdf import Particle, FailureField
+import numpy as np
+
+from cortex.observability.fdf import FailureField, Particle
 
 
 def memory_entropy(history: list[float]) -> float:

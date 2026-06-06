@@ -2,12 +2,13 @@
 from __future__ import annotations
 
 import logging
+
 from fastapi import APIRouter, Depends, HTTPException
 
 from cortex.api.deps import get_async_engine
 from cortex.auth import AuthResult, require_permission
 from cortex.engine import CortexEngine as AsyncCortexEngine
-from cortex.extensions.taas import TaaSMarketplace, JobRequest, JobQuote, JobExecutionResult
+from cortex.extensions.taas import JobExecutionResult, JobQuote, JobRequest, TaaSMarketplace
 
 router = APIRouter(tags=["taas"])
 logger = logging.getLogger("uvicorn.error")

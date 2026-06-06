@@ -11,19 +11,19 @@ import json
 import logging
 import random
 
+from cortex.engine._genome_tree_helper import remove_target, replace_target
+from cortex.engine._genome_types import MutationType, StrategyGenome
 from cortex.isa.builder import (
-    dispatch,
-    seq,
-    par,
-    cond,
-    loop_n,
-    halt,
-    noop,
-    dispatch_targets,
     Predicate,
+    cond,
+    dispatch,
+    dispatch_targets,
+    halt,
+    loop_n,
+    noop,
+    par,
+    seq,
 )
-from cortex.engine._genome_types import StrategyGenome, MutationType
-from cortex.engine._genome_tree_helper import replace_target, remove_target
 
 logger = logging.getLogger("cortex.engine.genome")
 

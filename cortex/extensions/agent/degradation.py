@@ -35,22 +35,22 @@ Usage::
             ...
 """
 
-from .degradation_types import (
-    SovereignAgentError,
-    SchemaIncompatibilityError,
-    ToolRegistrationError,
-    ModelUnavailableError,
-    AgentDegradedError,
-    AgentCalcificationError,
-    DegradationLevel,
-    AgentAction,
-    AgentResult,
-    DegradationReport,
-)
 from .degradation_executor import (
-    sovereign_execute,
-    _upgrade_to_l3,
     _persist_to_cortex,
+    _upgrade_to_l3,
+    sovereign_execute,
+)
+from .degradation_types import (
+    AgentAction,
+    AgentCalcificationError,
+    AgentDegradedError,
+    AgentResult,
+    DegradationLevel,
+    DegradationReport,
+    ModelUnavailableError,
+    SchemaIncompatibilityError,
+    SovereignAgentError,
+    ToolRegistrationError,
 )
 
 __all__ = [

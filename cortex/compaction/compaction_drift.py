@@ -57,7 +57,7 @@ async def apply_drift_check(
 
         embeddings = np.array([np.frombuffer(row[0], dtype=np.float32) for row in rows])
 
-        from pathlib import Path
+        from pathlib import Path  # noqa: F401
 
         from cortex.core.paths import DRIFT_DIR
 

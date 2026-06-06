@@ -3,14 +3,14 @@ from __future__ import annotations
 
 import asyncio
 import time
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from collections.abc import Callable, Awaitable
 from typing import Any
 
-from cortex.isa.builder import AgentOp
-from cortex.engine.genome import StrategyGenome, FitnessRecord
-
 import cortex_rs
+
+from cortex.engine.genome import FitnessRecord, StrategyGenome
+from cortex.isa.builder import AgentOp
 
 
 @dataclass

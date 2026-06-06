@@ -1,8 +1,8 @@
 # [C5-REAL] Exergy-Maximized
+import glob
 import json
 import os
-import glob
-from typing import Optional
+
 from .state import RuntimeState
 
 

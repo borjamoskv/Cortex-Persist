@@ -19,7 +19,7 @@ import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from cortex.extensions.git.poet_data import TYPE_REGEX, TEMPLATES, EMOJI_MAP, SCOPE_MAP
+from cortex.extensions.git.poet_data import EMOJI_MAP, SCOPE_MAP, TEMPLATES, TYPE_REGEX
 
 logger = logging.getLogger("cortex.extensions.git.poet")
 
@@ -98,8 +98,8 @@ class CommitPoet:
 
         try:
             from cortex.extensions.agents.registry import get_agent
-            from cortex.extensions.llm.provider import LLMProvider
             from cortex.extensions.llm._models import IntentProfile
+            from cortex.extensions.llm.provider import LLMProvider
 
             agent_def = get_agent("lorca")
             if agent_def:
@@ -224,8 +224,8 @@ class CommitPoet:
         """
         try:
             from cortex.extensions.agents.registry import get_agent
-            from cortex.extensions.llm.provider import LLMProvider
             from cortex.extensions.llm._models import IntentProfile
+            from cortex.extensions.llm.provider import LLMProvider
 
             agent_def = get_agent("lorca")
             if agent_def:

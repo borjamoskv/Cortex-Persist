@@ -21,10 +21,10 @@ Architecture:
 import logging
 
 logger = logging.getLogger("cortex.exergy")
+import glob
+import json
 import os
 import re
-import json
-import glob
 
 pass
 from datetime import datetime

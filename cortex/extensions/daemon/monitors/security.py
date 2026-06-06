@@ -150,7 +150,6 @@ class SecurityMonitor:
                 (alert.ip_address, alert.summary, alert.confidence),
             )
         except sqlite3.IntegrityError:
-            import logging
 
             pass
 

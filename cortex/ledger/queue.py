@@ -8,7 +8,6 @@ from typing import Any
 
 from cortex.ledger.store import LedgerStore
 
-
 _BOOT_TIME_OFFSET = time.time() - time.monotonic()
 
 

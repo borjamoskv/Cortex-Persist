@@ -70,7 +70,6 @@ class NemesisProtocol:
                     pattern = pattern.replace("\\\\", "\\")
                     dynamic_rules.append((pattern, reason.strip()))
         except FileNotFoundError:
-            import logging
 
             pass
         return dynamic_rules

@@ -1,8 +1,8 @@
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
 
-from enum import Enum
 from dataclasses import dataclass
+from enum import Enum
 from typing import Any
 
 from cortex.engine.repair_strategies import RepairResult

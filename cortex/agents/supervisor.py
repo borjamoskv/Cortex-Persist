@@ -13,11 +13,11 @@ This is the plano de control for the agent swarm.
 from __future__ import annotations
 
 import asyncio
-import logging
 import inspect
+import logging
 import time
-from dataclasses import dataclass, field
 from collections.abc import Callable
+from dataclasses import dataclass, field
 from typing import Any
 
 from cortex.agents.base import BaseAgent
@@ -197,7 +197,6 @@ class Supervisor:
             try:
                 await self._monitor_task
             except asyncio.CancelledError:
-                import logging
 
                 pass
 

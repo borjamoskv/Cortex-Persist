@@ -1,6 +1,8 @@
 # [C5-REAL] Exergy-Maximized
-import click
 import logging
+
+import click
+
 from cortex.cli.common import cli
 from cortex.engine.runtime_kernel import CortexRuntime
 

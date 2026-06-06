@@ -1,8 +1,8 @@
+import json
 import logging
 import time
-from typing import Any
-import json
 import uuid
+from typing import Any
 
 logger = logging.getLogger("cortex.engine.auth_gateway")
 

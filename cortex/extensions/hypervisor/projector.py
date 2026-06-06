@@ -79,7 +79,6 @@ class EventProjector:
         try:
             await self._signal_endocrine("awareness", 0.1)
         except Exception:
-            import logging
 
             pass
 
@@ -106,7 +105,6 @@ class EventProjector:
             endocrine = DigitalEndocrine()
             endocrine.signal(hormone, intensity=intensity)  # type: ignore[reportAttributeAccessIssue]
         except (ImportError, AttributeError, TypeError):
-            import logging
 
             pass
 
@@ -120,7 +118,6 @@ class EventProjector:
             ap = Autopoiesis()
             await ap.verify_songlines(project)  # type: ignore[reportAttributeAccessIssue]
         except (ImportError, AttributeError, TypeError):
-            import logging
 
             pass
 

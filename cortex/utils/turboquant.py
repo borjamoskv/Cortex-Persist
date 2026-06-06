@@ -12,7 +12,6 @@ import logging
 from collections.abc import Sequence
 
 from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
-
 from cortex.utils import void_vec
 
 logger = logging.getLogger("cortex.utils.turboquant")

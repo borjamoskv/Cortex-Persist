@@ -3,6 +3,6 @@
 Provides topography mapping and routing to EVM RPC nodes.
 """
 
-from .topography import EVMTopographyMapper, EVMNode
+from .topography import EVMNode, EVMTopographyMapper
 
 __all__ = ["EVMNode", "EVMTopographyMapper"]

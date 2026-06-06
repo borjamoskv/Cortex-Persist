@@ -8,9 +8,10 @@ from collections import deque
 from typing import Any
 
 from cortex.engine.endocrine import ENDOCRINE, HormoneType
-from cortex.engine.performance_tracker import PerformanceTracker, PerformanceSnapshot
-from .types import OptimizerConfig, OptimizationEvent, TuningDecision
+from cortex.engine.performance_tracker import PerformanceSnapshot, PerformanceTracker
+
 from .tuners import OptimizationTuners
+from .types import OptimizationEvent, OptimizerConfig, TuningDecision
 
 logger = logging.getLogger("cortex.engine.self_optimizer")
 

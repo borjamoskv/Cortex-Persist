@@ -1,13 +1,16 @@
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
+
+import logging
 import time
 from typing import Any
+
 from cortex.sica.meta_level import MetaLevel
 from cortex.sica.object_level import ObjectLevel
 from cortex.sica.strategy import SearchStrategy
-from .trace_synthesizer import TraceSynthesizer
+
 from .meta_meta_controller import MetaMetaController
-import logging
+from .trace_synthesizer import TraceSynthesizer
 
 logger = logging.getLogger("cortex.sica.autonomy.tick")
 

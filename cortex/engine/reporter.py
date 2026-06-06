@@ -133,7 +133,6 @@ class SovereignReporter:
         try:
             yield await self.collect_metrics()
         except sqlite3.Error:
-            import logging
 
             pass
 

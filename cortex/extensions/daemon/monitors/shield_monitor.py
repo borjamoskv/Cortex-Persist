@@ -177,7 +177,6 @@ class DailyShieldMonitor:
                 timeout=5,
             )
         except (OSError, subprocess.TimeoutExpired):
-            import logging
 
             pass
 

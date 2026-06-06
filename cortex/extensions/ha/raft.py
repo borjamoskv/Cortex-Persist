@@ -139,7 +139,6 @@ class RaftNode:
                 try:
                     await task
                 except asyncio.CancelledError:
-                    import logging
 
                     pass
         # Expected - do NOT re-raise during shutdown
@@ -436,7 +435,6 @@ class RaftNode:
                 try:
                     await self._heartbeat_task
                 except asyncio.CancelledError:
-                    import logging
 
                     pass
 

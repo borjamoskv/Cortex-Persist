@@ -14,6 +14,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 import aiosqlite
+
 from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
 
 try:

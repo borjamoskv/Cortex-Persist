@@ -1,6 +1,7 @@
 # [C5-REAL] Exergy-Maximized
 
 from typing import Any
+
 from cortex.sica.meta_level import MetaJudgment
 
 

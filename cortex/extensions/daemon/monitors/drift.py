@@ -13,7 +13,6 @@ import time
 from pathlib import Path
 
 from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
-
 from cortex.extensions.daemon.models import DriftAlert
 
 logger = logging.getLogger("moskv-daemon")

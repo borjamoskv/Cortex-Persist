@@ -5,23 +5,23 @@ Exposes the ImmutableLedger and JIS Auditing to external agent orchestrators
 via the Model Context Protocol (MCP).
 """
 
-import sys
-import logging
 import asyncio
+import logging
+import sys
 
 # Assuming usage of an MCP python sdk if available, otherwise defining a stub
 try:
     from mcp.server import Server
     from mcp.server.stdio import stdio_server
-    from mcp.types import Tool, TextContent
+    from mcp.types import TextContent, Tool
 
     MCP_AVAILABLE = True
 except ImportError:
     MCP_AVAILABLE = False
 
+from cortex.extensions.mcp.claude_tool import run_claude_query
 from cortex.extensions.policy.jis_auditor import JISAuditor
 from cortex.memory.vsa import VSAPipelineBridge
-from cortex.extensions.mcp.claude_tool import run_claude_query
 
 logger = logging.getLogger("cortex.mcp.server")
 

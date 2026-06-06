@@ -2,6 +2,7 @@
 # This file is part of CORTEX. Apache-2.0.
 import os
 from typing import Any
+
 from cortex.extensions.llm._models import IntentProfile
 from cortex.extensions.llm._presets import check_api_key
 

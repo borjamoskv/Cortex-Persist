@@ -39,7 +39,6 @@ async def play_ping(state):
         )
         await proc.wait()
     except OSError:
-        import logging
 
         pass
 

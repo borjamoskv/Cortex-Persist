@@ -8,10 +8,10 @@ from __future__ import annotations
 
 import asyncio
 import functools
-import logging
 import inspect
-from typing import Any
+import logging
 from collections.abc import Callable, Coroutine
+from typing import Any
 
 logger = logging.getLogger("cortex.extensions.aether.hooks")
 

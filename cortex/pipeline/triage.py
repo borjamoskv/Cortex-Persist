@@ -1,10 +1,11 @@
 # [C5-REAL] Exergy-Maximized
 from dataclasses import dataclass, field
 from typing import Any
-from cortex.worker.issue_reader import IssueReader, IssueContext
-from cortex.interfaces.memory_provider import MemoryProvider, MemoryNode, MemorySubgraph
-from cortex.semantic.intent_encoder import IntentEncoder
+
+from cortex.interfaces.memory_provider import MemoryProvider, MemorySubgraph
 from cortex.semantic.hybrid_retriever import HybridRetriever
+from cortex.semantic.intent_encoder import IntentEncoder
+from cortex.worker.issue_reader import IssueContext, IssueReader
 
 
 @dataclass

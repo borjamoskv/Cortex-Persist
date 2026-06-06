@@ -16,7 +16,6 @@ import time
 from typing import TYPE_CHECKING, Any
 
 from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
-
 from cortex.memory.models import CortexFactModel
 
 if TYPE_CHECKING:

@@ -34,7 +34,6 @@ class NetworkVoidOracle:
             try:
                 await self._ping_reality()
             except Exception:
-                import logging
 
                 pass
             await asyncio.sleep(self.poll_interval)

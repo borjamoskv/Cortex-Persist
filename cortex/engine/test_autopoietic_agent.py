@@ -19,34 +19,33 @@ import json
 import logging
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
-import random
-import time
-import sys
 import os
+import random
+import sys
+import time
 
 # Add project root to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from cortex.engine.genome import (
-    StrategyGenome,
-    GenomeMutator,
-    MutationType,
-    FitnessRecord,
-)
-from cortex.engine.genesis import (
-    GenesisEngine,
-    AgentBlueprint,
-    AgentSpecies,
-)
 from cortex.engine.autopoietic_agent import (
     AutopoieticAgent,
     EvolutionConfig,
 )
-from cortex.isa.builder import (
-    node_count,
-    dispatch_targets,
+from cortex.engine.genesis import (
+    AgentBlueprint,
+    AgentSpecies,
+    GenesisEngine,
 )
-
+from cortex.engine.genome import (
+    FitnessRecord,
+    GenomeMutator,
+    MutationType,
+    StrategyGenome,
+)
+from cortex.isa.builder import (
+    dispatch_targets,
+    node_count,
+)
 
 # ─── Mock Executor ───────────────────────────────────────────────
 

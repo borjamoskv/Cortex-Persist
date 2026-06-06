@@ -51,7 +51,6 @@ class CanaryMonitor:
                 st = path.stat()
                 self._last_stats[path] = max(st.st_atime, st.st_mtime)
             except OSError:
-                import logging
 
                 pass
 

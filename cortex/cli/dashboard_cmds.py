@@ -80,7 +80,6 @@ async def _collect_recent(engine, limit: int = 8) -> list[dict]:
                 for r in results
             ]
     except (sqlite3.Error, OSError, AttributeError, FileNotFoundError):
-        import logging
 
         pass
     return []
@@ -369,7 +368,6 @@ def dashboard(db: str, interval: float, once: bool) -> None:
                     live.update(_build_dashboard(data))
                     time.sleep(interval)
             except KeyboardInterrupt:
-                import logging
 
                 pass
 

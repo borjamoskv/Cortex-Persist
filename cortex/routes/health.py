@@ -130,7 +130,6 @@ def _get_db_path(request: Request) -> str:
         if engine:
             return str(getattr(engine, "_db_path", ""))
     except Exception:
-        import logging
 
         pass
     return ""

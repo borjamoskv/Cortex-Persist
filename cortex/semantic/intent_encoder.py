@@ -1,6 +1,6 @@
 # [C5-REAL] Exergy-Maximized
-from typing import Any
 import numpy as np
+
 from cortex.interfaces.memory_provider import IntentVector, MemoryProvider
 
 

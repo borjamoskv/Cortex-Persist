@@ -8,6 +8,7 @@ CLI interface for the Exergy Daemon background loop.
 """
 
 import asyncio
+
 import click
 from rich.panel import Panel
 

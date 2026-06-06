@@ -313,3 +313,6 @@ cortex_ledger.jsonl
 *.vsa_mmap
 cortex/swarm/staged_legion_2m.py
 .cortex_ledger.json
+
+# Quarantined entropy — dead code pending permanent deletion
+.quarantine/

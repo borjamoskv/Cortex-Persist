@@ -228,6 +228,5 @@ class TesseractManifold:
                 timeout=5,
             )
         except (subprocess.SubprocessError, OSError):
-            import logging
 
             pass

@@ -22,7 +22,6 @@ from pathlib import Path
 from typing import Final
 
 from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
-
 from cortex.memory.hdc.algebra import DEFAULT_DIM, HVType, random_bipolar
 
 __all__ = ["ItemMemory"]

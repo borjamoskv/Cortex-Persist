@@ -120,6 +120,5 @@ class HedgedRequestStrategy:
                     try:
                         await t
                     except (asyncio.CancelledError, Exception):
-                        import logging
 
                         pass

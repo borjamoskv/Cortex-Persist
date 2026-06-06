@@ -40,7 +40,6 @@ class SpoofManager:
 
                 ErrorBoundary("gateway.spoof.load_rules", reraise=False)._persist_sync(e)
             except Exception:
-                import logging
 
                 pass
             return {"mappings": {}, "default_intent": "general"}

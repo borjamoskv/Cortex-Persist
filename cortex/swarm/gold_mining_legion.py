@@ -24,7 +24,6 @@ def _cleanup_mmap(path: str):
     try:
         os.remove(path)
     except FileNotFoundError:
-        import logging
 
         pass
 

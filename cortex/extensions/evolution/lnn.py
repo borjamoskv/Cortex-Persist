@@ -15,7 +15,6 @@ import logging
 from dataclasses import dataclass
 
 from cortex.compat.optional import np  # lazy: pip install cortex-persist[compute]
-
 from cortex.extensions.evolution.action import SymbolicActionState
 
 logger = logging.getLogger(__name__)

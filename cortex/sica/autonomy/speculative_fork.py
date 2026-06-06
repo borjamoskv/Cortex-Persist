@@ -1,10 +1,12 @@
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
+
+import logging
 import random
+
 from cortex.sica.meta_level import MetaJudgment
 from cortex.sica.object_level import ExecutionTrace, StepOutcome
 from cortex.sica.strategy import SearchStrategy
-import logging
 
 logger = logging.getLogger("cortex.sica.autonomy.fork")
 from dataclasses import dataclass

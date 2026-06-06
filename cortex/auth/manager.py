@@ -43,8 +43,8 @@ class AuthManager:
                 DB_PATH,
                 PG_URL,
                 RUNBOOT_MODE,
-                TURSO_DATABASE_URL,
                 TURSO_AUTH_TOKEN,
+                TURSO_DATABASE_URL,
             )
 
             if RUNBOOT_MODE == "cloud":

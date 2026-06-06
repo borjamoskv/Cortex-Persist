@@ -1,6 +1,6 @@
 ---
 import SiteLayout from '../layouts/SiteLayout.astro';
-import CortexAuditLedger from '../components/CortexAuditLedger.tsx';
+import AwwwardsHero from '../components/landing/AwwwardsHero.tsx';
 import TelemetryWidget from '../components/TelemetryWidget.tsx';
 
 const navLinks = [
@@ -118,75 +118,7 @@ const docsUrl = 'https://github.com/borjamoskv/Cortex-Persist/tree/main/docs';
 			</div>
 		</header>
 
-		<section class="hero-section surface" id="quickstart">
-			<div class="hero-copy">
-				<p class="eyebrow">Developer SaaS / Built for AI Agent Teams</p>
-				<h1>Know exactly what your AI agents did.</h1>
-				<p class="hero-text">
-					Track every decision, prove integrity, and replay failures without relying on logs, screenshots, or human memory. 
-				</p>
-				<p class="microcopy">
-					A verifiable event ledger you can integrate in 2 lines of code. Plans start at $0.
-				</p>
-
-				<div class="action-row">
-					<a class="button-primary" href="/api-key">Start logging events</a>
-					<a class="button-secondary" href={githubUrl} target="_blank" rel="noreferrer">
-						View Documentation
-					</a>
-				</div>
-
-				<div class="chip-row" aria-label="Core product properties">
-					<span class="chip">Drop-in API</span>
-					<span class="chip">Cryptographic Ledger</span>
-					<span class="chip">No Stack Migration</span>
-					<span class="chip">Self-hosted or Cloud</span>
-				</div>
-
-				<div class="hero-proofbar" aria-label="What the product enables">
-					{
-						heroProofs.map((proof) => (
-							<article class="hero-proof surface-sunken">
-								<strong>{proof.value}</strong>
-								<span>{proof.label}</span>
-							</article>
-						))
-					}
-				</div>
-			</div>
-
-			<aside class="hero-console surface-sunken" aria-label="1-min Quickstart">
-				<div class="surface-head">
-					<span class="surface-label">1-min Quickstart</span>
-					<span class="surface-state">cURL</span>
-				</div>
-
-				<pre class="console-block" style="overflow-x: auto;"><code>curl -X POST https://api.cortexpersist.com/v1/event \
-  -H "Authorization: Bearer $CORTEX_API_KEY" \
-  -d '&#123;
-    "type": "agent.decision",
-    "actor": "pricing-agent-001",
-    "state": &#123; "action": "refund", "amount": 150.00 &#125;
-  &#125;'</code></pre>
-
-				<div class="proof-stack" style="margin-top: 1rem;">
-					<div class="proof-item">
-						<div>
-							<strong>Instant hash-chaining</strong>
-							<span>Event returns a verifiable cryptographic hash instantly.</span>
-						</div>
-						<span class="proof-tag live">23ms</span>
-					</div>
-					<div class="proof-item">
-						<div>
-							<strong>Immutable storage</strong>
-							<span>Stored in the ledger, impossible to silently mutate.</span>
-						</div>
-						<span class="proof-tag audit">Active</span>
-					</div>
-				</div>
-			</aside>
-		</section>
+		<AwwwardsHero client:load />
 
 		<section class="signal-grid" id="features">
 			{
@@ -202,8 +134,6 @@ const docsUrl = 'https://github.com/borjamoskv/Cortex-Persist/tree/main/docs';
 				))
 			}
 		</section>
-
-		<CortexAuditLedger client:load />
 
 		<section class="section-frame surface" id="why-cortex">
 			<div class="section-heading">

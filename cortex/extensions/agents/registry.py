@@ -151,7 +151,6 @@ class AgentCatalogEntry:
                 if resolved:
                     return resolved
             except ImportError:
-                import logging
 
                 pass
         return self.model

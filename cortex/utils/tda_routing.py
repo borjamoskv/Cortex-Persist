@@ -10,9 +10,8 @@ Reality Level: C5-REAL
 from __future__ import annotations
 
 import sqlite3
-import numpy as np
-from typing import Any, Final
 from pathlib import Path
+from typing import Any, Final
 
 DB_PATH: Final[Path] = Path("/Users/borjafernandezangulo/.cortex/cortex.db")
 

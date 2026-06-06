@@ -24,10 +24,10 @@ from cortex.extensions.llm._models import (
     IntentProfile,
     ReasoningMode,
 )
-from cortex.extensions.llm._telemetry import CascadeTelemetry
-from cortex.extensions.llm._router_shannon import compress_working_memory
-from cortex.extensions.llm._router_policy import ordered_fallbacks
 from cortex.extensions.llm._router_hedging import execute_hedged, execute_swarm
+from cortex.extensions.llm._router_policy import ordered_fallbacks
+from cortex.extensions.llm._router_shannon import compress_working_memory
+from cortex.extensions.llm._telemetry import CascadeTelemetry
 from cortex.utils.result import Err, Ok, Result
 
 logger = logging.getLogger("cortex.extensions.llm.router")
@@ -171,7 +171,6 @@ class CortexLLMRouter:
                             )
                             break
             except ImportError:
-                import logging
 
                 pass
 

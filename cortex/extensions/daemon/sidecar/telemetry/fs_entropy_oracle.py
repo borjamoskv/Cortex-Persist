@@ -30,7 +30,6 @@ class FSEntropyOracle:
             try:
                 await self._measure_entropy()
             except Exception:
-                import logging
 
                 pass
             await asyncio.sleep(self.poll_interval)

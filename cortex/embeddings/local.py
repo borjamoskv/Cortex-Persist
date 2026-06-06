@@ -51,7 +51,6 @@ def _resolve_device() -> str:
         if hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
             return "mps"
     except (ImportError, RuntimeError, AttributeError):
-        import logging
 
         pass
 
@@ -93,7 +92,9 @@ class LocalEmbedder:
                 return None
 
             try:
-                from sentence_transformers import SentenceTransformer  # pyright: ignore[reportMissingImports]
+                from sentence_transformers import (
+                    SentenceTransformer,  # pyright: ignore[reportMissingImports]
+                )
 
                 cls._model = SentenceTransformer(model_name, device=device)
                 cls._model_name = model_name

@@ -1,3 +1,4 @@
+import concurrent.futures
 # [C5-REAL] Exergy-Maximized
 """Auto-Healing capability for MEJORAlo.
 
@@ -8,6 +9,7 @@ v8.0 - Relentless Mode: no para hasta que sea INMEJORABLE.
 """
 
 from __future__ import annotations
+
 import ast
 import asyncio
 import logging
@@ -172,7 +174,6 @@ def _run_functional_inquisitor(
                 engine.record_scar(project, top_file_rel, f"Inquisidor: Eliminó {deleted}")
             return False
     except SyntaxError:
-        import logging
 
         pass
     return True

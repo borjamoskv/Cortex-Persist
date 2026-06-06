@@ -8,15 +8,15 @@ a hash-chain to prove immutability of the audit logs.
 
 import hashlib
 import logging
-import time
 import os
+import time
 from datetime import datetime, timezone
 from typing import Any
 
-from cryptography.hazmat.primitives.asymmetric import ed25519
-from cryptography.hazmat.primitives import serialization
-from cryptography.exceptions import InvalidSignature
 import aiosqlite
+from cryptography.exceptions import InvalidSignature
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import ed25519
 
 logger = logging.getLogger("cortex.audit.ledger")
 

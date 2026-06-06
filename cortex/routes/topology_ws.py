@@ -85,7 +85,6 @@ async def websocket_topology_endpoint(websocket: WebSocket):
                     )
                     # Implementation would trigger a re-consolidation with perturbation
             except json.JSONDecodeError:
-                import logging
 
                 pass
     except WebSocketDisconnect:

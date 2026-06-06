@@ -3,9 +3,9 @@ import logging
 from pathlib import Path
 
 try:
-    from cortex.extensions.daemon.centaur.heartbeat import HeartbeatDaemon
-    from cortex.extensions.daemon.centaur.entropic_queue import EntropicQueue
     from cortex.extensions.daemon.centaur.engine import CentauroEngine
+    from cortex.extensions.daemon.centaur.entropic_queue import EntropicQueue
+    from cortex.extensions.daemon.centaur.heartbeat import HeartbeatDaemon
 
     _CENTAUR_AVAILABLE = True
 except ImportError:
@@ -67,8 +67,8 @@ try:
 except ImportError:
     _ENTROPIC_WAKE_AVAILABLE = False
 
-from cortex.extensions.daemon.monitors import CloudSyncMonitor, DiskMonitor, EngineHealthCheck
 from cortex.extensions.daemon.models import CORTEX_DB, CORTEX_DIR
+from cortex.extensions.daemon.monitors import CloudSyncMonitor, DiskMonitor, EngineHealthCheck
 
 logger = logging.getLogger("moskv-daemon")
 
@@ -157,7 +157,6 @@ class ResourceMgrMixin:
             self._event_bus = DistributedEventBus()
             logger.info("📡 DistributedEventBus ENABLED")
         except ImportError:
-            import logging
 
             pass
 
@@ -165,9 +164,9 @@ class ResourceMgrMixin:
         self.sovereignty_runtime = None
         if self._event_bus:
             try:
-                from cortex.engine.event_sovereignty import EventSovereigntyRuntime
                 from cortex.engine.auth_gateway import AuthGateway
                 from cortex.engine.causal.anomaly_bridge import AnomalyBridge
+                from cortex.engine.event_sovereignty import EventSovereigntyRuntime
 
                 auth_gw = AuthGateway(self._shared_engine)
                 # ensure table is created, though we should probably run this asynchronously,
@@ -258,6 +257,7 @@ class ResourceMgrMixin:
         # Time Tracker
         try:
             import sqlite3
+
             from cortex.database.core import connect
             from cortex.extensions.timing import TimingTracker
 

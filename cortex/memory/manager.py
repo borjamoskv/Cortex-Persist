@@ -9,24 +9,23 @@ from typing import Any
 
 # Memory OS (RFC-CORTEX-MEMORY-OS)
 from cortex.compaction.mem0_pipeline import Mem0Pipeline
-from cortex.memory.encoder import AsyncEncoder
-from cortex.memory.ledger import EventLedgerL3
-from cortex.memory.models import MemoryEvent
-from cortex.memory.schemas import SchemaEngine
-from cortex.memory.thalamus import ThalamusGate
-from cortex.memory.working import WorkingMemoryL1
-
+from cortex.memory._manager_bg import (
+    cancel_background_tasks,
+    compression_worker_loop,
+)
 from cortex.memory._manager_init import (
     init_dynamic_space,
     init_hologram,
     init_metamemory,
     init_resonance_gate,
 )
-from cortex.memory._manager_bg import (
-    compression_worker_loop,
-    cancel_background_tasks,
-)
-from cortex.memory._manager_store import store_fact, check_deduplication
+from cortex.memory._manager_store import check_deduplication, store_fact
+from cortex.memory.encoder import AsyncEncoder
+from cortex.memory.ledger import EventLedgerL3
+from cortex.memory.models import MemoryEvent
+from cortex.memory.schemas import SchemaEngine
+from cortex.memory.thalamus import ThalamusGate
+from cortex.memory.working import WorkingMemoryL1
 
 try:
     from cortex.memory.hdc import HDCEncoder, HDCVectorStoreL2

@@ -11,8 +11,8 @@ from __future__ import annotations
 
 import logging
 import os
-from contextlib import asynccontextmanager
 from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 
 try:
     import asyncpg  # pyright: ignore[reportMissingImports]

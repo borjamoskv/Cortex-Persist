@@ -11,7 +11,6 @@ def _migration_020_tombstone(conn: sqlite3.Connection) -> None:
     try:
         conn.execute("ALTER TABLE facts ADD COLUMN is_tombstoned INTEGER NOT NULL DEFAULT 0")
     except sqlite3.OperationalError:
-        import logging
 
         pass
     # Column already exists
@@ -19,7 +18,6 @@ def _migration_020_tombstone(conn: sqlite3.Connection) -> None:
     try:
         conn.execute("ALTER TABLE facts ADD COLUMN tombstoned_at TEXT")
     except sqlite3.OperationalError:
-        import logging
 
         pass
     # Column already exists

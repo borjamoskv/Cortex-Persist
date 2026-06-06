@@ -16,7 +16,9 @@ _MAX_RESONANCES = 100
 async def evolution_loop(state, cortex_root, speak_func):
     """Monitors code entropy and suggests refactors."""
     try:
-        from analyze_entropy import calculate_module_overlap  # pyright: ignore[reportMissingImports]
+        from analyze_entropy import (
+            calculate_module_overlap,  # pyright: ignore[reportMissingImports]
+        )
     except ImportError:
         # Fallback if analyze_entropy is not on path
         return

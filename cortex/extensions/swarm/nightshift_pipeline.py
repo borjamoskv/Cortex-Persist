@@ -60,7 +60,6 @@ class PlannerNode:
                 data = json.loads(target)
                 return data.get("url") or data.get("target") or data.get("query") or target[:200]
             except json.JSONDecodeError:
-                import logging
 
                 pass
 

@@ -45,7 +45,6 @@ class PersistenceSupervisor:
             except asyncio.TimeoutError:
                 logger.warning("PersistenceSupervisor: Heartbeat loop did not exit in time.")
             except asyncio.CancelledError:
-                import logging
 
                 pass
 

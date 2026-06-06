@@ -1,8 +1,7 @@
 # [C5-REAL] Exergy-Maximized
+import datetime
 import json
 import os
-import datetime
-from typing import Any, Optional
 
 LOG_FILE = os.path.expanduser("~/.gemini/config/skills/_metrics/runtime_events.jsonl")
 

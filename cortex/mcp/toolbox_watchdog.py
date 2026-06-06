@@ -277,7 +277,6 @@ class ToolboxWatchdog:
             try:
                 self._log_fd.close()
             except OSError:
-                import logging
 
                 pass
             self._log_fd = None

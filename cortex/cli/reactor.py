@@ -126,6 +126,5 @@ if __name__ == "__main__":
     try:
         run_reactor()
     except KeyboardInterrupt:
-        import logging
 
         pass

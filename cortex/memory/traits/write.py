@@ -1,12 +1,13 @@
 # [C5-REAL] Exergy-Maximized
-import sqlite3
-import logging
-import json
 import asyncio
+import json
+import logging
+import sqlite3
+
 from cortex.compat.optional import np
 from cortex.guards.exergy_guard import calculate_exergy
-from cortex.utils import void_vec
 from cortex.memory.models import CortexFactModel
+from cortex.utils import void_vec
 
 logger = logging.getLogger(__name__)
 

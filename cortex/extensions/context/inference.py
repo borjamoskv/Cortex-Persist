@@ -206,13 +206,11 @@ class ContextInference:
             try:
                 signals_data = json.loads(row[5]) if row[5] else []
             except (json.JSONDecodeError, TypeError):
-                import logging
 
                 pass
             try:
                 projects_data = json.loads(row[6]) if row[6] else []
             except (json.JSONDecodeError, TypeError):
-                import logging
 
                 pass
 

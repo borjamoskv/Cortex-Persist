@@ -383,7 +383,6 @@ class P0VulnerabilityExtractor:
                             )
                         )
                     except json.JSONDecodeError:
-                        import logging
 
                         pass
                     start = -1

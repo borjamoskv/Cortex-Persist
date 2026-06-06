@@ -1,7 +1,9 @@
 # [C5-REAL] Exergy-Maximized
-import time
 import re
+import time
+
 from google.antigravity import hooks
+
 from cortex.observability.telemetry import telemetry
 
 _timers = {}

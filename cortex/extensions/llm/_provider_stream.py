@@ -1,13 +1,15 @@
 # [C5-REAL] Exergy-Maximized
 # This file is part of CORTEX. Apache-2.0.
-import json
-import httpx
 import asyncio
-import time
-import random
+import json
 import logging
-from typing import Any
+import random
+import time
 from collections.abc import AsyncGenerator
+from typing import Any
+
+import httpx
+
 from cortex.extensions.llm._resilience import CircuitBreakerError, is_retryable
 
 logger = logging.getLogger("cortex.extensions.llm")

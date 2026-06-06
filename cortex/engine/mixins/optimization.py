@@ -67,7 +67,6 @@ class SovereignTLRUCache:
             try:
                 self.order.remove(key)
             except ValueError:
-                import logging
 
                 pass
         elif len(self.cache) >= self.capacity:
@@ -85,7 +84,6 @@ class SovereignTLRUCache:
         try:
             self.order.remove(key)
         except ValueError:
-            import logging
 
             pass
         self._generate_proof(key, value, reason)
@@ -182,7 +180,6 @@ class OptimizationMixin:
                 for p in OptimizationMixin._executor._processes.values():
                     p.terminate()
             except Exception:
-                import logging
 
                 pass
             OptimizationMixin._executor.shutdown(wait=False, cancel_futures=True)

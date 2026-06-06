@@ -156,7 +156,6 @@ class ToolboxBridge:
             try:
                 await self._client.close()
             except ConnectionError:
-                import logging
 
                 pass
         self._client = None

@@ -131,7 +131,6 @@ class AgencyHypervisor:
         try:
             await self._projector.on_recall(query, project)
         except Exception:
-            import logging
 
             pass
 

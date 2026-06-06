@@ -57,7 +57,6 @@ class ResonanceEmitter:
                 logger.info("Embedded ghost %s on %s (os.setxattr)", ghost_id, target_file.name)
                 return
             except OSError:
-                import logging
 
                 pass
 
@@ -74,7 +73,6 @@ class ResonanceEmitter:
             logger.info("Embedded ghost %s on %s (xattr cli)", ghost_id, target_file.name)
             return
         except (subprocess.SubprocessError, FileNotFoundError):
-            import logging
 
             pass
 
@@ -90,7 +88,6 @@ class ResonanceEmitter:
                 with open(songline_file) as f:
                     data = json.load(f)
             except (json.JSONDecodeError, OSError):
-                import logging
 
                 pass
 

@@ -50,7 +50,6 @@ class TransactionMixin(EngineMixinBase):
                 # Depending on strictness, we might raise an Exception here,
                 # but for now we log it as an error to track entropy.
         except ImportError:
-            import logging
 
             pass
 

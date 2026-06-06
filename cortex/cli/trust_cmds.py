@@ -306,7 +306,6 @@ def siege(db: str) -> None:
             if key:
                 engine.vault = Vault(key.encode("utf-8"))  # pyright: ignore[reportAttributeAccessIssue]
         except (ValueError, KeyError, OSError, RuntimeError, AttributeError):
-            import logging
 
             pass
 

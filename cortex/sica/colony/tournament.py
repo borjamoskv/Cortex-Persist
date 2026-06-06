@@ -1,9 +1,11 @@
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
+
 import logging
 
-from .types import TournamentResult
 from cortex.sica.strategy import SearchStrategy
+
+from .types import TournamentResult
 
 logger = logging.getLogger("cortex.sica.colony.tournament")
 

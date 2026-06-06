@@ -58,7 +58,6 @@ class BicameralConsole:
             with open(relay_path, "a") as f:
                 f.write(json.dumps(event) + "\n")
         except OSError:
-            import logging
 
             pass
 

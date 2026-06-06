@@ -1,10 +1,16 @@
 # [C5-REAL] Exergy-Maximized
 from typing import Any
-from llama_index.core.callbacks.base_handler import BaseCallbackHandler  # pyright: ignore[reportMissingImports]
+
+from llama_index.core.callbacks.base_handler import (
+    BaseCallbackHandler,  # pyright: ignore[reportMissingImports]
+)
 from llama_index.core.callbacks.schema import CBEventType  # pyright: ignore[reportMissingImports]
+from llama_index.core.postprocessor.types import (
+    BaseNodePostprocessor,  # pyright: ignore[reportMissingImports]
+)
 from llama_index.core.schema import NodeWithScore  # pyright: ignore[reportMissingImports]
-from llama_index.core.postprocessor.types import BaseNodePostprocessor  # pyright: ignore[reportMissingImports]
 from pydantic import Field
+
 from cortex.engine import CortexEngine
 
 

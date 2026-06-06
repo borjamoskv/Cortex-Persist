@@ -5,12 +5,15 @@ Reality Level: C5-REAL
 """
 
 from __future__ import annotations
+
 import asyncio
 import logging
 import threading
-from typing import TYPE_CHECKING, Any
 from pathlib import Path
+from typing import TYPE_CHECKING, Any
+
 import aiosqlite
+
 from cortex.config import DEFAULT_DB_PATH
 from cortex.engine.agent_mixin import AgentMixin
 from cortex.engine.durability import PersistenceSupervisor
@@ -20,13 +23,13 @@ from cortex.engine.mixins.components import ComponentsMixin
 from cortex.engine.mixins.optimization import OptimizationMixin
 
 pass
+from cortex.engine._engine_connection import ConnectionMixin
+from cortex.engine._engine_delegates import DelegatesMixin
 from cortex.engine.query_mixin import QueryMixin
 from cortex.engine.search_mixin import SearchMixin
 from cortex.engine.store_mixin import StoreMixin
 from cortex.engine.sync_mixin import SyncMixin
 from cortex.engine.transaction_mixin import TransactionMixin
-from cortex.engine._engine_connection import ConnectionMixin
-from cortex.engine._engine_delegates import DelegatesMixin
 
 if TYPE_CHECKING:
     from cortex.consensus.manager import ConsensusManager

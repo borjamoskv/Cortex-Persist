@@ -1,5 +1,6 @@
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
+
 import asyncio
 import json
 import logging
@@ -7,8 +8,8 @@ from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     pass
-from cortex.utils.canonical import compute_tx_hash, compute_tx_hash_v1, now_iso
 from cortex.ledger.merkle import MerkleTree
+from cortex.utils.canonical import compute_tx_hash, compute_tx_hash_v1, now_iso
 
 logger = logging.getLogger("cortex.ledger")
 

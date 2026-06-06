@@ -1,13 +1,13 @@
 # [C5-REAL] Exergy-Maximized
-from typing import Any
 from dataclasses import dataclass, field
-from cortex.interfaces.memory_provider import MemoryProvider, MemoryNode
+from typing import Any
+
+from cortex.interfaces.memory_provider import MemoryProvider
 from cortex.semantic.intent_encoder import IntentEncoder
-from cortex.simulation.monte_carlo import MonteCarloRecallEngine
 from cortex.simulation.mcp import MemoryCollapseProtocol
-from cortex.simulation.primitives import SimulationField
+from cortex.simulation.monte_carlo import MonteCarloRecallEngine
+from cortex.simulation.narrative_compiler import ActionOutput, NarrativeCompiler
 from cortex.simulation.thermodynamics import MemoryEnergyField
-from cortex.simulation.narrative_compiler import NarrativeCompiler, ActionOutput
 
 
 @dataclass

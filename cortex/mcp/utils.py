@@ -171,7 +171,6 @@ class AsyncConnectionPool:
         try:
             await conn.close()
         except (OSError, ValueError, KeyError):
-            import logging
 
             pass
 

@@ -1,10 +1,10 @@
 # [C5-REAL] Exergy-Maximized
 import asyncio
-import signal
-import threading
-import time
 import logging
+import signal
+import time
 from datetime import datetime, timezone
+
 from cortex.extensions.daemon.models import DEFAULT_INTERVAL
 
 logger = logging.getLogger("moskv-daemon")
@@ -60,7 +60,6 @@ class EventLoopMixin:
             try:
                 loop.add_signal_handler(sig, self._signal_shutdown)
             except (NotImplementedError, RuntimeError):
-                import logging
 
                 pass
         logger.info("🚀 MOSKV-1 Sovereign Daemon starting (interval=%ds)", interval)
@@ -171,7 +170,6 @@ class EventLoopMixin:
         try:
             await asyncio.gather(*tasks, return_exceptions=True)
         except asyncio.CancelledError:
-            import logging
 
             pass
         finally:

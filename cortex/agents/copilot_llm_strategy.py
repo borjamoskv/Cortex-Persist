@@ -24,9 +24,9 @@ from cortex.agents.copilot_context import (
 from cortex.agents.copilot_contracts import (
     Confidence,
     CopilotContextPayload,
+    SuggestionBatch,
     SuggestionKind,
     SuggestionProposal,
-    SuggestionBatch,
 )
 
 logger = logging.getLogger("cortex.agents.copilot.llm_strategy")

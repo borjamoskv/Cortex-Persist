@@ -254,7 +254,6 @@ class SovereignScheduler:
                 )
                 break  # stop_event was set
             except asyncio.TimeoutError:
-                import logging
 
                 pass
         # normal tick timeout

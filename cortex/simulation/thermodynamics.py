@@ -1,6 +1,7 @@
 # [C5-REAL] Exergy-Maximized
-import numpy as np
 from dataclasses import dataclass
+
+import numpy as np
 
 from cortex.simulation.primitives import MemoryTrajectory
 

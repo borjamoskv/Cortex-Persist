@@ -38,7 +38,6 @@ async def check_gate_11_cobbler() -> GateResult:
                 ):
                     v.append(f"print-call:{node.lineno}")
         except SyntaxError:
-            import logging
 
             pass
         return v

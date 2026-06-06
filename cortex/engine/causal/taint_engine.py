@@ -1,18 +1,12 @@
 # [C5-REAL] Exergy-Maximized
-import hashlib
-import logging
 import base64
+import hashlib
 import json
-import inspect
+import logging
 import time
 from datetime import datetime, timezone
-from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey, Ed25519PrivateKey
-from cryptography.hazmat.primitives.serialization import (
-    Encoding,
-    PublicFormat,
-    PrivateFormat,
-    NoEncryption,
-)
+
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey, Ed25519PublicKey
 
 logger = logging.getLogger("cortex.engine.causal.taint_engine")
 

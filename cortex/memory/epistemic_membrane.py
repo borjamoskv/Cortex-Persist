@@ -1,10 +1,11 @@
 # [C5-REAL] Exergy-Maximized
 import hashlib
 import time
+
+import numpy as np
 import torch  # pyright: ignore[reportMissingImports]
 import torchhd  # pyright: ignore[reportMissingImports]
 from torchhd import functional as F  # pyright: ignore[reportMissingImports]
-import numpy as np
 
 D = 16384
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

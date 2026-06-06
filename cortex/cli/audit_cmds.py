@@ -10,8 +10,6 @@ import click
 
 from cortex.audit.frontier import FrontierAuditor
 from cortex.cli.common import console, get_engine
-
-
 from cortex.cli.trust_cmds import audit
 
 

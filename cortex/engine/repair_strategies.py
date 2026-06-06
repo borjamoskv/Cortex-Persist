@@ -187,7 +187,6 @@ class ResetPoolAndRetry:
                     try:
                         await conn.close()
                     except Exception:
-                        import logging
 
                         pass
                 engine._conns_by_loop.clear()

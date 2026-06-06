@@ -16,7 +16,6 @@ import logging
 import sqlite3
 from pathlib import Path
 
-
 try:
     import sqlite_vec
 except ImportError:
@@ -41,8 +40,8 @@ def cortex_decay(is_diamond: int, timestamp: float, current_time: float, half_li
     return float(0.5 ** (age / half_life))
 
 
-from cortex.memory.traits.schema import SchemaTrait
 from cortex.memory.traits.read import ReadTrait
+from cortex.memory.traits.schema import SchemaTrait
 from cortex.memory.traits.write import WriteTrait
 
 

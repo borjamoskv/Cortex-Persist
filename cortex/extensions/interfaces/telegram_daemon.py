@@ -5,10 +5,11 @@ Connects the Telegram API to the local CORTEX-Persist engine.
 Enforces Identity Hygiene via Whitelist.
 """
 
-import os
 import logging
+import os
+
 from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
+from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, MessageHandler, filters
 
 from cortex.cli.common import get_engine
 

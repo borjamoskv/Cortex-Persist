@@ -5,8 +5,8 @@ import json
 import logging
 import os
 import time
-import urllib.request
 import urllib.error
+import urllib.request
 
 from cortex.ledger.models import IntentPayload
 from cortex.ledger.writer import LedgerWriter

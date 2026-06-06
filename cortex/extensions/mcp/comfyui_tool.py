@@ -2,7 +2,6 @@
 import json
 import uuid
 
-
 # CORTEX-Persist Visual Engine (ComfyUI)
 # MCP Tool Bridge
 
@@ -17,9 +16,9 @@ def run_comfyui_workflow(workflow_json: str) -> str:
     Returns:
         str: A JSON string containing the paths of the generated assets or an error trace.
     """
-    import urllib.request
     import urllib.error
     import urllib.parse
+    import urllib.request
 
     SERVER_ADDRESS = "127.0.0.1:8188"
     CLIENT_ID = str(uuid.uuid4())

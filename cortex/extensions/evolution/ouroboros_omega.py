@@ -10,16 +10,17 @@ import ast
 import copy
 import hashlib
 import logging
-from cortex.extensions.evolution.ast_mutators import (
-    _AstAnalyzer,
-    _DeadCodePurge,
-    _DocstringInjector,
-    _EntropyAnnihilator,
-    _BlockingPatternDetector,
-)
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
+
+from cortex.extensions.evolution.ast_mutators import (
+    _AstAnalyzer,
+    _BlockingPatternDetector,
+    _DeadCodePurge,
+    _DocstringInjector,
+    _EntropyAnnihilator,
+)
 
 logger = logging.getLogger("cortex.extensions.evolution.ouroboros")
 
@@ -243,8 +244,8 @@ class OuroborosOmega:
             # ── TERMINAL STATE 4: REMOTE MUTATION (SWARM AST BROADCAST) ──
             if not self.dry_run:
                 try:
-                    import sys
                     import os
+                    import sys
 
                     # Path to cortex-core relative to cortex/extensions/evolution
                     cortex_core_path = os.path.abspath(
@@ -253,7 +254,9 @@ class OuroborosOmega:
                     if cortex_core_path not in sys.path:
                         sys.path.insert(0, cortex_core_path)
 
-                    from persistence import enqueue_swarm_task  # pyright: ignore[reportAttributeAccessIssue]
+                    from persistence import (
+                        enqueue_swarm_task,  # pyright: ignore[reportAttributeAccessIssue]
+                    )
 
                     payload = {
                         "type": "AST_MUTATION",

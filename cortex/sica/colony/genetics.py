@@ -1,10 +1,12 @@
 # [C5-REAL] Exergy-Maximized
 from __future__ import annotations
+
 import copy
 import logging
 import random
 import time
 from typing import Any
+
 from cortex.sica.strategy import Heuristic, SearchStrategy, StrategyGenome
 
 from .types import GeneFragment

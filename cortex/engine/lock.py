@@ -208,7 +208,6 @@ class SovereignLock:
                     try:
                         ttl_s = float(action_val.split(":")[1])
                     except ValueError:
-                        import logging
 
                         pass
 

@@ -21,10 +21,10 @@ from __future__ import annotations
 
 import logging
 import time
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
-from collections.abc import Callable, Awaitable
 
 from cortex.isa.builder import (
     AgentOp,
@@ -253,7 +253,7 @@ class TreeRewriter:
     @staticmethod
     def add_timeout_guard(tree: AgentOp, timeout_ms: int = 5000) -> AgentOp:
         """Wrap the entire tree in a conditional timeout halt."""
-        from cortex.isa.builder import seq, cond, halt, Predicate
+        from cortex.isa.builder import Predicate, cond, halt, seq
 
         return seq(
             tree,
@@ -533,7 +533,6 @@ class ReflexionEngine:
                 ENDOCRINE.pulse(HormoneType.NEURAL_GROWTH, 0.01)
                 ENDOCRINE.pulse(HormoneType.CORTISOL, -0.02)
         except ImportError:
-            import logging
 
             pass
 

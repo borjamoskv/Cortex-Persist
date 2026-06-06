@@ -1,6 +1,6 @@
 # [C5-REAL] Exergy-Maximized
-from .types import OptimizerConfig, TuningDecision, OptimizationEvent, TuningType
 from .core import SelfOptimizer
+from .types import OptimizationEvent, OptimizerConfig, TuningDecision, TuningType
 
 __all__ = [
     "OptimizationEvent",

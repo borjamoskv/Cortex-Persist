@@ -28,8 +28,8 @@ class OuroborosCompiler:
     def _ensure_engine(self) -> None:
         if self._engine is not None:
             return
-        from cortex.engine import CortexEngine
         from cortex.config import DEFAULT_DB_PATH
+        from cortex.engine import CortexEngine
 
         db_val = str(self._db_path) if self._db_path else DEFAULT_DB_PATH
         self._engine = CortexEngine(db_path=db_val)
@@ -63,7 +63,6 @@ class OuroborosCompiler:
                     ):
                         llm_calls += 1
         except SyntaxError:
-            import logging
 
             pass
 

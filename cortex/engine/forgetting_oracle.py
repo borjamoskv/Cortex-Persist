@@ -306,7 +306,6 @@ class ForgettingOracle(AnalyzerMixin, PolicyMixin, EvidenceMixin):
                 return True
 
         except (sqlite3.Error, AttributeError, OSError):
-            import logging
 
             pass
 

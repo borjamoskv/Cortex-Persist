@@ -55,7 +55,6 @@ async def protocolo_ship_omega(data: str):
         # subprocess.run(["cortex", "store", "--type", "decision", "--source", "agent:gemini", "sovereign_e2e_swarm", "Iteración finalizada end-to-end"])
         pass
     except Exception:
-        import logging
 
         pass
     print("[SHIP-Ω] Cristalización C5-REAL completada.\n")

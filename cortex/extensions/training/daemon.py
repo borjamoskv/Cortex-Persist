@@ -192,7 +192,6 @@ class AutonomousTrainingDaemon:
             try:
                 await self._task
             except asyncio.CancelledError:
-                import logging
 
                 pass
         logger.info("🛑 Autonomous Training Daemon stopped.")

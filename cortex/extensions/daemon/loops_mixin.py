@@ -125,7 +125,6 @@ class LoopsMixin:
             try:
                 tracker.flush()
             except (ValueError, KeyError, OSError, RuntimeError, AttributeError):  # noqa: BLE001 — tracker flush is best-effort
-                import logging
 
                 pass
 

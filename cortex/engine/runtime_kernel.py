@@ -1,12 +1,11 @@
 # [C5-REAL] Exergy-Maximized
+import glob
+import json
+import logging
+import os
 import time
 import uuid
-import logging
-import json
-import glob
-import os
-from dataclasses import dataclass, field, asdict
-from copy import deepcopy
+from dataclasses import asdict, dataclass, field
 
 from cortex.observability.prometheus_exporter import CortexPrometheusExporter
 

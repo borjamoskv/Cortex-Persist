@@ -1,3 +1,4 @@
+from typing import Any
 # [C5-REAL] Exergy-Maximized
 """Ley 2 Loop: Expensive Errors First (Kernel de Re-weighting Termodinámico).
 

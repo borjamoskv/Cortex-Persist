@@ -270,7 +270,6 @@ async def health_check(request: Request) -> dict:
         RuntimeError,
         AttributeError,
     ):
-        import logging
 
         pass
 
@@ -290,7 +289,6 @@ async def health_check(request: Request) -> dict:
         health_score = round(hs.score, 2)
         health_grade = hs.grade
     except (ValueError, KeyError, OSError, RuntimeError, AttributeError):
-        import logging
 
         pass
 

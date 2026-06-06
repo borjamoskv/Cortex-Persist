@@ -75,7 +75,9 @@ class ConsensusMixin(EngineMixinBase):
             raise ValueError("Vote must be -1, 0, or 1")
 
         async with self.session() as conn:  # type: ignore[reportAttributeAccessIssue]
-            from cortex.engine_async import TX_BEGIN_IMMEDIATE  # pyright: ignore[reportMissingImports]
+            from cortex.engine_async import (
+                TX_BEGIN_IMMEDIATE,  # pyright: ignore[reportMissingImports]
+            )
 
             await conn.execute(TX_BEGIN_IMMEDIATE)
             try:

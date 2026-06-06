@@ -281,7 +281,6 @@ async def compact_session(
     try:
         await conn.create_function("cortex_decay", 4, _cortex_decay)
     except (sqlite3.Error, AttributeError):
-        import logging
 
         pass
     # Already registered or unsupported

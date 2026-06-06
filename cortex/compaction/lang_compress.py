@@ -241,7 +241,6 @@ def detect_language(text: str) -> str:
         if detected in _TOKEN_TAX_RATIOS:
             return detected
     except ImportError:
-        import logging
 
         pass
 

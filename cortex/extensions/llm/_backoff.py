@@ -31,7 +31,6 @@ def extract_retry_delay(text: str) -> float | None:
                 if delay_str.endswith("s"):
                     return float(delay_str[:-1])
     except (KeyError, TypeError, ValueError, AttributeError):
-        import logging
 
         pass
 
@@ -41,7 +40,6 @@ def extract_retry_delay(text: str) -> float | None:
             val = float(match.group(1))
             return val / 1000.0 if match.group(2) == "ms" else val
         except ValueError:
-            import logging
 
             pass
     return None

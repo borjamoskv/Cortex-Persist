@@ -1,9 +1,10 @@
 # [C5-REAL] Exergy-Maximized
-import uuid
 import json
 import logging
-import aiosqlite
+import uuid
 from typing import Any
+
+import aiosqlite
 
 logger = logging.getLogger(__name__)
 

@@ -88,7 +88,6 @@ class SemanticMutator:
             try:
                 await self._worker_task
             except asyncio.CancelledError:
-                import logging
 
                 pass
             except Exception as e:
@@ -318,7 +317,6 @@ class DynamicSemanticSpace:
             try:
                 await self._heartbeat_task
             except asyncio.CancelledError:
-                import logging
 
                 pass
             except Exception as e:

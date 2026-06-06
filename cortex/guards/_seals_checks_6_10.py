@@ -2,7 +2,8 @@
 import ast
 import asyncio
 from pathlib import Path
-from cortex.guards._seals_cache import GlobalSourceCache, ROOT_DIR, printer
+
+from cortex.guards._seals_cache import ROOT_DIR, GlobalSourceCache, printer
 from cortex.guards.sovereign_seals import (
     check_gate_21_preservation,
     check_seal_8_dependency_impl,

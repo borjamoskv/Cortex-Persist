@@ -1,10 +1,9 @@
 # [C5-REAL] Exergy-Maximized
+import logging
 import math
 import time
-from dataclasses import dataclass
-
 from collections.abc import Callable
-import logging
+from dataclasses import dataclass
 
 logger = logging.getLogger("cortex.hotpath")
 

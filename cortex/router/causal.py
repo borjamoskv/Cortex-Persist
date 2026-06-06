@@ -6,12 +6,12 @@ Updates policy weights via causal advantage (expected KL reduction).
 """
 
 from __future__ import annotations
-import math
+
 import logging
 from dataclasses import dataclass
 from typing import Literal
 
-from cortex.router.policy import SignalVector, EpistemicPolicyNetwork
+from cortex.router.policy import EpistemicPolicyNetwork, SignalVector
 
 logger = logging.getLogger("cortex.router.causal")
 

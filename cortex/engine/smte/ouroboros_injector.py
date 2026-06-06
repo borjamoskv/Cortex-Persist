@@ -6,11 +6,11 @@ para someter a estrés al Ouroboros Stream Kernel (CQRS Pruning).
 """
 
 import json
+import logging
+import random
+import sys
 import time
 import uuid
-import random
-import logging
-import sys
 
 logger = logging.getLogger("cortex.engine.smte.ouroboros_injector")
 

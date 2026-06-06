@@ -4,7 +4,12 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from playwright.async_api import Browser, BrowserContext, Page, async_playwright  # pyright: ignore[reportMissingImports]
+from playwright.async_api import (  # pyright: ignore[reportMissingImports]
+    Browser,
+    BrowserContext,
+    Page,
+    async_playwright,
+)
 
 LOG = logging.getLogger("cortex.extensions.browser")
 
