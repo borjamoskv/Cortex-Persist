@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Multi-node Federation Gossip Protocol (Sovereign Swarm).
 

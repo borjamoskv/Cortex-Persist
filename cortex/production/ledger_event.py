@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 class LedgerEvent:
     def __init__(self, id, cost, trace_hash):
         self.id = id

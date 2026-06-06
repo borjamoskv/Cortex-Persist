@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX MCP Server Package.
 
 Optimized Multi-Transport Implementation.

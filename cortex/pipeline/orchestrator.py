@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Pipeline - Sovereign E2E Orchestrator.
 
 Wires Ingress → Context → Plan → Execute → Persist → Egress

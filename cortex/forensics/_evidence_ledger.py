@@ -1,4 +1,4 @@
-"""Ledger commitments for forensic evidence."""
+# [C5-REAL] Exergy-Maximized
 
 import json
 import sqlite3

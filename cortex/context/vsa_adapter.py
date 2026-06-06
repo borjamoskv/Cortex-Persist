@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Context - VSA-SDM Adapter.
 
 Wraps the sovereign VSA-SDM SwarmMemory into the ContextAssembler's

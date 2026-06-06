@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """compaction_ttl - TTL Prune strategy for the Auto-Compaction Engine.
 
 Extracted from compactor.py to satisfy the Landauer LOC barrier (≤500).

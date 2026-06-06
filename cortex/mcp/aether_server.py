@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX MCP Server for Aether integration.
 
 Sovereign bridge between local CORTEX infrastructure and the Aether autonomous agent.

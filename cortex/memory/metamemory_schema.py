@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX - Metamemory Schema Layer: Models, Index, and Judge.
 
 Extracted from metamemory.py for module splitting (Ω₂: LOC ≤ 500).

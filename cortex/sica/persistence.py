@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """SICA Persistence - Genome Save/Load.
 
 Autonomy requirement: learned strategies MUST survive restarts.

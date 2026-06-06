@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """HotStateDB - SQLite-backed hot state for the daemon.
 
 Replaces the in-memory dict+JSON flush pattern with a durable,

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """GhostWatcher - Optimized Cognitive Stratification.
 
 Listens to GHOST_DETECTED mutations in Nexus and triggers GHOST_WATCH_TRIGGER

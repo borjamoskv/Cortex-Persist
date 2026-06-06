@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 KETER-∞ Daemon CLI commands.
 Sovereign Orchestration and Reality Weaver.

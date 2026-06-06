@@ -1,4 +1,4 @@
-"""Helper functions for Trust and Compliance CLI commands."""
+# [C5-REAL] Exergy-Maximized
 
 import json
 import sqlite3

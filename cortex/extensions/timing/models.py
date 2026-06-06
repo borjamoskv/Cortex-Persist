@@ -1,4 +1,4 @@
-"""Timing data classes, constants, and classification."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

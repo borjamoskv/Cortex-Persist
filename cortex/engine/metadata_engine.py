@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Metadata Engine - Deterministic and Async Classification.
 
 Decouples metabolic state (Thermodynamic Plane) from thematic domain (Semantic Plane).

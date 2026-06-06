@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Deduplication strategy for compaction.
 """

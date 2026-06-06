@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """MCP Server Utilities.
 
 Configuration, Metrics, Caching, and Connection Pooling.

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX CLI - Main entry point with timeout guard.
 
 Prevents CLI commands from hanging forever by enforcing a maximum

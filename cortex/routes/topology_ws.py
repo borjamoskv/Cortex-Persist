@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Topology WebSocket Router.
 Streaming real-time graph updates and Doubt Circuit alerts to the dashboard.

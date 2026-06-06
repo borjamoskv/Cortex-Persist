@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Sovereign Degradation Protocol (Ω₅ Applied).
 
 Materializes §14 of AGENTICA.md: "Degradación Soberana - Ω₅ Aplicado a Sistemas Agénticos".

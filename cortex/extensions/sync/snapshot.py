@@ -1,4 +1,4 @@
-"""Sync Engine: Snapshot Export."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

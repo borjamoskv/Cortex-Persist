@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX-SWARM-PRIME: 100K-Agent Reverse Engineering Legion.
 Applies VSA/HDC Memory-Mapped Swarm to brute-force or collaboratively decode/decompile

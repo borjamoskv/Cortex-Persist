@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX security package exports.
 
 Keep package import lightweight so callers can access specific submodules

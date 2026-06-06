@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Sharded Signal Bus for CORTEX-SWARM-10K.
 Eliminates lock contention by routing messages to specific SQLite DB shards

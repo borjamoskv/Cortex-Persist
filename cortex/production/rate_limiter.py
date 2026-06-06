@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 class RateLimiter:
     def __init__(self, limit_per_sec):
         self.limit = limit_per_sec

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Drift Monitor (Topological Stability Engine).
 
 Detects catastrophic drift in the L2 vector space before recall degrades

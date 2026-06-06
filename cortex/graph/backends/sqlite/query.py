@@ -1,4 +1,4 @@
-"""SQLite Graph Query Mixin."""
+# [C5-REAL] Exergy-Maximized
 
 __all__ = ["SQLiteQueryMixin"]
 

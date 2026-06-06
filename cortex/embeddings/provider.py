@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Embedding providers - Abstraction layer for survival-ready embeddings.
 """

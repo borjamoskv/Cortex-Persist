@@ -1,4 +1,4 @@
-"""Memory syncer monitor for MOSKV daemon."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

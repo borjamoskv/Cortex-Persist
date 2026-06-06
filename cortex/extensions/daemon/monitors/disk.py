@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Disk usage monitor for MOSKV daemon.
 
 Sovereign 200: Uses TTL-cached measurement to prevent O(N) rglob

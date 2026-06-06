@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX - Weismann Barrier (Kernel Isolation Protocol)
 Protects the CORTEX-Persist kernel from fatal mutations during autopoiesis.

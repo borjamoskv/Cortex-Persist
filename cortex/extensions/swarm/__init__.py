@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Swarm.
 
 High-agency orchestration for 10,000+ autonomous agents.

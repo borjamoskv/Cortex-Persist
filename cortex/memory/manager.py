@@ -1,4 +1,4 @@
-"""Cognitive Memory Orchestrator."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

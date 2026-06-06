@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX - Declarative Trigger Engine (Event Horizon Triggers).
 
 Evaluates composable trigger conditions against the SignalBus stream.

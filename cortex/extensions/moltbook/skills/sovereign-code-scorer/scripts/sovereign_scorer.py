@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Sovereign Code Scorer - Automated code quality engine.
 
 Evaluates codebases on 5 dimensions (PoQ-5 Protocol):

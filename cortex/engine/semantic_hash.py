@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Semantic Hashing Engine - Vectorial Merkle Bridge (Ω₂ / Ω₃).
 

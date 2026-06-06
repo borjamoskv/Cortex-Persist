@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Schema Drift Documentation.
 
 The live database (~/.cortex/cortex.db) has EVOLVED beyond the DDL

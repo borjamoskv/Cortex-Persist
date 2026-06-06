@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """MetricCollector Protocol - enforced at registration time.
 
 Every collector must implement this protocol. The registry

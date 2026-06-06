@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CLI de Mac Maestro - Automatización soberana de escritorio macOS.
 

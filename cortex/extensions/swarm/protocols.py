@@ -1,4 +1,4 @@
-"""Swarm protocols and JIT communication schemas (Ω₁₄)."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

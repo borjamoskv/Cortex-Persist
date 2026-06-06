@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX v6+ - Predictive Memory & Anticipatory Caching.
 
 Strategies #2 + #10: The brain doesn't just store - it PREDICTS.

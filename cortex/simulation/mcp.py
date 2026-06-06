@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 import numpy as np
 from typing import Optional
 from cortex.simulation.primitives import MemoryTrajectory, SimulationField

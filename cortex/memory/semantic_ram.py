@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Semantic RAM & Topological Mutator (130/100 Sovereign Standard).
 

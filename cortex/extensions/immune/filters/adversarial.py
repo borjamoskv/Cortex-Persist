@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 F2 - ADVERSARIAL DETECTOR: Context Authentication & Intent Integrity.
 """

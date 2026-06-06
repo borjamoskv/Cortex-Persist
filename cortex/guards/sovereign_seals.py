@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 # This file is part of CORTEX. Apache-2.0.
 """Sovereign Seals - Helper functions for 10-Seal Quality Gates.
 

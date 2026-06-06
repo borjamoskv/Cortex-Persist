@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Belief Consolidation Engine - The AI "Sleep" Cycle (Ω₂ / Ω₁₁).
 

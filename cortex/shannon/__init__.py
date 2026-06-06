@@ -1,4 +1,4 @@
-"""Shannon Module - Corpus entropy and information quality measurement."""
+# [C5-REAL] Exergy-Maximized
 
 from cortex.shannon.entropy import (
     ShannonReport,

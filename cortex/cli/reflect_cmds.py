@@ -1,4 +1,4 @@
-"""CLI commands for CORTEX Reflection System - reflect + inject."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

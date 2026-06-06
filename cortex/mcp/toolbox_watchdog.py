@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Toolbox Watchdog - Subprocess Lifecycle Manager.
 
 Manages the genai-toolbox binary as a child process, auto-restarting

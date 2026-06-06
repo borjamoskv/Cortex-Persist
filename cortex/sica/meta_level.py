@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """SICA Meta-Level - Metacognitive Monitor & Controller.
 
 Nelson-Narens (1990) implementation:

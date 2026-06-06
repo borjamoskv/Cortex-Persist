@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Canonical forensic evidence manifests and ledger commitments.
 
 The manifest functions verify local artifact bytes. The commitment functions

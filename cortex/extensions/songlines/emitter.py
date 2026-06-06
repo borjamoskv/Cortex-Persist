@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 ResonanceEmitter - The Ocre Painter.
 Embeds hyperdimensional ghost traces into the file system.

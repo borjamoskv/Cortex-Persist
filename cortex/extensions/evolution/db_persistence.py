@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 # cortex/evolution/db_persistence.py
 """Database Persistence for Evolution State - Long-Term Memory Consolidation.
 

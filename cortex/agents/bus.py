@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Agent Runtime - Message Bus.
 
 MessageBus protocol and SQLite implementation wrapping the

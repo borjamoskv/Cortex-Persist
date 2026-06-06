@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """moneytv-1 Funding Rate Arbitrage Scanner.
 
 Estrategia market-neutral más viable para individuales en 2026.

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Gateway - Telegram Channel Adapter.
 
 Bridges inbound Telegram messages → GatewayRequest → GatewayResponse → Telegram reply.

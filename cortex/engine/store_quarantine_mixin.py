@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """store_quarantine_mixin - Quarantine / Unquarantine lifecycle for the Store Layer.
 
 Extracted from StoreMixin to satisfy the Landauer LOC barrier (≤500).

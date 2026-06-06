@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Solver for Moltbook AI Verification Challenges.
 
 Challenges are obfuscated math word problems with:

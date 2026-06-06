@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Cortex Router v1 - Epistemic Model Arbitrator.
 
 Routes tasks dynamically between Gemini 3.5 Flash (Physical Layer)

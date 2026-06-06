@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Haiku Guard (Ω₄): Aesthetic Integrity Validator for Sacred Truths.
 Enforces the 5-7-5 syllable structure for facts with high exergy or sacred intent.

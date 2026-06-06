@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """OUROBOROS INJECTOR - Synthetic Friction Generator.
 
 Inyecta conflictos estocásticos y asimétricos (eventos de fricción) en Redpanda

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CLI bootstrap with tolerant command-module loading.
 
 This keeps the root CLI usable even when some subcommand modules are

@@ -1,4 +1,4 @@
-"""SQLite Graph Store Mixin."""
+# [C5-REAL] Exergy-Maximized
 
 import aiosqlite
 

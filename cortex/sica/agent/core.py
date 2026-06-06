@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """SICA Agent - The Integrated Self-Improving Cognitive Architecture.
 
 Integrates the three SICA layers into a single agent that inherits

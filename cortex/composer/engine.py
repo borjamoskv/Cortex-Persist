@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Orquestador de Síntesis Frontend JIT (CORTEX-Composer Engine).
 
 Genera, extrae y audita código visual bajo las leyes Sovereign.

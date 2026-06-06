@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Phase 1: Multi-Source Trend Detection.
 
 Detects initial sparks. A signal is only valid if it reaches multi-source convergence.

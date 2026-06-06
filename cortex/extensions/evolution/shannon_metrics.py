@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Shannon Entropy-modulated metrics for Evolution Engine.
 
 Implements recursive TTL adaptation via logistic sigmoid decay

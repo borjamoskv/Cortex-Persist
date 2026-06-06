@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 DiscoveryProvider (Ω₁: Multi-Scale Causality).
 

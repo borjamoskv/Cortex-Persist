@@ -1,4 +1,4 @@
-"""ForgettingAnalysisMixin - Core analysis logic for the ForgettingOracle."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

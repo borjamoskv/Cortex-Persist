@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Hybrid Logical Clock - Causal Ordering for Edge Swarms (Ω₃ / Ω₁₂).
 

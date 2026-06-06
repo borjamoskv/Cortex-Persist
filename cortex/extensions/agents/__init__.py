@@ -1,4 +1,4 @@
-"""CORTEX Agents - handoff, neural, system prompts and pitch arsenal."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Shannon Entropy Module - Corpus-Level Information Measurement (Ω₁₃).
 
 Computes Shannon entropy H(X) = -Σ p(x) log₂ p(x) over the fact corpus.

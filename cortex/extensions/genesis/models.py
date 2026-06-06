@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Genesis - Declarative System Specification Models.
 
 Dataclasses that define the shape of a system before it exists.

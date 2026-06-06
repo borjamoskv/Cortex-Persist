@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX v7+ - Epistemic Void Detector.
 
 Strategy #12: Before the agent responds, analyze the *topology* of

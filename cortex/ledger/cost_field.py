@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Cost Field - Extractor de gradiente termodinámico.
 
 Convierte las trazas de ejecución en campos de energía que permiten

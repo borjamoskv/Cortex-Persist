@@ -1,4 +1,4 @@
-"""Genesis Template Renderers for CLI Commands."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

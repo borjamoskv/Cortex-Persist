@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """MCP Server Implementation.
 
 Core logic for the CORTEX MCP Trust Server.

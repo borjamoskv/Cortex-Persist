@@ -1,6 +1,4 @@
-# This file is part of CORTEX. Apache-2.0. Change Date: 2030-01-01.
-
-"""Built-in metric collectors."""
+# [C5-REAL] Exergy-Maximized
 
 from cortex.extensions.health.collectors.db import DbCollector, DiskSpaceCollector, WalCollector
 from cortex.extensions.health.collectors.ledger import LedgerCollector

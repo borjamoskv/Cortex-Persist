@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Pipeline - Runner implementations.
 
 Reality Level: C5-REAL

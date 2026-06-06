@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """_scanner_visitors - AST visitors for BroadException and AsyncIntegrity scanners.
 
 Extracted from antipatterns.py to satisfy the Landauer LOC barrier (≤500).

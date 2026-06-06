@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """SOVEREIGN AST ORACLE (CORTEX Sidecar v6 Telemetry)
 El Lector de Mentes Asíncrono.
 

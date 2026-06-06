@@ -1,4 +1,4 @@
-"""CORTEX Compliance SDK - EU AI Act Article 12 in 3 lines of code."""
+# [C5-REAL] Exergy-Maximized
 
 from cortex.compliance.tracker import ComplianceTracker
 

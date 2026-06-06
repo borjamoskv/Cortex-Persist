@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Motor Heurístico Difuso (Right-Brain Engine) - CORTEX-Persist
 Procesa señales ambientales y divergencias (lateral thinking) cuando

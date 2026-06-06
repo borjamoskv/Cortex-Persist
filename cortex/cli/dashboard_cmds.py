@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Sovereign Dashboard (Industrial Noir).
 
 Live terminal dashboard showing system health, Shannon entropy,

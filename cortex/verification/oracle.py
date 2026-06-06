@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Verification Oracle - Deterministic validation for P0 Decoupling (V6).
 
 Provides a ground-truth verification layer for facts and transactions,

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Shannon Module - Information Theory for Memory Intelligence.
 
 Applies Shannon entropy, KL divergence, mutual information,

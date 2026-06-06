@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """MOSKV-Aether - CDP AgentKit Sovereign Wallet.
 
 [SOVEREIGN WALLET V3.0] - Axioma Ω₅ (Antifragile by Default)

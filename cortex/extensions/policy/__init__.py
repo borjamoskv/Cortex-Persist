@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Policy Engine - Bellman Bridge.
 
 Converts memory (facts, ghosts, errors, bridges) into prioritized actions

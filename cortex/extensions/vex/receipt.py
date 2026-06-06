@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """VEX Receipt - Verification and export utilities.
 
 Provides functions for third-party receipt verification, export

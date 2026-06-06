@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Engine - Connection and Schema Initialization Mixin.
 
 Reality Level: C5-REAL

@@ -1,4 +1,4 @@
-"""Advanced stack detection with tool intelligence for MEJORAlo."""
+# [C5-REAL] Exergy-Maximized
 
 import logging
 import shlex

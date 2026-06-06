@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX - macOS Notification Adapter.
 
 Delivers events as native macOS notifications via `osascript`.

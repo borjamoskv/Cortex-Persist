@@ -1,4 +1,4 @@
-"""Migration 024: P0 Decoupling - Enrichment Queue."""
+# [C5-REAL] Exergy-Maximized
 
 import sqlite3
 

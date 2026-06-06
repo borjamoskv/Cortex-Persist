@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """memory_compression - Background L1 Overflow Compression Pipeline.
 
 Extracted from CortexMemoryManager to satisfy the Landauer LOC barrier (≤500).

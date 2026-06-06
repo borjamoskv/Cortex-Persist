@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Strategy Genome - Code-as-Data Foundation for L7 Autopoiesis.
 
 A StrategyGenome is a serializable dict that encodes:

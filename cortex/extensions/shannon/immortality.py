@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Immortality Index (ι) - Cognitive Crystallization Metric.
 
 Measures the ratio of crystallized cognitive state to estimated total

@@ -1,4 +1,4 @@
-"""Hedged execution and Swarm Racing for LLM Router."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX-Persist MCP Server
 Exposes the ImmutableLedger and JIS Auditing to external agent orchestrators

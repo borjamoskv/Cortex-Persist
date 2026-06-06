@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Motor de Física Termodinámica para el modo Ultrathink (P0-Mechanics).
 Calcula la exergía cognitiva y el Blast Radius para autorizar bifurcaciones masivas.

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Sovereign Input Sanitization.
 
 Centralizes input validation for all API-facing parameters.

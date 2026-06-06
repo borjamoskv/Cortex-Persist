@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX-SWARM-PRIME: Staged Hierarchical Legion - 2M Agents.
 Overcomes physical RAM/disk limits by streaming waves of agents through

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Graph Processing Engine.
 
 Extraction, relationship detection, and backend orchestration.

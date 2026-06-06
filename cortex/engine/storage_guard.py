@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """StorageGuard - Mandatory pre-store middleware.
 
 No fact reaches the database without passing through this guard.

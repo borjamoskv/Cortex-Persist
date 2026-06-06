@@ -1,4 +1,4 @@
-"""Genesis Template Renderers for Python Code."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

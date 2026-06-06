@@ -1,4 +1,4 @@
-"""MOSKV-Aether - Background daemon and MoskvDaemon monitor."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

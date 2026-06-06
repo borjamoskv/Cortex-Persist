@@ -1,4 +1,4 @@
-"""Store mutation helpers for deprecate, invalidate, and purge flows."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

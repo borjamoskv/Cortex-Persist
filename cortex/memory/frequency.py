@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX v6+ - Continuous Memory System (CMS) & BIFT Frequency Bands.
 
 Strategy 1 (CMS): Stratifies memory into frequency layers with different

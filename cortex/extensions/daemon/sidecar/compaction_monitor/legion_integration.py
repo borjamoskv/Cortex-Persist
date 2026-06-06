@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """legion_integration.py
 
 Integration with the LEGION swarm to offload specialist components of the

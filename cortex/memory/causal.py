@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX v6+ - Causal Memory Graph (do-calculus chains).
 
 Strategy #6: Don't just store WHAT happened - store WHY.

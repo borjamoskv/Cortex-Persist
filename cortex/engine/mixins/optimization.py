@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Optimization Mixin - High-performance buffered writes and LRU caching.
 Ω₂: Thermodynamic optimization - reduces IO wait and recomputation.
 """

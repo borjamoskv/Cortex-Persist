@@ -1,4 +1,4 @@
-"""CLI commands for Sovereign Swarm operations."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

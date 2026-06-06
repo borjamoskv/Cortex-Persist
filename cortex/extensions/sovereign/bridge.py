@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 # cortex/sovereign/bridge.py
 """Sovereign Bridge - The interface between CORTEX and Antigravity skills.
 

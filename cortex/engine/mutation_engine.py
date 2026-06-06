@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Solid-State Mutation Engine (CQRS Write Gateway).
 
 The ONLY sanctioned write path for fact state changes.

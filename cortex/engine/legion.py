@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 LEGION-OMEGA: The Immortal Siege Engine.
 Implementing Phase 6: Adverse Swarm Intelligence for Code Immunity.

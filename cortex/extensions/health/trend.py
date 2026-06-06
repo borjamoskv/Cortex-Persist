@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Trend detection - drift detection from health snapshots.
 
 Ring buffer of last N scores. Computes slope to classify:

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Autonomous Drift Monitor (El Topólogo).
 
 Periodically samples L2 vector embeddings and checks topological health

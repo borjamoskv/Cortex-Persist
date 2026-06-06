@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Metacognition & The Doubt Circuit (DOUBT-Ω)
 Evaluates Semantic Divergence and Epistemic Uncertainty to prevent Coherence Traps.

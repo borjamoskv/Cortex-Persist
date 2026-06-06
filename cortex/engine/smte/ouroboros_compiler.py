@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """OUROBOROS-COMPILER-Ω - AOT Limerent Agent Compiler.
 
 Transforms high-entropy, low-utility execution graphs (limerent agents)

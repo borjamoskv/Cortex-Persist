@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 # cortex/evolution/cortex_metrics.py
 """Real Telemetry from CORTEX DB - Afferent Signals for Fitness Computation.
 

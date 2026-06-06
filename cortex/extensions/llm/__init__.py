@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """LLM Provider Module.
 
 OpenAI-compatible LLM integration for context-aware retrieval.

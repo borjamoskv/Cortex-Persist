@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """MOSKV-1 - PULSE-Ω (Sovereign Metabolism Engine).
 
 Injects biological life into the CORTEX Daemon. Repurposed from the experimental

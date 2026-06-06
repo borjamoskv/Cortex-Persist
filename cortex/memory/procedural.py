@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX v7+ - Procedural Memory & Skill Buffer.
 
 Basal Ganglia analogue: caches recently executed skills, tracking

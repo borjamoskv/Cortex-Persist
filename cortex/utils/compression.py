@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Embedding Compression.
 
 int8 quantization for embedding storage. Reduces storage from 1.5KB to 388 bytes

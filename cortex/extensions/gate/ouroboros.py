@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX - Ouroboros-Ω Gate.
 The thermodynamic enforcer for architectural scaling.

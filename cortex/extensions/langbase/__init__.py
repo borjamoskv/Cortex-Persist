@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Langbase Integration.
 
 Serverless AI agents backed by CORTEX sovereign memory.

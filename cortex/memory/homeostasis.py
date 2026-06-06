@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX v6+ - Thermodynamic Homeostasis Engine.
 
 Implements active biological memory management (Forget Gates & Synaptic Pruning).

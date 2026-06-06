@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Platform-specific daemon install/uninstall.
 
 Extracted from daemon_cli.py to keep file size under 300 LOC.

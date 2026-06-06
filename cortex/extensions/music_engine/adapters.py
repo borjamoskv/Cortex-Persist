@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Audio Adapters for CORTEX Music Engine.
 Interfaces with external frontier models (Suno v5, Udio v4, Lyria 3).

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Language Compression Engine - Tokenization Tax Eliminator.
 
 Ω₂: Entropic Asymmetry - The tokenizer doesn't care about culture.

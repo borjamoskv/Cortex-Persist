@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Hypervisor - Complexity Compressor.
 
 Transforms rich internal types into simple tenant-facing models.

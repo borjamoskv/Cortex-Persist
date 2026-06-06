@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Swarm Kanban Board (TUI).
 
 A rich-based live dashboard to monitor Sovereign Swarm agents in real-time.

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX VSA Engine Adapter - C5-REAL
 Exposes the sovereign VSAEngine from the skills directory.

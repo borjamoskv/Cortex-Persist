@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """SICA Constitution - Immutable Epistemic Principles.
 
 Inspired by Anthropic Constitutional AI. Every agent output is evaluated

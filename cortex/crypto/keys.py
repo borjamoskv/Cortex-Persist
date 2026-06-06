@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Substrate for CORTEX Agent Cryptographic Identity.
 

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX Persist TDA Subsystem — Hodge Memory Routing Engine.
 Implements RecallVectorField and geodesic descent over the memory graph

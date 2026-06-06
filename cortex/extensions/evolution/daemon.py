@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 # cortex/evolution/daemon.py
 """Daemon entry point - starts the Evolution Engine as a background process.
 

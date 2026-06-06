@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Revenue - Vector 1: Micro-SaaS Factory.
 
 Auto-generates small web tools, deploys them on Cloud Run,

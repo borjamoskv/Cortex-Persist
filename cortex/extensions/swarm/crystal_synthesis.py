@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Crystal Synthesis Node.
 
 Executes a deep synthesis of conflicting or redundant knowledge crystals.

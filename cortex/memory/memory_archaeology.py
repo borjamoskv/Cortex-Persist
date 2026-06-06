@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Anamnesis-Ω Semantic Deduplicator (Memory Archaeology).
 

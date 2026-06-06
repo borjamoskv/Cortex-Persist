@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Analyzer Mixin for Forgetting Oracle.
 
 Evaluates individual cache eviction decisions to measure regret value.

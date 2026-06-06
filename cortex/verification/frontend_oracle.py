@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Ω₇ Zero-Latency UI Axiom Enforcer.
 Evaluates Cognitive Complexity of JavaScript/TypeScript functions in frontend files.

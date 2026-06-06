@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 ThermalEconomy - The Entropy Gatekeeper.
 Enforces 'Proof-of-Skin' and field density limits.

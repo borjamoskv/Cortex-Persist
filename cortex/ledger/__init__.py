@@ -1,4 +1,4 @@
-"""CORTEX Ledger - Sovereign transaction logs and semantic enrichment."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

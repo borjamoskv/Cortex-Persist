@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Auto-persist hooks for MCP session lifecycle.
 
 When an MCP session closes, this module scans the interaction context

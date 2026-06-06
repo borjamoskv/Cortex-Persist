@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX - Omega Auditor (Axiom 20 + Massive Context).
 

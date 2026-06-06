@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """MCP tools for CORTEX NotebookLM integration.
 
 Registers NotebookLM tools on a FastMCP server so AI agents

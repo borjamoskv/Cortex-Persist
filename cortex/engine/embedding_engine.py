@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Embedding Engine - Asynchronous fact embedding and Specular Memory.
 Ω₁: G10 Specular Memory (HDC-Native).

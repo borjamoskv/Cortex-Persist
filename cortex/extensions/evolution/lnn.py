@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 # cortex/evolution/lnn.py
 """
 Lagrangian Neural Networks (LNN) for Evolutionary Policy - ψSAP Implementation.

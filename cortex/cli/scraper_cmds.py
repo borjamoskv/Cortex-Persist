@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """SCRAPER-Ω CLI - Sovereign Web Extraction commands.
 
 Commands:

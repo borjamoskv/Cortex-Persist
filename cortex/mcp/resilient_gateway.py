@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX MCP - Resilient Gateway Server.
 
 Cascading URL fetcher with per-provider circuit breakers.

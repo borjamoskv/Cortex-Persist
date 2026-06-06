@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """runner.py
 
 Async entry point for the Compaction Monitor sidecar.

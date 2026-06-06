@@ -1,4 +1,4 @@
-"""CORTEX Core - Foundational configuration and constants."""
+# [C5-REAL] Exergy-Maximized
 
 from cortex.core.config import (
     CORTEX_DIR,

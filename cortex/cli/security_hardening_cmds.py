@@ -1,4 +1,4 @@
-"""CLI commands: quarantine, unquarantine, reap-ghosts."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """loop_engine - ExecutionLoop: The Sovereign Task Execution Engine.
 
 Extracted from loop_cmds.py to satisfy the Landauer LOC barrier (≤500).

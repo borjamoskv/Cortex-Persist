@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Agent Executor - Real LLM Dispatch for E2E Pipeline.
 
 Connects the pipeline's abstract _execute() to the real CortexLLMRouter

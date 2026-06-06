@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """SCRAPER-Ω API Routes - REST endpoints for web extraction.
 
 Endpoints:

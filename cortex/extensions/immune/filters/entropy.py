@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 F4 - ENTROPY MEASURE: AX-I: The Threshold of Thermodynamics (Ω₂).
 """

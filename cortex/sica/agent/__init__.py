@@ -1,4 +1,4 @@
-"""SICA Agent components."""
+# [C5-REAL] Exergy-Maximized
 
 from cortex.sica.agent.core import SICAAgent
 

@@ -1,4 +1,4 @@
-"""CORTEX Music Engine (GRAMMY-Ω)."""
+# [C5-REAL] Exergy-Maximized
 
 from cortex.extensions.music_engine.orchestrator import (
     AlbumContext,

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Bayesian Trust Updater - Sovereign confidence as a running posterior.
 
 Treats fact confidence as a Beta distribution:

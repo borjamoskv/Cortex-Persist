@@ -1,4 +1,4 @@
-"""Embedding Sovereign Layer - EmbeddingManager for CORTEX."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

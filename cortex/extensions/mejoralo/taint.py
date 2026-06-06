@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Taint Circuit Breaker for MEJORAlo.
 
 Extracted from heal.py to maintain thermodynamic LOC limits.

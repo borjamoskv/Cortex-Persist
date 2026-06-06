@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """circuit_breaker.py
 
 A lightweight circuit‑breaker implementation used by the Compaction Monitor

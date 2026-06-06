@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Causality Module.
 
 Taint propagation, causal DAG integrity, and effective confidence

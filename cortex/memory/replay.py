@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX v6+ - Hippocampal Replay (Nocturnal Consolidation).
 
 Strategy #1: During "sleep" cycles (daemon idle periods), replay

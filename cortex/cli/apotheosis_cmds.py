@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 APOTHEOSIS-∞ Daemon CLI commands.
 El nivel 5 de autonomía Soberana en CORTEX.

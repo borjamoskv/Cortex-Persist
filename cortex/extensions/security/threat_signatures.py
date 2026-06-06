@@ -1,4 +1,4 @@
-"""Built-in Threat Signatures for CORTEX Security."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

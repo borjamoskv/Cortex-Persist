@@ -1,4 +1,4 @@
-"""CLI Commands for Sovereign Darknet (Vector Ω-5)."""
+# [C5-REAL] Exergy-Maximized
 
 import asyncio
 from datetime import datetime

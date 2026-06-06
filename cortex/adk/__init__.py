@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX ADK - Google Agent Development Kit Integration.
 
 Provides ADK agents that wrap CORTEX memory, search, and ledger

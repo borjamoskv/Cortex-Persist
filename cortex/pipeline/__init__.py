@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Pipeline - END-to-END Contracts & Types.
 
 Defines the sovereign pipeline contracts that wire all CORTEX layers

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 IMMUNE-SYSTEM-V1 (The Epistemic Arbitrator).
 Interprets and arbitrates signals between perception and execution.

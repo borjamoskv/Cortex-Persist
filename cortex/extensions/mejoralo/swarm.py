@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """MEJORAlo v9.0 - Swarm of Specialized Subagents.
 
 Uses ThoughtOrchestra to deploy multiple specialists in parallel,

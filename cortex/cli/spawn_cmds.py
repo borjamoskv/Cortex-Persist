@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX CLI - Headless Agent Spawn.
 Entry points for triggering detached, autonomous sub-agent execution.

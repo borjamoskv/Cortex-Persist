@@ -1,4 +1,4 @@
-"""Message emission logic for SICA."""
+# [C5-REAL] Exergy-Maximized
 
 import logging
 from typing import Any

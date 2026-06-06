@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Causal Rollback Engine (MVP).
 
 Motor de control de daño perfecto. Corta ramas de ejecución enteras y

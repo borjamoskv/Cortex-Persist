@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Gemini Context Caching Gateway (AX-042).
 Maneja la creación y resolución asíncrona de `cachedContents` nativo vía REST v1beta.

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Sovereign Electronic Music Engine (GRAMMY-Ω).
 Master Orchestrator powered by Gemini-3.1-Pro-Preview.

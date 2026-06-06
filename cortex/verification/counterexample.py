@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Counterexample Learning Protocol.
 
 Transforms formal verification failures into persistent sematic memories

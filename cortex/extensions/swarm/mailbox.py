@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Atomic Mailbox (LEGION-Ω)
 Zero-latency inter-agent communication via SQLite.
 Eliminates the coordinator by allowing agents to read/write

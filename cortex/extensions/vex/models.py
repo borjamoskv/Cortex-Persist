@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """VEX Data Models - Cryptographically verifiable execution primitives.
 
 All models are immutable dataclasses designed for hash-chain integration

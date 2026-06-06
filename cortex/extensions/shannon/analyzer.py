@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Shannon Information Theory - Pure Math Module.
 
 Zero external dependencies. All functions operate on dict frequency

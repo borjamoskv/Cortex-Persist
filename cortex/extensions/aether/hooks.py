@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Aether Hooks - Deterministic Execution Sandboxing.
 
 Provides decorators and wrappers to enforce limits on agent tool invocation.

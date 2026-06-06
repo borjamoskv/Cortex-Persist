@@ -1,4 +1,4 @@
-"""Allow running CORTEX ADK via ``python -m cortex.adk``."""
+# [C5-REAL] Exergy-Maximized
 
 from cortex.extensions.adk.runner import main
 

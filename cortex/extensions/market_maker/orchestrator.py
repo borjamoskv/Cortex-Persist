@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Phase 5: Full Cycle Orchestrator.
 
 Ties all 4 phases together: Detect -> Score -> Generate -> Validate.

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Swarm Budget Manager.
 
 Tracks token consumption and costs per mission using SQLite.

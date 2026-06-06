@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Autopoietic Agent - Level 7: Self-Modifying Runtime.
 
 The highest level in the agent capability matrix. This agent:

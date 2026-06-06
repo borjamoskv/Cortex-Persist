@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """APIS-Ω - Sovereign Key Arbiter.
 
 Manages the lifecycle, health, and acquisition of CORTEX LLM API keys.

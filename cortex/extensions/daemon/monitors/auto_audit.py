@@ -1,4 +1,4 @@
-"""AutoAudit monitor for the CORTEX daemon (Keter Layer)."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

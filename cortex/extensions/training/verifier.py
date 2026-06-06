@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Adapter Verifier.
 Verifies the structural, loading, and ethical integrity of LoRA adapters.

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """monitor.py
 
 MemoryPressureMonitor - Compaction Sidecar, Nivel 130/100.

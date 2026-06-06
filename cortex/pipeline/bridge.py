@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Pipeline Bridge - Wires E2E Pipeline to Real Infrastructure.
 
 Connects the abstract CortexOrchestrator to the real CortexEngine,

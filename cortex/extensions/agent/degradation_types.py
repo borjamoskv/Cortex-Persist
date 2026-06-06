@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Sovereign Degradation Types (leaf module).
 
 Contains the exception hierarchy, data contracts, and taxonomy shared by

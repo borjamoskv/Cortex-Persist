@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Migration: Simplify Facts Table
 Collapses non-essential columns into the `metadata` JSON field to reduce DB entropy.

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 # cortex/evolution/skill_bridge.py
 """AgentDomain ↔ MOSKV-1 Skill Mapping (Phase 5).
 

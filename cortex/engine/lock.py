@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Sovereign Synchronization (Axiom Ω₂: Entropic Asymmetry).
 

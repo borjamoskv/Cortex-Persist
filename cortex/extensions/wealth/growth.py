@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Sovereign Growth Engine v1.0.0.
 
 Motor soberano de crecimiento acelerado. Detecta oportunidades de monetización

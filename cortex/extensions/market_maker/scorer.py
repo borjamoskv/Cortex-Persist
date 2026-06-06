@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Phase 2: Opportunity Scorer.
 
 Evaluates signals on 4 axes: TAM, Competition, Advantage, and Time-To-Market.

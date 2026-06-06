@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 LedgerCredibilityStack - JIT Credibility Strike Engine.
 Computes high-exergy notarization, Merkle roots, signatures,

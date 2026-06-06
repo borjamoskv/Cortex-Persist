@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 # SOVEREIGN TIP generator – cada tip está anclado a una ley física.
 
 """Utility module to generate tips that reference concrete physical laws.

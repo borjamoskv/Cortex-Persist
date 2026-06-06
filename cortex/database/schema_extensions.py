@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """schema_extensions - Extended SQLite tables for CORTEX v5.
 
 Extracted from database/schema.py to satisfy the Landauer LOC barrier.

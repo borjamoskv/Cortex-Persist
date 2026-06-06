@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX Forensic Strike Module (AX-I) - Operation VOID-MAX.
 High-concurrency smart contract state auditing and anomaly detection.

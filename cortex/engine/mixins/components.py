@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Components Mixin for CortexEngine.
 
 Provides getters/setters for standard managers and registers default guards.

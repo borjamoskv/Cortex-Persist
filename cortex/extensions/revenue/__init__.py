@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Revenue Engine - Autonomous Revenue Generation.
 
 DINERO-Ω: Three zero-capital income vectors orchestrated by a sovereign engine.

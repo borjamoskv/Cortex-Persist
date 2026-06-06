@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Influencer Guard Extension for Moltbook.
 
 Monitors followed influencers' responses to prompts.

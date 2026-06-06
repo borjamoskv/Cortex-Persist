@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CLI Commands for GRAMMY-Ω.
 Sovereign Electronic Music Production.

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 LLMSurgeon Topology - Real-time Data Mixture Surgery Engine
 Implements algorithms inspired by arXiv:2605.30348v1 for surgical data inversion.

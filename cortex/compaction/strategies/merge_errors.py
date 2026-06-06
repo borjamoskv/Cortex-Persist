@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Error merging strategy for compaction.
 """

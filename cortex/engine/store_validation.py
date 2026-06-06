@@ -1,4 +1,4 @@
-"""Logic for store validation and thermodynamic enforcement."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

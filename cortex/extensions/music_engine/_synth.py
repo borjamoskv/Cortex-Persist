@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Synthesizer primitives for MIDI rendering.
 
 Extracted from midi_engine.py for LOC compliance (AX-IV).

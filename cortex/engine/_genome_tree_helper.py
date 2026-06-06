@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Tree manipulation helper functions for StrategyGenome.
 
 Reality Level: C5-REAL

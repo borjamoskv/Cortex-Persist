@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Authentication package exports.
 
 Keep package import lightweight so schema/manager consumers do not depend on

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Perception Layer 1.5: Diff Management.
 

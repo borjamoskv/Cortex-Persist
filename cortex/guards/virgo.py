@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Virgo Context Validation Filter (Virgo ♍)
 Enforces Logos-Critique constraints, dynamic agent trust weighting,

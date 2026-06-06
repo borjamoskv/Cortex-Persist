@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Query mixin - recall, history, time-travel, causal chains, stats.
 
 Note: ``search()`` is NOT defined here. The canonical search implementation

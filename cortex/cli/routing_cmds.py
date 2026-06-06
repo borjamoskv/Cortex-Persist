@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX CLI - LLM Routing Commands (Industrial Noir).
 
 Exposes the tier/cost-aware routing matrix to the terminal.

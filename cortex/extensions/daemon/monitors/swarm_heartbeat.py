@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Swarm Heartbeat Monitor - Detects silent daemon thread deaths.
 
 Integrates with the SwarmHeartbeat registry to surface SUSPECT/DEAD

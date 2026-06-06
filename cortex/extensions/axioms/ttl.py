@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 # SPDX-License-Identifier: Apache-2.0
 """Fact TTL Policy - Reconciles 'Persist Everything' with 'Entropy = Death'.
 

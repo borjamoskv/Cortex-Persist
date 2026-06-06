@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """WatchdogHub - Unified filesystem monitor for the daemon.
 
 Consolidates Git watching & AST monitoring into a single Observer

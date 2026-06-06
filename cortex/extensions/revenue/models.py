@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Revenue Engine - Data Models.
 
 Defines the core data structures for opportunities, execution results,

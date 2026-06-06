@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Entropy Report - Structured analysis of CORTEX memory health.
 
 Orchestrates MemoryScanner (data extraction) and analyzer (pure math)

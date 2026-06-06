@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Sovereign Engine - async-first orchestration layer.
 
 Production-grade async pipeline that coordinates all MOSKV-1 skills,

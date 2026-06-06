@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 import logging
 
 from cortex.engine.forensic_strike_config import STRIKE_V1, MissionProfile

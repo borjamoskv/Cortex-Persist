@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Phase 4: Demand Validation.
 
 Simulates demand validation via micro-budget ad spend.

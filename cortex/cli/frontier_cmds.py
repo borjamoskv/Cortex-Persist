@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Frontier CLI Commands
 Control the R&D and Metabolism pulse of CORTEX.

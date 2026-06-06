@@ -1,6 +1,4 @@
-# This file is part of CORTEX. Apache-2.0. Change Date: 2030-01-01.
-
-"""Ledger health collector."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

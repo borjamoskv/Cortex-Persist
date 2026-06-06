@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Agent Runtime - Agent Manifest (Identity + Policy).
 
 The manifest is the runtime contract for an agent. It declares

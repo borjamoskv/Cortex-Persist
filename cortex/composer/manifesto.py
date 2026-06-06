@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Sovereign Vibe-Coding Manifesto (Industrial Noir 2026).
 
 Reglas de síntesis visual inquebrantables del ecosistema CORTEX.

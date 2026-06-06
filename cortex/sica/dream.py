@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """SICA Dream Engine - NREM-Inspired Trace Consolidation.
 
 Biological insight: during NREM sleep, the hippocampus replays

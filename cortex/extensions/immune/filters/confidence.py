@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 F5 - CONFIDENCE THRESHOLD: AX-III: The Calibration Gap (Ω₃).
 """

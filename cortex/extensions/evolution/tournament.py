@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 # cortex/evolution/tournament.py
 """Tournament Selection & Speciation for the Evolution Engine.
 

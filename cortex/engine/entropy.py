@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Entropy Annihilator (JARL-Ω)
 Information Thermodynamics & Landauer's Razor: Axiom 12 Net-Negative Entropy.

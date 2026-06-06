@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Continuous Autopoiesis (Heartbeat Daemon).
 Vector 1 of the Singularity: non-discrete temporal execution.

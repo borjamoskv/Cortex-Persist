@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Workflow Recommender Monitor - suggests slash commands based on system state.
 
 Analyzes the current daemon status (ghosts, entropy, memory staleness, etc.)

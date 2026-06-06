@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Enrichment Worker - Asynchronous background processor for CORTEX.
 Ω₁₃: Thermodynamic decoupling sidecar.

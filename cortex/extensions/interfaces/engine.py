@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Engine Protocol - Minimal contract for downstream module consumption.
 
 Modules like guards, shannon, fingerprint, and policy should depend on

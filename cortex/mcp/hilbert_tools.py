@@ -1,4 +1,4 @@
-"""MCP tool registration for Hilbert-Omega theorem prover."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

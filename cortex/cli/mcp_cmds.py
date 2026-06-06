@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX MCP Module CLI commands.
 
 Registered under `cortex mcp`.

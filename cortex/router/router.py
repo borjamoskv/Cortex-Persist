@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Agent Router - Deterministic Capability Matching.
 
 Maps intents to agent capabilities using keyword/pattern matching

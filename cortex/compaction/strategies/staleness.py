@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Staleness pruning strategy for compaction.
 """

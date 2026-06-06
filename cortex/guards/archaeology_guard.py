@@ -1,4 +1,4 @@
-"""Archaeology Guard (Ley 1) - Pre-commit hook to audit history."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

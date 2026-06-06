@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Bayesian Trust Registry (Axiom Ω₃) - CORTEX Persist.
 

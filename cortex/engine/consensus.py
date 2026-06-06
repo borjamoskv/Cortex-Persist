@@ -1,4 +1,4 @@
-"""Consensus Mixin for AsyncCortexEngine."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

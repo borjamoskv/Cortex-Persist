@@ -1,4 +1,4 @@
-"""CORTEX Git Integration - Sovereign commit poetry and code narration."""
+# [C5-REAL] Exergy-Maximized
 
 from cortex.extensions.git.poet import CommitPoet
 

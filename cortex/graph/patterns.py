@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Entity and Relationship Extraction Patterns.
 
 Regex patterns and signal words for graph analysis.

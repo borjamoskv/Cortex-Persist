@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Cross-platform utilities for CORTEX.
 
 Centralized helpers for OS detection, path resolution, and

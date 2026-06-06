@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Secure Keychain integration.
 Never stores the CORTEX_MASTER_KEY in plain text .env unless forced (e.g., CI/CD).

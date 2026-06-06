@@ -1,4 +1,4 @@
-"""The Elder's Gate (Ω₁) - Deterministic Verification for Swarm Agents."""
+# [C5-REAL] Exergy-Maximized
 
 import logging
 from dataclasses import dataclass

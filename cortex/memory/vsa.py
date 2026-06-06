@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX VSA-SDM v7.1 - Zero-Dependency Sovereign Memory Substrate.
 
 Pure Python implementation of Vector Symbolic Architecture (VSA) with

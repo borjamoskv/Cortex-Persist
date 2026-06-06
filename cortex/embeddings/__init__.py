@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Embeddings.
 
 Vector substrate for semantic memory and similarity search.

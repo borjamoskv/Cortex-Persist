@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 The ZK-Swarm Epistemic Guard (RFC-003 Phase 1)
 

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Knowledge Watcher - VSA Sync Daemon.
 
 Continuously monitors the knowledge directory for any changes and automatically

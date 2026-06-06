@@ -1,4 +1,4 @@
-"""Evolution Operations Mixin - genetic operators and adversarial processes."""
+# [C5-REAL] Exergy-Maximized
 
 import asyncio
 import logging

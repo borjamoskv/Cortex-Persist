@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Sovereign Reporter - The Living Documentation Engine (Ω-Dynamic).
 

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """VEX Planner - Decomposes intent into verifiable execution steps.
 
 The planner is LLM-agnostic: it accepts a decomposition function

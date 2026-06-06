@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CortexEngine health health_mixin - engine.health_check() API.
 
 Cached collector, TrendDetector, configurable thresholds.

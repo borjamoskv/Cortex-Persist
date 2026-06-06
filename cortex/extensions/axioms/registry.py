@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 # SPDX-License-Identifier: Apache-2.0
 """Canonical Sovereign Axiom Registry - 7 axioms, zero ambiguity.
 

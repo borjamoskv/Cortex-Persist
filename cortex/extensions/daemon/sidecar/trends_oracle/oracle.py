@@ -1,4 +1,4 @@
-"""The Google Trends Oracle - permanent connection system."""
+# [C5-REAL] Exergy-Maximized
 
 import asyncio
 import logging

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Cognitive Fingerprint - Raw pattern queries from CORTEX SQLite.
 
 Async bridge between the engine and the preference extractor.

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX MCP Guard - MOSKV-1 Hard Limits Enforcement.
 
 Validates all inputs to MCP tools against safety constraints:

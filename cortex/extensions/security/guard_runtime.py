@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Sovereign Guard Runtime (Fail-Closed Stub).
 Defined per RFC-CORTEX-NATIVE-AI §9 Epistemic Veto.

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX - SMTE AST Parser (Transcription)
 Axiom Ω₁₄: Code as DNA.

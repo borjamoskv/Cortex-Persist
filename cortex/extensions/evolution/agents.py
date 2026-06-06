@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 # cortex/evolution/agents.py
 """Sovereign Agent & SubAgent definitions for the Continuous Improvement Engine.
 

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Moltbook Pre-flight Check - Zero-Waste Dispatch Gate.
 
 Consult suspension state BEFORE generating any LLM payload.

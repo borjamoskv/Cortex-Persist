@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Execution Trace Ledger - The Memory Thermodynamics Graph (v19).
 
 Records the flow of energy between hypotheses, tracking cost, lineage,

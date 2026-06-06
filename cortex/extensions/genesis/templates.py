@@ -1,4 +1,4 @@
-"""Genesis Template Registry - deterministic ComponentSpec → Python source renderers."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

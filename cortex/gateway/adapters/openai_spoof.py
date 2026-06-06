@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Gateway - OpenAI Spoofing Adapter (API Proxy).
 
 Intercepts OpenAI-compatible requests from any tool/IDE and routes them

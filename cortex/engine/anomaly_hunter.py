@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Anomaly Hunter Engine - NightShift Memory Refiner.
 
 Detects physical and temporal contradictions in the daily logs.

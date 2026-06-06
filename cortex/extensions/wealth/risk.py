@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """moneytv-1 Trading Bot Architecture v1.1 - Risk Management.
 
 Con circuit breakers y risk management militar.

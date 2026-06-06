@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Metastability Probing - Axiom Ω₁₃ Immune System Upgrade.
 
 Detects systems that appear stable only because nobody has perturbed them.

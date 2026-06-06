@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Worker commands for background enrichment.
 """

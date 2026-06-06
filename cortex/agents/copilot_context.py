@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Level 3 Copilot - Context Window Manager.
 
 Intelligent prefix/suffix extraction for LLM context windows.

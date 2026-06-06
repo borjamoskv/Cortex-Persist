@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX CLI - Health dashboard command.
 
 Rich terminal dashboard showing system health at a glance.

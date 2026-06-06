@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 ENCB Router Spec v1 - Epistemic Routing DSL
 SYS_ID: ENCB_ROUTER_OMEGA

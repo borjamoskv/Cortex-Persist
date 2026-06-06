@@ -1,4 +1,4 @@
-"""SQLite-backed signal bus used by the memory subsystem and telemetry."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 # cortex/evolution/landscape.py
 """Dynamic Fitness Landscape - the ceiling that moves.
 

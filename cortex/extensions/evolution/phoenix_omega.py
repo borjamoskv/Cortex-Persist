@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 PHOENIX-OMEGA: Motor de Transformación Atómica y Escalado Estructural
 Wrapper para el core engine en cortex.engine.phoenix_omega.

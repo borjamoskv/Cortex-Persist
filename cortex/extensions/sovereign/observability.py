@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Sovereign Observability Integration.
 
 Provides OpenTelemetry instrumentation, custom metrics, and

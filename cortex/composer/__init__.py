@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Sovereign Vibe-Coding Composer (Vector 1).
 
 Autonomous JIT frontend synthesis engine reinforcing the Industrial Noir 2026 aesthetic.

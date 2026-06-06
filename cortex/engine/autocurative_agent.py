@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Auto-Curative Agent - Level 5 Self-Healing Daemon.
 
 Unifies the CORTEX self-healing primitives into a single closed-loop daemon.

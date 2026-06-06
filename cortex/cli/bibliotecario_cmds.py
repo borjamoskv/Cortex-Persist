@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 CORTEX CLI - Bibliotecario (LIBRARIAN-1) commands.
 

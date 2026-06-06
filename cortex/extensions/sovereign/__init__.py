@@ -1,1 +1,1 @@
-"""Sovereign package."""
+# [C5-REAL] Exergy-Maximized

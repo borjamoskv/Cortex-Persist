@@ -1,4 +1,4 @@
-"""MEJORAlo Ledger - session recording and history retrieval."""
+# [C5-REAL] Exergy-Maximized
 
 import json
 import logging

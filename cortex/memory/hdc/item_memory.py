@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """HDC Item Memory (Codebook).
 
 Deterministic mapping of atomic symbols (tokens, roles, projects)

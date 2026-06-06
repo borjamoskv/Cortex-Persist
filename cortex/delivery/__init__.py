@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Delivery - Typed Egress Layer.
 
 Routes pipeline results to their delivery targets:

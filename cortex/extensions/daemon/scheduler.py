@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """SovereignScheduler - Async cron/interval task scheduler with SQLite persistence.
 
 Runs recurring and one-shot tasks on the daemon's single event loop.

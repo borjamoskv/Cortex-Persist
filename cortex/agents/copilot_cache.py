@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Level 3 Copilot - Suggestion Cache (LRU).
 
 Deduplicates identical context→suggestion mappings.

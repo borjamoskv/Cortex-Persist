@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Observatory - consolidated CORTEX system status endpoint.
 
 Provides a single GET /v1/observatory endpoint that aggregates:

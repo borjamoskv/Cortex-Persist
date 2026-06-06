@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """sovereign_scorer_dimensions - Semantic and Test Coverage scorers.
 
 Extracted from sovereign_scorer.py to satisfy the Landauer LOC barrier (≤500).

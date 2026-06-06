@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """store_validators - Content validation and deduplication for the Store Layer.
 
 Extracted from StoreMixin to satisfy the Landauer LOC barrier (≤500).

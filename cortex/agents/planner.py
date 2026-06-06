@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Agent Runtime - Exergy-Aware Planner.
 
 Decomposes an objective into an ordered sequence of executable steps.

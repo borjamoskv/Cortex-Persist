@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX Gateway - FastAPI REST Adapter.
 
 Exposes the GatewayRouter as a set of REST endpoints.

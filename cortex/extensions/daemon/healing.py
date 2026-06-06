@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """MoskvDaemon — Self-healing monitor mixin.
 
 Extracted from core.py to keep file size under 300 LOC.

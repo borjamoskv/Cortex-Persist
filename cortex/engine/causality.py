@@ -1,4 +1,4 @@
-"""Causal graph and taint propagation utilities for CORTEX."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 
