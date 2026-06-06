@@ -160,6 +160,28 @@ class ResourceMgrMixin:
 
             pass
 
+        # 2.5 Event Sovereignty Runtime (Hito 34)
+        self.sovereignty_runtime = None
+        if self._event_bus:
+            try:
+                from cortex.engine.event_sovereignty import EventSovereigntyRuntime
+                from cortex.engine.auth_gateway import AuthGateway
+                from cortex.engine.causal.anomaly_bridge import AnomalyBridge
+
+                auth_gw = AuthGateway(self._shared_engine)
+                # ensure table is created, though we should probably run this asynchronously, 
+                # but it's safe to run create table in init or async start.
+                anomaly_br = AnomalyBridge()
+
+                self.sovereignty_runtime = EventSovereigntyRuntime(
+                    event_bus=self._event_bus,
+                    anomaly_bridge=anomaly_br,
+                    auth_gateway=auth_gw
+                )
+                logger.info("👑 EventSovereigntyRuntime ENABLED")
+            except Exception as e:
+                logger.warning("Failed to init EventSovereigntyRuntime: %s", e)
+
         # 3. Scheduler — cron/interval task execution
         self.scheduler = None
         if _SCHEDULER_AVAILABLE:
