@@ -193,22 +193,52 @@ class AccessibilityEngine:
 
     async def wait_for_element(
         self,
-        app_name: str,
-        identifier: str,
+        app_name_or_label: str,
+        identifier_or_timeout: str | float = 10.0,
         timeout: float = 5.0,
         poll_interval: float = 0.25,
-    ) -> AXElement | None:
+        timeout_s: float | None = None,
+    ) -> bool | AXElement | None:
         """
-        Polls for an element until found or timeout.
-        Returns the element if found, None if timed out.
+        Polls the accessibility tree.
+        Supports two signatures:
+        1. wait_for_element(app_name: str, identifier: str, timeout: float = 5.0, poll_interval: float = 0.25) -> AXElement | None
+        2. wait_for_element(accessibility_label: str, timeout_s: float = 10.0) -> bool
         """
-        deadline = time.monotonic() + timeout
-        while time.monotonic() < deadline:
-            element = self.find_element(app_name, identifier)
-            if element:
-                return element
-            await asyncio.sleep(poll_interval)
-        return None
+        is_signature_2 = (timeout_s is not None) or isinstance(identifier_or_timeout, (int, float))
+
+        if is_signature_2:
+            label = app_name_or_label
+            final_timeout = float(timeout_s if timeout_s is not None else identifier_or_timeout)
+
+            if not NSWorkspace:
+                return False
+
+            deadline = time.monotonic() + final_timeout
+            poll_interval_s = 0.5
+
+            while time.monotonic() < deadline:
+                active_app = NSWorkspace.sharedWorkspace().frontmostApplication()
+                if active_app:
+                    app_name = active_app.localizedName()
+                    if app_name:
+                        element = self.find_element(app_name, label)
+                        if not element:
+                            element = self.find_element_by_title(app_name, label)
+                        if element:
+                            return True
+                await asyncio.sleep(poll_interval_s)
+            return False
+        else:
+            app_name = app_name_or_label
+            identifier = str(identifier_or_timeout)
+            deadline = time.monotonic() + timeout
+            while time.monotonic() < deadline:
+                element = self.find_element(app_name, identifier)
+                if element:
+                    return element
+                await asyncio.sleep(poll_interval)
+            return None
 
     # ─── Actions ────────────────────────────────────────────────
 

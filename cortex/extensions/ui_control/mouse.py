@@ -125,6 +125,25 @@ class MouseEngine:
 
         return InteractionResult(success=True)
 
+    def drag_and_drop(
+        self,
+        start_x: int,
+        start_y: int,
+        end_x: int,
+        end_y: int,
+        duration_ms: int = 500,
+    ) -> InteractionResult:
+        """
+        Smooth drag between coordinates (wrapper over drag).
+        """
+        return self.drag(
+            from_x=start_x,
+            from_y=start_y,
+            to_x=end_x,
+            to_y=end_y,
+            duration=duration_ms / 1000.0,
+        )
+
     def move(self, x: int, y: int) -> InteractionResult:
         """Mueve el cursor a coordenadas específicas."""
         if not CG:

@@ -1,5 +1,5 @@
 # [C5-REAL] Exergy-Maximized
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, patch, MagicMock
 
 import pytest
 
@@ -99,3 +99,52 @@ async def test_click_menu_success(maestro):
         mock_run.assert_called_once()
         script_arg = mock_run.call_args[0][0]
         assert 'click menu item "Export as PDF..." of menu "File"' in script_arg
+
+
+def test_screenshot_region_success(maestro):
+    from cortex.extensions.ui_control.models import InteractionResult
+    with patch("cortex.extensions.ui_control.vision.CG") as mock_cg, \
+         patch.object(maestro.vision, "capture_screen") as mock_capture:
+        
+        mock_capture.return_value = InteractionResult(success=True, output="/fake/path.png")
+        
+        # Mocking open and os.path.exists
+        with patch("builtins.open", mock_open := patch("builtins.open").start()):
+            mock_open.return_value.__enter__.return_value.read.return_value = b"fake_png_data"
+            with patch("os.path.exists", return_value=True), patch("os.remove") as mock_remove:
+                data = maestro.screenshot_region(10, 20, 100, 200)
+                assert data == b"fake_png_data"
+                mock_capture.assert_called_once_with(region=(10, 20, 100, 200))
+                mock_remove.assert_called_once_with("/fake/path.png")
+            patch("builtins.open").stop()
+
+
+@pytest.mark.asyncio
+async def test_wait_for_element_by_label_success(maestro):
+    from cortex.extensions.ui_control.models import AXElement
+    with patch("cortex.extensions.ui_control.accessibility.NSWorkspace") as mock_ws:
+        mock_app = MagicMock()
+        mock_app.localizedName.return_value = "Safari"
+        mock_ws.sharedWorkspace.return_value.frontmostApplication.return_value = mock_app
+        
+        # Mock element lookup
+        mock_element = AXElement(role="AXButton", title="Submit")
+        with patch.object(maestro.accessibility, "find_element", return_value=None), \
+             patch.object(maestro.accessibility, "find_element_by_title", return_value=mock_element):
+            
+            found = await maestro.wait_for_element("Submit", timeout_s=1.0)
+            assert found is True
+
+
+@pytest.mark.asyncio
+async def test_wait_for_element_by_label_timeout(maestro):
+    with patch("cortex.extensions.ui_control.accessibility.NSWorkspace") as mock_ws:
+        mock_app = MagicMock()
+        mock_app.localizedName.return_value = "Safari"
+        mock_ws.sharedWorkspace.return_value.frontmostApplication.return_value = mock_app
+        
+        with patch.object(maestro.accessibility, "find_element", return_value=None), \
+             patch.object(maestro.accessibility, "find_element_by_title", return_value=None):
+            
+            found = await maestro.wait_for_element("NonExistent", timeout_s=0.1)
+            assert found is False

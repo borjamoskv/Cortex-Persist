@@ -77,3 +77,24 @@ class VisionEngine:
             return InteractionResult(success=True, output=path)
 
         return InteractionResult(success=False, error="Failed to finalize image")
+
+    def screenshot_region(self, x: int, y: int, width: int, height: int) -> bytes:
+        """
+        Captures a specific screen region and returns the raw PNG bytes.
+        """
+        if not CG:
+            raise RuntimeError("Quartz/CoreGraphics not available")
+
+        res = self.capture_screen(region=(x, y, width, height))
+        if not res.success or not res.output:
+            raise RuntimeError(f"Failed to capture region: {res.error}")
+
+        filepath = res.output
+        try:
+            with open(filepath, "rb") as f:
+                data = f.read()
+            if os.path.exists(filepath):
+                os.remove(filepath)
+            return data
+        except Exception as e:
+            raise RuntimeError(f"Failed to read screenshot file: {e}")
