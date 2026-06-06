@@ -1,4 +1,4 @@
-"""Tests for sortu_models.py - State machine, transitions, invocations."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

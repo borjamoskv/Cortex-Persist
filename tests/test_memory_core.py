@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Tests for CORTEX Memory Core - L1, Compression, Thalamus, Resonance.
 
 Covers the 4 most critical untested paths in cortex/memory/.

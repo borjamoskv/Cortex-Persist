@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Tests for causal edge creation in the write path.
 
 Verifies that insert_fact_record creates causal_edges when

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX - Taint Propagation Test Suite.
 
 Tests the causal DAG taint propagation engine (Axiom Ω₁₃).

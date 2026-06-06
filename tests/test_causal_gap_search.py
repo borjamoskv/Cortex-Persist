@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX - Causal Gap Search Test Suite.
 
 Tests the causal gap retrieval engine (Axiom Ω₁₃).

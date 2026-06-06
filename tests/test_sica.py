@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Tests for SICA - Self-Improving Cognitive Architecture.
 
 Validates the full Nelson-Narens metacognitive loop:

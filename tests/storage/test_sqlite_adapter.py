@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Tests for StorageAdapter protocol conformance and SQLiteAdapter behavior.
 

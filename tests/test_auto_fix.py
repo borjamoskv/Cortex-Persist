@@ -1,4 +1,4 @@
-"""Tests for the AutoFixPipeline (Phase 2)."""
+# [C5-REAL] Exergy-Maximized
 
 from dataclasses import dataclass
 from unittest.mock import patch

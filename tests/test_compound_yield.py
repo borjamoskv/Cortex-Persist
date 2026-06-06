@@ -1,4 +1,4 @@
-"""Tests for the CHRONOS-1 Compound Yield System (Axiom Ω₁₁)."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

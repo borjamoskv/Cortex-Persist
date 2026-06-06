@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Tests for Level 3 Copilot Infrastructure - Context, Debounce, Cache, LLM Strategy.
 
 Validates the production-grade modules that support the CopilotAgent.

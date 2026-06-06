@@ -1,4 +1,4 @@
-"""Tests for SovereignLock - Ω₂ Lock-Free Concurrency."""
+# [C5-REAL] Exergy-Maximized
 
 import asyncio
 

@@ -1,4 +1,4 @@
-"""Tests for cortex.genesis.models - SystemSpec, ComponentSpec, GenesisResult."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

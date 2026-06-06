@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Unit tests for cortex.wealth.growth - GrowthEngine.
 
 No DB, no IO. Tests deduplication, sorting, and configurability.

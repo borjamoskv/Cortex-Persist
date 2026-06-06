@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Tests for P0 Decoupling (V6) - Thermodynamic Isolation.
 
 Verifies that facts are persistent and ledgerized even when enrichment

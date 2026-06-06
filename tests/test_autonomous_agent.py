@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Test suite for the Level 4 Autonomous Multi-Step Agent.
 
 Tests the complete lifecycle:

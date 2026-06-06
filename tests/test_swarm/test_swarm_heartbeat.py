@@ -1,4 +1,4 @@
-"""Tests for SwarmHeartbeat - includes thermodynamic ghost-eviction coverage."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Tests for CortexAutoSynthesisEngine.
 Validates the Ω-Phase: Forge, Siege, Evolve loops.

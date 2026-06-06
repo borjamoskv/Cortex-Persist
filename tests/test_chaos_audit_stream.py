@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Chaos Simulation Tests for Audit Stream L1.
 
 Axiom: Ω₅ (Antifragile by Default)

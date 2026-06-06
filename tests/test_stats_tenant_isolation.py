@@ -1,4 +1,4 @@
-"""Tests for stats() tenant isolation in CORTEX Engine."""
+# [C5-REAL] Exergy-Maximized
 
 import pytest
 

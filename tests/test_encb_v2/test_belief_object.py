@@ -1,4 +1,4 @@
-"""Tests for belief_object.py - BeliefObject, Evidence, version vectors."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

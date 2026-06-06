@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Tests for cortex.pipeline.orchestrator - Sovereign E2E Pipeline.
 
 C5-REAL audit remediation: pipeline/ coverage gap.

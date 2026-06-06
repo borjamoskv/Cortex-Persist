@@ -1,4 +1,4 @@
-"""Tests for KV Prefix Registry ensuring Tenant Isolation."""
+# [C5-REAL] Exergy-Maximized
 
 from cortex.extensions.swarm.kv_prefix_registry import KVPrefixRegistry
 

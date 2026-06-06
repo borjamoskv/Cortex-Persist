@@ -1,4 +1,4 @@
-"""Tests for cortex.genesis.templates - TemplateRegistry and renderers."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

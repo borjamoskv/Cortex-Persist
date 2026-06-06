@@ -1,4 +1,4 @@
-"""Tests for Context Cache Adapter - Phase 5."""
+# [C5-REAL] Exergy-Maximized
 
 import time
 

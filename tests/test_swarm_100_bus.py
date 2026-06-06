@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Tests for CORTEX-SWARM-100 architecture and AsyncSignalBus implementation.
 Validates O(1) parallel racing and collision-free P2P sync.

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Tests for CORTEX Vertical Scale - SQLite Pragma Tuning + GPU Embeddings.
 
 Validates:

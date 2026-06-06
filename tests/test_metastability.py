@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """CORTEX - Metastability Probing Test Suite.
 
 Tests the immune metastability probe (Axiom Ω₁₃).

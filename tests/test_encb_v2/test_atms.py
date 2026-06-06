@@ -1,4 +1,4 @@
-"""Tests for atms.py - ATMS-lite truth maintenance."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

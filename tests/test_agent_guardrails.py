@@ -1,4 +1,4 @@
-"""Tests for YAML Agent Interface and Session Guardrails (Phase 3)."""
+# [C5-REAL] Exergy-Maximized
 
 import tempfile
 

@@ -1,4 +1,4 @@
-"""Tests for verify_sortu.py - Tripartite mechanical verification."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Tests for ReflexionEngine - Self-Healing Dispatch Loop (L5).
 
 Validates the core reflexion cycle: execute → fail → reflect → rewrite → retry.

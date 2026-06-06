@@ -1,4 +1,4 @@
-"""Tests for AgentRegistry (Phase 3)."""
+# [C5-REAL] Exergy-Maximized
 
 import logging
 import os

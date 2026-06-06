@@ -1,4 +1,4 @@
-"""Tests for get_swarm_metrics cache and database query optimizations."""
+# [C5-REAL] Exergy-Maximized
 
 import time
 import pytest

@@ -1,4 +1,4 @@
-"""pytest configuration for cortex/agents/ tests."""
+# [C5-REAL] Exergy-Maximized
 
 
 def pytest_configure(config: object) -> None:

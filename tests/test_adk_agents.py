@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Tests for CORTEX ADK Agent Definitions.
 
 Tests agent creation, tool registration, and configuration

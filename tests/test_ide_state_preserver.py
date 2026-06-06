@@ -1,4 +1,4 @@
-"""Tests for IdeStatePreserver in cortex-core/persistence.py."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

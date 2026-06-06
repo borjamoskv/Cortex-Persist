@@ -1,4 +1,4 @@
-"""Tests para KeyboardEngine - inyección de teclas vía AppleScript."""
+# [C5-REAL] Exergy-Maximized
 
 from unittest.mock import AsyncMock, patch
 

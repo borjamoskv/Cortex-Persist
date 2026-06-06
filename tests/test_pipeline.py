@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Tests for cortex.memory.pipeline - NeuromorphicPipeline.
 
 Covers query assessment and store processing paths.

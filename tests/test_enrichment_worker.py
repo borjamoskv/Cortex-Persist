@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """
 Tests for cortex.enrichment.worker (EnrichmentWorker via LedgerStore + EnrichmentQueue)
 ────────────────────────────────────────────────────────────────────────────────────────

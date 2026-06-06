@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Unit tests for cortex.wealth.scanner - FundingRateScanner.
 
 Deterministic via seed injection. No network IO.

@@ -1,5 +1,4 @@
-# SPDX-License-Identifier: Apache-2.0
-"""Tests for Cadastral Perimeter Check and Axioma Ω₇ Zero-Prompting Evolution."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

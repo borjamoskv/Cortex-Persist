@@ -1,4 +1,4 @@
-"""Tests for merge.py - CRDT merge per belief type."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

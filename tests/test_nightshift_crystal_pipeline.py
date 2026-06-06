@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Tests for NightShift Crystal Pipeline - Autonomous Knowledge Generation.
 
 Tests the full DAG: KnowledgeRadar → PlannerNode → ExecutorNode →

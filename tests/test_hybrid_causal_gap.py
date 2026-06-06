@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Integration tests: causal gap re-ranking in hybrid_search_sync.
 
 Validates Ω₁₃ enforcement: search with CausalGap populates

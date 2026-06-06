@@ -1,4 +1,4 @@
-"""Tests for logop.py - Log-odds pooling."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

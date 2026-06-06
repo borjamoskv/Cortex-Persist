@@ -1,4 +1,4 @@
-"""CORTEX - Immune Arbiter + Falsifier Test Suite."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

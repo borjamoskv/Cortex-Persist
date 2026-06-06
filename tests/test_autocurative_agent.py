@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Tests for Level 5 Auto-Curative Agent.
 
 Validates the full self-healing loop:

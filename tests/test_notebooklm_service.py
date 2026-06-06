@@ -1,4 +1,4 @@
-"""Tests for CORTEX NotebookLM service and data helpers."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

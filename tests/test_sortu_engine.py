@@ -1,4 +1,4 @@
-"""Tests for sortu_engine.py - Full forge lifecycle and sweeps."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

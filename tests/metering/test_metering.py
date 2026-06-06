@@ -1,4 +1,4 @@
-"""Tests for cortex.metering module - tracker, quotas, and middleware."""
+# [C5-REAL] Exergy-Maximized
 
 import os
 import tempfile

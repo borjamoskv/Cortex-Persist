@@ -1,4 +1,4 @@
-"""Tests for the Cognitive Fingerprint Extractor."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 

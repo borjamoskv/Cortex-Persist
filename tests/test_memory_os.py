@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Tests for Memory OS modules (RFC-CORTEX-MEMORY-OS).
 
 Covers: Mem0Pipeline, MemoryOS, HiAgentTraceManager.

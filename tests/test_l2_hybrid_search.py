@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Tests for cortex.memory.l2_hybrid_search - RRF fusion, FTS sanitizer, result model.
 
 All tests exercise pure/static functions - no DB, no sqlite-vec required.

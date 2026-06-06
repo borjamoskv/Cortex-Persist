@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Tests for cortex-core/ki_promoter.py - KI Context Promoter.
 
 C5-REAL coverage for context detection, scoring, and promotion mechanisms.

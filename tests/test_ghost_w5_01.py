@@ -1,4 +1,4 @@
-"""E2E Multi-Backend Integration Test for CORTEX Trust-Ledger (Waves 5 & 6)."""
+# [C5-REAL] Exergy-Maximized
 
 import os
 import json

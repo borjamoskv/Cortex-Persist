@@ -1,3 +1,4 @@
+# [C5-REAL] Exergy-Maximized
 """Tests for SICA Autonomy & Persistence.
 
 Validates the 5 autonomy upgrades:

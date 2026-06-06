@@ -1,4 +1,4 @@
-"""Tests for algorithmic scaling: indices, FTS5 triggers, WAL checkpoint, pool."""
+# [C5-REAL] Exergy-Maximized
 
 from __future__ import annotations
 
