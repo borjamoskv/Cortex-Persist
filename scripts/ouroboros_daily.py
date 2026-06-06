@@ -171,7 +171,7 @@ async def main():
         import cortex_rs
 
         acc = cortex_rs.OuroborosStateAccumulator()
-        for i, item in enumerate(diagnoses):
+        for item in diagnoses:
             acc.append_state(item["file"], json.dumps({"entropy": item["entropy"]}))
         accumulator_root = acc.get_root()
     except Exception as e:
@@ -226,7 +226,7 @@ async def main():
         json.dump(report, f, indent=2, ensure_ascii=False)
 
     logger.info("Daily report written to %s", report_file)
-    print(
+    sys.stdout.write(
         json.dumps(
             {
                 "status": "COMPLETE",
@@ -236,7 +236,7 @@ async def main():
                 "metabolized": [m["file"] for m in metabolisms],
             },
             indent=2,
-        )
+        ) + "\n"
     )
 
 
