@@ -60,7 +60,8 @@ class BicameralConsole:
             import logging
 
             pass
-# Fail silently to avoid interrupting the agent loop
+
+    # Fail silently to avoid interrupting the agent loop
 
     def log_limbic(self, message: str, source: str = "LORE") -> None:
         """Logs emotional, historical, or allergy-driven reasoning."""

@@ -4,11 +4,12 @@ import json
 import subprocess
 from dotenv import load_dotenv
 
+
 def main():
     load_dotenv()
     smtp_user = os.getenv("P2P_SMTP_USER")
     smtp_pass = os.getenv("P2P_SMTP_PASSWORD")
-    
+
     if not smtp_user or not smtp_pass:
         print("ERROR: Faltan credenciales SMTP (P2P_SMTP_USER / P2P_SMTP_PASSWORD) en .env")
         return
@@ -27,7 +28,7 @@ Borja
 """
 
     leads = []
-    
+
     # Leer Firecrawl leads
     try:
         with open("firecrawl_leads.csv") as f:
@@ -49,21 +50,18 @@ Borja
         print(f"No se pudo leer github_leads: {e}")
 
     print(f"Iniciando broadcast a {len(leads)} leads cristalizados...")
-    
+
     p2p_script_path = "/Users/borjafernandezangulo/.gemini/config/skills/P2P-Comms-OMEGA/scripts/send_p2p_email.py"
-    
+
     for lead in leads:
         formatted_body = body.format(name=lead["name"])
-        payload = {
-            "to": lead["email"],
-            "subject": subject,
-            "body": formatted_body
-        }
-        
+        payload = {"to": lead["email"], "subject": subject, "body": formatted_body}
+
         # Ejecución determinista C5-REAL
         cmd = ["python3", p2p_script_path, json.dumps(payload)]
         result = subprocess.run(cmd, capture_output=True, text=True)
         print(f"C5-REAL: Enviado a {lead['email']} (Code: {result.returncode})")
+
 
 if __name__ == "__main__":
     main()

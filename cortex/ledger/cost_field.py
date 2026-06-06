@@ -1,6 +1,6 @@
 """Cost Field - Extractor de gradiente termodinámico.
 
-Convierte las trazas de ejecución en campos de energía que permiten 
+Convierte las trazas de ejecución en campos de energía que permiten
 penalizar o favorecer rutas (lineages) futuras según su costo histórico.
 """
 
@@ -22,21 +22,19 @@ class CostField:
     def __init__(self, ledger: ExecutionTraceLedger):
         self.ledger = ledger
 
-    async def compute_cost_gradient(self, lineage_hash: str, tenant_id: str = "default") -> dict[str, float]:
+    async def compute_cost_gradient(
+        self, lineage_hash: str, tenant_id: str = "default"
+    ) -> dict[str, float]:
         """Calcula la presión y varianza de costo para un linaje."""
         traces = await self.ledger.query_by_lineage(lineage_hash, tenant_id=tenant_id)
 
         if not traces:
-            return {
-                "cost_pressure": 0.0, 
-                "variance": 0.0,
-                "median_pressure": 0.0
-            }
+            return {"cost_pressure": 0.0, "variance": 0.0, "median_pressure": 0.0}
 
         costs = [t["cost"] for t in traces]
 
         return {
             "cost_pressure": mean(costs),
             "variance": (max(costs) - min(costs)) if costs else 0.0,
-            "median_pressure": median(costs)
+            "median_pressure": median(costs),
         }

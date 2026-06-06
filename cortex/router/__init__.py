@@ -11,14 +11,14 @@ from cortex.router.causal import CausalPolicyGradientRouter, CausalTrajectory
 from cortex.router.nash import NashCausalRouter, RoutingUtilities
 
 __all__ = [
-    "AgentRouter", 
-    "EpistemicArbitrator", 
-    "ExecutionContext", 
-    "ModelType", 
-    "EpistemicPolicyNetwork", 
+    "AgentRouter",
+    "EpistemicArbitrator",
+    "ExecutionContext",
+    "ModelType",
+    "EpistemicPolicyNetwork",
     "SignalVector",
     "CausalPolicyGradientRouter",
     "CausalTrajectory",
     "NashCausalRouter",
-    "RoutingUtilities"
+    "RoutingUtilities",
 ]

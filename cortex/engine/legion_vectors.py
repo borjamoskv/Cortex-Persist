@@ -227,7 +227,7 @@ class VaultCracker:
                 import logging
 
                 pass
-# Success = Tag caught it
+        # Success = Tag caught it
 
         except Exception as e:
             logger.debug("VaultCracker error: %s", e)

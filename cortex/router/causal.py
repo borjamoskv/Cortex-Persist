@@ -16,19 +16,23 @@ logger = logging.getLogger("cortex.router.causal")
 
 ModelType = Literal["gemini-3.5-flash", "gemini-3.1-pro"]
 
+
 @dataclass
 class CausalTrajectory:
     """A sequence of routing events mapping decisions to future KL divergence."""
+
     state: SignalVector
     action: ModelType
     kl_divergence_post: float
     hazard_rate_impact: float
+
 
 class CausalPolicyGradientRouter(EpistemicPolicyNetwork):
     """
     Learns 'which model reduces future KL divergence trajectories'.
     Implements a stability-optimal objective via policy gradient.
     """
+
     def __init__(self, temperature: float = 1.0, learning_rate: float = 0.01, gamma: float = 0.99):
         super().__init__(temperature)
         self.learning_rate = learning_rate
@@ -56,31 +60,35 @@ class CausalPolicyGradientRouter(EpistemicPolicyNetwork):
         if not self.trajectories:
             return
 
-        logger.info("[CAUSAL] Running policy gradient update over %d trajectories", len(self.trajectories))
-        
+        logger.info(
+            "[CAUSAL] Running policy gradient update over %d trajectories", len(self.trajectories)
+        )
+
         for t in self.trajectories:
             # 1. Compute Advantage
             advantage = self._compute_causal_advantage(t)
-            
+
             # 2. Forward pass to get probabilities
             probs = self.forward(t.state)
             action_idx = self.models.index(t.action)
-            
+
             # 3. Causal log-probability gradient mapping
             # d(log_pi)/d(logit_i) = 1 - pi_i (for chosen action)
             grad_log_pi = 1.0 - probs[action_idx]
-            
+
             # Policy Shift = α * A * grad
             policy_shift = self.learning_rate * advantage * grad_log_pi
-            
+
             # Apply gradient shift directly to the action's bias layer (Simplified for C5-REAL pure Python)
             self.b2[action_idx] += policy_shift
-            
+
             logger.debug(
-                "Trajectory KL=%.3f, Advantage=%.3f, Shift=%.4f", 
-                t.kl_divergence_post, advantage, policy_shift
+                "Trajectory KL=%.3f, Advantage=%.3f, Shift=%.4f",
+                t.kl_divergence_post,
+                advantage,
+                policy_shift,
             )
-            
+
         # Flush buffer
         self.trajectories.clear()
         logger.info("[CAUSAL] Policy parameters updated. Future KL trajectories optimized.")

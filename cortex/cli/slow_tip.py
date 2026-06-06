@@ -151,6 +151,8 @@ class SlowOpTipEmitter:
             import logging
 
             pass
+
+
 # Tips are non-critical; never break the CLI
 
 

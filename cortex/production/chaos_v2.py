@@ -2,6 +2,7 @@ import time
 import random
 import pathlib
 
+
 class ChaosLayerV2:
     def __init__(self, kernel, snapshots_dir):
         self.kernel = kernel
@@ -50,5 +51,5 @@ class ChaosLayerV2:
             "freeze_events": getattr(self.kernel, "freeze_count", 0),
             "recovery_time_ms": getattr(self.kernel, "last_recovery_time", 0),
             "split_brain_events": getattr(self.kernel, "lock_contentions", 0),
-            "state_divergence": getattr(self.kernel, "divergence_score", 0)
+            "state_divergence": getattr(self.kernel, "divergence_score", 0),
         }

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import logging
+
 logger = logging.getLogger("script")
 import os
 import sys
@@ -14,8 +15,9 @@ QUERIES = [
     "crypto agent language:python",
     "blockchain ai language:rust",
     "zero knowledge machine learning",
-    "zkml language:rust"
+    "zkml language:rust",
 ]
+
 
 def run_gh_api(endpoint):
     try:
@@ -25,9 +27,10 @@ def run_gh_api(endpoint):
         logger.info(f"Error calling GH API {endpoint}: {e.stderr}")
         return None
 
+
 def main():
     existing_emails = set()
-    
+
     # Cargar correos existentes
     for file in ["github_leads.csv", "firecrawl_leads.csv", "github_leads_v2.csv"]:
         if os.path.exists(file):
@@ -53,19 +56,19 @@ def main():
         for repo in search_results["items"]:
             repo_name = repo["full_name"]
             logger.info(f"  Scraping commits from: {repo_name}")
-            
+
             commits_endpoint = f"/repos/{repo_name}/commits?per_page=20"
             commits_results = run_gh_api(commits_endpoint)
-            
+
             if not commits_results or not isinstance(commits_results, list):
                 continue
-                
+
             for commit_data in commits_results:
                 commit = commit_data.get("commit", {})
                 author = commit.get("author", {})
                 email = author.get("email", "").strip().lower()
                 name = author.get("name", "Dev")
-                
+
                 if email and "noreply" not in email and email not in existing_emails:
                     existing_emails.add(email)
                     new_leads.append({"name": name, "email": email, "repo": repo_name})
@@ -78,10 +81,15 @@ def main():
             if not file_exists:
                 writer.writeheader()
             for lead in new_leads:
-                writer.writerow({"Name": lead["name"], "Email": lead["email"], "Repo": lead["repo"]})
-        logger.info(f"\nSuccess! Extracted {len(new_leads)} NEW leads. Saved to github_leads_v2.csv")
+                writer.writerow(
+                    {"Name": lead["name"], "Email": lead["email"], "Repo": lead["repo"]}
+                )
+        logger.info(
+            f"\nSuccess! Extracted {len(new_leads)} NEW leads. Saved to github_leads_v2.csv"
+        )
     else:
         logger.info("\nNo new leads found.")
+
 
 if __name__ == "__main__":
     main()

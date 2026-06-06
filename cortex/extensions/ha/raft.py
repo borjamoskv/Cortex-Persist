@@ -141,7 +141,7 @@ class RaftNode:
                     import logging
 
                     pass
-# Expected - do NOT re-raise during shutdown
+        # Expected - do NOT re-raise during shutdown
         self._election_task = None
         self._heartbeat_task = None
         NodeRegistry.deregister(self.node_id)

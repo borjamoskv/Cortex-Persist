@@ -283,7 +283,7 @@ async def compact_session(
         import logging
 
         pass
-# Already registered or unsupported
+    # Already registered or unsupported
 
     now = time.monotonic()
     half_life = 7 * 24 * 3600  # 7 days in seconds

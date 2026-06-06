@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 CORTEX Persist TDA Subsystem — Hodge Zero-Mode Transport Engine.
 Implements combinatorial Hodge Laplacian computations and zero-mode tracking
@@ -12,6 +11,7 @@ from __future__ import annotations
 import numpy as np
 from typing import Any, Final
 
+
 class HodgeZeroModeTransport:
     """
     Computes combinatorial Hodge Laplacians and tracks zero-modes
@@ -22,7 +22,9 @@ class HodgeZeroModeTransport:
         self.num_vertices = num_vertices
         self.vertices = list(range(num_vertices))
 
-    def compute_boundary_operators(self, simplices: dict[int, list[tuple[int, ...]]]) -> tuple[np.ndarray, np.ndarray]:
+    def compute_boundary_operators(
+        self, simplices: dict[int, list[tuple[int, ...]]]
+    ) -> tuple[np.ndarray, np.ndarray]:
         """
         Computes the boundary matrices d1 (edges -> vertices) and d2 (triangles -> edges).
         """
@@ -74,13 +76,13 @@ class HodgeZeroModeTransport:
         """
         if L1.size == 0:
             return np.zeros((0, 0))
-        
+
         eigenvalues, eigenvectors = np.linalg.eigh(L1)
         zero_indices = np.where(eigenvalues < tol)[0]
-        
+
         if len(zero_indices) == 0:
             return np.zeros((L1.shape[0], 0))
-            
+
         return eigenvectors[:, zero_indices]
 
     def compute_parallel_transport(self, basis_a: np.ndarray, basis_b: np.ndarray) -> np.ndarray:
@@ -106,6 +108,6 @@ class HodgeZeroModeTransport:
         """
         if holonomy.size == 0 or holonomy.shape[0] != holonomy.shape[1]:
             return 0.0
-        
+
         trace_val = np.abs(np.trace(holonomy))
         return float(trace_val / (1.0 + max(0.0, noise_entropy)))

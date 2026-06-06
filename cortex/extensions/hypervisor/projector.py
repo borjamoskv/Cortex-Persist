@@ -108,7 +108,8 @@ class EventProjector:
             import logging
 
             pass
-# Endocrine not installed - degrade gracefully
+
+    # Endocrine not installed - degrade gracefully
 
     async def _verify_songlines(self, project: str) -> None:
         """Trigger autopoiesis songline verification if available."""
@@ -121,4 +122,6 @@ class EventProjector:
             import logging
 
             pass
+
+
 # Autopoiesis not installed - degrade gracefully

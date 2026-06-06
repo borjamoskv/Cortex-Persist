@@ -20,17 +20,18 @@ from cortex.engine.bifurcation_engine import ExergyBifurcationEngine
 
 CORTEX_DB_PATH = str(Path("~/.cortex/cortex_engine.db").expanduser())
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Inicialización del ecosistema termodinámico
     Path(CORTEX_DB_PATH).parent.mkdir(parents=True, exist_ok=True)
-    
+
     ledger = ExecutionTraceLedger(CORTEX_DB_PATH)
     graph = CausalGraph(CORTEX_DB_PATH)
     rollback = CausalRollbackEngine(CORTEX_DB_PATH, ledger, None)
     scheduler = CausalScheduler(graph, rollback, ledger)
     bifurcation = ExergyBifurcationEngine(ledger, scheduler)
-    
+
     async with aiosqlite.connect(CORTEX_DB_PATH) as conn:
         await conn.execute("PRAGMA journal_mode=WAL;")
         await conn.execute("""
@@ -45,12 +46,14 @@ async def lifespan(app: FastAPI):
                 created_at      TEXT NOT NULL DEFAULT (datetime('now'))
             )
         """)
-        await conn.execute("CREATE TABLE IF NOT EXISTS thermodynamics_state (tenant_id TEXT PRIMARY KEY, entropy_budget REAL)")
+        await conn.execute(
+            "CREATE TABLE IF NOT EXISTS thermodynamics_state (tenant_id TEXT PRIMARY KEY, entropy_budget REAL)"
+        )
         await conn.commit()
 
     exergy_daemon = ExergyDaemon(bifurcation, scan_interval=60.0)
     entropy_daemon = EntropyDaemon(CORTEX_DB_PATH, scan_interval=3600.0)
-    
+
     exergy_daemon.start()
     entropy_daemon.start()
 
@@ -58,6 +61,7 @@ async def lifespan(app: FastAPI):
 
     await exergy_daemon.stop()
     await entropy_daemon.stop()
+
 
 app = FastAPI(
     title="CORTEX Persist API",

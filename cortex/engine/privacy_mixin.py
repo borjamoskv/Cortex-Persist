@@ -54,5 +54,5 @@ class PrivacyMixin(EngineMixinBase):
             import logging
 
             pass
-# Classifier not available - degrade gracefully
+        # Classifier not available - degrade gracefully
         return meta

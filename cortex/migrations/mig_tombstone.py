@@ -13,7 +13,7 @@ def _migration_020_tombstone(conn: sqlite3.Connection) -> None:
         import logging
 
         pass
-# Column already exists
+    # Column already exists
 
     try:
         conn.execute("ALTER TABLE facts ADD COLUMN tombstoned_at TEXT")
@@ -21,6 +21,6 @@ def _migration_020_tombstone(conn: sqlite3.Connection) -> None:
         import logging
 
         pass
-# Column already exists
+    # Column already exists
 
     conn.execute("CREATE INDEX IF NOT EXISTS idx_facts_tombstone ON facts(is_tombstoned)")

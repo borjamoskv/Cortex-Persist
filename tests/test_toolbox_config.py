@@ -60,7 +60,7 @@ def cortex_db() -> sqlite3.Connection:
             import logging
 
             pass
-# Virtual tables (vec0) won't work in vanilla SQLite
+    # Virtual tables (vec0) won't work in vanilla SQLite
     return conn
 
 

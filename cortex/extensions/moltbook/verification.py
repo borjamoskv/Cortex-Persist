@@ -48,7 +48,7 @@ def _extract_numbers_and_op(text: str) -> tuple[float | None, str | None, float 
     all_keys.sort(key=len, reverse=True)
     regex_parts = []
     for key in all_keys:
-        part = ''.join((f'{ch}+' for ch in key))
+        part = ''.join(f'{ch}+' for ch in key)
         regex_parts.append(part)
     pattern = re.compile('(' + '|'.join(regex_parts) + '|\\d+(?:\\.\\d+)?)')
 

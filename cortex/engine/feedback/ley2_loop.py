@@ -1,6 +1,6 @@
 """Ley 2 Loop: Expensive Errors First (Kernel de Re-weighting Termodinámico).
 
-Aplica la selección evolutiva re-inyectando bias en base al costo real 
+Aplica la selección evolutiva re-inyectando bias en base al costo real
 de los linajes de ejecución.
 """
 
@@ -17,6 +17,7 @@ logger = logging.getLogger("cortex.engine.feedback.ley2_loop")
 
 class DummyScheduler:
     """Mock scheduler para cristalizar el hook mientras se conecta al scheduler real."""
+
     def adjust_weight(self, lineage: str, delta: float) -> None:
         logger.debug(f"[Ley 2 Loop] Scheduler weight adjusted for {lineage}: delta={delta:.4f}")
 
@@ -42,13 +43,14 @@ class Ley2Loop:
             lineages = t.get("lineage", [])
             if not lineages:
                 continue
-            
+
             # Usar el root/último lineage del array como key
             key = lineages[-1] if isinstance(lineages, list) else str(lineages)
             pressure_map.setdefault(key, []).append(t["cost"])
 
         # 3. Calcular mediana y aplicar damping para cold-start y ataques
         import statistics
+
         weights = {}
         for k, v in pressure_map.items():
             cost_median = statistics.median(v)
@@ -57,5 +59,5 @@ class Ley2Loop:
         # 4. Re-inyectar bias en el scheduler
         for lineage, weight in weights.items():
             # Oscillation damping (0.85)
-            delta = -weight * 0.85  
+            delta = -weight * 0.85
             self.scheduler.adjust_weight(lineage=lineage, delta=delta)

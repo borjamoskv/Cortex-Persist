@@ -14,6 +14,7 @@ logging.basicConfig(level=logging.WARNING)
 
 DB_PATH = "/tmp/gcc_stress.db"
 
+
 async def init_db():
     if os.path.exists(DB_PATH):
         os.remove(DB_PATH)
@@ -30,10 +31,14 @@ async def init_db():
                 created_at      TEXT NOT NULL DEFAULT (datetime('now'))
             )
         """)
-        await conn.execute("CREATE TABLE IF NOT EXISTS thermodynamics_state (tenant_id TEXT PRIMARY KEY, entropy_budget REAL)")
+        await conn.execute(
+            "CREATE TABLE IF NOT EXISTS thermodynamics_state (tenant_id TEXT PRIMARY KEY, entropy_budget REAL)"
+        )
         await conn.commit()
 
+
 import uuid
+
 
 async def inject_noise(db_path: str, intensity: float):
     """
@@ -46,7 +51,7 @@ async def inject_noise(db_path: str, intensity: float):
             node_id = f"ghost_{uuid.uuid4().hex[:8]}"
             cost = random.uniform(0.1, 10.0)
             broken_parent = random.choice([True, False])
-            
+
             lineage = []
             if broken_parent:
                 # Simulamos dependencia de un nodo muerto para colapsar el CF
@@ -55,16 +60,17 @@ async def inject_noise(db_path: str, intensity: float):
                 # Ensure the dead parent exists as rolled_back
                 await conn.execute(
                     "INSERT OR IGNORE INTO execution_trace_ledger (id, tenant_id, origin, cost, lineage, outcome, rollback_possible) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                    (parent_id, "default", "noise", 1.0, "[]", "rolled_back", False)
+                    (parent_id, "default", "noise", 1.0, "[]", "rolled_back", False),
                 )
-                
+
             outcome = "crystallized" if random.random() > 0.2 else "rolled_back"
-            
+
             await conn.execute(
                 "INSERT INTO execution_trace_ledger (id, tenant_id, origin, cost, lineage, outcome, rollback_possible) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                (node_id, "default", "noise_injector", cost, json.dumps(lineage), outcome, True)
+                (node_id, "default", "noise_injector", cost, json.dumps(lineage), outcome, True),
             )
         await conn.commit()
+
 
 async def stress_tick(scheduler, db_path, iterations=1000):
     stats = {
@@ -73,7 +79,7 @@ async def stress_tick(scheduler, db_path, iterations=1000):
         "rollbacks": 0,
         "coherence_locks": 0,
         "collapse_events": 0,
-        "ticks": 0
+        "ticks": 0,
     }
 
     print("Iniciando tortura ontologica (CF / EB)...")
@@ -83,14 +89,14 @@ async def stress_tick(scheduler, db_path, iterations=1000):
 
         tick_result = await scheduler.tick_and_act(window_seconds=3600)
         state = tick_result["tick_state"]
-        
+
         mode = state["execution_mode"]
         cf = state["cf"]
         eb = state["eb"]
-        
+
         stats["CF"].append(cf)
         stats["EB"].append(eb)
-        
+
         if mode == "collapse_prevent":
             stats["rollbacks"] += len(tick_result.get("actions", []))
         elif mode == "coherence_lock":
@@ -105,28 +111,36 @@ async def stress_tick(scheduler, db_path, iterations=1000):
 
     return stats
 
+
 async def main():
     await init_db()
-    
+
     ledger = ExecutionTraceLedger(DB_PATH)
     graph = CausalGraph(DB_PATH)
-    rollback = CausalRollbackEngine(DB_PATH, ledger, None)  # cost_field no es critico para el MVP del test
+    rollback = CausalRollbackEngine(
+        DB_PATH, ledger, None
+    )  # cost_field no es critico para el MVP del test
     scheduler = CausalScheduler(graph, rollback, ledger)
-    
+
     report = await stress_tick(scheduler, DB_PATH, iterations=5000)
-    
-    print("\n" + "="*50)
+
+    print("\n" + "=" * 50)
     print("STRESS REPORT:")
     print(f"Ticks sobrevivientes : {report['ticks']}")
     print(f"Macro-Rollbacks      : {report['rollbacks']}")
     print(f"Coherence Locks      : {report['coherence_locks']}")
     print(f"Eventos de Colapso   : {report['collapse_events']}")
-    
+
     if report["CF"]:
-        print(f"CF final / max / min : {report['CF'][-1]:.3f} / {max(report['CF']):.3f} / {min(report['CF']):.3f}")
+        print(
+            f"CF final / max / min : {report['CF'][-1]:.3f} / {max(report['CF']):.3f} / {min(report['CF']):.3f}"
+        )
     if report["EB"]:
-        print(f"EB final / max / min : {report['EB'][-1]:.1f} / {max(report['EB']):.1f} / {min(report['EB']):.1f}")
-    print("="*50)
+        print(
+            f"EB final / max / min : {report['EB'][-1]:.1f} / {max(report['EB']):.1f} / {min(report['EB']):.1f}"
+        )
+    print("=" * 50)
+
 
 if __name__ == "__main__":
     asyncio.run(main())

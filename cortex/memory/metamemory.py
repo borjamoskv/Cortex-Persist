@@ -301,16 +301,12 @@ class MetamemoryMonitor:
 
     # ─── Epistemic Collapse Tracking (Metamemory) ─────────────────────────
 
-    def calculate_structural_weight(
-        self,
-        delta_h: float,
-        cost_of_falsification: float
-    ) -> float:
+    def calculate_structural_weight(self, delta_h: float, cost_of_falsification: float) -> float:
         """Calculate W_h (Structural Weight) for hypothesis falsification.
-        
+
         Uses the Collapse Benefit Ratio (CBR):
             W_h = \\Delta H_{collapsed} / C_f
-            
+
         Where \\Delta H_{collapsed} is the entropy reduction from falsifying the hypothesis,
         and C_f is the energy cost of the falsification process.
         """

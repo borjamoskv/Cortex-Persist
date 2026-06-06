@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 SNAPSHOT_DIR = "cortex_data/snapshots"
 WAL_DIR = "cortex_data/wal"
 
+
 @dataclass
 class CortexState:
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
@@ -22,6 +23,7 @@ class CortexState:
     drift: float = 0.0
     cost: float = 0.0
     tick_count: int = 0
+
 
 class SnapshotManager:
     def __init__(self):
@@ -38,9 +40,10 @@ class SnapshotManager:
         files = sorted(glob.glob(os.path.join(SNAPSHOT_DIR, "snapshot_*.json")))
         if not files:
             return None
-        with open(files[-1], "r") as f:
+        with open(files[-1]) as f:
             data = json.load(f)
         return CortexState(**data)
+
 
 class WALManager:
     def __init__(self):
@@ -62,22 +65,25 @@ class WALManager:
     def replay_from(self, snapshot: CortexState | None) -> CortexState:
         start_tick = snapshot.tick_count if snapshot else -1
         files = sorted(glob.glob(os.path.join(WAL_DIR, "*.log")))
-        
+
         current_state = snapshot or CortexState()
         replay_count = 0
-        
+
         for fpath in files:
             basename = os.path.basename(fpath)
             tick = int(basename.split(".")[0])
             if tick > start_tick:
-                with open(fpath, "r") as f:
+                with open(fpath) as f:
                     data = json.load(f)
                 current_state = CortexState(**data)
                 replay_count += 1
-                
+
         if replay_count > 0:
-            logger.info(f"[WAL] Replayed {replay_count} frames from WAL. Recovered to tick {current_state.tick_count}.")
+            logger.info(
+                f"[WAL] Replayed {replay_count} frames from WAL. Recovered to tick {current_state.tick_count}."
+            )
         return current_state
+
 
 class RecoveryManager:
     def __init__(self, snapshot_mgr: SnapshotManager, wal_mgr: WALManager):
@@ -86,17 +92,18 @@ class RecoveryManager:
 
     def recover(self, error: Exception) -> CortexState:
         logger.error(f"[RECOVERY] Initiating crash-consistent recovery due to: {error}")
-        
+
         latest_snap = self.snapshot_mgr.get_latest()
         if latest_snap:
             logger.info(f"[RECOVERY] Loaded base snapshot at tick {latest_snap.tick_count}.")
         else:
             logger.critical("[RECOVERY] No snapshots available! Generating baseline state.")
             latest_snap = CortexState()
-            
+
         # Replay WAL on top of snapshot
         recovered_state = self.wal_mgr.replay_from(latest_snap)
         return recovered_state
+
 
 class CortexRuntime:
     def __init__(self):
@@ -117,13 +124,13 @@ class CortexRuntime:
 
     def execute_cycle(self, state: CortexState) -> CortexState:
         start_time = time.time()
-        
+
         # Simulate execution physics
         state.tick_count += 1
         state.entropy += 0.05
         state.exergy -= 0.005
         state.cost += 0.02
-        
+
         # Simulate a random failure for testing auto-recovery if entropy gets too high
         if state.entropy > 1.0:
             raise RuntimeError("Entropy Runaway Detected")
@@ -134,7 +141,7 @@ class CortexRuntime:
     def persist(self, state: CortexState):
         # 1. Always append to WAL (Write-Ahead Log)
         self.wal_mgr.write_event(state)
-        
+
         # 2. Snapshot every 10 ticks
         if state.tick_count % 10 == 0:
             snap_path = self.snapshot_mgr.create(state)
@@ -143,30 +150,36 @@ class CortexRuntime:
             self.wal_mgr.truncate_before(state.tick_count)
 
     def emit_metrics(self):
-        self.exporter.update_metrics({
-            "exergy": self.state.exergy,
-            "entropy": self.state.entropy,
-            "cost": self.state.cost,
-            "drift": self.state.drift
-        })
+        self.exporter.update_metrics(
+            {
+                "exergy": self.state.exergy,
+                "entropy": self.state.entropy,
+                "cost": self.state.cost,
+                "drift": self.state.drift,
+            }
+        )
 
     def run_forever(self, tick_delay: float = 1.0):
         self.load_state()
         self.running = True
-        logger.info(f"[RUNTIME] Cortex Kernel Started at Tick {self.state.tick_count}. Awaiting physical workload.")
-        
+        logger.info(
+            f"[RUNTIME] Cortex Kernel Started at Tick {self.state.tick_count}. Awaiting physical workload."
+        )
+
         while self.running:
             try:
                 self.state = self.execute_cycle(self.state)
                 self.persist(self.state)
                 self.emit_metrics()
-                logger.info(f"[TICK {self.state.tick_count}] Exergy: {self.state.exergy:.3f} | Entropy: {self.state.entropy:.3f}")
+                logger.info(
+                    f"[TICK {self.state.tick_count}] Exergy: {self.state.exergy:.3f} | Entropy: {self.state.entropy:.3f}"
+                )
                 time.sleep(tick_delay)
-                
+
             except Exception as e:
                 # In a normal crash, process dies. Here we catch internally to simulate rapid self-healing supervisor.
                 self.state = self.recovery_mgr.recover(e)
                 # Dampen entropy to break crash loop
                 self.state.entropy *= 0.5
-                self.persist(self.state) # Force WAL entry of the dampened state
+                self.persist(self.state)  # Force WAL entry of the dampened state
                 time.sleep(tick_delay)

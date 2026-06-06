@@ -535,7 +535,8 @@ class ReflexionEngine:
             import logging
 
             pass
-# Endocrine system not available
+
+    # Endocrine system not available
 
     def get_session_stats(self) -> dict[str, Any]:
         """Return session-level metrics for the meta-level monitor."""

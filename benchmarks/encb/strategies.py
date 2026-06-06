@@ -6,6 +6,7 @@ Four strategies implementing a common interface:
     S2 - CRDT-only: convergence without reliability adaptation
     S3 - Cortex: CRDT + LogOP + ATMS-lite + reliability adaptation
 """
+
 from __future__ import annotations
 import statistics
 from collections import defaultdict
@@ -14,14 +15,22 @@ from typing import Any
 from benchmarks.encb.agents import NodeProfile, update_reliability
 from benchmarks.encb.atms import ATMSLite
 from benchmarks.encb.belief_object import BeliefType
-from benchmarks.encb.logop import robust_scalar_aggregate, scored_set_aggregate, weighted_logop_binary, weighted_logop_categorical
+from benchmarks.encb.logop import (
+    robust_scalar_aggregate,
+    scored_set_aggregate,
+    weighted_logop_binary,
+    weighted_logop_categorical,
+)
+
 
 class StrategyID(str, Enum):
     """The four resolution strategies."""
-    LWW = 'S0_lww'
-    RAG = 'S1_rag'
-    CRDT_ONLY = 'S2_crdt_only'
-    CORTEX = 'S3_cortex'
+
+    LWW = "S0_lww"
+    RAG = "S1_rag"
+    CRDT_ONLY = "S2_crdt_only"
+    CORTEX = "S3_cortex"
+
 
 class PropState:
     """Runtime state for a single proposition during simulation.
@@ -29,9 +38,26 @@ class PropState:
     Tracks the current resolved value, confidence, support history,
     and conflict mass.
     """
-    __slots__ = ('belief_type', 'categories', 'confidence', 'conflict_mass', 'current_value', 'key', 'set_universe', 'truth')
 
-    def __init__(self, key: str, belief_type: BeliefType, truth: Any, categories: list[Any] | None=None, set_universe: set | None=None) -> None:
+    __slots__ = (
+        "belief_type",
+        "categories",
+        "confidence",
+        "conflict_mass",
+        "current_value",
+        "key",
+        "set_universe",
+        "truth",
+    )
+
+    def __init__(
+        self,
+        key: str,
+        belief_type: BeliefType,
+        truth: Any,
+        categories: list[Any] | None = None,
+        set_universe: set | None = None,
+    ) -> None:
         self.key = key
         self.belief_type = belief_type
         self.truth = truth
@@ -56,7 +82,10 @@ class PropState:
         if self.belief_type == BeliefType.SET:
             return set(self.current_value) == set(self.truth)
         return False
+
+
 Observation = tuple[NodeProfile, Any, float]
+
 
 def resolve_lww(state: PropState, observations: list[Observation], round_idx: int) -> None:
     """S0 - Last observation wins. No intelligence."""
@@ -66,6 +95,7 @@ def resolve_lww(state: PropState, observations: list[Observation], round_idx: in
     state.current_value = value
     state.confidence = conf
     state.conflict_mass = _compute_conflict_mass(state, observations)
+
 
 def resolve_rag(state: PropState, observations: list[Observation], round_idx: int) -> None:
     """S1 - Majority vote weighted by confidence. Simulates RAG retrieval."""
@@ -97,6 +127,7 @@ def resolve_rag(state: PropState, observations: list[Observation], round_idx: in
         state.current_value = {e for e, c in elem_count.items() if c >= threshold}
         state.confidence = 0.6
     state.conflict_mass = _compute_conflict_mass(state, observations)
+
 
 def resolve_crdt_only(state: PropState, observations: list[Observation], round_idx: int) -> None:
     """S2 - CRDT convergence without reliability adaptation.
@@ -138,7 +169,17 @@ def resolve_crdt_only(state: PropState, observations: list[Observation], round_i
         state.confidence = 0.6
     state.conflict_mass = _compute_conflict_mass(state, observations)
 
-def resolve_cortex(state: PropState, observations: list[Observation], round_idx: int, atms: ATMSLite | None=None, use_reliability: bool=True, use_atms: bool=True, use_freshness: bool=True, warmup_rounds: int=5) -> None:
+
+def resolve_cortex(
+    state: PropState,
+    observations: list[Observation],
+    round_idx: int,
+    atms: ATMSLite | None = None,
+    use_reliability: bool = True,
+    use_atms: bool = True,
+    use_freshness: bool = True,
+    warmup_rounds: int = 5,
+) -> None:
     """S3 - CRDT merge + LogOP + ATMS-lite + reliability adaptation.
 
     Three-layer architecture:
@@ -160,7 +201,10 @@ def resolve_cortex(state: PropState, observations: list[Observation], round_idx:
                 votes[val] += conf
             fallback_val = max(votes, key=lambda k: votes[k])
             fallback_conf = votes[fallback_val] / (sum(votes.values()) + 1e-09)
-        obs_tuples = [(val, conf, node.reliability if use_reliability else 0.5) for node, val, conf in observations]
+        obs_tuples = [
+            (val, conf, node.reliability if use_reliability else 0.5)
+            for node, val, conf in observations
+        ]
         logop_val, logop_prob = weighted_logop_binary(obs_tuples)
         if alpha >= 1.0:
             state.current_value = logop_val
@@ -178,7 +222,10 @@ def resolve_cortex(state: PropState, observations: list[Observation], round_idx:
                 tallies[val] += conf
             fallback_val = max(tallies, key=lambda k: tallies[k])
             fallback_conf = tallies[fallback_val] / (sum(tallies.values()) + 1e-09)
-        obs_tuples = [(val, conf, node.reliability if use_reliability else 0.5) for node, val, conf in observations]
+        obs_tuples = [
+            (val, conf, node.reliability if use_reliability else 0.5)
+            for node, val, conf in observations
+        ]
         logop_val, logop_conf = weighted_logop_categorical(obs_tuples, state.categories)
         if alpha >= 1.0:
             state.current_value = logop_val
@@ -190,12 +237,23 @@ def resolve_cortex(state: PropState, observations: list[Observation], round_idx:
             state.current_value = fallback_val
             state.confidence = (1.0 - alpha) * fallback_conf + alpha * logop_conf
     elif state.belief_type == BeliefType.SCALAR:
-        obs_tuples = [(val, conf, node.reliability if use_reliability else 0.5) for node, val, conf in observations]
+        obs_tuples = [
+            (val, conf, node.reliability if use_reliability else 0.5)
+            for node, val, conf in observations
+        ]
         resolved_val, resolved_conf = robust_scalar_aggregate(obs_tuples)
         state.current_value = resolved_val
         state.confidence = resolved_conf
     elif state.belief_type == BeliefType.SET:
-        obs_tuples = [(val if isinstance(val, set) else set(), conf, node.reliability if use_reliability else 0.5, round_idx) for node, val, conf in observations]
+        obs_tuples = [
+            (
+                val if isinstance(val, set) else set(),
+                conf,
+                node.reliability if use_reliability else 0.5,
+                round_idx,
+            )
+            for node, val, conf in observations
+        ]
         resolved_val, resolved_conf = scored_set_aggregate(obs_tuples)
         state.current_value = resolved_val
         state.confidence = resolved_conf
@@ -204,20 +262,28 @@ def resolve_cortex(state: PropState, observations: list[Observation], round_idx:
             was_correct = _values_match(state.belief_type, val, state.current_value)
             node.reliability = update_reliability(node.reliability, was_correct, lr=0.15)
     if use_atms and atms is not None:
-        belief_id = f'{state.key}:{round_idx}'
-        assumption_ids = frozenset((f'{node.node_id}:{round_idx}' for node, _, _ in observations))
+        belief_id = f"{state.key}:{round_idx}"
+        assumption_ids = frozenset((f"{node.node_id}:{round_idx}" for node, _, _ in observations))
         atms.add_justification(belief_id, assumption_ids)
         for node, _, _ in observations:
             if use_reliability and node.reliability < 0.15:
-                atms.add_nogood(frozenset({f'{node.node_id}:{round_idx}'}))
+                atms.add_nogood(frozenset({f"{node.node_id}:{round_idx}"}))
     state.conflict_mass = _compute_conflict_mass(state, observations)
+
 
 def _compute_conflict_mass(state: PropState, observations: list[Observation]) -> float:
     """Fraction of observations that disagree with the resolved value."""
     if not observations:
         return 0.0
-    disagreements = sum((conf for _, val, conf in observations if not _values_match(state.belief_type, val, state.current_value)))
+    disagreements = sum(
+        (
+            conf
+            for _, val, conf in observations
+            if not _values_match(state.belief_type, val, state.current_value)
+        )
+    )
     return disagreements / max(1, len(observations))
+
 
 def _values_match(bt: BeliefType, a: Any, b: Any) -> bool:
     """Check if two values match for a given belief type."""
@@ -234,4 +300,11 @@ def _values_match(bt: BeliefType, a: Any, b: Any) -> bool:
     if bt == BeliefType.SET:
         return set(a) == set(b)
     return a == b
-STRATEGY_FN = {StrategyID.LWW: resolve_lww, StrategyID.RAG: resolve_rag, StrategyID.CRDT_ONLY: resolve_crdt_only, StrategyID.CORTEX: resolve_cortex}
+
+
+STRATEGY_FN = {
+    StrategyID.LWW: resolve_lww,
+    StrategyID.RAG: resolve_rag,
+    StrategyID.CRDT_ONLY: resolve_crdt_only,
+    StrategyID.CORTEX: resolve_cortex,
+}

@@ -58,7 +58,7 @@ class ExecutionTraceLedger:
             VALUES (?, ?, ?, ?, ?, ?, ?)
         """
         lineage_json = json.dumps(lineage)
-        
+
         try:
             async with aiosqlite.connect(self.db_path) as conn:
                 await conn.execute(
@@ -74,11 +74,14 @@ class ExecutionTraceLedger:
                     ),
                 )
                 await conn.commit()
-            logger.debug("Recorded execution trace %s (cost=%.2f, outcome=%s)", trace_id, cost, outcome)
-            
+            logger.debug(
+                "Recorded execution trace %s (cost=%.2f, outcome=%s)", trace_id, cost, outcome
+            )
+
             # Cierre termodinámico (Ley 2)
             if self._feedback_kernel:
                 import asyncio
+
                 # Trigger thermodynamic feedback loop en background fire-and-forget
                 asyncio.create_task(self._feedback_kernel.apply_feedback(tenant_id=tenant_id))
 
@@ -95,7 +98,7 @@ class ExecutionTraceLedger:
             row = await cursor.fetchone()
             if not row:
                 return None
-            
+
             return {
                 "id": row["id"],
                 "tenant_id": row["tenant_id"],
@@ -107,26 +110,33 @@ class ExecutionTraceLedger:
                 "created_at": row["created_at"],
             }
 
-    async def get_recent(self, limit: int = 500, tenant_id: str = "default") -> list[dict[str, Any]]:
+    async def get_recent(
+        self, limit: int = 500, tenant_id: str = "default"
+    ) -> list[dict[str, Any]]:
         """Retrieves recent execution traces for feedback mapping."""
         query = "SELECT * FROM execution_trace_ledger WHERE tenant_id = ? ORDER BY id DESC LIMIT ?"
         async with aiosqlite.connect(self.db_path) as conn:
             conn.row_factory = aiosqlite.Row
             cursor = await conn.execute(query, (tenant_id, limit))
             rows = await cursor.fetchall()
-            
-            return [{
-                "id": r["id"],
-                "tenant_id": r["tenant_id"],
-                "origin": r["origin"],
-                "cost": r["cost"],
-                "lineage": json.loads(r["lineage"]),
-                "outcome": r["outcome"],
-                "rollback_possible": bool(r["rollback_possible"]),
-                "created_at": r["created_at"],
-            } for r in rows]
 
-    async def query_by_lineage(self, lineage_hash: str, tenant_id: str = "default") -> list[dict[str, Any]]:
+            return [
+                {
+                    "id": r["id"],
+                    "tenant_id": r["tenant_id"],
+                    "origin": r["origin"],
+                    "cost": r["cost"],
+                    "lineage": json.loads(r["lineage"]),
+                    "outcome": r["outcome"],
+                    "rollback_possible": bool(r["rollback_possible"]),
+                    "created_at": r["created_at"],
+                }
+                for r in rows
+            ]
+
+    async def query_by_lineage(
+        self, lineage_hash: str, tenant_id: str = "default"
+    ) -> list[dict[str, Any]]:
         """Busca todas las trazas que compartan un hash de linaje."""
         # Se busca el lineage_hash dentro del array JSON
         query = "SELECT * FROM execution_trace_ledger WHERE tenant_id = ? AND lineage LIKE ?"
@@ -134,15 +144,17 @@ class ExecutionTraceLedger:
             conn.row_factory = aiosqlite.Row
             cursor = await conn.execute(query, (tenant_id, f"%{lineage_hash}%"))
             rows = await cursor.fetchall()
-            
-            return [{
-                "id": r["id"],
-                "tenant_id": r["tenant_id"],
-                "origin": r["origin"],
-                "cost": r["cost"],
-                "lineage": json.loads(r["lineage"]),
-                "outcome": r["outcome"],
-                "rollback_possible": bool(r["rollback_possible"]),
-                "created_at": r["created_at"],
-            } for r in rows]
 
+            return [
+                {
+                    "id": r["id"],
+                    "tenant_id": r["tenant_id"],
+                    "origin": r["origin"],
+                    "cost": r["cost"],
+                    "lineage": json.loads(r["lineage"]),
+                    "outcome": r["outcome"],
+                    "rollback_possible": bool(r["rollback_possible"]),
+                    "created_at": r["created_at"],
+                }
+                for r in rows
+            ]
