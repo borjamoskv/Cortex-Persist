@@ -96,7 +96,7 @@ class CausalScheduler:
         # 1. Entropy Exhaustion (Chaos breakdown)
         if eb < 0.0:
             mode = "chaotic_irreversible"
-            candidates = []  # Se prohíben operaciones defensivas, todo arde
+            candidates = []  # Se prohíben operaciones defensivas, el sistema entero arde
         # 2. Coherence collapse (Fragmentación de realidad)
         elif cf < self.cf_threshold:
             mode = "coherence_lock"

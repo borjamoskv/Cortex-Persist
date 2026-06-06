@@ -38,7 +38,7 @@ class SMTConstraintGuard:
 
     @property
     def backend(self) -> str:
-        """TODO: Document backend"""
+        """Get the backend implementation name."""
         return "z3-smt" if self._z3_available else "arithmetic-fallback"
 
     def validate_fact(self, fact: dict[str, Any]) -> bool:

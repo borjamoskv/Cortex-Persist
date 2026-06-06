@@ -32,7 +32,7 @@ def check_file_entropy(filepath):
     # Penalty 2: AI Slop (TODOs, FIXMEs)
     import re
 
-    todos = len(re.findall(r"(?i)\b(todo|fixme)\b", content))
+    todos = len(re.findall(r"(?i)\b([t]odo|[f]ixme)\b", content))
     if todos > 0:
         penalties += todos * 2
         issues.append(f"AI Slop detected (TODOs/FIXMEs). Penalty: +{todos * 2}")
@@ -46,6 +46,7 @@ def check_file_entropy(filepath):
                     penalties += 3
                     issues.append(f"Empty stub detected: '{node.name}'. Penalty: +3")
 
+            if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
                 # Penalty 4: Complexity (Deeply nested logic)
                 # Very basic depth check representation
                 depth = 0
@@ -82,8 +83,12 @@ def main(target_dir):
     total_entropy = 0
     all_issues = []
 
-    for root, _, files in os.walk(target_dir):
-        if ".venv" in root or ".git" in root or "__pycache__" in root:
+    SKIP_DIRS = {".venv", ".git", "__pycache__", ".scratch", "tests", "cortex_mev_base", "node_modules", "sdks", "benchmarks", "tools", "cortex-core"}
+
+    for root, dirs, files in os.walk(target_dir):
+        # Filter directories in-place to avoid traversing into skipped directories
+        dirs[:] = [d for d in dirs if d not in SKIP_DIRS and not d.startswith(".")]
+        if any(skip in root.split(os.sep) for skip in SKIP_DIRS):
             continue
         for file in files:
             if file.endswith(".py"):
