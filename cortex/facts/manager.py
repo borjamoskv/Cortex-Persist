@@ -156,7 +156,7 @@ class FactManager:
                 return fact_id
 
             # V8 Semantic Deduplication
-            if hasattr(self.engine, "embeddings") and self.engine.embeddings:
+            if fact_type not in ("mafia_node", "telemetry_batch") and hasattr(self.engine, "embeddings") and self.engine.embeddings:
                 # 1. Generate text embedding
                 if hasattr(self.engine.embeddings, "embed_text"):
                     vec = await self.engine.embeddings.embed_text(content)

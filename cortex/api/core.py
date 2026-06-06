@@ -253,6 +253,7 @@ async def memory_redirect(path: str, request: Request):
     return RedirectResponse(url=new_url, status_code=307)
 
 
+@app.get("/api/v1/health", tags=["health"], include_in_schema=False)
 @app.get("/health", tags=["health"])
 async def health_check(request: Request) -> dict:
     lang = request.headers.get("Accept-Language", DEFAULT_LANGUAGE)

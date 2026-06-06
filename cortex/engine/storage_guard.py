@@ -58,6 +58,8 @@ _ALLOWED_FACT_TYPES: frozenset[str] = frozenset(
         "test",
         "system_health",
         "discovery",
+        "mafia_node",
+        "telemetry_batch",
     }
 )
 
@@ -78,7 +80,7 @@ _MAX_PROJECT_LENGTH = 256
 _MAX_CONTENT_LENGTH = 500_000
 _MAX_TAGS = 50
 _MAX_TAG_LENGTH = 128
-_MIN_CONTENT_LENGTH = 10
+_MIN_CONTENT_LENGTH = 3
 
 # ─── Poisoning Patterns (shared with MCPGuard) ────────────────────
 
