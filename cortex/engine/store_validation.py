@@ -78,6 +78,26 @@ async def _apply_semantic_dedup(
     return None
 
 
+async def _enforce_ctre(meta: dict | None) -> None:
+    """Enforce Commit-Time Reconciliation Engine (CTRE) logic for UI_ACTION."""
+    if meta and meta.get("intent") == "UI_ACTION" and "expected_ui_hash" in meta:
+        from cortex.guards.ctre_guard import CTREGuard
+        
+        expected_hash = meta["expected_ui_hash"]
+        current_hash = meta.get("current_ui_hash", expected_hash)
+        target_x = meta.get("ui_target_x", 0.0)
+        target_y = meta.get("ui_target_y", 0.0)
+        
+        success, epsilon = CTREGuard.validate_commit(
+            expected_hash=expected_hash,
+            current_hash=current_hash,
+            target_x=target_x,
+            target_y=target_y
+        )
+        if not success:
+            logger.error(f"🛑 [CTRE] SAGA ABORT: UI TOCTOU Collision detected. Epsilon: {epsilon}µs")
+            raise RuntimeError("CTRE SAGA ABORT: UI TOCTOU Collision.")
+
 async def run_store_validation_logic(
     mixin_instance: Any, conn: Any, project: str, content: str, tenant_id: str,
     fact_type: str, tags: list[str] | None, confidence: str, source: str | None,
@@ -86,6 +106,7 @@ async def run_store_validation_logic(
     """Orchestrates the multi-stage validation pipeline for memory storage."""
     _validate_dependencies()
     await _check_byzantine_auth(mixin_instance, meta, source, tenant_id)
+    await _enforce_ctre(meta)
 
     cls = mixin_instance.__class__
     skip_thermo = os.getenv("CORTEX_SKIP_EXERGY_VALIDATION") == "1"
@@ -131,6 +152,8 @@ async def run_store_validation_logic(
         bridge_result=bridge_result,
     )
 
+    await _enforce_cortex_taint(conn, content, fact_type, meta)
+
     return None, meta, content, fact_type
 
 def _validate_dependencies():
@@ -146,8 +169,8 @@ def _validate_dependencies():
         raise RuntimeError(f"FAIL-CLOSED: dependencies unavailable: {exc}") from exc
 
 def _apply_exergy(cls: Any, meta: dict[str, Any] | None, fact_type: str, skip_thermo: bool):
-    from cortex.shannon.exergy import ActionRisk, ExergyInput, calculate_exergy, enforce_exergy
     from cortex.guards.thermodynamic import AgentMode, should_enter_decorative_mode
+    from cortex.shannon.exergy import ActionRisk, ExergyInput, calculate_exergy, enforce_exergy
     _has_entropy = meta is not None and ("_prior_entropy" in meta or "_posterior_entropy" in meta)
     if not skip_thermo and meta is not None and _has_entropy:
         ex_input = ExergyInput(
@@ -177,6 +200,20 @@ def _sanitize_engram(content: str, fact_type: str, source: str | None, project: 
     m = pure.metadata
     m["_membrane_log"] = membrane_log.model_dump() if hasattr(membrane_log, "model_dump") else membrane_log.dict()
     return pure.content, m
+
+async def _enforce_cortex_taint(
+    conn: Any,
+    content: str,
+    fact_type: str,
+    meta: dict[str, Any] | None,
+) -> None:
+    """Enforce attribution before ledger or persistence mutation begins."""
+    if fact_type in ("telemetry_batch", "mafia_node"):
+        return
+    from cortex.engine.causal.taint_engine import enforce_taint_check
+
+    token = meta.get("cortex_taint") if meta else None
+    await enforce_taint_check(conn, token, content)
 
 async def _apply_bridge_guard(conn, content, project, tenant_id, fact_type):
     from cortex.engine.bridge_guard import BridgeGuard
