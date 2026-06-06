@@ -19,10 +19,12 @@ from typing import Any
 
 try:
     import redis
+    from redis.exceptions import RedisError
 
     HAS_REDIS = True
 except ImportError:
     redis = None  # type: ignore[assignment]
+    RedisError = Exception  # type: ignore[assignment,misc]
     HAS_REDIS = False
 
 logger = logging.getLogger("cortex.cache.redis_l1")
@@ -67,9 +69,8 @@ class RedisL1Cache:
                     socket_timeout=1.0,
                     decode_responses=False,
                 )
-                self._client.ping()
-                logger.info("Redis L1 cache connected: %s:%d/%d", host, port, db)
-            except (OSError, ConnectionError, TimeoutError) as exc:
+                logger.info("Redis L1 cache instance created: %s:%d/%d", host, port, db)
+            except (OSError, ConnectionError, TimeoutError, RedisError) as exc:
                 logger.warning("Redis L1 unavailable (%s), operating in pass-through mode", exc)
                 self._client = None
 
@@ -102,7 +103,7 @@ class RedisL1Cache:
             else:
                 self._misses += 1
             return val
-        except (OSError, ConnectionError, TimeoutError):
+        except (OSError, ConnectionError, TimeoutError, RedisError):
             self._misses += 1
             return None
 
@@ -112,7 +113,7 @@ class RedisL1Cache:
             return False
         try:
             return bool(self._client.setex(self._key(key), ttl or self._default_ttl, value))
-        except (OSError, ConnectionError, TimeoutError):
+        except (OSError, ConnectionError, TimeoutError, RedisError):
             return False
 
     def get_or_compute(
@@ -135,7 +136,7 @@ class RedisL1Cache:
             return False
         try:
             return bool(self._client.delete(self._key(key)))
-        except (OSError, ConnectionError, TimeoutError):
+        except (OSError, ConnectionError, TimeoutError, RedisError):
             return False
 
     def flush_namespace(self, prefix: str) -> int:
@@ -148,7 +149,7 @@ class RedisL1Cache:
             if keys:
                 return self._client.delete(*keys)
             return 0
-        except (OSError, ConnectionError, TimeoutError):
+        except (OSError, ConnectionError, TimeoutError, RedisError):
             return 0
 
     def health_check(self) -> dict[str, Any]:
@@ -171,7 +172,7 @@ class RedisL1Cache:
             info = self._client.info("memory")
             result["used_memory_bytes"] = info.get("used_memory", 0)
             result["used_memory_human"] = info.get("used_memory_human", "N/A")
-        except (OSError, ConnectionError, TimeoutError) as exc:
+        except (OSError, ConnectionError, TimeoutError, RedisError) as exc:
             result["error"] = str(exc)
         return result
 
