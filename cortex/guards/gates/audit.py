@@ -37,9 +37,9 @@ async def check_gate_11_cobbler() -> GateResult:
                     and node.func.id == "print"
                 ):
                     v.append(f"print-call:{node.lineno}")
-        except SyntaxError:
-
-            pass
+        except Exception as exc:
+            import logging
+            logging.warning("Suppressed exception: %s", exc)
         return v
 
     async def _audit_all() -> list[str]:

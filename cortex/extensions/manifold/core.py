@@ -227,6 +227,5 @@ class TesseractManifold:
                 capture_output=True,
                 timeout=5,
             )
-        except (subprocess.SubprocessError, OSError):
-
-            pass
+        except Exception as exc:
+            logger.warning("Suppressed exception: %s", exc)

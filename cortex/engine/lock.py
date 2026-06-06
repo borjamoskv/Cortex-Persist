@@ -207,9 +207,8 @@ class SovereignLock:
                 if ":" in action_val:
                     try:
                         ttl_s = float(action_val.split(":")[1])
-                    except ValueError:
-
-                        pass
+                    except Exception as exc:
+                        logger.warning("Suppressed exception: %s", exc)
 
                 new_expiry = (datetime.now(timezone.utc) + timedelta(seconds=ttl_s)).isoformat()
 

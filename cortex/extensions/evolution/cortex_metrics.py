@@ -293,9 +293,8 @@ async def fetch_domain_metrics(
                         dt = datetime.fromisoformat(str(row[0]).replace("Z", "+00:00"))
                         age_s = time.monotonic() - dt.timestamp()
                         m.last_decision_age_hours = age_s / 3600
-                    except (ValueError, TypeError):
-
-                        pass
+                    except Exception as exc:
+                        logger.warning("Suppressed exception: %s", exc)
 
             # ── LLM Telemetry (Afferent Cascade Signals) ──
             # Measure terminal failures and average depth in the last hour

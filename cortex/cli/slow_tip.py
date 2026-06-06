@@ -148,9 +148,9 @@ class SlowOpTipEmitter:
                     padding=(0, 2),
                 )
             )
-        except (ValueError, KeyError, OSError, RuntimeError, ImportError):
-
-            pass
+        except Exception as exc:
+            import logging
+            logging.warning("Suppressed exception: %s", exc)
 
 
 # Tips are non-critical; never break the CLI

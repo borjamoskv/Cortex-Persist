@@ -305,9 +305,8 @@ class ForgettingOracle(AnalyzerMixin, PolicyMixin, EvidenceMixin):
             if fact and fact.get("fact_type") in ("decision", "error", "axiom"):
                 return True
 
-        except (sqlite3.Error, AttributeError, OSError):
-
-            pass
+        except Exception as exc:
+            logger.warning("Suppressed exception: %s", exc)
 
         return False
 

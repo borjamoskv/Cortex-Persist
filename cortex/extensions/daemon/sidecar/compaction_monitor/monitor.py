@@ -125,9 +125,8 @@ def _collect_snapshot() -> MemorySnapshot:
             rss, vms = mi.rss, mi.vms
             vm = _p.virtual_memory()
             sys_avail, sys_total = vm.available, vm.total
-        except (ValueError, KeyError, OSError, RuntimeError, ImportError):
-
-            pass
+        except Exception as exc:
+            logger.warning("Suppressed exception: %s", exc)
 
     if _IS_LINUX:
         # Lazy import: ctypes.CDLL("libc.so.6") only attempted on Linux
@@ -138,9 +137,8 @@ def _collect_snapshot() -> MemorySnapshot:
 
             info = get_mallinfo2()
             arena, free_b = info.arena, info.fordblks
-        except (ValueError, KeyError, OSError, RuntimeError, ImportError):
-
-            pass
+        except Exception as exc:
+            logger.warning("Suppressed exception: %s", exc)
 
     return MemorySnapshot(
         rss_bytes=rss,
@@ -247,9 +245,8 @@ class MemoryPressureMonitor:
             try:
                 # Give it a moment to finish cleanup
                 await asyncio.wait_for(self._task, timeout=1.0)
-            except (asyncio.CancelledError, asyncio.TimeoutError):
-
-                pass
+            except Exception as exc:
+                logger.warning("Suppressed exception: %s", exc)
 
         self._executor.shutdown(wait=False, cancel_futures=True)
         logger.info("MemoryPressureMonitor stopped")

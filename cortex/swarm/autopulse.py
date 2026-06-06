@@ -123,8 +123,8 @@ async def _append_state_ledger(agent: str, payload: dict) -> None:
                 state = json.load(f)
                 if state.get("ledgers"):
                     prev_hash = state["ledgers"][-1]["hash"]
-        except (OSError, json.JSONDecodeError, KeyError, ValueError):
-            pass
+        except Exception as exc:
+            logger.warning("Suppressed exception: %s", exc)
     action = f"SwarmSolve:{agent}"
     vector_id = payload.get("vector_id", "swarm_task_auto")
     yield_amount = 1.0

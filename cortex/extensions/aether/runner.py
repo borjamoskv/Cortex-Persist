@@ -269,6 +269,5 @@ class AetherAgent:
                 stderr=asyncio.subprocess.PIPE,
             )
             await asyncio.wait_for(proc.communicate(), timeout=5.0)
-        except (asyncio.TimeoutError, OSError):
-
-            pass
+        except Exception as exc:
+            logger.warning("Suppressed exception: %s", exc)

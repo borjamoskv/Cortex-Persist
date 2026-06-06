@@ -68,9 +68,9 @@ async def _ingest_and_organize(path: Path) -> str:
                 try:
                     text = file_path.read_text(encoding="utf-8")
                     content += f"\\n\\n--- FILE: {file_path.relative_to(path)} ---\\n{text}"
-                except (UnicodeDecodeError, OSError):
-
-                    pass
+                except Exception as exc:
+                    import logging
+                    logging.warning("Suppressed exception: %s", exc)
 
     # Truncate to avoid context window explosion
     if len(content) > 100000:

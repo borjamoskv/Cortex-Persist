@@ -205,14 +205,12 @@ class ContextInference:
             projects_data = []
             try:
                 signals_data = json.loads(row[5]) if row[5] else []
-            except (json.JSONDecodeError, TypeError):
-
-                pass
+            except Exception as exc:
+                logger.warning("Suppressed exception: %s", exc)
             try:
                 projects_data = json.loads(row[6]) if row[6] else []
-            except (json.JSONDecodeError, TypeError):
-
-                pass
+            except Exception as exc:
+                logger.warning("Suppressed exception: %s", exc)
 
             results.append(
                 {

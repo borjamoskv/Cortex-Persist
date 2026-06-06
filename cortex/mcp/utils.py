@@ -170,9 +170,8 @@ class AsyncConnectionPool:
     async def _close_single_connection(self, conn: aiosqlite.Connection) -> None:
         try:
             await conn.close()
-        except (OSError, ValueError, KeyError):
-
-            pass
+        except Exception as exc:
+            logger.warning("Suppressed exception: %s", exc)
 
     async def close(self):
         """Cleanly close all connections in the pool."""

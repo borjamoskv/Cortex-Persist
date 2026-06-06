@@ -81,24 +81,21 @@ class MacMaestroAgent:
     def _parse_json_response(self, text: str) -> dict[str, Any] | None:
         try:
             return json.loads(text)
-        except json.JSONDecodeError:
-
-            pass
+        except Exception as exc:
+            logger.warning("Suppressed exception: %s", exc)
 
         match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.DOTALL)
         if match:
             try:
                 return json.loads(match.group(1))
-            except json.JSONDecodeError:
-
-                pass
+            except Exception as exc:
+                logger.warning("Suppressed exception: %s", exc)
 
         match = re.search(r"(\{.*\})", text, re.DOTALL)
         if match:
             try:
                 return json.loads(match.group(1))
-            except json.JSONDecodeError:
-
-                pass
+            except Exception as exc:
+                logger.warning("Suppressed exception: %s", exc)
 
         return None

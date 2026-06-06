@@ -101,8 +101,8 @@ class ExergyEngine:
                 with open(META_PARAMS_LOG, encoding="utf-8") as f:
                     data = json.load(f)
                     return MetaParams(**data)
-            except (ValueError, KeyError, OSError):
-                pass
+            except Exception as exc:
+                logger.warning("Suppressed exception: %s", exc)
         return MetaParams()
 
     def _save_meta_params(self):

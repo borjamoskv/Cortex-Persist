@@ -129,7 +129,7 @@ def _get_db_path(request: Request) -> str:
         engine = getattr(request.app.state, "engine", None)
         if engine:
             return str(getattr(engine, "_db_path", ""))
-    except Exception:
-
-        pass
+    except Exception as exc:
+        import logging
+        logging.warning("Suppressed exception: %s", exc)
     return ""

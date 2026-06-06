@@ -224,9 +224,8 @@ class VaultCracker:
                 findings.append(
                     "VaultCracker: Malleability attack succeeded (authentication failed)."
                 )
-            except Exception:
-
-                pass
+            except Exception as exc:
+                logger.warning("Suppressed exception: %s", exc)
         # Success = Tag caught it
 
         except Exception as e:

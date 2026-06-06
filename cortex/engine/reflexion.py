@@ -532,9 +532,8 @@ class ReflexionEngine:
                 # Solved after reflection: moderate reward + cortisol recovery
                 ENDOCRINE.pulse(HormoneType.NEURAL_GROWTH, 0.01)
                 ENDOCRINE.pulse(HormoneType.CORTISOL, -0.02)
-        except ImportError:
-
-            pass
+        except Exception as exc:
+            logger.warning("Suppressed exception: %s", exc)
 
     # Endocrine system not available
 

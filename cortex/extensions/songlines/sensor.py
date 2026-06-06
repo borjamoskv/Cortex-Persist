@@ -108,9 +108,8 @@ class TopographicSensor:
                 import logging  # noqa: F401
 
                 pass
-        except ImportError:
-
-            pass
+        except Exception as exc:
+            logger.warning("Suppressed exception: %s", exc)
 
         # 2. Try xattr CLI (Chronos Sniper: added timeout)
         try:
@@ -146,9 +145,8 @@ class TopographicSensor:
                 import logging  # noqa: F401
 
                 pass
-        except ImportError:
-
-            pass
+        except Exception as exc:
+            logger.warning("Suppressed exception: %s", exc)
 
         # 2. Try xattr CLI -p (Chronos Sniper: added timeout)
         try:
@@ -190,15 +188,13 @@ class TopographicSensor:
                 # type: ignore[reportAttributeAccessIssue]
                 os.removexattr(str(file_path), attr_name)  # type: ignore[reportAttributeAccessIssue]
                 return
-            except OSError:
-
-                pass
+            except Exception as exc:
+                logger.warning("Suppressed exception: %s", exc)
 
         try:
             subprocess.run(["xattr", "-d", attr_name, str(file_path)], capture_output=True)
-        except (subprocess.SubprocessError, FileNotFoundError, OSError):
-
-            pass
+        except Exception as exc:
+            logger.warning("Suppressed exception: %s", exc)
 
     def _scan_single_manifest(self, manifest: Path) -> list[GhostTrace]:
         """Read ghosts from a single .songlines fallback file."""
@@ -217,7 +213,6 @@ class TopographicSensor:
                         ghost["strength"] = strength
                         ghost["source_file"] = str(manifest.parent / filename)
                         results.append(ghost)
-        except (json.JSONDecodeError, KeyError, OSError):
-
-            pass
+        except Exception as exc:
+            logger.warning("Suppressed exception: %s", exc)
         return results

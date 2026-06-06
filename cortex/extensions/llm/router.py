@@ -170,9 +170,8 @@ class CortexLLMRouter:
                                 hp,
                             )
                             break
-            except ImportError:
-
-                pass
+            except Exception as exc:
+                logger.warning("Suppressed exception: %s", exc)
 
         if not provider_hint or self._primary.provider_name == provider_hint:
             return await self.execute_resilient(prompt)

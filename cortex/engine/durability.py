@@ -44,9 +44,8 @@ class PersistenceSupervisor:
                 await asyncio.wait_for(self._task, timeout=2.0)
             except asyncio.TimeoutError:
                 logger.warning("PersistenceSupervisor: Heartbeat loop did not exit in time.")
-            except asyncio.CancelledError:
-
-                pass
+            except Exception as exc:
+                logger.warning("Suppressed exception: %s", exc)
 
             await self.flush(reason="shutdown")
             self._task = None

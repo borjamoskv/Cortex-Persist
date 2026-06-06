@@ -40,9 +40,9 @@ def run_claude_query(prompt: str, model: str = "claude-3-opus-20240229") -> str:
             return json.dumps(
                 {"status": "C5-REAL", "model": data.get("model", model), "response": text}
             )
-    except ImportError:
-
-        pass
+    except Exception as exc:
+        import logging
+        logging.warning("Suppressed exception: %s", exc)
     except Exception as e:
         return json.dumps({"status": "error", "message": f"HTTPX request failed: {e}"})
 

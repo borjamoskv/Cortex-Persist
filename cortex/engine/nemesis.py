@@ -69,9 +69,8 @@ class NemesisProtocol:
                     # Escape backslashes if they were doubled in md
                     pattern = pattern.replace("\\\\", "\\")
                     dynamic_rules.append((pattern, reason.strip()))
-        except FileNotFoundError:
-
-            pass
+        except Exception as exc:
+            logger.warning("Suppressed exception: %s", exc)
         return dynamic_rules
 
     def analyze(cls, content: str, db_path: str | None = None) -> str | None:  # pyright: ignore[reportSelfClsParameterName]

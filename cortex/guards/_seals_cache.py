@@ -43,9 +43,9 @@ async def arun_cmd(cmd: list[str], timeout: float = 60.0) -> tuple[int, str]:
             try:
                 proc.kill()
                 await asyncio.wait_for(proc.wait(), timeout=5.0)
-            except (ProcessLookupError, asyncio.TimeoutError):
-
-                pass
+            except Exception as exc:
+                import logging
+                logging.warning("Suppressed exception: %s", exc)
             return 124, f"Command timed out after {timeout}s: {' '.join(cmd)}"
     except FileNotFoundError:
         return 127, f"Command not found: {resolved[0]}"

@@ -113,9 +113,8 @@ async def gidatu_loop(state):
                             f"to get name of window 1"
                         )
                         win_title = await run_osascript(title_script)
-                    except OSError:
-
-                        pass
+                    except Exception as exc:
+                        logger.warning("Suppressed exception: %s", exc)
                 state.daemons["gidatu"]["window_title"] = win_title
 
                 prev_context = state.daemons["gidatu"].get("current_context")

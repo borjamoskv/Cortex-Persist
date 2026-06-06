@@ -8,7 +8,7 @@ import asyncio
 import logging
 from typing import Any
 
-from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect, Request, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel, Field
 
 from cortex.api.deps import get_async_engine

@@ -72,9 +72,9 @@ async def check_seal_2_type_safety() -> GateResult:
                 printer.fail(f"Type checking failed (threshold: {ecount}/165).")
                 printer.print(out[:2000], style="dim")
                 return False, "verified"
-        except (ValueError, KeyError, json.JSONDecodeError):
-
-            pass
+        except Exception as exc:
+            import logging
+            logging.warning("Suppressed exception: %s", exc)
 
     if code == 0 or "Success: no issues found" in out or '"errorCount":0' in out:
         printer.success("Type checks passed.")

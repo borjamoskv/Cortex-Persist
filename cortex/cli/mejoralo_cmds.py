@@ -175,9 +175,9 @@ def mejoralo_record(project, score_before, score_after, actions, db):
                 state["improvement_history"] = state["improvement_history"][-100:]
                 with open(state_file, "w") as f:
                     json.dump(state, f, indent=2, default=str)
-            except (OSError, ValueError):
-
-                pass
+            except Exception as exc:
+                import logging
+                logging.warning("Suppressed exception: %s", exc)
 
         console.print(
             f"[green]✓[/] Sesión registrada [bold]#{fact_id}[/] - "

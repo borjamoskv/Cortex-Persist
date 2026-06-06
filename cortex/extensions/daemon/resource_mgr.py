@@ -156,9 +156,8 @@ class ResourceMgrMixin:
 
             self._event_bus = DistributedEventBus()
             logger.info("📡 DistributedEventBus ENABLED")
-        except ImportError:
-
-            pass
+        except Exception as exc:
+            logger.warning("Suppressed exception: %s", exc)
 
         # 2.5 Event Sovereignty Runtime (Hito 34)
         self.sovereignty_runtime = None

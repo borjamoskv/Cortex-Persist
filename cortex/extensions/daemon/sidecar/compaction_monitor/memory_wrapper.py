@@ -33,9 +33,9 @@ if _libc:
         _libc.malloc_trim.argtypes = [ctypes.c_size_t]
         _libc.malloc_trim.restype = ctypes.c_int
         HAS_MALLOC_TRIM = True
-    except AttributeError:
-
-        pass
+    except Exception as exc:
+        import logging
+        logging.warning("Suppressed exception: %s", exc)
 
     try:
 
@@ -56,9 +56,9 @@ if _libc:
         _libc.mallinfo2.argtypes = []
         _libc.mallinfo2.restype = _MallInfo2Struct
         HAS_MALLINFO2 = True
-    except AttributeError:
-
-        pass
+    except Exception as exc:
+        import logging
+        logging.warning("Suppressed exception: %s", exc)
 
 
 def malloc_trim(pad: int = 0) -> int:

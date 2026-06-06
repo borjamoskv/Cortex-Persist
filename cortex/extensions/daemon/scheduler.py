@@ -253,9 +253,8 @@ class SovereignScheduler:
                     timeout=self._tick_interval,
                 )
                 break  # stop_event was set
-            except asyncio.TimeoutError:
-
-                pass
+            except Exception as exc:
+                logger.warning("Suppressed exception: %s", exc)
         # normal tick timeout
 
         logger.info("SovereignScheduler stopped")

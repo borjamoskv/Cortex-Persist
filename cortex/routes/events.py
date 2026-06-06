@@ -52,14 +52,14 @@ async def event_generator(
                         if hasattr(sig, "model_dump_json")
                         else sig.json(),
                     }
-            except Exception:
-
-                pass
+            except Exception as exc:
+                import logging
+                logging.warning("Suppressed exception: %s", exc)
 
             await asyncio.sleep(1.0)
-    except asyncio.CancelledError:
-
-        pass
+    except Exception as exc:
+        import logging
+        logging.warning("Suppressed exception: %s", exc)
 
 
 @events_router.get("/v1/events/stream")

@@ -191,9 +191,8 @@ class AutonomousTrainingDaemon:
             self._task.cancel()
             try:
                 await self._task
-            except asyncio.CancelledError:
-
-                pass
+            except Exception as exc:
+                logger.warning("Suppressed exception: %s", exc)
         logger.info("🛑 Autonomous Training Daemon stopped.")
 
     async def _loop(self) -> None:

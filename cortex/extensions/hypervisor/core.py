@@ -130,9 +130,8 @@ class AgencyHypervisor:
         # Fire lightweight side-effects
         try:
             await self._projector.on_recall(query, project)
-        except Exception:
-
-            pass
+        except Exception as exc:
+            logger.warning("Suppressed exception: %s", exc)
 
         # Handle fuse mode returning a string instead of list
         if isinstance(results, str):

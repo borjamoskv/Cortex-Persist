@@ -66,9 +66,8 @@ class SovereignTLRUCache:
         if key in self.cache:
             try:
                 self.order.remove(key)
-            except ValueError:
-
-                pass
+            except Exception as exc:
+                logger.warning("Suppressed exception: %s", exc)
         elif len(self.cache) >= self.capacity:
             if self.order:
                 oldest_key = self.order.popleft()
@@ -83,9 +82,8 @@ class SovereignTLRUCache:
         self.cache.pop(key, None)
         try:
             self.order.remove(key)
-        except ValueError:
-
-            pass
+        except Exception as exc:
+            logger.warning("Suppressed exception: %s", exc)
         self._generate_proof(key, value, reason)
 
     def _generate_proof(self, key: str, value: Any, reason: EvictionReason):
@@ -179,9 +177,8 @@ class OptimizationMixin:
             try:
                 for p in OptimizationMixin._executor._processes.values():
                     p.terminate()
-            except Exception:
-
-                pass
+            except Exception as exc:
+                logger.warning("Suppressed exception: %s", exc)
             OptimizationMixin._executor.shutdown(wait=False, cancel_futures=True)
             OptimizationMixin._executor = None
 

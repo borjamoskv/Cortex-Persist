@@ -113,9 +113,8 @@ class ResultCache:
                 if row:
                     logger.debug("LLM Cache [HIT] -> %s...", h[:8])
                     return row[0]
-        except sqlite3.OperationalError:
-
-            pass
+        except Exception as exc:
+            logger.warning("Suppressed exception: %s", exc)
         return None
 
     def set(

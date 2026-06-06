@@ -38,9 +38,9 @@ def _count_python_loc(root: Path) -> int:
             continue
         try:
             total += sum(1 for _ in p.open("r", errors="replace"))
-        except OSError:
-
-            pass
+        except Exception as exc:
+            import logging
+            logging.warning("Suppressed exception: %s", exc)
     return total
 
 
@@ -61,9 +61,9 @@ def _count_test_functions(root: Path) -> int:
             count += sum(
                 1 for line in p.open("r", errors="replace") if line.lstrip().startswith("def test_")
             )
-        except OSError:
-
-            pass
+        except Exception as exc:
+            import logging
+            logging.warning("Suppressed exception: %s", exc)
     return count
 
 
@@ -78,9 +78,9 @@ def _count_rest_endpoints(root: Path) -> int:
             continue
         try:
             count += sum(1 for line in p.open("r", errors="replace") if pattern.search(line))
-        except OSError:
-
-            pass
+        except Exception as exc:
+            import logging
+            logging.warning("Suppressed exception: %s", exc)
     return count
 
 
@@ -95,9 +95,9 @@ def _count_cli_commands(root: Path) -> int:
             continue
         try:
             count += sum(1 for line in p.open("r", errors="replace") if pattern.search(line))
-        except OSError:
-
-            pass
+        except Exception as exc:
+            import logging
+            logging.warning("Suppressed exception: %s", exc)
     return count
 
 

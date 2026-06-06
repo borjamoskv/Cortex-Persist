@@ -123,8 +123,8 @@ def _duration_ms(start_iso: str, end_iso: str) -> int | None:
                 continue
         if start_dt and end_dt:
             return max(0, int((end_dt - start_dt).total_seconds() * 1000))
-    except (ValueError, KeyError, OSError):
-        pass
+    except Exception as exc:
+        logger.warning("Suppressed exception: %s", exc)
     return None
 
 

@@ -102,9 +102,8 @@ class ConnectionMixin:
                 ):
                     try:
                         await conn.close()
-                    except Exception:
-
-                        pass
+                    except Exception as exc:
+                        logger.warning("Suppressed exception: %s", exc)
                     self._conns_by_loop.pop(current_loop, None)
                     conn = None
                 else:
@@ -177,9 +176,8 @@ class ConnectionMixin:
             conn.enable_load_extension(True)
             conn.load_extension(sqlite_vec.loadable_path())
             conn.enable_load_extension(False)
-        except (AttributeError, OSError):
-
-            pass
+        except Exception as exc:
+            logger.warning("Suppressed exception: %s", exc)
         return conn
 
     async def init_db(self) -> None:

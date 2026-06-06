@@ -190,9 +190,9 @@ def _sanitize_dsn(dsn: str) -> str:
             if ":" in pre_at:
                 user_part = pre_at.rsplit(":", 1)[0]
                 return f"{user_part}:***@{post_at}"
-        except (IndexError, ValueError):
-
-            pass
+        except Exception as exc:
+            import logging
+            logging.warning("Suppressed exception: %s", exc)
     return dsn
 
 

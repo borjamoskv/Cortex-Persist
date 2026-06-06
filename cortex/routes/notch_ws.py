@@ -113,9 +113,8 @@ async def notch_websocket(ws: WebSocket) -> None:
             else:
                 logger.debug("Notch message: %s", msg)
 
-    except WebSocketDisconnect:
-
-        pass
+    except Exception as exc:
+        logger.warning("Suppressed exception: %s", exc)
     except (OSError, RuntimeError) as exc:
         logger.warning("Notch WS error: %s", exc)
     finally:

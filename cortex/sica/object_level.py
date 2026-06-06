@@ -243,9 +243,8 @@ class ObjectLevel:
             try:
                 h = self._strategy._find_heuristic(heuristic_applied)
                 h.activate(success=(outcome == StepOutcome.SUCCESS))
-            except KeyError:
-
-                pass
+            except Exception as exc:
+                logger.warning("Suppressed exception: %s", exc)
         # Heuristic may have been pruned mid-execution
 
         return step

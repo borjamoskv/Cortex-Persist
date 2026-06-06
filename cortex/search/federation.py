@@ -120,9 +120,8 @@ def detach_federated_dbs(
             continue
         try:
             conn.execute(f"DETACH DATABASE {alias}")
-        except sqlite3.OperationalError:
-
-            pass
+        except Exception as exc:
+            logger.warning("Suppressed exception: %s", exc)
 
 
 async def detach_federated_dbs_async(
@@ -136,9 +135,8 @@ async def detach_federated_dbs_async(
             continue
         try:
             await conn.execute(f"DETACH DATABASE {alias}")
-        except (aiosqlite.Error, sqlite3.Error):
-
-            pass
+        except Exception as exc:
+            logger.warning("Suppressed exception: %s", exc)
 
 
 def _search_attached_db(

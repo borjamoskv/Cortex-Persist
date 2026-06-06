@@ -155,9 +155,8 @@ class ToolboxBridge:
         if self._client:
             try:
                 await self._client.close()
-            except ConnectionError:
-
-                pass
+            except Exception as exc:
+                logger.warning("Suppressed exception: %s", exc)
         self._client = None
         self._tools = []
 

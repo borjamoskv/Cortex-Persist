@@ -186,9 +186,8 @@ class ResetPoolAndRetry:
                 for conn in conns:
                     try:
                         await conn.close()
-                    except Exception:
-
-                        pass
+                    except Exception as exc:
+                        logger.warning("Suppressed exception: %s", exc)
                 engine._conns_by_loop.clear()
                 engine._schema_ready = False
 

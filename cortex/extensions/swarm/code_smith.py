@@ -401,9 +401,8 @@ class CodeSmith:
             # Cleanup sandbox (best-effort)
             try:
                 await self._sandbox.cleanup()
-            except Exception:
-
-                pass
+            except Exception as exc:
+                logger.warning("Suppressed exception: %s", exc)
 
         return result
 

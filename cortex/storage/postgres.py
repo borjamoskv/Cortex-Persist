@@ -204,9 +204,8 @@ class PostgresBackend:
                 if ":" in pre_at:
                     user_part = pre_at.rsplit(":", 1)[0]
                     return f"{user_part}:***@{post_at}"
-            except (IndexError, ValueError):
-
-                pass
+            except Exception as exc:
+                logger.warning("Suppressed exception: %s", exc)
         return dsn
 
     async def execute(self, sql: str, params: tuple[Any, ...] = ()) -> list[dict[str, Any]]:

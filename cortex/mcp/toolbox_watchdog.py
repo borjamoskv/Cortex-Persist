@@ -276,7 +276,6 @@ class ToolboxWatchdog:
         if self._log_fd:
             try:
                 self._log_fd.close()
-            except OSError:
-
-                pass
+            except Exception as exc:
+                logger.warning("Suppressed exception: %s", exc)
             self._log_fd = None

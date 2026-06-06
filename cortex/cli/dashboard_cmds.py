@@ -79,9 +79,9 @@ async def _collect_recent(engine, limit: int = 8) -> list[dict]:
                 }
                 for r in results
             ]
-    except (sqlite3.Error, OSError, AttributeError, FileNotFoundError):
-
-        pass
+    except Exception as exc:
+        import logging
+        logging.warning("Suppressed exception: %s", exc)
     return []
 
 
@@ -367,9 +367,9 @@ def dashboard(db: str, interval: float, once: bool) -> None:
                     data = _run_async(_collect_all(engine))
                     live.update(_build_dashboard(data))
                     time.sleep(interval)
-            except KeyboardInterrupt:
-
-                pass
+            except Exception as exc:
+                import logging
+                logging.warning("Suppressed exception: %s", exc)
 
         console.print(f"\n[{_DIM}]Dashboard closed.[/]")
 

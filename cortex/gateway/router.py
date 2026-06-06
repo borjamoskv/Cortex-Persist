@@ -212,9 +212,8 @@ class GatewayRouter:
                     extra_meta={"request_id": request.request_id, "source": request.source},
                 )
                 await boundary._persist(exc)
-            except Exception:
-
-                pass
+            except Exception as exc:
+                logger.warning("Suppressed exception: %s", exc)
             return GatewayResponse(
                 ok=False,
                 error=str(exc),

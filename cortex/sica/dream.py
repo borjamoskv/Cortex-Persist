@@ -546,9 +546,8 @@ class DreamEngine:
                                 factor=1 + delta,
                             )
                         applied += 1
-                    except KeyError:
-
-                        pass
+                    except Exception as exc:
+                        logger.warning("Suppressed exception: %s", exc)
 
         return applied
 

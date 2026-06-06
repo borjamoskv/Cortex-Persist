@@ -206,9 +206,8 @@ class SystemAssembler:
             try:
                 test_init.write_text("", encoding="utf-8")
                 created.append(str(test_init))
-            except OSError:
-
-                pass
+            except Exception as exc:
+                logger.warning("Suppressed exception: %s", exc)
 
         for comp in spec.components:
             if comp.component_type == "test":
@@ -228,9 +227,8 @@ class SystemAssembler:
                     try:
                         file_path.write_text(content, encoding="utf-8")
                         created.append(str(file_path))
-                    except OSError:
-
-                        pass
+                    except Exception as exc:
+                        logger.warning("Suppressed exception: %s", exc)
 
         return created
 
@@ -258,8 +256,7 @@ class SystemAssembler:
                     file_path.parent.mkdir(parents=True, exist_ok=True)
                     file_path.write_text(content, encoding="utf-8")
                     created.append(str(file_path))
-                except OSError:
-
-                    pass
+                except Exception as exc:
+                    logger.warning("Suppressed exception: %s", exc)
 
         return created

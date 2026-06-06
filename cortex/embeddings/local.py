@@ -50,9 +50,8 @@ def _resolve_device() -> str:
             return "cuda"
         if hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
             return "mps"
-    except (ImportError, RuntimeError, AttributeError):
-
-        pass
+    except Exception as exc:
+        logger.warning("Suppressed exception: %s", exc)
 
     return "cpu"
 

@@ -24,8 +24,8 @@ def canonicalize_content(content: str) -> str:
         data = json.loads(normalized)
         if isinstance(data, (dict, list)):
             return json.dumps(data, sort_keys=True, separators=(",", ":"))
-    except ValueError:
-        pass
+    except Exception as exc:
+        logger.warning("Suppressed exception: %s", exc)
     return normalized
 
 

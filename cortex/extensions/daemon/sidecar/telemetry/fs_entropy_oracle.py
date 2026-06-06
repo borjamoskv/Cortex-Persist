@@ -29,9 +29,9 @@ class FSEntropyOracle:
         while self._running:
             try:
                 await self._measure_entropy()
-            except Exception:
-
-                pass
+            except Exception as exc:
+                import logging
+                logging.warning("Suppressed exception: %s", exc)
             await asyncio.sleep(self.poll_interval)
 
     async def stop(self) -> None:

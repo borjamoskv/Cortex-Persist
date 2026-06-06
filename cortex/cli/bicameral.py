@@ -57,9 +57,9 @@ class BicameralConsole:
         try:
             with open(relay_path, "a") as f:
                 f.write(json.dumps(event) + "\n")
-        except OSError:
-
-            pass
+        except Exception as exc:
+            import logging
+            logging.warning("Suppressed exception: %s", exc)
 
     # Fail silently to avoid interrupting the agent loop
 

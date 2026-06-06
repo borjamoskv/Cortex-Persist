@@ -103,8 +103,8 @@ class AsyncSignalBus:
 
         try:
             self._conn._signals_ready = True
-        except AttributeError:
-            pass
+        except Exception as exc:
+            logger.warning("Suppressed exception: %s", exc)
         self._ready = True
 
     async def emit(
@@ -331,8 +331,8 @@ class SignalBus:
 
         try:
             self._conn._signals_ready = True
-        except AttributeError:
-            pass
+        except Exception as exc:
+            logger.warning("Suppressed exception: %s", exc)
         self._ready = True
 
     def emit(

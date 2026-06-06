@@ -143,9 +143,8 @@ class ASTOracle:
                 mtime = py_file.stat().st_mtime
                 self._mtimes[target_str] = mtime
                 self._cache[target_str] = self._extract_semantic_nodes(py_file)
-            except (ValueError, KeyError, OSError, RuntimeError, AttributeError):
-
-                pass
+            except Exception as exc:
+                logger.warning("Suppressed exception: %s", exc)
 
     async def _process_events(self) -> None:
         """Drain the event queue and process changed files."""

@@ -150,9 +150,8 @@ class AgentCatalogEntry:
                 resolved = resolve_model(self.provider, self.intent)
                 if resolved:
                     return resolved
-            except ImportError:
-
-                pass
+            except Exception as exc:
+                logger.warning("Suppressed exception: %s", exc)
         return self.model
 
     @property

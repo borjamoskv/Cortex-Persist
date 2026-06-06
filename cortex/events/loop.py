@@ -104,9 +104,8 @@ def sovereign_run(
                 "Sovereign loop: uvloop %s active (kqueue/epoll)",
                 getattr(uvloop, "__version__", "?"),
             )
-    except ImportError:
-
-        pass
+    except Exception as exc:
+        logger.warning("Suppressed exception: %s", exc)
 
     # 2. Execute with appropriate runner
     if has_uvloop:

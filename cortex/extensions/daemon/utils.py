@@ -38,9 +38,8 @@ async def play_ping(state):
             stderr=subprocess.PIPE,
         )
         await proc.wait()
-    except OSError:
-
-        pass
+    except Exception as exc:
+        logger.warning("Suppressed exception: %s", exc)
 
 
 async def run_osascript(script: str) -> str:

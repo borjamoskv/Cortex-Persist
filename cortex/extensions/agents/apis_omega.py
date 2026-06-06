@@ -63,9 +63,8 @@ class ApisOmegaAgent:
             from cortex.extensions.agents.registry import get_agent
 
             self._agent_def = get_agent("apis_omega")
-        except ImportError:
-
-            pass
+        except Exception as exc:
+            logger.warning("Suppressed exception: %s", exc)
 
     async def validate_key(self, provider: str, key: str, base_url: str) -> bool:
         """Lightweight check to verify if the key is actually functional."""

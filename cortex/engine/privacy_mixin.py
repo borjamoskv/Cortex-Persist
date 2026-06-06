@@ -50,8 +50,7 @@ class PrivacyMixin(EngineMixinBase):
                     "privacy_score": sensitivity.score,
                 }
                 return {**(meta or {}), **privacy_meta}
-        except ImportError:
-
-            pass
+        except Exception as exc:
+            logger.warning("Suppressed exception: %s", exc)
         # Classifier not available - degrade gracefully
         return meta

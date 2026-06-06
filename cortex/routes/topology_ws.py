@@ -84,8 +84,7 @@ async def websocket_topology_endpoint(websocket: WebSocket):
                         "Manual noise injection command received for %s", command.get("node_id")
                     )
                     # Implementation would trigger a re-consolidation with perturbation
-            except json.JSONDecodeError:
-
-                pass
+            except Exception as exc:
+                logger.warning("Suppressed exception: %s", exc)
     except WebSocketDisconnect:
         topology_manager.disconnect(websocket)

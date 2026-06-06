@@ -197,9 +197,8 @@ async def scan_all_crystals(
                 try:
                     embedding = np.frombuffer(embedding_data, dtype=np.float32).tolist()
                     resonance = await calculate_resonance(embedding, axiom_embeddings)
-                except Exception:
-
-                    pass
+                except Exception as exc:
+                    logger.warning("Suppressed exception: %s", exc)
 
             vital = measure_crystal_sync(
                 fact_id=fact_id,

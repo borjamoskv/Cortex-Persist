@@ -132,9 +132,8 @@ class SovereignReporter:
         # Send initial state
         try:
             yield await self.collect_metrics()
-        except sqlite3.Error:
-
-            pass
+        except Exception as exc:
+            logger.warning("Suppressed exception: %s", exc)
 
         try:
             async with connect_async_ctx(self.db_path) as conn:

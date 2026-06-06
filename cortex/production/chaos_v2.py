@@ -29,8 +29,9 @@ class ChaosLayerV2:
             victim = random.choice(snapshots)
             try:
                 victim.unlink()
-            except (ValueError, KeyError, OSError):
-                pass
+            except Exception as exc:
+                import logging
+                logging.warning("Suppressed exception: %s", exc)
 
     def temporal_distortion_attack(self, event):
         """4. Desordenar timestamps."""

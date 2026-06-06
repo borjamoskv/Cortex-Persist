@@ -23,9 +23,8 @@ MMAP_FILE = "market_wave.vsa_mmap"
 def _cleanup_mmap(path: str):
     try:
         os.remove(path)
-    except FileNotFoundError:
-
-        pass
+    except Exception as exc:
+        logger.warning("Suppressed exception: %s", exc)
 
 
 def extract_market_alpha(

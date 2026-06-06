@@ -75,9 +75,8 @@ class NativeVLLMProvider(BaseProvider):
                     reg = json.load(f)
                     if reg.get("status") == "verified":
                         verified_adapter_path = reg.get("adapter_path")
-            except Exception:
-
-                pass
+            except Exception as exc:
+                logger.warning("Suppressed exception: %s", exc)
 
         enable_lora = (
             verified_adapter_path is not None or os.environ.get("CORTEX_ENABLE_LORA") == "true"

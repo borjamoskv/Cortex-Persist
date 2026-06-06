@@ -39,9 +39,8 @@ class SpoofManager:
                 from cortex.extensions.immune.error_boundary import ErrorBoundary
 
                 ErrorBoundary("gateway.spoof.load_rules", reraise=False)._persist_sync(e)
-            except Exception:
-
-                pass
+            except Exception as exc:
+                logger.warning("Suppressed exception: %s", exc)
             return {"mappings": {}, "default_intent": "general"}
 
     # O(1) Zero-Latency Keyword Heuristics for Model Routing

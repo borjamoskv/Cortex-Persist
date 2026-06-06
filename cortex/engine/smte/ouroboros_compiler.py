@@ -62,9 +62,8 @@ class OuroborosCompiler:
                         "mutate_prompt",
                     ):
                         llm_calls += 1
-        except SyntaxError:
-
-            pass
+        except Exception as exc:
+            logger.warning("Suppressed exception: %s", exc)
 
         cost = (llm_calls * 10) + complexity
 

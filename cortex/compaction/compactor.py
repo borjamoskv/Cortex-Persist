@@ -280,9 +280,8 @@ async def compact_session(
     # ─── AXIOM L4: Unified Temporal Decay ──────────────────────────────
     try:
         await conn.create_function("cortex_decay", 4, _cortex_decay)
-    except (sqlite3.Error, AttributeError):
-
-        pass
+    except Exception as exc:
+        logger.warning("Suppressed exception: %s", exc)
     # Already registered or unsupported
 
     now = time.monotonic()

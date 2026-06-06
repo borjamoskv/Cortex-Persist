@@ -206,6 +206,5 @@ class TieredCache(Generic[T]):
         for queue in self._subscribers:
             try:
                 queue.put_nowait((event, key))
-            except asyncio.QueueFull:
-
-                pass
+            except Exception as exc:
+                logger.warning("Suppressed exception: %s", exc)

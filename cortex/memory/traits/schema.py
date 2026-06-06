@@ -150,8 +150,8 @@ class SchemaTrait:
         except Exception:
             try:
                 conn.close()
-            except (ValueError, KeyError, OSError):
-                pass
+            except Exception as exc:
+                logger.warning("Suppressed exception: %s", exc)
             raise
 
         # Initialize L2HybridSearch (FTS5 mirror) after conn is established
@@ -179,9 +179,8 @@ class SchemaTrait:
                 from cortex.memory.pii_sanitizer import get_pii_sanitizer
 
                 self._sanitizer = get_pii_sanitizer()
-            except ImportError:
-
-                pass
+            except Exception as exc:
+                logger.warning("Suppressed exception: %s", exc)
         return self._sanitizer
 
     def _get_domain_tables(

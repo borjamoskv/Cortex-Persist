@@ -196,9 +196,8 @@ class Supervisor:
             self._monitor_task.cancel()
             try:
                 await self._monitor_task
-            except asyncio.CancelledError:
-
-                pass
+            except Exception as exc:
+                logger.warning("Suppressed exception: %s", exc)
 
         for agent_id in list(self._agents.keys()):
             try:

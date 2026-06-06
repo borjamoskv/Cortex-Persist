@@ -126,9 +126,8 @@ async def call_external_compact(
             if engine is not None:
                 # compact() is sync - run in thread to avoid blocking event loop
                 return await asyncio.to_thread(compact, engine, project)
-        except ImportError:
-
-            pass
+        except Exception as exc:
+            logging.warning("Suppressed exception: %s", exc)
 
         # Fallback: direct SQLite WAL checkpoint
         if db_path:

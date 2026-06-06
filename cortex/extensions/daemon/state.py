@@ -105,9 +105,8 @@ class DaemonState:
                 hs = self.daemons.get("cortex", {}).get("handshake")
                 if policy == "ZERO_LOCAL_ON_HANDSHAKE" and hs == "remote":
                     return
-            except (json.JSONDecodeError, OSError, KeyError):
-
-                pass
+            except Exception as exc:
+                logger.warning("Suppressed exception: %s", exc)
 
         try:
             path = CORTEX_ROOT / "handoff.json"

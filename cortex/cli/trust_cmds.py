@@ -305,9 +305,9 @@ def siege(db: str) -> None:
             key = os.environ.get("CORTEX_VAULT_KEY")
             if key:
                 engine.vault = Vault(key.encode("utf-8"))  # pyright: ignore[reportAttributeAccessIssue]
-        except (ValueError, KeyError, OSError, RuntimeError, AttributeError):
-
-            pass
+        except Exception as exc:
+            import logging
+            logging.warning("Suppressed exception: %s", exc)
 
         console.print(
             Panel(

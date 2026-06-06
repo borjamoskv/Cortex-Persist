@@ -176,9 +176,8 @@ class DailyShieldMonitor:
                 capture_output=True,
                 timeout=5,
             )
-        except (OSError, subprocess.TimeoutExpired):
-
-            pass
+        except Exception as exc:
+            logger.warning("Suppressed exception: %s", exc)
 
 
 # Notification is best-effort

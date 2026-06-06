@@ -382,9 +382,8 @@ class P0VulnerabilityExtractor:
                                 function_name=obj.get("function_name", ""),
                             )
                         )
-                    except json.JSONDecodeError:
-
-                        pass
+                    except Exception as exc:
+                        logger.warning("Suppressed exception: %s", exc)
                     start = -1
 
         return findings

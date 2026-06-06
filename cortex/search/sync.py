@@ -109,9 +109,8 @@ def semantic_search_sync(
 
                 enc = get_default_encrypter()
                 content = enc.decrypt_str(content) or content
-            except (ValueError, OSError):
-
-                pass
+            except Exception as exc:
+                logger.warning("Suppressed exception: %s", exc)
 
         results.append(
             SyncSearchResult(
@@ -215,9 +214,8 @@ def _parse_row(row: tuple, has_rank: bool) -> SyncSearchResult:
 
             enc = get_default_encrypter()
             content = enc.decrypt_str(content) or content
-        except (ValueError, OSError):
-
-            pass
+        except Exception as exc:
+            logger.warning("Suppressed exception: %s", exc)
 
     return SyncSearchResult(
         fact_id=row[0],  # type: ignore[reportGeneralTypeIssues]

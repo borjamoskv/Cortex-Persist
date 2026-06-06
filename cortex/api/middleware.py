@@ -270,9 +270,8 @@ class SecurityFraudMiddleware(BaseHTTPMiddleware):
                 try:
                     with open(self.log_path, "a", encoding="utf-8") as f:
                         f.write("".join(data_lines))
-                except OSError:
-
-                    pass
+                except Exception as exc:
+                    logger.warning("Suppressed exception: %s", exc)
 
             # 1 thread spin-up per interval, not per attack request
             await asyncio.to_thread(_write_all, lines)
@@ -346,9 +345,8 @@ class ImmuneMiddleware(BaseHTTPMiddleware):
                             status_code=403,
                             content={"error": "Payload rejected by Immune System (Data Poisoning)"},
                         )
-                except ImportError:
-
-                    pass
+                except Exception as exc:
+                    logger.warning("Suppressed exception: %s", exc)
 
                 # Reconstruct stream since we consumed it
                 async def receive():

@@ -88,9 +88,8 @@ class ManifoldDaemon:
             # Keep connection open indefinitely
             while True:
                 await asyncio.sleep(60)
-        except asyncio.CancelledError:
-
-            pass
+        except Exception as exc:
+            logger.warning("Suppressed exception: %s", exc)
         finally:
             logger.info("SSE client detached.")
 

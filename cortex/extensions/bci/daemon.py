@@ -138,9 +138,9 @@ class BCI_Transmitter:
             try:
                 writer.close()
                 await writer.wait_closed()
-            except UnboundLocalError:
-
-                pass
+            except Exception as exc:
+                import logging
+                logging.warning("Suppressed exception: %s", exc)
 
 
 # -----------------------

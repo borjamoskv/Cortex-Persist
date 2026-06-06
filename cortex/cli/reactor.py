@@ -125,6 +125,6 @@ def run_reactor():
 if __name__ == "__main__":
     try:
         run_reactor()
-    except KeyboardInterrupt:
-
-        pass
+    except Exception as exc:
+        import logging
+        logging.warning("Suppressed exception: %s", exc)

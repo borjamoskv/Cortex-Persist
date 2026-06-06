@@ -138,9 +138,8 @@ class RaftNode:
                 task.cancel()
                 try:
                     await task
-                except asyncio.CancelledError:
-
-                    pass
+                except Exception as exc:
+                    logger.warning("Suppressed exception: %s", exc)
         # Expected - do NOT re-raise during shutdown
         self._election_task = None
         self._heartbeat_task = None
@@ -434,9 +433,8 @@ class RaftNode:
                 self._heartbeat_task.cancel()
                 try:
                     await self._heartbeat_task
-                except asyncio.CancelledError:
-
-                    pass
+                except Exception as exc:
+                    logger.warning("Suppressed exception: %s", exc)
 
             self.role = NodeRole.LEADER
             self.leader_id = self.node_id

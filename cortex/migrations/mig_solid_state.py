@@ -26,9 +26,9 @@ def _migration_021_solid_state(conn: sqlite3.Connection) -> None:
                 schema_version  TEXT NOT NULL DEFAULT '1'
             )
         """)
-    except sqlite3.OperationalError:
-
-        pass
+    except Exception as exc:
+        import logging
+        logging.warning("Suppressed exception: %s", exc)
     # Table already exists
 
     conn.execute("CREATE INDEX IF NOT EXISTS idx_ee_entity ON entity_events(entity_id)")

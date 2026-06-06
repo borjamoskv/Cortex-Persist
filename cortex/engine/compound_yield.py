@@ -157,9 +157,8 @@ class CompoundYieldTracker:
             # Check if chronos explicit report exists in meta
             if "hours_saved" in meta:
                 return float(meta["hours_saved"])
-        except (json.JSONDecodeError, TypeError, ValueError):
-
-            pass
+        except Exception as exc:
+            logger.warning("Suppressed exception: %s", exc)
 
         # If no explicit hours, assign a default baseline value of 0.5 hours
         # This prevents 0 yield for chained structural facts that lack explicit tracking

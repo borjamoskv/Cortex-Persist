@@ -104,9 +104,9 @@ def _show_tip(engine=None) -> None:
                 padding=(0, 2),
             )
         )
-    except (ImportError, RuntimeError, OSError, ValueError):
-
-        pass
+    except Exception as exc:
+        import logging
+        logging.warning("Suppressed exception: %s", exc)
 
 
 # Tips are non-critical

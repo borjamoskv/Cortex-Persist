@@ -59,9 +59,8 @@ class PlannerNode:
             try:
                 data = json.loads(target)
                 return data.get("url") or data.get("target") or data.get("query") or target[:200]
-            except json.JSONDecodeError:
-
-                pass
+            except Exception as exc:
+                logger.warning("Suppressed exception: %s", exc)
 
         # 3. Artifact header stripping
         clean = re.sub(r"═══.*?═══", "", target).strip()
