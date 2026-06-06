@@ -46,7 +46,7 @@ class AgentManifest:
     # Resource limits
     max_concurrency: int = 1
     budget_tokens: int = 50_000
-    budget_usd: float = 5.0
+    budget_usd: Decimal = Decimal("5.0")
     max_consecutive_errors: int = 3
 
     # Tenant isolation

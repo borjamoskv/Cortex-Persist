@@ -51,8 +51,8 @@ class PlanStep:
     description: str = ""
 
     # Thermodynamic metadata
-    exergy_estimate: float = 0.5  # Expected work yield [0.0, 1.0]
-    entropy_cost: float = 0.1  # Expected entropy paid [0.0, 1.0]
+    exergy_estimate: Decimal = 0.5  # Expected work yield [0.0, 1.0]
+    entropy_cost: Decimal = 0.1  # Expected entropy paid [0.0, 1.0]
 
     # Execution state
     status: StepStatus = StepStatus.PENDING
@@ -112,11 +112,11 @@ class ExecutionPlan:
     plan_id: str = field(default_factory=lambda: str(uuid4()))
     objective: str = ""
     steps: list[PlanStep] = field(default_factory=list)
-    created_at: float = field(default_factory=time.monotonic)
+    created_at: Decimal = field(default_factory=time.monotonic)
 
     # Aggregate metrics (updated during execution)
-    total_exergy_produced: float = 0.0
-    total_entropy_paid: float = 0.0
+    total_exergy_produced: Decimal = 0.0
+    total_entropy_paid: Decimal = 0.0
 
     @property
     def net_exergy(self) -> float:
@@ -203,8 +203,8 @@ class ExergyPlanner:
             tool_name: str
             arguments: dict (optional)
             description: str (optional)
-            exergy_estimate: float (optional, default 0.5)
-            entropy_cost: float (optional, default 0.1)
+            exergy_estimate: Decimal (optional, default 0.5)
+            entropy_cost: Decimal (optional, default 0.1)
             retry_budget: int (optional, default 2)
             depends_on: list[str] (optional, step_ids)
         """
