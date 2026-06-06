@@ -18,5 +18,6 @@ fn cortex_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<AtmsGraph>()?;
     m.add_class::<SmtLeaf>()?;
     m.add_function(wrap_pyfunction!(storage_guard::validate_proposal, m)?)?;
+    m.add_function(wrap_pyfunction!(storage_guard::detect_poisoning, m)?)?;
     Ok(())
 }

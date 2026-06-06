@@ -27,20 +27,7 @@ __all__ = ["MCPGuard"]
 logger = logging.getLogger("cortex.mcp.guard")
 
 # ─── Poisoning Detection Patterns ─────────────────────────────────
-# These catch common prompt injection / data poisoning attempts
-_POISON_PATTERNS: list[re.Pattern] = [
-    # SQL injection fragments
-    re.compile(r";\s*DROP\s+TABLE", re.IGNORECASE),
-    re.compile(r";\s*DELETE\s+FROM", re.IGNORECASE),
-    re.compile(r"UNION\s+SELECT\s+", re.IGNORECASE),
-    # Prompt injection markers
-    re.compile(r"<\s*system\s*>", re.IGNORECASE),
-    re.compile(r"ignore\s+(?:all\s+)?previous\s+instructions", re.IGNORECASE),
-    re.compile(r"you\s+are\s+now\s+(?:a|an|DAN)", re.IGNORECASE),
-    # Overwrite attempts targeting CORTEX internals
-    re.compile(r"__cortex_override__", re.IGNORECASE),
-    re.compile(r"GENESIS", re.IGNORECASE),  # Ledger genesis manipulation
-]
+# Patterns are defined and evaluated in Rust core (`cortex_rs.detect_poisoning`)
 
 
 class MCPGuard:
@@ -133,15 +120,19 @@ class MCPGuard:
 
     @classmethod
     def detect_poisoning(cls, content: str) -> bool:
-        """Check content against known data poisoning patterns.
+        """Check content against known data poisoning patterns using Rust extension.
 
         Returns True if any pattern matches (content should be rejected).
         """
-        for pattern in _POISON_PATTERNS:
-            if pattern.search(content):
-                logger.debug("Poison pattern matched: %s", pattern.pattern)
-                return True
-        return False
+        try:
+            import cortex_rs
+            match = cortex_rs.detect_poisoning(content)
+            if match:
+                logger.debug("Poison pattern matched in Rust core")
+            return match
+        except ImportError:
+            logger.error("Failed to load cortex_rs extension. Poisoning detection disabled.")
+            return False
 
     # ─── External Query Validators ─────────────────────────────────
 

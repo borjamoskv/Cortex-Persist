@@ -83,58 +83,63 @@ def _migrate_system(engine: CortexEngine, path: Path, stats: dict) -> None:
 
     project = "__system__"
 
+    facts_to_store = []
+
     # Preferences
     prefs = data.get("preferences", {})
     if prefs:
-        engine.store_sync(
-            project=project,
-            content=json.dumps(prefs, ensure_ascii=False),
-            fact_type="preference",
-            tags=["system", "preferences"],
-            confidence="verified",
-            source="migration-v3.1",
-        )
-        stats["facts_imported"] += 1
+        facts_to_store.append({
+            "project": project,
+            "content": json.dumps(prefs, ensure_ascii=False),
+            "fact_type": "preference",
+            "tags": ["system", "preferences"],
+            "confidence": "verified",
+            "source": "migration-v3.1",
+        })
 
     # Operator info
     operator = data.get("operator", {})
     if operator:
-        engine.store_sync(
-            project=project,
-            content=json.dumps(operator, ensure_ascii=False),
-            fact_type="identity",
-            tags=["system", "operator"],
-            confidence="verified",
-            source="migration-v3.1",
-        )
-        stats["facts_imported"] += 1
+        facts_to_store.append({
+            "project": project,
+            "content": json.dumps(operator, ensure_ascii=False),
+            "fact_type": "identity",
+            "tags": ["system", "operator"],
+            "confidence": "verified",
+            "source": "migration-v3.1",
+        })
 
     # Global decisions
     for decision in data.get("global_decisions", []):
-        engine.store_sync(
-            project=project,
-            content=decision.get("decision", str(decision)),
-            fact_type="decision",
-            tags=["system", "global"],
-            confidence="verified",
-            source="migration-v3.1",
-            meta=decision,
-        )
-        stats["facts_imported"] += 1
+        facts_to_store.append({
+            "project": project,
+            "content": decision.get("decision", str(decision)),
+            "fact_type": "decision",
+            "tags": ["system", "global"],
+            "confidence": "verified",
+            "source": "migration-v3.1",
+            "meta": decision,
+        })
 
     # Knowledge items
     for ki in data.get("knowledge", []):
-        engine.store_sync(
-            project=project,
-            content=ki.get("content", str(ki)),
-            fact_type="knowledge",
-            tags=["system", ki.get("topic", "general")],
-            confidence=ki.get("confidence", "stated"),
-            source="migration-v3.1",
-            valid_from=ki.get("added", None),
-            meta=ki,
-        )
-        stats["facts_imported"] += 1
+        facts_to_store.append({
+            "project": project,
+            "content": ki.get("content", str(ki)),
+            "fact_type": "knowledge",
+            "tags": ["system", ki.get("topic", "general")],
+            "confidence": ki.get("confidence", "stated"),
+            "source": "migration-v3.1",
+            "valid_from": ki.get("added", None),
+            "meta": ki,
+        })
+
+    if facts_to_store:
+        try:
+            engine.store_many_sync(facts_to_store)
+            stats["facts_imported"] += len(facts_to_store)
+        except Exception as e:
+            stats["errors"].append(f"System facts import failed: {e}")
 
     # Sessions
     conn = engine._get_sync_conn()
@@ -170,55 +175,60 @@ def _migrate_project(engine: CortexEngine, path: Path, stats: dict) -> None:
 
     project = data.get("meta", {}).get("id", path.stem)
 
+    facts_to_store = []
+
     # Decisions
     for decision in data.get("decisions", []):
-        engine.store_sync(
-            project=project,
-            content=decision.get("decision", str(decision)),
-            fact_type="decision",
-            tags=decision.get("tags", []),
-            confidence="verified",
-            source="migration-v3.1",
-            meta=decision,
-        )
-        stats["facts_imported"] += 1
+        facts_to_store.append({
+            "project": project,
+            "content": decision.get("decision", str(decision)),
+            "fact_type": "decision",
+            "tags": decision.get("tags", []),
+            "confidence": "verified",
+            "source": "migration-v3.1",
+            "meta": decision,
+        })
 
     # Knowledge
     for ki in data.get("knowledge", []):
-        engine.store_sync(
-            project=project,
-            content=ki.get("content", str(ki)),
-            fact_type="knowledge",
-            tags=[ki.get("type", "factual")],
-            confidence=ki.get("confidence", "stated"),
-            source="migration-v3.1",
-            meta=ki,
-        )
-        stats["facts_imported"] += 1
+        facts_to_store.append({
+            "project": project,
+            "content": ki.get("content", str(ki)),
+            "fact_type": "knowledge",
+            "tags": [ki.get("type", "factual")],
+            "confidence": ki.get("confidence", "stated"),
+            "source": "migration-v3.1",
+            "meta": ki,
+        })
 
     # Known issues
     for issue in data.get("known_issues", []):
-        engine.store_sync(
-            project=project,
-            content=issue if isinstance(issue, str) else str(issue),
-            fact_type="issue",
-            tags=["known-issue"],
-            source="migration-v3.1",
-        )
-        stats["facts_imported"] += 1
+        facts_to_store.append({
+            "project": project,
+            "content": issue if isinstance(issue, str) else str(issue),
+            "fact_type": "issue",
+            "tags": ["known-issue"],
+            "source": "migration-v3.1",
+        })
 
     # Ghost (last state)
     ghost = data.get("ghost", {})
     if ghost:
-        engine.store_sync(
-            project=project,
-            content=json.dumps(ghost, ensure_ascii=False),
-            fact_type="ghost",
-            tags=["context", "last-state"],
-            source="migration-v3.1",
-            meta=ghost,
-        )
-        stats["facts_imported"] += 1
+        facts_to_store.append({
+            "project": project,
+            "content": json.dumps(ghost, ensure_ascii=False),
+            "fact_type": "ghost",
+            "tags": ["context", "last-state"],
+            "source": "migration-v3.1",
+            "meta": ghost,
+        })
+
+    if facts_to_store:
+        try:
+            engine.store_many_sync(facts_to_store)
+            stats["facts_imported"] += len(facts_to_store)
+        except Exception as e:
+            stats["errors"].append(f"Project '{project}' facts import failed: {e}")
 
 
 def _migrate_mistakes(engine: CortexEngine, path: Path, stats: dict) -> None:
@@ -229,30 +239,37 @@ def _migrate_mistakes(engine: CortexEngine, path: Path, stats: dict) -> None:
         stats["errors"].append(f"Failed to read mistakes.jsonl: {e}")
         return
 
+    facts_to_store = []
     for line in content.strip().splitlines():
         try:
             mistake = json.loads(line)
             project = mistake.get("project", "__system__")
 
-            content = (
+            mistake_content = (
                 f"ERROR: {mistake.get('error', 'unknown')} | "
                 f"ROOT CAUSE: {mistake.get('root_cause', 'unknown')} | "
                 f"FIX: {mistake.get('fix', 'unknown')}"
             )
 
-            engine.store_sync(
-                project=project,
-                content=content,
-                fact_type="error",
-                tags=mistake.get("tags", []),
-                confidence="verified",
-                source="migration-v3.1",
-                valid_from=mistake.get("date", None),
-                meta=mistake,
-            )
-            stats["errors_imported"] += 1
-        except (json.JSONDecodeError, sqlite3.Error) as e:
-            stats["errors"].append(f"Mistake import failed: {e}")
+            facts_to_store.append({
+                "project": project,
+                "content": mistake_content,
+                "fact_type": "error",
+                "tags": mistake.get("tags", []),
+                "confidence": "verified",
+                "source": "migration-v3.1",
+                "valid_from": mistake.get("date", None),
+                "meta": mistake,
+            })
+        except json.JSONDecodeError as e:
+            stats["errors"].append(f"Mistake decode failed: {e}")
+
+    if facts_to_store:
+        try:
+            engine.store_many_sync(facts_to_store)
+            stats["errors_imported"] += len(facts_to_store)
+        except Exception as e:
+            stats["errors"].append(f"Mistakes import failed: {e}")
 
 
 def _migrate_bridges(engine: CortexEngine, path: Path, stats: dict) -> None:
@@ -263,26 +280,33 @@ def _migrate_bridges(engine: CortexEngine, path: Path, stats: dict) -> None:
         stats["errors"].append(f"Failed to read bridges.jsonl: {e}")
         return
 
+    facts_to_store = []
     for line in content.strip().splitlines():
         try:
             bridge = json.loads(line)
 
-            content = (
+            bridge_content = (
                 f"BRIDGE: {bridge.get('from', '?')} → {bridge.get('to', '?')} | "
                 f"Pattern: {bridge.get('pattern', '?')} | "
                 f"Note: {bridge.get('note', '')}"
             )
 
-            engine.store_sync(
-                project="__bridges__",
-                content=content,
-                fact_type="bridge",
-                tags=[bridge.get("from", ""), bridge.get("to", ""), bridge.get("pattern", "")],
-                confidence="verified",
-                source="migration-v3.1",
-                valid_from=bridge.get("date", None),
-                meta=bridge,
-            )
-            stats["bridges_imported"] += 1
-        except (json.JSONDecodeError, sqlite3.Error) as e:
-            stats["errors"].append(f"Bridge import failed: {e}")
+            facts_to_store.append({
+                "project": "__bridges__",
+                "content": bridge_content,
+                "fact_type": "bridge",
+                "tags": [bridge.get("from", ""), bridge.get("to", ""), bridge.get("pattern", "")],
+                "confidence": "verified",
+                "source": "migration-v3.1",
+                "valid_from": bridge.get("date", None),
+                "meta": bridge,
+            })
+        except json.JSONDecodeError as e:
+            stats["errors"].append(f"Bridge decode failed: {e}")
+
+    if facts_to_store:
+        try:
+            engine.store_many_sync(facts_to_store)
+            stats["bridges_imported"] += len(facts_to_store)
+        except Exception as e:
+            stats["errors"].append(f"Bridges import failed: {e}")
