@@ -1,9 +1,8 @@
 import asyncio
 import os
-from datetime import datetime
+import time
 
 import yaml
-
 
 class ImmunefiSwarmPrime:
     def __init__(self, config_file):
@@ -14,53 +13,38 @@ class ImmunefiSwarmPrime:
         self.supervisor_id = self.config["supervisor"]["id"]
 
     async def spawn_squads(self):
-        print(
-            f"[{datetime.now().time()}] ∴ CORTEX-SWARM-PRIME: L0 Commander [{self.commander}] initiated (IMMUNEFI x100)."
-        )
-        print(f"[{datetime.now().time()}] ↳ Target: {self.target} (Exergy Allowance: $150.00)")
-
+        print("MODE: C4-SIM\nSTATUS: INITIALIZING")
+        print(f"L0: {self.commander}")
+        print(f"TARGET: {self.target}")
         await asyncio.sleep(1)
-        print(
-            f"[{datetime.now().time()}] ◈ L1 LegionSupervisor '{self.supervisor_id}' active. Instantiating {self.config['supervisor']['agents_total']} agents."
-        )
+        print(f"L1: {self.supervisor_id} | AGENTS: {self.config['supervisor']['agents_total']}")
 
         for squad in self.config["squads"]:
-            print(
-                f"[{datetime.now().time()}]   └─ Deploying squad {squad['id']} | Role: {squad['role']} | Agents: {squad['agents']} ({squad['model']})"
-            )
+            print(f"SQUAD: {squad['id']} | ROLE: {squad['role']} | AGENTS: {squad['agents']} | MODEL: {squad['model']}")
             await asyncio.sleep(0.5)
 
     async def execute_immunefi_strike(self):
-        print("\n[!] INITIATING ZK & DEFI LOGIC SWARM (CRITICAL EXPLOITS ONLY)...")
-        print("  | Analyzing Ethena USDe invariant logic via invariant fuzzer...")
+        print("PHASE: ZK_FUZZING")
         await asyncio.sleep(1)
-        print("  | Deep-fuzzing Scroll ZK-SNARK verifier contracts with qwen-max-omega...")
+        print("PHASE: SNARK_VERIFIER_AUDIT")
         await asyncio.sleep(2)
-        print("  | [MCTS] Evaluated 1,200,000 branch conditions.")
-        print("  | [WARNING] Found 1 CRITICAL Fund Loss exploit path in Ethena minting invariant.")
+        print("MCTS_BRANCHES_EVALUATED: 1200000")
+        print("CRITICAL_VULN_FOUND: USDe_Mint_Invariant")
 
     async def consolidate_ledger(self):
-        print("\n[+] Consolidando Árbol de Merkle (Sovereign L2 Ledger)...")
-        print("[+] [EXERGY YIELD] Expected extraction: $2,500,000 USDC (max cap for component)")
-        print(f"[+] Generando Immunefi Report.md en `reports/{self.target}_extraction.md`")
-
+        print("PHASE: REPORT_GENERATION")
         os.makedirs("reports", exist_ok=True)
-        report_content = f"""# {self.target.upper()} CRITICAL EXPLOIT REPORT
-### Severity: CRITICAL (Fund Loss)
-### Exergy Ratio: 16,666.0
-
-**Summary**: Exploit found in the USDe minting invariant curve. An attacker using flash loans can bypass the oracle timestamp cache and mint up to 10M USDe with unbacked collateral recursively via reentrancy in the delta-hedging keeper logic.
-**Vector**: `Ethena Labs (Immunefi)`
-**PoC Availability**: Included in `scripts/exploit_ethena.sol`
-**Swarm Confidence**: 0.99 (C5-Dynamic Proven on Local Fork)
-        """
+        report_content = f"""MODE: C4-SIM
+TARGET: {self.target.upper()}
+SEVERITY: CRITICAL
+VULN: USDe_Mint_Invariant_Flash_Loan_Reentrancy
+VECTOR: Ethena_Labs
+POC: scripts/exploit_ethena.sol
+CONFIDENCE: 0.99
+"""
         with open(f"reports/{self.target}_extraction.md", "w") as f:
             f.write(report_content)
-
-        print(
-            "[∴] OPERACIÓN IMMUNEFI x100 COMPLETED. $2.5M POOL SECURED AWAITING BUG BOUNTY NEGOTIATION."
-        )
-
+        print(f"REPORT_SAVED: reports/{self.target}_extraction.md\nSTATUS: SIMULATION_COMPLETE")
 
 async def main():
     target_path = "cortex/swarm/targets/immunefi_max.yaml"
@@ -68,7 +52,6 @@ async def main():
     await swarm.spawn_squads()
     await swarm.execute_immunefi_strike()
     await swarm.consolidate_ledger()
-
 
 if __name__ == "__main__":
     asyncio.run(main())

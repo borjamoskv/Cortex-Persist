@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-CORTEX-SENTINEL v2 - C5-REAL Git Hook Substrate
-Role: AST-Validated Pre-commit (Trash/Secrets) & Diff-Context Commit Forge
+CORTEX-SENTINEL v2.
+C5-REAL.
+AST-Validated Pre-commit & Diff-Context Commit Forge.
 """
 
 import sys
@@ -37,7 +38,7 @@ def get_staged_files():
 
 
 def calculate_shannon_entropy(data: str) -> float:
-    """Calcula entropía real para detectar tokens ofuscados/secretos."""
+    """C5-REAL: Calculate Shannon entropy."""
     if not data:
         return 0
     entropy = 0
@@ -55,14 +56,14 @@ class ASTTrashDetector(ast.NodeVisitor):
     def visit_Call(self, node):
         if isinstance(node.func, ast.Name) and node.func.id == "print":
             self.has_trash = True
-            self.trash_nodes.append(f"print() en línea {node.lineno}")
+            self.trash_nodes.append(f"print():{node.lineno}")
         self.generic_visit(node)
 
     def visit_Import(self, node):
         for alias in node.names:
             if alias.name in ("pdb", "ipdb"):
                 self.has_trash = True
-                self.trash_nodes.append(f"import {alias.name} en línea {node.lineno}")
+                self.trash_nodes.append(f"import {alias.name}:{node.lineno}")
         self.generic_visit(node)
 
 
@@ -73,7 +74,7 @@ def run_pre_commit():
 
     diff = get_staged_diff()
 
-    # 1. Análisis Estructural de Código (AST) vs Regex frágiles
+    # 1. AST Analysis
     for file_path in files:
         if not file_path.endswith(".py") or not os.path.exists(file_path):
             continue
@@ -86,36 +87,33 @@ def run_pre_commit():
 
             if detector.has_trash:
                 print_cortex(
-                    f"AST Veto: Código residual detectado en {file_path}: {', '.join(detector.trash_nodes)}",
+                    f"AST-VETO: {file_path} -> {', '.join(detector.trash_nodes)}",
                     error=True,
                 )
                 return 1
         except SyntaxError:
-            print_cortex(
-                f"AST Veto: Error de sintaxis en {file_path}. Bloqueando commit.", error=True
-            )
+            print_cortex(f"AST-VETO: SyntaxError {file_path}", error=True)
             return 1
 
-    # 2. Análisis de Entropía sobre Diff (Secretos Reales)
+    # 2. Entropy Analysis
     for line in diff.splitlines():
         if line.startswith("+") and not line.startswith("+++"):
-            # Buscar secuencias alfanuméricas largas
             tokens = re.findall(r"[a-zA-Z0-9_\-]{20,}", line)
             for token in tokens:
                 entropy = calculate_shannon_entropy(token)
-                if entropy > 4.5:  # Umbral empírico para base64/hex keys
+                if entropy > 4.5:
                     print_cortex(
-                        f"Entropía Anómala Detectada (E={entropy:.2f}). Posible secreto: {token[:6]}... Bloqueando.",
+                        f"ENTROPY-VETO: E={entropy:.2f} {token[:6]}...",
                         error=True,
                     )
                     return 1
 
-    print_cortex("Pre-commit estructural superado.")
+    print_cortex("Pre-commit: PASS.")
     return 0
 
 
 def _extract_diff_context(diff: str) -> list:
-    """Extrae las funciones o clases reales modificadas leyendo el header de chunks del diff."""
+    """C5-REAL: Extract diff chunk headers."""
     context = []
     for line in diff.splitlines():
         if line.startswith("@@"):
@@ -143,7 +141,6 @@ def run_prepare_commit_msg(commit_msg_file):
     if not files:
         return 0
 
-    # 1. Extracción Causal de Contexto
     diff = get_staged_diff()
     modified_scopes = _extract_diff_context(diff)
 
@@ -160,15 +157,15 @@ def run_prepare_commit_msg(commit_msg_file):
     if scope in (".", ""):
         scope = "core"
 
-    auto_msg = f"{type_tag}({scope}): actualizar contexto estructural\n\n[CORTEX-SENTINEL: C5-REAL AST Forge]\n"
+    auto_msg = f"{type_tag}({scope}): update context\n\n[CORTEX-SENTINEL: C5-REAL]\n"
 
     if modified_scopes:
-        auto_msg += f"- Modificaciones detectadas: {', '.join(modified_scopes[:5])}\n"
+        auto_msg += f"- Scopes: {', '.join(modified_scopes[:5])}\n"
 
     with open(commit_msg_file, "w") as f:
         f.write(auto_msg + current_msg)
 
-    print_cortex(f"Forge semántico real basado en diff: {type_tag}({scope})")
+    print_cortex(f"Forge: {type_tag}({scope})")
     return 0
 
 
@@ -183,12 +180,12 @@ def main():
         else:
             sys.exit(0)
     else:
-        print_cortex("Instalando C5-REAL hooks (AST & Entropy)...")
+        print_cortex("Installing C5-REAL hooks...")
         repo_root = subprocess.run(
             ["git", "rev-parse", "--show-toplevel"], capture_output=True, text=True
         ).stdout.strip()
         if not repo_root:
-            print_cortex("Fuera de repositorio git.", error=True)
+            print_cortex("ERR: Not a git repo.", error=True)
             sys.exit(1)
 
         hooks_dir = Path(repo_root) / ".git" / "hooks"

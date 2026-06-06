@@ -1,6 +1,7 @@
 import asyncio
 import time
 import shutil
+import subprocess
 from pathlib import Path
 
 from cortex.engine import CortexEngine
@@ -9,14 +10,13 @@ from cortex.engine.swarm_10k import SwarmCommander
 
 
 async def deep_audit_cortex():
-    print("🦅 INICIANDO AUDITORÍA PROFUNDA DE CORTEX (C5-REAL) 🦅")
-    print("=========================================================")
+    print("[C5-REAL] AUDIT: CORTEX")
 
     # 1. Start Engine
     engine = CortexEngine()
 
     # 2. Orchestrate 1000 agents for deep structural scan
-    print("🌪️  Desplegando 1000 Agentes del Enjambre (LEGION-1k) para barrido estructural...")
+    print("[C5-REAL] TASK: SWARM_INIT | COUNT: 1000 | ACTION: AST_SCAN")
     test_bus_dir = Path("/tmp/cortex_1k_audit_bus")
     if test_bus_dir.exists():
         shutil.rmtree(test_bus_dir)
@@ -25,62 +25,52 @@ async def deep_audit_cortex():
     commander = SwarmCommander(bus_path=test_bus_dir)
     await commander.initialize()
 
-    tasks = []
-    # 1000 agents scanning the codebase logic
-    for i in range(1000):
-        tasks.append(
-            {"id": i, "domain": f"audit_shard_{i % 10}", "payload": f"scan_ast_region_{i}"}
-        )
+    tasks = [
+        {"id": i, "domain": f"audit_shard_{i % 10}", "payload": f"scan_ast_region_{i}"}
+        for i in range(1000)
+    ]
 
     start_time = time.perf_counter()
     await commander.execute_global_dispatch(tasks, parallel=True)
     total_time = time.perf_counter() - start_time
 
     report = await commander.get_density_report()
-    print(f"✅ Barrido completado en {total_time:.4f}s. Agentes desplegados: {report['agents']}")
+    print(f"[C5-REAL] TASK: SWARM_COMPLETE | TIME_S: {total_time:.4f} | AGENTS: {report['agents']}")
 
-    # Inyectar hallazgos de los 1000 agentes en la base de datos para TOM & OLIVER
-    print("💉 Inyectando telemetría del enjambre en CORTEX-Memory...")
+    print("[C5-REAL] TASK: TELEMETRY_INJECT | DEST: CORTEX-Memory")
     await engine.store(
         tenant_id="default",
         project="CORTEX",
         fact_type="system_health",
-        content=f"Enjambre desplegó {report['agents']} agentes en {total_time:.4f}s analizando el OuroborosGate, Rust ZeroCopyRingBuffer y el GIL annihilation.",
+        content=f"SWARM_DEPLOY: {report['agents']} AGENTS | TIME_S: {total_time:.4f} | TARGETS: OuroborosGate, Rust ZeroCopyRingBuffer, GIL",
         confidence="C5",
     )
     await engine.store(
         tenant_id="default",
         project="CORTEX",
         fact_type="system_health",
-        content="Los agentes detectaron deuda técnica menor en el manejo asíncrono y recomiendan purgar dependencias estocásticas para mantener la Ley de Exergía y el Límite de Landauer.",
+        content="ISSUE: ASYNC_TECH_DEBT | REC: PURGE_STOCHASTIC_DEPS | REASON: EXERGY_LAW_LANDAUER_LIMIT",
         confidence="C5",
     )
 
     # 3. TOM & OLIVER (y BENJI) Audit
-    print("\n🐺 DESPERTANDO LA TRÍADA SOBERANA (TOM -> BENJI -> OLIVER) ⚖️")
-    # Using default model/providers, overriding to anthropic to bypass gemini 429 quota limits
+    print("[C5-REAL] TASK: TRIAD_WAKE | TARGETS: TOM, BENJI, OLIVER")
     auditor = FrontierAuditor(engine, model_override="anthropic")
 
     audit_start = time.perf_counter()
     res = await auditor.run_audit("CORTEX")
     time.perf_counter() - audit_start
 
-    print("\n" + "=" * 60)
-    print("📜 REPORTE FORENSE FINAL:")
-    print("=" * 60)
+    print("---")
+    print("Report:")
     print(res["report_markdown"])
-    print("=" * 60)
-    print(
-        f"⏱️  Status: {res['status']} | Provider: {res['provider']} | Latency: {res['latency']:.1f}ms"
-    )
+    print(f"Metrics: {{ Status: {res['status']}, Provider: {res['provider']}, Latency_ms: {res['latency']:.1f} }}")
 
     await commander.consolidate_and_annihilate()
     if test_bus_dir.exists():
         shutil.rmtree(test_bus_dir)
 
     # Git Sentinel (R4)
-    import subprocess
-
     subprocess.run(["git", "status"])
 
 

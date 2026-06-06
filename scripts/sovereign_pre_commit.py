@@ -1,11 +1,7 @@
 #!/usr/bin/env python3
 """
-CORTEX Sovereign Pre-Commit Hook
-=================================
-Last line of defense against credential/seed leaks.
-Catches what .gitignore cannot - including `git add -f`.
-
-DERIVATION: Ω₃ Byzantine Default - verify, then trust.
+Claim: PRE_COMMIT_AUDIT
+Proof: { Base: Execute, Range: [0,1], Confidence: C5-REAL }
 """
 
 import re
@@ -44,7 +40,6 @@ RESET = "\033[0m"
 
 
 def get_staged_files() -> list[str]:
-    """Get list of files staged for commit."""
     paths, source = changed_files(include_untracked=False, prefer_staged=True)
     if source != "staged":
         return []
@@ -52,7 +47,6 @@ def get_staged_files() -> list[str]:
 
 
 def get_candidate_files() -> tuple[list[str], str, set[str]]:
-    """Prefer staged files, but fall back to the local diff when the index is empty."""
     paths, source = changed_files(include_untracked=True, prefer_staged=True)
     files = [str(path) for path in paths]
     tracked_paths = changed_files(include_untracked=False, prefer_staged=True)[0]
@@ -62,12 +56,11 @@ def get_candidate_files() -> tuple[list[str], str, set[str]]:
 
 
 def check_filenames(files: list[str]) -> list[str]:
-    """Check staged filenames against forbidden patterns."""
     violations: list[str] = []
     for filepath in files:
         for pattern in FORBIDDEN_PATTERNS:
             if pattern.search(filepath):
-                violations.append(f"  🚫 FILENAME: {filepath} (matched: {pattern.pattern})")
+                violations.append(f"- FILENAME: {filepath} | {pattern.pattern}")
                 break
     return violations
 
@@ -99,7 +92,6 @@ def _read_candidate_content(filepath: str, *, source: str, untracked_files: set[
 
 
 def check_file_contents(files: list[str], *, source: str, untracked_files: set[str]) -> list[str]:
-    """Scan candidate file contents for secret patterns."""
     violations: list[str] = []
     for filepath in files:
         try:
@@ -110,13 +102,12 @@ def check_file_contents(files: list[str], *, source: str, untracked_files: set[s
             )
             for pattern in CONTENT_PATTERNS:
                 if pattern.search(diff_content):
-                    violations.append(f"  🔍 CONTENT: {filepath} contains '{pattern.pattern}'")
+                    violations.append(f"- CONTENT: {filepath} | {pattern.pattern}")
                     break
         except (OSError, ValueError):
             import logging
 
             pass
-    # Binary files or access errors - skip
     return violations
 
 
@@ -130,16 +121,11 @@ def main() -> int:
     violations.extend(check_file_contents(files, source=source, untracked_files=untracked_files))
 
     if violations:
-        print(f"\n{RED}{BOLD}╔══════════════════════════════════════════════════╗{RESET}")
-        print(f"{RED}{BOLD}║  🛑 SOVEREIGN SECURITY GATE - COMMIT BLOCKED    ║{RESET}")
-        print(f"{RED}{BOLD}╚══════════════════════════════════════════════════╝{RESET}\n")
-        scope = "staged files" if source == "staged" else "local diff files"
-        print(f"{YELLOW}Wallet seeds / credentials detected in {scope}:{RESET}\n")
+        scope = "staged" if source == "staged" else "local"
+        print("Claim: COMMIT_BLOCKED")
+        print(f"Proof: {{ Base: 'Credentials detected ({scope})', Range: [1, {len(violations)}], Confidence: C5-REAL }}")
         for v in violations:
-            print(f"{RED}{v}{RESET}")
-        print(f"\n{YELLOW}If this is a false positive, bypass with:{RESET}")
-        print("  git commit --no-verify\n")
-        print(f"{RED}⚠️  Bots drain exposed wallet seeds in <600ms.{RESET}\n")
+            print(v)
         return 1
 
     return 0

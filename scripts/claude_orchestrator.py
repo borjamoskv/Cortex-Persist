@@ -1,24 +1,9 @@
 #!/usr/bin/env python3
 """
-claude_orchestrator.py - C5-REAL Deterministic Claude Dispatcher
-
-Fires structured, reproducible requests to the Anthropic Messages API.
-Zero decorative prose. Pure httpx async. Pydantic-validated payloads.
-
+claude_orchestrator.py [C5-REAL]
 Usage:
-    # Single prompt
-    python scripts/claude_orchestrator.py "Explain CORTEX-Persist architecture"
-
-    # Batch from YAML manifest
-    python scripts/claude_orchestrator.py --manifest scripts/data/claude_manifest.yaml
-
-    # Custom model + output file
-    python scripts/claude_orchestrator.py "Query" --model claude-sonnet-4-20250514 -o result.json
-
-    # Stream mode
-    python scripts/claude_orchestrator.py "Query" --stream
-
-Reality Level: C5-REAL
+  python scripts/claude_orchestrator.py "Prompt"
+  python scripts/claude_orchestrator.py -m manifest.yaml
 """
 
 from __future__ import annotations
@@ -35,7 +20,6 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Final
 
-# ── Project root ──────────────────────────────────────────────────────
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
@@ -58,7 +42,6 @@ try:
 except ImportError:
     _RICH = False
 
-# ── Constants ─────────────────────────────────────────────────────────
 ANTHROPIC_API_URL: Final[str] = "https://api.anthropic.com/v1/messages"
 ANTHROPIC_API_VERSION: Final[str] = "2023-06-01"
 DEFAULT_MODEL: Final[str] = "claude-sonnet-4-20250514"
@@ -67,7 +50,6 @@ MAX_RETRIES: Final[int] = 3
 BACKOFF_BASE: Final[float] = 1.0
 BACKOFF_CAP: Final[float] = 30.0
 
-# ── Logging ───────────────────────────────────────────────────────────
 if _RICH:
     logging.basicConfig(
         level=logging.INFO,
@@ -81,13 +63,7 @@ log = logging.getLogger("cortex.claude_orchestrator")
 console = Console() if _RICH else None
 
 
-# ═══════════════════════════════════════════════════════════════════════
-#  Models
-# ═══════════════════════════════════════════════════════════════════════
-
-
 class ClaudeRequest(BaseModel):
-    """Validated payload for a single Claude API request."""
 
     prompt: str = Field(..., min_length=1, description="User prompt text")
     system: str = Field(
@@ -112,7 +88,6 @@ class ClaudeRequest(BaseModel):
 
 
 class ClaudeResponse(BaseModel):
-    """Structured response from Claude."""
 
     status: str  # "C5-REAL" | "error" | "retry_exhausted"
     model: str
@@ -127,7 +102,6 @@ class ClaudeResponse(BaseModel):
 
 @dataclass
 class OrchestratorStats:
-    """Aggregate stats for batch runs."""
 
     total: int = 0
     success: int = 0
@@ -138,13 +112,7 @@ class OrchestratorStats:
     results: list[ClaudeResponse] = field(default_factory=list)
 
 
-# ═══════════════════════════════════════════════════════════════════════
-#  Core Dispatcher
-# ═══════════════════════════════════════════════════════════════════════
-
-
 def _request_hash(req: ClaudeRequest) -> str:
-    """Deterministic SHA-256 hash for request dedup/audit."""
     blob = f"{req.model}|{req.system}|{req.prompt}|{req.temperature}".encode()
     return hashlib.sha256(blob).hexdigest()[:16]
 
@@ -179,7 +147,6 @@ async def dispatch_single(
     *,
     stream: bool = False,
 ) -> ClaudeResponse:
-    """Fire a single deterministic request to Claude with retry + backoff."""
     headers = _build_headers(api_key)
     payload = _build_payload(req)
     rhash = _request_hash(req)
@@ -278,7 +245,6 @@ async def _dispatch_stream(
     model: str,
     t0: float,
 ) -> ClaudeResponse:
-    """Handle SSE streaming from Claude."""
     payload["stream"] = True
     chunks: list[str] = []
     input_tokens = 0
@@ -334,11 +300,6 @@ async def _dispatch_stream(
     )
 
 
-# ═══════════════════════════════════════════════════════════════════════
-#  Batch Orchestrator
-# ═══════════════════════════════════════════════════════════════════════
-
-
 async def dispatch_batch(
     requests: list[ClaudeRequest],
     api_key: str,
@@ -346,7 +307,6 @@ async def dispatch_batch(
     concurrency: int = 3,
     stream: bool = False,
 ) -> OrchestratorStats:
-    """Dispatch multiple requests with bounded concurrency."""
     stats = OrchestratorStats(total=len(requests))
     semaphore = asyncio.Semaphore(concurrency)
 
@@ -385,7 +345,6 @@ async def dispatch_batch(
 
 
 def load_manifest(path: str) -> list[ClaudeRequest]:
-    """Load batch requests from a YAML manifest file."""
     try:
         import yaml
     except ImportError:
@@ -407,13 +366,7 @@ def load_manifest(path: str) -> list[ClaudeRequest]:
     return requests
 
 
-# ═══════════════════════════════════════════════════════════════════════
-#  Output
-# ═══════════════════════════════════════════════════════════════════════
-
-
 def render_stats(stats: OrchestratorStats) -> None:
-    """Print batch stats."""
     if console:
         table = Table(title="Claude Orchestrator - C5-REAL Results", show_lines=True)
         table.add_column("#", justify="right", style="dim")
@@ -449,7 +402,6 @@ def render_stats(stats: OrchestratorStats) -> None:
 
 
 def write_output(stats: OrchestratorStats, path: str) -> None:
-    """Write results to JSON file."""
     output = {
         "reality_level": "C5-REAL",
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
@@ -465,11 +417,6 @@ def write_output(stats: OrchestratorStats, path: str) -> None:
     }
     Path(path).write_text(json.dumps(output, indent=2, ensure_ascii=False), encoding="utf-8")
     log.info("[WRITE] Output → %s", path)
-
-
-# ═══════════════════════════════════════════════════════════════════════
-#  CLI
-# ═══════════════════════════════════════════════════════════════════════
 
 
 def parse_args() -> argparse.Namespace:
