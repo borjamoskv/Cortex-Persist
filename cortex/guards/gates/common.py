@@ -54,46 +54,4 @@ async def arun_cmd(cmd: list[str], cwd: Path = ROOT_DIR) -> tuple[int, str]:
         return 127, f"Command not found: {resolved[0]}"
 
 
-class GlobalSourceCache:
-    """O(1) Memory Cache for Python Source Files to Annihilate Repeated O(N) Disk I/O."""
-
-    _instance = None
-    _loaded = False
-    files: dict[Path, str] = {}
-
-    def __new__(cls) -> GlobalSourceCache:
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
-        return cls._instance
-
-    @classmethod
-    async def load(cls) -> None:
-        """Loads all Python files into memory concurrently. Called exactly once."""
-        if cls._loaded:
-            return
-
-        cortex_dir = ROOT_DIR / "cortex"
-
-        def _get_files() -> list[Path]:
-            # synchronous scan is unavoidable, but we do it only once
-            return [
-                f for f in cortex_dir.rglob("*.py") if "test" not in str(f) and ".pyc" not in str(f)
-            ]
-
-        target_files = await asyncio.to_thread(_get_files)
-
-        async def _read_file(p: Path) -> tuple[Path, str | None]:
-            try:
-                # Use to_thread to prevent blocking event loop on disk I/O
-                content = await asyncio.to_thread(p.read_text, encoding="utf-8")
-                return p, content
-            except OSError:
-                return p, None
-
-        results = await asyncio.gather(*(_read_file(f) for f in target_files))
-        for p, content in results:
-            if content is not None:
-                cls.files[p] = content
-
-        cls._loaded = True
-        # print(f"   [CACHE] {len(cls.files)} files ingestion complete.")
+from cortex.guards._seals_cache import GlobalSourceCache

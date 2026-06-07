@@ -69,12 +69,9 @@ def _count_test_functions(root: Path) -> int:
     return count
 
 
-def _count_rest_endpoints(root: Path) -> int:
-    """Count FastAPI route decorators (@router.get/post/put/delete/patch)."""
+def _count_pattern_occurrences_in_py_files(root: Path, pattern: re.Pattern) -> int:
+    """Count lines matching a pattern in Python production code."""
     count = 0
-    import re
-
-    pattern = re.compile(r"@\w*router\.(get|post|put|delete|patch|head|options)\(")
     for p in root.rglob("*.py"):
         if "tests" in p.parts or ".venv" in p.parts:
             continue
@@ -85,24 +82,22 @@ def _count_rest_endpoints(root: Path) -> int:
 
             logging.warning("Suppressed exception: %s", exc)
     return count
+
+
+def _count_rest_endpoints(root: Path) -> int:
+    """Count FastAPI route decorators (@router.get/post/put/delete/patch)."""
+    import re
+
+    pattern = re.compile(r"@\w*router\.(get|post|put|delete|patch|head|options)\(")
+    return _count_pattern_occurrences_in_py_files(root, pattern)
 
 
 def _count_cli_commands(root: Path) -> int:
     """Count @cli.command() and @<group>.command() decorators."""
-    count = 0
     import re
 
     pattern = re.compile(r"@\w+\.command\(")
-    for p in root.rglob("*.py"):
-        if "tests" in p.parts or ".venv" in p.parts:
-            continue
-        try:
-            count += sum(1 for line in p.open("r", errors="replace") if pattern.search(line))
-        except Exception as exc:
-            import logging
-
-            logging.warning("Suppressed exception: %s", exc)
-    return count
+    return _count_pattern_occurrences_in_py_files(root, pattern)
 
 
 def _count_secret_patterns() -> int:
