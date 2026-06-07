@@ -6,7 +6,10 @@ Reality Level: C5-REAL
 """
 
 import pytest
+
+pytest.importorskip("numpy")
 import numpy as np
+
 from cortex.utils.tda_hodge import HodgeZeroModeTransport
 
 

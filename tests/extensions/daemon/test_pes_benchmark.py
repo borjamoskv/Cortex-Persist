@@ -4,7 +4,10 @@ import asyncio
 import time
 import json
 import sqlite3
+
+pytest.importorskip("numpy")
 import numpy as np
+
 from unittest.mock import AsyncMock, MagicMock
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
