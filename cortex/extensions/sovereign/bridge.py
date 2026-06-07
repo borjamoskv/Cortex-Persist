@@ -32,15 +32,15 @@ class SovereignBridge:
         self.discover_and_load()
 
     def _ensure_path(self) -> None:
-        """Ensure the skill parent directory is in sys.path.
+        """Ensure the skills root directory itself is in sys.path.
 
         Appended rather than inserted at 0 to prevent sys.path injection attacks
         where a file in the skills root could hijack the Python standard library.
         """
-        parent = str(self.skills_root.parent)
-        if parent not in sys.path:
-            sys.path.append(parent)
-            logger.debug("Appended %s to sys.path", parent)
+        skills_dir = str(self.skills_root)
+        if skills_dir not in sys.path:
+            sys.path.append(skills_dir)
+            logger.debug("Appended %s to sys.path", skills_dir)
 
     def discover_and_load(self) -> None:
         """Scan SKILLS_ROOT for skill packages and register them for lazy loading."""
@@ -56,9 +56,8 @@ class SovereignBridge:
 
     def _load_skill(self, skill_name: str) -> None:
         """Import a specific skill as a Python module."""
-        module_path = f"antigravity.skills.{skill_name}"
+        module_path = skill_name
         try:
-            # We assume the directory name is the package name inside antigravity.skills
             module = importlib.import_module(module_path)
             self.registry[skill_name] = module
             logger.debug("Skill loaded: %s", skill_name)
