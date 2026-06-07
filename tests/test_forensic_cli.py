@@ -171,31 +171,18 @@ def test_forensics_cli_rejects_manifest_paths_outside_base(tmp_path) -> None:
     assert "unsafe artifact path" in result.output
 
 
-def test_forensics_command_is_experimental_in_root_cli() -> None:
-    assert _root_cli_has_forensics(None) is False
-    assert _root_cli_has_forensics("1") is True
+def test_forensics_command_is_experimental_in_root_cli(monkeypatch) -> None:
+    import importlib
+    import cortex.cli.common
+    import cortex.cli.forensics_cmds
 
+    if "forensics" in cortex.cli.common.cli.commands:
+        del cortex.cli.common.cli.commands["forensics"]
 
-def _root_cli_has_forensics(flag: str | None) -> bool:
-    env = os.environ.copy()
-    env["PYTHONPATH"] = str(REPO_ROOT)
-    if flag is None:
-        env.pop("CORTEX_ENABLE_EXPERIMENTAL_CLI", None)
-    else:
-        env["CORTEX_ENABLE_EXPERIMENTAL_CLI"] = flag
+    monkeypatch.delenv("CORTEX_ENABLE_EXPERIMENTAL_CLI", raising=False)
+    importlib.reload(cortex.cli.forensics_cmds)
+    assert "forensics" not in cortex.cli.common.cli.commands
 
-    completed = subprocess.run(
-        [
-            sys.executable,
-            "-c",
-            "from cortex.cli import cli; print('forensics' in cli.commands)",
-        ],
-        cwd=REPO_ROOT,
-        env=env,
-        capture_output=True,
-        text=True,
-        timeout=20,
-        check=False,
-    )
-    assert completed.returncode == 0, completed.stderr
-    return completed.stdout.strip().splitlines()[-1] == "True"
+    monkeypatch.setenv("CORTEX_ENABLE_EXPERIMENTAL_CLI", "1")
+    importlib.reload(cortex.cli.forensics_cmds)
+    assert "forensics" in cortex.cli.common.cli.commands
