@@ -202,41 +202,6 @@ class WorkingMemoryL1:
             self._tenant_tokens.clear()
         return flushed
 
-    # ─── Snapshot & Export ────────────────────────────────────────
-
-    def snapshot(self, tenant_id: str | None = None) -> dict[str, Any]:
-        """Export current working memory state as a portable dictionary."""
-        resolved_tenant_id = tenant_id or get_tenant_id()
-        if resolved_tenant_id not in self._buffers:
-            return {"tenant_id": resolved_tenant_id, "tokens": 0, "events": []}
-
-        return {
-            "tenant_id": resolved_tenant_id,
-            "tokens": self._tenant_tokens[resolved_tenant_id],
-            "events": [
-                e.model_dump() if hasattr(e, "model_dump") else e.dict()
-                for e in self._buffers[resolved_tenant_id]
-            ],
-        }
-
-    def restore(self, snapshot_data: dict[str, Any], tenant_id: str | None = None) -> None:
-        """Import working memory state from a snapshot dictionary."""
-        resolved_tenant_id = tenant_id or snapshot_data.get("tenant_id") or get_tenant_id()
-        if not resolved_tenant_id:
-            raise ValueError("Cannot restore: resolved tenant_id is None or empty.")
-
-        events_data = snapshot_data.get("events", [])
-        events = []
-        for e_data in events_data:
-            if isinstance(e_data, dict):
-                events.append(MemoryEvent(**e_data))
-            else:
-                events.append(e_data)
-
-        self._buffers[resolved_tenant_id] = deque(events)
-        self._tenant_tokens[resolved_tenant_id] = snapshot_data.get(
-            "tokens", sum(e.token_count for e in events)
-        )
 
     # ─── Introspection ────────────────────────────────────────────
 
@@ -258,10 +223,6 @@ class WorkingMemoryL1:
             return 0.0
         return self._tenant_tokens.get(tenant_id, 0) / self._max_tokens
 
-    def event_count(self, tenant_id: str | None = None) -> int:
-        """Number of events in the buffer for a tenant."""
-        tenant_id = tenant_id or get_tenant_id()
-        return len(self._buffers.get(tenant_id, []))
 
     def __len__(self) -> int:
         """Total event count across all tenants."""

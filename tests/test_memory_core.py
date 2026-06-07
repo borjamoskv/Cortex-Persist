@@ -76,7 +76,6 @@ class TestWorkingMemoryL1:
         overflow = l1.add_event(event)
         assert overflow == []
         assert len(l1) == 1
-        assert l1.event_count(tenant_id="test_tenant") == 1
         assert l1.utilization(tenant_id="test_tenant") == pytest.approx(0.05)
 
     def test_add_triggers_overflow(self):
@@ -137,19 +136,6 @@ class TestWorkingMemoryL1:
         assert len(flushed) == 2
         assert len(l1) == 0
 
-    def test_snapshot_and_restore(self):
-        l1 = WorkingMemoryL1(max_tokens=1000)
-        l1.add_event(_make_event(content="snapshot me", token_count=50))
-
-        snap = l1.snapshot(tenant_id="test_tenant")
-        assert snap["tokens"] == 50
-        assert len(snap["events"]) == 1
-
-        l1_new = WorkingMemoryL1(max_tokens=1000)
-        l1_new.restore(snap, tenant_id="test_tenant")
-        ctx = l1_new.get_context(tenant_id="test_tenant")
-        assert len(ctx) == 1
-        assert ctx[0]["content"] == "snapshot me"
 
     def test_utilization_ratio(self):
         l1 = WorkingMemoryL1(max_tokens=200)

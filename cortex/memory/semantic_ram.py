@@ -23,6 +23,7 @@ from cortex.compat.optional import np  # lazy: pip install cortex-persist[comput
 class SemanticFactPayload(TypedDict):
     """Payload representing a fact transiting through working towards semantic memory."""
 
+    tenant_id: str
     project: str
     content: str
     fact_type: str
@@ -349,7 +350,7 @@ class DynamicSemanticSpace:
                     # Async background storage tracked in _active_flushes to prevent premature GC
                     _t = asyncio.create_task(
                         self.manager.store(
-                            tenant_id="default_tenant",  # Should be passed in real scenarios
+                            tenant_id=fact["tenant_id"],
                             project_id=fact["project"],
                             content=fact["content"],
                             fact_type=fact["fact_type"],
@@ -384,21 +385,3 @@ class DynamicSemanticSpace:
 
         return facts
 
-    async def store_with_heartbeat(
-        self, project: str, content: str, fact_type: str = "knowledge"
-    ) -> bool:
-        """Stores a fact and triggers autonomous flush if semantic pressure is high (150/100)."""
-        await asyncio.sleep(0)  # Yield to event loop
-        fact_data: SemanticFactPayload = {
-            "project": project,
-            "content": content,
-            "fact_type": fact_type,
-            "timestamp": str(time.monotonic()),
-        }
-        needs_flush = self.autonomic_buffer.add(fact_data)
-        if needs_flush:
-            # Autonomous trigger: Pressure threshold reached (Ω₅ Antifragile persistence)
-            _t = asyncio.create_task(self.force_autonomic_flush(reason="High Semantic Pressure"))
-            self._active_flushes.add(_t)
-            _t.add_done_callback(self._active_flushes.discard)
-        return True

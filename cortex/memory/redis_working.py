@@ -223,46 +223,6 @@ class RedisWorkingMemoryL1:
                 self._redis.delete(bkey, tkey)
         return flushed
 
-    def snapshot(self, tenant_id: str | None = None) -> dict[str, Any]:
-        resolved_tenant_id = tenant_id or get_tenant_id()
-        bkey = self._buffer_key(resolved_tenant_id)
-        tkey = self._tokens_key(resolved_tenant_id)
-
-        tokens = int(self._redis.get(tkey) or 0)
-        buffer_data = self._redis.lrange(bkey, 0, -1)
-        events = [json.loads(item) for item in buffer_data]
-
-        return {
-            "tenant_id": resolved_tenant_id,
-            "tokens": tokens,
-            "events": events,
-        }
-
-    def restore(self, snapshot_data: dict[str, Any], tenant_id: str | None = None) -> None:
-        resolved_tenant_id = tenant_id or snapshot_data.get("tenant_id") or get_tenant_id()
-        if not resolved_tenant_id:
-            raise ValueError("Cannot restore: resolved tenant_id is None or empty.")
-
-        bkey = self._buffer_key(resolved_tenant_id)
-        tkey = self._tokens_key(resolved_tenant_id)
-
-        events_data = snapshot_data.get("events", [])
-        pipe = self._redis.pipeline()
-        pipe.delete(bkey)
-        for e_data in events_data:
-            if isinstance(e_data, dict):
-                pipe.rpush(bkey, json.dumps(e_data))
-            else:
-                pipe.rpush(
-                    bkey,
-                    json.dumps(
-                        e_data.model_dump() if hasattr(e_data, "model_dump") else e_data.dict()
-                    ),
-                )
-
-        tokens = snapshot_data.get("tokens", 0)
-        pipe.set(tkey, tokens)
-        pipe.execute()
 
     @property
     def current_tokens(self) -> int:
@@ -281,10 +241,6 @@ class RedisWorkingMemoryL1:
         tkey = self._tokens_key(tenant_id)
         return int(self._redis.get(tkey) or 0) / self._max_tokens
 
-    def event_count(self, tenant_id: str | None = None) -> int:
-        tenant_id = tenant_id or get_tenant_id()
-        bkey = self._buffer_key(tenant_id)
-        return self._redis.llen(bkey)
 
     def __len__(self) -> int:
         keys = self._redis.keys(f"{self._prefix}buffer:*")
