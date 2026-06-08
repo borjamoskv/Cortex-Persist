@@ -8,5 +8,6 @@ C5-REAL Biological-Computational Substrate.
 [C5-REAL MUTATED BY SMTE]"""
 
 from .parser import AgentASTParser
+from .utm import UnifiedThermodynamicManifold
 
-__all__ = ["AgentASTParser"]
+__all__ = ["AgentASTParser", "UnifiedThermodynamicManifold"]
