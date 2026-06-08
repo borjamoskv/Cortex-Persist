@@ -1,9 +1,10 @@
-import json
 import hashlib
+import json
 import time
-from typing import Any, Dict, List, Optional
-from enum import Enum
 from dataclasses import dataclass
+from enum import Enum
+from typing import Any, Optional
+
 
 class EpistemicState(Enum):
     CONFIRMED = "confirmed"
@@ -24,7 +25,7 @@ class EpistemicEvent:
 
 # Z3 for logical guards
 try:
-    from z3 import Solver, Int, Real, Bool, And, sat, unsat
+    from z3 import And, Bool, Int, Real, Solver, sat, unsat
     Z3_AVAILABLE = True
 except ImportError:
     Z3_AVAILABLE = False
@@ -64,8 +65,8 @@ class Z3Guard:
         """Reset completo del solver SMT para verificación limpia e independiente."""
         if self.enabled:
             self.solver = Solver()
-            self.constraints: Dict[str, Any] = {}
-            self.variables: Dict[str, Any] = {}  # nombre -> variable Z3
+            self.constraints: dict[str, Any] = {}
+            self.variables: dict[str, Any] = {}  # nombre -> variable Z3
 
     def declare_var(self, name: str, var_type: str = "Real"):
         """
@@ -113,7 +114,7 @@ class Z3Guard:
         self.solver.add(expr)
         return True
 
-    def check(self, value: Any = None, guards: Optional[List[str]] = None) -> Dict:
+    def check(self, value: Any = None, guards: Optional[list[str]] = None) -> dict:
         """
         Verificación SMT completa.
         
@@ -200,7 +201,7 @@ class EpistemicMembrane:
         payload_str = json.dumps(value, ensure_ascii=False)
         return len(payload_str) / 100.0
 
-    def _get_causal_anchor(self, metadata: Dict) -> str:
+    def _get_causal_anchor(self, metadata: dict) -> str:
         if metadata and "causal_anchor" in metadata:
             return metadata["causal_anchor"]
         fallback = hashlib.sha256(
@@ -248,7 +249,7 @@ class EpistemicMembrane:
             reality_level=reality
         )
 
-    def check(self, key: str, value: Any, metadata: Dict = None, guards: List[str] = None) -> EpistemicEvent:
+    def check(self, key: str, value: Any, metadata: dict = None, guards: list[str] = None) -> EpistemicEvent:
         metadata = metadata or {}
         reality_level = "C4-SIM"
         causal_anchor = self._get_causal_anchor(metadata)

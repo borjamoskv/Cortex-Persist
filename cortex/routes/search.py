@@ -33,7 +33,7 @@ async def search_facts(
     )
     return [
         SearchResult(
-            fact_id=r.fact_id,
+            fact_id=str(r.fact_id),
             project=r.project,
             content=r.content,
             fact_type=r.fact_type,
@@ -71,7 +71,7 @@ async def search_facts_get(
     )
     return [
         SearchResult(
-            fact_id=r.fact_id,
+            fact_id=str(r.fact_id),
             project=r.project,
             content=r.content,
             fact_type=r.fact_type,

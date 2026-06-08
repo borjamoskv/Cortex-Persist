@@ -13,7 +13,7 @@ __all__ = ["SearchResult", "SearchScope"]
 class SearchResult:
     """A single search result with metadata."""
 
-    fact_id: int
+    fact_id: str
     content: str
     project: str
     fact_type: str

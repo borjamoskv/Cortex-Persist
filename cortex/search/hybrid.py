@@ -281,11 +281,11 @@ async def _expand_graph_context(
     # 1-hop traversal to align with AtmsGraph logic
     placeholders = ",".join(["?"] * len(fact_ids))
     try:
-        query = f\"\"\"
+        query = f"""
             SELECT parent_id, child_id, relationship_type 
             FROM causal_edges 
             WHERE parent_id IN ({placeholders}) OR child_id IN ({placeholders})
-        \"\"\"
+        """
         cursor = await conn.execute(query, fact_ids + fact_ids)
         edges = await cursor.fetchall()
 

@@ -1,15 +1,17 @@
 from dataclasses import dataclass
-from typing import List, Dict, Any, Optional
+from typing import Any, Optional
+
 from .manifold import _hash_to_vector
+
 
 @dataclass
 class UnknownCore:
     region: str
     unsat_trace: list
     entropy_signature: float
-    collapse_vector: List[float]
+    collapse_vector: list[float]
 
-def make_node(op: str, value: Any, weight: float = 1.0) -> Dict[str, Any]:
+def make_node(op: str, value: Any, weight: float = 1.0) -> dict[str, Any]:
     return {"op": op, "value": value, "weight": weight}
 
 def extract_unknown_core(event: Any) -> UnknownCore:
@@ -21,7 +23,7 @@ def extract_unknown_core(event: Any) -> UnknownCore:
         collapse_vector=_hash_to_vector(trace)
     )
 
-def synthesize_ast_from_collapse(core: UnknownCore) -> List[Dict[str, Any]]:
+def synthesize_ast_from_collapse(core: UnknownCore) -> list[dict[str, Any]]:
     ast = []
     
     # 1. seed from unsat constraints
@@ -37,7 +39,7 @@ def synthesize_ast_from_collapse(core: UnknownCore) -> List[Dict[str, Any]]:
         
     return ast
 
-def unknown_as_operator(epistemic_event: Any) -> Optional[List[Dict[str, Any]]]:
+def unknown_as_operator(epistemic_event: Any) -> Optional[list[dict[str, Any]]]:
     state_val = epistemic_event.state.value if hasattr(epistemic_event.state, 'value') else str(epistemic_event.state)
     if state_val not in ["unknown", "undecidable", "solver-silent"]:
         return None

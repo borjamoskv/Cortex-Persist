@@ -1,13 +1,15 @@
-from typing import List, Dict, Any
 from dataclasses import dataclass
-from .manifold import update_metric, EpistemicField
+from typing import Any
+
+from .manifold import EpistemicField, update_metric
+
 
 @dataclass
 class GhostNode:
     op: str
     value: Any
     weight: float
-    collapse_vector: List[float]
+    collapse_vector: list[float]
 
 class GhostManifold:
     """
@@ -16,9 +18,9 @@ class GhostManifold:
     en campos de fuerza persistentes que deforman el tensor g_ij continuamente.
     """
     def __init__(self):
-        self.ghost_structures: List[GhostNode] = []
+        self.ghost_structures: list[GhostNode] = []
         
-    def absorb_uop_ast(self, ast: List[Dict[str, Any]]):
+    def absorb_uop_ast(self, ast: list[dict[str, Any]]):
         """Asimila un AST generado por Unknown-As-Operator al manifold fantasma."""
         anchor_vector = [0.0] * 64
         # 1. Localizar vector topológico
@@ -38,7 +40,7 @@ class GhostManifold:
                     )
                 )
 
-    def propagate(self, g_dynamic: List[List[float]]) -> List[List[float]]:
+    def propagate(self, g_dynamic: list[list[float]]) -> list[list[float]]:
         """
         Propagación Estructural:
         Los nodos fantasma emiten un campo gravitacional pasivo y constante.

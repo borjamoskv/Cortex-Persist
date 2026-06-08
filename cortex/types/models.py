@@ -6,11 +6,9 @@ Centralized Pydantic models for request/response validation.
 
 from __future__ import annotations
 
-from typing import Any, Literal, TypedDict, Annotated
+from typing import Any, Literal, TypedDict
 
-from pydantic import BaseModel, Field, field_validator, BeforeValidator
-
-FactIdStr = Annotated[str, BeforeValidator(lambda v: str(v) if v is not None else v)]
+from pydantic import BaseModel, Field, field_validator
 
 __all__ = [
     "AcceptanceResult",
@@ -154,7 +152,7 @@ class StoreRequest(BaseModel):
 
 
 class StoreResponse(BaseModel):
-    fact_id: FactIdStr
+    fact_id: str
     project: str
     message: str
 
@@ -182,7 +180,7 @@ class SearchRequest(BaseModel):
 
 
 class SearchResult(BaseModel):
-    fact_id: FactIdStr
+    fact_id: str
     project: str
     content: str
     fact_type: str
@@ -209,7 +207,7 @@ class VoteRequest(BaseModel):
 
 
 class VoteResponse(BaseModel):
-    fact_id: FactIdStr
+    fact_id: str
     agent: str
     vote: int
     new_consensus_score: float
@@ -239,7 +237,7 @@ class VoteV2Request(BaseModel):
 
 
 class FactResponse(BaseModel):
-    id: FactIdStr
+    id: str
     project: str
     content: str
     fact_type: str
@@ -402,7 +400,7 @@ class LedgerReportResponse(BaseModel):
 
 
 class CheckpointResponse(BaseModel):
-    checkpoint_id: FactIdStr | None
+    checkpoint_id: str | None
     message: str
     status: str = "success"
 
@@ -431,7 +429,7 @@ class MejoraloScanResponse(BaseModel):
     dead_code: bool
     total_files: int = 0
     total_loc: int = 0
-    fact_id: FactIdStr | None = None
+    fact_id: str | None = None
 
 
 class MejoraloSessionRequest(BaseModel):
@@ -442,7 +440,7 @@ class MejoraloSessionRequest(BaseModel):
 
 
 class MejoraloSessionResponse(BaseModel):
-    fact_id: FactIdStr
+    fact_id: str
     project: str
     delta: int
     status: str = "recorded"

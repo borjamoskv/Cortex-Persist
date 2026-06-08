@@ -1,7 +1,7 @@
 # [C5-REAL] Unified Thermodynamic Manifold (UTM)
-import math
 import logging
-from typing import Dict, Any
+import math
+from typing import Any
 
 logger = logging.getLogger("cortex.engine.smte.utm")
 
@@ -70,7 +70,7 @@ class UnifiedThermodynamicManifold:
             f"R(Ψ)={self.curvature:.4f}, Exergy={self.exergy:.4f}"
         )
 
-    def get_manifold_state(self) -> Dict[str, Any]:
+    def get_manifold_state(self) -> dict[str, Any]:
         return {
             "reality_level": "C5-REAL",
             "psi_vector": self.psi,

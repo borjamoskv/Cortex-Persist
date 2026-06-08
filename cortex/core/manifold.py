@@ -1,6 +1,6 @@
 import hashlib
 from dataclasses import dataclass
-from typing import List, Any, Optional
+from typing import Any, Optional
 
 # Expected to import EpistemicState, EpistemicEvent from membrane
 # from .membrane import EpistemicEvent, EpistemicState
@@ -8,10 +8,10 @@ from typing import List, Any, Optional
 @dataclass
 class EpistemicField:
     curvature: float
-    direction: List[float]
+    direction: list[float]
     uncertainty_density: float
 
-def _hash_to_vector(trace: Optional[dict], dim: int = 64) -> List[float]:
+def _hash_to_vector(trace: Optional[dict], dim: int = 64) -> list[float]:
     """Generates a deterministic directional vector from the solver trace."""
     if not trace:
         return [0.0] * dim
@@ -37,7 +37,7 @@ def epistemic_projection(event: Any) -> EpistemicField:
         uncertainty_density=1.0 - event.confidence
     )
 
-def update_metric(g: List[List[float]], epistemic_field: EpistemicField) -> List[List[float]]:
+def update_metric(g: list[list[float]], epistemic_field: EpistemicField) -> list[list[float]]:
     """Deforms the g_ij Riemannian metric based on the epistemic field."""
     dim = len(g)
     direction = epistemic_field.direction
@@ -53,7 +53,7 @@ def update_metric(g: List[List[float]], epistemic_field: EpistemicField) -> List
             )
     return g
 
-def compute_geodesic(g_static: List[List[float]], g_dynamic: List[List[float]]) -> List[float]:
+def compute_geodesic(g_static: list[list[float]], g_dynamic: list[list[float]]) -> list[float]:
     """Computes the shortest path through the deformed space."""
     dim = len(g_dynamic)
     shift = [0.0] * dim
@@ -61,7 +61,7 @@ def compute_geodesic(g_static: List[List[float]], g_dynamic: List[List[float]]) 
         shift[i] = g_dynamic[i][i] - g_static[i][i]
     return shift
 
-def apply_mutation(ast: Any, vector: List[float], event: Optional[Any] = None) -> Any:
+def apply_mutation(ast: Any, vector: list[float], event: Optional[Any] = None) -> Any:
     """
     Applies the multi-dimensional drift vector to the AST.
     If the event indicates a logical collapse, UAO generates structure directly.
@@ -69,8 +69,8 @@ def apply_mutation(ast: Any, vector: List[float], event: Optional[Any] = None) -
     if event:
         state_val = event.state.value if hasattr(event.state, 'value') else str(event.state)
         if state_val in ["unknown", "solver-silent", "undecidable"]:
-            from .uop import unknown_as_operator
             from .ghost import ghost_manifold_engine
+            from .uop import unknown_as_operator
             new_ast = unknown_as_operator(event)
             if new_ast is not None:
                 # Ghost Manifold Absorbs the geometry of failure
@@ -79,7 +79,7 @@ def apply_mutation(ast: Any, vector: List[float], event: Optional[Any] = None) -
                 
     return ast
 
-def autodidact_step(ast: Any, g_static: List[List[float]], g_dynamic: List[List[float]], epistemic_events: List[Any]) -> Any:
+def autodidact_step(ast: Any, g_static: list[list[float]], g_dynamic: list[list[float]], epistemic_events: list[Any]) -> Any:
     """
     The Autodidact Drift Operator.
     Navigates the geometry of structured ignorance instead of avoiding errors.

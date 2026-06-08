@@ -70,7 +70,7 @@ async def record_session(
         actions=request.actions,
     )
     return MejoraloSessionResponse(
-        fact_id=fact_id,
+        fact_id=str(fact_id),
         project=request.project,
         delta=request.score_after - request.score_before,
     )

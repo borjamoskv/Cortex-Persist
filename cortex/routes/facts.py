@@ -106,7 +106,7 @@ async def store_fact(
             source=req.source,
             meta=req.meta,
         )
-        return StoreResponse(fact_id=fact_id, project=req.project, message="Fact stored")
+        return StoreResponse(fact_id=str(fact_id), project=req.project, message="Fact stored")
     except (ValueError, GuardViolation) as e:
         raise HTTPException(status_code=400, detail=str(e)) from None
     except HTTPException:
@@ -169,7 +169,7 @@ async def recall_facts(
         fact_data = _fact_data(fact)
         response.append(
             FactResponse(
-                id=fact_data["id"],
+                id=str(fact_data["id"]),
                 project=fact_data["project"],
                 content=fact_data["content"],
                 fact_type=fact_data["fact_type"],
@@ -203,7 +203,7 @@ async def list_all_facts(
         fact_data = _fact_data(fact)
         response.append(
             FactResponse(
-                id=fact_data["id"],
+                id=str(fact_data["id"]),
                 project=fact_data["project"],
                 content=fact_data["content"],
                 fact_type=fact_data["fact_type"],
@@ -240,7 +240,7 @@ async def search_facts(
     )
     return [
         FactResponse(
-            id=r.fact_id,
+            id=str(r.fact_id),
             project=r.project,
             content=r.content,
             fact_type=r.fact_type,
@@ -269,14 +269,14 @@ async def get_fact_history(
     # If using the 'updated_from' edge type.
     try:
         chain = await engine.get_causal_chain(
-            fact_id=fact_id, direction="up", max_depth=50, tenant_id=auth.tenant_id
+            fact_id=str(fact_id), direction="up", max_depth=50, tenant_id=auth.tenant_id
         )
         response: list[FactResponse] = []
         for fact in chain:
             fact_data = _fact_data(fact)
             response.append(
                 FactResponse(
-                    id=fact_data["id"],
+                    id=str(fact_data["id"]),
                     project=fact_data["project"],
                     content=fact_data["content"],
                     fact_type=fact_data["fact_type"],
@@ -360,7 +360,7 @@ async def cast_vote(
         updated_fact_data = _fact_data(updated_fact) if updated_fact else None
 
         return VoteResponse(
-            fact_id=fact_id,
+            fact_id=str(fact_id),
             agent=agent_id,
             vote=req.value,
             new_consensus_score=score,
@@ -395,7 +395,7 @@ async def cast_vote_v2(
             )
 
         score = await engine.vote_v2(
-            fact_id=fact_id,
+            fact_id=str(fact_id),
             agent=req.agent_id,
             value=req.vote,
         )
@@ -405,7 +405,7 @@ async def cast_vote_v2(
         updated_fact_data = _fact_data(updated_fact) if updated_fact else None
 
         return VoteResponse(
-            fact_id=fact_id,
+            fact_id=str(fact_id),
             agent=req.agent_id,
             vote=req.vote,
             new_consensus_score=score,
@@ -485,7 +485,7 @@ async def get_fact_by_id(
     fact_data = _fact_data(fact)
 
     return FactResponse(
-        id=fact_data["id"],
+        id=str(fact_data["id"]),
         project=fact_data["project"],
         content=fact_data["content"],
         fact_type=fact_data["fact_type"],
@@ -514,7 +514,7 @@ async def get_causal_chain(
     """Get the causal chain for a fact (up=ancestors, down=descendants)."""
     try:
         chain = await engine.get_causal_chain(
-            fact_id=fact_id,
+            fact_id=str(fact_id),
             direction=direction,
             max_depth=max_depth,
         )

@@ -5,10 +5,10 @@ Extraction, relationship detection, and backend orchestration.
 """
 
 import logging
+import os
 import sqlite3
 
-import os
-from cortex.graph.backends import GraphBackend, SQLiteBackend, Neo4jBackend
+from cortex.graph.backends import GraphBackend, Neo4jBackend, SQLiteBackend
 from cortex.graph.patterns import COMMON_WORDS, ENTITY_PATTERNS, RELATION_SIGNALS
 
 __all__ = [

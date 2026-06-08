@@ -2,8 +2,11 @@
 """Neo4j Backend for MÖBIUS OS Graph."""
 
 import os
+
 from neo4j import AsyncGraphDatabase
+
 from cortex.graph.backends.base import GraphBackend
+
 
 class Neo4jBackend(GraphBackend):
     def __init__(self, uri=None, user=None, password=None):

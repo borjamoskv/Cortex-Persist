@@ -14,7 +14,7 @@ import re
 from typing import Any
 
 try:
-    from z3 import Int, Real, Solver, sat, unsat, Bool, And
+    from z3 import And, Bool, Int, Real, Solver, sat, unsat
 
     HAS_Z3 = True
 except ImportError:
