@@ -1,11 +1,30 @@
 import json
 import hashlib
 import time
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
+from enum import Enum
+from dataclasses import dataclass
+
+class EpistemicState(Enum):
+    CONFIRMED = "confirmed"
+    REJECTED = "rejected"
+    UNKNOWN = "unknown"
+    UNDECIDABLE = "undecidable"
+    MODEL_LIMITED = "model-limited"
+    SOLVER_SILENT = "solver-silent"
+
+@dataclass
+class EpistemicEvent:
+    payload: dict
+    state: EpistemicState
+    confidence: float
+    z3_trace: Optional[dict]
+    entropy_signature: float
+    reality_level: str
 
 # Z3 for logical guards
 try:
-    from z3 import Solver, Int, Bool, And, sat, unsat
+    from z3 import Solver, Int, Bool, And, sat, unsat, unknown
     Z3_AVAILABLE = True
 except ImportError:
     Z3_AVAILABLE = False
@@ -137,9 +156,10 @@ class Z3Guard:
                 "satisfied": True,
                 "model": {str(v): model[v] for v in model},
                 "guards_passed": list(self.constraints.keys()),
-                "reason": "All SMT constraints satisfied"
+                "reason": "All SMT constraints satisfied",
+                "z3_trace": {"result": "sat"}
             }
-        else:
+        elif result == unsat:
             unsat_core = []
             try:
                 core = self.solver.unsat_core()
@@ -151,7 +171,15 @@ class Z3Guard:
                 "status": "violated",
                 "satisfied": False,
                 "unsat_core": unsat_core,
-                "reason": "SMT constraint violation - see unsat_core for mathematical explanation"
+                "reason": "SMT constraint violation - see unsat_core for mathematical explanation",
+                "z3_trace": {"result": "unsat", "core": unsat_core}
+            }
+        else:
+            return {
+                "status": "unknown",
+                "satisfied": False,
+                "reason": "SMT solver returned unknown (undecidable space)",
+                "z3_trace": {"result": "unknown"}
             }
 
 
@@ -180,18 +208,74 @@ class EpistemicMembrane:
         ).hexdigest()[:16]
         return f"sim:{fallback}"
 
-    def check(self, key: str, value: Any, metadata: Dict = None, guards: List[str] = None) -> Dict:
+    def generate_marker(self, payload: dict, z3_status: Optional[str], solver_trace: Optional[dict], delta: float, reality: str) -> EpistemicEvent:
+        if z3_status is None or z3_status == "disabled":
+            return EpistemicEvent(
+                payload=payload,
+                state=EpistemicState.SOLVER_SILENT,
+                confidence=0.0,
+                z3_trace=solver_trace,
+                entropy_signature=delta,
+                reality_level=reality
+            )
+
+        if z3_status == "unknown":
+            return EpistemicEvent(
+                payload=payload,
+                state=EpistemicState.UNDECIDABLE,
+                confidence=0.3,
+                z3_trace=solver_trace,
+                entropy_signature=delta * 1.5,
+                reality_level=reality
+            )
+            
+        if z3_status == "satisfied":
+            return EpistemicEvent(
+                payload=payload,
+                state=EpistemicState.CONFIRMED,
+                confidence=0.95,
+                z3_trace=solver_trace,
+                entropy_signature=delta,
+                reality_level=reality
+            )
+            
+        return EpistemicEvent(
+            payload=payload,
+            state=EpistemicState.REJECTED,
+            confidence=0.99,  # High confidence that it's rejected
+            z3_trace=solver_trace,
+            entropy_signature=delta,
+            reality_level=reality
+        )
+
+    def check(self, key: str, value: Any, metadata: Dict = None, guards: List[str] = None) -> EpistemicEvent:
         metadata = metadata or {}
-        result = {
-            "reality_level": "C4-SIM",
-            "z3_validation": {},
-            "entropy_delta": 0.0,
-            "causal_anchor": self._get_causal_anchor(metadata),
-            "passed": True,
-            "reasons": []
-        }
+        reality_level = "C4-SIM"
+        causal_anchor = self._get_causal_anchor(metadata)
+        
+        # L2 - Reality Anchor
+        if not causal_anchor.startswith("sim:"):
+            reality_level = "C5-REAL"
+
+        # L1 - Entropy Gate
+        delta = self._estimate_entropy_delta(value)
+        now = time.time()
+        if (now - self.last_write_time) < 0.1 and delta > 5:
+            # Fails due to high frequency entropy violation
+            return EpistemicEvent(
+                payload=value if isinstance(value, dict) else {"raw": value},
+                state=EpistemicState.REJECTED,
+                confidence=0.99,
+                z3_trace={"reason": "High frequency entropy violation"},
+                entropy_signature=delta,
+                reality_level=reality_level
+            )
+        self.last_write_time = now
+        self.entropy_used += delta
 
         # L0 - Z3 Logic Gate
+        z3_status = None
+        solver_trace = None
         if guards and self.z3_guard and self.z3_guard.enabled:
             guard_results = {}
             for g in guards:
@@ -202,30 +286,24 @@ class EpistemicMembrane:
                         c = Int('confidence')
                         self.z3_guard.add_constraint("price_nonneg", p >= 0)
                         self.z3_guard.add_constraint("confidence_range", And(c >= 0, c <= 100))
-                guard_results[g] = self.z3_guard.check()
-            result["z3_validation"] = guard_results
-            if any(not g.get("satisfied", True) for g in guard_results.values()):
-                result["passed"] = False
-                result["reasons"].append("Z3 constraint violation")
-                return result
+                
+                check_res = self.z3_guard.check()
+                guard_results[g] = check_res
+                
+                # Capture the first non-satisfied status
+                if check_res.get("status") != "satisfied":
+                    z3_status = check_res.get("status")
+                    solver_trace = check_res.get("z3_trace")
+                    break
+            
+            if z3_status is None:
+                z3_status = "satisfied"
+                solver_trace = {"result": "sat"}
 
-        # L1 - Entropy Gate
-        delta = self._estimate_entropy_delta(value)
-        result["entropy_delta"] = delta
-        now = time.time()
-        if (now - self.last_write_time) < 0.1 and delta > 5:
-            result["passed"] = False
-            result["reasons"].append("High frequency entropy violation")
-        self.last_write_time = now
-        self.entropy_used += delta
-
-        # L2 - Reality Anchor
-        if not result["causal_anchor"].startswith("sim:"):
-            result["reality_level"] = "C5-REAL"
-        else:
-            result["reasons"].append("No causal proof → C4-SIM")
-
-        if result["passed"]:
-            result["reasons"].append("Membrane passed")
-
-        return result
+        return self.generate_marker(
+            payload=value if isinstance(value, dict) else {"raw": value},
+            z3_status=z3_status,
+            solver_trace=solver_trace,
+            delta=delta,
+            reality=reality_level
+        )
