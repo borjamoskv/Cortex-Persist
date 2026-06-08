@@ -77,17 +77,7 @@ async def run_audit():
     avg_exergy = sum(e for _, e in centurions_exergy) / len(centurions_exergy)
     
     # Compile a beautiful report
-    audit_report = {
-        "agents_deployed": report["agents"],
-        "centurions_active": report["centurions"],
-        "legions": report["legions"],
-        "shards_active": report["shards_active"],
-        "dispatch_time_ms": elapsed_ms,
-        "average_exergy": avg_exergy,
-        "narrative_friction_index": 0.892,  # Calibrated for Cinco Julios
-        "entropy_state": "STABLE_CHAOS",
-        "verdict": "C5-REAL verification confirmed: Narrative contains healthy, optimized friction."
-    }
+    # (audit_report metadata omitted as it was unused and replaced by direct artifact creation)
     
     # Save the report as an artifact
     artifact_dir = "/Users/borjafernandezangulo/.gemini/antigravity/brain/2c8ee54e-09df-499e-8aef-db1f3cc7577c/artifacts"
