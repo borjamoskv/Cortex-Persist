@@ -70,8 +70,11 @@ def apply_mutation(ast: Any, vector: List[float], event: Optional[Any] = None) -
         state_val = event.state.value if hasattr(event.state, 'value') else str(event.state)
         if state_val in ["unknown", "solver-silent", "undecidable"]:
             from .uop import unknown_as_operator
+            from .ghost import ghost_manifold_engine
             new_ast = unknown_as_operator(event)
             if new_ast is not None:
+                # Ghost Manifold Absorbs the geometry of failure
+                ghost_manifold_engine.absorb_uop_ast(new_ast)
                 return new_ast
                 
     return ast
@@ -81,9 +84,14 @@ def autodidact_step(ast: Any, g_static: List[List[float]], g_dynamic: List[List[
     The Autodidact Drift Operator.
     Navigates the geometry of structured ignorance instead of avoiding errors.
     """
+    from .ghost import ghost_manifold_engine
     dim = len(g_dynamic)
     drift_vector = [0.0] * dim
 
+    # 1. Apply passive background deformation from Ghost Manifold
+    g_dynamic = ghost_manifold_engine.propagate(g_dynamic)
+
+    # 2. Process active epistemic events
     for event in epistemic_events:
         field = epistemic_projection(event)
         g_dynamic = update_metric(g_dynamic, field)
