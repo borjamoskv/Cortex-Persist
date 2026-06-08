@@ -1,0 +1,25 @@
+# mobius/fitness/constraints.yaml
+# C5-REAL Evolutionary Constraints Config
+
+mutation_budget:
+  max_nodes_changed: 5
+  max_ast_growth: 1.20
+  max_functions_touched: 1
+  max_mutations_per_generation: 10
+
+protected_domains:
+  - "^mobius\\.fitness\\..*"
+  - "^mobius\\.eval\\..*"
+  - "^mobius\\.shadow\\..*"
+  - "^ledger\\..*"
+  - "^core\\.security\\..*"
+
+reproducibility:
+  require_input_hash: true
+  require_candidate_hash: true
+  require_fitness_version: true
+  deterministic_seed_injection: true
+
+gene_pool:
+  survivors_per_generation: 3
+  diversity_threshold: 0.25 # Require 25% structural diff among survivors
