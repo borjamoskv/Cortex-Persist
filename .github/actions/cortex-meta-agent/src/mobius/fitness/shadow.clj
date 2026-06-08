@@ -83,7 +83,14 @@
         latency-ok? (<= (:latency-ms candidate-eval) (:latency-ms baseline-eval))
         complexity-ok? (<= (:c-ast candidate-metrics) (* (:c-ast baseline-metrics) max-complexity-growth))
 
-        promoted? (and tests-pass? fitness-ok? latency-ok? complexity-ok?)]
+        promoted? (and tests-pass? fitness-ok? latency-ok? complexity-ok?)
+
+        rejection-reason (cond
+                           (not tests-pass?) :tests-failed
+                           (not complexity-ok?) :complexity-growth-exceeded
+                           (not latency-ok?) :latency-regression
+                           (not fitness-ok?) :insufficient-fitness-delta
+                           :else nil)]
 
     {:mutation-id mutation-id
      :status :evaluated
@@ -104,7 +111,8 @@
                           :latency-ok latency-ok?
                           :complexity-ok complexity-ok?}
 
-     :promoted? promoted?}))
+     :promoted? promoted?
+     :rejection-reason rejection-reason}))
 
 
 ;; ---------------------------------------------------------
