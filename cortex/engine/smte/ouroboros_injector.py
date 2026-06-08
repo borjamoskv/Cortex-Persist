@@ -18,7 +18,9 @@ Producer = None
 try:
     from confluent_kafka import Producer  # pyright: ignore[reportMissingImports]
 except ImportError:
-    logger.warning("confluent_kafka not installed. Synthetic friction injection will fail if invoked.")
+    logger.warning(
+        "confluent_kafka not installed. Synthetic friction injection will fail if invoked."
+    )
 
 
 def delivery_report(err, msg):
@@ -30,7 +32,9 @@ def delivery_report(err, msg):
 def inject_synthetic_friction(broker="localhost:9092", num_events=500):
     """Inyecta una carga de exergía y entropía en el bus system.friction."""
     if Producer is None:
-        logger.error("confluent_kafka is not installed. Cannot inject friction. Run: pip install confluent_kafka")
+        logger.error(
+            "confluent_kafka is not installed. Cannot inject friction. Run: pip install confluent_kafka"
+        )
         sys.exit(1)
     producer = Producer({"bootstrap.servers": broker})
 

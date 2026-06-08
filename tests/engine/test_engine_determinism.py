@@ -6,6 +6,7 @@ Covers:
 - Logging presence (no bare print() regression)
 - Basic integration smoke tests for engine pipeline
 """
+
 from __future__ import annotations
 
 import importlib
@@ -27,6 +28,7 @@ _ENGINE_DIR = _REPO_ROOT / "cortex" / "engine"
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _collect_engine_modules() -> list[str]:
     """Return dotted module names for all .py files under cortex/engine/."""
     modules: list[str] = []
@@ -47,6 +49,7 @@ _ENGINE_MODULES = _collect_engine_modules()
 # ---------------------------------------------------------------------------
 # Module importability
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.parametrize("module_name", _ENGINE_MODULES, ids=lambda m: m)
 def test_engine_module_importable(module_name: str) -> None:
@@ -103,6 +106,7 @@ def test_engine_no_bare_print(py_file: Path) -> None:
 # Logger configuration: engine must not silence the root logger
 # ---------------------------------------------------------------------------
 
+
 def test_engine_logging_not_suppressed() -> None:
     """Root logger level must not be set to CRITICAL or above after engine import."""
     for module_name in _ENGINE_MODULES:
@@ -120,6 +124,7 @@ def test_engine_logging_not_suppressed() -> None:
 # ---------------------------------------------------------------------------
 # Sanity: engine directory must contain at least one module
 # ---------------------------------------------------------------------------
+
 
 def test_engine_has_modules() -> None:
     """Sanity guard: cortex/engine must expose at least one importable module."""
