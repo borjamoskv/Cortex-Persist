@@ -79,7 +79,7 @@ async def ingest_influencer(
             meta={"hype": req.hype, "utility": req.utility, "reality_level": req.reality_level},
         )
         return StoreResponse(
-            fact_id=fact_id, project="benchmark", message="Influencer ingested successfully"
+            fact_id=str(fact_id), project="benchmark", message="Influencer ingested successfully"
         )
     except Exception as e:
         logger.exception("Failed to ingest influencer: %s", e)
