@@ -167,3 +167,50 @@ async def test_wait_for_background_success(manager):
         # The worker should pick it up and call task_done
         await manager.wait_for_background(timeout=1.0)
         assert manager._bg_queue.empty()
+
+@pytest.mark.asyncio
+async def test_store_rollback_exergy_failure(manager):
+    """Test behavior when Exergy Pre-Filter fails (simulating rollback/abort)."""
+    manager._mem0_pipeline = AsyncMock()
+    manager._mem0_pipeline.evaluate_exergy = AsyncMock(side_effect=RuntimeError("Exergy failure"))
+
+    with pytest.raises(RuntimeError, match="Exergy failure"):
+        await manager.store(tenant_id="t1", content="This will fail")
+
+@pytest.mark.asyncio
+async def test_store_rollback_thalamus_failure(manager):
+    """Test behavior when Thalamus Gate fails (simulating rollback/abort)."""
+    manager._mem0_pipeline = AsyncMock()
+    manager._mem0_pipeline.evaluate_exergy = AsyncMock(return_value=MagicMock(score=0.9))
+    manager._mem0_pipeline.exergy_threshold = 0.5
+
+    manager.thalamus.filter = AsyncMock(side_effect=RuntimeError("Thalamus failure"))
+
+    with pytest.raises(RuntimeError, match="Thalamus failure"):
+        await manager.store(tenant_id="t1", content="This will fail")
+
+@pytest.mark.asyncio
+async def test_store_rollback_deduplication_failure(manager):
+    """Test behavior when Deduplication fails (simulating rollback/abort)."""
+    manager._mem0_pipeline = AsyncMock()
+    manager._mem0_pipeline.evaluate_exergy = AsyncMock(return_value=MagicMock(score=0.9))
+    manager._mem0_pipeline.exergy_threshold = 0.5
+    manager.thalamus.filter = AsyncMock(return_value=(True, "encode:new", None))
+
+    with patch("cortex.memory.manager.CortexMemoryManager._check_deduplication", side_effect=RuntimeError("Deduplication failure")):
+        with pytest.raises(RuntimeError, match="Deduplication failure"):
+            await manager.store(tenant_id="t1", content="This will fail")
+
+@pytest.mark.asyncio
+async def test_store_rollback_vector_encoding_failure(manager):
+    """Test behavior when Vector Encoding fails (simulating rollback/abort)."""
+    manager._mem0_pipeline = AsyncMock()
+    manager._mem0_pipeline.evaluate_exergy = AsyncMock(return_value=MagicMock(score=0.9))
+    manager._mem0_pipeline.exergy_threshold = 0.5
+    manager.thalamus.filter = AsyncMock(return_value=(True, "encode:new", None))
+
+    manager._encoder.encode = AsyncMock(side_effect=RuntimeError("Encoding failure"))
+
+    with patch("cortex.memory.manager.CortexMemoryManager._check_deduplication", return_value=None):
+        with pytest.raises(RuntimeError, match="Encoding failure"):
+            await manager.store(tenant_id="t1", content="This will fail")
