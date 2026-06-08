@@ -1,3 +1,4 @@
+#![allow(warnings)]
 pub mod belief_object;
 pub mod atms;
 pub mod smt;

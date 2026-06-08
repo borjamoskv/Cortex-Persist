@@ -152,7 +152,7 @@ class StoreRequest(BaseModel):
 
 
 class StoreResponse(BaseModel):
-    fact_id: str
+    fact_id: str | int
     project: str
     message: str
 
@@ -180,7 +180,7 @@ class SearchRequest(BaseModel):
 
 
 class SearchResult(BaseModel):
-    fact_id: str
+    fact_id: str | int
     project: str
     content: str
     fact_type: str
@@ -207,7 +207,7 @@ class VoteRequest(BaseModel):
 
 
 class VoteResponse(BaseModel):
-    fact_id: str
+    fact_id: str | int
     agent: str
     vote: int
     new_consensus_score: float
@@ -237,7 +237,7 @@ class VoteV2Request(BaseModel):
 
 
 class FactResponse(BaseModel):
-    id: str
+    id: str | int
     project: str
     content: str
     fact_type: str
@@ -429,7 +429,7 @@ class MejoraloScanResponse(BaseModel):
     dead_code: bool
     total_files: int = 0
     total_loc: int = 0
-    fact_id: str | None = None
+    fact_id: str | int | None = None
 
 
 class MejoraloSessionRequest(BaseModel):
@@ -440,7 +440,7 @@ class MejoraloSessionRequest(BaseModel):
 
 
 class MejoraloSessionResponse(BaseModel):
-    fact_id: str
+    fact_id: str | int
     project: str
     delta: int
     status: str = "recorded"
