@@ -61,11 +61,19 @@ def compute_geodesic(g_static: List[List[float]], g_dynamic: List[List[float]]) 
         shift[i] = g_dynamic[i][i] - g_static[i][i]
     return shift
 
-def apply_mutation(ast: Any, vector: List[float]) -> Any:
+def apply_mutation(ast: Any, vector: List[float], event: Optional[Any] = None) -> Any:
     """
-    Placeholder: Applies the multi-dimensional drift vector to the AST.
-    This is where the 'Unknown-as-operator' will hook into.
+    Applies the multi-dimensional drift vector to the AST.
+    If the event indicates a logical collapse, UAO generates structure directly.
     """
+    if event:
+        state_val = event.state.value if hasattr(event.state, 'value') else str(event.state)
+        if state_val in ["unknown", "solver-silent", "undecidable"]:
+            from .uop import unknown_as_operator
+            new_ast = unknown_as_operator(event)
+            if new_ast is not None:
+                return new_ast
+                
     return ast
 
 def autodidact_step(ast: Any, g_static: List[List[float]], g_dynamic: List[List[float]], epistemic_events: List[Any]) -> Any:
@@ -87,5 +95,8 @@ def autodidact_step(ast: Any, g_static: List[List[float]], g_dynamic: List[List[
     geodesic = compute_geodesic(g_static, g_dynamic)
     
     final_vector = [geodesic[i] + drift_vector[i] for i in range(dim)]
+    
+    # Track dominant unknown state for UAO
+    dominant_event = epistemic_events[-1] if epistemic_events else None
 
-    return apply_mutation(ast, final_vector)
+    return apply_mutation(ast, final_vector, dominant_event)
